@@ -14,6 +14,7 @@ Would be nice but is not strictly needed, in importance order:
 
   - Rid ourselves of the monolithic header in NQ
   - Merge QW server into QW client ala NQ
+  - Server browser
   - Test -dedicated to make sure there are no nasty surprises [LordHavoc]
   - sv_model.c for NQ [LordHavoc]
   - Build a seperate dedicated server in NQ [LordHavoc]
