@@ -1,5 +1,5 @@
 /*
-	$RCSfile$
+	$RCSfile$ -- Quake script command processing module
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -22,7 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// cmd.c -- Quake script command processing module
 static const char rcsid[] =
     "$Id$";
 
@@ -46,9 +45,9 @@ static const char rcsid[] =
 #define	MAX_ALIAS_NAME	32
 
 typedef struct cmdalias_s {
-	struct cmdalias_s *next;
-	char        name[MAX_ALIAS_NAME];
-	char       *value;
+	struct cmdalias_s	*next;
+	char				name[MAX_ALIAS_NAME];
+	char				*value;
 } cmdalias_t;
 
 cmdalias_t	*cmd_alias;
