@@ -34,6 +34,8 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <stdlib.h>		/* For malloc() */
+
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
@@ -715,7 +717,7 @@ Cmd_CompleteBuildList (char *partial)
 	char			**buf;
 
 	len = strlen(partial);
-	buf = malloc(sizeofbuf + sizeof (char *));
+	buf = (char**)malloc(sizeofbuf + sizeof (char *));
 	// Loop through the alias list and print all matches
 	for (cmd = cmd_functions; cmd; cmd = cmd->next)
 		if (!strncasecmp(partial, cmd->name, len))
@@ -788,7 +790,7 @@ Cmd_CompleteAliasBuildList (char *partial)
 	char		**buf;
 
 	len = strlen(partial);
-	buf = malloc(sizeofbuf + sizeof (char *));
+	buf = (char**)malloc(sizeofbuf + sizeof (char *));
 	// Loop through the alias list and print all matches
 	for (alias = cmd_alias; alias; alias = alias->next)
 		if (!strncasecmp(partial, alias->name, len))

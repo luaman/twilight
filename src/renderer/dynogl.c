@@ -34,9 +34,6 @@ static const char rcsid[] =
 #endif
 
 #include <stdio.h>
-#ifdef WIN32
-# include <windows.h>  // for APIENTRY
-#endif
 
 #include "SDL.h"
 
