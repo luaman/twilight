@@ -20,8 +20,10 @@ twilight_nq_LDADD= \
 
 if SYS_WIN32
 twilight_nq_sys_libs=-lwinmm -lwsock32
+twilight_nq_sys_sources=conproc.c
 else
 twilight_nq_sys_libs=
+twilight_nq_sys_sources=
 endif
 
 twilight_nq_SOURCES= \
@@ -44,7 +46,7 @@ twilight_nq_SOURCES= \
 	pcx.c tga.c \
 	view.c wad.c world.c world.h zone.c \
         quakedef.h bspfile.h client.h keys.h protocol.h \
-	render.h server.h sys.c
+	render.h server.h sys.c $(twilight_nq_sys_sources)
 
 EXTRA_twilight_nq_SOURCES= \
 	conproc.c conproc.h
