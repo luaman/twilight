@@ -102,6 +102,7 @@ DYNGL_NEED (void, glTexCoordPointer, (GLint size, GLenum type, GLsizei stride, c
 DYNGL_NEED (void, glTexEnvi, (GLenum target, GLenum pname, GLint param))
 DYNGL_NEED (void, glTexImage2D, (GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid * pixels))
 DYNGL_NEED (void, glTexParameteri, (GLenum target, GLenum pname, GLint param))
+DYNGL_NEED (void, glTexParameterf, (GLenum target, GLenum pname, GLfloat param))
 DYNGL_NEED (void, glTexSubImage2D, (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * pixels))
 DYNGL_NEED (void, glTranslatef, (GLfloat x, GLfloat y, GLfloat z))
 DYNGL_EXT (void, glUnlockArraysEXT, (void), "GL_EXT_compiled_vertex_array")

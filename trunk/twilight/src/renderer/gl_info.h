@@ -74,6 +74,7 @@ extern qboolean gl_secondary_color;
 extern qboolean gl_nv_register_combiners;
 extern qboolean gl_sgis_mipmap;
 extern qboolean gl_vbo;
+extern qboolean gl_ext_anisotropy;
 extern int gl_tmus;
 extern int gl_lightmap_format;
 

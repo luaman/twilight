@@ -131,7 +131,5 @@ PCX_Load (fs_file_t *file, SDL_RWops *rw)
 	image = PCX_LoadBuffer (buf);
 	Zone_Free (buf);
 	return image;
-
-	return NULL;
 }
 

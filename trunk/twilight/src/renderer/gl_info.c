@@ -69,6 +69,7 @@ qboolean gl_secondary_color = false;
 qboolean gl_nv_register_combiners = false;
 qboolean gl_sgis_mipmap = false;
 qboolean gl_vbo = false;
+qboolean gl_ext_anisotropy = false;
 int gl_tmus = 1;
 
 Uint32 gl_allow;
@@ -175,6 +176,13 @@ GLInfo_CheckExtensions (void)
 
 	Com_Printf ("Checking for GL_ARB_vertex_buffer_object: %s.\n",
 			gl_vbo ? "Yes" : "No");
+
+
+	if (!COM_CheckParm ("-noanisotropy"))
+		gl_ext_anisotropy = DynGL_HasExtension ("GL_EXT_texture_filter_anisotropic");
+
+	Com_Printf ("Checking for GL_EXT_texture_filter_anisotropic: %s.\n",
+			gl_ext_anisotropy ? "Yes" : "No");
 }
 
 static void
