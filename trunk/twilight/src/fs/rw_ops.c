@@ -173,6 +173,7 @@ Wrap_Close (SDL_RWops *rw)
 	else
 		SDL_RWclose (wrap->rw);
 	Zone_Free (wrap);
+	Zone_Free (rw);
 
 	return 0;
 }
