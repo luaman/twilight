@@ -137,8 +137,9 @@ Image_FromSDL (fs_file_t *file, SDL_RWops *rw)
 			if ((surf = search[i].load(rw))) {
 				rgb_surf = SDL_CreateRGBSurface (SDL_SWSURFACE, surf->w,
 						surf->h, 32, rmask, gmask, bmask, amask);
-				SDL_BlitSurface (surf, &surf->clip_rect, rgb_surf,
-						&surf->clip_rect);
+				SDL_SetAlpha(surf, 0, 0);
+				SDL_SetAlpha(rgb_surf, 0, 0);
+				SDL_BlitSurface (surf, NULL, rgb_surf, NULL);
 				image = Zone_Alloc (img_zone, sizeof(image_t));
 				image->width = rgb_surf->w;
 				image->height = rgb_surf->h;
@@ -151,7 +152,7 @@ Image_FromSDL (fs_file_t *file, SDL_RWops *rw)
 					out[0] = in[0];
 					out[1] = in[1];
 					out[2] = in[2];
-					out[3] = 255 - in[3];
+					out[3] = in[3];
 
 					in += 4;
 					out += 4;
