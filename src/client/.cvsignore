@@ -3,3 +3,5 @@ Makefile.in
 .deps
 *.o
 .*.swp
+*.i
+*.s

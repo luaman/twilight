@@ -10,3 +10,5 @@ lhbin2c
 .deps
 *.o
 .*.swp
+*.i
+*.s

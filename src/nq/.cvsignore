@@ -9,3 +9,5 @@ Release
 *.ncb
 *.opt
 *.plg
+*.i
+*.s
