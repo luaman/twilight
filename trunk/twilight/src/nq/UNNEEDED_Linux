@@ -146,3 +146,4 @@ winquake.h
 worlda.s
 wq.bat
 wqreadme.txt
+r_local.h
