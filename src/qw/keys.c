@@ -114,6 +114,8 @@ keyname_t   keynames[] = {
 	{"HOME", K_HOME},
 	{"END", K_END},
 
+	{"PAUSE", K_PAUSE},
+
 	{"MWHEELUP", K_MWHEELUP},
 	{"MWHEELDOWN", K_MWHEELDOWN},
 

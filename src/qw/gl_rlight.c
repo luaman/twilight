@@ -41,6 +41,7 @@ static const char rcsid[] =
 #include "view.h"
 
 int         r_dlightframecount;
+static int	rl_vindex, rl_iindex;
 
 
 /*
@@ -114,7 +115,7 @@ R_InitBubble (void)
 void
 R_RenderDlight (dlight_t *light)
 {
-	int     i, j, dvnum = 0;
+	int     i, j, vcenter, vlast = -1;
 	vec3_t  v, v_right, v_up;
 	float	*bub_sin = bubble_sintable, 
 			*bub_cos = bubble_costable;
@@ -143,12 +144,13 @@ R_RenderDlight (dlight_t *light)
 	}
 	VectorSubtract (light->origin, v, v);
 
-	VectorSet3 (varray[dvnum].vertex, v[0], v[1], v[2]);
-	varray[dvnum].color[0] = light->color[0] * 0.5;
-	varray[dvnum].color[1] = light->color[1] * 0.5;
-	varray[dvnum].color[2] = light->color[2] * 0.5;
-	varray[dvnum].color[3] = 1;
-	dvnum++;
+	VectorSet3 (v_array[rl_vindex], v[0], v[1], v[2]);
+	c_array[rl_vindex][0] = light->color[0] * 0.5;
+	c_array[rl_vindex][1] = light->color[1] * 0.5;
+	c_array[rl_vindex][2] = light->color[2] * 0.5;
+	c_array[rl_vindex][3] = 1;
+	vcenter = rl_vindex;
+	rl_vindex++;
 
 	for (i = 16; i >= 0; i--, bub_sin++, bub_cos++) 
 	{
@@ -156,13 +158,24 @@ R_RenderDlight (dlight_t *light)
 			v[j] = light->origin[j] + (v_right[j] * (*bub_cos) +
 				+ v_up[j] * (*bub_sin)) * rad;
 
-		VectorSet4 (varray[dvnum].color, 0, 0, 0, 0);
-		VectorSet3 (varray[dvnum].vertex, v[0], v[1], v[2]);
-		dvnum++;
-	}
+		VectorSet4 (c_array[rl_vindex], 0, 0, 0, 0);
+		VectorSet3 (v_array[rl_vindex], v[0], v[1], v[2]);
+		if (vlast != -1) {
+			vindices[rl_iindex + 0] = vcenter;
+			vindices[rl_iindex + 1] = vlast;
+			vindices[rl_iindex + 2] = rl_vindex;
+			rl_iindex += 3;
+		}
+		vlast = rl_vindex;
+		rl_vindex++;
 
-	qglDrawArrays (GL_TRIANGLE_FAN, 0, dvnum);
-	dvnum = 0;
+		if (((rl_vindex + 3) >= MAX_VERTEX_ARRAYS) ||
+				((rl_iindex + 3) >= MAX_VERTEX_INDICES)) {
+			qglDrawElements(GL_TRIANGLES, rl_iindex, GL_UNSIGNED_INT, vindices);
+			rl_vindex = 0;
+			rl_iindex = 0;
+		}
+	}
 }
 
 /*
@@ -188,6 +201,12 @@ R_RenderDlights (void)
 		if (l->die < cl.time || !l->radius)
 			continue;
 		R_RenderDlight (l);
+	}
+
+	if (rl_vindex || rl_iindex) {
+		qglDrawElements(GL_TRIANGLES, rl_iindex, GL_UNSIGNED_INT, vindices);
+		rl_vindex = 0;
+		rl_iindex = 0;
 	}
 
 	qglColor3f (1, 1, 1);

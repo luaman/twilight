@@ -172,13 +172,21 @@ extern qboolean gl_mtexable;
 // Vertex array stuff.
 
 #define MAX_VERTEX_ARRAYS	1024
-typedef struct varray_t2f_c4f_v3f_s {
+#define MAX_VERTEX_INDICES	(MAX_VERTEX_ARRAYS * 3)
+extern GLfloat	tc_array[MAX_VERTEX_ARRAYS][2];
+extern GLfloat	v_array[MAX_VERTEX_ARRAYS][3];
+extern GLfloat	c_array[MAX_VERTEX_ARRAYS][4];
+
+extern GLuint vindices[MAX_VERTEX_INDICES];
+
+/*
+extern varray_t2f_c4f_v4f_t varray[MAX_VERTEX_ARRAYS];
+typedef struct varray_t2f_c4f_v4f_s {
 	GLfloat		texcoord[2];
 	GLfloat		color[4];
-	GLfloat		vertex[3];
-} varray_t2f_c4f_v3f_t;
-
-extern varray_t2f_c4f_v3f_t varray[MAX_VERTEX_ARRAYS];
+	GLfloat		vertex[4];
+} varray_t2f_c4f_v4f_t;
+*/
 
 //
 // gl_warp.c

@@ -588,17 +588,17 @@ R_DrawParticles (void)
 		else
 			theAlpha = 1;
 
-		VectorSet4(varray[vnum + 0].color, at[0], at[1], at[2], theAlpha);
-		VectorSet4(varray[vnum + 1].color, at[0], at[1], at[2], theAlpha);
-		VectorSet4(varray[vnum + 2].color, at[0], at[1], at[2], theAlpha);
-		VectorSet2(varray[vnum + 0].texcoord, 0, 0);
-		VectorSet2(varray[vnum + 1].texcoord, 1, 0);
-		VectorSet2(varray[vnum + 2].texcoord, 0, 1);
-		VectorSet3(varray[vnum + 0].vertex, p->org[0], p->org[1], p->org[2]);
-		VectorSet3(varray[vnum + 1].vertex, p->org[0] + up[0] * scale,
+		VectorSet4(c_array[vnum + 0], at[0], at[1], at[2], theAlpha);
+		VectorSet4(c_array[vnum + 1], at[0], at[1], at[2], theAlpha);
+		VectorSet4(c_array[vnum + 2], at[0], at[1], at[2], theAlpha);
+		VectorSet2(tc_array[vnum + 0], 0, 0);
+		VectorSet2(tc_array[vnum + 1], 1, 0);
+		VectorSet2(tc_array[vnum + 2], 0, 1);
+		VectorSet3(v_array[vnum + 0], p->org[0], p->org[1], p->org[2]);
+		VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale,
 					p->org[1] + up[1] * scale,
 					p->org[2] + up[2] * scale);
-		VectorSet3(varray[vnum + 2].vertex, p->org[0] + right[0] * scale,
+		VectorSet3(v_array[vnum + 2], p->org[0] + right[0] * scale,
 					p->org[1] + right[1] * scale,
 					p->org[2] + right[2] * scale);
 		vnum += 3;
