@@ -737,7 +737,7 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 			newtime = Sys_FloatTime ();
 			time = newtime - oldtime;
 
-			while (time < sys_ticrate.value) {
+			while (time < sys_ticrate->value[0]) {
 				Sys_Sleep ();
 				newtime = Sys_FloatTime ();
 				time = newtime - oldtime;
