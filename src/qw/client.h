@@ -32,9 +32,7 @@
 #include "info.h"
 #include "net.h"
 #include "protocol.h"
-#ifdef WANT_CLIENTS
-# include "render.h"
-#endif
+#include "render.h"
 #include "zone.h"
 #include "pmove.h"
 #include "cclient.h"

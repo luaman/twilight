@@ -14,3 +14,12 @@ if building == 1:
 		SConscript (dirs=['src/client/', 'src/renderer/', 'src/sound/', 'src/image/'])
 	SConscript (dirs=['src/server/'])
 	SConscript (dirs=['src/nq/', 'src/qw/'])
+	Import ("nq_sources")
+	env.Program (target = "twilight-nq", source = nq_sources)
+
+	if int(opts['clients']):
+		Import ("qw_sources")
+		env.Program (target = "twilight-qw", source = qw_sources)
+	if int(opts['servers']):
+		Import ("qwsv_sources")
+		env.Program (target = "twilight-qwsv", source = qwsv_sources)

@@ -12,13 +12,15 @@ if int(opts['clients']):
 	    info.c menu.c net_chan.c net_udp.c pmove.c pmovetst.c skin.c
 	    snd_dma.c sv_null.c sys.c view.c""")
 
+    qw_headers = ['#/src/qw/'+e for e in qw_headers]
+    qw_sources = ['#/src/qw/'+e for e in qw_sources]
     qw_sources.extend (base_sources)
     qw_sources.extend (client_sources)
     qw_sources.extend (fs_sources)
     qw_sources.extend (image_sources)
     qw_sources.extend (renderer_sources)
     qw_sources.extend (sound_sources)
-    env.Program (target = "twilight-qw", source = qw_sources)
+    Export ("qw_headers", "qw_sources")
 
 if int(opts['servers']):
     qwsv_headers = Split("""progdefs.h progs.h server.h world.h""")
@@ -27,8 +29,8 @@ if int(opts['servers']):
 	    sv_ents.c sv_init.c sv_main.c sv_model.c sv_move.c sv_nchan.c
 	    sv_phys.c sv_send.c sv_sys.c sv_user.c world.c""")
 
+    qwsv_headers = ['#/src/qw/'+e for e in qwsv_headers]
+    qwsv_sources = ['#/src/qw/'+e for e in qwsv_sources]
     qwsv_sources.extend (base_sources)
     qwsv_sources.extend (fs_sources)
-    env.Program (target = "twilight-qwsv", source = qwsv_sources)
-
-Export ("qw_headers", "qw_sources")
+    Export ("qwsv_headers", "qwsv_sources")

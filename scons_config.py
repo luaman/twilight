@@ -221,9 +221,6 @@ def handle_opts (conf, opts, config_defs, destructive):
 		config_defs.set('USERCONF', '"' + opts['userconf'] + '"')
 		config_defs.set('SHARECONF', '"' + opts['userconf'] + '"')
 		config_defs.set('GL_LIBRARY', '"' + opts['libgl'] + '"')
-		config_defs.set('WANT_CLIENTS', str(opts['clients']))
-		config_defs.set('WANT_SERVERS', str(opts['servers']))
-		config_defs.set('CFLAG_WERROR', str(opts['werror']))
 
 def write_c_defines (filename, defs):
 	env.Append (CPPDEFINES = "HAVE_CONFIG_H")
@@ -239,6 +236,8 @@ def do_configure (env):
 	global opts, config_defs, env_defs
 
 	config_defs.set('VERSION', '"0.2.02.cvs"')
+	if (not (ARGUMENTS.has_key('reset') and ARGUMENTS['reset'])):
+		opts.load('config_opts.py')
 	opts.args (ARGUMENTS)
 	opts.save('config_opts.py')
 	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag, 'lflag' : check_lflag, 'func_flag' : check_func_flag}
@@ -298,21 +297,7 @@ def do_configure (env):
 
 	print "\nWriting src/config.h"
 	write_c_defines ("#/src/config.h", config_defs)
-	env_defs.set ('CCFLAGS', env['CCFLAGS'])
-	env_defs.set ('CC', env['CC'])
-	env_defs.set ('LIBS', env['LIBS'])
-	if env.has_key ('CPPPATH'):
-		env_defs.set ('CPPPATH', env['CPPPATH'])
-	if env.has_key ('CPPDEFINES'):
-		env_defs.set ('CPPDEFINES', env['CPPDEFINES'])
-	if env.has_key ('LINKFLAGS'):
-		env_defs.set ('LINKFLAGS', env['LINKFLAGS'])
-	if env.has_key ('LIBPATH'):
-		env_defs.set ('LIBPATH', env['LIBPATH'])
-	env_defs.save('config_env.py')
-	config_defs.save('config_defs.py')
 
-	print "\nConfiguration saved."
 	print """
   Project Twilight v""" + config_defs.get('VERSION')[1:-1] + """ configuration:
     Build platform              : """ + env['PLATFORM'] + """
@@ -337,46 +322,10 @@ def do_configure (env):
     User's configuration        : """ + opts['userconf'] + """
   """
 
-def load_configure (env):
-	global building, opts, env_defs, config_defs
-	if not env_defs.load ("config_env.py"):
-		print "Unable to load config. (1)"
-		print "Please run 'scons configure=1'."
-		Exit (1)
-
-	if not config_defs.load ("config_defs.py"):
-		print "Unable to load config. (2)"
-		print "Please run 'scons configure=1'."
-		Exit (1)
-
-	if not opts.load ("config_opts.py"):
-		print "Unable to load config. (3)"
-		print "Please run 'scons configure=1'."
-		Exit (1)
-	if env_defs.has_key('CCFLAGS'):
-		env.Replace (CCFLAGS = env_defs['CCFLAGS'])
-	if env_defs.has_key('CC'):
-		env.Replace (CC = env_defs['CC'])
-	if env_defs.has_key('LIBS'):
-		env.Replace (LIBS = env_defs['LIBS'])
-	if env_defs.has_key('CPPPATH'):
-		env.Replace (CPPPATH = env_defs['CPPPATH'])
-	if env_defs.has_key('CPPDEFINES'):
-		env.Replace (CPPDEFINES = env_defs['CPPDEFINES'])
-	if env_defs.has_key('LINKFLAGS'):
-		env.Replace (LINKFLAGS = env_defs['LINKFLAGS'])
-	if env_defs.has_key('LIBPATH'):
-		env.Replace (LIBPATH = env_defs['LIBPATH'])
-	building = 1
-
 env = Environment ()
 conf_base ()
 
-#env.Command('configure', None, write_configure)
-#AddPreAction('configure', do_configure)
-if (ARGUMENTS.has_key('configure')):
-	do_configure (env)
-else:
-	load_configure (env)
+do_configure (env)
+building = 1
 
 Export ("env", "opts", "building")
