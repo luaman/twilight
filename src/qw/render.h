@@ -72,10 +72,12 @@ typedef struct entity_s {
 	// not split
 
 	// Animation interpolation
-	float                   frame_start_time;
-	float                   frame_interval;
-	int                     pose1; 
-	int                     pose2;
+	float       frame_start_time;
+	float       frame_interval;
+	int         pose1; 
+	int         pose2;
+
+	vec3_t		last_light;
 } entity_t;
 
 typedef struct {

@@ -465,6 +465,7 @@ CL_RelinkEntities (void)
 			ent->frame_start_time     = 0;
 			ent->translate_start_time = 0;
 			ent->rotate_start_time    = 0;
+			VectorClear (ent->last_light);
 			continue;
 		}
 
@@ -489,6 +490,7 @@ CL_RelinkEntities (void)
 				ent->frame_start_time     = 0;
 				ent->translate_start_time = 0;
 				ent->rotate_start_time    = 0;
+				VectorClear (ent->last_light);
 			}
 
 			// interpolate the origin and angles

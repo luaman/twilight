@@ -384,7 +384,8 @@ SCR_CalcRefdef (void)
 		size = 100;
 		sb_lines = 0;
 	}
-	size /= 100.0;
+//	size /= 100.0;
+	size *= (1 / 100.0);
 
 	h = vid.height - sb_lines;
 
