@@ -668,11 +668,7 @@ void Com_Printf (char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
-#ifndef TWILIGHT_QWSV
 	extern char	logname[MAX_OSPATH];
-#else
-	extern FILE *sv_logfile;
-#endif
 
 	va_start (argptr, fmt);
 	vsnprintf (msg, sizeof (msg), fmt, argptr);
@@ -687,7 +683,6 @@ void Com_Printf (char *fmt, ...)
 	Sys_Printf ("%s", msg);				// also echo to debugging console
 
 // log all messages to file
-#ifndef TWILIGHT_QWSV
 	if (logname[0])
 		Sys_DebugLog (logname, "%s", msg);
 
@@ -696,10 +691,6 @@ void Com_Printf (char *fmt, ...)
 
 // write it to the scrollable buffer
 	Con_Print (msg);
-#else
-	if (sv_logfile)
-		fprintf (sv_logfile, "%s", msg);
-#endif
 }
 
 void Com_DPrintf (char *fmt, ...)
