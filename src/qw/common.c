@@ -977,21 +977,29 @@ COM_FileBase
 void
 COM_FileBase (char *in, char *out)
 {
-	char       *s, *s2;
+	char *slash, *dot;
+	char *s;
 
-	s = in + Q_strlen (in) - 1;
-
-	while (s != in && *s != '.')
-		s--;
-
-	for (s2 = s; *s2 && *s2 != '/' && s2 > in; s2--);
-
-	if (s - s2 < 2)
-		Q_strcpy (out, "?model?");
-	else {
-		s--;
-		Q_strncpy (out, s2 + 1, s - s2);
-		out[s - s2] = 0;
+	slash = in;
+	dot = NULL;
+	s = in;
+	while(*s)
+	{
+		if (*s == '/')
+			slash = s + 1;
+		if (*s == '.')
+			dot = s;
+		s++;
+	}
+	if (dot == NULL)
+		dot = s;
+	if (dot - slash < 2)
+		strcpy (out,"?model?");
+	else
+	{
+		while (slash < dot)
+			*out++ = *slash++;
+		*out++ = 0;
 	}
 }
 
