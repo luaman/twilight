@@ -456,23 +456,23 @@ PR_UglyValueString (etype_t type, eval_t *val)
 		case ev_field:
 			def = ED_FieldAtOfs (val->_int);
 			s = pr_strings + def->s_name;
-			for (i = 0; i < (sizeof (line) - 1) && *s; )
+			for (n = 0; n < (sizeof (line) - 1) && *s; )
 			{
 				if (*s == '\n')
 				{
-					line[i++] = '\\';
-					line[i++] = 'n';
+					line[n++] = '\\';
+					line[n++] = 'n';
 				}
 				else if (*s == '\r')
 				{
-					line[i++] = '\\';
-					line[i++] = 'r';
+					line[n++] = '\\';
+					line[n++] = 'r';
 				}
 				else
-					line[i] = *s;
+					line[n] = *s;
 				s++;
 			}
-			line[i++] = 0;
+			line[n++] = 0;
 			break;
 		case ev_void:
 			snprintf (line, sizeof (line), "void");
