@@ -35,8 +35,8 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "zone.h"
 #include "sys.h"
-#include "fs.h"
-#include "rw_ops.h"
+#include "fs/fs.h"
+#include "fs/rw_ops.h"
 
 #define LOC_BSIZE	128
 

@@ -34,7 +34,6 @@ static const char rcsid[] =
 #include "image.h"
 #include "qlmp.h"
 #include "strlib.h"
-#include "wad.h"
 
 static image_t *
 QLMP_LoadQPic (Uint8 *buf)

@@ -8,6 +8,7 @@ SConscript ("scons_config.py")
 Import ("env", "opts", "building")
 
 if building == 1:
+	env.Append (CPPPATH = ["#/src"])
 	SConscript (dirs=['src/include/', 'src/base/', 'src/fs/'])
 	if opts['clients']:
 		SConscript (dirs=['src/client/', 'src/renderer/', 'src/sound/', 'src/image/'])

@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 Import ("env", "opts")
-env.Append (CPPPATH = ["#/src/renderer"])
+#env.Append (CPPPATH = ["#/src/renderer"])
 
 renderer_headers = Split("""alias.h brush.h dglfuncs.h draw.h dyngl.h entities.h
 	explosion.h gen_textures.h gl_arrays.h gl_info.h gl_light.h gl_main.h

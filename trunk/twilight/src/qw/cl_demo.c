@@ -34,7 +34,7 @@ static const char rcsid[] =
 #include "pmove.h"
 #include "sys.h"
 #include "strlib.h"
-#include "fs.h"
+#include "fs/fs.h"
 
 static void CL_FinishTimeDemo (void);
 

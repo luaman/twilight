@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 Import ("env", "opts")
-env.Append (CPPPATH = ["#/src/image"])
+#env.Append (CPPPATH = ["#/src/image"])
 
 image_headers = Split("""image.h jpeg.h pcx.h qlmp.h sdlimage.h tga.h""")
 

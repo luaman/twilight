@@ -39,7 +39,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "view.h"
-#include "r_part.h"
+#include "renderer/r_part.h"
 
 int			cl_num_static_entities;
 entity_t	cl_static_entities[MAX_STATIC_ENTITIES];

@@ -30,10 +30,10 @@
 #include "qtypes.h"
 #include "cvar.h"
 #include "lh_parser.h"
-#include "wad.h"
+#include "fs/wad.h"
 #include "mathlib.h"
 #include "strlib.h"
-#include "image.h"
+#include "image/image.h"
 
 typedef enum {
 	m_command, m_slider, m_toggle, m_multi_select, m_text_entry, m_text,

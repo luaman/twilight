@@ -30,7 +30,7 @@ static const char rcsid[] =
 #include <stdlib.h>	/* for rand() */
 
 #include "quakedef.h"
-#include "cdaudio.h"
+#include "sound/cdaudio.h"
 #include "client.h"
 #include "cmd.h"
 #include "cvar.h"
@@ -38,12 +38,12 @@ static const char rcsid[] =
 #include "host.h"
 #include "mathlib.h"
 #include "net.h"
-#include "screen.h"
+#include "renderer/screen.h"
 #include "server.h"
-#include "sound.h"
+#include "sound/sound.h"
 #include "strlib.h"
 #include "sys.h"
-#include "sky.h"
+#include "renderer/sky.h"
 #include "teamplay.h"
 
 static char       *svc_strings[] = {

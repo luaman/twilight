@@ -34,10 +34,11 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "dlight.h"
 #include "mathlib.h"
-#include "screen.h"
+#include "renderer/screen.h"
 #include "strlib.h"
 #include "sys.h"
-#include "alias.h"
+#include "renderer/alias.h"
+
 
 /* NQ specific */
 #include "host.h"

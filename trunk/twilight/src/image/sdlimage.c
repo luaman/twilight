@@ -39,7 +39,7 @@ static const char rcsid[] =
 #include "sdlimage.h"
 #include "strlib.h"
 #include "sys.h"
-#include "fs.h"
+#include "fs/fs.h"
 
 /* SDL interprets each pixel as a 32-bit number, so our masks must depend
 *        on the endianness (byte order) of the machine */

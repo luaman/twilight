@@ -38,7 +38,7 @@ static const char rcsid[] =
 #include "mdfour.h"
 #include "model.h"
 #include "mod_brush.h"
-#include "fs.h"
+#include "fs/fs.h"
 
 Uint8	*mod_base;
 

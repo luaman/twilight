@@ -34,13 +34,13 @@ static const char rcsid[] =
 #include "dyngl.h"
 #include "gl_info.h"
 #include "textures.h"
-#include "image.h"
+#include "image/image.h"
 #include "mathlib.h"
 #include "model.h"
 #include "qtypes.h"
 #include "strlib.h"
 #include "sys.h"
-#include "wad.h"
+#include "fs/wad.h"
 
 static Uint32 * GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette, qboolean check_empty);
 static void GLT_FloodFill8 (Uint8 * skin, int skinwidth, int skinheight);

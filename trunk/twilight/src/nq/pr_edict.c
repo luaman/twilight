@@ -39,7 +39,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "world.h"
-#include "rw_ops.h"
+#include "fs/rw_ops.h"
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;

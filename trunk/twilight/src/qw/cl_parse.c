@@ -31,7 +31,7 @@ static const char rcsid[] =
 #include <stdlib.h>
 
 #include "quakedef.h"
-#include "cdaudio.h"
+#include "sound/cdaudio.h"
 #include "client.h"
 #include "cmd.h"
 #include "console.h"
@@ -42,13 +42,13 @@ static const char rcsid[] =
 #include "keys.h"
 #include "mathlib.h"
 #include "pmove.h"
-#include "screen.h"
-#include "sound.h"
+#include "renderer/screen.h"
+#include "sound/sound.h"
 #include "strlib.h"
 #include "sys.h"
-#include "sky.h"
+#include "renderer/sky.h"
 #include "teamplay.h"
-#include "fs.h"
+#include "fs/fs.h"
 
 static char       *svc_strings[] = {
 	"svc_bad",

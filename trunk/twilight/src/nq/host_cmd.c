@@ -36,13 +36,13 @@ static const char rcsid[] =
 #include "host.h"
 #include "keys.h"
 #include "net.h"
-#include "screen.h"
+#include "renderer/screen.h"
 #include "server.h"
 #include "strlib.h"
 #include "sys.h"
 #include "world.h"
-#include "fs.h"
-#include "rw_ops.h"
+#include "fs/fs.h"
+#include "fs/rw_ops.h"
 
 int         current_skill;
 

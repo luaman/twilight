@@ -40,13 +40,13 @@ static const char rcsid[] =
 #include "input.h"
 #include "mathlib.h"
 #include "net.h"
-#include "screen.h"
+#include "renderer/screen.h"
 #include "server.h"
-#include "sound.h"
+#include "sound/sound.h"
 #include "world.h"
-#include "textures.h"
+#include "renderer/textures.h"
 #include "teamplay.h"
-#include "surface.h"
+#include "renderer/surface.h"
 #include "chase.h"
 
 // we need to declare some mouse variables here, because the menu system

@@ -30,8 +30,7 @@
 
 #include "qtypes.h"
 #include "model.h"
-#include "image.h"
-#include "wad.h"
+#include "image/image.h"
 #include "mathlib.h"
 
 void GLT_Init_Cvars(void);

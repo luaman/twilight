@@ -29,7 +29,7 @@ static const char rcsid[] =
 #include <string.h>
 
 #include "client.h"
-#include "image.h"
+#include "image/image.h"
 
 /*
  * Null client

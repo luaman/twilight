@@ -35,7 +35,7 @@ static const char rcsid[] =
 #include "net.h"
 #include "strlib.h"
 #include "sys.h"
-#include "fs.h"
+#include "fs/fs.h"
 
 static void CL_FinishTimeDemo (void);
 

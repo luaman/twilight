@@ -28,7 +28,7 @@
 #define __GEN_TEXTURES_H
 
 #include "qtypes.h"
-#include "image.h"
+#include "image/image.h"
 
 #define MAX_GT_FONT_SLOTS 64
 // GTF_texture_t is a rectangle in the particlefonttexture

@@ -35,13 +35,13 @@ static const char rcsid[] =
 #include "console.h"
 #include "crc.h"
 #include "cvar.h"
-#include "draw.h"
+#include "renderer/draw.h"
 #include "net.h"
 #include "strlib.h"
 #include "sys.h"
 #include "zone.h"
 #include "mathlib.h"
-#include "fs.h"
+#include "fs/fs.h"
 
 static cvar_t *registered;
 cvar_t *fs_shareconf;

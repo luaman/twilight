@@ -38,7 +38,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "zone.h"
-#include "fs.h"
+#include "fs/fs.h"
 
 static qboolean    sv_allow_cheats;
 

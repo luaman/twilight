@@ -8,7 +8,7 @@ noinst_HEADERS= \
 	common.h \
 	host.h info.h \
 	input.h \
-	pmove.h pr_comp.h qtypes.h \
+	pr_comp.h qtypes.h \
 	quakedef.h sys.h \
 	twiconfig.h view.h
 

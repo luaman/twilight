@@ -27,18 +27,18 @@
 #ifndef __RENDER_H
 #define __RENDER_H
 
-#include "dyngl.h"
+#include "renderer/dyngl.h"
 #include "mathlib.h"
 #include "matrixlib.h"
 #include "model.h"
-#include "wad.h"
-#include "video.h"
-#include "vis.h"
-#include "gl_info.h"
-#include "entities.h"
-#include "gl_light.h"
-#include "brush.h"
-#include "gl_main.h"
+#include "fs/wad.h"
+#include "renderer/video.h"
+#include "renderer/vis.h"
+#include "renderer/gl_info.h"
+#include "renderer/entities.h"
+#include "renderer/gl_light.h"
+#include "renderer/brush.h"
+#include "renderer/gl_main.h"
 
 
 typedef struct entity_s {

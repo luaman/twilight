@@ -37,14 +37,14 @@ static const char rcsid[] =
 #include "console.h"
 #include "crc.h"
 #include "cvar.h"
-#include "draw.h"
+#include "renderer/draw.h"
 #include "net.h"
 #include "protocol.h"
 #include "strlib.h"
 #include "sys.h"
 #include "zone.h"
 #include "mathlib.h"
-#include "fs.h"
+#include "fs/fs.h"
 
 usercmd_t nullcmd;					// guarenteed to be zero
 

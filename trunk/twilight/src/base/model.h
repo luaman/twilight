@@ -29,9 +29,9 @@
 
 #include "common.h"
 #include "zone.h"
-#include "mod_alias.h"
+#include "renderer/mod_alias.h"
 #include "mod_brush.h"
-#include "mod_sprite.h"
+#include "renderer/mod_sprite.h"
 
 /*
 

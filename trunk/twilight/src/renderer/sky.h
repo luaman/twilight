@@ -29,7 +29,7 @@
 
 #include "qtypes.h"
 #include "model.h"
-#include "image.h"
+#include "image/image.h"
 
 typedef enum {
 	SKY_SPHERE, SKY_BOX, SKY_FAST,

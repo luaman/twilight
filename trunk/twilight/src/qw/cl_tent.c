@@ -35,10 +35,10 @@ static const char rcsid[] =
 #include "model.h"
 #include "mathlib.h"
 #include "strlib.h"
-#include "sound.h"
-#include "explosion.h"
+#include "sound/sound.h"
+#include "renderer/explosion.h"
 #include "host.h"
-#include "r_part.h"
+#include "renderer/r_part.h"
 
 #define	MAX_BEAMS	8
 typedef struct {
