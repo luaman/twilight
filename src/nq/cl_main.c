@@ -446,7 +446,6 @@ CL_RelinkEntities (void)
 	float       frac, f, delta;
 	vec3_t      oldorg;
 	dlight_t   *dl;
-	trace_t		tr;
 	extern		cvar_t *gl_flashblend, *gl_oldlights;
 
 // determine partial update time    
@@ -521,7 +520,7 @@ CL_RelinkEntities (void)
 			if (ent->effects & EF_MUZZLEFLASH) {
 				// don't draw our own muzzle flash if flashblending
 				if (i != cl.viewentity || chase_active->value || !gl_flashblend->value) {
-					vec3_t      fv;
+					vec3_t fv, impact, impactnormal;
 
 					dl = CL_AllocDlight (i);
 					VectorCopy (ent->origin, dl->origin);
@@ -529,14 +528,9 @@ CL_RelinkEntities (void)
 					VectorMA (dl->origin, 18, fv, dl->origin);
 
 					if (!gl_flashblend->value && !gl_oldlights->value)
-					{			
-						memset (&tr, 0, sizeof(tr));
-
-						VectorCopy (dl->origin, tr.endpos);
-
-						SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ent->origin, dl->origin, &tr);
-						
-						VectorCopy (tr.endpos, dl->origin);
+					{
+						TraceLine(ent->origin, dl->origin, impact, impactnormal);
+						VectorCopy(impact, dl->origin);
 					}
 
 					dl->radius = 200 + (Q_rand () & 31);
