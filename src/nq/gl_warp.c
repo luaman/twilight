@@ -340,8 +340,10 @@ EmitSkyPolys (msurface_t *fa)
 			qglVertex3fv (v);
 		}
 		qglEnd ();
+	}
 
-		if (!(cl.maxclients > 1) && r_showtris->value) {
+	if (!(cl.maxclients > 1) && r_showtris->value) {
+		for (p = fa->polys; p; p = p->next) {
 			qglDisable (GL_TEXTURE_2D);
 			qglDisable (GL_DEPTH_TEST);
 			qglColor4f (1,1,1,1);

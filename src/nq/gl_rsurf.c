@@ -594,6 +594,7 @@ static void
 DrawTextureChains ()
 {
 	unsigned int	i;
+	unsigned int	show_tris = 0;
 	msurface_t	   *s;
 	texture_t	   *t, *st;
 
@@ -651,6 +652,9 @@ DrawTextureChains ()
 		}
 		qglEnable (GL_TEXTURE_2D);
 
+		if (!(cl.maxclients > 1) && r_showtris->value)
+			show_tris = 1;
+
 		for (i = 0; i < cl.worldmodel->numtextures; i++)
 		{
 			t = cl.worldmodel->textures[i];
@@ -666,23 +670,26 @@ DrawTextureChains ()
 
 			for (; s; s = s->texturechain)
 				R_RenderBrushPolyMTex (s, st);
+			
+			if (!show_tris)
+				t->texturechain = NULL;
 		}
 
-		for (i = 0; i < cl.worldmodel->numtextures; i++)
-		{
-			t = cl.worldmodel->textures[i];
-			if (!t)
-				continue;
-			s = t->texturechain;
-			if (!s || (s->flags & SURF_DRAWTURB))
-				continue;
+		if (show_tris) {
+			for (i = 0; i < cl.worldmodel->numtextures; i++)
+			{
+				t = cl.worldmodel->textures[i];
+				if (!t)
+					continue;
+				s = t->texturechain;
+				if (!s || (s->flags & SURF_DRAWTURB))
+					continue;
 
-			if (!(cl.maxclients > 1) && r_showtris->value) {
 				for (; s; s = s->texturechain)
 					R_RenderTris (s);
-			}
 
-			t->texturechain = NULL;
+				t->texturechain = NULL;
+			}
 		}
 
 		qglDisable (GL_TEXTURE_2D);
@@ -699,6 +706,9 @@ DrawTextureChains ()
 	{
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
+		if (!(cl.maxclients > 1) && r_showtris->value)
+			show_tris = 1;
+
 		for (i = 0; i < cl.worldmodel->numtextures; i++)
 		{
 			t = cl.worldmodel->textures[i];
@@ -712,27 +722,29 @@ DrawTextureChains ()
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 			for (; s; s = s->texturechain)
 				R_RenderBrushPoly (s, st);
+				
+			if (!show_tris)
+				t->texturechain = NULL;
 		}
 
-		for (i = 0; i < cl.worldmodel->numtextures; i++)
-		{
-			t = cl.worldmodel->textures[i];
-			if (!t)
-				continue;
-			s = t->texturechain;
-			if (!s || (s->flags & SURF_DRAWTURB))
-				continue;
+		if (show_tris) {
+			for (i = 0; i < cl.worldmodel->numtextures; i++)
+			{
+				t = cl.worldmodel->textures[i];
+				if (!t)
+					continue;
+				s = t->texturechain;
+				if (!s || (s->flags & SURF_DRAWTURB))
+					continue;
 
-			if (!(cl.maxclients > 1) && r_showtris->value) {
 				for (; s; s = s->texturechain)
 					R_RenderTris (s);
-			}
 
-			t->texturechain = NULL;
+				t->texturechain = NULL;
+			}
 		}
 
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
 		R_BlendLightmaps();
 	}
 
@@ -750,9 +762,13 @@ void
 R_DrawWaterTextureChains ()
 {
 	unsigned int	i;
-	msurface_t	   *s;
-	texture_t	   *t, *st;
+	unsigned int	show_tris = 0;
+	msurface_t		*s;
+	texture_t		*t, *st;
 	float			wateralpha = r_wateralpha->value;
+
+	if (!(cl.maxclients > 1) && r_showtris->value)
+		show_tris = 1;
 
 	for (i = 0; i < cl.worldmodel->numtextures; i++)
 	{
@@ -768,23 +784,25 @@ R_DrawWaterTextureChains ()
 		for (; s; s = s->texturechain)
 			EmitWaterPolys (s, st, false, wateralpha);
 
+		if (!show_tris)
+			t->texturechain = NULL;
 	}
 
-	for (i = 0; i < cl.worldmodel->numtextures; i++)
-	{
-		t = cl.worldmodel->textures[i];
-		if (!t)
-			continue;
-		s = t->texturechain;
-		if (!(s && (s->flags & SURF_DRAWTURB)))
-			continue;
+	if (show_tris) {
+		for (i = 0; i < cl.worldmodel->numtextures; i++)
+		{
+			t = cl.worldmodel->textures[i];
+			if (!t)
+				continue;
+			s = t->texturechain;
+			if (!(s && (s->flags & SURF_DRAWTURB)))
+				continue;
 
-		if (!(cl.maxclients > 1) && r_showtris->value) {
 			for (; s; s = s->texturechain)
 				EmitWaterTris (s);
-		}
 
-		t->texturechain = NULL;
+			t->texturechain = NULL;
+		}
 	}
 
 	if (wateralpha != 1.0f)
