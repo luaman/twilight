@@ -381,16 +381,7 @@ CL_ParseUpdate (int bits)
 
 	ent = CL_EntityNum (num);
 
-	// no previous frame to lerp from
-	if (ent->msgtime != cl.mtime[1])
-	{
-		forcelink = true;
-		ent->time_left = 0;
-	}
-	else
-		forcelink = false;
-
-	ent->msgtime = cl.mtime[0];
+	forcelink = false;
 
 	if (bits & U_MODEL) {
 		modnum = MSG_ReadByte ();
@@ -401,6 +392,11 @@ CL_ParseUpdate (int bits)
 
 	model = cl.model_precache[modnum];
 	if (model != ent->model) {
+		entity_state_t	baseline;
+
+		baseline = ent->baseline;
+		memset(ent, 0, sizeof(*ent));
+		ent->baseline = baseline;
 		ent->model = model;
 		// automatic animation (torches, etc) can be either all together
 		// or randomized
@@ -412,6 +408,15 @@ CL_ParseUpdate (int bits)
 		} else
 			forcelink = true;			// hack to make null model players work
 	}
+
+	// no previous frame to lerp from
+	if (ent->msgtime != cl.mtime[1])
+	{
+		forcelink = true;
+		ent->time_left = 0;
+	}
+
+	ent->msgtime = cl.mtime[0];
 
 	if (bits & U_FRAME)
 		CL_Update_Frame(ent, MSG_ReadByte(), cl.time);

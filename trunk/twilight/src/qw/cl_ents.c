@@ -427,9 +427,8 @@ CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time)
 {
 	vec3_t		odelta, adelta;
 	qboolean	changed = false;
-	float		lerp;
 
-	if (!ent->times)
+	if (!ent->lerp_start_time)
 	{
 		VectorCopy (origin, ent->msg_origins[1]);
 		VectorCopy (origin, ent->msg_origins[0]);
@@ -454,10 +453,24 @@ CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time)
 
 		VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
 		VectorCopy (origin, ent->msg_origins[0]);
+		VectorCopy (origin, ent->origin);
 		VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
 		VectorCopy (angles, ent->msg_angles[0]);
+		VectorCopy (angles, ent->angles);
 		changed = true;
 	}
+
+	return changed;
+}
+
+void
+CL_Lerp_OriginAngles (entity_t *ent)
+{
+	vec3_t		odelta, adelta;
+	float		lerp;
+
+	VectorSubtract (ent->msg_origins[0], ent->msg_origins[1], odelta);
+	VectorSubtract (ent->msg_angles[0], ent->msg_angles[1], adelta);
 
 	// Now lerp it.
 	if (ent->lerp_delta_time)
@@ -475,8 +488,6 @@ CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time)
 			VectorCopy (ent->msg_angles[0], ent->angles);
 		}
 	}
-
-	return changed;
 }
 
 qboolean
@@ -584,8 +595,9 @@ CL_LinkPacketEntities (void)
 		ent->modelindex = state->modelindex;
 		ent->model = model = cl.model_precache[state->modelindex];	// Model.
 
-		moved = CL_Update_OriginAngles (ent, state->origin, state->angles, cls.realtime);
-		CL_Update_Frame (ent, state->frame, cls.realtime);
+		moved = CL_Update_OriginAngles (ent, state->origin, state->angles, cl.time);
+		CL_Lerp_OriginAngles (ent);
+		CL_Update_Frame (ent, state->frame, cl.time);
 
 		ent->skinnum = state->skinnum;
 		ent->effects = state->effects;
@@ -711,8 +723,8 @@ CL_LinkProjectiles (void)
 
 		ent->model = cl.model_precache[pr->modelindex];
 
-		CL_Update_OriginAngles (ent, pr->origin, pr->angles, cls.realtime);
-		CL_Update_Frame (ent, 0, cls.realtime);
+		CL_Update_OriginAngles (ent, pr->origin, pr->angles, cl.time);
+		CL_Update_Frame (ent, 0, cl.time);
 	}
 }
 
@@ -894,8 +906,8 @@ CL_AddFlagModels (entity_t *ent, int team)
 	VectorCopy (ent->angles, angles);
 	angles[2] -= 45;
 
-	CL_Update_OriginAngles (newent, origin, angles, cls.realtime);
-	CL_Update_Frame (newent, 0, cls.realtime);
+	CL_Update_OriginAngles (newent, origin, angles, cl.time);
+	CL_Update_Frame (newent, 0, cl.time);
 }
 
 /*
@@ -982,17 +994,18 @@ CL_LinkPlayers (void)
 		// only predict half the move to minimize overruns
 		msec = 500 * (playertime - state->state_time);
 		if (msec <= 0 || (!cl_predict_players->ivalue)) {
-			CL_Update_OriginAngles (ent, state->origin, angles, cls.realtime);
+			CL_Update_OriginAngles (ent, state->origin, angles, cl.time);
 		} else {
 			// predict players movement
 			state->command.msec = min (state->command.msec, 255);
 
 			CL_PredictUsercmd (j, state, &exact, &state->command, false);
 			VectorCopy (exact.origin, ent->origin);
-			CL_Update_OriginAngles (ent, exact.origin, angles, cls.realtime);
+			CL_Update_OriginAngles (ent, exact.origin, angles, cl.time);
 		}
 
-		CL_Update_Frame (ent, state->frame, cls.realtime);
+//		CL_Lerp_OriginAngles (ent);
+		CL_Update_Frame (ent, state->frame, cl.time);
 
 		if (state->effects & EF_FLAG1)
 			CL_AddFlagModels (ent, 0);

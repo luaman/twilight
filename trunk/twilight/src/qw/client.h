@@ -501,6 +501,7 @@ void CL_ParsePacketEntities (qboolean delta);
 void CL_SetSolidEntities (void);
 void CL_ParsePlayerinfo (void);
 qboolean CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time);
+void CL_Lerp_OriginAngles (entity_t *ent);
 qboolean CL_Update_Frame (entity_t *e, int frame, float frame_time);
 
 /*
