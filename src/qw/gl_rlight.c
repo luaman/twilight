@@ -558,13 +558,17 @@ RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 		tex = surf->texinfo;
 
 		s = DotProduct (mid, tex->vecs[0]) + tex->vecs[0][3];
-		t = DotProduct (mid, tex->vecs[1]) + tex->vecs[1][3];;
-
-		if (s < surf->texturemins[0] || t < surf->texturemins[1])
+		if (s < surf->texturemins[0])
 			continue;
-
+		t = DotProduct (mid, tex->vecs[1]) + tex->vecs[1][3];
+		if (t < surf->texturemins[1])
+			continue;
 		ds = s - surf->texturemins[0];
+		if (ds > surf->extents[0])
+			continue;
 		dt = t - surf->texturemins[1];
+		if (dt > surf->extents[1])
+			continue;
 
 		if (ds > surf->extents[0] || dt > surf->extents[1])
 			continue;

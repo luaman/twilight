@@ -1008,15 +1008,12 @@ PR_LoadProgs (void)
 	for (i = 0; i < GEFV_CACHESIZE; i++)
 		gefvCache[i].field[0] = 0;
 
-	CRC_Init (&pr_crc);
-
 	progs = (dprograms_t *) COM_LoadHunkFile ("progs.dat");
 	if (!progs)
 		Sys_Error ("PR_LoadProgs: couldn't load progs.dat");
 	Con_DPrintf ("Programs occupy %iK.\n", com_filesize / 1024);
 
-	for (i = 0; i < com_filesize; i++)
-		CRC_ProcessByte (&pr_crc, ((Uint8 *) progs)[i]);
+	pr_crc = CRC_Block ((Uint8 *) progs, com_filesize);
 
 // byte swap the header
 	for (i = 0; i < sizeof (*progs) / 4; i++)

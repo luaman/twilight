@@ -1680,13 +1680,9 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	if (!strcmp (loadmodel->name, "progs/player.mdl") ||
 		!strcmp (loadmodel->name, "progs/eyes.mdl")) {
 		unsigned short crc;
-		Uint8      *p;
-		int         len;
 		char        st[40];
 
-		CRC_Init (&crc);
-		for (len = com_filesize, p = buffer; len; len--, p++)
-			CRC_ProcessByte (&crc, *p);
+		crc = CRC_Block (buffer, com_filesize);
 
 		snprintf (st, sizeof (st), "%d", (int) crc);
 		Info_SetValueForKey (cls.userinfo,

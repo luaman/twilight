@@ -676,7 +676,7 @@ CL_Record_f (void)
 ====================
 CL_ReRecord_f
 
-record <demoname>
+rerecord <demoname>
 ====================
 */
 void
