@@ -94,7 +94,6 @@ const char *gl_renderer;
 const char *gl_version;
 const char *gl_extensions;
 
-qboolean	isPermedia = false;
 qboolean	gl_mtexable = false;
 qboolean	gl_mtexcombine_arb = false;
 qboolean	gl_mtexcombine_ext = false;
@@ -137,7 +136,7 @@ VID_InitTexGamma (void)
 	BUILD_GAMMA_RAMP(tex_gamma_ramps[1], tex[1], Uint8, 256);
 	BUILD_GAMMA_RAMP(tex_gamma_ramps[2], tex[2], Uint8, 256);
 
-	// 8 8 8 encoding
+	/* 8 8 8 encoding */
 	pal = host_basepal;
 	for (i = 0; i < 256; i++) {
 		r = tex_gamma_ramps[0][pal[0]];
@@ -156,7 +155,7 @@ VID_InitTexGamma (void)
 		d_8to32table[i] = (r << 0) + (g << 8) + (b << 16) + (255 << 24);
 #endif
 	}
-	d_8to32table[255] = 0x00000000;		// 255 is transparent
+	d_8to32table[255] = 0x00000000;		/* 255 is transparent */
 	VectorSet4 (d_8tofloattable[255], 0, 0, 0, 0);
 }
 
@@ -168,12 +167,12 @@ GammaChanged (cvar_t *cvar)
 	if (!VID_Inited)
 		return;
 
-	// Might be init, we don't want to segfault.
+	/* Might be init, we don't want to segfault. */
 	if (!(v_hwgamma && v_gamma && v_gammabias_r && v_gammabias_g &&
 				v_gammabias_b))
 		return;
 
-	// Do we have and want to use hardware gamma?
+	/* Do we have and want to use hardware gamma? */
 	hw[0] = v_gamma->value + v_gammabias_r->value;
 	hw[1] = v_gamma->value + v_gammabias_g->value;
 	hw[2] = v_gamma->value + v_gammabias_b->value;
@@ -185,7 +184,7 @@ GammaChanged (cvar_t *cvar)
 
 		if (SDL_SetGammaRamp(hw_gamma_ramps[0], hw_gamma_ramps[1],
 			hw_gamma_ramps[2]) < 0) {
-			// No hardware gamma support, turn off and set ROM.
+			/* No hardware gamma support, turn off and set ROM. */
 			Con_Printf("No hardware gamma support: Disabling. (%s)\n",
 						SDL_GetError());
 			Cvar_Set(v_hwgamma, "0");
@@ -310,9 +309,9 @@ VID_Init (unsigned char *palette)
 
 	vid.colormap = host_colormap;
 
-	// interpret command-line params
+	/* interpret command-line params */
 
-	// set vid parameters
+	/* set vid parameters */
 	if ((i = COM_CheckParm ("-nomouse")) == 0)
 		use_mouse = true;
 
@@ -343,12 +342,12 @@ VID_Init (unsigned char *palette)
 	else
 		vid.conwidth = vid.width;
 
-	vid.conwidth &= 0xfff8;				// make it a multiple of eight
+	vid.conwidth &= 0xfff8;				/* make it a multiple of eight */
 
 	if (vid.conwidth < 320)
 		vid.conwidth = 320;
 
-	// pick a conheight that matches with correct aspect
+	/* pick a conheight that matches with correct aspect */
 	vid.conheight = vid.conwidth * 3 / 4;
 
 	i = COM_CheckParm ("-conheight");
@@ -382,7 +381,7 @@ VID_Init (unsigned char *palette)
 	else
 		vid.bpp = info->vfmt->BitsPerPixel;
 
-	// We want at least 444 (16 bit RGB)
+	/* We want at least 444 (16 bit RGB) */
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 4);
@@ -409,7 +408,7 @@ VID_Init (unsigned char *palette)
 
 	Con_SafePrintf ("Video mode %dx%d initialized.\n", vid.width, vid.height);
 
-	vid.recalc_refdef = true;		// force a surface cache flush
+	vid.recalc_refdef = true;		/* force a surface cache flush */
 
 	if (use_mouse) {
 		SDL_ShowCursor (0);
@@ -543,8 +542,7 @@ Sys_SendKeyEvents (void)
 						}
 						break;
 				}
-				// If we're not directly handled and still above 255
-				// just force it to 0
+				/* If we're not directly handled and still above 255 just force it to 0 */
 				if (sym > 255)
 					sym = 0;
 				Key_Event (sym, state);
