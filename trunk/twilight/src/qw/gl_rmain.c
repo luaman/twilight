@@ -139,6 +139,8 @@ static float shadescale = 0.0;
 int	lastposenum =  0;
 int	lastposenum0 = 0;
 
+qboolean PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, pmtrace_t *trace);
+
 void GL_DrawAliasBlendedShadow (aliashdr_t *, int, int, entity_t *);
 void GL_DrawAliasBlendedFrame (aliashdr_t *, int, int, float);
 void R_SetupAliasBlendedFrame (int, aliashdr_t *, entity_t *);
@@ -518,13 +520,12 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 	float       lheight;
 	int         count;
 	float       blend;
-#if 0
-	/* No r_shadows 2 support yet */
+//#if 0
 	pmtrace_t		downtrace;
 	vec3_t		downmove;
 	float		s1 = 0.0f;
 	float		c1 = 0.0f;
-#endif
+//#endif
 
 	blend = (realtime - e->frame_start_time) / e->frame_interval;
 
@@ -541,7 +542,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
 
-#if 0
+//#if 0
 	/* FIXME: We don't have SV_RecursiveHullCheck. */
 	if (r_shadows->value == 2)
 	{
@@ -551,13 +552,13 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 		VectorCopy (currententity->origin, downmove);
 		downmove[2] = downmove[2] - 4096;
 		memset (&downtrace, 0, sizeof(downtrace));
-		SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, currententity->origin, downmove, &downtrace);
+		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, currententity->origin, downmove, &downtrace);
 
 		// calculate the all important angles to keep speed up
 		s1 = Q_sin( currententity->angles[1]/180*M_PI);
 		c1 = Q_cos( currententity->angles[1]/180*M_PI);
 	}
-#endif
+//#endif
 	while ((count = *order++))
 	{
 		// get the vertex count and primitive type
@@ -589,8 +590,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 
 			VectorSubtract(point2, point1, d);
 
-#if 0
-			/* No r_shadows 2 support yet */
+//#if 0
 			if (r_shadows->value == 2)
 			{	
 				point1[0] = point1[0] + (blend * d[0]);
@@ -610,9 +610,9 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 				glVertex3fv (point1);
 			}
 			else {
-#else
-			{
-#endif
+//#else
+//			{
+//#endif
 				glVertex3f (point1[0] + (blend * d[0]),
 					point1[1] + (blend * d[1]),
 					height);
