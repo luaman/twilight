@@ -33,10 +33,9 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "glquake.h"
 #include "console.h"
 #include "cvar.h"
-#include "glquake.h"
 #include "server.h"
 
 #define MAX_PARTICLES			2048	// default max # of particles at one
@@ -80,49 +79,6 @@ R_InitParticles (void)
 		Hunk_AllocName (r_numparticles * sizeof (particle_t), "particles");
 }
 
-#ifdef QUAKE2
-void
-R_DarkFieldParticles (entity_t *ent)
-{
-	int         i, j, k;
-	particle_t *p;
-	float       vel;
-	vec3_t      dir;
-	vec3_t      org;
-
-	org[0] = ent->origin[0];
-	org[1] = ent->origin[1];
-	org[2] = ent->origin[2];
-	for (i = -16; i < 16; i += 8)
-		for (j = -16; j < 16; j += 8)
-			for (k = 0; k < 32; k += 8) {
-				if (!free_particles)
-					return;
-				p = free_particles;
-				free_particles = p->next;
-				p->next = active_particles;
-				active_particles = p;
-
-				p->die = cl.time + 0.2 + (Q_rand () & 7) * 0.02;
-				p->color = 150 + Q_rand () % 6;
-				p->type = pt_slowgrav;
-
-				dir[0] = j * 8;
-				dir[1] = i * 8;
-				dir[2] = k * 8;
-
-				p->org[0] = org[0] + i + (Q_rand () & 3);
-				p->org[1] = org[1] + j + (Q_rand () & 3);
-				p->org[2] = org[2] + k + (Q_rand () & 3);
-
-				VectorNormalizeFast (dir);
-				vel = 50 + (Q_rand () & 63);
-				VectorScale (dir, vel, p->vel);
-			}
-}
-#endif
-
-
 /*
 ===============
 R_EntityParticles
@@ -140,22 +96,18 @@ float       timescale = 0.01;
 void
 R_EntityParticles (entity_t *ent)
 {
-	int         count;
+	int         count = 50;
 	int         i;
 	particle_t *p;
 	float       angle;
 	float       sr, sp, sy, cr, cp, cy;
 	vec3_t      forward;
-	float       dist;
-
-	dist = 64;
-	count = 50;
+	float       dist = 64;
 
 	if (!avelocities[0][0]) {
 		for (i = 0; i < NUMVERTEXNORMALS * 3; i++)
 			avelocities[0][i] = (Q_rand () & 255) * 0.01;
 	}
-
 
 	for (i = 0; i < NUMVERTEXNORMALS; i++) {
 		angle = cl.time * avelocities[i][0];
@@ -280,11 +232,7 @@ R_ParseParticleEffect (void)
 		dir[i] = MSG_ReadChar () * (1.0 / 16);
 	msgcount = MSG_ReadByte ();
 	color = MSG_ReadByte ();
-
-	if (msgcount == 255)
-		count = 1024;
-	else
-		count = msgcount;
+	count = (msgcount == 255) ? 1024 : msgcount;
 
 	R_RunParticleEffect (org, dir, color, count);
 }
@@ -538,24 +486,18 @@ R_TeleportSplash (vec3_t org)
 void
 R_RocketTrail (vec3_t start, vec3_t end, int type)
 {
-	vec3_t      vec;
+	vec3_t      vec, avec;
 	float       len;
-	int         j;
+	int         j,lsub;
 	particle_t *p;
-	int         dec;
 	static int  tracercount;
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
-	if (type < 128)
-		dec = 3;
-	else {
-		dec = 1;
-		type -= 128;
-	}
+	VectorScale (vec, 3, vec);
 
 	while (len > 0) {
-		len -= dec;
+		lsub = 3;
 
 		if (!free_particles)
 			return;
@@ -617,7 +559,7 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 				p->color = 67 + (Q_rand () & 3);
 				for (j = 0; j < 3; j++)
 					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
-				len -= 3;
+				lsub += 3;
 				break;
 
 			case 6:					// voor trail
@@ -629,8 +571,9 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 				break;
 		}
 
-
-		VectorAdd (start, vec, start);
+		VectorScale(vec, lsub, avec);
+		VectorAdd (start, avec, start);
+		len -= lsub;
 	}
 }
 
@@ -654,6 +597,8 @@ R_DrawParticles (void)
 	float       frametime;
 	vec3_t      up, right;
 	float       scale;
+	Uint8		theAlpha, *at;
+	extern	double host_frametime;
 
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
 
@@ -663,7 +608,7 @@ R_DrawParticles (void)
 
 	VectorScale (vup, 1.5, up);
 	VectorScale (vright, 1.5, right);
-	frametime = cl.time - cl.oldtime;
+	frametime = host_frametime;
 	time3 = frametime * 15;
 	time2 = frametime * 10;				// 15;
 	time1 = frametime * 5;
@@ -698,11 +643,20 @@ R_DrawParticles (void)
 			(p->org[0] - r_origin[0]) * vpn[0] + (p->org[1] -
 												  r_origin[1]) * vpn[1]
 			+ (p->org[2] - r_origin[2]) * vpn[2];
+
 		if (scale < 20)
 			scale = 1;
 		else
 			scale = 1 + scale * 0.004;
-		qglColor3ubv ((Uint8 *) & d_8to32table[(int) p->color]);
+
+		at = (Uint8 *)&d_8to32table[(int) p->color];
+
+		if (p->type == pt_fire)
+			theAlpha = 255 - p->ramp * (1 / 6);
+		else
+			theAlpha = 255;
+
+		qglColor4ub (at[0], at[1], at[2], theAlpha);
 		qglTexCoord2f (0, 0);
 		qglVertex3fv (p->org);
 		qglTexCoord2f (1, 0);
@@ -711,9 +665,7 @@ R_DrawParticles (void)
 		qglTexCoord2f (0, 1);
 		qglVertex3f (p->org[0] + right[0] * scale, p->org[1] + right[1] * scale,
 					p->org[2] + right[2] * scale);
-		p->org[0] += p->vel[0] * frametime;
-		p->org[1] += p->vel[1] * frametime;
-		p->org[2] += p->vel[2] * frametime;
+		VectorMA (p->org, frametime, p->vel, p->org);
 
 		switch (p->type) {
 			case pt_static:
@@ -762,10 +714,6 @@ R_DrawParticles (void)
 				break;
 
 			case pt_grav:
-#ifdef QUAKE2
-				p->vel[2] -= grav * 20;
-				break;
-#endif
 			case pt_slowgrav:
 				p->vel[2] -= grav;
 				break;

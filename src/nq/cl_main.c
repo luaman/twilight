@@ -514,10 +514,6 @@ CL_RelinkEntities (void)
 
 		if (ent->effects & EF_BRIGHTFIELD)
 			R_EntityParticles (ent);
-#ifdef QUAKE2
-		if (ent->effects & EF_DARKFIELD)
-			R_DarkFieldParticles (ent);
-#endif
 
 		if (ent->effects & EF_MUZZLEFLASH) {
 			// don't draw our own muzzle flash if flashblending
@@ -574,6 +570,7 @@ CL_RelinkEntities (void)
 			dl->die = cl.time + 0.001;
 		}
 #ifdef QUAKE2
+
 		if (ent->effects & EF_DARKLIGHT) {
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin, dl->origin);
