@@ -158,8 +158,8 @@ typedef struct mnode_s {
 	int         contents;				// 0, to differentiate from leafs
 	int         visframe;				// node needs to be traversed if
 										// current
-
-	float       minmaxs[6];				// for bounding box culling
+	vec3_t      mins;					// for bounding box culling
+	vec3_t		maxs;					// for bounding box culling
 
 	struct mnode_s *parent;
 
@@ -178,8 +178,8 @@ typedef struct mleaf_s {
 	int         contents;				// wil be a negative contents number
 	int         visframe;				// node needs to be traversed if
 										// current
-
-	float       minmaxs[6];				// for bounding box culling
+	vec3_t      mins;					// for bounding box culling
+	vec3_t		maxs;					// for bounding box culling
 
 	struct mnode_s *parent;
 

@@ -350,12 +350,12 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 					if (leaf->contents == CONTENTS_SOLID)
 						continue;
 					// if out of the light radius, skip
-					if (leaf->minmaxs[0] > high[0]
-							|| leaf->minmaxs[3+0] < low[0]
-					 || leaf->minmaxs[1] > high[1]
-					 || leaf->minmaxs[3+1] < low[1]
-					 || leaf->minmaxs[2] > high[2]
-					 || leaf->minmaxs[3+2] < low[2])
+					if (leaf->mins[0] > high[0]
+						|| leaf->maxs[0] < low[0]
+						|| leaf->mins[1] > high[1]
+						|| leaf->maxs[1] < low[1]
+						|| leaf->mins[2] > high[2]
+						|| leaf->maxs[2] < low[2])
 						continue; 
 					if ((m = leaf->nummarksurfaces))
 					{

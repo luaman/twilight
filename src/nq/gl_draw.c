@@ -1033,70 +1033,6 @@ void R_ResampleTexture (void *indata, int inwidth, int inheight,
 
 /*
 ================
-GL_ResampleTexture
-================
-*/
-/*
-void
-GL_ResampleTexture (Uint32 *in, int inwidth, int inheight, Uint32 *out,
-					int outwidth, int outheight)
-{
-	int         i, j;
-	Uint32      *inrow;
-	unsigned    frac, fracstep;
-
-	fracstep = inwidth * 0x10000 / outwidth;
-	for (i = 0; i < outheight; i++, out += outwidth) {
-		inrow = in + inwidth * (i * inheight / outheight);
-		frac = fracstep >> 1;
-		for (j = 0; j < outwidth; j += 4) {
-			out[j] = inrow[frac >> 16];
-			frac += fracstep;
-			out[j + 1] = inrow[frac >> 16];
-			frac += fracstep;
-			out[j + 2] = inrow[frac >> 16];
-			frac += fracstep;
-			out[j + 3] = inrow[frac >> 16];
-			frac += fracstep;
-		}
-	}
-}
-*/
-
-/*
-================
-GL_Resample8BitTexture -- JACK
-================
-*/
-/*
-void
-GL_Resample8BitTexture (Uint8 *in, int inwidth, int inheight,
-						Uint8 *out, int outwidth, int outheight)
-{
-	int         i, j;
-	Uint8      *inrow;
-	unsigned    frac, fracstep;
-
-	fracstep = inwidth * 0x10000 / outwidth;
-	for (i = 0; i < outheight; i++, out += outwidth) {
-		inrow = in + inwidth * (i * inheight / outheight);
-		frac = fracstep >> 1;
-		for (j = 0; j < outwidth; j += 4) {
-			out[j] = inrow[frac >> 16];
-			frac += fracstep;
-			out[j + 1] = inrow[frac >> 16];
-			frac += fracstep;
-			out[j + 2] = inrow[frac >> 16];
-			frac += fracstep;
-			out[j + 3] = inrow[frac >> 16];
-			frac += fracstep;
-		}
-	}
-}
-*/
-
-/*
-================
 GL_MipMap
 
 Operates in place, quartering the size of the texture
@@ -1150,21 +1086,6 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 
 	samples = alpha ? gl_alpha_format : gl_solid_format;
 
-#if 0
-	// LordHavoc: disabled this because my resampling is faster than glu
-	if (mipmap)
-		gluBuild2DMipmaps (GL_TEXTURE_2D, samples, width, height, GL_RGBA,
-						   GL_UNSIGNED_BYTE, data);
-	else if (scaled_width == width && scaled_height == height)
-		qglTexImage2D (GL_TEXTURE_2D, 0, samples, width, height, 0, GL_RGBA,
-					  GL_UNSIGNED_BYTE, data);
-	else {
-		gluScaleImage (GL_RGBA, width, height, GL_UNSIGNED_BYTE, data,
-					   scaled_width, scaled_height, GL_UNSIGNED_BYTE, scaled);
-		qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
-					  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-	}
-#else
 	texels += scaled_width * scaled_height;
 
 	if (scaled_width == width && scaled_height == height) {
@@ -1198,8 +1119,6 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 		}
 	}
   done:;
-#endif
-
 
 	if (mipmap) {
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);

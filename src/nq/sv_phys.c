@@ -455,7 +455,7 @@ SV_PushMove
 void
 SV_PushMove (edict_t *pusher, float movetime)
 {
-	int         i, e;
+	int         i, e, savesolid;
 	edict_t    *check, *block;
 	vec3_t      mins, maxs, move;
 	vec3_t      entorig, pushorig;
@@ -513,6 +513,7 @@ SV_PushMove (edict_t *pusher, float movetime)
 			if (!SV_TestEntityPosition (check))
 				continue;
 		}
+
 		// remove the onground flag for non-players
 		if (check->v.movetype != MOVETYPE_WALK)
 			check->v.flags = (int) check->v.flags & ~FL_ONGROUND;
@@ -523,12 +524,21 @@ SV_PushMove (edict_t *pusher, float movetime)
 		num_moved++;
 
 		// try moving the contacted entity 
-		pusher->v.solid = SOLID_NOT;
-		SV_PushEntity (check, move);
-		pusher->v.solid = SOLID_BSP;
+		savesolid = pusher->v.solid;
 
-		// if it is still inside the pusher, block
-		block = SV_TestEntityPosition (check);
+		if (savesolid == SOLID_BSP || savesolid == SOLID_BBOX || savesolid == SOLID_SLIDEBOX)
+		{
+			pusher->v.solid = SOLID_NOT;
+			SV_PushEntity (check, move);
+			pusher->v.solid = savesolid;
+
+			// if it is still inside the pusher, block
+			block = SV_TestEntityPosition (check);
+		}
+		else {
+			block = NULL;
+		}
+
 		if (block) {					// fail the move
 			if (check->v.mins[0] == check->v.maxs[0])
 				continue;
@@ -573,7 +583,7 @@ SV_PushRotate
 void
 SV_PushRotate (edict_t *pusher, float movetime)
 {
-	int         i, e;
+	int         i, e, savesolid;
 	edict_t    *check, *block;
 	vec3_t      move, a, amove;
 	vec3_t      entorig, pushorig;
@@ -647,13 +657,22 @@ SV_PushRotate (edict_t *pusher, float movetime)
 		org2[2] = DotProduct (org, up);
 		VectorSubtract (org2, org, move);
 
-		// try moving the contacted entity 
-		pusher->v.solid = SOLID_NOT;
-		SV_PushEntity (check, move);
-		pusher->v.solid = SOLID_BSP;
+		// try moving the contacted entity
+		savesolid = pusher->v.solid;
 
-		// if it is still inside the pusher, block
-		block = SV_TestEntityPosition (check);
+		if (savesolid == SOLID_BSP || savesolid == SOLID_BBOX || savesolid == SOLID_SLIDEBOX)
+		{
+			pusher->v.solid = SOLID_NOT;
+			SV_PushEntity (check, move);
+			pusher->v.solid = savesolid;
+
+			// if it is still inside the pusher, block
+			block = SV_TestEntityPosition (check);
+		}
+		else {
+			block = NULL;
+		}
+
 		if (block) {					// fail the move
 			if (check->v.mins[0] == check->v.maxs[0])
 				continue;
