@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 
+memzone_t	*qsock_zone;
 qsocket_t  *net_activeSockets = NULL;
 qsocket_t  *net_freeSockets = NULL;
 Uint        net_numsockets = 0;
@@ -728,6 +729,8 @@ NET_Init (void)
 	int         controlSocket;
 	qsocket_t  *s;
 
+	qsock_zone = Zone_AllocZone ("qsocket");
+
 	i = COM_CheckParm ("-port");
 	if (!i)
 		i = COM_CheckParm ("-udpport");
@@ -749,7 +752,7 @@ NET_Init (void)
 	SetNetTime ();
 
 	for (i = 0; i < net_numsockets; i++) {
-		s = (qsocket_t *) Hunk_AllocName (sizeof (qsocket_t), "qsocket");
+		s = (qsocket_t *) Zone_Alloc (qsock_zone, sizeof (qsocket_t));
 		s->next = net_freeSockets;
 		net_freeSockets = s;
 		s->disconnected = true;

@@ -51,6 +51,9 @@ globalvars_t *pr_global_struct;
 float *pr_globals;			// same as pr_global_struct
 Uint32 pr_edict_size;			// in bytes
 
+static memzone_t *progs_memzone;
+static memzone_t *edictstring_memzone;
+
 Uint32 type_size[8] =
 {
 	1,
@@ -755,7 +758,7 @@ ED_NewString (char *string)
 	int			i, l;
 
 	l = strlen (string) + 1;
-	new = Hunk_AllocName (l, "edict string");
+	new = Zone_Alloc(edictstring_memzone, l);
 	new_p = new;
 
 	for (i = 0; i < l; i++)
@@ -1051,17 +1054,20 @@ PR_LoadProgs (void)
 	for (i = 0; i < GEFV_CACHESIZE; i++)
 		gefvCache[i].field[0] = 0;
 
+	Zone_EmptyZone (progs_memzone);
+	Zone_EmptyZone (edictstring_memzone);
+
 	progs = NULL;
 
 	if (!deathmatch->ivalue)
 	{
-		progs = (dprograms_t *)COM_LoadHunkFile ("spprogs.dat", true);
+		progs = (dprograms_t *)COM_LoadZoneFile ("spprogs.dat", true, progs_memzone);
 		strcpy (pname, "spprogs.dat");
 	}
 
 	if (!progs)
 	{
-		progs = (dprograms_t *)COM_LoadHunkFile ("qwprogs.dat", true);
+		progs = (dprograms_t *)COM_LoadZoneFile ("qwprogs.dat", true, progs_memzone);
 		strcpy (pname, "qwprogs.dat");
 	}
 
@@ -1165,6 +1171,9 @@ PR_Init (void)
 	Cmd_AddCommand ("edicts", ED_PrintEdicts);
 	Cmd_AddCommand ("edictcount", ED_Count);
 	Cmd_AddCommand ("profile", PR_Profile_f);
+
+	progs_memzone = Zone_AllocZone("progs.dat");
+	edictstring_memzone = Zone_AllocZone("edict strings");
 }
 
 edict_t *

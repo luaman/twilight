@@ -239,7 +239,7 @@ typedef struct lightblock_s {
 } lightblock_t;
 
 typedef struct brushhdr_s {
-	qboolean		is_submodel;
+	struct model_s	*main_model;		// Only set if we are a submodel.
 	Uint			firstmodelsurface, nummodelsurfaces;
 
 	lightblock_t	lightblock;

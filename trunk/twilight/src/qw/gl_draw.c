@@ -91,7 +91,7 @@ gltexture_t;
 gltexture_t *gltextures;
 
 static memzone_t *resamplezone;
-static memzone_t *texturezone;
+memzone_t *texturezone;
 
 /* ========================================================================= */
 /* Support Routines */
@@ -173,6 +173,8 @@ Draw_CachePic (char *path)
 	gl->sh = 1;
 	gl->tl = 0;
 	gl->th = 1;
+
+	Zone_Free (dat);
 
 	return &pic->pic;
 }

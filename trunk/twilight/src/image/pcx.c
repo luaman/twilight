@@ -130,10 +130,14 @@ PCX_Load
 image_t *
 PCX_Load (char *name)
 {
-	Uint8 *buf = COM_LoadTempFile (name, false);
+	image_t	*image;
+	Uint8	*buf = COM_LoadTempFile (name, false);
 
-	if (buf)
-		return PCX_LoadBuffer (buf);
+	if (buf) {
+		image = PCX_LoadBuffer (buf);
+		Zone_Free (buf);
+		return image;
+	}
 
 	return NULL;
 }

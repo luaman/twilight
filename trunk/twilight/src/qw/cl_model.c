@@ -93,7 +93,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 //
 // load the file
 //
-	buf = (unsigned *) COM_LoadAllocFile (mod->name, true);
+	buf = (unsigned *) COM_LoadTempFile (mod->name, true);
 	if (!buf) {
 		if (crash)
 			Host_EndGame ("Mod_LoadModel: %s not found", mod->name);

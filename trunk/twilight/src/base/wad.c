@@ -33,9 +33,10 @@ static const char rcsid[] =
 #include "sys.h"
 #include "wad.h"
 
-int         wad_numlumps;
-lumpinfo_t *wad_lumps;
-Uint8      *wad_base;
+int			 wad_numlumps;
+lumpinfo_t	*wad_lumps;
+Uint8		*wad_base;
+memzone_t	*wad_zone;
 
 void        SwapPic (qpic_t *pic);
 
@@ -85,7 +86,11 @@ W_LoadWadFile (char *filename)
 	int			i;
 	int			infotableofs;
 
-	wad_base = COM_LoadHunkFile (filename, true);
+	if (wad_zone)
+		Zone_FreeZone (&wad_zone);
+
+	wad_zone = Zone_AllocZone (va("wad %s", filename));
+	wad_base = COM_LoadZoneFile (filename, true, wad_zone);
 	if (!wad_base)
 		Sys_Error ("W_LoadWadFile: couldn't load %s", filename);
 

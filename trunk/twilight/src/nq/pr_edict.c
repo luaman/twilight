@@ -53,8 +53,8 @@ int				pr_edictareasize;	// in bytes
 
 unsigned short pr_crc;
 
-memzone_t *progs_memzone;
-memzone_t *edictstring_memzone;
+static memzone_t *progs_memzone;
+static memzone_t *edictstring_memzone;
 
 Uint type_size[8] =
 {
@@ -1160,7 +1160,6 @@ PR_LoadProgs (void)
 	Uint			i;
 	dstatement_t	*st;
 	ddef_t			*infielddefs;
-	void			*temp;
 
 	// flush the non-C variable lookup cache
 	for (i = 0; i < GEFV_CACHESIZE; i++)
@@ -1169,14 +1168,9 @@ PR_LoadProgs (void)
 	Zone_EmptyZone (progs_memzone);
 	Zone_EmptyZone (edictstring_memzone);
 
-	temp = COM_LoadAllocFile ("progs.dat", false);
-	if (!temp)
+	progs = (dprograms_t *) COM_LoadZoneFile("progs.dat", false, progs_memzone);
+	if (!progs)
 		Host_Error ("PR_LoadProgs: couldn't load progs.dat");
-
-	progs = (dprograms_t *) Zone_Alloc (progs_memzone, com_filesize);
-
-	memcpy (progs, temp, com_filesize);
-	Zone_Free (temp);
 
 	Com_DPrintf ("Programs occupy %iK.\n", com_filesize / 1024);
 

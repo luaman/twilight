@@ -241,6 +241,7 @@ CL_ParseServerInfo (void)
 // wipe the client_state_t struct
 //
 	CL_ClearState ();
+	cl.zone = Zone_AllocZone ("client");
 
 // parse protocol version number
 	i = MSG_ReadLong ();
@@ -254,7 +255,7 @@ CL_ParseServerInfo (void)
 	if (cl.maxclients < 1 || cl.maxclients > MAX_SCOREBOARD)
 		Host_Error ("Bad maxclients (%u) from server\n", cl.maxclients);
 
-	cl.scores = Hunk_AllocName (cl.maxclients * sizeof (*cl.scores), "scores");
+	cl.scores = Zone_Alloc (cl.zone, cl.maxclients * sizeof (*cl.scores));
 
 // parse gametype
 	cl.gametype = MSG_ReadByte ();
@@ -339,7 +340,7 @@ CL_ParseServerInfo (void)
 	R_NewMap ();
 	Team_NewMap ();
 
-	Hunk_Check ();						// make sure nothing is hurt
+	Zone_CheckSentinelsGlobal ();		// Make sure nothing is hurt
 
 	noclip_anglehack = false;			// noclip is turned off at start 
 }

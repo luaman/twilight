@@ -36,8 +36,6 @@ static const char rcsid[] =
 model_t    *loadmodel;
 
 void		 Mod_LoadBrushModel (model_t *mod, void *buffer);
-model_t		*Mod_LoadModel (model_t *mod, qboolean crash);
-void		*Mod_UnloadModel (model_t *mod);
 
 Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 

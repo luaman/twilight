@@ -100,20 +100,28 @@ QLMP_LoadFont (Uint8 *buf)
 image_t *
 QLMP_Load (char *name)
 {
-	Uint8	   *buf = COM_LoadTempFile (name, false);
+	image_t		*image;
+	Uint8		*buf = COM_LoadTempFile (name, false);
+	qboolean	need_free = true;
 
 	if (!buf)
 	{
 		COM_StripExtension (name, name);
 		buf = W_GetLumpName (name);
+		need_free = false;
 	}
 
 	if (buf)
 	{
 		if (strncasecmp ("conchars.lmp", name, 12))
-			return QLMP_LoadFont (buf);
+			image = QLMP_LoadFont (buf);
 		else
-			return QLMP_LoadQPic (buf);
+			image = QLMP_LoadQPic (buf);
+
+		if (need_free)
+			Zone_Free (buf);
+
+		return image;
 	}
 
 	return NULL;

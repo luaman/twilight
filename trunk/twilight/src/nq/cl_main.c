@@ -88,6 +88,7 @@ CL_ClearState (void)
 		Host_ClearMemory ();
 
 // wipe the entire cl structure
+	Zone_FreeZone (&cl.zone);
 	memset (&cl, 0, sizeof (cl));
 
 	// we don't get this from the server, that'd take a new protocol
@@ -221,7 +222,6 @@ CL_SignonReply (void)
 		case 3:
 			MSG_WriteByte (&cls.message, clc_stringcmd);
 			MSG_WriteString (&cls.message, "begin");
-			Cache_Report ();			// print remaining memory
 			break;
 
 		case 4:

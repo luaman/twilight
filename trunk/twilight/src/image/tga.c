@@ -270,10 +270,14 @@ TGA_Load
 image_t *
 TGA_Load (char *name)
 {
-	Uint8 *buf = COM_LoadTempFile (name, false);
+	image_t	*image;
+	Uint8	*buf = COM_LoadTempFile (name, false);
 
-	if (buf)
-		return TGA_LoadBuffer (buf);
+	if (buf) {
+		image = TGA_LoadBuffer (buf);
+		Zone_Free (buf);
+		return image;
+	}
 
 	return NULL;
 }

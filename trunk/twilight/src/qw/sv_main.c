@@ -1670,15 +1670,11 @@ SV_Init (void)
 	SV_InitLocal ();
 	Pmove_Init ();
 
-	Hunk_AllocName (0, "-HOST_HUNKLEVEL-");
-	host_hunklevel = Hunk_LowMark ();
-
 	Cbuf_InsertText ("exec server.cfg\n");
 
 	host_initialized = true;
 
 	Com_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
-	Com_Printf ("%4.1f megabyte heap\n", hunk_size / (1024 * 1024.0));
 
 	Com_Printf ("\nTwilight Server Version %s (Build %04d)\n\n", VERSION,
 				build_number ());

@@ -84,7 +84,6 @@ model_t *
 Mod_LoadModel (model_t *mod, qboolean crash)
 {
 	unsigned	*buf;
-	Uint8		stackbuf[1024];			// avoid dirtying the cache heap
 
 	if (!mod->needload) {
 		return mod;					// not cached at all
@@ -92,8 +91,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 //
 // load the file
 //
-	buf = (unsigned *) COM_LoadStackFile (mod->name, stackbuf,
-			sizeof (stackbuf), true);
+	buf = (unsigned *) COM_LoadTempFile (mod->name, true);
 	if (!buf) {
 		if (crash)
 			Host_EndGame ("Mod_LoadModel: %s not found", mod->name);
@@ -123,6 +121,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 			break;
 	}
 
+	Zone_Free (buf);
 	return mod;
 }
 

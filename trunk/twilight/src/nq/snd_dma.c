@@ -54,6 +54,7 @@ void		CDAudio_Bgmcallback (cvar_t *cvar);
 // Internal sound data & structures
 // =======================================================================
 
+memzone_t	*snd_zone;
 channel_t   channels[MAX_CHANNELS];
 int         total_channels;
 
@@ -186,11 +187,6 @@ S_Init_Cvars (void)
 	snd_noextraupdate = Cvar_Get ("snd_noextraupdate", "0", CVAR_NONE, NULL);
 	snd_show = Cvar_Get ("snd_show", "0", CVAR_NONE, NULL);
 	_snd_mixahead = Cvar_Get ("_snd_mixahead", "0.05", CVAR_ARCHIVE, NULL);
-
-	if (hunk_size < 0x800000) {
-		Cvar_Set (loadas8bit, "1");
-		Com_Printf ("loading all sounds as 8bit\n");
-	}
 }
 
 /*
@@ -222,13 +218,14 @@ S_Init (void)
 
 	SND_InitScaletable ();
 
-	known_sfx = Hunk_AllocName (MAX_SFX * sizeof (sfx_t), "sfx_t");
+	snd_zone = Zone_AllocZone ("sound");
+	known_sfx = Zone_Alloc (snd_zone, MAX_SFX * sizeof (sfx_t));
 	num_sfx = 0;
 
 // create a piece of DMA memory
 
 	if (fakedma) {
-		shm = (void *) Hunk_AllocName (sizeof (*shm), "shm");
+		shm = Zone_Alloc (snd_zone, sizeof (*shm));
 		shm->splitbuffer = 0;
 		shm->samplebits = 16;
 		shm->speed = 22050;
@@ -238,7 +235,7 @@ S_Init (void)
 		shm->soundalive = true;
 		shm->gamealive = true;
 		shm->submission_chunk = 1;
-		shm->buffer = Hunk_AllocName (1 << 16, "shmbuf");
+		shm->buffer = Zone_Alloc (snd_zone, 1 << 16);
 	}
 //  Com_Printf ("Sound sampling rate: %i\n", shm->speed);
 
@@ -316,24 +313,6 @@ S_FindName (char *name)
 	return sfx;
 }
 
-
-/*
-==================
-S_TouchSound
-
-==================
-*/
-void
-S_TouchSound (char *name)
-{
-	sfx_t      *sfx;
-
-	if (!sound_started)
-		return;
-
-	sfx = S_FindName (name);
-	Cache_Check (&sfx->cache);
-}
 
 /*
 ==================
@@ -464,11 +443,10 @@ void
 S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol,
 			  float attenuation)
 {
-	channel_t  *target_chan, *check;
-	sfxcache_t *sc;
-	int         vol;
-	int         ch_idx;
-	int         skip;
+	channel_t	*target_chan, *check;
+	int			 vol;
+	int			 ch_idx;
+	int			 skip;
 
 	if (!sound_started)
 		return;
@@ -499,15 +477,15 @@ S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol,
 		return;							// not audible at all
 
 // new channel
-	sc = S_LoadSound (sfx);
-	if (!sc) {
+	S_LoadSound (sfx);
+	if (!sfx->loaded) {
 		target_chan->sfx = NULL;
 		return;							// couldn't load the sound's data
 	}
 
 	target_chan->sfx = sfx;
 	target_chan->pos = 0.0;
-	target_chan->end = paintedtime + sc->length;
+	target_chan->end = paintedtime + sfx->length;
 
 // if an identical sound has also been started this frame, offset the pos
 // a bit to keep it from just making the first one louder
@@ -595,7 +573,6 @@ void
 S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation)
 {
 	channel_t  *ss;
-	sfxcache_t *sc;
 
 	if (!sfx)
 		return;
@@ -608,11 +585,11 @@ S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation)
 	ss = &channels[total_channels];
 	total_channels++;
 
-	sc = S_LoadSound (sfx);
-	if (!sc)
+	S_LoadSound (sfx);
+	if (!sfx->loaded)
 		return;
 
-	if (sc->loopstart == -1) {
+	if (sfx->loopstart == -1) {
 		Com_Printf ("Sound %s not looped\n", sfx->name);
 		return;
 	}
@@ -621,7 +598,7 @@ S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation)
 	VectorCopy (origin, ss->origin);
 	ss->master_vol = vol;
 	ss->dist_mult = (attenuation / 64) / sound_nominal_clip_dist;
-	ss->end = paintedtime + sc->length;
+	ss->end = paintedtime + sfx->length;
 
 	SND_Spatialize (ss);
 }
@@ -892,21 +869,19 @@ S_SoundList (void)
 {
 	int         i;
 	sfx_t      *sfx;
-	sfxcache_t *sc;
 	int         size, total;
 
 	total = 0;
 	for (sfx = known_sfx, i = 0; i < num_sfx; i++, sfx++) {
-		sc = Cache_Check (&sfx->cache);
-		if (!sc)
+		if (!sfx->loaded)
 			continue;
-		size = sc->length * sc->width * (sc->stereo + 1);
+		size = sfx->length * sfx->width * (sfx->stereo + 1);
 		total += size;
-		if (sc->loopstart >= 0)
+		if (sfx->loopstart >= 0)
 			Com_Printf ("L");
 		else
 			Com_Printf (" ");
-		Com_Printf ("(%2db) %6i : %s\n", sc->width * 8, size, sfx->name);
+		Com_Printf ("(%2db) %6i : %s\n", sfx->width * 8, size, sfx->name);
 	}
 	Com_Printf ("Total resident: %i\n", total);
 }

@@ -303,7 +303,7 @@ Mod_LoadLighting (lump_t *l)
 	strcpy(litfilename, loadmodel->name);
 	COM_StripExtension(litfilename, litfilename);
 	COM_DefaultExtension(litfilename, ".lit");
-	data = (Uint8 *) COM_LoadHunkFile (litfilename, false);
+	data = (Uint8 *) COM_LoadZoneFile (litfilename, false, loadmodel->zone);
 
 	if (data)
 	{
@@ -870,7 +870,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 			// And change the pointers for the next loop!
 			bheader = loadmodel->brush;
 			mod = loadmodel;
-			bheader->is_submodel = true;
+			bheader->main_model = first;
 		}
 	}
 }
@@ -878,19 +878,32 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 /*
 =================
 Mod_UnloadBrushModel
+
+NOTE: Watch the 'unloading' variable, it is a simple lock to prevent
+an infinite loop!
 =================
 */
 void
 Mod_UnloadBrushModel (model_t *mod)
 {
-	model_t	*sub;
-	Uint	i;
+	model_t			*sub;
+	Uint			 i;
+	static qboolean	 unloading = false;
 
 	for (i = 0; i < mod->brush->lightblock.num; i++)
 		qglDeleteTextures (1, &mod->brush->lightblock.chains[i].l_texnum);
 
-	if (mod->brush->is_submodel)
+	if (mod->brush->main_model)
+	{
+		if (unloading)
+			return;
+
+		unloading = true;
+		Mod_UnloadModel (mod->brush->main_model);
+		unloading = false;
+
 		return;
+	}
 
 	for (i = 1; i <= mod->brush->numsubmodels; i++) {
 		sub = Mod_FindName(va("*%d", i));
