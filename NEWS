@@ -1,322 +1,324 @@
 NEWS for Project Twilight
 
-[This file contains all known updates/changes to Project Twilight that are different from id's standard quake I distributions]
----------------------------------------------------
+[ This file contains all known updates/changes to
+  Project Twilight that are different from id's
+  standard Quake I distributions ]
+-------------------------------------------------
 
 2001-09-14 09:02  digiman
-	Twilight does not draw skybox if sky was not initialized
-	(no sky surfaces).
+        Twilight does not draw skybox if sky was not initialized
+        (no sky surfaces).
 
 2001-09-14 07:15  knghtbrd
-	Added fs_gamename cvar, needed for Debian packages
+        Added fs_gamename cvar, needed for Debian packages
 
 2001-09-13 07:36  knghtbrd
-	Shared and user configuration files for settings that can't be in your
-	autoexec files are now supported.  fs_shareconf and fs_userconf are the
-	cvars, and can be +set as you'd expect to change defaults.
+        Shared and user configuration files for settings that can't be in your
+        autoexec files are now supported.  fs_shareconf and fs_userconf are the
+        cvars, and can be +set as you'd expect to change defaults.
 
 2001-09-12 22:15  lordhavoc
-	Fix for e3m3.bsp bizarre broken rotated physics (in other words: clear 
-	the angles on world when loading)
+        Fix for e3m3.bsp bizarre broken rotated physics (in other words: clear 
+        the angles on world when loading)
 
 2001-09-11 04:46  lordhavoc
-	Added DarkPlaces texture resampling code, should improve load times 
-	r_lerpimages	1	smooth resampling
-	r_lerpimages	0	old style
+        Added DarkPlaces texture resampling code, should improve load times 
+        r_lerpimages        1        smooth resampling
+        r_lerpimages        0        old style
 
 2001-09-11 04:14  mercury
-	2-5% speed increase due to an OpenGL state change audit...
+        2-5% speed increase due to an OpenGL state change audit...
 
 2001-09-11 03:38  mercury
-	Fixed COM_StripExtension to strip the last ., not the first.  Oh, it 
-	also won't strip off a directory
+        Fixed COM_StripExtension to strip the last ., not the first.  Oh, it 
+        also won't strip off a directory
 
 2001-09-10 13:27  digiman
-	Added skybox support to twilight-nq and twilight-qw. Use skybox cvar to
-	load skyboxes
+        Added skybox support to twilight-nq and twilight-qw. Use skybox cvar to
+        load skyboxes
 
 2001-09-10 03:43  knghtbrd
-	"Key unbound, press F4 to bind" message removed entirely. How does it
-	know what I have F4 bound to?  And why does it happen for some keys but 
-	not others?  And spamming the console because I hold down a key that
-	isn't bound or something? Maybe I bumped it?  No, this message has to
-	go.
+        "Key unbound, press F4 to bind" message removed entirely. How does it
+        know what I have F4 bound to?  And why does it happen for some keys but 
+        not others?  And spamming the console because I hold down a key that
+        isn't bound or something? Maybe I bumped it?  No, this message has to
+        go.
 
 2001-09-09 19:13  knghtbrd
-	QuakeForge's console background was much better than ours. I should know
-	since I did the console	background stuff.  The useful changes have been
-	brought over, along with the Cvars cl_verstring and gl_constretch.
-	Unlike QF, gl_constretch defaults to on, it looks nifty with the id
-	conback, so deal with it.  =)
+        QuakeForge's console background was much better than ours. I should know
+        since I did the console        background stuff.  The useful changes have been
+        brought over, along with the Cvars cl_verstring and gl_constretch.
+        Unlike QF, gl_constretch defaults to on, it looks nifty with the id
+        conback, so deal with it.  =)
 
 2001-09-09 18:58  eviltypeguy
-	Changed "Hardware Brightness" to "Hardware Gamma" on graphics options
-	menu
+        Changed "Hardware Brightness" to "Hardware Gamma" on graphics options
+        menu
 
 2001-09-09 18:45  eviltypeguy
-	Fixed twilight-nq hardware brightness slider on the options menu
-	to work like the other sliders...
+        Fixed twilight-nq hardware brightness slider on the options menu
+        to work like the other sliders...
 
 2001-09-09 17:59  knghtbrd
-	Added preliminary Debian packaging scripts, currently with an undeclared
-	dep on gamedata and I want to break the dedicated server out into
-	its own package but they DO work if you replace the auto* symlinks
-	with real files - make dist will build its tarball like that, which
-	I needed to tweak a couple of the Makefile.am's to get working.
+        Added preliminary Debian packaging scripts, currently with an undeclared
+        dep on gamedata and I want to break the dedicated server out into
+        its own package but they DO work if you replace the auto* symlinks
+        with real files - make dist will build its tarball like that, which
+        I needed to tweak a couple of the Makefile.am's to get working.
 
 2001-09-09 10:32  zinx
-	Removed cl_predict_players2 cvar. It didn't make any sense to
-	have it, as cl_predict_players and cl_predict_players2 were always
-	checked together...
+        Removed cl_predict_players2 cvar. It didn't make any sense to
+        have it, as cl_predict_players and cl_predict_players2 were always
+        checked together...
 
 2001-09-09 07:30  digiman
-	Fixed the rest of dynamic lights in twilght-qw and twilight-nq. Also
-	fixed a crash in after map change if in 32 bit mode.
+        Fixed the rest of dynamic lights in twilght-qw and twilight-nq. Also
+        fixed a crash in after map change if in 32 bit mode.
 
 2001-09-09 07:25  mercury
-	Added hardware gamma support...
-	For my next trick I might make the cshifts alter the gamma bias
-	instead of drawing the big polys on the screen! *cackle*
-	NOTE: The new gamma system is NOT compatible with the old one,
-	the cvars and other things have changed, use the graphics options menu
-	to change settings for now
+        Added hardware gamma support...
+        For my next trick I might make the cshifts alter the gamma bias
+        instead of drawing the big polys on the screen! *cackle*
+        NOTE: The new gamma system is NOT compatible with the old one,
+        the cvars and other things have changed, use the graphics options menu
+        to change settings for now
 
 2001-09-08 15:53  digiman
-	Dynamic SDL linkage: to win32 applications (nq and qw), you must
-	have SDL.dll
+        Dynamic SDL linkage: to win32 applications (nq and qw), you must
+        have SDL.dll
 
 2001-09-08 12:39  digiman
-	Added show_fps cvar to twilight-nq and set fps_counter to 0 by default
-	in twilight-qw
+        Added show_fps cvar to twilight-nq and set fps_counter to 0 by default
+        in twilight-qw
 
 2001-09-07 11:06  digiman
-	Added mipmapping routines from Mesa by Brian Paul.
+        Added mipmapping routines from Mesa by Brian Paul.
 
 2001-09-07 10:33  digiman
-	Added tga and pcx modules (support?)
+        Added tga and pcx modules (support?)
 
 2001-09-06 18:18  knghtbrd
-	It's possible to make the menu think you're in a game with a console
-	open simply by opening one and typing "disconnect".  This causes the
-	menu to	refuse to open, thinking instead that it should close the
-	console. Fixed.	We now set key_dest == key_console after we init the
-	host, probably other places need to set key_dest still, the diff for
-	Mercury's new key code has them all covered.  Mouse wheel works
-	fine, but can spit out warnings about unbound keys if you don't
-	bind the wheel, even when using it to scroll the console. Cleaning
-	up the key_dest state changes will fix that.
+        It's possible to make the menu think you're in a game with a console
+        open simply by opening one and typing "disconnect".  This causes the
+        menu to        refuse to open, thinking instead that it should close the
+        console. Fixed.        We now set key_dest == key_console after we init the
+        host, probably other places need to set key_dest still, the diff for
+        Mercury's new key code has them all covered.  Mouse wheel works
+        fine, but can spit out warnings about unbound keys if you don't
+        bind the wheel, even when using it to scroll the console. Cleaning
+        up the key_dest state changes will fix that.
 
 2001-09-02 07:12  digiman
-	Dedicated server doesn't overwrite config.cfg
+        Dedicated server doesn't overwrite config.cfg
 
 2001-09-01 17:27  digiman
-	Added -bpp command line option for color depth setting
+        Added -bpp command line option for color depth setting
 
 2001-08-31 13:38  digiman
-	Added gl_oldlights cvar to disable PVS dynamic lights
+        Added gl_oldlights cvar to disable PVS dynamic lights
 
 2001-08-30 23:56  eviltypeguy
-	GL_TEXTUREMODE is now a graphics options menu item, so users don't have
-	to go digging through cvar land to set texture quality...
+        GL_TEXTUREMODE is now a graphics options menu item, so users don't have
+        to go digging through cvar land to set texture quality...
 
 2001-08-30 23:56  eviltypeguy
-	Fixed up bad texture mode message, added sane default if user put in a
-	bogus value
+        Fixed up bad texture mode message, added sane default if user put in a
+        bogus value
 
 2001-08-30 21:28  eviltypeguy
-	gl_texturemode is now a cvar and not a command (I consider the old way
-	to be a bug, so do others :) Basically, this means that anal players
-	like me can have gl_linear_mipmap_linear automagically enabled for them,
-	and since it's a cvar with cvar_archive set, it's automatically saved on
-	quit into the user's .cfg file...
+        gl_texturemode is now a cvar and not a command (I consider the old way
+        to be a bug, so do others :) Basically, this means that anal players
+        like me can have gl_linear_mipmap_linear automagically enabled for them,
+        and since it's a cvar with cvar_archive set, it's automatically saved on
+        quit into the user's .cfg file...
 
 2001-08-27 18:21  eviltypeguy
-	Added back frame interpolation and fullbright models options to graphics
-	options menu, setup fullbright option to change both gl_fb_models, and
-	gl_fb_bmodels, so fullbright is applied or not applied respectively to
-	both types of models...
+        Added back frame interpolation and fullbright models options to graphics
+        options menu, setup fullbright option to change both gl_fb_models, and
+        gl_fb_bmodels, so fullbright is applied or not applied respectively to
+        both types of models...
 
 2001-08-26 20:53  eviltypeguy
-	Added controllable waterwarp to twilight-nq and twilight-qw:
-	r_waterwarp 0 = disabled r_waterwarp > 0 = intensity
-	examples:
-	r_waterwarp 1 = very subtle r_waterwarp 8 = id default
-	r_waterwarp 50 = trippy
+        Added controllable waterwarp to twilight-nq and twilight-qw:
+        r_waterwarp 0 = disabled r_waterwarp > 0 = intensity
+        examples:
+        r_waterwarp 1 = very subtle r_waterwarp 8 = id default
+        r_waterwarp 50 = trippy
 
 2001-08-26 19:17  knghtbrd
-	fs_userpath/fs_sharepath cvars exist now
+        fs_userpath/fs_sharepath cvars exist now
 
 2001-08-25 21:35  eviltypeguy
-	Added software brightness and contrast control (ported from lordhavoc's
-	darkplaces) Looks sweet!
+        Added software brightness and contrast control (ported from lordhavoc's
+        darkplaces) Looks sweet!
 
 2001-08-25 14:52  digiman
-	Fullbright models are rendered with multitexturing now
+        Fullbright models are rendered with multitexturing now
 
 2001-08-25 10:00  digiman
-	PVS dynamic lights work now. HUGE speedup.'r_shadows 2' is back.
+        PVS dynamic lights work now. HUGE speedup.'r_shadows 2' is back.
 
 2001-08-25 00:00  knghtbrd
-	shutter glasses support removed since it doesn't work in OpenGL
+        shutter glasses support removed since it doesn't work in OpenGL
 
 2001-08-24 23:58  eviltypeguy
-	corrected key repeating for both twilight-nq & twilight-qw now repeats
-	if the key is bound for the console and it's not the pause key no matter
-	what, this makes for useful key repeat
+        corrected key repeating for both twilight-nq & twilight-qw now repeats
+        if the key is bound for the console and it's not the pause key no matter
+        what, this makes for useful key repeat
 
 2001-08-24 22:54  eviltypeguy
-	addition of key repeat for twilight-qw and twilight-nq controllable just
-	through these cvars:
-	in_key_repeat_delay in_key_repeat_interval
-	(milliseconds & characters a second respectively)
+        addition of key repeat for twilight-qw and twilight-nq controllable just
+        through these cvars:
+        in_key_repeat_delay in_key_repeat_interval
+        (milliseconds & characters a second respectively)
 
 2001-08-24 16:42  lordhavoc
-	removed gl_smoothmodels cvar (and corresponding	affine models graphics
-	option). Removed all setting of glShadeModel (the GL default is
-	smooth) sped up player model check in CL_LinkPacketEntities (uses
-	cl_playerindex like the CL_LinkPlayers code)
+        removed gl_smoothmodels cvar (and corresponding        affine models graphics
+        option). Removed all setting of glShadeModel (the GL default is
+        smooth) sped up player model check in CL_LinkPacketEntities (uses
+        cl_playerindex like the CL_LinkPlayers code)
 
 2001-08-22 21:57  eviltypeguy
-	Beep the user in twilight-nq and let them know it couldn't match
-	anything for tab completion.
-	
-	For twilight-qw, let the user know it couldn't match anything for tab
-	completion.
+        Beep the user in twilight-nq and let them know it couldn't match
+        anything for tab completion.
+        
+        For twilight-qw, let the user know it couldn't match anything for tab
+        completion.
 
 2001-08-22 07:29  digiman
-	Improved chasecam.
+        Improved chasecam.
 
 2001-08-22 06:45  molivier
-	Add +use support.
+        Add +use support.
 
 2001-08-21 23:57  eviltypeguy
-	Added bash-style-like tab completion for twilight-nq & twilight-qw
-	
-	It basically works like so: c<tab>
-	<===============================================================>
-	X possible commands:
-	color      connect	 changing   cd	      
-	clear	   centerview    cmd
-	
-	X possible variables:
-	cl_chasecam	    cl_hightrack.......
-	Enjoy!
-	
-	This could change drastically in the future....
+        Added bash-style-like tab completion for twilight-nq & twilight-qw
+        
+        It basically works like so: c<tab>
+        <===============================================================>
+        X possible commands:
+        color      connect         changing   cd              
+        clear           centerview    cmd
+        
+        X possible variables:
+        cl_chasecam            cl_hightrack.......
+        Enjoy!
+        
+        This could change drastically in the future....
 
 2001-08-21 21:04  eviltypeguy
-	Added early +set execute fix to twilight-qwsv
+        Added early +set execute fix to twilight-qwsv
 
 2001-08-21 15:40  digiman
-	Added fullbright texture support on models, bmodels and player model
-	skins for twilight-qw and twilight-nq.
+        Added fullbright texture support on models, bmodels and player model
+        skins for twilight-qw and twilight-nq.
 
 2001-08-19 17:55  eviltypeguy
-	Fix early +set execution for twilight-nq & twilight-qw, this allows a
-	user to do:
-	twilight-nq +set gl_driver "blah.so", since once the engine has
-	started it is not possible to change the gl_driver...
+        Fix early +set execution for twilight-nq & twilight-qw, this allows a
+        user to do:
+        twilight-nq +set gl_driver "blah.so", since once the engine has
+        started it is not possible to change the gl_driver...
 
 2001-08-16 17:54  digiman
-	Added big-endian machines support for skins (future work)
+        Added big-endian machines support for skins (future work)
 
 2001-08-16 17:50  digiman
-	Fixed some misc. particle system bugs...
+        Fixed some misc. particle system bugs...
 
 2001-08-14 05:11  digiman
-	Enabled rotating bmodels support in twilight-nq
+        Enabled rotating bmodels support in twilight-nq
 
 2001-08-13 18:11  knghtbrd
-	In Linux, you may now specify --with-opengl=libWhateverGL.so.something
-	to pick your compiled-in default for GL library.  ./configure will tell
-	you what it's set to. Win32 gets opengl32.dll as normal
+        In Linux, you may now specify --with-opengl=libWhateverGL.so.something
+        to pick your compiled-in default for GL library.  ./configure will tell
+        you what it's set to. Win32 gets opengl32.dll as normal
 
 2001-08-13 17:03  digiman
-	Speed up recursive light checking in twilight-nq and twilight-qw this
-	version is faster than id's one	and LordHavoc's one too....
+        Speed up recursive light checking in twilight-nq and twilight-qw this
+        version is faster than id's one        and LordHavoc's one too....
 
 2001-08-13 17:01  digiman
-	Faster console drawing for twilight-nq and twilight-qw
+        Faster console drawing for twilight-nq and twilight-qw
 
 2001-08-13 16:24  digiman
-	Runtime GL library linking works under Windows
+        Runtime GL library linking works under Windows
 
 2001-08-13 01:58  knghtbrd
-	-basedir no longer needed in Linux, also fixed a QW server bug regarding
-	the temp1 var..
+        -basedir no longer needed in Linux, also fixed a QW server bug regarding
+        the temp1 var..
 
 2001-08-12 07:07  raineth
-	Ported model interpolation, fullbright model support, and the graphics
-	options	menu from twilight-nq to twilight-qw.
+        Ported model interpolation, fullbright model support, and the graphics
+        options        menu from twilight-nq to twilight-qw.
 
 2001-08-12 06:25  digiman
-	Speedup - prefind models for temporary entities
+        Speedup - prefind models for temporary entities
 
 2001-08-12 05:03  mercury
-	Init the speed cheat protection stuff on client connect.
+        Init the speed cheat protection stuff on client connect.
 
 2001-08-12 04:59  mercury
-	Added Speed cheat detection.  Allow connecting clients to see people
-	talking.
+        Added Speed cheat detection.  Allow connecting clients to see people
+        talking.
 
 2001-08-10 13:01  digiman
-	Added "Improved" shadows (r_shadows 2).
+        Added "Improved" shadows (r_shadows 2).
 
 2001-08-10 13:00  digiman
-	Added Advance console editing for twilight-nq
+        Added Advance console editing for twilight-nq
 
 2001-08-10 12:56  digiman
-	Enabled rotation bmodels for twilight-nq
+        Enabled rotation bmodels for twilight-nq
 
 2001-08-09 13:18  digiman
-	Added some stuff to improve look of models in Shrak (it didn't work
-	in Twilight at all) and Dissolution of Eternity.
+        Added some stuff to improve look of models in Shrak (it didn't work
+        in Twilight at all) and Dissolution of Eternity.
 
 2001-08-09 07:49  digiman
-	Optimized model drawing
+        Optimized model drawing
 
 2001-08-09 06:51  digiman
-	Added movement and frame interpolation to twilight-nq, some small
-	changes	to improved look of new maths.
+        Added movement and frame interpolation to twilight-nq, some small
+        changes        to improved look of new maths.
 
 2001-08-08 18:08  digiman
-	Fixed a security hole in twilight-nq's network code
+        Fixed a security hole in twilight-nq's network code
 
 2001-08-08 17:48  digiman
-	Added -lm_4 command line option to use RGBA format for lightmaps for
-	twilight-nq
+        Added -lm_4 command line option to use RGBA format for lightmaps for
+        twilight-nq
 
 2001-08-08 15:42  digiman
-	Added modflags for indicating if model is fullbright and there's no need
-	to calculate ambient and dynamic lighting for it. Modflags also indicate
-	if model should not cast shadow or should be double sized (eyes). A LOT
-	of models use this flags and look nicer now. There's also a HACK to make
-	shells bmodel look nicer (by Tonik) for both twilight-nq and
-	twilight-qw.
+        Added modflags for indicating if model is fullbright and there's no need
+        to calculate ambient and dynamic lighting for it. Modflags also indicate
+        if model should not cast shadow or should be double sized (eyes). A LOT
+        of models use this flags and look nicer now. There's also a HACK to make
+        shells bmodel look nicer (by Tonik) for both twilight-nq and
+        twilight-qw.
 
 2001-08-05 17:18  mercury
-	Added -nomouse option to twilight-qw
+        Added -nomouse option to twilight-qw
 
 2001-08-04 12:38  knghtbrd
-	Say bye bye to the remaining vestiges of IPX and serial support.  We
-	don't actually support these things, better not to have code which
-	claims we do.
+        Say bye bye to the remaining vestiges of IPX and serial support.  We
+        don't actually support these things, better not to have code which
+        claims we do.
 
 2001-07-30 12:48  mercury
-	A few fixes for mouse input. (Wheel supported, movement is done a /lot/
-	saner.) for twilight-qw
+        A few fixes for mouse input. (Wheel supported, movement is done a /lot/
+        saner.) for twilight-qw
 
 2001-07-30 01:00  knghtbrd
-	Made SHAREPATH default to ${datadir}/games/twilight by default in unix.
+        Made SHAREPATH default to ${datadir}/games/twilight by default in unix.
 
 2001-07-28 09:27  digiman
-	Greatly optimized Draw_String and Draw_Alt_String as LordHavoc
-	requested. (makes messages displayed on screen not effect performance
-	nearly as much...)
+        Greatly optimized Draw_String and Draw_Alt_String as LordHavoc
+        requested. (makes messages displayed on screen not effect performance
+        nearly as much...)
 
 2001-07-10 15:55  knghtbrd
-	Remove IDGODS stuff. Bwahahaha, it's been 18 months since I've seen
-	that.
+        Remove IDGODS stuff. Bwahahaha, it's been 18 months since I've seen
+        that.
 
 2001-07-09 08:52  knghtbrd
-	Removed more 3dfx voodoo specific support code
+        Removed more 3dfx voodoo specific support code
