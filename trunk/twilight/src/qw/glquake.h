@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+$Id$
+
 */
 // disable data conversion warnings
 
@@ -200,6 +202,8 @@ extern cvar_t *gl_reporttjunctions;
 extern cvar_t *gl_flashblend;
 extern cvar_t *gl_nocolors;
 extern cvar_t *gl_finish;
+extern cvar_t *gl_im_animation;
+extern cvar_t *gl_fb_models;
 
 extern int  gl_lightmap_format;
 extern int  gl_solid_format;

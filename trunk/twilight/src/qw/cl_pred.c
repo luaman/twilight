@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+static const char rcsid[] =
+	"$Id$";
+
 #include "quakedef.h"
 #include "keys.h"
 
@@ -203,12 +207,8 @@ CL_PredictMove (void)
 	}
 
 	for (i = 0; i < 3; i++)
-		if (Q_fabs (from->playerstate[cl.playernum].origin[i] - to->playerstate[cl.playernum].origin[i]) > 128) {	// teleported, 
-																												// 
-			// 
-			// so 
-			// don't 
-			// lerp
+		if (Q_fabs (from->playerstate[cl.playernum].origin[i] - to->playerstate[cl.playernum].origin[i]) > 128) {
+			// teleported, so don't lerp
 			VectorCopy (to->playerstate[cl.playernum].velocity, cl.simvel);
 			VectorCopy (to->playerstate[cl.playernum].origin, cl.simorg);
 			return;

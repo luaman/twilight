@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+$Id$
 */
 
 // refresh.h -- public interface to refresh functions
@@ -60,6 +61,20 @@ typedef struct entity_s {
 	struct mnode_s *topnode;			// for bmodels, first world node
 	// that splits bmodel, or NULL if
 	// not split
+
+	/* Variables used for interpolation */
+	/* FIXME: A lot of these variables can be reused */
+	float       frame_start_time;
+	float       frame_interval;
+	int         pose1;
+	int         pose2;
+	float       translate_start_time;
+	vec3_t      origin1;
+	vec3_t      origin2;
+	float       rotate_start_time;
+	vec3_t      angles1;
+	vec3_t      angles2;
+
 } entity_t;
 
 typedef struct {

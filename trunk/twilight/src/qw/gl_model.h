@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+$Id$
 */
 
 #ifndef __MODEL__
@@ -329,6 +330,8 @@ typedef enum { mod_brush, mod_sprite, mod_alias } modtype_t;
 #define FLAG_FULLBRIGHT	1				// always fullbright
 #define FLAG_NOSHADOW	2				// do not draw shadow
 #define FLAG_DOUBLESIZE 4				// double sized model
+#define FLAG_NO_IM_ANIM 8				// do not interpolate frames (1 frame only)
+#define FLAG_NO_IM_FORM 16				// do not interpolate angles or position (weapons)
 #define FLAG_ALWAYSLIT	32				// always has some light
 
 typedef struct model_s {

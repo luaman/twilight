@@ -19,6 +19,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // cl_ents.c -- entity parsing and management
 
+static const char rcsid[] =
+	"$Id$";
+
 #include "quakedef.h"
 
 extern cvar_t cl_predict_players;
@@ -474,6 +477,11 @@ CL_LinkPacketEntities (void)
 
 		// set frame
 		ent->frame = s1->frame;
+		if (ent->visframe != r_framecount - 1) {
+			ent->pose1 = -1;
+			ent->pose2 = -1;
+		}
+		ent->visframe = r_framecount;
 
 		// rotate binary objects locally
 		if (model->flags & EF_ROTATE) {

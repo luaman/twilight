@@ -17,7 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-// r_main.c
+
+static const char rcsid[] =
+	"$Id$";
 
 #include "quakedef.h"
 
@@ -98,6 +100,8 @@ cvar_t     *gl_nocolors;
 cvar_t     *gl_keeptjunctions;
 cvar_t     *gl_reporttjunctions;
 cvar_t     *gl_finish;
+cvar_t	   *gl_im_animation;
+cvar_t	   *gl_fb_models;
 
 #if 0
 cvar_t      r_norefresh = { "r_norefresh", "0" };
@@ -131,6 +135,13 @@ extern cvar_t *gl_ztrick;
 extern cvar_t *scr_fov;
 
 static float shadescale = 0.0;
+
+int	lastposenum =  0;
+int	lastposenum0 = 0;
+
+void GL_DrawAliasBlendedShadow (aliashdr_t *, int, int, entity_t *);
+void GL_DrawAliasBlendedFrame (aliashdr_t *, int, int, float);
+void R_SetupAliasBlendedFrame (int, aliashdr_t *, entity_t *);
 
 /*
 =================
@@ -356,6 +367,74 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 	}
 }
 
+/*
+=============
+GL_DrawAliasBlendedFrame
+
+fenix@io.com: model animation interpolation
+=============
+*/
+void 
+GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float blend)
+{
+	float       light;
+	trivertx_t	*verts1;
+	trivertx_t	*verts2;
+	int			*order;
+	int         count;
+	vec3_t      d;
+	
+	lastposenum0 = pose1;
+	lastposenum  = pose2;
+	
+	verts1 = (trivertx_t *)((byte *)paliashdr + paliashdr->posedata);
+	verts2 = verts1;
+	verts1 += pose1 * paliashdr->poseverts;
+	verts2 += pose2 * paliashdr->poseverts;
+	order = (int *)((byte *)paliashdr + paliashdr->commands);
+	
+	while (1)
+	{
+		count = *order++;
+		if (!count)
+			break;						// done
+
+		// get the vertex count and primitive type
+		if (count < 0) {
+			count = -count;
+			glBegin (GL_TRIANGLE_FAN);
+		} else
+			glBegin (GL_TRIANGLE_STRIP);
+
+		do
+		{
+			// texture coordinates come from the draw list
+			glTexCoord2f (((float *)order)[0], ((float *)order)[1]);
+			order += 2;
+
+			// normals and vertexes come from the frame list
+			// blend the light intensity from the two frames together
+			d[0] = shadedots[verts2->lightnormalindex] -
+				shadedots[verts1->lightnormalindex];
+
+			light = shadelight * (shadedots[verts1->lightnormalindex] + (blend * d[0]));
+			glColor3f (light, light, light);
+
+			VectorSubtract(verts2->v, verts1->v, d);
+
+			// blend the vertex positions from each frame together
+			glVertex3f (
+				verts1->v[0] + (blend * d[0]),
+				verts1->v[1] + (blend * d[1]),
+				verts1->v[2] + (blend * d[2]));
+
+			verts1++;
+			verts2++;
+		} while (--count);
+
+		glEnd ();
+	}
+}
 
 /*
 =============
@@ -419,7 +498,132 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 	}
 }
 
+/*
+=============
+GL_DrawAliasBlendedShadow
 
+fenix@io.com: model animation interpolation
+=============
+*/
+void 
+GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t* e)
+{
+	trivertx_t	*verts1;
+	trivertx_t	*verts2;
+	int			*order;
+	vec3_t      point1;
+	vec3_t      point2;
+	vec3_t      d;
+	float       height;
+	float       lheight;
+	int         count;
+	float       blend;
+#if 0
+	/* No r_shadows 2 support yet */
+	pmtrace_t		downtrace;
+	vec3_t		downmove;
+	float		s1 = 0.0f;
+	float		c1 = 0.0f;
+#endif
+
+	blend = (realtime - e->frame_start_time) / e->frame_interval;
+
+	if (blend > 1) blend = 1;
+
+	lheight = e->origin[2] - lightspot[2];
+	height  = -lheight + 1.0;
+
+	verts1 = (trivertx_t *)((byte *)paliashdr + paliashdr->posedata);
+	verts2 = verts1;
+
+	verts1 += pose1 * paliashdr->poseverts;
+	verts2 += pose2 * paliashdr->poseverts;
+
+	order = (int *)((byte *)paliashdr + paliashdr->commands);
+
+#if 0
+	/* FIXME: We don't have SV_RecursiveHullCheck. */
+	if (r_shadows->value == 2)
+	{
+		// better shadowing, now takes angle of ground into account
+		// cast a traceline into the floor directly below the player
+		// and gets normals from this
+		VectorCopy (currententity->origin, downmove);
+		downmove[2] = downmove[2] - 4096;
+		memset (&downtrace, 0, sizeof(downtrace));
+		SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, currententity->origin, downmove, &downtrace);
+
+		// calculate the all important angles to keep speed up
+		s1 = Q_sin( currententity->angles[1]/180*M_PI);
+		c1 = Q_cos( currententity->angles[1]/180*M_PI);
+	}
+#endif
+	while ((count = *order++))
+	{
+		// get the vertex count and primitive type
+		if (count < 0)
+		{
+			count = -count;
+			glBegin (GL_TRIANGLE_FAN);
+		}
+		else
+		{
+			glBegin (GL_TRIANGLE_STRIP);
+		}
+		do
+		{
+			order += 2;
+
+			point1[0] = verts1->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
+			point1[1] = verts1->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
+			point1[2] = verts1->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
+			
+			point1[0] -= shadevector[0]*(point1[2]+lheight);
+			point1[1] -= shadevector[1]*(point1[2]+lheight);
+			point2[0] = verts2->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
+			point2[1] = verts2->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
+			point2[2] = verts2->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
+
+			point2[0] -= shadevector[0]*(point2[2]+lheight);
+			point2[1] -= shadevector[1]*(point2[2]+lheight);
+
+			VectorSubtract(point2, point1, d);
+
+#if 0
+			/* No r_shadows 2 support yet */
+			if (r_shadows->value == 2)
+			{	
+				point1[0] = point1[0] + (blend * d[0]);
+				point1[1] = point1[1] + (blend * d[1]);
+				point1[2] = point1[2] + (blend * d[2]);
+
+				// drop it down to floor
+				point1[2] =  - (currententity->origin[2] - downtrace.endpos[2]) ;
+
+				// now move the z-coordinate as appropriate
+				point1[2] += ((point1[1] * (s1 * downtrace.plane.normal[0])) -
+					(point1[0] * (c1 * downtrace.plane.normal[0])) -
+					(point1[0] * (s1 * downtrace.plane.normal[1])) -
+					(point1[1] * (c1 * downtrace.plane.normal[1]))
+					) + 20.2 - downtrace.plane.normal[2]*20.0;
+
+				glVertex3fv (point1);
+			}
+			else {
+#else
+			{
+#endif
+				glVertex3f (point1[0] + (blend * d[0]),
+					point1[1] + (blend * d[1]),
+					height);
+			}
+
+			verts1++;
+			verts2++;
+		} while (--count);
+		glEnd ();
+	}      
+}
 
 /*
 =================
@@ -449,6 +653,53 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr)
 	GL_DrawAliasFrame (paliashdr, pose);
 }
 
+/*
+=================
+R_SetupAliasBlendedFrame
+
+fenix@io.com: model animation interpolation
+=================
+*/
+void 
+R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t* e)
+{
+	int   pose, numposes;
+	float blend;
+
+	if ((frame >= paliashdr->numframes) || (frame < 0))
+	{
+		Con_DPrintf ("R_AliasSetupFrame: no such frame %d\n", frame);
+		frame = 0;
+	}
+
+	pose = paliashdr->frames[frame].firstpose;
+	numposes = paliashdr->frames[frame].numposes;
+
+	if (numposes > 1)
+	{
+		e->frame_interval = paliashdr->frames[frame].interval;
+		pose += (int)(cl.time / e->frame_interval) % numposes;
+	} else
+		e->frame_interval = 0.1;
+
+	if (e->pose2 != pose)
+	{
+		e->frame_start_time = realtime;
+		if (e->pose2 == -1)
+			e->pose1 = pose;
+		else
+			e->pose1 = e->pose2;
+		e->pose2 = pose;
+		blend = 0.0;
+	} else
+		blend = (realtime - e->frame_start_time) / e->frame_interval;
+
+	// wierd things start happening if blend passes 1
+	if (cl.paused || blend > 1) 
+		blend = 1;
+
+	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend);
+}
 
 
 /*
@@ -485,7 +736,7 @@ R_DrawAliasModel (entity_t *e)
 	// get lighting information
 	// 
 
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT))
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || !gl_fb_models->value)
 	{
 		ambientlight = shadelight = R_LightPoint (currententity->origin);
 
@@ -513,8 +764,9 @@ R_DrawAliasModel (entity_t *e)
 		if (ambientlight + shadelight > 192)
 			shadelight = 192 - ambientlight;
 	}
-	else 
-		// HACK HACK HACK -- no fullbright colors, so make torches full light
+
+	// HACK HACK HACK -- no fullbright colors, so make torches full light
+	if ((clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value)
 		ambientlight = shadelight = 256;
 
 	// ZOID: never allow players to go totally black
@@ -542,6 +794,7 @@ R_DrawAliasModel (entity_t *e)
 	GL_DisableMultitexture ();
 
 	glPushMatrix ();
+
 	R_RotateForEntity (e);
 
 	if (clmodel->modflags & FLAG_DOUBLESIZE) {
@@ -579,7 +832,10 @@ R_DrawAliasModel (entity_t *e)
 	if (gl_affinemodels->value)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
-	R_SetupAliasFrame (currententity->frame, paliashdr);
+	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
+	else
+		R_SetupAliasFrame (currententity->frame, paliashdr);
 
 	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
@@ -600,11 +856,16 @@ R_DrawAliasModel (entity_t *e)
 		shadevector[2] = shadescale;
 
 		glPushMatrix ();
+
 		R_RotateForEntity (e);
+
 		glDisable (GL_TEXTURE_2D);
 		glEnable (GL_BLEND);
 		glColor4f (0, 0, 0, 0.5);
-		GL_DrawAliasShadow (paliashdr, lastposenum);
+		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0, lastposenum, currententity);
+		else
+			GL_DrawAliasShadow (paliashdr, lastposenum);
 		glEnable (GL_TEXTURE_2D);
 		glDisable (GL_BLEND);
 		glColor4f (1, 1, 1, 1);
