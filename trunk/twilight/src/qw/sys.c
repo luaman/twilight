@@ -168,6 +168,7 @@ Sys_Quit (void)
 #ifdef HAVE_FCNTL
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 #endif
+	SDL_Quit ();
 	exit (0);
 }
 
