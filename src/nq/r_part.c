@@ -201,7 +201,7 @@ void R_ReadPointFile_f (void)
 	particle_t	*p;
 	char	name[MAX_OSPATH];
 	
-	sprintf (name,"maps/%s.pts", sv.name);
+	snprintf (name, sizeof(name), "maps/%s.pts", sv.name);
 
 	COM_FOpenFile (name, &f);
 	if (!f)

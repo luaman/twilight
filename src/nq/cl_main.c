@@ -201,7 +201,7 @@ CL_SignonReply (void)
 								 ((int) cl_color.value) & 15));
 
 			MSG_WriteByte (&cls.message, clc_stringcmd);
-			sprintf (str, "spawn %s", cls.spawnparms);
+			snprintf (str, sizeof(str), "spawn %s", cls.spawnparms);
 			MSG_WriteString (&cls.message, str);
 			break;
 
@@ -243,7 +243,7 @@ CL_NextDemo (void)
 		}
 	}
 
-	sprintf (str, "playdemo %s\n", cls.demos[cls.demonum]);
+	snprintf (str, sizeof(str), "playdemo %s\n", cls.demos[cls.demonum]);
 	Cbuf_InsertText (str);
 	cls.demonum++;
 }

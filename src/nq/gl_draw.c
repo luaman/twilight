@@ -399,7 +399,7 @@ Draw_Init (void)
 	SwapPic (cb);
 
 	// hack the version number directly into the pic
-	sprintf (ver, "twilight %-7s", VERSION);
+	snprintf (ver, sizeof(ver), "twilight %-7s", VERSION);
 	dest = cb->data + 320 * 186 + 320 - 11 - 8 * Q_strlen (ver);
 	y = Q_strlen (ver);
 	for (x = 0; x < y; x++)
