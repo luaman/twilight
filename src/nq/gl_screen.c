@@ -620,12 +620,6 @@ SCR_SetUpToDrawConsole (void)
 		if (scr_conlines < scr_con_current)
 			scr_con_current = scr_conlines;
 	}
-
-	if (clearconsole++ < vid.numpages) {
-		Sbar_Changed ();
-	} else if (clearnotify++ < vid.numpages) {
-	} else
-		con_notifylines = 0;
 }
 
 /*
@@ -914,7 +908,6 @@ SCR_UpdateScreen (void)
 		Con_Printf ("SCR_UpdateScreen: WARNING: gl_triplebuffer not inited\n");
 		return;
 	}
-	vid.numpages = 2 + gl_triplebuffer->value;
 
 	scr_copytop = 0;
 	scr_copyeverything = 0;
