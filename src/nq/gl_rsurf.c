@@ -48,9 +48,6 @@ static const char rcsid[] =
 
 static int lightmap_bytes;				// 1, 3, or 4
 
-// LordHavoc: align TexSubImage2D updates on 4 byte boundaries
-static int lightmapalign, lightmapalignmask;
-
 static int lightmap_textures;
 
 static Uint32 blocklights[BLOCK_WIDTH * BLOCK_HEIGHT * 3];
@@ -210,7 +207,7 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 static void
 GL_BuildLightmap (msurface_t *surf)
 {
-	int			i, j, size, shift, outwidth, stride;
+	int			i, j, size, shift, stride;
 	Uint8	   *lightmap, *dest;
 	Uint32		scale, *bl;
 
@@ -267,8 +264,8 @@ store:
 
 	bl = blocklights;
 	dest = templight;
-	outwidth = (surf->smax + lightmapalign - 1) & lightmapalignmask;
-	stride = outwidth * lightmap_bytes;
+
+	stride = surf->alignedwidth * lightmap_bytes;
 
 	switch (gl_lightmap_format)
 	{
@@ -317,7 +314,7 @@ store:
 	}
 
 	qglTexSubImage2D (GL_TEXTURE_2D, 0, surf->light_s, surf->light_t,
-			outwidth, surf->tmax, gl_lightmap_format, GL_UNSIGNED_BYTE,
+			surf->alignedwidth, surf->tmax, gl_lightmap_format, GL_UNSIGNED_BYTE,
 			templight);
 }
 
@@ -1095,8 +1092,7 @@ AllocBlock (int w, int h, int *x, int *y)
 	for (texnum = 0; texnum < MAX_LIGHTMAPS; texnum++) {
 		best = BLOCK_HEIGHT;
 
-		// LordHavoc: align TexSubImage2D on 4 byte boundaries
-		for (i = 0; i < BLOCK_WIDTH - w; i += lightmapalign)
+		for (i = 0; i < BLOCK_WIDTH - w; i++)
 		{
 			best2 = 0;
 
@@ -1127,7 +1123,7 @@ AllocBlock (int w, int h, int *x, int *y)
 			qglBindTexture(GL_TEXTURE_2D, lightmap_textures + texnum);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			qglTexImage2D (GL_TEXTURE_2D, 0, lightmap_bytes, BLOCK_WIDTH,
+			qglTexImage2D (GL_TEXTURE_2D, 0, colorlights ? 3 : 1, BLOCK_WIDTH,
 					BLOCK_HEIGHT, 0, gl_lightmap_format, GL_UNSIGNED_BYTE,
 					templight);
 		}
@@ -1229,8 +1225,17 @@ GL_CreateSurfaceLightmap (msurface_t *surf)
 	if (surf->flags & (SURF_DRAWSKY | SURF_DRAWTURB))
 		return;
 
+	/*
+	 * LordHavoc: TexSubImage2D needs data aligned on 4 byte boundaries
+	 * unless I specify glPixelStorei(GL_UNPACK_ALIGNMENT, 1), I suspect 4
+	 * byte may be faster anyway, so it is aligned on 4 byte boundaries...
+	 */
+	surf->alignedwidth = surf->smax;
+	while ((surf->alignedwidth * lightmap_bytes) & 3)
+		surf->alignedwidth++;
+
 	surf->lightmaptexturenum =
-		AllocBlock (surf->smax, surf->tmax, &surf->light_s, &surf->light_t);
+		AllocBlock (surf->alignedwidth, surf->tmax, &surf->light_s, &surf->light_t);
 	GL_BuildLightmap(surf);
 }
 
@@ -1276,16 +1281,6 @@ GL_BuildLightmaps (void)
 			colorlights = true;
 			break;
 	}
-
-	/*
-	 * LordHavoc: TexSubImage2D needs data aligned on 4 byte boundaries
-	 * unless I specify glPixelStorei(GL_UNPACK_ALIGNMENT, 1), I suspect 4
-	 * byte may be faster anyway, so it is aligned on 4 byte boundaries...
-	 */
-	lightmapalign = 1;
-	while ((lightmapalign * lightmap_bytes) & 3)
-		lightmapalign <<= 1;
-	lightmapalignmask = ~(lightmapalign - 1);
 
 	for (j = 1; j < MAX_MODELS; j++) {
 		m = cl.model_precache[j];
