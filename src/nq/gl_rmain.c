@@ -502,7 +502,8 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 	int         count;
 	trace_t		downtrace;
 	vec3_t		downmove;
-	float		s1, c1;
+	float		s1 = 0;
+	float		c1 = 0;
 
 	lheight = currententity->origin[2] - lightspot[2];
 
@@ -601,7 +602,8 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 	float       blend;
 	trace_t		downtrace;
 	vec3_t		downmove;
-	float		s1, c1;
+	float		s1 = 0.0f;
+	float		c1 = 0.0f;
 
 	blend = (realtime - e->frame_start_time) / e->frame_interval;
 
