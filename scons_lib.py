@@ -47,9 +47,9 @@ class My_Options:
 		try:
 			fh = open (file, "r")
 			try:
-				for line in fh:
-					line = line[0:-1]
-					tmp = line.split(" = ")
+				for line in fh.readlines():
+					line = string.strip(line)
+					tmp = string.split(line, " = ")
 					self.values[tmp[0]] = eval(tmp[1])
 			finally:
 				fh.close()
