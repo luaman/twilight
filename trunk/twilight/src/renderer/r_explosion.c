@@ -41,6 +41,7 @@ static const char rcsid[] =
 #include "gl_arrays.h"
 #include "gl_info.h"
 #include "noise.h"
+#include "cclient.h"
 
 #define MAX_EXPLOSIONS 128
 #define EXPLOSIONGRID 8
@@ -215,7 +216,7 @@ R_NewExplosion (vec3_t org)
 	{
 		if (explosion[i].alpha <= 0.01f)
 		{
-			explosion[i].starttime = r_time;
+			explosion[i].starttime = ccl.time;
 			explosion[i].time = explosion[i].starttime - 0.1;
 			explosion[i].alpha = EXPLOSIONFADESTART;
 			VectorCopy(org, explosion[i].origin);
@@ -239,9 +240,9 @@ R_MoveExplosion (explosion_t *e)
 	int			i;
 	float		dot, frictionscale, end[3], impact[3], normal[3], frametime;
 
-	frametime = r_time - e->time;
-	e->time = r_time;
-	e->alpha = EXPLOSIONFADESTART - (r_time - e->starttime)
+	frametime = ccl.time - e->time;
+	e->time = ccl.time;
+	e->alpha = EXPLOSIONFADESTART - (ccl.time - e->starttime)
 		* EXPLOSIONFADERATE;
 
 	if (e->alpha <= 0.01f)

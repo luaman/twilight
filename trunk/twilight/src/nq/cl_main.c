@@ -47,6 +47,7 @@ static const char rcsid[] =
 #include "gl_textures.h"
 #include "teamplay.h"
 #include "surface.h"
+#include "chase.h"
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.
@@ -279,13 +280,14 @@ static float
 CL_LerpPoint (void)
 {
 	float       f, frac;
+	double		time = ccl.time;
 
 	f = cl.mtime[0] - cl.mtime[1];
 
 	if (!f || cl_nolerp->ivalue || ccls.timedemo || sv.active) {
+		ccl.frametime = cl.mtime[0] - ccl.oldtime;
+		ccl.oldtime = ccl.time;
 		ccl.time = cl.mtime[0];
-		r_time = ccl.time;
-		r_frametime = ccl.time - ccl.oldtime;
 		return 1;
 	}
 
@@ -297,18 +299,19 @@ CL_LerpPoint (void)
 
 	if (frac < 0) {
 		if (frac < -0.01) {
-			ccl.time = cl.mtime[1];
+			time = cl.mtime[1];
 		}
 		frac = 0;
 	} else if (frac > 1) {
 		if (frac > 1.01) {
-			ccl.time = cl.mtime[0];
+			time = cl.mtime[0];
 		}
 		frac = 1;
 	}
 
-	r_time = ccl.time;
-	r_frametime = ccl.time - ccl.oldtime;
+	ccl.frametime = time - ccl.oldtime;
+	ccl.oldtime = ccl.time;
+	ccl.time = time;
 
 	return frac;
 }
@@ -434,7 +437,8 @@ CL_ReadFromServer (void)
 	int         ret;
 
 	ccl.oldtime = ccl.time;
-	ccl.time += host_frametime;
+	ccl.time += host.frametime;
+	ccl.frametime = host.frametime;
 
 	do {
 		ret = CL_GetMessage ();
@@ -443,7 +447,7 @@ CL_ReadFromServer (void)
 		if (!ret)
 			break;
 
-		cl.last_received_message = host_realtime;
+		cl.last_received_message = host.time;
 		CL_ParseServerMessage ();
 
 		if (cl_shownet->ivalue)

@@ -66,14 +66,11 @@ CCL_DecayLights (void)
 {
 	int i;
 	dlight_t *dl;
-	float time;
-	
-	time = ccl.time - ccl.oldtime;
 
 	for (i = 0, dl = ccl.dlights;i < MAX_DLIGHTS;i++, dl++)
 		if (dl->radius)
 			dl->radius = (ccl.time < dl->die) ?
-				max(0, dl->radius - time * dl->decay) : 0;
+				max(0, dl->radius - ccl.frametime * dl->decay) : 0;
 }
 
 
@@ -126,7 +123,7 @@ CCL_BuildLightList (void)
 	for (i = 0; i < MAX_DLIGHTS; i++)
 	{
 		cd = ccl.dlights + i;
-		if (cd->radius <= 0 || cd->die < r_time)
+		if (cd->radius <= 0 || cd->die < ccl.time)
 			continue;
 
 		rd = &r_dlight[r_numdlights++];

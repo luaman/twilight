@@ -86,7 +86,7 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_common_t *e)
 	frame = &paliashdr->frames[e->frame[0]];
 
 	if (frame->numposes > 1)
-		pose_num = (GLuint) (r_time / frame->interval) % frame->numposes;
+		pose_num = (GLuint) (ccl.time / frame->interval) % frame->numposes;
 	else
 		pose_num = 0;
 
@@ -123,8 +123,8 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_common_t *e)
 			continue;
 		frame = &paliashdr->frames[e->frame[i]];
 		if (frame->numposes > 1) {
-			i1 = (int) (r_time / e->frame_interval[i]) % frame->numposes;
-			frac = (r_time / e->frame_interval[i]);
+			i1 = (int) (ccl.time / e->frame_interval[i]) % frame->numposes;
+			frac = (ccl.time / e->frame_interval[i]);
 			frac -= floor(frac);
 			i2 = (i1 + 1) % frame->numposes;
 			poses[num_frames] = &frame->poses[i1];
@@ -217,9 +217,9 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 
 	if (gl_particletorches->ivalue) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
-			if (r_time >= e->time_left) {
+			if (ccl.time >= e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
-				e->time_left = r_time + 0.10;
+				e->time_left = ccl.time + 0.10;
 			}
 			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_torch) {
 				clmodel = mdl_torch;
@@ -293,7 +293,7 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 
 	if (!(skin = e->skin))
 		skin = &paliashdr->skins[e->skinnum % paliashdr->numskins];
-	anim = (int) (r_time / skin->interval) % skin->frames;
+	anim = (int) (ccl.time / skin->interval) % skin->frames;
 
 	has_top = has_bottom = has_fb = false;
 

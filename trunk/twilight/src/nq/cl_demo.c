@@ -113,13 +113,13 @@ CL_GetMessage (void)
 		if (cls.signon == SIGNONS)		// always grab until fully connected
 		{
 			if (ccls.timedemo) {
-				if (host_framecount == ccls.td_lastframe)
+				if (host.framecount == ccls.td_lastframe)
 					return 0;			// already read this frame's message
-				ccls.td_lastframe = host_framecount;
+				ccls.td_lastframe = host.framecount;
 				// if this is the second frame, grab the real td_starttime
 				// so the bogus time on the first frame doesn't count
-				if (host_framecount == ccls.td_startframe + 1)
-					ccls.td_starttime = host_realtime;
+				if (host.framecount == ccls.td_startframe + 1)
+					ccls.td_starttime = host.time;
 			} else if ( /* ccl.time > 0 && */ ccl.time <= cl.mtime[0]) {
 				return 0;				// don't need another message yet
 			}
@@ -321,8 +321,8 @@ CL_FinishTimeDemo (void)
 	ccls.timedemo = false;
 
 	// the first frame didn't count
-	frames = (host_framecount - ccls.td_startframe) - 1;
-	time = host_realtime - ccls.td_starttime;
+	frames = (host.framecount - ccls.td_startframe) - 1;
+	time = host.time - ccls.td_starttime;
 	if (!time)
 		time = 1;
 	Com_Printf ("%i frames %5.1f seconds %5.1f fps\n", frames, time,
@@ -350,6 +350,6 @@ CL_TimeDemo_f (void)
 	// ccls.td_starttime will be grabbed at the second frame of the demo, so
 	// all the loading time doesn't get counted
 	ccls.timedemo = true;
-	ccls.td_startframe = host_framecount;
+	ccls.td_startframe = host.framecount;
 	ccls.td_lastframe = -1;				// get a new message this frame
 }

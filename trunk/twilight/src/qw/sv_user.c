@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "world.h"
 #include "crc.h"
 #include "fs.h"
+#include "host.h"
 
 edict_t			*sv_player;
 
@@ -1293,12 +1294,12 @@ SV_RunCmd__clear:
 			V_CalcRoll (sv_player->v.angles, sv_player->v.velocity) * 4;
 	}
 
-	host_frametime = ucmd->msec * 0.001;
-	if (host_frametime > 0.1)
-		host_frametime = 0.1;
+	host.frametime = ucmd->msec * 0.001;
+	if (host.frametime > 0.1)
+		host.frametime = 0.1;
 
 	if (!host_client->spectator) {
-		pr_global_struct->frametime = host_frametime;
+		pr_global_struct->frametime = host.frametime;
 
 		pr_global_struct->time = sv.time;
 		pr_global_struct->self = EDICT_TO_PROG (sv_player);

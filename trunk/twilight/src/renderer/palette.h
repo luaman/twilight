@@ -33,6 +33,7 @@
 #define d_palette_empty	0xFF000000
 #endif
 
+extern Uint8	*host_basepal;
 extern Uint32 d_palette_raw[256];
 extern Uint32 d_palette_base[256];
 extern Uint32 d_palette_fb[256];

@@ -157,7 +157,7 @@ SV_UserFriction (void)
 
 // apply friction   
 	control = speed < sv_stopspeed->fvalue ? sv_stopspeed->fvalue : speed;
-	newspeed = speed - host_frametime * control * friction;
+	newspeed = speed - host.frametime * control * friction;
 
 	if (newspeed < 0) {
 		VectorClear (vel);
@@ -178,7 +178,7 @@ SV_Accelerate (void)
 	addspeed = wishspeed - currentspeed;
 	if (addspeed <= 0)
 		return;
-	accelspeed = sv_accelerate->fvalue * host_frametime * wishspeed;
+	accelspeed = sv_accelerate->fvalue * host.frametime * wishspeed;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 
@@ -199,7 +199,7 @@ SV_AirAccelerate (vec3_t wishveloc)
 	addspeed = wishspd - currentspeed;
 	if (addspeed <= 0)
 		return;
-	accelspeed = sv_accelerate->fvalue * wishspeed * host_frametime;
+	accelspeed = sv_accelerate->fvalue * wishspeed * host.frametime;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 
@@ -216,7 +216,7 @@ DropPunchAngle (void)
 
 	len = VectorNormalize (sv_player->v.punchangle);
 
-	len -= 10 * host_frametime;
+	len -= 10 * host.frametime;
 	if (len < 0)
 		len = 0;
 	VectorScale (sv_player->v.punchangle, len, sv_player->v.punchangle);
@@ -225,7 +225,7 @@ DropPunchAngle (void)
 	{
 		len = VectorNormalize (val->vector);
 		
-		len -= 20 * host_frametime;
+		len -= 20 * host.frametime;
 		if (len < 0)
 			len = 0;
 		VectorScale (val->vector, len, val->vector);
@@ -285,7 +285,7 @@ SV_WaterMove (void)
 //
 	speed = VectorLength (velocity);
 	if (speed) {
-		newspeed = speed - host_frametime * speed * sv_friction->fvalue;
+		newspeed = speed - host.frametime * speed * sv_friction->fvalue;
 		if (newspeed < 0)
 			newspeed = 0;
 		VectorScale (velocity, newspeed / speed, velocity);
@@ -303,7 +303,7 @@ SV_WaterMove (void)
 		return;
 
 	VectorNormalizeFast (wishvel);
-	accelspeed = sv_accelerate->fvalue * wishspeed * host_frametime;
+	accelspeed = sv_accelerate->fvalue * wishspeed * host.frametime;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 

@@ -52,6 +52,7 @@ static const char rcsid[] =
 #include "net.h"
 #include "server.h"
 #include "sys.h"
+#include "host.h"
 
 #define	PACKET_HEADER	8
 
@@ -189,7 +190,7 @@ Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 
 #ifdef HAVE_SDL_H
 	if ((sys_gametypes & GAME_QW_CLIENT) && ccls.demoplayback)
-		chan->last_received = ccls.realtime;
+		chan->last_received = host.time;
 #endif
 
 	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
@@ -419,7 +420,7 @@ Netchan_Process (netchan_t *chan)
 
 #ifdef HAVE_SDL_H
 	if ((sys_gametypes & GAME_QW_CLIENT) && ccls.demoplayback)
-		chan->last_received = ccls.realtime;
+		chan->last_received = host.time;
 #endif
 
 	return true;

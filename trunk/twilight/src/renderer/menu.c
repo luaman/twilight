@@ -46,6 +46,7 @@ static const char rcsid[] =
 #include "common.h"
 #include "gl_info.h"
 #include "sound.h"
+#include "cclient.h"
 
 /*
 ================
@@ -256,7 +257,7 @@ M_Do_Draw (menu_t *menu, int current)
 			y_add = item->height;
 		}
 
-#define PULSE		(sin(r_realtime * 5) * 0.2)
+#define PULSE		(sin(host.time * 5) * 0.2)
 
 		if (MItem_Draw_Label(item)) {
 			len = strlen(item->label);

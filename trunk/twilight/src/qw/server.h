@@ -374,9 +374,6 @@ void SV_SpawnServer(char *server);
 
 
 /* sv_main.c */
-extern qboolean host_initialized;
-extern double host_frametime;
-extern int host_hunklevel;
 extern netadr_t master_adr[MAX_MASTERS];
 extern client_t *host_client;
 extern cvar_t *sv_mintic;

@@ -179,9 +179,5 @@
 #define	PRINT_HIGH			2			// critical messages
 #define	PRINT_CHAT			3			// chat messages
 
-
-extern double host_frametime;
-extern double curtime;
-
 #endif // __QUAKEDEF_H
 

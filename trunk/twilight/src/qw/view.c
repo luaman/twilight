@@ -133,7 +133,7 @@ V_CalcBob (void)
 	if (!cl_bobcycle->fvalue)
 		return bob = 0;
 
-	bobtime += host_frametime;
+	bobtime += ccl.frametime;
 	cycle = bobtime - (int) (bobtime / cl_bobcycle->fvalue)
 		* cl_bobcycle->fvalue;
 	cycle /= cl_bobcycle->fvalue;
@@ -203,7 +203,7 @@ V_DriftPitch (void)
 		if (fabs(cl.frames[(cls.netchan.outgoing_sequence - 1) & UPDATE_MASK].cmd.forwardmove) < 200)
 			cl.driftmove = 0;
 		else
-			cl.driftmove += host_frametime;
+			cl.driftmove += ccl.frametime;
 
 		if (cl.driftmove > v_centermove->fvalue)
 			V_StartPitchDrift();
@@ -218,8 +218,8 @@ V_DriftPitch (void)
 		return;
 	}
 
-	move = host_frametime * cl.pitchvel;
-	cl.pitchvel += host_frametime * v_centerspeed->fvalue;
+	move = ccl.frametime * cl.pitchvel;
+	cl.pitchvel += ccl.frametime * v_centerspeed->fvalue;
 
 	if (delta > 0) {
 		if (move > delta) {
@@ -445,12 +445,12 @@ V_UpdatePalette (void)
 	}
 
 	/* drop the damage value */
-	ccl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime * 150;
+	ccl.cshifts[CSHIFT_DAMAGE].percent -= ccl.frametime * 150;
 	if (ccl.cshifts[CSHIFT_DAMAGE].percent <= 0)
 		ccl.cshifts[CSHIFT_DAMAGE].percent = 0;
 
 	/* drop the bonus value */
-	ccl.cshifts[CSHIFT_BONUS].percent -= host_frametime * 100;
+	ccl.cshifts[CSHIFT_BONUS].percent -= ccl.frametime * 100;
 	if (ccl.cshifts[CSHIFT_BONUS].percent <= 0)
 		ccl.cshifts[CSHIFT_BONUS].percent = 0;
 
@@ -510,7 +510,7 @@ V_CalcViewRoll (void)
 	if (v_dmg_time > 0) {
 		r_refdef.viewangles[ROLL] += v_dmg_time / v_kicktime->fvalue * v_dmg_roll;
 		r_refdef.viewangles[PITCH] += v_dmg_time / v_kicktime->fvalue * v_dmg_pitch;
-		v_dmg_time -= host_frametime;
+		v_dmg_time -= ccl.frametime;
 	}
 }
 
@@ -578,7 +578,7 @@ V_CalcRefdef (void)
 		r_refdef.viewangles[ROLL] = 80;	/*   dead view angle */
 
 	if (v_zoom->fvalue != cl.viewzoom)
-		cl.viewzoom = SLIDE (cl.viewzoom, v_zoom->fvalue, 4 * host_frametime);
+		cl.viewzoom = SLIDE (cl.viewzoom, v_zoom->fvalue, 4 * host.frametime);
 
 	/* offsets */
 	AngleVectors (ccl.player_angles, forward, right, up);
@@ -625,7 +625,7 @@ V_CalcRefdef (void)
 	if (view_message->groundent && (ccl.player_origin[2] - oldz > 0)) {
 		float	steptime;
 
-		steptime = host_frametime;
+		steptime = ccl.frametime;
 
 		oldz += steptime * 80;
 		if (oldz > ccl.player_origin[2])
@@ -642,7 +642,7 @@ V_CalcRefdef (void)
 static void
 DropPunchAngle (void)
 {
-	cl.punchangle -= 10 * host_frametime;
+	cl.punchangle -= 10 * ccl.frametime;
 	if (cl.punchangle < 0)
 		cl.punchangle = 0;
 }
@@ -755,8 +755,8 @@ R_DrawViewModel (void)
 		return;
 	}
 
-	CL_Update_OriginAngles(&cl.viewent, cl.viewent_origin, cl.viewent_angles, ccls.realtime);
-	CL_Update_Frame(&cl.viewent, cl.viewent_frame, ccls.realtime);
+	CL_Update_OriginAngles(&cl.viewent, cl.viewent_origin, cl.viewent_angles, ccl.time);
+	CL_Update_Frame(&cl.viewent, cl.viewent_frame, ccl.time);
 
 	// hack the depth range to prevent view model from poking into walls
 	qglDepthRange (0.0f, 0.3f);

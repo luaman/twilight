@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "cmd.h"
 #include "strlib.h"
+#include "cclient.h"
 
 static GLuint	skyboxtexnums[6];
 
@@ -190,7 +191,7 @@ Sky_Sphere_Draw (void)
 {
 	float speedscale;
 
-	speedscale = r_time * (8.0 / 128.0);
+	speedscale = ccl.time * (8.0 / 128.0);
 	speedscale -= floor(speedscale);
 
 	qglDepthMask (GL_FALSE);

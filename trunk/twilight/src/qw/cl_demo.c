@@ -90,7 +90,7 @@ CL_WriteDemoCmd (usercmd_t *pcmd)
 	Uint8		c;
 	usercmd_t	cmd;
 
-	fl = LittleFloat ((float) ccls.realtime);
+	fl = LittleFloat ((float) host.time);
 	SDL_RWwrite (ccls.demofile, &fl, sizeof (fl), 1);
 
 	c = dem_cmd;
@@ -130,7 +130,7 @@ CL_WriteDemoMessage (sizebuf_t *msg)
 	if (!ccls.demorecording)
 		return;
 
-	fl = LittleFloat ((float) ccls.realtime);
+	fl = LittleFloat ((float) host.time);
 	SDL_RWwrite (ccls.demofile, &fl, sizeof (fl), 1);
 
 	c = dem_read;
@@ -164,25 +164,25 @@ CL_GetDemoMessage (void)
 			return 0;					// already read this frame's message
 		}
 		if (!ccls.td_starttime && ccls.state == ca_active) {
-			ccls.td_starttime = Sys_DoubleTime ();
-			ccls.td_startframe = host_framecount;
+			ccls.td_starttime = host.time;
+			ccls.td_startframe = host.framecount;
 		}
-		ccls.realtime = demotime;			// warp
+		ccl.basetime = demotime;			// warp
 	} else if (!cl.paused && ccls.state >= ca_onserver) {
 		// always grab until fully connected
-		if (ccls.realtime + 1.0 < demotime) {
+		if (ccl.time + 1.0 < demotime) {
 			// too far back
-			ccls.realtime = demotime - 1.0;
+			ccl.basetime = demotime - 1.0;
 			// rewind back to time
 			SDL_RWseek (ccls.demofile, -((int)sizeof (demotime)), SEEK_CUR);
 			return 0;
-		} else if (ccls.realtime < demotime) {
+		} else if (ccl.time < demotime) {
 			// rewind back to time
 			SDL_RWseek (ccls.demofile, -((int)sizeof (demotime)), SEEK_CUR);
 			return 0;	// don't need another message yet
 		}
 	} else
-		ccls.realtime = demotime;	// we're warping
+		ccl.basetime = demotime;	// we're warping
 
 	if (ccls.state < ca_demostart)
 		Host_Error ("CL_GetDemoMessage: ccls.state != ca_active");
@@ -307,7 +307,7 @@ CL_WriteRecordDemoMessage (sizebuf_t *msg, int seq)
 	if (!ccls.demorecording)
 		return;
 
-	fl = LittleFloat ((float) ccls.realtime);
+	fl = LittleFloat ((float) ccl.time);
 	SDL_RWwrite (ccls.demofile, &fl, sizeof (fl), 1);
 
 	c = dem_read;
@@ -332,7 +332,7 @@ CL_WriteSetDemoMessage (void)
 	if (!ccls.demorecording)
 		return;
 
-	fl = LittleFloat ((float) ccls.realtime);
+	fl = LittleFloat ((float) ccl.time);
 	SDL_RWwrite (ccls.demofile, &fl, sizeof (fl), 1);
 
 	c = dem_set;
@@ -565,7 +565,7 @@ CL_Record_f (void)
 
 		MSG_WriteByte (&buf, svc_updateentertime);
 		MSG_WriteByte (&buf, i);
-		MSG_WriteFloat (&buf, ccls.realtime - user->entertime);
+		MSG_WriteFloat (&buf, ccl.time - user->entertime);
 
 		MSG_WriteByte (&buf, svc_updateuserinfo);
 		MSG_WriteByte (&buf, i);
@@ -693,7 +693,7 @@ CL_PlayDemo_f (void)
 	ccls.demoplayback = true;
 	ccls.state = ca_demostart;
 	Netchan_Setup (NS_CLIENT, &cls.netchan, net_from, 0);
-	ccls.realtime = 0;
+	ccl.time = ccl.basetime = 0;
 }
 
 static void
@@ -704,8 +704,8 @@ CL_FinishTimeDemo (void)
 
 	ccls.timedemo = false;
 	// the first frame didn't count
-	frames = (host_framecount - ccls.td_startframe) - 1;
-	time = Sys_DoubleTime () - ccls.td_starttime;
+	frames = (host.framecount - ccls.td_startframe) - 1;
+	time = host.time - ccls.td_starttime;
 	if (!time)
 		time = 1;
 	Com_Printf ("%i frames %5.1f seconds %5.1f fps\n", frames, time,
@@ -734,7 +734,8 @@ CL_TimeDemo_f (void)
 	// all the loading time doesn't get counted
 	ccls.timedemo = true;
 	ccls.td_starttime = 0;
-	ccls.td_startframe = host_framecount;
+	ccls.td_startframe = host.framecount;
 	ccls.td_lastframe = -1;	// get a new message this frame
+	ccl.time = ccl.basetime = 0;
 }
 

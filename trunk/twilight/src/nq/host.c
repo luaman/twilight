@@ -60,6 +60,7 @@ static const char rcsid[] =
 #include "surface.h"
 #include "fs.h"
 #include "image.h"
+#include "chase.h"
 
 /*
 
@@ -72,14 +73,7 @@ Memory is cleared / released when a server or client begins, not when they end.
 
 */
 
-qboolean    host_initialized;			// true if into command execution
-
-double      host_frametime;
-double      host_time;
-double      host_realtime;				// without any filtering or bounding
-double      oldrealtime;				// last frame run
-int         host_framecount;
-
+host_t host;
 client_t   *host_client;				// current client
 
 static jmp_buf     host_abortserver;
@@ -244,7 +238,7 @@ Host_InitLocal (void)
 {
 	Host_InitCommands ();
 	Host_FindMaxClients ();
-	host_time = 1.0;		// so a think at time 0 won't get called
+	host.time = 1.0;		// so a think at time 0 won't get called
 }
 
 /*
@@ -260,7 +254,7 @@ Host_WriteConfiguration (const char *name)
 
 // dedicated servers initialize the host but don't parse and set the
 // config.cfg cvars
-	if (host_initialized && ccls.state != ca_dedicated) {
+	if (host.initialized && ccls.state != ca_dedicated) {
 		char fname[MAX_QPATH] = { 0 };
 
 		strlcpy_s (fname, name);
@@ -502,51 +496,6 @@ Host_ClearMemory (void)
 
 /*
 ===================
-Returns false if the time is too short to run a frame
-===================
-*/
-static qboolean
-Host_FilterTime (float time)
-{
-	float		fps;
-	float		newframetime;
-
-	host_realtime += time;
-	ccls.realtime = host_realtime;
-	r_realtime = host_realtime;
-
-	/* if the frame time is below 0.001, don't even bother computing anything */
-	newframetime = host_realtime - oldrealtime;
-	if (newframetime < 0.001)
-		return false;
-
-	fps = cl_maxfps->fvalue;
-	if (ccl.max_users > 1) {
-		fps = bound (30.0f, fps, 72.0f);
-	} else if (fps) {
-		fps = bound (30.0f, fps, 999.0f);
-	}
-
-	/* eviltypeguy - added && cl.maxclients > 1 to allow uncapped framerate
-	   when playing singleplayer quake, possible NetQuake breakage? */
-	if ((!ccls.timedemo && fps) && (newframetime < (1.0 / fps)))
-		return false;					/* framerate is too high */
-
-	host_frametime = newframetime;
-	oldrealtime = host_realtime;
-
-	if (host_framerate->fvalue > 0)
-		host_frametime = host_framerate->fvalue;
-	else {								/* don't allow really long frames */
-		if (host_frametime > 0.1)
-			host_frametime = 0.1;
-	}
-
-	return true;
-}
-
-/*
-===================
 Add them exactly as if they had been typed at the console
 ===================
 */
@@ -568,7 +517,7 @@ static void
 Host_ServerFrame (void)
 {
 // run the world state  
-	pr_global_struct->frametime = host_frametime;
+	pr_global_struct->frametime = host.frametime;
 
 // set the time and clear the general datagram
 	SV_ClearDatagram ();
@@ -591,19 +540,19 @@ Host_ServerFrame (void)
 void
 Host_Frame (double time)
 {
-	static double time1 = 0;
-	static double time2 = 0;
-	static double time3 = 0;
-	static double time4 = 0;
-	int pass1, pass2, pass3;
-	static double timetotal;
-	static int timecount;
-	int m;
-	Uint32 i, c;
+	static double	time1 = 0;
+	static double	time2 = 0;
+	static double	time3 = 0;
+	static double	time4 = 0;
+	int				pass1, pass2, pass3;
+	static double	timetotal;
+	static int		timecount;
+	int				m;
+	Uint32			i, c;
+	double			fps, min_time, wait;
 
 	if (serverprofile->ivalue)
 		time4 = Sys_DoubleTime ();
-		return;
 
 	if (setjmp (host_abortserver))
 		// something bad happened, or the server disconnected
@@ -612,12 +561,47 @@ Host_Frame (double time)
 	// keep the random time dependent
 	rand ();
 
-	// decide the simulation time
-	if (!Host_FilterTime (time))
-	{
-		SDL_Delay (1);
-		// don't run too fast, or packets will flood out
-		return;
+	// The time management, ugh.
+
+	host.frametime = time - host.time;
+
+	if (!ccls.timedemo) {
+		if (ccls.state == ca_dedicated) {
+			min_time = sys_ticrate->fvalue;
+		} else {
+			fps = cl_maxfps->fvalue;
+
+			if (ccl.max_users > 1) {
+				fps = bound (30.0f, fps, 72.0f);
+			} else if (fps) {
+				fps = bound (30.0f, fps, 999.0f);
+			} else
+				goto time_done;
+
+			min_time = 1.0f / fps;
+		}
+
+		if (host.frametime < min_time) {
+			fps_capped0++;
+			if (host.frametime < (min_time - 0.002)) {
+				wait = (host.time + min_time) - time;
+				SDL_Delay(wait * 990);
+				fps_capped1++;
+			}
+
+			return;                         // framerate is too high
+		}
+	}
+
+time_done:
+
+	host.oldtime = host.time;
+	host.time = time;
+	if (host_framerate->fvalue > 0)
+		host.frametime = host_framerate->fvalue;
+	else {								/* don't allow really long frames */
+		if (host.frametime > 0.1)
+			host.frametime = 0.1;
 	}
 
 	// get new key events
@@ -655,8 +639,6 @@ Host_Frame (double time)
 	if (!sv.active)
 		CL_SendCmd ();
 
-	host_time += host_frametime;
-
 	// fetch results from server
 	if (ccls.state >= ca_connected)
 		CL_ReadFromServer ();
@@ -689,8 +671,9 @@ Host_Frame (double time)
 					pass1 + pass2 + pass3, pass1, pass2, pass3);
 	}
 
-	host_framecount++;
+	host.framecount++;
 	fps_count++;
+	fps_capped0 = fps_capped1 = 0;
 
 	if (!serverprofile->ivalue)
 		return;
@@ -808,7 +791,7 @@ Host_Init ()
 
 	Cbuf_InsertText ("exec twilight.rc\n");
 
-	host_initialized = true;
+	host.initialized = true;
 
 	Sys_Printf ("========Quake Initialized=========\n");
 }
