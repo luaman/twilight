@@ -31,7 +31,6 @@ static const char rcsid[] =
 #include "client.h"
 #include "cvar.h"
 #include "glquake.h"
-#include "opengl_ext.h"
 #include "mathlib.h"
 #include "strlib.h"
 #include "host.h"

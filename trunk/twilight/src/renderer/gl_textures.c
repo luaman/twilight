@@ -29,9 +29,9 @@ static const char rcsid[] =
 
 #include <math.h>
 
+#include "dyngl.h"
 #include "gl_textures.h"
 #include "mathlib.h"
-#include "opengl.h"
 #include "qtypes.h"
 #include "strlib.h"
 #include "model.h"

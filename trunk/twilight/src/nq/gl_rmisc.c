@@ -36,7 +36,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "gl_textures.h"
-#include "opengl_ext.h"
 
 // FIXME
 extern void TNT_Init (void);

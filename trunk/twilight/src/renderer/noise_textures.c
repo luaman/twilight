@@ -29,10 +29,10 @@ static const char rcsid[] =
 #include "twiconfig.h"
 
 #include <stdlib.h>
-
 #include "SDL_types.h"
+
+#include "dyngl.h"
 #include "qtypes.h"
-#include "opengl.h"
 #include "mathlib.h"
 
 extern int texture_extension_number;

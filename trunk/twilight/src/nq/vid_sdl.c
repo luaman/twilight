@@ -30,7 +30,6 @@ static const char rcsid[] =
 
 #include "SDL.h"
 
-#include "opengl_ext.h"
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
@@ -104,7 +103,7 @@ void IN_WindowedMouse (cvar_t *cvar);
 void
 VID_Shutdown (void)
 {
-	DGL_CloseLibrary ();
+	DynGL_CloseLibrary ();
 }
 
 static void
@@ -222,38 +221,45 @@ CheckExtensions (void)
 {
 	qboolean	gl_mtexcombine_arb = 0, gl_mtexcombine_ext = 0;
 
-	if (!COM_CheckParm ("-nomtex")) {
-		gl_mtex = DGL_HasExtension ("GL_ARB_multitexture");
-	}
+	if (!COM_CheckParm ("-nomtex"))
+		gl_mtex = DynGL_HasExtension ("GL_ARB_multitexture");
+
 	Com_Printf ("Checking for multitexture: ");
-	if (gl_mtex) {
+	if (gl_mtex)
+	{
 		qglGetIntegerv (GL_MAX_TEXTURE_UNITS_ARB, &gl_tmus);
 		Com_Printf ("GL_ARB_multitexture. (%d TMUs)\n", gl_tmus);
-	} else
+	}
+	else
 		Com_Printf ("no.\n");
 
-	if (gl_mtex && (!qglActiveTextureARB || !qglClientActiveTextureARB)) {
+	if (gl_mtex && (!qglActiveTextureARB || !qglClientActiveTextureARB))
+	{
 		Sys_Error ("Missing GL_ARB_multitexture functions. (%p %p)\n",
 				qglActiveTextureARB, qglClientActiveTextureARB);
 	}
 
-	if (gl_mtex && !COM_CheckParm ("-nomtexcombine")) {
-		gl_mtexcombine_arb = DGL_HasExtension ("GL_ARB_texture_env_combine");
-		gl_mtexcombine_ext = DGL_HasExtension ("GL_EXT_texture_env_combine");
+	if (gl_mtex && !COM_CheckParm ("-nomtexcombine"))
+	{
+		gl_mtexcombine_arb = DynGL_HasExtension ("GL_ARB_texture_env_combine");
+		gl_mtexcombine_ext = DynGL_HasExtension ("GL_EXT_texture_env_combine");
 	}
 	Com_Printf ("Checking for texenv combine: ");
-	if (gl_mtex && gl_mtexcombine_arb) {
+	if (gl_mtex && gl_mtexcombine_arb)
+	{
 		Com_Printf ("GL_ARB_texture_env_combine.\n");
 		gl_mtexcombine = true;
-	} else if (gl_mtex && gl_mtexcombine_ext) {
+	}
+	else if (gl_mtex && gl_mtexcombine_ext)
+	{
 		Com_Printf ("GL_EXT_texture_env_combine.\n");
 		gl_mtexcombine = true;
-	} else {
-		Com_Printf ("no.\n");
 	}
+	else
+		Com_Printf ("no.\n");
 
 	if (!COM_CheckParm ("-nocva"))
-		gl_cva = DGL_HasExtension ("GL_EXT_compiled_vertex_array");
+		gl_cva = DynGL_HasExtension ("GL_EXT_compiled_vertex_array");
 
 	Com_Printf ("Checking for compiled vertex arrays... %s\n",
 			gl_cva ? "GL_EXT_compiled_vertex_array." : "no.");
@@ -432,9 +438,9 @@ VID_Init (unsigned char *palette)
     }
 
 	Sys_Printf ("Using OpenGL driver '%s'\n", gl_driver->svalue);
-	if (!DGL_LoadLibrary(gl_driver->svalue))
-		Sys_Error("%s\n", DGL_GetError());
-	Com_DPrintf ("VID_Init: DGL_LoadLibrary successful.\n");
+	if (!DynGL_LoadLibrary (gl_driver->svalue))
+		Sys_Error("%s\n", SDL_GetError());
+	Com_DPrintf ("VID_Init: DynGL_LoadLibrary successful.\n");
 
 	i = COM_CheckParm ("-bpp");
 	if (i && i < com_argc - 1)
@@ -456,9 +462,9 @@ VID_Init (unsigned char *palette)
 	}
 	Com_DPrintf ("VID_Init: SDL_SetVideoMode successful.\n");
 
-	if (!DGL_GetFuncs())
-		Sys_Error("%s\n", DGL_GetError());
-	Com_DPrintf ("VID_Init: DGL_GetFuncs successful.\n");
+	if (!DynGL_GetFunctions())
+		Sys_Error("%s\n", SDL_GetError());
+	Com_DPrintf ("VID_Init: DynGL_GetFuncs successful.\n");
 
 	SDL_WM_SetCaption ("Twilight NetQuake", "twilight");
 	Com_DPrintf ("VID_Init: Window caption set.\n");

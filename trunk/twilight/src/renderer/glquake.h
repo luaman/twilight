@@ -29,8 +29,7 @@
 
 #define	MAX_GLTEXTURES	1024
 
-#include "opengl.h"
-#include "dynogl.h"
+#include "dyngl.h"
 
 #include "wad.h"
 #include "render.h"
