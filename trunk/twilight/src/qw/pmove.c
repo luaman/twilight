@@ -378,7 +378,7 @@ PM_Friction (void)
 
 	if (newspeed < 0) {
 		newspeed = 0;
-		VectorClear (newspeed);
+		VectorClear (vel);
 	}
 	else {
 		newspeed /= speed;
