@@ -173,7 +173,7 @@ extract_line (char *line)
 	else {
 		i++;
 		cmd_text->cursize -= i;
-		memcpy (text, text + i, cmd_text->cursize);
+		memmove (text, text + i, cmd_text->cursize);
 	}
 }
 

@@ -35,6 +35,7 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "mathlib.h"
 #include "client.h"
+#include "r_explosion.h"
 
 memzone_t *part_zone;
 
