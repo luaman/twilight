@@ -874,7 +874,6 @@ Host_Init ()
 	host_initialized = true;
 
 	Sys_Printf ("========Quake Initialized=========\n");
-	key_dest = key_console;
 }
 
 
