@@ -456,7 +456,7 @@ PR_UglyValueString (etype_t type, eval_t *val)
 		case ev_field:
 			def = ED_FieldAtOfs (val->_int);
 			s = pr_strings + def->s_name;
-			for (n = 0; n < (sizeof (line) - 1) && *s; )
+			for (n = 0; n < (signed)(sizeof (line) - 1) && *s; )
 			{
 				if (*s == '\n')
 				{
