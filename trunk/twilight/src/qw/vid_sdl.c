@@ -98,6 +98,8 @@ const char *gl_extensions;
 
 qboolean	isPermedia = false;
 qboolean	gl_mtexable = false;
+qboolean	gl_mtexcombine_arb = false;
+qboolean	gl_mtexcombine_ext = false;
 
 void		I_KeypadMode (cvar_t *cvar);
 void		IN_WindowedMouse (cvar_t *cvar);
@@ -199,37 +201,39 @@ GammaChanged (cvar_t *cvar)
 
 
 /*
-	CheckMultiTextureExtensions
+	CheckExtensions
 
 	Check for ARB multitexture support
 */
 
 void
-CheckMultiTextureExtensions (void)
+CheckExtensions (void)
 {
-	gl_mtexable = false;
-	Con_Printf ("Checking for multitexture... ");
-	if (COM_CheckParm ("-nomtex"))
-	{
-		Con_Printf ("disabled\n");
+	Con_Printf ("Checking for multitexture: ");
+	if (COM_CheckParm ("-nomtex")) {
+		Con_Printf ("disabled.\n");
 		return;
 	}
-	// FIXME: don't strstr for extensions!
-	if (DGL_HasExtension ("GL_ARB_multitexture"))
-	{
-		if (qglActiveTextureARB && qglMultiTexCoord2fARB)
-		{
-			Con_Printf ("GL_ARB_multitexture\n");
-			gl_mtexable = true;
-		} else {
-			// Shouldn't happen - driver is fucked up or its author is!
-			Con_Printf ("no, but driver thinks otherwise\n");
-			Con_DPrintf ("qglActiveTextureARB is 0x%p, "
-					"qglMultiTexCoord2fARB is 0x%p\n",
-					qglActiveTextureARB, qglMultiTexCoord2fARB);
+	gl_mtexable = DGL_HasExtension ("GL_ARB_multitexture");
+	gl_mtexcombine_arb = DGL_HasExtension ("GL_ARB_texture_env_combine");
+	gl_mtexcombine_ext = DGL_HasExtension ("GL_EXT_texture_env_combine");
+	if (gl_mtexable && gl_mtexcombine_arb)
+		Con_Printf ("GL_ARB_multitexture + GL_ARB_texture_env_combine.\n");
+	else if (gl_mtexable && gl_mtexcombine_ext)
+		Con_Printf ("GL_ARB_multitexture + GL_EXT_texture_env_combine.\n");
+	else if (gl_mtexable)
+		Con_Printf ("GL_ARB_multitexture.\n");
+	else {
+		Con_Printf ("no.\n");
+		gl_mtexcombine_arb = false;
+		gl_mtexcombine_ext = false;
+	}
+
+	if (gl_mtexable) {
+		if (!qglActiveTextureARB || !qglMultiTexCoord2fARB) {
+			Sys_Error ("Extension list says we have GL_ARB_multitexture but missing functions. (%p %p)\n", qglActiveTextureARB, qglMultiTexCoord2fARB);
 		}
-	} else
-		Con_Printf ("no\n");
+	}
 }
 
 
@@ -254,7 +258,7 @@ GL_Init (void)
 	gl_extensions = qglGetString (GL_EXTENSIONS);
 	Con_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
 
-	CheckMultiTextureExtensions ();
+	CheckExtensions ();
 
 	qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
 	qglCullFace (GL_FRONT);
