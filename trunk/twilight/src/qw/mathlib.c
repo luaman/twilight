@@ -34,9 +34,10 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <SDL_types.h>
 #include <math.h>
 #include <time.h>
+
+#include "SDL_types.h"
 
 #include "bothdefs.h"
 #include "mathlib.h"

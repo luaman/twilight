@@ -34,14 +34,8 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <SDL.h>
+#include "SDL.h"
 
-#ifndef WIN32
-#include <termios.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/vt.h>
-#endif
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -29,7 +29,7 @@
 #ifndef __MDFOUR_H
 #define __MDFOUR_H
 
-#include <SDL_types.h>
+#include "SDL_types.h"
 
 struct mdfour {
 	Uint32 A, B, C, D;

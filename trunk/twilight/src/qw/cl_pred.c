@@ -33,6 +33,8 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include "SDL.h"
+
 #include "client.h"
 #include "console.h"
 #include "cvar.h"
@@ -40,7 +42,6 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "pmove.h"
 
-#include <SDL.h>
 #ifdef _WIN32
 #include "winquake.h"
 #endif

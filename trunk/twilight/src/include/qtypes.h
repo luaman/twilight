@@ -27,7 +27,7 @@
 #ifndef __QTYPES_H
 #define __QTYPES_H
 
-#include <SDL_types.h>
+#include "SDL_types.h"
 
 // KJB Undefined true and false defined in SciTech's DEBUG.H header
 #undef true

@@ -38,7 +38,7 @@ static const char rcsid[] =
 #include <time.h>
 #include <errno.h>
 
-#include <SDL.h>
+#include "SDL.h"
 
 #include "bothdefs.h"
 #include "cdaudio.h"
