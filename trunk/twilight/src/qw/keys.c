@@ -523,7 +523,7 @@ Key_Message (knum_t key, short unicode)
 	if (keydown[key] != 1)
 		return;
 
-	if (unicode == '\n') {
+	if (unicode == '\n' || key == SDLK_RETURN) {
 		if (chat_team)
 			Cbuf_AddText ("say_team \"");
 		else
