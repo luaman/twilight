@@ -524,6 +524,7 @@ Host_ClearMemory (void)
 		Zone_EmptyZone (cl_zone);
 	memset (&sv, 0, sizeof (sv));
 	memset (&cl, 0, sizeof (cl));
+	memset (&ccl, 0, sizeof (ccl));
 }
 
 
