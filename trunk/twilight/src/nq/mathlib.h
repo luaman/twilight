@@ -39,23 +39,29 @@ extern int  nanmask;
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
 #define DotProduct(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
-#define VectorSubtract(a,b,c) {c[0]=a[0]-b[0];c[1]=a[1]-b[1];c[2]=a[2]-b[2];}
-#define VectorAdd(a,b,c) {c[0]=a[0]+b[0];c[1]=a[1]+b[1];c[2]=a[2]+b[2];}
-#define VectorCopy(a,b) {b[0]=a[0];b[1]=a[1];b[2]=a[2];}
+#define VectorSubtract(a,b,c) (c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2])
+#define VectorAdd(a,b,c) (c[0]=a[0]+b[0],c[1]=a[1]+b[1],c[2]=a[2]+b[2])
+#define VectorCopy(a,b) (b[0]=a[0],b[1]=a[1],b[2]=a[2])
+#define VectorInverse(x) (x[0]=-x[0],x[1]=-x[1],x[2]=-x[2])
+#define CrossProduct(v1,v2,cross) (cross[0]=v1[1]*v2[2]-v1[2]*v2[1],cross[1]=v1[2]*v2[0]-v1[0]*v2[2],cross[2]=v1[0]*v2[1]-v1[1]*v2[0])
+#define VectorScale(a,b,c) (c[0]=a[0]*b,c[1]=a[1]*b,c[2]=a[2]*b)
+#define VectorMA(a,b,c,d) (d[0]=a[0]+b*c[0],d[1]=a[1]+b*c[1],d[2]=a[2]+b*c[2])
+#define VectorCompare(a,b) ((a[0]==b[0])&&(a[1]==b[1])&&(a[2]==b[2]))
+#define VectorClear(a)		(a[0]=a[1]=a[2]=0)
 
-void        VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
-
+void        _VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
 vec_t       _DotProduct (vec3_t v1, vec3_t v2);
 void        _VectorSubtract (vec3_t veca, vec3_t vecb, vec3_t out);
 void        _VectorAdd (vec3_t veca, vec3_t vecb, vec3_t out);
 void        _VectorCopy (vec3_t in, vec3_t out);
+int         _VectorCompare (vec3_t v1, vec3_t v2);
+void        _CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross);
+void        _VectorInverse (vec3_t v);
+void        _VectorScale (vec3_t in, vec_t scale, vec3_t out);
 
-int         VectorCompare (vec3_t v1, vec3_t v2);
-vec_t       Length (vec3_t v);
-void        CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross);
+vec_t       VectorLength (vec3_t v);
 float       VectorNormalize (vec3_t v);	// returns vector length
-void        VectorInverse (vec3_t v);
-void        VectorScale (vec3_t in, vec_t scale, vec3_t out);
+void		VectorNormalizeFast (vec3_t v);
 int         Q_log2 (int val);
 
 void        R_ConcatRotations (float in1[3][3], float in2[3][3],
@@ -91,10 +97,6 @@ float       anglemod (float a);
 		BoxOnPlaneSide( (emins), (emaxs), (p)))
 
 
-#ifndef Q_abs
-#define Q_abs(x)	(x > 0) ? (x) : (-x)
-#endif
-
 void Init_Mathlib (void);
 
 double Q_sin(double x);
@@ -108,11 +110,9 @@ float Q_fabs(float f);
 float Q_sqrt(float n);
 void Q_srand(unsigned seed);
 int	Q_rand(void);
+float Q_RSqrt(float number);
 
-
-
-
-
-
-
+#ifndef Q_abs
+#define Q_abs(x)	(x > 0) ? (x) : (-x)
+#endif
 
