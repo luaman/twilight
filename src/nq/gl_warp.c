@@ -60,6 +60,7 @@ float       speedscale;					// for top sky and bottom sky
 
 msurface_t *warpface;
 
+extern cvar_t *r_showtris;
 extern cvar_t *gl_subdivide_size;
 
 #define	MAX_CLIP_VERTS	64
@@ -262,6 +263,28 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 			qglVertex3fv (temp);
 		}
 		qglEnd ();
+
+		if (!(cl.maxclients > 1) && r_showtris->value) {
+			qglDisable (GL_TEXTURE_2D);
+			qglDisable (GL_DEPTH_TEST);
+			qglColor4f (1,1,1,1);
+
+			qglBegin (GL_LINE_STRIP);
+			v = v = p->verts[0];
+			for (i = 2 ; i < p->numverts; i++)
+			{
+				qglBegin (GL_LINE_STRIP);
+				qglVertex3fv (p->verts[0]);
+				qglVertex3fv (p->verts[i - 1]);
+				qglVertex3fv (p->verts[i]);
+				qglVertex3fv (p->verts[0]);
+				qglEnd ();
+			}
+			qglEnd ();
+
+			qglEnable (GL_DEPTH_TEST);
+			qglEnable (GL_TEXTURE_2D);
+		}
 	}
 }
 
@@ -299,6 +322,28 @@ EmitSkyPolys (msurface_t *fa)
 			qglVertex3fv (v);
 		}
 		qglEnd ();
+
+		if (!(cl.maxclients > 1) && r_showtris->value) {
+			qglDisable (GL_TEXTURE_2D);
+			qglDisable (GL_DEPTH_TEST);
+			qglColor4f (1,1,1,1);
+
+			qglBegin (GL_LINE_STRIP);
+			v = v = p->verts[0];
+			for (i = 2 ; i < p->numverts; i++)
+			{
+				qglBegin (GL_LINE_STRIP);
+				qglVertex3fv (p->verts[0]);
+				qglVertex3fv (p->verts[i - 1]);
+				qglVertex3fv (p->verts[i]);
+				qglVertex3fv (p->verts[0]);
+				qglEnd ();
+			}
+			qglEnd ();
+
+			qglEnable (GL_DEPTH_TEST);
+			qglEnable (GL_TEXTURE_2D);
+		}
 	}
 }
 
@@ -343,8 +388,7 @@ R_DrawSkyChain (msurface_t *s)
 {
 	msurface_t *fa;
 
-	if (r_fastsky->value)
-	{
+	if (r_fastsky->value) {
 		glpoly_t	*p;
 		float		*v;
 		int			i;
@@ -352,10 +396,10 @@ R_DrawSkyChain (msurface_t *s)
 		qglDisable (GL_TEXTURE_2D);
 		qglColor4fv (d_8tofloattable[(Uint8) r_fastsky->value - 1]);
 
-		for (fa=s ; fa ; fa=fa->texturechain){
-			for (p=fa->polys ; p ; p=p->next) {
+		for (fa = s; fa; fa = fa->texturechain){
+			for (p = fa->polys; p; p = p->next) {
 				qglBegin (GL_POLYGON);
-				for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
+				for (i = 0,v = p->verts[0] ; i < p->numverts ; i++, v+=VERTEXSIZE)
 					qglVertex3fv (v);
 
 				qglEnd ();
