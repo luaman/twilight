@@ -435,13 +435,22 @@ VID_Init (unsigned char *palette)
 	if (i && i < com_argc - 1)
 		vid.bpp = Q_atoi (com_argv[i + 1]);
 	else
-		vid.bpp = info->vfmt->BitsPerPixel;
+		vid.bpp = 0;
 
-	/* We want at least 444 (16 bit RGB) */
-	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 4);
-	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 4);
-	SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 4);
-	if (vid.bpp == 32) SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 4);
+	if (vid.bpp > 23)
+	{
+		/* Insist on at least 8 bits per channel */
+		SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 8);
+		SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 8);
+		SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 8);
+	}
+	else
+	{
+		/* Take whatever OpenGL gives us */
+		SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 1);
+		SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 1);
+		SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 1);
+	}
 
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
