@@ -403,7 +403,7 @@ CL_UpdateBeams (void)
 			continue;
 
 		// if coming from the player, update the start position
-		if (b->entity == cl.playernum + 1) {
+		if (b->entity == cl.viewentity) {
 			VectorCopy (cl.simorg, b->start);
 		}
 

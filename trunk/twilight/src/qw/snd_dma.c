@@ -50,9 +50,7 @@ void        S_SoundList (void);
 void        S_Update_ ();
 void        S_StopAllSounds (qboolean clear);
 void        S_StopAllSoundsC (void);
-
-// QuakeWorld hack...
-#define	viewentity	playernum+1
+void		CDAudio_Bgmcallback (cvar_t *cvar);
 
 // =======================================================================
 // Internal sound data & structures
@@ -183,7 +181,7 @@ S_Init_Cvars
 void
 S_Init_Cvars (void)
 {
-	bgmvolume = Cvar_Get ("bgmvolume", "1", CVAR_ARCHIVE, NULL);
+	bgmvolume = Cvar_Get ("bgmvolume", "1", CVAR_ARCHIVE, &CDAudio_Bgmcallback);
 	volume = Cvar_Get ("volume", "0.7", CVAR_ARCHIVE, NULL);
 
 	ambient_level = Cvar_Get ("ambient_level", "0.3", CVAR_NONE, NULL);
