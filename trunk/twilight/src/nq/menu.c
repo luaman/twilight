@@ -1142,9 +1142,11 @@ M_Options_Key (int k)
 	Frame interpolation	    on/off
 	Movement interpolation	on/off
 	Texture Mode			see glmode_t modes[]
+	Light lerping			on/off
+	Particle torches		on/off
 */
 
-#define GFX_ITEMS	9
+#define GFX_ITEMS	10
 
 int gfx_cursor = 0;
 
@@ -1189,7 +1191,8 @@ M_Gfx_Draw (void)
 	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->value); y += 8;
 	M_Print (16, y, "  Motion interpolation"); M_DrawCheckbox (220, y, gl_im_transform->value); y += 8;
 	M_Print (16, y, "          Texture mode"); M_Print (220, y, gl_texturemode->string); y += 8;
-	M_Print (16, y, "         Light lerping"); M_DrawCheckbox (220, y, r_lightlerp->value);
+	M_Print (16, y, "         Light lerping"); M_DrawCheckbox (220, y, r_lightlerp->value); y += 8;
+	M_Print (16, y, "      Particle torches"); M_DrawCheckbox (220, y, gl_particletorches->value);
 
 	// cursor
 	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (realtime * 4) & 1));
@@ -1199,6 +1202,8 @@ void
 M_Gfx_Set (void)
 {
 	int v = 0;
+
+	S_LocalSound ("misc/menu3.wav");
 
 	switch (gfx_cursor)
 	{
@@ -1253,6 +1258,11 @@ M_Gfx_Set (void)
 		case 8:
 			v = !(int)r_lightlerp->value;
 			Cvar_Set (r_lightlerp, va("%i", v));
+			break;
+
+		case 9:
+			v = !(int)gl_particletorches->value;
+			Cvar_Set (gl_particletorches, va("%i", v));
 			break;
 
 		default:
