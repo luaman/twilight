@@ -116,8 +116,6 @@ static qboolean	scr_initialized;			/* ready to draw */
 static image_t   *scr_net;
 static image_t   *scr_turtle;
 
-static int		clearconsole;
-
 qboolean		scr_disabled_for_loading;
 static qboolean	scr_drawloading;
 static float	scr_disabled_time;
@@ -507,7 +505,7 @@ SCR_DrawFPS (void)
 
 	x = vid.width_2d - st_len * con->tsize - con->tsize;
 	y = vid.height_2d - sb_lines - con->tsize;
-	Draw_String_Len (x, y, va("%3d FPS", lastfps), st_len, con->tsize);
+	Draw_String_Len (x, y, st, st_len, con->tsize);
 }
 
 
@@ -581,7 +579,6 @@ SCR_DrawConsole (void)
 {
 	if (scr_con_current) {
 		Con_DrawConsole (scr_con_current);
-		clearconsole = 0;
 	} else {
 		if (key_dest == key_game || key_dest == key_message)
 			Con_DrawNotify ();			/* only draw notify in game */

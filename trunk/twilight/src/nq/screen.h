@@ -31,7 +31,6 @@
 #include "video.h"
 
 extern float scr_con_current;
-extern int clearconsole;
 extern viddef_t vid;
 extern qboolean scr_disabled_for_loading;
 extern float scr_centertime_off;

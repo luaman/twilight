@@ -123,8 +123,6 @@ static qboolean	scr_initialized;			/* ready to draw */
 static image_t   *scr_net;
 static image_t   *scr_turtle;
 
-int				clearconsole;
-
 qboolean		scr_disabled_for_loading;
 static qboolean	scr_drawloading;
 static float	scr_disabled_time;
@@ -212,9 +210,9 @@ for a few moments
 ==============
 */
 void
-SCR_CenterPrint (char *str)
+SCR_CenterPrint (const char *str)
 {
-	char	   *s;
+	const char	*s;
 	char		line[64];
 	int			i, j, l;
 
@@ -595,7 +593,6 @@ SCR_DrawConsole (void)
 {
 	if (scr_con_current) {
 		Con_DrawConsole (scr_con_current);
-		clearconsole = 0;
 	} else {
 		if (key_dest == key_game || key_dest == key_message)
 			Con_DrawNotify ();			/* only draw notify in game */
