@@ -212,7 +212,6 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 void
 R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 {
-	int			t;
 	int			i, j, size;
 	Uint8		*lightmap;
 	unsigned	scale;
@@ -273,12 +272,9 @@ store:
 
 			for (i = 0; i < surf->tmax; i++, dest += stride) {
 				for (j=surf->smax; j; j--) {
-					t = bl[0]; t = t >> 7; if (t > 255) t = 255;
-					dest[0] = 255-t;
-					t = bl[1]; t = t >> 7; if (t > 255) t = 255;
-					dest[1] = 255-t;
-					t = bl[2]; t = t >> 7; if (t > 255) t = 255;
-					dest[2] = 255-t;
+					dest[0] = (Uint8) (min(bl[0], (128 * 255)) >> 7);
+					dest[1] = (Uint8) (min(bl[1], (128 * 255)) >> 7);
+					dest[2] = (Uint8) (min(bl[2], (128 * 255)) >> 7);
 					bl+=3;
 					dest+=3;
 				}
@@ -293,12 +289,9 @@ store:
 
 			for (i = 0; i < surf->tmax; i++, dest += stride) {
 				for (j=surf->smax; j; j--) {
-					t = bl[0]; t = t >> 7; if (t > 255) t = 255;
-					dest[0] = 255-t;
-					t = bl[1]; t = t >> 7; if (t > 255) t = 255;
-					dest[1] = 255-t;
-					t = bl[2]; t = t >> 7; if (t > 255) t = 255;
-					dest[2] = 255-t;
+					dest[0] = (Uint8) (min(bl[0], (128 * 255)) >> 7);
+					dest[1] = (Uint8) (min(bl[1], (128 * 255)) >> 7);
+					dest[2] = (Uint8) (min(bl[2], (128 * 255)) >> 7);
 					dest[3] = 255;
 					bl+=3;
 					dest+=4;
@@ -310,12 +303,9 @@ store:
 		case GL_LUMINANCE:
 			bl = blocklights;
 
-			for (i = 0; i < surf->tmax; i++, dest += stride) {
-				for (j = 0; j < surf->smax; j++) {
-					t = *bl++; t >>= 7;	if (t > 255) t = 255;
-					dest[j] = 255 - t;
-				}
-			}
+			for (i = 0; i < surf->tmax; i++, dest += stride, bl += surf->smax)
+				for (j = 0; j < surf->smax; j++)
+					dest[j] = (Uint8) (min(bl[j], (128 * 255)) >> 7);
 
 			break;
 
@@ -435,7 +425,7 @@ R_DrawSequentialPoly (msurface_t *s)
 				theRect->h = 0;
 				theRect->w = 0;
 			}
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			qglBegin (GL_POLYGON);
 			v = p->verts[0];
 			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
@@ -459,7 +449,23 @@ R_DrawSequentialPoly (msurface_t *s)
 			}
 			qglEnd ();
 
+			qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
 			qglBindTexture (GL_TEXTURE_2D, lightmap_textures + s->lightmaptexturenum);
+			i = s->lightmaptexturenum;
+			if (lightmap_modified[i]) {
+				lightmap_modified[i] = false;
+				theRect = &lightmap_rectchange[i];
+				qglTexSubImage2D (GL_TEXTURE_2D, 0, 0, theRect->t,
+								 BLOCK_WIDTH, theRect->h, gl_lightmap_format,
+								 GL_UNSIGNED_BYTE,
+								 lightmaps + (i * BLOCK_HEIGHT +
+											  theRect->t) * BLOCK_WIDTH *
+								 lightmap_bytes);
+				theRect->l = BLOCK_WIDTH;
+				theRect->t = BLOCK_HEIGHT;
+				theRect->h = 0;
+				theRect->w = 0;
+			}
 			qglEnable (GL_BLEND);
 			qglBegin (GL_POLYGON);
 			v = p->verts[0];
@@ -541,7 +547,7 @@ R_DrawSequentialPoly (msurface_t *s)
 			theRect->h = 0;
 			theRect->w = 0;
 		}
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		if (r_waterwarp->value > 0) {	// warping factor greater than 0
 			DrawGLWaterPolyMTex(p);
 		} else {						// no warping
@@ -574,7 +580,23 @@ R_DrawSequentialPoly (msurface_t *s)
 			qglEnd ();
 		}
 
+		qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
 		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + s->lightmaptexturenum);
+		i = s->lightmaptexturenum;
+		if (lightmap_modified[i]) {
+			lightmap_modified[i] = false;
+			theRect = &lightmap_rectchange[i];
+			qglTexSubImage2D (GL_TEXTURE_2D, 0, 0, theRect->t,
+							 BLOCK_WIDTH, theRect->h, gl_lightmap_format,
+							 GL_UNSIGNED_BYTE,
+							 lightmaps + (i * BLOCK_HEIGHT +
+										  theRect->t) * BLOCK_WIDTH *
+							 lightmap_bytes);
+			theRect->l = BLOCK_WIDTH;
+			theRect->t = BLOCK_HEIGHT;
+			theRect->h = 0;
+			theRect->w = 0;
+		}
 		qglEnable (GL_BLEND);
 		if (r_waterwarp->value > 0) {	// warping factor greater than 0
 			DrawGLWaterPolyLightmap (p);
@@ -588,6 +610,7 @@ R_DrawSequentialPoly (msurface_t *s)
 			qglEnd ();
 		}
 		qglDisable (GL_BLEND);
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 }
 
@@ -708,7 +731,7 @@ R_BlendLightmaps (void)
 		return;
 
 	qglDepthMask (0);					// don't bother writing Z
-	qglBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+	qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
 
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglEnable (GL_BLEND);
