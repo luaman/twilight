@@ -226,7 +226,7 @@ OGL_EXT_DONT_WANT (void, glFinalCombinerInputNV, (GLenum, GLenum, GLenum, GLenum
 OGL_NEED (void, glFinish, (void));
 OGL_EXT_DONT_WANT (GLint, glFinishAsyncSGIX, (GLuint *));
 OGL_EXT_DONT_WANT (void, glFinishTextureSUNX, (void));
-OGL_DONT_NEED (void, glFlush, (void));
+OGL_NEED (void, glFlush, (void));
 OGL_EXT_DONT_WANT (void, glFlushRasterSGIX, (void));
 OGL_EXT_DONT_WANT (void, glFlushVertexArrayRangeNV, (void));
 OGL_EXT_DONT_WANT (void, glFogCoordPointerEXT, (GLenum, GLsizei, const GLvoid *));
