@@ -294,15 +294,20 @@ Cbuf_InsertFile (char *path)
 	if (f)
 	{
 		size = COM_filelength (f);
-		text = Zone_Alloc(tempzone, size);
-		if (text)
+		if (size)
 		{
-			fread (text, size, 1, f);
-			Cbuf_InsertText (text);
-			Zone_Free(text);
+			text = Zone_Alloc(tempzone, size);
+			if (text)
+			{
+				fread (text, size, 1, f);
+				Cbuf_InsertText (text);
+				Zone_Free(text);
+			}
+			else
+				Sys_Printf ("Cbuf_InsertFile: Allocation failed for %s\n", path);
 		}
 		else
-			Sys_Printf ("Cbuf_InsertFile: Allocation failed for %s\n", path);
+			Sys_Printf ("Cbuf_InsertFile: Empty file %s\n", path);
 		fclose (f);
 	}
 	else
