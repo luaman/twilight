@@ -816,7 +816,7 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame)
 		R_DrawLiquidTextureChains (mod);
 
 	// Draw the fullbrights, if there are any
-	if (gl_fb_bmodels->ivalue)
+	if (gl_fb->ivalue)
 	{
 		qglDepthMask (GL_FALSE);	// don't bother writing Z
 		qglEnable (GL_BLEND);

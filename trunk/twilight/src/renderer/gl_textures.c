@@ -217,6 +217,41 @@ GLT_TriangleCheck8 (Uint32 *tex, int width, int height,
 }
 
 static void
+GLT_Skin_IndicesFromSkins (aliashdr_t *amodel, int num_skins,
+		skin_sub_t **skins, skin_indices_t *indices)
+{
+	int			alias_numtris = amodel->numtris;
+	mtriangle_t	*alias_tris = amodel->triangles;
+	Uint8		*tris;
+	int			i, j, numtris;
+
+	tris = Zone_Alloc(tempzone, sizeof(Uint8) * alias_numtris);
+
+	for (i = 0; i < num_skins; i++)
+		for (j = 0; j < skins[i]->num_tris; j++)
+			tris[skins[i]->tris[j]] = true;
+
+	for (i = numtris = 0; i < alias_numtris; i++)
+		if (tris[i])
+			numtris++;
+
+	if (numtris) {
+		indices->num = numtris * 3;
+		indices->i = Zone_Alloc(glt_zone, sizeof(int) * numtris * 3);
+		for (i = j = 0; i < alias_numtris; i++) {
+			if (tris[i]) {
+				indices->i[(j * 3) + 0] = alias_tris[i].vertindex[0];
+				indices->i[(j * 3) + 1] = alias_tris[i].vertindex[1];
+				indices->i[(j * 3) + 2] = alias_tris[i].vertindex[2];
+				j++;
+			}
+		}
+	}
+
+	Zone_Free(tris);
+}
+
+static void
 GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 		int height, Uint32 *palette, qboolean tri_check, qboolean upload,
 		char *name)
@@ -226,8 +261,7 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 	int				*triangles;
 	astvert_t		texcoords[3];
 
-	skin->texnum = skin->num_indices = 0;
-	skin->indices = NULL;
+	memset(skin, 0, sizeof(*skin));
 
 	mskin = GLT_8to32_convert(in, width, height, palette);
 	if (!mskin)
@@ -254,15 +288,10 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 	}
 
 	if (numtris) {
-		mtriangle_t	*atris = amodel->triangles;
-
-		skin->num_indices = numtris * 3;
-		skin->indices = Zone_Alloc(glt_zone, sizeof(int) * numtris * 3);
-		for (i = 0; i < numtris; i++) {
-			skin->indices[(i * 3) + 0] = atris[triangles[i]].vertindex[0];
-			skin->indices[(i * 3) + 1] = atris[triangles[i]].vertindex[1];
-			skin->indices[(i * 3) + 2] = atris[triangles[i]].vertindex[2];
-		}
+		skin->num_tris = numtris;
+		skin->tris = Zone_Alloc(glt_zone, sizeof(int) * numtris);
+		memcpy(skin->tris, triangles, sizeof(int) * numtris);
+		GLT_Skin_IndicesFromSkins (amodel, 1, &skin, &skin->indices);
 		if (upload)
 			skin->texnum = GL_LoadTexture (name, width, height, (Uint8 *) mskin,
 					NULL, TEX_MIPMAP | TEX_ALPHA, 32);
@@ -275,6 +304,7 @@ void
 GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 		int width, int height, int frames, float interval)
 {
+	skin_sub_t	*subs[2];
 	Uint8	*iskin;
 	int		i;
 	size_t	s;
@@ -286,10 +316,13 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 
 	skin->base = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->base_team = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
-	skin->top_bottom = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->fb = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->top = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->bottom = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
+
+	skin->base_fb_i = Zone_Alloc(glt_zone, sizeof(skin_indices_t) * frames);
+	skin->base_team_fb_i =Zone_Alloc(glt_zone, sizeof(skin_indices_t) * frames);
+	skin->top_bottom_i = Zone_Alloc(glt_zone, sizeof(skin_indices_t) * frames);
 
 	iskin = Zone_Alloc(glt_zone, s);
 
@@ -304,9 +337,6 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 		GLT_Skin_SubParse (amodel, &skin->base_team[i], iskin, width, height,
 				d_palette_base_team, false, true, va("%s_base_team", name));
 
-		GLT_Skin_SubParse (amodel, &skin->top_bottom[i], iskin, width, height,
-				d_palette_top_bottom, true, false, va("%s_top_bottom", name));
-
 		GLT_Skin_SubParse (amodel, &skin->fb[i], iskin, width, height,
 				d_palette_fb, true, true, va("%s_fb", name));
 
@@ -315,6 +345,15 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 
 		GLT_Skin_SubParse (amodel, &skin->bottom[i], iskin, width, height,
 				d_palette_bottom, true, true, va("%s_bottom", name));
+
+		subs[0] = &skin->base[i]; subs[1] = &skin->fb[i];
+		GLT_Skin_IndicesFromSkins (amodel, 2, subs, &skin->base_fb_i[i]);
+
+		subs[0] = &skin->base_team[i]; subs[1] = &skin->fb[i];
+		GLT_Skin_IndicesFromSkins (amodel, 2, subs, &skin->base_team_fb_i[i]);
+
+		subs[0] = &skin->top[i]; subs[1] = &skin->bottom[i];
+		GLT_Skin_IndicesFromSkins (amodel, 2, subs, &skin->top_bottom_i[i]);
 	}
 
 	Zone_Free(iskin);
@@ -324,9 +363,17 @@ void
 GLT_Delete_Sub_Skin (skin_sub_t *sub)
 {
 	GL_DeleteTexture(sub->texnum);
-	if (sub->indices)
-		Zone_Free(sub->indices);
+	if (sub->indices.i)
+		Zone_Free(sub->indices.i);
 	Zone_Free(sub);
+}
+
+void
+GLT_Delete_Indices (skin_indices_t *i)
+{
+	if (i->i)
+		Zone_Free(i->i);
+	Zone_Free(i);
 }
 
 void
@@ -337,10 +384,13 @@ GLT_Delete_Skin (skin_t *skin)
 	for (i = 0; i < skin->frames; i++) {
 		GLT_Delete_Sub_Skin(&skin->base[i]);
 		GLT_Delete_Sub_Skin(&skin->base_team[i]);
-		GLT_Delete_Sub_Skin(&skin->top_bottom[i]);
 		GLT_Delete_Sub_Skin(&skin->fb[i]);
 		GLT_Delete_Sub_Skin(&skin->top[i]);
 		GLT_Delete_Sub_Skin(&skin->bottom[i]);
+
+		GLT_Delete_Indices(&skin->base_fb_i[i]);
+		GLT_Delete_Indices(&skin->base_team_fb_i[i]);
+		GLT_Delete_Indices(&skin->top_bottom_i[i]);
 	}
 }
 

@@ -41,7 +41,6 @@ extern Uint32	d_palette_fb[256];
 extern Uint32	d_palette_base_team[256];
 extern Uint32	d_palette_top[256];
 extern Uint32	d_palette_bottom[256];
-extern Uint32	d_palette_top_bottom[256];
 extern int		gl_solid_format;
 extern int		gl_alpha_format;
 extern int		gl_filter_mag;

@@ -583,8 +583,7 @@ M_Options_Key (int k)
 
 /*
 	Affine models			on/off
-	Fullbright models		on/off
-	Fullbright bmodels		on/off
+	Fullbright colors		on/off
 	Fast dynamic lights		on/off
 	Shadows					on/fast/nice
 	Frame interpolation	    on/off
@@ -593,7 +592,7 @@ M_Options_Key (int k)
 	Particle torches		on/off
 */
 
-#define GFX_ITEMS	9
+#define GFX_ITEMS	8
 
 int gfx_cursor = 0;
 
@@ -631,8 +630,7 @@ M_Gfx_Draw (void)
 
 	y = 32;
 	M_Print (16, y, "         Affine models"); M_DrawCheckbox (220, y, gl_affinemodels->ivalue); y += 8;
-	M_Print (16, y, "     Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->ivalue); y += 8;
-	M_Print (16, y, "    Fullbright bmodels"); M_DrawCheckbox (220, y, gl_fb_bmodels->ivalue); y += 8;
+	M_Print (16, y, "     Fullbright colors"); M_DrawCheckbox (220, y, gl_fb->ivalue); y += 8;
 	M_Print (16, y, "   Fast dynamic lights"); M_DrawCheckbox (220, y, gl_flashblend->ivalue); y += 8;
 	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->ivalue) ? (r_shadows->ivalue == 2 ? "nice" : "fast") : "off"); y += 8;
 	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->ivalue); y += 8;
@@ -659,37 +657,32 @@ M_Gfx_Set (void)
 			break;
 
 		case 1:
-			v = !gl_fb_models->ivalue;
-			Cvar_Set (gl_fb_models, va("%i", v));
+			v = !gl_fb->ivalue;
+			Cvar_Set (gl_fb, va("%i", v));
 			break;
 
 		case 2:
-			v = !gl_fb_bmodels->ivalue;
-			Cvar_Set (gl_fb_bmodels, va("%i", v));
-			break;
-
-		case 3:
 			v = !gl_flashblend->ivalue;
 			Cvar_Set (gl_flashblend, va("%i", v));
 			break;
 
-		case 4:
+		case 3:
 			v = r_shadows->ivalue + 1;
 			if (v > 2) v = 0;
 			Cvar_Set (r_shadows, va("%i", v));
 			break;
 
-		case 5:
+		case 4:
 			v = !gl_im_animation->ivalue;
 			Cvar_Set (gl_im_animation, va("%i", v));
 			break;
 
-		case 6:
+		case 5:
 			v = !gl_im_transform->ivalue;
 			Cvar_Set (gl_im_transform, va("%i", v));
 			break;
 
-		case 7:
+		case 6:
 			for (v = 0; v < 6; v++) {
 				if (strcasecmp (texmodes[v].name, gl_texturemode->svalue) == 0)
 					break;
@@ -700,7 +693,7 @@ M_Gfx_Set (void)
 			Cvar_Set (gl_texturemode, texmodes[v].name);
 			break;
 
-		case 8:
+		case 7:
 			v = !gl_particletorches->ivalue;
 			Cvar_Set (gl_particletorches, va("%i", v));
 			break;
