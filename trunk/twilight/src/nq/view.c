@@ -537,6 +537,7 @@ V_AddIdle (void)
 		v_idlescale->fvalue * Q_sin (cl.time * v_iyaw_cycle->fvalue) *
 		v_iyaw_level->fvalue;
 
+	/*
 	cl.viewent.angles[ROLL] -=
 		v_idlescale->fvalue * Q_sin (cl.time * v_iroll_cycle->fvalue) *
 		v_iroll_level->fvalue;
@@ -546,6 +547,7 @@ V_AddIdle (void)
 	cl.viewent.angles[YAW] -=
 		v_idlescale->fvalue * Q_sin (cl.time * v_iyaw_cycle->fvalue) *
 		v_iyaw_level->fvalue;
+		*/
 }
 
 /*
@@ -706,7 +708,11 @@ V_CalcRefdef (void)
 	}
 
 	origin[2] += bob;
-	view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
+	if (view->model != cl.model_precache[cl.stats[STAT_WEAPON]])
+	{
+		memset(view, 0, sizeof(*view));
+		view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
+	}
 
 	/* set up the refresh position */
 	VectorAdd (r_refdef.viewangles, cl.punchangle, r_refdef.viewangles);

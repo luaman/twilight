@@ -440,24 +440,42 @@ CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time)
 
 		ent->lerp_start_time = time;
 		ent->lerp_delta_time = 0;
-		return true;
+		changed = true;
+	} else {
+		VectorSubtract (origin, ent->msg_origins[0], odelta);
+		VectorSubtract (angles, ent->msg_angles[0], adelta);
+
+		if (DotProduct(odelta, odelta) + DotProduct(adelta, adelta) > 0.01)
+		{
+			ent->lerp_delta_time = bound (0, time - ent->lerp_start_time, 1);
+			ent->lerp_start_time = time;
+
+			VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
+			VectorCopy (origin, ent->msg_origins[0]);
+			VectorCopy (origin, ent->origin);
+			VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
+			VectorCopy (angles, ent->msg_angles[0]);
+			VectorCopy (angles, ent->angles);
+			changed = true;
+		}
 	}
 
-	VectorSubtract (origin, ent->msg_origins[0], odelta);
-	VectorSubtract (angles, ent->msg_angles[0], adelta);
-
-	if (DotProduct(odelta, odelta) + DotProduct(adelta, adelta) > 0.01)
+	if (changed)
 	{
-		ent->lerp_delta_time = bound (0, time - ent->lerp_start_time, 1);
-		ent->lerp_start_time = time;
+		if (ent->model && ent->model->alias)
+			ent->angles[PITCH] = -ent->angles[PITCH];
 
-		VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
-		VectorCopy (origin, ent->msg_origins[0]);
-		VectorCopy (origin, ent->origin);
-		VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
-		VectorCopy (angles, ent->msg_angles[0]);
-		VectorCopy (angles, ent->angles);
-		changed = true;
+		if (!ent->lerping)
+		{
+			Matrix4x4_CreateFromQuakeEntity(&ent->matrix, ent->origin, ent->angles, 1);
+			if (ent->model && ent->model->alias)
+			{
+				aliashdr_t  *alias = ent->model->alias;
+				Matrix4x4_ConcatTranslate(&ent->matrix, alias->scale_origin);
+				Matrix4x4_ConcatScale3(&ent->matrix, alias->scale);
+			}
+			Matrix4x4_Invert_Simple(&ent->invmatrix, &ent->matrix);
+		}
 	}
 
 	return changed;
@@ -487,6 +505,17 @@ CL_Lerp_OriginAngles (entity_t *ent)
 			VectorCopy (ent->msg_origins[0], ent->origin);
 			VectorCopy (ent->msg_angles[0], ent->angles);
 		}
+		if (ent->model && ent->model->alias)
+			ent->angles[PITCH] = -ent->angles[PITCH];
+
+		Matrix4x4_CreateFromQuakeEntity(&ent->matrix, ent->origin, ent->angles, 1);
+		if (ent->model && ent->model->alias)
+		{
+			aliashdr_t  *alias = ent->model->alias;
+			Matrix4x4_ConcatTranslate(&ent->matrix, alias->scale_origin);
+			Matrix4x4_ConcatScale3(&ent->matrix, alias->scale);
+		}
+		Matrix4x4_Invert_Simple(&ent->invmatrix, &ent->matrix);
 	}
 }
 

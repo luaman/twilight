@@ -63,7 +63,7 @@ R_AddDynamicLights
 ===============
 */
 static int
-R_AddDynamicLights (msurface_t *surf)
+R_AddDynamicLights (msurface_t *surf, matrix4x4_t *invmatrix)
 {
 	int				i, lnum, lit;
 	int				s, t, td, smax, tmax, smax3;
@@ -88,7 +88,11 @@ R_AddDynamicLights (msurface_t *surf)
 			continue;                   // not lit by this light
 
 		rd = &r_dlight[lnum];
-		VectorCopy (rd->origin, local);
+
+		if (invmatrix)
+			Matrix4x4_Transform(invmatrix, rd->origin, local);
+		else
+			VectorCopy (rd->origin, local);
 		dist = PlaneDiff (local, surf->plane);
 		
 		// for comparisons to minimum acceptable light
@@ -369,7 +373,6 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 	icolor[7] = ca2;
 
 	model = cl.worldmodel;
-	softwaretransformidentity();
 	R_StainNode(model->brush->nodes + model->hulls[0].firstclipnode,
 			model, origin, radius, icolor);
 
@@ -382,8 +385,7 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 		{
 			if (model->type == mod_brush)
 			{
-				softwaretransformforentity (ent->origin, ent->angles);
-				softwareuntransform (origin, org);
+				Matrix4x4_Transform(&ent->invmatrix, origin, org);
 				R_StainNode(model->brush->nodes + model->hulls[0].firstclipnode, model, org, radius, icolor);
 			}
 		}
@@ -399,7 +401,7 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 ===============
 */
 static void
-GL_BuildLightmap (model_t *mod, msurface_t *surf)
+GL_BuildLightmap (model_t *mod, msurface_t *surf, matrix4x4_t *invmatrix)
 {
 	int			 i, j, size3, stride;
 	Uint8		*lightmap, *dest, *stain;
@@ -433,7 +435,7 @@ GL_BuildLightmap (model_t *mod, msurface_t *surf)
 
 		// add all the dynamic lights
 		if (surf->dlightframe == r_framecount)
-			if (R_AddDynamicLights (surf))
+			if (R_AddDynamicLights (surf, invmatrix))
 				surf->cached_dlight = 1;
 
 		// add all the lightmaps
@@ -520,7 +522,7 @@ GL_BuildLightmap (model_t *mod, msurface_t *surf)
 }
 
 static void
-GL_UpdateLightmap (model_t *mod, msurface_t *fa)
+GL_UpdateLightmap (model_t *mod, msurface_t *fa, matrix4x4_t *invmatrix)
 {
 	if (!r_dynamic->ivalue)
 		return;
@@ -531,7 +533,7 @@ GL_UpdateLightmap (model_t *mod, msurface_t *fa)
 			|| d_lightstylevalue[fa->styles[1]] != fa->cached_light[1]
 			|| d_lightstylevalue[fa->styles[2]] != fa->cached_light[2]
 			|| d_lightstylevalue[fa->styles[3]] != fa->cached_light[3])
-		GL_BuildLightmap(mod, fa);
+		GL_BuildLightmap(mod, fa, invmatrix);
 }
 
 
@@ -602,14 +604,10 @@ R_DrawBrushDepthSkies (void)
 			if (Vis_CullBox (mins, maxs))
 				continue;
 
-			softwaretransformforbrushentity (e->origin, e->angles);
-			softwareuntransform(r_origin, org);
+			Matrix4x4_Transform(&e->invmatrix, r_origin, org);
 
 			qglPushMatrix ();
-			qglTranslatef(e->origin[0], e->origin[1], e->origin[2]);
-			qglRotatef (e->angles[1], 0, 0, 1);
-			qglRotatef (e->angles[0], 0, 1, 0);
-			qglRotatef (e->angles[2], 1, 0, 0);
+			qglMultTransposeMatrixf ((GLfloat *) &e->matrix);
 
 			R_Draw_Depth_Sky_Chain (&brush->sky_chain, org);
 
@@ -669,7 +667,8 @@ R_DrawTextureChains
 ================
 */
 void
-R_DrawTextureChains (model_t *mod, vec3_t origin, int frame)
+R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
+		matrix4x4_t *matrix, matrix4x4_t *invmatrix)
 {
 	Uint			 i, j;
 	texture_t		*st;
@@ -677,6 +676,11 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame)
 	chain_item_t	*c;
 	brushhdr_t		*brush = mod->brush;
 	
+	if (matrix) {
+		qglPushMatrix ();
+
+		qglMultTransposeMatrixf ((GLfloat *) matrix);
+	}
 
 	// LordHavoc: upload lightmaps early
 	for (i = 0; i < brush->lightblock.num; i++)
@@ -689,7 +693,7 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame)
 		{
 			if (chain->items[j].visframe != vis_framecount)
 				continue;
-			GL_UpdateLightmap (mod, chain->items[j].surf);
+			GL_UpdateLightmap (mod, chain->items[j].surf, invmatrix);
 		}
 	}
 
@@ -846,6 +850,9 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame)
 		qglDisable (GL_BLEND);
 		qglDepthMask (GL_TRUE);
 	}
+
+	if (matrix)
+		qglPopMatrix ();
 }
 
 /*
@@ -863,8 +870,7 @@ R_VisBrushModel (entity_t *e)
 	brushhdr_t		*brush = mod->brush;
 	vec3_t			 org;
 
-	softwaretransformforbrushentity (e->origin, e->angles);
-	softwareuntransform(r_origin, org);
+	Matrix4x4_Transform(&e->invmatrix, r_origin, org);
 		
 	/*
 	 * LordHavoc: decide which surfs are visible and update lightmaps, then
@@ -906,46 +912,34 @@ R_DrawOpaqueBrushModel (entity_t *e)
 {
 	int				 k;
 	model_t			*mod = e->model;
-	brushhdr_t		*brush = mod->brush;
+	vec3_t			lightorigin;
 
 	// calculate dynamic lighting for bmodel if it's not an instanced model
-	if (brush->firstmodelsurface != 0 && !gl_flashblend->ivalue)
+	if (mod->brush->firstmodelsurface != 0 && !gl_flashblend->ivalue)
 	{
-		for (k = 0; k < r_numdlights; k++)
-			R_MarkLightsNoVis (&r_dlight[k], 1 << k,
-					brush->nodes + mod->hulls[0].firstclipnode);
+		for (k = 0; k < r_numdlights; k++) {
+			Matrix4x4_Transform(&e->invmatrix, r_dlight[k].origin, lightorigin);
+			R_MarkLightsNoVis (lightorigin, &r_dlight[k], 1 << k, mod,
+					mod->brush->nodes + mod->hulls[0].firstclipnode);
+		}
 	}
 
-	qglPushMatrix ();
-
-	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
-
-	qglRotatef (e->angles[1], 0, 0, 1);
-	qglRotatef (e->angles[0], 0, 1, 0);
-	qglRotatef (e->angles[2], 1, 0, 0);
-
-	R_DrawTextureChains (mod, e->origin, e->frame[0]);
-
-	qglPopMatrix ();
+	R_DrawTextureChains(mod, e->origin, e->frame[0], &e->matrix, &e->invmatrix);
 }
 
 /*
 =================
 R_DrawAddBrushModel
 =================
- */
+*/
 void
 R_DrawAddBrushModel (entity_t *e)
 {
-	model_t *mod = e->model;
+	model_t			*mod = e->model;
 
 	qglPushMatrix ();
 
-	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
-
-	qglRotatef (e->angles[1], 0, 0, 1);
-	qglRotatef (e->angles[0], 0, 1, 0);
-	qglRotatef (e->angles[2], 1, 0, 0);
+	qglMultTransposeMatrixf ((GLfloat *) &e->matrix);
 
 	R_DrawLiquidTextureChains (mod);
 

@@ -28,6 +28,7 @@
 #define __RENDERER_LIGHT_H
 
 #include "model.h"
+#include "matrixlib.h"
 
 // Light sources are points, use this to pretend they are not
 #define LIGHTOFFSET (32 * 32)
@@ -59,8 +60,9 @@ extern rdlight_t r_dlight[MAX_DLIGHTS];
 
 void R_InitLightTextures (void);
 void R_BuildLightList (void);
-void R_MarkLights (rdlight_t *light, int bit, model_t *model);
-void R_MarkLightsNoVis (rdlight_t *light, int bit, mnode_t *node);
+void R_MarkLights (rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix);
+void R_MarkLightsNoVis (vec3_t lightorigin, rdlight_t *rd, int bit, model_t *mod, mnode_t *node);
+
 void R_AnimateLight (void);
 int R_LightPoint (vec3_t p);
 void R_PushDlights (void);

@@ -31,6 +31,7 @@ static const char rcsid[] =
 #include "client.h"
 #include "cvar.h"
 #include "sys.h"
+#include "matrixlib.h"
 
 void R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 extern vec3_t lightcolor;
@@ -68,6 +69,7 @@ static vec4_t		top, bottom;
 static skin_t		*skin;
 static vec_t		*mod_origin, *mod_angles;
 static aliashdr_t	*paliashdr;
+static matrix4x4_t	*matrix;
 
 /*
  * START OF NON-COMMON CODE.
@@ -352,6 +354,7 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 	 * locate the proper data
 	 */
 	paliashdr = clmodel->alias;
+	matrix = &e->matrix;
 
 	c_alias_polys += paliashdr->numtris;
 
@@ -403,15 +406,7 @@ R_DrawAliasModel ()
 {
 	qglPushMatrix ();
 
-	qglTranslatef (mod_origin[0], mod_origin[1], mod_origin[2]);
-	qglRotatef (mod_angles[1], 0, 0, 1);
-	qglRotatef (-mod_angles[0], 0, 1, 0);
-	qglRotatef (mod_angles[2], 1, 0, 0);
-
-	qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
-			paliashdr->scale_origin[2]);
-
-	qglScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+	qglMultTransposeMatrixf ((GLfloat *) matrix);
 
 	TWI_PreVDrawCVA (0, paliashdr->numverts);
 
@@ -473,15 +468,7 @@ R_DrawAliasModelNV ()
 {
 	qglPushMatrix ();
 
-	qglTranslatef (mod_origin[0], mod_origin[1], mod_origin[2]);
-	qglRotatef (mod_angles[1], 0, 0, 1);
-	qglRotatef (-mod_angles[0], 0, 1, 0);
-	qglRotatef (mod_angles[2], 1, 0, 0);
-
-	qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
-			paliashdr->scale_origin[2]);
-
-	qglScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+	qglMultTransposeMatrixf ((GLfloat *) matrix);
 
 	TWI_PreVDraw (0, paliashdr->numverts);
 

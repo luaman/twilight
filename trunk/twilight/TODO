@@ -11,11 +11,8 @@ with MSVC 4. (If we don't, then Sys_mkdir needs fixing.)
 
 Bugs we know about:
 
-  - lights do not react to moving bmodels, untransforming into the
-    bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.
     (Need some example bad BSPs.)
-  - dlights brighten bmodels twice as much as world
   - rocket trails (and presumably some other kinds of particle) keep
     spawning while paused
   - RC #0: Bogus player names in death messages?

@@ -29,8 +29,8 @@
 
 #include "dyngl.h"
 #include "mathlib.h"
+#include "matrixlib.h"
 #include "model.h"
-#include "transform.h"
 #include "wad.h"
 #include "vid.h"
 #include "vis.h"
@@ -69,11 +69,15 @@ typedef struct entity_s {
 	vec3_t			msg_angles[2];
 	vec3_t			angles;
 
+	matrix4x4_t		matrix;
+	matrix4x4_t		invmatrix;
+
 	// Last two updates. (0 is the newest)
 	int				frame[2];
 	float			frame_frac[2];
 	float			frame_time[2];
 	float			frame_interval[2];
+	qboolean		lerping;
 
 	// Bounding box
 	vec3_t			mins;
@@ -283,7 +287,7 @@ void R_DrawBrushDepthSkies (void);
 void R_VisWorld (void);
 void R_DrawWorld (void);
 void R_DrawLiquidTextureChains (model_t *mod);
-void R_DrawTextureChains (model_t *mod, vec3_t origin, int frame);
+void R_DrawTextureChains (model_t *mod, vec3_t origin, int frame, matrix4x4_t *matrix, matrix4x4_t *invmatrix);
 void GL_BuildLightmaps (void);
 
 /*
