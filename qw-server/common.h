@@ -32,7 +32,12 @@
 #define	MAX_SERVERINFO_STRING	512
 #define	MAX_LOCALINFO_STRING	32768
 
-//============================================================================
+extern struct cvar_s *fs_userconf;
+extern struct cvar_s *fs_userpath;
+extern struct cvar_s *fs_shareconf;
+extern struct cvar_s *fs_sharepath;
+
+//==========================================================================n
 
 typedef struct sizebuf_s {
 	qboolean    allowoverflow;			// if false, do a Sys_Error
