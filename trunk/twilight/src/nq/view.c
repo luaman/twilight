@@ -45,9 +45,6 @@ when crossing a water boudnary.
 
 */
 
-cvar_t     *lcd_x;
-cvar_t     *lcd_yaw;
-
 cvar_t     *scr_ofsx;
 cvar_t     *scr_ofsy;
 cvar_t     *scr_ofsz;
@@ -953,38 +950,7 @@ V_RenderView (void)
 
 	R_PushDlights ();
 
-	if (lcd_x->value) {
-		// 
-		// render two interleaved views
-		// 
-		int         i;
-
-		vid.rowbytes <<= 1;
-		vid.aspect *= 0.5;
-
-		r_refdef.viewangles[YAW] -= lcd_yaw->value;
-		for (i = 0; i < 3; i++)
-			r_refdef.vieworg[i] -= right[i] * lcd_x->value;
-		R_RenderView ();
-
-		vid.buffer += vid.rowbytes >> 1;
-
-		R_PushDlights ();
-
-		r_refdef.viewangles[YAW] += lcd_yaw->value * 2;
-		for (i = 0; i < 3; i++)
-			r_refdef.vieworg[i] += 2 * right[i] * lcd_x->value;
-		R_RenderView ();
-
-		vid.buffer -= vid.rowbytes >> 1;
-
-		r_refdef.vrect.height <<= 1;
-
-		vid.rowbytes >>= 1;
-		vid.aspect *= 2;
-	} else {
-		R_RenderView ();
-	}
+	R_RenderView ();
 }
 
 //============================================================================
@@ -997,9 +963,6 @@ V_Init_Cvars
 void
 V_Init_Cvars (void)
 {
-	lcd_x = Cvar_Get ("lcd_x", "0", CVAR_NONE, NULL);
-	lcd_yaw = Cvar_Get ("lcd_yaw", "0", CVAR_NONE, NULL);
-
 	scr_ofsx = Cvar_Get ("scr_ofsx", "0", CVAR_NONE, NULL);
 	scr_ofsy = Cvar_Get ("scr_ofsy", "0", CVAR_NONE, NULL);
 	scr_ofsz = Cvar_Get ("scr_ofsz", "0", CVAR_NONE, NULL);
