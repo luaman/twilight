@@ -345,12 +345,40 @@ void
 Sys_mkdir (char *path)
 {
 #if defined(HAVE_MKDIR)
-	mkdir (path, 0777);
+#define do_mkdir(x)	mkdir(x, 0777)
 #elif defined(HAVE__MKDIR)
-	_mkdir (path);
+#define do_mkdir(x)	_mkdir(x)
 #else
 # error "Need either POSIX mkdir or Win32 _mkdir"
 #endif
+
+	int		ret;
+	char	*dup, *c;
+
+	ret = do_mkdir(path);
+	if (!ret || (errno == EEXIST))
+		return;
+
+	dup = strdup(path);
+	c = dup;
+	if (*c == '/')
+		c++;
+	while (*c) {
+		if (*c == '/') {
+			*c = '\0';
+			ret = do_mkdir(dup);
+			if (ret && (errno != EEXIST))
+				Sys_Error("ERROR: Can not make path %s %s (%s)\n",
+						dup, path, strerror(errno));
+
+			*c = '/';
+		}
+		c++;
+	}
+
+	ret = do_mkdir(dup);
+	if (ret && (errno != EEXIST))
+		Sys_Error("ERROR: Can not make path %s (%s)\n", dup, strerror(errno));
 }
 
 void
