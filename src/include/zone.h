@@ -43,7 +43,7 @@ typedef struct memheader_s
 	struct memheader_s	*chain;			// next memheader in this zone
 	struct memzone_s	*zone;			// the parent zone
 	size_t				size;			// allocated size, excludes header
-	char				*filename;		// source file of this alloc
+	const char			*filename;		// source file of this alloc
 	int					fileline;		// line of alloc in source file
 	Uint32				sentinel1;	// MEMHEADER_SENTINEL1
 	// followed by data and a MEMHEADER_SENTINEL2 byte
@@ -70,15 +70,15 @@ typedef struct memzone_s
 #define Zone_FreeZone(zone) _Zone_FreeZone(zone, __FILE__, __LINE__)
 #define Zone_EmptyZone(zone) _Zone_EmptyZone(zone, __FILE__, __LINE__)
 
-void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline);
-void *_Zone_AllocName(char *name, size_t size, char *filename, int fileline);
-void _Zone_Free(void *data, char *filename, int fileline);
-memzone_t *_Zone_AllocZone(char *name, char *filename, int fileline);
-void _Zone_FreeZone(memzone_t **zone, char *filename, int fileline);
-void _Zone_EmptyZone(memzone_t *zone, char *filename, int fileline);
-void _Zone_CheckSentinels(void *data, char *filename, int fileline);
-void _Zone_CheckSentinelsZone(memzone_t *zone, char *filename, int fileline);
-void _Zone_CheckSentinelsGlobal(char *filename, int fileline);
+void *_Zone_Alloc(memzone_t *zone, const size_t size, const char *filename, const int fileline);
+void *_Zone_AllocName(const char *name, const size_t size, const char *filename, const int fileline);
+void _Zone_Free(void *data, const char *filename, int fileline);
+memzone_t *_Zone_AllocZone(const char *name, const char *filename, const int fileline);
+void _Zone_FreeZone(memzone_t **zone, const char *filename, const int fileline);
+void _Zone_EmptyZone(memzone_t *zone, const char *filename, const int fileline);
+void _Zone_CheckSentinels(void *data, const char *filename, const int fileline);
+void _Zone_CheckSentinelsZone(memzone_t *zone, const char *filename, const int fileline);
+void _Zone_CheckSentinelsGlobal(const char *filename, const int fileline);
 
 void Zone_Init (void);
 void Zone_Init_Commands (void);
