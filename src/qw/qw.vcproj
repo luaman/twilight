@@ -168,9 +168,6 @@
 				RelativePath=".\console.c">
 			</File>
 			<File
-				RelativePath=".\gl_alias.c">
-			</File>
-			<File
 				RelativePath=".\gl_draw.c">
 			</File>
 			<File
@@ -214,9 +211,6 @@
 			</File>
 			<File
 				RelativePath=".\r_explosion.c">
-			</File>
-			<File
-				RelativePath=".\r_part.c">
 			</File>
 			<File
 				RelativePath=".\sbar.c">
