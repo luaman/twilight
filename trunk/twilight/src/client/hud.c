@@ -35,12 +35,11 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "cmd.h"
 #include "cvar.h"
-#include "gl_draw.h"
+#include "draw.h"
 #include "video.h"
 #include "wad.h"
 #include "mathlib.h"
 #include "gl_arrays.h"
-#include "gl_draw.h"
 
 extern void CL_UpdatePings (void);
 

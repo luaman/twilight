@@ -37,7 +37,7 @@ static const char rcsid[] =
 #include "screen.h"
 #include "strlib.h"
 #include "host.h"
-#include "gl_alias.h"
+#include "alias.h"
 
 /* QW specific */
 #include "pmove.h"

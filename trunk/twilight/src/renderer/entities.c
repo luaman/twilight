@@ -35,9 +35,9 @@ static const char rcsid[] =
 #include "host.h"
 #include "sky.h"
 #include "gl_info.h"
-#include "gl_alias.h"
-#include "gl_brush.h"
-#include "gl_sprite.h"
+#include "alias.h"
+#include "brush.h"
+#include "sprite.h"
 #include "gl_main.h"
 #include "vis.h"
 

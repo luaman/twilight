@@ -36,7 +36,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
-#include "gl_textures.h"
+#include "textures.h"
 
 void
 Mod_UnloadModel (model_t *mod, qboolean keep)

@@ -38,10 +38,10 @@
 #include "quakedef.h"
 #include "matrixlib.h"
 #include "r_part.h"
-#include "gl_alias.h"
+#include "alias.h"
 #include "entities.h"
 #include "gl_light.h"
-#include "gl_brush.h"
+#include "brush.h"
 #include "gl_main.h"
 
 typedef struct entity_s {

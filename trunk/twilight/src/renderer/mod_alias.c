@@ -35,7 +35,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
-#include "gl_textures.h"
+#include "textures.h"
 #include "mod_alias.h"
 #include "gl_arrays.h"
 
