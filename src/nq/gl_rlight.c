@@ -664,6 +664,34 @@ loc0:
 					lightmap += surf->smax * surf->tmax *3;
 				}
 
+				/*
+				// LordHavoc: here's the readable version of the interpolation
+				// code, not quite as easy for the compiler to optimize...
+
+				// dsfrac is the X position in the lightmap pixel, * 16
+				// dtfrac is the Y position in the lightmap pixel, * 16
+				// r00 is top left corner, r01 is top right corner
+				// r10 is bottom left corner, r11 is bottom right corner
+				// g and b are the same layout.
+				// r0 and r1 are the top and bottom intermediate results
+
+				// first we interpolate the top two points, to get the top
+				// edge sample
+				r0 = (((r01-r00) * dsfrac) >> 4) + r00;
+				g0 = (((g01-g00) * dsfrac) >> 4) + g00;
+				b0 = (((b01-b00) * dsfrac) >> 4) + b00;
+				// then we interpolate the bottom two points, to get the
+				// bottom edge sample
+				r1 = (((r11-r10) * dsfrac) >> 4) + r10;
+				g1 = (((g11-g10) * dsfrac) >> 4) + g10;
+				b1 = (((b11-b10) * dsfrac) >> 4) + b10;
+				// then we interpolate the top and bottom samples to get the
+				// middle sample (the one which was requested)
+				r = (((r1-r0) * dtfrac) >> 4) + r0;
+				g = (((g1-g0) * dtfrac) >> 4) + g0;
+				b = (((b1-b0) * dtfrac) >> 4) + b0;
+				*/
+
 				color[0] += (float)((int)((((((((r11-r10) * dsfrac) >> 4)
 											+ r10)-((((r01-r00) * dsfrac) >> 4)
 												+ r00)) * dtfrac) >> 4)
