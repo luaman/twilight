@@ -15,16 +15,10 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 
 lib_LIBRARIES=libtwilight_renderer.a
 
-noinst_HEADERS= \
-	dyngl.h dglfuncs.h \
-	glquake.h transform.h gl_textures.h \
-	light.h \
-	pointers.h
-
 libtwilight_renderer_a_SOURCES= \
-	dyngl.c \
-	gl_textures.c \
+	dyngl.c dyngl.h dglfuncs.h \
+	gl_textures.c gl_textures.h \
 	noise.c noise_textures.c \
-	transform.c \
-	pointers.c
+	transform.c transform.h light.h \
+	pointers.c pointers.h
 

@@ -32,11 +32,10 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cvar.h"
-#include "glquake.h"
+#include "host.h"
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
-#include "host.h"
 
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128

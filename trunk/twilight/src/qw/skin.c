@@ -27,19 +27,19 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
+#include <errno.h>
+
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
 #include "cvar.h"
+#include "draw.h"
+#include "gl_textures.h"
 #include "image.h"
+#include "mathlib.h"
 #include "pcx.h"
 #include "strlib.h"
 #include "sys.h"
-#include "glquake.h"
-#include "draw.h"
-#include "gl_textures.h"
-#include "mathlib.h"
-#include <errno.h>
 
 typedef struct {
 	char		name[128];

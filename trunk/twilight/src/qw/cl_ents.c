@@ -32,13 +32,12 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cvar.h"
-#include "glquake.h"
 #include "host.h"
 #include "mathlib.h"
-#include "strlib.h"
 #include "pmove.h"
-#include "view.h"
+#include "strlib.h"
 #include "sys.h"
+#include "view.h"
 
 int			cl_num_static_entities;
 entity_t	cl_static_entities[MAX_STATIC_ENTITIES];

@@ -35,13 +35,12 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
+#include "console.h"
 #include "cvar.h"
-#include "keys.h"
-#include "glquake.h"
 #include "host.h"
+#include "keys.h"
 #include "mathlib.h"
 #include "sys.h"
-#include "console.h"
 
 
 Uint32 d_8to32table[256];

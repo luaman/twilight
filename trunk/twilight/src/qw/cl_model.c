@@ -27,19 +27,19 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
+#include <math.h>
+
 #include "quakedef.h"
 #include "client.h"
 #include "crc.h"
 #include "cvar.h"
 #include "draw.h"
-#include "glquake.h"
+#include "gl_textures.h"
 #include "host.h"
 #include "mathlib.h"
 #include "mdfour.h"
 #include "strlib.h"
 #include "sys.h"
-#include "gl_textures.h"
-#include <math.h>
 
 extern model_t	*loadmodel;
 

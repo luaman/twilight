@@ -35,10 +35,10 @@ static const char rcsid[] =
 #include "client.h"
 #include "cmd.h"
 #include "console.h"
+#include "collision.h"
 #include "cvar.h"
 #include "host.h"
 #include "keys.h"
-#include "glquake.h"
 #include "mathlib.h"
 #include "pmove.h"
 #include "screen.h"
@@ -46,7 +46,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "teamplay.h"
-#include "collision.h"
 
 char       *svc_strings[] = {
 	"svc_bad",
