@@ -468,7 +468,7 @@ void R_SkyBox(void)
 
 void R_DrawSkyBox (void)
 {
-	if (!draw_skybox)
+	if (!draw_skybox || (skytexturenum == -1))
 		return;
 
 	qglDisable(GL_DEPTH_TEST);
