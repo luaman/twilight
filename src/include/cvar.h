@@ -27,6 +27,9 @@
 #ifndef __CVAR_H
 #define __CVAR_H
 
+
+// NOTE: These flags must match Cvar_FlagString in cvar.c
+
 #define CVAR_NONE			0
 
 #define CVAR_ARCHIVE		1
@@ -38,10 +41,11 @@
 
 #define CVAR_ROM			4096
 
-
-typedef struct cvar_s {
+typedef struct cvar_s
+{
 	char			   *name;
 	char			   *string;
+	char			   *initstr;
 	float			   	value;
 	int					flags;
 
@@ -60,6 +64,7 @@ cvar_t *Cvar_Get (const char *name, const char *value, const int flags,
 
 void Cvar_Set (cvar_t *var, const char *value);
 void Cvar_Set_f (void);
+void Cvar_Reset_f (void);
 
 cvar_t *Cvar_CreateTemp (const char *name, const char *value);
 
