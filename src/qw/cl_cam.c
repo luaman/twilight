@@ -130,7 +130,7 @@ Cam_Lock (int playernum)
 {
 	char        st[40];
 
-	snprintf (st, sizeof(st), "ptrack %i", playernum);
+	snprintf (st, sizeof (st), "ptrack %i", playernum);
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message, st);
 	spec_track = playernum;
@@ -340,9 +340,8 @@ Cam_Track (usercmd_t *cmd)
 	if (!autocam || cls.state != ca_active)
 		return;
 
-	if (locked
-		&& (!cl.players[spec_track].name[0]
-			|| cl.players[spec_track].spectator)) {
+	if (locked && (!cl.players[spec_track].name[0]
+				   || cl.players[spec_track].spectator)) {
 		locked = false;
 		if (cl_hightrack.value)
 			Cam_CheckHighTarget ();

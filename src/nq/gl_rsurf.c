@@ -350,7 +350,8 @@ R_DrawSequentialPoly (msurface_t *s)
 	// 
 	if (s->flags & SURF_DRAWSKY) {
 		GL_Bind (solidskytexture);
-SG		speedscale = realtime * 8;
+		SG          speedscale = realtime * 8;
+
 		speedscale -= (int) speedscale;
 
 		EmitSkyPolys (s);

@@ -38,7 +38,7 @@ typedef enum { false, true } qboolean;
 typedef struct sizebuf_s {
 	qboolean    allowoverflow;			// if false, do a Sys_Error
 	qboolean    overflowed;				// set to true if the buffer size
-										// failed
+	// failed
 	byte       *data;
 	int         maxsize;
 	int         cursize;
@@ -115,6 +115,7 @@ void        MSG_WriteDeltaUsercmd (sizebuf_t *sb, struct usercmd_s *from,
 
 extern int  msg_readcount;
 extern qboolean msg_badread;			// set if a read goes beyond end of
+
 										// message
 
 void        MSG_BeginReading (void);

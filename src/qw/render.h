@@ -35,7 +35,7 @@ typedef struct efrag_s {
 
 typedef struct entity_s {
 	int         keynum;					// for matching entities in different
-										// frames
+	// frames
 	vec3_t      origin;
 	vec3_t      angles;
 	struct model_s *model;				// NULL = no model
@@ -81,7 +81,7 @@ typedef struct {
 	float       fvrectbottom;			// bottommost edge, for Alias clamping
 	float       horizontalFieldOfView;	// at Z = 1.0, this many X is visible 
 	// 2.0 = 90 degrees
-	float       xOrigin;				// should probably allways be 0.5
+	float       xOrigin;				// should probably always be 0.5
 	float       yOrigin;				// between be around 0.3 to 0.5
 
 	vec3_t      vieworg;
@@ -142,6 +142,7 @@ void        R_DrawWaterSurfaces (void);
 // surface cache related
 //
 extern int  reinit_surfcache;			// if 1, surface cache is currently
+
 										// empty and
 extern qboolean r_cache_thrash;			// set if thrashing the surface cache
 

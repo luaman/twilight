@@ -61,7 +61,7 @@ Con_Printf ();
 net 
 turn off messages option
 
-the refresh is allways rendered, unless the console is full screen
+the refresh is always rendered, unless the console is full screen
 
 
 console is:
@@ -489,7 +489,7 @@ SCR_DrawFPS (void)
 		lastframetime = t;
 	}
 
-	snprintf (st, sizeof(st), "%3d FPS", lastfps);
+	snprintf (st, sizeof (st), "%3d FPS", lastfps);
 	x = vid.width - Q_strlen (st) * 8 - 8;
 	y = vid.height - sb_lines - 8;
 //  Draw_TileClear(x, y, Q_strlen(st) * 8, 8);
@@ -640,7 +640,7 @@ SCR_ScreenShot_f (void)
 	for (i = 0; i <= 99; i++) {
 		pcxname[5] = i / 10 + '0';
 		pcxname[6] = i % 10 + '0';
-		snprintf (checkname, sizeof(checkname), "%s/%s", com_gamedir, pcxname);
+		snprintf (checkname, sizeof (checkname), "%s/%s", com_gamedir, pcxname);
 		if (Sys_FileTime (checkname) == -1)
 			break;						// file doesn't exist
 	}
@@ -854,25 +854,6 @@ SCR_RSShot_f (void)
 
 	Con_Printf ("Remote screen shot requested.\n");
 
-#if 0
-// 
-// find a file name to save it to 
-// 
-	Q_strcpy (pcxname, "mquake00.pcx");
-
-	for (i = 0; i <= 99; i++) {
-		pcxname[6] = i / 10 + '0';
-		pcxname[7] = i % 10 + '0';
-		snprintf (checkname, checkname), "%s/%s", com_gamedir, pcxname);
-		if (Sys_FileTime (checkname) == -1)
-			break;						// file doesn't exist
-	}
-	if (i == 100) {
-		Con_Printf ("SCR_ScreenShot_f: Couldn't create a PCX");
-		return;
-	}
-#endif
-
 // 
 // save the pcx file 
 // 
@@ -1015,7 +996,7 @@ SCR_BringDownConsole (void)
 		SCR_UpdateScreen ();
 
 	cl.cshifts[0].percent = 0;			// no area contents palette on next
-										// frame
+	// frame
 	VID_SetPalette (host_basepal);
 }
 

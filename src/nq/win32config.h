@@ -11,4 +11,4 @@
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
 
-#endif	// _CONFIG_H
+#endif // _CONFIG_H

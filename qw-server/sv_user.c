@@ -131,7 +131,7 @@ SV_Soundlist_f (void)
 	int         n;
 
 	if (host_client->state != cs_connected) {
-		Con_Printf ("soundlist not valid -- allready spawned\n");
+		Con_Printf ("soundlist not valid -- already spawned\n");
 		return;
 	}
 	// handle the case of a level changing while a client was connecting
@@ -143,12 +143,11 @@ SV_Soundlist_f (void)
 
 	n = atoi (Cmd_Argv (2));
 	if (n >= MAX_SOUNDS) {
-		SV_ClientPrintf (host_client, PRINT_HIGH, 
-			"SV_Soundlist_f: Invalid soundlist index\n");
+		SV_ClientPrintf (host_client, PRINT_HIGH,
+						 "SV_Soundlist_f: Invalid soundlist index\n");
 		SV_DropClient (host_client);
 		return;
 	}
-
 //NOTE:  This doesn't go through ClientReliableWrite since it's before the user
 //spawns.  These functions are written to not overflow
 	if (host_client->num_backbuf) {
@@ -186,7 +185,7 @@ SV_Modellist_f (void)
 	int         n;
 
 	if (host_client->state != cs_connected) {
-		Con_Printf ("modellist not valid -- allready spawned\n");
+		Con_Printf ("modellist not valid -- already spawned\n");
 		return;
 	}
 	// handle the case of a level changing while a client was connecting
@@ -198,12 +197,11 @@ SV_Modellist_f (void)
 
 	n = atoi (Cmd_Argv (2));
 	if (n >= MAX_MODELS) {
-		SV_ClientPrintf (host_client, PRINT_HIGH, 
-			"SV_Modellist_f: Invalid modellist index\n");
+		SV_ClientPrintf (host_client, PRINT_HIGH,
+						 "SV_Modellist_f: Invalid modellist index\n");
 		SV_DropClient (host_client);
 		return;
 	}
-
 //NOTE:  This doesn't go through ClientReliableWrite since it's before the user
 //spawns.  These functions are written to not overflow
 	if (host_client->num_backbuf) {
@@ -240,7 +238,7 @@ SV_PreSpawn_f (void)
 	unsigned    check;
 
 	if (host_client->state != cs_connected) {
-		Con_Printf ("prespawn not valid -- allready spawned\n");
+		Con_Printf ("prespawn not valid -- already spawned\n");
 		return;
 	}
 	// handle the case of a level changing while a client was connecting
@@ -311,7 +309,7 @@ SV_Spawn_f (void)
 	int         n;
 
 	if (host_client->state != cs_connected) {
-		Con_Printf ("Spawn not valid -- allready spawned\n");
+		Con_Printf ("Spawn not valid -- already spawned\n");
 		return;
 	}
 // handle the case of a level changing while a client was connecting
@@ -329,7 +327,6 @@ SV_Spawn_f (void)
 		SV_New_f ();
 		return;
 	}
-
 
 // send all current names, colors, and frag counts
 	// FIXME: is this a good thing?
@@ -566,7 +563,7 @@ OutofBandPrintf (netadr_t where, char *fmt, ...)
 	send[3] = 0xff;
 	send[4] = A2C_PRINT;
 	va_start (argptr, fmt);
-	vsnprintf (send + 5, sizeof(send) - 5, fmt, argptr);
+	vsnprintf (send + 5, sizeof (send) - 5, fmt, argptr);
 	va_end (argptr);
 
 	NET_SendPacket (strlen (send) + 1, send, where);
@@ -745,11 +742,11 @@ SV_Say (qboolean team)
 	}
 
 	if (host_client->spectator && (!sv_spectalk.value || team))
-		snprintf (text, sizeof(text), "[SPEC] %s: ", host_client->name);
+		snprintf (text, sizeof (text), "[SPEC] %s: ", host_client->name);
 	else if (team)
-		snprintf (text, sizeof(text), "(%s): ", host_client->name);
+		snprintf (text, sizeof (text), "(%s): ", host_client->name);
 	else {
-		snprintf (text, sizeof(text), "%s: ", host_client->name);
+		snprintf (text, sizeof (text), "%s: ", host_client->name);
 	}
 
 	if (fp_messages) {
@@ -762,8 +759,7 @@ SV_Say (qboolean team)
 		tmp = host_client->whensaidhead - fp_messages + 1;
 		if (tmp < 0)
 			tmp = 10 + tmp;
-		if (!sv.paused &&
-			host_client->whensaid[tmp]
+		if (!sv.paused && host_client->whensaid[tmp]
 			&& (realtime - host_client->whensaid[tmp] < fp_persecond)) {
 			host_client->lockedtill = realtime + fp_secondsdead;
 			if (fp_msg[0])
@@ -881,7 +877,7 @@ SV_Kill_f (void)
 {
 	if (sv_player->v.health <= 0) {
 		SV_ClientPrintf (host_client, PRINT_HIGH,
-						 "Can't suicide -- allready dead!\n");
+						 "Can't suicide -- already dead!\n");
 		return;
 	}
 
@@ -938,9 +934,9 @@ SV_Pause_f (void)
 	}
 
 	if (!sv.paused)
-		snprintf (st, sizeof(st), "%s paused the game\n", host_client->name);
+		snprintf (st, sizeof (st), "%s paused the game\n", host_client->name);
 	else
-		snprintf (st, sizeof(st), "%s unpaused the game\n", host_client->name);
+		snprintf (st, sizeof (st), "%s unpaused the game\n", host_client->name);
 
 	SV_TogglePause (st);
 }

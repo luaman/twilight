@@ -105,7 +105,8 @@ UDP_Init (void)
 
 	((struct sockaddr_in *) &broadcastaddr)->sin_family = AF_INET;
 	((struct sockaddr_in *) &broadcastaddr)->sin_addr.s_addr = INADDR_BROADCAST;
-	((struct sockaddr_in *) &broadcastaddr)->sin_port = htons ((unsigned short) net_hostport);
+	((struct sockaddr_in *) &broadcastaddr)->sin_port =
+		htons ((unsigned short) net_hostport);
 
 	UDP_GetSocketAddr (net_controlsocket, &addr);
 	Q_strcpy (my_tcpip_address, UDP_AddrToString (&addr));
@@ -157,6 +158,7 @@ UDP_OpenSocket (int port)
 	int         newsocket;
 	struct sockaddr_in address;
 	int         i;
+
 #ifdef _WIN32
 #define ioctl ioctlsocket
 	unsigned long _true = true;
@@ -164,7 +166,7 @@ UDP_OpenSocket (int port)
 	int         _true = 1;
 #endif
 
-	memset (&address, 0, sizeof(address));
+	memset (&address, 0, sizeof (address));
 
 	if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 		Sys_Error ("UDP_OpenSocket: socket:%s", strerror (errno));
@@ -353,9 +355,9 @@ UDP_AddrToString (struct qsockaddr *addr)
 	int         haddr;
 
 	haddr = ntohl (((struct sockaddr_in *) addr)->sin_addr.s_addr);
-	snprintf (buffer, sizeof(buffer), "%d.%d.%d.%d:%d", (haddr >> 24) & 0xff,
-			 (haddr >> 16) & 0xff, (haddr >> 8) & 0xff, haddr & 0xff,
-			 ntohs (((struct sockaddr_in *) addr)->sin_port));
+	snprintf (buffer, sizeof (buffer), "%d.%d.%d.%d:%d", (haddr >> 24) & 0xff,
+			  (haddr >> 16) & 0xff, (haddr >> 8) & 0xff, haddr & 0xff,
+			  ntohs (((struct sockaddr_in *) addr)->sin_port));
 	return buffer;
 }
 
@@ -427,7 +429,8 @@ UDP_GetAddrFromName (char *name, struct qsockaddr *addr)
 		return -1;
 
 	addr->sa_family = AF_INET;
-	((struct sockaddr_in *) addr)->sin_port = htons ((unsigned short) net_hostport);
+	((struct sockaddr_in *) addr)->sin_port =
+		htons ((unsigned short) net_hostport);
 	((struct sockaddr_in *) addr)->sin_addr.s_addr =
 		*(int *) hostentry->h_addr_list[0];
 

@@ -33,10 +33,10 @@ char       *svc_strings[] = {
 	"svc_time",							// [float] server time
 	"svc_print",						// [string] null terminated string
 	"svc_stufftext",					// [string] stuffed into client's
-										// console buffer
+	// console buffer
 	// the string should be \n terminated
 	"svc_setangle",						// [vec3] set the view angle to this
-										// absolute value
+	// absolute value
 
 	"svc_serverdata",					// [long] version ...
 	"svc_lightstyle",					// [byte] [string]
@@ -47,7 +47,7 @@ char       *svc_strings[] = {
 	"svc_updatecolors",					// [byte] [byte]
 	"svc_particle",						// [vec3] <variable>
 	"svc_damage",						// [byte] impact [byte] blood [vec3]
-										// from
+	// from
 
 	"svc_spawnstatic",
 	"OBSOLETE svc_spawnbinary",
@@ -215,8 +215,7 @@ Model_NextDownload (void)
 	}
 
 	cls.downloadtype = dl_model;
-	for (; cl.model_name[cls.downloadnumber][0];
-		 cls.downloadnumber++) {
+	for (; cl.model_name[cls.downloadnumber][0]; cls.downloadnumber++) {
 		s = cl.model_name[cls.downloadnumber];
 		if (s[0] == '*')
 			continue;					// inline brush model
@@ -272,8 +271,7 @@ Sound_NextDownload (void)
 	}
 
 	cls.downloadtype = dl_sound;
-	for (; cl.sound_name[cls.downloadnumber][0];
-		 cls.downloadnumber++) {
+	for (; cl.sound_name[cls.downloadnumber][0]; cls.downloadnumber++) {
 		s = cl.sound_name[cls.downloadnumber];
 		if (!CL_CheckOrDownloadFile (va ("sound/%s", s)))
 			return;						// started a download
@@ -361,9 +359,10 @@ CL_ParseDownload (void)
 	// open the file if not opened yet
 	if (!cls.download) {
 		if (Q_strncmp (cls.downloadtempname, "skins/", 6))
-			snprintf (name, sizeof(name), "%s/%s", com_gamedir, cls.downloadtempname);
+			snprintf (name, sizeof (name), "%s/%s", com_gamedir,
+					  cls.downloadtempname);
 		else
-			snprintf (name, sizeof(name), "qw/%s", cls.downloadtempname);
+			snprintf (name, sizeof (name), "qw/%s", cls.downloadtempname);
 
 		COM_CreatePath (name);
 
@@ -406,11 +405,13 @@ CL_ParseDownload (void)
 		// rename the temp file to it's final name
 		if (Q_strcmp (cls.downloadtempname, cls.downloadname)) {
 			if (Q_strncmp (cls.downloadtempname, "skins/", 6)) {
-				snprintf (oldn, sizeof(oldn), "%s/%s", com_gamedir, cls.downloadtempname);
-				snprintf (newn, sizeof(newn), "%s/%s", com_gamedir, cls.downloadname);
+				snprintf (oldn, sizeof (oldn), "%s/%s", com_gamedir,
+						  cls.downloadtempname);
+				snprintf (newn, sizeof (newn), "%s/%s", com_gamedir,
+						  cls.downloadname);
 			} else {
-				snprintf (oldn, sizeof(oldn), "qw/%s", cls.downloadtempname);
-				snprintf (newn, sizeof(newn), "qw/%s", cls.downloadname);
+				snprintf (oldn, sizeof (oldn), "qw/%s", cls.downloadtempname);
+				snprintf (newn, sizeof (newn), "qw/%s", cls.downloadname);
 			}
 			r = rename (oldn, newn);
 			if (r)
@@ -559,7 +560,7 @@ CL_ParseServerData (void)
 	// ZOID--run the autoexec.tcf in the gamedir
 	// if it exists
 	if (cflag) {
-		snprintf (fn, sizeof(fn), "%s/%s", com_gamedir, "config.tcf");
+		snprintf (fn, sizeof (fn), "%s/%s", com_gamedir, "config.tcf");
 		if ((f = fopen (fn, "r")) != NULL) {
 			fclose (f);
 			Cbuf_AddText ("cl_warncmd 0\n");
@@ -891,7 +892,7 @@ void
 CL_ProcessUserInfo (int slot, player_info_t *player)
 {
 	Q_strncpy (player->name, Info_ValueForKey (player->userinfo, "name"),
-			 sizeof (player->name) - 1);
+			   sizeof (player->name) - 1);
 	player->topcolor = atoi (Info_ValueForKey (player->userinfo, "topcolor"));
 	player->bottomcolor =
 		atoi (Info_ValueForKey (player->userinfo, "bottomcolor"));
@@ -926,7 +927,7 @@ CL_UpdateUserinfo (void)
 	player = &cl.players[slot];
 	player->userid = MSG_ReadLong ();
 	Q_strncpy (player->userinfo, MSG_ReadString (),
-			 sizeof (player->userinfo) - 1);
+			   sizeof (player->userinfo) - 1);
 
 	CL_ProcessUserInfo (slot, player);
 }
@@ -1089,7 +1090,7 @@ CL_ParseServerMessage (void)
 
 		if (cmd == -1) {
 			msg_readcount++;			// so the EOM showner has the right
-										// value
+			// value
 			SHOWNET ("END OF MESSAGE");
 			break;
 		}
@@ -1141,7 +1142,7 @@ CL_ParseServerMessage (void)
 
 			case svc_serverdata:
 				Cbuf_Execute ();		// make sure any stuffed commands are
-										// done
+				// done
 				CL_ParseServerData ();
 				vid.recalc_refdef = true;	// leave full screen intermission
 				break;

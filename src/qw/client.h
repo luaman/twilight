@@ -30,7 +30,7 @@ typedef struct {
 // to do move prediction and to generate a drawable entity
 typedef struct {
 	int         messagenum;				// all player's won't be updated each
-										// frame
+	// frame
 
 	double      state_time;				// not the same as the packet time,
 	// because player commands come asyncronously
@@ -50,7 +50,7 @@ typedef struct {
 
 	float       waterjumptime;
 	int         onground;				// -1 = in air, else pmove entity
-										// number
+	// number
 	int         oldbuttons;
 } player_state_t;
 
@@ -85,16 +85,16 @@ typedef struct {
 	usercmd_t   cmd;					// cmd that generated the frame
 	double      senttime;				// time cmd was sent off
 	int         delta_sequence;			// sequence number to delta from, -1 =
-										// full update
+	// full update
 
 	// received from server
 	double      receivedtime;			// time message was received, or -1
 	player_state_t playerstate[MAX_CLIENTS];	// message received that
-												// reflects performing
+	// reflects performing
 	// the usercmd
 	packet_entities_t packet_entities;
 	qboolean    invalid;				// true if the packet_entities delta
-										// was invalid
+	// was invalid
 } frame_t;
 
 
@@ -139,14 +139,14 @@ typedef struct {
 
 typedef enum {
 	ca_disconnected,					// full screen console with no
-										// connection
+	// connection
 	ca_demostart,						// starting up a demo
 	ca_connected,						// netchan_t established, waiting for
-										// svc_serverdata
+	// svc_serverdata
 	ca_onserver,						// processing data lists, donwloading,
-										// etc
+	// etc
 	ca_active							// everything is in, so frames can be
-										// rendered
+		// rendered
 } cactive_t;
 
 typedef enum {
@@ -214,7 +214,7 @@ typedef struct {
 
 	int         parsecount;				// server message counter
 	int         validsequence;			// this is the sequence number of the
-										// last good
+	// last good
 	// packetentity_t we got.  If this is 0, we can't
 	// render a frame yet
 	int         movemessages;			// since connecting to this server
@@ -233,7 +233,7 @@ typedef struct {
 // information for local display
 	int         stats[MAX_CL_STATS];	// health, etc
 	float       item_gettime[32];		// cl.time of aquiring item, for
-										// blinking
+	// blinking
 	float       faceanimtime;			// use anim frame if cl.time < this
 
 	cshift_t    cshifts[NUM_CSHIFTS];	// color shifts for damage, powerups
@@ -246,8 +246,8 @@ typedef struct {
 
 // the client simulates or interpolates movement to get these values
 	double      time;					// this is the time value that the
-										// client
-	// is rendering at.  allways <= realtime
+	// client
+	// is rendering at.  always <= realtime
 	vec3_t      simorg;
 	vec3_t      simvel;
 	vec3_t      simangles;
@@ -264,12 +264,12 @@ typedef struct {
 	qboolean    paused;					// send over by server
 
 	float       punchangle;				// temporar yview kick from weapon
-										// firing
+	// firing
 
 	int         intermission;			// don't change view angle, full
-										// screen, etc
+	// screen, etc
 	int         completed_time;			// latched ffrom time at intermission
-										// start
+	// start
 
 //
 // information that is static for the entire time connected to a server
@@ -287,7 +287,7 @@ typedef struct {
 	struct model_s *worldmodel;			// cl_entitites[0].model
 	struct efrag_s *free_efrags;
 	int         num_entities;			// stored bottom up in cl_entities
-										// array
+	// array
 	int         num_statics;			// stored top down in cl_entitiers
 
 	int         cdtrack;				// cd audio

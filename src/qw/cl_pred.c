@@ -152,14 +152,14 @@ CL_PredictMove (void)
 
 	// we can now render a frame
 	if (cls.state == ca_onserver) {		// first update is the final signon
-										// stage
+		// stage
 		char        text[1024];
 
 		cls.state = ca_active;
 		key_dest = key_game;
 		game_target = KGT_DEFAULT;
-		snprintf (text, sizeof(text), "Twilight QWCL: %s", cls.servername);
-		SDL_WM_SetCaption(text, "Twilight QWCL");
+		snprintf (text, sizeof (text), "Twilight QWCL: %s", cls.servername);
+		SDL_WM_SetCaption (text, "Twilight QWCL");
 	}
 
 	if (cl_nopred.value) {
@@ -188,7 +188,9 @@ CL_PredictMove (void)
 
 	if (i == UPDATE_BACKUP - 1 || !to)
 		return;							// net hasn't deliver packets in a long 
-										// time...
+										// 
+	// 
+	// time...
 
 	// now interpolate some fraction of the final frame
 	if (to->senttime == from->senttime)
@@ -204,9 +206,11 @@ CL_PredictMove (void)
 
 	for (i = 0; i < 3; i++)
 		if (fabs (from->playerstate[cl.playernum].origin[i] - to->playerstate[cl.playernum].origin[i]) > 128) {	// teleported, 
-																												// so 
-																												// don't 
-																												// lerp
+																												// 
+			// 
+			// so 
+			// don't 
+			// lerp
 			VectorCopy (to->playerstate[cl.playernum].velocity, cl.simvel);
 			VectorCopy (to->playerstate[cl.playernum].origin, cl.simorg);
 			return;

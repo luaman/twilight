@@ -32,10 +32,10 @@ char       *svc_strings[] = {
 	"svc_time",							// [float] server time
 	"svc_print",						// [string] null terminated string
 	"svc_stufftext",					// [string] stuffed into client's
-										// console buffer
+	// console buffer
 	// the string should be \n terminated
 	"svc_setangle",						// [vec3] set the view angle to this
-										// absolute value
+	// absolute value
 
 	"svc_serverinfo",					// [long] version
 	// [string] signon string
@@ -49,7 +49,7 @@ char       *svc_strings[] = {
 	"svc_updatecolors",					// [byte] [byte]
 	"svc_particle",						// [vec3] <variable>
 	"svc_damage",						// [byte] impact [byte] blood [vec3]
-										// from
+	// from
 
 	"svc_spawnstatic",
 	"OBSOLETE svc_spawnbinary",
@@ -333,7 +333,7 @@ CL_ParseUpdate (int bits)
 	int         skin;
 
 	if (cls.signon == SIGNONS - 1) {	// first update is the final signon
-										// stage
+		// stage
 		cls.signon = SIGNONS;
 		CL_SignonReply ();
 	}
@@ -609,7 +609,7 @@ CL_NewTranslation (int slot)
 
 	for (i = 0; i < VID_GRADES; i++, dest += 256, source += 256) {
 		if (top < 128)					// the artists made some backwards
-										// ranges.  sigh.
+			// ranges.  sigh.
 			memcpy (dest + TOP_RANGE, source + top, 16);
 		else
 			for (j = 0; j < 16; j++)

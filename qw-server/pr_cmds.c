@@ -473,7 +473,7 @@ Each entity can have eight independant sound sources, like voice,
 weapon, feet, etc.
 
 Channel 0 is an auto-allocate channel, the others override anything
-allready running on that entity/channel pair.
+already running on that entity/channel pair.
 
 An attenuation of 0 will play full volume everywhere in the level.
 Larger attenuations will drop off.
@@ -827,9 +827,9 @@ PF_ftos (void)
 	v = G_FLOAT (OFS_PARM0);
 
 	if (v == (int) v)
-		snprintf (pr_string_temp, sizeof(pr_string_temp), "%d", (int) v);
+		snprintf (pr_string_temp, sizeof (pr_string_temp), "%d", (int) v);
 	else
-		snprintf (pr_string_temp, sizeof(pr_string_temp), "%5.1f", v);
+		snprintf (pr_string_temp, sizeof (pr_string_temp), "%5.1f", v);
 	G_INT (OFS_RETURN) = PR_SetString (pr_string_temp);
 }
 
@@ -845,8 +845,9 @@ PF_fabs (void)
 void
 PF_vtos (void)
 {
-	snprintf (pr_string_temp, sizeof(pr_string_temp), "'%5.1f %5.1f %5.1f'", G_VECTOR (OFS_PARM0)[0],
-			 G_VECTOR (OFS_PARM0)[1], G_VECTOR (OFS_PARM0)[2]);
+	snprintf (pr_string_temp, sizeof (pr_string_temp), "'%5.1f %5.1f %5.1f'",
+			  G_VECTOR (OFS_PARM0)[0], G_VECTOR (OFS_PARM0)[1],
+			  G_VECTOR (OFS_PARM0)[2]);
 	G_INT (OFS_RETURN) = PR_SetString (pr_string_temp);
 }
 
@@ -910,7 +911,7 @@ PR_CheckEmptyString (char *s)
 void
 PF_precache_file (void)
 {										// precache_file is only used to copy
-										// files with qcc, it does nothing
+	// files with qcc, it does nothing
 	G_INT (OFS_RETURN) = G_INT (OFS_PARM0);
 }
 
@@ -1227,7 +1228,6 @@ PF_aim (void)
 		VectorCopy (pr_global_struct->v_forward, G_VECTOR (OFS_RETURN));
 		return;
 	}
-
 // try all possible entities
 	VectorCopy (dir, bestdir);
 	bestdist = sv_aim.value;
@@ -1612,7 +1612,7 @@ PF_infokey (void)
 		else if (!strcmp (key, "ping")) {
 			int         ping = SV_CalcPing (&svs.clients[e1 - 1]);
 
-			snprintf (ov, sizeof(ov), "%d", ping);
+			snprintf (ov, sizeof (ov), "%d", ping);
 			value = ov;
 		} else
 			value = Info_ValueForKey (svs.clients[e1 - 1].userinfo, key);
@@ -1672,17 +1672,18 @@ builtin_t   pr_builtin[] = {
 	PF_Fixme,
 	PF_makevectors,						// void(entity e) makevectors = #1;
 	PF_setorigin,						// void(entity e, vector o) setorigin = 
-										// #2;
+										// 
+	// #2;
 	PF_setmodel,						// void(entity e, string m) setmodel =
-										// #3;
+	// #3;
 	PF_setsize,							// void(entity e, vector min, vector
-										// max) setsize = #4;
+	// max) setsize = #4;
 	PF_Fixme,							// void(entity e, vector min, vector
-										// max) setabssize = #5;
+	// max) setabssize = #5;
 	PF_break,							// void() break = #6;
 	PF_random,							// float() random = #7;
 	PF_sound,							// void(entity e, float chan, string
-										// samp) sound = #8;
+	// samp) sound = #8;
 	PF_normalize,						// vector(vector v) normalize = #9;
 	PF_error,							// void(string e) error = #10;
 	PF_objerror,						// void(string e) objerror = #11;
@@ -1691,19 +1692,20 @@ builtin_t   pr_builtin[] = {
 	PF_Spawn,							// entity() spawn = #14;
 	PF_Remove,							// void(entity e) remove = #15;
 	PF_traceline,						// float(vector v1, vector v2, float
-										// tryents) traceline = #16;
+	// tryents) traceline = #16;
 	PF_checkclient,						// entity() clientlist = #17;
 	PF_Find,							// entity(entity start, .string fld,
-										// string match) find = #18;
+	// string match) find = #18;
 	PF_precache_sound,					// void(string s) precache_sound = #19;
 	PF_precache_model,					// void(string s) precache_model = #20;
 	PF_stuffcmd,						// void(entity client, string
-										// s)stuffcmd = #21;
+	// s)stuffcmd = #21;
 	PF_findradius,						// entity(vector org, float rad)
-										// findradius = #22;
+	// findradius = #22;
 	PF_bprint,							// void(string s) bprint = #23;
 	PF_sprint,							// void(entity client, string s) sprint 
-										// = #24;
+										// 
+	// = #24;
 	PF_dprint,							// void(string s) dprint = #25;
 	PF_ftos,							// void(string s) ftos = #26;
 	PF_vtos,							// void(string s) vtos = #27;
@@ -1711,11 +1713,12 @@ builtin_t   pr_builtin[] = {
 	PF_traceon,
 	PF_traceoff,
 	PF_eprint,							// void(entity e) debug print an entire 
-										// entity
+										// 
+	// entity
 	PF_walkmove,						// float(float yaw, float dist)
-										// walkmove
+	// walkmove
 	PF_Fixme,							// float(float yaw, float dist)
-										// walkmove
+	// walkmove
 	PF_droptofloor,
 	PF_lightstyle,
 	PF_rint,
@@ -1766,7 +1769,7 @@ builtin_t   pr_builtin[] = {
 
 	PF_precache_model,
 	PF_precache_sound,					// precache_sound2 is different only
-										// for qcc
+	// for qcc
 	PF_precache_file,
 
 	PF_setspawnparms,

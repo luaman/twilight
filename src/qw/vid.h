@@ -36,11 +36,13 @@ typedef struct {
 	unsigned short *colormap16;			// 256 * VID_GRADES size
 	int         fullbright;				// index of first fullbright color
 	unsigned    rowbytes;				// may be > width if displayed in a
-										// window
+	// window
 	unsigned    width;
 	unsigned    height;
 	float       aspect;					// width / height -- < 0 is taller than 
-										// wide
+										// 
+	// 
+	// wide
 	int         numpages;
 	int         recalc_refdef;			// if true, recalc vid-based stuff
 	pixel_t    *conbuffer;
@@ -50,7 +52,7 @@ typedef struct {
 	int         maxwarpwidth;
 	int         maxwarpheight;
 	pixel_t    *direct;					// direct drawing to framebuffer, if
-										// not
+	// not
 	// NULL
 } viddef_t;
 

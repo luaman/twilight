@@ -284,7 +284,7 @@ SV_SpawnServer (char *server)
 	SV_SaveSpawnparms ();
 
 	svs.spawncount++;					// any partially connected client will
-										// be
+	// be
 	// restarted
 
 	sv.state = ss_dead;
@@ -333,7 +333,7 @@ SV_SpawnServer (char *server)
 	sv.time = 1.0;
 
 	strcpy (sv.name, server);
-	snprintf (sv.modelname, sizeof(sv.modelname), "maps/%s.bsp", server);
+	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
 	sv.worldmodel = Mod_ForName (sv.modelname, true);
 	SV_CalcPHS ();
 

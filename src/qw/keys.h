@@ -53,7 +53,7 @@ typedef enum { key_game, key_console, key_message, key_menu } keydest_t;
 extern keydest_t key_dest;
 extern kgt_t game_target;
 
-extern int	keydown[KSYM_LAST];		// if > 1, it is autorepeating
+extern int  keydown[KSYM_LAST];			// if > 1, it is autorepeating
 extern char *keybindings[KGT_MAX][KSYM_LAST];
 extern char chat_buffer[];
 extern int  chat_bufferlen;

@@ -71,7 +71,7 @@ svc_serverinfo
 	PROTOCOL_VERSION
 	servercount		// for detecting when the server
 	gamedir			// for deciding the add-on directory (qw, ctf, etc)
-	playernumber	// the client will allways be in this slot
+	playernumber	// the client will always be in this slot
 	the qc string of world.message	// usually the level's full verbose name
 cdtrack
 fullserverinfo

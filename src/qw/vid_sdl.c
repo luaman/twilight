@@ -42,7 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifdef WIN32
 // LordHavoc: evil thing - DirectSound with SDL
-HWND mainwindow;
+HWND        mainwindow;
 #endif
 
 unsigned short d_8to16table[256];
@@ -196,9 +196,9 @@ VID_SetPalette (unsigned char *palette)
 			}
 			d_15to8table[i] = k;
 		}
-		snprintf (s, sizeof(s), "%s/glquake", com_gamedir);
+		snprintf (s, sizeof (s), "%s/glquake", com_gamedir);
 		Sys_mkdir (s);
-		snprintf (s, sizeof(s), "%s/glquake/15to8.pal", com_gamedir);
+		snprintf (s, sizeof (s), "%s/glquake/15to8.pal", com_gamedir);
 		if ((f = fopen (s, "wb")) != NULL) {
 			fwrite (d_15to8table, 1 << 15, 1, f);
 			fclose (f);
@@ -240,75 +240,74 @@ CheckMultiTextureExtensions (void)
 
 	Check for ARB or SGIS multitexture support
 */
-GLenum gl_mtex_enum = 0;
+GLenum      gl_mtex_enum = 0;
+
 #ifdef WIN32
-void CheckMultiTextureExtensions(void)
+void
+CheckMultiTextureExtensions (void)
 {
 	qglMTexCoord2f = NULL;
 	qglSelectTexture = NULL;
 	gl_mtexable = false;
 	// Check to see if multitexture is disabled
-	if (COM_CheckParm("-nomtex"))
-	{
-		Con_Printf("...multitexture disabled\n");
+	if (COM_CheckParm ("-nomtex")) {
+		Con_Printf ("...multitexture disabled\n");
 		return;
 	}
 	// Test for ARB_multitexture
-	if (!COM_CheckParm("-SGISmtex") && strstr(gl_extensions, "GL_ARB_multitexture "))
-	{
-		Con_Printf("...using GL_ARB_multitexture\n");
-		qglMTexCoord2f = (void *) wglGetProcAddress("glMultiTexCoord2fARB");
-		qglSelectTexture = (void *) wglGetProcAddress("glActiveTextureARB");
+	if (!COM_CheckParm ("-SGISmtex")
+		&& strstr (gl_extensions, "GL_ARB_multitexture ")) {
+		Con_Printf ("...using GL_ARB_multitexture\n");
+		qglMTexCoord2f = (void *) wglGetProcAddress ("glMultiTexCoord2fARB");
+		qglSelectTexture = (void *) wglGetProcAddress ("glActiveTextureARB");
 		gl_mtexable = true;
 		gl_mtex_enum = GL_TEXTURE0_ARB;
-	}
-	else if (strstr(gl_extensions, "GL_SGIS_multitexture ")) // Test for SGIS_multitexture (if ARB_multitexture not found)
+	} else if (strstr (gl_extensions, "GL_SGIS_multitexture "))	// Test for
+		// SGIS_multitexture 
+		// (if
+		// ARB_multitexture 
+		// not found)
 	{
-		Con_Printf("...using GL_SGIS_multitexture\n");
-		qglMTexCoord2f = (void *) wglGetProcAddress("glMTexCoord2fSGIS");
-		qglSelectTexture = (void *) wglGetProcAddress("glSelectTextureSGIS");
+		Con_Printf ("...using GL_SGIS_multitexture\n");
+		qglMTexCoord2f = (void *) wglGetProcAddress ("glMTexCoord2fSGIS");
+		qglSelectTexture = (void *) wglGetProcAddress ("glSelectTextureSGIS");
 		gl_mtexable = true;
 		gl_mtex_enum = TEXTURE0_SGIS;
-	}
-	else
-		Con_Printf("...multitexture disabled (not detected)\n");
+	} else
+		Con_Printf ("...multitexture disabled (not detected)\n");
 }
 #else
-void CheckMultiTextureExtensions(void)
+void
+CheckMultiTextureExtensions (void)
 {
-	void 	   *dlhand;
+	void       *dlhand;
 
 	Con_Printf ("Checking for multitexture... ");
-	if (COM_CheckParm ("-nomtex"))
-	{
+	if (COM_CheckParm ("-nomtex")) {
 		Con_Printf ("disabled\n");
 		return;
 	}
 	dlhand = dlopen (NULL, RTLD_LAZY);
-	if (dlhand == NULL)
-	{
+	if (dlhand == NULL) {
 		Con_Printf ("unable to check\n");
 		return;
 	}
-	if (!COM_CheckParm("-SGISmtex") && strstr(gl_extensions, "GL_ARB_multitexture "))
-	{
+	if (!COM_CheckParm ("-SGISmtex")
+		&& strstr (gl_extensions, "GL_ARB_multitexture ")) {
 		Con_Printf ("GL_ARB_multitexture\n");
-		qglMTexCoord2f = (void *)dlsym(dlhand, "glMultiTexCoord2fARB");
-		qglSelectTexture = (void *)dlsym(dlhand, "glActiveTextureARB");
+		qglMTexCoord2f = (void *) dlsym (dlhand, "glMultiTexCoord2fARB");
+		qglSelectTexture = (void *) dlsym (dlhand, "glActiveTextureARB");
 		gl_mtex_enum = GL_TEXTURE0_ARB;
 		gl_mtexable = true;
-	}
-	else if (strstr(gl_extensions, "GL_SGIS_multitexture "))
-	{
+	} else if (strstr (gl_extensions, "GL_SGIS_multitexture ")) {
 		Con_Printf ("GL_SGIS_multitexture\n");
-		qglMTexCoord2f = (void *)dlsym(dlhand, "glMTexCoord2fSGIS");
-		qglSelectTexture = (void *)dlsym(dlhand, "glSelectTextureSGIS");
+		qglMTexCoord2f = (void *) dlsym (dlhand, "glMTexCoord2fSGIS");
+		qglSelectTexture = (void *) dlsym (dlhand, "glSelectTextureSGIS");
 		gl_mtex_enum = TEXTURE0_SGIS;
 		gl_mtexable = true;
-	}
-	else
+	} else
 		Con_Printf ("none found\n");
-	dlclose(dlhand);
+	dlclose (dlhand);
 	dlhand = NULL;
 }
 #endif
@@ -473,7 +472,7 @@ VID_Init (unsigned char *palette)
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 4);
-//	SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 4);
+//  SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 4);
 
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
@@ -485,7 +484,7 @@ VID_Init (unsigned char *palette)
 	SDL_WM_SetCaption ("Twilight QWCL", "twilight");
 
 	/* Enable UNICODE translation for keyboard input */
-	SDL_EnableUNICODE(1);
+	SDL_EnableUNICODE (1);
 
 	vid.height = scr_height;
 	vid.width = scr_width;
@@ -499,7 +498,7 @@ VID_Init (unsigned char *palette)
 
 	Check_Gamma (palette);
 
-	snprintf (gldir, sizeof(gldir), "%s/glquake", com_gamedir);
+	snprintf (gldir, sizeof (gldir), "%s/glquake", com_gamedir);
 	Sys_mkdir (gldir);
 
 	VID_SetPalette (palette);
@@ -513,7 +512,7 @@ VID_Init (unsigned char *palette)
 #ifdef WIN32
 	// LordHavoc: a dark incantation necessary for DirectSound with SDL
 	// (an evil which Loki clearly did not intend)
-	mainwindow = GetActiveWindow();
+	mainwindow = GetActiveWindow ();
 #endif
 }
 
@@ -522,7 +521,7 @@ Sys_SendKeyEvents (void)
 {
 	SDL_Event   event;
 	int         sym, state, but;
-	short		unicode;
+	short       unicode;
 
 	while (SDL_PollEvent (&event)) {
 		switch (event.type) {
@@ -551,12 +550,12 @@ Sys_SendKeyEvents (void)
 								   == SDL_MOUSEBUTTONDOWN);
 						break;
 					case 4:
-						Key_Event(KM_WHEEL_UP, 0, true);
-						Key_Event(KM_WHEEL_UP, 0, false);
+						Key_Event (KM_WHEEL_UP, 0, true);
+						Key_Event (KM_WHEEL_UP, 0, false);
 						break;
 					case 5:
-						Key_Event(KM_WHEEL_DOWN, 0, true);
-						Key_Event(KM_WHEEL_DOWN, 0, false);
+						Key_Event (KM_WHEEL_DOWN, 0, true);
+						Key_Event (KM_WHEEL_DOWN, 0, false);
 						break;
 				}
 				break;

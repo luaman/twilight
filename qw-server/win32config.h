@@ -8,4 +8,4 @@
 
 #define SHAREPATH ""
 
-#endif	// _CONFIG_H
+#endif // _CONFIG_H

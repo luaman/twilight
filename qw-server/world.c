@@ -32,7 +32,8 @@ line of sight checks trace->crosscontent, but bullets don't
 
 typedef struct {
 	vec3_t      boxmins, boxmaxs;		// enclose the test object along entire 
-										// move
+										// 
+	// move
 	float      *mins, *maxs;			// size of the moving object
 	vec3_t      mins2, maxs2;			// size when clipping against mosnters
 	float      *start, *end;
@@ -157,7 +158,8 @@ SV_HullForEntity (edict_t *ent, vec3_t mins, vec3_t maxs, vec3_t offset)
 		VectorSubtract (hull->clip_mins, mins, offset);
 		VectorAdd (offset, ent->v.origin, offset);
 	} else {							// create a temp hull from bounding box 
-										// sizes
+										// 
+		// sizes
 
 		VectorSubtract (ent->v.mins, maxs, hullmins);
 		VectorSubtract (ent->v.maxs, mins, hullmaxs);
@@ -388,7 +390,7 @@ SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 		ent->v.absmax[0] += 15;
 		ent->v.absmax[1] += 15;
 	} else {							// because movement is clipped an
-										// epsilon away from an actual edge,
+		// epsilon away from an actual edge,
 		// we must fully check even when bounding boxes don't quite touch
 		ent->v.absmin[0] -= 1;
 		ent->v.absmin[1] -= 1;
@@ -643,7 +645,7 @@ SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
 
 	while (SV_HullPointContents (hull, hull->firstclipnode, mid)
 		   == CONTENTS_SOLID) {			// shouldn't really happen, but does
-										// occasionally
+		// occasionally
 		frac -= 0.1;
 		if (frac < 0) {
 			trace->fraction = midf;

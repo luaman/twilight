@@ -35,39 +35,42 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define PAUSE_SLEEP		50				// sleep time on pause or minimization
 #define NOT_FOCUS_SLEEP	20				// sleep time when not focus
 
-int		starttime;
-qboolean	ActiveApp = 1, Minimized = 0; // LordHavoc: FIXME: set these based on the real situation
+int         starttime;
+qboolean    ActiveApp = 1, Minimized = 0;	// LordHavoc: FIXME: set these
 
-//HWND	hwnd_dialog;		// startup dialog box
+											// based on the real situation
 
-static double		pfreq;
-static double		curtime = 0.0;
-static double		lastcurtime = 0.0;
-static int			lowshift;
-static HANDLE		hinput, houtput;
+//HWND  hwnd_dialog;        // startup dialog box
 
-HANDLE		qwclsemaphore;
+static double pfreq;
+static double curtime = 0.0;
+static double lastcurtime = 0.0;
+static int  lowshift;
+static HANDLE hinput, houtput;
 
-static HANDLE	tevent;
+HANDLE      qwclsemaphore;
 
-void Sys_InitFloatTime (void);
+static HANDLE tevent;
 
-void MaskExceptions (void);
-void Sys_PopFPCW (void);
-void Sys_PushFPCW_SetHigh (void);
+void        Sys_InitFloatTime (void);
 
-void Sys_DebugLog(char *file, char *fmt, ...)
+void        MaskExceptions (void);
+void        Sys_PopFPCW (void);
+void        Sys_PushFPCW_SetHigh (void);
+
+void
+Sys_DebugLog (char *file, char *fmt, ...)
 {
-    va_list argptr; 
-    static char data[1024];
-    int fd;
-    
-    va_start(argptr, fmt);
-    vsnprintf(data, sizeof(data), fmt, argptr);
-    va_end(argptr);
-    fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0666);
-    write(fd, data, Q_strlen(data));
-    close(fd);
+	va_list     argptr;
+	static char data[1024];
+	int         fd;
+
+	va_start (argptr, fmt);
+	vsnprintf (data, sizeof (data), fmt, argptr);
+	va_end (argptr);
+	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
+	write (fd, data, Q_strlen (data));
+	close (fd);
 };
 
 /*
@@ -83,10 +86,11 @@ FILE IO
 qfilelength
 ================
 */
-int qfilelength (FILE *f)
+int
+qfilelength (FILE * f)
 {
-	int		pos;
-	int		end;
+	int         pos;
+	int         end;
 
 	pos = ftell (f);
 	fseek (f, 0, SEEK_END);
@@ -97,27 +101,26 @@ int qfilelength (FILE *f)
 }
 
 
-int	Sys_FileTime (char *path)
+int
+Sys_FileTime (char *path)
 {
-	FILE	*f;
-	int		retval;
+	FILE       *f;
+	int         retval;
 
-	f = fopen(path, "rb");
+	f = fopen (path, "rb");
 
-	if (f)
-	{
-		fclose(f);
+	if (f) {
+		fclose (f);
 		retval = 1;
-	}
-	else
-	{
+	} else {
 		retval = -1;
 	}
-	
+
 	return retval;
 }
 
-void Sys_mkdir (char *path)
+void
+Sys_mkdir (char *path)
 {
 	_mkdir (path);
 }
@@ -136,13 +139,15 @@ SYSTEM IO
 Sys_MakeCodeWriteable
 ================
 */
-void Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
+void
+Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
 {
-	DWORD  flOldProtect;
+	DWORD       flOldProtect;
 
 //@@@ copy on write or just read-write?
-	if (!VirtualProtect((LPVOID)startaddr, length, PAGE_READWRITE, &flOldProtect))
-   		Sys_Error("Protection change failed\n");
+	if (!VirtualProtect
+		((LPVOID) startaddr, length, PAGE_READWRITE, &flOldProtect))
+		Sys_Error ("Protection change failed\n");
 }
 
 
@@ -151,31 +156,30 @@ void Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
 Sys_Init
 ================
 */
-void Sys_Init (void)
+void
+Sys_Init (void)
 {
 #if 0
-	LARGE_INTEGER	PerformanceFreq;
-	unsigned int	lowpart, highpart;
+	LARGE_INTEGER PerformanceFreq;
+	unsigned int lowpart, highpart;
 #endif
 
 #ifndef SERVERONLY
 	// allocate a named semaphore on the client so the
 	// front end can tell if it is alive
 
-	// mutex will fail if semephore allready exists
-    qwclsemaphore = CreateMutex(
-        NULL,         /* Security attributes */
-        0,            /* owner       */
-        "qwcl"); /* Semaphore name      */
+	// mutex will fail if semephore already exists
+	qwclsemaphore = CreateMutex (NULL,	/* Security attributes */
+								 0,		/* owner */
+								 "qwcl");	/* Semaphore name */
 	if (!qwclsemaphore)
 		Sys_Error ("QWCL is already running on this system");
 	CloseHandle (qwclsemaphore);
 
-    qwclsemaphore = CreateSemaphore(
-        NULL,         /* Security attributes */
-        0,            /* Initial count       */
-        1,            /* Maximum count       */
-        "qwcl"); /* Semaphore name      */
+	qwclsemaphore = CreateSemaphore (NULL,	/* Security attributes */
+									 0,	/* Initial count */
+									 1,	/* Maximum count */
+									 "qwcl");	/* Semaphore name */
 #endif
 
 #if id386
@@ -189,41 +193,41 @@ void Sys_Init (void)
 
 // get 32 out of the 64 time bits such that we have around
 // 1 microsecond resolution
-	lowpart = (unsigned int)PerformanceFreq.LowPart;
-	highpart = (unsigned int)PerformanceFreq.HighPart;
+	lowpart = (unsigned int) PerformanceFreq.LowPart;
+	highpart = (unsigned int) PerformanceFreq.HighPart;
 	lowshift = 0;
 
-	while (highpart || (lowpart > 2000000.0))
-	{
+	while (highpart || (lowpart > 2000000.0)) {
 		lowshift++;
 		lowpart >>= 1;
 		lowpart |= (highpart & 1) << 31;
 		highpart >>= 1;
 	}
 
-	pfreq = 1.0 / (double)lowpart;
+	pfreq = 1.0 / (double) lowpart;
 
 	Sys_InitFloatTime ();
 #endif
 
 	// make sure the timer is high precision, otherwise
 	// NT gets 18ms resolution
-	timeBeginPeriod( 1 );
+	timeBeginPeriod (1);
 }
 
 
-void Sys_Error (char *error, ...)
+void
+Sys_Error (char *error, ...)
 {
-	va_list		argptr;
-	char		text[1024];
+	va_list     argptr;
+	char        text[1024];
 
 	Host_Shutdown ();
 
 	va_start (argptr, error);
-	vsnprintf (text, sizeof(text), error, argptr);
+	vsnprintf (text, sizeof (text), error, argptr);
 	va_end (argptr);
 
-	MessageBox(NULL, text, "Error", 0 /* MB_OK */ );
+	MessageBox (NULL, text, "Error", 0 /* MB_OK */ );
 
 #ifndef SERVERONLY
 	CloseHandle (qwclsemaphore);
@@ -232,18 +236,20 @@ void Sys_Error (char *error, ...)
 	exit (1);
 }
 
-void Sys_Printf (char *fmt, ...)
+void
+Sys_Printf (char *fmt, ...)
 {
-	va_list		argptr;
-	
-	va_start (argptr,fmt);
+	va_list     argptr;
+
+	va_start (argptr, fmt);
 	vprintf (fmt, argptr);
 	va_end (argptr);
 }
 
-void Sys_Quit (void)
+void
+Sys_Quit (void)
 {
-	Host_Shutdown();
+	Host_Shutdown ();
 #ifndef SERVERONLY
 	if (tevent)
 		CloseHandle (tevent);
@@ -262,55 +268,47 @@ void Sys_Quit (void)
 Sys_DoubleTime
 ================
 */
-double Sys_DoubleTime (void)
+double
+Sys_DoubleTime (void)
 {
-	static int			sametimecount;
-	static unsigned int	oldtime;
-	static int			first = 1;
-	LARGE_INTEGER		PerformanceCount;
-	unsigned int		temp, t2;
-	double				time;
+	static int  sametimecount;
+	static unsigned int oldtime;
+	static int  first = 1;
+	LARGE_INTEGER PerformanceCount;
+	unsigned int temp, t2;
+	double      time;
 
 	Sys_PushFPCW_SetHigh ();
 
 	QueryPerformanceCounter (&PerformanceCount);
 
-	temp = ((unsigned int)PerformanceCount.LowPart >> lowshift) |
-		   ((unsigned int)PerformanceCount.HighPart << (32 - lowshift));
+	temp = ((unsigned int) PerformanceCount.LowPart >> lowshift) |
+		((unsigned int) PerformanceCount.HighPart << (32 - lowshift));
 
-	if (first)
-	{
+	if (first) {
 		oldtime = temp;
 		first = 0;
-	}
-	else
-	{
-	// check for turnover or backward time
-		if ((temp <= oldtime) && ((oldtime - temp) < 0x10000000))
-		{
-			oldtime = temp;	// so we can't get stuck
-		}
-		else
-		{
+	} else {
+		// check for turnover or backward time
+		if ((temp <= oldtime) && ((oldtime - temp) < 0x10000000)) {
+			oldtime = temp;				// so we can't get stuck
+		} else {
 			t2 = temp - oldtime;
 
-			time = (double)t2 * pfreq;
+			time = (double) t2 *pfreq;
+
 			oldtime = temp;
 
 			curtime += time;
 
-			if (curtime == lastcurtime)
-			{
+			if (curtime == lastcurtime) {
 				sametimecount++;
 
-				if (sametimecount > 100000)
-				{
+				if (sametimecount > 100000) {
 					curtime += 1.0;
 					sametimecount = 0;
 				}
-			}
-			else
-			{
+			} else {
 				sametimecount = 0;
 			}
 
@@ -320,7 +318,7 @@ double Sys_DoubleTime (void)
 
 	Sys_PopFPCW ();
 
-    return curtime;
+	return curtime;
 }
 
 /*
@@ -328,20 +326,18 @@ double Sys_DoubleTime (void)
 Sys_InitFloatTime
 ================
 */
-void Sys_InitFloatTime (void)
+void
+Sys_InitFloatTime (void)
 {
-	int		j;
+	int         j;
 
 	Sys_DoubleTime ();
 
-	j = COM_CheckParm("-starttime");
+	j = COM_CheckParm ("-starttime");
 
-	if (j)
-	{
-		curtime = (double) (Q_atof(com_argv[j+1]));
-	}
-	else
-	{
+	if (j) {
+		curtime = (double) (Q_atof (com_argv[j + 1]));
+	} else {
 		curtime = 0.0;
 	}
 
@@ -350,21 +346,22 @@ void Sys_InitFloatTime (void)
 
 #endif
 
-double Sys_DoubleTime (void)
+double
+Sys_DoubleTime (void)
 {
 	static DWORD starttime;
 	static qboolean first = true;
-	DWORD now;
+	DWORD       now;
 
-	now = timeGetTime();
+	now = timeGetTime ();
 
 	if (first) {
 		first = false;
 		starttime = now;
 		return 0.0;
 	}
-	
-	if (now < starttime) // wrapped?
+
+	if (now < starttime)				// wrapped?
 		return (now / 1000.0) + (LONG_MAX - starttime / 1000.0);
 
 	if (now - starttime == 0)
@@ -373,46 +370,43 @@ double Sys_DoubleTime (void)
 	return (now - starttime) / 1000.0;
 }
 
-char *Sys_ConsoleInput (void)
+char       *
+Sys_ConsoleInput (void)
 {
-	static char	text[256];
-	static int		len;
-	INPUT_RECORD	recs[1024];
-	int		dummy;
-	int		ch, numread, numevents;
+	static char text[256];
+	static int  len;
+	INPUT_RECORD recs[1024];
+	int         dummy;
+	int         ch, numread, numevents;
+
 #if 0
-	int		i;
-	HANDLE	th;
-	char	*clipText, *textCopied;
+	int         i;
+	HANDLE      th;
+	char       *clipText, *textCopied;
 #endif
 
-	for ( ;; )
-	{
+	for (;;) {
 		if (!GetNumberOfConsoleInputEvents (hinput, &numevents))
 			Sys_Error ("Error getting # of console events");
 
 		if (numevents <= 0)
 			break;
 
-		if (!ReadConsoleInput(hinput, recs, 1, &numread))
+		if (!ReadConsoleInput (hinput, recs, 1, &numread))
 			Sys_Error ("Error reading console input");
 
 		if (numread != 1)
 			Sys_Error ("Couldn't read console input");
 
-		if (recs[0].EventType == KEY_EVENT)
-		{
-			if (!recs[0].Event.KeyEvent.bKeyDown)
-			{
+		if (recs[0].EventType == KEY_EVENT) {
+			if (!recs[0].Event.KeyEvent.bKeyDown) {
 				ch = recs[0].Event.KeyEvent.uChar.AsciiChar;
 
-				switch (ch)
-				{
+				switch (ch) {
 					case '\r':
-						WriteFile(houtput, "\r\n", 2, &dummy, NULL);	
+						WriteFile (houtput, "\r\n", 2, &dummy, NULL);
 
-						if (len)
-						{
+						if (len) {
 							text[len] = 0;
 							len = 0;
 							return text;
@@ -420,52 +414,58 @@ char *Sys_ConsoleInput (void)
 						break;
 
 					case '\b':
-						WriteFile(houtput, "\b \b", 3, &dummy, NULL);	
-						if (len)
-						{
+						WriteFile (houtput, "\b \b", 3, &dummy, NULL);
+						if (len) {
 							len--;
-							putchar('\b');
+							putchar ('\b');
 						}
 						break;
 
 					default:
-						Con_Printf("Stupid: %d\n", recs[0].Event.KeyEvent.dwControlKeyState);
+						Con_Printf ("Stupid: %d\n",
+									recs[0].Event.KeyEvent.dwControlKeyState);
 // LordHavoc: clipboard stuff in an SDL app?  no thanks
 #if 0
-						if (((ch=='V' || ch=='v') && (recs[0].Event.KeyEvent.dwControlKeyState & 
-							(LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))) || ((recs[0].Event.KeyEvent.dwControlKeyState 
-							& SHIFT_PRESSED) && (recs[0].Event.KeyEvent.wVirtualKeyCode
-							==VK_INSERT))) {
-							if (OpenClipboard(NULL)) {
-								th = GetClipboardData(CF_TEXT);
+						if (((ch == 'V' || ch == 'v')
+							 && (recs[0].Event.KeyEvent.
+								 dwControlKeyState & (LEFT_CTRL_PRESSED |
+													  RIGHT_CTRL_PRESSED)))
+							||
+							((recs[0].Event.KeyEvent.
+							  dwControlKeyState & SHIFT_PRESSED)
+							 && (recs[0].Event.KeyEvent.wVirtualKeyCode ==
+								 VK_INSERT))) {
+							if (OpenClipboard (NULL)) {
+								th = GetClipboardData (CF_TEXT);
 								if (th) {
-									clipText = GlobalLock(th);
+									clipText = GlobalLock (th);
 									if (clipText) {
-										textCopied = malloc(GlobalSize(th)+1);
-										Q_strcpy(textCopied, clipText);
-/* Substitutes a NULL for every token */Q_strtok(textCopied, "\n\r\b");
-										i = Q_strlen(textCopied);
-										if (i+len>=256)
-											i=256-len;
-										if (i>0) {
-											textCopied[i]=0;
-											text[len]=0;
-											Q_strcat(text, textCopied);
-											len+=dummy;
-											WriteFile(houtput, textCopied, i, &dummy, NULL);
+										textCopied =
+											malloc (GlobalSize (th) + 1);
+										Q_strcpy (textCopied, clipText);
+/* Substitutes a NULL for every token */
+										Q_strtok (textCopied, "\n\r\b");
+										i = Q_strlen (textCopied);
+										if (i + len >= 256)
+											i = 256 - len;
+										if (i > 0) {
+											textCopied[i] = 0;
+											text[len] = 0;
+											Q_strcat (text, textCopied);
+											len += dummy;
+											WriteFile (houtput, textCopied, i,
+													   &dummy, NULL);
 										}
-										free(textCopied);
+										free (textCopied);
 									}
-									GlobalUnlock(th);
+									GlobalUnlock (th);
 								}
-								CloseClipboard();
+								CloseClipboard ();
 							}
-						}
-						else
+						} else
 #endif
-						if (ch >= ' ')
-						{
-							WriteFile(houtput, &ch, 1, &dummy, NULL);	
+						if (ch >= ' ') {
+							WriteFile (houtput, &ch, 1, &dummy, NULL);
 							text[len] = ch;
 							len = (len + 1) & 0xff;
 						}
@@ -480,7 +480,8 @@ char *Sys_ConsoleInput (void)
 	return NULL;
 }
 
-void Sys_Sleep (void)
+void
+Sys_Sleep (void)
 {
 }
 
@@ -500,10 +501,11 @@ void Sys_Sleep (void)
 WinMain
 ==================
 */
-void SleepUntilInput (int time)
+void
+SleepUntilInput (int time)
 {
 
-	MsgWaitForMultipleObjects(1, &tevent, FALSE, time, QS_ALLINPUT);
+	MsgWaitForMultipleObjects (1, &tevent, FALSE, time, QS_ALLINPUT);
 }
 
 
@@ -513,53 +515,53 @@ void SleepUntilInput (int time)
 WinMain
 ==================
 */
-HINSTANCE	global_hInstance;
-int			global_nCmdShow;
-char		*argv[MAX_NUM_ARGVS];
-static char	*empty_string = "";
-//HWND		hwnd_dialog;
+HINSTANCE   global_hInstance;
+int         global_nCmdShow;
+char       *argv[MAX_NUM_ARGVS];
+static char *empty_string = "";
+
+//HWND      hwnd_dialog;
 
 
-int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int         WINAPI
+WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
+		 int nCmdShow)
 {
-	quakeparms_t	parms;
-	double			time, oldtime, newtime;
-	MEMORYSTATUS	lpBuffer;
-	static	char	cwd[1024];
-	int				t;
+	quakeparms_t parms;
+	double      time, oldtime, newtime;
+	MEMORYSTATUS lpBuffer;
+	static char cwd[1024];
+	int         t;
 
-    /* previous instances do not exist in Win32 */
-    if (hPrevInstance)
-        return 0;
+	/* previous instances do not exist in Win32 */
+	if (hPrevInstance)
+		return 0;
 
 	global_hInstance = hInstance;
 	global_nCmdShow = nCmdShow;
 
-	lpBuffer.dwLength = sizeof(MEMORYSTATUS);
+	lpBuffer.dwLength = sizeof (MEMORYSTATUS);
 	GlobalMemoryStatus (&lpBuffer);
 
 	parms.argc = 1;
 	argv[0] = empty_string;
 
-	while (*lpCmdLine && (parms.argc < MAX_NUM_ARGVS))
-	{
+	while (*lpCmdLine && (parms.argc < MAX_NUM_ARGVS)) {
 		while (*lpCmdLine && ((*lpCmdLine <= 32) || (*lpCmdLine > 126)))
 			lpCmdLine++;
 
-		if (*lpCmdLine)
-		{
+		if (*lpCmdLine) {
 			argv[parms.argc] = lpCmdLine;
 			parms.argc++;
 
 			while (*lpCmdLine && ((*lpCmdLine > 32) && (*lpCmdLine <= 126)))
 				lpCmdLine++;
 
-			if (*lpCmdLine)
-			{
+			if (*lpCmdLine) {
 				*lpCmdLine = 0;
 				lpCmdLine++;
 			}
-			
+
 		}
 	}
 
@@ -570,27 +572,17 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	parms.argc = com_argc;
 	parms.argv = com_argv;
 
-	/*
-	hwnd_dialog = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
+	/* 
+	   hwnd_dialog = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1),
+	   NULL, NULL);
 
-	if (hwnd_dialog)
-	{
-		if (GetWindowRect (hwnd_dialog, &rect))
-		{
-			if (rect.left > (rect.top * 2))
-			{
-				SetWindowPos (hwnd_dialog, 0,
-					(rect.left / 2) - ((rect.right - rect.left) / 2),
-					rect.top, 0, 0,
-					SWP_NOZORDER | SWP_NOSIZE);
-			}
-		}
+	   if (hwnd_dialog) { if (GetWindowRect (hwnd_dialog, &rect)) { if
+	   (rect.left > (rect.top * 2)) { SetWindowPos (hwnd_dialog, 0, (rect.left
+	   / 2) - ((rect.right - rect.left) / 2), rect.top, 0, 0, SWP_NOZORDER |
+	   SWP_NOSIZE); } }
 
-		ShowWindow (hwnd_dialog, SW_SHOWDEFAULT);
-		UpdateWindow (hwnd_dialog);
-		SetForegroundWindow (hwnd_dialog);
-	}
-	*/
+	   ShowWindow (hwnd_dialog, SW_SHOWDEFAULT); UpdateWindow (hwnd_dialog);
+	   SetForegroundWindow (hwnd_dialog); } */
 
 // take the greater of all the available memory or half the total memory,
 // but at least 8 Mb and no more than 16 Mb, unless they explicitly
@@ -606,9 +598,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	if (parms.memsize > MAXIMUM_WIN_MEMORY)
 		parms.memsize = MAXIMUM_WIN_MEMORY;
 
-	if (COM_CheckParm ("-heapsize"))
-	{
-		t = COM_CheckParm("-heapsize") + 1;
+	if (COM_CheckParm ("-heapsize")) {
+		t = COM_CheckParm ("-heapsize") + 1;
 
 		if (t < com_argc)
 			parms.memsize = Q_atoi (com_argv[t]) * 1024;
@@ -619,7 +610,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	if (!parms.membase)
 		Sys_Error ("Not enough memory free; check disk space\n");
 
-	tevent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	tevent = CreateEvent (NULL, FALSE, FALSE, NULL);
 
 	if (!tevent)
 		Sys_Error ("Couldn't create event");
@@ -634,17 +625,15 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
 	oldtime = Sys_DoubleTime ();
 
-    /* main window message loop */
-	while (1)
-	{
+	/* main window message loop */
+	while (1) {
 		scr_skipupdate = 0;
-	// yield the CPU for a little while when paused, minimized, or not the focus
-		if ((cl.paused && !ActiveApp) || Minimized || block_drawing)
-		{
+		// yield the CPU for a little while when paused, minimized, or not the
+		// focus
+		if ((cl.paused && !ActiveApp) || Minimized || block_drawing) {
 			SleepUntilInput (PAUSE_SLEEP);
-			scr_skipupdate = 1;		// no point in bothering to draw
-		}
-		else if (!ActiveApp)
+			scr_skipupdate = 1;			// no point in bothering to draw
+		} else if (!ActiveApp)
 			SleepUntilInput (NOT_FOCUS_SLEEP);
 
 		newtime = Sys_DoubleTime ();
@@ -653,7 +642,6 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 		oldtime = newtime;
 	}
 
-    /* return success of application */
-    return TRUE;
+	/* return success of application */
+	return TRUE;
 }
-

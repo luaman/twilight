@@ -290,7 +290,7 @@ GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 	aliasmodel = m;
 	paliashdr = hdr;					// (aliashdr_t *)Mod_Extradata (m);
 
-	BuildTris ();					// trifans or lists
+	BuildTris ();						// trifans or lists
 
 	// save the data out
 

@@ -156,7 +156,7 @@ V_StartPitchDrift (void)
 #if 1
 	if (cl.laststop == cl.time) {
 		return;							// something else is keeping it from
-										// drifting
+		// drifting
 	}
 #endif
 	if (cl.nodrift || !cl.pitchvel) {
@@ -768,7 +768,7 @@ V_CalcIntermissionRefdef (void)
 	VectorCopy (cl.simangles, r_refdef.viewangles);
 	view->model = NULL;
 
-// allways idle in intermission
+// always idle in intermission
 	old = v_idlescale.value;
 	v_idlescale.value = 1;
 	V_AddIdle ();

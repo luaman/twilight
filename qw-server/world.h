@@ -27,10 +27,10 @@ typedef struct {
 typedef struct {
 	qboolean    allsolid;				// if true, plane is not valid
 	qboolean    startsolid;				// if true, the initial point was in a
-										// solid area
+	// solid area
 	qboolean    inopen, inwater;
 	float       fraction;				// time completed, 1.0 = didn't hit
-										// anything
+	// anything
 	vec3_t      endpos;					// final position
 	plane_t     plane;					// surface normal at impact
 	edict_t    *ent;					// entity the surface is on

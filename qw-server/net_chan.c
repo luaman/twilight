@@ -56,7 +56,7 @@ If the message buffer is overflowed, either by a single message, or by
 multiple frames worth piling up while the last reliable transmit goes
 unacknowledged, the netchan signals a fatal error.
 
-Reliable messages are allways placed first in a packet, then the unreliable
+Reliable messages are always placed first in a packet, then the unreliable
 message is included if there is sufficient room.
 
 To the receiver, there is no distinction between the reliable and unreliable
@@ -150,7 +150,7 @@ Netchan_OutOfBandPrint (netadr_t adr, char *format, ...)
 	static char string[8192];			// ??? why static?
 
 	va_start (argptr, format);
-	vsnprintf (string, sizeof(string), format, argptr);
+	vsnprintf (string, sizeof (string), format, argptr);
 	va_end (argptr);
 
 
@@ -348,12 +348,12 @@ Netchan_Process (netchan_t *chan)
 		time = realtime - chan->outgoing_time[i];
 		time -= 0.1;					// subtract 100 ms
 		if (time <= 0) {				// gotta be a digital link for <100 ms
-										// ping
+			// ping
 			if (chan->rate > 1.0 / 5000)
 				chan->rate = 1.0 / 5000;
 		} else {
 			if (chan->outgoing_size[i] < 512) {	// only deal with small
-												// messages
+				// messages
 				rate = chan->outgoing_size[i] / time;
 				if (rate > 5000)
 					rate = 5000;

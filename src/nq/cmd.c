@@ -157,7 +157,7 @@ Cbuf_Execute (void)
 				quotes++;
 			if (!(quotes & 1) && text[i] == ';')
 				break;					// don't break if inside a quoted
-										// string
+			// string
 			if (text[i] == '\n')
 				break;
 		}
@@ -182,7 +182,8 @@ Cbuf_Execute (void)
 		Cmd_ExecuteString (line, src_command);
 
 		if (cmd_wait) {					// skip out while text still remains in 
-										// buffer, leaving it
+										// 
+			// buffer, leaving it
 			// for next frame
 			cmd_wait = false;
 			break;
@@ -352,7 +353,7 @@ Cmd_Alias_f (void)
 		Con_Printf ("Alias name is too long\n");
 		return;
 	}
-	// if the alias allready exists, reuse it
+	// if the alias already exists, reuse it
 	for (a = cmd_alias; a; a = a->next) {
 		if (!Q_strcmp (s, a->name)) {
 			Z_Free (a->value);
@@ -488,7 +489,7 @@ Cmd_TokenizeString (char *text)
 		}
 
 		if (*text == '\n') {			// a newline seperates commands in the
-										// buffer
+			// buffer
 			text++;
 			break;
 		}
@@ -524,7 +525,7 @@ Cmd_AddCommand (char *cmd_name, xcommand_t function)
 	cmd_function_t *cmd;
 
 	if (host_initialized)				// because hunk allocation would get
-										// stomped
+		// stomped
 		Sys_Error ("Cmd_AddCommand after host_initialized");
 
 // fail if the command is a variable name

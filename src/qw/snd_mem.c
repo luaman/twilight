@@ -300,8 +300,10 @@ GetWavinfo (char *name, byte * wav, int wavlength)
 		FindNextChunk ("LIST");
 		if (data_p) {
 			if (!Q_strncmp (data_p + 28, "mark", 4)) {	// this is not a proper 
-														// parse, but it works
-														// with cooledit...
+														// 
+				// 
+				// parse, but it works
+				// with cooledit...
 				data_p += 24;
 				i = GetLittleLong ();	// samples in loop
 				info.samples = info.loopstart + i;

@@ -192,8 +192,8 @@ BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 	int         sides;
 
 #if 0									// this is done by the
-										// BOX_ON_PLANE_SIDE macro before
-										// calling this
+	// BOX_ON_PLANE_SIDE macro before
+	// calling this
 	// function
 // fast axial cases
 	if (p->type < 3) {

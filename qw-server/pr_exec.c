@@ -254,7 +254,7 @@ PR_RunError (char *error, ...)
 	char        string[1024];
 
 	va_start (argptr, error);
-	vsnprintf (string, sizeof(string), error, argptr);
+	vsnprintf (string, sizeof (string), error, argptr);
 	va_end (argptr);
 
 	PR_PrintStatement (pr_statements + pr_xstatement);
@@ -262,7 +262,7 @@ PR_RunError (char *error, ...)
 	Con_Printf ("%s\n", string);
 
 	pr_depth = 0;						// dump the stack so SV_Error can
-										// shutdown functions
+	// shutdown functions
 
 	SV_Error ("Program error");
 }
@@ -620,7 +620,7 @@ PR_ExecuteProgram (func_t fnum)
 				newf = &pr_functions[a->function];
 
 				if (newf->first_statement < 0) {	// negative statements are
-													// built in functions
+					// built in functions
 					i = -newf->first_statement;
 					if (i >= pr_numbuiltins)
 						PR_RunError ("Bad builtin call number");

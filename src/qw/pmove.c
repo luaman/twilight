@@ -136,7 +136,7 @@ PM_FlyMove (void)
 		trace = PM_PlayerMove (pmove.origin, end);
 
 		if (trace.startsolid || trace.allsolid) {	// entity is trapped in
-													// another solid
+			// another solid
 			VectorCopy (vec3_origin, pmove.velocity);
 			return 3;
 		}
@@ -352,7 +352,6 @@ PM_Friction (void)
 		control = speed < movevars.stopspeed ? movevars.stopspeed : speed;
 		drop += control * friction * frametime;
 	}
-
 // scale the velocity
 	newspeed = speed - drop;
 	if (newspeed < 0)
@@ -527,7 +526,7 @@ PM_AirMove (void)
 		pmove.velocity[2] -= movevars.entgravity * movevars.gravity * frametime;
 		PM_GroundMove ();
 	} else {							// not on ground, so little effect on
-										// velocity
+		// velocity
 		PM_AirAccelerate (wishdir, wishspeed, movevars.accelerate);
 
 		// add gravity

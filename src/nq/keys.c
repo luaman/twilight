@@ -41,10 +41,13 @@ int         key_count;					// incremented every key event
 
 char       *keybindings[256];
 qboolean    consolekeys[256];			// if true, can't be rebound while in
+
 										// console
 qboolean    menubound[256];				// if true, can't be rebound while in
+
 										// menu
 int         keyshift[256];				// key to map to if shift held down in
+
 										// console
 int         key_repeats[256];			// if > 1, it is autorepeating
 qboolean    keydown[256];
@@ -137,7 +140,7 @@ keyname_t   keynames[] = {
 	{"MWHEELDOWN", K_MWHEELDOWN},
 
 	{"SEMICOLON", ';'},					// because a raw semicolon seperates
-										// commands
+	// commands
 
 	{NULL, 0}
 };
@@ -639,13 +642,13 @@ Key_Event (int key, qboolean down)
 	if (!down) {
 		kb = keybindings[key];
 		if (kb && kb[0] == '+') {
-			snprintf (cmd, sizeof(cmd), "-%s %i\n", kb + 1, key);
+			snprintf (cmd, sizeof (cmd), "-%s %i\n", kb + 1, key);
 			Cbuf_AddText (cmd);
 		}
 		if (keyshift[key] != key) {
 			kb = keybindings[keyshift[key]];
 			if (kb && kb[0] == '+') {
-				snprintf (cmd, sizeof(cmd), "-%s %i\n", kb + 1, key);
+				snprintf (cmd, sizeof (cmd), "-%s %i\n", kb + 1, key);
 				Cbuf_AddText (cmd);
 			}
 		}
@@ -667,7 +670,7 @@ Key_Event (int key, qboolean down)
 		kb = keybindings[key];
 		if (kb) {
 			if (kb[0] == '+') {			// button commands add keynum as a parm
-				snprintf (cmd, sizeof(cmd), "%s %i\n", kb, key);
+				snprintf (cmd, sizeof (cmd), "%s %i\n", kb, key);
 				Cbuf_AddText (cmd);
 			} else {
 				Cbuf_AddText (kb);
@@ -679,7 +682,7 @@ Key_Event (int key, qboolean down)
 
 	if (!down)
 		return;							// other systems only care about key
-										// down events
+	// down events
 
 	if (shift_down) {
 		key = keyshift[key];

@@ -397,7 +397,7 @@ Mod_LoadTextures (lump_t *l)
 		if (!tx || tx->name[0] != '+')
 			continue;
 		if (tx->anim_next)
-			continue;					// allready sequenced
+			continue;					// already sequenced
 
 		// find the number of frames in the animation
 		memset (anims, 0, sizeof (anims));
@@ -1186,7 +1186,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		if (i < mod->numsubmodels - 1) {	// duplicate the basic information
 			char        name[10];
 
-			snprintf (name, sizeof(name), "*%i", i + 1);
+			snprintf (name, sizeof (name), "*%i", i + 1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			Q_strcpy (loadmodel->name, name);
@@ -1411,7 +1411,7 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			pheader->texels[i] = texels - (byte *) pheader;
 			memcpy (texels, (byte *) (pskintype + 1), s);
 			// }
-			snprintf (name, sizeof(name), "%s_%i", loadmodel->name, i);
+			snprintf (name, sizeof (name), "%s_%i", loadmodel->name, i);
 			pheader->gl_texturenum[i][0] =
 				pheader->gl_texturenum[i][1] =
 				pheader->gl_texturenum[i][2] =
@@ -1437,7 +1437,8 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 					pheader->texels[i] = texels - (byte *) pheader;
 					memcpy (texels, (byte *) (pskintype), s);
 				}
-				snprintf (name, sizeof(name), "%s_%i_%i", loadmodel->name, i, j);
+				snprintf (name, sizeof (name), "%s_%i_%i", loadmodel->name, i,
+						  j);
 				pheader->gl_texturenum[i][j & 3] =
 					GL_LoadTexture (name, pheader->skinwidth,
 									pheader->skinheight, (byte *) (pskintype),
@@ -1649,7 +1650,7 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 	pspriteframe->left = origin[0];
 	pspriteframe->right = width + origin[0];
 
-	snprintf (name, sizeof(name), "%s_%i", loadmodel->name, framenum);
+	snprintf (name, sizeof (name), "%s_%i", loadmodel->name, framenum);
 	pspriteframe->gl_texturenum =
 		GL_LoadTexture (name, width, height, (byte *) (pinframe + 1), true,
 						true);

@@ -117,7 +117,7 @@ Cvar_Set (char *var_name, char *value)
 
 	var = Cvar_FindVar (var_name);
 	if (!var) {							// there is an error in C code if this
-										// happens
+		// happens
 		Con_Printf ("Cvar_Set: variable %s not found\n", var_name);
 		return;
 	}
@@ -148,7 +148,7 @@ Cvar_SetValue (char *var_name, float value)
 {
 	char        val[32];
 
-	snprintf (val, sizeof(val), "%f", value);
+	snprintf (val, sizeof (val), "%f", value);
 	Cvar_Set (var_name, val);
 }
 
@@ -165,9 +165,9 @@ Cvar_RegisterVariable (cvar_t *variable)
 {
 	char        value[512];
 
-// first check to see if it has allready been defined
+// first check to see if it has already been defined
 	if (Cvar_FindVar (variable->name)) {
-		Con_Printf ("Can't register variable %s, allready defined\n",
+		Con_Printf ("Can't register variable %s, already defined\n",
 					variable->name);
 		return;
 	}

@@ -58,7 +58,7 @@ Con_Printf ();
 net 
 turn off messages option
 
-the refresh is allways rendered, unless the console is full screen
+the refresh is always rendered, unless the console is full screen
 
 
 console is:
@@ -69,7 +69,7 @@ console is:
 
 */
 
-qboolean	scr_skipupdate = 0;
+qboolean    scr_skipupdate = 0;
 
 int         glx, gly, glwidth, glheight;
 
@@ -603,7 +603,7 @@ SCR_ScreenShot_f (void)
 	for (i = 0; i <= 99; i++) {
 		pcxname[5] = i / 10 + '0';
 		pcxname[6] = i % 10 + '0';
-		snprintf (checkname, sizeof(checkname), "%s/%s", com_gamedir, pcxname);
+		snprintf (checkname, sizeof (checkname), "%s/%s", com_gamedir, pcxname);
 		if (Sys_FileTime (checkname) == -1)
 			break;						// file doesn't exist
 	}
@@ -782,7 +782,7 @@ SCR_BringDownConsole (void)
 		SCR_UpdateScreen ();
 
 	cl.cshifts[0].percent = 0;			// no area contents palette on next
-										// frame
+	// frame
 	VID_SetPalette (host_basepal);
 }
 

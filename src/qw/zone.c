@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 typedef struct memblock_s {
 	int         size;					// including the header and possibly
-										// tiny fragments
+	// tiny fragments
 	int         tag;					// a tag of 0 is a free block
 	int         id;						// should be ZONEID
 	struct memblock_s *next, *prev;
@@ -37,7 +37,7 @@ typedef struct memblock_s {
 
 typedef struct {
 	int         size;					// total bytes malloced, including
-										// header
+	// header
 	memblock_t  blocklist;				// start / end cap for linked list
 	memblock_t *rover;
 } memzone_t;
@@ -125,7 +125,7 @@ Z_Free (void *ptr)
 
 	other = block->next;
 	if (!other->tag) {					// merge the next free block onto the
-										// end
+		// end
 		block->size += other->size;
 		block->next = other->next;
 		block->next->prev = block;
@@ -188,7 +188,7 @@ Z_TagMalloc (int size, int tag)
 //
 	extra = base->size - size;
 	if (extra > MINFRAGMENT) {			// there will be a free fragment after
-										// the allocated block
+		// the allocated block
 		new = (memblock_t *) ((byte *) base + size);
 		new->size = extra;
 		new->tag = 0;					// free block
@@ -203,7 +203,7 @@ Z_TagMalloc (int size, int tag)
 	base->tag = tag;					// no longer a free block
 
 	mainzone->rover = base->next;		// next allocation will start looking
-										// here
+	// here
 
 	base->id = ZONEID;
 
@@ -273,7 +273,7 @@ Z_CheckHeap (void)
 typedef struct {
 	int         sentinal;
 	int         size;					// including sizeof(hunk_t), -1 = not
-										// allocated
+	// allocated
 	char        name[8];
 } hunk_t;
 
@@ -886,7 +886,7 @@ Cache_Alloc (cache_user_t *c, int size, char *name)
 	cache_system_t *cs;
 
 	if (c->data)
-		Sys_Error ("Cache_Alloc: allready allocated");
+		Sys_Error ("Cache_Alloc: already allocated");
 
 	if (size <= 0)
 		Sys_Error ("Cache_Alloc: size %i", size);

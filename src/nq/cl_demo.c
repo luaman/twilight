@@ -96,11 +96,11 @@ CL_GetMessage (void)
 
 	if (cls.demoplayback) {
 		// decide if it is time to grab the next message 
-		if (cls.signon == SIGNONS)		// allways grab until fully connected
+		if (cls.signon == SIGNONS)		// always grab until fully connected
 		{
 			if (cls.timedemo) {
 				if (host_framecount == cls.td_lastframe)
-					return 0;			// allready read this frame's message
+					return 0;			// already read this frame's message
 				cls.td_lastframe = host_framecount;
 				// if this is the second frame, grab the real td_starttime
 				// so the bogus time on the first frame doesn't count
@@ -219,7 +219,7 @@ CL_Record_f (void)
 	} else
 		track = -1;
 
-	snprintf (name, sizeof(name), "%s/%s", com_gamedir, Cmd_Argv (1));
+	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 
 //
 // start the map up
