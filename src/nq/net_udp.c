@@ -135,6 +135,9 @@ UDP_Shutdown (void)
 {
 	UDP_Listen (false);
 	UDP_CloseSocket (net_controlsocket);
+#ifdef _WIN32
+	WSACleanup();
+#endif
 }
 
 //=============================================================================
