@@ -1,7 +1,6 @@
 %define name	@PACKAGE@
 %define version @VERSION@
 %define release 1
-%define builddir ${RPM_BUILD_DIR}/%{name}-%{version}
 
 Name:		%{name}
 Version:	%{version}
@@ -10,7 +9,7 @@ Vendor:		The Twilight Project
 Packager:	The Twilight Project <twilight-devel@lists.sourceforge.net>
 URL:		http://twilight.sf.net/
 Source:		%{name}-%{version}.tar.gz
-Group:		Amusement/Games
+Group:		Amusements/Games
 Copyright:	GPL
 BuildRoot:	/var/tmp/%{name}-%{version}-root
 Requires:	SDL >= 1.2.0
