@@ -518,6 +518,13 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 	float	pdie;
 	vec3_t	porg, pvel;
 
+	if (count == 1024)
+	{
+		// Special case used by id1 progs
+		R_NewExplosion (org);
+		return;
+	}
+	
 	for (i = 0; i < count; i++) {
 		pdie = 0.1 * (Q_rand () % 5);
 		pcolor = (color & ~7) + (Q_rand () & 7);
