@@ -45,6 +45,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "view.h"
 #include "world.h"
+#include "r_explosion.h"
 
 entity_t *currententity;
 int r_framecount;						// used for dlight push checking
@@ -284,53 +285,85 @@ R_DrawSpriteModel
 =================
 */
 static void
-R_DrawSpriteModel (entity_t *e)
+R_DrawSpriteModels ()
 {
-	mspriteframe_t	   *frame;
+	mspriteframe_t	   *f;
 	float			   *up, *right;
 	vec3_t				v_forward, v_right, v_up;
 	msprite_t		   *psprite;
+	entity_t		   *e;
+	int					i, last_tex;
 
-	/*
-	 * don't even bother culling, because it's just a single polygon without
-	 * a surface cache
-	 */
-	frame = R_GetSpriteFrame (e);
-	psprite = e->model->cache.data;
+	last_tex = -1;
+	v_index = 0;
 
-	if (psprite->type == SPR_ORIENTED) {
-		// bullet marks on walls
-		AngleVectors (e->angles, v_forward, v_right, v_up);
-		up = v_up;
-		right = v_right;
-	} else {
-		// normal sprite
-		up = vup;
-		right = vright;
+	qglEnable (GL_ALPHA_TEST);
+
+	for (i = 0; i < cl_numvisedicts; i++) {
+		e = cl_visedicts[i];
+
+		if (e->model->type != mod_sprite)
+			continue;
+
+		/*
+		 * don't even bother culling, because it's just a single polygon without
+		 * a surface cache
+		 */
+		f = R_GetSpriteFrame (e);
+		psprite = e->model->cache.data;
+
+		if (last_tex != f->gl_texturenum) {
+			if (v_index) {
+				TWI_PreVDrawCVA (0, v_index);
+				qglDrawArrays (GL_QUADS, 0, v_index);
+				TWI_PostVDrawCVA ();
+				v_index = 0;
+			}
+			last_tex = f->gl_texturenum;
+			qglBindTexture (GL_TEXTURE_2D, last_tex);
+		}
+
+		if (psprite->type == SPR_ORIENTED) {
+			// bullet marks on walls
+			AngleVectors (e->angles, v_forward, v_right, v_up);
+			up = v_up;
+			right = v_right;
+		} else {
+			// normal sprite
+			up = vup;
+			right = vright;
+		}
+
+		VectorSet2(tc_array[v_index + 0], 0, 1);
+		VectorSet2(tc_array[v_index + 1], 0, 0);
+		VectorSet2(tc_array[v_index + 2], 1, 0);
+		VectorSet2(tc_array[v_index + 3], 1, 1);
+
+		VectorTwiddle (e->origin, up, f->down,  right, f->left, 1,
+				v_array[v_index + 0]);
+		VectorTwiddle (e->origin, up, f->up,    right, f->left, 1,
+				v_array[v_index + 1]);
+		VectorTwiddle (e->origin, up, f->up,    right, f->right, 1,
+				v_array[v_index + 2]);
+		VectorTwiddle (e->origin, up, f->down,  right, f->right, 1,
+				v_array[v_index + 3]);
+
+		v_index += 4;
+		if ((v_index + 4) >= MAX_VERTEX_ARRAYS) {
+			TWI_PreVDrawCVA (0, v_index);
+			qglDrawArrays (GL_QUADS, 0, v_index);
+			TWI_PostVDrawCVA ();
+			v_index = 0;
+		}
 	}
 
-	transpolybegin(frame->gl_texturenum, 0, TPOLYTYPE_ALPHA);
-	transpolyvertub(
-			e->origin[0] + frame->down * up[0] + frame->left  * right[0],
-			e->origin[1] + frame->down * up[1] + frame->left  * right[1],
-			e->origin[2] + frame->down * up[2] + frame->left  * right[2],
-			0, 1, 255, 255, 255, 255);
-	transpolyvertub(
-			e->origin[0] + frame->up   * up[0] + frame->left  * right[0],
-			e->origin[1] + frame->up   * up[1] + frame->left  * right[1],
-			e->origin[2] + frame->up   * up[2] + frame->left  * right[2],
-			0, 0, 255, 255, 255, 255);
-	transpolyvertub(
-			e->origin[0] + frame->up   * up[0] + frame->right * right[0],
-			e->origin[1] + frame->up   * up[1] + frame->right * right[1],
-			e->origin[2] + frame->up   * up[2] + frame->right * right[2],
-			1, 0, 255, 255, 255, 255);
-	transpolyvertub(
-			e->origin[0] + frame->down * up[0] + frame->right * right[0],
-			e->origin[1] + frame->down * up[1] + frame->right * right[1],
-			e->origin[2] + frame->down * up[2] + frame->right * right[2],
-			1, 1, 255, 255, 255, 255);
-	transpolyend();
+	if (v_index) {
+		TWI_PreVDrawCVA (0, v_index);
+		qglDrawArrays (GL_QUADS, 0, v_index);
+		TWI_PostVDrawCVA ();
+		v_index = 0;
+	}
+	qglDisable (GL_ALPHA_TEST);
 }
 
 /*
@@ -878,7 +911,7 @@ R_DrawAliasModel (entity_t *e)
 
 	if (gl_particletorches->value) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
-			if ((cl.time + 2) > e->time_left) {
+			if (cl.time > e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
 				e->time_left = cl.time + 0.05;
 			}
@@ -1131,9 +1164,9 @@ R_DrawEntitiesOnList (void)
 
 		if (currententity->model->type == mod_brush)
 			R_DrawBrushModel (currententity);
-		else if (currententity->model->type == mod_sprite)
-			R_DrawSpriteModel (currententity);
 	}
+
+	R_DrawSpriteModels ();
 
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = cl_visedicts[i];
@@ -1202,7 +1235,9 @@ R_PolyBlend (void)
 	VectorSet3 (v_array[1], 10, -100, 100);
 	VectorSet3 (v_array[2], 10, -100, -100);
 	VectorSet3 (v_array[3], 10, 100, -100);
+	TWI_PreVDraw (0, 4);
 	qglDrawArrays(GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 
 	qglColor3f (1, 1, 1);
 	qglDisable (GL_BLEND);
@@ -1469,10 +1504,13 @@ R_RenderView (void)
 	qglEnable (GL_BLEND);
 	qglDepthMask (GL_FALSE);
 
-	transpolyrender ();
+//	transpolyrender ();
 
+	R_MoveExplosions ();
+	R_DrawExplosions ();
 	R_DrawParticles ();
 	R_RenderDlights ();
+	R_DrawWaterTextureChains ();
 
 	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);

@@ -36,6 +36,7 @@ static const char rcsid[] =
 
 #include "SDL.h"
 
+#include "opengl_ext.h"
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
@@ -95,6 +96,7 @@ const char *gl_extensions;
 qboolean	gl_cva = false;
 qboolean	gl_mtex = false;
 qboolean	gl_mtexcombine = false;
+int			gl_tmus = 1;
 
 void		I_KeypadMode (cvar_t *cvar);
 void		IN_WindowedMouse (cvar_t *cvar);
@@ -208,8 +210,12 @@ CheckExtensions (void)
 	if (!COM_CheckParm ("-nomtex")) {
 		gl_mtex = DGL_HasExtension ("GL_ARB_multitexture");
 	}
-	Con_Printf ("Checking for multitexture... %s\n",
-			gl_mtex ? "GL_ARB_multitexture." : "no.");
+	Con_Printf ("Checking for multitexture: ");
+	if (gl_mtex) {
+		qglGetIntegerv (GL_MAX_TEXTURE_UNITS_ARB, &gl_tmus);
+		Con_Printf ("GL_ARB_multitexture. (%d TMUs)\n", gl_tmus);
+	} else
+		Con_Printf ("no.\n");
 
 	if (gl_mtex && (!qglActiveTextureARB || !qglMultiTexCoord2fARB)) {
 		Sys_Error ("Missing GL_ARB_multitexture functions. (%p %p)\n",
@@ -220,7 +226,7 @@ CheckExtensions (void)
 		gl_mtexcombine_arb = DGL_HasExtension ("GL_ARB_texture_env_combine");
 		gl_mtexcombine_ext = DGL_HasExtension ("GL_EXT_texture_env_combine");
 	}
-	Con_Printf ("Checking for texenv combine... ");
+	Con_Printf ("Checking for texenv combine: ");
 	if (gl_mtex && gl_mtexcombine_arb) {
 		Con_Printf ("GL_ARB_texture_env_combine.\n");
 		gl_mtexcombine = true;
@@ -269,6 +275,8 @@ GL_Init (void)
 	qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
 	qglCullFace (GL_FRONT);
 	qglEnable (GL_TEXTURE_2D);
+
+	qglAlphaFunc (GL_GREATER, 0.666);
 
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 

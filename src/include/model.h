@@ -51,6 +51,8 @@ m*_t structures are in-memory
 #define EF_BLUE					64
 #define EF_RED					128
 
+#define EF_LIGHTMASK		(EF_BRIGHTLIGHT | EF_DIMLIGHT | EF_BLUE | EF_RED)
+
 /*
 ==============================================================================
 
@@ -186,7 +188,6 @@ typedef struct mleaf_s {
 
 // leaf specific
 	Uint8      *compressed_vis;
-	struct efrag_s    *efrags;
 
 	msurface_t **firstmarksurface;
 	int         nummarksurfaces;

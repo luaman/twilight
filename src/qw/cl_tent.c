@@ -263,8 +263,8 @@ CL_ParseTEnt (void)
 			pos[0] = MSG_ReadCoord ();
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
-//			R_NewExplosion (pos);
-			R_ParticleExplosion (pos);
+			R_NewExplosion (pos);
+//			R_ParticleExplosion (pos);
 
 			// light
 			dl = CL_AllocDlight (0);

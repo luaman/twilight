@@ -155,5 +155,7 @@ R_NetGraph (void)
 	VectorSet2 (v_array[2], x + NET_TIMINGS, y + NET_GRAPHHEIGHT);
 	VectorSet2 (tc_array[3], 0, 1);
 	VectorSet2 (v_array[3], x, y + NET_GRAPHHEIGHT);
+	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 }

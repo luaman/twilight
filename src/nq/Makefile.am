@@ -33,14 +33,14 @@ twilight_nq_SOURCES= \
 	cvar.c \
 	gl_draw.c \
 	gl_poly.c gl_poly.h \
-	gl_refrag.c gl_rlight.c gl_rmain.c gl_rmisc.c \
+	gl_rlight.c gl_rmain.c gl_rmisc.c \
 	gl_rsurf.c gl_screen.c gl_warp.c \
 	host.c host_cmd.c keys.c keys.h menu.c \
 	net.h net_bsd.c net_dgrm.c net_dgrm.h net_loop.c net_loop.h \
 	net_main.c net_udp.c net_udp.h \
 	pr_cmds.c pr_edict.c pr_exec.c progs.h progdefs.h \
 	progdefs.q1 protocol.h \
-	r_part.c render.h sbar.c screen.h server.h \
+	r_part.c r_explosion.c render.h sbar.c screen.h server.h \
 	snd_dma.c \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
 	sys.c vid_sdl.c \
