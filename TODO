@@ -40,6 +40,19 @@ Would be nice but is not strictly needed:
     sound file which matches frame outputs (for recording videos)
   - JPEG screenshots
   - Add {gl,cl}_weirdshit.c to support Nehahra.  ;)
+  - Nehahra needs fog support.
+  - Nehahra needs alpha (alias/bmodel).
+  - Nehahra needs EF_FULLBRIGHT (512) (for alias/bmodel).
+  - Nehahra needs svc_showlmp (35), svc_hidelmp (36).
+  - Nehahra needs svc_skybox (37).
+  - Nehahra needs play2 command.
+  - Nehahra needs TE_EXPLOSION3 (16).
+  - Nehahra needs TE_LIGHTNING4NEH (17).
+  - Nehahra needs EF_BLUE (64).
+  - Nehahra needs EF_RED (128).
+  - Nehahra probably needs EF_NODRAW (16).
+  - Nehahra needs RestoreGame QC callback (called when savegame is loaded).
+  - Nehahra needs lots of other things...
   - gl_colorlights can/should be made to work without +set
   - BloodBath needs sv_stepheight cvar to control how much players step up
   - BloodBath needs automatic step-up while airborn (Blood/Q2/Q3 style),
