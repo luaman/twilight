@@ -45,7 +45,7 @@ typedef struct {
 	unsigned    height;
 	float       aspect;					// width / height -- < 0 is taller than
 										// wide
-	int         recalc_refdef;			// if true, recalc vid-based stuff
+	qboolean    recalc_refdef;			// if true, recalc vid-based stuff
 	unsigned    conwidth;
 	unsigned    conheight;
 

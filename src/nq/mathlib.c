@@ -411,7 +411,7 @@ PerpendicularVector (vec3_t dst, const vec3_t src)
 
 	/* 
 	   ** normalize the result */
-	VectorNormalize (dst);
+	VectorNormalizeFast (dst);
 }
 
 #if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
@@ -698,15 +698,27 @@ VectorNormalize (vec3_t v)
 	float length = DotProduct(v,v);
 
 	if (length) {
+		float ilength;
 
 		length = Q_sqrt(length);
+		ilength = 1 / length;
 
-		v[0] /= length;
-		v[1] /= length;
-		v[2] /= length;
+		v[0] *= ilength;
+		v[1] *= ilength;
+		v[2] *= ilength;
 	}
 
 	return length;
+}
+
+void 
+VectorNormalizeFast (vec3_t v)
+{
+	float ilength = Q_RSqrt (DotProduct(v,v));
+
+	v[0] *= ilength;
+	v[1] *= ilength;
+	v[2] *= ilength;
 }
 
 void

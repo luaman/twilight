@@ -164,7 +164,7 @@ Cam_TryFlyby (player_state_t * self, player_state_t * player, vec3_t vec,
 
 	vectoangles (vec, v);
 	VectorCopy (v, pmove.angles);
-	VectorNormalize (vec);
+	VectorNormalizeFast (vec);
 	VectorMA (player->origin, 800, vec, v);
 
 	// v is endpos

@@ -76,7 +76,6 @@ qboolean		VID_Inited;
 static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
 
-static int  old_windowed_mouse;
 static qboolean	use_mouse = false;
 
 static int  scr_width = 640, scr_height = 480, scr_bpp = 15;
@@ -103,6 +102,8 @@ const char *gl_extensions;
 
 qboolean    isPermedia = false;
 qboolean    gl_mtexable = false;
+
+void		IN_WindowedMouse (cvar_t *cvar);
 
 /*-----------------------------------------------------------------------*/
 void
@@ -284,7 +285,7 @@ VID_Init_Cvars (void)
 {
 	vid_mode = Cvar_Get ("vid_mode", "0", CVAR_NONE, NULL);
 	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
-	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE, NULL);
+	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE, IN_WindowedMouse);
 	gl_ztrick = Cvar_Get ("gl_ztrick", "0", CVAR_NONE, NULL);
 	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
 	v_hwgamma = Cvar_Get ("v_hwgamma", "1", CVAR_NONE, NULL);
@@ -397,7 +398,7 @@ VID_Init (unsigned char *palette)
 
 	Con_SafePrintf ("Video mode %dx%d initialized.\n", scr_width, scr_height);
 
-	vid.recalc_refdef = 1;				// force a surface cache flush
+	vid.recalc_refdef = true;		// force a surface cache flush
 
 	if (use_mouse)
 		SDL_ShowCursor (0);
@@ -625,7 +626,7 @@ Sys_SendKeyEvents (void)
 				if (!use_mouse)
 					break;
 
-				if (_windowed_mouse->value) {
+				if (_windowed_mouse->value && (cls.state == ca_connected)) {
 					mouse_x += event.motion.xrel;
 					mouse_y += event.motion.yrel;
 				}
@@ -659,13 +660,26 @@ IN_Init_Cvars (void)
 void
 IN_Init (void)
 {
-	mouse_x = mouse_y = 0.0;
+	mouse_x = 0.0f;
+	mouse_y = 0.0f;
 	old_mouse_x = old_mouse_y = 0.0;
 }
 
 void
 IN_Shutdown (void)
 {
+}
+
+void 
+IN_WindowedMouse (cvar_t *cvar)
+{
+	if (!use_mouse)
+		return;
+
+	if (!_windowed_mouse->value)
+		SDL_WM_GrabInput (SDL_GRAB_OFF);
+	else
+		SDL_WM_GrabInput (SDL_GRAB_ON);
 }
 
 /*
@@ -676,17 +690,6 @@ IN_Commands
 void
 IN_Commands (void)
 {
-	if (!use_mouse)
-		return;
-
-	// FIXME: Move this to a Cvar callback when they're implemented
-	if (old_windowed_mouse != _windowed_mouse->value) {
-		old_windowed_mouse = _windowed_mouse->value;
-		if (!_windowed_mouse->value)
-			SDL_WM_GrabInput (SDL_GRAB_OFF);
-		else
-			SDL_WM_GrabInput (SDL_GRAB_ON);
-	}
 }
 
 /*
@@ -697,7 +700,9 @@ IN_Move
 void
 IN_Move (usercmd_t *cmd)
 {
-	if (m_filter->value) {
+	if (m_filter->value && 
+		(mouse_x != old_mouse_x) &&
+		(mouse_y != old_mouse_y)) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
 		mouse_y = (mouse_y + old_mouse_y) * 0.5;
 	}
@@ -713,10 +718,10 @@ IN_Move (usercmd_t *cmd)
 	else
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
 
-	if ((in_mlook.state & 1) || freelook)
+	if (freelook)
 		V_StopPitchDrift ();
 
-	if ((in_mlook.state & 1) || (freelook && !(in_strafe.state & 1))) {
+	if (freelook && !(in_strafe.state & 1)) {
 		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
 		cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
 	} else {

@@ -39,5 +39,9 @@
 # define mkdir(s) _mkdir((s))
 #endif
 
+#if defined(HAVE___INLINE)
+# define inline __inline
+#endif
+
 #endif // __COMPAT_H
 
