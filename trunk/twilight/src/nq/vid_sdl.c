@@ -396,23 +396,26 @@ VID_Init (unsigned char *palette)
 	if ((i = COM_CheckParm ("-window")) == 0)
 		sdl_flags |= SDL_FULLSCREEN;
 
+	vid.width = 640;
+	vid.height = 480;
+
 	i = COM_CheckParm ("-width");
 	if (i && i < com_argc - 1)
 		vid.width = Q_atoi (com_argv[i + 1]);
-	else
-		vid.width = 640;
-
-	if (vid.width < 320)
-		vid.width = 320;
 
 	i = COM_CheckParm ("-height");
 	if (i && i < com_argc - 1)
 		vid.height = Q_atoi (com_argv[i + 1]);
-	else
-		vid.height = 480;
 
-	if (vid.height < 200)
-		vid.height = 200;
+	i = COM_CheckParm ("-winsize");
+	if (i && i < com_argc - 2)
+	{
+		vid.width = Q_atoi (com_argv[i + 1]);
+		vid.height = Q_atoi (com_argv[i + 2]);
+	}
+
+	vid.width = max (320, vid.width);
+	vid.height = max (200, vid.height);
 
 	i = COM_CheckParm ("-conwidth");
 	if (i && i < (com_argc - 1))
