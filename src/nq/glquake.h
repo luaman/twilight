@@ -19,11 +19,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // disable data conversion warnings
 
+#ifdef _WIN32
 #pragma warning(disable : 4244)     // MIPS
 #pragma warning(disable : 4136)     // X86
 #pragma warning(disable : 4051)     // ALPHA
   
-#ifdef _WIN32
 #include <windows.h>
 #endif
 
@@ -249,3 +249,27 @@ extern qboolean gl_mtexable;
 
 void GL_DisableMultitexture(void);
 void GL_EnableMultitexture(void);
+
+void R_DrawWorld (void);
+void R_RenderBrushPoly (msurface_t *fa);
+void R_DrawWaterSurfaces (void);
+void R_DrawParticles (void);
+void R_RenderDlights (void);
+void V_CalcBlend (void);
+void R_AnimateLight (void);
+void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees );
+void R_DrawBrushModel (entity_t *e);
+int R_LightPoint (vec3_t p);
+void GL_BuildLightmaps (void);
+void R_ClearParticles (void);
+void GL_Upload8_EXT (byte *data, int width, int height,  qboolean mipmap, qboolean alpha);
+void R_InitParticles (void);
+void R_StoreEfrags (efrag_t **ppefrag);
+void R_RotateForEntity (entity_t *e);
+void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
+qboolean R_CullBox (vec3_t mins, vec3_t maxs);
+void R_DrawSkyChain (msurface_t *s);
+void EmitBothSkyLayers (msurface_t *fa);
+void EmitWaterPolys (msurface_t *fa);
+void EmitSkyPolys (msurface_t *fa);
+
