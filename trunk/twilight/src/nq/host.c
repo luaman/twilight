@@ -280,7 +280,6 @@ Host_InitLocal (void)
 	host_time = 1.0;		// so a think at time 0 won't get called
 }
 
-
 /*
 ===============
 Host_WriteConfiguration
@@ -289,18 +288,25 @@ Writes key bindings and archived cvars to config.cfg
 ===============
 */
 void
-Host_WriteConfiguration (void)
+Host_WriteConfiguration (char *name)
 {
 	FILE       *f;
 
 // dedicated servers initialize the host but don't parse and set the
 // config.cfg cvars
 	if (host_initialized && !isDedicated) {
-		f = fopen (va ("%s/config.cfg", com_gamedir), "w");
+		char fname[MAX_QPATH] = { 0 };
+
+		snprintf (fname, sizeof (fname), "%s/%s", com_gamedir, name);
+		COM_DefaultExtension (fname, ".cfg");
+
+		f = fopen (fname, "wt");
 		if (!f) {
-			Con_Printf ("Couldn't write config.cfg.\n");
+			Con_Printf ("Couldn't write %s.\n", fname);
 			return;
 		}
+
+		Con_Printf ("Writing %s\n", fname);
 
 		Key_WriteBindings (f);
 		Cvar_WriteVars (f);
@@ -308,7 +314,6 @@ Host_WriteConfiguration (void)
 		fclose (f);
 	}
 }
-
 
 /*
 =================
@@ -942,7 +947,7 @@ Host_Shutdown (void)
 // keep Con_Printf from trying to update the screen
 	scr_disabled_for_loading = true;
 
-	Host_WriteConfiguration ();
+	Host_WriteConfiguration ("config");
 
 	CDAudio_Shutdown ();
 	NET_Shutdown ();

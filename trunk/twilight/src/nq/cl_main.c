@@ -466,7 +466,6 @@ CL_RelinkEntities (void)
 	int         i, j;
 	float       frac, f, d;
 	vec3_t      delta;
-	float       bobjrotate;
 	vec3_t      oldorg;
 	dlight_t   *dl;
 	trace_t		tr;
@@ -496,7 +495,6 @@ CL_RelinkEntities (void)
 		}
 	}
 
-	bobjrotate = anglemod (100 * cl.time);
 
 // start on the entity after the world
 	for (i = 1, ent = cl_entities + 1; i < cl.num_entities; i++, ent++) {
@@ -625,8 +623,9 @@ CL_RelinkEntities (void)
 // rotate binary objects locally
 		if (ent->model->flags)
 		{
-			if (ent->model->flags & EF_ROTATE)
-				ent->angles[1] = bobjrotate;
+			if (ent->model->flags & EF_ROTATE) {
+				ent->angles[1] = anglemod (100 * (cl.time + ent->syncbase));
+			}
 			if (ent->model->flags & EF_GIB)
 				R_RocketTrail (oldorg, ent->origin, 2);
 			else if (ent->model->flags & EF_ZOMGIB)

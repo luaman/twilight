@@ -50,6 +50,7 @@ void Host_Frame (float time);
 void Host_Quit_f (void);
 void Host_ClientCommands (char *fmt, ...);
 void Host_ShutdownServer (qboolean crash);
+void Host_WriteConfiguration (char *name);
 
 #ifdef TWILIGHT_NQ
 extern qboolean noclip_anglehack;
