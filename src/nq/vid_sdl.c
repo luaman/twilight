@@ -217,75 +217,29 @@ VID_SetPalette (unsigned char *palette)
 */
 GLenum      gl_mtex_enum = 0;
 
-#ifdef WIN32
 void
 CheckMultiTextureExtensions (void)
 {
-	qglMTexCoord2f = NULL;
-	qglSelectTexture = NULL;
-	gl_mtexable = false;
-	// Check to see if multitexture is disabled
-	if (COM_CheckParm ("-nomtex")) {
-		Con_Printf ("...multitexture disabled\n");
-		return;
-	}
-	// Test for ARB_multitexture
-	if (!COM_CheckParm ("-SGISmtex")
-		&& strstr (gl_extensions, "GL_ARB_multitexture ")) {
-		Con_Printf ("...using GL_ARB_multitexture\n");
-		qglMTexCoord2f = (void *) wglGetProcAddress ("glMultiTexCoord2fARB");
-		qglSelectTexture = (void *) wglGetProcAddress ("glActiveTextureARB");
-		gl_mtexable = true;
-		gl_mtex_enum = GL_TEXTURE0_ARB;
-	} else if (strstr (gl_extensions, "GL_SGIS_multitexture "))	// Test for
-																// SGIS_multitexture 
-																// (if
-																// ARB_multitexture 
-																// not found)
-	{
-		Con_Printf ("...using GL_SGIS_multitexture\n");
-		qglMTexCoord2f = (void *) wglGetProcAddress ("glMTexCoord2fSGIS");
-		qglSelectTexture = (void *) wglGetProcAddress ("glSelectTextureSGIS");
-		gl_mtexable = true;
-		gl_mtex_enum = TEXTURE0_SGIS;
-	} else
-		Con_Printf ("...multitexture disabled (not detected)\n");
-}
-#else
-void
-CheckMultiTextureExtensions (void)
-{
-	void       *dlhand;
-
 	Con_Printf ("Checking for multitexture... ");
 	if (COM_CheckParm ("-nomtex")) {
 		Con_Printf ("disabled\n");
 		return;
 	}
-	dlhand = dlopen (NULL, RTLD_LAZY);
-	if (dlhand == NULL) {
-		Con_Printf ("unable to check\n");
-		return;
-	}
-	if (!COM_CheckParm ("-SGISmtex")
-		&& strstr (gl_extensions, "GL_ARB_multitexture ")) {
+	if (strstr (gl_extensions, "GL_ARB_multitexture")) {
 		Con_Printf ("GL_ARB_multitexture\n");
-		qglMTexCoord2f = (void *) dlsym (dlhand, "glMultiTexCoord2fARB");
-		qglSelectTexture = (void *) dlsym (dlhand, "glActiveTextureARB");
+		qglMTexCoord2f = SDL_GL_GetProcAddress ("glMultiTexCoord2fARB");
+		qglSelectTexture = SDL_GL_GetProcAddress ("glActiveTextureARB");
 		gl_mtex_enum = GL_TEXTURE0_ARB;
 		gl_mtexable = true;
-	} else if (strstr (gl_extensions, "GL_SGIS_multitexture ")) {
+	} else if (strstr (gl_extensions, "GL_SGIS_multitexture")) {
 		Con_Printf ("GL_SGIS_multitexture\n");
-		qglMTexCoord2f = (void *) dlsym (dlhand, "glMTexCoord2fSGIS");
-		qglSelectTexture = (void *) dlsym (dlhand, "glSelectTextureSGIS");
+		qglMTexCoord2f = SDL_GL_GetProcAddress ("glMTexCoord2fSGIS");
+		qglSelectTexture = SDL_GL_GetProcAddress ("glSelectTextureSGIS");
 		gl_mtex_enum = TEXTURE0_SGIS;
 		gl_mtexable = true;
 	} else
 		Con_Printf ("none found\n");
-	dlclose (dlhand);
-	dlhand = NULL;
 }
-#endif
 
 
 /*
