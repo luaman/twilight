@@ -35,6 +35,8 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <stdlib.h>
+
 #include "client.h"
 #include "cmd.h"
 #include "console.h"
@@ -858,7 +860,8 @@ GL_FindTexture (char *identifier)
 	return -1;
 }
 
-void R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth, int outwidth)
+void R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth,
+		int outwidth)
 {
 	int		j, xi, oldx = 0, f, fstep, endx;
 	fstep = (int) (inwidth*65536.0f/outwidth);
@@ -894,7 +897,8 @@ void R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth, int outwidth
 R_ResampleTexture
 ================
 */
-void R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,  int outwidth, int outheight)
+void R_ResampleTexture (void *indata, int inwidth, int inheight,
+		void *outdata, int outwidth, int outheight)
 {
 	if (r_lerpimages->value)
 	{
@@ -908,7 +912,8 @@ void R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata, 
 		inrow = indata;
 		oldy = 0;
 		R_ResampleTextureLerpLine (inrow, row1, inwidth, outwidth);
-		R_ResampleTextureLerpLine (inrow + inwidth*4, row2, inwidth, outwidth);
+		R_ResampleTextureLerpLine (inrow + inwidth*4, row2, inwidth,
+				outwidth);
 		for (i = 0, f = 0;i < outheight;i++,f += fstep)
 		{
 			yi = f >> 16;
@@ -921,29 +926,47 @@ void R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata, 
 					if (yi == oldy+1)
 						memcpy(row1, row2, outwidth*4);
 					else
-						R_ResampleTextureLerpLine (inrow, row1, inwidth, outwidth);
-					R_ResampleTextureLerpLine (inrow + inwidth*4, row2, inwidth, outwidth);
+						R_ResampleTextureLerpLine (inrow, row1, inwidth,
+								outwidth);
+					R_ResampleTextureLerpLine (inrow + inwidth*4, row2,
+							inwidth, outwidth);
 					oldy = yi;
 				}
 				j = outwidth - 4;
 				while(j >= 0)
 				{
-					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16) + row1[ 0]);
-					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16) + row1[ 1]);
-					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16) + row1[ 2]);
-					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16) + row1[ 3]);
-					out[ 4] = (Uint8) ((((row2[ 4] - row1[ 4]) * lerp) >> 16) + row1[ 4]);
-					out[ 5] = (Uint8) ((((row2[ 5] - row1[ 5]) * lerp) >> 16) + row1[ 5]);
-					out[ 6] = (Uint8) ((((row2[ 6] - row1[ 6]) * lerp) >> 16) + row1[ 6]);
-					out[ 7] = (Uint8) ((((row2[ 7] - row1[ 7]) * lerp) >> 16) + row1[ 7]);
-					out[ 8] = (Uint8) ((((row2[ 8] - row1[ 8]) * lerp) >> 16) + row1[ 8]);
-					out[ 9] = (Uint8) ((((row2[ 9] - row1[ 9]) * lerp) >> 16) + row1[ 9]);
-					out[10] = (Uint8) ((((row2[10] - row1[10]) * lerp) >> 16) + row1[10]);
-					out[11] = (Uint8) ((((row2[11] - row1[11]) * lerp) >> 16) + row1[11]);
-					out[12] = (Uint8) ((((row2[12] - row1[12]) * lerp) >> 16) + row1[12]);
-					out[13] = (Uint8) ((((row2[13] - row1[13]) * lerp) >> 16) + row1[13]);
-					out[14] = (Uint8) ((((row2[14] - row1[14]) * lerp) >> 16) + row1[14]);
-					out[15] = (Uint8) ((((row2[15] - row1[15]) * lerp) >> 16) + row1[15]);
+					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16)
+							+ row1[ 0]);
+					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16)
+							+ row1[ 1]);
+					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16)
+							+ row1[ 2]);
+					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16)
+							+ row1[ 3]);
+					out[ 4] = (Uint8) ((((row2[ 4] - row1[ 4]) * lerp) >> 16)
+							+ row1[ 4]);
+					out[ 5] = (Uint8) ((((row2[ 5] - row1[ 5]) * lerp) >> 16)
+							+ row1[ 5]);
+					out[ 6] = (Uint8) ((((row2[ 6] - row1[ 6]) * lerp) >> 16)
+							+ row1[ 6]);
+					out[ 7] = (Uint8) ((((row2[ 7] - row1[ 7]) * lerp) >> 16)
+							+ row1[ 7]);
+					out[ 8] = (Uint8) ((((row2[ 8] - row1[ 8]) * lerp) >> 16)
+							+ row1[ 8]);
+					out[ 9] = (Uint8) ((((row2[ 9] - row1[ 9]) * lerp) >> 16)
+							+ row1[ 9]);
+					out[10] = (Uint8) ((((row2[10] - row1[10]) * lerp) >> 16)
+							+ row1[10]);
+					out[11] = (Uint8) ((((row2[11] - row1[11]) * lerp) >> 16)
+							+ row1[11]);
+					out[12] = (Uint8) ((((row2[12] - row1[12]) * lerp) >> 16)
+							+ row1[12]);
+					out[13] = (Uint8) ((((row2[13] - row1[13]) * lerp) >> 16)
+							+ row1[13]);
+					out[14] = (Uint8) ((((row2[14] - row1[14]) * lerp) >> 16)
+							+ row1[14]);
+					out[15] = (Uint8) ((((row2[15] - row1[15]) * lerp) >> 16)
+							+ row1[15]);
 					out += 16;
 					row1 += 16;
 					row2 += 16;
@@ -951,24 +974,36 @@ void R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata, 
 				}
 				if (j & 2)
 				{
-					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16) + row1[ 0]);
-					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16) + row1[ 1]);
-					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16) + row1[ 2]);
-					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16) + row1[ 3]);
-					out[ 4] = (Uint8) ((((row2[ 4] - row1[ 4]) * lerp) >> 16) + row1[ 4]);
-					out[ 5] = (Uint8) ((((row2[ 5] - row1[ 5]) * lerp) >> 16) + row1[ 5]);
-					out[ 6] = (Uint8) ((((row2[ 6] - row1[ 6]) * lerp) >> 16) + row1[ 6]);
-					out[ 7] = (Uint8) ((((row2[ 7] - row1[ 7]) * lerp) >> 16) + row1[ 7]);
+					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16)
+							+ row1[ 0]);
+					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16)
+							+ row1[ 1]);
+					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16)
+							+ row1[ 2]);
+					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16)
+							+ row1[ 3]);
+					out[ 4] = (Uint8) ((((row2[ 4] - row1[ 4]) * lerp) >> 16)
+							+ row1[ 4]);
+					out[ 5] = (Uint8) ((((row2[ 5] - row1[ 5]) * lerp) >> 16)
+							+ row1[ 5]);
+					out[ 6] = (Uint8) ((((row2[ 6] - row1[ 6]) * lerp) >> 16)
+							+ row1[ 6]);
+					out[ 7] = (Uint8) ((((row2[ 7] - row1[ 7]) * lerp) >> 16)
+							+ row1[ 7]);
 					out += 8;
 					row1 += 8;
 					row2 += 8;
 				}
 				if (j & 1)
 				{
-					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16) + row1[ 0]);
-					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16) + row1[ 1]);
-					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16) + row1[ 2]);
-					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16) + row1[ 3]);
+					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16)
+							+ row1[ 0]);
+					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16)
+							+ row1[ 1]);
+					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16)
+							+ row1[ 2]);
+					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16)
+							+ row1[ 3]);
 					out += 4;
 					row1 += 4;
 					row2 += 4;
@@ -984,7 +1019,8 @@ void R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata, 
 					if (yi == oldy+1)
 						memcpy(row1, row2, outwidth*4);
 					else
-						R_ResampleTextureLerpLine (inrow, row1, inwidth, outwidth);
+						R_ResampleTextureLerpLine (inrow, row1, inwidth,
+								outwidth);
 					oldy = yi;
 				}
 				memcpy(out, row1, outwidth * 4);
