@@ -37,12 +37,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/ioctl.h>
 #include <sys/uio.h>
 #include <arpa/inet.h>
-#endif
-#include <errno.h>
-
-#if defined(sun)
 #include <unistd.h>
 #endif
+#include <errno.h>
 
 #ifdef sun
 #include <sys/filio.h>
