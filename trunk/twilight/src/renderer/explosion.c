@@ -44,22 +44,21 @@ static const char rcsid[] =
 #include "cclient.h"
 #include "gl_main.h"
 
-#define MAX_EXPLOSIONS 128
+#define MAX_EXPLOSIONS 64
 #define EXPLOSIONGRID 8
 #define EXPLOSIONVERTS ((EXPLOSIONGRID+1)*(EXPLOSIONGRID+1))
 #define EXPLOSIONTRIS (EXPLOSIONGRID*EXPLOSIONGRID*2)
 #define EXPLOSIONINDICES (EXPLOSIONTRIS*3)
-#define EXPLOSIONSTARTRADIUS (20.0f)
-#define EXPLOSIONSTARTVEL (256.0f)
+#define EXPLOSIONSTARTVELOCITY (256.0f)
 #define EXPLOSIONFADESTART (1.5f)
 #define EXPLOSIONFADERATE (3.0f)
 
 
-static vec3_t explosionspherevertvel[EXPLOSIONVERTS];
-static float explosiontexcoords[EXPLOSIONVERTS][2];
+static float explosiontexcoord2f[EXPLOSIONVERTS][2];
 static int explosiontris[EXPLOSIONTRIS][3];
 static int explosionnoiseindex[EXPLOSIONVERTS];
 static vec3_t explosionpoint[EXPLOSIONVERTS];
+static vec3_t explosionspherevertvel[EXPLOSIONVERTS];
 
 typedef struct explosion_s
 {
@@ -76,41 +75,10 @@ explosion_t;
 static explosion_t explosion[MAX_EXPLOSIONS];
 
 static int	explosiontexture;
-static int	explosiontexturefog;
 
 static cvar_t *r_explosionclip, *r_drawexplosions;
-static cvar_t *r_explosioncolor_r, *r_explosioncolor_g, *r_explosioncolor_b, *r_explosioncolor_a;
 
-static int
-R_ExplosionVert (int column, int row)
-{
-	int			i;
-	float		a, b, c;
-
-	i = row * (EXPLOSIONGRID + 1) + column;
-	a = row * M_PI * 2 / EXPLOSIONGRID;
-	b = column * M_PI * 2 / EXPLOSIONGRID;
-	c = cos(b);
-
-	explosionpoint[i][0] = cos(a) * c;
-	explosionpoint[i][1] = sin(a) * c;
-	explosionpoint[i][2] = -sin(b);
-	explosionspherevertvel[i][0] = explosionpoint[i][0] * EXPLOSIONSTARTVEL;
-	explosionspherevertvel[i][1] = explosionpoint[i][1] * EXPLOSIONSTARTVEL;
-	explosionspherevertvel[i][2] = explosionpoint[i][2] * EXPLOSIONSTARTVEL;
-	explosiontexcoords[i][0] = (float) column / (float) EXPLOSIONGRID;
-	explosiontexcoords[i][1] = (float) row / (float) EXPLOSIONGRID;
-
-	// top and bottom rows are all one position...
-	if (row == 0 || row == EXPLOSIONGRID)
-		column = 0;
-
-	explosionnoiseindex[i] = (row % EXPLOSIONGRID) * EXPLOSIONGRID
-		+ (column % EXPLOSIONGRID);
-
-	return i;
-}
-
+static int R_ExplosionVert(int column, int row);
 
 static void
 r_explosion_start (void)
@@ -131,9 +99,9 @@ r_explosion_start (void)
 		for (x = 0; x < 128; x++)
 		{
 			j = (noise1[y][x] * noise2[y][x]) * 3 / 256 - 128;
-			r = j;
-			g = j;
-			b = j;
+			r = (j * 512) / 256;
+			g = (j * 256) / 256;
+			b = (j * 128) / 256;
 			a = noise3[y][x] * 3 - 128;
 			data[y][x][0] = bound(0, r, 255);
 			data[y][x][1] = bound(0, g, 255);
@@ -144,12 +112,6 @@ r_explosion_start (void)
 
 	explosiontexture = GLT_Load_Raw ("explosiontexture", 128, 128,
 			&data[0][0][0], NULL, TEX_MIPMAP|TEX_ALPHA, 32);
-	for (y = 0; y < 128; y++)
-		for (x = 0; x < 128; x++)
-			data[y][x][0] = data[y][x][1] = data[y][x][2] = 255;
-
-	explosiontexturefog = GLT_Load_Raw ("explosiontexturefog", 128, 128,
-			&data[0][0][0], NULL, TEX_MIPMAP|TEX_ALPHA, 32);
 
 	// note that explosions survive the restart
 }
@@ -159,7 +121,6 @@ void
 R_Explosion_Shutdown (void)
 {
 	GLT_Delete (explosiontexture);
-	GLT_Delete (explosiontexturefog);
 }
 
 void
@@ -197,12 +158,31 @@ R_Explosion_Init (void)
 
 	r_explosionclip = Cvar_Get ("r_explosionclip", "1", CVAR_ARCHIVE, NULL);
 	r_drawexplosions = Cvar_Get ("r_drawexplosions", "1", CVAR_ARCHIVE, NULL);
-	r_explosioncolor_r = Cvar_Get ("r_explosioncolor_r", "1", CVAR_ARCHIVE, NULL);
-	r_explosioncolor_g = Cvar_Get ("r_explosioncolor_g", "0.5", CVAR_ARCHIVE, NULL);
-	r_explosioncolor_b = Cvar_Get ("r_explosioncolor_b", "0.25", CVAR_ARCHIVE, NULL);
-	r_explosioncolor_a = Cvar_Get ("r_explosioncolor_a", "1", CVAR_ARCHIVE, NULL);
 
 	r_explosion_start();
+}
+
+static int
+R_ExplosionVert(int column, int row)
+{
+	int i;
+	float yaw, pitch;
+	// top and bottom rows are all one position...
+	if (row == 0 || row == EXPLOSIONGRID)
+		column = 0;
+	i = row * (EXPLOSIONGRID + 1) + column;
+	yaw = ((double) column / EXPLOSIONGRID) * M_PI * 2;
+	pitch = (((double) row / EXPLOSIONGRID) - 0.5) * M_PI;
+	explosionpoint[i][0] = cos(yaw) *  cos(pitch);
+	explosionpoint[i][1] = sin(yaw) *  cos(pitch);
+	explosionpoint[i][2] =        1 * -sin(pitch);
+	explosionspherevertvel[i][0] = explosionpoint[i][0] * EXPLOSIONSTARTVELOCITY;
+	explosionspherevertvel[i][1] = explosionpoint[i][1] * EXPLOSIONSTARTVELOCITY;
+	explosionspherevertvel[i][2] = explosionpoint[i][2] * EXPLOSIONSTARTVELOCITY;
+	explosiontexcoord2f[i][0] = (float) column / (float) EXPLOSIONGRID;
+	explosiontexcoord2f[i][1] = (float) row / (float) EXPLOSIONGRID;
+	explosionnoiseindex[i] = (row % EXPLOSIONGRID) * EXPLOSIONGRID + (column % EXPLOSIONGRID);
+	return i;
 }
 
 void
@@ -296,82 +276,35 @@ R_MoveExplosions (void)
 			R_MoveExplosion(&explosion[i]);
 }
 
-static void
-R_DrawExplosion (explosion_t *e)
-{
-	int			i;
-	float		red, g, b, a;
-	float		dist;
-	vec3_t		centerdir, diff;
-
-	if (((v_index + EXPLOSIONINDICES) >= MAX_VERTEX_ARRAYS) ||
-			((i_index + EXPLOSIONINDICES) >= MAX_VERTEX_INDICES))
-	{
-		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
-		TWI_PreVDrawCVA (0, EXPLOSIONTRIS * 3);
-		qglDrawElements (GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
-		TWI_PostVDrawCVA ();
-		v_index = 0;
-		i_index = 0;
-	}
-
-	memcpy (&v_array_v(v_index), &e->vert[0][0], sizeof(float[3])
-			* EXPLOSIONVERTS);
-	memcpy (&tc_array_v(v_index), &explosiontexcoords[0][0], sizeof(float[2])
-			* EXPLOSIONVERTS);
-
-	for (i = 0; i < EXPLOSIONINDICES; i++)
-		vindices[i_index + i] = explosiontris[0][i] + v_index;
-
-	red = r_explosioncolor_r->fvalue;
-	g = r_explosioncolor_g->fvalue;
-	b = r_explosioncolor_b->fvalue;
-	a = r_explosioncolor_a->fvalue * e->alpha;
-
-	VectorSubtract (r.origin, e->origin, centerdir);
-	VectorNormalizeFast(centerdir);
-	for (i = 0;i < EXPLOSIONVERTS;i++)
-	{
-		VectorSubtract(e->vert[i], e->origin, diff);
-		VectorNormalizeFast(diff);
-		dist = (DotProduct(diff, centerdir) * 6.0f - 4.0f) * a;
-		dist = max (dist, 0);
-		VectorSet4 (cf_array_v(v_index + i), dist * red, dist * g, dist * b, 1);
-	}
-
-	v_index += EXPLOSIONVERTS;
-	i_index += EXPLOSIONINDICES;
-}
-
 void
 R_DrawExplosions (void)
 {
 	int			i;
+	qboolean	drawn = false;
 
 	if (!r_drawexplosions->ivalue)
 		return;
 
-	qglEnableClientState (GL_COLOR_ARRAY);
 	qglBindTexture (GL_TEXTURE_2D, explosiontexture);
 
 	if (gl_cull->ivalue)
 		qglDisable (GL_CULL_FACE);
 
 	for (i = 0; i < MAX_EXPLOSIONS; i++)
-		if (explosion[i].alpha > 0.01f)
-			R_DrawExplosion(&explosion[i]);
+		if (explosion[i].alpha > 0.01f) {
+			TWI_ChangeVDrawArraysALL (EXPLOSIONVERTS, 1, (vertex_t *) explosion[i].vert, NULL,
+					(texcoord_t *) explosiontexcoord2f, NULL,
+					NULL, NULL);
+			qglColor4f (explosion[i].alpha, explosion[i].alpha, explosion[i].alpha, 1);
+			qglDrawElements (GL_TRIANGLES, EXPLOSIONTRIS * 3, GL_UNSIGNED_INT, explosiontris);
+			drawn = true;
+		}
 
-	if (v_index || i_index)
-	{
-		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
-		TWI_PreVDrawCVA (0, EXPLOSIONTRIS * 3);
-		qglDrawElements (GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
-		TWI_PostVDrawCVA ();
-		v_index = 0;
-		i_index = 0;
+	if (drawn) {
+		TWI_ChangeVDrawArraysALL (EXPLOSIONVERTS, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+		qglColor4fv (whitev);
 	}
 
-	qglDisableClientState (GL_COLOR_ARRAY);
 	if (gl_cull->ivalue)
 		qglEnable (GL_CULL_FACE);
 }
