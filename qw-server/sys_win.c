@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <direct.h>
 
 
-cvar_t      sys_nostdout = { "sys_nostdout", "0" };
+cvar_t     *sys_nostdout;
 
 /*
 ================
@@ -154,7 +154,7 @@ Sys_Printf (char *fmt, ...)
 {
 	va_list     argptr;
 
-	if (sys_nostdout.value)
+	if (sys_nostdout->value)
 		return;
 
 	va_start (argptr, fmt);
@@ -185,7 +185,9 @@ is marked
 void
 Sys_Init (void)
 {
-	Cvar_RegisterVariable (&sys_nostdout);
+	sys_nostdout = Cvar_Get ("sys_nostdout", "0", CVAR_NONE, NULL);
+
+	Math_Init();
 }
 
 /*
