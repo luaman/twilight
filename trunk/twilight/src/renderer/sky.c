@@ -425,8 +425,8 @@ Sky_InitSky (image_t *img)
 		for (j = 0; j < 128; j++)
 		{
 			p = src[i * 256 + j + 128];
+			trans[(i * 128) + j] = d_palette_raw[p];
 			memcpy(rgba, &d_palette_raw[p], sizeof(rgba));
-			memcpy(&trans[(i * 128) + j], rgba, sizeof(trans[0]));
 			r += ((Uint8 *) rgba)[0];
 			g += ((Uint8 *) rgba)[1];
 			b += ((Uint8 *) rgba)[2];
@@ -447,7 +447,7 @@ Sky_InitSky (image_t *img)
 			if (p == 0)
 				memcpy(&trans[(i * 128) + j], &transpix, sizeof(trans[0]));
 			else
-				memcpy(&trans[(i * 128) + j], &d_palette_raw[p], sizeof(trans[0]));
+				trans[(i * 128) + j] = d_palette_raw[p];
 		}
 
 	alphaskytexture = GLT_Load_Raw ("Sky Alpha", 128, 128, (Uint8 *) trans, NULL, TEX_REPLACE | TEX_ALPHA, 32);
