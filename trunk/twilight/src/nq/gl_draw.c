@@ -38,9 +38,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "glquake.h"
 
-#define GL_COLOR_INDEX8_EXT     0x80E5
-
-extern unsigned char d_15to8table[65536];
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
 cvar_t		*gl_max_size;
@@ -497,7 +494,7 @@ Draw_Crosshair (void)
 		x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
 		y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
 
-		pColor = (Uint8 *) &d_8to24table[(Uint8) crosshaircolor->value];
+		pColor = (Uint8 *) &d_8to32table[(Uint8) crosshaircolor->value];
 		qglColor4ubv (pColor);
 		qglBindTexture (GL_TEXTURE_2D, cs_texture);
 
@@ -636,7 +633,7 @@ Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 * translation)
 			if (p == 255)
 				dest[u] = p;
 			else
-				dest[u] = d_8to24table[translation[p]];
+				dest[u] = d_8to32table[translation[p]];
 		}
 	}
 
@@ -716,9 +713,9 @@ void
 Draw_Fill (int x, int y, int w, int h, int c)
 {
 	qglDisable (GL_TEXTURE_2D);
-	qglColor3f (host_basepal[c * 3] / 255.0,
-			   host_basepal[c * 3 + 1] / 255.0,
-			   host_basepal[c * 3 + 2] / 255.0);
+	qglColor3f (d_8to32table[c * 3] / 255.0,
+			   d_8to32table[c * 3 + 1] / 255.0,
+			   d_8to32table[c * 3 + 2] / 255.0);
 
 	qglBegin (GL_QUADS);
 
@@ -934,42 +931,6 @@ GL_MipMap (Uint8 *in, int width, int height)
 }
 
 /*
-================
-GL_MipMap8Bit
-
-Mipping for 8 bit textures
-================
-*/
-void
-GL_MipMap8Bit (Uint8 *in, int width, int height)
-{
-	int         i, j;
-	unsigned short r, g, b;
-	Uint8      *out, *at1, *at2, *at3, *at4;
-
-//  width <<=2;
-	height >>= 1;
-	out = in;
-	for (i = 0; i < height; i++, in += width) {
-		for (j = 0; j < width; j += 2, out += 1, in += 2) {
-			at1 = (Uint8 *) (d_8to24table + in[0]);
-			at2 = (Uint8 *) (d_8to24table + in[1]);
-			at3 = (Uint8 *) (d_8to24table + in[width + 0]);
-			at4 = (Uint8 *) (d_8to24table + in[width + 1]);
-
-			r = (at1[0] + at2[0] + at3[0] + at4[0]);
-			r >>= 5;
-			g = (at1[1] + at2[1] + at3[1] + at4[1]);
-			g >>= 5;
-			b = (at1[2] + at2[2] + at3[2] + at4[2]);
-			b >>= 5;
-
-			out[0] = d_15to8table[(r << 0) + (g << 5) + (b << 10)];
-		}
-	}
-}
-
-/*
 ===============
 GL_Upload32
 ===============
@@ -1069,7 +1030,7 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha)
 	int         i, s;
 	qboolean    noalpha;
 	int         p;
-	unsigned	*table = d_8to24table;
+	unsigned	*table = d_8to32table;
 
 	s = width * height;
 

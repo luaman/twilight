@@ -86,8 +86,6 @@ cvar_t     *gl_cshiftpercent;
 
 cvar_t     *v_contentblend;
 
-cvar_t     *v_gamma;
-
 cvar_t     *v_centermove;
 cvar_t     *v_centerspeed;
 
@@ -281,49 +279,7 @@ cshift_t    cshift_slime = { {0, 25, 5}, 150 };
 cshift_t    cshift_lava = { {255, 80, 0}, 150 };
 
 
-Uint8       gammatable[256];			// palette is sent through this
-
-
-Uint8       ramps[3][256];
 float       v_blend[4];					// rgba 0.0 - 1.0
-
-void
-BuildGammaTable (float g)
-{
-	int         i, inf;
-
-	if (g == 1.0) {
-		for (i = 0; i < 256; i++)
-			gammatable[i] = i;
-		return;
-	}
-
-	for (i = 0; i < 256; i++) {
-		inf = (int)(255 * Q_pow ((i + 0.5) / 255.5, g) + 0.5);
-		inf = bound(0, inf, 255);
-		gammatable[i] = (Uint8)inf;
-	}
-}
-
-/*
-=================
-V_CheckGamma
-=================
-*/
-qboolean
-V_CheckGamma (void)
-{
-	static float oldgammavalue;
-
-	if (v_gamma->value == oldgammavalue)
-		return false;
-	oldgammavalue = v_gamma->value;
-
-	BuildGammaTable (v_gamma->value);
-	vid.recalc_refdef = 1;				// force a surface cache flush
-
-	return true;
-}
 
 
 
@@ -557,7 +513,6 @@ V_UpdatePalette (void)
 	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
 		cl.cshifts[CSHIFT_BONUS].percent = 0;
 
-//	force = V_CheckGamma ();
 //	if (!new && !force)
 //		return;
 
@@ -923,8 +878,6 @@ V_Init_Cvars (void)
 
 	v_contentblend = Cvar_Get ("v_contentblend", "1", CVAR_NONE, NULL);
 
-	v_gamma = Cvar_Get ("gamma", "1", CVAR_ARCHIVE, NULL);
-
 	v_centermove = Cvar_Get ("v_centermove", "0.15", CVAR_NONE, NULL);
 	v_centerspeed = Cvar_Get ("v_centerspeed", "500", CVAR_NONE, NULL);
 }
@@ -940,8 +893,6 @@ V_Init (void)
 	Cmd_AddCommand ("v_cshift", V_cshift_f);
 	Cmd_AddCommand ("bf", V_BonusFlash_f);
 	Cmd_AddCommand ("centerview", V_StartPitchDrift);
-
-	BuildGammaTable (1.0);				// no gamma yet
 
 	// FIXME: make this work sometime...
 	lcd_x = Cvar_Get ("lcd_x", "0", CVAR_NONE, NULL);
@@ -975,8 +926,6 @@ V_Init (void)
 	gl_cshiftpercent = Cvar_Get ("gl_cshiftpercent", "100", CVAR_NONE, NULL);
 
 	v_contentblend = Cvar_Get ("v_contentblend", "1", CVAR_NONE, NULL);
-
-	v_gamma = Cvar_Get ("gamma", "1", CVAR_ARCHIVE, NULL);
 
 	v_centermove = Cvar_Get ("v_centermove", "0.15", CVAR_NONE, NULL);
 	v_centerspeed = Cvar_Get ("v_centerspeed", "500", CVAR_NONE, NULL);

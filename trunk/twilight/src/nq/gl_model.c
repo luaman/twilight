@@ -1415,7 +1415,7 @@ typedef struct {
 	short       x, y;
 } floodfill_t;
 
-extern unsigned d_8to24table[];
+extern unsigned d_8to32table[];
 
 // must be a power of 2
 #define FLOODFILL_FIFO_SIZE 0x1000
@@ -1445,7 +1445,7 @@ Mod_FloodFillSkin (Uint8 *skin, int skinwidth, int skinheight)
 		filledcolor = 0;
 		// attempt to find opaque black
 		for (i = 0; i < 256; ++i)
-			if (d_8to24table[i] == (255 << 0))	// alpha 1.0
+			if (d_8to32table[i] == (255 << 0))	// alpha 1.0
 			{
 				filledcolor = i;
 				break;

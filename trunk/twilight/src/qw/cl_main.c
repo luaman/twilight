@@ -1469,7 +1469,7 @@ Host_Init (void)
 
 	R_InitTextures ();				// setup texture system defaults
 
-//  Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
+	Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
 	Con_Printf ("%4.1f megs RAM used.\n", sys_memsize / (1024 * 1024.0));
 
 	host_basepal = (Uint8 *) COM_LoadHunkFile ("gfx/palette.lmp");

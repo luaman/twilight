@@ -717,7 +717,7 @@ R_InitSky (texture_t *mt)
 	for (i = 0; i < 128; i++)
 		for (j = 0; j < 128; j++) {
 			p = src[i * 256 + j + 128];
-			rgba = &d_8to24table[p];
+			rgba = &d_8to32table[p];
 			trans[(i * 128) + j] = *rgba;
 			r += ((Uint8 *) rgba)[0];
 			g += ((Uint8 *) rgba)[1];
@@ -745,7 +745,7 @@ R_InitSky (texture_t *mt)
 			if (p == 0)
 				trans[(i * 128) + j] = transpix;
 			else
-				trans[(i * 128) + j] = d_8to24table[p];
+				trans[(i * 128) + j] = d_8to32table[p];
 		}
 
 	if (!alphaskytexture)

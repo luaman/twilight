@@ -277,7 +277,7 @@ R_TranslatePlayerSkin (int playernum)
 	scaled_height >>= (int) gl_playermip->value;
 
 	for (i = 0; i < 256; i++)
-		translate32[i] = d_8to24table[translate[i]];
+		translate32[i] = d_8to32table[translate[i]];
 
 	out = pixels;
 	fracstep = inwidth * 0x10000 / scaled_width;
