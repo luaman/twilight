@@ -36,7 +36,6 @@ static const char rcsid[] =
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "opengl_ext.h"
 
@@ -45,8 +44,9 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
-#include "tga.h"
 #include "pcx.h"
+#include "tga.h"
+#include "strlib.h"
 #include "sys.h"
 
 extern model_t *loadmodel;
@@ -230,8 +230,8 @@ Does a water warp on the pre-fragmented glpoly_t chain
 void
 EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform)
 {
-	glpoly_t	*p;
-	float		*v;
+	glpoly_t   *p;
+	float	   *v;
 	float		temp[3];
 	int			i, texnum;
 	Uint8		cr, cg, cb, ca;
@@ -267,8 +267,6 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform)
 		transpolyend();
 	}
 }
-
-
 
 
 /*

@@ -231,6 +231,8 @@ CL_CheckOrDownloadFile (char *filename)
 	return false;
 }
 
+model_t *mdl_fire = NULL;
+
 /*
 =================
 Model_NextDownload
@@ -285,6 +287,10 @@ Model_NextDownload (void)
 			COM_StripExtension (mapname, mapname);
 			Cvar_Set (cl_mapname, mapname);
 		}
+
+		if (!strcasecmp (cl.model_precache[i]->name, "progs/flame.mdl"))
+			if (!mdl_fire)
+				mdl_fire = Mod_ForName ("progs/fire.mdl", false);		
 	}
 
 	// all done

@@ -22,7 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// screen.c -- master for refresh, status bar, console, chat, notify, etc
 static const char rcsid[] =
     "$Id$";
 
@@ -44,9 +43,9 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "draw.h"
 #include "glquake.h"
-#include "mathlib.h"
-#include "keys.h"
 #include "host.h"
+#include "keys.h"
+#include "mathlib.h"
 #include "menu.h"
 #include "sbar.h"
 #include "screen.h"
@@ -103,56 +102,52 @@ console is:
 
 int			glx, gly;
 
-// only the refresh window will be updated unless these variables are flagged 
-int			scr_copytop;
-int			scr_copyeverything;
-
 float		scr_con_current;
-float		scr_conlines;				// lines of console to display
+float		scr_conlines;				/* lines of console to display */
 
-float       oldscreensize, oldfov;
-cvar_t		*scr_viewsize;
-cvar_t		*scr_fov;
-cvar_t		*scr_conspeed;
-cvar_t		*scr_centertime;
-cvar_t		*scr_showram;
-cvar_t		*scr_showturtle;
-cvar_t		*scr_showpause;
-cvar_t		*scr_printspeed;
-cvar_t		*scr_allowsnap;
-cvar_t		*gl_triplebuffer;
-cvar_t		*r_brightness;
-cvar_t		*r_contrast;
-cvar_t		*r_waterwarp;
+float		oldscreensize, oldfov;
+cvar_t	   *scr_viewsize;
+cvar_t	   *scr_fov;
+cvar_t	   *scr_conspeed;
+cvar_t	   *scr_centertime;
+cvar_t	   *scr_showram;
+cvar_t	   *scr_showturtle;
+cvar_t	   *scr_showpause;
+cvar_t	   *scr_printspeed;
+cvar_t	   *scr_allowsnap;
+cvar_t	   *gl_triplebuffer;
+cvar_t	   *r_brightness;
+cvar_t	   *r_contrast;
+cvar_t	   *r_waterwarp;
 
 extern cvar_t *crosshair;
 
-qboolean    scr_initialized;			// ready to draw
+qboolean	scr_initialized;			/* ready to draw */
 
-qpic_t		*scr_ram;
-qpic_t		*scr_net;
-qpic_t		*scr_turtle;
+qpic_t	   *scr_ram;
+qpic_t	   *scr_net;
+qpic_t	   *scr_turtle;
 
-int         clearconsole;
-int         clearnotify;
+int			clearconsole;
+int			clearnotify;
 
-int         sb_lines;
+int			sb_lines;
 
-viddef_t    vid;						// global video state
+viddef_t	vid;						/* global video state */
 
-vrect_t     scr_vrect;
+vrect_t		scr_vrect;
 
-qboolean    scr_disabled_for_loading;
-qboolean    scr_drawloading;
-float       scr_disabled_time;
+qboolean	scr_disabled_for_loading;
+qboolean	scr_drawloading;
+float		scr_disabled_time;
 
-void        SCR_ScreenShot_f (void);
-void        SCR_RSShot_f (void);
+void		SCR_ScreenShot_f (void);
+void		SCR_RSShot_f (void);
 
 void
 GL_BrightenScreen(void)
 {
-	float f;
+	float		f;
 
 	if (r_brightness->value < 0.1f)
 		Cvar_Set (r_brightness, va("%f",0.1f));
@@ -212,12 +207,12 @@ CENTER PRINTING
 ===============================================================================
 */
 
-char        scr_centerstring[1024];
-float       scr_centertime_start;		// for slow victory printing
-float       scr_centertime_off;
-int         scr_center_lines;
-int         scr_erase_lines;
-int         scr_erase_center;
+char		scr_centerstring[1024];
+float		scr_centertime_start;		/* for slow victory printing */
+float		scr_centertime_off;
+int			scr_center_lines;
+int			scr_erase_lines;
+int			scr_erase_center;
 
 /*
 ==============
@@ -234,7 +229,7 @@ SCR_CenterPrint (char *str)
 	scr_centertime_off = scr_centertime->value;
 	scr_centertime_start = cl.time;
 
-// count the number of lines for centering
+	/* count the number of lines for centering */
 	scr_center_lines = 1;
 	while (*str) {
 		if (*str == '\n')
@@ -247,13 +242,13 @@ SCR_CenterPrint (char *str)
 void
 SCR_DrawCenterString (void)
 {
-	char       *start;
-	int         l;
-	int         j;
-	int         x, y;
-	int         remaining;
+	char	   *start;
+	int			l;
+	int			j;
+	int			x, y;
+	int			remaining;
 
-// the finale prints the characters one at a time
+	/* the finale prints the characters one at a time */
 	if (cl.intermission)
 		remaining = scr_printspeed->value * (cl.time - scr_centertime_start);
 	else
@@ -268,7 +263,7 @@ SCR_DrawCenterString (void)
 		y = 48;
 
 	do {
-		// scan the width of the line
+		/* scan the width of the line */
 		for (l = 0; l < 40; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
@@ -286,14 +281,13 @@ SCR_DrawCenterString (void)
 
 		if (!*start)
 			break;
-		start++;						// skip the \n
+		start++;						/* skip the \n */
 	} while (1);
 }
 
 void
 SCR_CheckDrawCenterString (void)
 {
-	scr_copytop = 1;
 	if (scr_center_lines > scr_erase_lines)
 		scr_erase_lines = scr_center_lines;
 
@@ -307,7 +301,7 @@ SCR_CheckDrawCenterString (void)
 	SCR_DrawCenterString ();
 }
 
-//=============================================================================
+/* ========================================================================= */
 
 /*
 ====================
@@ -317,8 +311,8 @@ CalcFov
 float
 CalcFov (float fov_x, float width, float height)
 {
-	float x;
-	float a;
+	float		x;
+	float		a;
 
 	if (fov_x < 1 || fov_x > 179)
 		Sys_Error ("Bad fov: %f", fov_x);
@@ -342,7 +336,7 @@ SCR_CalcRefdef (void)
 {
 	vid.recalc_refdef = false;
 
-	// intermission is always full screen   
+	/* intermission is always full screen */
 	if (scr_viewsize->value >= 120 || cl.intermission) {
 		sb_lines = 0;
 	} else if (scr_viewsize->value >= 110) {
@@ -395,11 +389,11 @@ SCR_SizeDown_f (void)
 	Cvar_Slide (scr_viewsize, -10);
 }
 
-//============================================================================
+/* ========================================================================= */
 static void
 SCR_viewsize_CB (cvar_t *cvar)
 {
-	// bound viewsize
+	/* bound viewsize */
 	if (cvar->value < 30) {
 		Cvar_Set (cvar, "30");
 	} else if (cvar->value > 120) {
@@ -412,7 +406,7 @@ SCR_viewsize_CB (cvar_t *cvar)
 static void
 SCR_fov_CB (cvar_t *cvar)
 {
-	// bound field of view
+	/* bound field of view */
 	if (cvar->value < 1) {
 		Cvar_Set (cvar, "1");
 	} else if (cvar->value > 170) {
@@ -426,7 +420,7 @@ void
 SCR_Init_Cvars (void)
 {
 	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE, SCR_viewsize_CB);
-	scr_fov = Cvar_Get ("fov", "90", CVAR_NONE, SCR_fov_CB);	// 10 - 170
+	scr_fov = Cvar_Get ("fov", "90", CVAR_NONE, SCR_fov_CB);	/* 10-170 */
 	scr_conspeed = Cvar_Get ("scr_conspeed", "300", CVAR_NONE, NULL);
 	scr_centertime = Cvar_Get ("scr_centertime", "2", CVAR_NONE, NULL);
 	scr_showram = Cvar_Get ("showram", "1", CVAR_NONE, NULL);
@@ -450,9 +444,9 @@ void
 SCR_Init (void)
 {
 
-//
-// register our commands
-//
+	/*
+	 * register our commands
+	 */
 	Cmd_AddCommand ("screenshot", SCR_ScreenShot_f);
 	Cmd_AddCommand ("snap", SCR_RSShot_f);
 	Cmd_AddCommand ("sizeup", SCR_SizeUp_f);
@@ -475,7 +469,7 @@ SCR_DrawTurtle
 void
 SCR_DrawTurtle (void)
 {
-	static int  count;
+	static int		count;
 
 	if (!scr_showturtle->value)
 		return;
@@ -512,13 +506,13 @@ SCR_DrawNet (void)
 void
 SCR_DrawFPS (void)
 {
-	extern cvar_t *show_fps;
-	static double lastframetime;
-	double      t;
-	extern int  fps_count;
-	static int  lastfps;
-	int         x, y;
-	char        st[80];
+	extern cvar_t	   *show_fps;
+	static double		lastframetime;
+	double				t;
+	extern int			fps_count;
+	static int			lastfps;
+	int					x, y;
+	char				st[80];
 
 	if (!show_fps->value)
 		return;
@@ -533,7 +527,6 @@ SCR_DrawFPS (void)
 	snprintf (st, sizeof (st), "%3d FPS", lastfps);
 	x = vid.conwidth - strlen (st) * 8 - 8;
 	y = vid.conheight - sb_lines - 8;
-//  Draw_TileClear(x, y, strlen(st) * 8, 8);
 	Draw_String (x, y, st);
 }
 
@@ -546,9 +539,9 @@ DrawPause
 void
 SCR_DrawPause (void)
 {
-	qpic_t     *pic;
+	qpic_t	   *pic;
 
-	if (!scr_showpause->value)			// turn off for screenshots
+	if (!scr_showpause->value)			/* turn off for screenshots */
 		return;
 
 	if (!cl.paused)
@@ -560,7 +553,6 @@ SCR_DrawPause (void)
 }
 
 
-
 /*
 ==============
 SCR_DrawLoading
@@ -569,7 +561,7 @@ SCR_DrawLoading
 void
 SCR_DrawLoading (void)
 {
-	qpic_t     *pic;
+	qpic_t	   *pic;
 
 	if (!scr_drawloading)
 		return;
@@ -581,7 +573,7 @@ SCR_DrawLoading (void)
 
 
 
-//=============================================================================
+/* ========================================================================= */
 
 
 /*
@@ -595,16 +587,17 @@ SCR_SetUpToDrawConsole (void)
 	Con_CheckResize ();
 
 	if (scr_drawloading)
-		return;							// never a console with loading plaque
+		/* never a console with loading plaque */
+		return;
 
-// decide on the height of the console
+	/* decide on the height of the console */
 	if (cls.state != ca_active) {
-		scr_conlines = vid.conheight;		// full screen
+		scr_conlines = vid.conheight;		/* full screen */
 		scr_con_current = scr_conlines;
 	} else if (key_dest == key_console)
-		scr_conlines = vid.conheight / 2;	// half screen
+		scr_conlines = vid.conheight / 2;	/* half screen */
 	else
-		scr_conlines = 0;				// none visible
+		scr_conlines = 0;					/* none visible */
 
 	if (scr_conlines < scr_con_current) {
 		scr_con_current -= scr_conspeed->value * host_frametime;
@@ -627,22 +620,21 @@ void
 SCR_DrawConsole (void)
 {
 	if (scr_con_current) {
-		scr_copyeverything = 1;
 		Con_DrawConsole (scr_con_current);
 		clearconsole = 0;
 	} else {
 		if (key_dest == key_game || key_dest == key_message)
-			Con_DrawNotify ();			// only draw notify in game
+			Con_DrawNotify ();			/* only draw notify in game */
 	}
 }
 
 
-/* 
-============================================================================== 
- 
-						SCREEN SHOTS 
- 
-============================================================================== 
+/*
+==============================================================================
+
+						SCREEN SHOTS
+
+==============================================================================
 */
 
 /* 
@@ -653,14 +645,14 @@ SCR_ScreenShot_f
 void
 SCR_ScreenShot_f (void)
 {
-	Uint8      *buffer;
-	char        pcxname[80];
-	char        checkname[MAX_OSPATH];
-	int         i;
+	Uint8	   *buffer;
+	char		pcxname[80];
+	char		checkname[MAX_OSPATH];
+	int			i;
 
-// 
-// find a file name to save it to 
-// 
+	/*
+	 * find a file name to save it to 
+	 */
 	strcpy (pcxname, "quake00.tga");
 
 	for (i = 0; i <= 99; i++) {
@@ -668,7 +660,7 @@ SCR_ScreenShot_f (void)
 		pcxname[6] = i % 10 + '0';
 		snprintf (checkname, sizeof (checkname), "%s/%s", com_gamedir, pcxname);
 		if (Sys_FileTime (checkname) == -1)
-			break;						// file doesn't exist
+			break;						/* file doesn't exist */
 	}
 	if (i == 100) {
 		Con_Printf ("SCR_ScreenShot_f: Couldn't create a TGA file\n");
@@ -696,9 +688,9 @@ void
 WritePCXfile (char *filename, Uint8 *data, int width, int height,
 			  int rowbytes, Uint8 *palette, qboolean upload)
 {
-	int         i, j, length;
-	pcx_t      *pcx;
-	Uint8      *pack;
+	int			i, j, length;
+	pcx_t	   *pcx;
+	Uint8	   *pack;
 
 	pcx = Hunk_TempAlloc (width * height * 2 + 1000);
 	if (pcx == NULL) {
@@ -706,10 +698,10 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 		return;
 	}
 
-	pcx->manufacturer = 0x0a;			// PCX id
-	pcx->version = 5;					// 256 color
-	pcx->encoding = 1;					// uncompressed
-	pcx->bits_per_pixel = 8;			// 256 color
+	pcx->manufacturer = 0x0a;			/* PCX id */
+	pcx->version = 5;					/* 256 color */
+	pcx->encoding = 1;					/* uncompressed */
+	pcx->bits_per_pixel = 8;			/* 256 color */
 	pcx->xmin = 0;
 	pcx->ymin = 0;
 	pcx->xmax = LittleShort ((short) (width - 1));
@@ -717,12 +709,12 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 	pcx->hres = LittleShort ((short) width);
 	pcx->vres = LittleShort ((short) height);
 	memset (pcx->palette, 0, sizeof (pcx->palette));
-	pcx->color_planes = 1;				// chunky image
+	pcx->color_planes = 1;				/* chunky image */
 	pcx->bytes_per_line = LittleShort ((short) width);
-	pcx->palette_type = LittleShort (2);	// not a grey scale
+	pcx->palette_type = LittleShort (2);	/* not a grey scale */
 	memset (pcx->filler, 0, sizeof (pcx->filler));
 
-// pack the image
+	/* pack the image */
 	pack = pcx->data;
 
 	data += rowbytes * (height - 1);
@@ -741,12 +733,12 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 		data -= rowbytes * 2;
 	}
 
-// write the palette
-	*pack++ = 0x0c;						// palette ID byte
+	/* write the palette */
+	*pack++ = 0x0c;						/* palette ID byte */
 	for (i = 0; i < 768; i++)
 		*pack++ = *palette++;
 
-// write output file 
+	/* write output file */
 	length = pack - (Uint8 *) pcx;
 
 	if (upload)
@@ -758,18 +750,18 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 
 
 /*
-Find closest color in the palette for named color
-*/
+ * Find closest color in the palette for named color
+ */
 int
 MipColor (int r, int g, int b)
 {
-	int         i;
-	float       dist;
-	int         best = 0;
-	float       bestdist;
-	int         r1, g1, b1;
-	static int  lr = -1, lg = -1, lb = -1;
-	static int  lastbest;
+	int			i;
+	float		dist;
+	int			best = 0;
+	float		bestdist;
+	int			r1, g1, b1;
+	static int	lr = -1, lg = -1, lb = -1;
+	static int	lastbest;
 
 	if (r == lr && g == lg && b == lb)
 		return lastbest;
@@ -793,16 +785,16 @@ MipColor (int r, int g, int b)
 	return best;
 }
 
-// from gl_draw.c
-Uint8      *draw_chars;					// 8*8 graphic characters
+/* FIXME: from gl_draw.c */
+extern Uint8 *draw_chars;
 
 void
 SCR_DrawCharToSnap (int num, Uint8 *dest, int width)
 {
-	int         row, col;
-	Uint8      *source;
-	int         drawline;
-	int         x;
+	int			row, col;
+	Uint8	   *source;
+	int			drawline;
+	int			x;
 
 	row = num >> 4;
 	col = num & 15;
@@ -825,8 +817,8 @@ SCR_DrawCharToSnap (int num, Uint8 *dest, int width)
 void
 SCR_DrawStringToSnap (const char *s, Uint8 *buf, int x, int y, int width)
 {
-	Uint8      *dest;
-	const unsigned char *p;
+	Uint8		   *dest;
+	const Uint8	   *p;
 
 	dest = buf + ((y * width) + x);
 
@@ -846,29 +838,29 @@ SCR_RSShot_f
 void
 SCR_RSShot_f (void)
 {
-	int         x, y;
-	unsigned char *src, *dest;
-	char        pcxname[80];
-	unsigned char *newbuf;
-	int         w, h;
-	int         dx, dy, dex, dey, nx;
-	int         r, b, g;
-	int         count;
-	float       fracw, frach;
-	char        st[80];
-	time_t      now;
+	int			x, y;
+	Uint8	   *src, *dest;
+	char		pcxname[80];
+	Uint8	   *newbuf;
+	int			w, h;
+	int			dx, dy, dex, dey, nx;
+	int			r, b, g;
+	int			count;
+	float		fracw, frach;
+	char		st[80];
+	time_t		now;
 
 	if (CL_IsUploading ())
-		return;							// already one pending
+		return;							/* already one pending */
 
 	if (cls.state < ca_onserver)
-		return;							// gotta be connected
+		return;							/* gotta be connected */
 
 	Con_Printf ("Remote screen shot requested.\n");
 
-// 
-// save the pcx file 
-// 
+	/*
+	 * save the pcx file
+	 */
 	newbuf = malloc (vid.height * vid.width * 3);
 
 	qglReadPixels (glx, gly, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE,
@@ -889,11 +881,11 @@ SCR_RSShot_f (void)
 			dx = x * fracw;
 			dex = (x + 1) * fracw;
 			if (dex == dx)
-				dex++;					// at least one
+				dex++;					/* at least one */
 			dy = y * frach;
 			dey = (y + 1) * frach;
 			if (dey == dy)
-				dey++;					// at least one
+				dey++;					/* at least one */
 
 			count = 0;
 			for ( /* */ ; dy < dey; dy++) {
@@ -914,7 +906,7 @@ SCR_RSShot_f (void)
 		}
 	}
 
-	// convert to eight bit
+	/* convert to eight bit */
 	for (y = 0; y < h; y++) {
 		src = newbuf + (w * 3 * y);
 		dest = newbuf + (w * y);
@@ -946,12 +938,7 @@ SCR_RSShot_f (void)
 }
 
 
-
-
-//=============================================================================
-
-
-//=============================================================================
+/* ========================================================================= */
 
 char       *scr_notifystring;
 qboolean    scr_drawdialog;
@@ -959,17 +946,17 @@ qboolean    scr_drawdialog;
 void
 SCR_DrawNotifyString (void)
 {
-	char       *start;
-	int         l;
-	int         j;
-	int         x, y;
+	char	   *start;
+	int			l;
+	int			j;
+	int			x, y;
 
 	start = scr_notifystring;
 
 	y = vid.conheight * 0.35;
 
 	do {
-		// scan the width of the line
+		/* scan the width of the line */
 		for (l = 0; l < 40; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
@@ -984,11 +971,11 @@ SCR_DrawNotifyString (void)
 
 		if (!*start)
 			break;
-		start++;						// skip the \n
+		start++;						/* skip the \n */
 	} while (1);
 }
 
-//=============================================================================
+/* ========================================================================= */
 
 /*
 ==================
@@ -1004,9 +991,6 @@ needs almost the entire 256k of stack space!
 void
 SCR_UpdateScreen (void)
 {
-	scr_copytop = 0;
-	scr_copyeverything = 0;
-
 	if (scr_disabled_for_loading) {
 		if (realtime - scr_disabled_time > 60) {
 			scr_disabled_for_loading = false;
@@ -1016,25 +1000,25 @@ SCR_UpdateScreen (void)
 	}
 
 	if (!scr_initialized || !con_initialized)
-		return;							// not initialized yet
+		return;							/* not initialized yet */
 
 	qglEnable (GL_DEPTH_TEST);
 
 	if (vid.recalc_refdef)
 		SCR_CalcRefdef ();
 
-//
-// do 3D refresh drawing, and then update the screen
-//
+	/*
+	 * do 3D refresh drawing, and then update the screen
+	 */
 	SCR_SetUpToDrawConsole ();
 
 	V_RenderView ();
 
 	GL_Set2D ();
 
-	// 
-	// draw any areas not covered by the refresh
-	// 
+	/*
+	 * draw any areas not covered by the refresh
+	 */
 	if (r_netgraph->value)
 		R_NetGraph ();
 
@@ -1042,7 +1026,6 @@ SCR_UpdateScreen (void)
 		Sbar_Draw ();
 		Draw_FadeScreen ();
 		SCR_DrawNotifyString ();
-		scr_copyeverything = true;
 	} else if (scr_drawloading) {
 		SCR_DrawLoading ();
 		Sbar_Draw ();

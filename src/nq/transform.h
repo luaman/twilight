@@ -24,7 +24,8 @@
 	$Id$
 */
 
-// LordHavoc: software transform support, intended for transpoly and wallpoly systems
+#ifndef __TRANSFORM_H
+#define __TRANSFORM_H
 
 #define tft_translate 1
 #define tft_rotate 2
@@ -42,3 +43,6 @@ extern void softwaretransformidentity (void);
 extern void softwaretransformset (vec3_t origin, vec3_t angles, vec_t scale);
 extern void (*softwaretransform) (vec3_t in, vec3_t out);
 extern void softwareuntransform (vec3_t in, vec3_t out);
+
+#endif // __TRANSFORM_H
+

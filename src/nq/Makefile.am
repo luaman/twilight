@@ -46,7 +46,9 @@ twilight_nq_SOURCES= \
 	pcx.c tga.c \
 	view.c wad.c world.c world.h zone.c \
         quakedef.h bspfile.h client.h keys.h protocol.h \
-	render.h server.h sys.c $(twilight_nq_sys_sources)
+	render.h server.h sys.c \
+	gl_poly.c gl_poly.h transform.c transform.h \
+	$(twilight_nq_sys_sources)
 
 EXTRA_twilight_nq_SOURCES= \
 	conproc.c conproc.h
