@@ -925,7 +925,7 @@ SV_Pause_f (void)
 		return;
 	}
 
-	if (sv.paused)
+	if (!sv.paused)
 		sprintf (st, "%s paused the game\n", host_client->name);
 	else
 		sprintf (st, "%s unpaused the game\n", host_client->name);
