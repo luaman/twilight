@@ -811,9 +811,7 @@ DrawTextureChainsMTexCombine (void)
 		if (!s)
 			continue;
 		st = R_TextureAnimation (s->texinfo->texture);
-		if (i == skytexturenum)
-			R_DrawSkyChain (s);
-		else {
+		if (i != skytexturenum) {
 			if ((s->flags & SURF_DRAWTURB))
 				continue;				/* draw translucent water later */
 
