@@ -23,7 +23,8 @@ qboolean			isDedicated;
 
 int nostdout = 0;
 
-char *basedir = ".";
+char *basedir = USERPATH;
+char *sharedir = SHAREPATH;
 char *cachedir = "/tmp";
 
 cvar_t  sys_linerefresh = {"sys_linerefresh","0"};// set for entity display
@@ -365,6 +366,7 @@ int main (int c, char **v)
 	parms.membase = malloc (parms.memsize);
 
 	parms.basedir = basedir;
+	parms.sharedir = sharedir;
 // caching is disabled by default, use -cachedir to enable
 //	parms.cachedir = cachedir;
 

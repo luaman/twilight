@@ -35,6 +35,9 @@ cvar_t      cmdline = { "cmdline", "0", false, true };
 
 qboolean    com_modified;				// set true if using non-id files
 
+static char	basedir[MAX_OSPATH];
+static char sharedir[MAX_OSPATH];
+
 qboolean    proghack;
 
 qboolean    msg_suppress_1 = 0;
@@ -1637,20 +1640,21 @@ COM_LoadPackFile (char *packfile)
 
 /*
 ================
-COM_AddGameDirectory
+COM_AddDirectory
 
 Sets com_gamedir, adds the directory to the head of the path,
 then loads and adds pak1.pak pak2.pak ... 
 ================
 */
 void
-COM_AddGameDirectory (char *dir)
+COM_AddDirectory (char *dir)
 {
 	int         i;
 	searchpath_t *search;
 	pack_t     *pak;
 	char        pakfile[MAX_OSPATH];
 
+	Sys_mkdir (dir);
 	strcpy (com_gamedir, dir);
 
 //
@@ -1681,6 +1685,27 @@ COM_AddGameDirectory (char *dir)
 
 }
 
+
+/*
+================
+COM_AddGameDirectory
+
+Wrapper for COM_AddDirectory
+================
+*/
+void
+COM_AddGameDirectory (char *dir)
+{
+	char *d = NULL;
+	
+	COM_AddDirectory (va ("%s/%s", sharedir, dir));
+
+	d = va ("%s/%s", basedir, dir);
+	Sys_mkdir (d);
+	COM_AddDirectory (d);
+}
+
+
 /*
 ================
 COM_InitFilesystem
@@ -1690,12 +1715,11 @@ void
 COM_InitFilesystem (void)
 {
 	int         i, j;
-	char        basedir[MAX_OSPATH];
 	searchpath_t *search;
 
 //
 // -basedir <path>
-// Overrides the system supplied base directory (under GAMENAME)
+// Overrides the system supplied base directory
 //
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
@@ -1708,6 +1732,25 @@ COM_InitFilesystem (void)
 	if (j > 0) {
 		if ((basedir[j - 1] == '\\') || (basedir[j - 1] == '/'))
 			basedir[j - 1] = 0;
+	}
+
+	Sys_mkdir (basedir);
+
+//
+// -sharedir <path>
+// Overrides the system supplied share directory
+//
+	i = COM_CheckParm ("-sharedir");
+	if (i && i < com_argc - 1)
+		strcpy (sharedir, com_argv[i + 1]);
+	else
+		strcpy (sharedir, host_parms.sharedir);
+
+	j = strlen (sharedir);
+
+	if (j > 0) {
+		if ((sharedir[j - 1] == '\\') || (sharedir[j - 1] == '/'))
+			sharedir[j - 1] = 0;
 	}
 //
 // -cachedir <path>
@@ -1728,12 +1771,12 @@ COM_InitFilesystem (void)
 //
 // start up with GAMENAME by default (id1)
 //
-	COM_AddGameDirectory (va ("%s/" GAMENAME, basedir));
+	COM_AddGameDirectory (GAMENAME);
 
 	if (COM_CheckParm ("-rogue"))
-		COM_AddGameDirectory (va ("%s/rogue", basedir));
+		COM_AddGameDirectory ("rogue");
 	if (COM_CheckParm ("-hipnotic"))
-		COM_AddGameDirectory (va ("%s/hipnotic", basedir));
+		COM_AddGameDirectory ("hipnotic");
 
 //
 // -game <gamedir>
@@ -1742,7 +1785,7 @@ COM_InitFilesystem (void)
 	i = COM_CheckParm ("-game");
 	if (i && i < com_argc - 1) {
 		com_modified = true;
-		COM_AddGameDirectory (va ("%s/%s", basedir, com_argv[i + 1]));
+		COM_AddGameDirectory (com_argv[i + 1]);
 	}
 //
 // -path <dir or packfile> [<dir or packfile>] ...
@@ -1771,3 +1814,4 @@ COM_InitFilesystem (void)
 	if (COM_CheckParm ("-proghack"))
 		proghack = true;
 }
+
