@@ -39,7 +39,7 @@ AM_CONDITIONAL(USE_X86_ASM,test x$USE_X86_ASM = xyes)
 dnl userpath/sharepath config
 AC_ARG_WITH(share-path,
 	[  --with-share-path       set default shared data path [DATADIR/twilight]],,
-	with_share_path=\${datadir}/twilight)
+	with_share_path=\${datadir}/games/twilight)
 SHAREPATH="$with_share_path"
 AC_SUBST(SHAREPATH)
 
