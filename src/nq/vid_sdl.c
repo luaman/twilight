@@ -526,16 +526,6 @@ I_KeypadMode (cvar_t *cvar)
 
 /*
 ===========
-IN_Commands
-===========
-*/
-void
-IN_Commands (void)
-{
-}
-
-/*
-===========
 IN_Move
 ===========
 */

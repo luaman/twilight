@@ -120,7 +120,6 @@ qboolean	host_initialized;			// true if into command execution
 qboolean	nomaster;
 
 double		host_frametime;
-double		oldrealtime;				// last frame run
 int			host_framecount;
 
 int			host_hunklevel;
@@ -1310,19 +1309,19 @@ int         nopacketcount;
 void
 Host_Frame (double time)
 {
+	static double	old_realtime, old_time;
 	static double	time1 = 0;
 	static double	time2 = 0;
 	static double	time3 = 0;
 	int				pass1, pass2, pass3;
-	double			fps;
+	double			fps, time_diff;
 
 	if (setjmp (host_abort))
 		return;							// something bad happened, or the
 	// server disconnected
 
 	// decide the simulation time
-	cls.realtime = time;
-	r_realtime = time;
+	time_diff = time - old_realtime;
 
 	if (cl_maxfps->fvalue)
 		fps = cl_maxfps->fvalue;
@@ -1331,27 +1330,35 @@ Host_Frame (double time)
 
 	fps = bound (30.0f, fps, 72.0f);
 
-	if (!cls.timedemo && ((cls.realtime - oldrealtime) < (1.0 / fps))) {
+	if (!cls.timedemo && ((time_diff) < (1.0 / fps))) {
 		SDL_Delay(1);
 		return;							// framerate is too high
 	}
 
-	host_frametime = cls.realtime - oldrealtime;
-	oldrealtime = cls.realtime;
+	old_realtime = time;
+	cls.realtime += time_diff;
+	r_realtime += time_diff;
+	host_frametime = time_diff;
 	if (host_frametime > 0.2)
 		host_frametime = 0.2;
+
+	// fetch results from server
+	CL_ReadPackets ();
+
+	if (old_time > cls.realtime)
+		old_time = cls.realtime;
+	else {
+		host_frametime = cls.realtime - old_time;
+		old_time = cls.realtime;
+		if (host_frametime > 0.2)
+			host_frametime = 0.2;
+	}
 
 	// get new key events
 	Sys_SendKeyEvents ();
 
-	// allow mice or other external controllers to add commands
-	IN_Commands ();
-
 	// process console commands
 	Cbuf_Execute ();
-
-	// fetch results from server
-	CL_ReadPackets ();
 
 	// send intentions now
 	// resend a connection request if necessary
