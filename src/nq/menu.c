@@ -31,7 +31,7 @@ void        (*vid_menukeyfn) (int key);
 
 enum { m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup,
 	m_net, m_options, m_video, m_keys, m_help, m_quit, m_lanconfig,
-	m_gameoptions, m_search, m_slist
+	m_gameoptions, m_search, m_slist, m_gfx
 } m_state;
 
 void        M_Menu_Main_f (void);
@@ -44,6 +44,7 @@ void        M_Menu_Net_f (void);
 void        M_Menu_Options_f (void);
 void        M_Menu_Keys_f (void);
 void        M_Menu_Video_f (void);
+void		M_Menu_Gfx_f (void);
 void        M_Menu_Help_f (void);
 void        M_Menu_Quit_f (void);
 void        M_Menu_LanConfig_f (void);
@@ -1040,9 +1041,9 @@ M_Net_Key (int k)
 /* OPTIONS MENU */
 
 #ifdef _WIN32
-#define	OPTIONS_ITEMS	14
+#define	OPTIONS_ITEMS	15
 #else
-#define	OPTIONS_ITEMS	13
+#define	OPTIONS_ITEMS	14
 #endif
 
 #define	SLIDER_RANGE	10
@@ -1067,16 +1068,19 @@ M_AdjustSliders (int dir)
 
 	switch (options_cursor) {
 		case 3:						// screen size
-			t = bound (30, scr_viewsize->value[0] + (dir * 10.0f), 120);
-			Cvar_Set (scr_viewsize, va("%i", t));
+			t = scr_viewsize->value[0] + (dir * 10.0f);
+			t = bound (30, t, 120);
+			Cvar_Set (scr_viewsize, va("%f", t));
 			break;
 		case 4:						// gamma
-			t = bound (0.5, v_gamma->value[0] - (dir * 0.05f), 1.0);
-			Cvar_Set (v_gamma, va("%i", t));
+			t = v_gamma->value[0] - (dir * 0.05f);
+			t = bound (0.5, t, 1.0);
+			Cvar_Set (v_gamma, va("%f", t));
 			break;
 		case 5:						// mouse speed
-			t = bound (1, sensitivity->value[0] + (dir * 0.5f), 11);
-			Cvar_Set (sensitivity, va("%i", t));
+			t = sensitivity->value[0] + (dir * 0.5f);
+			t = bound (1, t, 11);
+			Cvar_Set (sensitivity, va("%f", t));
 			break;
 		case 6:						// music volume
 #if 0 // Not with SDL  --KB
@@ -1095,8 +1099,9 @@ M_AdjustSliders (int dir)
 #endif
 			break;
 		case 7:						// sfx volume
-			t = bound (0, volume->value[0] = (dir * 0.1f), 1);
-			Cvar_Set (volume, va("%i", t));
+			t = volume->value[0] + (dir * 0.1f);
+			t = bound (0, t, 1);
+			Cvar_Set (volume, va("%f", t));
 			break;
 
 		case 8:						// always run
@@ -1111,7 +1116,7 @@ M_AdjustSliders (int dir)
 
 		case 9:						// invert mouse
 			t = -m_pitch->value[0];
-			Cvar_Set (m_pitch, va("%i", t));
+			Cvar_Set (m_pitch, va("%f", t));
 			break;
 
 		case 10:						// lookspring
@@ -1125,6 +1130,9 @@ M_AdjustSliders (int dir)
 		case 13:						// _windowed_mouse
 			Cvar_Set (_windowed_mouse, va("%i", !_windowed_mouse->value[0]));
 			break;
+
+		case 14:
+			break;
 	}
 }
 
@@ -1134,10 +1142,8 @@ M_DrawSlider (int x, int y, float range)
 {
 	int         i;
 
-	if (range < 0)
-		range = 0;
-	if (range > 1)
-		range = 1;
+	range = bound (0, range, 1);
+
 	M_DrawCharacter (x - 8, y, 128);
 	for (i = 0; i < SLIDER_RANGE; i++)
 		M_DrawCharacter (x + i * 8, y, 129);
@@ -1154,10 +1160,8 @@ M_DrawCheckbox (int x, int y, int on)
 	else
 		M_DrawCharacter (x, y, 129);
 #endif
-	if (on)
-		M_Print (x, y, "on");
-	else
-		M_Print (x, y, "off");
+
+	M_Print (x, y, (on) ? "on" : "off");
 }
 
 void
@@ -1212,6 +1216,8 @@ M_Options_Draw (void)
 	M_Print (16, 136, "             Use Mouse");
 	M_DrawCheckbox (220, 136, _windowed_mouse->value[0]);
 
+	M_Print (16, 144, "      Graphics Options");
+
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8,
 					 12 + ((int) (realtime * 4) & 1));
@@ -1241,6 +1247,9 @@ M_Options_Key (int k)
 					break;
 				case 12:
 					M_Menu_Video_f ();
+					break;
+				case 14:
+					M_Menu_Gfx_f();
 					break;
 				default:
 					M_AdjustSliders (1);
@@ -1275,7 +1284,164 @@ M_Options_Key (int k)
 		if (k == K_UPARROW)
 			options_cursor = 11;
 		else
+			options_cursor = 13;
+	}
+
+	if (options_cursor == 15) {
+		if (k == K_UPARROW)
+			options_cursor = 14;
+		else
 			options_cursor = 0;
+	}
+}
+
+//=============================================================================
+/* GFX */
+
+/*
+	Smooth models			on/off
+	Affine models			on/off
+	Fullbright models		on/off
+	Fast dynamic lights		on/off
+	Shadows					on/fast/nice
+	Frame interpolation	    on/off
+	Movement interpolation	on/off
+*/
+
+#define GFX_ITEMS	7
+
+int gfx_cursor = 0;
+
+void
+M_Menu_Gfx_f (void)
+{
+	key_dest = key_menu;
+	m_state = m_gfx;
+	m_entersound = true;
+}
+
+void
+M_Gfx_Draw (void)
+{
+	static qpic_t *p = NULL;
+
+	if (!p) p = Draw_CachePic ("gfx/p_option.lmp");
+
+	M_DrawPic ((320 - p->width) / 2, 4, p);
+
+	M_Print (16, 32, "                      ");
+
+	M_Print (16, 32, "         Smooth models");
+	M_DrawCheckbox (220, 32, gl_smoothmodels->value[0]);
+
+	M_Print (16, 40, "         Affine models");
+	M_DrawCheckbox (220, 40, gl_affinemodels->value[0]);
+
+	M_Print (16, 48, "      Fullbright models");
+	M_DrawCheckbox (220, 48, gl_fb_models->value[0]);
+
+	M_Print (16, 56, "   Fast dynamic lights");
+	M_DrawCheckbox (220, 56, gl_flashblend->value[0]);
+
+	M_Print (16, 64, "               Shadows");
+	M_Print (220, 64, 
+		(r_shadows->value[0]) ? (r_shadows->value[0] == 2 ? "nice" : "fast") : "off");
+
+	M_Print (16, 72, "   Frame interpolation");
+	M_DrawCheckbox (220, 72, gl_im_animation->value[0]);
+
+	M_Print (16, 80, "  Motion interpolation");
+	M_DrawCheckbox (220, 80, gl_im_transform->value[0]);
+
+// cursor
+	M_DrawCharacter (200, 32 + gfx_cursor * 8,
+					 12 + ((int) (realtime * 4) & 1));
+}
+
+void
+M_Gfx_Set (void)
+{
+	int v = 0;
+
+	switch (gfx_cursor)
+	{
+		case 0:
+			v = !(int)gl_smoothmodels->value[0];
+			Cvar_Set (gl_smoothmodels, va("%i", v));
+			break;
+
+		case 1:
+			v = !(int)gl_affinemodels->value[0];
+			Cvar_Set (gl_affinemodels, va("%i", v));
+			break;
+
+		case 2:
+			v = !(int)gl_fb_models->value[0];
+			Cvar_Set (gl_fb_models, va("%i", v));
+			break;
+
+		case 3:
+			v = !(int)gl_flashblend->value[0];
+			Cvar_Set (gl_flashblend, va("%i", v));
+			break;
+
+		case 4:
+			v = (int)r_shadows->value[0] + 1;
+			if (v > 2) v = 0;
+			Cvar_Set (r_shadows, va("%i", v));
+			break;
+
+		case 5:
+			v = !(int)gl_im_animation->value[0];
+			Cvar_Set (gl_im_animation, va("%i", v));
+			break;
+
+		case 6:
+			v = !(int)gl_im_transform->value[0];
+			Cvar_Set (gl_im_transform, va("%i", v));
+			break;
+			
+		default:
+			break;
+	}
+}
+
+void
+M_Gfx_Key (int k)
+{
+	switch (k) {
+		case K_ESCAPE:
+			M_Menu_Options_f ();
+			return;
+			
+		case K_ENTER:
+			m_entersound = true;
+			return;
+
+		case K_UPARROW:
+			S_LocalSound ("misc/menu1.wav");
+			gfx_cursor--;
+			if (gfx_cursor < 0)
+				gfx_cursor = GFX_ITEMS - 1;
+			break;
+
+		case K_DOWNARROW:
+			S_LocalSound ("misc/menu1.wav");
+			gfx_cursor++;
+			if (gfx_cursor >= GFX_ITEMS)
+				gfx_cursor = 0;
+			break;
+
+		case K_LEFTARROW:
+			M_Gfx_Set ();
+			break;
+
+		case K_RIGHTARROW:
+			M_Gfx_Set ();
+			break;
+
+		default:
+			break;
 	}
 }
 
@@ -2209,23 +2375,27 @@ M_NetStart_Change (int dir)
 			else
 				count = 2;
 
-			t = bound (0, teamplay->value[0] + dir, count);
+			t = teamplay->value[0] + dir;
+			t = bound (0, t, count);
 			Cvar_Set (teamplay, va("%i", t));
 			break;
 
 		case 4:
-			t = bound (0, skill->value[0] + dir, 3);
+			t = skill->value[0] + dir;
+			t = bound (0, t, 3);
 			Cvar_Set (skill, va("%i", t));
 			break;
 
 		case 5:
-			t = bound (0, fraglimit->value[0] + dir * 10, 100);
+			t = fraglimit->value[0] + dir * 10;
+			t = bound (0, t, 100);
 			Cvar_Set (fraglimit, va("%i", t));
 			break;
 
 		case 6:
-			t = bound (0, timelimit->value[0] + dir * 5, 60);
-			Cvar_Set (timelimit, va("%i", t));
+			t = timelimit->value[0] + dir * 5;
+			t = bound (0, t, 60);
+			Cvar_Set (timelimit, va("%f", t));
 			break;
 
 		case 7:
@@ -2608,6 +2778,10 @@ M_Draw (void)
 		case m_slist:
 			M_ServerList_Draw ();
 			break;
+
+		case m_gfx:
+			M_Gfx_Draw ();
+			break;
 	}
 
 	if (m_entersound) {
@@ -2688,6 +2862,10 @@ M_Keydown (int key)
 
 		case m_slist:
 			M_ServerList_Key (key);
+			return;
+
+		case m_gfx:
+			M_Gfx_Key (key);
 			return;
 	}
 }
