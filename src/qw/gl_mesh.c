@@ -1,5 +1,5 @@
 /*
-	$RCSfile$
+	$RCSfile$ -- triangle model functions
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -22,7 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// gl_mesh.c: triangle model functions
 static const char rcsid[] =
     "$Id$";
 
@@ -53,13 +52,12 @@ aliashdr_t *paliashdr;
 
 qboolean    used[8192];
 
-// the command list holds counts and s/t values that are valid for
-// every frame
+/* the command list holds counts and s/t values that are valid for every frame */
 int         commands[8192];
 int         numcommands;
 
-// all frames will have their vertexes rearranged and expanded
-// so they are in the order expected by the command list
+/*	all frames will have their vertexes rearranged and expanded
+	so they are in the order expected by the command list */
 int         vertexorder[8192];
 int         numorder;
 
@@ -96,7 +94,7 @@ StripLength (int starttri, int startv)
 	m1 = last->vertindex[(startv + 2) % 3];
 	m2 = last->vertindex[(startv + 1) % 3];
 
-	// look for a matching triangle
+	/* look for a matching triangle */
   nexttri:
 	for (j = starttri + 1, check = &triangles[starttri + 1];
 		 j < pheader->numtris; j++, check++) {
@@ -108,13 +106,13 @@ StripLength (int starttri, int startv)
 			if (check->vertindex[(k + 1) % 3] != m2)
 				continue;
 
-			// this is the next part of the fan
+			/* this is the next part of the fan */
 
-			// if we can't use this triangle, this tristrip is done
+			/* if we can't use this triangle, this tristrip is done */
 			if (used[j])
 				goto done;
 
-			// the new edge
+			/* the new edge */
 			if (stripcount & 1)
 				m2 = check->vertindex[(k + 2) % 3];
 			else
@@ -129,7 +127,7 @@ StripLength (int starttri, int startv)
 	}
   done:
 
-	// clear the temp used flags
+	/* clear the temp used flags */
 	for (j = starttri + 1; j < pheader->numtris; j++)
 		if (used[j] == 2)
 			used[j] = 0;
@@ -165,7 +163,7 @@ FanLength (int starttri, int startv)
 	m2 = last->vertindex[(startv + 2) % 3];
 
 
-	// look for a matching triangle
+	/* look for a matching triangle */
   nexttri:
 	for (j = starttri + 1, check = &triangles[starttri + 1];
 		 j < pheader->numtris; j++, check++) {
@@ -177,13 +175,13 @@ FanLength (int starttri, int startv)
 			if (check->vertindex[(k + 1) % 3] != m2)
 				continue;
 
-			// this is the next part of the fan
+			/* this is the next part of the fan */
 
-			// if we can't use this triangle, this tristrip is done
+			/* if we can't use this triangle, this tristrip is done */
 			if (used[j])
 				goto done;
 
-			// the new edge
+			/* the new edge */
 			m2 = check->vertindex[(k + 2) % 3];
 
 			stripverts[stripcount + 2] = m2;
@@ -195,7 +193,7 @@ FanLength (int starttri, int startv)
 	}
   done:
 
-	// clear the temp used flags
+	/* clear the temp used flags */
 	for (j = starttri + 1; j < pheader->numtris; j++)
 		if (used[j] == 2)
 			used[j] = 0;
@@ -224,20 +222,20 @@ BuildTris (void)
 	int         besttris[MAXALIASVERTS];
 	int         type;
 
-	// 
-	// build tristrips
-	// 
+	/* 
+		build tristrips
+	*/
 	numorder = 0;
 	numcommands = 0;
 	memset (used, 0, sizeof (used));
 	for (i = 0; i < pheader->numtris; i++) {
-		// pick an unused triangle and start the trifan
+		/* pick an unused triangle and start the trifan */
 		if (used[i])
 			continue;
 
 		bestlen = 0;
 		for (type = 0; type < 2; type++)
-//  type = 1;
+/* type = 1; */
 		{
 			for (startv = 0; startv < 3; startv++) {
 				if (type == 1)
@@ -255,7 +253,7 @@ BuildTris (void)
 			}
 		}
 
-		// mark the tris on the best strip as used
+		/* mark the tris on the best strip as used */
 		for (j = 0; j < bestlen; j++)
 			used[besttris[j]] = 1;
 
@@ -265,15 +263,15 @@ BuildTris (void)
 			commands[numcommands++] = -(bestlen + 2);
 
 		for (j = 0; j < bestlen + 2; j++) {
-			// emit a vertex into the reorder buffer
+			/* emit a vertex into the reorder buffer */
 			k = bestverts[j];
 			vertexorder[numorder++] = k;
 
-			// emit s/t coords into the commands stream
+			/* emit s/t coords into the commands stream */
 			s = stverts[k].s;
 			t = stverts[k].t;
 			if (!triangles[besttris[0]].facesfront && stverts[k].onseam)
-				s += pheader->skinwidth / 2;	// on back side
+				s += pheader->skinwidth / 2;	/* on back side */
 			s = (s + 0.5) / pheader->skinwidth;
 			t = (t + 0.5) / pheader->skinheight;
 
@@ -282,7 +280,7 @@ BuildTris (void)
 		}
 	}
 
-	commands[numcommands++] = 0;		// end of list marker
+	commands[numcommands++] = 0;		/* end of list marker */
 
 	Con_DPrintf ("%3i tri %3i vert %3i cmd\n", pheader->numtris, numorder,
 				 numcommands);
@@ -305,11 +303,11 @@ GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 	trivertx_t *verts;
 
 	aliasmodel = m;
-	paliashdr = hdr;					// (aliashdr_t *)Mod_Extradata (m);
+	paliashdr = hdr;					/* (aliashdr_t *)Mod_Extradata (m); */
 
-	BuildTris ();						// trifans or lists
+	BuildTris ();						/* trifans or lists */
 
-	// save the data out
+	/* save the data out */
 
 	paliashdr->poseverts = numorder;
 
