@@ -41,4 +41,11 @@ Would be nice but is not strictly needed:
   - JPEG screenshots
   - Add {gl,cl}_weirdshit.c to support Nehahra.  ;)
   - gl_colorlights can/should be made to work without +set
+  - BloodBath needs sv_stepheight cvar to control how much players step up
+  - BloodBath needs automatic step-up while airborn (Blood/Q2/Q3 style),
+    even though this does allow strafe jumping...  a physics glitch allowing
+    people to jump faster, farther, and higher, than normally possible, when
+    jumping up very steep stairs in the right conditions (double/triple jump).
+  - BloodBath needs different sbar.
+  - BloodBath needs different key bindings menu.
 
