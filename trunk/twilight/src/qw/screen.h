@@ -49,8 +49,8 @@ extern int clearnotify;			/* set to 0 whenever notify text is drawn */
 extern qboolean scr_disabled_for_loading;
 
 extern struct cvar_s *scr_viewsize;
-extern cvar_t *r_brightness;
-extern cvar_t *r_contrast;
+extern struct cvar_s *r_brightness;
+extern struct cvar_s *r_contrast;
 
 #endif // __SCREEN_H
 

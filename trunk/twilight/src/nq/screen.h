@@ -48,6 +48,7 @@ extern float scr_con_current;
 extern float scr_conlines;		/* lines of console to display */
 
 extern int clearnotify;			/* set to 0 whenever notify text is drawn */
+
 extern qboolean scr_disabled_for_loading;
 
 extern struct cvar_s *scr_viewsize;
