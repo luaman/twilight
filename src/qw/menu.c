@@ -780,9 +780,12 @@ M_Keys_Key (int k)
 		if (k == SDLK_ESCAPE) {
 			bind_grab = false;
 		} else if (k != '`') {
-			snprintf (cmd, sizeof (cmd), "bind %s \"%s\"\n",
+			Key_SetBinding(KGT_DEFAULT, k, bindnames[keys_cursor][0]);
+			/*
+			snprintf (cmd, sizeof (cmd), "bind KGT_DEFAULT %s \"%s\"\n",
 					  Key_KeynumToString (k), bindnames[keys_cursor][0]);
 			Cbuf_InsertText (cmd);
+			*/
 		}
 
 		bind_grab = false;
