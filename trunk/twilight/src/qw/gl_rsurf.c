@@ -1029,10 +1029,7 @@ R_DrawBrushModel (entity_t *e)
 		if (psurf->visframe == r_framecount)
 		{
 			if (psurf->flags & SURF_DRAWSKY)
-			{
-//				EmitBothSkyLayers (psurf);
 				psurf->visframe = -1;
-			}
 		}
 	}
 
@@ -1122,6 +1119,36 @@ R_DrawBrushModel (entity_t *e)
 	{
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		R_BlendLightmaps ();
+	}
+
+	if (gl_fb_bmodels->ivalue)
+	{
+		qglDepthMask (GL_FALSE);			// don't bother writing Z
+		qglEnable (GL_BLEND);
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
+
+		for (i = 0, psurf = &clmodel->surfaces[clmodel->firstmodelsurface];
+				i < clmodel->nummodelsurfaces; i++, psurf++)
+		{
+			if (psurf->visframe == r_framecount)
+			{
+				t = R_TextureAnimation(psurf->texinfo->texture,
+						e->cur.frame);
+				if (t->fb_texturenum)
+				{
+					if (texnum != t->fb_texturenum)
+					{
+						texnum = t->fb_texturenum;
+						qglBindTexture (GL_TEXTURE_2D, texnum);
+					}
+					R_RenderBrushPoly (psurf, t);
+				}
+			}
+		}
+
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		qglDisable (GL_BLEND);
+		qglDepthMask (GL_TRUE);
 	}
 
 	qglPopMatrix ();
