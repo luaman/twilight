@@ -372,7 +372,7 @@ PF_vectoyaw (void)
 	if (value1[1] == 0 && value1[0] == 0)
 		yaw = 0;
 	else {
-		yaw = (int) (Q_atan2 (value1[1], value1[0]) * 180 / M_PI);
+		yaw = Q_atan2 (value1[1], value1[0]) * 180 / M_PI;
 		if (yaw < 0)
 			yaw += 360;
 	}
@@ -404,12 +404,12 @@ PF_vectoangles (void)
 		else
 			pitch = 270;
 	} else {
-		yaw = (int) (Q_atan2 (value1[1], value1[0]) * 180 / M_PI);
+		yaw = Q_atan2 (value1[1], value1[0]) * 180 / M_PI;
 		if (yaw < 0)
 			yaw += 360;
 
 		forward = Q_sqrt (value1[0] * value1[0] + value1[1] * value1[1]);
-		pitch = (int) (Q_atan2 (value1[2], forward) * 180 / M_PI);
+		pitch = Q_atan2 (value1[2], forward) * 180 / M_PI;
 		if (pitch < 0)
 			pitch += 360;
 	}
