@@ -40,7 +40,6 @@ static const char rcsid[] =
 #include "host.h"
 #include "image.h"
 #include "keys.h"
-#include "mathlib.h"
 #include "menu.h"
 #include "pcx.h"
 #include "sbar.h"
@@ -679,7 +678,7 @@ SCR_ScreenShot_f (void)
 		return;
 	}
 
-	buffer = malloc (vid.width * vid.height * 3);
+	buffer = Zone_Alloc (tempzone, vid.width * vid.height * 3);
 
 	qglReadPixels (glx, gly, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
 				  buffer);
@@ -687,7 +686,7 @@ SCR_ScreenShot_f (void)
 	if (TGA_Write (name, vid.width, vid.height, 3, buffer))
 		Com_Printf ("Wrote %s\n", name);
 
-	free (buffer);
+	Zone_Free (buffer);
 }
 
 void
@@ -719,9 +718,10 @@ SCR_CaptureAviDemo (void)
 void AvidemoChanged(cvar_t *cvar)
 {
 	if (cvar->ivalue) 
-		avibuffer = malloc(vid.width * vid.height * 3);
+		avibuffer = Zone_Alloc(tempzone, vid.width * vid.height * 3);
 	else {
-		free(avibuffer);
+		if (avibuffer)
+			Zone_Free(avibuffer);
 		aviframeno = 0;
 	}
 }

@@ -28,6 +28,9 @@
 #ifndef __WORLD_H
 #define __WORLD_H
 
+#include "collision.h"
+
+/*
 typedef struct {
 	vec3_t      normal;
 	float       dist;
@@ -44,6 +47,7 @@ typedef struct {
 	plane_t     plane;					// surface normal at impact
 	struct edict_s    *ent;					// entity the surface is on
 } trace_t;
+*/
 
 
 #define	MOVE_NORMAL		0

@@ -108,7 +108,7 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 	AngleVectors (angles, forward, right, up);
 	side = DotProduct (velocity, right);
 	sign = side < 0 ? -1 : 1;
-	side = Q_fabs(side);
+	side = fabs(side);
 
 	value = cl_rollangle->fvalue;
 
@@ -138,7 +138,7 @@ V_CalcBob (void)
 	if (cl.spectator)
 		return 0;
 
-	if (pmove.groundent == -1)
+	if (!pmove.groundent)
 		return bob;		/* just use old value */
 
 	if (!cl_bobcycle->fvalue)
@@ -205,7 +205,7 @@ V_DriftPitch (void)
 {
 	float	delta, move;
 
-	if (view_message->groundent == -1 || cls.demoplayback) {
+	if (!view_message->groundent || cls.demoplayback) {
 		cl.driftmove = 0;
 		cl.pitchvel = 0;
 		return;
@@ -213,7 +213,7 @@ V_DriftPitch (void)
 
 	/* don't count small mouse motion */
 	if (cl.nodrift) {
-		if (Q_fabs(cl.frames[(cls.netchan.outgoing_sequence - 1) & UPDATE_MASK].cmd.forwardmove) < 200)
+		if (fabs(cl.frames[(cls.netchan.outgoing_sequence - 1) & UPDATE_MASK].cmd.forwardmove) < 200)
 			cl.driftmove = 0;
 		else
 			cl.driftmove += host_frametime;
@@ -718,7 +718,7 @@ V_CalcRefdef (void)
 	r_refdef.viewangles[PITCH] += cl.punchangle;
 
 	/* smooth out stair step ups */
-	if ((view_message->groundent != -1) && (cl.simorg[2] - oldz > 0)) {
+	if (view_message->groundent && (cl.simorg[2] - oldz > 0)) {
 		float	steptime;
 
 		steptime = host_frametime;

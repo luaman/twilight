@@ -1232,7 +1232,7 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 	AngleVectors (angles, forward, right, NULL);
 	side = DotProduct (velocity, right);
 	sign = side < 0 ? -1 : 1;
-	side = Q_fabs (side);
+	side = fabs (side);
 
 	value = cl_rollangle->fvalue;
 
@@ -1289,8 +1289,7 @@ AddLinksToPmove (areanode_t *node)
 				continue;
 			if (pmove.numphysent == MAX_PHYSENTS)
 				return;
-			pe = &pmove.physents[pmove.numphysent];
-			pmove.numphysent++;
+			pe = &pmove.physents[pmove.numphysent++];
 
 			VectorCopy (check->v.origin, pe->origin);
 			pe->info = NUM_FOR_EDICT (check);
@@ -1502,10 +1501,10 @@ SV_RunCmd__clear:
 	sv_player->v.teleport_time = pmove.waterjumptime;
 	sv_player->v.waterlevel = pmove.waterlevel;
 	sv_player->v.watertype = pmove.watertype;
-	if (pmove.groundent != -1) {
+	if (pmove.groundent) {
 		sv_player->v.flags = (int) sv_player->v.flags | FL_ONGROUND;
 		sv_player->v.groundentity =
-			EDICT_TO_PROG (EDICT_NUM (pmove.physents[pmove.groundent].info));
+			EDICT_TO_PROG (EDICT_NUM (pmove.groundent->info));
 	} else
 		sv_player->v.flags = (int) sv_player->v.flags & ~FL_ONGROUND;
 	for (i = 0; i < 3; i++)
@@ -1522,7 +1521,7 @@ SV_RunCmd__clear:
 
 		// touch other objects
 		for (i = 0; i < pmove.numtouch; i++) {
-			n = pmove.physents[pmove.touchindex[i]].info;
+			n = pmove.touch[i]->info;
 			ent = EDICT_NUM (n);
 			if (!ent->v.touch || (playertouch[n / 8] & (1 << (n % 8))))
 				continue;

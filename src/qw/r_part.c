@@ -35,7 +35,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
-#include "pmove.h"
+#include "collision.h"
 #include "r_explosion.h"
 
 memzone_t *part_zone;
@@ -352,7 +352,7 @@ R_EntityParticles (entity_t *ent)
 
 	if (!avelocities[0][0])
 		for (i = 0; i < NUMVERTEXNORMALS * 3; i++)
-			avelocities[0][i] = (Q_rand () & 255) * 0.01;
+			avelocities[0][i] = (rand () & 255) * 0.01;
 
 	dist = 64;
 	for (i = 0; i < NUMVERTEXNORMALS; i++) {
@@ -466,8 +466,8 @@ R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength)
 		color = colorStart + (colorMod % colorLength);
 		colorMod++;
 		for (j = 0; j < 3; j++) {
-			porg[j] = org[j] + ((Q_rand () % 32) - 16);
-			vel[j] = (Q_rand () % 512) - 256;
+			porg[j] = org[j] + ((rand () % 32) - 16);
+			vel[j] = (rand () % 512) - 256;
 		}
 		new_base_particle_oc (pt_blob, porg, vel, color, 0, -1, 0.3, 0);
 	}
@@ -488,18 +488,18 @@ R_BlobExplosion (vec3_t org)
 	ptype_t	ptype;
 
 	for (i = 0; i < 1024; i++) {
-		pdie = 1 + (Q_rand () & 8) * 0.05;
+		pdie = 1 + (rand () & 8) * 0.05;
 		if (i & 1) {
 			ptype = pt_blob;
-			color = 66 + Q_rand() % 6;
+			color = 66 + rand() % 6;
 		} else {
 			ptype = pt_blob2;
-			color = 150 + Q_rand() % 6;
+			color = 150 + rand() % 6;
 		}
 
 		for (j = 0; j < 3; j++) {
-			porg[j] = org[j] + ((Q_rand () % 32) - 16);
-			pvel[j] = (Q_rand () % 512) - 256;
+			porg[j] = org[j] + ((rand () % 32) - 16);
+			pvel[j] = (rand () % 512) - 256;
 		}
 		new_base_particle_oc (ptype, porg, pvel, color, 0, -1, pdie, 0);
 	}
@@ -526,11 +526,11 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 	}
 	
 	for (i = 0; i < count; i++) {
-		pdie = 0.1 * (Q_rand () % 5);
-		pcolor = (color & ~7) + (Q_rand () & 7);
+		pdie = 0.1 * (rand () % 5);
+		pcolor = (color & ~7) + (rand () & 7);
 		for (j = 0; j < 3; j++) {
-			porg[j] = org[j] + ((Q_rand () & 15) - 8);
-			pvel[j] = dir[j] * 15;	// + (Q_rand()%300)-150;
+			porg[j] = org[j] + ((rand () & 15) - 8);
+			pvel[j] = dir[j] * 15;	// + (rand()%300)-150;
 		}
 		new_base_particle_oc (pt_slowgrav, porg, pvel, pcolor, 0, -1, pdie, 0);
 	}
@@ -552,19 +552,19 @@ R_LavaSplash (vec3_t org)
 
 	for (i = -16; i < 16; i++)
 		for (j = -16; j < 16; j++) {
-			pdie = 2 + (Q_rand () & 31) * 0.02;
-			pcolor = 224 + (Q_rand () & 7);
+			pdie = 2 + (rand () & 31) * 0.02;
+			pcolor = 224 + (rand () & 7);
 
-			dir[0] = j * 8 + (Q_rand () & 7);
-			dir[1] = i * 8 + (Q_rand () & 7);
+			dir[0] = j * 8 + (rand () & 7);
+			dir[1] = i * 8 + (rand () & 7);
 			dir[2] = 256;
 
 			porg[0] = org[0] + dir[0];
 			porg[1] = org[1] + dir[1];
-			porg[2] = org[2] + (Q_rand () & 63);
+			porg[2] = org[2] + (rand () & 63);
 
 			VectorNormalizeFast (dir);
-			vel = 50 + (Q_rand () & 63);
+			vel = 50 + (rand () & 63);
 			VectorScale (dir, vel, pvel);
 			new_base_particle_oc (pt_slowgrav, porg, pvel, pcolor, 0, -1,
 				pdie, 0);
@@ -618,18 +618,18 @@ R_Torch (entity_t *ent, qboolean torch2)
 		return;
 
 	VectorSet4 (color, 0.89, 0.59, 0.31, 0.5);
-	VectorSet (pvel, (Q_rand() & 3) - 2, (Q_rand() & 3) - 2, 0);
+	VectorSet (pvel, (rand() & 3) - 2, (rand() & 3) - 2, 0);
 	VectorSet (porg, ent->cur.origin[0], ent->cur.origin[1],
 			ent->cur.origin[2] + 4);
 
 	if (torch2) { 
 		// used for large torches (eg, start map near spawn)
 		porg[2] = ent->cur.origin[2] - 2;
-		VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
-		new_base_particle (pt_torch2, porg, pvel, color, Q_rand () & 3,
+		VectorSet (pvel, (rand() & 7) - 4, (rand() & 7) - 4, 0);
+		new_base_particle (pt_torch2, porg, pvel, color, rand () & 3,
 			ent->cur.frame ? 30 : 10, 5, 0);
 	} else	// wall torches
-		new_base_particle (pt_torch, porg, pvel, color, Q_rand () & 3,
+		new_base_particle (pt_torch, porg, pvel, color, rand () & 3,
 			10, 5, 0);
 }
 
@@ -718,20 +718,20 @@ R_ParticleTrail (vec3_t start, vec3_t end, int type)
 
 		switch (type) {
 			case EF_GRENADE:		// smoke
-				pramp = (Q_rand () & 3) + 2;
+				pramp = (rand () & 3) + 2;
 				pcolor = ramp3[(int) pramp];
 				ptype = pt_fire;
 				for (j = 0; j < 3; j++)
-					porg[j] = start[j] + ((Q_rand () % 6) - 3);
+					porg[j] = start[j] + ((rand () % 6) - 3);
 				break;
 
 			case EF_ZOMGIB:			// slight blood
 				lsub += 3;
 			case EF_GIB:			// blood
 				ptype = pt_grav;
-				pcolor = 0x40 + (Q_rand () & 3);
+				pcolor = 0x40 + (rand () & 3);
 				for (j = 0; j < 3; j++)
-					porg[j] = start[j] + ((Q_rand () % 6) - 3);
+					porg[j] = start[j] + ((rand () % 6) - 3);
 				R_Stain (start, 32, 32, 16, 16, 32, 192, 48, 48, 32);
 				break;
 
@@ -757,11 +757,11 @@ R_ParticleTrail (vec3_t start, vec3_t end, int type)
 				break;
 
 			case EF_TRACER3:		// voor trail
-				pcolor = 9 * 16 + 8 + (Q_rand () & 3);
+				pcolor = 9 * 16 + 8 + (rand () & 3);
 				ptype = pt_static;
 				pdie = 0.3;
 				for (j = 0; j < 3; j++)
-					porg[j] = start[j] + ((Q_rand () & 15) - 8);
+					porg[j] = start[j] + ((rand () & 15) - 8);
 				break;
 		}
 
@@ -818,7 +818,6 @@ R_Move_Base_Particles (void)
 			if ((mleaf->contents == CONTENTS_SOLID) ||
 					(mleaf->contents == CONTENTS_SKY)) {
 				p->die = -1;
-				p->draw = false;
 			}
 			if (mleaf->visframe != r_framecount)
 				p->draw = false;
@@ -913,7 +912,7 @@ R_Move_Base_Particles (void)
 					p->die = -1;
 				break;
 			case pt_torch2:
-				p->color[3] -= (frametime * 64 / 255);
+				p->color[3] -= frametime * 0.25;
 				p->scale -= frametime * 4;
 				p->vel[2] += grav;
 				if (p->scale <= 0)
@@ -929,7 +928,10 @@ R_Move_Base_Particles (void)
 				break;
 		}
 
-		if ((p->die <= cl.time) || (p->color[3] <= 0)) {
+		if (p->color[3] <= 0)
+			p->die = -1;
+
+		if ((p->die <= cl.time)) {
 			free_base_particles[j++] = p;
 			continue;
 		}
@@ -966,7 +968,7 @@ R_Draw_Base_Particles (void)
 	v_index = 0;
 
 	for (i = 0, p = base_particles; i < num_base_particles; i++, p++) {
-		if (!p->draw)
+		if (p->die <= cl.time || !p->draw)
 			continue;
 
 		if (p->scale < 0) {
@@ -980,10 +982,10 @@ R_Draw_Base_Particles (void)
 		} else
 			scale = p->scale;
 
-		VectorCopy4 (p->color, c_array_v(v_index + 0));
-		VectorCopy4 (p->color, c_array_v(v_index + 1));
-		VectorCopy4 (p->color, c_array_v(v_index + 2));
-		VectorCopy4 (p->color, c_array_v(v_index + 3));
+		VectorCopy4 (p->color, cf_array_v(v_index + 0));
+		VectorCopy4 (p->color, cf_array_v(v_index + 1));
+		VectorCopy4 (p->color, cf_array_v(v_index + 2));
+		VectorCopy4 (p->color, cf_array_v(v_index + 3));
 		VectorSet2(tc_array_v(v_index + 0), 1, 1);
 		VectorSet2(tc_array_v(v_index + 1), 0, 1);
 		VectorSet2(tc_array_v(v_index + 2), 0, 0);
@@ -998,6 +1000,7 @@ R_Draw_Base_Particles (void)
 		v_index += 4;
 
 		if ((v_index + 4) >= MAX_VERTEX_ARRAYS) {
+			TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 			TWI_PreVDrawCVA (0, v_index);
 			qglDrawArrays (GL_QUADS, 0, v_index);
 			TWI_PostVDrawCVA ();
@@ -1007,6 +1010,7 @@ R_Draw_Base_Particles (void)
 	}
 
 	if (v_index) {
+		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 		TWI_PreVDrawCVA (0, v_index);
 		qglDrawArrays (GL_QUADS, 0, v_index);
 		TWI_PostVDrawCVA ();
@@ -1071,6 +1075,7 @@ R_Move_Beam_Particles (void)
 			default:
 				break;
 		}
+
 		if (p->die <= cl.time) {
 			free_beam_particles[j++] = p;
 			continue;
@@ -1124,10 +1129,10 @@ DrawBeam (beam_particle_t *p)
 	VectorTwiddle (p->org2, v_up, -p->scale, v_right2,  p->scale, 1,
 			v_array_v(v_index + 3));
 
-	VectorCopy4 (p->color1, c_array_v(v_index + 0));
-	VectorCopy4 (p->color1, c_array_v(v_index + 1));
-	VectorCopy4 (p->color2, c_array_v(v_index + 2));
-	VectorCopy4 (p->color2, c_array_v(v_index + 3));
+	VectorCopy4 (p->color1, cf_array_v(v_index + 0));
+	VectorCopy4 (p->color1, cf_array_v(v_index + 1));
+	VectorCopy4 (p->color2, cf_array_v(v_index + 2));
+	VectorCopy4 (p->color2, cf_array_v(v_index + 3));
 
 	dp = DotProduct(p->org1, p->normal) / 64;
 	dp -= p->ramp;
@@ -1167,10 +1172,14 @@ R_Draw_Beam_Particles (void)
 	i_index = 0;
 
 	for (k = 0, p = beam_particles; k < num_beam_particles; k++, p++) {
+		if (p->die <= cl.time)
+			continue;
+
 		DrawBeam (p);
 
 		if (((i_index + 6) > MAX_VERTEX_INDICES) ||
 				((v_index + 4) > MAX_VERTEX_ARRAYS)) {
+			TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 			TWI_PreVDrawCVA (0, v_index);
 			qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
 			TWI_PostVDrawCVA ();
@@ -1180,6 +1189,7 @@ R_Draw_Beam_Particles (void)
 	}
 
 	if (v_index || i_index) {
+		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 		TWI_PreVDrawCVA (0, v_index);
 		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
 		TWI_PostVDrawCVA ();
@@ -1207,10 +1217,10 @@ R_Draw_SmokeRings (void)
 	v_index = 0;
 
 	for (k = 0, p = smokerings; k < num_smokerings; k++, p++) {
-		VectorCopy4 (p->color, c_array_v(v_index + 0));
-		VectorCopy4 (p->color, c_array_v(v_index + 1));
-		VectorCopy4 (p->color, c_array_v(v_index + 2));
-		VectorCopy4 (p->color, c_array_v(v_index + 3));
+		VectorCopy4 (p->color, cf_array_v(v_index + 0));
+		VectorCopy4 (p->color, cf_array_v(v_index + 1));
+		VectorCopy4 (p->color, cf_array_v(v_index + 2));
+		VectorCopy4 (p->color, cf_array_v(v_index + 3));
 		VectorSet2(tc_array_v(v_index + 0), 1, 1);
 		VectorSet2(tc_array_v(v_index + 1), 0, 1);
 		VectorSet2(tc_array_v(v_index + 2), 0, 0);
@@ -1229,6 +1239,7 @@ R_Draw_SmokeRings (void)
 		v_index += 4;
 
 		if ((v_index + 4) > MAX_VERTEX_ARRAYS) {
+			TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 			TWI_PreVDrawCVA (0, v_index);
 			qglDrawArrays (GL_QUADS, 0, v_index);
 			TWI_PostVDrawCVA ();
@@ -1237,6 +1248,7 @@ R_Draw_SmokeRings (void)
 	}
 
 	if (v_index) {
+		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 		TWI_PreVDrawCVA (0, v_index);
 		qglDrawArrays (GL_QUADS, 0, v_index);
 		TWI_PostVDrawCVA ();
@@ -1316,17 +1328,6 @@ R_Move_Cone_Particles (void)
 				if (p->ramp >= 1)
 					p->die = -1;
 				break;
-			case pt_rtrail:
-				p->color1[3] -= frametime * 0.5;
-				if (p->color1[3] <= 0)
-					p->die = -1;
-				if (p->color1[1] < p->color1[0]) {
-					p->color1[1] += frametime * 0.50;
-					p->color1[2] += frametime * 0.50;
-					p->color1[3] += frametime * 0.50;
-				}
-				p->scale += frametime * 1.5;
-				break;
 			default:
 				break;
 		}
@@ -1369,10 +1370,13 @@ R_Draw_Cone_Particles (void)
 	i_index = 0;
 
 	for (k = 0, p = cone_particles; k < num_cone_particles; k++, p++) {
+		if (p->die <= cl.time)
+			continue;
+
 		VectorVectors (p->normal, v_right, v_up);
 
 		VectorCopy (p->org2, v_array_v(v_index));
-		VectorCopy4 (p->color2, c_array_v(v_index));
+		VectorCopy4 (p->color2, cf_array_v(v_index));
 		VectorSet2 (tc_array_v(v_index), 0.5, 0.5);
 		v_center = v_index++;
 		v_last = -1;
@@ -1387,7 +1391,7 @@ R_Draw_Cone_Particles (void)
 
 			VectorSet2 (tc_array_v(v_index), *bub_cos * 0.5 + 0.5,
 					*bub_sin * 0.5 + 0.5);
-			VectorCopy4 (p->color1, c_array_v(v_index));
+			VectorCopy4 (p->color1, cf_array_v(v_index));
 			if (v_last != -1) {
 				vindices[i_index + 0] = v_center;
 				vindices[i_index + 1] = v_last;
@@ -1406,6 +1410,7 @@ R_Draw_Cone_Particles (void)
 
 		if (((i_index + (17 * 3)) >= MAX_VERTEX_INDICES) ||
 				(v_index + 17) >= MAX_VERTEX_ARRAYS) {
+			TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 			TWI_PreVDrawCVA (0, v_index);
 			qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
 			TWI_PostVDrawCVA ();
@@ -1415,6 +1420,7 @@ R_Draw_Cone_Particles (void)
 	}
 
 	if (v_index || i_index) {
+		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 		TWI_PreVDrawCVA (0, v_index);
 		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
 		TWI_PostVDrawCVA ();

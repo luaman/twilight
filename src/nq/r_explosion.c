@@ -38,9 +38,9 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "gl_textures.h"
+#include "collision.h"
 
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);
-extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
 
 #define MAX_EXPLOSIONS 128
 #define EXPLOSIONGRID 8
@@ -262,7 +262,8 @@ R_MoveExplosion (explosion_t *e)
 			VectorMA(e->vert[i], frametime, e->vertvel[i], end);
 			if (r_explosionclip->ivalue)
 			{
-				if (TraceLine(e->vert[i], end, impact, normal) < 1)
+				if (TraceLine
+						(cl.worldmodel, e->vert[i], end, impact, normal) < 1)
 				{
 					// clip velocity against the wall
 					dot = DotProduct(e->vertvel[i], normal) * -1.125f;
@@ -304,6 +305,7 @@ R_DrawExplosion (explosion_t *e)
 	if (((v_index + EXPLOSIONINDICES) >= MAX_VERTEX_ARRAYS) ||
 			((i_index + EXPLOSIONINDICES) >= MAX_VERTEX_INDICES))
 	{
+		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 		TWI_PreVDrawCVA (0, EXPLOSIONTRIS * 3);
 		qglDrawElements (GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
 		TWI_PostVDrawCVA ();
@@ -332,7 +334,7 @@ R_DrawExplosion (explosion_t *e)
 		VectorNormalizeFast(diff);
 		dist = (DotProduct(diff, centerdir) * 6.0f - 4.0f) * a;
 		dist = max (dist, 0);
-		VectorSet4 (c_array_v(v_index + i), dist * r, dist * g, dist * b, 1);
+		VectorSet4 (cf_array_v(v_index + i), dist * r, dist * g, dist * b, 1);
 	}
 
 	v_index += EXPLOSIONVERTS;
@@ -359,6 +361,7 @@ R_DrawExplosions (void)
 
 	if (v_index || i_index)
 	{
+		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 		TWI_PreVDrawCVA (0, EXPLOSIONTRIS * 3);
 		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
 		TWI_PostVDrawCVA ();

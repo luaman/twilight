@@ -29,6 +29,7 @@
 
 #define	MAX_GLTEXTURES	1024
 
+#include "mathlib.h"
 #include "dyngl.h"
 
 #include "wad.h"
@@ -156,7 +157,8 @@ extern qboolean gl_mtexcombine;
 extern texcoord_t	*tc0_array_p;
 extern texcoord_t	*tc1_array_p;
 extern vertex_t		*v_array_p;
-extern color_t		*c_array_p;
+extern colorf_t		*cf_array_p;
+extern colorub_t	*cub_array_p;
 
 #define tc_array_v(x) tc0_array_p[x].v
 #define tc_array(x,y) tc0_array_p[x].v[y]
@@ -166,14 +168,41 @@ extern color_t		*c_array_p;
 #define tc1_array(x,y) tc1_array_p[x].v[y]
 #define v_array_v(x) v_array_p[x].v
 #define v_array(x,y) v_array_p[x].v[y]
-#define c_array_v(x) c_array_p[x].v
-#define c_array(x,y) c_array_p[x].v[y]
+#define c_array_v(x) cub_array_p[x].v
+#define c_array(x,y) cub_array_p[x].v[y]
+#define cub_array_v(x) cub_array_p[x].v
+#define cub_array(x,y) cub_array_p[x].v[y]
+#define cf_array_v(x) cf_array_p[x].v
+#define cf_array(x,y) cf_array_p[x].v[y]
 
 extern GLuint *vindices;
 
 extern GLuint v_index, i_index;
 extern qboolean va_locked;
 extern memzone_t *vzone;
+
+extern float_int_t *FtoUB_tmp;
+
+extern void inline TWI_FtoUB (GLfloat *in, GLubyte *out, int num)
+{
+	int		i;
+
+	// shift float to have 8bit fraction at base of number
+	for (i = 0; i < num; i += 4) {
+		FtoUB_tmp[i    ].f = in[i    ] + 32768.0f;
+		FtoUB_tmp[i + 1].f = in[i + 1] + 32768.0f;
+		FtoUB_tmp[i + 2].f = in[i + 2] + 32768.0f;
+		FtoUB_tmp[i + 3].f = in[i + 3] + 32768.0f;
+	}
+
+	// then read as integer and kill float bits...
+	for (i = 0; i < num; i += 4) {
+		out[i    ] = (Uint8) min(FtoUB_tmp[i    ].i & 0x7FFFFF, 255);
+		out[i + 1] = (Uint8) min(FtoUB_tmp[i + 1].i & 0x7FFFFF, 255);
+		out[i + 2] = (Uint8) min(FtoUB_tmp[i + 2].i & 0x7FFFFF, 255);
+		out[i + 3] = (Uint8) min(FtoUB_tmp[i + 3].i & 0x7FFFFF, 255);
+	}
+}
 
 extern void inline TWI_PreVDrawCVA (GLint min, GLint max)
 {

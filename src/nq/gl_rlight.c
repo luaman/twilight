@@ -155,7 +155,8 @@ void
 R_RenderDlight (rdlight_t *light)
 {
 	int     i, j, vcenter, vlast = -1;
-	vec3_t  v, v_right, v_up, c;
+	vec3_t  v, v_right, v_up;
+	vec4_t	c;
 	float	*bub_sin = bubble_sintable,
 			*bub_cos = bubble_costable;
 	float   rad = light->cullradius * 0.35, length;
@@ -189,10 +190,8 @@ R_RenderDlight (rdlight_t *light)
 	VectorSubtract (light->origin, v, v);
 
 	VectorSet3 (v_array_v(v_index), v[0], v[1], v[2]);
-	c_array(v_index, 0) = c[0];
-	c_array(v_index, 1) = c[1];
-	c_array(v_index, 2) = c[2];
-	c_array(v_index, 3) = 1.0;
+	TWI_FtoUB(c, c_array_v(v_index), 4);
+	c_array(v_index, 3) = 255;
 	vcenter = v_index;
 	v_index++;
 
@@ -202,7 +201,7 @@ R_RenderDlight (rdlight_t *light)
 			v[j] = light->origin[j] + (v_right[j] * (*bub_cos) +
 				+ v_up[j] * (*bub_sin)) * rad;
 
-		VectorSet4 (c_array_v(v_index), 0.0, 0.0, 0.0, 0.0);
+		VectorSet4 (c_array_v(v_index), 0, 0, 0, 0);
 		VectorSet3 (v_array_v(v_index), v[0], v[1], v[2]);
 		if (vlast != -1) {
 			vindices[i_index + 0] = vcenter;

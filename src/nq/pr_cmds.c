@@ -428,7 +428,7 @@ PF_random (void)
 {
 	float       num;
 
-	num = (Q_rand () & 0x7fff) / ((float) 0x7fff);
+	num = (rand () & 0x7fff) / ((float) 0x7fff);
 
 	G_FLOAT (OFS_RETURN) = num;
 }
@@ -885,7 +885,7 @@ PF_fabs (void)
 	float       v;
 
 	v = G_FLOAT (OFS_PARM0);
-	G_FLOAT (OFS_RETURN) = Q_fabs (v);
+	G_FLOAT (OFS_RETURN) = fabs (v);
 }
 
 void
@@ -1160,13 +1160,13 @@ PF_rint (void)
 void
 PF_floor (void)
 {
-	G_FLOAT (OFS_RETURN) = Q_floor (G_FLOAT (OFS_PARM0));
+	G_FLOAT (OFS_RETURN) = floor (G_FLOAT (OFS_PARM0));
 }
 
 void
 PF_ceil (void)
 {
-	G_FLOAT (OFS_RETURN) = Q_ceil (G_FLOAT (OFS_PARM0));
+	G_FLOAT (OFS_RETURN) = ceil (G_FLOAT (OFS_PARM0));
 }
 
 
@@ -1255,9 +1255,9 @@ PF_aim (void)
 	VectorCopy (pr_global_struct->v_forward, dir);
 	VectorMA (start, 2048, dir, end);
 	tr = SV_Move (start, vec3_origin, vec3_origin, end, false, ent);
-	if (tr.ent && tr.ent->v.takedamage == DAMAGE_AIM
+	if (tr.ent && ((edict_t *) tr.ent)->v.takedamage == DAMAGE_AIM
 		&& (!teamplay->ivalue || ent->v.team <= 0
-			|| ent->v.team != tr.ent->v.team)) {
+			|| ent->v.team != ((edict_t *) tr.ent)->v.team)) {
 		VectorCopy (pr_global_struct->v_forward, G_VECTOR (OFS_RETURN));
 		return;
 	}

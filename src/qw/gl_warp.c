@@ -99,7 +99,7 @@ SubdividePolygon (int numverts, float *verts)
 	for (i = 0; i < 3; i++) {
 		m = (mins[i] + maxs[i]) * 0.5;
 		m = gl_subdivide_size->ivalue
-			* Q_floor (m / gl_subdivide_size->ivalue + 0.5);
+			* floor (m / gl_subdivide_size->ivalue + 0.5);
 		if (maxs[i] - m < 8)
 			continue;
 		if (m - mins[i] < 8)
@@ -527,7 +527,6 @@ void R_SkyBoxChanged (cvar_t *cvar)
 	else
 		draw_skybox = false;
 }
-
 
 #define SKYBOXVERT(i, x, y, z, s, t)							\
 	((v_array(i, 0) = (x) * 1024.0f + r_origin[0]),				\

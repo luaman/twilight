@@ -501,7 +501,7 @@ SVC_GetChallenge (void)
 
 	if (i == MAX_CHALLENGES) {
 		// overwrite the oldest
-		svs.challenges[oldest].challenge = (Q_rand () << 16) ^ Q_rand ();
+		svs.challenges[oldest].challenge = (rand () << 16) ^ rand ();
 		svs.challenges[oldest].adr = net_from;
 		svs.challenges[oldest].time = svs.realtime;
 		i = oldest;
@@ -1224,7 +1224,7 @@ SV_Frame (float time)
 	svs.stats.idle += start - end;
 
 // keep the random time dependent
-	Q_rand ();
+	rand ();
 
 // decide the simulation time
 	if (!sv.paused) {

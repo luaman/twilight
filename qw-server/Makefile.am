@@ -13,8 +13,8 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -Umain
 
 bin_PROGRAMS=twilight-qwsv
 twilight_qwsv_LDADD= \
-	$(top_builddir)/src/base/libtwilight_base.a \
-	$(top_builddir)/qw/libqwsv.a
+	$(top_builddir)/qw/libqwsv.a \
+	$(top_builddir)/src/base/libtwilight_base.a
 
 if SYS_WIN32
 twilight_qwsv_sys_libs=-lwsock32 -lwinmm

@@ -27,7 +27,6 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
-#include <stdlib.h>	/* for malloc() */
 
 #include "quakedef.h"
 #include "client.h"
@@ -226,7 +225,7 @@ SCR_CenterPrint (char *str)
 	int			i, j, l;
 
 	strlcpy (scr_centerstring, str, sizeof (scr_centerstring) - 1);
-	scr_centertime_off = scr_centertime->ivalue;
+	scr_centertime_off = scr_centertime->fvalue;
 	scr_centertime_start = cl.time;
 
 	/* count the number of lines for centering */
@@ -612,12 +611,12 @@ SCR_SetUpToDrawConsole (void)
 		scr_conlines = 0;					/* none visible */
 
 	if (scr_conlines < scr_con_current) {
-		scr_con_current -= scr_conspeed->ivalue * host_frametime;
+		scr_con_current -= scr_conspeed->fvalue * host_frametime;
 		if (scr_conlines > scr_con_current)
 			scr_con_current = scr_conlines;
 
 	} else if (scr_conlines > scr_con_current) {
-		scr_con_current += scr_conspeed->ivalue * host_frametime;
+		scr_con_current += scr_conspeed->fvalue * host_frametime;
 		if (scr_conlines < scr_con_current)
 			scr_con_current = scr_conlines;
 	}
@@ -676,7 +675,7 @@ SCR_ScreenShot_f (void)
 		return;
 	}
 
-	buffer = malloc (vid.width * vid.height * 3);
+	buffer = Zone_Alloc (tempzone, vid.width * vid.height * 3);
 
 	qglReadPixels (glx, gly, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
 				  buffer);
@@ -684,7 +683,7 @@ SCR_ScreenShot_f (void)
 	if (TGA_Write (name, vid.width, vid.height, 3, buffer))
 		Com_Printf ("Wrote %s\n", name);
 
-	free (buffer);
+	Zone_Free (buffer);
 }
 
 void
@@ -716,9 +715,10 @@ SCR_CaptureAviDemo (void)
 void AvidemoChanged(cvar_t *cvar)
 {
 	if (cvar->ivalue) 
-		avibuffer = malloc(vid.width * vid.height * 3);
+		avibuffer = Zone_Alloc(tempzone, vid.width * vid.height * 3);
 	else {
-		free(avibuffer);
+		if (avibuffer)
+			Zone_Free(avibuffer);
 		aviframeno = 0;
 	}
 }

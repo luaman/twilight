@@ -498,7 +498,7 @@ Sbar_DrawInventory
 void
 Sbar_DrawInventory (void)
 {
-	int         i;
+	int         i, j, y;
 	char        num[6];
 	float       time;
 	int         flashon;
@@ -597,29 +597,20 @@ Sbar_DrawInventory (void)
 // ammo counts
 	for (i = 0; i < 4; i++) {
 		snprintf (num, sizeof (num), "%3i", cl.stats[STAT_SHELLS + i]);
+		for (j = 0; j < 3; j++)
+			num[j] = 18 + num[j] - '0';
 		if (headsup) {
-			Sbar_DrawSubPic ((hudswap) ? 0 : (vid.width_2d - 42), 
-					-24 - (4 - i) * 11, sb_ibar, 3 + (i * 48), 0, 42, 11);
-			if (num[0] != ' ')
-				Sbar_DrawCharacter ((hudswap) ? 3 : (vid.width_2d - 39),
-						-24 - (4 - i) * 11, 18 + num[0] - '0');
-			if (num[1] != ' ')
-				Sbar_DrawCharacter ((hudswap) ? 11 : (vid.width_2d - 31),
-						-24 - (4 - i) * 11, 18 + num[1] - '0');
-			if (num[2] != ' ')
-				Sbar_DrawCharacter ((hudswap) ? 19 : (vid.width_2d - 23),
-						-24 - (4 - i) * 11, 18 + num[2] - '0');
-		} else {
-			if (num[0] != ' ')
-				Sbar_DrawCharacter ((6 * i + 1) * 8 - 2, -24,
-						18 + num[0] - '0');
-			if (num[1] != ' ')
-				Sbar_DrawCharacter ((6 * i + 2) * 8 - 2, -24,
-						18 + num[1] - '0');
-			if (num[2] != ' ')
-				Sbar_DrawCharacter ((6 * i + 3) * 8 - 2, -24,
-						18 + num[2] - '0');
-		}
+			y = -24 - (4 - i) * 11;
+			if (hudswap) {
+				Sbar_DrawSubPic (0, y, sb_ibar, 3 + (i * 48), 0, 42, 11);
+				Sbar_DrawString (3, y, num);
+			} else {
+				Sbar_DrawSubPic (vid.width_2d - 42, y, sb_ibar, 3 + (i * 48),
+						0, 42, 11);
+				Sbar_DrawString (vid.width_2d - 39, y, num);
+			}
+		} else
+			Sbar_DrawString ((6 * i + 1) * 8 - 2, -24, num);
 	}
 
 	flashon = 0;
@@ -673,8 +664,7 @@ void
 Sbar_DrawFrags (void)
 {
 	Sint32			k;
-	Uint32			i, l, x, y, f, xofs;
-	char			num[12];
+	Uint32			i, l, x, y, xofs;
 	scoreboard_t	*s;
 	vec4_t			color;
 
@@ -705,12 +695,7 @@ Sbar_DrawFrags (void)
 		Draw_Fill (xofs + x * 8 + 10, y + 4, 28, 3, color);
 
 		// draw number
-		f = s->frags;
-		snprintf (num, sizeof (num), "%3i", f);
-
-		Sbar_DrawCharacter ((x + 1) * 8, -24, num[0]);
-		Sbar_DrawCharacter ((x + 2) * 8, -24, num[1]);
-		Sbar_DrawCharacter ((x + 3) * 8, -24, num[2]);
+		Sbar_DrawString (((x + 1) * 8) + 4, -24, va("%3i", s->frags));
 
 		if (k == cl.viewentity - 1) {
 			Sbar_DrawCharacter (x * 8 + 2, -24, 16);
@@ -739,7 +724,6 @@ Sbar_DrawFace (void)
 		(cl.maxclients != 1) && (teamplay->ivalue > 3)
 		&& (teamplay->ivalue < 7)) {
 		int         xofs;
-		char        num[12];
 		scoreboard_t *s;
 		vec4_t		color;
 
@@ -758,13 +742,7 @@ Sbar_DrawFace (void)
 		Draw_Fill (xofs, vid.height_2d - SBAR_HEIGHT + 12, 22, 9, color);
 
 		// draw number
-		f = s->frags;
-		snprintf (num, sizeof (num), "%3i", f);
-
-		Sbar_DrawCharacter (109, 3, num[0]);
-		Sbar_DrawCharacter (116, 3, num[1]);
-		Sbar_DrawCharacter (123, 3, num[2]);
-
+		Sbar_DrawString (113, 3, va("%3i", s->frags));
 		return;
 	}
 // PGM 01/19/97 - team color drawing
@@ -953,8 +931,7 @@ Sbar_DeathmatchOverlay (void)
 {
 	qpic_t     *pic;
 	int         i, k, l;
-	int         x, y, f;
-	char        num[12];
+	int         x, y;
 	vec4_t		color;
 	scoreboard_t *s;
 
@@ -984,12 +961,7 @@ Sbar_DeathmatchOverlay (void)
 		Draw_Fill (x, y + 4, 40, 4, color);
 
 		// draw number
-		f = s->frags;
-		snprintf (num, sizeof (num), "%3i", f);
-
-		Draw_Character (x + 8, y, num[0], 8);
-		Draw_Character (x + 16, y, num[1], 8);
-		Draw_Character (x + 24, y, num[2], 8);
+		Draw_String_Len (x + 8, y, va("%3d", s->frags), 3, 8);
 
 		if (k == cl.viewentity - 1)
 			Draw_Character (x - 8, y, 12, 8);
@@ -1003,7 +975,7 @@ Sbar_DeathmatchOverlay (void)
 
 /*
 ==================
-Sbar_DeathmatchOverlay
+Sbar_MiniDeathmatchOverlay
 
 ==================
 */
@@ -1011,8 +983,7 @@ void
 Sbar_MiniDeathmatchOverlay (void)
 {
 	Sint32			k;
-	Uint32			i, l, x, y, f, numlines;
-	char			num[12];
+	Uint32			i, l, x, y, numlines;
 	scoreboard_t	*s;
 	vec4_t			color;
 
@@ -1060,12 +1031,7 @@ Sbar_MiniDeathmatchOverlay (void)
 		Draw_Fill (x, y + 4, 40, 4, color);
 
 		// draw number
-		f = s->frags;
-		snprintf (num, sizeof (num), "%3i", f);
-
-		Draw_Character (x + 8, y, num[0], 8);
-		Draw_Character (x + 16, y, num[1], 8);
-		Draw_Character (x + 24, y, num[2], 8);
+		Draw_String_Len (x + 8, y, va("%3d", s->frags), 3, 8);
 
 		if (k == cl.viewentity - 1) {
 			Draw_Character (x, y, 16, 8);

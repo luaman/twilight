@@ -29,38 +29,9 @@
 
 #include "model.h"
 #include "protocol.h"
+#include "collision.h"
 
 #define	MAX_PHYSENTS	32
-
-
-typedef struct
-{
-	vec3_t		normal;
-	float		dist;
-} pmplane_t;
-
-typedef struct
-{
-	// if true, plane is not valid
-	qboolean	allsolid;
-
-	// if true, the initial point was in a solid area
-	qboolean	startsolid;
-	qboolean	inopen, inwater;
-
-	// time completed, 1.0 = didn't hit anything
-	float		fraction;
-
-	// final position
-	vec3_t		endpos;
-
-	// surface normal at impact
-	pmplane_t	plane;
-
-	// entity the surface is on
-	int			ent;
-} pmtrace_t;
-
 
 typedef struct
 {
@@ -102,9 +73,9 @@ typedef struct
 
 	// results
 	int			numtouch;
-	int			touchindex[MAX_PHYSENTS];
+	physent_t	*touch[MAX_PHYSENTS];
 
-	int			groundent;
+	physent_t	*groundent;
 	int			waterlevel;
 	int			watertype;
 } playermove_t;
@@ -135,14 +106,7 @@ int PM_HullPointContents (struct hull_s *hull, int num, vec3_t p);
 
 int PM_PointContents (vec3_t point);
 qboolean PM_TestPlayerPosition (vec3_t point);
-pmtrace_t PM_PlayerMove (vec3_t start, vec3_t stop);
-
-qboolean PM_RecursiveHullCheck (struct hull_s *hull, int num, float p1f,
-		float p2f, vec3_t p1, vec3_t p2, pmtrace_t *trace);
-
-float TraceLine (model_t *mdl, vec3_t start, vec3_t end, vec3_t impact,
-		vec3_t normal);
-	
+trace_t PM_PlayerMove (vec3_t start, vec3_t stop);
 
 #endif // __PMOVE_H
 

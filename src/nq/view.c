@@ -110,7 +110,7 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 	AngleVectors (angles, forward, right, up);
 	side = DotProduct (velocity, right);
 	sign = side < 0 ? -1 : 1;
-	side = Q_fabs(side);
+	side = fabs(side);
 
 	value = cl_rollangle->fvalue;
 
@@ -206,7 +206,7 @@ V_DriftPitch (void)
 
 	/* don't count small mouse motion */
 	if (cl.nodrift) {
-		if (Q_fabs(cl.cmd.forwardmove) < cl_forwardspeed->fvalue)
+		if (fabs(cl.cmd.forwardmove) < cl_forwardspeed->fvalue)
 			cl.driftmove = 0;
 		else
 			cl.driftmove += (cl.time - cl.oldtime);

@@ -113,7 +113,7 @@ VID_Build_Gamma_Ramp8 (Uint8 *ramp, int n, double gam, double con, double bri)
 	invgam = 1.0 / gam;
 
 	for (i_d = i = 0; i < n; i++, i_d++) {
-		ramp[i] = bound_bits((Q_pow(i_d * i_s, invgam) * con + bri) * BIT(8),8);
+		ramp[i] = bound_bits((pow(i_d * i_s, invgam) * con + bri) * BIT(8),8);
 	}
 }
 
@@ -127,7 +127,7 @@ VID_Build_Gamma_Ramp16 (Uint16 *ramp, int n, double gam, double con, double bri)
 	invgam = 1.0 / gam;
 
 	for (i_d = i = 0; i < n; i++, i_d++) {
-		ramp[i]=bound_bits((Q_pow(i_d * i_s, invgam) * con + bri) * BIT(16),16);
+		ramp[i]=bound_bits((pow(i_d * i_s, invgam) * con + bri) * BIT(16),16);
 	}
 }
 
@@ -229,12 +229,6 @@ CheckExtensions (void)
 	}
 	else
 		Com_Printf ("no.\n");
-
-	if (gl_mtex && (!qglActiveTextureARB || !qglClientActiveTextureARB))
-	{
-		Sys_Error ("Missing GL_ARB_multitexture functions. (%p %p)\n",
-				qglActiveTextureARB, qglClientActiveTextureARB);
-	}
 
 	if (gl_mtex && !COM_CheckParm ("-nomtexcombine"))
 	{
