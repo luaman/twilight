@@ -37,7 +37,7 @@ static const vec3_t softwaretransform_offset_id = { 0.0f, 0.0f, 0.0f };
 static const vec3_t softwaretransform_x_id = { 1.0f, 0.0f, 0.0f };
 static const vec3_t softwaretransform_y_id = { 0.0f, 1.0f, 0.0f };
 static const vec3_t softwaretransform_z_id = { 0.0f, 0.0f, 1.0f };
-static const float softwaretransform_scale_id = 1.0f;
+static const vec_t softwaretransform_scale_id = 1.0f;
 
 // set to different transform code depending on complexity of transform
 void (*softwaretransform) (vec3_t in, vec3_t out);
@@ -174,7 +174,7 @@ softwaretransform_classify (void)
 					softwaretransform_x_id) ||
 				!VectorCompare(softwaretransform_y,
 					softwaretransform_y_id) ||
-				!VectorCompare(softwaretransform_x,
+				!VectorCompare(softwaretransform_z,
 					softwaretransform_z_id))
 				softwaretransform = &softwaretransform_dorotatescaletranslate;
 			else
@@ -184,7 +184,7 @@ softwaretransform_classify (void)
 					softwaretransform_x_id) ||
 				!VectorCompare(softwaretransform_y,
 					softwaretransform_y_id) ||
-				!VectorCompare(softwaretransform_x,
+				!VectorCompare(softwaretransform_z,
 					softwaretransform_z_id))
 				softwaretransform = &softwaretransform_dorotatetranslate;
 			else
@@ -197,7 +197,7 @@ softwaretransform_classify (void)
 					softwaretransform_x_id) ||
 				!VectorCompare(softwaretransform_y,
 					softwaretransform_y_id) ||
-				!VectorCompare(softwaretransform_x,
+				!VectorCompare(softwaretransform_z,
 					softwaretransform_z_id))
 				softwaretransform = &softwaretransform_dorotatescale;
 			else
@@ -207,7 +207,7 @@ softwaretransform_classify (void)
 					softwaretransform_x_id) ||
 				!VectorCompare(softwaretransform_y,
 					softwaretransform_y_id) ||
-				!VectorCompare(softwaretransform_x,
+				!VectorCompare(softwaretransform_z,
 					softwaretransform_z_id))
 				softwaretransform = &softwaretransform_dorotate;
 			else
@@ -254,13 +254,13 @@ softwaretransformforentity (vec3_t origin, vec3_t angles)
 	eangles[0] = -angles[0];
 	eangles[1] = angles[1];
 	eangles[2] = angles[2];
-	softwaretransformset(origin, eangles, 1);
+	softwaretransformset(origin, eangles, softwaretransform_scale_id);
 }
 
 // brush entities are not backwards like models and sprites are
 void
 softwaretransformforbrushentity (vec3_t origin, vec3_t angles)
 {
-	softwaretransformset(origin, angles, 1);
+	softwaretransformset(origin, angles, softwaretransform_scale_id);
 }
 

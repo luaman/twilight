@@ -39,6 +39,7 @@ static const char rcsid[] =
 
 #include "SDL.h"
 
+#include "quakedef.h"
 #include "common.h"
 #include "pcx.h"
 #include "strlib.h"
@@ -57,7 +58,7 @@ typedef struct {
 	unsigned short bytes_per_line;
 	unsigned short palette_type;
 	char        filler[58];
-	unsigned char   data;					// unbounded
+	unsigned char   data[0];					// unbounded
 } pcx_t;
 
 /*
@@ -81,7 +82,7 @@ PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
 // parse the PCX file
 //
 	pcx = (pcx_t *)buf;
-	raw = &(pcx->data);
+	raw = pcx->data;
 
 	pcx->xmin = LittleShort(pcx->xmin);
 	pcx->ymin = LittleShort(pcx->ymin);
