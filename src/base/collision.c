@@ -230,7 +230,7 @@ TraceLine_Raw (hull_t *hull, vec3_t start, vec3_t end, trace_t *trace)
 	else
 		RecursiveHullCheckPoint (&rhc, hull->firstclipnode);
 
-	return trace->fraction;
+	return (float)trace->fraction;
 }
 
 float
