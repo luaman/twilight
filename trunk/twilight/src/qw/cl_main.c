@@ -201,13 +201,8 @@ CL_Version_f
 void
 CL_Version_f (void)
 {
-	static int b_n = 0;
-	
-	if (!b_n)
-		b_n = build_number();
-
 	Con_Printf ("Version %s\n", VERSION);
-	Con_Printf ("Build: %i\n", b_n);
+	Con_Printf ("Build: %04d\n", build_number());
 	Con_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
 }
 
@@ -1515,7 +1510,7 @@ Host_Init (void)
 
 	host_initialized = true;
 
-	Con_Printf ("\nClient Version %4.2f (Build %04d)\n\n", VERSION,
+	Con_Printf ("\nClient Version %s (Build %04d)\n\n", VERSION,
 				build_number ());
 
 	Con_Printf ("€ QuakeWorld Initialized ‚\n");

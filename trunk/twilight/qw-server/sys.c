@@ -92,6 +92,8 @@ Uint32		sys_sleep;
 int			sys_memsize = 0;
 void	   *sys_membase = NULL;
 
+char       *qdate = __DATE__;
+
 // =======================================================================
 // General routines
 // =======================================================================
@@ -204,7 +206,7 @@ Sys_DoubleTime (void)
 
 	last = now;
 
-	return epoch + now / 1000.0;
+	return epoch + (double)(now / 1000.0);
 }
 
 #ifndef _WIN32

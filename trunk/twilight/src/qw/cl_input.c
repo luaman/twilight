@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include "input.h"
 #include "mathlib.h"
 #include "strlib.h"
+#include "crc.h"
 
 cvar_t     *cl_nodelta;
 

@@ -123,6 +123,7 @@ CL_NewDlight (int key, vec3_t org, float radius, float time,
 
 	dl->radius = radius;
 	dl->die = cl.time + time;
+	VectorCopy (org, dl->origin);
 
 	if (type == 0) // Normal
 	{

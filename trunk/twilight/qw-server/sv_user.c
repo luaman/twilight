@@ -50,6 +50,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "world.h"
+#include "crc.h"
 
 edict_t			*sv_player;
 
