@@ -210,6 +210,7 @@ Sys_Init (void)
 {
 	Cvar_RegisterVariable (&sys_nostdout);
 	Cvar_RegisterVariable (&sys_extrasleep);
+	Math_Init ();
 }
 
 /*
