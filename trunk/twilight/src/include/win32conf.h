@@ -1,6 +1,10 @@
+/*
+	$Id$
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+	System configuration
+*/
+#ifndef __WIN32CONF_H
+#define __WIN32CONF_H
 
 #define VERSION			"0.0.0"
 
@@ -12,4 +16,5 @@
 
 #include "compat.h"
 
-#endif // _CONFIG_H
+#endif // __WIN32CONF_H
+

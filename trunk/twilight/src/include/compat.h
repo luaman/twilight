@@ -1,5 +1,5 @@
 /*
-	$Id$
+	$RCSfile$
 
 	Copyright (C) 2001  Joseph Carter
 
@@ -20,10 +20,18 @@
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
+
+	$Id$
 */
 
+#ifndef __COMPAT_H
+#define __COMPAT_H
+
 #ifdef _WIN32
-#define snprintf		_snprintf
-#define vsnprintf		_vsnprintf
-#define strcasecmp		_strcmpi
+# define snprintf		_snprintf
+# define vsnprintf		_vsnprintf
+# define strcasecmp		_strcmpi
 #endif // _WIN32
+
+#endif // __COMPAT_H
+
