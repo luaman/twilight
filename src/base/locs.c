@@ -89,7 +89,6 @@ loc_clear ()
 	int	i;
 
 	for (i = 0; i < num_locs; i++) {
-		Com_Printf("i: %d, num_locs: %d\n", i, num_locs);
 		Zone_Free(locs[i]);
 		locs[i] = NULL;
 	}
@@ -155,7 +154,6 @@ loc_parse (char *line)
 	loc[1] = y * (1.0 / 8);
 	loc[2] = z * (1.0 / 8);
 
-//	Com_Printf("%f %f %f: '%s'\n", loc[0], loc[1], loc[2], line);
 	loc_new (loc, line);
 }
 
@@ -198,12 +196,10 @@ loc_newmap (char *worldname)
 {
 	char	*name;
 
-	Com_Printf("%s %d, %d %d\n", __FUNCTION__, __LINE__, num_locs, num_blocks);
 	loc_clear ();
 	name = loc_locfile (worldname);
 	loc_load (va ("%s.loc", name));
 	free (name);
-	Com_Printf("%s %d, %d %d\n", __FUNCTION__, __LINE__, num_locs, num_blocks);
 }
 
 void
