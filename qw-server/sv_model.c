@@ -51,7 +51,6 @@ static const char rcsid[] =
 #include <math.h>
 
 model_t    *loadmodel;
-char        loadname[32];				// for hunk tags
 
 void        Mod_LoadBrushModel (model_t *mod, void *buffer);
 model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
@@ -95,8 +94,6 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 //
 // allocate a new model
 //
-	COM_FileBase (mod->name, loadname);
-
 	loadmodel = mod;
 
 //
@@ -138,7 +135,7 @@ Mod_LoadFaces (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		SV_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->surfaces = out;
 	loadmodel->numsurfaces = count;

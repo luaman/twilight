@@ -853,40 +853,6 @@ COM_FileExtension (char *in)
 
 
 /*
-============
-COM_FileBase
-============
-*/
-void
-COM_FileBase (char *in, char *out)
-{
-	char *slash, *dot;
-	char *s;
-
-	slash = in;
-	dot = NULL;
-	s = in;
-	while(*s)
-	{
-		if (*s == '/')
-			slash = s + 1;
-		if (*s == '.')
-			dot = s;
-		s++;
-	}
-	if (dot == NULL)
-		dot = s;
-	if (dot - slash < 2)
-		strcpy (out,"?model?");
-	else {
-		while (slash < dot)
-			*out++ = *slash++;
-		*out++ = 0;
-	}
-}
-
-
-/*
 ==================
 COM_DefaultExtension
 ==================
@@ -1355,7 +1321,6 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 {
 	FILE	   *h;
 	Uint8	   *buf = NULL;				// silence compiler warning
-	char		base[32];
 	int			len;
 
 	// look for it in the filesystem or pack files
@@ -1363,16 +1328,13 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 	if (!h)
 		return NULL;
 
-	// extract the filename base name for hunk tag
-	COM_FileBase (path, base);
-
 	switch (usehunk)
 	{
 		case 0:
 			buf = Z_Malloc (len + 1);
 			break;
 		case 1:
-			buf = Hunk_AllocName (len + 1, base);
+			buf = Hunk_AllocName (len + 1, path);
 			break;
 		case 2:
 			buf = Hunk_TempAlloc (len + 1);

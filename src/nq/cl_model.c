@@ -51,7 +51,6 @@ static const char rcsid[] =
 #include <math.h>
 
 extern model_t	*loadmodel;
-extern char	loadname[32];				// for hunk tags
 
 void	Mod_LoadSpriteModel (model_t *mod, void *buffer);
 void	Mod_LoadBrushModel (model_t *mod, void *buffer);
@@ -108,10 +107,6 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 			Host_EndGame ("Mod_LoadModel: %s not found", mod->name);
 		return NULL;
 	}
-//
-// allocate a new model
-//
-	COM_FileBase (mod->name, loadname);
 
 	loadmodel = mod;
 
@@ -188,7 +183,7 @@ Mod_LoadTextures (lump_t *l)
 
 	loadmodel->numtextures = m->nummiptex;
 	loadmodel->textures =
-		Hunk_AllocName (m->nummiptex * sizeof (*loadmodel->textures), loadname);
+		Hunk_AllocName (m->nummiptex * sizeof (*loadmodel->textures), loadmodel->name);
 
 	for (i = 0; i < m->nummiptex; i++) {
 		m->dataofs[i] = LittleLong (m->dataofs[i]);
@@ -203,7 +198,7 @@ Mod_LoadTextures (lump_t *l)
 		if ((mt->width & 15) || (mt->height & 15))
 			Host_EndGame ("Texture %s is not 16 aligned", mt->name);
 		pixels = mt->width * mt->height * (85 / 64);
-		tx = Hunk_AllocName (sizeof (texture_t) + pixels, loadname);
+		tx = Hunk_AllocName (sizeof (texture_t) + pixels, loadmodel->name);
 		loadmodel->textures[i] = tx;
 
 		memcpy (tx->name, mt->name, sizeof (tx->name));
@@ -336,7 +331,7 @@ Mod_LoadLighting (lump_t *l)
 			loadmodel->lightdata = NULL;
 			return;
 		}
-		loadmodel->lightdata = Hunk_AllocName (l->filelen, loadname);
+		loadmodel->lightdata = Hunk_AllocName (l->filelen, loadmodel->name);
 		memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
 	}
 	else {
@@ -405,7 +400,7 @@ Mod_LoadTexinfo (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->texinfo = out;
 	loadmodel->numtexinfo = count;
@@ -515,7 +510,7 @@ Mod_LoadFaces (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->surfaces = out;
 	loadmodel->numsurfaces = count;
@@ -1239,7 +1234,7 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 	height = LittleLong (pinframe->height);
 	size = width * height;
 
-	pspriteframe = Hunk_AllocName (sizeof (mspriteframe_t), loadname);
+	pspriteframe = Hunk_AllocName (sizeof (mspriteframe_t), loadmodel->name);
 
 	memset (pspriteframe, 0, sizeof (mspriteframe_t));
 
@@ -1290,7 +1285,7 @@ Mod_LoadSpriteGroup (void *pin, mspriteframe_t **ppframe, int framenum)
 	pspritegroup = Hunk_AllocName (sizeof (mspritegroup_t) +
 								   (numframes -
 									1) * sizeof (pspritegroup->frames[0]),
-								   loadname);
+								   loadmodel->name);
 
 	pspritegroup->numframes = numframes;
 
@@ -1298,7 +1293,7 @@ Mod_LoadSpriteGroup (void *pin, mspriteframe_t **ppframe, int framenum)
 
 	pin_intervals = (dspriteinterval_t *) (pingroup + 1);
 
-	poutintervals = Hunk_AllocName (numframes * sizeof (float), loadname);
+	poutintervals = Hunk_AllocName (numframes * sizeof (float), loadmodel->name);
 
 	pspritegroup->intervals = poutintervals;
 
@@ -1350,7 +1345,7 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 
 	size = sizeof (msprite_t) + (numframes - 1) * sizeof (psprite->frames);
 
-	psprite = Hunk_AllocName (size, loadname);
+	psprite = Hunk_AllocName (size, loadmodel->name);
 
 	mod->extradata = psprite;
 
