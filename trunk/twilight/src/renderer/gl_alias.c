@@ -103,8 +103,6 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_common_t *e)
 
 	for (i = 0; i < paliashdr->numverts; i++) {
 		VectorCopy(pose->vertices[i].v, v_array_v(i));
-		tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
-		tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
 
 		l = shadedots[pose->normal_indices[i]] * shadelight;
 		VectorScale(lightcolor, l, cf_array_v(i));
@@ -115,8 +113,6 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_common_t *e)
 
 /*
 =================
-R_SetupAliasBlendedFrame
-
 Please forgive me for the duplicated code here..
  -- Zephaniah E. Hull.
 =================
@@ -168,9 +164,6 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_common_t *e)
 				d *= shadelight;
 				VectorScale (lightcolor, d, cf_array_v(i));
 				cf_array(i, 3) = 1;
-
-				tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
-				tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
 			}
 			break;
 		case 2:
@@ -187,9 +180,6 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_common_t *e)
 				d *= shadelight;
 				VectorScale (lightcolor, d, cf_array_v(i));
 				cf_array(i, 3) = 1;
-
-				tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
-				tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
 			}
 			break;
 		case 3:
@@ -210,9 +200,6 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_common_t *e)
 				d *= shadelight;
 				VectorScale (lightcolor, d, cf_array_v(i));
 				cf_array(i, 3) = 1;
-
-				tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
-				tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
 			}
 			break;
 		default:
@@ -231,9 +218,6 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_common_t *e)
 				d *= shadelight;
 				VectorScale (lightcolor, d, cf_array_v(i));
 				cf_array(i, 3) = 1;
-
-				tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
-				tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
 			}
 			break;
 	}
@@ -380,6 +364,7 @@ R_DrawAliasModel ()
 {
 	qglPushMatrix ();
 
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), paliashdr->tcarray);
 
 	qglMultTransposeMatrixf ((GLfloat *) matrix);
 
@@ -419,6 +404,8 @@ R_DrawAliasModel ()
 		qglDisable (GL_BLEND);
 	}
 
+	GLArrays_Reset_TC (false);
+
 	qglPopMatrix ();
 }
 
@@ -444,6 +431,11 @@ static void
 R_DrawAliasModelNV ()
 {
 	qglPushMatrix ();
+
+	qglClientActiveTextureARB(GL_TEXTURE1_ARB);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), paliashdr->tcarray);
+	qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), paliashdr->tcarray);
 
 	qglMultTransposeMatrixf ((GLfloat *) matrix);
 
@@ -488,6 +480,8 @@ R_DrawAliasModelNV ()
 	}
 
 	TWI_PostVDrawCVA ();
+
+	GLArrays_Reset_TC (true);
 
 	qglPopMatrix ();
 }

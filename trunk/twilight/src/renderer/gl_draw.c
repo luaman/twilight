@@ -43,6 +43,8 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "gl_info.h"
 #include "gl_draw.h"
+#include "cclient.h"
+#include "console.h"
 
 qpic_t *draw_disc;
 static qpic_t *draw_backtile;
@@ -64,6 +66,19 @@ static cachepic_t	GLT_cachepics[MAX_CACHED_PICS];
 static int			GLT_numcachepics;
 
 static Uint8		menuplyr_pixels[4096];
+
+extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
+
+static cvar_t *gl_constretch;
+extern cvar_t *cl_verstring;
+
+static cvar_t *hud_chsize;
+static cvar_t *hud_chflash;
+static cvar_t *hud_chspeed;
+static cvar_t *hud_chalpha;
+
+static GLuint   ch_textures[NUM_CROSSHAIRS];            // crosshair texture
+
 
 qpic_t     *
 Draw_PicFromWad (char *name)
@@ -87,11 +102,6 @@ Draw_PicFromWad (char *name)
 }
 
 
-/*
-================
-Draw_CachePic
-================
-*/
 qpic_t     *
 Draw_CachePic (char *path)
 {
@@ -136,15 +146,26 @@ Draw_CachePic (char *path)
 	return &pic->pic;
 }
 
-/*
-===============
-Draw_Init
-===============
-*/
 void
-Draw_Common_Init (void)
+Draw_Init_Cvars (void)
+{
+	GLT_Init_Cvars ();
+
+	gl_constretch = Cvar_Get ("gl_constretch", "1", CVAR_ARCHIVE, NULL);
+
+	hud_chsize = Cvar_Get ("hud_chsize", "0.5", CVAR_ARCHIVE, NULL);
+	hud_chflash = Cvar_Get ("hud_chflash", "0.0", CVAR_ARCHIVE, NULL);
+	hud_chspeed = Cvar_Get ("hud_chspeed", "1.5", CVAR_ARCHIVE, NULL);
+	hud_chalpha = Cvar_Get ("hud_chalpha", "1.0", CVAR_ARCHIVE, NULL);
+}
+
+void
+Draw_Init (void)
 {
 	image_t		*img;
+	int			i;
+
+	GLT_Init ();
 
 	img = Image_Load ("conchars");
 	if (!img)
@@ -158,14 +179,16 @@ Draw_Common_Init (void)
 	/* get the other pics we need */
 	draw_disc = Draw_PicFromWad ("disc");
 	draw_backtile = Draw_PicFromWad ("backtile");
+
+	/* Keep track of the first crosshair texture */
+	for (i = 0; i < NUM_CROSSHAIRS; i++)
+		ch_textures[i] = GLT_Load_Pixmap (va ("crosshair%i", i), crosshairs[i]);
 }
 
 
 
 /*
 ================
-Draw_Character
-
 Draws one 8*8 graphics character with 0 being transparent.
 It can be clipped to the top of the screen to allow the console to be
 smoothly scrolled off.
@@ -208,11 +231,6 @@ Draw_Character (float x, float y, int num, float text_size)
 	qglDisable (GL_BLEND);
 }
 
-/*
-================
-Draw_String_Len
-================
-*/
 void
 Draw_String_Len (float x, float y, char *str, int len, float text_size)
 {
@@ -259,11 +277,6 @@ Draw_String_Len (float x, float y, char *str, int len, float text_size)
 	qglDisable (GL_BLEND);
 }
 
-/*
-================
-Draw_String
-================
-*/
 void
 Draw_String (float x, float y, char *str, float text_size)
 {
@@ -271,11 +284,6 @@ Draw_String (float x, float y, char *str, float text_size)
 }
 
 
-/*
-================
-Draw_Alt_String_Len
-================
-*/
 void
 Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size)
 {
@@ -326,22 +334,12 @@ Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size)
 	qglDisable (GL_BLEND);
 }
 
-/*
-================
-Draw_Alt_String
-================
-*/
 void
 Draw_Alt_String (float x, float y, char *str, float text_size)
 {
 	Draw_Alt_String_Len (x, y, str, strlen(str), text_size);
 }
 
-/*
-================
-Draw_Conv_String_Len
-================
-*/
 void
 Draw_Conv_String_Len (float x, float y, char *str, int len, float text_size)
 {
@@ -402,11 +400,6 @@ Draw_Conv_String_Len (float x, float y, char *str, int len, float text_size)
 	qglDisable (GL_BLEND);
 }
 
-/*
-================
-Draw_Conv_String
-================
-*/
 void
 Draw_Conv_String (float x, float y, char *str, float text_size)
 {
@@ -414,11 +407,6 @@ Draw_Conv_String (float x, float y, char *str, float text_size)
 }
 
 
-/*
-=============
-Draw_Pic
-=============
-*/
 void
 Draw_Pic (int x, int y, qpic_t *pic)
 {
@@ -480,8 +468,6 @@ Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
 
 /*
 =============
-Draw_TransPicTranslate
-
 Only used for the player color selection menu
 =============
 */
@@ -529,8 +515,6 @@ Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
 
 /*
 =============
-Draw_Fill
-
 Fills a box of pixels with a single color
 =============
 */
@@ -555,12 +539,6 @@ Draw_Fill (int x, int y, int w, int h, vec4_t color)
 
 /* ========================================================================= */
 
-/*
-================
-Draw_FadeScreen
-
-================
-*/
 void
 Draw_FadeScreen (void)
 {
@@ -585,8 +563,6 @@ Draw_FadeScreen (void)
 
 /*
 ================
-Draw_Disc
-
 Draws the little blue disc in the corner of the screen.
 Call before beginning any disc IO.
 ================
@@ -600,3 +576,138 @@ Draw_Disc (void)
 	Draw_Pic (vid.width_2d - 24, 0, draw_disc);
 	qglDrawBuffer (GL_BACK);
 }
+
+void
+Draw_Crosshair (void)
+{
+	float	x1, y1, x2, y2;
+	int		color;
+	float	base[4];
+	float	ofs;
+	int		ctexture;
+
+	if (crosshair->ivalue < 1)
+		return;
+
+	/* FIXME: when textures have structures, fix the hardcoded 32x32 size */
+
+	ctexture = ch_textures[((crosshair->ivalue - 1) % NUM_CROSSHAIRS)];
+
+	x1 = (vid.width - 32 * hud_chsize->fvalue) * 0.5
+		* vid.width_2d / vid.width;
+	y1 = (vid.height - 32 * hud_chsize->fvalue) * 0.5
+		* vid.height_2d / vid.height;
+
+	x2 = (vid.width + 32 * hud_chsize->fvalue) * 0.5
+		* vid.width_2d / vid.width;
+	y2 = (vid.height + 32 * hud_chsize->fvalue) * 0.5
+		* vid.height_2d / vid.height;
+
+	/* Color selection madness */
+	color = crosshaircolor->ivalue % 256;
+	if (color == 255 && ccl.colormap)
+		VectorScale (ccl.colormap->bottom, 0.5, base);
+	else
+		VectorCopy (d_8tofloattable[color], base);
+
+	ofs = Q_sin (ccl.time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
+	ofs = boundsign (ofs, hud_chflash->fvalue);
+	VectorSlide (base, ofs, base);
+	base[3] = hud_chalpha->fvalue;
+	qglColor4fv (base);
+
+	qglBindTexture (GL_TEXTURE_2D, ctexture);
+
+	qglEnable (GL_BLEND);
+	VectorSet2 (tc_array_v(0), 0, 0);
+	VectorSet2 (v_array_v(0), x1, y1);
+	VectorSet2 (tc_array_v(1), 1, 0);
+	VectorSet2 (v_array_v(1), x2, y1);
+	VectorSet2 (tc_array_v(2), 1, 1);
+	VectorSet2 (v_array_v(2), x2, y2);
+	VectorSet2 (tc_array_v(3), 0, 1);
+	VectorSet2 (v_array_v(3), x1, y2);
+	TWI_PreVDraw (0, 4);
+	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
+	qglColor4fv (whitev);
+	qglDisable (GL_BLEND);
+}
+
+
+void
+Draw_ConsoleBackground (int lines)
+{
+	int		y;
+	qpic_t	*conback;
+	glpic_t	*gl;
+	float	alpha;
+	float	ofs;
+
+	conback = Draw_CachePic ("gfx/conback.lmp");
+	gl = (glpic_t *) conback->data;
+
+	y = (vid.height_2d * 3) >> 2;
+
+	if (ccls.state != ca_active || lines > y)
+		alpha = 1.0;
+	else
+		alpha = (float) (0.6 * lines / y);
+
+	if (gl_constretch->ivalue)
+		ofs = 0.0f;
+	else
+		ofs = (float) ((vid.height_2d - lines) / vid.height_2d);
+
+	if (alpha != 1.0f) {
+		qglColor4f (1.0f, 1.0f, 1.0f, alpha);
+		qglEnable (GL_BLEND);
+	}
+
+	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
+	VectorSet2 (tc_array_v(0), gl->sl, gl->tl + ofs);
+	VectorSet2 (v_array_v(0), 0, 0);
+	VectorSet2 (tc_array_v(1), gl->sh, gl->tl + ofs);
+	VectorSet2 (v_array_v(1), vid.width_2d, 0);
+	VectorSet2 (tc_array_v(2), gl->sh, gl->th);
+	VectorSet2 (v_array_v(2), vid.width_2d, lines);
+	VectorSet2 (tc_array_v(3), gl->sl, gl->th);
+	VectorSet2 (v_array_v(3), 0, lines);
+	TWI_PreVDraw (0, 4);
+	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
+
+	/* hack the version number directly into the pic */
+	{
+		int     ver_len = strlen (cl_verstring->svalue);
+
+		Draw_Alt_String_Len (vid.width_2d - (ver_len * con->tsize) - 16,
+				lines - 14, cl_verstring->svalue, ver_len, con->tsize);
+	}
+	if (alpha != 1.0f)
+		qglDisable (GL_BLEND);
+
+	qglColor4fv (whitev);
+}
+
+/*
+================
+Setup for single-pixel units
+================
+ */
+void
+GL_Set2D (void)
+{
+	qglViewport (0, 0, vid.width, vid.height);
+
+	qglMatrixMode (GL_PROJECTION);
+	qglLoadIdentity ();
+	qglOrtho (0, vid.width_2d, vid.height_2d, 0, -99999, 99999);
+
+	qglMatrixMode (GL_MODELVIEW);
+	qglLoadIdentity ();
+
+	qglDisable (GL_DEPTH_TEST);
+	qglDisable (GL_CULL_FACE);
+}
+

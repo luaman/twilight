@@ -30,7 +30,7 @@ static const char rcsid[] =
 #include <math.h>
 
 #include "quakedef.h"
-#include "client.h"
+#include "cclient.h"
 #include "collision.h"
 #include "cvar.h"
 #include "draw.h"
@@ -38,8 +38,21 @@ static const char rcsid[] =
 #include "image.h"
 #include "light.h"
 #include "mathlib.h"
+#include "matrixlib.h"
 #include "strlib.h"
 #include "view.h"
+#include "gl_info.h"
+#include "gl_arrays.h"
+#include "vis.h"
+#include "gl_light.h"
+
+extern lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
+extern dlight_t cl_dlights[MAX_DLIGHTS];
+extern int d_lightstylevalue[256];
+
+extern cvar_t *r_dynamic;
+extern cvar_t *gl_oldlights;
+extern cvar_t *gl_flashblend;
 
 rdlight_t r_dlight[MAX_DLIGHTS];
 int r_numdlights = 0;
@@ -215,7 +228,7 @@ DYNAMIC LIGHTS BLEND RENDERING
 =============================================================================
 */
 
-float       bubble_sintable[17], bubble_costable[17];
+static float       bubble_sintable[17], bubble_costable[17];
 
 void
 R_InitBubble (void)
@@ -250,7 +263,7 @@ R_MarkLightsNoVis
 */
 void
 R_MarkLightsNoVis (vec3_t lightorigin, rdlight_t *rd,
-		        int bit, model_t *mod, mnode_t *node)
+		int bit, model_t *mod, mnode_t *node)
 {
 	float ndist, maxdist;
 	msurface_t *surf;
@@ -409,7 +422,7 @@ R_MarkLights (rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix)
 			if (!(c & (1<<i)))
 				continue;
 			/* warning to the clumsy: numleafs is one less than it should
-			 *              * be, it only counts leafs with vis bits (skips leaf 0) */
+			 * be, it only counts leafs with vis bits (skips leaf 0) */
 			leafnum = (k << 3)+i+1;
 			if (leafnum > model->brush->numleafs)
 				return;
@@ -425,7 +438,7 @@ R_MarkLights (rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix)
 				{
 					surf = *mark++;
 					/* If not visible in current frame, or already marked
-					 *                      * because it was in another leaf we passed, skip. */
+					 * because it was in another leaf we passed, skip. */
 					if (surf->lightframe == lightframe)
 						continue;
 					surf->lightframe = lightframe;
@@ -435,7 +448,7 @@ R_MarkLights (rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix)
 					if (surf->flags & SURF_PLANEBACK)
 						dist = -dist;
 					/* LordHavoc: make sure it is infront of
-					 *                      * the surface and not too far away */
+					 * the surface and not too far away */
 					if (dist >= rd->cullradius || (dist <= -0.25f))
 						continue;
 

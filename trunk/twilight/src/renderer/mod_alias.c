@@ -472,18 +472,18 @@ Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 		Host_Error ("Model %s too big for vertex arrays! (%d %d)", mod->name,
 				pheader->numverts, MAX_VERTEX_ARRAYS);
 
-	pheader->tcarray = Zone_Alloc(mod->zone, pheader->numverts * sizeof(astvert_t));
+	pheader->tcarray = Zone_Alloc(mod->zone, pheader->numverts * sizeof(texcoord_t));
 	for (i = 0, j = 0; i < numinverts; i++) {
 		j = vremap[i];
 
 		s = LittleLong (pinstverts[i].s) + 0.5;
 		t = LittleLong (pinstverts[i].t) + 0.5;
-		pheader->tcarray[j].s = s / pheader->skinwidth;
-		pheader->tcarray[j].t = t / pheader->skinheight;
+		pheader->tcarray[j].v[0] = s / pheader->skinwidth;
+		pheader->tcarray[j].v[1] = t / pheader->skinheight;
 		if (vseams[i]) {	// Duplicate for back texture.
 			s += pheader->skinwidth / 2;
-			pheader->tcarray[j + 1].s = s / pheader->skinwidth;
-			pheader->tcarray[j + 1].t = t / pheader->skinheight;
+			pheader->tcarray[j + 1].v[0] = s / pheader->skinwidth;
+			pheader->tcarray[j + 1].v[1] = t / pheader->skinheight;
 		}
 	}
 

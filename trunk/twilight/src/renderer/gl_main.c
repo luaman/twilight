@@ -28,7 +28,7 @@ static const char rcsid[] =
 #include "twiconfig.h"
 
 #include "quakedef.h"
-#include "client.h"
+#include "cclient.h"
 #include "cmd.h"
 #include "cvar.h"
 #include "draw.h"
@@ -43,16 +43,22 @@ static const char rcsid[] =
 #include "view.h"
 #include "sky.h"
 #include "liquid.h"
+#include "entities.h"
+#include "vid.h"
+#include "vis.h"
 #include "r_part.h"
-#include "gl_alias.h"
+#include "gl_brush.h"
 
 // FIXME - These need to be in a header somewhere
 extern void TNT_Init (void);
 extern void R_InitBubble (void);
-void R_DrawViewModel (void);
+extern void GL_EndRendering (void);
+extern void V_SetContentsColor (int contents);
+extern void R_DrawViewModel (void);
+extern void CL_ParseEntityLump (char *entdata);
+
 
 Uint c_brush_polys, c_alias_polys;
-
 
 /*
  * view origin
@@ -77,10 +83,9 @@ static cvar_t *r_norefresh;
 cvar_t *r_drawentities;
 cvar_t *r_drawviewmodel;
 static cvar_t *r_speeds;
-static cvar_t *r_shadows;
+static cvar_t *r_wireframe;
 cvar_t *r_dynamic;
 cvar_t *r_stainmaps;
-cvar_t *r_netgraph;
 
 cvar_t *gl_clear;
 cvar_t *gl_polyblend;
@@ -91,7 +96,14 @@ cvar_t *gl_im_transform;
 cvar_t *gl_oldlights;
 cvar_t *gl_colorlights;
 
+extern vec3_t lightcolor;
 qboolean colorlights = true;
+
+//static float shadescale = 0.0;
+
+extern model_t *mdl_fire;
+
+//============================================================================
 
 /*
 ============
@@ -141,12 +153,6 @@ R_SetupFrame
 static void
 R_SetupFrame (void)
 {
-	// don't allow cheats in multiplayer
-	// FIXME: do this differently/elsewhere
-	if (!Q_atoi (Info_ValueForKey (cl.serverinfo, "watervis")))
-		if (r_wateralpha->ivalue != 1)
-			Cvar_Set (r_wateralpha, "1");
-
 	R_AnimateLight ();
 
 	r_framecount++;
@@ -260,7 +266,7 @@ R_Render3DView (void)
 	R_DrawExplosions ();
 	R_DrawParticles ();
 	R_DrawCoronas ();
-	
+
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);
@@ -305,10 +311,31 @@ R_RenderView (void)
 	R_MoveExplosions ();
 	R_MoveParticles ();
 
-	R_Render3DView ();
+	if (r_wireframe->ivalue != 1 || !(gl_allow & GLA_WIREFRAME))
+		R_Render3DView ();
 
 	// don't let sound get messed up if going slow
 	S_ExtraUpdate ();
+
+	if ((gl_allow & GLA_WIREFRAME) && r_wireframe->ivalue) {
+		if (r_wireframe->ivalue == 3)
+			qglDisable (GL_DEPTH_TEST);
+		else if (r_wireframe->ivalue == 2)
+			qglEnable (GL_POLYGON_OFFSET_LINE);
+		qglDepthMask (GL_FALSE);
+		qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		qglDisable (GL_TEXTURE_2D);
+
+		R_Render3DView ();
+
+		qglEnable (GL_TEXTURE_2D);
+		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		qglDepthMask (GL_TRUE);
+		if (r_wireframe->ivalue == 3)
+			qglEnable (GL_DEPTH_TEST);
+		else if (r_wireframe->ivalue == 2)
+			qglDisable (GL_POLYGON_OFFSET_LINE);
+	}
 
 	R_PolyBlend ();
 
@@ -320,7 +347,6 @@ R_RenderView (void)
 					c_alias_polys);
 	}
 }
-
 
 
 /*
@@ -387,10 +413,9 @@ R_Init_Cvars (void)
 	r_drawentities = Cvar_Get ("r_drawentities", "1", CVAR_NONE, NULL);
 	r_drawviewmodel = Cvar_Get ("r_drawviewmodel", "1", CVAR_NONE, NULL);
 	r_speeds = Cvar_Get ("r_speeds", "0", CVAR_NONE, NULL);
-	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_ARCHIVE, NULL);
+	r_wireframe = Cvar_Get ("r_wireframe", "0", CVAR_NONE, NULL);
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
 	r_stainmaps = Cvar_Get ("r_stainmaps", "1", CVAR_ARCHIVE, NULL);
-	r_netgraph = Cvar_Get ("r_netgraph", "0", CVAR_NONE, NULL);
 
 	gl_clear = Cvar_Get ("gl_clear", "0", CVAR_ARCHIVE, NULL);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", CVAR_NONE, NULL);
@@ -400,9 +425,11 @@ R_Init_Cvars (void)
 
 	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_ARCHIVE, NULL);
 
-	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
 
+	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
+
+
 
 	Sky_Init_Cvars ();
 	R_Init_Liquid_Cvars ();
@@ -442,6 +469,7 @@ R_TimeRefresh_f (void)
 	GL_EndRendering ();
 }
 
+
 /*
 ===============
 R_Init
@@ -453,15 +481,12 @@ R_Init (void)
 	Cmd_AddCommand ("timerefresh", &R_TimeRefresh_f);
 	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
 
-	qglGenTextures(1, &netgraphtexture);
-
 	R_InitTextures ();
 	R_InitBubble ();
 	R_InitParticles ();
 	TNT_Init ();
 	R_Explosion_Init ();
 	R_InitSurf ();
-
 	Sky_Init ();
 	R_Init_Liquid ();
 	Vis_Init ();
@@ -481,11 +506,6 @@ R_NewMap (void)
 		d_lightstylevalue[i] = 264;		// normal light value
 
 	R_ClearParticles ();
-
-	memset (&cl_network_entities, 0, sizeof(cl_network_entities));
-	memset (&cl_player_entities, 0, sizeof(cl_player_entities));
-	memset (&cl_static_entities, 0, sizeof(cl_static_entities));
-	cl_num_static_entities = 0;
 
 	// Parse map entities
 	CL_ParseEntityLump (ccl.worldmodel->brush->entities);

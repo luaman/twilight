@@ -253,8 +253,8 @@ Sky_Sphere_Draw (void)
 	qglPopMatrix ();
 	qglMatrixMode (GL_MODELVIEW);
 
-	GLArrays_Reset_TC ();
 	GLArrays_Reset_Vertex ();
+	GLArrays_Reset_TC (true);
 
 	qglPopMatrix ();
 	qglDepthMask (GL_TRUE);

@@ -205,8 +205,6 @@ static int			scr_erase_center;
 
 /*
 ==============
-SCR_CenterPrint
-
 Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
@@ -327,23 +325,12 @@ SCR_CheckDrawCenterString (void)
 
 /* ========================================================================= */
 
-/*
-====================
-CalcFov
-====================
-*/
 static float
 CalcFov (float fov_x, float width, float height)
 {
 	return Q_atan (height / (width / Q_tan (fov_x/360*M_PI))) * 360 / M_PI;
 }
 
-/*
-=================
-SCR_CalcRefdef
-
-=================
-*/
 static void
 SCR_CalcRefdef (void)
 {
@@ -374,8 +361,6 @@ SCR_CalcRefdef (void)
 
 /*
 =================
-SCR_SizeUp_f
-
 Keybinding command
 =================
 */
@@ -388,8 +373,6 @@ SCR_SizeUp_f (void)
 
 /*
 =================
-SCR_SizeDown_f
-
 Keybinding command
 =================
 */
@@ -451,11 +434,6 @@ SCR_Init_Cvars (void)
 }
 
 
-/*
-==================
-SCR_Init
-==================
-*/
 void
 SCR_Init (void)
 {
@@ -477,11 +455,6 @@ SCR_Init (void)
 
 
 
-/*
-==============
-SCR_DrawTurtle
-==============
-*/
 static void
 SCR_DrawTurtle (void)
 {
@@ -502,11 +475,6 @@ SCR_DrawTurtle (void)
 	Draw_Pic (0, 0, scr_turtle);
 }
 
-/*
-==============
-SCR_DrawNet
-==============
-*/
 static void
 SCR_DrawNet (void)
 {
@@ -549,11 +517,6 @@ SCR_DrawFPS (void)
 }
 
 
-/*
-==============
-DrawPause
-==============
-*/
 static void
 SCR_DrawPause (void)
 {
@@ -571,11 +534,6 @@ SCR_DrawPause (void)
 }
 
 
-/*
-==============
-SCR_DrawLoading
-==============
-*/
 static void
 SCR_DrawLoading (void)
 {
@@ -594,11 +552,6 @@ SCR_DrawLoading (void)
 /* ========================================================================= */
 
 
-/*
-==================
-SCR_SetUpToDrawConsole
-==================
-*/
 static void
 SCR_SetUpToDrawConsole (void)
 {
@@ -629,11 +582,6 @@ SCR_SetUpToDrawConsole (void)
 	}
 }
 
-/*
-==================
-SCR_DrawConsole
-==================
-*/
 static void
 SCR_DrawConsole (void)
 {
@@ -655,11 +603,6 @@ SCR_DrawConsole (void)
 ==============================================================================
 */
 
-/* 
-================== 
-SCR_ScreenShot_f
-================== 
-*/
 static void
 SCR_ScreenShot_f (void)
 {
@@ -719,11 +662,6 @@ SCR_CaptureAviDemo (void)
 	}
 }
 
-/* 
-============== 
-WritePCXfile 
-============== 
-*/
 static void
 WritePCXfile (char *filename, Uint8 *data, int width, int height,
 			  int rowbytes, Uint8 *palette, qboolean upload)
@@ -842,11 +780,6 @@ rshot_fill (int x, int y, int w, int h)
 }
 
 
-/* 
-================== 
-SCR_RSShot_f
-================== 
-*/
 static void
 SCR_RSShot_f (void)
 {
@@ -1003,13 +936,8 @@ SCR_DrawNotifyString (void)
 
 /*
 ==================
-SCR_UpdateScreen
-
 This is called every frame, and can also be called explicitly to flush
 text to the screen.
-
-WARNING: be very careful calling this from elsewhere, because the refresh
-needs almost the entire 256k of stack space!
 ==================
 */
 void
@@ -1041,9 +969,6 @@ SCR_UpdateScreen (void)
 	/*
 	 * draw any areas not covered by the refresh
 	 */
-	if (r_netgraph->ivalue)
-		R_NetGraph ();
-
 	if (scr_drawdialog) {
 		HUD_Draw ();
 		Draw_FadeScreen ();

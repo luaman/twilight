@@ -78,6 +78,12 @@ extern int gl_tmus;
 extern int gl_lightmap_format;
 
 
+#define GLA_WIREFRAME		BIT(0)
+#define GLA_WATERALPHA		BIT(1)
+
+extern Uint32 gl_allow;
+
+
 extern int fb_size[4];
 extern int accum_size[4];
 extern int doublebuffer, buffer_size, depth_size, stencil_size;

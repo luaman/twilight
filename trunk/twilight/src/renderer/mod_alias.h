@@ -60,11 +60,6 @@ typedef struct {
 } avertex_t;
 
 typedef struct {
-	float s;
-	float t;
-} astvert_t;
-
-typedef struct {
 	Uint8		*normal_indices;	// Vertex normal indices.
 	avertex_t	*vertices;			// The compressed vertices.
 } maliaspose_t;
@@ -129,7 +124,7 @@ typedef struct {
 	int         numposes;
 	int         poseverts;
 	mtriangle_t	*triangles;			// Triangle list.
-	astvert_t	*tcarray;			// Texcoord array.
+	texcoord_t	*tcarray;			// Texcoord array.
 	maliasframedesc_t	*frames;	// Frames.
 
 	skin_t		*skins;

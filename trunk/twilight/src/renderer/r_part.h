@@ -50,6 +50,7 @@ void R_InitParticles (void);
 void R_ClearParticles (void);
 void R_MoveParticles (void);
 void R_DrawParticles (void);
+void R_ReadPointFile_f (void);
 
 #endif // __R_PART_H
 
