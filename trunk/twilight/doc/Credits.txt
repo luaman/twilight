@@ -38,7 +38,7 @@ Credits for Project: Twilight
    Zephaniah E. Hull <warp@whitestar.soark.net>
    Forest Hale <lordhavoc@users.sourceforge.net>
    Tomas Jakobsson <tompsson@hotmail.com>
-   Victor Luchits <vic@captured.com>
+   Victor Luchits <vic@quakesrc.org>
    Todd C. Miller <Todd.Miller@courtesan.com>
    Jeremy Nelson <jnelson@acronet.net>
    Mathieu Olivier <molivier@users.sourceforge.net>
