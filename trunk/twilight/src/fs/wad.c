@@ -141,14 +141,12 @@ FSW_Add_Wad (fs_group_t *group, fsw_group_t *wad, fs_file_t *file)
 	pheader.nfiles = LittleLong(pheader.nfiles);
 
 	SDL_RWseek(rw, pheader.dirofs, SEEK_SET);
-	Com_Printf("%x %d\n", pheader.dirofs, pheader.nfiles);
 	for (i = 0; i < pheader.nfiles; i++) {
 		SDL_RWread(rw, &pfile, sizeof(pfile), 1);
 		pfile.filepos = LittleLong (pfile.filepos);
 		pfile.filelen = LittleLong (pfile.filelen);
 		fsw_file = Zone_Alloc (fs_zone, sizeof(fsw_file_t));
 		fsw_file->ofs = pfile.filepos;
-		Com_Printf("gfx/%s.lmp\n", pfile.name);
 		FS_Add_File (group, va("gfx/%s.lmp", pfile.name), pfile.filelen, FSW_Open_File, fsw_file);
 	}
 	SDL_RWclose(rw);
