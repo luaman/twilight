@@ -58,11 +58,12 @@ extern struct cvar_s *fs_sharepath;
 //============================================================================
 
 typedef struct sizebuf_s {
-	qboolean    allowoverflow;			// if false, do a Sys_Error
-	qboolean    overflowed;				// true if the buffer was too small
-	Uint8      *data;
-	int         maxsize;
-	int         cursize;
+	qboolean			allowoverflow;	// if false, do a Sys_Error
+	qboolean			overflowed;		// true if the buffer was too small
+	Uint8				*data;
+	int					maxsize;
+	int					cursize;
+	struct sizebuf_s	*next;			// used for cmd_text chain
 } sizebuf_t;
 
 void SZ_Init (sizebuf_t *buf, Uint8 *data, int length);
