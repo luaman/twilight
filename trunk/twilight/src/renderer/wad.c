@@ -92,7 +92,7 @@ W_LoadWadFile (char *filename)
 	int			i;
 	int			infotableofs;
 
-	wad_base = COM_LoadHunkFile (filename);
+	wad_base = COM_LoadHunkFile (filename, true);
 	if (!wad_base)
 		Sys_Error ("W_LoadWadFile: couldn't load %s", filename);
 

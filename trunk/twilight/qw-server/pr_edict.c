@@ -999,13 +999,15 @@ PR_LoadProgs (void)
 
 	progs = NULL;
 
-	if (!deathmatch->value) {
-		progs = (dprograms_t *)COM_LoadHunkFile ("spprogs.dat");
+	if (!deathmatch->value)
+	{
+		progs = (dprograms_t *)COM_LoadHunkFile ("spprogs.dat", true);
 		strcpy (pname, "spprogs.dat");
 	}
 
-	if (!progs) {
-		progs = (dprograms_t *)COM_LoadHunkFile ("qwprogs.dat");
+	if (!progs)
+	{
+		progs = (dprograms_t *)COM_LoadHunkFile ("qwprogs.dat", true);
 		strcpy (pname, "qwprogs.dat");
 	}
 

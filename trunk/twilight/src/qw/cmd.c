@@ -26,8 +26,6 @@
 static const char rcsid[] =
     "$Id$";
 
-#include <stdlib.h>
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #else
@@ -35,6 +33,8 @@ static const char rcsid[] =
 #  include <win32conf.h>
 # endif
 #endif
+
+#include <stdlib.h>
 
 #include "quakedef.h"
 #include "cmd.h"
@@ -48,15 +48,16 @@ void Cmd_ForwardToServer_f (void);
 
 #define	MAX_ALIAS_NAME	32
 
-typedef struct cmdalias_s {
-	struct cmdalias_s *next;
-	char        name[MAX_ALIAS_NAME];
-	char       *value;
+typedef struct cmdalias_s
+{
+	struct cmdalias_s	   *next;
+	char					name[MAX_ALIAS_NAME];
+	char				   *value;
 } cmdalias_t;
 
 cmdalias_t *cmd_alias;
 
-qboolean    cmd_wait;
+qboolean cmd_wait;
 
 cvar_t     *cl_warncmd;
 
@@ -94,8 +95,8 @@ Cmd_Crash_f (void)
 =============================================================================
 */
 
-sizebuf_t   cmd_text;
-Uint8       cmd_text_buf[8192];
+sizebuf_t cmd_text;
+Uint8 cmd_text_buf[8192];
 
 /*
 ============
@@ -119,14 +120,16 @@ Adds command text at the end of the buffer
 void
 Cbuf_AddText (char *text)
 {
-	int         l;
+	int			l;
 
 	l = strlen (text);
 
-	if (cmd_text.cursize + l >= cmd_text.maxsize) {
+	if (cmd_text.cursize + l >= cmd_text.maxsize)
+	{
 		Com_Printf ("Cbuf_AddText: overflow\n");
 		return;
 	}
+
 	SZ_Write (&cmd_text, text, strlen (text));
 }
 
@@ -143,23 +146,25 @@ FIXME: actually change the command buffer to do less copying
 void
 Cbuf_InsertText (char *text)
 {
-	char       *temp;
-	int         templen;
+	char	   *temp = NULL;
+	int			templen;
 
-// copy off any commands still remaining in the exec buffer
+	// copy off any commands still remaining in the exec buffer
 	templen = cmd_text.cursize;
-	if (templen) {
+	if (templen)
+	{
 		temp = Z_Malloc (templen);
 		memcpy (temp, cmd_text.data, templen);
 		SZ_Clear (&cmd_text);
-	} else
-		temp = NULL;					// shut up compiler
+	}
 
-// add the entire text of the file
+	// add the entire text of the file
 	Cbuf_AddText (text);
 	SZ_Write (&cmd_text, "\n", 1);
-// add the copied off data
-	if (templen) {
+
+	// add the copied off data
+	if (templen)
+	{
 		SZ_Write (&cmd_text, temp, templen);
 		Z_Free (temp);
 	}
@@ -173,33 +178,36 @@ Cbuf_Execute
 void
 Cbuf_Execute (void)
 {
-	int         i;
-	char       *text;
-	char        line[1024];
-	int         quotes;
+	int			i;
+	char	   *text;
+	char		line[1024];
+	int			quotes;
 
-	while (cmd_text.cursize) {
-// find a \n or ; line break
+	while (cmd_text.cursize)
+	{
+		// find a \n or ; line break
 		text = (char *) cmd_text.data;
 
 		quotes = 0;
-		for (i = 0; i < cmd_text.cursize; i++) {
+		for (i = 0; i < cmd_text.cursize; i++)
+		{
 			if (text[i] == '"')
 				quotes++;
 			if (!(quotes & 1) && text[i] == ';')
-				break;					// don't break if inside a quoted
-			// string
+				// don't break if inside a quoted string
+				break;
 			if (text[i] == '\n')
 				break;
 		}
 
-
 		memcpy (line, text, i);
 		line[i] = 0;
 
-// delete the text from the command buffer and move remaining commands down
-// this is necessary because commands (exec, alias) can insert data at the
-// beginning of the text buffer
+		/*
+		 * delete the text from the command buffer and move remaining
+		 * commands down this is necessary because commands (exec, alias)
+		 * can insert data at the beginning of the text buffer
+		 */
 
 		if (i == cmd_text.cursize)
 			cmd_text.cursize = 0;
@@ -209,14 +217,15 @@ Cbuf_Execute (void)
 			memmove (text, text + i, cmd_text.cursize);
 		}
 
-// execute the command line
+		// execute the command line
 		Cmd_ExecuteString (line, src_command);
 
-		if (cmd_wait) {					// skip out while text still remains in 
-										// 
-			// 
-			// buffer, leaving it
-			// for next frame
+		if (cmd_wait)
+		{
+			/*
+			 * skip out while text still remains in  buffer, leaving it for
+			 * next frame
+			 */
 			cmd_wait = false;
 			break;
 		}
@@ -226,9 +235,9 @@ Cbuf_Execute (void)
 static void
 extract_line (char *line)
 {
-	int         i;
-	char       *text;
-	int         quotes;
+	int			i;
+	char	   *text;
+	int			quotes;
 
 	// find a \n or ; line break
 	text = (char *) cmd_text.data;
@@ -237,17 +246,20 @@ extract_line (char *line)
 		if (text[i] == '"')
 			quotes++;
 		if (!(quotes & 1) && text[i] == ';')
-			break;						// don't break if inside a quoted
-										// string
+			// don't break if inside a quoted string
+			break;
 		if (text[i] == '\n' || text[i] == '\r')
 			break;
 	}
 
 	memcpy (line, text, i);
 	line[i] = '\0';
-	// delete the text from the command buffer and move remaining commands
-	// down this is necessary because commands (exec, alias) can insert
-	// data at the beginning of the text buffer
+
+	/*
+	 * delete the text from the command buffer and move remaining commands
+	 * down this is necessary because commands (exec, alias) can insert
+	 * data at the beginning of the text buffer
+	 */
 
 	if (i == cmd_text.cursize)
 		cmd_text.cursize = 0;
@@ -281,13 +293,13 @@ Cbuf_Execute_Sets (void)
 void
 Cbuf_InsertFile (char *path)
 {
-	char	str[2048];
-	FILE	*f;
+	char		str[2048];
+	FILE	   *f;
 
 	f = fopen (Sys_ExpandPath (path), "r");
 	if (!f)
 		return;
-	
+
 	while (fgets (str, 2048, f) != NULL)
 		Cbuf_InsertText (str);
 
@@ -386,7 +398,7 @@ Cmd_Exec_f (void)
 	}
 	// FIXME: is this safe freeing the hunk here???
 	mark = Hunk_LowMark ();
-	f = (char *) COM_LoadHunkFile (Cmd_Argv (1));
+	f = (char *) COM_LoadHunkFile (Cmd_Argv (1), true);
 	if (!f) {
 		Com_Printf ("couldn't exec %s\n", Cmd_Argv (1));
 		return;
@@ -409,7 +421,7 @@ Just prints the rest of the line to the console
 void
 Cmd_Echo_f (void)
 {
-	int         i;
+	int			i;
 
 	for (i = 1; i < Cmd_Argc (); i++)
 		Com_Printf ("%s ", Cmd_Argv (i));
@@ -426,12 +438,13 @@ Creates a new command that executes a command string (possibly ; seperated)
 void
 Cmd_Alias_f (void)
 {
-	cmdalias_t *a;
-	char        cmd[1024];
-	int         i, c;
-	char       *s;
+	cmdalias_t	   *a;
+	char			cmd[1024];
+	int				i, c;
+	char		   *s;
 
-	if (Cmd_Argc () == 1) {
+	if (Cmd_Argc () == 1)
+	{
 		Com_Printf ("Current alias commands:\n");
 		for (a = cmd_alias; a; a = a->next)
 			Com_Printf ("%s : %s\n", a->name, a->value);
@@ -443,23 +456,27 @@ Cmd_Alias_f (void)
 		Com_Printf ("Alias name is too long\n");
 		return;
 	}
+
 	// if the alias already exists, reuse it
-	for (a = cmd_alias; a; a = a->next) {
-		if (!strcmp (s, a->name)) {
+	for (a = cmd_alias; a; a = a->next)
+	{
+		if (!strcmp (s, a->name))
+		{
 			Z_Free (a->value);
 			break;
 		}
 	}
 
-	if (!a) {
+	if (!a)
+	{
 		a = Z_Malloc (sizeof (cmdalias_t));
 		a->next = cmd_alias;
 		cmd_alias = a;
 	}
 	strcpy (a->name, s);
 
-// copy the rest of the command line
-	cmd[0] = 0;							// start out with a null string
+	// copy the rest of the command line
+	cmd[0] = '\0';
 	c = Cmd_Argc ();
 	for (i = 2; i < c; i++) {
 		strlcat (cmd, Cmd_Argv (i), sizeof (cmd));
@@ -479,22 +496,22 @@ Cmd_Alias_f (void)
 =============================================================================
 */
 
-typedef struct cmd_function_s {
-	struct cmd_function_s *next;
-	char       *name;
-	xcommand_t  function;
+typedef struct cmd_function_s
+{
+	struct cmd_function_s  *next;
+	char				   *name;
+	xcommand_t				function;
 } cmd_function_t;
 
 
 #define	MAX_ARGS		80
 
-static int  cmd_argc;
+static int cmd_argc;
 static char *cmd_argv[MAX_ARGS];
 static char *cmd_null_string = "";
 static char *cmd_args = NULL;
 
 cmd_source_t cmd_source;
-
 
 static cmd_function_t *cmd_functions;	// possible commands to execute
 
@@ -514,7 +531,7 @@ Cmd_Argc (void)
 Cmd_Argv
 ============
 */
-char       *
+char *
 Cmd_Argv (int arg)
 {
 	if (arg >= cmd_argc)
@@ -529,7 +546,7 @@ Cmd_Args
 Returns a single string containing argv(1) to argv(argc()-1)
 ============
 */
-char       *
+char *
 Cmd_Args (void)
 {
 	if (!cmd_args)
@@ -578,7 +595,8 @@ Cmd_TokenizeString (char *text)
 		if (!text)
 			return;
 
-		if (cmd_argc < MAX_ARGS) {
+		if (cmd_argc < MAX_ARGS)
+		{
 			size_t length = strlen (com_token) + 1;
 			cmd_argv[cmd_argc] = Z_Malloc (length);
 			memcpy (cmd_argv[cmd_argc], com_token, length);
@@ -630,9 +648,10 @@ Cmd_Exists
 qboolean
 Cmd_Exists (char *cmd_name)
 {
-	cmd_function_t *cmd;
+	cmd_function_t	   *cmd;
 
-	for (cmd = cmd_functions; cmd; cmd = cmd->next) {
+	for (cmd = cmd_functions; cmd; cmd = cmd->next)
+	{
 		if (!strcmp (cmd_name, cmd->name))
 			return true;
 	}
@@ -647,19 +666,19 @@ Cmd_Exists (char *cmd_name)
 Cmd_CompleteCommand
 ============
 */
-char       *
+char *
 Cmd_CompleteCommand (char *partial)
 {
-	static cmd_function_t *cmd;
-	int         len;
-	static cmdalias_t *a;
+	static cmd_function_t	   *cmd;
+	int							len;
+	static cmdalias_t		   *a;
 
 	len = strlen (partial);
 
 	if (!len)
 		return NULL;
 
-// check for exact match
+	// check for exact match
 	for (cmd = cmd_functions; cmd; cmd = cmd->next)
 		if (!strcmp (partial, cmd->name))
 			return cmd->name;
@@ -667,7 +686,7 @@ Cmd_CompleteCommand (char *partial)
 		if (!strcmp (partial, a->name))
 			return a->name;
 
-// check for partial match
+	// check for partial match
 	for (cmd = cmd_functions; cmd; cmd = cmd->next)
 		if (!strncmp (partial, cmd->name, len))
 			return cmd->name;

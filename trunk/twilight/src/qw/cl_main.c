@@ -1520,10 +1520,10 @@ Host_Init (void)
 	Com_Printf ("Exe: "__TIME__" "__DATE__"\n");
 	Com_Printf ("%4.1f megs RAM used.\n", sys_memsize / (1024 * 1024.0));
 
-	host_basepal = (Uint8 *) COM_LoadHunkFile ("gfx/palette.lmp");
+	host_basepal = (Uint8 *) COM_LoadHunkFile ("gfx/palette.lmp", true);
 	if (!host_basepal)
 		Sys_Error ("Couldn't load gfx/palette.lmp");
-	host_colormap = (Uint8 *) COM_LoadHunkFile ("gfx/colormap.lmp");
+	host_colormap = (Uint8 *) COM_LoadHunkFile ("gfx/colormap.lmp", true);
 	if (!host_colormap)
 		Sys_Error ("Couldn't load gfx/colormap.lmp");
 

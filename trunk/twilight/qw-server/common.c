@@ -51,7 +51,7 @@ static const char rcsid[] =
 #include "zone.h"
 #include "mathlib.h"
 
-usercmd_t   nullcmd;					// guarenteed to be zero
+usercmd_t nullcmd;					// guarenteed to be zero
 
 cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;
@@ -60,13 +60,13 @@ cvar_t *fs_userpath;
 cvar_t *fs_gamename;
 cvar_t *registered;
 
-void        COM_InitFilesystem (void);
-void        COM_Path_f (void);
+void COM_InitFilesystem (void);
+void COM_Path_f (void);
 
 
-qboolean    standard_quake = true, rogue, hipnotic;
+qboolean standard_quake = true, rogue, hipnotic;
 
-char        gamedirfile[MAX_OSPATH];
+char gamedirfile[MAX_OSPATH];
 
 /*
 
@@ -139,11 +139,12 @@ InsertLinkAfter (link_t *l, link_t *after)
 int
 Q_atoi (char *str)
 {
-	int         val;
-	int         sign;
-	int         c;
+	int			val;
+	int			sign;
+	int			c;
 
-	if (*str == '-') {
+	if (*str == '-')
+	{
 		sign = -1;
 		str++;
 	} else
@@ -151,12 +152,14 @@ Q_atoi (char *str)
 
 	val = 0;
 
-//
-// check for hex
-//
-	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
+	/*
+	 * check for hex
+	 */
+	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
+	{
 		str += 2;
-		while (1) {
+		while (1)
+		{
 			c = *str++;
 			if (c >= '0' && c <= '9')
 				val = (val << 4) + c - '0';
@@ -168,16 +171,18 @@ Q_atoi (char *str)
 				return val * sign;
 		}
 	}
-//
-// check for character
-//
-	if (str[0] == '\'') {
+
+	/*
+	 * check for character
+	 */
+	if (str[0] == '\'')
 		return sign * str[1];
-	}
-//
-// assume decimal
-//
-	while (1) {
+
+	/*
+	 * assume decimal
+	 */
+	while (1)
+	{
 		c = *str++;
 		if (c < '0' || c > '9')
 			return val * sign;
@@ -191,12 +196,13 @@ Q_atoi (char *str)
 float
 Q_atof (char *str)
 {
-	double      val;
-	int         sign;
-	int         c;
-	int         decimal, total;
+	double		val;
+	int			sign;
+	int			c;
+	int			decimal, total;
 
-	if (*str == '-') {
+	if (*str == '-')
+	{
 		sign = -1;
 		str++;
 	} else
@@ -204,12 +210,14 @@ Q_atof (char *str)
 
 	val = 0;
 
-//
-// check for hex
-//
-	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
+	/*
+	 * check for hex
+	 */
+	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
+	{
 		str += 2;
-		while (1) {
+		while (1)
+		{
 			c = *str++;
 			if (c >= '0' && c <= '9')
 				val = (val * 16) + c - '0';
@@ -221,20 +229,23 @@ Q_atof (char *str)
 				return val * sign;
 		}
 	}
-//
-// check for character
-//
-	if (str[0] == '\'') {
+
+	/*
+	 * check for character
+	 */
+	if (str[0] == '\'')
 		return sign * str[1];
-	}
-//
-// assume decimal
-//
+
+	/*
+	 * assume decimal
+	 */
 	decimal = -1;
 	total = 0;
-	while (1) {
+	while (1)
+	{
 		c = *str++;
-		if (c == '.') {
+		if (c == '.')
+		{
 			decimal = total;
 			continue;
 		}
@@ -246,7 +257,8 @@ Q_atof (char *str)
 
 	if (decimal == -1)
 		return val * sign;
-	while (total > decimal) {
+	while (total > decimal)
+	{
 		val /= 10;
 		total--;
 	}
@@ -263,14 +275,14 @@ Handles byte ordering and avoids alignment errors
 ==============================================================================
 */
 
-//
-// writing functions
-//
+/*
+ * writing functions
+ */
 
 void
 MSG_WriteChar (sizebuf_t *sb, int c)
 {
-	Uint8      *buf;
+	Uint8	   *buf;
 
 #ifdef PARANOID
 	if (c < -128 || c > 127)
@@ -284,7 +296,7 @@ MSG_WriteChar (sizebuf_t *sb, int c)
 void
 MSG_WriteByte (sizebuf_t *sb, int c)
 {
-	Uint8      *buf;
+	Uint8	   *buf;
 
 #ifdef PARANOID
 	if (c < 0 || c > 255)
@@ -298,7 +310,7 @@ MSG_WriteByte (sizebuf_t *sb, int c)
 void
 MSG_WriteShort (sizebuf_t *sb, int c)
 {
-	Uint8      *buf;
+	Uint8	   *buf;
 
 #ifdef PARANOID
 	if (c < ((short) 0x8000) || c > (short) 0x7fff)
@@ -313,7 +325,7 @@ MSG_WriteShort (sizebuf_t *sb, int c)
 void
 MSG_WriteLong (sizebuf_t *sb, int c)
 {
-	Uint8      *buf;
+	Uint8	   *buf;
 
 	buf = SZ_GetSpace (sb, 4);
 	buf[0] = c & 0xff;
@@ -329,7 +341,6 @@ MSG_WriteFloat (sizebuf_t *sb, float f)
 		float       f;
 		int         l;
 	} dat;
-
 
 	dat.f = f;
 	dat.l = LittleLong (dat.l);
@@ -369,11 +380,11 @@ MSG_WriteAngle16 (sizebuf_t *sb, float f)
 void
 MSG_WriteDeltaUsercmd (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd)
 {
-	int         bits;
+	int			bits;
 
-//
-// send the movement message
-//
+	/*
+	 * send the movement message
+	 */
 	bits = 0;
 	if (cmd->angles[0] != from->angles[0])
 		bits |= CM_ANGLE1;
@@ -416,11 +427,11 @@ MSG_WriteDeltaUsercmd (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd)
 }
 
 
-//
-// reading functions
-//
-int         msg_readcount;
-qboolean    msg_badread;
+/*
+ * reading functions
+ */
+int msg_readcount;
+qboolean msg_badread;
 
 void
 MSG_BeginReading (void)
@@ -439,7 +450,7 @@ MSG_GetReadCount (void)
 int
 MSG_ReadChar (void)
 {
-	signed char c;
+	signed char		c;
 
 	if (msg_readcount + 1 > net_message.cursize) {
 		msg_badread = true;
@@ -455,7 +466,7 @@ MSG_ReadChar (void)
 int
 MSG_ReadByte (void)
 {
-	unsigned char c;
+	unsigned char	c;
 
 	if (msg_readcount + 1 > net_message.cursize) {
 		msg_badread = true;
@@ -471,7 +482,7 @@ MSG_ReadByte (void)
 int
 MSG_ReadShort (void)
 {
-	short c;
+	short		c;
 
 	if (msg_readcount + 2 > net_message.cursize) {
 		msg_badread = true;
@@ -489,7 +500,7 @@ MSG_ReadShort (void)
 int
 MSG_ReadLong (void)
 {
-	int         c;
+	int			c;
 
 	if (msg_readcount + 4 > net_message.cursize) {
 		msg_badread = true;
@@ -510,9 +521,9 @@ float
 MSG_ReadFloat (void)
 {
 	union {
-		Uint8       b[4];
-		float       f;
-		int         l;
+		Uint8		b[4];
+		float		f;
+		int			l;
 	} dat;
 
 	dat.b[0] = net_message.data[msg_readcount];
@@ -526,7 +537,7 @@ MSG_ReadFloat (void)
 	return dat.f;
 }
 
-char       *
+char *
 MSG_ReadString (void)
 {
 	static char		string[2048];
@@ -589,13 +600,13 @@ MSG_ReadAngle16 (void)
 void
 MSG_ReadDeltaUsercmd (usercmd_t *from, usercmd_t *move)
 {
-	int         bits;
+	int			bits;
 
 	memcpy (move, from, sizeof (*move));
 
 	bits = MSG_ReadByte ();
 
-// read current angles
+	// read current angles
 	if (bits & CM_ANGLE1)
 		move->angles[0] = MSG_ReadAngle16 ();
 	if (bits & CM_ANGLE2)
@@ -603,7 +614,7 @@ MSG_ReadDeltaUsercmd (usercmd_t *from, usercmd_t *move)
 	if (bits & CM_ANGLE3)
 		move->angles[2] = MSG_ReadAngle16 ();
 
-// read movement
+	// read movement
 	if (bits & CM_FORWARD)
 		move->forwardmove = MSG_ReadShort ();
 	if (bits & CM_SIDE)
@@ -611,14 +622,14 @@ MSG_ReadDeltaUsercmd (usercmd_t *from, usercmd_t *move)
 	if (bits & CM_UP)
 		move->upmove = MSG_ReadShort ();
 
-// read buttons
+	// read buttons
 	if (bits & CM_BUTTONS)
 		move->buttons = MSG_ReadByte ();
 
 	if (bits & CM_IMPULSE)
 		move->impulse = MSG_ReadByte ();
 
-// read time to run command
+	// read time to run command
 	move->msec = MSG_ReadByte ();
 }
 
@@ -727,10 +738,10 @@ SZ_Clear (sizebuf_t *buf)
 	buf->overflowed = false;
 }
 
-void       *
+void *
 SZ_GetSpace (sizebuf_t *buf, int length)
 {
-	void       *data;
+	void	   *data;
 
 	if (buf->cursize + length > buf->maxsize) {
 		if (!buf->allowoverflow)
@@ -761,7 +772,7 @@ SZ_Write (sizebuf_t *buf, void *data, int length)
 void
 SZ_Print (sizebuf_t *buf, char *data)
 {
-	int         len;
+	int			len;
 
 	len = strlen (data) + 1;
 
@@ -782,13 +793,14 @@ SZ_Print (sizebuf_t *buf, char *data)
 COM_SkipPath
 ============
 */
-char       *
+char *
 COM_SkipPath (char *pathname)
 {
 	char       *last;
 
 	last = pathname;
-	while (*pathname) {
+	while (*pathname)
+	{
 		if (*pathname == '/')
 			last = pathname + 1;
 		pathname++;
@@ -805,7 +817,8 @@ void COM_StripExtension (char *in, char *out)
 {
 	char *last = NULL;
 
-	while (*in) {
+	while (*in)
+	{
 		if (*in == '.')
 			last = out;
 		if ((*in == '/') || (*in == '\\') || (*in == ':'))
@@ -822,11 +835,11 @@ void COM_StripExtension (char *in, char *out)
 COM_FileExtension
 ============
 */
-char       *
+char *
 COM_FileExtension (char *in)
 {
-	static char exten[8];
-	int         i;
+	static char		exten[8];
+	int				i;
 
 	while (*in && *in != '.')
 		in++;
@@ -847,7 +860,7 @@ COM_FileBase
 void
 COM_FileBase (char *in, char *out)
 {
-	char       *s, *s2;
+	char	   *s, *s2;
 
 	s = in + strlen (in) - 1;
 
@@ -874,17 +887,18 @@ COM_DefaultExtension
 void
 COM_DefaultExtension (char *path, char *extension)
 {
-	char       *src;
+	char	   *src;
 
-//
-// if path doesn't have a .EXT, append extension
-// (extension should include the .)
-//
+	/*
+	 * if path doesn't have a .EXT, append extension
+	 * (extension should include the .)
+	 */
 	src = path + strlen (path) - 1;
 
 	while (*src != '/' && src != path) {
 		if (*src == '.')
-			return;						// it has an extension
+			// it has an extension
+			return;
 		src--;
 	}
 
@@ -893,7 +907,7 @@ COM_DefaultExtension (char *path, char *extension)
 
 //============================================================================
 
-char        com_token[1024];
+char com_token[1024];
 
 /*
 ==============
@@ -902,11 +916,11 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-char       *
+char *
 COM_Parse (char *data)
 {
-	int         c;
-	int         len;
+	int			c;
+	int			len;
 
 	len = 0;
 	com_token[0] = 0;
@@ -914,26 +928,33 @@ COM_Parse (char *data)
 	if (!data)
 		return NULL;
 
-// skip whitespace
+	// skip whitespace
   skipwhite:
-	while ((c = *data) <= ' ') {
+	while ((c = *data) <= ' ')
+	{
 		if (c == 0)
-			return NULL;				// end of file;
+			// end of file;
+			return NULL;
 		data++;
 	}
 
-// skip // comments
-	if (c == '/' && data[1] == '/') {
+	// skip // comments
+	if (c == '/' && data[1] == '/')
+	{
 		while (*data && *data != '\n')
 			data++;
 		goto skipwhite;
 	}
-// handle quoted strings specially
-	if (c == '\"') {
+
+	// handle quoted strings specially
+	if (c == '\"')
+	{
 		data++;
-		while (1) {
+		while (1)
+		{
 			c = *data++;
-			if (c == '\"' || !c) {
+			if (c == '\"' || !c)
+			{
 				com_token[len] = 0;
 				return data;
 			}
@@ -941,7 +962,8 @@ COM_Parse (char *data)
 			len++;
 		}
 	}
-// parse a regular word
+
+	// parse a regular word
 	do {
 		com_token[len] = c;
 		data++;
@@ -963,13 +985,12 @@ COM_CheckFile
 qboolean 
 COM_CheckFile (char *fname)
 {
-	FILE *h;
+	FILE	   *h;
 
-	COM_FOpenFile (fname, &h);
+	COM_FOpenFile (fname, &h, false);
 
-	if (!h) {
+	if (!h)
 		return false;
-	}
 
 	fclose (h);
 	return true;
@@ -1047,34 +1068,38 @@ QUAKE FILESYSTEM
 =============================================================================
 */
 
-int         com_filesize;
+int com_filesize;
 
 
-//
-// in memory
-//
+/*
+ * in memory
+ */
 
-typedef struct {
+typedef struct
+{
 	char        name[MAX_QPATH];
 	int         filepos, filelen;
 } packfile_t;
 
-typedef struct pack_s {
+typedef struct pack_s
+{
 	char        filename[MAX_OSPATH];
 	FILE       *handle;
 	int         numfiles;
 	packfile_t *files;
 } pack_t;
 
-//
-// on disk
-//
-typedef struct {
+/*
+ * on disk
+ */
+typedef struct
+{
 	char        name[56];
 	int         filepos, filelen;
 } dpackfile_t;
 
-typedef struct {
+typedef struct
+{
 	char        id[4];
 	int         dirofs;
 	int         dirlen;
@@ -1082,9 +1107,10 @@ typedef struct {
 
 #define	MAX_FILES_IN_PACK	2048
 
-char        com_gamedir[MAX_OSPATH];
+char com_gamedir[MAX_OSPATH];
 
-typedef struct searchpath_s {
+typedef struct searchpath_s
+{
 	char        filename[MAX_OSPATH];
 	pack_t     *pack;		// only one of filename / pack will be used
 	struct searchpath_s *next;
@@ -1101,8 +1127,8 @@ COM_filelength
 int
 COM_filelength (FILE * f)
 {
-	int         pos;
-	int         end;
+	int			pos;
+	int			end;
 
 	pos = ftell (f);
 	fseek (f, 0, SEEK_END);
@@ -1115,10 +1141,11 @@ COM_filelength (FILE * f)
 int
 COM_FileOpenRead (char *path, FILE ** hndl)
 {
-	FILE       *f;
+	FILE	   *f;
 
 	f = fopen (path, "rb");
-	if (!f) {
+	if (!f)
+	{
 		*hndl = NULL;
 		return -1;
 	}
@@ -1136,7 +1163,7 @@ COM_Path_f
 void
 COM_Path_f (void)
 {
-	searchpath_t *s;
+	searchpath_t	   *s;
 
 	Com_Printf ("Current search path:\n");
 	for (s = com_searchpaths; s; s = s->next) {
@@ -1160,13 +1187,14 @@ The filename will be prefixed by the current game directory
 void
 COM_WriteFile (char *filename, void *data, int len)
 {
-	FILE       *f;
-	char        name[MAX_OSPATH];
+	FILE	   *f;
+	char		name[MAX_OSPATH];
 
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, filename);
 
 	f = fopen (name, "wb");
-	if (!f) {
+	if (!f)
+	{
 		Sys_mkdir (com_gamedir);
 		f = fopen (name, "wb");
 		if (!f)
@@ -1189,10 +1217,13 @@ Only used for CopyFile and download
 void
 COM_CreatePath (char *path)
 {
-	char       *ofs;
+	char	   *ofs;
 
-	for (ofs = path + 1; *ofs; ofs++) {
-		if (*ofs == '/') {				// create the directory
+	for (ofs = path + 1; *ofs; ofs++)
+	{
+		if (*ofs == '/')
+		{
+			// create the directory
 			*ofs = 0;
 			Sys_mkdir (path);
 			*ofs = '/';
@@ -1223,7 +1254,8 @@ COM_CopyFile (char *netpath, char *cachepath)
 	if (!out)
 		Sys_Error ("Error opening %s", cachepath);
 
-	while (remaining) {
+	while (remaining)
+	{
 		if (remaining < sizeof (buf))
 			count = remaining;
 		else
@@ -1245,30 +1277,33 @@ Finds the file in the search path.
 Sets com_filesize and one of handle or file
 ===========
 */
-int         file_from_pak;				// global indicating file came from
+int file_from_pak;						// global indicating file came from
 										// pack file ZOID
 
 int
-COM_FOpenFile (char *filename, FILE ** file)
+COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 {
-	searchpath_t *search;
-	char        netpath[MAX_OSPATH];
-	pack_t     *pak;
-	int         i;
-	int         findtime;
+	searchpath_t   *search;
+	char			netpath[MAX_OSPATH];
+	pack_t		   *pak;
+	int				i;
+	int				findtime;
 
 	file_from_pak = 0;
 
-//
-// search through the path, one element at a time
-//
-	for (search = com_searchpaths; search; search = search->next) {
+	/*
+	 * search through the path, one element at a time
+	 */
+	for (search = com_searchpaths; search; search = search->next)
+	{
 		// is the element a pak file?
-		if (search->pack) {
+		if (search->pack)
+		{
 			// look through all the pak file elements
 			pak = search->pack;
 			for (i = 0; i < pak->numfiles; i++)
-				if (!strcmp (pak->files[i].name, filename)) {
+				if (!strcmp (pak->files[i].name, filename))
+				{
 					// found it!
 					Sys_Printf ("PackFile: %s : %s\n", pak->filename,
 							filename);
@@ -1283,8 +1318,6 @@ COM_FOpenFile (char *filename, FILE ** file)
 				}
 		} else {
 			// check a file in the directory tree
-//			if (strchr (filename, '/') || strchr (filename, '\\'))
-//				continue;
 
 			snprintf (netpath, sizeof (netpath), "%s/%s", search->filename,
 					  filename);
@@ -1301,7 +1334,8 @@ COM_FOpenFile (char *filename, FILE ** file)
 
 	}
 
-	Sys_Printf ("FindFile: can't find %s\n", filename);
+	if (complain)
+		Sys_Printf ("FindFile: can't find %s\n", filename);
 
 	*file = NULL;
 	com_filesize = -1;
@@ -1317,27 +1351,27 @@ Allways appends a 0 byte to the loaded data.
 ============
 */
 cache_user_t *loadcache;
-Uint8        *loadbuf;
-int         loadsize;
+Uint8*loadbuf;
+int loadsize;
+
 Uint8 *
-COM_LoadFile (char *path, int usehunk)
+COM_LoadFile (char *path, int usehunk, qboolean complain)
 {
-	FILE       *h;
-	Uint8      *buf;
-	char        base[32];
-	int         len;
+	FILE	   *h;
+	Uint8	   *buf = NULL;
+	char		base[32];
+	int			len;
 
-	buf = NULL;							// quiet compiler warning
-
-// look for it in the filesystem or pack files
-	len = com_filesize = COM_FOpenFile (path, &h);
+	// look for it in the filesystem or pack files
+	len = com_filesize = COM_FOpenFile (path, &h, complain);
 	if (!h)
 		return NULL;
 
-// extract the filename base name for hunk tag
+	// extract the filename base name for hunk tag
 	COM_FileBase (path, base);
 
-	switch (usehunk) {
+	switch (usehunk)
+	{
 		case 0:
 			buf = Z_Malloc (len + 1);
 			break;
@@ -1376,33 +1410,33 @@ COM_LoadFile (char *path, int usehunk)
 }
 
 Uint8 *
-COM_LoadHunkFile (char *path)
+COM_LoadHunkFile (char *path, qboolean complain)
 {
-	return COM_LoadFile (path, 1);
+	return COM_LoadFile (path, 1, complain);
 }
 
 Uint8 *
-COM_LoadTempFile (char *path)
+COM_LoadTempFile (char *path, qboolean complain)
 {
-	return COM_LoadFile (path, 2);
+	return COM_LoadFile (path, 2, complain);
 }
 
 void
-COM_LoadCacheFile (char *path, struct cache_user_s *cu)
+COM_LoadCacheFile (char *path, struct cache_user_s *cu, qboolean complain)
 {
 	loadcache = cu;
-	COM_LoadFile (path, 3);
+	COM_LoadFile (path, 3, complain);
 }
 
 // uses temp hunk if larger than bufsize
 Uint8 *
-COM_LoadStackFile (char *path, void *buffer, int bufsize)
+COM_LoadStackFile (char *path, void *buffer, int bufsize, qboolean complain)
 {
 	Uint8      *buf;
 
 	loadbuf = (Uint8 *) buffer;
 	loadsize = bufsize;
-	buf = COM_LoadFile (path, 4);
+	buf = COM_LoadFile (path, 4, complain);
 
 	return buf;
 }
@@ -1420,13 +1454,13 @@ of the list so they override previous pack files.
 pack_t     *
 COM_LoadPackFile (char *packfile)
 {
-	dpackheader_t header;
-	int         i;
-	packfile_t *newfiles;
-	int         numpackfiles;
-	pack_t     *pack;
-	FILE       *packhandle;
-	dpackfile_t info[MAX_FILES_IN_PACK];
+	dpackheader_t	header;
+	int				i;
+	packfile_t	   *newfiles;
+	int				numpackfiles;
+	pack_t		   *pack;
+	FILE		   *packhandle;
+	dpackfile_t		info[MAX_FILES_IN_PACK];
 
 	if (COM_FileOpenRead (packfile, &packhandle) == -1)
 		return NULL;
@@ -1448,8 +1482,9 @@ COM_LoadPackFile (char *packfile)
 	fseek (packhandle, header.dirofs, SEEK_SET);
 	fread (&info, 1, header.dirlen, packhandle);
 
-// parse the directory
-	for (i = 0; i < numpackfiles; i++) {
+	// parse the directory
+	for (i = 0; i < numpackfiles; i++)
+	{
 		strcpy (newfiles[i].name, info[i].name);
 		newfiles[i].filepos = LittleLong (info[i].filepos);
 		newfiles[i].filelen = LittleLong (info[i].filelen);
@@ -1477,12 +1512,12 @@ then loads and adds pak1.pak pak2.pak ...
 void
 COM_AddDirectory (char *indir)
 {
-	int         i;
-	searchpath_t *search;
-	pack_t     *pak;
-	char        pakfile[MAX_OSPATH];
-	char	   *dir;
-	char       *p;
+	int				i;
+	searchpath_t   *search;
+	pack_t		   *pak;
+	char			pakfile[MAX_OSPATH];
+	char		   *dir;
+	char		   *p;
 
 	dir = Sys_ExpandPath (indir);
 	Com_Printf ("COM_AddDirectory: Adding %s\n", dir);
@@ -1494,18 +1529,19 @@ COM_AddDirectory (char *indir)
 	strcpy (com_gamedir, dir);
 	Sys_mkdir (com_gamedir);
 
-//
-// add the directory to the search path
-//
+	/*
+	 * add the directory to the search path
+	 */
 	search = Z_Malloc (sizeof (searchpath_t));
 	strcpy (search->filename, dir);
 	search->next = com_searchpaths;
 	com_searchpaths = search;
 
-//
-// add any pak files in the format pak0.pak pak1.pak, ...
-//
-	for (i = 0;; i++) {
+	/*
+	 * add any pak files in the format pak0.pak pak1.pak, ...
+	 */
+	for (i = 0;; i++)
+	{
 		snprintf (pakfile, sizeof (pakfile), "%s/pak%i.pak", dir, i);
 		pak = COM_LoadPackFile (pakfile);
 		if (!pak)
@@ -1515,7 +1551,6 @@ COM_AddDirectory (char *indir)
 		search->next = com_searchpaths;
 		com_searchpaths = search;
 	}
-
 }
 
 /*
@@ -1534,7 +1569,8 @@ COM_AddGameDirectory (char *dir)
 	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->string, dir);
 	COM_AddDirectory (buf);
 
-	if (strcmp (fs_userpath->string, fs_sharepath->string) != 0) {
+	if (strcmp (fs_userpath->string, fs_sharepath->string) != 0)
+	{
 		// only do this if the share path is not the same as the base path
 		snprintf (buf, sizeof (buf), "%s/%s", fs_userpath->string, dir);
 		Sys_mkdir (buf);
@@ -1556,21 +1592,25 @@ COM_Gamedir (char *dir)
 	searchpath_t *next;
 
 	if (strstr (dir, "..") || strstr (dir, "/")
-		|| strstr (dir, "\\") || strstr (dir, ":")) {
+		|| strstr (dir, "\\") || strstr (dir, ":"))
+	{
 		Com_Printf ("Gamedir should be a single filename, not a path\n");
 		return;
 	}
 
 	if (!strcmp (gamedirfile, dir))
-		return;							// still the same
+		// still the same
+		return;
 
 	strcpy (gamedirfile, dir);
 
-	//
-	// free up any current game dir info
-	//
-	while (com_searchpaths != com_base_searchpaths) {
-		if (com_searchpaths->pack) {
+	/*
+	 * free up any current game dir info
+	 */
+	while (com_searchpaths != com_base_searchpaths)
+	{
+		if (com_searchpaths->pack)
+		{
 			fclose (com_searchpaths->pack->handle);
 			Z_Free (com_searchpaths->pack->files);
 			Z_Free (com_searchpaths->pack);
@@ -1580,9 +1620,9 @@ COM_Gamedir (char *dir)
 		com_searchpaths = next;
 	}
 
-	//
-	// flush all data, so it will be forced to reload
-	//
+	/*
+	 * flush all data, so it will be forced to reload
+	 */
 	Cache_Flush ();
 
 	if (!strcmp (dir, fs_gamename->string) || !strcmp (dir, "qw"))
@@ -1599,17 +1639,14 @@ COM_InitFilesystem
 void
 COM_InitFilesystem (void)
 {
-	int         i;
+	int			i;
 
-//
-// -basedir <path>
-// Overrides the system supplied base directory
-//
+	// -basedir <path>, now the same as fs_userpath
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
 		Cvar_Set (fs_userpath, com_argv[i + 1]);
 
-// Make sure fs_sharepath is set to something useful
+	// Make sure fs_sharepath is set to something useful
 	if (!strlen (fs_sharepath->string))
 		Cvar_Set (fs_sharepath, fs_userpath->string);
 
@@ -1619,7 +1656,6 @@ COM_InitFilesystem (void)
 	// any set gamedirs will be freed up to here
 	com_base_searchpaths = com_searchpaths;
 }
-
 
 
 /*
@@ -1638,22 +1674,22 @@ Searches the string for the given
 key and returns the associated value, or an empty string.
 ===============
 */
-char       *
+char *
 Info_ValueForKey (char *s, char *key)
 {
-	char        pkey[512];
-	static char value[4][512];			// use two buffers so compares
-
-	// work without stomping on each other
-	static int  valueindex;
-	char       *o;
+	char			pkey[512];
+	static char		value[4][512];		// extra buffers for compares
+	static int		valueindex;
+	char		   *o;
 
 	valueindex = (valueindex + 1) % 4;
 	if (*s == '\\')
 		s++;
-	while (1) {
+	while (1)
+	{
 		o = pkey;
-		while (*s != '\\') {
+		while (*s != '\\')
+		{
 			if (!*s)
 				return "";
 			*o++ = *s++;
@@ -1663,7 +1699,8 @@ Info_ValueForKey (char *s, char *key)
 
 		o = value[valueindex];
 
-		while (*s != '\\' && *s) {
+		while (*s != '\\' && *s)
+		{
 			if (!*s)
 				return "";
 			*o++ = *s++;
@@ -1682,22 +1719,25 @@ Info_ValueForKey (char *s, char *key)
 void
 Info_RemoveKey (char *s, char *key)
 {
-	char       *start;
-	char        pkey[512];
-	char        value[512];
-	char       *o;
+	char	   *start;
+	char		pkey[512];
+	char		value[512];
+	char	   *o;
 
-	if (strstr (key, "\\")) {
+	if (strstr (key, "\\"))
+	{
 		Com_Printf ("Can't use a key with a \\\n");
 		return;
 	}
 
-	while (1) {
+	while (1)
+	{
 		start = s;
 		if (*s == '\\')
 			s++;
 		o = pkey;
-		while (*s != '\\') {
+		while (*s != '\\')
+		{
 			if (!*s)
 				return;
 			*o++ = *s++;
@@ -1706,14 +1746,16 @@ Info_RemoveKey (char *s, char *key)
 		s++;
 
 		o = value;
-		while (*s != '\\' && *s) {
+		while (*s != '\\' && *s)
+		{
 			if (!*s)
 				return;
 			*o++ = *s++;
 		}
 		*o = 0;
 
-		if (!strcmp (key, pkey)) {
+		if (!strcmp (key, pkey))
+		{
  			memmove (start, s, strlen(s) + 1);		// remove this part
 			return;
 		}
@@ -1727,18 +1769,20 @@ Info_RemoveKey (char *s, char *key)
 void
 Info_RemovePrefixedKeys (char *start, char prefix)
 {
-	char       *s;
-	char        pkey[512];
-	char        value[512];
-	char       *o;
+	char	   *s;
+	char		pkey[512];
+	char		value[512];
+	char	   *o;
 
 	s = start;
 
-	while (1) {
+	while (1)
+	{
 		if (*s == '\\')
 			s++;
 		o = pkey;
-		while (*s != '\\') {
+		while (*s != '\\')
+		{
 			if (!*s)
 				return;
 			*o++ = *s++;
@@ -1747,14 +1791,16 @@ Info_RemovePrefixedKeys (char *start, char prefix)
 		s++;
 
 		o = value;
-		while (*s != '\\' && *s) {
+		while (*s != '\\' && *s)
+		{
 			if (!*s)
 				return;
 			*o++ = *s++;
 		}
 		*o = 0;
 
-		if (pkey[0] == prefix) {
+		if (pkey[0] == prefix)
+		{
 			Info_RemoveKey (start, pkey);
 			s = start;
 		}
@@ -1769,29 +1815,34 @@ Info_RemovePrefixedKeys (char *start, char prefix)
 void
 Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 {
-	char        new[1024], *v;
-	int         c;
-	extern cvar_t sv_highchars;
+	char			new[1024], *v;
+	int				c;
+	extern cvar_t	sv_highchars;
 
-	if (strstr (key, "\\") || strstr (value, "\\")) {
+	if (strstr (key, "\\") || strstr (value, "\\"))
+	{
 		Com_Printf ("Can't use keys or values with a \\\n");
 		return;
 	}
 
-	if (strstr (key, "\"") || strstr (value, "\"")) {
+	if (strstr (key, "\"") || strstr (value, "\""))
+	{
 		Com_Printf ("Can't use keys or values with a \"\n");
 		return;
 	}
 
-	if (strlen (key) > 63 || strlen (value) > 63) {
+	if (strlen (key) > 63 || strlen (value) > 63)
+	{
 		Com_Printf ("Keys and values must be < 64 characters.\n");
 		return;
 	}
-	// this next line is kinda trippy
-	if (*(v = Info_ValueForKey (s, key))) {
-		// key exists, make sure we have enough room for new value, if we
-		// don't change it!
-		if (strlen (value) - strlen (v) + strlen (s) > maxsize) {
+
+	v = Info_ValueForKey (s, key);
+	if (v && *v)
+	{
+		// make sure we have enough room for new value
+		if (strlen (value) - strlen (v) + strlen (s) > maxsize)
+		{
 			Com_Printf ("Info string length exceeded\n");
 			return;
 		}
@@ -1802,22 +1853,24 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 
 	snprintf (new, sizeof (new), "\\%s\\%s", key, value);
 
-	if ((strlen (new) + strlen (s)) > maxsize) {
+	if ((strlen (new) + strlen (s)) > maxsize)
+	{
 		Com_Printf ("Info string length exceeded\n");
 		return;
 	}
 	// only copy ascii values
 	s += strlen (s);
 	v = new;
-	while (*v) {
+	while (*v)
+	{
 		c = (unsigned char) *v++;
 		if (!sv_highchars.value) {
 			c &= 127;
 			if (c < 32 || c > 127)
 				continue;
 		}
-//      c &= 127;       // strip high bits
-		if (c > 13)						// && c < 127)
+		if (c > 13)
+			// && c < 127)
 			*s++ = c;
 	}
 	*s = 0;
@@ -1826,7 +1879,8 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 void
 Info_SetValueForKey (char *s, char *key, char *value, int maxsize)
 {
-	if (key[0] == '*') {
+	if (key[0] == '*')
+	{
 		Com_Printf ("Can't set * keys\n");
 		return;
 	}
@@ -1837,27 +1891,30 @@ Info_SetValueForKey (char *s, char *key, char *value, int maxsize)
 void
 Info_Print (char *s)
 {
-	char        key[512];
-	char        value[512];
-	char       *o;
-	int         l;
+	char		key[512];
+	char		value[512];
+	char	   *o;
+	int			l;
 
 	if (*s == '\\')
 		s++;
-	while (*s) {
+	while (*s)
+	{
 		o = key;
 		while (*s && *s != '\\')
 			*o++ = *s++;
 
 		l = o - key;
-		if (l < 20) {
+		if (l < 20)
+		{
 			memset (o, ' ', 20 - l);
 			key[20] = 0;
 		} else
 			*o = 0;
 		Com_Printf ("%s", key);
 
-		if (!*s) {
+		if (!*s)
+		{
 			Com_Printf ("MISSING VALUE\n");
 			return;
 		}
@@ -1873,3 +1930,4 @@ Info_Print (char *s)
 		Com_Printf ("%s\n", value);
 	}
 }
+

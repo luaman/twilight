@@ -142,11 +142,11 @@ Skin_Cache (player_skin_t *skin)
 	 * load the pic from disk
 	 */
 	snprintf (name, sizeof (name), "skins/%s.pcx", skin->name);
-	raw = COM_LoadTempFile (name);
+	raw = COM_LoadTempFile (name, true);
 	if (!raw) {
 		Com_Printf ("Couldn't load skin %s\n", name);
 		snprintf (name, sizeof (name), "skins/%s.pcx", baseskin->string);
-		raw = COM_LoadTempFile (name);
+		raw = COM_LoadTempFile (name, true);
 		if (!raw) {
 			skin->failedload = true;
 			return NULL;

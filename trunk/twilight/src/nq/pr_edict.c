@@ -1008,7 +1008,7 @@ PR_LoadProgs (void)
 	for (i = 0; i < GEFV_CACHESIZE; i++)
 		gefvCache[i].field[0] = 0;
 
-	progs = (dprograms_t *) COM_LoadHunkFile ("progs.dat");
+	progs = (dprograms_t *) COM_LoadHunkFile ("progs.dat", true);
 	if (!progs)
 		Sys_Error ("PR_LoadProgs: couldn't load progs.dat");
 	Com_DPrintf ("Programs occupy %iK.\n", com_filesize / 1024);

@@ -833,7 +833,7 @@ COM_CheckFile (char *fname)
 {
 	FILE *h;
 
-	COM_FOpenFile (fname, &h);
+	COM_FOpenFile (fname, &h, false);
 
 	if (!h) {
 		return false;
@@ -1109,7 +1109,7 @@ int         file_from_pak;				// global indicating file came from
 										// pack file ZOID
 
 int
-COM_FOpenFile (char *filename, FILE ** file)
+COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 {
 	searchpath_t *search;
 	char        netpath[MAX_OSPATH];
@@ -1162,7 +1162,8 @@ COM_FOpenFile (char *filename, FILE ** file)
 
 	}
 
-	Sys_Printf ("FindFile: can't find %s\n", filename);
+	if (complain)
+		Sys_Printf ("FindFile: can't find %s\n", filename);
 
 	*file = NULL;
 	com_filesize = -1;
@@ -1181,7 +1182,7 @@ cache_user_t *loadcache;
 Uint8        *loadbuf;
 int           loadsize;
 Uint8 *
-COM_LoadFile (char *path, int usehunk)
+COM_LoadFile (char *path, int usehunk, qboolean complain)
 {
 	FILE       *h;
 	Uint8      *buf;
@@ -1191,7 +1192,7 @@ COM_LoadFile (char *path, int usehunk)
 	buf = NULL;							// quiet compiler warning
 
 // look for it in the filesystem or pack files
-	len = com_filesize = COM_FOpenFile (path, &h);
+	len = com_filesize = COM_FOpenFile (path, &h, complain);
 	if (!h)
 		return NULL;
 
@@ -1238,33 +1239,33 @@ COM_LoadFile (char *path, int usehunk)
 }
 
 Uint8 *
-COM_LoadHunkFile (char *path)
+COM_LoadHunkFile (char *path, qboolean complain)
 {
-	return COM_LoadFile (path, 1);
+	return COM_LoadFile (path, 1, complain);
 }
 
 Uint8 *
-COM_LoadTempFile (char *path)
+COM_LoadTempFile (char *path, qboolean complain)
 {
-	return COM_LoadFile (path, 2);
+	return COM_LoadFile (path, 2, complain);
 }
 
 void
-COM_LoadCacheFile (char *path, struct cache_user_s *cu)
+COM_LoadCacheFile (char *path, struct cache_user_s *cu, qboolean complain)
 {
 	loadcache = cu;
-	COM_LoadFile (path, 3);
+	COM_LoadFile (path, 3, complain);
 }
 
 // uses temp hunk if larger than bufsize
 Uint8 *
-COM_LoadStackFile (char *path, void *buffer, int bufsize)
+COM_LoadStackFile (char *path, void *buffer, int bufsize, qboolean complain)
 {
 	Uint8      *buf;
 
 	loadbuf = (Uint8 *) buffer;
 	loadsize = bufsize;
-	buf = COM_LoadFile (path, 4);
+	buf = COM_LoadFile (path, 4, complain);
 
 	return buf;
 }

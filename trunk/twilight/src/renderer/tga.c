@@ -274,7 +274,7 @@ TGA_Load
 Uint8 **
 TGA_Load (char *name, Uint8 **image_rgba, int *width, int *height)
 {
-	Uint8 *buf = COM_LoadTempFile (name);
+	Uint8 *buf = COM_LoadTempFile (name, true);
 
 	if (buf)
 		TGA_LoadBuffer (buf, image_rgba, width, height);

@@ -188,7 +188,7 @@ Draw_CachePic (char *path)
 	strcpy (pic->name, path);
 
 	/* load the pic from disk */
-	dat = (qpic_t *) COM_LoadTempFile (path);
+	dat = (qpic_t *) COM_LoadTempFile (path, true);
 	if (!dat)
 		Sys_Error ("Draw_CachePic: failed to load %s", path);
 	SwapPic (dat);
