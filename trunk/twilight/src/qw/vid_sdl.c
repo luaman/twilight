@@ -290,6 +290,9 @@ GL_Init (void)
 
 //  qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	Con_Printf ("Forcing glFinish\n");
+	qglFinish();
 }
 
 /*
