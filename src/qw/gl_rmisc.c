@@ -125,6 +125,7 @@ R_Init_Cvars (void)
 	r_speeds = Cvar_Get ("r_speeds", "0", CVAR_NONE, NULL);
 	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_NONE, NULL);
 	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
+	r_waterripple = Cvar_Get ("r_waterripple", "0", CVAR_NONE, NULL);
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
 	r_novis = Cvar_Get ("r_novis", "0", CVAR_NONE, NULL);
 	r_netgraph = Cvar_Get ("r_netgraph", "0", CVAR_NONE, NULL);

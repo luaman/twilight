@@ -84,6 +84,7 @@ cvar_t *r_drawviewmodel;
 cvar_t *r_speeds;
 cvar_t *r_shadows;
 cvar_t *r_wateralpha;
+cvar_t *r_waterripple;
 cvar_t *r_dynamic;
 cvar_t *r_novis;
 cvar_t *r_lightlerp;
@@ -1505,13 +1506,13 @@ R_RenderView (void)
 	qglDepthMask (GL_FALSE);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
 
-//	transpolyrender ();
-
 	R_MoveExplosions ();
 	R_DrawExplosions ();
 	R_DrawParticles ();
 	R_RenderDlights ();
 	R_DrawWaterTextureChains ();
+
+	transpolyrender ();
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (GL_TRUE);
