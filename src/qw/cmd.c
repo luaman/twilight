@@ -80,6 +80,15 @@ Cmd_Wait_f (void)
 	cmd_wait = true;
 }
 
+void
+Cmd_Crash_f (void)
+{
+	if (!developer->value)
+		Con_Printf ("I wouldn't do that if I were you...\n");
+	else
+		*(int *)NULL = BigLong (0x55303052); // W00T
+}
+
 /*
 =============================================================================
 
@@ -928,6 +937,7 @@ Cmd_Init (void)
 	Cmd_AddCommand ("echo", Cmd_Echo_f);
 	Cmd_AddCommand ("alias", Cmd_Alias_f);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
+	Cmd_AddCommand ("crash", Cmd_Crash_f);
 	Cmd_AddCommand ("cmd", Cmd_ForwardToServer_f);
 }
 
