@@ -56,6 +56,7 @@ static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
 
 static int  old_windowed_mouse;
+static int  use_mouse = false;
 
 static int  scr_width = 640, scr_height = 480;
 
@@ -430,6 +431,9 @@ VID_Init (unsigned char *palette)
 // interpret command-line params
 
 // set vid parameters
+	if ((i = COM_CheckParm ("-nomouse")) == 0)
+		use_mouse = true;
+
 	if ((i = COM_CheckParm ("-window")) == 0)
 		flags |= SDL_FULLSCREEN;
 
@@ -722,23 +726,12 @@ Sys_SendKeyEvents (void)
 				break;
 
 			case SDL_MOUSEMOTION:
+				if (!use_mouse)
+					break;
+				
 				if (_windowed_mouse->value[0]) {
-					if ((event.motion.x != (vid.width / 2))
-						|| (event.motion.y != (vid.height / 2))) {
-						mouse_x = event.motion.xrel * 5;
-						mouse_y = event.motion.yrel * 5;
-						if ((event.motion.x <
-							 ((vid.width / 2) - (vid.width / 4)))
-							|| (event.motion.x >
-								((vid.width / 2) + (vid.width / 4)))
-							|| (event.motion.y <
-								((vid.height / 2) - (vid.height / 4)))
-							|| (event.motion.y >
-								((vid.height / 2) + (vid.height / 4)))) {
-							SDL_WarpMouse ((Uint16) (vid.width / 2),
-										   (Uint16) (vid.height / 2));
-						}
-					}
+					mouse_x += event.motion.xrel;
+					mouse_y += event.motion.yrel;
 				}
 				break;
 
