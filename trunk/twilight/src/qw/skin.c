@@ -71,7 +71,7 @@ skin_t *
 Skin_Load (char *skin_name)
 {
 	char			name[MAX_OSPATH];
-	Uint8			*raw;
+	Uint8			*raw, *file;
 	Uint8			*out, *pix, *tmp, *in, *final;
 	pcx_t			*pcx;
 	int				i;
@@ -106,7 +106,7 @@ Skin_Load (char *skin_name)
 	/*
 	 * load the pic from disk
 	 */
-	raw = COM_LoadTempFile (name, true);
+	raw = file = COM_LoadTempFile (name, true);
 	if (!raw) {
 		Com_Printf ("Couldn't load skin %s\n", name);
 		return NULL;
@@ -143,8 +143,8 @@ Skin_Load (char *skin_name)
 
 	for (y = 0; y < pcx->ymax; y++, pix += pcx->xmax) {
 		for (x = 0; x <= pcx->xmax;) {
-			if (raw - (Uint8 *) pcx > com_filesize) {
-				Zone_Free (raw);
+			if ((raw - (Uint8 *) pcx) > com_filesize) {
+				Zone_Free (file);
 				Zone_Free (tmp);
 				Com_Printf ("Skin %s was malformed.  You should delete it.\n",
 							name);
@@ -155,7 +155,7 @@ Skin_Load (char *skin_name)
 			if ((dataByte & 0xC0) == 0xC0) {
 				runLength = dataByte & 0x3F;
 				if (raw - (Uint8 *) pcx > com_filesize) {
-					Zone_Free (raw);
+					Zone_Free (file);
 					Zone_Free (tmp);
 					Com_Printf
 						("Skin %s was malformed.  You should delete it.\n",
@@ -168,7 +168,7 @@ Skin_Load (char *skin_name)
 
 			// skin sanity check
 			if (runLength + x > pcx->xmax + 2) {
-				Zone_Free (raw);
+				Zone_Free (file);
 				Zone_Free (tmp);
 				Com_Printf ("Skin %s was malformed.  You should delete it.\n",
 							name);
@@ -181,7 +181,7 @@ Skin_Load (char *skin_name)
 	}
 
 	if (raw - (Uint8 *) pcx > com_filesize) {
-		Zone_Free (raw);
+		Zone_Free (file);
 		Zone_Free (tmp);
 		Com_Printf ("Skin %s was malformed.  You should delete it.\n", name);
 		return NULL;
@@ -198,7 +198,7 @@ Skin_Load (char *skin_name)
 	skin = Zone_Alloc(skin_zone, sizeof(skin_t));
 
 	GLT_Skin_Parse(final, skin, player_model->alias, name, 295, 193, 1,1);
-	Zone_Free (raw);
+	Zone_Free (file);
 	Zone_Free (tmp);
 	Zone_Free (final);
 
