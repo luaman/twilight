@@ -153,10 +153,6 @@ SOURCE=.\gl_rmain.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_rmisc.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_rsurf.c
 # End Source File
 # Begin Source File

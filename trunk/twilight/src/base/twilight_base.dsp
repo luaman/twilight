@@ -93,6 +93,10 @@ SOURCE=.\cmd.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\collision.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\crc.c
 # End Source File
 # Begin Source File
