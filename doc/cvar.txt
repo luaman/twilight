@@ -83,9 +83,9 @@ Configuration Variables
   Cvar system.  Since the system behaves a bit differently depending on
   whether Cvar exists on a server (serverinfo) or a client (userinfo), we
   have a flag for each.  This is done to eventually allow for a QuakeWorld
-  client to start its own server.  In NetQuake, the equivalent of the info
-  key system was simply for the server to propagate values to all clients.
-  We use the CVAR_USERINFO flag for this.
+  client to start its own server.  In NetQuake, the closest thing to an
+  info variable is the few Cvars which can be queried by qstat/GameSpy.
+  These are given the CVAR_SERVERINFO flag.
 
   As suggested above, Cvar_Get does not necessarily create the Cvar.  The
   Cvar may already exist.  In that case, Cvar_Get only changes the flags

@@ -12,7 +12,9 @@ LIBS=@LIBS@ -lm @SDL_LIBS@ $(twilight_qwsv_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -Umain -DTWILIGHT_QWSV
 
 bin_PROGRAMS=twilight-qwsv
-twilight_qwsv_LDADD=$(top_builddir)/src/base/libtwilight_base.a
+twilight_qwsv_LDADD= \
+	$(top_builddir)/src/base/libtwilight_base.a \
+	$(top_builddir)/qw/libqwsv.a
 
 if SYS_WIN32
 twilight_qwsv_sys_libs=-lwsock32 -lwinmm
@@ -27,7 +29,7 @@ twilight_qwsv_SOURCES= \
 	pr_cmds.c pr_edict.c pr_exec.c progdefs.h progs.h \
 	protocol.h server.h sv_ccmds.c \
 	sv_ents.c sv_init.c sv_main.c sv_model.c sv_move.c sv_nchan.c sv_phys.c \
-        sv_send.c sv_sys.c sv_user.c world.c world.h
+	sv_send.c sv_sys.c sv_user.c world.c world.h
 
 EXTRA_DIST= \
 	qwsv.dsp

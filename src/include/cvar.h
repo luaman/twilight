@@ -27,6 +27,7 @@
 #ifndef __CVAR_H
 #define __CVAR_H
 
+#include "qtypes.h"
 
 // NOTE: These flags must match Cvar_FlagString in cvar.c
 
