@@ -1006,7 +1006,7 @@ GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 
 void
 GL_Upload8_EXT (byte * data, int width, int height, qboolean mipmap,
-				int alpha)
+				qboolean alpha)
 {
 	int         i, s;
 	qboolean    noalpha;
