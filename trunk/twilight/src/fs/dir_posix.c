@@ -129,22 +129,14 @@ qboolean
 FSD_Open_New (fs_group_t *group, fs_new_t *new)
 {
 	fsd_group_t	*dir = group->fs_data;
-	int			fd = 0;
 	FILE		*file;
 
 	new->temp = zasprintf (fs_zone, "%s.tmp", new->wanted);
-	fd = creat (va("%s/%s", dir->path, new->temp), 0666);
-	if (!fd || fd == -1) {
-		Com_Printf ("FSD_Open_New: Unable to open. %s\n", strerror(errno));
-		Zone_Free (new->temp);
-		new->temp = NULL;
-		return false;
-	}
-	if (!(file = fdopen(fd, (new->flags & FSF_ASCII) ? "w" : "wb"))) {
+	if (!(file = fopen(va("%s/%s", dir->path, new->temp),
+					(new->flags & FSF_ASCII) ? "w" : "wb"))) {
 		Com_Printf ("FSD_Open_New: Unable to fdopen. %s\n", strerror(errno));
 		Zone_Free (new->temp);
 		new->temp = NULL;
-		close (fd);
 		return false;
 	}
 	if ((new->rw = SDL_RWFromFP (file, 1)))
