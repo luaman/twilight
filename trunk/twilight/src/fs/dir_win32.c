@@ -118,16 +118,20 @@ qboolean
 FSD_Open_New (fs_group_t *group, fs_new_t *new)
 {
 	fsd_group_t	*dir = group->fs_data;
+	char		*name;
 
 	new->temp = zasprintf (fs_zone, "%s.tmp", new->wanted);
-	new->rw = SDL_RWFromFile (va("%s/%s", dir->path, new->temp), 
-			(new->flags & FSF_ASCII) ? "r" : "rb");
+	name = zasprintf (tempzone, "%s/%s", dir->path, new->temp);
+	new->rw = SDL_RWFromFile (name, (new->flags & FSF_ASCII) ? "r" : "rb");
 	if (!new->rw) {
+		Com_Printf ("FSD_Open_New: Unable to open %s. (%s)\n", name, strerror(errno));
 		Zone_Free (new->temp);
-		Com_Printf ("FSD_Open_New: Unable to open. %s\n", strerror(errno));
+		Zone_Free (name);
 		return false;
-	} else
+	} else {
+		Zone_Free (name);
 		return true;
+	}
 }
 
 void
