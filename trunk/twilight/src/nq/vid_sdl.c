@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <SDL.h>
 #include "quakedef.h"
+#include "glquake.h"
 
 
 #define WARP_WIDTH              640
@@ -51,6 +52,8 @@ cvar_t     *vid_mode;
 cvar_t     *m_filter;
 cvar_t     *_windowed_mouse;
 cvar_t     *gl_ztrick;
+cvar_t     *gl_driver;
+
 
 static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
@@ -309,39 +312,39 @@ GL_Init
 void
 GL_Init (void)
 {
-	gl_vendor = glGetString (GL_VENDOR);
+	gl_vendor = qglGetString (GL_VENDOR);
 	Con_Printf ("GL_VENDOR: %s\n", gl_vendor);
-	gl_renderer = glGetString (GL_RENDERER);
+	gl_renderer = qglGetString (GL_RENDERER);
 	Con_Printf ("GL_RENDERER: %s\n", gl_renderer);
 
-	gl_version = glGetString (GL_VERSION);
+	gl_version = qglGetString (GL_VERSION);
 	Con_Printf ("GL_VERSION: %s\n", gl_version);
-	gl_extensions = glGetString (GL_EXTENSIONS);
+	gl_extensions = qglGetString (GL_EXTENSIONS);
 	Con_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
 
 //  Con_Printf ("%s %s\n", gl_renderer, gl_version);
 
 	CheckMultiTextureExtensions ();
 
-	glClearColor (1, 0, 0, 0);
-	glCullFace (GL_FRONT);
-	glEnable (GL_TEXTURE_2D);
+	qglClearColor (1, 0, 0, 0);
+	qglCullFace (GL_FRONT);
+	qglEnable (GL_TEXTURE_2D);
 
-	glEnable (GL_ALPHA_TEST);
-	glAlphaFunc (GL_GREATER, 0.666);
+	qglEnable (GL_ALPHA_TEST);
+	qglAlphaFunc (GL_GREATER, 0.666);
 
-	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-	glShadeModel (GL_FLAT);
+	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+	qglShadeModel (GL_FLAT);
 
-	glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-//  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//  qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
 /*
@@ -407,6 +410,7 @@ VID_Init (unsigned char *palette)
 	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
 	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE, NULL);
 	gl_ztrick = Cvar_Get ("gl_ztrick", "1", CVAR_NONE, NULL);
+	gl_driver = Cvar_Get ("gl_driver", "libGL.so.1", CVAR_ROM, NULL);
 
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
@@ -459,6 +463,8 @@ VID_Init (unsigned char *palette)
 		fprintf (stderr, "Error: %s\n", SDL_GetError ());
 		exit (1);
 	}
+	if (!GLF_Init())
+		Sys_Error ("Could not init the libGL!\n");
 
 	// We want at least 4444 (16 bit RGBA)
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 4);

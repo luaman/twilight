@@ -23,6 +23,7 @@ static const char rcsid[] =
 	"$Id$";
 
 #include "quakedef.h"
+#include "glquake.h"
 
 extern cvar_t cl_predict_players;
 extern cvar_t cl_predict_players2;

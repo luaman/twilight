@@ -225,8 +225,6 @@ typedef struct {
 #include "crc.h"
 #include "cdaudio.h"
 
-#include "glquake.h"
-
 //=============================================================================
 
 // the host system specifies the base of the directory tree, the

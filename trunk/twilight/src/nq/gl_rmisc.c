@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // r_misc.c
 
 #include "quakedef.h"
+#include "glquake.h"
 
 void R_InitBubble (void);
 
@@ -86,7 +87,7 @@ R_InitParticleTexture (void)
 	// particle texture
 	// 
 	particletexture = texture_extension_number++;
-	glBindTexture (GL_TEXTURE_2D, particletexture);
+	qglBindTexture (GL_TEXTURE_2D, particletexture);
 
 	for (x = 0; x < 8; x++) {
 		for (y = 0; y < 8; y++) {
@@ -96,13 +97,13 @@ R_InitParticleTexture (void)
 			data[y][x][3] = dottexture[x][y] * 255;
 		}
 	}
-	glTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 8, 8, 0, GL_RGBA,
+	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 8, 8, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, data);
 
-	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 /*
@@ -117,8 +118,8 @@ R_Envmap_f (void)
 {
 	byte        buffer[256 * 256 * 4];
 
-	glDrawBuffer (GL_FRONT);
-	glReadBuffer (GL_FRONT);
+	qglDrawBuffer (GL_FRONT);
+	qglReadBuffer (GL_FRONT);
 	envmap = true;
 
 	r_refdef.vrect.x = 0;
@@ -131,44 +132,44 @@ R_Envmap_f (void)
 	r_refdef.viewangles[2] = 0;
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 	R_RenderView ();
-	glReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	COM_WriteFile ("env0.rgb", buffer, sizeof (buffer));
 
 	r_refdef.viewangles[1] = 90;
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 	R_RenderView ();
-	glReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	COM_WriteFile ("env1.rgb", buffer, sizeof (buffer));
 
 	r_refdef.viewangles[1] = 180;
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 	R_RenderView ();
-	glReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	COM_WriteFile ("env2.rgb", buffer, sizeof (buffer));
 
 	r_refdef.viewangles[1] = 270;
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 	R_RenderView ();
-	glReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	COM_WriteFile ("env3.rgb", buffer, sizeof (buffer));
 
 	r_refdef.viewangles[0] = -90;
 	r_refdef.viewangles[1] = 0;
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 	R_RenderView ();
-	glReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	COM_WriteFile ("env4.rgb", buffer, sizeof (buffer));
 
 	r_refdef.viewangles[0] = 90;
 	r_refdef.viewangles[1] = 0;
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 	R_RenderView ();
-	glReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	COM_WriteFile ("env5.rgb", buffer, sizeof (buffer));
 
 	envmap = false;
-	glDrawBuffer (GL_BACK);
-	glReadBuffer (GL_BACK);
+	qglDrawBuffer (GL_BACK);
+	qglReadBuffer (GL_BACK);
 	GL_EndRendering ();
 }
 
@@ -310,7 +311,7 @@ R_TranslatePlayerSkin (int playernum)
 
 	// because this happens during gameplay, do it fast
 	// instead of sending it through gl_upload 8
-	glBindTexture (GL_TEXTURE_2D, playertextures + playernum);
+	qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
 
 #if 0
 	byte        translated[320 * 200];
@@ -353,12 +354,12 @@ R_TranslatePlayerSkin (int playernum)
 			frac += fracstep;
 		}
 	}
-	glTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, scaled_width,
+	qglTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, scaled_width,
 				  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
-	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 #endif
 
 }
@@ -421,8 +422,8 @@ R_TimeRefresh_f (void)
 	int         i;
 	float       start, stop, time;
 
-	glDrawBuffer (GL_FRONT);
-	glFinish ();
+	qglDrawBuffer (GL_FRONT);
+	qglFinish ();
 
 	start = Sys_FloatTime ();
 	for (i = 0; i < 128; i++) {
@@ -430,12 +431,12 @@ R_TimeRefresh_f (void)
 		R_RenderView ();
 	}
 
-	glFinish ();
+	qglFinish ();
 	stop = Sys_FloatTime ();
 	time = stop - start;
 	Con_Printf ("%f seconds (%f fps)\n", time, 128 / time);
 
-	glDrawBuffer (GL_BACK);
+	qglDrawBuffer (GL_BACK);
 	GL_EndRendering ();
 }
 
