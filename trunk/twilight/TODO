@@ -5,21 +5,12 @@ These things need to be done before public release:
 
   - replacement md4.c, ours is a GPL violation
 
-  - Mercury's key system updates
-    - agree on names for KGT_*
-    - documentation of the new key system
-    - code needs porting to NQ
-    - new defaults for Id, mission packs, and anything else we find
-    - conversion tool for old configs
-
   - Sys_ExpandPath, for twiddle expansion, / normalization, etc
 
   - Dynamic OpenGL binding
 
   - New Cvar system
-    - finish in NQ
     - port to QW
-    - add callbacks where helpful
     - convert from list to hash
 
   - Documentation, we've changed enough that this is necessary
@@ -32,6 +23,7 @@ These things need to be done before public release:
     4 Menu overhaul, perhaps following tQER model for now
     4 Console font
     7 Knghtbrd's server console
+    9 Use callbacks for Cvars to increase performance somewhat
 
 
 Stuff that can probably wait:
@@ -49,4 +41,6 @@ Stuff that can probably wait:
 Wishlist stuff:
 
   - Change resolutions in-game
+  - Produce a dedicated server for NQ
+  - Merge QW server into QW client ala NQ
 
