@@ -863,3 +863,4 @@ void Vector2Angles (vec3_t in, vec3_t out)
 	out[1] = y;
 	out[2] = 0;
 }
+
