@@ -115,11 +115,11 @@ void InsertLinkAfter (link_t *l, link_t *after);
 # define LittleFloat(x) (x)
 # define BigShort(x) (Sint16)SDL_SwapBE16(x)
 # define BigLong(x) (Sint32)SDL_SwapBE32(x)
-# define BigFloat(x) ((float_int_t)SDL_SwapBE32(((float_int_t)(x)).i)).fp
+# define BigFloat(x) ((float_int_t)SDL_SwapBE32(((float_int_t)(x)).i)).f
 #else
 # define LittleShort(x) (Sint16)SDL_SwapLE16(x)
 # define LittleLong(x) (Sint32)SDL_SwapLE32(x)
-# define LittleFloat(x) ((float_int_t)SDL_SwapLE32(((float_int_t)(x)).i)).fp
+# define LittleFloat(x) ((float_int_t)SDL_SwapLE32(((float_int_t)(x)).i)).f
 # define BigShort(x) (x)
 # define BigLong(x) (x)
 # define BigFloat(x) (x)
