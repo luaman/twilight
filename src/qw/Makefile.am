@@ -43,7 +43,7 @@ twilight_qw_SOURCES= \
 	view.c wad.c zone.c \
 	bspfile.h keys.h protocol.h \
 	render.h sys.c \
-	transform.c gl_poly.c
+	transform.c transform.h gl_poly.c gl_poly.h
 
 
 EXTRA_DIST= \
