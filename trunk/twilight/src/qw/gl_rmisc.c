@@ -294,12 +294,24 @@ R_TranslatePlayerSkin (int playernum)
 		// instead of sending it through gl_upload 8
 		qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
 
-		scaled_width = gl_max_size->value < 512 ? gl_max_size->value : 512;
-		scaled_height = gl_max_size->value < 256 ? gl_max_size->value : 256;
+		for (scaled_width = 1; scaled_width < tinwidth; scaled_width <<= 1);
+		for (scaled_height = 1; scaled_height < tinheight; scaled_height <<= 1);
+
+		// always scale player textures down to 512x256
+		scaled_width = min (scaled_width, 512);
+		scaled_height = min (scaled_height, 256);
 
 		// allow users to crunch sizes down even more if they want
 		scaled_width >>= (int)gl_playermip->value;
 		scaled_height >>= (int)gl_playermip->value;
+
+		// and also clip them to gl_max_size
+		scaled_width = min (scaled_width, gl_max_size->value);
+		scaled_height = min (scaled_height, gl_max_size->value);
+
+		// don't allow 0x0 textures, they don't work well.
+		scaled_width = max (scaled_width, 1);
+		scaled_height = max (scaled_height, 1);
 
 		for (i=0 ; i<256 ; i++)
 			translate32[i] = d_8to32table[translate[i]];

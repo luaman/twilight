@@ -1104,10 +1104,13 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 	scaled_width >>= (int) gl_picmip->value;
 	scaled_height >>= (int) gl_picmip->value;
 
-	if (scaled_width > gl_max_size->value)
-		scaled_width = gl_max_size->value;
-	if (scaled_height > gl_max_size->value)
-		scaled_height = gl_max_size->value;
+	// and also clip them to gl_max_size
+	scaled_width = min (scaled_width, gl_max_size->value);
+	scaled_height = min (scaled_height, gl_max_size->value);
+
+	// don't allow 0x0 textures, they don't work well.
+	scaled_width = max (scaled_width, 1);
+	scaled_height = max (scaled_height, 1);
 
 	if (scaled_width * scaled_height > sizeof (scaled) / 4)
 		Sys_Error ("GL_LoadTexture: too big");
