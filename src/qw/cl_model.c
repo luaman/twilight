@@ -1002,7 +1002,7 @@ mflags_t modelflags[] =
 
 	// Common
 	{ "progs/v_", 8, FLAG_NOSHADOW|FLAG_NO_IM_FORM },
-	{ "progs/eyes.mdl", 0, FLAG_DOUBLESIZE },
+	{ "progs/eyes.mdl", 0, FLAG_EYES },
 	{ "progs/armor.mdl", 0, 0 },
 	{ "progs/g_", 8, 0 },
 
@@ -1135,7 +1135,6 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		pheader->eyeposition[i] = LittleFloat (pinmodel->eyeposition[i]);
 	}
 
-
 //
 // load the skins
 //
@@ -1205,6 +1204,13 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	if (mod->numframes == 1)
 		if (!mod->modflags & FLAG_NO_IM_ANIM)
 			mod->modflags |= FLAG_NO_IM_ANIM;
+
+	// double size of eyes, since they are really hard to see in gl
+	if (mod->modflags & FLAG_EYES)
+	{
+		pheader->scale_origin[2] += -(22 + 8);
+		VectorScale (pheader->scale, 2, pheader->scale);
+	}
 
 	// 
 	// build the draw lists

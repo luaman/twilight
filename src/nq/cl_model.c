@@ -996,7 +996,7 @@ mflags_t modelflags[] =
 	{ "progs/spidleg.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/gor1_gib.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/gor2_gib.mdl", 0, FLAG_NOSHADOW },
-	{ "progs/xhairo", 12, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_DOUBLESIZE },
+	{ "progs/xhairo", 12, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
 	{ "progs/bluankey.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/bluplkey.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/gldankey.mdl", 0, FLAG_NOSHADOW },
@@ -1008,7 +1008,7 @@ mflags_t modelflags[] =
 	{ "progs/g_", 8, 0 },
 	{ "progs/h_", 8, FLAG_NOSHADOW },
 	{ "progs/gib", 9, FLAG_NOSHADOW },
-	{ "progs/eyes.mdl", 0, FLAG_DOUBLESIZE },
+	{ "progs/eyes.mdl", 0, FLAG_EYES },
 	{ "progs/armor.mdl", 0, 0 },
 
 	// end of list
@@ -1186,6 +1186,13 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	if (mod->numframes == 1)
 		if (!mod->modflags & FLAG_NO_IM_ANIM)
 			mod->modflags |= FLAG_NO_IM_ANIM;
+
+	// double size of eyes, since they are really hard to see in gl
+	if (mod->modflags & FLAG_EYES)
+	{
+		pheader->scale_origin[2] += -(22 + 8);
+		VectorScale (pheader->scale, 2, pheader->scale);
+	}
 
 	// 
 	// build the draw lists
