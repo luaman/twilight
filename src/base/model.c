@@ -527,6 +527,7 @@ Mod_LoadClipnodes (lump_t *l)
 	hull->clip_maxs[0] = 16;
 	hull->clip_maxs[1] = 16;
 	hull->clip_maxs[2] = 32;
+	VectorSubtract (hull->clip_maxs, hull->clip_mins, hull->clip_size);
 
 	hull = &loadmodel->hulls[2];
 	hull->clipnodes = out;
@@ -539,6 +540,7 @@ Mod_LoadClipnodes (lump_t *l)
 	hull->clip_maxs[0] = 32;
 	hull->clip_maxs[1] = 32;
 	hull->clip_maxs[2] = 64;
+	VectorSubtract (hull->clip_maxs, hull->clip_mins, hull->clip_size);
 
 	for (i = 0; i < count; i++, out++, in++) {
 		out->planenum = LittleLong (in->planenum);
