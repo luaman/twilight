@@ -17,7 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-// r_misc.c
+
+static const char rcsid[] =
+	"$Id$";
 
 #include "quakedef.h"
 
@@ -209,6 +211,10 @@ R_Init (void)
 	gl_reporttjunctions = Cvar_Get ("gl_reporttjunctions", "0", CVAR_NONE,
 			NULL);
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
+
+	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_NONE, NULL);
+
+	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_NONE, NULL);
 
 	if (gl_mtexable)
 		Cvar_Set (gl_texsort, "0");

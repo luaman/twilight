@@ -19,6 +19,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // cl_parse.c  -- parse a message received from the server
 
+static const char rcsid[] =
+	"$Id$";
+
 #include "quakedef.h"
 #include "keys.h"
 
@@ -746,6 +749,9 @@ CL_ParseStatic (void)
 	ent->frame = es.frame;
 	ent->colormap = vid.colormap;
 	ent->skinnum = es.skinnum;
+	ent->pose1 = -1;
+	ent->pose2 = -1;
+	ent->frame_start_time = 0;
 
 	VectorCopy (es.origin, ent->origin);
 	VectorCopy (es.angles, ent->angles);

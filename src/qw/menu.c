@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+static const char rcsid[] =
+	"$Id$";
+
 #include "quakedef.h"
 #include "keys.h"
 
@@ -29,7 +33,7 @@ void        (*vid_menukeyfn) (int key);
 
 enum { m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup,
 	m_net, m_options, m_video, m_keys, m_help, m_quit, m_serialconfig,
-	m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist
+	m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist, m_gfx
 } m_state;
 
 void        M_Menu_Main_f (void);
@@ -42,6 +46,7 @@ void        M_Menu_Net_f (void);
 void        M_Menu_Options_f (void);
 void        M_Menu_Keys_f (void);
 void        M_Menu_Video_f (void);
+void		M_Menu_Gfx_f (void);
 void        M_Menu_Help_f (void);
 void        M_Menu_Quit_f (void);
 void        M_Menu_SerialConfig_f (void);
@@ -377,7 +382,7 @@ M_Main_Key (int key)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	16
+#define	OPTIONS_ITEMS	17
 
 #define	SLIDER_RANGE	10
 
@@ -561,6 +566,8 @@ M_Options_Draw (void)
 	M_Print (16, 152, "             Use Mouse");
 	M_DrawCheckbox (220, 152, _windowed_mouse->value);
 
+	M_Print (16, 160, "      Graphics Options");
+
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8,
 					 12 + ((int) (realtime * 4) & 1));
@@ -590,6 +597,9 @@ M_Options_Key (int k)
 					break;
 				case 14:
 					M_Menu_Video_f ();
+					break;
+				case 16:
+					M_Menu_Gfx_f ();
 					break;
 				default:
 					M_AdjustSliders (1);
@@ -628,6 +638,146 @@ M_Options_Key (int k)
 	}
 }
 
+//=============================================================================
+/* GFX */
+
+/*
+	Smooth models			on/off
+	Affine models			on/off
+	Fullbright models		on/off
+	Fast dynamic lights		on/off
+	Shadows					on/fast/nice
+	Frame interpolation	    on/off
+*/
+
+#define GFX_ITEMS	6
+
+int gfx_cursor = 0;
+
+void
+M_Menu_Gfx_f (void)
+{
+	key_dest = key_menu;
+	m_state = m_gfx;
+	m_entersound = true;
+}
+
+void
+M_Gfx_Draw (void)
+{
+	static qpic_t *p = NULL;
+
+	if (!p) p = Draw_CachePic ("gfx/p_option.lmp");
+
+	M_DrawPic ((320 - p->width) / 2, 4, p);
+
+	M_Print (16, 32, "                      ");
+
+	M_Print (16, 32, "         Smooth models");
+	M_DrawCheckbox (220, 32, gl_smoothmodels->value);
+
+	M_Print (16, 40, "         Affine models");
+	M_DrawCheckbox (220, 40, gl_affinemodels->value);
+
+	M_Print (16, 48, "      Fullbright models");
+	M_DrawCheckbox (220, 48, gl_fb_models->value);
+
+	M_Print (16, 56, "   Fast dynamic lights");
+	M_DrawCheckbox (220, 56, gl_flashblend->value);
+
+	M_Print (16, 64, "               Shadows");
+	M_Print (220, 64, 
+		(r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off");
+
+	M_Print (16, 72, "   Frame interpolation");
+	M_DrawCheckbox (220, 72, gl_im_animation->value);
+
+// cursor
+	M_DrawCharacter (200, 32 + gfx_cursor * 8,
+					 12 + ((int) (realtime * 4) & 1));
+}
+
+void
+M_Gfx_Set (void)
+{
+	int v = 0;
+
+	switch (gfx_cursor)
+	{
+		case 0:
+			v = !(int)gl_smoothmodels->value;
+			Cvar_Set (gl_smoothmodels, va("%i", v));
+			break;
+
+		case 1:
+			v = !(int)gl_affinemodels->value;
+			Cvar_Set (gl_affinemodels, va("%i", v));
+			break;
+
+		case 2:
+			v = !(int)gl_fb_models->value;
+			Cvar_Set (gl_fb_models, va("%i", v));
+			break;
+
+		case 3:
+			v = !(int)gl_flashblend->value;
+			Cvar_Set (gl_flashblend, va("%i", v));
+			break;
+
+		case 4:
+			v = (int)r_shadows->value + 1;
+			if (v > 2) v = 0;
+			Cvar_Set (r_shadows, va("%i", v));
+			break;
+
+		case 5:
+			v = !(int)gl_im_animation->value;
+			Cvar_Set (gl_im_animation, va("%i", v));
+			break;
+			
+		default:
+			break;
+	}
+}
+
+void
+M_Gfx_Key (int k)
+{
+	switch (k) {
+		case K_ESCAPE:
+			M_Menu_Options_f ();
+			return;
+			
+		case K_ENTER:
+			m_entersound = true;
+			return;
+
+		case K_UPARROW:
+			S_LocalSound ("misc/menu1.wav");
+			gfx_cursor--;
+			if (gfx_cursor < 0)
+				gfx_cursor = GFX_ITEMS - 1;
+			break;
+
+		case K_DOWNARROW:
+			S_LocalSound ("misc/menu1.wav");
+			gfx_cursor++;
+			if (gfx_cursor >= GFX_ITEMS)
+				gfx_cursor = 0;
+			break;
+
+		case K_LEFTARROW:
+			M_Gfx_Set ();
+			break;
+
+		case K_RIGHTARROW:
+			M_Gfx_Set ();
+			break;
+
+		default:
+			break;
+	}
+}
 
 //=============================================================================
 /* KEYS MENU */
@@ -1222,6 +1372,10 @@ M_Draw (void)
 		case m_slist:
 //      M_ServerList_Draw ();
 			break;
+
+		case m_gfx:
+			M_Gfx_Draw ();
+			break;
 	}
 
 	if (m_entersound) {
@@ -1310,6 +1464,10 @@ M_Keydown (int key)
 
 		case m_slist:
 //      M_ServerList_Key (key);
+			return;
+
+		case m_gfx:
+			M_Gfx_Key (key);
 			return;
 	}
 }
