@@ -575,10 +575,10 @@ PF_checkpos (void)
 
 Uint8       checkpvs[MAX_MAP_LEAFS / 8];
 
-int
-PF_newcheckclient (int check)
+Uint
+PF_newcheckclient (Uint check)
 {
-	int         i;
+	Uint        i;
 	Uint8      *pvs;
 	edict_t    *ent;
 	mleaf_t    *leaf;

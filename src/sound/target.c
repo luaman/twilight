@@ -77,7 +77,7 @@ paint_audio (void *unused, Uint8 *stream, int len)
 qboolean
 SNDDMA_Init (void)
 {
-	int				i;
+	Uint			i;
 	SDL_AudioSpec	desired;
 	SDL_AudioSpec	obtained;
 	qboolean		supported;

@@ -345,7 +345,7 @@ Mod_LoadLighting
 void
 Mod_LoadLighting (lump_t *l)
 {
-	int i;
+	Uint i;
 	Uint8 *in, *out, *data;
 	Uint8 d;
 	char litfilename[MAX_OSPATH];
@@ -1025,7 +1025,7 @@ mflags_t modelflags[] =
 	{ "progs/eyes.mdl", 0, FLAG_EYES|FLAG_DOUBLESIZE },
 
 	// end of list
-	{ NULL }
+	{ NULL, 0, 0 }
 };
 
 static int nummflags = sizeof(modelflags) / sizeof(modelflags[0]) - 1;
@@ -1257,13 +1257,6 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	}
 	VectorSet(mod->yawmins, -bboxyawradius, -bboxyawradius, mod->normalmins[2]);
 	VectorSet(mod->yawmaxs, bboxyawradius, bboxyawradius, mod->normalmaxs[2]);
-	mod->c1 = 0xFF000000;
-	mod->c2 = 0x00FF0000;
-	mod->c3 = 0x0000FF00;
-	mod->c4 = 0x000000FF;
-	mod->c5 = 0xFFFF0000;
-	mod->c6 = 0xFF00FF00;
-	mod->c7 = 0xFF0000FF;
 
 /*
  * Actually load the skins, now that we have the triangle and texcoord data.

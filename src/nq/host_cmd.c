@@ -92,8 +92,6 @@ Host_Status_f (void)
 
 	print ("host:    %s\n", hostname->svalue);
 	print ("version: %s\n", VERSION);
-	if (tcpipAvailable)
-		print ("tcp/ip:  %s\n", my_tcpip_address);
 	print ("map:     %s\n", sv.name);
 	print ("players: %i active (%i max)\n\n", net_activeconnections,
 		   svs.maxclients);
@@ -1125,7 +1123,7 @@ Host_Kick_f (void)
 
 	if (Cmd_Argc () > 2 && strcmp (Cmd_Argv (1), "#") == 0) {
 		i = Q_atof (Cmd_Argv (2)) - 1;
-		if (i < 0 || i >= svs.maxclients)
+		if (i >= svs.maxclients)
 			return;
 		if (!svs.clients[i].active)
 			return;

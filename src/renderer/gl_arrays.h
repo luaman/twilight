@@ -72,17 +72,17 @@ extern memzone_t *vzone;
 
 extern float_int_t *FtoUB_tmp;
 
-extern void inline
-TWI_FtoUBMod (GLfloat *in, GLubyte *out, vec4_t *mod, int num)
+extern inline void
+TWI_FtoUBMod (GLfloat *in, GLubyte *out, vec4_t mod, int num)
 {
 	int		i;
 
 	// shift float to have 8bit fraction at base of number
 	for (i = 0; i < num; i += 4) {
-		FtoUB_tmp[i    ].f = (in[i    ] * (*mod)[0]) + 32768.0f;
-		FtoUB_tmp[i + 1].f = (in[i + 1] * (*mod)[1]) + 32768.0f;
-		FtoUB_tmp[i + 2].f = (in[i + 2] * (*mod)[2]) + 32768.0f;
-		FtoUB_tmp[i + 3].f = (in[i + 3] * (*mod)[3]) + 32768.0f;
+		FtoUB_tmp[i    ].f = (in[i    ] * mod[0]) + 32768.0f;
+		FtoUB_tmp[i + 1].f = (in[i + 1] * mod[1]) + 32768.0f;
+		FtoUB_tmp[i + 2].f = (in[i + 2] * mod[2]) + 32768.0f;
+		FtoUB_tmp[i + 3].f = (in[i + 3] * mod[3]) + 32768.0f;
 	}
 
 	// then read as integer and kill float bits...
@@ -94,7 +94,7 @@ TWI_FtoUBMod (GLfloat *in, GLubyte *out, vec4_t *mod, int num)
 	}
 }
 
-extern void inline
+extern inline void
 TWI_FtoUB (GLfloat *in, GLubyte *out, int num)
 {
 	int		i;
@@ -116,7 +116,7 @@ TWI_FtoUB (GLfloat *in, GLubyte *out, int num)
 	}
 }
 
-extern void inline
+extern inline void
 TWI_PreVDrawCVA (GLint min, GLint max)
 {
 	if (gl_cva) {
@@ -125,19 +125,19 @@ TWI_PreVDrawCVA (GLint min, GLint max)
 	}
 }
 
-extern void inline
+extern inline void
 TWI_PostVDrawCVA ()
 {
 	if (va_locked)
 		qglUnlockArraysEXT ();
 }
 
-extern void inline
+extern inline void
 TWI_PreVDraw (GLint min, GLint max)
 {
 }
 
-extern void inline
+extern inline void
 TWI_PostVDraw ()
 {
 }

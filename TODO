@@ -1,6 +1,17 @@
 Project Twilight todo list
 --------------------------
 
+Stuff keeping 0.2.0 from being released: (Items may be repeated below.)
+  - Add 3dfx quirk to limit vertex array size.
+    (Do we need to limit indices too?)
+    (Need output of start and gl_info from a windows 3Dfx box for this.)
+  - Find and fix twibugs_qwsv_time_jump.
+  - Get /sane/ lerping for both NQ and QW. (Even QW is currently a mess.)
+    (If LH could please do this.)
+  - Add the rest of the items that need doing to the list.
+    (And then do them!)
+  - Need to fix twibugs_userpath.
+  
 Bugs we know about:
 
   - Damm can demonstrate lightmap corruption consistantly with certain
@@ -9,9 +20,6 @@ Bugs we know about:
   - lights do not react to moving bmodels, untransforming into the
     bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.
-  - Cosmetic bug: The new particles look cool, but some people would
-    prefer the original GLQuake particles just for nostalgia value.  We
-    should support that.
   - Twilight uses far too much memory.  Textures should be freed when they
     are uploaded for one, and we should use fewer big static buffers.
 
@@ -28,6 +36,7 @@ Would be nice but is not strictly needed:
   - Build a seperate dedicated server in NQ [LordHavoc]
   - Move Quake library functions used by all targets and tools to a common
     directory (zone, mathlib, qtypes, compat, part of console, etc)
+    (Largely done.)
   - switch to using specific-sized SDL variables for file accesses
   - Convert Cvars from an unsorted list to a hash
   - Use traceline to determine visibility (trace from eye to random places
@@ -42,15 +51,15 @@ Would be nice but is not strictly needed:
   - Add {gl,cl}_weirdshit.c to support Nehahra.  ;)
   - Nehahra needs fog support.
   - Nehahra needs alpha (alias/bmodel).
+    (Likely not going to happen, alpha effects are a nightmare!)
   - Nehahra needs EF_FULLBRIGHT (512) (for alias/bmodel).
   - Nehahra needs svc_showlmp (35), svc_hidelmp (36).
   - Nehahra needs svc_skybox (37).
   - Nehahra needs play2 command.
   - Nehahra needs TE_EXPLOSION3 (16).
   - Nehahra needs TE_LIGHTNING4NEH (17).
-  - Nehahra needs EF_BLUE (64).
-  - Nehahra needs EF_RED (128).
   - Nehahra probably needs EF_NODRAW (16).
+    (CONFLICTS WITH QW!!!)
   - Nehahra needs RestoreGame QC callback (called when savegame is loaded).
   - Nehahra needs lots of other things...
   - gl_colorlights can/should be made to work without +set
@@ -61,4 +70,7 @@ Would be nice but is not strictly needed:
     jumping up very steep stairs in the right conditions (double/triple jump).
   - BloodBath needs different sbar.
   - BloodBath needs different key bindings menu.
+  - Cosmetic bug: The new particles look cool, but some people would
+    prefer the original GLQuake particles just for nostalgia value.  We
+    should support that. (Likely won't happen.)
 

@@ -332,7 +332,7 @@ int
 Cvar_CompleteCountPossible (char *partial)
 {
 	cvar_list_t	*v;
-	int			len;
+	size_t		len;
 	int			h;
 	
 	h = 0;
@@ -362,7 +362,7 @@ char	**
 Cvar_CompleteBuildList (char *partial)
 {
 	cvar_list_t	*v;
-	int			len = 0;
+	size_t		len = 0;
 	int			bpos = 0;
 	int			sizeofbuf = (Cvar_CompleteCountPossible (partial) + 1) * sizeof (char *);
 	char		**buf;
@@ -383,7 +383,7 @@ char *
 Cvar_TabComplete (const char *partial)
 {
 	cvar_list_t	   *v;
-	int				len;
+	size_t			len;
 
 	len = strlen (partial);
 	if (!len)

@@ -91,8 +91,6 @@ UDP_Init (void)
 {
 	struct hostent *local;
 	char        buf[MAXHOSTNAMELEN];
-	struct qsockaddr addr;
-	char       *colon;
 
 #ifdef _WIN32
 	WSADATA     winsockdata;
@@ -126,12 +124,6 @@ UDP_Init (void)
 	((struct sockaddr_in *) &broadcastaddr)->sin_addr.s_addr = INADDR_BROADCAST;
 	((struct sockaddr_in *) &broadcastaddr)->sin_port =
 		htons ((unsigned short) net_hostport);
-
-	UDP_GetSocketAddr (net_controlsocket, &addr);
-	strcpy (my_tcpip_address, UDP_AddrToString (&addr));
-	colon = strrchr (my_tcpip_address, ':');
-	if (colon)
-		*colon = 0;
 
 	Com_Printf ("UDP Initialized\n");
 	tcpipAvailable = true;
@@ -176,7 +168,7 @@ UDP_OpenSocket (int port)
 {
 	int         newsocket;
 	struct sockaddr_in address;
-	int         i;
+	Uint         i;
 
 #ifdef _WIN32
 # define ioctl ioctlsocket
@@ -220,64 +212,6 @@ UDP_CloseSocket (int socket)
 #endif
 }
 
-
-//=============================================================================
-/*
-============
-PartialIPAddress
-
-this lets you type only as much of the net address as required, using
-the local network components to fill in the rest
-============
-*/
-static int
-PartialIPAddress (char *in, struct qsockaddr *hostaddr)
-{
-	char        buff[256];
-	char       *b;
-	int         addr;
-	int         num;
-	int         mask;
-	int         run;
-	int         port;
-
-	buff[0] = '.';
-	b = buff;
-	strcpy (buff + 1, in);
-	if (buff[1] == '.')
-		b++;
-
-	addr = 0;
-	mask = -1;
-	while (*b == '.') {
-		b++;
-		num = 0;
-		run = 0;
-		while (!(*b < '0' || *b > '9')) {
-			num = num * 10 + *b++ - '0';
-			if (++run > 3)
-				return -1;
-		}
-		if ((*b < '0' || *b > '9') && *b != '.' && *b != ':' && *b != 0)
-			return -1;
-		if (num < 0 || num > 255)
-			return -1;
-		mask <<= 8;
-		addr = (addr << 8) + num;
-	}
-
-	if (*b++ == ':')
-		port = Q_atoi (b);
-	else
-		port = net_hostport;
-
-	hostaddr->sa_family = AF_INET;
-	((struct sockaddr_in *) hostaddr)->sin_port = htons ((short) port);
-	((struct sockaddr_in *) hostaddr)->sin_addr.s_addr =
-		(myAddr & htonl (mask)) | htonl (addr);
-
-	return 0;
-}
 
 //=============================================================================
 
@@ -443,9 +377,6 @@ int
 UDP_GetAddrFromName (char *name, struct qsockaddr *addr)
 {
 	struct hostent *hostentry;
-
-	if (name[0] >= '0' && name[0] <= '9')
-		return PartialIPAddress (name, addr);
 
 	hostentry = gethostbyname (name);
 	if (!hostentry)

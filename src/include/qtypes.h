@@ -29,6 +29,7 @@
 
 #include <stdio.h>
 #include "SDL_types.h"
+#include <stdio.h>
 
 // KJB Undefined true and false defined in SciTech's DEBUG.H header
 #undef true
@@ -38,6 +39,9 @@ typedef enum { false, true } qboolean;
 
 #ifndef DYNGL_TYPES
 #define DYNGL_TYPES
+
+typedef unsigned int	Uint;
+typedef signed int		Sint;
 
 typedef void			GLvoid;
 typedef Uint8			GLboolean;

@@ -391,7 +391,7 @@ Sbar_DrawNum (int x, int y, int num, int digits, int color)
 //=============================================================================
 
 int		fragsort[MAX_SCOREBOARD];
-Uint32	scoreboardlines;
+int		scoreboardlines;
 
 /*
 ===============
@@ -401,8 +401,7 @@ Sbar_SortFrags
 void
 Sbar_SortFrags (void)
 {
-	Uint32	i, j;
-	Sint32	k;
+	int	i, j, k;
 
 	// sort by frags
 	scoreboardlines = 0;
@@ -982,8 +981,8 @@ Sbar_MiniDeathmatchOverlay
 void
 Sbar_MiniDeathmatchOverlay (void)
 {
-	Sint32			k;
-	Uint32			i, l, x, y, numlines;
+	Sint32			k, i, numlines;
+	Uint32			l, x, y;
 	scoreboard_t	*s;
 	vec4_t			color;
 

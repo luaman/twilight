@@ -331,17 +331,18 @@ Sys_DebugLog (char *file, char *fmt, ...)
 double
 Sys_DoubleTime (void)
 {
-	static double	epoch = 0.0;
-	static Uint32	last;
-	Uint32			now = SDL_GetTicks ();
+	static double   curtime = 0.0;
+	static Uint32   last = 0;
+	Uint32          now = SDL_GetTicks ();
 
-	// happens every 47 days or so - hey it _could_ happen!
 	if (now < last)
-		epoch += 65536.0 * 65536.0; // max Uint32 + 1
+		Com_Printf ("Time wrapped or skewed. %f, %d %d\n",
+				curtime, last, now);
+	else
+		curtime += now - last;
 
 	last = now;
-
-	return epoch + (double)(now / 1000.0);
+	return (double) (curtime / 1000.0);
 }
 
 char *

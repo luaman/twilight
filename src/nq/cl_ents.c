@@ -22,7 +22,7 @@
 		Boston, MA  02111-1307, USA
 
 */
-const static char rcsid[] =
+static const char rcsid[] =
 	"$Id$";
 
 #include "twiconfig.h"

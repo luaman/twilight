@@ -1119,7 +1119,7 @@ Sbar_MiniDeathmatchOverlay (void)
 	for (; i < scoreboardlines && y < vid.height_2d - 8 + 1; i++) {
 		k = fragsort[i];
 		s = &cl.players[k];
-		if (!s->name[0])
+		if (!s->name[0] || s->spectator)
 			continue;
 
 		// draw ping

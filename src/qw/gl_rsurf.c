@@ -516,9 +516,9 @@ GL_BuildLightmap (msurface_t *surf)
 			{
 				for (j = 0; j < surf->smax; j++)
 				{
-					dest[0]=bound(0, (bl[0] * stain[0]) >> lightmap_shift, 255);
-					dest[1]=bound(0, (bl[1] * stain[1]) >> lightmap_shift, 255);
-					dest[2]=bound(0, (bl[2] * stain[2]) >> lightmap_shift, 255);
+					dest[0] = min ((bl[0] * stain[0]) >> lightmap_shift, 255);
+					dest[1] = min ((bl[1] * stain[1]) >> lightmap_shift, 255);
+					dest[2] = min ((bl[2] * stain[2]) >> lightmap_shift, 255);
 					bl += 3;
 					dest += 3;
 					stain += 3;
@@ -533,9 +533,9 @@ GL_BuildLightmap (msurface_t *surf)
 			{
 				for (j = 0; j < surf->smax; j++)
 				{
-					dest[0]=bound(0, (bl[0] * stain[0]) >> lightmap_shift, 255);
-					dest[1]=bound(0, (bl[1] * stain[1]) >> lightmap_shift, 255);
-					dest[2]=bound(0, (bl[2] * stain[2]) >> lightmap_shift, 255);
+					dest[0] = min ((bl[0] * stain[0]) >> lightmap_shift, 255);
+					dest[1] = min ((bl[1] * stain[1]) >> lightmap_shift, 255);
+					dest[2] = min ((bl[2] * stain[2]) >> lightmap_shift, 255);
 					dest[3] = 255;
 					bl += 3;
 					dest += 4;
@@ -554,7 +554,7 @@ GL_BuildLightmap (msurface_t *surf)
 				{
 					// 85 / 256 == 0.33203125, close enough
 					scale = ((bl[0] + bl[1] + bl[2]) * 85) >> lightmap_shift;
-					*dest++ = bound (0, scale, 255);
+					*dest++ = min (scale, 255);
 					bl += 3;
 				}
 			}

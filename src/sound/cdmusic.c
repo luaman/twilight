@@ -368,7 +368,8 @@ CDAudio_Init_Cvars(void)
 int
 CDAudio_Init (void)
 {
-	int	i, x, sdl_num_drives;
+	Uint i;
+	int	x, sdl_num_drives;
 
 	if (COM_CheckParm ("-nocdaudio"))
 		return -1;

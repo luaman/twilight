@@ -231,7 +231,7 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 	skin->indices = NULL;
 
 	if (bits) {
-		mskin = Zone_Alloc(glt_zone, width * height);
+		mskin = Zone_Alloc(glt_zone, (size_t) width * height);
 		if (!GLT_Mangle8(in, mskin, width, height, bits, color, bleach)) {
 			Zone_Free(mskin);
 			return;
@@ -284,7 +284,8 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 		int width, int height, int frames, float interval)
 {
 	Uint8	*iskin;
-	int		s, i;
+	int		i;
+	size_t	s;
 
 	s = width * height;
 

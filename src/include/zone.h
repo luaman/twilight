@@ -43,7 +43,7 @@ typedef struct memheader_s
 	struct memheader_s	*chain;			// next memheader in this zone
 	struct memzone_s	*zone;			// the parent zone
 	struct memclump_s	*clump;			// parent clump, if any
-	int					size;			// allocated size, excludes header
+	size_t				size;			// allocated size, excludes header
 	char				*filename;		// source file of this alloc
 	int					fileline;		// line of alloc in source file
 	Uint32				sentinel1;	// MEMHEADER_SENTINEL1
@@ -81,7 +81,7 @@ typedef struct memzone_s
 #define Zone_FreeZone(zone) _Zone_FreeZone(zone, __FILE__, __LINE__)
 #define Zone_EmptyZone(zone) _Zone_EmptyZone(zone, __FILE__, __LINE__)
 
-void *_Zone_Alloc(memzone_t *zone, int size, char *filename, int fileline);
+void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline);
 void _Zone_Free(void *data, char *filename, int fileline);
 memzone_t *_Zone_AllocZone(char *name, char *filename, int fileline);
 void _Zone_FreeZone(memzone_t **zone, char *filename, int fileline);
@@ -166,20 +166,20 @@ Zone block
 
 */
 
-extern int hunk_size;
+extern size_t hunk_size;
 
-void       *Hunk_Alloc (int size);		// returns 0 filled memory
-void       *Hunk_AllocName (int size, char *name);
+void       *Hunk_Alloc (size_t size);		// returns 0 filled memory
+void       *Hunk_AllocName (size_t size, char *name);
 
-void       *Hunk_HighAllocName (int size, char *name);
+void       *Hunk_HighAllocName (size_t size, char *name);
 
-int         Hunk_LowMark (void);
-void        Hunk_FreeToLowMark (int mark);
+size_t		Hunk_LowMark (void);
+void        Hunk_FreeToLowMark (size_t mark);
 
-int         Hunk_HighMark (void);
-void        Hunk_FreeToHighMark (int mark);
+size_t		Hunk_HighMark (void);
+void        Hunk_FreeToHighMark (size_t mark);
 
-void       *Hunk_TempAlloc (int size);
+void       *Hunk_TempAlloc (size_t size);
 
 void        Hunk_Check (void);
 
@@ -196,7 +196,7 @@ void       *Cache_Check (cache_user_t *c);
 
 void        Cache_Free (cache_user_t *c);
 
-void       *Cache_Alloc (cache_user_t *c, int size, char *name);
+void       *Cache_Alloc (cache_user_t *c, size_t size, char *name);
 
 // Returns NULL if all purgable data was tossed and there still
 // wasn't enough room.

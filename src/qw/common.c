@@ -331,15 +331,12 @@ MSG_WriteLong (sizebuf_t *sb, int c)
 void
 MSG_WriteFloat (sizebuf_t *sb, float f)
 {
-	union {
-		float       f;
-		int         l;
-	} dat;
+	float_int_t dat;
 
 	dat.f = f;
-	dat.l = LittleLong (dat.l);
+	dat.i = LittleLong (dat.i);
 
-	SZ_Write (sb, &dat.l, 4);
+	SZ_Write (sb, &dat.i, 4);
 }
 
 void
@@ -424,7 +421,7 @@ MSG_WriteDeltaUsercmd (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd)
 /*
  * reading functions
  */
-int msg_readcount;
+size_t msg_readcount;
 qboolean msg_badread;
 
 void
@@ -514,19 +511,20 @@ MSG_ReadLong (void)
 float
 MSG_ReadFloat (void)
 {
-	union {
-		Uint8		b[4];
-		float		f;
-		int			l;
-	} dat;
+	float_int_t dat;
 
-	dat.b[0] = net_message.data[msg_readcount];
-	dat.b[1] = net_message.data[msg_readcount + 1];
-	dat.b[2] = net_message.data[msg_readcount + 2];
-	dat.b[3] = net_message.data[msg_readcount + 3];
+	if (msg_readcount + 4 > net_message.cursize) {
+		msg_badread = true;
+		return -1;
+	}
+
+	dat.i = net_message.data[msg_readcount] +
+		(net_message.data[msg_readcount + 1] << 8) +
+		(net_message.data[msg_readcount + 2] << 16) +
+		(net_message.data[msg_readcount + 3] << 24);
 	msg_readcount += 4;
 
-	dat.l = LittleLong (dat.l);
+	dat.i = LittleLong (dat.i);
 
 	return dat.f;
 }
@@ -716,7 +714,7 @@ void Com_DPrintf (const char *fmt, ...)
 //===========================================================================
 
 void 
-SZ_Init (sizebuf_t *buf, Uint8 *data, int length)
+SZ_Init (sizebuf_t *buf, Uint8 *data, size_t length)
 {
 	memset (buf, 0, sizeof(*buf));
 	buf->data = data;
@@ -731,7 +729,7 @@ SZ_Clear (sizebuf_t *buf)
 }
 
 void *
-SZ_GetSpace (sizebuf_t *buf, int length)
+SZ_GetSpace (sizebuf_t *buf, size_t length)
 {
 	void	   *data;
 
@@ -757,7 +755,7 @@ SZ_GetSpace (sizebuf_t *buf, int length)
 }
 
 void
-SZ_Write (sizebuf_t *buf, void *data, int length)
+SZ_Write (sizebuf_t *buf, void *data, size_t length)
 {
 	memcpy (SZ_GetSpace (buf, length), data, length);
 }
@@ -1594,7 +1592,7 @@ COM_InitFilesystem
 void
 COM_InitFilesystem (void)
 {
-	int			i;
+	Uint			i;
 
 	// -basedir <path>, now the same as fs_userpath
 	i = COM_CheckParm ("-basedir");

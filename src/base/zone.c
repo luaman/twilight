@@ -37,7 +37,7 @@ static const char rcsid[] =
 
 memzone_t *zonechain = NULL;
 
-void *_Zone_Alloc(memzone_t *zone, int size, char *filename, int fileline)
+void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
 {
 	int i, j, k, needed, endbit, largest;
 	memclump_t *clump, **clumpchainpointer;
@@ -368,8 +368,8 @@ void ZoneStats_f(void)
 }
 
 
-void        Cache_FreeLow (int new_low_hunk);
-void        Cache_FreeHigh (int new_high_hunk);
+void        Cache_FreeLow (size_t new_low_hunk);
+void        Cache_FreeHigh (size_t new_high_hunk);
 
 //============================================================================
 
@@ -377,19 +377,19 @@ void        Cache_FreeHigh (int new_high_hunk);
 
 typedef struct {
 	int         sentinal;
-	int         size;					// including sizeof(hunk_t), -1 = not
+	size_t		size;					// including sizeof(hunk_t), -1 = not
 										// allocated
 	char        name[64];
 } hunk_t;
 
 Uint8      *hunk_base;
-int         hunk_size;
+size_t		hunk_size;
 
-int         hunk_low_used;
-int         hunk_high_used;
+size_t		hunk_low_used;
+size_t		hunk_high_used;
 
 qboolean    hunk_tempactive;
-int         hunk_tempmark;
+size_t		hunk_tempmark;
 
 void        R_FreeTextures (void);
 
@@ -408,7 +408,7 @@ Hunk_Check (void)
 	for (h = (hunk_t *) hunk_base; (Uint8 *) h != hunk_base + hunk_low_used;) {
 		if (h->sentinal != HUNK_SENTINAL)
 			Sys_Error ("Hunk_Check: trahsed sentinal");
-		if (h->size < 16 || h->size + (Uint8 *) h - hunk_base > hunk_size)
+		if (h->size < 16 || (h->size + ((Uint8 *) h - hunk_base)) > hunk_size)
 			Sys_Error ("Hunk_Check: bad size");
 		h = (hunk_t *) ((Uint8 *) h + h->size);
 	}
@@ -465,7 +465,7 @@ Hunk_Print (qboolean all)
 		//
 		if (h->sentinal != HUNK_SENTINAL)
 			Sys_Error ("Hunk_Check: trahsed sentinal");
-		if (h->size < 16 || h->size + (Uint8 *) h - hunk_base > hunk_size)
+		if (h->size < 16 || h->size + ((Uint8 *) h - hunk_base) > hunk_size)
 			Sys_Error ("Hunk_Check: bad size");
 
 		next = (hunk_t *) ((Uint8 *) h + h->size);
@@ -505,7 +505,7 @@ Hunk_AllocName
 ===================
 */
 void       *
-Hunk_AllocName (int size, char *name)
+Hunk_AllocName (size_t size, char *name)
 {
 	hunk_t     *h;
 
@@ -513,10 +513,7 @@ Hunk_AllocName (int size, char *name)
 	Hunk_Check ();
 #endif
 
-	if (size < 0)
-		Sys_Error ("Hunk_Alloc: bad size: %i", size);
-
-	size = sizeof (hunk_t) + ((size + 15) & ~15);
+	size = sizeof (hunk_t) + ((size + 15) & ~15u);
 
 	if (hunk_size - hunk_low_used - hunk_high_used < size)
 //      Sys_Error ("Hunk_Alloc: failed on %i bytes",size);
@@ -543,27 +540,27 @@ Hunk_Alloc
 ===================
 */
 void       *
-Hunk_Alloc (int size)
+Hunk_Alloc (size_t size)
 {
 	return Hunk_AllocName (size, "unknown");
 }
 
-int
+size_t
 Hunk_LowMark (void)
 {
 	return hunk_low_used;
 }
 
 void
-Hunk_FreeToLowMark (int mark)
+Hunk_FreeToLowMark (size_t mark)
 {
-	if (mark < 0 || mark > hunk_low_used)
+	if (mark > hunk_low_used)
 		Sys_Error ("Hunk_FreeToLowMark: bad mark %i", mark);
 	memset (hunk_base + mark, 0, hunk_low_used - mark);
 	hunk_low_used = mark;
 }
 
-int
+size_t
 Hunk_HighMark (void)
 {
 	if (hunk_tempactive) {
@@ -575,13 +572,13 @@ Hunk_HighMark (void)
 }
 
 void
-Hunk_FreeToHighMark (int mark)
+Hunk_FreeToHighMark (size_t mark)
 {
 	if (hunk_tempactive) {
 		hunk_tempactive = false;
 		Hunk_FreeToHighMark (hunk_tempmark);
 	}
-	if (mark < 0 || mark > hunk_high_used)
+	if (mark > hunk_high_used)
 		Sys_Error ("Hunk_FreeToHighMark: bad mark %i", mark);
 	memset (hunk_base + hunk_size - hunk_high_used, 0, hunk_high_used - mark);
 	hunk_high_used = mark;
@@ -594,12 +591,9 @@ Hunk_HighAllocName
 ===================
 */
 void       *
-Hunk_HighAllocName (int size, char *name)
+Hunk_HighAllocName (size_t size, char *name)
 {
 	hunk_t     *h;
-
-	if (size < 0)
-		Sys_Error ("Hunk_HighAllocName: bad size: %i", size);
 
 	if (hunk_tempactive) {
 		Hunk_FreeToHighMark (hunk_tempmark);
@@ -609,7 +603,7 @@ Hunk_HighAllocName (int size, char *name)
 	Hunk_Check ();
 #endif
 
-	size = sizeof (hunk_t) + ((size + 15) & ~15);
+	size = sizeof (hunk_t) + ((size + 15) & ~15u);
 
 	if (hunk_size - hunk_low_used - hunk_high_used < size) {
 		Com_Printf ("Hunk_HighAlloc: failed on %i bytes\n", size);
@@ -638,11 +632,11 @@ Return space from the top of the hunk
 =================
 */
 void       *
-Hunk_TempAlloc (int size)
+Hunk_TempAlloc (size_t size)
 {
 	void       *buf;
 
-	size = (size + 15) & ~15;
+	size = (size + 15) & ~15u;
 
 	if (hunk_tempactive) {
 		Hunk_FreeToHighMark (hunk_tempmark);
@@ -667,14 +661,14 @@ CACHE MEMORY
 */
 
 typedef struct cache_system_s {
-	int         size;					// including this header
+	size_t		size;					// including this header
 	cache_user_t *user;
 	char        name[16];
 	struct cache_system_s *prev, *next;
 	struct cache_system_s *lru_prev, *lru_next;	// for LRU flushing 
 } cache_system_t;
 
-cache_system_t *Cache_TryAlloc (int size, qboolean nobottom);
+cache_system_t *Cache_TryAlloc (size_t size, qboolean nobottom);
 
 cache_system_t cache_head;
 
@@ -713,7 +707,7 @@ Throw things out until the hunk can be expanded to the given point
 ============
 */
 void
-Cache_FreeLow (int new_low_hunk)
+Cache_FreeLow (size_t new_low_hunk)
 {
 	cache_system_t *c;
 
@@ -735,7 +729,7 @@ Throw things out until the hunk can be expanded to the given point
 ============
 */
 void
-Cache_FreeHigh (int new_high_hunk)
+Cache_FreeHigh (size_t new_high_hunk)
 {
 	cache_system_t *c, *prev;
 
@@ -788,7 +782,7 @@ Size should already include the header and padding
 ============
 */
 cache_system_t *
-Cache_TryAlloc (int size, qboolean nobottom)
+Cache_TryAlloc (size_t size, qboolean nobottom)
 {
 	cache_system_t *cs, *new;
 
@@ -815,7 +809,8 @@ Cache_TryAlloc (int size, qboolean nobottom)
 
 	do {
 		if (!nobottom || cs != cache_head.next) {
-			if ((Uint8 *) cs - (Uint8 *) new >= size) {	// found space
+			// found space?
+			if ((size_t) ((Uint8 *) cs - (Uint8 *) new) >= size) {
 				memset (new, 0, sizeof (*new));
 				new->size = size;
 
@@ -836,7 +831,7 @@ Cache_TryAlloc (int size, qboolean nobottom)
 	} while (cs != &cache_head);
 
 // try to allocate one at the very end
-	if (hunk_base + hunk_size - hunk_high_used - (Uint8 *) new >= size) {
+	if ((hunk_base - (Uint8 *) new) + hunk_size - hunk_high_used >= size) {
 		memset (new, 0, sizeof (*new));
 		new->size = size;
 
@@ -981,7 +976,7 @@ Cache_Alloc
 ==============
 */
 void       *
-Cache_Alloc (cache_user_t *c, int size, char *name)
+Cache_Alloc (cache_user_t *c, size_t size, char *name)
 {
 	cache_system_t *cs;
 
@@ -991,7 +986,7 @@ Cache_Alloc (cache_user_t *c, int size, char *name)
 	if (size <= 0)
 		Sys_Error ("Cache_Alloc: size %i", size);
 
-	size = (size + sizeof (cache_system_t) + 15) & ~15;
+	size = (size + sizeof (cache_system_t) + 15) & ~15u;
 
 // find memory for it
 	while (1) {

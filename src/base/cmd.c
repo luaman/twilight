@@ -103,7 +103,7 @@ Adds command text at the end of the buffer
 void
 Cbuf_AddText (char *text)
 {
-	int	l;
+	size_t	l;
 
 	l = strlen (text);
 	if (cmd_text->cursize + l >= cmd_text->maxsize) {
@@ -146,7 +146,8 @@ Cbuf_InsertText (char *text)
 static void
 extract_line (char *line)
 {
-	int		i, quotes;
+	size_t	i;
+	int		quotes;
 	char	*text;
 
 	// find a \n or ; line break
@@ -203,7 +204,8 @@ Cbuf_Execute
 void
 Cbuf_Execute (void)
 {
-	int			i, quotes;
+	size_t		i;
+	int			quotes;
 	char		*text, line[1024];
 	sizebuf_t	*p;
 
@@ -274,7 +276,7 @@ Cbuf_InsertFile (char *path)
 {
 	FILE		*f;
 	char		*text;
-	int			mark, size;
+	size_t		mark, size;
 
     mark = Hunk_LowMark ();
 	f = fopen (path, "rb");
@@ -318,7 +320,8 @@ quake -nosound +cmd amlev1
 void
 Cmd_StuffCmds_f (void)
 {
-	int		i, j, s;
+	size_t	s, i;
+	int		j;
 	char	*text, *build, c;
 
 	// build the combined string to parse from
@@ -379,7 +382,7 @@ void
 Cmd_Exec_f (void)
 {
 	char	*f;
-	int		mark;
+	size_t	mark;
 
 	if (Cmd_Argc () != 2) {
 		Com_Printf ("exec <filename> : execute a script file\n");
@@ -646,7 +649,7 @@ Cmd_CompleteCommand
 char       *
 Cmd_CompleteCommand (char *partial)
 {
-	int				len;
+	size_t			len;
 	cmdalias_t		*a;
 	cmd_function_t	*cmd;
 
@@ -684,7 +687,8 @@ int
 Cmd_CompleteCountPossible (char *partial)
 {
 	cmd_function_t	*cmd;
-	int				len, h;
+	int				h;
+	size_t			len;
 	
 	len = strlen(partial);
 	if (!len)
@@ -709,7 +713,7 @@ char	**
 Cmd_CompleteBuildList (char *partial)
 {
 	cmd_function_t	*cmd;
-	int				len, bpos;
+	size_t			len, bpos;
 	int				sizeofbuf = (Cmd_CompleteCountPossible (partial) + 1) * sizeof (char *);
 	char			**buf;
 
@@ -734,7 +738,7 @@ char
 *Cmd_CompleteAlias (char * partial)
 {
 	static cmdalias_t	*alias;
-	int			len;
+	size_t				len;
 
 	len = strlen(partial);
 
@@ -757,7 +761,8 @@ int
 Cmd_CompleteAliasCountPossible (char *partial)
 {
 	cmdalias_t	*alias;
-	int			len, h;
+	int			h;
+	size_t		len;
 
 	len = strlen(partial);
 
@@ -781,7 +786,7 @@ char	**
 Cmd_CompleteAliasBuildList (char *partial)
 {
 	cmdalias_t	*alias;
-	int			len, bpos;
+	size_t		len, bpos;
 	int			sizeofbuf = (Cmd_CompleteAliasCountPossible (partial) + 1) * sizeof (char *);
 	char		**buf;
 
