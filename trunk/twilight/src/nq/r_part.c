@@ -691,7 +691,7 @@ R_ParticleTrail (vec3_t start, vec3_t end, int type)
 				pcolor = 0x40 + (rand () & 3);
 				for (j = 0; j < 3; j++)
 					porg[j] = start[j] + ((rand () % 6) - 3);
-				R_Stain (start, 32, 32, 16, 16, 32, 192, 48, 48, 32);
+				R_Stain (start, 32, 64, 32, 32, 32, 192, 64, 64, 32);
 				break;
 
 			case EF_TRACER:

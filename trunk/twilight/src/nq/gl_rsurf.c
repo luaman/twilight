@@ -174,14 +174,14 @@ R_AddDynamicLights (msurface_t *surf, matrix4x4_t *invmatrix)
 }
 
 inline qboolean
-R_StainBlendTexel (int k, int *icolor, Uint8 *bl)
+R_StainBlendTexel (Sint64 k, int *icolor, Uint8 *bl)
 {
 	int			ratio, a;
 	int			cr, cg, cb, ca;
 
 	ratio = rand() & 255;
 	ca = (((icolor[7] - icolor[3]) * ratio) >> 8) + icolor[3];
-	a = (ca * k);
+	a = (ca * k) >> 8;
 
 	if (a > 0)
 	{
@@ -212,10 +212,11 @@ R_StainNode (mnode_t *node, model_t *model, vec3_t origin, float radius,
 	int				i, stained;
 	int				s, t, td, smax, tmax, smax3;
 	int				dist2, maxdist, maxdist2, maxdist3;
-	int				impacts, impactt, subtract, k;
+	int				impacts, impactt, subtract;
 	int				sdtable[256];
 	Uint8			*bl; 
 	vec3_t			impact;
+	Sint64			k;
 
 	// for comparisons to minimum acceptable light
 	// compensate for 4096 offset
@@ -304,7 +305,6 @@ loc0:
 							{
 								k = dlightdivtable[(sdtable[s] + td) >> 7]
 									- subtract;
-								k >>= 8;
 								if (k > 0)
 									if (R_StainBlendTexel (k, icolor, bl))
 										stained = true;
