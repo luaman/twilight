@@ -391,32 +391,36 @@ char       *suf[6] = { "rt", "bk", "lf", "ft", "up", "dn" };
 qboolean
 R_LoadSkys (void)
 {
-	int   i, w, h;
-	char  name[64];
-	Uint8  *image_buf = NULL;
+	int			i;
+	char		name[64];
+	image_t	   *img;
 
 	for (i = 0; i < 6; i++) {
 		snprintf (name, sizeof (name), "env/%s%s",
 				r_skyname->string, suf[i]);
-		if (!IMG_Load (name, &image_buf, &w, &h))
+		img = IMG_Load (name);
+		if (!img)
 		{
 			snprintf (name, sizeof (name), "gfx/env/%s%s",
 					r_skyname->string, suf[i]);
-			IMG_Load (name, &image_buf, &w, &h);
+			img = IMG_Load (name);
 		}
 
-		if (!image_buf)
+		if (!img)
 			return false;
-		if ((w != 256) || (h != 256)) {
-			free (image_buf);
+		if ((img->width != 256) || (img->height != 256))
+		{
+			free (img->pixels);
+			free (img);
 			return false;
 		}
 
 		qglBindTexture (GL_TEXTURE_2D, skyboxtexnum+i);
-		qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_buf);
+		qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height,
+				0, GL_RGBA, GL_UNSIGNED_BYTE, img->pixels);
 
-		free (image_buf);
-		image_buf = NULL;
+		free (img->pixels);
+		free (img);
 
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

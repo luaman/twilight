@@ -34,28 +34,43 @@ static const char rcsid[] =
 #endif
 
 #include "common.h"
+#include "image.h"
 #include "strlib.h"
 #include "pcx.h"
+#include "qlmp.h"
 #include "tga.h"
+#include "sys.h"
 
-Uint8 **
-IMG_Load (char *name, Uint8 **buf, int *w, int *h)
+image_t *
+IMG_Load (char *name)
 {
-	char wext[256];
+	char woext[MAX_OSPATH];
+	char buf[MAX_OSPATH];
+	char *p;
+	image_t *img;
 
-	strcpy(wext, name);
-	COM_StripExtension (wext, wext);
-	COM_DefaultExtension (wext, ".tga");
+	if (!name)
+		Sys_Error ("IMG_Load: Attempt to load NULL image");
 
-	if (TGA_Load (wext, buf, w, h))
-		return buf;
+	strlcpy(woext, name, MAX_OSPATH);
+	COM_StripExtension (woext, woext);
 
-	strcpy(wext, name);
-	COM_StripExtension (wext, wext);
-	COM_DefaultExtension (wext, ".pcx");
+	// Concession for win32, # is used because DarkPlaces uses it
+	for (p = woext; *p; p++)
+		if (*p == '*')
+			*p = '#';
 
-	if (PCX_Load (wext, buf, w, h))
-		return buf;
+	snprintf (buf, MAX_OSPATH, "%s.tga", woext);
+	if ((img = TGA_Load (buf)))
+		return img;
+
+	snprintf (buf, MAX_OSPATH, "%s.pcx", woext);
+	if ((img = PCX_Load (buf)))
+		return img;
+
+	snprintf (buf, MAX_OSPATH, "%s.lmp", woext);
+	if ((img = QLMP_Load (buf)))
+		return img;
 
 	return NULL;
 }

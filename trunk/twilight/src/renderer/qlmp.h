@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) 1996-1997  Id Software, Inc.
+	Copyright (C) 2002  Joseph Carter
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -21,20 +21,13 @@
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
 
+	$Id$
 */
 
-#ifndef __IMAGE_H
-#define __IMAGE_H
+#ifndef __QLMP_H
+#define __QLMP_H
 
-typedef struct image_s
-{
-	char	   *name;
-	Uint32		width;
-	Uint32		height;
-	Uint8	   *pixels;
-} image_t;
+image_t *QLMP_Load (char *name);
 
-image_t *IMG_Load (char *name);
-
-#endif // __IMAGE_H
+#endif // __QLMP_H
 

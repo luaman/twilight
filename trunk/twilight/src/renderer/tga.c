@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "SDL.h"
 
 #include "common.h"
+#include "image.h"
 #include "sys.h"
 #include "tga.h"
 
@@ -56,8 +57,8 @@ typedef struct _TargaHeader {
 TGA_LoadBuffer
 =============
 */
-static void
-TGA_LoadBuffer (Uint8 *buffer, Uint8 **pic, int *width, int *height)
+static image_t *
+TGA_LoadBuffer (Uint8 *buffer)
 {
 	int         columns, rows, numPixels;
 	Uint8       *pixbuf;
@@ -65,8 +66,9 @@ TGA_LoadBuffer (Uint8 *buffer, Uint8 **pic, int *width, int *height)
 	TargaHeader	targa_header;
 	Uint8		*targa_rgba, *buf_p;
 	Uint8		red, green, blue, alphabyte;
+	image_t		*img;
 
-	*pic = NULL;
+	img = malloc (sizeof(image_t));
 
 	buf_p = buffer;
 
@@ -103,13 +105,11 @@ TGA_LoadBuffer (Uint8 *buffer, Uint8 **pic, int *width, int *height)
 	rows = targa_header.height;
 	numPixels = columns * rows;
 
-	if (width)
-		*width = columns;
-	if (height)
-		*height = rows;
+	img->width = columns;
+	img->height = rows;
 
 	targa_rgba = malloc (numPixels*4);
-	*pic = targa_rgba;
+	img->pixels = targa_rgba;
 
 	if (targa_header.id_length != 0)
 		buf_p += targa_header.id_length;  // skip TARGA image comment
@@ -264,6 +264,8 @@ TGA_LoadBuffer (Uint8 *buffer, Uint8 **pic, int *width, int *height)
 			breakOut:;
 		}
 	}
+
+	return img;
 }
 
 /*
@@ -271,17 +273,15 @@ TGA_LoadBuffer (Uint8 *buffer, Uint8 **pic, int *width, int *height)
 TGA_Load
 =============
 */
-Uint8 **
-TGA_Load (char *name, Uint8 **image_rgba, int *width, int *height)
+image_t *
+TGA_Load (char *name)
 {
 	Uint8 *buf = COM_LoadTempFile (name, true);
 
 	if (buf)
-		TGA_LoadBuffer (buf, image_rgba, width, height);
-	else
-		return NULL;
+		return TGA_LoadBuffer (buf);
 
-	return image_rgba;
+	return NULL;
 }
 
 /*
