@@ -1318,14 +1318,14 @@ int loadsize;
 COM_LoadFile
 
 Filename are reletive to the quake directory.
-Allways appends a 0 byte to the loaded data.
+Always appends a 0 byte to the loaded data.
 ============
 */
 Uint8 *
 COM_LoadFile (char *path, int usehunk, qboolean complain)
 {
-	FILE	   *h;
-	Uint8	   *buf = NULL;				// silence compiler warning
+	FILE		*h;
+	Uint8		*buf = NULL;
 	int			len;
 
 	// look for it in the filesystem or pack files
@@ -1335,9 +1335,6 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 
 	switch (usehunk)
 	{
-		case 0:
-			buf = Z_Malloc (len + 1);
-			break;
 		case 1:
 			buf = Hunk_AllocName (len + 1, path);
 			break;
@@ -1349,6 +1346,9 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 				buf = Hunk_TempAlloc (len + 1);
 			else
 				buf = loadbuf;
+			break;
+		case 6:
+			buf = Zone_Alloc (tempzone, len + 1);
 			break;
 		default:
 			Sys_Error ("COM_LoadFile: bad usehunk");
@@ -1391,6 +1391,13 @@ COM_LoadStackFile (char *path, void *buffer, int bufsize, qboolean complain)
 
 	return buf;
 }
+
+Uint8 *
+COM_LoadAllocFile (char *path, qboolean complain)
+{
+	return COM_LoadFile (path, 6, complain);
+}
+
 
 /*
 =================

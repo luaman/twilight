@@ -191,11 +191,12 @@ void COM_WriteFile (char *filename, void *data, int len);
 int COM_FOpenFile (char *filename, FILE ** file, qboolean complain);
 
 int COM_filelength (FILE *f);
+// FIXME: ALL FILES SHOULD BE LOADED WITH COM_LoadAllocFile!
 Uint8 *COM_LoadStackFile (char *path, void *buffer, int bufsize,
 		qboolean complain);
 Uint8 *COM_LoadTempFile (char *path, qboolean complain);
-Uint8 *COM_LoadZoneFile (char *path, qboolean complain);
 Uint8 *COM_LoadHunkFile (char *path, qboolean complain);
+Uint8 *COM_LoadAllocFile (char *path, qboolean complain);
 void COM_CreatePath (char *path);
 void COM_Gamedir (char *dir);
 
