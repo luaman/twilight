@@ -51,7 +51,7 @@ static const char rcsid[] =
 #include "screen.h"
 #include "strlib.h"
 #include "sys.h"
-
+#include "tga.h"
 
 /*
 
@@ -734,14 +734,7 @@ SCR_ScreenShot_f (void)
 	}
 
 
-	buffer = malloc (glwidth * glheight * 3 + 18);
-	memset (buffer, 0, 18);
-	buffer[2] = 2;						// uncompressed type
-	buffer[12] = glwidth & 255;
-	buffer[13] = glwidth >> 8;
-	buffer[14] = glheight & 255;
-	buffer[15] = glheight >> 8;
-	buffer[16] = 24;					// pixel size
+	buffer = malloc (glwidth * glheight * 3);
 
 	qglReadPixels (glx, gly, glwidth, glheight, GL_RGB, GL_UNSIGNED_BYTE,
 				  buffer + 18);
@@ -753,7 +746,8 @@ SCR_ScreenShot_f (void)
 		buffer[i] = buffer[i + 2];
 		buffer[i + 2] = temp;
 	}
-	COM_WriteFile (pcxname, buffer, glwidth * glheight * 3 + 18);
+
+	TGA_Write (pcxname, glwidth, glheight, 3, buffer);
 
 	free (buffer);
 	Con_Printf ("Wrote %s\n", pcxname);
