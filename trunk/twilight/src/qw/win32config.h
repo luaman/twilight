@@ -4,7 +4,7 @@
 
 #define VERSION 0.0
 
-#define BASEPATH ""
+#define USERPATH ""
 
 #define SHAREPATH ""
 
