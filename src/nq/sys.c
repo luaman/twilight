@@ -243,7 +243,19 @@ Sys_Error (char *error, ...)
 #endif
 
 #ifdef _WIN32
-	// Win32 gets a GUI message box
+	// Win32 gets a message box, but needs us to clear events first!
+	do {
+		MSG			msg;
+
+		while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			if (msg.message == WM_QUIT)
+				break;
+
+			TranslateMessage (&msg);
+			DispatchMessage (&msg);
+		}
+	} while (0);
 	MessageBox (NULL, text, "Error", 0);
 #endif
 	fprintf (stderr, "Error: %s\n", text);
