@@ -403,11 +403,11 @@ R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec3_t *color)
 	int			i;
 
 	if (color) {
-		TWI_PreVDrawCVA (0, paliashdr->numverts);
+		TWI_PostVDrawCVA ();
 		for (i = 0; i < paliashdr->numverts; i++) {
 			VectorMultiply(acolors[i], *color, c_array_v(i));
 		}
-		TWI_PostVDrawCVA ();
+		TWI_PreVDrawCVA (0, paliashdr->numverts);
 	}
 
 	qglBindTexture (GL_TEXTURE_2D, skin->texnum);

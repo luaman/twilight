@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "sound.h"
 #include "world.h"
 #include "gl_textures.h"
+#include "teamplay.h"
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.
@@ -669,6 +670,8 @@ Sends the entire command line over to the server
 void
 Cmd_ForwardToServer (void)
 {
+	char *s;
+
 	if (cls.state != ca_connected) {
 		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
 		return;
@@ -682,9 +685,22 @@ Cmd_ForwardToServer (void)
 		SZ_Print (&cls.message, Cmd_Argv (0));
 		SZ_Print (&cls.message, " ");
 	}
-	if (Cmd_Argc () > 1)
-		SZ_Print (&cls.message, Cmd_Args ());
-	else
+	if (Cmd_Argc () > 1) {
+		if (strcasecmp (Cmd_Argv (0), "say") &&
+				strcasecmp (Cmd_Argv (0), "say_team"))
+			SZ_Print (&cls.message, Cmd_Args ());
+		else {
+			s = Team_ParseSay (Cmd_Args ());
+			if (*s && *s < 32 && *s != 10) {
+				// otherwise the server would eat leading characters
+				// less than 32 or greater than 127
+				SZ_Print (&cls.message, "\"");
+				SZ_Print (&cls.message, s);
+				SZ_Print (&cls.message, "\"");
+			} else
+				SZ_Print (&cls.message, s);
+		}
+	} else
 		SZ_Print (&cls.message, "\n");
 }
 
@@ -725,6 +741,7 @@ CL_Init (void)
 	CL_Input_Init ();
 	CL_InitTEnts ();
 	GLT_Init ();
+	Team_Init ();
 
 	//
 	// register our commands

@@ -12,5 +12,5 @@ lib_LIBRARIES=libtwilight_base.a
 
 libtwilight_base_a_SOURCES= \
         buildnum.c cmd.c crc.c cvar.c mathlib.c model.c parm.c strlib.c wad.c \
-	zone.c
+	zone.c locs.c
 

@@ -205,8 +205,6 @@ typedef struct {
 	int			td_startframe;			// host_framecount at start
 	float		td_starttime;			// realtime at second frame of timedemo
 
-	int			challenge;
-
 	float		latency;				// rolling average
 
 	double		realtime;

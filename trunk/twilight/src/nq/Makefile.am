@@ -45,7 +45,7 @@ twilight_nq_SOURCES= \
 	r_part.c r_explosion.c render.h sbar.c screen.h server.h \
 	snd_dma.c \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
-	sys.c vid_sdl.c \
+	sys.c teamplay.c vid_sdl.c \
         view.c world.c world.h \
 	$(twilight_nq_sys_sources)
 
