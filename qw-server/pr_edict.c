@@ -281,35 +281,35 @@ PR_ValueString (etype_t type, eval_t *val)
 
 	switch (type) {
 		case ev_string:
-			sprintf (line, "%s", PR_GetString (val->string));
+			snprintf (line, sizeof(line), "%s", PR_GetString (val->string));
 			break;
 		case ev_entity:
-			sprintf (line, "entity %i",
+			snprintf (line, sizeof(line), "entity %i",
 					 NUM_FOR_EDICT (PROG_TO_EDICT (val->edict)));
 			break;
 		case ev_function:
 			f = pr_functions + val->function;
-			sprintf (line, "%s()", PR_GetString (f->s_name));
+			snprintf (line, sizeof(line), "%s()", PR_GetString (f->s_name));
 			break;
 		case ev_field:
 			def = ED_FieldAtOfs (val->_int);
-			sprintf (line, ".%s", PR_GetString (def->s_name));
+			snprintf (line, sizeof(line), ".%s", PR_GetString (def->s_name));
 			break;
 		case ev_void:
-			sprintf (line, "void");
+			snprintf (line, sizeof(line), "void");
 			break;
 		case ev_float:
-			sprintf (line, "%5.1f", val->_float);
+			snprintf (line, sizeof(line), "%5.1f", val->_float);
 			break;
 		case ev_vector:
-			sprintf (line, "'%5.1f %5.1f %5.1f'", val->vector[0],
+			snprintf (line, sizeof(line), "'%5.1f %5.1f %5.1f'", val->vector[0],
 					 val->vector[1], val->vector[2]);
 			break;
 		case ev_pointer:
-			sprintf (line, "pointer");
+			snprintf (line, sizeof(line), "pointer");
 			break;
 		default:
-			sprintf (line, "bad type %i", type);
+			snprintf (line, sizeof(line), "bad type %i", type);
 			break;
 	}
 
@@ -335,31 +335,31 @@ PR_UglyValueString (etype_t type, eval_t *val)
 
 	switch (type) {
 		case ev_string:
-			sprintf (line, "%s", PR_GetString (val->string));
+			snprintf (line, sizeof(line), "%s", PR_GetString (val->string));
 			break;
 		case ev_entity:
-			sprintf (line, "%i", NUM_FOR_EDICT (PROG_TO_EDICT (val->edict)));
+			snprintf (line, sizeof(line), "%i", NUM_FOR_EDICT (PROG_TO_EDICT (val->edict)));
 			break;
 		case ev_function:
 			f = pr_functions + val->function;
-			sprintf (line, "%s", PR_GetString (f->s_name));
+			snprintf (line, sizeof(line), "%s", PR_GetString (f->s_name));
 			break;
 		case ev_field:
 			def = ED_FieldAtOfs (val->_int);
-			sprintf (line, "%s", PR_GetString (def->s_name));
+			snprintf (line, sizeof(line), "%s", PR_GetString (def->s_name));
 			break;
 		case ev_void:
-			sprintf (line, "void");
+			snprintf (line, sizeof(line), "void");
 			break;
 		case ev_float:
-			sprintf (line, "%f", val->_float);
+			snprintf (line, sizeof(line), "%f", val->_float);
 			break;
 		case ev_vector:
-			sprintf (line, "%f %f %f", val->vector[0], val->vector[1],
+			snprintf (line, sizeof(line), "%f %f %f", val->vector[0], val->vector[1],
 					 val->vector[2]);
 			break;
 		default:
-			sprintf (line, "bad type %i", type);
+			snprintf (line, sizeof(line), "bad type %i", type);
 			break;
 	}
 
@@ -386,10 +386,10 @@ PR_GlobalString (int ofs)
 	val = (void *) &pr_globals[ofs];
 	def = ED_GlobalAtOfs (ofs);
 	if (!def)
-		sprintf (line, "%i(???)", ofs);
+		snprintf (line, sizeof(line), "%i(???)", ofs);
 	else {
 		s = PR_ValueString (def->type, val);
-		sprintf (line, "%i(%s)%s", ofs, PR_GetString (def->s_name), s);
+		snprintf (line, sizeof(line), "%i(%s)%s", ofs, PR_GetString (def->s_name), s);
 	}
 
 	i = strlen (line);
@@ -409,9 +409,9 @@ PR_GlobalStringNoContents (int ofs)
 
 	def = ED_GlobalAtOfs (ofs);
 	if (!def)
-		sprintf (line, "%i(???)", ofs);
+		snprintf (line, sizeof(line), "%i(???)", ofs);
 	else
-		sprintf (line, "%i(%s)", ofs, PR_GetString (def->s_name));
+		snprintf (line, sizeof(line), "%i(%s)", ofs, PR_GetString (def->s_name));
 
 	i = strlen (line);
 	for (; i < 20; i++)
@@ -849,7 +849,7 @@ ED_ParseEdict (char *data, edict_t *ent)
 			char        temp[32];
 
 			strcpy (temp, com_token);
-			sprintf (com_token, "0 %s 0", temp);
+			snprintf (com_token, sizeof(com_token), "0 %s 0", temp);
 		}
 
 		if (!ED_ParseEpair ((void *) &ent->v, key, com_token))
@@ -962,7 +962,7 @@ PR_LoadProgs (void)
 	Con_DPrintf ("Programs occupy %iK.\n", com_filesize / 1024);
 
 // add prog crc to the serverinfo
-	sprintf (num, "%i", CRC_Block ((byte *) progs, com_filesize));
+	snprintf (num, sizeof(num), "%i", CRC_Block ((byte *) progs, com_filesize));
 	Info_SetValueForStarKey (svs.info, "*progs", num, MAX_SERVERINFO_STRING);
 
 // byte swap the header

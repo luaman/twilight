@@ -333,7 +333,7 @@ SV_SpawnServer (char *server)
 	sv.time = 1.0;
 
 	strcpy (sv.name, server);
-	sprintf (sv.modelname, "maps/%s.bsp", server);
+	snprintf (sv.modelname, sizeof(sv.modelname), "maps/%s.bsp", server);
 	sv.worldmodel = Mod_ForName (sv.modelname, true);
 	SV_CalcPHS ();
 

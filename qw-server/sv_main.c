@@ -136,7 +136,7 @@ SV_Error (char *error, ...)
 	inerror = true;
 
 	va_start (argptr, error);
-	vsprintf (string, error, argptr);
+	vsnprintf (string, sizeof(string), error, argptr);
 	va_end (argptr);
 
 	Con_Printf ("SV_Error: %s\n", string);
@@ -435,7 +435,7 @@ SVC_Log (void)
 	Con_DPrintf ("sending log %i to %s\n", svs.logsequence - 1,
 				 NET_AdrToString (net_from));
 
-	sprintf (data, "stdlog %i\n", svs.logsequence - 1);
+	snprintf (data, sizeof(data), "stdlog %i\n", svs.logsequence - 1);
 	strcat (data, (char *) svs.log_buf[((svs.logsequence - 1) & 1)]);
 
 	NET_SendPacket (strlen (data) + 1, data, net_from);
@@ -986,7 +986,7 @@ SV_WriteIP_f (void)
 	byte        b[4];
 	int         i;
 
-	sprintf (name, "%s/listip.cfg", com_gamedir);
+	snprintf (name, sizeof(name), "%s/listip.cfg", com_gamedir);
 
 	Con_Printf ("Writing %s.\n", name);
 
@@ -1345,7 +1345,7 @@ SV_InitLocal (void)
 	Cmd_AddCommand ("writeip", SV_WriteIP_f);
 
 	for (i = 0; i < MAX_MODELS; i++)
-		sprintf (localmodels[i], "*%i", i);
+		snprintf (localmodels[i], sizeof(localmodels[i]), "*%i", i);
 
 	Info_SetValueForStarKey (svs.info, "*version", va ("twilight %s", VERSION),
 							 MAX_SERVERINFO_STRING);
@@ -1397,7 +1397,7 @@ Master_Heartbeat (void)
 			active++;
 
 	svs.heartbeat_sequence++;
-	sprintf (string, "%c\n%i\n%i\n", S2M_HEARTBEAT,
+	snprintf (string, sizeof(string), "%c\n%i\n%i\n", S2M_HEARTBEAT,
 			 svs.heartbeat_sequence, active);
 
 
@@ -1423,7 +1423,7 @@ Master_Shutdown (void)
 	char        string[2048];
 	int         i;
 
-	sprintf (string, "%c\n", S2M_SHUTDOWN);
+	snprintf (string, sizeof(string), "%c\n", S2M_SHUTDOWN);
 
 	// send to group master
 	for (i = 0; i < MAX_MASTERS; i++)
@@ -1504,7 +1504,7 @@ SV_ExtractFromUserinfo (client_t *cl)
 					p = val + 4;
 			}
 
-			sprintf (newname, "(%d)%-.40s", dupc++, p);
+			snprintf (newname, sizeof(newname), "(%d)%-.40s", dupc++, p);
 			Info_SetValueForKey (cl->userinfo, "name", newname,
 								 MAX_INFO_STRING);
 			val = Info_ValueForKey (cl->userinfo, "name");
