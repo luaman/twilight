@@ -29,7 +29,6 @@
 #define __SERVER_H
 
 #include <setjmp.h>
-
 #include "client.h"
 #include "progs.h"
 #include "net.h"
@@ -136,6 +135,8 @@ typedef struct client_s {
 #define	MOVETYPE_NOCLIP			8
 #define	MOVETYPE_FLYMISSILE		9		// extra size to monsters
 #define	MOVETYPE_BOUNCE			10
+#define MOVETYPE_BOUNCEMISSILE	11		// bounce w/o gravity
+#define MOVETYPE_FOLLOW			12		// track movement of aiment
 
 // edict->solid values
 #define	SOLID_NOT				0		// no interaction with other objects
@@ -143,6 +144,8 @@ typedef struct client_s {
 #define	SOLID_BBOX				2		// touch on edge, block
 #define	SOLID_SLIDEBOX			3		// touch on edge, but not an onground
 #define	SOLID_BSP				4		// bsp clip, touch on edge, block
+// LordHavoc: corpse code
+#define	SOLID_CORPSE			5		// same as SOLID_BBOX, except it behaves as SOLID_NOT against SOLID_SLIDEBOX objects (players/monsters)
 
 // edict->deadflag values
 #define	DEAD_NO					0
