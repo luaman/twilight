@@ -53,9 +53,6 @@ static glpoly_t *lightmap_polys[MAX_LIGHTMAPS];
 
 static int allocated[MAX_LIGHTMAPS][BLOCK_WIDTH];
 
-static glpoly_t *fullbright_polys[MAX_GLTEXTURES];
-static qboolean drawfullbrights = false;
-
 static int r_pvsframecount = 1;
 
 static int dlightdivtable[32768];
@@ -70,45 +67,6 @@ R_InitSurf (void)
 	dlightdivtable[0] = 4194304;
 	for (i = 1;i < 32768;i++)
 		dlightdivtable[i] = 4194304 / (i << 7);
-}
-
-static void
-R_RenderFullbrights (void)
-{
-	int				i;
-	glpoly_t	   *p;
-
-	if (!drawfullbrights || !gl_fb_bmodels->ivalue)
-		return;
-
-	qglDepthMask (GL_FALSE);	// don't bother writing Z
-
-	qglEnable (GL_BLEND);
-
-	for (i = 1; i < MAX_GLTEXTURES; i++) {
-		if (!fullbright_polys[i])
-			continue;
-
-		qglBindTexture (GL_TEXTURE_2D, i);
-
-		for (p = fullbright_polys[i]; p; p = p->fb_chain)
-		{
-			memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
-			memcpy(tc0_array_p, p->tc, sizeof(texcoord_t) * p->numverts);
-
-			TWI_PreVDrawCVA (0, p->numverts);
-			qglDrawArrays (GL_POLYGON, 0, p->numverts);
-			TWI_PostVDrawCVA ();
-		}
-
-		fullbright_polys[i] = NULL;
-	}
-
-	qglDisable (GL_BLEND);
-
-	qglDepthMask (GL_TRUE);
-
-	drawfullbrights = false;
 }
 
 /*
@@ -708,14 +666,6 @@ R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 	TWI_PreVDrawCVA (0, fa->polys->numverts);
 	qglDrawArrays (GL_POLYGON, 0, fa->polys->numverts);
 	TWI_PostVDrawCVA ();
-
-	// add the poly to the proper fullbright chain
-
-	if (t->fb_texturenum) {
-		fa->polys->fb_chain = fullbright_polys[t->fb_texturenum];
-		fullbright_polys[t->fb_texturenum] = fa->polys;
-		drawfullbrights = true;
-	}
 }
 
 /*
@@ -735,14 +685,6 @@ R_RenderBrushPoly (msurface_t *fa, texture_t *t)
 	TWI_PreVDrawCVA (0, fa->polys->numverts);
 	qglDrawArrays (GL_POLYGON, 0, fa->polys->numverts);
 	TWI_PostVDrawCVA ();
-
-	// add the poly to the proper lightmap chain
-
-	if (t->fb_texturenum) {
-		fa->polys->fb_chain = fullbright_polys[t->fb_texturenum];
-		fullbright_polys[t->fb_texturenum] = fa->polys;
-		drawfullbrights = true;
-	}
 }
 
 /*
@@ -830,8 +772,6 @@ DrawTextureChains ()
 
 			for (; s; s = s->texturechain)
 				R_RenderBrushPolyMTex (s, st);
-			
-			t->texturechain = NULL;
 		}
 
 		qglDisable (GL_TEXTURE_2D);
@@ -861,8 +801,6 @@ DrawTextureChains ()
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 			for (; s; s = s->texturechain)
 				R_RenderBrushPoly (s, st);
-				
-			t->texturechain = NULL;
 		}
 
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -872,6 +810,47 @@ DrawTextureChains ()
 	// If the water is solid, draw here, if not, then later.
 	if (r_wateralpha->fvalue == 1)
 		R_DrawWaterTextureChains ();
+
+	// Draw the fullbrights, if there are any
+	if (!gl_fb_bmodels->ivalue)
+	{
+		for (i = 0; i < cl.worldmodel->numtextures; i++)
+		{
+			s = cl.worldmodel->textures[i]->texturechain;
+			if (!s || (s->flags & SURF_DRAWTURB))
+				continue;
+			cl.worldmodel->textures[i]->texturechain = NULL;
+		}
+		return;
+	}
+
+	qglDepthMask (GL_FALSE);	// don't bother writing Z
+	qglEnable (GL_BLEND);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
+
+	for (i = 0; i < cl.worldmodel->numtextures; i++)
+	{
+		t = cl.worldmodel->textures[i];
+		if (!t)
+			continue;
+		s = t->texturechain;
+		if (!s || (s->flags & SURF_DRAWTURB))
+			continue;
+		st = R_TextureAnimation (t);
+
+		if (st->fb_texturenum)
+		{
+			qglBindTexture (GL_TEXTURE_2D, st->fb_texturenum);
+			for (; s; s = s->texturechain)
+				R_RenderBrushPoly (s, st);
+		}
+
+		t->texturechain = NULL;
+	}
+
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDisable (GL_BLEND);
+	qglDepthMask (GL_TRUE);
 }
 
 /*
@@ -1148,8 +1127,6 @@ R_DrawBrushModel (entity_t *e)
 		R_BlendLightmaps ();
 	}
 
-	R_RenderFullbrights ();
-
 	qglPopMatrix ();
 }
 
@@ -1305,17 +1282,12 @@ R_DrawWorld (void)
 
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
-	if (gl_fb_bmodels->ivalue)
-		memset (fullbright_polys, 0, sizeof(fullbright_polys));
-
 	R_MarkLeaves ();
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
 
 	R_PushDlights ();
 
 	DrawTextureChains ();
-
-	R_RenderFullbrights ();
 }
 
 

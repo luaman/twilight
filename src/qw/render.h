@@ -36,7 +36,6 @@
 #include "gl_info.h"
 #include "gl_arrays.h"
 
-#define	MAX_GLTEXTURES	1024
 #define	TOP_RANGE		16				// soldier uniform colors
 #define	BOTTOM_RANGE	96
 

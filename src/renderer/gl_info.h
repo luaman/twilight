@@ -27,8 +27,6 @@
 #ifndef __GL_INFO_H
 #define __GL_INFO_H
 
-#define	MAX_GLTEXTURES	1024
-
 #include "mathlib.h"
 #include "dyngl.h"
 
