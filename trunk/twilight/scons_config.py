@@ -256,6 +256,8 @@ def do_configure (env):
 
 	if env['PLATFORM'] == 'win32':
 		env.Append (LIBS = ['SDLmain', 'user32', 'ws2_32'])
+		env.Append (LINKFLAGS = ['/subsystem:windows', '/nodefaultlib:libc.lib'])
+		env.Append (CCFLAGS = ['/G5'])
 
 	conf.Finish ()
 
