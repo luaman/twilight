@@ -724,7 +724,7 @@ Host_Say (qboolean teamonly)
 	client_t	*save;
 	Uint32		j;
 	char		*p;
-	unsigned char text[64];
+	char		text[64];
 	qboolean    fromServer = false;
 
 	if (cmd_source == src_command) {
@@ -743,18 +743,18 @@ Host_Say (qboolean teamonly)
 	save = host_client;
 
 	p = Cmd_Args ();
-// remove quotes if present
+	// remove quotes if present
 	if (*p == '"') {
 		p++;
 		p[strlen (p) - 1] = 0;
 	}
-// turn on color set 1
+	// turn on color set 1
 	if (!fromServer)
 		snprintf (text, sizeof (text), "%c%s: ", 1, save->name);
 	else
 		snprintf (text, sizeof (text), "%c<%s> ", 1, hostname->svalue);
 
-	j = sizeof (text) - 2 - strlen (text);	// -2 for /n and null
+	j = sizeof (text) - 2 - strlen ((const char *)text);	// -2 for /n and null
 	// terminator
 	if (strlen (p) > j)
 		p[j] = 0;

@@ -229,9 +229,9 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 	has_top = has_bottom = has_fb = false;
 
 	if (e->colormap && !gl_nocolors->ivalue) {
-		if ((has_top = !!skin->top[anim].num_indices))
+		if ((has_top = !!skin->top[anim].num_indices) == true)
 			VectorCopy4 (e->colormap->top, top);
-		if ((has_bottom = !!skin->bottom[anim].num_indices))
+		if ((has_bottom = !!skin->bottom[anim].num_indices) == true)
 			VectorCopy4 (e->colormap->bottom, bottom);
 	}
 

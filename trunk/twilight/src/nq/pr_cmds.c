@@ -1475,7 +1475,7 @@ PF_changepitch (void)
 	
 	ent = G_EDICT(OFS_PARM0);
 	current = ANGLEMOD ( ent->v.angles[0] );
-	if ((val = GETEDICTFIELDVALUE (ent, eval_idealpitch)))
+	if ((val = GETEDICTFIELDVALUE (ent, eval_idealpitch)) != NULL)
 		ideal = val->_float;
 	else
 	{
@@ -1483,7 +1483,7 @@ PF_changepitch (void)
 				"pitch_speed must be defined to use changepitch");
 		return;
 	}
-	if ((val = GETEDICTFIELDVALUE (ent, eval_pitch_speed)))
+	if ((val = GETEDICTFIELDVALUE (ent, eval_pitch_speed)) != NULL)
 		speed = val->_float;
 	else
 	{
