@@ -727,6 +727,7 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame, model_t *mod)
 
 	pose = frame->poses;
 
+	frame->interval = 1;
 	frame->poses->normal_indices = Zone_Alloc(mod->extrazone, pheader->numverts * sizeof(Uint8));
 	frame->poses->vertices = Zone_Alloc(mod->extrazone, pheader->numverts * sizeof(avertex_t));
 
