@@ -845,6 +845,8 @@ GL_Set2D (void)
 
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
+
+	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
 //====================================================================
@@ -1301,7 +1303,7 @@ GL_SelectTexture (GLenum target)
 {
 	if (!gl_mtexable)
 		return;
-	qglSelectTexture (GL_TEXTURE0_ARB + target);
+	qglActiveTextureARB (GL_TEXTURE0_ARB + target);
 	if (target == oldtarget)
 		return;
 	cnttextures[oldtarget] = currenttexture;

@@ -141,6 +141,12 @@ extern vec3_t vright;
 extern vec3_t r_origin;
 
 //
+// gl_draw.c
+//
+extern int	gl_filter_min;
+extern int	gl_filter_max;
+
+//
 // screen size info
 //
 extern refdef_t r_refdef;
@@ -227,10 +233,12 @@ void        R_TranslatePlayerSkin (int playernum);
 
 typedef void (OGLDECL * lpMTexFUNC) (GLenum, GLfloat, GLfloat);
 typedef void (OGLDECL * lpSelTexFUNC) (GLenum);
-extern lpMTexFUNC qglMTexCoord2f;
-extern lpSelTexFUNC qglSelectTexture;
+extern lpMTexFUNC qglMultiTexCoord2fARB;
+extern lpSelTexFUNC qglActiveTextureARB;
 
 extern qboolean gl_mtexable;
+extern qboolean gl_mtexcombine_arb;
+extern qboolean gl_mtexcombine_ext;
 
 // Vertex array stuff.
 
@@ -243,7 +251,7 @@ extern GLfloat  c_array[MAX_VERTEX_ARRAYS][4];
 extern GLuint vindices[MAX_VERTEX_INDICES];
 
 void        R_DrawWorld (void);
-void        R_RenderBrushPoly (msurface_t *fa);
+void        R_RenderBrushPoly (msurface_t *fa, texture_t *t);
 void        R_DrawWaterSurfaces (void);
 void        R_DrawParticles (void);
 void        V_CalcBlend (void);
