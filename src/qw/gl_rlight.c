@@ -41,6 +41,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "view.h"
+#include <math.h>
 
 int         r_dlightframecount;
 static int	rl_vindex, rl_iindex;
@@ -106,10 +107,11 @@ R_InitBubble (void)
 				*bub_cos = bubble_costable;
 
 	// additional accuracy here
+	// NOTE: We REALLY want to use the real sin and cos in this case.
 	for (i = 16; i >= 0; i--) {
 		a = i * (M_PI / 8.0);
-		*bub_sin++ = Q_sin (a);
-		*bub_cos++ = Q_cos (a);
+		*bub_sin++ = sin (a);
+		*bub_cos++ = cos (a);
 	}
 }
 
