@@ -189,6 +189,37 @@ Sys_Init (void)
 	sys_asciionly = Cvar_Get ("sys_asciionly", "0", CVAR_ARCHIVE, NULL);
 
 	Math_Init ();
+
+#ifdef _WIN32
+	if (COM_CheckParm ("-nopriority"))
+	{
+		Cvar_Set (sys_extrasleep, "0");
+	}
+	else
+	{
+		OSVERSIONINFO	vinfo;
+
+		vinfo.dwOSVersionInfoSize = sizeof(vinfo);
+
+		if (!GetVersionEx (&vinfo))
+			Sys_Error ("Couldn't get OS info");
+
+		if ((vinfo.dwMajorVersion < 4) ||
+			(vinfo.dwPlatformId == VER_PLATFORM_WIN32s))
+		{
+			Sys_Error ("QuakeWorld requires at least Win95 or NT 4.0");
+		}
+
+		if ( ! SetPriorityClass (GetCurrentProcess(), HIGH_PRIORITY_CLASS))
+			Sys_Printf ("SetPriorityClass() failed\n");
+		else
+			Sys_Printf ("Process priority class set to HIGH\n");
+
+		// sys_extrasleep > 0 seems to cause packet loss on WinNT (why?)
+		if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_NT)
+			Cvar_Set (sys_extrasleep, "0");
+	}
+#endif
 }
 
 void
@@ -405,11 +436,6 @@ main (int c, char **v)
 {
 	double  	    time, oldtime, newtime, base;
 	int     	    j;
-#ifndef _WIN32
-	fd_set			fdset;
-	struct timeval	timeout;
-	extern int		ip_sockets[2];
-#endif
 
 	SDL_Init (SDL_INIT_TIMER);
 	atexit (SDL_Quit);
@@ -437,22 +463,13 @@ main (int c, char **v)
 
 	base = oldtime = Sys_DoubleTime () - 0.1;
 	while (1) {
-#ifndef _WIN32
 		// the only reason we have a timeout at all is so that if the last
 		// connected client times out, the message would not otherwise
 		// be printed until the next event.
-		FD_ZERO (&fdset);
-		if (do_stdin)
-			FD_SET (0, &fdset);
-		FD_SET (ip_sockets[NS_SERVER], &fdset);
-		timeout.tv_sec = 1;
-		timeout.tv_usec = 0;
-		if (select (ip_sockets[NS_SERVER] + 1, &fdset, NULL, NULL, &timeout) == -1)
-		{
-			printf("select returned error: %s\n", strerror (errno));
-			continue;
-		}
-		stdin_ready = FD_ISSET (0, &fdset);
+#ifndef _WIN32
+		NET_Sleep (10);
+#else
+		NET_Sleep (1);
 #endif
 
 		// find time spent rendering last frame

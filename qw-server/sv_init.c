@@ -46,6 +46,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "world.h"
 #include "zone.h"
+#include "cvar.h"
 
 server_static_t svs;					// persistant server info
 server_t    sv;							// local server
@@ -317,6 +318,18 @@ SV_SpawnServer (char *server)
 	Mod_ClearAll ();
 	Hunk_FreeToLowMark (host_hunklevel);
 
+	//
+	// make cvars consistent
+	//
+	if (coop->value)
+		Cvar_Set (deathmatch, "0");
+	if (deathmatch->value)
+		Cvar_Set (coop, "0");
+	current_skill = (int) (skill->value + 0.5);
+	current_skill = bound (0, current_skill, 3);
+
+	Cvar_Set (skill, va("%i", current_skill));
+
 	// wipe the entire per-level structure
 	memset (&sv, 0, sizeof (sv));
 
@@ -416,7 +429,10 @@ SV_SpawnServer (char *server)
 	// run two frames to allow everything to settle
 	host_frametime = 0.1;
 	SV_Physics ();
+	sv.time += 0.1;
 	SV_Physics ();
+	sv.time += 0.1;
+	sv.old_time = sv.time;
 
 	// save movement vars
 	SV_SetMoveVars ();

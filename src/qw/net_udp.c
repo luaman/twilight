@@ -80,7 +80,7 @@ netadr_t    net_local_adr;
 netadr_t    net_from;
 sizebuf_t   net_message;
 
-int			ip_sockets[2];		// non blocking, for receives
+static int	ip_sockets[2];		// non blocking, for receives
 
 #define	MAX_UDP_PACKET	8192
 Uint8       net_message_buffer[MAX_UDP_PACKET];
@@ -415,6 +415,35 @@ NET_Init (void)
 	// 
 	SZ_Init (&net_message, net_message_buffer, 
 		sizeof(net_message_buffer));
+}
+
+/*
+====================
+NET_Sleep
+====================
+*/
+void 
+NET_Sleep (int msec)
+{
+	fd_set			fdset;
+	struct timeval	timeout;
+
+	FD_ZERO (&fdset);
+
+#ifndef _WIN32
+	if (do_stdin)
+		FD_SET (0, &fdset);
+#endif
+
+	FD_SET (ip_sockets[NS_SERVER], &fdset);
+	timeout.tv_sec = msec/1000;
+	timeout.tv_usec = (msec%1000)*1000;
+
+	select (ip_sockets[NS_SERVER] + 1, &fdset, NULL, NULL, &timeout);
+
+#ifndef _WIN32
+	stdin_ready = FD_ISSET (0, &fdset);
+#endif
 }
 
 /*

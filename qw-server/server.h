@@ -52,6 +52,7 @@ typedef struct {
 	// during load
 
 	double      time;
+	double		old_time;
 
 	int         lastcheck;				// used by PF_checkclient
 	double      lastchecktime;			// for monster ai 
@@ -344,6 +345,8 @@ extern netadr_t master_adr[MAX_MASTERS];	// address of the master server
 extern struct cvar_s *spawn;
 extern struct cvar_s *teamplay;
 extern struct cvar_s *deathmatch;
+extern struct cvar_s *coop;
+extern struct cvar_s *skill;
 extern struct cvar_s *fraglimit;
 extern struct cvar_s *timelimit;
 
@@ -361,6 +364,8 @@ extern char localinfo[MAX_LOCALINFO_STRING + 1];
 extern int  host_hunklevel;
 extern FILE *sv_logfile;
 extern FILE *sv_fraglogfile;
+
+extern	int		current_skill;
 
 //===========================================================
 

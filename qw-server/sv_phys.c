@@ -913,15 +913,17 @@ SV_Physics (void)
 {
 	int         i;
 	edict_t    *ent;
-	static double old_time;
 
 // don't bother running a frame if sys_ticrate seconds haven't passed
-	host_frametime = svs.realtime - old_time;
-	if (host_frametime < sv_mintic->value)
-		return;
-	if (host_frametime > sv_maxtic->value)
-		host_frametime = sv_maxtic->value;
-	old_time = svs.realtime;
+	if (sv.old_time)
+	{
+		host_frametime = sv.time - sv.old_time;
+		if (host_frametime < sv_mintic->value)
+			return;
+		if (host_frametime > sv_maxtic->value)
+			host_frametime = sv_maxtic->value;
+		sv.old_time = sv.time;
+	}
 
 	pr_global_struct->frametime = host_frametime;
 
