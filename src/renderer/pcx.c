@@ -41,6 +41,7 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "common.h"
+#include "image.h"
 #include "pcx.h"
 #include "strlib.h"
 #include "sys.h"
@@ -50,17 +51,16 @@ static const char rcsid[] =
 PCX_LoadBuffer
 ============
 */
-static void
-PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
+static image_t *
+PCX_LoadBuffer (Uint8 *buf)
 {
 	pcx_t		*pcx;
-	Uint8        palette[768];
+	Uint8		palette[768];
 	Uint8       *pix, *pcx_rgb, *raw;
 	int         x, y;
 	int         dataByte, runLength;
 	int         count;
-
-	*pic = NULL;
+	image_t		*img;
 
 //
 // parse the PCX file
@@ -83,20 +83,20 @@ PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
 		pcx->bits_per_pixel != 8 || 
 		pcx->xmax >= 320 || 
 		pcx->ymax >= 256) {
-		return;
+		return NULL;
 	}
+
+	img = malloc (sizeof(image_t));
 
 	memcpy (palette, buf + com_filesize - 768, 768);
 
 	count = (pcx->xmax + 1) * (pcx->ymax + 1);
 
-	if (width)
-		*width = pcx->xmax+1;
-	if (height)
-		*height = pcx->ymax+1;
+	img->width = pcx->xmax+1;
+	img->height = pcx->ymax+1;
 
 	pcx_rgb = malloc (count * 4);
-	*pic = pcx_rgb;
+	img->pixels = pcx_rgb;
 	pix = pcx_rgb;
 
 	for (y = 0; y <= pcx->ymax; y++) {
@@ -124,6 +124,8 @@ PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
 			}
 		}
 	}
+
+	return img;
 }
 
 /*
@@ -131,16 +133,14 @@ PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
 PCX_Load
 ============
 */
-Uint8 **
-PCX_Load (char *name, Uint8 **image_pcx, int *width, int *height)
+image_t *
+PCX_Load (char *name)
 {
 	Uint8 *buf = COM_LoadTempFile (name, true);
 
 	if (buf)
-		PCX_LoadBuffer (buf, image_pcx, width, height);
-	else
-		return NULL;
+		return PCX_LoadBuffer (buf);
 
-	return image_pcx;
+	return NULL;
 }
 

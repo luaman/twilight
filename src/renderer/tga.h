@@ -26,7 +26,7 @@
 #ifndef __TGA_H
 #define __TGA_H
 
-Uint8 **TGA_Load (char *name, Uint8 **image_rgba, int *width, int *height);
+image_t *TGA_Load (char *name);
 
 qboolean TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer);
 
