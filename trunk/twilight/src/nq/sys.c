@@ -242,8 +242,8 @@ Sys_Error (char *error, ...)
 	fprintf (stderr, "Error: %s\n", text);
 #endif
 
+	SDL_Quit ();
 	exit (1);
-
 }
 
 /*

@@ -227,6 +227,7 @@ Sys_Error (char *error, ...)
 #endif
 	Sys_BackTrace(2);
 
+	SDL_Quit ();
 	exit (1);
 
 }
