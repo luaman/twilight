@@ -141,89 +141,6 @@ R_CullBox (vec3_t mins, vec3_t maxs)
 }
 
 /*
-=============
-R_BlendedRotateForEntity
-
-fenix@io.com: model transform interpolation
-=============
-*/
-void R_BlendedRotateForEntity (entity_t *e, qboolean shadow)
-{
-	float timepassed;
-	float blend;
-	vec3_t d;
-	int i;
-
-	// positional interpolation
-	timepassed = cl.time - e->translate_start_time;
-
-	if (e->translate_start_time == 0 || timepassed > 1)
-	{
-		e->translate_start_time = cl.time;
-		VectorCopy (e->cur.origin, e->origin1);
-		VectorCopy (e->cur.origin, e->origin2);
-	}
-
-	if (!VectorCompare (e->cur.origin, e->origin2))
-	{
-		e->translate_start_time = cl.time;
-		VectorCopy (e->origin2, e->origin1);
-		VectorCopy (e->cur.origin,  e->origin2);
-		blend = 0;
-	}
-	else
-	{
-		blend = timepassed * 10;
-		if (cl.paused || blend > 1) blend = 1;
-	}
-
-	Lerp_Vectors (e->origin1, blend, e->origin2, d);
-	qglTranslatef (d[0], d[1], d[2]);
-
-	// orientation interpolation (Euler angles, yuck!)
-	timepassed = cl.time - e->rotate_start_time;
-
-	if (e->rotate_start_time == 0 || timepassed > 1)
-	{
-		e->rotate_start_time = cl.time;
-		VectorCopy (e->cur.angles, e->angles1);
-		VectorCopy (e->cur.angles, e->angles2);
-	}
-
-	if (!VectorCompare (e->cur.angles, e->angles2))
-	{
-		e->rotate_start_time = cl.time;
-		VectorCopy (e->angles2, e->angles1);
-		VectorCopy (e->cur.angles,  e->angles2);
-		blend = 0;
-	}
-	else
-	{
-		blend = timepassed * 10;
-		if (cl.paused || blend > 1) blend = 1;
-	}
-
-	VectorSubtract (e->angles2, e->angles1, d);
-
-	// always interpolate along the shortest path
-	for (i = 0; i < 3; i++)
-	{
-		if (d[i] > 180)
-			d[i] -= 360;
-		else if (d[i] < -180)
-			d[i] += 360;
-	}
-
-	qglRotatef (e->angles1[1] + (blend * d[1]), 0, 0, 1);
-
-	if (!shadow)
-	{
-		qglRotatef (-e->angles1[0] + (-blend * d[0]), 0, 1, 0);
-		qglRotatef ( e->angles1[2] + ( blend * d[2]), 1, 0, 0);
-	}
-}
-
-/*
 =============================================================
 
   SPRITE MODELS
@@ -697,8 +614,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
 	float			s1 = 0.0f;
 	float			c1 = 0.0f;
 
-	blend = (cl.time - e->frame_start_time) / e->frame_interval;
-	blend = min (blend, 1);
+	blend = e->frame_blend;
 
 	lheight = e->cur.origin[2] - lightspot[2];
 	height = -lheight + 1.0;
@@ -803,27 +719,16 @@ R_SetupAliasFrame
 =================
 */
 static void
-R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
-		qboolean fb)
+R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e, qboolean fb)
 {
 	int			pose, numposes;
-	float		interval;
 
-	if ((frame >= paliashdr->numframes) || (frame < 0)) {
-		Com_DPrintf ("R_AliasSetupFrame: no such frame %d\n", frame);
-		frame = 0;
-	}
-
-	pose = paliashdr->frames[frame].firstpose;
-	numposes = paliashdr->frames[frame].numposes;
+	pose = paliashdr->frames[e->to.frame].firstpose;
+	numposes = paliashdr->frames[e->to.frame].numposes;
 
 	if (numposes > 1) {
-		interval = paliashdr->frames[frame].interval;
-		pose += (int) (cl.time / interval) % numposes;
+		pose += (int) (cl.time / e->to.frame_interval) % numposes;
 	}
-
-	e->pose1 = e->pose2 = pose;
-	e->frame_start_time = cl.time;
 
 	GL_DrawAliasFrame (paliashdr, pose, fb);
 }
@@ -837,56 +742,26 @@ fenix@io.com: model animation interpolation
 =================
 */
 static void
-R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
-		qboolean fb)
+R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e, qboolean fb)
 {
-	int			pose, numposes;
-	float		blend;
+	int			pose_from, numposes_from;
+	int			pose_to, numposes_to;
 
-	if ((frame >= paliashdr->numframes) || (frame < 0)) {
-		Com_DPrintf ("R_AliasSetupFrame: no such frame %d\n", frame);
-		frame = 0;
+	pose_from = paliashdr->frames[e->from.frame].firstpose;
+	numposes_from = paliashdr->frames[e->from.frame].numposes;
+
+	if (numposes_from > 1) {
+		pose_from += (int) (e->from.frame_time / e->from.frame_interval) % numposes_from;
 	}
 
-	pose = paliashdr->frames[frame].firstpose;
-	numposes = paliashdr->frames[frame].numposes;
+	pose_to = paliashdr->frames[e->to.frame].firstpose;
+	numposes_to = paliashdr->frames[e->to.frame].numposes;
 
-	if (numposes > 1) {
-		e->frame_interval = paliashdr->frames[frame].interval;
-		pose += (int) (cl.time / e->frame_interval) % numposes;
-	} else {
-		/*
-		 * One tenth of a second is a good for most Quake animations. If the
-		 * nextthink is longer then the animation is usually meant to pause
-		 * (e.g. check out the shambler magic animation in shambler.qc).  If
-		 * its shorter then things will still be smoothed partly, and the
-		 * jumps will be less noticable because of the shorter time.  So,
-		 * this is probably a good assumption.
-		 */
-		e->frame_interval = 0.1;
+	if (numposes_to > 1) {
+		pose_to += (int) (e->to.frame_time / e->to.frame_interval) % numposes_to;
 	}
 
-	if (e->times && !(!e->pose1 && !e->pose2)) {
-		if (e->pose2 != pose) {
-			e->frame_start_time = cl.time;
-			e->pose1 = e->pose2;
-			e->pose2 = pose;
-			blend = 0;
-		} else {
-			blend = (cl.time - e->frame_start_time) / e->frame_interval;
-		}
-	} else {
-		e->frame_start_time = cl.time;
-		e->pose1 = pose;
-		e->pose2 = pose;
-		blend = 0;
-	}
-
-	// wierd things start happening if blend passes 1
-	if (cl.paused || blend > 1)
-		blend = 1;
-
-	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend, fb);
+	GL_DrawAliasBlendedFrame(paliashdr, pose_from, pose_to, e->frame_blend, fb);
 }
 
 /*
@@ -896,7 +771,7 @@ R_DrawAliasModel
 =================
 */
 static void
-R_DrawAliasModel (entity_t *e)
+R_DrawAliasModel (entity_t *e, qboolean viewent)
 {
 	int				i;
 	int				lnum;
@@ -920,14 +795,13 @@ R_DrawAliasModel (entity_t *e)
 		}
 	}
 
-	if (e != &cl.viewent) {
+	if (!viewent) {
 		vec3_t      mins, maxs;
 
 		VectorAdd (e->cur.origin, clmodel->mins, mins);
 		VectorAdd (e->cur.origin, clmodel->maxs, maxs);
 
 		if (R_CullBox (mins, maxs)) {
-			e->times = 0;
 			return;
 		}
 	} 
@@ -940,12 +814,10 @@ R_DrawAliasModel (entity_t *e)
 		ambientlight = shadelight = R_LightPoint (e->cur.origin);
 
 		// always give the gun some light
-		if (!colorlights) {
-			if (e == &cl.viewent && ambientlight < 24)
+		if (viewent) {
+			if (!colorlights && (ambientlight < 24)) {
 				ambientlight = shadelight = 24;
-		} else {
-			if (e == &cl.viewent)
-			{
+			} else {
 				lightcolor[0] = max (lightcolor[0], 24);
 				lightcolor[1] = max (lightcolor[1], 24);
 				lightcolor[2] = max (lightcolor[2], 24);
@@ -1040,13 +912,16 @@ R_DrawAliasModel (entity_t *e)
 	 */
 	qglPushMatrix ();
 
-	if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM) && (e != &cl.viewent))
-		R_BlendedRotateForEntity (e, false);
-	else {
+	if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM)) {
 		qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
 		qglRotatef (e->cur.angles[1], 0, 0, 1);
 		qglRotatef (-e->cur.angles[0], 0, 1, 0);
 		qglRotatef (e->cur.angles[2], 1, 0, 0);
+	} else {
+		qglTranslatef (e->to.origin[0], e->to.origin[1], e->to.origin[2]);
+		qglRotatef (e->to.angles[1], 0, 0, 1);
+		qglRotatef (-e->to.angles[0], 0, 1, 0);
+		qglRotatef (e->to.angles[2], 1, 0, 0);
 	}
 
 	if ( clmodel->flags & FLAG_EYES ) {
@@ -1062,7 +937,7 @@ R_DrawAliasModel (entity_t *e)
 	}
 
 	anim = (int) (cl.time * 10) & 3;
-	skinnum = e->cur.skinnum;
+	skinnum = e->skinnum;
 	texture = paliashdr->gl_texturenum[skinnum][anim];
 	fb_texture = e->scoreboard && (clmodel->modflags & FLAG_PLAYER) ?
 		fb_skins[e->scoreboard - cl.players] :
@@ -1094,18 +969,18 @@ R_DrawAliasModel (entity_t *e)
 	qglBindTexture (GL_TEXTURE_2D, texture);
 
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-		R_SetupAliasBlendedFrame (e->cur.frame, paliashdr, e, false);
+		R_SetupAliasBlendedFrame (paliashdr, e, false);
 	else
-		R_SetupAliasFrame (e->cur.frame, paliashdr, e, false);
+		R_SetupAliasFrame (paliashdr, e, false);
 
 	if (fb_texture) {
 		qglEnable (GL_BLEND);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
 		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-			R_SetupAliasBlendedFrame (e->cur.frame, paliashdr, e, true);
+			R_SetupAliasBlendedFrame (paliashdr, e, true);
 		else
-			R_SetupAliasFrame (e->cur.frame, paliashdr, e, true);
+			R_SetupAliasFrame (paliashdr, e, true);
 
 		qglDisable (GL_BLEND);
 	}
@@ -1127,11 +1002,12 @@ R_DrawAliasModel (entity_t *e)
 
 		qglPushMatrix ();
 
-		if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
-			R_BlendedRotateForEntity (e, true);
-		else {
-			qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
+		if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM)) {
+			qglTranslatef(e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
 			qglRotatef (e->cur.angles[1], 0, 0, 1);
+		} else {
+			qglTranslatef(e->to.origin[0], e->to.origin[1], e->to.origin[2]);
+			qglRotatef (e->to.angles[1], 0, 0, 1);
 		}
 
 		qglDisable (GL_TEXTURE_2D);
@@ -1177,7 +1053,7 @@ R_DrawEntitiesOnList (void)
 		currententity = r_refdef.entities[i];
 
 		if (currententity->model->type == mod_alias)
-			R_DrawAliasModel (currententity);
+			R_DrawAliasModel (currententity, false);
 	}
 }
 
@@ -1189,7 +1065,18 @@ R_DrawViewModel
 static void
 R_DrawViewModel (void)
 {
-	currententity = &cl.viewent;
+	static entity_t viewent;
+	static qboolean first = true;
+
+	if ((cl.viewent_model != viewent.model) || first) {
+		memset (&viewent, 0, sizeof (entity_t));
+		first = false;
+	} else {
+		viewent.times++;
+	}
+
+	viewent.model = cl.viewent_model;
+	currententity = &viewent;
 
 	if (!r_drawviewmodel->value ||
 		!Cam_DrawViewModel () ||
@@ -1197,16 +1084,17 @@ R_DrawViewModel (void)
 		(cl.stats[STAT_ITEMS] & IT_INVISIBILITY) ||
 		(cl.stats[STAT_HEALTH] <= 0) ||
 		!currententity->model) {
-		currententity->times = 0;
 		return;
 	}
 
+	CL_Update_Origin(&viewent, cl.viewent_origin, cls.realtime);
+	CL_Update_Angles(&viewent, cl.viewent_angles, cls.realtime);
+	CL_UpdateAndLerp_Frame(&viewent, cl.viewent_frame, cls.realtime);
+
 	// hack the depth range to prevent view model from poking into walls
 	qglDepthRange (gldepthmin, gldepthmin + 0.3 * (gldepthmax - gldepthmin));
-	R_DrawAliasModel (currententity);
+	R_DrawAliasModel (currententity, true);
 	qglDepthRange (gldepthmin, gldepthmax);
-
-	currententity->times = -1;
 }
 
 

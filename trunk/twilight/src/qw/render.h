@@ -38,36 +38,33 @@
 
 typedef struct entity_save_s {
 	vec3_t	origin;
+	float	origin_time;
+	float	origin_interval;
 	vec3_t	angles;
+	float	angles_time;
+	float	angles_interval;
 	int		frame;
-	int		skinnum;
-	int		effects;
-	int		time;
-	int		entity_frame;
+	float	frame_time;
+	float	frame_interval;
 } entity_save_t;
 
 typedef struct entity_s {
-	entity_save_t	prev;
+	volatile int	a, b, c;
+	entity_save_t	from;
+	entity_save_t	to;
 	entity_save_t	cur;
-	struct model_s	*model;				// NULL = no model
 
+	struct model_s	*model;				// NULL = no model
+	int				skinnum;
+	int				effects;
+
+	int				modelindex;
+	int				entity_frame;
 	vec3_t			last_light;
 	float			time_left;
-	int				times;
+	unsigned int	times;
 
-	float			frame_start_time;
-	float			frame_interval;
-	int				pose1;
-	int				pose2;
-
-	float			translate_start_time;
-	vec3_t			origin1;
-	vec3_t			origin2;
-
-	float			rotate_start_time;
-	vec3_t			angles1;
-	vec3_t			angles2;
-
+	float			frame_blend;
 	struct player_info_s *scoreboard;	// identify player
 } entity_t;
 
