@@ -748,8 +748,8 @@ Con_CompleteCommandLine (void)
 	}
 	
 	if (cmd) {
-		snprintf (key_lines[edit_line] + 1, MAX_INPUTLINE, "/%s", cmd);
-		key_linepos = cmd_len + 2;
+		strlcpy(key_lines[edit_line] + 1, cmd, cmd_len);
+		key_linepos = cmd_len + 1;
 		if (c + v + a == 1) {
 			key_lines[edit_line][key_linepos] = ' ';
 			key_linepos++;
