@@ -15,7 +15,7 @@ Stuff /required/ for 0.2.0:
 
 Bugs we know about:
   - In QW coop mode, the scoreboard does not seem to work.
-    (Possibily a server issue though.)
+    (Possibly a server issue though.)
   - Some of the particles need tweaking.
 
   - Quake never checked BSPs very well, a bad one can crash the engine.
@@ -48,7 +48,7 @@ Stuff that isn't needed for 0.2, but would be nice:
     are listed on the graphics options menu in both nq/qw
   - clean up the Cmd system
   - Merge QW server into QW client ala NQ
-  - Build a seperate dedicated server in NQ [LordHavoc]
+  - Build a separate dedicated server in NQ [LordHavoc]
   - switch to using specific-sized SDL variables for file accesses
   - Convert Cvars from an unsorted list to a hash
   - Use traceline to determine visibility (trace from eye to random places
