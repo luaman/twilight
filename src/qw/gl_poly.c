@@ -163,8 +163,6 @@ void transpolyrender(void)
 	if (currenttranspoly < 1)
 		return;
 	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	qglEnable(GL_BLEND);
-	qglDepthMask(0); // disable zbuffer updates
 	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	tpolytype = TPOLYTYPE_ALPHA;
 	texnum = -1;
@@ -240,9 +238,7 @@ void transpolyrender(void)
 	qglDisable(GL_COLOR_ARRAY);
 
 	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDisable(GL_BLEND);
 	qglColor3f(1,1,1);
-	qglDepthMask(1); // enable zbuffer updates
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array[0]), tc_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(c_array[0]), c_array[0]);
