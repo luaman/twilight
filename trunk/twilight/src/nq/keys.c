@@ -662,10 +662,11 @@ Key_Event (int key, qboolean down)
 	if (key_count <= 0) {
 		return;							// just catching keys for Con_NotifyBox
 	}
-// update auto-repeat status
+
+	// update auto-repeat status
 	if (down) {
 		key_repeats[key]++;
-		if (key != K_BACKSPACE && key != K_PAUSE && key_repeats[key] > 1) {
+		if (key_dest != key_console && key_repeats[key] > 1) {
 			return;						// ignore most autorepeats
 		}
 
@@ -674,12 +675,9 @@ Key_Event (int key, qboolean down)
 						Key_KeynumToString (key));
 	}
 
-	if (key == K_SHIFT)
-		shift_down = down;
-
-//
-// handle escape specialy, so the user can never unbind it
-//
+	//
+	// handle escape specialy, so the user can never unbind it
+	//
 	if (key == K_ESCAPE) {
 		if (!down)
 			return;
@@ -699,13 +697,17 @@ Key_Event (int key, qboolean down)
 		}
 		return;
 	}
-//
-// key up events only generate commands if the game key binding is
-// a button command (leading + sign).  These will occur even in console mode,
-// to keep the character from continuing an action started before a console
-// switch.  Button commands include the kenum as a parameter, so multiple
-// downs can be matched with ups
-//
+
+	if (key == K_SHIFT)
+		shift_down = down;
+
+	//
+	// key up events only generate commands if the game key binding is
+	// a button command (leading + sign).  These will occur even in console mode,
+	// to keep the character from continuing an action started before a console
+	// switch.  Button commands include the kenum as a parameter, so multiple
+	// downs can be matched with ups
+	//
 	if (!down) {
 		kb = keybindings[key];
 		if (kb && kb[0] == '+') {
@@ -721,16 +723,18 @@ Key_Event (int key, qboolean down)
 		}
 		return;
 	}
-//
-// during demo playback, most keys bring up the main menu
-//
+
+	//
+	// during demo playback, most keys bring up the main menu
+	//
 	if (cls.demoplayback && down && consolekeys[key] && key_dest == key_game) {
 		M_ToggleMenu_f ();
 		return;
 	}
-//
-// if not a consolekey, send to the interpreter no matter what mode is
-//
+
+	//
+	// if not a consolekey, send to the interpreter no matter what mode is
+	//
 	if ((key_dest == key_menu && menubound[key])
 		|| (key_dest == key_console && !consolekeys[key])
 		|| (key_dest == key_game && (!con_forcedup || !consolekeys[key]))) {
