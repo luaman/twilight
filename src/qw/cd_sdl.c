@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include <SDL.h>
 
 #include "quakedef.h"
+#include "cvar.h"
 
 static qboolean cdValid = false;
 static qboolean playing = false;
@@ -380,7 +381,7 @@ CDAudio_Init (void)
 	if (COM_CheckParm ("-nocdaudio"))
 		return -1;
 
-	if (SDL_Init (SDL_INIT_CDROM) < 0) {
+	if (SDL_InitSubSystem (SDL_INIT_CDROM) < 0) {
 		Con_Printf ("Unable to initialize CD audio: %s\n", SDL_GetError ());
 		return -1;
 	}
