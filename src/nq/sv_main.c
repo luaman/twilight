@@ -1179,6 +1179,8 @@ SV_SpawnServer (char *server)
 	pr_global_struct->serverflags = svs.serverflags;
 
 	ED_LoadFromFile (sv.worldmodel->entities);
+	// LordHavoc: clear world angles (to fix e3m3.bsp)
+	VectorClear(sv.edicts->v.angles);
 
 	sv.active = true;
 
