@@ -442,5 +442,6 @@ CDAudio_Shutdown (void)
 		return;
 	CDAudio_Stop ();
 	SDL_CDClose (cd_handle);
+	SDL_QuitSubSystem(SDL_INIT_CDROM);
 	cd_handle = NULL;
 }
