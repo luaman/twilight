@@ -330,7 +330,7 @@ Size_Changed2D (cvar_t *cvar)
 
 	if (!VID_Inited) {
 		vid.width_2d = 320;
-		vid.height_2d = 200;
+		vid.height_2d = 240;
 		Con_CheckResize();
 		return;
 	}
@@ -349,7 +349,7 @@ Size_Changed2D (cvar_t *cvar)
 	if (height == -1)
 		height = width * 3 / 4;
 
-	height = bound (200, height, (int) vid.height);
+	height = bound (240, height, (int) vid.height);
 
 	vid.width_2d = width;
 	vid.height_2d = height;
@@ -415,7 +415,7 @@ VID_Init (unsigned char *palette)
 	}
 
 	vid.width = max (320, vid.width);
-	vid.height = max (200, vid.height);
+	vid.height = max (240, vid.height);
 
 	i = COM_CheckParm ("-conwidth");
 	if (i && i < (com_argc - 1))
