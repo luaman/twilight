@@ -208,7 +208,7 @@ SOURCE=.\mathlib.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\md4.c
+SOURCE=.\mdfour.c
 # End Source File
 # Begin Source File
 
@@ -357,6 +357,10 @@ SOURCE=.\keys.h
 # Begin Source File
 
 SOURCE=.\mathlib.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mdfour.h
 # End Source File
 # Begin Source File
 
