@@ -4,9 +4,9 @@ SHAREPATH=\"/usr/share/games/twilight\"
 USERPATH=\"/home/knghtbrd/.twilight\"
 
 
-OBJECTS=cd_linux.o cl_cam.o cl_demo.o cl_ents.o cl_input.o cl_main.o \
-	cl_parse.o cl_pred.o cl_tent.o cmd.o common.o console.o crc.o \
-	cvar.o gl_draw.o gl_mesh.o gl_model.o gl_ngraph.o gl_refrag.o \
+OBJECTS=buildnum.o cd_linux.o cl_cam.o cl_demo.o cl_ents.o cl_input.o \
+	cl_main.o cl_parse.o cl_pred.o cl_tent.o cmd.o common.o console.o \
+	crc.o cvar.o gl_draw.o gl_mesh.o gl_model.o gl_ngraph.o gl_refrag.o \
 	gl_rlight.o gl_rmain.o gl_rmisc.o gl_rsurf.o gl_screen.o gl_warp.o \
 	keys.o mathlib.o md4.o menu.o net_chan.o net_udp.o nonintel.o \
 	pmove.o pmovetst.o r_part.o sbar.o skin.o snd_dma.o snd_mem.o \

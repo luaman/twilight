@@ -46,7 +46,7 @@ int build_number( void )
 
 	for (m = 0; m < 11; m++)
 	{
-		if (_strnicmp( &qdate[0], mon[m], 3 ) == 0)
+		if (Q_strncasecmp( &qdate[0], mon[m], 3 ) == 0)
 			break;
 		d += mond[m];
 	}
