@@ -28,6 +28,7 @@
 #ifndef __CLIENT_H
 #define __CLIENT_H
 
+#include "quakedef.h"
 #include "common.h"
 #include "net.h"
 #include "protocol.h"
@@ -70,7 +71,6 @@ typedef struct {
 } player_state_t;
 
 
-#define	MAX_SCOREBOARDNAME	16
 typedef struct player_info_s {
 	int         userid;
 	char        userinfo[MAX_INFO_STRING];
