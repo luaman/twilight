@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) 2001  Forest Hale
+	Copyright (C)  2001 Forest Hale
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -39,6 +39,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "gl_textures.h"
 #include "collision.h"
+#include "sys.h"
 
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 
@@ -51,14 +52,6 @@ extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 #define EXPLOSIONSTARTVEL (256.0f)
 #define EXPLOSIONFADESTART (1.5f)
 #define EXPLOSIONFADERATE (3.0f)
-
-#if EXPLOSIONSVERTS > MAX_VERTEX_ARRAYS
-#error Explosion too complex for vertex array size.
-#endif
-
-#if EXPLOSIONINDICES > MAX_VERTEX_INDICES
-#error Explosion too complex for vertex indice array size.
-#endif
 
 
 vec3_t explosionspherevertvel[EXPLOSIONVERTS];
@@ -176,6 +169,12 @@ void
 R_Explosion_Init (void)
 {
 	int			i, x, y;
+
+	if (EXPLOSIONVERTS > MAX_VERTEX_ARRAYS)
+		Sys_Error("Explosion too complex for vertex array size.");
+
+	if (EXPLOSIONINDICES > MAX_VERTEX_INDICES)
+		Sys_Error("Explosion too complex for vertex indice array size.");
 
 	i = 0;
 	for (y = 0; y < EXPLOSIONGRID; y++)

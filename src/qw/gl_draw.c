@@ -403,7 +403,7 @@ void
 Draw_String_Len (float x, float y, char *str, int len, float text_size)
 {
 	float	frow, fcol, size = 0.0625;
-	int		num, i, vnum;
+	int		num, i;
 
 	if (y <= -8)
 		return;							/* totally off screen */
@@ -413,34 +413,34 @@ Draw_String_Len (float x, float y, char *str, int len, float text_size)
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
 	qglEnable (GL_BLEND);
-	vnum = 0;
+	v_index = 0;
 
 	for (i = 0; *str && (i < len); i++, x += text_size) {
 		if ((num = *str++) != 32) {		/* Skip drawing spaces */
 			frow = (float) (num >> 4) * size;
 			fcol = (float) (num & 15) * size;
-			VectorSet2 (tc_array_v(vnum + 0), fcol, frow);
-			VectorSet2 (v_array_v(vnum + 0), x, y);
-			VectorSet2 (tc_array_v(vnum + 1), fcol + size, frow);
-			VectorSet2 (v_array_v(vnum + 1), x + text_size, y);
-			VectorSet2 (tc_array_v(vnum + 2), fcol + size, frow + size);
-			VectorSet2 (v_array_v(vnum + 2), x + text_size, y + text_size);
-			VectorSet2 (tc_array_v(vnum + 3), fcol, frow + size);
-			VectorSet2 (v_array_v(vnum + 3), x, y + text_size);
-			vnum += 4;
-			if ((vnum + 4) >= MAX_VERTEX_ARRAYS) {
-				TWI_PreVDraw (0, vnum);
-				qglDrawArrays (GL_QUADS, 0, vnum);
+			VectorSet2 (tc_array_v(v_index + 0), fcol, frow);
+			VectorSet2 (v_array_v(v_index + 0), x, y);
+			VectorSet2 (tc_array_v(v_index + 1), fcol + size, frow);
+			VectorSet2 (v_array_v(v_index + 1), x + text_size, y);
+			VectorSet2 (tc_array_v(v_index + 2), fcol + size, frow + size);
+			VectorSet2 (v_array_v(v_index + 2), x + text_size, y + text_size);
+			VectorSet2 (tc_array_v(v_index + 3), fcol, frow + size);
+			VectorSet2 (v_array_v(v_index + 3), x, y + text_size);
+			v_index += 4;
+			if ((v_index + 4) >= MAX_VERTEX_ARRAYS) {
+				TWI_PreVDraw (0, v_index);
+				qglDrawArrays (GL_QUADS, 0, v_index);
 				TWI_PostVDraw ();
-				vnum = 0;
+				v_index = 0;
 			}
 		}
 	}
-	if (vnum) {
-		TWI_PreVDraw (0, vnum);
-		qglDrawArrays (GL_QUADS, 0, vnum);
+	if (v_index) {
+		TWI_PreVDraw (0, v_index);
+		qglDrawArrays (GL_QUADS, 0, v_index);
 		TWI_PostVDraw ();
-		vnum = 0;
+		v_index = 0;
 	}
 	qglDisable (GL_BLEND);
 }
@@ -466,7 +466,7 @@ void
 Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size)
 {
 	float	frow, fcol, size = 0.0625;
-	int		num, i, vnum;
+	int		num, i;
 
 	if (y <= -8)
 		return;							/* totally off screen */
@@ -476,7 +476,7 @@ Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size)
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
 	qglEnable (GL_BLEND);
-	vnum = 0;
+	v_index = 0;
 
 	for (i = 0; *str && (i < len); i++, x += text_size)
 	{
@@ -484,30 +484,30 @@ Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size)
 		{
 			frow = (float) (num >> 4) * size;
 			fcol = (float) (num & 15) * size;
-			VectorSet2 (tc_array_v(vnum + 0), fcol, frow);
-			VectorSet2 (v_array_v(vnum + 0), x, y);
-			VectorSet2 (tc_array_v(vnum + 1), fcol + size, frow);
-			VectorSet2 (v_array_v(vnum + 1), x + text_size, y);
-			VectorSet2 (tc_array_v(vnum + 2), fcol + size, frow + size);
-			VectorSet2 (v_array_v(vnum + 2), x + text_size, y + text_size);
-			VectorSet2 (tc_array_v(vnum + 3), fcol, frow + size);
-			VectorSet2 (v_array_v(vnum + 3), x, y + text_size);
-			vnum += 4;
-			if ((vnum + 4) >= MAX_VERTEX_ARRAYS)
+			VectorSet2 (tc_array_v(v_index + 0), fcol, frow);
+			VectorSet2 (v_array_v(v_index + 0), x, y);
+			VectorSet2 (tc_array_v(v_index + 1), fcol + size, frow);
+			VectorSet2 (v_array_v(v_index + 1), x + text_size, y);
+			VectorSet2 (tc_array_v(v_index + 2), fcol + size, frow + size);
+			VectorSet2 (v_array_v(v_index + 2), x + text_size, y + text_size);
+			VectorSet2 (tc_array_v(v_index + 3), fcol, frow + size);
+			VectorSet2 (v_array_v(v_index + 3), x, y + text_size);
+			v_index += 4;
+			if ((v_index + 4) >= MAX_VERTEX_ARRAYS)
 			{
-				TWI_PreVDraw (0, vnum);
-				qglDrawArrays (GL_QUADS, 0, vnum);
+				TWI_PreVDraw (0, v_index);
+				qglDrawArrays (GL_QUADS, 0, v_index);
 				TWI_PostVDraw ();
-				vnum = 0;
+				v_index = 0;
 			}
 		}
 	}
-	if (vnum)
+	if (v_index)
 	{
-		TWI_PreVDraw (0, vnum);
-		qglDrawArrays (GL_QUADS, 0, vnum);
+		TWI_PreVDraw (0, v_index);
+		qglDrawArrays (GL_QUADS, 0, v_index);
 		TWI_PostVDraw ();
-		vnum = 0;
+		v_index = 0;
 	}
 	qglDisable (GL_BLEND);
 }

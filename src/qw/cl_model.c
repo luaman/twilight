@@ -1143,6 +1143,10 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 	pheader->numverts = numinverts + numseams;
 
+	if (pheader->numverts > MAX_VERTEX_ARRAYS)
+		Sys_Error("Model %s too big for vertex arrays! (%d %d)", mod->name,
+				pheader->numverts, MAX_VERTEX_ARRAYS);
+
 	pheader->tcarray = Zone_Alloc(mod->extrazone, pheader->numverts * sizeof(astvert_t));
 	for (i = 0, j = 0; i < numinverts; i++) {
 		j = vremap[i];

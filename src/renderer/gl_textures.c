@@ -222,10 +222,10 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 		int height, short bits, Uint8 color, qboolean bleach,
 		qboolean tri_check, char *name)
 {
-	Uint8		*mskin;
-	int			i, numtris;
-	int			*triangles;
-	astvert_t	texcoords[3];
+	Uint8			*mskin;
+	int				i, numtris;
+	int				*triangles;
+	astvert_t		texcoords[3];
 
 	skin->texnum = skin->num_indices = 0;
 	skin->indices = NULL;

@@ -40,7 +40,7 @@ static const char rcsid[] =
 #include "r_explosion.h"
 #include "host.h"
 
-// FIXME - These need headers somewhere
+// FIXME - These need to be in a header somewhere
 extern void TNT_Init (void);
 extern void R_InitBubble (void);
 extern void R_SkyBoxChanged (cvar_t *cvar);
@@ -60,8 +60,10 @@ colorub_t	*cub_array_p;
 GLuint		*vindices;
 float_int_t	*FtoUB_tmp;
 
-GLuint v_index, i_index;
-qboolean va_locked;
+GLint		v_index, i_index;
+qboolean	va_locked;
+
+GLint		MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
 
 /*
  * view origin
@@ -112,6 +114,8 @@ cvar_t *gl_fb_bmodels;
 cvar_t *gl_oldlights;
 cvar_t *gl_colorlights;
 cvar_t *gl_particletorches;
+cvar_t *gl_varray_size;
+cvar_t *gl_iarray_size;
 
 extern vec3_t lightcolor;
 qboolean colorlights = true;
@@ -315,8 +319,6 @@ float       r_avertexnormal_dots[SHADEDOT_QUANT][256] =
            ;
 
 float *shadedots = r_avertexnormal_dots[0];
-GLfloat acolors[MAX_VERTEX_ARRAYS][4];
-
 
 /*
 =================
@@ -347,10 +349,10 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 		tc_array(i, 1) = paliashdr->tcarray[i].t;
 
 		l = shadedots[pose->normal_indices[i]] * shadelight;
-		VectorScale(lightcolor, l, acolors[i]);
-		acolors[i][3] = 1;
+		VectorScale(lightcolor, l, cf_array_v(i));
+		cf_array(i, 3) = 1;
 	}
-	TWI_FtoUB (acolors[0], c_array_v(0), paliashdr->numverts * 4);
+	TWI_FtoUB (cf_array_v(0), c_array_v(0), paliashdr->numverts * 4);
 }
 
 /*
@@ -362,13 +364,8 @@ R_DrawSubSkin
 void
 R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec4_t *color)
 {
-	int			i;
-
-	if (color) {
-		for (i = 0; i < paliashdr->numverts; i++)
-			VectorMultiply(acolors[i], *color, cf_array_v(i));
-		TWI_FtoUB (cf_array_v(0), c_array_v(0), paliashdr->numverts * 4);
-	}
+	if (color)
+		TWI_FtoUBMod(cf_array_v(0), c_array_v(0), color, paliashdr->numverts*4);
 
 	qglBindTexture (GL_TEXTURE_2D, skin->texnum);
 	qglDrawRangeElements(GL_TRIANGLES, 0, paliashdr->numverts,
@@ -992,6 +989,9 @@ R_Init_Cvars (void)
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 
 	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
+
+	gl_varray_size = Cvar_Get ("gl_varray_size", "2048", CVAR_ARCHIVE | CVAR_ROM, NULL);
+	gl_iarray_size = Cvar_Get ("gl_iarray_size", "2048", CVAR_ARCHIVE | CVAR_ROM, NULL);
 }
 
 /*
@@ -1057,14 +1057,11 @@ R_Init (void)
 	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
 	Cmd_AddCommand ("loadsky", &R_LoadSky_f);
 
-	R_InitBubble ();
-	R_InitParticles ();
-	TNT_Init ();
-	R_Explosion_Init ();
-	R_InitSurf ();
-
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
+
+	MAX_VERTEX_ARRAYS = gl_varray_size->ivalue;
+	MAX_VERTEX_INDICES = gl_iarray_size->ivalue;
 
 	tc0_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
 	tc1_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
@@ -1088,6 +1085,12 @@ R_Init (void)
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
 	}
+
+	R_InitBubble ();
+	R_InitParticles ();
+	TNT_Init ();
+	R_Explosion_Init ();
+	R_InitSurf ();
 }
 
 /*
