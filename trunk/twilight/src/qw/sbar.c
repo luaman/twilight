@@ -568,7 +568,7 @@ Sbar_DrawInventory (void)
 	for (i = 0; i < 4; i++) {
 		snprintf (num, sizeof (num), "%3i", cl.stats[STAT_SHELLS + i]);
 		for (j = 0; j < 3; j++)
-			num[j] = 18 + num[j] - '0';
+			num[j] = (num[j] == 32 ? ' ' : 18 + num[j] - '0');
 		if (headsup) {
 			y = -24 - (4 - i) * 11;
 			if (hudswap) {
