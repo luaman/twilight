@@ -28,10 +28,10 @@
 #ifndef __gl_main_h
 #define __gl_main_h
 
-#include "qtypes.h"
 #include "cvar.h"
 #include "entities.h"
 #include "gl_light.h"
+#include "qtypes.h"
 
 typedef struct renderer_s {
 	/*

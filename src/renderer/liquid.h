@@ -27,10 +27,10 @@
 #ifndef __R_LIQUID_H
 #define __R_LIQUID_H
 
-#include "mathlib.h"
-#include "dyngl.h"
-#include "model.h"
 #include "cvar.h"
+#include "dyngl.h"
+#include "mathlib.h"
+#include "model.h"
 
 extern cvar_t *r_wateralpha;
 void R_Liquid_Init_Cvars(void);

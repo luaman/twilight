@@ -27,8 +27,9 @@
 #ifndef __GL_ALIAS_H
 #define __GL_ALIAS_H
 
-#include "qtypes.h"
+#include "entities.h"
 #include "gl_info.h"
+#include "qtypes.h"
 
 extern float r_avertexnormals[162][3];
 

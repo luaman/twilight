@@ -27,21 +27,22 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
-#include "quakedef.h"
+#include <math.h>
+
 #include "crc.h"
 #include "cvar.h"
+#include "dyngl.h"
+#include "gl_info.h"
+#include "gl_main.h"
 #include "host.h"
 #include "mathlib.h"
+#include "mdfour.h"
+#include "quakedef.h"
+#include "sky.h"
 #include "strlib.h"
+#include "surface.h"
 #include "sys.h"
 #include "textures.h"
-#include "gl_info.h"
-#include <math.h>
-#include "surface.h"
-#include "sky.h"
-#include "mdfour.h"
-#include "dyngl.h"
-#include "gl_main.h"
 
 /*
 ===============================================================================

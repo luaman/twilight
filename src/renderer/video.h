@@ -27,8 +27,8 @@
 #ifndef __VID_H
 #define __VID_H
 
-#include "qtypes.h"
 #include "cvar.h"
+#include "qtypes.h"
 
 typedef struct vrect_s
 {

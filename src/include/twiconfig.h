@@ -28,12 +28,12 @@
 #define __TWICONFIG_H
 
 #ifdef HAVE_CONFIG_H
-# include "../config.h"
+# include "config.h"
 #else
 # ifdef _WIN32
-#  include "../win32config.h"
+#  include "win32config.h"
 # elif defined(__APPLE__) && defined(__MACH__)
-#  include "../OSXconfig.h"
+#  include "OSXconfig.h"
 # else
 #  error "No compile config available"
 # endif

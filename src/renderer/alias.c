@@ -27,18 +27,18 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
-#include "gl_main.h"
 #include "cvar.h"
-#include "sys.h"
-#include "gl_info.h"
 #include "gl_arrays.h"
+#include "gl_info.h"
+#include "gl_light.h"
+#include "gl_main.h"
+#include "matrixlib.h"
 #include "model.h"
+#include "palette.h"
 #include "quakedef.h"
 #include "r_part.h"
+#include "sys.h"
 #include "vis.h"
-#include "matrixlib.h"
-#include "palette.h"
-#include "gl_light.h"
 
 #define NUMVERTEXNORMALS	162
 float r_avertexnormals[NUMVERTEXNORMALS][3] = {

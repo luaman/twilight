@@ -29,20 +29,20 @@ static const char rcsid[] =
 
 #include <math.h>
 
-#include "quakedef.h"
+#include "cclient.h"
 #include "collision.h"
 #include "common.h"
 #include "cvar.h"
-#include "textures.h"
-#include "mathlib.h"
-#include "strlib.h"
-#include "sys.h"
 #include "dyngl.h"
 #include "gl_arrays.h"
 #include "gl_info.h"
-#include "noise.h"
-#include "cclient.h"
 #include "gl_main.h"
+#include "mathlib.h"
+#include "noise.h"
+#include "quakedef.h"
+#include "strlib.h"
+#include "sys.h"
+#include "textures.h"
 
 #define MAX_EXPLOSIONS 64
 #define EXPLOSIONGRID 8

@@ -28,16 +28,16 @@ static const char rcsid[] =
 #include "twiconfig.h"
 #include <math.h>
 
-#include "quakedef.h"
 #include "crc.h"
 #include "cvar.h"
+#include "gl_arrays.h"
 #include "host.h"
 #include "mathlib.h"
+#include "mod_alias.h"
+#include "quakedef.h"
 #include "strlib.h"
 #include "sys.h"
 #include "textures.h"
-#include "mod_alias.h"
-#include "gl_arrays.h"
 
 /*
 ==============================================================================

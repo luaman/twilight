@@ -42,11 +42,11 @@
 #include <stdio.h>
 
 #include "cmdlib.h"
-#include "scriplib.h"
-#include "trilib.h"
 #include "lbmlib.h"
 #include "mathlib.h"
+#include "scriplib.h"
 #include "strlib.h"
+#include "trilib.h"
 
 #endif
 

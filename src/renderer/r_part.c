@@ -30,21 +30,21 @@ static const char rcsid[] =
 #include <stdlib.h>	/* for rand() and calloc() */
 #include <string.h> /* for memcpy() */
 
-#include "quakedef.h"
+#include "alias.h"
+#include "brush.h"
+#include "cclient.h"
 #include "collision.h"
 #include "common.h"
 #include "cvar.h"
-#include "mathlib.h"
 #include "explosion.h"
 #include "gen_textures.h"
 #include "gl_arrays.h"
 #include "gl_info.h"
+#include "gl_main.h"
+#include "mathlib.h"
+#include "quakedef.h"
 #include "r_part.h"
 #include "vis.h"
-#include "alias.h"
-#include "brush.h"
-#include "cclient.h"
-#include "gl_main.h"
 
 extern cvar_t *cl_mapname;
 

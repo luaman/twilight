@@ -30,14 +30,14 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <string.h> /* for malloc() */
 
-#include "model.h"
 #include "cvar.h"
-#include "qtypes.h"
-#include "mathlib.h"
-#include "sys.h"
 #include "gl_info.h"
 #include "gl_main.h"
+#include "mathlib.h"
+#include "model.h"
+#include "qtypes.h"
 #include "surface.h"
+#include "sys.h"
 
 Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
 

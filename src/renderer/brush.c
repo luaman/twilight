@@ -29,21 +29,21 @@ static const char rcsid[] =
 
 #include <stdlib.h>
 
-#include "quakedef.h"
-#include "cvar.h"
-#include "host.h"
-#include "mathlib.h"
-#include "strlib.h"
-#include "sys.h"
-#include "sky.h"
-#include "liquid.h"
-#include "gl_info.h"
-#include "gl_arrays.h"
-#include "vis.h"
 #include "cclient.h"
+#include "cvar.h"
 #include "entities.h"
+#include "gl_arrays.h"
+#include "gl_info.h"
 #include "gl_light.h"
 #include "gl_main.h"
+#include "host.h"
+#include "liquid.h"
+#include "mathlib.h"
+#include "quakedef.h"
+#include "sky.h"
+#include "strlib.h"
+#include "sys.h"
+#include "vis.h"
 
 #define BACKFACE_EPSILON 0.01
 

@@ -29,24 +29,24 @@ static const char rcsid[] =
 
 #include <math.h>
 
-#include "quakedef.h"
 #include "collision.h"
 #include "cvar.h"
 #include "dlight.h"
-#include "textures.h"
+#include "gen_textures.h"
+#include "gl_arrays.h"
+#include "gl_info.h"
+#include "gl_light.h"
+#include "gl_main.h"
 #include "image/image.h"
 #include "mathlib.h"
 #include "matrixlib.h"
+#include "quakedef.h"
 #include "strlib.h"
-#include "view.h"
-#include "gl_info.h"
-#include "gl_arrays.h"
-#include "vis.h"
-#include "gl_light.h"
-#include "sys.h"
 #include "surface.h"
-#include "gl_main.h"
-#include "gen_textures.h"
+#include "sys.h"
+#include "textures.h"
+#include "view.h"
+#include "vis.h"
 
 static Uint32 blocklights[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 3];
 

@@ -30,21 +30,21 @@ static const char rcsid[] =
 #include <stdlib.h>
 #include <string.h>
 
-#include "video.h"
-#include "strlib.h"
-#include "pointers.h"
-#include "textures.h"
-#include "gl_arrays.h"
-#include "image/image.h"
-#include "sys.h"
-#include "fs/wad.h"
-#include "cvar.h"
-#include "qtypes.h"
-#include "mathlib.h"
-#include "gl_info.h"
-#include "draw.h"
 #include "cclient.h"
 #include "console.h"
+#include "cvar.h"
+#include "draw.h"
+#include "fs/wad.h"
+#include "gl_arrays.h"
+#include "gl_info.h"
+#include "image/image.h"
+#include "mathlib.h"
+#include "pointers.h"
+#include "qtypes.h"
+#include "strlib.h"
+#include "sys.h"
+#include "textures.h"
+#include "video.h"
 
 image_t *draw_disc;
 

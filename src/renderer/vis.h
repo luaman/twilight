@@ -27,8 +27,8 @@
 #ifndef __VIS_H
 #define __VIS_H
 
-#include "qtypes.h"
 #include "model.h"
+#include "qtypes.h"
 
 extern Uint		 vis_framecount;
 extern mleaf_t	*vis_viewleaf, *vis_oldviewleaf;

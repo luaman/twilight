@@ -29,25 +29,25 @@ static const char rcsid[] =
 
 #include <stdio.h>
 
-#include "quakedef.h"
+#include "cclient.h"
 #include "cmd.h"
+#include "common.h"
 #include "console.h"
 #include "cvar.h"
 #include "draw.h"
+#include "fs/wad.h"
+#include "gl_info.h"
+#include "gl_main.h"
 #include "host.h"
 #include "keys.h"
+#include "lh_parser.h"
 #include "mathlib.h"
 #include "menu.h"
+#include "quakedef.h"
+#include "sound/sound.h"
 #include "strlib.h"
 #include "sys.h"
-#include "fs/wad.h"
 #include "video.h"
-#include "lh_parser.h"
-#include "common.h"
-#include "gl_info.h"
-#include "sound/sound.h"
-#include "cclient.h"
-#include "gl_main.h"
 
 /*
 ================
