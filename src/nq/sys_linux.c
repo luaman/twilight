@@ -295,56 +295,41 @@ Sys_ConsoleInput (void)
 char *
 Sys_ExpandPath (char *str)
 {
-	char		buf[PATH_MAX] = "";
-	char	   *s = str;
-	char	   *p;
-	char	   *home = NULL;
+	static char buf[PATH_MAX] = "";
+	char *s = str, *p;
+	struct passwd *entry;
+
 
 	if (*s == '~')
 	{
-		struct passwd	   *entry;
-
 		s++;
 		if (*s == '/' || *s == '\0')
 		{
-			if ((entry = getpwuid(getuid())))
-			{
-				if (entry->pw_dir && *(entry->pw_dir))
-					home = Q_strdup (entry->pw_dir);
-			}
+			/* Current user's home directory */
 			if ((p = getenv("HOME")))
-				if (home)
-					free (home);
-				home = Q_strdup (p);
-			else if (!home)
-				home = Q_strdup (".");
-			Q_strncpy (buf, home, PATH_MAX);
+				Q_strncpy(buf, p, PATH_MAX);
+			else
+				Q_strncpy(buf, ".", PATH_MAX);
 			Q_strncat (buf, s, PATH_MAX);
 		} else {
-			char			   *rest;
-
-			if ((rest = strchr(s, '/')) != NULL)
-				*rest++ = '\0';
+			/* Another user's home directory */
+			if ((p = strchr(s, '/')) != NULL)
+				*p = '\0';
 			if ((entry = getpwnam(s)) != NULL)
 			{
 				Q_strncpy (buf, entry->pw_dir, PATH_MAX);
-				if (rest)
-				{
-					Q_strncat (buf, "/", PATH_MAX);
-					Q_strncat (buf, rest, PATH_MAX);
+				if (p) {
+					*p = '/';
+					Q_strncat (buf, p, PATH_MAX);
 				}
 			} else
-				return NULL;
+				/* ~user expansion failed, no such user */
+				Q_strcpy(buf, "");
 		}
 	} else
 		Q_strncpy (buf, str, PATH_MAX);
 
-	if (home)
-		free (home);
-
-	p = Z_Malloc (Q_strlen (buf));
-	Q_strcpy (p, buf);
-	return p;
+	return buf;
 }
 
 int
