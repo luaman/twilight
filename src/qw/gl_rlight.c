@@ -175,6 +175,12 @@ R_RenderDlight (dlight_t *light)
 			qglDrawElements(GL_TRIANGLES, rl_iindex, GL_UNSIGNED_INT, vindices);
 			rl_vindex = 0;
 			rl_iindex = 0;
+			memcpy(v_array[rl_vindex], v_array[vcenter], sizeof(*v_array));
+			memcpy(c_array[rl_vindex], c_array[vcenter], sizeof(*c_array));
+			vcenter = rl_vindex++;
+			memcpy(v_array[rl_vindex], v_array[vlast], sizeof(*v_array));
+			memcpy(c_array[rl_vindex], c_array[vlast], sizeof(*c_array));
+			vlast = rl_vindex++;
 		}
 	}
 }

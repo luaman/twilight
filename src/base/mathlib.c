@@ -408,6 +408,27 @@ PerpendicularVector (vec3_t dst, const vec3_t src)
 	VectorNormalizeFast (dst);
 }
 
+/*
+ * Written by LordHavoc.
+ * Like AngleVectors, but taking a forward vector instead of angles.
+ * Useful!
+ */
+void VectorVectors(const vec3_t forward, vec3_t right, vec3_t up)
+{
+	float d;
+
+	right[0] = forward[2];
+	right[1] = -forward[0];
+	right[2] = forward[1];
+
+	d = DotProduct(forward, right);
+	right[0] -= d * forward[0];
+	right[1] -= d * forward[1];
+	right[2] -= d * forward[2];
+	VectorNormalize(right);
+	CrossProduct(right, forward, up);
+}
+
 #if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma optimize( "", off )
 #endif

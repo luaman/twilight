@@ -152,6 +152,7 @@ void        AngleVectors (vec3_t angles, vec3_t forward, vec3_t right,
 						  vec3_t up);
 int         BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
 float       anglemod (float a);
+void        VectorVectors(const vec3_t forward, vec3_t right, vec3_t up);
 void        RotatePointAroundVector (vec3_t dst, const vec3_t dir,
 									const vec3_t point, float degrees);
 

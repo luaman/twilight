@@ -179,6 +179,8 @@ extern GLfloat	c_array[MAX_VERTEX_ARRAYS][4];
 
 extern GLuint vindices[MAX_VERTEX_INDICES];
 
+extern GLuint v_index, i_index;
+
 /*
 extern varray_t2f_c4f_v4f_t varray[MAX_VERTEX_ARRAYS];
 typedef struct varray_t2f_c4f_v4f_s {
