@@ -56,6 +56,9 @@
 
 #define	ON_EPSILON		0.1				// point on plane side epsilon
 
+#define NUM_FBS				32				// Number of fullbright colors		
+#define FIRST_FB			(256 - NUM_FBS)	// First fullbright color.
+
 
 //
 // per-level limits

@@ -1270,7 +1270,7 @@ GL_Upload8 (Uint8 *data, int width, int height, unsigned *ttable, int flags)
 		for (i = 0; i < s; i++)
 		{
 			p = *data++;
-			if (p < 224)
+			if (p < FIRST_FB)
 				trans[i] = 0;			/* transparent */
 			else
 				trans[i] = table[p];	/* fullbright */
