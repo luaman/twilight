@@ -109,7 +109,7 @@ void
 VID_Shutdown (void)
 {
 	DGL_CloseLibrary ();
-	SDL_Quit ();
+	//SDL_Quit (); // LordHavoc: don't quit yet, we might be called by Sys_Error
 }
 
 static void
