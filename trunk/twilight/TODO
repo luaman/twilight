@@ -14,7 +14,6 @@ New stuff slated for 0.2.0:
 
   - QW/NQ renderers - port changes between them
   - faster dlights if we can make them faster
-  - particle torches
 
 Would be nice but is not strictly needed:
 

@@ -60,7 +60,6 @@ extern cvar_t *gl_subdivide_size;
 
 cvar_t *r_skybox;
 cvar_t *r_fastsky;
-
 static qboolean draw_skybox = false;
 
 void R_DrawSkyboxChain (msurface_t *s);
@@ -97,6 +96,8 @@ SubdividePolygon (int numverts, float *verts)
 	glpoly_t   *poly;
 	float       s, t;
 
+	if (!numverts)
+		Sys_Error ("numverts = 0!");
 	if (numverts > 60)
 		Sys_Error ("numverts = %i", numverts);
 
@@ -104,7 +105,7 @@ SubdividePolygon (int numverts, float *verts)
 
 	for (i = 0; i < 3; i++) {
 		m = (mins[i] + maxs[i]) * 0.5;
-		m = gl_subdivide_size->value 
+		m = gl_subdivide_size->value
 			* Q_floor (m / gl_subdivide_size->value + 0.5);
 		if (maxs[i] - m < 8)
 			continue;
@@ -227,7 +228,10 @@ EmitWaterPolys (msurface_t *fa)
 	float      *v;
 	int         i;
 	float       s, t, os, ot;
+	texture_t  *tex;
 
+	tex = R_TextureAnimation (fa->texinfo->texture);
+	qglBindTexture (GL_TEXTURE_2D, tex->gl_texturenum);
 
 	for (p = fa->polys; p; p = p->next) {
 		qglBegin (GL_POLYGON);
@@ -256,7 +260,7 @@ EmitWaterPolys (msurface_t *fa)
 EmitSkyPolys
 =============
 */
-void
+static void
 EmitSkyPolys (msurface_t *fa)
 {
 	glpoly_t   *p;
@@ -335,7 +339,7 @@ R_DrawSkyChain (msurface_t *s)
 		int			i;
 		
 		qglDisable (GL_TEXTURE_2D);
-		qglColor4ubv ((Uint8 *)&d_8to32table[(Uint8)(r_fastsky->value-1)]);
+		qglColor4fv (d_8tofloattable[(Uint8) r_fastsky->value - 1]);
 		
 		for (fa=s ; fa ; fa=fa->texturechain){
 			for (p=fa->polys ; p ; p=p->next) {
@@ -383,8 +387,6 @@ R_DrawSkyChain (msurface_t *s)
 
 =================================================================
 */
-
-void        GL_SelectTexture (GLenum target);
 
 /*
 ==================
@@ -693,9 +695,7 @@ void MakeSkyVec (float s, float t, int axis)
 	s = bound ((1.0/512), s, (511.0/512));
 	t = 1.0 - bound ((1.0/512), t, (511.0/512));
 
-	if (!r_fastsky->value)
-		qglTexCoord2f (s, t);
-
+	qglTexCoord2f (s, t);
 	qglVertex3fv (v);
 }
 
@@ -713,16 +713,13 @@ void R_DrawSkyBox (void)
 	if (!draw_skybox || (skytexturenum == -1))
 		return;
 
-	GL_SelectTexture (0);
-
 	for (i = 0; i < 6; i++)
 	{
 		if (skymins[0][i] >= skymaxs[0][i]
 			|| skymins[1][i] >= skymaxs[1][i])
 			continue;
 
-		if (!r_fastsky->value)
-			qglBindTexture (GL_TEXTURE_2D, skyboxtexnum+skytexorder[i]);
+		qglBindTexture (GL_TEXTURE_2D, skyboxtexnum+skytexorder[i]);
 
 		qglBegin (GL_QUADS);
 		MakeSkyVec (skymins[0][i], skymins[1][i], i);
@@ -747,7 +744,7 @@ void
 R_InitSky (texture_t *mt)
 {
 	int         i, j, p;
-	Uint8       *src;
+	Uint8      *src;
 	unsigned    trans[128 * 128];
 	int         r, g, b;
 	unsigned char rgba[4], transpix[4];
@@ -779,8 +776,8 @@ R_InitSky (texture_t *mt)
 	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, 128, 128, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, trans);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 
 
 	for (i = 0; i < 128; i++)
@@ -797,6 +794,7 @@ R_InitSky (texture_t *mt)
 	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 128, 128, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, trans);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 }
+
