@@ -215,7 +215,7 @@ Key_Console (int key)
 	{
 		if (key_lines[edit_line][1] == '\\' || key_lines[edit_line][1] == '/')
 			Cbuf_AddText (key_lines[edit_line] + 2);	// skip the >
-		else if (cl_chatmode->ivalue && ccl.state >= ca_connected)
+		else if (cl_chatmode->ivalue && ccls.state >= ca_connected)
 		{
 			if (CheckForCommand ())
 				Cbuf_AddText (key_lines[edit_line] + 1);
@@ -232,7 +232,7 @@ Key_Console (int key)
 		edit_line = (edit_line + 1) & 31;
 		history_line = edit_line;
 		Key_ClearEditLine (edit_line);
-		if (ccl.state == ca_disconnected)
+		if (ccls.state == ca_disconnected)
 		{
 			// Make sure the user's command is printed
 			SCR_UpdateScreen ();

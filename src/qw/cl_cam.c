@@ -294,7 +294,7 @@ Cam_Track (usercmd_t *cmd)
 	if (cl_hightrack->ivalue && !locked)
 		Cam_CheckHighTarget ();
 
-	if (!autocam || ccl.state != ca_active)
+	if (!autocam || ccls.state != ca_active)
 		return;
 
 	if (locked && (!ccl.users[spec_track].name[0]
@@ -369,7 +369,7 @@ Cam_FinishMove (usercmd_t *cmd)
 	user_info_t *s;
 	int         end;
 
-	if (ccl.state != ca_active)
+	if (ccls.state != ca_active)
 		return;
 
 	if (!cl.spectator)					// only in spectator mode

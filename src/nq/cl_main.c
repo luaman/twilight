@@ -126,7 +126,7 @@ CL_Disconnect (void)
 // if running a local server, shut it down
 	if (cls.demoplayback)
 		CL_StopPlayback ();
-	else if (ccl.state >= ca_connected) {
+	else if (ccls.state >= ca_connected) {
 		if (cls.demorecording)
 			CL_Stop_f ();
 
@@ -137,7 +137,7 @@ CL_Disconnect (void)
 		SZ_Clear (&cls.message);
 		NET_Close (cls.netcon);
 
-		ccl.state = ca_disconnected;
+		ccls.state = ca_disconnected;
 		if (sv.active)
 			Host_ShutdownServer (false);
 	}
@@ -168,7 +168,7 @@ Host should be either "local" or a net address to be passed on
 void
 CL_EstablishConnection (char *host)
 {
-	if (ccl.state == ca_dedicated)
+	if (ccls.state == ca_dedicated)
 		return;
 
 	if (cls.demoplayback)
@@ -182,7 +182,7 @@ CL_EstablishConnection (char *host)
 	Com_DPrintf ("CL_EstablishConnection: connected to %s\n", host);
 
 	cls.demonum = -1;					// not in the demo loop now
-	ccl.state = ca_connected;
+	ccls.state = ca_connected;
 	cls.signon = 0;						// need all the signon messages before
 	// playing
 }
@@ -229,6 +229,7 @@ CL_SignonReply (void)
 			break;
 
 		case 4:
+			ccls.state = ca_active;
 			SCR_EndLoadingPlaque ();	// allow normal screen updates
 			break;
 	}
@@ -575,7 +576,7 @@ CL_ReadFromServer (void)
 
 		cl.last_received_message = host_realtime;
 		CL_ParseServerMessage ();
-	} while (ret && ccl.state >= ca_connected);
+	} while (ret && ccls.state >= ca_connected);
 
 	if (cl_shownet->ivalue)
 		Com_Printf ("\n");
@@ -600,7 +601,7 @@ CL_SendCmd (void)
 {
 	usercmd_t   cmd;
 
-	if (ccl.state != ca_active)
+	if (ccls.state != ca_active)
 		return;
 
 	if (cls.signon == SIGNONS) {
@@ -646,7 +647,7 @@ Cmd_ForwardToServer (void)
 {
 	char *s;
 
-	if (ccl.state < ca_connected) {
+	if (ccls.state < ca_connected) {
 		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
 		return;
 	}

@@ -207,6 +207,8 @@ HUD_Init (void)
 
 	hud_zone = Zone_AllocZone("HUD");
 
+	HUD_Changed (cl_sbar);
+
 	for (i = 0; i < 10; i++)
 	{
 		sb_nums[0][i] = Draw_PicFromWad (va ("num_%i", i));
@@ -541,12 +543,14 @@ HUD_Draw_MiniScoreboard (void)
 
 	y = base_y;
 
-	for (j = 0; (i < n_users) && (j < n_lines); i++, j++) {
+	for (j = 0; (i < n_users) && (j < n_lines); i++) {
 		user = &ccl.users[fragsort[i]];
 		if (!user->name[0])
 			continue;
 		if (user->flags & USER_SPECTATOR)
 			continue;
+
+		j++;
 
 		x = base_x;
 
@@ -941,6 +945,9 @@ HUD_Draw (void)
 {
 	int show = hud_scoreboard;
 
+	if (ccls.state != ca_active)
+		return;
+
 	HUD_Draw_MiniScoreboard ();
 
 	if (ccl.stats[STAT_HEALTH] <= 0)
@@ -972,6 +979,9 @@ HUD_IntermissionOverlay (void)
 {
 	qpic_t	*pic;
 	int		dig, num;
+
+	if (ccls.state != ca_active)
+		return;
 
 	switch (ccl.game_teams) {
 		case GAME_TEAMS:
@@ -1011,6 +1021,9 @@ void
 HUD_FinaleOverlay (void)
 {
 	qpic_t     *pic;
+
+	if (ccls.state != ca_active)
+		return;
 
 	pic = Draw_CachePic ("gfx/finale.lmp");
 	Draw_Pic ((hud.width - pic->width) / 2, 16, pic);

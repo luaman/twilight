@@ -598,7 +598,7 @@ main (int argc, char *argv[])
 
 	Host_Init ();
 
-	if (ccl.state != ca_dedicated && COM_CheckParm ("-nostdout"))
+	if (ccls.state != ca_dedicated && COM_CheckParm ("-nostdout"))
 		nostdout = 1;
 
 	oldtime = base = Sys_DoubleTime ();
@@ -612,7 +612,7 @@ main (int argc, char *argv[])
 		Host_Frame (time);
 		oldtime = newtime;
 
-		if (ccl.state == ca_dedicated && sys_extrasleep->ivalue)
+		if (ccls.state == ca_dedicated && sys_extrasleep->ivalue)
 			SDL_Delay (sys_sleep);
 	}
 

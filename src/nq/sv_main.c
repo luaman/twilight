@@ -980,7 +980,7 @@ SV_SendReconnect (void)
 	MSG_WriteString (&msg, "reconnect\n");
 	NET_SendToAll (&msg, 5);
 
-	if (ccl.state != ca_dedicated)
+	if (ccls.state != ca_dedicated)
 		Cmd_ExecuteString ("reconnect\n", src_command);
 }
 
@@ -1092,7 +1092,7 @@ SV_SpawnServer (char *server)
 	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
 
 	SetupLightmapSettings ();
-	if (ccl.state == ca_dedicated)
+	if (ccls.state == ca_dedicated)
 		sv.worldmodel = Mod_ForName (sv.modelname, FLAG_CRASH | FLAG_SUBMODELS);
 	else
 		sv.worldmodel = Mod_ForName (sv.modelname, FLAG_CRASH | FLAG_SUBMODELS | FLAG_RENDER);
@@ -1112,7 +1112,7 @@ SV_SpawnServer (char *server)
 	sv.model_precache[1] = sv.modelname;
 	for (i = 1; i < sv.worldmodel->brush->numsubmodels; i++) {
 		sv.model_precache[1 + i] = localmodels[i];
-		if (ccl.state == ca_dedicated)
+		if (ccls.state == ca_dedicated)
 			sv.models[i + 1] = Mod_ForName (localmodels[i], 0);
 		else
 			sv.models[i + 1] = Mod_ForName (localmodels[i], FLAG_RENDER);

@@ -167,7 +167,7 @@ Draw_ConsoleBackground (int lines)
 
 	y = (vid.height_2d * 3) >> 2;
 
-	if (ccl.state != ca_active || lines > y)
+	if (ccls.state != ca_active || lines > y)
 		alpha = 1.0;
 	else
 		alpha = (float) (0.6 * lines / y);

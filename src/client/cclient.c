@@ -33,6 +33,7 @@ static const char rcsid[] =
 #include "cclient.h"
 
 client_common_t	 ccl;
+client_common_static_t	 ccls;
 
 memzone_t	*ccl_zone;
 
