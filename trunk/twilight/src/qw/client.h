@@ -72,6 +72,7 @@ typedef struct player_info_s {
 	char		userinfo[MAX_INFO_STRING];
 
 	// scoreboard information
+	char		team[MAX_SCOREBOARDNAME];
 	char		name[MAX_SCOREBOARDNAME];
 	float		entertime;
 	int			frags;
@@ -213,7 +214,10 @@ typedef struct {
 extern client_static_t cls;
 
 // these determine which intermission screen plays
-typedef enum { GAME_COOP, GAME_DEATHMATCH } gametype_t;
+typedef enum { GAME_SINGLE, GAME_COOP, GAME_DEATHMATCH, GAME_TEAMS } gametype_t;
+
+#define FRAGS_SORTED		1
+#define FRAGS_TEAM_SORTED	2
 
 /*
  * the client_state_t structure is wiped completely at every server signon
@@ -312,7 +316,8 @@ typedef struct {
 	int				viewent_frame;
 
 	// all player information
-	player_info_t players[MAX_CLIENTS];
+	player_info_t	players[MAX_CLIENTS];
+	int				frags_updated;
 } client_state_t;
 
 
