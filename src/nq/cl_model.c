@@ -911,7 +911,7 @@ Mod_LoadAllSkins (model_t *mod, Uint8 *datapointer, qboolean load)
 			interval = time->interval;
 			datapointer += sizeof(daliasskininterval_t) * numskins;
 			if ((interval - 0.00005) <= 0) {
-				Com_Printf("Broken alias model skin group: %s %d, %d %f\n",
+				Com_DPrintf("Broken alias model skin group: %s %d, %d %f\n",
 						mod->name, i, numskins, interval);
 				interval = 1;
 			}
