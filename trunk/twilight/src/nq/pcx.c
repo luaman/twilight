@@ -70,9 +70,9 @@ PCX_LoadBuffer
 static void
 PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
 {
-	pcx_t      *pcx;
+	pcx_t		*pcx;
 	Uint8        palette[768];
-	Uint8       *pix, *pcx_rgb;
+	Uint8       *pix, *pcx_rgb, *raw;
 	int         x, y;
 	int         dataByte, runLength;
 	int         count;
@@ -83,7 +83,7 @@ PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
 // parse the PCX file
 //
 	pcx = (pcx_t *)buf;
-	pix = &pcx->data;
+	raw = &(pcx->data);
 
 	pcx->xmin = LittleShort(pcx->xmin);
 	pcx->ymin = LittleShort(pcx->ymin);
@@ -100,7 +100,6 @@ PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
 		pcx->bits_per_pixel != 8 || 
 		pcx->xmax >= 320 || 
 		pcx->ymax >= 256) {
-		Con_Printf ("Bad pcx file\n");
 		return;
 	}
 
@@ -115,14 +114,15 @@ PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
 
 	pcx_rgb = malloc (count * 4);
 	*pic = pcx_rgb;
+	pix = pcx_rgb;
 
-	for (y = 0; y <= pcx->ymax; y++, pcx_rgb += pcx->xmax+1) {
+	for (y = 0; y <= pcx->ymax; y++) {
 		for (x = 0; x <= pcx->xmax; ) {
-			dataByte = *pix++;
+			dataByte = *raw++;
 
 			if ((dataByte & 0xC0) == 0xC0) {
 				runLength = dataByte & 0x3F;
-				dataByte = *pix++;
+				dataByte = *raw++;
 			} else {
 				runLength = 1;
 			}
@@ -132,12 +132,12 @@ PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
 			}
 
 			while (runLength-- > 0) {
-				pcx_rgb[0] = palette[dataByte * 3];
-				pcx_rgb[1] = palette[dataByte * 3 + 1];
-				pcx_rgb[2] = palette[dataByte * 3 + 2];
-				pcx_rgb[3] = 255;
-				pcx_rgb += 4;
-				x++;
+				pix[0] = palette[dataByte * 3];
+				pix[1] = palette[dataByte * 3 + 1];
+				pix[2] = palette[dataByte * 3 + 2];
+				pix[3] = 255;
+				pix += 4;
+				x++; 
 			}
 		}
 	}
