@@ -209,7 +209,14 @@ HUD_Init_Cvars (void)
 static image_t *
 HUD_LoadIMG (char *name)
 {
-	return Image_Load (name, TEX_UPLOAD | TEX_ALPHA);
+	image_t	*img = Image_Load (name, TEX_UPLOAD | TEX_ALPHA);
+
+	/*
+	if (!img)
+		Com_Printf("ERROR! CAN NOT LOAD -%s-\n", name);
+		*/
+
+	return img;
 }
 
 void

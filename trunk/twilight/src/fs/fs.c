@@ -229,7 +229,7 @@ fs_group_t *
 FS_Alloc_Group (fs_group_t *parent, const char *id)
 {
 	fs_group_t	*group;
-	char		*t0, *t1, *t2;
+	char		*t0, *t1;
 
 	group = Zone_Alloc (fs_zone, sizeof (fs_group_t));
 	group->files = hash_create (10, (do_compare_t *) FSH_compare, (do_index_t *) FSH_hash, (do_free_t *) FSH_free);
@@ -242,15 +242,14 @@ FS_Alloc_Group (fs_group_t *parent, const char *id)
 	} else
 		group->id = FS_MangleName(id);
 
-	t0 = Zstrdup (tempzone, group->id);
-	if ((t1 = strchr (t0, '/'))) {
-		t1++;
-		if ((t2 = strrchr (t1, '/'))) {
-			*t2 = '\0';
-			group->prefix = Zstrdup (fs_zone, t1);
-		}
+	if (!parent)
+		group->prefix = Zstrdup (fs_zone, "/");
+	else {
+		t0 = zasprintf(fs_zone, "%s/%s", parent->prefix, id);
+		if ((t1 = strrchr (t0, '/')) && t1 != t0)
+			*t1 = '\0';
+		group->prefix = t0;
 	}
-	Zone_Free (t0);
 
 	return group;
 }
@@ -262,13 +261,14 @@ FS_Free_Group (fs_group_t *group)
 	for (sub = group->subs; sub; sub = sub->sub_next)
 		FS_Free_Group (sub);
 
-	hash_destroy (sub->files);
+	hash_destroy (group->files);
 
-	if (sub->free)
-		sub->free(sub);
+	if (group->free)
+		group->free(group);
 
-	Zone_Free (sub->id);
-	Zone_Free (sub);
+	Zone_Free (group->id);
+	Zone_Free (group);
+	Zone_Free (group->prefix);
 }
 
 void
