@@ -348,7 +348,12 @@ VID_Init (unsigned char *palette)
 	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
 	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE, NULL);
 	gl_ztrick = Cvar_Get ("gl_ztrick", "1", CVAR_NONE, NULL);
+
+#ifndef _WIN32
 	gl_driver = Cvar_Get ("gl_driver", "libGL.so.1", CVAR_ROM, NULL);
+#else
+	gl_driver = Cvar_Get ("gl_driver", "opengl32.dll", CVAR_ROM, NULL);
+#endif
 
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;

@@ -17,7 +17,7 @@
 #include "TGL_types.h"
 #include "TGL_defines.h"
 
-#define TWIGL_NEED(ret, name, args)	extern ret (* q##name) args
+#define TWIGL_NEED(ret, name, args)	extern ret (APIENTRY * q##name) args
 #include "TGL_funcs_list.h"
 #undef TWIGL_NEED
 

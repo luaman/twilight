@@ -35,7 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include <stdio.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "qtypes.h"
 #include "TGL_types.h"
 #include "TGL_funcs.h"
@@ -45,8 +45,7 @@ static const char rcsid[] =
 extern cvar_t     *gl_driver;
 
 // First we need all the function pointers.
-#define TWIGL_NEED(ret, name, args) \
-ret APIENTRY (* q##name) args = NULL;
+#define TWIGL_NEED(ret, name, args) ret (APIENTRY * q##name) args = NULL;
 #include "TGL_funcs_list.h"
 #undef TWIGL_NEED
 
