@@ -46,7 +46,7 @@ extern cvar_t     *gl_driver;
 
 // First we need all the function pointers.
 #define TWIGL_NEED(ret, name, args) \
-ret (* q##name) args = NULL;
+ret APIENTRY (* q##name) args = NULL;
 #include "TGL_funcs_list.h"
 #undef TWIGL_NEED
 
