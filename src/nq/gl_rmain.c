@@ -824,22 +824,24 @@ R_DrawAliasModel (entity_t *e)
 	int         i;
 	int         lnum;
 	float       add;
-	model_t    *clmodel;
-	vec3_t      mins, maxs;
+	model_t    *clmodel = e->model;
 	aliashdr_t *paliashdr;
 	int         anim;
 	int			texture, fb_texture = 0;
 	dlight_t	*l;
 
-	clmodel = currententity->model;
+	VectorCopy (e->origin, r_entorigin);
 
-	VectorAdd (currententity->origin, clmodel->mins, mins);
-	VectorAdd (currententity->origin, clmodel->maxs, maxs);
+	if (e != &cl.viewent) {
+		vec3_t      mins, maxs;
 
-	if (R_CullBox (mins, maxs))
-		return;
+		VectorAdd (r_entorigin, clmodel->mins, mins);
+		VectorAdd (r_entorigin, clmodel->maxs, maxs);
 
-	VectorCopy (currententity->origin, r_entorigin);
+		if (R_CullBox (mins, maxs))
+			return;
+	}
+
 	VectorSubtract (r_origin, r_entorigin, modelorg);
 
 	// 
@@ -848,7 +850,7 @@ R_DrawAliasModel (entity_t *e)
 
 	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || !gl_fb_models->value)
 	{
-		ambientlight = shadelight = R_LightPoint (currententity->origin);
+		ambientlight = shadelight = R_LightPoint (e->origin);
 
 		// always give the gun some light
 		if (!colorlights) {
@@ -868,7 +870,7 @@ R_DrawAliasModel (entity_t *e)
 			if (l->die < cl.time || !l->radius)
 				continue;
 
-			add = l->radius - VectorDistance (currententity->origin, cl_dlights[lnum].origin);
+			add = l->radius - VectorDistance (e->origin, cl_dlights[lnum].origin);
 
 			if (add > 0.01) {
 				if (!colorlights)
@@ -924,29 +926,29 @@ R_DrawAliasModel (entity_t *e)
 	if (!colorlights) {
 		shadelight = shadelight * (1.0 / 200.0);
 
-		if (!currententity->last_light[0])
-			currententity->last_light[0] = shadelight;
+		if (!e->last_light[0])
+			e->last_light[0] = shadelight;
 		else {
-			shadelight = (shadelight + currententity->last_light[0])*0.5f;
-			currententity->last_light[0] = shadelight;
+			shadelight = (shadelight + e->last_light[0])*0.5f;
+			e->last_light[0] = shadelight;
 		}
 	}
 	else {
 		VectorScale(lightcolor, 1.0f / 200.0f, lightcolor);
 
-		if (!currententity->last_light[0] && !currententity->last_light[1] && !currententity->last_light[2])
-			VectorCopy (lightcolor, currententity->last_light);
+		if (!e->last_light[0] && !e->last_light[1] && !e->last_light[2])
+			VectorCopy (lightcolor, e->last_light);
 		else {
-			VectorAdd (lightcolor, currententity->last_light, lightcolor);
+			VectorAdd (lightcolor, e->last_light, lightcolor);
 			VectorScale (lightcolor, 0.5f, lightcolor);
-			VectorCopy (lightcolor, currententity->last_light);
+			VectorCopy (lightcolor, e->last_light);
 		}
 	}
 
 	// 
 	// locate the proper data
 	// 
-	paliashdr = (aliashdr_t *) Mod_Extradata (currententity->model);
+	paliashdr = (aliashdr_t *) Mod_Extradata (e->model);
 
 	c_alias_polys += paliashdr->numtris;
 
@@ -957,7 +959,7 @@ R_DrawAliasModel (entity_t *e)
 	anim = (int) (cl.time * 10) & 3;
 
 	if (!(clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value)
-		fb_texture = paliashdr->fb_texturenum[currententity->skinnum][anim];
+		fb_texture = paliashdr->fb_texturenum[e->skinnum][anim];
 
 	qglPushMatrix ();
 
@@ -985,14 +987,14 @@ R_DrawAliasModel (entity_t *e)
 				  paliashdr->scale[2]);
 	}
 
-	texture = paliashdr->gl_texturenum[currententity->skinnum][anim];
+	texture = paliashdr->gl_texturenum[e->skinnum][anim];
 
 	// we can't dynamically colormap textures, so they are cached
 	// seperately for the players.  Heads are just uncolored.
-	if (currententity->colormap != vid.colormap && !gl_nocolors->value) {
-		i = currententity - cl_entities;
+	if (e->colormap != vid.colormap && !gl_nocolors->value) {
+		i = e - cl_entities;
 		if (i >= 1 && i <= cl.maxclients	/* && !strcmp
-			   (currententity->model->name,
+			   (e->model->name,
 			   "progs/player.mdl") */ )
 			texture = playertextures - 1 + i;
 	}
@@ -1019,9 +1021,9 @@ R_DrawAliasModel (entity_t *e)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity, (fb_texture && gl_mtexable));
+		R_SetupAliasBlendedFrame (e->frame, paliashdr, e, (fb_texture && gl_mtexable));
 	else
-		R_SetupAliasFrame (currententity->frame, paliashdr, (fb_texture && gl_mtexable));
+		R_SetupAliasFrame (e->frame, paliashdr, (fb_texture && gl_mtexable));
 
 	if (fb_texture && gl_mtexable) {
 		qglDisable (GL_TEXTURE_2D);
@@ -1035,9 +1037,9 @@ R_DrawAliasModel (entity_t *e)
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
 		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-			R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity, false);
+			R_SetupAliasBlendedFrame (e->frame, paliashdr, e, false);
 		else
-			R_SetupAliasFrame (currententity->frame, paliashdr, false);
+			R_SetupAliasFrame (e->frame, paliashdr, false);
 		
 		qglDisable (GL_BLEND);
 	}
@@ -1075,7 +1077,7 @@ R_DrawAliasModel (entity_t *e)
 
 		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
 			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0,
-					lastposenum, currententity);
+					lastposenum, e);
 		else
             GL_DrawAliasShadow (paliashdr, lastposenum);
 
