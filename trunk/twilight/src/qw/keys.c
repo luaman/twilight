@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "quakedef.h"
 #include "keys.h"
+#include "hash.h"
 #ifdef _WINDOWS
 #include <windows.h>
 #endif
@@ -42,8 +43,8 @@ kgt_t       game_target = KGT_DEFAULT;
 
 int         key_count;					// incremented every key event
 
-char       *keybindings[KGT_MAX][KSYM_LAST];
-int         keydown[KSYM_LAST];			// if > 1, it is autorepeating
+hash_t	*keybindings[KGT_MAX];
+int	keydown[KSYM_LAST];			// if > 1, it is autorepeating
 
 typedef struct {
 	char       *name;
@@ -372,16 +373,13 @@ Game key handling.
 qboolean
 Key_Game (knum_t key, short unicode)
 {
-	char       *kb;
-	char        cmd[1024];
+	char			*kb;
+	char			cmd[1024];
 
-	kb = keybindings[game_target][key];
+	kb = Key_Hash_GetBind(game_target, key);
 	if (!kb && game_target > KGT_DEFAULT)
-		kb = keybindings[KGT_DEFAULT][key];
+		kb = Key_Hash_GetBind(KGT_DEFAULT, key);
 
-	/* 
-	   Con_Printf("kb %p, game_target %d, key_dest %d, key %d\n", kb,
-	   game_target, key_dest, key); */
 	if (!kb)
 		return false;
 
@@ -674,23 +672,10 @@ Key_SetBinding
 void
 Key_SetBinding (kgt_t target, knum_t keynum, char *binding)
 {
-	char       *new;
-	int         l;
-
 	if (keynum == -1)
 		return;
 
-// free old bindings
-	if (keybindings[target][keynum]) {
-		Z_Free (keybindings[target][keynum]);
-		keybindings[target][keynum] = NULL;
-	}
-// allocate memory for new binding
-	l = Q_strlen (binding);
-	new = Z_Malloc (l + 1);
-	Q_strcpy (new, binding);
-	new[l] = 0;
-	keybindings[target][keynum] = new;
+	Key_Hash_SetBind(target, keynum, binding);
 }
 
 /*
@@ -726,12 +711,12 @@ Key_Unbind_f (void)
 void
 Key_Unbindall_f (void)
 {
-	int         i, j;
+	int         i;
 
-	for (j = 0; j < KGT_MAX; j++)
-		for (i = 0; i < KSYM_LAST; i++)
-			if (keybindings[j][i])
-				Key_SetBinding (j, i, "");
+	for (i = 0; i < KGT_MAX; i++) {
+		Key_Hash_Destroy(i);
+		Key_Hash_Create(i);
+	}
 }
 
 
@@ -743,8 +728,9 @@ Key_Bind_f
 void
 Key_Bind_f (void)
 {
-	int         i, c, t, b;
-	char        cmd[1024];
+	int				i, c, t, b;
+	char			*kb;
+	char			cmd[1024];
 
 	c = Cmd_Argc ();
 
@@ -766,9 +752,9 @@ Key_Bind_f (void)
 	}
 
 	if (c == 3) {
-		if (keybindings[t][b])
+		if ((kb = Key_Hash_GetBind(t, b)))
 			Con_Printf ("\"%s\"[\"%s\"] = \"%s\"\n", Cmd_Argv (2), Cmd_Argv (1),
-						keybindings[t][b]);
+						kb);
 		else
 			Con_Printf ("\"%s\"[\"%s\"] is not bound\n", Cmd_Argv (2),
 						Cmd_Argv (1));
@@ -821,13 +807,14 @@ Writes lines containing "bind key value"
 void
 Key_WriteBindings (FILE * f)
 {
-	int         i, j;
+	int		i, j;
+	char	*kb;
 
 	for (j = 0; j < KGT_MAX; j++)
 		for (i = 0; i < KSYM_LAST; i++)
-			if (keybindings[j][i])
+			if ((kb = Key_Hash_GetBind(j, i)))
 				fprintf (f, "bind %s %s \"%s\"\n", Key_KgtnumToString (j),
-						 Key_KeynumToString (i), keybindings[j][i]);
+						 Key_KeynumToString (i), kb);
 }
 
 
@@ -846,6 +833,10 @@ Key_Init (void)
 		key_lines[i][1] = 0;
 	}
 	key_linepos = 1;
+
+	for (i = 0; i < KGT_MAX; i++) {
+		Key_Hash_Create(i);
+	}
 
 //
 // register our functions
@@ -947,4 +938,71 @@ Key_ClearStates (void)
 	for (i = 0; i < 256; i++) {
 		keydown[i] = false;
 	}
+}
+
+typedef struct kh_data_s {
+	knum_t	key;
+	char	*bind;
+} kh_data_t;
+
+static void
+KH_free (hash_t *hash, kh_data_t *data)
+{
+	free (data->bind);
+	free (data);
+}
+
+static int
+KH_index (hash_t *hash, kh_data_t *data)
+{
+	return (data->key % hash->length);
+}
+
+static int
+KH_compare (hash_t *hash, kh_data_t *data1, kh_data_t *data2)
+{
+	return (data1->key - data2->key);
+}
+
+void Key_Hash_Create (kgt_t kgt)
+{
+	keybindings[kgt] = hash_create(16, (do_compare_t *) &KH_compare,
+			(do_index_t *) &KH_index, (do_free_t *) &KH_free);
+}
+
+void Key_Hash_Destroy (kgt_t kgt)
+{
+	hash_destroy(keybindings[kgt]);
+	keybindings[kgt] = NULL;
+}
+
+char *
+Key_Hash_GetBind (kgt_t kgt, knum_t key)
+{
+	kh_data_t	search;
+	kh_data_t	*bind;
+
+	search.key = key;
+	search.bind = NULL;
+
+	bind = (kh_data_t *) hash_get(keybindings[kgt], &search);
+
+	if (bind)
+		return bind->bind;
+	else
+		return NULL;
+}
+
+void
+Key_Hash_SetBind (kgt_t kgt, knum_t key, char *bind)
+{
+	kh_data_t	*data;
+
+	data = (kh_data_t *) malloc(sizeof(kh_data_t));
+	data->key = key;
+	data->bind = strdup(bind);
+	Con_Printf("bind %p '%s' data->bind %p '%s'\n", bind, bind, data->bind,
+				data->bind);
+
+	hash_add(keybindings[kgt], data);
 }

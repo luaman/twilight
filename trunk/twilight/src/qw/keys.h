@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _KEYS_H
 
 #include <SDL_keysym.h>
+#include "hash.h"
 
 typedef enum {
 	KM_BUTTON1 = SDLK_LAST + 1,
@@ -54,15 +55,19 @@ extern keydest_t key_dest;
 extern kgt_t game_target;
 
 extern int  keydown[KSYM_LAST];			// if > 1, it is autorepeating
-extern char *keybindings[KGT_MAX][KSYM_LAST];
+extern hash_t *keybindings[KGT_MAX];
 extern char chat_buffer[];
 extern int  chat_bufferlen;
 extern qboolean chat_team;
 
-void        Key_Event (knum_t key, short unicode, qboolean down);
-void        Key_Init (void);
-void        Key_WriteBindings (FILE * f);
-void        Key_SetBinding (kgt_t target, knum_t keynum, char *binding);
-void        Key_ClearStates (void);
+void	Key_Event (knum_t key, short unicode, qboolean down);
+void	Key_Init (void);
+void	Key_WriteBindings (FILE * f);
+void	Key_SetBinding (kgt_t target, knum_t keynum, char *binding);
+void	Key_ClearStates (void);
+void	Key_Hash_Create (kgt_t kgt);
+void	Key_Hash_Destroy (kgt_t kgt);
+void	Key_Hash_SetBind (kgt_t kgt, knum_t key, char *bind);
+char	*Key_Hash_GetBind (kgt_t kgt, knum_t key);
 
 #endif

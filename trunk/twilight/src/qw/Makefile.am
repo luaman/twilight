@@ -12,7 +12,7 @@ twilight_qw_SOURCES= \
 	gl_draw.c gl_mesh.c gl_model.c gl_model.h modelgen.h spritegn.h \
 	gl_ngraph.c gl_refrag.c gl_rlight.c gl_rmain.c anorms.h anorm_dots.h \
 	gl_rmisc.c gl_rsurf.c gl_screen.c screen.h gl_warp.c gl_warp_sin.h \
-	glquake.h \
+	glquake.h hash.c hash.h \
 	keys.c mathlib.c mathlib.h md4.c menu.c menu.h \
 	net.h net_chan.c net_udp.c \
 	nonintel.c pmove.c pmove.h pmovetst.c r_part.c sbar.c sbar.h skin.c \
