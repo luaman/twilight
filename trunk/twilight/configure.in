@@ -49,11 +49,14 @@ dnl Checks for functions and headers
 AC_CHECK_FUNCS(
 	strlcat strlcpy \
 	snprintf _snprintf vsnprintf _vsnprintf \
-	strcasecmp _stricmp strncasecmp _strnicmp
+	strcasecmp _stricmp strncasecmp _strnicmp \
+	fcntl stat _stat mkdir _mkdir
 )
 
-AC_CHECK_HEADERS(unistd.h fcntl.h windef.h)
-
+AC_CHECK_HEADERS(
+	unistd.h fcntl.h windef.h pwd.h sys/types.h sys/stat.h \
+	limits.h signal.h
+)
 
 dnl Checks for paths
 test "$prefix" = "NONE" && prefix="$ac_default_prefix"

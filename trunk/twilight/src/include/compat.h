@@ -28,11 +28,16 @@
 #define __COMPAT_H
 
 #if !defined(HAVE_SNPRINTF) && defined(HAVE__SNPRINTF)
-#define snprintf _snprintf
+# define snprintf _snprintf
 #endif
 
 #if !defined(HAVE_VSNPRINTF) && defined(HAVE__VSNPRINTF)
-#define vsnprintf _vsnprintf
+# define vsnprintf _vsnprintf
+#endif
+
+#if !defined(HAVE_MKDIR) && defined(HAVE__MKDIR)
+# define mkdir(s) _mkdir((s))
 #endif
 
 #endif // __COMPAT_H
+
