@@ -25,7 +25,7 @@
 #define HAVE_MKDIR 1
 #define HAVE_PWD_H 1
 #define HAVE_SDL_H 1
-#define HAVE_SDL_LOADOBJ 1
+#define HAVE_SDL_LOADOBJECT 1
 #define HAVE_SIGNAL_H 1
 #define HAVE_SNPRINTF 1
 #define HAVE_STAT 1

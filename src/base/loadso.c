@@ -55,7 +55,7 @@ static const char rcsid[] =
 #include "SDL_types.h"
 #include "SDL_error.h"
 
-#ifdef HAVE_SDL_LOADOBJ
+#ifdef HAVE_SDL_LOADOBJECT
 extern DECLSPEC void *SDL_LoadObject(const char *sofile);
 extern DECLSPEC void *SDL_LoadFunction(void *handle, const char *name);
 extern DECLSPEC void SDL_UnloadObject(void *handle);
@@ -78,6 +78,7 @@ typedef enum {
 #ifdef macintosh
 	SO_MAC,
 #endif
+	SO_NONE,
 } so_type_e;
 
 typedef struct so_handle_s {
@@ -92,7 +93,7 @@ TWI_LoadObject (const char *sofile)
 
 	twi_handle = Zone_AllocName (sofile, sizeof (so_handle_t));
 
-#ifdef HAVE_SDL_LOADOBJ
+#ifdef HAVE_SDL_LOADOBJECT
 	if (!twi_handle->handle) {
 		if ((twi_handle->handle = SDL_LoadObject (sofile)))
 			twi_handle->type = SO_SDL;
@@ -197,7 +198,7 @@ TWI_LoadFunction (void *handle, const char *name)
 	}
 
 	switch (twi_handle->type) {
-#ifdef HAVE_SDL_LOADOBJ
+#ifdef HAVE_SDL_LOADOBJECT
 		case SO_SDL:
 			symbol = SDL_LoadFunction (twi_handle->handle, name);
 			loaderror = SDL_GetError ();
@@ -248,6 +249,9 @@ TWI_LoadFunction (void *handle, const char *name)
 			}
 			break;
 #endif
+		case SO_NONE:
+			loaderror = "Invalid loader!";
+			break;
 	}
 
 	if (!symbol)
@@ -267,7 +271,7 @@ TWI_UnloadObject (void *handle)
 	}
 
 	switch (twi_handle->type) {
-#ifdef HAVE_SDL_LOADOBJ
+#ifdef HAVE_SDL_LOADOBJECT
 		case SO_SDL:
 			SDL_UnloadObject (twi_handle->handle);
 			break;
@@ -292,6 +296,8 @@ TWI_UnloadObject (void *handle)
 			CloseConnection((CFragConnectionID) twi_handle->handle);
 			break;
 #endif
+		case SO_NONE:
+			break;
 	}
 	Zone_Free (twi_handle);
 }
