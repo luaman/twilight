@@ -71,7 +71,11 @@ static const char rcsid[] =
 # include <execinfo.h>
 #endif
 
-#include "SDL.h"
+#ifdef HAVE_SDL_H
+# include "SDL.h"
+#else
+# include "sv_sdlstub.h"
+#endif
 
 #include "quakedef.h"
 #include "client.h"
