@@ -60,7 +60,6 @@ float       speedscale;					// for top sky and bottom sky
 
 msurface_t *warpface;
 
-extern cvar_t *r_showtris;
 extern cvar_t *gl_subdivide_size;
 
 #define	MAX_CLIP_VERTS	64
@@ -235,94 +234,34 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 	glpoly_t   *p;
 	float	   *v;
 	float		temp[3];
-	int			i, texnum;
-	float		s, t;
-
-	texnum = tex->gl_texturenum;
-
-	if (r_waterripple->value) {
-		for (p = fa->polys; p; p = p->next)
-		{
-			qglBegin (GL_TRIANGLE_FAN);
-			for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
-			{
-				if (transform)
-					softwaretransform(v, temp);
-				else
-					VectorCopy(v, temp);
-
-				temp[2] += r_waterripple->value * TURBSIN(temp[0], 1/32.0f) *
-					TURBSIN(temp[1], 1/32.0f) * (1/64.0f);
-
-				s = (temp[3] + v[3]) * (1/64.0f);
-				t = (temp[4] + v[4]) * (1/64.0f);
-
-				qglColor4f(1, 1, 1, alpha);
-				qglTexCoord2f (s, t);
-				qglVertex3fv (temp);
-			}
-			qglEnd ();
-		}
-	} else {
-		for (p = fa->polys; p; p = p->next)
-		{
-			qglBegin (GL_TRIANGLE_FAN);
-			for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
-			{
-				s = (v[3] + TURBSIN(v[4], 0.125)) * (1/64.0f);
-				t = (v[4] + TURBSIN(v[3], 0.125)) * (1/64.0f);
-
-				if (transform)
-					softwaretransform(v, temp);
-				else
-					VectorCopy(v, temp);
-
-				qglColor4f(1, 1, 1, alpha);
-				qglTexCoord2f (s, t);
-				qglVertex3fv (temp);
-			}
-			qglEnd ();
-		}
-	}
-}
-
-/*
-=============
-EmitWaterTris
-
-r_showtris logic specifically for liquids
-=============
-*/
-void
-EmitWaterTris (msurface_t *fa)
-{
-	glpoly_t   *p;
-	float	   *v;
 	int			i;
+	float		s, t, ripple;
+
+	ripple = r_waterripple->value;
+
+	qglColor4f(1, 1, 1, alpha);
 
 	for (p = fa->polys; p; p = p->next)
 	{
-		if (!(cl.maxclients > 1) && r_showtris->value) {
-			qglDisable (GL_TEXTURE_2D);
-			qglDisable (GL_DEPTH_TEST);
-			qglColor4f (1,1,1,1);
+		qglBegin (GL_TRIANGLE_FAN);
+		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
+		{
+			if (transform)
+				softwaretransform(v, temp);
+			else
+				VectorCopy(v, temp);
 
-			qglBegin (GL_LINE_STRIP);
-			v = p->verts[0];
-			for (i = 2 ; i < p->numverts; i++)
-			{
-				qglBegin (GL_LINE_STRIP);
-				qglVertex3fv (p->verts[0]);
-				qglVertex3fv (p->verts[i - 1]);
-				qglVertex3fv (p->verts[i]);
-				qglVertex3fv (p->verts[0]);
-				qglEnd ();
-			}
-			qglEnd ();
+			if (ripple)
+				temp[2] += ripple * TURBSIN(temp[0], 1/32.0f) *
+					TURBSIN(temp[1], 1/32.0f) * (1/64.0f);
 
-			qglEnable (GL_DEPTH_TEST);
-			qglEnable (GL_TEXTURE_2D);
+			s = (v[3] + TURBSIN(v[4], 0.125)) * (1/64.0f);
+			t = (v[4] + TURBSIN(v[3], 0.125)) * (1/64.0f);
+
+			qglTexCoord2f (s, t);
+			qglVertex3fv (temp);
 		}
+		qglEnd ();
 	}
 }
 
@@ -359,30 +298,6 @@ EmitSkyPolys (msurface_t *fa)
 			qglVertex3fv (v);
 		}
 		qglEnd ();
-	}
-
-	if (!(cl.maxclients > 1) && r_showtris->value) {
-		for (p = fa->polys; p; p = p->next) {
-			qglDisable (GL_TEXTURE_2D);
-			qglDisable (GL_DEPTH_TEST);
-			qglColor4f (1,1,1,1);
-
-			qglBegin (GL_LINE_STRIP);
-			v = p->verts[0];
-			for (i = 2 ; i < p->numverts; i++)
-			{
-				qglBegin (GL_LINE_STRIP);
-				qglVertex3fv (p->verts[0]);
-				qglVertex3fv (p->verts[i - 1]);
-				qglVertex3fv (p->verts[i]);
-				qglVertex3fv (p->verts[0]);
-				qglEnd ();
-			}
-			qglEnd ();
-
-			qglEnable (GL_DEPTH_TEST);
-			qglEnable (GL_TEXTURE_2D);
-		}
 	}
 }
 
@@ -788,7 +703,7 @@ void R_DrawSkyBox (void)
 	if (!draw_skybox || (skytexturenum == -1))
 		return;
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	for (i = 0; i < 6; i++)
 	{
 		if (skymins[0][i] >= skymaxs[0][i]
@@ -804,7 +719,7 @@ void R_DrawSkyBox (void)
 		MakeSkyVec (skymaxs[0][i], skymins[1][i], i);
 		qglEnd ();
 	}
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
 
