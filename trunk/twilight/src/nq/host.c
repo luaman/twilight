@@ -195,12 +195,15 @@ Host_FindMaxClients (void)
 	i = COM_CheckParm ("-dedicated");
 	if (i) {
 		cls.state = ca_dedicated;
+		isDedicated = true;
 		if (i != (com_argc - 1)) {
 			svs.maxclients = Q_atoi (com_argv[i + 1]);
 		} else
 			svs.maxclients = 8;
-	} else
+	} else {
 		cls.state = ca_disconnected;
+		isDedicated = false;
+	}
 
 	i = COM_CheckParm ("-listen");
 	if (i) {
