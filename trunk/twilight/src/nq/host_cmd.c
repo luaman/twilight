@@ -79,7 +79,7 @@ Host_Status_f (void)
 	client_t	*client;
 	int         seconds, minutes, hours = 0;
 	Uint32		j;
-	void		(*print) (char *fmt, ...);
+	void		(*print) (const char *fmt, ...);
 
 	if (cmd_source == src_command) {
 		if (!sv.active) {

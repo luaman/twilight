@@ -310,7 +310,7 @@ DynGL_HasExtension (char *ext)
  * namespaces not already widely used for this purpose.
  */
 SDL_bool
-DynGL_GetFunctions (void)
+DynGL_GetFunctions (void (*errfunc)(const char *fmt, ...))
 {
 	char			*p;
 	const char		*last;
@@ -360,7 +360,11 @@ DynGL_GetFunctions (void)
 #define DYNGL_EXT(ret, name, args, extension)								\
 	if (DynGL_HasExtension (extension))										\
 		if (!(q##name = SDL_GL_GetProcAddress (#name)))						\
-			DynGL_BadExtension (extension);
+		{																	\
+			DynGL_BadExtension (extension);									\
+			errfunc ("DynGL_GetFunctions: Missing %s, needed for %s\n",		\
+					#name, extension);										\
+		}
 #define DYNGL_WANT(ret, name, args, alt)
 #include "dglfuncs.h"
 #undef DYNGL_EXT

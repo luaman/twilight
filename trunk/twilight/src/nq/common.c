@@ -501,7 +501,7 @@ void Com_EndRedirect (void)
 	rd_print = NULL;
 }
 
-void Com_Printf (char *fmt, ...)
+void Com_Printf (const char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
@@ -530,7 +530,7 @@ void Com_Printf (char *fmt, ...)
 	Con_Print (msg);
 }
 
-void Com_DPrintf (char *fmt, ...)
+void Com_DPrintf (const char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];

@@ -82,7 +82,6 @@ static int sdl_flags = SDL_OPENGL;
 
 int texture_extension_number = 1;
 
-
 const char *gl_vendor;
 const char *gl_renderer;
 const char *gl_version;
@@ -112,9 +111,8 @@ VID_Build_Gamma_Ramp8 (Uint8 *ramp, int n, double gam, double con, double bri)
 	i_s = 1.0 / n;
 	invgam = 1.0 / gam;
 
-	for (i_d = i = 0; i < n; i++, i_d++) {
+	for (i_d = i = 0; i < n; i++, i_d++)
 		ramp[i] = bound_bits((pow(i_d * i_s, invgam) * con + bri) * BIT(8),8);
-	}
 }
 
 static void
@@ -126,9 +124,8 @@ VID_Build_Gamma_Ramp16 (Uint16 *ramp, int n, double gam, double con, double bri)
 	i_s = 1.0 / n;
 	invgam = 1.0 / gam;
 
-	for (i_d = i = 0; i < n; i++, i_d++) {
+	for (i_d = i = 0; i < n; i++, i_d++)
 		ramp[i]=bound_bits((pow(i_d * i_s, invgam) * con + bri) * BIT(16),16);
-	}
 }
 
 static void
@@ -143,13 +140,14 @@ VID_InitTexGamma (void)
 	tex[1] = v_tgamma->fvalue + v_tgammabias_g->fvalue;
 	tex[2] = v_tgamma->fvalue + v_tgammabias_b->fvalue;
 
-	VID_Build_Gamma_Ramp8(tex_gamma_ramps[0], 256, tex[0], 1, 0);
-	VID_Build_Gamma_Ramp8(tex_gamma_ramps[1], 256, tex[1], 1, 0);
-	VID_Build_Gamma_Ramp8(tex_gamma_ramps[2], 256, tex[2], 1, 0);
+	VID_Build_Gamma_Ramp8 (tex_gamma_ramps[0], 256, tex[0], 1, 0);
+	VID_Build_Gamma_Ramp8 (tex_gamma_ramps[1], 256, tex[1], 1, 0);
+	VID_Build_Gamma_Ramp8 (tex_gamma_ramps[2], 256, tex[2], 1, 0);
 
 	/* 8 8 8 encoding */
 	pal = host_basepal;
-	for (i = 0; i < 256; i++) {
+	for (i = 0; i < 256; i++)
+	{
 		r = tex_gamma_ramps[0][pal[0]];
 		g = tex_gamma_ramps[1][pal[1]];
 		b = tex_gamma_ramps[2][pal[2]];
@@ -188,22 +186,24 @@ GammaChanged (cvar_t *cvar)
 	hw[1] = v_gamma->fvalue + v_gammabias_g->fvalue;
 	hw[2] = v_gamma->fvalue + v_gammabias_b->fvalue;
 
-	if (v_hwgamma->ivalue == 1) {
-		VID_Build_Gamma_Ramp16(hw_gamma_ramps[0], 256, hw[0], 1, 0);
-		VID_Build_Gamma_Ramp16(hw_gamma_ramps[1], 256, hw[1], 1, 0);
-		VID_Build_Gamma_Ramp16(hw_gamma_ramps[2], 256, hw[2], 1, 0);
+	if (v_hwgamma->ivalue == 1)
+	{
+		VID_Build_Gamma_Ramp16 (hw_gamma_ramps[0], 256, hw[0], 1, 0);
+		VID_Build_Gamma_Ramp16 (hw_gamma_ramps[1], 256, hw[1], 1, 0);
+		VID_Build_Gamma_Ramp16 (hw_gamma_ramps[2], 256, hw[2], 1, 0);
 
-		if (SDL_SetGammaRamp(hw_gamma_ramps[0], hw_gamma_ramps[1],
-			hw_gamma_ramps[2]) < 0) {
+		if (SDL_SetGammaRamp (hw_gamma_ramps[0], hw_gamma_ramps[1],
+			hw_gamma_ramps[2]) < 0)
+		{
 			/* No hardware gamma support, turn off and set ROM. */
-			Com_Printf("No hardware gamma support: Disabling. (%s)\n",
-						SDL_GetError());
-			Cvar_Set(v_hwgamma, "0");
+			Com_Printf ("No hardware gamma support: Disabling. (%s)\n",
+						SDL_GetError ());
+			Cvar_Set (v_hwgamma, "0");
 			v_hwgamma->flags |= CVAR_ROM;
 		}
-	} else if (v_hwgamma->ivalue == 2) {
-		SDL_SetGamma(hw[0], hw[1], hw[2]);
 	}
+	else if (v_hwgamma->ivalue == 2)
+		SDL_SetGamma (hw[0], hw[1], hw[2]);
 }
 
 
@@ -274,7 +274,7 @@ GL_Init
 void
 GL_Init (void)
 {
-	qglFinish();
+	qglFinish ();
 
 	gl_vendor = qglGetString (GL_VENDOR);
 	gl_renderer = qglGetString (GL_RENDERER);
@@ -300,7 +300,7 @@ GL_Init (void)
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	qglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
 void
@@ -315,15 +315,17 @@ Size_Changed2D (cvar_t *cvar)
 	int			width, height;
 	float		txt_scale;
 
-	if (con) {
+	if (con)
+	{
 		txt_scale = bound (0.5, text_scale->fvalue, 3);
 		con->tsize = 8 * txt_scale;
 	}
 
-	if (!VID_Inited) {
+	if (!VID_Inited)
+	{
 		vid.width_2d = 320;
 		vid.height_2d = 240;
-		Con_CheckResize();
+		Con_CheckResize ();
 		return;
 	}
 
@@ -346,7 +348,7 @@ Size_Changed2D (cvar_t *cvar)
 	vid.width_2d = width;
 	vid.height_2d = height;
 
-	Con_CheckResize();
+	Con_CheckResize ();
 }
 
 void
@@ -417,19 +419,17 @@ VID_Init (unsigned char *palette)
 	if (i && i < (com_argc - 1))
 		Cvar_Set(height_2d, com_argv[i + 1]);
 
-	if (SDL_InitSubSystem (SDL_INIT_VIDEO) != 0) {
+	if (SDL_InitSubSystem (SDL_INIT_VIDEO) != 0)
 		Sys_Error ("Could not init SDL video: %s\n", SDL_GetError ());
-	}
 
 	info = SDL_GetVideoInfo();
 
-	if (!info) {
+	if (!info)
 		Sys_Error ("Could not get video information!\n");
-    }
 
 	Sys_Printf ("Using OpenGL driver '%s'\n", gl_driver->svalue);
-	if (!DynGL_LoadLibrary(gl_driver->svalue))
-		Sys_Error("%s\n", SDL_GetError());
+	if (!DynGL_LoadLibrary (gl_driver->svalue))
+		Sys_Error ("%s\n", SDL_GetError ());
 	Com_DPrintf ("VID_Init: DynGL_LoadLibrary successful.\n");
 
 	i = COM_CheckParm ("-bpp");
@@ -456,21 +456,21 @@ VID_Init (unsigned char *palette)
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
 
-	if (SDL_SetVideoMode (vid.width, vid.height, vid.bpp, sdl_flags) == NULL) {
+	if (SDL_SetVideoMode (vid.width, vid.height, vid.bpp, sdl_flags) == NULL)
 		Sys_Error ("Could not init video mode: %s", SDL_GetError ());
-	}
+
 	Com_DPrintf ("VID_Init: SDL_SetVideoMode successful.\n");
 
-	if (!DynGL_GetFunctions ())
-		Sys_Error("%s\n", SDL_GetError());
+	if (!DynGL_GetFunctions (Com_Printf))
+		Sys_Error ("%s\n", SDL_GetError ());
 	Com_DPrintf ("VID_Init: DynGL_GetFuncs successful.\n");
 
 	SDL_WM_SetCaption ("Twilight QWCL", "twilight");
 	Com_DPrintf ("VID_Init: Window caption set.\n");
 
 	VID_Inited = true;
-	GammaChanged(v_gamma);
-	Size_Changed2D(NULL);
+	GammaChanged (v_gamma);
+	Size_Changed2D (NULL);
 
 	GL_Init ();
 	Com_DPrintf ("VID_Init: GL_Init successful.\n");
@@ -480,7 +480,8 @@ VID_Init (unsigned char *palette)
 	Com_Printf ("Video mode %dx%d initialized: %s.\n", vid.width, vid.height,
 			SDL_VideoDriverName(sdl_driver, sizeof(sdl_driver)));
 
-	if (use_mouse) {
+	if (use_mouse)
+	{
 		SDL_ShowCursor (0);
 		SDL_WM_GrabInput (SDL_GRAB_ON);
 	}
@@ -495,14 +496,17 @@ Sys_SendKeyEvents (void)
 	int			sym, state, but;
 	SDLMod		modstate;
 
-	while (SDL_PollEvent (&event) > 0) {
-		switch (event.type) {
+	while (SDL_PollEvent (&event) > 0)
+	{
+		switch (event.type)
+		{
 			case SDL_KEYDOWN:
 			case SDL_KEYUP:
 				sym = event.key.keysym.sym;
 				state = event.key.state;
 				modstate = SDL_GetModState ();
-				switch (sym) {
+				switch (sym)
+				{
 					case SDLK_DELETE: sym = K_DEL; break;
 					case SDLK_BACKSPACE: sym = K_BACKSPACE; break;
 					case SDLK_F1: sym = K_F1; break;
@@ -551,8 +555,10 @@ Sys_SendKeyEvents (void)
 					case SDLK_KP_DIVIDE: case SDLK_KP_MULTIPLY:
 					case SDLK_KP_MINUS: case SDLK_KP_PLUS:
 					case SDLK_KP_ENTER: case SDLK_KP_EQUALS:
-						if (keypadmode) {
-							switch (sym) {
+						if (keypadmode)
+						{
+							switch (sym)
+							{
 								case SDLK_KP0: sym = K_KP_0; break;
 								case SDLK_KP1: sym = K_KP_1; break;
 								case SDLK_KP2: sym = K_KP_2; break;
@@ -571,8 +577,11 @@ Sys_SendKeyEvents (void)
 								case SDLK_KP_ENTER: sym = K_KP_ENTER; break;
 								case SDLK_KP_EQUALS: sym = K_KP_EQUALS; break;
 							}
-						} else if (modstate & KMOD_NUM) {
-							switch (sym) {
+						}
+						else if (modstate & KMOD_NUM)
+						{
+							switch (sym)
+							{
 								case SDLK_KP0: sym = K_INS; break;
 								case SDLK_KP1: sym = K_END; break;
 								case SDLK_KP2: sym = K_DOWNARROW; break;
@@ -591,8 +600,11 @@ Sys_SendKeyEvents (void)
 								case SDLK_KP_ENTER: sym = SDLK_RETURN; break;
 								case SDLK_KP_EQUALS: sym = SDLK_EQUALS; break;
 							}
-						} else {
-							switch (sym) {
+						}
+						else
+						{
+							switch (sym)
+							{
 								case SDLK_KP0: sym = SDLK_0; break;
 								case SDLK_KP1: sym = SDLK_1; break;
 								case SDLK_KP2: sym = SDLK_2; break;
@@ -614,7 +626,8 @@ Sys_SendKeyEvents (void)
 						}
 						break;
 				}
-				/* If we're not directly handled and still above 255 just force it to 0 */
+
+				/* Anything else above 255 we just don't handle */
 				if (sym > 255)
 					sym = 0;
 				Key_Event (sym, state);
@@ -629,7 +642,8 @@ Sys_SendKeyEvents (void)
 				if ((but < 1) || (but > 16))
 					break;
 
-				switch (but) {
+				switch (but)
+				{
 					case 2: but = 3; break;
 					case 3: but = 2; break;
 				}
@@ -642,7 +656,8 @@ Sys_SendKeyEvents (void)
 				if (!use_mouse)
 					break;
 
-				if (_windowed_mouse->ivalue && (cls.state >= ca_connected)) {
+				if (_windowed_mouse->ivalue && (cls.state >= ca_connected))
+				{
 					mouse_x += event.motion.xrel;
 					mouse_y += event.motion.yrel;
 				}
@@ -724,8 +739,9 @@ void
 IN_Move (usercmd_t *cmd)
 {
 	if (m_filter->fvalue &&
-		((mouse_x != old_mouse_x) ||
-		(mouse_y != old_mouse_y))) {
+		((mouse_x != old_mouse_x)
+		 || (mouse_y != old_mouse_y)))
+	{
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
 		mouse_y = (mouse_y + old_mouse_y) * 0.5;
 	}
@@ -744,11 +760,14 @@ IN_Move (usercmd_t *cmd)
 	if (freelook)
 		V_StopPitchDrift ();
 
-	if (freelook && !(in_strafe.state & 1)) {
+	if (freelook && !(in_strafe.state & 1))
+	{
 		cl.viewangles[PITCH] += m_pitch->fvalue * mouse_y;
 		// KB: Allow looking straight up/down
 		cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90);
-	} else {
+	}
+	else
+	{
 		if (in_strafe.state & 1)
 			cmd->upmove -= m_forward->fvalue * mouse_y;
 		else

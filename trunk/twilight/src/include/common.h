@@ -201,8 +201,8 @@ void COM_CreatePath (char *path);
 void COM_Gamedir (char *dir);
 
 void Com_PrintHex (char *str, int len);
-void Com_Printf (char *fmt, ...);
-void Com_DPrintf (char *fmt, ...);
+void Com_Printf (const char *fmt, ...);
+void Com_DPrintf (const char *fmt, ...);
 void Com_SafePrintf (char *fmt, ...);
 void Com_BeginRedirect (void (*RedirectedPrint) (char *));
 void Com_EndRedirect (void);
