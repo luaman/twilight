@@ -235,7 +235,7 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 	/*
 	 * get lighting information
 	 */
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb_models->ivalue) {
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb->ivalue) {
 		shadelight = R_LightPoint (e->cur.origin);
 
 		// always give the gun some light
@@ -264,7 +264,7 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 			lightcolor[1] = max (lightcolor[1], 8);
 			lightcolor[2] = max (lightcolor[2], 8);
 		}
-	} else if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb_models->ivalue) {
+	} else if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb->ivalue) {
 		lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
 	}
 
@@ -299,14 +299,13 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 	has_top = has_bottom = has_fb = false;
 
 	if (e->colormap && !gl_nocolors->ivalue) {
-		if ((has_top = !!skin->top[anim].num_indices))
+		if ((has_top = !!skin->top[anim].indices.num))
 			VectorCopy4 (e->colormap->top, top);
-		if ((has_bottom = !!skin->bottom[anim].num_indices))
+		if ((has_bottom = !!skin->bottom[anim].indices.num))
 			VectorCopy4 (e->colormap->bottom, bottom);
 	}
 
-	if (gl_fb_models->ivalue)
-		has_fb = !!skin->fb[anim].num_indices;
+	has_fb = !!skin->fb[anim].indices.num;
 
 	if (gl_im_animation->ivalue && !(clmodel->modflags & FLAG_NO_IM_ANIM))
 		R_SetupAliasBlendedFrame (paliashdr, e);
@@ -334,7 +333,7 @@ R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec4_t color)
 
 	qglBindTexture (GL_TEXTURE_2D, skin->texnum);
 	qglDrawRangeElements(GL_TRIANGLES, 0, paliashdr->numverts,
-			skin->num_indices, GL_UNSIGNED_INT, skin->indices);
+			skin->indices.num, GL_UNSIGNED_INT, skin->indices.i);
 }
 
 static void
@@ -391,7 +390,7 @@ R_DrawAliasModel ()
 }
 
 static void
-R_DrawSubSkinNV (aliashdr_t *paliashdr, skin_sub_t *tris, skin_sub_t *s0,
+R_DrawSubSkinNV (aliashdr_t *paliashdr, skin_indices_t *ind, skin_sub_t *s0,
 		skin_sub_t *s1)
 {
 	qglBindTexture (GL_TEXTURE_2D, s0->texnum);
@@ -401,7 +400,7 @@ R_DrawSubSkinNV (aliashdr_t *paliashdr, skin_sub_t *tris, skin_sub_t *s0,
 		qglBindTexture (GL_TEXTURE_2D, s1->texnum);
 	}
 	qglDrawRangeElements(GL_TRIANGLES, 0, paliashdr->numverts,
-			tris->num_indices, GL_UNSIGNED_INT, tris->indices);
+			ind->num, GL_UNSIGNED_INT, ind->i);
 	if (s1) {
 		qglDisable (GL_TEXTURE_2D);
 		qglActiveTextureARB (GL_TEXTURE0_ARB);
@@ -411,8 +410,6 @@ R_DrawSubSkinNV (aliashdr_t *paliashdr, skin_sub_t *tris, skin_sub_t *s0,
 static void
 R_DrawAliasModelNV ()
 {
-	skin_sub_t	*base;
-
 	qglPushMatrix ();
 
 	qglTranslatef (mod_origin[0], mod_origin[1], mod_origin[2]);
@@ -427,18 +424,24 @@ R_DrawAliasModelNV ()
 
 	TWI_PreVDraw (0, paliashdr->numverts);
 
-	if (!has_top && !has_bottom)
-		base = &skin->base[anim];
-	else
-		base = &skin->base_team[anim];
-
 	if (has_fb)
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);
 
-	if (has_fb)
-		R_DrawSubSkinNV (paliashdr, base, base, &skin->fb[anim]);
-	else
-		R_DrawSubSkinNV (paliashdr, base, base, NULL);
+	if (has_fb) {
+		if (!has_top && !has_bottom)
+			R_DrawSubSkinNV (paliashdr, &skin->base_fb_i[anim],
+					&skin->base[anim], &skin->fb[anim]);
+		else
+			R_DrawSubSkinNV (paliashdr, &skin->base_team_fb_i[anim],
+					&skin->base_team[anim], &skin->fb[anim]);
+	} else {
+		if (!has_top && !has_bottom)
+			R_DrawSubSkinNV (paliashdr, &skin->base[anim].indices,
+					&skin->base[anim], NULL);
+		else
+			R_DrawSubSkinNV (paliashdr, &skin->base_team[anim].indices,
+					&skin->base_team[anim], NULL);
+	}
 
 	if (has_fb)
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
@@ -453,7 +456,7 @@ R_DrawAliasModelNV ()
 		qglCombinerParameterfvNV (GL_CONSTANT_COLOR1_NV, bottom);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_CONSTANT_COLOR1_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 
-		R_DrawSubSkinNV (paliashdr, &skin->top_bottom[anim], &skin->top[anim], &skin->bottom[anim]);
+		R_DrawSubSkinNV (paliashdr, &skin->top_bottom_i[anim], &skin->top[anim], &skin->bottom[anim]);
 
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);

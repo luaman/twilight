@@ -83,21 +83,29 @@ typedef struct mtriangle_s {
 	int         vertindex[3];
 } mtriangle_t;
 
+typedef struct skin_indices_s {
+	int	num;
+	int	*i;
+} skin_indices_t;
+
 typedef struct skin_sub_s {
-	int	texnum;
-	int	num_indices;
-	int	*indices;
+	int				texnum;
+	int				num_tris;
+	int				*tris;
+	skin_indices_t	indices;
 } skin_sub_t;
 
 typedef struct skin_s {
-	int			frames;
-	float		interval;
-	skin_sub_t	*base;
-	skin_sub_t	*base_team;
-	skin_sub_t	*top_bottom;
-	skin_sub_t	*fb;
-	skin_sub_t	*top;
-	skin_sub_t	*bottom;
+	int				frames;
+	float			interval;
+	skin_sub_t		*base;
+	skin_sub_t		*base_team;
+	skin_sub_t		*fb;
+	skin_sub_t		*top;
+	skin_sub_t		*bottom;
+	skin_indices_t	*base_fb_i;
+	skin_indices_t	*base_team_fb_i;
+	skin_indices_t	*top_bottom_i;
 } skin_t;
 
 #define	MAX_SKINS	32

@@ -93,8 +93,7 @@ cvar_t *gl_nocolors;
 cvar_t *gl_finish;
 cvar_t *gl_im_animation;
 cvar_t *gl_im_transform;
-cvar_t *gl_fb_models;
-cvar_t *gl_fb_bmodels;
+cvar_t *gl_fb;
 cvar_t *gl_oldlights;
 cvar_t *gl_colorlights;
 cvar_t *gl_particletorches;
@@ -671,8 +670,7 @@ R_Init_Cvars (void)
 	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_ARCHIVE, NULL);
 	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_ARCHIVE, NULL);
 
-	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_ARCHIVE, NULL);
-	gl_fb_bmodels = Cvar_Get ("gl_fb_bmodels", "1", CVAR_ARCHIVE, NULL);
+	gl_fb = Cvar_Get ("gl_fb", "1", CVAR_ARCHIVE, NULL);
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
 

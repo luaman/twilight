@@ -49,7 +49,6 @@ Uint32 d_palette_fb[256];
 Uint32 d_palette_base_team[256];
 Uint32 d_palette_top[256];
 Uint32 d_palette_bottom[256];
-Uint32 d_palette_top_bottom[256];
 float d_8tofloattable[256][4];
 
 cvar_t *width_2d;
@@ -166,32 +165,36 @@ VID_BuildPalettes (void)
 {
 	int i, num_fb;
 
-	num_fb = host_colormap[0x4000];
+	if (gl_fb->ivalue)
+		num_fb = host_colormap[0x4000];
+	else
+		num_fb = 0;
 
 	for (i = 0; i < (256 - num_fb); i++)
 	{
 		d_palette_base_team[i] = d_palette_base[i] = d_palette_raw[i];
 		d_palette_fb[i] = d_palette_empty;
-		d_palette_top[i] = d_palette_bottom[i] = d_palette_top_bottom[i] = d_palette_empty;
+		d_palette_top[i] = d_palette_bottom[i] = d_palette_empty;
 	}
 	for (; i < 256; i++)
 	{
 		d_palette_base_team[i] = d_palette_base[i] = d_palette_empty;
 		d_palette_fb[i] = d_palette_raw[i];
-		d_palette_top[i] = d_palette_bottom[i] = d_palette_top_bottom[i] = d_palette_empty;
+		d_palette_top[i] = d_palette_bottom[i] = d_palette_empty;
 	}
 
 	for (i = 0x10; i < 0x20; i++)   // Top range.
 	{
-		d_palette_top[i] = d_palette_top_bottom[i] = d_palette_raw[i - 0x10];
+		d_palette_top[i] = d_palette_raw[i - 0x10];
 		d_palette_base_team[i] = d_palette_empty;
 	}
 	for (i = 0x60; i < 0x70; i++)   // Bottom range.
 	{
-		d_palette_bottom[i] = d_palette_top_bottom[i] = d_palette_raw[i - 0x60];        d_palette_base_team[i] = d_palette_empty;
+		d_palette_bottom[i] = d_palette_raw[i - 0x60];
+		d_palette_base_team[i] = d_palette_empty;
 	}
-	d_palette_base[255] = d_palette_base_team[255] = d_palette_top_bottom[255]
-		= d_palette_top[255] = d_palette_bottom[255] = d_palette_raw[255];
+	d_palette_base[255] = d_palette_base_team[255] = d_palette_top[255]
+		= d_palette_bottom[255] = d_palette_raw[255];
 }
 
 
