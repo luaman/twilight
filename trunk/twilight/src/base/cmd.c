@@ -821,12 +821,8 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 	}
 
 	// check cvars
-	if (cl_warncmd) {
-		if (!Cvar_LegacyCmd () && (cl_warncmd->value || developer->value))
-			Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
-	} else
-		if (!Cvar_LegacyCmd () && developer->value)
-			Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
+	if (!Cvar_LegacyCmd () && (cl_warncmd->value || developer->value))
+		Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
 }
 
 /*
