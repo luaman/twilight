@@ -10,13 +10,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -70,7 +70,7 @@ SignbitsForPlane (mplane_t *out)
 	}
 	return bits;
 }
-			
+
 void
 Vis_NewVisParams (model_t *mod, vec3_t org, vec3_t up, vec3_t right,
 		vec3_t point, float fov_x, float fov_y)
@@ -100,17 +100,50 @@ Vis_NewVisParams (model_t *mod, vec3_t org, vec3_t up, vec3_t right,
 }
 
 qboolean
-Vis_CullBox (vec3_t mins, vec3_t maxs)
+Vis_CullBox(vec3_t emins, vec3_t emaxs)
 {
-	if (BoxOnPlaneSide (mins, maxs, &frustum[0]) == 2)
-		return true;
-	if (BoxOnPlaneSide (mins, maxs, &frustum[1]) == 2)
-		return true;
-	if (BoxOnPlaneSide (mins, maxs, &frustum[2]) == 2)
-		return true;
-	if (BoxOnPlaneSide (mins, maxs, &frustum[3]) == 2)
-		return true;
-
+	int i;
+	mplane_t *p;
+	for (i = 0;i < 4;i++)
+	{
+		p = frustum + i;
+		switch(p->signbits)
+		{
+		default:
+		case 0:
+			if (p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2] < p->dist)
+				return true;
+			break;
+		case 1:
+			if (p->normal[0]*emins[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2] < p->dist)
+				return true;
+			break;
+		case 2:
+			if (p->normal[0]*emaxs[0] + p->normal[1]*emins[1] + p->normal[2]*emaxs[2] < p->dist)
+				return true;
+			break;
+		case 3:
+			if (p->normal[0]*emins[0] + p->normal[1]*emins[1] + p->normal[2]*emaxs[2] < p->dist)
+				return true;
+			break;
+		case 4:
+			if (p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emins[2] < p->dist)
+				return true;
+			break;
+		case 5:
+			if (p->normal[0]*emins[0] + p->normal[1]*emaxs[1] + p->normal[2]*emins[2] < p->dist)
+				return true;
+			break;
+		case 6:
+			if (p->normal[0]*emaxs[0] + p->normal[1]*emins[1] + p->normal[2]*emins[2] < p->dist)
+				return true;
+			break;
+		case 7:
+			if (p->normal[0]*emins[0] + p->normal[1]*emins[1] + p->normal[2]*emins[2] < p->dist)
+				return true;
+			break;
+		}
+	}
 	return false;
 }
 
