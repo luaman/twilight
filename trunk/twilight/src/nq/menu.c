@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 // FIXME: do this right
-extern cvar_t _windowed_mouse;
+extern cvar_t *_windowed_mouse;
 
 void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
@@ -728,10 +728,10 @@ M_Menu_Setup_f (void)
 	key_dest = key_menu;
 	m_state = m_setup;
 	m_entersound = true;
-	Q_strcpy (setup_myname, cl_name.string);
-	Q_strcpy (setup_hostname, hostname.string);
-	setup_top = setup_oldtop = ((int) cl_color.value) >> 4;
-	setup_bottom = setup_oldbottom = ((int) cl_color.value) & 15;
+	Q_strcpy (setup_myname, _cl_name->string);
+	Q_strcpy (setup_hostname, hostname->string);
+	setup_top = setup_oldtop = ((int) _cl_color->value[0]) >> 4;
+	setup_bottom = setup_oldbottom = ((int) _cl_color->value[0]) & 15;
 }
 
 
@@ -831,10 +831,10 @@ M_Setup_Key (int k)
 				goto forward;
 
 			// setup_cursor == 4 (OK)
-			if (Q_strcmp (cl_name.string, setup_myname) != 0)
+			if (Q_strcmp (_cl_name->string, setup_myname) != 0)
 				Cbuf_AddText (va ("name \"%s\"\n", setup_myname));
-			if (Q_strcmp (hostname.string, setup_hostname) != 0)
-				Cvar_Set ("hostname", setup_hostname);
+			if (Q_strcmp (hostname->string, setup_hostname) != 0)
+				Cvar_Set (hostname, setup_hostname);
 			if (setup_top != setup_oldtop || setup_bottom != setup_oldbottom)
 				Cbuf_AddText (va ("color %i %i\n", setup_top, setup_bottom));
 			m_entersound = true;
@@ -1084,34 +1084,37 @@ M_Menu_Options_f (void)
 void
 M_AdjustSliders (int dir)
 {
+	float		t;
+
 	S_LocalSound ("misc/menu3.wav");
 
 	switch (options_cursor) {
 		case 3:						// screen size
-			scr_viewsize.value += dir * 10;
-			if (scr_viewsize.value < 30)
-				scr_viewsize.value = 30;
-			if (scr_viewsize.value > 120)
-				scr_viewsize.value = 120;
-			Cvar_SetValue ("viewsize", scr_viewsize.value);
+			t = scr_viewsize->value[0] + (dir * 10.0f);
+			if (t < 30.0f)
+				t = 30.0f;
+			if (t > 120.0f)
+				t = 120.0f;
+			Cvar_Set (scr_viewsize, va("%i", t));
 			break;
 		case 4:						// gamma
-			v_gamma.value -= dir * 0.05;
-			if (v_gamma.value < 0.5)
-				v_gamma.value = 0.5;
-			if (v_gamma.value > 1)
-				v_gamma.value = 1;
-			Cvar_SetValue ("gamma", v_gamma.value);
+			t = v_gamma->value[0] - (dir * 0.05f);
+			if (t < 0.5f)
+				t = 0.5f;
+			if (t > 1.0f)
+				t = 1.0f;
+			Cvar_Set (v_gamma, va("%i", t));
 			break;
 		case 5:						// mouse speed
-			sensitivity.value += dir * 0.5;
-			if (sensitivity.value < 1)
-				sensitivity.value = 1;
-			if (sensitivity.value > 11)
-				sensitivity.value = 11;
-			Cvar_SetValue ("sensitivity", sensitivity.value);
+			t = sensitivity->value[0] + (dir * 0.5f);
+			if (t < 1.0f)
+				t = 1.0f;
+			if (t > 11.0f)
+				t = 11.0f;
+			Cvar_Set (sensitivity, va("%i", t));
 			break;
 		case 6:						// music volume
+#if 0 // Not with SDL  --KB
 #ifdef _WIN32
 			bgmvolume.value += dir * 1.0;
 #else
@@ -1122,40 +1125,43 @@ M_AdjustSliders (int dir)
 			if (bgmvolume.value > 1)
 				bgmvolume.value = 1;
 			Cvar_SetValue ("bgmvolume", bgmvolume.value);
+#else
+			Cvar_Set (bgmvolume, bgmvolume->value[0] ? "0" : "1");
+#endif
 			break;
 		case 7:						// sfx volume
-			volume.value += dir * 0.1;
-			if (volume.value < 0)
-				volume.value = 0;
-			if (volume.value > 1)
-				volume.value = 1;
-			Cvar_SetValue ("volume", volume.value);
+			t = volume->value[0] = (dir * 0.1f);
+			if (t < 0.0f)
+				t = 0.0f;
+			if (t > 1.0f)
+				t = 1.0f;
+			Cvar_Set (volume, va("%i", t));
 			break;
 
 		case 8:						// always run
-			if (cl_forwardspeed.value > 200) {
-				Cvar_SetValue ("cl_forwardspeed", 200);
-				Cvar_SetValue ("cl_backspeed", 200);
+			if (cl_forwardspeed->value[0] > 200) {
+				Cvar_Set (cl_forwardspeed, "200");
+				Cvar_Set (cl_backspeed, "200");
 			} else {
-				Cvar_SetValue ("cl_forwardspeed", 400);
-				Cvar_SetValue ("cl_backspeed", 400);
+				Cvar_Set (cl_forwardspeed, "400");
+				Cvar_Set (cl_backspeed, "400");
 			}
 			break;
 
 		case 9:						// invert mouse
-			Cvar_SetValue ("m_pitch", -m_pitch.value);
+			Cvar_Set (m_pitch, va("%i", -m_pitch->value[0]));
 			break;
 
 		case 10:						// lookspring
-			Cvar_SetValue ("lookspring", !lookspring.value);
+			Cvar_Set (lookspring, va("%i", !lookspring->value[0]));
 			break;
 
 		case 11:						// lookstrafe
-			Cvar_SetValue ("lookstrafe", !lookstrafe.value);
+			Cvar_Set (lookstrafe, va("%i", !lookstrafe->value[0]));
 			break;
 
 		case 13:						// _windowed_mouse
-			Cvar_SetValue ("_windowed_mouse", !_windowed_mouse.value);
+			Cvar_Set (_windowed_mouse, va("%i", !_windowed_mouse->value[0]));
 			break;
 	}
 }
@@ -1207,42 +1213,42 @@ M_Options_Draw (void)
 	M_Print (16, 48, "     Reset to defaults");
 
 	M_Print (16, 56, "           Screen size");
-	r = (scr_viewsize.value - 30) / (120 - 30);
+	r = (scr_viewsize->value[0] - 30) / (120 - 30);
 	M_DrawSlider (220, 56, r);
 
 	M_Print (16, 64, "            Brightness");
-	r = (1.0 - v_gamma.value) / 0.5;
+	r = (1.0 - v_gamma->value[0]) / 0.5;
 	M_DrawSlider (220, 64, r);
 
 	M_Print (16, 72, "           Mouse Speed");
-	r = (sensitivity.value - 1) / 10;
+	r = (sensitivity->value[0] - 1) / 10;
 	M_DrawSlider (220, 72, r);
 
 	M_Print (16, 80, "       CD Music Volume");
-	r = bgmvolume.value;
+	r = bgmvolume->value[0];
 	M_DrawSlider (220, 80, r);
 
 	M_Print (16, 88, "          Sound Volume");
-	r = volume.value;
+	r = volume->value[0];
 	M_DrawSlider (220, 88, r);
 
 	M_Print (16, 96, "            Always Run");
-	M_DrawCheckbox (220, 96, cl_forwardspeed.value > 200);
+	M_DrawCheckbox (220, 96, cl_forwardspeed->value[0] > 200);
 
 	M_Print (16, 104, "          Invert Mouse");
-	M_DrawCheckbox (220, 104, m_pitch.value < 0);
+	M_DrawCheckbox (220, 104, m_pitch->value[0] < 0);
 
 	M_Print (16, 112, "            Lookspring");
-	M_DrawCheckbox (220, 112, lookspring.value);
+	M_DrawCheckbox (220, 112, lookspring->value[0]);
 
 	M_Print (16, 120, "            Lookstrafe");
-	M_DrawCheckbox (220, 120, lookstrafe.value);
+	M_DrawCheckbox (220, 120, lookstrafe->value[0]);
 
 	if (vid_menudrawfn)
 		M_Print (16, 128, "         Video Options");
 
 	M_Print (16, 136, "             Use Mouse");
-	M_DrawCheckbox (220, 136, _windowed_mouse.value);
+	M_DrawCheckbox (220, 136, _windowed_mouse->value[0]);
 
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8,
@@ -2550,7 +2556,7 @@ M_GameOptions_Draw (void)
 	M_Print (160, 56, va ("%i", maxplayers));
 
 	M_Print (0, 64, "        Game Type");
-	if (coop.value)
+	if (coop->value[0])
 		M_Print (160, 64, "Cooperative");
 	else
 		M_Print (160, 64, "Deathmatch");
@@ -2559,7 +2565,7 @@ M_GameOptions_Draw (void)
 	if (rogue) {
 		char       *msg;
 
-		switch ((int) teamplay.value) {
+		switch ((int) teamplay->value[0]) {
 			case 1:
 				msg = "No Friendly Fire";
 				break;
@@ -2586,7 +2592,7 @@ M_GameOptions_Draw (void)
 	} else {
 		char       *msg;
 
-		switch ((int) teamplay.value) {
+		switch ((int) teamplay->value[0]) {
 			case 1:
 				msg = "No Friendly Fire";
 				break;
@@ -2601,26 +2607,26 @@ M_GameOptions_Draw (void)
 	}
 
 	M_Print (0, 80, "            Skill");
-	if (skill.value == 0)
+	if (skill->value[0] == 0)
 		M_Print (160, 80, "Easy difficulty");
-	else if (skill.value == 1)
+	else if (skill->value[0] == 1)
 		M_Print (160, 80, "Normal difficulty");
-	else if (skill.value == 2)
+	else if (skill->value[0] == 2)
 		M_Print (160, 80, "Hard difficulty");
 	else
 		M_Print (160, 80, "Nightmare difficulty");
 
 	M_Print (0, 88, "       Frag Limit");
-	if (fraglimit.value == 0)
+	if (fraglimit->value[0] == 0)
 		M_Print (160, 88, "none");
 	else
-		M_Print (160, 88, va ("%i frags", (int) fraglimit.value));
+		M_Print (160, 88, va ("%i frags", (int) fraglimit->value[0]));
 
 	M_Print (0, 96, "       Time Limit");
-	if (timelimit.value == 0)
+	if (timelimit->value[0] == 0)
 		M_Print (160, 96, "none");
 	else
-		M_Print (160, 96, va ("%i minutes", (int) timelimit.value));
+		M_Print (160, 96, va ("%i minutes", (int) timelimit->value[0]));
 
 	M_Print (0, 112, "         Episode");
 	// MED 01/06/97 added hipnotic episodes
@@ -2696,7 +2702,7 @@ M_NetStart_Change (int dir)
 			break;
 
 		case 2:
-			Cvar_SetValue ("coop", coop.value ? 0 : 1);
+			Cvar_Set (coop, coop->value[0] ? "0" : "1");
 			break;
 
 		case 3:
@@ -2705,35 +2711,35 @@ M_NetStart_Change (int dir)
 			else
 				count = 2;
 
-			Cvar_SetValue ("teamplay", teamplay.value + dir);
-			if (teamplay.value > count)
-				Cvar_SetValue ("teamplay", 0);
-			else if (teamplay.value < 0)
-				Cvar_SetValue ("teamplay", count);
+			Cvar_Set (teamplay, va("%i", teamplay->value[0] + dir));
+			if (teamplay->value[0] > count)
+				Cvar_Set (teamplay, "0");
+			else if (teamplay->value[0] < 0)
+				Cvar_Set (teamplay, va("%i", count));
 			break;
 
 		case 4:
-			Cvar_SetValue ("skill", skill.value + dir);
-			if (skill.value > 3)
-				Cvar_SetValue ("skill", 0);
-			if (skill.value < 0)
-				Cvar_SetValue ("skill", 3);
+			Cvar_Set (skill, va("%i", skill->value[0] + dir));
+			if (skill->value[0] > 3)
+				Cvar_Set (skill, "0");
+			if (skill->value[0] < 0)
+				Cvar_Set (skill, "3");
 			break;
 
 		case 5:
-			Cvar_SetValue ("fraglimit", fraglimit.value + dir * 10);
-			if (fraglimit.value > 100)
-				Cvar_SetValue ("fraglimit", 0);
-			if (fraglimit.value < 0)
-				Cvar_SetValue ("fraglimit", 100);
+			Cvar_Set (fraglimit, va("%i", fraglimit->value[0] + dir * 10));
+			if (fraglimit->value[0] > 100)
+				Cvar_Set (fraglimit, "0");
+			if (fraglimit->value[0] < 0)
+				Cvar_Set (fraglimit, "100");
 			break;
 
 		case 6:
-			Cvar_SetValue ("timelimit", timelimit.value + dir * 5);
-			if (timelimit.value > 60)
-				Cvar_SetValue ("timelimit", 0);
-			if (timelimit.value < 0)
-				Cvar_SetValue ("timelimit", 60);
+			Cvar_Set (timelimit, va("%i", timelimit->value[0] + dir * 5));
+			if (timelimit->value[0] > 60)
+				Cvar_Set (timelimit, "0");
+			if (timelimit->value[0] < 0)
+				Cvar_Set (timelimit, "60");
 			break;
 
 		case 7:
@@ -2745,7 +2751,7 @@ M_NetStart_Change (int dir)
 			// PGM 03/02/97 added 1 for dmatch episode
 			else if (rogue)
 				count = 4;
-			else if (registered.value)
+			else if (registered->value[0])
 				count = 7;
 			else
 				count = 2;

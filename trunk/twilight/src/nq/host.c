@@ -53,32 +53,28 @@ jmp_buf     host_abortserver;
 byte       *host_basepal;
 byte       *host_colormap;
 
-cvar_t      host_framerate = { "host_framerate", "0" };	// set for slow motion
-cvar_t      host_speeds = { "host_speeds", "0" };	// set for running times
+cvar_t     *host_framerate;
+cvar_t     *host_speeds;
 
-cvar_t      sys_ticrate = { "sys_ticrate", "0.05" };
-cvar_t      serverprofile = { "serverprofile", "0" };
+cvar_t     *sys_ticrate;
+cvar_t     *serverprofile;
 
-cvar_t      fraglimit = { "fraglimit", "0", false, true };
-cvar_t      timelimit = { "timelimit", "0", false, true };
-cvar_t      teamplay = { "teamplay", "0", false, true };
+cvar_t     *fraglimit;
+cvar_t     *timelimit;
+cvar_t     *teamplay;
 
-cvar_t      samelevel = { "samelevel", "0" };
-cvar_t      noexit = { "noexit", "0", false, true };
+cvar_t     *samelevel;
+cvar_t     *noexit;
 
-#ifdef QUAKE2
-cvar_t      developer = { "developer", "1" };	// should be 0 for release!
-#else
-cvar_t      developer = { "developer", "0" };
-#endif
+cvar_t     *developer;
 
-cvar_t      skill = { "skill", "1" };	// 0 - 3
-cvar_t      deathmatch = { "deathmatch", "0" };	// 0, 1, or 2
-cvar_t      coop = { "coop", "0" };		// 0 or 1
+cvar_t     *skill;
+cvar_t     *deathmatch;
+cvar_t     *coop;
 
-cvar_t      pausable = { "pausable", "1" };
+cvar_t     *pausable;
 
-cvar_t      temp1 = { "temp1", "0" };
+cvar_t     *temp1;
 
 
 /*
@@ -193,9 +189,9 @@ Host_FindMaxClients (void)
 		Hunk_AllocName (svs.maxclientslimit * sizeof (client_t), "clients");
 
 	if (svs.maxclients > 1)
-		Cvar_SetValue ("deathmatch", 1.0);
+		Cvar_Set (deathmatch, "1");
 	else
-		Cvar_SetValue ("deathmatch", 0.0);
+		Cvar_Set (deathmatch, "0");
 }
 
 
@@ -209,25 +205,33 @@ Host_InitLocal (void)
 {
 	Host_InitCommands ();
 
-	Cvar_RegisterVariable (&host_framerate);
-	Cvar_RegisterVariable (&host_speeds);
+	// set for slow motion
+	host_framerate = Cvar_Get ("host_framerate", "0", CVAR_NONE, NULL);
+	// set for running times
+	host_speeds = Cvar_Get ("host_speeds", "0", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&sys_ticrate);
-	Cvar_RegisterVariable (&serverprofile);
+	sys_ticrate = Cvar_Get ("sys_ticrate", "0.05", CVAR_NONE, NULL);
+	serverprofile = Cvar_Get ("serverprofile", "0", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&fraglimit);
-	Cvar_RegisterVariable (&timelimit);
-	Cvar_RegisterVariable (&teamplay);
-	Cvar_RegisterVariable (&samelevel);
-	Cvar_RegisterVariable (&noexit);
-	Cvar_RegisterVariable (&skill);
-	Cvar_RegisterVariable (&developer);
-	Cvar_RegisterVariable (&deathmatch);
-	Cvar_RegisterVariable (&coop);
+	fraglimit = Cvar_Get ("fraglimit", "0", CVAR_USERINFO, NULL);
+	timelimit = Cvar_Get ("timelimit", "0", CVAR_USERINFO, NULL);
+	teamplay = Cvar_Get ("teamplay", "0", CVAR_USERINFO, NULL);
 
-	Cvar_RegisterVariable (&pausable);
+	samelevel = Cvar_Get ("samelevel", "0", CVAR_NONE, NULL);
+	noexit = Cvar_Get ("noexit", "0", CVAR_USERINFO, NULL);
 
-	Cvar_RegisterVariable (&temp1);
+	developer = Cvar_Get ("developer", "0", CVAR_NONE, NULL);
+
+	// 0 - 3
+	skill = Cvar_Get ("skill", "1", CVAR_NONE, NULL);
+	// 0, 1, or 2
+	deathmatch = Cvar_Get ("deathmatch", "0", CVAR_NONE, NULL);
+	// 0 or 1
+	coop = Cvar_Get ("coop", "0", CVAR_NONE, NULL);
+
+	pausable = Cvar_Get ("pausable", "1", CVAR_NONE, NULL);
+
+	temp1 = Cvar_Get ("temp1", "0", CVAR_NONE, NULL);
 
 	Host_FindMaxClients ();
 
@@ -258,7 +262,7 @@ Host_WriteConfiguration (void)
 		}
 
 		Key_WriteBindings (f);
-		Cvar_WriteVariables (f);
+		Cvar_Archive (f);
 
 		fclose (f);
 	}
@@ -507,8 +511,8 @@ Host_FilterTime (float time)
 	host_frametime = realtime - oldrealtime;
 	oldrealtime = realtime;
 
-	if (host_framerate.value > 0)
-		host_frametime = host_framerate.value;
+	if (host_framerate->value[0] > 0)
+		host_frametime = host_framerate->value[0];
 	else {								// don't allow really long or short
 		// frames
 		if (host_frametime > 0.1)
@@ -696,12 +700,12 @@ _Host_Frame (float time)
 		CL_ReadFromServer ();
 	}
 // update video
-	if (host_speeds.value)
+	if (host_speeds->value[0])
 		time1 = Sys_FloatTime ();
 
 	SCR_UpdateScreen ();
 
-	if (host_speeds.value)
+	if (host_speeds->value[0])
 		time2 = Sys_FloatTime ();
 
 // update audio
@@ -713,7 +717,7 @@ _Host_Frame (float time)
 
 	CDAudio_Update ();
 
-	if (host_speeds.value) {
+	if (host_speeds->value[0]) {
 		pass1 = (time1 - time3) * 1000;
 		time3 = Sys_FloatTime ();
 		pass2 = (time2 - time1) * 1000;
@@ -733,7 +737,7 @@ Host_Frame (float time)
 	static int  timecount;
 	int         i, c, m;
 
-	if (!serverprofile.value) {
+	if (!serverprofile->value[0]) {
 		_Host_Frame (time);
 		return;
 	}
@@ -795,6 +799,7 @@ Host_Init (quakeparms_t *parms)
 	V_Init ();
 	Chase_Init ();
 	COM_Init ();
+	SCR_InitCvars ();
 	Host_InitLocal ();
 	W_LoadWadFile ("gfx.wad");
 	Key_Init ();

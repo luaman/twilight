@@ -21,10 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-cvar_t      chase_back = { "chase_back", "100" };
-cvar_t      chase_up = { "chase_up", "16" };
-cvar_t      chase_right = { "chase_right", "0" };
-cvar_t      chase_active = { "chase_active", "0" };
+cvar_t      *chase_back;
+cvar_t      *chase_up;
+cvar_t      *chase_right;
+cvar_t      *chase_active;
 
 vec3_t      chase_pos;
 vec3_t      chase_angles;
@@ -36,10 +36,10 @@ vec3_t      chase_dest_angles;
 void
 Chase_Init (void)
 {
-	Cvar_RegisterVariable (&chase_back);
-	Cvar_RegisterVariable (&chase_up);
-	Cvar_RegisterVariable (&chase_right);
-	Cvar_RegisterVariable (&chase_active);
+	chase_back = Cvar_Get ("chase_back", "100", CVAR_NONE, NULL);
+	chase_up = Cvar_Get ("chase_up", "16", CVAR_NONE, NULL);
+	chase_right = Cvar_Get ("chase_right", "0", CVAR_NONE, NULL);
+	chase_active = Cvar_Get ("chase_active", "0", CVAR_NONE, NULL);
 }
 
 void
@@ -75,8 +75,9 @@ Chase_Update (void)
 	// calc exact destination
 	for (i = 0; i < 3; i++)
 		chase_dest[i] = r_refdef.vieworg[i]
-			- forward[i] * chase_back.value - right[i] * chase_right.value;
-	chase_dest[2] = r_refdef.vieworg[2] + chase_up.value;
+			- forward[i] * chase_back->value[0]
+			- right[i] * chase_right->value[0];
+	chase_dest[2] = r_refdef.vieworg[2] + chase_up->value[0];
 
 	// find the spot the player is looking at
 	VectorMA (r_refdef.vieworg, 4096, forward, dest);

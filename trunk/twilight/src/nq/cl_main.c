@@ -25,20 +25,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // references them even when on a unix system.
 
 // these two are not intended to be set directly
-cvar_t      cl_name = { "_cl_name", "player", true };
-cvar_t      cl_color = { "_cl_color", "0", true };
+cvar_t      *_cl_name;
+cvar_t      *_cl_color;
 
-cvar_t      cl_shownet = { "cl_shownet", "0" };	// can be 0, 1, or 2
-cvar_t      cl_nolerp = { "cl_nolerp", "0" };
+cvar_t      *cl_shownet;
+cvar_t      *cl_nolerp;
 
-cvar_t      lookspring = { "lookspring", "0", true };
-cvar_t      lookstrafe = { "lookstrafe", "0", true };
-cvar_t      sensitivity = { "sensitivity", "3", true };
+cvar_t      *lookspring;
+cvar_t      *lookstrafe;
+cvar_t      *sensitivity;
 
-cvar_t      m_pitch = { "m_pitch", "0.022", true };
-cvar_t      m_yaw = { "m_yaw", "0.022", true };
-cvar_t      m_forward = { "m_forward", "1", true };
-cvar_t      m_side = { "m_side", "0.8", true };
+cvar_t      *m_pitch;
+cvar_t      *m_yaw;
+cvar_t      *m_forward;
+cvar_t      *m_side;
 
 
 client_static_t cls;
@@ -193,12 +193,13 @@ CL_SignonReply (void)
 		case 2:
 			MSG_WriteByte (&cls.message, clc_stringcmd);
 			MSG_WriteString (&cls.message,
-							 va ("name \"%s\"\n", cl_name.string));
+							 va ("name \"%s\"\n", _cl_name->string));
 
 			MSG_WriteByte (&cls.message, clc_stringcmd);
 			MSG_WriteString (&cls.message,
-							 va ("color %i %i\n", ((int) cl_color.value) >> 4,
-								 ((int) cl_color.value) & 15));
+							 va ("color %i %i\n", 
+								 ((int) _cl_color->value[0]) >> 4,
+								 ((int) _cl_color->value[0]) & 15));
 
 			MSG_WriteByte (&cls.message, clc_stringcmd);
 			snprintf (str, sizeof (str), "spawn %s", cls.spawnparms);
@@ -394,7 +395,7 @@ CL_LerpPoint (void)
 
 	f = cl.mtime[0] - cl.mtime[1];
 
-	if (!f || cl_nolerp.value || cls.timedemo || sv.active) {
+	if (!f || cl_nolerp->value[0] || cls.timedemo || sv.active) {
 		cl.time = cl.mtime[0];
 		return 1;
 	}
@@ -584,7 +585,7 @@ CL_RelinkEntities (void)
 
 		ent->forcelink = false;
 
-		if (i == cl.viewentity && !chase_active.value)
+		if (i == cl.viewentity && !chase_active->value[0])
 			continue;
 
 #ifdef QUAKE2
@@ -626,7 +627,7 @@ CL_ReadFromServer (void)
 		CL_ParseServerMessage ();
 	} while (ret && cls.state == ca_connected);
 
-	if (cl_shownet.value)
+	if (cl_shownet->value[0])
 		Con_Printf ("\n");
 
 	CL_RelinkEntities ();
@@ -698,28 +699,22 @@ CL_Init (void)
 //
 // register our commands
 //
-	Cvar_RegisterVariable (&cl_name);
-	Cvar_RegisterVariable (&cl_color);
-	Cvar_RegisterVariable (&cl_upspeed);
-	Cvar_RegisterVariable (&cl_forwardspeed);
-	Cvar_RegisterVariable (&cl_backspeed);
-	Cvar_RegisterVariable (&cl_sidespeed);
-	Cvar_RegisterVariable (&cl_movespeedkey);
-	Cvar_RegisterVariable (&cl_yawspeed);
-	Cvar_RegisterVariable (&cl_pitchspeed);
-	Cvar_RegisterVariable (&cl_anglespeedkey);
-	Cvar_RegisterVariable (&cl_shownet);
-	Cvar_RegisterVariable (&cl_nolerp);
-	Cvar_RegisterVariable (&lookspring);
-	Cvar_RegisterVariable (&lookstrafe);
-	Cvar_RegisterVariable (&sensitivity);
 
-	Cvar_RegisterVariable (&m_pitch);
-	Cvar_RegisterVariable (&m_yaw);
-	Cvar_RegisterVariable (&m_forward);
-	Cvar_RegisterVariable (&m_side);
+	_cl_name = Cvar_Get ("_cl_name", "player", CVAR_ARCHIVE, NULL);
+	_cl_color = Cvar_Get ("_cl_color", "0", CVAR_ARCHIVE, NULL);
 
-//  Cvar_RegisterVariable (&cl_autofire);
+	// cl_shownet can be 0, 1, or 2
+	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);
+	cl_nolerp = Cvar_Get ("cl_nolerp", "0", CVAR_NONE, NULL);
+
+	lookspring = Cvar_Get ("lookspring", "0", CVAR_ARCHIVE, NULL);
+	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE, NULL);
+	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE, NULL);
+
+	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE, NULL);
+	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_ARCHIVE, NULL);
+	m_forward = Cvar_Get ("m_forward", "1", CVAR_ARCHIVE, NULL);
+	m_side = Cvar_Get ("m_side", "0.8", CVAR_ARCHIVE, NULL);
 
 	Cmd_AddCommand ("entities", CL_PrintEntities_f);
 	Cmd_AddCommand ("disconnect", CL_Disconnect_f);

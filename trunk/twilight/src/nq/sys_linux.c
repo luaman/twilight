@@ -391,7 +391,7 @@ main (int c, char **v)
 		nostdout = 1;
 	else {
 		fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
-		printf ("Twilight -- Version %s\n", VERSION);
+		printf ("Project Twilight -- Version %s\n", VERSION);
 	}
 
 	oldtime = Sys_FloatTime () - 0.1;
@@ -401,15 +401,15 @@ main (int c, char **v)
 		time = newtime - oldtime;
 
 		if (cls.state == ca_dedicated) {	// play vcrfiles at max speed
-			if (time < sys_ticrate.value) {
+			if (time < sys_ticrate->value[0]) {
 				usleep (1);
 				continue;				// not time to run a server only tic
 										// yet
 			}
-			time = sys_ticrate.value;
+			time = sys_ticrate->value[0];
 		}
 
-		if (time > sys_ticrate.value * 2)
+		if (time > sys_ticrate->value[0] * 2)
 			oldtime = newtime;
 		else
 			oldtime += time;

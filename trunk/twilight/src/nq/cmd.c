@@ -523,20 +523,23 @@ void
 Cmd_AddCommand (char *cmd_name, xcommand_t function)
 {
 	cmd_function_t *cmd;
+	cvar_t *var;
 
 	if (host_initialized)				// because hunk allocation would get
 		// stomped
 		Sys_Error ("Cmd_AddCommand after host_initialized");
 
 // fail if the command is a variable name
-	if (Cvar_VariableString (cmd_name)[0]) {
-		Con_Printf ("Cmd_AddCommand: %s already defined as a var\n", cmd_name);
+	var = Cvar_Find (cmd_name);
+	if (var) {
+		Con_Printf ("\"%s\" already defined as a Cvar\n",
+				cmd_name);
 		return;
 	}
 // fail if the command already exists
 	for (cmd = cmd_functions; cmd; cmd = cmd->next) {
 		if (!Q_strcmp (cmd_name, cmd->name)) {
-			Con_Printf ("Cmd_AddCommand: %s already defined\n", cmd_name);
+			Con_Printf ("\"%s\" already defined\n", cmd_name);
 			return;
 		}
 	}
@@ -603,8 +606,8 @@ FIXME: lookupnoadd the token to speed search?
 void
 Cmd_ExecuteString (char *text, cmd_source_t src)
 {
-	cmd_function_t *cmd;
-	cmdalias_t *a;
+	cmd_function_t	   *cmd;
+	cmdalias_t		   *a;
 
 	cmd_source = src;
 	Cmd_TokenizeString (text);
@@ -630,7 +633,7 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 	}
 
 // check cvars
-	if (!Cvar_Command ())
+	if (!Cvar_LegacyCmd ())
 		Con_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
 
 }
@@ -689,3 +692,4 @@ Cmd_CheckParm (char *parm)
 
 	return 0;
 }
+

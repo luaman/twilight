@@ -115,7 +115,7 @@ R_RenderDlights (void)
 	int         i;
 	dlight_t   *l;
 
-	if (!gl_flashblend.value)
+	if (!gl_flashblend->value[0])
 		return;
 
 	r_dlightframecount = r_framecount + 1;	// because the count hasn't
@@ -202,7 +202,7 @@ R_PushDlights (void)
 	int         i;
 	dlight_t   *l;
 
-	if (gl_flashblend.value)
+	if (gl_flashblend->value[0])
 		return;
 
 	r_dlightframecount = r_framecount + 1;	// because the count hasn't

@@ -49,7 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //extern int  gethostname (char *, int);
 //extern int  close (int);
 
-extern cvar_t hostname;
+extern cvar_t *hostname;
 
 static int  net_acceptsocket = -1;		// socket for fielding new connections
 static int  net_controlsocket;
@@ -70,7 +70,7 @@ int
 UDP_Init (void)
 {
 	struct hostent *local;
-	char        buff[MAXHOSTNAMELEN];
+	char        buf[MAXHOSTNAMELEN];
 	struct qsockaddr addr;
 	char       *colon;
 
@@ -90,14 +90,14 @@ UDP_Init (void)
 		return -1;
 
 	// determine my name & address
-	gethostname (buff, MAXHOSTNAMELEN);
-	local = gethostbyname (buff);
+	gethostname (buf, MAXHOSTNAMELEN);
+	local = gethostbyname (buf);
 	myAddr = *(int *) local->h_addr_list[0];
 
 	// if the quake hostname isn't set, set it to the machine name
-	if (Q_strcmp (hostname.string, "UNNAMED") == 0) {
-		buff[15] = 0;
-		Cvar_Set ("hostname", buff);
+	if (Q_strcmp (hostname->string, "UNNAMED") == 0) {
+		buf[15] = 0;
+		Cvar_Set (hostname, buf);
 	}
 
 	if ((net_controlsocket = UDP_OpenSocket (0)) == -1)
