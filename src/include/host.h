@@ -62,8 +62,6 @@ extern qboolean host_initialized;		// true if into command execution
  */
 extern int	current_skill;
 
-extern qboolean isDedicated;
-
 extern int	minimum_memory;
 
 //
