@@ -525,10 +525,6 @@ Host_ClearMemory (void)
 	Mod_ClearAll ();
 
 	cls.signon = 0;
-	if (cl.worldmodel)
-		Mod_UnloadModel (cl.worldmodel);
-	if (sv.worldmodel)
-		Mod_UnloadModel (sv.worldmodel);
 	Zone_EmptyZone (sv_zone);
 	Zone_EmptyZone (cl_zone);
 	memset (&sv, 0, sizeof (sv));

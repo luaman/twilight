@@ -48,8 +48,6 @@ void *_Zone_AllocName (char *name, size_t size, char *filename, int fileline)
 
 void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
 {
-	int i, j, k, needed, endbit, largest;
-	memclump_t *clump, **clumpchainpointer;
 	memheader_t *mem;
 	if (zone == NULL)
 		Sys_Error("Zone_Alloc: zone == NULL (alloc at %s:%i)", filename, fileline);
@@ -57,69 +55,10 @@ void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
 		Sys_Error("Zone_Alloc: size <= 0 (alloc at %s:%i, zone %s, size %i)", filename, fileline, zone->name, size);
 	Com_DPrintf("Zone_Alloc: zone %s, file %s:%i, size %i bytes\n", zone->name, filename, fileline, size);
 	zone->totalsize += size;
-	if (size < 4096)
-	{
-		// clumping
-		needed = (sizeof(memheader_t) + size + sizeof(Uint32) + (MEMUNIT - 1)) / MEMUNIT;
-		endbit = MEMBITS - needed;
-		for (clumpchainpointer = &zone->clumpchain;*clumpchainpointer;clumpchainpointer = &(*clumpchainpointer)->chain)
-		{
-			clump = *clumpchainpointer;
-			if (clump->sentinel1 != MEMCLUMP_SENTINEL)
-				//Sys_Error("Zone_Alloc: trashed clump sentinel 1 (alloc at %s:%d, zone %s)", filename, fileline, zone->name);
-				Sys_Error("Zone_Alloc: trashed clump sentinel 1 (zone %s)", zone->name);
-			if (clump->sentinel2 != MEMCLUMP_SENTINEL)
-				Sys_Error("Zone_Alloc: trashed clump sentinel 2 (alloc at %s:%d, zone %s)", filename, fileline, zone->name);
-			if (clump->largestavailable >= needed)
-			{
-				largest = 0;
-				for (i = 0;i < endbit;i++)
-				{
-					if (clump->bits[i >> 5] & (1 << (i & 31)))
-						continue;
-					k = i + needed;
-					for (j = i;i < k;i++)
-						if (clump->bits[i >> 5] & (1 << (i & 31)))
-							goto loopcontinue;
-					goto choseclump;
-	loopcontinue:;
-					if (largest < j - i)
-						largest = j - i;
-				}
-				// since clump falsely advertised enough space (nothing wrong
-				// with that), update largest count to avoid wasting time in
-				// later allocations
-				clump->largestavailable = largest;
-			}
-		}
-		zone->realsize += sizeof(memclump_t);
-		clump = malloc(sizeof(memclump_t));
-		if (clump == NULL)
-			Sys_Error("Zone_Alloc: out of memory (alloc at %s:%i, zone %s)", filename, fileline, zone->name);
-		memset(clump, 0, sizeof(memclump_t));
-		*clumpchainpointer = clump;
-		clump->sentinel1 = MEMCLUMP_SENTINEL;
-		clump->sentinel2 = MEMCLUMP_SENTINEL;
-		clump->chain = NULL;
-		clump->blocksinuse = 0;
-		clump->largestavailable = MEMBITS - needed;
-		j = 0;
-choseclump:
-		mem = (memheader_t *)((Uint8 *) clump->block + j * MEMUNIT);
-		mem->clump = clump;
-		clump->blocksinuse += needed;
-		for (i = j + needed;j < i;j++)
-			clump->bits[j >> 5] |= (1 << (j & 31));
-	}
-	else
-	{
-		// big allocations are not clumped
-		zone->realsize += sizeof(memheader_t) + size + sizeof(Uint32);
-		mem = malloc(sizeof(memheader_t) + size + sizeof(Uint32));
-		if (mem == NULL)
-			Sys_Error("Zone_Alloc: out of memory (alloc at %s:%i, zone %s)", filename, fileline, zone->name);
-		mem->clump = NULL;
-	}
+	zone->realsize += sizeof(memheader_t) + size + sizeof(Uint32);
+	mem = malloc(sizeof(memheader_t) + size + sizeof(Uint32));
+	if (mem == NULL)
+		Sys_Error("Zone_Alloc: out of memory (alloc at %s:%i, zone %s)", filename, fileline, zone->name);
 	mem->filename = filename;
 	mem->fileline = fileline;
 	mem->size = size;
@@ -136,8 +75,6 @@ choseclump:
 
 void _Zone_Free(void *data, char *filename, int fileline)
 {
-	int i, firstblock, endblock;
-	memclump_t *clump, **clumpchainpointer;
 	memheader_t *mem, **memchainpointer;
 	memzone_t *zone;
 	if (data == NULL)
@@ -163,49 +100,9 @@ void _Zone_Free(void *data, char *filename, int fileline)
 		{
 			*memchainpointer = mem->chain;
 			zone->totalsize -= mem->size;
-			if ((clump = mem->clump))
-			{
-				if (clump->sentinel1 != MEMCLUMP_SENTINEL)
-					Sys_Error("Zone_Free: trashed clump sentinel 1 (free at %s:%i, zone %s)", filename, fileline, zone->name);
-				if (clump->sentinel2 != MEMCLUMP_SENTINEL)
-					Sys_Error("Zone_Free: trashed clump sentinel 2 (free at %s:%i, zone %s)", filename, fileline, zone->name);
-				firstblock = ((Uint8 *) mem - (Uint8 *) clump->block);
-				if (firstblock & (MEMUNIT - 1))
-					Sys_Error("Zone_Free: address not valid in clump (free at %s:%i, zone %s)", filename, fileline, zone->name);
-				firstblock /= MEMUNIT;
-				endblock = firstblock + ((sizeof(memheader_t) + mem->size + sizeof(Uint32) + (MEMUNIT - 1)) / MEMUNIT);
-				clump->blocksinuse -= endblock - firstblock;
-				// could use &, but we know the bit is set
-				for (i = firstblock;i < endblock;i++)
-					clump->bits[i >> 5] -= (1 << (i & 31));
-				if (clump->blocksinuse <= 0)
-				{
-					// unlink from chain
-					for (clumpchainpointer = &zone->clumpchain;*clumpchainpointer;clumpchainpointer = &(*clumpchainpointer)->chain)
-					{
-						if (*clumpchainpointer == clump)
-						{
-							*clumpchainpointer = clump->chain;
-							break;
-						}
-					}
-					zone->realsize -= sizeof(memclump_t);
-					memset(clump, 0xBF, sizeof(memclump_t));
-					free(clump);
-				}
-				else
-				{
-					// clump still has some allocations
-					// force re-check of largest available space on next alloc
-					clump->largestavailable = MEMBITS - clump->blocksinuse;
-				}
-			}
-			else
-			{
-				zone->realsize -= sizeof(memheader_t) + mem->size + sizeof(Uint32);
-				memset(mem, 0xBF, sizeof(memheader_t) + mem->size + sizeof(Uint32));
-				free(mem);
-			}
+			zone->realsize -= sizeof(memheader_t) + mem->size + sizeof(Uint32);
+			memset(mem, 0xBF, sizeof(memheader_t) + mem->size + sizeof(Uint32));
+			free(mem);
 			return;
 		}
 	}
@@ -275,23 +172,11 @@ void _Zone_CheckSentinels(void *data, char *filename, int fileline)
 		Sys_Error("Zone_CheckSentinels: trashed header sentinel 2 (block allocated at %s:%i, sentinel check at %s:%i, zone %s)", mem->filename, mem->fileline, filename, fileline, mem->zone->name);
 }
 
-static void _Zone_CheckClumpSentinels(memclump_t *clump, char *filename, int fileline, memzone_t *zone)
-{
-	// this isn't really very useful
-	if (clump->sentinel1 != MEMCLUMP_SENTINEL)
-		Sys_Error("Zone_CheckClumpSentinels: trashed sentinel 1 (sentinel check at %s:%i, zone %s)", filename, fileline, zone->name);
-	if (clump->sentinel2 != MEMCLUMP_SENTINEL)
-		Sys_Error("Zone_CheckClumpSentinels: trashed sentinel 2 (sentinel check at %s:%i, zone %s)", filename, fileline, zone->name);
-}
-
 void _Zone_CheckSentinelsZone(memzone_t *zone, char *filename, int fileline)
 {
 	memheader_t *mem;
-	memclump_t *clump;
 	for (mem = zone->chain;mem;mem = mem->chain)
 		_Zone_CheckSentinels((void *)((Uint8 *) mem + sizeof(memheader_t)), filename, fileline);
-	for (clump = zone->clumpchain;clump;clump = clump->chain)
-		_Zone_CheckClumpSentinels(clump, filename, fileline, zone);
 }
 
 void _Zone_CheckSentinelsGlobal(char *filename, int fileline)

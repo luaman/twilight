@@ -83,6 +83,7 @@ typedef struct gltexture_s
 	GLuint				width, height;
 	qboolean			mipmap;
 	unsigned short		crc;
+	int					count;
 	struct gltexture_s	*next;
 }
 gltexture_t;
@@ -1310,9 +1311,10 @@ R_LoadTexture (const char *identifier, image_t *img, int flags)
 			if (!strcmp (identifier, glt->identifier))
 			{
 				if (img->width == glt->width && img->height == glt->height
-						&& crc == glt->crc)
+						&& crc == glt->crc) {
+					glt->count++;
 					return glt->texnum;
-				else
+				} else
 					/* reload the texture into the same slot */
 					goto setuptexture;
 			}
@@ -1321,6 +1323,7 @@ R_LoadTexture (const char *identifier, image_t *img, int flags)
 
 	glt = Zone_Alloc (texturezone, sizeof (gltexture_t));
 	glt->next = gltextures;
+	glt->count = 1;
 	gltextures = glt;
 
 	strlcpy (glt->identifier, identifier, sizeof(glt->identifier));
@@ -1376,9 +1379,10 @@ GL_LoadTexture (const char *identifier, Uint width, Uint height, Uint8 *data,
 			if (!strcmp (identifier, glt->identifier))
 			{
 				if (width == glt->width && height == glt->height
-						&& crc == glt->crc)
+						&& crc == glt->crc) {
+					glt->count++;
 					return glt->texnum;
-				else
+				} else
 					/* reload the texture into the same slot */
 					goto setuptexture;
 			}
@@ -1387,6 +1391,7 @@ GL_LoadTexture (const char *identifier, Uint width, Uint height, Uint8 *data,
 
 	glt = Zone_Alloc (texturezone, sizeof (gltexture_t));
 	glt->next = gltextures;
+	glt->count = 1;
 	gltextures = glt;
 
 	strlcpy (glt->identifier, identifier, sizeof(glt->identifier));
@@ -1423,9 +1428,11 @@ GL_DeleteTexture (GLuint texnum)
 	for (cur = gltextures; cur != NULL; cur = cur->next)
 	{
 		if (cur->texnum == texnum) {
-			*last = cur->next;
-			qglDeleteTextures (1, &cur->texnum);
-			Zone_Free (cur);
+			if (!--cur->count) {
+				*last = cur->next;
+				qglDeleteTextures (1, &cur->texnum);
+				Zone_Free (cur);
+			}
 			return true;
 		}
 		last = &cur->next;

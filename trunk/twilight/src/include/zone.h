@@ -42,7 +42,6 @@ typedef struct memheader_s
 {
 	struct memheader_s	*chain;			// next memheader in this zone
 	struct memzone_s	*zone;			// the parent zone
-	struct memclump_s	*clump;			// parent clump, if any
 	size_t				size;			// allocated size, excludes header
 	char				*filename;		// source file of this alloc
 	int					fileline;		// line of alloc in source file
@@ -50,21 +49,9 @@ typedef struct memheader_s
 	// followed by data and a MEMHEADER_SENTINEL2 byte
 } memheader_t;
 
-typedef struct memclump_s
-{
-	Uint8				block[MEMCLUMPSIZE];	// contents of the clump
-	Uint32				sentinel1;				// MEMCLUMP_SENTINEL
-	int					bits[MEMBITINTS];		// used to mark allocations
-	Uint32				sentinel2;				// MEMCLUMP_SENTINEL
-	int					blocksinuse;			// zone usage refcount
-	int					largestavailable;		// updated on alloc/free
-	struct memclump_s	*chain;					// next clump in chain
-} memclump_t;
-
 typedef struct memzone_s
 {
 	struct memheader_s	*chain;				// chain of individual allocs
-	struct memclump_s	*clumpchain;		// clain of clumps, if any
 	qboolean			single;				// free the zone on first alloc free
 	int					totalsize;			// total size of allocs
 	int					realsize;			// actual malloc size of zone
