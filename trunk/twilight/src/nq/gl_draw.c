@@ -535,15 +535,15 @@ Draw_Crosshair (void)
 	
 	ctexture = ch_texture + ((crosshair->ivalue - 1) % NUM_CROSSHAIRS);
 
-	x1 = ((vid.width_2d - 32 * hud_chsize->fvalue) * 0.5
-		+ cl_crossx->ivalue) / (double) vid.width * vid.width_2d;
-	y1 = ((vid.height_2d - 32 * hud_chsize->fvalue) * 0.5
-		+ cl_crossy->ivalue) / (double) vid.height * vid.height_2d;
+	x1 = (vid.width - 32 * hud_chsize->fvalue) * 0.5
+		* vid.width_2d / vid.width;
+	y1 = (vid.height - 32 * hud_chsize->fvalue) * 0.5
+		* vid.height_2d / vid.height;
 
-	x2 = ((vid.width_2d + 32 * hud_chsize->fvalue) * 0.5
-		+ cl_crossx->ivalue) / (double) vid.width * vid.width_2d;
-	y2 = ((vid.height_2d + 32 * hud_chsize->fvalue) * 0.5
-		+ cl_crossy->ivalue) / (double) vid.height * vid.height_2d;
+	x2 = (vid.width + 32 * hud_chsize->fvalue) * 0.5
+		* vid.width_2d / vid.width;
+	y2 = (vid.height + 32 * hud_chsize->fvalue) * 0.5
+		* vid.height_2d / vid.height;
 
 	// Color selection madness
 	color = crosshaircolor->ivalue % 256;
@@ -873,7 +873,7 @@ GL_Set2D (void)
 
 	qglMatrixMode (GL_PROJECTION);
 	qglLoadIdentity ();
-	qglOrtho (0, vid.width, vid.height, 0, -99999, 99999);
+	qglOrtho (0, vid.width_2d, vid.height_2d, 0, -99999, 99999);
 
 	qglMatrixMode (GL_MODELVIEW);
 	qglLoadIdentity ();
