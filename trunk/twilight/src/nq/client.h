@@ -254,6 +254,7 @@ extern struct cvar_s *m_yaw;
 extern struct cvar_s *m_forward;
 extern struct cvar_s *m_side;
 extern struct cvar_s *m_freelook;
+extern struct cvar_s *m_filter;
 
 #define	MAX_TEMP_ENTITIES	64			// lightning bolts, etc
 #define	MAX_STATIC_ENTITIES	128			// torches, etc
