@@ -398,6 +398,7 @@ void
 R_NewMap (void)
 {
 	int         i;
+	extern int r_dlightframecount;
 
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
@@ -412,6 +413,8 @@ R_NewMap (void)
 
 	r_viewleaf = NULL;
 	R_ClearParticles ();
+
+	r_dlightframecount = 0;
 
 	GL_BuildLightmaps ();
 

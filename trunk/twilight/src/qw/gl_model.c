@@ -1574,6 +1574,7 @@ mflags_t modelflags[] =
 	{ "progs/s_spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/zom_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/player.mdl", 0, FLAG_PLAYER },
+	{ "progs/v_spike.mdl", 0, FLAG_NO_IM_ANIM|FLAG_NO_IM_FORM },
 
 	// keys and runes do not cast shadows
 	{ "progs/w_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },

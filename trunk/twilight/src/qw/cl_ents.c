@@ -101,7 +101,7 @@ CL_NewDlight
 ===============
 */
 void
-CL_NewDlight (int key, float x, float y, float z, float radius, float time,
+CL_NewDlight (int key, vec3_t org, float x, float y, float z, float radius, float time,
 			  int type)
 {
 	dlight_t   *dl;
@@ -110,6 +110,17 @@ CL_NewDlight (int key, float x, float y, float z, float radius, float time,
 	dl->origin[0] = x;
 	dl->origin[1] = y;
 	dl->origin[2] = z;
+
+	if (!gl_flashblend->value)
+	{
+		pmtrace_t tr;
+		
+		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, org, dl->origin, &tr);
+				
+		if (tr.endpos[0] && tr.endpos[1] && tr.endpos[2])
+			VectorCopy (tr.endpos, dl->origin);
+	}
+
 	dl->radius = radius;
 	dl->die = cl.time + time;
 	if (type == 0) {
@@ -441,19 +452,19 @@ CL_LinkPacketEntities (void)
 
 		// spawn light flashes, even ones coming from invisible objects
 		if ((s1->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
-			CL_NewDlight (s1->number, s1->origin[0], s1->origin[1],
+			CL_NewDlight (s1->number, s1->origin, s1->origin[0], s1->origin[1],
 						  s1->origin[2], 200 + (Q_rand () & 31), 0.1, 3);
 		else if (s1->effects & EF_BLUE)
-			CL_NewDlight (s1->number, s1->origin[0], s1->origin[1],
+			CL_NewDlight (s1->number, s1->origin, s1->origin[0], s1->origin[1],
 						  s1->origin[2], 200 + (Q_rand () & 31), 0.1, 1);
 		else if (s1->effects & EF_RED)
-			CL_NewDlight (s1->number, s1->origin[0], s1->origin[1],
+			CL_NewDlight (s1->number, s1->origin, s1->origin[0], s1->origin[1],
 						  s1->origin[2], 200 + (Q_rand () & 31), 0.1, 2);
 		else if (s1->effects & EF_BRIGHTLIGHT)
-			CL_NewDlight (s1->number, s1->origin[0], s1->origin[1],
+			CL_NewDlight (s1->number, s1->origin, s1->origin[0], s1->origin[1],
 						  s1->origin[2] + 16, 400 + (Q_rand () & 31), 0.1, 0);
 		else if (s1->effects & EF_DIMLIGHT)
-			CL_NewDlight (s1->number, s1->origin[0], s1->origin[1],
+			CL_NewDlight (s1->number, s1->origin, s1->origin[0], s1->origin[1],
 						  s1->origin[2], 200 + (Q_rand () & 31), 0.1, 0);
 
 		// if set to invisible, skip
@@ -842,20 +853,20 @@ CL_LinkPlayers (void)
 		// spawn light flashes, even ones coming from invisible objects
 		if (!gl_flashblend->value || j != cl.playernum) {
 			if ((state->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
-				CL_NewDlight (j + 1, state->origin[0], state->origin[1],
+				CL_NewDlight (j + 1, state->origin, state->origin[0], state->origin[1],
 							  state->origin[2], 200 + (Q_rand () & 31), 0.1, 3);
 			else if (state->effects & EF_BLUE)
-				CL_NewDlight (j + 1, state->origin[0], state->origin[1],
+				CL_NewDlight (j + 1, state->origin, state->origin[0], state->origin[1],
 							  state->origin[2], 200 + (Q_rand () & 31), 0.1, 1);
 			else if (state->effects & EF_RED)
-				CL_NewDlight (j + 1, state->origin[0], state->origin[1],
+				CL_NewDlight (j + 1, state->origin, state->origin[0], state->origin[1],
 							  state->origin[2], 200 + (Q_rand () & 31), 0.1, 2);
 			else if (state->effects & EF_BRIGHTLIGHT)
-				CL_NewDlight (j + 1, state->origin[0], state->origin[1],
+				CL_NewDlight (j + 1, state->origin, state->origin[0], state->origin[1],
 							  state->origin[2] + 16, 400 + (Q_rand () & 31), 0.1,
 							  0);
 			else if (state->effects & EF_DIMLIGHT)
-				CL_NewDlight (j + 1, state->origin[0], state->origin[1],
+				CL_NewDlight (j + 1, state->origin, state->origin[0], state->origin[1],
 							  state->origin[2], 200 + (Q_rand () & 31), 0.1, 0);
 		}
 		// the player object never gets added

@@ -1048,7 +1048,7 @@ R_DrawBrushModel (entity_t *e)
 			if ((cl_dlights[k].die < cl.time) || (!cl_dlights[k].radius))
 				continue;
 
-			R_MarkLights (&cl_dlights[k], 1 << k,
+			R_MarkLightsNoVis (&cl_dlights[k], 1 << k,
 						  clmodel->nodes + clmodel->hulls[0].firstclipnode);
 		}
 	}
