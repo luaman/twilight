@@ -607,6 +607,33 @@ V_CalcIntermissionRefdef (void)
 
 /*
 ==================
+V_AddEntity
+==================
+*/
+void
+V_AddEntity ( entity_t *ent )
+{
+	if ( r_refdef.num_entities >= MAX_VISEDICTS ) {
+		Sys_Error ("ERROR! Out of entitys!");
+		return;
+	}
+
+	r_refdef.entities[r_refdef.num_entities++] = ent;
+}
+
+/*
+==================
+V_ClearEntities
+==================
+*/
+void 
+V_ClearEntities ( void )
+{
+	r_refdef.num_entities = 0;
+}
+
+/*
+==================
 V_CalcRefdef
 
 ==================

@@ -41,6 +41,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "screen.h"
 #include "strlib.h"
+#include "sys.h"
 
 /* QW specific */
 #include "pmove.h"
@@ -606,6 +607,32 @@ V_CalcIntermissionRefdef (void)
 		v_ipitch_level->value;
 	r_refdef.viewangles[YAW] += Q_sin (cl.time * v_iyaw_cycle->value) *
 		v_iyaw_level->value;
+}
+
+/*
+==================
+V_AddEntity
+==================
+*/
+void
+V_AddEntity ( entity_t *ent )
+{
+	if ( r_refdef.num_entities >= MAX_ENTITIES ) {
+		Sys_Error ("ERROR! Out of entitys!");
+	}
+
+	r_refdef.entities[r_refdef.num_entities++] = ent;
+}
+
+/*
+==================
+V_ClearEntities
+==================
+*/
+void 
+V_ClearEntities ( void )
+{
+	r_refdef.num_entities = 0;
 }
 
 /*

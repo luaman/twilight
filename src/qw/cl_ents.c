@@ -46,9 +46,6 @@ static const char rcsid[] =
 #include "view.h"
 #include "sys.h"
 
-int			cl_num_vis_entities;
-entity_t	*cl_vis_entities[MAX_ENTITIES];
-
 int			cl_num_static_entities;
 entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
 
@@ -511,11 +508,10 @@ CL_LinkPacketEntities (void)
 		}
 
 		if (!s1->modelindex)
-			return;
+			continue;		// Vic: is it correct?
+//			return;
 
-		if ((cl_num_vis_entities + 1) >= MAX_ENTITIES)
-			Sys_Error ("ERROR! Out of entitys!\n");
-		cl_vis_entities[cl_num_vis_entities++] = ent;
+		V_AddEntity ( ent );
 
 		Lerp_Vectors ( ent->prev.origin, f, s1->origin,
 			ent->cur.origin );
@@ -889,9 +885,7 @@ CL_LinkPlayers (void)
 		if (!Cam_DrawPlayer (j))
 			continue;
 
-		if ((cl_num_vis_entities + 1) >= MAX_ENTITIES)
-			Sys_Error ("Out of entities!");
-		cl_vis_entities[cl_num_vis_entities++] = ent;
+		V_AddEntity ( ent );
 
 		ent->prev = ent->cur;
 		ent->times++;
@@ -1094,9 +1088,7 @@ CL_LinkStaticEntites (void)
 	int i;
 
 	for (i = 0; i < cl_num_static_entities; i++) {
-		if ((cl_num_vis_entities + 1) >= MAX_ENTITIES)
-			Sys_Error("Out of entities!");
-		cl_vis_entities[cl_num_vis_entities++] = &cl_static_entities[i];
+		V_AddEntity ( &cl_static_entities[i] );
 		cl_static_entities[i].times++;
 	}
 }
@@ -1118,7 +1110,8 @@ CL_EmitEntities (void)
 	if (!cl.validsequence)
 		return;
 
-	cl_num_vis_entities = 0;
+	V_ClearEntities ();
+
 	cl_num_tmp_entities = 0;
 
 	entity_frame++;

@@ -395,15 +395,13 @@ qboolean CL_DemoBehind (void);
 void CL_BeginServerConnect (void);
 
 #define MAX_STATIC_ENTITIES	128
-#define MAX_ENTITIES	1024
-extern int cl_num_vis_entities;
-extern entity_t	*cl_vis_entities[MAX_ENTITIES];
+#define MAX_TMP_ENTITIES	1024
 
 extern int cl_num_static_entities;
 extern entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
 
 extern int cl_num_tmp_entities;
-extern entity_t	cl_tmp_entities[MAX_ENTITIES];
+extern entity_t	cl_tmp_entities[MAX_TMP_ENTITIES];
 
 extern entity_t	cl_network_entities[MAX_EDICTS];
 extern entity_t	cl_player_entities[MAX_CLIENTS];
@@ -486,7 +484,8 @@ void V_UpdatePalette (void);
 void V_Register (void);
 void V_ParseDamage (void);
 void V_SetContentsColor (int contents);
-
+void V_AddEntity ( entity_t *ent );
+void V_ClearEntities ( void );
 
 /*
  * cl_tent

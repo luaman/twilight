@@ -372,13 +372,12 @@ CL_NewTempEntity (void)
 {
 	entity_t   *ent;
 
-	if ((cl_num_vis_entities + 1) >= MAX_ENTITIES)
-		Sys_Error ("Out of entities!");
 	if ((cl_num_tmp_entities + 1) >= MAX_ENTITIES)
 		Sys_Error ("Out of entities!");
 
 	ent = &cl_tmp_entities[cl_num_tmp_entities++];
-	cl_vis_entities[cl_num_vis_entities++] = ent;
+
+	V_AddEntity ( ent );
 
 	memset (ent, 0, sizeof (*ent));
 
