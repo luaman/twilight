@@ -121,7 +121,7 @@ CL_PredictUsercmd (player_state_t * from, player_state_t * to, usercmd_t *u,
 //for (i=0 ; i<3 ; i++)
 //pmove.origin[i] = ((int)(pmove.origin[i]*8))*0.125;
 	to->waterjumptime = pmove.waterjumptime;
-	to->oldbuttons = pmove.cmd.buttons;
+	to->oldbuttons = pmove.oldbuttons;
 	VectorCopy (pmove.origin, to->origin);
 	VectorCopy (pmove.angles, to->viewangles);
 	VectorCopy (pmove.velocity, to->velocity);
