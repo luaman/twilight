@@ -89,11 +89,7 @@ AC_CHECK_HEADERS(
 
 dnl Let 'em figure this one out...
 AC_MSG_CHECKING(if -l33t works)
-if test "x`id -u`" = "x0"; then
-	AC_MSG_RESULT(yes)
-else
-	AC_MSG_RESULT([no (good!)])
-fi
+AC_MSG_RESULT(no)
 
 dnl userpath/sharepath config
 AC_ARG_WITH(sharepath,
