@@ -71,6 +71,9 @@ Stuff that isn't needed for 0.2, but would be nice:
     + Custom sbar
     + Custom keybindings
     + builtin to register Cvars
+    + Transparency in brush models (windows)
+    + Targa loading for lmps (main menu)
+    + Sprite orientation fixes
   - Improve the particle code more.
   - Option to use classic-looking particles?  (slow!)
 
