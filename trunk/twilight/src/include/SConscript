@@ -1,0 +1,14 @@
+#! /usr/bin/python
+
+Import ("env", "opts")
+env.Append (CPPPATH = ["#/src/include"])
+
+include_headers = Split("""common.h host.h info.h input.h pmove.h pr_comp.h
+	qtypes.h quakedef.h sys.h twiconfig.h view.h""")
+
+include_sources = Split(""" """)
+
+include_headers = ['#/src/include/'+e for e in include_headers]
+include_sources = ['#/src/include/'+e for e in include_sources]
+
+Export ("include_headers")

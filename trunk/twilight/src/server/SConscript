@@ -1,0 +1,13 @@
+#! /usr/bin/python
+
+Import ("env", "opts")
+env.Append (CPPPATH = ["#/src/server"])
+
+server_headers = Split(""" """)
+
+server_sources = Split(""" """)
+
+server_headers = ['#/src/server/'+e for e in server_headers]
+server_sources = ['#/src/server/'+e for e in server_sources]
+
+Export ("server_headers", "server_sources")

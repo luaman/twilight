@@ -1,0 +1,26 @@
+#! /usr/bin/python
+
+Import ("env", "opts", "base_sources", "client_sources", "fs_sources")
+Import ("image_sources", "renderer_sources", "sound_sources")
+#env.Append (CPPPATH = ["#/src/nq"])
+
+nq_headers = Split("""chase.h cl_console.h client.h net.h net_dgram.h
+	net_loop.h net_udp.h pr_execprogram.h progdefs.h progs.h protocol.h
+	render.h server.h world.h""")
+
+nq_sources = Split("""chase.c cl_demo.c cl_ents.c cl_input.c cl_main.c
+	cl_model.c cl_parse.c cl_tent.c common.c gl_screen.c host.c host_cmd.c
+	menu.c net_bsd.c net_dgrm.c net_loop.c net_main.c net_udp.c pr_cmds.c
+	pr_edict.c pr_exec.c snd_dma.c sv_main.c sv_move.c sv_phys.c
+	sv_user.c sys.c view.c world.c""")
+
+nq_sources.extend (base_sources)
+nq_sources.extend (client_sources)
+nq_sources.extend (fs_sources)
+nq_sources.extend (image_sources)
+nq_sources.extend (renderer_sources)
+nq_sources.extend (sound_sources)
+
+env.Program (target = "twilight-nq", source = nq_sources)
+
+Export ("nq_headers", "nq_sources")

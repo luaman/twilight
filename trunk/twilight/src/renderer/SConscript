@@ -1,0 +1,20 @@
+#! /usr/bin/python
+
+Import ("env", "opts")
+env.Append (CPPPATH = ["#/src/renderer"])
+
+renderer_headers = Split("""alias.h brush.h dglfuncs.h draw.h dyngl.h entities.h
+	explosion.h gen_textures.h gl_arrays.h gl_info.h gl_light.h gl_main.h
+	liquid.h mod_alias.h mod_sprite.h noise.h palette.h pointers.h r_part.h
+	screen.h sky.h sprite.h surface.h textures.h video.h vis.h""")
+
+renderer_sources = Split("""alias.c brush.c draw.c dyngl.c entities.c
+	explosion.c gen_textures.c gl_arrays.c gl_info.c gl_light.c gl_main.c
+	liquid.c menu.c mod_alias.c mod_brush.c mod_sprite.c noise.c
+	palette.c pointers.c r_part.c sky.c sprite.c surface.c textures.c
+	video.c vis.c""")
+
+renderer_headers = ['#/src/renderer/'+e for e in renderer_headers]
+renderer_sources = ['#/src/renderer/'+e for e in renderer_sources]
+
+Export ("renderer_headers", "renderer_sources")

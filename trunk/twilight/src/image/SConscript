@@ -1,0 +1,13 @@
+#! /usr/bin/python
+
+Import ("env", "opts")
+env.Append (CPPPATH = ["#/src/image"])
+
+image_headers = Split("""image.h jpeg.h pcx.h qlmp.h sdlimage.h tga.h""")
+
+image_sources = Split("""image.c jpeg.c pcx.c qlmp.c sdlimage.c tga.c""")
+
+image_headers = ['#/src/image/'+e for e in image_headers]
+image_sources = ['#/src/image/'+e for e in image_sources]
+
+Export ("image_headers", "image_sources")
