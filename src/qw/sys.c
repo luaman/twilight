@@ -92,7 +92,7 @@ int         nostdout = 0;
 
 char       *qdate = __DATE__;
 
-cvar_t	   *sys_asciionly;
+cvar_t *sys_asciionly;
 
 double		curtime = 0;
 
@@ -178,6 +178,8 @@ HANDLE		qwclsemaphore;
 void
 Sys_Init (void)
 {
+	int			sdlflags;
+
 #ifdef _WIN32
 	// Win32 clients need to make front-end programs happy
 
@@ -191,6 +193,14 @@ Sys_Init (void)
 
 	sys_asciionly = Cvar_Get ("sys_asciionly", "1", CVAR_ARCHIVE, NULL);
 
+	sdlflags = SDL_INIT_TIMER;
+	if (COM_CheckParm ("-noparachute"))
+	{
+		sdlflags |= SDL_INIT_NOPARACHUTE;
+		Sys_Printf ("Flying without a parachute!\n");
+	}
+	SDL_Init (sdlflags);
+			
 	Math_Init ();
 }
 
