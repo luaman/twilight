@@ -1071,9 +1071,11 @@ R_DrawBrushModel (entity_t *e)
 	}
 
 	glPushMatrix ();
-	e->angles[0] = -e->angles[0];		// stupid quake bug
-	R_RotateForEntity (e);
-	e->angles[0] = -e->angles[0];		// stupid quake bug
+
+	glTranslatef (e->origin[0], e->origin[1], e->origin[2]);
+	glRotatef (e->angles[1], 0, 0, 1);
+	glRotatef (e->angles[0], 0, 1, 0);	// stupid quake bug
+	glRotatef (e->angles[2], 1, 0, 0);
 
 	// 
 	// draw texture
@@ -1355,7 +1357,7 @@ AllocBlock (int w, int h, int *x, int *y)
 mvertex_t  *r_pcurrentvertbase;
 model_t    *currentmodel;
 
-int         nColinElim;
+//int         nColinElim;
 
 /*
 ================
@@ -1458,7 +1460,7 @@ BuildSurfaceDisplayList (msurface_t *fa)
 						poly->verts[j - 1][k] = poly->verts[j][k];
 				}
 				--lnumverts;
-				++nColinElim;
+//				++nColinElim;
 				// retry next vertex next time, which is now current vertex
 				--i;
 			}
