@@ -109,7 +109,28 @@ void        R_ParticleExplosion (vec3_t org);
 void        R_LavaSplash (vec3_t org);
 void        R_TeleportSplash (vec3_t org);
 
+//
+// gl_rlight.c
+//
+#define	MAX_DLIGHTS		32
+
+typedef struct {
+	int         key;					// so entities can reuse same entry
+	vec3_t      origin;
+	float       radius;
+	float       die;					// stop lighting after this time
+	float       decay;					// drop this each second
+	float       minlight;				// don't add when contributing less
+	float       color[3];
+} dlight_t;
+
+void        R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node);
+void		R_MarkLights (dlight_t *light, int bit, model_t *model);
+void        R_AnimateLight (void);
+void        R_RenderDlights (void);
+int         R_LightPoint (vec3_t p);
 void        R_PushDlights (void);
+
 void        R_InitParticles (void);
 void        R_ClearParticles (void);
 void        R_DrawParticles (void);

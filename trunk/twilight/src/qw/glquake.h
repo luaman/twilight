@@ -45,8 +45,8 @@
 #include "TGL_types.h"
 #include "TGL_funcs.h"
 
-#include "gl_model.h"
 #include "wad.h"
+#include "render.h"
 
 void        GL_EndRendering (void);
 
@@ -73,24 +73,6 @@ extern int  glx, gly;
 
 void        R_ReadPointFile_f (void);
 texture_t  *R_TextureAnimation (texture_t *base);
-
-typedef enum {
-	pt_static, pt_grav, pt_slowgrav, pt_fire, pt_explode, pt_explode2, pt_blob,
-	pt_blob2
-} ptype_t;
-
-typedef struct particle_s {
-// driver-usable fields
-	vec3_t      org;
-	float       color;
-// drivers never touch the following fields
-	struct particle_s *next;
-	vec3_t      vel;
-	float       ramp;
-	float       die;
-	ptype_t     type;
-} particle_t;
-
 
 //====================================================
 
@@ -203,15 +185,6 @@ extern int	gl_filter_max;
 // gl_rmain.c
 //
 qboolean    R_CullBox (vec3_t mins, vec3_t maxs);
-
-//
-// gl_rlight.c
-//
-void        R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node);
-void		R_MarkLights (dlight_t *light, int bit, model_t *model);
-void        R_AnimateLight (void);
-void        R_RenderDlights (void);
-int         R_LightPoint (vec3_t p);
 
 //
 // gl_refrag.c

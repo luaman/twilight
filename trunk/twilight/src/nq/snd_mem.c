@@ -121,14 +121,13 @@ S_LoadSound (sfx_t *s)
 	int         len;
 	float       stepscale;
 	sfxcache_t *sc;
-	Uint8       stackbuf[1 * 1024];		// avoid dirtying the cache heap
+	Uint8       stackbuf[1024];		// avoid dirtying the cache heap
 
 // see if still in memory
 	sc = Cache_Check (&s->cache);
 	if (sc)
 		return sc;
 
-//Con_Printf ("S_LoadSound: %x\n", (int)stackbuf);
 // load it in
 	strcpy (namebuffer, "sound/");
 	strcat (namebuffer, s->name);
@@ -295,7 +294,6 @@ GetWavinfo (char *name, Uint8 *wav, int wavlength)
 	}
 // get "fmt " chunk
 	iff_data = data_p + 12;
-// DumpChunks ();
 
 	FindChunk ("fmt ");
 	if (!data_p) {
@@ -319,7 +317,6 @@ GetWavinfo (char *name, Uint8 *wav, int wavlength)
 	if (data_p) {
 		data_p += 32;
 		info.loopstart = GetLittleLong ();
-//      Con_Printf("loopstart=%d\n", sfx->loopstart);
 
 		// if the next chunk is a LIST chunk, look for a cue length marker
 		FindNextChunk ("LIST");
@@ -330,7 +327,6 @@ GetWavinfo (char *name, Uint8 *wav, int wavlength)
 				data_p += 24;
 				i = GetLittleLong ();	// samples in loop
 				info.samples = info.loopstart + i;
-//              Con_Printf("looped length: %i\n", i);
 			}
 		}
 	} else

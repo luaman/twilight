@@ -222,6 +222,7 @@ R_TranslatePlayerSkin (int playernum)
 	unsigned	frac, fracstep;
 	player_info_t	*player;
 	extern Uint8	player_8bit_texels[320*200];
+	extern int 		player_8bit_width, player_8bit_height;
 	char s[512];
 
 	player = &cl.players[playernum];
@@ -278,34 +279,17 @@ R_TranslatePlayerSkin (int playernum)
 			inheight = 200;
 		} else {
 			original = player_8bit_texels;
-			inwidth = 296;
-			inheight = 194;
+			inwidth = player_8bit_width;
+			inheight = player_8bit_height;
 		}
 
 		// because this happens during gameplay, do it fast
 		// instead of sending it through gl_upload 8
 		qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
 
-	#if 0
-		s = 320*200;
-		byte	translated[320*200];
-
-		for (i=0 ; i<s ; i+=4)
-		{
-			translated[i] = translate[original[i]];
-			translated[i+1] = translate[original[i+1]];
-			translated[i+2] = translate[original[i+2]];
-			translated[i+3] = translate[original[i+3]];
-		}
-
-
-		// don't mipmap these, because it takes too long
-		GL_Upload8 (translated, paliashdr->skinwidth, paliashdr->skinheight, 
-			false, false, true);
-	#endif
-
 		scaled_width = gl_max_size->value < 512 ? gl_max_size->value : 512;
 		scaled_height = gl_max_size->value < 256 ? gl_max_size->value : 256;
+
 		// allow users to crunch sizes down even more if they want
 		scaled_width >>= (int)gl_playermip->value;
 		scaled_height >>= (int)gl_playermip->value;
