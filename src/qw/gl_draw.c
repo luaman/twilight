@@ -1179,11 +1179,11 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 {
 	int         i;
 	gltexture_t *glt;
-	unsigned short crc;
+	unsigned short crc = 0;
 
-	crc = CRC_Block (data, width*height);
 	// see if the texture is already present
 	if (identifier[0]) {
+		crc = CRC_Block (data, width*height);
 
 		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
 			if (!Q_strcmp (identifier, glt->identifier)) {
