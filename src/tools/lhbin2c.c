@@ -53,9 +53,13 @@ int main(int argc, char **argv)
 				printf("/*file \"%s\"*/\n", argv[i]);
 				if (strings/* && filesize < 8192*/)
 				{
-					printf("char embeddedfile_data%i[%i] =", filenum, filesize);
+					printf("char embeddedfile_data%i[%i] =", filenum, filesize ? filesize : 1);
 					filenum++;
-					for(;;)
+					
+					if (!filesize) {
+						printf("\"\"");
+					}
+					else for(;;)
 					{
 						w = 0;
 						writebuf[w++] = '\n';
@@ -112,9 +116,11 @@ int main(int argc, char **argv)
 				else
 				{
 					skipstart = 1;
-					printf("unsigned char embeddedfile_data%i[%i] =\n{", filenum, filesize);
+					printf("unsigned char embeddedfile_data%i[%i] =\n{", filenum, filesize ? filesize : 1);
 					filenum++;
-					for(;;)
+					if (!filesize)
+						printf("\n0");
+					else for(;;)
 					{
 						c = fread(readbuf, 1, sizeof(readbuf), infile);
 						if (c < 1)
