@@ -40,14 +40,22 @@ static const char rcsid[] =
 
 #include "SDL.h"
 
-#include "quakedef.h"
+#include "qtypes.h"
 #include "cdaudio.h"
-#include "cmd.h"
 #include "common.h"
-#include "console.h"
 #include "strlib.h"
 #include "cvar.h"
 #include "sound.h"
+
+// FIXME: All of this is not yet common
+void Con_Printf (char *fmt, ...);
+void Con_DPrintf (char *fmt, ...);
+typedef void (*xcommand_t) (void);
+void Cmd_AddCommand (char *cmd_name, xcommand_t function);
+int Cmd_Argc (void);
+char *Cmd_Argv (int arg);
+extern double realtime;
+
 
 static qboolean cdValid = false;
 static qboolean playing = false;

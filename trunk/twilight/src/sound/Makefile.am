@@ -4,4 +4,11 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
+CFLAGS=@CFLAGS@ @SDL_CFLAGS@
+
+lib_LIBRARIES=libtwilight_sound.a
+
+libtwilight_sound_a_SOURCES= \
+	cdaudio.h sound.h \
+	cdmusic.c mem.c mix.c target.c
 

@@ -34,13 +34,16 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "qtypes.h"
 #include "common.h"
-#include "console.h"
 #include "cvar.h"
 #include "sound.h"
 #include "strlib.h"
 #include "sys.h"
+
+// FIXME: console.h is not yet common
+void Con_Printf (char *fmt, ...);
+void Con_DPrintf (char *fmt, ...);
 
 int         cache_full_cycle;
 
@@ -131,8 +134,6 @@ S_LoadSound (sfx_t *s)
 // load it in
 	strcpy (namebuffer, "sound/");
 	strcat (namebuffer, s->name);
-
-//  Con_Printf ("loading %s\n",namebuffer);
 
 	data = COM_LoadStackFile (namebuffer, stackbuf, sizeof (stackbuf));
 
@@ -247,6 +248,7 @@ FindChunk (char *name)
 	FindNextChunk (name);
 }
 
+
 /*
 ============
 GetWavinfo
@@ -304,9 +306,8 @@ GetWavinfo (char *name, Uint8 *wav, int wavlength)
 		// if the next chunk is a LIST chunk, look for a cue length marker
 		FindNextChunk ("LIST");
 		if (data_p) {
-			if (!strncmp (data_p + 28, "mark", 4)) {	// this is not a proper 
-														// parse, but it works
-														// with cooledit...
+			// this is not a proper parse, but it works with cooledit...
+			if (!strncmp (data_p + 28, "mark", 4)) {
 				data_p += 24;
 				i = GetLittleLong ();	// samples in loop
 				info.samples = info.loopstart + i;
