@@ -218,7 +218,11 @@ UDP_CloseSocket (int socket)
 {
 	if (socket == net_broadcastsocket)
 		net_broadcastsocket = 0;
+#ifdef _WIN32
+	return closesocket (socket);
+#else
 	return close (socket);
+#endif
 }
 
 
