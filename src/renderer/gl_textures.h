@@ -31,7 +31,7 @@
 #include "qtypes.h"
 #include "model.h"
 
-extern Uint32 *GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette);
+extern Uint32 *GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette, qboolean check_empty);
 extern void GLT_FloodFillSkin8 (Uint8 * skin, int skinwidth, int skinheight);
 extern qboolean GLT_TriangleCheck8 (Uint32 *tex, int width, int height, astvert_t texcoords[3], Uint32 color);
 extern void GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name, int width, int height, int frames, float interval);
