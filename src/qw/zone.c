@@ -936,13 +936,13 @@ Memory_Init
 ========================
 */
 void
-Memory_Init (void *buf, int size)
+Memory_Init (void)
 {
 	int         p;
 	int         zonesize = DYNAMIC_SIZE;
 
-	hunk_base = buf;
-	hunk_size = size;
+	hunk_base = sys_membase;
+	hunk_size = sys_memsize;
 	hunk_low_used = 0;
 	hunk_high_used = 0;
 
