@@ -35,13 +35,13 @@ static const char rcsid[] =
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include <errno.h>
 
 #include <SDL.h>
 
 #include "quakedef.h"
+#include "strlib.h"
 #include "cvar.h"
 
 static qboolean cdValid = false;

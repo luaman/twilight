@@ -43,13 +43,13 @@ static const char rcsid[] =
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
-#include <string.h>
 #include <ctype.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <errno.h>
 
 #include "quakedef.h"
+#include "strlib.h"
 
 qboolean    isDedicated;
 

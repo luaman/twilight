@@ -40,14 +40,13 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-//#include <math.h>
-#include <string.h>
 
 #include "cmdlib.h"
 #include "scriplib.h"
 #include "trilib.h"
 #include "lbmlib.h"
 #include "mathlib.h"
+#include "strlib.h"
 
 #endif
 

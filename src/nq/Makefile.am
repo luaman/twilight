@@ -24,7 +24,7 @@ twilight_nq_SOURCES= \
 	r_part.c sbar.c sbar.h \
 	host.c host_cmd.c keys.c mathlib.c mathlib.h menu.c menu.h \
 	net.h net_bsd.c net_dgrm.c net_dgrm.h net_loop.c net_loop.h \
-	net_main.c net_udp.c net_udp.h \
+	net_main.c net_udp.c net_udp.h strlib.c strlib.h \
 	pr_cmds.c pr_edict.c pr_exec.c progs.h progdefs.h pr_comp.h \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
 	sys.h vid_sdl.c vid.h \

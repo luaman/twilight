@@ -35,7 +35,6 @@ static const char rcsid[] =
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include <errno.h>
 
@@ -43,6 +42,7 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "cdaudio.h"
+#include "strlib.h"
 #include "cvar.h"
 #include "sound.h"
 

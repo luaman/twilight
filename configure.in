@@ -60,6 +60,8 @@ esac
 AM_CONDITIONAL(SYS_POSIX, test "$SYS" = "POSIX")
 AM_CONDITIONAL(SYS_WIN32, test "$SYS" = "WIN32")
 
+AC_CHECK_FUNCS(strlcat strlcpy)
+
 dnl Check for SDL, fatal if not found
 AM_PATH_SDL(1.2.0,
 	,
