@@ -126,7 +126,7 @@ AC_SUBST(SHAREPATH)
 
 dnl XXX FIXME: make this a little more sane..
 AC_ARG_WITH(user-path,
-	[  --with-user-path        set default user data path [\$HOME/twilight]],,
+	[  --with-user-path        set default user data path [\$HOME/.twilight]],,
 	with_user_path="$HOME/.twilight")
 USERPATH="$with_user_path"
 AC_SUBST(USERPATH)
