@@ -78,6 +78,7 @@ typedef struct {
 	float		scale2;
 	float		ramp;
 	float		die;
+	float		rstep;
 	ptype_t		type;
 } tube_particle_t;
 
@@ -86,7 +87,7 @@ static int num_tube_particles, max_tube_particles;
 
 inline qboolean
 new_tube_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
-		float ramp, float scale1, float scale2, float die)
+		float ramp, float rstep, float scale1, float scale2, float die)
 {
 	tube_particle_t	   *p;
 	vec3_t				normal;
@@ -102,6 +103,7 @@ new_tube_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
 	VectorCopy (org2, p->org2);
 	VectorCopy4 (color, p->color);
 	p->ramp = ramp;
+	p->rstep = rstep;
 	p->die = realtime + die;
 	p->scale1 = scale1;
 	p->scale2 = scale1;
@@ -581,7 +583,8 @@ R_RocketConeTrail (vec3_t start, vec3_t end, int type)
 
 	if (len) {
 		VectorSet4 (color, 0.6, 0.0, 0.0, 0.2);
-		new_tube_particle (pt_rtrail, start, end, color, 0, 5, 5, 15);
+		new_tube_particle (pt_rtrail, start, end, color, 0, 8, 5, 5, 15);
+		new_tube_particle (pt_rtrail, start, end, color, 0, -8, 3, 3, 15);
 	}
 }
 
@@ -953,7 +956,7 @@ R_Draw_Tube_Particles (void)
 
 		switch (p->type) {
 			case pt_rtrail:
-				p->ramp += frametime * 5;
+				p->ramp += frametime * p->rstep;
 
 				p->color[3] -= frametime * 0.5;
 				if (p->color[3] <= 0)
@@ -1168,8 +1171,8 @@ R_DrawParticles (void)
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
 	R_Draw_Base_Particles();
 	R_Draw_Cone_Particles();
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	R_Draw_Tube_Particles();
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglColor3f(1, 1, 1);
 }
