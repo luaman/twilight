@@ -3,7 +3,6 @@ Project Twilight todo list
 
 These things need to be done before first public release:
 
-  - replacement md4.c, ours is a GPL violation
   - Make +set happen as early as possible
   - Add Cvars fs_sharepath and fs_userpath
   - Global config file support
@@ -38,7 +37,6 @@ Would be nice but is not strictly needed, in importance order:
   - Menu overhaul
   - Knghtbrd's server console
   - Use SDL functions to simplify code
-  - Change resolutions in-game
 
 
 Stuff that can wait:
@@ -55,4 +53,5 @@ Stuff that definitely should wait:
 
   - The New Protocol(TM)
   - Design a new HUD system
+  - Change resolutions in-game
 
