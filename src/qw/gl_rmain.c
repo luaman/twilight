@@ -102,7 +102,6 @@ cvar_t     *gl_polyblend;
 cvar_t     *gl_flashblend;
 cvar_t     *gl_playermip;
 cvar_t     *gl_nocolors;
-cvar_t     *gl_keeptjunctions;
 cvar_t     *gl_finish;
 cvar_t	   *gl_im_animation;
 cvar_t	   *gl_fb_models;

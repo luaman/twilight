@@ -127,7 +127,6 @@ extern struct cvar_s *gl_clear;
 extern struct cvar_s *gl_cull;
 extern struct cvar_s *gl_affinemodels;
 extern struct cvar_s *gl_polyblend;
-extern struct cvar_s *gl_keeptjunctions;
 extern struct cvar_s *gl_flashblend;
 extern struct cvar_s *gl_nocolors;
 extern struct cvar_s *gl_finish;

@@ -150,7 +150,6 @@ R_Init_Cvars (void)
 	gl_playermip = Cvar_Get ("gl_playermip", "0", CVAR_NONE, NULL);
 	gl_nocolors = Cvar_Get ("gl_nocolors", "0", CVAR_NONE, NULL);
 
-	gl_keeptjunctions = Cvar_Get ("gl_keeptjunctions", "0", CVAR_NONE, NULL);
 	gl_reporttjunctions = Cvar_Get ("gl_reporttjunctions", "0", CVAR_NONE, NULL);
 
 	gl_doubleeyes = Cvar_Get ("gl_doubleeys", "1", CVAR_NONE, NULL);
