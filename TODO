@@ -1,11 +1,12 @@
 Project Twilight todo list
 --------------------------
 
-These things need to be done before first public release:
+These things should be done before first public release:
 
   - Add Cvars fs_sharepath and fs_userpath
   - Global config file support
   - Website updates
+    - MySQL-based news
     - Important non-project files
     - Releases page
     - Credits page
@@ -18,44 +19,43 @@ These things need to be done before first public release:
     - RPM
     ? Something for win32?
 
+
 Would be nice but is not strictly needed, in importance order:
 
-  - MySQL-based news
-  - Mac port
-  - Produce a dedicated server for NQ
-  - Convert Cvars from list to hash
-  - SDL audio, massive portability bonus to doing this now
   - Rid ourselves of the monolithic header
-  - Nightly CVS snapshots
-  - Use SDL datatypes where appropriate
   - Merge QW server into QW client ala NQ
+  - Produce a dedicated server for NQ
+  - Nightly CVS snapshots
   - Prettiness features all around
   - Console font
-  - Use callbacks for Cvars where appropriate
   - Menu overhaul
   - Knghtbrd's server console
-  - Use SDL functions to simplify code
-  - Ability to define custom callback functions for
-    tab completion when Cmd_AddCommand is used
-    * This would allow for neato things like:
-      /map <tab> and getting a list of all maps,
-                 or completing the current mapname
-      /set <tab> getting a list of all cvars
-                 or completing the current cvar, etc.
+
 
 Stuff that can wait:
 
   - Add PNG loader
-  - Zip archive support
+  - Move Quake library functions used by all targets and tools to a common
+    directory (zone, mathlib, qtypes, compat, part of console, etc)
+  - SDL improvements
+    - Replace snd_* with SDL-based audio
+    - MacOS/MacOS X ports
+    - Remove Quake-specific simple datatypes which SDL gives us
+    - switch to using specific-sized SDL variables for file accesses
+    - Replace Quake library functions with SDL functions
   - Cvar improvements
+    - Convert from an unsorted list to a hash
     - Implement CVAR_TEMP for progs-created vars
     - Implement Cvar_Clean to delete CVAR_TEMPs that aren't CVAR_USER
     - Implement flag manipulation functions for internal use
+    - Use Cvar callbacks for Cvar bounds checking and internal updates
+  - Command-specific tab completion (set, map, etc)
 
 
 Stuff that definitely should wait:
 
   - The New Protocol(TM)
+  - Zip archive support
   - Design a new HUD system
   - Change resolutions in-game
 
