@@ -221,7 +221,7 @@ SV_CalcPHS (void)
 	rowwords = (num + 31) >> 5;
 	rowbytes = rowwords * 4;
 
-	sv.pvs = Hunk_Alloc (rowbytes * num);
+	sv.pvs = Hunk_AllocName (rowbytes * num, "PVS");
 	scan = sv.pvs;
 	vcount = 0;
 	for (i = 0; i < num; i++, scan += rowbytes) {
@@ -237,7 +237,7 @@ SV_CalcPHS (void)
 	}
 
 
-	sv.phs = Hunk_Alloc (rowbytes * num);
+	sv.phs = Hunk_AllocName (rowbytes * num, "PHS");
 	count = 0;
 	scan = sv.pvs;
 	dest = (unsigned *) sv.phs;
