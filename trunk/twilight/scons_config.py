@@ -114,6 +114,7 @@ def handle_opts (conf, opts, config_defs):
 	config_defs.set('GL_LIBRARY', '"' + opts['libgl'] + '"')
 	config_defs.set('WANT_CLIENTS', str(opts['clients']))
 	config_defs.set('WANT_SERVERS', str(opts['servers']))
+	config_defs.set('CFLAG_WERROR', str(opts['werror']))
 
 def write_c_defines (filename, defs):
 	env.Append (CPPDEFINES = "HAVE_CONFIG_H")
@@ -139,7 +140,7 @@ def do_configure (env):
 		config_defs.set('HAVE_SDL_H', 1)
 	else:
 		print "Dying, we need SDL 1.2.5 or greater."
-		exit (1)
+		Exit (1)
 
 	check_funcs (conf, config_defs, ['strlcat', 'strlcpy', 'snprintf', \
 		'_snprintf', 'vsnprintf', '_vsnprintf', 'strcasecmp', '_stricmp', \
