@@ -34,6 +34,7 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <ctype.h>
 #include "quakedef.h"
 
 void        Cmd_ForwardToServer (void);
@@ -146,6 +147,60 @@ Cbuf_InsertText (char *text)
 	if (templen) {
 		SZ_Write (&cmd_text, temp, templen);
 		Z_Free (temp);
+	}
+}
+
+static void
+extract_line (char *line)
+{
+	int         i;
+	char       *text;
+	int         quotes;
+
+	// find a \n or ; line break
+	text = (char *) cmd_text.data;
+	quotes = 0;
+	for (i = 0; i < cmd_text.cursize; i++) {
+		if (text[i] == '"')
+			quotes++;
+		if (!(quotes & 1) && text[i] == ';')
+			break;						// don't break if inside a quoted
+										// string
+		if (text[i] == '\n' || text[i] == '\r')
+			break;
+	}
+
+	memcpy (line, text, i);
+	line[i] = '\0';
+	// delete the text from the command buffer and move remaining commands
+	// down this is necessary because commands (exec, alias) can insert
+	// data at the beginning of the text buffer
+
+	if (i == cmd_text.cursize)
+		cmd_text.cursize = 0;
+	else {
+		i += 2;
+		cmd_text.cursize -= i;
+		memcpy (text, text + i, cmd_text.cursize);
+	}
+}
+
+/*
+
+	Cbuf_Execute_Sets
+
+*/
+void
+Cbuf_Execute_Sets (void)
+{
+	char	line[1024] = { 0 };
+
+	while (cmd_text.cursize) {
+		extract_line (line);
+		// execute the command line
+		if (Q_strncmp (line, "set", 3) == 0 && isspace ((int) line[3])) {
+			Cmd_ExecuteString (line, src_command);
+		}
 	}
 }
 

@@ -819,6 +819,10 @@ Host_Init (quakeparms_t *parms)
 	Cbuf_Init ();		// initialize cmd_text buffer
 	Cmd_Init ();		// setup the basic commands we need for the system
 
+	// execute +set as early as possible
+	Cmd_StuffCmds_f ();
+	Cbuf_Execute_Sets ();
+
 	Con_Init_Cvars ();				// initialize all console related cvars
 	Key_Init_Cvars ();				// initialize all key related cvars
 	Mod_Init_Cvars();				// initialize all model related cvars
@@ -835,9 +839,6 @@ Host_Init (quakeparms_t *parms)
 	NET_Init_Cvars ();				// initialize all net related cvars
 	Host_InitLocal_Cvars ();		// initialize all local host related cvars
 	PR_Init_Cvars();				// initialize all pr_* related cvars
-		
-	// execute +set as early as possible
-	Cmd_StuffCmds_f ();
 
 	Chase_Init ();					// setup chase camera
 	COM_Init ();					// setup filesystem, add related commands

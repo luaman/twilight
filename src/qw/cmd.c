@@ -256,7 +256,7 @@ Cbuf_Execute_Sets (void)
 	while (cmd_text.cursize) {
 		extract_line (line);
 		// execute the command line
-		if (strncmp (line, "set", 3) == 0 && isspace ((int) line[3])) {
+		if (Q_strncmp (line, "set", 3) == 0 && isspace ((int) line[3])) {
 			Cmd_ExecuteString (line);
 		}
 	}
