@@ -302,44 +302,12 @@ Sys_ConsoleInput (void)
 	return NULL;
 }
 
-#ifdef _WIN32
-char *
-Sys_ExpandPath (char *str)
-{
-	static char buf[MAX_PATH] = "";
-	char *s = str, *p;
-
-	if (*s == '~')
-	{
-		s++;
-		if (*s == '/' || *s == '\0')
-		{
-			/* Current user's home directory */
-			if ((p = getenv("TWILIGHT")))
-				strlcpy(buf, p, MAX_PATH);
-			else if ((p = getenv("HOME")))
-				strlcpy(buf, p, MAX_PATH);
-			else if ((p = getenv("WINDIR")))
-				strlcpy(buf, p, MAX_PATH);
-			else
-				/* should never happen */
-				strlcpy(buf, ".", MAX_PATH);
-			strlcat (buf, s, MAX_PATH);
-		} else {
-			/* ~user expansion in win32 always fails */
-			strcpy(buf, "");
-		}
-	} else
-		strlcpy (buf, str, MAX_PATH);
-
-	return buf;
-}
-
 extern int key_linepos;
 extern char key_lines[32][MAX_INPUTLINE];
 extern int edit_line;
 int Sys_CheckClipboardPaste(int key)
 {
+#ifdef __WIN32
 	int		i;
 	HANDLE	th;
 	char	*clipText, *textCopied;
@@ -374,53 +342,64 @@ int Sys_CheckClipboardPaste(int key)
 			return true;
 		}
 	}
+#endif
 	return false;
 }
-#else
+
+
 char *
 Sys_ExpandPath (char *str)
 {
-	static char buf[PATH_MAX] = "";
-	char *s = str, *p;
-	struct passwd *entry;
+	static char	buf[PATH_MAX] = "";
+    char		*s, *p;
 
+	s = str;
 	if (*s == '~')
 	{
 		s++;
 		if (*s == '/' || *s == '\0')
-		{
+		{                           
 			/* Current user's home directory */
 			if ((p = getenv("HOME")))
-				strlcpy(buf, p, PATH_MAX);
+				strncpy(buf, p, PATH_MAX);
+#ifdef __WIN32
+			else if ((p = getenv("USERPROFILE")))
+				strncpy(buf, p, PATH_MAX);
+			else if ((p = getenv("WINDIR")))
+				strncpy(buf, p, PATH_MAX);
+#endif /* __WIN32 */
 			else
-				strlcpy(buf, ".", PATH_MAX);
+				/* This should never happen */
+				strncpy(buf, ".", PATH_MAX);
+
 			strlcat (buf, s, PATH_MAX);
 		} else {
-			/* Another user's home directory */
+			/* Get named user's home directory */
 			if ((p = strchr(s, '/')) != NULL)
-				*p = '\0';
-			if ((entry = getpwnam(s)) != NULL)
 			{
-				strlcpy (buf, entry->pw_dir, PATH_MAX);
-				if (p) {
-					*p = '/';
-					strlcat (buf, p, PATH_MAX);
-				}
-			} else
-				/* ~user expansion failed, no such user */
-				strcpy(buf, "");
+#ifdef HAVE_GETPWNAM
+				struct passwd   *entry;
+				*p = '\0';
+				if ((entry = getpwnam(s)) != NULL)
+				{
+					strncpy (buf, entry->pw_dir, PATH_MAX);
+					if (p)
+					{
+						*p = '/';
+						strlcat (buf, p, PATH_MAX);
+					}
+				} else
+#endif /* HAVE_GETPWNAM */
+					/* Can't expand this, leave it alone */
+					strncpy (buf, str, PATH_MAX);
+			}
 		}
 	} else
-		strlcpy (buf, str, PATH_MAX);
+		/* Does not begin with ~, leave it alone */
+		strncpy (buf, str, PATH_MAX);
 
 	return buf;
 }
-
-int Sys_CheckClipboardPaste(int key)
-{
-	return false;
-}
-#endif
 
 int
 main (int c, char **v)
