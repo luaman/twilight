@@ -479,7 +479,7 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 			// blend the vertex positions from each frame together
 			VectorCopy (verts1->v, v1);
 			VectorCopy (verts2->v, v2);
-			VectorInterpolate (v1, blend, v2, d);
+			Lerp_Vectors (v1, blend, v2, d);
 
 			qglVertex3fv (d);
 

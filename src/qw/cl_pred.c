@@ -221,9 +221,9 @@ CL_PredictMove (void)
 		}
 	}
 
-	VectorInterpolate (from->playerstate[cl.playernum].origin,
+	Lerp_Vectors (from->playerstate[cl.playernum].origin,
 		f, to->playerstate[cl.playernum].origin, cl.simorg);
-	VectorInterpolate (from->playerstate[cl.playernum].velocity,
+	Lerp_Vectors (from->playerstate[cl.playernum].velocity,
 		f, to->playerstate[cl.playernum].velocity, cl.simvel);
 }
 

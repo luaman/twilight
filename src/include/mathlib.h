@@ -125,6 +125,8 @@ double Q_pow(double x, double y);
 		((to)[1]=(base)[1]+((((a1)[1]*(a2))+((b1)[1]*(b2)))*c)),	\
 		((to)[2]=(base)[2]+((((a1)[2]*(a2))+((b1)[2]*(b2)))*c)))
 
+#define Q_rint(x)	((x) < 0 ? (int)((x)-0.5f) : (int)((x)+0.5f))
+
 /*
  * VectorDistance, the distance between two points.
  * Yes, this is the same as sqrt(VectorSubtract then DotProduct),
@@ -149,8 +151,8 @@ void        _VectorScale (vec3_t in, vec_t scale, vec3_t out);
 
 vec_t       VectorNormalize (vec3_t v);	// returns vector length
 void		VectorNormalizeFast (vec3_t v);
-void		VectorInterpolate (vec3_t v1, float frac, vec3_t v2, vec3_t v);
-void		AngleInterpolate (vec3_t v1, vec_t frac, vec3_t v2, vec3_t v);
+void		Lerp_Vectors (vec3_t v1, float frac, vec3_t v2, vec3_t v);
+void		Lerp_Angles (vec3_t v1, vec_t frac, vec3_t v2, vec3_t v);
 void		Vector2Angles (vec3_t in, vec3_t out);
 
 int         Q_log2 (int val);

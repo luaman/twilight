@@ -494,9 +494,9 @@ CL_LinkPacketEntities (void)
 			Sys_Error ("ERROR! Out of entitys!\n");
 		cl_vis_entities[cl_num_vis_entities++] = ent;
 
-		VectorInterpolate ( ent->prev.origin, f, s1->origin,
+		Lerp_Vectors ( ent->prev.origin, f, s1->origin,
 			ent->cur.origin );
-		AngleInterpolate ( ent->prev.angles, f, s1->angles,
+		Lerp_Angles ( ent->prev.angles, f, s1->angles,
 			ent->cur.angles );
 
 		ent->cur.skinnum = s1->skinnum;
