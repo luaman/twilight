@@ -210,7 +210,13 @@ Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 
 	chan->sock = sock;
 	chan->remote_address = adr;
+
 	chan->last_received = curtime;
+
+#ifndef TWILIGHT_QWSV
+	if ( cls.demoplayback )
+		chan->last_received = cls.realtime;
+#endif
 
 	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
 	chan->message.allowoverflow = true;
@@ -437,6 +443,11 @@ Netchan_Process (netchan_t *chan)
 	chan->good_count += 1;
 
 	chan->last_received = curtime;
+
+#ifndef TWILIGHT_QWSV
+	if ( cls.demoplayback )
+		chan->last_received = cls.realtime;
+#endif
 
 	return true;
 }

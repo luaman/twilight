@@ -960,12 +960,10 @@ CL_ReadPackets (void)
 	// 
 	if (cls.state >= ca_connected
 		&& cls.realtime - cls.netchan.last_received > cl_timeout->value) {
-		Con_Printf ("\nServer connection timed out. (%d %d %f)\n", cls.realtime,
+		Con_Printf ("\nServer connection timed out. (%f %f %f)\n", cls.realtime,
 				cls.netchan.last_received, cl_timeout->value);
 		CL_Disconnect ();
-		return;
 	}
-
 }
 
 //=============================================================================

@@ -477,7 +477,7 @@ CL_LinkPacketEntities (void)
 	if ( cls.timedemo )
 		frac = 1.0;
 	else {
-		frac = min ( cls.realtime - cls.latency + 0.02, cls.realtime ); 
+		frac = min ( cls.realtime - cls.latency, cls.realtime ); 
 		frac = 1.0 - ( frac - cl.frames[cl.validsequence & UPDATE_MASK].senttime );
 		frac = bound ( 0, frac, 1 );
 	}

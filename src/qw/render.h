@@ -60,6 +60,14 @@ typedef struct entity_s {
 	int				pose1;
 	int				pose2;
 
+	float			translate_start_time;
+	vec3_t			origin1;
+	vec3_t			origin2;
+
+	float			rotate_start_time;
+	vec3_t			angles1;
+	vec3_t			angles2;
+
 	struct player_info_s *scoreboard;	// identify player
 } entity_t;
 

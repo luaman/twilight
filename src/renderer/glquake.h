@@ -124,6 +124,7 @@ extern struct cvar_s *gl_flashblend;
 extern struct cvar_s *gl_nocolors;
 extern struct cvar_s *gl_finish;
 extern struct cvar_s *gl_im_animation;
+extern struct cvar_s *gl_im_transform;
 extern struct cvar_s *gl_fb_models;
 extern struct cvar_s *gl_fb_bmodels;
 extern struct cvar_s *gl_oldlights;
