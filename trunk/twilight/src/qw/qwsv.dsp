@@ -99,10 +99,6 @@ SOURCE=.\info.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mdfour.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\net_chan.c
 # End Source File
 # Begin Source File
