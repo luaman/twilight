@@ -359,14 +359,14 @@ Draw_Character (int x, int y, int num)
 	qglEnable(GL_BLEND);
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
-	VectorSet2 (varray[0].texcoord, fcol, frow);
-	VectorSet2 (varray[0].vertex, x, y);
-	VectorSet2 (varray[1].texcoord, fcol + size, frow);
-	VectorSet2 (varray[1].vertex, x + 8, y);
-	VectorSet2 (varray[2].texcoord, fcol + size, frow + size);
-	VectorSet2 (varray[2].vertex, x + 8, y + 8);
-	VectorSet2 (varray[3].texcoord, fcol, frow + size);
-	VectorSet2 (varray[3].vertex, x, y + 8);
+	VectorSet2 (tc_array[0], fcol, frow);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], fcol + size, frow);
+	VectorSet2 (v_array[1], x + 8, y);
+	VectorSet2 (tc_array[2], fcol + size, frow + size);
+	VectorSet2 (v_array[2], x + 8, y + 8);
+	VectorSet2 (tc_array[3], fcol, frow + size);
+	VectorSet2 (v_array[3], x, y + 8);
 	qglDrawArrays (GL_QUADS, 0, 4);
 
 	qglDisable(GL_BLEND);
@@ -397,14 +397,14 @@ Draw_String_Len (int x, int y, char *str, int len)
 		if ((num = *str++) != 32) {		// Skip drawing spaces.
 			frow = (float) (num >> 4) * size;
 			fcol = (float) (num & 15) * size;
-			VectorSet2(varray[vnum + 0].texcoord, fcol, frow);
-			VectorSet2(varray[vnum + 0].vertex, x, y);
-			VectorSet2(varray[vnum + 1].texcoord, fcol + size, frow);
-			VectorSet2(varray[vnum + 1].vertex, x + 8, y);
-			VectorSet2(varray[vnum + 2].texcoord, fcol + size, frow + size);
-			VectorSet2(varray[vnum + 2].vertex, x + 8, y + 8);
-			VectorSet2(varray[vnum + 3].texcoord, fcol, frow + size);
-			VectorSet2(varray[vnum + 3].vertex, x, y + 8);
+			VectorSet2 (tc_array[vnum + 0], fcol, frow);
+			VectorSet2 (v_array[vnum + 0], x, y);
+			VectorSet2 (tc_array[vnum + 1], fcol + size, frow);
+			VectorSet2 (v_array[vnum + 1], x + 8, y);
+			VectorSet2 (tc_array[vnum + 2], fcol + size, frow + size);
+			VectorSet2 (v_array[vnum + 2], x + 8, y + 8);
+			VectorSet2 (tc_array[vnum + 3], fcol, frow + size);
+			VectorSet2 (v_array[vnum + 3], x, y + 8);
 			vnum += 4;
 			if ((vnum + 4) >= MAX_VERTEX_ARRAYS) {
 				qglDrawArrays (GL_QUADS, 0, vnum);
@@ -456,14 +456,14 @@ Draw_Alt_String_Len (int x, int y, char *str, int len)
 		if ((num = *str++ | 0x80) != (32 | 0x80)) {
 			frow = (float) (num >> 4) * size;
 			fcol = (float) (num & 15) * size;
-			VectorSet2(varray[vnum + 0].texcoord, fcol, frow);
-			VectorSet2(varray[vnum + 0].vertex, x, y);
-			VectorSet2(varray[vnum + 1].texcoord, fcol + size, frow);
-			VectorSet2(varray[vnum + 1].vertex, x + 8, y);
-			VectorSet2(varray[vnum + 2].texcoord, fcol + size, frow + size);
-			VectorSet2(varray[vnum + 2].vertex, x + 8, y + 8);
-			VectorSet2(varray[vnum + 3].texcoord, fcol, frow + size);
-			VectorSet2(varray[vnum + 3].vertex, x, y + 8);
+			VectorSet2 (tc_array[vnum + 0], fcol, frow);
+			VectorSet2 (v_array[vnum + 0], x, y);
+			VectorSet2 (tc_array[vnum + 1], fcol + size, frow);
+			VectorSet2 (v_array[vnum + 1], x + 8, y);
+			VectorSet2 (tc_array[vnum + 2], fcol + size, frow + size);
+			VectorSet2 (v_array[vnum + 2], x + 8, y + 8);
+			VectorSet2 (tc_array[vnum + 3], fcol, frow + size);
+			VectorSet2 (v_array[vnum + 3], x, y + 8);
 			vnum += 4;
 			if ((vnum + 4) >= MAX_VERTEX_ARRAYS) {
 				qglDrawArrays (GL_QUADS, 0, vnum);
@@ -515,14 +515,14 @@ Draw_Crosshair (void)
 			qglBindTexture (GL_TEXTURE_2D, cs_texture);
 
 			qglEnable (GL_BLEND);
-			VectorSet2 (varray[0].texcoord, 0, 0);
-			VectorSet2 (varray[0].vertex, x - 4, y - 4);
-			VectorSet2 (varray[1].texcoord, 1, 0);
-			VectorSet2 (varray[1].vertex, x + 12, y - 4);
-			VectorSet2 (varray[2].texcoord, 1, 1);
-			VectorSet2 (varray[2].vertex, x + 12, y + 12);
-			VectorSet2 (varray[3].texcoord, 0, 1);
-			VectorSet2 (varray[3].vertex, x - 4, y + 12);
+			VectorSet2 (tc_array[0], 0, 0);
+			VectorSet2 (v_array[0], x - 4, y - 4);
+			VectorSet2 (tc_array[1], 1, 0);
+			VectorSet2 (v_array[1], x + 12, y - 4);
+			VectorSet2 (tc_array[2], 1, 1);
+			VectorSet2 (v_array[2], x + 12, y + 12);
+			VectorSet2 (tc_array[3], 0, 1);
+			VectorSet2 (v_array[3], x - 4, y + 12);
 			qglDrawArrays (GL_QUADS, 0, 4);
 			qglColor3f (1, 1, 1);
 			qglDisable (GL_BLEND);
@@ -532,14 +532,14 @@ Draw_Crosshair (void)
 			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->value]);
 			qglBindTexture (GL_TEXTURE_2D, cs_square);
 
-			VectorSet2 (varray[0].texcoord, 0, 0);
-			VectorSet2 (varray[0].vertex, x - 4, y - 4);
-			VectorSet2 (varray[1].texcoord, 1, 0);
-			VectorSet2 (varray[1].vertex, x + 12, y - 4);
-			VectorSet2 (varray[2].texcoord, 1, 1);
-			VectorSet2 (varray[2].vertex, x + 12, y + 12);
-			VectorSet2 (varray[3].texcoord, 0, 1);
-			VectorSet2 (varray[3].vertex, x - 4, y + 12);
+			VectorSet2 (tc_array[0], 0, 0);
+			VectorSet2 (v_array[0], x - 4, y - 4);
+			VectorSet2 (tc_array[1], 1, 0);
+			VectorSet2 (v_array[1], x + 12, y - 4);
+			VectorSet2 (tc_array[2], 1, 1);
+			VectorSet2 (v_array[2], x + 12, y + 12);
+			VectorSet2 (tc_array[3], 0, 1);
+			VectorSet2 (v_array[3], x - 4, y + 12);
 			qglDrawArrays (GL_QUADS, 0, 4);
 			qglColor4f (1, 1, 1, 1);
 			break;
@@ -575,14 +575,14 @@ Draw_Pic (int x, int y, qpic_t *pic)
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
 	qglEnable (GL_BLEND);
 
-	VectorSet2 (varray[0].texcoord, gl->sl, gl->tl);
-	VectorSet2 (varray[0].vertex, x, y);
-	VectorSet2 (varray[1].texcoord, gl->sh, gl->tl);
-	VectorSet2 (varray[1].vertex, x + pic->width, y);
-	VectorSet2 (varray[2].texcoord, gl->sh, gl->th);
-	VectorSet2 (varray[2].vertex, x + pic->width, y + pic->height);
-	VectorSet2 (varray[3].texcoord, gl->sl, gl->th);
-	VectorSet2 (varray[3].vertex, x, y + pic->height);
+	VectorSet2 (tc_array[0], gl->sl, gl->tl);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], gl->sh, gl->tl);
+	VectorSet2 (v_array[1], x + pic->width, y);
+	VectorSet2 (tc_array[2], gl->sh, gl->th);
+	VectorSet2 (v_array[2], x + pic->width, y + pic->height);
+	VectorSet2 (tc_array[3], gl->sl, gl->th);
+	VectorSet2 (v_array[3], x, y + pic->height);
 	qglDrawArrays (GL_QUADS, 0, 4);
 
 	qglDisable (GL_BLEND);
@@ -603,14 +603,14 @@ Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 	qglEnable (GL_BLEND);
 	qglColor4f (1, 1, 1, alpha);
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
-	VectorSet2 (varray[0].texcoord, gl->sl, gl->tl);
-	VectorSet2 (varray[0].vertex, x, y);
-	VectorSet2 (varray[1].texcoord, gl->sh, gl->tl);
-	VectorSet2 (varray[1].vertex, x + pic->width, y);
-	VectorSet2 (varray[2].texcoord, gl->sh, gl->th);
-	VectorSet2 (varray[2].vertex, x + pic->width, y + pic->height);
-	VectorSet2 (varray[3].texcoord, gl->sl, gl->th);
-	VectorSet2 (varray[3].vertex, x, y + pic->height);
+	VectorSet2 (tc_array[0], gl->sl, gl->tl);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], gl->sh, gl->tl);
+	VectorSet2 (v_array[1], x + pic->width, y);
+	VectorSet2 (tc_array[2], gl->sh, gl->th);
+	VectorSet2 (v_array[2], x + pic->width, y + pic->height);
+	VectorSet2 (tc_array[3], gl->sl, gl->th);
+	VectorSet2 (v_array[3], x, y + pic->height);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	qglColor3f (1, 1, 1);
 //	qglEnable (GL_ALPHA_TEST);
@@ -637,14 +637,14 @@ Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
 	newth = newtl + (height * oldglheight) / pic->height;
 
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
-	VectorSet2 (varray[0].texcoord, newsl, newtl);
-	VectorSet2 (varray[0].vertex, x, y);
-	VectorSet2 (varray[1].texcoord, newsh, newtl);
-	VectorSet2 (varray[1].vertex, x + width, y);
-	VectorSet2 (varray[2].texcoord, newsh, newth);
-	VectorSet2 (varray[2].vertex, x + width, y + height);
-	VectorSet2 (varray[3].texcoord, newsl, newth);
-	VectorSet2 (varray[3].vertex, x, y + height);
+	VectorSet2 (tc_array[0], newsl, newtl);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], newsh, newtl);
+	VectorSet2 (v_array[1], x + width, y);
+	VectorSet2 (tc_array[2], newsh, newth);
+	VectorSet2 (v_array[2], x + width, y + height);
+	VectorSet2 (tc_array[3], newsl, newth);
+	VectorSet2 (v_array[3], x, y + height);
 	qglDrawArrays (GL_QUADS, 0, 4);
 }
 
@@ -702,14 +702,14 @@ Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 64, 64, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, trans);
 
-	VectorSet2 (varray[0].texcoord, 0, 0);
-	VectorSet2 (varray[0].vertex, x, y);
-	VectorSet2 (varray[1].texcoord, 1, 0);
-	VectorSet2 (varray[1].vertex, x + pic->width, y);
-	VectorSet2 (varray[2].texcoord, 1, 1);
-	VectorSet2 (varray[2].vertex, x + pic->width, y + pic->height);
-	VectorSet2 (varray[3].texcoord, 0, 1);
-	VectorSet2 (varray[3].vertex, x, y + pic->height);
+	VectorSet2 (tc_array[0], 0, 0);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], 1, 0);
+	VectorSet2 (v_array[1], x + pic->width, y);
+	VectorSet2 (tc_array[2], 1, 1);
+	VectorSet2 (v_array[2], x + pic->width, y + pic->height);
+	VectorSet2 (tc_array[3], 0, 1);
+	VectorSet2 (v_array[3], x, y + pic->height);
 	qglDrawArrays (GL_QUADS, 0, 4);
 }
 
@@ -746,14 +746,14 @@ Draw_ConsoleBackground (int lines)
 
 	qglColor4f (1.0f, 1.0f, 1.0f, alpha);
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
-	VectorSet2 (varray[0].texcoord, gl->sl, gl->tl + ofs);
-	VectorSet2 (varray[0].vertex, 0, 0);
-	VectorSet2 (varray[1].texcoord, gl->sh, gl->tl + ofs);
-	VectorSet2 (varray[1].vertex, vid.conwidth, 0);
-	VectorSet2 (varray[2].texcoord, gl->sh, gl->th);
-	VectorSet2 (varray[2].vertex, vid.conwidth, lines);
-	VectorSet2 (varray[3].texcoord, gl->sl, gl->th);
-	VectorSet2 (varray[3].vertex, 0, lines);
+	VectorSet2 (tc_array[0], gl->sl, gl->tl + ofs);
+	VectorSet2 (v_array[0], 0, 0);
+	VectorSet2 (tc_array[1], gl->sh, gl->tl + ofs);
+	VectorSet2 (v_array[1], vid.conwidth, 0);
+	VectorSet2 (tc_array[2], gl->sh, gl->th);
+	VectorSet2 (v_array[2], vid.conwidth, lines);
+	VectorSet2 (tc_array[3], gl->sl, gl->th);
+	VectorSet2 (v_array[3], 0, lines);
 	qglDrawArrays (GL_QUADS, 0, 4);
 											
 	// hack the version number directly into the pic
@@ -778,14 +778,14 @@ void
 Draw_TileClear (int x, int y, int w, int h)
 {
 	qglBindTexture (GL_TEXTURE_2D, *(int *) draw_backtile->data);
-	VectorSet2 (varray[0].texcoord, x / 64.0, y / 64.0);
-	VectorSet2 (varray[0].vertex, x, y);
-	VectorSet2 (varray[1].texcoord, (x + w) / 64.0, y / 64.0);
-	VectorSet2 (varray[1].vertex, x + w, y);
-	VectorSet2 (varray[2].texcoord, (x + w) / 64.0, (y + h) / 64.0);
-	VectorSet2 (varray[2].vertex, x + w, y + h);
-	VectorSet2 (varray[3].texcoord, x / 64.0, (y + h) / 64.0);
-	VectorSet2 (varray[3].vertex, x, y + h);
+	VectorSet2 (tc_array[0], x / 64.0, y / 64.0);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], (x + w) / 64.0, y / 64.0);
+	VectorSet2 (v_array[1], x + w, y);
+	VectorSet2 (tc_array[2], (x + w) / 64.0, (y + h) / 64.0);
+	VectorSet2 (v_array[2], x + w, y + h);
+	VectorSet2 (tc_array[3], x / 64.0, (y + h) / 64.0);
+	VectorSet2 (v_array[3], x, y + h);
 	qglDrawArrays (GL_QUADS, 0, 4);
 }
 
@@ -804,10 +804,10 @@ Draw_Fill (int x, int y, int w, int h, int c)
 
 	qglColor4fv (d_8tofloattable[c]);
 
-	VectorSet2 (varray[0].vertex, x, y);
-	VectorSet2 (varray[1].vertex, x + w, y);
-	VectorSet2 (varray[2].vertex, x + w, y + h);
-	VectorSet2 (varray[3].vertex, x, y + h);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (v_array[1], x + w, y);
+	VectorSet2 (v_array[2], x + w, y + h);
+	VectorSet2 (v_array[3], x, y + h);
 	qglDrawArrays (GL_QUADS, 0, 4);
 
 	qglColor3f (1, 1, 1);
@@ -829,10 +829,10 @@ Draw_FadeScreen (void)
 	qglDisable (GL_TEXTURE_2D);
 	qglColor4f (0, 0, 0, 0.8);
 
-	VectorSet2 (varray[0].vertex, 0, 0);
-	VectorSet2 (varray[1].vertex, vid.conwidth, 0);
-	VectorSet2 (varray[2].vertex, vid.conwidth, vid.conheight);
-	VectorSet2 (varray[3].vertex, 0, vid.conheight);
+	VectorSet2 (v_array[0], 0, 0);
+	VectorSet2 (v_array[1], vid.conwidth, 0);
+	VectorSet2 (v_array[2], vid.conwidth, vid.conheight);
+	VectorSet2 (v_array[3], 0, vid.conheight);
 	qglDrawArrays (GL_QUADS, 0, 4);
 
 	qglColor3f (1, 1, 1);

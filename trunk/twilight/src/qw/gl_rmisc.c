@@ -41,7 +41,11 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-varray_t2f_c4f_v3f_t varray[MAX_VERTEX_ARRAYS];
+//varray_t2f_c4f_v4f_t varray[MAX_VERTEX_ARRAYS];
+GLfloat	tc_array[MAX_VERTEX_ARRAYS][2];
+GLfloat	v_array[MAX_VERTEX_ARRAYS][3];
+GLfloat	c_array[MAX_VERTEX_ARRAYS][4];
+unsigned int vindices[MAX_VERTEX_INDICES];
 
 void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
@@ -197,9 +201,9 @@ R_Init (void)
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
 
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(varray[0]), varray[0].texcoord);
-	qglColorPointer (4, GL_FLOAT, sizeof(varray[0]), varray[0].color);
-	qglVertexPointer (3, GL_FLOAT, sizeof(varray[0]), varray[0].vertex);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array[0]), tc_array[0]);
+	qglColorPointer (4, GL_FLOAT, sizeof(c_array[0]), c_array[0]);
+	qglVertexPointer (3, GL_FLOAT, sizeof(v_array[0]), v_array[0]);
 
 	qglDisableClientState (GL_COLOR_ARRAY);
 //	qglEnableClientState (GL_COLOR_ARRAY);
