@@ -47,8 +47,6 @@ void        Sys_Error (char *error, ...);
 
 vec3_t      vec3_origin = { 0, 0, 0 };
 
-vec_t  vectortemp = 0;
-
 /*-----------------------------------------------------------------*/
 
 // some q3 stuff here
@@ -333,6 +331,9 @@ Q_RSqrt(float number)
 {
 	long i;
 	float x2, y;
+
+	if (number == 0.0)
+		return 0.0;
 
 	x2 = number * 0.5f;
 	y = number;
