@@ -167,9 +167,7 @@ def handle_opts (conf, opts, config_defs, destructive):
 			conf.cflag ('-Werror')
 	else:
 		conf.env.Replace (CC = opts['CC'])
-		if (env['PLATFORM'] == 'win32'):
-		    print 'Things may not work too well, trying anyways.'
-		else:
+		if (env['PLATFORM'] != 'win32'):
 		    conf.env.Replace (CCFLAGS = Split (opts['CFLAGS']))
 		    if int(opts['bitchiness']):
 			    conf.cflag ('-Wcast-qual')
@@ -255,6 +253,10 @@ def do_configure (env):
 		if conf.CheckLib ('dl', 'dlopen', 1):
 			config_defs.set('HAVE_DLOPEN', 1)
 	handle_opts (conf, opts, config_defs, 1)
+
+	if env['PLATFORM'] == 'win32':
+		env.Append (LIBS = ['SDL_main', 'user32', 'ws2_32'])
+
 	conf.Finish ()
 
 	print "\nWriting src/config.h"
