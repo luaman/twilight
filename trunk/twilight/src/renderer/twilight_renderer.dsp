@@ -137,10 +137,6 @@ SOURCE=.\surface.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\transform.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\vis.c
 # End Source File
 # End Group
@@ -202,10 +198,6 @@ SOURCE=.\sky.h
 # Begin Source File
 
 SOURCE=.\surface.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\transform.h
 # End Source File
 # Begin Source File
 
