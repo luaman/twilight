@@ -1039,6 +1039,8 @@ PR_LoadProgs (void)
 
 	pr_edict_size =
 		progs->entityfields * 4 + sizeof (edict_t) - sizeof (entvars_t);
+	// Alignment fix for 64 bit
+	pr_edict_size = (pr_edict_size + 7) & ~7;
 
 	// byte swap the lumps
 	for (i = 0; i < progs->numstatements; i++) {

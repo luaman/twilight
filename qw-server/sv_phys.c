@@ -904,7 +904,7 @@ SV_Physics (void)
 	int         i;
 	edict_t    *ent;
 
-// don't bother running a frame if sys_ticrate seconds haven't passed
+	// don't bother running a frame if sys_ticrate seconds haven't passed
 	if (sv.old_time)
 	{
 		host_frametime = sv.time - sv.old_time;
@@ -919,21 +919,23 @@ SV_Physics (void)
 
 	SV_ProgStartFrame ();
 
-//
-// treat each object in turn
-// even the world gets a chance to think
-//
+	/*
+	 * treat each object in turn
+	 * even the world gets a chance to think
+	 */
 	ent = sv.edicts;
-	for (i = 0; i < sv.num_edicts; i++, ent = NEXT_EDICT (ent)) {
+	for (i = 0; i < sv.num_edicts; i++, ent = NEXT_EDICT (ent))
+	{
 		if (ent->free)
 			continue;
 
+		// force retouch even for stationary
 		if (pr_global_struct->force_retouch)
-			SV_LinkEdict (ent, true);	// force retouch even for stationary
+			SV_LinkEdict (ent, true);
 
+		// clients are run directly from packets			
 		if (i > 0 && i <= MAX_CLIENTS)
-			continue;					// clients are run directly from
-		// packets
+			continue;
 
 		SV_RunEntity (ent);
 		SV_RunNewmis ();

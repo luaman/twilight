@@ -1227,6 +1227,8 @@ PR_LoadProgs (void)
 
 	// moved edict_size calculation down here, below field adding code
 	pr_edict_size = progs->entityfields * 4 + sizeof (edict_t) - sizeof(entvars_t);
+	// Alignment fix for 64 bit
+	pr_edict_size = (pr_edict_size + 7) & ~7;
 
 	pr_edictareasize = pr_edict_size * MAX_EDICTS;
 
