@@ -66,7 +66,8 @@ static char engine_extensions[] =
 "DP_QC_RANDOMVEC "
 "DP_QC_SINCOSSQRTPOW "
 "DP_QC_TRACEBOX "
-"DP_REGISTERCVAR ";
+"DP_REGISTERCVAR "
+"TW_SV_STEPCONTROLS ";
 
 /*
 ===============================================================================
