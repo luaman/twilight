@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "screen.h"
 #include "strlib.h"
 #include "host.h"
+#include "sys.h"
 
 
 /*
@@ -361,7 +362,9 @@ Key_Console (int key)
 		}
 	}
 
-	// There was some clipboard stuff here, but it was not portable
+	// LordHavoc: added back clipboard paste support
+	if (Sys_CheckClipboardPaste(key))
+		return;
 
 	if (key < 32 || key > 127)
 		return;							// non printable

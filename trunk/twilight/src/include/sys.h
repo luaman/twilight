@@ -51,6 +51,8 @@ char       *Sys_ConsoleInput (void);
 void        Sys_Init (void);
 
 char       *Sys_ExpandPath (char *str);
+// returns true if a clipboard paste occurred
+int         Sys_CheckClipboardPaste(int key);
 
 // FIXME: not in server
 void        Sys_SendKeyEvents (void);
