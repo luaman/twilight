@@ -400,11 +400,9 @@ PR_ValueString (etype_t type, eval_t *val)
 			snprintf (line, sizeof (line), "void");
 			break;
 		case ev_float:
-			// LordHavoc: changed from %5.1f to %10.4f
 			snprintf (line, sizeof (line), "%10.4f", val->_float);
 			break;
 		case ev_vector:
-			// LordHavoc: changed from %5.1f to %10.4f
 			snprintf (line, sizeof (line), "'%10.4f %10.4f %10.4f'",
 					  val->vector[0], val->vector[1], val->vector[2]);
 			break;
@@ -478,12 +476,10 @@ PR_UglyValueString (etype_t type, eval_t *val)
 			snprintf (line, sizeof (line), "void");
 			break;
 		case ev_float:
-			// etg: changed from %5.1f to %10.4f
-			snprintf (line, sizeof (line), "%10.4f", val->_float);
+			snprintf (line, sizeof (line), "%g", val->_float);
 			break;
 		case ev_vector:
-			// etg: changed from %5.1f to %10.4f
-			snprintf (line, sizeof (line), "'%10.4f %10.4f %10.4f'",
+			snprintf (line, sizeof (line), "%g %g %g",
 					  val->vector[0], val->vector[1], val->vector[2]);
 			break;
 		default:
