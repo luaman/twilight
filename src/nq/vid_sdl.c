@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include <SDL.h>
-#include <math.h>
 #include "quakedef.h"
 
 
@@ -398,7 +397,7 @@ Check_Gamma (unsigned char *pal)
 		vid_gamma = Q_atof (com_argv[i + 1]);
 
 	for (i = 0; i < 768; i++) {
-		f = pow ((pal[i] + 1) / 256.0, vid_gamma);
+		f = Q_pow ((pal[i] + 1) / 256.0, vid_gamma);
 		inf = f * 255 + 0.5;
 		if (inf < 0)
 			inf = 0;
