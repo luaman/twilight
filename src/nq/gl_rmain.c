@@ -845,17 +845,28 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolea
 		e->frame_interval = 0.1;
 	}
 
-	if (e->pose2 != pose)
+	if (e->lastmodel == e->model) 
 	{
+		if (e->pose2 != pose)
+		{
+			e->frame_start_time = realtime;
+			e->pose1 = e->pose2;
+			e->pose2 = pose;
+			blend = 0;
+		}
+		else {
+			blend = (realtime - e->frame_start_time) / e->frame_interval;
+		}
+	}
+	else
+	{
+		e->lastmodel = e->model;
 		e->frame_start_time = realtime;
-		e->pose1 = e->pose2;
+		e->pose1 = pose;
 		e->pose2 = pose;
 		blend = 0;
 	}
-	else {
-		blend = (realtime - e->frame_start_time) / e->frame_interval;
-	}
-	
+
 	// wierd things start happening if blend passes 1
 	if (cl.paused || blend > 1) 
 		blend = 1;

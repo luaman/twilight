@@ -69,6 +69,7 @@ typedef struct entity_s {
 
 	vec3_t		last_light;
 	float		time_left;
+	struct model_s *lastmodel;
 } entity_t;
 
 typedef struct {
