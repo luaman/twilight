@@ -35,8 +35,10 @@ static const char rcsid[] =
 
 #include <stdio.h>
 #include <stdarg.h>
-#ifndef WIN32
-#include <unistd.h>
+#ifdef WIN32
+# include <windows.h>
+#else
+# include <unistd.h>
 #endif
 #include <sys/types.h>
 #include <time.h>
@@ -97,10 +99,6 @@ to the new value before sending out any replies.
 
 
 */
-
-#ifdef WIN32
-#include <windows.h>
-#endif
 
 int         net_drop;
 cvar_t     *showpackets;

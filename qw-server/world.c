@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "progs.h"
 #include "server.h"
 #include "world.h"
+#include "strlib.h"
 
 /*
 
@@ -264,7 +265,7 @@ SV_ClearWorld (void)
 {
 	SV_InitBoxHull ();
 
-	memset (sv_areanodes, 0, sizeof (sv_areanodes));
+	Q_memset (sv_areanodes, 0, sizeof (sv_areanodes));
 	sv_numareanodes = 0;
 	SV_CreateAreaNode (0, sv.worldmodel->mins, sv.worldmodel->maxs);
 }
@@ -703,7 +704,7 @@ SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs,
 	hull_t     *hull;
 
 // fill in a default trace
-	memset (&trace, 0, sizeof (trace_t));
+	Q_memset (&trace, 0, sizeof (trace_t));
 	trace.fraction = 1;
 	trace.allsolid = true;
 	VectorCopy (end, trace.endpos);
