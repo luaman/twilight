@@ -1442,33 +1442,34 @@ Host_Init (quakeparms_t *parms)
 
 	Memory_Init (parms->membase, parms->memsize);
 	Cvar_Init ();		// add all cvar related manipulation commands and set developer cvar
-
 	Cbuf_Init ();		// initialize cmd_text buffer
 	Cmd_Init ();		// setup the basic commands we need for the system
+
+	Con_Init_Cvars ();				// initialize all console related cvars
+	Key_Init_Cvars ();				// initialize all key related cvars
+	Mod_Init_Cvars();				// initialize all model related cvars
+	Netchan_Init_Cvars ();			// initialize all netchan related cvars
+	SCR_Init_Cvars ();				// initialize all screen(?) related cvars
+	VID_Init_Cvars();				// initialize all video related cvars
+	V_Init_Cvars();					// initialize all view related cvars
+	M_Init_Cvars ();				// initialize all menu related cvars
+	R_Init_Cvars ();				// initialize all rendering system related cvars
+	Sbar_Init_Cvars ();				// initialize all statusbar related cvars
+	CL_Init_Cvars ();				// initialize all cl_* related cvars
+	S_Init_Cvars ();				// initialize all sound system related cvars
+	IN_Init_Cvars ();				// initialize all input related cvars
 
 	// execute +set as early as possible
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
 
-	COM_Init_Cvars ();				// initialize basic cvars
 	COM_Init ();					// setup and initialize filesystem, endianess, add related commands
-
-	Con_Init_Cvars ();				// initialize all console related cvars
-
-	Key_Init_Cvars ();				// initialize all key related cvars
+	COM_Init_Cvars ();				// initialize basic cvars
 
 	Host_FixupModelNames ();		// fix model names (how?)
-	Mod_Init_Cvars();				// initialize all model related cvars
 	Mod_Init ();					// setup models, add related commands
 
-	Netchan_Init_Cvars ();			// initialize all netchan related cvars
-
-	VID_Init_Cvars();				// initialize all video related cvars
-
-	V_Init_Cvars();					// initialize all view related cvars
 	V_Init ();						// setup view, add related commands
-
-	SCR_Init_Cvars ();				// initialize all screen(?) related cvars
 
 	NET_Init (PORT_CLIENT);			// setup net sockets and identify host
 	Netchan_Init ();				// setup netchan
@@ -1476,7 +1477,6 @@ Host_Init (quakeparms_t *parms)
 	W_LoadWadFile ("gfx.wad");
 	Key_Init ();					// setup keysym structures, add related commands
 	Con_Init ();					// setup and initialize console, add related commands
-	M_Init_Cvars ();				// initialize all menu related cvars
 	M_Init ();						// setup menu, add related commands
 
 	R_InitTextures ();				// setup texture system defaults
@@ -1497,23 +1497,18 @@ Host_Init (quakeparms_t *parms)
 
 	SCR_Init ();					// setup and initialize screen(?), add related commands
 
-	R_Init_Cvars ();				// initialize all rendering system related cvars
 	R_Init ();						// setup rendering system, add related commands
 
-	S_Init_Cvars ();				// initialize all sound system related cvars
 	S_Init ();						// setup sound system, add related commands
 
 	cls.state = ca_disconnected;
 	CDAudio_Init_Cvars ();			// initialize all cdaudio related cvars
 	CDAudio_Init ();				// setup cdaudio system, add related commands
 
-	Sbar_Init_Cvars ();				// initialize all statusbar related cvars
 	Sbar_Init ();					// setup statusbar, add related commands
 
-	CL_Init_Cvars ();				// initialize all cl_* related cvars
 	CL_Init ();						// setup client, add related commands
 
-	IN_Init_Cvars ();				// initialize all input related cvars
 	IN_Init ();						// setup input
 
 	Cbuf_InsertText ("exec quake.rc\n");
