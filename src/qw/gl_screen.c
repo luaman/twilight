@@ -352,7 +352,7 @@ Keybinding command
 void
 SCR_SizeUp_f (void)
 {
-	Cvar_Set (scr_viewsize, va("%s", scr_viewsize->value + 10));
+	Cvar_Set (scr_viewsize, va("%f", scr_viewsize->value + 10));
 	vid.recalc_refdef = 1;
 }
 
@@ -367,7 +367,7 @@ Keybinding command
 void
 SCR_SizeDown_f (void)
 {
-	Cvar_Set (scr_viewsize, va("%s", scr_viewsize->value - 10));
+	Cvar_Set (scr_viewsize, va("%f", scr_viewsize->value - 10));
 	vid.recalc_refdef = 1;
 }
 
