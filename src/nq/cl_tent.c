@@ -223,6 +223,9 @@ CL_ParseTEnt (void)
 			dl->radius = 350;
 			dl->die = cl.time + 0.5;
 			dl->decay = 300;
+			dl->color[0] = 0.86;
+			dl->color[1] = 0.31;
+			dl->color[2] = 0.24;
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 			break;
 

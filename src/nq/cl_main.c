@@ -528,10 +528,12 @@ CL_RelinkEntities (void)
 				if (!gl_flashblend->value)
 				{			
 					memset (&tr, 0, sizeof(tr));
+
+					VectorCopy (dl->origin, tr.endpos);
+
 					SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ent->origin, dl->origin, &tr);
 					
-					if (tr.endpos[0] && tr.endpos[1] && tr.endpos[2])
-						VectorCopy (tr.endpos, dl->origin);
+					VectorCopy (tr.endpos, dl->origin);
 				}
 
 				dl->radius = 200 + (Q_rand () & 31);
@@ -550,10 +552,12 @@ CL_RelinkEntities (void)
 				trace_t tr;
 				
 				memset (&tr, 0, sizeof(tr));
+
+				VectorCopy (dl->origin, tr.endpos);
+
 				SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ent->origin, dl->origin, &tr);
 				
-				if ((tr.endpos[0] != 0) && (tr.endpos[1] != 0) && (tr.endpos[2] != 0))
-					VectorCopy (tr.endpos, dl->origin);
+				VectorCopy (tr.endpos, dl->origin);
 			}
 
 			dl->radius = 400 + (Q_rand () & 31);
