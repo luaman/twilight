@@ -148,10 +148,6 @@ SOURCE=.\gl_poly.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_refrag.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_rlight.c
 # End Source File
 # Begin Source File
@@ -221,6 +217,10 @@ SOURCE=.\pr_edict.c
 # Begin Source File
 
 SOURCE=.\pr_exec.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\r_explosion.c
 # End Source File
 # Begin Source File
 
@@ -413,6 +413,10 @@ SOURCE=.\protocol.h
 # Begin Source File
 
 SOURCE=..\include\qtypes.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\r_explosion.h
 # End Source File
 # Begin Source File
 
