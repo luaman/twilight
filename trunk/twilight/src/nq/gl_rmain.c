@@ -782,6 +782,8 @@ R_Clear (void)
 }
 
 
+// XXX
+extern void R_DrawSkyBox (void);
 /*
 ================
 R_Render3DView
@@ -792,6 +794,8 @@ Called by R_RenderView, possibily repeatedly.
 void
 R_Render3DView (void)
 {
+	R_DrawSkyBox ();
+
 	// adds static entities to the list
 	R_DrawWorld ();
 

@@ -1215,8 +1215,6 @@ R_DrawWorld (void)
 	if (gl_fb_bmodels->ivalue)
 		memset (fullbright_polys, 0, sizeof(fullbright_polys));
 
-	R_ClearSkyBox ();
-
 	R_MarkLeaves ();
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
 
@@ -1225,8 +1223,6 @@ R_DrawWorld (void)
 	DrawTextureChains ();
 
 	R_RenderFullbrights ();
-
-	R_DrawSkyBox ();
 }
 
 
