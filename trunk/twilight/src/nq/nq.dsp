@@ -228,6 +228,10 @@ SOURCE=.\net_udp.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\pcx.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\pr_cmds.c
 # End Source File
 # Begin Source File
@@ -285,6 +289,10 @@ SOURCE=.\sv_user.c
 # Begin Source File
 
 SOURCE=.\sys_win.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tga.c
 # End Source File
 # Begin Source File
 
@@ -412,6 +420,10 @@ SOURCE=.\net_udp.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\pcx.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\pr_comp.h
 # End Source File
 # Begin Source File
@@ -469,6 +481,10 @@ SOURCE=.\strlib.h
 # Begin Source File
 
 SOURCE=.\sys.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\tga.h
 # End Source File
 # Begin Source File
 

@@ -228,6 +228,10 @@ SOURCE=.\net_udp.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\pcx.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\pmove.c
 # End Source File
 # Begin Source File
@@ -269,6 +273,10 @@ SOURCE=.\strlib.c
 # Begin Source File
 
 SOURCE=.\sys_win.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tga.c
 # End Source File
 # Begin Source File
 

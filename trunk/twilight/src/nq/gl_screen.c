@@ -36,6 +36,7 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "glquake.h"
+#include "tga.h"
 
 /*
 
@@ -666,7 +667,7 @@ SCR_ScreenShot_f
 void
 SCR_ScreenShot_f (void)
 {
-	Uint8      *buffer;
+	Uint8       *buffer = NULL;
 	char        pcxname[80];
 	char        checkname[MAX_OSPATH];
 	int         i, c, temp;
@@ -683,35 +684,28 @@ SCR_ScreenShot_f (void)
 		if (Sys_FileTime (checkname) == -1)
 			break;						// file doesn't exist
 	}
+
 	if (i == 100) {
 		Con_Printf ("SCR_ScreenShot_f: Couldn't create a PCX file\n");
 		return;
 	}
 
-
-	buffer = malloc (glwidth * glheight * 3 + 18);
-	memset (buffer, 0, 18);
-	buffer[2] = 2;						// uncompressed type
-	buffer[12] = glwidth & 255;
-	buffer[13] = glwidth >> 8;
-	buffer[14] = glheight & 255;
-	buffer[15] = glheight >> 8;
-	buffer[16] = 24;					// pixel size
-
+	buffer = malloc (glwidth * glheight * 3);
 	qglReadPixels (glx, gly, glwidth, glheight, GL_RGB, GL_UNSIGNED_BYTE,
-				  buffer + 18);
+				  buffer);
 
 	// swap rgb to bgr
-	c = 18 + glwidth * glheight * 3;
-	for (i = 18; i < c; i += 3) {
+	c = glwidth * glheight * 3;
+	for (i = 0; i < c; i += 3) {
 		temp = buffer[i];
 		buffer[i] = buffer[i + 2];
 		buffer[i + 2] = temp;
 	}
-	COM_WriteFile (pcxname, buffer, glwidth * glheight * 3 + 18);
+
+	if (TGA_Write (pcxname, glwidth, glheight, 3, buffer))
+		Con_Printf ("Wrote %s\n", pcxname);
 
 	free (buffer);
-	Con_Printf ("Wrote %s\n", pcxname);
 }
 
 

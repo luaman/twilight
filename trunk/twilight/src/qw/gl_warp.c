@@ -41,8 +41,8 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
+#include "tga.h"
 #include "sys.h"
-
 
 extern model_t *loadmodel;
 
@@ -243,7 +243,7 @@ EmitWaterPolys (msurface_t *fa)
 
 
 
-#include <math.h>
+
 /*
 =============
 EmitSkyPolys
@@ -350,338 +350,6 @@ R_DrawSkyChain (msurface_t *s)
 
 #ifdef QUAKE2
 
-
-#define	SKY_TEX		2000
-
-/*
-=================================================================
-
-  PCX Loading
-
-=================================================================
-*/
-
-typedef struct {
-	char        manufacturer;
-	char        version;
-	char        encoding;
-	char        bits_per_pixel;
-	unsigned short xmin, ymin, xmax, ymax;
-	unsigned short hres, vres;
-	unsigned char palette[48];
-	char        reserved;
-	char        color_planes;
-	unsigned short bytes_per_line;
-	unsigned short palette_type;
-	char        filler[58];
-	unsigned    data;					// unbounded
-} pcx_t;
-
-byte       *pcx_rgb;
-
-/*
-============
-LoadPCX
-============
-*/
-void
-LoadPCX (FILE * f)
-{
-	pcx_t      *pcx, pcxbuf;
-	byte        palette[768];
-	byte       *pix;
-	int         x, y;
-	int         dataByte, runLength;
-	int         count;
-
-//
-// parse the PCX file
-//
-	fread (&pcxbuf, 1, sizeof (pcxbuf), f);
-
-	pcx = &pcxbuf;
-
-	if (pcx->manufacturer != 0x0a
-		|| pcx->version != 5
-		|| pcx->encoding != 1
-		|| pcx->bits_per_pixel != 8 || pcx->xmax >= 320 || pcx->ymax >= 256) {
-		Con_Printf ("Bad pcx file\n");
-		return;
-	}
-	// seek to palette
-	fseek (f, -768, SEEK_END);
-	fread (palette, 1, 768, f);
-
-	fseek (f, sizeof (pcxbuf) - 4, SEEK_SET);
-
-	count = (pcx->xmax + 1) * (pcx->ymax + 1);
-	pcx_rgb = malloc (count * 4);
-
-	for (y = 0; y <= pcx->ymax; y++) {
-		pix = pcx_rgb + 4 * y * (pcx->xmax + 1);
-		for (x = 0; x <= pcx->xmax;) {
-			dataByte = fgetc (f);
-
-			if ((dataByte & 0xC0) == 0xC0) {
-				runLength = dataByte & 0x3F;
-				dataByte = fgetc (f);
-			} else
-				runLength = 1;
-
-			while (runLength-- > 0) {
-				pix[0] = palette[dataByte * 3];
-				pix[1] = palette[dataByte * 3 + 1];
-				pix[2] = palette[dataByte * 3 + 2];
-				pix[3] = 255;
-				pix += 4;
-				x++;
-			}
-		}
-	}
-}
-
-#endif
-
-/*
-=========================================================
-
-TARGA LOADING
-
-=========================================================
-*/
-
-
-typedef struct _TargaHeader {
-	unsigned char id_length, colormap_type, image_type;
-	unsigned short colormap_index, colormap_length;
-	unsigned char colormap_size;
-	unsigned short x_origin, y_origin, width, height;
-	unsigned char pixel_size, attributes;
-} TargaHeader;
-
-
-/*
-=============
-LoadTGABuffer
-=============
-*/
-void
-LoadTGABuffer (byte *buffer, byte **pic, int *width, int *height)
-{
-	int         columns, rows, numPixels;
-	byte       *pixbuf;
-	int         row, column;
-	TargaHeader	targa_header;
-	byte		*targa_rgba, *buf_p;
-
-	*pic = NULL;
-
-	buf_p = buffer;
-
-	targa_header.id_length = *buf_p++;
-	targa_header.colormap_type = *buf_p++;
-	targa_header.image_type = *buf_p++;
-	
-	targa_header.colormap_index = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.colormap_length = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.colormap_size = *buf_p++;
-	targa_header.x_origin = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.y_origin = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.width = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.height = LittleShort ( *(short *)buf_p );
-	buf_p += 2;
-	targa_header.pixel_size = *buf_p++;
-	targa_header.attributes = *buf_p++;
-
-	if (targa_header.image_type != 2 && targa_header.image_type != 10 &&
-		targa_header.image_type != 3)
-		Sys_Error ("LoadTGA: Only type 2, 3 and 10 targa RGB images supported\n");
-
-	if (targa_header.colormap_type != 0
-		|| (targa_header.pixel_size != 32 && targa_header.pixel_size != 24))
-		Sys_Error
-			("Texture_LoadTGA: Only 32 or 24 bit images supported (no colormaps)\n");
-
-	columns = targa_header.width;
-	rows = targa_header.height;
-	numPixels = columns * rows;
-
-	if (width)
-		*width = columns;
-	if (height)
-		*height = rows;
-
-	targa_rgba = malloc (numPixels*4);
-	*pic = targa_rgba;
-
-	if (targa_header.id_length != 0)
-		buf_p += targa_header.id_length;  // skip TARGA image comment
-
-	if ( targa_header.image_type==2 || targa_header.image_type == 3 )
-	{ 
-		// Uncompressed RGB or gray scale image
-		for(row=rows-1; row>=0; row--) 
-		{
-			pixbuf = targa_rgba + row*columns*4;
-			for(column=0; column<columns; column++) 
-			{
-				unsigned char red,green,blue,alphabyte;
-				switch (targa_header.pixel_size) 
-				{
-					
-				case 8:
-					blue = *buf_p++;
-					green = blue;
-					red = blue;
-					*pixbuf++ = red;
-					*pixbuf++ = green;
-					*pixbuf++ = blue;
-					*pixbuf++ = 255;
-					break;
-
-				case 24:
-					blue = *buf_p++;
-					green = *buf_p++;
-					red = *buf_p++;
-					*pixbuf++ = red;
-					*pixbuf++ = green;
-					*pixbuf++ = blue;
-					*pixbuf++ = 255;
-					break;
-				case 32:
-					blue = *buf_p++;
-					green = *buf_p++;
-					red = *buf_p++;
-					alphabyte = *buf_p++;
-					*pixbuf++ = red;
-					*pixbuf++ = green;
-					*pixbuf++ = blue;
-					*pixbuf++ = alphabyte;
-					break;
-				default:
-					//Error("LoadTGA: illegal pixel_size '%d' in file '%s'\n", targa_header.pixel_size, name );
-					break;
-				}
-			}
-		}
-	}
-	else if (targa_header.image_type==10) {   // Runlength encoded RGB images
-		unsigned char red,green,blue,alphabyte,packetHeader,packetSize,j;
-
-		red = 0;
-		green = 0;
-		blue = 0;
-		alphabyte = 0xff;
-
-		for(row=rows-1; row>=0; row--) {
-			pixbuf = targa_rgba + row*columns*4;
-			for(column=0; column<columns; ) {
-				packetHeader= *buf_p++;
-				packetSize = 1 + (packetHeader & 0x7f);
-				if (packetHeader & 0x80) {        // run-length packet
-					switch (targa_header.pixel_size) {
-						case 24:
-								blue = *buf_p++;
-								green = *buf_p++;
-								red = *buf_p++;
-								alphabyte = 255;
-								break;
-						case 32:
-								blue = *buf_p++;
-								green = *buf_p++;
-								red = *buf_p++;
-								alphabyte = *buf_p++;
-								break;
-						default:
-							//Error("LoadTGA: illegal pixel_size '%d' in file '%s'\n", targa_header.pixel_size, name );
-							break;
-					}
-	
-					for(j=0;j<packetSize;j++) {
-						*pixbuf++=red;
-						*pixbuf++=green;
-						*pixbuf++=blue;
-						*pixbuf++=alphabyte;
-						column++;
-						if (column==columns) { // run spans across rows
-							column=0;
-							if (row>0)
-								row--;
-							else
-								goto breakOut;
-							pixbuf = targa_rgba + row*columns*4;
-						}
-					}
-				}
-				else {                            // non run-length packet
-					for(j=0;j<packetSize;j++) {
-						switch (targa_header.pixel_size) {
-							case 24:
-									blue = *buf_p++;
-									green = *buf_p++;
-									red = *buf_p++;
-									*pixbuf++ = red;
-									*pixbuf++ = green;
-									*pixbuf++ = blue;
-									*pixbuf++ = 255;
-									break;
-							case 32:
-									blue = *buf_p++;
-									green = *buf_p++;
-									red = *buf_p++;
-									alphabyte = *buf_p++;
-									*pixbuf++ = red;
-									*pixbuf++ = green;
-									*pixbuf++ = blue;
-									*pixbuf++ = alphabyte;
-									break;
-							default:
-								//Sys_Printf("LoadTGA: illegal pixel_size '%d' in file '%s'\n", targa_header.pixel_size, name );
-								break;
-						}
-						column++;
-						if (column==columns) { // pixel packet run spans across rows
-							column=0;
-							if (row>0)
-								row--;
-							else
-								goto breakOut;
-							pixbuf = targa_rgba + row*columns*4;
-						}						
-					}
-				}
-			}
-			breakOut:;
-		}
-	}
-}
-
-byte       *image_rgba = NULL;
-
-/*
-=============
-LoadTGA
-=============
-*/
-void
-LoadTGA (char *name, int *width, int *height)
-{
-	byte *buf = COM_LoadTempFile (name);
-
-	if (buf) {
-		LoadTGABuffer (buf, &image_rgba, width, height);
-	}
-	else {
-		image_rgba = NULL;
-	}
-}
-
-#ifdef QUAKE2
 /*
 ==================
 R_LoadSkys
@@ -692,12 +360,13 @@ R_LoadSkys (void)
 {
 	int   i, w, h;
 	char  name[64];
+	byte  *image_rgba;
 
 	for (i = 0; i < 6; i++) {
 
 		snprintf (name, sizeof (name), "gfx/env/bkgtst%s.tga", suf[i]);
 
-		LoadTGA (name, &w, &h);
+		TGA_Load (name, &w, &h);
 
 		if (!image_rgba || (w != 256) || (h != 256))
 			continue;
