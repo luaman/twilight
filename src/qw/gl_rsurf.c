@@ -719,7 +719,6 @@ R_DrawBrushModel (entity_t *e)
 		 || (!(psurf->flags & SURF_PLANEBACK) && (dot > BACKFACE_EPSILON)))
 		{
 			psurf->visframe = r_framecount;
-			GL_UpdateLightmap(psurf);
 		}
 		else
 			psurf->visframe = -1;
