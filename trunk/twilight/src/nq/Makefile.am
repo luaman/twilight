@@ -20,7 +20,7 @@ twilight_nq_LDADD= \
 
 if SYS_WIN32
 twilight_nq_sys_libs=-lwinmm -lwsock32
-twilight_nq_sys_sources=conproc.c
+twilight_nq_sys_sources=conproc.c conproc.h
 else
 twilight_nq_sys_libs=
 twilight_nq_sys_sources=
@@ -29,24 +29,22 @@ endif
 twilight_nq_SOURCES= \
 	chase.c \
 	cl_demo.c cl_input.c cl_main.c cl_model.c cl_parse.c cl_tent.c \
-	cmd.c cmd.h common.c console.c console.h \
+	client.h cmd.c cmd.h common.c console.c console.h \
 	cvar.c \
-        gl_draw.c \
+	gl_draw.c \
+	gl_poly.c gl_poly.h \
 	gl_refrag.c gl_rlight.c gl_rmain.c gl_rmisc.c \
-	gl_rsurf.c gl_screen.c screen.h gl_warp.c \
-	r_part.c sbar.c \
-        host.c host_cmd.c keys.c menu.c \
+	gl_rsurf.c gl_screen.c gl_warp.c \
+	host.c host_cmd.c keys.c keys.h menu.c \
 	net.h net_bsd.c net_dgrm.c net_dgrm.h net_loop.c net_loop.h \
 	net_main.c net_udp.c net_udp.h \
 	pr_cmds.c pr_edict.c pr_exec.c progs.h progdefs.h \
-	progdefs.q1 \
-	sv_main.c sv_move.c sv_phys.c sv_user.c \
-	vid_sdl.c \
+	progdefs.q1 protocol.h \
+	r_part.c render.h sbar.c screen.h server.h \
 	snd_dma.c \
-        view.c world.c world.h zone.c \
-        quakedef.h bspfile.h client.h keys.h protocol.h \
-	render.h server.h sys.c \
-        gl_poly.c gl_poly.h \
+	sv_main.c sv_move.c sv_phys.c sv_user.c \
+	sys.c vid_sdl.c \
+	view.c world.c world.h zone.c \
 	$(twilight_nq_sys_sources)
 
 EXTRA_twilight_nq_SOURCES= \
