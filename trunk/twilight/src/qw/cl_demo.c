@@ -96,9 +96,9 @@ Writes the current user cmd
 void
 CL_WriteDemoCmd (usercmd_t *pcmd)
 {
-	float       fl, ang[3];
-	Uint8       c;
-	usercmd_t   cmd;
+	float		fl, ang[3];
+	Uint8		c;
+	usercmd_t	cmd;
 
 	fl = LittleFloat ((float) cls.realtime);
 	fwrite (&fl, sizeof (fl), 1, cls.demofile);
@@ -137,9 +137,9 @@ Dumps the current net message, prefixed by the length and view angles
 void
 CL_WriteDemoMessage (sizebuf_t *msg)
 {
-	int         len;
-	float       fl;
-	Uint8       c;
+	int		len;
+	float	fl;
+	Uint8	c;
 
 	if (!cls.demorecording)
 		return;
@@ -167,16 +167,16 @@ CL_GetDemoMessage
 qboolean
 CL_GetDemoMessage (void)
 {
-	int         r, i, j;
-	float       demotime;
-	Uint8       c;
-	usercmd_t  *pcmd;
+	int			r, i, j;
+	float		demotime;
+	Uint8		c;
+	usercmd_t	*pcmd;
 
 	// read the time from the packet
 	fread (&demotime, sizeof (demotime), 1, cls.demofile);
 	demotime = LittleFloat (demotime);
 
-// decide if it is time to grab the next message        
+	// decide if it is time to grab the next message        
 	if (cls.timedemo) {
 		if (cls.td_lastframe < 0)
 			cls.td_lastframe = demotime;
@@ -295,7 +295,6 @@ CL_GetMessage (void)
 	return true;
 }
 
-
 /*
 ====================
 CL_Stop_f
@@ -310,14 +309,14 @@ CL_Stop_f (void)
 		Com_Printf ("Not recording a demo.\n");
 		return;
 	}
-// write a disconnect message to the demo file
+	// write a disconnect message to the demo file
 	SZ_Clear (&net_message);
 	MSG_WriteLong (&net_message, -1);	// -1 sequence means out of band
 	MSG_WriteByte (&net_message, svc_disconnect);
 	MSG_WriteString (&net_message, "EndOfDemo");
 	CL_WriteDemoMessage (&net_message);
 
-// finish up
+	// finish up
 	fclose (cls.demofile);
 	cls.demofile = NULL;
 	cls.demorecording = false;
@@ -335,10 +334,10 @@ Dumps the current net message, prefixed by the length and view angles
 void
 CL_WriteRecordDemoMessage (sizebuf_t *msg, int seq)
 {
-	int         len;
-	int         i;
-	float       fl;
-	Uint8       c;
+	int		len;
+	int		i;
+	float	fl;
+	Uint8	c;
 
 	if (!cls.demorecording)
 		return;
@@ -361,13 +360,12 @@ CL_WriteRecordDemoMessage (sizebuf_t *msg, int seq)
 	fflush (cls.demofile);
 }
 
-
 void
 CL_WriteSetDemoMessage (void)
 {
-	int         len;
-	float       fl;
-	Uint8       c;
+	int		len;
+	float	fl;
+	Uint8	c;
 
 	if (!cls.demorecording)
 		return;
@@ -386,9 +384,6 @@ CL_WriteSetDemoMessage (void)
 	fflush (cls.demofile);
 }
 
-
-
-
 /*
 ====================
 CL_Record_f
@@ -399,17 +394,13 @@ record <demoname> <server>
 void
 CL_Record_f (void)
 {
-	int         c;
-	char        name[MAX_OSPATH];
-	sizebuf_t   buf;
-	char        buf_data[MAX_MSGLEN];
-	int         n, i, j;
-	char       *s;
-	entity_t   *ent;
-	entity_state_t *es, blankes;
-	player_info_t *player;
-	extern char gamedirfile[];
-	int         seq = 1;
+	int				c, n, i, j, seq = 1;
+	char			name[MAX_OSPATH], buf_data[MAX_MSGLEN], *s;
+	entity_t		*ent;
+	sizebuf_t		buf;
+	player_info_t	*player;
+	entity_state_t	*es, blankes;
+	extern char		gamedirfile[];
 
 	c = Cmd_Argc ();
 	if (c != 2) {
@@ -427,9 +418,7 @@ CL_Record_f (void)
 
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 
-//
-// open the demo file
-//
+	// open the demo file
 	COM_DefaultExtension (name, ".qwd");
 
 	cls.demofile = fopen (name, "wb");
@@ -443,11 +432,11 @@ CL_Record_f (void)
 
 /*-------------------------------------------------*/
 
-// serverdata
+	// serverdata
 	// send the info about the new client to all connected clients
 	SZ_Init (&buf, buf_data, sizeof(buf_data));
 
-// send the serverdata
+	// send the serverdata
 	MSG_WriteByte (&buf, svc_serverdata);
 	MSG_WriteLong (&buf, PROTOCOL_VERSION);
 	MSG_WriteLong (&buf, cl.servercount);
@@ -485,7 +474,7 @@ CL_Record_f (void)
 	CL_WriteRecordDemoMessage (&buf, seq++);
 	SZ_Clear (&buf);
 
-// soundlist
+	// soundlist
 	MSG_WriteByte (&buf, svc_soundlist);
 	MSG_WriteByte (&buf, 0);
 
@@ -510,7 +499,7 @@ CL_Record_f (void)
 		CL_WriteRecordDemoMessage (&buf, seq++);
 		SZ_Clear (&buf);
 	}
-// modellist
+	// modellist
 	MSG_WriteByte (&buf, svc_modellist);
 	MSG_WriteByte (&buf, 0);
 
@@ -535,7 +524,7 @@ CL_Record_f (void)
 		CL_WriteRecordDemoMessage (&buf, seq++);
 		SZ_Clear (&buf);
 	}
-// spawnstatic
+	// spawnstatic
 
 	for (i = 0; i < cl_num_static_entities; i++) {
 		ent = &cl_static_entities[i];
@@ -564,11 +553,10 @@ CL_Record_f (void)
 		}
 	}
 
-// spawnstaticsound
+	// spawnstaticsound
 	// static sounds are skipped in demos, life is hard
 
-// baselines
-
+	// baselines
 	memset (&blankes, 0, sizeof (blankes));
 	for (i = 0; i < MAX_EDICTS; i++) {
 		es = cl_baselines + i;
@@ -600,7 +588,7 @@ CL_Record_f (void)
 		CL_WriteRecordDemoMessage (&buf, seq++);
 		SZ_Clear (&buf);
 	}
-// send current status of all other players
+	// send current status of all other players
 
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		player = cl.players + i;
@@ -632,7 +620,7 @@ CL_Record_f (void)
 		}
 	}
 
-// send all current light styles
+	// send all current light styles
 	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
 		MSG_WriteByte (&buf, svc_lightstyle);
 		MSG_WriteByte (&buf, (char) i);
@@ -671,8 +659,8 @@ rerecord <demoname>
 void
 CL_ReRecord_f (void)
 {
-	int         c;
-	char        name[MAX_OSPATH];
+	int		c;
+	char	name[MAX_OSPATH];
 
 	c = Cmd_Argc ();
 	if (c != 2) {
@@ -690,9 +678,7 @@ CL_ReRecord_f (void)
 
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 
-//
-// open the demo file
-//
+	// open the demo file
 	COM_DefaultExtension (name, ".qwd");
 
 	cls.demofile = fopen (name, "wb");
@@ -719,20 +705,17 @@ play [demoname]
 void
 CL_PlayDemo_f (void)
 {
-	char        name[256];
+	char	name[256];
 
 	if (Cmd_Argc () != 2) {
 		Com_Printf ("play <demoname> : plays a demo\n");
 		return;
 	}
-//
-// disconnect from server
-//
+
+	// disconnect from server
 	CL_Disconnect ();
 
-//
-// open the demo file
-//
+	// open the demo file
 	strcpy (name, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".qwd");
 
@@ -759,12 +742,12 @@ CL_FinishTimeDemo
 void
 CL_FinishTimeDemo (void)
 {
-	int         frames;
-	float       time;
+	int		frames;
+	float	time;
 
 	cls.timedemo = false;
 
-// the first frame didn't count
+	// the first frame didn't count
 	frames = (host_framecount - cls.td_startframe) - 1;
 	time = Sys_DoubleTime () - cls.td_starttime;
 	if (!time)
@@ -793,9 +776,8 @@ CL_TimeDemo_f (void)
 	if (cls.state != ca_demostart)
 		return;
 
-// cls.td_starttime will be grabbed at the second frame of the demo, so
-// all the loading time doesn't get counted
-
+	// cls.td_starttime will be grabbed at the second frame of the demo, so
+	// all the loading time doesn't get counted
 	cls.timedemo = true;
 	cls.td_starttime = 0;
 	cls.td_startframe = host_framecount;

@@ -42,16 +42,16 @@ static const char rcsid[] =
 
 extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
 
-cvar_t      *chase_back;
-cvar_t      *chase_up;
-cvar_t      *chase_right;
-cvar_t      *chase_active;
+cvar_t	*chase_back;
+cvar_t	*chase_up;
+cvar_t	*chase_right;
+cvar_t	*chase_active;
 
-vec3_t      chase_pos;
-vec3_t      chase_angles;
+vec3_t	chase_pos;
+vec3_t	chase_angles;
 
-vec3_t      chase_dest;
-vec3_t      chase_dest_angles;
+vec3_t	chase_dest;
+vec3_t	chase_dest_angles;
 
 
 void
@@ -81,7 +81,6 @@ Chase_Update (void)
 	float	dist;
 	vec3_t	forward, up, right, dest, stop, normal;
 
-
 	// if can't see player, reset
 	AngleVectors (cl.viewangles, forward, right, up);
 
@@ -105,9 +104,9 @@ Chase_Update (void)
 	r_refdef.viewangles[PITCH] = -Q_atan (stop[2] / dist) / M_PI * 180;
 
 	// move towards destination
-	TraceLine(r_refdef.vieworg, chase_dest, stop, normal);
+	TraceLine (r_refdef.vieworg, chase_dest, stop, normal);
 
-	VectorCopy(stop, chase_dest);
+	VectorCopy (stop, chase_dest);
 
 	// move towards destination
 	VectorCopy (chase_dest, r_refdef.vieworg);

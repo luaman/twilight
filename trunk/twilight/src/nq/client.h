@@ -49,7 +49,7 @@ typedef struct {
 	char	name[MAX_SCOREBOARDNAME];
 	float	entertime;
 	int		frags;
-	int		colors;							// two 4 bit fields
+	int		colors;						// two 4 bit fields
 	Uint8	translations[VID_GRADES * 256];
 } scoreboard_t;
 
@@ -274,21 +274,21 @@ extern beam_t cl_beams[MAX_BEAMS];
 //
 // cl_main
 //
-dlight_t   *CL_AllocDlight (int key);
-void        CL_DecayLights (void);
+dlight_t	*CL_AllocDlight (int key);
+void		CL_DecayLights (void);
 
-void        CL_Init_Cvars (void);
-void        CL_Init (void);
+void		CL_Init_Cvars (void);
+void		CL_Init (void);
 
-void        CL_EstablishConnection (char *host);
-void        CL_Signon1 (void);
-void        CL_Signon2 (void);
-void        CL_Signon3 (void);
-void        CL_Signon4 (void);
+void		CL_EstablishConnection (char *host);
+void		CL_Signon1 (void);
+void		CL_Signon2 (void);
+void		CL_Signon3 (void);
+void		CL_Signon4 (void);
 
-void        CL_Disconnect (void);
-void        CL_Disconnect_f (void);
-void        CL_NextDemo (void);
+void		CL_Disconnect (void);
+void		CL_Disconnect_f (void);
+void		CL_NextDemo (void);
 
 #define			MAX_VISEDICTS	256
 

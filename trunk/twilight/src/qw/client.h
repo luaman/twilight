@@ -74,26 +74,26 @@ typedef struct {
 
 
 typedef struct player_info_s {
-	int					userid;
-	char				userinfo[MAX_INFO_STRING];
+	int				userid;
+	char			userinfo[MAX_INFO_STRING];
 
 	// scoreboard information
-	char				name[MAX_SCOREBOARDNAME];
-	float				entertime;
-	int					frags;
-	int					ping;
-	Uint8				pl;
+	char			name[MAX_SCOREBOARDNAME];
+	float			entertime;
+	int				frags;
+	int				ping;
+	Uint8			pl;
 
 	// skin information
-	int					topcolor;
-	int					bottomcolor;
+	int				topcolor;
+	int				bottomcolor;
 
-	int					_topcolor;
-	int					_bottomcolor;
+	int				_topcolor;
+	int				_bottomcolor;
 
-	int					spectator;
-	Uint8				translations[VID_GRADES * 256];
-	player_skin_t	   *skin;
+	int				spectator;
+	Uint8			translations[VID_GRADES * 256];
+	player_skin_t	*skin;
 } player_info_t;
 
 
@@ -124,8 +124,8 @@ typedef struct {
 
 
 typedef struct {
-	int			destcolor[3];
-	int			percent;				// 0-256 (yeah, someone's on drugs)
+	int	destcolor[3];
+	int	percent;		// 0-256 (yeah, someone's on drugs)
 } cshift_t;
 
 #define	CSHIFT_CONTENTS	0
@@ -139,8 +139,8 @@ typedef struct {
  * client_state_t should hold all pieces of the client state
  */
 typedef struct {
-	int			length;
-	char		map[MAX_STYLESTRING];
+	int		length;
+	char	map[MAX_STYLESTRING];
 } lightstyle_t;
 
 
@@ -190,7 +190,7 @@ typedef struct {
 
 	int			qport;
 
-	FILE	   *download;				// file transfer from server
+	FILE		*download;				// file transfer from server
 	char		downloadtempname[MAX_OSPATH];
 	char		downloadname[MAX_OSPATH];
 	int			downloadnumber;
@@ -209,7 +209,7 @@ typedef struct {
 	qboolean	demorecording;
 	qboolean	demoplayback;
 	qboolean	timedemo;
-	FILE	   *demofile;
+	FILE		*demofile;
 	float		td_lastframe;			// to meter out one message a frame
 	int			td_startframe;			// host_framecount at start
 	float		td_starttime;			// realtime at second frame of timedemo
@@ -230,96 +230,96 @@ typedef enum { GAME_COOP, GAME_DEATHMATCH } gametype_t;
  * the client_state_t structure is wiped completely at every server signon
  */
 typedef struct {
-	int			servercount;			// server identification for prespawns
+	int				servercount;			// server identification for prespawns
 
-	char		serverinfo[MAX_SERVERINFO_STRING];
+	char			serverinfo[MAX_SERVERINFO_STRING];
 
-	int			parsecount;				// server message counter
+	int				parsecount;				// server message counter
 	
 	/*
 	 * this is the sequence number of the last good  packetentity_t we got.
 	 * If this is 0, we can't render a frame yet
 	 */
-	int			validsequence;
+	int				validsequence;
 
 	/*
 	 * since connecting to this server throw out the first couple, so the
 	 * player doesn't accidentally do something the first frame
 	 */
-	int			movemessages;
+	int				movemessages;
 
-	int			spectator;
+	int				spectator;
 
-	gametype_t	gametype;
+	gametype_t		gametype;
 
-	double		last_ping_request;		// while showing scoreboard
-	double		last_servermessage;
+	double			last_ping_request;		// while showing scoreboard
+	double			last_servermessage;
 
 	// sentcmds[cl.netchan.outgoing_sequence & UPDATE_MASK] = cmd
-	frame_t		frames[UPDATE_BACKUP];
+	frame_t			frames[UPDATE_BACKUP];
 
 	// information for local display
-	int			stats[MAX_CL_STATS];	// health, etc
-	float		item_gettime[32];		// cl.time of aquiring, for blinking
-	float		faceanimtime;			// use anim frame if cl.time < this
+	int				stats[MAX_CL_STATS];	// health, etc
+	float			item_gettime[32];		// cl.time of aquiring, for blinking
+	float			faceanimtime;			// use anim frame if cl.time < this
 
-	cshift_t	cshifts[NUM_CSHIFTS];	// color shifts for damage, powerups
-	cshift_t	prev_cshifts[NUM_CSHIFTS];	// and content types
+	cshift_t		cshifts[NUM_CSHIFTS];	// color shifts for damage, powerups
+	cshift_t		prev_cshifts[NUM_CSHIFTS];	// and content types
 
 	/*
 	 * the client maintains its own idea of view angles, which are sent to
 	 * the server each frame.  And only reset at level change and teleport
 	 * times
 	 */
-	vec3_t		viewangles;
+	vec3_t			viewangles;
 
 	// the time that the client is rendering at.  always <= realtime
-	double		time, oldtime;
+	double			time, oldtime;
 
 	// the client simulates or interpolates movement to get these values
-	vec3_t		simorg;
-	vec3_t		simvel;
-	vec3_t		simangles;
+	vec3_t			simorg;
+	vec3_t			simvel;
+	vec3_t			simangles;
 
 	// pitch drifting vars
-	float		pitchvel;
-	qboolean	nodrift;
-	float		driftmove;
-	double		laststop;
+	float			pitchvel;
+	qboolean		nodrift;
+	float			driftmove;
+	double			laststop;
 
 
-	float		crouch;					// local amount for smoothing stepups
+	float			crouch;					// local amount for smoothing stepups
 
-	qboolean	paused;					// send over by server
+	qboolean		paused;					// send over by server
 
-	float		punchangle;				// yview kick from weapon firing
+	float			punchangle;				// yview kick from weapon firing
 
-	int			intermission;			// full screen, fixed view, etc
-	int         completed_time;			// from time at intermission start
+	int				intermission;			// full screen, fixed view, etc
+	int         	completed_time;			// from time at intermission start
 
 	/*
 	 * information that is static for the entire time connected to a server
 	 */
-	char		model_name[MAX_MODELS][MAX_QPATH];
-	char		sound_name[MAX_SOUNDS][MAX_QPATH];
+	char			model_name[MAX_MODELS][MAX_QPATH];
+	char			sound_name[MAX_SOUNDS][MAX_QPATH];
 
-	struct model_s	   *model_precache[MAX_MODELS];
-	struct sfx_s	   *sound_precache[MAX_SOUNDS];
+	struct model_s	*model_precache[MAX_MODELS];
+	struct sfx_s	*sound_precache[MAX_SOUNDS];
 
-	char		levelname[40];			// for display on solo scoreboard
-	int			playernum;
-	int			viewentity;
+	char			levelname[40];			// for display on solo scoreboard
+	int				playernum;
+	int				viewentity;
 
 	// refresh related state
-	struct model_s	   *worldmodel;		// cl_entitites[0].model
-	int			num_entities;			// bottom up in cl_entities array
+	struct model_s	*worldmodel;		// cl_entitites[0].model
+	int				num_entities;			// bottom up in cl_entities array
 
-	int			cdtrack;				// cd audio
+	int				cdtrack;				// cd audio
 
-	vec3_t		viewent_origin;
-	vec3_t		viewent_angles;
-	int			viewent_frame;
-	model_t		*viewent_model;
+	vec3_t			viewent_origin;
+	vec3_t			viewent_angles;
+	int				viewent_frame;
+	model_t			*viewent_model;
 
 	// all player information
 	player_info_t players[MAX_CLIENTS];
@@ -373,10 +373,9 @@ extern lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
 extern dlight_t cl_dlights[MAX_DLIGHTS];
 
 extern qboolean nomaster;
-extern float server_version;			// version of server we connected to
+extern float server_version;	// version of server we connected to
 
 //============================================================================
-
 
 /*
  * cl_main
@@ -416,8 +415,8 @@ extern char	emodel_name[], pmodel_name[], prespawn_name[], modellist_name[],
  * cl_input
  */
 typedef struct {
-	int			down[2];				// key nums holding it down
-	int			state;					// low bit is down state
+	int	down[2];	// key nums holding it down
+	int	state;		// low bit is down state
 } kbutton_t;
 
 extern kbutton_t in_mlook, in_klook;
@@ -532,7 +531,7 @@ void CL_PredictUsercmd (player_state_t * from, player_state_t * to,
 #define	CAM_TRACK	1
 
 extern int autocam;
-extern int spec_track;					// player# of who we are tracking
+extern int spec_track;	// player# of who we are tracking
 
 qboolean Cam_DrawViewModel (void);
 qboolean Cam_DrawPlayer (int playernum);
@@ -540,28 +539,6 @@ void Cam_Track (usercmd_t *cmd);
 void Cam_FinishMove (usercmd_t *cmd);
 void Cam_Reset (void);
 void CL_InitCam (void);
-
-/*
- * skin.c
- */
-/*
-typedef struct {
-	char			manufacturer;
-	char			version;
-	char			encoding;
-	char			bits_per_pixel;
-	unsigned short	xmin, ymin, xmax, ymax;
-	unsigned short	hres, vres;
-	unsigned char	palette[48];
-	char			reserved;
-	char			color_planes;
-	unsigned short	bytes_per_line;
-	unsigned short	palette_type;
-	char			filler[58];
-	unsigned char	data[0];			// unbounded
-} pcx_t;
-XXX: KILL THIS
-*/
 
 void Skin_Find (player_info_t *sc);
 Uint8 *Skin_Cache (player_skin_t *skin);
