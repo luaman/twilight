@@ -1476,27 +1476,8 @@ SV_RunCmd__clear:
 		pmove_mins[i] = pmove.origin[i] - 256;
 		pmove_maxs[i] = pmove.origin[i] + 256;
 	}
-#if 1
 	AddLinksToPmove (sv_areanodes);
-#else
-	AddAllEntsToPmove ();
-#endif
-
-#if 0
-	{
-		int         before, after;
-
-		before = PM_TestPlayerPosition (pmove.origin);
-		PlayerMove ();
-		after = PM_TestPlayerPosition (pmove.origin);
-
-		if (sv_player->v.health > 0 && before && !after)
-			Con_Printf ("player %s got stuck in playermove!!!!\n",
-						host_client->name);
-	}
-#else
 	PlayerMove ();
-#endif
 
 	host_client->oldbuttons = pmove.oldbuttons;
 	sv_player->v.teleport_time = pmove.waterjumptime;
@@ -1512,13 +1493,7 @@ SV_RunCmd__clear:
 		sv_player->v.origin[i] =
 			pmove.origin[i] - (sv_player->v.mins[i] - player_mins[i]);
 
-#if 0
-	// truncate velocity the same way the net protocol will
-	for (i = 0; i < 3; i++)
-		sv_player->v.velocity[i] = (int) pmove.velocity[i];
-#else
 	VectorCopy (pmove.velocity, sv_player->v.velocity);
-#endif
 
 	VectorCopy (pmove.angles, sv_player->v.v_angle);
 
