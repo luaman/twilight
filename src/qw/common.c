@@ -1826,13 +1826,6 @@ COM_InitFilesystem (void)
 {
 	int         i;
 
-#ifndef BASEPATH
-#define BASEPATH ""
-#endif
-#ifndef SHAREPATH
-#define SHAREPATH ""
-#endif
-
 //
 // -basedir <path>
 // Overrides the system supplied base directory
