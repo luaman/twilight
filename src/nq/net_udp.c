@@ -27,7 +27,7 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
-#ifdef __WIN32
+#ifdef _WIN32
 # include <winsock.h>
 # include <io.h>
 # define EWOULDBLOCK WSAEWOULDBLOCK
@@ -59,7 +59,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-#ifdef __WIN32
+#ifdef _WIN32
 # ifdef errno
 #  undef errno
 # endif
@@ -82,7 +82,7 @@ static unsigned long myAddr;
 
 //=============================================================================
 
-#ifdef __WIN32
+#ifdef _WIN32
 # define MAXHOSTNAMELEN		256
 #endif
 
@@ -94,7 +94,7 @@ UDP_Init (void)
 	struct qsockaddr addr;
 	char       *colon;
 
-#ifdef __WIN32
+#ifdef _WIN32
 	WSADATA     winsockdata;
 	WORD        wVersionRequested;
 	int         r;
@@ -104,7 +104,7 @@ UDP_Init (void)
 	r = WSAStartup (MAKEWORD (1, 1), &winsockdata);
 	if (r)
 		Sys_Error ("Winsock initialization failed.");
-#endif /* __WIN32 */
+#endif /* _WIN32 */
 
 	// determine my name & address
 	gethostname (buf, MAXHOSTNAMELEN);
@@ -176,7 +176,7 @@ UDP_OpenSocket (int port)
 	struct sockaddr_in address;
 	int         i;
 
-#ifdef __WIN32
+#ifdef _WIN32
 # define ioctl ioctlsocket
 	unsigned long _true = true;
 #else
@@ -211,7 +211,7 @@ UDP_CloseSocket (int socket)
 {
 	if (socket == net_broadcastsocket)
 		net_broadcastsocket = 0;
-#ifdef __WIN32
+#ifdef _WIN32
 	return closesocket (socket);
 #else
 	return close (socket);

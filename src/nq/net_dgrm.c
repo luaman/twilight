@@ -31,7 +31,7 @@ static const char rcsid[] =
 #define BAN_TEST
 
 #ifdef BAN_TEST
-# ifdef __WIN32
+# ifdef _WIN32
 #  include <windows.h>
 # else
 #  define AF_INET 		2				/* internet */

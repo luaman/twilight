@@ -59,7 +59,7 @@ static const char rcsid[] =
 #endif
 #include <errno.h>
 
-#ifdef __WIN32
+#ifdef _WIN32
 // Don't need windows.h till we have win32 GUI console
 # include <io.h>
 # include <conio.h>
@@ -185,7 +185,7 @@ Sys_Init (void)
 
 	Math_Init ();
 
-#ifdef __WIN32
+#ifdef _WIN32
 	if (COM_CheckParm ("-nopriority"))
 	{
 		Cvar_Set (sys_extrasleep, "0");
@@ -256,7 +256,7 @@ Sys_FileTime (char *path)
 void
 Sys_mkdir (char *path)
 {
-#ifdef __WIN32
+#ifdef _WIN32
 	_mkdir (path);
 #else
 	mkdir (path, 0777);
@@ -280,14 +280,14 @@ Sys_DoubleTime (void)
 	return epoch + (double)(now / 1000.0);
 }
 
-#ifndef __WIN32
+#ifndef _WIN32
 qboolean		do_stdin = true;
 qboolean		stdin_ready;
 #endif
 
 char *
 Sys_ConsoleInput (void)
-#ifndef __WIN32
+#ifndef _WIN32
 {
 	static char		text[256];
 	int				len;
@@ -365,12 +365,12 @@ Sys_ExpandPath (char *str)
 			/* Current user's home directory */
 			if ((p = getenv("HOME")))
 				strncpy(buf, p, PATH_MAX);
-#ifdef __WIN32
+#ifdef _WIN32
 			else if ((p = getenv("USERPROFILE")))
 				strncpy(buf, p, PATH_MAX);
 			else if ((p = getenv("WINDIR")))
 				strncpy(buf, p, PATH_MAX);
-#endif /* __WIN32 */
+#endif /* _WIN32 */
 			else
 				/* This should never happen */
 				strncpy(buf, ".", PATH_MAX);
@@ -427,7 +427,7 @@ main (int c, char **v)
 		// the only reason we have a timeout at all is so that if the last
 		// connected client times out, the message would not otherwise
 		// be printed until the next event.
-#ifndef __WIN32
+#ifndef _WIN32
 		NET_Sleep (10);
 #else
 		NET_Sleep (1);

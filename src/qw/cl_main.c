@@ -31,7 +31,7 @@ static const char rcsid[] =
 #include <stdarg.h>
 #include <setjmp.h>  // FIXME: REMOVE THIS EVIL SHIT!
 
-#ifdef __WIN32
+#ifdef _WIN32
 # include "winsock.h"
 #else
 # include <netinet/in.h>

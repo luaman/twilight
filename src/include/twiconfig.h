@@ -30,7 +30,7 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #else
-# ifdef __WIN32
+# ifdef _WIN32
 #  include "win32config.h"
 # endif
 #endif
