@@ -59,6 +59,9 @@ static const char rcsid[] =
 extern cvar_t *_windowed_mouse;
 extern cvar_t *gl_texturemode;
 extern cvar_t *gl_im_transform;
+extern cvar_t *width_2d;
+extern cvar_t *height_2d;
+extern cvar_t *text_scale;
 
 void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
@@ -912,11 +915,11 @@ M_Setup_Key (int k)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	19
+#define	OPTIONS_ITEMS	21
 
 #define	SLIDER_RANGE	10
 
-int         options_cursor;
+int options_cursor;
 
 void
 M_Menu_Options_f (void)
@@ -935,42 +938,67 @@ M_AdjustSliders (int dir)
 	S_LocalSound ("misc/menu3.wav");
 
 	switch (options_cursor) {
-		case 3:						// screen size
+		case 3:						// 2d resolution width
+			if (width_2d->ivalue == -1)
+				t = vid.width + (20.0f * dir);
+			else if (width_2d->ivalue == 320 && dir == -1)
+				t = width_2d->ivalue;
+			else
+				t = width_2d->ivalue + (20.0f * dir);
+			t = bound (-1, t, vid.width);
+			Cvar_Set (width_2d, va ("%f", t));
+			break;
+		case 4:						// 2d resolution height
+			if (height_2d->ivalue == -1)
+				t = vid.height + (20.0f * dir);
+			else if (height_2d->ivalue == 200 && dir == -1)
+				t = height_2d->ivalue;
+			else
+				t = height_2d->ivalue + (20.0f * dir);
+			t = bound (-1, t, vid.height);
+			Cvar_Set (height_2d, va ("%f", t));
+			break;
+		case 5:						// text scale
+			t = text_scale->fvalue + (dir * 0.5f);
+			t = bound (0.5, t, 3);
+			Cvar_Set (text_scale, va ("%f", t));
+			break;
+		case 6:						// screen size
 			t = scr_viewsize->ivalue + (dir * 10.0f);
 			t = bound (30, t, 120);
 			Cvar_Set (scr_viewsize, va ("%f", t));
 			break;
-		case 4:						// gamma
+		case 7:						// gamma
 			t = v_gamma->fvalue + (dir * 0.05f);
 			t = bound (1.0, t, 2.0);
 			Cvar_Set (v_gamma, va ("%f", t));
 			break;
-		case 5:						// software brightness
+		case 8:						// software brightness
 			t = r_brightness->fvalue + (dir * 0.25);
 			t = bound (1, t, 5);
 			Cvar_Set (r_brightness, va ("%f", t));
 			break;
-		case 6:						// software contrast (base brightness)
+		case 9:						// software contrast (base brightness)
 			t = r_contrast->fvalue + (dir * 0.025);
 			t = bound (0.75, t, 1);
 			Cvar_Set (r_contrast, va ("%f", t));
 			break;
-		case 7:						// mouse speed
+		case 10:					// mouse speed
 			t = sensitivity->fvalue + (dir * 0.5f);
 			t = bound (1, t, 11);
 			Cvar_Set (sensitivity, va ("%f", t));
 			break;
-		case 8:						// music volume
+		case 11:					// music volume
 			// Slider doesn't work with SDL
 			Cvar_Set (bgmvolume, bgmvolume->fvalue ? "0" : "1");
 			break;
-		case 9:						// sfx volume
+		case 12:					// sfx volume
 			t = volume->fvalue + (dir * 0.1f);
 			t = bound (0, t, 1);
 			Cvar_Set (volume, va ("%f", t));
 			break;
 
-		case 10:					// always run
+		case 13:					// always run
 			if (cl_forwardspeed->fvalue > 200) {
 				Cvar_Set (cl_forwardspeed, "200");
 				Cvar_Set (cl_backspeed, "200");
@@ -980,28 +1008,28 @@ M_AdjustSliders (int dir)
 			}
 			break;
 
-		case 11:						// invert mouse
+		case 14:					// invert mouse
 			t = -m_pitch->fvalue;
 			Cvar_Set (m_pitch, va ("%f", t));
 			break;
 
-		case 12:						// lookspring
+		case 15:					// lookspring
 			Cvar_Set (lookspring, va ("%i", !lookspring->ivalue));
 			break;
 
-		case 13:						// lookstrafe
+		case 16:					// lookstrafe
 			Cvar_Set (lookstrafe, va ("%i", !lookstrafe->ivalue));
 			break;
 
-		case 14:
+		case 17:
 			Cvar_Set (cl_sbar, va ("%i", !cl_sbar->ivalue));
 			break;
 
-		case 15:
+		case 18:
 			Cvar_Set (cl_hudswap, va ("%i", !cl_hudswap->ivalue));
 			break;
 
-		case 16:						// _windowed_mouse
+		case 19:						// _windowed_mouse
 			Cvar_Set (_windowed_mouse, va ("%i", !_windowed_mouse->ivalue));
 			break;
 	}
@@ -1031,7 +1059,7 @@ M_DrawCheckbox (int x, int y, int on)
 void
 M_Options_Draw (void)
 {
-	int 	y;
+	int 	y, scrap;
 	qpic_t	*p;
 
 	M_DrawPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp"));
@@ -1042,6 +1070,12 @@ M_Options_Draw (void)
 	M_Print (16, y, "    Customize controls"); y += 8;
 	M_Print (16, y, "         Go to console"); y += 8;
 	M_Print (16, y, "     Reset to defaults"); y += 8;
+
+	scrap = (width_2d->ivalue == -1) ? vid.width : (width_2d->ivalue);
+	M_Print (16, y, "   2D Resolution Width"); M_DrawSlider (220, y, scrap / 1000.0f); y += 8;
+	scrap = (height_2d->ivalue == -1) ? vid.height : (height_2d->ivalue);
+	M_Print (16, y, "  2D Resolution Height"); M_DrawSlider (220, y, scrap / 1000.0f); y += 8;
+	M_Print (16, y, "             Text Size"); M_DrawSlider (220, y, text_scale->fvalue / 3.0f); y += 8;
 
 	M_Print (16, y, "           Screen size"); M_DrawSlider (220, y, (scr_viewsize->ivalue - 30) / (120 - 30)); y += 8;
 	M_Print (16, y, "        Hardware Gamma"); M_DrawSlider (220, y, v_gamma->fvalue - 1.0); y += 8;
@@ -1085,7 +1119,7 @@ M_Options_Key (int k)
 				case 2:
 					Cbuf_AddText ("exec default.cfg\n");
 					break;
-				case 17:
+				case 20:
 					M_Menu_Gfx_f ();
 					break;
 				default:

@@ -304,9 +304,12 @@ void
 Size_Changed2D (cvar_t *cvar)
 {
 	int		width, height;
+	float	txt_scale;
 
-	if (con)
-		con->tsize = 8 * text_scale->fvalue;
+	if (con) {
+		txt_scale = bound (0.5, text_scale->fvalue, 3);
+		con->tsize = 8 * txt_scale;
+	}
 
 	if (!VID_Inited) {
 		vid.width_2d = 320;
@@ -329,7 +332,7 @@ Size_Changed2D (cvar_t *cvar)
 	if (height == -1)
 		height = width * 3 / 4;
 
-	height = bound (320, height, (int) vid.height);
+	height = bound (200, height, (int) vid.height);
 
 	vid.width_2d = width;
 	vid.height_2d = height;
