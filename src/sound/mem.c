@@ -141,11 +141,8 @@ S_LoadSound (sfx_t *s)
 
 	len = len * info.width * info.channels;
 
-	if (!len) {
-		Com_Printf ("%s is invalid.\n", s->name);
-		Zone_Free (data);
-		return NULL;
-	}
+	if (!info.samples)
+		len = 1;
 
 	s->data = Zone_Alloc (snd_zone, len);
 	if (!s->data) {
