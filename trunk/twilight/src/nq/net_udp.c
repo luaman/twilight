@@ -108,7 +108,9 @@ UDP_Init (void)
 
 	// determine my name & address
 	gethostname (buf, MAXHOSTNAMELEN);
-	local = gethostbyname (buf);
+	if (!(local = gethostbyname (buf)))
+		Sys_Error ("Unable to resolve our own hostname: '%s'", buf);
+
 	myAddr = *(int *) local->h_addr_list[0];
 
 	// if the quake hostname isn't set, set it to the machine name
