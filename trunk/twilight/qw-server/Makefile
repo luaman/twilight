@@ -12,7 +12,7 @@ OPTIMIZATIONS= -O6 -ffast-math -funroll-loops -fomit-frame-pointer \
 
 LDFLAGS=
 
-all: frost-qwsv
+all: twilight-qwsv
 
 frost-qwsv: $(OBJECTS)
 	gcc $(LDFLAGS) -o $@ $^
@@ -23,7 +23,7 @@ frost-qwsv: $(OBJECTS)
 	gcc $(CFLAGS) $(OPTIMIZATIONS) -o $@ -c $<
 
 clean:
-	rm -f frost-qwsv *.o
+	rm -f twilight-qwsv *.o
 
 .PHONY: clean
 
