@@ -476,7 +476,11 @@ GL_BuildLightmap (msurface_t *surf)
 
 	// set to full bright if no light data
 	if (!cl.worldmodel->lightdata)
-		memset (blocklights, 255, size3	* sizeof(Uint32));
+	{
+		bl = blocklights;
+		for (i = 0;i < size3;i++)
+			bl[i] = 255*256;			
+	}
 	else
 	{
 		// clear to no light
