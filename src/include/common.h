@@ -83,11 +83,6 @@ void RemoveLink (link_t *l);
 void InsertLinkBefore (link_t *l, link_t *before);
 void InsertLinkAfter (link_t *l, link_t *after);
 
-// (type *)STRUCT_FROM_LINK(link_t *link, type, member)
-// ent = STRUCT_FROM_LINK(link,entity_t,order)
-// FIXME: remove this mess!
-#define	STRUCT_FROM_LINK(l,t,m) ((t *)((Uint8 *)l - (int)&(((t *)0)->m)))
-
 //============================================================================
 
 #ifndef NULL
@@ -204,6 +199,7 @@ int COM_FOpenFile (char *filename, FILE ** file, qboolean complain);
 Uint8 *COM_LoadStackFile (char *path, void *buffer, int bufsize,
 		qboolean complain);
 Uint8 *COM_LoadTempFile (char *path, qboolean complain);
+Uint8 *COM_LoadZoneFile (char *path, qboolean complain);
 Uint8 *COM_LoadHunkFile (char *path, qboolean complain);
 void COM_CreatePath (char *path);
 void COM_Gamedir (char *dir);
