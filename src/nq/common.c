@@ -1551,7 +1551,7 @@ COM_AddDirectory (char *indir)
 //
 // add the directory to the search path
 //
-	search = Hunk_Alloc (sizeof (searchpath_t));
+	search = Z_Malloc (sizeof (searchpath_t));
 	strcpy (search->filename, dir);
 	search->next = com_searchpaths;
 	com_searchpaths = search;
@@ -1564,7 +1564,7 @@ COM_AddDirectory (char *indir)
 		pak = COM_LoadPackFile (pakfile);
 		if (!pak)
 			break;
-		search = Hunk_Alloc (sizeof (searchpath_t));
+		search = Z_Malloc (sizeof (searchpath_t));
 		search->pack = pak;
 		search->next = com_searchpaths;
 		com_searchpaths = search;

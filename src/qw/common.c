@@ -1611,8 +1611,7 @@ COM_AddDirectory (char *indir)
 //
 // add the directory to the search path
 //
-	search = malloc (sizeof (searchpath_t));
-	search->pack = NULL;
+	search = Z_Malloc (sizeof (searchpath_t));
 	strcpy (search->filename, dir);
 	search->next = com_searchpaths;
 	com_searchpaths = search;
@@ -1625,7 +1624,7 @@ COM_AddDirectory (char *indir)
 		pak = COM_LoadPackFile (pakfile);
 		if (!pak)
 			break;
-		search = malloc (sizeof (searchpath_t));
+		search = Z_Malloc (sizeof (searchpath_t));
 		search->pack = pak;
 		search->next = com_searchpaths;
 		com_searchpaths = search;
@@ -1693,7 +1692,7 @@ COM_Gamedir (char *dir)
 			Z_Free (com_searchpaths->pack);
 		}
 		next = com_searchpaths->next;
-		free (com_searchpaths);
+		Z_Free (com_searchpaths);
 		com_searchpaths = next;
 	}
 
