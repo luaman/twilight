@@ -59,6 +59,8 @@ int         key_lastpress;
 int         edit_line = 0;
 int         history_line = 0;
 
+cvar_t	   *cl_chatmode;
+
 keydest_t   key_dest;
 
 int         key_count;					// incremented every key event
@@ -231,13 +233,17 @@ Key_Console (int key)
 										// chat
 		if (key_lines[edit_line][1] == '\\' || key_lines[edit_line][1] == '/')
 			Cbuf_AddText (key_lines[edit_line] + 2);	// skip the >
-		else if (CheckForCommand ())
-			Cbuf_AddText (key_lines[edit_line] + 1);	// valid command
-		else {							// convert to a chat message
-			if (cls.state >= ca_connected)
+		else if (cl_chatmode->value && cls.state >= ca_connected)
+		{
+			if (CheckForCommand ())
+				Cbuf_AddText (key_lines[edit_line] + 1);
+			else {
 				Cbuf_AddText ("say ");
-			Cbuf_AddText (key_lines[edit_line] + 1);	// skip the >
+				Cbuf_AddText (key_lines[edit_line] + 1);
+			}
 		}
+		else
+			Cbuf_AddText (key_lines[edit_line] + 1);
 
 		Cbuf_AddText ("\n");
 		Con_Printf ("%s\n", key_lines[edit_line]);
@@ -629,13 +635,12 @@ Key_Init (void)
 	Cmd_AddCommand ("bind", Key_Bind_f);
 	Cmd_AddCommand ("unbind", Key_Unbind_f);
 	Cmd_AddCommand ("unbindall", Key_Unbindall_f);
-
-
 }
 
 void
 Key_Init_Cvars (void)
 {
+	cl_chatmode = Cvar_Get ("cl_chatmode", "0", CVAR_ARCHIVE, NULL);
 }
 
 
