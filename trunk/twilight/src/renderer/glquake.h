@@ -262,6 +262,7 @@ extern void inline TWI_PostVDraw ()
 void EmitBothSkyLayers (msurface_t *fa);
 void EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform,float alpha);
 void R_DrawSkyChain (msurface_t *s);
+extern void R_DrawSkyBoxChain (msurface_t *s);
 
 /*
  * gl_draw.c
@@ -278,6 +279,7 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs);
  * gl_rsurf.c
  */
 void R_DrawBrushModel (entity_t *e);
+void R_DrawBrushModelSkies (void);
 void R_DrawWorld (void);
 void R_DrawWaterTextureChains (void);
 void GL_BuildLightmaps (void);

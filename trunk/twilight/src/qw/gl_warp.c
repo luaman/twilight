@@ -390,7 +390,7 @@ EmitBothSkyLayersMTEX (msurface_t *fa)
 	EmitSkyPolysMTEX (fa);
 }
 
-static void
+void
 R_DrawSkyBoxChain (msurface_t *s)
 {
 	glpoly_t	*p;
@@ -529,9 +529,9 @@ void R_SkyBoxChanged (cvar_t *cvar)
 }
 
 #define SKYBOXVERT(i, x, y, z, s, t)							\
-	((v_array(i, 0) = (x) * 1024.0f + modelorg[0]),				\
-	(v_array(i, 1) = (y) * 1024.0f + modelorg[1]),				\
-	(v_array(i, 2) = (z) * 1024.0f + modelorg[2]),				\
+	((v_array(i, 0) = (x) * 1024.0f + r_origin[0]),				\
+	(v_array(i, 1) = (y) * 1024.0f + r_origin[1]),				\
+	(v_array(i, 2) = (z) * 1024.0f + r_origin[2]),				\
 	(tc_array(i, 0) = (s) * (254.0f/256.0f) + (1.0f/256.0f)),	\
 	(tc_array(i, 1) = (t) * (254.0f/256.0f) + (1.0f/256.0f)))
 
