@@ -371,7 +371,7 @@ M_AdjustSliders (int dir)
 		case 4:						// 2d resolution height
 			if (height_2d->ivalue == -1)
 				t = vid.height + (20.0f * dir);
-			else if (height_2d->ivalue == 200 && dir == -1)
+			else if (height_2d->ivalue == 240 && dir == -1)
 				t = height_2d->ivalue;
 			else
 				t = height_2d->ivalue + (20.0f * dir);
