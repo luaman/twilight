@@ -112,6 +112,4 @@ QLMP_Load (fs_file_t *file, SDL_RWops *rw)
 		image = QLMP_LoadQPic (buf);
 	Zone_Free (buf);
 	return image;
-
-	return NULL;
 }

@@ -875,6 +875,7 @@ GL_BuildLightmap (model_t *mod, msurface_t *surf, matrix4x4_t *invmatrix)
 	{
 		case GL_RGB:
 			stride -= surf->smax * 3;
+#if 1
 			for (i = 0; i < surf->tmax; i++, dest += stride)
 			{
 				for (j = 0; j < surf->smax; j++)
@@ -887,6 +888,41 @@ GL_BuildLightmap (model_t *mod, msurface_t *surf, matrix4x4_t *invmatrix)
 					stain += 3;
 				}
 			}
+#else
+			{
+				Uint16		max1[4] = {255, 255, 255, 255};
+
+				for (i = 0; i < surf->tmax; i++, dest += stride)
+				{
+					for (j = 0; j < surf->smax; j++) {
+						asm ("\n"
+								"pxor					%%mm2, %%mm2\n"
+								"movq					%1, %%mm0\n"
+								"movq					%2, %%mm1\n"
+								"psrld					$9, %%mm0\n"
+								"psrld					$9, %%mm1\n"
+								"packssdw				%%mm1, %%mm0\n"
+								"pminsw					%4, %%mm0\n"
+								"movd					%3, %%mm1\n"
+								"punpcklbw				%%mm2, %%mm1\n"
+								"pmullw					%%mm0, %%mm1\n"
+								"psrlw					$8, %%mm1\n"
+								"packuswb				%%mm2, %%mm1\n"
+								"movd					%%mm1, %0\n"
+								: "=m" (*(Uint32 *)dest) :
+								"m" (*(Uint64 *)(&bl[0])),
+								"m" (*(Uint64 *)(&bl[2])),
+								"m" (*(Uint32 *)stain),
+								"m" (*(Uint64 *)max1)
+								: "mm0", "mm1", "mm2");
+						bl += 3;
+						dest += 3;
+						stain += 3;
+					}
+				}
+			}
+			asm volatile ("emms\n");
+#endif
 
 			break;
 

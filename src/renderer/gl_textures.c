@@ -93,11 +93,13 @@ static glmode_t modes[] = {
 };
 
 static void Set_TextureMode_f (struct cvar_s *var);
+static void Set_Anisotropy_f (struct cvar_s *var);
 static cvar_t *gl_texturemode;
 static cvar_t *r_lerpimages;
 static cvar_t *r_colormiplevels;
 static cvar_t *gl_picmip;
 static cvar_t *gl_max_size;
+static cvar_t *gl_texture_anisotropy;
 
 static void
 GLT_verify_pow2 (cvar_t *cvar)
@@ -128,6 +130,7 @@ GLT_Init_Cvars ()
 	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
 	r_colormiplevels = Cvar_Get ("r_colormiplevels", "0", CVAR_NONE, NULL);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
+	gl_texture_anisotropy = Cvar_Get("gl_texture_anisotropy", "0", CVAR_ARCHIVE, Set_Anisotropy_f);
 }
 
 void
@@ -174,6 +177,30 @@ Set_TextureMode_f (struct cvar_s *var)
 					glt_filter_min);
 			qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
 					glt_filter_mag);
+		}
+	}
+}
+
+static void
+Set_Anisotropy_f (struct cvar_s *var)
+{
+	gltexture_t *glt;
+
+	if (!gl_ext_anisotropy)
+	{
+		if (var->fvalue)
+			Com_Printf("Ignoring anisotropy (not supported)\n");
+		return;
+	}
+
+	/* change all the existing max anisotropy settings */
+	for (glt = gltextures; glt != NULL; glt = glt->next)
+	{
+		if (glt->mipmap)
+		{
+			qglBindTexture (GL_TEXTURE_2D, glt->texnum);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT,
+					var->fvalue);
 		}
 	}
 }
@@ -763,7 +790,7 @@ R_ResampleTextureLerpLineMMX (Uint8 *in, Uint8 *out, int inwidth, int outwidth,
 	endx = (inwidth-1);
 	for (j = 0,f = 0;j < outwidth;j++, f += fstep_w)
 	{
-		xi = (int) f >> 16;
+		xi = f >> 16;
 		if (xi != oldx)
 		{
 			in += (xi - oldx) * 4;
@@ -771,7 +798,7 @@ R_ResampleTextureLerpLineMMX (Uint8 *in, Uint8 *out, int inwidth, int outwidth,
 		}
 		if (xi < endx)
 		{
-			Uint16	lerp = (f & 0xFFFF) >> 8;
+			Uint16	lerp = (f >> 8) & 0xFF;
 			Uint16	lerp1_4[4] = {lerp, lerp, lerp, lerp};
 			Uint16	lerp2_4[4] = {256-lerp, 256-lerp, 256-lerp, 256-lerp};
 			Uint64	zero = 0;
@@ -1121,6 +1148,8 @@ GL_Upload32 (Uint32 *data, int width, int height, int flags)
 		final = data;
 
 	if (flags & TEX_MIPMAP) {
+		if (gl_ext_anisotropy)
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, gl_texture_anisotropy->fvalue);
 		qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_min);
 		qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
 		if (gl_sgis_mipmap)
