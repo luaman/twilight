@@ -140,10 +140,10 @@ Cbuf_InsertText (char *text)
 		return;
 
 	p = Zone_Alloc (stringzone, sizeof (sizebuf_t));
-	buf = Zone_Alloc (stringzone, len);
+	buf = Zone_Alloc (stringzone, len + 2048);
 	memcpy (buf, text, len);
 	p->cursize = len;
-	p->maxsize = len;
+	p->maxsize = len + 2048;
 	p->data = buf;
 	p->next = cmd_text;
 	cmd_text = p;
