@@ -1086,7 +1086,6 @@ R_DrawEntitiesOnList (void)
 	}
 }
 
-
 /*
 =============
 R_DrawViewModel
