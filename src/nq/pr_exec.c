@@ -375,15 +375,17 @@ PR_ExecuteProgram
 void
 PR_ExecuteProgram (func_t fnum)
 {
-	eval_t     *a, *b, *c;
-	int         s;
-	dstatement_t *st;
-	dfunction_t *f, *newf;
-	int         runaway;
-	int         i;
-	edict_t    *ed;
-	int         exitdepth;
-	eval_t     *ptr;
+	eval_t  	   *a = NULL;
+	eval_t		   *b = NULL;
+	eval_t		   *c = NULL;
+	int				s;
+	dstatement_t   *st = NULL;
+	dfunction_t	   *f, *newf;
+	int				runaway;
+	int				i;
+	edict_t		   *ed;
+	int				exitdepth;
+	eval_t		   *ptr;
 
 	if (!fnum || fnum >= progs->numfunctions) {
 		if (pr_global_struct->self)
