@@ -39,7 +39,6 @@
 #include "quakedef.h"
 
 
-#define	MAX_GLTEXTURES	1024
 #define	MAXCLIPPLANES	11
 #define	TOP_RANGE		16				// soldier uniform colors
 #define	BOTTOM_RANGE	96

@@ -80,16 +80,18 @@ int		gl_filter_mag = GL_LINEAR;
 
 int		texels;
 
-typedef struct {
-	int         texnum;
-	char        identifier[64];
-	int         width, height;
-	qboolean    mipmap;
-	unsigned short crc;
-} gltexture_t;
+typedef struct gltexture_s
+{
+	GLuint				texnum;
+	char				identifier[128];
+	GLuint				width, height;
+	qboolean			mipmap;
+	unsigned short		crc;
+	struct gltexture_s	*next;
+}
+gltexture_t;
 
-gltexture_t *gltextures[MAX_GLTEXTURES];
-int         numgltextures;
+gltexture_t *gltextures;
 
 static memzone_t *resamplezone;
 static memzone_t *texturezone;
@@ -226,9 +228,8 @@ Set_TextureMode_f (struct cvar_s *var)
 	gl_filter_mag = modes[i].magnify;
 
 	/* change all the existing mipmap texture objects */
-	for (i = 0; i < numgltextures; i++)
+	for (glt = gltextures; glt != NULL; glt = glt->next)
 	{
-		glt = gltextures[i];
 		if (glt->mipmap)
 		{
 			qglBindTexture (GL_TEXTURE_2D, glt->texnum);
@@ -1300,7 +1301,7 @@ int
 R_LoadTexture (const char *identifier, image_t *img, int flags)
 {
 	int         i;
-	gltexture_t *glt;
+	gltexture_t *glt = NULL;
 	unsigned short crc = 0;
 
 	/* see if the texture is already present */
@@ -1308,13 +1309,11 @@ R_LoadTexture (const char *identifier, image_t *img, int flags)
 	{
 		crc = CRC_Block (img->pixels, img->width * img->height);
 
-		for (i = 0; i < numgltextures; i++)
+		for (glt = gltextures; glt != NULL; glt = glt->next)
 		{
-			glt = gltextures[i];
 			if (!strcmp (identifier, glt->identifier))
 			{
-				if (img->width == (Uint32)glt->width
-						&& img->height == (Uint32)glt->height
+				if (img->width == glt->width && img->height == glt->height
 						&& crc == glt->crc)
 					return glt->texnum;
 				else
@@ -1324,10 +1323,10 @@ R_LoadTexture (const char *identifier, image_t *img, int flags)
 		}
 	}
 
-	gltextures[numgltextures] = Zone_Alloc (texturezone, sizeof (gltexture_t));
-	glt = gltextures[numgltextures];
+	glt = Zone_Alloc (texturezone, sizeof (gltexture_t));
+	glt->next = gltextures;
+	gltextures = glt;
 
-	numgltextures++;
 	strcpy (glt->identifier, identifier);
 	glt->texnum = texture_extension_number++;
 
@@ -1362,11 +1361,11 @@ GL_LoadTexture
 ================
 */
 int
-GL_LoadTexture (const char *identifier, int width, int height, Uint8 *data,
+GL_LoadTexture (const char *identifier, Uint width, Uint height, Uint8 *data,
 		int flags, int bpp)
 {
 	int         i;
-	gltexture_t *glt;
+	gltexture_t *glt = NULL;
 	unsigned short crc = 0;
 
 	/* see if the texture is already present */
@@ -1374,9 +1373,8 @@ GL_LoadTexture (const char *identifier, int width, int height, Uint8 *data,
 	{
 		crc = CRC_Block (data, width*height);
 
-		for (i = 0; i < numgltextures; i++)
+		for (glt = gltextures; glt != NULL; glt = glt->next)
 		{
-			glt = gltextures[i];
 			if (!strcmp (identifier, glt->identifier))
 			{
 				if (width == glt->width && height == glt->height
@@ -1389,9 +1387,10 @@ GL_LoadTexture (const char *identifier, int width, int height, Uint8 *data,
 		}
 	}
 
-	gltextures[numgltextures] = Zone_Alloc (texturezone, sizeof (gltexture_t));
-	glt = gltextures[numgltextures];
-	numgltextures++;
+	glt = Zone_Alloc (texturezone, sizeof (gltexture_t));
+	glt->next = gltextures;
+	gltextures = glt;
+
 	strcpy (glt->identifier, identifier);
 	glt->texnum = texture_extension_number++;
 
