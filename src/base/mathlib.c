@@ -36,10 +36,9 @@ static const char rcsid[] =
 
 #include <math.h>
 #include <time.h>
+#include <strlib.h>
 
-#include "common.h"
 #include "mathlib.h"
-#include "strlib.h"
 
 void        Sys_Error (char *error, ...);
 
@@ -591,13 +590,13 @@ AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	float       angle;
 	float       sr, sp, sy, cr, cp, cy;
 
-	angle = angles[YAW] * (M_PI * 2 / 360);
-	sy = Q_sin (angle);
-	cy = Q_cos (angle);
-	angle = angles[PITCH] * (M_PI * 2 / 360);
+	angle = angles[0] * (M_PI * 2 / 360);
 	sp = Q_sin (angle);
 	cp = Q_cos (angle);
-	angle = angles[ROLL] * (M_PI * 2 / 360);
+	angle = angles[1] * (M_PI * 2 / 360);
+	sy = Q_sin (angle);
+	cy = Q_cos (angle);
+	angle = angles[2] * (M_PI * 2 / 360);
 	sr = Q_sin (angle);
 	cr = Q_cos (angle);
 
