@@ -76,6 +76,7 @@ int	explosiontexture;
 int	explosiontexturefog;
 
 static cvar_t *r_explosionclip, *r_drawexplosions;
+static cvar_t *r_explosioncolor_r, *r_explosioncolor_g, *r_explosioncolor_b, *r_explosioncolor_a;
 
 int R_ExplosionVert(int column, int row)
 {
@@ -106,9 +107,9 @@ void r_explosion_start(void)
 		{
 			int j, r, g, b, a;
 			j = noise1[y][x] * 3 - 128;
-			r = (j * 256) / 256;
-			g = (j * 128) / 256;
-			b = (j *  64) / 256;
+			r = j;
+			g = j;
+			b = j;
 			a = noise2[y][x];
 			data[y][x][0] = bound(0, r, 255);
 			data[y][x][1] = bound(0, g, 255);
@@ -164,6 +165,10 @@ void R_Explosion_Init(void)
 
 	r_explosionclip = Cvar_Get ("r_explosionclip", "1", CVAR_ARCHIVE, NULL);
 	r_drawexplosions = Cvar_Get ("r_drawexplosions", "1", CVAR_ARCHIVE, NULL);
+	r_explosioncolor_r = Cvar_Get ("r_explosioncolor_r", "1", CVAR_ARCHIVE, NULL);
+	r_explosioncolor_g = Cvar_Get ("r_explosioncolor_g", "0.5", CVAR_ARCHIVE, NULL);
+	r_explosioncolor_b = Cvar_Get ("r_explosioncolor_b", "0.25", CVAR_ARCHIVE, NULL);
+	r_explosioncolor_a = Cvar_Get ("r_explosioncolor_a", "1", CVAR_ARCHIVE, NULL);
 
 	r_explosion_start();
 }
@@ -197,14 +202,21 @@ void R_NewExplosion(vec3_t org)
 void R_DrawExplosion(explosion_t *e)
 {
 	int i;
+	float r, g, b, a;
 
 	memcpy (&v_array[v_index], &e->vert[0][0], sizeof(float[3]) * EXPLOSIONVERTS);
 	memcpy (&tc_array[v_index], &explosiontexcoords[0][0], sizeof(float[2]) * EXPLOSIONVERTS);
 	for (i = 0; i < EXPLOSIONINDICES; i++) {
 		vindices[i_index + i] = explosiontris[0][i] + v_index;
 	}
+
+	r = r_explosioncolor_r->value;
+	g = r_explosioncolor_g->value;
+	b = r_explosioncolor_b->value;
+	a = r_explosioncolor_a->value * e->alpha;
+
 	for (i = 0; i < EXPLOSIONVERTS; i++)
-		VectorSet4(c_array[v_index + i], 1, 1, 1, e->alpha);
+		VectorSet4(c_array[v_index + i], r, g, b, a);
 
 	v_index += EXPLOSIONVERTS;
 	i_index += EXPLOSIONINDICES;
