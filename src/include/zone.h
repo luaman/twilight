@@ -80,6 +80,8 @@ void _Zone_CheckSentinels(void *data, const char *filename, const int fileline);
 void _Zone_CheckSentinelsZone(memzone_t *zone, const char *filename, const int fileline);
 void _Zone_CheckSentinelsGlobal(const char *filename, const int fileline);
 
+void Zone_PrintZone (const int all, memzone_t *zone);
+
 void Zone_Init (void);
 void Zone_Init_Commands (void);
 

@@ -230,24 +230,39 @@ Zone_PrintStats(void)
 	}
 }
 
+void
+Zone_PrintZone (const int all, memzone_t *zone)
+{
+	memheader_t *mem;
+	if (zone->lastchecksize && zone->totalsize != zone->lastchecksize)
+		Com_Printf ("%6ik (%6ik actual) %s (%i byte change)\n",
+				(zone->totalsize + 1023) / 1024,
+				(zone->realsize + 1023) / 1024,
+				zone->name, zone->totalsize - zone->lastchecksize);
+	else
+		Com_Printf ("%6ik (%6ik actual) %s\n",
+				(zone->totalsize + 1023) / 1024,
+				(zone->realsize + 1023) / 1024, zone->name);
+
+	zone->lastchecksize = zone->totalsize;
+
+	if (all)
+		for (mem = zone->chain;mem;mem = mem->chain)
+			Com_Printf ("%10i bytes allocated at %s:%i\n",
+					mem->size, mem->filename, mem->fileline);
+}
+
 static void
 Zone_PrintList(const int listallocations)
 {
 	memzone_t *zone;
-	memheader_t *mem;
+
 	Zone_CheckSentinelsGlobal();
 	Com_Printf("memory zone list:\n"
 	           "size    name\n");
 	for (zone = zonechain;zone;zone = zone->next)
 	{
-		if (zone->lastchecksize != 0 && zone->totalsize != zone->lastchecksize)
-			Com_Printf("%6ik (%6ik actual) %s (%i byte change)\n", (zone->totalsize + 1023) / 1024, (zone->realsize + 1023) / 1024, zone->name, zone->totalsize - zone->lastchecksize);
-		else
-			Com_Printf("%6ik (%6ik actual) %s\n", (zone->totalsize + 1023) / 1024, (zone->realsize + 1023) / 1024, zone->name);
-		zone->lastchecksize = zone->totalsize;
-		if (listallocations)
-			for (mem = zone->chain;mem;mem = mem->chain)
-				Com_Printf("%10i bytes allocated at %s:%i\n", mem->size, mem->filename, mem->fileline);
+		Zone_PrintZone (listallocations, zone);
 	}
 }
 
