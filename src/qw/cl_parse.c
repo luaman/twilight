@@ -1056,7 +1056,7 @@ CL_MuzzleFlash (void)
 	AngleVectors (pl->viewangles, fv, rv, uv);
 	VectorMA (dl->origin, 18, fv, dl->origin);
 
-	if (!gl_flashblend->value)
+	if (!gl_flashblend->value && !gl_oldlights->value)
 	{
 		pmtrace_t tr;
 		
