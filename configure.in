@@ -19,7 +19,7 @@ AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
 dnl Set up automake
-AM_INIT_AUTOMAKE(twilight,$VERSION)
+AM_INIT_AUTOMAKE(twilight-src,$VERSION)
 AM_CONFIG_HEADER(src/config.h)
 
 
