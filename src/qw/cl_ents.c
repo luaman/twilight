@@ -46,8 +46,8 @@ static const char rcsid[] =
 #include "view.h"
 #include "sys.h"
 
-extern cvar_t cl_predict_players;
-extern cvar_t cl_solid_players;
+extern cvar_t *cl_predict_players;
+extern cvar_t *cl_solid_players;
 
 extern int  cl_spikeindex, cl_playerindex, cl_flagindex;
 
@@ -853,35 +853,41 @@ CL_LinkPlayers (void)
 	int         msec;
 	frame_t    *frame;
 	int         oldphysent;
+	vec3_t      org;
 
 	playertime = realtime - cls.latency + 0.02;
-	if (playertime > realtime)
-		playertime = realtime;
+	playertime = min(playertime, realtime);
 
 	frame = &cl.frames[cl.parsecount & UPDATE_MASK];
 
-	for (j = 0, info = cl.players, state = frame->playerstate; j < MAX_CLIENTS;
-		 j++, info++, state++) {
+	for (j = 0, info = cl.players, state = frame->playerstate;
+			j < MAX_CLIENTS;
+			j++, info++, state++)
+	{
+		// If not present this frame, skip it
 		if (state->messagenum != cl.parsecount)
-			continue;					// not present this frame
+			continue;
 
-		// spawn light flashes, even ones coming from invisible objects
-		if (j != cl.playernum) {
+		// spawn light flashes
+		if (!gl_flashblend->value || j != cl.playernum)
+		{
+			if (j == cl.playernum)
+			{					// remember, VectorCopy is a macro!
+				VectorCopy (cl.simorg, org);
+			} else {
+				VectorCopy (state->origin, org);
+			}
+
 			if ((state->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
-				CL_NewDlight (j + 1, state->origin,
-							  200 + (Q_rand () & 31), 0.1, 3);
+				CL_NewDlight (j, org, 200 + (Q_rand () & 31), 0.1, 3);
 			else if (state->effects & EF_BLUE)
-				CL_NewDlight (j + 1, state->origin,
-							  200 + (Q_rand () & 31), 0.1, 1);
+				CL_NewDlight (j, org, 200 + (Q_rand () & 31), 0.1, 1);
 			else if (state->effects & EF_RED)
-				CL_NewDlight (j + 1, state->origin,
-							  200 + (Q_rand () & 31), 0.1, 2);
+				CL_NewDlight (j, org, 200 + (Q_rand () & 31), 0.1, 2);
 			else if (state->effects & EF_BRIGHTLIGHT)
-				CL_NewDlight (j + 1, state->origin,
-							  400 + (Q_rand () & 31), 0.1, 0);
+				CL_NewDlight (j, org, 400 + (Q_rand () & 31), 0.1, 0);
 			else if (state->effects & EF_DIMLIGHT)
-				CL_NewDlight (j + 1, state->origin,
-							  200 + (Q_rand () & 31), 0.1, 0);
+				CL_NewDlight (j, org, 200 + (Q_rand () & 31), 0.1, 0);
 		}
 		// the player object never gets added
 		if (j == cl.playernum)
@@ -893,10 +899,11 @@ CL_LinkPlayers (void)
 		if (!Cam_DrawPlayer (j))
 			continue;
 
-		// grab an entity to fill in
-		if (cl_numvisedicts == MAX_VISEDICTS)	// object list is full
+		// object list is full
+		if (cl_numvisedicts == MAX_VISEDICTS)
 			break;
 
+		// grab an entity to fill in
 		ent = &cl_visedicts[cl_numvisedicts++];
 
 		ent->frame = state->frame;
@@ -914,7 +921,6 @@ CL_LinkPlayers (void)
 		}
 
 		ent->keynum = 0;
-//		ent->keynum = state->number;
 		ent->model = cl.model_precache[state->modelindex];
 		ent->skinnum = state->skinnum;
 		ent->colormap = info->translations;
@@ -933,16 +939,12 @@ CL_LinkPlayers (void)
 
 		// only predict half the move to minimize overruns
 		msec = 500 * (playertime - state->state_time);
-		if (msec <= 0
-			|| (!cl_predict_players.value)) {
+		if (msec <= 0 || (!cl_predict_players->value))
+		{
 			VectorCopy (state->origin, ent->origin);
-//Con_DPrintf ("nopredict\n");
 		} else {
 			// predict players movement
-			if (msec > 255)
-				msec = 255;
-			state->command.msec = msec;
-//Con_DPrintf ("predict: %i\n", msec);
+			state->command.msec = min(msec, 255);
 
 			oldphysent = pmove.numphysent;
 			CL_SetSolidPlayers (j);
@@ -955,7 +957,6 @@ CL_LinkPlayers (void)
 			CL_AddFlagModels (ent, 0);
 		else if (state->effects & EF_FLAG2)
 			CL_AddFlagModels (ent, 1);
-
 	}
 }
 
@@ -1052,8 +1053,8 @@ CL_SetUpPlayerPrediction (qboolean dopred)
 			// only predict half the move to minimize overruns
 			msec = 500 * (playertime - state->state_time);
 			if (msec <= 0 ||
-				(!cl_predict_players.value) ||
-				!dopred) {
+				(!cl_predict_players->value) || !dopred)
+			{
 				VectorCopy (state->origin, pplayer->origin);
 				// Con_DPrintf ("nopredict\n");
 			} else {
@@ -1089,7 +1090,7 @@ CL_SetSolidPlayers (int playernum)
 	struct predicted_player *pplayer;
 	physent_t  *pent;
 
-	if (!cl_solid_players.value)
+	if (!cl_solid_players->value)
 		return;
 
 	pent = pmove.physents + pmove.numphysent;
