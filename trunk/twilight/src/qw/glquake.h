@@ -55,8 +55,8 @@ extern int  texture_extension_number;
 
 extern float gldepthmin, gldepthmax;
 
-void GL_Upload32 (unsigned *data, unsigned width, unsigned height,
-		qboolean mipmap, qboolean alpha);
+void GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
+		qboolean alpha);
 void GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, 
 						int alpha, unsigned *ttable);
 
