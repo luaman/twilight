@@ -138,7 +138,7 @@ R_Init_Cvars (void)
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
 	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_NONE, NULL);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", CVAR_NONE, NULL);
-	gl_flashblend = Cvar_Get ("gl_flashblend", "1", CVAR_NONE, NULL);
+	gl_flashblend = Cvar_Get ("gl_flashblend", "1", CVAR_ARCHIVE, NULL);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", CVAR_NONE, NULL);
 	gl_nocolors = Cvar_Get ("gl_nocolors", "0", CVAR_NONE, NULL);
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
