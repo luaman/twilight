@@ -40,6 +40,17 @@ typedef struct {
 	char	map[MAX_STYLESTRING];
 } lightstyle_t;
 
+
+typedef enum
+{
+	ca_dedicated,		// NQ - dedicated server
+	ca_disconnected,	// not connected at all
+	ca_demostart,		// QW - starting a demo
+	ca_connected,		// waiting for server data
+	ca_onserver,		// QW - processing data, downloading, etc
+	ca_active			// world is active
+} ca_state_t;
+
 #define USER_SPECTATOR			BIT(0)
 #define TEAM_SPECTATOR			-1
 #define TEAM_SHOW				-2
@@ -65,6 +76,7 @@ typedef struct {
 
 	char		skin_name[MAX_SKIN_NAME];
 	skin_t		*skin;
+	
 } user_info_t;
 
 #define	CSHIFT_CONTENTS	0
@@ -112,6 +124,7 @@ typedef struct client_common_s {
 
 	model_t			*worldmodel;
 	char			levelname[40];
+	ca_state_t		state;
 } client_common_t;
 
 extern client_common_t	 ccl;

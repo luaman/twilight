@@ -44,7 +44,7 @@ qsocket_t  *loop_server = NULL;
 int
 Loop_Init (void)
 {
-	if (cls.state == ca_dedicated)
+	if (ccl.state == ca_dedicated)
 		return -1;
 	return 0;
 }

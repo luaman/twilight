@@ -67,7 +67,7 @@ CL_StopPlayback (void)
 	fclose (cls.demofile);
 	cls.demoplayback = false;
 	cls.demofile = NULL;
-	cls.state = ca_disconnected;
+	ccl.state = ca_disconnected;
 	r_worldmodel = NULL;
 
 	if (cls.timedemo)
@@ -229,7 +229,7 @@ CL_Record_f (void)
 		return;
 	}
 
-	if (c == 2 && cls.state == ca_connected) {
+	if (c == 2 && ccl.state >= ca_connected) {
 		Com_Printf
 			("Can not record - already connected to server\nClient demo recording must be started before connecting\n");
 		return;
@@ -302,7 +302,8 @@ CL_PlayDemo_f (void)
 	}
 
 	cls.demoplayback = true;
-	cls.state = ca_connected;
+	// --KB-- Is this right?
+	ccl.state = ca_connected;
 	cls.forcetrack = 0;
 
 	while ((c = getc (cls.demofile)) != '\n')

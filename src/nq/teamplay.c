@@ -248,7 +248,7 @@ Team_loc (void)
 		}
 	}
 	
-	if (cls.state != ca_connected) {
+	if (ccl.state != ca_active) {
 		Com_Printf ("Not connected.\n");
 		return;
 	}

@@ -57,12 +57,6 @@ extern void M_Menu_Quit_f (void);
 static void
 Host_Quit_f (void)
 {
-	/*
-	if (key_dest != key_console && cls.state != ca_dedicated) {
-		M_Menu_Quit_f ();
-		return;
-	}
-	*/
 	CL_Disconnect ();
 	Host_ShutdownServer (false);
 
@@ -294,7 +288,7 @@ Host_Map_f (void)
 	if (!sv.active)
 		return;
 
-	if (cls.state != ca_dedicated) {
+	if (ccl.state != ca_dedicated) {
 		strcpy (cls.spawnparms, "");
 
 		for (i = 2; i < Cmd_Argc (); i++) {
@@ -661,7 +655,7 @@ Host_Loadgame_f (void)
 	for (i = 0; i < NUM_SPAWN_PARMS; i++)
 		svs.clients->spawn_parms[i] = spawn_parms[i];
 
-	if (cls.state != ca_dedicated)
+	if (ccl.state != ca_dedicated)
 	{
 		CL_EstablishConnection ("local");
 		Host_Reconnect_f ();
@@ -693,7 +687,7 @@ Host_Name_f (void)
 		if (strcmp (_cl_name->svalue, newName) == 0)
 			return;
 		Cvar_Set (_cl_name, newName);
-		if (cls.state == ca_connected)
+		if (ccl.state >= ca_connected)
 			Cmd_ForwardToServer ();
 		return;
 	}
@@ -730,7 +724,7 @@ Host_Say (qboolean teamonly)
 	qboolean    fromServer = false;
 
 	if (cmd_source == src_command) {
-		if (cls.state == ca_dedicated) {
+		if (ccl.state == ca_dedicated) {
 			fromServer = true;
 			teamonly = false;
 		} else {
@@ -878,7 +872,7 @@ Host_Color_f (void)
 
 	if (cmd_source == src_command) {
 		Cvar_Set (_cl_color, va("%i", playercolor));
-		if (cls.state == ca_connected)
+		if (ccl.state >= ca_connected)
 			Cmd_ForwardToServer ();
 		return;
 	}
@@ -1168,7 +1162,7 @@ Host_Kick_f (void)
 
 	if (i < svs.maxclients) {
 		if (cmd_source == src_command)
-			if (cls.state == ca_dedicated)
+			if (ccl.state == ca_dedicated)
 				who = "Console";
 			else
 				who = _cl_name->svalue;
@@ -1403,7 +1397,7 @@ Host_Startdemos_f (void)
 {
 	int         i, c;
 
-	if (cls.state == ca_dedicated) {
+	if (ccl.state == ca_dedicated) {
 		if (!sv.active)
 			Cbuf_AddText ("map start\n");
 		return;
@@ -1437,7 +1431,7 @@ Return to looping demos
 static void
 Host_Demos_f (void)
 {
-	if (cls.state == ca_dedicated)
+	if (ccl.state == ca_dedicated)
 		return;
 	if (cls.demonum == -1)
 		cls.demonum = 1;
@@ -1455,7 +1449,7 @@ Return to looping demos
 static void
 Host_Stopdemo_f (void)
 {
-	if (cls.state == ca_dedicated)
+	if (ccl.state == ca_dedicated)
 		return;
 	if (!cls.demoplayback)
 		return;

@@ -717,7 +717,7 @@ R_TimeRefresh_f (void)
 	int         i;
 	float       start, stop, time;
 
-	if (cls.state != ca_connected)
+	if (ccl.state != ca_active)
 		return;
 
 	qglFinish ();
