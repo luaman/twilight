@@ -67,10 +67,10 @@ void        Cmd_ForwardToServer (void);
 // references them even when on a unix system.
 
 
-cvar_t		*rcon_password;
-cvar_t		*rcon_address;
+static cvar_t		*rcon_password;
+static cvar_t		*rcon_address;
 
-cvar_t		*cl_timeout;
+static cvar_t		*cl_timeout;
 cvar_t		*cl_shownet;
 
 cvar_t		*cl_hudswap;
@@ -86,17 +86,17 @@ cvar_t		*localid;
 // info mirrors
 //
 cvar_t		*password;
-cvar_t		*spectator;
+static cvar_t		*spectator;
 cvar_t		*name;
-cvar_t		*team;
+static cvar_t		*team;
 cvar_t		*skin;
-cvar_t		*topcolor;
-cvar_t		*bottomcolor;
-cvar_t		*rate;
-cvar_t		*noaim;
-cvar_t		*msg;
+static cvar_t		*topcolor;
+static cvar_t		*bottomcolor;
+static cvar_t		*rate;
+static cvar_t		*noaim;
+static cvar_t		*msg;
 
-cvar_t		*host_speeds;
+static cvar_t		*host_speeds;
 cvar_t		*show_fps;
 
 
@@ -135,7 +135,7 @@ static jmp_buf host_abort;
 
 void		Master_Connect_f (void);
 
-float		server_version = 0;			// version of server we connected to
+static float	server_version = 0;			// version of server we connected to
 
 char        emodel_name[] =
 	{ 'e' ^ 0xff, 'm' ^ 0xff, 'o' ^ 0xff, 'd' ^ 0xff, 'e' ^ 0xff, 'l' ^ 0xff,

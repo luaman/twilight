@@ -105,8 +105,8 @@ to the new value before sending out any replies.
 */
 
 int			net_drop;
-cvar_t		*showpackets;
-cvar_t		*showdrop;
+static cvar_t		*showpackets;
+static cvar_t		*showdrop;
 cvar_t		*qport;
 
 /*

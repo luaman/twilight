@@ -46,10 +46,10 @@ static const char rcsid[] =
 #include "common.h"
 
 
-int			menu_errors;
+static int			menu_errors;
 menu_t		*m_menu;
-menu_t		*m_first;
-memzone_t	*m_zone;
+static menu_t		*m_first;
+static memzone_t	*m_zone;
 qboolean	m_entersound;
 
 void

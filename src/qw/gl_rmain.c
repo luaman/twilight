@@ -73,11 +73,11 @@ texture_t *r_notexture_water;
 int d_lightstylevalue[256];				// 8.8 fraction of base light value
 
 
-cvar_t *r_norefresh;
+static cvar_t *r_norefresh;
 cvar_t *r_drawentities;
 cvar_t *r_drawviewmodel;
-cvar_t *r_speeds;
-cvar_t *r_shadows;
+static cvar_t *r_speeds;
+static cvar_t *r_shadows;
 cvar_t *r_dynamic;
 cvar_t *r_stainmaps;
 cvar_t *r_netgraph;

@@ -58,11 +58,11 @@ client_t   *host_client;				// current client
 
 cvar_t     *sv_mintic;
 cvar_t     *sv_maxtic;
-cvar_t     *timeout;
-cvar_t     *zombietime;
-cvar_t     *rcon_password;
-cvar_t     *password;
-cvar_t     *spectator_password;
+static cvar_t     *timeout;
+static cvar_t     *zombietime;
+static cvar_t     *rcon_password;
+static cvar_t     *password;
+static cvar_t     *spectator_password;
 cvar_t     *allow_download;
 cvar_t     *allow_download_skins;
 cvar_t     *allow_download_models;
@@ -72,24 +72,24 @@ cvar_t     *sv_highchars;
 cvar_t     *sv_phs;
 cvar_t     *pausable;
 cvar_t     *sv_aim;
-cvar_t     *fraglimit;
-cvar_t     *timelimit;
+static cvar_t     *fraglimit;
+static cvar_t     *timelimit;
 cvar_t     *teamplay;
-cvar_t     *samelevel;
-cvar_t     *maxclients;
-cvar_t     *maxspectators;
+static cvar_t     *samelevel;
+static cvar_t     *maxclients;
+static cvar_t     *maxspectators;
 cvar_t     *deathmatch;
-cvar_t     *spawn;
-cvar_t     *watervis;
-cvar_t     *hostname;
-cvar_t     *filterban;
-cvar_t     *temp1;
+static cvar_t     *spawn;
+static cvar_t     *watervis;
+static cvar_t     *hostname;
+static cvar_t     *filterban;
+static cvar_t     *temp1;
 cvar_t     *coop;
 cvar_t     *skill;
 
 cvar_t	   *sv_nailhack;
 
-FILE       *sv_logfile;
+static FILE       *sv_logfile;
 FILE       *sv_fraglogfile;
 
 void        SV_AcceptClient (netadr_t adr, int userid, char *userinfo);

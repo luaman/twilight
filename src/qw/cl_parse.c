@@ -48,7 +48,7 @@ static const char rcsid[] =
 #include "sky.h"
 #include "teamplay.h"
 
-char       *svc_strings[] = {
+static char       *svc_strings[] = {
 	"svc_bad",
 	"svc_nop",
 	"svc_disconnect",
@@ -132,7 +132,7 @@ char       *svc_strings[] = {
 
 extern model_t *player_model;
 
-int         oldparsecountmod;
+static int         oldparsecountmod;
 int         parsecountmod;
 double      parsecounttime;
 
@@ -1138,7 +1138,7 @@ CL_MuzzleFlash (void)
 CL_ParseServerMessage
 =====================
 */
-int         received_framecount;
+static int         received_framecount;
 void
 CL_ParseServerMessage (void)
 {

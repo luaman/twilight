@@ -46,8 +46,6 @@ void Mod_UnloadBrushModel (model_t *mod);
 
 Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 
-texture_t   r_notexture_mip;
-
 unsigned   *model_checksum;
 
 void

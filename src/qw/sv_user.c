@@ -50,13 +50,13 @@ usercmd_t		cmd;
 
 cvar_t			*cl_rollspeed;
 cvar_t			*cl_rollangle;
-cvar_t			*sv_spectalk;
+static cvar_t			*sv_spectalk;
 
-cvar_t			*sv_timekick;
-cvar_t			*sv_timekick_allowed;
-cvar_t			*sv_timekick_interval;
+static cvar_t			*sv_timekick;
+static cvar_t			*sv_timekick_allowed;
+static cvar_t			*sv_timekick_interval;
 
-cvar_t			*sv_mapcheck;
+static cvar_t			*sv_mapcheck;
 
 extern vec3_t	player_mins;
 
@@ -1145,7 +1145,7 @@ typedef struct {
 	void        (*func) (void);
 } ucmd_t;
 
-ucmd_t      ucmds[] = {
+static ucmd_t      ucmds[] = {
 	{"new", SV_New_f},
 	{"modellist", SV_Modellist_f},
 	{"soundlist", SV_Soundlist_f},
@@ -1252,7 +1252,7 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 
 //============================================================================
 
-vec3_t      pmove_mins, pmove_maxs;
+static vec3_t      pmove_mins, pmove_maxs;
 
 /*
 ====================
@@ -1324,7 +1324,7 @@ SV_PreRunCmd
 ===========
 Done before running a player command.  Clears the touch array
 */
-Uint8       playertouch[(MAX_EDICTS + 7) / 8];
+static Uint8       playertouch[(MAX_EDICTS + 7) / 8];
 
 static void
 SV_PreRunCmd (void)

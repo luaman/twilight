@@ -60,10 +60,10 @@ typedef struct cachepic_s {
 } cachepic_t;
 
 #define		MAX_CACHED_PICS		128
-cachepic_t	menu_cachepics[MAX_CACHED_PICS];
-int			menu_numcachepics;
+static cachepic_t	GLT_cachepics[MAX_CACHED_PICS];
+static int			GLT_numcachepics;
 
-Uint8		menuplyr_pixels[4096];
+static Uint8		menuplyr_pixels[4096];
 
 qpic_t     *
 Draw_PicFromWad (char *name)
@@ -100,13 +100,13 @@ Draw_CachePic (char *path)
 	qpic_t     *dat;
 	glpic_t    *gl;
 
-	for (pic = menu_cachepics, i = 0; i < menu_numcachepics; pic++, i++)
+	for (pic = GLT_cachepics, i = 0; i < GLT_numcachepics; pic++, i++)
 		if (!strcmp (path, pic->name))
 			return &pic->pic;
 
-	if (menu_numcachepics == MAX_CACHED_PICS)
-		Sys_Error ("menu_numcachepics == MAX_CACHED_PICS");
-	menu_numcachepics++;
+	if (GLT_numcachepics == MAX_CACHED_PICS)
+		Sys_Error ("GLT_numcachepics == MAX_CACHED_PICS");
+	GLT_numcachepics++;
 	strlcpy (pic->name, path, sizeof (pic->name));
 
 	/* load the pic from disk */
