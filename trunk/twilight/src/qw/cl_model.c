@@ -349,13 +349,13 @@ Mod_LoadLighting (lump_t *l)
 		int i;
 		Uint8 *in, *out, *data;
 		Uint8 d;
-		char litfilename[1024];
+		char litfilename[MAX_OSPATH];
 
 		loadmodel->lightdata = NULL;
 
 		strcpy(litfilename, loadmodel->name);
 		COM_StripExtension(litfilename, litfilename);
-		strcat(litfilename, ".lit");
+		COM_DefaultExtension(litfilename, ".lit");
 		data = (Uint8 *) COM_LoadHunkFile (litfilename);
 
 		if (data)
@@ -700,7 +700,7 @@ int         posenum;
 Uint8       player_8bit_texels[320 * 200];
 int			player_8bit_width = 296, player_8bit_height = 194;
 
-Uint8 aliasbboxmin[3], aliasbboxmax[3];
+Uint8		aliasbboxmin[3], aliasbboxmax[3];
 
 /*
 =================
@@ -1175,7 +1175,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	pframetype = (daliasframetype_t *) &pintriangles[pheader->numtris];
 
 	aliasbboxmin[0] = aliasbboxmin[1] = aliasbboxmin[2] = 255;
-	aliasbboxmax[0] = aliasbboxmax[1] = aliasbboxmax[2] = 0;
+	aliasbboxmax[0] = aliasbboxmax[1] = aliasbboxmax[2] = -255;
 
 	for (i = 0; i < numframes; i++) {
 		aliasframetype_t frametype;

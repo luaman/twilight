@@ -28,17 +28,14 @@ static const char rcsid[] =
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #else
-# ifdef __WIN32
+# ifdef _WIN32
 #  include <win32conf.h>
 # endif
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "qtypes.h"
-#include "pcx.h"
+#include "common.h"
 #include "strlib.h"
+#include "pcx.h"
 #include "tga.h"
 
 Uint8 **
@@ -46,11 +43,17 @@ IMG_Load (char *name, Uint8 **buf, int *w, int *h)
 {
 	char wext[256];
 
-	snprintf (wext, 256, "%s.tga", name);
+	strcpy(wext, name);
+	COM_StripExtension (wext, wext);
+	COM_DefaultExtension (wext, ".tga");
+
 	if (TGA_Load (wext, buf, w, h))
 		return buf;
 
-	snprintf (wext, 256, "%s.pcx", name);
+	strcpy(wext, name);
+	COM_StripExtension (wext, wext);
+	COM_DefaultExtension (wext, ".pcx");
+
 	if (PCX_Load (wext, buf, w, h))
 		return buf;
 

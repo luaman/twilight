@@ -89,6 +89,10 @@ SOURCE=.\dynogl.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\image.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\noise.c
 # End Source File
 # Begin Source File
@@ -121,11 +125,27 @@ SOURCE=.\dynogl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\glquake.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\image.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\oglfuncs.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\opengl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\pcx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tga.h
 # End Source File
 # Begin Source File
 
