@@ -479,6 +479,9 @@ CL_RelinkEntities (void)
 // if the object wasn't included in the last packet, remove it
 		if (ent->msgtime != cl.mtime[0]) {
 			ent->model = NULL;
+			ent->frame_start_time     = 0;
+			ent->translate_start_time = 0;
+			ent->rotate_start_time    = 0;
 			continue;
 		}
 
@@ -496,6 +499,13 @@ CL_RelinkEntities (void)
 				delta[j] = ent->msg_origins[0][j] - ent->msg_origins[1][j];
 				if (delta[j] > 100 || delta[j] < -100)
 					f = 1;				// assume a teleportation, not a motion
+			}
+
+			if (f >= 1)
+			{
+				ent->frame_start_time     = 0;
+				ent->translate_start_time = 0;
+				ent->rotate_start_time    = 0;
 			}
 
 			// interpolate the origin and angles

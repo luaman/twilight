@@ -572,7 +572,7 @@ SV_PushRotate (edict_t *pusher, float movetime)
 	for (i = 0; i < 3; i++)
 		amove[i] = pusher->v.avelocity[i] * movetime;
 
-	VectorSubtract (vec3_origin, amove, a);
+	VectorInverse (amove, a);
 	AngleVectors (a, forward, right, up);
 
 	VectorCopy (pusher->v.angles, pushorig);

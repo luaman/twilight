@@ -44,7 +44,7 @@ extern vec3_t vec3_origin;
 #define VectorSubtract(a,b,c) (c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2])
 #define VectorAdd(a,b,c) (c[0]=a[0]+b[0],c[1]=a[1]+b[1],c[2]=a[2]+b[2])
 #define VectorCopy(a,b) (b[0]=a[0],b[1]=a[1],b[2]=a[2])
-#define VectorInverse(x) (x[0]=-x[0],x[1]=-x[1],x[2]=-x[2])
+#define VectorInverse(a,b) (b[0]=-a[0],b[1]=-a[1],b[2]=-a[2])
 #define VectorScale(a,b,c) (c[0]=a[0]*b,c[1]=a[1]*b,c[2]=a[2]*b)
 #define VectorMA(a,b,c,d) (d[0]=a[0]+b*c[0],d[1]=a[1]+b*c[1],d[2]=a[2]+b*c[2])
 #define VectorCompare(a,b) ((a[0]==b[0])&&(a[1]==b[1])&&(a[2]==b[2]))

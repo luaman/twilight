@@ -224,8 +224,8 @@ Sys_Init (void)
 	LARGE_INTEGER PerformanceFreq;
 	unsigned int lowpart, highpart;
 
-	MaskExceptions ();
-	Sys_SetFPCW ();
+//	MaskExceptions ();
+//	Sys_SetFPCW ();
 
 	if (!QueryPerformanceFrequency (&PerformanceFreq))
 		Sys_Error ("No hardware timer available");
@@ -376,7 +376,7 @@ Sys_FloatTime (void)
 	unsigned int temp, t2;
 	double      time;
 
-	Sys_PushFPCW_SetHigh ();
+//	Sys_PushFPCW_SetHigh ();
 
 	QueryPerformanceCounter (&PerformanceCount);
 
@@ -414,7 +414,7 @@ Sys_FloatTime (void)
 		}
 	}
 
-	Sys_PopFPCW ();
+//	Sys_PopFPCW ();
 
 	return curtime;
 }

@@ -326,6 +326,8 @@ typedef enum { mod_brush, mod_sprite, mod_alias } modtype_t;
 #define FLAG_FULLBRIGHT	1				// always fullbright
 #define FLAG_NOSHADOW	2				// do not draw shadow
 #define FLAG_DOUBLESIZE 4				// double sized model
+#define FLAG_NO_IM_ANIM 8				// do not interpolate frames (1 frame only)
+#define FLAG_NO_IM_FORM 16				// do not interpolate angles or position (weapons)
 
 typedef struct model_s {
 	char        name[MAX_QPATH];
