@@ -155,13 +155,15 @@ void transpolyend(void)
 
 void transpolyrender(void)
 {
-	int i, j, k, tpolytype, texnum;
-	transpoly_t *p;
-	int points = -1;
-	translistitem *item;
-	transvert_t *vert;
+	int				i, j, k, tpolytype, texnum;
+	transpoly_t		*p;
+	int				points = -1;
+	translistitem	*item;
+	transvert_t		*vert;
+
 	if (currenttranspoly < 1)
 		return;
+
 	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	tpolytype = TPOLYTYPE_ALPHA;
