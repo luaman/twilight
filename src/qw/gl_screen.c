@@ -186,8 +186,8 @@ GL_BrightenScreen(void)
 			f *= 0.5;
 		}
 		qglEnd ();
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	if (r_contrast->value <= 0.99f)
 	{
 		qglColor4f (1, 1, 1, 1 - r_contrast->value);
@@ -230,7 +230,7 @@ for a few moments
 void
 SCR_CenterPrint (char *str)
 {
-	strncpy (scr_centerstring, str, sizeof (scr_centerstring) - 1);
+	strlcpy (scr_centerstring, str, sizeof (scr_centerstring) - 1);
 	scr_centertime_off = scr_centertime->value;
 	scr_centertime_start = cl.time;
 
@@ -689,10 +689,10 @@ SCR_ScreenShot_f (void)
 		buffer[i + 2] = temp;
 	}
 
-	TGA_Write (pcxname, vid.width, vid.height, 3, buffer);
+	if (TGA_Write (pcxname, vid.width, vid.height, 3, buffer))
+		Con_Printf ("Wrote %s\n", pcxname);
 
 	free (buffer);
-	Con_Printf ("Wrote %s\n", pcxname);
 }
 
 /* 

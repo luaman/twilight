@@ -98,16 +98,14 @@ console is:
 
 */
 
-qboolean    scr_skipupdate = 0;
-
-int         glx, gly;
+int			glx, gly;
 
 // only the refresh window will be updated unless these variables are flagged 
-int         scr_copytop;
-int         scr_copyeverything;
+int			scr_copytop;
+int			scr_copyeverything;
 
-float       scr_con_current;
-float       scr_conlines;				// lines of console to display
+float		scr_con_current;
+float		scr_conlines;				// lines of console to display
 
 cvar_t		*scr_viewsize;
 cvar_t		*scr_fov;
@@ -122,11 +120,13 @@ cvar_t		*r_brightness;
 cvar_t		*r_contrast;
 cvar_t		*r_waterwarp;
 
+extern cvar_t *crosshair;
+
 qboolean    scr_initialized;			// ready to draw
 
-struct qpic_s     *scr_ram;
-struct qpic_s     *scr_net;
-struct qpic_s     *scr_turtle;
+qpic_t		*scr_ram;
+qpic_t		*scr_net;
+qpic_t		*scr_turtle;
 
 int         clearconsole;
 int         clearnotify;
@@ -141,12 +141,7 @@ qboolean    scr_disabled_for_loading;
 qboolean    scr_drawloading;
 float       scr_disabled_time;
 
-qboolean    block_drawing;
-
 void        SCR_ScreenShot_f (void);
-void        GL_BrightenScreen (void);
-
-extern cvar_t *crosshair;
 
 void
 GL_BrightenScreen(void)
@@ -185,23 +180,22 @@ GL_BrightenScreen(void)
 			f *= 0.5;
 		}
 		qglEnd ();
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 	if (r_contrast->value <= 0.99f)
 	{
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			qglColor4f (1, 1, 1, 1 - r_contrast->value);
+		qglColor4f (1, 1, 1, 1 - r_contrast->value);
 		qglBegin (GL_TRIANGLES);
 		qglVertex2f (-5000, -5000);
 		qglVertex2f (10000, -5000);
 		qglVertex2f (-5000, 10000);
 		qglEnd ();
 	}
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	qglEnable (GL_CULL_FACE);
-	qglEnable (GL_DEPTH_TEST);
-	qglDisable (GL_BLEND);
+	qglColor3f (1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
+	qglEnable (GL_CULL_FACE);
+	qglDisable (GL_BLEND);
 }
 
 /*
@@ -230,7 +224,7 @@ for a few moments
 void
 SCR_CenterPrint (char *str)
 {
-	strlcpy (scr_centerstring, str, sizeof (scr_centerstring));
+	strlcpy (scr_centerstring, str, sizeof (scr_centerstring) - 1);
 	scr_centertime_off = scr_centertime->value;
 	scr_centertime_start = cl.time;
 
@@ -255,8 +249,7 @@ SCR_DrawCenterString (void)
 
 // the finale prints the characters one at a time
 	if (cl.intermission)
-		remaining = scr_printspeed->value
-			* (cl.time - scr_centertime_start);
+		remaining = scr_printspeed->value * (cl.time - scr_centertime_start);
 	else
 		remaining = 9999;
 
@@ -264,7 +257,7 @@ SCR_DrawCenterString (void)
 	start = scr_centerstring;
 
 	if (scr_center_lines <= 4)
-		y = vid.height * 0.35;
+		y = vid.conheight * 0.35;
 	else
 		y = 48;
 
@@ -273,7 +266,7 @@ SCR_DrawCenterString (void)
 		for (l = 0; l < 40; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
-		x = (vid.width - l * 8) / 2;
+		x = (vid.conwidth - l * 8) / 2;
 		for (j = 0; j < l; j++, x += 8) {
 			Draw_Character (x, y, start[j]);
 			if (!remaining--)
@@ -318,8 +311,8 @@ CalcFov
 float
 CalcFov (float fov_x, float width, float height)
 {
-	float a;
 	float x;
+	float a;
 
 	if (fov_x < 1 || fov_x > 179)
 		Sys_Error ("Bad fov: %f", fov_x);
@@ -440,6 +433,7 @@ SCR_Init_Cvars (void)
 	r_waterwarp = Cvar_Get ("r_waterwarp", "0", CVAR_ARCHIVE, NULL);
 }
 
+
 /*
 ==================
 SCR_Init
@@ -448,6 +442,7 @@ SCR_Init
 void
 SCR_Init (void)
 {
+
 //
 // register our commands
 //
@@ -463,23 +458,6 @@ SCR_Init (void)
 }
 
 
-
-/*
-==============
-SCR_DrawRam
-==============
-*/
-void
-SCR_DrawRam (void)
-{
-	if (!scr_showram->value)
-		return;
-
-	if (!r_cache_thrash)
-		return;
-
-	Draw_Pic (scr_vrect.x + 32, scr_vrect.y, scr_ram);
-}
 
 /*
 ==============
@@ -522,6 +500,35 @@ SCR_DrawNet (void)
 	Draw_Pic (scr_vrect.x + 64, scr_vrect.y, scr_net);
 }
 
+void
+SCR_DrawFPS (void)
+{
+	extern cvar_t *show_fps;
+	static double lastframetime;
+	double      t;
+	extern int  fps_count;
+	static int  lastfps;
+	int         x, y;
+	char        st[80];
+
+	if (!show_fps->value)
+		return;
+
+	t = Sys_DoubleTime ();
+	if ((t - lastframetime) >= 1.0) {
+		lastfps = fps_count;
+		fps_count = 0;
+		lastframetime = t;
+	}
+
+	snprintf (st, sizeof (st), "%3d FPS", lastfps);
+	x = vid.conwidth - strlen (st) * 8 - 8;
+	y = vid.conheight - sb_lines - 8;
+//  Draw_TileClear(x, y, strlen(st) * 8, 8);
+	Draw_String (x, y, st);
+}
+
+
 /*
 ==============
 DrawPause
@@ -530,7 +537,7 @@ DrawPause
 void
 SCR_DrawPause (void)
 {
-	struct qpic_s     *pic;
+	qpic_t		*pic;
 
 	if (!scr_showpause->value)			// turn off for screenshots
 		return;
@@ -553,7 +560,7 @@ SCR_DrawLoading
 void
 SCR_DrawLoading (void)
 {
-	struct qpic_s     *pic;
+	qpic_t		*pic;
 
 	if (!scr_drawloading)
 		return;
@@ -583,7 +590,6 @@ SCR_SetUpToDrawConsole (void)
 
 // decide on the height of the console
 	con_forcedup = !cl.worldmodel || cls.signon != SIGNONS;
-
 	if (con_forcedup) {
 		scr_conlines = vid.conheight;		// full screen
 		scr_con_current = scr_conlines;
@@ -622,33 +628,6 @@ SCR_DrawConsole (void)
 	}
 }
 
-void
-SCR_DrawFPS (void)
-{
-	extern cvar_t *show_fps;
-	static double lastframetime;
-	double      t;
-	extern int  fps_count;
-	static int  lastfps;
-	int         x, y;
-	char        st[80];
-
-	if (!show_fps->value)
-		return;
-
-	t = Sys_DoubleTime ();
-	if ((t - lastframetime) >= 1.0) {
-		lastfps = fps_count;
-		fps_count = 0;
-		lastframetime = t;
-	}
-
-	snprintf (st, sizeof (st), "%3d FPS", lastfps);
-	x = vid.width - strlen (st) * 8 - 8;
-	y = vid.height - sb_lines - 8;
-//  Draw_TileClear(x, y, strlen(st) * 8, 8);
-	Draw_String (x, y, st);
-}
 
 /* 
 ============================================================================== 
@@ -666,7 +645,7 @@ SCR_ScreenShot_f
 void
 SCR_ScreenShot_f (void)
 {
-	Uint8       *buffer = NULL;
+	Uint8       *buffer;
 	char        pcxname[80];
 	char        checkname[MAX_OSPATH];
 	int         i, c, temp;
@@ -683,13 +662,14 @@ SCR_ScreenShot_f (void)
 		if (Sys_FileTime (checkname) == -1)
 			break;						// file doesn't exist
 	}
-
 	if (i == 100) {
 		Con_Printf ("SCR_ScreenShot_f: Couldn't create a TGA file\n");
 		return;
 	}
 
+
 	buffer = malloc (vid.width * vid.height * 3);
+
 	qglReadPixels (glx, gly, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE,
 				  buffer);
 
@@ -768,14 +748,14 @@ SCR_DrawNotifyString (void)
 
 	start = scr_notifystring;
 
-	y = vid.height * 0.35;
+	y = vid.conheight * 0.35;
 
 	do {
 		// scan the width of the line
 		for (l = 0; l < 40; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
-		x = (vid.width - l * 8) / 2;
+		x = (vid.conwidth - l * 8) / 2;
 		for (j = 0; j < l; j++, x += 8)
 			Draw_Character (x, y, start[j]);
 
@@ -789,41 +769,6 @@ SCR_DrawNotifyString (void)
 		start++;						// skip the \n
 	} while (1);
 }
-
-/*
-==================
-SCR_ModalMessage
-
-Displays a text string in the center of the screen and waits for a Y or N
-keypress.  
-==================
-*/
-int
-SCR_ModalMessage (char *text)
-{
-	if (cls.state == ca_dedicated)
-		return true;
-
-	scr_notifystring = text;
-
-// draw a fresh screen
-	scr_drawdialog = true;
-	SCR_UpdateScreen ();
-	scr_drawdialog = false;
-
-	S_ClearBuffer ();					// so dma doesn't loop current sound
-
-	do {
-		key_count = -1;					// wait for a key down and up
-		Sys_SendKeyEvents ();
-	} while (key_lastpress != 'y' && key_lastpress != 'n'
-			 && key_lastpress != K_ESCAPE);
-
-	SCR_UpdateScreen ();
-
-	return key_lastpress == 'y';
-}
-
 
 //=============================================================================
 
@@ -867,14 +812,6 @@ needs almost the entire 256k of stack space!
 void
 SCR_UpdateScreen (void)
 {
-	if (block_drawing)
-		return;
-	if (!gl_triplebuffer)
-	{
-		Con_Printf ("SCR_UpdateScreen: WARNING: gl_triplebuffer not inited\n");
-		return;
-	}
-
 	scr_copytop = 0;
 	scr_copyeverything = 0;
 
@@ -889,15 +826,14 @@ SCR_UpdateScreen (void)
 	if (!scr_initialized || !con_initialized)
 		return;							// not initialized yet
 
-
 	qglEnable (GL_DEPTH_TEST);
 
 	if (vid.recalc_refdef)
 		SCR_CalcRefdef ();
 
-	//
-	// do 3D refresh drawing, and then update the screen
-	//
+//
+// do 3D refresh drawing, and then update the screen
+//
 	SCR_SetUpToDrawConsole ();
 
 	V_RenderView ();
@@ -926,7 +862,6 @@ SCR_UpdateScreen (void)
 		if (crosshair->value)
 			Draw_Crosshair ();
 
-		SCR_DrawRam ();
 		SCR_DrawNet ();
 		SCR_DrawFPS ();
 		SCR_DrawTurtle ();

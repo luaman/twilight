@@ -47,6 +47,7 @@ static const char rcsid[] =
 #include "server.h"
 #include "sound.h"
 #include "strlib.h"
+#include "sys.h"
 #include "view.h"
 #include "wad.h"
 
@@ -155,6 +156,34 @@ void
 M_DrawPic (int x, int y, qpic_t *pic)
 {
 	Draw_Pic (x + ((vid.width - 320) >> 1), y, pic);
+}
+
+
+static int
+M_ModalMessage (char *text)
+{
+	extern char *scr_notifystring;
+	extern int scr_drawdialog;
+
+	if (cls.state == ca_dedicated)
+		return true;
+
+	scr_notifystring = text;
+	
+	scr_drawdialog = true;
+	SCR_UpdateScreen ();
+	scr_drawdialog = false;
+
+	S_ClearBuffer ();			// so dma doesn't loop current sound
+
+	do {
+		key_count = -1;			// wait for a key down and up
+		Sys_SendKeyEvents ();
+	} while (key_lastpress != 'y' && key_lastpress != 'n'
+			&& key_lastpress != K_ESCAPE);
+	SCR_UpdateScreen ();
+
+	return key_lastpress == 'y';
 }
 
 Uint8       identityTable[256];
@@ -430,7 +459,7 @@ M_SinglePlayer_Key (int key)
 			switch (m_singleplayer_cursor) {
 				case 0:
 					if (sv.active)
-						if (!SCR_ModalMessage
+						if (!M_ModalMessage
 							("Are you sure you want to\nstart a new game?\n"))
 							break;
 					key_dest = key_game;
