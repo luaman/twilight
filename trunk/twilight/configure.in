@@ -40,6 +40,7 @@ dnl Checks for programs
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
+AC_PROG_RANLIB
 AC_CHECK_PROG(CVS2CL, cvs2cl, cvs2cl)
 AM_CONDITIONAL(CVS2CL, test "x$CVS2CL" != "x")
 

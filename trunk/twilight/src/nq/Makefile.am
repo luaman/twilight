@@ -9,6 +9,7 @@ LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_nq_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_NQ
 
 bin_PROGRAMS=twilight-nq
+twilight_nq_LDADD=$(top_srcdir)/src/base/libtwilight_base.a
 
 if SYS_WIN32
 twilight_nq_sys_libs=-lwinmm -lwsock32
@@ -26,7 +27,7 @@ twilight_nq_SOURCES= \
 	r_part.c sbar.c \
 	host.c host_cmd.c keys.c mathlib.c menu.c \
 	net.h net_bsd.c net_dgrm.c net_dgrm.h net_loop.c net_loop.h \
-	net_main.c net_udp.c net_udp.h strlib.c \
+	net_main.c net_udp.c net_udp.h \
 	pr_cmds.c pr_edict.c pr_exec.c progs.h progdefs.h \
 	progdefs.q1 \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \

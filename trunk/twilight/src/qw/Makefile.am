@@ -5,15 +5,16 @@
 AUTOMAKE_OPTIONS=gnu dist-zip
 
 INCLUDES= -I$(top_srcdir)/include
-LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_nq_sys_libs)
+LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_qw_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_QW
 
 bin_PROGRAMS=twilight-qw
+twilight_qw_LDADD=$(top_srcdir)/src/base/libtwilight_base.a
 
 if SYS_WIN32
-twilight_nq_sys_libs=-lwinmm -lwsock32
+twilight_qw_sys_libs=-lwinmm -lwsock32
 else
-twilight_nq_sys_libs=
+twilight_qw_sys_libs=
 endif
 
 twilight_qw_SOURCES= \
@@ -26,7 +27,7 @@ twilight_qw_SOURCES= \
 	gl_rmisc.c gl_rsurf.c gl_screen.c screen.h gl_warp.c \
 	glquake.h hash.c hash.h \
 	keys.c mathlib.c mdfour.c menu.c \
-	net.h net_chan.c net_udp.c strlib.c \
+	net.h net_chan.c net_udp.c \
 	pmove.c pmovetst.c r_part.c sbar.c skin.c \
 	snd_dma.c snd_mem.c snd_sdl.c\
 	snd_mix.c cd_sdl.c \
