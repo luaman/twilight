@@ -130,7 +130,7 @@ Cam_Lock (int playernum)
 {
 	char        st[40];
 
-	sprintf (st, "ptrack %i", playernum);
+	snprintf (st, sizeof(st), "ptrack %i", playernum);
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message, st);
 	spec_track = playernum;

@@ -333,7 +333,7 @@ void
 CL_ParseDownload (void)
 {
 	int         size, percent;
-	byte        name[1024];
+	byte        name[MAX_OSPATH];
 	int         r;
 
 
@@ -360,9 +360,9 @@ CL_ParseDownload (void)
 	// open the file if not opened yet
 	if (!cls.download) {
 		if (Q_strncmp (cls.downloadtempname, "skins/", 6))
-			sprintf (name, "%s/%s", com_gamedir, cls.downloadtempname);
+			snprintf (name, sizeof(name), "%s/%s", com_gamedir, cls.downloadtempname);
 		else
-			sprintf (name, "qw/%s", cls.downloadtempname);
+			snprintf (name, sizeof(name), "qw/%s", cls.downloadtempname);
 
 		COM_CreatePath (name);
 
@@ -405,11 +405,11 @@ CL_ParseDownload (void)
 		// rename the temp file to it's final name
 		if (Q_strcmp (cls.downloadtempname, cls.downloadname)) {
 			if (Q_strncmp (cls.downloadtempname, "skins/", 6)) {
-				sprintf (oldn, "%s/%s", com_gamedir, cls.downloadtempname);
-				sprintf (newn, "%s/%s", com_gamedir, cls.downloadname);
+				snprintf (oldn, sizeof(oldn), "%s/%s", com_gamedir, cls.downloadtempname);
+				snprintf (newn, sizeof(newn), "%s/%s", com_gamedir, cls.downloadname);
 			} else {
-				sprintf (oldn, "qw/%s", cls.downloadtempname);
-				sprintf (newn, "qw/%s", cls.downloadname);
+				snprintf (oldn, sizeof(oldn), "qw/%s", cls.downloadtempname);
+				snprintf (newn, sizeof(newn), "qw/%s", cls.downloadname);
 			}
 			r = rename (oldn, newn);
 			if (r)
@@ -558,7 +558,7 @@ CL_ParseServerData (void)
 	// ZOID--run the autoexec.cfg in the gamedir
 	// if it exists
 	if (cflag) {
-		sprintf (fn, "%s/%s", com_gamedir, "config.cfg");
+		snprintf (fn, sizeof(fn), "%s/%s", com_gamedir, "config.cfg");
 		if ((f = fopen (fn, "r")) != NULL) {
 			fclose (f);
 			Cbuf_AddText ("cl_warncmd 0\n");

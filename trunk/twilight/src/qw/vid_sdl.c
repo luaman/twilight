@@ -147,7 +147,7 @@ VID_SetPalette (unsigned char *palette)
 	unsigned short i;
 	unsigned   *table;
 	FILE       *f;
-	char        s[255];
+	char        s[MAX_OSPATH];
 	float       dist, bestdist;
 	static qboolean palflag = false;
 
@@ -195,9 +195,9 @@ VID_SetPalette (unsigned char *palette)
 			}
 			d_15to8table[i] = k;
 		}
-		sprintf (s, "%s/glquake", com_gamedir);
+		snprintf (s, sizeof(s), "%s/glquake", com_gamedir);
 		Sys_mkdir (s);
-		sprintf (s, "%s/glquake/15to8.pal", com_gamedir);
+		snprintf (s, sizeof(s), "%s/glquake/15to8.pal", com_gamedir);
 		if ((f = fopen (s, "wb")) != NULL) {
 			fwrite (d_15to8table, 1 << 15, 1, f);
 			fclose (f);
@@ -495,7 +495,7 @@ VID_Init (unsigned char *palette)
 
 	Check_Gamma (palette);
 
-	sprintf (gldir, "%s/glquake", com_gamedir);
+	snprintf (gldir, sizeof(gldir), "%s/glquake", com_gamedir);
 	Sys_mkdir (gldir);
 
 	VID_SetPalette (palette);

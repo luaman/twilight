@@ -231,7 +231,7 @@ CL_SendConnectPacket (void)
 							 MAX_INFO_STRING);
 
 //  Con_Printf ("Connecting to %s...\n", cls.servername);
-	sprintf (data, "%c%c%c%cconnect %i %i %i \"%s\"\n",
+	snprintf (data, sizeof(data), "%c%c%c%cconnect %i %i %i \"%s\"\n",
 			 255, 255, 255, 255, PROTOCOL_VERSION, cls.qport, cls.challenge,
 			 cls.userinfo);
 	NET_SendPacket (Q_strlen (data), data, adr);
@@ -278,7 +278,7 @@ CL_CheckForResend (void)
 	connect_time = realtime + t2 - t1;	// for retransmit requests
 
 	Con_Printf ("Connecting to %s...\n", cls.servername);
-	sprintf (data, "%c%c%c%cgetchallenge\n", 255, 255, 255, 255);
+	snprintf (data, sizeof(data), "%c%c%c%cgetchallenge\n", 255, 255, 255, 255);
 	NET_SendPacket (Q_strlen (data), data, adr);
 }
 
@@ -552,9 +552,9 @@ CL_Color_f (void)
 	if (bottom > 13)
 		bottom = 13;
 
-	sprintf (num, "%i", top);
+	snprintf (num, sizeof(num), "%i", top);
 	Cvar_Set ("topcolor", num);
-	sprintf (num, "%i", bottom);
+	snprintf (num, sizeof(num), "%i", bottom);
 	Cvar_Set ("bottomcolor", num);
 }
 
@@ -736,7 +736,7 @@ CL_NextDemo (void)
 		}
 	}
 
-	sprintf (str, "playdemo %s\n", cls.demos[cls.demonum]);
+	snprintf (str, sizeof(str), "playdemo %s\n", cls.demos[cls.demonum]);
 	Cbuf_InsertText (str);
 	cls.demonum++;
 }
@@ -996,7 +996,7 @@ CL_Download_f (void)
 		return;
 	}
 
-	sprintf (cls.downloadname, "%s/%s", com_gamedir, Cmd_Argv (1));
+	snprintf (cls.downloadname, sizeof(cls.downloadname), "%s/%s", com_gamedir, Cmd_Argv (1));
 
 	p = cls.downloadname;
 	for (;;) {
@@ -1036,7 +1036,7 @@ CL_Init (void)
 	Info_SetValueForKey (cls.userinfo, "bottomcolor", "0", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "rate", "2500", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "msg", "1", MAX_INFO_STRING);
-	sprintf (st, "%4.2f-%04d", VERSION, build_number ());
+	snprintf (st, sizeof(st), "%s-%04d", VERSION, build_number ());
 	Info_SetValueForStarKey (cls.userinfo, "*ver", st, MAX_INFO_STRING);
 
 	CL_InitInput ();
@@ -1161,7 +1161,7 @@ Host_EndGame (char *message, ...)
 	char        string[1024];
 
 	va_start (argptr, message);
-	vsprintf (string, message, argptr);
+	vsnprintf (string, sizeof(string), message, argptr);
 	va_end (argptr);
 	Con_Printf ("\n===========================\n");
 	Con_Printf ("Host_EndGame: %s\n", string);
@@ -1191,7 +1191,7 @@ Host_Error (char *error, ...)
 	inerror = true;
 
 	va_start (argptr, error);
-	vsprintf (string, error, argptr);
+	vsnprintf (string, sizeof(string), error, argptr);
 	va_end (argptr);
 	Con_Printf ("Host_Error: %s\n", string);
 
