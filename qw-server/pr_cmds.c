@@ -832,7 +832,7 @@ PF_findradius (void)
 			eorg[j] =
 				org[j] - (ent->v.origin[j] +
 						  (ent->v.mins[j] + ent->v.maxs[j]) * 0.5);
-		if (VectorLength (eorg) > rad)
+		if (DotProduct(eorg,eorg) > rad*rad)
 			continue;
 
 		ent->v.chain = EDICT_TO_PROG (chain);

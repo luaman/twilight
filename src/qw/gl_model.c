@@ -64,6 +64,8 @@ int         mod_numknown;
 
 cvar_t     *gl_subdivide_size;
 
+qboolean    isnotmap;
+
 /*
 ===============
 Mod_Init_Cvars
@@ -977,7 +979,6 @@ Mod_LoadLeafs (lump_t *l)
 	mleaf_t    *out;
 	int         i, j, count, p;
 	char        s[MAX_OSPATH];
-	qboolean    isnotmap = true;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
@@ -1237,6 +1238,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 	int         i, j;
 	dheader_t  *header;
 	dmodel_t   *bm;
+	char        name[10];
 
 	loadmodel->type = mod_brush;
 
@@ -1316,10 +1318,10 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 		mod->numleafs = bm->visleafs;
 
-		if (i < mod->numsubmodels - 1) {	// duplicate the basic information
-			char        name[10];
-
-			snprintf (name, sizeof (name), "*%i", i + 1);
+		if (!isnotmap && (i < mod->numsubmodels - 1))
+		{
+			// duplicate the basic information
+			strncpy (name, va("*%i", i + 1), sizeof(name));
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);
