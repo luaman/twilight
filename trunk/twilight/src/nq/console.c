@@ -748,7 +748,7 @@ Con_CompleteCommandLine (void)
 	}
 	
 	if (cmd) {
-		strncpy(key_lines[edit_line] + 1, cmd, cmd_len);
+		strlcpy(key_lines[edit_line] + 1, cmd, cmd_len + 1);
 		key_linepos = cmd_len + 1;
 		if (c + v + a == 1) {
 			key_lines[edit_line][key_linepos] = ' ';
