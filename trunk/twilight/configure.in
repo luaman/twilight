@@ -173,7 +173,7 @@ dnl Make the compiler extra-bitchy if desired
 save_CFLAGS="$CFLAGS"
 CFLAGS="-Wall -Winline"
 if test "x$enable_bitchiness" = "xyes"; then
-	CFLAGS="$CFLAGS -Wcast-qual -Wsign-compare -W -Wno-unused-parameter"
+	CFLAGS="$CFLAGS -Wcast-qual -Wsign-compare -W -Wno-unused"
 	dnl Other potential bitchiness:
 	dnl -Wuninitialized -Wwrite-strings -Wbad-function-cast
 	dnl -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
