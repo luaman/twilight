@@ -466,7 +466,7 @@ void SV_PushMoveAndRotate (edict_t *pusher, float movetime, vec3_t amove, vec3_t
 		maxs[i] = pusher->v.absmax[i] + move[i];
 	}
 
-	VectorCopy (pusher->v.angles, pushorig);
+	VectorCopy (pusher->v.origin, pushorig);
 	VectorCopy (pusher->v.angles, pushangles);
 
 // move the pusher to it's final position
@@ -556,7 +556,8 @@ void SV_PushMoveAndRotate (edict_t *pusher, float movetime, vec3_t amove, vec3_t
 			VectorCopy (entorig, check->v.origin);
 			SV_LinkEdict (check, true);
 
-			VectorCopy (pushorig, pusher->v.angles);
+			VectorCopy (pushorig, pusher->v.origin);
+			VectorCopy (pushangles, pusher->v.angles);
 			SV_LinkEdict (pusher, false);
 
 			pusher->v.ltime -= movetime;
