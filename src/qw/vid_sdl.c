@@ -326,7 +326,7 @@ VID_Init_Cvars (void)
 	vid_mode = Cvar_Get ("vid_mode", "0", CVAR_NONE, NULL);
 	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
 	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE, NULL);
-	gl_ztrick = Cvar_Get ("gl_ztrick", "1", CVAR_NONE, NULL);
+	gl_ztrick = Cvar_Get ("gl_ztrick", "0", CVAR_NONE, NULL);
 	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
 	v_hwgamma = Cvar_Get ("v_hwgamma", "1", CVAR_NONE, NULL);
 	v_gamma = Cvar_Get ("gamma", "1", CVAR_NONE, &GammaChanged);
