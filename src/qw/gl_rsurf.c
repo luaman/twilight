@@ -413,6 +413,7 @@ R_DrawSequentialPoly (msurface_t *s)
 	if (!(s->flags & (SURF_DRAWSKY | SURF_DRAWTURB | SURF_UNDERWATER))) {
 		R_RenderDynamicLightmaps (s);
 		if (gl_mtexable) {
+			qglEnable (GL_BLEND);
 			p = s->polys;
 
 			t = R_TextureAnimation (s->texinfo->texture);
@@ -448,6 +449,7 @@ R_DrawSequentialPoly (msurface_t *s)
 			qglEnd ();
 			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			GL_SelectTexture (0);
+			qglDisable(GL_BLEND);
 		} else {
 			p = s->polys;
 
@@ -467,6 +469,8 @@ R_DrawSequentialPoly (msurface_t *s)
 				qglBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 			else if (gl_lightmap_format == GL_INTENSITY) {
 				qglColor4f (0, 0, 0, 1);
+			} else if (gl_lightmap_format == GL_RGB) {
+				qglBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 			}
 			qglBegin (GL_POLYGON);
 			v = p->verts[0];
@@ -480,6 +484,8 @@ R_DrawSequentialPoly (msurface_t *s)
 				qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			else if (gl_lightmap_format == GL_INTENSITY) {
 				qglColor3f (1, 1, 1);
+			} else if (gl_lightmap_format == GL_RGB) {
+				qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
 			qglDisable (GL_BLEND);
 		}
@@ -528,6 +534,7 @@ R_DrawSequentialPoly (msurface_t *s)
 	if (gl_mtexable) {
 		p = s->polys;
 
+		qglEnable (GL_BLEND);
 		t = R_TextureAnimation (s->texinfo->texture);
 		GL_SelectTexture (0);
 		qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
@@ -563,6 +570,7 @@ R_DrawSequentialPoly (msurface_t *s)
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		GL_SelectTexture (0);
 
+		qglDisable (GL_BLEND);
 	} else {
 		p = s->polys;
 
@@ -586,7 +594,10 @@ R_DrawSequentialPoly (msurface_t *s)
 			qglBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 		else if (gl_lightmap_format == GL_INTENSITY) {
 			qglColor3f (0, 0, 0);
+		} else if (gl_lightmap_format == GL_RGB) {
+			qglBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 		}
+
 		if (r_waterwarp->value > 0) {	// water warp factor > 0, so warp
 			DrawGLWaterPolyLightmap (p);
 		} else {						// no water warp
@@ -602,7 +613,9 @@ R_DrawSequentialPoly (msurface_t *s)
 			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		else if (gl_lightmap_format == GL_INTENSITY) {
 			qglColor3f (1, 1, 1);
-		}
+		} else if (gl_lightmap_format == GL_RGB)
+			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		qglDisable (GL_BLEND);
 	}
 }
