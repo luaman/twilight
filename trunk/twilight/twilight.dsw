@@ -3,19 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "libjpeg"=".\src\image\libjpeg\libjpeg.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "nq"=".\nq\nq.dsp" - Package Owner=<4>
+Project: "nq"=.\nq\nq.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -35,14 +23,11 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name twilight_image
     End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libjpeg
-    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "qw"=".\qw\qw.dsp" - Package Owner=<4>
+Project: "qw"=.\qw\qw.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -61,9 +46,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name twilight_image
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libjpeg
     End Project Dependency
 }}}
 
@@ -84,7 +66,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "twilight_base"=".\src\base\twilight_base.dsp" - Package Owner=<4>
+Project: "twilight_base"=.\src\base\twilight_base.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -96,7 +78,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "twilight_image"=".\src\image\twilight_image.dsp" - Package Owner=<4>
+Project: "twilight_image"=.\src\image\twilight_image.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -108,7 +90,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "twilight_renderer"=".\src\renderer\twilight_renderer.dsp" - Package Owner=<4>
+Project: "twilight_renderer"=.\src\renderer\twilight_renderer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -120,7 +102,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "twilight_sound"=".\src\sound\twilight_sound.dsp" - Package Owner=<4>
+Project: "twilight_sound"=.\src\sound\twilight_sound.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
