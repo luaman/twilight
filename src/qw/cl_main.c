@@ -119,17 +119,8 @@ client_static_t cls;
 client_state_t cl;
 
 entity_state_t	cl_baselines[MAX_EDICTS];
-efrag_t			cl_efrags[MAX_EFRAGS];
-entity_t		cl_static_entities[MAX_STATIC_ENTITIES];
 lightstyle_t	cl_lightstyle[MAX_LIGHTSTYLES];
 dlight_t		cl_dlights[MAX_DLIGHTS];
-
-// refresh list
-// this is double buffered so the last frame
-// can be scanned for oldorigins of trailing objects
-int			cl_numvisedicts, cl_oldnumvisedicts;
-entity_t	*cl_visedicts, *cl_oldvisedicts;
-entity_t	cl_visedicts_list[2][MAX_VISEDICTS];
 
 double		connect_time = -1;			// for connection retransmits
 
@@ -401,8 +392,6 @@ CL_ClearState
 void
 CL_ClearState (void)
 {
-	int         i;
-
 	S_StopAllSounds (true);
 
 	Con_DPrintf ("Clearing memory\n");
@@ -418,18 +407,9 @@ CL_ClearState (void)
 	SZ_Clear (&cls.netchan.message);
 
 // clear other arrays   
-	memset (cl_efrags, 0, sizeof (cl_efrags));
 	memset (cl_dlights, 0, sizeof (cl_dlights));
 	memset (cl_lightstyle, 0, sizeof (cl_lightstyle));
 	memset (cl_baselines, 0, sizeof(cl_baselines));
-
-//
-// allocate the efrags and chain together into a free list
-//
-	cl.free_efrags = cl_efrags;
-	for (i = 0; i < MAX_EFRAGS - 1; i++)
-		cl.free_efrags[i].entnext = &cl.free_efrags[i + 1];
-	cl.free_efrags[i].entnext = NULL;
 }
 
 /*
@@ -1298,7 +1278,7 @@ Runs all active servers
 */
 int         nopacketcount;
 void
-Host_Frame (float time)
+Host_Frame (double time)
 {
 	static double time1 = 0;
 	static double time2 = 0;
@@ -1322,7 +1302,7 @@ Host_Frame (float time)
 
 	fps = bound (30.0f, fps, 72.0f);
 
-	if (!cls.timedemo && realtime - oldrealtime < 1.0 / fps)
+	if (!cls.timedemo && ((realtime - oldrealtime) < (1.0 / fps)))
 		return;							// framerate is too high
 
 	host_frametime = realtime - oldrealtime;

@@ -160,7 +160,7 @@ R_GetSpriteFrame (entity_t *currententity)
 	float			   *pintervals, fullinterval, targettime, time;
 
 	psprite = currententity->model->cache.data;
-	frame = currententity->frame;
+	frame = currententity->cur.frame;
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
 		Con_Printf ("R_DrawSprite: no such frame %d\n", frame);
@@ -218,7 +218,7 @@ R_DrawSpriteModel (entity_t *e)
 
 	if (psprite->type == SPR_ORIENTED) {
 		// bullet marks on walls
-		AngleVectors (currententity->angles, v_forward, v_right, v_up);
+		AngleVectors (currententity->cur.angles, v_forward, v_right, v_up);
 		up = v_up;
 		right = v_right;
 	} else {
@@ -229,24 +229,24 @@ R_DrawSpriteModel (entity_t *e)
 
 	transpolybegin(frame->gl_texturenum, 0, TPOLYTYPE_ALPHA);
 	transpolyvertub(
-			e->origin[0] + frame->down * up[0] + frame->left  * right[0],
-			e->origin[1] + frame->down * up[1] + frame->left  * right[1],
-			e->origin[2] + frame->down * up[2] + frame->left  * right[2],
+			e->cur.origin[0] + frame->down * up[0] + frame->left  * right[0],
+			e->cur.origin[1] + frame->down * up[1] + frame->left  * right[1],
+			e->cur.origin[2] + frame->down * up[2] + frame->left  * right[2],
 			0, 1, 255, 255, 255, 255);
 	transpolyvertub(
-			e->origin[0] + frame->up   * up[0] + frame->left  * right[0],
-			e->origin[1] + frame->up   * up[1] + frame->left  * right[1],
-			e->origin[2] + frame->up   * up[2] + frame->left  * right[2],
+			e->cur.origin[0] + frame->up   * up[0] + frame->left  * right[0],
+			e->cur.origin[1] + frame->up   * up[1] + frame->left  * right[1],
+			e->cur.origin[2] + frame->up   * up[2] + frame->left  * right[2],
 			0, 0, 255, 255, 255, 255);
 	transpolyvertub(
-			e->origin[0] + frame->up   * up[0] + frame->right * right[0],
-			e->origin[1] + frame->up   * up[1] + frame->right * right[1],
-			e->origin[2] + frame->up   * up[2] + frame->right * right[2],
+			e->cur.origin[0] + frame->up   * up[0] + frame->right * right[0],
+			e->cur.origin[1] + frame->up   * up[1] + frame->right * right[1],
+			e->cur.origin[2] + frame->up   * up[2] + frame->right * right[2],
 			1, 0, 255, 255, 255, 255);
 	transpolyvertub(
-			e->origin[0] + frame->down * up[0] + frame->right * right[0],
-			e->origin[1] + frame->down * up[1] + frame->right * right[1],
-			e->origin[2] + frame->down * up[2] + frame->right * right[2],
+			e->cur.origin[0] + frame->down * up[0] + frame->right * right[0],
+			e->cur.origin[1] + frame->down * up[1] + frame->right * right[1],
+			e->cur.origin[2] + frame->down * up[2] + frame->right * right[2],
 			1, 1, 255, 255, 255, 255);
 	transpolyend();
 }
@@ -479,7 +479,7 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 	float			s1 = 0;
 	float			c1 = 0;
 
-	lheight = currententity->origin[2] - lightspot[2];
+	lheight = currententity->cur.origin[2] - lightspot[2];
 
 	height = 0;
 	verts = (trivertx_t *) ((Uint8 *) paliashdr + paliashdr->posedata);
@@ -495,15 +495,15 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 		 * traceline into the floor directly below the player and gets
 		 * normals from this
 		 */
-		VectorCopy (currententity->origin, downmove);
+		VectorCopy (currententity->cur.origin, downmove);
 		downmove[2] = downmove[2] - 4096;
 		memset (&downtrace, 0, sizeof(downtrace));
 		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1,
-				currententity->origin, downmove, &downtrace);
+				currententity->cur.origin, downmove, &downtrace);
 
 		// calculate the all important angles to keep speed up
-		s1 = Q_sin(currententity->angles[1] / 180 * M_PI);
-		c1 = Q_cos(currententity->angles[1] / 180 * M_PI);
+		s1 = Q_sin(currententity->cur.angles[1] / 180 * M_PI);
+		c1 = Q_cos(currententity->cur.angles[1] / 180 * M_PI);
 	}
 
 	while ((count = *order++)) {
@@ -532,7 +532,7 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 				point[2] -= shadevector[2] * point[2];
 
 				// drop it down to floor
-				point[2] = point[2] - (currententity->origin[2]
+				point[2] = point[2] - (currententity->cur.origin[2]
 						- downtrace.endpos[2]);
 
 				/*
@@ -582,7 +582,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
 	blend = (realtime - e->frame_start_time) / e->frame_interval;
 	blend = min (blend, 1);
 
-	lheight = e->origin[2] - lightspot[2];
+	lheight = e->cur.origin[2] - lightspot[2];
 	height = -lheight + 1.0;
 
 	verts2 = verts1 = (trivertx_t *) ((Uint8 *) paliashdr
@@ -600,15 +600,15 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
 		 * traceline into the floor directly below the player and gets
 		 * normals from this
 		 */
-		VectorCopy (currententity->origin, downmove);
+		VectorCopy (currententity->cur.origin, downmove);
 		downmove[2] = downmove[2] - 4096;
 		memset (&downtrace, 0, sizeof(downtrace));
 		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1,
-				currententity->origin, downmove, &downtrace);
+				currententity->cur.origin, downmove, &downtrace);
 
 		// calculate the all important angles to keep speed up
-		s1 = Q_sin(currententity->angles[1] / 180 * M_PI);
-		c1 = Q_cos(currententity->angles[1] / 180 * M_PI);
+		s1 = Q_sin(currententity->cur.angles[1] / 180 * M_PI);
+		c1 = Q_cos(currententity->cur.angles[1] / 180 * M_PI);
 	}
 
 	while ((count = *order++)) {
@@ -652,7 +652,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
 				point1[2] = point1[2] + (blend * d[2]);
 
 				// drop it down to floor
-				point1[2] = - (currententity->origin[2]
+				point1[2] = - (currententity->cur.origin[2]
 						- downtrace.endpos[2]);
 
 				// now move the z-coordinate as appropriate
@@ -676,7 +676,6 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
 		qglEnd ();
 	}
 }
-
 
 
 /*
@@ -745,8 +744,7 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
 		e->frame_interval = 0.1;
 	}
 
-	if (e->lastmodel == e->model)
-	{
+	if (e->times) {
 		if (e->pose2 != pose) {
 			e->frame_start_time = realtime;
 			if (e->pose2 == -1) {
@@ -759,10 +757,7 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
 		} else {
 			blend = (realtime - e->frame_start_time) / e->frame_interval;
 		}
-	}
-	else
-	{
-		e->lastmodel = e->model;
+	} else {
 		e->frame_start_time = realtime;
 		e->pose1 = pose;
 		e->pose2 = pose;
@@ -796,8 +791,7 @@ R_DrawAliasModel (entity_t *e)
 
 	if (gl_particletorches->value) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
-			if (e->time_left == 0) {
-//			if ((realtime + 2) > e->time_left) {
+			if (realtime >= e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
 				e->time_left = realtime + 0.05;
 			}
@@ -811,8 +805,8 @@ R_DrawAliasModel (entity_t *e)
 	if (e != &cl.viewent) {
 		vec3_t      mins, maxs;
 
-		VectorAdd (e->origin, clmodel->mins, mins);
-		VectorAdd (e->origin, clmodel->maxs, maxs);
+		VectorAdd (e->cur.origin, clmodel->mins, mins);
+		VectorAdd (e->cur.origin, clmodel->maxs, maxs);
 
 		if (R_CullBox (mins, maxs))
 			return;
@@ -823,7 +817,7 @@ R_DrawAliasModel (entity_t *e)
 	 */
 	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb_models->value)
 	{
-		ambientlight = shadelight = R_LightPoint (e->origin);
+		ambientlight = shadelight = R_LightPoint (e->cur.origin);
 
 		// always give the gun some light
 		if (!colorlights) {
@@ -842,7 +836,7 @@ R_DrawAliasModel (entity_t *e)
 			if (l->die < cl.time || !l->radius)
 				continue;
 
-			add = l->radius - VectorDistance (e->origin,
+			add = l->radius - VectorDistance (e->cur.origin,
 					cl_dlights[lnum].origin);
 
 			if (add > 0.01) {
@@ -888,7 +882,7 @@ R_DrawAliasModel (entity_t *e)
 			lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
 	}
 
-	shadedots = r_avertexnormal_dots[((int) (e->angles[1]
+	shadedots = r_avertexnormal_dots[((int) (e->cur.angles[1]
 				* (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
 
 	if (!colorlights) {
@@ -926,10 +920,10 @@ R_DrawAliasModel (entity_t *e)
 	 */
 	qglPushMatrix ();
 
-	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
-	qglRotatef (e->angles[1], 0, 0, 1);
-	qglRotatef (-e->angles[0], 0, 1, 0);
-	qglRotatef (e->angles[2], 1, 0, 0);
+	qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
+	qglRotatef (e->cur.angles[1], 0, 0, 1);
+	qglRotatef (-e->cur.angles[0], 0, 1, 0);
+	qglRotatef (e->cur.angles[2], 1, 0, 0);
 
 	// double size of eyes, since they are really hard to see in gl
 	if (clmodel->modflags & FLAG_DOUBLESIZE) {
@@ -945,8 +939,8 @@ R_DrawAliasModel (entity_t *e)
 	}
 
 	anim = (int) (cl.time * 10) & 3;
-	skinnum = e->skinnum;
-	texture = paliashdr->gl_texturenum[e->skinnum][anim];
+	skinnum = e->cur.skinnum;
+	texture = paliashdr->gl_texturenum[skinnum][anim];
 	fb_texture = e->scoreboard && (clmodel->modflags & FLAG_PLAYER) ?
 		fb_skins[e->scoreboard - cl.players] :
 		paliashdr->fb_texturenum[skinnum][anim];
@@ -976,19 +970,19 @@ R_DrawAliasModel (entity_t *e)
 
 	qglBindTexture (GL_TEXTURE_2D, texture);
 
-	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-		R_SetupAliasBlendedFrame (e->frame, paliashdr, e, false);
+	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
+		R_SetupAliasBlendedFrame (e->cur.frame, paliashdr, e, false);
 	else
-		R_SetupAliasFrame (e->frame, paliashdr, false);
+		R_SetupAliasFrame (e->cur.frame, paliashdr, false);
 
 	if (fb_texture) {
 		qglEnable (GL_BLEND);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
 		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
-			R_SetupAliasBlendedFrame (e->frame, paliashdr, e, true);
+			R_SetupAliasBlendedFrame (e->cur.frame, paliashdr, e, true);
 		else
-			R_SetupAliasFrame (e->frame, paliashdr, true);
+			R_SetupAliasFrame (e->cur.frame, paliashdr, true);
 
 		qglDisable (GL_BLEND);
 	}
@@ -999,7 +993,7 @@ R_DrawAliasModel (entity_t *e)
 	qglPopMatrix ();
 
 	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {
-		float an = -e->angles[1] * (M_PI / 180);
+		float an = -e->cur.angles[1] * (M_PI / 180);
 
 		if (!shadescale)
 			shadescale = 1 / Q_sqrt(2);
@@ -1010,8 +1004,8 @@ R_DrawAliasModel (entity_t *e)
 
 		qglPushMatrix ();
 
-		qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
-		qglRotatef (e->angles[1], 0, 0, 1);
+		qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
+		qglRotatef (e->cur.angles[1], 0, 0, 1);
 
 		qglDisable (GL_TEXTURE_2D);
 		qglEnable (GL_BLEND);
@@ -1044,8 +1038,8 @@ R_DrawEntitiesOnList (void)
 	if (!r_drawentities->value)
 		return;
 
-	for (i = 0; i < cl_numvisedicts; i++) {
-		currententity = &cl_visedicts[i];
+	for (i = 0; i < cl_num_vis_entities; i++) {
+		currententity = cl_vis_entities[i];
 
 		if (currententity->model->type == mod_brush)
 			R_DrawBrushModel (currententity);
@@ -1053,8 +1047,8 @@ R_DrawEntitiesOnList (void)
 			R_DrawSpriteModel (currententity);
 	}
 
-	for (i = 0; i < cl_numvisedicts; i++) {
-		currententity = &cl_visedicts[i];
+	for (i = 0; i < cl_num_vis_entities; i++) {
+		currententity = cl_vis_entities[i];
 
 		if (currententity->model->type == mod_alias)
 			R_DrawAliasModel (currententity);

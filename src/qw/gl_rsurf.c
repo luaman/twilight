@@ -360,7 +360,7 @@ R_TextureAnimation (texture_t *base)
 	int			reletive;
 	int			count;
 
-	if (currententity->frame) {
+	if (currententity->cur.frame) {
 		if (base->alternate_anims)
 			base = base->alternate_anims;
 	}
@@ -695,16 +695,16 @@ R_DrawBrushModel (entity_t *e)
 	texture_t	   *t;
 	vec3_t			modelorg;
 
-	if (e->angles[0] || e->angles[1] || e->angles[2]) {
+	if (e->cur.angles[0] || e->cur.angles[1] || e->cur.angles[2]) {
 		rotated = true;
 		for (i = 0; i < 3; i++) {
-			mins[i] = e->origin[i] - clmodel->radius;
-			maxs[i] = e->origin[i] + clmodel->radius;
+			mins[i] = e->cur.origin[i] - clmodel->radius;
+			maxs[i] = e->cur.origin[i] + clmodel->radius;
 		}
 	} else {
 		rotated = false;
-		VectorAdd (e->origin, clmodel->mins, mins);
-		VectorAdd (e->origin, clmodel->maxs, maxs);
+		VectorAdd (e->cur.origin, clmodel->mins, mins);
+		VectorAdd (e->cur.origin, clmodel->maxs, maxs);
 	}
 
 	if (R_CullBox (mins, maxs))
@@ -712,13 +712,13 @@ R_DrawBrushModel (entity_t *e)
 
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
-	VectorSubtract (r_origin, e->origin, modelorg);
+	VectorSubtract (r_origin, e->cur.origin, modelorg);
 	if (rotated) {
 		vec3_t      temp;
 		vec3_t      forward, right, up;
 
 		VectorCopy (modelorg, temp);
-		AngleVectors (e->angles, forward, right, up);
+		AngleVectors (e->cur.angles, forward, right, up);
 		modelorg[0] = DotProduct (temp, forward);
 		modelorg[1] = -DotProduct (temp, right);
 		modelorg[2] = DotProduct (temp, up);
@@ -763,14 +763,14 @@ R_DrawBrushModel (entity_t *e)
 
 	qglPushMatrix ();
 
-	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
+	qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
 
-	qglRotatef (e->angles[1], 0, 0, 1);
-	qglRotatef (e->angles[0], 0, 1, 0);	// stupid quake bug
-	qglRotatef (e->angles[2], 1, 0, 0);
+	qglRotatef (e->cur.angles[1], 0, 0, 1);
+	qglRotatef (e->cur.angles[0], 0, 1, 0);	// stupid quake bug
+	qglRotatef (e->cur.angles[2], 1, 0, 0);
 
 	// for transpoly water
-	softwaretransformforbrushentity (e->origin, e->angles);
+	softwaretransformforbrushentity (e->cur.origin, e->cur.angles);
 
 	/*
 	 * draw texture
@@ -912,10 +912,6 @@ R_RecursiveWorldNode (mnode_t *node)
 				mark++;
 			} while (--c);
 		}
-		// deal with model fragments in this leaf
-		if (pleaf->efrags)
-			R_StoreEfrags (&pleaf->efrags);
-
 		return;
 	}
 	// node is just a decision point, so go down the apropriate sides

@@ -44,32 +44,31 @@ typedef struct efrag_s {
 } efrag_t;
 
 
+typedef struct entity_save_s {
+	vec3_t	origin;
+	vec3_t	angles;
+	int		frame;
+	int		skinnum;
+	int		effects;
+	int		time;
+	int		entity_frame;
+} entity_save_t;
+
 typedef struct entity_s {
-	int         keynum;					// for matching entities in different
-	// frames
-	vec3_t      origin;
-	vec3_t      angles;
-	struct model_s *model;				// NULL = no model
-	int         frame;
-	Uint8      *colormap;
-	int         skinnum;				// for Alias models
+	entity_save_t	prev;
+	entity_save_t	cur;
+	struct model_s	*model;				// NULL = no model
+
+	vec3_t			last_light;
+	float			time_left;
+	int				times;
+
+	float			frame_start_time;
+	float			frame_interval;
+	int				pose1;
+	int				pose2;
 
 	struct player_info_s *scoreboard;	// identify player
-
-	struct efrag_s *efrag;				// linked list of efrags (FIXME)
-	int         visframe;				// last frame this entity was
-										// found in an active leaf
-										// only used for static objects
-
-	// Animation interpolation
-	float       frame_start_time;
-	float       frame_interval;
-	int         pose1; 
-	int         pose2;
-
-	vec3_t		last_light;
-	float		time_left;
-	struct model_s *lastmodel;
 } entity_t;
 
 typedef struct {
@@ -96,9 +95,6 @@ void        R_InitTextures (void);
 void        R_RenderView (void);		// must set r_refdef first
 								// called whenever r_refdef or vid change
 void        R_InitSky (texture_t *mt);	// called at level load
-
-void        R_AddEfrags (entity_t *ent);
-void        R_RemoveEfrags (entity_t *ent);
 
 void        R_NewMap (void);
 

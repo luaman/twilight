@@ -683,7 +683,7 @@ Runs all active servers
 ==================
 */
 void
-_Host_Frame (float time)
+_Host_Frame (double time)
 {
 	static double time1 = 0;
 	static double time2 = 0;
@@ -779,7 +779,7 @@ _Host_Frame (float time)
 }
 
 void
-Host_Frame (float time)
+Host_Frame (double time)
 {
 	double			time1, time2;
 	static double	timetotal;

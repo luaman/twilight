@@ -141,6 +141,8 @@ double      parsecounttime;
 
 int         cl_spikeindex, cl_playerindex, cl_flagindex;
 
+extern void CL_ParseStatic (void);
+
 //=============================================================================
 
 int         packet_latency[NET_TIMINGS];
@@ -765,47 +767,6 @@ CL_ParseBaseline (entity_state_t *es)
 	}
 }
 
-
-
-/*
-=====================
-CL_ParseStatic
-
-Static entities are non-interactive world objects
-like torches
-=====================
-*/
-void
-CL_ParseStatic (void)
-{
-	entity_t   *ent;
-	int         i;
-	entity_state_t es;
-
-	CL_ParseBaseline (&es);
-
-	i = cl.num_statics;
-	if (i >= MAX_STATIC_ENTITIES)
-		Host_EndGame ("Too many static entities");
-	ent = &cl_static_entities[i];
-	cl.num_statics++;
-
-// copy it to the current state
-	ent->model = cl.model_precache[es.modelindex];
-	ent->frame = es.frame;
-	ent->colormap = vid.colormap;
-	ent->skinnum = es.skinnum;
-	ent->pose1 = -1;
-	ent->pose2 = -1;
-	ent->frame_start_time = 0;
-	ent->time_left = 0;
-	VectorClear (ent->last_light);
-
-	VectorCopy (es.origin, ent->origin);
-	VectorCopy (es.angles, ent->angles);
-
-	R_AddEfrags (ent);
-}
 
 /*
 ===================

@@ -43,7 +43,6 @@ static const char rcsid[] =
 #include "sound.h"
 #include "sys.h"
 
-
 #define	MAX_BEAMS	8
 typedef struct {
 	int         entity;
@@ -369,14 +368,18 @@ CL_NewTempEntity (void)
 {
 	entity_t   *ent;
 
-	if (cl_numvisedicts == MAX_VISEDICTS)
-		return NULL;
-	ent = &cl_visedicts[cl_numvisedicts++];
-	ent->keynum = 0;
+	if ((cl_num_vis_entities + 1) >= MAX_ENTITIES)
+		Sys_Error ("Out of entities!");
+	if ((cl_num_tmp_entities + 1) >= MAX_ENTITIES)
+		Sys_Error ("Out of entities!");
+
+	ent = &cl_tmp_entities[cl_num_tmp_entities++];
+	cl_vis_entities[cl_num_vis_entities++] = ent;
 
 	memset (ent, 0, sizeof (*ent));
 
-	ent->colormap = vid.colormap;
+	ent->times = -1;
+
 	return ent;
 }
 
@@ -434,11 +437,11 @@ CL_UpdateBeams (void)
 			ent = CL_NewTempEntity ();
 			if (!ent)
 				return;
-			VectorCopy (org, ent->origin);
+			VectorCopy (org, ent->cur.origin);
 			ent->model = b->model;
-			ent->angles[0] = pitch;
-			ent->angles[1] = yaw;
-			ent->angles[2] = Q_rand () % 360;
+			ent->cur.angles[0] = pitch;
+			ent->cur.angles[1] = yaw;
+			ent->cur.angles[2] = Q_rand () % 360;
 
 			for (i = 0; i < 3; i++)
 				org[i] += dist[i] * 30;
@@ -473,9 +476,9 @@ CL_UpdateExplosions (void)
 		ent = CL_NewTempEntity ();
 		if (!ent)
 			return;
-		VectorCopy (ex->origin, ent->origin);
+		VectorCopy (ex->origin, ent->cur.origin);
 		ent->model = ex->model;
-		ent->frame = f;
+		ent->cur.frame = f;
 	}
 }
 

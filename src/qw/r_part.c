@@ -233,11 +233,11 @@ R_EntityParticles (entity_t *ent)
 		forward[0] = cp * cy;
 		forward[1] = cp * sy;
 		forward[2] = -sp;
-		org[0] = ent->origin[0] + r_avertexnormals[i][0] * dist + forward[0]
+		org[0] = ent->cur.origin[0] + r_avertexnormals[i][0] * dist + forward[0]
 			* beamlength;
-		org[1] = ent->origin[1] + r_avertexnormals[i][1] * dist + forward[1]
+		org[1] = ent->cur.origin[1] + r_avertexnormals[i][1] * dist + forward[1]
 			* beamlength;
-		org[2] = ent->origin[2] + r_avertexnormals[i][2] * dist + forward[2]
+		org[2] = ent->cur.origin[2] + r_avertexnormals[i][2] * dist + forward[2]
 			* beamlength;
 		new_base_particle_oc(pt_explode, org, r_origin, 0x6f, 0, -1, 0.01);
 	}
@@ -499,14 +499,15 @@ R_Torch (entity_t *ent, qboolean torch2)
 //	VectorSet4 (color, 227.0 / 255.0, 151.0 / 255.0, 79.0 / 255.0, .5);
 	VectorSet4 (color, 0.89, 0.59, 0.31, 0.5);
 	VectorSet (pvel, (Q_rand() & 3) - 2, (Q_rand() & 3) - 2, 0);
-	VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
+	VectorSet (porg, ent->cur.origin[0], ent->cur.origin[1],
+			ent->cur.origin[2] + 4);
 
 	if (torch2) { 
 		// used for large torches (eg, start map near spawn)
-		porg[2] = ent->origin[2] - 2;
+		porg[2] = ent->cur.origin[2] - 2;
 		VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
 		new_base_particle (pt_torch2, porg, pvel, color,
-				Q_rand () & 3, ent->frame ? 30 : 10, 5);
+				Q_rand () & 3, ent->cur.frame ? 30 : 10, 5);
 	} else { 
 		// wall torches
 		new_base_particle (pt_torch, porg, pvel, color,
@@ -809,7 +810,7 @@ R_Draw_Cone_Particles (void)
 	vec3_t				v_up, v_right;
 	float			   *bub_sin, *bub_cos;
 
-	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke);
+	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_ring);
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
 

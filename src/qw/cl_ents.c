@@ -46,12 +46,27 @@ static const char rcsid[] =
 #include "view.h"
 #include "sys.h"
 
+int			cl_num_vis_entities;
+entity_t	*cl_vis_entities[MAX_ENTITIES];
+
+int			cl_num_static_entities;
+entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
+
+int			cl_num_tmp_entities;
+entity_t	cl_tmp_entities[MAX_ENTITIES];
+
+entity_t	cl_network_entities[MAX_EDICTS];
+entity_t	cl_player_entities[MAX_CLIENTS];
+
+static int	entity_frame = 0;
+
 extern cvar_t *cl_predict_players;
 extern cvar_t *cl_solid_players;
 
 extern int  cl_spikeindex, cl_playerindex, cl_flagindex;
 
-entity_t   *CL_NewTempEntity (void);
+extern void CL_ParseBaseline (entity_state_t *es);
+extern entity_t   *CL_NewTempEntity (void);
 
 static struct predicted_player {
 	int         flags;
@@ -434,30 +449,23 @@ CL_LinkPacketEntities
 void
 CL_LinkPacketEntities (void)
 {
-	entity_t   *ent;
-	packet_entities_t *pack;
-	entity_state_t *s1, *s2;
-	float       f;
-	model_t    *model;
-	vec3_t      old_origin;
-	float       autorotate;
-	int         i;
-	int         pnum;
-	dlight_t   *dl;
+	entity_t			*ent;
+	packet_entities_t	*pack;
+	entity_state_t		*s1;
+	model_t				*model;
+	float				autorotate;
+	int					pnum;
+	dlight_t			*dl;
 
 	pack =
 		&cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK].packet_entities;
 
 	autorotate = anglemod (100 * cl.time);
 
-	f = 0;								// FIXME: no interpolation right now
-
 	for (pnum = 0; pnum < pack->num_entities; pnum++) {
 		s1 = &pack->entities[pnum];
-		s2 = s1;						// FIXME: no interpolation right now
 
-		if (s1->effects)
-		{
+		if (s1->effects) {
 			// spawn light flashes, even ones coming from invisible objects
 			if ((s1->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
 				CL_NewDlight (s1->number, s1->origin,
@@ -476,116 +484,70 @@ CL_LinkPacketEntities (void)
 					  200 + (Q_rand () & 31), 0.1, 0);
 		}
 
-		// if set to invisible, skip
-		if (!s1->modelindex)
-			continue;
+		if (s1->number >= MAX_EDICTS) {
+			Sys_Error ("ERROR! Entity number >= MAX_EDICTS!!\n");
+		}
 
-		// create a new entity
-		if (cl_numvisedicts == MAX_VISEDICTS)
-			break;						// object list is full
+		ent = &cl_network_entities[s1->number];
 
-		ent = &cl_visedicts[cl_numvisedicts++];
+		ent->prev = ent->cur;
 
-		ent->keynum = s1->number;
-		ent->model = model = cl.model_precache[s1->modelindex];
+		if (ent->prev.entity_frame != (entity_frame - 1)) {
+			memset (ent, 0, sizeof (*ent));
+		} else {
+			ent->times++;
+		}
+
+		if ((cl_num_vis_entities + 1) >= MAX_ENTITIES)
+			Sys_Error ("ERROR! Out of entitys!\n");
+		cl_vis_entities[cl_num_vis_entities++] = ent;
+
+		VectorCopy (s1->origin, ent->cur.origin);
+		VectorCopy (s1->angles, ent->cur.angles);
+		ent->cur.skinnum = s1->skinnum;
+		ent->cur.frame = s1->frame;
+		ent->cur.effects = s1->effects;
+		ent->cur.entity_frame = entity_frame;
 
 		// set colormap
 		if (s1->colormap && (s1->colormap < MAX_CLIENTS)
 			&& s1->modelindex == cl_playerindex) {
-			ent->colormap = cl.players[s1->colormap - 1].translations;
 			ent->scoreboard = &cl.players[s1->colormap - 1];
 		} else {
-			ent->colormap = vid.colormap;
 			ent->scoreboard = NULL;
 		}
 
-		// set skin
-		ent->skinnum = s1->skinnum;
-
-		// set frame
-		ent->frame = s1->frame;
-		if (ent->visframe != r_framecount - 1) {
-			ent->pose1 = -1;
-			ent->pose2 = -1;
-			ent->time_left = 0;
-		}
-		ent->visframe = r_framecount;
+		ent->model = model = cl.model_precache[s1->modelindex];	// Model.
 
 		// rotate binary objects locally
 		if (model->flags & EF_ROTATE) {
-			ent->angles[0] = 0;
-			ent->angles[1] = autorotate;
-			ent->angles[2] = 0;
-		} else {
-			float       a1, a2;
-
-			for (i = 0; i < 3; i++) {
-				a1 = s1->angles[i];
-				a2 = s2->angles[i];
-				if (a1 - a2 > 180)
-					a1 -= 360;
-				if (a1 - a2 < -180)
-					a1 += 360;
-				ent->angles[i] = a2 + f * (a1 - a2);
-			}
-		}
-
-		// calculate origin
-		for (i = 0; i < 3; i++)
-			ent->origin[i] = s2->origin[i] + f * (s1->origin[i] - s2->origin[i]);
-
-		// scan the old entity display list for a matching
-		for (i = 0; i < cl_oldnumvisedicts; i++) {
-			if (cl_oldvisedicts[i].keynum == ent->keynum) {
-				ent->frame_start_time = cl_oldvisedicts[i].frame_start_time;
-				ent->frame_interval = cl_oldvisedicts[i].frame_interval;
-				ent->time_left = cl_oldvisedicts[i].time_left;
-				ent->pose1 = cl_oldvisedicts[i].pose1;
-				ent->pose2 = cl_oldvisedicts[i].pose2;
-				VectorCopy (cl_oldvisedicts[i].origin, old_origin);
-				VectorCopy (cl_oldvisedicts[i].last_light, ent->last_light);
-				break;
-			}
-		}
-
-		if (i == cl_oldnumvisedicts) {	// not in last message, don't lerp 
-			ent->pose1 = ent->pose2 = -1;
-			ent->time_left = 0;
-			continue;
+			ent->cur.angles[0] = 0;
+			ent->cur.angles[1] = autorotate;
+			ent->cur.angles[2] = 0;
 		}
 
 		// add automatic particle trails
-		if (!model->flags)
+		if (!model->flags || !ent->times)
 			continue;
 
-		for (i = 0; i < 3; i++)
-			if (Q_abs (old_origin[i] - ent->origin[i]) > 128) {
-				// no trail if too far
-				VectorCopy (ent->origin, old_origin);
-				break;
-			}
-
-		if (model->flags)
-		{
-			if (model->flags & EF_ROCKET) {
-				R_RocketTrail (old_origin, ent->origin, 0);
-				dl = CL_AllocDlight (s1->number);
-				VectorCopy (ent->origin, dl->origin);
-				dl->radius = 200;
-				dl->die = cl.time + 0.1;
-			} else if (model->flags & EF_GRENADE)
-				R_RocketTrail (old_origin, ent->origin, 1);
-			else if (model->flags & EF_GIB)
-				R_RocketTrail (old_origin, ent->origin, 2);
-			else if (model->flags & EF_ZOMGIB)
-				R_RocketTrail (old_origin, ent->origin, 4);
-			else if (model->flags & EF_TRACER)
-				R_RocketTrail (old_origin, ent->origin, 3);
-			else if (model->flags & EF_TRACER2)
-				R_RocketTrail (old_origin, ent->origin, 5);
-			else if (model->flags & EF_TRACER3)
-				R_RocketTrail (old_origin, ent->origin, 6);
-		}
+		if (model->flags & EF_ROCKET) {
+			R_RocketTrail (ent->prev.origin, ent->cur.origin, 0);
+			dl = CL_AllocDlight (s1->number);
+			VectorCopy (ent->cur.origin, dl->origin);
+			dl->radius = 200;
+			dl->die = cl.time + 0.1;
+		} else if (model->flags & EF_GRENADE)
+			R_RocketTrail (ent->prev.origin, ent->cur.origin, 1);
+		else if (model->flags & EF_GIB)
+			R_RocketTrail (ent->prev.origin, ent->cur.origin, 2);
+		else if (model->flags & EF_ZOMGIB)
+			R_RocketTrail (ent->prev.origin, ent->cur.origin, 4);
+		else if (model->flags & EF_TRACER)
+			R_RocketTrail (ent->prev.origin, ent->cur.origin, 3);
+		else if (model->flags & EF_TRACER2)
+			R_RocketTrail (ent->prev.origin, ent->cur.origin, 5);
+		else if (model->flags & EF_TRACER3)
+			R_RocketTrail (ent->prev.origin, ent->cur.origin, 6);
 	}
 }
 
@@ -664,22 +626,49 @@ CL_LinkProjectiles (void)
 
 	for (i = 0, pr = cl_projectiles; i < cl_num_projectiles; i++, pr++) {
 		// grab an entity to fill in
-		if (cl_numvisedicts == MAX_VISEDICTS)
+		ent = CL_NewTempEntity ();
+		if (!ent)
 			break;						// object list is full
-		ent = &cl_visedicts[cl_numvisedicts++];
-		ent->keynum = 0;
 
 		if (pr->modelindex < 1)
 			continue;
 		ent->model = cl.model_precache[pr->modelindex];
-		ent->skinnum = 0;
-		ent->frame = 0;
-		ent->colormap = vid.colormap;
-		ent->scoreboard = NULL;
-		VectorCopy (pr->origin, ent->origin);
-		VectorCopy (pr->angles, ent->angles);
+		VectorCopy (pr->origin, ent->cur.origin);
+		VectorCopy (pr->angles, ent->cur.angles);
 	}
 }
+
+/*
+=====================
+CL_ParseStatic
+
+Static entities are non-interactive world objects
+like torches
+=====================
+*/
+void
+CL_ParseStatic (void)
+{
+	entity_t   *ent;
+	entity_state_t es;
+
+	CL_ParseBaseline (&es);
+
+	if ((cl_num_static_entities + 1) >= MAX_STATIC_ENTITIES)
+		Host_EndGame ("Too many static entities");
+	ent = &cl_static_entities[cl_num_static_entities++];
+
+// copy it to the current state
+	ent->model = cl.model_precache[es.modelindex];
+	ent->cur.frame = es.frame;
+	ent->cur.skinnum = es.skinnum;
+	ent->time_left = 0;
+	VectorClear (ent->last_light);
+
+	VectorCopy (es.origin, ent->cur.origin);
+	VectorCopy (es.angles, ent->cur.angles);
+}
+
 
 //========================================
 
@@ -769,57 +758,57 @@ CL_AddFlagModels (entity_t *ent, int team)
 		return;
 
 	f = 14;
-	if (ent->frame >= 29 && ent->frame <= 40) {
-		if (ent->frame >= 29 && ent->frame <= 34) {	// axpain
-			if (ent->frame == 29)
+	if (ent->cur.frame >= 29 && ent->cur.frame <= 40) {
+		if (ent->cur.frame >= 29 && ent->cur.frame <= 34) {	// axpain
+			if (ent->cur.frame == 29)
 				f = f + 2;
-			else if (ent->frame == 30)
+			else if (ent->cur.frame == 30)
 				f = f + 8;
-			else if (ent->frame == 31)
+			else if (ent->cur.frame == 31)
 				f = f + 12;
-			else if (ent->frame == 32)
+			else if (ent->cur.frame == 32)
 				f = f + 11;
-			else if (ent->frame == 33)
+			else if (ent->cur.frame == 33)
 				f = f + 10;
-			else if (ent->frame == 34)
+			else if (ent->cur.frame == 34)
 				f = f + 4;
-		} else if (ent->frame >= 35 && ent->frame <= 40) {	// pain
-			if (ent->frame == 35)
+		} else if (ent->cur.frame >= 35 && ent->cur.frame <= 40) {	// pain
+			if (ent->cur.frame == 35)
 				f = f + 2;
-			else if (ent->frame == 36)
+			else if (ent->cur.frame == 36)
 				f = f + 10;
-			else if (ent->frame == 37)
+			else if (ent->cur.frame == 37)
 				f = f + 10;
-			else if (ent->frame == 38)
+			else if (ent->cur.frame == 38)
 				f = f + 8;
-			else if (ent->frame == 39)
+			else if (ent->cur.frame == 39)
 				f = f + 4;
-			else if (ent->frame == 40)
+			else if (ent->cur.frame == 40)
 				f = f + 2;
 		}
-	} else if (ent->frame >= 103 && ent->frame <= 118) {
-		if (ent->frame >= 103 && ent->frame <= 104)
+	} else if (ent->cur.frame >= 103 && ent->cur.frame <= 118) {
+		if (ent->cur.frame >= 103 && ent->cur.frame <= 104)
 			f = f + 6;					// nailattack
-		else if (ent->frame >= 105 && ent->frame <= 106)
+		else if (ent->cur.frame >= 105 && ent->cur.frame <= 106)
 			f = f + 6;					// light 
-		else if (ent->frame >= 107 && ent->frame <= 112)
+		else if (ent->cur.frame >= 107 && ent->cur.frame <= 112)
 			f = f + 7;					// rocketattack
-		else if (ent->frame >= 112 && ent->frame <= 118)
+		else if (ent->cur.frame >= 112 && ent->cur.frame <= 118)
 			f = f + 7;					// shotattack
 	}
 
 	newent = CL_NewTempEntity ();
 	newent->model = cl.model_precache[cl_flagindex];
-	newent->skinnum = team;
+	newent->cur.skinnum = team;
 
-	AngleVectors (ent->angles, v_forward, v_right, v_up);
+	AngleVectors (ent->cur.angles, v_forward, v_right, v_up);
 	v_forward[2] = -v_forward[2];		// reverse z component
 	for (i = 0; i < 3; i++)
-		newent->origin[i] = ent->origin[i] - f * v_forward[i] + 22 * v_right[i];
-	newent->origin[2] -= 16;
+		newent->cur.origin[i] = ent->cur.origin[i] - f * v_forward[i] + 22 * v_right[i];
+	newent->cur.origin[2] -= 16;
 
-	VectorCopy (ent->angles, newent->angles);
-	newent->angles[2] -= 45;
+	VectorCopy (ent->cur.angles, newent->cur.angles);
+	newent->cur.angles[2] -= 45;
 }
 
 /*
@@ -833,7 +822,7 @@ for all current players
 void
 CL_LinkPlayers (void)
 {
-	int         j, i;
+	int         j;
 	player_info_t *info;
 	player_state_t *state;
 	player_state_t exact;
@@ -853,19 +842,21 @@ CL_LinkPlayers (void)
 			j < MAX_CLIENTS;
 			j++, info++, state++)
 	{
+		ent = &cl_player_entities[j];
+
 		// If not present this frame, skip it
-		if (state->messagenum != cl.parsecount)
+		if (state->messagenum != cl.parsecount) {
+			memset (ent, 0, sizeof(*ent));
 			continue;
+		}
 
 		// spawn light flashes
 		if (state->effects && (!gl_flashblend->value || j != cl.playernum))
 		{
 			if (j == cl.playernum)
-			{					// remember, VectorCopy is a macro!
 				VectorCopy (cl.simorg, org);
-			} else {
+			else
 				VectorCopy (state->origin, org);
-			}
 
 			if ((state->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
 				CL_NewDlight (j, org, 200 + (Q_rand () & 31), 0.1, 3);
@@ -889,32 +880,17 @@ CL_LinkPlayers (void)
 		if (!Cam_DrawPlayer (j))
 			continue;
 
-		// object list is full
-		if (cl_numvisedicts == MAX_VISEDICTS)
-			break;
+		if ((cl_num_vis_entities + 1) >= MAX_ENTITIES)
+			Sys_Error ("Out of entities!");
+		cl_vis_entities[cl_num_vis_entities++] = ent;
 
-		// grab an entity to fill in
-		ent = &cl_visedicts[cl_numvisedicts++];
+		ent->prev = ent->cur;
+		ent->times++;
 
-		ent->frame = state->frame;
+		ent->cur.frame = state->frame;
+		ent->cur.skinnum = state->skinnum;
 
-		// scan the old entity display list for a matching player
-		for (i = 0; i < cl_oldnumvisedicts; i++) {
-			if (cl_oldvisedicts[i].keynum == state->number) {
-				ent->frame_start_time = cl_oldvisedicts[i].frame_start_time;
-				ent->frame_interval = cl_oldvisedicts[i].frame_interval;
-				ent->time_left = cl_oldvisedicts[i].time_left;
-				ent->pose1 = cl_oldvisedicts[i].pose1;
-				ent->pose2 = cl_oldvisedicts[i].pose2;
-				VectorCopy (cl_oldvisedicts[i].last_light, ent->last_light);
-				break;
-			}
-		}
-
-		ent->keynum = 0;
 		ent->model = cl.model_precache[state->modelindex];
-		ent->skinnum = state->skinnum;
-		ent->colormap = info->translations;
 		if (state->modelindex == cl_playerindex)
 			ent->scoreboard = info;		// use custom skin
 		else
@@ -923,16 +899,16 @@ CL_LinkPlayers (void)
 		// 
 		// angles
 		// 
-		ent->angles[PITCH] = -state->viewangles[PITCH] / 3;
-		ent->angles[YAW] = state->viewangles[YAW];
-		ent->angles[ROLL] = 0;
-		ent->angles[ROLL] = V_CalcRoll (ent->angles, state->velocity) * 4;
+		ent->cur.angles[PITCH] = -state->viewangles[PITCH] / 3;
+		ent->cur.angles[YAW] = state->viewangles[YAW];
+		ent->cur.angles[ROLL] = 0;
+		ent->cur.angles[ROLL] = V_CalcRoll(ent->cur.angles,state->velocity) * 4;
 
 		// only predict half the move to minimize overruns
 		msec = 500 * (playertime - state->state_time);
 		if (msec <= 0 || (!cl_predict_players->value))
 		{
-			VectorCopy (state->origin, ent->origin);
+			VectorCopy (state->origin, ent->cur.origin);
 		} else {
 			// predict players movement
 			state->command.msec = min (state->command.msec, 255);
@@ -941,7 +917,7 @@ CL_LinkPlayers (void)
 			CL_SetSolidPlayers (j);
 			CL_PredictUsercmd (state, &exact, &state->command, false);
 			pmove.numphysent = oldphysent;
-			VectorCopy (exact.origin, ent->origin);
+			VectorCopy (exact.origin, ent->cur.origin);
 		}
 
 		if (state->effects & EF_FLAG1)
@@ -1103,6 +1079,18 @@ CL_SetSolidPlayers (int playernum)
 	}
 }
 
+void
+CL_LinkStaticEntites (void)
+{
+	int i;
+
+	for (i = 0; i < cl_num_static_entities; i++) {
+		if ((cl_num_vis_entities + 1) >= MAX_ENTITIES)
+			Sys_Error("Out of entities!");
+		cl_vis_entities[cl_num_vis_entities++] = &cl_static_entities[i];
+		cl_static_entities[i].times++;
+	}
+}
 
 /*
 ===============
@@ -1121,16 +1109,15 @@ CL_EmitEntities (void)
 	if (!cl.validsequence)
 		return;
 
-	cl_oldnumvisedicts = cl_numvisedicts;
-	cl_oldvisedicts =
-		cl_visedicts_list[(cls.netchan.incoming_sequence - 1) & 1];
-	cl_visedicts = cl_visedicts_list[cls.netchan.incoming_sequence & 1];
+	cl_num_vis_entities = 0;
+	cl_num_tmp_entities = 0;
 
-	cl_numvisedicts = 0;
+	entity_frame++;
 
 	CL_LinkPlayers ();
-	CL_LinkPacketEntities ();
 	CL_LinkProjectiles ();
+	CL_LinkStaticEntites ();
+	CL_LinkPacketEntities ();
 	CL_UpdateTEnts ();
 }
 

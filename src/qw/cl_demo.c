@@ -548,8 +548,8 @@ CL_Record_f (void)
 	}
 // spawnstatic
 
-	for (i = 0; i < cl.num_statics; i++) {
-		ent = cl_static_entities + i;
+	for (i = 0; i < cl_num_static_entities; i++) {
+		ent = &cl_static_entities[i];
 
 		MSG_WriteByte (&buf, svc_spawnstatic);
 
@@ -561,12 +561,12 @@ CL_Record_f (void)
 		else
 			MSG_WriteByte (&buf, j);
 
-		MSG_WriteByte (&buf, ent->frame);
+		MSG_WriteByte (&buf, ent->cur.frame);
 		MSG_WriteByte (&buf, 0);
-		MSG_WriteByte (&buf, ent->skinnum);
+		MSG_WriteByte (&buf, ent->cur.skinnum);
 		for (j = 0; j < 3; j++) {
-			MSG_WriteCoord (&buf, ent->origin[j]);
-			MSG_WriteAngle (&buf, ent->angles[j]);
+			MSG_WriteCoord (&buf, ent->cur.origin[j]);
+			MSG_WriteAngle (&buf, ent->cur.angles[j]);
 		}
 
 		if (buf.cursize > MAX_MSGLEN / 2) {
