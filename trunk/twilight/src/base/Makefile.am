@@ -6,7 +6,7 @@ AUTOMAKE_OPTIONS=gnu dist-zip
 
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/src/include
 
 lib_LIBRARIES=libtwilight_base.a
 

@@ -3,7 +3,7 @@ dnl
 dnl Process this file with ./bootstrap to produce a configure script.
 
 AC_PREREQ(2.13)
-AC_INIT(nq/sv_main.c)
+AC_INIT(src/nq/sv_main.c)
 AC_CONFIG_AUX_DIR(tools)
 AC_REVISION($Revision$)
 
@@ -20,7 +20,7 @@ AC_CANONICAL_TARGET
 
 dnl Set up automake
 AM_INIT_AUTOMAKE(twilight,$VERSION)
-AM_CONFIG_HEADER(include/config.h)
+AM_CONFIG_HEADER(src/config.h)
 
 
 dnl Checks for paths
@@ -225,14 +225,14 @@ fi
 AC_OUTPUT(
 	Makefile
 	twilight.spec
-	include/Makefile
+	src/include/Makefile
 	src/Makefile
 	src/base/Makefile
 	src/image/Makefile
 	src/renderer/Makefile
 	src/sound/Makefile
-	nq/Makefile
-	qw/Makefile
+	src/nq/Makefile
+	src/qw/Makefile
 	doc/Makefile
 	doc/olddoc/Makefile
 	tools/Makefile

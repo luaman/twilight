@@ -5,7 +5,7 @@
 AUTOMAKE_OPTIONS=gnu dist-zip
 
 INCLUDES= \
-	-I$(top_srcdir)/include \
+	-I$(top_srcdir)/src/include \
 	-I$(top_srcdir)/src/base \
 	-I$(top_srcdir)/src/image \
 	-I$(top_srcdir)/src/renderer \
