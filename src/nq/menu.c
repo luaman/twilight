@@ -149,13 +149,13 @@ M_DrawCharacter (int cx, int line, int num)
 void
 M_Print (int cx, int cy, char *str)
 {
-	Draw_Alt_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
+	Draw_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
 }
 
 void
-M_PrintWhite (int cx, int cy, char *str)
+M_PrintAlt (int cx, int cy, char *str)
 {
-	Draw_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
+	Draw_Alt_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
 }
 
 void
@@ -692,8 +692,8 @@ M_MultiPlayer_Draw (void)
 
 	if (tcpipAvailable)
 		return;
-	M_PrintWhite ((320 / 2) - ((27 * 8) / 2), 148,
-				  "No Communications Available");
+	M_PrintAlt ((320 / 2) - ((27 * 8) / 2), 148,
+			"No Communications Available");
 }
 
 
@@ -1665,27 +1665,27 @@ M_Quit_Draw (void)
 	}
 #ifdef _WIN32
 	M_DrawTextBox (0, 0, 38, 23);
-	M_PrintWhite (16, 12, "  Quake version 1.09 by id Software\n\n");
-	M_PrintWhite (16, 28, "Programming        Art \n");
+	M_PrintAlt (16, 12, "  Quake version 1.09 by id Software\n\n");
+	M_PrintAlt (16, 28, "Programming        Art \n");
 	M_Print (16, 36, " John Carmack       Adrian Carmack\n");
 	M_Print (16, 44, " Michael Abrash     Kevin Cloud\n");
 	M_Print (16, 52, " John Cash          Paul Steed\n");
 	M_Print (16, 60, " Dave 'Zoid' Kirsch\n");
-	M_PrintWhite (16, 68, "Design             Biz\n");
+	M_PrintAlt (16, 68, "Design             Biz\n");
 	M_Print (16, 76, " John Romero        Jay Wilbur\n");
 	M_Print (16, 84, " Sandy Petersen     Mike Wilson\n");
 	M_Print (16, 92, " American McGee     Donna Jackson\n");
 	M_Print (16, 100, " Tim Willits        Todd Hollenshead\n");
-	M_PrintWhite (16, 108, "Support            Projects\n");
+	M_PrintAlt (16, 108, "Support            Projects\n");
 	M_Print (16, 116, " Barrett Alexander  Shawn Green\n");
-	M_PrintWhite (16, 124, "Sound Effects\n");
+	M_PrintAlt (16, 124, "Sound Effects\n");
 	M_Print (16, 132, " Trent Reznor and Nine Inch Nails\n\n");
-	M_PrintWhite (16, 140, "Quake is a trademark of Id Software,\n");
-	M_PrintWhite (16, 148, "inc., (c)1996 Id Software, inc. All\n");
-	M_PrintWhite (16, 156, "rights reserved. NIN logo is a\n");
-	M_PrintWhite (16, 164, "registered trademark licensed to\n");
-	M_PrintWhite (16, 172, "Nothing Interactive, Inc. All rights\n");
-	M_PrintWhite (16, 180, "reserved. Press y to exit\n");
+	M_PrintAlt (16, 140, "Quake is a trademark of Id Software,\n");
+	M_PrintAlt (16, 148, "inc., (c)1996 Id Software, inc. All\n");
+	M_PrintAlt (16, 156, "rights reserved. NIN logo is a\n");
+	M_PrintAlt (16, 164, "registered trademark licensed to\n");
+	M_PrintAlt (16, 172, "Nothing Interactive, Inc. All rights\n");
+	M_PrintAlt (16, 180, "reserved. Press y to exit\n");
 #else
 	M_DrawTextBox (56, 76, 24, 4);
 	M_Print (64, 84, quitMessage[msgNumber * 4 + 0]);
@@ -1783,7 +1783,7 @@ M_LanConfig_Draw (void)
 						 10 + ((int) (host_realtime * 4) & 1));
 
 	if (*m_return_reason)
-		M_PrintWhite (basex, 148, m_return_reason);
+		M_PrintAlt (basex, 148, m_return_reason);
 }
 
 
@@ -2399,7 +2399,7 @@ M_Search_Draw (void)
 		return;
 	}
 
-	M_PrintWhite ((320 / 2) - ((22 * 8) / 2), 64, "No Quake servers found");
+	M_PrintAlt ((320 / 2) - ((22 * 8) / 2), 64, "No Quake servers found");
 	if ((host_realtime - searchCompleteTime) < 3.0)
 		return;
 
@@ -2470,7 +2470,7 @@ M_ServerList_Draw (void)
 	M_DrawCharacter (0, 32 + slist_cursor * 8, 12 + ((int) (host_realtime * 4) & 1));
 
 	if (*m_return_reason)
-		M_PrintWhite (16, 148, m_return_reason);
+		M_PrintAlt (16, 148, m_return_reason);
 }
 
 

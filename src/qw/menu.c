@@ -149,13 +149,13 @@ M_DrawCharacter (int cx, int line, int num)
 void
 M_Print (int cx, int cy, char *str)
 {
-	Draw_Alt_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
+	Draw_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
 }
 
 void
-M_PrintWhite (int cx, int cy, char *str)
+M_PrintAlt (int cx, int cy, char *str)
 {
-	Draw_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
+	Draw_Alt_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
 }
 
 void
@@ -1093,8 +1093,8 @@ M_SinglePlayer_Draw (void)
 //  M_DrawPic (72, 32, Draw_CachePic ("gfx/sp_menu.lmp") );
 
 	M_DrawTextBox (60, 10 * 8, 23, 4);
-	M_PrintWhite (92, 12 * 8, "QuakeWorld is for");
-	M_PrintWhite (88, 13 * 8, "Internet play only");
+	M_PrintAlt (92, 12 * 8, "QuakeWorld is for");
+	M_PrintAlt (88, 13 * 8, "Internet play only");
 
 }
 
@@ -1122,13 +1122,13 @@ M_MultiPlayer_Draw (void)
 //  M_DrawPic (72, 32, Draw_CachePic ("gfx/sp_menu.lmp") );
 
 	M_DrawTextBox (46, 8 * 8, 27, 9);
-	M_PrintWhite (72, 10 * 8, "If you want to find QW  ");
-	M_PrintWhite (72, 11 * 8, "games, head on over to: ");
+	M_PrintAlt (72, 10 * 8, "If you want to find QW  ");
+	M_PrintAlt (72, 11 * 8, "games, head on over to: ");
 	M_Print (72, 12 * 8, "   www.quakeworld.net   ");
-	M_PrintWhite (72, 13 * 8, "          or            ");
+	M_PrintAlt (72, 13 * 8, "          or            ");
 	M_Print (72, 14 * 8, "   www.quakespy.com     ");
-	M_PrintWhite (72, 15 * 8, "For pointers on getting ");
-	M_PrintWhite (72, 16 * 8, "        started!        ");
+	M_PrintAlt (72, 15 * 8, "For pointers on getting ");
+	M_PrintAlt (72, 16 * 8, "        started!        ");
 }
 
 void
@@ -1183,7 +1183,7 @@ M_Quit_Draw (void)
 	y = 12;
 	for (p = cmsg; *p; p++, y += 8) {
 		if (**p == '0')
-			M_PrintWhite (16, y, *p + 1);
+			M_PrintAlt (16, y, *p + 1);
 		else
 			M_Print (16, y, *p + 1);
 	}
