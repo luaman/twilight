@@ -546,7 +546,7 @@ void Com_DPrintf (char *fmt, ...)
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
 
-	if (!developer->value)
+	if (!developer || !developer->value)
 		return;							// don't confuse non-developers with
 	// techie stuff...
 

@@ -1637,11 +1637,12 @@ SV_Init
 void
 SV_Init (void)
 {
-	Memory_Init ();
+	Zone_Init ();
 	Cvar_Init (&SV_CvarServerinfo);
 	Cbuf_Init ();
 	Cmd_Init (NULL);
 	Sys_Init ();
+	Zone_Init_Commands ();
 
 	// These have to be here.
 	fs_shareconf = Cvar_Get ("fs_shareconf", SHARECONF, CVAR_ROM, NULL);
@@ -1681,7 +1682,7 @@ SV_Init (void)
 	host_initialized = true;
 
 	Com_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
-	Com_Printf ("%4.1f megabyte heap\n", sys_memsize / (1024 * 1024.0));
+	Com_Printf ("%4.1f megabyte heap\n", hunk_size / (1024 * 1024.0));
 
 	Com_Printf ("\nTwilight Server Version %s (Build %04d)\n\n", VERSION,
 				build_number ());

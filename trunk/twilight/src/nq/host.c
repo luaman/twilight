@@ -796,11 +796,12 @@ Host_Init
 void
 Host_Init ()
 {
-	Memory_Init ();
+	Zone_Init ();
 	Cvar_Init (&Host_CvarUserinfo);		// Cvar system
 	Cbuf_Init ();						// Command buffer
 	Cmd_Init (&Cmd_ForwardToServer);	// Command system
 	Sys_Init ();						// System system =)
+	Zone_Init_Commands ();
 
 	// These have to be here.
 	fs_shareconf = Cvar_Get ("fs_shareconf", SHARECONF, CVAR_ROM, NULL);
@@ -853,7 +854,7 @@ Host_Init ()
 	V_Init ();						// setup view, add related commands
 
 //	Com_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
-	Com_Printf ("%4.1f megs RAM used.\n", sys_memsize / (1024 * 1024.0));
+	Com_Printf ("%4.1f megs RAM used.\n", hunk_size / (1024 * 1024.0));
 
 	R_InitTextures ();				// needed even for dedicated servers
 

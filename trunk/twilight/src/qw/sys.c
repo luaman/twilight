@@ -84,9 +84,6 @@ static const char rcsid[] =
 
 int         nostdout = 0;
 
-int			sys_memsize = 0;
-void	   *sys_membase = NULL;
-
 char       *qdate = __DATE__;
 
 cvar_t	   *sys_asciionly;
@@ -432,24 +429,8 @@ int
 main (int c, char **v)
 {
 	double      time, oldtime, newtime, base;
-	int         j;
 
 	COM_InitArgv (c, v);
-
-	sys_memsize = 16 * 1024 * 1024;
-
-	j = COM_CheckParm ("-mem");
-	if (j)
-		sys_memsize = (int) (Q_atof (com_argv[j + 1]) * 1024 * 1024);
-	else
-		if (COM_CheckParm ("-minmemory"))
-			sys_memsize = MINIMUM_MEMORY;
-	if (sys_memsize < MINIMUM_MEMORY)
-		Sys_Error ("Only %4.1f megs of memory reported, can't execute game",
-				sys_memsize / (float) 0x100000);
-
-	if (!(sys_membase = malloc (sys_memsize)))
-			Sys_Error ("Can't allocate %ld\n", sys_memsize);
 
 #ifdef HAVE_FCNTL
 	if (!COM_CheckParm ("-noconinput"))

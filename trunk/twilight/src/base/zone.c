@@ -10,7 +10,7 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
@@ -40,253 +40,336 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "zone.h"
+#include "stdlib.h"
 
-#define	DYNAMIC_SIZE	0x40000
+memzone_t *zonechain = NULL;
 
-#define	ZONEID	0x1d4a11
-#define MINFRAGMENT	64
+void *_Zone_Alloc(memzone_t *zone, int size, char *filename, int fileline)
+{
+	int i, j, k, needed, endbit, largest;
+	memclump_t *clump, **clumpchainpointer;
+	memheader_t *mem;
+	if (size <= 0)
+		return NULL;
+	if (zone == NULL)
+		Sys_Error("Zone_Alloc: zone == NULL (alloc at %s:%i)", filename, fileline);
+	Com_DPrintf("Zone_Alloc: zone %s, file %s:%i, size %i bytes\n", zone->name, filename, fileline, size);
+	zone->totalsize += size;
+	if (size < 4096)
+	{
+		// clumping
+		needed = (sizeof(memheader_t) + size + sizeof(int) + (MEMUNIT - 1)) / MEMUNIT;
+		endbit = MEMBITS - needed;
+		for (clumpchainpointer = &zone->clumpchain;*clumpchainpointer;clumpchainpointer = &(*clumpchainpointer)->chain)
+		{
+			clump = *clumpchainpointer;
+			if (clump->sentinel1 != MEMCLUMP_SENTINEL)
+				Sys_Error("Zone_Alloc: trashed clump sentinel 1 (alloc at %s:%d)", filename, fileline);
+			if (clump->sentinel2 != MEMCLUMP_SENTINEL)
+				Sys_Error("Zone_Alloc: trashed clump sentinel 2 (alloc at %s:%d)", filename, fileline);
+			if (clump->largestavailable >= needed)
+			{
+				largest = 0;
+				for (i = 0;i < endbit;i++)
+				{
+					if (clump->bits[i >> 5] & (1 << (i & 31)))
+						continue;
+					k = i + needed;
+					for (j = i;i < k;i++)
+						if (clump->bits[i >> 5] & (1 << (i & 31)))
+							goto loopcontinue;
+					goto choseclump;
+	loopcontinue:;
+					if (largest < j - i)
+						largest = j - i;
+				}
+				// since clump falsely advertised enough space (nothing wrong
+				// with that), update largest count to avoid wasting time in
+				// later allocations
+				clump->largestavailable = largest;
+			}
+		}
+		zone->realsize += sizeof(memclump_t);
+		clump = malloc(sizeof(memclump_t));
+		if (clump == NULL)
+			Sys_Error("Zone_Alloc: out of memory (alloc at %s:%i)", filename, fileline);
+		memset(clump, 0, sizeof(memclump_t));
+		*clumpchainpointer = clump;
+		clump->sentinel1 = MEMCLUMP_SENTINEL;
+		clump->sentinel2 = MEMCLUMP_SENTINEL;
+		clump->chain = NULL;
+		clump->blocksinuse = 0;
+		clump->largestavailable = MEMBITS - needed;
+		j = 0;
+choseclump:
+		mem = (memheader_t *)((long) clump->block + j * MEMUNIT);
+		mem->clump = clump;
+		clump->blocksinuse += needed;
+		for (i = j + needed;j < i;j++)
+			clump->bits[j >> 5] |= (1 << (j & 31));
+	}
+	else
+	{
+		// big allocations are not clumped
+		zone->realsize += sizeof(memheader_t) + size + sizeof(int);
+		mem = malloc(sizeof(memheader_t) + size + sizeof(int));
+		if (mem == NULL)
+			Sys_Error("Zone_Alloc: out of memory (alloc at %s:%i)", filename, fileline);
+		mem->clump = NULL;
+	}
+	mem->filename = filename;
+	mem->fileline = fileline;
+	mem->size = size;
+	mem->zone = zone;
+	mem->sentinel1 = MEMHEADER_SENTINEL;
+	*((int *)((long) mem + sizeof(memheader_t) + mem->size)) = MEMHEADER_SENTINEL;
+	// append to head of list
+	mem->chain = zone->chain;
+	zone->chain = mem;
+	memset((void *)((long) mem + sizeof(memheader_t)), 0, mem->size);
+	return (void *)((long) mem + sizeof(memheader_t));
+}
 
-typedef struct memblock_s {
-	int         size;					// including the header and possibly
-										// tiny fragments
-	int         tag;					// a tag of 0 is a free block
-	int         id;						// should be ZONEID
-	struct memblock_s *next, *prev;
-	int         pad;					// pad to 64 bit boundary
-} memblock_t;
+void _Zone_Free(void *data, char *filename, int fileline)
+{
+	int i, firstblock, endblock;
+	memclump_t *clump, **clumpchainpointer;
+	memheader_t *mem, **memchainpointer;
+	memzone_t *zone;
+	if (data == NULL)
+		Sys_Error("Zone_Free: data == NULL (called at %s:%i)", filename, fileline);
 
-typedef struct {
-	int         size;					// total bytes malloced, including
-										// header
-	memblock_t  blocklist;				// start / end cap for linked list
-	memblock_t *rover;
-} memzone_t;
+
+	mem = (memheader_t *)((long) data - sizeof(memheader_t));
+	if (mem->sentinel1 != MEMHEADER_SENTINEL)
+		Sys_Error("Zone_Free: trashed header sentinel 1 (alloc at %s:%i, free at %s:%i)", mem->filename, mem->fileline, filename, fileline);
+	if (*((Uint32 *)((long) mem + sizeof(memheader_t) + mem->size)) != MEMHEADER_SENTINEL)
+		Sys_Error("Zone_Free: trashed header sentinel 2 (alloc at %s:%i, free at %s:%i)", mem->filename, mem->fileline, filename, fileline);
+	zone = mem->zone;
+	Com_DPrintf("Zone_Free: zone %s, alloc %s:%i, free %s:%i, size %i bytes\n", zone->name, mem->filename, mem->fileline, filename, fileline, mem->size);
+	for (memchainpointer = &zone->chain;*memchainpointer;memchainpointer = &(*memchainpointer)->chain)
+	{
+		if (*memchainpointer == mem)
+		{
+			*memchainpointer = mem->chain;
+			zone->totalsize -= mem->size;
+			if ((clump = mem->clump))
+			{
+				if (clump->sentinel1 != MEMCLUMP_SENTINEL)
+					Sys_Error("Zone_Free: trashed clump sentinel 1 (free at %s:%i)", filename, fileline);
+				if (clump->sentinel2 != MEMCLUMP_SENTINEL)
+					Sys_Error("Zone_Free: trashed clump sentinel 2 (free at %s:%i)", filename, fileline);
+				firstblock = ((long) mem - (long) clump->block);
+				if (firstblock & (MEMUNIT - 1))
+					Sys_Error("Zone_Free: address not valid in clump (free at %s:%i)", filename, fileline);
+				firstblock /= MEMUNIT;
+				endblock = firstblock + ((sizeof(memheader_t) + mem->size + sizeof(int) + (MEMUNIT - 1)) / MEMUNIT);
+				clump->blocksinuse -= endblock - firstblock;
+				// could use &, but we know the bit is set
+				for (i = firstblock;i < endblock;i++)
+					clump->bits[i >> 5] -= (1 << (i & 31));
+				if (clump->blocksinuse <= 0)
+				{
+					// unlink from chain
+					for (clumpchainpointer = &zone->clumpchain;*clumpchainpointer;clumpchainpointer = &(*clumpchainpointer)->chain)
+					{
+						if (*clumpchainpointer == clump)
+						{
+							*clumpchainpointer = clump->chain;
+							break;
+						}
+					}
+					zone->realsize -= sizeof(memclump_t);
+					memset(clump, 0xBF, sizeof(memclump_t));
+					free(clump);
+				}
+				else
+				{
+					// clump still has some allocations
+					// force re-check of largest available space on next alloc
+					clump->largestavailable = MEMBITS - clump->blocksinuse;
+				}
+			}
+			else
+			{
+				zone->realsize -= sizeof(memheader_t) + mem->size + sizeof(int);
+				memset(mem, 0xBF, sizeof(memheader_t) + mem->size + sizeof(int));
+				free(mem);
+			}
+			return;
+		}
+	}
+	Sys_Error("Zone_Free: not allocated (free at %s:%i)", filename, fileline);
+}
+
+memzone_t *_Zone_AllocZone(char *name, char *filename, int fileline)
+{
+	memzone_t *zone;
+	zone = malloc(sizeof(memzone_t));
+	if (zone == NULL)
+		Sys_Error("Zone_AllocZone: out of memory (alloczone at %s:%i)", filename, fileline);
+	memset(zone, 0, sizeof(memzone_t));
+	zone->chain = NULL;
+	zone->totalsize = 0;
+	zone->realsize = sizeof(memzone_t);
+	strcpy(zone->name, name);
+	zone->next = zonechain;
+	zonechain = zone;
+	return zone;
+}
+
+void _Zone_FreeZone(memzone_t **zone, char *filename, int fileline)
+{
+	memzone_t **chainaddress;
+	if (*zone)
+	{
+		// unlink zone from chain
+		for (chainaddress = &zonechain;*chainaddress && *chainaddress != *zone;chainaddress = &((*chainaddress)->next));
+		if (*chainaddress != *zone)
+			Sys_Error("Zone_FreeZone: zone already free (freezone at %s:%i)", filename, fileline);
+		*chainaddress = (*zone)->next;
+
+		// free memory owned by the zone
+		while ((*zone)->chain)
+			Zone_Free((void *)((long) (*zone)->chain + sizeof(memheader_t)));
+
+		// free the zone itself
+		memset(*zone, 0xBF, sizeof(memzone_t));
+		free(*zone);
+		*zone = NULL;
+	}
+}
+
+void _Zone_EmptyZone(memzone_t *zone, char *filename, int fileline)
+{
+	if (zone == NULL)
+		Sys_Error("Zone_EmptyZone: zone == NULL (emptyzone at %s:%i)", filename, fileline);
+
+	// free memory owned by the zone
+	while (zone->chain)
+		Zone_Free((void *)((long) zone->chain + sizeof(memheader_t)));
+}
+
+void _Zone_CheckSentinels(void *data, char *filename, int fileline)
+{
+	memheader_t *mem;
+
+	if (data == NULL)
+		Sys_Error("Zone_CheckSentinels: data == NULL (sentinel check at %s:%i)", filename, fileline);
+
+	mem = (memheader_t *)((long) data - sizeof(memheader_t));
+	if (mem->sentinel1 != MEMHEADER_SENTINEL)
+		Sys_Error("Zone_CheckSentinels: trashed header sentinel 1 (block allocated at %s:%i, sentinel check at %s:%i)", mem->filename, mem->fileline, filename, fileline);
+	if (*((Uint32 *)((long) mem + sizeof(memheader_t) + mem->size)) != MEMHEADER_SENTINEL)
+		Sys_Error("Zone_CheckSentinels: trashed header sentinel 2 (block allocated at %s:%i, sentinel check at %s:%i)", mem->filename, mem->fileline, filename, fileline);
+}
+
+static void _Zone_CheckClumpSentinels(memclump_t *clump, char *filename, int fileline)
+{
+	// this isn't really very useful
+	if (clump->sentinel1 != MEMCLUMP_SENTINEL)
+		Sys_Error("Zone_CheckClumpSentinels: trashed sentinel 1 (sentinel check at %s:%i)", filename, fileline);
+	if (clump->sentinel2 != MEMCLUMP_SENTINEL)
+		Sys_Error("Zone_CheckClumpSentinels: trashed sentinel 2 (sentinel check at %s:%i)", filename, fileline);
+}
+
+void _Zone_CheckSentinelsGlobal(char *filename, int fileline)
+{
+	memheader_t *mem;
+	memclump_t *clump;
+	memzone_t *zone;
+	for (zone = zonechain;zone;zone = zone->next)
+	{
+		for (mem = zone->chain;mem;mem = mem->chain)
+			_Zone_CheckSentinels((void *)((long) mem + sizeof(memheader_t)), filename, fileline);
+		for (clump = zone->clumpchain;clump;clump = clump->chain)
+			_Zone_CheckClumpSentinels(clump, filename, fileline);
+	}
+}
+
+// used for temporary memory allocations around the engine, not for longterm
+// storage, if anything in this zone stays allocated during gameplay, it is
+// considered a leak
+memzone_t *tempzone;
+// string storage for console mainly
+memzone_t *stringzone;
+// used only for hunk
+memzone_t *hunkzone;
+
+void Zone_PrintStats(void)
+{
+	int count = 0, size = 0;
+	memzone_t *zone;
+	memheader_t *mem;
+	Zone_CheckSentinelsGlobal();
+	for (zone = zonechain;zone;zone = zone->next)
+	{
+		count++;
+		size += zone->totalsize;
+	}
+	Com_Printf("%i zones, totalling %i bytes (%.3fMB)\n", count, size, size / 1048576.0);
+	if (tempzone == NULL)
+		Com_Printf("Error: no tempzone allocated\n");
+	else if (tempzone->chain)
+	{
+		Com_Printf("%i bytes (%.3fMB) of temporary memory still allocated (Leak!)\n", tempzone->totalsize, tempzone->totalsize / 1048576.0);
+		Com_Printf("listing temporary memory allocations:\n");
+		for (mem = tempzone->chain;mem;mem = mem->chain)
+			Com_Printf("%10i bytes allocated at %s:%i\n", mem->size, mem->filename, mem->fileline);
+	}
+}
+
+void Zone_PrintList(int listallocations)
+{
+	memzone_t *zone;
+	memheader_t *mem;
+	Zone_CheckSentinelsGlobal();
+	Com_Printf("memory zone list:\n"
+	           "size    name\n");
+	for (zone = zonechain;zone;zone = zone->next)
+	{
+		if (zone->lastchecksize != 0 && zone->totalsize != zone->lastchecksize)
+			Com_Printf("%6ik (%6ik actual) %s (%i byte change)\n", (zone->totalsize + 1023) / 1024, (zone->realsize + 1023) / 1024, zone->name, zone->totalsize - zone->lastchecksize);
+		else
+			Com_Printf("%6ik (%6ik actual) %s\n", (zone->totalsize + 1023) / 1024, (zone->realsize + 1023) / 1024, zone->name);
+		zone->lastchecksize = zone->totalsize;
+		if (listallocations)
+			for (mem = zone->chain;mem;mem = mem->chain)
+				Com_Printf("%10i bytes allocated at %s:%i\n", mem->size, mem->filename, mem->fileline);
+	}
+}
+
+void ZoneList_f(void)
+{
+	switch(Cmd_Argc())
+	{
+	case 1:
+		Zone_PrintList(false);
+		Zone_PrintStats();
+		break;
+	case 2:
+		if (!strcmp(Cmd_Argv(1), "all"))
+		{
+			Zone_PrintList(true);
+			Zone_PrintStats();
+			break;
+		}
+		// drop through
+	default:
+		Com_Printf("ZoneList_f: unrecognized options\nusage: zonelist [all]\n");
+		break;
+	}
+}
+
+void ZoneStats_f(void)
+{
+	Zone_CheckSentinelsGlobal();
+	Zone_PrintStats();
+}
+
 
 void        Cache_FreeLow (int new_low_hunk);
 void        Cache_FreeHigh (int new_high_hunk);
-
-
-/*
-==============================================================================
-
-						ZONE MEMORY ALLOCATION
-
-There is never any space between memblocks, and there will never be two
-contiguous free memblocks.
-
-The rover can be left pointing at a non-empty block
-
-The zone calls are pretty much only used for small strings and structures,
-all big things are allocated on the hunk.
-==============================================================================
-*/
-
-memzone_t  *mainzone;
-
-void        Z_ClearZone (memzone_t * zone, int size);
-
-
-/*
-========================
-Z_ClearZone
-========================
-*/
-void
-Z_ClearZone (memzone_t * zone, int size)
-{
-	memblock_t *block;
-
-// set the entire zone to one free block
-
-	zone->blocklist.next = zone->blocklist.prev = block =
-		(memblock_t *) ((Uint8 *) zone + sizeof (memzone_t));
-	zone->blocklist.tag = 1;			// in use block
-	zone->blocklist.id = 0;
-	zone->blocklist.size = 0;
-	zone->rover = block;
-
-	block->prev = block->next = &zone->blocklist;
-	block->tag = 0;						// free block
-	block->id = ZONEID;
-	block->size = size - sizeof (memzone_t);
-}
-
-
-/*
-========================
-Z_Free
-========================
-*/
-void
-Z_Free (void *ptr)
-{
-	memblock_t *block, *other;
-
-	if (!ptr)
-		Sys_Error ("Z_Free: NULL pointer");
-
-	block = (memblock_t *) ((Uint8 *) ptr - sizeof (memblock_t));
-	if (block->id != ZONEID)
-		Sys_Error ("Z_Free: freed a pointer without ZONEID");
-	if (block->tag == 0)
-		Sys_Error ("Z_Free: freed a freed pointer");
-
-	block->tag = 0;						// mark as free
-
-	other = block->prev;
-	if (!other->tag) {					// merge with previous free block
-		other->size += block->size;
-		other->next = block->next;
-		other->next->prev = other;
-		if (block == mainzone->rover)
-			mainzone->rover = other;
-		block = other;
-	}
-
-	other = block->next;
-	if (!other->tag) {					// merge the next free block onto the
-										// end
-		block->size += other->size;
-		block->next = other->next;
-		block->next->prev = block;
-		if (other == mainzone->rover)
-			mainzone->rover = block;
-	}
-}
-
-
-/*
-========================
-Z_Malloc
-========================
-*/
-void       *
-Z_Malloc (int size)
-{
-	void       *buf;
-
-#ifdef PARANOID
-	Z_CheckHeap ();
-#endif
-	buf = Z_TagMalloc (size, 1);
-	if (!buf)
-		Sys_Error ("Z_Malloc: failed on allocation of %i bytes", size);
-	memset (buf, 0, size);
-
-	return buf;
-}
-
-void       *
-Z_TagMalloc (int size, int tag)
-{
-	int         extra;
-	memblock_t *start, *rover, *new, *base;
-
-	if (!tag)
-		Sys_Error ("Z_TagMalloc: tried to use a 0 tag");
-
-//
-// scan through the block list looking for the first free block
-// of sufficient size
-//
-	size += sizeof (memblock_t);		// account for size of block header
-	size += 4;							// space for memory trash tester
-	size = (size + 7) & ~7;				// align to 8-byte boundary
-
-	base = rover = mainzone->rover;
-	start = base->prev;
-
-	do {
-		if (rover == start)				// scaned all the way around the list
-			return NULL;
-		if (rover->tag)
-			base = rover = rover->next;
-		else
-			rover = rover->next;
-	} while (base->tag || base->size < size);
-
-//
-// found a block big enough
-//
-	extra = base->size - size;
-	if (extra > MINFRAGMENT) {			// there will be a free fragment after
-										// the allocated block
-		new = (memblock_t *) ((Uint8 *) base + size);
-		new->size = extra;
-		new->tag = 0;					// free block
-		new->prev = base;
-		new->id = ZONEID;
-		new->next = base->next;
-		new->next->prev = new;
-		base->next = new;
-		base->size = size;
-	}
-
-	base->tag = tag;					// no longer a free block
-
-	mainzone->rover = base->next;		// next allocation will start looking
-										// here
-
-	base->id = ZONEID;
-
-// marker for memory trash testing
-	*(int *) ((Uint8 *) base + base->size - 4) = ZONEID;
-
-	return (void *) ((Uint8 *) base + sizeof (memblock_t));
-}
-
-
-/*
-========================
-Z_Print
-========================
-*/
-void
-Z_Print (memzone_t * zone)
-{
-	memblock_t *block;
-
-	Com_Printf ("zone size: %i  location: %p\n", mainzone->size, mainzone);
-
-	for (block = zone->blocklist.next;; block = block->next) {
-		Com_Printf ("block:%p    size:%7i    tag:%3i\n",
-					block, block->size, block->tag);
-
-		if (block->next == &zone->blocklist)
-			break;						// all blocks have been hit 
-		if ((Uint8 *) block + block->size != (Uint8 *) block->next)
-			Com_Printf ("ERROR: block size does not touch the next block\n");
-		if (block->next->prev != block)
-			Com_Printf ("ERROR: next block doesn't have proper back link\n");
-		if (!block->tag && !block->next->tag)
-			Com_Printf ("ERROR: two consecutive free blocks\n");
-	}
-}
-
-
-/*
-========================
-Z_CheckHeap
-========================
-*/
-void
-Z_CheckHeap (void)
-{
-	memblock_t *block;
-
-	for (block = mainzone->blocklist.next;; block = block->next) {
-		if (block->next == &mainzone->blocklist)
-			break;						// all blocks have been hit 
-		if ((Uint8 *) block + block->size != (Uint8 *) block->next)
-			Sys_Error
-				("Z_CheckHeap: block size does not touch the next block\n");
-		if (block->next->prev != block)
-			Sys_Error
-				("Z_CheckHeap: next block doesn't have proper back link\n");
-		if (!block->tag && !block->next->tag)
-			Sys_Error ("Z_CheckHeap: two consecutive free blocks\n");
-	}
-}
 
 //============================================================================
 
@@ -361,9 +444,9 @@ Hunk_Print (qboolean all)
 	Com_Printf ("-------------------------\n");
 
 	while (1) {
-		// 
+		//
 		// skip to the high hunk if done with low hunk
-		// 
+		//
 		if (h == endlow) {
 			Com_Printf ("-------------------------\n");
 			Com_Printf ("          :%8i REMAINING\n",
@@ -371,15 +454,15 @@ Hunk_Print (qboolean all)
 			Com_Printf ("-------------------------\n");
 			h = starthigh;
 		}
-		// 
+		//
 		// if totally done, break
-		// 
+		//
 		if (h == endhigh)
 			break;
 
-		// 
+		//
 		// run consistancy checks
-		// 
+		//
 		if (h->sentinal != HUNK_SENTINAL)
 			Sys_Error ("Hunk_Check: trahsed sentinal");
 		if (h->size < 16 || h->size + (Uint8 *) h - hunk_base > hunk_size)
@@ -397,9 +480,9 @@ Hunk_Print (qboolean all)
 		if (all)
 			Com_Printf ("%8p :%8i %8s\n", h, h->size, name);
 
-		// 
+		//
 		// print the total
-		// 
+		//
 		if (next == endlow || next == endhigh ||
 			strncmp (h->name, next->name, 8)) {
 			if (!all)
@@ -437,13 +520,8 @@ Hunk_AllocName (int size, char *name)
 
 	if (hunk_size - hunk_low_used - hunk_high_used < size)
 //      Sys_Error ("Hunk_Alloc: failed on %i bytes",size);
-#ifdef _WIN32
 		Sys_Error
-			("Not enough RAM allocated.  Try starting using \"-heapsize 16000\" on the QuakeWorld command line.");
-#else
-		Sys_Error
-			("Not enough RAM allocated.  Try starting using \"-mem 16\" on the QuakeWorld command line.");
-#endif
+			("Not enough RAM allocated.  Try starting using \"-mem 16\" on the command line.");
 
 	h = (hunk_t *) (hunk_base + hunk_low_used);
 	hunk_low_used += size;
@@ -915,7 +993,7 @@ Cache_Alloc (cache_user_t *c, int size, char *name)
 
 	size = (size + sizeof (cache_system_t) + 15) & ~15;
 
-// find memory for it   
+// find memory for it
 	while (1) {
 		cs = Cache_TryAlloc (size, false);
 		if (cs) {
@@ -939,29 +1017,34 @@ Cache_Alloc (cache_user_t *c, int size, char *name)
 
 /*
 ========================
-Memory_Init
+Zone_Init
 ========================
 */
-void
-Memory_Init (void)
+void Zone_Init (void)
 {
-	int         p;
-	int         zonesize = DYNAMIC_SIZE;
+	int j;
+	tempzone = Zone_AllocZone("Temporary Memory");
+	stringzone = Zone_AllocZone("Strings");
+	hunkzone = Zone_AllocZone("Hunk Memory");
 
-	hunk_base = sys_membase;
-	hunk_size = sys_memsize;
+	// FIXME: kill off hunk after destroying cache
+	j = COM_CheckParm ("-mem");
+	if (j)
+		hunk_size = (int) (Q_atof (com_argv[j + 1]) * 1024 * 1024);
+	else
+		hunk_size = 16 * 1024 * 1024;
+
+	hunk_base = Zone_Alloc (hunkzone, hunk_size);
+
 	hunk_low_used = 0;
 	hunk_high_used = 0;
 
+	// FIXME: take a chainsaw to cache
 	Cache_Init ();
-	p = COM_CheckParm ("-zone");
-	if (p) {
-		if (p < com_argc - 1)
-			zonesize = Q_atoi (com_argv[p + 1]) * 1024;
-		else
-			Sys_Error
-				("Memory_Init: you must specify a size in KB after -zone");
-	}
-	mainzone = Hunk_AllocName (zonesize, "zone");
-	Z_ClearZone (mainzone, zonesize);
+}
+
+void Zone_Init_Commands (void)
+{
+	Cmd_AddCommand ("zonestats", ZoneStats_f);
+	Cmd_AddCommand ("zonelist", ZoneList_f);
 }

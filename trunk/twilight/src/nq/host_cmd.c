@@ -661,17 +661,16 @@ Host_Name_f
 void
 Host_Name_f (void)
 {
-	char       *newName;
+	char newName[16];
 
 	if (Cmd_Argc () == 1) {
 		Com_Printf ("\"name\" is \"%s\"\n", _cl_name->string);
 		return;
 	}
 	if (Cmd_Argc () == 2)
-		newName = Cmd_Argv (1);
+		strlcpy(newName, Cmd_Argv (1), 16);
 	else
-		newName = Cmd_Args ();
-	newName[15] = 0;
+		strlcpy(newName, Cmd_Args (), 16);
 
 	if (cmd_source == src_command) {
 		if (strcmp (_cl_name->string, newName) == 0)
