@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "../include" /I "../src/renderer" /I "../SDL/include" /I "../src/sound" /I "../src/image" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../base" /I "../client" /I "../fs" /I "../image" /I "../include" /I "../renderer" /I "../sound" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "HAVE_SDL_H" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x419 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../include" /I "../src/renderer" /I "../SDL/include" /I "../src/sound" /I "../src/image" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../base" /I "../client" /I "../fs" /I "../image" /I "../include" /I "../renderer" /I "../sound" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "HAVE_SDL_H" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x419 /d "_DEBUG"
@@ -128,26 +128,6 @@ SOURCE=.\common.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\console.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_draw.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_rlight.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_rmain.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_rsurf.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_screen.c
 # End Source File
 # Begin Source File
@@ -157,10 +137,6 @@ SOURCE=.\host.c
 # Begin Source File
 
 SOURCE=.\host_cmd.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\keys.c
 # End Source File
 # Begin Source File
 
@@ -200,14 +176,6 @@ SOURCE=.\pr_exec.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\r_explosion.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\sbar.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\snd_dma.c
 # End Source File
 # Begin Source File
@@ -232,84 +200,12 @@ SOURCE=.\sys.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\teamplay.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\vid_sdl.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\view.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\world.c
 # End Source File
-# End Group
-# Begin Group "Header Files"
-
-# PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=.\cl_console.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\client.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\net.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\net_dgrm.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\net_loop.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\net_udp.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\pr_execprogram.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\progdefs.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\progs.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\protocol.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\render.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\screen.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\server.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\world.h
-# End Source File
-# End Group
-# Begin Group "Resource Files"
-
-# PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # End Group
 # End Target
 # End Project

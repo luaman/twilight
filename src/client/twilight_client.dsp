@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="twilight_base" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="twilight_client" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=twilight_base - Win32 Debug
+CFG=twilight_client - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "twilight_base.mak".
+!MESSAGE NMAKE /f "twilight_client.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "twilight_base.mak" CFG="twilight_base - Win32 Debug"
+!MESSAGE NMAKE /f "twilight_client.mak" CFG="twilight_client - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "twilight_base - Win32 Release" (based on "Win32 (x86) Static Library")
-!MESSAGE "twilight_base - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "twilight_client - Win32 Release" (based on "Win32 (x86) Static Library")
+!MESSAGE "twilight_client - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -28,7 +28,7 @@ CFG=twilight_base - Win32 Debug
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "twilight_base - Win32 Release"
+!IF  "$(CFG)" == "twilight_client - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I ".." /I "../client" /I "../fs" /I "../image" /I "../include" /I "../renderer" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "HAVE_SDL_H" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../base" /I "../fs" /I "../image" /I "../include" /I "../renderer" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "HAVE_SDL_H" /YX /FD /c
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
 # ADD RSC /l 0x40c /d "NDEBUG"
 BSC32=bscmake.exe
@@ -51,7 +51,7 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "twilight_base - Win32 Debug"
+!ELSEIF  "$(CFG)" == "twilight_client - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".." /I "../client" /I "../fs" /I "../image" /I "../include" /I "../renderer" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "HAVE_SDL_H" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../base" /I "../fs" /I "../image" /I "../include" /I "../renderer" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "HAVE_SDL_H" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x40c /d "_DEBUG"
 # ADD RSC /l 0x40c /d "_DEBUG"
 BSC32=bscmake.exe
@@ -78,86 +78,30 @@ LIB32=link.exe -lib
 
 # Begin Target
 
-# Name "twilight_base - Win32 Release"
-# Name "twilight_base - Win32 Debug"
+# Name "twilight_client - Win32 Release"
+# Name "twilight_client - Win32 Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\buildnum.c
+SOURCE=.\cclient.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmd.c
+SOURCE=.\console.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\collision.c
+SOURCE=.\hud.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\cpu.c
+SOURCE=.\keys.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\crc.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\cvar.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\hash.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\lh_parser.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\locs.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\mathlib.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\matrixlib.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\mdfour.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\menu.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\mod_brush.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\model.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\parm.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\sdlstub.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\strlib.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\zone.c
+SOURCE=.\teamplay.c
 # End Source File
 # End Group
 # End Target
