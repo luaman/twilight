@@ -9,3 +9,4 @@ Release
 *.plg
 *.i
 *.s
+.DS_Store

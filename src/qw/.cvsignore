@@ -13,3 +13,4 @@ Release
 *.i
 *.s
 *.ilk
+.DS_Store

@@ -7,3 +7,4 @@ Makefile.in
 *.s
 Debug
 Release
+.DS_Store

@@ -3,3 +3,4 @@ Makefile.in
 .deps
 *.i
 *.s
+.DS_Store

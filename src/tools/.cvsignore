@@ -15,3 +15,4 @@ lhbin2c
 *.ilk
 Debug
 Release
+.DS_Store

@@ -10,3 +10,4 @@ Debug
 *.plg
 *.i
 *.s
+.DS_Store

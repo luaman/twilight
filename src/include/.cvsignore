@@ -4,3 +4,4 @@ stamp-h.in
 stamp-h*
 Makefile.in
 Makefile
+.DS_Store
