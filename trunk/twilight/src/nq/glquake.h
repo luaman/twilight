@@ -61,7 +61,6 @@ int gluBuild2DMipmaps (GLenum target, GLint components,
 						GLenum format, GLenum type, const void *data);
 
 extern int  texture_extension_number;
-extern int  texture_mode;
 
 extern float gldepthmin, gldepthmax;
 

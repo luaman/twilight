@@ -276,6 +276,8 @@ Model_NextDownload (void)
 			CL_Disconnect ();
 			return;
 		}
+
+		Con_Printf ("%s\n", cl.model_name[i]);
 	}
 
 	// all done

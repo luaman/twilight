@@ -1409,7 +1409,6 @@ M_Keys_Draw (void)
 void
 M_Keys_Key (int k)
 {
-	char        cmd[80];
 	int         keys[2];
 
 	if (bind_grab) {					// defining a key
@@ -1417,9 +1416,7 @@ M_Keys_Key (int k)
 		if (k == K_ESCAPE) {
 			bind_grab = false;
 		} else if (k != '`') {
-			snprintf (cmd, sizeof (cmd), "bind \"%s\" \"%s\"\n",
-					  Key_KeynumToString (k), bindnames[keys_cursor][0]);
-			Cbuf_InsertText (cmd);
+			Key_SetBinding (k, bindnames[keys_cursor][0]);
 		}
 
 		bind_grab = false;
