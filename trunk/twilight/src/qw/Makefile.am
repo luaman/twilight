@@ -17,9 +17,9 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 if CLIENTS
 clients=twilight-qw
 twilight_qw_LDADD= \
-	$(top_builddir)/src/base/libtwilight_base.a \
 	$(top_builddir)/src/image/libtwilight_image.a \
 	$(top_builddir)/src/renderer/libtwilight_renderer.a \
+	$(top_builddir)/src/base/libtwilight_base.a \
 	$(top_builddir)/src/sound/libtwilight_sound.a
 endif
 
@@ -43,13 +43,13 @@ twilight_qw_SOURCES= \
 	cmd.h common.c console.c console.h \
 	gl_alias.c gl_draw.c gl_ngraph.c gl_rlight.c \
 	gl_rmain.c gl_rsurf.c gl_screen.c \
-	info.c keys.c keys.h mdfour.c \
+	info.c keys.c keys.h \
 	menu.c net.h net_chan.c net_udp.c pmove.c pmovetst.c protocol.h \
 	r_explosion.c r_explosion.h r_part.c render.h sbar.c screen.h skin.c \
 	snd_dma.c sv_null.c teamplay.c sys.c vid_sdl.c view.c
 
 twilight_qwsv_SOURCES= \
-	cl_null.c common.c info.c mdfour.c net_chan.c net_udp.c pmove.c \
+	cl_null.c common.c info.c net_chan.c net_udp.c pmove.c \
 	pmovetst.c pr_cmds.c pr_edict.c pr_exec.c progdefs.h progs.h \
 	server.h sv_ccmds.c sv_ents.c sv_init.c sv_main.c sv_model.c \
 	sv_move.c sv_nchan.c sv_phys.c sv_send.c sv_sys.c sv_user.c \
