@@ -400,7 +400,7 @@ M_Main_Key (int key)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	17
+#define	OPTIONS_ITEMS	19
 
 #define	SLIDER_RANGE	10
 
@@ -561,12 +561,12 @@ M_Options_Draw (void)
 	M_Print (16, y, "            Lookstrafe"); M_DrawCheckbox (220, y, lookstrafe->value); y += 8;
 	M_Print (16, y, "    Use old status bar"); M_DrawCheckbox (220, y, cl_sbar->value); y += 8;
 	M_Print (16, y, "      HUD on left side"); M_DrawCheckbox (220, y, cl_hudswap->value); y += 8;
+	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->value); y += 8;
+	M_Print (16, y, "      Graphics Options");
 
 	if (vid_menudrawfn)
 		M_Print (16, y, "         Video Options"); y += 8;
 
-	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->value); y += 8;
-	M_Print (16, y, "      Graphics Options");
 
 	// cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8, 12 + ((int) (realtime * 4) & 1));
@@ -594,11 +594,11 @@ M_Options_Key (int k)
 				case 2:
 					Cbuf_AddText ("exec default.cfg\n");
 					break;
-				case 14:
-					M_Menu_Video_f ();
-					break;
-				case 16:
+				case 17:
 					M_Menu_Gfx_f ();
+					break;
+				case 18:
+					M_Menu_Video_f ();
 					break;
 				default:
 					M_AdjustSliders (1);
@@ -629,11 +629,11 @@ M_Options_Key (int k)
 			break;
 	}
 
-	if (options_cursor == 14) {
+	if (options_cursor == 18) {
 		if (k == K_UPARROW)
-			options_cursor = 13;
+			options_cursor = 17;
 		else
-			options_cursor = 15;
+			options_cursor = 0;
 	}
 }
 
