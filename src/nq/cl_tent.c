@@ -373,11 +373,9 @@ CL_UpdateTEnts (void)
 			ent = CL_NewTempEntity ();
 			if (!ent)
 				return;
-			VectorCopy (org, ent->origin);
 			ent->model = b->model;
-			ent->angles[0] = ang[0];
-			ent->angles[1] = ang[1];
-			ent->angles[2] = rand () % 360;
+			ang[2] = rand () % 360;
+			CL_Update_OriginAngles(ent, org, ang, cl.mtime[1]);
 
 			for (i = 0; i < 3; i++)
 				org[i] += dist[i] * 30;

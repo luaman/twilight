@@ -31,13 +31,13 @@
 #include "mathlib.h"
 #include "model.h"
 #include "protocol.h"
-#include "transform.h"
 #include "wad.h"
 #include "vid.h"
 #include "vis.h"
 #include "gl_info.h"
 #include "gl_arrays.h"
 #include "quakedef.h"
+#include "matrixlib.h"
 
 
 #define	MAXCLIPPLANES	11
@@ -71,6 +71,11 @@ typedef struct entity_s {
 	vec3_t			msg_angles[2];
 	vec3_t			angles;
 
+	qboolean		lerping;
+
+	matrix4x4_t		matrix;
+	matrix4x4_t		invmatrix;
+
 	// Bounding box
 	vec3_t			mins;
 	vec3_t			maxs;
@@ -97,7 +102,6 @@ typedef struct entity_s {
 
 	vec3_t			last_light;
 	float			time_left;
-	struct model_s	*lastmodel;
 } entity_t;
 
 typedef struct {
@@ -289,7 +293,7 @@ void R_DrawBrushDepthSkies (void);
 void R_VisWorld (void);
 void R_DrawWorld (void);
 void R_DrawLiquidTextureChains (model_t *mod);
-void R_DrawTextureChains (model_t *mod, vec3_t origin, int frame);
+void R_DrawTextureChains (model_t *mod, vec3_t origin, int frame, matrix4x4_t *matrix, matrix4x4_t *invmatrix);
 void GL_BuildLightmaps (void);
 
 #endif // __RENDER_H

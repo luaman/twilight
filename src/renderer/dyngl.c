@@ -22,6 +22,7 @@ static const char rcsid[] =
 #include "SDL.h"
 
 #include "dyngl.h"
+#include "matrixlib.h"
 
 /*
  * Alternate functions for DYNGL_WANT
@@ -40,6 +41,32 @@ Alt_glDrawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count,
 		qglDrawRangeElementsEXT (mode, start, end, count, type, indices);
 	else
 		qglDrawElements (mode, count, type, indices);
+}
+
+static matrix4x4_t	conv_matrix;
+
+DYNGLCALL void DYNGLENTRY
+Alt_glLoadTransposeMatrixf (const GLfloat * m)
+{
+	if (qglLoadTransposeMatrixfARB)
+		qglLoadTransposeMatrixfARB (m);
+	else
+	{
+		Matrix4x4_Transpose(&conv_matrix, (const matrix4x4_t *) m);
+		qglLoadMatrixf ((const GLfloat *) &conv_matrix);
+	}
+}
+
+DYNGLCALL void DYNGLENTRY
+Alt_glMultTransposeMatrixf (const GLfloat * m)
+{
+	if (qglMultTransposeMatrixfARB)
+		qglMultTransposeMatrixfARB (m);
+	else
+	{
+		Matrix4x4_Transpose(&conv_matrix, (const matrix4x4_t *) m);
+		qglMultMatrixf ((const GLfloat *) &conv_matrix);
+	}
 }
 
 
