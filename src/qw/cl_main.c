@@ -81,7 +81,6 @@ cvar_t		*rcon_address;
 cvar_t		*cl_timeout;
 cvar_t		*cl_shownet;
 
-cvar_t		*cl_sbar;
 cvar_t		*cl_hudswap;
 cvar_t		*cl_maxfps;
 cvar_t		*cl_mapname;
@@ -1014,12 +1013,6 @@ CL_Download_f (void)
 }
 
 void 
-CL_SbarCallback (cvar_t *cvar)
-{
-	vid.recalc_refdef = true;
-}
-
-void 
 CL_WriteConfig_f (void)
 {
 	if (Cmd_Argc () != 2) {
@@ -1106,7 +1099,6 @@ CL_Init_Cvars (void)
 	// can be 0, 1, or 2
 	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);
 
-	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, &CL_SbarCallback);
 	cl_hudswap = Cvar_Get ("cl_hudswap", "0", CVAR_ARCHIVE, NULL);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
 

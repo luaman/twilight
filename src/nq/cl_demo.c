@@ -194,12 +194,12 @@ CL_Stop_f (void)
 		Com_Printf ("Not recording a demo.\n");
 		return;
 	}
-// write a disconnect message to the demo file
+	// write a disconnect message to the demo file
 	SZ_Clear (&net_message);
 	MSG_WriteByte (&net_message, svc_disconnect);
 	CL_WriteDemoMessage ();
 
-// finish up
+	// finish up
 	fclose (cls.demofile);
 	cls.demofile = NULL;
 	cls.demorecording = false;
@@ -216,9 +216,9 @@ record <demoname> <map> [cd track]
 void
 CL_Record_f (void)
 {
-	int         c;
-	char        name[MAX_OSPATH];
-	int         track;
+	int		c;
+	char	name[MAX_OSPATH];
+	int		track;
 
 	if (cmd_source != src_command)
 		return;

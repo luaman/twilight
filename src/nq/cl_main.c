@@ -59,7 +59,6 @@ cvar_t		*_cl_color;
 cvar_t		*cl_shownet;
 cvar_t		*cl_nolerp;
 
-cvar_t		*cl_sbar;
 cvar_t		*cl_hudswap;
 cvar_t		*cl_maxfps;
 
@@ -669,12 +668,6 @@ CL_SendCmd (void)
 	SZ_Clear (&cls.message);
 }
 
-void 
-CL_SbarCallback (cvar_t *cvar)
-{
-	vid.recalc_refdef = true;
-}
-
 /*
 ===================
 Cmd_ForwardToServer
@@ -723,7 +716,6 @@ CL_Init_Cvars (void)
 
 	cl_warncmd = Cvar_Get ("cl_warncmd", "0", CVAR_NONE, NULL);
 
-	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, &CL_SbarCallback);
 	cl_hudswap = Cvar_Get ("cl_hudswap", "0", CVAR_ARCHIVE, NULL);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
 

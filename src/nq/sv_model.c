@@ -40,14 +40,14 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "strlib.h"
 
-extern model_t    *loadmodel;
-extern char        loadname[32];				// for hunk tags
-extern Uint8      *mod_base;
+extern model_t	*loadmodel;
+extern char		loadname[32];	// for hunk tags
+extern Uint8	*mod_base;
+cvar_t			*gl_subdivide_size;
 
-model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
-void        Mod_LoadBrushModel (model_t *mod, void *buffer);
+model_t *Mod_LoadModel (model_t *mod, qboolean crash);
+void Mod_LoadBrushModel (model_t *mod, void *buffer);
 
-cvar_t		*gl_subdivide_size;
 
 /*
 ===============
@@ -57,7 +57,7 @@ Mod_Init_Cvars
 void
 Mod_Init_Cvars (void)
 {
-	gl_subdivide_size = NULL;		// FIXME?
+	gl_subdivide_size = Cvar_Get ("gl_subdivide_size", "128", CVAR_ARCHIVE, NULL);
 }
 
 /*
@@ -70,9 +70,9 @@ Loads a model into the cache
 model_t    *
 Mod_LoadModel (model_t *mod, qboolean crash)
 {
-	void       *d;
-	unsigned   *buf;
-	Uint8       stackbuf[1024];			// avoid dirtying the cache heap
+	void			*d;
+	unsigned int	*buf;
+	Uint8			stackbuf[1024];	// avoid dirtying the cache heap
 
 	if (!mod->needload) {
 		if (mod->type == mod_alias) {
@@ -80,17 +80,11 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 			if (d)
 				return mod;
 		} else
-			return mod;					// not cached at all
+			return mod;	// not cached at all
 	}
-//
-// because the world is so huge, load it one piece at a time
-//
-	if (!crash) {
 
-	}
-//
-// load the file
-//
+	// because the world is so huge, load it one piece at a time
+	// load the file
 	buf =
 		(unsigned *) COM_LoadStackFile (mod->name, stackbuf, sizeof (stackbuf));
 	if (!buf) {
@@ -98,20 +92,15 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 			Sys_Error ("Mod_NumForName: %s not found", mod->name);
 		return NULL;
 	}
-//
-// allocate a new model
-//
+
+	// allocate a new model
 	COM_FileBase (mod->name, loadname);
 
 	loadmodel = mod;
 
-//
-// fill it in
-//
-
-// call the apropriate loader
+	// fill it in
+	// call the apropriate loader
 	mod->needload = false;
-
 	Mod_LoadBrushModel (mod, buf);
 
 	return mod;
@@ -125,10 +114,9 @@ Mod_LoadFaces
 void
 Mod_LoadFaces (lump_t *l)
 {
-	dface_t    *in;
-	msurface_t *out;
-	int         i, count, surfnum;
-	int         planenum, side;
+	dface_t		*in;
+	msurface_t	*out;
+	int			i, count, surfnum, planenum, side;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
@@ -170,11 +158,11 @@ Mod_LoadBrushModel
 void
 Mod_LoadBrushModel (model_t *mod, void *buffer)
 {
-	int         i, j;
-	dheader_t  *header;
-	dmodel_t   *bm;
-	char        name[10];
-	extern qboolean isnotmap;
+	int				i, j;
+	dheader_t		*header;
+	dmodel_t		*bm;
+	char			name[10];
+	extern qboolean	isnotmap;
 
 	loadmodel->type = mod_brush;
 
@@ -186,14 +174,13 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 			("Mod_LoadBrushModel: %s has wrong version number (%i should be %i)",
 			 mod->name, i, BSPVERSION);
 
-// swap all the lumps
+	// swap all the lumps
 	mod_base = (Uint8 *) header;
 
 	for (i = 0; i < sizeof (dheader_t) / 4; i++)
 		((int *) header)[i] = LittleLong (((int *) header)[i]);
 
-// load into heap
-
+	// load into heap
 	Mod_LoadVertexes (&header->lumps[LUMP_VERTEXES]);
 	Mod_LoadEdges (&header->lumps[LUMP_EDGES]);
 	Mod_LoadSurfedges (&header->lumps[LUMP_SURFEDGES]);
@@ -209,11 +196,9 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	Mod_MakeHull0 ();
 
-	mod->numframes = 2;					// regular and alternate animation
+	mod->numframes = 2;	// regular and alternate animation
 
-//
-// set up the submodels (FIXME: this is confusing)
-//
+	// set up the submodels (FIXME: this is confusing)
 	for (i = 0; i < mod->numsubmodels; i++) {
 		bm = &mod->submodels[i];
 
@@ -233,8 +218,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 		mod->numleafs = bm->visleafs;
 
-		if (!isnotmap && (i < mod->numsubmodels - 1)) 
-		{	
+		if (!isnotmap && (i < mod->numsubmodels - 1)) {
 			// duplicate the basic information
 			strlcpy (name, va("*%i", i + 1), sizeof(name));
 			loadmodel = Mod_FindName (name);

@@ -29,7 +29,8 @@
 
 #define	SBAR_HEIGHT		24
 
-extern int  sb_lines;					// scan lines to draw
+extern int sb_lines;			// scan lines to draw
+extern struct cvar_s *cl_sbar;
 
 void		Sbar_Init_Cvars (void);
 void		Sbar_Init (void);
