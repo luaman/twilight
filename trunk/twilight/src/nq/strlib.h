@@ -47,23 +47,16 @@
 #define Q_strtok(d, s) strtok((d), (s))
 #define Q_strdup(s) strdup ((s))
 
-#ifdef _WIN32
-
-#define Q_strcasecmp(s1, s2) _stricmp((s1), (s2))
-#define Q_strncasecmp(s1, s2, n) _strnicmp((s1), (s2), (n))
-
-#else
-
+#ifdef HAVE_STRCASECMP
 #define Q_strcasecmp(s1, s2) strcasecmp((s1), (s2))
-#define Q_strncasecmp(s1, s2, n) strncasecmp((s1), (s2), (n))
-
+#elif defined(HAVE__STRICMP)
+#define Q_strcasecmp(s1, s2) _stricmp((s1), (s2))
 #endif
 
-// FIXME: do this with auto*
-#ifdef _WIN32
-#define Q_snprintf _snprintf
-#else
-#define Q_snprintf snprintf
+#ifdef HAVE_STRNCASECMP
+#define Q_strncasecmp(s1, s2, n) strncasecmp((s1), (s2), (n))
+#elif defined (HAVE__STRNICMP)
+#define Q_strncasecmp(s1, s2, n) _strnicmp((s1), (s2), (n))
 #endif
 
 

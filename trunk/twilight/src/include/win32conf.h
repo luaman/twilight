@@ -18,9 +18,17 @@
 
 #define GL_LIBRARY		"opengl32.dll"
 
-#include "compat.h"
+#define HAVE__SNPRINTF 1
 
-#define HAVE_FCNTL_H
+#define HAVE__STRICMP 1
+
+#define HAVE__STRNICMP 1
+
+#define HAVE__VSNPRINTF 1
+
+#define HAVE_FCNTL_H 1
+
+#include "compat.h"
 
 #endif // __WIN32CONF_H
 

@@ -207,7 +207,7 @@ Cvar_Slide (cvar_t *var, const float change)
 
 	var->value += change;
 	Z_Free (var->string);
-	Q_snprintf (buf, 128, "%f", var->value);
+	snprintf (buf, 128, "%f", var->value);
 	var->string = Z_Malloc (Q_strlen (buf) + 1);
 	Q_strcpy (var->string, buf);
 

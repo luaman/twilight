@@ -27,11 +27,12 @@
 #ifndef __COMPAT_H
 #define __COMPAT_H
 
-#ifdef _WIN32
-# define snprintf		_snprintf
-# define vsnprintf		_vsnprintf
-# define strcasecmp		_strcmpi
-#endif // _WIN32
+#if !defined(HAVE_SNPRINTF) && defined(HAVE__SNPRINTF)
+#define snprintf _snprintf
+#endif
+
+#if !defined(HAVE_VSNPRINTF) && defined(HAVE__VSNPRINTF)
+#define vsnprintf _vsnprintf
+#endif
 
 #endif // __COMPAT_H
-
