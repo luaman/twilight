@@ -13,7 +13,7 @@ building = 0
 def check_mmx_asm (context):
 	context.Message('Checking to see if computer understands MMX asm ... ')
 	ret = context.TryCompile ("""
-int main (int argc, char *argv[])
+int main ()
 {
 	asm ("movq %%mm0, %%mm1" ::: "mm0", "mm1");
 	return 0;
@@ -25,7 +25,7 @@ int main (int argc, char *argv[])
 def check_sse_asm (context):
 	context.Message('Checking to see if computer understands SSE asm ... ')
 	ret = context.TryCompile ("""
-int main (int argc, char *argv[])
+int main ()
 {
 	asm ("movhlps %%xmm0, %%xmm1" ::: "xmm0", "xmm1");
 	return 0;
@@ -37,7 +37,7 @@ int main (int argc, char *argv[])
 def check_func_flag (context, flag):
 	context.Message ('Checking for function flag "' + flag + '" ... ')
 	ret = context.TryCompile ("""
-int """ + flag + """ test (int a, int b)
+""" + flag + """ int test (int a, int b)
 {
 	return a + b;
 }
@@ -310,13 +310,6 @@ def do_configure (env):
 		'pwd.h', 'sys/types.h', 'sys/stat.h', 'limits.h', 'signal.h', \
 		'sys/time.h', 'time.h', 'execinfo.h', 'dlfcn.h'])
 
-	if conf.func_flag('inline __attribute__((always_inline))'):
-		config_defs.create('inline', 'inline __attribute__((always_inline))')
-	elif conf.func_flag('inline'):
-		config_defs.create('inline', 'inline')
-	elif conf.func_flag('__inline'):
-		config_defs.create('inline', '__inline')
-
 	if conf.mmx_asm():
 		config_defs.set('HAVE_MMX', 1)
 	if conf.sse_asm():
@@ -326,6 +319,13 @@ def do_configure (env):
 		if conf.CheckLib ('dl', 'dlopen', 1):
 			config_defs.set('HAVE_DLOPEN', 1)
 	handle_opts (conf, opts, config_defs, 1)
+
+	if conf.func_flag('inline __attribute__((always_inline))'):
+		config_defs.create('inline', 'inline __attribute__((always_inline))')
+	elif conf.func_flag('inline'):
+		config_defs.create('inline', 'inline')
+	elif conf.func_flag('__inline'):
+		config_defs.create('inline', '__inline')
 
 	if env['PLATFORM'] == 'win32':
 		env.Append (LIBS = ['user32', 'gdi32', 'shell32', 'wsock32', 'msvcrt', 'kernel32'])
