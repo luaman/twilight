@@ -46,77 +46,30 @@ static const char rcsid[] =
 #include "sys.h"
 #include "surface.h"
 #include "gl_main.h"
-
-extern lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
+#include "gen_textures.h"
 
 static Uint32 blocklights[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 3];
-
-int dlightdivtable[32768];
-
-rdlight_t r_dlight[MAX_DLIGHTS];
-int r_numdlights = 0;
-
-static int corona_texture;
-
-void
-R_InitSurf (void)
-{
-	int			i;
-
-	dlightdivtable[0] = 4194304;
-	for (i = 1;i < 32768;i++)
-		dlightdivtable[i] = 4194304 / (i << 7);
-}
-
-void
-R_InitLightTextures (void)
-{
-	float		dx, dy;
-	int			x, y, a;
-	Uint8		pixels[32][32][4];
-	image_t		img;
-	
-	for (y = 0; y < 32; y++)
-	{
-		dy = (y - 15.5f) * (1.0f / 16.0f);
-		for (x = 0; x < 32; x++)
-		{
-			dx = (x - 15.5f) * (1.0f / 16.0f);
-			a = ((1.0f / (dx * dx + dy * dy + 0.2f)) - (1.0f / 1.2f))
-				* 32.0f / (1.0f / (1.0f + 0.2));
-			a = bound(0, a, 255);
-			pixels[y][x][0] = 255;
-			pixels[y][x][1] = 255;
-			pixels[y][x][2] = 255;
-			pixels[y][x][3] = a;
-		}
-	}
-	img.width = 32;
-	img.height = 32;
-	img.type = IMG_RGBA;
-	img.pixels = (Uint8 *)pixels;
-	corona_texture = GLT_Load_image ("dlcorona", &img, NULL, TEX_ALPHA);
-}
 
 void
 R_DrawCoronas (void)
 {
-	int			i;
+	Uint		i;
 	float		scale, viewdist, dist;
 	vec4_t		brightness;
 	vec3_t		diff;
 	rdlight_t	*rd;
+	GTF_texture_t	*tex = &GTF_texture[GTF_corona];
 
 	qglDisable (GL_DEPTH_TEST);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
-	qglBindTexture (GL_TEXTURE_2D, corona_texture);
+	qglBindTexture (GL_TEXTURE_2D, GTF_texnum);
 	qglEnableClientState (GL_COLOR_ARRAY);
 
-	VectorSet2 (tc_array_v(0), 0.0f, 0.0f);
-	VectorSet2 (tc_array_v(1), 0.0f, 1.0f);
-	VectorSet2 (tc_array_v(2), 1.0f, 1.0f);
-	VectorSet2 (tc_array_v(3), 1.0f, 0.0f);
-	viewdist = DotProduct (r_origin, vpn);
+	VectorSet2 (tc_array_v(0), tex->s1, tex->t1);
+	VectorSet2 (tc_array_v(1), tex->s1, tex->t2);
+	VectorSet2 (tc_array_v(2), tex->s2, tex->t2);
+	VectorSet2 (tc_array_v(3), tex->s2, tex->t1);
+	viewdist = DotProduct (r.origin, r.vpn);
 
 	// Need brighter coronas if we don't have dynamic lightmaps
 	if (gl_flashblend->ivalue)
@@ -126,15 +79,15 @@ R_DrawCoronas (void)
 		VectorSet4 (brightness, 1.0f / 262144.0f, 1.0f / 262144.0f,
 				1.0f / 262144.0f, 1.0f);
 
-	for (i = 0; i < r_numdlights; i++)
+	for (i = 0; i < r.numdlights; i++)
 	{
-		rd = r_dlight + i;
-		dist = (DotProduct (rd->origin, vpn) - viewdist);
+		rd = r.dlight + i;
+		dist = (DotProduct (rd->origin, r.vpn) - viewdist);
 		if (dist >= 24.0f)
 		{
 			// trace to a point just barely closer to the eye
-			VectorSubtract(rd->origin, vpn, diff);
-			if (TraceLine (r_worldmodel, r_origin, diff, NULL, NULL) == 1)
+			VectorSubtract(rd->origin, r.vpn, diff);
+			if (TraceLine (r.worldmodel, r.origin, diff, NULL, NULL) == 1)
 			{
 				TWI_FtoUBMod (rd->light, c_array_v(0), brightness, 4);
 				VectorCopy4 (c_array_v(0), c_array_v(1));
@@ -142,13 +95,13 @@ R_DrawCoronas (void)
 				VectorCopy4 (c_array_v(0), c_array_v(3));
 
 				scale = rd->cullradius * 0.25f;
-				VectorTwiddle (rd->origin, vright, -1, vup, -1, scale,
+				VectorTwiddle (rd->origin, r.vright, -1, r.vup, -1, scale,
 						v_array_v(0));
-				VectorTwiddle (rd->origin, vright, -1, vup, 1, scale,
+				VectorTwiddle (rd->origin, r.vright, -1, r.vup, 1, scale,
 						v_array_v(1));
-				VectorTwiddle (rd->origin, vright, 1, vup, 1, scale,
+				VectorTwiddle (rd->origin, r.vright, 1, r.vup, 1, scale,
 						v_array_v(2));
-				VectorTwiddle (rd->origin, vright, 1, vup, -1, scale,
+				VectorTwiddle (rd->origin, r.vright, 1, r.vup, -1, scale,
 						v_array_v(3));
 				TWI_PreVDraw (0, 4);
 				qglDrawArrays (GL_QUADS, 0, 4);
@@ -173,12 +126,12 @@ R_AnimateLight (void)
 // 'm' is normal light, 'a' is no light, 'z' is double bright
 	i = (int) (ccl.time * 10);
 	for (j = 0; j < MAX_LIGHTSTYLES; j++) {
-		if (!cl_lightstyle[j].length) {
+		if (!ccl.lightstyles[j].length) {
 			d_lightstylevalue[j] = 256;
 			continue;
 		}
-		k = i % cl_lightstyle[j].length;
-		k = cl_lightstyle[j].map[k] - 'a';
+		k = i % ccl.lightstyles[j].length;
+		k = ccl.lightstyles[j].map[k] - 'a';
 		k = k * 22;
 		d_lightstylevalue[j] = k;
 	}
@@ -195,8 +148,10 @@ DYNAMIC LIGHTS BLEND RENDERING
 
 static float       bubble_sintable[17], bubble_costable[17];
 
+int dlightdivtable[32768];
+
 void
-R_InitBubble (void)
+GL_Light_Tables_Init (void)
 {
 	float       a;
 	int         i;
@@ -210,6 +165,10 @@ R_InitBubble (void)
 		*bub_sin++ = sin (a);
 		*bub_cos++ = cos (a);
 	}
+
+	dlightdivtable[0] = 4194304;
+	for (i = 1;i < 32768;i++)
+		dlightdivtable[i] = 4194304 / (i << 7);
 }
 
 
@@ -294,10 +253,10 @@ loc0:
 		if (dist2 > maxdist)
 			continue;
 
-		if (surf->dlightframe != r_framecount)
+		if (surf->dlightframe != r.framecount)
 		{ /* not dynamic until now */
 			surf->dlightbits = 0;
-			surf->dlightframe = r_framecount;
+			surf->dlightframe = r.framecount;
 		}
 		surf->dlightbits |= bit;
 	}
@@ -428,10 +387,10 @@ R_MarkLights (rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix)
 					if (dist2 > maxdist)
 						continue;
 
-					if (surf->dlightframe != r_framecount)
+					if (surf->dlightframe != r.framecount)
 					{ /* not dynamic until now */
 						surf->dlightbits = 0;
-						surf->dlightframe = r_framecount;
+						surf->dlightframe = r.framecount;
 					}
 					surf->dlightbits |= bit;
 				}
@@ -446,16 +405,16 @@ R_MarkLights (rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix)
 void
 R_PushDlights (void)
 {
-	int			i;
+	Uint		i;
 	rdlight_t	*l;
 
 	if (gl_flashblend->ivalue)
 		return;
 
-	l = r_dlight;
+	l = r.dlight;
 
-	for (i = 0; i < r_numdlights; i++, l++)
-		R_MarkLights (l, 1 << i, r_worldmodel, NULL);
+	for (i = 0; i < r.numdlights; i++, l++)
+		R_MarkLights (l, 1 << i, r.worldmodel, NULL);
 }
 
 
@@ -517,7 +476,7 @@ RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 		// check for impact on this node
 		VectorCopy (mid, lightspot);
 		lightplane = node->plane;
-		surf = r_worldmodel->brush->surfaces + node->firstsurface;
+		surf = r.worldmodel->brush->surfaces + node->firstsurface;
 
 		for (i = 0; i < node->numsurfaces; i++, surf++)
 		{
@@ -633,7 +592,7 @@ R_LightPoint (vec3_t p, vec3_t out)
 {
 	vec3_t end;
 
-	if (!r_worldmodel->brush->lightdata)
+	if (!r.worldmodel->brush->lightdata)
 	{
 		out[0] = out[1] = out[2] = 1;
 		return;
@@ -644,7 +603,7 @@ R_LightPoint (vec3_t p, vec3_t out)
 	end[2] = p[2] - 2048;
 	out[0] = out[1] = out[2] = 0;
 
-	RecursiveLightPoint (out, r_worldmodel->brush->nodes, p, end);
+	RecursiveLightPoint (out, r.worldmodel->brush->nodes, p, end);
 
 	return;
 }
@@ -653,7 +612,8 @@ R_LightPoint (vec3_t p, vec3_t out)
 static int
 R_AddDynamicLights (msurface_t *surf, matrix4x4_t *invmatrix)
 {
-	int				i, lnum, lit;
+	Uint			lnum;
+	int				i, lit;
 	int				s, t, td, smax, tmax, smax3;
 	int				red, green, blue;
 	int				dist2, maxdist, maxdist2, maxdist3;
@@ -670,12 +630,12 @@ R_AddDynamicLights (msurface_t *surf, matrix4x4_t *invmatrix)
 	tmax = surf->tmax;
 	smax3 = smax * 3;
 
-	for (lnum = 0; lnum < r_numdlights; lnum++)
+	for (lnum = 0; lnum < r.numdlights; lnum++)
 	{
 		if (!(surf->dlightbits & (1 << (lnum & 31))))
 			continue;                   // not lit by this light
 
-		rd = &r_dlight[lnum];
+		rd = &r.dlight[lnum];
 
 		if (invmatrix)
 			Matrix4x4_Transform(invmatrix, rd->origin, local);
@@ -801,7 +761,7 @@ GL_BuildLightmap (model_t *mod, msurface_t *surf, matrix4x4_t *invmatrix)
 		memset (blocklights, 0, size3 * sizeof(Uint32));
 
 		// add all the dynamic lights
-		if (surf->dlightframe == r_framecount)
+		if (surf->dlightframe == r.framecount)
 			if (R_AddDynamicLights (surf, invmatrix))
 				surf->cached_dlight = 1;
 
@@ -940,7 +900,7 @@ GL_UpdateLightmap (model_t *mod, msurface_t *fa, matrix4x4_t *invmatrix)
 	if (!r_dynamic->ivalue)
 		return;
 
-	if (fa->dlightframe == r_framecount // dynamic lighting
+	if (fa->dlightframe == r.framecount // dynamic lighting
 			|| fa->cached_dlight // previously lit
 			|| d_lightstylevalue[fa->styles[0]] != fa->cached_light[0]
 			|| d_lightstylevalue[fa->styles[1]] != fa->cached_light[1]
@@ -948,3 +908,35 @@ GL_UpdateLightmap (model_t *mod, msurface_t *fa, matrix4x4_t *invmatrix)
 			|| d_lightstylevalue[fa->styles[3]] != fa->cached_light[3])
 		GL_BuildLightmap(mod, fa, invmatrix);
 }
+
+
+void
+R_BuildLightList (void)
+{
+	int i;
+	dlight_t *cd;
+	rdlight_t *rd;
+
+	r.numdlights = 0;
+
+	if (!r_dynamic->ivalue)
+		return;
+
+	for (i = 0; i < MAX_DLIGHTS; i++)
+	{
+		cd = ccl.dlights + i;
+		if (cd->radius <= 0 || cd->die < ccl.time)
+			continue;
+
+		rd = &r.dlight[r.numdlights++];
+		VectorCopy (cd->origin, rd->origin);
+		VectorScale (cd->color, cd->radius * 128.0f, rd->light);
+		rd->light[3] = 1.0f;
+		rd->cullradius = (1.0f / 128.0f) * VectorLength(rd->light);
+		rd->cullradius = max(2048.0f, rd->cullradius);  // avoid overflow
+
+		rd->cullradius2 = rd->cullradius * rd->cullradius;
+		rd->lightsubtract = 1.0f / rd->cullradius2;
+	}
+}
+

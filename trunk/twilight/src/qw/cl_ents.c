@@ -495,7 +495,7 @@ CL_LinkPacketEntities (void)
 			continue;		// Yes, it IS correct, go away.
 
 		ent->modelindex = state->modelindex;
-		ent->common.model = model = cl.model_precache[state->modelindex];
+		ent->common.model = model = ccl.model_precache[state->modelindex];
 
 		ent->common.skinnum = state->skinnum;
 		ent->effects = state->effects;
@@ -613,7 +613,7 @@ CL_LinkProjectiles (void)
 		if (!ent)
 			break;						// object list is full
 
-		ent->common.model = cl.model_precache[pr->modelindex];
+		ent->common.model = ccl.model_precache[pr->modelindex];
 
 		CL_Update_OriginAngles (ent, pr->origin, pr->angles, ccl.time);
 		CL_Update_Frame (ent, 0, ccl.time);
@@ -643,7 +643,7 @@ CL_ParseStatic (void)
 	// copy it to the current state
 	memset (ent, 0, sizeof(*ent));
 
-	ent->common.model = cl.model_precache[es.modelindex];
+	ent->common.model = ccl.model_precache[es.modelindex];
 	ent->common.frame[0] = ent->common.frame[1] = es.frame;
 	ent->common.skinnum = es.skinnum;
 
@@ -775,7 +775,7 @@ CL_AddFlagModels (entity_t *ent, int team)
 	}
 
 	newent = CL_NewTempEntity ();
-	newent->common.model = cl.model_precache[cl_flagindex];
+	newent->common.model = ccl.model_precache[cl_flagindex];
 	newent->common.skinnum = team;
 
 	AngleVectors (ent->common.angles, v_forward, v_right, v_up);
@@ -854,7 +854,7 @@ CL_LinkPlayers (void)
 
 		ent->common.skinnum = state->skinnum;
 
-		ent->common.model = cl.model_precache[state->modelindex];
+		ent->common.model = ccl.model_precache[state->modelindex];
 		if (state->modelindex == cl_playerindex) {
 			ent->common.colormap = &info->color_map;	// Use custom colormap.
 			ent->common.skin = info->skin;				// Use custom skin.
@@ -923,13 +923,13 @@ CL_SetSolidEntities (void)
 
 		if (!state->modelindex)
 			continue;
-		if (!cl.model_precache[state->modelindex])
+		if (!ccl.model_precache[state->modelindex])
 			continue;
-		if (cl.model_precache[state->modelindex]->hulls[1].firstclipnode) {
+		if (ccl.model_precache[state->modelindex]->hulls[1].firstclipnode) {
 			if (pmove.numphysent >= MAX_PHYSENTS)
 				return;
 			pent = &pmove.physents[pmove.numphysent++];
-			pent->model = cl.model_precache[state->modelindex];
+			pent->model = ccl.model_precache[state->modelindex];
 			VectorCopy (state->origin, pent->origin);
 			pent->id = -1;
 			pent->info = __LINE__;

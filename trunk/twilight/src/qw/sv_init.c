@@ -295,7 +295,7 @@ SV_SpawnServer (char *server)
 
 	sv.state = ss_dead;
 
-	Mod_ClearAll ();
+	Mod_ClearAll (false);
 
 	//
 	// make cvars consistent

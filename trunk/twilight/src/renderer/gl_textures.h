@@ -36,6 +36,7 @@
 
 void GLT_Init_Cvars(void);
 void GLT_Init(void);
+void GLT_Shutdown (void);
 void GLT_Skin_Parse(Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name, int width, int height, int frames, float interval);
 void GLT_Delete_Skin(skin_t *skin);
 void R_ResampleTexture(void *id, int iw, int ih, void *od, int ow, int oh);

@@ -124,6 +124,21 @@ static hud_t	hud;
 #define HUD_WIDTH2		42
 #define HUD_WIDTH		(HUD_WIDTH1 + HUD_WIDTH2)
 
+typedef struct {
+	char	name[MAX_SCOREBOARDNAME];
+	int		frags;
+	int		players;
+	int		phigh, plow, ptotal;
+	double	color[3];
+} team_t;
+
+static team_t	*teams;
+static int		*teamsort;
+static int		n_max_teams = 0, n_teams = 0;
+
+static int		*fragsort;
+static int		n_max_users = 0, n_users = 0, n_spectators = 0;
+
 void
 HUD_Changed (cvar_t *unused)
 {
@@ -372,6 +387,155 @@ HUD_Init (void)
 }
 
 
+void
+HUD_Shutdown (void)
+{
+	int			i;
+
+	for (i = 0; i < 10; i++)
+	{
+		Image_Free(sb_nums[0][i], true);
+		Image_Free(sb_nums[1][i], true);
+	}
+
+	Image_Free(sb_nums[0][10], true);
+	Image_Free(sb_nums[1][10], true);
+
+	Image_Free(sb_colon, true);
+	Image_Free(sb_slash, true);
+
+	Image_Free(sb_weapons[0][0], true);
+	Image_Free(sb_weapons[0][1], true);
+	Image_Free(sb_weapons[0][2], true);
+	Image_Free(sb_weapons[0][3], true);
+	Image_Free(sb_weapons[0][4], true);
+	Image_Free(sb_weapons[0][5], true);
+	Image_Free(sb_weapons[0][6], true);
+
+	Image_Free(sb_weapons[1][0], true);
+	Image_Free(sb_weapons[1][1], true);
+	Image_Free(sb_weapons[1][2], true);
+	Image_Free(sb_weapons[1][3], true);
+	Image_Free(sb_weapons[1][4], true);
+	Image_Free(sb_weapons[1][5], true);
+	Image_Free(sb_weapons[1][6], true);
+
+	for (i = 0; i < 5; i++)
+	{
+		Image_Free(sb_weapons[2 + i][0], true);
+		Image_Free(sb_weapons[2 + i][1], true);
+		Image_Free(sb_weapons[2 + i][2], true);
+		Image_Free(sb_weapons[2 + i][3], true);
+		Image_Free(sb_weapons[2 + i][4], true);
+		Image_Free(sb_weapons[2 + i][5], true);
+		Image_Free(sb_weapons[2 + i][6], true);
+	}
+
+	Image_Free(sb_ammo[0], true);
+	Image_Free(sb_ammo[1], true);
+	Image_Free(sb_ammo[2], true);
+	Image_Free(sb_ammo[3], true);
+
+	Image_Free(sb_armor[0], true);
+	Image_Free(sb_armor[1], true);
+	Image_Free(sb_armor[2], true);
+
+	Image_Free(sb_items[0], true);
+	Image_Free(sb_items[1], true);
+	Image_Free(sb_items[2], true);
+	Image_Free(sb_items[3], true);
+	Image_Free(sb_items[4], true);
+	Image_Free(sb_items[5], true);
+
+	Image_Free(sb_sigil[0], true);
+	Image_Free(sb_sigil[1], true);
+	Image_Free(sb_sigil[2], true);
+	Image_Free(sb_sigil[3], true);
+
+	Image_Free(sb_faces[4][0], true);
+	Image_Free(sb_faces[4][1], true);
+	Image_Free(sb_faces[3][0], true);
+	Image_Free(sb_faces[3][1], true);
+	Image_Free(sb_faces[2][0], true);
+	Image_Free(sb_faces[2][1], true);
+	Image_Free(sb_faces[1][0], true);
+	Image_Free(sb_faces[1][1], true);
+	Image_Free(sb_faces[0][0], true);
+	Image_Free(sb_faces[0][1], true);
+
+	Image_Free(sb_face_invis, true);
+	Image_Free(sb_face_invuln, true);
+	Image_Free(sb_face_invis_invuln, true);
+	Image_Free(sb_face_quad, true);
+
+	Image_Free(sb_sbar, true);
+	Image_Free(sb_ibar, true);
+	Image_Free(sb_scorebar, true);
+
+	Image_Free(hsb_weapons[0][0], true);
+	Image_Free(hsb_weapons[0][1], true);
+	Image_Free(hsb_weapons[0][2], true);
+	Image_Free(hsb_weapons[0][3], true);
+	Image_Free(hsb_weapons[0][4], true);
+
+	Image_Free(hsb_weapons[1][0], true);
+	Image_Free(hsb_weapons[1][1], true);
+	Image_Free(hsb_weapons[1][2], true);
+	Image_Free(hsb_weapons[1][3], true);
+	Image_Free(hsb_weapons[1][4], true);
+
+	for (i = 0; i < 5; i++)
+	{
+		Image_Free(hsb_weapons[2 + i][0], true);
+		Image_Free(hsb_weapons[2 + i][1], true);
+		Image_Free(hsb_weapons[2 + i][2], true);
+		Image_Free(hsb_weapons[2 + i][3], true);
+		Image_Free(hsb_weapons[2 + i][4], true);
+	}
+
+	Image_Free(hsb_items[0], true);
+	Image_Free(hsb_items[1], true);
+
+	Image_Free(rsb_invbar[0], true);
+	Image_Free(rsb_invbar[1], true);
+
+	Image_Free (rsb_weapons[0], true);
+	Image_Free (rsb_weapons[1], true);
+	Image_Free (rsb_weapons[2], true);
+	Image_Free (rsb_weapons[3], true);
+	Image_Free (rsb_weapons[4], true);
+
+	Image_Free (rsb_items[0], true);
+	Image_Free (rsb_items[1], true);
+
+	// PGM 01/19/97 - team color border
+	Image_Free (rsb_teambord, true);
+	// PGM 01/19/97 - team color border
+
+	Image_Free (rsb_ammo[0], true);
+	Image_Free (rsb_ammo[1], true);
+	Image_Free (rsb_ammo[2], true);
+
+	/*
+	Cmd_RemoveCommand ("+showscores", HUD_ShowScores);
+	Cmd_RemoveCommand ("-showscores", HUD_DontShowScores);
+	Cmd_RemoveCommand ("+showteamscores", HUD_ShowTeamScores);
+	Cmd_RemoveCommand ("-showteamscores", HUD_DontShowScores);
+	*/
+
+	teams = NULL;
+	teamsort = NULL;
+	fragsort = NULL;
+	n_max_teams = 0;
+	n_teams = 0;
+	n_max_users = 0;
+	n_users = 0;
+	n_spectators = 0;
+	
+	Zone_FreeZone (&hud_zone);
+}
+
+
 static void
 HUD_DrawNum (int x, int y, int num, int digits, int color)
 {
@@ -399,21 +563,6 @@ HUD_DrawNum (int x, int y, int num, int digits, int color)
 }
 
 //=============================================================================
-
-typedef struct {
-	char	name[MAX_SCOREBOARDNAME];
-	int		frags;
-	int		players;
-	int		phigh, plow, ptotal;
-	double	color[3];
-} team_t;
-
-static team_t	*teams;
-static int		*teamsort;
-static int		n_max_teams = 0, n_teams = 0;
-
-static int		*fragsort;
-static int		n_max_users = 0, n_users = 0, n_spectators = 0;
 
 static void
 HUD_SortFrags (void)

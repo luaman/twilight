@@ -40,20 +40,38 @@ static const char rcsid[] =
 #include "server.h"
 #include <math.h>
 
-void Mod_UnloadBrushModel (model_t *mod);
-
 Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 
 unsigned   *model_checksum;
 
 void
-Mod_UnloadModel (model_t *mod)
+Mod_UnloadModel (model_t *mod, qboolean keep)
 {
 	if (!mod->loaded)
 		return;
 
-	Mod_UnloadBrushModel (mod);
-	memset(mod, 0, sizeof(model_t));
+	Mod_UnloadBrushModel (mod, keep);
+
+	if (keep) {
+		char		name[MAX_QPATH];
+		qboolean	submodel;
+		int			flags;
+
+		strcpy (name, mod->name);
+		submodel = mod->submodel;
+		flags = mod->modflags;
+
+		memset(mod, 0, sizeof(model_t));
+
+		mod->submodel = submodel;
+		strcpy (mod->name, name);
+		if (!submodel) {
+			mod->needload = true;
+			mod->modflags = flags;
+		}
+	} else {
+		memset(mod, 0, sizeof(model_t));
+	}
 }
 
 /*

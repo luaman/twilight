@@ -100,8 +100,6 @@ Draw_CacheImg (char *path)
 void
 Draw_Init_Cvars (void)
 {
-	GLT_Init_Cvars ();
-
 	gl_constretch = Cvar_Get ("gl_constretch", "1", CVAR_ARCHIVE, NULL);
 
 	hud_chsize = Cvar_Get ("hud_chsize", "0.5", CVAR_ARCHIVE, NULL);
@@ -119,17 +117,17 @@ Draw_Init (void)
 	image_t		*img;
 	int			i;
 
-	GLT_Init ();
-
 	img = Image_Load ("gfx/conchars", TEX_UPLOAD | TEX_ALPHA | TEX_NEED);
 	if (!img)
 		Sys_Error ("Draw_Init: Unable to load conchars\n");
 
 	char_texture = img->texnum;
+	Image_Free (img, false);
 
 	img = Image_Load ("gfx/conback", TEX_UPLOAD | TEX_ALPHA);
 	if (img)
 		conback_texture = img->texnum;
+	Image_Free (img, false);
 
 	/* save a texture slot for translated picture */
 	qglGenTextures(1, &translate_texture);
@@ -140,6 +138,35 @@ Draw_Init (void)
 	/* Keep track of the first crosshair texture */
 	for (i = 0; i < NUM_CROSSHAIRS; i++)
 		ch_textures[i] = GLT_Load_Pixmap (va ("crosshair%i", i), crosshairs[i]);
+}
+
+void
+Draw_Shutdown (void)
+{
+	int		i;
+
+	GLT_Delete (char_texture);
+	GLT_Delete (conback_texture);
+	char_texture = 0;
+	conback_texture = 0;
+
+	qglDeleteTextures (1, &translate_texture);
+	translate_texture = 0;
+
+	Image_Free (draw_disc, true);
+	draw_disc = NULL;
+
+	for (i = 0; i < GLT_numcacheimgs; i++) {
+		Image_Free (GLT_cacheimgs[i], true);
+		GLT_cacheimgs[i] = NULL;
+	}
+	GLT_numcacheimgs = 0;
+
+	/* Keep track of the first crosshair texture */
+	for (i = 0; i < NUM_CROSSHAIRS; i++) {
+		GLT_Delete (ch_textures[i]);
+		ch_textures[i] = 0;
+	}
 }
 
 

@@ -110,7 +110,6 @@ client_static_t cls;
 client_state_t cl;
 
 entity_state_t	cl_baselines[MAX_EDICTS];
-lightstyle_t	cl_lightstyle[MAX_LIGHTSTYLES];
 
 double		connect_time = -1;			// for connection retransmits
 
@@ -331,7 +330,7 @@ CL_ClearState (void)
 	S_StopAllSounds (true);
 
 	Com_DPrintf ("Clearing memory\n");
-	Mod_ClearAll ();
+	Mod_ClearAll (false);
 
 	CL_ClearTEnts ();
 
@@ -345,12 +344,11 @@ CL_ClearState (void)
 	ccl.users = Zone_Alloc(ccl_zone, sizeof(*ccl.users) * ccl.max_users);
 
 	// We don't get this from the server, that'd take a new protocol
-	cl.viewzoom = 1.0f;
+	ccl.viewzoom = 1.0f;
 
 	SZ_Clear (&cls.netchan.message);
 
 // clear other arrays   
-	memset (cl_lightstyle, 0, sizeof (cl_lightstyle));
 	memset (cl_baselines, 0, sizeof(cl_baselines));
 
 	SetupLightmapSettings ();
@@ -399,7 +397,7 @@ CL_Disconnect (void)
 	}
 
 	CL_StopUpload ();
-	r_worldmodel = NULL;
+	r.worldmodel = NULL;
 
 }
 
@@ -1045,7 +1043,7 @@ CL_Init (void)
 	ccl.users = Zone_Alloc(ccl_zone, sizeof(*ccl.users) * ccl.max_users);
 
 	ccls.state = ca_disconnected;
-	r_worldmodel = NULL;
+	r.worldmodel = NULL;
 
 	Info_SetValueForKey (cls.userinfo, "name", "unnamed", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "topcolor", "0", MAX_INFO_STRING);
@@ -1297,7 +1295,7 @@ Host_Frame (double time)
 
 	// update audio
 	if (ccls.state == ca_active) {
-		S_Update (r_origin, vpn, vright, vup);
+		S_Update (r.origin, r.vpn, r.vright, r.vup);
 		CCL_DecayLights ();
 	} else
 		S_Update (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
@@ -1383,10 +1381,7 @@ Host_Init (void)
 	COM_Init_Cvars ();				// basic cvars
 	Con_Init_Cvars ();				// all console related cvars
 	Key_Init_Cvars ();				// all key related cvars
-	Surf_Init_Cvars();				// all model related cvars
 	Netchan_Init_Cvars ();			// all netchan related cvars
-	SCR_Init_Cvars ();				// all screen(?) related cvars
-	VID_Init_Cvars();				// all video related cvars
 	V_Init_Cvars();					// all view related cvars
 	M_Init_Cvars ();				// all menu related cvars
 	R_Init_Cvars ();				// all rendering system related cvars
@@ -1417,14 +1412,7 @@ Host_Init (void)
 	Com_Printf ("Exe: "__TIME__" "__DATE__"\n");
 
 	Image_Init ();
-	VID_Init ();
-
-	Draw_Init_Cvars ();				// initialize all draw system related cvars
-	Draw_Init ();					// setup draw system, add related commands
-
-	SCR_Init ();					// setup and initialize screen(?), add related commands
-
-	R_Init ();						// setup rendering system, add related commands
+	R_Init ();
 
 	S_Init ();						// setup sound system, add related commands
 

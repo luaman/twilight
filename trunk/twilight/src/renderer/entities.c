@@ -38,25 +38,25 @@ static const char rcsid[] =
 #include "gl_alias.h"
 #include "gl_brush.h"
 #include "gl_sprite.h"
+#include "gl_main.h"
 #include "vis.h"
 
-refdef_t	r_refdef;
 static qboolean need_sky;
 
 void
 R_AddEntity (entity_common_t *ent)
 {
-	if ( r_refdef.num_entities >= MAX_ENTITIES ) {
+	if ( r.num_entities >= MAX_ENTITIES ) {
 		Host_EndGame ("ERROR! Out of entitys!");
 	}
 
-	r_refdef.entities[r_refdef.num_entities++] = ent;
+	r.entities[r.num_entities++] = ent;
 }
 
 void
 R_ClearEntities (void)
 {
-	r_refdef.num_entities = 0;
+	r.num_entities = 0;
 }
 
 void
@@ -85,7 +85,7 @@ void
 R_DrawOpaqueEntities (void)
 {
 	R_DrawOpaqueBrushModels ();
-	R_DrawOpaqueAliasModels (r_refdef.entities, r_refdef.num_entities, false);
+	R_DrawOpaqueAliasModels (r.entities, r.num_entities, false);
 	R_DrawOpaqueSpriteModels ();
 }
 

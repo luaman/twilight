@@ -127,7 +127,7 @@ BuildGLPolyFromEdges (msurface_t *surf, model_t *model, int *count)
 void
 SetupLightmapSettings (void)
 {
-	r_framecount = 1;
+	r.framecount = 1;
 	if (gl_mtexcombine)
 		lightmap_shift = 9;
 	else

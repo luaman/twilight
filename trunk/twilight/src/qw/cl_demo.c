@@ -168,7 +168,7 @@ CL_GetDemoMessage (void)
 			ccls.td_startframe = host.framecount;
 		}
 		ccl.basetime = demotime;			// warp
-	} else if (!cl.paused && ccls.state >= ca_onserver) {
+	} else if (!ccl.paused && ccls.state >= ca_onserver) {
 		// always grab until fully connected
 		if (ccl.time + 1.0 < demotime) {
 			// too far back
@@ -489,7 +489,7 @@ CL_Record_f (void)
 		MSG_WriteByte (&buf, svc_spawnstatic);
 
 		for (j = 1; j < MAX_MODELS; j++)
-			if (ent->common.model == cl.model_precache[j])
+			if (ent->common.model == ccl.model_precache[j])
 				break;
 		if (j == MAX_MODELS)
 			MSG_WriteByte (&buf, 0);
@@ -582,7 +582,7 @@ CL_Record_f (void)
 	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
 		MSG_WriteByte (&buf, svc_lightstyle);
 		MSG_WriteByte (&buf, (char) i);
-		MSG_WriteString (&buf, cl_lightstyle[i].map);
+		MSG_WriteString (&buf, ccl.lightstyles[i].map);
 	}
 
 	for (i = 0; i < MAX_CL_STATS; i++) {

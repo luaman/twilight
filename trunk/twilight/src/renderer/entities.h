@@ -78,18 +78,6 @@ typedef struct entity_common_s {
 	float			syncbase;
 } entity_common_t;
 
-typedef struct {
-	vec3_t			vieworg;
-	vec3_t			viewangles;
-
-	float			fov_x, fov_y;
-
-	int				num_entities;
-	entity_common_t	*entities[MAX_ENTITIES];
-} refdef_t;
-
-extern refdef_t	r_refdef;
-
 void R_AddEntity(entity_common_t *ent);
 void R_ClearEntities(void);
 void R_VisEntities(void);

@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "gl_alias.h"
 #include "gl_brush.h"
 #include "cclient.h"
+#include "gl_main.h"
 
 extern cvar_t *cl_mapname;
 
@@ -220,11 +221,15 @@ Part_FreeArrays ()
 	{
 		Zone_Free (base_particles);
 		Zone_Free (free_base_particles);
+		base_particles = NULL;
+		free_base_particles = NULL;
 	}
 	if (xbeam_particles)
 	{
 		Zone_Free (xbeam_particles);
 		Zone_Free (free_xbeam_particles);
+		xbeam_particles = NULL;
+		free_xbeam_particles = NULL;
 	}
 }
 
@@ -247,22 +252,35 @@ Part_CB (cvar_t *cvar)
 		max_xbeam_particles = r_xbeam_particles->ivalue;
 	}
 
-	Part_FreeArrays ();
+	if (part_zone) {
+		Part_FreeArrays ();
+		Part_AllocArrays ();
+	}
+}
+
+void
+R_Particles_Init_Cvars (void)
+{
+	r_particles = Cvar_Get ("r_particles", "1", CVAR_NONE, &Part_CB);
+	r_base_particles = Cvar_Get ("r_base_particles", "32768", CVAR_NONE, &Part_CB);
+	r_xbeam_particles = Cvar_Get ("r_xbeam_particles", "32", CVAR_NONE, &Part_CB);
+	r_particle_physics = Cvar_Get ("r_particle_physics", "0", CVAR_NONE, &Part_CB);
+}
+
+void
+R_Particles_Init (void)
+{
+	part_zone = Zone_AllocZone ("Particle zone.");
+
 	Part_AllocArrays ();
 }
 
 void
-R_InitParticles (void)
+R_Particles_Shutdown (void)
 {
-	part_zone = Zone_AllocZone ("Particle zone.");
-
-	r_particles = Cvar_Get ("r_particles", "1", CVAR_NONE, &Part_CB);
-	r_base_particles = Cvar_Get ("r_base_particles", "32768", CVAR_NONE, &Part_CB);
-	r_xbeam_particles = Cvar_Get ("r_xbeam_particles", "32", CVAR_NONE, &Part_CB);
-
-	r_particle_physics = Cvar_Get ("r_particle_physics", "0", CVAR_NONE, &Part_CB);
-
-	Part_AllocArrays ();
+	Part_FreeArrays ();
+	Zone_PrintZone (true, part_zone);
+	Zone_FreeZone (&part_zone);
 }
 
 #define NUMVERTEXNORMALS 162
@@ -302,7 +320,7 @@ R_EntityParticles (entity_common_t *ent)
 			+ forward[1] * beamlength;
 		org[2] = ent->origin[2] + r_avertexnormals[i][2] * dist
 			+ forward[2] * beamlength;
-		new_base_particle_oc (pt_explode, org, r_origin, 0x6f, 0, -1, 0.01, 0);
+		new_base_particle_oc (pt_explode, org, r.origin, 0x6f, 0, -1, 0.01, 0);
 	}
 }
 
@@ -318,7 +336,7 @@ R_ReadPointFile_f (void)
 {
 	char			*cur, *tmp, *start;
 	vec3_t			org;
-	int				r, c;
+	int				ret, c;
 	char			name[MAX_OSPATH];
 	base_particle_t	*p;
 
@@ -336,13 +354,13 @@ R_ReadPointFile_f (void)
 	c = 0;
 	while (cur[0] && (tmp = strchr (cur, '\n'))) {
 		tmp[0] = '\n';
-		r = sscanf (cur, "%f %f %f", &org[0], &org[1], &org[2]);
+		ret = sscanf (cur, "%f %f %f", &org[0], &org[1], &org[2]);
 		cur = tmp + 1;
-		if (r != 3)
+		if (ret != 3)
 			break;
 
 		c++;
-		p = new_base_particle_oc (pt_normal, org, r_origin, (-c) & 15, 0, -1,
+		p = new_base_particle_oc (pt_normal, org, r.origin, (-c) & 15, 0, -1,
 			99999, 0);
 		if (!p)
 			return;
@@ -771,7 +789,7 @@ R_Move_Base_Particles (void)
 #if 1
 		if (r_particle_physics->ivalue)
 		{
-			mleaf = Mod_PointInLeaf(p->org, r_worldmodel);
+			mleaf = Mod_PointInLeaf(p->org, r.worldmodel);
 			if ((mleaf->contents == CONTENTS_SOLID) ||
 					(mleaf->contents == CONTENTS_SKY))
 				p->die = -1;
@@ -788,7 +806,7 @@ R_Move_Base_Particles (void)
 		{
 			vec3_t normal;
 			float dist;
-			if (TraceLine (r_worldmodel, oldorg, p->org, v, normal) < 1) {
+			if (TraceLine (r.worldmodel, oldorg, p->org, v, normal) < 1) {
 				VectorCopy (v, p->org);
 				if (p->bounce < 0)
 				{
@@ -903,14 +921,12 @@ R_Draw_Base_Particles (void)
 			continue;
 
 		tex = &GTF_texture[p->texnum];
-		if (tex->texture != GTF_texnum)
-			continue;
 
 		if (p->scale < 0)
 		{
-			scale = ((p->org[0] - r_origin[0]) * vpn[0])
-				+ ((p->org[1] - r_origin[1]) * vpn[1])
-				+ ((p->org[2] - r_origin[2]) * vpn[2]);
+			scale = ((p->org[0] - r.origin[0]) * r.vpn[0])
+				+ ((p->org[1] - r.origin[1]) * r.vpn[1])
+				+ ((p->org[2] - r.origin[2]) * r.vpn[2]);
 			if (scale < 20)
 				scale = -p->scale;
 			else
@@ -923,15 +939,15 @@ R_Draw_Base_Particles (void)
 		VectorCopy4 (p->color, cf_array_v(v_index + 1));
 		VectorCopy4 (p->color, cf_array_v(v_index + 2));
 		VectorCopy4 (p->color, cf_array_v(v_index + 3));
-		VectorSet2(tc_array_v(v_index + 0), tex->s2, tex->t1);
-		VectorSet2(tc_array_v(v_index + 1), tex->s1, tex->t1);
-		VectorSet2(tc_array_v(v_index + 2), tex->s1, tex->t2);
-		VectorSet2(tc_array_v(v_index + 3), tex->s2, tex->t2);
+		VectorSet2(tc_array_v(v_index + 0), tex->s1, tex->t1);
+		VectorSet2(tc_array_v(v_index + 1), tex->s1, tex->t2);
+		VectorSet2(tc_array_v(v_index + 2), tex->s2, tex->t2);
+		VectorSet2(tc_array_v(v_index + 3), tex->s2, tex->t1);
 
-		VectorTwiddle(p->org, vright, 1, vup,-1, scale, v_array_v(v_index+0));
-		VectorTwiddle(p->org, vright,-1, vup,-1, scale, v_array_v(v_index+1));
-		VectorTwiddle(p->org, vright,-1, vup, 1, scale, v_array_v(v_index+2));
-		VectorTwiddle(p->org, vright, 1, vup, 1, scale, v_array_v(v_index+3));
+		VectorTwiddle(p->org, r.vright, 1,r.vup,-1,scale, v_array_v(v_index+0));
+		VectorTwiddle(p->org, r.vright,-1,r.vup,-1,scale, v_array_v(v_index+1));
+		VectorTwiddle(p->org, r.vright,-1,r.vup, 1,scale, v_array_v(v_index+2));
+		VectorTwiddle(p->org, r.vright, 1,r.vup, 1,scale, v_array_v(v_index+3));
 
 		v_index += 4;
 
@@ -1034,7 +1050,7 @@ DrawXBeam (xbeam_particle_t *p)
 
 	// Up, pointing towards view, and rotates around beam normal.
 	// Get direction from start of beam to viewer.
-	VectorSubtract (r_origin, p->org1, v_up);
+	VectorSubtract (r.origin, p->org1, v_up);
 	// Remove the portion of the vector that moves along the beam.
 	// (This leaves only a a vector pointing directly away from the beam.)
 	t1 = -DotProduct(v_up, p->normal);
@@ -1092,7 +1108,7 @@ R_Draw_XBeam_Particles (void)
 	if (!max_xbeam_particles)
 		return;
 
-	qglBindTexture (GL_TEXTURE_2D, GTF_texture[GTF_lightning_beam].texture);
+	qglBindTexture (GL_TEXTURE_2D, GT_lightning_beam->texnum);
 	v_index = 0;
 	i_index = 0;
 

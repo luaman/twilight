@@ -121,10 +121,10 @@ qboolean		scr_disabled_for_loading;
 static qboolean	scr_drawloading;
 static float	scr_disabled_time;
 
+static void		SCR_ScreenShot_f (void);
+
 static Uint8	*avibuffer;
 static Uint32	 aviframeno;
-
-static void SCR_ScreenShot_f (void);
 
 static void
 GL_BrightenScreen(void)
@@ -337,16 +337,16 @@ SCR_CalcRefdef (void)
 	else
 		sb_lines = 24 + 16 + 8;
 
-	r_refdef.fov_x = bound (10, scr_fov->fvalue * cl.viewzoom, 170);
-	r_refdef.fov_y = CalcFov (r_refdef.fov_x, vid.width, vid.height);
+	r.fov_x = bound (10, scr_fov->fvalue * ccl.viewzoom, 170);
+	r.fov_y = CalcFov (r.fov_x, vid.width, vid.height);
 
 	if (ccl.worldmodel)
 	{
-		contents = Mod_PointInLeaf (r_refdef.vieworg, ccl.worldmodel)->contents;
+		contents = Mod_PointInLeaf (r.origin, ccl.worldmodel)->contents;
 		if (contents != CONTENTS_EMPTY && contents != CONTENTS_SOLID)
 		{
-			r_refdef.fov_x *= (Q_sin(ccl.time * 4.7) * 0.015 + 0.985);
-			r_refdef.fov_y *= (Q_sin(ccl.time * 3.0) * 0.015 + 0.985);
+			r.fov_x *= (Q_sin(ccl.time * 4.7) * 0.015 + 0.985);
+			r.fov_y *= (Q_sin(ccl.time * 3.0) * 0.015 + 0.985);
 		}
 	}
 }
@@ -444,6 +444,23 @@ SCR_Init (void)
 	scr_initialized = true;
 }
 
+void
+SCR_Shutdown (void)
+{
+	/*
+	Cmd_RemoveCommand ("screenshot", SCR_ScreenShot_f);
+	Cmd_RemoveCommand ("sizeup", SCR_SizeUp_f);
+	Cmd_RemoveCommand ("sizedown", SCR_SizeDown_f);
+	*/
+
+	Image_Free (scr_net, true);
+	Image_Free (scr_turtle, true);
+	scr_net = NULL;
+	scr_turtle = NULL;
+
+	scr_initialized = false;
+}
+
 
 
 static void
@@ -519,7 +536,7 @@ SCR_DrawPause (void)
 	if (!scr_showpause->ivalue)			/* turn off for screenshots */
 		return;
 
-	if (!cl.paused)
+	if (!ccl.paused)
 		return;
 
 	pic = Draw_CacheImg ("gfx/pause");

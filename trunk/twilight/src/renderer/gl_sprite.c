@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include "matrixlib.h"
 #include "palette.h"
 #include "cclient.h"
+#include "gl_main.h"
 
 static mspriteframe_t *
 R_GetSpriteFrame (entity_common_t *e)
@@ -91,7 +92,8 @@ R_DrawOpaqueSpriteModels (void)
 	float				*up, *right;
 	vec3_t				 v_forward, v_right, v_up;
 	msprite_t			*psprite;
-	int					 i, last_tex;
+	Uint				 i;
+	int					 last_tex;
 
 	entity_common_t     *ce;
 
@@ -100,8 +102,8 @@ R_DrawOpaqueSpriteModels (void)
 
 	qglEnable (GL_ALPHA_TEST);
 
-	for (i = 0; i < r_refdef.num_entities; i++) {
-		ce = r_refdef.entities[i];
+	for (i = 0; i < r.num_entities; i++) {
+		ce = r.entities[i];
 
 		if (ce->model->type != mod_sprite)
 			continue;
@@ -131,8 +133,8 @@ R_DrawOpaqueSpriteModels (void)
 			right = v_right;
 		} else {
 			// normal sprite
-			up = vup;
-			right = vright;
+			up = r.vup;
+			right = r.vright;
 		}
 
 		VectorSet2(tc_array_v(v_index + 0), 0, 1);

@@ -56,6 +56,11 @@ Vis_Init (void)
 	vis_pvsframecount = 1;
 }
 
+void
+Vis_Shutdown (void)
+{
+}
+
 static int
 SignbitsForPlane (mplane_t *out)
 {

@@ -212,11 +212,13 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer, int flags)
 }
 
 void
-Mod_UnloadSpriteModel (model_t *mod)
+Mod_UnloadSpriteModel (model_t *mod, qboolean keep)
 {
 	int				 i, j;
 	msprite_t		*psprite;
 	mspritegroup_t	*pspritegroup;
+
+	keep = keep;
 
 	psprite = mod->sprite;
 	for (i = 0; i < psprite->numframes; i++) {

@@ -186,10 +186,10 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 	}
 
 	// Add the r_notextures to the list
-	r_notexture->tex_idx = i;
-	bheader->textures[i++] = r_notexture;
-	r_notexture_water->tex_idx = i;
-	bheader->textures[i++] = r_notexture_water;
+	bheader->notexture.tex_idx = i;
+	bheader->textures[i++] = &bheader->notexture;
+	bheader->notexture_water.tex_idx = i;
+	bheader->textures[i++] = &bheader->notexture_water;
 
 //
 // sequence the animations
@@ -375,9 +375,9 @@ Mod_LoadTexinfo (lump_t *l, model_t *mod)
 		if (!out->texture)
 		{
 			if (out->flags & TEX_SPECIAL)
-				out->texture = r_notexture_water;
+				out->texture = &bheader->notexture_water;
 			else
-				out->texture = r_notexture;
+				out->texture = &bheader->notexture;
 		}
 	}
 }

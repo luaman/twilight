@@ -46,11 +46,6 @@ typedef struct colormap_s {
 	vec4_t	bottom;
 } colormap_t;
 
-extern vec3_t	r_origin, vpn, vright, vup;
-extern Uint		r_framecount;	// Current frame.
-extern model_t	*r_worldmodel;	// World model.
-extern vec3_t	r_origin;
-
 extern cvar_t *gl_affinemodels;
 extern cvar_t *gl_nocolors;
 extern cvar_t *gl_im_animation;
@@ -88,5 +83,6 @@ extern int doublebuffer, buffer_size, depth_size, stencil_size;
 
 extern void GLInfo_Init_Cvars (void);
 extern void GLInfo_Init (void);
+extern void GLInfo_Shutdown (void);
 
 #endif // __GL_INFO_H

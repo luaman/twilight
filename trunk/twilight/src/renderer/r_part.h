@@ -31,7 +31,10 @@
 #include "gl_info.h"
 #include "entities.h"
 
-void R_InitParticles(void);
+void R_Particles_Init_Cvars (void);
+void R_Particles_Init (void);
+void R_Particles_Shutdown (void);
+
 void R_EntityParticles(entity_common_t *ent);
 void R_ClearParticles(void);
 void R_ReadPointFile_f(void);

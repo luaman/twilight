@@ -102,22 +102,15 @@ typedef struct {
 	vec3_t			mviewangles[2];			// during demo playback viewangles is lerped
 	// between these
 	vec3_t			viewangles;
+	vec3_t			punchangle;
 
 	vec3_t			mvelocity[2];			// update by server, used for lean+bob (0 is newest)
 
-	vec3_t			punchangle;				// temporary offset
-
 	// pitch drifting vars
 	float			idealpitch;
-	float			pitchvel;
-	qboolean		nodrift;
-	float			driftmove;
-	double			laststop;
 
 	float			viewheight;
-	float			crouch;					// local amount for smoothing stepups
 
-	qboolean		paused;					// send over by server
 	qboolean		onground;
 	qboolean		inwater;
 
@@ -127,9 +120,6 @@ typedef struct {
 	//
 	// information that is static for the entire time connected to a server
 	//
-	model_t			*model_precache[MAX_MODELS];
-	struct sfx_s	*sound_precache[MAX_SOUNDS];
-
 	int				viewentity;				// cl_entitites[cl.viewentity] = player
 
 	// refresh related state
@@ -138,7 +128,6 @@ typedef struct {
 	entity_t		viewent;				// the gun model
 
 	int				cdtrack, looptrack;		// cd audio
-	float			viewzoom;				// scales fov and sensitivity
 } client_state_t;
 
 
@@ -189,7 +178,6 @@ extern client_state_t	 cl;
 // FIXME, allocate dynamically
 extern entity_t cl_entities[MAX_EDICTS];
 extern entity_t cl_static_entities[MAX_STATIC_ENTITIES];
-extern lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
 extern entity_t cl_temp_entities[MAX_TEMP_ENTITIES];
 extern beam_t cl_beams[MAX_BEAMS];
 

@@ -36,6 +36,7 @@ void		HUD_Changed (cvar_t *unused);
 
 void		HUD_Init_Cvars (void);
 void		HUD_Init (void);
+void		HUD_Shutdown (void);
 
 // call whenever any of the client stats represented on the sbar changes
 

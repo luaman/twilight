@@ -49,6 +49,12 @@ static const char rcsid[] =
 #include "gl_brush.h"
 #include "gl_light.h"
 #include "gen_textures.h"
+#include "gl_main.h"
+#include "gl_arrays.h"
+#include "gl_draw.h"
+#include "screen.h"
+#include "surface.h"
+#include "hud.h"
 
 // FIXME: These /NEED/ to move to headers.
 extern void V_SetContentsColor (int contents);
@@ -56,23 +62,7 @@ extern void CL_ParseEntityLump (char *entdata);
 extern void R_DrawViewModel (void);
 
 
-Uint c_brush_polys, c_alias_polys;
-
-/*
- * view origin
- */
-vec3_t vup;
-vec3_t vpn;
-vec3_t vright;
-vec3_t r_origin;
-
-/*
- * screen size info
- */
-refdef_t r_refdef;
-
-texture_t *r_notexture;
-texture_t *r_notexture_water;
+renderer_t r;
 
 int d_lightstylevalue[256];				// 8.8 fraction of base light value
 
@@ -137,21 +127,19 @@ R_SetupFrame (void)
 {
 	R_AnimateLight ();
 
-	r_framecount++;
+	r.framecount++;
 
 	// build the transformation matrix for the given view angles
-	VectorCopy (r_refdef.vieworg, r_origin);
+	AngleVectors (r.angles, r.vpn, r.vright, r.vup);
 
-	AngleVectors (r_refdef.viewangles, vpn, vright, vup);
-
-	Vis_NewVisParams (r_worldmodel, r_origin, vup, vright, vpn,
-			r_refdef.fov_x, r_refdef.fov_y);
+	Vis_NewVisParams (r.worldmodel, r.origin, r.vup, r.vright, r.vpn,
+			r.fov_x, r.fov_y);
 
 	V_SetContentsColor (vis_viewleaf->contents);
 	V_CalcBlend ();
 
-	c_brush_polys = 0;
-	c_alias_polys = 0;
+	r.brush_polys = 0;
+	r.alias_polys = 0;
 }
 
 
@@ -168,8 +156,8 @@ R_SetupGL (void)
 
 	qglViewport (0, 0, vid.width, vid.height);
 
-	xmax = Q_tan (r_refdef.fov_x * M_PI / 360.0) * (vid.width / vid.height);
-	ymax = Q_tan (r_refdef.fov_y * M_PI / 360.0);
+	xmax = Q_tan (r.fov_x * M_PI / 360.0) * (vid.width / vid.height);
+	ymax = Q_tan (r.fov_y * M_PI / 360.0);
 
 	qglFrustum (-xmax, xmax, -ymax, ymax, 1.0f, 8192.0);
 
@@ -181,11 +169,11 @@ R_SetupGL (void)
 	// put Z going up
 	qglRotatef (-90, 1, 0, 0);
 	qglRotatef (90, 0, 0, 1);
-	qglRotatef (-r_refdef.viewangles[2], 1, 0, 0);
-	qglRotatef (-r_refdef.viewangles[0], 0, 1, 0);
-	qglRotatef (-r_refdef.viewangles[1], 0, 0, 1);
-	qglTranslatef (-r_refdef.vieworg[0], -r_refdef.vieworg[1],
-				  -r_refdef.vieworg[2]);
+	qglRotatef (-r.angles[2], 1, 0, 0);
+	qglRotatef (-r.angles[0], 0, 1, 0);
+	qglRotatef (-r.angles[1], 0, 0, 1);
+	qglTranslatef (-r.origin[0], -r.origin[1],
+				  -r.origin[2]);
 
 	/*
 	 * set drawing parms
@@ -243,7 +231,7 @@ R_Render3DView (void)
 
 /*
 ================
-r_refdef must be set before the first call
+r must be set before the first call
 ================
 */
 void
@@ -255,15 +243,15 @@ R_RenderView (void)
 	if (r_norefresh->ivalue)
 		return;
 
-	if (!r_worldmodel)
+	if (!r.worldmodel)
 		Host_EndGame ("R_RenderView: NULL worldmodel");
 
 	if (r_speeds->ivalue)
 	{
 		qglFinish ();
 		time1 = Sys_DoubleTime ();
-		c_brush_polys = 0;
-		c_alias_polys = 0;
+		r.brush_polys = 0;
+		r.alias_polys = 0;
 	}
 	else if (gl_finish->ivalue)
 		qglFinish ();
@@ -311,57 +299,9 @@ R_RenderView (void)
 	{
 		time2 = Sys_DoubleTime ();
 		Com_Printf ("%3i ms  %4i wpoly %4i epoly\n",
-					(int) ((time2 - time1) * 1000), c_brush_polys,
-					c_alias_polys);
+					(int) ((time2 - time1) * 1000), r.brush_polys,
+					r.alias_polys);
 	}
-}
-
-
-static void
-R_InitTextures (void)
-{
-	int			x, y;
-	Uint8		pixels[16][16][4];
-	image_t		img;
-
-	img.width = 16;
-	img.height = 16;
-	img.pixels = (Uint8 *)&pixels;
-	img.type = IMG_RGBA;
-
-	// Set up the notexture
-	for (y = 0; y < 16; y++)
-	{
-		for (x = 0; x < 16; x++)
-		{
-			if ((y < 8) ^ (x < 8))
-			{
-				pixels[y][x][0] = 128;
-				pixels[y][x][1] = 128;
-				pixels[y][x][2] = 128;
-				pixels[y][x][3] = 255;
-			}
-			else
-			{
-				pixels[y][x][0] = 64;
-				pixels[y][x][1] = 64;
-				pixels[y][x][2] = 64;
-				pixels[y][x][3] = 255;
-			}
-		}
-	}
-
-	r_notexture = Zone_Alloc (glt_zone, sizeof(texture_t));
-	strlcpy_s (r_notexture->name, "notexture");
-	r_notexture->width = img.width;
-	r_notexture->height = img.height;
-	r_notexture->gl_texturenum = GLT_Load_image (r_notexture->name, &img, NULL,
-			TEX_MIPMAP);
-
-	r_notexture_water = Zone_Alloc (glt_zone, sizeof(texture_t));
-	*r_notexture_water = *r_notexture;
-
-	R_InitLightTextures ();
 }
 
 void
@@ -386,11 +326,17 @@ R_Init_Cvars (void)
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
 
-
-
+	GLArrays_Init_Cvars ();
+	Draw_Init_Cvars ();
+	GLInfo_Init_Cvars ();
+	R_Liquid_Init_Cvars ();
+	PAL_Init_Cvars ();
+	R_Particles_Init_Cvars ();
 	Sky_Init_Cvars ();
-	R_Init_Liquid_Cvars ();
+	Surf_Init_Cvars ();
+	VID_Init_Cvars ();
 	Vis_Init_Cvars ();
+	SCR_Init_Cvars ();
 }
 
 /*
@@ -411,7 +357,7 @@ R_TimeRefresh_f (void)
 
 	start = Sys_DoubleTime ();
 	for (i = 0; i < 128; i++) {
-		r_refdef.viewangles[1] = i * (360.0 / 128.0);
+		r.angles[1] = i * (360.0 / 128.0);
 		R_RenderView ();
 		GL_EndRendering ();
 	}
@@ -424,22 +370,86 @@ R_TimeRefresh_f (void)
 	GL_EndRendering ();
 }
 
+static void
+VID_Restart_f (void)
+{
+	Mod_ClearAll (true);
+	HUD_Shutdown ();
+	R_Shutdown ();
+
+	R_Init ();
+	HUD_Init ();
+	Mod_ReloadAll (FLAG_RENDER);
+}
+
+
+static void
+GL_Defaults (void)
+{
+	qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
+	qglCullFace (GL_FRONT);
+	qglEnable (GL_TEXTURE_2D);
+
+	qglAlphaFunc (GL_GREATER, 0.666);
+
+	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+			GL_LINEAR_MIPMAP_NEAREST);
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+}
 
 void
 R_Init (void)
 {
 	Cmd_AddCommand ("timerefresh", &R_TimeRefresh_f);
 	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
+	Cmd_AddCommand ("vid_restart", &VID_Restart_f);
 
-	R_InitTextures ();
-	R_InitBubble ();
-	R_InitParticles ();
-	TNT_Init ();
+	VID_Init ();		// Makes the window, gets the GL pointers.
+	GLT_Init_Cvars ();	// FIXME: Evil evil hack.
+	GLInfo_Init ();		// Basic driver information.
+	GL_Defaults ();		// Set some sane defaults.
+	GLArrays_Init ();	// Vertex arrays, so we CAN draw.
+	GLT_Init ();		// Ability to load textures.
+
+	Draw_Init ();		// Basic drawing stuff.
+	GT_Init ();			// Load generated textures.
+	SCR_Init ();		// Screen management. (Some needs to merge with draw.)
+
+	// Everything else, order independent.
+	R_Particles_Init ();
 	R_Explosion_Init ();
-	R_InitSurf ();
+	GL_Light_Tables_Init ();
 	Sky_Init ();
-	R_Init_Liquid ();
 	Vis_Init ();
+}
+
+void
+R_Shutdown (void)
+{
+	/*
+	Cmd_RemoveCommand ("timerefresh", &R_TimeRefresh_f);
+	Cmd_RemoveCommand ("pointfile", &R_ReadPointFile_f);
+	*/
+
+	R_Particles_Shutdown ();
+	R_Explosion_Shutdown ();
+	Sky_Shutdown ();
+	Vis_Shutdown ();
+
+	SCR_Shutdown ();
+	GT_Shutdown ();
+	Draw_Shutdown ();
+	GLT_Shutdown ();
+	GLArrays_Shutdown ();
+	VID_Shutdown ();
 }
 
 void
@@ -456,8 +466,7 @@ R_NewMap (void)
 	R_ClearParticles ();
 
 	// Parse map entities
-	CL_ParseEntityLump (r_worldmodel->brush->entities);
+	CL_ParseEntityLump (r.worldmodel->brush->entities);
 
 	r_explosion_newmap ();
 }
-

@@ -41,7 +41,7 @@ static const char rcsid[] =
 #include "sys.h"
 
 void
-Mod_UnloadModel (model_t *mod)
+Mod_UnloadModel (model_t *mod, qboolean keep)
 {
 	if (!mod->loaded)
 		return;
@@ -50,21 +50,41 @@ Mod_UnloadModel (model_t *mod)
 		case mod_alias:
 			mod->type = mod_alias;
 			if (mod->modflags & FLAG_RENDER)
-				Mod_UnloadAliasModel (mod);
+				Mod_UnloadAliasModel (mod, keep);
 			break;
 
 		case mod_sprite:
 			mod->type = mod_sprite;
 			if (mod->modflags & FLAG_RENDER)
-				Mod_UnloadSpriteModel (mod);
+				Mod_UnloadSpriteModel (mod, keep);
 			break;
 
 		case mod_brush:
 			mod->type = mod_brush;
-			Mod_UnloadBrushModel (mod);
+			Mod_UnloadBrushModel (mod, keep);
 			break;
 	}
-	memset(mod, 0, sizeof(model_t));
+
+	if (keep) {
+		char		name[MAX_QPATH];
+		qboolean	submodel;
+		int			flags;
+
+		strcpy (name, mod->name);
+		submodel = mod->submodel;
+		flags = mod->modflags;
+
+		memset(mod, 0, sizeof(model_t));
+
+		mod->submodel = submodel;
+		strcpy (mod->name, name);
+		if (!submodel) {
+			mod->needload = true;
+			mod->modflags = flags;
+		}
+	} else {
+		memset(mod, 0, sizeof(model_t));
+	}
 }
 
 /*

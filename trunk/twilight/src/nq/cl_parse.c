@@ -149,7 +149,7 @@ CL_ParseStartSoundPacket (void)
 	for (i = 0; i < 3; i++)
 		pos[i] = MSG_ReadCoord ();
 
-	S_StartSound (ent, channel, cl.sound_precache[sound_num], pos,
+	S_StartSound (ent, channel, ccl.sound_precache[sound_num], pos,
 				  volume / 255.0, attenuation);
 }
 
@@ -240,8 +240,6 @@ CL_ParseServerInfo (void)
 	if (ccl.max_users < 1 || ccl.max_users > MAX_SCOREBOARD)
 		Host_Error ("Bad maxclients (%u) from server\n", ccl.max_users);
 
-	if (ccl.users)
-		Zone_Free(ccl.users);
 	ccl.users = Zone_Alloc (cl_zone, ccl.max_users * sizeof (*ccl.users));
 	ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 
@@ -269,7 +267,6 @@ CL_ParseServerInfo (void)
 //
 
 // precache models
-	memset (cl.model_precache, 0, sizeof (cl.model_precache));
 	for (nummodels = 1;; nummodels++) {
 		str = MSG_ReadString ();
 		if (!str[0])
@@ -281,7 +278,6 @@ CL_ParseServerInfo (void)
 	}
 
 // precache sounds
-	memset (cl.sound_precache, 0, sizeof (cl.sound_precache));
 	for (numsounds = 1;; numsounds++) {
 		str = MSG_ReadString ();
 		if (!str[0])
@@ -300,14 +296,14 @@ CL_ParseServerInfo (void)
 		{
 			char mapname[MAX_QPATH] = { 0 };
 
-			cl.model_precache[i] = Mod_ForName (model_precache[i],
+			ccl.model_precache[i] = Mod_ForName (model_precache[i],
 					FLAG_CRASH | FLAG_RENDER | FLAG_SUBMODELS);
 
 			strlcpy_s (mapname, COM_SkipPath (model_precache[i]));
 			COM_StripExtension (mapname, mapname);
 			Cvar_Set (cl_mapname, mapname);
 		} else
-			cl.model_precache[i] = Mod_ForName (model_precache[i],
+			ccl.model_precache[i] = Mod_ForName (model_precache[i],
 					FLAG_CRASH | FLAG_RENDER);
 
 
@@ -322,13 +318,13 @@ CL_ParseServerInfo (void)
 	}
 
 	for (i = 1; i < numsounds; i++) {
-		cl.sound_precache[i] = S_PrecacheSound (sound_precache[i]);
+		ccl.sound_precache[i] = S_PrecacheSound (sound_precache[i]);
 		CL_KeepaliveMessage ();
 	}
 
 
 // local state
-	cl_entities[0].common.model = ccl.worldmodel = r_worldmodel = cl.model_precache[1];
+	cl_entities[0].common.model = ccl.worldmodel = r.worldmodel = ccl.model_precache[1];
 
 	R_NewMap ();
 	Team_NewMap ();
@@ -383,7 +379,7 @@ CL_ParseUpdate (int bits)
 	} else
 		modnum = ent->baseline.modelindex;
 
-	model = cl.model_precache[modnum];
+	model = ccl.model_precache[modnum];
 	if (model != ent->common.model) {
 		entity_state_t	baseline;
 
@@ -606,7 +602,7 @@ CL_ParseStatic (void)
 	}
 
 // copy it to the current state
-	ent->common.model = cl.model_precache[ent->baseline.modelindex];
+	ent->common.model = ccl.model_precache[ent->baseline.modelindex];
 	CL_Update_Frame(ent, ent->baseline.frame, cl.mtime[1]);
 	ent->common.colormap = NULL;
 	ent->common.skinnum = ent->baseline.skin;
@@ -630,7 +626,7 @@ CL_ParseStaticSound (void)
 	vol = MSG_ReadByte ();
 	atten = MSG_ReadByte ();
 
-	S_StaticSound (cl.sound_precache[sound_num], org, vol, atten);
+	S_StaticSound (ccl.sound_precache[sound_num], org, vol, atten);
 }
 
 
@@ -745,8 +741,8 @@ CL_ParseServerMessage (void)
 				i = MSG_ReadByte ();
 				if (i >= MAX_LIGHTSTYLES)
 					Sys_Error ("svc_lightstyle > MAX_LIGHTSTYLES");
-				strlcpy_s (cl_lightstyle[i].map, MSG_ReadString ());
-				cl_lightstyle[i].length = strlen (cl_lightstyle[i].map);
+				strlcpy_s (ccl.lightstyles[i].map, MSG_ReadString ());
+				ccl.lightstyles[i].length = strlen (ccl.lightstyles[i].map);
 				break;
 
 			case svc_sound:
@@ -803,9 +799,9 @@ CL_ParseServerMessage (void)
 
 			case svc_setpause:
 				{
-					cl.paused = MSG_ReadByte ();
+					ccl.paused = MSG_ReadByte ();
 
-					if (cl.paused)
+					if (ccl.paused)
 						CDAudio_Pause ();
 					else
 						CDAudio_Resume ();

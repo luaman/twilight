@@ -312,3 +312,10 @@ PAL_Init (void)
 	GammaChanged (v_grey);
 	TGammaChanged (v_tgrey);
 }
+
+void
+PAL_Shutdown (void)
+{
+	Zone_Free (host_basepal);
+	host_basepal = NULL;
+}

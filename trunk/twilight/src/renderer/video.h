@@ -55,7 +55,7 @@ void VID_Shutdown(void);
 void GL_EndRendering(void);
 void Size_Changed2D(cvar_t *cvar);
 void VID_Init_Cvars(void);
-void VID_Init(void);
+void VID_Init (void);
 void Sys_SendKeyEvents(void);
 void IN_Init(void);
 void IN_Shutdown(void);

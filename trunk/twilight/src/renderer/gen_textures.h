@@ -28,11 +28,11 @@
 #define __GEN_TEXTURES_H
 
 #include "qtypes.h"
+#include "image.h"
 
-#define MAX_GT_FONT_TEXTURES 64
+#define MAX_GT_FONT_SLOTS 64
 // GTF_texture_t is a rectangle in the particlefonttexture
 typedef struct {
-	int		texture;
 	float	s1, t1, s2, t2;
 } GTF_texture_t;
 
@@ -41,11 +41,15 @@ extern const int GTF_rainsplash[16];
 extern const int GTF_dot;
 extern const int GTF_raindrop;
 extern const int GTF_bubble;
-extern const int GTF_lightning_beam;
 extern const int GTF_blooddecal[8];
-extern int GTF_texnum;
-extern GTF_texture_t GTF_texture[64];
+extern const int GTF_corona;
+extern GLuint GTF_texnum;
+extern GTF_texture_t GTF_texture[MAX_GT_FONT_SLOTS];
 
-void TNT_Init(void);
+extern image_t *GT_lightning_beam;
+extern image_t *GT_checker_board;
+
+void GT_Init(void);
+void GT_Shutdown(void);
 
 #endif // __GEN_TEXTURES_H

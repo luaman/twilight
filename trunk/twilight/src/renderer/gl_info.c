@@ -38,9 +38,6 @@ static const char rcsid[] =
 #include "sys.h"
 #include "model.h"
 
-model_t *r_worldmodel;
-Uint r_framecount;          // Current frame.
-
 GLfloat whitev[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 static int fb_size[4];
@@ -242,4 +239,12 @@ GLInfo_Init (void)
 	Com_Printf ("Depth bits: %d. Stencil bits: %d\n", depth_size, stencil_size);
 
 	Cmd_AddCommand ("gl_info", &GL_Info_f);
+}
+
+void
+GLInfo_Shutdown (void)
+{
+	/*
+	Cmd_RemoveCommand ("gl_info", &GL_Info_f);
+	*/
 }

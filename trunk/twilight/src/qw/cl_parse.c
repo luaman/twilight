@@ -245,14 +245,14 @@ Model_NextDownload (void)
 
 		if (i == 1)
 		{
-			cl.model_precache[i] = Mod_ForName (cl.model_name[i], FLAG_RENDER | FLAG_SUBMODELS);
-			strlcpy (mapname, COM_SkipPath (cl.model_precache[1]->name), MAX_QPATH);
+			ccl.model_precache[i] = Mod_ForName (cl.model_name[i], FLAG_RENDER | FLAG_SUBMODELS);
+			strlcpy (mapname, COM_SkipPath (ccl.model_precache[1]->name), MAX_QPATH);
 			COM_StripExtension (mapname, mapname);
 			Cvar_Set (cl_mapname, mapname);
 		} else
-			cl.model_precache[i] = Mod_ForName (cl.model_name[i], FLAG_RENDER);
+			ccl.model_precache[i] = Mod_ForName (cl.model_name[i], FLAG_RENDER);
 
-		if (!cl.model_precache[i]) {
+		if (!ccl.model_precache[i]) {
 			Com_Printf ("\nThe required model file '%s' could not be found "
 					"or downloaded.\n\n", cl.model_name[i]);
 			Com_Printf ("You may need to download or purchase a %s client "
@@ -262,7 +262,7 @@ Model_NextDownload (void)
 			return;
 		}
 
-		if (!strcasecmp (cl.model_precache[i]->name, "progs/flame.mdl")) {
+		if (!strcasecmp (ccl.model_precache[i]->name, "progs/flame.mdl")) {
 			if (!mdl_torch)
 				mdl_torch = Mod_ForName ("progs/torch.mdl", FLAG_RENDER);
 			if (!mdl_torch)
@@ -271,7 +271,7 @@ Model_NextDownload (void)
 	}
 
 	// all done
-	ccl.worldmodel = r_worldmodel = cl.model_precache[1];
+	ccl.worldmodel = r.worldmodel = ccl.model_precache[1];
 
 	memset (&cl_network_entities, 0, sizeof(cl_network_entities));
 	memset (&cl_player_entities, 0, sizeof(cl_player_entities));
@@ -312,11 +312,11 @@ Sound_NextDownload (void)
 		if (!cl.sound_name[i][0])
 			break;
 
-		cl.sound_precache[i] = S_PrecacheSound (cl.sound_name[i]);
+		ccl.sound_precache[i] = S_PrecacheSound (cl.sound_name[i]);
 	}
 
 	// done with sounds, request models now
-	memset (cl.model_precache, 0, sizeof (cl.model_precache));
+	memset (ccl.model_precache, 0, sizeof (ccl.model_precache));
 	cl_playerindex = -1;
 	cl_spikeindex = -1;
 	cl_flagindex = -1;
@@ -427,7 +427,7 @@ static int    upload_size;
 void
 CL_NextUpload (void)
 {
-	Uint8       buffer[1024];
+	Uint8       buffer[768];
 	int         r;
 	int         percent;
 	int         size;
@@ -599,7 +599,7 @@ CL_ParseSoundlist (void)
 	int         n;
 
 // precache sounds
-//  memset (cl.sound_precache, 0, sizeof(cl.sound_precache));
+//  memset (ccl.sound_precache, 0, sizeof(ccl.sound_precache));
 
 	numsounds = MSG_ReadByte ();
 
@@ -697,7 +697,7 @@ CL_ParseStaticSound (void)
 	vol = MSG_ReadByte ();
 	atten = MSG_ReadByte ();
 
-	S_StaticSound (cl.sound_precache[sound_num], org, vol, atten);
+	S_StaticSound (ccl.sound_precache[sound_num], org, vol, atten);
 }
 
 
@@ -743,7 +743,7 @@ CL_ParseStartSoundPacket (void)
 	if (ent > MAX_EDICTS)
 		Host_EndGame ("CL_ParseStartSoundPacket: ent = %i", ent);
 
-	S_StartSound (ent, channel, cl.sound_precache[sound_num], pos,
+	S_StartSound (ent, channel, ccl.sound_precache[sound_num], pos,
 				  volume / 255.0, attenuation);
 }
 
@@ -1114,8 +1114,8 @@ CL_ParseServerMessage (void)
 				i = MSG_ReadByte ();
 				if (i >= MAX_LIGHTSTYLES)
 					Host_EndGame ("svc_lightstyle > MAX_LIGHTSTYLES");
-				strlcpy_s (cl_lightstyle[i].map, MSG_ReadString ());
-				cl_lightstyle[i].length = strlen (cl_lightstyle[i].map);
+				strlcpy_s (ccl.lightstyles[i].map, MSG_ReadString ());
+				ccl.lightstyles[i].length = strlen (ccl.lightstyles[i].map);
 				break;
 
 			case svc_sound:
@@ -1292,8 +1292,8 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_setpause:
-				cl.paused = MSG_ReadByte ();
-				if (cl.paused)
+				ccl.paused = MSG_ReadByte ();
+				if (ccl.paused)
 					CDAudio_Pause ();
 				else
 					CDAudio_Resume ();
