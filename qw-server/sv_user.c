@@ -1737,7 +1737,7 @@ SV_UserInit (void)
 
 	sv_timekick = Cvar_Get ("sv_timekick", "3", CVAR_NONE, NULL);
 	sv_timekick_allowed = Cvar_Get ("sv_timekick_allowed",
-									"3", CVAR_NONE, NULL);
+									"200", CVAR_NONE, NULL);
 	sv_timekick_interval = Cvar_Get ("sv_timekick_interval",
 									 "30", CVAR_NONE, NULL);
 }
