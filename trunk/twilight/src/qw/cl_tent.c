@@ -71,10 +71,10 @@ sfx_t      *cl_sfx_ric2;
 sfx_t      *cl_sfx_ric3;
 sfx_t      *cl_sfx_r_exp3;
 
-model_t	   *cl_expl_mod;
-model_t	   *cl_bolt1_mod;
-model_t	   *cl_bolt2_mod;
-model_t	   *cl_bolt3_mod;
+model_t	   *cl_expl_mod = NULL;
+model_t	   *cl_bolt1_mod = NULL;
+model_t	   *cl_bolt2_mod = NULL;
+model_t	   *cl_bolt3_mod = NULL;
 
 
 /*
@@ -92,11 +92,6 @@ CL_InitTEnts (void)
 	cl_sfx_ric2 = S_PrecacheSound ("weapons/ric2.wav");
 	cl_sfx_ric3 = S_PrecacheSound ("weapons/ric3.wav");
 	cl_sfx_r_exp3 = S_PrecacheSound ("weapons/r_exp3.wav");
-
-	cl_expl_mod = Mod_ForName ("progs/s_explod.spr", true);
-	cl_bolt1_mod = Mod_ForName ("progs/bolt.mdl", true);
-	cl_bolt2_mod = Mod_ForName ("progs/bolt2.mdl", true);
-	cl_bolt3_mod = Mod_ForName ("progs/bolt3.mdl", true);
 }
 
 /*
@@ -286,6 +281,10 @@ CL_ParseTEnt (void)
 			ex = CL_AllocExplosion ();
 			VectorCopy (pos, ex->origin);
 			ex->start = cl.time;
+
+			if (!cl_expl_mod)
+				cl_expl_mod = Mod_ForName ("progs/s_explod.spr", true);
+
 			ex->model = cl_expl_mod;
 			break;
 
@@ -299,14 +298,20 @@ CL_ParseTEnt (void)
 			break;
 
 		case TE_LIGHTNING1:			// lightning bolts
+			if (!cl_bolt1_mod)
+				cl_bolt1_mod = Mod_ForName ("progs/bolt.mdl", true);
 			CL_ParseBeam (cl_bolt1_mod);
 			break;
 
 		case TE_LIGHTNING2:			// lightning bolts
+			if (!cl_bolt2_mod)
+				cl_bolt2_mod = Mod_ForName ("progs/bolt2.mdl", true);
 			CL_ParseBeam (cl_bolt2_mod);
 			break;
 
 		case TE_LIGHTNING3:			// lightning bolts
+			if (!cl_bolt3_mod)
+				cl_bolt3_mod = Mod_ForName ("progs/bolt3.mdl", true);
 			CL_ParseBeam (cl_bolt3_mod);
 			break;
 

@@ -583,7 +583,7 @@ CL_FinishMove (usercmd_t *cmd)
 	cmd->upmove = MakeChar (cmd->upmove);
 
 	for (i = 0; i < 3; i++)
-		cmd->angles[i] = ((int) (cmd->angles[i] * (65536.0 / 360)) & 65535)
+		cmd->angles[i] = ((int) (cmd->angles[i] * (65536.0f / 360.0f) + 0.5f) & 65535)
 			* (360.0 / 65536.0);
 }
 
