@@ -43,7 +43,13 @@ static const char rcsid[] =
 #include "sys.h"
 
 
-Uint32 d_8to32table[256];
+Uint32 d_palette_raw[256];
+Uint32 d_palette_base[256];
+Uint32 d_palette_fb[256];
+Uint32 d_palette_base_team[256];
+Uint32 d_palette_top[256];
+Uint32 d_palette_bottom[256];
+Uint32 d_palette_top_bottom[256];
 float d_8tofloattable[256][4];
 
 cvar_t *width_2d;
@@ -146,14 +152,48 @@ VID_InitTexGamma (void)
 		d_8tofloattable[i][3] = 1;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		d_8to32table[i] = (r << 24) + (g << 16) + (b << 8) + (255 << 0);
+		d_palette_raw[i] = (r << 24) + (g << 16) + (b << 8) + (255 << 0);
 #else
-		d_8to32table[i] = (r << 0) + (g << 8) + (b << 16) + (255 << 24);
+		d_palette_raw[i] = (r << 0) + (g << 8) + (b << 16) + (255 << 24);
 #endif
 	}
-	d_8to32table[255] = 0x00000000;		/* 255 is transparent */
+	d_palette_raw[255] = 0x00000000;		/* 255 is transparent */
 	VectorSet4 (d_8tofloattable[255], 0, 0, 0, 0);
 }
+
+static void
+VID_BuildPalettes (void)
+{
+	int i, num_fb;
+
+	num_fb = host_colormap[0x4000];
+
+	for (i = 0; i < (256 - num_fb); i++)
+	{
+		d_palette_base_team[i] = d_palette_base[i] = d_palette_raw[i];
+		d_palette_fb[i] = d_palette_empty;
+		d_palette_top[i] = d_palette_bottom[i] = d_palette_top_bottom[i] = d_palette_empty;
+	}
+	for (; i < 256; i++)
+	{
+		d_palette_base_team[i] = d_palette_base[i] = d_palette_empty;
+		d_palette_fb[i] = d_palette_raw[i];
+		d_palette_top[i] = d_palette_bottom[i] = d_palette_top_bottom[i] = d_palette_empty;
+	}
+
+	for (i = 0x10; i < 0x20; i++)   // Top range.
+	{
+		d_palette_top[i] = d_palette_top_bottom[i] = d_palette_raw[i - 0x10];
+		d_palette_base_team[i] = d_palette_empty;
+	}
+	for (i = 0x60; i < 0x70; i++)   // Bottom range.
+	{
+		d_palette_bottom[i] = d_palette_top_bottom[i] = d_palette_raw[i - 0x60];        d_palette_base_team[i] = d_palette_empty;
+	}
+	d_palette_base[255] = d_palette_base_team[255] = d_palette_top_bottom[255]
+		= d_palette_top[255] = d_palette_bottom[255] = d_palette_raw[255];
+}
+
 
 static void
 GammaChanged (cvar_t *cvar)
@@ -412,6 +452,7 @@ VID_Init (unsigned char *palette)
 	Com_DPrintf ("VID_Init: GL_Init successful.\n");
 
 	VID_InitTexGamma ();
+	VID_BuildPalettes ();
 
 	if (use_mouse)
 	{

@@ -92,7 +92,6 @@ typedef struct skin_sub_s {
 typedef struct skin_s {
 	int			frames;
 	float		interval;
-	skin_sub_t	*raw;
 	skin_sub_t	*base;
 	skin_sub_t	*base_team;
 	skin_sub_t	*top_bottom;

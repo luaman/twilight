@@ -176,8 +176,8 @@ void GL_EndRendering (void);
 
 int GL_MangleImage8 (Uint8 *in, Uint8 *out, int width, int height, short mask,
 		        Uint8 to, qboolean bleach);
-void GL_Upload32 (Uint32 *data, int width, int height, int flags);
-void GL_Upload8 (Uint8 *data, int width, int height,unsigned *ttable,
+qboolean GL_Upload32 (Uint32 *data, int width, int height, int flags);
+qboolean GL_Upload8 (Uint8 *data, int width, int height, Uint32 *palette,
 		int flags);
 
 extern int glx, gly;

@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "gl_textures.h"
+#include "gl_info.h"
 #include "mod_sprite.h"
 
 extern vec3_t	 bboxmin, bboxmax;
@@ -87,7 +88,8 @@ Mod_LoadSpriteFrame (void *pin, model_t *mod, mspriteframe_t **ppframe,
 
 	pspriteframe->gl_texturenum =
 		GL_LoadTexture (va("%s_%i", mod->name, framenum), width, height,
-				(Uint8 *) (pinframe + 1), TEX_MIPMAP|TEX_ALPHA, 8);
+				(Uint8 *) (pinframe + 1), d_palette_raw,
+				TEX_MIPMAP|TEX_ALPHA, 8);
 
 	return (void *) ((Uint8 *) pinframe + sizeof (dspriteframe_t) + size);
 }

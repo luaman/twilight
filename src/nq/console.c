@@ -72,13 +72,6 @@ extern int key_linepos;
 
 qboolean con_initialized;
 
-void
-Key_ClearTyping (void)
-{
-	key_lines[edit_line][1] = 0;		// clear any typing
-	key_linepos = 1;
-}
-
 /*
 ================
 Con_ToggleConsole_f
@@ -87,7 +80,7 @@ Con_ToggleConsole_f
 void
 Con_ToggleConsole_f (void)
 {
-	Key_ClearTyping ();
+	Key_ClearEditLine (edit_line);
 
 	if (key_dest == key_console)
 	{

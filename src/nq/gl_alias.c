@@ -278,12 +278,10 @@ R_DrawAliasModel ()
 
 	qglEnableClientState (GL_COLOR_ARRAY);
 
-	if (!has_fb && !has_top && !has_bottom)
-		R_DrawSubSkin (paliashdr, &skin->raw[anim], NULL);
-	else if (!has_top || !has_bottom)
-		R_DrawSubSkin (paliashdr, &skin->base_team[anim], NULL);
-	else
+	if (!has_top || !has_bottom)
 		R_DrawSubSkin (paliashdr, &skin->base[anim], NULL);
+	else
+		R_DrawSubSkin (paliashdr, &skin->base_team[anim], NULL);
 
 	if (has_top || has_bottom || has_fb) {
 		qglEnable (GL_BLEND);
@@ -352,9 +350,9 @@ R_DrawAliasModelNV ()
 	TWI_PreVDraw (0, paliashdr->numverts);
 
 	if (!has_top && !has_bottom)
-		base = &skin->base_team[anim];
-	else
 		base = &skin->base[anim];
+	else
+		base = &skin->base_team[anim];
 
 	if (has_fb)
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);

@@ -31,6 +31,7 @@ static const char rcsid[] =
 
 #include "dyngl.h"
 #include "gl_textures.h"
+#include "gl_info.h"
 #include "mathlib.h"
 #include "qtypes.h"
 #include "strlib.h"
@@ -38,6 +39,36 @@ static const char rcsid[] =
 #include "draw.h"
 
 memzone_t	*glt_zone;
+
+static Uint32 *trans;
+static int trans_size;
+
+Uint32 *
+GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette)
+{
+	int i, size, count = 0;
+
+	if (!palette)
+		palette = d_palette_raw;
+
+	size = width * height;
+	if (size > trans_size)
+	{
+		if (trans)
+			Zone_Free(trans);
+		trans = Zone_Alloc(glt_zone, size * sizeof(Uint32));
+		trans_size = size;
+	}
+
+	for (i = 0; i < size; i++)
+		if ((trans[i] = palette[data[i]]) != d_palette_empty)
+			count++;
+
+	if (count)
+		return trans;
+	else
+		return NULL;
+}
 
 /*
 =================
@@ -50,8 +81,6 @@ Fill background pixels so mipmapping doesn't have haloes - Ed
 typedef struct {
 	short	x, y;
 } floodfill_t;
-
-extern unsigned d_8to32table[];
 
 // must be a power of 2
 #define FLOODFILL_FIFO_SIZE 0x1000
@@ -81,7 +110,7 @@ GLT_FloodFillSkin8 (Uint8 * skin, int skinwidth, int skinheight)
 		filledcolor = 0;
 		// attempt to find opaque black
 		for (i = 0; i < 256; ++i)
-			if (d_8to32table[i] == (255 << 0))	// alpha 1.0
+			if (d_palette_raw[i] == (255 << 0))	// alpha 1.0
 			{
 				filledcolor = i;
 				break;
@@ -148,12 +177,12 @@ GL_DoSpan(astvert_t *a, astvert_t *b, span_t *span)
 }
 
 qboolean
-GLT_TriangleCheck8 (Uint8 *tex, int width, int height,
-		astvert_t texcoords[3], Uint8 color)
+GLT_TriangleCheck8 (Uint32 *tex, int width, int height,
+		astvert_t texcoords[3], Uint32 color)
 {
 	astvert_t	v[3];
 	span_t		*span;
-	Uint8		*line;
+	Uint32		*line;
 	int			x, y, start = 0, end = 0;
 
 	span = Zone_Alloc(tempzone, sizeof(span_t) * height);
@@ -187,42 +216,12 @@ GLT_TriangleCheck8 (Uint8 *tex, int width, int height,
 	return false;
 }
 
-
-int
-GLT_Mangle8 (Uint8 *in, Uint8 *out, int width, int height, short mask,
-		Uint8 to, qboolean bleach)
-{
-	int			i, pixels, mangled = 0;
-	qboolean	rows[16];
-
-	for (i = 0; i < 16; i++) {
-		rows[i] = !!(mask & (1 << i));
-	}
-
-	pixels = width * height;
-	for (i = 0; i < pixels; i++, in++, out++) {
-		if (rows[*in >> 4]) {
-			mangled++;
-			if (bleach) {
-				if (*in >= 128 && *in < 224)	// Reversed.
-					*out = (*in & 15) ^ 15;
-				else
-					*out = *in & 15;
-			} else
-				*out = *in;
-		} else
-			*out = to;
-	}
-
-	return mangled;
-}
-
 static void
 GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
-		int height, short bits, Uint8 color, qboolean bleach,
-		qboolean tri_check, char *name)
+		int height, Uint32 *palette, qboolean tri_check, qboolean upload,
+		char *name)
 {
-	Uint8			*mskin;
+	Uint32			*mskin;
 	int				i, numtris;
 	int				*triangles;
 	astvert_t		texcoords[3];
@@ -230,15 +229,9 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 	skin->texnum = skin->num_indices = 0;
 	skin->indices = NULL;
 
-	if (bits) {
-		mskin = Zone_Alloc(glt_zone, (size_t) width * height);
-		if (!GLT_Mangle8(in, mskin, width, height, bits, color, bleach)) {
-			Zone_Free(mskin);
-			return;
-		}
-	} else
-		mskin = in;
-
+	mskin = GLT_8to32_convert(in, width, height, palette);
+	if (!mskin)
+		return;
 
 	triangles = Zone_Alloc(glt_zone, sizeof(int) * amodel->numtris);
 
@@ -248,7 +241,8 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 			texcoords[1] = amodel->tcarray[amodel->triangles[i].vertindex[1]];
 			texcoords[2] = amodel->tcarray[amodel->triangles[i].vertindex[2]];
 
-			if (GLT_TriangleCheck8(mskin, width, height, texcoords, color)) {
+			if (GLT_TriangleCheck8(mskin, width, height, texcoords,
+						d_palette_empty)) {
 				triangles[numtris] = i;
 				numtris++;
 			}
@@ -269,12 +263,10 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 			skin->indices[(i * 3) + 1] = atris[triangles[i]].vertindex[1];
 			skin->indices[(i * 3) + 2] = atris[triangles[i]].vertindex[2];
 		}
-		skin->texnum = GL_LoadTexture (name, width, height, mskin,
-				TEX_MIPMAP | TEX_ALPHA, 8);
+		if (upload)
+			skin->texnum = GL_LoadTexture (name, width, height, (Uint8 *) mskin,
+					NULL, TEX_MIPMAP | TEX_ALPHA, 32);
 	}
-
-	if (bits)
-		Zone_Free(mskin);
 
 	Zone_Free(triangles);
 }
@@ -292,7 +284,6 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 	skin->frames = frames;
 	skin->interval = interval;
 
-	skin->raw = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->base = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->base_team = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->top_bottom = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
@@ -313,28 +304,23 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 
 		GLT_FloodFillSkin8 (iskin, width, height);
 
-		GLT_Skin_SubParse (amodel, &skin->raw[i], iskin, width, height, 0,
-				0, false, false, va("%s_raw", name));
-
 		GLT_Skin_SubParse (amodel, &skin->base[i], iskin, width, height,
-				BASE_MASK, 0, false, false, va("%s_base", name));
+				d_palette_base, false, true, va("%s_base", name));
 
 		GLT_Skin_SubParse (amodel, &skin->base_team[i], iskin, width, height,
-				BASE_MASK | TEAM_MASK,
-				0, false, false, va("%s_base_team", name));
+				d_palette_base_team, false, true, va("%s_base_team", name));
 
 		GLT_Skin_SubParse (amodel, &skin->top_bottom[i], iskin, width, height,
-				TOP_MASK | BOTTOM_MASK,
-				0, true, true, va("%s_top_bottom", name));
+				d_palette_top_bottom, true, false, va("%s_top_bottom", name));
 
 		GLT_Skin_SubParse (amodel, &skin->fb[i], iskin, width, height,
-				FB_MASK, 0, false, true, va("%s_fb", name));
+				d_palette_fb, true, true, va("%s_fb", name));
 
 		GLT_Skin_SubParse (amodel, &skin->top[i], iskin, width, height,
-				TOP_MASK, 0, true, true, va("%s_top", name));
+				d_palette_top, true, true, va("%s_top", name));
 
 		GLT_Skin_SubParse (amodel, &skin->bottom[i], iskin, width, height,
-				BOTTOM_MASK, 0, true, true, va("%s_bottom", name));
+				d_palette_bottom, true, true, va("%s_bottom", name));
 	}
 
 	Zone_Free(iskin);
@@ -355,7 +341,6 @@ GLT_Delete_Skin (skin_t *skin)
 	int i;
 
 	for (i = 0; i < skin->frames; i++) {
-		GLT_Delete_Sub_Skin(&skin->raw[i]);
 		GLT_Delete_Sub_Skin(&skin->base[i]);
 		GLT_Delete_Sub_Skin(&skin->base_team[i]);
 		GLT_Delete_Sub_Skin(&skin->top_bottom[i]);

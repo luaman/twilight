@@ -745,7 +745,6 @@ CL_Init (void)
 	CL_Input_Init_Cvars ();
 	CL_Input_Init ();
 	CL_InitTEnts ();
-	GLT_Init ();
 	Team_Init ();
 
 	//
