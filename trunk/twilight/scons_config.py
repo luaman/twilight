@@ -9,12 +9,12 @@ opts = My_Options ();
 config_defs = My_Options ()
 building = 0
 
-def check_SDL (context, config, ver):
+def check_SDL (context, ver):
 	context.Message ('Checking for SDL ' + repr(ver) + ' ... ')
 
 	# Version.
 	try:
-		sdl_ver_str = os.popen(config + " --version").read().strip()
+		sdl_ver_str = os.popen("sdl-config --version").read().strip()
 		sdl_ver = map(int, sdl_ver_str.split("."))
 	except:
 		context.Result (0)
@@ -25,13 +25,13 @@ def check_SDL (context, config, ver):
 		return 0
 
 	# Ok, sdl-config exists, and reports a usable version.
-	ParseConfig (context.env, config + " --cflags")
-	ParseConfig (context.env, config + " --libs")
+	ParseConfig (context.env, "sdl-config --cflags")
+	ParseConfig (context.env, "sdl-config --libs")
 	context.Result (1)
 	return 1
 
 def check_cflag (context, cflag, add = 1):
-	context.Message ('Checking to see if compiler flag ' + cflag + ' works ... ')
+	context.Message('Checking to see if compiler flag ' + cflag + ' works ... ')
 	old_flags = context.env['CCFLAGS']
 	context.env['CCFLAGS'] = cflag
 	ret = context.TryCompile ("""
@@ -49,6 +49,7 @@ def check_cflag (context, cflag, add = 1):
 	return ret
 
 def conf_base ():
+	global opts
 	opts.create('bitchiness', 1, 'Enable (many) extra compiler warnings')
 	opts.create('werror', 1, 'Enable error on compiler warnings')
 	opts.create('profile', 0, 'Enable profiling with gprof')
@@ -125,15 +126,21 @@ def write_c_defines (filename, defs):
 	fh.close();
 
 def do_configure (env):
+	global opts
+
 	env_defs = My_Options ()
 	config_defs.set('VERSION', '"0.2.02.cvs"')
 	conf_base ()
 	opts.args (ARGUMENTS)
 	opts.save('config_opts.py')
-	conf = Configure(env, custom_tests = {'SDL' : check_SDL, 'cflag': check_cflag})
+	conf = Configure(env, custom_tests = {'SDL' : check_SDL, 'cflag' : check_cflag})
 	handle_opts (conf, opts, config_defs)
-	if conf.SDL ("sdl-config", [1, 2, 5]):
+	if conf.SDL ([1, 2, 5]):
 		config_defs.set('HAVE_SDL_H', 1)
+	else:
+		print "Dying, we need SDL 1.2.5 or greater."
+		exit (1)
+
 	check_funcs (conf, config_defs, ['strlcat', 'strlcpy', 'snprintf', \
 		'_snprintf', 'vsnprintf', '_vsnprintf', 'strcasecmp', '_stricmp', \
 		'strncasecmp', '_strnicmp', 'fcntl', 'stat', '_stat', 'mkdir', \

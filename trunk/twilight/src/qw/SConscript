@@ -26,6 +26,7 @@ if opts['servers']:
 	    pmove.c pmovetst.c pr_cmds.c pr_edict.c pr_exec.c sv_ccmds.c
 	    sv_ents.c sv_init.c sv_main.c sv_model.c sv_move.c sv_nchan.c
 	    sv_phys.c sv_send.c sv_sys.c sv_user.c world.c""")
+
     qwsv_sources.extend (base_sources)
     qwsv_sources.extend (fs_sources)
     env.Program (target = "twilight-qwsv", source = qwsv_sources)
