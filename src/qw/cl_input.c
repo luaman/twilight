@@ -754,17 +754,17 @@ CL_Input_Init_Cvars (void)
 	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE, NULL);
 
 	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE, NULL);
-	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_NONE, NULL);
-	m_forward = Cvar_Get ("m_forward", "1", CVAR_NONE, NULL);
-	m_side = Cvar_Get ("m_side", "0.8", CVAR_NONE, NULL);
+	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_ARCHIVE, NULL);
+	m_forward = Cvar_Get ("m_forward", "1", CVAR_ARCHIVE, NULL);
+	m_side = Cvar_Get ("m_side", "0.8", CVAR_ARCHIVE, NULL);
 	m_freelook = Cvar_Get ("freelook", "0", CVAR_ARCHIVE, NULL);
 
 	cl_nodelta = Cvar_Get ("cl_nodelta", "0", CVAR_NONE, NULL);
 	in_key_repeat_delay = Cvar_Get ("in_key_repeat_delay",
-			va ("%i", SDL_DEFAULT_REPEAT_DELAY), CVAR_NONE,
+			va ("%i", SDL_DEFAULT_REPEAT_DELAY), CVAR_ARCHIVE,
 			CL_InputSetRepeatDelay);
 	in_key_repeat_interval = Cvar_Get ("in_key_repeat_interval",
-			va ("%i", SDL_DEFAULT_REPEAT_INTERVAL), CVAR_NONE,
+			va ("%i", SDL_DEFAULT_REPEAT_INTERVAL), CVAR_ARCHIVE,
 			CL_InputSetRepeatInterval);
 }
 
