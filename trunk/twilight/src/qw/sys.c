@@ -219,9 +219,8 @@ Sys_Error (char *error, ...)
 #ifdef _WIN32
 	// Win32 gets a GUI message box
 	MessageBox (NULL, text, "Error", 0);
-#else
-	fprintf (stderr, "Error: %s\n", text);
 #endif
+	fprintf (stderr, "Error: %s\n", text);
 	Sys_BackTrace(2);
 
 	SDL_Quit ();
