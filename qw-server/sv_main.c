@@ -1295,9 +1295,6 @@ SV_InitLocal (void)
 	extern cvar_t *sv_friction;
 	extern cvar_t *sv_waterfriction;
 
-	SV_InitOperatorCommands ();
-	SV_UserInit ();
-
 	// bound the size of the
 	sv_mintic = Cvar_Get ("sv_mintic", "0.03", CVAR_NONE, NULL);
 	// physics time tic 
@@ -1372,6 +1369,9 @@ SV_InitLocal (void)
 	skill = Cvar_Get ("skill", "0", CVAR_SERVERINFO, NULL);
 
 	hostname = Cvar_Get ("hostname", "unnamed", CVAR_SERVERINFO, NULL);
+
+	SV_InitOperatorCommands ();
+	SV_UserInit ();
 
 	Cmd_AddCommand ("addip", SV_AddIP_f);
 	Cmd_AddCommand ("removeip", SV_RemoveIP_f);

@@ -75,17 +75,10 @@ Caches the data if needed
 void       *
 Mod_Extradata (model_t *mod)
 {
-	void       *r;
+	if (!mod->extradata)
+		Sys_Error ("Mod_Extradata: No data!");
 
-	r = Cache_Check (&mod->cache);
-	if (r)
-		return r;
-
-	Mod_LoadModel (mod, true);
-
-	if (!mod->cache.data)
-		Sys_Error ("Mod_Extradata: caching failed");
-	return mod->cache.data;
+	return mod->extradata;
 }
 
 /*
@@ -229,11 +222,6 @@ Mod_TouchModel (char *name)
 	model_t    *mod;
 
 	mod = Mod_FindName (name);
-
-	if (!mod->needload) {
-		if (mod->type == mod_alias)
-			Cache_Check (&mod->cache);
-	}
 }
 
 

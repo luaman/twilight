@@ -155,7 +155,7 @@ extern qboolean gl_mtexcombine;
 
 // Vertex array stuff.
 
-#define MAX_VERTEX_ARRAYS	1024
+#define MAX_VERTEX_ARRAYS	2048
 #define MAX_VERTEX_INDICES	(MAX_VERTEX_ARRAYS * 4)
 GLfloat v_arrays[2][MAX_VERTEX_ARRAYS][3];
 

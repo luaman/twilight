@@ -110,7 +110,7 @@ extern cvar_t *gl_ztrick;
 extern vec3_t lightcolor;
 qboolean colorlights = true;
 
-static float shadescale = 0.0;
+//static float shadescale = 0.0;
 
 int lastposenum = 0, lastposenum0 = 0;
 extern model_t *mdl_fire;
@@ -162,7 +162,7 @@ R_GetSpriteFrame (entity_t *e)
 	int					i, numframes, frame;
 	float			   *pintervals, fullinterval, targettime, time;
 
-	psprite = e->model->cache.data;
+	psprite = Mod_Extradata(e->model);
 	frame = e->cur.frame;
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
@@ -230,7 +230,7 @@ R_DrawSpriteModels ()
 		 * a surface cache
 		 */
 		f = R_GetSpriteFrame (e);
-		psprite = e->model->cache.data;
+		psprite = Mod_Extradata(e->model);
 
 		if (last_tex != f->gl_texturenum) {
 			if (v_index) {
@@ -311,187 +311,8 @@ float       r_avertexnormal_dots[SHADEDOT_QUANT][256] =
            ;
 
 float *shadedots = r_avertexnormal_dots[0];
-float *shadedots2 = r_avertexnormal_dots[0];
-float lightlerpoffset;
 
-/*
-=============
-GL_DrawAliasFrame
-=============
-*/
-static void
-GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean fb)
-{
-	float			l;
-	trivertx_t	   *verts;
-	int			   *order;
-	int				count;
-
-	lastposenum = posenum;
-
-	verts = (trivertx_t *) ((Uint8 *) paliashdr + paliashdr->posedata);
-	verts += posenum * paliashdr->poseverts;
-	order = (int *) ((Uint8 *) paliashdr + paliashdr->commands);
-
-	while ((count = *order++)) {
-		// get the vertex count and primitive type
-		if (count < 0) {
-			count = -count;
-			qglBegin (GL_TRIANGLE_FAN);
-		} else
-			qglBegin (GL_TRIANGLE_STRIP);
-
-		do {
-			// texture coordinates come from the draw list
-			qglTexCoord2fv ((float *) order);
-
-			order += 2;
-
-			if (!r_lightlerp->value)
-				l = shadedots[verts->lightnormalindex] * shadelight;
-			else {
-				float l1, l2, diff;
-				l1 = shadedots[verts->lightnormalindex] * shadelight;
-				l2 = shadedots2[verts->lightnormalindex] * shadelight;
-
-				if (l1 != l2)
-				{
-					if (l1 > l2) {
-						diff = l1 - l2;
-						diff *= lightlerpoffset;
-						l = l1 - diff;
-					} else {
-						diff = l2 - l1;
-						diff *= lightlerpoffset;
-						l = l1 + diff;
-					}
-				} else {
-					l = l1;
-				}
-			}
-
-			// normals and vertexes come from the frame list
-			if (!fb) {
-				if (!colorlights) {
-					qglColor3f (l, l, l);
-				} else {
-					qglColor3f (l*lightcolor[0], l*lightcolor[1],
-							l*lightcolor[2]);
-				}
-			}
-
-			qglVertex3f (verts->v[0], verts->v[1], verts->v[2]);
-			verts++;
-		} while (--count);
-
-		qglEnd ();
-	}
-	qglColor3f (1, 1, 1);
-}
-
-/*
-=================
-GL_DrawAliasBlendedFrame
-
-fenix@io.com: model animation interpolation
-=================
-*/
-static void
-GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
-		float blend, qboolean fb)
-{
-	float			l;
-	trivertx_t	   *verts1;
-	trivertx_t	   *verts2;
-	int			   *order;
-	int				count;
-	vec3_t			d, v1, v2;
-
-	lastposenum0 = pose1;
-	lastposenum = pose2;
-
-	verts2 = verts1 = (trivertx_t *) ((Uint8 *) paliashdr
-			+ paliashdr->posedata);
-
-	verts1 += pose1 * paliashdr->poseverts;
-	verts2 += pose2 * paliashdr->poseverts;
-
-	order = (int *) ((Uint8 *) paliashdr + paliashdr->commands);
-
-	while ((count = *order++)) {
-		// get the vertex count and primitive type
-		if (count < 0) {
-			count = -count;
-			qglBegin (GL_TRIANGLE_FAN);
-		} else {
-			qglBegin (GL_TRIANGLE_STRIP);
-		}
-
-		do {
-			// texture coordinates come from the draw list
-			qglTexCoord2fv ((float *) order);
-
-			order += 2;
-
-			/*
-			 * normals and vertexes come from the frame list
-			 * blend the light intensity from the two frames together
-			 */
-			if (!r_lightlerp->value)
-			{
-				d[0] = shadedots[verts2->lightnormalindex] -
-					shadedots[verts1->lightnormalindex];
-				l = shadelight * (shadedots[verts1->lightnormalindex]
-						+ (blend * d[0]));
-			} else {
-				float d2, l1, l2, diff;
-				d[0] = shadedots[verts2->lightnormalindex]
-					- shadedots[verts1->lightnormalindex];
-				d2 = shadedots2[verts2->lightnormalindex]
-					- shadedots2[verts1->lightnormalindex];
-				l1 = shadelight * (shadedots[verts1->lightnormalindex]
-						+ (blend * d[0]));
-				l2 = shadelight * (shadedots2[verts1->lightnormalindex]
-						+ (blend * d2));
-				if (l1 != l2)
-				{
-					if (l1 > l2) {
-						diff = l1 - l2;
-						diff *= lightlerpoffset;
-						l = l1 - diff;
-					} else {
-						diff = l2 - l1;
-						diff *= lightlerpoffset;
-						l = l1 + diff;
-					}
-				} else {
-					l = l1;
-				}
-			}
-
-			if (!fb) {
-				if (!colorlights)
-					qglColor3f (l, l, l);
-				else
-					qglColor3f (l*lightcolor[0], l*lightcolor[1],
-							l*lightcolor[2]);
-			}
-
-			// blend the vertex positions from each frame together
-			VectorCopy (verts1->v, v1);
-			VectorCopy (verts2->v, v2);
-			Lerp_Vectors (v1, blend, v2, d);
-
-			qglVertex3fv (d);
-
-			verts1++;
-			verts2++;
-		} while (--count);
-		qglEnd ();
-	}
-	qglColor3f (1, 1, 1);
-}
-
+#if 0
 /*
 =================
 GL_DrawAliasShadow
@@ -710,6 +531,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
 		qglEnd ();
 	}
 }
+#endif
 
 
 /*
@@ -719,18 +541,43 @@ R_SetupAliasFrame
 =================
 */
 static void
-R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e, qboolean fb)
+R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 {
-	int			pose, numposes;
+	float				l;
+	int					pose_num, i;
+	maliasframedesc_t	*frame;
+	maliaspose_t		*pose;
 
-	pose = paliashdr->frames[e->to.frame].firstpose;
-	numposes = paliashdr->frames[e->to.frame].numposes;
+	frame = &paliashdr->frames[e->to.frame];
 
-	if (numposes > 1) {
-		pose += (int) (cl.time / e->to.frame_interval) % numposes;
+	if (frame->numposes > 1)
+		pose_num = (int) (cl.time / e->to.frame_interval) % frame->numposes;
+	else
+		pose_num = 0;
+
+	pose = &frame->poses[pose_num];
+
+	for (i = 0; i < paliashdr->numverts; i++) {
+		VectorCopy(pose->vertices[i].v, v_array[i]);
+		tc_array[i][0] = paliashdr->tcarray[i].s;
+		tc_array[i][1] = paliashdr->tcarray[i].t;
+
+		if ((shadedots[pose->normal_indices[i]] < 0.69) || (shadedots[pose->normal_indices[i]] > 2.0)) {
+			fprintf(stderr, "%p Error! Corrupt shadedots! %f\n", paliashdr, shadedots[pose->normal_indices[i]]);
+		}
+		l = shadedots[pose->normal_indices[i]] * shadelight;
+		if (l < 0.69) {
+			fprintf(stderr, "%p l: %f, shadelight %f, shadedots: %f indice: %d\n",
+					paliashdr, l, shadelight,
+					shadedots[pose->normal_indices[i]],
+					pose->normal_indices[i]);
+		}
+		if (colorlights) {
+			VectorScale(lightcolor, l, c_array[i]);
+			c_array[i][3] = 1;
+		} else
+			VectorSet4(c_array[i], l, l, l, 1);
 	}
-
-	GL_DrawAliasFrame (paliashdr, pose, fb);
 }
 
 
@@ -742,26 +589,50 @@ fenix@io.com: model animation interpolation
 =================
 */
 static void
-R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e, qboolean fb)
+R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 {
-	int			pose_from, numposes_from;
-	int			pose_to, numposes_to;
+	float				l, d;
+	int					i;
+	int					pose_to_num, pose_from_num;
+	maliasframedesc_t	*frame_from, *frame_to;
+	maliaspose_t		*pose_from, *pose_to;
+	vec3_t				v1, v2;
 
-	pose_from = paliashdr->frames[e->from.frame].firstpose;
-	numposes_from = paliashdr->frames[e->from.frame].numposes;
 
-	if (numposes_from > 1) {
-		pose_from += (int) (e->from.frame_time / e->from.frame_interval) % numposes_from;
+	frame_from = &paliashdr->frames[e->to.frame];
+
+	if (frame_from->numposes > 1)
+		pose_from_num = (int) (cl.time / e->to.frame_interval) % frame_from->numposes;
+	else
+		pose_from_num = 0;
+
+	frame_to = &paliashdr->frames[e->to.frame];
+
+	if (frame_to->numposes > 1)
+		pose_to_num = (int) (cl.time / e->to.frame_interval) % frame_to->numposes;
+	else
+		pose_to_num = 0;
+
+	pose_from = &frame_from->poses[pose_from_num];
+	pose_to = &frame_to->poses[pose_to_num];
+
+	for (i = 0; i < paliashdr->numverts; i++) {
+		VectorCopy(pose_from->vertices[i].v, v1);
+		VectorCopy(pose_to->vertices[i].v, v2);
+		Lerp_Vectors (v1, e->frame_blend, v2, v_array[i]);
+		tc_array[i][0] = paliashdr->tcarray[i].s;
+		tc_array[i][1] = paliashdr->tcarray[i].t;
+
+		d = shadedots[pose_to->normal_indices[i]] -
+			shadedots[pose_from->normal_indices[i]];
+		l = shadelight * (shadedots[pose_from->normal_indices[i]]
+				+ (e->frame_blend * d));
+		if (colorlights) {
+			VectorScale(lightcolor, l, c_array[i]);
+			c_array[i][3] = 1;
+		} else
+			VectorSet4(c_array[i], l, l, l, 1);
 	}
-
-	pose_to = paliashdr->frames[e->to.frame].firstpose;
-	numposes_to = paliashdr->frames[e->to.frame].numposes;
-
-	if (numposes_to > 1) {
-		pose_to += (int) (e->to.frame_time / e->to.frame_interval) % numposes_to;
-	}
-
-	GL_DrawAliasBlendedFrame(paliashdr, pose_from, pose_to, e->frame_blend, fb);
 }
 
 /*
@@ -969,27 +840,35 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 	qglBindTexture (GL_TEXTURE_2D, texture);
 
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-		R_SetupAliasBlendedFrame (paliashdr, e, false);
+		R_SetupAliasBlendedFrame (paliashdr, e);
 	else
-		R_SetupAliasFrame (paliashdr, e, false);
+		R_SetupAliasFrame (paliashdr, e);
+
+	TWI_PreVDrawCVA (0, paliashdr->numverts);
+
+	qglEnableClientState (GL_COLOR_ARRAY);
+	qglDrawElements(GL_TRIANGLES, paliashdr->numtris * 3, GL_UNSIGNED_INT,
+			paliashdr->indices);
+	qglDisableClientState (GL_COLOR_ARRAY);
+	qglColor3f (1, 1, 1);
 
 	if (fb_texture) {
-		qglEnable (GL_BLEND);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
-		
-		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-			R_SetupAliasBlendedFrame (paliashdr, e, true);
-		else
-			R_SetupAliasFrame (paliashdr, e, true);
-
+		qglEnable (GL_BLEND);
+		qglDrawElements(GL_TRIANGLES, paliashdr->numtris * 3, GL_UNSIGNED_INT,
+				paliashdr->indices);
 		qglDisable (GL_BLEND);
 	}
+
+	TWI_PostVDrawCVA ();
+	v_index = 0;
 
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	qglPopMatrix ();
 
+	/*
 	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {
 		float an = -e->cur.angles[1] * (M_PI / 180);
 
@@ -1023,6 +902,7 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 		qglEnable (GL_TEXTURE_2D);
 		qglPopMatrix ();
 	}
+	*/
 }
 
 //============================================================================

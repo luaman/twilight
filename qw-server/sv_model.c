@@ -75,17 +75,11 @@ Loads a model into the cache
 model_t    *
 Mod_LoadModel (model_t *mod, qboolean crash)
 {
-	void       *d;
 	unsigned   *buf;
 	Uint8       stackbuf[1024];			// avoid dirtying the cache heap
 
 	if (!mod->needload) {
-		if (mod->type == mod_alias) {
-			d = Cache_Check (&mod->cache);
-			if (d)
-				return mod;
-		} else
-			return mod;					// not cached at all
+		return mod;					// not cached at all
 	}
 //
 // load the file

@@ -37,7 +37,6 @@ static const char rcsid[] =
 #include "client.h"
 #include "cvar.h"
 #include "glquake.h"
-#include "host.h"
 #include "mathlib.h"
 #include "sound.h"
 #include "strlib.h"
@@ -45,6 +44,7 @@ static const char rcsid[] =
 #include "view.h"
 #include "world.h"
 #include "r_explosion.h"
+#include "host.h"
 
 entity_t *currententity;
 int r_framecount;						// used for dlight push checking
@@ -110,7 +110,7 @@ extern cvar_t *gl_ztrick;
 extern vec3_t lightcolor;
 qboolean colorlights = true;
 
-static float shadescale = 0.0;
+//static float shadescale = 0.0;
 
 int gl_wireframe = 0;
 
@@ -140,89 +140,6 @@ R_CullBox (vec3_t mins, vec3_t maxs)
 }
 
 /*
-=============
-R_BlendedRotateForEntity
-
-fenix@io.com: model transform interpolation
-=============
-*/
-void R_BlendedRotateForEntity (entity_t *e, qboolean shadow)
-{
-	float timepassed;
-	float blend;
-	vec3_t d;
-	int i;
-
-	// positional interpolation
-	timepassed = cl.time - e->translate_start_time;
-
-	if (e->translate_start_time == 0 || timepassed > 1)
-	{
-		e->translate_start_time = cl.time;
-		VectorCopy (e->origin, e->origin1);
-		VectorCopy (e->origin, e->origin2);
-	}
-
-	if (!VectorCompare (e->origin, e->origin2))
-	{
-		e->translate_start_time = cl.time;
-		VectorCopy (e->origin2, e->origin1);
-		VectorCopy (e->origin,  e->origin2);
-		blend = 0;
-	}
-	else
-	{
-		blend = timepassed * 10;
-		if (cl.paused || blend > 1) blend = 1;
-	}
-
-	Lerp_Vectors (e->origin1, blend, e->origin2, d);
-	qglTranslatef (d[0], d[1], d[2]);
-
-	// orientation interpolation (Euler angles, yuck!)
-	timepassed = cl.time - e->rotate_start_time;
-
-	if (e->rotate_start_time == 0 || timepassed > 1)
-	{
-		e->rotate_start_time = cl.time;
-		VectorCopy (e->angles, e->angles1);
-		VectorCopy (e->angles, e->angles2);
-	}
-
-	if (!VectorCompare (e->angles, e->angles2))
-	{
-		e->rotate_start_time = cl.time;
-		VectorCopy (e->angles2, e->angles1);
-		VectorCopy (e->angles,  e->angles2);
-		blend = 0;
-	}
-	else
-	{
-		blend = timepassed * 10;
-		if (cl.paused || blend > 1) blend = 1;
-	}
-
-	VectorSubtract (e->angles2, e->angles1, d);
-
-	// always interpolate along the shortest path
-	for (i = 0; i < 3; i++)
-	{
-		if (d[i] > 180)
-			d[i] -= 360;
-		else if (d[i] < -180)
-			d[i] += 360;
-	}
-
-	qglRotatef (e->angles1[1] + (blend * d[1]), 0, 0, 1);
-
-	if (!shadow)
-	{
-		qglRotatef (-e->angles1[0] + (-blend * d[0]), 0, 1, 0);
-		qglRotatef ( e->angles1[2] + ( blend * d[2]), 1, 0, 0);
-	}
-}
-
-/*
 =============================================================
 
   SPRITE MODELS
@@ -244,7 +161,7 @@ R_GetSpriteFrame (entity_t *e)
 	int					i, numframes, frame;
 	float			   *pintervals, fullinterval, targettime, time;
 
-	psprite = e->model->cache.data;
+	psprite = Mod_Extradata(e->model);
 	frame = e->frame;
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
@@ -312,7 +229,7 @@ R_DrawSpriteModels ()
 		 * a surface cache
 		 */
 		f = R_GetSpriteFrame (e);
-		psprite = e->model->cache.data;
+		psprite = Mod_Extradata(e->model);
 
 		if (last_tex != f->gl_texturenum) {
 			if (v_index) {
@@ -396,184 +313,7 @@ float *shadedots = r_avertexnormal_dots[0];
 float *shadedots2 = r_avertexnormal_dots[0];
 float lightlerpoffset;
 
-/*
-=============
-GL_DrawAliasFrame
-=============
-*/
-static void
-GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean fb)
-{
-	float			l;
-	trivertx_t	   *verts;
-	int			   *order;
-	int				count;
-
-	lastposenum = posenum;
-
-	verts = (trivertx_t *) ((Uint8 *) paliashdr + paliashdr->posedata);
-	verts += posenum * paliashdr->poseverts;
-	order = (int *) ((Uint8 *) paliashdr + paliashdr->commands);
-
-	while ((count = *order++)) {
-		// get the vertex count and primitive type
-		if (count < 0) {
-			count = -count;
-			qglBegin (GL_TRIANGLE_FAN);
-		} else
-			qglBegin (GL_TRIANGLE_STRIP);
-
-		do {
-			// texture coordinates come from the draw list
-			qglTexCoord2fv ((float *) order);
-
-			order += 2;
-
-			if (!r_lightlerp->value)
-				l = shadedots[verts->lightnormalindex] * shadelight;
-			else {
-				float l1, l2, diff;
-				l1 = shadedots[verts->lightnormalindex] * shadelight;
-				l2 = shadedots2[verts->lightnormalindex] * shadelight;
-
-				if (l1 != l2)
-				{
-					if (l1 > l2) {
-						diff = l1 - l2;
-						diff *= lightlerpoffset;
-						l = l1 - diff;
-					} else {
-						diff = l2 - l1;
-						diff *= lightlerpoffset;
-						l = l1 + diff;
-					}
-				} else {
-					l = l1;
-				}
-			}
-
-			// normals and vertexes come from the frame list
-			if (!fb) {
-				if (!colorlights) {
-					qglColor3f (l, l, l);
-				} else {
-					qglColor3f (l*lightcolor[0], l*lightcolor[1],
-							l*lightcolor[2]);
-				}
-			}
-
-			qglVertex3f (verts->v[0], verts->v[1], verts->v[2]);
-			verts++;
-		} while (--count);
-
-		qglEnd ();
-	}
-	qglColor3f (1, 1, 1);
-}
-
-/*
-=================
-GL_DrawAliasBlendedFrame
-
-fenix@io.com: model animation interpolation
-=================
-*/
-static void
-GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
-		float blend, qboolean fb)
-{
-	float			l;
-	trivertx_t	   *verts1;
-	trivertx_t	   *verts2;
-	int			   *order;
-	int				count;
-	vec3_t			d, v1, v2;
-
-	lastposenum0 = pose1;
-	lastposenum = pose2;
-
-	verts2 = verts1 = (trivertx_t *) ((Uint8 *) paliashdr
-			+ paliashdr->posedata);
-
-	verts1 += pose1 * paliashdr->poseverts;
-	verts2 += pose2 * paliashdr->poseverts;
-
-	order = (int *) ((Uint8 *) paliashdr + paliashdr->commands);
-
-	while ((count = *order++)) {
-		// get the vertex count and primitive type
-		if (count < 0) {
-			count = -count;
-			qglBegin (GL_TRIANGLE_FAN);
-		} else {
-			qglBegin (GL_TRIANGLE_STRIP);
-		}
-
-		do {
-			// texture coordinates come from the draw list
-			qglTexCoord2fv ((float *) order);
-
-			order += 2;
-
-			/*
-			 * normals and vertexes come from the frame list
-			 * blend the light intensity from the two frames together
-			 */
-			if (!r_lightlerp->value)
-			{
-				d[0] = shadedots[verts2->lightnormalindex] -
-					shadedots[verts1->lightnormalindex];
-				l = shadelight * (shadedots[verts1->lightnormalindex]
-						+ (blend * d[0]));
-			} else {
-				float d2, l1, l2, diff;
-				d[0] = shadedots[verts2->lightnormalindex]
-					- shadedots[verts1->lightnormalindex];
-				d2 = shadedots2[verts2->lightnormalindex]
-					- shadedots2[verts1->lightnormalindex];
-				l1 = shadelight * (shadedots[verts1->lightnormalindex]
-						+ (blend * d[0]));
-				l2 = shadelight * (shadedots2[verts1->lightnormalindex]
-						+ (blend * d2));
-				if (l1 != l2)
-				{
-					if (l1 > l2) {
-						diff = l1 - l2;
-						diff *= lightlerpoffset;
-						l = l1 - diff;
-					} else {
-						diff = l2 - l1;
-						diff *= lightlerpoffset;
-						l = l1 + diff;
-					}
-				} else {
-					l = l1;
-				}
-			}
-
-			if (!fb) {
-				if (!colorlights)
-					qglColor3f (l, l, l);
-				else
-					qglColor3f (l*lightcolor[0], l*lightcolor[1],
-							l*lightcolor[2]);
-			}
-
-			// blend the vertex positions from each frame together
-			VectorCopy (verts1->v, v1);
-			VectorCopy (verts2->v, v2);
-			Lerp_Vectors (v1, blend, v2, d);
-
-			qglVertex3fv (d);
-
-			verts1++;
-			verts2++;
-		} while (--count);
-		qglEnd ();
-	}
-	qglColor3f (1, 1, 1);
-}
-
+#if 0
 /*
 =================
 GL_DrawAliasShadow
@@ -675,124 +415,8 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 		qglEnd ();
 	}
 }
+#endif
 
-/*
-=================
-GL_DrawAliasBlendedShadow
-
-fenix@io.com: model animation interpolation
-=================
-*/
-static void
-GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
-		entity_t *e)
-{
-	trivertx_t	   *verts1, *verts2;
-	vec3_t			point1, point2, d;
-	int			   *order, count;
-	float			height, lheight, blend;
-	trace_t			downtrace;
-	vec3_t			downmove;
-	float			s1 = 0.0f;
-	float			c1 = 0.0f;
-
-	blend = (cl.time - e->frame_start_time) / e->frame_interval;
-	blend = min (blend, 1);
-
-	lheight = e->origin[2] - lightspot[2];
-	height = -lheight + 1.0;
-
-	verts2 = verts1 = (trivertx_t *) ((Uint8 *) paliashdr
-			+ paliashdr->posedata);
-
-	verts1 += pose1 * paliashdr->poseverts;
-	verts2 += pose2 * paliashdr->poseverts;
-
-	order = (int *) ((Uint8 *) paliashdr + paliashdr->commands);
-
-	if (r_shadows->value == 2)
-	{
-		/*
-		 * better shadowing, now takes angle of ground into account cast a
-		 * traceline into the floor directly below the player and gets
-		 * normals from this
-		 */
-		VectorCopy (currententity->origin, downmove);
-		downmove[2] = downmove[2] - 4096;
-		memset (&downtrace, 0, sizeof(downtrace));
-		SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1,
-				currententity->origin, downmove, &downtrace);
-
-		// calculate the all important angles to keep speed up
-		s1 = Q_sin(currententity->angles[1] / 180 * M_PI);
-		c1 = Q_cos(currententity->angles[1] / 180 * M_PI);
-	}
-
-	while ((count = *order++)) {
-		// get the vertex count and primitive type
-		if (count < 0) {
-			count = -count;
-			qglBegin (GL_TRIANGLE_FAN);
-		} else {
-			qglBegin (GL_TRIANGLE_STRIP);
-		}
-
-		do {
-			order += 2;
-
-			point1[0] = verts1->v[0] * paliashdr->scale[0]
-				+ paliashdr->scale_origin[0];
-			point1[1] = verts1->v[1] * paliashdr->scale[1]
-				+ paliashdr->scale_origin[1];
-			point1[2] = verts1->v[2] * paliashdr->scale[2]
-				+ paliashdr->scale_origin[2];
-
-			point1[0] -= shadevector[0] * (point1[2] + lheight);
-			point1[1] -= shadevector[1] * (point1[2] + lheight);
-
-			point2[0] = verts2->v[0] * paliashdr->scale[0]
-				+ paliashdr->scale_origin[0];
-			point2[1] = verts2->v[1] * paliashdr->scale[1]
-				+ paliashdr->scale_origin[1];
-			point2[2] = verts2->v[2] * paliashdr->scale[2]
-				+ paliashdr->scale_origin[2];
-
-			point2[0] -= shadevector[0] * (point2[2] + lheight);
-			point2[1] -= shadevector[1] * (point2[2] + lheight);
-
-			VectorSubtract (point2, point1, d);
-
-			if (r_shadows->value == 2)
-			{	
-				point1[0] = point1[0] + (blend * d[0]);
-				point1[1] = point1[1] + (blend * d[1]);
-				point1[2] = point1[2] + (blend * d[2]);
-
-				// drop it down to floor
-				point1[2] = - (currententity->origin[2]
-						- downtrace.endpos[2]);
-
-				// now move the z-coordinate as appropriate
-				point1[2] += ((point1[1] * (s1 * downtrace.plane.normal[0])) -
-					(point1[0] * (c1 * downtrace.plane.normal[0])) -
-					(point1[0] * (s1 * downtrace.plane.normal[1])) -
-					(point1[1] * (c1 * downtrace.plane.normal[1]))
-					) + 20.2 - downtrace.plane.normal[2]*20.0;
-
-				qglVertex3fv (point1);
-			}
-			else {
-				qglVertex3f (point1[0] + (blend * d[0]),
-					point1[1] + (blend * d[1]),
-					height);
-			}
-
-			verts1++;
-			verts2++;
-		} while (--count);
-		qglEnd ();
-	}
-}
 
 
 
@@ -803,92 +427,46 @@ R_SetupAliasFrame
 =================
 */
 static void
-R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
-		qboolean fb)
+R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 {
-	int			pose, numposes;
-	float		interval;
+	float				l, interval;
+	int					pose_num, i;
+	maliasframedesc_t	*frame;
+	maliaspose_t		*pose;
 
-	if ((frame >= paliashdr->numframes) || (frame < 0)) {
-		Com_DPrintf ("R_AliasSetupFrame: no such frame %d\n", frame);
-		frame = 0;
-	}
+	frame = &paliashdr->frames[e->frame];
 
-	pose = paliashdr->frames[frame].firstpose;
-	numposes = paliashdr->frames[frame].numposes;
+	if (frame->numposes > 1) {
+		interval = paliashdr->frames[e->frame].interval;
+		pose_num = (int) (cl.time / interval) % frame->numposes;
+	} else
+		pose_num = 0;
 
-	if (numposes > 1) {
-		interval = paliashdr->frames[frame].interval;
-		pose += (int) (cl.time / interval) % numposes;
-	}
+	pose = &frame->poses[pose_num];
 
-	e->pose1 = e->pose2 = pose;
-	e->frame_start_time = cl.time;
+	for (i = 0; i < paliashdr->numverts; i++) {
+		VectorCopy(pose->vertices[i].v, v_array[i]);
+		tc_array[i][0] = paliashdr->tcarray[i].s;
+		tc_array[i][1] = paliashdr->tcarray[i].t;
 
-	GL_DrawAliasFrame (paliashdr, pose, fb);
-}
-
-
-/*
-=================
-R_SetupAliasBlendedFrame
-
-fenix@io.com: model animation interpolation
-=================
-*/
-static void
-R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
-		qboolean fb)
-{
-	int			pose, numposes;
-	float		blend;
-
-	if ((frame >= paliashdr->numframes) || (frame < 0)) {
-		Com_DPrintf ("R_AliasSetupFrame: no such frame %d\n", frame);
-		frame = 0;
-	}
-
-	pose = paliashdr->frames[frame].firstpose;
-	numposes = paliashdr->frames[frame].numposes;
-
-	if (numposes > 1) {
-		e->frame_interval = paliashdr->frames[frame].interval;
-		pose += (int) (cl.time / e->frame_interval) % numposes;
-	} else {
-		/*
-		 * One tenth of a second is a good for most Quake animations. If the
-		 * nextthink is longer then the animation is usually meant to pause
-		 * (e.g. check out the shambler magic animation in shambler.qc).  If
-		 * its shorter then things will still be smoothed partly, and the
-		 * jumps will be less noticable because of the shorter time.  So,
-		 * this is probably a good assumption.
-		 */
-		e->frame_interval = 0.1;
-	}
-
-	if (e->lastmodel == e->model && !(!e->pose1 && !e->pose2)) {
-		if (e->pose2 != pose) {
-			e->frame_start_time = cl.time;
-			e->pose1 = e->pose2;
-			e->pose2 = pose;
-			blend = 0;
-		} else {
-			blend = (cl.time - e->frame_start_time) / e->frame_interval;
+		if ((shadedots[pose->normal_indices[i]] < 0.69) || (shadedots[pose->normal_indices[i]] > 2.0)) {
+			fprintf(stderr, "%p Error! Corrupt shadedots! %f\n", paliashdr, shadedots[pose->normal_indices[i]]);
 		}
-	} else {
-		e->lastmodel = e->model;
-		e->frame_start_time = cl.time;
-		e->pose1 = pose;
-		e->pose2 = pose;
-		blend = 0;
+		l = shadedots[pose->normal_indices[i]] * shadelight;
+		if (l < 0.69) {
+			fprintf(stderr, "%p l: %f, shadelight %f, shadedots: %f indice: %d\n",
+					paliashdr, l, shadelight,
+					shadedots[pose->normal_indices[i]],
+					pose->normal_indices[i]);
+		}
+		if (colorlights) {
+			VectorScale(lightcolor, l, c_array[i]);
+			c_array[i][3] = 1;
+		} else
+			VectorSet4(c_array[i], l, l, l, 1);
 	}
-
-	// wierd things start happening if blend passes 1
-	if (cl.paused || blend > 1)
-		blend = 1;
-
-	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend, fb);
 }
+
 
 /*
 =================
@@ -1041,14 +619,10 @@ R_DrawAliasModel (entity_t *e)
 	 */
 	qglPushMatrix ();
 
-	if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM) && (e != &cl.viewent))
-		R_BlendedRotateForEntity (e, false);
-	else {
-		qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
-		qglRotatef (e->angles[1], 0, 0, 1);
-		qglRotatef (-e->angles[0], 0, 1, 0);
-		qglRotatef (e->angles[2], 1, 0, 0);
-	}
+	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
+	qglRotatef (e->angles[1], 0, 0, 1);
+	qglRotatef (-e->angles[0], 0, 1, 0);
+	qglRotatef (e->angles[2], 1, 0, 0);
 
 	if ( clmodel->flags & FLAG_EYES ) {
 		qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
@@ -1085,28 +659,33 @@ R_DrawAliasModel (entity_t *e)
 
 	qglBindTexture (GL_TEXTURE_2D, texture);
 
-	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-		R_SetupAliasBlendedFrame (e->frame, paliashdr, e, false);
-	else
-		R_SetupAliasFrame (e->frame, paliashdr, e, false);
+	R_SetupAliasFrame (paliashdr, e);
+
+	TWI_PreVDrawCVA (0, paliashdr->numverts);
+
+	qglEnableClientState (GL_COLOR_ARRAY);
+	qglDrawElements(GL_TRIANGLES, paliashdr->numtris * 3, GL_UNSIGNED_INT,
+			paliashdr->indices);
+	qglDisableClientState (GL_COLOR_ARRAY);
+	qglColor3f (1, 1, 1);
 
 	if (fb_texture) {
-		qglEnable (GL_BLEND);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
-		
-		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-			R_SetupAliasBlendedFrame (e->frame, paliashdr, e, true);
-		else
-			R_SetupAliasFrame (e->frame, paliashdr, e, true);
-
+		qglEnable (GL_BLEND);
+		qglDrawElements(GL_TRIANGLES, paliashdr->numtris * 3, GL_UNSIGNED_INT,
+				paliashdr->indices);
 		qglDisable (GL_BLEND);
 	}
+
+	TWI_PostVDrawCVA ();
+	v_index = 0;
 
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	qglPopMatrix ();
 
+#if 0
 	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {
 		float an = -e->angles[1] * (M_PI / 180);
 
@@ -1119,26 +698,19 @@ R_DrawAliasModel (entity_t *e)
 
 		qglPushMatrix ();
 
-		if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
-			R_BlendedRotateForEntity (e, true);
-		else {
-			qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
-			qglRotatef (e->angles[1], 0, 0, 1);
-		}
+		qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
+		qglRotatef (e->angles[1], 0, 0, 1);
 
 		qglDisable (GL_TEXTURE_2D);
 		qglEnable (GL_BLEND);
 		qglColor4f (0, 0, 0, 0.5);
-		if (gl_im_animation->value) {
-			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0, lastposenum, e);
-		} else {
-			GL_DrawAliasShadow (paliashdr, lastposenum);
-		}
+		GL_DrawAliasShadow (paliashdr, lastposenum);
 		qglDisable (GL_BLEND);
 		qglColor4f (1, 1, 1, 1);
 		qglEnable (GL_TEXTURE_2D);
 		qglPopMatrix ();
 	}
+#endif
 }
 
 //============================================================================

@@ -255,29 +255,30 @@ Alias models are position independent, so the cache manager can move them.
 */
 
 typedef struct {
-	int         firstpose;
-	int         numposes;
-	float       interval;
-	trivertx_t  bboxmin;
-	trivertx_t  bboxmax;
-	int         frame;
-	char        name[16];
+	Uint8	v[3];
+} avertex_t;
+
+typedef struct {
+	float s;
+	float t;
+} astvert_t;
+
+typedef struct {
+	Uint8		*normal_indices;	// Vertex normal indices.
+	avertex_t	*vertices;			// The compressed vertices.
+} maliaspose_t;
+
+typedef struct {
+	int				numposes;
+	float			interval;
+	avertex_t		bboxmin;
+	avertex_t		bboxmax;
+	int				frame;
+	maliaspose_t	*poses;
+	char			name[16];
 } maliasframedesc_t;
 
-typedef struct {
-	trivertx_t  bboxmin;
-	trivertx_t  bboxmax;
-	int         frame;
-} maliasgroupframedesc_t;
-
-typedef struct {
-	int         numframes;
-	int         intervals;
-	maliasgroupframedesc_t frames[1];
-} maliasgroup_t;
-
 typedef struct mtriangle_s {
-	int         facesfront;
 	int         vertindex[3];
 } mtriangle_t;
 
@@ -302,14 +303,14 @@ typedef struct {
 
 	int         numposes;
 	int         poseverts;
-	int         posedata;				// numposes*poseverts trivert_t
-	int         commands;				// gl command list with embedded s/t
+	Uint32		*indices;				// Vertex indices for GL.
+	astvert_t			*tcarray;				// Texcoord array.
+	maliasframedesc_t	*frames;		// Frames.
 	int         gl_texturenum[MAX_SKINS][4];
 	int			fb_texturenum[MAX_SKINS][4];// index of fullbright mask or 0
 #ifdef TWILIGHT_NQ
 	int         texels[MAX_SKINS];		// only for player skins
 #endif
-	maliasframedesc_t frames[1];		// variable sized
 } aliashdr_t;
 
 #define	MAXALIASVERTS	1024
@@ -423,7 +424,7 @@ typedef struct model_s {
 //
 // additional model data
 //
-	cache_user_t cache;				// only access through Mod_Extradata
+	void		*extradata;
 
 } model_t;
 

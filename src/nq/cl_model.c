@@ -50,13 +50,12 @@ static const char rcsid[] =
 extern model_t	*loadmodel;
 extern char		loadname[32];				// for hunk tags
 
-model_t	*Mod_LoadModel (model_t *mod, qboolean crash);
-void	Mod_LoadAliasModel (model_t *mod, void *buffer);
 void	Mod_LoadSpriteModel (model_t *mod, void *buffer);
 void	Mod_LoadBrushModel (model_t *mod, void *buffer);
+void	Mod_LoadAliasModel (model_t *mod, void *buffer);
+model_t	*Mod_LoadModel (model_t *mod, qboolean crash);
 
 void	GL_SubdivideSurface (msurface_t *fa);
-void	GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
 
 cvar_t	*gl_subdivide_size;
 
@@ -82,17 +81,11 @@ Loads a model into the cache
 model_t *
 Mod_LoadModel (model_t *mod, qboolean crash)
 {
-	void		*d;
 	unsigned	*buf;
 	Uint8		stackbuf[1024];			// avoid dirtying the cache heap
 
 	if (!mod->needload) {
-		if (mod->type == mod_alias) {
-			d = Cache_Check (&mod->cache);
-			if (d)
-				return mod;
-		} else
-			return mod;					// not cached at all
+		return mod;					// not cached at all
 	}
 //
 // load the file
@@ -662,13 +655,8 @@ ALIAS MODELS
 
 aliashdr_t *pheader;
 
-stvert_t    stverts[MAXALIASVERTS];
+qboolean	vseams[MAXALIASVERTS];
 mtriangle_t triangles[MAXALIASTRIS];
-
-// a pose is a single set of vertexes.  a frame may be
-// an animating sequence of poses
-trivertx_t *poseverts[MAXALIASFRAMES];
-int         posenum;
 
 float		aliasbboxmin[3], aliasbboxmax[3];
 
@@ -681,18 +669,16 @@ void *
 Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame)
 {
 	trivertx_t		*pinframe;
-	int				i;
+	int				i, j;
 	daliasframe_t	*pdaliasframe;
 
 	pdaliasframe = (daliasframe_t *) pin;
 
 	strcpy (frame->name, pdaliasframe->name);
-	frame->firstpose = posenum;
 	frame->numposes = 1;
 
 	for (i = 0; i < 3; i++) {
-		// these are byte values, so we don't have to worry about
-		// endianness
+		// these are byte values, so we don't have to worry about endianness
 		frame->bboxmin.v[i] = pdaliasframe->bboxmin.v[i];
 		frame->bboxmax.v[i] = pdaliasframe->bboxmax.v[i];
 
@@ -704,10 +690,22 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame)
 
 	pinframe = (trivertx_t *) (pdaliasframe + 1);
 
-	poseverts[posenum] = pinframe;
-	posenum++;
+	frame->poses = Zone_Alloc(tempzone, sizeof(maliaspose_t));
+	frame->poses->normal_indices = Zone_Alloc(tempzone, pheader->numverts * 2* sizeof(Uint8));
+	frame->poses->vertices = Zone_Alloc(tempzone, pheader->numverts * 2* sizeof(avertex_t));
 
-	pinframe += pheader->numverts;
+	for (i = 0; i < pheader->numverts; i++) {
+		frame->poses->normal_indices[i] = pinframe->lightnormalindex;
+		VectorCopy(pinframe->v, frame->poses->vertices[i].v);
+
+		if (vseams[i]) {
+			j = pheader->numverts + i;
+			frame->poses->normal_indices[j] = pinframe->lightnormalindex;
+			VectorCopy(pinframe->v, frame->poses->vertices[j].v);
+		}
+
+		pinframe++;
+	}
 
 	return (void *) pinframe;
 }
@@ -722,15 +720,15 @@ void *
 Mod_LoadAliasGroup (void *pin, maliasframedesc_t *frame)
 {
 	daliasgroup_t		*pingroup;
-	int					i, numframes;
+	int					i, j, k, numframes;
 	daliasinterval_t	*pin_intervals;
-	void				*ptemp;
+	maliaspose_t		*pose;
+	trivertx_t			*pinframe;
 
 	pingroup = (daliasgroup_t *) pin;
 
 	numframes = LittleLong (pingroup->numframes);
 
-	frame->firstpose = posenum;
 	frame->numposes = numframes;
 
 	for (i = 0; i < 3; i++) {
@@ -750,15 +748,32 @@ Mod_LoadAliasGroup (void *pin, maliasframedesc_t *frame)
 
 	pin_intervals += numframes;
 
-	ptemp = (void *) pin_intervals;
+	pinframe = (trivertx_t *) (((daliasframe_t *) pin_intervals));
+
+	frame->poses = Zone_Alloc(tempzone, numframes * sizeof(maliaspose_t));
 
 	for (i = 0; i < numframes; i++) {
-		poseverts[posenum++] = (trivertx_t *) ((daliasframe_t *) ptemp + 1);
-		ptemp =
-			(trivertx_t *) ((daliasframe_t *) ptemp + 1) + pheader->numverts;
+		pose = &frame->poses[i];
+
+		pinframe = (trivertx_t *) ((daliasframe_t *) pinframe + 1);
+
+		pose->normal_indices = Zone_Alloc(tempzone, pheader->numverts * 2* sizeof(Uint8));
+		pose->vertices = Zone_Alloc(tempzone, pheader->numverts * 2* sizeof(avertex_t));
+
+		for (j = 0; j < pheader->numverts; j++) {
+			frame->poses->normal_indices[j] = pinframe[j].lightnormalindex;
+			VectorCopy(pinframe[j].v, frame->poses->vertices[j].v);
+
+			if (vseams[j]) {
+				k = pheader->numverts + j;
+				frame->poses->normal_indices[k] = pinframe[j].lightnormalindex;
+				VectorCopy(pinframe[j].v, frame->poses->vertices[k].v);
+			}
+		}
+		pinframe += pheader->numverts;
 	}
 
-	return ptemp;
+	return (void *) pinframe;
 }
 
 //=========================================================
@@ -851,9 +866,8 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 {
 	int						i, j, k;
 	char					name[32];
-	int						s;
-	Uint8					*skin;
-	Uint8					*texels;
+	unsigned				s;
+	Uint8					*skin, *texels;
 	daliasskingroup_t		*pinskingroup;
 	int						groupskins;
 	daliasskininterval_t	*pinskinintervals;
@@ -1048,18 +1062,17 @@ Mod_LoadAliasModel
 void
 Mod_LoadAliasModel (model_t *mod, void *buffer)
 {
-	int					i, j;
+	int					i, j, s, t, v;
 	mdl_t				*pinmodel;
 	stvert_t			*pinstverts;
 	dtriangle_t			*pintriangles;
 	int					version, numframes;
-	int					size;
 	daliasframetype_t	*pframetype;
 	daliasskintype_t	*pskintype;
-	int					start, end, total;
 	qboolean			typeSingle = false;
 
-	start = Hunk_LowMark ();
+	// Clear the arrays to NULL.
+	memset (vseams, 0, sizeof(vseams));
 
 	pinmodel = (mdl_t *) buffer;
 
@@ -1074,9 +1087,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 // allocate space for a working header, plus all the data except the frames,
 // skin and group info
 //
-	size = sizeof (aliashdr_t)
-		+ (LittleLong (pinmodel->numframes) - 1) * sizeof (pheader->frames[0]);
-	pheader = Hunk_AllocName (size, loadname);
+	pheader = Zone_Alloc(tempzone, sizeof(aliashdr_t));
 
 	mod->flags = LittleLong (pinmodel->flags);
 
@@ -1132,10 +1143,20 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 //
 	pinstverts = (stvert_t *) pskintype;
 
-	for (i = 0; i < pheader->numverts; i++) {
-		stverts[i].onseam = LittleLong (pinstverts[i].onseam);
-		stverts[i].s = LittleLong (pinstverts[i].s);
-		stverts[i].t = LittleLong (pinstverts[i].t);
+	pheader->tcarray = Zone_Alloc(tempzone, pheader->numverts * 2 * sizeof(astvert_t));
+	for (i = 0, j = 0; i < pheader->numverts; i++) {
+		s = LittleLong (pinstverts[i].s);
+		t = LittleLong (pinstverts[i].t);
+		pheader->tcarray[i].s = (s + 0.5) / pheader->skinwidth;
+		pheader->tcarray[i].t = (t + 0.5) / pheader->skinheight;
+		vseams[i] = LittleLong (pinstverts[i].onseam); 
+
+		if (vseams[i]) {	// Duplicate for back texture.
+			j = i + pheader->numverts;
+			s += pheader->skinwidth / 2;
+			pheader->tcarray[j].s = (s + 0.5) / pheader->skinwidth;
+			pheader->tcarray[j].t = (t + 0.5) / pheader->skinheight;
+		}
 	}
 
 //
@@ -1143,23 +1164,28 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 //
 	pintriangles = (dtriangle_t *) &pinstverts[pheader->numverts];
 
+	pheader->indices = Zone_Alloc(tempzone, pheader->numtris *3* sizeof(GLint));
+
 	for (i = 0; i < pheader->numtris; i++) {
-		triangles[i].facesfront = LittleLong (pintriangles[i].facesfront);
+		int facesfront = LittleLong (pintriangles[i].facesfront);
 
 		for (j = 0; j < 3; j++) {
-			triangles[i].vertindex[j] =
-				LittleLong (pintriangles[i].vertindex[j]);
+			v = LittleLong (pintriangles[i].vertindex[j]);
+			if (vseams[v] && !facesfront)
+				v = pheader->numverts + v;
+			pheader->indices[(i * 3) + j] = v;
 		}
 	}
 
 //
 // load the frames
 //
-	posenum = 0;
 	pframetype = (daliasframetype_t *) &pintriangles[pheader->numtris];
 
 	aliasbboxmin[0] = aliasbboxmin[1] = aliasbboxmin[2] = 255.0f;
 	aliasbboxmax[0] = aliasbboxmax[1] = aliasbboxmax[2] = -255.0f;
+
+	pheader->frames = Zone_Alloc(tempzone, numframes* sizeof(maliasframedesc_t));
 
 	for (i = 0; i < numframes; i++) {
 		aliasframetype_t frametype;
@@ -1176,8 +1202,6 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		}
 	}
 
-	pheader->numposes = posenum;
-
 	mod->type = mod_alias;
 
 	for (i = 0; i < 3; i++)
@@ -1193,297 +1217,9 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 			if (!(mod->modflags & FLAG_NO_IM_ANIM))
 				mod->modflags |= FLAG_NO_IM_ANIM;
 
-	// 
-	// build the draw lists
-	// 
-	GL_MakeAliasModelDisplayLists (mod, pheader);
+	pheader->numverts *= 2;
 
-//
-// move the complete, relocatable alias model to the cache
-//  
-	end = Hunk_LowMark ();
-	total = end - start;
-
-	Cache_Alloc (&mod->cache, total, loadname);
-	if (!mod->cache.data)
-		return;
-	memcpy (mod->cache.data, pheader, total);
-
-	Hunk_FreeToLowMark (start);
-}
-
-/*
-=================================================================
-
-ALIAS MODEL DISPLAY LIST GENERATION
-
-=================================================================
-*/
-
-qboolean    used[8192];
-
-// the command list holds counts and s/t values that are valid for
-// every frame
-int         commands[8192];
-
-// all frames will have their vertexes rearranged and expanded
-// so they are in the order expected by the command list
-int         vertexorder[8192];
-int         numorder;
-
-int         stripverts[128];
-int         striptris[128];
-int         stripcount;
-
-/*
-================
-StripLength
-================
-*/
-int
-StripLength (int starttri, int startv)
-{
-	int			m1, m2;
-	int			j;
-	mtriangle_t	*last, *check;
-	int			k;
-
-	used[starttri] = 2;
-
-	last = &triangles[starttri];
-
-	stripverts[0] = last->vertindex[(startv) % 3];
-	stripverts[1] = last->vertindex[(startv + 1) % 3];
-	stripverts[2] = last->vertindex[(startv + 2) % 3];
-
-	striptris[0] = starttri;
-	stripcount = 1;
-
-	m1 = last->vertindex[(startv + 2) % 3];
-	m2 = last->vertindex[(startv + 1) % 3];
-
-	// look for a matching triangle
-  nexttri:
-	for (j = starttri + 1, check = &triangles[starttri + 1];
-		 j < pheader->numtris; j++, check++) {
-		if (check->facesfront != last->facesfront)
-			continue;
-		for (k = 0; k < 3; k++) {
-			if (check->vertindex[k] != m1)
-				continue;
-			if (check->vertindex[(k + 1) % 3] != m2)
-				continue;
-
-			// this is the next part of the fan
-
-			// if we can't use this triangle, this tristrip is done
-			if (used[j])
-				goto done;
-
-			// the new edge
-			if (stripcount & 1)
-				m2 = check->vertindex[(k + 2) % 3];
-			else
-				m1 = check->vertindex[(k + 2) % 3];
-
-			stripverts[stripcount + 2] = check->vertindex[(k + 2) % 3];
-			striptris[stripcount++] = j;
-
-			used[j] = 2;
-			goto nexttri;
-		}
-	}
-  done:
-
-	// clear the temp used flags
-	for (j = starttri + 1; j < pheader->numtris; j++)
-		if (used[j] == 2)
-			used[j] = 0;
-
-	return stripcount;
-}
-
-/*
-===========
-FanLength
-===========
-*/
-int
-FanLength (int starttri, int startv)
-{
-	int			m1, m2;
-	int			j;
-	mtriangle_t	*last, *check;
-	int			k;
-
-	used[starttri] = 2;
-
-	last = &triangles[starttri];
-
-	stripverts[0] = last->vertindex[(startv) % 3];
-	stripverts[1] = last->vertindex[(startv + 1) % 3];
-	stripverts[2] = last->vertindex[(startv + 2) % 3];
-
-	striptris[0] = starttri;
-	stripcount = 1;
-
-	m1 = last->vertindex[(startv + 0) % 3];
-	m2 = last->vertindex[(startv + 2) % 3];
-
-
-	// look for a matching triangle
-  nexttri:
-	for (j = starttri + 1, check = &triangles[starttri + 1];
-		 j < pheader->numtris; j++, check++) {
-		if (check->facesfront != last->facesfront)
-			continue;
-		for (k = 0; k < 3; k++) {
-			if (check->vertindex[k] != m1)
-				continue;
-			if (check->vertindex[(k + 1) % 3] != m2)
-				continue;
-
-			// this is the next part of the fan
-
-			// if we can't use this triangle, this tristrip is done
-			if (used[j])
-				goto done;
-
-			// the new edge
-			m2 = check->vertindex[(k + 2) % 3];
-
-			stripverts[stripcount + 2] = m2;
-			striptris[stripcount++] = j;
-
-			used[j] = 2;
-			goto nexttri;
-		}
-	}
-  done:
-
-	// clear the temp used flags
-	for (j = starttri + 1; j < pheader->numtris; j++)
-		if (used[j] == 2)
-			used[j] = 0;
-
-	return stripcount;
-}
-
-
-/*
-================
-BuildTris
-
-Generate a list of trifans or strips
-for the model, which holds for all frames
-================
-*/
-int
-BuildTris (void)
-{
-	int		i, j, k;
-	int		startv;
-	float	s, t;
-	int		len, bestlen;
-	int		besttype = 0;			// shut up gcc
-	int		bestverts[MAXALIASVERTS];
-	int		besttris[MAXALIASVERTS];
-	int		type;
-	int		numcommands = 0;
-
-	// 
-	// build tristrips
-	// 
-	numorder = 0;
-	memset (used, 0, sizeof (used));
-	for (i = 0; i < pheader->numtris; i++) {
-		// pick an unused triangle and start the trifan
-		if (used[i])
-			continue;
-
-		bestlen = 0;
-		for (type = 0; type < 2; type++)
-//  type = 1;
-		{
-			for (startv = 0; startv < 3; startv++) {
-				if (type == 1)
-					len = StripLength (i, startv);
-				else
-					len = FanLength (i, startv);
-				if (len > bestlen) {
-					besttype = type;
-					bestlen = len;
-					for (j = 0; j < bestlen + 2; j++)
-						bestverts[j] = stripverts[j];
-					for (j = 0; j < bestlen; j++)
-						besttris[j] = striptris[j];
-				}
-			}
-		}
-
-		// mark the tris on the best strip as used
-		for (j = 0; j < bestlen; j++)
-			used[besttris[j]] = 1;
-
-		if (besttype == 1)
-			commands[numcommands++] = (bestlen + 2);
-		else
-			commands[numcommands++] = -(bestlen + 2);
-
-		for (j = 0; j < bestlen + 2; j++) {
-			// emit a vertex into the reorder buffer
-			k = bestverts[j];
-			vertexorder[numorder++] = k;
-
-			// emit s/t coords into the commands stream
-			s = stverts[k].s;
-			t = stverts[k].t;
-			if (!triangles[besttris[0]].facesfront && stverts[k].onseam)
-				s += pheader->skinwidth / 2;	// on back side
-			s = (s + 0.5) / pheader->skinwidth;
-			t = (t + 0.5) / pheader->skinheight;
-
-			*(float *) &commands[numcommands++] = s;
-			*(float *) &commands[numcommands++] = t;
-		}
-	}
-
-	commands[numcommands++] = 0;		// end of list marker
-
-	Com_DPrintf ("%3i tri %3i vert %3i cmd\n", pheader->numtris, numorder,
-				 numcommands);
-
-	return numcommands;
-}
-
-
-/*
-================
-GL_MakeAliasModelDisplayLists
-================
-*/
-void
-GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
-{
-	int			i, j;
-	int			*cmds;
-	trivertx_t	*verts;
-	int			numcommands = BuildTris ();	// trifans or lists
-
-	// save the data out
-
-	hdr->poseverts = numorder;
-
-	cmds = Hunk_Alloc (numcommands * 4);
-	hdr->commands = (Uint8 *) cmds - (Uint8 *) hdr;
-	memcpy (cmds, commands, numcommands * 4);
-
-	verts = Hunk_Alloc (hdr->numposes * hdr->poseverts
-						* sizeof (trivertx_t));
-	hdr->posedata = (Uint8 *) verts - (Uint8 *) hdr;
-	for (i = 0; i < hdr->numposes; i++)
-		for (j = 0; j < numorder; j++)
-			*verts++ = poseverts[i][vertexorder[j]];
+	mod->extradata = pheader;
 }
 
 //=============================================================================
@@ -1616,7 +1352,7 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 
 	psprite = Hunk_AllocName (size, loadname);
 
-	mod->cache.data = psprite;
+	mod->extradata = psprite;
 
 	psprite->type = LittleLong (pin->type);
 	psprite->maxwidth = LittleLong (pin->width);
