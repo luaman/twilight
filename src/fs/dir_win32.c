@@ -95,7 +95,7 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 	tmp = zasprintf(fs_zone, "%s/%s/*", g_dir->path, path);
 	dir = _findfirst (tmp, &n_file);
 	Zone_Free (tmp);
-	if (dir)
+	if (dir != -1)
 		goto fire;
 
 	return;
