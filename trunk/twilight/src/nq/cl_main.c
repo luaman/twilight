@@ -423,7 +423,7 @@ CL_RelinkEntities (void)
 	vec3_t      oldorg;
 	dlight_t   *dl;
 	trace_t		tr;
-	extern		cvar_t *gl_flashblend;
+	extern		cvar_t *gl_flashblend, *gl_oldlights;
 
 // determine partial update time    
 	frac = CL_LerpPoint ();
@@ -525,7 +525,7 @@ CL_RelinkEntities (void)
 				AngleVectors (ent->angles, fv, rv, uv);
 				VectorMA (dl->origin, 18, fv, dl->origin);
 
-				if (!gl_flashblend->value)
+				if (!gl_flashblend->value && !gl_oldlights->value)
 				{			
 					memset (&tr, 0, sizeof(tr));
 
@@ -547,7 +547,7 @@ CL_RelinkEntities (void)
 			VectorCopy (ent->origin, dl->origin);
 			dl->origin[2] += 16;
 
-			if (!gl_flashblend->value)
+			if (!gl_flashblend->value && !gl_oldlights->value)
 			{
 				trace_t tr;
 				
