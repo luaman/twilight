@@ -1466,6 +1466,98 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 
 //=========================================================================
 
+typedef struct
+{
+	char	*name;
+	int		len;
+	int		flags;
+} mflags_t;
+
+mflags_t modelflags[] =
+{
+	// Regular Quake
+	{ "progs/flame.mdl", 11, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/bolt.mdl", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/laser.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/gib", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/missile.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/grenade.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/s_spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/zom_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+
+	// keys and runes are fullbright and do not cast shadows
+	{ "progs/w_s_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/m_s_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/b_s_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/w_g_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/m_g_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/b_g_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/end.mdl", 9, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+
+	// Dissolution of Eternity
+	{ "progs/lavalball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },	
+	{ "progs/beam.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/firball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/lspike.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/plasma.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/sphere.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/statgib.mdl", 13, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/wrthgib.mdl", 13, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/eelgib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/eelhead.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/timegib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/merveup.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/rockup.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/rocket.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+
+	// Shrak
+	{ "progs/shelcase.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/flare.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/bone.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/spine.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/spidleg.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/gor1_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/gor2_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/xhairo", 12, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM|FLAG_DOUBLESIZE },
+	{ "progs/bluankey.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/bluplkey.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/gldankey.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/gldplkey.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/chip", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+
+	// Common
+	{ "progs/v_", 8, FLAG_NOSHADOW|FLAG_NO_IM_FORM },
+	{ "progs/eyes.mdl", 0, FLAG_DOUBLESIZE|FLAG_NO_IM_ANIM },
+	{ "progs/armor.mdl", 0, FLAG_NO_IM_ANIM },
+	{ "progs/g_", 8, FLAG_NO_IM_ANIM },
+
+	// end of list
+	{ NULL }
+};
+
+static int nummflags = sizeof(modelflags) / sizeof(modelflags[0]) - 1;
+
+int
+Mod_FindModelFlags(char *name)
+{
+	int i;
+
+	for (i = 0; i < nummflags; i++)
+	{
+		if (modelflags[i].len > 0) {
+			if (!Q_strncmp(name, modelflags[i].name, modelflags[i].len))
+				return modelflags[i].flags;
+		}
+		else {
+			if (!Q_strcmp(name, modelflags[i].name))
+				return modelflags[i].flags;
+		}
+	}
+	
+	return 0;
+}
+
 /*
 =================
 Mod_LoadAliasModel
@@ -1493,91 +1585,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		Sys_Error ("%s has wrong version number (%i should be %i)",
 				   mod->name, version, ALIAS_VERSION);
 
-	mod->modflags = 0;
-
-	if (!Q_strncmp(mod->name, "progs/flame.mdl", 11)) {
-		mod->modflags |= FLAG_FULLBRIGHT;
-		mod->modflags |= FLAG_NOSHADOW;
-	}
-	else if (!Q_strncmp(mod->name, "progs/bolt.mdl", 10) ||
-		!Q_strcmp(mod->name, "progs/laser.mdl") ||
-		!Q_strcmp (mod->name, "progs/lavaball.mdl") ||
-		!Q_strcmp (mod->name, "progs/beam.mdl") ||		// MP 2
-		!Q_strcmp (mod->name, "progs/fireball.mdl") ||	// MP 2
-		!Q_strcmp (mod->name, "progs/lspike.mdl") ||	// MP 2
-		!Q_strcmp (mod->name, "progs/plasma.mdl") ||	// MP 2
-		!Q_strcmp (mod->name, "progs/sphere.mdl")		// MP 2
-		) {
-		mod->modflags |= FLAG_FULLBRIGHT;
-		mod->modflags |= FLAG_NOSHADOW;
-		mod->modflags |= FLAG_NO_IM_ANIM;
-	}
-	else if (
-		!Q_strcmp(mod->name, "progs/missile.mdl") ||
-		!Q_strcmp(mod->name, "progs/grenade.mdl") ||
-		!Q_strcmp(mod->name, "progs/spike.mdl") ||
-		!Q_strcmp(mod->name, "progs/s_spike.mdl") ||
-		!Q_strcmp(mod->name, "progs/zom_gib") ||
-		!Q_strncmp(mod->name, "progs/gib", 9) ||
-		!Q_strcmp(mod->name, "progs/eelgib.mdl") ||		// MP 2
-		!Q_strcmp(mod->name, "progs/eelhead.mdl") ||	// MP 2
-		!Q_strcmp(mod->name, "progs/timegib.mdl") ||	// MP 2
-		!Q_strcmp(mod->name, "progs/merveup.mdl") ||	// MP 2
-		!Q_strcmp(mod->name, "progs/rockup.mdl") ||		// MP 2
-		!Q_strncmp(mod->name, "progs/statgib", 13) ||	// MP 2
-		!Q_strncmp(mod->name, "progs/wrthgib", 13) ||	// MP 2
-		!Q_strcmp(mod->name, "progs/rocket.mdl") ||		// Shrak
-		!Q_strcmp(mod->name, "progs/shelcase.mdl") ||	// Shrak
-		!Q_strcmp(mod->name, "progs/flare.mdl") ||		// Shrak
-		!Q_strcmp(mod->name, "progs/bone.mdl") ||		// Shrak
-		!Q_strcmp(mod->name, "progs/spine.mdl") ||		// Shrak
-		!Q_strcmp(mod->name, "progs/spidleg.mdl") ||	// Shrak
-		!Q_strcmp(mod->name, "progs/gor1_gib.mdl") ||	// Shrak
-		!Q_strcmp(mod->name, "progs/gor2_gib.mdl"))		// Shrak
-	{
-		mod->modflags |= FLAG_NO_IM_ANIM;
-		mod->modflags |= FLAG_NOSHADOW;
-	}
-	else if (!Q_strncmp(mod->name, "progs/v_", 8)) 
-	{
-		mod->modflags |= FLAG_NOSHADOW;
-		mod->modflags |= FLAG_NO_IM_FORM;
-	}
-	else if (!Q_strcmp(mod->name, "progs/eyes.mdl")) {
-		mod->modflags |= FLAG_DOUBLESIZE;
-		mod->modflags |= FLAG_NO_IM_ANIM;
-	}
-	else if (!Q_strcmp(mod->name, "progs/armor.mdl") ||
-		!Q_strncmp(mod->name, "progs/g_", 8)) {
-		mod->modflags |= FLAG_NO_IM_ANIM;
-	}
-	// keys and runes are fullbright and do not cast shadows
-	else if (
-		!Q_strcmp(mod->name, "progs/w_s_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/m_s_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/b_s_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/w_g_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/m_g_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/b_g_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/bluankey.mdl") ||	// Shrak
-		!Q_strcmp(mod->name, "progs/bluplkey.mdl") ||	// Shrak
-		!Q_strcmp(mod->name, "progs/gldankey.mdl") ||	// Shrak
-		!Q_strcmp(mod->name, "progs/gldplkey.mdl") ||	// Shrak
-		!Q_strncmp(mod->name, "progs/chip", 10)	||		// Shrak
-		!Q_strncmp(mod->name, "progs/end", 9)) {
-		mod->modflags |= FLAG_FULLBRIGHT;
-		mod->modflags |= FLAG_NOSHADOW;
-		mod->modflags |= FLAG_NO_IM_ANIM;
-	}
-	else if	(
-		!Q_strcmp(mod->name, "progs/xhairoff.mdl") ||		// Shrak
-		!Q_strcmp(mod->name, "progs/xhairon.mdl"))			// Shrak
-	{
-		mod->modflags |= FLAG_FULLBRIGHT;
-		mod->modflags |= FLAG_NOSHADOW;
-		mod->modflags |= FLAG_NO_IM_ANIM;
-		mod->modflags |= FLAG_DOUBLESIZE;
-	}
+	mod->modflags = Mod_FindModelFlags(mod->name);
 
 //
 // allocate space for a working header, plus all the data except the frames,
