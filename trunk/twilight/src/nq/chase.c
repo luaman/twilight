@@ -83,6 +83,7 @@ TraceLine (vec3_t start, vec3_t end, vec3_t impact)
 	trace_t     trace;
 
 	memset (&trace, 0, sizeof (trace));
+	VectorCopy (end, trace.endpos);
 	SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, start, end, &trace);
 
 	VectorCopy (trace.endpos, impact);
@@ -121,8 +122,7 @@ Chase_Update (void)
 	// move towards destination
 	TraceLine(r_refdef.vieworg, chase_dest, stop);
 
-	if ((stop[0] != 0) && (stop[1] != 0) && (stop[2] != 0))
-		VectorCopy(stop, chase_dest);
+	VectorCopy(stop, chase_dest);
 
 	// move towards destination
 	VectorCopy (chase_dest, r_refdef.vieworg);
