@@ -792,6 +792,7 @@ CL_ParseStatic (void)
 	ent->pose1 = -1;
 	ent->pose2 = -1;
 	ent->frame_start_time = 0;
+	ent->time_left = 0;
 	VectorClear (ent->last_light);
 
 	VectorCopy (es.origin, ent->origin);
