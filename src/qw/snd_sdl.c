@@ -36,6 +36,7 @@ static const char rcsid[] =
 #include <SDL_audio.h>
 #include <SDL_byteorder.h>
 
+#include "strlib.h"
 #include "common.h"
 #include "console.h"
 #include "cvar.h"
