@@ -201,7 +201,6 @@ GammaChanged (cvar_t *cvar)
 		VID_Build_Gamma_Ramp16(hw_gamma_ramps[0], 256, hw[0], 1, 0);
 		VID_Build_Gamma_Ramp16(hw_gamma_ramps[1], 256, hw[1], 1, 0);
 		VID_Build_Gamma_Ramp16(hw_gamma_ramps[2], 256, hw[2], 1, 0);
-								
 
 		if (SDL_SetGammaRamp(hw_gamma_ramps[0], hw_gamma_ramps[1],
 			hw_gamma_ramps[2]) < 0) {
