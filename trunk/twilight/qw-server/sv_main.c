@@ -1615,6 +1615,16 @@ SV_InitNet (void)
 //  NET_StringToAdr ("192.246.40.70:27000", &idmaster_adr);
 }
 
+static void
+SV_CvarServerinfo (cvar_t *var)
+{
+	if (var->flags & CVAR_SERVERINFO)
+	{
+		Info_SetValueForKey (svs.info, var->name, var->string,
+				MAX_SERVERINFO_STRING);
+		SV_SendServerInfoChange (var->name, var->string);
+	}
+}
 
 /*
 ====================
@@ -1625,9 +1635,9 @@ void
 SV_Init (void)
 {
 	Memory_Init ();
+	Cvar_Init (&SV_CvarServerinfo);
 	Cbuf_Init ();
 	Cmd_Init ();
-	Cvar_Init ();
 	Sys_Init ();
 
 	// These have to be here.

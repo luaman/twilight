@@ -88,6 +88,11 @@ Configuration Variables
   its numerical value(s), the string should be updated to reflect this as
   it is the string which is reported when a user queries a Cvar's content.
 
+  Cvar_Init also takes the same format of a callback which, if set, is
+  called for every Cvar which is set after the var-specific Cvar.  The
+  traditional use of the global callback is related to CVAR_USERINFO and
+  CVAR_SERVERINFO variables.  If you don't need these features, just set
+  the callback to NULL and all will work as you'd expect.
 
   Using a Cvar once you have created it is fairly straightforward.  If the
   Cvar contains a string, where you would have referred to var.string

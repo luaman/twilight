@@ -30,6 +30,9 @@
 
 #include <SDL_endian.h>
 
+#include "quakedef.h"
+#include "qtypes.h"
+
 extern struct cvar_s *fs_userconf;
 extern struct cvar_s *fs_userpath;
 extern struct cvar_s *fs_shareconf;

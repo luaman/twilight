@@ -806,6 +806,16 @@ Host_Frame (float time)
 
 //============================================================================
 
+static void
+Host_CvarUserinfo (cvar_t *var)
+{
+	if (var->flags & CVAR_USERINFO)
+	{
+		if (sv.active)
+			SV_BroadcastPrintf ("\"%s\" changed to \"%s\"\n", var->name,
+					var->string);
+	}
+}
 
 /*
 ====================
@@ -816,9 +826,9 @@ void
 Host_Init ()
 {
 	Memory_Init ();
-	Cvar_Init ();		// add all cvar related manipulation commands and set developer cvar
-	Cbuf_Init ();		// initialize cmd_text buffer
-	Cmd_Init ();		// setup the basic commands we need for the system
+	Cvar_Init (&Host_CvarUserinfo);		// Cvar system
+	Cbuf_Init ();						// Command buffer
+	Cmd_Init ();						// Command system
 
 	// These have to be here.
 	fs_shareconf = Cvar_Get ("fs_shareconf", SHARECONF, CVAR_ROM, NULL);
@@ -837,23 +847,23 @@ Host_Init ()
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
 
-	COM_Init_Cvars ();				// initialize all filesystem related variables
-	Con_Init_Cvars ();				// initialize all console related cvars
-	Key_Init_Cvars ();				// initialize all key related cvars
-	Mod_Init_Cvars();				// initialize all model related cvars
-	Chase_Init_Cvars ();			// initialize all chase camera related cvars
-	SCR_Init_Cvars ();				// initialize all screen(?) related cvars
-	VID_Init_Cvars();				// initialize all video related cvars
-	V_Init_Cvars();					// initialize all view related cvars
-	M_Init_Cvars ();				// initialize all menu related cvars
-	R_Init_Cvars ();				// initialize all rendering system related cvars
-	Sbar_Init_Cvars ();				// initialize all statusbar related cvars
-	CL_Init_Cvars ();				// initialize all cl_* related cvars
-	S_Init_Cvars ();				// initialize all sound system related cvars
-	IN_Init_Cvars ();				// initialize all input related cvars
-	NET_Init_Cvars ();				// initialize all net related cvars
-	Host_InitLocal_Cvars ();		// initialize all local host related cvars
-	PR_Init_Cvars();				// initialize all pr_* related cvars
+	COM_Init_Cvars ();				// filesystem related variables
+	Con_Init_Cvars ();				// console related cvars
+	Key_Init_Cvars ();				// key related cvars
+	Mod_Init_Cvars();				// model related cvars
+	Chase_Init_Cvars ();			// chase camera related cvars
+	SCR_Init_Cvars ();				// screen(?) related cvars
+	VID_Init_Cvars();				// video related cvars
+	V_Init_Cvars();					// view related cvars
+	M_Init_Cvars ();				// menu related cvars
+	R_Init_Cvars ();				// rendering system related cvars
+	Sbar_Init_Cvars ();				// statusbar related cvars
+	CL_Init_Cvars ();				// cl_* related cvars
+	S_Init_Cvars ();				// sound system related cvars
+	IN_Init_Cvars ();				// input related cvars
+	NET_Init_Cvars ();				// net related cvars
+	Host_InitLocal_Cvars ();		// local host related cvars
+	PR_Init_Cvars();				// pr_* related cvars
 
 	Chase_Init ();					// setup chase camera
 	COM_Init ();					// setup filesystem, add related commands
@@ -940,3 +950,4 @@ Host_Shutdown (void)
 		VID_Shutdown ();
 	}
 }
+
