@@ -108,7 +108,29 @@ Q_cos(double x)
 double 
 Q_asin(double x)
 {
-	return x * (M_PI / 2048);
+	int i;
+	double degree;
+	qboolean inv;
+
+	if (x < 0)
+	{
+		inv = true;
+		x = -x;
+	}
+	else
+	{
+		inv = false;
+	}
+
+	for (i = 0; i < 1024; i++)
+	{
+		if (sintable[i] >= x)
+			break;
+	}
+
+	degree = i * M_PI / 2048.0;
+
+	return inv ? degree : -degree;
 }
 
 double 
