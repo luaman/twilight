@@ -1109,12 +1109,14 @@ GL_MipMap (Uint8 *in, int width, int height)
 GL_Upload32
 ===============
 */
+
+/* WARNING this is not reentrant! */
+static Uint32 scaled[1024 * 512];	// [512*256];
 void
 GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 			 int alpha)
 {
 	int         samples;
-	static Uint32 scaled[1024 * 512];	// [512*256];
 	int         scaled_width, scaled_height;
 
 	for (scaled_width = 1; scaled_width < width; scaled_width <<= 1);
@@ -1184,10 +1186,11 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 GL_Upload8
 ===============
 */
+/* WARNING this is not reentrant! */
+static unsigned trans[640 * 480];	// FIXME, temporary
 void
 GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsigned *ttable)
 {
-	static unsigned trans[640 * 480];	// FIXME, temporary
 	int         i, s = width * height;
 	qboolean    noalpha;
 	int         p;
