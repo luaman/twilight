@@ -337,10 +337,15 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 #endif
 		NET_SendPacket (chan->sock, send.cursize, send.data, chan->remote_address);
 
+	// LordHavoc: helpful info to anyone looking at this code in the future:
+	// cleartime is used for rate choking, each packet adds it's size divided
+	// by the rate (this means how much time at that rate it would take to
+	// send) to the cleartime, and if cleartime is too far ahead of the
+	// current time, it will not send (the current time will advance until it
+	// is acceptable to send it)
 	if (chan->cleartime < curtime)
-		chan->cleartime = curtime + send.cursize * chan->rate;
-	else
-		chan->cleartime += send.cursize * chan->rate;
+		chan->cleartime = curtime;
+	chan->cleartime += send.cursize * chan->rate;
 
 #ifdef TWILIGHT_QWSV
 	if (ServerPaused ())
