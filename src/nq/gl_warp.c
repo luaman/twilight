@@ -270,7 +270,7 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 			qglColor4f (1,1,1,1);
 
 			qglBegin (GL_LINE_STRIP);
-			v = v = p->verts[0];
+			v = p->verts[0];
 			for (i = 2 ; i < p->numverts; i++)
 			{
 				qglBegin (GL_LINE_STRIP);
@@ -329,7 +329,7 @@ EmitSkyPolys (msurface_t *fa)
 			qglColor4f (1,1,1,1);
 
 			qglBegin (GL_LINE_STRIP);
-			v = v = p->verts[0];
+			v = p->verts[0];
 			for (i = 2 ; i < p->numverts; i++)
 			{
 				qglBegin (GL_LINE_STRIP);
