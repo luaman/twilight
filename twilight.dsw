@@ -51,7 +51,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "qwsv"=".\qw-server\qwsv.dsp" - Package Owner=<4>
+Project: "qwsv"=".\qw\qwsv.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
