@@ -25,7 +25,7 @@ CFG=twilight_renderer - Win32 Debug
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
-CPP=cl.exe
+CPP=xicl6.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "twilight_renderer - Win32 Release"
@@ -40,14 +40,14 @@ RSC=rc.exe
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG"  /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "../../include" /I "../image" /I "../../SDL/include" /D "WIN32" /D "NDEBUG"  /D "_LIB" /YX /FD /c
+# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_LIB" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../../include" /I "../image" /I "../../SDL/include" /D "WIN32" /D "NDEBUG" /D "_LIB" /YX /FD /c
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
 # ADD RSC /l 0x40c /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=link.exe -lib
+LIB32=xilink6.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
@@ -63,14 +63,14 @@ LIB32=link.exe -lib
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG"  /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../image" /I "../../SDL/include" /D "WIN32" /D "_DEBUG"  /D "_LIB" /YX /FD /GZ /c
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../image" /I "../../SDL/include" /D "WIN32" /D "_DEBUG" /D "_LIB" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x40c /d "_DEBUG"
 # ADD RSC /l 0x40c /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=link.exe -lib
+LIB32=xilink6.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
@@ -101,6 +101,10 @@ SOURCE=.\gl_textures.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\liquid.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\noise.c
 # End Source File
 # Begin Source File
@@ -110,6 +114,14 @@ SOURCE=.\noise_textures.c
 # Begin Source File
 
 SOURCE=.\pointers.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\sky.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\surface.c
 # End Source File
 # Begin Source File
 
@@ -149,7 +161,19 @@ SOURCE=.\light.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\liquid.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\pointers.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\sky.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\surface.h
 # End Source File
 # Begin Source File
 
