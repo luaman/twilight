@@ -726,10 +726,10 @@ IN_Move (usercmd_t *cmd)
 	else
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
 
-	if (freelook)
+	if ((in_mlook.state & 1) || freelook)
 		V_StopPitchDrift ();
 
-	if (freelook && !(in_strafe.state & 1)) {
+	if ((in_mlook.state & 1) || (freelook && !(in_strafe.state & 1))) {
 		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
 		cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
 	} else {
