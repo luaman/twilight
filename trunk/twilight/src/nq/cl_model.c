@@ -36,7 +36,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "common.h"
-#include "console.h"
 #include "crc.h"
 #include "cvar.h"
 #include "draw.h"
@@ -354,15 +353,15 @@ Mod_LoadLighting (lump_t *l)
 				i = LittleLong(((int *)data)[1]);
 				if (i == 1)
 				{
-					Con_DPrintf("%s loaded\n", litfilename);
+					Com_DPrintf("%s loaded\n", litfilename);
 					loadmodel->lightdata = data + 8;
 					return;
 				}
 				else
-					Con_Printf("Unknown .lit file version (%d)\n", i);
+					Com_Printf("Unknown .lit file version (%d)\n", i);
 			}
 			else
-				Con_Printf("Corrupt .lit file (old version?), ignoring\n");
+				Com_Printf("Corrupt .lit file (old version?), ignoring\n");
 		}
 
 		if (!l->filelen)
@@ -1445,7 +1444,7 @@ BuildTris (void)
 
 	commands[numcommands++] = 0;		// end of list marker
 
-	Con_DPrintf ("%3i tri %3i vert %3i cmd\n", pheader->numtris, numorder,
+	Com_DPrintf ("%3i tri %3i vert %3i cmd\n", pheader->numtris, numorder,
 				 numcommands);
 
 	return numcommands;

@@ -37,7 +37,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "client.h"
-#include "console.h"
 #include "crc.h"
 #include "cvar.h"
 #include "draw.h"
@@ -245,10 +244,10 @@ Set_TextureMode_f (struct cvar_s *var)
 	}
 	if (i == 6) {
 		Cvar_Set (gl_texturemode,"GL_LINEAR_MIPMAP_NEAREST");
-		Con_Printf ("Bad GL_TEXTUREMODE, valid modes are:\n");
-		Con_Printf ("GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST\n");
-		Con_Printf ("GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST (default), \n");
-		Con_Printf ("GL_LINEAR_MIPMAP_LINEAR (trilinear)\n\n");
+		Com_Printf ("Bad GL_TEXTUREMODE, valid modes are:\n");
+		Com_Printf ("GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST\n");
+		Com_Printf ("GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST (default), \n");
+		Com_Printf ("GL_LINEAR_MIPMAP_LINEAR (trilinear)\n\n");
 		return;
 	}
 

@@ -39,7 +39,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "strlib.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "host.h"
 #include "mathlib.h"
@@ -173,7 +172,7 @@ SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 			break;
 
 	if (sound_num == MAX_SOUNDS || !sv.sound_precache[sound_num]) {
-		Con_Printf ("SV_StartSound: %s not precacheed\n", sample);
+		Com_Printf ("SV_StartSound: %s not precacheed\n", sample);
 		return;
 	}
 
@@ -286,7 +285,7 @@ SV_ConnectClient (int clientnum)
 
 	client = svs.clients + clientnum;
 
-	Con_DPrintf ("Client %s connected\n", client->netconnection->address);
+	Com_DPrintf ("Client %s connected\n", client->netconnection->address);
 
 	edictnum = clientnum + 1;
 
@@ -487,7 +486,7 @@ SV_WriteEntitiesToClient (edict_t *clent, sizebuf_t *msg)
 		}
 
 		if (msg->maxsize - msg->cursize < 16) {
-			Con_Printf ("packet overflow\n");
+			Com_Printf ("packet overflow\n");
 			return;
 		}
 		// send an update
@@ -1051,7 +1050,7 @@ SV_SpawnServer (char *server)
 		Cvar_Set (hostname, "UNNAMED");
 	scr_centertime_off = 0;
 
-	Con_DPrintf ("SpawnServer: %s\n", server);
+	Com_DPrintf ("SpawnServer: %s\n", server);
 	svs.changelevel_issued = false;		// now safe to issue another
 
 	//
@@ -1119,7 +1118,7 @@ SV_SpawnServer (char *server)
 	sv.worldmodel = Mod_ForName (sv.modelname, false);
 	isnotmap = true;
 	if (!sv.worldmodel) {
-		Con_Printf ("Couldn't spawn server %s\n", sv.modelname);
+		Com_Printf ("Couldn't spawn server %s\n", sv.modelname);
 		sv.active = false;
 		return;
 	}
@@ -1183,5 +1182,5 @@ SV_SpawnServer (char *server)
 		if (host_client->active)
 			SV_SendServerinfo (host_client);
 
-	Con_DPrintf ("Server spawned.\n");
+	Com_DPrintf ("Server spawned.\n");
 }

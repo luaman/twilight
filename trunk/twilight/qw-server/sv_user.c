@@ -40,7 +40,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "cmd.h"
 #include "common.h"
-#include "console.h"
 #include "cvar.h"
 #include "mathlib.h"
 #include "model.h"
@@ -112,7 +111,7 @@ SV_New_f (void)
 //NOTE:  This doesn't go through ClientReliableWrite since it's before the user
 //spawns.  These functions are written to not overflow
 	if (host_client->num_backbuf) {
-		Con_Printf ("WARNING %s: [SV_New] Back buffered (%d0, clearing",
+		Com_Printf ("WARNING %s: [SV_New] Back buffered (%d0, clearing",
 					host_client->name, host_client->netchan.message.cursize);
 		host_client->num_backbuf = 0;
 		SZ_Clear (&host_client->netchan.message);
@@ -166,12 +165,12 @@ SV_Soundlist_f (void)
 	int         n;
 
 	if (host_client->state != cs_connected) {
-		Con_Printf ("soundlist not valid -- already spawned\n");
+		Com_Printf ("soundlist not valid -- already spawned\n");
 		return;
 	}
 	// handle the case of a level changing while a client was connecting
 	if (Q_atoi (Cmd_Argv (1)) != svs.spawncount) {
-		Con_Printf ("SV_Soundlist_f from different level\n");
+		Com_Printf ("SV_Soundlist_f from different level\n");
 		SV_New_f ();
 		return;
 	}
@@ -186,7 +185,7 @@ SV_Soundlist_f (void)
 //NOTE:  This doesn't go through ClientReliableWrite since it's before the user
 //spawns.  These functions are written to not overflow
 	if (host_client->num_backbuf) {
-		Con_Printf ("WARNING %s: [SV_Soundlist] Back buffered (%d0, clearing",
+		Com_Printf ("WARNING %s: [SV_Soundlist] Back buffered (%d0, clearing",
 					host_client->name, host_client->netchan.message.cursize);
 		host_client->num_backbuf = 0;
 		SZ_Clear (&host_client->netchan.message);
@@ -220,12 +219,12 @@ SV_Modellist_f (void)
 	int         n;
 
 	if (host_client->state != cs_connected) {
-		Con_Printf ("modellist not valid -- already spawned\n");
+		Com_Printf ("modellist not valid -- already spawned\n");
 		return;
 	}
 	// handle the case of a level changing while a client was connecting
 	if (Q_atoi (Cmd_Argv (1)) != svs.spawncount) {
-		Con_Printf ("SV_Modellist_f from different level\n");
+		Com_Printf ("SV_Modellist_f from different level\n");
 		SV_New_f ();
 		return;
 	}
@@ -240,7 +239,7 @@ SV_Modellist_f (void)
 //NOTE:  This doesn't go through ClientReliableWrite since it's before the user
 //spawns.  These functions are written to not overflow
 	if (host_client->num_backbuf) {
-		Con_Printf ("WARNING %s: [SV_Modellist] Back buffered (%d0, clearing",
+		Com_Printf ("WARNING %s: [SV_Modellist] Back buffered (%d0, clearing",
 					host_client->name, host_client->netchan.message.cursize);
 		host_client->num_backbuf = 0;
 		SZ_Clear (&host_client->netchan.message);
@@ -273,12 +272,12 @@ SV_PreSpawn_f (void)
 	Uint32	check;
 
 	if (host_client->state != cs_connected) {
-		Con_Printf ("prespawn not valid -- already spawned\n");
+		Com_Printf ("prespawn not valid -- already spawned\n");
 		return;
 	}
 	// handle the case of a level changing while a client was connecting
 	if (Q_atoi (Cmd_Argv (1)) != svs.spawncount) {
-		Con_Printf ("SV_PreSpawn_f from different level\n");
+		Com_Printf ("SV_PreSpawn_f from different level\n");
 		SV_New_f ();
 		return;
 	}
@@ -291,7 +290,7 @@ SV_PreSpawn_f (void)
 		// should be three numbers following containing checksums
 		check = Q_atoi (Cmd_Argv (3));
 
-//		Con_DPrintf("Client check = %d\n", check);
+//		Com_DPrintf("Client check = %d\n", check);
 
 		if (sv_mapcheck->value && check != sv.worldmodel->checksum &&
 			check != sv.worldmodel->checksum2) {
@@ -308,7 +307,7 @@ SV_PreSpawn_f (void)
 	//NOTE:  This doesn't go through ClientReliableWrite since it's before the user
 	//spawns.  These functions are written to not overflow
 	if (host_client->num_backbuf) {
-		Con_Printf ("WARNING %s: [SV_PreSpawn] Back buffered (%d0, clearing",
+		Com_Printf ("WARNING %s: [SV_PreSpawn] Back buffered (%d0, clearing",
 					host_client->name, host_client->netchan.message.cursize);
 		host_client->num_backbuf = 0;
 		SZ_Clear (&host_client->netchan.message);
@@ -344,12 +343,12 @@ SV_Spawn_f (void)
 	int         n;
 
 	if (host_client->state != cs_connected) {
-		Con_Printf ("Spawn not valid -- already spawned\n");
+		Com_Printf ("Spawn not valid -- already spawned\n");
 		return;
 	}
 // handle the case of a level changing while a client was connecting
 	if (Q_atoi (Cmd_Argv (1)) != svs.spawncount) {
-		Con_Printf ("SV_Spawn_f from different level\n");
+		Com_Printf ("SV_Spawn_f from different level\n");
 		SV_New_f ();
 		return;
 	}
@@ -358,7 +357,7 @@ SV_Spawn_f (void)
 
 	// make sure n is valid
 	if (n < 0 || n > MAX_CLIENTS) {
-		Con_Printf ("SV_Spawn_f invalid client start\n");
+		Com_Printf ("SV_Spawn_f invalid client start\n");
 		SV_New_f ();
 		return;
 	}
@@ -474,7 +473,7 @@ SV_Begin_f (void)
 
 	// handle the case of a level changing while a client was connecting
 	if (Q_atoi (Cmd_Argv (1)) != svs.spawncount) {
-		Con_Printf ("SV_Begin_f from different level\n");
+		Com_Printf ("SV_Begin_f from different level\n");
 		SV_New_f ();
 		return;
 	}
@@ -640,7 +639,7 @@ SV_NextUpload (void)
 	fwrite (net_message.data + msg_readcount, 1, size, host_client->upload);
 	msg_readcount += size;
 
-	Con_DPrintf ("UPLOAD: %d received\n", size);
+	Com_DPrintf ("UPLOAD: %d received\n", size);
 
 	if (percent != 100) {
 		ClientReliableWrite_Begin (host_client, svc_stufftext, 8);
@@ -1092,13 +1091,13 @@ SV_SetInfo_f (void)
 
 
 	if (Cmd_Argc () == 1) {
-		Con_Printf ("User info settings:\n");
+		Com_Printf ("User info settings:\n");
 		Info_Print (host_client->userinfo);
 		return;
 	}
 
 	if (Cmd_Argc () != 3) {
-		Con_Printf ("usage: setinfo [ <key> <value> ]\n");
+		Com_Printf ("usage: setinfo [ <key> <value> ]\n");
 		return;
 	}
 
@@ -1215,7 +1214,7 @@ SV_ExecuteUserCommand (char *s)
 		}
 
 	if (!u->name)
-		Con_Printf ("Bad user command: %s\n", Cmd_Argv (0));
+		Com_Printf ("Bad user command: %s\n", Cmd_Argv (0));
 
 	SV_EndRedirect ();
 }
@@ -1619,7 +1618,7 @@ SV_ExecuteClientMessage (client_t *cl)
 	cl->delta_sequence = -1;			// no delta unless requested
 	while (1) {
 		if (msg_badread) {
-			Con_Printf ("SV_ReadClientMessage: badread\n");
+			Com_Printf ("SV_ReadClientMessage: badread\n");
 			SV_DropClient (cl);
 			return;
 		}
@@ -1630,7 +1629,7 @@ SV_ExecuteClientMessage (client_t *cl)
 
 		switch (c) {
 			default:
-				Con_Printf ("SV_ReadClientMessage: unknown command char\n");
+				Com_Printf ("SV_ReadClientMessage: unknown command char\n");
 				SV_DropClient (cl);
 				return;
 
@@ -1668,7 +1667,7 @@ SV_ExecuteClientMessage (client_t *cl)
 											  checksumIndex - 1, seq_hash);
 
 				if (calculatedChecksum != checksum) {
-					Con_DPrintf
+					Com_DPrintf
 						("Failed command checksum for %s(%d) (%d != %d)\n",
 						 cl->name, cl->netchan.incoming_sequence, checksum,
 						 calculatedChecksum);

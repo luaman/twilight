@@ -53,7 +53,6 @@ static const char rcsid[] =
 #endif
 
 #include "common.h"
-#include "console.h"
 #include "strlib.h"
 #include "cvar.h"
 #include "net.h"
@@ -283,7 +282,7 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 // check for message overflow
 	if (chan->message.overflowed) {
 		chan->fatal_error = true;
-		Con_Printf ("%s:Outgoing message overflow\n",
+		Com_Printf ("%s:Outgoing message overflow\n",
 					NET_AdrToString (chan->remote_address));
 		return;
 	}
@@ -349,7 +348,7 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 #endif
 
 	if (showpackets->value)
-		Con_Printf ("--> s=%i(%i) a=%i(%i) %i\n", chan->outgoing_sequence,
+		Com_Printf ("--> s=%i(%i) a=%i(%i) %i\n", chan->outgoing_sequence,
 					send_reliable, chan->incoming_sequence,
 					chan->incoming_reliable_sequence, send.cursize);
 }
@@ -390,7 +389,7 @@ Netchan_Process (netchan_t *chan)
 	sequence_ack &= ~(1 << 31);
 
 	if (showpackets->value)
-		Con_Printf ("<-- s=%i(%i) a=%i(%i) %i\n", sequence, reliable_message,
+		Com_Printf ("<-- s=%i(%i) a=%i(%i) %i\n", sequence, reliable_message,
 					sequence_ack, reliable_ack, net_message.cursize);
 
 //
@@ -398,7 +397,7 @@ Netchan_Process (netchan_t *chan)
 //
 	if (sequence <= (unsigned) chan->incoming_sequence) {
 		if (showdrop->value)
-			Con_Printf ("%s:Out of order packet %i at %i\n",
+			Com_Printf ("%s:Out of order packet %i at %i\n",
 						NET_AdrToString (chan->remote_address)
 						, sequence, chan->incoming_sequence);
 		return false;
@@ -411,7 +410,7 @@ Netchan_Process (netchan_t *chan)
 		chan->drop_count += 1;
 
 		if (showdrop->value)
-			Con_Printf ("%s:Dropped %i packets at %i\n",
+			Com_Printf ("%s:Dropped %i packets at %i\n",
 						NET_AdrToString (chan->remote_address)
 						, sequence - (chan->incoming_sequence + 1)
 						, sequence);

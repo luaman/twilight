@@ -38,7 +38,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "bspfile.h"
 #include "common.h"
-#include "console.h"
 #include "mathlib.h"
 #include "model.h"
 #include "progs.h"
@@ -303,15 +302,13 @@ SV_EmitPacketEntities (client_t *client, packet_entities_t *to, sizebuf_t *msg)
 
 	newindex = 0;
 	oldindex = 0;
-//Con_Printf ("---%i to %i ----\n", client->delta_sequence & UPDATE_MASK
-//          , client->netchan.outgoing_sequence & UPDATE_MASK);
+
 	while (newindex < to->num_entities || oldindex < oldmax) {
 		newnum =
 			newindex >= to->num_entities ? 9999 : to->entities[newindex].number;
 		oldnum = oldindex >= oldmax ? 9999 : from->entities[oldindex].number;
 
 		if (newnum == oldnum) {			// delta update from old position
-//Con_Printf ("delta %i\n", newnum);
 			SV_WriteDelta (&from->entities[oldindex], &to->entities[newindex],
 						   msg, false);
 			oldindex++;
@@ -322,7 +319,6 @@ SV_EmitPacketEntities (client_t *client, packet_entities_t *to, sizebuf_t *msg)
 		if (newnum < oldnum) {			// this is a new entity, send it from
 			// the baseline
 			ent = EDICT_NUM (newnum);
-//Con_Printf ("baseline %i\n", newnum);
 			SV_WriteDelta (&ent->baseline, &to->entities[newindex], msg, true);
 			newindex++;
 			continue;
@@ -330,7 +326,6 @@ SV_EmitPacketEntities (client_t *client, packet_entities_t *to, sizebuf_t *msg)
 
 		if (newnum > oldnum) {			// the old entity isn't present in the
 			// new message
-//Con_Printf ("remove %i\n", oldnum);
 			MSG_WriteShort (msg, oldnum | U_REMOVE);
 			oldindex++;
 			continue;

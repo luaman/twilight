@@ -85,7 +85,7 @@ draw
 CenterPrint ()
 SlowPrint ()
 Screen_Update ();
-Con_Printf ();
+Com_Printf ();
 
 net 
 turn off messages option
@@ -246,7 +246,7 @@ SCR_CenterPrint (char *str)
 		return;
 
 	// echo it to the console
-	Con_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
+	Com_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
 
 	s = str;
 	do
@@ -263,7 +263,7 @@ SCR_CenterPrint (char *str)
 
 		line[i] = '\n';
 		line[i+1] = 0;
-		Con_Printf ("%s", line);
+		Com_Printf ("%s", line);
 
 		while (*s && *s != '\n')
 			s++;
@@ -272,7 +272,7 @@ SCR_CenterPrint (char *str)
 			break;
 		s++;        // skip the \n
 	} while (1);
-	Con_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
+	Com_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
 	Con_ClearNotify ();
 }
 
@@ -700,7 +700,7 @@ SCR_ScreenShot_f (void)
 			break;						/* file doesn't exist */
 	}
 	if (i == 100) {
-		Con_Printf ("SCR_ScreenShot_f: Couldn't create a TGA file\n");
+		Com_Printf ("SCR_ScreenShot_f: Couldn't create a TGA file\n");
 		return;
 	}
 
@@ -711,7 +711,7 @@ SCR_ScreenShot_f (void)
 				  buffer);
 
 	if (TGA_Write (pcxname, vid.width, vid.height, 3, buffer))
-		Con_Printf ("Wrote %s\n", pcxname);
+		Com_Printf ("Wrote %s\n", pcxname);
 
 	free (buffer);
 }
@@ -816,7 +816,7 @@ SCR_UpdateScreen (void)
 	if (scr_disabled_for_loading) {
 		if (host_realtime - scr_disabled_time > 60) {
 			scr_disabled_for_loading = false;
-			Con_Printf ("load failed.\n");
+			Com_Printf ("load failed.\n");
 		} else
 			return;
 	}

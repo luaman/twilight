@@ -213,6 +213,12 @@ void        COM_LoadCacheFile (char *path, struct cache_user_s *cu);
 void        COM_CreatePath (char *path);
 void        COM_Gamedir (char *dir);
 
+void        Com_Printf (char *fmt, ...);
+void        Com_DPrintf (char *fmt, ...);
+void		Com_SafePrintf (char *fmt, ...);
+void		Com_BeginRedirect (void (*RedirectedPrint) (char *));
+void		Com_EndRedirect (void);
+
 extern struct cvar_s *registered;
 extern qboolean standard_quake, rogue, hipnotic;
 

@@ -38,7 +38,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "input.h"
 #include "mathlib.h"
@@ -113,7 +112,7 @@ KeyDown (kbutton_t *b)
 	else if (!b->down[1])
 		b->down[1] = k;
 	else {
-		Con_Printf ("Three keys down for a button!\n");
+		Com_Printf ("Three keys down for a button!\n");
 		return;
 	}
 

@@ -42,12 +42,12 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "bspfile.h"
 #include "common.h"
-#include "console.h"
 #include "mathlib.h"
 #include "mdfour.h"
 #include "model.h"
 #include "strlib.h"
 #include "zone.h"
+#include "server.h"
 
 model_t    *loadmodel;
 char        loadname[32];				// for hunk tags

@@ -42,7 +42,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "client.h"
-#include "console.h"
 #include "cvar.h"
 #include "mathlib.h"
 #include "pmove.h"
@@ -423,7 +422,7 @@ Cam_FinishMove (usercmd_t *cmd)
 		}
 		oldbuttons |= BUTTON_JUMP;		// don't jump again until released
 	}
-//  Con_Printf("Selecting track target...\n");
+//  Com_Printf("Selecting track target...\n");
 
 	if (locked && autocam)
 		end = (spec_track + 1) % MAX_CLIENTS;
@@ -445,7 +444,7 @@ Cam_FinishMove (usercmd_t *cmd)
 		Cam_Lock (i);
 		return;
 	}
-	Con_Printf ("No target found ...\n");
+	Com_Printf ("No target found ...\n");
 	autocam = locked = false;
 }
 

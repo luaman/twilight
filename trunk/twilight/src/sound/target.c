@@ -43,10 +43,6 @@ static const char rcsid[] =
 #include "sound.h"
 #include "sys.h"
 
-// console.h is not common
-void Con_Printf (char *fmt, ...);
-
-
 cvar_t *snd_bits;
 cvar_t *snd_rate;
 cvar_t *snd_channels;
@@ -126,7 +122,7 @@ SNDDMA_Init (void)
 			desired.format = AUDIO_U8;
 			break;
 		default:
-			Con_Printf ("Unknown number of audio bits: %i\n",
+			Com_Printf ("Unknown number of audio bits: %i\n",
 					(int)snd_bits->value);
 			return false;
 	}
@@ -137,7 +133,7 @@ SNDDMA_Init (void)
 
 	// See what we got
 	if (SDL_OpenAudio (&desired, &obtained) < 0) {
-		Con_Printf ("Couldn't open SDL audio: %s\n", SDL_GetError ());
+		Com_Printf ("Couldn't open SDL audio: %s\n", SDL_GetError ());
 		return false;
 	}
 
@@ -164,7 +160,7 @@ SNDDMA_Init (void)
 		SDL_CloseAudio ();
 		// SDL will convert for us - I wouldn't count on it being fast.
 		if (SDL_OpenAudio (&desired, NULL) < 0) {
-			Con_Printf ("Couldn't open SDL audio: %s\n", SDL_GetError ());
+			Com_Printf ("Couldn't open SDL audio: %s\n", SDL_GetError ());
 			return false;
 		}
 		memcpy (&obtained, &desired, sizeof (desired));

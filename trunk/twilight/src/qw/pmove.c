@@ -208,7 +208,6 @@ PM_FlyMove (void)
 		if (i != numplanes) {			// go along this plane
 		} else {						// go along the crease
 			if (numplanes != 2) {
-//              Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
 				VectorClear (pmove.velocity);
 				break;
 			}
@@ -487,8 +486,6 @@ PM_WaterMove (void)
 //
 // water acceleration
 //
-//  if (pmove.waterjumptime)
-//      Con_Printf ("wm->%f, %f, %f\n", pmove.velocity[0], pmove.velocity[1], pmove.velocity[2]);
 	PM_Accelerate (wishdir, wishspeed, movevars.wateraccelerate);
 
 // assume it is a stair or a slope, so press down from stepheight above
@@ -503,8 +500,6 @@ PM_WaterMove (void)
 	}
 
 	PM_FlyMove ();
-//  if (pmove.waterjumptime)
-//      Con_Printf ("<-wm%f, %f, %f\n", pmove.velocity[0], pmove.velocity[1], pmove.velocity[2]);
 }
 
 
@@ -546,8 +541,6 @@ PM_AirMove (void)
 		VectorScale (wishvel, wishspeed, wishvel);
 		wishspeed = movevars.maxspeed;
 	}
-//  if (pmove.waterjumptime)
-//      Con_Printf ("am->%f, %f, %f\n", pmove.velocity[0], pmove.velocity[1], pmove.velocity[2]);
 
 	if (onground != -1) {
 		pmove.velocity[2] = 0;
@@ -564,15 +557,6 @@ PM_AirMove (void)
 		PM_FlyMove ();
 
 	}
-
-//Con_Printf("airmove:vec: %4.2f %4.2f %4.2f\n",
-//          pmove.velocity[0],
-//          pmove.velocity[1],
-//          pmove.velocity[2]);
-//
-
-//  if (pmove.waterjumptime)
-//      Con_Printf ("<-am%f, %f, %f\n", pmove.velocity[0], pmove.velocity[1], pmove.velocity[2]);
 }
 
 
@@ -766,7 +750,6 @@ NudgePosition (void)
 		}
 	}
 	VectorCopy (base, pmove.origin);
-//  Con_DPrintf ("NudgePosition: stuck\n");
 }
 
 /*

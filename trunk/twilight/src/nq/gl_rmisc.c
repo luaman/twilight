@@ -37,7 +37,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "glquake.h"
 #include "strlib.h"
@@ -165,7 +164,7 @@ R_LoadSky_f (void)
 {
 	if (Cmd_Argc() != 2)
 	{
-		Con_Printf ("loadsky <name> : load a skybox\n");
+		Com_Printf ("loadsky <name> : load a skybox\n");
 		return;
 	}
 
@@ -256,7 +255,7 @@ R_TranslatePlayerSkin (int playernum)
 	s = paliashdr->skinwidth * paliashdr->skinheight;
 	if (currententity->skinnum < 0
 		|| currententity->skinnum >= paliashdr->numskins) {
-		Con_Printf ("(%d): Invalid player skin #%d\n", playernum,
+		Com_Printf ("(%d): Invalid player skin #%d\n", playernum,
 					currententity->skinnum);
 		original = (Uint8 *) paliashdr + paliashdr->texels[0];
 	} else
@@ -346,7 +345,7 @@ R_TimeRefresh_f (void)
 	qglFinish ();
 	stop = Sys_DoubleTime ();
 	time = stop - start;
-	Con_Printf ("%f seconds (%f fps)\n", time, 128 / time);
+	Com_Printf ("%f seconds (%f fps)\n", time, 128 / time);
 
 	GL_EndRendering ();
 }

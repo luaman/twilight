@@ -37,7 +37,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
-#include "console.h"
 #include "host.h"
 #include "pmove.h"
 #include "sys.h"
@@ -249,7 +248,7 @@ CL_GetDemoMessage (void)
 			// get the next message
 			fread (&net_message.cursize, 4, 1, cls.demofile);
 			net_message.cursize = LittleLong (net_message.cursize);
-			// Con_Printf("read: %ld bytes\n", net_message.cursize);
+			// Com_Printf("read: %ld bytes\n", net_message.cursize);
 			if (net_message.cursize > MAX_MSGLEN)
 				Sys_Error ("Demo message > MAX_MSGLEN");
 			r = fread (net_message.data, net_message.cursize, 1, cls.demofile);
@@ -267,7 +266,7 @@ CL_GetDemoMessage (void)
 			break;
 
 		default:
-			Con_Printf ("Corrupted demo.\n");
+			Com_Printf ("Corrupted demo.\n");
 			CL_StopPlayback ();
 			return 0;
 	}
@@ -308,7 +307,7 @@ void
 CL_Stop_f (void)
 {
 	if (!cls.demorecording) {
-		Con_Printf ("Not recording a demo.\n");
+		Com_Printf ("Not recording a demo.\n");
 		return;
 	}
 // write a disconnect message to the demo file
@@ -322,7 +321,7 @@ CL_Stop_f (void)
 	fclose (cls.demofile);
 	cls.demofile = NULL;
 	cls.demorecording = false;
-	Con_Printf ("Completed demo\n");
+	Com_Printf ("Completed demo\n");
 }
 
 
@@ -414,12 +413,12 @@ CL_Record_f (void)
 
 	c = Cmd_Argc ();
 	if (c != 2) {
-		Con_Printf ("record <demoname>\n");
+		Com_Printf ("record <demoname>\n");
 		return;
 	}
 
 	if (cls.state != ca_active) {
-		Con_Printf ("You must be connected to record.\n");
+		Com_Printf ("You must be connected to record.\n");
 		return;
 	}
 
@@ -435,11 +434,11 @@ CL_Record_f (void)
 
 	cls.demofile = fopen (name, "wb");
 	if (!cls.demofile) {
-		Con_Printf ("ERROR: couldn't open.\n");
+		Com_Printf ("ERROR: couldn't open.\n");
 		return;
 	}
 
-	Con_Printf ("recording to %s.\n", name);
+	Com_Printf ("recording to %s.\n", name);
 	cls.demorecording = true;
 
 /*-------------------------------------------------*/
@@ -677,12 +676,12 @@ CL_ReRecord_f (void)
 
 	c = Cmd_Argc ();
 	if (c != 2) {
-		Con_Printf ("rerecord <demoname>\n");
+		Com_Printf ("rerecord <demoname>\n");
 		return;
 	}
 
 	if (!*cls.servername) {
-		Con_Printf ("No server to reconnect to...\n");
+		Com_Printf ("No server to reconnect to...\n");
 		return;
 	}
 
@@ -698,11 +697,11 @@ CL_ReRecord_f (void)
 
 	cls.demofile = fopen (name, "wb");
 	if (!cls.demofile) {
-		Con_Printf ("ERROR: couldn't open.\n");
+		Com_Printf ("ERROR: couldn't open.\n");
 		return;
 	}
 
-	Con_Printf ("recording to %s.\n", name);
+	Com_Printf ("recording to %s.\n", name);
 	cls.demorecording = true;
 
 	CL_Disconnect ();
@@ -723,7 +722,7 @@ CL_PlayDemo_f (void)
 	char        name[256];
 
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("play <demoname> : plays a demo\n");
+		Com_Printf ("play <demoname> : plays a demo\n");
 		return;
 	}
 //
@@ -737,10 +736,10 @@ CL_PlayDemo_f (void)
 	strcpy (name, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".qwd");
 
-	Con_Printf ("Playing demo from %s.\n", name);
+	Com_Printf ("Playing demo from %s.\n", name);
 	COM_FOpenFile (name, &cls.demofile);
 	if (!cls.demofile) {
-		Con_Printf ("ERROR: couldn't open.\n");
+		Com_Printf ("ERROR: couldn't open.\n");
 		cls.demonum = -1;				// stop demo loop
 		return;
 	}
@@ -770,7 +769,7 @@ CL_FinishTimeDemo (void)
 	time = Sys_DoubleTime () - cls.td_starttime;
 	if (!time)
 		time = 1;
-	Con_Printf ("%i frames %5.1f seconds %5.1f fps\n", frames, time,
+	Com_Printf ("%i frames %5.1f seconds %5.1f fps\n", frames, time,
 				frames / time);
 }
 
@@ -785,7 +784,7 @@ void
 CL_TimeDemo_f (void)
 {
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("timedemo <demoname> : gets demo speeds\n");
+		Com_Printf ("timedemo <demoname> : gets demo speeds\n");
 		return;
 	}
 

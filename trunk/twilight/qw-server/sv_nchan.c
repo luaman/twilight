@@ -38,7 +38,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "common.h"
-#include "console.h"
 #include "server.h"
 #include "strlib.h"
 
@@ -61,7 +60,7 @@ ClientReliableCheckBlock (client_t *cl, int maxsize)
 
 		if (cl->backbuf.cursize > cl->backbuf.maxsize - maxsize - 1) {
 			if (cl->num_backbuf == MAX_BACK_BUFFERS) {
-				Con_Printf ("WARNING: MAX_BACK_BUFFERS for %s\n", cl->name);
+				Com_Printf ("WARNING: MAX_BACK_BUFFERS for %s\n", cl->name);
 				cl->backbuf.cursize = 0;	// don't overflow without
 				// allowoverflow set
 				cl->netchan.message.overflowed = true;	// this will drop the
@@ -93,7 +92,7 @@ ClientReliable_FinishWrite (client_t *cl)
 		cl->backbuf_size[cl->num_backbuf - 1] = cl->backbuf.cursize;
 
 		if (cl->backbuf.overflowed) {
-			Con_Printf ("WARNING: backbuf [%d] reliable overflow for %s\n",
+			Com_Printf ("WARNING: backbuf [%d] reliable overflow for %s\n",
 						cl->num_backbuf, cl->name);
 			cl->netchan.message.overflowed = true;	// this will drop the
 			// client

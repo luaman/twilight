@@ -37,7 +37,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "common.h"
-#include "console.h"
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
@@ -344,11 +343,11 @@ R_ReadPointFile_f (void)
 
 	COM_FOpenFile (name, &f);
 	if (!f) {
-		Con_Printf ("couldn't open %s\n", name);
+		Com_Printf ("couldn't open %s\n", name);
 		return;
 	}
 
-	Con_Printf ("Reading %s...\n", name);
+	Com_Printf ("Reading %s...\n", name);
 	c = 0;
 	for (;;) {
 		r = fscanf (f, "%f %f %f\n", &org[0], &org[1], &org[2]);
@@ -361,7 +360,7 @@ R_ReadPointFile_f (void)
 	}
 
 	fclose (f);
-	Con_Printf ("%i points read\n", c);
+	Com_Printf ("%i points read\n", c);
 }
 
 /*

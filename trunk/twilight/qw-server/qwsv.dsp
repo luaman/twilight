@@ -200,11 +200,11 @@ SOURCE=.\bspfile.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\cdaudio.h
+SOURCE=.\cmd.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmd.h
+SOURCE=..\include\common.h
 # End Source File
 # Begin Source File
 
@@ -213,10 +213,6 @@ SOURCE=.\console.h
 # Begin Source File
 
 SOURCE=..\include\draw.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\gl_warp_sin.h
 # End Source File
 # Begin Source File
 
@@ -268,10 +264,6 @@ SOURCE=.\sys.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\tga.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\TGL_defines.h
 # End Source File
 # Begin Source File
@@ -285,14 +277,6 @@ SOURCE=..\include\TGL_funcs_list.h
 # Begin Source File
 
 SOURCE=..\include\TGL_types.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vid.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\view.h
 # End Source File
 # Begin Source File
 

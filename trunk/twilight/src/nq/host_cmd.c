@@ -37,7 +37,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "model.h"
 #include "host.h"
@@ -93,7 +92,7 @@ Host_Status_f (void)
 			Cmd_ForwardToServer ();
 			return;
 		}
-		print = Con_Printf;
+		print = Com_Printf;
 	} else
 		print = SV_ClientPrintf;
 
@@ -275,7 +274,7 @@ Host_Map_f (void)
 	if (cmd_source != src_command)
 		return;
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("map <levelname> : continue game on a new level\n");
+		Com_Printf ("map <levelname> : continue game on a new level\n");
 		return;
 	}
 
@@ -326,11 +325,11 @@ Host_Changelevel_f (void)
 	char        level[MAX_QPATH];
 
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("changelevel <levelname> : continue game on a new level\n");
+		Com_Printf ("changelevel <levelname> : continue game on a new level\n");
 		return;
 	}
 	if (!sv.active || cls.demoplayback) {
-		Con_Printf ("Only the server may changelevel\n");
+		Com_Printf ("Only the server may changelevel\n");
 		return;
 	}
 	SV_SaveSpawnparms ();
@@ -454,33 +453,33 @@ Host_Savegame_f (void)
 		return;
 
 	if (!sv.active) {
-		Con_Printf ("Not playing a local game.\n");
+		Com_Printf ("Not playing a local game.\n");
 		return;
 	}
 
 	if (cl.intermission) {
-		Con_Printf ("Can't save in intermission.\n");
+		Com_Printf ("Can't save in intermission.\n");
 		return;
 	}
 
 	if (svs.maxclients != 1) {
-		Con_Printf ("Can't save multiplayer games.\n");
+		Com_Printf ("Can't save multiplayer games.\n");
 		return;
 	}
 
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("save <savename> : save a game\n");
+		Com_Printf ("save <savename> : save a game\n");
 		return;
 	}
 
 	if (strstr (Cmd_Argv (1), "..")) {
-		Con_Printf ("Relative pathnames are not allowed.\n");
+		Com_Printf ("Relative pathnames are not allowed.\n");
 		return;
 	}
 
 	for (i = 0; i < svs.maxclients; i++) {
 		if (svs.clients[i].active && (svs.clients[i].edict->v.health <= 0)) {
-			Con_Printf ("Can't savegame with a dead player\n");
+			Com_Printf ("Can't savegame with a dead player\n");
 			return;
 		}
 	}
@@ -488,10 +487,10 @@ Host_Savegame_f (void)
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".sav");
 
-	Con_Printf ("Saving game to %s...\n", name);
+	Com_Printf ("Saving game to %s...\n", name);
 	f = fopen (name, "w");
 	if (!f) {
-		Con_Printf ("ERROR: couldn't open.\n");
+		Com_Printf ("ERROR: couldn't open.\n");
 		return;
 	}
 
@@ -518,7 +517,7 @@ Host_Savegame_f (void)
 		fflush (f);
 	}
 	fclose (f);
-	Con_Printf ("done.\n");
+	Com_Printf ("done.\n");
 }
 
 
@@ -541,7 +540,7 @@ Host_Loadgame_f (void)
 		return;
 
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("load <savename> : load a game\n");
+		Com_Printf ("load <savename> : load a game\n");
 		return;
 	}
 
@@ -554,17 +553,17 @@ Host_Loadgame_f (void)
 // been used.  The menu calls it before stuffing loadgame command
 //  SCR_BeginLoadingPlaque ();
 
-	Con_Printf ("Loading game from %s...\n", name);
+	Com_Printf ("Loading game from %s...\n", name);
 	f = fopen (name, "r");
 	if (!f) {
-		Con_Printf ("ERROR: couldn't open.\n");
+		Com_Printf ("ERROR: couldn't open.\n");
 		return;
 	}
 
 	fscanf (f, "%i\n", &version);
 	if (version != SAVEGAME_VERSION) {
 		fclose (f);
-		Con_Printf ("Savegame is version %i, not %i\n", version,
+		Com_Printf ("Savegame is version %i, not %i\n", version,
 					SAVEGAME_VERSION);
 		return;
 	}
@@ -584,7 +583,7 @@ Host_Loadgame_f (void)
 	SV_SpawnServer (mapname);
 
 	if (!sv.active) {
-		Con_Printf ("Couldn't load map\n");
+		Com_Printf ("Couldn't load map\n");
 		return;
 	}
 	sv.paused = true;					// pause until all clients connect
@@ -665,7 +664,7 @@ Host_Name_f (void)
 	char       *newName;
 
 	if (Cmd_Argc () == 1) {
-		Con_Printf ("\"name\" is \"%s\"\n", _cl_name->string[0]);
+		Com_Printf ("\"name\" is \"%s\"\n", _cl_name->string[0]);
 		return;
 	}
 	if (Cmd_Argc () == 2)
@@ -685,7 +684,7 @@ Host_Name_f (void)
 
 	if (host_client->name[0] && strcmp (host_client->name, "unconnected"))
 		if (strcmp (host_client->name, newName) != 0)
-			Con_Printf ("%s renamed to %s\n", host_client->name, newName);
+			Com_Printf ("%s renamed to %s\n", host_client->name, newName);
 	strcpy (host_client->name, newName);
 	host_client->edict->v.netname = host_client->name - pr_strings;
 
@@ -699,9 +698,9 @@ Host_Name_f (void)
 void
 Host_Version_f (void)
 {
-	Con_Printf ("Version %s\n", VERSION);
-	Con_Printf ("Build: %04d\n", build_number());
-	Con_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
+	Com_Printf ("Version %s\n", VERSION);
+	Com_Printf ("Build: %04d\n", build_number());
+	Com_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
 }
 
 void
@@ -838,10 +837,10 @@ Host_Color_f (void)
 	int         playercolor;
 
 	if (Cmd_Argc () == 1) {
-		Con_Printf ("\"color\" is \"%i %i\"\n",
+		Com_Printf ("\"color\" is \"%i %i\"\n",
 				((int) _cl_color->value) >> 4,
 				((int) _cl_color->value) & 0x0f);
-		Con_Printf ("color <0-13> [0-13]\n");
+		Com_Printf ("color <0-13> [0-13]\n");
 		return;
 	}
 
@@ -903,7 +902,7 @@ Host_Kill_f (void)
 void Host_WriteConfig_f (void)
 {
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("writeconfig <filename> : dump configuration to file\n");
+		Com_Printf ("writeconfig <filename> : dump configuration to file\n");
 		return;
 	}
 
@@ -954,12 +953,12 @@ void
 Host_PreSpawn_f (void)
 {
 	if (cmd_source == src_command) {
-		Con_Printf ("prespawn is not valid from the console\n");
+		Com_Printf ("prespawn is not valid from the console\n");
 		return;
 	}
 
 	if (host_client->spawned) {
-		Con_Printf ("prespawn not valid -- already spawned\n");
+		Com_Printf ("prespawn not valid -- already spawned\n");
 		return;
 	}
 
@@ -982,12 +981,12 @@ Host_Spawn_f (void)
 	edict_t		*ent;
 
 	if (cmd_source == src_command) {
-		Con_Printf ("spawn is not valid from the console\n");
+		Com_Printf ("spawn is not valid from the console\n");
 		return;
 	}
 
 	if (host_client->spawned) {
-		Con_Printf ("Spawn not valid -- already spawned\n");
+		Com_Printf ("Spawn not valid -- already spawned\n");
 		return;
 	}
 // run the entrance script
@@ -1097,7 +1096,7 @@ void
 Host_Begin_f (void)
 {
 	if (cmd_source == src_command) {
-		Con_Printf ("begin is not valid from the console\n");
+		Com_Printf ("begin is not valid from the console\n");
 		return;
 	}
 
@@ -1344,7 +1343,7 @@ PrintFrameName (model_t *m, int frame)
 		return;
 	pframedesc = &hdr->frames[frame];
 
-	Con_Printf ("frame %i: %s\n", frame, pframedesc->name);
+	Com_Printf ("frame %i: %s\n", frame, pframedesc->name);
 }
 
 /*
@@ -1374,10 +1373,10 @@ Host_Startdemos_f (void)
 
 	c = Cmd_Argc () - 1;
 	if (c > MAX_DEMOS) {
-		Con_Printf ("Max %i demos in demoloop\n", MAX_DEMOS);
+		Com_Printf ("Max %i demos in demoloop\n", MAX_DEMOS);
 		c = MAX_DEMOS;
 	}
-	Con_Printf ("%i demo(s) in loop\n", c);
+	Com_Printf ("%i demo(s) in loop\n", c);
 
 	for (i = 1; i < c + 1; i++)
 		strlcpy (cls.demos[i - 1], Cmd_Argv (i), sizeof (cls.demos[0]));

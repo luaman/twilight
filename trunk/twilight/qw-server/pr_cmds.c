@@ -38,7 +38,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "cmd.h"
 #include "common.h"
-#include "console.h"
 #include "cvar.h"
 #include "mathlib.h"
 #include "model.h"
@@ -91,7 +90,7 @@ PF_error (void)
 	edict_t    *ed;
 
 	s = PF_VarString (0);
-	Con_Printf ("======SERVER ERROR in %s:\n%s\n",
+	Com_Printf ("======SERVER ERROR in %s:\n%s\n",
 				PR_GetString (pr_xfunction->s_name), s);
 	ed = PROG_TO_EDICT (pr_global_struct->self);
 	ED_Print (ed);
@@ -116,7 +115,7 @@ PF_objerror (void)
 	edict_t    *ed;
 
 	s = PF_VarString (0);
-	Con_Printf ("======OBJECT ERROR in %s:\n%s\n",
+	Com_Printf ("======OBJECT ERROR in %s:\n%s\n",
 				PR_GetString (pr_xfunction->s_name), s);
 	ed = PROG_TO_EDICT (pr_global_struct->self);
 	ED_Print (ed);
@@ -274,7 +273,7 @@ PF_sprint (void)
 	s = PF_VarString (2);
 
 	if (entnum < 1 || entnum > MAX_CLIENTS) {
-		Con_Printf ("tried to sprint to a non-client\n");
+		Com_Printf ("tried to sprint to a non-client\n");
 		return;
 	}
 
@@ -304,7 +303,7 @@ PF_centerprint (void)
 	s = PF_VarString (1);
 
 	if (entnum < 1 || entnum > MAX_CLIENTS) {
-		Con_Printf ("tried to sprint to a non-client\n");
+		Com_Printf ("tried to sprint to a non-client\n");
 		return;
 	}
 
@@ -459,7 +458,7 @@ PF_ambientsound (void)
 			break;
 
 	if (!*check) {
-		Con_Printf ("no precache: %s\n", samp);
+		Com_Printf ("no precache: %s\n", samp);
 		return;
 	}
 // add an svc_spawnambient command to the level signon packet
@@ -518,7 +517,7 @@ break()
 void
 PF_break (void)
 {
-	Con_Printf ("break statement\n");
+	Com_Printf ("break statement\n");
 	*(int *) -4 = 0;					// dump to debugger
 //  PR_RunError ("break statement");
 }
@@ -834,7 +833,7 @@ PF_dprint
 void
 PF_dprint (void)
 {
-	Con_Printf ("%s", PF_VarString (0));
+	Com_Printf ("%s", PF_VarString (0));
 }
 
 char        pr_string_temp[128];

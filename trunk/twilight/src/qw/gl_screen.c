@@ -85,7 +85,7 @@ draw
 CenterPrint ()
 SlowPrint ()
 Screen_Update ();
-Con_Printf ();
+Com_Printf ();
 
 net 
 turn off messages option
@@ -248,7 +248,7 @@ SCR_CenterPrint (char *str)
 		return;
 
 	// echo it to the console
-	Con_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
+	Com_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
 
 	s = str;
 	do
@@ -265,7 +265,7 @@ SCR_CenterPrint (char *str)
 
 		line[i] = '\n';
 		line[i+1] = 0;
-		Con_Printf ("%s", line);
+		Com_Printf ("%s", line);
 
 		while (*s && *s != '\n')
 			s++;
@@ -274,7 +274,7 @@ SCR_CenterPrint (char *str)
 			break;
 		s++;        // skip the \n
 	} while (1);
-	Con_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
+	Com_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
 	Con_ClearNotify ();
 }
 
@@ -704,7 +704,7 @@ SCR_ScreenShot_f (void)
 			break;						/* file doesn't exist */
 	}
 	if (i == 100) {
-		Con_Printf ("SCR_ScreenShot_f: Couldn't create a TGA file\n");
+		Com_Printf ("SCR_ScreenShot_f: Couldn't create a TGA file\n");
 		return;
 	}
 
@@ -715,7 +715,7 @@ SCR_ScreenShot_f (void)
 				  buffer);
 
 	if (TGA_Write (pcxname, vid.width, vid.height, 3, buffer))
-		Con_Printf ("Wrote %s\n", pcxname);
+		Com_Printf ("Wrote %s\n", pcxname);
 
 	free (buffer);
 }
@@ -735,7 +735,7 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 
 	pcx = Hunk_TempAlloc (width * height * 2 + 1000);
 	if (pcx == NULL) {
-		Con_Printf ("SCR_ScreenShot_f: not enough memory\n");
+		Com_Printf ("SCR_ScreenShot_f: not enough memory\n");
 		return;
 	}
 
@@ -897,7 +897,7 @@ SCR_RSShot_f (void)
 	if (cls.state < ca_onserver)
 		return;							/* gotta be connected */
 
-	Con_Printf ("Remote screen shot requested.\n");
+	Com_Printf ("Remote screen shot requested.\n");
 
 	/*
 	 * save the pcx file
@@ -975,7 +975,7 @@ SCR_RSShot_f (void)
 
 	free (newbuf);
 
-	Con_Printf ("Wrote %s\n", pcxname);
+	Com_Printf ("Wrote %s\n", pcxname);
 }
 
 
@@ -1035,7 +1035,7 @@ SCR_UpdateScreen (void)
 	if (scr_disabled_for_loading) {
 		if (cls.realtime - scr_disabled_time > 60) {
 			scr_disabled_for_loading = false;
-			Con_Printf ("load failed.\n");
+			Com_Printf ("load failed.\n");
 		} else
 			return;
 	}

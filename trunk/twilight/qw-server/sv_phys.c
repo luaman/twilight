@@ -39,7 +39,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "bspfile.h"
 #include "common.h"
-#include "console.h"
 #include "cvar.h"
 #include "mathlib.h"
 #include "pmove.h"
@@ -104,7 +103,7 @@ SV_CheckAllEnts (void)
 			continue;
 
 		if (SV_TestEntityPosition (check))
-			Con_Printf ("entity in invalid position\n");
+			Com_Printf ("entity in invalid position\n");
 	}
 }
 
@@ -123,12 +122,12 @@ SV_CheckVelocity (edict_t *ent)
 //
 	for (i = 0; i < 3; i++) {
 		if (IS_NAN (ent->v.velocity[i])) {
-			Con_Printf ("Got a NaN velocity on %s\n",
+			Com_Printf ("Got a NaN velocity on %s\n",
 						PR_GetString (ent->v.classname));
 			ent->v.velocity[i] = 0;
 		}
 		if (IS_NAN (ent->v.origin[i])) {
-			Con_Printf ("Got a NaN origin on %s\n",
+			Com_Printf ("Got a NaN origin on %s\n",
 						PR_GetString (ent->v.classname));
 			ent->v.origin[i] = 0;
 		}
@@ -360,7 +359,6 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 			VectorCopy (new_velocity, ent->v.velocity);
 		} else {						// go along the crease
 			if (numplanes != 2) {
-//              Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
 				VectorClear (ent->v.velocity);
 				return 7;
 			}
@@ -632,7 +630,6 @@ SV_Physics_Pusher (edict_t *ent)
 
 		l = VectorLength (move);
 		if (l > 1.0 / 64) {
-//  Con_Printf ("**** snap: %f\n", Length (l));
 			VectorCopy (oldorg, ent->v.origin);
 			SV_Push (ent, move);
 		}

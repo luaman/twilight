@@ -233,7 +233,7 @@ Key_Console (int key)
 			Cbuf_AddText (key_lines[edit_line] + 1);
 
 		Cbuf_AddText ("\n");
-		Con_Printf ("%s\n", key_lines[edit_line]);
+		Com_Printf ("%s\n", key_lines[edit_line]);
 		edit_line = (edit_line + 1) & 31;
 		history_line = edit_line;
 		Key_ClearEditLine (edit_line);
@@ -529,13 +529,13 @@ Key_Unbind_f (void)
 	int         b;
 
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("unbind <key> : remove commands from a key\n");
+		Com_Printf ("unbind <key> : remove commands from a key\n");
 		return;
 	}
 
 	b = Key_StringToKeynum (Cmd_Argv (1));
 	if (b == -1) {
-		Con_Printf ("\"%s\" isn't a valid key\n", Cmd_Argv (1));
+		Com_Printf ("\"%s\" isn't a valid key\n", Cmd_Argv (1));
 		return;
 	}
 
@@ -567,20 +567,20 @@ Key_Bind_f (void)
 	c = Cmd_Argc ();
 
 	if (c != 2 && c != 3) {
-		Con_Printf ("bind <key> [command] : attach a command to a key\n");
+		Com_Printf ("bind <key> [command] : attach a command to a key\n");
 		return;
 	}
 	b = Key_StringToKeynum (Cmd_Argv (1));
 	if (b == -1) {
-		Con_Printf ("\"%s\" isn't a valid key\n", Cmd_Argv (1));
+		Com_Printf ("\"%s\" isn't a valid key\n", Cmd_Argv (1));
 		return;
 	}
 
 	if (c == 2) {
 		if (keybindings[b])
-			Con_Printf ("\"%s\" = \"%s\"\n", Cmd_Argv (1), keybindings[b]);
+			Com_Printf ("\"%s\" = \"%s\"\n", Cmd_Argv (1), keybindings[b]);
 		else
-			Con_Printf ("\"%s\" is not bound\n", Cmd_Argv (1));
+			Com_Printf ("\"%s\" is not bound\n", Cmd_Argv (1));
 		return;
 	}
 // copy the rest of the command line
@@ -711,7 +711,7 @@ Key_Event (int key, qboolean down)
 	char       *kb;
 	char        cmd[1024];
 
-//  Con_Printf ("%i : %i\n", key, down); //@@@
+//  Com_Printf ("%i : %i\n", key, down); //@@@
 
 	keydown[key] = down;
 

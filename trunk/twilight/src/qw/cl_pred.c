@@ -37,7 +37,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "client.h"
-#include "console.h"
 #include "cvar.h"
 #include "keys.h"
 #include "mathlib.h"
@@ -77,7 +76,7 @@ CL_NudgePosition (void)
 		}
 	}
 
-	Con_DPrintf ("CL_NudgePosition: stuck\n");
+	Com_DPrintf ("CL_NudgePosition: stuck\n");
 }
 
 /*

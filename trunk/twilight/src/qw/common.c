@@ -624,6 +624,92 @@ MSG_ReadDeltaUsercmd (usercmd_t *from, usercmd_t *move)
 	move->msec = MSG_ReadByte ();
 }
 
+//===========================================================================
+
+#define	MAXPRINTMSG	4096
+
+void (*rd_print) (char *) = NULL;
+
+void Com_BeginRedirect (void (*RedirectedPrint) (char *))
+{
+	rd_print = RedirectedPrint;
+}
+
+void Com_EndRedirect (void)
+{
+	rd_print = NULL;
+}
+
+void Com_Printf (char *fmt, ...)
+{
+	va_list     argptr;
+	char        msg[MAXPRINTMSG];
+#ifndef TWILIGHT_QWSV
+	extern char	logname[MAX_OSPATH];
+#else
+	extern FILE *sv_logfile;
+#endif
+
+	va_start (argptr, fmt);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
+	va_end (argptr);
+
+	if ( rd_print ) {
+		rd_print ( msg );
+		return;
+	}
+
+// also echo to debugging console
+	Sys_Printf ("%s", msg);				// also echo to debugging console
+
+// log all messages to file
+#ifndef TWILIGHT_QWSV
+	if (logname[0])
+		Sys_DebugLog (logname, "%s", msg);
+
+	if (!con_initialized)
+		return;
+
+// write it to the scrollable buffer
+	Con_Print (msg);
+#else
+	if (sv_logfile)
+		fprintf (sv_logfile, "%s", msg);
+#endif
+}
+
+void Com_DPrintf (char *fmt, ...)
+{
+	va_list     argptr;
+	char        msg[MAXPRINTMSG];
+
+	if (!developer->value)
+		return;							// don't confuse non-developers with
+	// techie stuff...
+
+	va_start (argptr, fmt);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
+	va_end (argptr);
+
+	Com_Printf ("%s", msg);
+}
+
+void
+Com_SafePrintf (char *fmt, ...)
+{
+	va_list     argptr;
+	char        msg[1024];
+
+	va_start (argptr, fmt);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
+	va_end (argptr);
+
+#ifndef TWILIGHT_QWSV
+	Con_SafePrint (msg);
+#else
+	Com_Printf (msg);
+#endif
+}
 
 //===========================================================================
 
@@ -913,7 +999,7 @@ COM_CheckRegistered (void)
 		return;
 
 	Cvar_Set (registered, "1");
-	Con_Printf ("Playing registered version.\n");
+	Com_Printf ("Playing registered version.\n");
 }
 
 
@@ -1059,15 +1145,15 @@ COM_Path_f (void)
 {
 	searchpath_t *s;
 
-	Con_Printf ("Current search path:\n");
+	Com_Printf ("Current search path:\n");
 	for (s = com_searchpaths; s; s = s->next) {
 		if (s == com_base_searchpaths)
-			Con_Printf ("----------\n");
+			Com_Printf ("----------\n");
 		if (s->pack)
-			Con_Printf ("%s (%i files)\n", s->pack->filename,
+			Com_Printf ("%s (%i files)\n", s->pack->filename,
 						s->pack->numfiles);
 		else
-			Con_Printf ("%s\n", s->filename);
+			Com_Printf ("%s\n", s->filename);
 	}
 }
 
@@ -1184,7 +1270,7 @@ COM_FOpenFile (char *filename, FILE ** file)
 			pak = search->pack;
 			for (i = 0; i < pak->numfiles; i++)
 				if (!strcmp (pak->files[i].name, filename)) {	// found it!
-					Con_DPrintf ("PackFile: %s : %s\n", pak->filename,
+					Com_DPrintf ("PackFile: %s : %s\n", pak->filename,
 								 filename);
 					// open a new file on the pakfile
 					*file = fopen (pak->filename, "rb");
@@ -1209,7 +1295,7 @@ COM_FOpenFile (char *filename, FILE ** file)
 			if (findtime == -1)
 				continue;
 
-			Con_DPrintf ("FindFile: %s\n", netpath);
+			Com_DPrintf ("FindFile: %s\n", netpath);
 
 			*file = fopen (netpath, "rb");
 			return COM_filelength (*file);
@@ -1378,7 +1464,7 @@ COM_LoadPackFile (char *packfile)
 	pack->numfiles = numpackfiles;
 	pack->files = newfiles;
 
-	Con_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
+	Com_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
 	return pack;
 }
 
@@ -1402,7 +1488,7 @@ COM_AddDirectory (char *indir)
 	char       *p;
 
 	dir = Sys_ExpandPath (indir);
-	Con_Printf ("COM_AddDirectory: Adding %s\n", dir);
+	Com_Printf ("COM_AddDirectory: Adding %s\n", dir);
 
 	if ((p = strrchr (dir, '/')) != NULL)
 		strcpy (gamedirfile, ++p);
@@ -1447,7 +1533,7 @@ COM_AddGameDirectory (char *dir)
 {
 	char		buf[1024];
 
-	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
+	Com_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
 	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->string, dir);
 	COM_AddDirectory (buf);
 
@@ -1474,7 +1560,7 @@ COM_Gamedir (char *dir)
 
 	if (strstr (dir, "..") || strstr (dir, "/")
 		|| strstr (dir, "\\") || strstr (dir, ":")) {
-		Con_Printf ("Gamedir should be a single filename, not a path\n");
+		Com_Printf ("Gamedir should be a single filename, not a path\n");
 		return;
 	}
 
@@ -1610,7 +1696,7 @@ Info_RemoveKey (char *s, char *key)
 	char       *o;
 
 	if (strstr (key, "\\")) {
-		Con_Printf ("Can't use a key with a \\\n");
+		Com_Printf ("Can't use a key with a \\\n");
 		return;
 	}
 
@@ -1695,17 +1781,17 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 	int         c;
 
 	if (strstr (key, "\\") || strstr (value, "\\")) {
-		Con_Printf ("Can't use keys or values with a \\\n");
+		Com_Printf ("Can't use keys or values with a \\\n");
 		return;
 	}
 
 	if (strstr (key, "\"") || strstr (value, "\"")) {
-		Con_Printf ("Can't use keys or values with a \"\n");
+		Com_Printf ("Can't use keys or values with a \"\n");
 		return;
 	}
 
 	if (strlen (key) > 63 || strlen (value) > 63) {
-		Con_Printf ("Keys and values must be < 64 characters.\n");
+		Com_Printf ("Keys and values must be < 64 characters.\n");
 		return;
 	}
 	// this next line is kinda trippy
@@ -1713,7 +1799,7 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 		// key exists, make sure we have enough room for new value, if we
 		// don't change it!
 		if (strlen (value) - strlen (v) + strlen (s) > maxsize) {
-			Con_Printf ("Info string length exceeded\n");
+			Com_Printf ("Info string length exceeded\n");
 			return;
 		}
 	}
@@ -1724,7 +1810,7 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 	snprintf (new, sizeof (new), "\\%s\\%s", key, value);
 
 	if ((strlen (new) + strlen (s)) > maxsize) {
-		Con_Printf ("Info string length exceeded\n");
+		Com_Printf ("Info string length exceeded\n");
 		return;
 	}
 	// only copy ascii values
@@ -1752,7 +1838,7 @@ void
 Info_SetValueForKey (char *s, char *key, char *value, int maxsize)
 {
 	if (key[0] == '*') {
-		Con_Printf ("Can't set * keys\n");
+		Com_Printf ("Can't set * keys\n");
 		return;
 	}
 
@@ -1780,10 +1866,10 @@ Info_Print (char *s)
 			key[20] = 0;
 		} else
 			*o = 0;
-		Con_Printf ("%s", key);
+		Com_Printf ("%s", key);
 
 		if (!*s) {
-			Con_Printf ("MISSING VALUE\n");
+			Com_Printf ("MISSING VALUE\n");
 			return;
 		}
 
@@ -1795,7 +1881,7 @@ Info_Print (char *s)
 
 		if (*s)
 			s++;
-		Con_Printf ("%s\n", value);
+		Com_Printf ("%s\n", value);
 	}
 }
 

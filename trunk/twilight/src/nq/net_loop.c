@@ -38,7 +38,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "strlib.h"
-#include "console.h"
 #include "cvar.h"
 #include "net.h"
 #include "net_loop.h"
@@ -99,7 +98,7 @@ Loop_Connect (char *host)
 
 	if (!loop_client) {
 		if ((loop_client = NET_NewQSocket ()) == NULL) {
-			Con_Printf ("Loop_Connect: no qsocket available\n");
+			Com_Printf ("Loop_Connect: no qsocket available\n");
 			return NULL;
 		}
 		strcpy (loop_client->address, "localhost");
@@ -110,7 +109,7 @@ Loop_Connect (char *host)
 
 	if (!loop_server) {
 		if ((loop_server = NET_NewQSocket ()) == NULL) {
-			Con_Printf ("Loop_Connect: no qsocket available\n");
+			Com_Printf ("Loop_Connect: no qsocket available\n");
 			return NULL;
 		}
 		strcpy (loop_server->address, "LOCAL");

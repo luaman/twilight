@@ -38,7 +38,6 @@ static const char rcsid[] =
 #include "cdaudio.h"
 #include "client.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "glquake.h"
 #include "model.h"
@@ -221,7 +220,7 @@ CL_KeepaliveMessage (void)
 	lastmsg = time;
 
 // write out a nop
-	Con_Printf ("--> client to server keepalive\n");
+	Com_Printf ("--> client to server keepalive\n");
 
 	MSG_WriteByte (&cls.message, clc_nop);
 	NET_SendMessage (cls.netcon, &cls.message);
@@ -245,7 +244,7 @@ CL_ParseServerInfo (void)
 	char        sound_precache[MAX_SOUNDS][MAX_QPATH];
 	extern		qboolean    isnotmap;
 
-	Con_DPrintf ("Serverinfo packet received.\n");
+	Com_DPrintf ("Serverinfo packet received.\n");
 //
 // wipe the client_state_t struct
 //
@@ -255,7 +254,7 @@ CL_ParseServerInfo (void)
 	i = MSG_ReadLong ();
 
 	if (i != PROTOCOL_VERSION) {
-		Con_Printf ("Server returned version %i, not %i", i, PROTOCOL_VERSION);
+		Com_Printf ("Server returned version %i, not %i", i, PROTOCOL_VERSION);
 		return;
 	}
 
@@ -263,7 +262,7 @@ CL_ParseServerInfo (void)
 	cl.maxclients = MSG_ReadByte ();
 
 	if (cl.maxclients < 1 || cl.maxclients > MAX_SCOREBOARD) {
-		Con_Printf ("Bad maxclients (%u) from server\n", cl.maxclients);
+		Com_Printf ("Bad maxclients (%u) from server\n", cl.maxclients);
 		return;
 	}
 
@@ -277,9 +276,9 @@ CL_ParseServerInfo (void)
 	strlcpy (cl.levelname, str, sizeof (cl.levelname));
 
 // seperate the printfs so the server message can have a color
-	Con_Printf ("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36"
+	Com_Printf ("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36"
 			"\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
-	Con_Printf ("%c%s\n", 2, str);
+	Com_Printf ("%c%s\n", 2, str);
 
 //
 // first we go through and touch all of the precache data that still
@@ -294,7 +293,7 @@ CL_ParseServerInfo (void)
 		if (!str[0])
 			break;
 		if (nummodels == MAX_MODELS) {
-			Con_Printf ("Server sent too many model precaches\n");
+			Com_Printf ("Server sent too many model precaches\n");
 			return;
 		}
 		strcpy (model_precache[nummodels], str);
@@ -308,7 +307,7 @@ CL_ParseServerInfo (void)
 		if (!str[0])
 			break;
 		if (numsounds == MAX_SOUNDS) {
-			Con_Printf ("Server sent too many sound precaches\n");
+			Com_Printf ("Server sent too many sound precaches\n");
 			return;
 		}
 		strcpy (sound_precache[numsounds], str);
@@ -323,7 +322,7 @@ CL_ParseServerInfo (void)
 		cl.model_precache[i] = Mod_ForName (model_precache[i], false);
 
 		if (cl.model_precache[i] == NULL) {
-			Con_Printf ("Model %s not found\n", model_precache[i]);
+			Com_Printf ("Model %s not found\n", model_precache[i]);
 			return;
 		}
 
@@ -696,7 +695,7 @@ CL_ParseStaticSound (void)
 
 #define SHOWNET(x)											\
 	if (cl_shownet->value==2)								\
-		Con_Printf ("%3i:%s\n", msg_readcount-1, x);
+		Com_Printf ("%3i:%s\n", msg_readcount-1, x);
 
 /*
 =====================
@@ -713,9 +712,9 @@ CL_ParseServerMessage (void)
 // if recording demos, copy the message out
 //
 	if (cl_shownet->value == 1)
-		Con_Printf ("%i ", net_message.cursize);
+		Com_Printf ("%i ", net_message.cursize);
 	else if (cl_shownet->value == 2)
-		Con_Printf ("------------------\n");
+		Com_Printf ("------------------\n");
 
 	// unless the server says otherwise
 	cl.onground = false;
@@ -752,7 +751,7 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_nop:
-//          Con_Printf ("svc_nop\n");
+//          Com_Printf ("svc_nop\n");
 				break;
 
 			case svc_time:
@@ -776,7 +775,7 @@ CL_ParseServerMessage (void)
 				Host_EndGame ("Server disconnected\n");
 
 			case svc_print:
-				Con_Printf ("%s", MSG_ReadString ());
+				Com_Printf ("%s", MSG_ReadString ());
 				break;
 
 			case svc_centerprint:

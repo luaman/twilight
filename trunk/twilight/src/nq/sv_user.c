@@ -38,7 +38,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "host.h"
 #include "keys.h"
@@ -570,7 +569,7 @@ SV_ReadClientMessage (void)
 					else if (ret == 1)
 						Cmd_ExecuteString (s, src_client);
 					else
-						Con_DPrintf ("%s tried to %s\n", host_client->name, s);
+						Com_DPrintf ("%s tried to %s\n", host_client->name, s);
 					break;
 
 				case clc_disconnect:

@@ -41,6 +41,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "screen.h"
 #include "strlib.h"
+#include "sys.h"
 
 /* NQ specific */
 #include "host.h"
