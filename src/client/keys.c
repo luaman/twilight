@@ -804,13 +804,12 @@ Key_Event (int key, char ascii, qboolean down)
 	}
 
 	//
-	// key up events only generate commands if the game key binding is
-	// a button command (leading + sign).  These will occur even in console mode,
-	// to keep the character from continuing an action started before a console
+	// key up events only generate commands if the game key binding is a button
+	// command (leading + sign).  These will occur even in console mode, to
+	// keep the character from continuing an action started before a console
 	// switch.  Button commands include the kenum as a parameter, so multiple
 	// downs can be matched with ups
 	//
-//	Com_Printf ("%d : %d %d : %d\n", key, key_bmap, key_bmap2, down);
 	if (!down) {
 		if (!(kb = keybindings[key_bmap][key]))
 			kb = keybindings[key_bmap2][key];

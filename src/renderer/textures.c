@@ -1235,13 +1235,13 @@ GLT_Load_Raw (const char *identifier, Uint width, Uint height, Uint8 *data,
 	/* see if the texture is already present */
 	if (identifier[0])
 	{
-		crc = CRC_Block (data, width*height);
+		crc = CRC_Block (data, width*height*(bpp/8));
 
 		for (glt = gltextures; glt != NULL; glt = glt->next)
 		{
 			if (!strcmp (identifier, glt->identifier))
 			{
-				if ((flags & TEX_REPLACE) ||
+				if (!(flags & TEX_REPLACE) ||
 						(width == glt->width && height == glt->height
 						&& crc == glt->crc)) {
 					glt->count++;

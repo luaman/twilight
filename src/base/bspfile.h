@@ -66,7 +66,7 @@
 #define	TOOLVERSION	2
 
 typedef struct {
-	size_t	fileofs, filelen;
+	Uint32	fileofs, filelen;
 } lump_t;
 
 #define	LUMP_ENTITIES		0
@@ -89,26 +89,26 @@ typedef struct {
 typedef struct {
 	float	mins[3], maxs[3];
 	float	origin[3];
-	int		headnode[MAX_MAP_HULLS];
-	int		visleafs;				/* not including the solid leaf 0 */
-	int		firstface, numfaces;
+	Sint32	headnode[MAX_MAP_HULLS];
+	Sint32	visleafs;				/* not including the solid leaf 0 */
+	Sint32	firstface, numfaces;
 } dmodel_t;
 
 typedef struct {
-	int		version;
+	Sint32	version;
 	lump_t	lumps[HEADER_LUMPS];
 } dheader_t;
 
 typedef struct {
-	int	nummiptex;
-	int	dataofs[0];				/* [nummiptex] */
+	Sint32	nummiptex;
+	Sint32	dataofs[0];				/* [nummiptex] */
 } dmiptexlump_t;
 
 #define	MIPLEVELS	4
 typedef struct miptex_s {
-	char			name[16];
-	unsigned int	width, height;
-	unsigned int	offsets[MIPLEVELS];		/* four mip maps stored */
+	char	name[16];
+	Uint32	width, height;
+	Uint32	offsets[MIPLEVELS];		/* four mip maps stored */
 } miptex_t;
 
 
@@ -130,7 +130,7 @@ typedef struct {
 typedef struct {
 	float		normal[3];
 	float		dist;
-	int			type;					/* PLANE_X - PLANE_ANYZ ?remove? trivial to regenerate */
+	Sint32		type;					/* PLANE_X - PLANE_ANYZ ?remove? trivial to regenerate */
 } dplane_t;
 
 
@@ -153,25 +153,25 @@ typedef struct {
 
 
 typedef struct {
-	int					planenum;
-	short int			children[2];	/* negative numbers are -(leafs+1), */
+	Sint32		planenum;
+	Sint16		children[2];	/* negative numbers are -(leafs+1), */
 										/* not nodes */
-	short int			mins[3];		/* for sphere culling */
-	short int			maxs[3];
-	unsigned short int	firstface;
-	unsigned short int	numfaces;		/* counting both sides */
+	Sint16		mins[3];		/* for sphere culling */
+	Sint16		maxs[3];
+	Uint16		firstface;
+	Uint16		numfaces;		/* counting both sides */
 } dnode_t;
 
 typedef struct {
-	int			planenum;
-	short int	children[2];	/* negative numbers are contents */
+	Sint32		planenum;
+	Sint16		children[2];	/* negative numbers are contents */
 } dclipnode_t;
 
 
 typedef struct texinfo_s {
-	float	vecs[2][4];			/* [s/t][xyz offset] */
-	int		miptex;
-	int		flags;
+	float		vecs[2][4];			/* [s/t][xyz offset] */
+	Sint16		miptex;
+	Sint16		flags;
 } texinfo_t;
 
 #define	TEX_SPECIAL		1		/* sky or slime, no lightmap or 256 subdivision */
@@ -179,21 +179,21 @@ typedef struct texinfo_s {
 /* note that edge 0 is never used, because negative edge nums are used for
    counterclockwise use of the edge in a face */
 typedef struct {
-	unsigned short int	v[2];	/* vertex numbers */
+	Uint16		v[2];	/* vertex numbers */
 } dedge_t;
 
 #define	MAXLIGHTMAPS	4
 typedef struct {
-	short int	planenum;
-	short int	side;
+	Sint16		planenum;
+	Sint16		side;
 
-	int			firstedge;		/* we must support > 64k edges */
-	short int	numedges;
-	short int	texinfo;
+	Sint32		firstedge;		/* we must support > 64k edges */
+	Sint16		numedges;
+	Sint16		texinfo;
 
 	/* lighting info */
 	Uint8		styles[MAXLIGHTMAPS];
-	int			lightofs;		/* start of [numstyles*surfsize] samples */
+	Sint32		lightofs;		/* start of [numstyles*surfsize] samples */
 } dface_t;
 
 #define	AMBIENT_WATER	0
