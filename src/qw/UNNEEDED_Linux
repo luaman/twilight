@@ -1,5 +1,2 @@
-sys_win.c
 snd_win.c
-net_wins.c
-sys_null.c
 winquake.h
