@@ -163,6 +163,8 @@ R_Init_Cvars (void)
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
 
+	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
+
 	if (gl_mtexable)
 		Cvar_Set (gl_texsort, "0");
 }

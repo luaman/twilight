@@ -1353,17 +1353,20 @@ Host_Frame (float time)
 	} else
 		CL_SendCmd ();
 
-	// Set up prediction for other players
-	CL_SetUpPlayerPrediction (false);
+	if (cls.state >= ca_onserver)
+	{
+		// Set up prediction for other players
+		CL_SetUpPlayerPrediction (false);
 
-	// do client side motion prediction
-	CL_PredictMove ();
+		// do client side motion prediction
+		CL_PredictMove ();
 
-	// Set up prediction for other players
-	CL_SetUpPlayerPrediction (true);
+		// Set up prediction for other players
+		CL_SetUpPlayerPrediction (true);
 
-	// build a refresh entity list
-	CL_EmitEntities ();
+		// build a refresh entity list
+		CL_EmitEntities ();
+	}
 
 	// update video
 	if (host_speeds->value)

@@ -307,6 +307,9 @@ CL_AllocDlight (int key)
 			if (dl->key == key) {
 				memset (dl, 0, sizeof (*dl));
 				dl->key = key;
+				dl->color[0] = 0.2f; 
+				dl->color[1] = 0.1f; 
+				dl->color[2] = 0.0f;
 				return dl;
 			}
 		}
@@ -317,6 +320,9 @@ CL_AllocDlight (int key)
 		if (dl->die < cl.time) {
 			memset (dl, 0, sizeof (*dl));
 			dl->key = key;
+			dl->color[0] = 0.2f; 
+			dl->color[1] = 0.1f; 
+			dl->color[2] = 0.0f;
 			return dl;
 		}
 	}
@@ -324,6 +330,9 @@ CL_AllocDlight (int key)
 	dl = &cl_dlights[0];
 	memset (dl, 0, sizeof (*dl));
 	dl->key = key;
+	dl->color[0] = 0.2f; 
+	dl->color[1] = 0.1f; 
+	dl->color[2] = 0.0f;
 	return dl;
 }
 

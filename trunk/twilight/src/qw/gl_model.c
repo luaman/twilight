@@ -542,12 +542,61 @@ Mod_LoadLighting
 void
 Mod_LoadLighting (lump_t *l)
 {
-	if (!l->filelen) {
-		loadmodel->lightdata = NULL;
-		return;
+	if (!gl_colorlights->value)
+	{
+		if (!l->filelen) {
+			loadmodel->lightdata = NULL;
+			return;
+		}
+		loadmodel->lightdata = Hunk_AllocName (l->filelen, loadname);
+		memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
 	}
-	loadmodel->lightdata = Hunk_AllocName (l->filelen, loadname);
-	memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
+	else {
+		int i;
+		Uint8 *in, *out, *data;
+		Uint8 d;
+		char litfilename[1024];
+
+		loadmodel->lightdata = NULL;
+
+		strcpy(litfilename, loadmodel->name);
+		COM_StripExtension(litfilename, litfilename);
+		strcat(litfilename, ".lit");
+		data = (Uint8 *) COM_LoadHunkFile (litfilename);
+
+		if (data)
+		{
+			if (data[0] == 'Q' && data[1] == 'L' && data[2] == 'I' && data[3] == 'T')
+			{
+				i = LittleLong(((int *)data)[1]);
+				if (i == 1)
+				{
+					Con_DPrintf("%s loaded\n", litfilename);
+					loadmodel->lightdata = data + 8;
+					return;
+				}
+				else
+					Con_Printf("Unknown .lit file version (%d)\n", i);
+			}
+			else
+				Con_Printf("Corrupt .lit file (old version?), ignoring\n");
+		}
+
+		if (!l->filelen)
+			return;
+
+		loadmodel->lightdata = Hunk_AllocName (l->filelen*3, litfilename);
+		in = loadmodel->lightdata + l->filelen*2;
+		out = loadmodel->lightdata;
+		memcpy (in, mod_base + l->fileofs, l->filelen);
+		for (i = 0; i < l->filelen; i++)
+		{
+			d = *in++;
+			*out++ = d;
+			*out++ = d;
+			*out++ = d;
+		}
+	}
 }
 
 
@@ -834,10 +883,13 @@ Mod_LoadFaces (lump_t *l)
 		for (i = 0; i < MAXLIGHTMAPS; i++)
 			out->styles[i] = in->styles[i];
 		i = LittleLong (in->lightofs);
+
 		if (i == -1)
 			out->samples = NULL;
-		else
+		else if (!gl_colorlights->value)
 			out->samples = loadmodel->lightdata + i;
+		else if (gl_colorlights->value)
+			out->samples = loadmodel->lightdata + i*3;
 
 		// set the drawing flags flag
 
