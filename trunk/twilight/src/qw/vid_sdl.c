@@ -148,9 +148,17 @@ VID_InitTexGamma (void)
 		b = tex_gamma_ramps[2][pal[2]];
 		pal += 3;
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		*table++ = (r << 24) + (g << 16) + (b << 8) + (255 << 0);
+#else
 		*table++ = (r << 0) + (g << 8) + (b << 16) + (255 << 24);
+#endif
 	}
-	d_8to32table[255] &= 0xffffff;		// 255 is transparent
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	d_8to32table[255] &= 0xffffff00;		// 255 is transparent
+#else
+	d_8to32table[255] &= 0x00ffffff;		// 255 is transparent
+#endif
 }
 
 static void
