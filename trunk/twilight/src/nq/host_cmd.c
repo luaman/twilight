@@ -34,6 +34,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "console.h"
 
 extern cvar_t pausable;
 

@@ -44,8 +44,8 @@ static const char rcsid[] =
 #include <fcntl.h>
 #endif
 
-#include <SDL.h>
-#include <SDL_main.h>
+#include "SDL.h"
+#include "SDL_main.h"
 
 #define MINIMUM_WIN_MEMORY		0x0880000
 #define MAXIMUM_WIN_MEMORY		0x1000000

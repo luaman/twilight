@@ -35,7 +35,9 @@ static const char rcsid[] =
 #endif
 
 #include <stdio.h>
-#include <SDL.h>
+
+#include "SDL.h"
+
 #include "qtypes.h"
 #include "TGL_types.h"
 #include "TGL_funcs.h"

@@ -38,11 +38,13 @@ static const char rcsid[] =
 #include <time.h>
 #include <errno.h>
 
-#include <SDL.h>
+#include "SDL.h"
 
 #include "quakedef.h"
-#include "strlib.h"
+#include "cdaudio.h"
+#include "console.h"
 #include "cvar.h"
+#include "strlib.h"
 
 static qboolean cdValid = false;
 static qboolean playing = false;

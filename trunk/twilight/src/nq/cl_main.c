@@ -35,6 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "console.h"
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.

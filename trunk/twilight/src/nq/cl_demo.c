@@ -34,6 +34,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "console.h"
 
 void        CL_FinishTimeDemo (void);
 
