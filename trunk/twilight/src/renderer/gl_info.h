@@ -34,6 +34,13 @@
 #include "model.h"
 #include "palette.h"
 
+#define Check_GL_Error()		do {								\
+	int _err;														\
+	if ((_err = qglGetError())) {									\
+		printf("%s %d (%s): Error: %d\n",__FILE__,__LINE__,__FUNCTION__,_err);\
+	}																\
+} while (0)
+
 typedef struct colormap_s {
 	vec4_t	top;
 	vec4_t	bottom;
@@ -108,6 +115,7 @@ extern qboolean gl_mtexcombine;
 extern qboolean gl_secondary_color;
 extern qboolean gl_nv_register_combiners;
 extern qboolean gl_sgis_mipmap;
+extern qboolean gl_vbo;
 extern int gl_tmus;
 
 

@@ -68,6 +68,7 @@ qboolean gl_mtexcombine = false;
 qboolean gl_secondary_color = false;
 qboolean gl_nv_register_combiners = false;
 qboolean gl_sgis_mipmap = false;
+qboolean gl_vbo = false;
 int gl_tmus = 1;
 
 /*
@@ -146,13 +147,13 @@ GLInfo_CheckExtensions (void)
 		gl_mtexcombine = true;
 	}
 	else
-		Com_Printf ("no.\n");
+		Com_Printf ("No.\n");
 
 	if (!COM_CheckParm ("-nocva"))
 		gl_cva = DynGL_HasExtension ("GL_EXT_compiled_vertex_array");
 
-	Com_Printf ("Checking for compiled vertex arrays: %s.\n",
-			gl_cva ? "GL_EXT_compiled_vertex_array" : "no");
+	Com_Printf ("Checking for GL_EXT_compiled_vertex_array: %s.\n",
+			gl_cva ? "Yes" : "No");
 
 	gl_secondary_color = DynGL_HasExtension ("GL_EXT_secondary_color");
 	Com_Printf ("Checking for GL_EXT_secondary_color: %s.\n",
@@ -166,9 +167,15 @@ GLInfo_CheckExtensions (void)
 	if (!COM_CheckParm ("-noautomip"))
 		gl_sgis_mipmap = DynGL_HasExtension ("GL_SGIS_generate_mipmap");
 
-	Com_Printf ("Checking for accelerated mipmap generation: %s.\n",
-			gl_sgis_mipmap ? "GL_SGIS_generate_mipmap" : "no");
+	Com_Printf ("Checking for GL_SGIS_generate_mipmap: %s.\n",
+			gl_sgis_mipmap ? "Yes" : "No");
 
+
+	if (COM_CheckParm ("-vbo"))
+		gl_vbo = DynGL_HasExtension ("GL_ARB_vertex_buffer_object");
+
+	Com_Printf ("Checking for GL_ARB_vertex_buffer_object: %s.\n",
+			gl_vbo ? "Yes" : "No");
 }
 
 void

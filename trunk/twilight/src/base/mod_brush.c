@@ -187,22 +187,22 @@ static void
 Mod_LoadVertexes (lump_t *l, model_t *mod)
 {
 	dvertex_t  *in;
-	mvertex_t  *out;
+	vertex_t  *out;
 	int         i, count;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", mod->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (mod->zone, count * sizeof (*out));
+	out = Zone_Alloc (mod->zone, count * sizeof (vertex_t));
 
-	mod->brush->vertexes = out;
-	mod->brush->numvertexes = count;
+	mod->brush->numvertices = count;
+	mod->brush->vertices = out;
 
 	for (i = 0; i < count; i++, in++, out++) {
-		out->position[0] = LittleFloat (in->point[0]);
-		out->position[1] = LittleFloat (in->point[1]);
-		out->position[2] = LittleFloat (in->point[2]);
+		out->v[0] = LittleFloat (in->point[0]);
+		out->v[1] = LittleFloat (in->point[1]);
+		out->v[2] = LittleFloat (in->point[2]);
 	}
 }
 
@@ -701,9 +701,9 @@ Mod_LoadBrushModel (model_t *mod, void *buffer, int flags)
 			for (k = 0; k < surf->numedges; k++) {
 				l = bheader->surfedges[k + surf->firstedge];
 				if (l > 0)
-					vec = bheader->vertexes[bheader->edges[l].v[0]].position;
+					vec = bheader->vertices[bheader->edges[l].v[0]].v;
 				else
-					vec = bheader->vertexes[bheader->edges[-l].v[1]].position;
+					vec = bheader->vertices[bheader->edges[-l].v[1]].v;
 				if (mod->normalmins[0] > vec[0]) mod->normalmins[0] = vec[0];
 				if (mod->normalmins[1] > vec[1]) mod->normalmins[1] = vec[1];
 				if (mod->normalmins[2] > vec[2]) mod->normalmins[2] = vec[2];

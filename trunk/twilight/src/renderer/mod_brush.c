@@ -127,7 +127,7 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 		}
 
 		if (!strncmp (dmiptex->name, "sky", 3))
-			R_InitSky (tx, mtdata);
+			Sky_InitSky (tx, mtdata);
 		else
 		{
 			if (dmiptex->name[0] == '*')
@@ -365,7 +365,7 @@ CalcSurfaceExtents (msurface_t *s, model_t *mod)
 	float		mins[2], maxs[2], val;
 	int			j, e;
 	int			i;
-	mvertex_t	*v;
+	vertex_t	*v;
 	mtexinfo_t	*tex;
 	int			bmins[2], bmaxs[2];
 	brushhdr_t	*bheader = mod->brush;
@@ -378,14 +378,14 @@ CalcSurfaceExtents (msurface_t *s, model_t *mod)
 	for (i = 0; i < s->numedges; i++) {
 		e = bheader->surfedges[s->firstedge + i];
 		if (e >= 0)
-			v = &bheader->vertexes[bheader->edges[e].v[0]];
+			v = &bheader->vertices[bheader->edges[e].v[0]];
 		else
-			v = &bheader->vertexes[bheader->edges[-e].v[1]];
+			v = &bheader->vertices[bheader->edges[-e].v[1]];
 
 		for (j = 0; j < 2; j++) {
-			val = v->position[0] * tex->vecs[j][0] +
-				v->position[1] * tex->vecs[j][1] +
-				v->position[2] * tex->vecs[j][2] + tex->vecs[j][3];
+			val = v->v[0] * tex->vecs[j][0] +
+				v->v[1] * tex->vecs[j][1] +
+				v->v[2] * tex->vecs[j][2] + tex->vecs[j][3];
 			if (val < mins[j])
 				mins[j] = val;
 			if (val > maxs[j])
@@ -495,7 +495,7 @@ Mod_MakeChains
 void
 Mod_MakeChains (model_t *mod)
 {
-	Uint			 i, first, last, tidx;
+	Uint			 i, first, last, tidx, count;
 	msurface_t		*surf;
 	chain_head_t	*chain;
 	chain_item_t	*c_item;
@@ -516,6 +516,8 @@ Mod_MakeChains (model_t *mod)
 
 	first = bheader->firstmodelsurface;
 	last = bheader->nummodelsurfaces + first;
+
+	bheader->numsets = 0;
 
 	/*
 	 * First pass:
@@ -557,10 +559,13 @@ Mod_MakeChains (model_t *mod)
 		else
 			bheader->tex_chains[surf->texinfo->texture->tex_idx].n_items++;
 
+		/*
 		if (surf->flags & SURF_SUBDIVIDE)
-			BuildSubdividedGLPolyFromEdges (surf, mod);
+			CountSubdividedGLPolyFromEdges (surf, mod);
 		else
-			BuildGLPolyFromEdges (surf, mod);
+			CountGLPolyFromEdges (surf, mod);
+		*/
+		bheader->numsets += surf->numedges;
 	}
 
 	/*
@@ -606,6 +611,10 @@ Mod_MakeChains (model_t *mod)
 						sizeof(chain_item_t) * bheader->tex_chains[i].n_items);
 		}
 
+	bheader->verts = Zone_Alloc(mod->zone, sizeof(vertex_t) * bheader->numsets);
+	bheader->tcoords[0] = Zone_Alloc(mod->zone, sizeof(texcoord_t) * bheader->numsets);
+	bheader->tcoords[1] = Zone_Alloc(mod->zone, sizeof(texcoord_t) * bheader->numsets);
+
 	/*
 	 * Second pass:
 	 * Count the number of items for each lightblock chain.
@@ -613,8 +622,16 @@ Mod_MakeChains (model_t *mod)
 	 * Add the surfaces to the sky and texture chains.
 	 */
 	schain_cur = 0;
+	count = 0;
 	for (i = first, surf = &bheader->surfaces[i]; i < last; i++, surf++)
 	{
+		/*
+		if (surf->flags & SURF_SUBDIVIDE)
+			BuildSubdividedGLPolyFromEdges (surf, mod);
+		else
+		*/
+			BuildGLPolyFromEdges (surf, mod, &count);
+
 		if (surf->flags & SURF_LIGHTMAP)
 			bheader->lightblock.chains[surf->lightmap_texnum].n_items++;
 
@@ -678,6 +695,28 @@ Mod_MakeChains (model_t *mod)
 		Zone_Free(lchains_cur);
 	}
 	Zone_Free(tchains_cur);
+
+	// Vertex Buffer Objects, VERY cool stuff!
+	if (gl_vbo) {
+		qglGenBuffersARB(3, bheader->vbo_objects);
+
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, bheader->vbo_objects[VBO_VERTS]);
+		qglBufferDataARB(GL_ARRAY_BUFFER_ARB,
+				sizeof(vertex_t) * bheader->numsets, bheader->verts,
+				GL_STATIC_DRAW_ARB);
+
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, bheader->vbo_objects[VBO_TC0]);
+		qglBufferDataARB(GL_ARRAY_BUFFER_ARB,
+				sizeof(texcoord_t) * bheader->numsets, bheader->tcoords[0],
+				GL_STATIC_DRAW_ARB);
+
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, bheader->vbo_objects[VBO_TC1]);
+		qglBufferDataARB(GL_ARRAY_BUFFER_ARB,
+				sizeof(texcoord_t) * bheader->numsets, bheader->tcoords[1],
+				GL_STATIC_DRAW_ARB);
+
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	}
 }
 
 void

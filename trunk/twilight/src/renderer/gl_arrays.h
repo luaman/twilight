@@ -143,5 +143,33 @@ TWI_PostVDraw ()
 
 extern void GLArrays_Init_Cvars (void);
 extern void GLArrays_Init (void);
+extern void GLArrays_Set_Default (void);
+
+extern inline void
+GLArrays_Reset_Vertex (void)
+{
+	qglVertexPointer (3, GL_FLOAT, 0, v_array_p);
+}
+
+extern inline void
+GLArrays_Reset_Color (void)
+{
+	qglColorPointer (4, GL_UNSIGNED_BYTE, 0, cub_array_p);
+	if (gl_secondary_color)
+		qglSecondaryColorPointerEXT (4, GL_UNSIGNED_BYTE, 0, scub_array_p);
+}
+
+extern inline void
+GLArrays_Reset_TC (void)
+{
+	qglTexCoordPointer (2, GL_FLOAT, 0, tc0_array_p);
+
+	if (gl_mtex) {
+		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
+		qglTexCoordPointer (2, GL_FLOAT, 0, tc1_array_p);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+	}
+}
 
 #endif // __GL_ARRAYS_H

@@ -46,7 +46,7 @@ extern qboolean colorlights;
 
 extern cvar_t *gl_colorlights;
 
-static msurface_t *warpface;
+//static msurface_t *warpface;
 
 cvar_t *gl_subdivide_size;
 
@@ -61,7 +61,7 @@ Surf_Init_Cvars (void)
 	gl_subdivide_size =Cvar_Get("gl_subdivide_size", "128", CVAR_ARCHIVE, NULL);
 }
 
-
+#if 0
 static void
 BoundPoly (int numverts, float *verts, vec3_t mins, vec3_t maxs)
 {
@@ -81,7 +81,8 @@ BoundPoly (int numverts, float *verts, vec3_t mins, vec3_t maxs)
 }
 
 static void
-SubdividePolygon (int numverts, float *verts, memzone_t *zone)
+CountSubdividePolygon (brushhdr_t *brush, int numverts, float *verts,
+		memzone_t *zone)
 {
 	int         i, j, k;
 	vec3_t      mins, maxs;
@@ -91,7 +92,6 @@ SubdividePolygon (int numverts, float *verts, memzone_t *zone)
 	int         f, b;
 	float       dist[64];
 	float       frac;
-	glpoly_t   *poly;
 
 	if (!numverts)
 		Sys_Error ("numverts = 0!");
@@ -142,8 +142,117 @@ SubdividePolygon (int numverts, float *verts, memzone_t *zone)
 			}
 		}
 
-		SubdividePolygon (f, front[0], zone);
-		SubdividePolygon (b, back[0], zone);
+		CountSubdividePolygon (brush, f, front[0], zone);
+		CountSubdividePolygon (brush, b, back[0], zone);
+		return;
+	}
+
+	brush->numsets += numverts;
+}
+
+/*
+================
+Breaks a polygon up along axial 64 unit
+boundaries so that turbulent and sky warps
+can be done reasonably.
+================
+*/
+void
+CountSubdividedGLPolyFromEdges (msurface_t *surf, model_t *model)
+{
+	vec3_t		 verts[64];
+	int			 numverts;
+	int			 i;
+	int			 lindex;
+	float		*vec;
+	brushhdr_t	*brush = model->brush;
+	memzone_t	*zone = model->zone;
+
+	warpface = surf;
+
+	// 
+	// convert edges back to a normal polygon
+	// 
+	numverts = 0;
+	for (i = 0; i < surf->numedges; i++) {
+		lindex = brush->surfedges[surf->firstedge + i];
+
+		if (lindex > 0)
+			vec = brush->vertices[brush->edges[lindex].v[0]].v;
+		else
+			vec = brush->vertices[brush->edges[-lindex].v[1]].v;
+		VectorCopy (vec, verts[numverts]);
+		numverts++;
+	}
+
+	CountSubdividePolygon (brush, numverts, verts[0], zone);
+}
+
+static void
+SubdividePolygon (brushhdr_t *brush, Uint numverts, Uint *verts,
+		memzone_t *zone)
+{
+	int         i, j, k, v;
+	vec3_t      mins, maxs;
+	float       m;
+	vec3_t      front[64], back[64];
+	int         f, b;
+	float       dist[64];
+	float       frac;
+	glpoly_t   *poly;
+
+	if (!numverts)
+		Sys_Error ("numverts = 0!");
+	if (numverts > 60)
+		Sys_Error ("numverts = %i", numverts);
+
+	BoundPoly (numverts, verts, mins, maxs);
+	v = 0;
+
+	for (i = 0; i < 3; i++) {
+		m = (mins[i] + maxs[i]) * 0.5;
+		m = gl_subdivide_size->ivalue
+			* floor (m / gl_subdivide_size->ivalue + 0.5);
+		if (maxs[i] - m < 8)
+			continue;
+		if (m - mins[i] < 8)
+			continue;
+
+		// cut it
+		v = verts + i;
+		for (j = 0; j < numverts; j++, v += 3)
+			dist[j] = *v - m;
+
+		// wrap cases
+		dist[j] = dist[0];
+		v -= i;
+		VectorCopy (verts, v);
+
+		f = b = 0;
+		v = verts;
+		for (j = 0; j < numverts; j++, v += 3) {
+			if (dist[j] >= 0) {
+				VectorCopy (v, front[f]);
+				f++;
+			}
+			if (dist[j] <= 0) {
+				VectorCopy (v, back[b]);
+				b++;
+			}
+			if (dist[j] == 0 || dist[j + 1] == 0)
+				continue;
+			if ((dist[j] > 0) != (dist[j + 1] > 0)) {
+				// clip point
+				frac = dist[j] / (dist[j] - dist[j + 1]);
+				for (k = 0; k < 3; k++)
+					front[f][k] = back[b][k] = v[k] + frac * (v[3 + k] - v[k]);
+				f++;
+				b++;
+			}
+		}
+
+		SubdividePolygon (brush, f, front[0], zone);
+		SubdividePolygon (brush, b, back[0], zone);
 		return;
 	}
 
@@ -173,7 +282,7 @@ can be done reasonably.
 void
 BuildSubdividedGLPolyFromEdges (msurface_t *surf, model_t *model)
 {
-	vec3_t		 verts[64];
+	Uint		 verts[64];
 	int			 numverts;
 	int			 i;
 	int			 lindex;
@@ -191,14 +300,26 @@ BuildSubdividedGLPolyFromEdges (msurface_t *surf, model_t *model)
 		lindex = brush->surfedges[surf->firstedge + i];
 
 		if (lindex > 0)
-			vec = brush->vertexes[brush->edges[lindex].v[0]].position;
+			verts[numverts++] = brush->edges[lindex].v[0];
 		else
-			vec = brush->vertexes[brush->edges[-lindex].v[1]].position;
-		VectorCopy (vec, verts[numverts]);
-		numverts++;
+			verts[numverts++] = brush->edges[-lindex].v[0];
 	}
 
-	SubdividePolygon (numverts, verts[0], zone);
+	SubdividePolygon (brush, numverts, verts, zone);
+}
+#endif
+
+/*
+================
+CountGLPolyFromEdges
+================
+ */
+void
+CountGLPolyFromEdges (msurface_t *surf, model_t *model)
+{
+	brushhdr_t	*brush = model->brush;
+
+	brush->numsets += surf->numedges;
 }
 
 /*
@@ -207,9 +328,9 @@ BuildGLPolyFromEdges
 ================
  */
 void
-BuildGLPolyFromEdges (msurface_t *surf, model_t *model)
+BuildGLPolyFromEdges (msurface_t *surf, model_t *model, int *count)
 {
-	int			 i, lindex, lnumverts;
+	int			 i, vert, lindex, lnumverts;
 	medge_t		*pedges, *r_pedge;
 	int			 vertpage;
 	float		*vec;
@@ -228,25 +349,24 @@ BuildGLPolyFromEdges (msurface_t *surf, model_t *model)
 	 * draw texture
 	 */
 	poly = Zone_Alloc (zone, sizeof (glpoly_t)); 
-	poly->tc = Zone_Alloc (zone, lnumverts * sizeof (texcoord_t));
-	poly->ltc = Zone_Alloc (zone, lnumverts * sizeof (texcoord_t));
-	poly->v = Zone_Alloc (zone, lnumverts * sizeof (vertex_t));
 
 	poly->next = surf->polys;
 	surf->polys = poly;
 	poly->numverts = lnumverts;
+	poly->start = *count;
 
-	for (i = 0; i < lnumverts; i++) {
+	for (i = 0; i < lnumverts; i++, (*count)++) {
 		lindex = brush->surfedges[surf->firstedge + i];
 
 		if (lindex > 0) {
 			r_pedge = &pedges[lindex];
-			vec = brush->vertexes[r_pedge->v[0]].position;
+			vert = r_pedge->v[0];
 		} else {
 			r_pedge = &pedges[-lindex];
-			vec = brush->vertexes[r_pedge->v[1]].position;
+			vert = r_pedge->v[1];
 		}
-		VectorCopy (vec, poly->v[i].v);
+		vec = brush->vertices[vert].v;
+		VectorCopy (vec, brush->verts[*count].v);
 
 		s = DotProduct (vec, texinfo->vecs[0]) + texinfo->vecs[0][3];
 		s /= texinfo->texture->width;
@@ -254,8 +374,8 @@ BuildGLPolyFromEdges (msurface_t *surf, model_t *model)
 		t = DotProduct (vec, texinfo->vecs[1]) + texinfo->vecs[1][3];
 		t /= texinfo->texture->height;
 
-		poly->tc[i].v[0] = s;
-		poly->tc[i].v[1] = t;
+		B_TC(brush, 0, *count, 0) = s;
+		B_TC(brush, 0, *count, 1) = t;
 
 		/*
 		 * lightmap texture coordinates
@@ -271,8 +391,8 @@ BuildGLPolyFromEdges (msurface_t *surf, model_t *model)
 		t += surf->light_t << 4;
 		t += 8;
 		t /= LIGHTBLOCK_HEIGHT << 4;		// texinfo->texture->height;
-		poly->ltc[i].v[0] = s;
-		poly->ltc[i].v[1] = t;
+		B_TC(brush, 1, *count, 0) = s;
+		B_TC(brush, 1, *count, 1) = t;
 	}
 }
 

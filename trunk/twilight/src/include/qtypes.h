@@ -63,6 +63,14 @@ typedef float			GLclampf;		/* single precision float in [0,1] */
 typedef double			GLdouble;		/* double precision float */
 typedef double			GLclampd;		/* double precision float in [0,1] */
 
+/*
+ * FIXME: These are from the GL_ARB_vertex_buffer_object extension.
+ * I am 99% sure that nVidia has these types completely WRONG.
+ * But this is what they have for x86, at least at the moment.
+ */
+typedef int GLintptrARB;
+typedef int GLsizeiptrARB;
+
 #endif /* DYNGL_TYPES */
 
 typedef GLfloat vec_t;

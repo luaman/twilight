@@ -30,14 +30,19 @@
 #include "qtypes.h"
 #include "model.h"
 
-extern void R_Draw_Old_Sky_Chain (chain_head_t *chain, vec3_t origin);
-extern void R_Draw_Fast_Sky_Chain (chain_head_t *chain, vec3_t origin);
-extern void R_Draw_Depth_Sky_Chain (chain_head_t *chain, vec3_t origin);
-extern void R_DrawSkyBox (void);
-extern void R_Init_Sky (void);
-extern void R_Init_Sky_Cvars (void);
-extern void R_InitSky (texture_t *unused, Uint8 *pixels);
+typedef enum {
+	SKY_SPHERE, SKY_BOX, SKY_FAST,
+} sky_type_t;
 
-extern qboolean draw_skybox;
+extern sky_type_t	sky_type;
+
+void Sky_Init_Cvars (void);
+void Sky_Init (void);
+void Sky_InitSky (texture_t *unused, Uint8 *pixels);
+void Sky_Box_Draw (void);
+void Sky_Changed (cvar_t *unused);
+void Sky_Sphere_Draw (void);
+void Sky_Depth_Draw_Chain (model_t *mod, chain_head_t *chain);
+void Sky_Fast_Draw_Chain (model_t *mod, chain_head_t *chain);
 
 #endif // __R_SKY_H
