@@ -23,7 +23,7 @@ twilight_qw_SOURCES= \
 	cvar.c gl_funcs.c \
 	gl_draw.c gl_mesh.c gl_model.c gl_model.h modelgen.h spritegn.h \
 	gl_ngraph.c gl_refrag.c gl_rlight.c gl_rmain.c anorms.h anorm_dots.h \
-	gl_rmisc.c gl_rsurf.c gl_screen.c screen.h gl_warp.c gl_warp_sin.h \
+	gl_rmisc.c gl_rsurf.c gl_screen.c screen.h gl_warp.c \
 	glquake.h gl_proc.c hash.c hash.h \
 	keys.c mathlib.c mdfour.c mdfour.h menu.c menu.h \
 	net.h net_chan.c net_udp.c strlib.c \
@@ -34,7 +34,7 @@ twilight_qw_SOURCES= \
 	sys.h vid_sdl.c vid.h \
 	view.c view.h wad.c wad.h zone.c zone.h \
 	buildnum.c \
-	quakedef.h bothdefs.h bspfile.h draw.h input.h keys.h protocol.h \
+	bothdefs.h bspfile.h draw.h input.h keys.h protocol.h \
 	render.h $(twilight_nq_sys)
 
 EXTRA_twilight_qw_SOURCES= \

@@ -8,12 +8,11 @@ These things should be done before first public release:
     - Releases page
     - Credits page
     - CVS walktrhoughs
-    - Anything else we can get done by release date
   - Packaging scripts
     - Debian
     - RPM
     ? Something for win32?
-  - Hardware gamma/brightness support [EvilTypeGuy]
+  - Hardware gamma/brightness support [Mercury]
 
 
 Would be nice but is not strictly needed, in importance order:
@@ -23,14 +22,10 @@ Would be nice but is not strictly needed, in importance order:
   - Test -dedicated to make sure there are no nasty surprises [LordHavoc]
   - sv_model.c for NQ [LordHavoc]
   - Build a seperate dedicated server in NQ [LordHavoc]
-  - Nightly CVS snapshots [Knghtbrd]
   - Prettiness features all around
   - Console font [Knghtbrd]
   - Menu overhaul
   - Knghtbrd's server console
-  - Make water warping optional, and the intensity of it
-    controllable via cvars, and menu, most likely off
-    by default for QW, and on by default for NQ
 
 Stuff that can wait:
 
