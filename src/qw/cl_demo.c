@@ -521,16 +521,16 @@ CL_Record_f (void)
 		MSG_WriteByte (&buf, svc_spawnstatic);
 
 		for (j = 1; j < MAX_MODELS; j++)
-			if (ent->model == cl.model_precache[j])
+			if (ent->common.model == cl.model_precache[j])
 				break;
 		if (j == MAX_MODELS)
 			MSG_WriteByte (&buf, 0);
 		else
 			MSG_WriteByte (&buf, j);
 
-		MSG_WriteByte (&buf, ent->frame[0]);
+		MSG_WriteByte (&buf, ent->common.frame[0]);
 		MSG_WriteByte (&buf, 0);
-		MSG_WriteByte (&buf, ent->skinnum);
+		MSG_WriteByte (&buf, ent->common.skinnum);
 		for (j = 0; j < 3; j++) {
 			MSG_WriteCoord (&buf, ent->msg_origins[0][j]);
 			MSG_WriteAngle (&buf, ent->msg_angles[0][j]);

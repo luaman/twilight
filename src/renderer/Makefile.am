@@ -18,13 +18,15 @@ lib_LIBRARIES=libtwilight_renderer.a
 
 libtwilight_renderer_a_SOURCES= \
 	dyngl.c dyngl.h dglfuncs.h \
+	gl_alias.c gl_alias.h \
 	gl_arrays.c gl_arrays.h gl_info.c gl_info.h \
 	gl_textures.c gl_textures.h \
 	liquid.c liquid.h \
 	mod_alias.c mod_alias.h \
 	mod_brush.c mod_brush.h \
 	mod_sprite.c mod_sprite.h \
-	noise.c noise_textures.c \
+	noise.c gen_textures.c \
+	r_part.c r_part.h \
 	sky.c sky.h surface.c surface.h \
 	light.h vis.c vis.h pointers.c pointers.h
 

@@ -105,10 +105,10 @@ Team_ParseSay (const char *s)
 				case 'l':
 location:
 					bracket = 0;
-					location = loc_search (cl_entities[cl.viewentity].origin);
+					location = loc_search (cl_entities[cl.viewentity].common.origin);
 					if (location) {
 						recorded_location = true;
-						VectorCopy (cl_entities[cl.viewentity].origin, last_recorded_location);
+						VectorCopy (cl_entities[cl.viewentity].common.origin, last_recorded_location);
 						t1 = location->name;
 					} else
 						snprintf (t2, sizeof (t2), "Unknown!\n");
@@ -208,7 +208,7 @@ void
 Team_Dead (void)
 {
 	died = true;
-	VectorCopy (cl_entities[cl.viewentity].origin, death_location);
+	VectorCopy (cl_entities[cl.viewentity].common.origin, death_location);
 }
 
 void
@@ -255,14 +255,14 @@ Team_loc (void)
 	
 	if (!strcasecmp (Cmd_Argv (1), "add")) {
 		if (Cmd_Argc () >= 3)
-			loc_new (cl_entities[cl.viewentity].origin, desc);
+			loc_new (cl_entities[cl.viewentity].common.origin, desc);
 		else
 			Com_Printf ("loc add <description> :marks the current location with the description and records the information into a loc file.\n");
 	}
 
 	if (!strcasecmp (Cmd_Argv (1), "rename")) {
 		if (Cmd_Argc () >= 3) {
-			loc = loc_search (cl_entities[cl.viewentity].origin);
+			loc = loc_search (cl_entities[cl.viewentity].common.origin);
 			if (loc)
 				strlcpy (loc->name, desc, sizeof(loc->name));
 		} else
@@ -271,7 +271,7 @@ Team_loc (void)
 	
 	if (!strcasecmp (Cmd_Argv (1), "delete")) {
 		if (Cmd_Argc () == 2) {
-			loc = loc_search (cl_entities[cl.viewentity].origin);
+			loc = loc_search (cl_entities[cl.viewentity].common.origin);
 			if (loc)
 				loc_delete (loc);
 		} else
@@ -280,9 +280,9 @@ Team_loc (void)
 	
 	if (!strcasecmp (Cmd_Argv (1), "move")) {
 		if (Cmd_Argc () == 2) {
-			loc = loc_search (cl_entities[cl.viewentity].origin);
+			loc = loc_search (cl_entities[cl.viewentity].common.origin);
 			if (loc)
-				VectorCopy(cl_entities[cl.viewentity].origin, loc->where);
+				VectorCopy(cl_entities[cl.viewentity].common.origin, loc->where);
 		} else
 			Com_Printf ("loc move :moves the nearest location marker to your current location\n");
 	}

@@ -28,30 +28,36 @@ static const char rcsid[] =
 #include "twiconfig.h"
 
 #include <stdlib.h>	/* for rand() and calloc() */
+#include <string.h> /* for memcpy() */
 
 #include "quakedef.h"
 #include "collision.h"
 #include "common.h"
-#include "client.h"
 #include "cvar.h"
 #include "mathlib.h"
-#include "render.h"
 #include "r_explosion.h"
+#include "gen_textures.h"
+#include "gl_arrays.h"
+#include "gl_info.h"
+#include "r_part.h"
+
+extern void R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1, int cr2, int cg2, int cb2, int ca2);
+
+static inline void
+VecRBetween (vec3_t c1, vec3_t c2, vec3_t out)
+{
+	float f = lhrandom(0, 1);
+	VectorSubtract(c2, c1, out);
+	VectorMA(c1, f, out, out);
+}
 
 memzone_t *part_zone;
 
-extern int part_tex_dot;
-extern int part_tex_spark;
-extern int part_tex_smoke;
-extern int part_tex_smoke_beam;
-extern int part_tex_smoke_ring;
-
 static cvar_t *r_particles, *r_particle_physics;
-static cvar_t *r_base_particles, *r_beam_particles;
+static cvar_t *r_base_particles, *r_xbeam_particles;
 
 static int ramp1[8] = { 0x6f, 0x6d, 0x6b, 0x69, 0x67, 0x65, 0x63, 0x61 };
 static int ramp2[8] = { 0x6f, 0x6e, 0x6d, 0x6c, 0x6b, 0x6a, 0x68, 0x66 };
-static int ramp3[8] = { 0x6d, 0x6b, 6, 5, 4, 3 };
 
 typedef enum
 {
@@ -63,85 +69,53 @@ typedef enum
 	pt_blob, pt_blob2,
 	pt_torch, pt_torch2,
 	pt_teleport1, pt_teleport2,
-	pt_rtrail, pt_railtrail
+	pt_rtrail, pt_rtrail_ring, pt_railtrail, pt_lightning
 }
 ptype_t;
 
 typedef struct
 {
-	vec3_t		org, up, right;
-	vec4_t		color;
-	float		scale;
-}
-smokering_t;
-
-static smokering_t *smokerings;
-static int num_smokerings, max_smokerings;
-
-inline qboolean
-new_smokering (vec3_t org, vec3_t up, vec3_t right, float scale, vec4_t color)
-{
-	smokering_t		*ring;
-
-	if (num_smokerings >= max_smokerings)
-		return false;
-
-	ring = &smokerings[num_smokerings++];
-
-	VectorCopy (org, ring->org);
-	VectorCopy (up, ring->up);
-	VectorCopy (right, ring->right);
-	VectorCopy4 (color, ring->color);
-	ring->scale = scale;
-
-	return true;
-}
-
-typedef struct
-{
 	vec3_t		org1;
 	vec3_t		org2;
-	vec3_t		org_center;
-
 	vec3_t		normal;
-	vec4_t		color1;
-	vec4_t		color2;
-	float		scale;
-	float		ramp;
+	float		len;
+
+	vec4_t		color;
+	float		thickness;
+	float		scroll;
+	float		repeat_scale;
+
 	float		die;
-	float		rstep;
 	ptype_t		type;
 }
-beam_particle_t;
+xbeam_particle_t;
 
-static beam_particle_t *beam_particles, **free_beam_particles;
-static int num_beam_particles, max_beam_particles;
+static xbeam_particle_t *xbeam_particles, **free_xbeam_particles;
+static int num_xbeam_particles, max_xbeam_particles;
 
 inline qboolean
-new_beam_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color1,
-		vec4_t color2, float ramp, float rstep, float scale, float die)
+new_xbeam_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
+		float thickness, float scroll, float repeat_scale, float die)
 {
-	beam_particle_t		*p;
-	float				length;
+	xbeam_particle_t	*p;
 
-	if (num_beam_particles >= max_beam_particles)
+	if (num_xbeam_particles >= max_xbeam_particles)
 		// Out of particles
 		return false;
 
-	p = &beam_particles[num_beam_particles++];
+	p = &xbeam_particles[num_xbeam_particles++];
 	p->type = type;
 	VectorCopy (org1, p->org1);
 	VectorCopy (org2, p->org2);
-	VectorCopy4 (color1, p->color1);
-	VectorCopy4 (color2, p->color2);
-	p->ramp = ramp;
-	p->rstep = rstep;
-	p->die = cl.time + die;
-	p->scale = scale;
+	VectorCopy4 (color, p->color);
+	p->die = r_time + die;
+	p->thickness = thickness;
+	p->scroll = scroll;
+	p->repeat_scale = repeat_scale;
 
-	VectorSubtract (org1, org2, p->normal);
-	length = VectorNormalize (p->normal);
-	VectorMA (org1, length/2, p->normal, p->org_center);
+	// Get the normal and length of the xbeam. (FIXME: Put in the struct!)
+	VectorSubtract (p->org2, p->org1, p->normal);
+	p->len = VectorNormalize(p->normal);
 
 	return true;
 }
@@ -149,9 +123,13 @@ new_beam_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color1,
 typedef struct
 {
 	ptype_t		type;
+	int			texnum;
+
 	vec3_t		org;
 	vec3_t		vel;
 	vec4_t		color;
+
+	float		alphadie;
 
 	// how much bounce-back from a surface the particle hits (0 = no physics,
 	// 1 = stop and slide, 2 = keep bouncing forever, 1.5 is typical)
@@ -160,14 +138,16 @@ typedef struct
 	float		die;
 	float		ramp;
 	float		scale;
-	qboolean	 draw;
+	float		scale_change;
+	float		gravity;
+	qboolean	draw;
 }
 base_particle_t;
 
 static base_particle_t *base_particles, **free_base_particles;
 static int num_base_particles, max_base_particles;
 
-inline qboolean
+inline base_particle_t *
 new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 		float ramp, float scale, float die, float bounce)
 {
@@ -175,30 +155,33 @@ new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 
 	if (num_base_particles >= max_base_particles)
 		// Out of particles
-		return false;
+		return NULL;
 
 	p = &base_particles[num_base_particles++];
 	p->type = type;
+	p->texnum = GTF_dot;
 	VectorCopy (org, p->org);
 	VectorCopy (vel, p->vel);
 	VectorCopy4 (color, p->color);
 	p->ramp = ramp;
-	p->die = cl.time + die;
+	p->die = r_time + die;
+	p->alphadie = 0;
 	p->scale = scale;
+	p->scale_change = 0;
+	p->gravity = 1;
 	p->bounce = bounce;
 
-	return true;
+	return p;
 }
 	
-inline qboolean
+inline base_particle_t *
 new_base_particle_oc (ptype_t type, vec3_t org, vec3_t vel, int color,
 		float ramp, float scale, float die, float bounce)
 {
 	vec4_t		vcolor;
 
 	VectorCopy4 (d_8tofloattable[color], vcolor);	
-	return new_base_particle (type, org, vel, vcolor, ramp, scale, die,
-			bounce);
+	return new_base_particle (type, org, vel, vcolor, ramp, scale, die, bounce);
 }
 
 static void
@@ -216,26 +199,17 @@ Part_AllocArrays ()
 		base_particles = NULL;
 		free_base_particles = NULL;
 	}
-	if (max_beam_particles)
+	if (max_xbeam_particles)
 	{
-		beam_particles = (beam_particle_t *) Zone_Alloc (part_zone, 
-				max_beam_particles * sizeof (beam_particle_t));
-		free_beam_particles = (beam_particle_t **) Zone_Alloc (part_zone,
-				max_beam_particles * sizeof (beam_particle_t *));
+		xbeam_particles = (xbeam_particle_t *) Zone_Alloc (part_zone, 
+				max_xbeam_particles * sizeof (xbeam_particle_t));
+		free_xbeam_particles = (xbeam_particle_t **) Zone_Alloc (part_zone,
+				max_xbeam_particles * sizeof (xbeam_particle_t *));
 	}
 	else
 	{
-		beam_particles = NULL;
-		free_beam_particles = NULL;
-	}
-	if (max_smokerings)
-	{
-		smokerings = (smokering_t *) Zone_Alloc (part_zone,
-				max_smokerings * sizeof (smokering_t));
-	}
-	else
-	{
-		smokerings = NULL;
+		xbeam_particles = NULL;
+		free_xbeam_particles = NULL;
 	}
 }
 
@@ -247,13 +221,11 @@ Part_FreeArrays ()
 		Zone_Free (base_particles);
 		Zone_Free (free_base_particles);
 	}
-	if (beam_particles)
+	if (xbeam_particles)
 	{
-		Zone_Free (beam_particles);
-		Zone_Free (free_beam_particles);
+		Zone_Free (xbeam_particles);
+		Zone_Free (free_xbeam_particles);
 	}
-	if (smokerings)
-		Zone_Free (smokerings);
 }
 
 static void
@@ -261,19 +233,18 @@ Part_CB (cvar_t *cvar)
 {
 	cvar = cvar;
 
-	if (!r_particles || !r_base_particles || !r_beam_particles)
+	if (!r_particles || !r_base_particles || !r_xbeam_particles)
 		return;
 
 	if (!r_particles->ivalue)
 	{
 		max_base_particles = 0;
-		max_beam_particles = max_smokerings = 0;
+		max_xbeam_particles = 0;
 	}
 	else
 	{
 		max_base_particles = r_base_particles->ivalue;
-		max_beam_particles = r_beam_particles->ivalue;
-		max_smokerings = max_beam_particles;
+		max_xbeam_particles = r_xbeam_particles->ivalue;
 	}
 
 	Part_FreeArrays ();
@@ -291,8 +262,8 @@ R_InitParticles (void)
 	part_zone = Zone_AllocZone ("Particle zone.");
 
 	r_particles = Cvar_Get ("r_particles", "1", CVAR_NONE, &Part_CB);
-	r_base_particles = Cvar_Get ("r_base_particles", "2048", CVAR_NONE, &Part_CB);
-	r_beam_particles = Cvar_Get ("r_beam_particles", "2048", CVAR_NONE, &Part_CB);
+	r_base_particles = Cvar_Get ("r_base_particles", "32768", CVAR_NONE, &Part_CB);
+	r_xbeam_particles = Cvar_Get ("r_xbeam_particles", "32", CVAR_NONE, &Part_CB);
 
 	r_particle_physics = Cvar_Get ("r_particle_physics", "0", CVAR_NONE, &Part_CB);
 
@@ -311,7 +282,7 @@ vec3_t avelocities[NUMVERTEXNORMALS];
 float beamlength = 16;
 
 void
-R_EntityParticles (entity_t *ent)
+R_EntityParticles (entity_common_t *ent)
 {
 	int			i;
 	float		angle, dist, sr, sp, sy, cr, cp, cy;
@@ -324,13 +295,13 @@ R_EntityParticles (entity_t *ent)
 	dist = 64;
 	for (i = 0; i < NUMVERTEXNORMALS; i++)
 	{
-		angle = cl.time * avelocities[i][0];
+		angle = r_time * avelocities[i][0];
 		sy = Q_sin (angle);
 		cy = Q_cos (angle);
-		angle = cl.time * avelocities[i][1];
+		angle = r_time * avelocities[i][1];
 		sp = Q_sin (angle);
 		cp = Q_cos (angle);
-		angle = cl.time * avelocities[i][2];
+		angle = r_time * avelocities[i][2];
 		sr = Q_sin (angle);
 		cr = Q_cos (angle);
 
@@ -356,7 +327,7 @@ void
 R_ClearParticles (void)
 {
 	num_base_particles = 0;
-	num_beam_particles = 0;
+	num_xbeam_particles = 0;
 }
 
 void
@@ -367,6 +338,7 @@ R_ReadPointFile_f (void)
 	vec3_t			org;
 	int				r, c;
 	char			name[MAX_OSPATH];
+	base_particle_t	*p;
 
 	snprintf (name, sizeof (name), "maps/%s.pts", cl_mapname->svalue);
 
@@ -386,8 +358,11 @@ R_ReadPointFile_f (void)
 			break;
 
 		c++;
-		new_base_particle_oc (pt_static, org, r_origin, (-c) & 15, 0, -1,
+		p = new_base_particle_oc (pt_static, org, r_origin, (-c) & 15, 0, -1,
 			99999, 0);
+		if (!p)
+			return;
+		p->gravity = 0;
 	}
 
 	fclose (f);
@@ -493,6 +468,7 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 	int			i, j, pcolor;
 	float		pdie;
 	vec3_t		porg, pvel;
+	base_particle_t *p;
 
 	if (count == 1024)
 	{
@@ -510,7 +486,10 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 			porg[j] = org[j] + ((rand () & 15) - 8);
 			pvel[j] = dir[j] * 15;	// + (rand()%300)-150;
 		}
-		new_base_particle_oc (pt_slowgrav, porg, pvel, pcolor, 0, -1, pdie, 0);
+		p = new_base_particle_oc (pt_grav, porg, pvel, pcolor, 0, 1, pdie, 0);
+		if (!p)
+			return;
+		p->alphadie = 2;
 	}
 }
 
@@ -546,8 +525,7 @@ R_LavaSplash (vec3_t org)
 			VectorNormalizeFast (dir);
 			vel = 50 + (rand () & 63);
 			VectorScale (dir, vel, pvel);
-			new_base_particle_oc (pt_slowgrav, porg, pvel, pcolor, 0, -1,
-				pdie, 0);
+			new_base_particle_oc (pt_grav, porg, pvel, pcolor, 0, -1, pdie, 0);
 		}
 	}
 }
@@ -559,10 +537,11 @@ R_Torch
 ==========
 */
 void 
-R_Torch (entity_t *ent, qboolean torch2)
+R_Torch (entity_common_t *ent, qboolean torch2)
 {
 	vec3_t	porg, pvel;
 	vec4_t	color;
+	base_particle_t	*p;
 
 	if (!r_particles->ivalue)
 		return;
@@ -577,13 +556,24 @@ R_Torch (entity_t *ent, qboolean torch2)
 		// used for large torches (eg, start map near spawn)
 		porg[2] = ent->origin[2] - 2;
 		VectorSet (pvel, (rand() & 7) - 4, (rand() & 7) - 4, 0);
-		new_base_particle (pt_torch2, porg, pvel, color, rand () & 3,
+		p = new_base_particle (pt_torch2, porg, pvel, color, rand () & 3,
 			ent->frame[0] ? 30 : 10, 5, 0);
+		if (!p)
+			return;
+		p->alphadie = 0.4;
+		p->scale_change = -3;
+		p->gravity = -2.5;
 	}
-	else
+	else {
 		// wall torches
-		new_base_particle (pt_torch, porg, pvel, color, rand () & 3,
+		p = new_base_particle (pt_torch, porg, pvel, color, rand () & 3,
 			10, 5, 0);
+		if (!p)
+			return;
+		p->alphadie = 0.4;
+		p->scale_change = -1.5;
+		p->gravity = -2.0;
+	}
 }
 
 void
@@ -592,6 +582,7 @@ R_RailTrail (vec3_t start, vec3_t end)
 	vec3_t		vec, org, vel, right;
 	vec4_t		color;
 	float		sr, sp, sy, cr, cp, cy, len, roll = 0.0f;
+	base_particle_t	*p;
 
 	VectorSubtract (end, start, vec);
 	Vector2Angles (vec, org);
@@ -611,14 +602,22 @@ R_RailTrail (vec3_t start, vec3_t end)
 	while (len > 0)
 	{
 		VectorCopy (d_8tofloattable[(rand() & 3) + 225], color); color[3] = 0.5;
-		new_base_particle (pt_railtrail, start, vec3_origin, color,
+		p = new_base_particle (pt_railtrail, start, vec3_origin, color,
 			0, 2.5, 1.0, 0);
+		if (!p)
+			return;
+		p->alphadie = 0.5;
+		p->gravity = 0;
 
 		VectorMA (start, 4, right, org);
 		VectorScale (right, 8, vel);
 		VectorCopy (d_8tofloattable[(rand() & 7) + 206], color); color[3] = 0.5;
-		new_base_particle (pt_railtrail, org, vel, color,
+		p = new_base_particle (pt_railtrail, org, vel, color,
 				0, 5.0, 1.0, 0);
+		if (!p)
+			return;
+		p->alphadie = 0.5;
+		p->gravity = 0;
 
 		roll += 7.5 * (M_PI / 180.0);
 
@@ -637,49 +636,109 @@ R_RailTrail (vec3_t start, vec3_t end)
 }
 
 void
-R_RocketTrail (vec3_t start, vec3_t end)
+R_Lightning (vec3_t start, vec3_t end, float die)
 {
 	vec4_t	color;
+	float	rs = 1.0f/1024.0f;
 
 	if (!VectorCompare (start, end))
 	{
-		VectorSet4 (color, 0.5, 0.2, 0.2, 0.5);
-		new_beam_particle (pt_rtrail, start, end, color, color, 0, 8, 10, 15);
+		VectorSet4 (color, 1, 1, 1, 1);
+		new_xbeam_particle(pt_lightning,start,end,color,8.0,5.0,rs,die);
 	}
 }
 
 void
-R_ParticleTrail (vec3_t start, vec3_t end, int type)
+R_ParticleTrail (entity_common_t *ent)
 {
-	vec3_t		vec, porg, pvel;
-	float		len, pdie, pramp;
-	int			j, lsub, pcolor;
+	vec3_t		vec, pvel, start, end, c1, c2;
+	float		len;
+	int			j, lsub, pcolor, dec, type;
 	static int	tracercount;
-	ptype_t		ptype;
+	base_particle_t *p;
+
+	if (!ent->trail_times++) {
+		VectorCopy(ent->origin, ent->trail_old_org);
+		return;
+	}
+
+	VectorCopy (ent->trail_old_org, start);
+	VectorCopy (ent->origin, end);
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
+	dec = -ent->trail_len;
+	ent->trail_len += len;
+	if (ent->trail_len < 0.01f)
+		return;
+	ent->trail_len = 0;
+	VectorCopy (end, ent->trail_old_org);
 
-	while (len > 0)
+	type = ent->model->flags & ~EF_ROTATE;
+
+	// Move forward to reach first puff location.
+	VectorMA (start, dec, vec, start);
+	len -= dec;
+		
+	while (len >= 0)
 	{
-		lsub = 3;
-
-		pdie = 2;
-		VectorClear(porg);
-		VectorClear(pvel);
-		pramp = 0;
 		pcolor = 0;
-		ptype = 0;
+		lsub = 3;
+		VectorClear(pvel);
+
+		p = new_base_particle_oc(pt_static, start, pvel, 0, 0, -1, 2, 0);
+		if (!p)
+			return;
 
 		switch (type)
 		{
-			case EF_GRENADE:
-				// smoke
-				pramp = (rand () & 3) + 2;
-				pcolor = ramp3[(int) pramp];
-				ptype = pt_fire;
-				for (j = 0; j < 3; j++)
-					porg[j] = start[j] + ((rand () % 6) - 3);
+			case EF_ROCKET:
+				dec = 3;
+				pcolor = 0;
+				p->type = pt_static;
+				p->vel[0] = lhrandom(-5, 5);
+				p->vel[1] = lhrandom(-5, 5);
+				p->vel[2] = lhrandom(-5, 5);
+				p->scale = dec;
+				p->die = r_time + 9999;
+				VectorSet(c1, 0.188, 0.188, 0.188);
+				VectorSet(c2, 0.376, 0.376, 0.376);
+				VecRBetween(c1, c2, p->color);
+				p->color[3] = 0.245;
+				p->alphadie = 0.2696;
+				p->scale_change = 7;
+
+				p = new_base_particle_oc(pt_static, start,pvel, 0, 0, -1, 2, 0);
+				if (!p)
+					return;
+				p->type = pt_static;
+				p->vel[0] = lhrandom(-5, 5);
+				p->vel[1] = lhrandom(-5, 5);
+				p->vel[2] = lhrandom(-5, 5);
+				p->scale = dec;
+				p->die = r_time + 9999;
+				VectorSet(c1, 0.502, 0.063, 0.063);
+				VectorSet(c2, 1.000, 0.627, 0.125);
+				VecRBetween(c1, c2, p->color);
+				p->color[3] = 0.565;
+				p->alphadie = 3.0196;
+
+				break;
+			case EF_GRENADE: // smoke
+				dec = 3;
+				pcolor = 0;
+				p->type = pt_static;
+				p->vel[0] = lhrandom(-5, 5);
+				p->vel[1] = lhrandom(-5, 5);
+				p->vel[2] = lhrandom(-5, 5);
+				p->scale = dec;
+				p->die = r_time + 9999;
+				VectorSet(c1, 0.188, 0.188, 0.188);
+				VectorSet(c2, 0.376, 0.376, 0.376);
+				VecRBetween(c1, c2, p->color);
+				p->color[3] = 0.196;
+				p->scale_change = 7;
+				p->alphadie = 0.216;
 				break;
 
 			case EF_ZOMGIB:
@@ -687,18 +746,19 @@ R_ParticleTrail (vec3_t start, vec3_t end, int type)
 				lsub += 3;
 			case EF_GIB:
 				// blood
-				ptype = pt_grav;
+				p->type = pt_grav;
 				pcolor = 0x40 + (rand () & 3);
 				for (j = 0; j < 3; j++)
-					porg[j] = start[j] + ((rand () % 6) - 3);
+					p->org[j] = start[j] + ((rand () % 6) - 3);
 				R_Stain (start, 32, 64, 32, 32, 32, 192, 64, 64, 32);
 				break;
 
 			case EF_TRACER:
 			case EF_TRACER2:
 				// tracer
-				pdie = 0.5;
-				ptype = pt_static;
+				p->die = r_time + 0.5;
+				p->type = pt_static;
+				p->gravity = 0;
 				if (type == EF_TRACER)
 					pcolor = 52 + ((tracercount & 4) << 1);
 				else
@@ -706,30 +766,31 @@ R_ParticleTrail (vec3_t start, vec3_t end, int type)
 
 				tracercount++;
 
-				VectorCopy (start, porg);
+				VectorCopy (start, p->org);
 				if (tracercount & 1)
 				{
-					pvel[0] = 30 * vec[1];
-					pvel[1] = 30 * -vec[0];
+					p->vel[0] = 30 * vec[1];
+					p->vel[1] = 30 * -vec[0];
 				}
 				else
 				{
-					pvel[0] = 30 * -vec[1];
-					pvel[1] = 30 * vec[0];
+					p->vel[0] = 30 * -vec[1];
+					p->vel[1] = 30 * vec[0];
 				}
 				break;
 
 			case EF_TRACER3:
 				// voor trail
 				pcolor = 9 * 16 + 8 + (rand () & 3);
-				ptype = pt_static;
-				pdie = 0.3;
+				p->type = pt_static;
+				p->gravity = 0;
+				p->die = r_time + 0.3;
 				for (j = 0; j < 3; j++)
-					porg[j] = start[j] + ((rand () & 15) - 8);
+					p->org[j] = start[j] + ((rand () & 15) - 8);
 				break;
 		}
-
-		new_base_particle_oc (ptype, porg, pvel, pcolor, pramp, -1, pdie, 0);
+		if (pcolor)
+			VectorCopy4 (d_8tofloattable[pcolor], p->color);	
 
 		VectorMA (start, lsub, vec, start);
 		len -= lsub;
@@ -749,17 +810,13 @@ R_Move_Base_Particles (void)
 #endif
 	base_particle_t		*p;
 	int					i, j, k, activeparticles, maxparticle;
-	float				grav, dvel, frametime;
-	vec3_t				v, oldorg;
+	float				grav, dvel;
 
 	if (!max_base_particles)
 		return;
 
-	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
-
-	frametime = cl.time - cl.oldtime;
-	grav = frametime * 800 * 0.05;
-	dvel = 4 * frametime;
+	grav = r_frametime * 800 * 0.05;
+	dvel = 4 * r_frametime;
 
 	activeparticles = 0;
 	maxparticle = -1;
@@ -767,7 +824,7 @@ R_Move_Base_Particles (void)
 
 	for (k = 0, p = base_particles; k < num_base_particles; k++, p++)
 	{
-		if (p->die <= cl.time)
+		if (p->die <= r_time)
 		{
 			free_base_particles[j++] = p;
 			continue;
@@ -778,6 +835,7 @@ R_Move_Base_Particles (void)
 
 		p->draw = true;
 
+#if 0
 		if (r_particle_physics->ivalue)
 		{
 #ifdef MOD_POINTINLEAF
@@ -791,8 +849,10 @@ R_Move_Base_Particles (void)
 
 			VectorCopy(p->org, oldorg);
 		}
+#endif
 
-		VectorMA (p->org, frametime, p->vel, p->org);
+		VectorMA (p->org, r_frametime, p->vel, p->org);
+#if 0
 		if (p->bounce && r_particle_physics->ivalue)
 		{
 			vec3_t normal;
@@ -814,97 +874,65 @@ R_Move_Base_Particles (void)
 				}
 			}
 		}
+#endif
 
 		switch (p->type)
 		{
-			case pt_static:
-				break;
 			case pt_fire:
-				p->ramp += frametime * 5;
+				p->ramp += r_frametime * 5;
 				if (p->ramp >= 6)
 					p->die = -1;
-				else
-					p->color[3] -= frametime;
-				p->vel[2] += grav;
 				break;
 
 			case pt_explode:
-				p->ramp += frametime * 10;
+				p->ramp += r_frametime * 10;
 				if (p->ramp >= 8)
 					p->die = -1;
 				else
-					VectorCopy (d_8tofloattable[ramp1[(int) p->ramp]],
-							p->color);
+					VectorCopy(d_8tofloattable[ramp1[(int) p->ramp]], p->color);
 				for (i = 0; i < 3; i++)
 					p->vel[i] += p->vel[i] * dvel;
-				p->vel[2] -= grav;
 				break;
 
 			case pt_explode2:
-				p->ramp += frametime * 15;
+				p->ramp += r_frametime * 15;
 				if (p->ramp >= 8)
 					p->die = -1;
 				else
-					VectorCopy (d_8tofloattable[ramp2[(int) p->ramp]],
-							p->color);
+					VectorCopy(d_8tofloattable[ramp2[(int) p->ramp]], p->color);
 				for (i = 0; i < 3; i++)
-					p->vel[i] -= p->vel[i] * frametime;
-				p->vel[2] -= grav;
+					p->vel[i] -= p->vel[i] * r_frametime;
 				break;
 
 			case pt_blob:
 				for (i = 0; i < 3; i++)
 					p->vel[i] += p->vel[i] * dvel;
-				p->vel[2] -= grav;
 				break;
 
 			case pt_blob2:
 				for (i = 0; i < 2; i++)
 					p->vel[i] -= p->vel[i] * dvel;
-				p->vel[2] -= grav;
-				break;
-
-			case pt_grav:
-			case pt_slowgrav:
-				if (r_particle_physics->ivalue)
-				{
-					p->die = 9999;
-					p->bounce = 1.5;
-					p->color[3] -= (frametime * 1.5);
-					p->vel[2] -= grav * 9.8;
-				}
-				else
-					p->vel[2] -= grav;
-
-				break;
-			case pt_torch:
-				p->color[3] -= (frametime * 64 / 255);
-				p->scale -= frametime * 2;
-				p->vel[2] += grav * 0.4;
-				if (p->scale <= 0)
-					p->die = -1;
-				break;
-			case pt_torch2:
-				p->color[3] -= frametime * 0.25;
-				p->scale -= frametime * 4;
-				p->vel[2] += grav;
-				if (p->scale <= 0)
-					p->die = -1;
-				break;
-			case pt_railtrail:
-				p->color[3] -= frametime * 0.5;
-				if (p->color[3] <= 0)
-					p->die = -1;
 				break;
 
 			default:
 				break;
 		}
 
-		if (p->color[3] <= 0)
-			p->die = -1;
+		if (p->alphadie) {
+			p->color[3] -= p->alphadie * r_frametime;
+			if (p->color[3] <= 0)
+				p->die = -1;
+		}
+		if (p->scale_change) {
+			p->scale += p->scale_change * r_frametime;
+			if (p->scale <= 0)
+				p->die = -1;
+		}
+		if (p->gravity)
+			p->vel[2] -= p->gravity * grav;
 
-		if ((p->die <= cl.time))
+
+		if ((p->die <= r_time))
 		{
 			free_base_particles[j++] = p;
 			continue;
@@ -916,7 +944,7 @@ R_Move_Base_Particles (void)
 	{
 		*free_base_particles[k++] = base_particles[maxparticle--];
 		while (maxparticle >= activeparticles
-				&& base_particles[maxparticle].die <= cl.time)
+				&& base_particles[maxparticle].die <= r_time)
 			maxparticle--;
 	}
 	num_base_particles = activeparticles;
@@ -933,18 +961,23 @@ R_Draw_Base_Particles (void)
 {
 	base_particle_t		*p;
 	int					i;
-	float				scale, *corner;
+	float				scale;
+	GTF_texture_t		*tex;
 
 	if (!max_base_particles)
 		return;
 
-	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
+	qglBindTexture (GL_TEXTURE_2D, GTF_texnum);
 
 	v_index = 0;
 
 	for (i = 0, p = base_particles; i < num_base_particles; i++, p++)
 	{
-		if (p->die <= cl.time || !p->draw)
+		if (p->die <= r_time || !p->draw)
+			continue;
+
+		tex = &GTF_texture[p->texnum];
+		if (tex->texture != GTF_texnum)
 			continue;
 
 		if (p->scale < 0)
@@ -964,16 +997,21 @@ R_Draw_Base_Particles (void)
 		VectorCopy4 (p->color, cf_array_v(v_index + 1));
 		VectorCopy4 (p->color, cf_array_v(v_index + 2));
 		VectorCopy4 (p->color, cf_array_v(v_index + 3));
-		VectorSet2(tc_array_v(v_index + 0), 1, 1);
-		VectorSet2(tc_array_v(v_index + 1), 0, 1);
-		VectorSet2(tc_array_v(v_index + 2), 0, 0);
-		VectorSet2(tc_array_v(v_index + 3), 1, 0);
+		VectorSet2(tc_array_v(v_index + 0), tex->s2, tex->t1);
+		VectorSet2(tc_array_v(v_index + 1), tex->s1, tex->t1);
+		VectorSet2(tc_array_v(v_index + 2), tex->s1, tex->t2);
+		VectorSet2(tc_array_v(v_index + 3), tex->s2, tex->t2);
 
-		corner = v_array_v(v_index);
+		VectorTwiddle(p->org, vright, 1, vup,-1, scale, v_array_v(v_index+0));
+		VectorTwiddle(p->org, vright,-1, vup,-1, scale, v_array_v(v_index+1));
+		VectorTwiddle(p->org, vright,-1, vup, 1, scale, v_array_v(v_index+2));
+		VectorTwiddle(p->org, vright, 1, vup, 1, scale, v_array_v(v_index+3));
+		/*
 		VectorTwiddleS (p->org, vup, vright, scale * -0.5, v_array_v(v_index));
 		VectorTwiddle(corner, vup, 1, vright, 0, scale, v_array_v(v_index+1));
 		VectorTwiddle(corner, vup, 1, vright, 1, scale, v_array_v(v_index+2));
 		VectorTwiddle(corner, vup, 0, vright, 1, scale, v_array_v(v_index+3));
+		*/
 
 		v_index += 4;
 
@@ -1001,30 +1039,27 @@ extern float bubble_sintable[17], bubble_costable[17];
 
 /*
 ===============
-R_Move_Beam_Particles
+R_Move_XBeam_Particles
 ===============
 */
 static void
-R_Move_Beam_Particles (void)
+R_Move_XBeam_Particles (void)
 {
-	beam_particle_t		*p;
+	xbeam_particle_t	*p;
 	int					i, j, activeparticles, maxparticle;
-	float				frametime;
 
-	if (!max_beam_particles)
+	if (!max_xbeam_particles)
 		return;
-
-	frametime = cl.time - cl.oldtime;
 
 	activeparticles = 0;
 	maxparticle = -1;
 	j = 0;
 
-	for (i = 0, p = beam_particles; i < num_beam_particles; i++, p++)
+	for (i = 0, p = xbeam_particles; i < num_xbeam_particles; i++, p++)
 	{
-		if (p->die <= cl.time)
+		if (p->die < r_time)
 		{
-			free_beam_particles[j++] = p;
+			free_xbeam_particles[j++] = p;
 			continue;
 		}
 
@@ -1033,36 +1068,15 @@ R_Move_Beam_Particles (void)
 
 		switch (p->type)
 		{
-			case pt_rtrail:
-				p->ramp += frametime * p->rstep;
-				if (p->rstep > 0.0)
-					p->rstep -= frametime;
-
-				p->color1[3] -= frametime * 0.4;
-				if (p->color1[3] <= 0)
-					p->die = -1;
-				if (p->color1[1] < p->color1[0])
-				{
-					p->color1[1] += frametime * 0.40;
-					p->color1[2] += frametime * 0.40;
-				}
-
-				p->color2[3] -= frametime * 0.4;
-				if (p->color2[3] <= 0)
-					p->die = -1;
-				if (p->color2[1] < p->color2[0])
-				{
-					p->color2[1] += frametime * 0.40;
-					p->color2[2] += frametime * 0.40;
-				}
+			case pt_lightning:
 				break;
 			default:
 				break;
 		}
 
-		if (p->die <= cl.time)
+		if (p->die <= r_time)
 		{
-			free_beam_particles[j++] = p;
+			free_xbeam_particles[j++] = p;
 			continue;
 		}
 	}
@@ -1070,103 +1084,119 @@ R_Move_Beam_Particles (void)
 	i = 0;
 	while (maxparticle >= activeparticles)
 	{
-		*free_beam_particles[i++] = beam_particles[maxparticle--];
+		*free_xbeam_particles[i++] = xbeam_particles[maxparticle--];
 		while (maxparticle >= activeparticles &&
-				beam_particles[maxparticle].die <= cl.time)
+				xbeam_particles[maxparticle].die <= r_time)
 			maxparticle--;
 	}
-	num_beam_particles = activeparticles;
+	num_xbeam_particles = activeparticles;
 }
 
-static void
-DrawBeam (beam_particle_t *p)
+extern inline void
+Calc_XBeam_Verts (int i, vec3_t start, vec3_t end, vec3_t offset,
+		float t1, float t2)
 {
-	float	dp;
-	vec3_t	v_up, v_right1, v_right2, v_diff1, v_diff2, v_dist;
+	// near right corner
+	VectorAdd     (start, offset, v_array_v(i + 0));
+	VectorSet2 (tc_array_v(i + 0), 0, t1);
+	// near left corner
+	VectorSubtract(start, offset, v_array_v(i + 1));
+	VectorSet2 (tc_array_v(i + 1), 1, t1);
+	// far left corner
+	VectorSubtract(end  , offset, v_array_v(i + 2));
+	VectorSet2 (tc_array_v(i + 2), 1, t2);
+	// far right corner
+	VectorAdd     (end  , offset, v_array_v(i + 3));
+	VectorSet2 (tc_array_v(i + 3), 0, t2);
+}
 
-	{
-		VectorSubtract (r_origin, p->org_center, v_diff1);
-		VectorVectors (p->normal, v_right1, v_up);
-		v_dist[0] = DotProduct(v_diff1, v_right1);
-		v_dist[1] = DotProduct(v_diff1, v_up);
-		v_dist[2] = 0;
-		if (DotProduct(v_dist, v_dist) < (p->scale * p->scale))
-		{
-			new_smokering(p->org_center, v_up, v_right1, p->scale/2, p->color2);
-			return;
-		}
-	}
+static int xbeam_elements[18] = {0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11};
 
-	VectorSubtract (r_origin, p->org1, v_diff1);
-	VectorNormalizeFast (v_diff1);
-	CrossProduct (p->normal, v_diff1, v_right1);
+static void
+DrawXBeam (xbeam_particle_t *p)
+{
+	int		i;
+	float	t1, t2;
+	vec3_t	v_up, v_right, v_offset;
 
-	VectorSubtract (r_origin, p->org2, v_diff2);
-	VectorNormalizeFast (v_diff2);
-	CrossProduct (p->normal, v_diff2, v_right2);
+	// Up, pointing towards view, and rotates around beam normal.
+	// Get direction from start of beam to viewer.
+	VectorSubtract (r_origin, p->org1, v_up);
+	// Remove the portion of the vector that moves along the beam.
+	// (This leaves only a a vector pointing directly away from the beam.)
+	t1 = -DotProduct(v_up, p->normal);
+	VectorMA(v_up, t1, p->normal, v_up);
+	// Normalize the up.
+	VectorNormalizeFast(v_up);
+	// Generate right vector from dir and up, result already normalized.
+	CrossProduct (p->normal, v_up, v_right);
 
-	VectorCopy (p->normal, v_up);
+	// Calculate the T coordinates, scrolling. (Texcoords)
+	t1 = r_time * -p->scroll + p->repeat_scale * DotProduct(p->org1, p->normal);
+	t1 = t1 - floor(t1);
+	t2 = t1 + p->repeat_scale * p->len;
+	
+	/*
+	 * The beam is 3 polygons in this configuration:
+	 *  *   2
+	 *   * *
+	 * 1******
+	 *   * *
+	 *  *   3
+	 * They are showing different portions of the beam texture, creating an
+	 * illusion of a beam that appears to curl around in 3D space.
+	 * (Realize that the whole polygon assembly orients itself to face
+	 *  the viewer)
+	 */
 
-	VectorTwiddle (p->org1, v_up, -p->scale, v_right1,  p->scale, 1,
-			v_array_v(v_index + 0));
-	VectorTwiddle (p->org1, v_up,  p->scale, v_right1, -p->scale, 1,
-			v_array_v(v_index + 1));
-	VectorTwiddle (p->org2, v_up,  p->scale, v_right2, -p->scale, 1,
-			v_array_v(v_index + 2));
-	VectorTwiddle (p->org2, v_up, -p->scale, v_right2,  p->scale, 1,
-			v_array_v(v_index + 3));
+	// Polygon 1, verts 0-3.
+	VectorScale(v_right, p->thickness, v_offset);
+	Calc_XBeam_Verts(0, p->org1, p->org2, v_offset, t1, t2);
+	// Polygon 2, verts 4-7.
+	VectorAdd(v_right, v_up, v_offset);
+	VectorScale(v_offset, p->thickness * 0.70710681f, v_offset);
+	Calc_XBeam_Verts(4, p->org1, p->org2, v_offset, t1 + 0.33, t2 + 0.33);
+	// Polygon 3, verts 8-11.
+	VectorSubtract(v_right, v_up, v_offset);
+	VectorScale(v_offset, p->thickness * 0.70710681f, v_offset);
+	Calc_XBeam_Verts(8, p->org1, p->org2, v_offset, t1 + 0.66, t2 + 0.66);
 
-	VectorCopy4 (p->color1, cf_array_v(v_index + 0));
-	VectorCopy4 (p->color1, cf_array_v(v_index + 1));
-	VectorCopy4 (p->color2, cf_array_v(v_index + 2));
-	VectorCopy4 (p->color2, cf_array_v(v_index + 3));
+	for (i = 0; i < 12; i++)
+		VectorCopy4 (p->color, cf_array_v(v_index + i));
 
-	dp = DotProduct(p->org1, p->normal) / 64;
-	dp -= p->ramp;
-	VectorSet2 (tc_array_v(v_index + 0), 1, dp);
-	VectorSet2 (tc_array_v(v_index + 1), 0, dp);
-	dp = DotProduct(p->org2, p->normal) / 64;
-	dp -= p->ramp;
-	VectorSet2 (tc_array_v(v_index + 2), 0, dp);
-	VectorSet2 (tc_array_v(v_index + 3), 1, dp);
+	memcpy(vindices + i_index, xbeam_elements, sizeof(xbeam_elements));
 
-	vindices[i_index + 0] = v_index + 0;
-	vindices[i_index + 1] = v_index + 1;
-	vindices[i_index + 2] = v_index + 2;
-	vindices[i_index + 3] = v_index + 0;
-	vindices[i_index + 4] = v_index + 2;
-	vindices[i_index + 5] = v_index + 3;
-	i_index += 6;
-	v_index += 4;
+	i_index += 18;
+	v_index += 12;
 }
 
 /*
 ===============
-R_Draw_Beam_Particles
+R_Draw_XBeam_Particles
 ===============
 */
 static void
-R_Draw_Beam_Particles (void)
+R_Draw_XBeam_Particles (void)
 {
-	beam_particle_t		*p;
+	xbeam_particle_t	*p;
 	int					k;
 
-	if (!max_beam_particles)
+	if (!max_xbeam_particles)
 		return;
 
-	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_beam);
+	qglBindTexture (GL_TEXTURE_2D, GTF_texture[GTF_lightning_beam].texture);
 	v_index = 0;
 	i_index = 0;
 
-	for (k = 0, p = beam_particles; k < num_beam_particles; k++, p++)
+	for (k = 0, p = xbeam_particles; k < num_xbeam_particles; k++, p++)
 	{
-		if (p->die <= cl.time)
+		if (p->die < r_time)
 			continue;
 
-		DrawBeam (p);
+		DrawXBeam (p);
 
-		if (((i_index + 6) > MAX_VERTEX_INDICES)
-				|| ((v_index + 4) > MAX_VERTEX_ARRAYS))
+		if (((i_index + 18) > MAX_VERTEX_INDICES)
+				|| ((v_index + 12) > MAX_VERTEX_ARRAYS))
 		{
 			TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 			TWI_PreVDrawCVA (0, v_index);
@@ -1190,69 +1220,6 @@ R_Draw_Beam_Particles (void)
 
 /*
 ===============
-R_Draw_SmokeRings
-===============
-*/
-static void
-R_Draw_SmokeRings (void)
-{
-	smokering_t		*p;
-	int				k;
-	vec_t			*corner;
-
-	if (!max_smokerings)
-		return;
-
-	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_ring);
-	v_index = 0;
-
-	for (k = 0, p = smokerings; k < num_smokerings; k++, p++)
-	{
-		VectorCopy4 (p->color, cf_array_v(v_index + 0));
-		VectorCopy4 (p->color, cf_array_v(v_index + 1));
-		VectorCopy4 (p->color, cf_array_v(v_index + 2));
-		VectorCopy4 (p->color, cf_array_v(v_index + 3));
-		VectorSet2(tc_array_v(v_index + 0), 1, 1);
-		VectorSet2(tc_array_v(v_index + 1), 0, 1);
-		VectorSet2(tc_array_v(v_index + 2), 0, 0);
-		VectorSet2(tc_array_v(v_index + 3), 1, 0);
-
-		corner = v_array_v(v_index);
-		VectorTwiddleS (p->org, p->up, p->right, p->scale * -0.5,
-				v_array_v(v_index));
-		VectorTwiddle (corner, p->up, p->scale, p->right, 0       , 1,
-				v_array_v(v_index+1));
-		VectorTwiddle (corner, p->up, p->scale, p->right, p->scale, 1,
-				v_array_v(v_index+2));
-		VectorTwiddle (corner, p->up, 0       , p->right, p->scale, 1,
-				v_array_v(v_index+3));
-
-		v_index += 4;
-
-		if ((v_index + 4) > MAX_VERTEX_ARRAYS)
-		{
-			TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
-			TWI_PreVDrawCVA (0, v_index);
-			qglDrawArrays (GL_QUADS, 0, v_index);
-			TWI_PostVDrawCVA ();
-			v_index = 0;
-		}
-	}
-
-	if (v_index)
-	{
-		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
-		TWI_PreVDrawCVA (0, v_index);
-		qglDrawArrays (GL_QUADS, 0, v_index);
-		TWI_PostVDrawCVA ();
-		v_index = 0;
-	}
-
-	num_smokerings = 0;
-}
-
-/*
-===============
 R_MoveParticles
 ===============
 */
@@ -1260,7 +1227,7 @@ void
 R_MoveParticles (void)
 {
 	R_Move_Base_Particles();
-	R_Move_Beam_Particles();
+	R_Move_XBeam_Particles();
 }
 
 /*
@@ -1276,8 +1243,7 @@ R_DrawParticles (void)
 		qglDisable (GL_CULL_FACE);
 
 	R_Draw_Base_Particles();
-	R_Draw_Beam_Particles();
-	R_Draw_SmokeRings ();
+	R_Draw_XBeam_Particles();
 
 	if (gl_cull->ivalue)
 		qglEnable (GL_CULL_FACE);

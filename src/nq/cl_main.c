@@ -275,14 +275,15 @@ CL_PrintEntities_f (void)
 
 	for (i = 0, ent = cl_entities; i < cl.num_entities; i++, ent++) {
 		Com_Printf ("%3i:", i);
-		if (!ent->model) {
+		if (!ent->common.model) {
 			Com_Printf ("EMPTY\n");
 			continue;
 		}
 		Com_Printf ("%s:%2i  (%5.1f,%5.1f,%5.1f) [%5.1f %5.1f %5.1f]\n",
-					ent->model->name, ent->frame, ent->origin[0],
-					ent->origin[1], ent->origin[2], ent->angles[0],
-					ent->angles[1], ent->angles[2]);
+					ent->common.model->name, ent->common.frame,
+					ent->common.origin[0], ent->common.origin[1],
+					ent->common.origin[2], ent->common.angles[0],
+					ent->common.angles[1], ent->common.angles[2]);
 	}
 }
 
@@ -404,6 +405,8 @@ CL_LerpPoint (void)
 
 	if (!f || cl_nolerp->ivalue || cls.timedemo || sv.active) {
 		cl.time = cl.mtime[0];
+		r_time = cl.time;
+		r_frametime = cl.time - cl.oldtime;
 		return 1;
 	}
 
@@ -425,6 +428,9 @@ CL_LerpPoint (void)
 		frac = 1;
 	}
 
+	r_time = cl.time;
+	r_frametime = cl.time - cl.oldtime;
+
 	return frac;
 }
 
@@ -434,7 +440,7 @@ CL_LerpPoint (void)
 CL_RelinkEntities
 ===============
 */
-void
+static void
 CL_RelinkEntities (void)
 {
 	entity_t   *ent;
@@ -460,21 +466,21 @@ CL_RelinkEntities (void)
 
 // start on the entity after the world
 	for (i = 1, ent = cl_entities + 1; i < cl.num_entities; i++, ent++) {
-		if (!ent->model)				// empty slot
+		if (!ent->common.model)				// empty slot
 			continue;
 // if the object wasn't included in the last packet, remove it
 		if (ent->msgtime != cl.mtime[0]) {
-			ent->model = NULL;
-			VectorClear (ent->last_light);
+			ent->common.model = NULL;
+			VectorClear (ent->common.last_light);
 			continue;
 		}
 
 		CL_Lerp_OriginAngles (ent);
 
-		if (ent->effects)
+		if (ent->effects && (cl.time - cl.oldtime))
 		{
 			if (ent->effects & EF_BRIGHTFIELD)
-				R_EntityParticles (ent);
+				R_EntityParticles (&ent->common);
 
 			if (ent->effects & EF_MUZZLEFLASH) {
 				// don't draw our own muzzle flash if flashblending
@@ -483,13 +489,13 @@ CL_RelinkEntities (void)
 					vec3_t fv, impact, impactnormal;
 
 					dl = CL_AllocDlight (i);
-					VectorCopy (ent->origin, dl->origin);
-					AngleVectors (ent->angles, fv, NULL, NULL);
+					VectorCopy (ent->common.origin, dl->origin);
+					AngleVectors (ent->common.angles, fv, NULL, NULL);
 					VectorMA (dl->origin, 18, fv, dl->origin);
 
 					if (!gl_flashblend->ivalue && !gl_oldlights->ivalue)
 					{
-						TraceLine(cl.worldmodel, ent->origin, dl->origin, impact, impactnormal);
+						TraceLine(cl.worldmodel, ent->common.origin, dl->origin, impact, impactnormal);
 						VectorCopy(impact, dl->origin);
 					}
 
@@ -504,32 +510,30 @@ CL_RelinkEntities (void)
 
 			// spawn light flashes, even ones coming from invisible objects
 			if (ent->effects & EF_LIGHTMASK) {
-				CL_NewDlight (i, ent->origin, ent->effects);
+				CL_NewDlight (i, ent->common.origin, ent->effects);
 			}
 		}
 
 // rotate binary objects locally
-		if (ent->model->flags) {
-			int flags = ent->model->flags;
+		if (ent->common.model->flags && (cl.time - cl.oldtime)) {
+			int flags = ent->common.model->flags;
 
 			if (flags & EF_ROTATE) {
 				flags &= ~EF_ROTATE;
-				ent->angles[YAW] = ANGLEMOD (100 * (cl.time + ent->syncbase));
+				ent->common.angles[YAW] = ANGLEMOD (100 * (cl.time + ent->syncbase));
 				CL_Update_Matrices (ent);
 			}
 
 			if (flags & EF_ROCKET) {
-				flags &= ~EF_ROCKET;
-				R_RocketTrail (ent->msg_origins[1], ent->msg_origins[0]);
 				dl = CL_AllocDlight (i);
-				VectorCopy (ent->origin, dl->origin);
+				VectorCopy (ent->common.origin, dl->origin);
 				dl->radius = 200;
 				dl->die = cl.time + 0.01;
 				VectorSet (dl->color, 1.0f, 0.6f, 0.2f);
 			}
 
 			if (flags)
-				R_ParticleTrail (ent->msg_origins[1], ent->msg_origins[0], flags);
+				R_ParticleTrail (&ent->common);
 		}
 
 		ent->forcelink = false;
@@ -696,6 +700,9 @@ CL_Init_Cvars (void)
 	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
 
 	cl_mapname = Cvar_Get ("cl_mapname", "", CVAR_ROM, NULL);
+
+	CL_Input_Init_Cvars ();
+	CL_TEnts_Init_Cvars ();
 }
 
 /*
@@ -710,9 +717,8 @@ CL_Init (void)
 
 	SZ_Init (&cls.message, cls.msg_buf, sizeof(cls.msg_buf));
 
-	CL_Input_Init_Cvars ();
 	CL_Input_Init ();
-	CL_InitTEnts ();
+	CL_TEnts_Init ();
 	Team_Init ();
 
 	//

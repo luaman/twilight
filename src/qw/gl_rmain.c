@@ -43,12 +43,13 @@ static const char rcsid[] =
 #include "view.h"
 #include "sky.h"
 #include "liquid.h"
+#include "r_part.h"
+#include "gl_alias.h"
 
 // FIXME - These need to be in a header somewhere
 extern void TNT_Init (void);
 extern void R_InitBubble (void);
 void R_DrawViewModel (void);
-void R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 
 Uint r_framecount;
 Uint c_brush_polys, c_alias_polys;
@@ -84,19 +85,13 @@ cvar_t *r_stainmaps;
 cvar_t *r_netgraph;
 
 cvar_t *gl_clear;
-cvar_t *gl_cull;
-cvar_t *gl_affinemodels;
 cvar_t *gl_polyblend;
 cvar_t *gl_flashblend;
 cvar_t *gl_playermip;
-cvar_t *gl_nocolors;
 cvar_t *gl_finish;
-cvar_t *gl_im_animation;
 cvar_t *gl_im_transform;
-cvar_t *gl_fb;
 cvar_t *gl_oldlights;
 cvar_t *gl_colorlights;
-cvar_t *gl_particletorches;
 
 qboolean colorlights = true;
 
@@ -114,13 +109,16 @@ R_GetSpriteFrame
 ================
 */
 static mspriteframe_t *
-R_GetSpriteFrame (entity_t *e)
+R_GetSpriteFrame (entity_common_t *e)
 {
 	msprite_t		   *psprite;
 	mspritegroup_t	   *pspritegroup;
 	mspriteframe_t	   *pspriteframe;
 	int					i, numframes, frame;
 	float			   *pintervals, fullinterval, targettime, time;
+
+	if (!e->real_ent)
+		Sys_Error("No real ent! EVIL!\n");
 
 	psprite = e->model->sprite;
 	frame = e->frame[0];
@@ -171,7 +169,7 @@ R_DrawOpaqueSpriteModels ()
 	float			   *up, *right;
 	vec3_t				v_forward, v_right, v_up;
 	msprite_t		   *psprite;
-	entity_t		   *e;
+	entity_common_t	   *e;
 	int					i, last_tex;
 
 	last_tex = -1;
@@ -256,9 +254,9 @@ R_VisEntitiesOnList
 static void
 R_VisBrushModels (void)
 {
-	entity_t	*e;
-	vec3_t		 mins, maxs;
-	int			 i;
+	entity_common_t	*e;
+	vec3_t			 mins, maxs;
+	int				 i;
 
 	// First off, the world.
 
@@ -285,9 +283,9 @@ R_VisBrushModels (void)
 static void
 R_DrawOpaqueBrushModels ()
 {
-	entity_t	*e;
-	vec3_t		 mins, maxs;
-	int			 i;
+	entity_common_t	*e;
+	vec3_t			 mins, maxs;
+	int				 i;
 
 	R_DrawTextureChains (cl.worldmodel, r_origin, 0, NULL, NULL);
 
@@ -310,9 +308,9 @@ R_DrawOpaqueBrushModels ()
 static void
 R_DrawAddBrushModels ()
 {
-	entity_t	*e;
-	vec3_t		 mins, maxs;
-	int			 i;
+	entity_common_t	*e;
+	vec3_t			 mins, maxs;
+	int				 i;
 
 	if (r_wateralpha->fvalue == 1)
 		return;
@@ -541,9 +539,6 @@ R_RenderView (void)
 	double		time1 = 0.0;
 	double		time2;
 
-	r_time = cl.time;
-	r_frametime = host_frametime;
-
 	if (r_norefresh->ivalue)
 		return;
 
@@ -659,24 +654,16 @@ R_Init_Cvars (void)
 	r_netgraph = Cvar_Get ("r_netgraph", "0", CVAR_NONE, NULL);
 
 	gl_clear = Cvar_Get ("gl_clear", "0", CVAR_ARCHIVE, NULL);
-	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
-	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_ARCHIVE, NULL);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", CVAR_NONE, NULL);
 	gl_flashblend = Cvar_Get ("gl_flashblend", "1", CVAR_ARCHIVE, NULL);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", CVAR_NONE, NULL);
-	gl_nocolors = Cvar_Get ("gl_nocolors", "0", CVAR_NONE, NULL);
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
 
-	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_ARCHIVE, NULL);
 	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_ARCHIVE, NULL);
-
-	gl_fb = Cvar_Get ("gl_fb", "1", CVAR_ARCHIVE, NULL);
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
 
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
-
-	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
 
 	R_Init_Sky_Cvars ();
 	R_Init_Liquid_Cvars ();

@@ -356,7 +356,7 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 {
 	int			icolor[8];
 	int			n;
-	entity_t	*ent;
+	entity_common_t	*ent;
 	vec3_t		org;
 	model_t		*model;
 
@@ -379,7 +379,7 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 	// look for embedded bmodels
 	for (n = 1; n < MAX_EDICTS; n++)
 	{
-		ent = &cl_network_entities[n];
+		ent = &cl_network_entities[n].common;
 		model = ent->model;
 		if (model && model->name[0] == '*')
 		{
@@ -596,7 +596,7 @@ R_DrawBrushDepthSkies (void)
 	int			 i;
 	vec3_t		 mins, maxs, org;
 	brushhdr_t	*brush;
-	entity_t	*e;
+	entity_common_t	*e;
 
 	R_Draw_Depth_Sky_Chain (&cl.worldmodel->brush->sky_chain, r_origin);
 
@@ -871,7 +871,7 @@ R_VisBrushModel
 =================
 */
 void
-R_VisBrushModel (entity_t *e)
+R_VisBrushModel (entity_common_t *e)
 {
 	Uint			 i;
 	msurface_t		*psurf;
@@ -918,7 +918,7 @@ R_DrawOpaqueBrushModel
 =================
 */
 void
-R_DrawOpaqueBrushModel (entity_t *e)
+R_DrawOpaqueBrushModel (entity_common_t *e)
 {
 	int				 k;
 	model_t			*mod = e->model;
@@ -943,7 +943,7 @@ R_DrawAddBrushModel
 =================
 */
 void
-R_DrawAddBrushModel (entity_t *e)
+R_DrawAddBrushModel (entity_common_t *e)
 {
 	model_t			*mod = e->model;
 

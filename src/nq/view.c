@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "screen.h"
 #include "strlib.h"
 #include "sys.h"
+#include "gl_alias.h"
 
 /* NQ specific */
 #include "host.h"
@@ -308,10 +309,10 @@ V_ParseDamage (void)
 	/* calculate view angle kicks */
 	ent = &cl_entities[cl.viewentity];
 
-	VectorSubtract(from, ent->origin, from);
+	VectorSubtract(from, ent->common.origin, from);
 	VectorNormalizeFast(from);
 
-	AngleVectors(ent->angles, forward, right, up);
+	AngleVectors(ent->common.angles, forward, right, up);
 
 	side = DotProduct(from, right);
 	v_dmg_roll = count * side * v_kickroll->fvalue;
@@ -508,7 +509,7 @@ V_BoundOffsets (void)
 {
 	vec3_t org;
 	
-	VectorCopy (cl_entities[cl.viewentity].origin, org);
+	VectorCopy (cl_entities[cl.viewentity].common.origin, org);
 
 	/* absolutely bound refresh relative to entity clipping hull
 	   so the view can never be inside a solid wall */
@@ -562,7 +563,7 @@ V_CalcViewRoll (void)
 {
 	float       side;
 
-	side = V_CalcRoll (cl_entities[cl.viewentity].angles, cl.velocity);
+	side = V_CalcRoll (cl_entities[cl.viewentity].common.angles, cl.velocity);
 	r_refdef.viewangles[ROLL] += side;
 
 	if (v_dmg_time > 0) {
@@ -587,9 +588,9 @@ V_CalcIntermissionRefdef (void)
 	/* ent is the player model (visible when out of body) */
 	entity_t   *ent = &cl_entities[cl.viewentity];
 
-	VectorCopy(ent->origin, r_refdef.vieworg);
-	VectorCopy(ent->angles, r_refdef.viewangles);
-	cl.viewent.model = NULL;
+	VectorCopy(ent->common.origin, r_refdef.vieworg);
+	VectorCopy(ent->common.angles, r_refdef.viewangles);
+	cl.viewent.common.model = NULL;
 
 	/* always idle in intermission */
 	r_refdef.viewangles[ROLL] += Q_sin (cl.time * v_iroll_cycle->fvalue) *
@@ -613,7 +614,7 @@ V_AddEntity ( entity_t *ent )
 		return;
 	}
 
-	r_refdef.entities[r_refdef.num_entities++] = ent;
+	r_refdef.entities[r_refdef.num_entities++] = &ent->common;
 }
 
 /*
@@ -636,7 +637,8 @@ V_CalcRefdef
 void
 V_CalcRefdef (void)
 {
-	entity_t		*ent, *view;
+	entity_t		*ent;
+	entity_t		*view;
 	int				i;
 	vec3_t			forward, right, up;
 	vec3_t			angles, origin;
@@ -652,17 +654,17 @@ V_CalcRefdef (void)
 	view = &cl.viewent;
 
 	/* Keep the colormap correct. */
-	cl.colormap = ent->colormap;
+	cl.colormap = ent->common.colormap;
 
 	/* transform the view offset by the model's matrix to get the offset from
 	   model origin for the view */
-	ent->angles[YAW] = cl.viewangles[YAW];		/* the model should */
-	ent->angles[PITCH] = -cl.viewangles[PITCH];	/* face the view dir */
+	ent->common.angles[YAW] = cl.viewangles[YAW];		/* the model should */
+	ent->common.angles[PITCH] = -cl.viewangles[PITCH];	/* face the view dir */
 
 	bob = V_CalcBob();
 
 	/* refresh position */
-	VectorCopy (ent->origin, r_refdef.vieworg);
+	VectorCopy (ent->common.origin, r_refdef.vieworg);
 	r_refdef.vieworg[2] += cl.viewheight + bob;
 
 	/* never let it sit exactly on a node line, because a water plane can
@@ -680,9 +682,9 @@ V_CalcRefdef (void)
 		cl.viewzoom = SLIDE (cl.viewzoom, v_zoom->fvalue, 4 * host_frametime);
 
 	/* offsets */
-	angles[PITCH] = -ent->angles[PITCH]; /* because entity pitches are actually backward */
-	angles[YAW] = ent->angles[YAW];
-	angles[ROLL] = ent->angles[ROLL];
+	angles[PITCH] = -ent->common.angles[PITCH]; /* because entity pitches are actually backward */
+	angles[YAW] = ent->common.angles[YAW];
+	angles[ROLL] = ent->common.angles[ROLL];
 
 	AngleVectors (angles, forward, right, up);
 	for (i = 0; i < 3; i++)
@@ -700,7 +702,7 @@ V_CalcRefdef (void)
 	angles[YAW] = r_refdef.viewangles[YAW];
 	angles[PITCH] = -r_refdef.viewangles[PITCH];
 
-	VectorCopy (ent->origin, origin);
+	VectorCopy (ent->common.origin, origin);
 	origin[2] += cl.viewheight;
 
 	for (i = 0; i < 3; i++) {
@@ -708,30 +710,30 @@ V_CalcRefdef (void)
 	}
 
 	origin[2] += bob;
-	if (view->model != cl.model_precache[cl.stats[STAT_WEAPON]])
+	if (view->common.model != cl.model_precache[cl.stats[STAT_WEAPON]])
 	{
 		memset(view, 0, sizeof(*view));
-		view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
+		view->common.model = cl.model_precache[cl.stats[STAT_WEAPON]];
 	}
 
 	/* set up the refresh position */
 	VectorAdd (r_refdef.viewangles, cl.punchangle, r_refdef.viewangles);
 
 	/* smooth out stair step ups */
-	if (cl.onground && (ent->origin[2] - oldz > 0)) {
+	if (cl.onground && (ent->common.origin[2] - oldz > 0)) {
 		float	steptime;
 
 		steptime = (cl.time - cl.oldtime);
 
 		oldz += steptime * 80;
-		if (oldz > ent->origin[2])
-			oldz = ent->origin[2];
-		if (ent->origin[2] - oldz > 12)
-			oldz = ent->origin[2] - 12;
-		r_refdef.vieworg[2] += oldz - ent->origin[2];
-		origin[2] += oldz - ent->origin[2];
+		if (oldz > ent->common.origin[2])
+			oldz = ent->common.origin[2];
+		if (ent->common.origin[2] - oldz > 12)
+			oldz = ent->common.origin[2] - 12;
+		r_refdef.vieworg[2] += oldz - ent->common.origin[2];
+		origin[2] += oldz - ent->common.origin[2];
 	} else
-		oldz = ent->origin[2];
+		oldz = ent->common.origin[2];
 
 	CL_Update_OriginAngles(view, origin, angles, cl.mtime[1]);
 	CL_Update_Frame(view, cl.stats[STAT_WEAPONFRAME], cl.mtime[1]);
@@ -846,4 +848,23 @@ V_Init (void)
 	Cmd_AddCommand ("centerview", V_StartPitchDrift);
 }
 
+void
+R_DrawViewModel (void)
+{
+	entity_common_t *ent_pointer;
+
+	ent_pointer = &cl.viewent.common;
+	cl.viewent.common.real_ent = &cl.viewent;
+
+	if (!r_drawviewmodel->ivalue || chase_active->ivalue ||
+			!r_drawentities->ivalue || cl.items & IT_INVISIBILITY ||
+			(cl.stats[STAT_HEALTH] <= 0) || !cl.viewent.common.model)
+		return;
+
+	// hack the depth range to prevent view model from poking into walls
+	qglDepthRange (0.0f, 0.3f);
+	R_DrawOpaqueAliasModels(&ent_pointer, 1, true);
+	qglDepthRange (0.0f, 1.0f);
+}
+					
 

@@ -27,16 +27,20 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
-#include "render.h"
-#include "client.h"
 #include "cvar.h"
 #include "sys.h"
+#include "gl_info.h"
+#include "gl_arrays.h"
+#include "model.h"
+#include "light.h"
+#include "quakedef.h"
+#include "r_part.h"
+#include "vis.h"
 #include "matrixlib.h"
 
-void R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
+void R_DrawOpaqueAliasModels (entity_common_t *ents[],int num_ents, qboolean viewent);
 extern vec3_t lightcolor;
 
-extern void R_Torch (entity_t *ent, qboolean torch2);
 extern model_t *mdl_fire;
 
 #define NUMVERTEXNORMALS	162
@@ -77,26 +81,6 @@ static matrix4x4_t	*matrix;
 
 #include "host.h"
 
-void
-R_DrawViewModel (void)
-{
-	entity_t *ent_pointer;
-
-	if (!VectorCompare(cl.viewent.origin, cl.viewent.msg_origins[0]))
-		Sys_Error("Ack!\n");
-
-	ent_pointer = &cl.viewent;
-	if (!r_drawviewmodel->ivalue || chase_active->ivalue ||
-			!r_drawentities->ivalue || cl.items & IT_INVISIBILITY ||
-			(cl.stats[STAT_HEALTH] <= 0) || !cl.viewent.model)
-		return;
-
-	// hack the depth range to prevent view model from poking into walls
-	qglDepthRange (0.0f, 0.3f);
-	R_DrawOpaqueAliasModels(&ent_pointer, 1, true);
-	qglDepthRange (0.0f, 1.0f);
-}
-
 /*
 =================
 R_SetupAliasFrame
@@ -104,7 +88,7 @@ R_SetupAliasFrame
 =================
 */
 static void
-R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
+R_SetupAliasFrame (aliashdr_t *paliashdr, entity_common_t *e)
 {
 	float				l;
 	int					pose_num, i;
@@ -114,7 +98,7 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 	frame = &paliashdr->frames[e->frame[0]];
 
 	if (frame->numposes > 1)
-		pose_num = (int) (cl.time / frame->interval) % frame->numposes;
+		pose_num = (int) (r_time / frame->interval) % frame->numposes;
 	else
 		pose_num = 0;
 
@@ -141,7 +125,7 @@ Please forgive me for the duplicated code here..
 =================
 */
 static void
-R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
+R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_common_t *e)
 {
 	float				d, frac;
 	int					i1, i2, i, j;
@@ -155,8 +139,8 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 			continue;
 		frame = &paliashdr->frames[e->frame[i]];
 		if (frame->numposes > 1) {
-			i1 = (int) (cl.time / e->frame_interval[i]) % frame->numposes;
-			frac = (cl.time / e->frame_interval[i]);
+			i1 = (int) (r_time / e->frame_interval[i]) % frame->numposes;
+			frac = (r_time / e->frame_interval[i]);
 			frac -= floor(frac);
 			i2 = (i1 + 1) % frame->numposes;
 			poses[num_frames] = &frame->poses[i1];
@@ -267,7 +251,7 @@ R_SetupAliasModel
 =================
 */
 static void
-R_SetupAliasModel (entity_t *e, qboolean viewent)
+R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 {
 	int			lnum;
 	model_t		*clmodel = e->model;
@@ -279,9 +263,9 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 
 	if (gl_particletorches->ivalue) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
-			if (cl.time >= e->time_left) {
+			if (r_time >= e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
-				e->time_left = cl.time + 0.10;
+				e->time_left = r_time + 0.10;
 			}
 			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_fire)
 				clmodel = mdl_fire;
@@ -356,10 +340,11 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 	paliashdr = clmodel->alias;
 	matrix = &e->matrix;
 
-	c_alias_polys += paliashdr->numtris;
+//	c_alias_polys += paliashdr->numtris;
 
-	skin = &paliashdr->skins[e->skinnum % paliashdr->numskins];
-	anim = (int) (cl.time / skin->interval) % skin->frames;
+	if (!(skin = e->skin))
+		skin = &paliashdr->skins[e->skinnum % paliashdr->numskins];
+	anim = (int) (r_time / skin->interval) % skin->frames;
 
 	has_top = has_bottom = has_fb = false;
 
@@ -377,13 +362,8 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 	else
 		R_SetupAliasFrame (paliashdr, e);
 
-	if (gl_im_transform->ivalue && !(clmodel->modflags & FLAG_NO_IM_FORM)) {
-		mod_origin = e->origin;
-		mod_angles = e->angles;
-	} else {
-		mod_origin = e->msg_origins[0];
-		mod_angles = e->msg_angles[0];
-	}
+	mod_origin = e->origin;
+	mod_angles = e->angles;
 	draw = true;
 }
 /*
@@ -524,10 +504,10 @@ R_DrawOpaqueAliasModels
 =============
 */
 void
-R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
+R_DrawOpaqueAliasModels (entity_common_t *ents[],int num_ents, qboolean viewent)
 {
-	int			i;
-	entity_t	*e;
+	int				i;
+	entity_common_t	*e;
 
 	if (gl_affinemodels->ivalue)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);

@@ -74,6 +74,8 @@
 #define bound_bits(n, bits)	bound(0, n, BIT(bits) - 1)
 #endif
 
+#define lhrandom(MIN,MAX) ((rand() & 32767) * (((MAX)-(MIN)) * (1.0f / 32767.0f)) + (MIN))
+
 struct mplane_s;
 
 extern vec3_t vec3_origin;
@@ -93,6 +95,7 @@ float Q_RSqrt(double number);
 
 #define NANMASK		255 << 23
 #define	IS_NAN(x) (((*(int *)&x)&NANMASK)==NANMASK)
+#define INF			(1.0f / 0.0f)
 
 #define PlaneDiff(point,plane) (((plane)->type < 3 ? (point)[(plane)->type] : DotProduct((point), (plane)->normal)) - (plane)->dist)
 

@@ -77,9 +77,10 @@ typedef struct {
 #define	MAX_BEAMS	24
 typedef struct {
 	int				entity;
+	qboolean		lightning;
 	struct model_s	*model;
 	float			endtime;
-	vec3_t			start, end;
+	vec3_t			start, end, diff;
 } beam_t;
 
 #define	MAX_EFRAGS		640
@@ -370,14 +371,17 @@ extern int traceline_entities;
 
 void CL_ScanForBModels (void);
 void CL_Update_Matrices (entity_t *ent);
+void CL_Update_Matrices_C (entity_common_t *ent);
 void CL_Lerp_OriginAngles (entity_t *ent);
 qboolean CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time);
 qboolean CL_Update_Frame (entity_t *ent, int frame, float frame_time);
+qboolean CL_Update_Frame_C (entity_common_t *ent, int frame, float frame_time);
 
 //
 // cl_tent
 //
-void	CL_InitTEnts (void);
+void	CL_TEnts_Init_Cvars (void);
+void	CL_TEnts_Init (void);
 void	CL_SignonReply (void);
 
 #endif // __CLIENT_H
