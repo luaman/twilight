@@ -43,7 +43,6 @@ twilight_nq_SOURCES= \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
 	vid_sdl.c \
 	snd_dma.c \
-	pcx.c tga.c \
         view.c world.c world.h zone.c \
         quakedef.h bspfile.h client.h keys.h protocol.h \
 	render.h server.h sys.c \

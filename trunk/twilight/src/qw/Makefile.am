@@ -37,8 +37,7 @@ twilight_qw_SOURCES= \
 	net.h net_chan.c net_udp.c \
 	pmove.c pmovetst.c r_part.c sbar.c skin.c \
 	snd_dma.c \
-	pcx.c tga.c \
-	vid_sdl.c \
+        vid_sdl.c \
         view.c zone.c \
 	bspfile.h keys.h protocol.h \
 	render.h sys.c \

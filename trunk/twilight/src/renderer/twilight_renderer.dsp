@@ -97,6 +97,14 @@ SOURCE=.\noise_textures.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\pcx.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tga.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\transform.c
 # End Source File
 # Begin Source File
