@@ -36,41 +36,19 @@ static const char rcsid[] =
 #include "dir.h"
 #include "pak.h"
 #include "cmd.h"
+#include "rw_ops.h"
 
 static int
-FS_Close_New (SDL_RWops *new)
+FS_Close_New (SDL_RWops *rw, void *data)
 {
-	fs_new_t	*cur = new->hidden.unknown.data1;
+	fs_new_t	*cur = data;
+
+	rw = rw;
 
 	cur->group->close_new (cur->group, cur);
 	Zone_Free (cur->wanted);
-	Zone_Free (new);
 
 	return 0;
-}
-
-static int
-FS_Seek_New (SDL_RWops *rw, int offset, int whence)
-{
-	fs_new_t	*new = rw->hidden.unknown.data1;
-
-	return SDL_RWseek (new->rw, offset, whence);
-}
-
-static int
-FS_Read_New (SDL_RWops *rw, void *ptr, int size, int maxnum)
-{
-	fs_new_t	*new = rw->hidden.unknown.data1;
-
-	return SDL_RWread (new->rw, ptr, size, maxnum);
-}
-
-static int
-FS_Write_New (SDL_RWops *rw, const void *ptr, int size, int num)
-{
-	fs_new_t	*new = rw->hidden.unknown.data1;
-
-	return SDL_RWwrite (new->rw, ptr, size, num);
 }
 
 SDL_RWops *
@@ -88,12 +66,7 @@ FS_Open_New (const char *file, Uint32 flags)
 		if (cur->open_new && cur->open_new(cur, new)) {
 			new->group = cur;
 
-			rw = Zone_Alloc (fs_zone, sizeof (SDL_RWops));
-			rw->hidden.unknown.data1 = new;
-			rw->seek = FS_Seek_New;
-			rw->read = FS_Read_New;
-			rw->write = FS_Write_New;
-			rw->close = FS_Close_New;
+			rw = WrapRW (new->rw, new, FS_Close_New);
 			
 			return rw;
 		}

@@ -28,6 +28,20 @@
 
 #include "fs.h"
 
+typedef int (wrap_close_t) (SDL_RWops *rw, void *data);
+
+typedef struct rw_wrap_s {
+	SDL_RWops		*rw;
+	wrap_close_t	*close;
+	void			*data;
+} rw_wrap_t;
+
+int Wrap_Seek (SDL_RWops *rw, int offset, int whence);
+int Wrap_Read (SDL_RWops *rw, void *ptr, int size, int maxnum);
+int Wrap_Write (SDL_RWops *rw, const void *ptr, int size, int num);
+int Wrap_Close (SDL_RWops *rw);
+SDL_RWops *WrapRW (SDL_RWops *rw, void *data, wrap_close_t *close);
+
 SDL_RWops *LimitFromRW (SDL_RWops *rw, int start, int end);
 int RWprintf (SDL_RWops *rw, const char *format, ...);
 
