@@ -538,9 +538,8 @@ CL_SendMove (usercmd_t *cmd)
 	sizebuf_t   buf;
 	Uint8       data[128];
 
-	buf.maxsize = 128;
-	buf.cursize = 0;
-	buf.data = data;
+	SZ_Init (&buf, data, sizeof(data));
+	SZ_Clear (&buf);
 
 	cl.cmd = *cmd;
 

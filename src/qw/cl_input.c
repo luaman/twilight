@@ -610,7 +610,7 @@ CL_SendCmd (void)
 	// save this command off for prediction
 	i = cls.netchan.outgoing_sequence & UPDATE_MASK;
 	cmd = &cl.frames[i].cmd;
-	cl.frames[i].senttime = realtime;
+	cl.frames[i].senttime = cls.realtime;
 	cl.frames[i].receivedtime = -1;		// we haven't gotten a reply yet
 
 //  seq_hash = (cls.netchan.outgoing_sequence & 0xffff) ; // ^ QW_CHECK_HASH;
@@ -632,9 +632,7 @@ CL_SendCmd (void)
 
 	// send this and the previous cmds in the message, so
 	// if the last packet was dropped, it can be recovered
-	buf.maxsize = 128;
-	buf.cursize = 0;
-	buf.data = data;
+	SZ_Init (&buf, data, sizeof(data));
 
 	MSG_WriteByte (&buf, clc_move);
 

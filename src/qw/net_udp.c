@@ -79,14 +79,30 @@ netadr_t    net_local_adr;
 
 netadr_t    net_from;
 sizebuf_t   net_message;
-int         net_socket;					// non blocking, for receives
-int         net_send_socket;			// blocking, for sends
+
+int         ip_sockets[2];					// non blocking, for receives
 
 #define	MAX_UDP_PACKET	8192
 Uint8       net_message_buffer[MAX_UDP_PACKET];
 
 //int         gethostname (char *, int);
 int         close (int);
+
+#define	MAX_LOOPBACK	4	// must be a power of two
+
+typedef struct
+{
+	byte	data[MAX_UDP_PACKET];
+	int		datalen;
+} loopmsg_t;
+
+typedef struct
+{
+	loopmsg_t	msgs[MAX_LOOPBACK];
+	unsigned int	get, send;
+} loopback_t;
+
+loopback_t	loopbacks[2];
 
 //=============================================================================
 
@@ -103,6 +119,7 @@ NetadrToSockadr (netadr_t *a, struct sockaddr_in *s)
 void
 SockadrToNetadr (struct sockaddr_in *s, netadr_t *a)
 {
+	a->type = NA_IP;
 	*(int *) &a->ip = *(int *) &s->sin_addr;
 	a->port = s->sin_port;
 }
@@ -110,26 +127,25 @@ SockadrToNetadr (struct sockaddr_in *s, netadr_t *a)
 qboolean
 NET_CompareBaseAdr (netadr_t a, netadr_t b)
 {
-	if (a.ip[0] == b.ip[0] && a.ip[1] == b.ip[1] && a.ip[2] == b.ip[2]
-		&& a.ip[3] == b.ip[3])
-		return true;
-	return false;
+	return ((a.type == NA_LOOPBACK && b.type == NA_LOOPBACK) ||
+		(*(unsigned *)a.ip == *(unsigned *)b.ip));
 }
 
 
 qboolean
 NET_CompareAdr (netadr_t a, netadr_t b)
 {
-	if (a.ip[0] == b.ip[0] && a.ip[1] == b.ip[1] && a.ip[2] == b.ip[2]
-		&& a.ip[3] == b.ip[3] && a.port == b.port)
-		return true;
-	return false;
+	return ((a.type == NA_LOOPBACK && b.type == NA_LOOPBACK) ||
+		(*(unsigned *)a.ip == *(unsigned *)b.ip && a.port == b.port));
 }
 
 char       *
 NET_AdrToString (netadr_t a)
 {
 	static char s[64];
+
+	if (a.type == NA_LOOPBACK)
+		return "loopback";
 
 	snprintf (s, sizeof (s), "%i.%i.%i.%i:%i", a.ip[0], a.ip[1], a.ip[2],
 			  a.ip[3], ntohs (a.port));
@@ -165,6 +181,12 @@ NET_StringToAdr (char *s, netadr_t *a)
 	char       *colon;
 	char        copy[128];
 
+	if (!strcmp(s, "local"))
+	{
+		memset(a, 0, sizeof(*a));
+		a->type = NA_LOOPBACK;
+		return true;
+	}
 
 	memset (&sadr, 0, sizeof (sadr));
 	sadr.sin_family = AF_INET;
@@ -192,46 +214,71 @@ NET_StringToAdr (char *s, netadr_t *a)
 	return true;
 }
 
-// Returns true if we can't bind the address locally--in other words, 
-// the IP is NOT one of our interfaces.
-qboolean
-NET_IsClientLegal (netadr_t *adr)
+/*
+=============================================================================
+
+LOOPBACK BUFFERS FOR LOCAL PLAYER
+
+=============================================================================
+*/
+
+qboolean NET_GetLoopPacket (netsrc_t sock)
 {
-#if 0
-	struct sockaddr_in sadr;
-	int         newsocket;
+	int		i;
+	loopback_t	*loop;
 
-	if (adr->ip[0] == 127)
-		return false;					// no local connections period
+	loop = &loopbacks[sock];
 
-	NetadrToSockadr (adr, &sadr);
+	if (loop->send - loop->get > MAX_LOOPBACK)
+		loop->get = loop->send - MAX_LOOPBACK;
 
-	if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
-		Sys_Error ("NET_IsClientLegal: socket:", strerror (errno));
+	if ((int)(loop->send - loop->get) <= 0)
+		return false;
 
-	sadr.sin_port = 0;
+	i = loop->get & (MAX_LOOPBACK-1);
+	loop->get++;
 
-	if (bind (newsocket, (void *) &sadr, sizeof (sadr)) == -1) {
-		// It is not a local address
-		close (newsocket);
-		return true;
-	}
-	close (newsocket);
-	return false;
-#else
+	memcpy (net_message.data, loop->msgs[i].data, loop->msgs[i].datalen);
+	net_message.cursize = loop->msgs[i].datalen;
+	memset (&net_from, 0, sizeof(net_from));
+	net_from.type = NA_LOOPBACK;
 	return true;
-#endif
+}
+
+
+void NET_SendLoopPacket (netsrc_t sock, int length, void *data, netadr_t to)
+{
+	int		i;
+	loopback_t	*loop;
+
+	loop = &loopbacks[sock^1];
+
+	i = loop->send & (MAX_LOOPBACK-1);
+	loop->send++;
+
+	if (length > sizeof(loop->msgs[i].data))
+		Sys_Error ("NET_SendLoopPacket: length > MAX_UDP_PACKET");
+
+	memcpy (loop->msgs[i].data, data, length);
+	loop->msgs[i].datalen = length;
 }
 
 
 //=============================================================================
 
 qboolean
-NET_GetPacket (void)
+NET_GetPacket (netsrc_t sock)
 {
 	int         ret;
 	struct sockaddr_in from;
 	int         fromlen;
+	int			net_socket = ip_sockets[sock];
+
+	if (NET_GetLoopPacket (sock))
+		return true;
+
+	if (net_socket == -1)
+		return false;
 
 	fromlen = sizeof (from);
 	ret =
@@ -261,10 +308,20 @@ NET_GetPacket (void)
 //=============================================================================
 
 void
-NET_SendPacket (int length, void *data, netadr_t to)
+NET_SendPacket (netsrc_t sock, int length, void *data, netadr_t to)
 {
 	int         ret;
 	struct sockaddr_in addr;
+	int			net_socket = ip_sockets[sock];
+
+	if (to.type == NA_LOOPBACK)
+	{
+		NET_SendLoopPacket (sock, length, data, to);
+		return;
+	}
+
+	if (net_socket == -1)
+		return;
 
 	NetadrToSockadr (&to, &addr);
 
@@ -320,33 +377,19 @@ UDP_OpenSocket (int port)
 	return newsocket;
 }
 
-void
-NET_GetLocalAddress (void)
+qboolean 
+NET_IsLocalAddress (netadr_t adr)
 {
-	char        buff[MAXHOSTNAMELEN];
-	struct sockaddr_in address;
-	int         namelen;
-
-	gethostname (buff, MAXHOSTNAMELEN);
-	buff[MAXHOSTNAMELEN - 1] = 0;
-
-	NET_StringToAdr (buff, &net_local_adr);
-
-	namelen = sizeof (address);
-	if (getsockname (net_socket, (struct sockaddr *) &address, &namelen) == -1)
-		Sys_Error ("NET_Init: getsockname:", strerror (errno));
-	net_local_adr.port = address.sin_port;
-
-	Con_Printf ("IP address %s\n", NET_AdrToString (net_local_adr));
+	return NET_CompareAdr (adr, net_local_adr);
 }
 
 /*
 ====================
-NET_Init
+NET_OpenSocket
 ====================
 */
 void
-NET_Init (int port)
+NET_OpenSocket (netsrc_t sock, int port)
 {
 #ifdef _WIN32
 	WSADATA     winsockdata;
@@ -363,20 +406,24 @@ NET_Init (int port)
 	// 
 	// open the single socket to be used for all communications
 	// 
-	net_socket = UDP_OpenSocket (port);
+	ip_sockets[sock] = UDP_OpenSocket (port);
+}
+
+/*
+====================
+NET_Init
+====================
+*/
+void
+NET_Init (void)
+{
+	ip_sockets[NS_CLIENT] = ip_sockets[NS_SERVER] = -1;
 
 	// 
 	// init the message buffer
 	// 
-	net_message.maxsize = sizeof (net_message_buffer);
-	net_message.data = net_message_buffer;
-
-	// 
-	// determine my name & address
-	// 
-	NET_GetLocalAddress ();
-
-	Con_Printf ("UDP Initialized\n");
+	SZ_Init (&net_message, net_message_buffer, 
+		sizeof(net_message_buffer));
 }
 
 /*
@@ -387,6 +434,10 @@ NET_Shutdown
 void
 NET_Shutdown (void)
 {
-	close (net_socket);
+	if (ip_sockets[NS_CLIENT] != -1)
+		close (ip_sockets[NS_CLIENT]);
+
+	if (ip_sockets[NS_SERVER] != -1)
+		close (ip_sockets[NS_SERVER]);
 }
 

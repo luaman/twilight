@@ -33,7 +33,11 @@
 
 #define	PORT_ANY	-1
 
+typedef enum {NA_LOOPBACK, NA_BROADCAST, NA_IP, NA_IPX, NA_BROADCAST_IPX} netadrtype_t;
+
 typedef struct {
+	netadrtype_t	type;
+
 	Uint8       ip[4];
 	unsigned short port;
 	unsigned short pad;
@@ -45,19 +49,20 @@ extern sizebuf_t net_message;
 
 extern struct cvar_s *hostname;
 
-extern int  net_socket;
+typedef enum {NS_CLIENT, NS_SERVER} netsrc_t;
 
-void        NET_Init (int port);
+void        NET_Init (void);
 void        NET_Shutdown (void);
-qboolean    NET_GetPacket (void);
-void        NET_SendPacket (int length, void *data, netadr_t to);
+qboolean    NET_GetPacket (netsrc_t sock);
+void        NET_SendPacket (netsrc_t sock, int length, void *data, netadr_t to);
+void		NET_OpenSocket (netsrc_t sock, int port);
 
 qboolean    NET_CompareAdr (netadr_t a, netadr_t b);
 qboolean    NET_CompareBaseAdr (netadr_t a, netadr_t b);
 char       *NET_AdrToString (netadr_t a);
 char       *NET_BaseAdrToString (netadr_t a);
 qboolean    NET_StringToAdr (char *s, netadr_t *a);
-qboolean    NET_IsClientLegal (netadr_t *adr);
+qboolean	NET_IsLocalAddress (netadr_t adr);
 
 //============================================================================
 
@@ -109,16 +114,18 @@ typedef struct {
 // time and size data to calculate bandwidth
 	int         outgoing_size[MAX_LATENT];
 	double      outgoing_time[MAX_LATENT];
+
+	netsrc_t	sock;
 } netchan_t;
 
 extern int  net_drop;					// packets dropped before this one
 
 void        Netchan_Init (void);
 void        Netchan_Transmit (netchan_t *chan, int length, Uint8 *data);
-void        Netchan_OutOfBand (netadr_t adr, int length, Uint8 *data);
-void        Netchan_OutOfBandPrint (netadr_t adr, char *format, ...);
+void		Netchan_OutOfBand (netsrc_t sock, netadr_t adr, int length, Uint8 *data);
+void        Netchan_OutOfBandPrint (netsrc_t sock, netadr_t adr, char *format, ...);
 qboolean    Netchan_Process (netchan_t *chan);
-void        Netchan_Setup (netchan_t *chan, netadr_t adr, int qport);
+void        Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport);
 
 qboolean    Netchan_CanPacket (netchan_t *chan);
 qboolean    Netchan_CanReliable (netchan_t *chan);

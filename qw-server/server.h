@@ -250,6 +250,8 @@ typedef struct {
 	client_t    clients[MAX_CLIENTS];
 	int         serverflags;			// episode completion information
 
+	double		realtime;
+
 	double      last_heartbeat;
 	int         heartbeat_sequence;
 	svstats_t   stats;

@@ -560,7 +560,7 @@ M_Load_Draw (void)
 		M_Print (16, 32 + 8 * i, m_filenames[i]);
 
 // line cursor
-	M_DrawCharacter (8, 32 + load_cursor * 8, 12 + ((int) (realtime * 4) & 1));
+	M_DrawCharacter (8, 32 + load_cursor * 8, 12 + ((int) (host_realtime * 4) & 1));
 }
 
 
@@ -577,7 +577,7 @@ M_Save_Draw (void)
 		M_Print (16, 32 + 8 * i, m_filenames[i]);
 
 // line cursor
-	M_DrawCharacter (8, 32 + load_cursor * 8, 12 + ((int) (realtime * 4) & 1));
+	M_DrawCharacter (8, 32 + load_cursor * 8, 12 + ((int) (host_realtime * 4) & 1));
 }
 
 
@@ -793,17 +793,17 @@ M_Setup_Draw (void)
 	M_DrawTransPicTranslate (172, 72, p);
 
 	M_DrawCharacter (56, setup_cursor_table[setup_cursor],
-					 12 + ((int) (realtime * 4) & 1));
+					 12 + ((int) (host_realtime * 4) & 1));
 
 	if (setup_cursor == 0)
 		M_DrawCharacter (168 + 8 * strlen (setup_hostname),
 						 setup_cursor_table[setup_cursor],
-						 10 + ((int) (realtime * 4) & 1));
+						 10 + ((int) (host_realtime * 4) & 1));
 
 	if (setup_cursor == 1)
 		M_DrawCharacter (168 + 8 * strlen (setup_myname),
 						 setup_cursor_table[setup_cursor],
-						 10 + ((int) (realtime * 4) & 1));
+						 10 + ((int) (host_realtime * 4) & 1));
 }
 
 
@@ -1065,7 +1065,7 @@ M_Options_Draw (void)
 	}
 
 	// cursor
-	M_DrawCharacter (200, 32 + options_cursor * 8, 12 + ((int) (realtime * 4) & 1));
+	M_DrawCharacter (200, 32 + options_cursor * 8, 12 + ((int) (host_realtime * 4) & 1));
 }
 
 
@@ -1199,7 +1199,7 @@ M_Gfx_Draw (void)
 	M_Print (16, y, "      Particle torches"); M_DrawCheckbox (220, y, gl_particletorches->value);
 
 	// cursor
-	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (realtime * 4) & 1));
+	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (host_realtime * 4) & 1));
 }
 
 void
@@ -1438,7 +1438,7 @@ M_Keys_Draw (void)
 		M_DrawCharacter (130, 48 + keys_cursor * 8, '=');
 	else
 		M_DrawCharacter (130, 48 + keys_cursor * 8,
-						 12 + ((int) (realtime * 4) & 1));
+						 12 + ((int) (host_realtime * 4) & 1));
 }
 
 
@@ -1783,17 +1783,17 @@ M_LanConfig_Draw (void)
 	}
 
 	M_DrawCharacter (basex - 8, lanConfig_cursor_table[lanConfig_cursor],
-					 12 + ((int) (realtime * 4) & 1));
+					 12 + ((int) (host_realtime * 4) & 1));
 
 	if (lanConfig_cursor == 0)
 		M_DrawCharacter (basex + 9 * 8 + 8 * strlen (lanConfig_portname),
 						 lanConfig_cursor_table[0],
-						 10 + ((int) (realtime * 4) & 1));
+						 10 + ((int) (host_realtime * 4) & 1));
 
 	if (lanConfig_cursor == 2)
 		M_DrawCharacter (basex + 16 + 8 * strlen (lanConfig_joinname),
 						 lanConfig_cursor_table[2],
-						 10 + ((int) (realtime * 4) & 1));
+						 10 + ((int) (host_realtime * 4) & 1));
 
 	if (*m_return_reason)
 		M_PrintWhite (basex, 148, m_return_reason);
@@ -2193,10 +2193,10 @@ M_GameOptions_Draw (void)
 
 // line cursor
 	M_DrawCharacter (144, gameoptions_cursor_table[gameoptions_cursor],
-					 12 + ((int) (realtime * 4) & 1));
+					 12 + ((int) (host_realtime * 4) & 1));
 
 	if (m_serverInfoMessage) {
-		if ((realtime - m_serverInfoMessageTime) < 5.0) {
+		if ((host_realtime - m_serverInfoMessageTime) < 5.0) {
 			x = (320 - 26 * 8) / 2;
 			M_DrawTextBox (x, 138, 24, 4);
 			x += 8;
@@ -2223,7 +2223,7 @@ M_NetStart_Change (int dir)
 			if (maxplayers > svs.maxclientslimit) {
 				maxplayers = svs.maxclientslimit;
 				m_serverInfoMessage = true;
-				m_serverInfoMessageTime = realtime;
+				m_serverInfoMessageTime = host_realtime;
 			}
 			if (maxplayers < 2)
 				maxplayers = 2;
@@ -2404,7 +2404,7 @@ M_Search_Draw (void)
 
 	if (!searchComplete) {
 		searchComplete = true;
-		searchCompleteTime = realtime;
+		searchCompleteTime = host_realtime;
 	}
 
 	if (hostCacheCount) {
@@ -2413,7 +2413,7 @@ M_Search_Draw (void)
 	}
 
 	M_PrintWhite ((320 / 2) - ((22 * 8) / 2), 64, "No Quake servers found");
-	if ((realtime - searchCompleteTime) < 3.0)
+	if ((host_realtime - searchCompleteTime) < 3.0)
 		return;
 
 	M_Menu_LanConfig_f ();
@@ -2480,7 +2480,7 @@ M_ServerList_Draw (void)
 					  hostcache[n].name, hostcache[n].map);
 		M_Print (16, 32 + 8 * n, string);
 	}
-	M_DrawCharacter (0, 32 + slist_cursor * 8, 12 + ((int) (realtime * 4) & 1));
+	M_DrawCharacter (0, 32 + slist_cursor * 8, 12 + ((int) (host_realtime * 4) & 1));
 
 	if (*m_return_reason)
 		M_PrintWhite (16, 148, m_return_reason);

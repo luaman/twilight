@@ -86,7 +86,7 @@ SV_FlushRedirect (void)
 		send[4] = A2C_PRINT;
 		memcpy (send + 5, outputbuf, strlen (outputbuf) + 1);
 
-		NET_SendPacket (strlen (send) + 1, send, net_from);
+		NET_SendPacket (NS_SERVER, strlen (send) + 1, send, net_from);
 	} else if (sv_redirected == RD_CLIENT) {
 		ClientReliableWrite_Begin (host_client, svc_print,
 								   strlen (outputbuf) + 3);
@@ -597,11 +597,10 @@ SV_SendClientDatagram (client_t *client)
 	Uint8       buf[MAX_DATAGRAM];
 	sizebuf_t   msg;
 
-	msg.data = buf;
-	msg.maxsize = sizeof (buf);
-	msg.cursize = 0;
+	SZ_Init (&msg, buf, sizeof(buf));
+	SZ_Clear (&msg);
+
 	msg.allowoverflow = true;
-	msg.overflowed = false;
 
 	// add the client specific data to the datagram
 	SV_WriteClientdataToMessage (client, &msg);

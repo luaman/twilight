@@ -968,8 +968,8 @@ Sbar_DeathmatchOverlay (int start)
 		skip = 8;
 
 	// request new ping times every two second
-	if (realtime - cl.last_ping_request > 2) {
-		cl.last_ping_request = realtime;
+	if (curtime - cl.last_ping_request > 2) {
+		cl.last_ping_request = curtime;
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		SZ_Print (&cls.netchan.message, "pings");
 	}
@@ -1047,7 +1047,7 @@ Sbar_DeathmatchOverlay (int start)
 		if (cl.intermission)
 			total = cl.completed_time - s->entertime;
 		else
-			total = realtime - s->entertime;
+			total = curtime - s->entertime;
 		minutes = (int) total / 60;
 		snprintf (num, sizeof (num), "%4i", minutes);
 		Draw_String (x + 64, y, num);

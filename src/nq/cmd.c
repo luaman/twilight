@@ -89,6 +89,7 @@ Cmd_Wait_f (void)
 */
 
 sizebuf_t   cmd_text;
+Uint8		cmd_text_buf[8192];
 
 /*
 ============
@@ -98,7 +99,8 @@ Cbuf_Init
 void
 Cbuf_Init (void)
 {
-	SZ_Alloc (&cmd_text, 8192);			// space for commands and script files
+	cmd_text.data = cmd_text_buf;
+	cmd_text.maxsize = sizeof (cmd_text_buf);
 }
 
 

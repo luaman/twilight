@@ -181,7 +181,7 @@
 
 
 extern double host_frametime;
-extern double realtime;
+extern double curtime;
 
 #endif // __QUAKEDEF_H
 

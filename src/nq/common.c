@@ -495,24 +495,12 @@ MSG_ReadAngle (void)
 
 //===========================================================================
 
-void
-SZ_Alloc (sizebuf_t *buf, int startsize)
+void 
+SZ_Init (sizebuf_t *buf, Uint8 *data, int length)
 {
-	if (startsize < 256)
-		startsize = 256;
-	buf->data = Hunk_AllocName (startsize, "sizebuf");
-	buf->maxsize = startsize;
-	buf->cursize = 0;
-}
-
-
-void
-SZ_Free (sizebuf_t *buf)
-{
-//      Z_Free (buf->data);
-//      buf->data = NULL;
-//      buf->maxsize = 0;
-	buf->cursize = 0;
+	memset (buf, 0, sizeof(*buf));
+	buf->data = data;
+	buf->maxsize = length;
 }
 
 void

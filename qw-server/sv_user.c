@@ -99,7 +99,7 @@ SV_New_f (void)
 		return;
 
 	host_client->state = cs_connected;
-	host_client->connection_started = realtime;
+	host_client->connection_started = svs.realtime;
 
 	// send the info about the new client to all connected clients
 //  SV_FullClientUpdate (host_client, &sv.reliable_datagram);
@@ -591,7 +591,7 @@ OutofBandPrintf (netadr_t where, char *fmt, ...)
 	vsnprintf (send + 5, sizeof (send) - 5, fmt, argptr);
 	va_end (argptr);
 
-	NET_SendPacket (strlen (send) + 1, send, where);
+	NET_SendPacket (NS_SERVER, strlen (send) + 1, send, where);
 }
 
 /*
@@ -775,18 +775,18 @@ SV_Say (qboolean team)
 	}
 
 	if (fp_messages) {
-		if (!sv.paused && realtime < host_client->lockedtill) {
+		if (!sv.paused && svs.realtime < host_client->lockedtill) {
 			SV_ClientPrintf (host_client, PRINT_CHAT,
 							 "You can't talk for %d more seconds\n",
-							 (int) (host_client->lockedtill - realtime));
+							 (int) (host_client->lockedtill - svs.realtime));
 			return;
 		}
 		tmp = host_client->whensaidhead - fp_messages + 1;
 		if (tmp < 0)
 			tmp = 10 + tmp;
 		if (!sv.paused && host_client->whensaid[tmp]
-			&& (realtime - host_client->whensaid[tmp] < fp_persecond)) {
-			host_client->lockedtill = realtime + fp_secondsdead;
+			&& (svs.realtime - host_client->whensaid[tmp] < fp_persecond)) {
+			host_client->lockedtill = svs.realtime + fp_secondsdead;
 			if (fp_msg[0])
 				SV_ClientPrintf (host_client, PRINT_CHAT,
 								 "FloodProt: %s\n", fp_msg);
@@ -799,7 +799,7 @@ SV_Say (qboolean team)
 		host_client->whensaidhead++;
 		if (host_client->whensaidhead > 9)
 			host_client->whensaidhead = 0;
-		host_client->whensaid[host_client->whensaidhead] = realtime;
+		host_client->whensaid[host_client->whensaidhead] = svs.realtime;
 	}
 
 	p = Cmd_Args ();
@@ -1417,7 +1417,7 @@ SV_RunCmd (usercmd_t *ucmd, qboolean inside)
 			goto SV_RunCmd__clear;
 
 		host_client->msecs += ucmd->msec;
-		time_since = realtime - host_client->msec_last_check;
+		time_since = svs.realtime - host_client->msec_last_check;
 		if (time_since >= sv_timekick_interval->value) {
 			time_allowed = time_since * (1000 + sv_timekick_allowed->value);
 			if (host_client->msecs > time_allowed) {
@@ -1437,7 +1437,7 @@ SV_RunCmd (usercmd_t *ucmd, qboolean inside)
 		}
 SV_RunCmd__clear:
 		host_client->msecs = 0;
-		host_client->msec_last_check = realtime;
+		host_client->msec_last_check = svs.realtime;
 	}
 		
 	cmd = *ucmd;
@@ -1594,7 +1594,7 @@ SV_ExecuteClientMessage (client_t *cl)
 
 	// calc ping time
 	frame = &cl->frames[cl->netchan.incoming_acknowledged & UPDATE_MASK];
-	frame->ping_time = realtime - frame->senttime;
+	frame->ping_time = svs.realtime - frame->senttime;
 
 	// make sure the reply sequence number matches the incoming
 	// sequence number 
@@ -1604,7 +1604,7 @@ SV_ExecuteClientMessage (client_t *cl)
 		cl->send_message = false;		// don't reply, sequences have slipped 
 
 	// save time for ping calculations
-	cl->frames[cl->netchan.outgoing_sequence & UPDATE_MASK].senttime = realtime;
+	cl->frames[cl->netchan.outgoing_sequence & UPDATE_MASK].senttime = svs.realtime;
 	cl->frames[cl->netchan.outgoing_sequence & UPDATE_MASK].ping_time = -1;
 
 	host_client = cl;

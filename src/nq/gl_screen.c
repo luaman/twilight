@@ -531,7 +531,7 @@ SCR_DrawNet
 void
 SCR_DrawNet (void)
 {
-	if (realtime - cl.last_received_message < 0.3)
+	if (host_realtime - cl.last_received_message < 0.3)
 		return;
 	if (cls.demoplayback)
 		return;
@@ -744,7 +744,7 @@ SCR_BeginLoadingPlaque (void)
 	scr_drawloading = false;
 
 	scr_disabled_for_loading = true;
-	scr_disabled_time = realtime;
+	scr_disabled_time = host_realtime;
 }
 
 /*
@@ -814,7 +814,7 @@ void
 SCR_UpdateScreen (void)
 {
 	if (scr_disabled_for_loading) {
-		if (realtime - scr_disabled_time > 60) {
+		if (host_realtime - scr_disabled_time > 60) {
 			scr_disabled_for_loading = false;
 			Con_Printf ("load failed.\n");
 		} else
