@@ -385,6 +385,9 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 	vec3_t		org;
 	model_t		*model;
 
+	if (!r_stainmaps->ivalue)
+		return;
+
 	icolor[0] = cr1;
 	icolor[1] = cg1;
 	icolor[2] = cb1;
