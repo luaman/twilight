@@ -953,7 +953,8 @@ R_DrawAliasModel (entity_t *e)
 		}
 	}
 
-/* FIXME: ?	qglShadeModel (GL_FLAT); */
+/* FIXME: Should this be completely removed with gl_smoothmodels cvar too? */
+	qglShadeModel (GL_FLAT);
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 

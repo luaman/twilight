@@ -547,19 +547,26 @@ CL_RelinkEntities (void)
 		if (ent->effects & EF_DARKFIELD)
 			R_DarkFieldParticles (ent);
 #endif
+
 		if (ent->effects & EF_MUZZLEFLASH) {
-			vec3_t      fv, rv, uv;
+			extern cvar_t *gl_flashblend;
 
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin, dl->origin);
-			dl->origin[2] += 16;
-			AngleVectors (ent->angles, fv, rv, uv);
+			// don't draw our own muzzle flash if flashblending
+			if (i != cl.viewentity || !gl_flashblend->value) {
+				vec3_t      fv, rv, uv;
 
-			VectorMA (dl->origin, 18, fv, dl->origin);
-			dl->radius = 200 + (Q_rand () & 31);
-			dl->minlight = 32;
-			dl->die = cl.time + 0.1;
+				dl = CL_AllocDlight (i);
+				VectorCopy (ent->origin, dl->origin);
+				dl->origin[2] += 16;
+				AngleVectors (ent->angles, fv, rv, uv);
+
+				VectorMA (dl->origin, 18, fv, dl->origin);
+				dl->radius = 200 + (Q_rand () & 31);
+				dl->minlight = 32;
+				dl->die = cl.time + 0.1;
+			}
 		}
+
 		if (ent->effects & EF_BRIGHTLIGHT) {
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin, dl->origin);
