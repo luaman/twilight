@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "gl_info.h"
 #include "gl_main.h"
+#include "surface.h"
 
 Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
 
@@ -45,11 +46,13 @@ int lightmap_shift;
 int gl_lightmap_format = GL_RGB;
 
 cvar_t *gl_subdivide_size;
+cvar_t *gl_colorlights;
 
 void
 Surf_Init_Cvars (void)
 {
 	gl_subdivide_size =Cvar_Get("gl_subdivide_size", "128", CVAR_ARCHIVE, NULL);
+	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 }
 
 void
@@ -122,7 +125,7 @@ BuildGLPolyFromEdges (msurface_t *surf, model_t *model, int *count)
 }
 
 void
-SetupLightmapSettings ()
+SetupLightmapSettings (void)
 {
 	r_framecount = 1;
 	if (gl_mtexcombine)

@@ -31,7 +31,7 @@
 
 void Surf_Init_Cvars(void);
 void BuildGLPolyFromEdges(msurface_t *surf, model_t *model, int *count);
-void SetupLightmapSettings(void);
+void SetupLightmapSettings (void);
 qboolean AllocLightBlockForSurf(int *allocated, int num, msurface_t *surf, memzone_t *zone);
 
 extern Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];

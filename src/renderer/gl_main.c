@@ -92,7 +92,6 @@ cvar_t *gl_playermip;
 cvar_t *gl_finish;
 cvar_t *gl_im_transform;
 cvar_t *gl_oldlights;
-cvar_t *gl_colorlights;
 
 qboolean colorlights = true;
 
@@ -386,7 +385,6 @@ R_Init_Cvars (void)
 
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
-	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 
 
 
