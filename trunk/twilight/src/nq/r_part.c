@@ -97,7 +97,6 @@ float       timescale = 0.01;
 void
 R_EntityParticles (entity_t *ent)
 {
-	int         count = 50;
 	int         i;
 	particle_t *p;
 	float       angle;

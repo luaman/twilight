@@ -41,9 +41,7 @@ twilight_nq_SOURCES= \
 	render.h server.h sys.c
 
 EXTRA_twilight_nq_SOURCES= \
-	sys_win.c conproc.c conproc.h \
-	sys_linux.c \
-	sys_wind.c
+	conproc.c conproc.h
 
 EXTRA_DIST= \
 	nq.dsp
