@@ -424,12 +424,12 @@ static void
 R_DrawAliasModel (entity_t *e, qboolean viewent)
 {
 	int				lnum, anim;
-	float			add;
-	model_t		   *clmodel = e->model;
-	aliashdr_t	   *paliashdr;
-	dlight_t	   *l;
+	model_t			*clmodel = e->model;
+	aliashdr_t		*paliashdr;
+	rdlight_t		*rd;
 	skin_t			*skin;
-	vec3_t			top, bottom;
+	vec3_t			top, bottom, dist;
+	float			f;
 	qboolean		has_top = false, has_bottom = false, has_fb = false;
 
 	if (gl_particletorches->ivalue) {
@@ -468,16 +468,16 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 			lightcolor[2] = max (lightcolor[2], 24);
 		}
 
-		for (lnum = 0, l = &cl_dlights[0]; lnum < MAX_DLIGHTS; lnum++, l++) {
-			if (l->die < cl.time || !l->radius)
-				continue;
-
-			add = VectorDistance_fast (e->cur.origin, l->origin);
-
-			if (add <= l->radius * l->radius) {
-				add = 8 * l->radius * l->radius / add; 
-
-				VectorMA(lightcolor, add, l->color, lightcolor);
+		for (lnum = 0; lnum < r_numdlights; lnum++)
+		{
+			rd = r_dlight + lnum;
+			VectorSubtract (e->cur.origin, rd->origin, dist);
+			f = DotProduct (dist, dist) + LIGHTOFFSET;
+			if (f < rd->cullradius2)
+			{
+				f = (1.0f / f) - rd->lightsubtract;
+				if (f > 0)
+					VectorMA (lightcolor, f, rd->light, lightcolor);
 			}
 		}
 
