@@ -54,8 +54,7 @@ void Host_ShutdownServer (qboolean crash);
 #ifdef TWILIGHT_NQ
 extern qboolean noclip_anglehack;
 extern qboolean host_initialized;		// true if into command execution
-extern qboolean msg_suppress_1;	// suppresses resolution and cache size 
-										// console output
+
 /*
  * skill level for currently loaded level (in case the user changes the
  *cvar while the level is running, this reflects the level actually in use)

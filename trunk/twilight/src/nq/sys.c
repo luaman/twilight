@@ -123,6 +123,7 @@ Sys_Printf (char *fmt, ...)
 		DWORD		dummy;
 
 		WriteFile(houtput, text, strlen (text), &dummy, NULL);
+		FlushFileBuffers(houtput);
 		return;
 	}
 #endif
@@ -132,6 +133,8 @@ Sys_Printf (char *fmt, ...)
 			printf ("[%02x]", *p);
 		else
 			putc (*p, stdout);
+
+	fflush(stdout);
 }
 
 void
