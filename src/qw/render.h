@@ -164,10 +164,6 @@ extern int d_lightstylevalue[256];		// 8.8 fraction of base light value
 extern int netgraphtexture;				// netgraph texture
 extern int playertextures;
 
-extern int skyboxtexnums[6];
-
-extern int skytexturenum;				// in cl.loadmodel, not GL texture
-
 extern struct cvar_s *r_norefresh;
 extern struct cvar_s *r_drawentities;
 extern struct cvar_s *r_drawviewmodel;
@@ -181,8 +177,6 @@ extern struct cvar_s *r_dynamic;
 extern struct cvar_s *r_novis;
 extern struct cvar_s *r_stainmaps;
 extern struct cvar_s *r_netgraph;
-extern struct cvar_s *r_skyname;
-extern struct cvar_s *r_fastsky;
 
 extern struct cvar_s *gl_clear;
 extern struct cvar_s *gl_cull;

@@ -78,13 +78,11 @@ EmitWaterPolys (model_t *mod, glpoly_t *p, qboolean arranged)
 					sizeof(vertex_t) * p->numverts);
 			memcpy(tc0_array_v(0), B_TC_v(brush, 0, p->start),
 					sizeof(texcoord_t) * p->numverts);
-			TWI_PreVDrawCVA (0, p->numverts);
+			TWI_PreVDraw (0, p->numverts);
 			qglDrawArrays (GL_TRIANGLE_FAN, 0, p->numverts);
-			TWI_PostVDrawCVA ();
+			TWI_PostVDraw ();
 		} else {
-			TWI_PreVDrawCVA (p->start, p->numverts);
 			qglDrawArrays (GL_TRIANGLE_FAN, p->start, p->numverts);
-			TWI_PostVDrawCVA ();
 		}
 	}
 	qglPopMatrix ();

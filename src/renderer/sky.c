@@ -43,14 +43,14 @@ static const char rcsid[] =
 
 #include "cvar.h"
 #include "cmd.h"
+#include "strlib.h"
 
 extern model_t *loadmodel;
 
-GLuint	skyboxtexnums[6];
+static GLuint	skyboxtexnums[6];
 
-GLuint	solidskytexture;
-GLuint	alphaskytexture;
-float	speedscale, speedscale2;	// for top sky and bottom sky
+static GLuint	solidskytexture;
+static GLuint	alphaskytexture;
 
 cvar_t *r_skyname;
 cvar_t *r_fastsky;
@@ -79,9 +79,7 @@ Sky_Emit_Chain (model_t *mod, chain_head_t *chain, qboolean arranged)
 					qglDrawArrays (GL_POLYGON, 0, p->numverts);
 					TWI_PostVDrawCVA ();
 				} else {
-					TWI_PreVDrawCVA (p->start, p->numverts);
 					qglDrawArrays (GL_POLYGON, p->start, p->numverts);
-					TWI_PostVDrawCVA ();
 				}
 			}
 		}
@@ -196,22 +194,25 @@ Sky_Sphere_Calc (void)
 void
 Sky_Sphere_Draw (void)
 {
+	float speedscale;
+
+	speedscale = r_time * (8.0 / 128.0);
+	speedscale -= floor(speedscale);
+
 	qglDepthMask (GL_FALSE);
 	qglPushMatrix ();
 	qglTranslatef(r_origin[0], r_origin[1], r_origin[2]);
-	qglMatrixMode (GL_TEXTURE);
 
-	qglVertexPointer (3, GL_FLOAT, 0, Sky_Sphere_Verts);
-	qglTexCoordPointer (2, GL_FLOAT, 0, Sky_Sphere_Texcoords);
+	qglVertexPointer (3, GL_FLOAT, sizeof(vertex_t), Sky_Sphere_Verts);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), Sky_Sphere_Texcoords);
+
+	qglMatrixMode (GL_TEXTURE);
+	qglPushMatrix ();
+	qglTranslatef (speedscale, speedscale, 0);
+
+	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
 
 	if (!gl_mtex) {
-		speedscale = r_time * (8.0 / 128.0);
-		speedscale -= floor(speedscale);
-
-		qglPushMatrix ();
-		qglTranslatef (speedscale, speedscale, 0);
-		qglBindTexture (GL_TEXTURE_2D, solidskytexture);
-
 		qglDrawElements (GL_TRIANGLES, Sky_Sphere_Numele, GL_UNSIGNED_INT,
 				Sky_Sphere_Elements);
 
@@ -224,25 +225,19 @@ Sky_Sphere_Draw (void)
 				Sky_Sphere_Elements);
 
 		qglDisable (GL_BLEND);
-		qglPopMatrix ();
 	} else {
-		speedscale = r_time * (8.0 / 128.0);
-		speedscale -= floor(speedscale);
-
-		qglPushMatrix ();
-		qglTranslatef (speedscale, speedscale, 0);
-		qglBindTexture (GL_TEXTURE_2D, solidskytexture);
+		qglClientActiveTextureARB (GL_TEXTURE1_ARB);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), Sky_Sphere_Texcoords);
+		qglClientActiveTextureARB (GL_TEXTURE0_ARB);
 
 		qglActiveTextureARB (GL_TEXTURE1_ARB);
-		qglClientActiveTextureARB (GL_TEXTURE1_ARB);
-		qglTexCoordPointer (2, GL_FLOAT, 0, Sky_Sphere_Texcoords);
-		qglClientActiveTextureARB (GL_TEXTURE0_ARB);
 		qglPushMatrix ();
-		speedscale *= 2;
 
+		speedscale *= 2;
 		qglTranslatef (speedscale, speedscale, 0);
-		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 		qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
+
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 		qglEnable (GL_TEXTURE_2D);
 
 		qglDrawElements (GL_TRIANGLES, Sky_Sphere_Numele, GL_UNSIGNED_INT,
@@ -250,15 +245,17 @@ Sky_Sphere_Draw (void)
 
 		qglDisable (GL_TEXTURE_2D);
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
 		qglPopMatrix ();
 		qglActiveTextureARB (GL_TEXTURE0_ARB);
-		qglPopMatrix ();
 	}
+
+	qglPopMatrix ();
+	qglMatrixMode (GL_MODELVIEW);
 
 	GLArrays_Reset_TC ();
 	GLArrays_Reset_Vertex ();
 
-	qglMatrixMode (GL_MODELVIEW);
 	qglPopMatrix ();
 	qglDepthMask (GL_TRUE);
 }
@@ -296,15 +293,7 @@ Sky_LoadSkys (cvar_t *cvar)
 			return false;
 		}
 
-		qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[i]);
-		qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height,
-				0, GL_RGBA, GL_UNSIGNED_BYTE, img->pixels);
-
-		free (img->pixels);
-		free (img);
-
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		skyboxtexnums[i] = GLT_Load_image(va("%s#%d", name, i), img, NULL, 0);
 	}
 
 	return true;
@@ -455,15 +444,7 @@ Sky_InitSky (texture_t *unused, Uint8 *pixels)
 	transpix[3] = 0;
 
 
-	if (!solidskytexture)
-		qglGenTextures(1, &solidskytexture);
-
-	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
-	qglTexImage2D (GL_TEXTURE_2D, 0, glt_solid_format, 128, 128, 0, GL_RGBA,
-				  GL_UNSIGNED_BYTE, trans);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_mag);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
-
+	solidskytexture = GLT_Load_Raw ("Sky Solid", 128, 128, (Uint8 *) trans, NULL, TEX_REPLACE, 32);
 
 	for (i = 0; i < 128; i++)
 		for (j = 0; j < 128; j++)
@@ -475,14 +456,7 @@ Sky_InitSky (texture_t *unused, Uint8 *pixels)
 				memcpy(&trans[(i * 128) + j], &d_palette_raw[p], sizeof(trans[0]));
 		}
 
-	if (!alphaskytexture)
-		qglGenTextures(1, &alphaskytexture);
-
-	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
-	qglTexImage2D (GL_TEXTURE_2D, 0, glt_alpha_format, 128, 128, 0, GL_RGBA,
-			GL_UNSIGNED_BYTE, trans);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_mag);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
+	alphaskytexture = GLT_Load_Raw ("Sky Alpha", 128, 128, (Uint8 *) trans, NULL, TEX_REPLACE | TEX_ALPHA, 32);
 }
 
 /*

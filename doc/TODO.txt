@@ -2,9 +2,6 @@ Project Twilight todo list
 --------------------------
 
 Stuff /required/ for 0.2.0:
-  - Texture size limit in loading, we screw up, badly:
-    * We need to make sure that gl_max_size is a power of two.
-    * We need to keep the texture aspect ratio.
   - Menu: (Listed in order of priority.)
     * Find a clean way to include a text file in the binary so that we
       still have a basic menu.

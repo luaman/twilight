@@ -363,7 +363,7 @@ R_DrawExplosions (void)
 	{
 		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 		TWI_PreVDrawCVA (0, EXPLOSIONTRIS * 3);
-		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
+		qglDrawElements (GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
 		TWI_PostVDrawCVA ();
 		v_index = 0;
 		i_index = 0;

@@ -84,7 +84,7 @@ R_NetGraph (void)
 	int         a, x, i, y;
 	int         lost;
 	char        st[80];
-	unsigned    ngraph_pixels[NET_GRAPHHEIGHT][NET_TIMINGS];
+	Uint32      ngraph_pixels[NET_GRAPHHEIGHT][NET_TIMINGS];
 
 	x = 0;
 	lost = CL_CalcNet ();
@@ -110,12 +110,7 @@ R_NetGraph (void)
 
 	qglBindTexture (GL_TEXTURE_2D, netgraphtexture);
 
-	qglTexImage2D (GL_TEXTURE_2D, 0, glt_alpha_format,
-				  NET_TIMINGS, NET_GRAPHHEIGHT, 0, GL_RGBA,
-				  GL_UNSIGNED_BYTE, ngraph_pixels);
-
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_mag);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
+	GL_Upload32 ((Uint32 *) ngraph_pixels, NET_TIMINGS, NET_GRAPHHEIGHT, TEX_ALPHA);
 
 	x = 8;
 	VectorSet2 (tc_array_v(0), 0, 0);

@@ -434,10 +434,7 @@ Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
 		}
 	}
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_mag);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
-	qglTexImage2D (GL_TEXTURE_2D, 0, glt_alpha_format, 64, 64, 0, GL_RGBA,
-				  GL_UNSIGNED_BYTE, trans);
+	GL_Upload32 (trans, 64, 64, TEX_ALPHA);
 
 	VectorSet2 (tc_array_v(0), 0, 0);
 	VectorSet2 (v_array_v(0), x, y);

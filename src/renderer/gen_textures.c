@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "zone.h"
 #include "gen_textures.h"
+#include "gl_textures.h"
 
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 
@@ -90,11 +91,7 @@ TNT_InitLightningBeamTexture (void)
 		}
 	}
 
-	qglGenTextures(1, &tmp);
-	qglBindTexture (GL_TEXTURE_2D, tmp);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	qglTexImage2D (GL_TEXTURE_2D, 0, 4, 32, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	tmp = GLT_Load_Raw ("GTF_lightning", 32, 512, data, NULL, TEX_ALPHA, 32);
 
 	Zone_Free(data);
 	Zone_Free(noise1);
@@ -293,12 +290,8 @@ GTF_Init (void)
 		}
 		setuptex(GTF_blooddecal[i], &data[0][0][0], font_texture_data);
 	}
-	qglGenTextures(1, &GTF_texnum);
-	qglBindTexture (GL_TEXTURE_2D, GTF_texnum);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	qglTexImage2D (GL_TEXTURE_2D, 0, 4, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, font_texture_data);
 
+	GTF_texnum = GLT_Load_Raw ("GTF_main", 256, 256, font_texture_data, NULL, TEX_ALPHA, 32);
 	for (i = 0;i < MAX_GT_FONT_TEXTURES;i++)
 		GTF_texture[i].texture = GTF_texnum;
 

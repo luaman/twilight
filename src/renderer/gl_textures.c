@@ -97,6 +97,14 @@ cvar_t *r_colormiplevels;
 cvar_t *gl_picmip;
 cvar_t *gl_max_size;
 
+static void
+GLT_verify_pow2 (cvar_t *cvar)
+{
+	int out;
+	out = near_pow2_low(cvar->ivalue);
+	if (out != cvar->ivalue)
+		Cvar_Set(cvar, va("%d", out));
+}
 
 /*
  * The Init functions, by now all the types and variables should be declared.
@@ -112,7 +120,7 @@ GLT_Init_Cvars ()
 		max_tex_size = 1024;
 
 	gl_max_size = Cvar_Get ("gl_max_size", va("%d", max_tex_size), CVAR_NONE,
-			NULL);
+			GLT_verify_pow2);
 	gl_texturemode = Cvar_Get ("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST",
 			CVAR_ARCHIVE, Set_TextureMode_f);
 	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
@@ -1175,13 +1183,8 @@ GL_Upload32 (Uint32 *data, int width, int height, int flags)
 	Uint32	*final;
 
 	// OpenGL textures are power of two
-	scaled_width = 1;
-	while (scaled_width < width)
-		scaled_width <<= 1;
-
-	scaled_height = 1;
-	while (scaled_height < height)
-		scaled_height <<= 1;
+	scaled_width = near_pow2_high(width);
+	scaled_height = near_pow2_high(height);
 
 	// Apply gl_picmip, a setting of one cuts texture memory usage 75%!
 	scaled_width >>= gl_picmip->ivalue;
@@ -1263,8 +1266,9 @@ GLT_Load_Raw (const char *identifier, Uint width, Uint height, Uint8 *data,
 		{
 			if (!strcmp (identifier, glt->identifier))
 			{
-				if (width == glt->width && height == glt->height
-						&& crc == glt->crc) {
+				if ((flags & TEX_REPLACE) ||
+						(width == glt->width && height == glt->height
+						&& crc == glt->crc)) {
 					glt->count++;
 					return glt->texnum;
 				} else

@@ -677,12 +677,13 @@ R_DrawTextureChains (model_t *mod, int frame,
 
 	if (gl_vbo) {
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_VERTS]);
-		qglVertexPointer (3, GL_FLOAT, 0, 0);
+		qglVertexPointer (3, GL_FLOAT, sizeof(vertex_t), 0);
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC0]);
-		qglTexCoordPointer (2, GL_FLOAT, 0, 0);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), 0);
 	} else {
-		qglVertexPointer (3, GL_FLOAT, 0, brush->verts);
-		qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[0]);
+		qglVertexPointer (3, GL_FLOAT, sizeof(vertex_t), brush->verts);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), brush->tcoords[0]);
+		TWI_PreVDrawCVA(0, brush->numsets);
 	}
 	
 	if (matrix) {
@@ -739,11 +740,11 @@ R_DrawTextureChains (model_t *mod, int frame,
 		if (gl_vbo) {
 			qglClientActiveTextureARB(GL_TEXTURE1_ARB);
 			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC1]);
-			qglTexCoordPointer (2, GL_FLOAT, 0, 0);
+			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), 0);
 			qglClientActiveTextureARB(GL_TEXTURE0_ARB);
 		} else {
 			qglClientActiveTextureARB(GL_TEXTURE1_ARB);
-			qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[1]);
+			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), brush->tcoords[1]);
 			qglClientActiveTextureARB(GL_TEXTURE0_ARB);
 		}
 
@@ -810,9 +811,9 @@ R_DrawTextureChains (model_t *mod, int frame,
 
 		if (gl_vbo) {
 			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC1]);
-			qglTexCoordPointer (2, GL_FLOAT, 0, 0);
+			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), 0);
 		} else
-			qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[1]);
+			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), brush->tcoords[1]);
 
 		qglEnable (GL_BLEND);
 		for (i = 0; i < brush->lightblock.num; i++)
@@ -832,9 +833,9 @@ R_DrawTextureChains (model_t *mod, int frame,
 
 		if (gl_vbo) {
 			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC0]);
-			qglTexCoordPointer (2, GL_FLOAT, 0, 0);
+			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), 0);
 		} else
-			qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[0]);
+			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), brush->tcoords[0]);
 
 		qglDisable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -881,6 +882,8 @@ R_DrawTextureChains (model_t *mod, int frame,
 
 	if (gl_vbo)
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	else
+		TWI_PostVDrawCVA ();
 
 	GLArrays_Reset_Vertex ();
 	GLArrays_Reset_TC ();

@@ -34,6 +34,7 @@ typedef enum {
 	SKY_SPHERE, SKY_BOX, SKY_FAST,
 } sky_type_t;
 
+extern cvar_t *r_skyname;
 extern sky_type_t	sky_type;
 
 void Sky_Init_Cvars (void);
