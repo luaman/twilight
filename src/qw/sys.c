@@ -43,6 +43,12 @@ static const char rcsid[] =
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#ifdef HAVE_DIRECT_H
+#include <direct.h>
+#endif
+#ifdef HAVE_TCHAR_H
+#include <tchar.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -56,6 +62,9 @@ static const char rcsid[] =
 #include <pwd.h>
 #endif
 #include <errno.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #include <SDL.h>
 
@@ -110,6 +119,10 @@ Sys_Quit (void)
 #endif
 	exit (0);
 }
+
+#ifdef _WIN32
+HANDLE		qwclsemaphore;
+#endif
 
 void
 Sys_Init (void)
@@ -179,7 +192,11 @@ Sys_FileTime (char *path)
 void
 Sys_mkdir (char *path)
 {
+#ifdef _WIN32
+	_mkdir (path);
+#else
 	mkdir (path, 0777);
+#endif
 }
 
 
@@ -188,14 +205,27 @@ Sys_DebugLog (char *file, char *fmt, ...)
 {
 	va_list     argptr;
 	static char data[1024];
+
+#ifdef _WIN32
+	FILE		*fd;
+#else
 	int         fd;
+#endif
 
 	va_start (argptr, fmt);
 	vsnprintf (data, sizeof (data), fmt, argptr);
 	va_end (argptr);
+
+#ifdef _WIN32
+	fd = fopen (file, "at");
+	fprintf (fd, data);
+	fclose (fd);
+#else
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
 	write (fd, data, strlen (data));
 	close (fd);
+#endif
+
 }
 
 
@@ -300,9 +330,17 @@ Sys_ExpandPath (char *str)
 }
 #endif
 
+#ifdef _WIN32
+int 
+WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+	int c = __argc;
+	char **v = __argv;
+#else
 int
 main (int c, char **v)
 {
+#endif
 
 	double      time, oldtime, newtime;
 	int         j;

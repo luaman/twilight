@@ -26,7 +26,16 @@
 
 #define HAVE__VSNPRINTF 1
 
+#define HAVE_SYS_TYPES_H 1
+
+#define HAVE_SYS_STAT_H 1 
+
+#define HAVE_DIRECT_H 1
+
+#define HAVE_TCHAR_H 1
+
 #define HAVE_FCNTL_H 1
+
 #define HAVE_WINDEF_H 1
 
 #include "compat.h"
