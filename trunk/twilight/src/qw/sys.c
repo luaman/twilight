@@ -75,6 +75,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "common.h"
 #include "compat.h"
+#include "cvar.h"
 #include "host.h"
 #include "mathlib.h"
 #include "strlib.h"
@@ -88,11 +89,48 @@ void	   *sys_membase = NULL;
 
 char       *qdate = __DATE__;
 
+cvar_t	   *sys_asciionly;
+
 // =======================================================================
 // General routines
 // =======================================================================
 
+static const char sys_charmap[256] = {
+	' ', '#', '#', '#', '#', '.', '#', '#',
+	'#', '\t', '\n', '#', ' ', '\n', '.', '.',
+	'[', ']', '0', '1', '2', '3', '4', '5',
+	'6', '7', '8', '9', '.', '<', '=', '>',
+	' ', '!', '"', '#', '$', '%', '&', '\'',
+	'(', ')', '*', '+', ',', '-', '.', '/',
+	'0', '1', '2', '3', '4', '5', '6', '7',
+	'8', '9', ':', ';', '<', '=', '>', '?',
+	'@', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+	'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+	'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+	'X', 'Y', 'Z', '[', '\\', ']', '^', '_',
+	'`', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+	'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+	'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
+	'x', 'y', 'z', '{', '|', '}', '~', '<',
 
+	'<', '=', '>', '#', '#', '.', '#', '#',
+	'#', '#', ' ', '#', ' ', '>', '.', '.',
+	'[', ']', '0', '1', '2', '3', '4', '5',
+	'6', '7', '8', '9', '.', '<', '=', '>',
+	' ', '!', '"', '#', '$', '%', '&', '\'',
+	'(', ')', '*', '+', ',', '-', '.', '/',
+	'0', '1', '2', '3', '4', '5', '6', '7',
+	'8', '9', ':', ';', '<', '=', '>', '?',
+	'@', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+	'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+	'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+	'X', 'Y', 'Z', '[', '\\', ']', '^', '_',
+	'`', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+	'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+	'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
+	'x', 'y', 'z', '{', '|', '}', '~', '<'
+};
+ 
 void
 Sys_Printf (char *fmt, ...)
 {
@@ -110,11 +148,15 @@ Sys_Printf (char *fmt, ...)
 	if (nostdout)
 		return;
 
-	for (p = (unsigned char *) text; *p; p++)
-		if ((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
-			printf ("[%02x]", *p);
-		else
-			putc (*p, stdout);
+	if (sys_asciionly && sys_asciionly->value)
+		for (p = (unsigned char *) text; *p; p++)
+			putc (sys_charmap[*p], stdout);
+	else
+		for (p = (unsigned char *) text; *p; p++)
+			if ((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
+				printf ("[%02x]", *p);
+			else
+				putc (*p, stdout);
 }
 
 void
@@ -144,6 +186,8 @@ Sys_Init (void)
 
 	qwclsemaphore = CreateSemaphore (NULL, 0, 1, "qwcl");
 #endif
+
+	sys_asciionly = Cvar_Get ("sys_asciionly", "0", CVAR_ARCHIVE, NULL);
 
 	Math_Init ();
 }
@@ -365,8 +409,6 @@ main (int c, char **v)
 
 	if (COM_CheckParm ("-nostdout"))
 		nostdout = 1;
-
-	Sys_Init ();
 
 	Host_Init ();
 

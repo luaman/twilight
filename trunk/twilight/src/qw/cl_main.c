@@ -1422,6 +1422,7 @@ Host_Init (void)
 	Cvar_Init (&Host_CvarUserinfo);		// Cvar system
 	Cbuf_Init ();						// Command buffer
 	Cmd_Init ();						// Command system
+	Sys_Init ();						// System system =)
 
 	// These have to be here.
 	fs_shareconf = Cvar_Get ("fs_shareconf", SHARECONF, CVAR_ROM, NULL);
