@@ -213,7 +213,6 @@ def handle_opts (conf, opts, config_defs, destructive):
 				conf.cflag ('-Werror')
 		if ('msvc' in env['TOOLS']):
 			conf.cflag ('/MD')
-			conf.lflag ('/subsystem:windows')
 			if int(opts['werror']):
 				conf.cflag ('/WX')
 	else:
@@ -244,10 +243,11 @@ def handle_opts (conf, opts, config_defs, destructive):
 				conf.cflag ('/Zi')
 				conf.cflag ('/GZ')
 			if int(opts['optimize']):
-				conf.cflag ('/O2', 1)
-				conf.cflag ('/Og', 1)
 				conf.cflag ('/Oi', 1)
 				conf.cflag ('/G5', 1)
+				if (int(opts['debug']) == 0):
+					conf.cflag ('/Og', 1)
+					conf.cflag ('/O2', 1)
 
 		config_defs.set('SDL_IMAGE_LIBRARY', '"' + opts['sdl_image'] + '"')
 		config_defs.set('USERPATH', '"' + opts['userpath'] + '"')
@@ -328,8 +328,9 @@ def do_configure (env):
 		config_defs.create('inline', '__inline')
 
 	if env['PLATFORM'] == 'win32':
-		env.Append (LIBS = ['user32', 'gdi32', 'shell32', 'wsock32', 'msvcrt', 'kernel32'])
+		env.Append (LIBS = ['user32', 'wsock32', 'shell32', 'gdi32'])
 		env.Append (LINKFLAGS = ['/subsystem:windows'])
+		env.Append (CCFLAGS = ['/nologo'])
 
 	conf.Finish ()
 
@@ -360,7 +361,7 @@ def do_configure (env):
     User's configuration        : """ + opts['userconf'] + """
   """
 
-env = Environment (ENV = {'PATH' : os.environ['PATH']})
+env = Environment ()
 conf_base ()
 
 do_configure (env)
