@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "host.h"
 #include "sys.h"
 
+#include <stdlib.h>
 
 /*
 
