@@ -43,17 +43,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "winquake.h"
 
-// the host system specifies the base of the directory tree, the
-// command line parms passed to the program, and the amount of memory
-// available for the program to use
-
-typedef struct {
-	int			argc;
-	char		**argv;
-	void		*membase;
-	int			memsize;
-} quakeparms_t;
-
 #define MINIMUM_WIN_MEMORY	0x0c00000
 #define MAXIMUM_WIN_MEMORY	0x1000000
 
@@ -558,7 +547,8 @@ int         WINAPI
 WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 		 int nCmdShow)
 {
-	quakeparms_t parms;
+	int			pargc;
+	char		**pargv;
 	double      time, oldtime, newtime;
 	MEMORYSTATUS lpBuffer;
 	int         t;
@@ -573,16 +563,16 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	lpBuffer.dwLength = sizeof (MEMORYSTATUS);
 	GlobalMemoryStatus (&lpBuffer);
 
-	parms.argc = 1;
+	pargc = 1;
 	argv[0] = empty_string;
 
-	while (*lpCmdLine && (parms.argc < MAX_NUM_ARGVS)) {
+	while (*lpCmdLine && (pargc < MAX_NUM_ARGVS)) {
 		while (*lpCmdLine && ((*lpCmdLine <= 32) || (*lpCmdLine > 126)))
 			lpCmdLine++;
 
 		if (*lpCmdLine) {
-			argv[parms.argc] = lpCmdLine;
-			parms.argc++;
+			argv[pargc] = lpCmdLine;
+			pargc++;
 
 			while (*lpCmdLine && ((*lpCmdLine > 32) && (*lpCmdLine <= 126)))
 				lpCmdLine++;
@@ -595,12 +585,9 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 		}
 	}
 
-	parms.argv = argv;
+	pargv = argv;
 
-	COM_InitArgv (parms.argc, parms.argv);
-
-	parms.argc = com_argc;
-	parms.argv = com_argv;
+	COM_InitArgv (pargc, pargv);
 
 // take the greater of all the available memory or half the total memory,
 // but at least 8 Mb and no more than 16 Mb, unless they explicitly
