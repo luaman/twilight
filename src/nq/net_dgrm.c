@@ -1352,7 +1352,7 @@ _Datagram_Connect (char *host)
 	if (ret == CCREP_REJECT) {
 		reason = MSG_ReadString ();
 		Con_Printf (reason);
-		strncpy (m_return_reason, reason, 31);
+		strlcpy (m_return_reason, reason, sizeof (m_return_reason));
 		goto ErrorReturn;
 	}
 

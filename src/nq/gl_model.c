@@ -1302,7 +1302,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		if (!isnotmap && (i < mod->numsubmodels - 1)) 
 		{	
 			// duplicate the basic information
-			strncpy (name, va("*%i", i + 1), sizeof(name));
+			strlcpy (name, va("*%i", i + 1), sizeof(name));
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);
