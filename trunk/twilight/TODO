@@ -41,4 +41,5 @@ Would be nice but is not strictly needed:
   - Implement stainmaps (ie, blood staining the lightmaps)a
   - Rewrite the sound code so that it is possible to spit out a timed
     sound file which matches frame outputs (for recording videos)
+  - Add {gl,cl}_weirdshit.c to support Nehahra.  ;)
 
