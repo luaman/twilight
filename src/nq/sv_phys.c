@@ -515,8 +515,10 @@ void SV_PushMoveAndRotate (edict_t *pusher, float movetime, vec3_t amove, vec3_t
 		num_moved++;
 
 		// calculate destination position
-		VectorSubtract (check->v.origin, pusher->v.origin, org);
+		VectorAdd (check->v.origin, move, org);		// add regular move
 		check->v.angles[YAW] += amove[YAW];		// FIXME?
+
+		VectorSubtract (org, pusher->v.origin, org);
 		org2[0] = DotProduct (org, forward);
 		org2[1] = -DotProduct (org, right);
 		org2[2] = DotProduct (org, up);
@@ -572,7 +574,7 @@ void SV_PushMoveAndRotate (edict_t *pusher, float movetime, vec3_t amove, vec3_t
 			for (i=0 ; i<num_moved ; i++)
 			{
 				VectorCopy (moved_from[i], moved_edict[i]->v.origin);
-				VectorSubtract (moved_edict[i]->v.angles, amove, moved_edict[i]->v.angles);
+				moved_edict[i]->v.angles[YAW] -= amove[YAW];
 				SV_LinkEdict (moved_edict[i], false);
 			}
 			return;

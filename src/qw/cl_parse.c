@@ -1077,7 +1077,7 @@ CL_MuzzleFlash (void)
 
 	dl = CL_AllocDlight (-i);
 	VectorCopy (pl->origin, dl->origin);
-	AngleVectors (pl->viewangles, fv, rv, uv);
+	AngleVectors (pl->viewangles, fv, NULL, NULL);
 	VectorMA (dl->origin, 18, fv, dl->origin);
 
 	if (!gl_flashblend->value && !gl_oldlights->value)

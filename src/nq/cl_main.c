@@ -561,11 +561,11 @@ CL_RelinkEntities (void)
 			if (ent->effects & EF_MUZZLEFLASH) {
 				// don't draw our own muzzle flash if flashblending
 				if (i != cl.viewentity || chase_active->value || !gl_flashblend->value) {
-					vec3_t      fv, rv, uv;
+					vec3_t      fv;
 
 					dl = CL_AllocDlight (i);
 					VectorCopy (ent->origin, dl->origin);
-					AngleVectors (ent->angles, fv, rv, uv);
+					AngleVectors (ent->angles, fv, NULL, NULL);
 					VectorMA (dl->origin, 18, fv, dl->origin);
 
 					if (!gl_flashblend->value && !gl_oldlights->value)
