@@ -587,7 +587,7 @@ Mod_LoadFaces (lump_t *l)
 		// It's a wall - allocate a stainmap for it
 		ssize = out->smax;
 		tsize = out->tmax;
-		out->stainsamples = Hunk_Alloc (ssize * tsize * 3);
+		out->stainsamples = Hunk_AllocName (ssize * tsize * 3, loadmodel->name);
 		memset(out->stainsamples, 255, ssize * tsize * 3);
 	}
 }
