@@ -513,18 +513,6 @@ angledelta (float a)
 }
 
 /*
-==================
-V_CalcGunAngle
-==================
-*/
-void
-V_CalcGunAngle (void)
-{
-	cl.viewent.cur.angles[YAW] = r_refdef.viewangles[YAW];
-	cl.viewent.cur.angles[PITCH] = -r_refdef.viewangles[PITCH];
-}
-
-/*
 ==============
 V_BoundOffsets
 ==============
@@ -605,8 +593,6 @@ V_CalcIntermissionRefdef
 void
 V_CalcIntermissionRefdef (void)
 {
-	float       old;
-
 	/* view is the weapon model (only visible from inside body) */
 	cl.viewent.model = NULL;
 
@@ -614,10 +600,12 @@ V_CalcIntermissionRefdef (void)
 	VectorCopy(cl.simangles, r_refdef.viewangles);
 
 	/* always idle in intermission */
-	old = v_idlescale->value;
-	Cvar_Set(v_idlescale, "1");
-	V_AddIdle();
-	Cvar_Set(v_idlescale, va("%i", old));
+	r_refdef.viewangles[ROLL] += Q_sin (cl.time * v_iroll_cycle->value) *
+		v_iroll_level->value;
+	r_refdef.viewangles[PITCH] += Q_sin (cl.time * v_ipitch_cycle->value) *
+		v_ipitch_level->value;
+	r_refdef.viewangles[YAW] += Q_sin (cl.time * v_iyaw_cycle->value) *
+		v_iyaw_level->value;
 }
 
 /*
@@ -637,8 +625,6 @@ V_CalcRefdef (void)
 	static float	oldz = 0;
 
 	V_DriftPitch();
-
-
 
 	/* view is the weapon model (only visible from inside body) */
 	view = &cl.viewent;
@@ -678,7 +664,9 @@ V_CalcRefdef (void)
 	/* set up gun position */
 	VectorCopy (cl.simangles, view->cur.angles);
 
-	V_CalcGunAngle();
+	/* set up gun angles */
+	view->cur.angles[YAW] = r_refdef.viewangles[YAW];
+	view->cur.angles[PITCH] = -r_refdef.viewangles[PITCH];
 
 	VectorCopy (cl.simorg, view->cur.origin);
 	view->cur.origin[2] += 22;
