@@ -35,7 +35,7 @@ static const char rcsid[] =
 #include "qtypes.h"
 #include "fs.h"
 #include "fs_hash.h"
-#include "dir.h"
+#include "rw_ops.h"
 
 typedef struct {
 	SDL_RWops	*base;
@@ -134,6 +134,68 @@ LimitFromRW (SDL_RWops *rw, int start, int end)
 	limit->size = end - start;
 
 	SDL_RWseek (new, 0, SEEK_SET);
+
+	return new;
+}
+
+
+int
+Wrap_Seek (SDL_RWops *rw, int offset, int whence)
+{
+	rw_wrap_t	*wrap = rw->hidden.unknown.data1;
+
+	return SDL_RWseek (wrap->rw, offset, whence);
+}
+
+int
+Wrap_Read (SDL_RWops *rw, void *ptr, int size, int maxnum)
+{
+	rw_wrap_t	*wrap = rw->hidden.unknown.data1;
+
+	return SDL_RWread (wrap->rw, ptr, size, maxnum);
+}
+
+int
+Wrap_Write (SDL_RWops *rw, const void *ptr, int size, int num)
+{
+	rw_wrap_t	*wrap = rw->hidden.unknown.data1;
+
+	return SDL_RWwrite (wrap->rw, ptr, size, num);
+}
+
+int
+Wrap_Close (SDL_RWops *rw)
+{
+	rw_wrap_t	*wrap = rw->hidden.unknown.data1;
+
+	if (wrap->close)
+		wrap->close (wrap->rw, wrap->data);
+	else
+		SDL_RWclose (wrap->rw);
+	Zone_Free (wrap);
+
+	return 0;
+}
+
+SDL_RWops *
+WrapRW (SDL_RWops *rw, void *data, wrap_close_t *close)
+{
+	rw_wrap_t	*wrap;
+	SDL_RWops	*new;
+
+	new = Zone_Alloc (fs_zone, sizeof (SDL_RWops));
+	wrap = Zone_Alloc (fs_zone, sizeof (rw_wrap_t));
+	
+	new->hidden.unknown.data1 = wrap;
+	wrap->rw = rw;
+	wrap->data = data;
+	if (close)
+		wrap->close = close;
+
+	new->seek = Wrap_Seek;
+	new->read = Wrap_Read;
+	new->write = Wrap_Write;
+	new->close = Wrap_Close;
 
 	return new;
 }

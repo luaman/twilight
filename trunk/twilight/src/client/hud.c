@@ -114,7 +114,7 @@ typedef struct {
 static hud_t	hud;
 
 #define	SBAR_HEIGHT1	24
-#define	SBAR_HEIGHT2	16
+#define	SBAR_HEIGHT2	24
 #define SBAR_HEIGHT		(SBAR_HEIGHT1 + SBAR_HEIGHT2)
 #define SBAR_WIDTH		320
 #define HUD_HEIGHT1		112
@@ -823,11 +823,11 @@ HUD_Draw_Standard_Sbar_Inventory (void)
 {
 	Uint	i, j;
 	char	num[4];
-	int		x = hud.sbar_x, y1 = hud.sbar_y1, y2 = hud.sbar_y2;
+	int		x = hud.sbar_x, y = hud.sbar_y2;
 	int		flashon;
 	
 	// The backdrop.
-	Draw_Img (x, y2, sb_ibar);
+	Draw_Img (x, y, sb_ibar);
 
 	// The ammo counts.
 	for (i = 0; i < 4; i++) {
@@ -835,7 +835,7 @@ HUD_Draw_Standard_Sbar_Inventory (void)
 		for (j = 0; j < 3; j++)
 			if (num[j] != ' ')
 				num[j] = 18 + num[j] - '0';
-		Draw_String (x + ((6 * i + 1) * 8 - 2), y2, num, 8);
+		Draw_String (x + ((6 * i + 1) * 8 - 2), y + 1, num, 8);
 	}
 
 	// The weapons.
@@ -849,19 +849,19 @@ HUD_Draw_Standard_Sbar_Inventory (void)
 			} else
 				flashon = (flashon % 5) + 2;
 
-			Draw_Img (x + (i * 24), y1, sb_weapons[flashon][i]);
+			Draw_Img (x + (i * 24), y + 8, sb_weapons[flashon][i]);
 		}
 	}
 
 	// Normal items.
 	for (i = 0; i < 6; i++)
 		if (ccl.stats[STAT_ITEMS] & (IT_KEY1 << i))
-			Draw_Img (x + (192 + i * 16), y2, sb_items[i]);
+			Draw_Img (x + (192 + i * 16), y + 8, sb_items[i]);
 
 	// Sigils.
 	for (i = 0; i < 4; i++)
 		if (ccl.stats[STAT_ITEMS] & (IT_SIGIL1 << i))
-			Draw_Img (x + (SBAR_WIDTH - 32 + i * 8), y2, sb_sigil[i]);
+			Draw_Img (x + (SBAR_WIDTH - 32 + i * 8), y + 1, sb_sigil[i]);
 }
 
 static void
