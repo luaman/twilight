@@ -80,6 +80,8 @@ static qboolean	use_mouse = false;
 
 static int  scr_width = 640, scr_height = 480, scr_bpp = 15;
 
+static int  sdl_flags = SDL_OPENGL;
+
 /*-----------------------------------------------------------------------*/
 
 //int       texture_mode = GL_NEAREST;
@@ -303,7 +305,6 @@ void
 VID_Init (unsigned char *palette)
 {
 	int         i;
-	int         flags = SDL_OPENGL;
 	const		SDL_VideoInfo *info = NULL;
 
 	vid.colormap = host_colormap;
@@ -315,7 +316,7 @@ VID_Init (unsigned char *palette)
 		use_mouse = true;
 
 	if ((i = COM_CheckParm ("-window")) == 0)
-		flags |= SDL_FULLSCREEN;
+		sdl_flags |= SDL_FULLSCREEN;
 
 	if ((i = COM_CheckParm ("-width")) != 0)
 		scr_width = Q_atoi (com_argv[i + 1]);
@@ -378,7 +379,7 @@ VID_Init (unsigned char *palette)
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
 
-	if (SDL_SetVideoMode (scr_width, scr_height, scr_bpp, flags) == NULL) {
+	if (SDL_SetVideoMode (scr_width, scr_height, scr_bpp, sdl_flags) == NULL) {
 		Sys_Error ("Could not init video mode: %s", SDL_GetError ());
 	}
 
@@ -626,7 +627,7 @@ Sys_SendKeyEvents (void)
 				if (!use_mouse)
 					break;
 
-				if (_windowed_mouse->value && (cls.state == ca_connected)) {
+				if (_windowed_mouse->value && (cls.state >= ca_connected)) {
 					mouse_x += event.motion.xrel;
 					mouse_y += event.motion.yrel;
 				}
@@ -676,6 +677,13 @@ IN_WindowedMouse (cvar_t *cvar)
 	if (!use_mouse)
 		return;
 
+	if (sdl_flags & SDL_FULLSCREEN)
+	{
+		_windowed_mouse->flags |= CVAR_ROM;
+		_windowed_mouse->value = 1;
+		return;
+	}
+
 	if (!_windowed_mouse->value)
 		SDL_WM_GrabInput (SDL_GRAB_OFF);
 	else
@@ -701,8 +709,8 @@ void
 IN_Move (usercmd_t *cmd)
 {
 	if (m_filter->value && 
-		(mouse_x != old_mouse_x) &&
-		(mouse_y != old_mouse_y)) {
+		((mouse_x != old_mouse_x) ||
+		(mouse_y != old_mouse_y))) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
 		mouse_y = (mouse_y + old_mouse_y) * 0.5;
 	}
