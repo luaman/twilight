@@ -804,7 +804,10 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 	// check functions
 	for (cmd = cmd_functions; cmd; cmd = cmd->next) {
 		if (!strcasecmp (cmd_argv[0], cmd->name)) {
-			cmd->function ();
+			if (!cmd->function)
+				Cmd_ForwardToServer ();
+			else
+				cmd->function ();
 			return;
 		}
 	}
@@ -818,8 +821,12 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 	}
 
 	// check cvars
-	if (!Cvar_LegacyCmd () && (cl_warncmd->value || developer->value))
-		Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
+	if (cl_warncmd) {
+		if (!Cvar_LegacyCmd () && (cl_warncmd->value || developer->value))
+			Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
+	} else
+		if (!Cvar_LegacyCmd () && developer->value)
+			Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
 }
 
 /*
