@@ -163,10 +163,47 @@ Q_atan2(double y, double x)
 	return base + dir * i * (M_PI / 2048.0f);
 }
 
+double
+Q_atan(double x)
+{
+	float test, y = Q_fabs(x), dir = (x < 0) ? -1 : 1;
+	int i;
+
+	if (!x)
+		return 0;
+
+	for (i = 0; i < 512; i++)
+	{
+		test = sintable[i] / sintable[1023-i];
+		if (test > y)
+			break;
+	}
+
+	return dir * i * (M_PI / 2048.0f);
+}
+
 double 
 Q_tan(double x)
 {
-	return Q_sin(x) / Q_cos(x);
+	int	index = (int)(1024 * x / (M_PI * 0.5));
+	int	quad = index >> 10;
+
+	index &= 1023;
+	quad &= 3;
+
+	switch (quad) 
+	{
+		case 0:
+			return sintable[index] / sintable[1023-index];
+		case 1:
+			return sintable[1023-index] / -sintable[index];
+		case 2:
+			return sintable[index] / sintable[1023-index];
+		case 3:
+			return -sintable[1023-index] / sintable[index];
+	}
+
+	return 0;
 }
 
 double 
@@ -277,7 +314,7 @@ Q_RSqrt(float number)
 }
 
 void 
-Init_Mathlib (void)
+Math_Init (void)
 {
 	Math_BuildSqrtTable();
 	Math_BuildSinTable();
