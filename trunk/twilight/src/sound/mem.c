@@ -131,7 +131,10 @@ S_LoadSound (sfx_t *s)
 	Com_DFPrintf (DEBUG_SOUND, "  dataofs: %d\n", info.dataofs);
 
 	if (info.channels != 1) {
-		Com_Printf ("%s is a stereo sample\n", s->name);
+		if (info.channels > 1)
+			Com_Printf ("%s is a stereo sample\n", s->name);
+		else
+			Com_DFPrintf (DEBUG_SOUND, "  %s is a bad sample\n", s->name);
 		Zone_Free (data);
 		return NULL;
 	}
@@ -255,7 +258,7 @@ GetWavinfo (char *name, Uint8 *wav, int wavlength)
 
 	memset (&info, 0, sizeof (info));
 
-	if (!wav)
+	if (!wav || !wavlength)
 		return info;
 
 	iff_name = name;
