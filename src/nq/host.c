@@ -1,5 +1,5 @@
 /*
-	$RCSfile$ -- coordinates spawning and killing of local servers
+	$RCSfile$
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
