@@ -1317,21 +1317,3 @@ GL_LoadPicTexture (qpic_t *pic)
 {
 	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true);
 }
-
-/****************************************/
-
-static GLenum oldtarget = 0;
-extern GLenum gl_mtex_enum;
-
-void
-GL_SelectTexture (GLenum target)
-{
-	if (!gl_mtexable)
-		return;
-	qglSelectTexture (gl_mtex_enum + target);
-	if (target == oldtarget)
-		return;
-	cnttextures[oldtarget] = currenttexture;
-	currenttexture = cnttextures[target];
-	oldtarget = target;
-}

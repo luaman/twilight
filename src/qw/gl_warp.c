@@ -362,8 +362,6 @@ R_DrawSkyChain (msurface_t *s)
 =================================================================
 */
 
-void        GL_SelectTexture (GLenum target);
-
 /*
 ==================
 R_LoadSkys
@@ -690,8 +688,6 @@ void R_DrawSkyBox (void)
 
 	if (!draw_skybox || (skytexturenum == -1))
 		return;
-
-	GL_SelectTexture (0);
 
 	for (i = 0; i < 6; i++)
 	{

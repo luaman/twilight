@@ -22,7 +22,7 @@
 		Boston, MA  02111-1307, USA
 
 */
-// Run time GL linking.
+//	Run time GL linking.
 static const char rcsid[] =
     "$Id$";
 
@@ -48,7 +48,9 @@ extern cvar_t     *gl_driver;
 
 // First we need all the function pointers.
 #define TWIGL_NEED(ret, name, args) ret (APIENTRY * q##name) args = NULL;
+#define TWIGL_EXT_WANT(ret, name, args) ret (APIENTRY * q##name) args = NULL;
 #include "TGL_funcs_list.h"
+#undef TWIGL_EXT_WANT
 #undef TWIGL_NEED
 
 qboolean
@@ -65,8 +67,10 @@ GLF_Init (void)
 		Sys_Error ("Can't load func %s: %s\n", #name, SDL_GetError()); \
 		return false; \
 	}
+#define TWIGL_EXT_WANT(ret, name, args)	q##name = SDL_GL_GetProcAddress(#name);
 
 #include "TGL_funcs_list.h"
+#undef TWIGL_EXT_WANT
 #undef TWIGL_NEED
 
 	return true;

@@ -59,10 +59,6 @@ mplane_t    frustum[4];
 
 int         c_brush_polys, c_alias_polys;
 
-int         currenttexture = -1;		// to avoid unnecessary texture sets
-
-int         cnttextures[2] = { -1, -1 };	// cached
-
 int         particletexture;			// little dot for particles
 int         playertextures;				// up to 16 color translated skins
 
@@ -318,8 +314,6 @@ float      *shadedots = r_avertexnormal_dots[0];
 
 int         lastposenum;
 
-extern GLenum gl_mtex_enum;
-
 /*
 =============
 GL_DrawAliasFrame
@@ -350,8 +344,8 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 		do {
 			// texture coordinates come from the draw list
 			if (mtex) {
-				qglMTexCoord2f (gl_mtex_enum + 0, ((float *) order)[0], ((float *) order)[1]);
-				qglMTexCoord2f (gl_mtex_enum + 1, ((float *) order)[0], ((float *) order)[1]);
+				qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, ((float *) order)[0], ((float *) order)[1]);
+				qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, ((float *) order)[0], ((float *) order)[1]);
 			}
 			else {
 				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
@@ -417,8 +411,8 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 		do {
 			// texture coordinates come from the draw list
 			if (mtex) {
-				qglMTexCoord2f (gl_mtex_enum + 0, ((float *) order)[0], ((float *) order)[1]);
-				qglMTexCoord2f (gl_mtex_enum + 1, ((float *) order)[0], ((float *) order)[1]);
+				qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, ((float *) order)[0], ((float *) order)[1]);
+				qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, ((float *) order)[0], ((float *) order)[1]);
 			}
 			else {
 				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
@@ -756,8 +750,6 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolea
 	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend, mtex);
 }
 
-void GL_SelectTexture (GLenum target);
-
 /*
 =================
 R_DrawAliasModel
@@ -949,10 +941,10 @@ R_DrawAliasModel (entity_t *e)
 	mtex = fb_texture && gl_mtexable;
 
 	if (mtex) {
-		GL_SelectTexture (0);
+		qglActiveTextureARB (GL_TEXTURE0_ARB);
 		qglBindTexture (GL_TEXTURE_2D, texture);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		GL_SelectTexture (1);
+		qglActiveTextureARB (GL_TEXTURE1_ARB);
 		qglEnable (GL_TEXTURE_2D);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
@@ -971,7 +963,7 @@ R_DrawAliasModel (entity_t *e)
 
 	if (mtex) {
 		qglDisable (GL_TEXTURE_2D);
-		GL_SelectTexture (0);
+		qglActiveTextureARB (GL_TEXTURE0_ARB);
 	}
 
 	if (fb_texture && !gl_mtexable) {
