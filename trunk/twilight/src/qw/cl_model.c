@@ -795,6 +795,84 @@ Mod_LoadAliasGroup (void *pin, maliasframedesc_t *frame)
 //=========================================================
 
 /*
+=================
+Mod_FloodFillSkin
+
+Fill background pixels so mipmapping doesn't have haloes - Ed
+=================
+*/
+
+typedef struct {
+	short       x, y;
+} floodfill_t;
+
+extern unsigned d_8to32table[];
+
+// must be a power of 2
+#define FLOODFILL_FIFO_SIZE 0x1000
+#define FLOODFILL_FIFO_MASK (FLOODFILL_FIFO_SIZE - 1)
+
+#define FLOODFILL_STEP( off, dx, dy ) \
+{ \
+	if (pos[off] == fillcolor) \
+	{ \
+		pos[off] = 255; \
+		fifo[inpt].x = x + (dx), fifo[inpt].y = y + (dy); \
+		inpt = (inpt + 1) & FLOODFILL_FIFO_MASK; \
+	} \
+	else if (pos[off] != 255) fdc = pos[off]; \
+}
+
+void
+Mod_FloodFillSkin (Uint8 * skin, int skinwidth, int skinheight)
+{
+	Uint8       fillcolor = *skin;		// assume this is the pixel to fill
+	floodfill_t fifo[FLOODFILL_FIFO_SIZE];
+	int         inpt = 0, outpt = 0;
+	int         filledcolor = -1;
+	int         i;
+
+	if (filledcolor == -1) {
+		filledcolor = 0;
+		// attempt to find opaque black
+		for (i = 0; i < 256; ++i)
+			if (d_8to32table[i] == (255 << 0))	// alpha 1.0
+			{
+				filledcolor = i;
+				break;
+			}
+	}
+	// can't fill to filled color or to transparent color (used as visited
+	// marker)
+	if ((fillcolor == filledcolor) || (fillcolor == 255)) {
+		// printf( "not filling skin from %d to %d\n", fillcolor, filledcolor
+		// );
+		return;
+	}
+
+	fifo[inpt].x = 0, fifo[inpt].y = 0;
+	inpt = (inpt + 1) & FLOODFILL_FIFO_MASK;
+
+	while (outpt != inpt) {
+		int         x = fifo[outpt].x, y = fifo[outpt].y;
+		int         fdc = filledcolor;
+		Uint8      *pos = &skin[x + skinwidth * y];
+
+		outpt = (outpt + 1) & FLOODFILL_FIFO_MASK;
+
+		if (x > 0)
+			FLOODFILL_STEP (-1, -1, 0);
+		if (x < skinwidth - 1)
+			FLOODFILL_STEP (1, 1, 0);
+		if (y > 0)
+			FLOODFILL_STEP (-skinwidth, 0, -1);
+		if (y < skinheight - 1)
+			FLOODFILL_STEP (skinwidth, 0, 1);
+		skin[x + skinwidth * y] = fdc;
+	}
+}
+
+/*
 ===============
 Mod_LoadAllSkins
 ===============
@@ -819,6 +897,8 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 
 	for (i = 0; i < numskins; i++) {
 		if (pskintype->type == ALIAS_SKIN_SINGLE) {
+			Mod_FloodFillSkin (skin, pheader->skinwidth, pheader->skinheight);
+
 			// save 8 bit texels for the player model to remap
 			if (!strcmp (loadmodel->name, "progs/player.mdl")) {
 				if (s > sizeof (player_8bit_texels))
@@ -856,6 +936,8 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			pskintype = (void *) (pinskinintervals + groupskins);
 
 			for (j = 0; j < groupskins; j++) {
+				Mod_FloodFillSkin (skin, pheader->skinwidth,
+								   pheader->skinheight);
 				snprintf (name, sizeof (name), "%s_%i_%i", loadmodel->name, i,
 						  j);
 				pheader->gl_texturenum[i][j & 3] =
