@@ -1511,9 +1511,6 @@ COM_FOpenFile (char *filename, FILE ** file)
 				continue;
 			if (strstr (filename, ".."))
 				continue;
-			/* 
-			   if (strchr (filename, '/') || strchr (filename, '\\')) continue; 
-			 */
 
 			snprintf (netpath, sizeof (netpath), "%s/%s", search->filename,
 					  filename);

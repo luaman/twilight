@@ -275,8 +275,7 @@ M_ToggleMenu_f (void)
 		game_target = KGT_DEFAULT;
 		m_state = m_none;
 		return;
-	}
-	if (key_dest == key_console) {
+	} else if (key_dest == key_console) {
 		Con_ToggleConsole_f ();
 	} else {
 		M_Menu_Main_f ();
@@ -680,17 +679,17 @@ M_Menu_Keys_f (void)
 void
 M_FindKeysForCommand (char *command, int *twokeys)
 {
-	int         count;
-	int         j;
-	int         l;
-	char       *b;
+	int		count;
+	int		j;
+	int		l;
+	char	*b;
 
 	twokeys[0] = twokeys[1] = -1;
 	l = Q_strlen (command);
 	count = 0;
 
 	for (j = 0; j < KSYM_LAST; j++) {
-		b = keybindings[KGT_DEFAULT][j];
+		b = Key_Hash_GetBind(KGT_DEFAULT, j);
 		if (!b)
 			continue;
 		if (!Q_strncmp (b, command, l)) {
@@ -705,14 +704,14 @@ M_FindKeysForCommand (char *command, int *twokeys)
 void
 M_UnbindCommand (char *command)
 {
-	int         j;
-	int         l;
-	char       *b;
+	int		j;
+	int		l;
+	char	*b;
 
 	l = Q_strlen (command);
 
 	for (j = 0; j < KSYM_LAST; j++) {
-		b = keybindings[KGT_DEFAULT][j];
+		b = Key_Hash_GetBind(KGT_DEFAULT, j);
 		if (!b)
 			continue;
 		if (!Q_strncmp (b, command, l))
@@ -781,11 +780,6 @@ M_Keys_Key (int k)
 			bind_grab = false;
 		} else if (k != '`') {
 			Key_SetBinding(KGT_DEFAULT, k, bindnames[keys_cursor][0]);
-			/*
-			snprintf (cmd, sizeof (cmd), "bind KGT_DEFAULT %s \"%s\"\n",
-					  Key_KeynumToString (k), bindnames[keys_cursor][0]);
-			Cbuf_InsertText (cmd);
-			*/
 		}
 
 		bind_grab = false;

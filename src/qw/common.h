@@ -19,6 +19,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // comndef.h  -- general definitions
 
+#ifndef _COMMON_H
+#define _COMMON_H
+
+#include "bothdefs.h"
+#include <stdio.h>
+
 typedef unsigned char byte;
 
 #define _DEF_BYTE_
@@ -230,3 +236,5 @@ byte        COM_BlockSequenceCheckByte (byte * base, int length, int sequence,
 byte        COM_BlockSequenceCRCByte (byte * base, int length, int sequence);
 
 int         build_number (void);
+
+#endif // _COMMON_H

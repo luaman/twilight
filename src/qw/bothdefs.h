@@ -20,6 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // defs common to client and server
 
+#ifndef _BOTHDEFS_H
+#define _BOTHDEFS_H
+
 //#if (defined(_M_IX86) || defined(__i386__)) && !defined(id386)
 //#define id386 1
 //#else
@@ -147,3 +150,5 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	PRINT_MEDIUM		1			// death messages
 #define	PRINT_HIGH			2			// critical messages
 #define	PRINT_CHAT			3			// chat messages
+
+#endif // _BOTHDEFS_H

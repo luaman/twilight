@@ -58,6 +58,7 @@ static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
 
 static int  old_windowed_mouse;
+static int	use_mouse = false;
 
 static int  scr_width = 640, scr_height = 480;
 
@@ -428,6 +429,9 @@ VID_Init (unsigned char *palette)
 // interpret command-line params
 
 // set vid parameters
+	if ((i = COM_CheckParm ("-nomouse")) == 0)
+		use_mouse = true;
+
 	if ((i = COM_CheckParm ("-window")) == 0)
 		flags |= SDL_FULLSCREEN;
 
@@ -507,7 +511,8 @@ VID_Init (unsigned char *palette)
 
 	vid.recalc_refdef = 1;				// force a surface cache flush
 
-	SDL_ShowCursor (0);
+	if (use_mouse)
+		SDL_ShowCursor (0);
 
 #ifdef WIN32
 	// LordHavoc: a dark incantation necessary for DirectSound with SDL
@@ -537,6 +542,9 @@ Sys_SendKeyEvents (void)
 
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
+				if (!use_mouse)
+					break;
+
 				but = event.button.button;
 				if (but == 2)
 					but = 3;
@@ -561,6 +569,9 @@ Sys_SendKeyEvents (void)
 				break;
 
 			case SDL_MOUSEMOTION:
+				if (!use_mouse)
+					break;
+
 				if (_windowed_mouse.value) {
 					mouse_x += event.motion.xrel;
 					mouse_y += event.motion.yrel;
@@ -606,6 +617,9 @@ IN_Commands
 void
 IN_Commands (void)
 {
+	if (!use_mouse)
+		return;
+
 	// FIXME: Move this to a Cvar callback when they're implemented
 	if (old_windowed_mouse != _windowed_mouse.value) {
 		old_windowed_mouse = _windowed_mouse.value;
