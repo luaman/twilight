@@ -1120,6 +1120,10 @@ R_SetFrustum (void)
 {
 	int         i;
 
+	// LordHavoc: note to all quake engine coders, this code was making the
+	// view frustum taller than it should have been (it assumed the view is
+	// square; it is not square), so I disabled it
+	/*
 	if (r_refdef.fov_x == 90) {
 		// front side is visible
 
@@ -1129,7 +1133,7 @@ R_SetFrustum (void)
 		VectorAdd (vpn, vup, frustum[2].normal);
 		VectorSubtract (vpn, vup, frustum[3].normal);
 	} else {
-
+	*/
 		// rotate VPN right by FOV_X/2 degrees
 		RotatePointAroundVector (frustum[0].normal, vup, vpn,
 								 -(90 - r_refdef.fov_x / 2));
@@ -1142,7 +1146,7 @@ R_SetFrustum (void)
 		// rotate VPN down by FOV_X/2 degrees
 		RotatePointAroundVector (frustum[3].normal, vright, vpn,
 								 -(90 - r_refdef.fov_y / 2));
-	}
+	//}
 
 	for (i = 0; i < 4; i++) {
 		frustum[i].type = PLANE_ANYZ;
