@@ -385,7 +385,7 @@ TWIGL_NEED (void, glScalef, (GLfloat x, GLfloat y, GLfloat z));
 TWIGL_DONT_NEED (void, glScissor, (GLint x, GLint y, GLsizei width, GLsizei height));
 TWIGL_DONT_NEED (void, glSelectBuffer, (GLsizei size, GLuint * buffer));
 TWIGL_DONT_NEED (void, glSeparableFilter2D, (GLenum target, GLenum internalformat, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * row, const GLvoid * column));
-TWIGL_NEED (void, glShadeModel, (GLenum mode));
+TWIGL_DONT_NEED (void, glShadeModel, (GLenum mode));
 TWIGL_DONT_NEED (void, glStencilFunc, (GLenum func, GLint ref, GLuint mask));
 TWIGL_DONT_NEED (void, glStencilMask, (GLuint mask));
 TWIGL_DONT_NEED (void, glStencilOp, (GLenum fail, GLenum zfail, GLenum zpass));
