@@ -303,7 +303,7 @@ TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer)
 
 	snprintf (tganame, sizeof (tganame), "%s", name);
 	COM_StripExtension (tganame, tganame);
-	COM_DefaultExtension (tganame, ".tga");
+	COM_DefaultExtension (tganame, ".tga", sizeof(tganame));
 
 	handle = fopen (tganame, "wb");
 

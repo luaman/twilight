@@ -186,7 +186,7 @@ void COM_Init (void);
 
 char *COM_SkipPath (char *pathname);
 void COM_StripExtension (char *in, char *out);
-void COM_DefaultExtension (char *path, char *extension);
+void COM_DefaultExtension (char *path, char *extension, size_t len);
 char *COM_FileExtension (char *in);
 
 //============================================================================

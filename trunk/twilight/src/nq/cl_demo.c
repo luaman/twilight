@@ -248,7 +248,7 @@ CL_Record_f (void)
 		Cmd_ExecuteString (va ("map %s", Cmd_Argv (2)), src_command);
 
 	// open the demo file
-	COM_DefaultExtension (name, ".dem");
+	COM_DefaultExtension (name, ".dem", sizeof(name));
 
 	Com_Printf ("recording to %s.\n", name);
 	ccls.demofile = fopen (name, "wb");
@@ -291,7 +291,7 @@ CL_PlayDemo_f (void)
 
 	// open the demo file
 	strlcpy_s (name, Cmd_Argv (1));
-	COM_DefaultExtension (name, ".dem");
+	COM_DefaultExtension (name, ".dem", sizeof(name));
 
 	Com_Printf ("Playing demo from %s.\n", name);
 	COM_FOpenFile (name, &ccls.demofile, true);

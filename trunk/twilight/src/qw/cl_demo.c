@@ -409,7 +409,7 @@ CL_Record_f (void)
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 
 	// open the demo file
-	COM_DefaultExtension (name, ".qwd");
+	COM_DefaultExtension (name, ".qwd", sizeof (name));
 
 	ccls.demofile = fopen (name, "wb");
 	if (!ccls.demofile) {
@@ -669,7 +669,7 @@ CL_ReRecord_f (void)
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 
 	// open the demo file
-	COM_DefaultExtension (name, ".qwd");
+	COM_DefaultExtension (name, ".qwd", sizeof (name));
 
 	ccls.demofile = fopen (name, "wb");
 	if (!ccls.demofile) {
@@ -707,7 +707,7 @@ CL_PlayDemo_f (void)
 
 	// open the demo file
 	strlcpy_s (name, Cmd_Argv (1));
-	COM_DefaultExtension (name, ".qwd");
+	COM_DefaultExtension (name, ".qwd", sizeof (name));
 
 	Com_Printf ("Playing demo from %s.\n", name);
 	COM_FOpenFile (name, &ccls.demofile, true);
