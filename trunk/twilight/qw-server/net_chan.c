@@ -211,9 +211,7 @@ Returns true if the bandwidth choke isn't active
 qboolean
 Netchan_CanPacket (netchan_t *chan)
 {
-	if (chan->cleartime < curtime + MAX_BACKUP * chan->rate)
-		return true;
-	return false;
+	return (chan->cleartime < curtime + MAX_BACKUP * chan->rate);
 }
 
 
