@@ -8,9 +8,17 @@ echo "Setting up your build system..."
 if [ ! -f ChangeLog ]; then
 	touch ChangeLog
 fi
-aclocal
+
+# Debian's automake 1.6 does not provide /usr/bin/automake.  *sigh*
+if command -v automake-1.6 > /dev/null; then
+	DEBFUCKUP="-1.6"
+else
+	DEBFUCKUP=""
+fi
+
+aclocal${DEBFUCKUP}
 autoheader
-automake --add-missing
+automake${DEBFUCKUP} --add-missing
 autoconf
 echo "Okay, you should be able to run ./configure now."
 
