@@ -13,6 +13,9 @@
 /* Location of user-modifyable gamedata */
 #undef USERPATH
 
+/* Define to whatever your OS requires */
+#undef APIENTRY
+
 @BOTTOM@
 #endif // __CONFIG_H
 
