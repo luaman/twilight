@@ -760,12 +760,11 @@ DrawTextureChainsMTexCombine (void)
 			R_DrawSkyChain (s);
 		else {
 			if ((s->flags & SURF_DRAWTURB))
-				continue;				// draw translucent water later
+				continue;				/* draw translucent water later */
 
 			if (s->flags & SURF_DRAWSKY) {
-				for (; s; s = s->texturechain) {
+				for (; s; s = s->texturechain)
 					EmitBothSkyLayers (s);
-				}
 				return;
 			}
 
