@@ -44,10 +44,6 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <signal.h>
 
-#ifndef WIN32
-#include <dlfcn.h>
-#endif
-
 #include <SDL.h>
 #include "quakedef.h"
 #include "keys.h"
@@ -394,11 +390,7 @@ VID_Init (unsigned char *palette)
 	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE, NULL);
 	gl_ztrick = Cvar_Get ("gl_ztrick", "1", CVAR_NONE, NULL);
 
-#ifndef _WIN32
-	gl_driver = Cvar_Get ("gl_driver", "libGL.so.1", CVAR_ROM, NULL);
-#else
-	gl_driver = Cvar_Get ("gl_driver", "opengl32.dll", CVAR_ROM, NULL);
-#endif
+	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
 
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;

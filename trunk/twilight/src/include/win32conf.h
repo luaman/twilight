@@ -11,6 +11,8 @@
 // This is done by win32, we don't need to do it
 //define APIENTRY __stdcall
 
+#define GL_LIBRARY "opengl32.dll"
+
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
 #define strcasecmp _strcmpi

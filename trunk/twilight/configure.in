@@ -43,8 +43,19 @@ AM_PATH_SDL(1.2.0,
 SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"
 
 
-dnl APIENTRY needs to be defined to nothing
+dnl APIENTRY needs to be defined to nothing except on win32
 AC_DEFINE_UNQUOTED(APIENTRY,)
+
+
+dnl let the user choose the default OpenGL library
+AC_ARG_WITH(opengl,
+	[  --with-opengl           Default name of your OpenGL library
+                          (only affects value of the gl_driver Cvar)],,
+	with_opengl="libGL.so.1")
+AC_DEFINE_UNQUOTED(GL_LIBRARY, "$with_opengl")
+
+
+dnl sanitize our paths a bit
 
 test "$prefix" = "NONE" && prefix="$ac_default_prefix"
 test "x$exec_prefix" = "xNONE" && exec_prefix="$prefix"
@@ -77,6 +88,7 @@ AC_MSG_RESULT([
   Project Twilight v$VERSION configuration:
     Compiler flags              : $CFLAGS
     SDL version                 : $SDLVER
+    Default OpenGL library      : $with_opengl
 
   Path information
     Installation prefix         : $PDIR
