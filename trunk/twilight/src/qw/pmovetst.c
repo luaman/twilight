@@ -35,7 +35,6 @@ static const char rcsid[] =
 #include "pmove.h"
 #include "sys.h"
 #include "strlib.h"
-#include "client.h"
 
 static hull_t box_hull;
 static dclipnode_t box_clipnodes[6];
