@@ -45,6 +45,7 @@ static const char rcsid[] =
 #endif
 
 #include <SDL.h>
+#include <SDL_main.h>
 
 #define MINIMUM_WIN_MEMORY		0x0880000
 #define MAXIMUM_WIN_MEMORY		0x1000000
@@ -605,61 +606,22 @@ SleepUntilInput (int time)
 WinMain
 ==================
 */
-HINSTANCE   global_hInstance;
 int         global_nCmdShow;
 char       *argv[MAX_NUM_ARGVS];
 static char *empty_string = "";
 
 //HWND      hwnd_dialog;
 
-
-int WINAPI
-WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
-		 int nCmdShow)
+int main (int argc, char **argv)
 {
-	int			pargc;
-	char		**pargv;
 	double      time, oldtime, newtime;
 	MEMORYSTATUS lpBuffer;
 	int         t;
 
-	/* previous instances do not exist in Win32 */
-	if (hPrevInstance)
-		return 0;
-
-    SDL_RegisterApp("Twilight NetQuake", 0, GetModuleHandle(NULL));
-
-	global_hInstance = hInstance;
-	global_nCmdShow = nCmdShow;
-
 	lpBuffer.dwLength = sizeof (MEMORYSTATUS);
 	GlobalMemoryStatus (&lpBuffer);
 
-	pargc = 1;
-	argv[0] = empty_string;
-
-	while (*lpCmdLine && (pargc < MAX_NUM_ARGVS)) {
-		while (*lpCmdLine && ((*lpCmdLine <= 32) || (*lpCmdLine > 126)))
-			lpCmdLine++;
-
-		if (*lpCmdLine) {
-			argv[pargc] = lpCmdLine;
-			pargc++;
-
-			while (*lpCmdLine && ((*lpCmdLine > 32) && (*lpCmdLine <= 126)))
-				lpCmdLine++;
-
-			if (*lpCmdLine) {
-				*lpCmdLine = 0;
-				lpCmdLine++;
-			}
-
-		}
-	}
-
-	pargv = argv;
-
-	COM_InitArgv (pargc, pargv);
+	COM_InitArgv (argc, argv);
 
 	isDedicated = (COM_CheckParm ("-dedicated") != 0);
 
