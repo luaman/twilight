@@ -202,6 +202,9 @@ Sys_Init (void)
 	sys_asciionly = Cvar_Get ("sys_asciionly", "1", CVAR_ARCHIVE, NULL);
 	sys_logname = Cvar_Get ("sys_logname", "", CVAR_NONE, &setlogname);
 
+	if (COM_CheckParm ("-condebug"))
+		Cvar_Set (sys_logname, "qconsole");
+
 	sdlflags = SDL_INIT_TIMER;
 	if (COM_CheckParm ("-noparachute"))
 	{
@@ -454,9 +457,6 @@ main (int c, char **v)
 
 	if (COM_CheckParm ("-nostdout"))
 		nostdout = 1;
-
-	if (COM_CheckParm ("-condebug"))
-		Cvar_Set (sys_logname, "qconsole");
 
 	Host_Init ();
 

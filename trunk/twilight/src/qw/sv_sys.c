@@ -206,6 +206,9 @@ Sys_Init (void)
 	sys_asciionly = Cvar_Get ("sys_asciionly", "1", CVAR_ARCHIVE, NULL);
 	sys_logname = Cvar_Get ("sys_logname", "", CVAR_NONE, &setlogname);
 
+	if (COM_CheckParm ("-condebug"))
+		Cvar_Set (sys_logname, "qconsole");
+
 	Math_Init ();
 
 #ifdef _WIN32
@@ -486,9 +489,6 @@ main (int c, char **v)
 	sys_gametypes = GAME_QW_SERVER;
 
 	COM_InitArgv (c, v);
-
-	if (COM_CheckParm ("-condebug"))
-		Cvar_Set (sys_logname, "qconsole");
 
 	CL_Init ();							// Inits cls for net_chan.c
 	SV_Init ();
