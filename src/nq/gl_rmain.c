@@ -85,6 +85,7 @@ cvar_t *r_speeds;
 cvar_t *r_shadows;
 cvar_t *r_wateralpha;
 cvar_t *r_waterripple;
+cvar_t *r_wireframe;
 cvar_t *r_dynamic;
 cvar_t *r_novis;
 cvar_t *r_lightlerp;
@@ -112,6 +113,8 @@ extern vec3_t lightcolor;
 qboolean colorlights = true;
 
 static float shadescale = 0.0;
+
+int gl_wireframe = 0;
 
 int lastposenum = 0, lastposenum0 = 0;
 extern model_t *mdl_fire;
@@ -1491,6 +1494,12 @@ R_RenderView (void)
 
 	transpolyclear();
 
+	if (gl_wireframe) {
+		qglDepthMask (GL_FALSE);
+		qglPolygonMode(GL_BACK, GL_LINE);
+		qglDisable (GL_TEXTURE_2D);
+	}
+			
 	// adds static entities to the list
 	R_DrawWorld ();
 
@@ -1516,6 +1525,11 @@ R_RenderView (void)
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);
+
+	if (gl_wireframe) {
+		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		qglEnable (GL_TEXTURE_2D);
+	}
 
 	R_PolyBlend ();
 

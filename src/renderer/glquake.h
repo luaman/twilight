@@ -108,6 +108,7 @@ extern struct cvar_s *r_waterwarp;
 extern struct cvar_s *r_shadows;
 extern struct cvar_s *r_wateralpha;
 extern struct cvar_s *r_waterripple;
+extern struct cvar_s *r_wireframe;
 extern struct cvar_s *r_dynamic;
 extern struct cvar_s *r_novis;
 extern struct cvar_s *r_netgraph;
@@ -134,6 +135,7 @@ extern int gl_lightmap_format;
 extern int gl_solid_format;
 extern int gl_alpha_format;
 extern qboolean colorlights;
+extern int gl_wireframe;
 
 extern struct cvar_s *gl_max_size;
 extern struct cvar_s *gl_playermip;
