@@ -276,7 +276,7 @@ Cvar_Cleanup (void)
 
 
 void
-Cvar_Archive (FILE *f)
+Cvar_WriteVars (FILE *f)
 {
 	cvar_list_t	   *v;
 
