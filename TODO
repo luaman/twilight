@@ -3,7 +3,6 @@ Project Twilight todo list
 
 These things should be done before first public release:
 
-  - Add Cvars fs_sharepath and fs_userpath [Knghtbrd]
   - Global config file support
   - Website updates
     - MySQL-based news [CoderJoe]

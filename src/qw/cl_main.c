@@ -1453,6 +1453,7 @@ Host_Init (void)
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
 
+	COM_Init_Cvars ();				// initialize basic cvars
 	Con_Init_Cvars ();				// initialize all console related cvars
 	Key_Init_Cvars ();				// initialize all key related cvars
 	Mod_Init_Cvars();				// initialize all model related cvars
@@ -1468,7 +1469,6 @@ Host_Init (void)
 	IN_Init_Cvars ();				// initialize all input related cvars
 
 	COM_Init ();					// setup and initialize filesystem, endianess, add related commands
-	COM_Init_Cvars ();				// initialize basic cvars
 
 	Host_FixupModelNames ();		// fix model names (how?)
 	Mod_Init ();					// setup models, add related commands
