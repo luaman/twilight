@@ -49,8 +49,8 @@ colorub_t	*scub_array_p;
 GLuint		v_index, i_index;
 qboolean	va_locked;
 
-varray_type_t _vtype, _tc0type, _tc1type, _ctype;
-varray_t _varray, _tc0array, _tc1array, _carray;
+varray_type_t gva_vtype, gva_tc0type, gva_tc1type, gva_ctype;
+varray_t gva_varray, gva_tc0array, gva_tc1array, gva_carray;
 
 GLuint		MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
 
