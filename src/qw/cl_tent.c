@@ -406,12 +406,12 @@ CL_UpdateBeams (void)
 			else
 				pitch = 270;
 		} else {
-			yaw = (int)(Q_atan2 (dist[1], dist[0]) * 180 / M_PI);
+			yaw = Q_atan2 (dist[1], dist[0]) * 180 / M_PI;
 			if (yaw < 0)
 				yaw += 360;
 
 			forward = VectorLength2 (dist);
-			pitch = (int)(Q_atan2 (dist[2], forward) * 180 / M_PI);
+			pitch = Q_atan2 (dist[2], forward) * 180 / M_PI;
 			if (pitch < 0)
 				pitch += 360;
 		}
