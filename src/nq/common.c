@@ -524,13 +524,40 @@ void Com_Printf (const char *fmt, ...)
 	Con_Print (msg);
 }
 
+/*
+ * This just wraps to Com_DFPrintf for now.
+ * Should we eventually move everything to Com_DFPrintf?
+ */
 void Com_DPrintf (const char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
 
-	if (!developer || !developer->ivalue)
-		// don't confuse non-developers with techie stuff...
+	/*
+	 * I'd really rather do this with a macro, but I can't do that
+	 * without breaking portability.  I don't know which compilers
+	 * support ... in #defines, but I know that it's an extension. - rain
+	 */
+
+	va_start (argptr, fmt);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
+	va_end (argptr);
+
+	Com_DFPrintf (DEBUG_DEFAULT, "%s", msg);
+}
+
+/* Like Com_DFPrintf, but takes a log level to sort things out a bit */
+void Com_DFPrintf (int level, const char *fmt, ...)
+{
+	va_list     argptr;
+	char        msg[MAXPRINTMSG];
+
+	/*
+	 * don't confuse non-developers with
+	 * techie stuff...
+	 */
+
+	if (!developer || !developer->ivalue || !(developer->ivalue & level))
 		return;
 
 	va_start (argptr, fmt);
@@ -539,7 +566,6 @@ void Com_DPrintf (const char *fmt, ...)
 
 	Com_Printf ("%s", msg);
 }
-
 
 //===========================================================================
 
