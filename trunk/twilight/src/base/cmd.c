@@ -513,7 +513,7 @@ Cmd_Alias_f (void)
 	}
 	strlcat (cmd, "\n", sizeof (cmd));
 
-	a->value = CopyString (cmd);
+	a->value = Zstrdup (cmdzone, cmd);
 }
 
 /*

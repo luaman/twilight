@@ -126,16 +126,16 @@ strlcpy (char *dst, const char *src, size_t siz)
 
 /*
 ==================
-CopyString
+Zstrdup
 
-Duplicate a string (memory allocated with Z_Malloc)
+Duplicate a string (memory allocated with given zone)
 ==================
 */
 char*
-CopyString (const char *string)
+Zstrdup (memzone_t *zone, const char *string)
 {
 	size_t length = strlen (string) + 1;
-	char *out = Z_Malloc (length);
+	char *out = Zone_Alloc (zone, length);
 	memcpy (out, string, length);
 	return out;
 }
