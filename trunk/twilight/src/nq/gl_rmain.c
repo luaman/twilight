@@ -953,7 +953,7 @@ R_DrawAliasModel (entity_t *e)
 		}
 	}
 
-	qglShadeModel (GL_FLAT);
+/* FIXME: ?	qglShadeModel (GL_FLAT); */
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
