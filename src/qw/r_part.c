@@ -580,7 +580,7 @@ R_RocketConeTrail (vec3_t start, vec3_t end, int type)
 	len = VectorLength (vec);
 
 	if (len) {
-		VectorSet4 (color, 0.8, 0.0, 0.0, 0.3);
+		VectorSet4 (color, 0.6, 0.0, 0.0, 0.2);
 		new_tube_particle (pt_rtrail, start, end, color, 0, 5, 5, 15);
 	}
 }
