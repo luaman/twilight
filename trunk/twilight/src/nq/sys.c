@@ -68,6 +68,7 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "common.h"
+#include "cclient.h"
 #include "cvar.h"
 #include "host.h"
 #include "mathlib.h"
@@ -96,7 +97,6 @@ char logname[MAX_OSPATH] = "";
 
 double curtime = 0;
 
-qboolean isDedicated;
 qboolean do_stdin = true;
 
 #ifdef _WIN32
@@ -598,7 +598,7 @@ main (int argc, char *argv[])
 
 	Host_Init ();
 
-	if (!isDedicated && COM_CheckParm ("-nostdout"))
+	if (ccl.state != ca_dedicated && COM_CheckParm ("-nostdout"))
 		nostdout = 1;
 
 	oldtime = base = Sys_DoubleTime ();
@@ -612,7 +612,7 @@ main (int argc, char *argv[])
 		Host_Frame (time);
 		oldtime = newtime;
 
-		if (isDedicated && sys_extrasleep->ivalue)
+		if (ccl.state == ca_dedicated && sys_extrasleep->ivalue)
 			SDL_Delay (sys_sleep);
 	}
 

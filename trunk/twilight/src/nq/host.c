@@ -188,7 +188,6 @@ Host_FindMaxClients (void)
 	i = COM_CheckParm ("-dedicated");
 	if (i) {
 		ccl.state = ca_dedicated;
-		isDedicated = true;
 		if (i != (com_argc - 1)) {
 			svs.maxclients = Q_atoi (com_argv[i + 1]);
 		} else
@@ -196,7 +195,6 @@ Host_FindMaxClients (void)
 	} else {
 		ccl.state = ca_disconnected;
 		r_worldmodel = NULL;
-		isDedicated = false;
 	}
 
 	i = COM_CheckParm ("-listen");
@@ -284,7 +282,7 @@ Host_WriteConfiguration (char *name)
 
 // dedicated servers initialize the host but don't parse and set the
 // config.cfg cvars
-	if (host_initialized && !isDedicated) {
+	if (host_initialized && ccl.state != ca_dedicated) {
 		char fname[MAX_QPATH] = { 0 };
 
 		snprintf (fname, sizeof (fname), "%s/%s", com_gamedir, name);
@@ -717,7 +715,7 @@ _Host_Frame (double time)
 	} else
 		S_Update (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
 
-	if (!isDedicated)
+	if (ccl.state != ca_dedicated)
 		CDAudio_Update ();
 
 	if (host_speeds->ivalue) {
