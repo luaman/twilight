@@ -404,17 +404,18 @@ A sky texture is 256*128, with the right side being a masked overlay
 ==============
 */
 void
-Sky_InitSky (texture_t *unused, Uint8 *pixels)
+Sky_InitSky (image_t *img)
 {
 	int			i, j, p;
 	Uint8		*src;
-	unsigned	trans[128 * 128];
+	Uint32		trans[128 * 128];
 	int			r, g, b;
 	Uint8		rgba[4], transpix[4];
 
-	unused = unused;
-
-	src = pixels;
+	if ((img->type != IMG_QPAL) || (!img->pixels)) {
+		return;
+	}
+	src = img->pixels;
 
 	// make an average value for the back to avoid
 	// a fringe on the top level

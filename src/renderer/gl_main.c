@@ -358,7 +358,7 @@ R_InitTextures (void)
 	strlcpy_s (r_notexture->name, "notexture");
 	r_notexture->width = img.width;
 	r_notexture->height = img.height;
-	r_notexture->gl_texturenum = GLT_Load_image (r_notexture->name, &img,
+	r_notexture->gl_texturenum = GLT_Load_image (r_notexture->name, &img, NULL,
 			TEX_MIPMAP);
 
 	r_notexture_water = Zone_Alloc (glt_zone, sizeof(texture_t));

@@ -42,7 +42,7 @@ void R_ResampleTexture(void *id, int iw, int ih, void *od, int ow, int oh);
 qboolean GL_Upload32(Uint32 *data, int width, int height, int flags);
 qboolean GL_Upload8(Uint8 *data, int width, int height, Uint32 *palette, int flags);
 int GLT_Load_Raw(const char *identifier, Uint width, Uint height, Uint8 *data, Uint32 *palette, int flags, int bpp);
-int GLT_Load_image(const char *identifier, image_t *img, int flags);
+int GLT_Load_image(const char *identifier, image_t *img, Uint32 *palette, int flags);
 int GLT_Load_Pixmap(const char *name, const char *data);
 qboolean GLT_Delete(GLuint texnum);
 

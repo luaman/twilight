@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) 1996-1997  Id Software, Inc.
+	Copyright (C) 2003  Zephaniah E. Hull.
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -21,29 +21,14 @@
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
 
-	$Id$
 */
 
-#ifndef __R_SKY_H
-#define __R_SKY_H
+#ifndef __FS_BSP_H
+#define __FS_BSP_H
 
-#include "qtypes.h"
-#include "model.h"
-#include "image.h"
+#include "fs.h"
 
-typedef enum {
-	SKY_SPHERE, SKY_BOX, SKY_FAST,
-} sky_type_t;
+fs_group_t *FSB_New_Group (fs_file_t *bsp, fs_group_t *parent, const char *id);
 
-extern cvar_t *r_skyname;
-extern sky_type_t	sky_type;
+#endif // __FS_BSP_H
 
-void Sky_Fast_Draw_Chain(model_t *mod, chain_head_t *chain);
-void Sky_Depth_Draw_Chain(model_t *mod, chain_head_t *chain);
-void Sky_Sphere_Draw(void);
-void Sky_Box_Draw(void);
-void Sky_InitSky (image_t *img);
-void Sky_Init(void);
-void Sky_Init_Cvars(void);
-
-#endif // __R_SKY_H

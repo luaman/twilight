@@ -80,7 +80,7 @@ extern fs_group_t	*fs_paths;
 void FS_Init (void);
 
 void FS_Add_File (fs_group_t *group, const char *name, size_t len, fs_open_t *open, void *fs_data);
-fs_file_t *FS_FindFiles_Complex (const char **names, char ***exts);
+fs_file_t *FS_FindFiles_Complex (const char **names, char **exts);
 fs_file_t *FS_FindFile_Complex (const char *name, char **exts);
 fs_file_t *FS_FindFile (const char *name);
 void FS_AddPath (const char *path, const char *id, const Uint32 flags);

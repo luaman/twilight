@@ -35,6 +35,7 @@ static const char rcsid[] =
 #include "crc.h"
 #include "dir.h"
 #include "pak.h"
+#include "bsp.h"
 #include "wad.h"
 #include "cmd.h"
 #include "embedded.h"
@@ -110,13 +111,13 @@ FS_MangleName (const char *name)
 }
 
 fs_file_t *
-FS_FindFiles_Complex (const char **names, char ***exts)
+FS_FindFiles_Complex (const char **names, char **exts)
 {
 	int			i;
 	fs_file_t	*best = NULL, *cur = NULL;
 
 	for (i = 0; names[i]; i++)
-		if ((cur = FS_FindFile_Complex (names[i], exts[i])))
+		if ((cur = FS_FindFile_Complex (names[i], exts)))
 			if (!best || cur->group->path_num > best->group->path_num)
 				best = cur;
 
@@ -209,6 +210,8 @@ FS_Add_File (fs_group_t *group, const char *name, size_t len,
 			FS_AddGroup (FSP_New_Group (file, group, name));
 		if (!strcasecmp("wad", file->ext))
 			FS_AddGroup (FSW_New_Group (file, group, name));
+		if (!strcasecmp("bsp", file->ext))
+			FS_AddGroup (FSB_New_Group (file, group, name));
 	}
 }
 
