@@ -977,7 +977,7 @@ R_ResampleTextureMMX_EXT (void *indata, int inwidth, int inheight,
 void
 R_ResampleTexture (void *id, int iw, int ih, void *od, int ow, int oh)
 {
-	if (r_lerpimages->ivalue) {
+	if (!r_lerpimages->ivalue) {
 		R_ResampleTextureNoLerpBase (id, iw, ih, od, ow, oh);
 		return;
 	}
