@@ -1594,8 +1594,6 @@ SV_Init
 void
 SV_Init (quakeparms_t *parms)
 {
-	Math_Init();
-
 	COM_InitArgv (parms->argc, parms->argv);
 	COM_AddParm ("-game");
 	COM_AddParm ("qw");
