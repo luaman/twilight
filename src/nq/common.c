@@ -1376,7 +1376,6 @@ COM_AddGameDirectory (char *dir)
 {
 	char		buf[1024];
 
-	Com_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
 	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->string, dir);
 	COM_AddDirectory (buf);
 
