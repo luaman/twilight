@@ -53,7 +53,7 @@ static glpoly_t *lightmap_polys[MAX_LIGHTMAPS];
 
 static int allocated[MAX_LIGHTMAPS][BLOCK_WIDTH];
 
-static int r_pvsframecount = 1;
+static Uint r_pvsframecount = 1;
 
 static int dlightdivtable[32768];
 

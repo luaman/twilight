@@ -189,7 +189,7 @@ void R_ReadPointFile_f (void);
 //============================================================================
 
 
-extern int r_framecount;
+extern Uint r_framecount;
 extern int c_brush_polys, c_alias_polys;
 
 

@@ -43,7 +43,7 @@ static const char rcsid[] =
 
 rdlight_t r_dlight[MAX_DLIGHTS];
 int r_numdlights = 0;
-int r_dlightframecount;
+Uint r_dlightframecount;
 
 static int corona_texture;
 
