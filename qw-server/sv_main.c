@@ -305,7 +305,7 @@ SV_FullClientUpdate (client_t *client, sizebuf_t *buf)
 	MSG_WriteByte (buf, i);
 	MSG_WriteFloat (buf, realtime - client->connection_started);
 
-	strcpy (info, client->userinfo);
+	Q_strcpy (info, client->userinfo);
 	Info_RemovePrefixedKeys (info, '_');	// server passwords, etc
 
 	MSG_WriteByte (buf, svc_updateuserinfo);
@@ -442,7 +442,7 @@ SVC_Log (void)
 				 NET_AdrToString (net_from));
 
 	snprintf (data, sizeof (data), "stdlog %i\n", svs.logsequence - 1);
-	strcat (data, (char *) svs.log_buf[((svs.logsequence - 1) & 1)]);
+	Q_strcat (data, (char *) svs.log_buf[((svs.logsequence - 1) & 1)]);
 
 	NET_SendPacket (strlen (data) + 1, data, net_from);
 }
@@ -546,7 +546,7 @@ SVC_DirectConnect (void)
 	challenge = atoi (Cmd_Argv (3));
 
 	// note an extra byte is needed to replace spectator key
-	strncpy (userinfo, Cmd_Argv (4), sizeof (userinfo) - 2);
+	Q_strncpy (userinfo, Cmd_Argv (4), sizeof (userinfo) - 2);
 	userinfo[sizeof (userinfo) - 2] = 0;
 
 	// see if the challenge is valid
@@ -613,7 +613,7 @@ SVC_DirectConnect (void)
 			if (*q > 31 && *q <= 127)
 				*p++ = *q;
 	} else
-		strncpy (newcl->userinfo, userinfo, sizeof (newcl->userinfo) - 1);
+		Q_strncpy (newcl->userinfo, userinfo, sizeof (newcl->userinfo) - 1);
 
 	// if there is already a slot for this ip, drop it
 	for (i = 0, cl = svs.clients; i < MAX_CLIENTS; i++, cl++) {
@@ -763,8 +763,8 @@ SVC_RemoteCommand (void)
 		remaining[0] = 0;
 
 		for (i = 2; i < Cmd_Argc (); i++) {
-			strcat (remaining, Cmd_Argv (i));
-			strcat (remaining, " ");
+			Q_strcat (remaining, Cmd_Argv (i));
+			Q_strcat (remaining, " ");
 		}
 
 		Cmd_ExecuteString (remaining);
@@ -1025,7 +1025,7 @@ SV_SendBan (void)
 	data[0] = data[1] = data[2] = data[3] = 0xff;
 	data[4] = A2C_PRINT;
 	data[5] = 0;
-	strcat (data, "\nbanned.\n");
+	Q_strcat (data, "\nbanned.\n");
 
 	NET_SendPacket (strlen (data), data, net_from);
 }
@@ -1484,14 +1484,14 @@ SV_ExtractFromUserinfo (client_t *cl)
 	val = Info_ValueForKey (cl->userinfo, "name");
 
 	// trim user name
-	strncpy (newname, val, sizeof (newname) - 1);
+	Q_strncpy (newname, val, sizeof (newname) - 1);
 	newname[sizeof (newname) - 1] = 0;
 
 	for (p = newname; (*p == ' ' || *p == '\r' || *p == '\n') && *p; p++);
 
 	if (p != newname && !*p) {
 		// white space only
-		strcpy (newname, "unnamed");
+		Q_strcpy (newname, "unnamed");
 		p = newname;
 	}
 
@@ -1561,7 +1561,7 @@ SV_ExtractFromUserinfo (client_t *cl)
 	}
 
 
-	strncpy (cl->name, val, sizeof (cl->name) - 1);
+	Q_strncpy (cl->name, val, sizeof (cl->name) - 1);
 
 	// rate command
 	val = Info_ValueForKey (cl->userinfo, "rate");

@@ -332,7 +332,7 @@ SV_SpawnServer (char *server)
 	sv.signon.data = sv.signon_buffers[0];
 	sv.num_signon_buffers = 1;
 
-	strcpy (sv.name, server);
+	Q_strcpy (sv.name, server);
 
 	// load progs to get entity field count
 	// which determines how big each edict is
@@ -352,7 +352,7 @@ SV_SpawnServer (char *server)
 
 	sv.time = 1.0;
 
-	strcpy (sv.name, server);
+	Q_strcpy (sv.name, server);
 	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
 	sv.worldmodel = Mod_ForName (sv.modelname, true);
 	SV_CalcPHS ();

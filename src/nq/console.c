@@ -518,7 +518,7 @@ Con_DrawInput (void)
 	if (key_dest != key_console && !con_forcedup)
 		return;							// don't draw anything
 	
-	text = strcpy(temp, key_lines[edit_line]);
+	text = Q_strcpy(temp, key_lines[edit_line]);
 	y = strlen(text);
 
 	// fill out remainder with spaces
