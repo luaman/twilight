@@ -157,7 +157,6 @@ M_DrawPic (int x, int y, qpic_t *pic)
 	Draw_Pic (x + ((vid.width_2d - 320) >> 1), y, pic);
 }
 
-
 static int
 M_ModalMessage (char *text)
 {
@@ -1118,7 +1117,7 @@ M_Options_Key (int k)
 				case 2:
 					Cbuf_AddText ("exec default.cfg\n");
 					break;
-				case 22:
+				case 21:
 					M_Menu_Gfx_f ();
 					break;
 				default:
