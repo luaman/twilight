@@ -41,7 +41,7 @@ int lightmap_bytes;				// 1, 3, or 4
 int lightmap_shift;
 
 static Uint32 blocklights[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 3];
-static Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
+extern Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
 
 static qboolean drawfullbrights = false;
 
@@ -479,7 +479,7 @@ GL_BuildLightmap (msurface_t *surf, brushhdr_t *brush)
 
 	// Bind your textures early and often - or at least early
 	qglBindTexture(GL_TEXTURE_2D, 
-			brush->lightblock.chains[surf->lightmap_texnum].l_texnum);
+			brush->lightblock->b[surf->lightmap_texnum].chain.l_texnum);
 
 	// Reset stuff here
 	surf->cached_light[0] = d_lightstylevalue[surf->styles[0]];
@@ -661,6 +661,7 @@ R_BlendLightmaps (brushhdr_t *brush)
 	msurface_t		*s;
 	glpoly_t		*p;
 	qboolean		 bound;
+	lightsubblock_t	*sub;
 
 	// don't bother writing Z
 	qglDepthMask (GL_FALSE);
@@ -669,8 +670,10 @@ R_BlendLightmaps (brushhdr_t *brush)
 
 	qglEnable (GL_BLEND);
 
-	for (i = 0; i < MAX_LIGHTMAPS; i++) {
-		chain = &brush->lightblock.chains[i];
+	for (sub = brush->lightblock->b, i = 0; i < brush->lightblock->num;
+			i++, sub++)
+	{
+		chain = &sub->chain;
 		bound = false;
 		if ((chain->visframe != r_framecount))
 			continue;
@@ -716,10 +719,13 @@ DrawTextureChains (brushhdr_t *brush, qboolean transform)
 	qboolean		bound;
 	chain_head_t	*chain;
 	chain_item_t	*c;
+	lightsubblock_t	*sub;
 
 	// LordHavoc: upload lightmaps early
-	for (i = 0; i < MAX_LIGHTMAPS; i++) {
-		chain = &brush->lightblock.chains[i];
+	for (sub = brush->lightblock->b, i = 0; i < brush->lightblock->num;
+			i++, sub++)
+	{
+		chain = &sub->chain;
 		if (!chain->n_items || (chain->visframe != r_framecount))
 			continue;
 
@@ -772,8 +778,7 @@ DrawTextureChains (brushhdr_t *brush, qboolean transform)
 						qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 						qglActiveTextureARB (GL_TEXTURE1_ARB);
 					}
-					qglBindTexture(GL_TEXTURE_2D, 
-							brush->lightblock.chains[s->lightmap_texnum].l_texnum);
+					qglBindTexture(GL_TEXTURE_2D, brush->lightblock->b[s->lightmap_texnum].chain.l_texnum);
 					R_RenderPolys (s->polys, true, true);
 				}
 		}
@@ -1128,6 +1133,8 @@ R_VisWorld
 void
 R_VisWorld (void)
 {
+	VectorCopy (r_origin, modelorg);
+
 	R_MarkLeaves ();
 	R_RecursiveWorldNode (cl.worldmodel->extra.brush->nodes);
 }
@@ -1140,83 +1147,9 @@ R_DrawWorld
 void
 R_DrawWorld (void)
 {
-	R_MarkLeaves ();
-	R_RecursiveWorldNode (cl.worldmodel->extra.brush->nodes);
-
 	R_PushDlights ();
 
 	DrawTextureChains (cl.worldmodel->extra.brush, false);
 
 	R_RenderFullbrights (cl.worldmodel->extra.brush);
-}
-
-
-
-/*
-=============================================================================
-
-  LIGHTMAP ALLOCATION
-
-=============================================================================
-*/
-
-// returns a texture number and the position inside it
-int
-AllocLightBlock (lightblock_t *block, int w, int h, int *x, int *y)
-{
-	int			i, j;
-	int			best, best2;
-	int			texnum;
-
-	for (texnum = 0; texnum < MAX_LIGHTMAPS; texnum++)
-	{
-		best = LIGHTBLOCK_HEIGHT;
-
-		for (i = 0; i < LIGHTBLOCK_WIDTH - w; i++)
-		{
-			best2 = 0;
-
-			for (j = 0; j < w; j++)
-			{
-				if (block->allocated[texnum][i + j] >= best)
-					break;
-				if (block->allocated[texnum][i + j] > best2)
-					best2 = block->allocated[texnum][i + j];
-			}
-			
-			if (j == w)
-			{
-				// this is a valid spot
-				*x = i;
-				*y = best = best2;
-			}
-		}
-
-		if (best + h > LIGHTBLOCK_HEIGHT)
-			continue;
-
-		/*
-		 * LordHavoc: clear texture to blank image, fragments are uploaded
-		 * using subimage
-		 */
-		if (!block->allocated[texnum][0])
-		{
-			memset(templight, 32, sizeof(templight));
-			qglGenTextures(1, &block->chains[texnum].l_texnum);
-			qglBindTexture(GL_TEXTURE_2D, block->chains[texnum].l_texnum);
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			qglTexImage2D (GL_TEXTURE_2D, 0, colorlights ? 3 : 1,
-					LIGHTBLOCK_WIDTH, LIGHTBLOCK_HEIGHT, 0, gl_lightmap_format,
-					GL_UNSIGNED_BYTE, templight);
-		}
-
-		for (i = 0; i < w; i++)
-			block->allocated[texnum][*x + i] = best + h;
-
-		return texnum;
-	}
-
-	Host_Error ("AllocBlock: full");
-	return 0;
 }

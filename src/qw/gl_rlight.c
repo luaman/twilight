@@ -137,6 +137,7 @@ R_DrawCoronas (void)
 	}
 
 	qglDisableClientState (GL_COLOR_ARRAY);
+	qglColor4fv (whitev);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglEnable (GL_DEPTH_TEST);
 }

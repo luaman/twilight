@@ -32,7 +32,7 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "common.h"
-#include "strlib.h"						/* XoXus: needed for memset call */
+#include <strlib.h>						/* XoXus: needed for memset call */
 #include "mdfour.h"
 
 /* NOTE: This code makes no attempt to be fast!

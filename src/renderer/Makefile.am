@@ -20,6 +20,7 @@ libtwilight_renderer_a_SOURCES= \
 	gl_arrays.c gl_arrays.h gl_info.c gl_info.h \
 	gl_textures.c gl_textures.h \
 	liquid.c liquid.h \
+	mod_brush.c mod_brush.h \
 	noise.c noise_textures.c \
 	sky.c sky.h \
 	surface.c surface.h \
