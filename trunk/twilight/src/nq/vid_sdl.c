@@ -233,12 +233,6 @@ CheckExtensions (void)
 	else
 		Com_Printf ("no.\n");
 
-	if (gl_mtex && (!qglActiveTextureARB || !qglClientActiveTextureARB))
-	{
-		Sys_Error ("Missing GL_ARB_multitexture functions. (%p %p)\n",
-				qglActiveTextureARB, qglClientActiveTextureARB);
-	}
-
 	if (gl_mtex && !COM_CheckParm ("-nomtexcombine"))
 	{
 		gl_mtexcombine_arb = DynGL_HasExtension ("GL_ARB_texture_env_combine");

@@ -197,14 +197,15 @@ Sys_Init (void)
 	Math_Init ();
 }
 
-void
+static void
 Sys_BackTrace (int fd)
 {
 #if HAVE_EXECINFO_H
-	void *array[128];
-	int size;
-	size = backtrace(array, sizeof(array)/sizeof(array[0]));
-	backtrace_symbols_fd(array, size, fd);
+	void		*array[128];
+	int			size;
+
+	size = backtrace (array, sizeof(array)/sizeof(array[0]));
+	backtrace_symbols_fd (array, size, fd);
 #endif
 }
 
