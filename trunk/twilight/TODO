@@ -8,17 +8,16 @@ fixed before release, they're marked RC below.
 
 Bugs we know about:
 
-  - RC: When you touch the bottom of a pool, you make a splash sound.  DP
-    broke this and DP has fixed it.
-  - RC: Fix net_udp (line 112) so we don't resolve non-network connections.
-    (Non-trivial)
-  - RC: Interpolation is broken in both NQ/QW.
+  - RC #1: When you touch the bottom of a pool, you make a splash
+    sound.  DP broke this and DP has fixed it.
+  - RC #2: Fix net_udp (line 112) so we don't resolve non-network
+    connections.  (Non-trivial)
+  - RC #3: Interpolation is broken in both NQ/QW.
     (Can LH do this /please/?)
-  - RC: Need to print out Id's Copyright message on engine startup.
+  - RC #4: Need to print out Id's Copyright message on engine startup.
     (Knghtbrd? What exactly needs to be printed?)
-  - RC: userpath is not properly created if it doesn't exist.  Needs to be.
-  - RC: twilight should create ~/.twilight and ~/.twilight/id1 on demand (and
-    any other mod directories as needed)
+  - RC #5: We should create directories as needed, such as the userpath
+    (~/.twilight/) and gamedirs (~/.twilight/id1 and others).
     (Reported by Peter Jay Salzman)
   - lights do not react to moving bmodels, untransforming into the
     bmodel's coordinates would fix this.  This is a stock Quake bug.
@@ -30,19 +29,20 @@ Bugs we know about:
     (known to occur on most Linux distributions out of the box)
 
   Driver related quirks:
-  - RC: Need a 3dfx quirk for limiting vertex array size.  We need the
-    output of the OpenGL strings in Win32 for this.
-  - 3dfxvgl.dll does not work with Twilight even though it should.  Forest
-    can try a minimal example SDL app which binds OpenGL dynamically if we
-    get him one.  Workaround: copy 3dfxvgl.dll to opengl32.dll in your Quake
-    directory.  NOTE, if you don't have to do this and Twilight works, let
-    us know, we are having trouble identifying this problem.
-  - Win32 ATI Radeon: Leaving the game via alt-tab when fullscreen leaves
-    sound looping.  Trying to return to the game has no effect.  This only
-    happens if playing the game, not if watching a demo; watching a demo and
-    doing this works.
-    (Darkplaces does not have this problem, may be SDL related, very likely
-     ATI related as well)
+  - RC #6: Need a 3dfx quirk for limiting vertex array size.  We need
+    the output of the OpenGL strings in Win32 for this.
+  - 3dfxvgl.dll does not work with Twilight even though it should.
+    Forest can try a minimal example SDL app which binds OpenGL
+    dynamically if we get him one.  Workaround: copy 3dfxvgl.dll to
+    opengl32.dll in your Quake directory.  NOTE, if you don't have to do
+    this and Twilight works, let us know, we are having trouble
+    identifying this problem.
+  - Win32 ATI Radeon: Leaving the game via alt-tab when fullscreen
+    leaves sound looping.  Trying to return to the game has no effect.
+    This only happens if playing the game, not if watching a demo;
+    watching a demo and doing this works.
+    (Darkplaces does not have this problem, may be SDL related, very
+     likely ATI related as well)
     (Reported by Dry-ice)
 
 
