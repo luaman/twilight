@@ -84,10 +84,6 @@ int main (int argc, char *argv[])
 		context.Result (0)
 		return (0, [])
 
-	sdl_ver = context.SDL_config ()
-
-	return sdl_ver
-
 def check_cflag (context, cflag, add = 1):
 	context.Message('Checking to see if compiler flag ' + cflag + ' works ... ')
 	old_flags = context.env['CCFLAGS']
@@ -247,7 +243,8 @@ def do_configure (env):
 	env_defs.set ('CCFLAGS', env['CCFLAGS'])
 	env_defs.set ('CC', env['CC'])
 	env_defs.set ('LIBS', env['LIBS'])
-	env_defs.set ('CPPPATH', env['CPPPATH'])
+	if env.has_key ('CPPPATH'):
+	    env_defs.set ('CPPPATH', env['CPPPATH'])
 	if env.has_key ('CPPDEFINES'):
 		env_defs.set ('CPPDEFINES', env['CPPDEFINES'])
 	if env.has_key ('LINKFLAGS'):
