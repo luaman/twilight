@@ -53,3 +53,5 @@
 
 #define inline __inline
 
+/* foo */
+
