@@ -72,6 +72,7 @@ typedef struct memzone_s
 #define Zone_Alloc(zone,size) _Zone_Alloc(zone, size, __FILE__, __LINE__)
 #define Zone_Free(mem) _Zone_Free(mem, __FILE__, __LINE__)
 #define Zone_CheckSentinels(data) _Zone_CheckSentinels(data, __FILE__, __LINE__)
+#define Zone_CheckSentinelsZone(zone) _Zone_CheckSentinelsZone(zone, __FILE__, __LINE__)
 #define Zone_CheckSentinelsGlobal() _Zone_CheckSentinelsGlobal(__FILE__, __LINE__)
 #define Zone_AllocZone(name) _Zone_AllocZone(name, __FILE__, __LINE__)
 #define Zone_FreeZone(zone) _Zone_FreeZone(zone, __FILE__, __LINE__)
@@ -83,6 +84,7 @@ memzone_t *_Zone_AllocZone(char *name, char *filename, int fileline);
 void _Zone_FreeZone(memzone_t **zone, char *filename, int fileline);
 void _Zone_EmptyZone(memzone_t *zone, char *filename, int fileline);
 void _Zone_CheckSentinels(void *data, char *filename, int fileline);
+void _Zone_CheckSentinelsZone(memzone_t *zone, char *filename, int fileline);
 void _Zone_CheckSentinelsGlobal(char *filename, int fileline);
 
 void Zone_Init (void);

@@ -273,18 +273,21 @@ static void _Zone_CheckClumpSentinels(memclump_t *clump, char *filename, int fil
 		Sys_Error("Zone_CheckClumpSentinels: trashed sentinel 2 (sentinel check at %s:%i, zone %s)", filename, fileline, zone->name);
 }
 
-void _Zone_CheckSentinelsGlobal(char *filename, int fileline)
+void _Zone_CheckSentinelsZone(memzone_t *zone, char *filename, int fileline)
 {
 	memheader_t *mem;
 	memclump_t *clump;
+	for (mem = zone->chain;mem;mem = mem->chain)
+		_Zone_CheckSentinels((void *)((long) mem + sizeof(memheader_t)), filename, fileline);
+	for (clump = zone->clumpchain;clump;clump = clump->chain)
+		_Zone_CheckClumpSentinels(clump, filename, fileline, zone);
+}
+
+void _Zone_CheckSentinelsGlobal(char *filename, int fileline)
+{
 	memzone_t *zone;
 	for (zone = zonechain;zone;zone = zone->next)
-	{
-		for (mem = zone->chain;mem;mem = mem->chain)
-			_Zone_CheckSentinels((void *)((long) mem + sizeof(memheader_t)), filename, fileline);
-		for (clump = zone->clumpchain;clump;clump = clump->chain)
-			_Zone_CheckClumpSentinels(clump, filename, fileline, zone);
-	}
+		_Zone_CheckSentinelsZone(zone, filename, fileline);
 }
 
 // used for temporary memory allocations around the engine, not for longterm
