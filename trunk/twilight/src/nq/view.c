@@ -211,7 +211,7 @@ V_DriftPitch (void)
 		if (Q_fabs(cl.cmd.forwardmove) < cl_forwardspeed->value)
 			cl.driftmove = 0;
 		else
-			cl.driftmove += host_frametime;
+			cl.driftmove += (cl.time - cl.oldtime);
 
 		if (cl.driftmove > v_centermove->value)
 			V_StartPitchDrift();
@@ -226,8 +226,8 @@ V_DriftPitch (void)
 		return;
 	}
 
-	move = host_frametime * cl.pitchvel;
-	cl.pitchvel += host_frametime * v_centerspeed->value;
+	move = (cl.time - cl.oldtime) * cl.pitchvel;
+	cl.pitchvel += (cl.time - cl.oldtime) * v_centerspeed->value;
 
 	if (delta > 0) {
 		if (move > delta) {
@@ -489,12 +489,12 @@ V_UpdatePalette (void)
 	}
 
 	/* drop the damage value */
-	cl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime * 150;
+	cl.cshifts[CSHIFT_DAMAGE].percent -= (cl.time - cl.oldtime) * 150;
 	if (cl.cshifts[CSHIFT_DAMAGE].percent <= 0)
 		cl.cshifts[CSHIFT_DAMAGE].percent = 0;
 
 	/* drop the bonus value */
-	cl.cshifts[CSHIFT_BONUS].percent -= host_frametime * 100;
+	cl.cshifts[CSHIFT_BONUS].percent -= (cl.time - cl.oldtime) * 100;
 	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
 		cl.cshifts[CSHIFT_BONUS].percent = 0;
 
@@ -539,7 +539,7 @@ CalcGunAngle (void)
 	pitch = angledelta (-pitch - r_refdef.viewangles[PITCH]) * 0.4;
 	pitch = bound (-10, pitch, 10);
 
-	move = host_frametime * 20;
+	move = (cl.time - cl.oldtime) * 20;
 	if (yaw > oldyaw) {
 		if (oldyaw + move < yaw)
 			yaw = oldyaw + move;
@@ -641,7 +641,7 @@ V_CalcViewRoll (void)
 	if (v_dmg_time > 0) {
 		r_refdef.viewangles[ROLL] += v_dmg_time / v_kicktime->value * v_dmg_roll;
 		r_refdef.viewangles[PITCH] += v_dmg_time / v_kicktime->value * v_dmg_pitch;
-		v_dmg_time -= host_frametime;
+		v_dmg_time -= (cl.time - cl.oldtime);
 	}
 	if (cl.stats[STAT_HEALTH] <= 0) {
 		r_refdef.viewangles[ROLL] = 80; // dead view angle
@@ -761,7 +761,7 @@ V_CalcRefdef (void)
 	if (cl.onground && (ent->origin[2] - oldz > 0)) {
 		float	steptime;
 
-		steptime = host_frametime;
+		steptime = (cl.time - cl.oldtime);
 
 		oldz += steptime * 80;
 		if (oldz > ent->origin[2])

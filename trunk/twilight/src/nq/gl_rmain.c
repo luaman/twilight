@@ -151,18 +151,18 @@ void R_BlendedRotateForEntity (entity_t *e, qboolean shadow)
 	int i;
 
 	// positional interpolation
-	timepassed = realtime - e->translate_start_time;
+	timepassed = cl.time - e->translate_start_time;
 
 	if (e->translate_start_time == 0 || timepassed > 1)
 	{
-		e->translate_start_time = realtime;
+		e->translate_start_time = cl.time;
 		VectorCopy (e->origin, e->origin1);
 		VectorCopy (e->origin, e->origin2);
 	}
 
 	if (!VectorCompare (e->origin, e->origin2))
 	{
-		e->translate_start_time = realtime;
+		e->translate_start_time = cl.time;
 		VectorCopy (e->origin2, e->origin1);
 		VectorCopy (e->origin,  e->origin2);
 		blend = 0;
@@ -177,18 +177,18 @@ void R_BlendedRotateForEntity (entity_t *e, qboolean shadow)
 	qglTranslatef (d[0], d[1], d[2]);
 
 	// orientation interpolation (Euler angles, yuck!)
-	timepassed = realtime - e->rotate_start_time;
+	timepassed = cl.time - e->rotate_start_time;
 
 	if (e->rotate_start_time == 0 || timepassed > 1)
 	{
-		e->rotate_start_time = realtime;
+		e->rotate_start_time = cl.time;
 		VectorCopy (e->angles, e->angles1);
 		VectorCopy (e->angles, e->angles2);
 	}
 
 	if (!VectorCompare (e->angles, e->angles2))
 	{
-		e->rotate_start_time = realtime;
+		e->rotate_start_time = cl.time;
 		VectorCopy (e->angles2, e->angles1);
 		VectorCopy (e->angles,  e->angles2);
 		blend = 0;
@@ -661,7 +661,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
 	float			s1 = 0.0f;
 	float			c1 = 0.0f;
 
-	blend = (realtime - e->frame_start_time) / e->frame_interval;
+	blend = (cl.time - e->frame_start_time) / e->frame_interval;
 	blend = min (blend, 1);
 
 	lheight = e->origin[2] - lightspot[2];
@@ -874,9 +874,9 @@ R_DrawAliasModel (entity_t *e)
 
 	if (gl_particletorches->value) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
-			if ((realtime + 2) > e->time_left) {
+			if ((cl.time + 2) > e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
-				e->time_left = realtime + 0.05;
+				e->time_left = cl.time + 0.05;
 			}
 			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_fire)
 				clmodel = mdl_fire;

@@ -135,8 +135,7 @@ void
 CL_ParseTEnt (void)
 {
 	int         type;
-	vec3_t      pos;
-
+	vec3_t      pos, pos2;
 	dlight_t   *dl;
 	int         rnd;
 	int         colorStart, colorLength;
@@ -280,6 +279,16 @@ CL_ParseTEnt (void)
 			dl->die = cl.time + 0.5;
 			dl->decay = 300;
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
+			break;
+
+		case TE_RAILTRAIL:
+			pos[0] = MSG_ReadCoord();
+			pos[1] = MSG_ReadCoord();
+			pos[2] = MSG_ReadCoord();
+			pos2[0] = MSG_ReadCoord();
+			pos2[1] = MSG_ReadCoord();
+			pos2[2] = MSG_ReadCoord();
+			R_RailTrail (pos, pos2);
 			break;
 
 		default:

@@ -65,7 +65,7 @@ typedef enum {
 	pt_blob, pt_blob2,
 	pt_torch, pt_torch2,
 	pt_teleport1, pt_teleport2,
-	pt_rtrail
+	pt_rtrail, pt_railtrail
 } ptype_t;
 
 typedef struct {
@@ -104,7 +104,7 @@ new_tube_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
 	VectorCopy4 (color, p->color);
 	p->ramp = ramp;
 	p->rstep = rstep;
-	p->die = realtime + die;
+	p->die = cl.time + die;
 	p->scale1 = scale1;
 	p->scale2 = scale1;
 
@@ -153,7 +153,7 @@ new_cone_particle (ptype_t type, vec3_t org1, vec3_t org2, vec3_t org3,
 	VectorCopy4 (color1, p->color1);
 	VectorCopy4 (color2, p->color2);
 	p->ramp = ramp;
-	p->die = realtime + die;
+	p->die = cl.time + die;
 	p->scale = scale;
 
 	VectorSubtract (org1, org2, normal);
@@ -192,7 +192,7 @@ new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 	VectorCopy (vel, p->vel);
 	VectorCopy4 (color, p->color);
 	p->ramp = ramp;
-	p->die = realtime + die;
+	p->die = cl.time + die;
 	p->scale = scale;
 
 	return true;
@@ -275,13 +275,13 @@ R_EntityParticles (entity_t *ent)
 	}
 
 	for (i = 0; i < NUMVERTEXNORMALS; i++) {
-		angle = realtime * avelocities[i][0];
+		angle = cl.time * avelocities[i][0];
 		sy = Q_sin (angle);
 		cy = Q_cos (angle);
-		angle = realtime * avelocities[i][1];
+		angle = cl.time * avelocities[i][1];
 		sp = Q_sin (angle);
 		cp = Q_cos (angle);
-		angle = realtime * avelocities[i][2];
+		angle = cl.time * avelocities[i][2];
 		sr = Q_sin (angle);
 		cr = Q_cos (angle);
 
@@ -571,6 +571,54 @@ R_Torch (entity_t *ent, qboolean torch2)
 	}
 }
 
+void 
+R_RailTrail (vec3_t start, vec3_t end)
+{
+	vec3_t		vec, org, vel, right;
+	vec4_t		color;
+	float		len, roll = 0.0f;
+	float       sr, sp, sy, cr, cp, cy;
+
+	VectorSubtract (end, start, vec);
+	Vector2Angles (vec, org);
+
+	sp = Q_sin (org[0]);
+	cp = Q_cos (org[0]);
+	sy = Q_sin (org[1]);
+	cy = Q_cos (org[1]);
+
+	len = VectorNormalize(vec);
+	VectorScale (vec, 1.5, vec);
+	VectorSet (right, sy, cy, 0);
+
+	while (len > 0)
+	{
+		VectorCopy (d_8tofloattable[(rand() & 3) + 225], color); color[3] = 0.5;
+		new_base_particle (pt_railtrail, start, vec3_origin, color,
+			0, 2.5, 1.0);
+
+		VectorMA (start, 4, right, org);
+		VectorScale (right, 8, vel);
+		VectorCopy (d_8tofloattable[(rand() & 7) + 206], color); color[3] = 0.5;
+		new_base_particle (pt_railtrail, org, vel, color,
+			0, 5.0, 1.0);
+
+		roll += 7.5 * (M_PI / 180.0); 
+
+		if (roll > 2*M_PI)
+			roll -= 2*M_PI;
+
+		sr = Q_sin (roll);
+		cr = Q_cos (roll);
+		right[0] = (cr * sy - sr * sp * cy);
+		right[1] = -(sr * sp * sy + cr * cy);
+		right[2] = -sr * cp;
+
+		len -= 1.5;
+		VectorAdd (start, vec, start);
+	}
+}
+
 void
 R_RocketTubeTrail (vec3_t start, vec3_t end, int type)
 {
@@ -700,7 +748,7 @@ R_Draw_Base_Particles (void)
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
 
-	frametime = host_frametime;
+	frametime = cl.time - cl.oldtime;
 	time1 = frametime * 5;
 	time2 = frametime * 10;
 	time3 = frametime * 15;
@@ -713,7 +761,7 @@ R_Draw_Base_Particles (void)
 	j = 0;
 
 	for (k = 0, p = base_particles; k < num_base_particles; k++, p++) {
-		if (p->die <= realtime) {
+		if (p->die <= cl.time) {
 			free_base_particles[j++] = p;
 			continue;
 		}
@@ -837,6 +885,12 @@ R_Draw_Base_Particles__physics:
 				if (p->scale < 0)
 					p->die = -1;
 				break;
+			case pt_railtrail:
+				p->color[3] -= frametime * 0.5;
+				if (p->color[3] <= 0)
+					p->die = -1;
+				break;
+
 			default:
 				break;
 		}
@@ -853,7 +907,7 @@ R_Draw_Base_Particles__physics:
 	while (maxparticle >= activeparticles) {
 		*free_base_particles[k++] = base_particles[maxparticle--];
 		while (maxparticle >= activeparticles &&
-				base_particles[maxparticle].die <= realtime)
+				base_particles[maxparticle].die <= cl.time)
 			maxparticle--;
 	}
 	num_base_particles = activeparticles;
@@ -881,7 +935,7 @@ R_Draw_Tube_Particles (void)
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
 
-	frametime = host_frametime;
+	frametime = cl.time - cl.oldtime;
 
 	activeparticles = 0;
 	maxparticle = -1;
@@ -890,7 +944,7 @@ R_Draw_Tube_Particles (void)
 	i_index = 0;
 
 	for (k = 0, p = tube_particles; k < num_tube_particles; k++, p++) {
-		if (p->die <= realtime) {
+		if (p->die <= cl.time) {
 			free_tube_particles[j++] = p;
 			continue;
 		}
@@ -990,7 +1044,7 @@ R_Draw_Tube_Particles (void)
 	while (maxparticle >= activeparticles) {
 		*free_tube_particles[k++] = tube_particles[maxparticle--];
 		while (maxparticle >= activeparticles &&
-				tube_particles[maxparticle].die <= realtime)
+				tube_particles[maxparticle].die <= cl.time)
 			maxparticle--;
 	}
 	num_tube_particles = activeparticles;
@@ -1019,7 +1073,7 @@ R_Draw_Cone_Particles (void)
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
 
-	frametime = host_frametime;
+	frametime = cl.time - cl.oldtime;
 	teletime = frametime * 120;
 
 	activeparticles = 0;
@@ -1029,7 +1083,7 @@ R_Draw_Cone_Particles (void)
 	i_index = 0;
 
 	for (k = 0, p = cone_particles; k < num_cone_particles; k++, p++) {
-		if (p->die <= realtime) {
+		if (p->die <= cl.time) {
 			free_cone_particles[j++] = p;
 			continue;
 		}
@@ -1151,7 +1205,7 @@ R_Draw_Cone_Particles (void)
 	while (maxparticle >= activeparticles) {
 		*free_cone_particles[k++] = cone_particles[maxparticle--];
 		while (maxparticle >= activeparticles &&
-				cone_particles[maxparticle].die <= realtime)
+				cone_particles[maxparticle].die <= cl.time)
 			maxparticle--;
 	}
 	num_cone_particles = activeparticles;
