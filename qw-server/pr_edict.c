@@ -1,5 +1,5 @@
 /*
-	$RCSfile$
+	$RCSfile$ -- entity dictionary
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -22,7 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// sv_edict.c -- entity dictionary
 static const char rcsid[] =
     "$Id$";
 
@@ -48,17 +47,17 @@ static const char rcsid[] =
 #include "world.h"
 #include "zone.h"
 
-dprograms_t *progs;
-dfunction_t *pr_functions;
-char       *pr_strings;
-ddef_t     *pr_fielddefs;
-ddef_t     *pr_globaldefs;
-dstatement_t *pr_statements;
-globalvars_t *pr_global_struct;
-float      *pr_globals;					// same as pr_global_struct
-int         pr_edict_size;				// in bytes
+dprograms_t		*progs;
+dfunction_t		*pr_functions;
+char			*pr_strings;
+ddef_t			*pr_fielddefs;
+ddef_t			*pr_globaldefs;
+dstatement_t	*pr_statements;
+globalvars_t	*pr_global_struct;
+float			*pr_globals;			// same as pr_global_struct
+Sint32			pr_edict_size;			// in bytes
 
-int         type_size[8] =
+Sint32			type_size[8] =
 	{ 1, sizeof (void *) / 4, 1, 3, 1, 1, sizeof (void *) / 4,
 	sizeof (void *) / 4
 };
@@ -977,11 +976,11 @@ PR_LoadProgs
 void
 PR_LoadProgs (void)
 {
-	int         i;
-	char        num[32];
-	dfunction_t *f;
+	Sint32		i;
+	char		num[32];
+	dfunction_t	*f;
 
-// flush the non-C variable lookup cache
+	// flush the non-C variable lookup cache
 	for (i = 0; i < GEFV_CACHESIZE; i++)
 		gefvCache[i].field[0] = 0;
 
@@ -992,13 +991,13 @@ PR_LoadProgs (void)
 		SV_Error ("PR_LoadProgs: couldn't load progs.dat");
 	Con_DPrintf ("Programs occupy %iK.\n", com_filesize / 1024);
 
-// add prog crc to the serverinfo
+	// add prog crc to the serverinfo
 	snprintf (num, sizeof (num), "%i",
 			  CRC_Block ((Uint8 *) progs, com_filesize));
 	Info_SetValueForStarKey (svs.info, "*progs", num, MAX_SERVERINFO_STRING);
 
-// byte swap the header
-	for (i = 0; i < sizeof (*progs) / 4; i++)
+	// byte swap the header
+	for (i = 0; i < (Sint32)sizeof (*progs) / 4; i++)
 		((int *) progs)[i] = LittleLong (((int *) progs)[i]);
 
 	if (progs->version != PROG_VERSION)
@@ -1021,7 +1020,7 @@ PR_LoadProgs (void)
 	pr_edict_size =
 		progs->entityfields * 4 + sizeof (edict_t) - sizeof (entvars_t);
 
-// byte swap the lumps
+	// byte swap the lumps
 	for (i = 0; i < progs->numstatements; i++) {
 		pr_statements[i].op = LittleShort (pr_statements[i].op);
 		pr_statements[i].a = LittleShort (pr_statements[i].a);

@@ -303,16 +303,14 @@ This is only called from the SV_Map_f() function.
 void
 SV_SpawnServer (char *server)
 {
-	edict_t    *ent;
-	int         i;
+	edict_t		*ent;
+	Uint32		i;
 
 	Con_DPrintf ("SpawnServer: %s\n", server);
 
 	SV_SaveSpawnparms ();
 
-	svs.spawncount++;					// any partially connected client will
-	// be
-	// restarted
+	svs.spawncount++;			// any partially connected client will be restarted
 
 	sv.state = ss_dead;
 
@@ -353,7 +351,7 @@ SV_SpawnServer (char *server)
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		ent = EDICT_NUM (i + 1);
 		svs.clients[i].edict = ent;
-//ZOID - make sure we update frags right
+		//ZOID - make sure we update frags right
 		svs.clients[i].old_frags = 0;
 	}
 

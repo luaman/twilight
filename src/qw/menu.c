@@ -809,7 +809,7 @@ char       *bindnames[][2] = {
 
 #define	NUMCOMMANDS	(sizeof(bindnames)/sizeof(bindnames[0]))
 
-int         keys_cursor;
+Uint32		keys_cursor;
 int         bind_grab;
 
 void
@@ -868,11 +868,11 @@ M_UnbindCommand (char *command)
 void
 M_Keys_Draw (void)
 {
-	int         i, l;
-	int         keys[2];
-	char       *name;
-	int         x, y;
-	qpic_t     *p;
+	Uint32	i, l;
+	int		keys[2];
+	char	*name;
+	Uint32	x, y;
+	qpic_t	*p;
 
 	p = Draw_CachePic ("gfx/ttl_cstm.lmp");
 	M_DrawPic ((320 - p->width) / 2, 4, p);
@@ -882,7 +882,7 @@ M_Keys_Draw (void)
 	else
 		M_Print (18, 32, "Enter to change, backspace to clear");
 
-// search for known bindings
+	// search for known bindings
 	for (i = 0; i < NUMCOMMANDS; i++) {
 		y = 48 + 8 * i;
 

@@ -269,8 +269,8 @@ SV_PreSpawn_f
 void
 SV_PreSpawn_f (void)
 {
-	unsigned    buf;
-	unsigned    check;
+	Sint32	buf;
+	Uint32	check;
 
 	if (host_client->state != cs_connected) {
 		Con_Printf ("prespawn not valid -- already spawned\n");
@@ -291,7 +291,7 @@ SV_PreSpawn_f (void)
 		// should be three numbers following containing checksums
 		check = Q_atoi (Cmd_Argv (3));
 
-//      Con_DPrintf("Client check = %d\n", check);
+//		Con_DPrintf("Client check = %d\n", check);
 
 		if (sv_mapcheck->value && check != sv.worldmodel->checksum &&
 			check != sv.worldmodel->checksum2) {
@@ -305,8 +305,8 @@ SV_PreSpawn_f (void)
 		}
 		host_client->checksum = check;
 	}
-//NOTE:  This doesn't go through ClientReliableWrite since it's before the user
-//spawns.  These functions are written to not overflow
+	//NOTE:  This doesn't go through ClientReliableWrite since it's before the user
+	//spawns.  These functions are written to not overflow
 	if (host_client->num_backbuf) {
 		Con_Printf ("WARNING %s: [SV_PreSpawn] Back buffered (%d0, clearing",
 					host_client->name, host_client->netchan.message.cursize);

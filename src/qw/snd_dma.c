@@ -1,5 +1,5 @@
 /*
-	$RCSfile$
+	$RCSfile$ -- main control for any streaming sound output device
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -22,7 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// snd_dma.c -- main control for any streaming sound output device
 static const char rcsid[] =
     "$Id$";
 
@@ -37,11 +36,12 @@ static const char rcsid[] =
 #include "SDL.h"
 
 #include "quakedef.h"
-#include "client.h"
 #include "cmd.h"
+#include "client.h"
 #include "console.h"
 #include "cvar.h"
 #include "model.h"
+#include "host.h"
 #include "mathlib.h"
 #include "sound.h"
 #include "strlib.h"
@@ -592,7 +592,7 @@ S_ClearBuffer (void)
 		clear = 0x80;
 	else
 		clear = 0;
-
+	
 	memset (shm->buffer, clear, shm->samples * shm->samplebits / 8);
 }
 
@@ -821,25 +821,25 @@ S_ExtraUpdate (void)
 void
 S_Update_ (void)
 {
-	unsigned    endtime;
+	Uint32	endtime;
 	int         samps;
 
 	if (!sound_started || (snd_blocked > 0))
 		return;
 
 	SDL_LockAudio ();
-// Updates DMA time
+	// Updates DMA time
 	GetSoundtime ();
 
-// check to make sure that we haven't overshot
+	// check to make sure that we haven't overshot
 	if (paintedtime < soundtime) {
 		// Con_Printf ("S_Update_ : overflow\n");
 		paintedtime = soundtime;
 	}
-// mix ahead of current position
+	// mix ahead of current position
 	endtime = soundtime + _snd_mixahead->value * shm->speed;
 	samps = shm->samples >> (shm->channels - 1);
-	if (endtime - soundtime > samps)
+	if ((endtime - soundtime) > (Uint32)samps)
 		endtime = soundtime + samps;
 
 	S_PaintChannels (endtime);

@@ -862,16 +862,16 @@ added by Zoid
 void
 Sbar_TeamOverlay (void)
 {
-	qpic_t     *pic;
-	int         i, k, l;
-	int         x, y;
-	char        num[12];
-	int         teamplay;
-	char        team[5];
-	team_t     *tm;
-	int         plow, phigh, pavg;
+	qpic_t		*pic;
+	Sint32		i, k, l;
+	Uint32		x, y;
+	char		num[12];
+	Sint32		teamplay;
+	char		team[5];
+	team_t		*tm;
+	Sint32		plow, phigh, pavg;
 
-// request new ping times every two second
+	// request new ping times every two second
 	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
 
 	if (!teamplay) {
@@ -894,10 +894,10 @@ Sbar_TeamOverlay (void)
 			"\x1d\x1e\x1e\x1e\x1e\x1e\x1f");
 	y += 8;
 
-// sort the teams
+	// sort the teams
 	Sbar_SortTeams ();
 
-// draw the text
+	// draw the text
 	l = scoreboardlines;
 
 	for (i = 0; i < scoreboardteams && y <= vid.conheight - 10; i++) {
@@ -955,23 +955,23 @@ ping time frags name
 void
 Sbar_DeathmatchOverlay (int start)
 {
-	qpic_t     *pic;
-	int         i, k, l;
-	int         top, bottom;
-	int         x, y, f;
-	char        num[12];
-	player_info_t *s;
-	int         total;
-	int         minutes;
-	int         p;
-	int         teamplay;
-	char        team[5];
-	int         skip = 10;
+	qpic_t			*pic;
+	Sint32			i, k, l;
+	Sint32			top, bottom;
+	Uint32			x, y, f;
+	char			num[12];
+	player_info_t	*s;
+	Sint32			total;
+	Sint32			minutes;
+	Sint32			p;
+	Sint32			teamplay;
+	char			team[5];
+	Sint32			skip = 10;
 
 	if (largegame)
 		skip = 8;
 
-// request new ping times every two second
+	// request new ping times every two second
 	if (realtime - cl.last_ping_request > 2) {
 		cl.last_ping_request = realtime;
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
@@ -986,10 +986,10 @@ Sbar_DeathmatchOverlay (int start)
 		pic = Draw_CachePic ("gfx/ranking.lmp");
 		Draw_Pic (160 - pic->width / 2, 0, pic);
 	}
-// scores   
+	// scores   
 	Sbar_SortFrags (true);
 
-// draw the text
+	// draw the text
 	l = scoreboardlines;
 
 	if (start)
@@ -1113,16 +1113,16 @@ displayed to right of status bar if there's room
 void
 Sbar_MiniDeathmatchOverlay (void)
 {
-	int         i, k;
-	int         top, bottom;
-	int         x, y, f;
-	char        num[12];
-	player_info_t *s;
-	int         teamplay;
-	char        team[5];
-	int         numlines;
-	char        name[16 + 1];
-	team_t     *tm;
+	Sint32			i, k;
+	Sint32			top, bottom;
+	Uint32			x, y, f;
+	char        	num[12];
+	player_info_t	*s;
+	Sint32			teamplay;
+	char        	team[5];
+	Sint32			numlines;
+	char			name[16 + 1];
+	team_t			*tm;
 
 	if (vid.conwidth < 512 || !sb_lines)
 		return;							// not enuff room
@@ -1131,7 +1131,7 @@ Sbar_MiniDeathmatchOverlay (void)
 
 	scr_copyeverything = 1;
 
-// scores   
+	// scores   
 	Sbar_SortFrags (false);
 	if (vid.conwidth >= 640)
 		Sbar_SortTeams ();
@@ -1139,7 +1139,7 @@ Sbar_MiniDeathmatchOverlay (void)
 	if (!scoreboardlines)
 		return;							// no one there?
 
-// draw the text
+	// draw the text
 	y = vid.conheight - sb_lines - 1;
 	numlines = sb_lines / 8;
 	if (numlines < 3)
@@ -1160,7 +1160,7 @@ Sbar_MiniDeathmatchOverlay (void)
 
 	x = 324;
 
-	for ( /**/ ; i < scoreboardlines && y < vid.conheight - 8 + 1; i++) {
+	for (; i < scoreboardlines && y < vid.conheight - 8 + 1; i++) {
 		k = fragsort[i];
 		s = &cl.players[k];
 		if (!s->name[0])
