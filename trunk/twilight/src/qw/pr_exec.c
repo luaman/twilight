@@ -389,7 +389,6 @@ PR_ExecuteProgram (func_t fnum)
 	dstatement_t	*st = NULL;
 	dfunction_t		*f, *newf;
 	int				runaway;
-	Uint			i;
 	edict_t			*ed;
 	int				exitdepth;
 	eval_t			*ptr;
@@ -654,10 +653,12 @@ PR_ExecuteProgram (func_t fnum)
 				if (newf->first_statement < 0)
 				{
 					// negative statements are built in functions
-					i = -newf->first_statement;
-					if (i >= pr_numbuiltins)
-						PR_RunError ("Bad builtin call number");
-					pr_builtins[i] ();
+					Uint builtinnumber = -newf->first_statement;
+					if (builtinnumber < pr_numbuiltins
+							&& pr_builtins[builtinnumber])
+						pr_builtins[builtinnumber] ();
+					else
+						PR_RunError ("No such builtin #%i", builtinnumber);
 					break;
 				}
 

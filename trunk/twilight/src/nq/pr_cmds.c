@@ -1940,27 +1940,18 @@ PF_checkextension (void)
 	G_FLOAT(OFS_RETURN) = false;
 }
 
-static void
-PF_fixme (void)
-{
-	PR_RunError ("unimplemented builtin");
-}
-
-#define PF_FIXME10 PF_fixme, PF_fixme, PF_fixme, PF_fixme, PF_fixme, \
-					PF_fixme, PF_fixme, PF_fixme, PF_fixme, PF_fixme
-#define PF_FIXME100 PF_FIXME10, PF_FIXME10, PF_FIXME10, \
-					PF_FIXME10, PF_FIXME10, PF_FIXME10, \
-					PF_FIXME10, PF_FIXME10, PF_FIXME10, \
-					PF_FIXME10
+#define NULL10 NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+#define NULL100 NULL10, NULL10, NULL10, NULL10, NULL10, NULL10, NULL10, \
+		NULL10, NULL10, NULL10
 
 static builtin_t pr_builtin[] =
 {
-	PF_fixme,				// #000 runtime error
+	NULL,					// #000 runtime error
 	PF_makevectors,			// #001
 	PF_setorigin,			// #002
 	PF_setmodel,			// #003
 	PF_setsize,				// #004
-	PF_fixme,				// #005 setabssize (never implemented)
+	NULL,					// #005 setabssize (never implemented)
 	PF_break,				// #006
 	PF_random,				// #007
 	PF_sound,				// #008
@@ -1991,17 +1982,17 @@ static builtin_t pr_builtin[] =
 	PF_traceoff,			// #030
 	PF_eprint,				// #031
 	PF_walkmove,			// #032
-	PF_fixme,				// #033 ???
+	NULL,					// #033 ???
 	PF_droptofloor,			// #034
 	PF_lightstyle,			// #035
 	PF_rint,				// #036
 	PF_floor,				// #037
 	PF_ceil,				// #038
-	PF_fixme,				// #039
+	NULL,					// #039
 
 	PF_checkbottom,			// #040
 	PF_pointcontents,		// #041
-	PF_fixme,				// #042
+	NULL,					// #042
 	PF_fabs,				// #043
 	PF_aim,					// #044
 	PF_cvar,				// #045
@@ -2010,7 +2001,7 @@ static builtin_t pr_builtin[] =
 	PF_particle,			// #048
 	PF_changeyaw,			// #049
 
-	PF_fixme,				// #050
+	NULL,					// #050
 	PF_vectoangles,			// #051
 	PF_WriteByte,			// #052
 	PF_WriteChar,			// #053
@@ -2027,13 +2018,13 @@ static builtin_t pr_builtin[] =
 	PF_changepitch,			// #063 Q2: DP_QC_CHANGEPITCH
 	PF_tracetoss,			// #064 Q2: DP_QC_TRACETOSS
 	PF_etos,				// #065 Q2: DP_QC_ETOS
-	PF_fixme,				// #066 Q2: PF_watermove (don't implement)
+	NULL,					// #066 Q2: PF_watermove (don't implement)
 	SV_MoveToGoal,			// #067
 	PF_precache_file,		// #068
 	PF_makestatic,			// #069
 
 	PF_changelevel,			// #070
-	PF_fixme,				// #071
+	NULL,					// #071
 	PF_cvar_set,			// #072
 	PF_centerprint,			// #073
 	PF_ambientsound,		// #074
@@ -2043,24 +2034,24 @@ static builtin_t pr_builtin[] =
 	PF_setspawnparms,		// #078
 
 	// Used by various QSG "tutorials" (overlap with QW)
-	PF_fixme,				// #079
-	PF_fixme,				// #080
-	PF_fixme,				// #081
-	PF_fixme,				// #082
+	NULL,					// #079
+	NULL,					// #080
+	NULL,					// #081
+	NULL,					// #082
 
 	// Used by various QSG "tutorials"
-	PF_fixme,				// #083
-	PF_fixme,				// #084
-	PF_fixme,				// #085
-	PF_fixme,				// #086
-	PF_fixme,				// #087
-	PF_fixme,				// #088
-	PF_fixme,				// #089
+	NULL,					// #083
+	NULL,					// #084
+	NULL,					// #085
+	NULL,					// #086
+	NULL,					// #087
+	NULL,					// #088
+	NULL,					// #089
 
 	// DarkPlaces extensions (1)
 	PF_tracebox,			// #090 DP: DP_QC_TRACEBOX
 	PF_randomvec,			// #091 DP: DP_QC_RANDOMVEC
-	PF_fixme,				// #092 DP: PF_getlight (don't implement)
+	NULL,					// #092 DP: PF_getlight (don't implement)
 	PF_registercvar,        // #093 DP: DP_REGISTERCVAR
 	PF_min,					// #094 DP: DP_QC_MINMAXBOUND
 	PF_max,                 // #095 DP: DP_QC_MINMAXBOUND
@@ -2070,45 +2061,45 @@ static builtin_t pr_builtin[] =
 	PF_checkextension,      // #099 DP/TQ: checkextension
 
 	// Used by someone for something probably...
-	PF_FIXME100,			// #100 - 199
-	PF_FIXME100,			// #200 - 299
-	PF_FIXME100,			// #300 - 399
+	NULL100,				// #100 - 199
+	NULL100,				// #200 - 299
+	NULL100,				// #300 - 399
 
 	// DarkPlaces extensions (2)
 	PF_copyentity,			// #400 DP: DP_QC_COPYENTITY
 	PF_setcolor,			// #401 DP: DP_SV_SETCOLOR
 	PF_findchain,			// #401 DP: DP_QC_FINDCHAIN
 	PF_findchainfloat,		// #403 DP: DP_QC_FINDCHAINFLOAT
-	PF_fixme,				// #404 PF_effect
-	PF_fixme,				// #405 PF_te_blood
-	PF_fixme,				// #406 PF_te_bloodshower
-	PF_fixme,				// #407 PF_te_explosionrgb
-	PF_fixme,				// #408 PF_te_particlecube
-	PF_fixme,				// #409 PF_te_particlerain
-	PF_fixme,				// #410 PF_te_particlesnow
-	PF_fixme,				// #411 PF_te_spark
-	PF_fixme,				// #412 PF_te_gunshotquad
-	PF_fixme,				// #413 PF_te_spikequad
-	PF_fixme,				// #414 PF_te_superspikequad
-	PF_fixme,				// #415 PF_te_explosionquad
-	PF_fixme,				// #416 PF_te_smallflash
-	PF_fixme,				// #417 PF_te_customflash
-	PF_fixme,				// #418 PF_te_gunshot
-	PF_fixme,				// #419 PF_te_spike
-	PF_fixme,				// #420 PF_te_superspike
-	PF_fixme,				// #421 PF_te_explosion
-	PF_fixme,				// #422 PF_te_tarexplosion
-	PF_fixme,				// #423 PF_te_wizspike
-	PF_fixme,				// #424 PF_te_knightspike
-	PF_fixme,				// #425 PF_te_lavasplash
-	PF_fixme,				// #426 PF_te_teleport
-	PF_fixme,				// #427 PF_te_explosion2
-	PF_fixme,				// #428 PF_te_lightning1
-	PF_fixme,				// #429 PF_te_lightning2
-	PF_fixme,				// #430 PF_te_lightning3
-	PF_fixme,				// #431 PF_te_beam
+	NULL,					// #404 PF_effect
+	NULL,					// #405 PF_te_blood
+	NULL,					// #406 PF_te_bloodshower
+	NULL,					// #407 PF_te_explosionrgb
+	NULL,					// #408 PF_te_particlecube
+	NULL,					// #409 PF_te_particlerain
+	NULL,					// #410 PF_te_particlesnow
+	NULL,					// #411 PF_te_spark
+	NULL,					// #412 PF_te_gunshotquad
+	NULL,					// #413 PF_te_spikequad
+	NULL,					// #414 PF_te_superspikequad
+	NULL,					// #415 PF_te_explosionquad
+	NULL,					// #416 PF_te_smallflash
+	NULL,					// #417 PF_te_customflash
+	NULL,					// #418 PF_te_gunshot
+	NULL,					// #419 PF_te_spike
+	NULL,					// #420 PF_te_superspike
+	NULL,					// #421 PF_te_explosion
+	NULL,					// #422 PF_te_tarexplosion
+	NULL,					// #423 PF_te_wizspike
+	NULL,					// #424 PF_te_knightspike
+	NULL,					// #425 PF_te_lavasplash
+	NULL,					// #426 PF_te_teleport
+	NULL,					// #427 PF_te_explosion2
+	NULL,					// #428 PF_te_lightning1
+	NULL,					// #429 PF_te_lightning2
+	NULL,					// #430 PF_te_lightning3
+	NULL,					// #431 PF_te_beam
 	PF_vectorvectors,		// #432 DP_QC_VECTORVECTORS
-	PF_fixme,				// #433 PF_te_plasmaburn
+	NULL,					// #433 PF_te_plasmaburn
 };
 
 builtin_t *pr_builtins = pr_builtin;
