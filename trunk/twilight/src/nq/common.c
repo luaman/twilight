@@ -53,6 +53,7 @@ cvar_t *game_directory;
 cvar_t *game_rogue;
 cvar_t *game_hipnotic;
 cvar_t *game_mission;
+cvar_t *game_name;
 
 // prototypes used later in the file
 void COM_InitFilesystem (void);
@@ -841,6 +842,8 @@ COM_Init_Cvars (void)
 	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, ExpandPath);
 
 	fs_gamename = Cvar_Get ("fs_gamename", "id1", CVAR_ROM, NULL);
+
+	game_name = Cvar_Get ("game_name", "nq", CVAR_ROM, NULL);
 
 	game_directory = Cvar_Get ("game_directory", "", CVAR_ROM, NULL);
 

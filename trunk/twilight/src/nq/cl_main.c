@@ -53,6 +53,7 @@ static const char rcsid[] =
 // these two are not intended to be set directly
 cvar_t		*_cl_name;
 cvar_t		*_cl_color;
+cvar_t		*_maxplayers;
 
 cvar_t		*cl_shownet;
 cvar_t		*cl_nolerp;
@@ -142,6 +143,7 @@ CL_Disconnect (void)
 
 	cls.demoplayback = cls.timedemo = false;
 	cls.signon = 0;
+	r_worldmodel = NULL;
 }
 
 void
@@ -691,6 +693,7 @@ CL_Init_Cvars (void)
 
 	_cl_name = Cvar_Get ("_cl_name", "player", CVAR_ARCHIVE, NULL);
 	_cl_color = Cvar_Get ("_cl_color", "0", CVAR_ARCHIVE, NULL);
+	_maxplayers = Cvar_Get ("_maxplayers", "1", CVAR_ARCHIVE, NULL);
 
 	// cl_shownet can be 0, 1, or 2
 	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);

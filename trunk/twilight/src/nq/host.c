@@ -201,6 +201,7 @@ Host_FindMaxClients (void)
 			svs.maxclients = 16;
 	} else {
 		cls.state = ca_disconnected;
+		r_worldmodel = NULL;
 		isDedicated = false;
 	}
 

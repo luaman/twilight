@@ -82,6 +82,7 @@ int			unreliableMessagesSent = 0;
 int			unreliableMessagesReceived = 0;
 
 cvar_t     *net_messagetimeout;
+cvar_t     *_net_hostport;
 cvar_t     *hostname;
 
 qboolean    configRestored = false;
@@ -712,7 +713,8 @@ NET_Init_Cvars
 void
 NET_Init_Cvars (void)
 {
-	net_messagetimeout = Cvar_Get ("net_messagetimeout", "300", CVAR_NONE, NULL);
+	net_messagetimeout =Cvar_Get ("net_messagetimeout", "300", CVAR_NONE, NULL);
+	_net_hostport = Cvar_Get ("_net_hostport", "26000", CVAR_NONE, NULL);
 	hostname = Cvar_Get ("hostname", "UNNAMED", CVAR_NONE, NULL);
 }
 

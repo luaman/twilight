@@ -1,0 +1,246 @@
+menu:
+	id "single_game"
+	title "Single Player"
+	item command:
+		label "New Game"
+		command "disconnect; maxplayers 1; map start"
+
+menu:
+	id "multi_game"
+	title "Multiplayer Game"
+	item command:
+		control kill_load "game_name" "nq"
+		label "Begin Game"
+		command "disconnect; port $_net_hostport; listen 0; maxplayers $_maxplayers; map $cl_mapname"
+	item text_entry:
+		control kill_load "game_name" "nq"
+		cvar "hostname"
+		max_len 15
+		label "Hostname"
+	item text_entry:
+		control kill_load "game_name" "nq"
+		cvar "_net_hostport"
+		max_len 5
+		label "Port"
+		min_valid 48
+		max_valid 57
+	item slider:
+		control kill_load "game_name" "nq"
+		cvar "_maxplayers"
+		label "Max Players"
+		min 1
+		max 16
+		step 1
+	item multi_select:
+		control kill_load "game_name" "nq"
+		cvar "coop"
+		label "Game Type"
+		value "0" "Deathmatch"
+		value "1" "Cooperative"
+	item multi_select:
+		control kill_load "game_name" "nq"
+		cvar "teamplay"
+		label "Teamplay"
+		value "0" "Off"
+		value "1" "No Friendly Fire"
+		value "2" "Friendly Fire"
+	item multi_select:
+		control kill_load "game_name" "nq"
+		cvar "skill"
+		label "Skill"
+		value "0" "Easy difficulty"
+		value "1" "Normal difficulty"
+		value "2" "Hard difficulty"
+		value "3" "Nightmare difficulty"
+	item slider:
+		control kill_load "game_name" "nq"
+		cvar "fraglimit"
+		label "Fraglimit"
+		min 0
+		max 100
+		step 10
+	item slider:
+		control kill_load "game_name" "nq"
+		cvar "timelimit"
+		label "Timelimit"
+		min 0
+		max 60
+		step 5
+	item text_entry:
+		control kill_load "game_name" "nq"
+		cvar "cl_mapname"
+		max_len 30
+		label "Map"
+	item text_entry:
+		control kill_load "game_name" "nq"
+		cvar "_cl_name"
+		max_len 16
+		label "Player Name"
+	item qpic:
+		control kill_load "game_name" "nq"
+		flags ~selectable
+		qpic "gfx/menuplyr.lmp"
+		height 0
+		x 16
+		y 0
+		trans:
+			from "_cl_color"
+			from_shift 4
+			from_bits 4
+			to 1
+			to_bits 4
+		trans:
+			from "_cl_color"
+			from_shift 0
+			from_bits 4
+			to 6
+			to_bits 4
+	item loop_int:
+		control kill_load "game_name" "nq"
+		label "Top Color"
+		flags ~draw_value
+		height 18
+		cvar "_cl_color"
+		shift 4
+		bits 4
+		max 13
+	item loop_int:
+		control kill_load "game_name" "nq"
+		label "Bottom Color"
+		flags ~draw_value
+		height 18
+		cvar "_cl_color"
+		shift 0
+		bits 4
+		max 13
+	item text_entry:
+		control kill_load "game_name" "qw"
+		cvar "name"
+		max_len 16
+		label "Player Name"
+	item qpic:
+		control kill_load "game_name" "qw"
+		flags ~selectable
+		qpic "gfx/menuplyr.lmp"
+		height 0
+		x 16
+		y 0
+		trans:
+			from "topcolor"
+			from_shift 0
+			from_bits 4
+			to 1
+			to_bits 4
+		trans:
+			from "bottomcolor"
+			from_shift 0
+			from_bits 4
+			to 6
+			to_bits 4
+	item loop_int:
+		control kill_load "game_name" "qw"
+		label "Top Color"
+		flags ~draw_value
+		height 18
+		cvar "topcolor"
+		shift 0
+		bits 4
+		max 13
+	item loop_int:
+		control kill_load "game_name" "qw"
+		label "Bottom Color"
+		flags ~draw_value
+		height 18
+		cvar "bottomcolor"
+		shift 0
+		bits 4
+		max 13
+
+menu:
+	id "config"
+	title "Configuration Options"
+	item step_float:
+		label "2D Width"
+		cvar "width_2d"
+		min 320
+		step 20
+	item step_float:
+		label "2D Height"
+		cvar "height_2d"
+		min 240
+		step 20
+	item slider:
+		label "Text Size"
+		cvar "text_scale"
+		min 0.5
+		max 3
+		step 0.5
+	item slider:
+		label "Screen Size"
+		cvar "viewsize"
+		min 30
+		max 120
+		step 10
+	item slider:
+		label "Mouse Sensitivity"
+		cvar "sensitivity"
+		min 1
+		max 100
+		step 0.5
+	item slider:
+		label "Volume"
+		cvar "volume"
+		min 0
+		max 1
+		step 0.1
+	item toggle:
+		label "Mouse Look"
+		cvar "freelook"
+	item toggle:
+		label "Mouse Smoothing"
+		cvar "m_filter"
+	item toggle:
+		label "Look Spring"
+		cvar "lookspring"
+	item toggle:
+		label "Look Strafe"
+		cvar "lookstrafe"
+	item toggle:
+		label "Old status bar"
+		cvar "cl_sbar"
+	item toggle:
+		label "HUD on left side"
+		cvar "cl_hudswap"
+	item toggle:
+		label "Grab Mouse"
+		cvar "_windowed_mouse"
+	item multi_select:
+		label "Texture mode"
+		cvar "gl_texturemode"
+		value "GL_NEAREST"
+		value "GL_LINEAR"
+		value "GL_NEAREST_MIPMAP_NEAREST"
+		value "GL_LINEAR_MIPMAP_NEAREST"
+		value "GL_NEAREST_MIPMAP_LINEAR"
+		value "GL_LINEAR_MIPMAP_LINEAR" "Trilinear"
+	item text_entry:
+		cvar "r_skyname"
+		max_len 30
+		label "Skybox Name"
+
+menu:
+	id "Main"
+	title "Main Menu"
+	item command:
+		control kill_load "game_name" "nq"
+		label "Single Player Game"
+		command "menu single_game"
+	item command:
+		label "MultiPlayer Game"
+		command "menu multi_game"
+	item command:
+		label "Configure"
+		command "menu Config"
+	item command:
+		label "Quit"
+		command "quit"

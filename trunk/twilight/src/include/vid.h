@@ -46,14 +46,6 @@ typedef struct
 } viddef_t;
 
 extern viddef_t vid;					// global video state
-extern Uint32 d_palette_raw[256];
-extern Uint32 d_palette_base[256];
-extern Uint32 d_palette_fb[256];
-extern Uint32 d_palette_base_team[256];
-extern Uint32 d_palette_top[256];
-extern Uint32 d_palette_bottom[256];
-extern float d_8tofloattable[256][4];
-
 
 void VID_Init_Cvars (void);
 void VID_Init (unsigned char *palette);

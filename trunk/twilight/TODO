@@ -33,8 +33,6 @@ Bugs we know about:
 
 Stuff that isn't needed for 0.2, but would be nice:
 
-  - It should be possibile to override the colormap as to the number of
-    fullbrights, to say, 0. (Load time)
   - Being able to restart the renderer would be useful.
   - clean up the menus, make sure all cvar graphics options
     are listed on the graphics options menu in both nq/qw

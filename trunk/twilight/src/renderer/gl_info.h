@@ -32,6 +32,7 @@
 #include "matrixlib.h"
 #include "mod_alias.h"
 #include "model.h"
+#include "palette.h"
 
 typedef struct colormap_s {
 	vec4_t	top;
@@ -86,25 +87,10 @@ extern double	r_frametime;	// Time since last frame.
 extern Uint		r_framecount;	// Current frame.
 extern model_t	*r_worldmodel;	// World model.
 extern vec3_t	r_origin;
-extern float	d_8tofloattable[256][4];
-extern Uint32	d_palette_raw[256];
-extern Uint32	d_palette_base[256];
-extern Uint32	d_palette_fb[256];
-extern Uint32	d_palette_base_team[256];
-extern Uint32	d_palette_top[256];
-extern Uint32	d_palette_bottom[256];
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-#define d_palette_empty	0x000000FF
-#else
-#define d_palette_empty	0xFF000000
-#endif
-
 
 extern cvar_t *gl_affinemodels;
 extern cvar_t *gl_nocolors;
 extern cvar_t *gl_im_animation;
-extern cvar_t *gl_fb;
 extern cvar_t *gl_particletorches;
 extern cvar_t *gl_cull;
 

@@ -440,6 +440,7 @@ CL_Disconnect (void)
 	}
 
 	CL_StopUpload ();
+	r_worldmodel = NULL;
 
 }
 
@@ -1136,6 +1137,7 @@ CL_Init (void)
 	char			st[80];
 
 	cls.state = ca_disconnected;
+	r_worldmodel = NULL;
 
 	Info_SetValueForKey (cls.userinfo, "name", "unnamed", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "topcolor", "0", MAX_INFO_STRING);

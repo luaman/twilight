@@ -21,30 +21,43 @@
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
 
+	$Id$
 */
-static const char rcsid[] =
-    "$Id$";
 
-#include "twiconfig.h"
+#ifndef __LH_PARSER_H
+#define __LH_PARSER_H
 
-#include <stdio.h>
+#include "qtypes.h"
+#include "zone.h"
 
-#include "quakedef.h"
-#include "cmd.h"
-#include "console.h"
-#include "cvar.h"
-#include "menu.h"
+#define WORDFLAG_STRING		1
+#define WORDFLAG_INTEGER	2
+#define WORDFLAG_DOUBLE		4
 
-void
-M_Init_Cvars (void)
+typedef struct codeword_s
 {
-	M_Base_Init_Cvars ();
-	M_Renderer_Init_Cvars ();
+	struct codeword_s *next, *prev;
+	struct codetree_s *parent;
+	char *string;
+	int intvalue;
+	double doublevalue;
+	int flags;
 }
+codeword_t;
 
-void
-M_Init (void)
+typedef struct codetree_s
 {
-	M_Base_Init ();
-	M_Renderer_Init ();
-}
+	struct codetree_s *prev, *next, *child, *parent;
+	codeword_t *words;
+	int beginsindent;
+	int temporarybeginsindent;
+	int linenumber;
+} codetree_t;
+
+extern codetree_t *LHP_parse(char *text, char *name, memzone_t *zone);
+extern void LHP_printcodetree_c(int indentlevel, codetree_t *code);
+extern void LHP_freecodewords(codeword_t *word);
+extern void LHP_freecodetree(codetree_t *code);
+
+
+#endif // __QTYPES_H
