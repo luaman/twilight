@@ -483,7 +483,7 @@ SCR_DrawNet (void)
 {
 	if (host_realtime - cl.last_received_message < 0.3)
 		return;
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return;
 
 	Draw_Pic (64, 0, scr_net);

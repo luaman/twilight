@@ -110,9 +110,9 @@ CL_PredictMove (void)
 		return;
 
 	ccl.oldtime = ccl.time;
-	ccl.time = cls.realtime - cls.latency - cl_pushlatency->fvalue * 0.001;
-	if (ccl.time > cls.realtime)
-		ccl.time = cls.realtime;
+	ccl.time = ccls.realtime - cls.latency - cl_pushlatency->fvalue * 0.001;
+	if (ccl.time > ccls.realtime)
+		ccl.time = ccls.realtime;
 
 	r_time = ccl.time;
 	r_frametime = ccl.time - ccl.oldtime;

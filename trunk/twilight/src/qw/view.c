@@ -206,7 +206,7 @@ V_DriftPitch (void)
 {
 	float	delta, move;
 
-	if (!view_message->groundent || cls.demoplayback) {
+	if (!view_message->groundent || ccls.demoplayback) {
 		cl.driftmove = 0;
 		cl.pitchvel = 0;
 		return;
@@ -851,8 +851,8 @@ R_DrawViewModel (void)
 		return;
 	}
 
-	CL_Update_OriginAngles(&cl.viewent, cl.viewent_origin, cl.viewent_angles, cls.realtime);
-	CL_Update_Frame(&cl.viewent, cl.viewent_frame, cls.realtime);
+	CL_Update_OriginAngles(&cl.viewent, cl.viewent_origin, cl.viewent_angles, ccls.realtime);
+	CL_Update_Frame(&cl.viewent, cl.viewent_frame, ccls.realtime);
 
 	// hack the depth range to prevent view model from poking into walls
 	qglDepthRange (0.0f, 0.3f);

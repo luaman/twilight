@@ -220,7 +220,7 @@ CL_SendConnectPacket (int challenge)
 		adr.port = BigShort (27500);
 	t2 = Sys_DoubleTime ();
 
-	connect_time = cls.realtime + t2 - t1;	// for retransmit requests
+	connect_time = ccls.realtime + t2 - t1;	// for retransmit requests
 
 	cls.qport = qport->ivalue;
 
@@ -253,7 +253,7 @@ CL_CheckForResend (void)
 		return;
 	if (ccls.state != ca_disconnected)
 		return;
-	if (connect_time && cls.realtime - connect_time < 5.0)
+	if (connect_time && ccls.realtime - connect_time < 5.0)
 		return;
 
 	t1 = Sys_DoubleTime ();
@@ -267,7 +267,7 @@ CL_CheckForResend (void)
 		adr.port = BigShort (27500);
 	t2 = Sys_DoubleTime ();
 
-	connect_time = cls.realtime + t2 - t1;	// for retransmit requests
+	connect_time = ccls.realtime + t2 - t1;	// for retransmit requests
 
 	Com_Printf ("Connecting to %s...\n", cls.servername);
 	snprintf (data, sizeof (data), "%c%c%c%cgetchallenge\n", 255, 255, 255,
@@ -420,10 +420,10 @@ CL_Disconnect (void)
 	S_StopAllSounds (true);
 
 // if running a local server, shut it down
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		CL_StopPlayback ();
 	else if (ccls.state != ca_disconnected) {
-		if (cls.demorecording)
+		if (ccls.demorecording)
 			CL_Stop_f ();
 
 		final[0] = clc_stringcmd;
@@ -434,7 +434,7 @@ CL_Disconnect (void)
 
 		ccls.state = ca_disconnected;
 
-		cls.demoplayback = cls.demorecording = cls.timedemo = false;
+		ccls.demoplayback = ccls.demorecording = ccls.timedemo = false;
 	}
 	Cam_Reset ();
 
@@ -479,7 +479,7 @@ CL_User_f (void)
 	for (i = 0; i < ccl.max_users; i++) {
 		if (!ccl.users[i].name[0])
 			continue;
-		if (cl.players[i].userid == uid
+		if (ccl.users[i].user_id == uid
 			|| !strcmp (ccl.users[i].name, Cmd_Argv (1))) {
 			Info_Print (cl.players[i].userinfo);
 			return;
@@ -506,7 +506,7 @@ CL_Users_f (void)
 	Com_Printf ("------ ----- ----\n");
 	for (i = 0; i < ccl.max_users; i++) {
 		if (ccl.users[i].name[0]) {
-			Com_Printf ("%6i %4i %s\n", cl.players[i].userid,
+			Com_Printf ("%6i %4i %s\n", ccl.users[i].user_id,
 						ccl.users[i].frags, ccl.users[i].name);
 			c++;
 		}
@@ -719,21 +719,21 @@ CL_NextDemo (void)
 {
 	char        str[1024];
 
-	if (cls.demonum == -1)
+	if (ccls.demonum == -1)
 		return;							// don't play demos
 
-	if (!cls.demos[cls.demonum][0] || cls.demonum == MAX_DEMOS) {
-		cls.demonum = 0;
-		if (!cls.demos[cls.demonum][0]) {
+	if (!ccls.demos[ccls.demonum][0] || ccls.demonum == MAX_DEMOS) {
+		ccls.demonum = 0;
+		if (!ccls.demos[ccls.demonum][0]) {
 //          Com_Printf ("No demos listed with startdemos\n");
-			cls.demonum = -1;
+			ccls.demonum = -1;
 			return;
 		}
 	}
 
-	snprintf (str, sizeof (str), "playdemo %s\n", cls.demos[cls.demonum]);
+	snprintf (str, sizeof (str), "playdemo %s\n", ccls.demos[ccls.demonum]);
 	Cbuf_InsertText (str);
-	cls.demonum++;
+	ccls.demonum++;
 }
 
 
@@ -808,14 +808,14 @@ CL_ConnectionlessPacket (void)
 
 	c = MSG_ReadByte ();
 
-	if (!cls.demoplayback)
+	if (!ccls.demoplayback)
 		Com_Printf ("%s: ", NET_AdrToString (net_from));
 
 	switch (c) {
 		case S2C_CONNECTION:
 			Com_Printf ("connection\n");
 			if (ccls.state >= ca_connected) {
-				if (!cls.demoplayback)
+				if (!ccls.demoplayback)
 					Com_Printf ("Dup connect received.  Ignored.\n");
 				return;
 			}
@@ -893,7 +893,7 @@ CL_ConnectionlessPacket (void)
 			CL_SendConnectPacket (Q_atoi (MSG_ReadString ()));
 			return;
 		case svc_disconnect:
-			if (cls.demoplayback)
+			if (ccls.demoplayback)
 				Host_EndGame ("End of demo");
 			return;
 	}
@@ -935,8 +935,8 @@ CL_ReadPackets (void)
 	// check timeout
 	// 
 	if (ccls.state >= ca_connected
-		&& cls.realtime - cls.netchan.last_received > cl_timeout->fvalue) {
-		Com_Printf ("\nServer connection timed out. (%f %f %f)\n", cls.realtime,
+		&& ccls.realtime - cls.netchan.last_received > cl_timeout->fvalue) {
+		Com_Printf ("\nServer connection timed out. (%f %f %f)\n", ccls.realtime,
 				cls.netchan.last_received, cl_timeout->fvalue);
 		CL_Disconnect ();
 	}
@@ -1015,7 +1015,7 @@ Cmd_ForwardToServer (void)
 		return;
 	}
 
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return;							// not really connected
 
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
@@ -1040,7 +1040,7 @@ Cmd_ForwardToServer_f (void)
 		return;
 	}
 
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return;							// not really connected
 
 	if (Cmd_Argc () > 1) {
@@ -1059,7 +1059,7 @@ Cmd_Say_f (void)
 		return;
 	}
 
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return;							// not really connected
 
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
@@ -1260,7 +1260,7 @@ Host_Error (char *error, ...)
 	Com_Printf ("Host_Error: %s\n", string);
 
 	CL_Disconnect ();
-	cls.demonum = -1;
+	ccls.demonum = -1;
 
 	inerror = false;
 
@@ -1341,13 +1341,13 @@ Host_Frame (double time)
 
 	fps = bound (30.0f, fps, 72.0f);
 
-	if (!cls.timedemo && ((time_diff) < (1.0 / fps))) {
+	if (!ccls.timedemo && ((time_diff) < (1.0 / fps))) {
 		SDL_Delay(1);
 		return;							// framerate is too high
 	}
 
 	old_realtime = time;
-	cls.realtime += time_diff;
+	ccls.realtime += time_diff;
 	r_realtime += time_diff;
 	host_frametime = time_diff;
 	if (host_frametime > 0.2)
@@ -1357,11 +1357,11 @@ Host_Frame (double time)
 	// fetch results from server
 	CL_ReadPackets ();
 
-	if (old_time > cls.realtime)
-		old_time = cls.realtime;
+	if (old_time > ccls.realtime)
+		old_time = ccls.realtime;
 	else {
-		host_frametime = cls.realtime - old_time;
-		old_time = cls.realtime;
+		host_frametime = ccls.realtime - old_time;
+		old_time = ccls.realtime;
 		if (host_frametime > 0.2)
 			host_frametime = 0.2;
 	}
@@ -1599,8 +1599,8 @@ Host_Shutdown (void)
 void
 CL_UpdatePings (void)
 {
-	if ((ccls.state == ca_active) && ((cls.realtime - cl.last_ping_request) > 5)) {
-		cl.last_ping_request = cls.realtime;
+	if ((ccls.state == ca_active) && ((ccls.realtime - cl.last_ping_request) > 5)) {
+		cl.last_ping_request = ccls.realtime;
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		SZ_Print (&cls.netchan.message, "pings");
 	}

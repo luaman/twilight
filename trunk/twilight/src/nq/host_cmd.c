@@ -266,7 +266,7 @@ Host_Map_f (void)
 		return;
 	}
 
-	cls.demonum = -1;					// stop demo loop in case this fails
+	ccls.demonum = -1;					// stop demo loop in case this fails
 
 	CL_Disconnect ();
 	Host_ShutdownServer (false);
@@ -316,7 +316,7 @@ Host_Changelevel_f (void)
 		Com_Printf ("changelevel <levelname> : continue game on a new level\n");
 		return;
 	}
-	if (!sv.active || cls.demoplayback) {
+	if (!sv.active || ccls.demoplayback) {
 		Com_Printf ("Only the server may changelevel\n");
 		return;
 	}
@@ -337,7 +337,7 @@ Host_Restart_f (void)
 {
 	char        mapname[MAX_QPATH];
 
-	if (cls.demoplayback || !sv.active)
+	if (ccls.demoplayback || !sv.active)
 		return;
 
 	if (cmd_source != src_command)
@@ -376,8 +376,8 @@ Host_Connect_f (void)
 {
 	char        name[MAX_QPATH];
 
-	cls.demonum = -1;					// stop demo loop in case this fails
-	if (cls.demoplayback) {
+	ccls.demonum = -1;					// stop demo loop in case this fails
+	if (ccls.demoplayback) {
 		CL_StopPlayback ();
 		CL_Disconnect ();
 	}
@@ -542,7 +542,7 @@ Host_Loadgame_f (void)
 		return;
 	}
 
-	cls.demonum = -1;					// stop demo loop in case this fails
+	ccls.demonum = -1;					// stop demo loop in case this fails
 
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".sav");
@@ -1411,13 +1411,13 @@ Host_Startdemos_f (void)
 	Com_Printf ("%i demo(s) in loop\n", c);
 
 	for (i = 1; i < c + 1; i++)
-		strlcpy (cls.demos[i - 1], Cmd_Argv (i), sizeof (cls.demos[0]));
+		strlcpy (ccls.demos[i - 1], Cmd_Argv (i), sizeof (ccls.demos[0]));
 
-	if (!sv.active && cls.demonum != -1 && !cls.demoplayback) {
-		cls.demonum = 0;
+	if (!sv.active && ccls.demonum != -1 && !ccls.demoplayback) {
+		ccls.demonum = 0;
 		CL_NextDemo ();
 	} else
-		cls.demonum = -1;
+		ccls.demonum = -1;
 }
 
 
@@ -1433,8 +1433,8 @@ Host_Demos_f (void)
 {
 	if (ccls.state == ca_dedicated)
 		return;
-	if (cls.demonum == -1)
-		cls.demonum = 1;
+	if (ccls.demonum == -1)
+		ccls.demonum = 1;
 	CL_Disconnect_f ();
 	CL_NextDemo ();
 }
@@ -1451,7 +1451,7 @@ Host_Stopdemo_f (void)
 {
 	if (ccls.state == ca_dedicated)
 		return;
-	if (!cls.demoplayback)
+	if (!ccls.demoplayback)
 		return;
 	CL_StopPlayback ();
 	CL_Disconnect ();

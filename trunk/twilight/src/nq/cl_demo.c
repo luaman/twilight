@@ -61,16 +61,16 @@ Called when a demo file runs out, or the user starts a game
 void
 CL_StopPlayback (void)
 {
-	if (!cls.demoplayback)
+	if (!ccls.demoplayback)
 		return;
 
-	fclose (cls.demofile);
-	cls.demoplayback = false;
-	cls.demofile = NULL;
+	fclose (ccls.demofile);
+	ccls.demoplayback = false;
+	ccls.demofile = NULL;
 	ccls.state = ca_disconnected;
-	r_worldmodel = NULL;
+	ccl.worldmodel = r_worldmodel = NULL;
 
-	if (cls.timedemo)
+	if (ccls.timedemo)
 		CL_FinishTimeDemo ();
 
 	memset (ccl.cshifts, 0, sizeof(ccl.cshifts));
@@ -90,16 +90,16 @@ CL_WriteDemoMessage (void)
 	float	ang[3];
 	
 	len = LittleLong (net_message.cursize);
-	fwrite (&len, 4, 1, cls.demofile);
+	fwrite (&len, 4, 1, ccls.demofile);
 
 	ang[0] = LittleFloat (cl.viewangles[0]);
 	ang[1] = LittleFloat (cl.viewangles[1]);
 	ang[2] = LittleFloat (cl.viewangles[2]);
 
-	fwrite (ang, 12, 1, cls.demofile);
+	fwrite (ang, 12, 1, ccls.demofile);
 
-	fwrite (net_message.data, net_message.cursize, 1, cls.demofile);
-	fflush (cls.demofile);
+	fwrite (net_message.data, net_message.cursize, 1, ccls.demofile);
+	fflush (ccls.demofile);
 }
 
 /*
@@ -114,27 +114,27 @@ CL_GetMessage (void)
 {
 	int	r, i;
 
-	if (cls.demoplayback) {
+	if (ccls.demoplayback) {
 		// decide if it is time to grab the next message 
 		if (cls.signon == SIGNONS)		// always grab until fully connected
 		{
-			if (cls.timedemo) {
-				if (host_framecount == cls.td_lastframe)
+			if (ccls.timedemo) {
+				if (host_framecount == ccls.td_lastframe)
 					return 0;			// already read this frame's message
-				cls.td_lastframe = host_framecount;
+				ccls.td_lastframe = host_framecount;
 				// if this is the second frame, grab the real td_starttime
 				// so the bogus time on the first frame doesn't count
-				if (host_framecount == cls.td_startframe + 1)
-					cls.td_starttime = host_realtime;
+				if (host_framecount == ccls.td_startframe + 1)
+					ccls.td_starttime = host_realtime;
 			} else if ( /* ccl.time > 0 && */ ccl.time <= cl.mtime[0]) {
 				return 0;				// don't need another message yet
 			}
 		}
 		// get the next message
-		fread (&net_message.cursize, 4, 1, cls.demofile);
+		fread (&net_message.cursize, 4, 1, ccls.demofile);
 		VectorCopy (cl.mviewangles[0], cl.mviewangles[1]);
 
-		fread (cl.mviewangles[0], 12, 1, cls.demofile);
+		fread (cl.mviewangles[0], 12, 1, ccls.demofile);
 
 		for (i = 0; i < 3; i++) {
 			cl.mviewangles[0][i] = LittleFloat (cl.mviewangles[0][i]);
@@ -143,7 +143,7 @@ CL_GetMessage (void)
 		net_message.cursize = LittleLong (net_message.cursize);
 		if (net_message.cursize > MAX_MSGLEN)
 			Sys_Error ("Demo message > MAX_MSGLEN");
-		r = fread (net_message.data, net_message.cursize, 1, cls.demofile);
+		r = fread (net_message.data, net_message.cursize, 1, ccls.demofile);
 		if (r != 1) {
 			CL_StopPlayback ();
 			return 0;
@@ -165,7 +165,7 @@ CL_GetMessage (void)
 			break;
 	}
 
-	if (cls.demorecording)
+	if (ccls.demorecording)
 		CL_WriteDemoMessage ();
 
 	return r;
@@ -185,7 +185,7 @@ CL_Stop_f (void)
 	if (cmd_source != src_command)
 		return;
 
-	if (!cls.demorecording) {
+	if (!ccls.demorecording) {
 		Com_Printf ("Not recording a demo.\n");
 		return;
 	}
@@ -195,9 +195,9 @@ CL_Stop_f (void)
 	CL_WriteDemoMessage ();
 
 	// finish up
-	fclose (cls.demofile);
-	cls.demofile = NULL;
-	cls.demorecording = false;
+	fclose (ccls.demofile);
+	ccls.demofile = NULL;
+	ccls.demorecording = false;
 	Com_Printf ("Completed demo\n");
 }
 
@@ -251,16 +251,16 @@ CL_Record_f (void)
 	COM_DefaultExtension (name, ".dem");
 
 	Com_Printf ("recording to %s.\n", name);
-	cls.demofile = fopen (name, "wb");
-	if (!cls.demofile) {
+	ccls.demofile = fopen (name, "wb");
+	if (!ccls.demofile) {
 		Com_Printf ("ERROR: couldn't open.\n");
 		return;
 	}
 
 	cls.forcetrack = track;
-	fprintf (cls.demofile, "%i\n", cls.forcetrack);
+	fprintf (ccls.demofile, "%i\n", cls.forcetrack);
 
-	cls.demorecording = true;
+	ccls.demorecording = true;
 }
 
 
@@ -294,18 +294,18 @@ CL_PlayDemo_f (void)
 	COM_DefaultExtension (name, ".dem");
 
 	Com_Printf ("Playing demo from %s.\n", name);
-	COM_FOpenFile (name, &cls.demofile, true);
-	if (!cls.demofile) {
+	COM_FOpenFile (name, &ccls.demofile, true);
+	if (!ccls.demofile) {
 		Com_Printf ("ERROR: couldn't open.\n");
-		cls.demonum = -1;	// stop demo loop
+		ccls.demonum = -1;	// stop demo loop
 		return;
 	}
 
-	cls.demoplayback = true;
+	ccls.demoplayback = true;
 	ccls.state = ca_connected;
 	cls.forcetrack = 0;
 
-	while ((c = getc (cls.demofile)) != '\n')
+	while ((c = getc (ccls.demofile)) != '\n')
 		if (c == '-')
 			neg = true;
 		else
@@ -327,11 +327,11 @@ CL_FinishTimeDemo (void)
 	int		frames;
 	float	time;
 
-	cls.timedemo = false;
+	ccls.timedemo = false;
 
 	// the first frame didn't count
-	frames = (host_framecount - cls.td_startframe) - 1;
-	time = host_realtime - cls.td_starttime;
+	frames = (host_framecount - ccls.td_startframe) - 1;
+	time = host_realtime - ccls.td_starttime;
 	if (!time)
 		time = 1;
 	Com_Printf ("%i frames %5.1f seconds %5.1f fps\n", frames, time,
@@ -358,9 +358,9 @@ CL_TimeDemo_f (void)
 
 	CL_PlayDemo_f ();
 
-	// cls.td_starttime will be grabbed at the second frame of the demo, so
+	// ccls.td_starttime will be grabbed at the second frame of the demo, so
 	// all the loading time doesn't get counted
-	cls.timedemo = true;
-	cls.td_startframe = host_framecount;
-	cls.td_lastframe = -1;				// get a new message this frame
+	ccls.timedemo = true;
+	ccls.td_startframe = host_framecount;
+	ccls.td_lastframe = -1;				// get a new message this frame
 }

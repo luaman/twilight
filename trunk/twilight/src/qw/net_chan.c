@@ -161,7 +161,7 @@ Netchan_OutOfBand (netsrc_t sock, netadr_t adr, size_t length, Uint8 *data)
 	// send the datagram
 	// zoid, no input in demo playback mode
 #ifdef HAVE_SDL_H
-	if ((sys_gametypes & GAME_QW_SERVER) || !cls.demoplayback)
+	if ((sys_gametypes & GAME_QW_SERVER) || !ccls.demoplayback)
 #else
 	if ((sys_gametypes & GAME_QW_SERVER))
 #endif
@@ -206,8 +206,8 @@ Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 	chan->last_received = curtime;
 
 #ifdef HAVE_SDL_H
-	if ((sys_gametypes & GAME_QW_CLIENT) && cls.demoplayback)
-		chan->last_received = cls.realtime;
+	if ((sys_gametypes & GAME_QW_CLIENT) && ccls.demoplayback)
+		chan->last_received = ccls.realtime;
 #endif
 
 	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
@@ -322,7 +322,7 @@ Netchan_Transmit (netchan_t *chan, size_t length, Uint8 *data)
 
 	// zoid, no input in demo playback mode
 #ifdef HAVE_SDL_H
-	if ((sys_gametypes & GAME_QW_SERVER) || !cls.demoplayback)
+	if ((sys_gametypes & GAME_QW_SERVER) || !ccls.demoplayback)
 #else
 	if ((sys_gametypes & GAME_QW_SERVER))
 #endif
@@ -366,7 +366,7 @@ Netchan_Process (netchan_t *chan)
 	unsigned    reliable_ack, reliable_message;
 
 #ifdef HAVE_SDL_H
-	if ((sys_gametypes & GAME_QW_SERVER) || !cls.demoplayback)
+	if ((sys_gametypes & GAME_QW_SERVER) || !ccls.demoplayback)
 #else
 	if ((sys_gametypes & GAME_QW_SERVER))
 #endif
@@ -444,8 +444,8 @@ Netchan_Process (netchan_t *chan)
 	chan->last_received = curtime;
 
 #ifdef HAVE_SDL_H
-	if ((sys_gametypes & GAME_QW_CLIENT) && cls.demoplayback)
-		chan->last_received = cls.realtime;
+	if ((sys_gametypes & GAME_QW_CLIENT) && ccls.demoplayback)
+		chan->last_received = ccls.realtime;
 #endif
 
 	return true;

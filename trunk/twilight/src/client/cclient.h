@@ -128,8 +128,25 @@ typedef struct client_common_s {
 
 extern client_common_t	 ccl;
 
+#define MAX_DEMOS		8
+#define MAX_DEMONAME	16
+
 typedef struct client_common_static_s {
 	ca_state_t		state;
+	double			realtime;
+
+	// Demo loop control.
+	int				demonum;			// -1 = don't play demos
+	char			demos[MAX_DEMOS][MAX_DEMONAME]; // when not playing
+
+	// Demo recording.
+	qboolean		demorecording;
+	qboolean		demoplayback;
+	qboolean		timedemo;
+	FILE			*demofile;
+	float			td_lastframe;		// to meter out one message a frame
+	int				td_startframe;		// host_framecount at start
+	float			td_starttime;		// realtime at second frame of timedemo
 } client_common_static_t;
 
 extern client_common_static_t	 ccls;
