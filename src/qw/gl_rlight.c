@@ -114,7 +114,7 @@ R_InitBubble (void)
 void
 R_RenderDlight (dlight_t *light)
 {
-	int     i, j;
+	int     i, j, dvnum = 0;
 	vec3_t  v, v_right, v_up;
 	float	*bub_sin = bubble_sintable, 
 			*bub_cos = bubble_costable;
@@ -127,10 +127,6 @@ R_RenderDlight (dlight_t *light)
 		AddLightBlend (1, 0.5, 0, light->radius * 0.0003);
 		return;
 	}
-
-	qglColor3f (light->color[0] * 0.5, light->color[1] * 0.5,
-			light->color[2] * 0.5);
-	qglBegin (GL_TRIANGLE_FAN);
 
 	v_right[0] = v[1];
 	v_right[1] = -v[0];
@@ -147,8 +143,12 @@ R_RenderDlight (dlight_t *light)
 	}
 	VectorSubtract (light->origin, v, v);
 
-	qglVertex3fv (v);
-	qglColor3f(0, 0, 0);
+	VectorSet3 (varray[dvnum].vertex, v[0], v[1], v[2]);
+	varray[dvnum].color[0] = light->color[0] * 0.5;
+	varray[dvnum].color[1] = light->color[1] * 0.5;
+	varray[dvnum].color[2] = light->color[2] * 0.5;
+	varray[dvnum].color[3] = 1;
+	dvnum++;
 
 	for (i = 16; i >= 0; i--, bub_sin++, bub_cos++) 
 	{
@@ -156,10 +156,13 @@ R_RenderDlight (dlight_t *light)
 			v[j] = light->origin[j] + (v_right[j] * (*bub_cos) +
 				+ v_up[j] * (*bub_sin)) * rad;
 
-		qglVertex3fv (v);
+		VectorSet4 (varray[dvnum].color, 0, 0, 0, 0);
+		VectorSet3 (varray[dvnum].vertex, v[0], v[1], v[2]);
+		dvnum++;
 	}
 
-	qglEnd ();
+	qglDrawArrays (GL_TRIANGLE_FAN, 0, dvnum);
+	dvnum = 0;
 }
 
 /*
@@ -178,6 +181,7 @@ R_RenderDlights (void)
 
 	qglDisable (GL_TEXTURE_2D);
 	qglBlendFunc (GL_ONE, GL_ONE);
+	qglEnableClientState (GL_COLOR_ARRAY);
 
 	l = cl_dlights;
 	for (i = 0; i < MAX_DLIGHTS; i++, l++) {
@@ -189,6 +193,7 @@ R_RenderDlights (void)
 	qglColor3f (1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDisableClientState (GL_COLOR_ARRAY);
 }
 
 

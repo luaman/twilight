@@ -342,7 +342,7 @@ R_DrawSkyChain (msurface_t *s)
 		int			i;
 		
 		qglDisable (GL_TEXTURE_2D);
-		qglColor4ubv ((Uint8 *)&d_8to32table[(Uint8)(r_fastsky->value-1)]);
+		qglColor4fv (d_8tofloattable[(Uint8) r_fastsky->value - 1]);
 		
 		for (fa=s ; fa ; fa=fa->texturechain){
 			for (p=fa->polys ; p ; p=p->next) {

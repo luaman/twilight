@@ -523,7 +523,7 @@ CL_BaseMove (usercmd_t *cmd)
 	}
 }
 
-int
+static int
 MakeChar (int i)
 {
 	i &= ~3;

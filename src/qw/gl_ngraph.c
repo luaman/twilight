@@ -145,14 +145,13 @@ R_NetGraph (void)
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 
 	x = 8;
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (0, 0);
-	qglVertex2f (x, y);
-	qglTexCoord2f (1, 0);
-	qglVertex2f (x + NET_TIMINGS, y);
-	qglTexCoord2f (1, 1);
-	qglVertex2f (x + NET_TIMINGS, y + NET_GRAPHHEIGHT);
-	qglTexCoord2f (0, 1);
-	qglVertex2f (x, y + NET_GRAPHHEIGHT);
-	qglEnd ();
+	VectorSet2 (varray[0].texcoord, 0, 0);
+	VectorSet2 (varray[0].vertex, x, y);
+	VectorSet2 (varray[1].texcoord, 1, 0);
+	VectorSet2 (varray[1].vertex, x + NET_TIMINGS, y);
+	VectorSet2 (varray[2].texcoord, 1, 1);
+	VectorSet2 (varray[2].vertex, x + NET_TIMINGS, y + NET_GRAPHHEIGHT);
+	VectorSet2 (varray[3].texcoord, 0, 1);
+	VectorSet2 (varray[3].vertex, x, y + NET_GRAPHHEIGHT);
+	qglDrawArrays (GL_QUADS, 0, 4);
 }

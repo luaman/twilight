@@ -52,7 +52,8 @@ typedef struct {
 } viddef_t;
 
 extern viddef_t vid;					// global video state
-extern unsigned d_8to32table[256];
+extern Uint32	d_8to32table[256];
+extern float	d_8tofloattable[256][4];
 
 // called at startup and after any gamma correction
 
