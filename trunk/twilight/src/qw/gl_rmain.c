@@ -318,13 +318,15 @@ float      *shadedots = r_avertexnormal_dots[0];
 
 int         lastposenum;
 
+extern GLenum gl_mtex_enum;
+
 /*
 =============
 GL_DrawAliasFrame
 =============
 */
 void
-GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
+GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 {
 	float       l;
 	trivertx_t *verts;
@@ -347,7 +349,14 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 
 		do {
 			// texture coordinates come from the draw list
-			qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
+			if (mtex) {
+				qglMTexCoord2f (gl_mtex_enum + 0, ((float *) order)[0], ((float *) order)[1]);
+				qglMTexCoord2f (gl_mtex_enum + 1, ((float *) order)[0], ((float *) order)[1]);
+			}
+			else {
+				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
+			}
+
 			order += 2;
 
 			// normals and vertexes come from the frame list
@@ -376,7 +385,7 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 */
 void
 GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
-		float blend)
+		float blend, qboolean mtex)
 {
 	float       l;
 	trivertx_t *verts1;
@@ -407,7 +416,14 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 
 		do {
 			// texture coordinates come from the draw list
-			qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
+			if (mtex) {
+				qglMTexCoord2f (gl_mtex_enum + 0, ((float *) order)[0], ((float *) order)[1]);
+				qglMTexCoord2f (gl_mtex_enum + 1, ((float *) order)[0], ((float *) order)[1]);
+			}
+			else {
+				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
+			}
+
 			order += 2;
 
 			// normals and vertexes come from the frame list
@@ -662,7 +678,7 @@ R_SetupAliasFrame
 =================
 */
 void
-R_SetupAliasFrame (int frame, aliashdr_t *paliashdr)
+R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, qboolean mtex)
 {
 	int         pose, numposes;
 	float       interval;
@@ -680,7 +696,7 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr)
 		pose += (int) (cl.time / interval) % numposes;
 	}
 
-	GL_DrawAliasFrame (paliashdr, pose);
+	GL_DrawAliasFrame (paliashdr, pose, mtex);
 }
 
 
@@ -690,7 +706,7 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr)
 
 */
 void
-R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e)
+R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolean mtex)
 {
 	int 	pose, numposes;
 	float	blend;
@@ -737,9 +753,10 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e)
 	if (cl.paused || blend > 1)
 		blend = 1;
 
-	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend);
+	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend, mtex);
 }
 
+void GL_SelectTexture (GLenum target);
 
 /*
 =================
@@ -758,6 +775,8 @@ R_DrawAliasModel (entity_t *e)
 	vec3_t      mins, maxs;
 	aliashdr_t *paliashdr;
 	int         anim;
+	int			texture, fb_texture, skinnum;
+	qboolean	mtex;
 
 	clmodel = currententity->model;
 
@@ -900,8 +919,10 @@ R_DrawAliasModel (entity_t *e)
 	}
 
 	anim = (int) (cl.time * 10) & 3;
-	qglBindTexture (GL_TEXTURE_2D,
-			paliashdr->gl_texturenum[currententity->skinnum][anim]);
+	skinnum = currententity->skinnum;
+	texture = paliashdr->gl_texturenum[currententity->skinnum][anim];
+	fb_texture = currententity->scoreboard && (clmodel->modflags & FLAG_PLAYER) ?
+		fb_skins[currententity->scoreboard - cl.players] : paliashdr->fb_texturenum[skinnum][anim];
 
 	// we can't dynamically colormap textures, so they are cached
 	// seperately for the players.  Heads are just uncolored.
@@ -911,46 +932,59 @@ R_DrawAliasModel (entity_t *e)
 			Skin_Find (currententity->scoreboard);
 			R_TranslatePlayerSkin (i);
 		}
-		if (i >= 0 && i < MAX_CLIENTS)
-			qglBindTexture (GL_TEXTURE_2D, playertextures + i);
+
+		if (i >= 0 && i < MAX_CLIENTS) {
+			texture = playertextures + i;
+			fb_texture = fb_skins[i];
+		}
 	}
 
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
+	if (!gl_fb_models->value)
+		fb_texture = 0;
+
+	mtex = fb_texture && gl_mtexable;
+
+	if (mtex) {
+		GL_SelectTexture (0);
+		qglBindTexture (GL_TEXTURE_2D, texture);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		GL_SelectTexture (1);
+		qglEnable (GL_TEXTURE_2D);
+		qglBindTexture (GL_TEXTURE_2D, fb_texture);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	}
+	else
+	{
+		qglBindTexture (GL_TEXTURE_2D, texture);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	}
+
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 		R_SetupAliasBlendedFrame (currententity->frame, paliashdr,
-				currententity);
+				currententity, mtex);
 	else
-		R_SetupAliasFrame (currententity->frame, paliashdr);
+		R_SetupAliasFrame (currententity->frame, paliashdr, mtex);
 
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value) {
-		int	fb_texture = 0;
+	if (mtex) {
+		qglDisable (GL_TEXTURE_2D);
+		GL_SelectTexture (0);
+	}
+
+	if (fb_texture && !gl_mtexable) {
+		qglEnable (GL_BLEND);
+		qglBlendFunc(GL_ONE, GL_ONE);
+		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
-		if ((clmodel->modflags & FLAG_PLAYER) && currententity->scoreboard)
-		{
-			i = currententity->scoreboard - cl.players;
-
-			if (i >= 0 && i < MAX_CLIENTS)
-				fb_texture = fb_skins[i];
-		}
+		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
+			R_SetupAliasBlendedFrame (currententity->frame, paliashdr,
+					currententity, false);
 		else
-			fb_texture =
-				paliashdr->fb_texturenum[currententity->skinnum][anim];
+			R_SetupAliasFrame (currententity->frame, paliashdr, false);
 
-		if (fb_texture) {
-			qglEnable (GL_BLEND);
-			qglBindTexture (GL_TEXTURE_2D, fb_texture);
-
-			if (gl_im_animation->value &&
-					!(clmodel->modflags & FLAG_NO_IM_ANIM))
-				R_SetupAliasBlendedFrame (currententity->frame, paliashdr,
-						currententity);
-			else
-				R_SetupAliasFrame (currententity->frame, paliashdr);
-
-			qglDisable (GL_BLEND);
-		}
+		qglDisable (GL_BLEND);
 	}
 
 	if (gl_affinemodels->value)
@@ -959,7 +993,7 @@ R_DrawAliasModel (entity_t *e)
 	qglPopMatrix ();
 
 	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {
-		float an = -e->angles[1] / 180 * M_PI;
+		float an = -e->angles[1] * (M_PI / 180);
 
 		if (!shadescale)
 			shadescale = 1 / Q_sqrt(2);

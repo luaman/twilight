@@ -1134,8 +1134,12 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 		if (!mipmap) {
 			qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width,
 						  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			goto done;
+
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+			return;
 		}
+
 		memcpy (scaled, data, width * height * 4);
 	} else
 		R_ResampleTexture (data, width, height, scaled, scaled_width,
@@ -1143,10 +1147,10 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 
 	qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
 				  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-	if (mipmap) {
-		int         miplevel;
 
-		miplevel = 0;
+	if (mipmap) {
+		int miplevel = 0;
+
 		while (scaled_width > 1 || scaled_height > 1) {
 			GL_MipMap ((Uint8 *) scaled, scaled_width, scaled_height);
 			scaled_width >>= 1;
@@ -1160,7 +1164,6 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 						  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 		}
 	}
-  done:;
 
 	if (mipmap) {
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
@@ -1177,23 +1180,21 @@ GL_Upload8
 ===============
 */
 void
-GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha)
+GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsigned *ttable)
 {
 	static unsigned trans[640 * 480];	// FIXME, temporary
-	int         i, s;
+	int         i, s = width * height;
 	qboolean    noalpha;
 	int         p;
-	unsigned	*table = d_8to32table;
-
-	s = width * height;
+	unsigned	*table = ttable ? ttable : d_8to32table;
 
 	if (alpha == 2)
 	{
 	// this is a fullbright mask, so make all non-fullbright
 	// colors transparent
-		for (i=0 ; i<s ; i++)
+		for (i = 0; i < s; i++)
 		{
-			p = data[i];
+			p = *data++;
 			if (p < 224)
 				trans[i] = 0; // transparent 
 			else
@@ -1205,7 +1206,7 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha)
 	// texture even if it was specified as otherwise
 		noalpha = true;
 		for (i = 0; i < s; i++) {
-			p = data[i];
+			p = *data++;
 			if (p == 255)
 				noalpha = false;
 			trans[i] = table[p];
@@ -1276,7 +1277,7 @@ setuptexture:
 
 	qglBindTexture (GL_TEXTURE_2D, glt->texnum);
 
-	GL_Upload8 (data, width, height, mipmap, alpha);
+	GL_Upload8 (data, width, height, mipmap, alpha, NULL);
 
 	return glt->texnum;
 }

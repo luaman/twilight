@@ -41,9 +41,9 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-
-extern void R_InitBubble (void);
+void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
+void R_TimeRefresh_f (void);
 
 /*
 ==================
@@ -184,7 +184,6 @@ R_Init (void)
 	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);
 
 	R_InitBubble ();
-
 	R_InitParticles ();
 	R_InitParticleTexture ();
 
@@ -213,28 +212,28 @@ Translates a skin texture by the per-player color lookup
 void
 R_TranslatePlayerSkin (int playernum)
 {
-	int         top, bottom;
-	Uint8       translate[256];
-	unsigned    translate32[256];
-	int         i, j;
-	Uint8      *original;
-	unsigned    pixels[512 * 256], *out;
-	unsigned    scaled_width, scaled_height;
-	int         inwidth, inheight;
-	int         tinwidth, tinheight;
-	Uint8      *inrow;
-	unsigned    frac, fracstep;
+	int		top, bottom;
+	byte	translate[256];
+	unsigned	translate32[256];
+	int		i, j;
+	byte	*original;
+	unsigned	pixels[512*256], *out;
+	unsigned	scaled_width, scaled_height;
+	int			inwidth, inheight;
+	int			tinwidth, tinheight;
+	byte		*inrow;
+	unsigned	frac, fracstep;
 	player_info_t *player;
-	extern Uint8 player_8bit_texels[320 * 200];
-	char        s[512];
+	extern	byte		player_8bit_texels[320*200];
+	char s[512];
 
 	player = &cl.players[playernum];
 	if (!player->name[0])
 		return;
 
-	strcpy (s, Info_ValueForKey (player->userinfo, "skin"));
-	COM_StripExtension (s, s);
-	if (player->skin && !strcasecmp (s, player->skin->name))
+	strcpy(s, Info_ValueForKey(player->userinfo, "skin"));
+	COM_StripExtension(s, s);
+	if (player->skin && !stricmp(s, player->skin->name))
 		player->skin = NULL;
 
 	if (player->_topcolor != player->topcolor ||
@@ -249,33 +248,33 @@ R_TranslatePlayerSkin (int playernum)
 		top *= 16;
 		bottom *= 16;
 
-		for (i = 0; i < 256; i++)
+		for (i=0 ; i<256 ; i++)
 			translate[i] = i;
 
-		for (i = 0; i < 16; i++) {
-			if (top < 128)				// the artists made some backwards
-				// ranges.  sigh.
-				translate[TOP_RANGE + i] = top + i;
+		for (i=0 ; i<16 ; i++)
+		{
+			if (top < 128)	// the artists made some backwards ranges.  sigh.
+				translate[TOP_RANGE+i] = top+i;
 			else
-				translate[TOP_RANGE + i] = top + 15 - i;
-
+				translate[TOP_RANGE+i] = top+15-i;
+					
 			if (bottom < 128)
-				translate[BOTTOM_RANGE + i] = bottom + i;
+				translate[BOTTOM_RANGE+i] = bottom+i;
 			else
-				translate[BOTTOM_RANGE + i] = bottom + 15 - i;
+				translate[BOTTOM_RANGE+i] = bottom+15-i;
 		}
 
-		// 
+		//
 		// locate the original skin pixels
-		// 
+		//
 		// real model width
 		tinwidth = 296;
 		tinheight = 194;
 
 		if (!player->skin)
-			Skin_Find (player);
-		if ((original = Skin_Cache (player->skin)) != NULL) {
-			// skin data width
+			Skin_Find(player);
+		if ((original = Skin_Cache(player->skin)) != NULL) {
+			//skin data width
 			inwidth = 320;
 			inheight = 200;
 		} else {
@@ -284,44 +283,63 @@ R_TranslatePlayerSkin (int playernum)
 			inheight = 194;
 		}
 
-
 		// because this happens during gameplay, do it fast
 		// instead of sending it through gl_upload 8
 		qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
 
-		scaled_width = min (gl_max_size->value, 512);
-		scaled_height = min (gl_max_size->value, 256);
-		// allow users to crunch sizes down even more if they want
-		scaled_width >>= (int) gl_playermip->value;
-		scaled_height >>= (int) gl_playermip->value;
+	#if 0
+		s = 320*200;
+		byte	translated[320*200];
 
-		for (i = 0; i < 256; i++)
+		for (i=0 ; i<s ; i+=4)
+		{
+			translated[i] = translate[original[i]];
+			translated[i+1] = translate[original[i+1]];
+			translated[i+2] = translate[original[i+2]];
+			translated[i+3] = translate[original[i+3]];
+		}
+
+
+		// don't mipmap these, because it takes too long
+		GL_Upload8 (translated, paliashdr->skinwidth, paliashdr->skinheight, 
+			false, false, true);
+	#endif
+
+		scaled_width = gl_max_size->value < 512 ? gl_max_size->value : 512;
+		scaled_height = gl_max_size->value < 256 ? gl_max_size->value : 256;
+		// allow users to crunch sizes down even more if they want
+		scaled_width >>= (int)gl_playermip->value;
+		scaled_height >>= (int)gl_playermip->value;
+
+		for (i=0 ; i<256 ; i++)
 			translate32[i] = d_8to32table[translate[i]];
 
 		out = pixels;
-		memset (pixels, 0, sizeof (pixels));
-		fracstep = tinwidth * 0x10000 / scaled_width;
-		for (i = 0; i < scaled_height; i++, out += scaled_width) {
-			inrow = original + inwidth * (i * tinheight / scaled_height);
+		memset(pixels, 0, sizeof(pixels));
+		fracstep = tinwidth*0x10000/scaled_width;
+		for (i=0 ; i<scaled_height ; i++, out += scaled_width)
+		{
+			inrow = original + inwidth*(i*tinheight/scaled_height);
 			frac = fracstep >> 1;
-			for (j = 0; j < scaled_width; j += 4) {
-				out[j] = translate32[inrow[frac >> 16]];
+			for (j=0 ; j<scaled_width ; j+=4)
+			{
+				out[j] = translate32[inrow[frac>>16]];
 				frac += fracstep;
-				out[j + 1] = translate32[inrow[frac >> 16]];
+				out[j+1] = translate32[inrow[frac>>16]];
 				frac += fracstep;
-				out[j + 2] = translate32[inrow[frac >> 16]];
+				out[j+2] = translate32[inrow[frac>>16]];
 				frac += fracstep;
-				out[j + 3] = translate32[inrow[frac >> 16]];
+				out[j+3] = translate32[inrow[frac>>16]];
 				frac += fracstep;
 			}
 		}
 
-		qglTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format,
-					  scaled_width, scaled_height, 0, GL_RGBA,
-					  GL_UNSIGNED_BYTE, pixels);
+		qglTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, 
+			scaled_width, scaled_height, 0, GL_RGBA, 
+			GL_UNSIGNED_BYTE, pixels);
 
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		if (Img_HasFullbrights ((Uint8 *)original, inwidth*inheight))
 		{
@@ -332,48 +350,34 @@ R_TranslatePlayerSkin (int playernum)
 			out = pixels;
 			memset(pixels, 0, sizeof(pixels));
 			fracstep = tinwidth*0x10000/scaled_width;
-
-			// make all non-fullbright colors transparent
 			for (i=0 ; i<scaled_height ; i++, out += scaled_width)
 			{
 				inrow = original + inwidth*(i*tinheight/scaled_height);
 				frac = fracstep >> 1;
 				for (j=0 ; j<scaled_width ; j+=4)
 				{
-					if (inrow[frac>>16] < 224)
-						out[j] = translate32[inrow[frac>>16]] & 0x00FFFFFF; // transparent 
-					else
-						out[j] = translate32[inrow[frac>>16]]; // fullbright 
-
+					if (out[j] < 224) out[j] = 0; else out[j] = d_8to32table[inrow[frac>>16]];
 					frac += fracstep;
-					if (inrow[frac>>16] < 224)
-						out[j+1] = translate32[inrow[frac>>16]] & 0x00FFFFFF; // transparent 
-					else
-						out[j+1] = translate32[inrow[frac>>16]]; // fullbright 
+					if (out[j+1] < 224) out[j+1] = 0; else out[j+1] = d_8to32table[inrow[frac>>16]];
 					frac += fracstep;
-					if (inrow[frac>>16] < 224)
-						out[j+2] = translate32[inrow[frac>>16]] & 0x00FFFFFF; // transparent 
-					else
-						out[j+2] = translate32[inrow[frac>>16]]; // fullbright 
+					if (out[j+2] < 224) out[j+2] = 0; else out[j+2] = d_8to32table[inrow[frac>>16]];
 					frac += fracstep;
-					if (inrow[frac>>16] < 224)
-						out[j+3] = translate32[inrow[frac>>16]] & 0x00FFFFFF; // transparent 
-					else
-						out[j+3] = translate32[inrow[frac>>16]]; // fullbright 
+					if (out[j+3] < 224) out[j+3] = 0; else out[j+3] = d_8to32table[inrow[frac>>16]];
 					frac += fracstep;
 				}
-			}
+			}	
 
-			qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 
+			qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, 
 				scaled_width, scaled_height, 0, GL_RGBA, 
 				GL_UNSIGNED_BYTE, pixels);
 
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 		else {
 			fb_skins[playernum] = 0;
 		}
+
 	}
 }
 

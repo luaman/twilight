@@ -1349,6 +1349,7 @@ trivertx_t *poseverts[MAXALIASFRAMES];
 int         posenum;
 
 Uint8       player_8bit_texels[320 * 200];
+int			player_8bit_width = 296, player_8bit_height = 194;
 
 /*
 =================
@@ -1539,11 +1540,12 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			Mod_FloodFillSkin (skin, pheader->skinwidth, pheader->skinheight);
 
 			// save 8 bit texels for the player model to remap
-			// save 8 bit texels for the player model to remap
 			if (!strcmp (loadmodel->name, "progs/player.mdl")) {
 				if (s > sizeof (player_8bit_texels))
 					Sys_Error ("Player skin too large");
 				memcpy (player_8bit_texels, (Uint8 *) (pskintype + 1), s);
+				player_8bit_width = pheader->skinwidth;
+				player_8bit_height = pheader->skinheight;
 			}
 			snprintf (name, sizeof (name), "%s_%i", loadmodel->name, i);
 			pheader->gl_texturenum[i][0] =

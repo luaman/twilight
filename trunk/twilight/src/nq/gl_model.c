@@ -1325,9 +1325,6 @@ mtriangle_t triangles[MAXALIASTRIS];
 trivertx_t *poseverts[MAXALIASFRAMES];
 int         posenum;
 
-Uint8     **player_8bit_texels_tbl;
-Uint8      *player_8bit_texels;
-
 /*
 =================
 Mod_LoadAliasFrame
@@ -1517,12 +1514,10 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 		if (pskintype->type == ALIAS_SKIN_SINGLE) {
 			Mod_FloodFillSkin (skin, pheader->skinwidth, pheader->skinheight);
 
-			// save 8 bit texels for the player model to remap
-			// if (!strcmp(loadmodel->name,"progs/player.mdl")) {
 			texels = Hunk_AllocName (s, loadname);
 			pheader->texels[i] = texels - (Uint8 *) pheader;
 			memcpy (texels, (Uint8 *) (pskintype + 1), s);
-			// }
+
 			snprintf (name, sizeof (name), "%s_%i", loadmodel->name, i);
 
 			pheader->gl_texturenum[i][0] =
