@@ -28,24 +28,22 @@ static const char rcsid[] =
 #include "twiconfig.h"
 
 #include "quakedef.h"
-#include "client.h"
+#include "cclient.h"
 #include "cmd.h"
 #include "console.h"
-#include "cl_console.h"
 #include "cvar.h"
 #include "keys.h"
 #include "mathlib.h"
 #include "menu.h"
-#include "screen.h"
 #include "strlib.h"
 #include "sys.h"
 
 #include <stdlib.h>
 
+extern void SCR_UpdateScreen (void);
+
 /*
-
 key up events are sent even if in console mode
-
 */
 
 char		key_lines[32][MAX_INPUTLINE];
@@ -876,7 +874,8 @@ Key_Event (int key, qboolean down)
 	//
 	if ((key_dest == key_menu && menubound[key])
 		|| (key_dest == key_console && !consolekeys[key])
-		|| (key_dest == key_game && (!con_forcedup || !consolekeys[key]))) {
+		|| (key_dest == key_game &&
+			((ccls.state == ca_active) || !consolekeys[key]))) {
 		if (!(kb = keybindings[key_bmap][key]))
 			kb = keybindings[key_bmap2][key];
 		if (kb) {

@@ -18,6 +18,8 @@ lib_LIBRARIES=libtwilight_client.a
 
 libtwilight_client_a_SOURCES= \
 	cclient.c cclient.h \
+	console.c console.h \
+	keys.c keys.h \
 	hud.c hud.h
 
 EXTRA_DIST = \

@@ -678,7 +678,7 @@ the entity origin, so any view position inside that will be valid
 void
 V_RenderView (void)
 {
-	if (con_forcedup)
+	if (ccls.state != ca_active)
 		return;
 
 	/* don't allow cheats in multiplayer */
