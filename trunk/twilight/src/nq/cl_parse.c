@@ -253,18 +253,14 @@ CL_ParseServerInfo (void)
 // parse protocol version number
 	i = MSG_ReadLong ();
 
-	if (i != PROTOCOL_VERSION) {
-		Com_Printf ("Server returned version %i, not %i", i, PROTOCOL_VERSION);
-		return;
-	}
+	if (i != PROTOCOL_VERSION)
+		Host_Error ("Server returned version %i, not %i", i, PROTOCOL_VERSION);
 
 // parse maxclients
 	cl.maxclients = MSG_ReadByte ();
 
-	if (cl.maxclients < 1 || cl.maxclients > MAX_SCOREBOARD) {
-		Com_Printf ("Bad maxclients (%u) from server\n", cl.maxclients);
-		return;
-	}
+	if (cl.maxclients < 1 || cl.maxclients > MAX_SCOREBOARD)
+		Host_Error ("Bad maxclients (%u) from server\n", cl.maxclients);
 
 	cl.scores = Hunk_AllocName (cl.maxclients * sizeof (*cl.scores), "scores");
 
@@ -292,10 +288,8 @@ CL_ParseServerInfo (void)
 		str = MSG_ReadString ();
 		if (!str[0])
 			break;
-		if (nummodels == MAX_MODELS) {
-			Com_Printf ("Server sent too many model precaches\n");
-			return;
-		}
+		if (nummodels == MAX_MODELS)
+			Host_Error ("Server sent too many model precaches\n");
 		strcpy (model_precache[nummodels], str);
 		Mod_TouchModel (str);
 	}
@@ -306,10 +300,8 @@ CL_ParseServerInfo (void)
 		str = MSG_ReadString ();
 		if (!str[0])
 			break;
-		if (numsounds == MAX_SOUNDS) {
-			Com_Printf ("Server sent too many sound precaches\n");
-			return;
-		}
+		if (numsounds == MAX_SOUNDS)
+			Host_Error ("Server sent too many sound precaches\n");
 		strcpy (sound_precache[numsounds], str);
 	}
 
@@ -321,16 +313,14 @@ CL_ParseServerInfo (void)
 		isnotmap = (i != 1);
 		cl.model_precache[i] = Mod_ForName (model_precache[i], false);
 
-		if (cl.model_precache[i] == NULL) {
-			Com_Printf ("Model %s not found\n", model_precache[i]);
-			return;
-		}
+		if (cl.model_precache[i] == NULL)
+			Host_Error ("Model %s not found\n", model_precache[i]);
 
 		if (!isnotmap)
 		{
 			char mapname[MAX_QPATH] = { 0 };
 
-			strncpy (mapname, COM_SkipPath (model_precache[i]), MAX_QPATH);
+			strlcpy (mapname, COM_SkipPath (model_precache[i]), sizeof (mapname));
 			COM_StripExtension (mapname, mapname);
 			Cvar_Set (cl_mapname, mapname);
 		}
