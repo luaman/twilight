@@ -70,7 +70,6 @@ static const char rcsid[] =
 // Don't need windows.h till we have win32 GUI console
 #include <io.h>
 #include <conio.h>
-#include <sys/time.h>
 #endif
 
 #include "SDL.h"
