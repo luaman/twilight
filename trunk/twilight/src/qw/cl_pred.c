@@ -18,6 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 #include "quakedef.h"
+#include "keys.h"
 
 #include <SDL.h>
 #ifdef _WIN32
@@ -155,6 +156,8 @@ CL_PredictMove (void)
 		char        text[1024];
 
 		cls.state = ca_active;
+		key_dest = key_game;
+		game_target = KGT_DEFAULT;
 		snprintf (text, sizeof(text), "Twilight QWCL: %s", cls.servername);
 		SDL_WM_SetCaption(text, "Twilight QWCL");
 	}

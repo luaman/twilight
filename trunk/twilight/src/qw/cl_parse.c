@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // cl_parse.c  -- parse a message received from the server
 
 #include "quakedef.h"
+#include "keys.h"
 
 char       *svc_strings[] = {
 	"svc_bad",
@@ -603,6 +604,8 @@ CL_ParseServerData (void)
 
 	// now waiting for downloads, etc
 	cls.state = ca_onserver;
+	key_dest = key_console;
+	game_target = KGT_CONSOLE;
 }
 
 /*
