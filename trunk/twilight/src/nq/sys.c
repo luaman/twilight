@@ -82,6 +82,10 @@ static const char rcsid[] =
 # define PATH_MAX 256
 #endif
 
+#ifdef WIN32
+#include "winconsole.h"
+#endif
+
 int nostdout = 0;
 
 static Uint32 sys_sleep;
@@ -158,6 +162,15 @@ Sys_Printf (const char *fmt, ...)
 	vsnprintf (text, sizeof (text), fmt, argptr);
 	va_end (argptr);
 
+#ifdef WIN32
+	// windows dedicated server console has its own text output routine
+	if (ccls.state == ca_dedicated)
+	{
+		WinCon_Printf(text);
+		return;
+	}
+#endif
+
 	if (sys_asciionly && sys_asciionly->ivalue)
 		for (p = text; *p; p++)
 			putc (sys_charmap[*p], stdout);
@@ -177,6 +190,11 @@ Sys_Quit (int ret)
 #ifdef HAVE_FCNTL
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 #endif
+#ifdef WIN32
+	if (ccls.state == ca_dedicated)
+		WinCon_Shutdown();
+#endif
+
 	SDL_Quit ();
 	exit (ret);
 }
@@ -418,6 +436,11 @@ Sys_ConsoleInput (void)
 	static int		len;
 	int				c;
 
+	// on windows, the dedicated server console input is handled in the message pump.
+	if (ccls.state == ca_dedicated)
+		return NULL;
+
+
 	// read a line out
 	while (_kbhit ())
 	{
@@ -585,6 +608,12 @@ main (int argc, char *argv[])
 		fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
 #endif
 
+#ifdef WIN32
+	// if we are in dedicated server mode on windows, start up the console ASAP
+	if (COM_CheckParm ("-dedicated"))
+		WinCon_Init();
+#endif
+
 	Host_Init ();
 
 	if (ccls.state != ca_dedicated && COM_CheckParm ("-nostdout"))
@@ -593,6 +622,10 @@ main (int argc, char *argv[])
 	base = Sys_DoubleTime ();
 	while (1)
 	{
+#ifdef WIN32
+		if (ccls.state == ca_dedicated)
+			WinCon_PumpMessages();
+#endif
 		// find time spent rendering last frame
 		newtime = Sys_DoubleTime ();
 		curtime = newtime - base;

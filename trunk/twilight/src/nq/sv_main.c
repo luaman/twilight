@@ -42,6 +42,10 @@ static const char rcsid[] =
 #include "world.h"
 #include "renderer/surface.h"
 
+#ifdef WIN32
+# include "winconsole.h"
+#endif
+
 server_t		 sv;
 server_static_t	 svs;
 memzone_t		*sv_zone;
@@ -963,6 +967,12 @@ SV_SpawnServer (const char *server)
 
 	Com_DPrintf ("SpawnServer: %s\n", server);
 	svs.changelevel_issued = false;		// now safe to issue another
+
+
+#ifdef WIN32
+	// tell the win32 console the new map name.
+	WinCon_SetMapname (server);
+#endif
 
 	// tell all connected clients that we are going to a new level
 	if (sv.active)

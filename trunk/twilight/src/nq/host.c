@@ -62,6 +62,10 @@ static const char rcsid[] =
 #include "image/image.h"
 #include "chase.h"
 
+#ifdef WIN32
+# include "winconsole.h"
+#endif
+
 /*
 
 A server can always be started, even if the system started out as a client
@@ -397,6 +401,10 @@ SV_DropClient (qboolean crash)
 		MSG_WriteByte (&client->message, host_client - svs.clients);
 		MSG_WriteByte (&client->message, 0);
 	}
+
+#ifdef WIN32
+	WinCon_SetConnectedClients(net_activeconnections);
+#endif
 }
 
 /*
