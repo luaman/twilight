@@ -127,6 +127,8 @@ typedef struct {
 	sizebuf_t			message;				// writing buffer to send to server
 
 	Uint8				msg_buf[1024];
+
+	double				realtime;
 } client_static_t;
 
 extern client_static_t cls;

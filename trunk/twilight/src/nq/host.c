@@ -197,7 +197,7 @@ Host_FindMaxClients (void)
 		if (i != (com_argc - 1)) {
 			svs.maxclients = Q_atoi (com_argv[i + 1]);
 		} else
-			svs.maxclients = 8;
+			svs.maxclients = 16;
 	} else {
 		cls.state = ca_disconnected;
 		isDedicated = false;
@@ -210,12 +210,9 @@ Host_FindMaxClients (void)
 		if (i != (com_argc - 1))
 			svs.maxclients = Q_atoi (com_argv[i + 1]);
 		else
-			svs.maxclients = 8;
+			svs.maxclients = MAX_SCOREBOARD;
 	}
-	if (svs.maxclients < 1)
-		svs.maxclients = 8;
-	else if (svs.maxclients > MAX_SCOREBOARD)
-		svs.maxclients = MAX_SCOREBOARD;
+	svs.maxclients = bound (1, svs.maxclients, MAX_SCOREBOARD);
 
 	svs.maxclientslimit = svs.maxclients;
 	if (svs.maxclientslimit < 4)
@@ -549,6 +546,7 @@ Host_FilterTime (float time)
 	float		newframetime;
 
 	host_realtime += time;
+	cls.realtime = host_realtime;
 
 	/* if the frame time is below 0.001, don't even bother computing anything */
 	newframetime = host_realtime - oldrealtime;

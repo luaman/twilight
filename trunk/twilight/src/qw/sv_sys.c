@@ -160,9 +160,6 @@ Sys_Printf (char *fmt, ...)
 	vsnprintf (text, sizeof (text), fmt, argptr);
 	va_end (argptr);
 
-	if (strlen (text) > sizeof (text))
-		Sys_Error ("memory overwrite in Sys_Printf");
-
 	if (sys_asciionly && sys_asciionly->ivalue)
 		for (p = (unsigned char *) text; *p; p++)
 			putc (sys_charmap[*p], stdout);
