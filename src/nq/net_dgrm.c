@@ -94,12 +94,6 @@ struct {
 	Uint8       data[MAX_DATAGRAM];
 } packetBuffer;
 
-extern int  m_return_state;
-extern int  m_state;
-extern qboolean m_return_onerror;
-extern char m_return_reason[32];
-
-
 #ifdef DEBUG
 char *
 StrAddr (struct qsockaddr *addr)
@@ -1312,7 +1306,6 @@ _Datagram_Connect (char *host)
 	if (ret == 0) {
 		reason = "No Response";
 		Com_Printf ("%s\n", reason);
-		strcpy (m_return_reason, reason);
 		goto ErrorReturn;
 	}
 
@@ -1320,7 +1313,6 @@ _Datagram_Connect (char *host)
 	if (ret == CCREP_REJECT) {
 		reason = MSG_ReadString ();
 		Com_Printf (reason);
-		strlcpy (m_return_reason, reason, sizeof (m_return_reason));
 		goto ErrorReturn;
 	}
 
@@ -1330,7 +1322,6 @@ _Datagram_Connect (char *host)
 	} else {
 		reason = "Bad Response";
 		Com_Printf ("%s\n", reason);
-		strcpy (m_return_reason, reason);
 		goto ErrorReturn;
 	}
 
@@ -1343,22 +1334,15 @@ _Datagram_Connect (char *host)
 	if (dfunc.Connect (newsock, &sock->addr) == -1) {
 		reason = "Connect to Game failed";
 		Com_Printf ("%s\n", reason);
-		strcpy (m_return_reason, reason);
 		goto ErrorReturn;
 	}
 
-	m_return_onerror = false;
 	return sock;
 
   ErrorReturn:
 	NET_FreeQSocket (sock);
   ErrorReturn2:
 	dfunc.CloseSocket (newsock);
-	if (m_return_onerror) {
-		key_dest = key_menu;
-		m_state = m_return_state;
-		m_return_onerror = false;
-	}
 	return NULL;
 }
 

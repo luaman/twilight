@@ -27,28 +27,248 @@
 #ifndef __MENU_H
 #define __MENU_H
 
+#include "qtypes.h"
+#include "cvar.h"
+#include "lh_parser.h"
 #include "wad.h"
+#include "mathlib.h"
+#include "strlib.h"
 
-//
-// the net drivers should just set the apropriate bits in m_activenet,
-// instead of having the menu code look through their internal tables
-//
-#define	MNET_IPX		1
-#define	MNET_TCP		2
+typedef enum {
+	m_command, m_slider, m_toggle, m_multi_select, m_text_entry, m_text,
+	m_step_float, m_loop_int, m_qpic,
+} item_type_t;
 
-extern int  m_activenet;
+typedef struct menu_qpic_trans_s {
+	cvar_t		*from_cvar;
+	int			 from_shift, from_bits, from;
+	cvar_t		*to_cvar;
+	int			 to_shift, to_bits, to;
+} menu_qpic_trans_t;
 
-//
-// menus
-//
-void        M_Init_Cvars (void);
-void        M_Init (void);
-void        M_Keydown (int key);
-void        M_Draw (void);
-void        M_ToggleMenu_f (void);
-qpic_t     *M_CachePic (char *path);
-void        M_DrawTextBox (int x, int y, int width, int lines);
-void        M_Menu_Quit_f (void);
+typedef struct menu_item_qpic_s {
+	qpic_t				*qpic;
+	int					x, y;		// FIXME: HACK HACK HACK!
+	menu_qpic_trans_t	*trans;
+	int					n_trans;
+} menu_item_qpic_t;
+
+typedef struct menu_item_loop_int_s {
+	cvar_t		*cvar;
+	int			 max, shift, bits;
+} menu_item_loop_int_t;
+
+typedef struct menu_item_step_float_s {
+	cvar_t		*cvar;
+	float		 min, step;
+	qboolean	 bound;	
+} menu_item_step_float_t;
+
+typedef struct menu_item_slider_s {
+	cvar_t	*cvar;
+	float	 min, max, step;
+} menu_item_slider_t;
+
+typedef struct multi_item_s {
+	char	*value;
+	char	*label;
+} multi_item_t;
+
+typedef struct menu_item_multi_s {
+	cvar_t			*cvar;
+	multi_item_t	*values;
+	int				 n_values;
+} menu_item_multi_t;
+
+typedef struct menu_item_text_entry_s {
+	cvar_t	*cvar;
+	int		 max_len;
+	char	 min_valid, max_valid;
+} menu_item_text_entry_t;
+
+#define MITEM_SELECTABLE			BIT(0)
+#define MITEM_DRAW					BIT(1)
+#define MITEM_DRAW_LABEL			BIT(2)
+#define MITEM_DRAW_VALUE			BIT(3)
+
+typedef enum {
+	c_none, c_grey, c_kill, c_kill_load,
+} control_type_t;
+
+typedef struct menu_control_s {
+	cvar_t			*cvar;
+	char			*svalue;
+	int				 ivalue;
+	qboolean		 invert;
+	control_type_t	 type;
+} menu_control_t;
+
+typedef struct menu_item_s {
+	char			*label;
+	int				 n_control;
+	menu_control_t	*control;
+	int				 flags;
+	int				 height;	// FIXME: HACK HACK HACK!
+	item_type_t	 type;
+	union {
+		menu_item_slider_t		 slider;
+		char					*command;
+		cvar_t					*toggle;
+		char					*text;
+		menu_item_multi_t		 multi;
+		menu_item_text_entry_t	 text_entry;
+		menu_item_step_float_t	 step_float;
+		menu_item_loop_int_t	 loop_int;
+		menu_item_qpic_t		 qpic;
+	} u;
+} menu_item_t;
+
+typedef struct menu_s {
+	char			*id, *title;
+	menu_item_t		**items;
+	struct menu_s	*next;
+} menu_t;
+
+extern int			m_item;
+extern menu_t		*m_menu;
+extern menu_t		*m_first;
+extern memzone_t	*m_zone;
+extern qboolean		m_entersound;
+
+
+extern void M_Keydown (int key);
+extern void M_Draw (void);
+extern void Menu_Parse_Menus (codetree_t *tree_base);
+extern void M_ToggleMenu_f (void);
+extern void M_DrawPic (int x, int y, qpic_t *pic);
+extern void M_DrawTextBox (int x, int y, int width, int lines);
+
+extern void M_Init (void);
+extern void M_Init_Cvars(void);
+extern void M_Base_Init (void);
+extern void M_Base_Init_Cvars (void);
+extern void M_Renderer_Init (void);
+extern void M_Renderer_Init_Cvars (void);
+
+extern inline control_type_t
+MItem_Control (menu_item_t *item)
+{
+	cvar_t			*cvar;
+	int				 i;
+	qboolean		 match;
+	control_type_t	 worst = c_none;
+
+	for (i = 0; i < item->n_control; i++) {
+		match = false;
+		cvar = item->control[i].cvar;
+
+		if (item->control[i].svalue) {
+			if (!strcasecmp(item->control[i].svalue, cvar->svalue))
+				match = true;
+		} else
+			if (cvar->ivalue == item->control[i].ivalue)
+				match = true;
+
+		if ((!item->control[i].invert && !match) ||
+				(item->control[i].invert && match))
+			if (worst < item->control[i].type)
+				worst = item->control[i].type;
+	}
+
+	return worst;
+}
+
+extern inline qboolean
+MItem_Selectable (menu_item_t *item)
+{
+	if (!(item->flags & MITEM_SELECTABLE))
+		return 0;
+	if (MItem_Control(item) != c_none)
+		return 0;
+	return 1;
+}
+
+extern inline int
+MItem_Draw (menu_item_t *item)
+{
+	control_type_t	state;
+
+	if (!(item->flags & MITEM_DRAW))
+		return 0;
+	state = MItem_Control(item);
+	if (state == c_none)
+		return 1;
+	else if (state == c_grey)
+		return 2;
+	else if (state == c_kill)
+		return 0;
+	else
+		return 1;
+}
+
+extern inline int
+MItem_Draw_Label (menu_item_t *item)
+{
+	control_type_t	state;
+
+	if (!(item->flags & MITEM_DRAW_LABEL))
+		return 0;
+	if (!item->label)
+		return 0;
+
+	state = MItem_Control(item);
+	if (state == c_none)
+		return 1;
+	else if (state == c_grey)
+		return 2;
+	else if (state == c_kill)
+		return 0;
+	else
+		return 1;
+}
+
+extern inline int
+MItem_Draw_Value (menu_item_t *item)
+{
+	control_type_t	state;
+	qboolean		good;
+
+	if (!(item->flags & MITEM_DRAW_VALUE))
+		return 0;
+	switch (item->type) {
+		case m_toggle:
+			good = !!item->u.toggle;
+		case m_text:
+			good = !!item->u.text;
+		case m_qpic:
+			good = !!item->u.qpic.qpic;
+		case m_loop_int:
+			good = !!item->u.loop_int.cvar;
+		case m_step_float:
+			good = !!item->u.step_float.cvar;
+		case m_slider:
+			good = !!item->u.slider.cvar;
+		case m_multi_select:
+			good = !!item->u.multi.cvar;
+		case m_text_entry:
+			good = !!item->u.text_entry.cvar;
+		default:
+			good = 1;
+	}
+	if (!good)
+		return 0;
+
+	state = MItem_Control(item);
+	if (state == c_none)
+		return 1;
+	else if (state == c_grey)
+		return 2;
+	else if (state == c_kill)
+		return 0;
+	else
+		return 1;
+}
+
 
 #endif // __MENU_H
 

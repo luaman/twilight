@@ -348,7 +348,6 @@ Draw_Pic (int x, int y, qpic_t *pic)
 {
 	glpic_t	   *gl;
 
-
 	gl = (glpic_t *) pic->data;
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
 	qglEnable (GL_BLEND);

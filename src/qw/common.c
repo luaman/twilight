@@ -52,6 +52,7 @@ cvar_t *fs_sharepath;
 cvar_t *fs_userconf;
 cvar_t *fs_userpath;
 cvar_t *fs_gamename;
+cvar_t *game_name;
 cvar_t *registered;
 
 void COM_InitFilesystem (void);
@@ -1024,6 +1025,8 @@ COM_Init_Cvars (void)
 	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, ExpandPath);
 
 	fs_gamename = Cvar_Get ("fs_gamename", "id1", CVAR_ROM, NULL);
+
+	game_name = Cvar_Get ("game_name", "qw", CVAR_ROM, NULL);
 }
 
 /*

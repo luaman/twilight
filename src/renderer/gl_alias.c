@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "r_part.h"
 #include "vis.h"
 #include "matrixlib.h"
+#include "palette.h"
 
 void R_DrawOpaqueAliasModels (entity_common_t *ents[],int num_ents, qboolean viewent);
 extern vec3_t lightcolor;

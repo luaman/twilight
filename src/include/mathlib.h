@@ -75,6 +75,7 @@
 #endif
 
 #define lhrandom(MIN,MAX) ((rand() & 32767) * (((MAX)-(MIN)) * (1.0f / 32767.0f)) + (MIN))
+#define invpow(base,number)	(log(number) / log(base))
 
 struct mplane_s;
 

@@ -42,15 +42,6 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "sys.h"
 
-
-Uint32 d_palette_raw[256];
-Uint32 d_palette_base[256];
-Uint32 d_palette_fb[256];
-Uint32 d_palette_base_team[256];
-Uint32 d_palette_top[256];
-Uint32 d_palette_bottom[256];
-float d_8tofloattable[256][4];
-
 cvar_t *width_2d;
 cvar_t *height_2d;
 cvar_t *text_scale;
@@ -59,18 +50,6 @@ cvar_t *m_filter;
 cvar_t *_windowed_mouse;
 cvar_t *gl_driver;
 
-cvar_t *v_hwgamma;
-cvar_t *v_gamma;
-cvar_t *v_gammabias_r;
-cvar_t *v_gammabias_b;
-cvar_t *v_gammabias_g;
-cvar_t *v_tgamma;
-cvar_t *v_tgammabias_r;
-cvar_t *v_tgammabias_b;
-cvar_t *v_tgammabias_g;
-
-static Uint16 hw_gamma_ramps[3][256];
-static Uint8 tex_gamma_ramps[3][256];
 qboolean VID_Inited;
 qboolean keypadmode = false;
 
@@ -92,150 +71,6 @@ void
 VID_Shutdown (void)
 {
 	DynGL_CloseLibrary ();
-}
-
-static void
-VID_Build_Gamma_Ramp8 (Uint8 *ramp, int n, double gam, double con, double bri)
-{
-	int			i;
-	double		i_d, i_s, invgam;
-
-	i_s = 1.0 / n;
-	invgam = 1.0 / gam;
-
-	for (i_d = i = 0; i < n; i++, i_d++)
-		ramp[i] = bound_bits((pow(i_d * i_s, invgam) * con + bri) * BIT(8),8);
-}
-
-static void
-VID_Build_Gamma_Ramp16 (Uint16 *ramp, int n, double gam, double con, double bri)
-{
-	int			i;
-	double		i_d, i_s, invgam;
-
-	i_s = 1.0 / n;
-	invgam = 1.0 / gam;
-
-	for (i_d = i = 0; i < n; i++, i_d++)
-		ramp[i]=bound_bits((pow(i_d * i_s, invgam) * con + bri) * BIT(16),16);
-}
-
-static void
-VID_InitTexGamma (void)
-{
-	int			i;
-	Uint8		*pal;
-	Uint8		r, g, b;
-	vec3_t		tex;
-
-	tex[0] = v_tgamma->fvalue + v_tgammabias_r->fvalue;
-	tex[1] = v_tgamma->fvalue + v_tgammabias_g->fvalue;
-	tex[2] = v_tgamma->fvalue + v_tgammabias_b->fvalue;
-
-	VID_Build_Gamma_Ramp8 (tex_gamma_ramps[0], 256, tex[0], 1, 0);
-	VID_Build_Gamma_Ramp8 (tex_gamma_ramps[1], 256, tex[1], 1, 0);
-	VID_Build_Gamma_Ramp8 (tex_gamma_ramps[2], 256, tex[2], 1, 0);
-
-	/* 8 8 8 encoding */
-	pal = host_basepal;
-	for (i = 0; i < 256; i++)
-	{
-		r = tex_gamma_ramps[0][pal[0]];
-		g = tex_gamma_ramps[1][pal[1]];
-		b = tex_gamma_ramps[2][pal[2]];
-		pal += 3;
-
-		d_8tofloattable[i][0] = (float) r / 255;
-		d_8tofloattable[i][1] = (float) g / 255;
-		d_8tofloattable[i][2] = (float) b / 255;
-		d_8tofloattable[i][3] = 1;
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		d_palette_raw[i] = (r << 24) + (g << 16) + (b << 8) + (255 << 0);
-#else
-		d_palette_raw[i] = (r << 0) + (g << 8) + (b << 16) + (255 << 24);
-#endif
-	}
-	d_palette_raw[255] = 0x00000000;		/* 255 is transparent */
-	VectorSet4 (d_8tofloattable[255], 0, 0, 0, 0);
-}
-
-static void
-VID_BuildPalettes (void)
-{
-	int i, num_fb;
-
-	if (gl_fb->ivalue)
-		num_fb = host_colormap[0x4000];
-	else
-		num_fb = 0;
-
-	for (i = 0; i < (256 - num_fb); i++)
-	{
-		d_palette_base_team[i] = d_palette_base[i] = d_palette_raw[i];
-		d_palette_fb[i] = d_palette_empty;
-		d_palette_top[i] = d_palette_bottom[i] = d_palette_empty;
-	}
-	for (; i < 256; i++)
-	{
-		d_palette_base_team[i] = d_palette_base[i] = d_palette_empty;
-		d_palette_fb[i] = d_palette_raw[i];
-		d_palette_top[i] = d_palette_bottom[i] = d_palette_empty;
-	}
-
-	for (i = 0x10; i < 0x20; i++)   // Top range.
-	{
-		d_palette_top[i] = d_palette_raw[i - 0x10];
-		d_palette_base_team[i] = d_palette_empty;
-	}
-	for (i = 0x60; i < 0x70; i++)   // Bottom range.
-	{
-		d_palette_bottom[i] = d_palette_raw[i - 0x60];
-		d_palette_base_team[i] = d_palette_empty;
-	}
-	d_palette_base[255] = d_palette_base_team[255] = d_palette_top[255]
-		= d_palette_bottom[255] = d_palette_raw[255];
-}
-
-
-static void
-GammaChanged (cvar_t *cvar)
-{
-	vec3_t		hw;
-
-	cvar = cvar;
-
-	if (!VID_Inited)
-		return;
-
-	/* Might be init, we don't want to segfault. */
-	if (!(v_hwgamma && v_gamma && v_gammabias_r && v_gammabias_g &&
-				v_gammabias_b))
-		return;
-
-	/* Do we have and want to use hardware gamma? */
-	hw[0] = v_gamma->fvalue + v_gammabias_r->fvalue;
-	hw[1] = v_gamma->fvalue + v_gammabias_g->fvalue;
-	hw[2] = v_gamma->fvalue + v_gammabias_b->fvalue;
-
-	if (v_hwgamma->ivalue == 1)
-	{
-		VID_Build_Gamma_Ramp16 (hw_gamma_ramps[0], 256, hw[0], 1, 0);
-		VID_Build_Gamma_Ramp16 (hw_gamma_ramps[1], 256, hw[1], 1, 0);
-		VID_Build_Gamma_Ramp16 (hw_gamma_ramps[2], 256, hw[2], 1, 0);
-
-		if (SDL_SetGammaRamp (hw_gamma_ramps[0], hw_gamma_ramps[1],
-			hw_gamma_ramps[2]) < 0)
-		{
-			/* No hardware gamma support, turn off and set ROM. */
-			Com_Printf ("No hardware gamma support: Disabling. (%s)\n",
-						SDL_GetError ());
-			Cvar_Set (v_hwgamma, "0");
-			v_hwgamma->flags |= CVAR_ROM;
-		}
-	}
-	else if (v_hwgamma->ivalue == 2)
-		SDL_SetGamma (hw[0], hw[1], hw[2]);
 }
 
 /*
@@ -324,6 +159,7 @@ VID_Init_Cvars (void)
 {
 	GLArrays_Init_Cvars ();
 	GLInfo_Init_Cvars ();
+	PAL_Init_Cvars ();
 
 	width_2d = Cvar_Get ("width_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
 	height_2d = Cvar_Get ("height_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
@@ -333,15 +169,6 @@ VID_Init_Cvars (void)
 	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE,
 			&IN_WindowedMouse);
 	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
-	v_hwgamma = Cvar_Get ("v_hwgamma", "1", CVAR_NONE, &GammaChanged);
-	v_gamma = Cvar_Get ("v_gamma", "1", CVAR_ARCHIVE, &GammaChanged);
-	v_gammabias_r = Cvar_Get ("v_gammabias_r", "0", CVAR_ARCHIVE, &GammaChanged);
-	v_gammabias_g = Cvar_Get ("v_gammabias_g", "0", CVAR_ARCHIVE, &GammaChanged);
-	v_gammabias_b = Cvar_Get ("v_gammabias_b", "0", CVAR_ARCHIVE, &GammaChanged);
-	v_tgamma = Cvar_Get ("v_tgamma", "1", CVAR_ROM, NULL);
-	v_tgammabias_r = Cvar_Get ("v_tgammabias_r", "0", CVAR_ROM, NULL);
-	v_tgammabias_g = Cvar_Get ("v_tgammabias_g", "0", CVAR_ROM, NULL);
-	v_tgammabias_b = Cvar_Get ("v_tgammabias_b", "0", CVAR_ROM, NULL);
 }
 
 void
@@ -446,7 +273,7 @@ VID_Init (unsigned char *palette)
 	Com_DPrintf ("VID_Init: Window caption set.\n");
 
 	VID_Inited = true;
-	GammaChanged (v_gamma);
+	PAL_Init ();
 	Size_Changed2D (NULL);
 
 	Com_Printf ("Video mode %dx%d initialized: %s.\n", vid.width, vid.height,
@@ -454,9 +281,6 @@ VID_Init (unsigned char *palette)
 
 	GL_Init ();
 	Com_DPrintf ("VID_Init: GL_Init successful.\n");
-
-	VID_InitTexGamma ();
-	VID_BuildPalettes ();
 
 	if (use_mouse)
 	{
