@@ -433,8 +433,6 @@ Mod_LoadTextures (lump_t *l)
 		if (!strncmp (mt->name, "sky", 3))
 			R_InitSky (tx);
 		else {
-			texture_mode = GL_LINEAR_MIPMAP_NEAREST;	// _LINEAR;
-
 			if (mt->name[0] == '*')	// we don't brighten turb textures
 				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (Uint8 *)(tx+1), true, false);
 			else {
@@ -445,8 +443,6 @@ Mod_LoadTextures (lump_t *l)
 									(Uint8 *) (tx + 1), true, 2);
 				}
 			}
-
-			texture_mode = GL_LINEAR;
 		}
 	}
 

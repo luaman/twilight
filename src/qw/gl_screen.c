@@ -100,7 +100,7 @@ console is:
 
 */
 
-int			glx, gly, glwidth, glheight;
+int			glx, gly;
 
 // only the refresh window will be updated unless these variables are flagged 
 int			scr_copytop;
@@ -339,78 +339,25 @@ Internal use only
 static void
 SCR_CalcRefdef (void)
 {
-	float       size;
-	int         h;
-	qboolean    full = false;
-
-
 	vid.recalc_refdef = false;
 
-//========================================
-
-// Vic
-// FIXME: make these two callbacks?
-
-// bound viewsize
-	if (scr_viewsize->value < 30)
-		Cvar_Set (scr_viewsize, "30");
-	if (scr_viewsize->value > 120)
-		Cvar_Set (scr_viewsize, "120");
-
-// bound field of view
-	if (scr_fov->value < 10)
-		Cvar_Set (scr_fov, "10");
-	if (scr_fov->value > 170)
-		Cvar_Set (scr_fov, "170");
-
-// intermission is always full screen   
-	if (cl.intermission)
-		size = 120;
-	else
-		size = scr_viewsize->value;
-
-	if (size >= 120)
-		sb_lines = 0;					// no status bar at all
-	else if (size >= 110)
-		sb_lines = 24;					// no inventory
-	else
-		sb_lines = 24 + 16 + 8;
-
-	if (scr_viewsize->value >= 100.0) {
-		full = true;
-		size = 100.0;
-	} else
-		size = scr_viewsize->value;
-	if (cl.intermission) {
-		full = true;
-		size = 100.0;
+	// intermission is always full screen   
+	if (scr_viewsize->value >= 120 || cl.intermission) {
 		sb_lines = 0;
+	} else if (scr_viewsize->value >= 110) {
+		sb_lines = 24;
+	} else {
+		sb_lines = 24 + 16 + 8;
 	}
-//	size /= 100.0;
-	size *= (1 / 100.0);
 
-	if (!cl_sbar->value && full)
-		h = vid.height;
+	if (cl_sbar->value)
+		r_refdef.vrect.height = vid.height - sb_lines;
 	else
-		h = vid.height - sb_lines;
-
-	r_refdef.vrect.width = vid.width * size;
-	if (r_refdef.vrect.width < 96) {
-		size = 96.0 / r_refdef.vrect.width;
-		r_refdef.vrect.width = 96;		// min for icons
-	}
-
-	r_refdef.vrect.height = vid.height * size;
-	if (cl_sbar->value || !full) {
-		if (r_refdef.vrect.height > vid.height - sb_lines)
-			r_refdef.vrect.height = vid.height - sb_lines;
-	} else if (r_refdef.vrect.height > vid.height)
 		r_refdef.vrect.height = vid.height;
-	r_refdef.vrect.x = (vid.width - r_refdef.vrect.width) / 2;
-	if (full)
-		r_refdef.vrect.y = 0;
-	else
-		r_refdef.vrect.y = (h - r_refdef.vrect.height) / 2;
+
+	r_refdef.vrect.width = vid.width;
+	r_refdef.vrect.x = 0;
+	r_refdef.vrect.y = 0;
 
 	r_refdef.fov_x = scr_fov->value;
 	r_refdef.fov_y =
@@ -431,7 +378,6 @@ void
 SCR_SizeUp_f (void)
 {
 	Cvar_Slide (scr_viewsize, 10);
-	vid.recalc_refdef = true;
 }
 
 
@@ -446,16 +392,40 @@ void
 SCR_SizeDown_f (void)
 {
 	Cvar_Slide (scr_viewsize, -10);
-	vid.recalc_refdef = true;
 }
 
 //============================================================================
+static void
+SCR_viewsize_CB (cvar_t *cvar)
+{
+	// bound viewsize
+	if (cvar->value < 30) {
+		Cvar_Set (cvar, "30");
+	} else if (cvar->value > 120) {
+		Cvar_Set (cvar, "120");
+	} else {
+		vid.recalc_refdef = true;
+	}
+}
+
+static void
+SCR_fov_CB (cvar_t *cvar)
+{
+	// bound field of view
+	if (cvar->value < 1) {
+		Cvar_Set (cvar, "1");
+	} else if (cvar->value > 170) {
+		Cvar_Set (cvar, "170");
+	} else {
+		vid.recalc_refdef = true;
+	}
+}
 
 void
 SCR_Init_Cvars (void)
 {
-	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE, NULL);
-	scr_fov = Cvar_Get ("fov", "90", CVAR_NONE, NULL);	// 10 - 170
+	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE, SCR_viewsize_CB);
+	scr_fov = Cvar_Get ("fov", "90", CVAR_NONE, SCR_fov_CB);	// 10 - 170
 	scr_conspeed = Cvar_Get ("scr_conspeed", "300", CVAR_NONE, NULL);
 	scr_centertime = Cvar_Get ("scr_centertime", "2", CVAR_NONE, NULL);
 	scr_showram = Cvar_Get ("showram", "1", CVAR_NONE, NULL);
@@ -495,23 +465,6 @@ SCR_Init (void)
 }
 
 
-
-/*
-==============
-SCR_DrawRam
-==============
-*/
-void
-SCR_DrawRam (void)
-{
-	if (!scr_showram->value)
-		return;
-
-	if (!r_cache_thrash)
-		return;
-
-	Draw_Pic (scr_vrect.x + 32, scr_vrect.y, scr_ram);
-}
 
 /*
 ==============
@@ -722,20 +675,20 @@ SCR_ScreenShot_f (void)
 	}
 
 
-	buffer = malloc (glwidth * glheight * 3);
+	buffer = malloc (vid.width * vid.height * 3);
 
-	qglReadPixels (glx, gly, glwidth, glheight, GL_RGB, GL_UNSIGNED_BYTE,
+	qglReadPixels (glx, gly, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE,
 				  buffer);
 
 	// swap rgb to bgr
-	c = glwidth * glheight * 3;
+	c = vid.width * vid.height * 3;
 	for (i = 0; i < c; i += 3) {
 		temp = buffer[i];
 		buffer[i] = buffer[i + 2];
 		buffer[i + 2] = temp;
 	}
 
-	TGA_Write (pcxname, glwidth, glheight, 3, buffer);
+	TGA_Write (pcxname, vid.width, vid.height, 3, buffer);
 
 	free (buffer);
 	Con_Printf ("Wrote %s\n", pcxname);
@@ -923,16 +876,16 @@ SCR_RSShot_f (void)
 // 
 // save the pcx file 
 // 
-	newbuf = malloc (glheight * glwidth * 3);
+	newbuf = malloc (vid.height * vid.width * 3);
 
-	qglReadPixels (glx, gly, glwidth, glheight, GL_RGB, GL_UNSIGNED_BYTE,
+	qglReadPixels (glx, gly, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE,
 				  newbuf);
 
-	w = (vid.width < RSSHOT_WIDTH) ? glwidth : RSSHOT_WIDTH;
-	h = (vid.height < RSSHOT_HEIGHT) ? glheight : RSSHOT_HEIGHT;
+	w = (vid.width < RSSHOT_WIDTH) ? vid.width : RSSHOT_WIDTH;
+	h = (vid.height < RSSHOT_HEIGHT) ? vid.height : RSSHOT_HEIGHT;
 
-	fracw = (float) glwidth / (float) w;
-	frach = (float) glheight / (float) h;
+	fracw = (float) vid.width / (float) w;
+	frach = (float) vid.height / (float) h;
 
 	for (y = 0; y < h; y++) {
 		dest = newbuf + (w * 3 * y);
@@ -951,7 +904,7 @@ SCR_RSShot_f (void)
 
 			count = 0;
 			for ( /* */ ; dy < dey; dy++) {
-				src = newbuf + (glwidth * 3 * dy) + dx * 3;
+				src = newbuf + (vid.width * 3 * dy) + dx * 3;
 				for (nx = dx; nx < dex; nx++) {
 					r += *src++;
 					g += *src++;
@@ -1065,31 +1018,6 @@ SCR_BringDownConsole (void)
 	// frame
 }
 
-void
-SCR_TileClear (void)
-{
-	if (r_refdef.vrect.x > 0) {
-		// left
-		Draw_TileClear (0, 0, r_refdef.vrect.x, vid.height - sb_lines);
-		// right
-		Draw_TileClear (r_refdef.vrect.x + r_refdef.vrect.width, 0,
-						vid.width - r_refdef.vrect.x + r_refdef.vrect.width,
-						vid.height - sb_lines);
-	}
-	if (r_refdef.vrect.y > 0) {
-		// top
-		Draw_TileClear (r_refdef.vrect.x, 0,
-						r_refdef.vrect.x + r_refdef.vrect.width,
-						r_refdef.vrect.y);
-		// bottom
-		Draw_TileClear (r_refdef.vrect.x,
-						r_refdef.vrect.y + r_refdef.vrect.height,
-						r_refdef.vrect.width,
-						vid.height - sb_lines -
-						(r_refdef.vrect.height + r_refdef.vrect.y));
-	}
-}
-
 float       oldsbar = 0;
 
 /*
@@ -1128,16 +1056,6 @@ SCR_UpdateScreen (void)
 
 	qglEnable (GL_DEPTH_TEST);
 
-	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
-
-	// 
-	// determine size of refresh window
-	// 
-	if (oldfov != scr_fov->value) {
-		oldfov = scr_fov->value;
-		vid.recalc_refdef = true;
-	}
-
 	if (vid.recalc_refdef)
 		SCR_CalcRefdef ();
 
@@ -1153,8 +1071,6 @@ SCR_UpdateScreen (void)
 	// 
 	// draw any areas not covered by the refresh
 	// 
-	SCR_TileClear ();
-
 	if (r_netgraph->value)
 		R_NetGraph ();
 
@@ -1175,7 +1091,6 @@ SCR_UpdateScreen (void)
 		if (crosshair->value)
 			Draw_Crosshair ();
 
-		SCR_DrawRam ();
 		SCR_DrawNet ();
 		SCR_DrawFPS ();
 		SCR_DrawTurtle ();

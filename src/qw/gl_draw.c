@@ -374,14 +374,14 @@ Draw_Character (int x, int y, int num)
 
 /*
 ================
-Draw_String
+Draw_String_Len
 ================
 */
 void
-Draw_String (int x, int y, char *str)
+Draw_String_Len (int x, int y, char *str, int len)
 {
-	float       frow, fcol, size = 0.0625;
-	int         num, i;
+	float	frow, fcol, size = 0.0625;
+	int		num, i;
 
 	if (y <= -8)
 		return;							// totally off screen
@@ -390,16 +390,11 @@ Draw_String (int x, int y, char *str)
 
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
-
-	i = 0;
 	qglEnable (GL_BLEND);
 	qglBegin (GL_QUADS);
-	while (*str)						// stop rendering when out of
-		// characters
-	{
-		i++;
-		if ((num = *str++) != 32)		// skip spaces
-		{
+
+	for (i = 0; *str && (i < len); i++, x += 8) {
+		if ((num = *str++) != 32) {		// Skip drawing spaces.
 			frow = (float) (num >> 4) * size;
 			fcol = (float) (num & 15) * size;
 			qglTexCoord2f (fcol, frow);
@@ -411,12 +406,20 @@ Draw_String (int x, int y, char *str)
 			qglTexCoord2f (fcol, frow + size);
 			qglVertex2f (x, y + 8);
 		}
-
-		x += 8;
 	}
 	qglEnd ();
 	qglDisable (GL_BLEND);
+}
 
+/*
+================
+Draw_String
+================
+*/
+void
+Draw_String (int x, int y, char *str)
+{
+	Draw_String_Len (x, y, str, strlen(str));
 }
 
 
@@ -869,7 +872,7 @@ Setup as if the screen was 320*200
 void
 GL_Set2D (void)
 {
-	qglViewport (glx, gly, glwidth, glheight);
+	qglViewport (glx, gly, vid.width, vid.height);
 
 	qglMatrixMode (GL_PROJECTION);
 	qglLoadIdentity ();
@@ -883,25 +886,6 @@ GL_Set2D (void)
 }
 
 //====================================================================
-
-/*
-================
-GL_FindTexture
-================
-*/
-int
-GL_FindTexture (char *identifier)
-{
-	int         i;
-	gltexture_t *glt;
-
-	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
-		if (!strcmp (identifier, glt->identifier))
-			return gltextures[i].texnum;
-	}
-
-	return -1;
-}
 
 void R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth,
 		int outwidth)

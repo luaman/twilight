@@ -262,7 +262,7 @@ EmitWaterPolys (msurface_t *fa)
 EmitSkyPolys
 =============
 */
-void
+static void
 EmitSkyPolys (msurface_t *fa)
 {
 	glpoly_t   *p;

@@ -461,8 +461,7 @@ Con_DrawInput (void)
 // draw it
 	y = con_vislines - 22;
 
-	for (i = 0; i < con_linewidth; i++)
-		Draw_Character ((i + 1) << 3, con_vislines - 22, text[i]);
+	Draw_String_Len(1 << 3, con_vislines - 22, text, con_linewidth);
 
 // remove cursor
 	key_lines[edit_line][key_linepos] = 0;
@@ -479,7 +478,7 @@ Draws the last few lines of output transparently over the game top
 void
 Con_DrawNotify (void)
 {
-	int         x, v;
+	int         v;
 	char       *text;
 	int         i;
 	float       time;
@@ -501,8 +500,7 @@ Con_DrawNotify (void)
 		clearnotify = 0;
 		scr_copytop = 1;
 
-		for (x = 0; x < con_linewidth; x++)
-			Draw_Character ((x + 1) << 3, v, text[x]);
+		Draw_String_Len(1 << 3, v, text, con_linewidth);
 
 		v += 8;
 	}
@@ -584,8 +582,7 @@ Con_DrawConsole (int lines)
 
 		text = con->text + (row % con_totallines) * con_linewidth;
 
-		for (x = 0; x < con_linewidth; x++)
-			Draw_Character ((x + 1) << 3, y, text[x]);
+		Draw_String_Len(1 << 3, y, text, con_linewidth);
 	}
 
 	// draw the download bar
@@ -628,8 +625,7 @@ Con_DrawConsole (int lines)
 
 		// draw it
 		y = con_vislines - 22 + 8;
-		for (i = 0; i < strlen (dlbar); i++)
-			Draw_Character ((i + 1) << 3, y, dlbar[i]);
+		Draw_String(1 << 3, y, dlbar);
 	}
 // draw the input prompt, user text, and cursor if desired
 	Con_DrawInput ();

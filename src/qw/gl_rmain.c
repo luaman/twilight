@@ -45,10 +45,6 @@ static const char rcsid[] =
 #include "sys.h"
 
 
-entity_t    r_worldentity;
-
-qboolean    r_cache_thrash;				// compatability
-
 vec3_t      modelorg, r_entorigin;
 entity_t   *currententity;
 
@@ -91,8 +87,6 @@ cvar_t     *r_norefresh;
 cvar_t     *r_drawentities;
 cvar_t     *r_drawviewmodel;
 cvar_t     *r_speeds;
-cvar_t     *r_fullbright;
-cvar_t     *r_lightmap;
 cvar_t     *r_shadows;
 cvar_t     *r_wateralpha;
 cvar_t     *r_dynamic;
@@ -107,7 +101,6 @@ cvar_t     *gl_flashblend;
 cvar_t     *gl_playermip;
 cvar_t     *gl_nocolors;
 cvar_t     *gl_keeptjunctions;
-cvar_t     *gl_reporttjunctions;
 cvar_t     *gl_finish;
 cvar_t	   *gl_im_animation;
 cvar_t	   *gl_fb_models;
@@ -116,7 +109,6 @@ cvar_t	   *gl_oldlights;
 cvar_t	   *gl_colorlights;
 
 extern cvar_t *gl_ztrick;
-extern cvar_t *scr_fov;
 
 extern vec3_t lightcolor;
 qboolean colorlights = true;
@@ -204,7 +196,7 @@ R_GetSpriteFrame (entity_t *currententity)
 		numframes = pspritegroup->numframes;
 		fullinterval = pintervals[numframes - 1];
 
-		time = cl.time + currententity->syncbase;
+		time = cl.time;
 
 		// when loading in Mod_LoadSpriteGroup, we guaranteed all interval
 		// values are positive, so we don't have to worry about division by 0
@@ -769,7 +761,7 @@ R_DrawAliasModel (entity_t *e)
 	// get lighting information
 	// 
 
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || !gl_fb_models->value)
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb_models->value)
 	{
 		ambientlight = shadelight = R_LightPoint (currententity->origin);
 
@@ -832,7 +824,7 @@ R_DrawAliasModel (entity_t *e)
 		}
 	}
 	
-	if ((clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value) {
+	if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb_models->value) {
 		if (!colorlights)
 			ambientlight = shadelight = 256;
 		else
@@ -1120,33 +1112,18 @@ R_SetFrustum (void)
 {
 	int         i;
 
-	// LordHavoc: note to all quake engine coders, this code was making the
-	// view frustum taller than it should have been (it assumed the view is
-	// square; it is not square), so I disabled it
-	/*
-	if (r_refdef.fov_x == 90) {
-		// front side is visible
-
-		VectorAdd (vpn, vright, frustum[0].normal);
-		VectorSubtract (vpn, vright, frustum[1].normal);
-
-		VectorAdd (vpn, vup, frustum[2].normal);
-		VectorSubtract (vpn, vup, frustum[3].normal);
-	} else {
-	*/
-		// rotate VPN right by FOV_X/2 degrees
-		RotatePointAroundVector (frustum[0].normal, vup, vpn,
-								 -(90 - r_refdef.fov_x / 2));
-		// rotate VPN left by FOV_X/2 degrees
-		RotatePointAroundVector (frustum[1].normal, vup, vpn,
-								 90 - r_refdef.fov_x / 2);
-		// rotate VPN up by FOV_X/2 degrees
-		RotatePointAroundVector (frustum[2].normal, vright, vpn,
-								 90 - r_refdef.fov_y / 2);
-		// rotate VPN down by FOV_X/2 degrees
-		RotatePointAroundVector (frustum[3].normal, vright, vpn,
-								 -(90 - r_refdef.fov_y / 2));
-	//}
+	// rotate VPN right by FOV_X/2 degrees
+	RotatePointAroundVector (frustum[0].normal, vup, vpn,
+							 -(90 - r_refdef.fov_x / 2));
+	// rotate VPN left by FOV_X/2 degrees
+	RotatePointAroundVector (frustum[1].normal, vup, vpn,
+							 90 - r_refdef.fov_x / 2);
+	// rotate VPN up by FOV_X/2 degrees
+	RotatePointAroundVector (frustum[2].normal, vright, vpn,
+							 90 - r_refdef.fov_y / 2);
+	// rotate VPN down by FOV_X/2 degrees
+	RotatePointAroundVector (frustum[3].normal, vright, vpn,
+							 -(90 - r_refdef.fov_y / 2));
 
 	for (i = 0; i < 4; i++) {
 		frustum[i].type = PLANE_ANYZ;
@@ -1166,11 +1143,6 @@ void
 R_SetupFrame (void)
 {
 // don't allow cheats in multiplayer
-	if (r_fullbright->value || r_lightmap->value)
-	{
-		Cvar_Set (r_fullbright, "0");
-		Cvar_Set (r_lightmap, "0");
-	}
 	if (!Q_atoi (Info_ValueForKey (cl.serverinfo, "watervis")))
 		if (r_wateralpha->value != 1)
 			Cvar_Set (r_wateralpha, "1");
@@ -1190,8 +1162,6 @@ R_SetupFrame (void)
 
 	V_SetContentsColor (r_viewleaf->contents);
 	V_CalcBlend ();
-
-	r_cache_thrash = false;
 
 	c_brush_polys = 0;
 	c_alias_polys = 0;
@@ -1223,7 +1193,6 @@ void
 R_SetupGL (void)
 {
 	float       screenaspect;
-	extern int  glwidth, glheight;
 	int         x, x2, y2, y, w, h;
 
 	// 
@@ -1231,20 +1200,20 @@ R_SetupGL (void)
 	// 
 	qglMatrixMode (GL_PROJECTION);
 	qglLoadIdentity ();
-	x = r_refdef.vrect.x * glwidth / vid.width;
-	x2 = (r_refdef.vrect.x + r_refdef.vrect.width) * glwidth / vid.width;
-	y = (vid.height - r_refdef.vrect.y) * glheight / vid.height;
+	x = r_refdef.vrect.x * vid.width / vid.width;
+	x2 = (r_refdef.vrect.x + r_refdef.vrect.width) * vid.width / vid.width;
+	y = (vid.height - r_refdef.vrect.y) * vid.height / vid.height;
 	y2 = (vid.height -
-		  (r_refdef.vrect.y + r_refdef.vrect.height)) * glheight / vid.height;
+		  (r_refdef.vrect.y + r_refdef.vrect.height)) * vid.height / vid.height;
 
 	// fudge around because of frac screen scale
 	if (x > 0)
 		x--;
-	if (x2 < glwidth)
+	if (x2 < vid.width)
 		x2++;
 	if (y2 < 0)
 		y2--;
-	if (y < glheight)
+	if (y < vid.height)
 		y++;
 
 	w = x2 - x;
@@ -1366,7 +1335,7 @@ R_RenderView (void)
 	if (r_norefresh->value)
 		return;
 
-	if (!r_worldentity.model || !cl.worldmodel)
+	if (!cl.worldmodel)
 		Sys_Error ("R_RenderView: NULL worldmodel");
 
 	if (r_speeds->value) {
