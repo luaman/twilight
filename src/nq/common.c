@@ -1152,10 +1152,9 @@ COM_LoadFile (char *path, int usehunk)
 		Sys_Error ("COM_LoadFile: not enough space for %s", path);
 
 	((Uint8 *) buf)[len] = 0;
-	Draw_BeginDisc ();
+	Draw_Disc ();
 	fread (buf, 1, len, h);
 	fclose (h);
-	Draw_EndDisc ();
 
 	return buf;
 }
