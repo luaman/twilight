@@ -111,8 +111,6 @@ W_LoadWadFile (char *filename)
 		lump_p->filepos = LittleLong (lump_p->filepos);
 		lump_p->size = LittleLong (lump_p->size);
 		W_CleanupName (lump_p->name, lump_p->name);
-		if (lump_p->type == TYP_QPIC)
-			SwapPic ((qpic_t *) (wad_base + lump_p->filepos));
 	}
 }
 

@@ -150,6 +150,7 @@ Draw_PicFromWad (char *name)
 	if (!p)
 		Sys_Error ("Draw_PicFromWad: cannot find a lump named %s\n", name);
 
+	SwapPic (p);
 	gl = (glpic_t *) p->data;
 
 	gl->texnum = GL_LoadPicTexture (p);
