@@ -42,7 +42,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 
-#define	DYNAMIC_SIZE	0x20000
+#define	DYNAMIC_SIZE	0x40000
 
 #define	ZONEID	0x1d4a11
 #define MINFRAGMENT	64
