@@ -7,7 +7,7 @@ AC_INIT(src/nq/sv_main.c)
 AC_CONFIG_AUX_DIR(src/tools)
 AC_REVISION($Revision$)
 
-VERSION=0.2.02
+VERSION=0.2.02.cvs
 DEVEL_RELEASE=yes
 
 if test "x$DEVEL_RELEASE" = "xyes"; then

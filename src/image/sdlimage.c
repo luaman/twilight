@@ -138,9 +138,9 @@ Image_FromSDL (fs_file_t *file, SDL_RWops *rw)
 				image->width = rgb_surf->w;
 				image->height = rgb_surf->h;
 				image->type = IMG_RGBA;
-				image->pixels = Zone_Alloc(img_zone, image->width * image->height * 4);
+				image->pixels = Zone_Alloc(img_zone, image->width * image->height * sizeof (Uint32));
 
-				memcpy (image->pixels, rgb_surf->pixels, rgb_surf->w * rgb_surf->h * sizeof (Uint32));
+				memcpy (image->pixels, rgb_surf->pixels, image->width * image->height * sizeof (Uint32));
 				SDL_FreeSurface (rgb_surf);
 				SDL_FreeSurface (surf);
 				return image;
