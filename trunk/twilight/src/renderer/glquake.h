@@ -110,7 +110,7 @@ extern struct cvar_s *r_wateralpha;
 extern struct cvar_s *r_dynamic;
 extern struct cvar_s *r_novis;
 extern struct cvar_s *r_netgraph;
-extern struct cvar_s *r_skybox;
+extern struct cvar_s *r_skyname;
 extern struct cvar_s *r_fastsky;
 extern struct cvar_s *r_lightlerp;
 extern struct cvar_s *r_showtris;

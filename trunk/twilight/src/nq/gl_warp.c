@@ -66,7 +66,7 @@ extern cvar_t *gl_subdivide_size;
 
 #define	MAX_CLIP_VERTS	64
 
-cvar_t *r_skybox;
+cvar_t *r_skyname;
 cvar_t *r_fastsky;
 static qboolean draw_skybox = false;
 
@@ -462,7 +462,8 @@ R_LoadSkys (void)
 	Uint8  *image_buf = NULL;
 
 	for (i = 0; i < 6; i++) {
-		snprintf (name, sizeof (name), "gfx/env/%s%s.tga", r_skybox->string, suf[i]);
+		snprintf (name, sizeof (name), "gfx/env/%s%s.tga",
+				r_skyname->string, suf[i]);
 
 		TGA_Load (name, &image_buf, &w, &h);
 
@@ -470,7 +471,8 @@ R_LoadSkys (void)
 			((w != 256) || (h != 256))) {
 
 			name[0] = 0;
-			snprintf (name, sizeof (name), "gfx/env/%s%s.pcx", r_skybox->string, suf[i]);
+			snprintf (name, sizeof (name), "gfx/env/%s%s.pcx",
+					r_skyname->string, suf[i]);
 
 			PCX_Load (name, &image_buf, &w, &h);
 

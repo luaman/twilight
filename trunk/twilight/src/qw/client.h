@@ -463,6 +463,7 @@ qboolean CL_IsUploading (void);
 void CL_NextUpload (void);
 void CL_StartUpload (Uint8 *data, int size);
 void CL_StopUpload (void);
+void CL_ParseEntityLump (char *entdata);
 
 /*
  * view.c
