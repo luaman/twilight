@@ -1214,7 +1214,6 @@ M_Gfx_Draw (void)
 	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->ivalue); y += 8;
 	M_Print (16, y, "  Motion interpolation"); M_DrawCheckbox (220, y, gl_im_transform->ivalue); y += 8;
 	M_Print (16, y, "          Texture mode"); M_Print (220, y, gl_texturemode->svalue); y += 8;
-	M_Print (16, y, "         Light lerping"); M_DrawCheckbox (220, y, r_lightlerp->ivalue); y += 8;
 	M_Print (16, y, "      Particle torches"); M_DrawCheckbox (220, y, gl_particletorches->ivalue);
 
 	// cursor
@@ -1279,11 +1278,6 @@ M_Gfx_Set (void)
 			break;
 
 		case 8:
-			v = !r_lightlerp->ivalue;
-			Cvar_Set (r_lightlerp, va("%i", v));
-			break;
-
-		case 9:
 			v = !gl_particletorches->ivalue;
 			Cvar_Set (gl_particletorches, va("%i", v));
 			break;
