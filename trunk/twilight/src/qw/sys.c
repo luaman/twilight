@@ -10,13 +10,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -33,7 +33,7 @@ static const char rcsid[] =
 # endif
 #endif
 
-	
+
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -261,21 +261,21 @@ Sys_ExpandPath (char *str)
 		{
 			/* Current user's home directory */
 			if ((p = getenv("TWILIGHT")))
-				strncpy(buf, p, MAX_PATH);
+				strlcpy(buf, p, MAX_PATH);
 			else if ((p = getenv("HOME")))
-				strncpy(buf, p, MAX_PATH);
+				strlcpy(buf, p, MAX_PATH);
 			else if ((p = getenv("WINDIR")))
-				strncpy(buf, p, MAX_PATH);
+				strlcpy(buf, p, MAX_PATH);
 			else
 				/* should never happen */
-				strncpy(buf, ".", MAX_PATH);
-			strncat (buf, s, MAX_PATH);
+				strlcpy(buf, ".", MAX_PATH);
+			strlcat (buf, s, MAX_PATH);
 		} else {
 			/* ~user expansion in win32 always fails */
 			strcpy(buf, "");
 		}
 	} else
-		strncpy (buf, str, MAX_PATH);
+		strlcpy (buf, str, MAX_PATH);
 
 	return buf;
 }
@@ -294,34 +294,34 @@ Sys_ExpandPath (char *str)
 		{
 			/* Current user's home directory */
 			if ((p = getenv("HOME")))
-				strncpy(buf, p, PATH_MAX);
+				strlcpy(buf, p, PATH_MAX);
 			else
-				strncpy(buf, ".", PATH_MAX);
-			strncat (buf, s, PATH_MAX);
+				strlcpy(buf, ".", PATH_MAX);
+			strlcat (buf, s, PATH_MAX);
 		} else {
 			/* Another user's home directory */
 			if ((p = strchr(s, '/')) != NULL)
 				*p = '\0';
 			if ((entry = getpwnam(s)) != NULL)
 			{
-				strncpy (buf, entry->pw_dir, PATH_MAX);
+				strlcpy (buf, entry->pw_dir, PATH_MAX);
 				if (p) {
 					*p = '/';
-					strncat (buf, p, PATH_MAX);
+					strlcat (buf, p, PATH_MAX);
 				}
 			} else
 				/* ~user expansion failed, no such user */
 				strcpy(buf, "");
 		}
 	} else
-		strncpy (buf, str, PATH_MAX);
+		strlcpy (buf, str, PATH_MAX);
 
 	return buf;
 }
 #endif
 
 #ifdef _WIN32
-int 
+int
 WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	int c = __argc;

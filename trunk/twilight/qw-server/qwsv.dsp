@@ -183,7 +183,7 @@ SOURCE=.\sv_user.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\sys_win.c
+SOURCE=.\sys.c
 # End Source File
 # Begin Source File
 

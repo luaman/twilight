@@ -10,13 +10,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -558,21 +558,21 @@ Sys_ExpandPath (char *str)
 		{
 			/* Current user's home directory */
 			if ((p = getenv("TWILIGHT")))
-				strncpy(buf, p, MAX_PATH);
+				strlcpy(buf, p, MAX_PATH);
 			else if ((p = getenv("HOME")))
-				strncpy(buf, p, MAX_PATH);
+				strlcpy(buf, p, MAX_PATH);
 			else if ((p = getenv("WINDIR")))
-				strncpy(buf, p, MAX_PATH);
+				strlcpy(buf, p, MAX_PATH);
 			else
 				/* should never happen */
-				strncpy(buf, ".", MAX_PATH);
-			strncat (buf, s, MAX_PATH);
+				strlcpy(buf, ".", MAX_PATH);
+			strlcat (buf, s, MAX_PATH);
 		} else {
 			/* ~user expansion in win32 always fails */
 			strcpy(buf, "");
 		}
 	} else
-		strncpy (buf, str, MAX_PATH);
+		strlcpy (buf, str, MAX_PATH);
 
 	return buf;
 }
