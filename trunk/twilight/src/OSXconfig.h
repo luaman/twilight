@@ -1,7 +1,7 @@
 /*
 	$Id$
 
-	System configuration for Win32 without autoconf
+	System configuration for MacOS X without autoconf
 */
 
 #define VERSION "0.2.02.cvs"
