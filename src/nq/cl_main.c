@@ -34,6 +34,7 @@ static const char rcsid[] =
 #include "client.h"
 #include "cmd.h"
 #include "cvar.h"
+#include "dlight.h"
 #include "model.h"
 #include "host.h"
 #include "input.h"
@@ -71,7 +72,6 @@ memzone_t		*cl_zone;
 entity_t	cl_entities[MAX_EDICTS];
 entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
 lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
-dlight_t	cl_dlights[MAX_DLIGHTS];
 
 void
 CL_ClearState (void)
@@ -92,7 +92,6 @@ CL_ClearState (void)
 
 // clear other arrays   
 	memset (cl_entities, 0, sizeof (cl_entities));
-	memset (cl_dlights, 0, sizeof (cl_dlights));
 	memset (cl_lightstyle, 0, sizeof (cl_lightstyle));
 	memset (cl_temp_entities, 0, sizeof (cl_temp_entities));
 	memset (cl_beams, 0, sizeof (cl_beams));
@@ -269,84 +268,6 @@ CL_PrintEntities_f (void)
 	}
 }
 
-dlight_t   *
-CL_AllocDlight (int key)
-{
-	int         i;
-	dlight_t   *dl;
-
-// first look for an exact key match
-	if (key) {
-		dl = cl_dlights;
-		for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
-			if (dl->key == key) {
-				memset (dl, 0, sizeof (*dl));
-				dl->key = key;
-				return dl;
-			}
-		}
-	}
-// then look for anything else
-	dl = cl_dlights;
-	for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
-		if (dl->die < ccl.time) {
-			memset (dl, 0, sizeof (*dl));
-			dl->key = key;
-			return dl;
-		}
-	}
-
-	dl = &cl_dlights[0];
-	memset (dl, 0, sizeof (*dl));
-	dl->key = key;
-	return dl;
-}
-
-static void
-CL_NewDlight (int key, vec3_t org, int effects)
-{
-	dlight_t   *dl = CL_AllocDlight (key);
-
-	dl->radius = 1.0f;
-	dl->die = ccl.time + 0.1f;
-	VectorCopy (org, dl->origin);
-
-	VectorClear (dl->color);
-
-	if (effects & EF_BRIGHTLIGHT)
-	{
-		dl->color[0] += 400.0f;
-		dl->color[1] += 400.0f;
-		dl->color[2] += 400.0f;
-	}
-	if (effects & EF_DIMLIGHT)
-	{
-		dl->color[0] += 200.0f;
-		dl->color[1] += 200.0f;
-		dl->color[2] += 200.0f;
-	}
-
-	if (effects & EF_RED)
-		dl->color[0] += 200.0f;
-	if (effects & EF_BLUE)
-		dl->color[2] += 200.0f;
-}
-
-void
-CL_DecayLights (void)
-{
-	int			i;
-	dlight_t	*dl;
-	float		time;
-
-	time = ccl.time - ccl.oldtime;
-
-	for (i = 0, dl = cl_dlights;i < MAX_DLIGHTS;i++, dl++)
-		if (dl->radius)
-			dl->radius = (ccl.time < dl->die) ?
-				max(0, dl->radius - time * dl->decay) : 0;
-}
-
 
 /*
 ===============
@@ -440,7 +361,7 @@ CL_RelinkEntities (void)
 						|| !gl_flashblend->ivalue) {
 					vec3_t fv, impact, impactnormal;
 
-					dl = CL_AllocDlight (i);
+					dl = CCL_AllocDlight (i);
 					VectorCopy (ent->common.origin, dl->origin);
 					AngleVectors (ent->common.angles, fv, NULL, NULL);
 					VectorMA (dl->origin, 18, fv, dl->origin);
@@ -462,7 +383,7 @@ CL_RelinkEntities (void)
 
 			// spawn light flashes, even ones coming from invisible objects
 			if (ent->effects & EF_LIGHTMASK) {
-				CL_NewDlight (i, ent->common.origin, ent->effects);
+				CCL_NewDlight (i, ent->common.origin, ent->effects);
 			}
 		}
 
@@ -477,7 +398,7 @@ CL_RelinkEntities (void)
 			}
 
 			if (flags & EF_ROCKET) {
-				dl = CL_AllocDlight (i);
+				dl = CCL_AllocDlight (i);
 				VectorCopy (ent->common.origin, dl->origin);
 				dl->radius = 200;
 				dl->die = ccl.time + 0.01;

@@ -32,6 +32,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "strlib.h"
 #include "client.h"
+#include "dlight.h"
 #include "model.h"
 #include "mathlib.h"
 #include "sound.h"
@@ -208,7 +209,7 @@ CL_ParseTEnt (void)
 			pos[2] = MSG_ReadCoord ();
 			R_NewExplosion (pos);
 
-			dl = CL_AllocDlight (0);
+			dl = CCL_AllocDlight (0);
 			VectorCopy (pos, dl->origin);
 			dl->radius = 350;
 			dl->die = ccl.time + 0.5;
@@ -267,7 +268,7 @@ CL_ParseTEnt (void)
 			pos[0] = MSG_ReadCoord ();
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
-			dl = CL_AllocDlight (0);
+			dl = CCL_AllocDlight (0);
 			VectorCopy (pos, dl->origin);
 			dl->radius = 1000;
 			dl->die = ccl.time + 99;
@@ -285,7 +286,7 @@ CL_ParseTEnt (void)
 			colorLength = MSG_ReadByte ();
 			R_Stain (pos, 96, 64, 64, 64, 128, 192, 192, 192, 192);
 			R_ParticleExplosion2 (pos, colorStart, colorLength);
-			dl = CL_AllocDlight (0);
+			dl = CCL_AllocDlight (0);
 			VectorCopy (pos, dl->origin);
 			dl->radius = 350;
 			dl->die = ccl.time + 0.5;

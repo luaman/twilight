@@ -32,6 +32,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cvar.h"
+#include "dlight.h"
 #include "host.h"
 #include "mathlib.h"
 #include "pmove.h"
@@ -50,103 +51,6 @@ entity_t	cl_network_entities[MAX_EDICTS];
 entity_t	cl_player_entities[MAX_CLIENTS];
 
 static int	entity_frame = 0;
-
-//============================================================
-
-dlight_t   *
-CL_AllocDlight (int key)
-{
-	int         i;
-	dlight_t   *dl;
-
-// first look for an exact key match
-	if (key) {
-		dl = cl_dlights;
-		for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
-			if (dl->key == key) {
-				memset (dl, 0, sizeof (*dl));
-				dl->key = key;
-				dl->color[0] = 0.2f; 
-				dl->color[1] = 0.1f; 
-				dl->color[2] = 0.0f;
-				return dl;
-			}
-		}
-	}
-
-// then look for anything else
-	dl = cl_dlights;
-	for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
-		if (dl->die < ccl.time) {
-			memset (dl, 0, sizeof (*dl));
-			dl->key = key;
-			dl->color[0] = 0.2f; 
-			dl->color[1] = 0.1f; 
-			dl->color[2] = 0.0f;
-			return dl;
-		}
-	}
-
-	dl = &cl_dlights[0];
-	memset (dl, 0, sizeof (*dl));
-	dl->key = key;
-	dl->color[0] = 0.2f; 
-	dl->color[1] = 0.1f; 
-	dl->color[2] = 0.0f;
-	return dl;
-}
-
-static void
-CL_NewDlight (int key, vec3_t org, int effects)
-{
-	dlight_t   *dl = CL_AllocDlight (key);
-
-	dl->radius = 1.0f;
-	dl->die = ccl.time + 0.1f;
-	VectorCopy (org, dl->origin);
-
-	VectorClear (dl->color);
-
-	if (effects & EF_BRIGHTLIGHT)
-	{
-		dl->color[0] += 400.0f;
-		dl->color[1] += 400.0f;
-		dl->color[2] += 400.0f;
-	}
-	if (effects & EF_DIMLIGHT)
-	{
-		dl->color[0] += 200.0f;
-		dl->color[1] += 200.0f;
-		dl->color[2] += 200.0f;
-	}
-
-	// QW uses DIMLIGHT _and_ RED/BLUE - looks bad. *sigh*
-	if (effects & (EF_RED|EF_BLUE))
-	{
-		VectorSet (dl->color, 20.0f, 20.0f, 20.0f);
-		if (effects & EF_RED)
-			dl->color[0] += 180.0f;
-		if (effects & EF_BLUE)
-			dl->color[2] += 180.0f;
-	}
-}
-
-
-void
-CL_DecayLights (void)
-{
-	int			i;
-	dlight_t	*dl;
-	float		time;
-
-	time = ccl.time - ccl.oldtime;
-
-	for (i = 0, dl = cl_dlights;i < MAX_DLIGHTS;i++, dl++)
-		if (dl->radius)
-			dl->radius = (ccl.time < dl->die) ?
-				max(0, dl->radius - time * dl->decay) : 0;
-}
-
 
 /*
 =========================================================================
@@ -571,7 +475,7 @@ CL_LinkPacketEntities (void)
 
 		if (state->effects & EF_LIGHTMASK) {
 			// spawn light flashes, even ones coming from invisible objects
-			CL_NewDlight (state->number, state->origin, state->effects);
+			CCL_NewDlight (state->number, state->origin, state->effects);
 		}
 
 		if (state->number >= MAX_EDICTS) {
@@ -626,7 +530,7 @@ CL_LinkPacketEntities (void)
 			continue;
 
 		if (flags & EF_ROCKET) {
-			dl = CL_AllocDlight (state->number);
+			dl = CCL_AllocDlight (state->number);
 			VectorCopy (ent->common.origin, dl->origin);
 			dl->radius = 200;
 			dl->die = ccl.time + 0.1;
@@ -931,7 +835,7 @@ CL_LinkPlayers (void)
 				VectorCopy (ccl.player_origin, org);
 			else
 				VectorCopy (state->origin, org);
-			CL_NewDlight (j, org, state->effects);
+			CCL_NewDlight (j, org, state->effects);
 		}
 
 		// the player object never gets added

@@ -32,6 +32,7 @@ static const char rcsid[] =
 #include "client.h"
 #include "cmd.h"
 #include "cvar.h"
+#include "dlight.h"
 #include "mathlib.h"
 #include "screen.h"
 #include "strlib.h"
@@ -670,7 +671,7 @@ V_RenderView (void)
 	else
 		V_CalcRefdef ();
 
-	R_BuildLightList ();
+	CCL_BuildLightList ();
 	R_RenderView ();
 }
 

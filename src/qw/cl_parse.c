@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "console.h"
 #include "collision.h"
 #include "cvar.h"
+#include "dlight.h"
 #include "host.h"
 #include "keys.h"
 #include "mathlib.h"
@@ -972,7 +973,7 @@ CL_MuzzleFlash (void)
 			ent = &cl.frames[cls.netchan.incoming_sequence&UPDATE_MASK].packet_entities.entities[j];
 			if (ent->number == i)
 			{
-				dl = CL_AllocDlight (-i);
+				dl = CCL_AllocDlight (-i);
 				AngleVectors (ent->angles, fv, NULL, NULL);
 				VectorMA (ent->origin, 18, fv, dl->origin);
 				TraceLine (ccl.worldmodel, ent->origin, dl->origin, dl->origin,
@@ -996,7 +997,7 @@ CL_MuzzleFlash (void)
 
 	pl = &cl.frames[parsecountmod].playerstate[i - 1];
 
-	dl = CL_AllocDlight (-i);
+	dl = CCL_AllocDlight (-i);
 	AngleVectors (pl->viewangles, fv, NULL, NULL);
 	VectorMA (pl->origin, 18, fv, dl->origin);
 	TraceLine (ccl.worldmodel, pl->origin, dl->origin, dl->origin, NULL);

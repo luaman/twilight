@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "cmd.h"
 #include "console.h"
 #include "cvar.h"
+#include "dlight.h"
 #include "gl_draw.h"
 #include "model.h"
 #include "host.h"
@@ -110,7 +111,6 @@ client_state_t cl;
 
 entity_state_t	cl_baselines[MAX_EDICTS];
 lightstyle_t	cl_lightstyle[MAX_LIGHTSTYLES];
-dlight_t		cl_dlights[MAX_DLIGHTS];
 
 double		connect_time = -1;			// for connection retransmits
 
@@ -358,7 +358,6 @@ CL_ClearState (void)
 	SZ_Clear (&cls.netchan.message);
 
 // clear other arrays   
-	memset (cl_dlights, 0, sizeof (cl_dlights));
 	memset (cl_lightstyle, 0, sizeof (cl_lightstyle));
 	memset (cl_baselines, 0, sizeof(cl_baselines));
 
@@ -1315,7 +1314,7 @@ Host_Frame (double time)
 	// update audio
 	if (ccls.state == ca_active) {
 		S_Update (r_origin, vpn, vright, vup);
-		CL_DecayLights ();
+		CCL_DecayLights ();
 	} else
 		S_Update (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
 

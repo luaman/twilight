@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "console.h"
 #include "client.h"
 #include "cvar.h"
+#include "dlight.h"
 #include "gl_draw.h"
 #include "model.h"
 #include "host.h"
@@ -668,7 +669,7 @@ _Host_Frame (double time)
 // update audio
 	if (ccls.state == ca_active) {
 		S_Update (r_origin, vpn, vright, vup);
-		CL_DecayLights ();
+		CCL_DecayLights ();
 	} else
 		S_Update (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
 
