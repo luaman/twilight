@@ -6,8 +6,10 @@ AUTOMAKE_OPTIONS=gnu dist-zip
 
 INCLUDES= \
 	-I$(top_srcdir)/include \
+	-I$(top_srcdir)/src/image \
 	-I$(top_srcdir)/src/renderer \
 	-I$(top_srcdir)/src/sound
+
 
 LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_nq_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_NQ
@@ -15,6 +17,7 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_NQ
 bin_PROGRAMS=twilight-nq
 twilight_nq_LDADD= \
 		   $(top_srcdir)/src/base/libtwilight_base.a \
+		   $(top_srcdir)/src/image/libtwilight_image.a \
 		   $(top_srcdir)/src/renderer/libtwilight_renderer.a \
 		   $(top_srcdir)/src/sound/libtwilight_sound.a
 
