@@ -22,7 +22,7 @@ endif
 
 twilight_qwsv_SOURCES= \
 	cmd.c cmd.h common.c console.h \
-	cvar.c mdfour.c net.h net_chan.c net_udp.c \
+	mdfour.c net.h net_chan.c net_udp.c \
 	pmove.c pmovetst.c \
 	pr_cmds.c pr_edict.c pr_exec.c progdefs.h progs.h \
 	protocol.h server.h sv_ccmds.c \

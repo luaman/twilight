@@ -30,7 +30,6 @@ twilight_nq_SOURCES= \
 	chase.c \
 	cl_demo.c cl_input.c cl_main.c cl_model.c cl_parse.c cl_tent.c \
 	client.h cmd.c cmd.h common.c console.c console.h \
-	cvar.c \
 	gl_draw.c \
 	gl_poly.c gl_poly.h \
 	gl_rlight.c gl_rmain.c gl_rmisc.c \
