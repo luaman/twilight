@@ -122,9 +122,9 @@ FSD_Open_New (fs_group_t *group, fs_new_t *new)
 
 	new->temp = zasprintf (fs_zone, "%s.tmp", new->wanted);
 	name = zasprintf (tempzone, "%s/%s", dir->path, new->temp);
-	new->rw = SDL_RWFromFile (name, (new->flags & FSF_ASCII) ? "r" : "rb");
+	new->rw = SDL_RWFromFile (name, (new->flags & FSF_ASCII) ? "w" : "wb");
 	if (!new->rw) {
-		Com_Printf ("FSD_Open_New: Unable to open %s. (%s)\n", name, strerror(errno));
+		Com_Printf ("FSD_Open_New: Unable to open %s. (%s) (%s)\n", name, strerror(errno), SDL_GetError());
 		Zone_Free (new->temp);
 		Zone_Free (name);
 		return false;

@@ -215,7 +215,7 @@ loc_write (const char *worldname)
 
 	name = loc_locfile (worldname);
 	if ((file = FS_FindFile (name)))
-		rw = file->open(file, FSF_WRITE);
+		rw = file->open(file, FSF_WRITE | FSF_ASCII);
 
 	if (!rw)
 		rw = FS_Open_New (name, FSF_ASCII);
