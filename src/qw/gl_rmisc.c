@@ -217,7 +217,10 @@ R_TranslatePlayerSkin (int playernum)
 	unsigned	translate32[256];
 	int		i, j;
 	Uint8		*original;
-	unsigned	pixels[512*256], *out;
+#define PIXELS_BUFFER_SIZE	512*256*sizeof(unsigned)
+	unsigned	*pixels;
+//	static unsigned	pixels[512*256];
+	unsigned	*out;
 	unsigned	scaled_width, scaled_height;
 	int		inwidth, inheight;
 	int		tinwidth, tinheight;
@@ -230,7 +233,9 @@ R_TranslatePlayerSkin (int playernum)
 	player = &cl.players[playernum];
 	if (!player->name[0])
 		return;
-
+	
+	pixels = malloc(PIXELS_BUFFER_SIZE);
+	
 	strcpy(s, Info_ValueForKey(player->userinfo, "skin"));
 	COM_StripExtension(s, s);
 	if (player->skin && !strcasecmp(s, player->skin->name))
@@ -315,7 +320,7 @@ R_TranslatePlayerSkin (int playernum)
 			translate32[i] = d_8to32table[translate[i]];
 
 		out = pixels;
-		memset(pixels, 0, sizeof(pixels));
+		memset(pixels, 0, PIXELS_BUFFER_SIZE);
 		fracstep = tinwidth*0x10000/scaled_width;
 		for (i=0 ; i<scaled_height ; i++, out += scaled_width)
 		{
@@ -348,7 +353,7 @@ R_TranslatePlayerSkin (int playernum)
 			qglBindTexture (GL_TEXTURE_2D, fb_skins[playernum]);
 
 			out = pixels;
-			memset(pixels, 0, sizeof(pixels));
+			memset(pixels, 0, PIXELS_BUFFER_SIZE);
 			fracstep = tinwidth*0x10000/scaled_width;
 			for (i=0 ; i<scaled_height ; i++, out += scaled_width)
 			{
@@ -379,6 +384,8 @@ R_TranslatePlayerSkin (int playernum)
 		}
 
 	}
+	
+	free(pixels);
 }
 
 /*
