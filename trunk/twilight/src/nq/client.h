@@ -220,6 +220,8 @@ typedef struct {
 
 // frag scoreboard
 	scoreboard_t *scores;				// [cl.maxclients]
+
+	qboolean	teamfortress;
 } client_state_t;
 
 

@@ -300,6 +300,8 @@ typedef struct {
 
 // all player information
 	player_info_t players[MAX_CLIENTS];
+
+	qboolean	teamfortress;
 } client_state_t;
 
 
