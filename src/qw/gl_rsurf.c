@@ -951,7 +951,7 @@ R_DrawWaterTextureChains (void)
 		t->texturechain = NULL;
 	}
 	if (wateralpha != 1.0f)
-		qglColor3f (1.0f, 1.0f, 1.0f);
+		qglColor4fv (whitev);
 }
 
 /*

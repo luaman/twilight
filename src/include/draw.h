@@ -23,8 +23,6 @@
 
 	$Id$
 */
-// draw.h -- these are the only functions outside the refresh allowed
-// to touch the vid buffer
 
 #ifndef __DRAW_H
 #define __DRAW_H
@@ -33,31 +31,31 @@
 
 extern struct qpic_s *draw_disc;				// also used on sbar
 
-void        Draw_Init_Cvars (void);
-void        Draw_Init (void);
-void        Draw_Character (float x, float y, int num, float text_size);
-void        Draw_SubPic (int x, int y, struct qpic_s *pic,
-				int srcx, int srcy, int width, int height);
-void        Draw_Pic (int x, int y, struct qpic_s *pic);
-void        Draw_TransPicTranslate (int x, int y, struct qpic_s *pic,
-									Uint8 *translation);
-void        Draw_ConsoleBackground (int lines);
-void        Draw_Disc (void);
-void        Draw_TileClear (int x, int y, int w, int h);
-void        Draw_Fill (int x, int y, int w, int h, vec3_t color);
-void        Draw_FadeScreen (void);
-void        Draw_String (float x, float y, char *str, float text_size);
-void        Draw_String_Len (float x, float y, char *str, int len, float text_size);
-void        Draw_Alt_String (float x, float y, char *str, float text_size);
-void        Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size);
-struct qpic_s     *Draw_PicFromWad (char *name);
-struct qpic_s     *Draw_CachePic (char *path);
-void        Draw_Crosshair (void);
+void Draw_Init_Cvars (void);
+void Draw_Init (void);
+void Draw_Character (float x, float y, int num, float text_size);
+void Draw_SubPic (int x, int y, struct qpic_s *pic,
+		int srcx, int srcy, int width, int height);
+void Draw_Pic (int x, int y, struct qpic_s *pic);
+void Draw_TransPicTranslate (int x, int y, struct qpic_s *pic,
+		Uint8 *translation);
+void Draw_ConsoleBackground (int lines);
+void Draw_Disc (void);
+void Draw_TileClear (int x, int y, int w, int h);
+void Draw_Fill (int x, int y, int w, int h, vec4_t color);
+void Draw_FadeScreen (void);
+void Draw_String (float x, float y, char *str, float text_size);
+void Draw_String_Len (float x, float y, char *str, int len, float text_size);
+void Draw_Alt_String (float x, float y, char *str, float text_size);
+void Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size);
+struct qpic_s *Draw_PicFromWad (char *name);
+struct qpic_s *Draw_CachePic (char *path);
+void Draw_Crosshair (void);
 
-int         GL_LoadTexture (const char *identifier, int width, int height,
-				Uint8 *data, int flags, int bpp);
-int         GL_LoadPicTexture (struct qpic_s *pic);
-void        GL_Set2D (void);
+int GL_LoadTexture (const char *identifier, int width, int height,
+		Uint8 *data, int flags, int bpp);
+int GL_LoadPicTexture (struct qpic_s *pic);
+void GL_Set2D (void);
 
 int R_LoadTexture (const char *identifier, image_t *img, int flags);
 

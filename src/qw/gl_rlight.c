@@ -260,7 +260,7 @@ R_RenderDlights (void)
 		i_index = 0;
 	}
 
-	qglColor3f (1, 1, 1);
+	qglColor4fv (whitev);
 	qglEnable (GL_TEXTURE_2D);
 	qglDisableClientState (GL_COLOR_ARRAY);
 }

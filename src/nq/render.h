@@ -38,8 +38,8 @@
 //=============================================================================
 
 typedef struct colormap_s {
-	vec3_t		top;
-	vec3_t		bottom;
+	vec4_t		top;
+	vec4_t		bottom;
 } colormap_t;
 
 typedef struct entity_s {

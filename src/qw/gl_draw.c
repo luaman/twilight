@@ -552,9 +552,9 @@ Draw_Crosshair (void)
 	// Color selection madness
 	color = crosshaircolor->ivalue % 256;
 	if (color == 255 && cl.colormap)
-		VectorScale(cl.colormap->bottom, 0.5, base);
+		VectorScale (cl.colormap->bottom, 0.5, base);
 	else
-		VectorCopy (d_8tofloattable[color], base);
+		VectorCopy4 (d_8tofloattable[color], base);
 
 	ofs = Q_sin (cl.time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
 	ofs = boundsign (ofs, hud_chflash->fvalue);
@@ -576,7 +576,7 @@ Draw_Crosshair (void)
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
-	qglColor3f (1, 1, 1);
+	qglColor4fv (whitev);
 	qglDisable (GL_BLEND);
 }
 
@@ -733,7 +733,7 @@ Draw_ConsoleBackground (int lines)
 		qglColor4f (1.0f, 1.0f, 1.0f, alpha);
 		qglEnable (GL_BLEND);
 	} else
-		qglColor3f (1.0f, 1.0f, 1.0f);
+		qglColor4fv (whitev);
 
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
 	VectorSet2 (tc_array_v(0), gl->sl, gl->tl + ofs);
@@ -758,7 +758,7 @@ Draw_ConsoleBackground (int lines)
 	if (alpha != 1.0f)
 		qglDisable (GL_BLEND);
 
-	qglColor3f (1.0f, 1.0f, 1.0f);
+	qglColor4fv (whitev);
 }
 
 
@@ -796,11 +796,11 @@ Fills a box of pixels with a single color
 =============
 */
 void
-Draw_Fill (int x, int y, int w, int h, vec3_t color)
+Draw_Fill (int x, int y, int w, int h, vec4_t color)
 {
 	qglDisable (GL_TEXTURE_2D);
 
-	qglColor3fv (color);
+	qglColor4fv (color);
 
 	VectorSet2 (v_array_v(0), x, y);
 	VectorSet2 (v_array_v(1), x + w, y);
@@ -810,7 +810,7 @@ Draw_Fill (int x, int y, int w, int h, vec3_t color)
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
 
-	qglColor3f (1, 1, 1);
+	qglColor4fv (whitev);
 	qglEnable (GL_TEXTURE_2D);
 }
 
@@ -837,7 +837,7 @@ Draw_FadeScreen (void)
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
 
-	qglColor3f (1, 1, 1);
+	qglColor4fv (whitev);
 	qglEnable (GL_TEXTURE_2D);
 	qglDisable (GL_BLEND);
 }

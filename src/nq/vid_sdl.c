@@ -46,6 +46,8 @@ static const char rcsid[] =
 Uint32 d_8to32table[256];
 float d_8tofloattable[256][4];
 
+GLfloat whitev[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
 cvar_t *width_2d;
 cvar_t *height_2d;
 cvar_t *text_scale;

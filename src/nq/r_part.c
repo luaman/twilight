@@ -1458,6 +1458,6 @@ R_DrawParticles (void)
 		qglEnable (GL_CULL_FACE);
 
 	qglDisableClientState (GL_COLOR_ARRAY);
-	qglColor3f(1, 1, 1);
+	qglColor4fv (whitev);
 }
 

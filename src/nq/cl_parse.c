@@ -586,13 +586,13 @@ CL_NewTranslation (int slot)
 	color = bound(0, color, 13) * 16;
 	if (color < 128)
 		color += 15;
-	VectorCopy(d_8tofloattable[color], cl.scores[slot].colormap.top);
+	VectorCopy4 (d_8tofloattable[color], cl.scores[slot].colormap.top);
 
 	color = (cl.scores[slot].colors & 15) << 4;
 	color = bound(0, color, 13) * 16;
 	if (color < 128)
 		color += 15;
-	VectorCopy(d_8tofloattable[color], cl.scores[slot].colormap.bottom);
+	VectorCopy4 (d_8tofloattable[color], cl.scores[slot].colormap.bottom);
 }
 
 /*

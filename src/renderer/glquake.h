@@ -37,6 +37,10 @@
 
 #include "transform.h"
 
+// for glColor4fv
+extern GLfloat whitev[4];
+
+
 qboolean GLF_Init (void);
 void GL_EndRendering (void);
 

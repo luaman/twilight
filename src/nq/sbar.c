@@ -687,7 +687,7 @@ Sbar_DrawFrags (void)
 	Uint32			i, l, x, y, f, xofs;
 	char			num[12];
 	scoreboard_t	*s;
-	vec3_t			color;
+	vec4_t			color;
 
 	Sbar_SortFrags ();
 
@@ -702,6 +702,7 @@ Sbar_DrawFrags (void)
 
 	y = vid.height_2d - SBAR_HEIGHT - 23;
 
+	color[3] = 1.0f;
 	for (i = 0; i < l; i++) {
 		k = fragsort[i];
 		s = &cl.scores[k];
@@ -709,9 +710,9 @@ Sbar_DrawFrags (void)
 			continue;
 
 		// draw background
-		VectorScale(s->colormap.top, 0.5, color);
+		VectorScale (s->colormap.top, 0.5, color);
 		Draw_Fill (xofs + x * 8 + 10, y, 28, 4, color);
-		VectorScale(s->colormap.bottom, 0.5, color);
+		VectorScale (s->colormap.bottom, 0.5, color);
 		Draw_Fill (xofs + x * 8 + 10, y + 4, 28, 3, color);
 
 		// draw number
@@ -751,7 +752,7 @@ Sbar_DrawFace (void)
 		int         xofs;
 		char        num[12];
 		scoreboard_t *s;
-		vec3_t		color;
+		vec4_t		color;
 
 		s = &cl.scores[cl.viewentity - 1];
 		// draw background
@@ -760,6 +761,7 @@ Sbar_DrawFace (void)
 		else
 			xofs = ((vid.width_2d - 320) >> 1) + 113;
 
+		color[3] = 1.0f;
 		Sbar_DrawPic (112, 0, rsb_teambord);
 		VectorScale (s->colormap.top, 0.5, color);
 		Draw_Fill (xofs, vid.height_2d - SBAR_HEIGHT + 3, 22, 9, color);
@@ -964,7 +966,7 @@ Sbar_DeathmatchOverlay (void)
 	int         i, k, l;
 	int         x, y, f;
 	char        num[12];
-	vec3_t		color;
+	vec4_t		color;
 	scoreboard_t *s;
 
 	pic = Draw_CachePic ("gfx/ranking.lmp");
@@ -978,6 +980,8 @@ Sbar_DeathmatchOverlay (void)
 
 	x = 80 + ((vid.width_2d - 320) >> 1);
 	y = 40;
+	
+	color[3] = 1.0f;
 	for (i = 0; i < l; i++) {
 		k = fragsort[i];
 		s = &cl.scores[k];
@@ -1021,7 +1025,7 @@ Sbar_MiniDeathmatchOverlay (void)
 	Uint32			i, l, x, y, f, numlines;
 	char			num[12];
 	scoreboard_t	*s;
-	vec3_t			color;
+	vec4_t			color;
 
 	if (vid.width_2d < 512 || !sb_lines)
 		return;
@@ -1052,6 +1056,8 @@ Sbar_MiniDeathmatchOverlay (void)
 		i = 0;
 
 	x = 324;
+
+	color[3] = 1.0f;
 	for (; i < scoreboardlines && y < vid.height_2d - 8; i++) {
 		k = fragsort[i];
 		s = &cl.scores[k];
