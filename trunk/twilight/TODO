@@ -38,6 +38,7 @@ Would be nice but is not strictly needed:
   - Add back mirrors at some point
   - Rewrite the sound code so that it is possible to spit out a timed
     sound file which matches frame outputs (for recording videos)
+  - JPEG screenshots
   - Add {gl,cl}_weirdshit.c to support Nehahra.  ;)
   - gl_colorlights can/should be made to work without +set
 

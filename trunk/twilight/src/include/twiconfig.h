@@ -49,13 +49,5 @@
 # define mkdir(s) _mkdir((s))
 #endif
 
-
-/*
- * Don't we love compiler disparity?
- */
-#ifdef HAVE___INLINE
-# define inline __inline
-#endif
-
 #endif // __TWICONFIG_H
 
