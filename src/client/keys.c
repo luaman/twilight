@@ -801,8 +801,10 @@ Key_Event (int key, qboolean down)
 	// update auto-repeat status
 	if (down) {
 		key_repeats[key]++;
-		if (key != K_BACKSPACE && key_repeats[key] > 1) {
-			return;						// ignore most autorepeats
+		if (key_repeats[key] > 1) {
+			if ((key_dest == key_console && !consolekeys[key]) ||
+					(key_dest == key_game && (ccls.state == ca_active)))
+				return;						// ignore most autorepeats
 		}
 	}
 
