@@ -671,7 +671,7 @@ Host_Say (qboolean teamonly)
 	client_t	*client;
 	client_t	*save;
 	Uint32		j;
-	char		*p;
+	char		*p, *p_r;
 	char		text[64];
 	qboolean    fromServer = false;
 
@@ -690,7 +690,7 @@ Host_Say (qboolean teamonly)
 
 	save = host_client;
 
-	p = Zstrdup(tempzone, Cmd_Args ());
+	p = p_r = Zstrdup(tempzone, Cmd_Args ());
 // remove quotes if present
 	if (*p == '"') {
 		p++;
@@ -710,7 +710,7 @@ Host_Say (qboolean teamonly)
 	strlcat_s (text, p);
 	strlcat_s (text, "\n");
 
-	Z_Free(p);
+	Z_Free(p_r);
 
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
 		if (!client || !client->active || !client->spawned)
