@@ -57,14 +57,14 @@ static const char *gl_renderer;
 static const char *gl_version;
 static const char *gl_extensions;
 
-qboolean gl_cva = false;
-qboolean gl_mtex = false;
-qboolean gl_mtexcombine = false;
-qboolean gl_secondary_color = false;
-qboolean gl_nv_register_combiners = false;
-qboolean gl_sgis_mipmap = false;
-qboolean gl_vbo = false;
-qboolean gl_ext_anisotropy = false;
+int gl_cva = 0;
+int gl_mtex = 0;
+int gl_mtexcombine = 0;
+int gl_secondary_color = 0;
+int gl_nv_register_combiners = 0;
+int gl_sgis_mipmap = 0;
+int gl_vbo = 0;
+int gl_ext_anisotropy = 0;
 int gl_tmus = 1;
 
 Uint32 gl_allow;
@@ -78,6 +78,18 @@ Uint32 gl_allow;
 static void
 GLInfo_CheckDriverQuirks (void)
 {
+	if (!strcmp (gl_vendor, "NVIDIA Corporation"))	// nVidia drivers.
+	{
+		char	*num;
+		float	ver;
+		if ((num = strrchr (gl_version, ' '))) {
+			ver = atof(num);
+			if (ver < 44.96) {
+				Com_Printf ("Not using GL_ARB_vertex_buffer_object by default due to driver issues. (Use -vbo to enable.)\n");
+				gl_vbo = -2;
+			}
+		}
+	}
 	/*
 	if (strstr (gl_vendor, "NVIDIA")) {		// nVidia drivers.
 		DynGL_BadExtension ("GL_EXT_compiled_vertex_array");
@@ -108,77 +120,67 @@ GLInfo_CheckDriverQuirks (void)
 	Check for the OpenGL extensions we use
 */
 
+#define CHECK_EXT(name,var)		{ \
+	Com_Printf ("Checking for " name ": ");				\
+	switch (var) {										\
+		case -1:										\
+			Com_Printf("Disabled. (Argument)\n");		\
+			var = 0;									\
+			break;										\
+		case -2:										\
+			Com_Printf("Disabled. (Drive Quirk)\n");	\
+			var = 0;									\
+			break;										\
+		default:										\
+			var = DynGL_HasExtension (name);			\
+			if (var)									\
+				Com_Printf ("Yes.\n");					\
+			else										\
+				Com_Printf ("No.\n");					\
+			break;										\
+	}													\
+}
+
 static void
 GLInfo_CheckExtensions (void)
 {
-	qboolean	gl_mtexcombine_arb = 0, gl_mtexcombine_ext = 0;
+	int	gl_mtexcombine_arb = 0, gl_mtexcombine_ext = 0;
 
-	if (!COM_CheckParm ("-nomtex"))
-		gl_mtex = DynGL_HasExtension ("GL_ARB_multitexture");
+	if (COM_CheckParm ("-nomtex"))
+		gl_mtex = -1;
+	if (COM_CheckParm ("-nocva"))
+		gl_cva = -1;
+	if (COM_CheckParm ("-nocombiners"))
+		gl_nv_register_combiners = -1;
+	if (COM_CheckParm ("-noautomip"))
+		gl_sgis_mipmap = -1;
+	if (COM_CheckParm ("-novbo"))
+		gl_vbo = -1;
+	else if (COM_CheckParm ("-vbo"))
+		gl_vbo = 0;
+	if (COM_CheckParm ("-noanisotropy"))
+		gl_ext_anisotropy = -1;
+	if (COM_CheckParm ("-nomtexcombine"))
+		gl_mtexcombine_arb = gl_mtexcombine_ext = -1;
 
-	Com_Printf ("Checking for multitexture: ");
-	if (gl_mtex)
-	{
+	CHECK_EXT("GL_ARB_multitexture", gl_mtex);
+	if (gl_mtex) {
 		qglGetIntegerv (GL_MAX_TEXTURE_UNITS_ARB, &gl_tmus);
-		Com_Printf ("GL_ARB_multitexture. (%d TMUs)\n", gl_tmus);
+		Com_Printf ("(%d TMUs)\n", gl_tmus);
+		CHECK_EXT("GL_ARB_texture_env_combine", gl_mtexcombine_arb);
+		CHECK_EXT("GL_EXT_texture_env_combine", gl_mtexcombine_ext);
+		gl_mtexcombine = gl_mtexcombine_arb || gl_mtexcombine_ext;
 	}
-	else
-		Com_Printf ("no.\n");
 
-	if (gl_mtex && !COM_CheckParm ("-nomtexcombine"))
-	{
-		gl_mtexcombine_arb = DynGL_HasExtension ("GL_ARB_texture_env_combine");
-		gl_mtexcombine_ext = DynGL_HasExtension ("GL_EXT_texture_env_combine");
-	}
-	Com_Printf ("Checking for texenv combine: ");
-	if (gl_mtex && gl_mtexcombine_arb)
-	{
-		Com_Printf ("GL_ARB_texture_env_combine.\n");
-		gl_mtexcombine = true;
-	}
-	else if (gl_mtex && gl_mtexcombine_ext)
-	{
-		Com_Printf ("GL_EXT_texture_env_combine.\n");
-		gl_mtexcombine = true;
-	}
-	else
-		Com_Printf ("No.\n");
-
-	if (!COM_CheckParm ("-nocva"))
-		gl_cva = DynGL_HasExtension ("GL_EXT_compiled_vertex_array");
-
-	Com_Printf ("Checking for GL_EXT_compiled_vertex_array: %s.\n",
-			gl_cva ? "Yes" : "No");
-
-	gl_secondary_color = DynGL_HasExtension ("GL_EXT_secondary_color");
-	Com_Printf ("Checking for GL_EXT_secondary_color: %s.\n",
-			gl_secondary_color ? "Yes" : "No");
-
-	if (!COM_CheckParm ("-nocombiners"))
-		gl_nv_register_combiners=DynGL_HasExtension("GL_NV_register_combiners");
-	Com_Printf ("Checking for GL_NV_register_combiners: %s.\n",
-			gl_nv_register_combiners ? "Yes" : "No");
-
-	if (!COM_CheckParm ("-noautomip"))
-		gl_sgis_mipmap = DynGL_HasExtension ("GL_SGIS_generate_mipmap");
-
-	Com_Printf ("Checking for GL_SGIS_generate_mipmap: %s.\n",
-			gl_sgis_mipmap ? "Yes" : "No");
-
-
-	if (COM_CheckParm ("-vbo"))
-		gl_vbo = DynGL_HasExtension ("GL_ARB_vertex_buffer_object");
-
-	Com_Printf ("Checking for GL_ARB_vertex_buffer_object: %s.\n",
-			gl_vbo ? "Yes" : "No");
-
-
-	if (!COM_CheckParm ("-noanisotropy"))
-		gl_ext_anisotropy = DynGL_HasExtension ("GL_EXT_texture_filter_anisotropic");
-
-	Com_Printf ("Checking for GL_EXT_texture_filter_anisotropic: %s.\n",
-			gl_ext_anisotropy ? "Yes" : "No");
+	CHECK_EXT("GL_EXT_compiled_vertex_array", gl_cva);
+//	CHECK_EXT("GL_EXT_secondary_color", gl_secondary_color);
+	CHECK_EXT("GL_NV_register_combiners", gl_nv_register_combiners);
+	CHECK_EXT("GL_SGIS_generate_mipmap", gl_sgis_mipmap);
+	CHECK_EXT("GL_ARB_vertex_buffer_object", gl_vbo);
+	CHECK_EXT("GL_EXT_texture_filter_anisotropic", gl_ext_anisotropy);
 }
+
+#undef CHECK_EXT
 
 static void
 GL_Info_f (void)
