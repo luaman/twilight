@@ -1232,7 +1232,7 @@ GL_Upload8 (Uint8 *data, int width, int height, Uint32 *palette, int flags)
 {
 	Uint32 *trans;
 
-	trans = GLT_8to32_convert(data, width, height, palette, true);
+	trans=GLT_8to32_convert(data, width, height, palette, !(flags & TEX_FORCE));
 	if (!trans)
 		return false;
 

@@ -21,10 +21,6 @@ Bugs we know about:
   - RC #0: Bogus player names in death messages?
     (Test by doing impulse 9 and blowing self up with RL)
     (Happens for LordHavoc, anyone else?)
-  - RC #2: We need to identify WTF is being used in frontlin for the
-    start part, and z7 for the 'night sky' surface wise and get
-    /something/ drawn there, because right now we are not drawing
-    anything at all.
   - RC #3: We /REALLY/ need to build on win32 without requiring the
     .net compiler.
 

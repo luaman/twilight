@@ -134,12 +134,12 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 				// we don't brighten turb textures
 				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width,
 						tx->height, (Uint8 *)(mtdata), d_palette_raw,
-						TEX_MIPMAP, 8);
+						TEX_MIPMAP | TEX_FORCE, 8);
 			else
 			{
 				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width,
 						tx->height, (Uint8 *)(mtdata), d_palette_base,
-						TEX_MIPMAP, 8);
+						TEX_MIPMAP | TEX_FORCE, 8);
 				tx->fb_texturenum = GL_LoadTexture (va("@fb_%s", dmiptex->name),
 						tx->width, tx->height, (Uint8 *)(mtdata),
 						d_palette_fb, TEX_MIPMAP, 8);
