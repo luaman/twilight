@@ -63,7 +63,10 @@ qboolean    isDedicated;
 static qboolean sc_return_on_enter = false;
 HANDLE      hinput, houtput;
 
+/*
+FIXME: Do I even want to know?
 static char *tracking_tag = "Clams & Mooses";
+*/
 
 static HANDLE tevent;
 static HANDLE hFile;
@@ -276,7 +279,6 @@ Sys_Error (char *error, ...)
 	char       *text5 = "\n";
 	DWORD       dummy;
 	double      starttime;
-	static int  in_sys_error0 = 0;
 	static int  in_sys_error1 = 0;
 	static int  in_sys_error2 = 0;
 	static int  in_sys_error3 = 0;
@@ -465,8 +467,7 @@ Sys_ConsoleInput (void)
 	static char text[256];
 	static int  len;
 	INPUT_RECORD recs[1024];
-	int         dummy;
-	int         ch, numread, numevents;
+	DWORD	numevents, numread, ch, dummy;
 
 	if (!isDedicated)
 		return NULL;
@@ -612,7 +613,6 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	quakeparms_t parms;
 	double      time, oldtime, newtime;
 	MEMORYSTATUS lpBuffer;
-	static char cwd[1024];
 	int         t;
 
 	/* previous instances do not exist in Win32 */

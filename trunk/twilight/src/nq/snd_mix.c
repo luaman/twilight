@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "winquake.h"
 #else
 #define DWORD	unsigned long
+#define LPVOID	void *
 #endif
 
 #define	PAINTBUFFER_SIZE	512
@@ -80,12 +81,12 @@ S_TransferStereo16 (int endtime)
 {
 	int         lpos;
 	int         lpaintedtime;
-	DWORD      *pbuf;
+	LPVOID	pbuf;
 
 #ifdef _WIN32
 	int         reps;
 	DWORD       dwSize, dwSize2;
-	DWORD      *pbuf2;
+	LPVOID	pbuf2;
 	HRESULT     hresult;
 #endif
 
@@ -158,12 +159,12 @@ S_TransferPaintBuffer (int endtime)
 	int         step;
 	int         val;
 	int         snd_vol;
-	DWORD      *pbuf;
+	LPVOID	pbuf;
 
 #ifdef _WIN32
 	int         reps;
 	DWORD       dwSize, dwSize2;
-	DWORD      *pbuf2;
+	LPVOID		pbuf2;
 	HRESULT     hresult;
 #endif
 

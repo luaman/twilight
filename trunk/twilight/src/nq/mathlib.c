@@ -408,7 +408,7 @@ PerpendicularVector (vec3_t dst, const vec3_t src)
 	VectorNormalizeFast (dst);
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma optimize( "", off )
 #endif
 
@@ -470,7 +470,7 @@ RotatePointAroundVector (vec3_t dst, const vec3_t dir, const vec3_t point,
 	}
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma optimize( "", on )
 #endif
 

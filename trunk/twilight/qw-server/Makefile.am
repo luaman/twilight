@@ -6,6 +6,14 @@ INCLUDES= -I$(top_srcdir)/include
 
 bin_PROGRAMS=twilight-qwsv
 
+if SYS_WIN32
+twilight_nq_sys=sys_win.c
+twilight_nq_sys_libs=-lwsock32 -lwinmm
+else
+twilight_nq_sys=sys_unix.c
+twilight_nq_sys_libs=
+endif
+
 twilight_qwsv_SOURCES= \
 	common.c common.h cmd.c cmd.h crc.c crc.h cvar.c cval.h mathlib.c \
 	mathlib.h md4.c \
@@ -15,9 +23,10 @@ twilight_qwsv_SOURCES= \
 	progs.h progdefs.h pc_comp.h \
 	sv_ccmds.c sv_ents.c sv_init.c sv_main.c sv_move.c sv_nchan.c \
 	sv_phys.c sv_send.c sv_user.c \
-	sys_unix.c sys.h world.c world.h zone.c zone.h \
-	quakedef.h bothdefs.h bspfile.h protocol.h qwsvdef.h server.h 
+	sys.h world.c world.h zone.c zone.h \
+	quakedef.h bothdefs.h bspfile.h protocol.h qwsvdef.h server.h \
+	$(twilight_nq_sys)
 
-LDFLAGS=@SDL_LIBS@ @LIBS@ -lm
-CFLAGS=@CFLAGS@ @SDL_CFLAGS@
+LIBS=@LIBS@ -lm $(twilight_nq_sys_libs)
+CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -Umain
 

@@ -22,9 +22,11 @@ $Id$
 // disable data conversion warnings
 
 #ifdef _WIN32
+#if _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma warning(disable : 4244)			// MIPS
 #pragma warning(disable : 4136)			// X86
 #pragma warning(disable : 4051)			// ALPHA
+#endif
 
 #include <windows.h>
 #endif
