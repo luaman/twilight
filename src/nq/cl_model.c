@@ -1210,22 +1210,16 @@ ALIAS MODEL DISPLAY LIST GENERATION
 =================================================================
 */
 
-model_t    *aliasmodel;
-aliashdr_t *paliashdr;
-
 qboolean    used[8192];
 
 // the command list holds counts and s/t values that are valid for
 // every frame
 int         commands[8192];
-int         numcommands;
 
 // all frames will have their vertexes rearranged and expanded
 // so they are in the order expected by the command list
 int         vertexorder[8192];
 int         numorder;
-
-int         allverts, alltris;
 
 int         stripverts[128];
 int         striptris[128];
@@ -1374,7 +1368,7 @@ Generate a list of trifans or strips
 for the model, which holds for all frames
 ================
 */
-void
+int
 BuildTris (void)
 {
 	int         i, j, k;
@@ -1385,12 +1379,12 @@ BuildTris (void)
 	int         bestverts[MAXALIASVERTS];
 	int         besttris[MAXALIASVERTS];
 	int         type;
+	int			numcommands = 0;
 
 	// 
 	// build tristrips
 	// 
 	numorder = 0;
-	numcommands = 0;
 	memset (used, 0, sizeof (used));
 	for (i = 0; i < pheader->numtris; i++) {
 		// pick an unused triangle and start the trifan
@@ -1449,8 +1443,7 @@ BuildTris (void)
 	Con_DPrintf ("%3i tri %3i vert %3i cmd\n", pheader->numtris, numorder,
 				 numcommands);
 
-	allverts += numorder;
-	alltris += pheader->numtris;
+	return numcommands;
 }
 
 
@@ -1465,24 +1458,20 @@ GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 	int         i, j;
 	int        *cmds;
 	trivertx_t *verts;
-
-	aliasmodel = m;
-	paliashdr = hdr;					// (aliashdr_t *)Mod_Extradata (m);
-
-	BuildTris ();						// trifans or lists
+	int			numcommands = BuildTris ();	// trifans or lists
 
 	// save the data out
 
-	paliashdr->poseverts = numorder;
+	hdr->poseverts = numorder;
 
 	cmds = Hunk_Alloc (numcommands * 4);
-	paliashdr->commands = (Uint8 *) cmds - (Uint8 *) paliashdr;
+	hdr->commands = (Uint8 *) cmds - (Uint8 *) hdr;
 	memcpy (cmds, commands, numcommands * 4);
 
-	verts = Hunk_Alloc (paliashdr->numposes * paliashdr->poseverts
+	verts = Hunk_Alloc (hdr->numposes * hdr->poseverts
 						* sizeof (trivertx_t));
-	paliashdr->posedata = (Uint8 *) verts - (Uint8 *) paliashdr;
-	for (i = 0; i < paliashdr->numposes; i++)
+	hdr->posedata = (Uint8 *) verts - (Uint8 *) hdr;
+	for (i = 0; i < hdr->numposes; i++)
 		for (j = 0; j < numorder; j++)
 			*verts++ = poseverts[i][vertexorder[j]];
 }
