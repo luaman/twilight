@@ -58,6 +58,10 @@
 #define bound(a,b,c) (max(a, min(b, c)))
 #endif
 
+#ifndef boundsign
+#define boundsign(a, b) ((b) > 0 ? max(0, (a)) : min ((a), 0))
+#endif
+
 #ifndef BIT
 #define BIT(bit)			(1 << bit)
 #endif
