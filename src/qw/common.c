@@ -796,7 +796,7 @@ COM_StripExtension
 void
 COM_StripExtension (char *in, char *out)
 {
-	char *last;
+	char *last = NULL;
 
 	while (*in) {
 		if (*in == '.')
