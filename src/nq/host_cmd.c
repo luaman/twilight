@@ -898,6 +898,15 @@ Host_Kill_f (void)
 	PR_ExecuteProgram (pr_global_struct->ClientKill);
 }
 
+void Host_WriteConfig_f (void)
+{
+	if (Cmd_Argc () != 2) {
+		Con_Printf ("writeconfig <filename> : dump configuration to file\n");
+		return;
+	}
+
+	Host_WriteConfiguration (Cmd_Argv(1));
+}
 
 /*
 ==================
@@ -1452,6 +1461,7 @@ Host_InitCommands (void)
 	Cmd_AddCommand ("load", Host_Loadgame_f);
 	Cmd_AddCommand ("save", Host_Savegame_f);
 	Cmd_AddCommand ("give", Host_Give_f);
+	Cmd_AddCommand ("writeconfig", Host_WriteConfig_f);
 
 	Cmd_AddCommand ("startdemos", Host_Startdemos_f);
 	Cmd_AddCommand ("demos", Host_Demos_f);
