@@ -468,7 +468,7 @@ SOURCE=..\include\wad.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\win32conf.h
+SOURCE=..\include\win32config.h
 # End Source File
 # Begin Source File
 

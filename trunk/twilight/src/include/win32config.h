@@ -3,8 +3,8 @@
 
 	System configuration for Win32 without autoconf
 */
-#ifndef __WIN32CONF_H
-#define __WIN32CONF_H
+#ifndef __WIN32CONFIG_H
+#define __WIN32CONFIG_H
 
 #if _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma warning( disable : 4244 4127 4201 4214 4514 4305 4115 4018)
@@ -50,5 +50,5 @@
 
 #define OGLDECL APIENTRY
 
-#endif // __WIN32CONF_H
+#endif /* __WIN32CONFIG_H */
 

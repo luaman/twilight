@@ -9,4 +9,4 @@ noinst_HEADERS= \
 	draw.h gl_warp_sin.h host.h input.h mathlib.h mdfour.h menu.h \
 	model.h modelgen.h pmove.h pr_comp.h qtypes.h quakedef.h sbar.h \
 	spritegn.h strlib.h sys.h twiconfig.h vid.h view.h wad.h \
-	win32conf.h zone.h
+	win32config.h zone.h
