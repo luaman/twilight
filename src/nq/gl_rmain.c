@@ -517,8 +517,8 @@ R_Render3DView (void)
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
 
 	R_DrawExplosions ();
+	R_DrawCoronas ();
 	R_DrawParticles ();
-	R_RenderDlights ();
 	R_DrawWaterTextureChains ();
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -622,6 +622,7 @@ R_InitTextures (void)
 	img.pixels = (Uint8 *)&pixels;
 	img.type = IMG_RGBA;
 
+	// Set up the notexture
 	for (y = 0; y < 16; y++)
 	{
 		for (x = 0; x < 16; x++)
@@ -652,6 +653,8 @@ R_InitTextures (void)
 
 	r_notexture_water = Hunk_AllocName (sizeof (texture_t), "notexturewater");
 	*r_notexture_water = *r_notexture;
+
+	R_InitLightTextures ();
 }
 
 /*

@@ -57,13 +57,14 @@ extern int r_numdlights;
 extern rdlight_t r_dlight[MAX_DLIGHTS];
 
 
+void R_InitLightTextures (void);
 void R_BuildLightList (void);
 void R_MarkLights (rdlight_t *light, int bit, model_t *model);
 void R_MarkLightsNoVis (rdlight_t *light, int bit, mnode_t *node);
 void R_AnimateLight (void);
 int R_LightPoint (vec3_t p);
-void R_RenderDlights (void);
 void R_PushDlights (void);
+void R_DrawCoronas (void);
 
 #endif // __RENDERER_LIGHT_H
 
