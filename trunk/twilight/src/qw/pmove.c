@@ -115,7 +115,7 @@ PM_FlyMove (void)
 	vec3_t      planes[MAX_CLIP_PLANES];
 	vec3_t      primal_velocity, original_velocity;
 	int         i, j;
-	pmtrace_t   trace;
+	trace_t		trace;
 	vec3_t      end;
 	float       time_left;
 	int         blocked;
@@ -150,8 +150,7 @@ PM_FlyMove (void)
 			break;						// moved the entire distance
 
 		// save entity for contact
-		pmove.touchindex[pmove.numtouch] = trace.ent;
-		pmove.numtouch++;
+		pmove.touch[pmove.numtouch++] = trace.ent;
 
 		if (trace.plane.normal[2] > 0.7) {
 			blocked |= 1;				// floor
@@ -223,7 +222,7 @@ void
 PM_GroundMove (void)
 {
 	vec3_t      start, dest;
-	pmtrace_t   trace;
+	trace_t		trace;
 	vec3_t      original, originalvel, down, up, downvel;
 	float       downdist, updist;
 
@@ -312,7 +311,7 @@ PM_Friction (void)
 	float       friction;
 	float       drop;
 	vec3_t      start, stop;
-	pmtrace_t   trace;
+	trace_t		trace;
 
 	if (pmove.waterjumptime)
 		return;
@@ -330,7 +329,7 @@ PM_Friction (void)
 	friction = movevars.friction;
 
 // if the leading edge is over a dropoff, increase friction
-	if (pmove.groundent != -1) {
+	if (pmove.groundent) {
 		start[0] = stop[0] = pmove.origin[0] + vel[0] / speed * 16;
 		start[1] = stop[1] = pmove.origin[1] + vel[1] / speed * 16;
 		start[2] = pmove.origin[2] + player_mins[2];
@@ -347,7 +346,7 @@ PM_Friction (void)
 
 	if (pmove.waterlevel >= 2)				// apply water friction
 		drop += speed * movevars.waterfriction * pmove.waterlevel * frametime;
-	else if (pmove.groundent != -1)			// apply ground friction
+	else if (pmove.groundent)				// apply ground friction
 	{
 		control = speed < movevars.stopspeed ? movevars.stopspeed : speed;
 		drop += control * friction * frametime;
@@ -438,7 +437,7 @@ PM_WaterMove (void)
 	float       wishspeed;
 	vec3_t      wishdir;
 	vec3_t      start, dest;
-	pmtrace_t   trace;
+	trace_t		trace;
 
 //
 // user intentions
@@ -519,7 +518,7 @@ PM_AirMove (void)
 		wishspeed = movevars.maxspeed;
 	}
 
-	if (pmove.groundent != -1) {
+	if (pmove.groundent) {
 		pmove.velocity[2] = 0;
 		PM_Accelerate (wishdir, wishspeed, movevars.accelerate);
 		pmove.velocity[2] -= movevars.entgravity * movevars.gravity * frametime;
@@ -547,7 +546,7 @@ PM_CatagorizePosition (void)
 {
 	vec3_t      point;
 	int         cont;
-	pmtrace_t   tr;
+	trace_t		tr;
 
 // if the player hull point one unit down is solid, the player
 // is on ground
@@ -557,22 +556,21 @@ PM_CatagorizePosition (void)
 	point[1] = pmove.origin[1];
 	point[2] = pmove.origin[2] - 1;
 	if (pmove.velocity[2] > 180) {
-		pmove.groundent = -1;
+		pmove.groundent = NULL;
 	} else {
 		tr = PM_PlayerMove (pmove.origin, point);
 		if (tr.plane.normal[2] < 0.7)
-			pmove.groundent = -1;				// too steep
+			pmove.groundent = NULL;				// too steep
 		else
 			pmove.groundent = tr.ent;
-		if (pmove.groundent != -1) {
+		if (pmove.groundent) {
 			pmove.waterjumptime = 0;
 			if (!tr.startsolid && !tr.allsolid)
 				VectorCopy (tr.endpos, pmove.origin);
 		}
 		// standing on an entity other than the world
 		if (tr.ent > 0) {
-			pmove.touchindex[pmove.numtouch] = tr.ent;
-			pmove.numtouch++;
+			pmove.touch[pmove.numtouch++] = tr.ent;
 		}
 	}
 
@@ -622,7 +620,7 @@ JumpButton (void)
 	}
 
 	if (pmove.waterlevel >= 2) {		// swimming, not jumping
-		pmove.groundent = -1;
+		pmove.groundent = NULL;
 
 		if (pmove.watertype == CONTENTS_WATER)
 			pmove.velocity[2] = 100;
@@ -633,13 +631,13 @@ JumpButton (void)
 		return;
 	}
 
-	if (pmove.groundent == -1)
+	if (!pmove.groundent)
 		return;							// in air, so no effect
 
 	if (pmove.oldbuttons & BUTTON_JUMP)
 		return;							// don't pogo stick
 
-	pmove.groundent = -1;
+	pmove.groundent = NULL;
 	pmove.velocity[2] += 270;
 
 	pmove.oldbuttons |= BUTTON_JUMP;	// don't jump again until released
@@ -806,7 +804,7 @@ PlayerMove
 
 Returns with origin, angles, and velocity modified in place.
 
-Numtouch and touchindex[] will be set if any of the physents
+Numtouch and touch[] will be set if any of the physents
 were contacted during the move.
 =============
 */

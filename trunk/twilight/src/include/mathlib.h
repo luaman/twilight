@@ -33,6 +33,7 @@
 #endif
 
 #include <qtypes.h>
+#include <math.h>
 
 // LordHavoc: min and max are defined in stdlib in MSVC
 #ifndef max
@@ -85,15 +86,10 @@ double Q_asin(double x);
 double Q_atan(double x);
 double Q_atan2(double y, double x);
 double Q_tan(double x);
-double Q_floor(double x);
-double Q_ceil(double x);
 float Q_fabs(float f);
 int Q_abs(int x);
 float Q_sqrt(float n);
 float Q_RSqrt(float number);
-void Q_srand(unsigned seed);
-int	Q_rand(void);
-double Q_pow(double x, double y);
 
 #define NANMASK		255 << 23
 #define	IS_NAN(x) (((*(int *)&x)&NANMASK)==NANMASK)
@@ -172,7 +168,7 @@ void        R_ConcatRotations (float in1[3][3], float in2[3][3],
 
 void        AngleVectors (vec3_t angles, vec3_t forward, vec3_t right,
 						  vec3_t up);
-void        AngleVectorsFLU (vec3_t angles, vec3_t forward, vec3_t left,
+void        AngleVectorsFLU (const vec3_t angles, vec3_t forward, vec3_t left,
 						  vec3_t up);
 int         BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
 

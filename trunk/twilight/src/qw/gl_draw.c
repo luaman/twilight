@@ -554,7 +554,7 @@ Draw_Crosshair (void)
 	if (color == 255 && cl.colormap)
 		VectorScale (cl.colormap->bottom, 0.5, base);
 	else
-		VectorCopy4 (d_8tofloattable[color], base);
+		VectorCopy (d_8tofloattable[color], base);
 
 	ofs = Q_sin (cl.time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
 	ofs = boundsign (ofs, hud_chflash->fvalue);
@@ -728,12 +728,10 @@ Draw_ConsoleBackground (int lines)
 	else
 		ofs = (float) ((vid.height_2d - lines) / vid.height_2d);
 
-	if (alpha != 1.0f)
-	{
+	if (alpha != 1.0f) {
 		qglColor4f (1.0f, 1.0f, 1.0f, alpha);
 		qglEnable (GL_BLEND);
-	} else
-		qglColor4fv (whitev);
+	}
 
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
 	VectorSet2 (tc_array_v(0), gl->sl, gl->tl + ofs);
@@ -941,8 +939,8 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
 		out = outdata;
 		fstep = (int) (inheight*65536.0f/outheight);
 
-		row1 = malloc(outwidth*4);
-		row2 = malloc(outwidth*4);
+		row1 = Zone_Alloc(tempzone, outwidth*4);
+		row2 = Zone_Alloc(tempzone, outwidth*4);
 		inrow = indata;
 		oldy = 0;
 		R_ResampleTextureLerpLine (inrow, row1, inwidth, outwidth);
@@ -1058,8 +1056,8 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
 				memcpy(out, row1, outwidth * 4);
 			}
 		}
-		free(row1);
-		free(row2);
+		Zone_Free(row1);
+		Zone_Free(row2);
 	} else {
 		int i, j;
 		unsigned frac, fracstep;

@@ -46,6 +46,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "teamplay.h"
+#include "collision.h"
 
 char       *svc_strings[] = {
 	"svc_bad",
@@ -1092,7 +1093,8 @@ CL_MuzzleFlash (void)
 				dl = CL_AllocDlight (-i);
 				AngleVectors (ent->angles, fv, NULL, NULL);
 				VectorMA (ent->origin, 18, fv, dl->origin);
-				CL_BoundDlight (dl, ent->origin);
+				TraceLine (cl.worldmodel, ent->origin, dl->origin, dl->origin,
+						NULL);
 
 				dl->radius = 200 + (rand()&31);
 				dl->minlight = 32;
@@ -1113,12 +1115,12 @@ CL_MuzzleFlash (void)
 	pl = &cl.frames[parsecountmod].playerstate[i - 1];
 
 	dl = CL_AllocDlight (-i);
-	VectorCopy (pl->origin, dl->origin);
 	AngleVectors (pl->viewangles, fv, NULL, NULL);
-	VectorMA (dl->origin, 18, fv, dl->origin);
-	CL_BoundDlight (dl, pl->origin);
+	VectorMA (pl->origin, 18, fv, dl->origin);
+	TraceLine (cl.worldmodel, pl->origin, dl->origin, dl->origin,
+			NULL);
 
-	dl->radius = 200 + (Q_rand () & 31);
+	dl->radius = 200 + (rand () & 31);
 	dl->minlight = 32;
 	dl->die = cl.time + 0.1;
 	dl->color[0] = 0.2;

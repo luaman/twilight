@@ -938,7 +938,7 @@ Sbar_DeathmatchOverlay (int start)
 {
 	qpic_t			*pic;
 	Sint32			i, k, l;
-	Uint32			x, y, f;
+	Uint32			x, y;
 	player_info_t	*s;
 	Sint32			total;
 	Sint32			minutes;
@@ -1039,9 +1039,7 @@ Sbar_DeathmatchOverlay (int start)
 		Draw_Fill (x + 104, y + 4, 40, 4, color);
 
 		// draw number
-		f = s->frags;
-
-		Draw_String_Len (x + 112, y, va("%3d", f), 3, 8);
+		Draw_String_Len (x + 112, y, va("%3d", s->frags), 3, 8);
 
 		if (k == cl.playernum) {
 			Draw_Character (x + 104, y, 16, 8);

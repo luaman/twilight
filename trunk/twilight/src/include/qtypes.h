@@ -35,15 +35,6 @@
 
 typedef enum { false, true } qboolean;
 
-typedef float vec_t;
-typedef vec_t vec3_t[3];
-typedef vec_t vec4_t[4];
-typedef vec_t vec5_t[5];
-
-typedef int fixed4_t;
-typedef int fixed8_t;
-typedef int fixed16_t;
-
 #ifndef DYNGL_TYPES
 #define DYNGL_TYPES
 
@@ -65,18 +56,35 @@ typedef double			GLclampd;		/* double precision float in [0,1] */
 
 #endif /* DYNGL_TYPES */
 
+typedef GLfloat vec_t;
+typedef vec_t vec3_t[3];
+typedef vec_t vec4_t[4];
+typedef vec_t vec5_t[5];
+
+typedef GLdouble dvec_t;
+typedef dvec_t dvec3_t[3];
+typedef dvec_t dvec4_t[4];
+typedef dvec_t dvec5_t[5];
+
+typedef GLubyte bvec_t;
+typedef bvec_t bvec3_t[3];
+typedef bvec_t bvec4_t[4];
 
 typedef struct {
     GLfloat v[2];
 } texcoord_t;
 
 typedef struct {
-    GLfloat v[3];
+    vec3_t	v;
 } vertex_t;
 
 typedef struct {
-    GLfloat v[4];
-} color_t;
+    vec4_t	v;
+} colorf_t;
+
+typedef struct {
+    bvec4_t	v;
+} colorub_t;
 
 // plane_t structure
 typedef struct mplane_s {
@@ -87,6 +95,11 @@ typedef struct mplane_s {
 	Uint8       signbits;				// signx + signy<<1 + signz<<1
 	Uint8       pad[2];
 } mplane_t;
+
+typedef union {
+	float	f;
+	Uint32	i;
+} float_int_t;
 
 #endif // __QTYPES_H
 

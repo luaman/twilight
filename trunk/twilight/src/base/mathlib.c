@@ -30,6 +30,7 @@ static const char rcsid[] =
 #include <math.h>
 #include <time.h>
 #include <strlib.h>
+#include <stdio.h>
 
 #include "mathlib.h"
 
@@ -197,7 +198,7 @@ Q_atan2(double y, double x)
 double
 Q_atan(double x)
 {
-	float test, y = Q_fabs(x), dir = (x < 0) ? -1 : 1;
+	float test, y = fabs(x), dir = (x < 0) ? -1 : 1;
 	int i;
 
 	if (!x)
@@ -235,18 +236,6 @@ Q_tan(double x)
 	return 0;
 }
 
-double 
-Q_floor(double x)
-{
-	return floor(x);
-}
-
-double 
-Q_ceil(double x)
-{
-	return ceil(x);
-}
-
 float 
 Q_fabs( float f ) 
 {
@@ -261,23 +250,6 @@ Q_abs(int x)
 	int tmp = x;
 
 	return (tmp < 0) ? -tmp : tmp;
-}
-
-//static int q_randSeed = 0;
-
-void 
-Q_srand(unsigned seed)
-{
-//	q_randSeed = seed;
-	srand(seed);
-}
-
-int	
-Q_rand(void)
-{
-//	q_randSeed = (69069 * q_randSeed + 1);
-//	return q_randSeed & 0x7fff;
-	return rand();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -298,8 +270,8 @@ static unsigned int iFastSqrtTable[0x10000];
 static void 
 Math_BuildSqrtTable(void)
 {
-	unsigned int i;
-	FastSqrtUnion s;
+	Uint32		i;
+	float_int_t	s;
 
 	// Build the fast square root table
 	for (i = 0; i <= 0x7FFF; i++)
@@ -336,29 +308,25 @@ Q_sqrt(float n)
 	return n;
 }
 
+/*
+ * Q_RSqrt
+ * This function calculates 1/sqrt(num), using some form of black magic.
+ * This function WILL NOT WORK if the storage of floats is not IEEE.
+ * (Note: The last line can be done twice for additional precision.)
+ */
 float 
-Q_RSqrt(float number)
+Q_RSqrt(float num)
 {
-	Sint32 i;
-	float x2, y;
+	float_int_t	evil;	// NOTE: evil.f and evil.i refer to the same memory.
 
-	if (number == 0.0)
+	if (num <= 0.0)
 		return 0.0;
 
-	x2 = number * 0.5f;
-	y = number;
-	i = * (Sint32 *) &y;			// evil floating point bit level hacking
-	i = 0x5f3759df - (i >> 1);		// what the fuck?
-	y = * (float *) &i;
-	y = y * (1.5f - (x2 * y * y));	// this can be done a second time
+	evil.f = num;
+	evil.i = 0x5f3759df - (evil.i >> 1);				// The black magic!
+	evil.f *= (1.5f - (num * 0.5f * evil.f * evil.f));
 
-	return y;
-}
-
-double
-Q_pow (double x, double y)
-{
-	return pow (x, y);
+	return evil.f;
 }
 
 void 
@@ -367,7 +335,7 @@ Math_Init (void)
 	Math_BuildSqrtTable();
 	Math_BuildSinTable();
 
-	Q_srand (time(NULL));
+	srand (time(NULL));
 }
 
 
@@ -405,9 +373,9 @@ PerpendicularVector (vec3_t dst, const vec3_t src)
 	/* 
 	   ** find the smallest magnitude axially aligned vector */
 	for (pos = 0, i = 0; i < 3; i++) {
-		if (Q_fabs (src[i]) < minelem) {
+		if (fabs (src[i]) < minelem) {
 			pos = i;
-			minelem = Q_fabs (src[i]);
+			minelem = fabs (src[i]);
 		}
 	}
 	tempvec[0] = tempvec[1] = tempvec[2] = 0.0F;
@@ -570,11 +538,6 @@ BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 	if (dist2 < p->dist)
 		sides |= 2;
 
-#ifdef PARANOID
-	if (sides == 0)
-		Sys_Error ("BoxOnPlaneSide: sides==0");
-#endif
-
 	return sides;
 }
 
@@ -616,7 +579,7 @@ AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 }
 
 void
-AngleVectorsFLU (vec3_t angles, vec3_t forward, vec3_t left, vec3_t up)
+AngleVectorsFLU (const vec3_t angles, vec3_t forward, vec3_t left, vec3_t up)
 {
 	float       angle;
 	float       sr = 0.0f, sp, sy, cr = 0.0f, cp, cy;

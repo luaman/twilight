@@ -214,25 +214,6 @@ CL_DecayLights (void)
 
 
 /*
-==============
-CL_BoundDlight
-==============
-*/
-void
-CL_BoundDlight (dlight_t *dl, vec3_t org)
-{
-	pmtrace_t tr;
-
-	if (gl_flashblend->ivalue || gl_oldlights->ivalue)
-		return;
-
-	memset (&tr, 0, sizeof(tr));
-	VectorCopy (dl->origin, tr.endpos);
-	PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, org, dl->origin, &tr);
-	VectorCopy (tr.endpos, dl->origin);
-}
-
-/*
 =========================================================================
 
 PACKET ENTITY PARSING / LINKING
@@ -1245,7 +1226,7 @@ CL_SetSolidPlayers (int playernum)
 	if (!cl_solid_players->ivalue)
 		return;
 
-	pent = pmove.physents + pmove.numphysent;
+	pent = &pmove.physents[pmove.numphysent];
 
 	for (j = 0, pplayer = predicted_players; j < MAX_CLIENTS; j++, pplayer++) {
 

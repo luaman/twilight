@@ -480,7 +480,7 @@ GL_BuildLightmap (msurface_t *surf)
 	// apply the stainmap
 	// NB: This is only done for colored lighting.  While it is possible to do
 	// it in the non-colored case, but it would suck.  A lot. 
-	if (colorlights)
+	if (colorlights && r_stainmaps->ivalue)
 	{
 		stain = surf->stainsamples;
 		if (stain)

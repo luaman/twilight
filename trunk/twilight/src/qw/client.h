@@ -35,6 +35,7 @@
 #include "protocol.h"
 #include "render.h"
 #include "zone.h"
+#include "pmove.h"
 
 /*
  * player_state_t is the information needed by a player entity
@@ -62,7 +63,7 @@ typedef struct {
 	int			flags;					// dead, gib, etc
 
 	float		waterjumptime;
-	int			groundent;				// -1 in air, else pmove ent num
+	physent_t	*groundent;				// NULL in air, else pmove ent num
 	int			number;
 	int			oldbuttons;
 } player_state_t;
@@ -375,7 +376,6 @@ extern float server_version;	// version of server we connected to
  */
 dlight_t *CL_AllocDlight (int key);
 void CL_DecayLights (void);
-void CL_BoundDlight (dlight_t *dl, vec3_t org);
 
 void CL_Init_Cvars (void);
 void CL_Init (void);

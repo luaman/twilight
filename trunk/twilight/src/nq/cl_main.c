@@ -516,11 +516,11 @@ CL_RelinkEntities (void)
 
 					if (!gl_flashblend->ivalue && !gl_oldlights->ivalue)
 					{
-						TraceLine(ent->origin, dl->origin, impact, impactnormal);
+						TraceLine(cl.worldmodel, ent->origin, dl->origin, impact, impactnormal);
 						VectorCopy(impact, dl->origin);
 					}
 
-					dl->radius = 200 + (Q_rand () & 31);
+					dl->radius = 200 + (rand () & 31);
 					dl->minlight = 32;
 					dl->color[0] = 1.0f;
 					dl->color[1] = 1.0f;

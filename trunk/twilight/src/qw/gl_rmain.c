@@ -52,11 +52,13 @@ int c_brush_polys, c_alias_polys;
 
 memzone_t *vzone;
 
-texcoord_t *tc0_array_p;
-texcoord_t *tc1_array_p;
-vertex_t *v_array_p;
-color_t *c_array_p;
-GLuint *vindices;
+texcoord_t	*tc0_array_p;
+texcoord_t	*tc1_array_p;
+vertex_t	*v_array_p;
+colorf_t	*cf_array_p;
+colorub_t	*cub_array_p;
+GLuint		*vindices;
+float_int_t	*FtoUB_tmp;
 
 GLuint v_index, i_index;
 qboolean va_locked;
@@ -343,10 +345,10 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 		tc_array(i, 1) = paliashdr->tcarray[i].t;
 
 		l = shadedots[pose->normal_indices[i]] * shadelight;
-		VectorScale(lightcolor, l, c_array_v(i));
 		VectorScale(lightcolor, l, acolors[i]);
-		c_array(i, 3) = acolors[i][3] = 1;
+		acolors[i][3] = 1;
 	}
+	TWI_FtoUB (acolors[0], c_array_v(0), paliashdr->numverts * 4);
 }
 
 
@@ -396,10 +398,10 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 			shadedots[pose_from->normal_indices[i]];
 		l = shadelight * (shadedots[pose_from->normal_indices[i]]
 				+ (e->frame_blend * d));
-		VectorScale(lightcolor, l, c_array_v(i));
 		VectorScale(lightcolor, l, acolors[i]);
-		c_array(i, 3) = acolors[i][3] = 1;
+		acolors[i][3] = 1;
 	}
+	TWI_FtoUB (acolors[0], c_array_v(0), paliashdr->numverts * 4);
 }
 
 /*
@@ -414,9 +416,9 @@ R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec4_t *color)
 	int			i;
 
 	if (color) {
-		for (i = 0; i < paliashdr->numverts; i++) {
-			VectorMultiply(acolors[i], *color, c_array_v(i));
-		}
+		for (i = 0; i < paliashdr->numverts; i++)
+			VectorMultiply(acolors[i], *color, cf_array_v(i));
+		TWI_FtoUB (cf_array_v(0), c_array_v(0), paliashdr->numverts * 4);
 	}
 
 	qglBindTexture (GL_TEXTURE_2D, skin->texnum);
@@ -1020,7 +1022,7 @@ R_Init_Cvars (void)
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
 
 	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_ARCHIVE, NULL);
-	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_ARCHIVE, NULL);;
+	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_ARCHIVE, NULL);
 
 	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_ARCHIVE, NULL);
 	gl_fb_bmodels = Cvar_Get ("gl_fb_bmodels", "1", CVAR_ARCHIVE, NULL);
@@ -1041,6 +1043,7 @@ R_LoadSky_f (void)
 	if (Cmd_Argc() != 2)
 	{
 		Com_Printf ("loadsky <name> : load a skybox\n");
+		return;
 	}
 
 	Cvar_Set (r_skyname, Cmd_Argv(1));
@@ -1108,11 +1111,13 @@ R_Init (void)
 	tc0_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
 	tc1_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
 	v_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(vertex_t));
-	c_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(color_t));
 	vindices = Zone_Alloc(vzone, MAX_VERTEX_INDICES * sizeof(GLuint));
+	cf_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(colorf_t));
+	cub_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(colorub_t));
+	FtoUB_tmp = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(float_int_t) * 4);
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc0_array_v(0)), tc0_array_p);
-	qglColorPointer (4, GL_FLOAT, sizeof(c_array_v(0)), c_array_p);
+	qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(c_array_v(0)), cub_array_p);
 	qglVertexPointer (3, GL_FLOAT, sizeof(v_array_v(0)), v_array_p);
 
 	qglDisableClientState (GL_COLOR_ARRAY);

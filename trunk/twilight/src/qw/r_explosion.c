@@ -35,10 +35,10 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "draw.h"
 #include "glquake.h"
-#include "gl_textures.h"
 #include "mathlib.h"
-#include "pmove.h"
 #include "strlib.h"
+#include "gl_textures.h"
+#include "collision.h"
 
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 
@@ -305,6 +305,7 @@ R_DrawExplosion (explosion_t *e)
 	if (((v_index + EXPLOSIONINDICES) >= MAX_VERTEX_ARRAYS) ||
 			((i_index + EXPLOSIONINDICES) >= MAX_VERTEX_INDICES))
 	{
+		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 		TWI_PreVDrawCVA (0, EXPLOSIONTRIS * 3);
 		qglDrawElements (GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
 		TWI_PostVDrawCVA ();
@@ -333,7 +334,7 @@ R_DrawExplosion (explosion_t *e)
 		VectorNormalizeFast(diff);
 		dist = (DotProduct(diff, centerdir) * 6.0f - 4.0f) * a;
 		dist = max (dist, 0);
-		VectorSet4 (c_array_v(v_index + i), dist * r, dist * g, dist * b, 1);
+		VectorSet4 (cf_array_v(v_index + i), dist * r, dist * g, dist * b, 1);
 	}
 
 	v_index += EXPLOSIONVERTS;
@@ -360,6 +361,7 @@ R_DrawExplosions (void)
 
 	if (v_index || i_index)
 	{
+		TWI_FtoUB (cf_array_v(0), c_array_v(0), v_index * 4);
 		TWI_PreVDrawCVA (0, EXPLOSIONTRIS * 3);
 		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
 		TWI_PostVDrawCVA ();

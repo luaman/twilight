@@ -422,7 +422,7 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 
 /*
 ===============
-R_BuildLightmap
+GL_BuildLightmap
 
 Combine and scale multiple lightmaps into the 8.8 format in blocklights
 ===============
@@ -479,7 +479,7 @@ GL_BuildLightmap (msurface_t *surf)
 	// apply the stainmap
 	// NB: This is only done for colored lighting.  While it is possible to do
 	// it in the non-colored case, but it would suck.  A lot. 
-	if (colorlights)
+	if (colorlights && r_stainmaps->ivalue)
 	{
 		stain = surf->stainsamples;
 		if (stain)

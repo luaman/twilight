@@ -34,8 +34,6 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "world.h"
 
-extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
-
 cvar_t	*chase_back;
 cvar_t	*chase_up;
 cvar_t	*chase_right;
@@ -86,7 +84,7 @@ Chase_Update (void)
 
 	// find the spot the player is looking at
 	VectorMA (r_refdef.vieworg, 4096, forward, dest);
-	TraceLine (r_refdef.vieworg, dest, stop, normal);
+	TraceLine (cl.worldmodel, r_refdef.vieworg, dest, stop, normal);
 
 	// calculate pitch to look at the same spot from camera
 	VectorSubtract (stop, r_refdef.vieworg, stop);
@@ -98,7 +96,7 @@ Chase_Update (void)
 	r_refdef.viewangles[PITCH] = -Q_atan (stop[2] / dist) / M_PI * 180;
 
 	// move towards destination
-	TraceLine (r_refdef.vieworg, chase_dest, stop, normal);
+	TraceLine (cl.worldmodel, r_refdef.vieworg, chase_dest, stop, normal);
 
 	VectorCopy (stop, chase_dest);
 

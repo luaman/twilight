@@ -217,7 +217,7 @@ returns the blocked flags (1 = floor, 2 = step / wall)
 #define	STOP_EPSILON	0.1
 
 int
-ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
+ClipVelocity (vec3_t in, dvec3_t normal, vec3_t out, float overbounce)
 {
 	float       backoff;
 	float       change;
@@ -262,7 +262,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 	vec3_t      dir;
 	float       d;
 	int         numplanes;
-	vec3_t      planes[MAX_CLIP_PLANES];
+	dvec3_t     planes[MAX_CLIP_PLANES];
 	vec3_t      primal_velocity, original_velocity, new_velocity;
 	int         i, j;
 	trace_t     trace;
@@ -305,7 +305,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 
 		if (trace.plane.normal[2] > 0.7) {
 			blocked |= 1;				// floor
-			if (trace.ent->v.solid == SOLID_BSP) {
+			if (((edict_t *) trace.ent)->v.solid == SOLID_BSP) {
 				ent->v.flags = (int) ent->v.flags | FL_ONGROUND;
 				ent->v.groundentity = EDICT_TO_PROG (trace.ent);
 			}

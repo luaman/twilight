@@ -159,10 +159,10 @@ CL_ParseTEnt (void)
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 10);
 			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
-			if (Q_rand () % 5)
+			if (rand () % 5)
 				S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
 			else {
-				rnd = Q_rand () & 3;
+				rnd = rand () & 3;
 				if (rnd == 1)
 					S_StartSound (-1, 0, cl_sfx_ric1, pos, 1, 1);
 				else if (rnd == 2)
@@ -178,10 +178,10 @@ CL_ParseTEnt (void)
 			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
 			R_RunParticleEffect (pos, vec3_origin, 0, 20);
 
-			if (Q_rand () % 5)
+			if (rand () % 5)
 				S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
 			else {
-				rnd = Q_rand () & 3;
+				rnd = rand () & 3;
 				if (rnd == 1)
 					S_StartSound (-1, 0, cl_sfx_ric1, pos, 1, 1);
 				else if (rnd == 2)
@@ -368,7 +368,7 @@ CL_UpdateTEnts (void)
 			ent->model = b->model;
 			ent->angles[0] = ang[0];
 			ent->angles[1] = ang[1];
-			ent->angles[2] = Q_rand () % 360;
+			ent->angles[2] = rand () % 360;
 
 			for (i = 0; i < 3; i++)
 				org[i] += dist[i] * 30;

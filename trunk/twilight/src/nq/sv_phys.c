@@ -202,7 +202,7 @@ returns the blocked flags (1 = floor, 2 = step / wall)
 #define	STOP_EPSILON	0.1
 
 int
-ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
+ClipVelocity (vec3_t in, dvec3_t normal, vec3_t out, float overbounce)
 {
 	float	backoff;
 	float	change;
@@ -246,7 +246,8 @@ If steptrace is not NULL, the trace of any vertical wall hit will be stored
 int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 {
 	int		bumpcount, numbumps, numplanes, i, j, blocked;
-	vec3_t	dir, planes[MAX_CLIP_PLANES], end;
+	dvec3_t	planes[MAX_CLIP_PLANES];
+	vec3_t	dir, end;
 	vec3_t	primal_velocity, original_velocity, new_velocity;
 	trace_t	trace;
 	float	d, time_left;
@@ -288,7 +289,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 
 		if (trace.plane.normal[2] > 0.7) {
 			blocked |= 1;	// floor
-			if (trace.ent->v.solid == SOLID_BSP) {
+			if (((edict_t *) trace.ent)->v.solid == SOLID_BSP) {
 				ent->v.flags =	(int)ent->v.flags | FL_ONGROUND;
 				ent->v.groundentity = EDICT_TO_PROG(trace.ent);
 			}
@@ -843,8 +844,8 @@ SV_TryUnstick (edict_t *ent, vec3_t oldvel)
 		ent->v.velocity[2] = 0;
 		clip = SV_FlyMove (ent, 0.1, &steptrace);
 
-		if (Q_fabs (oldorg[1] - ent->v.origin[1]) > 4
-			|| Q_fabs (oldorg[0] - ent->v.origin[0]) > 4) {
+		if (fabs (oldorg[1] - ent->v.origin[1]) > 4
+			|| fabs (oldorg[0] - ent->v.origin[0]) > 4) {
 			Com_DPrintf ("unstuck!\n");
 			return clip;
 		}
@@ -918,8 +919,8 @@ SV_WalkMove (edict_t *ent)
 	// check for stuckness, possibly due to the limited precision of floats
 	// in the clipping hulls
 	if (clip) {
-		if (Q_fabs (oldorg[1] - ent->v.origin[1]) < 0.03125 &&
-				Q_fabs (oldorg[0] - ent->v.origin[0]) < 0.03125)	// stepping up didn't make any progress
+		if (fabs (oldorg[1] - ent->v.origin[1]) < 0.03125 &&
+				fabs (oldorg[0] - ent->v.origin[0]) < 0.03125)	// stepping up didn't make any progress
 			clip = SV_TryUnstick (ent, oldvel);
 	}
 

@@ -521,7 +521,7 @@ S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol,
 		if (check == target_chan)
 			continue;
 		if (check->sfx == sfx && !check->pos) {
-			skip = Q_rand () % (int) (0.1 * shm->speed);
+			skip = rand () % (int) (0.1 * shm->speed);
 			if (skip >= target_chan->end)
 				skip = target_chan->end - 1;
 			target_chan->pos += skip;
@@ -671,11 +671,11 @@ S_UpdateAmbientSounds (void)
 
 		// don't adjust volume too fast
 		if (chan->master_vol < vol) {
-			chan->master_vol += host_frametime * ambient_fade->ivalue;
+			chan->master_vol += host_frametime * ambient_fade->fvalue;
 			if (chan->master_vol > vol)
 				chan->master_vol = vol;
 		} else if (chan->master_vol > vol) {
-			chan->master_vol -= host_frametime * ambient_fade->ivalue;
+			chan->master_vol -= host_frametime * ambient_fade->fvalue;
 			if (chan->master_vol < vol)
 				chan->master_vol = vol;
 		}
