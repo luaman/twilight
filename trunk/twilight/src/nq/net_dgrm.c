@@ -22,29 +22,19 @@
 		Boston, MA  02111-1307, USA
 
 */
-// net_dgrm.c
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 // This is enables a simple IP banning mechanism
 #define BAN_TEST
 
 #ifdef BAN_TEST
-#if defined(_WIN32)
-#include <windows.h>
-#elif defined (NeXT)
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#else
-#define AF_INET 		2				/* internet */
+# ifdef __WIN32
+#  include <windows.h>
+# else
+#  define AF_INET 		2				/* internet */
 struct in_addr {
 	union {
 		struct {
@@ -57,7 +47,7 @@ struct in_addr {
 	} S_un;
 };
 
-#define	s_addr	S_un.S_addr				/* can be used for most tcp & ip code */
+#  define	s_addr	S_un.S_addr		/* can be used for most tcp & ip code */
 struct sockaddr_in {
 	short       sin_family;
 	unsigned short sin_port;
@@ -66,7 +56,7 @@ struct sockaddr_in {
 };
 char       *inet_ntoa (struct in_addr in);
 unsigned long inet_addr (const char *cp);
-#endif
+# endif
 #endif // BAN_TEST
 
 #include <stdio.h>

@@ -1,5 +1,5 @@
 /*
-	$RCSfile$ -- gl_poly.c
+	$RCSfile$
 
 	Copyright (C) 2001 Forest "LordHavoc" Hale
 
@@ -25,13 +25,7 @@
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include "quakedef.h"
 #include "mathlib.h"

@@ -22,17 +22,10 @@
 		Boston, MA  02111-1307, USA
 
 */
-// strlib.c -- string manipulations
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include <stdio.h>
 #include <string.h>

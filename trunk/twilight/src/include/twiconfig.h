@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) 2001  Joseph Carter
+	Copyright (C) 2001-2002  Joseph Carter
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -24,24 +24,38 @@
 	$Id$
 */
 
-#ifndef __COMPAT_H
-#define __COMPAT_H
+#ifndef __TWICONFIG_H
+#define __TWICONFIG_H
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#else
+# ifdef __WIN32
+#  include "win32config.h"
+# endif
+#endif
+
+/*
+ * Win32 uses an underscore at the beginning of the functions it provides for
+ * POSIX "compatibility" - mangle things here if we need to.
+ */
 #if !defined(HAVE_SNPRINTF) && defined(HAVE__SNPRINTF)
 # define snprintf _snprintf
 #endif
-
 #if !defined(HAVE_VSNPRINTF) && defined(HAVE__VSNPRINTF)
 # define vsnprintf _vsnprintf
 #endif
-
 #if !defined(HAVE_MKDIR) && defined(HAVE__MKDIR)
 # define mkdir(s) _mkdir((s))
 #endif
 
-#if defined(HAVE___INLINE)
+
+/*
+ * Don't we love compiler disparity?
+ */
+#ifdef HAVE___INLINE
 # define inline __inline
 #endif
 
-#endif // __COMPAT_H
+#endif // __TWICONFIG_H
 
