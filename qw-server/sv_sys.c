@@ -351,78 +351,60 @@ Sys_ConsoleInput (void)
 }
 #endif
 
-#ifdef _WIN32
+
 char *
 Sys_ExpandPath (char *str)
 {
-	static char buf[_MAX_PATH] = "";
-	char *s = str, *p;
+	static char	buf[PATH_MAX] = "";
+    char		*s, *p;
 
+	s = str;
 	if (*s == '~')
 	{
 		s++;
 		if (*s == '/' || *s == '\0')
-		{
-			/* Current user's home directory */
-			if ((p = getenv("TWILIGHT")))
-				strlcpy(buf, p, _MAX_PATH);
-			else if ((p = getenv("HOME")))
-				strlcpy(buf, p, _MAX_PATH);
-			else if ((p = getenv("WINDIR")))
-				strlcpy(buf, p, _MAX_PATH);
-			else
-				/* should never happen */
-				strlcpy(buf, ".", _MAX_PATH);
-			strlcat (buf, s, _MAX_PATH);
-		} else {
-			/* ~user expansion in win32 always fails */
-			strcpy(buf, "");
-		}
-	} else
-		strlcpy (buf, str, _MAX_PATH);
-
-	return buf;
-}
-#else
-char *
-Sys_ExpandPath (char *str)
-{
-	static char buf[PATH_MAX] = "";
-	char *s = str, *p;
-	struct passwd *entry;
-
-	if (*s == '~')
-	{
-		s++;
-		if (*s == '/' || *s == '\0')
-		{
+		{                           
 			/* Current user's home directory */
 			if ((p = getenv("HOME")))
-				strlcpy(buf, p, PATH_MAX);
+				strncpy(buf, p, PATH_MAX);
+#ifdef __WIN32
+			else if ((p = getenv("USERPROFILE")))
+				strncpy(buf, p, PATH_MAX);
+			else if ((p = getenv("WINDIR")))
+				strncpy(buf, p, PATH_MAX);
+#endif /* __WIN32 */
 			else
-				strlcpy(buf, ".", PATH_MAX);
+				/* This should never happen */
+				strncpy(buf, ".", PATH_MAX);
+
 			strlcat (buf, s, PATH_MAX);
 		} else {
-			/* Another user's home directory */
+			/* Get named user's home directory */
 			if ((p = strchr(s, '/')) != NULL)
-				*p = '\0';
-			if ((entry = getpwnam(s)) != NULL)
 			{
-				strlcpy (buf, entry->pw_dir, PATH_MAX);
-				if (p) {
-					*p = '/';
-					strlcat (buf, p, PATH_MAX);
-				}
-			} else
-				/* ~user expansion failed, no such user */
-				strcpy(buf, "");
+#ifdef HAVE_GETPWNAM
+				struct passwd   *entry;
+				*p = '\0';
+				if ((entry = getpwnam(s)) != NULL)
+				{
+					strncpy (buf, entry->pw_dir, PATH_MAX);
+					if (p)
+					{
+						*p = '/';
+						strlcat (buf, p, PATH_MAX);
+					}
+				} else
+#endif /* HAVE_GETPWNAM */
+					/* Can't expand this, leave it alone */
+					strncpy (buf, str, PATH_MAX);
+			}
 		}
 	} else
-		strlcpy (buf, str, PATH_MAX);
+		/* Does not begin with ~, leave it alone */
+		strncpy (buf, str, PATH_MAX);
 
 	return buf;
 }
-#endif
 
 #ifdef _CONSOLE 
 #undef main
