@@ -29,7 +29,6 @@ static const char rcsid[] =
 
 #include <stdio.h>
 #include "quakedef.h"
-#include "bspfile.h"
 #include "common.h"
 #include "mathlib.h"
 #include "model.h"

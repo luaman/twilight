@@ -27,10 +27,8 @@
 #ifndef __MOD_BRUSH_H
 #define __MOD_BRUSH_H
 
-#include "bspfile.h"
+#include "mod_brush_disk.h"
 #include "common.h"
-#include "modelgen.h"
-#include "spritegen.h"
 #include "zone.h"
 #include "qtypes.h"
 

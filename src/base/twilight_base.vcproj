@@ -459,9 +459,6 @@
 				RelativePath="..\include\anorms.h">
 			</File>
 			<File
-				RelativePath="..\include\bspfile.h">
-			</File>
-			<File
 				RelativePath="..\include\cmd.h">
 			</File>
 			<File
@@ -516,13 +513,13 @@
 				RelativePath="..\include\menu.h">
 			</File>
 			<File
+				RelativePath="..\include\mod_brush_disk.h">
+			</File>
+			<File
 				RelativePath="..\include\mod_brush.h">
 			</File>
 			<File
 				RelativePath="..\include\model.h">
-			</File>
-			<File
-				RelativePath="..\include\modelgen.h">
 			</File>
 			<File
 				RelativePath="..\include\pmove.h">
@@ -541,9 +538,6 @@
 			</File>
 			<File
 				RelativePath="..\include\sbar.h">
-			</File>
-			<File
-				RelativePath="..\include\spritegn.h">
 			</File>
 			<File
 				RelativePath="..\include\strlib.h">

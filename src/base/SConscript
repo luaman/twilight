@@ -3,9 +3,9 @@
 Import ("env", "opts")
 env.Append (CPPPATH = ["#/src/base"])
 
-base_headers = Split("""bspfile.h cmd.h collision.h cpu.h crc.h cvar.h
+base_headers = Split("""cmd.h collision.h cpu.h crc.h cvar.h
 	hash.h lh_parser.h loadso.h locs.h mathlib.h matrixlib.h mdfour.h
-	menu.h mod_brush.h model.h modelgen.h sdlstub.h spritegen.h strlib.h
+	menu.h mod_brush.h mod_brush_disk.h model.h sdlstub.h strlib.h
 	zone.h""")
 
 base_sources = Split("""buildnum.c cmd.c collision.c cpu.c crc.c cvar.c hash.c

@@ -26,8 +26,8 @@ libtwilight_base_a_SOURCES= \
 	matrixlib.c matrixlib.h \
 	menu.c menu.h \
 	mdfour.c mdfour.h \
-	model.c model.h modelgen.h spritegen.h \
-	mod_brush.c mod_brush.h bspfile.h \
+	model.c model.h \
+	mod_brush.c mod_brush.h mod_brush_disk.h \
 	parm.c \
 	strlib.c strlib.h \
 	locs.c locs.h \

@@ -27,9 +27,8 @@
 #ifndef __MOD_SPRITE_H
 #define __MOD_SPRITE_H
 
-#include "bspfile.h"
 #include "common.h"
-#include "spritegen.h"
+#include "mod_sprite_disk.h"
 #include "zone.h"
 
 /*

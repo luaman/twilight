@@ -34,9 +34,9 @@ libtwilight_renderer_a_SOURCES= \
 	liquid.c liquid.h \
 	video.c video.h \
 	menu.c \
-	mod_alias.c mod_alias.h \
+	mod_alias.c mod_alias.h mod_alias_disk.h \
 	mod_brush.c \
-	mod_sprite.c mod_sprite.h \
+	mod_sprite.c mod_sprite.h mod_sprite_disk.h \
 	noise.c gen_textures.c gen_textures.h \
 	palette.c palette.h \
 	explosion.c explosion.h \
