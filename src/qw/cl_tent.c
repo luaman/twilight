@@ -123,18 +123,22 @@ CL_AllocExplosion (void)
 	float       time;
 	int         index;
 
-	for (i = 0; i < MAX_EXPLOSIONS; i++)
+	for (i = 0; i < MAX_EXPLOSIONS; i++) {
 		if (!cl_explosions[i].model)
 			return &cl_explosions[i];
+	}
+
 // find the oldest explosion
 	time = cl.time;
 	index = 0;
 
-	for (i = 0; i < MAX_EXPLOSIONS; i++)
+	for (i = 0; i < MAX_EXPLOSIONS; i++) {
 		if (cl_explosions[i].start < time) {
 			time = cl_explosions[i].start;
 			index = i;
 		}
+	}
+
 	return &cl_explosions[index];
 }
 
@@ -162,15 +166,16 @@ CL_ParseBeam (model_t *m)
 	end[2] = MSG_ReadCoord ();
 
 // override any beam with the same entity
-	for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++)
+	for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++) {
 		if (b->entity == ent) {
-			b->entity = ent;
 			b->model = m;
 			b->endtime = cl.time + 0.2;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
 			return;
 		}
+	}
+
 // find a free beam
 	for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++) {
 		if (!b->model || b->endtime < cl.time) {
@@ -182,7 +187,8 @@ CL_ParseBeam (model_t *m)
 			return;
 		}
 	}
-	Con_Printf ("beam list overflow!\n");
+
+	Con_Printf ("CL_ParseBeam: beam list overflow!\n");
 }
 
 /*
@@ -391,11 +397,10 @@ CL_UpdateBeams (void)
 			continue;
 
 		// if coming from the player, update the start position
-		if (b->entity == cl.playernum + 1)	// entity 0 is the world
-		{
+		if (b->entity == cl.playernum + 1) {
 			VectorCopy (cl.simorg, b->start);
-//          b->start[2] -= 22;  // adjust for view height
 		}
+
 		// calculate pitch and yaw
 		VectorSubtract (b->end, b->start, dist);
 
