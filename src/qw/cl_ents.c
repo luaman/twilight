@@ -616,6 +616,7 @@ void
 CL_ClearProjectiles (void)
 {
 	cl_num_projectiles = 0;
+	memset (cl_projectiles, 0, sizeof(cl_projectiles));
 }
 
 /*

@@ -40,6 +40,7 @@ static const char rcsid[] =
 
 void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
+void R_TimeRefresh_f (void);
 
 /*
 ==================
@@ -212,15 +213,10 @@ R_TranslatePlayerSkin (int playernum)
 	int         top, bottom;
 	Uint8       translate[256];
 	unsigned    translate32[256];
-	int         i, j, s;
+	int         i, s;
 	model_t    *model;
 	aliashdr_t *paliashdr;
 	Uint8      *original;
-	unsigned    pixels[512 * 256], *out;
-	unsigned    scaled_width, scaled_height;
-	int         inwidth, inheight;
-	Uint8      *inrow;
-	unsigned    frac, fracstep;
 
 	top = cl.scores[playernum].colors & 0xf0;
 	bottom = (cl.scores[playernum].colors & 15) << 4;
@@ -261,45 +257,15 @@ R_TranslatePlayerSkin (int playernum)
 	} else
 		original =
 			(Uint8 *) paliashdr + paliashdr->texels[currententity->skinnum];
+
 	if (s & 3)
 		Sys_Error ("R_TranslateSkin: s&3");
-
-	inwidth = paliashdr->skinwidth;
-	inheight = paliashdr->skinheight;
-
-	// because this happens during gameplay, do it fast
-	// instead of sending it through gl_upload 8
-	qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
-
-	scaled_width = gl_max_size->value < 512 ? gl_max_size->value : 512;
-	scaled_height = gl_max_size->value < 256 ? gl_max_size->value : 256;
-
-	// allow users to crunch sizes down even more if they want
-	scaled_width >>= (int) gl_playermip->value;
-	scaled_height >>= (int) gl_playermip->value;
 
 	for (i = 0; i < 256; i++)
 		translate32[i] = d_8to32table[translate[i]];
 
-	out = pixels;
-	fracstep = inwidth * 0x10000 / scaled_width;
-	for (i = 0; i < scaled_height; i++, out += scaled_width) {
-		inrow = original + inwidth * (i * inheight / scaled_height);
-		frac = fracstep >> 1;
-		for (j = 0; j < scaled_width; j += 4) {
-			out[j] = translate32[inrow[frac >> 16]];
-			frac += fracstep;
-			out[j + 1] = translate32[inrow[frac >> 16]];
-			frac += fracstep;
-			out[j + 2] = translate32[inrow[frac >> 16]];
-			frac += fracstep;
-			out[j + 3] = translate32[inrow[frac >> 16]];
-			frac += fracstep;
-		}
-	}
-	qglTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, scaled_width,
-				  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
+	qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
+	GL_Upload8 (original, paliashdr->skinwidth, paliashdr->skinheight, true, false, translate32);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }

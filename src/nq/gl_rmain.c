@@ -885,7 +885,8 @@ R_DrawAliasModel (entity_t *e)
 			if (cl_dlights[lnum].die >= cl.time) {
 				VectorSubtract (currententity->origin,
 								cl_dlights[lnum].origin, dist);
-				add = cl_dlights[lnum].radius - VectorLength (dist);
+				add = (cl_dlights[lnum].radius * cl_dlights[lnum].radius * 8)
+					/ (DotProduct (dist, dist));	// FIXME Deek
 
 				if (add > 0) {
 					if (!colorlights)
@@ -1044,7 +1045,7 @@ R_DrawAliasModel (entity_t *e)
 
 	if (fb_texture && !gl_mtexable) {
 		qglEnable (GL_BLEND);
-		qglBlendFunc(GL_ONE, GL_ONE); //GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		qglBlendFunc(GL_ONE, GL_ONE);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
 		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))

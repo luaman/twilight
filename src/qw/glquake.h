@@ -67,8 +67,8 @@ extern float gldepthmin, gldepthmax;
 
 void        GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 						 qboolean alpha);
-void        GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap,
-						qboolean alpha);
+void        GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, 
+						int alpha, unsigned *ttable);
 int         GL_LoadTexture (char *identifier, int width, int height,
 							Uint8 *data, qboolean mipmap, int alpha);
 int         GL_FindTexture (char *identifier);
@@ -107,7 +107,6 @@ extern PROC glVertexPointerEXT;
 #define BACKFACE_EPSILON	0.01
 
 
-void        R_TimeRefresh_f (void);
 void        R_ReadPointFile_f (void);
 texture_t  *R_TextureAnimation (texture_t *base);
 
