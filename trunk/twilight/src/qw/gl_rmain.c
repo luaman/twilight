@@ -98,6 +98,7 @@ cvar_t *gl_playermip;
 cvar_t *gl_nocolors;
 cvar_t *gl_finish;
 cvar_t *gl_im_animation;
+cvar_t *gl_im_transform;
 cvar_t *gl_fb_models;
 cvar_t *gl_fb_bmodels;
 cvar_t *gl_oldlights;
@@ -137,6 +138,89 @@ R_CullBox (vec3_t mins, vec3_t maxs)
 		return true;
 
 	return false;
+}
+
+/*
+=============
+R_BlendedRotateForEntity
+
+fenix@io.com: model transform interpolation
+=============
+*/
+void R_BlendedRotateForEntity (entity_t *e, qboolean shadow)
+{
+	float timepassed;
+	float blend;
+	vec3_t d;
+	int i;
+
+	// positional interpolation
+	timepassed = cl.time - e->translate_start_time;
+
+	if (e->translate_start_time == 0 || timepassed > 1)
+	{
+		e->translate_start_time = cl.time;
+		VectorCopy (e->cur.origin, e->origin1);
+		VectorCopy (e->cur.origin, e->origin2);
+	}
+
+	if (!VectorCompare (e->cur.origin, e->origin2))
+	{
+		e->translate_start_time = cl.time;
+		VectorCopy (e->origin2, e->origin1);
+		VectorCopy (e->cur.origin,  e->origin2);
+		blend = 0;
+	}
+	else
+	{
+		blend = timepassed * 10;
+		if (cl.paused || blend > 1) blend = 1;
+	}
+
+	Lerp_Vectors (e->origin1, blend, e->origin2, d);
+	qglTranslatef (d[0], d[1], d[2]);
+
+	// orientation interpolation (Euler angles, yuck!)
+	timepassed = cl.time - e->rotate_start_time;
+
+	if (e->rotate_start_time == 0 || timepassed > 1)
+	{
+		e->rotate_start_time = cl.time;
+		VectorCopy (e->cur.angles, e->angles1);
+		VectorCopy (e->cur.angles, e->angles2);
+	}
+
+	if (!VectorCompare (e->cur.angles, e->angles2))
+	{
+		e->rotate_start_time = cl.time;
+		VectorCopy (e->angles2, e->angles1);
+		VectorCopy (e->cur.angles,  e->angles2);
+		blend = 0;
+	}
+	else
+	{
+		blend = timepassed * 10;
+		if (cl.paused || blend > 1) blend = 1;
+	}
+
+	VectorSubtract (e->angles2, e->angles1, d);
+
+	// always interpolate along the shortest path
+	for (i = 0; i < 3; i++)
+	{
+		if (d[i] > 180)
+			d[i] -= 360;
+		else if (d[i] < -180)
+			d[i] += 360;
+	}
+
+	qglRotatef (e->angles1[1] + (blend * d[1]), 0, 0, 1);
+
+	if (!shadow)
+	{
+		qglRotatef (-e->angles1[0] + (-blend * d[0]), 0, 1, 0);
+		qglRotatef ( e->angles1[2] + ( blend * d[2]), 1, 0, 0);
+	}
 }
 
 /*
@@ -960,10 +1044,14 @@ R_DrawAliasModel (entity_t *e)
 	 */
 	qglPushMatrix ();
 
-	qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
-	qglRotatef (e->cur.angles[1], 0, 0, 1);
-	qglRotatef (-e->cur.angles[0], 0, 1, 0);
-	qglRotatef (e->cur.angles[2], 1, 0, 0);
+	if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM) && (e != &cl.viewent))
+		R_BlendedRotateForEntity (e, false);
+	else {
+		qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
+		qglRotatef (e->cur.angles[1], 0, 0, 1);
+		qglRotatef (-e->cur.angles[0], 0, 1, 0);
+		qglRotatef (e->cur.angles[2], 1, 0, 0);
+	}
 
 	// double size of eyes, since they are really hard to see in gl
 	if (clmodel->modflags & FLAG_DOUBLESIZE) {
@@ -1044,8 +1132,12 @@ R_DrawAliasModel (entity_t *e)
 
 		qglPushMatrix ();
 
-		qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
-		qglRotatef (e->cur.angles[1], 0, 0, 1);
+		if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
+			R_BlendedRotateForEntity (e, true);
+		else {
+			qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
+			qglRotatef (e->cur.angles[1], 0, 0, 1);
+		}
 
 		qglDisable (GL_TEXTURE_2D);
 		qglEnable (GL_BLEND);

@@ -45,7 +45,6 @@ static const char rcsid[] =
 #include "r_explosion.h"
 
 // FIXME
-extern cvar_t *gl_im_transform;
 extern void TNT_Init (void);
 
 GLfloat tc_arrays[2][MAX_VERTEX_ARRAYS][2];
