@@ -482,6 +482,9 @@ SV_Begin_f (void)
 	host_client->netchan.frame_rate = 0;
 	host_client->netchan.drop_count = 0;
 	host_client->netchan.good_count = 0;
+	host_client->msec_last_check = -1;
+	host_client->msecs = 0;
+	host_client->msec_over = 0;
 
 	// check he's not cheating
 
@@ -499,19 +502,6 @@ SV_Begin_f (void)
 		ClientReliableWrite_Byte (host_client, sv.paused);
 		SV_ClientPrintf (host_client, PRINT_HIGH, "Server is paused.\n");
 	}
-#if 0
-//
-// send a fixangle over the reliable channel to make sure it gets there
-// Never send a roll angle, because savegames can catch the server
-// in a state where it is expecting the client to correct the angle
-// and it won't happen if the game was just loaded, so you wind up
-// with a permanent head tilt
-	ent = EDICT_NUM (1 + (host_client - svs.clients));
-	MSG_WriteByte (&host_client->netchan.message, svc_setangle);
-	for (i = 0; i < 2; i++)
-		MSG_WriteAngle (&host_client->netchan.message, ent->v.angles[i]);
-	MSG_WriteAngle (&host_client->netchan.message, 0);
-#endif
 }
 
 //=============================================================================
