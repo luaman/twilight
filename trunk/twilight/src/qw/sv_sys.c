@@ -470,16 +470,16 @@ Sys_ExpandPath (char *str)
 		{                           
 			/* Current user's home directory */
 			if ((p = getenv("HOME")))
-				strncpy(buf, p, PATH_MAX);
+				strlcpy(buf, p, PATH_MAX);
 #ifdef _WIN32
 			else if ((p = getenv("USERPROFILE")))
-				strncpy(buf, p, PATH_MAX);
+				strlcpy(buf, p, PATH_MAX);
 			else if ((p = getenv("WINDIR")))
-				strncpy(buf, p, PATH_MAX);
+				strlcpy(buf, p, PATH_MAX);
 #endif /* _WIN32 */
 			else
 				/* This should never happen */
-				strncpy(buf, ".", PATH_MAX);
+				strlcpy(buf, ".", PATH_MAX);
 
 			strlcat (buf, s, PATH_MAX);
 		} else {
@@ -491,21 +491,18 @@ Sys_ExpandPath (char *str)
 				*p = '\0';
 				if ((entry = getpwnam(s)) != NULL)
 				{
-					strncpy (buf, entry->pw_dir, PATH_MAX);
-					if (p)
-					{
-						*p = '/';
-						strlcat (buf, p, PATH_MAX);
-					}
+					strlcpy (buf, entry->pw_dir, PATH_MAX);
+					*p = '/';
+					strlcat (buf, p, PATH_MAX);
 				} else
 #endif /* HAVE_GETPWNAM */
 					/* Can't expand this, leave it alone */
-					strncpy (buf, str, PATH_MAX);
+					strlcpy (buf, str, PATH_MAX);
 			}
 		}
 	} else
 		/* Does not begin with ~, leave it alone */
-		strncpy (buf, str, PATH_MAX);
+		strlcpy (buf, str, PATH_MAX);
 
 	return buf;
 }

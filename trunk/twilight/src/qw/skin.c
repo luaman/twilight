@@ -99,7 +99,7 @@ Skin_Load (char *skin_name)
 
 	cached = &skins[numskins++];
 	memset (cached, 0, sizeof (*cached));
-	strncpy (cached->name, name, sizeof (cached->name) - 1);
+	strlcpy (cached->name, name, sizeof (cached->name));
 
 	/*
 	 * load the pic from disk
