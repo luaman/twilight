@@ -70,7 +70,7 @@ Sys_Error (char *error, ...)
 	char        text[1024];
 
 	va_start (argptr, error);
-	vsprintf (text, error, argptr);
+	vsnprintf (text, sizeof(text), error, argptr);
 	va_end (argptr);
 
 //    MessageBox(NULL, text, "Error", 0 /* MB_OK */ );

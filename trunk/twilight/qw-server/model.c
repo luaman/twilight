@@ -1103,7 +1103,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		if (i < mod->numsubmodels - 1) {	// duplicate the basic information
 			char        name[10];
 
-			sprintf (name, "*%i", i + 1);
+			snprintf (name, sizeof(name), "*%i", i + 1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);

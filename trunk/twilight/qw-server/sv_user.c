@@ -566,7 +566,7 @@ OutofBandPrintf (netadr_t where, char *fmt, ...)
 	send[3] = 0xff;
 	send[4] = A2C_PRINT;
 	va_start (argptr, fmt);
-	vsprintf (send + 5, fmt, argptr);
+	vsnprintf (send + 5, sizeof(send) - 5, fmt, argptr);
 	va_end (argptr);
 
 	NET_SendPacket (strlen (send) + 1, send, where);
@@ -745,11 +745,11 @@ SV_Say (qboolean team)
 	}
 
 	if (host_client->spectator && (!sv_spectalk.value || team))
-		sprintf (text, "[SPEC] %s: ", host_client->name);
+		snprintf (text, sizeof(text), "[SPEC] %s: ", host_client->name);
 	else if (team)
-		sprintf (text, "(%s): ", host_client->name);
+		snprintf (text, sizeof(text), "(%s): ", host_client->name);
 	else {
-		sprintf (text, "%s: ", host_client->name);
+		snprintf (text, sizeof(text), "%s: ", host_client->name);
 	}
 
 	if (fp_messages) {
@@ -938,9 +938,9 @@ SV_Pause_f (void)
 	}
 
 	if (!sv.paused)
-		sprintf (st, "%s paused the game\n", host_client->name);
+		snprintf (st, sizeof(st), "%s paused the game\n", host_client->name);
 	else
-		sprintf (st, "%s unpaused the game\n", host_client->name);
+		snprintf (st, sizeof(st), "%s unpaused the game\n", host_client->name);
 
 	SV_TogglePause (st);
 }
