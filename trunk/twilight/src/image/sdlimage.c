@@ -61,7 +61,9 @@ static const char rcsid[] =
  */
 static qboolean		loaded;
 
+#include "begin_code.h"
 typedef DECLSPEC SDL_Surface * SDLCALL (IMG_SDL_Load) (SDL_RWops *);
+#include "close_code.h"
 
 static void			*sdl_handle;
 
