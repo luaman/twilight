@@ -185,42 +185,42 @@ extern int  skytexturenum;				// index in cl.loadmodel, not gl
 
 										// texture object
 
-extern cvar_t *r_norefresh;
-extern cvar_t *r_drawentities;
-extern cvar_t *r_drawworld;
-extern cvar_t *r_drawviewmodel;
-extern cvar_t *r_speeds;
-extern cvar_t *r_waterwarp;
-extern cvar_t *r_fullbright;
-extern cvar_t *r_lightmap;
-extern cvar_t *r_shadows;
-extern cvar_t *r_mirroralpha;
-extern cvar_t *r_wateralpha;
-extern cvar_t *r_dynamic;
-extern cvar_t *r_novis;
-extern cvar_t *r_netgraph;
+extern struct cvar_s *r_norefresh;
+extern struct cvar_s *r_drawentities;
+extern struct cvar_s *r_drawworld;
+extern struct cvar_s *r_drawviewmodel;
+extern struct cvar_s *r_speeds;
+extern struct cvar_s *r_waterwarp;
+extern struct cvar_s *r_fullbright;
+extern struct cvar_s *r_lightmap;
+extern struct cvar_s *r_shadows;
+extern struct cvar_s *r_mirroralpha;
+extern struct cvar_s *r_wateralpha;
+extern struct cvar_s *r_dynamic;
+extern struct cvar_s *r_novis;
+extern struct cvar_s *r_netgraph;
 
-extern cvar_t *gl_clear;
-extern cvar_t *gl_cull;
-extern cvar_t *gl_poly;
-extern cvar_t *gl_texsort;
-extern cvar_t *gl_smoothmodels;
-extern cvar_t *gl_affinemodels;
-extern cvar_t *gl_polyblend;
-extern cvar_t *gl_keeptjunctions;
-extern cvar_t *gl_reporttjunctions;
-extern cvar_t *gl_flashblend;
-extern cvar_t *gl_nocolors;
-extern cvar_t *gl_finish;
-extern cvar_t *gl_im_animation;
-extern cvar_t *gl_fb_models;
+extern struct cvar_s *gl_clear;
+extern struct cvar_s *gl_cull;
+extern struct cvar_s *gl_poly;
+extern struct cvar_s *gl_texsort;
+extern struct cvar_s *gl_smoothmodels;
+extern struct cvar_s *gl_affinemodels;
+extern struct cvar_s *gl_polyblend;
+extern struct cvar_s *gl_keeptjunctions;
+extern struct cvar_s *gl_reporttjunctions;
+extern struct cvar_s *gl_flashblend;
+extern struct cvar_s *gl_nocolors;
+extern struct cvar_s *gl_finish;
+extern struct cvar_s *gl_im_animation;
+extern struct cvar_s *gl_fb_models;
 
 extern int  gl_lightmap_format;
 extern int  gl_solid_format;
 extern int  gl_alpha_format;
 
-extern cvar_t *gl_max_size;
-extern cvar_t *gl_playermip;
+extern struct cvar_s *gl_max_size;
+extern struct cvar_s *gl_playermip;
 
 extern int  mirrortexturenum;			// quake texturenum, not gltexturenum
 extern qboolean mirror;

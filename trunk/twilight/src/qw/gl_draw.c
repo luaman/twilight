@@ -36,6 +36,8 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "crc.h"
+#include "cvar.h"
 #include "glquake.h"
 
 extern unsigned char d_15to8table[65536];
@@ -840,8 +842,6 @@ Draw_FadeScreen (void)
 	qglColor4f (1, 1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
 	qglDisable (GL_BLEND);
-
-	Sbar_Changed ();
 }
 
 //=============================================================================

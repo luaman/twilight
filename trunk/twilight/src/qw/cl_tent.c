@@ -35,6 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "sound.h"
 
 
 #define	MAX_BEAMS	8

@@ -34,10 +34,10 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cvar.h"
 #include "keys.h"
-#ifdef _WIN32
-#include <windows.h>
-#endif
+#include "menu.h"
+
 /*
 
 key up events are sent even if in console mode

@@ -34,6 +34,8 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "sound.h"
+
 #include "winquake.h"
 
 extern HWND mainwindow;

@@ -34,8 +34,8 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <math.h>
 #include "quakedef.h"
+#include "cvar.h"
 #include "glquake.h"
 
 int         r_dlightframecount;
@@ -102,8 +102,8 @@ R_InitBubble (void)
 	// additional accuracy here
 	for (i = 16; i >= 0; i--) {
 		a = i / 16.0 * M_PI * 2;
-		*bub_sin++ = sin (a);
-		*bub_cos++ = cos (a);
+		*bub_sin++ = Q_sin (a);
+		*bub_cos++ = Q_cos (a);
 	}
 }
 
