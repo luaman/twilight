@@ -286,8 +286,8 @@ Sys_DoubleTime (void)
 }
 
 #ifndef _WIN32
-	static qboolean		do_stdin = true;
-	static qboolean		stdin_ready;
+qboolean		do_stdin = true;
+qboolean		stdin_ready;
 #endif
 
 char *
