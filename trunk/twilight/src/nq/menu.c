@@ -1087,17 +1087,17 @@ M_AdjustSliders (int dir)
 			Cvar_Set (scr_viewsize, va("%f", t));
 			break;
 		case 4:						// gamma
-			t = v_gamma->value - (dir * 0.05f);
+			t = v_gamma->value + (dir * 0.05f);
 			t = bound (1.0, t, 2.0);
 			Cvar_Set (v_gamma, va("%f", t));
 			break;
 		case 5:						// software brightness
-			t = r_brightness->value + dir * 0.25;
+			t = r_brightness->value + (dir * 0.25);
 			t = bound (1, t, 5);
 			Cvar_Set (r_brightness, va("%f", t));
 			break;
 		case 6:						// software contrast (base brightness)
-			t = r_contrast->value + dir * 0.025;
+			t = r_contrast->value + (dir * 0.025);
 			t = bound (.75, t, 1);
 			Cvar_Set (r_contrast, va("%f", t));
 			break;
