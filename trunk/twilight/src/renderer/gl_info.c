@@ -35,6 +35,7 @@ static const char rcsid[] =
 #include "qtypes.h"
 #include "dyngl.h"
 #include "cmd.h"
+#include "sys.h"
 
 double r_time, r_frametime; // Current time, and time since last frame.
 Uint r_framecount;          // Current frame.
@@ -87,6 +88,11 @@ GLInfo_CheckDriverQuirks (void)
 			Com_Printf ("Disabling GL_SGIS_generate_mipmap due to buggy ATI driver version.");
 		}
 		*/
+	}
+	if (!strcmp (gl_renderer, "Mesa DRI Voodoo3 20010501 x86/MMX")) {
+		Com_Printf ("Disabiling glLoadTransposeMatrixf and glLoadTransposeMatrixf due to buggy DRI drivers.\n");
+		DynGL_BadFunction("glLoadTransposeMatrixf", Sys_Error);
+		DynGL_BadFunction("glMultTransposeMatrixf", Sys_Error);
 	}
 }
 

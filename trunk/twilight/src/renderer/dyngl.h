@@ -87,10 +87,19 @@
  *                      by DynGL_HasExtension and added instead to the list of
  *                      bad extensions.  Nothing is done if the driver does
  *                      not claim to have the extension.
+ *
+ * DynGL_BadFunction  - If for some reason you know that a given function is
+ *                      broken with a particular driver, you may call this
+ *                      function with its name.  If the function is an EXT
+ *                      then the extension it belongs to will be marked bad.
+ *                      If the function is an ALT then it will be replaced
+ *                      with the alternate function. If the function is a
+ *                      NEED then errfunc will be called.
  */
 SDL_bool DynGL_LoadLibrary (char *name);
 void DynGL_CloseLibrary (void);
 SDL_bool DynGL_GetFunctions (void (*errfunc)(const char *fmt, ...));
+SDL_bool DynGL_BadFunction (const char *func, void (*errfunc)(char *fmt, ...));
 SDL_bool DynGL_HasExtension (char *ext);
 void DynGL_BadExtension (char *ext);
 
