@@ -77,6 +77,10 @@ static float old_mouse_x, old_mouse_y;
 static qboolean use_mouse = false;
 
 static int sdl_flags = SDL_OPENGL;
+int red_size, green_size, blue_size, alpha_size;
+int doublebuffer, buffer_size, depth_size, stencil_size;
+int accum_red_size, accum_green_size, accum_blue_size, accum_alpha_size;
+
 
 /*-----------------------------------------------------------------------*/
 
@@ -252,13 +256,19 @@ CheckExtensions (void)
 	if (!COM_CheckParm ("-nocva"))
 		gl_cva = DynGL_HasExtension ("GL_EXT_compiled_vertex_array");
 
-	Com_Printf ("Checking for compiled vertex arrays... %s\n",
+	Com_Printf ("Checking for compiled vertex arrays: %s\n",
 			gl_cva ? "GL_EXT_compiled_vertex_array." : "no.");
 }
 
 void
 GL_Info_f (void)
 {
+	Com_Printf ("Frame Buffer: %d bpp, %d-%d-%d-%d, %s buffered\n",
+			buffer_size, red_size, green_size, blue_size, alpha_size,
+			doublebuffer ? "double" : "single");
+	Com_Printf ("Accum Buffer: %d-%d-%d-%d\n", accum_red_size, accum_green_size,
+			accum_blue_size, accum_alpha_size);
+	Com_Printf ("Depth bits: %d. Stencil bits: %d\n", depth_size, stencil_size);
 	Com_Printf ("GL_VENDOR: %s\n", gl_vendor);
 	Com_Printf ("GL_RENDERER: %s\n", gl_renderer);
 	Com_Printf ("GL_VERSION: %s\n", gl_version);
@@ -438,15 +448,17 @@ VID_Init (unsigned char *palette)
 	else
 		vid.bpp = 0;
 
-	if (vid.bpp > 23)
-	{
+	if (vid.bpp >= 24) {
 		/* Insist on at least 8 bits per channel */
 		SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 8);
 		SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 8);
 		SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 8);
-	}
-	else
-	{
+	} else if (vid.bpp >= 16) {
+		/* Insist on at least 5 bits per channel */
+		SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 5);
+		SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 5);
+		SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 5);
+	} else {
 		/* Take whatever OpenGL gives us */
 		SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 1);
 		SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 1);
@@ -465,6 +477,19 @@ VID_Init (unsigned char *palette)
 		Sys_Error ("%s\n", SDL_GetError ());
 	Com_DPrintf ("VID_Init: DynGL_GetFuncs successful.\n");
 
+	SDL_GL_GetAttribute (SDL_GL_RED_SIZE, &red_size);
+	SDL_GL_GetAttribute (SDL_GL_GREEN_SIZE, &green_size);
+	SDL_GL_GetAttribute (SDL_GL_BLUE_SIZE, &blue_size);
+	SDL_GL_GetAttribute (SDL_GL_ALPHA_SIZE, &alpha_size);
+	SDL_GL_GetAttribute (SDL_GL_DOUBLEBUFFER, &doublebuffer);
+	SDL_GL_GetAttribute (SDL_GL_BUFFER_SIZE, &buffer_size);
+	SDL_GL_GetAttribute (SDL_GL_DEPTH_SIZE, &depth_size);
+	SDL_GL_GetAttribute (SDL_GL_STENCIL_SIZE, &stencil_size);
+	SDL_GL_GetAttribute (SDL_GL_ACCUM_RED_SIZE, &accum_red_size);
+	SDL_GL_GetAttribute (SDL_GL_ACCUM_GREEN_SIZE, &accum_green_size);
+	SDL_GL_GetAttribute (SDL_GL_ACCUM_BLUE_SIZE, &accum_blue_size);
+	SDL_GL_GetAttribute (SDL_GL_ACCUM_ALPHA_SIZE, &accum_alpha_size);
+
 	SDL_WM_SetCaption ("Twilight QWCL", "twilight");
 	Com_DPrintf ("VID_Init: Window caption set.\n");
 
@@ -479,6 +504,12 @@ VID_Init (unsigned char *palette)
 
 	Com_Printf ("Video mode %dx%d initialized: %s.\n", vid.width, vid.height,
 			SDL_VideoDriverName(sdl_driver, sizeof(sdl_driver)));
+	Com_Printf ("Frame Buffer: %d bpp, %d-%d-%d-%d, %s buffered\n",
+			buffer_size, red_size, green_size, blue_size, alpha_size,
+			doublebuffer ? "double" : "single");
+	Com_Printf ("Accum Buffer: %d-%d-%d-%d\n", accum_red_size, accum_green_size,
+			accum_blue_size, accum_alpha_size);
+	Com_Printf ("Depth bits: %d. Stencil bits: %d\n", depth_size, stencil_size);
 
 	if (use_mouse)
 	{
