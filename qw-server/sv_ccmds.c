@@ -614,7 +614,7 @@ void
 SV_User_f (void)
 {
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("Usage: info <userid>\n");
+		Con_Printf ("Usage: user <userid>\n");
 		return;
 	}
 
@@ -821,7 +821,7 @@ SV_Snap_f (void)
 	int         uid;
 
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("Usage:  snap <userid>\n");
+		Con_Printf ("Usage: snap <userid>\n");
 		return;
 	}
 
