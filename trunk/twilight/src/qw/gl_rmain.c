@@ -207,7 +207,7 @@ R_DrawSpriteModel
 void
 R_DrawSpriteModel (entity_t *e)
 {
-	vec3_t      point;
+//	vec3_t      point;
 	mspriteframe_t *frame;
 	float      *up, *right;
 	vec3_t      v_forward, v_right, v_up;
@@ -229,6 +229,30 @@ R_DrawSpriteModel (entity_t *e)
 		right = vright;
 	}
 
+#if 1
+	transpolybegin(frame->gl_texturenum, 0, TPOLYTYPE_ALPHA);
+	transpolyvertub(
+		e->origin[0] + frame->down * up[0] + frame->left  * right[0],
+		e->origin[1] + frame->down * up[1] + frame->left  * right[1],
+		e->origin[2] + frame->down * up[2] + frame->left  * right[2],
+		0, 1, 255, 255, 255, 255);
+	transpolyvertub(
+		e->origin[0] + frame->up   * up[0] + frame->left  * right[0],
+		e->origin[1] + frame->up   * up[1] + frame->left  * right[1],
+		e->origin[2] + frame->up   * up[2] + frame->left  * right[2],
+		0, 0, 255, 255, 255, 255);
+	transpolyvertub(
+		e->origin[0] + frame->up   * up[0] + frame->right * right[0],
+		e->origin[1] + frame->up   * up[1] + frame->right * right[1],
+		e->origin[2] + frame->up   * up[2] + frame->right * right[2],
+		1, 0, 255, 255, 255, 255);
+	transpolyvertub(
+		e->origin[0] + frame->down * up[0] + frame->right * right[0],
+		e->origin[1] + frame->down * up[1] + frame->right * right[1],
+		e->origin[2] + frame->down * up[2] + frame->right * right[2],
+		1, 1, 255, 255, 255, 255);
+	transpolyend();
+#else
 	qglBindTexture (GL_TEXTURE_2D, frame->gl_texturenum);
 
 	VectorSet2 (tc_array[0], 0, 1);
@@ -252,6 +276,7 @@ R_DrawSpriteModel (entity_t *e)
 	VectorSet3 (v_array[3], point[0], point[1], point[2]);
 
 	qglDrawArrays (GL_QUADS, 0, 4);
+#endif
 }
 
 /*
@@ -341,7 +366,7 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean fb)
 				{
 					l = l1;
 				}
-				
+
 			}
 
 			// normals and vertexes come from the frame list
@@ -739,7 +764,7 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolea
 		e->frame_interval = 0.1;
 	}
 
-	if (e->lastmodel == e->model) 
+	if (e->lastmodel == e->model)
 	{
 		if (e->pose2 != pose) {
 			e->frame_start_time = realtime;
@@ -875,7 +900,7 @@ R_DrawAliasModel (entity_t *e)
 			lightcolor[2] = max (lightcolor[2], 8);
 		}
 	}
-	
+
 	if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb_models->value) {
 		if (!colorlights)
 			ambientlight = shadelight = 256;
@@ -1042,11 +1067,15 @@ R_DrawEntitiesOnList (void)
 
 	// LordHavoc: draw brush models, models, and sprites separately because
 	// of different states
+	// LordHavoc: changed sprites to be mixed with brushs, because they are
+	// now transpoly based
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = &cl_visedicts[i];
 
 		if (currententity->model->type == mod_brush)
 			R_DrawBrushModel (currententity);
+		else if (currententity->model->type == mod_sprite)
+			R_DrawSpriteModel (currententity);
 	}
 
 	for (i = 0; i < cl_numvisedicts; i++) {
@@ -1057,26 +1086,6 @@ R_DrawEntitiesOnList (void)
 	}
 }
 
-/*
-=============
-R_DrawEntitiesOnList
-=============
-*/
-void
-R_DrawEntitiesOnList2 (void)
-{
-	int i;
-
-	if (!r_drawentities->value)
-		return;
-
-	for (i = 0; i < cl_numvisedicts; i++) {
-		currententity = &cl_visedicts[i];
-
-		if (currententity->model->type == mod_sprite)
-			R_DrawSpriteModel (currententity);
-	}
-}
 
 /*
 =============
@@ -1321,31 +1330,6 @@ R_SetupGL (void)
 void R_DrawSkyBox (void);
 
 /*
-================
-R_RenderScene
-
-r_refdef must be set before the first call
-================
-*/
-void
-R_RenderScene (void)
-{
-	R_SetupFrame ();
-
-	R_SetFrustum ();
-
-	R_SetupGL ();
-
-	R_DrawWorld ();						// adds static entities to the list
-
-	S_ExtraUpdate ();					// don't let sound get messed up if
-	// going slow
-
-	R_DrawEntitiesOnList ();
-}
-
-
-/*
 =============
 R_Clear
 =============
@@ -1401,30 +1385,44 @@ R_RenderView (void)
 	if (!cl.worldmodel)
 		Sys_Error ("R_RenderView: NULL worldmodel");
 
-	if (r_speeds->value) {
+	if (r_speeds->value)
+	{
 		qglFinish ();
 		time1 = Sys_DoubleTime ();
 		c_brush_polys = 0;
 		c_alias_polys = 0;
 	}
-
-	if (gl_finish->value)
+	else if (gl_finish->value)
 		qglFinish ();
 
 	R_Clear ();
 
+	// render normal view
+	R_SetupFrame ();
+
+	R_SetFrustum ();
+
+	R_SetupGL ();
+
 	transpolyclear();
 
-	// render normal view
-	R_RenderScene ();
+	// adds static entities to the list
+	R_DrawWorld ();
+
+	// don't let sound get messed up if going slow
+	S_ExtraUpdate ();
+
+	R_DrawEntitiesOnList ();
+
 	R_DrawViewModel ();
 
 	qglEnable (GL_BLEND);
 	qglDepthMask (GL_FALSE);
 
-	R_DrawEntitiesOnList2 ();
-	R_RenderDlights ();
 	transpolyrender ();
+
+	R_RenderDlights ();
+
 	R_DrawParticles ();
 
 	qglDepthMask (GL_TRUE);
@@ -1432,8 +1430,9 @@ R_RenderView (void)
 
 	R_PolyBlend ();
 
-	if (r_speeds->value) {
-//      qglFinish ();
+	if (r_speeds->value)
+	{
+		qglFinish ();
 		time2 = Sys_DoubleTime ();
 		Con_Printf ("%3i ms  %4i wpoly %4i epoly\n",
 					(int) ((time2 - time1) * 1000), c_brush_polys,
