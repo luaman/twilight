@@ -543,7 +543,7 @@ void Com_DPrintf (const char *fmt, ...)
 
 //===========================================================================
 
-void 
+void
 SZ_Init (sizebuf_t *buf, Uint8 *data, size_t length)
 {
 	memset (buf, 0, sizeof(*buf));
@@ -766,7 +766,7 @@ COM_CheckFile
 
 ================
 */
-qboolean 
+qboolean
 COM_CheckFile (char *fname)
 {
 	FILE *h;
@@ -1083,7 +1083,7 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
  			filename++;
  		while (filename[0] == '/');
  	}
- 
+
   	/*
   	 * search through the path, one element at a time
   	 */

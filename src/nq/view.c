@@ -10,7 +10,7 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
@@ -41,6 +41,7 @@ static const char rcsid[] =
 /* NQ specific */
 #include "host.h"
 #include "console.h"
+#include "cl_console.h"
 
 /*
 
@@ -243,11 +244,11 @@ V_DriftPitch (void)
 }
 
 /*
-============================================================================== 
- 
-						PALETTE FLASHES 
- 
-============================================================================== 
+==============================================================================
+
+						PALETTE FLASHES
+
+==============================================================================
 */
 cshift_t    cshift_empty = { {130, 80, 50}, 0 };
 cshift_t    cshift_water = { {130, 80, 50}, 128 };
@@ -489,12 +490,12 @@ V_UpdatePalette (void)
 	V_CalcBlend();
 }
 
-/* 
-============================================================================== 
- 
-						VIEW RENDERING 
- 
-============================================================================== 
+/*
+==============================================================================
+
+						VIEW RENDERING
+
+==============================================================================
 */
 
 /*
@@ -618,7 +619,7 @@ V_AddEntity ( entity_t *ent )
 V_ClearEntities
 ==================
 */
-void 
+void
 V_ClearEntities ( void )
 {
 	r_refdef.num_entities = 0;
