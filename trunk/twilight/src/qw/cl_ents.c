@@ -486,7 +486,7 @@ CL_Lerp_Origin (entity_t *ent, vec3_t origin, float origin_time)
 {
 	int f;
 
-	f = CL_CalcBlend (ent->from.origin_time, ent->to.origin_time, 1);
+	f = CL_CalcBlend (ent->from.origin_time, ent->to.origin_time, .1);
 	Lerp_Vectors (ent->from.origin, f, ent->to.origin, ent->cur.origin);
 }
 
@@ -533,7 +533,7 @@ CL_Lerp_Angles (entity_t *ent, vec3_t angles, float angles_time)
 {
 	int f;
 
-	f = CL_CalcBlend (ent->from.angles_time, ent->to.angles_time, 1);
+	f = CL_CalcBlend (ent->from.angles_time, ent->to.angles_time, .1);
 	Lerp_Angles (ent->from.angles, f, ent->to.angles, ent->cur.angles);
 }
 

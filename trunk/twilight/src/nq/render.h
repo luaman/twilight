@@ -42,8 +42,6 @@
 typedef struct entity_s {
 	qboolean    forcelink;				// model changed
 
-	int         update_type;
-
 	entity_state_t baseline;			// to fill in defaults in updates
 
 	double      msgtime;				// time of last update
@@ -52,7 +50,6 @@ typedef struct entity_s {
 	vec3_t      msg_angles[2];			// last two updates (0 is newest)
 	vec3_t      angles;
 	struct model_s *model;				// NULL = no model
-	struct efrag_s *efrag;				// linked list of efrags
 	int         frame;
 	float       syncbase;				// for client-side animations
 	Uint8      *colormap;
@@ -60,15 +57,6 @@ typedef struct entity_s {
 	int         skinnum;				// for Alias models
 	int         visframe;				// last frame this entity was
 	// found in an active leaf
-
-	int         dlightframe;			// dynamic lighting
-	int         dlightbits;
-
-// FIXME: could turn these into a union
-	int         trivial_accept;
-	struct mnode_s *topnode;			// for bmodels, first world node
-	// that splits bmodel, or NULL if
-	// not split
 
 	float       frame_start_time;
 	float       frame_interval;
