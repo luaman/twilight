@@ -1,8 +1,5 @@
 conproc.c
 conproc.h
-snd_null.c
-snd_win.c
-sys_null.c
 sys_win.c
 sys_wind.c
 winquake.h

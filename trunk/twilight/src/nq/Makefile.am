@@ -9,10 +9,10 @@ INCLUDES= -I$(top_srcdir)/include
 bin_PROGRAMS=twilight-nq
 
 if SYS_WIN32
-twilight_nq_sys=sys_win.c snd_win.c conproc.c conproc.h
+twilight_nq_sys=sys_win.c conproc.c conproc.h
 twilight_nq_sys_libs=-lwinmm -lwsock32
 else
-twilight_nq_sys=sys_linux.c snd_linux.c
+twilight_nq_sys=sys_linux.c
 twilight_nq_sys_libs=
 endif
 
@@ -31,7 +31,7 @@ twilight_nq_SOURCES= \
 	progdefs.q1 \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
 	sys.h vid_sdl.c vid.h \
-	snd_dma.c snd_mem.c snd_mix.c sound.h \
+	snd_dma.c snd_mem.c snd_mix.c snd_sdl.c sound.h \
 	cd_sdl.c cdaudio.h \
 	pcx.c tga.c \
 	view.c view.h wad.c wad.h world.c world.h zone.c zone.h \
@@ -40,9 +40,9 @@ twilight_nq_SOURCES= \
 	render.h server.h $(twilight_nq_sys)
 
 EXTRA_twilight_nq_SOURCES= \
-	sys_win.c snd_win.c conproc.c conproc.h winquake.h \
-	sys_linux.c snd_linux.c \
-	snd_null.c sys_null.c sys_wind.c
+	sys_win.c conproc.c conproc.h winquake.h \
+	sys_linux.c \
+	sys_wind.c
 
 EXTRA_DIST= \
 	nq.dsp
