@@ -392,19 +392,6 @@ Con_Printf (char *fmt, ...)
 
 // write it to the scrollable buffer
 	Con_Print (msg);
-
-#if 0
-// update the screen immediately if the console is displayed
-	if (cls.state != ca_active) {
-		// protect against infinite loop if something in SCR_UpdateScreen calls
-		// Con_Printd
-		if (!inupdate) {
-			inupdate = true;
-			SCR_UpdateScreen ();
-			inupdate = false;
-		}
-	}
-#endif
 }
 
 /*
