@@ -477,7 +477,7 @@ VID_Init (unsigned char *palette)
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
 
-	if (SDL_SetVideoMode (scr_width, scr_height, 32, flags) == NULL) {
+	if (SDL_SetVideoMode (scr_width, scr_height, 16, flags) == NULL) {
 		fprintf (stderr, "Error: %s\n", SDL_GetError ());
 		exit (1);
 	}
