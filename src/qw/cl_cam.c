@@ -48,26 +48,26 @@ static const char rcsid[] =
 #include "strlib.h"
 
 #define	PM_SPECTATORMAXSPEED	500
-#define	PM_STOPSPEED	100
-#define	PM_MAXSPEED			320
-#define BUTTON_JUMP 2
-#define BUTTON_ATTACK 1
-#define MAX_ANGLE_TURN 10
+#define	PM_STOPSPEED			100
+#define	PM_MAXSPEED				320
+#define BUTTON_JUMP				2
+#define BUTTON_ATTACK			1
+#define MAX_ANGLE_TURN			10
 
 static vec3_t desired_position;			// where the camera wants to be
 static qboolean locked = false;
 static int  oldbuttons;
 
 // track high fragger
-cvar_t     *cl_hightrack;
-cvar_t     *cl_chasecam;
+cvar_t		*cl_hightrack;
+cvar_t		*cl_chasecam;
 
-qboolean    cam_forceview;
-vec3_t      cam_viewangles;
-double      cam_lastviewtime;
+qboolean	cam_forceview;
+vec3_t		cam_viewangles;
+double		cam_lastviewtime;
 
-int         spec_track = 0;				// player# of who we are tracking
-int         autocam = CAM_NONE;
+int			spec_track = 0;				// player# of who we are tracking
+int			autocam = CAM_NONE;
 
 // returns true if weapon model should be drawn in camera mode
 qboolean
@@ -103,7 +103,7 @@ Cam_Unlock (void)
 void
 Cam_Lock (int playernum)
 {
-	char        st[40];
+	char	st[40];
 
 	snprintf (st, sizeof (st), "ptrack %i", playernum);
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
@@ -125,9 +125,9 @@ static float
 Cam_TryFlyby (player_state_t * self, player_state_t * player, vec3_t vec,
 			  qboolean checkvis)
 {
-	vec3_t      v;
-	pmtrace_t   trace;
-	float       len;
+	vec3_t		v;
+	pmtrace_t	trace;
+	float		len;
 
 	Vector2Angles (vec, v);
 	VectorCopy (v, pmove.angles);

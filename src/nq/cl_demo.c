@@ -42,7 +42,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-void        CL_FinishTimeDemo (void);
+void CL_FinishTimeDemo (void);
 
 /*
 ==============================================================================
@@ -91,8 +91,8 @@ Dumps the current net message, prefixed by the length and view angles
 void
 CL_WriteDemoMessage (void)
 {
-	int         len;
-	float       ang[3];
+	int		len;
+	float	ang[3];
 	
 	len = LittleLong (net_message.cursize);
 	fwrite (&len, 4, 1, cls.demofile);
@@ -117,7 +117,7 @@ Handles recording and playback of demos, on top of NET_ code
 int
 CL_GetMessage (void)
 {
-	int         r, i;
+	int	r, i;
 
 	if (cls.demoplayback) {
 		// decide if it is time to grab the next message 
@@ -239,7 +239,7 @@ CL_Record_f (void)
 			("Can not record - already connected to server\nClient demo recording must be started before connecting\n");
 		return;
 	}
-// write the forced cd track number, or -1
+	// write the forced cd track number, or -1
 	if (c == 4) {
 		track = Q_atoi (Cmd_Argv (3));
 		Com_Printf ("Forcing CD track to %i\n", cls.forcetrack);
@@ -248,15 +248,11 @@ CL_Record_f (void)
 
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 
-//
-// start the map up
-//
+	// start the map up
 	if (c > 2)
 		Cmd_ExecuteString (va ("map %s", Cmd_Argv (2)), src_command);
 
-//
-// open the demo file
-//
+	// open the demo file
 	COM_DefaultExtension (name, ".dem");
 
 	Com_Printf ("recording to %s.\n", name);
@@ -283,9 +279,9 @@ play [demoname]
 void
 CL_PlayDemo_f (void)
 {
-	char        name[256];
-	int         c;
-	qboolean    neg = false;
+	char		name[256];
+	int			c;
+	qboolean	neg = false;
 
 	if (cmd_source != src_command)
 		return;
@@ -294,14 +290,11 @@ CL_PlayDemo_f (void)
 		Com_Printf ("play <demoname> : plays a demo\n");
 		return;
 	}
-//
-// disconnect from server
-//
+
+	// disconnect from server
 	CL_Disconnect ();
 
-//
-// open the demo file
-//
+	// open the demo file
 	strcpy (name, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".dem");
 
@@ -309,7 +302,7 @@ CL_PlayDemo_f (void)
 	COM_FOpenFile (name, &cls.demofile, true);
 	if (!cls.demofile) {
 		Com_Printf ("ERROR: couldn't open.\n");
-		cls.demonum = -1;				// stop demo loop
+		cls.demonum = -1;	// stop demo loop
 		return;
 	}
 
@@ -325,8 +318,6 @@ CL_PlayDemo_f (void)
 
 	if (neg)
 		cls.forcetrack = -cls.forcetrack;
-// ZOID, fscanf is evil
-//  fscanf (cls.demofile, "%i\n", &cls.forcetrack);
 }
 
 /*
@@ -338,12 +329,12 @@ CL_FinishTimeDemo
 void
 CL_FinishTimeDemo (void)
 {
-	int         frames;
-	float       time;
+	int		frames;
+	float	time;
 
 	cls.timedemo = false;
 
-// the first frame didn't count
+	// the first frame didn't count
 	frames = (host_framecount - cls.td_startframe) - 1;
 	time = host_realtime - cls.td_starttime;
 	if (!time)
@@ -372,9 +363,8 @@ CL_TimeDemo_f (void)
 
 	CL_PlayDemo_f ();
 
-// cls.td_starttime will be grabbed at the second frame of the demo, so
-// all the loading time doesn't get counted
-
+	// cls.td_starttime will be grabbed at the second frame of the demo, so
+	// all the loading time doesn't get counted
 	cls.timedemo = true;
 	cls.td_startframe = host_framecount;
 	cls.td_lastframe = -1;				// get a new message this frame
