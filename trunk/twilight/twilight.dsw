@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "nq"=.\nq\nq.dsp - Package Owner=<4>
+Project: "nq"=.\src\nq\nq.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -23,11 +23,17 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name twilight_image
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name twilight_client
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name twilight_fs
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "qw"=.\qw\qw.dsp - Package Owner=<4>
+Project: "qw"=.\src\qw\qw.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -47,11 +53,17 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name twilight_image
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name twilight_client
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name twilight_fs
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "qwsv"=".\qw\qwsv.dsp" - Package Owner=<4>
+Project: "qwsv"=.\src\qw\qwsv.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -63,13 +75,37 @@ Package=<4>
     Project_Dep_Name twilight_base
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name twilight_renderer
+    Project_Dep_Name twilight_fs
     End Project Dependency
 }}}
 
 ###############################################################################
 
 Project: "twilight_base"=.\src\base\twilight_base.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "twilight_client"=.\src\client\twilight_client.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "twilight_fs"=.\src\fs\twilight_fs.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
