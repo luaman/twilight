@@ -549,7 +549,7 @@ SV_NextUpload (void)
 
 	if (!host_client->upload) 
 	{
-		host_client->upload = FS_Open_New (host_client->uploadfn);
+		host_client->upload = FS_Open_New (host_client->uploadfn, 0);
 		if (!host_client->upload) 
 		{
 			Sys_Printf ("Can't create %s\n", host_client->uploadfn);

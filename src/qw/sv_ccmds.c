@@ -131,7 +131,7 @@ SV_Fraglogfile_f (void)
 	for (i = 0; i < 1000; i++) {
 		snprintf (name, sizeof (name), "frag_%i.log", i);
 		if (!FS_FindFile(name)) {			// can't read it, so create this one
-			sv_fraglogfile = FS_Open_New (name);
+			sv_fraglogfile = FS_Open_New (name, FSF_ASCII);
 			if (!sv_fraglogfile)
 				i = 1000;				// give error
 			break;

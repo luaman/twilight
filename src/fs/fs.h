@@ -37,6 +37,7 @@ struct fs_new_s;
 typedef SDL_RWops *(fs_open_t) (struct fs_file_s *, Uint32 flags);
 
 #define FSF_WRITE										BIT(0)
+#define FSF_ASCII										BIT(1)
 
 #define FS_READ_ONLY									BIT(0)
 #define FS_NO_UPLOAD									BIT(1)

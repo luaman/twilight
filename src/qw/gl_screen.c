@@ -751,7 +751,7 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 
 	if (upload)
 		CL_StartUpload ((void *) pcx, length);
-	else if ((file = FS_Open_New (filename))) {
+	else if ((file = FS_Open_New (filename, 0))) {
 		SDL_RWwrite (file, pcx, length, 1);
 		SDL_RWclose (file);
 	}

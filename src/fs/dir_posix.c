@@ -76,9 +76,9 @@ FSD_Open_File (fs_file_t *file, Uint32 flags)
 			Com_Printf ("Refusing to open '%s' in write mode.\n", f->path);
 			rw = NULL;
 		} else
-			rw = SDL_RWFromFile (f->path, "w");
+			rw = SDL_RWFromFile (f->path, (flags & FSF_ASCII) ? "w" : "wb");
 	} else
-		rw = SDL_RWFromFile (f->path, "r");
+		rw = SDL_RWFromFile (f->path, (flags & FSF_ASCII) ? "r" : "rb");
 
 	return rw;
 }
@@ -140,7 +140,7 @@ FSD_Open_New (fs_group_t *group, fs_new_t *new)
 		new->temp = NULL;
 		return false;
 	}
-	if (!(file = fdopen(fd, "w"))) {
+	if (!(file = fdopen(fd, (new->flags & FSF_ASCII) ? "w" : "wb"))) {
 		Com_Printf ("FSD_Open_New: Unable to fdopen. %s\n", strerror(errno));
 		Zone_Free (new->temp);
 		new->temp = NULL;

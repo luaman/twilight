@@ -74,7 +74,7 @@ FS_Write_New (SDL_RWops *rw, const void *ptr, int size, int num)
 }
 
 SDL_RWops *
-FS_Open_New (const char *file)
+FS_Open_New (const char *file, Uint32 flags)
 {
 	SDL_RWops	*rw;
 	fs_new_t	*new;
@@ -82,6 +82,7 @@ FS_Open_New (const char *file)
 
 	new = Zone_Alloc (fs_zone, sizeof (fs_new_t));
 	new->wanted = Zstrdup (fs_zone, file);
+	new->flags = flags;
 
 	for (cur = fs_paths; cur; cur = cur->next) {
 		if (cur->open_new && cur->open_new(cur, new)) {

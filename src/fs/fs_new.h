@@ -31,11 +31,12 @@
 
 typedef struct fs_new_s {
 	char			*wanted, *temp;
+	Uint32			flags;
 	SDL_RWops		*rw;
 	fs_group_t		*group;
 } fs_new_t;
 
-SDL_RWops *FS_Open_New (const char *file);
+SDL_RWops *FS_Open_New (const char *file, Uint32 flags);
 
 #endif // __FS_NEW_H
 

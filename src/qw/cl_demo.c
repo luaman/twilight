@@ -379,7 +379,7 @@ CL_Record_f (void)
 	// open the demo file
 	COM_DefaultExtension (name, ".qwd", sizeof (name));
 
-	ccls.demofile = FS_Open_New (name);
+	ccls.demofile = FS_Open_New (name, 0);
 	if (!ccls.demofile) {
 		Com_Printf ("ERROR: couldn't open.\n");
 		return;
@@ -637,7 +637,7 @@ CL_ReRecord_f (void)
 	// open the demo file
 	COM_DefaultExtension (name, ".qwd", sizeof (name));
 
-	ccls.demofile = FS_Open_New (name);
+	ccls.demofile = FS_Open_New (name, 0);
 	if (!ccls.demofile) {
 		Com_Printf ("ERROR: couldn't open.\n");
 		return;
