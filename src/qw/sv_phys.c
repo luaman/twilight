@@ -74,11 +74,6 @@ cvar_t     *sv_waterfriction;
 
 static void        SV_Physics_Toss (edict_t *ent);
 
-/*
-================
-SV_CheckVelocity
-================
-*/
 static void
 SV_CheckVelocity (edict_t *ent)
 {
@@ -110,8 +105,6 @@ SV_CheckVelocity (edict_t *ent)
 
 /*
 =============
-SV_RunThink
-
 Runs thinking code if time.  There is some play in the exact time the think
 function will be called, because it is called before any movement is done
 in a frame.  Not used for pushmove objects, because they must be exact.
@@ -149,8 +142,6 @@ SV_RunThink (edict_t *ent)
 
 /*
 ==================
-SV_Impact
-
 Two entities have touched, so run their touch functions
 ==================
 */
@@ -182,8 +173,6 @@ SV_Impact (edict_t *e1, edict_t *e2)
 
 /*
 ==================
-ClipVelocity
-
 Slide off of the impacting object
 returns the blocked flags (1 = floor, 2 = step / wall)
 ==================
@@ -218,8 +207,6 @@ ClipVelocity (vec3_t in, dvec3_t normal, vec3_t out, float overbounce)
 
 /*
 ============
-SV_FlyMove
-
 The basic solid body movement clip that slides along multiple planes
 Returns the clipflags if the velocity was modified (hit something solid)
 1 = floor
@@ -348,12 +335,6 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 }
 
 
-/*
-============
-SV_AddGravity
-
-============
-*/
 static void
 SV_AddGravity (edict_t *ent, float scale)
 {
@@ -370,8 +351,6 @@ PUSHMOVE
 
 /*
 ============
-SV_PushEntity
-
 Does not change the entities velocity at all
 ============
 */
@@ -407,12 +386,6 @@ SV_PushEntity (edict_t *ent, vec3_t push)
 }
 
 
-/*
-============
-SV_Push
-
-============
-*/
 static qboolean
 SV_Push (edict_t *pusher, vec3_t move)
 {
@@ -543,12 +516,6 @@ SV_Push (edict_t *pusher, vec3_t move)
 	return true;
 }
 
-/*
-============
-SV_PushMove
-
-============
-*/
 static void
 SV_PushMove (edict_t *pusher, float movetime)
 {
@@ -570,12 +537,6 @@ SV_PushMove (edict_t *pusher, float movetime)
 }
 
 
-/*
-================
-SV_Physics_Pusher
-
-================
-*/
 static void
 SV_Physics_Pusher (edict_t *ent)
 {
@@ -623,8 +584,6 @@ SV_Physics_Pusher (edict_t *ent)
 
 /*
 =============
-SV_Physics_None
-
 Non moving objects can only think
 =============
 */
@@ -639,8 +598,6 @@ SV_Physics_None (edict_t *ent)
 
 /*
 =============
-SV_Physics_Noclip
-
 A moving object that doesn't obey physics
 =============
 */
@@ -665,12 +622,6 @@ TOSS / BOUNCE
 ==============================================================================
 */
 
-/*
-=============
-SV_CheckWaterTransition
-
-=============
-*/
 static void
 SV_CheckWaterTransition (edict_t *ent)
 {
@@ -700,8 +651,6 @@ SV_CheckWaterTransition (edict_t *ent)
 
 /*
 =============
-SV_Physics_Toss
-
 Toss, bounce, and fly movement.  When onground, do nothing.
 =============
 */
@@ -772,8 +721,6 @@ STEPPING MOVEMENT
 
 /*
 =============
-SV_Physics_Step
-
 Monsters freefall when they don't have a ground entity, otherwise
 all movement is done with discrete steps.
 
@@ -823,12 +770,6 @@ SV_ProgStartFrame (void)
 	PR_ExecuteProgram (pr_global_struct->StartFrame);
 }
 
-/*
-================
-SV_RunEntity
-
-================
-*/
 static void
 SV_RunEntity (edict_t *ent)
 {
@@ -861,12 +802,6 @@ SV_RunEntity (edict_t *ent)
 	}
 }
 
-/*
-================
-SV_RunNewmis
-
-================
-*/
 void
 SV_RunNewmis (void)
 {
@@ -881,12 +816,6 @@ SV_RunNewmis (void)
 	SV_RunEntity (ent);
 }
 
-/*
-================
-SV_Physics
-
-================
-*/
 void
 SV_Physics (void)
 {

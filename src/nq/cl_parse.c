@@ -98,8 +98,6 @@ static char       *svc_strings[] = {
 
 /*
 ===============
-CL_EntityNum
-
 This error checks and tracks the total number of entities
 ===============
 */
@@ -116,11 +114,6 @@ CL_EntityNum (int num)
 }
 
 
-/*
-==================
-CL_ParseStartSoundPacket
-==================
-*/
 static void
 CL_ParseStartSoundPacket (void)
 {
@@ -162,8 +155,6 @@ CL_ParseStartSoundPacket (void)
 
 /*
 ==================
-CL_KeepaliveMessage
-
 When the client is taking a long time to load stuff, send keepalive messages
 so the server doesn't disconnect.
 ==================
@@ -222,11 +213,6 @@ CL_KeepaliveMessage (void)
 
 model_t		*mdl_fire = NULL;
 
-/*
-==================
-CL_ParseServerInfo
-==================
-*/
 static void
 CL_ParseServerInfo (void)
 {
@@ -352,8 +338,6 @@ CL_ParseServerInfo (void)
 
 /*
 ==================
-CL_ParseUpdate
-
 Parse an entity update message from the server
 If an entities model or origin changes from frame to frame, it must be
 relinked.  Other attributes can change without relinking.
@@ -478,11 +462,6 @@ CL_ParseUpdate (int bits)
 	}
 }
 
-/*
-==================
-CL_ParseBaseline
-==================
-*/
 static void
 CL_ParseBaseline (entity_t *ent)
 {
@@ -501,8 +480,6 @@ CL_ParseBaseline (entity_t *ent)
 
 /*
 ==================
-CL_ParseClientdata
-
 Server information pertaining to this client only
 ==================
 */
@@ -587,11 +564,6 @@ CL_ParseClientdata (int bits)
 	}
 }
 
-/*
-=====================
-CL_NewTranslation
-=====================
-*/
 static void
 CL_NewTranslation (int slot, int colors)
 {
@@ -616,11 +588,6 @@ CL_NewTranslation (int slot, int colors)
 	ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 }
 
-/*
-=====================
-CL_ParseStatic
-=====================
-*/
 static void
 CL_ParseStatic (void)
 {
@@ -647,11 +614,6 @@ CL_ParseStatic (void)
 	CL_Update_OriginAngles(ent, ent->baseline.origin, ent->baseline.angles, cl.mtime[1]);
 }
 
-/*
-===================
-CL_ParseStaticSound
-===================
-*/
 static void
 CL_ParseStaticSound (void)
 {
@@ -673,11 +635,6 @@ CL_ParseStaticSound (void)
 	if (cl_shownet->ivalue==2)								\
 		Com_Printf ("%3i:%s\n", msg_readcount-1, x);
 
-/*
-=====================
-CL_ParseServerMessage
-=====================
-*/
 void
 CL_ParseServerMessage (void)
 {

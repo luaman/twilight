@@ -144,7 +144,7 @@ typedef struct client_common_static_s {
 	qboolean		demorecording;
 	qboolean		demoplayback;
 	qboolean		timedemo;
-	FILE			*demofile;
+	SDL_RWops		*demofile;
 	float			td_lastframe;		// to meter out one message a frame
 	int				td_startframe;		// host_framecount at start
 	float			td_starttime;		// realtime at second frame of timedemo

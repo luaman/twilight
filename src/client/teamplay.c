@@ -42,11 +42,7 @@ static cvar_t	*cl_parsesay;
 static qboolean	died = false, recorded_location = false;
 static vec3_t	death_location, last_recorded_location;
 
-/*
-===================
-Team_ParseSay
-===================
-*/
+
 const char *
 Team_ParseSay (const char *s)
 {

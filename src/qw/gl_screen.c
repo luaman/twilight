@@ -48,6 +48,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "tga.h"
 #include "gl_textures.h"
+#include "fs.h"
 
 /*
 
@@ -698,6 +699,7 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 	int			i, j, length;
 	pcx_t	   *pcx;
 	Uint8	   *pack;
+	SDL_RWops	*file;
 
 	rowbytes = rowbytes;
 
@@ -746,8 +748,10 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 
 	if (upload)
 		CL_StartUpload ((void *) pcx, length);
-	else
-		COM_WriteFile (filename, pcx, length);
+	else if ((file = FS_Open_New (filename))) {
+		SDL_RWwrite (file, pcx, length, 1);
+		SDL_RWclose (file);
+	}
 	Zone_Free(pcx);
 }
 

@@ -165,8 +165,6 @@ NET_BaseAdrToString (netadr_t a)
 
 /*
 =============
-NET_StringToAdr
-
 idnewt
 idnewt:28000
 192.246.40.70
@@ -377,11 +375,6 @@ UDP_OpenSocket (int port)
 	return newsocket;
 }
 
-/*
-====================
-NET_OpenSocket
-====================
-*/
 void
 NET_OpenSocket (netsrc_t sock, int port)
 {
@@ -403,11 +396,6 @@ NET_OpenSocket (netsrc_t sock, int port)
 	ip_sockets[sock] = UDP_OpenSocket (port);
 }
 
-/*
-====================
-NET_Init
-====================
-*/
 void
 NET_Init (void)
 {
@@ -424,8 +412,6 @@ NET_Init (void)
 
 /*
 ====================
-NET_Sleep
-
 Only used by the server
 FIXME: Abstract the nonblocking stdin stuff
 ====================
@@ -454,11 +440,6 @@ NET_Sleep (int msec)
 #endif
 }
 
-/*
-====================
-NET_Shutdown
-====================
-*/
 void
 NET_Shutdown (void)
 {

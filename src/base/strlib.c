@@ -45,8 +45,6 @@ static const char rcsid[] =
 #ifndef HAVE_STRLCAT
 /*
 ==================
-strlcat
-
 Appends src to string dst of size siz (unlike strncat, siz is the
 full size of dst, not space left).  At most siz-1 characters
 will be copied.  Always NUL terminates (unless siz == 0).
@@ -88,8 +86,6 @@ strlcat(char *dst, const char *src, size_t siz)
 #ifndef HAVE_STRLCPY
 /*
 ==================
-strlcpy
-
 Copy src to string dst of size siz.  At most siz-1 characters
 will be copied.  Always NUL terminates (unless siz == 0).
 Returns strlen(src); if retval >= siz, truncation occurred.
@@ -125,8 +121,6 @@ strlcpy(char *dst, const char *src, size_t siz)
 
 /*
 ==================
-Zstrdup
-
 Duplicate a string (memory allocated with given zone)
 ==================
 */
@@ -142,8 +136,6 @@ Zstrdup (memzone_t *zone, const char *string)
 
 /*
 ============
-va
-
 does a varargs printf into a temp buffer, so I don't need to have
 varargs versions of all text functions.
 
@@ -165,4 +157,3 @@ va (char *format, ...)
 	
 	return string[refcount];
 }
-

@@ -41,8 +41,6 @@ static const char rcsid[] =
 
 /*
 =============
-SV_CheckBottom
-
 Returns false if any part of the bottom of the entity is off an edge that
 is not a staircase.
 
@@ -114,8 +112,6 @@ SV_CheckBottom (edict_t *ent)
 
 /*
 =============
-SV_movestep
-
 Called by monster program code.
 The move will be adjusted for slopes and stairs, but if the move isn't
 possible, no move is done, false is returned, and
@@ -231,11 +227,8 @@ SV_movestep (edict_t *ent, vec3_t move, qboolean relink)
 
 /*
 ======================
-SV_StepDirection
-
 Turns to the movement direction, and walks the current distance if
 facing it.
-
 ======================
 */
 void        PF_changeyaw (void);
@@ -268,12 +261,6 @@ SV_StepDirection (edict_t *ent, float yaw, float dist)
 	return false;
 }
 
-/*
-======================
-SV_FixCheckBottom
-
-======================
-*/
 static void
 SV_FixCheckBottom (edict_t *ent)
 {
@@ -282,12 +269,6 @@ SV_FixCheckBottom (edict_t *ent)
 
 
 
-/*
-================
-SV_NewChaseDir
-
-================
-*/
 #define	DI_NODIR	-1
 static void
 SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
@@ -368,12 +349,6 @@ SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 
 }
 
-/*
-======================
-SV_CloseEnough
-
-======================
-*/
 static qboolean
 SV_CloseEnough (edict_t *ent, edict_t *goal, float dist)
 {
@@ -388,12 +363,6 @@ SV_CloseEnough (edict_t *ent, edict_t *goal, float dist)
 	return true;
 }
 
-/*
-======================
-SV_MoveToGoal
-
-======================
-*/
 void
 SV_MoveToGoal (void)
 {

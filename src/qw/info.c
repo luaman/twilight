@@ -37,8 +37,6 @@ static const char rcsid[] =
 
 /*
 ===============
-Info_ValueForKey
-
 Searches the string for the given
 key and returns the associated value, or an empty string.
 ===============

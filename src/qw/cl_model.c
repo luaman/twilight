@@ -69,8 +69,6 @@ Mod_UnloadModel (model_t *mod)
 
 /*
 ==================
-Mod_LoadModel
-
 Loads a model into the cache
 ==================
 */

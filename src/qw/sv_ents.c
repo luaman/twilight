@@ -89,8 +89,6 @@ SV_AddToFatPVS (vec3_t org, mnode_t *node)
 
 /*
 =============
-SV_FatPVS
-
 Calculates a PVS that is the inclusive or of all leafs within 8 pixels of the
 given point.
 =============
@@ -166,8 +164,6 @@ SV_EmitNailUpdate (sizebuf_t *msg)
 
 /*
 ==================
-SV_WriteDelta
-
 Writes part of a packetentities message.
 Can delta from either a baseline or a previous packet_entity
 ==================
@@ -262,8 +258,6 @@ SV_WriteDelta (entity_state_t *from, entity_state_t *to, sizebuf_t *msg,
 
 /*
 =============
-SV_EmitPacketEntities
-
 Writes a delta update of a packet_entities_t to the message.
 
 =============
@@ -328,12 +322,6 @@ SV_EmitPacketEntities (client_t *client, packet_entities_t *to, sizebuf_t *msg)
 	MSG_WriteShort (msg, 0);			// end of packetentities
 }
 
-/*
-=============
-SV_WritePlayersToClient
-
-=============
-*/
 static void
 SV_WritePlayersToClient (client_t *client, edict_t *clent, Uint8 *pvs,
 		sizebuf_t *msg)
@@ -457,8 +445,6 @@ SV_WritePlayersToClient (client_t *client, edict_t *clent, Uint8 *pvs,
 
 /*
 =============
-SV_WriteEntitiesToClient
-
 Encodes the current state of the world as
 a svc_packetentities messages and possibly
 a svc_nails message and

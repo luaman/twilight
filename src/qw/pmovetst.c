@@ -44,8 +44,6 @@ static mplane_t box_planes[6];
 
 /*
 ===================
-PM_InitBoxHull
-
 Set up the planes and clipnodes so that the six floats of a bounding box
 can just be stored out and get a proper hull_t structure.
 ===================
@@ -81,8 +79,6 @@ PM_InitBoxHull (void)
 
 /*
 ===================
-PM_HullForBox
-
 To keep everything totally uniform, bounding boxes are turned into small
 BSP trees instead of being compared directly.
 ===================
@@ -101,12 +97,6 @@ PM_HullForBox (vec3_t mins, vec3_t maxs)
 }
 
 
-/*
-==================
-PM_HullPointContents
-
-==================
-*/
 static int
 PM_HullPointContents (hull_t *hull, int num, vec3_t p)
 {
@@ -130,12 +120,6 @@ PM_HullPointContents (hull_t *hull, int num, vec3_t p)
 	return num;
 }
 
-/*
-==================
-PM_PointContents
-
-==================
-*/
 int
 PM_PointContents (vec3_t p)
 {
@@ -175,8 +159,6 @@ LINE TESTING IN HULLS
 
 /*
 ================
-PM_TestPlayerPosition
-
 Returns false if the given player position is not valid (in solid)
 ================
 */
@@ -212,11 +194,6 @@ PM_TestPlayerPosition (vec3_t pos)
 	return true;
 }
 
-/*
-================
-PM_PlayerMove
-================
-*/
 trace_t *
 PM_PlayerMove (vec3_t start, vec3_t end)
 {

@@ -125,12 +125,6 @@ S_SoundInfo_f (void)
 }
 
 
-/*
-================
-S_Startup
-================
-*/
-
 static void
 S_Startup (void)
 {
@@ -151,11 +145,6 @@ S_Startup (void)
 	sound_started = 1;
 }
 
-/*
-================
-S_Init_Cvars
-================
-*/
 void
 S_Init_Cvars (void)
 {
@@ -172,11 +161,6 @@ S_Init_Cvars (void)
 	_snd_mixahead = Cvar_Get ("_snd_mixahead", "0.05", CVAR_ARCHIVE, NULL);
 }
 
-/*
-================
-S_Init
-================
-*/
 void
 S_Init (void)
 {
@@ -254,12 +238,6 @@ S_Shutdown (void)
 // Load a sound
 // =======================================================================
 
-/*
-==================
-S_FindName
-
-==================
-*/
 static sfx_t      *
 S_FindName (char *name)
 {
@@ -290,12 +268,6 @@ S_FindName (char *name)
 }
 
 
-/*
-==================
-S_PrecacheSound
-
-==================
-*/
 sfx_t      *
 S_PrecacheSound (char *name)
 {
@@ -316,11 +288,6 @@ S_PrecacheSound (char *name)
 
 //=============================================================================
 
-/*
-=================
-SND_PickChannel
-=================
-*/
 static channel_t  *
 SND_PickChannel (int entnum, int entchannel)
 {
@@ -361,11 +328,6 @@ SND_PickChannel (int entnum, int entchannel)
 	return &channels[first_to_die];
 }
 
-/*
-=================
-SND_Spatialize
-=================
-*/
 static void
 SND_Spatialize (channel_t *ch)
 {
@@ -540,11 +502,6 @@ S_ClearBuffer (void)
 }
 
 
-/*
-=================
-S_StaticSound
-=================
-*/
 void
 S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation)
 {
@@ -582,11 +539,6 @@ S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation)
 
 //=============================================================================
 
-/*
-===================
-S_UpdateAmbientSounds
-===================
-*/
 static void
 S_UpdateAmbientSounds (void)
 {
@@ -633,8 +585,6 @@ S_UpdateAmbientSounds (void)
 
 /*
 ============
-S_Update
-
 Called once each time through the main loop
 ============
 */

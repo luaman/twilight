@@ -61,11 +61,7 @@ static int con_vislines;
 
 qboolean con_initialized;
 
-/*
-================
-Con_ToggleConsole_f
-================
-*/
+
 void
 Con_ToggleConsole_f (void)
 {
@@ -82,11 +78,7 @@ Con_ToggleConsole_f (void)
 	Con_ClearNotify ();
 }
 
-/*
-================
-Con_Clear_f
-================
-*/
+
 static void
 Con_Clear_f (void)
 {
@@ -102,11 +94,7 @@ Con_Clear_f (void)
 }
 
 
-/*
-================
-Con_ClearNotify
-================
-*/
+
 void
 Con_ClearNotify (void)
 {
@@ -114,11 +102,7 @@ Con_ClearNotify (void)
 }
 
 
-/*
-================
-Con_MessageMode_f
-================
-*/
+
 static void
 Con_MessageMode_f (void)
 {
@@ -138,12 +122,7 @@ Con_MessageMode2_f (void)
 	key_dest = key_message;
 }
 
-/*
-================
-Con_Resize
 
-================
-*/
 static void
 Con_Resize (console_t *con)
 {
@@ -160,8 +139,6 @@ Con_Resize (console_t *con)
 
 /*
 ================
-Con_CheckResize
-
 If the line width has changed, reformat the buffer.
 ================
 */
@@ -172,22 +149,14 @@ Con_CheckResize (void)
 		Con_Resize (con);
 }
 
-/*
-================
-Con_Init_Cvars
-================
-*/
+
 void
 Con_Init_Cvars (void)
 {
 	con_notifytime = Cvar_Get ("con_notifytime", "3", CVAR_NONE, NULL);
 }
 
-/*
-================
-Con_Init
-================
-*/
+
 void
 Con_Init (void)
 {
@@ -215,11 +184,7 @@ Con_Init (void)
 }
 
 
-/*
-===============
-Con_Linefeed
-===============
-*/
+
 static con_line_t *
 Con_Linefeed (void)
 {
@@ -238,8 +203,6 @@ Con_Linefeed (void)
 
 /*
 ================
-Con_Print
-
 Handles cursor positioning, line wrapping, etc
 All console printing must go through this in order to be logged to disk
 If no console is visible, the notify window will pop up.
@@ -306,8 +269,6 @@ DRAWING
 
 /*
 ================
-Con_DrawInput
-
 The input line scrolls horizontally if typing goes beyond the right edge
 ================
 */
@@ -352,8 +313,6 @@ Con_FindLine (console_t *con, int line_len, int line,
 
 /*
 ================
-Con_DrawNotify
-
 Draws the last few lines of output transparently over the game top
 ================
 */
@@ -417,8 +376,6 @@ Con_DrawNotify (void)
 
 /*
 ================
-Con_DrawConsole
-
 Draws the console with the solid background
 ================
 */

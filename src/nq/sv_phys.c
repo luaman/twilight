@@ -158,8 +158,6 @@ SV_Impact (edict_t *e1, edict_t *e2)
 
 /*
 ==================
-ClipVelocity
-
 Slide off of the impacting object
 returns the blocked flags (1 = floor, 2 = step / wall)
 ==================

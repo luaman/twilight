@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 #include "mathlib.h"
+#include "fs.h"
 
 usercmd_t nullcmd;					// guarenteed to be zero
 
@@ -56,7 +57,7 @@ static cvar_t *game_name;
 static cvar_t *registered;
 
 static void COM_InitFilesystem (void);
-static void COM_Path_f (void);
+//static void COM_Path_f (void);
 static void Com_PrintHex (const char *str, int len);
 static void *SZ_GetSpace (sizebuf_t *buf, size_t length);
 
@@ -811,11 +812,6 @@ SZ_Print (sizebuf_t *buf, const char *data)
 //============================================================================
 
 
-/*
-============
-COM_SkipPath
-============
-*/
 const char *
 COM_SkipPath (const char *pathname)
 {
@@ -831,11 +827,6 @@ COM_SkipPath (const char *pathname)
 	return last;
 }
 
-/*
-============
-COM_StripExtension
-============
-*/
 void
 COM_StripExtension (const char *in, char *out)
 {
@@ -856,11 +847,6 @@ COM_StripExtension (const char *in, char *out)
 
 
 
-/*
-==================
-COM_DefaultExtension
-==================
-*/
 void
 COM_DefaultExtension (char *path, const char *extension, size_t len)
 {
@@ -889,8 +875,6 @@ char com_token[1024];
 
 /*
 ==============
-COM_Parse
-
 Parse a token out of a string
 ==============
 */
@@ -956,28 +940,6 @@ COM_Parse (const char *data)
 
 /*
 ================
-COM_CheckFile
-
-================
-*/
-static qboolean 
-COM_CheckFile (const char *fname)
-{
-	FILE	   *h;
-
-	COM_FOpenFile (fname, &h, false);
-
-	if (!h)
-		return false;
-
-	fclose (h);
-	return true;
-}
-
-/*
-================
-COM_CheckRegistered
-
 Looks for the pop.lmp file
 Sets the "registered" cvar.
 ================
@@ -985,7 +947,7 @@ Sets the "registered" cvar.
 static void
 COM_CheckRegistered (void)
 {
-	if (!COM_CheckFile ("gfx/pop.lmp"))
+	if (!FS_FindFile ("gfx/pop.lmp"))
 		return;
 
 	Cvar_Set (registered, "1");
@@ -993,11 +955,6 @@ COM_CheckRegistered (void)
 }
 
 
-/*
-================
-COM_Init_Cvars
-================
-*/
 void
 COM_Init_Cvars (void)
 {
@@ -1012,15 +969,10 @@ COM_Init_Cvars (void)
 	game_name = Cvar_Get ("game_name", "qw", CVAR_ROM, NULL);
 }
 
-/*
-================
-COM_Init
-================
-*/
 void
 COM_Init (void)
 {
-	Cmd_AddCommand ("path", COM_Path_f);
+//	Cmd_AddCommand ("path", COM_Path_f);
 
 	COM_InitFilesystem ();
 	COM_CheckRegistered ();
@@ -1035,149 +987,12 @@ QUAKE FILESYSTEM
 =============================================================================
 */
 
-int com_filesize;
-
-
-/*
- * in memory
- */
-
-typedef struct
-{
-	char        name[MAX_QPATH];
-	int         filepos, filelen;
-} packfile_t;
-
-typedef struct pack_s
-{
-	char        filename[MAX_OSPATH];
-	FILE       *handle;
-	int         numfiles;
-	packfile_t *files;
-} pack_t;
-
-/*
- * on disk
- */
-typedef struct
-{
-	char        name[56];
-	int         filepos, filelen;
-} dpackfile_t;
-
-typedef struct
-{
-	char        id[4];
-	int         dirofs;
-	int         dirlen;
-} dpackheader_t;
-
-#define	MAX_FILES_IN_PACK	2048
-
-char com_gamedir[MAX_OSPATH];
-
-typedef struct searchpath_s
-{
-	char		filename[MAX_OSPATH];
-	pack_t	   *pack;			// only one of filename / pack will be used
-	struct searchpath_s *next;
-} searchpath_t;
-
-searchpath_t *com_searchpaths;
-searchpath_t *com_base_searchpaths;		// without gamedirs
-
-/*
-================
-COM_filelength
-================
-*/
-int
-COM_filelength (FILE * f)
-{
-	int			pos;
-	int			end;
-
-	pos = ftell (f);
-	fseek (f, 0, SEEK_END);
-	end = ftell (f);
-	fseek (f, pos, SEEK_SET);
-
-	return end;
-}
-
-static int
-COM_FileOpenRead (const char *path, FILE ** hndl)
-{
-	FILE	   *f;
-
-	f = fopen (path, "rb");
-	if (!f)
-	{
-		*hndl = NULL;
-		return -1;
-	}
-	*hndl = f;
-
-	return COM_filelength (f);
-}
-
-/*
-============
-COM_Path_f
-
-============
-*/
-static void
-COM_Path_f (void)
-{
-	searchpath_t	   *s;
-
-	Com_Printf ("Current search path:\n");
-	for (s = com_searchpaths; s; s = s->next) {
-		if (s == com_base_searchpaths)
-			Com_Printf ("----------\n");
-		if (s->pack)
-			Com_Printf ("%s (%i files)\n", s->pack->filename,
-						s->pack->numfiles);
-		else
-			Com_Printf ("%s\n", s->filename);
-	}
-}
-
-/*
-============
-COM_WriteFile
-
-The filename will be prefixed by the current game directory
-============
-*/
-void
-COM_WriteFile (const char *filename, const void *data, int len)
-{
-	FILE	   *f;
-	char		name[MAX_OSPATH];
-
-	snprintf (name, sizeof (name), "%s/%s", com_gamedir, filename);
-
-	f = fopen (name, "wb");
-	if (!f)
-	{
-		Sys_mkdir (com_gamedir);
-		f = fopen (name, "wb");
-		if (!f)
-			Sys_Error ("Error opening %s", filename);
-	}
-
-	Sys_Printf ("COM_WriteFile: %s\n", name);
-	fwrite (data, 1, len, f);
-	fclose (f);
-}
+int		com_filesize;
+char	com_gamedir[MAX_OSPATH];
 
 
 /*
 ============
-COM_CreatePath
-
 Only used for CopyFile and download
 ============
 */
@@ -1200,94 +1015,8 @@ COM_CreatePath (const char *path)
 	Z_Free (tmp);
 }
 
-
-int file_from_pak;						// last file came from pack
-
-int
-COM_FOpenFile (const char *filename, FILE ** file, qboolean complain)
-{
-	searchpath_t	*search;
-	char			netpath[MAX_OSPATH];
-	pack_t			*pak;
-	int				i;
-	char			*s;
-
-	file_from_pak = 0;
-
-	if ((s = strchr (filename, '\\')))
-	{
-		Com_Printf ("COM_FOpenFile: %s should use / to seperate paths, fixing it\n",
-				filename);
-		do
-			*s = '/';
-		while ((s = strchr (filename, '\\')));
-	}
-	if (filename[0] == '/')
-	{
-		Com_Printf ("COM_FOpenFile: %s should not begin with /, correcting it\n",
-				filename);
-		do
-			filename++;
-		while (filename[0] == '/');
-	}
-
-	/*
-	 * search through the path, one element at a time
-	 */
-	for (search = com_searchpaths; search; search = search->next)
-	{
-		// is the element a pak file?
-		if (search->pack)
-		{
-			// look through all the pak file elements
-			pak = search->pack;
-			for (i = 0; i < pak->numfiles; i++)
-				if (!strcmp (pak->files[i].name, filename))
-				{
-					// found it!
-					Com_DPrintf ("PackFile: %s : %s\n", pak->filename,
-							filename);
-					// open a new file on the pakfile
-					*file = fopen (pak->filename, "rb");
-					if (!*file)
-						Sys_Error ("Couldn't reopen %s", pak->filename);
-					fseek (*file, pak->files[i].filepos, SEEK_SET);
-					com_filesize = pak->files[i].filelen;
-					file_from_pak = 1;
-					return com_filesize;
-				}
-		} else {
-			// check a file in the directory tree
-			if (strstr (filename, ".."))
-				continue;
-
-			snprintf (netpath, sizeof (netpath), "%s/%s", search->filename,
-					  filename);
-
-			*file = fopen (netpath, "rb");
-
-			if (!*file)
-				continue;
-
-			Com_DPrintf ("FindFile: %s\n", netpath);
-
-			return COM_filelength (*file);
-		}
-
-	}
-
-	if (complain)
-		Sys_Printf ("FindFile: can't find %s\n", filename);
-
-	*file = NULL;
-	com_filesize = -1;
-	return -1;
-}
-
 /*
 ============
-COM_LoadFile
-
 Filename are reletive to the quake directory.
 Always appends a 0 byte to the loaded data.
 ============
@@ -1295,14 +1024,25 @@ Always appends a 0 byte to the loaded data.
 static Uint8 *
 COM_LoadFile (const char *path, qboolean complain, int type, memzone_t *zone)
 {
-	FILE		*h;
+	fs_file_t	*file;
+	SDL_RWops	*rw;
 	Uint8		*buf = NULL;
 	int			len;
 
 	// look for it in the filesystem or pack files
-	len = com_filesize = COM_FOpenFile (path, &h, complain);
-	if (!h)
+	file = FS_FindFile (path);
+	if (!file) {
+		if (complain)
+			Sys_Printf ("LoadFile: can't find %s\n", path);
 		return NULL;
+	}
+	rw = file->open(file, false);
+	if (!rw) {
+		if (complain)
+			Sys_Printf ("LoadFile: can't open %s\n", path);
+		return NULL;
+	}
+	len = com_filesize = file->len;
 
 	switch (type)
 	{
@@ -1324,10 +1064,10 @@ COM_LoadFile (const char *path, qboolean complain, int type, memzone_t *zone)
 		Sys_Error ("COM_LoadFile: not enough space for %s (%i bytes)", path,
 				len + 1);
 
-	((Uint8 *) buf)[len] = 0;
 	Draw_Disc ();
-	fread (buf, 1, len, h);
-	fclose (h);
+	SDL_RWread(rw, buf, len, 1);
+	SDL_RWclose(rw);
+	buf[len] = '\0';
 
 	return buf;
 }
@@ -1351,117 +1091,21 @@ COM_LoadNamedFile (const char *path, qboolean complain)
 }
 
 /*
-=================
-COM_LoadPackFile
-
-Takes an explicit (not game tree related) path to a pak file.
-
-Loads the header and directory, adding the files at the beginning
-of the list so they override previous pack files.
-=================
-*/
-static pack_t     *
-COM_LoadPackFile (const char *packfile)
-{
-	dpackheader_t	header;
-	int				i;
-	packfile_t	   *newfiles;
-	int				numpackfiles;
-	pack_t		   *pack;
-	FILE		   *packhandle;
-	dpackfile_t		info[MAX_FILES_IN_PACK];
-
-	if (COM_FileOpenRead (packfile, &packhandle) == -1)
-		return NULL;
-
-	fread (&header, 1, sizeof (header), packhandle);
-	if (header.id[0] != 'P' || header.id[1] != 'A'
-		|| header.id[2] != 'C' || header.id[3] != 'K')
-		Sys_Error ("%s is not a packfile", packfile);
-	header.dirofs = LittleLong (header.dirofs);
-	header.dirlen = LittleLong (header.dirlen);
-
-	numpackfiles = header.dirlen / sizeof (dpackfile_t);
-
-	if (numpackfiles > MAX_FILES_IN_PACK)
-		Sys_Error ("%s has %i files", packfile, numpackfiles);
-
-	newfiles = Z_Malloc (numpackfiles * sizeof (packfile_t));
-
-	fseek (packhandle, header.dirofs, SEEK_SET);
-	fread (&info, 1, header.dirlen, packhandle);
-
-	// parse the directory
-	for (i = 0; i < numpackfiles; i++)
-	{
-		strlcpy_s (newfiles[i].name, info[i].name);
-		newfiles[i].filepos = LittleLong (info[i].filepos);
-		newfiles[i].filelen = LittleLong (info[i].filelen);
-	}
-
-	pack = Z_Malloc (sizeof (pack_t));
-	strlcpy_s (pack->filename, packfile);
-	pack->handle = packhandle;
-	pack->numfiles = numpackfiles;
-	pack->files = newfiles;
-
-	Com_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
-	return pack;
-}
-
-
-/*
 ================
-COM_AddDirectory
-
-Sets com_gamedir, adds the directory to the head of the path,
-then loads and adds pak1.pak pak2.pak ...
+Sets com_gamedir, and adds the directory to the head of the path.
 ================
 */
 static void
 COM_AddDirectory (const char *dir)
 {
-	int				i;
-	searchpath_t   *search;
-	pack_t		   *pak;
-	char			pakfile[MAX_OSPATH];
-	char		   *p;
-
-	if ((p = strrchr (dir, '/')) != NULL)
-		strlcpy_s (gamedirfile, ++p);
-	else
-		strlcpy_s (gamedirfile, p);
 	strlcpy_s (com_gamedir, dir);
 	Sys_mkdir (com_gamedir);
 
-	/*
-	 * add the directory to the search path
-	 */
-	search = Z_Malloc (sizeof (searchpath_t));
-	strlcpy_s (search->filename, dir);
-	search->next = com_searchpaths;
-	com_searchpaths = search;
-
-	/*
-	 * add any pak files in the format pak0.pak pak1.pak, ...
-	 */
-	for (i = 0;; i++)
-	{
-		snprintf (pakfile, sizeof (pakfile), "%s/pak%i.pak", dir, i);
-		pak = COM_LoadPackFile (pakfile);
-		if (!pak)
-			break;
-		search = Z_Malloc (sizeof (searchpath_t));
-		search->pack = pak;
-		search->next = com_searchpaths;
-		com_searchpaths = search;
-	}
+	FS_AddPath (dir, NULL);
 }
 
 /*
 ================
-COM_AddGameDirectory
-
 Wrapper for COM_AddDirectory
 ================
 */
@@ -1485,16 +1129,12 @@ COM_AddGameDirectory (const char *dir)
 
 /*
 ================
-COM_Gamedir
-
 Sets the gamedir and path to a different directory.
 ================
 */
 void
 COM_Gamedir (const char *dir)
 {
-	searchpath_t *next;
-
 	if (strstr (dir, "..") || strstr (dir, "/")
 		|| strstr (dir, "\\") || strstr (dir, ":"))
 	{
@@ -1506,45 +1146,22 @@ COM_Gamedir (const char *dir)
 		// still the same
 		return;
 
+	FS_Delete_ID (gamedirfile);
+
 	strlcpy_s (gamedirfile, dir);
-
-	/*
-	 * free up any current game dir info
-	 */
-	while (com_searchpaths != com_base_searchpaths)
-	{
-		if (com_searchpaths == NULL)
-			Sys_Error ("Com_Gamedir: tried to free to base searchpath and "
-					"hit NULL\n");
-
-		if (com_searchpaths->pack)
-		{
-			fclose (com_searchpaths->pack->handle);
-			Z_Free (com_searchpaths->pack->files);
-			Z_Free (com_searchpaths->pack);
-		}
-		next = com_searchpaths->next;
-		Z_Free (com_searchpaths);
-		com_searchpaths = next;
-	}
-
-	if (!strcmp (dir, fs_gamename->svalue) || !strcmp (dir, "qw"))
-		return;
 
 	COM_AddGameDirectory (dir);
 }
 
-/*
-================
-COM_InitFilesystem
-================
-*/
 static void
 COM_InitFilesystem (void)
 {
-	Uint			i;
+	Uint	i;
 
-	// -basedir <path>, now the same as fs_userpath
+	FS_Init ();
+
+// -basedir <path>
+// Overrides the system supplied base directory.
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1) {
 		Cvar_Set (fs_userpath, com_argv[i + 1]);
@@ -1561,7 +1178,7 @@ COM_InitFilesystem (void)
 	COM_AddGameDirectory ("qw");
 
 	// any set gamedirs will be freed up to here
-	com_base_searchpaths = com_searchpaths;
+//	com_base_searchpaths = com_searchpaths;
 }
 
 void

@@ -119,10 +119,10 @@ void ED_Free (edict_t *ed);
 // returns a copy of the string allocated from the server's string heap
 
 void ED_Print (edict_t *ed);
-void ED_Write (FILE *f, edict_t *ed);
+void ED_Write (SDL_RWops *rw, edict_t *ed);
 const char *ED_ParseEdict (const char *data, edict_t *ent);
 
-void ED_WriteGlobals (FILE *f);
+void ED_WriteGlobals (SDL_RWops *rw);
 void ED_ParseGlobals (const char *data);
 
 void ED_LoadFromFile (const char *data);

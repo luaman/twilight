@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "zone.h"
+#include "fs.h"
 
 static qboolean    sv_allow_cheats;
 
@@ -56,8 +57,6 @@ These commands can only be entered from stdin or by a remote operator datagram
 
 /*
 ====================
-SV_SetMaster_f
-
 Make a master server current
 ====================
 */
@@ -92,11 +91,6 @@ SV_SetMaster_f (void)
 }
 
 
-/*
-==================
-SV_Quit_f
-==================
-*/
 static void
 SV_Quit_f (void)
 {
@@ -106,11 +100,6 @@ SV_Quit_f (void)
 	Sys_Quit ();
 }
 
-/*
-============
-SV_Logfile_f
-============
-*/
 static void
 SV_Logfile_f (void)
 {
@@ -126,11 +115,6 @@ SV_Logfile_f (void)
 }
 
 
-/*
-============
-SV_Fraglogfile_f
-============
-*/
 static void
 SV_Fraglogfile_f (void)
 {
@@ -139,21 +123,19 @@ SV_Fraglogfile_f (void)
 
 	if (sv_fraglogfile) {
 		Com_Printf ("Frag file logging off.\n");
-		fclose (sv_fraglogfile);
+		SDL_RWclose (sv_fraglogfile);
 		sv_fraglogfile = NULL;
 		return;
 	}
 	// find an unused name
 	for (i = 0; i < 1000; i++) {
-		snprintf (name, sizeof (name), "%s/frag_%i.log", com_gamedir, i);
-		sv_fraglogfile = fopen (name, "r");
-		if (!sv_fraglogfile) {			// can't read it, so create this one
-			sv_fraglogfile = fopen (name, "w");
+		snprintf (name, sizeof (name), "frag_%i.log", i);
+		if (!FS_FindFile(name)) {			// can't read it, so create this one
+			sv_fraglogfile = FS_Open_New (name);
 			if (!sv_fraglogfile)
 				i = 1000;				// give error
 			break;
 		}
-		fclose (sv_fraglogfile);
 	}
 	if (i == 1000) {
 		Com_Printf ("Can't open any logfiles.\n");
@@ -167,8 +149,6 @@ SV_Fraglogfile_f (void)
 
 /*
 ==================
-SV_SetPlayer
-
 Sets host_client and sv_player to the player with idnum Cmd_Argv(1)
 ==================
 */
@@ -197,8 +177,6 @@ SV_SetPlayer (void)
 
 /*
 ==================
-SV_God_f
-
 Sets client to godmode
 ==================
 */
@@ -244,11 +222,6 @@ SV_Noclip_f (void)
 }
 
 
-/*
-==================
-SV_Give_f
-==================
-*/
 static void
 SV_Give_f (void)
 {
@@ -301,8 +274,6 @@ SV_Give_f (void)
 
 /*
 ======================
-SV_Map_f
-
 handle a 
 map <mapname>
 command from the console or progs.
@@ -313,7 +284,6 @@ SV_Map_f (void)
 {
 	char        level[MAX_QPATH];
 	char        expanded[MAX_QPATH];
-	FILE       *f;
 
 	if (Cmd_Argc () != 2) {
 		Com_Printf ("map <levelname> : continue game on a new level\n");
@@ -323,12 +293,10 @@ SV_Map_f (void)
 
 	// check to make sure the level exists
 	snprintf (expanded, sizeof (expanded), "maps/%s.bsp", level);
-	COM_FOpenFile (expanded, &f, true);
-	if (!f) {
+	if (!FS_FindFile (expanded)) {
 		Com_Printf ("Can't find %s\n", expanded);
 		return;
 	}
-	fclose (f);
 
 	SV_BroadcastCommand ("changing\n");
 	SV_SendMessagesToAll ();
@@ -341,8 +309,6 @@ SV_Map_f (void)
 
 /*
 ==================
-SV_Kick_f
-
 Kick a user off of the server
 ==================
 */
@@ -372,11 +338,6 @@ SV_Kick_f (void)
 }
 
 
-/*
-================
-SV_Status_f
-================
-*/
 static void
 SV_Status_f (void)
 {
@@ -476,11 +437,6 @@ SV_Status_f (void)
 	Com_Printf ("\n");
 }
 
-/*
-==================
-SV_ConSay_f
-==================
-*/
 static void
 SV_ConSay_f (void)
 {
@@ -510,11 +466,6 @@ SV_ConSay_f (void)
 }
 
 
-/*
-==================
-SV_Heartbeat_f
-==================
-*/
 static void
 SV_Heartbeat_f (void)
 {
@@ -534,8 +485,6 @@ SV_SendServerInfoChange (const char *key, const char *value)
 
 /*
 ===========
-SV_Serverinfo_f
-
   Examine or change the serverinfo string
 ===========
 */
@@ -573,8 +522,6 @@ SV_Serverinfo_f (void)
 
 /*
 ===========
-SV_Serverinfo_f
-
   Examine or change the serverinfo string
 ===========
 */
@@ -603,8 +550,6 @@ SV_Localinfo_f (void)
 
 /*
 ===========
-SV_User_f
-
 Examine a users info strings
 ===========
 */
@@ -624,8 +569,6 @@ SV_User_f (void)
 
 /*
 ================
-SV_Gamedir
-
 Sets the fake *gamedir to a different directory.
 ================
 */
@@ -658,8 +601,6 @@ SV_Gamedir (void)
 
 /*
 ================
-SV_Floodport_f
-
 Sets the gamedir and path to a different directory.
 ================
 */
@@ -721,8 +662,6 @@ SV_Floodprotmsg_f (void)
 
 /*
 ================
-SV_Gamedir_f
-
 Sets the gamedir and path to a different directory.
 ================
 */
@@ -753,11 +692,6 @@ SV_Gamedir_f (void)
 	Info_SetValueForStarKey (svs.info, "*gamedir", dir, MAX_SERVERINFO_STRING);
 }
 
-/*
-================
-SV_Snap
-================
-*/
 static void
 SV_Snap (int uid)
 {
@@ -808,11 +742,6 @@ SV_Snap (int uid)
 	Com_Printf ("Requesting snap from user %d...\n", uid);
 }
 
-/*
-================
-SV_Snap_f
-================
-*/
 static void
 SV_Snap_f (void)
 {
@@ -828,11 +757,6 @@ SV_Snap_f (void)
 	SV_Snap (uid);
 }
 
-/*
-================
-SV_Snap
-================
-*/
 static void
 SV_SnapAll_f (void)
 {
@@ -846,11 +770,6 @@ SV_SnapAll_f (void)
 	}
 }
 
-/*
-==================
-SV_InitOperatorCommands
-==================
-*/
 void
 SV_InitOperatorCommands (void)
 {

@@ -71,11 +71,6 @@ SV_Init_Cvars (void)
 	sv_stepheight = Cvar_Get ("sv_stepheight", "18", CVAR_SERVERINFO, NULL);
 }
 
-/*
-===============
-SV_Init
-===============
-*/
 void
 SV_Init (void)
 {
@@ -97,8 +92,6 @@ EVENT MESSAGES
 
 /*  
 ==================
-SV_StartParticle
-
 Make sure the event gets sent to all clients
 ==================
 */
@@ -127,8 +120,6 @@ SV_StartParticle (vec3_t org, vec3_t dir, int color, int count)
 
 /*  
 ==================
-SV_StartSound
-
 Each entity can have eight independant sound sources, like voice,
 weapon, feet, etc.
 
@@ -219,7 +210,7 @@ SV_SendServerinfo (client_t *client)
 
 	MSG_WriteByte (&client->message, svc_print);
 	snprintf (message, sizeof (message),
-			  "%c\nTwilight version %s server (%i CRC)", 2, VERSION, pr_crc);
+			  "%c\nTwilight version %s server (%i CRC)\n", 2, VERSION, pr_crc);
 	MSG_WriteString (&client->message, message);
 
 	MSG_WriteByte (&client->message, svc_serverinfo);
@@ -261,8 +252,6 @@ SV_SendServerinfo (client_t *client)
 
 /*
 ================
-SV_ConnectClient
-
 Initializes a client_t for a new net connection.  This will only be called
 once for a player each game, not once for each level change.
 ================
@@ -316,12 +305,6 @@ SV_ConnectClient (int clientnum)
 }
 
 
-/*
-===================
-SV_CheckForNewClients
-
-===================
-*/
 void
 SV_CheckForNewClients (void)
 {
@@ -362,12 +345,6 @@ FRAME UPDATES
 ===============================================================================
 */
 
-/*
-==================
-SV_ClearDatagram
-
-==================
-*/
 void
 SV_ClearDatagram (void)
 {
@@ -422,8 +399,6 @@ SV_AddToFatPVS (vec3_t org, mnode_t *node)
 
 /*
 =============
-SV_FatPVS
-
 Calculates a PVS that is the inclusive or of all leafs within 8 pixels of the
 given point.
 =============
@@ -556,12 +531,6 @@ SV_WriteEntitiesToClient (edict_t *clent, sizebuf_t *msg)
 	}
 }
 
-/*
-=============
-SV_CleanupEnts
-
-=============
-*/
 static void
 SV_CleanupEnts (void)
 {
@@ -575,12 +544,6 @@ SV_CleanupEnts (void)
 
 }
 
-/*
-==================
-SV_WriteClientdataToMessage
-
-==================
-*/
 void
 SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 {
@@ -794,11 +757,6 @@ SV_SendNop (client_t *client)
 	client->last_message = host_realtime;
 }
 
-/*
-=======================
-SV_SendClientMessages
-=======================
-*/
 void
 SV_SendClientMessages (void)
 {
@@ -873,12 +831,6 @@ SERVER SPAWNING
 ==============================================================================
 */
 
-/*
-================
-SV_ModelIndex
-
-================
-*/
 int
 SV_ModelIndex (const char *name)
 {
@@ -895,12 +847,6 @@ SV_ModelIndex (const char *name)
 	return i;
 }
 
-/*
-================
-SV_CreateBaseline
-
-================
-*/
 static void
 SV_CreateBaseline (void)
 {
@@ -975,8 +921,6 @@ SV_SendReconnect (void)
 
 /*
 ================
-SV_SaveSpawnparms
-
 Grabs the current state of each client for saving across the
 transition to another level
 ================

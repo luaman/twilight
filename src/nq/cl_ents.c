@@ -35,11 +35,6 @@ static const char rcsid[] =
 static entity_t *traceline_entity[MAX_EDICTS];
 static int traceline_entities;
 
-/*
-================
-CL_ScanForBModels
-================
-*/
 void
 CL_ScanForBModels (void)
 {

@@ -42,8 +42,6 @@ void        SwapPic (qpic_t *pic);
 
 /*
 ==================
-W_CleanupName
-
 Lowercases name and pads with spaces and a terminating 0 to the length of
 lumpinfo_t->name.
 Used so lumpname lookups can proceed rapidly by comparing 4 chars at a time
@@ -65,11 +63,6 @@ W_CleanupName (const char *in, char *out)
 
 
 
-/*
-====================
-W_LoadWadFile
-====================
-*/
 void
 W_LoadWadFile (const char *filename)
 {
@@ -105,11 +98,6 @@ W_LoadWadFile (const char *filename)
 }
 
 
-/*
-=============
-W_GetLumpinfo
-=============
-*/
 static lumpinfo_t *
 W_GetLumpinfo (const char *name)
 {

@@ -78,12 +78,6 @@ typedef struct areanode_s {
 static areanode_t sv_areanodes[AREA_NODES];
 static int  sv_numareanodes;
 
-/*
-===============
-SV_CreateAreaNode
-
-===============
-*/
 static areanode_t *
 SV_CreateAreaNode (int depth, vec3_t mins, vec3_t maxs)
 {
@@ -123,12 +117,6 @@ SV_CreateAreaNode (int depth, vec3_t mins, vec3_t maxs)
 	return anode;
 }
 
-/*
-===============
-SV_ClearWorld
-
-===============
-*/
 void
 SV_ClearWorld (void)
 {
@@ -140,12 +128,6 @@ SV_ClearWorld (void)
 }
 
 
-/*
-===============
-SV_UnlinkEdict
-
-===============
-*/
 void
 SV_UnlinkEdict (edict_t *ent)
 {
@@ -156,11 +138,6 @@ SV_UnlinkEdict (edict_t *ent)
 }
 
 
-/*
-====================
-SV_TouchLinks
-====================
-*/
 static void
 SV_TouchLinks (edict_t *ent, areanode_t *node)
 {
@@ -244,12 +221,6 @@ SV_FindTouchedLeafs (edict_t *ent, mnode_t *node)
 		SV_FindTouchedLeafs (ent, node->children[1]);
 }
 
-/*
-===============
-SV_LinkEdict
-
-===============
-*/
 void
 SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 {
@@ -377,12 +348,6 @@ POINT TESTING IN HULLS
 ===============================================================================
 */
 
-/*
-==================
-SV_PointContents
-
-==================
-*/
 int
 SV_PointContents (vec3_t p)
 {
@@ -393,8 +358,6 @@ SV_PointContents (vec3_t p)
 
 /*
 ============
-SV_TestEntityPosition
-
 This could be a lot more efficient...
 ============
 */
@@ -425,8 +388,6 @@ LINE TESTING IN HULLS
 
 /*
 ==================
-SV_ClipMoveToEntity
-
 Handles selection or creation of a clipping hull, and offseting (and
 eventually rotation) of the end points
 ==================
@@ -563,11 +524,6 @@ SV_ClipToLinks (areanode_t *node, moveclip_t * clip)
 }
 
 
-/*
-==================
-SV_MoveBounds
-==================
-*/
 static void
 SV_MoveBounds (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
 			   vec3_t boxmins, vec3_t boxmaxs)
@@ -585,11 +541,6 @@ SV_MoveBounds (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
 	}
 }
 
-/*
-==================
-SV_Move
-==================
-*/
 trace_t
 SV_Move (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type,
 		 edict_t *passedict)

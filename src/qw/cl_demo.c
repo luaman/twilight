@@ -34,6 +34,7 @@ static const char rcsid[] =
 #include "pmove.h"
 #include "sys.h"
 #include "strlib.h"
+#include "fs.h"
 
 static void CL_FinishTimeDemo (void);
 
@@ -52,8 +53,6 @@ read from the demo file.
 
 /*
 ==============
-CL_StopPlayback
-
 Called when a demo file runs out, or the user starts a game
 ==============
 */
@@ -63,7 +62,7 @@ CL_StopPlayback (void)
 	if (!ccls.demoplayback)
 		return;
 
-	fclose (ccls.demofile);
+	SDL_RWclose (ccls.demofile);
 	ccls.demofile = NULL;
 	ccls.state = ca_disconnected;
 	ccls.demoplayback = 0;
@@ -81,8 +80,6 @@ CL_StopPlayback (void)
 
 /*
 ====================
-CL_WriteDemoCmd
-
 Writes the current user cmd
 ====================
 */
@@ -94,10 +91,10 @@ CL_WriteDemoCmd (usercmd_t *pcmd)
 	usercmd_t	cmd;
 
 	fl = LittleFloat ((float) ccls.realtime);
-	fwrite (&fl, sizeof (fl), 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &fl, sizeof (fl), 1);
 
 	c = dem_cmd;
-	fwrite (&c, sizeof (c), 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &c, sizeof (c), 1);
 
 	// correct for byte order, bytes don't matter
 	cmd = *pcmd;
@@ -109,21 +106,17 @@ CL_WriteDemoCmd (usercmd_t *pcmd)
 	cmd.sidemove = LittleShort (cmd.sidemove);
 	cmd.upmove = LittleShort (cmd.upmove);
 
-	fwrite (&cmd, sizeof (cmd), 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &cmd, sizeof (cmd), 1);
 
 	ang[0] = LittleFloat (cl.viewangles[0]);
 	ang[1] = LittleFloat (cl.viewangles[1]);
 	ang[2] = LittleFloat (cl.viewangles[2]);
 
-	fwrite (ang, 12, 1, ccls.demofile);
-
-	fflush (ccls.demofile);
+	SDL_RWwrite (ccls.demofile, ang, 12, 1);
 }
 
 /*
 ====================
-CL_WriteDemoMessage
-
 Dumps the current net message, prefixed by the length and view angles
 ====================
 */
@@ -138,25 +131,16 @@ CL_WriteDemoMessage (sizebuf_t *msg)
 		return;
 
 	fl = LittleFloat ((float) ccls.realtime);
-	fwrite (&fl, sizeof (fl), 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &fl, sizeof (fl), 1);
 
 	c = dem_read;
-	fwrite (&c, sizeof (c), 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &c, sizeof (c), 1);
 
 	len = LittleLong (msg->cursize);
-	fwrite (&len, 4, 1, ccls.demofile);
-	fwrite (msg->data, msg->cursize, 1, ccls.demofile);
-
-	fflush (ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &len, 4, 1);
+	SDL_RWwrite (ccls.demofile, msg->data, msg->cursize, 1);
 }
 
-/*
-====================
-CL_GetDemoMessage
-
-  FIXME...
-====================
-*/
 static qboolean
 CL_GetDemoMessage (void)
 {
@@ -166,7 +150,7 @@ CL_GetDemoMessage (void)
 	usercmd_t	*pcmd;
 
 	// read the time from the packet
-	fread (&demotime, sizeof (demotime), 1, ccls.demofile);
+	SDL_RWread (ccls.demofile, &demotime, sizeof (demotime), 1);
 	demotime = LittleFloat (demotime);
 
 	// decide if it is time to grab the next message        
@@ -176,8 +160,7 @@ CL_GetDemoMessage (void)
 		else if (demotime > ccls.td_lastframe) {
 			ccls.td_lastframe = demotime;
 			// rewind back to time
-			fseek (ccls.demofile, ftell (ccls.demofile) - sizeof (demotime),
-				   SEEK_SET);
+			SDL_RWseek (ccls.demofile, -sizeof (demotime), SEEK_CUR);
 			return 0;					// already read this frame's message
 		}
 		if (!ccls.td_starttime && ccls.state == ca_active) {
@@ -191,13 +174,11 @@ CL_GetDemoMessage (void)
 			// too far back
 			ccls.realtime = demotime - 1.0;
 			// rewind back to time
-			fseek (ccls.demofile, ftell (ccls.demofile) - sizeof (demotime),
-				   SEEK_SET);
+			SDL_RWseek (ccls.demofile, -sizeof (demotime), SEEK_CUR);
 			return 0;
 		} else if (ccls.realtime < demotime) {
 			// rewind back to time
-			fseek (ccls.demofile, ftell (ccls.demofile) - sizeof (demotime),
-				   SEEK_SET);
+			SDL_RWseek (ccls.demofile, -sizeof (demotime), SEEK_CUR);
 			return 0;	// don't need another message yet
 		}
 	} else
@@ -207,14 +188,14 @@ CL_GetDemoMessage (void)
 		Host_Error ("CL_GetDemoMessage: ccls.state != ca_active");
 
 	// get the msg type
-	fread (&c, sizeof (c), 1, ccls.demofile);
+	SDL_RWread (ccls.demofile, &c, sizeof (c), 1);
 
 	switch (c) {
 		case dem_cmd:
 			// user sent input
 			i = cls.netchan.outgoing_sequence & UPDATE_MASK;
 			pcmd = &cl.frames[i].cmd;
-			r = fread (pcmd, sizeof (*pcmd), 1, ccls.demofile);
+			r = SDL_RWread (ccls.demofile, pcmd, sizeof (*pcmd), 1);
 			if (r != 1) {
 				CL_StopPlayback ();
 				return 0;
@@ -229,7 +210,7 @@ CL_GetDemoMessage (void)
 			cl.frames[i].receivedtime = -1;	// we haven't gotten a reply yet
 			cls.netchan.outgoing_sequence++;
 
-			r = fread (cl.viewangles, 12, 1, ccls.demofile);
+			r = SDL_RWread (ccls.demofile, cl.viewangles, 12, 1);
 
 			for (i = 0; i < 3; i++) {
 				cl.viewangles[i] = LittleFloat (cl.viewangles[i]);
@@ -238,12 +219,12 @@ CL_GetDemoMessage (void)
 
 		case dem_read:
 			// get the next message
-			fread (&net_message.cursize, 4, 1, ccls.demofile);
+			SDL_RWread (ccls.demofile, &net_message.cursize, 4, 1);
 			net_message.cursize = LittleLong (net_message.cursize);
 			// Com_Printf("read: %ld bytes\n", net_message.cursize);
 			if (net_message.cursize > MAX_MSGLEN)
 				Host_EndGame ("Demo message > MAX_MSGLEN");
-			r = fread (net_message.data, net_message.cursize, 1, ccls.demofile);
+			r = SDL_RWread (ccls.demofile, net_message.data, net_message.cursize, 1);
 			if (r != 1) {
 				CL_StopPlayback ();
 				return 0;
@@ -251,9 +232,9 @@ CL_GetDemoMessage (void)
 			break;
 
 		case dem_set:
-			fread (&i, 4, 1, ccls.demofile);
+			SDL_RWread (ccls.demofile, &i, 4, 1);
 			cls.netchan.outgoing_sequence = LittleLong (i);
-			fread (&i, 4, 1, ccls.demofile);
+			SDL_RWread (ccls.demofile, &i, 4, 1);
 			cls.netchan.incoming_sequence = LittleLong (i);
 			break;
 
@@ -268,8 +249,6 @@ CL_GetDemoMessage (void)
 
 /*
 ====================
-CL_GetMessage
-
 Handles recording and playback of demos, on top of NET_ code
 ====================
 */
@@ -289,8 +268,6 @@ CL_GetMessage (void)
 
 /*
 ====================
-CL_Stop_f
-
 stop recording a demo
 ====================
 */
@@ -309,7 +286,7 @@ CL_Stop_f (void)
 	CL_WriteDemoMessage (&net_message);
 
 	// finish up
-	fclose (ccls.demofile);
+	SDL_RWclose (ccls.demofile);
 	ccls.demofile = NULL;
 	ccls.demorecording = false;
 	Com_Printf ("Completed demo\n");
@@ -317,8 +294,6 @@ CL_Stop_f (void)
 
 /*
 ====================
-CL_WriteDemoMessage
-
 Dumps the current net message, prefixed by the length and view angles
 ====================
 */
@@ -333,21 +308,18 @@ CL_WriteRecordDemoMessage (sizebuf_t *msg, int seq)
 		return;
 
 	fl = LittleFloat ((float) ccls.realtime);
-	fwrite (&fl, sizeof (fl), 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &fl, sizeof (fl), 1);
 
 	c = dem_read;
-	fwrite (&c, sizeof (c), 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &c, sizeof (c), 1);
 
 	len = LittleLong (msg->cursize + 8);
-	fwrite (&len, 4, 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &len, 4, 1);
 
 	i = LittleLong (seq);
-	fwrite (&i, 4, 1, ccls.demofile);
-	fwrite (&i, 4, 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &i, 4, 1);
 
-	fwrite (msg->data, msg->cursize, 1, ccls.demofile);
-
-	fflush (ccls.demofile);
+	SDL_RWwrite (ccls.demofile, msg->data, msg->cursize, 1);
 }
 
 static void
@@ -361,23 +333,19 @@ CL_WriteSetDemoMessage (void)
 		return;
 
 	fl = LittleFloat ((float) ccls.realtime);
-	fwrite (&fl, sizeof (fl), 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &fl, sizeof (fl), 1);
 
 	c = dem_set;
-	fwrite (&c, sizeof (c), 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &c, sizeof (c), 1);
 
 	len = LittleLong (cls.netchan.outgoing_sequence);
-	fwrite (&len, 4, 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &len, 4, 1);
 	len = LittleLong (cls.netchan.incoming_sequence);
-	fwrite (&len, 4, 1, ccls.demofile);
-
-	fflush (ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &len, 4, 1);
 }
 
 /*
 ====================
-CL_Record_f
-
 record <demoname> <server>
 ====================
 */
@@ -406,12 +374,12 @@ CL_Record_f (void)
 	if (ccls.demorecording)
 		CL_Stop_f ();
 
-	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
+	strncpy (name, Cmd_Argv (1), sizeof (name));
 
 	// open the demo file
 	COM_DefaultExtension (name, ".qwd", sizeof (name));
 
-	ccls.demofile = fopen (name, "wb");
+	ccls.demofile = FS_Open_New (name);
 	if (!ccls.demofile) {
 		Com_Printf ("ERROR: couldn't open.\n");
 		return;
@@ -641,8 +609,6 @@ CL_Record_f (void)
 
 /*
 ====================
-CL_ReRecord_f
-
 rerecord <demoname>
 ====================
 */
@@ -666,12 +632,12 @@ CL_ReRecord_f (void)
 	if (ccls.demorecording)
 		CL_Stop_f ();
 
-	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
+	strncpy (name, Cmd_Argv (1), sizeof (name));
 
 	// open the demo file
 	COM_DefaultExtension (name, ".qwd", sizeof (name));
 
-	ccls.demofile = fopen (name, "wb");
+	ccls.demofile = FS_Open_New (name);
 	if (!ccls.demofile) {
 		Com_Printf ("ERROR: couldn't open.\n");
 		return;
@@ -687,8 +653,6 @@ CL_ReRecord_f (void)
 
 /*
 ====================
-CL_PlayDemo_f
-
 play [demoname]
 ====================
 */
@@ -696,6 +660,7 @@ void
 CL_PlayDemo_f (void)
 {
 	char	name[256];
+	fs_file_t	*file;
 
 	if (Cmd_Argc () != 2) {
 		Com_Printf ("play <demoname> : plays a demo\n");
@@ -710,9 +675,17 @@ CL_PlayDemo_f (void)
 	COM_DefaultExtension (name, ".qwd", sizeof (name));
 
 	Com_Printf ("Playing demo from %s.\n", name);
-	COM_FOpenFile (name, &ccls.demofile, true);
+
+	file = FS_FindFile (name);
+	if (!file) {
+		Com_Printf ("ERROR: couldn't find %s.\n", name);
+		ccls.demonum = -1;				// stop demo loop
+		return;
+	}
+
+	ccls.demofile = file->open(file, false);
 	if (!ccls.demofile) {
-		Com_Printf ("ERROR: couldn't open.\n");
+		Com_Printf ("ERROR: couldn't open %s.\n", name);
 		ccls.demonum = -1;				// stop demo loop
 		return;
 	}
@@ -723,12 +696,6 @@ CL_PlayDemo_f (void)
 	ccls.realtime = 0;
 }
 
-/*
-====================
-CL_FinishTimeDemo
-
-====================
-*/
 static void
 CL_FinishTimeDemo (void)
 {
@@ -747,8 +714,6 @@ CL_FinishTimeDemo (void)
 
 /*
 ====================
-CL_TimeDemo_f
-
 timedemo [demoname]
 ====================
 */

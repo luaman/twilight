@@ -76,8 +76,6 @@ PF_VarString (int first)
 
 /*
 =================
-PF_errror
-
 This is a TERMINAL error, which will kill off the entire server.
 Dumps self.
 
@@ -101,8 +99,6 @@ PF_error (void)
 
 /*
 =================
-PF_objerror
-
 Dumps out self, then an error message.  The program is aborted and self is
 removed, but the level can continue.
 
@@ -129,8 +125,6 @@ PF_objerror (void)
 
 /*
 ==============
-PF_makevectors
-
 Writes new values for v_forward, v_up, and v_right based on angles
 makevectors(vector)
 ==============
@@ -144,8 +138,6 @@ PF_makevectors (void)
 
 /*
 =================
-PF_setorigin
-
 This is the only valid way to move an object without using the physics of the world (setting velocity and waiting).  Directly changing origin will not set internal links correctly, so clipping would be messed up.  This should be called when an object is spawned, and then only if it is teleported.
 
 setorigin (entity, origin)
@@ -166,8 +158,6 @@ PF_setorigin (void)
 
 /*
 =================
-PF_setsize
-
 the size box is rotated by the current angle
 
 setsize (entity, minvector, maxvector)
@@ -191,8 +181,6 @@ PF_setsize (void)
 
 /*
 =================
-PF_setmodel
-
 setmodel(entity, model)
 Also sets size, mins, and maxs for inline bmodels
 =================
@@ -232,8 +220,6 @@ PF_setmodel (void)
 
 /*
 =================
-PF_bprint
-
 broadcast print to everyone on server
 
 bprint(value)
@@ -253,8 +239,6 @@ PF_bprint (void)
 
 /*
 =================
-PF_sprint
-
 single print to a specific client
 
 sprint(clientent, value)
@@ -286,8 +270,6 @@ PF_sprint (void)
 
 /*
 =================
-PF_centerprint
-
 single print to a specific client
 
 centerprint(clientent, value)
@@ -317,8 +299,6 @@ PF_centerprint (void)
 
 /*
 =================
-PF_normalize
-
 vector normalize(vector)
 =================
 */
@@ -348,8 +328,6 @@ PF_normalize (void)
 
 /*
 =================
-PF_vlen
-
 scalar vlen(vector)
 =================
 */
@@ -368,8 +346,6 @@ PF_vlen (void)
 
 /*
 =================
-PF_vectoyaw
-
 float vectoyaw(vector)
 =================
 */
@@ -395,8 +371,6 @@ PF_vectoyaw (void)
 
 /*
 =================
-PF_vectoangles
-
 vector vectoangles(vector)
 =================
 */
@@ -415,8 +389,6 @@ PF_vectoangles (void)
 
 /*
 =================
-PF_Random
-
 Returns a number from 0<= num < 1
 
 random()
@@ -433,12 +405,6 @@ PF_random (void)
 }
 
 
-/*
-=================
-PF_ambientsound
-
-=================
-*/
 static void
 PF_ambientsound (void)
 {
@@ -477,8 +443,6 @@ PF_ambientsound (void)
 
 /*
 =================
-PF_sound
-
 Each entity can have eight independant sound sources, like voice,
 weapon, feet, etc.
 
@@ -510,8 +474,6 @@ PF_sound (void)
 
 /*
 =================
-PF_break
-
 break()
 =================
 */
@@ -525,8 +487,6 @@ PF_break (void)
 
 /*
 =================
-PF_traceline
-
 Used for use tracing and shot targeting
 Traces are blocked by bbox and exact bsp entityes, and also slide box entities
 if the tryents flag is set.
@@ -565,8 +525,6 @@ PF_traceline (void)
 
 /*
 =================
-PF_tracebox
-
 Used for use tracing and shot targeting
 Traces are blocked by bbox and exact bsp entityes, and also slide box entities
 if the tryents flag is set.
@@ -663,8 +621,6 @@ PF_newcheckclient (Uint check)
 
 /*
 =================
-PF_checkclient
-
 Returns a client (or object that has a client enemy) that would be a
 valid target.
 
@@ -717,8 +673,6 @@ PF_checkclient (void)
 
 /*
 =================
-PF_stuffcmd
-
 Sends text over to the client's execution buffer
 
 stuffcmd (clientent, value)
@@ -750,8 +704,6 @@ PF_stuffcmd (void)
 
 /*
 =================
-PF_localcmd
-
 Sends text over to the client's execution buffer
 
 localcmd (string)
@@ -768,8 +720,6 @@ PF_localcmd (void)
 
 /*
 =================
-PF_cvar
-
 float cvar (string)
 =================
 */
@@ -790,8 +740,6 @@ PF_cvar (void)
 
 /*
 =================
-PF_cvar_set
-
 float cvar (string)
 =================
 */
@@ -813,8 +761,6 @@ PF_cvar_set (void)
 
 /*
 =================
-PF_findradius
-
 Returns a chain of entities that have origins within a spherical area
 
 findradius (origin, radius)
@@ -855,11 +801,6 @@ PF_findradius (void)
 }
 
 
-/*
-=========
-PF_dprint
-=========
-*/
 static void
 PF_dprint (void)
 {
@@ -1056,8 +997,6 @@ PF_eprint (void)
 
 /*
 ===============
-PF_walkmove
-
 float(float yaw, float dist) walkmove
 ===============
 */
@@ -1099,8 +1038,6 @@ PF_walkmove (void)
 
 /*
 ===============
-PF_droptofloor
-
 void() droptofloor
 ===============
 */
@@ -1131,8 +1068,6 @@ PF_droptofloor (void)
 
 /*
 ===============
-PF_lightstyle
-
 void(float style, string value) lightstyle
 ===============
 */
@@ -1188,11 +1123,6 @@ PF_ceil (void)
 }
 
 
-/*
-=============
-PF_checkbottom
-=============
-*/
 static void
 PF_checkbottom (void)
 {
@@ -1203,11 +1133,6 @@ PF_checkbottom (void)
 	G_FLOAT (OFS_RETURN) = SV_CheckBottom (ent);
 }
 
-/*
-=============
-PF_pointcontents
-=============
-*/
 static void
 PF_pointcontents (void)
 {
@@ -1220,8 +1145,6 @@ PF_pointcontents (void)
 
 /*
 =============
-PF_nextent
-
 entity nextent(entity)
 =============
 */
@@ -1248,8 +1171,6 @@ PF_nextent (void)
 
 /*
 =============
-PF_aim
-
 Pick a vector for the player to shoot along
 vector aim(entity, missilespeed)
 =============
@@ -1332,8 +1253,6 @@ PF_aim (void)
 
 /*
 ==============
-PF_changeyaw
-
 This was a major timewaster in progs, so it was converted to C
 ==============
 */
@@ -1557,11 +1476,6 @@ PF_makestatic (void)
 
 //=============================================================================
 
-/*
-==============
-PF_setspawnparms
-==============
-*/
 static void
 PF_setspawnparms (void)
 {
@@ -1581,11 +1495,6 @@ PF_setspawnparms (void)
 		(&pr_global_struct->parm1)[i] = client->spawn_parms[i];
 }
 
-/*
-==============
-PF_changelevel
-==============
-*/
 static void
 PF_changelevel (void)
 {
@@ -1604,8 +1513,6 @@ PF_changelevel (void)
 
 /*
 ==============
-PF_logfrag
-
 logfrag (killer, killee)
 ==============
 */
@@ -1629,17 +1536,13 @@ PF_logfrag (void)
 			svs.clients[e2 - 1].name);
 
 	SZ_Print (&svs.log[svs.logsequence & 1], s);
-	if (sv_fraglogfile) {
-		fprintf (sv_fraglogfile, s);
-		fflush (sv_fraglogfile);
-	}
+	if (sv_fraglogfile)
+		SDL_RWwrite (sv_fraglogfile, s, strlen(s), 1);
 }
 
 
 /*
 ==============
-PF_infokey
-
 string(entity e, string key) infokey
 ==============
 */
@@ -1677,8 +1580,6 @@ PF_infokey (void)
 
 /*
 ==============
-PF_stof
-
 float(string s) stof
 ==============
 */
@@ -1695,8 +1596,6 @@ PF_stof (void)
 
 /*
 ==============
-PF_multicast
-
 void(vector where, float set) multicast
 ==============
 */
@@ -1776,8 +1675,6 @@ PF_registercvar (void)
 
 /*
 =================
-PF_min
-
 returns the minimum of two or more supplied floats
 =================
 */
@@ -1804,8 +1701,6 @@ PF_min (void)
 
 /*
 =================
-PF_max
-
 returns the maximum of two or more supplied floats
 =================
 */
@@ -1832,8 +1727,6 @@ PF_max (void)
 
 /*
 =================
-PF_bound
-
 returns float bounded within a supplied range
 =================
 */
@@ -1845,8 +1738,6 @@ PF_bound (void)
 
 /*
 =================
-PF_pow
-
 returns x raised to the y power
 =================
 */
@@ -1856,12 +1747,6 @@ PF_pow (void)
 	G_FLOAT(OFS_RETURN) = pow(G_FLOAT(OFS_PARM0), G_FLOAT(OFS_PARM1));
 }
 
-/*
-=================
-PF_findfloat
-
-=================
-*/
 static void
 PF_findfloat (void)
 {

@@ -28,12 +28,6 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
-#ifdef HAVE_SDL_H
-# include "SDL_types.h"
-#else
-# include "sdlstub.h"
-#endif
-
 #include "quakedef.h"
 #include "common.h"
 #include <strlib.h>						/* XoXus: needed for memset call */

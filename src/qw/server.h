@@ -190,9 +190,9 @@ typedef struct client_s {
 
 	client_frame_t frames[UPDATE_BACKUP];	// updates can be deltad from here
 
-	FILE       *download;				// file being downloaded
-	int         downloadsize;			// total bytes
-	int         downloadcount;			// bytes sent
+	SDL_RWops	*download;				// file being downloaded
+	int			downloadsize;			// total bytes
+	int			downloadcount;			// bytes sent
 
 	int         spec_track;				// entnum of player tracking
 
@@ -206,7 +206,7 @@ typedef struct client_s {
 
 	qboolean    upgradewarn;			// did we warn him?
 
-	FILE       *upload;
+	SDL_RWops	*upload;
 	char        uploadfn[MAX_QPATH];
 	netadr_t    snap_from;
 	qboolean    remote_snap;
@@ -395,7 +395,7 @@ extern cvar_t *deathmatch;
 extern cvar_t *coop;
 extern cvar_t *skill;
 extern cvar_t *sv_nailhack;
-extern FILE *sv_fraglogfile;
+extern SDL_RWops *sv_fraglogfile;
 extern int current_skill;
 
 qboolean ServerPaused(void);

@@ -27,6 +27,7 @@
 #ifndef __CVAR_H
 #define __CVAR_H
 
+#include "twiconfig.h"
 #include "qtypes.h"
 
 // NOTE: These flags must match Cvar_FlagString in cvar.c
@@ -81,7 +82,7 @@ const char *Cvar_TabComplete (const char *partial);
 
 void Cvar_Cleanup (void);
 
-void Cvar_WriteVars (FILE *f);
+void Cvar_WriteVars (SDL_RWops *rw);
 
 struct cvar_foreach_s *Cvar_ForeachStart (void);
 cvar_t *Cvar_ForeachNext (struct cvar_foreach_s *id);

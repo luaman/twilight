@@ -315,7 +315,7 @@ R_ClearParticles (void)
 void
 R_ReadPointFile_f (void)
 {
-	FILE			*f;
+	char			*cur, *tmp, *start;
 	vec3_t			org;
 	int				r, c;
 	char			name[MAX_OSPATH];
@@ -323,18 +323,20 @@ R_ReadPointFile_f (void)
 
 	snprintf (name, sizeof (name), "maps/%s.pts", cl_mapname->svalue);
 
-	COM_FOpenFile (name, &f, true);
-	if (!f)
+	Com_Printf ("Reading %s...\n", name);
+	cur = start = COM_LoadTempFile (name, true);
+
+	if (!cur)
 	{
 		Com_Printf ("couldn't open %s\n", name);
 		return;
 	}
 
-	Com_Printf ("Reading %s...\n", name);
 	c = 0;
-	for (;;)
-	{
-		r = fscanf (f, "%f %f %f\n", &org[0], &org[1], &org[2]);
+	while (cur[0] && (tmp = strchr (cur, '\n'))) {
+		tmp[0] = '\n';
+		r = sscanf (cur, "%f %f %f", &org[0], &org[1], &org[2]);
+		cur = tmp + 1;
 		if (r != 3)
 			break;
 
@@ -346,7 +348,7 @@ R_ReadPointFile_f (void)
 		p->gravity = 0;
 	}
 
-	fclose (f);
+	Zone_Free (start);
 	Com_Printf ("%i points read\n", c);
 }
 

@@ -39,6 +39,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "world.h"
+#include "rw_ops.h"
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
@@ -449,8 +450,6 @@ PR_UglyValueString (etype_t type, eval_t *val)
 
 /*
 ============
-PR_GlobalString
-
 Returns a string with a description and the contents of a global,
 padded to 20 field width
 ============
@@ -564,17 +563,17 @@ For savegames
 =============
 */
 void
-ED_Write (FILE *f, edict_t *ed)
+ED_Write (SDL_RWops *rw, edict_t *ed)
 {
 	ddef_t		*d;
 	Uint		*v, i, j, type;
 	char		*name;
 
-	fprintf (f, "{\n");
+	RWprintf (rw, "{\n");
 
 	if (ed->free)
 	{
-		fprintf (f, "}\n");
+		RWprintf (rw, "}\n");
 		return;
 	}
 
@@ -596,11 +595,11 @@ ED_Write (FILE *f, edict_t *ed)
 		if (j == type_size[type])
 			continue;
 
-		fprintf (f, "\"%s\" ", name);
-		fprintf (f, "\"%s\"\n", PR_UglyValueString (d->type, (eval_t *) v));
+		RWprintf (rw, "\"%s\" ", name);
+		RWprintf (rw, "\"%s\"\n", PR_UglyValueString (d->type, (eval_t *) v));
 	}
 
-	fprintf (f, "}\n");
+	RWprintf (rw, "}\n");
 }
 
 void
@@ -687,14 +686,14 @@ FIXME: need to tag constants, doesn't really work
 */
 
 void
-ED_WriteGlobals (FILE * f)
+ED_WriteGlobals (SDL_RWops *rw)
 {
 	ddef_t		*def;
 	Uint		i;
 	char		*name;
 	Uint		type;
 
-	fprintf (f, "{\n");
+	RWprintf (rw, "{\n");
 	for (i = 0; i < progs->numglobaldefs; i++)
 	{
 		def = &pr_globaldefs[i];
@@ -707,11 +706,11 @@ ED_WriteGlobals (FILE * f)
 			continue;
 
 		name = pr_strings + def->s_name;
-		fprintf (f, "\"%s\" ", name);
-		fprintf (f, "\"%s\"\n", PR_UglyValueString (type,
+		RWprintf (rw, "\"%s\" ", name);
+		RWprintf (rw, "\"%s\"\n", PR_UglyValueString (type,
 					(eval_t *) &pr_globals[def->ofs]));
 	}
-	fprintf (f, "}\n");
+	RWprintf (rw, "}\n");
 }
 
 void
@@ -1082,11 +1081,6 @@ eval_field_t eval_fields[] =
 	{ev_vector, "punchvector"}
 };
 
-/*
-===============
-PR_LoadProgs
-===============
-*/
 void
 PR_LoadProgs (void)
 {
@@ -1347,11 +1341,6 @@ PR_Globals_f (void)
 		progs->numglobals, progs->numglobals * 4);
 }
 
-/*
-===============
-PR_Init_Cvars
-===============
-*/
 void
 PR_Init_Cvars (void)
 {
@@ -1370,11 +1359,6 @@ PR_Init_Cvars (void)
 	pr_checkextension = Cvar_Get ("pr_checkextension", "1", CVAR_ROM, NULL);
 }
 
-/*
-===============
-PR_Init
-===============
-*/
 void
 PR_Init (void)
 {

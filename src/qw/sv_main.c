@@ -43,6 +43,8 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 #include "net.h"
+#include "fs.h"
+#include "rw_ops.h"
 
 qboolean    host_initialized;			// true if into command execution
 
@@ -89,8 +91,7 @@ cvar_t     *skill;
 
 cvar_t	   *sv_nailhack;
 
-static FILE       *sv_logfile;
-FILE       *sv_fraglogfile;
+SDL_RWops	*sv_fraglogfile;
 
 void        SV_AcceptClient (netadr_t adr, int userid, char *userinfo);
 void        Master_Shutdown (void);
@@ -107,8 +108,6 @@ ServerPaused (void)
 
 /*
 ================
-SV_Shutdown
-
 Quake calls this before calling Sys_Quit or Sys_Error
 ================
 */
@@ -116,21 +115,15 @@ void
 SV_Shutdown (void)
 {
 	Master_Shutdown ();
-	if (sv_logfile) {
-		fclose (sv_logfile);
-		sv_logfile = NULL;
-	}
 	if (sv_fraglogfile) {
-		fclose (sv_fraglogfile);
-		sv_logfile = NULL;
+		SDL_RWclose (sv_fraglogfile);
+		sv_fraglogfile = NULL;
 	}
 	NET_Shutdown ();
 }
 
 /*
 ================
-SV_Error
-
 Sends a datagram to all the clients informing them of the server crash,
 then exits
 ================
@@ -162,8 +155,6 @@ SV_Error (char *error, ...)
 
 /*
 ==================
-SV_FinalMessage
-
 Used by SV_Error and SV_Quit_f to send a final message to all connected
 clients before the server goes down.  The messages are sent immediately,
 not just stuck on the outgoing message list, because the server is going
@@ -192,8 +183,6 @@ SV_FinalMessage (char *message)
 
 /*
 =====================
-SV_DropClient
-
 Called when the player is totally leaving the server, either willingly
 or unwillingly.  This is NOT called if the entire server is quiting
 or crashing.
@@ -225,11 +214,11 @@ SV_DropClient (client_t *drop)
 		Com_Printf ("Client %s removed\n", drop->name);
 
 	if (drop->download) {
-		fclose (drop->download);
+		SDL_RWclose (drop->download);
 		drop->download = NULL;
 	}
 	if (drop->upload) {
-		fclose (drop->upload);
+		SDL_RWclose (drop->upload);
 		drop->upload = NULL;
 	}
 	*drop->uploadfn = 0;
@@ -249,12 +238,6 @@ SV_DropClient (client_t *drop)
 
 //====================================================================
 
-/*
-===================
-SV_CalcPing
-
-===================
-*/
 int
 SV_CalcPing (client_t *cl)
 {
@@ -280,8 +263,6 @@ SV_CalcPing (client_t *cl)
 
 /*
 ===================
-SV_FullClientUpdate
-
 Writes all update values to a sizebuf
 ===================
 */
@@ -320,8 +301,6 @@ SV_FullClientUpdate (client_t *client, sizebuf_t *buf)
 
 /*
 ===================
-SV_FullClientUpdateToClient
-
 Writes all update values to a client's reliable stream
 ===================
 */
@@ -347,8 +326,6 @@ CONNECTIONLESS COMMANDS
 
 /*
 ================
-SVC_Status
-
 Responds with all the info that qplug or qspy can see
 This message can be up to around 5k with worst case string lengths.
 ================
@@ -383,12 +360,6 @@ SVC_Status (void)
 	SV_EndRedirect ();
 }
 
-/*
-===================
-SV_CheckLog
-
-===================
-*/
 #define	LOG_HIGHWATER	4096
 #define	LOG_FLUSH		10*60
 static void
@@ -414,8 +385,6 @@ SV_CheckLog (void)
 
 /*
 ================
-SVC_Log
-
 Responds with all the logged frags for ranking programs.
 If a sequence number is passed as a parameter and it is
 the same as the current sequence, an A2A_NACK will be returned
@@ -453,8 +422,6 @@ SVC_Log (void)
 
 /*
 ================
-SVC_Ping
-
 Just responds with an acknowledgement
 ================
 */
@@ -470,8 +437,6 @@ SVC_Ping (void)
 
 /*
 =================
-SVC_GetChallenge
-
 Returns a challenge number that can be used
 in a subsequent client_connect command.
 We do this to prevent denial of service attacks that
@@ -513,8 +478,6 @@ SVC_GetChallenge (void)
 
 /*
 ==================
-SVC_DirectConnect
-
 A connection request that did not come from the master
 ==================
 */
@@ -736,8 +699,6 @@ Rcon_Validate (void)
 
 /*
 ===============
-SVC_RemoteCommand
-
 A client issued an rcon command.
 Shift down the remaining args
 Redirect all printfs
@@ -786,8 +747,6 @@ Cmd_ForwardToServer (void)
 
 /*
 =================
-SV_ConnectionlessPacket
-
 A connectionless packet has four leading 0xff
 characters to distinguish it from a game channel.
 Clients that are in the game can still send
@@ -879,11 +838,6 @@ static ipfilter_t  ipfilters[MAX_IPFILTERS];
 static int         numipfilters;
 
 
-/*
-=================
-StringToFilter
-=================
-*/
 static qboolean
 StringToFilter (const char *s, ipfilter_t * f)
 {
@@ -923,11 +877,6 @@ StringToFilter (const char *s, ipfilter_t * f)
 	return true;
 }
 
-/*
-=================
-SV_AddIP_f
-=================
-*/
 static void
 SV_AddIP_f (void)
 {
@@ -948,11 +897,6 @@ SV_AddIP_f (void)
 		ipfilters[i].compare = 0xffffffff;
 }
 
-/*
-=================
-SV_RemoveIP_f
-=================
-*/
 static void
 SV_RemoveIP_f (void)
 {
@@ -972,11 +916,6 @@ SV_RemoveIP_f (void)
 	Com_Printf ("Didn't find %s.\n", Cmd_Argv (1));
 }
 
-/*
-=================
-SV_ListIP_f
-=================
-*/
 static void
 SV_ListIP_f (void)
 {
@@ -990,53 +929,42 @@ SV_ListIP_f (void)
 	}
 }
 
-/*
-=================
-SV_WriteIP_f
-=================
-*/
 static void
 SV_WriteIP_f (void)
 {
-	FILE       *f;
-	char        name[MAX_OSPATH];
+	fs_file_t	*file;
+	SDL_RWops	*rw = NULL;
 	Uint8       b[4];
 	int         i;
 
-	snprintf (name, sizeof (name), "%s/listip.cfg", com_gamedir);
+	Com_Printf ("Writing listip.cfg.\n");
 
-	Com_Printf ("Writing %s.\n", name);
+	if ((file = FS_FindFile ("listip.cfg")))
+		rw = file->open(file, true);
 
-	f = fopen (name, "wb");
-	if (!f) {
-		Com_Printf ("Couldn't open %s\n", name);
+	if (!rw)
+		rw = FS_Open_New ("listip.cfg");
+
+	if (!rw) {
+		Com_Printf ("Couldn't write listip.cfg.\n");
 		return;
 	}
 
+
 	for (i = 0; i < numipfilters; i++) {
 		*(unsigned *) b = ipfilters[i].compare;
-		fprintf (f, "addip %i.%i.%i.%i\n", b[0], b[1], b[2], b[3]);
+		RWprintf (rw, "addip %i.%i.%i.%i\n", b[0], b[1], b[2], b[3]);
 	}
 
-	fclose (f);
+	SDL_RWclose (rw);
 }
 
-/*
-=================
-SV_SendBan
-=================
-*/
 static void
 SV_SendBan (void)
 {
 	Netchan_OutOfBandPrint (NS_SERVER, net_from, "%c\nbanned.\n", A2C_PRINT);
 }
 
-/*
-=================
-SV_FilterPacket
-=================
-*/
 static qboolean
 SV_FilterPacket (void)
 {
@@ -1054,11 +982,6 @@ SV_FilterPacket (void)
 
 //============================================================================
 
-/*
-=================
-SV_ReadPackets
-=================
-*/
 static void
 SV_ReadPackets (void)
 {
@@ -1116,8 +1039,6 @@ SV_ReadPackets (void)
 
 /*
 ==================
-SV_CheckTimeouts
-
 If a packet has not been received from a client in timeout.value
 seconds, drop the conneciton.
 
@@ -1160,8 +1081,6 @@ SV_CheckTimeouts (void)
 
 /*
 ===================
-SV_GetConsoleCommands
-
 Add them exactly as if they had been typed at the console
 ===================
 */
@@ -1178,12 +1097,6 @@ SV_GetConsoleCommands (void)
 	}
 }
 
-/*
-===================
-SV_CheckVars
-
-===================
-*/
 static void
 SV_CheckVars (void)
 {
@@ -1209,12 +1122,6 @@ SV_CheckVars (void)
 							 MAX_SERVERINFO_STRING);
 }
 
-/*
-==================
-SV_Frame
-
-==================
-*/
 void
 SV_Frame (float time)
 {
@@ -1272,11 +1179,6 @@ SV_Frame (float time)
 	}
 }
 
-/*
-===============
-SV_InitLocal
-===============
-*/
 static void
 SV_InitLocal (void)
 {
@@ -1391,8 +1293,6 @@ SV_InitLocal (void)
 
 /*
 ================
-Master_Heartbeat
-
 Send a message to the master every few minutes to
 let it know we are alive, and log information
 ================
@@ -1435,8 +1335,6 @@ Master_Heartbeat (void)
 
 /*
 =================
-Master_Shutdown
-
 Informs all masters that this server is going down
 =================
 */
@@ -1459,8 +1357,6 @@ Master_Shutdown (void)
 
 /*
 =================
-SV_ExtractFromUserinfo
-
 Pull specific info from a newly changed userinfo string
 into a more C freindly form.
 =================
@@ -1578,11 +1474,6 @@ SV_ExtractFromUserinfo (client_t *cl)
 
 //============================================================================
 
-/*
-====================
-SV_InitNet
-====================
-*/
 static void
 SV_InitNet (void)
 {
@@ -1616,11 +1507,6 @@ SV_CvarServerinfo (cvar_t *var)
 	}
 }
 
-/*
-====================
-SV_Init
-====================
-*/
 void
 SV_Init (void)
 {

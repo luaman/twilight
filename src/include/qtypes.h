@@ -28,12 +28,8 @@
 #define __QTYPES_H
 
 #include <stdio.h>
-#ifdef HAVE_SDL_H
-# include "SDL_types.h"
-#else
-# include "sdlstub.h"
-#endif
-#include <stdio.h>
+
+#include "twiconfig.h"
 
 // KJB Undefined true and false defined in SciTech's DEBUG.H header
 #undef true

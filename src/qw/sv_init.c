@@ -49,12 +49,6 @@ char        localmodels[MAX_MODELS][5];	// inline model names for precache
 
 char        localinfo[MAX_LOCALINFO_STRING + 1];	// local game info
 
-/*
-================
-SV_ModelIndex
-
-================
-*/
 int
 SV_ModelIndex (char *name)
 {
@@ -73,8 +67,6 @@ SV_ModelIndex (char *name)
 
 /*
 ================
-SV_FlushSignon
-
 Moves to the next signon buffer if needed
 ================
 */
@@ -95,8 +87,6 @@ SV_FlushSignon (void)
 
 /*
 ================
-SV_CreateBaseline
-
 Entity baselines are used to compress the update messages
 to the clients -- only the fields that differ from the
 baseline will be transmitted
@@ -165,8 +155,6 @@ SV_CreateBaseline (void)
 
 /*
 ================
-SV_SaveSpawnparms
-
 Grabs the current state of the progs serverinfo flags 
 and each client for saving across the
 transition to another level
@@ -200,8 +188,6 @@ SV_SaveSpawnparms (void)
 
 /*
 ================
-SV_CalcPHS
-
 Expands the PVS and calculates the PHS
 (Potentially Hearable Set)
 ================
@@ -288,8 +274,6 @@ SV_CheckModel (char *mdl)
 
 /*
 ================
-SV_SpawnServer
-
 Change the server to a new map, taking all connected
 clients along with it.
 

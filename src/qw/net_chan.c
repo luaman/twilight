@@ -109,12 +109,6 @@ static cvar_t		*showpackets;
 static cvar_t		*showdrop;
 cvar_t		*qport;
 
-/*
-===============
-Netchan_Init_Cvars
-
-===============
-*/
 void
 Netchan_Init_Cvars (void)
 {
@@ -128,12 +122,6 @@ Netchan_Init_Cvars (void)
 	qport = Cvar_Get ("qport", va ("%i", port), CVAR_NONE, NULL);
 }
 
-/*
-===============
-Netchan_Init
-
-===============
-*/
 void
 Netchan_Init (void)
 {
@@ -141,8 +129,6 @@ Netchan_Init (void)
 
 /*
 ===============
-Netchan_OutOfBand
-
 Sends an out-of-band datagram
 ================
 */
@@ -170,8 +156,6 @@ Netchan_OutOfBand (netsrc_t sock, netadr_t adr, size_t length, Uint8 *data)
 
 /*
 ===============
-Netchan_OutOfBandPrint
-
 Sends a text message in an out-of-band datagram
 ================
 */
@@ -191,8 +175,6 @@ Netchan_OutOfBandPrint (netsrc_t sock, netadr_t adr, const char *format, ...)
 
 /*
 ==============
-Netchan_Setup
-
 called to open a channel to a remote system
 ==============
 */
@@ -221,8 +203,6 @@ Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 
 /*
 ===============
-Netchan_CanPacket
-
 Returns true if the bandwidth choke isn't active
 ================
 */
@@ -236,8 +216,6 @@ Netchan_CanPacket (netchan_t *chan)
 
 /*
 ===============
-Netchan_CanReliable
-
 Returns true if the bandwidth choke isn't 
 ================
 */
@@ -251,8 +229,6 @@ Netchan_CanReliable (netchan_t *chan)
 
 /*
 ===============
-Netchan_Transmit
-
 tries to send an unreliable message to a connection, and handles the
 transmition / retransmition of the reliable messages.
 
@@ -353,8 +329,6 @@ Netchan_Transmit (netchan_t *chan, size_t length, Uint8 *data)
 
 /*
 =================
-Netchan_Process
-
 called when the current net_message is from remote_address
 modifies net_message so that it points to the packet payload
 =================

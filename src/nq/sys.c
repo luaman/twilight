@@ -322,8 +322,6 @@ Sys_Error (const char *error, ...)
 
 /*
 ============
-Sys_FileTime
-
 returns -1 if not present
 ============
 */

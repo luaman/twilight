@@ -237,6 +237,7 @@ AC_OUTPUT(
 	src/server/Makefile
 	src/nq/Makefile
 	src/qw/Makefile
+	src/fs/Makefile
 	src/tools/Makefile
 	doc/Makefile
 	doc/olddoc/Makefile

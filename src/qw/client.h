@@ -130,12 +130,11 @@ typedef struct {
 
 	int			qport;
 
-	FILE		*download;				// file transfer from server
-	char		downloadtempname[MAX_OSPATH];
-	char		downloadname[MAX_OSPATH];
+	SDL_RWops	*download;				// file transfer from server
 	int			downloadnumber;
 	dltype_t	downloadtype;
 	int			downloadpercent;
+	char		downloadname[MAX_OSPATH];
 
 	float		latency;				// rolling average
 } client_static_t;

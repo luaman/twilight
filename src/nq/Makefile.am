@@ -11,6 +11,7 @@ INCLUDES= \
 	-I$(top_srcdir)/src/renderer \
 	-I$(top_srcdir)/src/sound \
 	-I$(top_srcdir)/src/server \
+	-I$(top_srcdir)/src/fs \
 	-I$(top_srcdir)/src/client
 
 
@@ -25,6 +26,7 @@ twilight_nq_LDADD= \
 	$(top_builddir)/src/renderer/libtwilight_renderer.a \
 	$(top_builddir)/src/image/libtwilight_image.a \
 	$(top_builddir)/src/client/libtwilight_client.a \
+	$(top_builddir)/src/fs/libtwilight_fs.a \
 	$(top_builddir)/src/base/libtwilight_base.a \
 	$(top_builddir)/src/sound/libtwilight_sound.a
 endif

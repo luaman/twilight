@@ -8,6 +8,7 @@ INCLUDES= \
 	-I$(top_srcdir)/src/include \
 	-I$(top_srcdir)/src/base \
 	-I$(top_srcdir)/src/renderer \
+	-I$(top_srcdir)/src/fs \
 	-I$(top_srcdir)/src/image \
 	-I$(top_srcdir)/src/sound
 

@@ -275,11 +275,7 @@ ZoneStats_f(void)
 //============================================================================
 
 
-/*
-========================
-Zone_Init
-========================
-*/
+
 void Zone_Init (void)
 {
 	tempzone = Zone_AllocZone("Temporary Memory");

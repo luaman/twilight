@@ -59,8 +59,6 @@ static int numskins;
 
 /*
 ==========
-Skin_Load
-
 Returns a pointer to the skin struct, or NULL to use the default
 ==========
 */
@@ -205,11 +203,6 @@ Skin_Load (char *skin_name)
 }
 
 
-/*
-=================
-Skin_NextDownload
-=================
-*/
 void
 Skin_NextDownload (void)
 {
@@ -248,8 +241,6 @@ Skin_NextDownload (void)
 
 /*
 ==========
-Skin_Skins_f
-
 Refind all skins, downloading if needed.
 ==========
 */
@@ -273,8 +264,6 @@ Skin_Skins_f (void)
 
 /*
 ==========
-Skin_AllSkins_f
-
 Sets all skins to one specific one
 ==========
 */
@@ -285,11 +274,6 @@ Skin_AllSkins_f (void)
 	Skin_Skins_f ();
 }
 
-/*
-=================
-CL_InitSkins
-=================
-*/
 void
 CL_InitSkins (void)
 {
