@@ -1390,7 +1390,7 @@ Host_Frame (float time)
 }
 
 static void
-simple_crypt (char *buf, int len)
+simple_decrypt (char *buf, int len)
 {
 	while (len--)
 		*buf++ ^= 0xff;
@@ -1399,11 +1399,11 @@ simple_crypt (char *buf, int len)
 void
 Host_FixupModelNames (void)
 {
-	simple_crypt (emodel_name, sizeof (emodel_name) - 1);
-	simple_crypt (pmodel_name, sizeof (pmodel_name) - 1);
-	simple_crypt (prespawn_name, sizeof (prespawn_name) - 1);
-	simple_crypt (modellist_name, sizeof (modellist_name) - 1);
-	simple_crypt (soundlist_name, sizeof (soundlist_name) - 1);
+	simple_decrypt (emodel_name, sizeof (emodel_name) - 1);
+	simple_decrypt (pmodel_name, sizeof (pmodel_name) - 1);
+	simple_decrypt (prespawn_name, sizeof (prespawn_name) - 1);
+	simple_decrypt (modellist_name, sizeof (modellist_name) - 1);
+	simple_decrypt (soundlist_name, sizeof (soundlist_name) - 1);
 }
 
 //============================================================================
