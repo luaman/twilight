@@ -133,7 +133,7 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 	if (header.version != BSPVERSION) {
 		Com_Printf("WARNING: %s", file->name_base);
 		if (file->ext)
-			Com_Printf(".%s", file->name_base, file->ext);
+			Com_Printf(".%s", file->ext);
 		Com_Printf(" is NOT a bsp file.  Skipping.\n");
 		SDL_RWclose (rw);
 		return false;
