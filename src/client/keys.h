@@ -28,6 +28,7 @@
 #define __KEYS_H
 
 #include "SDL.h"
+#include "qtypes.h"
 
 //
 // these are the key numbers that should be passed to Key_Event

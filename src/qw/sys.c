@@ -72,6 +72,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
+#include "keys.h"
 
 // LordHavoc: for win32 which does not have PATH_MAX defined without POSIX
 // (and that disables lots of other useful stuff)

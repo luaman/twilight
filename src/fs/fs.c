@@ -133,6 +133,9 @@ FS_FindFile (const char *name)
 	Zone_Free (new_name);
 	Zone_Free (exts);
 
+	if (!ret)
+		Com_DPrintf("Unable to find %s\n", name);
+
 	return ret;
 }
 
