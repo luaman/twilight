@@ -185,7 +185,7 @@ Host_FindMaxClients
 void
 Host_FindMaxClients (void)
 {
-	int         i;
+	Uint         i;
 
 	svs.maxclients = 1;
 

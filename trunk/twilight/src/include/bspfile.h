@@ -27,6 +27,8 @@
 #ifndef __BSPFILE_H
 #define __BSPFILE_H
 
+#include <qtypes.h>
+
 /* upper design bounds */
 
 #define	MAX_MAP_HULLS			4
@@ -64,7 +66,7 @@
 #define	TOOLVERSION	2
 
 typedef struct {
-	int	fileofs, filelen;
+	size_t	fileofs, filelen;
 } lump_t;
 
 #define	LUMP_ENTITIES		0

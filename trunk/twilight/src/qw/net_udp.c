@@ -340,7 +340,7 @@ UDP_OpenSocket (int port)
 {
 	int         newsocket;
 	struct sockaddr_in address;
-	int         i;
+	Uint        i;
 
 #ifdef _WIN32
 #define ioctl ioctlsocket

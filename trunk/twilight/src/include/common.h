@@ -37,7 +37,7 @@
 
 // FIXME: now in src/base/parm.c - remove this at some point
 
-extern int com_argc;
+extern size_t com_argc;
 extern char **com_argv;
 
 void COM_InitArgv (int argc, char **argv);
@@ -55,15 +55,15 @@ typedef struct sizebuf_s {
 	qboolean			allowoverflow;	// if false, do a Sys_Error
 	qboolean			overflowed;		// true if the buffer was too small
 	Uint8				*data;
-	int					maxsize;
-	int					cursize;
+	size_t				maxsize;
+	size_t				cursize;
 	struct sizebuf_s	*next;			// used for cmd_text chain
 } sizebuf_t;
 
-void SZ_Init (sizebuf_t *buf, Uint8 *data, int length);
+void SZ_Init (sizebuf_t *buf, Uint8 *data, size_t length);
 void SZ_Clear (sizebuf_t *buf);
-void *SZ_GetSpace (sizebuf_t *buf, int length);
-void SZ_Write (sizebuf_t *buf, void *data, int length);
+void *SZ_GetSpace (sizebuf_t *buf, size_t length);
+void SZ_Write (sizebuf_t *buf, void *data, size_t length);
 void SZ_Print (sizebuf_t *buf, char *data);	// strcats onto the sizebuf
 
 //============================================================================
@@ -99,22 +99,17 @@ void InsertLinkAfter (link_t *l, link_t *after);
 //============================================================================
 // Byte order macros
 
-union flint {
-	float	fp;
-	Uint32	i;
-};
-
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
 # define LittleShort(x) (x)
 # define LittleLong(x) (x)
 # define LittleFloat(x) (x)
 # define BigShort(x) (Sint16)SDL_SwapBE16(x)
 # define BigLong(x) (Sint32)SDL_SwapBE32(x)
-# define BigFloat(x) ((union flint)SDL_SwapBE32(((union flint)(x)).i)).fp
+# define BigFloat(x) ((float_int_t)SDL_SwapBE32(((float_int_t)(x)).i)).fp
 #else
 # define LittleShort(x) (Sint16)SDL_SwapLE16(x)
 # define LittleLong(x) (Sint32)SDL_SwapLE32(x)
-# define LittleFloat(x) ((union flint)SDL_SwapLE32(((union flint)(x)).i)).fp
+# define LittleFloat(x) ((float_int_t)SDL_SwapLE32(((float_int_t)(x)).i)).fp
 # define BigShort(x) (x)
 # define BigLong(x) (x)
 # define BigFloat(x) (x)
@@ -138,7 +133,7 @@ void MSG_WriteAngle16 (sizebuf_t *sb, float f);
 void MSG_WriteDeltaUsercmd (sizebuf_t *sb, struct usercmd_s *from,
 		struct usercmd_s *cmd);
 
-extern int msg_readcount;
+extern size_t msg_readcount;
 extern qboolean msg_badread;			// if a read goes beyond end of msg
 
 void MSG_BeginReading (void);

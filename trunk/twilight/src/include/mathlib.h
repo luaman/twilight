@@ -67,7 +67,7 @@
 #endif
 
 #ifndef BIT
-#define BIT(bit)			(1 << bit)
+#define BIT(bit)			(1l << bit)
 #endif
 
 #ifndef bound_bits
@@ -88,8 +88,8 @@ double Q_atan2(double y, double x);
 double Q_tan(double x);
 float Q_fabs(float f);
 int Q_abs(int x);
-float Q_sqrt(float n);
-float Q_RSqrt(float number);
+float Q_sqrt(double n);
+float Q_RSqrt(double number);
 
 #define NANMASK		255 << 23
 #define	IS_NAN(x) (((*(int *)&x)&NANMASK)==NANMASK)

@@ -52,7 +52,8 @@ TGA_LoadBuffer
 static image_t *
 TGA_LoadBuffer (Uint8 *buffer)
 {
-	int         columns, rows, numPixels;
+	size_t		numPixels;
+	int         columns, rows;
 	Uint8       *pixbuf;
 	int         row, column;
 	TargaHeader	targa_header;
@@ -309,7 +310,7 @@ TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer)
 
 	Sys_Printf ("COM_WriteFile: %s\n", tganame);
 	fwrite (header, 1, 18, handle);
-	fwrite (buffer, 1, width * height * bpp, handle);
+	fwrite (buffer, 1, (size_t) width * height * bpp, handle);
 	fclose (handle);
 
 	return true;

@@ -256,14 +256,6 @@ Q_abs(int x)
 // Square root with lookup table (http://www.nvidia.com/developer)
 ////////////////////////////////////////////////////////////////////////
 
-#define FP_BITS(fp) (* (Uint32 *) &(fp))
-
-typedef union FastSqrtUnion
-{
-	float f;
-	unsigned int i;
-} FastSqrtUnion;
-
 static unsigned int iFastSqrtTable[0x10000];
 
 // Build the square root table
@@ -295,17 +287,19 @@ Math_BuildSqrtTable(void)
 }
 
 float 
-Q_sqrt(float n)
+Q_sqrt(double n)
 {
+	float_int_t	num;
 	// Check for square root of 0
-	if (FP_BITS(n) == 0)
+	if (n <= 0)
 		return 0.0;                 
   
-	FP_BITS(n) = iFastSqrtTable[(FP_BITS(n) >> 8) & 0xFFFF] | 
-		((((FP_BITS(n) - 0x3F800000) >> 1) +
-		0x3F800000) & 0x7F800000);
+	num.f = n;
+
+	num.i = iFastSqrtTable[(num.i >> 8) & 0xFFFF] | 
+		((((num.i - 0x3F800000) >> 1) + 0x3F800000) & 0x7F800000);
   
-	return n;
+	return num.f;
 }
 
 /*
@@ -315,7 +309,7 @@ Q_sqrt(float n)
  * (Note: The last line can be done twice for additional precision.)
  */
 float 
-Q_RSqrt(float num)
+Q_RSqrt(double num)
 {
 	float_int_t	evil;	// NOTE: evil.f and evil.i refer to the same memory.
 
@@ -335,7 +329,7 @@ Math_Init (void)
 	Math_BuildSqrtTable();
 	Math_BuildSinTable();
 
-	srand (time(NULL));
+	srand ((Uint) time(NULL));
 }
 
 
@@ -614,81 +608,6 @@ AngleVectorsFLU (const vec3_t angles, vec3_t forward, vec3_t left, vec3_t up)
 	}
 }
 
-int
-_VectorCompare (vec3_t v1, vec3_t v2)
-{
-	int         i;
-
-	for (i = 0; i < 3; i++)
-		if (v1[i] != v2[i])
-			return 0;
-
-	return 1;
-}
-
-void
-_VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc)
-{
-	vecc[0] = veca[0] + scale * vecb[0];
-	vecc[1] = veca[1] + scale * vecb[1];
-	vecc[2] = veca[2] + scale * vecb[2];
-}
-
-
-vec_t
-_DotProduct (vec3_t v1, vec3_t v2)
-{
-	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-}
-
-void
-_VectorSubtract (vec3_t veca, vec3_t vecb, vec3_t out)
-{
-	out[0] = veca[0] - vecb[0];
-	out[1] = veca[1] - vecb[1];
-	out[2] = veca[2] - vecb[2];
-}
-
-void
-_VectorAdd (vec3_t veca, vec3_t vecb, vec3_t out)
-{
-	out[0] = veca[0] + vecb[0];
-	out[1] = veca[1] + vecb[1];
-	out[2] = veca[2] + vecb[2];
-}
-
-void
-_VectorCopy (vec3_t in, vec3_t out)
-{
-	out[0] = in[0];
-	out[1] = in[1];
-	out[2] = in[2];
-}
-
-void
-_CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
-{
-	cross[0] = v1[1] * v2[2] - v1[2] * v2[1];
-	cross[1] = v1[2] * v2[0] - v1[0] * v2[2];
-	cross[2] = v1[0] * v2[1] - v1[1] * v2[0];
-}
-
-vec_t 
-_VectorLength (vec3_t v)
-{
-	float length = DotProduct(v,v);
-
-	return length ? Q_sqrt(length) : 0;
-}
-
-vec_t 
-_VectorLength2 (vec3_t v)
-{
-	float length = DotProduct2(v,v);
-
-	return length ? Q_sqrt(length) : 0;
-}
-
 vec_t 
 VectorNormalize (vec3_t v)
 {
@@ -716,22 +635,6 @@ VectorNormalizeFast (vec3_t v)
 	v[0] *= ilength;
 	v[1] *= ilength;
 	v[2] *= ilength;
-}
-
-void
-_VectorInverse (vec3_t v, vec3_t t)
-{
-	t[0] = -v[0];
-	t[1] = -v[1];
-	t[2] = -v[2];
-}
-
-void
-_VectorScale (vec3_t in, vec_t scale, vec3_t out)
-{
-	out[0] = in[0] * scale;
-	out[1] = in[1] * scale;
-	out[2] = in[2] * scale;
 }
 
 int

@@ -393,7 +393,7 @@ Collision_ClipTrace (trace_t *trace, void *cent, const model_t *cmodel,
 		VectorCopy (rhc.end, rhc.trace->endpos);
 		VectorSubtract (rhc.end, rhc.start, rhc.dist);
 		if (DotProduct (rhc.dist, rhc.dist) > 0.00001)
-			RecursiveHullCheck (&rhc, rhc.hull->firstclipnode, 0, 1,
+			RecursiveHullCheck (&rhc, rhc.hull->firstclipnode, 0.0, 1.0,
 					rhc.start, rhc.end);
 		else
 			RecursiveHullCheckPoint (&rhc, rhc.hull->firstclipnode);
@@ -437,7 +437,7 @@ Collision_ClipTrace (trace_t *trace, void *cent, const model_t *cmodel,
 		VectorCopy (rhc.end, rhc.trace->endpos);
 		VectorSubtract (rhc.end, rhc.start, rhc.dist);
 		if (DotProduct (rhc.dist, rhc.dist) > 0.00001)
-			RecursiveHullCheck (&rhc, rhc.hull->firstclipnode, 0, 1,
+			RecursiveHullCheck (&rhc, rhc.hull->firstclipnode, 0.0, 1.0,
 					rhc.start, rhc.end);
 		else
 			RecursiveHullCheckPoint (&rhc, rhc.hull->firstclipnode);
@@ -473,7 +473,7 @@ TraceLine_Raw (hull_t *hull, vec3_t start, vec3_t end, trace_t *trace)
 	VectorCopy (rhc.end, rhc.trace->endpos);
 	VectorSubtract (rhc.end, rhc.start, rhc.dist);
 	if (DotProduct (rhc.dist, rhc.dist) > 0.00001)
-		RecursiveHullCheck (&rhc, hull->firstclipnode, 0, 1,
+		RecursiveHullCheck (&rhc, hull->firstclipnode, 0.0, 1.0,
 				rhc.start, rhc.end);
 	else
 		RecursiveHullCheckPoint (&rhc, hull->firstclipnode);

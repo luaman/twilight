@@ -143,7 +143,7 @@ Sends an out-of-band datagram
 ================
 */
 void
-Netchan_OutOfBand (netsrc_t sock, netadr_t adr, int length, Uint8 *data)
+Netchan_OutOfBand (netsrc_t sock, netadr_t adr, size_t length, Uint8 *data)
 {
 	sizebuf_t	send;
 	Uint8		send_buf[MAX_MSGLEN + PACKET_HEADER];
@@ -250,7 +250,7 @@ A 0 length will still generate a packet and deal with the reliable messages.
 ================
 */
 void
-Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
+Netchan_Transmit (netchan_t *chan, size_t length, Uint8 *data)
 {
 	sizebuf_t   send;
 	Uint8       send_buf[MAX_MSGLEN + PACKET_HEADER];

@@ -161,7 +161,7 @@ typedef struct qsocket_s {
 
 extern qsocket_t *net_activeSockets;
 extern qsocket_t *net_freeSockets;
-extern int  net_numsockets;
+extern Uint  net_numsockets;
 
 typedef struct {
 	char       *name;
@@ -320,7 +320,6 @@ typedef struct _PollProcedure {
 void        SchedulePollProcedure (PollProcedure * pp, double timeOffset);
 
 extern qboolean tcpipAvailable;
-extern char my_tcpip_address[NET_NAMELEN];
 
 extern qboolean slistInProgress;
 extern qboolean slistSilent;

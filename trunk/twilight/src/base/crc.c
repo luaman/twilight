@@ -93,7 +93,7 @@ CRC_Value (unsigned short crcvalue)
 }
 
 unsigned short
-CRC_Block (Uint8 *start, int count)
+CRC_Block (Uint8 *start, size_t count)
 {
 	unsigned short crc;
 
@@ -183,7 +183,7 @@ For proxy protecting
 ====================
 */
 Uint8
-COM_BlockSequenceCRCByte (Uint8 *base, int length, int sequence)
+COM_BlockSequenceCRCByte (Uint8 *base, size_t length, int sequence)
 {
 	unsigned short crc;
 	Uint8      *p;

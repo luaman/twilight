@@ -334,7 +334,7 @@ M_Main_Key (int key)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	23
+#define	OPTIONS_ITEMS	22
 
 #define	SLIDER_RANGE	10
 
@@ -407,17 +407,13 @@ M_AdjustSliders (int dir)
 			t = bound (1, t, 11);
 			Cvar_Set (sensitivity, va ("%f", t));
 			break;
-		case 11:					// music volume
-			// NOTE: sliding CD volume not possible with SDL
-			Cvar_Set (bgmvolume, bgmvolume->fvalue ? "0" : "1");
-			break;
-		case 12:					// sfx volume
+		case 11:					// sfx volume
 			t = volume->fvalue + (dir * 0.1f);
 			t = bound (0, t, 1);
 			Cvar_Set (volume, va ("%f", t));
 			break;
 
-		case 13:					// always run
+		case 12:					// always run
 			if (cl_forwardspeed->fvalue > 200) {
 				Cvar_Set (cl_forwardspeed, "200");
 				Cvar_Set (cl_backspeed, "200");
@@ -427,36 +423,36 @@ M_AdjustSliders (int dir)
 			}
 			break;
 
-		case 14:					// mouse look
+		case 13:					// mouse look
 			Cvar_Set (m_freelook, va ("%i", !m_freelook->ivalue));
 			break;
 
-		case 15:					// mouse filter (smooth input)
+		case 14:					// mouse filter (smooth input)
 			Cvar_Set (m_filter, va ("%i", !m_filter->ivalue));
 			break;
 
-		case 16:						// invert mouse
+		case 15:						// invert mouse
 			t = -m_pitch->fvalue;
 			Cvar_Set (m_pitch, va ("%f", t));
 			break;
 
-		case 17:						// lookspring
+		case 16:						// lookspring
 			Cvar_Set (lookspring, va ("%i", !lookspring->ivalue));
 			break;
 
-		case 18:						// lookstrafe
+		case 17:						// lookstrafe
 			Cvar_Set (lookstrafe, va ("%i", !lookstrafe->ivalue));
 			break;
 
-		case 19:
+		case 18:
 			Cvar_Set (cl_sbar, va ("%i", !cl_sbar->ivalue));
 			break;
 
-		case 20:
+		case 19:
 			Cvar_Set (cl_hudswap, va ("%i", !cl_hudswap->ivalue));
 			break;
 
-		case 21:						// _windowed_mouse
+		case 20:						// _windowed_mouse
 			Cvar_Set (_windowed_mouse, va ("%i", !_windowed_mouse->ivalue));
 			break;
 	}
@@ -509,7 +505,6 @@ M_Options_Draw (void)
 	M_Print (16, y, "   Software Brightness"); M_DrawSlider (220, y, (r_brightness->fvalue - 1) / 4); y += 8;
 	M_Print (16, y, "     Software Contrast"); M_DrawSlider (220, y, (r_contrast->fvalue - 0.75) * 4); y += 8;
 	M_Print (16, y, "           Mouse Speed"); M_DrawSlider (220, y, (sensitivity->fvalue - 1) / 10); y += 8;
-	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->fvalue); y += 8;
 	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->fvalue); y += 8;
 	M_Print (16, y, "            Always Run"); M_DrawCheckbox (220, y, cl_forwardspeed->fvalue > 200); y += 8;
 	M_Print (16, y, "            Mouse Look"); M_DrawCheckbox (220, y, m_freelook->ivalue); y += 8;
@@ -776,9 +771,9 @@ char       *bindnames[][2] = {
 	{"+movedown", "swim down"}
 };
 
-#define	NUMCOMMANDS	(sizeof(bindnames)/sizeof(bindnames[0]))
+#define	NUMCOMMANDS	((int) (sizeof(bindnames)/sizeof(bindnames[0])))
 
-Uint32		keys_cursor;
+int			keys_cursor;
 int         bind_grab;
 
 void
@@ -1101,7 +1096,7 @@ M_SinglePlayer_Draw (void)
 }
 
 void
-M_SinglePlayer_Key (key)
+M_SinglePlayer_Key (key_t key)
 {
 	if (key == K_ESCAPE || key == K_ENTER)
 		m_state = m_main;
@@ -1134,7 +1129,7 @@ M_MultiPlayer_Draw (void)
 }
 
 void
-M_MultiPlayer_Key (key)
+M_MultiPlayer_Key (key_t key)
 {
 	if (key == K_ESCAPE || key == K_ENTER)
 		m_state = m_main;

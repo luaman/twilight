@@ -558,9 +558,8 @@ PM_CatagorizePosition (void)
 				VectorCopy (tr->endpos, pmove.origin);
 		}
 		// standing on an entity other than the world
-		if (tr->ent > 0) {
+		if (tr->ent)
 			pmove.touch[pmove.numtouch++] = tr->ent;
-		}
 	}
 
 //

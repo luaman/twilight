@@ -110,7 +110,6 @@ cvar_t	   *scr_showpause;
 cvar_t	   *scr_printspeed;
 cvar_t	   *scr_logcprint;
 cvar_t	   *scr_allowsnap;
-cvar_t	   *gl_triplebuffer;
 cvar_t	   *r_brightness;
 cvar_t	   *r_contrast;
 cvar_t	   *cl_avidemo;
@@ -439,7 +438,6 @@ SCR_Init_Cvars (void)
 	scr_printspeed = Cvar_Get ("scr_printspeed", "8", CVAR_NONE, NULL);
 	scr_logcprint = Cvar_Get ("scr_logcprint", "0", CVAR_ARCHIVE, NULL);
 	scr_allowsnap = Cvar_Get ("scr_allowsnap", "1", CVAR_NONE, NULL);
-	gl_triplebuffer = Cvar_Get ("gl_triplebuffer", "1", CVAR_ARCHIVE, NULL);
 	r_brightness = Cvar_Get ("r_brightness", "1", CVAR_ARCHIVE, NULL);
 	r_contrast = Cvar_Get ("r_contrast", "1", CVAR_ARCHIVE, NULL);
 	cl_avidemo = Cvar_Get ("cl_avidemo", "0", CVAR_NONE, &AvidemoChanged);

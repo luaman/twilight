@@ -31,8 +31,8 @@
 void        CRC_Init (unsigned short *crcvalue);
 void        CRC_ProcessByte (unsigned short *crcvalue, Uint8 data);
 unsigned short CRC_Value (unsigned short crcvalue);
-unsigned short CRC_Block (Uint8 *start, int count);
-Uint8       COM_BlockSequenceCRCByte (Uint8 *base, int length, int sequence);
+unsigned short CRC_Block (Uint8 *start, size_t count);
+Uint8       COM_BlockSequenceCRCByte (Uint8 *base, size_t length, int sequence);
 
 #endif // __CRC_H
 

@@ -52,7 +52,7 @@ PCX_LoadBuffer (Uint8 *buf)
 	Uint8       *pix, *pcx_rgb, *raw;
 	int         x, y;
 	int         dataByte, runLength;
-	int         count;
+	size_t		count;
 	image_t		*img;
 
 //

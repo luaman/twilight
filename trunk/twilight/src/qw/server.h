@@ -54,7 +54,7 @@ typedef struct {
 	double      time;
 	double		old_time;
 
-	int         lastcheck;				// used by PF_checkclient
+	Uint        lastcheck;				// used by PF_checkclient
 	double      lastchecktime;			// for monster ai 
 
 	qboolean    paused;					// are we paused?

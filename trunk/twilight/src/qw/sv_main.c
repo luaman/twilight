@@ -1595,8 +1595,8 @@ SV_InitNet
 void
 SV_InitNet (void)
 {
-	int         port;
-	int         p;
+	Uint	port;
+	Uint	p;
 
 	port = PORT_SERVER;
 	p = COM_CheckParm ("-port");

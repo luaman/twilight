@@ -40,14 +40,12 @@ static const char rcsid[] =
 
 qsocket_t  *net_activeSockets = NULL;
 qsocket_t  *net_freeSockets = NULL;
-int         net_numsockets = 0;
+Uint        net_numsockets = 0;
 
 qboolean    tcpipAvailable = false;
 
 int         net_hostport;
 int         DEFAULTnet_hostport = 26000;
-
-char        my_tcpip_address[NET_NAMELEN];
 
 void        (*GetComPortConfig) (int portNumber, int *port, int *irq, int *baud,
 								 qboolean *useModem);
@@ -68,8 +66,8 @@ static int  slistLastShown;
 
 static void Slist_Send (void);
 static void Slist_Poll (void);
-PollProcedure slistSendProcedure = { NULL, 0.0, Slist_Send };
-PollProcedure slistPollProcedure = { NULL, 0.0, Slist_Poll };
+PollProcedure slistSendProcedure = { NULL, 0.0, Slist_Send, NULL };
+PollProcedure slistPollProcedure = { NULL, 0.0, Slist_Poll, NULL };
 
 
 sizebuf_t	net_message;
@@ -726,7 +724,7 @@ NET_Init
 void
 NET_Init (void)
 {
-	int         i;
+	Uint		i;
 	int         controlSocket;
 	qsocket_t  *s;
 
@@ -775,9 +773,6 @@ NET_Init (void)
 		if (listening)
 			net_drivers[net_driverlevel].Listen (true);
 	}
-
-	if (*my_tcpip_address)
-		Com_DPrintf ("TCP/IP address %s\n", my_tcpip_address);
 }
 
 /*

@@ -30,25 +30,14 @@ static const char rcsid[] =
 #include "render.h"
 #include "client.h"
 #include "cvar.h"
-#include "host.h"
 
-/*
-=============================================================
-
-  ALIAS MODELS
-
-=============================================================
-*/
-
-
+void R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 extern vec3_t lightcolor;
-
-//static float shadescale = 0.0;
 
 extern void R_Torch (entity_t *ent, qboolean torch2);
 extern model_t *mdl_fire;
-#define NUMVERTEXNORMALS	162
 
+#define NUMVERTEXNORMALS	162
 float r_avertexnormals[NUMVERTEXNORMALS][3] = {
 #include "anorms.h"
 };
@@ -62,6 +51,45 @@ static float       r_avertexnormal_dots[SHADEDOT_QUANT][256] =
            ;
 
 static float *shadedots = r_avertexnormal_dots[0];
+
+/*
+=============================================================
+
+  ALIAS MODELS
+
+=============================================================
+*/
+
+// These variables are passed between the setup code, and the renderer.
+static int			anim;
+static qboolean		has_top = false, has_bottom = false, has_fb = false, draw;
+static vec4_t		top, bottom;
+static skin_t		*skin;
+static vec_t		*mod_origin, *mod_angles;
+static aliashdr_t	*paliashdr;
+
+/*
+ * START OF NON-COMMON CODE.
+ */
+
+#include "host.h"
+
+void
+R_DrawViewModel (void)
+{
+	entity_t *ent_pointer;
+
+	ent_pointer = &cl.viewent;
+	if (!r_drawviewmodel->ivalue || chase_active->ivalue ||
+			!r_drawentities->ivalue || cl.items & IT_INVISIBILITY ||
+			(cl.stats[STAT_HEALTH] <= 0) || !cl.viewent.model)
+		return;
+
+	// hack the depth range to prevent view model from poking into walls
+	qglDepthRange (0.0f, 0.3f);
+	R_DrawAliasModels(&ent_pointer, 1, true);
+	qglDepthRange (0.0f, 1.0f);
+}
 
 /*
 =================
@@ -97,30 +125,6 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 	}
 	TWI_FtoUB (cf_array_v(0), c_array_v(0), paliashdr->numverts * 4);
 }
-
-/*
-=================
-R_DrawSubSkin
-
-=================
-*/
-static void
-R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec4_t *color)
-{
-	if (color)
-		TWI_FtoUBMod(cf_array_v(0), c_array_v(0), color, paliashdr->numverts*4);
-
-	qglBindTexture (GL_TEXTURE_2D, skin->texnum);
-	qglDrawRangeElements(GL_TRIANGLES, 0, paliashdr->numverts,
-			skin->num_indices, GL_UNSIGNED_INT, skin->indices);
-}
-
-static int			anim;
-static qboolean		has_top = false, has_bottom = false, has_fb = false, draw;
-static vec4_t		top, bottom;
-static skin_t		*skin;
-static vec_t		*mod_origin, *mod_angles;
-static aliashdr_t	*paliashdr;
 
 /*
 =================
@@ -240,19 +244,24 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 	mod_angles = e->angles;
 	draw = true;
 }
-
 /*
-=================
-R_DrawAliasModel
+ * END OF NON-COMMON CODE!
+ */
 
-=================
-*/
+static void
+R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec4_t color)
+{
+	if (color)
+		TWI_FtoUBMod(cf_array_v(0), c_array_v(0), color, paliashdr->numverts*4);
+
+	qglBindTexture (GL_TEXTURE_2D, skin->texnum);
+	qglDrawRangeElements(GL_TRIANGLES, 0, paliashdr->numverts,
+			skin->num_indices, GL_UNSIGNED_INT, skin->indices);
+}
+
 static void
 R_DrawAliasModel (entity_t *e, qboolean viewent)
 {
-	/*
-	 * draw all the triangles
-	 */
 	qglPushMatrix ();
 
 	qglTranslatef (mod_origin[0], mod_origin[1], mod_origin[2]);
@@ -283,10 +292,10 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 	}
 
 	if (has_top)
-		R_DrawSubSkin (paliashdr, &skin->top[anim], &top);
+		R_DrawSubSkin (paliashdr, &skin->top[anim], top);
 
 	if (has_bottom)
-		R_DrawSubSkin (paliashdr, &skin->bottom[anim], &bottom);
+		R_DrawSubSkin (paliashdr, &skin->bottom[anim], bottom);
 
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglColor4fv (whitev);
@@ -305,15 +314,9 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 	qglPopMatrix ();
 }
 
-/*
-=================
-R_DrawSubSkin
-
-=================
-*/
 static void
 R_DrawSubSkinNV (aliashdr_t *paliashdr, skin_sub_t *tris, skin_sub_t *s0,
-		skin_sub_t *s1, vec4_t *color)
+		skin_sub_t *s1, vec4_t color)
 {
 	if (color)
 		TWI_FtoUBMod(cf_array_v(0),scub_array_v(0),color,paliashdr->numverts*4);
@@ -332,20 +335,11 @@ R_DrawSubSkinNV (aliashdr_t *paliashdr, skin_sub_t *tris, skin_sub_t *s0,
 	}
 }
 
-/*
-=================
-R_DrawAliasModelNV
-
-=================
-*/
 static void
 R_DrawAliasModelNV (entity_t *e, qboolean viewent)
 {
 	skin_sub_t	*base;
 
-	/*
-	 * draw all the triangles
-	 */
 	qglPushMatrix ();
 
 	qglTranslatef (mod_origin[0], mod_origin[1], mod_origin[2]);
@@ -360,7 +354,6 @@ R_DrawAliasModelNV (entity_t *e, qboolean viewent)
 
 	TWI_PreVDraw (0, paliashdr->numverts);
 
-	qglEnableClientState (GL_COLOR_ARRAY);
 
 	if (!has_top && !has_bottom)
 		base = &skin->base_team[anim];
@@ -381,16 +374,14 @@ R_DrawAliasModelNV (entity_t *e, qboolean viewent)
 	if (has_top || has_bottom) {
 		qglEnable (GL_BLEND);
 		qglDepthMask (GL_FALSE);
-		qglBlendFunc (GL_ONE, GL_ONE);
 
-		qglCombinerParameterfvNV (GL_CONSTANT_COLOR0_NV, bottom);
+		qglCombinerParameterfvNV (GL_CONSTANT_COLOR0_NV, top);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_SECONDARY_COLOR_NV, GL_UNSIGNED_INVERT_NV, GL_RGB);
 		qglFinalCombinerInputNV (GL_VARIABLE_B_NV, GL_CONSTANT_COLOR0_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglFinalCombinerInputNV (GL_VARIABLE_D_NV, GL_SPARE1_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 
-		R_DrawSubSkinNV (paliashdr, &skin->top_bottom[anim], &skin->bottom[anim], &skin->top[anim], &top);
+		R_DrawSubSkinNV (paliashdr, &skin->top_bottom[anim], &skin->top[anim], &skin->bottom[anim], bottom);
 
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		qglDepthMask (GL_TRUE);
 		qglDisable (GL_BLEND);
 	}
@@ -417,7 +408,10 @@ R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
 	if (gl_secondary_color && gl_nv_register_combiners) {
+		qglEnableClientState (GL_COLOR_ARRAY);
 		qglEnable (GL_REGISTER_COMBINERS_NV);
+		qglBlendFunc (GL_ONE, GL_ONE);
+
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV, GL_TEXTURE0_ARB, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_ALPHA, GL_VARIABLE_A_NV, GL_TEXTURE0_ARB, GL_UNSIGNED_IDENTITY_NV, GL_ALPHA);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, GL_PRIMARY_COLOR_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
@@ -440,9 +434,11 @@ R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
 					R_DrawAliasModelNV (e, viewent);
 			}
 		}
+
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		qglDisable (GL_REGISTER_COMBINERS_NV);
 		qglDisableClientState (GL_COLOR_ARRAY);
 		qglColor4fv (whitev);
-		qglDisable (GL_REGISTER_COMBINERS_NV);
 	} else {
 		for (i = 0; i < num_ents; i++) {
 			e = ents[i];
@@ -457,26 +453,4 @@ R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
 		
 	if (gl_affinemodels->ivalue)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-}
-
-/*
-=============
-R_DrawViewModel
-=============
-*/
-void
-R_DrawViewModel (void)
-{
-	entity_t *ent_pointer;
-
-	ent_pointer = &cl.viewent;
-	if (!r_drawviewmodel->ivalue || chase_active->ivalue ||
-			!r_drawentities->ivalue || cl.items & IT_INVISIBILITY ||
-			(cl.stats[STAT_HEALTH] <= 0) || !cl.viewent.model)
-		return;
-
-	// hack the depth range to prevent view model from poking into walls
-	qglDepthRange (0.0f, 0.3f);
-	R_DrawAliasModels(&ent_pointer, 1, true);
-	qglDepthRange (0.0f, 1.0f);
 }

@@ -392,19 +392,12 @@ typedef struct model_s {
 //
 // volume occupied by the model graphics
 //      
-	Uint32		c1;
 	vec3_t		rotatedmins;
-	Uint32		c2;
 	vec3_t		rotatedmaxs;
-	Uint32		c3;
 	vec3_t		normalmins;
-	Uint32		c4;
 	vec3_t		normalmaxs;
-	Uint32		c5;
 	vec3_t		yawmins;
-	Uint32		c6;
 	vec3_t		yawmaxs;
-	Uint32		c7;
 
 //
 // brush model
