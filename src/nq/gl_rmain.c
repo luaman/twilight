@@ -1213,28 +1213,28 @@ R_PolyBlend (void)
 {
 	if (!gl_polyblend->value)
 		return;
-	if (!v_blend[3])
+	if (v_blend[3] < 0.01f)
 		return;
 
 	qglEnable (GL_BLEND);
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_TEXTURE_2D);
 
+	// LordHavoc: replaced old polyblend code (breaks on ATI Radeon) with
+	// darkplaces polyblend code (known to work on all cards)
+	qglMatrixMode(GL_PROJECTION);
 	qglLoadIdentity ();
-
-	// put Z going up
-	qglRotatef (-90, 1, 0, 0);
-	qglRotatef (90, 0, 0, 1);
+	qglOrtho  (0, 1, 1, 0, -99999, 99999);
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity ();
 
 	qglColor4fv (v_blend);
 
-	VectorSet3 (v_array[0], 10, 100, 100);
-	VectorSet3 (v_array[1], 10, -100, 100);
-	VectorSet3 (v_array[2], 10, -100, -100);
-	VectorSet3 (v_array[3], 10, 100, -100);
-	TWI_PreVDraw (0, 4);
-	qglDrawArrays(GL_QUADS, 0, 4);
-	TWI_PostVDraw ();
+	qglBegin (GL_TRIANGLES);
+	qglVertex2f (-5, -5);
+	qglVertex2f (10, -5);
+	qglVertex2f (-5, 10);
+	qglEnd ();
 
 	qglColor3f (1, 1, 1);
 	qglDisable (GL_BLEND);
