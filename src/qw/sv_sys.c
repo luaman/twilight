@@ -892,7 +892,6 @@ main (int argc, char *argv[])
 		{
 			snprintf(wintitle, sizeof(wintitle), "Twilight - port %d, clients %d/%d, map %s", port, lastclients, lastmaxclients, lastmap);
 			SetWindowText(hMainWnd, wintitle);
-			Sys_Printf("title length: %d\n", strlen(wintitle));
 			updatetitle = 0;
 		}
 
