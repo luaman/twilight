@@ -362,7 +362,7 @@ V_ParseDamage (void)
 	ent = &cl_entities[cl.viewentity];
 
 	VectorSubtract (from, ent->origin, from);
-	VectorNormalizeFast (from);
+	VectorNormalize (from);
 
 	AngleVectors (ent->angles, forward, right, up);
 

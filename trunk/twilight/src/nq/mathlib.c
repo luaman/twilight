@@ -37,7 +37,11 @@ static const char rcsid[] =
 #include <SDL_types.h>
 #include <math.h>
 #include <time.h>
+
 #include "quakedef.h"
+#include "mathlib.h"
+#include "strlib.h"
+#include "gl_model.h"
 
 void        Sys_Error (char *error, ...);
 
@@ -320,27 +324,6 @@ Q_sqrt(float n)
 	return n;
 }
 
-#define THREEHALFS	1.5f
-
-float 
-Q_RSqrt(float number)
-{
-	long i;
-	float x2, y;
-
-	if (number == 0.0)
-		return 0.0;
-
-	x2 = number * 0.5f;
-	y = number;
-	i = * (long *) &y;						// evil floating point bit level hacking
-	i = 0x5f3759df - (i >> 1);             // what the fuck?
-	y = * (float *) &i;
-	y = y * (THREEHALFS - (x2 * y * y));   // 1st iteration
-
-	return y;
-}
-
 double
 Q_pow (double x, double y)
 {
@@ -408,7 +391,7 @@ PerpendicularVector (vec3_t dst, const vec3_t src)
 
 	/* 
 	   ** normalize the result */
-	VectorNormalizeFast (dst);
+	VectorNormalize (dst);
 }
 
 #if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
@@ -478,7 +461,6 @@ RotatePointAroundVector (vec3_t dst, const vec3_t dir, const vec3_t point,
 #endif
 
 /*-----------------------------------------------------------------*/
-
 
 float
 anglemod (float a)
@@ -702,30 +684,15 @@ VectorNormalize (vec3_t v)
 	float length = DotProduct(v,v);
 
 	if (length) {
-		float ilength;
 
 		length = Q_sqrt(length);
-		ilength = 1 / length;
 
-		v[0] *= ilength;
-		v[1] *= ilength;
-		v[2] *= ilength;
+		v[0] /= length;
+		v[1] /= length;
+		v[2] /= length;
 	}
 
 	return length;
-}
-
-void 
-VectorNormalizeFast (vec3_t v)
-{
-	float length = DotProduct(v,v);
-
-	if (length) {
-		length = Q_RSqrt(length);
-		v[0] *= length;
-		v[1] *= length;
-		v[2] *= length;
-	}
 }
 
 void
@@ -744,13 +711,12 @@ _VectorScale (vec3_t in, vec_t scale, vec3_t out)
 	out[2] = in[2] * scale;
 }
 
-
 int
 Q_log2 (int val)
 {
 	int         answer = 0;
 
-	while (val >>= 1)
+	while ((val >>= 1) != 0)
 		answer++;
 	return answer;
 }
@@ -839,6 +805,10 @@ FloorDivMod (double numer, double denom, int *quotient, int *rem)
 #ifndef PARANOID
 	if (denom <= 0.0)
 		Sys_Error ("FloorDivMod: bad denominator %d\n", denom);
+
+//  if ((Q_floor(numer) != numer) || (Q_floor(denom) != denom))
+//      Sys_Error ("FloorDivMod: non-integer numer or denom %f %f\n",
+//              numer, denom);
 #endif
 
 	if (numer >= 0.0) {

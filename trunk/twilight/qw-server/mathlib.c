@@ -324,27 +324,6 @@ Q_sqrt(float n)
 	return n;
 }
 
-#define THREEHALFS	1.5f
-
-float 
-Q_RSqrt(float number)
-{
-	long i;
-	float x2, y;
-
-	if (number == 0.0)
-		return 0.0;
-
-	x2 = number * 0.5f;
-	y = number;
-	i = * (long *) &y;						// evil floating point bit level hacking
-	i = 0x5f3759df - (i >> 1);             // what the fuck?
-	y = * (float *) &i;
-	y = y * (THREEHALFS - (x2 * y * y));   // 1st iteration
-
-	return y;
-}
-
 double
 Q_pow (double x, double y)
 {
@@ -412,7 +391,7 @@ PerpendicularVector (vec3_t dst, const vec3_t src)
 
 	/* 
 	   ** normalize the result */
-	VectorNormalizeFast (dst);
+	VectorNormalize (dst);
 }
 
 #if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
@@ -705,30 +684,15 @@ VectorNormalize (vec3_t v)
 	float length = DotProduct(v,v);
 
 	if (length) {
-		float ilength;
 
 		length = Q_sqrt(length);
-		ilength = 1 / length;
 
-		v[0] *= ilength;
-		v[1] *= ilength;
-		v[2] *= ilength;
+		v[0] /= length;
+		v[1] /= length;
+		v[2] /= length;
 	}
 
 	return length;
-}
-
-void 
-VectorNormalizeFast (vec3_t v)
-{
-	float length = DotProduct(v,v);
-
-	if (length) {
-		length = Q_RSqrt(length);
-		v[0] *= length;
-		v[1] *= length;
-		v[2] *= length;
-	}
 }
 
 void

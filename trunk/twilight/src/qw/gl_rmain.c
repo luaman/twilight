@@ -867,11 +867,11 @@ R_DrawAliasModel (entity_t *e)
 		float an = -e->angles[1] / 180 * M_PI;
 
 		if (!shadescale)
-			shadescale = Q_RSqrt(2);
+			shadescale = Q_sqrt(2);
 
-		shadevector[0] = Q_cos (an) * shadescale;
-		shadevector[1] = Q_sin (an) * shadescale;
-		shadevector[2] = shadescale;
+		shadevector[0] = Q_cos (an) / shadescale;
+		shadevector[1] = Q_sin (an) / shadescale;
+		shadevector[2] = 1 / shadescale;
 
 		qglPushMatrix ();
 

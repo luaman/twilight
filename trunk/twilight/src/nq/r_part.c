@@ -112,7 +112,7 @@ R_DarkFieldParticles (entity_t *ent)
 				p->org[1] = org[1] + j + (Q_rand () & 3);
 				p->org[2] = org[2] + k + (Q_rand () & 3);
 
-				VectorNormalizeFast (dir);
+				VectorNormalize (dir);
 				vel = 50 + (Q_rand () & 63);
 				VectorScale (dir, vel, p->vel);
 			}
@@ -484,7 +484,7 @@ R_LavaSplash (vec3_t org)
 				p->org[1] = org[1] + dir[1];
 				p->org[2] = org[2] + (Q_rand () & 63);
 
-				VectorNormalizeFast (dir);
+				VectorNormalize (dir);
 				vel = 50 + (Q_rand () & 63);
 				VectorScale (dir, vel, p->vel);
 			}
@@ -526,7 +526,7 @@ R_TeleportSplash (vec3_t org)
 				p->org[1] = org[1] + j + (Q_rand () & 3);
 				p->org[2] = org[2] + k + (Q_rand () & 3);
 
-				VectorNormalizeFast (dir);
+				VectorNormalize (dir);
 				vel = 50 + (Q_rand () & 63);
 				VectorScale (dir, vel, p->vel);
 			}

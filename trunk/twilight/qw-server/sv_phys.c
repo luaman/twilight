@@ -137,7 +137,7 @@ SV_CheckVelocity (edict_t *ent)
 	if (DotProduct(ent->v.velocity,ent->v.velocity) >
 		sv_maxvelocity->value*sv_maxvelocity->value)
 	{
-		VectorNormalizeFast (ent->v.velocity);
+		VectorNormalize (ent->v.velocity);
 		VectorScale (ent->v.velocity, sv_maxvelocity->value, ent->v.velocity);
 	}
 }

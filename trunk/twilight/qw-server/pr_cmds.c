@@ -1280,7 +1280,7 @@ PF_aim (void)
 			end[j] = check->v.origin[j]
 				+ 0.5 * (check->v.mins[j] + check->v.maxs[j]);
 		VectorSubtract (end, start, dir);
-		VectorNormalizeFast (dir);
+		VectorNormalize (dir);
 		dist = DotProduct (dir, pr_global_struct->v_forward);
 		if (dist < bestdist)
 			continue;					// to far to turn
@@ -1296,7 +1296,7 @@ PF_aim (void)
 		dist = DotProduct (dir, pr_global_struct->v_forward);
 		VectorScale (pr_global_struct->v_forward, dist, end);
 		end[2] = dir[2];
-		VectorNormalizeFast (end);
+		VectorNormalize (end);
 		VectorCopy (end, G_VECTOR (OFS_RETURN));
 	} else {
 		VectorCopy (bestdir, G_VECTOR (OFS_RETURN));
