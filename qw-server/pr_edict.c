@@ -408,7 +408,7 @@ PR_GlobalString (int ofs)
 	val = (void *) &pr_globals[ofs];
 	def = ED_GlobalAtOfs (ofs);
 	if (!def)
-		snprintf (line, sizeof (line), "%i(???)", ofs);
+		snprintf (line, sizeof (line), "%i(\?\?\?)", ofs);
 	else {
 		s = PR_ValueString (def->type, val);
 		snprintf (line, sizeof (line), "%i(%s)%s", ofs,
@@ -432,7 +432,7 @@ PR_GlobalStringNoContents (int ofs)
 
 	def = ED_GlobalAtOfs (ofs);
 	if (!def)
-		snprintf (line, sizeof (line), "%i(???)", ofs);
+		snprintf (line, sizeof (line), "%i(\?\?\?)", ofs);
 	else
 		snprintf (line, sizeof (line), "%i(%s)", ofs,
 				  PR_GetString (def->s_name));
