@@ -63,7 +63,7 @@ qpic_t *draw_backtile;
 
 int         translate_texture;
 int         char_texture;
-int         ch_texture;					// crosshair texture
+int         ch_textures[NUM_CROSSHAIRS];			// crosshair texture
 
 typedef struct {
 	int		texnum;
@@ -81,16 +81,68 @@ int		gl_filter_mag = GL_LINEAR;
 int		texels;
 
 typedef struct {
-	int         texnum;
-	char        identifier[64];
-	int         width, height;
-	qboolean    mipmap;
-	unsigned short crc;
+	int			texnum;
+	char		identifier[64];
+	int			width, height;
+	qboolean	mipmap;
+	Uint16		crc;
 } gltexture_t;
 
+typedef struct {
+	gltexture_t	*glt;
+	qboolean	identical;
+} glt_ret_t;
+	
 gltexture_t gltextures[MAX_GLTEXTURES];
-int         numgltextures;
 
+glt_ret_t *
+GL_Find_Texture (const char *identifier, int width, int height, Uint16 crc)
+{
+	int			i;
+	gltexture_t	*glt;
+	static glt_ret_t	ret;
+
+	for (i = 0, glt = gltextures; i < MAX_GLTEXTURES; i++, glt++) {
+		if (glt->crc && !strcmp (identifier, glt->identifier)) {
+			ret.glt = glt;
+			if (width == glt->width && height == glt->height && crc == glt->crc)
+				ret.identical = true;
+			else
+				ret.identical = false;
+
+			return &ret;
+		}
+	}
+
+	return NULL;
+}
+
+gltexture_t *
+GL_Find_Free_Texture ()
+{
+	int i;
+
+	for (i = 0; i < MAX_GLTEXTURES; i++)
+		if (!gltextures[i].crc)
+			return &gltextures[i];
+
+	return NULL;
+}
+
+qboolean
+GL_Delete_Texture (int texnum)
+{
+	int i;
+	for (i = 0; i < MAX_GLTEXTURES; i++) {
+		if (gltextures[i].texnum == texnum) {
+			qglDeleteTextures(1, &gltextures[i].texnum);
+			memset(&gltextures[i], 0, sizeof(gltextures[0]));
+
+			return true;
+		}
+	}
+	return false;
+}
 
 /* ========================================================================= */
 /* Support Routines */
@@ -222,7 +274,7 @@ Set_TextureMode_f (struct cvar_s *var)
 	gl_filter_mag = modes[i].magnify;
 
 	/* change all the existing mipmap texture objects */
-	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
+	for (i = 0, glt = gltextures; i < MAX_GLTEXTURES; i++, glt++) {
 		if (glt->mipmap) {
 			qglBindTexture (GL_TEXTURE_2D, glt->texnum);
 			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
@@ -332,12 +384,11 @@ Draw_Init (void)
 	char_texture = R_LoadTexture ("charset", img, TEX_ALPHA);
 
 	// Keep track of the first crosshair texture
-	ch_texture = texture_extension_number;
 	for (i = 0; i < NUM_CROSSHAIRS; i++)
-		R_LoadPointer (va ("crosshair%i", i), crosshairs[i]);
+		ch_textures[i] = R_LoadPointer (va ("crosshair%i", i), crosshairs[i]);
 
 	/* save a texture slot for translated picture */
-	translate_texture = texture_extension_number++;
+	qglGenTextures(1, &translate_texture);
 
 	/* get the other pics we need */
 	draw_disc = Draw_PicFromWad ("disc");
@@ -532,7 +583,7 @@ Draw_Crosshair (void)
 
 	// FIXME: when textures have structures, fix the hardcoded 32x32 size
 	
-	ctexture = ch_texture + ((crosshair->ivalue - 1) % NUM_CROSSHAIRS);
+	ctexture = ch_textures[((crosshair->ivalue - 1) % NUM_CROSSHAIRS)];
 
 	x1 = (vid.width - 32 * hud_chsize->fvalue) * 0.5
 		* vid.width_2d / vid.width;
@@ -1317,7 +1368,7 @@ FIXME: HACK HACK HACK - this is just a GL_LoadTexture for image_t's for now
 int
 R_LoadTexture (const char *identifier, image_t *img, int flags)
 {
-	int         i;
+	glt_ret_t	*glt_ret;
 	gltexture_t *glt;
 	unsigned short crc = 0;
 
@@ -1325,29 +1376,23 @@ R_LoadTexture (const char *identifier, image_t *img, int flags)
 		return 0;
 
 	/* see if the texture is already present */
-	if (identifier[0])
-	{
+	if (identifier[0]) {
 		crc = CRC_Block (img->pixels, img->width * img->height);
 
-		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++)
-		{
-			if (!strcmp (identifier, glt->identifier))
-			{
-				if (img->width == (Uint32)glt->width
-						&& img->height == (Uint32)glt->height
-						&& crc == glt->crc)
-					return gltextures[i].texnum;
-				else
-					/* reload the texture into the same slot */
-					goto setuptexture;
-			}
+		glt_ret = GL_Find_Texture (identifier, img->width, img->height, crc);
+		if (glt_ret) {
+			glt = glt_ret->glt;
+			if (glt_ret->identical)
+				return glt->texnum;
+			else
+				goto setuptexture;
 		}
-	} else
-		glt = &gltextures[numgltextures];
+	}
 
-	numgltextures++;
+	glt = GL_Find_Free_Texture ();
+
 	strcpy (glt->identifier, identifier);
-	glt->texnum = texture_extension_number++;
+	qglGenTextures(1, &glt->texnum);
 
 setuptexture:
 	glt->width = img->width;
@@ -1383,36 +1428,31 @@ int
 GL_LoadTexture (const char *identifier, int width, int height, Uint8 *data,
 		int flags, int bpp)
 {
-	int         i;
+	glt_ret_t	*glt_ret;
 	gltexture_t *glt;
-	unsigned short crc = 0;
+	Uint16		crc = 0;
 
 	if (isDedicated)
 		return 0;
 
 	/* see if the texture is already present */
-	if (identifier[0])
-	{
-		crc = CRC_Block (data, width*height);
+	if (identifier[0]) {
+		crc = CRC_Block (data, width * height);
 
-		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++)
-		{
-			if (!strcmp (identifier, glt->identifier))
-			{
-				if (width == glt->width && height == glt->height
-						&& crc == glt->crc)
-					return gltextures[i].texnum;
-				else
-					/* reload the texture into the same slot */
-					goto setuptexture;
-			}
+		glt_ret = GL_Find_Texture (identifier, width, height, crc);
+		if (glt_ret) {
+			glt = glt_ret->glt;
+			if (glt_ret->identical)
+				return glt->texnum;
+			else
+				goto setuptexture;
 		}
-	} else
-		glt = &gltextures[numgltextures];
+	}
 
-	numgltextures++;
+	glt = GL_Find_Free_Texture ();
+
 	strcpy (glt->identifier, identifier);
-	glt->texnum = texture_extension_number++;
+	qglGenTextures(1, &glt->texnum);
 
 setuptexture:
 	glt->width = width;
@@ -1447,4 +1487,3 @@ GL_LoadPicTexture (qpic_t *pic)
 {
 	return GL_LoadTexture ("", pic->width, pic->height, pic->data, TEX_ALPHA, 8);
 }
-

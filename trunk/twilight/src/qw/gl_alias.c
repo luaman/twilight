@@ -115,7 +115,7 @@ static void
 R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 {
 	float				l;
-	int					pose_num, i;
+	Uint				pose_num, i;
 	maliasframedesc_t	*frame;
 	maliaspose_t		*pose;
 
@@ -151,7 +151,7 @@ static void
 R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 {
 	float				l, d;
-	int					i;
+	Uint				i;
 	int					pose_to_num, pose_from_num;
 	maliasframedesc_t	*frame_from, *frame_to;
 	maliaspose_t		*pose_from, *pose_to;
@@ -201,7 +201,7 @@ R_SetupAliasModel
 static void
 R_SetupAliasModel (entity_t *e, qboolean viewent)
 {
-	int			lnum;
+	Uint		lnum;
 	model_t		*clmodel = e->model;
 	rdlight_t	*rd;
 	vec3_t		dist;
@@ -338,7 +338,7 @@ R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec4_t color)
 }
 
 static void
-R_DrawAliasModel (entity_t *e, qboolean viewent)
+R_DrawAliasModel ()
 {
 	qglPushMatrix ();
 
@@ -414,7 +414,7 @@ R_DrawSubSkinNV (aliashdr_t *paliashdr, skin_sub_t *tris, skin_sub_t *s0,
 }
 
 static void
-R_DrawAliasModelNV (entity_t *e, qboolean viewent)
+R_DrawAliasModelNV ()
 {
 	skin_sub_t	*base;
 

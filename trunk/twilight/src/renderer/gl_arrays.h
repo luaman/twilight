@@ -28,8 +28,6 @@
 #ifndef __GL_ARRAYS_H
 #define __GL_ARRAYS_H
 
-#define	MAX_GLTEXTURES	1024
-
 #include "mathlib.h"
 #include "dyngl.h"
 #include "gl_info.h"
@@ -65,10 +63,9 @@ extern colorub_t	*scub_array_p;
 
 extern GLuint *vindices;
 
-extern GLint	v_index, i_index;
+extern GLuint	v_index, i_index;
 extern qboolean	va_locked;
-extern GLint	MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
-extern memzone_t *vzone;
+extern GLuint	MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
 
 extern float_int_t *FtoUB_tmp;
 
@@ -135,6 +132,7 @@ TWI_PostVDrawCVA ()
 extern inline void
 TWI_PreVDraw (GLint min, GLint max)
 {
+	min = min; max = max; // Kill the warning.
 }
 
 extern inline void

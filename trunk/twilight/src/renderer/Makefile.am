@@ -19,7 +19,10 @@ libtwilight_renderer_a_SOURCES= \
 	dyngl.c dyngl.h dglfuncs.h \
 	gl_arrays.c gl_arrays.h gl_info.c gl_info.h \
 	gl_textures.c gl_textures.h \
+	liquid.c liquid.h \
 	noise.c noise_textures.c \
+	sky.c sky.h \
+	surface.c surface.h \
 	transform.c transform.h light.h \
 	pointers.c pointers.h
 

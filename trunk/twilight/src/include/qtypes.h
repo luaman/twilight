@@ -37,11 +37,11 @@
 
 typedef enum { false, true } qboolean;
 
-#ifndef DYNGL_TYPES
-#define DYNGL_TYPES
-
 typedef unsigned int	Uint;
 typedef signed int		Sint;
+
+#ifndef DYNGL_TYPES
+#define DYNGL_TYPES
 
 typedef void			GLvoid;
 typedef Uint8			GLboolean;

@@ -244,7 +244,7 @@ NET_GetLoopPacket (netsrc_t sock)
 }
 
 void 
-NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
+NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data)
 {
 	int		i;
 	loopback_t	*loop = &loopbacks[sock^1];
@@ -312,7 +312,7 @@ NET_SendPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
 
 	if (to.type == NA_LOOPBACK)
 	{
-		NET_SendLoopPacket (sock, length, data, to);
+		NET_SendLoopPacket (sock, length, data);
 		return;
 	}
 

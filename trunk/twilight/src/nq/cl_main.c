@@ -45,6 +45,7 @@ static const char rcsid[] =
 #include "world.h"
 #include "gl_textures.h"
 #include "teamplay.h"
+#include "surface.h"
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.
@@ -72,8 +73,6 @@ entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
 lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
 dlight_t	cl_dlights[MAX_DLIGHTS];
 
-extern int	r_framecount;
-
 /*
 =====================
 CL_ClearState
@@ -100,6 +99,9 @@ CL_ClearState (void)
 	memset (cl_lightstyle, 0, sizeof (cl_lightstyle));
 	memset (cl_temp_entities, 0, sizeof (cl_temp_entities));
 	memset (cl_beams, 0, sizeof (cl_beams));
+
+	// Have to do this BEFORE we load models.
+	SetupLightmapSettings ();
 }
 
 /*
@@ -267,7 +269,7 @@ void
 CL_PrintEntities_f (void)
 {
 	entity_t   *ent;
-	int         i;
+	Uint        i;
 
 	for (i = 0, ent = cl_entities; i < cl.num_entities; i++, ent++) {
 		Com_Printf ("%3i:", i);
@@ -434,7 +436,7 @@ void
 CL_RelinkEntities (void)
 {
 	entity_t   *ent;
-	int         i, j;
+	Uint        i, j;
 	float       frac, f, delta;
 	vec3_t      oldorg;
 	dlight_t   *dl;

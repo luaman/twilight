@@ -45,13 +45,11 @@ static const char rcsid[] =
 // FIXME - These need to be in a header somewhere
 extern void TNT_Init (void);
 extern void R_InitBubble (void);
-extern void R_SkyBoxChanged (cvar_t *cvar);
 void R_DrawViewModel (void);
 void R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 
-int r_framecount;						// used for dlight push checking
 static mplane_t frustum[4];
-int c_brush_polys, c_alias_polys;
+Uint c_brush_polys, c_alias_polys;
 
 
 /*
@@ -80,8 +78,6 @@ cvar_t *r_drawentities;
 cvar_t *r_drawviewmodel;
 cvar_t *r_speeds;
 cvar_t *r_shadows;
-cvar_t *r_wateralpha;
-cvar_t *r_waterripple;
 cvar_t *r_dynamic;
 cvar_t *r_novis;
 cvar_t *r_stainmaps;
@@ -152,7 +148,7 @@ R_GetSpriteFrame (entity_t *e)
 	psprite = Mod_Extradata(e->model);
 	frame = e->cur.frame;
 
-	if ((frame >= psprite->numframes) || (frame < 0)) {
+	if (((Uint) frame >= psprite->numframes) || (frame < 0)) {
 		Com_Printf ("R_DrawSprite: no such frame %d\n", frame);
 		frame = 0;
 	}
@@ -199,7 +195,8 @@ R_DrawSpriteModels ()
 	vec3_t				v_forward, v_right, v_up;
 	msprite_t		   *psprite;
 	entity_t		   *e;
-	int					i, last_tex;
+	Uint				i;
+	int					last_tex;
 
 	last_tex = -1;
 	v_index = 0;
@@ -284,7 +281,7 @@ static void
 R_DrawEntitiesOnList (void)
 {
 	entity_t	*e;
-	int			i;
+	Uint		i;
 
 	if (!r_drawentities->ivalue)
 		return;
@@ -483,8 +480,6 @@ R_Clear (void)
 }
 
 
-// XXX
-extern void R_DrawSkyBox (void);
 /*
 ================
 R_Render3DView
@@ -495,9 +490,11 @@ Called by R_RenderView, possibily repeatedly.
 void
 R_Render3DView (void)
 {
-	R_DrawSkyBox ();
+	if (draw_skybox) {
+		R_DrawSkyBox ();
 
-	R_DrawBrushModelSkies ();
+		R_DrawBrushModelSkies ();
+	}
 	
 	// adds static entities to the list
 	R_DrawWorld ();
@@ -512,7 +509,8 @@ R_Render3DView (void)
 
 	R_DrawExplosions ();
 	R_DrawParticles ();
-	R_DrawWaterTextureChains ();
+	if (r_wateralpha->fvalue != 1)
+		R_DrawWaterTextureChains (cl.worldmodel->extra.brush, false);
 	R_DrawCoronas ();
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -532,6 +530,9 @@ R_RenderView (void)
 {
 	double		time1 = 0.0;
 	double		time2;
+
+	r_time = cl.time;
+	r_frametime = host_frametime;
 
 	if (r_norefresh->ivalue)
 		return;
@@ -644,15 +645,10 @@ R_Init_Cvars (void)
 	r_drawviewmodel = Cvar_Get ("r_drawviewmodel", "1", CVAR_NONE, NULL);
 	r_speeds = Cvar_Get ("r_speeds", "0", CVAR_NONE, NULL);
 	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_ARCHIVE, NULL);
-	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
-	r_waterripple = Cvar_Get ("r_waterripple", "0", CVAR_NONE, NULL);
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
 	r_novis = Cvar_Get ("r_novis", "0", CVAR_NONE, NULL);
 	r_stainmaps = Cvar_Get ("r_stainmaps", "1", CVAR_ARCHIVE, NULL);
 	r_netgraph = Cvar_Get ("r_netgraph", "0", CVAR_NONE, NULL);
-
-	r_skyname = Cvar_Get ("r_skyname", "", CVAR_NONE, &R_SkyBoxChanged);
-	r_fastsky = Cvar_Get ("r_fastsky", "0", CVAR_NONE, NULL);
 
 	gl_clear = Cvar_Get ("gl_clear", "0", CVAR_ARCHIVE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
@@ -674,22 +670,10 @@ R_Init_Cvars (void)
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 
 	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
+	R_Init_Sky_Cvars ();
+	R_Init_Liquid_Cvars ();
 }
 
-/*
- * compatibility function to set r_skyname
- */
-static void
-R_LoadSky_f (void)
-{
-	if (Cmd_Argc() != 2)
-	{
-		Com_Printf ("loadsky <name> : load a skybox\n");
-		return;
-	}
-
-	Cvar_Set (r_skyname, Cmd_Argv(1));
-}
 
 /*
 ====================
@@ -734,12 +718,9 @@ R_Init (void)
 {
 	Cmd_AddCommand ("timerefresh", &R_TimeRefresh_f);
 	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
-	Cmd_AddCommand ("loadsky", &R_LoadSky_f);
 
-	netgraphtexture = texture_extension_number++;
-
-	skyboxtexnum = texture_extension_number;
-	texture_extension_number += 6;
+	qglGenTextures(6, skyboxtexnums);
+	qglGenTextures(1, &netgraphtexture);
 
 	R_InitTextures ();
 	R_InitBubble ();
@@ -747,6 +728,8 @@ R_Init (void)
 	TNT_Init ();
 	R_Explosion_Init ();
 	R_InitSurf ();
+	R_Init_Sky ();
+	R_Init_Liquid ();
 }
 
 /*
@@ -758,7 +741,7 @@ void
 R_NewMap (void)
 {
 	Uint32			i;
-	extern Sint32	r_dlightframecount;
+	extern Uint		r_dlightframecount;
 
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
@@ -773,23 +756,22 @@ R_NewMap (void)
 
 	r_dlightframecount = 0;
 
-	GL_BuildLightmaps ();
-
 	// identify sky texture
 	skytexturenum = -1;
-	for (i = 0; i < cl.worldmodel->numtextures; i++) {
-		if (!cl.worldmodel->textures[i])
+	for (i = 0; i < cl.worldmodel->extra.brush->numtextures; i++) {
+		if (!cl.worldmodel->extra.brush->textures[i])
 			continue;
-		if (!strncmp (cl.worldmodel->textures[i]->name, "sky", 3))
+		if (!strncmp (cl.worldmodel->extra.brush->textures[i]->name, "sky", 3)){
 			skytexturenum = i;
-		cl.worldmodel->textures[i]->texturechain = NULL;
+			break;
+		}
 	}
 
 	// some Cvars need resetting on map change
 	Cvar_Set (r_skyname, "");
 
 	// Parse map entities
-	CL_ParseEntityLump (cl.worldmodel->entities);
+	CL_ParseEntityLump (cl.worldmodel->extra.brush->entities);
 
 	r_explosion_newmap ();
 }

@@ -259,6 +259,8 @@ Part_FreeArrays ()
 static void
 Part_CB (cvar_t *cvar)
 {
+	cvar = cvar;
+
 	if (!r_particles || !r_base_particles || !r_beam_particles)
 		return;
 
@@ -969,9 +971,9 @@ R_Draw_Base_Particles (void)
 
 		corner = v_array_v(v_index);
 		VectorTwiddleS (p->org, vup, vright, scale * -0.5, v_array_v(v_index));
-		VectorTwiddle(corner, vup, scale, vright, 0    ,1,v_array_v(v_index+1));
-		VectorTwiddle(corner, vup, scale, vright, scale,1,v_array_v(v_index+2));
-		VectorTwiddle(corner, vup, 0    , vright, scale,1,v_array_v(v_index+3));
+		VectorTwiddle(corner, vup, 1, vright, 0, scale, v_array_v(v_index+1));
+		VectorTwiddle(corner, vup, 1, vright, 1, scale, v_array_v(v_index+2));
+		VectorTwiddle(corner, vup, 0, vright, 1, scale, v_array_v(v_index+3));
 
 		v_index += 4;
 
@@ -983,7 +985,6 @@ R_Draw_Base_Particles (void)
 			TWI_PostVDrawCVA ();
 			v_index = 0;
 		}
-
 	}
 
 	if (v_index)

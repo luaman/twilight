@@ -148,7 +148,7 @@ PM_PointContents (vec3_t p)
 	hull_t     *hull;
 	int         num;
 
-	hull = &pmove.physents[0].model->hulls[0];
+	hull = &pmove.physents[0].model->extra.brush->hulls[0];
 
 	num = hull->firstclipnode;
 
@@ -197,8 +197,8 @@ PM_TestPlayerPosition (vec3_t pos)
 			continue;
 
 		// get the clipping hull
-		if (pe->model)
-			hull = &pmove.physents[i].model->hulls[1];
+		if (pe->model && (pe->model->type == mod_brush))
+			hull = &pmove.physents[i].model->extra.brush->hulls[1];
 		else {
 			VectorSubtract (pe->mins, player_maxs, mins);
 			VectorSubtract (pe->maxs, player_mins, maxs);
@@ -239,8 +239,8 @@ PM_PlayerMove (vec3_t start, vec3_t end)
 		if ((pe->id != -1) && (pe->id == pmove.player_id))
 			continue;
 		// get the clipping hull
-		if (pe->model)
-			hull = &pmove.physents[i].model->hulls[1];
+		if (pe->model && (pe->model->type == mod_brush))
+			hull = &pmove.physents[i].model->extra.brush->hulls[1];
 		else {
 			VectorSubtract (pe->mins, player_maxs, mins);
 			VectorSubtract (pe->maxs, player_mins, maxs);

@@ -32,6 +32,7 @@
 #include "modelgen.h"
 #include "spritegn.h"
 #include "zone.h"
+#include "qtypes.h"
 
 /*
 
@@ -75,26 +76,24 @@ typedef struct {
 
 
 typedef struct texture_s {
-	char        name[16];
-	unsigned    width, height;
-	int         gl_texturenum;
-	int			fb_texturenum;			// index of fullbright mask or 0
-	struct msurface_s *texturechain;	// for gl_texsort drawing
-	int         anim_total;				// total tenths in sequence ( 0 = no)
-	int         anim_min, anim_max;		// time for this frame min <=time< max
-	struct texture_s *anim_next;		// in the animation sequence
-	struct texture_s *alternate_anims;	// bmodels in frmae 1 use these
+	char				 name[16];
+	Uint				 width, height;
+	Uint				 texnum;		// Index into the bmodel texture array.
+	GLuint				 gl_texturenum;
+	GLuint				 fb_texturenum;	// index of fullbright mask or 0
+	int					 anim_total;	// total tenths in sequence ( 0 = no)
+	int					 anim_min;		// time for this frame min <=time< max
+	int					 anim_max;		// time for this frame min <=time< max
+	struct texture_s	*anim_next;		// in the animation sequence
+	struct texture_s	*alt_anims;		// bmodels in frmae 1 use these
 } texture_t;
 
-
-#define	SURF_PLANEBACK		2
-#define	SURF_DRAWSKY		4
-#define SURF_DRAWSPRITE		8
-#define SURF_DRAWTURB		0x10
-#define SURF_DRAWTILED		0x20
-#define SURF_DRAWBACKGROUND	0x40
-#define SURF_UNDERWATER		0x80
-#define SURF_DONTWARP		0x100
+#define SURF_PLANEBACK		BIT(1)
+#define	SURF_SKY			BIT(2)
+#define SURF_LIQUID			BIT(3)
+#define SURF_UNDERWATER		BIT(4)
+#define SURF_NOLIGHTMAP		BIT(5)
+#define SURF_SUBDIVIDE		BIT(6)
 
 typedef struct {
 	unsigned short v[2];
@@ -108,20 +107,17 @@ typedef struct {
 } mtexinfo_t;
 
 typedef struct glpoly_s {
-	struct glpoly_s *next;				// Next in texture chain.
-	struct glpoly_s *lchain;			// Next in lightmap chain.
-	struct glpoly_s	*fb_chain;			// Next in FB chain.
-	int         numverts;
-	int         flags;					// for SURF_UNDERWATER
-	vertex_t	*v;						// Vertices
-	texcoord_t	*tc;					// Texcoords
-	texcoord_t	*ltc;					// Lightmap texcoords
+	struct glpoly_s	*next;				// Next polygon on surface.
+	Uint			 numverts;
+	vertex_t		*v;					// Vertices
+	texcoord_t		*tc;				// Texcoords
+	texcoord_t		*ltc;				// Lightmap texcoords
 } glpoly_t;
 
 typedef struct msurface_s {
 	// should be drawn if visframe == r_framecount (set by WorldNode
 	// functions)
-	int					visframe;
+	Uint				visframe;
 
 	// the node plane this is on, backwards if SURF_PLANEBACK flag set
 	mplane_t			*plane;
@@ -131,29 +127,26 @@ typedef struct msurface_s {
 
 	
 	// look up in model->surfedges[], negative numbers are backwards edges
-	int					firstedge;
-	int					numedges;
+	Uint				firstedge;
+	Uint				numedges;
 
 	// gl lightmap coordinates mess
 	short				texturemins[2];
 	short				extents[2];
-	short				smax, tmax, alignedwidth, unusedpadding;
+	short				smax, tmax, alignedwidth;
 	int					light_s, light_t;
 
-	// raw polys for this surface
+	// raw polygon for this surface
 	glpoly_t			*polys;
-
-	// list of surfaces using this texture in this frame (yes, it's odd)
-	struct msurface_s	*texturechain;
 
 	// this is where the real texture information is
 	mtexinfo_t			*texinfo;
 
 	// dynamic lighting info
-	int					dlightframe, lightframe, lightmappedframe;
+	Uint				dlightframe, lightframe, lightmappedframe;
 	int					dlightbits;
 
-	int					lightmaptexturenum;
+	int					lightmap_texnum;
 	Uint8				styles[MAXLIGHTMAPS];
 
 	// values currently used in lightmap
@@ -161,6 +154,9 @@ typedef struct msurface_s {
 
 	// if lightmap was lit by dynamic lights, force update on next frame
 	qboolean			cached_dlight;
+
+	struct chain_item_s	*tex_chain;			// Tex chain item for us.
+	struct chain_item_s	*light_chain;		// Light chain item for us.
 
 	// RGB lighting data [numstyles][height][width][3] or white lighting
 	// data [numstyles][height][width] - FIXME: This is ugly as hell
@@ -170,11 +166,37 @@ typedef struct msurface_s {
 	Uint8				*stainsamples;
 } msurface_t;
 
+/*
+ * Flags for different chain types.
+ * (FIXME: Do these need to be flags, or just an enum?)
+ * (FIXED: Yes, a chain can be both normal and FB.)
+ */
+#define CHAIN_NORMAL							BIT(0) // Chain is normal.
+#define CHAIN_LIQUID							BIT(1) // Chain is liquid.
+#define CHAIN_SKY								BIT(2) // Chain is sky.
+#define CHAIN_FB								BIT(3) // Chain is fullbright.
+#define CHAIN_LIGHTMAP							BIT(4) // Chain is lightmap.
+
+typedef struct chain_head_s {
+	texture_t			*texture;
+	GLuint				 l_texnum;
+	Uint				 flags, n_items, visframe;
+	struct chain_item_s	*items;
+} chain_head_t;
+
+typedef struct chain_item_s {
+	Uint				 visframe;
+	msurface_t			*surf;
+	chain_head_t		*head;
+	struct chain_item_s	*next;
+} chain_item_t;
+		
+
 typedef struct mnode_s {
 // common with leaf
 	int         contents;				// 0, to differentiate from leafs
-	int         visframe;				// determined visible by WorldNode
-	int			pvsframe;				// set by MarkLeaves
+	Uint        visframe;				// determined visible by WorldNode
+	Uint		pvsframe;				// set by MarkLeaves
 
 	vec3_t      mins;					// for bounding box culling
 	vec3_t		maxs;					// for bounding box culling
@@ -194,8 +216,8 @@ typedef struct mnode_s {
 typedef struct mleaf_s {
 // common with node
 	int         contents;				// wil be a negative contents number
-	int         visframe;				// determined visible by WorldNode
-	int			pvsframe;				// set by MarkLeaves
+	Uint        visframe;				// determined visible by WorldNode
+	Uint		pvsframe;				// set by MarkLeaves
 
 	vec3_t      mins;					// for bounding box culling
 	vec3_t		maxs;					// for bounding box culling
@@ -222,6 +244,70 @@ typedef struct hull_s {
 	vec3_t		clip_size;
 } hull_t;
 
+#define LIGHTBLOCK_WIDTH	512
+#define LIGHTBLOCK_HEIGHT	512
+#define MAX_LIGHTMAPS		256
+
+typedef struct lightblock_s {
+	int				allocated[MAX_LIGHTMAPS][LIGHTBLOCK_WIDTH];
+	chain_head_t	chains[MAX_LIGHTMAPS];
+} lightblock_t;
+
+typedef struct brushhdr_s {
+	qboolean		is_submodel;
+	Uint			firstmodelsurface, nummodelsurfaces;
+
+	lightblock_t	lightblock;
+
+	Uint32			numsubmodels;
+	dmodel_t		*submodels;
+
+	Uint32			numplanes;
+	mplane_t		*planes;
+
+	Uint32			numleafs;		// number of visible leafs, not counting 0
+	mleaf_t			*leafs;
+
+	Uint32			numvertexes;
+	mvertex_t		*vertexes;
+
+	Uint32			numedges;
+	medge_t			*edges;
+
+	Uint32			numnodes;
+	mnode_t			*nodes;
+
+	Uint32			numtexinfo;
+	mtexinfo_t		*texinfo;
+
+	Uint32			numsurfaces;
+	msurface_t		*surfaces;
+
+	Uint32			numsurfedges;
+	int				*surfedges;
+
+	Uint32			numclipnodes;
+	dclipnode_t		*clipnodes;
+
+	Uint32			nummarksurfaces;
+	msurface_t		**marksurfaces;
+
+	hull_t			hulls[MAX_MAP_HULLS];
+
+	Uint32			numtextures;
+	texture_t		**textures;
+	chain_head_t	**tex_chains;
+
+	chain_head_t	sky_chain;
+
+	Uint8			*visdata;
+	Uint8			*lightdata;
+	char			*entities;
+
+	Uint32			checksum;
+	Uint32			checksum2;
+} brushhdr_t;
+
 /*
 ==============================================================================
 
@@ -240,9 +326,9 @@ typedef struct mspriteframe_s {
 } mspriteframe_t;
 
 typedef struct {
-	int         numframes;
-	float      *intervals;
-	mspriteframe_t *frames[1];
+	Uint			 numframes;
+	float			*intervals;
+	mspriteframe_t	*frames[1];
 } mspritegroup_t;
 
 typedef struct {
@@ -251,13 +337,11 @@ typedef struct {
 } mspriteframedesc_t;
 
 typedef struct {
-	int         type;
-	int         maxwidth;
-	int         maxheight;
-	int         numframes;
-	float       beamlength;				// remove?
-	void       *cachespot;				// remove?
-	mspriteframedesc_t frames[1];
+	Uint				type;
+	Uint				maxwidth;
+	Uint				maxheight;
+	Uint				numframes;
+	mspriteframedesc_t	frames[1];
 } msprite_t;
 
 
@@ -285,7 +369,7 @@ typedef struct {
 } maliaspose_t;
 
 typedef struct {
-	int				numposes;
+	Uint			numposes;
 	float			interval;
 	avertex_t		bboxmin;
 	avertex_t		bboxmax;
@@ -299,9 +383,9 @@ typedef struct mtriangle_s {
 } mtriangle_t;
 
 typedef struct skin_sub_s {
-	int	texnum;
-	int	num_indices;
-	int	*indices;
+	int		 texnum;
+	Uint	 num_indices;
+	int		*indices;
 } skin_sub_t;
 
 typedef struct skin_s {
@@ -324,17 +408,17 @@ typedef struct {
 	vec3_t      scale_origin;
 	float       boundingradius;
 	vec3_t      eyeposition;
-	int         numskins;
+	Uint        numskins;
 	int         skinwidth;
 	int         skinheight;
-	int         numverts;
-	int         numtris;
-	int         numframes;
+	Uint        numverts;
+	Uint        numtris;
+	Uint        numframes;
 	synctype_t  synctype;
 	int         flags;
 	float       size;
 
-	int         numposes;
+	Uint        numposes;
 	int         poseverts;
 	mtriangle_t	*triangles;			// Triangle list.
 	astvert_t	*tcarray;			// Texcoord array.
@@ -383,7 +467,7 @@ typedef struct model_s {
 	qboolean    needload;			// bmodels and sprites don't cache normally
 
 	modtype_t   type;
-	int         numframes;
+	Uint        numframes;
 	synctype_t  synctype;
 
 	int         flags;
@@ -400,61 +484,18 @@ typedef struct model_s {
 	vec3_t		yawmaxs;
 
 //
-// brush model
-//
-	int			firstmodelsurface, nummodelsurfaces;
-
-	Uint32		numsubmodels;
-	dmodel_t	*submodels;
-
-	Uint32		numplanes;
-	mplane_t	*planes;
-
-	Uint32		numleafs;			// number of visible leafs, not counting 0
-	mleaf_t		*leafs;
-
-	Uint32		numvertexes;
-	mvertex_t	*vertexes;
-
-	Uint32		numedges;
-	medge_t		*edges;
-
-	Uint32		numnodes;
-	mnode_t		*nodes;
-
-	Uint32		numtexinfo;
-	mtexinfo_t	*texinfo;
-
-	Uint32		numsurfaces;
-	msurface_t	*surfaces;
-
-	Uint32		numsurfedges;
-	int			*surfedges;
-
-	Uint32		numclipnodes;
-	dclipnode_t	*clipnodes;
-
-	Uint32		nummarksurfaces;
-	msurface_t	**marksurfaces;
-
-	hull_t		hulls[MAX_MAP_HULLS];
-
-	Uint32		numtextures;
-	texture_t	**textures;
-
-	Uint8		*visdata;
-	Uint8		*lightdata;
-	char		*entities;
-
-	Uint32		checksum;
-	Uint32		checksum2;
-
-//
 // additional model data
 //
 	memzone_t	*extrazone;
-	void		*extradata;
+	union {
+		brushhdr_t	*brush;
+		aliashdr_t	*alias;
+		msprite_t	*sprite;
+		void		*ptr;
+	} extra;
+//	void		*extradata;
 } model_t;
+
 
 //============================================================================
 

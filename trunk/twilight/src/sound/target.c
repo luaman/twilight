@@ -52,6 +52,8 @@ paint_audio (void *unused, Uint8 *stream, int len)
 	int sampleposbytes;
 	int samplesbytes;
 
+	unused = unused;
+
 	if (shm)
 	{
 		streamsamples = len / (shm->samplebits >> 3);
