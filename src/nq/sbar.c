@@ -22,8 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 
 
-int         sb_updates;					// if >= vid.numpages, no update needed
-
 #define STAT_MINUS		10				// num frame for '-' stats digit
 qpic_t     *sb_nums[2][11];
 qpic_t     *sb_colon, *sb_slash;
@@ -82,7 +80,6 @@ Sbar_ShowScores (void)
 	if (sb_showscores)
 		return;
 	sb_showscores = true;
-	sb_updates = 0;
 }
 
 /*
@@ -96,7 +93,6 @@ void
 Sbar_DontShowScores (void)
 {
 	sb_showscores = false;
-	sb_updates = 0;
 }
 
 /*
@@ -107,7 +103,6 @@ Sbar_Changed
 void
 Sbar_Changed (void)
 {
-	sb_updates = 0;						// update next frame
 }
 
 /*
@@ -594,9 +589,6 @@ Sbar_DrawInventory (void)
 				flashon = (flashon % 5) + 2;
 
 			Sbar_DrawPic (i * 24, -16, sb_weapons[flashon][i]);
-
-			if (flashon > 1)
-				sb_updates = 0;			// force update to remove flash
 		}
 	}
 
@@ -636,8 +628,6 @@ Sbar_DrawInventory (void)
 						Sbar_DrawPic (96, -16, hsb_weapons[flashon][4]);
 				} else
 					Sbar_DrawPic (176 + (i * 24), -16, hsb_weapons[flashon][i]);
-				if (flashon > 1)
-					sb_updates = 0;		// force update to remove flash
 			}
 		}
 	}
@@ -668,16 +658,10 @@ Sbar_DrawInventory (void)
 	for (i = 0; i < 6; i++)
 		if (cl.items & (1 << (17 + i))) {
 			time = cl.item_gettime[17 + i];
-			if (time && time > cl.time - 2 && flashon) {	// flash frame
-				sb_updates = 0;
-			} else {
-				// MED 01/04/97 changed keys
-				if (!hipnotic || (i > 1)) {
-					Sbar_DrawPic (192 + i * 16, -16, sb_items[i]);
-				}
+			// MED 01/04/97 changed keys
+			if (!hipnotic || (i > 1)) {
+				Sbar_DrawPic (192 + i * 16, -16, sb_items[i]);
 			}
-			if (time && time > cl.time - 2)
-				sb_updates = 0;
 		}
 	// MED 01/04/97 added hipnotic items
 	// hipnotic items
@@ -685,13 +669,7 @@ Sbar_DrawInventory (void)
 		for (i = 0; i < 2; i++)
 			if (cl.items & (1 << (24 + i))) {
 				time = cl.item_gettime[24 + i];
-				if (time && time > cl.time - 2 && flashon) {	// flash frame
-					sb_updates = 0;
-				} else {
-					Sbar_DrawPic (288 + i * 16, -16, hsb_items[i]);
-				}
-				if (time && time > cl.time - 2)
-					sb_updates = 0;
+				Sbar_DrawPic (288 + i * 16, -16, hsb_items[i]);
 			}
 	}
 
@@ -701,14 +679,7 @@ Sbar_DrawInventory (void)
 			if (cl.items & (1 << (29 + i))) {
 				time = cl.item_gettime[29 + i];
 
-				if (time && time > cl.time - 2 && flashon) {	// flash frame
-					sb_updates = 0;
-				} else {
-					Sbar_DrawPic (288 + i * 16, -16, rsb_items[i]);
-				}
-
-				if (time && time > cl.time - 2)
-					sb_updates = 0;
+				Sbar_DrawPic (288 + i * 16, -16, rsb_items[i]);
 			}
 		}
 	} else {
@@ -716,12 +687,7 @@ Sbar_DrawInventory (void)
 		for (i = 0; i < 4; i++) {
 			if (cl.items & (1 << (28 + i))) {
 				time = cl.item_gettime[28 + i];
-				if (time && time > cl.time - 2 && flashon) {	// flash frame
-					sb_updates = 0;
-				} else
-					Sbar_DrawPic (320 - 32 + i * 8, -16, sb_sigil[i]);
-				if (time && time > cl.time - 2)
-					sb_updates = 0;
+				Sbar_DrawPic (320 - 32 + i * 8, -16, sb_sigil[i]);
 			}
 		}
 	}
@@ -870,10 +836,9 @@ Sbar_DrawFace (void)
 	else
 		f = cl.stats[STAT_HEALTH] / 20;
 
-	if (cl.time <= cl.faceanimtime) {
+	if (cl.time <= cl.faceanimtime)
 		anim = 1;
-		sb_updates = 0;					// make sure the anim gets drawn over
-	} else
+	else
 		anim = 0;
 	Sbar_DrawPic (112, 0, sb_faces[f][anim]);
 }
@@ -889,12 +854,7 @@ Sbar_Draw (void)
 	if (scr_con_current == vid.height)
 		return;							// console is full screen
 
-	if (sb_updates >= vid.numpages)
-		return;
-
 	scr_copyeverything = 1;
-
-	sb_updates++;
 
 	if (sb_lines && vid.width > 320)
 		Draw_TileClear (0, vid.height - sb_lines, vid.width, sb_lines);
@@ -908,7 +868,6 @@ Sbar_Draw (void)
 	if (sb_showscores || cl.stats[STAT_HEALTH] <= 0) {
 		Sbar_DrawPic (0, 0, sb_scorebar);
 		Sbar_DrawScoreboard ();
-		sb_updates = 0;
 	} else if (sb_lines) {
 		Sbar_DrawPic (0, 0, sb_sbar);
 
@@ -1041,7 +1000,6 @@ Sbar_DeathmatchOverlay (void)
 	scoreboard_t *s;
 
 	scr_copyeverything = 1;
-	scr_fullupdate = 0;
 
 	pic = Draw_CachePic ("gfx/ranking.lmp");
 	M_DrawPic ((320 - pic->width) / 2, 8, pic);
@@ -1125,7 +1083,6 @@ Sbar_MiniDeathmatchOverlay (void)
 		return;
 
 	scr_copyeverything = 1;
-	scr_fullupdate = 0;
 
 // scores
 	Sbar_SortFrags ();
@@ -1219,7 +1176,6 @@ Sbar_IntermissionOverlay (void)
 	int         num;
 
 	scr_copyeverything = 1;
-	scr_fullupdate = 0;
 
 	if (cl.gametype == GAME_DEATHMATCH) {
 		Sbar_DeathmatchOverlay ();
