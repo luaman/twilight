@@ -40,7 +40,6 @@ static const char rcsid[] =
 #include "model.h"
 
 model_t    *loadmodel;
-char        loadname[32];				// for hunk tags
 
 void        Mod_LoadBrushModel (model_t *mod, void *buffer);
 model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
@@ -264,7 +263,7 @@ Mod_LoadVisibility (lump_t *l)
 		loadmodel->visdata = NULL;
 		return;
 	}
-	loadmodel->visdata = Hunk_AllocName (l->filelen, loadname);
+	loadmodel->visdata = Hunk_AllocName (l->filelen, loadmodel->name);
 	memcpy (loadmodel->visdata, mod_base + l->fileofs, l->filelen);
 }
 
@@ -281,7 +280,7 @@ Mod_LoadEntities (lump_t *l)
 		loadmodel->entities = NULL;
 		return;
 	}
-	loadmodel->entities = Hunk_AllocName (l->filelen, loadname);
+	loadmodel->entities = Hunk_AllocName (l->filelen, loadmodel->name);
 	memcpy (loadmodel->entities, mod_base + l->fileofs, l->filelen);
 }
 
@@ -302,7 +301,7 @@ Mod_LoadVertexes (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->vertexes = out;
 	loadmodel->numvertexes = count;
@@ -330,7 +329,7 @@ Mod_LoadSubmodels (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->submodels = out;
 	loadmodel->numsubmodels = count;
@@ -365,7 +364,7 @@ Mod_LoadEdges (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName ((count + 1) * sizeof (*out), loadname);
+	out = Hunk_AllocName ((count + 1) * sizeof (*out), loadmodel->name);
 
 	loadmodel->edges = out;
 	loadmodel->numedges = count;
@@ -407,7 +406,7 @@ Mod_LoadNodes (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->nodes = out;
 	loadmodel->numnodes = count;
@@ -452,7 +451,7 @@ Mod_LoadLeafs (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->leafs = out;
 	loadmodel->numleafs = count;
@@ -508,7 +507,7 @@ Mod_LoadClipnodes (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->clipnodes = out;
 	loadmodel->numclipnodes = count;
@@ -563,7 +562,7 @@ Mod_MakeHull0 (void)
 
 	in = loadmodel->nodes;
 	count = loadmodel->numnodes;
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	hull->clipnodes = out;
 	hull->firstclipnode = 0;
@@ -598,7 +597,7 @@ Mod_LoadMarksurfaces (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->marksurfaces = out;
 	loadmodel->nummarksurfaces = count;
@@ -626,7 +625,7 @@ Mod_LoadSurfedges (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->surfedges = out;
 	loadmodel->numsurfedges = count;
@@ -654,7 +653,7 @@ Mod_LoadPlanes (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Hunk_AllocName (count * 2 * sizeof (*out), loadname);
+	out = Hunk_AllocName (count * 2 * sizeof (*out), loadmodel->name);
 
 	loadmodel->planes = out;
 	loadmodel->numplanes = count;

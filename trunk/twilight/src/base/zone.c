@@ -385,7 +385,7 @@ typedef struct {
 	int         sentinal;
 	int         size;					// including sizeof(hunk_t), -1 = not
 										// allocated
-	char        name[8];
+	char        name[64];
 } hunk_t;
 
 Uint8      *hunk_base;
@@ -431,12 +431,12 @@ Otherwise, allocations with the same name will be totaled up before printing.
 void
 Hunk_Print (qboolean all)
 {
-	hunk_t     *h, *next, *endlow, *starthigh, *endhigh;
-	int         count, sum;
-	int         totalblocks;
-	char        name[9];
+	hunk_t		*h, *next, *endlow, *starthigh, *endhigh;
+	int			count, sum;
+	int			totalblocks;
+	char		name[65];
 
-	name[8] = 0;
+	name[64] = 0;
 	count = 0;
 	sum = 0;
 	totalblocks = 0;
