@@ -570,27 +570,6 @@ Sys_ExpandPath (char *str)
 }
 
 
-char *
-Sys_ExpandPath (char *str)
-{
-
-	if (strncmp (path, "~/", 2) != 0) {
-		strcpy (dest, path);
-		return;
-	}
-	home = getenv ("HOME");
-	if (!home || !home[0])
-		home = getenv ("WINDIR");
-	if (home) {
-		strcpy (dest, home);
-		strncat (dest, path + 1, MAX_OSPATH - strlen (dest));   // skip
-		// leading ~
-	}
-	else
-		strcpy (dest, path);
-	
-}
-
 /*
 ==============================================================================
 

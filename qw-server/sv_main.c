@@ -77,6 +77,7 @@ cvar_t     *spawn;
 cvar_t     *watervis;
 cvar_t     *hostname;
 cvar_t     *filterban;
+cvar_t     *temp1;
 
 FILE       *sv_logfile;
 FILE       *sv_fraglogfile;
@@ -1340,6 +1341,9 @@ SV_InitLocal (void)
 	sv_waterfriction = Cvar_Get ("sv_waterfriction", "4", CVAR_NONE, NULL);
 
 	filterban = Cvar_Get ("filterban", "1", CVAR_NONE, NULL);
+
+	// referenced by progs
+	temp1 = Cvar_Get ("temp1", "0", CVAR_NONE, NULL);
 
 //
 // game rules mirrored in svs.info
