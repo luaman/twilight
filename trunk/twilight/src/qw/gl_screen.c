@@ -1081,6 +1081,13 @@ SCR_UpdateScreen (void)
 	if (!scr_initialized || !con_initialized)
 		return;							/* not initialized yet */
 
+	// LordHavoc: do finish and display at the beginning of the frame,
+	// to get CPU/GPU overlap benefits (CPU thinks while GPU draws)
+	GL_EndRendering ();
+
+	if (cl_avidemo->ivalue)
+		SCR_CaptureAviDemo ();
+
 	qglEnable (GL_DEPTH_TEST);
 
 	if (vid.recalc_refdef)
@@ -1130,8 +1137,7 @@ SCR_UpdateScreen (void)
 	V_UpdatePalette ();
 	GL_BrightenScreen ();
 
-	GL_EndRendering ();
-
-	if (cl_avidemo->ivalue)
-		SCR_CaptureAviDemo ();
+	// LordHavoc: flush command queue to card (most drivers buffer commands for burst transfer)
+	// (note: this does not wait for anything to finish, it just empties the buffer)
+	glFlush();
 }
