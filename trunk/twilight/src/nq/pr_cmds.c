@@ -60,13 +60,20 @@ extern int SV_ModelIndex (char *name);
 
 static char engine_extensions[] =
 "DP_QC_CHANGEPITCH "
+"DP_QC_COPYENTITY "
 "DP_QC_ETOS "
+"DP_QC_FINDCHAIN "
+"DP_QC_FINDCHAINFLOAT "
 "DP_QC_FINDFLOAT "
+// "DP_QC_GETSURFACE "
 "DP_QC_MINMAXBOUND "
 "DP_QC_RANDOMVEC "
 "DP_QC_SINCOSSQRTPOW "
 "DP_QC_TRACEBOX "
+"DP_QC_TRACETOSS "
+"DP_QC_VECTORVECTORS "
 "DP_REGISTERCVAR "
+"DP_SV_SETCOLOR "
 "TW_SV_STEPCONTROLS ";
 
 /*
@@ -158,6 +165,23 @@ PF_makevectors (void)
 	AngleVectors (G_VECTOR (OFS_PARM0), pr_global_struct->v_forward,
 			pr_global_struct->v_right, pr_global_struct->v_up);
 }
+
+/*
+ * ==============
+PF_vectorvectors
+
+Writes new values for v_forward, v_up, and v_right based on the given
+forward vector
+vectorvectors(vector, vector)
+==============
+*/
+void PF_vectorvectors (void)
+{
+	VectorNormalize2(G_VECTOR(OFS_PARM0), pr_global_struct->v_forward);
+	VectorVectors(pr_global_struct->v_forward, pr_global_struct->v_right,
+			pr_global_struct->v_up);
+}
+
 
 /*
 =================
@@ -670,6 +694,35 @@ void PF_tracebox (void)
 	else
 		pr_global_struct->trace_ent = EDICT_TO_PROG(sv.edicts);
 }
+
+void PF_tracetoss (void)
+{
+	trace_t trace;
+	edict_t *ent;
+	edict_t *ignore;
+
+	// We don't profile yet...
+//	pr_xfunction->builtinsprofile += 600;
+
+	ent = G_EDICT(OFS_PARM0);
+	ignore = G_EDICT(OFS_PARM1);
+
+	trace = SV_Trace_Toss (ent, ignore);
+
+	pr_global_struct->trace_allsolid = trace.allsolid;
+	pr_global_struct->trace_startsolid = trace.startsolid;
+	pr_global_struct->trace_fraction = trace.fraction;
+	pr_global_struct->trace_inwater = trace.inwater;
+	pr_global_struct->trace_inopen = trace.inopen;
+	VectorCopy (trace.endpos, pr_global_struct->trace_endpos);
+	VectorCopy (trace.plane.normal, pr_global_struct->trace_plane_normal);
+	pr_global_struct->trace_plane_dist = trace.plane.dist;
+	if (trace.ent)
+		pr_global_struct->trace_ent = EDICT_TO_PROG(trace.ent);
+	else
+		pr_global_struct->trace_ent = EDICT_TO_PROG(sv.edicts);
+}
+
 
 /*
 =================
@@ -1829,6 +1882,58 @@ PF_pow (void)
 
 /*
 =================
+PF_copyentity
+
+copies data from one entity to another
+
+copyentity(src, dst)
+=================
+*/
+void PF_copyentity (void)
+{
+	edict_t *in, *out;
+
+	in = G_EDICT(OFS_PARM0);
+	out = G_EDICT(OFS_PARM1);
+	memcpy(&(out->v), &(in->v), progs->entityfields * 4);
+}
+
+/*
+=================
+PF_setcolor
+
+sets the color of a client and broadcasts the update to all connected
+clients
+
+setcolor(clientent, value)
+=================
+*/
+void PF_setcolor (void)
+{
+	client_t *client;
+	Uint entnum, i;
+
+	entnum = G_EDICTNUM(OFS_PARM0);
+	i = G_FLOAT(OFS_PARM1);
+
+	if (entnum < 1 || entnum > svs.maxclients)
+	{
+		Sys_Printf ("tried to setcolor a non-client\n");
+		return;
+	}
+
+	client = &svs.clients[entnum-1];
+	client->colors = i;
+	client->edict->v.team = (i & 15) + 1;
+
+	MSG_WriteByte (&sv.reliable_datagram, svc_updatecolors);
+	MSG_WriteByte (&sv.reliable_datagram, entnum - 1);
+	MSG_WriteByte (&sv.reliable_datagram, i);
+}
+
+
+/*
+=================
 PF_findfloat
 
 =================
@@ -1858,6 +1963,76 @@ PF_findfloat (void)
 	}
 
 	RETURN_EDICT(sv.edicts);
+}
+
+// chained search for strings in entity fields
+// entity(.string field, string match) findchain = #402;
+void PF_findchain (void)
+{
+	Uint i;
+	int f;
+	char *s, *t;
+	edict_t *ent, *chain;
+
+	chain = (edict_t *)sv.edicts;
+
+	f = G_INT(OFS_PARM0);
+	s = G_STRING(OFS_PARM1);
+	if (!s || !s[0])
+	{
+		RETURN_EDICT(sv.edicts);
+		return;
+	}
+
+	ent = NEXT_EDICT(sv.edicts);
+	for (i = 1;i < sv.num_edicts;i++, ent = NEXT_EDICT(ent))
+	{
+		// We don't (yet) profile QC
+//		pr_xfunction->builtinsprofile++;
+		if (ent->free)
+			continue;
+		t = E_STRING(ent,f);
+		if (!t)
+			continue;
+		if (strcmp(t,s))
+			continue;
+
+		ent->v.chain = EDICT_TO_PROG(chain);
+		chain = ent;
+	}
+
+	RETURN_EDICT(chain);
+}
+
+// LordHavoc: chained search for float, int, and entity reference fields
+// entity(.string field, float match) findchainfloat = #403;
+void PF_findchainfloat (void)
+{
+	Uint i;
+	int f;
+	float s;
+	edict_t *ent, *chain;
+	
+	chain = (edict_t *)sv.edicts;
+
+	f = G_INT(OFS_PARM0);
+	s = G_FLOAT(OFS_PARM1);
+
+	ent = NEXT_EDICT(sv.edicts);
+	for (i = 1;i < sv.num_edicts;i++, ent = NEXT_EDICT(ent))
+	{
+		// We do not (yet) profile QC
+//		pr_xfunction->builtinsprofile++;
+		if (ent->free)
+			continue;
+		if (E_FLOAT(ent,f) != s)
+			continue;
+
+		ent->v.chain = EDICT_TO_PROG(chain);
+		chain = ent;
+	}
+
+	RETURN_EDICT(chain);
 }
 
 void
@@ -1973,7 +2148,7 @@ builtin_t pr_builtin[] =
 	PF_cos,					// #061 Q2: DP_QC_SINCOSSQRTPOW
 	PF_sqrt,				// #062 Q2: DP_QC_SINCOSSQRTPOW
 	PF_changepitch,			// #063 Q2: DP_QC_CHANGEPITCH
-	PF_fixme,				// #064 Q2: PF_tracetoss
+	PF_tracetoss,			// #064 Q2: DP_QC_TRACETOSS
 	PF_etos,				// #065 Q2: DP_QC_ETOS
 	PF_fixme,				// #066 Q2: PF_watermove (don't implement)
 	SV_MoveToGoal,			// #067
@@ -2022,43 +2197,41 @@ builtin_t pr_builtin[] =
 	PF_FIXME100,			// #200 - 299
 	PF_FIXME100,			// #300 - 399
 
-/*
 	// DarkPlaces extensions (2)
-	PF_copyentity,			// #400
-	PF_setcolor,			// #401
-	PF_findchain,			// #402
-	PF_findchainfloat,		// #403
-	PF_effect,				// #404
-	PF_te_blood,			// #405
-	PF_te_bloodshower,		// #406
-	PF_te_explosionrgb,		// #407
-	PF_te_particlecube,		// #408
-	PF_te_particlerain,		// #409
-	PF_te_particlesnow,		// #410
-	PF_te_spark,			// #411
-	PF_te_gunshotquad,		// #412
-	PF_te_spikequad,		// #413
-	PF_te_superspikequad,	// #414
-	PF_te_explosionquad,	// #415
-	PF_te_smallflash,		// #416
-	PF_te_customflash,		// #417
-	PF_te_gunshot,			// #418
-	PF_te_spike,			// #419
-	PF_te_superspike,		// #420
-	PF_te_explosion,		// #421
-	PF_te_tarexplosion,		// #422
-	PF_te_wizspike,			// #423
-	PF_te_knightspike,		// #424
-	PF_te_lavasplash,		// #425
-	PF_te_teleport,			// #426
-	PF_te_explosion2,		// #427
-	PF_te_lightning1,		// #428
-	PF_te_lightning2,		// #429
-	PF_te_lightning3,		// #430
-	PF_te_beam,				// #431
-	PF_vectorvectors,		// #432
-	PF_te_plasmaburn,		// #433
-*/
+	PF_copyentity,			// #400 DP: DP_QC_COPYENTITY
+	PF_setcolor,			// #401 DP: DP_SV_SETCOLOR
+	PF_findchain,			// #401 DP: DP_QC_FINDCHAIN
+	PF_findchainfloat,		// #403 DP: DP_QC_FINDCHAINFLOAT
+	PF_fixme,				// #404 PF_effect
+	PF_fixme,				// #405 PF_te_blood
+	PF_fixme,				// #406 PF_te_bloodshower
+	PF_fixme,				// #407 PF_te_explosionrgb
+	PF_fixme,				// #408 PF_te_particlecube
+	PF_fixme,				// #409 PF_te_particlerain
+	PF_fixme,				// #410 PF_te_particlesnow
+	PF_fixme,				// #411 PF_te_spark
+	PF_fixme,				// #412 PF_te_gunshotquad
+	PF_fixme,				// #413 PF_te_spikequad
+	PF_fixme,				// #414 PF_te_superspikequad
+	PF_fixme,				// #415 PF_te_explosionquad
+	PF_fixme,				// #416 PF_te_smallflash
+	PF_fixme,				// #417 PF_te_customflash
+	PF_fixme,				// #418 PF_te_gunshot
+	PF_fixme,				// #419 PF_te_spike
+	PF_fixme,				// #420 PF_te_superspike
+	PF_fixme,				// #421 PF_te_explosion
+	PF_fixme,				// #422 PF_te_tarexplosion
+	PF_fixme,				// #423 PF_te_wizspike
+	PF_fixme,				// #424 PF_te_knightspike
+	PF_fixme,				// #425 PF_te_lavasplash
+	PF_fixme,				// #426 PF_te_teleport
+	PF_fixme,				// #427 PF_te_explosion2
+	PF_fixme,				// #428 PF_te_lightning1
+	PF_fixme,				// #429 PF_te_lightning2
+	PF_fixme,				// #430 PF_te_lightning3
+	PF_fixme,				// #431 PF_te_beam
+	PF_vectorvectors,		// #432 DP_QC_VECTORVECTORS
+	PF_fixme,				// #433 PF_te_plasmaburn
 };
 
 builtin_t *pr_builtins = pr_builtin;
