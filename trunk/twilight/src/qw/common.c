@@ -1242,24 +1242,36 @@ COM_LoadFile (char *path, int usehunk)
 // extract the filename base name for hunk tag
 	COM_FileBase (path, base);
 
-	if (usehunk == 1)
-		buf = Hunk_AllocName (len + 1, base);
-	else if (usehunk == 2)
-		buf = Hunk_TempAlloc (len + 1);
-	else if (usehunk == 0)
-		buf = Z_Malloc (len + 1);
-	else if (usehunk == 3)
-		buf = Cache_Alloc (loadcache, len + 1, base);
-	else if (usehunk == 4) {
-		if (len + 1 > loadsize)
+	switch (usehunk) {
+		case 0:
+			buf = Z_Malloc (len + 1);
+			break;
+		case 1:
+			buf = Hunk_AllocName (len + 1, base);
+			break;
+		case 2:
 			buf = Hunk_TempAlloc (len + 1);
-		else
-			buf = loadbuf;
-	} else
-		Sys_Error ("COM_LoadFile: bad usehunk");
+			break;
+		case 3:
+			buf = Cache_Alloc (loadcache, len + 1, base);
+			break;
+		case 4:
+			if (len + 1 > loadsize)
+				buf = Hunk_TempAlloc (len + 1);
+			else
+				buf = loadbuf;
+			break;
+		case 5:
+			buf = malloc (len + 1);
+			break;
+		default:
+			Sys_Error ("COM_LoadFile: bad usehunk");
+			break;
+	}
 
 	if (!buf)
-		Sys_Error ("COM_LoadFile: not enough space for %s", path);
+		Sys_Error ("COM_LoadFile: not enough space for %s (%i bytes)", path,
+				len + 1);
 
 	((Uint8 *) buf)[len] = 0;
 	Draw_Disc ();
