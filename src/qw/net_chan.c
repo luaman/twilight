@@ -160,7 +160,11 @@ Netchan_OutOfBand (netsrc_t sock, netadr_t adr, size_t length, Uint8 *data)
 
 	// send the datagram
 	// zoid, no input in demo playback mode
+#ifdef HAVE_SDL_H
 	if ((sys_gametypes & GAME_QW_SERVER) || !cls.demoplayback)
+#else
+	if ((sys_gametypes & GAME_QW_SERVER))
+#endif
 		NET_SendPacket (sock, send.cursize, send.data, adr);
 }
 
@@ -201,8 +205,10 @@ Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 	chan->remote_address = adr;
 	chan->last_received = curtime;
 
+#ifdef HAVE_SDL_H
 	if ((sys_gametypes & GAME_QW_CLIENT) && cls.demoplayback)
 		chan->last_received = cls.realtime;
+#endif
 
 	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
 	chan->message.allowoverflow = true;
@@ -315,7 +321,11 @@ Netchan_Transmit (netchan_t *chan, size_t length, Uint8 *data)
 	chan->outgoing_time[i] = curtime;
 
 	// zoid, no input in demo playback mode
+#ifdef HAVE_SDL_H
 	if ((sys_gametypes & GAME_QW_SERVER) || !cls.demoplayback)
+#else
+	if ((sys_gametypes & GAME_QW_SERVER))
+#endif
 		NET_SendPacket (chan->sock, send.cursize, send.data, chan->remote_address);
 
 	// LordHavoc: helpful info to anyone looking at this code in the future:
@@ -355,7 +365,11 @@ Netchan_Process (netchan_t *chan)
 	unsigned    sequence, sequence_ack;
 	unsigned    reliable_ack, reliable_message;
 
+#ifdef HAVE_SDL_H
 	if ((sys_gametypes & GAME_QW_SERVER) || !cls.demoplayback)
+#else
+	if ((sys_gametypes & GAME_QW_SERVER))
+#endif
 		if (!NET_CompareAdr (net_from, chan->remote_address))
 			return false;
 
@@ -429,8 +443,10 @@ Netchan_Process (netchan_t *chan)
 
 	chan->last_received = curtime;
 
+#ifdef HAVE_SDL_H
 	if ((sys_gametypes & GAME_QW_CLIENT) && cls.demoplayback)
 		chan->last_received = cls.realtime;
+#endif
 
 	return true;
 }
