@@ -65,6 +65,8 @@ static const char rcsid[] =
 #ifdef _WIN32
 # include <io.h>
 # include <windows.h>
+# include <richedit.h>
+# include "resource.h"
 // the win32 console needs cmd.h so it can directly stuff commands into the command
 // buffer from the message handlers.
 # include "cmd.h"
@@ -116,9 +118,15 @@ qboolean stdin_ready;
 HWND hMainWnd = NULL;
 HWND hLogWnd = NULL;
 HWND hEntryWnd = NULL;
+HWND hClearBtn = NULL;
+HWND hQuitBtn = NULL;
 HINSTANCE hOurInstance = NULL;
 HFONT console_font = NULL;
 WNDPROC prev_EntryProc = NULL;
+HMODULE hRichEditDLL = NULL;
+
+#define IDC_CLEAR	1025
+#define IDC_QUIT	1026
 #endif
 
 // =======================================================================
@@ -162,6 +170,37 @@ static const char sys_charmap[256] =
 	'x', 'y', 'z', '{', '|', '}', '~', '<'
 };
 
+#ifdef _WIN32
+static const COLORREF sys_colors[4] =
+{
+	RGB(255,255,255),
+	RGB(213,107,0),
+	RGB(202,198,0),
+	RGB(190,95,0)
+};
+#endif
+
+static const char sys_colormap[256] =
+{
+	3, 3, 3, 3, 3, 3, 3, 3,	3, 0, 0, 3, 3, 0, 3, 3,
+	2, 2, 2, 2, 2, 2, 2, 2,	2, 2, 2, 2, 2, 2, 2, 2,
+	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,
+
+	3, 3, 3, 3, 3, 3, 3, 3,	3, 0, 0, 3, 3, 0, 3, 3,
+	2, 2, 2, 2, 2, 2, 2, 2,	2, 2, 2, 2, 2, 2, 2, 2,
+	1, 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 1, 1, 1, 1,
+};
+
 void
 Sys_Printf (const char *fmt, ...)
 {
@@ -185,68 +224,68 @@ Sys_Printf (const char *fmt, ...)
 				putc (*p, stdout);
 	fflush (stdout);
 #else
-	if (hMainWnd)
+	if (hLogWnd)
 	{
 		char buf[4096];
 		Uint8 *pbuf = buf;
+		static int	bufsize;
+		int			len;
+		CHARRANGE	sel;
+		int			lastcolor = -1;
+		CHARFORMAT	charfmt;
 
-		if (sys_asciionly && sys_asciionly->ivalue)
-		{
-			for(p = (Uint8*)text; *p; p++)
-			{
-				if (*p == '\n')
-				{
-					*pbuf = '\r';
-					pbuf++;
-				}
+		memset(&charfmt, 0, sizeof(charfmt));
+		charfmt.cbSize = sizeof(charfmt);
+		charfmt.dwMask = CFM_COLOR;		// only changing the color
 
-				*pbuf = sys_charmap[*p];
-				pbuf++;
-			}
-			*pbuf = 0;
+		len = strlen( text );
+		bufsize += len;
+		if( bufsize > 0xFFFFFF ) {
+			sel.cpMin = 0;
+			sel.cpMax = 0xFFFFFFFF;
+			bufsize = len;
 		}
 		else
+			sel.cpMin = sel.cpMax = 0xFFFFFFFF;
+
+		SendMessage( hLogWnd, EM_EXSETSEL, 0, (LPARAM)&sel);
+		SendMessage( hLogWnd, EM_LINESCROLL, 0, 0xFFFF );
+		SendMessage( hLogWnd, EM_SCROLLCARET, 0, 0 );
+
+		for(p = (Uint8*)text; *p; p++)
 		{
-			for (p = (Uint8*) text; *p; p++)
+			// if we hit a new color
+			if(sys_colormap[*p] != lastcolor)
 			{
-				if((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
+				if(lastcolor != -1)
 				{
-					snprintf(pbuf, sizeof(buf) - (pbuf - buf) + 1, "[%02x]", *p);
-					pbuf += strlen(pbuf);
+					// flush the current buffer
+					*pbuf = 0;
+					SendMessage( hLogWnd, EM_REPLACESEL, FALSE, (LPARAM)buf );
+					// reset the buffer
+					pbuf = buf;
 				}
-				else
-				{
-					if(*p == '\n')
-					{
-						*pbuf = '\r';
-						pbuf++;
-					}
-					*pbuf = *p;
-					pbuf++;
-				}
+
+				// send the new color to the window and store it.
+				lastcolor = sys_colormap[*p];
+				charfmt.crTextColor = sys_colors[lastcolor];
+				SendMessage(hLogWnd, EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM)&charfmt);
 			}
-			*pbuf = 0;
+
+			if (*p == '\n')
+			{
+				*pbuf = '\r';
+				pbuf++;
+			}
+
+			*pbuf = sys_charmap[*p];
+			pbuf++;
 		}
 
-		{
-			static int	bufsize;
-			int			len;
-
-			len = strlen( buf );
-			bufsize += len;
-			if( bufsize > 0x7FFF ) {
-				SendMessage( hLogWnd, EM_SETSEL, 0, 0xFFFFFFFF );
-				bufsize = len;
-			}
-			else
-				SendMessage (hLogWnd, EM_SETSEL, 0xFFFF, 0xFFFF);
-
-
-			SendMessage( hLogWnd, EM_LINESCROLL, 0, 0xFFFF );
-			SendMessage( hLogWnd, EM_SCROLLCARET, 0, 0 );
+		// flush the last bit
+		*pbuf = 0;
+		if(strlen(buf) > 0)
 			SendMessage( hLogWnd, EM_REPLACESEL, FALSE, (LPARAM)buf );
-
-		}
 	}
 #endif
 }
@@ -554,14 +593,10 @@ Sys_ExpandPath (char *str)
 
 LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	static HBRUSH	logBG_brush;
 	NOTIFYICONDATA nd;
 	HRESULT res;
 
 	switch( uMsg ) {
-		case WM_CREATE:
-			logBG_brush = CreateSolidBrush( 0x000000 );
-			break;
 		case WM_ACTIVATE:
 			if( LOWORD( wParam ) != WA_INACTIVE ) {
 				SetFocus( hEntryWnd );
@@ -578,7 +613,7 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					// do minimize to tray here
 					nd.cbSize = sizeof(NOTIFYICONDATA);
 					nd.hWnd = hMainWnd;
-					nd.hIcon = LoadIcon ((HINSTANCE) NULL, IDI_APPLICATION);
+					nd.hIcon = LoadIcon (hOurInstance, MAKEINTRESOURCE( IDI_TWILIGHT ));
 					nd.uID = 1;
 					nd.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
 					nd.uCallbackMessage = WM_USER;
@@ -599,18 +634,25 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			switch(lParam) {
 				case WM_LBUTTONDOWN:
 				case WM_RBUTTONDOWN:
+				case WM_MBUTTONDOWN:
 					ShowWindow(hMainWnd, SW_SHOW);
 					nd.hWnd = hMainWnd;
 					nd.uID = 1;
 					Shell_NotifyIcon(NIM_DELETE, &nd);
+					return(0);
 					break;
 			}
 			break;
-		case WM_CTLCOLORSTATIC:
-			if( (HWND)lParam == hLogWnd ) {
-				SetBkColor( (HDC)wParam, 0x000000 );
-				SetTextColor( (HDC)wParam, 0xFFFFFF );
-				return( (long)logBG_brush );
+		case WM_COMMAND:
+			switch(LOWORD(wParam)) {
+			case IDC_CLEAR:
+				SetWindowText(hLogWnd, "");
+				return(0);
+				break;
+			case IDC_QUIT:
+				Cbuf_AddText("quit");
+				return(0);
+				break;
 			}
 			break;
 	}
@@ -624,21 +666,21 @@ LRESULT CALLBACK EntryWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 	switch( uMsg ) {
 		case WM_CHAR:
-			if( wParam == '\r' ) {
+			/* this is a switch in case we want to do command history, completetion, etc. */
+			switch(wParam) {
+			case '\r':
 				GetWindowText( hEntryWnd, buf, sizeof(buf) );
 				
 				/* clear commandline */
 				SetWindowText( hEntryWnd, "" );
 
-				if(strlen(buf) > 0)
-				{
-					/* add to command buffer */
-					Cbuf_AddText(buf);
+				/* add to command buffer */
+				Cbuf_AddText(buf);
 
-					/* print command */
-					Sys_Printf( "]%s\n", buf );
-				}
+				/* print command */
+				Sys_Printf( "]%s\n", buf );
 				return( 0 );
+				break;
 			}
 			break;
 	}
@@ -656,13 +698,29 @@ WinConsole_Init()
 	
 	hOurInstance = GetModuleHandle(NULL);
 
+	/* we need to make sure we load the richedit control.
+	   we will only be using functionality from RichEdit 1.0, so
+	   it doesn't matter what gets loaded, but the dll name is different
+	   with each version of the control (except between 2.0 and 3.0)
+	*/
+	/* richedit 1.0 */
+	hRichEditDLL = LoadLibrary("riched32.dll");
+
+	/* richedit 2.0/3.0 */
+	if(!hRichEditDLL)
+		hRichEditDLL = LoadLibrary("riched20.dll");
+
+	/* richedit 4.1 */
+	if(!hRichEditDLL)
+		hRichEditDLL = LoadLibrary("msftedit.dll");
+
 	wc.style = 0;
 	wc.lpfnWndProc = MainWinProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hOurInstance;
-	wc.hIcon = LoadIcon ((HINSTANCE) NULL, IDI_APPLICATION);
-	wc.hCursor = NULL;
+	wc.hIcon = LoadIcon (hOurInstance, MAKEINTRESOURCE( IDI_TWILIGHT ) );
+	wc.hCursor = LoadCursor( NULL, IDC_ARROW );
 	wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
 	wc.lpszMenuName =  NULL;
 	wc.lpszClassName = "TwiConsole";
@@ -702,16 +760,23 @@ WinConsole_Init()
 	hDC = GetDC( hMainWnd);
 	console_font = CreateFont( -MulDiv(8, GetDeviceCaps(hDC, LOGPIXELSY), 72), 0, 0, 0,
 					FW_LIGHT, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-					CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH|FF_MODERN, "Fixedsys");
+					CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH|FF_MODERN, "Courier New");
 	ReleaseDC(hMainWnd, hDC);
 
 	hEntryWnd = CreateWindowEx(0,"edit", NULL, WS_CHILD|WS_VISIBLE|WS_BORDER|ES_AUTOHSCROLL, 6,
 					400, 528, 20, hMainWnd, NULL, hOurInstance, NULL);
-	hLogWnd = CreateWindowEx(0, "edit", NULL, WS_CHILD|WS_VISIBLE|WS_BORDER|WS_VSCROLL|ES_READONLY|
-					ES_AUTOVSCROLL|ES_MULTILINE, 6, 40, 526, 354, hMainWnd, NULL, hOurInstance, NULL);
+	hLogWnd = CreateWindowEx(0, "richedit", NULL, WS_CHILD|WS_VISIBLE|WS_BORDER|WS_VSCROLL|ES_READONLY|
+					ES_AUTOVSCROLL|ES_MULTILINE|ES_LEFT|ES_NOHIDESEL, 6, 40, 526, 354, hMainWnd, NULL, hOurInstance, NULL);
+	SendMessage(hLogWnd, EM_SETBKGNDCOLOR, 0, RGB(0,0,0));
 	SendMessage(hLogWnd, WM_SETFONT, (WPARAM)console_font, FALSE);
 	SendMessage(hEntryWnd, WM_SETFONT, (WPARAM)console_font, FALSE);
 	prev_EntryProc = (WNDPROC)SetWindowLong(hEntryWnd, GWL_WNDPROC, (long)EntryWinProc);
+
+	hClearBtn = CreateWindowEx( 0, "button", "Clear", WS_CHILD|WS_VISIBLE, 6, 425, 72, 24, 
+					hMainWnd, (HMENU)IDC_CLEAR, hOurInstance, NULL );
+
+	hQuitBtn = CreateWindowEx( 0, "button", "Quit", WS_CHILD|WS_VISIBLE, 462, 425, 72, 24, 
+					hMainWnd, (HMENU)IDC_QUIT, hOurInstance, NULL );
 
 	ShowWindow(hMainWnd, SW_SHOWDEFAULT);
 	UpdateWindow(hMainWnd);

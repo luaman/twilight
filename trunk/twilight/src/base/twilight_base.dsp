@@ -161,10 +161,6 @@ SOURCE=.\strlib.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\sv_sys_win32.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\zone.c
 # End Source File
 # End Group
