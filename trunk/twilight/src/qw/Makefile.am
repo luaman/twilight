@@ -44,7 +44,7 @@ twilight_qw_SOURCES= \
 	snd_dma.c sv_null.c teamplay.c sys.c vid_sdl.c view.c
 
 libqwsv_a_SOURCES= \
-	info.c
+	cl_null.c info.c
 
 EXTRA_DIST= \
 	qw.dsp

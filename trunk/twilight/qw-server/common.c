@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "console.h"
 #include "crc.h"
 #include "cvar.h"
+#include "draw.h"
 #include "net.h"
 #include "protocol.h"
 #include "strlib.h"
@@ -643,15 +644,31 @@ void Com_EndRedirect (void)
 	rd_print = NULL;
 }
 
+void Com_PrintHex (char *str, int len)
+{
+	char	c;
+	int		i;
+
+	for (i = 0; i < len; i++) {
+		c = str[i];
+		if ((c > 126) || (c < 32)) {
+			c = '.';
+		}
+		Com_Printf("%c  ", c, str[i] & 0xFF);
+	}
+	Com_Printf("\n");
+
+	for (i = 0; i < len; i++) {
+		Com_Printf("%02x ", str[i] & 0xFF);
+	}
+	Com_Printf("\n");
+}
+
 void Com_Printf (char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
-#ifndef TWILIGHT_QWSV
-	extern char	logname[MAX_OSPATH];
-#else
-	extern FILE *sv_logfile;
-#endif
+	extern FILE	*sv_logfile;
 
 	va_start (argptr, fmt);
 	vsnprintf (msg, sizeof (msg), fmt, argptr);
@@ -666,19 +683,8 @@ void Com_Printf (char *fmt, ...)
 	Sys_Printf ("%s", msg);				// also echo to debugging console
 
 // log all messages to file
-#ifndef TWILIGHT_QWSV
-	if (logname[0])
-		Sys_DebugLog (logname, "%s", msg);
-
-	if (!con_initialized)
-		return;
-
-// write it to the scrollable buffer
-	Con_Print (msg);
-#else
 	if (sv_logfile)
 		fprintf (sv_logfile, "%s", msg);
-#endif
 }
 
 void Com_DPrintf (char *fmt, ...)
@@ -697,18 +703,6 @@ void Com_DPrintf (char *fmt, ...)
 	Com_Printf ("%s", msg);
 }
 
-void
-Com_SafePrintf (char *fmt, ...)
-{
-	va_list     argptr;
-	char        msg[1024];
-
-	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof (msg), fmt, argptr);
-	va_end (argptr);
-
-	Com_Printf ("%s", msg);
-}
 
 //===========================================================================
 
@@ -1233,7 +1227,6 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 	char			netpath[MAX_OSPATH];
 	pack_t			*pak;
 	int				i;
-	int				findtime;
 	char			*s;
 
 	file_from_pak = 0;
@@ -1288,13 +1281,13 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 			snprintf (netpath, sizeof (netpath), "%s/%s", search->filename,
 					  filename);
 
-			findtime = Sys_FileTime (netpath);
-			if (findtime == -1)
+			*file = fopen (netpath, "rb");
+
+			if (!*file)
 				continue;
 
 			Com_DPrintf ("FindFile: %s\n", netpath);
 
-			*file = fopen (netpath, "rb");
 			return COM_filelength (*file);
 		}
 
@@ -1360,6 +1353,7 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 				len + 1);
 
 	((Uint8 *) buf)[len] = 0;
+	Draw_Disc ();
 	fread (buf, 1, len, h);
 	fclose (h);
 

@@ -27,9 +27,10 @@
 #ifndef __DRAW_H
 #define __DRAW_H
 
-#include "image.h"
-
 extern struct qpic_s *draw_disc;				// also used on sbar
+
+// Need to make sure this structure exists
+struct image_s;
 
 void Draw_Init_Cvars (void);
 void Draw_Init (void);
@@ -57,7 +58,7 @@ int GL_LoadTexture (const char *identifier, int width, int height,
 int GL_LoadPicTexture (struct qpic_s *pic);
 void GL_Set2D (void);
 
-int R_LoadTexture (const char *identifier, image_t *img, int flags);
+int R_LoadTexture (const char *identifier, struct image_s *img, int flags);
 
 #endif // __DRAW_H
 

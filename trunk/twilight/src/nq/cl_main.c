@@ -296,9 +296,6 @@ CL_AllocDlight (int key)
 			if (dl->key == key) {
 				memset (dl, 0, sizeof (*dl));
 				dl->key = key;
-				dl->color[0] = 0.2f; 
-				dl->color[1] = 0.1f; 
-				dl->color[2] = 0.0f;
 				return dl;
 			}
 		}
@@ -309,9 +306,6 @@ CL_AllocDlight (int key)
 		if (dl->die < cl.time) {
 			memset (dl, 0, sizeof (*dl));
 			dl->key = key;
-			dl->color[0] = 0.2f; 
-			dl->color[1] = 0.1f; 
-			dl->color[2] = 0.0f;
 			return dl;
 		}
 	}
@@ -319,9 +313,6 @@ CL_AllocDlight (int key)
 	dl = &cl_dlights[0];
 	memset (dl, 0, sizeof (*dl));
 	dl->key = key;
-	dl->color[0] = 0.2f; 
-	dl->color[1] = 0.1f; 
-	dl->color[2] = 0.0f;
 	return dl;
 }
 
@@ -528,6 +519,9 @@ CL_RelinkEntities (void)
 
 					dl->radius = 200 + (Q_rand () & 31);
 					dl->minlight = 32;
+					dl->color[0] = 1.0f;
+					dl->color[1] = 1.0f;
+					dl->color[2] = 0.8f;
 					dl->die = cl.time + 0.1;
 				}
 			}

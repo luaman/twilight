@@ -740,7 +740,7 @@ R_ParticleTrail (vec3_t start, vec3_t end, int type)
 			case EF_TRACER2:		// tracer
 				pdie = 0.5;
 				ptype = pt_static;
-				if (type == 3)
+				if (type == EF_TRACER)
 					pcolor = 52 + ((tracercount & 4) << 1);
 				else
 					pcolor = 230 + ((tracercount & 4) << 1);
