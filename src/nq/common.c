@@ -1004,7 +1004,6 @@ void
 COM_CheckRegistered (void)
 {
 	int         h;
-	unsigned short check[128];
 
 	COM_OpenFile ("gfx/pop.lmp", &h);
 
