@@ -1275,6 +1275,10 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 			x = SrcX - x;
 			y = SrcY - y;
 
+// LordHavoc: added this to get it to compile, there must be a better solution
+#ifdef WIN32
+#define sqrtf sqrt
+#endif
 			w0pct = 1.0f - sqrtf( x*x + y*y);
 			w1pct = 1.0f - sqrtf( (1-x)*(1-x) + y*y);
 			w2pct = 1.0f - sqrtf( x*x + (1-y)*(1-y));
