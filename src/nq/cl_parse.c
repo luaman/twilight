@@ -251,16 +251,20 @@ CL_ParseServerInfo (void)
 
 // parse protocol version number
 	i = MSG_ReadLong ();
+
 	if (i != PROTOCOL_VERSION) {
 		Con_Printf ("Server returned version %i, not %i", i, PROTOCOL_VERSION);
 		return;
 	}
+
 // parse maxclients
 	cl.maxclients = MSG_ReadByte ();
+
 	if (cl.maxclients < 1 || cl.maxclients > MAX_SCOREBOARD) {
 		Con_Printf ("Bad maxclients (%u) from server\n", cl.maxclients);
 		return;
 	}
+
 	cl.scores = Hunk_AllocName (cl.maxclients * sizeof (*cl.scores), "scores");
 
 // parse gametype
@@ -324,6 +328,7 @@ CL_ParseServerInfo (void)
 	}
 
 	S_BeginPrecaching ();
+
 	for (i = 1; i < numsounds; i++) {
 		cl.sound_precache[i] = S_PrecacheSound (sound_precache[i]);
 		CL_KeepaliveMessage ();
@@ -364,8 +369,8 @@ CL_ParseUpdate (int bits)
 	int         num;
 	int         skin;
 
-	if (cls.signon == SIGNONS - 1) {	// first update is the final signon
-		// stage
+	if (cls.signon == SIGNONS - 1) {
+		// first update is the final signon stage
 		cls.signon = SIGNONS;
 		CL_SignonReply ();
 	}
@@ -375,10 +380,8 @@ CL_ParseUpdate (int bits)
 		bits |= (i << 8);
 	}
 
-	if (bits & U_LONGENTITY)
-		num = MSG_ReadShort ();
-	else
-		num = MSG_ReadByte ();
+	num = (bits & U_LONGENTITY) ? 
+		MSG_ReadShort() : MSG_ReadByte();
 
 	ent = CL_EntityNum (num);
 
@@ -386,10 +389,8 @@ CL_ParseUpdate (int bits)
 		if (bits & (1 << i))
 			bitcounts[i]++;
 
-	if (ent->msgtime != cl.mtime[1])
-		forcelink = true;				// no previous frame to lerp from
-	else
-		forcelink = false;
+	// no previous frame to lerp from
+	forcelink = (ent->msgtime != cl.mtime[1]);
 
 	ent->msgtime = cl.mtime[0];
 
@@ -416,15 +417,12 @@ CL_ParseUpdate (int bits)
 			R_TranslatePlayerSkin (num - 1);
 	}
 
-	if (bits & U_FRAME)
-		ent->frame = MSG_ReadByte ();
-	else
-		ent->frame = ent->baseline.frame;
+	ent->frame = (bits & U_FRAME) ? 
+		MSG_ReadByte() : ent->baseline.frame;
 
-	if (bits & U_COLORMAP)
-		i = MSG_ReadByte ();
-	else
-		i = ent->baseline.colormap;
+	i = (bits & U_COLORMAP) ? 
+		MSG_ReadByte() : ent->baseline.colormap;
+
 	if (!i)
 		ent->colormap = vid.colormap;
 	else {
@@ -433,56 +431,40 @@ CL_ParseUpdate (int bits)
 		ent->colormap = cl.scores[i - 1].translations;
 	}
 
-	if (bits & U_SKIN)
-		skin = MSG_ReadByte ();
-	else
-		skin = ent->baseline.skin;
+	skin = (bits & U_SKIN) ? 
+		MSG_ReadByte() : ent->baseline.skin;
+
 	if (skin != ent->skinnum) {
 		ent->skinnum = skin;
 		if (num > 0 && num <= cl.maxclients)
 			R_TranslatePlayerSkin (num - 1);
 	}
 
-	if (bits & U_EFFECTS)
-		ent->effects = MSG_ReadByte ();
-	else
-		ent->effects = ent->baseline.effects;
+	ent->effects = (bits & U_EFFECTS) ? 
+		MSG_ReadByte() : ent->baseline.effects;
 
-// shift the known values for interpolation
+	// shift the known values for interpolation
 	VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
 	VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
 
-	if (bits & U_ORIGIN1)
-		ent->msg_origins[0][0] = MSG_ReadCoord ();
-	else
-		ent->msg_origins[0][0] = ent->baseline.origin[0];
-	if (bits & U_ANGLE1)
-		ent->msg_angles[0][0] = MSG_ReadAngle ();
-	else
-		ent->msg_angles[0][0] = ent->baseline.angles[0];
-
-	if (bits & U_ORIGIN2)
-		ent->msg_origins[0][1] = MSG_ReadCoord ();
-	else
-		ent->msg_origins[0][1] = ent->baseline.origin[1];
-	if (bits & U_ANGLE2)
-		ent->msg_angles[0][1] = MSG_ReadAngle ();
-	else
-		ent->msg_angles[0][1] = ent->baseline.angles[1];
-
-	if (bits & U_ORIGIN3)
-		ent->msg_origins[0][2] = MSG_ReadCoord ();
-	else
-		ent->msg_origins[0][2] = ent->baseline.origin[2];
-	if (bits & U_ANGLE3)
-		ent->msg_angles[0][2] = MSG_ReadAngle ();
-	else
-		ent->msg_angles[0][2] = ent->baseline.angles[2];
+	ent->msg_origins[0][0] = (bits & U_ORIGIN1) ? 
+		MSG_ReadCoord() : ent->baseline.origin[0];
+	ent->msg_angles[0][0] = (bits & U_ANGLE1) ? 
+		MSG_ReadAngle() : ent->baseline.angles[0];
+	ent->msg_origins[0][1] = (bits & U_ORIGIN2) ? 
+		MSG_ReadCoord() : ent->baseline.origin[1];
+	ent->msg_angles[0][1] = (bits & U_ANGLE2) ? 
+		MSG_ReadAngle() : ent->baseline.angles[1];
+	ent->msg_origins[0][2] = (bits & U_ORIGIN3) ? 
+		MSG_ReadCoord() : ent->baseline.origin[2];
+	ent->msg_angles[0][2] = (bits & U_ANGLE3) ? 
+		MSG_ReadAngle() : ent->baseline.angles[2];
 
 	if (bits & U_NOLERP)
 		ent->forcelink = true;
 
-	if (forcelink) {					// didn't have an update last message
+	if (forcelink) {
+		// didn't have an update last message
 		VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
 		VectorCopy (ent->msg_origins[0], ent->origin);
 		VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);

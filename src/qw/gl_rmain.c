@@ -900,7 +900,11 @@ R_DrawAliasModel (entity_t *e)
 	// 
 
 	qglPushMatrix ();
-	R_RotateForEntity (e, false);
+
+	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
+	qglRotatef (e->angles[1], 0, 0, 1);
+	qglRotatef (-e->angles[0], 0, 1, 0);
+	qglRotatef (e->angles[2], 1, 0, 0);
 
 	if (clmodel->modflags & FLAG_DOUBLESIZE) {
 		qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
@@ -1001,7 +1005,8 @@ R_DrawAliasModel (entity_t *e)
 
 		qglPushMatrix ();
 
-		R_RotateForEntity (e, true);
+		qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
+		qglRotatef (e->angles[1], 0, 0, 1);
 
 		qglDisable (GL_TEXTURE_2D);
 		qglEnable (GL_BLEND);

@@ -1074,18 +1074,6 @@ CL_Init_Cvars (void)
 
 	cl_warncmd = Cvar_Get ("cl_warncmd", "0", CVAR_NONE, NULL);
 
-	cl_upspeed = Cvar_Get ("cl_upspeed", "200", CVAR_NONE, NULL);
-	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", CVAR_ARCHIVE, NULL);
-	cl_backspeed = Cvar_Get ("cl_backspeed", "200", CVAR_ARCHIVE, NULL);
-	cl_sidespeed = Cvar_Get ("cl_sidespeed", "350", CVAR_NONE, NULL);
-
-	cl_movespeedkey = Cvar_Get ("cl_movespeedkey", "2.0", CVAR_NONE, NULL);
-
-	cl_yawspeed = Cvar_Get ("cl_yawspeed", "140", CVAR_NONE, NULL);
-	cl_pitchspeed = Cvar_Get ("cl_pitchspeed", "150", CVAR_NONE, NULL);
-
-	cl_anglespeedkey = Cvar_Get ("cl_anglespeedkey", "1.5", CVAR_NONE, NULL);
-
 	rcon_password = Cvar_Get ("rcon_password", "", CVAR_NONE, NULL);
 	rcon_address = Cvar_Get ("rcon_address", "", CVAR_NONE, NULL);
 

@@ -81,6 +81,7 @@ CL_NudgePosition (void)
 				return;
 		}
 	}
+
 	Con_DPrintf ("CL_NudgePosition: stuck\n");
 }
 
@@ -107,7 +108,6 @@ CL_PredictUsercmd (player_state_t * from, player_state_t * to, usercmd_t *u,
 	}
 
 	VectorCopy (from->origin, pmove.origin);
-//  VectorCopy (from->viewangles, pmove.angles);
 	VectorCopy (u->angles, pmove.angles);
 	VectorCopy (from->velocity, pmove.velocity);
 
@@ -119,8 +119,7 @@ CL_PredictUsercmd (player_state_t * from, player_state_t * to, usercmd_t *u,
 	pmove.cmd = *u;
 
 	PlayerMove ();
-//for (i=0 ; i<3 ; i++)
-//pmove.origin[i] = ((int)(pmove.origin[i]*8))*0.125;
+
 	to->waterjumptime = pmove.waterjumptime;
 	to->oldbuttons = pmove.oldbuttons;
 	VectorCopy (pmove.origin, to->origin);
@@ -172,9 +171,9 @@ CL_PredictMove (void)
 	from = &cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK];
 
 	// we can now render a frame
-	if (cls.state == ca_onserver) {		// first update is the final signon
-		// stage
-		char        text[1024];
+	if (cls.state == ca_onserver) {		
+		// first update is the final signon stage
+		char        text[1024] = { 0 };
 
 		cls.state = ca_active;
 		snprintf (text, sizeof (text), "Twilight QWCL: %s", cls.servername);
@@ -186,6 +185,7 @@ CL_PredictMove (void)
 		VectorCopy (from->playerstate[cl.playernum].origin, cl.simorg);
 		return;
 	}
+
 	// predict forward until cl.time <= to->senttime
 	oldphysent = pmove.numphysent;
 	CL_SetSolidPlayers (cl.playernum);
@@ -216,20 +216,17 @@ CL_PredictMove (void)
 		f = 0;
 	else {
 		f = (cl.time - from->senttime) / (to->senttime - from->senttime);
-
-		if (f < 0)
-			f = 0;
-		if (f > 1)
-			f = 1;
+		f = bound (0, f, 1);
 	}
 
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < 3; i++) {
 		if (Q_fabs (from->playerstate[cl.playernum].origin[i] - to->playerstate[cl.playernum].origin[i]) > 128) {
 			// teleported, so don't lerp
 			VectorCopy (to->playerstate[cl.playernum].velocity, cl.simvel);
 			VectorCopy (to->playerstate[cl.playernum].origin, cl.simorg);
 			return;
 		}
+	}
 
 	for (i = 0; i < 3; i++) {
 		cl.simorg[i] = from->playerstate[cl.playernum].origin[i]
