@@ -135,5 +135,7 @@ void        Host_ClientCommands (char *fmt, ...);
 void        Host_ShutdownServer (qboolean crash);
 
 extern qboolean msg_suppress_1;			// suppresses resolution and cache size 
+										// 
+										// 
 										// console output
 										// an fullscreen DIB focus gain/loss

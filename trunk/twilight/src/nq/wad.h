@@ -36,40 +36,37 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	TYP_SOUND		67
 #define	TYP_MIPTEX		68
 
-typedef struct
-{
-	int			width, height;
-	byte		data[4];			// variably sized
+typedef struct {
+	int         width, height;
+	byte        data[4];				// variably sized
 } qpic_t;
 
 
 
-typedef struct
-{
-	char		identification[4];		// should be WAD2 or 2DAW
-	int			numlumps;
-	int			infotableofs;
+typedef struct {
+	char        identification[4];		// should be WAD2 or 2DAW
+	int         numlumps;
+	int         infotableofs;
 } wadinfo_t;
 
-typedef struct
-{
-	int			filepos;
-	int			disksize;
-	int			size;					// uncompressed
-	char		type;
-	char		compression;
-	char		pad1, pad2;
-	char		name[16];				// must be null terminated
+typedef struct {
+	int         filepos;
+	int         disksize;
+	int         size;					// uncompressed
+	char        type;
+	char        compression;
+	char        pad1, pad2;
+	char        name[16];				// must be null terminated
 } lumpinfo_t;
 
-extern	int			wad_numlumps;
-extern	lumpinfo_t	*wad_lumps;
-extern	byte		*wad_base;
+extern int  wad_numlumps;
+extern lumpinfo_t *wad_lumps;
+extern byte *wad_base;
 
-void	W_LoadWadFile (char *filename);
-void	W_CleanupName (char *in, char *out);
-lumpinfo_t	*W_GetLumpinfo (char *name);
-void	*W_GetLumpName (char *name);
-void	*W_GetLumpNum (int num);
+void        W_LoadWadFile (char *filename);
+void        W_CleanupName (char *in, char *out);
+lumpinfo_t *W_GetLumpinfo (char *name);
+void       *W_GetLumpName (char *name);
+void       *W_GetLumpNum (int num);
 
-void SwapPic (qpic_t *pic);
+void        SwapPic (qpic_t *pic);

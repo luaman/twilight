@@ -37,7 +37,7 @@ typedef enum {
 typedef struct {
 	qboolean    active;					// false when server is going down
 	server_state_t state;				// precache commands are only valid
-										// during load
+	// during load
 
 	double      time;
 
@@ -52,7 +52,7 @@ typedef struct {
 
 	char        name[64];				// map name
 	char        modelname[MAX_QPATH];	// maps/<name>.bsp, for
-										// model_precache[0]
+	// model_precache[0]
 	struct model_s *worldmodel;
 	char       *model_precache[MAX_MODELS];	// NULL terminated
 	char       *sound_precache[MAX_SOUNDS];	// NULL terminated
@@ -98,10 +98,11 @@ typedef struct {
 typedef enum {
 	cs_free,							// can be reused for a new connection
 	cs_zombie,							// client has been disconnected, but
-										// don't reuse
+	// don't reuse
 	// connection for a couple seconds
 	cs_connected,						// has been assigned to a client_t, but 
-										// not in game yet
+										// 
+	// not in game yet
 	cs_spawned							// client is fully in game
 } client_state_t;
 
@@ -133,7 +134,8 @@ typedef struct client_s {
 	char        userinfo[MAX_INFO_STRING];	// infostring
 
 	usercmd_t   lastcmd;				// for filling in big drops and partial 
-										// predictions
+										// 
+	// predictions
 	double      localtime;				// of last message
 	int         oldbuttons;
 
@@ -227,7 +229,7 @@ typedef struct {
 
 typedef struct {
 	int         spawncount;				// number of servers spawned since
-										// start,
+	// start,
 	// used to check late spawns
 	client_t    clients[MAX_CLIENTS];
 	int         serverflags;			// episode completion information
@@ -245,7 +247,7 @@ typedef struct {
 	byte        log_buf[2][MAX_DATAGRAM];
 
 	challenge_t challenges[MAX_CHALLENGES];	// to prevent invalid IPs from
-											// connecting
+	// connecting
 } server_static_t;
 
 //=============================================================================

@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
 
-A server can allways be started, even if the system started out as a client
+A server can always be started, even if the system started out as a client
 to a remote system.
 
 A client can NOT be started if the system started as a dedicated server.
@@ -93,7 +93,7 @@ Host_EndGame (char *message, ...)
 	char        string[1024];
 
 	va_start (argptr, message);
-	vsnprintf (string, sizeof(string), message, argptr);
+	vsnprintf (string, sizeof (string), message, argptr);
 	va_end (argptr);
 	Con_DPrintf ("Host_EndGame: %s\n", string);
 
@@ -132,7 +132,7 @@ Host_Error (char *error, ...)
 	SCR_EndLoadingPlaque ();			// reenable screen updates
 
 	va_start (argptr, error);
-	vsnprintf (string, sizeof(string), error, argptr);
+	vsnprintf (string, sizeof (string), error, argptr);
 	va_end (argptr);
 	Con_Printf ("Host_Error: %s\n", string);
 
@@ -232,7 +232,7 @@ Host_InitLocal (void)
 	Host_FindMaxClients ();
 
 	host_time = 1.0;					// so a think at time 0 won't get
-										// called
+	// called
 }
 
 
@@ -280,7 +280,7 @@ SV_ClientPrintf (char *fmt, ...)
 	char        string[1024];
 
 	va_start (argptr, fmt);
-	vsnprintf (string, sizeof(string), fmt, argptr);
+	vsnprintf (string, sizeof (string), fmt, argptr);
 	va_end (argptr);
 
 	MSG_WriteByte (&host_client->message, svc_print);
@@ -302,7 +302,7 @@ SV_BroadcastPrintf (char *fmt, ...)
 	int         i;
 
 	va_start (argptr, fmt);
-	vsnprintf (string, sizeof(string), fmt, argptr);
+	vsnprintf (string, sizeof (string), fmt, argptr);
 	va_end (argptr);
 
 	for (i = 0; i < svs.maxclients; i++)
@@ -326,7 +326,7 @@ Host_ClientCommands (char *fmt, ...)
 	char        string[1024];
 
 	va_start (argptr, fmt);
-	vsnprintf (string, sizeof(string), fmt, argptr);
+	vsnprintf (string, sizeof (string), fmt, argptr);
 	va_end (argptr);
 
 	MSG_WriteByte (&host_client->message, svc_stufftext);
@@ -510,7 +510,7 @@ Host_FilterTime (float time)
 	if (host_framerate.value > 0)
 		host_frametime = host_framerate.value;
 	else {								// don't allow really long or short
-										// frames
+		// frames
 		if (host_frametime > 0.1)
 			host_frametime = 0.1;
 		if (host_frametime < 0.001)
@@ -641,7 +641,7 @@ _Host_Frame (float time)
 
 	if (setjmp (host_abortserver))
 		return;							// something bad happened, or the
-										// server disconnected
+	// server disconnected
 
 // keep the random time dependent
 	rand ();
@@ -649,7 +649,7 @@ _Host_Frame (float time)
 // decide the simulation time
 	if (!Host_FilterTime (time))
 		return;							// don't run too fast, or packets will
-										// flood out
+	// flood out
 
 // get new key events
 	Sys_SendKeyEvents ();

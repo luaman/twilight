@@ -105,8 +105,8 @@ NET_AdrToString (netadr_t a)
 {
 	static char s[64];
 
-	snprintf (s, sizeof(s), "%i.%i.%i.%i:%i", a.ip[0], a.ip[1], a.ip[2], a.ip[3],
-			 ntohs (a.port));
+	snprintf (s, sizeof (s), "%i.%i.%i.%i:%i", a.ip[0], a.ip[1], a.ip[2],
+			  a.ip[3], ntohs (a.port));
 
 	return s;
 }
@@ -116,7 +116,7 @@ NET_BaseAdrToString (netadr_t a)
 {
 	static char s[64];
 
-	snprintf (s, sizeof(s), "%i.%i.%i.%i", a.ip[0], a.ip[1], a.ip[2], a.ip[3]);
+	snprintf (s, sizeof (s), "%i.%i.%i.%i", a.ip[0], a.ip[1], a.ip[2], a.ip[3]);
 
 	return s;
 }
@@ -256,6 +256,7 @@ UDP_OpenSocket (int port)
 	int         newsocket;
 	struct sockaddr_in address;
 	int         i;
+
 #ifdef _WIN32
 #define ioctl ioctlsocket
 	unsigned long _true = true;
@@ -263,7 +264,7 @@ UDP_OpenSocket (int port)
 	int         _true = 1;
 #endif
 
-	memset (&address, 0, sizeof(address));
+	memset (&address, 0, sizeof (address));
 
 	if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 		Sys_Error ("UDP_OpenSocket: socket:%s", strerror (errno));

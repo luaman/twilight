@@ -368,12 +368,14 @@ SND_PickChannel (int entnum, int entchannel)
 	for (ch_idx = NUM_AMBIENTS; ch_idx < NUM_AMBIENTS + MAX_DYNAMIC_CHANNELS;
 		 ch_idx++) {
 		if (entchannel != 0				// channel 0 never overrides
-			&& channels[ch_idx].entnum == entnum && (channels[ch_idx].entchannel == entchannel || entchannel == -1)) {	// allways 
-																														// override 
-																														// sound 
-																														// from 
-																														// same 
-																														// entity
+			&& channels[ch_idx].entnum == entnum && (channels[ch_idx].entchannel == entchannel || entchannel == -1)) {	// always 
+																														// 
+			// 
+			// override 
+			// sound 
+			// from 
+			// same 
+			// entity
 			first_to_die = ch_idx;
 			break;
 		}
@@ -411,7 +413,7 @@ SND_Spatialize (channel_t *ch)
 	vec3_t      source_vec;
 	sfx_t      *snd;
 
-// anything coming from the view entity will allways be full volume
+// anything coming from the view entity will always be full volume
 	if (ch->entnum == cl.viewentity) {
 		ch->leftvol = ch->master_vol;
 		ch->rightvol = ch->master_vol;
@@ -815,7 +817,7 @@ GetSoundtime (void)
 		buffers++;						// buffer wrapped
 
 		if (paintedtime > 0x40000000) {	// time to chop things off to avoid 32
-										// bit limits
+			// bit limits
 			buffers = 0;
 			paintedtime = fullsamples;
 			S_StopAllSounds (true);

@@ -28,14 +28,15 @@ static char *argvdummy = " ";
 
 static char *safeargvs[NUM_SAFE_ARGVS] =
 	{ "-stdvid", "-nolan", "-nosound", "-nocdaudio", "-nojoy", "-nomouse",
-"-dibonly" };
+	"-dibonly"
+};
 
 cvar_t      registered = { "registered", "0" };
 cvar_t      cmdline = { "cmdline", "0", false, true };
 
 qboolean    com_modified;				// set true if using non-id files
 
-static char	com_basedir[MAX_OSPATH];
+static char com_basedir[MAX_OSPATH];
 static char com_sharedir[MAX_OSPATH];
 
 qboolean    proghack;
@@ -784,12 +785,13 @@ SZ_Print (sizebuf_t *buf, char *data)
 // byte * cast to keep VC++ happy
 	if (buf->data[buf->cursize - 1])
 		Q_memcpy ((byte *) SZ_GetSpace (buf, len), data, len);	// no trailing
-																// 0
+	// 0
 	else
 		Q_memcpy ((byte *) SZ_GetSpace (buf, len - 1) - 1, data, len);	// write 
-																		// over 
-																		// trailing 
-																		// 0
+																		// 
+	// over 
+	// trailing 
+	// 0
 }
 
 
@@ -936,7 +938,6 @@ COM_Parse (char *data)
 			data++;
 		goto skipwhite;
 	}
-
 // handle quoted strings specially
 	if (c == '\"') {
 		data++;
@@ -989,7 +990,7 @@ COM_CheckParm (char *parm)
 	for (i = 1; i < com_argc; i++) {
 		if (!com_argv[i])
 			continue;					// NEXTSTEP sometimes clears appkit
-										// vars.
+		// vars.
 		if (!Q_strcmp (parm, com_argv[i]))
 			return i;
 	}
@@ -1144,7 +1145,7 @@ va (char *format, ...)
 	static char string[1024];
 
 	va_start (argptr, format);
-	vsnprintf (string, sizeof(string), format, argptr);
+	vsnprintf (string, sizeof (string), format, argptr);
 	va_end (argptr);
 
 	return string;
@@ -1211,7 +1212,7 @@ char        com_gamedir[MAX_OSPATH];
 typedef struct searchpath_s {
 	char        filename[MAX_OSPATH];
 	pack_t     *pack;					// only one of filename / pack will be
-										// used
+	// used
 	struct searchpath_s *next;
 } searchpath_t;
 
@@ -1251,7 +1252,7 @@ COM_WriteFile (char *filename, void *data, int len)
 	int         handle;
 	char        name[MAX_OSPATH];
 
-	snprintf (name, sizeof(name), "%s/%s", com_gamedir, filename);
+	snprintf (name, sizeof (name), "%s/%s", com_gamedir, filename);
 
 	handle = Sys_FileOpenWrite (name);
 	if (handle == -1) {
@@ -1304,7 +1305,7 @@ COM_CopyFile (char *netpath, char *cachepath)
 
 	remaining = Sys_FileOpenRead (netpath, &in);
 	COM_CreatePath (cachepath);			// create directories up to the cache
-										// file
+	// file
 	out = Sys_FileOpenWrite (cachepath);
 
 	while (remaining) {
@@ -1348,7 +1349,8 @@ COM_FindFile (char *filename, int *handle, FILE ** file)
 //
 	search = com_searchpaths;
 	if (proghack) {						// gross hack to use quake 1 progs with 
-										// quake 2 maps
+										// 
+		// quake 2 maps
 		if (!Q_strcmp (filename, "progs.dat"))
 			search = search->next;
 	}
@@ -1377,7 +1379,8 @@ COM_FindFile (char *filename, int *handle, FILE ** file)
 			if (strchr (filename, '/') || strchr (filename, '\\'))
 				continue;
 
-			snprintf (netpath, sizeof(netpath), "%s/%s", search->filename, filename);
+			snprintf (netpath, sizeof (netpath), "%s/%s", search->filename,
+					  filename);
 
 			findtime = Sys_FileTime (netpath);
 			if (findtime == -1)
@@ -1648,7 +1651,7 @@ COM_AddDirectory (char *dir)
 // add any pak files in the format pak0.pak pak1.pak, ...
 //
 	for (i = 0;; i++) {
-		snprintf (pakfile, sizeof(pakfile), "%s/pak%i.pak", dir, i);
+		snprintf (pakfile, sizeof (pakfile), "%s/pak%i.pak", dir, i);
 		pak = COM_LoadPackFile (pakfile);
 		if (!pak)
 			break;
@@ -1675,12 +1678,11 @@ Wrapper for COM_AddDirectory
 void
 COM_AddGameDirectory (char *dir)
 {
-	char *d = NULL;
-	
+	char       *d = NULL;
+
 	COM_AddDirectory (va ("%s/%s", com_sharedir, dir));
 
-	if (strcmp(com_basedir, com_sharedir))
-	{
+	if (strcmp (com_basedir, com_sharedir)) {
 		d = va ("%s/%s", com_basedir, dir);
 		Sys_mkdir (d);
 		COM_AddDirectory (d);
@@ -1734,10 +1736,9 @@ COM_InitFilesystem (void)
 		if ((com_sharedir[j - 1] == '\\') || (com_sharedir[j - 1] == '/'))
 			com_sharedir[j - 1] = 0;
 	}
-
 	// LordHavoc: fix for empty com_sharedir
 	if (!*com_sharedir)
-		strcpy(com_sharedir, com_basedir);
+		strcpy (com_sharedir, com_basedir);
 
 //
 // start up with GAMENAME by default (id1)
@@ -1785,4 +1786,3 @@ COM_InitFilesystem (void)
 	if (COM_CheckParm ("-proghack"))
 		proghack = true;
 }
-

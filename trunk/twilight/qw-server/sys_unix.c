@@ -77,8 +77,8 @@ Sys_mkdir (char *path)
 	if (mkdir (path, 0777) != -1)
 		return;
 	// FIXME: put this back
-//	if (errno != EEXIST)
-//		Sys_Error ("mkdir %s: %s", path, strerror (errno));
+//  if (errno != EEXIST)
+//      Sys_Error ("mkdir %s: %s", path, strerror (errno));
 }
 
 
@@ -116,7 +116,7 @@ Sys_Error (char *error, ...)
 	char        string[1024];
 
 	va_start (argptr, error);
-	vsnprintf (string, sizeof(string), error, argptr);
+	vsnprintf (string, sizeof (string), error, argptr);
 	va_end (argptr);
 	printf ("Fatal error: %s\n", string);
 
@@ -136,7 +136,7 @@ Sys_Printf (char *fmt, ...)
 	unsigned char *p;
 
 	va_start (argptr, fmt);
-	vsnprintf (text, sizeof(text), fmt, argptr);
+	vsnprintf (text, sizeof (text), fmt, argptr);
 	va_end (argptr);
 
 	if (sys_nostdout.value)

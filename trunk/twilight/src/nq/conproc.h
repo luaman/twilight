@@ -32,6 +32,5 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define CCOM_SET_SCR_LINES	0x5
 // Param1 : Number of lines
 
-void InitConProc (HANDLE hFile, HANDLE heventParent, HANDLE heventChild);
-void DeinitConProc (void);
-
+void        InitConProc (HANDLE hFile, HANDLE heventParent, HANDLE heventChild);
+void        DeinitConProc (void);

@@ -461,7 +461,7 @@ R_DrawAliasModel (entity_t *e)
 
 	ambientlight = shadelight = R_LightPoint (currententity->origin);
 
-	// allways give the gun some light
+	// always give the gun some light
 	if (e == &cl.viewent && ambientlight < 24)
 		ambientlight = shadelight = 24;
 
@@ -667,7 +667,7 @@ R_DrawViewModel (void)
 	j = R_LightPoint (currententity->origin);
 
 	if (j < 24)
-		j = 24;							// allways give some light on gun
+		j = 24;							// always give some light on gun
 	ambientlight = j;
 	shadelight = j;
 
@@ -950,12 +950,12 @@ R_RenderScene (void)
 	R_SetupGL ();
 
 	R_MarkLeaves ();					// done here so we know if we're in
-										// water
+	// water
 
 	R_DrawWorld ();						// adds static entities to the list
 
 	S_ExtraUpdate ();					// don't let sound get messed up if
-										// going slow
+	// going slow
 
 	R_DrawEntitiesOnList ();
 

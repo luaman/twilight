@@ -361,8 +361,8 @@ Host_Restart_f (void)
 
 	if (cmd_source != src_command)
 		return;
-	Q_strcpy (mapname, sv.name);			// must copy out, because it gets
-										// cleared
+	Q_strcpy (mapname, sv.name);		// must copy out, because it gets
+	// cleared
 	// in sv_spawnserver
 #ifdef QUAKE2
 	Q_strcpy (startspot, sv.startspot);
@@ -436,8 +436,8 @@ Host_SavegameComment (char *text)
 	for (i = 0; i < SAVEGAME_COMMENT_LENGTH; i++)
 		text[i] = ' ';
 	memcpy (text, cl.levelname, Q_strlen (cl.levelname));
-	snprintf (kills, sizeof(kills), "kills:%3i/%3i", cl.stats[STAT_MONSTERS],
-			 cl.stats[STAT_TOTALMONSTERS]);
+	snprintf (kills, sizeof (kills), "kills:%3i/%3i", cl.stats[STAT_MONSTERS],
+			  cl.stats[STAT_TOTALMONSTERS]);
 	memcpy (text + 22, kills, Q_strlen (kills));
 // convert space to _ to make stdio happy
 	for (i = 0; i < SAVEGAME_COMMENT_LENGTH; i++)
@@ -495,7 +495,7 @@ Host_Savegame_f (void)
 		}
 	}
 
-	snprintf (name, sizeof(name), "%s/%s", com_gamedir, Cmd_Argv (1));
+	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".sav");
 
 	Con_Printf ("Saving game to %s...\n", name);
@@ -563,7 +563,7 @@ Host_Loadgame_f (void)
 
 	cls.demonum = -1;					// stop demo loop in case this fails
 
-	snprintf (name, sizeof(name), "%s/%s", com_gamedir, Cmd_Argv (1));
+	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".sav");
 
 // we can't call SCR_BeginLoadingPlaque, because too much stack space has
@@ -687,7 +687,7 @@ SaveGamestate ()
 	char        comment[SAVEGAME_COMMENT_LENGTH + 1];
 	edict_t    *ent;
 
-	snprintf (name, sizeof(name), "%s/%s.gip", com_gamedir, sv.name);
+	snprintf (name, sizeof (name), "%s/%s.gip", com_gamedir, sv.name);
 
 	Con_Printf ("Saving game to %s...\n", name);
 	f = fopen (name, "w");
@@ -742,7 +742,7 @@ LoadGamestate (char *level, char *startspot)
 
 //  float   spawn_parms[NUM_SPAWN_PARMS];
 
-	snprintf (name, sizeof(name), "%s/%s.gip", com_gamedir, level);
+	snprintf (name, sizeof (name), "%s/%s.gip", com_gamedir, level);
 
 	Con_Printf ("Loading game from %s...\n", name);
 	f = fopen (name, "r");
@@ -949,12 +949,12 @@ Host_Say (qboolean teamonly)
 	}
 // turn on color set 1
 	if (!fromServer)
-		snprintf (text, sizeof(text), "%c%s: ", 1, save->name);
+		snprintf (text, sizeof (text), "%c%s: ", 1, save->name);
 	else
-		snprintf (text, sizeof(text), "%c<%s> ", 1, hostname.string);
+		snprintf (text, sizeof (text), "%c<%s> ", 1, hostname.string);
 
 	j = sizeof (text) - 2 - Q_strlen (text);	// -2 for /n and null
-												// terminator
+	// terminator
 	if (Q_strlen (p) > j)
 		p[j] = 0;
 
@@ -1019,7 +1019,7 @@ Host_Tell_f (void)
 	}
 // check length & truncate if necessary
 	j = sizeof (text) - 2 - Q_strlen (text);	// -2 for /n and null
-												// terminator
+	// terminator
 	if (Q_strlen (p) > j)
 		p[j] = 0;
 
@@ -1104,7 +1104,7 @@ Host_Kill_f (void)
 	}
 
 	if (sv_player->v.health <= 0) {
-		SV_ClientPrintf ("Can't suicide -- allready dead!\n");
+		SV_ClientPrintf ("Can't suicide -- already dead!\n");
 		return;
 	}
 
@@ -1163,7 +1163,7 @@ Host_PreSpawn_f (void)
 	}
 
 	if (host_client->spawned) {
-		Con_Printf ("prespawn not valid -- allready spawned\n");
+		Con_Printf ("prespawn not valid -- already spawned\n");
 		return;
 	}
 
@@ -1191,12 +1191,12 @@ Host_Spawn_f (void)
 	}
 
 	if (host_client->spawned) {
-		Con_Printf ("Spawn not valid -- allready spawned\n");
+		Con_Printf ("Spawn not valid -- already spawned\n");
 		return;
 	}
 // run the entrance script
 	if (sv.loadgame) {					// loaded games are fully inited
-										// allready
+		// already
 		// if this is the last client to be connected, unpause
 		sv.paused = false;
 	} else {

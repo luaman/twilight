@@ -30,8 +30,9 @@ void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
 
 enum { m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup,
-		m_net, m_options, m_video, m_keys, m_help, m_quit, m_serialconfig,
-		m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist } m_state;
+	m_net, m_options, m_video, m_keys, m_help, m_quit, m_serialconfig,
+	m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist
+} m_state;
 
 void        M_Menu_Main_f (void);
 void        M_Menu_SinglePlayer_f (void);
@@ -91,6 +92,7 @@ void        M_Search_Key (int key);
 void        M_ServerList_Key (int key);
 
 qboolean    m_entersound;				// play after drawing a frame, so
+
 										// caching
 								// won't disrupt the sound
 qboolean    m_recursiveDraw;
@@ -131,7 +133,7 @@ M_Print (int cx, int cy, char *str)
 		cx += 8;
 	}
 */
-	Draw_Alt_String (cx + ((vid.width - 320) >> 1), cy, str); 
+	Draw_Alt_String (cx + ((vid.width - 320) >> 1), cy, str);
 }
 
 void
@@ -144,7 +146,7 @@ M_PrintWhite (int cx, int cy, char *str)
 		cx += 8;
 	}
 */
-	Draw_String (cx + ((vid.width - 320) >> 1), cy, str); 
+	Draw_String (cx + ((vid.width - 320) >> 1), cy, str);
 }
 
 void
@@ -175,7 +177,7 @@ M_BuildTranslationTable (int top, int bottom)
 	memcpy (dest, source, 256);
 
 	if (top < 128)						// the artists made some backwards
-										// ranges.  sigh.
+		// ranges.  sigh.
 		memcpy (dest + TOP_RANGE, source + top, 16);
 	else
 		for (j = 0; j < 16; j++)
@@ -473,7 +475,7 @@ M_ScanSaves (void)
 	for (i = 0; i < MAX_SAVEGAMES; i++) {
 		Q_strcpy (m_filenames[i], "--- UNUSED SLOT ---");
 		loadable[i] = false;
-		snprintf (name, sizeof(name), "%s/s%i.sav", com_gamedir, i);
+		snprintf (name, sizeof (name), "%s/s%i.sav", com_gamedir, i);
 		f = fopen (name, "r");
 		if (!f)
 			continue;
@@ -1130,7 +1132,7 @@ M_AdjustSliders (int dir)
 			Cvar_SetValue ("volume", volume.value);
 			break;
 
-		case 8:						// allways run
+		case 8:						// always run
 			if (cl_forwardspeed.value > 200) {
 				Cvar_SetValue ("cl_forwardspeed", 200);
 				Cvar_SetValue ("cl_backspeed", 200);
@@ -1450,8 +1452,8 @@ M_Keys_Key (int k)
 		if (k == K_ESCAPE) {
 			bind_grab = false;
 		} else if (k != '`') {
-			snprintf (cmd, sizeof(cmd), "bind \"%s\" \"%s\"\n", Key_KeynumToString (k),
-					 bindnames[keys_cursor][0]);
+			snprintf (cmd, sizeof (cmd), "bind \"%s\" \"%s\"\n",
+					  Key_KeynumToString (k), bindnames[keys_cursor][0]);
 			Cbuf_InsertText (cmd);
 		}
 
@@ -2195,7 +2197,8 @@ M_Menu_LanConfig_f (void)
 	if (StartingGame && lanConfig_cursor == 2)
 		lanConfig_cursor = 1;
 	lanConfig_port = DEFAULTnet_hostport;
-	snprintf (lanConfig_portname, sizeof(lanConfig_portname), "%u", lanConfig_port);
+	snprintf (lanConfig_portname, sizeof (lanConfig_portname), "%u",
+			  lanConfig_port);
 
 	m_return_onerror = false;
 	m_return_reason[0] = 0;
@@ -2363,7 +2366,8 @@ M_LanConfig_Key (int key)
 		l = lanConfig_port;
 	else
 		lanConfig_port = l;
-	snprintf (lanConfig_portname, sizeof(lanConfig_portname), "%u", lanConfig_port);
+	snprintf (lanConfig_portname, sizeof (lanConfig_portname), "%u",
+			  lanConfig_port);
 }
 
 //=============================================================================
@@ -2817,7 +2821,7 @@ M_GameOptions_Key (int key)
 				if (sv.active)
 					Cbuf_AddText ("disconnect\n");
 				Cbuf_AddText ("listen 0\n");	// so host_netport will be
-												// re-examined
+				// re-examined
 				Cbuf_AddText (va ("maxplayers %u\n", maxplayers));
 				SCR_BeginLoadingPlaque ();
 
@@ -2953,12 +2957,12 @@ M_ServerList_Draw (void)
 	M_DrawPic ((320 - p->width) / 2, 4, p);
 	for (n = 0; n < hostCacheCount; n++) {
 		if (hostcache[n].maxusers)
-			snprintf (string, sizeof(string), "%-15.15s %-15.15s %2u/%2u\n", hostcache[n].name,
-					 hostcache[n].map, hostcache[n].users,
-					 hostcache[n].maxusers);
+			snprintf (string, sizeof (string), "%-15.15s %-15.15s %2u/%2u\n",
+					  hostcache[n].name, hostcache[n].map, hostcache[n].users,
+					  hostcache[n].maxusers);
 		else
-			snprintf (string, sizeof(string), "%-15.15s %-15.15s\n", hostcache[n].name,
-					 hostcache[n].map);
+			snprintf (string, sizeof (string), "%-15.15s %-15.15s\n",
+					  hostcache[n].name, hostcache[n].map);
 		M_Print (16, 32 + 8 * n, string);
 	}
 	M_DrawCharacter (0, 32 + slist_cursor * 8, 12 + ((int) (realtime * 4) & 1));

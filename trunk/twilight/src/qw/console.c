@@ -341,19 +341,19 @@ Con_Printf (char *fmt, ...)
 	static qboolean inupdate;
 
 	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof(msg), fmt, argptr);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
 	va_end (argptr);
 
 // also echo to debugging console
 	Sys_Printf ("%s", msg);				// also echo to debugging console
 
 // log all messages to file
-	if (con_debuglog)
-	{
-		char msg2[MAX_OSPATH+32];
+	if (con_debuglog) {
+		char        msg2[MAX_OSPATH + 32];
+
 		// LordHavoc: this used to use va(), but that was too dangerous,
 		// as Con_Printf and va() calls are often mixed.
-		snprintf(msg2, sizeof(msg2), "%s/qconsole.log", com_gamedir);
+		snprintf (msg2, sizeof (msg2), "%s/qconsole.log", com_gamedir);
 		Sys_DebugLog (msg2, "%s", msg);
 	}
 
@@ -390,10 +390,10 @@ Con_DPrintf (char *fmt, ...)
 
 	if (!developer.value)
 		return;							// don't confuse non-developers with
-										// techie stuff...
+	// techie stuff...
 
 	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof(msg), fmt, argptr);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
 	va_end (argptr);
 
 	Con_Printf ("%s", msg);
@@ -423,8 +423,8 @@ Con_DrawInput (void)
 	char       *text;
 
 	if (key_dest != key_console && cls.state == ca_active)
-		return;							// don't draw anything (allways draw if 
-										// not active)
+		return;							// don't draw anything (always draw if 
+	// not active)
 
 	text = key_lines[edit_line];
 
@@ -606,14 +606,14 @@ Con_DrawConsole (int lines)
 		dlbar[i++] = '\x82';
 		dlbar[i] = 0;
 
-		snprintf (dlbar + Q_strlen (dlbar), sizeof(dlbar) - Q_strlen(dlbar), " %02d%%", cls.downloadpercent);
+		snprintf (dlbar + Q_strlen (dlbar), sizeof (dlbar) - Q_strlen (dlbar),
+				  " %02d%%", cls.downloadpercent);
 
 		// draw it
 		y = con_vislines - 22 + 8;
 		for (i = 0; i < Q_strlen (dlbar); i++)
 			Draw_Character ((i + 1) << 3, y, dlbar[i]);
 	}
-
 // draw the input prompt, user text, and cursor if desired
 	Con_DrawInput ();
 }
@@ -633,7 +633,7 @@ Con_SafePrintf (char *fmt, ...)
 	int         temp;
 
 	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof(msg), fmt, argptr);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
 	va_end (argptr);
 
 	temp = scr_disabled_for_loading;

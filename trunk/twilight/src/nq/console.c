@@ -44,6 +44,7 @@ int         con_totallines;				// total lines in console scrollback
 int         con_backscroll;				// lines up from bottom to display
 int         con_current;				// where next message will be printed
 int         con_x;						// offset in current line for next
+
 										// print
 char       *con_text = 0;
 
@@ -223,7 +224,7 @@ Con_Init (void)
 
 	if (con_debuglog) {
 		if (Q_strlen (com_gamedir) < (MAXGAMEDIRLEN - Q_strlen (t2))) {
-			snprintf (temp, sizeof(temp), "%s%s", com_gamedir, t2);
+			snprintf (temp, sizeof (temp), "%s%s", com_gamedir, t2);
 			unlink (temp);
 		}
 	}
@@ -354,7 +355,7 @@ Con_DebugLog (char *file, char *fmt, ...)
 	int         fd;
 
 	va_start (argptr, fmt);
-	vsnprintf (data, sizeof(data), fmt, argptr);
+	vsnprintf (data, sizeof (data), fmt, argptr);
 	va_end (argptr);
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
 	write (fd, data, Q_strlen (data));
@@ -378,19 +379,19 @@ Con_Printf (char *fmt, ...)
 	static qboolean inupdate;
 
 	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof(msg), fmt, argptr);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
 	va_end (argptr);
 
 // also echo to debugging console
 	Sys_Printf ("%s", msg);				// also echo to debugging console
 
 // log all messages to file
-	if (con_debuglog)
-	{
-		char msg2[MAX_OSPATH+32];
+	if (con_debuglog) {
+		char        msg2[MAX_OSPATH + 32];
+
 		// LordHavoc: this used to use va(), but that was too dangerous,
 		// as Con_Printf and va() calls are often mixed.
-		snprintf(msg2, sizeof(msg2), "%s/qconsole.log", com_gamedir);
+		snprintf (msg2, sizeof (msg2), "%s/qconsole.log", com_gamedir);
 		Sys_DebugLog (msg2, "%s", msg);
 	}
 
@@ -430,10 +431,10 @@ Con_DPrintf (char *fmt, ...)
 
 	if (!developer.value)
 		return;							// don't confuse non-developers with
-										// techie stuff...
+	// techie stuff...
 
 	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof(msg), fmt, argptr);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
 	va_end (argptr);
 
 	Con_Printf ("%s", msg);
@@ -455,7 +456,7 @@ Con_SafePrintf (char *fmt, ...)
 	int         temp;
 
 	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof(msg), fmt, argptr);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
 	va_end (argptr);
 
 	temp = scr_disabled_for_loading;

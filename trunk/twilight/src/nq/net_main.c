@@ -851,4 +851,3 @@ SchedulePollProcedure (PollProcedure * proc, double timeOffset)
 	proc->next = pp;
 	prev->next = proc;
 }
-

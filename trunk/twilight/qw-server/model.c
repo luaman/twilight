@@ -328,7 +328,7 @@ Mod_LoadTextures (lump_t *l)
 		if (!tx || tx->name[0] != '+')
 			continue;
 		if (tx->anim_next)
-			continue;					// allready sequenced
+			continue;					// already sequenced
 
 		// find the number of frames in the animation
 		memset (anims, 0, sizeof (anims));
@@ -1103,7 +1103,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		if (i < mod->numsubmodels - 1) {	// duplicate the basic information
 			char        name[10];
 
-			snprintf (name, sizeof(name), "*%i", i + 1);
+			snprintf (name, sizeof (name), "*%i", i + 1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);

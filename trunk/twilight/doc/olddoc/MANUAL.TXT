@@ -121,7 +121,7 @@ dimension (this takes six to eight levels), you'll find a
         Rune and another slipgate, which returns you to the start. 
 
 B. Skill
-	The start area has three short hallways. The one you go down selects
+	The start area has three short halways. The one you go down selects
         the Skill you wish to play at.
 	Easy -- This is meant for little kids and grandmas. 
 	Medium --  Most people should start Quake at Medium skill. 

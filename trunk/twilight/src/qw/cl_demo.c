@@ -164,16 +164,16 @@ CL_GetDemoMessage (void)
 			// rewind back to time
 			fseek (cls.demofile, ftell (cls.demofile) - sizeof (demotime),
 				   SEEK_SET);
-			return 0;					// allready read this frame's message
+			return 0;					// already read this frame's message
 		}
 		if (!cls.td_starttime && cls.state == ca_active) {
 			cls.td_starttime = Sys_DoubleTime ();
 			cls.td_startframe = host_framecount;
 		}
 		realtime = demotime;			// warp
-	} else if (!cl.paused && cls.state >= ca_onserver) {	// allways grab
-															// until fully
-															// connected
+	} else if (!cl.paused && cls.state >= ca_onserver) {	// always grab
+		// until fully
+		// connected
 		if (realtime + 1.0 < demotime) {
 			// too far back
 			realtime = demotime - 1.0;
@@ -406,7 +406,7 @@ CL_Record_f (void)
 	if (cls.demorecording)
 		CL_Stop_f ();
 
-	snprintf (name, sizeof(name), "%s/%s", com_gamedir, Cmd_Argv (1));
+	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 
 //
 // open the demo file
@@ -685,7 +685,7 @@ CL_ReRecord_f (void)
 	if (cls.demorecording)
 		CL_Stop_f ();
 
-	snprintf (name, sizeof(name), "%s/%s", com_gamedir, Cmd_Argv (1));
+	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 
 //
 // open the demo file

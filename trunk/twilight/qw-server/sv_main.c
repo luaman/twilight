@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 quakeparms_t host_parms;
 
 qboolean    host_initialized;			// true if into command execution
+
 										// (compatability)
 
 double      host_frametime;
@@ -45,9 +46,11 @@ cvar_t      zombietime = { "zombietime", "2" };	// seconds to sink messages
 											// after disconnect
 
 cvar_t      rcon_password = { "rcon_password", "" };	// password for remote
+
 														// server commands
 cvar_t      password = { "password", "" };	// password for entering the game
 cvar_t      spectator_password = { "spectator_password", "" };	// password for 
+																// 
 																// entering as
 																// a sepctator
 
@@ -136,7 +139,7 @@ SV_Error (char *error, ...)
 	inerror = true;
 
 	va_start (argptr, error);
-	vsnprintf (string, sizeof(string), error, argptr);
+	vsnprintf (string, sizeof (string), error, argptr);
 	va_end (argptr);
 
 	Con_Printf ("SV_Error: %s\n", string);
@@ -423,10 +426,10 @@ SVC_Log (void)
 	else
 		seq = -1;
 
-	if (seq == svs.logsequence - 1 || !sv_fraglogfile) {	// they allready
-															// have this data,
-															// or we aren't
-															// logging frags
+	if (seq == svs.logsequence - 1 || !sv_fraglogfile) {	// they already
+		// have this data,
+		// or we aren't
+		// logging frags
 		data[0] = A2A_NACK;
 		NET_SendPacket (1, data, net_from);
 		return;
@@ -435,7 +438,7 @@ SVC_Log (void)
 	Con_DPrintf ("sending log %i to %s\n", svs.logsequence - 1,
 				 NET_AdrToString (net_from));
 
-	snprintf (data, sizeof(data), "stdlog %i\n", svs.logsequence - 1);
+	snprintf (data, sizeof (data), "stdlog %i\n", svs.logsequence - 1);
 	strcat (data, (char *) svs.log_buf[((svs.logsequence - 1) & 1)]);
 
 	NET_SendPacket (strlen (data) + 1, data, net_from);
@@ -528,7 +531,8 @@ SVC_DirectConnect (void)
 
 	version = atoi (Cmd_Argv (1));
 	if (version != PROTOCOL_VERSION) {
-		Netchan_OutOfBandPrint (net_from, "%c\nServer is Twilight version %s.\n",
+		Netchan_OutOfBandPrint (net_from,
+								"%c\nServer is Twilight version %s.\n",
 								A2C_PRINT, VERSION);
 		Con_Printf ("* rejected connect from version %i\n", version);
 		return;
@@ -606,7 +610,7 @@ SVC_DirectConnect (void)
 	} else
 		strncpy (newcl->userinfo, userinfo, sizeof (newcl->userinfo) - 1);
 
-	// if there is allready a slot for this ip, drop it
+	// if there is already a slot for this ip, drop it
 	for (i = 0, cl = svs.clients; i < MAX_CLIENTS; i++, cl++) {
 		if (cl->state == cs_free)
 			continue;
@@ -663,7 +667,6 @@ SVC_DirectConnect (void)
 		Con_Printf ("WARNING: miscounted available clients\n");
 		return;
 	}
-
 	// build a new connection
 	// accept the new client
 	// this is the only place a client_t is ever initialized
@@ -986,7 +989,7 @@ SV_WriteIP_f (void)
 	byte        b[4];
 	int         i;
 
-	snprintf (name, sizeof(name), "%s/listip.cfg", com_gamedir);
+	snprintf (name, sizeof (name), "%s/listip.cfg", com_gamedir);
 
 	Con_Printf ("Writing %s.\n", name);
 
@@ -1088,8 +1091,8 @@ SV_ReadPackets (void)
 				cl->netchan.remote_address.port = net_from.port;
 			}
 			if (Netchan_Process (&cl->netchan)) {	// this is a valid,
-													// sequenced packet, so
-													// process it
+				// sequenced packet, so
+				// process it
 				svs.stats.packets++;
 				good = true;
 				cl->send_message = true;	// reply at end of frame
@@ -1345,7 +1348,7 @@ SV_InitLocal (void)
 	Cmd_AddCommand ("writeip", SV_WriteIP_f);
 
 	for (i = 0; i < MAX_MODELS; i++)
-		snprintf (localmodels[i], sizeof(localmodels[i]), "*%i", i);
+		snprintf (localmodels[i], sizeof (localmodels[i]), "*%i", i);
 
 	Info_SetValueForStarKey (svs.info, "*version", va ("twilight %s", VERSION),
 							 MAX_SERVERINFO_STRING);
@@ -1397,8 +1400,8 @@ Master_Heartbeat (void)
 			active++;
 
 	svs.heartbeat_sequence++;
-	snprintf (string, sizeof(string), "%c\n%i\n%i\n", S2M_HEARTBEAT,
-			 svs.heartbeat_sequence, active);
+	snprintf (string, sizeof (string), "%c\n%i\n%i\n", S2M_HEARTBEAT,
+			  svs.heartbeat_sequence, active);
 
 
 	// send to group master
@@ -1423,7 +1426,7 @@ Master_Shutdown (void)
 	char        string[2048];
 	int         i;
 
-	snprintf (string, sizeof(string), "%c\n", S2M_SHUTDOWN);
+	snprintf (string, sizeof (string), "%c\n", S2M_SHUTDOWN);
 
 	// send to group master
 	for (i = 0; i < MAX_MASTERS; i++)
@@ -1504,7 +1507,7 @@ SV_ExtractFromUserinfo (client_t *cl)
 					p = val + 4;
 			}
 
-			snprintf (newname, sizeof(newname), "(%d)%-.40s", dupc++, p);
+			snprintf (newname, sizeof (newname), "(%d)%-.40s", dupc++, p);
 			Info_SetValueForKey (cl->userinfo, "name", newname,
 								 MAX_INFO_STRING);
 			val = Info_ValueForKey (cl->userinfo, "name");
@@ -1577,7 +1580,7 @@ SV_InitNet (void)
 
 	Netchan_Init ();
 
-	// heartbeats will allways be sent to the id master
+	// heartbeats will always be sent to the id master
 	svs.last_heartbeat = -99999;		// send immediately
 //  NET_StringToAdr ("192.246.40.70:27000", &idmaster_adr);
 }

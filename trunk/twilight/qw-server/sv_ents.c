@@ -291,7 +291,7 @@ SV_EmitPacketEntities (client_t *client, packet_entities_t *to, sizebuf_t *msg)
 		}
 
 		if (newnum < oldnum) {			// this is a new entity, send it from
-										// the baseline
+			// the baseline
 			ent = EDICT_NUM (newnum);
 //Con_Printf ("baseline %i\n", newnum);
 			SV_WriteDelta (&ent->baseline, &to->entities[newindex], msg, true);
@@ -300,7 +300,7 @@ SV_EmitPacketEntities (client_t *client, packet_entities_t *to, sizebuf_t *msg)
 		}
 
 		if (newnum > oldnum) {			// the old entity isn't present in the
-										// new message
+			// new message
 //Con_Printf ("remove %i\n", oldnum);
 			MSG_WriteShort (msg, oldnum | U_REMOVE);
 			oldindex++;
@@ -365,10 +365,11 @@ SV_WritePlayersToClient (client_t *client, edict_t *clent, byte * pvs,
 			pflags |= PF_GIB;
 
 		if (cl->spectator) {			// only sent origin and velocity to
-										// spectators
+			// spectators
 			pflags &= PF_VELOCITY1 | PF_VELOCITY2 | PF_VELOCITY3;
 		} else if (ent == clent) {		// don't send a lot of data on personal 
-										// entity
+										// 
+			// entity
 			pflags &= ~(PF_MSEC | PF_COMMAND);
 			if (ent->v.weaponframe)
 				pflags |= PF_WEAPONFRAME;
@@ -398,7 +399,7 @@ SV_WritePlayersToClient (client_t *client, edict_t *clent, byte * pvs,
 			cmd = cl->lastcmd;
 
 			if (ent->v.health <= 0) {	// don't show the corpse looking
-										// around...
+				// around...
 				cmd.angles[0] = 0;
 				cmd.angles[1] = ent->v.angles[1];
 				cmd.angles[0] = 0;

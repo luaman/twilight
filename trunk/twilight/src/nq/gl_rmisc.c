@@ -261,7 +261,7 @@ R_TranslatePlayerSkin (int playernum)
 
 	for (i = 0; i < 16; i++) {
 		if (top < 128)					// the artists made some backwards
-										// ranges.  sigh.
+			// ranges.  sigh.
 			translate[TOP_RANGE + i] = top + i;
 		else
 			translate[TOP_RANGE + i] = top + 15 - i;

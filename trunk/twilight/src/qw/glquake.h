@@ -109,7 +109,7 @@ typedef struct {
 	// adjust for lightmap levels for dynamic lighting
 	texture_t  *texture;				// corrected for animating textures
 	int         surfmip;				// mipmapped ratio of surface texels /
-										// world pixels
+	// world pixels
 	int         surfwidth;				// in mipmapped texels
 	int         surfheight;				// in mipmapped texels
 } drawsurf_t;
@@ -117,7 +117,7 @@ typedef struct {
 
 typedef enum {
 	pt_static, pt_grav, pt_slowgrav, pt_fire, pt_explode, pt_explode2, pt_blob,
-		pt_blob2
+	pt_blob2
 } ptype_t;
 
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
@@ -171,6 +171,7 @@ extern int  netgraphtexture;			// netgraph texture
 extern int  playertextures;
 
 extern int  skytexturenum;				// index in cl.loadmodel, not gl
+
 										// texture object
 
 extern cvar_t r_norefresh;

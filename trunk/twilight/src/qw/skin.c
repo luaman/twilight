@@ -69,7 +69,7 @@ Skin_Find (player_info_t *sc)
 	}
 
 	if (numskins == MAX_CACHED_SKINS) {	// ran out of spots, so flush
-										// everything
+		// everything
 		Skin_Skins_f ();
 		return;
 	}
@@ -105,7 +105,7 @@ Skin_Cache (skin_t *skin)
 		return NULL;					// use base until downloaded
 
 	if (noskins.value == 1)				// JACK: So NOSKINS > 1 will show
-										// skins, but
+		// skins, but
 		return NULL;					// not download new ones.
 
 	if (skin->failedload)
@@ -118,11 +118,11 @@ Skin_Cache (skin_t *skin)
 //
 // load the pic from disk
 //
-	snprintf (name, sizeof(name), "skins/%s.pcx", skin->name);
+	snprintf (name, sizeof (name), "skins/%s.pcx", skin->name);
 	raw = COM_LoadTempFile (name);
 	if (!raw) {
 		Con_Printf ("Couldn't load skin %s\n", name);
-		snprintf (name, sizeof(name), "skins/%s.pcx", baseskin.string);
+		snprintf (name, sizeof (name), "skins/%s.pcx", baseskin.string);
 		raw = COM_LoadTempFile (name);
 		if (!raw) {
 			skin->failedload = true;

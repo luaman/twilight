@@ -65,7 +65,7 @@ KeyDown (kbutton_t *b)
 		k = atoi (c);
 	else
 		k = -1;							// typed manually at the console for
-										// continuous down
+	// continuous down
 
 	if (k == b->down[0] || k == b->down[1])
 		return;							// repeating key
@@ -94,7 +94,7 @@ KeyUp (kbutton_t *b)
 	if (c[0])
 		k = atoi (c);
 	else {								// typed manually at the console,
-										// assume for unsticking, so clear all
+		// assume for unsticking, so clear all
 		b->down[0] = b->down[1] = 0;
 		b->state = 4;					// impulse up
 		return;
@@ -106,10 +106,10 @@ KeyUp (kbutton_t *b)
 		b->down[1] = 0;
 	else
 		return;							// key up without coresponding down
-										// (menu pass through)
+	// (menu pass through)
 	if (b->down[0] || b->down[1])
 		return;							// some other key is still holding it
-										// down
+	// down
 
 	if (!(b->state & 1))
 		return;							// still up (this should not happen)
@@ -515,7 +515,7 @@ CL_FinishMove (usercmd_t *cmd)
 	int         ms;
 
 //
-// allways dump the first two message, because it may contain leftover inputs
+// always dump the first two message, because it may contain leftover inputs
 // from the last level
 //
 	if (++cl.movemessages <= 2)

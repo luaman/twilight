@@ -616,7 +616,7 @@ SV_Physics_None (edict_t *ent)
 {
 // regular thinking
 	SV_RunThink (ent);
-	
+
 	SV_LinkEdict (ent, false);
 }
 
@@ -902,7 +902,7 @@ SV_Physics (void)
 
 		if (i > 0 && i <= MAX_CLIENTS)
 			continue;					// clients are run directly from
-										// packets
+		// packets
 
 		SV_RunEntity (ent);
 		SV_RunNewmis ();

@@ -136,24 +136,26 @@ float       server_version = 0;			// version of server we connected to
 
 char        emodel_name[] =
 	{ 'e' ^ 0xff, 'm' ^ 0xff, 'o' ^ 0xff, 'd' ^ 0xff, 'e' ^ 0xff, 'l' ^ 0xff,
-0 };
+	0
+};
 char        pmodel_name[] =
 	{ 'p' ^ 0xff, 'm' ^ 0xff, 'o' ^ 0xff, 'd' ^ 0xff, 'e' ^ 0xff, 'l' ^ 0xff,
-0 };
+	0
+};
 char        prespawn_name[] =
 	{ 'p' ^ 0xff, 'r' ^ 0xff, 'e' ^ 0xff, 's' ^ 0xff, 'p' ^ 0xff, 'a' ^ 0xff,
-'w' ^ 0xff, 'n' ^ 0xff,
+	'w' ^ 0xff, 'n' ^ 0xff,
 	' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, ' ' ^ 0xff, '0' ^ 0xff, ' ' ^ 0xff,
-		'%' ^ 0xff, 'i' ^ 0xff, 0
+	'%' ^ 0xff, 'i' ^ 0xff, 0
 };
 char        modellist_name[] =
 	{ 'm' ^ 0xff, 'o' ^ 0xff, 'd' ^ 0xff, 'e' ^ 0xff, 'l' ^ 0xff, 'l' ^ 0xff,
-'i' ^ 0xff, 's' ^ 0xff, 't' ^ 0xff,
+	'i' ^ 0xff, 's' ^ 0xff, 't' ^ 0xff,
 	' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, ' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, 0
 };
 char        soundlist_name[] =
 	{ 's' ^ 0xff, 'o' ^ 0xff, 'u' ^ 0xff, 'n' ^ 0xff, 'd' ^ 0xff, 'l' ^ 0xff,
-'i' ^ 0xff, 's' ^ 0xff, 't' ^ 0xff,
+	'i' ^ 0xff, 's' ^ 0xff, 't' ^ 0xff,
 	' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, ' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, 0
 };
 
@@ -229,9 +231,9 @@ CL_SendConnectPacket (void)
 							 MAX_INFO_STRING);
 
 //  Con_Printf ("Connecting to %s...\n", cls.servername);
-	snprintf (data, sizeof(data), "%c%c%c%cconnect %i %i %i \"%s\"\n",
-			 255, 255, 255, 255, PROTOCOL_VERSION, cls.qport, cls.challenge,
-			 cls.userinfo);
+	snprintf (data, sizeof (data), "%c%c%c%cconnect %i %i %i \"%s\"\n",
+			  255, 255, 255, 255, PROTOCOL_VERSION, cls.qport, cls.challenge,
+			  cls.userinfo);
 	NET_SendPacket (Q_strlen (data), data, adr);
 }
 
@@ -276,7 +278,8 @@ CL_CheckForResend (void)
 	connect_time = realtime + t2 - t1;	// for retransmit requests
 
 	Con_Printf ("Connecting to %s...\n", cls.servername);
-	snprintf (data, sizeof(data), "%c%c%c%cgetchallenge\n", 255, 255, 255, 255);
+	snprintf (data, sizeof (data), "%c%c%c%cgetchallenge\n", 255, 255, 255,
+			  255);
 	NET_SendPacket (Q_strlen (data), data, adr);
 }
 
@@ -421,7 +424,7 @@ CL_Disconnect (void)
 
 	connect_time = -1;
 
-	SDL_WM_SetCaption("Twilight QWCL: disconnected", "Twilight");
+	SDL_WM_SetCaption ("Twilight QWCL: disconnected", "Twilight");
 
 // stop sounds (especially looping!)
 	S_StopAllSounds (true);
@@ -552,9 +555,9 @@ CL_Color_f (void)
 	if (bottom > 13)
 		bottom = 13;
 
-	snprintf (num, sizeof(num), "%i", top);
+	snprintf (num, sizeof (num), "%i", top);
 	Cvar_Set ("topcolor", num);
-	snprintf (num, sizeof(num), "%i", bottom);
+	snprintf (num, sizeof (num), "%i", bottom);
 	Cvar_Set ("bottomcolor", num);
 }
 
@@ -632,7 +635,8 @@ CL_FullInfo_f (void)
 		if (*s)
 			s++;
 
-		if (!Q_strcasecmp (key, pmodel_name) || !Q_strcasecmp (key, emodel_name))
+		if (!Q_strcasecmp (key, pmodel_name)
+			|| !Q_strcasecmp (key, emodel_name))
 			continue;
 
 		Info_SetValueForKey (cls.userinfo, key, value, MAX_INFO_STRING);
@@ -736,7 +740,7 @@ CL_NextDemo (void)
 		}
 	}
 
-	snprintf (str, sizeof(str), "playdemo %s\n", cls.demos[cls.demonum]);
+	snprintf (str, sizeof (str), "playdemo %s\n", cls.demos[cls.demonum]);
 	Cbuf_InsertText (str);
 	cls.demonum++;
 }
@@ -759,7 +763,7 @@ CL_Changing_f (void)
 	S_StopAllSounds (true);
 	cl.intermission = 0;
 	cls.state = ca_connected;			// not active anymore, but not
-										// disconnected
+	// disconnected
 	key_dest = key_console;
 	game_target = KGT_CONSOLE;
 	Con_Printf ("\nChanging map...\n");
@@ -857,7 +861,8 @@ CL_ConnectionlessPacket (void)
 		while (*s && isspace (s[Q_strlen (s) - 1]))
 			s[Q_strlen (s) - 1] = 0;
 
-		if (!allowremotecmd && (!*localid.string || Q_strcmp (localid.string, s))) {
+		if (!allowremotecmd
+			&& (!*localid.string || Q_strcmp (localid.string, s))) {
 			if (!*localid.string) {
 				Con_Printf ("===========================\n");
 				Con_Printf ("Command packet received from local host, but no "
@@ -1000,7 +1005,8 @@ CL_Download_f (void)
 		return;
 	}
 
-	snprintf (cls.downloadname, sizeof(cls.downloadname), "%s/%s", com_gamedir, Cmd_Argv (1));
+	snprintf (cls.downloadname, sizeof (cls.downloadname), "%s/%s", com_gamedir,
+			  Cmd_Argv (1));
 
 	p = cls.downloadname;
 	for (;;) {
@@ -1042,7 +1048,7 @@ CL_Init (void)
 	Info_SetValueForKey (cls.userinfo, "bottomcolor", "0", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "rate", "2500", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "msg", "1", MAX_INFO_STRING);
-	snprintf (st, sizeof(st), "%s-%04d", VERSION, build_number ());
+	snprintf (st, sizeof (st), "%s-%04d", VERSION, build_number ());
 	Info_SetValueForStarKey (cls.userinfo, "*ver", st, MAX_INFO_STRING);
 
 	CL_InitInput ();
@@ -1167,7 +1173,7 @@ Host_EndGame (char *message, ...)
 	char        string[1024];
 
 	va_start (argptr, message);
-	vsnprintf (string, sizeof(string), message, argptr);
+	vsnprintf (string, sizeof (string), message, argptr);
 	va_end (argptr);
 	Con_Printf ("\n===========================\n");
 	Con_Printf ("Host_EndGame: %s\n", string);
@@ -1197,7 +1203,7 @@ Host_Error (char *error, ...)
 	inerror = true;
 
 	va_start (argptr, error);
-	vsnprintf (string, sizeof(string), error, argptr);
+	vsnprintf (string, sizeof (string), error, argptr);
 	va_end (argptr);
 	Con_Printf ("Host_Error: %s\n", string);
 
@@ -1287,7 +1293,7 @@ Host_Frame (float time)
 
 	if (setjmp (host_abort))
 		return;							// something bad happened, or the
-										// server disconnected
+	// server disconnected
 
 	// decide the simulation time
 	realtime += time;

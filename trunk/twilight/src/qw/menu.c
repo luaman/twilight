@@ -28,8 +28,9 @@ void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
 
 enum { m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup,
-		m_net, m_options, m_video, m_keys, m_help, m_quit, m_serialconfig,
-		m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist } m_state;
+	m_net, m_options, m_video, m_keys, m_help, m_quit, m_serialconfig,
+	m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist
+} m_state;
 
 void        M_Menu_Main_f (void);
 void        M_Menu_SinglePlayer_f (void);
@@ -89,6 +90,7 @@ void        M_Search_Key (int key);
 void        M_ServerList_Key (int key);
 
 qboolean    m_entersound;				// play after drawing a frame, so
+
 										// caching
 								// won't disrupt the sound
 qboolean    m_recursiveDraw;
@@ -132,7 +134,7 @@ M_Print (int cx, int cy, char *str)
 		cx += 8;
 	}
 */
-	Draw_Alt_String (cx + ((vid.width - 320) >> 1), cy, str); 
+	Draw_Alt_String (cx + ((vid.width - 320) >> 1), cy, str);
 }
 
 void
@@ -145,7 +147,7 @@ M_PrintWhite (int cx, int cy, char *str)
 		cx += 8;
 	}
 */
-	Draw_String (cx + ((vid.width - 320) >> 1), cy, str); 
+	Draw_String (cx + ((vid.width - 320) >> 1), cy, str);
 }
 
 void
@@ -176,7 +178,7 @@ M_BuildTranslationTable (int top, int bottom)
 	memcpy (dest, source, 256);
 
 	if (top < 128)						// the artists made some backwards
-										// ranges.  sigh.
+		// ranges.  sigh.
 		memcpy (dest + TOP_RANGE, source + top, 16);
 	else
 		for (j = 0; j < 16; j++)
@@ -444,7 +446,7 @@ M_AdjustSliders (int dir)
 			Cvar_SetValue ("volume", volume.value);
 			break;
 
-		case 8:						// allways run
+		case 8:						// always run
 			if (cl_forwardspeed.value > 200) {
 				Cvar_SetValue ("cl_forwardspeed", 200);
 				Cvar_SetValue ("cl_backspeed", 200);
@@ -778,8 +780,8 @@ M_Keys_Key (int k)
 		if (k == SDLK_ESCAPE) {
 			bind_grab = false;
 		} else if (k != '`') {
-			snprintf (cmd, sizeof(cmd), "bind %s \"%s\"\n", Key_KeynumToString (k),
-					 bindnames[keys_cursor][0]);
+			snprintf (cmd, sizeof (cmd), "bind %s \"%s\"\n",
+					  Key_KeynumToString (k), bindnames[keys_cursor][0]);
 			Cbuf_InsertText (cmd);
 		}
 
@@ -808,7 +810,7 @@ M_Keys_Key (int k)
 				keys_cursor = 0;
 			break;
 
-		case SDLK_RETURN:					// go into bind mode
+		case SDLK_RETURN:				// go into bind mode
 			M_FindKeysForCommand (bindnames[keys_cursor][0], keys);
 			S_LocalSound ("misc/menu2.wav");
 			if (keys[1] != -1)
@@ -816,8 +818,8 @@ M_Keys_Key (int k)
 			bind_grab = true;
 			break;
 
-		case SDLK_BACKSPACE:				// delete bindings
-		case SDLK_DELETE:					// delete bindings
+		case SDLK_BACKSPACE:			// delete bindings
+		case SDLK_DELETE:				// delete bindings
 			S_LocalSound ("misc/menu2.wav");
 			M_UnbindCommand (bindnames[keys_cursor][0]);
 			break;

@@ -26,9 +26,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 typedef struct {
 	char        text[CON_TEXTSIZE];
 	int         current;				// line where next message will be
-										// printed
+	// printed
 	int         x;						// offset in current line for next
-										// print
+	// print
 	int         display;				// bottom of console displays this line
 } console_t;
 
@@ -58,4 +58,5 @@ void        Con_ClearNotify (void);
 void        Con_ToggleConsole_f (void);
 
 void        Con_NotifyBox (char *text);	// during startup for sound / cd
+
 										// warnings

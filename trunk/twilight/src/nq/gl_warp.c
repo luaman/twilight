@@ -507,7 +507,7 @@ LoadTGA (FILE * fin)
 
 	if (targa_header.id_length != 0)
 		fseek (fin, targa_header.id_length, SEEK_CUR);	// skip TARGA image
-														// comment
+	// comment
 
 	if (targa_header.image_type == 2) {	// Uncompressed, RGB images
 		for (row = rows - 1; row >= 0; row--) {
@@ -603,7 +603,7 @@ LoadTGA (FILE * fin)
 						}
 						column++;
 						if (column == columns) {	// pixel packet run spans
-													// across rows
+							// across rows
 							column = 0;
 							if (row > 0)
 								row--;
@@ -636,7 +636,7 @@ R_LoadSkys (void)
 
 	for (i = 0; i < 6; i++) {
 		GL_Bind (SKY_TEX + i);
-		snprintf (name, sizeof(name), "gfx/env/bkgtst%s.tga", suf[i]);
+		snprintf (name, sizeof (name), "gfx/env/bkgtst%s.tga", suf[i]);
 		COM_FOpenFile (name, &f);
 		if (!f) {
 			Con_Printf ("Couldn't load %s\n", name);

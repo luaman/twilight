@@ -68,7 +68,7 @@ typedef struct {
 	int         entchannel;				// 
 	vec3_t      origin;					// origin of sound effect
 	vec_t       dist_mult;				// distance multiplier
-										// (attenuation/clipK)
+	// (attenuation/clipK)
 	int         master_vol;				// 0-255 master volume
 } channel_t;
 
@@ -79,7 +79,7 @@ typedef struct {
 	int         loopstart;
 	int         samples;
 	int         dataofs;				// chunk starts this many bytes from
-										// file start
+	// file start
 } wavinfo_t;
 
 void        S_Init (void);

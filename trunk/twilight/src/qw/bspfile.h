@@ -120,7 +120,7 @@ typedef struct {
 	float       normal[3];
 	float       dist;
 	int         type;					// PLANE_X - PLANE_ANYZ ?remove?
-										// trivial to regenerate
+	// trivial to regenerate
 } dplane_t;
 
 
@@ -136,7 +136,9 @@ typedef struct {
 typedef struct {
 	int         planenum;
 	short       children[2];			// negative numbers are -(leafs+1), not 
-										// nodes
+										// 
+	// 
+	// nodes
 	short       mins[3];				// for sphere culling
 	short       maxs[3];
 	unsigned short firstface;
@@ -176,7 +178,7 @@ typedef struct {
 // lighting info
 	byte        styles[MAXLIGHTMAPS];
 	int         lightofs;				// start of [numstyles*surfsize]
-										// samples
+	// samples
 } dface_t;
 
 

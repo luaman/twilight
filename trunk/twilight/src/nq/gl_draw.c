@@ -399,7 +399,7 @@ Draw_Init (void)
 	SwapPic (cb);
 
 	// hack the version number directly into the pic
-	snprintf (ver, sizeof(ver), "twilight %-7s", VERSION);
+	snprintf (ver, sizeof (ver), "twilight %-7s", VERSION);
 	dest = cb->data + 320 * 186 + 320 - 11 - 8 * Q_strlen (ver);
 	y = Q_strlen (ver);
 	for (x = 0; x < y; x++)
@@ -519,14 +519,14 @@ Draw_Character (int x, int y, int num)
 Draw_String
 ================
 */
-void 
+void
 Draw_String (int x, int y, char *str)
 {
-	float			frow, fcol;
-	int num;
+	float       frow, fcol;
+	int         num;
 
 	if (y <= -8)
-		return;			// totally off screen
+		return;							// totally off screen
 	if (!str || !str[0])
 		return;
 
@@ -534,20 +534,21 @@ Draw_String (int x, int y, char *str)
 
 	glBegin (GL_QUADS);
 
-	while (*str) // stop rendering when out of characters
+	while (*str)						// stop rendering when out of
+										// characters
 	{
-		if ((num = *str++) != 32) // skip spaces
+		if ((num = *str++) != 32)		// skip spaces
 		{
-			frow = (float) (num >> 4)*0.0625;
-			fcol = (float) (num & 15)*0.0625;
+			frow = (float) (num >> 4) * 0.0625;
+			fcol = (float) (num & 15) * 0.0625;
 			glTexCoord2f (fcol, frow);
 			glVertex2f (x, y);
 			glTexCoord2f (fcol + 0.0625, frow);
-			glVertex2f (x+8, y);
+			glVertex2f (x + 8, y);
 			glTexCoord2f (fcol + 0.0625, frow + 0.0625);
-			glVertex2f (x+8, y+8);
+			glVertex2f (x + 8, y + 8);
 			glTexCoord2f (fcol, frow + 0.0625);
-			glVertex2f (x, y+8);
+			glVertex2f (x, y + 8);
 		}
 
 		x += 8;
@@ -562,14 +563,14 @@ Draw_String (int x, int y, char *str)
 Draw_Alt_String
 ================
 */
-void 
+void
 Draw_Alt_String (int x, int y, char *str)
 {
-	float			frow, fcol;
-	int num;
+	float       frow, fcol;
+	int         num;
 
 	if (y <= -8)
-		return;			// totally off screen
+		return;							// totally off screen
 	if (!str || !str[0])
 		return;
 
@@ -577,20 +578,20 @@ Draw_Alt_String (int x, int y, char *str)
 
 	glBegin (GL_QUADS);
 
-	while (*str) // stop rendering when out of characters
+	while (*str)						// stop rendering when out of
+										// characters
 	{
-		if ((num = *str++|0x80) != (32|0x80))
-		{
-			frow = (float) (num >> 4)*0.0625;
-			fcol = (float) (num & 15)*0.0625;
+		if ((num = *str++ | 0x80) != (32 | 0x80)) {
+			frow = (float) (num >> 4) * 0.0625;
+			fcol = (float) (num & 15) * 0.0625;
 			glTexCoord2f (fcol, frow);
 			glVertex2f (x, y);
 			glTexCoord2f (fcol + 0.0625, frow);
-			glVertex2f (x+8, y);
+			glVertex2f (x + 8, y);
 			glTexCoord2f (fcol + 0.0625, frow + 0.0625);
-			glVertex2f (x+8, y+8);
+			glVertex2f (x + 8, y + 8);
 			glTexCoord2f (fcol, frow + 0.0625);
-			glVertex2f (x, y+8);
+			glVertex2f (x, y + 8);
 		}
 
 		x += 8;
@@ -1177,7 +1178,7 @@ GL_Upload8_EXT (byte * data, int width, int height, qboolean mipmap,
 		Sys_Error ("GL_LoadTexture: too big");
 
 	samples = 1;						// alpha ? gl_alpha_format :
-										// gl_solid_format;
+	// gl_solid_format;
 
 	texels += scaled_width * scaled_height;
 
@@ -1278,7 +1279,7 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 	int         i;
 	gltexture_t *glt;
 
-	// see if the texture is allready present
+	// see if the texture is already present
 	if (identifier[0]) {
 		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
 			if (!Q_strcmp (identifier, glt->identifier)) {

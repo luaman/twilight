@@ -70,7 +70,7 @@ typedef struct mplane_s {
 	vec3_t      normal;
 	float       dist;
 	byte        type;					// for texture axis selection and fast
-										// side tests
+	// side tests
 	byte        signbits;				// signx + signy<<1 + signz<<1
 	byte        pad[2];
 } mplane_t;
@@ -127,7 +127,7 @@ typedef struct msurface_s {
 	int         flags;
 
 	int         firstedge;				// look up in model->surfedges[],
-										// negative numbers
+	// negative numbers
 	int         numedges;				// are backwards edges
 
 	short       texturemins[2];
@@ -147,7 +147,7 @@ typedef struct msurface_s {
 	int         lightmaptexturenum;
 	byte        styles[MAXLIGHTMAPS];
 	int         cached_light[MAXLIGHTMAPS];	// values currently used in
-											// lightmap
+	// lightmap
 	qboolean    cached_dlight;			// true if dynamic light in cache
 	byte       *samples;				// [numstyles*surfsize]
 } msurface_t;
@@ -156,7 +156,7 @@ typedef struct mnode_s {
 // common with leaf
 	int         contents;				// 0, to differentiate from leafs
 	int         visframe;				// node needs to be traversed if
-										// current
+	// current
 
 	float       minmaxs[6];				// for bounding box culling
 
@@ -176,7 +176,7 @@ typedef struct mleaf_s {
 // common with node
 	int         contents;				// wil be a negative contents number
 	int         visframe;				// node needs to be traversed if
-										// current
+	// current
 
 	float       minmaxs[6];				// for bounding box culling
 
@@ -189,7 +189,7 @@ typedef struct mleaf_s {
 	msurface_t **firstmarksurface;
 	int         nummarksurfaces;
 	int         key;					// BSP sequence number for leaf's
-										// contents
+	// contents
 	byte        ambient_sound_level[NUM_AMBIENTS];
 } mleaf_t;
 
@@ -334,7 +334,7 @@ typedef enum { mod_brush, mod_sprite, mod_alias } modtype_t;
 typedef struct model_s {
 	char        name[MAX_QPATH];
 	qboolean    needload;				// bmodels and sprites don't cache
-										// normally
+	// normally
 
 	modtype_t   type;
 	int         numframes;
@@ -366,7 +366,7 @@ typedef struct model_s {
 	mplane_t   *planes;
 
 	int         numleafs;				// number of visible leafs, not
-										// counting 0
+	// counting 0
 	mleaf_t    *leafs;
 
 	int         numvertexes;

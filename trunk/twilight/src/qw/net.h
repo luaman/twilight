@@ -72,7 +72,9 @@ typedef struct {
 
 // bandwidth estimator
 	double      cleartime;				// if realtime > nc->cleartime, free to 
-										// go
+										// 
+	// 
+	// go
 	double      rate;					// seconds / byte
 
 // sequencing variables

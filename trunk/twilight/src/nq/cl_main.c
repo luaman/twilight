@@ -167,7 +167,7 @@ CL_EstablishConnection (char *host)
 	cls.demonum = -1;					// not in the demo loop now
 	cls.state = ca_connected;
 	cls.signon = 0;						// need all the signon messages before
-										// playing
+	// playing
 }
 
 /*
@@ -201,7 +201,7 @@ CL_SignonReply (void)
 								 ((int) cl_color.value) & 15));
 
 			MSG_WriteByte (&cls.message, clc_stringcmd);
-			snprintf (str, sizeof(str), "spawn %s", cls.spawnparms);
+			snprintf (str, sizeof (str), "spawn %s", cls.spawnparms);
 			MSG_WriteString (&cls.message, str);
 			break;
 
@@ -243,7 +243,7 @@ CL_NextDemo (void)
 		}
 	}
 
-	snprintf (str, sizeof(str), "playdemo %s\n", cls.demos[cls.demonum]);
+	snprintf (str, sizeof (str), "playdemo %s\n", cls.demos[cls.demonum]);
 	Cbuf_InsertText (str);
 	cls.demonum++;
 }
@@ -484,12 +484,12 @@ CL_RelinkEntities (void)
 		VectorCopy (ent->origin, oldorg);
 
 		if (ent->forcelink) {			// the entity was not updated in the
-										// last message
+			// last message
 			// so move to the final spot
 			VectorCopy (ent->msg_origins[0], ent->origin);
 			VectorCopy (ent->msg_angles[0], ent->angles);
 		} else {						// if the delta is large, assume a
-										// teleport and don't lerp
+			// teleport and don't lerp
 			f = frac;
 			for (j = 0; j < 3; j++) {
 				delta[j] = ent->msg_origins[0][j] - ent->msg_origins[1][j];

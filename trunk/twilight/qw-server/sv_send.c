@@ -109,7 +109,7 @@ Con_Printf (char *fmt, ...)
 	char        msg[MAXPRINTMSG];
 
 	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof(msg), fmt, argptr);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
 	va_end (argptr);
 
 	// add to redirected message
@@ -142,7 +142,7 @@ Con_DPrintf (char *fmt, ...)
 		return;
 
 	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof(msg), fmt, argptr);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
 	va_end (argptr);
 
 	Con_Printf ("%s", msg);
@@ -182,7 +182,7 @@ SV_ClientPrintf (client_t *cl, int level, char *fmt, ...)
 		return;
 
 	va_start (argptr, fmt);
-	vsnprintf (string, sizeof(string), fmt, argptr);
+	vsnprintf (string, sizeof (string), fmt, argptr);
 	va_end (argptr);
 
 	SV_PrintToClient (cl, level, string);
@@ -204,7 +204,7 @@ SV_BroadcastPrintf (int level, char *fmt, ...)
 	int         i;
 
 	va_start (argptr, fmt);
-	vsnprintf (string, sizeof(string), fmt, argptr);
+	vsnprintf (string, sizeof (string), fmt, argptr);
 	va_end (argptr);
 
 	Sys_Printf ("%s", string);			// print to the console
@@ -235,7 +235,7 @@ SV_BroadcastCommand (char *fmt, ...)
 	if (!sv.state)
 		return;
 	va_start (argptr, fmt);
-	vsnprintf (string, sizeof(string), fmt, argptr);
+	vsnprintf (string, sizeof (string), fmt, argptr);
 	va_end (argptr);
 
 	MSG_WriteByte (&sv.reliable_datagram, svc_stufftext);
@@ -342,7 +342,7 @@ Each entity can have eight independant sound sources, like voice,
 weapon, feet, etc.
 
 Channel 0 is an auto-allocate channel, the others override anything
-allready running on that entity/channel pair.
+already running on that entity/channel pair.
 
 An attenuation of 0 will play full volume everywhere in the level.
 Larger attenuations will drop off.  (max 4 attenuation)
@@ -387,7 +387,7 @@ SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 	{
 		if (channel & 8)
 			reliable = true;			// sounds that break the phs are
-										// reliable
+		// reliable
 		use_phs = false;
 		channel &= 7;
 	} else
@@ -663,7 +663,7 @@ SV_UpdateToReliableMessages (void)
 	for (j = 0, client = svs.clients; j < MAX_CLIENTS; j++, client++) {
 		if (client->state < cs_connected)
 			continue;					// reliables go to all connected or
-										// spawned
+		// spawned
 
 		ClientReliableCheckBlock (client, sv.reliable_datagram.cursize);
 		ClientReliableWrite_SZ (client, sv.reliable_datagram.data,
@@ -788,7 +788,7 @@ SV_SendMessagesToAll (void)
 
 	for (i = 0, c = svs.clients; i < MAX_CLIENTS; i++, c++)
 		if (c->state)					// FIXME: should this only send to
-										// active?
+			// active?
 			c->send_message = true;
 
 	SV_SendClientMessages ();
