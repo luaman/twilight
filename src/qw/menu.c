@@ -791,7 +791,7 @@ M_FindKeysForCommand (char *command, int *twokeys)
 	count = 0;
 
 	for (j = 0; j < 256; j++) {
-		b = keybindings[j];
+		b = keybindings[0][j];
 		if (!b)
 			continue;
 		if (!strcmp (b, command)) {
@@ -813,11 +813,11 @@ M_UnbindCommand (char *command)
 	l = strlen (command);
 
 	for (j = 0; j < 256; j++) {
-		b = keybindings[j];
+		b = keybindings[0][j];
 		if (!b)
 			continue;
 		if (!strncmp (b, command, l))
-			Key_SetBinding (j, "");
+			Key_SetBinding (j, 0, "");
 	}
 }
 
@@ -880,7 +880,7 @@ M_Keys_Key (int k)
 		if (k == K_ESCAPE) {
 			bind_grab = false;
 		} else if (k != '`') {
-			Key_SetBinding (k, bindnames[keys_cursor][0]);
+			Key_SetBinding (k, 0, bindnames[keys_cursor][0]);
 		}
 
 		bind_grab = false;

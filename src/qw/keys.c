@@ -10,7 +10,7 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
@@ -61,8 +61,9 @@ cvar_t	   *cl_chatmode;
 keydest_t   key_dest;
 
 int         key_count;					// incremented every key event
+int			key_bmap, key_bmap2;
 
-char       *keybindings[256];
+char       *keybindings[8][256];
 qboolean    consolekeys[256];			// if true, can't be rebound while in
 										// console
 qboolean    menubound[256];				// if true, can't be rebound while in
@@ -384,9 +385,9 @@ Key_Console (int key)
 
 //============================================================================
 
-qboolean    chat_team;
-char        chat_buffer[MAX_INPUTLINE];
-unsigned	chat_bufferlen = 0;
+qboolean	chat_team;
+char		chat_buffer[MAX_INPUTLINE];
+Uint32		chat_bufferlen = 0;
 
 void
 Key_Message (int key)
@@ -497,7 +498,7 @@ Key_SetBinding
 ===================
 */
 void
-Key_SetBinding (int keynum, char *binding)
+Key_SetBinding (int keynum, int bindmap, char *binding)
 {
 	char       *new;
 	int         l;
@@ -506,16 +507,127 @@ Key_SetBinding (int keynum, char *binding)
 		return;
 
 // free old bindings
-	if (keybindings[keynum]) {
-		Z_Free (keybindings[keynum]);
-		keybindings[keynum] = NULL;
+	if (keybindings[bindmap][keynum]) {
+		Z_Free (keybindings[bindmap][keynum]);
+		keybindings[bindmap][keynum] = NULL;
 	}
 // allocate memory for new binding
 	l = strlen (binding);
 	new = Z_Malloc (l + 1);
 	strcpy (new, binding);
 	new[l] = 0;
-	keybindings[keynum] = new;
+	keybindings[bindmap][keynum] = new;
+}
+
+/*
+===================
+Key_In_Unbind_f
+===================
+*/
+void
+Key_In_Unbind_f (void)
+{
+	int         b, m;
+
+	if (Cmd_Argc () != 3) {
+		Com_Printf ("in_unbind <bindmap> <key> : remove commands from a key\n");
+		return;
+	}
+
+	m = strtol(Cmd_Argv (1), NULL, 0);
+	if ((m < 0) || (m >= 8)) {
+		Com_Printf ("%d isn't a valid bindmap\n", m);
+		return;
+	}
+
+	b = Key_StringToKeynum (Cmd_Argv (2));
+	if (b == -1) {
+		Com_Printf ("\"%s\" isn't a valid key\n", Cmd_Argv (2));
+		return;
+	}
+
+	Key_SetBinding (b, m, "");
+}
+
+/*
+===================
+Key_In_Bind_f
+===================
+*/
+void
+Key_In_Bind_f (void)
+{
+	int         i, c, b, m;
+	char        cmd[1024];
+
+	c = Cmd_Argc ();
+
+	if (c != 3 && c != 4) {
+		Com_Printf ("in_bind <bindmap> <key> [command] : attach a command to a key\n");
+		return;
+	}
+
+	m = strtol(Cmd_Argv (1), NULL, 0);
+	if ((m < 0) || (m >= 8)) {
+		Com_Printf ("%d isn't a valid bindmap\n", m);
+		return;
+	}
+
+	b = Key_StringToKeynum (Cmd_Argv (2));
+	if (b == -1) {
+		Com_Printf ("\"%s\" isn't a valid key\n", Cmd_Argv (2));
+		return;
+	}
+
+	if (c == 3) {
+		if (keybindings[m][b])
+			Com_Printf ("\"%s\" = \"%s\"\n", Cmd_Argv (2), keybindings[m][b]);
+		else
+			Com_Printf ("\"%s\" is not bound\n", Cmd_Argv (2));
+		return;
+	}
+// copy the rest of the command line
+	cmd[0] = 0;							// start out with a null string
+	for (i = 3; i < c; i++) {
+		strcat (cmd, Cmd_Argv (i));
+		if (i != (c - 1))
+			strcat (cmd, " ");
+	}
+
+	Key_SetBinding (b, m, cmd);
+}
+
+/*
+===================
+Key_In_Bindmap_f
+===================
+*/
+void
+Key_In_Bindmap_f (void)
+{
+	int         m1, m2, c;
+
+	c = Cmd_Argc ();
+
+	if (c != 3) {
+		Com_Printf ("in_bindmap <bindmap> <fallback>: set current bindmap and fallback\n");
+		return;
+	}
+
+	m1 = strtol(Cmd_Argv (1), NULL, 0);
+	if ((m1 < 0) || (m1 >= 8)) {
+		Com_Printf ("%d isn't a valid bindmap\n", m1);
+		return;
+	}
+
+	m2 = strtol(Cmd_Argv (2), NULL, 0);
+	if ((m2 < 0) || (m2 >= 8)) {
+		Com_Printf ("%d isn't a valid bindmap\n", m2);
+		return;
+	}
+
+	key_bmap = m1;
+	key_bmap2 = m2;
 }
 
 /*
@@ -539,17 +651,18 @@ Key_Unbind_f (void)
 		return;
 	}
 
-	Key_SetBinding (b, "");
+	Key_SetBinding (b, 0, "");
 }
 
 void
 Key_Unbindall_f (void)
 {
-	int         i;
+	int         i, j;
 
-	for (i = 0; i < 256; i++)
-		if (keybindings[i])
-			Key_SetBinding (i, "");
+	for (j = 0; j < 8; j++)
+		for (i = 0; i < 256; i++)
+			if (keybindings[j][i])
+				Key_SetBinding (i, j, "");
 }
 
 
@@ -577,8 +690,8 @@ Key_Bind_f (void)
 	}
 
 	if (c == 2) {
-		if (keybindings[b])
-			Com_Printf ("\"%s\" = \"%s\"\n", Cmd_Argv (1), keybindings[b]);
+		if (keybindings[0][b])
+			Com_Printf ("\"%s\" = \"%s\"\n", Cmd_Argv (1), keybindings[0][b]);
 		else
 			Com_Printf ("\"%s\" is not bound\n", Cmd_Argv (1));
 		return;
@@ -591,7 +704,7 @@ Key_Bind_f (void)
 			strcat (cmd, " ");
 	}
 
-	Key_SetBinding (b, cmd);
+	Key_SetBinding (b, 0, cmd);
 }
 
 /*
@@ -604,12 +717,17 @@ Writes lines containing "bind key value"
 void
 Key_WriteBindings (FILE * f)
 {
-	int         i;
+	int         i, j;
 
 	for (i = 0; i < 256; i++)
-		if (keybindings[i])
+		if (keybindings[0][i])
 			fprintf (f, "bind %s \"%s\"\n", Key_KeynumToString (i),
-					 keybindings[i]);
+					 keybindings[0][i]);
+	for (j = 1; j < 8; j++)
+		for (i = 0; i < 256; i++)
+			if (keybindings[j][i])
+				fprintf (f, "in_bind %d %s \"%s\"\n", j, Key_KeynumToString (i),
+						keybindings[j][i]);
 }
 
 
@@ -685,6 +803,10 @@ Key_Init (void)
 //
 // register our functions
 //
+	Cmd_AddCommand ("in_bind", Key_In_Bind_f);
+	Cmd_AddCommand ("in_unbind", Key_In_Unbind_f);
+	Cmd_AddCommand ("in_bindmap", Key_In_Bindmap_f);
+
 	Cmd_AddCommand ("bind", Key_Bind_f);
 	Cmd_AddCommand ("unbind", Key_Unbind_f);
 	Cmd_AddCommand ("unbindall", Key_Unbindall_f);
@@ -769,13 +891,16 @@ Key_Event (int key, qboolean down)
 	// downs can be matched with ups
 	//
 	if (!down) {
-		kb = keybindings[key];
+		if (!(kb = keybindings[key_bmap][key]))
+			kb = keybindings[key_bmap2][key];
+
 		if (kb && kb[0] == '+') {
 			snprintf (cmd, sizeof(cmd), "-%s %i\n", kb + 1, key);
 			Cbuf_AddText (cmd);
 		}
 		if (keyshift[key] != key) {
-			kb = keybindings[keyshift[key]];
+			if (!(kb = keybindings[key_bmap][keyshift[key]]))
+				kb = keybindings[key_bmap2][keyshift[key]];
 			if (kb && kb[0] == '+') {
 				snprintf (cmd, sizeof(cmd), "-%s %i\n", kb + 1, key);
 				Cbuf_AddText (cmd);
@@ -799,7 +924,8 @@ Key_Event (int key, qboolean down)
 		|| (key_dest == key_console && !consolekeys[key])
 		|| (key_dest == key_game
 			&& (cls.state == ca_active || !consolekeys[key]))) {
-		kb = keybindings[key];
+		if (!(kb = keybindings[key_bmap][key]))
+			kb = keybindings[key_bmap2][key];
 		if (kb) {
 			if (kb[0] == '+') {			// button commands add keynum as a parm
 				snprintf (cmd, sizeof(cmd), "%s %i\n", kb, key);

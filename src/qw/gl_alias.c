@@ -353,7 +353,7 @@ R_DrawAliasModel ()
 
 	TWI_PreVDrawCVA (0, paliashdr->numverts);
 
-	if (!has_top || !has_bottom)
+	if (!has_top && !has_bottom)
 		R_DrawSubSkin (paliashdr, &skin->base[anim], NULL);
 	else
 		R_DrawSubSkin (paliashdr, &skin->base_team[anim], NULL);
