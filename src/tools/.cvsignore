@@ -16,3 +16,4 @@ lhbin2c
 Debug
 Release
 .DS_Store
+.sconsign

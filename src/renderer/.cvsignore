@@ -11,3 +11,4 @@ Debug
 *.i
 *.s
 .DS_Store
+.sconsign

@@ -5,3 +5,4 @@ stamp-h*
 Makefile.in
 Makefile
 .DS_Store
+.sconsign

@@ -8,3 +8,4 @@ Makefile.in
 Debug
 Release
 .DS_Store
+.sconsign

@@ -5,3 +5,4 @@ stamp-*
 .deps
 .DS_Store
 *.aps
+.sconsign

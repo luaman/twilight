@@ -14,3 +14,4 @@ Release
 *.map
 *.pdb
 .DS_Store
+.sconsign
