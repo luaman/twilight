@@ -126,7 +126,7 @@ R_NetGraph (void)
 	// now load the netgraph texture into gl and draw it
 	for (y = 0; y < NET_GRAPHHEIGHT; y++)
 		for (x = 0; x < NET_TIMINGS; x++)
-			ngraph_pixels[y][x] = d_8to24table[ngraph_texels[y][x]];
+			ngraph_pixels[y][x] = d_8to32table[ngraph_texels[y][x]];
 
 	x = -(((int)vid.width - 320) >> 1);
 	y = vid.height - sb_lines - 24 - NET_GRAPHHEIGHT - 1;

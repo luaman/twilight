@@ -52,6 +52,14 @@ typedef int fixed16_t;
 #define bound(a,b,c) (max(a, min(b, c)))
 #endif
 
+#ifndef BIT
+#define BIT(bit)			(1 << bit)
+#endif
+
+#ifndef bound_bits
+#define bound_bits(n, bits)	bound(0, n, BIT(bits) - 1)
+#endif
+
 struct mplane_s;
 
 extern vec3_t vec3_origin;
@@ -93,6 +101,16 @@ double Q_pow(double x, double y);
 #define VectorClear(a)		(a[0]=a[1]=a[2]=0)
 #define VectorLength(v)		(Q_sqrt(DotProduct(v,v)))
 #define VectorLength2(v)	(Q_sqrt(DotProduct2(v,v)))
+
+/*
+ * VectorDistance, the distance between two points.
+ * Yes, this is the same as sqrt(VectorSubtract then DotProduct),
+ * however that way would involve more vars, this is cheaper.
+ */
+#define VectorDistance_fast(a, b)	((((a)[0] - (b)[0]) * ((a)[0] - (b)[0])) + \
+									(((a)[1] - (b)[1]) * ((a)[1] - (b)[1])) + \
+									(((a)[2] - (b)[2]) * ((a)[2] - (b)[2])))
+#define VectorDistance(a, b)		Q_sqrt(VectorDistance_fast(a, b))
 
 vec_t       _VectorLength (vec3_t v);
 vec_t       _VectorLength2 (vec3_t v);

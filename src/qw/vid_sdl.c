@@ -46,6 +46,7 @@ static const char rcsid[] =
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
+#include <math.h>
 
 #include "client.h"
 #include "console.h"
@@ -63,9 +64,7 @@ static const char rcsid[] =
 HWND        mainwindow;
 #endif
 
-unsigned short d_8to16table[256];
-unsigned    d_8to24table[256];
-unsigned char d_15to8table[65536];
+unsigned    d_8to32table[256];
 
 cvar_t     *vid_mode;
 cvar_t     *m_filter;
@@ -73,11 +72,24 @@ cvar_t     *_windowed_mouse;
 cvar_t     *gl_ztrick;
 cvar_t     *gl_driver;
 
+cvar_t	*v_hwgamma;
+cvar_t	*v_gamma;
+cvar_t	*v_gammabias_r;
+cvar_t	*v_gammabias_b;
+cvar_t	*v_gammabias_g;
+cvar_t	*v_tgamma;
+cvar_t	*v_tgammabias_r;
+cvar_t	*v_tgammabias_b;
+cvar_t	*v_tgammabias_g;
+
+static Uint16	hw_gamma_ramps[3][256];
+static Uint8	tex_gamma_ramps[3][256];
+
 static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
 
 static int  old_windowed_mouse;
-static int	use_mouse = false;
+static qboolean	use_mouse = false;
 
 static int  scr_width = 640, scr_height = 480, scr_bpp = 15;
 
@@ -101,16 +113,10 @@ const char *gl_renderer;
 const char *gl_version;
 const char *gl_extensions;
 
-void        (*qglColorTableEXT) (int, int, int, int, int, const void *);
-void        (*qgl3DfxSetPaletteEXT) (GLuint *);
-
-static float vid_gamma = 1.0;
-
 qboolean    isPermedia = false;
 qboolean    gl_mtexable = false;
 
 /*-----------------------------------------------------------------------*/
-
 void
 VID_Shutdown (void)
 {
@@ -144,58 +150,73 @@ InitSig (void)
 #endif
 }
 
-
-void
-VID_SetPalette (unsigned char *palette)
+#define GAMMA(c, g, b, n)	(Q_pow((double) c / n, (double) 1 / g) * BIT(b))
+#define BUILD_GAMMA_RAMP(ramp, gamma, type, n) do {							\
+		int _i, _bits;														\
+		_bits = sizeof(type) * 8;											\
+		for (_i = 0; _i < n; _i++) {										\
+			ramp[_i] = (type)bound_bits(GAMMA(_i, gamma, _bits, n), _bits);	\
+		}																	\
+	} while (0)
+		
+static void
+VID_InitTexGamma ()
 {
-	Uint8      *pal;
-	unsigned    r, g, b;
-	unsigned    v;
-	int         r1, g1, b1;
-	int         k;
-	unsigned short i;
-	unsigned   *table;
-	float       dist, bestdist;
-	static qboolean palflag = false;
+	int i;
+	Uint8	*pal;
+	Uint8	r, g, b;
+	unsigned	*table;
+	vec3_t	tex;
 
-//
-// 8 8 8 encoding
-//
-	pal = palette;
-	table = d_8to24table;
+	tex[0] = v_tgamma->value + v_tgammabias_r->value;
+	tex[1] = v_tgamma->value + v_tgammabias_g->value;
+	tex[2] = v_tgamma->value + v_tgammabias_b->value;
+
+	BUILD_GAMMA_RAMP(tex_gamma_ramps[0], tex[0], Uint8, 256);
+	BUILD_GAMMA_RAMP(tex_gamma_ramps[1], tex[1], Uint8, 256);
+	BUILD_GAMMA_RAMP(tex_gamma_ramps[2], tex[2], Uint8, 256);
+
+	// 8 8 8 encoding
+	pal = host_basepal;
+	table = d_8to32table;
 	for (i = 0; i < 256; i++) {
-		r = pal[0];
-		g = pal[1];
-		b = pal[2];
+		r = tex_gamma_ramps[0][pal[0]];
+		g = tex_gamma_ramps[1][pal[1]];
+		b = tex_gamma_ramps[2][pal[2]];
 		pal += 3;
 
-		v = (255 << 24) + (r << 0) + (g << 8) + (b << 16);
-		*table++ = v;
+		*table++ = (r << 0) + (g << 8) + (b << 16) + (255 << 24);
 	}
-	d_8to24table[255] &= 0xffffff;		// 255 is transparent
+	d_8to32table[255] &= 0xffffff;		// 255 is transparent
+}
 
-	if (palflag)
+static void
+GammaChanged (cvar_t *cvar)
+{
+	vec3_t	hw;
+
+	// Might be init, we don't want to segfault.
+	if (!(v_hwgamma && v_gamma && v_gammabias_r && v_gammabias_g &&
+				v_gammabias_b))
 		return;
-	palflag = true;
 
-	for (i = 0; i < (1 << 15); i++) {
-	/* Maps 000000000000000 000000000011111 = Red = 0x1F
-		000001111100000 = Blue = 0x03E0 111110000000000 = Grn = 0x7C00 */
-		r = ((i & 0x1F) << 3) + 4;
-		g = ((i & 0x03E0) >> 2) + 4;
-		b = ((i & 0x7C00) >> 7) + 4;
-		pal = (unsigned char *) d_8to24table;
-		for (v = 0, k = 0, bestdist = 10000.0; v < 256; v++, pal += 4) {
-			r1 = (int) r - (int) pal[0];
-			g1 = (int) g - (int) pal[1];
-			b1 = (int) b - (int) pal[2];
-			dist = Q_sqrt (((r1 * r1) + (g1 * g1) + (b1 * b1)));
-			if (dist < bestdist) {
-				k = v;
-				bestdist = dist;
-			}
+	// Do we have and want to use hardware gamma?
+	if (v_hwgamma->value != 0) {
+		hw[0] = v_gamma->value + v_gammabias_r->value;
+		hw[1] = v_gamma->value + v_gammabias_g->value;
+		hw[2] = v_gamma->value + v_gammabias_b->value;
+
+		BUILD_GAMMA_RAMP(hw_gamma_ramps[0], hw[0], Uint16, 256);
+		BUILD_GAMMA_RAMP(hw_gamma_ramps[1], hw[1], Uint16, 256);
+		BUILD_GAMMA_RAMP(hw_gamma_ramps[2], hw[2], Uint16, 256);
+
+		if (SDL_SetGammaRamp(hw_gamma_ramps[0], hw_gamma_ramps[1],
+							 hw_gamma_ramps[2]) == -1) {
+			// No hardware gamma support, turn off and set ROM.
+			Con_Printf("No hardware gamma support: Disabiling.\n");
+			Cvar_Set(v_hwgamma, "0");
+			v_hwgamma->flags |= CVAR_ROM;
 		}
-		d_15to8table[i] = k;
 	}
 }
 
@@ -293,30 +314,6 @@ GL_EndRendering (void)
 }
 
 
-static void
-Check_Gamma (unsigned char *pal)
-{
-	unsigned char palette[768];
-	int         i, inf;
-
-	if ((i = COM_CheckParm ("-gamma")) == 0) {
-		if ((gl_renderer && strstr (gl_renderer, "Voodoo")) ||
-			(gl_vendor && strstr (gl_vendor, "3Dfx")))
-			vid_gamma = 1;
-		else
-			vid_gamma = 0.7;			// default to 0.7 on non-3dfx hardware
-	} else
-		vid_gamma = Q_atof (com_argv[i + 1]);
-
-	for (i = 0; i < 768; i++) {
-		inf = (int)(Q_pow ((pal[i] + 1) / 256.0, vid_gamma) * 255 + 0.5);
-		inf = bound (0, inf, 255);
-		palette[i] = (Uint8)inf;
-	}
-
-	memcpy (pal, palette, sizeof (palette));
-}
-
 void
 VID_Init_Cvars (void)
 {
@@ -325,6 +322,15 @@ VID_Init_Cvars (void)
 	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE, NULL);
 	gl_ztrick = Cvar_Get ("gl_ztrick", "1", CVAR_NONE, NULL);
 	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
+	v_hwgamma = Cvar_Get ("v_hwgamma", "1", CVAR_NONE, NULL);
+	v_gamma = Cvar_Get ("gamma", "1", CVAR_NONE, &GammaChanged);
+	v_gammabias_r = Cvar_Get ("v_gammabias_r", "0", CVAR_NONE, &GammaChanged);
+	v_gammabias_g = Cvar_Get ("v_gammabias_g", "0", CVAR_NONE, &GammaChanged);
+	v_gammabias_b = Cvar_Get ("v_gammabias_b", "0", CVAR_NONE, &GammaChanged);
+	v_tgamma = Cvar_Get ("v_tgamma", "1", CVAR_ROM, NULL);
+	v_tgammabias_r = Cvar_Get ("v_tgammabias_r", "0", CVAR_ROM, NULL);
+	v_tgammabias_g = Cvar_Get ("v_tgammabias_g", "0", CVAR_ROM, NULL);
+	v_tgammabias_b = Cvar_Get ("v_tgammabias_b", "0", CVAR_ROM, NULL);
 }
 
 void
@@ -407,7 +413,7 @@ VID_Init (unsigned char *palette)
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
 
-	if (SDL_SetVideoMode (scr_width, scr_height, 16, flags) == NULL) {
+	if (SDL_SetVideoMode (scr_width, scr_height, scr_bpp, flags) == NULL) {
 		Sys_Error ("Could not init video mode: %s", SDL_GetError ());
 	}
 
@@ -415,18 +421,17 @@ VID_Init (unsigned char *palette)
 
 	vid.height = scr_height;
 	vid.width = scr_width;
+	vid.bpp = scr_bpp;
 	vid.aspect = ((float) vid.height / (float) vid.width) * (4.0 / 3.0);
 
 	InitSig ();							// trap evil signals
 
 	GL_Init ();
 
-	Check_Gamma (palette);
-
 	snprintf (gldir, sizeof (gldir), "%s/glquake", com_gamedir);
 	Sys_mkdir (gldir);
 
-	VID_SetPalette (palette);
+	VID_InitTexGamma ();
 
 	Con_SafePrintf ("Video mode %dx%d initialized.\n", scr_width, scr_height);
 
@@ -447,7 +452,7 @@ Sys_SendKeyEvents (void)
 {
 	SDL_Event   event;
 	int         sym, state, but;
-	short       modstate;
+	SDLMod      modstate;
 
 	while (SDL_PollEvent (&event)) {
 		switch (event.type) {
@@ -648,7 +653,6 @@ Sys_SendKeyEvents (void)
 						Key_Event (K_MOUSE1 + but - 1, event.type
 								   == SDL_MOUSEBUTTONDOWN);
 						break;
-					// FIXME: make this work
 					case 4:
 						Key_Event (K_MWHEELUP, true);
 						Key_Event (K_MWHEELUP, false);

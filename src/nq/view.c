@@ -80,9 +80,6 @@ cvar_t     *gl_cshiftpercent;
 cvar_t     *v_centermove;
 cvar_t     *v_centerspeed;
 
-cvar_t     *v_gamma;
-
-
 float       v_dmg_time, v_dmg_roll, v_dmg_pitch;
 
 extern int  in_forward, in_forward2, in_back;
@@ -266,50 +263,7 @@ cshift_t    cshift_water = { {130, 80, 50}, 128 };
 cshift_t    cshift_slime = { {0, 25, 5}, 150 };
 cshift_t    cshift_lava = { {255, 80, 0}, 150 };
 
-Uint8       gammatable[256];			// palette is sent through this
-
-Uint8       ramps[3][256];
 float       v_blend[4];					// rgba 0.0 - 1.0
-
-void
-BuildGammaTable (float g)
-{
-	int         i, inf;
-
-	if (g == 1.0) {
-		for (i = 0; i < 256; i++)
-			gammatable[i] = i;
-		return;
-	}
-
-	for (i = 0; i < 256; i++) {
-		inf = (int)(255 * Q_pow ((i + 0.5) / 255.5, g) + 0.5);
-		inf = bound (0, inf, 255);
-		gammatable[i] = (Uint8)inf;
-	}
-}
-
-/*
-=================
-V_CheckGamma
-=================
-*/
-qboolean
-V_CheckGamma (void)
-{
-	static float oldgammavalue;
-
-	if (v_gamma->value == oldgammavalue)
-		return false;
-	oldgammavalue = v_gamma->value;
-
-	BuildGammaTable (v_gamma->value);
-	vid.recalc_refdef = 1;				// force a surface cache flush
-
-	return true;
-}
-
-
 
 /*
 ===============
@@ -511,11 +465,6 @@ V_UpdatePalette (void)
 {
 	int         i, j;
 	qboolean    new;
-	Uint8      *basepal, *newpal;
-	Uint8       pal[768];
-	float       r, g, b, a;
-	int         ir, ig, ib;
-	qboolean    force;
 
 	V_CalcPowerupCshift ();
 
@@ -543,44 +492,10 @@ V_UpdatePalette (void)
 	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
 		cl.cshifts[CSHIFT_BONUS].percent = 0;
 
-	force = V_CheckGamma ();
-	if (!new && !force)
-		return;
+//	if (!new && !force)
+//		return;
 
-	V_CalcBlend ();
-
-	a = v_blend[3];
-	r = 255 * v_blend[0] * a;
-	g = 255 * v_blend[1] * a;
-	b = 255 * v_blend[2] * a;
-
-	a = 1 - a;
-	for (i = 0; i < 256; i++) {
-		ir = i * a + r;	if (ir > 255) ir = 255;
-		ig = i * a + g; if (ig > 255) ig = 255;
-		ib = i * a + b; if (ib > 255) ib = 255;
-		
-		ramps[0][i] = gammatable[ir];
-		ramps[1][i] = gammatable[ig];
-		ramps[2][i] = gammatable[ib];
-	}
-
-	basepal = host_basepal;
-	newpal = pal;
-
-	for (i = 0; i < 256; i++) {
-		ir = basepal[0];
-		ig = basepal[1];
-		ib = basepal[2];
-		basepal += 3;
-
-		newpal[0] = ramps[0][ir];
-		newpal[1] = ramps[1][ig];
-		newpal[2] = ramps[2][ib];
-		newpal += 3;
-	}
-
-	VID_ShiftPalette (pal);
+	V_CalcBlend();
 }
 
 
@@ -955,8 +870,6 @@ V_Init_Cvars (void)
 
 	v_centermove = Cvar_Get ("v_centermove", "0.15", CVAR_NONE, NULL);
 	v_centerspeed = Cvar_Get ("v_centerspeed", "500", CVAR_NONE, NULL);
-
-	v_gamma = Cvar_Get ("gamma", "1", CVAR_ARCHIVE, NULL);
 }
 
 /*
@@ -970,6 +883,5 @@ V_Init (void)
 	Cmd_AddCommand ("v_cshift", V_cshift_f);
 	Cmd_AddCommand ("bf", V_BonusFlash_f);
 	Cmd_AddCommand ("centerview", V_StartPitchDrift);
-	BuildGammaTable (1.0);				// no gamma yet
 }
 
