@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include <windows.h>
 #include "conproc.h"
 #include "quakedef.h"
+#include "console.h"
 
 HANDLE      heventDone;
 HANDLE      hfileBuffer;

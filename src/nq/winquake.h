@@ -29,35 +29,6 @@
 #define __WINQUAKE_H
 
 #include <windows.h>
-#ifndef WM_MOUSEWHEEL
-#define WM_MOUSEWHEEL                   0x020A
-#endif
-
-#ifndef SERVERONLY
-#include <ddraw.h>
-#include <dsound.h>
-#endif
-
-#ifndef SERVERONLY
-
-extern LPDIRECTDRAW lpDD;
-extern LPDIRECTDRAWSURFACE lpPrimary;
-extern LPDIRECTDRAWSURFACE lpFrontBuffer;
-extern LPDIRECTDRAWSURFACE lpBackBuffer;
-extern LPDIRECTDRAWPALETTE lpDDPal;
-extern LPDIRECTSOUND pDS;
-extern LPDIRECTSOUNDBUFFER pDSBuf;
-
-extern DWORD gSndBufSize;
-
-//#define SNDBUFSIZE 65536
-
-void        VID_LockBuffer (void);
-void        VID_UnlockBuffer (void);
-
-#endif
-
-extern HWND mainwindow;
 extern qboolean ActiveApp, Minimized;
 
 void        IN_ShowMouse (void);
