@@ -44,8 +44,6 @@ static const char rcsid[] =
 #include <math.h>
 
 int         r_dlightframecount;
-static int	rl_vindex, rl_iindex;
-
 
 /*
 ==================
@@ -148,13 +146,13 @@ R_RenderDlight (dlight_t *light)
 	}
 	VectorSubtract (light->origin, v, v);
 
-	VectorSet3 (v_array[rl_vindex], v[0], v[1], v[2]);
-	c_array[rl_vindex][0] = light->color[0] * 0.5;
-	c_array[rl_vindex][1] = light->color[1] * 0.5;
-	c_array[rl_vindex][2] = light->color[2] * 0.5;
-	c_array[rl_vindex][3] = 1;
-	vcenter = rl_vindex;
-	rl_vindex++;
+	VectorSet3 (v_array[v_index], v[0], v[1], v[2]);
+	c_array[v_index][0] = light->color[0] * 0.5;
+	c_array[v_index][1] = light->color[1] * 0.5;
+	c_array[v_index][2] = light->color[2] * 0.5;
+	c_array[v_index][3] = 1;
+	vcenter = v_index;
+	v_index++;
 
 	for (i = 16; i >= 0; i--, bub_sin++, bub_cos++) 
 	{
@@ -162,32 +160,32 @@ R_RenderDlight (dlight_t *light)
 			v[j] = light->origin[j] + (v_right[j] * (*bub_cos) +
 				+ v_up[j] * (*bub_sin)) * rad;
 
-		VectorSet4 (c_array[rl_vindex], 0, 0, 0, 0);
-		VectorSet3 (v_array[rl_vindex], v[0], v[1], v[2]);
+		VectorSet4 (c_array[v_index], 0, 0, 0, 0);
+		VectorSet3 (v_array[v_index], v[0], v[1], v[2]);
 		if (vlast != -1) {
-			vindices[rl_iindex + 0] = vcenter;
-			vindices[rl_iindex + 1] = vlast;
-			vindices[rl_iindex + 2] = rl_vindex;
-			rl_iindex += 3;
+			vindices[i_index + 0] = vcenter;
+			vindices[i_index + 1] = vlast;
+			vindices[i_index + 2] = v_index;
+			i_index += 3;
 		}
-		vlast = rl_vindex;
-		rl_vindex++;
+		vlast = v_index;
+		v_index++;
 
-		if (((rl_vindex + 3) >= MAX_VERTEX_ARRAYS) ||
-				((rl_iindex + 3) >= MAX_VERTEX_INDICES)) {
+		if (((v_index + 3) >= MAX_VERTEX_ARRAYS) ||
+				((i_index + 3) >= MAX_VERTEX_INDICES)) {
 			if (gl_cva)
-				qglLockArraysEXT (0, rl_vindex);
-			qglDrawElements(GL_TRIANGLES, rl_iindex, GL_UNSIGNED_INT, vindices);
+				qglLockArraysEXT (0, v_index);
+			qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
 			if (gl_cva)
 				qglUnlockArraysEXT ();
-			rl_vindex = 0;
-			rl_iindex = 0;
-			memcpy(v_array[rl_vindex], v_array[vcenter], sizeof(*v_array));
-			memcpy(c_array[rl_vindex], c_array[vcenter], sizeof(*c_array));
-			vcenter = rl_vindex++;
-			memcpy(v_array[rl_vindex], v_array[vlast], sizeof(*v_array));
-			memcpy(c_array[rl_vindex], c_array[vlast], sizeof(*c_array));
-			vlast = rl_vindex++;
+			v_index = 0;
+			i_index = 0;
+			memcpy(v_array[v_index], v_array[vcenter], sizeof(*v_array));
+			memcpy(c_array[v_index], c_array[vcenter], sizeof(*c_array));
+			vcenter = v_index++;
+			memcpy(v_array[v_index], v_array[vlast], sizeof(*v_array));
+			memcpy(c_array[v_index], c_array[vlast], sizeof(*c_array));
+			vlast = v_index++;
 		}
 	}
 }
@@ -217,10 +215,10 @@ R_RenderDlights (void)
 		R_RenderDlight (l);
 	}
 
-	if (rl_vindex || rl_iindex) {
-		qglDrawElements(GL_TRIANGLES, rl_iindex, GL_UNSIGNED_INT, vindices);
-		rl_vindex = 0;
-		rl_iindex = 0;
+	if (v_index || i_index) {
+		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
+		v_index = 0;
+		i_index = 0;
 	}
 
 	qglColor3f (1, 1, 1);
