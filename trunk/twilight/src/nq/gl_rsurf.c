@@ -966,8 +966,47 @@ R_DrawBrushModel (entity_t *e)
 				EmitBothSkyLayers (psurf);
 			} else {
 				t = R_TextureAnimation(psurf->texinfo->texture);
-				qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
-				R_RenderBrushPoly (psurf, t);
+				if (gl_mtexable && (gl_mtexcombine_arb || gl_mtexcombine_ext))
+				{
+					qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
+							GL_COMBINE_ARB);
+					qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,
+							GL_REPLACE);
+					qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,
+							GL_TEXTURE);
+					qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2.0);
+					qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
+					qglActiveTextureARB (GL_TEXTURE1_ARB);
+					qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
+							GL_COMBINE_ARB);
+					qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,
+							GL_MODULATE);
+					qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,
+							GL_TEXTURE);
+					qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB,
+							GL_PREVIOUS_ARB);
+					
+					qglActiveTextureARB (GL_TEXTURE1_ARB);
+					R_RenderBrushPolyMTex (psurf, t);
+					qglActiveTextureARB (GL_TEXTURE0_ARB);
+
+					qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1.0);
+					qglActiveTextureARB (GL_TEXTURE0_ARB);
+					qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
+							GL_MODULATE);			
+				}
+				else if (gl_mtexable)
+				{
+					qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
+					qglActiveTextureARB (GL_TEXTURE1_ARB);
+					R_RenderBrushPolyMTex (psurf, t);
+					qglActiveTextureARB (GL_TEXTURE0_ARB);
+				}
+				else
+				{
+					qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
+					R_RenderBrushPoly (psurf, t);
+				}
 			}
 		}
 	}
