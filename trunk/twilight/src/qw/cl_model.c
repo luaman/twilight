@@ -373,7 +373,6 @@ Mod_LoadTexinfo (lump_t *l)
 	mtexinfo_t	*out;
 	Uint32		i, j, count;
 	Uint32		miptex;
-	float		len1, len2;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
@@ -388,17 +387,6 @@ Mod_LoadTexinfo (lump_t *l)
 		for (j = 0; j < 8; j++)
 			out->vecs[j / 4][j % 4] = 
 				LittleFloat (in->vecs[j/4][j % 4]);
-		len1 = VectorLength (out->vecs[0]);
-		len2 = VectorLength (out->vecs[1]);
-		len1 = (len1 + len2) * 0.5f;
-		if (len1 < 0.32)
-			out->mipadjust = 4;
-		else if (len1 < 0.49)
-			out->mipadjust = 3;
-		else if (len1 < 0.99)
-			out->mipadjust = 2;
-		else
-			out->mipadjust = 1;
 
 		miptex = LittleLong (in->miptex);
 		out->flags = LittleLong (in->flags);
