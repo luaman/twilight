@@ -449,16 +449,7 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 		tc_array[i][0] = paliashdr->tcarray[i].s;
 		tc_array[i][1] = paliashdr->tcarray[i].t;
 
-		if ((shadedots[pose->normal_indices[i]] < 0.69) || (shadedots[pose->normal_indices[i]] > 2.0)) {
-			fprintf(stderr, "%p Error! Corrupt shadedots! %f\n", paliashdr, shadedots[pose->normal_indices[i]]);
-		}
 		l = shadedots[pose->normal_indices[i]] * shadelight;
-		if (l < 0.69) {
-			fprintf(stderr, "%p l: %f, shadelight %f, shadedots: %f indice: %d\n",
-					paliashdr, l, shadelight,
-					shadedots[pose->normal_indices[i]],
-					pose->normal_indices[i]);
-		}
 		if (colorlights) {
 			VectorScale(lightcolor, l, c_array[i]);
 			c_array[i][3] = 1;
