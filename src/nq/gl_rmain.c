@@ -792,14 +792,11 @@ void
 R_NewMap (void)
 {
 	Uint32			i;
-	extern Sint32	r_dlightframecount;
 
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
 
 	R_ClearParticles ();
-
-	r_dlightframecount = 0;
 
 	// some Cvars need resetting on map change
 	Cvar_Set (r_skyname, "");

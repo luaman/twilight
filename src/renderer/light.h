@@ -30,7 +30,7 @@
 #include "model.h"
 
 // Light sources are points, use this to pretend they are not
-#define LIGHTOFFSET 32 * 32
+#define LIGHTOFFSET (32 * 32)
 
 // Note that you can't simply change this value (yet)
 #define MAX_DLIGHTS 32
