@@ -35,6 +35,11 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "SDL.h"
+
+// cvars
+cvar_t     *in_key_repeat_delay;
+cvar_t     *in_key_repeat_interval;
 
 /*
 ===============================================================================
@@ -637,7 +642,17 @@ CL_InitInput (void)
 	Cmd_AddCommand ("-klook", IN_KLookUp);
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
+	SDL_EnableKeyRepeat(in_key_repeat_delay->value, in_key_repeat_interval->value);
+}
 
+/*
+============
+CL_InitInputCvars
+============
+*/
+void
+CL_InitInputCvars (void)
+{
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", CVAR_NONE, NULL);
 	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", CVAR_ARCHIVE, NULL);
 	cl_backspeed = Cvar_Get ("cl_backspeed", "200", CVAR_ARCHIVE, NULL);
@@ -646,4 +661,26 @@ CL_InitInput (void)
 	cl_yawspeed = Cvar_Get ("cl_yawspeed", "140", CVAR_NONE, NULL);
 	cl_pitchspeed = Cvar_Get ("cl_pitchspeed", "150", CVAR_NONE, NULL);
 	cl_anglespeedkey = Cvar_Get ("cl_anglespeedkey", "1.5", CVAR_NONE, NULL);
+
+	in_key_repeat_delay = Cvar_Get ("in_key_repeat_delay", va ("%i", SDL_DEFAULT_REPEAT_DELAY), CVAR_NONE, CL_InputSetRepeatDelay);
+	in_key_repeat_interval = Cvar_Get ("in_key_repeat_interval", va ("%i", SDL_DEFAULT_REPEAT_INTERVAL), CVAR_NONE, CL_InputSetRepeatInterval);
 }
+
+/*
+	CL_InputSetRepeatDelay
+*/
+void
+CL_InputSetRepeatDelay (struct cvar_s *var)
+{
+	SDL_EnableKeyRepeat(var->value, (in_key_repeat_interval) ? in_key_repeat_interval->value : SDL_DEFAULT_REPEAT_INTERVAL);
+}
+
+/*
+	CL_InputSetRepeatDelay
+*/
+void
+CL_InputSetRepeatInterval (struct cvar_s *var)
+{
+	SDL_EnableKeyRepeat((in_key_repeat_delay) ? in_key_repeat_delay->value : SDL_DEFAULT_REPEAT_DELAY, var->value);
+}
+

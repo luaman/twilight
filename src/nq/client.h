@@ -329,59 +329,62 @@ extern kbutton_t in_mlook, in_klook;
 extern kbutton_t in_strafe;
 extern kbutton_t in_speed;
 
-void        CL_InitInput (void);
-void        CL_SendCmd (void);
-void        CL_SendMove (usercmd_t *cmd);
+void	CL_InitInput (void);
+void	CL_InitInputCvars (void);
+void	CL_InputSetRepeatDelay (struct cvar_s *var);
+void	CL_InputSetRepeatInterval (struct cvar_s *var);
+void	CL_SendCmd (void);
+void	CL_SendMove (usercmd_t *cmd);
 
-void        CL_ParseTEnt (void);
-void        CL_UpdateTEnts (void);
+void	CL_ParseTEnt (void);
+void	CL_UpdateTEnts (void);
 
-void        CL_ClearState (void);
-
-
-int         CL_ReadFromServer (void);
-void        CL_WriteToServer (usercmd_t *cmd);
-void        CL_BaseMove (usercmd_t *cmd);
+void	CL_ClearState (void);
 
 
-float       CL_KeyState (kbutton_t *key);
-char       *Key_KeynumToString (int keynum);
+int		CL_ReadFromServer (void);
+void	CL_WriteToServer (usercmd_t *cmd);
+void	CL_BaseMove (usercmd_t *cmd);
+
+
+float	CL_KeyState (kbutton_t *key);
+char	*Key_KeynumToString (int keynum);
 
 //
 // cl_demo.c
 //
-void        CL_StopPlayback (void);
-int         CL_GetMessage (void);
+void	CL_StopPlayback (void);
+int		CL_GetMessage (void);
 
-void        CL_Stop_f (void);
-void        CL_Record_f (void);
-void        CL_PlayDemo_f (void);
-void        CL_TimeDemo_f (void);
+void	CL_Stop_f (void);
+void	CL_Record_f (void);
+void	CL_PlayDemo_f (void);
+void	CL_TimeDemo_f (void);
 
 //
 // cl_parse.c
 //
-void        CL_ParseServerMessage (void);
-void        CL_NewTranslation (int slot);
+void	CL_ParseServerMessage (void);
+void	CL_NewTranslation (int slot);
 
 //
 // view
 //
-void        V_StartPitchDrift (void);
-void        V_StopPitchDrift (void);
+void	V_StartPitchDrift (void);
+void	V_StopPitchDrift (void);
 
-void        V_RenderView (void);
-void        V_UpdatePalette (void);
-void        V_Register (void);
-void        V_ParseDamage (void);
-void        V_SetContentsColor (int contents);
+void	V_RenderView (void);
+void	V_UpdatePalette (void);
+void	V_Register (void);
+void	V_ParseDamage (void);
+void	V_SetContentsColor (int contents);
 
 
 //
 // cl_tent
 //
-void        CL_InitTEnts (void);
-void        CL_SignonReply (void);
+void	CL_InitTEnts (void);
+void	CL_SignonReply (void);
 
 #endif // __CLIENT_H
 
