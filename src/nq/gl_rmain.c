@@ -895,8 +895,10 @@ R_DrawAliasModel (entity_t *e)
 		VectorAdd (e->origin, clmodel->mins, mins);
 		VectorAdd (e->origin, clmodel->maxs, maxs);
 
-		if (R_CullBox (mins, maxs))
+		if (R_CullBox (mins, maxs)) {
+			e->pose1 = e->pose2 = -1;
 			return;
+		}
 	}
 
 	/*

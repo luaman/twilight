@@ -157,10 +157,6 @@ SOURCE=.\gl_poly.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_refrag.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_rlight.c
 # End Source File
 # Begin Source File
