@@ -22,7 +22,6 @@ These things should be done before first public release:
 
 Would be nice but is not strictly needed, in importance order:
 
-  - Working gamma/brightness support
   - Working mousewheel support
   - Rid ourselves of the monolithic header
   - Merge QW server into QW client ala NQ
@@ -35,6 +34,8 @@ Would be nice but is not strictly needed, in importance order:
   - Make water warping optional, and the intensity of it
     controllable via cvars, and menu, most likely off
     by default for QW, and on by default for NQ
+  - Hardware gamma/brightness support
+    (we currently have software based)
 
 Stuff that can wait:
 
