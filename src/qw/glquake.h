@@ -207,7 +207,6 @@ extern struct cvar_s *gl_clear;
 extern struct cvar_s *gl_cull;
 extern struct cvar_s *gl_poly;
 extern struct cvar_s *gl_texsort;
-extern struct cvar_s *gl_smoothmodels;
 extern struct cvar_s *gl_affinemodels;
 extern struct cvar_s *gl_polyblend;
 extern struct cvar_s *gl_keeptjunctions;

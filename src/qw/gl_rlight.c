@@ -173,11 +173,10 @@ R_RenderDlights (void)
 	if (!gl_flashblend->value)
 		return;
 
-	r_dlightframecount = r_framecount + 1;	// because the count hasn't
-	// advanced yet for this frame
+	// because the count hasn't advanced yet for this frame
+	r_dlightframecount = r_framecount + 1;
 	qglDepthMask (0);
 	qglDisable (GL_TEXTURE_2D);
-	qglShadeModel (GL_SMOOTH);
 	qglEnable (GL_BLEND);
 	qglBlendFunc (GL_ONE, GL_ONE);
 
