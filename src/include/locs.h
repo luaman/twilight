@@ -35,13 +35,13 @@ typedef struct location_s {
 } location_t;
 
 void loc_init ();
-void loc_new (vec3_t where, char *name);
+void loc_new (vec3_t where, const char *name);
 void loc_clear ();
 location_t *loc_search (vec3_t where);
-void loc_load (char *map);
-void loc_newmap (char *worldname);
+void loc_load (const char *map);
+void loc_newmap (const char *worldname);
 void loc_delete (location_t *del);
-void loc_write (char *worldname);
+void loc_write (const char *worldname);
 
 #endif // __LOCS_H
 

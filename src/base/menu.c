@@ -160,7 +160,7 @@ Menu_Parse_QPic_Trans (codetree_t *tree_base, menu_qpic_trans_t *trans)
 }
 
 static menu_item_t *
-Menu_Parse_Item (char *type, codetree_t *tree_base)
+Menu_Parse_Item (const char *type, codetree_t *tree_base)
 {
 	menu_item_t		*item;
 	codetree_t		*code = tree_base;
@@ -571,8 +571,8 @@ Menu_Parse_Menus (codetree_t *tree_base)
 static void
 M_Deletemenu_f (void)
 {
-	menu_t	*menu, **last;
-	char	*id;
+	menu_t		*menu, **last;
+	const char	*id;
 
 	id = Cmd_Args ();
 	last = &m_first;
@@ -667,8 +667,8 @@ M_Enter (menu_t *menu)
 static void
 M_Menu_f (void)
 {
-	menu_t	*menu;
-	char	*id;
+	menu_t		*menu;
+	const char	*id;
 
 	id = Cmd_Args ();
 

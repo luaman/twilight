@@ -43,12 +43,12 @@ void Host_ClearMemory (void);
 void Host_InitCommands (void);
 void Host_Init (void);
 void Host_Shutdown (void);
-void Host_Error (char *error, ...);
-void Host_EndGame (char *message, ...);
+void Host_Error (const char *error, ...);
+void Host_EndGame (const char *message, ...);
 void Host_Frame (double time);
-void Host_ClientCommands (char *fmt, ...);
+void Host_ClientCommands (const char *fmt, ...);
 void Host_ShutdownServer (qboolean crash);
-void Host_WriteConfiguration (char *name);
+void Host_WriteConfiguration (const char *name);
 
 
 // HACK HACK HACK - the rest of this file is for NQ only

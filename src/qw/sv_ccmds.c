@@ -252,8 +252,8 @@ SV_Give_f
 static void
 SV_Give_f (void)
 {
-	char       *t;
-	int         v;
+	const char	*t;
+	int			v;
 
 	if (!sv_allow_cheats) {
 		Com_Printf
@@ -383,7 +383,7 @@ SV_Status_f (void)
 	int         i, j, l;
 	client_t   *cl;
 	float       cpu, avg, pak;
-	char       *s;
+	const char	*s;
 
 	cpu = (svs.stats.latched_active + svs.stats.latched_idle);
 	if (cpu)
@@ -486,7 +486,7 @@ SV_ConSay_f (void)
 {
 	client_t   *client;
 	int         j;
-	char       *p;
+	const char	*p;
 	char        text[1024];
 
 	if (Cmd_Argc () < 2)
@@ -497,10 +497,10 @@ SV_ConSay_f (void)
 
 	if (*p == '"') {
 		p++;
-		p[strlen (p) - 1] = 0;
-	}
-
-	strlcat_s (text, p);
+		strlcat_s (text, p);
+		text[strlen (text) - 1] = 0;
+	} else
+		strlcat_s (text, p);
 
 	for (j = 0, client = svs.clients; j < MAX_CLIENTS; j++, client++) {
 		if (client->state != cs_spawned)
@@ -522,7 +522,7 @@ SV_Heartbeat_f (void)
 }
 
 void
-SV_SendServerInfoChange (char *key, char *value)
+SV_SendServerInfoChange (const char *key, const char *value)
 {
 	if (!sv.state)
 		return;
@@ -632,7 +632,7 @@ Sets the fake *gamedir to a different directory.
 static void
 SV_Gamedir (void)
 {
-	char       *dir;
+	const char *dir;
 
 	if (Cmd_Argc () == 1) {
 		Com_Printf ("Current *gamedir: %s\n",
@@ -729,7 +729,7 @@ Sets the gamedir and path to a different directory.
 static void
 SV_Gamedir_f (void)
 {
-	char       *dir;
+	const char *dir;
 
 	if (Cmd_Argc () == 1) {
 		Com_Printf ("Current gamedir: %s\n", com_gamedir);

@@ -44,7 +44,7 @@ key and returns the associated value, or an empty string.
 ===============
 */
 char *
-Info_ValueForKey (char *s, char *key)
+Info_ValueForKey (char *s, const char *key)
 {
 	char			pkey[512];
 	static char		value[4][512];		// extra buffers for compares
@@ -86,7 +86,7 @@ Info_ValueForKey (char *s, char *key)
 }
 
 void
-Info_RemoveKey (char *s, char *key)
+Info_RemoveKey (char *s, const char *key)
 {
 	char	   *start;
 	char		pkey[512];
@@ -182,7 +182,8 @@ Info_RemovePrefixedKeys (char *start, char prefix)
 
 
 void
-Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
+Info_SetValueForStarKey (char *s, const char *key, const char *value,
+		unsigned maxsize)
 {
 	char		new[1024], *v;
 	int			c;
@@ -251,7 +252,7 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 }
 
 void
-Info_SetValueForKey (char *s, char *key, char *value, int maxsize)
+Info_SetValueForKey (char *s, const char *key, const char *value, int maxsize)
 {
 	if (key[0] == '*')
 	{
@@ -263,7 +264,7 @@ Info_SetValueForKey (char *s, char *key, char *value, int maxsize)
 }
 
 void
-Info_Print (char *s)
+Info_Print (const char *s)
 {
 	char		key[512];
 	char		value[512];

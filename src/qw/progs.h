@@ -101,9 +101,9 @@ void ED_Print (edict_t *ed);
 void ED_Write (FILE * f, edict_t *ed);
 
 void ED_WriteGlobals (FILE * f);
-void ED_ParseGlobals (char *data);
+void ED_ParseGlobals (const char *data);
 
-void ED_LoadFromFile (char *data);
+void ED_LoadFromFile (const char *data);
 
 edict_t *EDICT_NUM_ERROR (Uint n);
 #define EDICT_NUM(n) (n < MAX_EDICTS ? (edict_t *)((Uint8 *)sv.edicts + (n) * pr_edict_size) : EDICT_NUM_ERROR(n))

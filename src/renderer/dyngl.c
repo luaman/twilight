@@ -192,7 +192,7 @@ static char *gl_extensions_list;
  * option (or both!)
  */
 SDL_bool
-DynGL_LoadLibrary (char *name)
+DynGL_LoadLibrary (const char *name)
 {
 	if (dyngl_loaded)
 	{
@@ -273,7 +273,7 @@ DynGL_CloseLibrary (void)
  * extension will be disabled.
  */
 void
-DynGL_BadExtension (char *ext)
+DynGL_BadExtension (const char *ext)
 {
 	dynglnode_t		*p;
 
@@ -305,7 +305,7 @@ DynGL_BadExtension (char *ext)
  * extension to be bad in DynGL_GetFunctions () above.
  */
 SDL_bool
-DynGL_HasExtension (char *ext)
+DynGL_HasExtension (const char *ext)
 {
 	dynglnode_t		*p;
 
@@ -414,7 +414,7 @@ DynGL_GetFunctions (void (*errfunc)(const char *fmt, ...))
 
 
 SDL_bool
-DynGL_BadFunction (const char *func, void (*errfunc)(char *fmt, ...))
+DynGL_BadFunction (const char *func, void (*errfunc)(const char *fmt, ...))
 {
 	if (!dyngl_loaded)
 	{

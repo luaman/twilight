@@ -520,7 +520,8 @@ Host_Loadgame_f
 static void
 Host_Loadgame_f (void)
 {
-	char        name[MAX_OSPATH], mapname[MAX_QPATH], str[32768], *start;
+	char        name[MAX_OSPATH], mapname[MAX_QPATH], str[32768];
+	const char	*start;
 	float       time, tfloat, spawn_parms[NUM_SPAWN_PARMS];
 	Sint		entnum, version, r;
 	Uint		i;
@@ -612,7 +613,6 @@ Host_Loadgame_f (void)
 		if (i == sizeof (str) - 1)
 			Sys_Error ("Loadgame buffer overflow");
 		str[i] = 0;
-		start = str;
 		start = COM_Parse (str);
 		if (!com_token[0])
 			// end of file
@@ -732,7 +732,7 @@ Host_Say (qboolean teamonly)
 
 	save = host_client;
 
-	p = Cmd_Args ();
+	p = Zstrdup(tempzone, Cmd_Args ());
 // remove quotes if present
 	if (*p == '"') {
 		p++;
@@ -751,6 +751,8 @@ Host_Say (qboolean teamonly)
 
 	strlcat_s (text, p);
 	strlcat_s (text, "\n");
+
+	Z_Free(p);
 
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
 		if (!client || !client->active || !client->spawned)
@@ -799,7 +801,7 @@ Host_Tell_f (void)
 	strlcpy_s (text, host_client->name);
 	strlcat_s (text, ": ");
 
-	p = Cmd_Args ();
+	p = Zstrdup(tempzone, Cmd_Args ());
 
 	// remove quotes if present
 	if (*p == '"') {
@@ -814,6 +816,8 @@ Host_Tell_f (void)
 
 	strlcat_s (text, p);
 	strlcat_s (text, "\n");
+
+	Z_Free (p);
 
 	save = host_client;
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
@@ -1120,8 +1124,8 @@ Kicks a user off of the server
 static void
 Host_Kick_f (void)
 {
-	char       *who;
-	char       *message = NULL;
+	char       *who, *args;
+	const char	*message = NULL;
 	client_t   *save;
 	Uint32		i;
 	qboolean    byNumber = false;
@@ -1168,7 +1172,9 @@ Host_Kick_f (void)
 			return;
 
 		if (Cmd_Argc () > 2) {
-			message = COM_Parse (Cmd_Args ());
+			args = Zstrdup(tempzone, Cmd_Args ());
+			message = COM_Parse (args);
+			Z_Free (args);
 			if (byNumber) {
 				message++;				// skip the #
 				while (*message == ' ')	// skip white space
@@ -1204,7 +1210,7 @@ Host_Give_f
 static void
 Host_Give_f (void)
 {
-	char		*t;
+	const char	*t;
 	int			v;
 	eval_t		*val;
 

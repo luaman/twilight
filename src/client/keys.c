@@ -73,8 +73,8 @@ static Uint			key_repeats[256];	// if > 1, it is autorepeating
 static qboolean		keydown[256];
 
 typedef struct {
-	char       *name;
-	int         keynum;
+	const char	*name;
+	int			keynum;
 } keyname_t;
 
 static keyname_t   keynames[] = {
@@ -172,9 +172,9 @@ static keyname_t   keynames[] = {
 static qboolean
 CheckForCommand (void)
 {
-	char        command[128];
-	char       *cmd, *s;
-	int         i;
+	char		command[128];
+	const char	*cmd, *s;
+	int			i;
 
 	s = key_lines[edit_line] + 1;
 
@@ -437,7 +437,7 @@ the K_* names are matched up.
 ===================
 */
 static int
-Key_StringToKeynum (char *str)
+Key_StringToKeynum (const char *str)
 {
 	keyname_t  *kn;
 
@@ -460,7 +460,7 @@ given keynum.
 FIXME: handle quote special (general escape sequence?)
 ===================
 */
-static char       *
+static const char       *
 Key_KeynumToString (int keynum)
 {
 	keyname_t  *kn;
@@ -483,7 +483,7 @@ Key_KeynumToString (int keynum)
 
 
 static void
-Key_SetBinding (int keynum, int bindmap, char *binding)
+Key_SetBinding (int keynum, int bindmap, const char *binding)
 {
 	char       *new;
 	int         l;
@@ -781,8 +781,8 @@ Should NOT be called during an interrupt!
 void
 Key_Event (int key, qboolean down)
 {
-	char       *kb;
-	char        cmd[1024];
+	const char	*kb;
+	char		cmd[1024];
 
 //	Com_Printf ("%d : %d %d : %d\n", key, key_bmap, key_bmap2, down);
 

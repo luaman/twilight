@@ -40,22 +40,12 @@ model_t     mod_known[MAX_MOD_KNOWN];
 int         mod_numknown;
 
 
-/*
-===============
-Mod_Init
-===============
-*/
 void
 Mod_Init (void)
 {
 	Mod_Brush_Init ();
 }
 
-/*
-===================
-Mod_ClearAll
-===================
-*/
 void
 Mod_ClearAll (void)
 {
@@ -67,14 +57,8 @@ Mod_ClearAll (void)
 			Mod_UnloadModel (mod);
 }
 
-/*
-==================
-Mod_FindName
-
-==================
-*/
 model_t *
-Mod_FindName (char *name)
+Mod_FindName (const char *name)
 {
 	int			i;
 	model_t		*mod, *freemod;
@@ -109,14 +93,8 @@ Mod_FindName (char *name)
 	return NULL;
 }
 
-/*
-==================
-Mod_TouchModel
-
-==================
-*/
 void
-Mod_TouchModel (char *name)
+Mod_TouchModel (const char *name)
 {
 	model_t    *mod;
 
@@ -126,13 +104,11 @@ Mod_TouchModel (char *name)
 
 /*
 ==================
-Mod_ForName
-
 Loads in a model for the given name
 ==================
 */
 model_t    *
-Mod_ForName (char *name, int flags)
+Mod_ForName (const char *name, int flags)
 {
 	model_t    *mod;
 

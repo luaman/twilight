@@ -57,7 +57,7 @@ static cvar_t *registered;
 
 static void COM_InitFilesystem (void);
 static void COM_Path_f (void);
-static void Com_PrintHex (char *str, int len);
+static void Com_PrintHex (const char *str, int len);
 static void *SZ_GetSpace (sizebuf_t *buf, size_t length);
 
 
@@ -132,7 +132,7 @@ InsertLinkAfter (link_t *l, link_t *after)
 */
 
 int
-Q_atoi (char *str)
+Q_atoi (const char *str)
 {
 	int			val;
 	int			sign;
@@ -189,7 +189,7 @@ Q_atoi (char *str)
 
 
 float
-Q_atof (char *str)
+Q_atof (const char *str)
 {
 	double		val;
 	int			sign;
@@ -341,7 +341,7 @@ MSG_WriteFloat (sizebuf_t *sb, float f)
 }
 
 void
-MSG_WriteString (sizebuf_t *sb, char *s)
+MSG_WriteString (sizebuf_t *sb, const char *s)
 {
 	if (!s)
 		SZ_Write (sb, "", 1);
@@ -639,17 +639,20 @@ MSG_PrintPacket ()
 
 static void (*rd_print) (char *) = NULL;
 
-void Com_BeginRedirect (void (*RedirectedPrint) (char *))
+void
+Com_BeginRedirect (void (*RedirectedPrint) (char *))
 {
 	rd_print = RedirectedPrint;
 }
 
-void Com_EndRedirect (void)
+void
+Com_EndRedirect (void)
 {
 	rd_print = NULL;
 }
 
-static void Com_PrintHex (char *str, int len)
+static
+void Com_PrintHex (const char *str, int len)
 {
 	char	c;
 	int		i;
@@ -669,7 +672,8 @@ static void Com_PrintHex (char *str, int len)
 	Com_Printf("\n");
 }
 
-void Com_Printf (const char *fmt, ...)
+void
+Com_Printf (const char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
@@ -698,7 +702,8 @@ void Com_Printf (const char *fmt, ...)
  * This just wraps to Com_DFPrintf for now.
  * Should we eventually move everything to Com_DFPrintf?
  */
-void Com_DPrintf (const char *fmt, ...)
+void
+Com_DPrintf (const char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
@@ -717,7 +722,8 @@ void Com_DPrintf (const char *fmt, ...)
 }
 
 /* Like Com_DFPrintf, but takes a log level to sort things out a bit */
-void Com_DFPrintf (int level, const char *fmt, ...)
+void
+Com_DFPrintf (int level, const char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
@@ -810,10 +816,10 @@ SZ_Print (sizebuf_t *buf, const char *data)
 COM_SkipPath
 ============
 */
-char *
-COM_SkipPath (char *pathname)
+const char *
+COM_SkipPath (const char *pathname)
 {
-	char       *last;
+	const char       *last;
 
 	last = pathname;
 	while (*pathname)
@@ -831,7 +837,7 @@ COM_StripExtension
 ============
 */
 void
-COM_StripExtension (char *in, char *out)
+COM_StripExtension (const char *in, char *out)
 {
 	char *last = NULL;
 
@@ -856,9 +862,9 @@ COM_DefaultExtension
 ==================
 */
 void
-COM_DefaultExtension (char *path, char *extension, size_t len)
+COM_DefaultExtension (char *path, const char *extension, size_t len)
 {
-	char	   *src;
+	const char	   *src;
 
 	/*
 	 * if path doesn't have a .EXT, append extension
@@ -888,8 +894,8 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-char *
-COM_Parse (char *data)
+const char *
+COM_Parse (const char *data)
 {
 	int			c;
 	int			len;
@@ -955,7 +961,7 @@ COM_CheckFile
 ================
 */
 static qboolean 
-COM_CheckFile (char *fname)
+COM_CheckFile (const char *fname)
 {
 	FILE	   *h;
 
@@ -1100,7 +1106,7 @@ COM_filelength (FILE * f)
 }
 
 static int
-COM_FileOpenRead (char *path, FILE ** hndl)
+COM_FileOpenRead (const char *path, FILE ** hndl)
 {
 	FILE	   *f;
 
@@ -1146,7 +1152,7 @@ The filename will be prefixed by the current game directory
 ============
 */
 void
-COM_WriteFile (char *filename, void *data, int len)
+COM_WriteFile (const char *filename, const void *data, int len)
 {
 	FILE	   *f;
 	char		name[MAX_OSPATH];
@@ -1176,11 +1182,12 @@ Only used for CopyFile and download
 ============
 */
 void
-COM_CreatePath (char *path)
+COM_CreatePath (const char *path)
 {
-	char	   *ofs;
+	char	   *ofs, *tmp;
 
-	for (ofs = path + 1; *ofs; ofs++)
+	tmp = Zstrdup (tempzone, path);
+	for (ofs = tmp + 1; *ofs; ofs++)
 	{
 		if (*ofs == '/')
 		{
@@ -1190,13 +1197,14 @@ COM_CreatePath (char *path)
 			*ofs = '/';
 		}
 	}
+	Z_Free (tmp);
 }
 
 
 int file_from_pak;						// last file came from pack
 
 int
-COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
+COM_FOpenFile (const char *filename, FILE ** file, qboolean complain)
 {
 	searchpath_t	*search;
 	char			netpath[MAX_OSPATH];
@@ -1285,7 +1293,7 @@ Always appends a 0 byte to the loaded data.
 ============
 */
 static Uint8 *
-COM_LoadFile (char *path, qboolean complain, int type, memzone_t *zone)
+COM_LoadFile (const char *path, qboolean complain, int type, memzone_t *zone)
 {
 	FILE		*h;
 	Uint8		*buf = NULL;
@@ -1325,19 +1333,19 @@ COM_LoadFile (char *path, qboolean complain, int type, memzone_t *zone)
 }
 
 Uint8 *
-COM_LoadZoneFile (char *path, qboolean complain, memzone_t *zone)
+COM_LoadZoneFile (const char *path, qboolean complain, memzone_t *zone)
 {
 	return COM_LoadFile (path, complain, 0, zone);
 }
 
 Uint8 *
-COM_LoadTempFile (char *path, qboolean complain)
+COM_LoadTempFile (const char *path, qboolean complain)
 {
 	return COM_LoadFile (path, complain, 1, NULL);
 }
 
 Uint8 *
-COM_LoadNamedFile (char *path, qboolean complain)
+COM_LoadNamedFile (const char *path, qboolean complain)
 {
 	return COM_LoadFile (path, complain, 2, NULL);
 }
@@ -1353,7 +1361,7 @@ of the list so they override previous pack files.
 =================
 */
 static pack_t     *
-COM_LoadPackFile (char *packfile)
+COM_LoadPackFile (const char *packfile)
 {
 	dpackheader_t	header;
 	int				i;
@@ -1411,7 +1419,7 @@ then loads and adds pak1.pak pak2.pak ...
 ================
 */
 static void
-COM_AddDirectory (char *dir)
+COM_AddDirectory (const char *dir)
 {
 	int				i;
 	searchpath_t   *search;
@@ -1458,7 +1466,7 @@ Wrapper for COM_AddDirectory
 ================
 */
 static void
-COM_AddGameDirectory (char *dir)
+COM_AddGameDirectory (const char *dir)
 {
 	char		buf[1024];
 
@@ -1483,7 +1491,7 @@ Sets the gamedir and path to a different directory.
 ================
 */
 void
-COM_Gamedir (char *dir)
+COM_Gamedir (const char *dir)
 {
 	searchpath_t *next;
 

@@ -798,7 +798,7 @@ static void
 SV_ConnectionlessPacket (void)
 {
 	char       *s;
-	char       *c;
+	const char *c;
 
 	MSG_BeginReading ();
 	MSG_ReadLong ();					// skip the -1 marker
@@ -885,7 +885,7 @@ StringToFilter
 =================
 */
 static qboolean
-StringToFilter (char *s, ipfilter_t * f)
+StringToFilter (const char *s, ipfilter_t * f)
 {
 	char        num[128];
 	int         i, j;

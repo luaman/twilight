@@ -246,7 +246,7 @@ If no console is visible, the notify window will pop up.
 ================
 */
 void
-Con_Print (char *txt)
+Con_Print (const char *txt)
 {
 	int			mask;
 	char		c;
@@ -486,14 +486,14 @@ Con_DrawConsole (int lines)
 
 */
 static void
-Con_DisplayList(char **list)
+Con_DisplayList(const char **list)
 {
 	int			i = 0;
 	int			pos = 0;
 	int			len = 0;
 	int			maxlen = 0;
 	int			width = (con_linewidth - 4);
-	char		**walk = list;
+	const char	**walk = list;
 
 	while (*walk)
 	{
@@ -537,11 +537,11 @@ Con_DisplayList(char **list)
 void
 Con_CompleteCommandLine (void)
 {
-	char		*cmd = "";
+	const char		*cmd = "";
 	char		*s;
 	int			c, v, a, i;
 	int			cmd_len;
-	char		**list[3] = {0, 0, 0};
+	const char	**list[3] = {0, 0, 0};
 
 	s = key_lines[edit_line] + 1;
 	if (*s == '\\' || *s == '/')
@@ -587,7 +587,7 @@ Con_CompleteCommandLine (void)
 			for (i = 0; i < 3; i++)
 			{
 				char ch = cmd[cmd_len];
-				char **l = list[i];
+				const char **l = list[i];
 				if (l)
 				{
 					while (*l && (*l)[cmd_len] == ch)

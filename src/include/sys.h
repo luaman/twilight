@@ -41,13 +41,13 @@ extern char logname[128];
 extern double curtime;
 extern qboolean do_stdin;
 
-void Sys_Printf(char *fmt, ...);
+void Sys_Printf(const char *fmt, ...);
 void Sys_Quit(void);
 void Sys_Init(void);
-void Sys_Error(char *error, ...);
-int Sys_FileTime(char *path);
-void Sys_mkdir(char *path);
-void Sys_DebugLog(char *file, char *fmt, ...);
+void Sys_Error(const char *error, ...);
+int Sys_FileTime(const char *path);
+void Sys_mkdir(const char *path);
+void Sys_DebugLog(const char *file, const char *fmt, ...);
 double Sys_DoubleTime(void);
 char *Sys_ConsoleInput(void);
 int Sys_CheckClipboardPaste(int key);

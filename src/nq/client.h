@@ -263,7 +263,7 @@ void	CL_TimeDemo_f (void);
 // cl_parse.c
 //
 void	CL_ParseServerMessage (void);
-void	CL_ParseEntityLump (char *entdata);
+void	CL_ParseEntityLump (const char *entdata);
 
 //
 // view

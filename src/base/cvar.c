@@ -334,7 +334,7 @@ Cvar_Find (const char *name)
 
 */
 int
-Cvar_CompleteCountPossible (char *partial)
+Cvar_CompleteCountPossible (const char *partial)
 {
 	cvar_list_t	*v;
 	size_t		len;
@@ -363,14 +363,14 @@ Cvar_CompleteCountPossible (char *partial)
 	Thanks to taniwha
 
 */
-char	**
-Cvar_CompleteBuildList (char *partial)
+const char	**
+Cvar_CompleteBuildList (const char *partial)
 {
 	cvar_list_t	*v;
 	size_t		len = 0;
 	int			bpos = 0;
 	int			sizeofbuf = (Cvar_CompleteCountPossible (partial) + 1) * sizeof (char *);
-	char		**buf;
+	const char	**buf;
 
 	len = strlen(partial);
 	buf = malloc(sizeofbuf + sizeof (char *));
@@ -384,7 +384,7 @@ Cvar_CompleteBuildList (char *partial)
 }	
 
 // FIXME: Replace this mess with a bash-style complete
-char *
+const char *
 Cvar_TabComplete (const char *partial)
 {
 	cvar_list_t	   *v;

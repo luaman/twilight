@@ -144,9 +144,9 @@ void Mod_UnloadSpriteModel(model_t *mod);
 
 void Mod_Init(void);
 void Mod_ClearAll(void);
-model_t *Mod_FindName(char *name);
-void Mod_TouchModel(char *name);
-model_t *Mod_ForName(char *name, int flags);
+model_t *Mod_FindName(const char *name);
+void Mod_TouchModel(const char *name);
+model_t *Mod_ForName(const char *name, int flags);
 
 void Mod_Brush_Init(void);
 mleaf_t *Mod_PointInLeaf(vec3_t p, model_t *model);

@@ -36,7 +36,7 @@ extern viddef_t vid;
 extern qboolean scr_disabled_for_loading;
 extern float scr_centertime_off;
 
-void SCR_CenterPrint(char *str);
+void SCR_CenterPrint(const char *str);
 void SCR_Init_Cvars(void);
 void SCR_Init(void);
 void SCR_BeginLoadingPlaque(void);

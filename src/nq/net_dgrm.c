@@ -566,7 +566,7 @@ Test_Poll (void)
 static void
 Test_f (void)
 {
-	char       *host;
+	const char	*host;
 	int         n;
 	int         max = MAX_SCOREBOARD;
 	struct qsockaddr sendaddr;
@@ -700,7 +700,7 @@ Test2_Poll (void)
 static void
 Test2_f (void)
 {
-	char       *host;
+	const char	*host;
 	int         n;
 	struct qsockaddr sendaddr;
 
@@ -922,7 +922,7 @@ _Datagram_CheckNewConnections (void)
 	}
 
 	if (command == CCREQ_RULE_INFO) {
-		char					   *prevCvarName;
+		const char				   *prevCvarName;
 		struct cvar_foreach_s	   *id = NULL;
 		cvar_t					   *var = NULL;
 
@@ -1217,7 +1217,7 @@ _Datagram_Connect (char *host)
 	int         newsock, control, reps;
 	Uint32		ret;
 	double		start_time;
-	char		*reason;
+	const char	*reason;
 
 	// see if we can resolve the host name
 	if (dfunc.GetAddrFromName (host, &sendaddr) == -1)

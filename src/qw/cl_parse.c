@@ -1438,7 +1438,7 @@ CL_ParseServerMessage (void)
 void
 CL_ParseEntityLump (char *entdata)
 {
-	char *data;
+	const char *data;
 	char key[128], value[4096];
 
 	data = entdata;

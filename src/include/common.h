@@ -140,7 +140,7 @@ void MSG_WriteByte (sizebuf_t *sb, int c);
 void MSG_WriteShort (sizebuf_t *sb, int c);
 void MSG_WriteLong (sizebuf_t *sb, int c);
 void MSG_WriteFloat (sizebuf_t *sb, float f);
-void MSG_WriteString (sizebuf_t *sb, char *s);
+void MSG_WriteString (sizebuf_t *sb, const char *s);
 void MSG_WriteCoord (sizebuf_t *sb, float f);
 void MSG_WriteAngle (sizebuf_t *sb, float f);
 void MSG_WriteAngle16 (sizebuf_t *sb, float f);
@@ -168,8 +168,8 @@ void MSG_PrintPacket (void);
 
 //============================================================================
 
-int Q_atoi (char *str);
-float Q_atof (char *str);
+int Q_atoi (const char *str);
+float Q_atof (const char *str);
 
 
 
@@ -178,16 +178,16 @@ float Q_atof (char *str);
 extern char com_token[1024];
 extern qboolean com_eof;
 
-char *COM_Parse (char *data);
+const char *COM_Parse (const char *data);
 
 
 void COM_Init_Cvars (void);
 void COM_Init (void);
 
-char *COM_SkipPath (char *pathname);
-void COM_StripExtension (char *in, char *out);
-void COM_DefaultExtension (char *path, char *extension, size_t len);
-char *COM_FileExtension (char *in);
+const char *COM_SkipPath (const char *pathname);
+void COM_StripExtension (const char *in, char *out);
+void COM_DefaultExtension (char *path, const char *extension, size_t len);
+const char *COM_FileExtension (const char *in);
 
 //============================================================================
 
@@ -196,20 +196,20 @@ struct cache_user_s;
 
 extern char com_gamedir[MAX_OSPATH];
 
-void COM_WriteFile (char *filename, void *data, int len);
-int COM_FOpenFile (char *filename, FILE ** file, qboolean complain);
+void COM_WriteFile (const char *filename, const void *data, int len);
+int COM_FOpenFile (const char *filename, FILE ** file, qboolean complain);
 
 int COM_filelength (FILE *f);
-Uint8 *COM_LoadZoneFile (char *path, qboolean complain, memzone_t *zone);
-Uint8 *COM_LoadTempFile (char *path, qboolean complain);
-Uint8 *COM_LoadNamedFile (char *path, qboolean complain);
-void COM_CreatePath (char *path);
-void COM_Gamedir (char *dir);
+Uint8 *COM_LoadZoneFile (const char *path, qboolean complain, memzone_t *zone);
+Uint8 *COM_LoadTempFile (const char *path, qboolean complain);
+Uint8 *COM_LoadNamedFile (const char *path, qboolean complain);
+void COM_CreatePath (const char *path);
+void COM_Gamedir (const char *dir);
 
 void Com_Printf (const char *fmt, ...);
 void Com_DPrintf (const char *fmt, ...);
 void Com_DFPrintf (int level, const char *fmt, ...);
-void Com_SafePrintf (char *fmt, ...);
+void Com_SafePrintf (const char *fmt, ...);
 void Com_BeginRedirect (void (*RedirectedPrint) (char *));
 void Com_EndRedirect (void);
 

@@ -205,9 +205,9 @@ for a few moments
 ==============
 */
 void
-SCR_CenterPrint (char *str)
+SCR_CenterPrint (const char *str)
 {
-	char	   *s;
+	const char	*s;
 	char		line[64];
 	int			i, j, l;
 

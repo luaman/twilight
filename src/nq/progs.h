@@ -108,7 +108,7 @@ extern int	pr_edictareasize;			// in bytes
 void PR_Init_Cvars (void);
 void PR_Init (void);
 
-void PR_ExecuteProgram (func_t fnum, char *errormessage);
+void PR_ExecuteProgram (func_t fnum, const char *errormessage);
 void PR_LoadProgs (void);
 
 void PR_Profile_f (void);
@@ -120,12 +120,12 @@ void ED_Free (edict_t *ed);
 
 void ED_Print (edict_t *ed);
 void ED_Write (FILE *f, edict_t *ed);
-char *ED_ParseEdict (char *data, edict_t *ent);
+const char *ED_ParseEdict (const char *data, edict_t *ent);
 
 void ED_WriteGlobals (FILE *f);
-void ED_ParseGlobals (char *data);
+void ED_ParseGlobals (const char *data);
 
-void ED_LoadFromFile (char *data);
+void ED_LoadFromFile (const char *data);
 
 edict_t *EDICT_NUM_ERROR (Uint n);
 #define EDICT_NUM(n) (n < sv.max_edicts ? (edict_t *)((Uint8 *)sv.edicts + (n) * pr_edict_size) : EDICT_NUM_ERROR(n))
