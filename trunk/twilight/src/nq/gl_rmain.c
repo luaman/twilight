@@ -80,6 +80,7 @@ cvar_t *r_waterripple;
 cvar_t *r_wireframe;
 cvar_t *r_dynamic;
 cvar_t *r_novis;
+cvar_t *r_stainmaps;
 
 cvar_t *gl_clear;
 cvar_t *gl_cull;

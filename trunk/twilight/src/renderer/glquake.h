@@ -108,6 +108,7 @@ extern struct cvar_s *r_waterripple;
 extern struct cvar_s *r_wireframe;
 extern struct cvar_s *r_dynamic;
 extern struct cvar_s *r_novis;
+extern struct cvar_s *r_stainmaps;
 extern struct cvar_s *r_netgraph;
 extern struct cvar_s *r_skyname;
 extern struct cvar_s *r_fastsky;
