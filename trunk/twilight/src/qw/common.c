@@ -531,7 +531,7 @@ MSG_GetReadCount (void)
 int
 MSG_ReadChar (void)
 {
-	int         c;
+	signed char c;
 
 	if (msg_readcount + 1 > net_message.cursize) {
 		msg_badread = true;
@@ -547,7 +547,7 @@ MSG_ReadChar (void)
 int
 MSG_ReadByte (void)
 {
-	int         c;
+	unsigned char c;
 
 	if (msg_readcount + 1 > net_message.cursize) {
 		msg_badread = true;
@@ -563,7 +563,7 @@ MSG_ReadByte (void)
 int
 MSG_ReadShort (void)
 {
-	int         c;
+	short c;
 
 	if (msg_readcount + 2 > net_message.cursize) {
 		msg_badread = true;
