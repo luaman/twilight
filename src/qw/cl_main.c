@@ -100,7 +100,7 @@ static cvar_t		*noaim;
 static cvar_t		*msg;
 
 static cvar_t		*host_speeds;
-cvar_t		*show_fps;
+int					fps_capped0, fps_capped1;
 
 
 static qboolean allowremotecmd = true;
@@ -1002,7 +1002,6 @@ CL_Init_Cvars (void)
 
 	// set for running times
 	host_speeds = Cvar_Get ("host_speeds", "0", CVAR_NONE, NULL);
-	show_fps = Cvar_Get ("show_fps", "0", CVAR_NONE, NULL);
 
 	rcon_password = Cvar_Get ("rcon_password", "", CVAR_NONE, NULL);
 	rcon_address = Cvar_Get ("rcon_address", "", CVAR_NONE, NULL);
@@ -1230,7 +1229,7 @@ Host_Frame (double time)
 	static double	time2 = 0;
 	static double	time3 = 0;
 	int				pass1, pass2, pass3;
-	double			fps, time_diff, frametime, max_time;
+	double			fps, frametime, min_time;
 
 	if (setjmp (host_abort))
 		return;							// something bad happened, or the
@@ -1246,12 +1245,15 @@ Host_Frame (double time)
 			fps = rate->fvalue / 80.0f;
 
 		fps = bound (30.0f, fps, 72.0f);
-		max_time = 1.0 / fps;
-		time_diff = max_time - frametime;
+		min_time = 1.0f / fps;
 
-		if (time_diff > 0) {
-			if (time_diff > 0.010)
-				SDL_Delay(1);
+		if (time < (old_realtime + min_time)) {
+			fps_capped0++;
+			if (time < (old_realtime + min_time - 0.002)) {
+				float diff = (old_realtime + min_time) - time;
+				SDL_Delay(diff * 990);
+				fps_capped1++;
+			}
 
 			return;							// framerate is too high
 		}
@@ -1331,6 +1333,7 @@ Host_Frame (double time)
 
 	host_framecount++;
 	fps_count++;
+	fps_capped0 = fps_capped1 = 0;
 }
 
 static void
