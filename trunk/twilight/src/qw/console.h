@@ -67,8 +67,17 @@ void        Con_ClearNotify (void);
 void        Con_ToggleConsole_f (void);
 
 void        Con_NotifyBox (char *text);	// during startup for sound / cd
-
 										// warnings
+
+// wrapper function to attempt to either complete the command line
+// or to list possible matches grouped by type
+// (i.e. will display possible variables, aliases, commands
+// that match what they've typed so far)
+void Con_CompleteCommandLine(void);
+
+// Generic libs/util/console.c function to display a list
+// formatted in columns on the console
+void Con_DisplayList(char **list);
 
 #endif // __CONSOLE_H
 

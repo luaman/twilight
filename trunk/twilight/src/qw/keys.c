@@ -258,9 +258,9 @@ Key_Console (int key)
 		return;
 	}
 
-	if (key == K_TAB) {					// command completion
-		CompleteCommand ();
-		return;
+	// Command Line Completion
+	if (key == K_TAB) {
+		Con_CompleteCommandLine();
 	}
 
 	if (key == K_BACKSPACE || key == K_LEFTARROW) {

@@ -688,3 +688,146 @@ Con_NotifyBox (char *text)
 	key_dest = key_game;
 	realtime = 0;						// put the cursor back to invisible
 }
+
+/*
+	Con_DisplayList
+
+	New function for tab-completion system
+	Added by EvilTypeGuy
+	MEGA Thanks to Taniwha
+
+*/
+void
+Con_DisplayList(char **list)
+{
+	int	i = 0;
+	int	pos = 0;
+	int	len = 0;
+	int	maxlen = 0;
+	int	width = (con_linewidth - 4);
+	char	**walk = list;
+
+	while (*walk) {
+		len = strlen(*walk);
+		if (len > maxlen)
+			maxlen = len;
+		walk++;
+	}
+	maxlen += 1;
+
+	while (*list) {
+		len = strlen(*list);
+		if (pos + maxlen >= width) {
+			Con_Printf("\n");
+			pos = 0;
+		}
+
+		Con_Printf("%s", *list);
+		for (i = 0; i < (maxlen - len); i++)
+			Con_Printf(" ");
+
+		pos += maxlen;
+		list++;
+	}
+
+	if (pos)
+		Con_Printf("\n\n");
+}
+
+/*
+	Con_CompleteCommandLine
+
+	New function for tab-completion system
+	Added by EvilTypeGuy
+	Thanks to Fett erich@heintz.com
+	Thanks to taniwha
+
+*/
+void
+Con_CompleteCommandLine (void)
+{
+	char	*cmd = "";
+	char	*s;
+	int		c, v, a, i;
+	int		cmd_len;
+	char	**list[3] = {0, 0, 0};
+
+	s = key_lines[edit_line] + 1;
+	// Count number of possible matches
+	c = Cmd_CompleteCountPossible(s);
+	v = Cvar_CompleteCountPossible(s);
+	a = Cmd_CompleteAliasCountPossible(s);
+	
+	if (!(c + v + a))	// No possible matches
+		return;
+	
+	if (c + v + a == 1) {
+		if (c)
+			list[0] = Cmd_CompleteBuildList(s);
+		else if (v)
+			list[0] = Cvar_CompleteBuildList(s);
+		else
+			list[0] = Cmd_CompleteAliasBuildList(s);
+		cmd = *list[0];
+		cmd_len = strlen (cmd);
+	} else {
+		if (c)
+			cmd = *(list[0] = Cmd_CompleteBuildList(s));
+		if (v)
+			cmd = *(list[1] = Cvar_CompleteBuildList(s));
+		if (a)
+			cmd = *(list[2] = Cmd_CompleteAliasBuildList(s));
+
+		cmd_len = Q_strlen (s);
+		do {
+			for (i = 0; i < 3; i++) {
+				char ch = cmd[cmd_len];
+				char **l = list[i];
+				if (l) {
+					while (*l && (*l)[cmd_len] == ch)
+						l++;
+					if (*l)
+						break;
+				}
+			}
+			if (i == 3)
+				cmd_len++;
+		} while (i == 3);
+		// 'quakebar'
+		Con_Printf("\n\35");
+		for (i = 0; i < con_linewidth - 4; i++)
+			Con_Printf("\36");
+		Con_Printf("\37\n");
+
+		// Print Possible Commands
+		if (c) {
+			Con_Printf("%i possible command%s\n", c, (c > 1) ? "s: " : ":");
+			Con_DisplayList(list[0]);
+		}
+		
+		if (v) {
+			Con_Printf("%i possible variable%s\n", v, (v > 1) ? "s: " : ":");
+			Con_DisplayList(list[1]);
+		}
+		
+		if (a) {
+			Con_Printf("%i possible aliases%s\n", a, (a > 1) ? "s: " : ":");
+			Con_DisplayList(list[2]);
+		}
+		return;
+	}
+	
+	if (cmd) {
+		Q_strncpy(key_lines[edit_line] + 1, cmd, cmd_len);
+		key_linepos = cmd_len + 1;
+		if (c + v + a == 1) {
+			key_lines[edit_line][key_linepos] = ' ';
+			key_linepos++;
+		}
+		key_lines[edit_line][key_linepos] = 0;
+	}
+	for (i = 0; i < 3; i++)
+		if (list[i])
+			free (list[i]);
+}
+
