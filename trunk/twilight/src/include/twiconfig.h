@@ -52,5 +52,9 @@
 # include "sdlstub.h"
 #endif
 
+#ifndef __FUNCTION__
+#define __FUNCTION__	"Not A Clue!"
+#endif
+
 #endif // __TWICONFIG_H
 
