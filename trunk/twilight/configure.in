@@ -57,7 +57,7 @@ save_CFLAGS="$CFLAGS"
 CFLAGS="-Wall -Winline"
 AC_ARG_ENABLE(bitchiness,
 	[  --enable-bitchiness     Enable (many) extra compiler warnings],,
-	enable_bitchiness="no")
+	enable_bitchiness="$DEVEL_RELEASE")
 if test "x$enable_bitchiness" = "xyes"; then
 	CFLAGS="$CFLAGS -Wpointer-arith -Wcast-qual -Wsign-compare"
 	dnl Other potential bitchiness:
