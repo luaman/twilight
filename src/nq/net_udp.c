@@ -21,6 +21,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
+#ifdef WIN32
+#include <winsock.h>
+#include <io.h>
+#define EWOULDBLOCK WSAEWOULDBLOCK
+#define ECONNREFUSED WSAECONNREFUSED
+#else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -28,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <netdb.h>
 #include <sys/param.h>
 #include <sys/ioctl.h>
+#endif
 #include <errno.h>
 
 #ifdef __sun__
@@ -38,8 +45,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <libc.h>
 #endif
 
-extern int  gethostname (char *, int);
-extern int  close (int);
+//extern int  gethostname (char *, int);
+//extern int  close (int);
 
 extern cvar_t hostname;
 
@@ -54,6 +61,10 @@ static unsigned long myAddr;
 
 //=============================================================================
 
+#ifdef WIN32
+#define MAXHOSTNAMELEN		256
+#endif
+
 int
 UDP_Init (void)
 {
@@ -61,6 +72,18 @@ UDP_Init (void)
 	char        buff[MAXHOSTNAMELEN];
 	struct qsockaddr addr;
 	char       *colon;
+
+#ifdef _WIN32
+	WSADATA     winsockdata;
+	WORD        wVersionRequested;
+	int         r;
+
+	wVersionRequested = MAKEWORD (1, 1);
+
+	r = WSAStartup (MAKEWORD (1, 1), &winsockdata);
+	if (r)
+		Sys_Error ("Winsock initialization failed.");
+#endif /* _WIN32 */
 
 	if (COM_CheckParm ("-noudp"))
 		return -1;
@@ -81,7 +104,7 @@ UDP_Init (void)
 
 	((struct sockaddr_in *) &broadcastaddr)->sin_family = AF_INET;
 	((struct sockaddr_in *) &broadcastaddr)->sin_addr.s_addr = INADDR_BROADCAST;
-	((struct sockaddr_in *) &broadcastaddr)->sin_port = htons (net_hostport);
+	((struct sockaddr_in *) &broadcastaddr)->sin_port = htons ((unsigned short) net_hostport);
 
 	UDP_GetSocketAddr (net_controlsocket, &addr);
 	Q_strcpy (my_tcpip_address, UDP_AddrToString (&addr));
@@ -126,30 +149,39 @@ UDP_Listen (qboolean state)
 
 //=============================================================================
 
+// LordHavoc: grabbed QW's superior UDP_OpenSocket, and adjusted to fit
 int
 UDP_OpenSocket (int port)
 {
 	int         newsocket;
 	struct sockaddr_in address;
-	qboolean    _true = true;
+	int         i;
+#ifdef _WIN32
+#define ioctl ioctlsocket
+	unsigned long _true = true;
+#else
+	int         _true = 1;
+#endif
+
+	memset (&address, 0, sizeof(address));
 
 	if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
-		return -1;
-
-	if (ioctl (newsocket, FIONBIO, (char *) &_true) == -1)
-		goto ErrorReturn;
-
+		Sys_Error ("UDP_OpenSocket: socket:%s", strerror (errno));
+	if (ioctl (newsocket, FIONBIO, &_true) == -1)
+		Sys_Error ("UDP_OpenSocket: ioctl FIONBIO:", strerror (errno));
 	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons (port);
+//ZOID -- check for interface binding option
+	if ((i = COM_CheckParm ("-ip")) != 0 && i < com_argc) {
+		address.sin_addr.s_addr = inet_addr (com_argv[i + 1]);
+		Con_Printf ("Binding to IP Interface Address of %s\n",
+					inet_ntoa (address.sin_addr));
+	} else
+		address.sin_addr.s_addr = INADDR_ANY;
+	address.sin_port = htons ((short) port);
 	if (bind (newsocket, (void *) &address, sizeof (address)) == -1)
-		goto ErrorReturn;
+		Sys_Error ("UDP_OpenSocket: bind: %s", strerror (errno));
 
 	return newsocket;
-
-  ErrorReturn:
-	close (newsocket);
-	return -1;
 }
 
 //=============================================================================
@@ -185,7 +217,7 @@ PartialIPAddress (char *in, struct qsockaddr *hostaddr)
 
 	buff[0] = '.';
 	b = buff;
-	strcpy (buff + 1, in);
+	Q_strcpy (buff + 1, in);
 	if (buff[1] == '.')
 		b++;
 
@@ -339,7 +371,7 @@ UDP_StringToAddr (char *string, struct qsockaddr *addr)
 
 	addr->sa_family = AF_INET;
 	((struct sockaddr_in *) addr)->sin_addr.s_addr = htonl (ipaddr);
-	((struct sockaddr_in *) addr)->sin_port = htons (hp);
+	((struct sockaddr_in *) addr)->sin_port = htons ((unsigned short) hp);
 	return 0;
 }
 
@@ -394,7 +426,7 @@ UDP_GetAddrFromName (char *name, struct qsockaddr *addr)
 		return -1;
 
 	addr->sa_family = AF_INET;
-	((struct sockaddr_in *) addr)->sin_port = htons (net_hostport);
+	((struct sockaddr_in *) addr)->sin_port = htons ((unsigned short) net_hostport);
 	((struct sockaddr_in *) addr)->sin_addr.s_addr =
 		*(int *) hostentry->h_addr_list[0];
 
@@ -432,7 +464,7 @@ UDP_GetSocketPort (struct qsockaddr *addr)
 int
 UDP_SetSocketPort (struct qsockaddr *addr, int port)
 {
-	((struct sockaddr_in *) addr)->sin_port = htons (port);
+	((struct sockaddr_in *) addr)->sin_port = htons ((unsigned short) port);
 	return 0;
 }
 

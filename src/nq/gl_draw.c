@@ -76,11 +76,7 @@ GL_Bind (int texnum)
 	if (currenttexture == texnum)
 		return;
 	currenttexture = texnum;
-#ifdef _WIN32
-	bindTexFunc (GL_TEXTURE_2D, texnum);
-#else
 	glBindTexture (GL_TEXTURE_2D, texnum);
-#endif
 }
 
 
@@ -235,13 +231,13 @@ Draw_CachePic (char *path)
 	glpic_t    *gl;
 
 	for (pic = menu_cachepics, i = 0; i < menu_numcachepics; pic++, i++)
-		if (!strcmp (path, pic->name))
+		if (!Q_strcmp (path, pic->name))
 			return &pic->pic;
 
 	if (menu_numcachepics == MAX_CACHED_PICS)
 		Sys_Error ("menu_numcachepics == MAX_CACHED_PICS");
 	menu_numcachepics++;
-	strcpy (pic->name, path);
+	Q_strcpy (pic->name, path);
 
 //
 // load the pic from disk
@@ -254,7 +250,7 @@ Draw_CachePic (char *path)
 	// HACK HACK HACK --- we need to keep the bytes for
 	// the translatable player picture just for the menu
 	// configuration dialog
-	if (!strcmp (path, "gfx/menuplyr.lmp"))
+	if (!Q_strcmp (path, "gfx/menuplyr.lmp"))
 		memcpy (menuplyr_pixels, dat->data, dat->width * dat->height);
 
 	pic->pic.width = dat->width;
@@ -377,7 +373,7 @@ Draw_Init (void)
 
 	// 3dfx can only handle 256 wide textures
 	if (!Q_strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
-		strstr ((char *) gl_renderer, "Glide"))
+		Q_strstr ((char *) gl_renderer, "Glide"))
 		Cvar_Set ("gl_max_size", "256");
 
 	Cmd_AddCommand ("gl_texturemode", &Draw_TextureMode_f);
@@ -409,8 +405,8 @@ Draw_Init (void)
 #else
 	sprintf (ver, "(gl %4.2f) %4.2f", (float) GLQUAKE_VERSION, (float) VERSION);
 #endif
-	dest = cb->data + 320 * 186 + 320 - 11 - 8 * strlen (ver);
-	y = strlen (ver);
+	dest = cb->data + 320 * 186 + 320 - 11 - 8 * Q_strlen (ver);
+	y = Q_strlen (ver);
 	for (x = 0; x < y; x++)
 		Draw_CharToConback (ver[x], dest + (x << 3));
 
@@ -860,7 +856,7 @@ GL_FindTexture (char *identifier)
 	gltexture_t *glt;
 
 	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
-		if (!strcmp (identifier, glt->identifier))
+		if (!Q_strcmp (identifier, glt->identifier))
 			return gltextures[i].texnum;
 	}
 
@@ -1220,7 +1216,7 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 	// see if the texture is allready present
 	if (identifier[0]) {
 		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
-			if (!strcmp (identifier, glt->identifier)) {
+			if (!Q_strcmp (identifier, glt->identifier)) {
 				if (width != glt->width || height != glt->height)
 					Sys_Error ("GL_LoadTexture: cache mismatch");
 				return gltextures[i].texnum;
@@ -1231,7 +1227,7 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 		numgltextures++;
 	}
 
-	strcpy (glt->identifier, identifier);
+	Q_strcpy (glt->identifier, identifier);
 	glt->texnum = texture_extension_number;
 	glt->width = width;
 	glt->height = height;
@@ -1259,17 +1255,18 @@ GL_LoadPicTexture (qpic_t *pic)
 
 /****************************************/
 
-static GLenum oldtarget = TEXTURE0_SGIS;
+static GLenum oldtarget = 0;
+extern GLenum gl_mtex_enum;
 
 void
 GL_SelectTexture (GLenum target)
 {
 	if (!gl_mtexable)
 		return;
-	qglSelectTextureSGIS (target);
+	qglSelectTexture (gl_mtex_enum + target);
 	if (target == oldtarget)
 		return;
-	cnttextures[oldtarget - TEXTURE0_SGIS] = currenttexture;
-	currenttexture = cnttextures[target - TEXTURE0_SGIS];
+	cnttextures[oldtarget] = currenttexture;
+	currenttexture = cnttextures[target];
 	oldtarget = target;
 }

@@ -462,7 +462,7 @@ M_ScanSaves (void)
 	int         version;
 
 	for (i = 0; i < MAX_SAVEGAMES; i++) {
-		strcpy (m_filenames[i], "--- UNUSED SLOT ---");
+		Q_strcpy (m_filenames[i], "--- UNUSED SLOT ---");
 		loadable[i] = false;
 		sprintf (name, "%s/s%i.sav", com_gamedir, i);
 		f = fopen (name, "r");
@@ -470,7 +470,7 @@ M_ScanSaves (void)
 			continue;
 		fscanf (f, "%i\n", &version);
 		fscanf (f, "%79s\n", name);
-		strncpy (m_filenames[i], name, sizeof (m_filenames[i]) - 1);
+		Q_strncpy (m_filenames[i], name, sizeof (m_filenames[i]) - 1);
 
 		// change _ back to space
 		for (j = 0; j < SAVEGAME_COMMENT_LENGTH; j++)
@@ -757,12 +757,12 @@ M_Setup_Draw (void)
 					 12 + ((int) (realtime * 4) & 1));
 
 	if (setup_cursor == 0)
-		M_DrawCharacter (168 + 8 * strlen (setup_hostname),
+		M_DrawCharacter (168 + 8 * Q_strlen (setup_hostname),
 						 setup_cursor_table[setup_cursor],
 						 10 + ((int) (realtime * 4) & 1));
 
 	if (setup_cursor == 1)
-		M_DrawCharacter (168 + 8 * strlen (setup_myname),
+		M_DrawCharacter (168 + 8 * Q_strlen (setup_myname),
 						 setup_cursor_table[setup_cursor],
 						 10 + ((int) (realtime * 4) & 1));
 }
@@ -832,13 +832,13 @@ M_Setup_Key (int k)
 
 		case K_BACKSPACE:
 			if (setup_cursor == 0) {
-				if (strlen (setup_hostname))
-					setup_hostname[strlen (setup_hostname) - 1] = 0;
+				if (Q_strlen (setup_hostname))
+					setup_hostname[Q_strlen (setup_hostname) - 1] = 0;
 			}
 
 			if (setup_cursor == 1) {
-				if (strlen (setup_myname))
-					setup_myname[strlen (setup_myname) - 1] = 0;
+				if (Q_strlen (setup_myname))
+					setup_myname[Q_strlen (setup_myname) - 1] = 0;
 			}
 			break;
 
@@ -846,14 +846,14 @@ M_Setup_Key (int k)
 			if (k < 32 || k > 127)
 				break;
 			if (setup_cursor == 0) {
-				l = strlen (setup_hostname);
+				l = Q_strlen (setup_hostname);
 				if (l < 15) {
 					setup_hostname[l + 1] = 0;
 					setup_hostname[l] = k;
 				}
 			}
 			if (setup_cursor == 1) {
-				l = strlen (setup_myname);
+				l = Q_strlen (setup_myname);
 				if (l < 15) {
 					setup_myname[l + 1] = 0;
 					setup_myname[l] = k;
@@ -1067,12 +1067,6 @@ M_Menu_Options_f (void)
 	key_dest = key_menu;
 	m_state = m_options;
 	m_entersound = true;
-
-#ifdef _WIN32
-	if ((options_cursor == 13) && (modestate != MS_WINDOWED)) {
-		options_cursor = 0;
-	}
-#endif
 }
 
 
@@ -1238,12 +1232,8 @@ M_Options_Draw (void)
 	if (vid_menudrawfn)
 		M_Print (16, 128, "         Video Options");
 
-#ifdef _WIN32
-	if (modestate == MS_WINDOWED) {
-		M_Print (16, 136, "             Use Mouse");
-		M_DrawCheckbox (220, 136, _windowed_mouse.value);
-	}
-#endif
+	M_Print (16, 136, "             Use Mouse");
+	M_DrawCheckbox (220, 136, _windowed_mouse.value);
 
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8,
@@ -1310,14 +1300,6 @@ M_Options_Key (int k)
 		else
 			options_cursor = 0;
 	}
-#ifdef _WIN32
-	if ((options_cursor == 13) && (modestate != MS_WINDOWED)) {
-		if (k == K_UPARROW)
-			options_cursor = 12;
-		else
-			options_cursor = 0;
-	}
-#endif
 }
 
 //=============================================================================
@@ -1367,14 +1349,14 @@ M_FindKeysForCommand (char *command, int *twokeys)
 	char       *b;
 
 	twokeys[0] = twokeys[1] = -1;
-	l = strlen (command);
+	l = Q_strlen (command);
 	count = 0;
 
 	for (j = 0; j < 256; j++) {
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!strncmp (b, command, l)) {
+		if (!Q_strncmp (b, command, l)) {
 			twokeys[count] = j;
 			count++;
 			if (count == 2)
@@ -1390,13 +1372,13 @@ M_UnbindCommand (char *command)
 	int         l;
 	char       *b;
 
-	l = strlen (command);
+	l = Q_strlen (command);
 
 	for (j = 0; j < 256; j++) {
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!strncmp (b, command, l))
+		if (!Q_strncmp (b, command, l))
 			Key_SetBinding (j, "");
 	}
 }
@@ -1425,7 +1407,7 @@ M_Keys_Draw (void)
 
 		M_Print (16, y, bindnames[i][1]);
 
-		l = strlen (bindnames[i][0]);
+		l = Q_strlen (bindnames[i][0]);
 
 		M_FindKeysForCommand (bindnames[i][0], keys);
 
@@ -1434,7 +1416,7 @@ M_Keys_Draw (void)
 		} else {
 			name = Key_KeynumToString (keys[0]);
 			M_Print (140, y, name);
-			x = strlen (name) * 8;
+			x = Q_strlen (name) * 8;
 			if (keys[1] != -1) {
 				M_Print (140 + x + 8, y, "or");
 				M_Print (140 + x + 32, y, Key_KeynumToString (keys[1]));
@@ -1838,7 +1820,7 @@ M_SerialConfig_Draw (void)
 					 12 + ((int) (realtime * 4) & 1));
 
 	if (serialConfig_cursor == 4)
-		M_DrawCharacter (168 + 8 * strlen (serialConfig_phone),
+		M_DrawCharacter (168 + 8 * Q_strlen (serialConfig_phone),
 						 serialConfig_cursor_table[serialConfig_cursor],
 						 10 + ((int) (realtime * 4) & 1));
 
@@ -1974,8 +1956,8 @@ M_SerialConfig_Key (int key)
 
 		case K_BACKSPACE:
 			if (serialConfig_cursor == 4) {
-				if (strlen (serialConfig_phone))
-					serialConfig_phone[strlen (serialConfig_phone) - 1] = 0;
+				if (Q_strlen (serialConfig_phone))
+					serialConfig_phone[Q_strlen (serialConfig_phone) - 1] = 0;
 			}
 			break;
 
@@ -1983,7 +1965,7 @@ M_SerialConfig_Key (int key)
 			if (key < 32 || key > 127)
 				break;
 			if (serialConfig_cursor == 4) {
-				l = strlen (serialConfig_phone);
+				l = Q_strlen (serialConfig_phone);
 				if (l < 15) {
 					serialConfig_phone[l + 1] = 0;
 					serialConfig_phone[l] = key;
@@ -2051,7 +2033,7 @@ M_ModemConfig_Draw (void)
 	M_DrawTextBox (basex, modemConfig_cursor_table[1] + 4, 16, 1);
 	M_Print (basex + 8, modemConfig_cursor_table[1] + 12, modemConfig_clear);
 	if (modemConfig_cursor == 1)
-		M_DrawCharacter (basex + 8 + 8 * strlen (modemConfig_clear),
+		M_DrawCharacter (basex + 8 + 8 * Q_strlen (modemConfig_clear),
 						 modemConfig_cursor_table[1] + 12,
 						 10 + ((int) (realtime * 4) & 1));
 
@@ -2059,7 +2041,7 @@ M_ModemConfig_Draw (void)
 	M_DrawTextBox (basex, modemConfig_cursor_table[2] + 4, 30, 1);
 	M_Print (basex + 8, modemConfig_cursor_table[2] + 12, modemConfig_init);
 	if (modemConfig_cursor == 2)
-		M_DrawCharacter (basex + 8 + 8 * strlen (modemConfig_init),
+		M_DrawCharacter (basex + 8 + 8 * Q_strlen (modemConfig_init),
 						 modemConfig_cursor_table[2] + 12,
 						 10 + ((int) (realtime * 4) & 1));
 
@@ -2067,7 +2049,7 @@ M_ModemConfig_Draw (void)
 	M_DrawTextBox (basex, modemConfig_cursor_table[3] + 4, 16, 1);
 	M_Print (basex + 8, modemConfig_cursor_table[3] + 12, modemConfig_hangup);
 	if (modemConfig_cursor == 3)
-		M_DrawCharacter (basex + 8 + 8 * strlen (modemConfig_hangup),
+		M_DrawCharacter (basex + 8 + 8 * Q_strlen (modemConfig_hangup),
 						 modemConfig_cursor_table[3] + 12,
 						 10 + ((int) (realtime * 4) & 1));
 
@@ -2134,18 +2116,18 @@ M_ModemConfig_Key (int key)
 
 		case K_BACKSPACE:
 			if (modemConfig_cursor == 1) {
-				if (strlen (modemConfig_clear))
-					modemConfig_clear[strlen (modemConfig_clear) - 1] = 0;
+				if (Q_strlen (modemConfig_clear))
+					modemConfig_clear[Q_strlen (modemConfig_clear) - 1] = 0;
 			}
 
 			if (modemConfig_cursor == 2) {
-				if (strlen (modemConfig_init))
-					modemConfig_init[strlen (modemConfig_init) - 1] = 0;
+				if (Q_strlen (modemConfig_init))
+					modemConfig_init[Q_strlen (modemConfig_init) - 1] = 0;
 			}
 
 			if (modemConfig_cursor == 3) {
-				if (strlen (modemConfig_hangup))
-					modemConfig_hangup[strlen (modemConfig_hangup) - 1] = 0;
+				if (Q_strlen (modemConfig_hangup))
+					modemConfig_hangup[Q_strlen (modemConfig_hangup) - 1] = 0;
 			}
 			break;
 
@@ -2154,7 +2136,7 @@ M_ModemConfig_Key (int key)
 				break;
 
 			if (modemConfig_cursor == 1) {
-				l = strlen (modemConfig_clear);
+				l = Q_strlen (modemConfig_clear);
 				if (l < 15) {
 					modemConfig_clear[l + 1] = 0;
 					modemConfig_clear[l] = key;
@@ -2162,7 +2144,7 @@ M_ModemConfig_Key (int key)
 			}
 
 			if (modemConfig_cursor == 2) {
-				l = strlen (modemConfig_init);
+				l = Q_strlen (modemConfig_init);
 				if (l < 29) {
 					modemConfig_init[l + 1] = 0;
 					modemConfig_init[l] = key;
@@ -2170,7 +2152,7 @@ M_ModemConfig_Key (int key)
 			}
 
 			if (modemConfig_cursor == 3) {
-				l = strlen (modemConfig_hangup);
+				l = Q_strlen (modemConfig_hangup);
 				if (l < 15) {
 					modemConfig_hangup[l + 1] = 0;
 					modemConfig_hangup[l] = key;
@@ -2261,12 +2243,12 @@ M_LanConfig_Draw (void)
 					 12 + ((int) (realtime * 4) & 1));
 
 	if (lanConfig_cursor == 0)
-		M_DrawCharacter (basex + 9 * 8 + 8 * strlen (lanConfig_portname),
+		M_DrawCharacter (basex + 9 * 8 + 8 * Q_strlen (lanConfig_portname),
 						 lanConfig_cursor_table[0],
 						 10 + ((int) (realtime * 4) & 1));
 
 	if (lanConfig_cursor == 2)
-		M_DrawCharacter (basex + 16 + 8 * strlen (lanConfig_joinname),
+		M_DrawCharacter (basex + 16 + 8 * Q_strlen (lanConfig_joinname),
 						 lanConfig_cursor_table[2],
 						 10 + ((int) (realtime * 4) & 1));
 
@@ -2329,13 +2311,13 @@ M_LanConfig_Key (int key)
 
 		case K_BACKSPACE:
 			if (lanConfig_cursor == 0) {
-				if (strlen (lanConfig_portname))
-					lanConfig_portname[strlen (lanConfig_portname) - 1] = 0;
+				if (Q_strlen (lanConfig_portname))
+					lanConfig_portname[Q_strlen (lanConfig_portname) - 1] = 0;
 			}
 
 			if (lanConfig_cursor == 2) {
-				if (strlen (lanConfig_joinname))
-					lanConfig_joinname[strlen (lanConfig_joinname) - 1] = 0;
+				if (Q_strlen (lanConfig_joinname))
+					lanConfig_joinname[Q_strlen (lanConfig_joinname) - 1] = 0;
 			}
 			break;
 
@@ -2344,7 +2326,7 @@ M_LanConfig_Key (int key)
 				break;
 
 			if (lanConfig_cursor == 2) {
-				l = strlen (lanConfig_joinname);
+				l = Q_strlen (lanConfig_joinname);
 				if (l < 21) {
 					lanConfig_joinname[l + 1] = 0;
 					lanConfig_joinname[l] = key;
@@ -2354,7 +2336,7 @@ M_LanConfig_Key (int key)
 			if (key < '0' || key > '9')
 				break;
 			if (lanConfig_cursor == 0) {
-				l = strlen (lanConfig_portname);
+				l = Q_strlen (lanConfig_portname);
 				if (l < 5) {
 					lanConfig_portname[l + 1] = 0;
 					lanConfig_portname[l] = key;
@@ -2950,7 +2932,7 @@ M_ServerList_Draw (void)
 
 			for (i = 0; i < hostCacheCount; i++)
 				for (j = i + 1; j < hostCacheCount; j++)
-					if (strcmp (hostcache[j].name, hostcache[i].name) < 0) {
+					if (Q_strcmp (hostcache[j].name, hostcache[i].name) < 0) {
 						Q_memcpy (&temp, &hostcache[j], sizeof (hostcache_t));
 						Q_memcpy (&hostcache[j], &hostcache[i],
 								  sizeof (hostcache_t));

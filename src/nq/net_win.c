@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "net_loop.h"
 #include "net_dgrm.h"
-#include "net_ser.h"
 
 net_driver_t net_drivers[MAX_NET_DRIVERS] =
 {
@@ -64,7 +63,6 @@ int net_numdrivers = 2;
 
 
 #include "net_wins.h"
-#include "net_wipx.h"
 
 net_landriver_t	net_landrivers[MAX_NET_DRIVERS] =
 {
@@ -91,30 +89,6 @@ net_landriver_t	net_landrivers[MAX_NET_DRIVERS] =
 	WINS_GetSocketPort,
 	WINS_SetSocketPort
 	},
-	{
-	"Winsock IPX",
-	false,
-	0,
-	WIPX_Init,
-	WIPX_Shutdown,
-	WIPX_Listen,
-	WIPX_OpenSocket,
-	WIPX_CloseSocket,
-	WIPX_Connect,
-	WIPX_CheckNewConnections,
-	WIPX_Read,
-	WIPX_Write,
-	WIPX_Broadcast,
-	WIPX_AddrToString,
-	WIPX_StringToAddr,
-	WIPX_GetSocketAddr,
-	WIPX_GetNameFromAddr,
-	WIPX_GetAddrFromName,
-	WIPX_AddrCompare,
-	WIPX_GetSocketPort,
-	WIPX_SetSocketPort
-	}
-
 };
 
-int net_numlandrivers = 2;
+int net_numlandrivers = 1;

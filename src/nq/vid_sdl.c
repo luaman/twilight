@@ -17,15 +17,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+#ifndef WIN32
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/vt.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <signal.h>
 
+#ifndef WIN32
 #include <dlfcn.h>
+#endif
 
 #include <SDL.h>
 #include "quakedef.h"
@@ -34,6 +38,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define WARP_WIDTH              640
 #define WARP_HEIGHT             480
 
+#ifdef WIN32
+// LordHavoc: evil thing - DirectSound with SDL
+HWND mainwindow;
+#endif
 
 unsigned short	d_8to16table[256];
 unsigned		d_8to24table[256];
@@ -102,6 +110,7 @@ void signal_handler(int sig)
 
 void InitSig(void)
 {
+#ifndef WIN32
 	signal(SIGHUP, signal_handler);
 	signal(SIGINT, signal_handler);
 	signal(SIGQUIT, signal_handler);
@@ -112,6 +121,7 @@ void InitSig(void)
 	signal(SIGFPE, signal_handler);
 	signal(SIGSEGV, signal_handler);
 	signal(SIGTERM, signal_handler);
+#endif
 }
 
 void VID_ShiftPalette(unsigned char *p)
@@ -198,12 +208,13 @@ void	VID_SetPalette (unsigned char *palette)
 	}
 }
 
+/*
 void
 CheckMultiTextureExtensions (void)
 {
 	void *prjobj;
 
-	if (strstr(gl_extensions, "GL_SGIS_multitexture ")
+	if (Q_strstr(gl_extensions, "GL_SGIS_multitexture ")
 			&& !COM_CheckParm("-nomtex"))
 	{
 		Con_Printf("Found GL_SGIS_multitexture...\n");
@@ -217,7 +228,7 @@ CheckMultiTextureExtensions (void)
 		qglMTexCoord2fSGIS = (void *) dlsym(prjobj, "glMTexCoord2fSGIS");
 		qglSelectTextureSGIS = (void *) dlsym(prjobj, "glSelectTextureSGIS");
 
-		if (qglMTexCoord2fSGIS && qglSelectTextureSGIS)
+		if (qglMTexCoord2f && qglSelectTexture)
 		{
 			Con_Printf("Multitexture extensions found.\n");
 			gl_mtexable = true;
@@ -228,6 +239,83 @@ CheckMultiTextureExtensions (void)
 		dlclose(prjobj);
 	}
 }
+*/
+
+/*
+	CheckMultiTextureExtensions
+
+	Check for ARB or SGIS multitexture support
+*/
+GLenum gl_mtex_enum = 0;
+#ifdef WIN32
+void CheckMultiTextureExtensions(void)
+{
+	qglMTexCoord2f = NULL;
+	qglSelectTexture = NULL;
+	gl_mtexable = false;
+	// Check to see if multitexture is disabled
+	if (COM_CheckParm("-nomtex"))
+	{
+		Con_Printf("...multitexture disabled\n");
+		return;
+	}
+	// Test for ARB_multitexture
+	if (!COM_CheckParm("-SGISmtex") && strstr(gl_extensions, "GL_ARB_multitexture "))
+	{
+		Con_Printf("...using GL_ARB_multitexture\n");
+		qglMTexCoord2f = (void *) wglGetProcAddress("glMultiTexCoord2fARB");
+		qglSelectTexture = (void *) wglGetProcAddress("glActiveTextureARB");
+		gl_mtexable = true;
+		gl_mtex_enum = GL_TEXTURE0_ARB;
+	}
+	else if (strstr(gl_extensions, "GL_SGIS_multitexture ")) // Test for SGIS_multitexture (if ARB_multitexture not found)
+	{
+		Con_Printf("...using GL_SGIS_multitexture\n");
+		qglMTexCoord2f = (void *) wglGetProcAddress("glMTexCoord2fSGIS");
+		qglSelectTexture = (void *) wglGetProcAddress("glSelectTextureSGIS");
+		gl_mtexable = true;
+		gl_mtex_enum = TEXTURE0_SGIS;
+	}
+	else
+		Con_Printf("...multitexture disabled (not detected)\n");
+}
+#else
+void CheckMultiTextureExtensions(void)
+{
+	Con_Printf ("Checking for multitexture... ");
+	if (COM_CheckParm ("-nomtex"))
+	{
+		Con_Printf ("disabled\n");
+		return;
+	}
+	dlhand = dlopen (NULL, RTLD_LAZY);
+	if (dlhand == NULL)
+	{
+		Con_Printf ("unable to check\n");
+		return;
+	}
+	if (!COM_CheckParm("-SGISmtex") && strstr(gl_extensions, "GL_ARB_multitexture "))
+	{
+		Con_Printf ("GL_ARB_multitexture\n");
+		qglMTexCoord2f = (void *)dlsym(dlhand, "glMultiTexCoord2fARB");
+		qglSelectTexture = (void *)dlsym(dlhand, "glActiveTextureARB");
+		gl_mtex_enum = GL_TEXTURE0_ARB;
+		gl_mtexable = true;
+	}
+	else if (strstr(gl_extensions, "GL_SGIS_multitexture "))
+	{
+		Con_Printf ("GL_SGIS_multitexture\n");
+		qglMTexCoord2f = (void *)dlsym(dlhand, "glMTexCoord2fSGIS");
+		qglSelectTexture = (void *)dlsym(dlhand, "glSelectTextureSGIS");
+		gl_mtex_enum = TEXTURE0_SGIS;
+		gl_mtexable = true;
+	}
+	else
+		Con_Printf ("none found\n");
+	dlclose(dlhand);
+	dlhand = NULL;
+}
+#endif
 
 
 /*
@@ -301,8 +389,8 @@ Check_Gamma (unsigned char *pal)
 
 	if ((i = COM_CheckParm("-gamma")) == 0)
 	{
-		if ((gl_renderer && strstr(gl_renderer, "Voodoo")) ||
-				(gl_vendor && strstr(gl_vendor, "3Dfx")))
+		if ((gl_renderer && Q_strstr(gl_renderer, "Voodoo")) ||
+				(gl_vendor && Q_strstr(gl_vendor, "3Dfx")))
 			vid_gamma = 1;
 		else
 			vid_gamma = 0.7; // default to 0.7 on non-3dfx hardware
@@ -424,6 +512,12 @@ void VID_Init(unsigned char *palette)
 	vid.recalc_refdef = 1;				// force a surface cache flush
 
 	SDL_ShowCursor (0);
+
+#ifdef WIN32
+	// LordHavoc: a dark incantation necessary for DirectSound with SDL
+	// (an evil which Loki clearly did not intend)
+	mainwindow = GetActiveWindow();
+#endif
 }
 
 void Sys_SendKeyEvents(void)
@@ -561,7 +655,7 @@ void Sys_SendKeyEvents(void)
 								||   (event.motion.y >
 									((vid.height/2)+(vid.height/4))) )
 						{
-							SDL_WarpMouse(vid.width/2, vid.height/2);
+							SDL_WarpMouse ((Uint16) (vid.width / 2), (Uint16) (vid.height / 2));
 						}
 					}
 				}

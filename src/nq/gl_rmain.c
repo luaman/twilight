@@ -482,15 +482,15 @@ R_DrawAliasModel (entity_t *e)
 
 	// ZOID: never allow players to go totally black
 	i = currententity - cl_entities;
-	if (i >= 1 && i <= cl.maxclients	/* && !strcmp
+	if (i >= 1 && i <= cl.maxclients	/* && !Q_strcmp
 										   (currententity->model->name,
 										   "progs/player.mdl") */ )
 		if (ambientlight < 8)
 			ambientlight = shadelight = 8;
 
 	// HACK HACK HACK -- no fullbright colors, so make torches full light
-	if (!strcmp (clmodel->name, "progs/flame2.mdl")
-		|| !strcmp (clmodel->name, "progs/flame.mdl"))
+	if (!Q_strcmp (clmodel->name, "progs/flame2.mdl")
+		|| !Q_strcmp (clmodel->name, "progs/flame.mdl"))
 		ambientlight = shadelight = 256;
 
 	shadedots =
@@ -520,7 +520,7 @@ R_DrawAliasModel (entity_t *e)
 	glPushMatrix ();
 	R_RotateForEntity (e);
 
-	if (!strcmp (clmodel->name, "progs/eyes.mdl") && gl_doubleeyes.value) {
+	if (!Q_strcmp (clmodel->name, "progs/eyes.mdl") && gl_doubleeyes.value) {
 		glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
 					  paliashdr->scale_origin[2] - (22 + 8));
 // double size of eyes, since they are really hard to see in gl
@@ -540,7 +540,7 @@ R_DrawAliasModel (entity_t *e)
 	// seperately for the players.  Heads are just uncolored.
 	if (currententity->colormap != vid.colormap && !gl_nocolors.value) {
 		i = currententity - cl_entities;
-		if (i >= 1 && i <= cl.maxclients	/* && !strcmp
+		if (i >= 1 && i <= cl.maxclients	/* && !Q_strcmp
 											   (currententity->model->name,
 											   "progs/player.mdl") */ )
 			GL_Bind (playertextures - 1 + i);
@@ -618,7 +618,7 @@ R_DrawEntitiesOnList (void)
 			case mod_sprite:
 				R_DrawSpriteModel (currententity);
 				break;
-			default:
+			default:;
 		}
 	}
 }

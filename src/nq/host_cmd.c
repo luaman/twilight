@@ -262,13 +262,13 @@ Host_Map_f (void)
 
 	cls.mapstring[0] = 0;
 	for (i = 0; i < Cmd_Argc (); i++) {
-		strcat (cls.mapstring, Cmd_Argv (i));
-		strcat (cls.mapstring, " ");
+		Q_strcat (cls.mapstring, Cmd_Argv (i));
+		Q_strcat (cls.mapstring, " ");
 	}
-	strcat (cls.mapstring, "\n");
+	Q_strcat (cls.mapstring, "\n");
 
 	svs.serverflags = 0;				// haven't completed an episode yet
-	strcpy (name, Cmd_Argv (1));
+	Q_strcpy (name, Cmd_Argv (1));
 #ifdef QUAKE2
 	SV_SpawnServer (name, NULL);
 #else
@@ -278,11 +278,11 @@ Host_Map_f (void)
 		return;
 
 	if (cls.state != ca_dedicated) {
-		strcpy (cls.spawnparms, "");
+		Q_strcpy (cls.spawnparms, "");
 
 		for (i = 2; i < Cmd_Argc (); i++) {
-			strcat (cls.spawnparms, Cmd_Argv (i));
-			strcat (cls.spawnparms, " ");
+			Q_strcat (cls.spawnparms, Cmd_Argv (i));
+			Q_strcat (cls.spawnparms, " ");
 		}
 
 		Cmd_ExecuteString ("connect local", src_command);
@@ -313,11 +313,11 @@ Host_Changelevel_f (void)
 		return;
 	}
 
-	strcpy (level, Cmd_Argv (1));
+	Q_strcpy (level, Cmd_Argv (1));
 	if (Cmd_Argc () == 2)
 		startspot = NULL;
 	else {
-		strcpy (_startspot, Cmd_Argv (2));
+		Q_strcpy (_startspot, Cmd_Argv (2));
 		startspot = _startspot;
 	}
 
@@ -335,7 +335,7 @@ Host_Changelevel_f (void)
 		return;
 	}
 	SV_SaveSpawnparms ();
-	strcpy (level, Cmd_Argv (1));
+	Q_strcpy (level, Cmd_Argv (1));
 	SV_SpawnServer (level);
 #endif
 }
@@ -361,11 +361,11 @@ Host_Restart_f (void)
 
 	if (cmd_source != src_command)
 		return;
-	strcpy (mapname, sv.name);			// must copy out, because it gets
+	Q_strcpy (mapname, sv.name);			// must copy out, because it gets
 										// cleared
 	// in sv_spawnserver
 #ifdef QUAKE2
-	strcpy (startspot, sv.startspot);
+	Q_strcpy (startspot, sv.startspot);
 	SV_SpawnServer (mapname, startspot);
 #else
 	SV_SpawnServer (mapname);
@@ -404,7 +404,7 @@ Host_Connect_f (void)
 		CL_StopPlayback ();
 		CL_Disconnect ();
 	}
-	strcpy (name, Cmd_Argv (1));
+	Q_strcpy (name, Cmd_Argv (1));
 	CL_EstablishConnection (name);
 	Host_Reconnect_f ();
 }
@@ -435,10 +435,10 @@ Host_SavegameComment (char *text)
 
 	for (i = 0; i < SAVEGAME_COMMENT_LENGTH; i++)
 		text[i] = ' ';
-	memcpy (text, cl.levelname, strlen (cl.levelname));
+	memcpy (text, cl.levelname, Q_strlen (cl.levelname));
 	sprintf (kills, "kills:%3i/%3i", cl.stats[STAT_MONSTERS],
 			 cl.stats[STAT_TOTALMONSTERS]);
-	memcpy (text + 22, kills, strlen (kills));
+	memcpy (text + 22, kills, Q_strlen (kills));
 // convert space to _ to make stdio happy
 	for (i = 0; i < SAVEGAME_COMMENT_LENGTH; i++)
 		if (text[i] == ' ')
@@ -483,7 +483,7 @@ Host_Savegame_f (void)
 		return;
 	}
 
-	if (strstr (Cmd_Argv (1), "..")) {
+	if (Q_strstr (Cmd_Argv (1), "..")) {
 		Con_Printf ("Relative pathnames are not allowed.\n");
 		return;
 	}
@@ -619,8 +619,8 @@ Host_Loadgame_f (void)
 
 	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
 		fscanf (f, "%s\n", str);
-		sv.lightstyles[i] = Hunk_Alloc (strlen (str) + 1);
-		strcpy (sv.lightstyles[i], str);
+		sv.lightstyles[i] = Hunk_Alloc (Q_strlen (str) + 1);
+		Q_strcpy (sv.lightstyles[i], str);
 	}
 
 // load the edicts out of the savegame file
@@ -643,7 +643,7 @@ Host_Loadgame_f (void)
 		start = COM_Parse (str);
 		if (!com_token[0])
 			break;						// end of file
-		if (strcmp (com_token, "{"))
+		if (Q_strcmp (com_token, "{"))
 			Sys_Error ("First token isn't a brace");
 
 		if (entnum == -1) {				// parse the global vars
@@ -776,8 +776,8 @@ LoadGamestate (char *level, char *startspot)
 // load the light styles
 	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
 		fscanf (f, "%s\n", str);
-		sv.lightstyles[i] = Hunk_Alloc (strlen (str) + 1);
-		strcpy (sv.lightstyles[i], str);
+		sv.lightstyles[i] = Hunk_Alloc (Q_strlen (str) + 1);
+		Q_strcpy (sv.lightstyles[i], str);
 	}
 
 // load the edicts out of the savegame file
@@ -800,7 +800,7 @@ LoadGamestate (char *level, char *startspot)
 		start = COM_Parse (str);
 		if (!com_token[0])
 			break;						// end of file
-		if (strcmp (com_token, "{"))
+		if (Q_strcmp (com_token, "{"))
 			Sys_Error ("First token isn't a brace");
 
 		// parse an edict
@@ -843,11 +843,11 @@ Host_Changelevel2_f (void)
 		return;
 	}
 
-	strcpy (level, Cmd_Argv (1));
+	Q_strcpy (level, Cmd_Argv (1));
 	if (Cmd_Argc () == 2)
 		startspot = NULL;
 	else {
-		strcpy (_startspot, Cmd_Argv (2));
+		Q_strcpy (_startspot, Cmd_Argv (2));
 		startspot = _startspot;
 	}
 
@@ -894,7 +894,7 @@ Host_Name_f (void)
 		return;
 	}
 
-	if (host_client->name[0] && strcmp (host_client->name, "unconnected"))
+	if (host_client->name[0] && Q_strcmp (host_client->name, "unconnected"))
 		if (Q_strcmp (host_client->name, newName) != 0)
 			Con_Printf ("%s renamed to %s\n", host_client->name, newName);
 	Q_strcpy (host_client->name, newName);
@@ -958,8 +958,8 @@ Host_Say (qboolean teamonly)
 	if (Q_strlen (p) > j)
 		p[j] = 0;
 
-	strcat (text, p);
-	strcat (text, "\n");
+	Q_strcat (text, p);
+	Q_strcat (text, "\n");
 
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
 		if (!client || !client->active || !client->spawned)
@@ -1023,8 +1023,8 @@ Host_Tell_f (void)
 	if (Q_strlen (p) > j)
 		p[j] = 0;
 
-	strcat (text, p);
-	strcat (text, "\n");
+	Q_strcat (text, p);
+	Q_strcat (text, "\n");
 
 	save = host_client;
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
@@ -1544,7 +1544,7 @@ FindViewthing (void)
 
 	for (i = 0; i < sv.num_edicts; i++) {
 		e = EDICT_NUM (i);
-		if (!strcmp (pr_strings + e->v.classname, "viewthing"))
+		if (!Q_strcmp (pr_strings + e->v.classname, "viewthing"))
 			return e;
 	}
 	Con_Printf ("No viewthing on map\n");
@@ -1695,7 +1695,7 @@ Host_Startdemos_f (void)
 	Con_Printf ("%i demo(s) in loop\n", c);
 
 	for (i = 1; i < c + 1; i++)
-		strncpy (cls.demos[i - 1], Cmd_Argv (i), sizeof (cls.demos[0]) - 1);
+		Q_strncpy (cls.demos[i - 1], Cmd_Argv (i), sizeof (cls.demos[0]) - 1);
 
 	if (!sv.active && cls.demonum != -1 && !cls.demoplayback) {
 		cls.demonum = 0;

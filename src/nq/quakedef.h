@@ -21,6 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //#define	GLTEST			// experimental stuff
 
+#ifdef _WIN32
+#pragma warning( disable : 4244 4127 4201 4214 4514 4305 4115 4018)
+#endif
+
 #define	QUAKE_GAME			// as opposed to utilities
 
 #define	VERSION				1.09
@@ -243,9 +247,6 @@ typedef struct
 
 typedef struct
 {
-	char	*basedir;
-	char	*sharedir;
-	char	*cachedir;		// for development over ISDN lines
 	int		argc;
 	char	**argv;
 	void	*membase;
