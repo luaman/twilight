@@ -28,8 +28,8 @@
 #ifndef __VIEW_H
 #define __VIEW_H
 
-extern cvar_t	*v_gamma;
-extern cvar_t	*lcd_x;
+extern struct cvar_s	*v_gamma;
+extern struct cvar_s	*lcd_x;
 extern float	v_blend[4];
 
 void		V_Init_Cvars (void);

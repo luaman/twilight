@@ -34,6 +34,8 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <SDL.h>
+
 #ifndef WIN32
 #include <termios.h>
 #include <sys/ioctl.h>
@@ -44,15 +46,11 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <signal.h>
 
-#include <SDL.h>
 #include "quakedef.h"
+#include "cvar.h"
 #include "keys.h"
 #include "glquake.h"
 #include "TGL_funcs.h"
-
-#define WARP_WIDTH              640
-#define WARP_HEIGHT             480
-
 
 #ifdef WIN32
 // LordHavoc: evil thing - DirectSound with SDL
@@ -148,10 +146,6 @@ InitSig (void)
 #endif
 }
 
-void
-VID_ShiftPalette (unsigned char *p)
-{
-}
 
 void
 VID_SetPalette (unsigned char *palette)
@@ -222,34 +216,6 @@ VID_SetPalette (unsigned char *palette)
 	}
 }
 
-/*
-void
-CheckMultiTextureExtensions (void)
-{
-	void       *prjobj;
-
-	if (Q_strstr (gl_extensions, "GL_SGIS_multitexture ")
-		&& !COM_CheckParm ("-nomtex")) {
-		Con_Printf ("Found GL_SGIS_multitexture...\n");
-
-		if ((prjobj = dlopen (NULL, RTLD_LAZY)) == NULL) {
-			Con_Printf ("Unable to open symbol list for main program.\n");
-			return;
-		}
-
-		qglMTexCoord2fSGIS = (void *) dlsym (prjobj, "glMTexCoord2fSGIS");
-		qglSelectTextureSGIS = (void *) dlsym (prjobj, "glSelectTextureSGIS");
-
-		if (qglMTexCoord2fSGIS && qglSelectTextureSGIS) {
-			Con_Printf ("Multitexture extensions found.\n");
-			gl_mtexable = true;
-		} else
-			Con_Printf ("Symbol not found, disabled.\n");
-
-		dlclose (prjobj);
-	}
-}
-*/
 
 /*
 	CheckMultiTextureExtensions
@@ -394,8 +360,6 @@ VID_Init (unsigned char *palette)
 	char        gldir[MAX_OSPATH];
 	int         flags = SDL_OPENGL;
 
-	vid.maxwarpwidth = WARP_WIDTH;
-	vid.maxwarpheight = WARP_HEIGHT;
 	vid.colormap = host_colormap;
 	vid.fullbright = 256 - LittleLong (*((int *) vid.colormap + 2048));
 
@@ -466,7 +430,6 @@ VID_Init (unsigned char *palette)
 	vid.width = scr_width;
 
 	vid.aspect = ((float) vid.height / (float) vid.width) * (4.0 / 3.0);
-	vid.numpages = 2;
 
 	InitSig ();							// trap evil signals
 

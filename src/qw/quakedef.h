@@ -49,39 +49,21 @@
 #include "mathlib.h"
 #include "wad.h"
 #include "draw.h"
-#include "cvar.h"
 #include "screen.h"
 #include "net.h"
 #include "protocol.h"
 #include "cmd.h"
-#include "sbar.h"
-#include "sound.h"
 #include "render.h"
 #include "client.h"
 
 #include "gl_model.h"
 
-#include "input.h"
 #include "console.h"
 #include "view.h"
-#include "menu.h"
-#include "crc.h"
-#include "cdaudio.h"
 #include "pmove.h"
 
 //=============================================================================
 
-// the host system specifies the base of the directory tree, the
-// command line parms passed to the program, and the amount of memory
-// available for the program to use
-
-//typedef struct {
-//	int         argc;
-//	char      **argv;
-//} quakeparms_t;
-
-
-//=============================================================================
 
 #define MAX_NUM_ARGVS	50
 
@@ -93,11 +75,11 @@ extern qboolean noclip_anglehack;
 // host
 //
 
-extern cvar_t *sys_ticrate;
-extern cvar_t *sys_nostdout;
-extern cvar_t *developer;
+extern struct cvar_s *sys_ticrate;
+extern struct cvar_s *sys_nostdout;
+extern struct cvar_s *developer;
 
-extern cvar_t *password;
+extern struct cvar_s *password;
 
 extern qboolean host_initialized;		// true if into command execution
 extern double host_frametime;

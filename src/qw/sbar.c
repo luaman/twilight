@@ -35,9 +35,9 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cvar.h"
+#include "sbar.h"
 
-
-int         sb_updates;					// if >= vid.numpages, no update needed
 
 #define STAT_MINUS		10				// num frame for '-' stats digit
 qpic_t     *sb_nums[2][11];
@@ -88,7 +88,6 @@ Sbar_ShowTeamScores (void)
 		return;
 
 	sb_showteamscores = true;
-	sb_updates = 0;
 }
 
 /*
@@ -102,7 +101,6 @@ void
 Sbar_DontShowTeamScores (void)
 {
 	sb_showteamscores = false;
-	sb_updates = 0;
 }
 
 /*
@@ -119,7 +117,6 @@ Sbar_ShowScores (void)
 		return;
 
 	sb_showscores = true;
-	sb_updates = 0;
 }
 
 /*
@@ -133,18 +130,6 @@ void
 Sbar_DontShowScores (void)
 {
 	sb_showscores = false;
-	sb_updates = 0;
-}
-
-/*
-===============
-Sbar_Changed
-===============
-*/
-void
-Sbar_Changed (void)
-{
-	sb_updates = 0;						// update next frame
 }
 
 void
@@ -574,9 +559,6 @@ Sbar_DrawInventory (void)
 			} else
 				Sbar_DrawPic (i * 24, -16, sb_weapons[flashon][i]);
 //          Sbar_DrawSubPic (0,0,20,20,i*24, -16, sb_weapons[flashon][i]);
-
-			if (flashon > 1)
-				sb_updates = 0;			// force update to remove flash
 		}
 	}
 
@@ -615,23 +597,13 @@ Sbar_DrawInventory (void)
 	for (i = 0; i < 6; i++)
 		if (cl.stats[STAT_ITEMS] & (1 << (17 + i))) {
 			time = cl.item_gettime[17 + i];
-			if (time && time > cl.time - 2 && flashon) {	// flash frame
-				sb_updates = 0;
-			} else
-				Sbar_DrawPic (192 + i * 16, -16, sb_items[i]);
-			if (time && time > cl.time - 2)
-				sb_updates = 0;
+			Sbar_DrawPic (192 + i * 16, -16, sb_items[i]);
 		}
 // sigils
 	for (i = 0; i < 4; i++)
 		if (cl.stats[STAT_ITEMS] & (1 << (28 + i))) {
 			time = cl.item_gettime[28 + i];
-			if (time && time > cl.time - 2 && flashon) {	// flash frame
-				sb_updates = 0;
-			} else
-				Sbar_DrawPic (320 - 32 + i * 8, -16, sb_sigil[i]);
-			if (time && time > cl.time - 2)
-				sb_updates = 0;
+			Sbar_DrawPic (320 - 32 + i * 8, -16, sb_sigil[i]);
 		}
 }
 
@@ -734,10 +706,9 @@ Sbar_DrawFace (void)
 	else
 		f = cl.stats[STAT_HEALTH] / 20;
 
-	if (cl.time <= cl.faceanimtime) {
+	if (cl.time <= cl.faceanimtime)
 		anim = 1;
-		sb_updates = 0;					// make sure the anim gets drawn over
-	} else
+	else
 		anim = 0;
 	Sbar_DrawPic (112, 0, sb_faces[f][anim]);
 }
@@ -800,16 +771,11 @@ Sbar_Draw (void)
 	char        st[512];
 
 	headsup = !(cl_sbar->value || scr_viewsize->value < 100);
-	if ((sb_updates >= vid.numpages) && !headsup)
-		return;
 
 	if (scr_con_current == vid.height)
 		return;							// console is full screen
 
 	scr_copyeverything = 1;
-//  scr_fullupdate = 0;
-
-	sb_updates++;
 
 // top line
 	if (sb_lines > 24) {
@@ -855,8 +821,6 @@ Sbar_Draw (void)
 	else if (sb_showteamscores)
 		Sbar_TeamOverlay ();
 
-	if (sb_showscores || sb_showteamscores || cl.stats[STAT_HEALTH] <= 0)
-		sb_updates = 0;
 	// clear unused areas in gl
 #if 0
 	{

@@ -34,6 +34,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cvar.h"
 
 cvar_t     *baseskin;
 cvar_t     *noskins;

@@ -40,6 +40,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cvar.h"
 
 #ifdef _WIN32
 #include "winquake.h"

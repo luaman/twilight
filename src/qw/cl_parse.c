@@ -35,8 +35,11 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cdaudio.h"
+#include "cvar.h"
 #include "keys.h"
 #include "glquake.h"
+#include "sound.h"
 
 char       *svc_strings[] = {
 	"svc_bad",
@@ -921,7 +924,6 @@ CL_ProcessUserInfo (int slot, player_info_t *player)
 	if (cls.state == ca_active)
 		Skin_Find (player);
 
-	Sbar_Changed ();
 	CL_NewTranslation (slot);
 }
 
@@ -1014,10 +1016,7 @@ CL_SetStat (int stat, int value)
 	if (stat < 0 || stat >= MAX_CL_STATS)
 		Sys_Error ("CL_SetStat: %i is invalid", stat);
 
-	Sbar_Changed ();
-
 	if (stat == STAT_ITEMS) {			// set flash times
-		Sbar_Changed ();
 		for (j = 0; j < 32; j++)
 			if ((value & (1 << j)) && !(cl.stats[stat] & (1 << j)))
 				cl.item_gettime[j] = cl.time;
@@ -1189,7 +1188,6 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_updatefrags:
-				Sbar_Changed ();
 				i = MSG_ReadByte ();
 				if (i >= MAX_CLIENTS)
 					Host_EndGame

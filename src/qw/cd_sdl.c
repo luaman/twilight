@@ -42,7 +42,9 @@ static const char rcsid[] =
 #include <SDL.h>
 
 #include "quakedef.h"
+#include "cdaudio.h"
 #include "cvar.h"
+#include "sound.h"
 
 static qboolean cdValid = false;
 static qboolean playing = false;

@@ -35,8 +35,11 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cvar.h"
 #include "glquake.h"
 #include "keys.h"
+#include "menu.h"
+#include "sbar.h"
 
 #include <time.h>
 
@@ -283,9 +286,6 @@ SCR_CalcRefdef (void)
 
 	scr_fullupdate = 0;					// force a background redraw
 	vid.recalc_refdef = 0;
-
-// force the status bar to redraw
-	Sbar_Changed ();
 
 //========================================
 
@@ -596,12 +596,6 @@ SCR_SetUpToDrawConsole (void)
 		if (scr_conlines < scr_con_current)
 			scr_con_current = scr_conlines;
 	}
-
-	if (clearconsole++ < vid.numpages) {
-		Sbar_Changed ();
-	} else if (clearnotify++ < vid.numpages) {
-	} else
-		con_notifylines = 0;
 }
 
 /*
@@ -1064,8 +1058,6 @@ SCR_UpdateScreen (void)
 {
 	if (block_drawing)
 		return;
-
-	vid.numpages = 2 + gl_triplebuffer->value;
 
 	scr_copytop = 0;
 	scr_copyeverything = 0;

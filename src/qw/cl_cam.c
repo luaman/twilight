@@ -41,6 +41,8 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cvar.h"
+#include "sbar.h"
 
 #ifdef _WIN32
 #include "winquake.h"
@@ -126,7 +128,6 @@ Cam_Unlock (void)
 		MSG_WriteString (&cls.netchan.message, "ptrack");
 		autocam = CAM_NONE;
 		locked = false;
-		Sbar_Changed ();
 	}
 }
 
@@ -141,7 +142,6 @@ Cam_Lock (int playernum)
 	spec_track = playernum;
 	cam_forceview = true;
 	locked = false;
-	Sbar_Changed ();
 }
 
 pmtrace_t
