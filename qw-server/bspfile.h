@@ -132,7 +132,6 @@ typedef struct {
 #define	CONTENTS_LAVA		-5
 #define	CONTENTS_SKY		-6
 
-// !!! if this is changed, it must be changed in asm_i386.h too !!!
 typedef struct {
 	int         planenum;
 	short       children[2];			// negative numbers are -(leafs+1), not 

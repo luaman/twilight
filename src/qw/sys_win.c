@@ -54,7 +54,6 @@ static HANDLE tevent;
 
 void        Sys_InitFloatTime (void);
 
-void        MaskExceptions (void);
 void        Sys_PopFPCW (void);
 void        Sys_PushFPCW_SetHigh (void);
 
@@ -180,11 +179,6 @@ Sys_Init (void)
 									 0,	/* Initial count */
 									 1,	/* Maximum count */
 									 "qwcl");	/* Semaphore name */
-#endif
-
-#if id386
-	MaskExceptions ();
-	Sys_SetFPCW ();
 #endif
 
 #if 0

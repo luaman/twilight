@@ -24,8 +24,6 @@ twilight_nq_SOURCES= \
 	quakedef.h bspfile.h client.h draw.h input.h keys.h protocol.h \
 	render.h server.h
 
-EXTRA_twilight_nq_SOURCES=math.s snd_mixa.s sys_dosa.s worlda.s quakeasm.h
-
 LDFLAGS=@SDL_LIBS@ @GL_LIBS@ -lm
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DSHAREPATH=\"$(SHAREPATH)\" -DUSERPATH=\"$(USERPATH)\"
 

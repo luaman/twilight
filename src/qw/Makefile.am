@@ -15,7 +15,7 @@ twilight_qw_SOURCES= \
 	glquake.h hash.c hash.h \
 	keys.c mathlib.c mathlib.h md4.c menu.c menu.h \
 	net.h net_chan.c net_udp.c \
-	nonintel.c pmove.c pmove.h pmovetst.c r_part.c sbar.c sbar.h skin.c \
+	pmove.c pmove.h pmovetst.c r_part.c sbar.c sbar.h skin.c \
 	snd_dma.c snd_mem.c \
 	snd_mix.c snd_linux.c sound.h cd_sdl.c cdaudio.h \
 	sys_linux.c sys.h vid_sdl.c vid.h \
@@ -23,8 +23,6 @@ twilight_qw_SOURCES= \
 	buildnum.c \
 	quakedef.h bothdefs.h bspfile.h draw.h input.h keys.h protocol.h \
 	render.h
-
-EXTRA_twilight_qw_SOURCES=math.s snd_mixa.s sys_dosa.s quakeasm.h
 
 LDFLAGS=@SDL_LIBS@ @GL_LIBS@ -lm
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DSHAREPATH=\"$(SHAREPATH)\" -DUSERPATH=\"$(USERPATH)\"

@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef __SOUND__
 #define __SOUND__
 
-// !!! if this is changed, it much be changed in asm_i386.h too !!!
 typedef struct {
 	int         left;
 	int         right;
@@ -33,7 +32,6 @@ typedef struct sfx_s {
 	cache_user_t cache;
 } sfx_t;
 
-// !!! if this is changed, it much be changed in asm_i386.h too !!!
 typedef struct {
 	int         length;
 	int         loopstart;
@@ -56,7 +54,6 @@ typedef struct {
 	unsigned char *buffer;
 } dma_t;
 
-// !!! if this is changed, it much be changed in asm_i386.h too !!!
 typedef struct {
 	sfx_t      *sfx;					// sfx number
 	int         leftvol;				// 0-255 volume

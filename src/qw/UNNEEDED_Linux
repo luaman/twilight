@@ -1,11 +1,5 @@
 sys_win.c
-sys_dosa.s
 snd_win.c
 net_wins.c
-quakeasm.h
 sys_null.c
-buildnum.c
-sys_wina.s
-math.s
 winquake.h
-snd_mixa.s

@@ -163,20 +163,6 @@ anglemod (float a)
 	return a;
 }
 
-/*
-==================
-BOPS_Error
-
-Split out like this for ASM to call.
-==================
-*/
-void
-BOPS_Error (void)
-{
-	Sys_Error ("BoxOnPlaneSide:  Bad signbits");
-}
-
-#if !id386
 
 /*
 ==================
@@ -190,20 +176,6 @@ BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 {
 	float       dist1, dist2;
 	int         sides;
-
-#if 0									// this is done by the
-	// BOX_ON_PLANE_SIDE macro before
-	// calling this
-	// function
-// fast axial cases
-	if (p->type < 3) {
-		if (p->dist <= emins[p->type])
-			return 1;
-		if (p->dist >= emaxs[p->type])
-			return 2;
-		return 3;
-	}
-#endif
 
 // general case
 	switch (p->signbits) {
@@ -273,32 +245,10 @@ BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 			break;
 		default:
 			dist1 = dist2 = 0;			// shut up compiler
-			BOPS_Error ();
+			Sys_Error ("BoxOnPlaneSide:  Bad signbits");
 			break;
 	}
 
-#if 0
-	int         i;
-	vec3_t      corners[2];
-
-	for (i = 0; i < 3; i++) {
-		if (plane->normal[i] < 0) {
-			corners[0][i] = emins[i];
-			corners[1][i] = emaxs[i];
-		} else {
-			corners[1][i] = emins[i];
-			corners[0][i] = emaxs[i];
-		}
-	}
-	dist = DotProduct (plane->normal, corners[0]) - plane->dist;
-	dist2 = DotProduct (plane->normal, corners[1]) - plane->dist;
-	sides = 0;
-	if (dist1 >= 0)
-		sides = 1;
-	if (dist2 < 0)
-		sides |= 2;
-
-#endif
 
 	sides = 0;
 	if (dist1 >= p->dist)
@@ -313,8 +263,6 @@ BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 
 	return sides;
 }
-
-#endif
 
 
 void
@@ -599,10 +547,6 @@ GreatestCommonDivisor (int i1, int i2)
 }
 
 
-#if !id386
-
-// TODO: move to nonintel.c
-
 /*
 ===================
 Invert24To16
@@ -621,4 +565,3 @@ Invert24To16 (fixed16_t val)
 		(((double) 0x10000 * (double) 0x1000000 / (double) val) + 0.5);
 }
 
-#endif

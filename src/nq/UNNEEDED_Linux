@@ -1,14 +1,8 @@
 conproc.c
 conproc.h
-math.s
-quakeasm.h
-snd_mixa.s
 snd_null.c
 snd_win.c
-sys_dosa.s
 sys_null.c
 sys_win.c
-sys_wina.s
 sys_wind.c
 winquake.h
-worlda.s

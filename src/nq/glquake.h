@@ -111,7 +111,6 @@ typedef enum {
 		pt_blob2
 } ptype_t;
 
-// !!! if this is changed, it must be changed in d_ifacea.h too !!!
 typedef struct particle_s {
 // driver-usable fields
 	vec3_t      org;
