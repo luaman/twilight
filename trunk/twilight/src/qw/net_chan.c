@@ -19,7 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include <sys/types.h>
+
+#ifndef WIN32
 #include <unistd.h>
+#endif
 
 #include "quakedef.h"
 
@@ -152,7 +155,7 @@ Netchan_OutOfBandPrint (netadr_t adr, char *format, ...)
 	va_end (argptr);
 
 
-	Netchan_OutOfBand (adr, strlen (string), (byte *) string);
+	Netchan_OutOfBand (adr, Q_strlen (string), (byte *) string);
 }
 
 

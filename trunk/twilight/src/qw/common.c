@@ -974,7 +974,7 @@ COM_FileBase (char *in, char *out)
 {
 	char       *s, *s2;
 
-	s = in + strlen (in) - 1;
+	s = in + Q_strlen (in) - 1;
 
 	while (s != in && *s != '.')
 		s--;
@@ -982,10 +982,10 @@ COM_FileBase (char *in, char *out)
 	for (s2 = s; *s2 && *s2 != '/'; s2--);
 
 	if (s - s2 < 2)
-		strcpy (out, "?model?");
+		Q_strcpy (out, "?model?");
 	else {
 		s--;
-		strncpy (out, s2 + 1, s - s2);
+		Q_strncpy (out, s2 + 1, s - s2);
 		out[s - s2] = 0;
 	}
 }
@@ -1005,7 +1005,7 @@ COM_DefaultExtension (char *path, char *extension)
 // if path doesn't have a .EXT, append extension
 // (extension should include the .)
 //
-	src = path + strlen (path) - 1;
+	src = path + Q_strlen (path) - 1;
 
 	while (*src != '/' && src != path) {
 		if (*src == '.')
@@ -1013,7 +1013,7 @@ COM_DefaultExtension (char *path, char *extension)
 		src--;
 	}
 
-	strcat (path, extension);
+	Q_strcat (path, extension);
 }
 
 //============================================================================
@@ -1488,7 +1488,7 @@ COM_FOpenFile (char *filename, FILE ** file)
 			// look through all the pak file elements
 			pak = search->pack;
 			for (i = 0; i < pak->numfiles; i++)
-				if (!strcmp (pak->files[i].name, filename)) {	// found it!
+				if (!Q_strcmp (pak->files[i].name, filename)) {	// found it!
 					Sys_Printf ("PackFile: %s : %s\n", pak->filename, filename);
 					// open a new file on the pakfile
 					*file = fopen (pak->filename, "rb");
@@ -1670,13 +1670,13 @@ COM_LoadPackFile (char *packfile)
 
 // parse the directory
 	for (i = 0; i < numpackfiles; i++) {
-		strcpy (newfiles[i].name, info[i].name);
+		Q_strcpy (newfiles[i].name, info[i].name);
 		newfiles[i].filepos = LittleLong (info[i].filepos);
 		newfiles[i].filelen = LittleLong (info[i].filelen);
 	}
 
 	pack = Z_Malloc (sizeof (pack_t));
-	strcpy (pack->filename, packfile);
+	Q_strcpy (pack->filename, packfile);
 	pack->handle = packhandle;
 	pack->numfiles = numpackfiles;
 	pack->files = newfiles;
@@ -1705,18 +1705,18 @@ COM_AddDirectory (char *dir)
 
 	Con_Printf ("COM_AddDirectory: Adding %s\n", dir);
 
-	if ((p = strrchr (dir, '/')) != NULL)
-		strcpy (gamedirfile, ++p);
+	if ((p = Q_strrchr (dir, '/')) != NULL)
+		Q_strcpy (gamedirfile, ++p);
 	else
-		strcpy (gamedirfile, p);
-	strcpy (com_gamedir, dir);
+		Q_strcpy (gamedirfile, p);
+	Q_strcpy (com_gamedir, dir);
 	Sys_mkdir (com_gamedir);
 
 //
 // add the directory to the search path
 //
 	search = Hunk_Alloc (sizeof (searchpath_t));
-	strcpy (search->filename, dir);
+	Q_strcpy (search->filename, dir);
 	search->next = com_searchpaths;
 	com_searchpaths = search;
 
@@ -1769,16 +1769,16 @@ COM_Gamedir (char *dir)
 {
 	searchpath_t *next;
 
-	if (strstr (dir, "..") || strstr (dir, "/")
-		|| strstr (dir, "\\") || strstr (dir, ":")) {
+	if (Q_strstr (dir, "..") || Q_strstr (dir, "/")
+		|| Q_strstr (dir, "\\") || Q_strstr (dir, ":")) {
 		Con_Printf ("Gamedir should be a single filename, not a path\n");
 		return;
 	}
 
-	if (!strcmp (gamedirfile, dir))
+	if (!Q_strcmp (gamedirfile, dir))
 		return;							// still the same
 
-	strcpy (gamedirfile, dir);
+	Q_strcpy (gamedirfile, dir);
 
 	// 
 	// free up any current game dir info
@@ -1799,7 +1799,7 @@ COM_Gamedir (char *dir)
 	// 
 	Cache_Flush ();
 
-	if (!strcmp (dir, "id1") || !strcmp (dir, "qw"))
+	if (!Q_strcmp (dir, "id1") || !Q_strcmp (dir, "qw"))
 		return;
 
 	COM_AddGameDirectory (dir);
@@ -1821,9 +1821,9 @@ COM_InitFilesystem (void)
 //
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
-		strcpy (com_basedir, com_argv[i + 1]);
+		Q_strcpy (com_basedir, com_argv[i + 1]);
 	else
-		strcpy (com_basedir, host_parms.basedir);
+		Q_strcpy (com_basedir, host_parms.basedir);
 
 //
 // -sharedir <path>
@@ -1831,9 +1831,9 @@ COM_InitFilesystem (void)
 //
 	i = COM_CheckParm ("-sharedir");
 	if (i && i < com_argc - 1)
-		strcpy (com_sharedir, com_argv[i + 1]);
+		Q_strcpy (com_sharedir, com_argv[i + 1]);
 	else
-		strcpy (com_sharedir, host_parms.sharedir);
+		Q_strcpy (com_sharedir, host_parms.sharedir);
 
 //
 // start up with id1 by default
@@ -1895,7 +1895,7 @@ Info_ValueForKey (char *s, char *key)
 		}
 		*o = 0;
 
-		if (!strcmp (key, pkey))
+		if (!Q_strcmp (key, pkey))
 			return value[valueindex];
 
 		if (!*s)
@@ -1912,7 +1912,7 @@ Info_RemoveKey (char *s, char *key)
 	char        value[512];
 	char       *o;
 
-	if (strstr (key, "\\")) {
+	if (Q_strstr (key, "\\")) {
 		Con_Printf ("Can't use a key with a \\\n");
 		return;
 	}
@@ -1938,8 +1938,8 @@ Info_RemoveKey (char *s, char *key)
 		}
 		*o = 0;
 
-		if (!strcmp (key, pkey)) {
-			strcpy (start, s);			// remove this part
+		if (!Q_strcmp (key, pkey)) {
+			Q_strcpy (start, s);			// remove this part
 			return;
 		}
 
@@ -1997,17 +1997,17 @@ Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
 	char        new[1024], *v;
 	int         c;
 
-	if (strstr (key, "\\") || strstr (value, "\\")) {
+	if (Q_strstr (key, "\\") || Q_strstr (value, "\\")) {
 		Con_Printf ("Can't use keys or values with a \\\n");
 		return;
 	}
 
-	if (strstr (key, "\"") || strstr (value, "\"")) {
+	if (Q_strstr (key, "\"") || Q_strstr (value, "\"")) {
 		Con_Printf ("Can't use keys or values with a \"\n");
 		return;
 	}
 
-	if (strlen (key) > 63 || strlen (value) > 63) {
+	if (Q_strlen (key) > 63 || Q_strlen (value) > 63) {
 		Con_Printf ("Keys and values must be < 64 characters.\n");
 		return;
 	}
@@ -2016,33 +2016,33 @@ Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
 		// key exists, make sure we have enough room for new value, if we
 		// don't,
 		// don't change it!
-		if (strlen (value) - strlen (v) + strlen (s) > maxsize) {
+		if (Q_strlen (value) - Q_strlen (v) + Q_strlen (s) > maxsize) {
 			Con_Printf ("Info string length exceeded\n");
 			return;
 		}
 	}
 	Info_RemoveKey (s, key);
-	if (!value || !strlen (value))
+	if (!value || !Q_strlen (value))
 		return;
 
 	sprintf (new, "\\%s\\%s", key, value);
 
-	if ((int) (strlen (new) + strlen (s)) > maxsize) {
+	if ((int) (Q_strlen (new) + Q_strlen (s)) > maxsize) {
 		Con_Printf ("Info string length exceeded\n");
 		return;
 	}
 	// only copy ascii values
-	s += strlen (s);
+	s += Q_strlen (s);
 	v = new;
 	while (*v) {
 		c = (unsigned char) *v++;
 		// client only allows highbits on name
-		if (strcasecmp (key, "name") != 0) {
+		if (Q_strcasecmp (key, "name") != 0) {
 			c &= 127;
 			if (c < 32 || c > 127)
 				continue;
 			// auto lowercase team
-			if (strcasecmp (key, "team") == 0)
+			if (Q_strcasecmp (key, "team") == 0)
 				c = tolower (c);
 		}
 //      c &= 127;       // strip high bits
@@ -2254,44 +2254,4 @@ COM_BlockSequenceCRCByte (byte * base, int length, int sequence)
 	crc &= 0xff;
 
 	return crc;
-}
-
-// char *date = "Oct 24 1996";
-static char *date = __DATE__;
-static char *mon[12] =
-	{ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
-"Nov", "Dec" };
-static char mond[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-
-// returns days since Oct 24 1996
-int
-build_number (void)
-{
-	int         m = 0;
-	int         d = 0;
-	int         y = 0;
-	static int  b = 0;
-
-	if (b != 0)
-		return b;
-
-	for (m = 0; m < 11; m++) {
-		if (Q_strncasecmp (&date[0], mon[m], 3) == 0)
-			break;
-		d += mond[m];
-	}
-
-	d += atoi (&date[4]) - 1;
-
-	y = atoi (&date[7]) - 1900;
-
-	b = d + (int) ((y - 1) * 365.25);
-
-	if (((y % 4) == 0) && m > 1) {
-		b += 1;
-	}
-
-	b -= 35778;							// Dec 16 1998
-
-	return b;
 }

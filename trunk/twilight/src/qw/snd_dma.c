@@ -298,7 +298,7 @@ S_FindName (char *name)
 		Sys_Error ("S_FindName: out of sfx_t");
 
 	sfx = &known_sfx[i];
-	strcpy (sfx->name, name);
+	Q_strcpy (sfx->name, name);
 
 	num_sfx++;
 
@@ -829,11 +829,6 @@ GetSoundtime (void)
 void
 S_ExtraUpdate (void)
 {
-
-#ifdef _WIN32
-	IN_Accumulate ();
-#endif
-
 	if (snd_noextraupdate.value)
 		return;							// don't pollute timings
 	S_Update_ ();

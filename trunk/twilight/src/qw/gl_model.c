@@ -194,13 +194,13 @@ Mod_FindName (char *name)
 // search the currently loaded models
 //
 	for (i = 0, mod = mod_known; i < mod_numknown; i++, mod++)
-		if (!strcmp (mod->name, name))
+		if (!Q_strcmp (mod->name, name))
 			break;
 
 	if (i == mod_numknown) {
 		if (mod_numknown == MAX_MOD_KNOWN)
 			Sys_Error ("mod_numknown == MAX_MOD_KNOWN");
-		strcpy (mod->name, name);
+		Q_strcpy (mod->name, name);
 		mod->needload = true;
 		mod_numknown++;
 	}
@@ -424,7 +424,7 @@ Mod_LoadTextures (lump_t *l)
 			tx2 = loadmodel->textures[j];
 			if (!tx2 || tx2->name[0] != '+')
 				continue;
-			if (strcmp (tx2->name + 2, tx->name + 2))
+			if (Q_strcmp (tx2->name + 2, tx->name + 2))
 				continue;
 
 			num = tx2->name[1];
@@ -882,7 +882,7 @@ Mod_LoadLeafs (lump_t *l)
 	loadmodel->leafs = out;
 	loadmodel->numleafs = count;
 	sprintf (s, "maps/%s.bsp", Info_ValueForKey (cl.serverinfo, "map"));
-	if (!strcmp (s, loadmodel->name))
+	if (!Q_strcmp (s, loadmodel->name))
 		isnotmap = false;
 	for (i = 0; i < count; i++, in++, out++) {
 		for (j = 0; j < 3; j++) {
@@ -1215,7 +1215,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 			sprintf (name, "*%i", i + 1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
-			strcpy (loadmodel->name, name);
+			Q_strcpy (loadmodel->name, name);
 			mod = loadmodel;
 		}
 	}
@@ -1255,7 +1255,7 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame)
 
 	pdaliasframe = (daliasframe_t *) pin;
 
-	strcpy (frame->name, pdaliasframe->name);
+	Q_strcpy (frame->name, pdaliasframe->name);
 	frame->firstpose = posenum;
 	frame->numposes = 1;
 
@@ -1431,7 +1431,7 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 
 			// save 8 bit texels for the player model to remap
 			// save 8 bit texels for the player model to remap
-			if (!strcmp (loadmodel->name, "progs/player.mdl")) {
+			if (!Q_strcmp (loadmodel->name, "progs/player.mdl")) {
 				if (s > sizeof (player_8bit_texels))
 					Sys_Error ("Player skin too large");
 				memcpy (player_8bit_texels, (byte *) (pskintype + 1), s);
@@ -1495,8 +1495,8 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	daliasskintype_t *pskintype;
 	int         start, end, total;
 
-	if (!strcmp (loadmodel->name, "progs/player.mdl") ||
-		!strcmp (loadmodel->name, "progs/eyes.mdl")) {
+	if (!Q_strcmp (loadmodel->name, "progs/player.mdl") ||
+		!Q_strcmp (loadmodel->name, "progs/eyes.mdl")) {
 		unsigned short crc;
 		byte       *p;
 		int         len;
@@ -1508,14 +1508,14 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 		sprintf (st, "%d", (int) crc);
 		Info_SetValueForKey (cls.userinfo,
-							 !strcmp (loadmodel->name,
+							 !Q_strcmp (loadmodel->name,
 									  "progs/player.mdl") ? pmodel_name :
 							 emodel_name, st, MAX_INFO_STRING);
 
 		if (cls.state >= ca_connected) {
 			MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 			sprintf (st, "setinfo %s %d",
-					 !strcmp (loadmodel->name,
+					 !Q_strcmp (loadmodel->name,
 							  "progs/player.mdl") ? pmodel_name : emodel_name,
 					 (int) crc);
 			SZ_Print (&cls.netchan.message, st);

@@ -34,22 +34,6 @@ void        GL_BeginRendering (int *x, int *y, int *width, int *height);
 void        GL_EndRendering (void);
 
 
-// Function prototypes for the Texture Object Extension routines
-typedef     GLboolean (APIENTRY * ARETEXRESFUNCPTR) (GLsizei, const GLuint *,
-													 const GLboolean *);
-typedef void (APIENTRY * BINDTEXFUNCPTR) (GLenum, GLuint);
-typedef void (APIENTRY * DELTEXFUNCPTR) (GLsizei, const GLuint *);
-typedef void (APIENTRY * GENTEXFUNCPTR) (GLsizei, GLuint *);
-typedef     GLboolean (APIENTRY * ISTEXFUNCPTR) (GLuint);
-typedef void (APIENTRY * PRIORTEXFUNCPTR) (GLsizei, const GLuint *,
-										   const GLclampf *);
-typedef void (APIENTRY * TEXSUBIMAGEPTR) (int, int, int, int, int, int, int,
-										  int, void *);
-
-extern BINDTEXFUNCPTR bindTexFunc;
-extern DELTEXFUNCPTR delTexFunc;
-extern TEXSUBIMAGEPTR TexSubImage2DFunc;
-
 extern int  texture_extension_number;
 extern int  texture_mode;
 
@@ -242,13 +226,25 @@ void        GL_Bind (int texnum);
 #define    TEXTURE0_SGIS				0x835E
 #define    TEXTURE1_SGIS				0x835F
 
+#ifndef GL_ACTIVE_TEXTURE_ARB
+// multitexture
+#define GL_ACTIVE_TEXTURE_ARB			0x84E0
+#define GL_CLIENT_ACTIVE_TEXTURE_ARB	0x84E1
+#define GL_MAX_TEXTURES_UNITS_ARB		0x84E2
+#define GL_TEXTURE0_ARB					0x84C0
+#define GL_TEXTURE1_ARB					0x84C1
+#define GL_TEXTURE2_ARB					0x84C2
+#define GL_TEXTURE3_ARB					0x84C3
+// note: ARB supports up to 32 units, but only 2 are currently used in this engine
+#endif
+
 #ifdef _WIN32
 #endif
 
 typedef void (APIENTRY * lpMTexFUNC) (GLenum, GLfloat, GLfloat);
 typedef void (APIENTRY * lpSelTexFUNC) (GLenum);
-extern lpMTexFUNC qglMTexCoord2fSGIS;
-extern lpSelTexFUNC qglSelectTextureSGIS;
+extern lpMTexFUNC qglMTexCoord2f;
+extern lpSelTexFUNC qglSelectTexture;
 
 extern qboolean gl_mtexable;
 

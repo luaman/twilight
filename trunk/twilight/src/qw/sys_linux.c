@@ -85,7 +85,7 @@ void Sys_Printf (char *fmt, ...)
     vsprintf (text,fmt,argptr);
     va_end (argptr);
 
-    l = strlen(text);
+    l = Q_strlen(text);
     t_p = text;
 
 // make sure everything goes through, even though we are non-blocking
@@ -115,7 +115,7 @@ Sys_Printf (char *fmt, ...)
 	vsprintf (text, fmt, argptr);
 	va_end (argptr);
 
-	if (strlen (text) > sizeof (text))
+	if (Q_strlen (text) > sizeof (text))
 		Sys_Error ("memory overwrite in Sys_Printf");
 
 	if (nostdout)
@@ -269,7 +269,7 @@ Sys_DebugLog (char *file, char *fmt, ...)
 	va_end (argptr);
 //    fd = open(file, O_WRONLY | O_BINARY | O_CREAT | O_APPEND, 0666);
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
-	write (fd, data, strlen (data));
+	write (fd, data, Q_strlen (data));
 	close (fd);
 }
 
@@ -282,7 +282,7 @@ Sys_EditFile (char *filename)
 	char       *editor;
 
 	term = getenv ("TERM");
-	if (term && !strcmp (term, "xterm")) {
+	if (term && !Q_strcmp (term, "xterm")) {
 		editor = getenv ("VISUAL");
 		if (!editor)
 			editor = getenv ("EDITOR");

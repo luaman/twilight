@@ -6,10 +6,10 @@
 
 /*
 ================
-filelength
+qfilelength
 ================
 */
-int filelength (FILE *f)
+int qfilelength (FILE *f)
 {
 	int		pos;
 	int		end;
@@ -101,10 +101,6 @@ char *Sys_ConsoleInput (void)
 }
 
 void Sys_Sleep (void)
-{
-}
-
-void Sys_SendKeyEvents (void)
 {
 }
 

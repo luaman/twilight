@@ -557,14 +557,8 @@ M_Options_Draw (void)
 	if (vid_menudrawfn)
 		M_Print (16, 144, "         Video Options");
 
-#ifdef _WIN32
-	if (modestate == MS_WINDOWED) {
-#endif
-		M_Print (16, 152, "             Use Mouse");
-		M_DrawCheckbox (220, 152, _windowed_mouse.value);
-#ifdef _WIN32
-	}
-#endif
+	M_Print (16, 152, "             Use Mouse");
+	M_DrawCheckbox (220, 152, _windowed_mouse.value);
 
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8,
@@ -631,17 +625,6 @@ M_Options_Key (int k)
 		else
 			options_cursor = 0;
 	}
-
-	if ((options_cursor == 15)
-#ifdef _WIN32
-		&& (modestate != MS_WINDOWED)
-#endif
-		) {
-		if (k == K_UPARROW)
-			options_cursor = 14;
-		else
-			options_cursor = 0;
-	}
 }
 
 
@@ -692,14 +675,14 @@ M_FindKeysForCommand (char *command, int *twokeys)
 	char       *b;
 
 	twokeys[0] = twokeys[1] = -1;
-	l = strlen (command);
+	l = Q_strlen (command);
 	count = 0;
 
 	for (j = 0; j < 256; j++) {
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!strncmp (b, command, l)) {
+		if (!Q_strncmp (b, command, l)) {
 			twokeys[count] = j;
 			count++;
 			if (count == 2)
@@ -715,13 +698,13 @@ M_UnbindCommand (char *command)
 	int         l;
 	char       *b;
 
-	l = strlen (command);
+	l = Q_strlen (command);
 
 	for (j = 0; j < 256; j++) {
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!strncmp (b, command, l))
+		if (!Q_strncmp (b, command, l))
 			Key_SetBinding (j, "");
 	}
 }
@@ -750,7 +733,7 @@ M_Keys_Draw (void)
 
 		M_Print (16, y, bindnames[i][1]);
 
-		l = strlen (bindnames[i][0]);
+		l = Q_strlen (bindnames[i][0]);
 
 		M_FindKeysForCommand (bindnames[i][0], keys);
 
@@ -759,7 +742,7 @@ M_Keys_Draw (void)
 		} else {
 			name = Key_KeynumToString (keys[0]);
 			M_Print (140, y, name);
-			x = strlen (name) * 8;
+			x = Q_strlen (name) * 8;
 			if (keys[1] != -1) {
 				M_Print (140 + x + 8, y, "or");
 				M_Print (140 + x + 32, y, Key_KeynumToString (keys[1]));

@@ -113,7 +113,7 @@ W_GetLumpinfo (char *name)
 	W_CleanupName (name, clean);
 
 	for (lump_p = wad_lumps, i = 0; i < wad_numlumps; i++, lump_p++) {
-		if (!strcmp (clean, lump_p->name))
+		if (!Q_strcmp (clean, lump_p->name))
 			return lump_p;
 	}
 

@@ -584,23 +584,23 @@ Con_DrawConsole (int lines)
 	// draw the download bar
 	// figure out width
 	if (cls.download) {
-		if ((text = strrchr (cls.downloadname, '/')) != NULL)
+		if ((text = Q_strrchr (cls.downloadname, '/')) != NULL)
 			text++;
 		else
 			text = cls.downloadname;
 
 		x = con_linewidth - ((con_linewidth * 7) / 40);
-		y = x - strlen (text) - 8;
+		y = x - Q_strlen (text) - 8;
 		i = con_linewidth / 3;
-		if (strlen (text) > i) {
+		if (Q_strlen (text) > i) {
 			y = x - i - 11;
-			strncpy (dlbar, text, i);
+			Q_strncpy (dlbar, text, i);
 			dlbar[i] = 0;
-			strcat (dlbar, "...");
+			Q_strcat (dlbar, "...");
 		} else
-			strcpy (dlbar, text);
-		strcat (dlbar, ": ");
-		i = strlen (dlbar);
+			Q_strcpy (dlbar, text);
+		Q_strcat (dlbar, ": ");
+		i = Q_strlen (dlbar);
 		dlbar[i++] = '\x80';
 		// where's the dot go?
 		if (cls.downloadpercent == 0)
@@ -616,11 +616,11 @@ Con_DrawConsole (int lines)
 		dlbar[i++] = '\x82';
 		dlbar[i] = 0;
 
-		sprintf (dlbar + strlen (dlbar), " %02d%%", cls.downloadpercent);
+		sprintf (dlbar + Q_strlen (dlbar), " %02d%%", cls.downloadpercent);
 
 		// draw it
 		y = con_vislines - 22 + 8;
-		for (i = 0; i < strlen (dlbar); i++)
+		for (i = 0; i < Q_strlen (dlbar); i++)
 			Draw_Character ((i + 1) << 3, y, dlbar[i]);
 	}
 

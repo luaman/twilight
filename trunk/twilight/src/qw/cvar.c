@@ -93,7 +93,7 @@ Cvar_CompleteVariable (char *partial)
 
 	// check exact match
 	for (cvar = cvar_vars; cvar; cvar = cvar->next)
-		if (!strcmp (partial, cvar->name))
+		if (!Q_strcmp (partial, cvar->name))
 			return cvar->name;
 
 	// check partial match
@@ -181,7 +181,7 @@ Cvar_RegisterVariable (cvar_t *variable)
 	cvar_vars = variable;
 
 // copy the value off, because future sets will Z_Free it
-	strcpy (value, variable->string);
+	Q_strcpy (value, variable->string);
 	variable->string = Z_Malloc (1);
 
 // set it through the function to be consistant
