@@ -404,7 +404,7 @@ Draw_Init (void)
 		Sys_Error ("Couldn't load gfx/conback.lmp");
 	SwapPic (cb);
 
-	snprintf (ver, sizeof(ver), "twilight %-7s", VERSION);
+	snprintf (ver, sizeof(ver), "twilight %s", VERSION);
 	dest = cb->data + 320 + 320 * 186 - 11 - 8 * Q_strlen (ver);
 	for (x = 0; x < Q_strlen (ver); x++)
 		Draw_CharToConback (ver[x], dest + (x << 3));
@@ -841,7 +841,7 @@ Draw_ConsoleBackground (int lines)
 //  y = lines-186;
 	y = lines - 14;
 	if (!cls.download) {
-		snprintf (ver, sizeof(ver), "Twilight %-7s QuakeWorld", VERSION);
+		snprintf (ver, sizeof(ver), "Twilight %s QuakeWorld", VERSION);
 		x = vid.conwidth - (Q_strlen (ver) * 8 + 11) -
 			(vid.conwidth * 8 / 320) * 7;
 		for (i = 0; i < Q_strlen (ver); i++)
