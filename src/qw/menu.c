@@ -27,6 +27,8 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
+#include <stdlib.h>	/* for rand() */
+
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"

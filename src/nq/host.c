@@ -29,6 +29,7 @@ static const char rcsid[] =
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>	/* for rand() */
 
 #include "SDL.h"
 
