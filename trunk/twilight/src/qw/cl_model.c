@@ -105,19 +105,13 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 			return mod;					// not cached at all
 	}
 //
-// because the world is so huge, load it one piece at a time
-//
-	if (!crash) {
-
-	}
-//
 // load the file
 //
 	buf =
 		(unsigned *) COM_LoadStackFile (mod->name, stackbuf, sizeof (stackbuf));
 	if (!buf) {
 		if (crash)
-			Sys_Error ("Mod_NumForName: %s not found", mod->name);
+			Sys_Error ("Mod_LoadModel: %s not found", mod->name);
 		return NULL;
 	}
 //
