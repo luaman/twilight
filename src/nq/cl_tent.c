@@ -335,8 +335,7 @@ CL_UpdateTEnts (void)
 	vec3_t      dist, org;
 	float       d;
 	entity_t   *ent;
-	float       yaw, pitch;
-	float       forward;
+	vec3_t		ang;
 
 	num_temp_entities = 0;
 
@@ -352,35 +351,20 @@ CL_UpdateTEnts (void)
 
 		// calculate pitch and yaw
 		VectorSubtract (b->end, b->start, dist);
-
-		if (dist[1] == 0 && dist[0] == 0) {
-			yaw = 0;
-			if (dist[2] > 0)
-				pitch = 90;
-			else
-				pitch = 270;
-		} else {
-			yaw = Q_atan2 (dist[1], dist[0]) * 180 / M_PI;
-			if (yaw < 0)
-				yaw += 360;
-
-			forward = VectorLength2 (dist);
-			pitch = Q_atan2 (dist[2], forward) * 180 / M_PI;
-			if (pitch < 0)
-				pitch += 360;
-		}
+		Vector2Angles (dist, ang);
 
 		// add new entities for the lightning
 		VectorCopy (b->start, org);
 		d = VectorNormalize (dist);
+
 		while (d > 0) {
 			ent = CL_NewTempEntity ();
 			if (!ent)
 				return;
 			VectorCopy (org, ent->origin);
 			ent->model = b->model;
-			ent->angles[0] = pitch;
-			ent->angles[1] = yaw;
+			ent->angles[0] = ang[0];
+			ent->angles[1] = ang[1];
 			ent->angles[2] = Q_rand () % 360;
 
 			for (i = 0; i < 3; i++)
