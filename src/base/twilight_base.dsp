@@ -113,6 +113,10 @@ SOURCE=.\mdfour.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\mod_brush.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\model.c
 # End Source File
 # Begin Source File
