@@ -1063,7 +1063,7 @@ R_DrawAliasModel (entity_t *e)
 		qglEnable (GL_BLEND);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
-		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
+		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
 			R_SetupAliasBlendedFrame (e->frame, paliashdr, e, true);
 		else
 			R_SetupAliasFrame (e->frame, paliashdr, e, true);
