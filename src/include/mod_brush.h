@@ -49,13 +49,13 @@ BRUSH MODELS
 ==============================================================================
 */
 
+#define B_Vert_v(b,n)		(b->verts[n].v)
+#define B_TC_v(b,tc,n)		((b->tcoords[tc])[n].v)
+#define B_TC(b,tc,n,e)		((b->tcoords[tc])[n].v[e])
 
 //
 // in memory representation
 //
-typedef struct {
-	vec3_t      position;
-} mvertex_t;
 
 #define	SIDE_FRONT	0
 #define	SIDE_BACK	1
@@ -95,10 +95,7 @@ typedef struct {
 
 typedef struct glpoly_s {
 	struct glpoly_s	*next;				// Next polygon on surface.
-	Uint			 numverts;
-	vertex_t		*v;					// Vertices
-	texcoord_t		*tc;				// Texcoords
-	texcoord_t		*ltc;				// Lightmap texcoords
+	Uint			 numverts, start;
 } glpoly_t;
 
 typedef struct msurface_s {
@@ -253,8 +250,16 @@ typedef struct brushhdr_s {
 	Uint32			numleafs;		// number of visible leafs, not counting 0
 	mleaf_t			*leafs;
 
-	Uint32			numvertexes;
-	mvertex_t		*vertexes;
+	Uint32			numvertices;
+	vertex_t		*vertices;
+
+	Uint32			numsets;
+	vertex_t		*verts;
+	texcoord_t		*tcoords[2];
+#define VBO_VERTS		2
+#define VBO_TC0			0
+#define VBO_TC1			1
+	Uint			vbo_objects[3];
 
 	Uint32			numedges;
 	medge_t			*edges;

@@ -62,6 +62,26 @@ GLArrays_Init_Cvars (void)
 	gl_iarray_size = Cvar_Get ("gl_iarray_size", "2048", CVAR_ARCHIVE | CVAR_ROM, NULL);
 }
 
+void
+GLArrays_Set_Default (void)
+{
+	if (gl_vbo)
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc0_array_v(0)), tc0_array_p);
+	qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(c_array_v(0)), cub_array_p);
+	qglVertexPointer (3, GL_FLOAT, sizeof(v_array_v(0)), v_array_p);
+
+	if (gl_mtex) {
+		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(tc1_array_v(0)), tc1_array_p);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+	}
+	if (gl_secondary_color)
+		qglSecondaryColorPointerEXT (4, GL_UNSIGNED_BYTE, sizeof(scub_array_v(0)), scub_array_p);
+}
+
 /*
 ===============
 R_Init
@@ -87,20 +107,9 @@ GLArrays_Init (void)
 	  scub_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(colorub_t));
 	}
 
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc0_array_v(0)), tc0_array_p);
-	qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(c_array_v(0)), cub_array_p);
-	qglVertexPointer (3, GL_FLOAT, sizeof(v_array_v(0)), v_array_p);
+	GLArrays_Set_Default ();
 
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-	if (gl_mtex) {
-		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof(tc1_array_v(0)), tc1_array_p);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
-	}
-	if (gl_secondary_color)
-	  qglSecondaryColorPointerEXT (4, GL_UNSIGNED_BYTE, sizeof(scub_array_v(0)), scub_array_p);
 }

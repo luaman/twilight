@@ -29,6 +29,7 @@ static const char rcsid[] =
 
 #include <stdio.h>
 #include <stdlib.h>	/* for malloc() */
+#include <string.h>
 
 #include "qtypes.h"
 #include "model.h"
@@ -42,21 +43,11 @@ static const char rcsid[] =
 #include "cvar.h"
 
 cvar_t *r_wateralpha;
-cvar_t *r_waterripple;
-
-// speed up sin calculations - Ed
-float       turbsin[] = {
-#include "gl_warp_sin.h"
-};
-
-#define TURBSCALE (256.0 / (2 * M_PI))
-#define TURBSIN(f, s) turbsin[((int)(((f)*(s) + r_time) * TURBSCALE) & 255)]
 
 void
 R_Init_Liquid_Cvars ()
 {
 	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
-	r_waterripple = Cvar_Get ("r_waterripple", "0", CVAR_NONE, NULL);
 }
 
 void
@@ -72,38 +63,30 @@ Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
 static void
-EmitWaterPolys (glpoly_t *p)
+EmitWaterPolys (model_t *mod, glpoly_t *p)
 {
-	vec3_t		temp;
-	Uint		i;
-	float		s, t, ripple;
+	brushhdr_t	*brush = mod->brush;
 
-	ripple = r_waterripple->fvalue;
+	qglMatrixMode (GL_TEXTURE);
+	qglPushMatrix ();
+	qglTranslatef (Q_sin(r_time) * 0.2f, Q_cos(r_time) * 0.1f, 0);
 
 	for (; p; p = p->next)
 	{
-		for (i = 0; i < p->numverts; i++)
-		{
-			VectorCopy(p->v[i].v, temp);
-
-			if (ripple)
-				temp[2] += ripple * TURBSIN(temp[0], 1/32.0f) *
-					TURBSIN(temp[1], 1/32.0f) * (1/64.0f);
-
-			s = (p->tc[i].v[0] + TURBSIN(p->tc[i].v[1], 0.125)) * (1/64.0f);
-			t = (p->tc[i].v[1] + TURBSIN(p->tc[i].v[0], 0.125)) * (1/64.0f);
-
-			VectorSet2 (tc0_array_v(i), s, t);
-			VectorCopy (temp, v_array_v(i));
-		}
+		memcpy(v_array_v(0), B_Vert_v(brush, p->start),
+				sizeof(vertex_t) * p->numverts);
+		memcpy(tc0_array_v(0), B_TC_v(brush, 0, p->start),
+				sizeof(texcoord_t) * p->numverts);
 		TWI_PreVDrawCVA (0, p->numverts);
 		qglDrawArrays (GL_TRIANGLE_FAN, 0, p->numverts);
 		TWI_PostVDrawCVA ();
 	}
+	qglPopMatrix ();
+	qglMatrixMode (GL_MODELVIEW);
 }
 
 void
-R_Draw_Liquid_Chain (chain_head_t *chain)
+R_Draw_Liquid_Chain (model_t *mod, chain_head_t *chain)
 {
 	Uint			 i;
 	chain_item_t	*c;
@@ -117,7 +100,7 @@ R_Draw_Liquid_Chain (chain_head_t *chain)
 				bound = true;
 				qglBindTexture (GL_TEXTURE_2D, chain->texture->gl_texturenum);
 			}
-			EmitWaterPolys (c[i].surf->polys);
+			EmitWaterPolys (mod, c[i].surf->polys);
 		}
 	}
 }

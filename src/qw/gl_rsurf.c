@@ -598,7 +598,7 @@ R_DrawBrushDepthSkies (void)
 	brushhdr_t	*brush;
 	entity_common_t	*e;
 
-	R_Draw_Depth_Sky_Chain (&cl.worldmodel->brush->sky_chain, r_origin);
+	Sky_Depth_Draw_Chain (cl.worldmodel, &cl.worldmodel->brush->sky_chain);
 
 	if (!r_drawentities->ivalue)
 		return;
@@ -619,7 +619,7 @@ R_DrawBrushDepthSkies (void)
 			qglPushMatrix ();
 			qglMultTransposeMatrixf ((GLfloat *) &e->matrix);
 
-			R_Draw_Depth_Sky_Chain (&brush->sky_chain, org);
+			Sky_Depth_Draw_Chain (e->model, &brush->sky_chain);
 
 			qglPopMatrix ();
 		}
@@ -632,24 +632,13 @@ R_RenderBrushPolys
 ================
 */
 
-static void
-R_RenderBrushPolys (glpoly_t *p, qboolean t0, qboolean t1)
+static inline void
+R_RenderBrushPolys (glpoly_t *p)
 {
 	for (;p; p = p->next)
 	{
 		c_brush_polys++;
-
-		memcpy (v_array_p, p->v, sizeof(vertex_t) * p->numverts);
-		if (t0)
-			memcpy (tc0_array_p, p->tc, sizeof(texcoord_t) * p->numverts);
-		if (t0 && t1)
-			memcpy (tc1_array_p, p->ltc, sizeof(texcoord_t) * p->numverts);
-		else if (t1)
-			memcpy (tc0_array_p, p->ltc, sizeof(texcoord_t) * p->numverts);
-
-		TWI_PreVDrawCVA (0, p->numverts);
-		qglDrawArrays (GL_POLYGON, 0, p->numverts);
-		TWI_PostVDrawCVA ();
+		qglDrawArrays (GL_POLYGON, p->start, p->numverts);
 	}
 }
 
@@ -667,7 +656,7 @@ R_DrawLiquidTextureChains (model_t *mod)
 				|| !(chain->flags & CHAIN_LIQUID))
 			continue;
 
-		R_Draw_Liquid_Chain (chain);
+		R_Draw_Liquid_Chain (mod, chain);
 	}
 }
 
@@ -677,7 +666,7 @@ R_DrawTextureChains
 ================
 */
 void
-R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
+R_DrawTextureChains (model_t *mod, int frame,
 		matrix4x4_t *matrix, matrix4x4_t *invmatrix)
 {
 	Uint			 i, j;
@@ -707,12 +696,17 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
 		}
 	}
 
-	if (!draw_skybox && brush->sky_chain.visframe == vis_framecount)
-	{
-		if (r_fastsky->ivalue)
-			R_Draw_Fast_Sky_Chain (&brush->sky_chain, origin);
-		else
-			R_Draw_Old_Sky_Chain (&brush->sky_chain, origin);
+	if (sky_type == SKY_FAST && brush->sky_chain.visframe == vis_framecount)
+		Sky_Fast_Draw_Chain (mod, &brush->sky_chain);
+
+	if (gl_vbo) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_VERTS]);
+		qglVertexPointer (3, GL_FLOAT, 0, 0);
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC0]);
+		qglTexCoordPointer (2, GL_FLOAT, 0, 0);
+	} else {
+		qglVertexPointer (3, GL_FLOAT, 0, brush->verts);
+		qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[0]);
 	}
 
 	if (gl_mtex)
@@ -742,6 +736,17 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
 		}
 		qglEnable (GL_TEXTURE_2D);
 
+		if (gl_vbo) {
+			qglClientActiveTextureARB(GL_TEXTURE1_ARB);
+			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC1]);
+			qglTexCoordPointer (2, GL_FLOAT, 0, 0);
+			qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+		} else {
+			qglClientActiveTextureARB(GL_TEXTURE1_ARB);
+			qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[1]);
+			qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+		}
+
 		for (i = 0; i < brush->numtextures; i++)
 		{
 			chain = &brush->tex_chains[i];
@@ -759,7 +764,7 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
 				if (c->visframe != vis_framecount)
 					continue;
 				qglBindTexture (GL_TEXTURE_2D, brush->lightblock.chains[c->surf->lightmap_texnum].l_texnum);
-				R_RenderBrushPolys (c->surf->polys, true, true);
+				R_RenderBrushPolys (c->surf->polys);
 			}
 		}
 
@@ -791,7 +796,7 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
 				c = &chain->items[j];
 				if (c->visframe != vis_framecount)
 					continue;
-				R_RenderBrushPolys (c->surf->polys, true, false);
+				R_RenderBrushPolys (c->surf->polys);
 			}
 		}
 
@@ -801,6 +806,13 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
 		qglDepthMask (GL_FALSE);
 
 		qglBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
+
+
+		if (gl_vbo) {
+			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC1]);
+			qglTexCoordPointer (2, GL_FLOAT, 0, 0);
+		} else
+			qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[1]);
 
 		qglEnable (GL_BLEND);
 		for (i = 0; i < brush->lightblock.num; i++)
@@ -814,7 +826,7 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
 				if (chain->items[j].visframe != vis_framecount)
 					continue;
 				qglBindTexture (GL_TEXTURE_2D, chain->l_texnum);
-				R_RenderBrushPolys (chain->items[j].surf->polys, false, true);
+				R_RenderBrushPolys (chain->items[j].surf->polys);
 			}
 		}
 
@@ -825,16 +837,18 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
 		qglDepthMask (GL_TRUE);
 	}
 
-	// If the water is solid, draw here, if not, then later.
-	if (r_wateralpha->fvalue == 1)
-		R_DrawLiquidTextureChains (mod);
-
 	// Draw the fullbrights, if there are any
 	if (gl_fb->ivalue)
 	{
 		qglDepthMask (GL_FALSE);	// don't bother writing Z
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
+
+		if (gl_vbo) {
+			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC0]);
+			qglTexCoordPointer (2, GL_FLOAT, 0, 0);
+		} else
+			qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[0]);
 
 		for (i = 0; i < brush->numtextures; i++)
 		{
@@ -852,7 +866,7 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
 				c = &chain->items[j];
 				if (c->visframe != vis_framecount)
 					continue;
-				R_RenderBrushPolys (c->surf->polys, true, false);
+				R_RenderBrushPolys (c->surf->polys);
 			}
 		}
 
@@ -860,6 +874,12 @@ R_DrawTextureChains (model_t *mod, vec3_t origin, int frame,
 		qglDisable (GL_BLEND);
 		qglDepthMask (GL_TRUE);
 	}
+
+	GLArrays_Set_Default ();
+
+	// If the water is solid, draw here, if not, then later.
+	if (r_wateralpha->fvalue == 1)
+		R_DrawLiquidTextureChains (mod);
 
 	if (matrix)
 		qglPopMatrix ();
@@ -934,7 +954,7 @@ R_DrawOpaqueBrushModel (entity_common_t *e)
 		}
 	}
 
-	R_DrawTextureChains(mod, e->origin, e->frame[0], &e->matrix, &e->invmatrix);
+	R_DrawTextureChains(mod, e->frame[0], &e->matrix, &e->invmatrix);
 }
 
 /*

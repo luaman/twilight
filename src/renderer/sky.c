@@ -54,19 +54,16 @@ float	speedscale, speedscale2;	// for top sky and bottom sky
 
 cvar_t *r_skyname;
 cvar_t *r_fastsky;
-qboolean draw_skybox = false;
+sky_type_t	sky_type = SKY_SPHERE;
 
 static void
-R_Emit_Sky_Chain (chain_head_t *chain, vec3_t origin,
-		qboolean tex1, qboolean tex2)
+Sky_Emit_Chain (model_t *mod, chain_head_t *chain)
 {
 	glpoly_t		*p;
 	msurface_t		*s;
 	chain_item_t	*c;
-	Uint			 i, j;
-	vec3_t			 dir;
-	float			 s1, t1, s2, t2;
-	float			 length;
+	brushhdr_t		*brush = mod->brush;
+	Uint			 j;
 
 	c = chain->items;
 	for (j = 0; j < chain->n_items; j++) {
@@ -74,35 +71,8 @@ R_Emit_Sky_Chain (chain_head_t *chain, vec3_t origin,
 			s = c[j].surf;
 			for (p = s->polys; p; p = p->next) 
 			{
-				memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
-				if (tex1 || tex2)
-				{
-					for (i = 0; i < p->numverts; i++) 
-					{
-						VectorSubtract (p->v[i].v, origin, dir);
-						dir[2] *= 3;				// flatten the sphere
-
-						length = 6 * 63 * Q_RSqrt (DotProduct(dir,dir));
-
-						dir[0] *= length;
-						dir[1] *= length;
-
-						if (tex1)
-						{
-							s1 = (speedscale + dir[0]) * (1.0 / 128);
-							t1 = (speedscale + dir[1]) * (1.0 / 128);
-							VectorSet2(tc0_array_v(i), s1, t1);
-						}
-
-						if (tex2)
-						{
-							s2 = (speedscale2 + dir[0]) * (1.0 / 128);
-							t2 = (speedscale2 + dir[1]) * (1.0 / 128);
-
-							VectorSet2(tc1_array_v(i), s2, t2);
-						}
-					}
-				}
+				memcpy(v_array_v(0), B_Vert_v(brush, p->start),
+						sizeof(vertex_t) * p->numverts);
 
 				TWI_PreVDrawCVA (0, p->numverts);
 				qglDrawArrays (GL_POLYGON, 0, p->numverts);
@@ -114,64 +84,13 @@ R_Emit_Sky_Chain (chain_head_t *chain, vec3_t origin,
 
 /*
 ===============
-R_Draw_Old_Sky_Chain
-
-Draws a sky chain as an old style sky, possibily using mtex.
-===============
-*/
-void
-R_Draw_Old_Sky_Chain (chain_head_t *chain, vec3_t origin)
-{
-	if (!chain || !chain->items)
-		return;
-
-	if (gl_mtex) {
-		speedscale = r_time * 8;
-		speedscale -= (int) speedscale & ~127;
-
-		speedscale2 = r_time * 16;
-		speedscale2 -= (int) speedscale2 & ~127;
-
-		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		qglBindTexture (GL_TEXTURE_2D, solidskytexture);
-		qglActiveTextureARB (GL_TEXTURE1_ARB);
-		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-		qglEnable (GL_TEXTURE_2D);
-		qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
-
-		R_Emit_Sky_Chain (chain, origin, true, true);
-
-		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		qglDisable (GL_TEXTURE_2D);
-		qglActiveTextureARB (GL_TEXTURE0_ARB);
-		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	} else {
-		qglBindTexture (GL_TEXTURE_2D, solidskytexture);
-
-		speedscale = r_time * 8;
-		speedscale -= (int) speedscale & ~127;
-		R_Emit_Sky_Chain (chain, origin, true, false);
-
-		qglEnable (GL_BLEND);
-		qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
-
-		speedscale = r_time * 16;
-		speedscale -= (int) speedscale & ~127;
-
-		R_Emit_Sky_Chain (chain, origin, true, false);
-		qglDisable (GL_BLEND);
-	}
-}
-
-/*
-===============
 R_Draw_Fast_Sky_Chain
 
 Draws a sky chain as a fast sky.
 ===============
 */
 void
-R_Draw_Fast_Sky_Chain (chain_head_t *chain, vec3_t origin)
+Sky_Fast_Draw_Chain (model_t *mod, chain_head_t *chain)
 {
 	if (!chain || !chain->items)
 		return;
@@ -179,7 +98,7 @@ R_Draw_Fast_Sky_Chain (chain_head_t *chain, vec3_t origin)
 	qglDisable (GL_TEXTURE_2D);
 	qglColor4fv (d_8tofloattable[(Uint8) r_fastsky->ivalue - 1]);
 
-	R_Emit_Sky_Chain (chain, origin, false, false);
+	Sky_Emit_Chain (mod, chain);
 
 	qglColor4fv (whitev);
 	qglEnable (GL_TEXTURE_2D);
@@ -193,7 +112,7 @@ Draws a sky chain only in the depth buffer.
 ===============
 */
 void
-R_Draw_Depth_Sky_Chain (chain_head_t *chain, vec3_t origin)
+Sky_Depth_Draw_Chain (model_t *mod, chain_head_t *chain)
 {
 	if (!chain || !chain->items)
 		return;
@@ -202,7 +121,7 @@ R_Draw_Depth_Sky_Chain (chain_head_t *chain, vec3_t origin)
 	qglEnable (GL_BLEND);
 	qglBlendFunc (GL_ZERO, GL_ONE);
 
-	R_Emit_Sky_Chain (chain, origin, false, false);
+	Sky_Emit_Chain (mod, chain);
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDisable (GL_BLEND);
@@ -217,6 +136,97 @@ R_Draw_Depth_Sky_Chain (chain_head_t *chain, vec3_t origin)
 =================================================================
 */
 
+#define Sky_Sphere_Grid			32
+#define Sky_Sphere_Grid1		(Sky_Sphere_Grid + 1)
+#define Sky_Sphere_GridRecip	(1.0f / Sky_Sphere_Grid)
+#define Sky_Sphere_Numverts		(Sky_Sphere_Grid1 * Sky_Sphere_Grid1)
+#define Sky_Sphere_Numele		(Sky_Sphere_Grid * Sky_Sphere_Grid * 2 * 3)
+
+static vertex_t Sky_Sphere_Verts[Sky_Sphere_Numverts];
+static texcoord_t Sky_Sphere_Texcoords[Sky_Sphere_Numverts];
+static Uint Sky_Sphere_Elements[Sky_Sphere_Numele];
+
+static void
+Sky_Sphere_Calc (void)
+{
+	int x, y, i;
+	float a, b, c, ax, ay, length;
+	vec3_t v;
+
+	for (y = 0, i = 0; y <= Sky_Sphere_Grid; y++)
+	{
+		a = y * Sky_Sphere_GridRecip;
+		ax = cos(a * M_PI * 2);
+		ay = -sin(a * M_PI * 2);
+		for (x = 0; x <= Sky_Sphere_Grid; x++, i++)
+		{
+			b = x * Sky_Sphere_GridRecip;
+			c = cos((b + 0.5) * M_PI);
+			v[0] = ax*c * 16;
+			v[1] = ay*c * 16;
+			v[2] = -sin((b + 0.5) * M_PI) * (5);
+			length = 3.0f / sqrt(v[0]*v[0]+v[1]*v[1]+(v[2]*v[2]*9));
+			Sky_Sphere_Texcoords[i].v[0] = v[0] * length;
+			Sky_Sphere_Texcoords[i].v[1] = v[1] * length;
+			Sky_Sphere_Verts[i].v[0] = v[0];
+			Sky_Sphere_Verts[i].v[1] = v[1];
+			Sky_Sphere_Verts[i].v[2] = v[2];
+		}
+	}
+	for (y = 0, i = 0; y < Sky_Sphere_Grid; y++)
+	{
+		for (x = 0; x < Sky_Sphere_Grid; x++)
+		{
+			Sky_Sphere_Elements[i++] =  y      * Sky_Sphere_Grid1 + x;
+			Sky_Sphere_Elements[i++] =  y      * Sky_Sphere_Grid1 + x + 1;
+			Sky_Sphere_Elements[i++] = (y + 1) * Sky_Sphere_Grid1 + x;
+			Sky_Sphere_Elements[i++] =  y      * Sky_Sphere_Grid1 + x + 1;
+			Sky_Sphere_Elements[i++] = (y + 1) * Sky_Sphere_Grid1 + x + 1;
+			Sky_Sphere_Elements[i++] = (y + 1) * Sky_Sphere_Grid1 + x;
+		}
+	}
+}
+
+void
+Sky_Sphere_Draw (void)
+{
+	qglDepthMask (GL_FALSE);
+	qglPushMatrix ();
+	qglTranslatef(r_origin[0], r_origin[1], r_origin[2]);
+	qglMatrixMode (GL_TEXTURE);
+	qglPushMatrix ();
+
+	speedscale = r_time * (8.0 / 128.0);
+	speedscale -= floor(speedscale);
+
+	qglVertexPointer (3, GL_FLOAT, 0, Sky_Sphere_Verts);
+	qglTexCoordPointer (2, GL_FLOAT, 0, Sky_Sphere_Texcoords);
+
+	qglTranslatef (speedscale, speedscale, 0);
+	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
+
+	qglDrawElements (GL_TRIANGLES, Sky_Sphere_Numele, GL_UNSIGNED_INT,
+			Sky_Sphere_Elements);
+
+	qglEnable (GL_BLEND);
+
+	qglTranslatef (speedscale, speedscale, 0);
+	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
+
+	qglDrawElements (GL_TRIANGLES, Sky_Sphere_Numele, GL_UNSIGNED_INT,
+			Sky_Sphere_Elements);
+
+	qglDisable (GL_BLEND);
+
+	GLArrays_Reset_TC ();
+	GLArrays_Reset_Vertex ();
+
+	qglPopMatrix ();
+	qglMatrixMode (GL_MODELVIEW);
+	qglPopMatrix ();
+	qglDepthMask (GL_TRUE);
+}
+
 /*
 ==================
 R_LoadSkys
@@ -224,7 +234,7 @@ R_LoadSkys
 */
 char       *suf[6] = { "rt", "bk", "lf", "ft", "up", "dn" };
 qboolean
-R_LoadSkys (cvar_t *cvar)
+Sky_LoadSkys (cvar_t *cvar)
 {
 	int			i;
 	char		name[64];
@@ -266,16 +276,22 @@ R_LoadSkys (cvar_t *cvar)
 
 /*
 ==============
-R_SkyBoxChanged
+R_SkyChanged
 ==============
 */
 void
-R_SkyBoxChanged (cvar_t *cvar)
+Sky_Changed (cvar_t *unused)
 {
-	if (cvar->svalue[0])
-		draw_skybox = R_LoadSkys(cvar);
+	unused = unused;
+	if (!r_skyname || !r_fastsky)
+		return;
+
+	if (r_fastsky->ivalue)
+		sky_type = SKY_FAST;
+	else if (r_skyname->svalue[0] && Sky_LoadSkys(r_skyname))
+		sky_type = SKY_BOX;
 	else
-		draw_skybox = false;
+		sky_type = SKY_SPHERE;
 }
 
 #define SKYBOXVERT(i, x, y, z, s, t)							\
@@ -291,13 +307,9 @@ R_DrawSkyBox
 ==============
 */
 void
-R_DrawSkyBox (void)
+Sky_Box_Draw (void)
 {
-	if (!draw_skybox)
-		return;
-
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
+	qglDepthMask (GL_FALSE);
 	// Brute force method
 
 	// right
@@ -360,8 +372,7 @@ R_DrawSkyBox (void)
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
 
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	qglClear (GL_DEPTH_BUFFER_BIT);
+	qglDepthMask (GL_TRUE);
 }
 
 
@@ -375,7 +386,7 @@ A sky texture is 256*128, with the right side being a masked overlay
 ==============
 */
 void
-R_InitSky (texture_t *unused, Uint8 *pixels)
+Sky_InitSky (texture_t *unused, Uint8 *pixels)
 {
 	int			i, j, p;
 	Uint8		*src;
@@ -442,7 +453,7 @@ R_InitSky (texture_t *unused, Uint8 *pixels)
  * compatibility function to set r_skyname
  */
 static void
-R_LoadSky_f (void)
+Sky_LoadSky_f (void)
 {
 	if (Cmd_Argc() != 2)
 	{
@@ -454,14 +465,15 @@ R_LoadSky_f (void)
 }
 
 void
-R_Init_Sky (void)
+Sky_Init (void)
 {
-	Cmd_AddCommand ("loadsky", &R_LoadSky_f);
+	Cmd_AddCommand ("loadsky", &Sky_LoadSky_f);
+	Sky_Sphere_Calc ();
 }
 
 void
-R_Init_Sky_Cvars (void)
+Sky_Init_Cvars (void)
 {
-	r_skyname = Cvar_Get ("r_skyname", "", CVAR_NONE, &R_SkyBoxChanged);
-	r_fastsky = Cvar_Get ("r_fastsky", "0", CVAR_NONE, NULL);
+	r_skyname = Cvar_Get ("r_skyname", "", CVAR_NONE, &Sky_Changed);
+	r_fastsky = Cvar_Get ("r_fastsky", "0", CVAR_NONE, &Sky_Changed);
 }

@@ -292,7 +292,7 @@ R_DrawOpaqueBrushModels ()
 	vec3_t		 mins, maxs;
 	int			 i;
 
-	R_DrawTextureChains (cl.worldmodel, r_origin, 0, NULL, NULL);
+	R_DrawTextureChains (cl.worldmodel, 0, NULL, NULL);
 
 	if (!r_drawentities->ivalue)
 		return;
@@ -490,9 +490,11 @@ R_Render3DView (void)
 {
 	R_VisBrushModels ();
 
-	if (draw_skybox)
-	{
-		R_DrawSkyBox ();
+	if (sky_type != SKY_FAST) {
+		if (sky_type == SKY_BOX)
+			Sky_Box_Draw ();
+		else if (sky_type == SKY_SPHERE)
+			Sky_Sphere_Draw ();
 		R_DrawBrushDepthSkies ();
 	}
 	
@@ -702,7 +704,7 @@ R_Init_Cvars (void)
 
 
 
-	R_Init_Sky_Cvars ();
+	Sky_Init_Cvars ();
 	R_Init_Liquid_Cvars ();
 	Vis_Init_Cvars ();
 }
@@ -760,7 +762,7 @@ R_Init (void)
 	TNT_Init ();
 	R_Explosion_Init ();
 	R_InitSurf ();
-	R_Init_Sky ();
+	Sky_Init ();
 	R_Init_Liquid ();
 	Vis_Init ();
 }
