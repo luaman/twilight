@@ -54,7 +54,6 @@ static mplane_t    frustum[4];
 
 int         c_brush_polys, c_alias_polys;
 
-int         particletexture;			// little dot for particles
 int         playertextures;				// up to 16 color translated skins
 
 //
@@ -818,7 +817,8 @@ R_DrawAliasModel (entity_t *e)
 
 	if (gl_particletorches->value) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
-			if ((realtime + 2) > e->time_left) {
+			if (e->time_left == 0) {
+//			if ((realtime + 2) > e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
 				e->time_left = realtime + 0.05;
 			}

@@ -485,7 +485,8 @@ R_Torch (entity_t *ent, qboolean torch2)
 	if (!r_particles->value)
 		return;
 
-	VectorSet4 (color, 0.88, 0.95, 0.31, 0.5);
+//	VectorSet4 (color, 227.0 / 255.0, 151.0 / 255.0, 79.0 / 255.0, .5);
+	VectorSet4 (color, 0.89, 0.59, 0.31, 0.5);
 	VectorSet (pvel, (Q_rand() & 3) - 2, (Q_rand() & 3) - 2, 0);
 	VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
 
@@ -558,14 +559,6 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 		ptype = 0;
 
 		switch (type) {
-			case 0:					// rocket trail
-				pramp = (Q_rand () & 3);
-				pcolor = ramp3[(int) pramp];
-				ptype = pt_fire;
-				for (j = 0; j < 3; j++)
-					porg[j] = start[j] + ((Q_rand () % 6) - 3);
-				break;
-
 			case 1:					// smoke smoke
 				pramp = (Q_rand () & 3) + 2;
 				pcolor = ramp3[(int) pramp];
@@ -620,7 +613,6 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 		}
 
 		new_base_particle_oc (ptype, porg, pvel, pcolor, pramp, -1, pdie);
-//		particle_new(ptype, porg, pvel, pdie, pcolor, pramp);
 
 		VectorScale(vec, lsub, avec);
 		VectorAdd (start, avec, start);
@@ -637,35 +629,27 @@ static void
 R_Draw_Base_Particles (void)
 {
 	base_particle_t *p;
-	float       grav;
 	int         i, j, k, activeparticles, maxparticle;
-	float       time2, time3;
-	float       time1;
-	float       dvel;
+	float       time1, time2, time3;
+	float       grav, dvel;
 	float       frametime;
-	vec3_t      up, right;
-	float		scale, scale2;
+	float		scale, *corner;
 
-	qglBindTexture (GL_TEXTURE_2D, particletexture);
+	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
 
-	VectorScale (vup, 1.5, up);
-	VectorScale (vright, 1.5, right);
 	frametime = host_frametime;
-	time3 = frametime * 15;
-	time2 = frametime * 10;				// 15;
 	time1 = frametime * 5;
+	time2 = frametime * 10;
+	time3 = frametime * 15;
 	grav = frametime * 800 * 0.05;
 	dvel = 4 * frametime;
 
 	activeparticles = 0;
 	maxparticle = -1;
-	j = 0;
 	v_index = 0;
+	j = 0;
 
 	for (k = 0, p = base_particles; k < num_base_particles; k++, p++) {
-		// LordHavoc: this is probably no longer necessary, as it is
-		// checked at the end, but could still happen on weird particle
-		// effects, left for safety...
 		if (p->die <= realtime) {
 			free_base_particles[j++] = p;
 			continue;
@@ -677,9 +661,11 @@ R_Draw_Base_Particles (void)
 		VectorCopy4 (p->color, c_array[v_index + 0]);
 		VectorCopy4 (p->color, c_array[v_index + 1]);
 		VectorCopy4 (p->color, c_array[v_index + 2]);
-		VectorSet2(tc_array[v_index + 0], 0, 0);
-		VectorSet2(tc_array[v_index + 1], 1, 0);
-		VectorSet2(tc_array[v_index + 2], 0, 1);
+		VectorCopy4 (p->color, c_array[v_index + 3]);
+		VectorSet2(tc_array[v_index + 0], 1, 1);
+		VectorSet2(tc_array[v_index + 1], 0, 1);
+		VectorSet2(tc_array[v_index + 2], 0, 0);
+		VectorSet2(tc_array[v_index + 3], 1, 0);
 
 		if (p->scale < 0) {
 			scale = ((p->org[0] - r_origin[0]) * vpn[0]) + 
@@ -689,24 +675,20 @@ R_Draw_Base_Particles (void)
 				scale = -p->scale;
 			else
 				scale = (-p->scale) + scale * 0.004;
-
-			VectorSet3(v_array[v_index + 0], p->org[0], p->org[1], p->org[2]);
-			VectorMA (p->org, scale, up, v_array[v_index + 1]);
-			VectorMA (p->org, scale, right, v_array[v_index + 2]);
 		} else {
-			scale = p->scale * -0.25;
-			scale2 = p->scale * 0.75;
-			VectorSet3(v_array[v_index + 0], p->org[0] + (up[0]+right[0])*scale, p->org[1] + (up[1]+right[1])*scale, p->org[2] + (up[2]+right[2])*scale);
-			VectorSet3(v_array[v_index + 1], p->org[0] + up[0] * scale2 + right[0]*scale, p->org[1] + up[1] * scale2 + right[1]*scale, 
-				p->org[2] + up[2] * scale2 + right[2]*scale);
-			VectorSet3(v_array[v_index + 2], p->org[0] + up[0] * scale + right[0]*scale2, p->org[1] + up[1] * scale + right[1]*scale2, 
-				p->org[2] + up[2] * scale + right[2]*scale2);
+			scale = p->scale;
 		}
 
-		v_index += 3;
+		corner = v_array[v_index];
+		VectorTwiddleS (p->org, vup, vright, scale * -0.5, v_array[v_index]);
+		VectorTwiddle (corner, vup, scale, vright, 0    , v_array[v_index + 1]);
+		VectorTwiddle (corner, vup, scale, vright, scale, v_array[v_index + 2]);
+		VectorTwiddle (corner, vup, 0    , vright, scale, v_array[v_index + 3]);
 
-		if ((v_index + 3) >= MAX_VERTEX_ARRAYS) {
-			qglDrawArrays (GL_TRIANGLES, 0, v_index);
+		v_index += 4;
+
+		if ((v_index + 4) >= MAX_VERTEX_ARRAYS) {
+			qglDrawArrays (GL_QUADS, 0, v_index);
 			v_index = 0;
 		}
 		VectorMA (p->org, frametime, p->vel, p->org);
@@ -728,7 +710,7 @@ R_Draw_Base_Particles (void)
 				if (p->ramp >= 8)
 					p->die = -1;
 				else
-					VectorCopy (d_8tofloattable[ramp1[(int) p->ramp]], p->color);
+					VectorCopy (d_8tofloattable[ramp1[(int) p->ramp]],p->color);
 				for (i = 0; i < 3; i++)
 					p->vel[i] += p->vel[i] * dvel;
 				p->vel[2] -= grav;
@@ -739,7 +721,7 @@ R_Draw_Base_Particles (void)
 				if (p->ramp >= 8)
 					p->die = -1;
 				else
-					VectorCopy (d_8tofloattable[ramp2[(int) p->ramp]], p->color);
+					VectorCopy (d_8tofloattable[ramp2[(int) p->ramp]],p->color);
 				for (i = 0; i < 3; i++)
 					p->vel[i] -= p->vel[i] * frametime;
 				p->vel[2] -= grav;
@@ -783,7 +765,7 @@ R_Draw_Base_Particles (void)
 	}
 
 	if (v_index) {
-		qglDrawArrays (GL_TRIANGLES, 0, v_index);
+		qglDrawArrays (GL_QUADS, 0, v_index);
 		v_index = 0;
 	}
 
