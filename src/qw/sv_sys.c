@@ -250,7 +250,8 @@ Sys_BackTrace (int fd)
 	void		*array[128];
 	int			size;
 
-	size = backtrace (array, sizeof(array)/sizeof(array[0]));
+	memset (array, 0, sizeof(array));
+	size = backtrace (array, sizeof(array) / sizeof(array[0]));
 	backtrace_symbols_fd (array, size, fd);
 #endif
 }
