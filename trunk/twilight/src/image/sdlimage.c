@@ -125,7 +125,8 @@ image_t *
 Image_FromSDL (fs_file_t *file, SDL_RWops *rw)
 {
 	SDL_Surface	*surf, *rgb_surf;
-	int			i;
+	Uint8		*in, *out;
+	int			i, j;
 	image_t		*image = NULL;
 
 	if (!loaded)
@@ -144,8 +145,17 @@ Image_FromSDL (fs_file_t *file, SDL_RWops *rw)
 				image->type = IMG_RGBA;
 				image->pixels = Zone_Alloc(img_zone, image->width * image->height * 4);
 
-				memcpy (image->pixels, rgb_surf->pixels,
-						4 * rgb_surf->w * rgb_surf->h);
+				in = rgb_surf->pixels;
+				out = image->pixels;
+				for (j = 0; j < (rgb_surf->w * rgb_surf->h); j++) {
+					out[0] = in[0];
+					out[1] = in[1];
+					out[2] = in[2];
+					out[3] = 255 - in[3];
+
+					in += 4;
+					out += 4;
+				}
 				SDL_FreeSurface (rgb_surf);
 				SDL_FreeSurface (surf);
 				return image;

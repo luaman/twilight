@@ -23,12 +23,12 @@
 
 */
 
-#ifndef __FS_PAK_H
-#define __FS_PAK_H
+#ifndef __FS_EMBEDDED_H
+#define __FS_EMBEDDED_H
 
 #include "fs.h"
 
-fs_group_t *FSP_New_Group (fs_file_t *pak, fs_group_t *parent, const char *id);
+fs_group_t *FSE_New_Group (const char *id);
 
-#endif // __FS_PAK_H
+#endif // __FS_EMBEDDED_H
 

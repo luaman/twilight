@@ -37,9 +37,12 @@ static const char rcsid[] =
 #include "pak.h"
 #include "wad.h"
 #include "cmd.h"
+#include "embedded.h"
 
 memzone_t	*fs_zone;
 fs_group_t	*fs_paths;
+
+static void FS_AddGroup (fs_group_t *group);
 
 static void
 FS_Path_f (void)
@@ -58,6 +61,7 @@ FS_Init (void)
 	fs_paths = NULL;
 
 	Cmd_AddCommand ("path", FS_Path_f);
+	FS_AddGroup(FSE_New_Group ("*Embedded*"));
 }
 
 char *

@@ -825,7 +825,7 @@ Host_Init ()
 		IN_Init ();
 	}
 
-	Cbuf_InsertText ("exec quake.rc\n");
+	Cbuf_InsertText ("exec twilight.rc\n");
 
 	host_initialized = true;
 

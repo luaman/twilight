@@ -1,0 +1,10 @@
+Makefile
+Makefile.in
+*.fs
+.*.swp
+.deps
+Debug
+Release
+*.ncb
+*.opt
+*.plg

@@ -227,6 +227,7 @@ LDFLAGS=-Wl,-E
 AC_OUTPUT(
 	Makefile
 	twilight.spec
+	embedded_data/Makefile
 	src/include/Makefile
 	src/Makefile
 	src/base/Makefile

@@ -206,6 +206,12 @@ HUD_Init_Cvars (void)
 	hud_height = Cvar_Get ("hud_height", "480", CVAR_ARCHIVE, HUD_Changed);
 }
 
+static image_t *
+HUD_LoadIMG (char *name)
+{
+	return Image_Load (name, TEX_UPLOAD | TEX_ALPHA);
+}
+
 void
 HUD_Init (void)
 {
@@ -217,140 +223,141 @@ HUD_Init (void)
 
 	for (i = 0; i < 10; i++)
 	{
-		sb_nums[0][i] = Image_Load (va ("gfx/num_%i", i), TEX_UPLOAD | TEX_ALPHA);
-		sb_nums[1][i] = Image_Load (va ("gfx/anum_%i", i), TEX_UPLOAD | TEX_ALPHA);
+		sb_nums[0][i] = HUD_LoadIMG (va ("gfx/num_%i", i));
+		sb_nums[1][i] = HUD_LoadIMG (va ("gfx/anum_%i", i));
 	}
 
-	sb_nums[0][10] = Image_Load ("gfx/num_minus", TEX_UPLOAD | TEX_ALPHA);
-	sb_nums[1][10] = Image_Load ("gfx/anum_minus", TEX_UPLOAD | TEX_ALPHA);
+	sb_nums[0][10] = HUD_LoadIMG ("gfx/num_minus");
+	sb_nums[1][10] = HUD_LoadIMG ("gfx/anum_minus");
 
-	sb_colon = Image_Load ("gfx/num_colon", TEX_UPLOAD | TEX_ALPHA);
-	sb_slash = Image_Load ("gfx/num_slash", TEX_UPLOAD | TEX_ALPHA);
+	sb_colon = HUD_LoadIMG ("gfx/num_colon");
+	sb_slash = HUD_LoadIMG ("gfx/num_slash");
 
-	sb_weapons[0][0] = Image_Load ("gfx/inv_shotgun", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[0][1] = Image_Load ("gfx/inv_sshotgun", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[0][2] = Image_Load ("gfx/inv_nailgun", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[0][3] = Image_Load ("gfx/inv_snailgun", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[0][4] = Image_Load ("gfx/inv_rlaunch", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[0][5] = Image_Load ("gfx/inv_srlaunch", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[0][6] = Image_Load ("gfx/inv_lightng", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[0][0] = HUD_LoadIMG ("gfx/inv_shotgun");
+	sb_weapons[0][1] = HUD_LoadIMG ("gfx/inv_sshotgun");
+	sb_weapons[0][2] = HUD_LoadIMG ("gfx/inv_nailgun");
+	sb_weapons[0][3] = HUD_LoadIMG ("gfx/inv_snailgun");
+	sb_weapons[0][4] = HUD_LoadIMG ("gfx/inv_rlaunch");
+	sb_weapons[0][5] = HUD_LoadIMG ("gfx/inv_srlaunch");
+	sb_weapons[0][6] = HUD_LoadIMG ("gfx/inv_lightng");
 
-	sb_weapons[1][0] = Image_Load ("gfx/inv2_shotgun", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[1][1] = Image_Load ("gfx/inv2_sshotgun", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[1][2] = Image_Load ("gfx/inv2_nailgun", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[1][3] = Image_Load ("gfx/inv2_snailgun", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[1][4] = Image_Load ("gfx/inv2_rlaunch", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[1][5] = Image_Load ("gfx/inv2_srlaunch", TEX_UPLOAD | TEX_ALPHA);
-	sb_weapons[1][6] = Image_Load ("gfx/inv2_lightng", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[1][0] = HUD_LoadIMG ("gfx/inv2_shotgun");
+	sb_weapons[1][1] = HUD_LoadIMG ("gfx/inv2_sshotgun");
+	sb_weapons[1][2] = HUD_LoadIMG ("gfx/inv2_nailgun");
+	sb_weapons[1][3] = HUD_LoadIMG ("gfx/inv2_snailgun");
+	sb_weapons[1][4] = HUD_LoadIMG ("gfx/inv2_rlaunch");
+	sb_weapons[1][5] = HUD_LoadIMG ("gfx/inv2_srlaunch");
+	sb_weapons[1][6] = HUD_LoadIMG ("gfx/inv2_lightng");
 
 	for (i = 0; i < 5; i++)
 	{
-		sb_weapons[2 + i][0] = Image_Load (va ("gfx/inva%i_shotgun", i + 1), TEX_UPLOAD | TEX_ALPHA);
-		sb_weapons[2 + i][1] = Image_Load (va ("gfx/inva%i_sshotgun", i + 1), TEX_UPLOAD | TEX_ALPHA);
-		sb_weapons[2 + i][2] = Image_Load (va ("gfx/inva%i_nailgun", i + 1), TEX_UPLOAD | TEX_ALPHA);
-		sb_weapons[2 + i][3] = Image_Load (va ("gfx/inva%i_snailgun", i + 1), TEX_UPLOAD | TEX_ALPHA);
-		sb_weapons[2 + i][4] = Image_Load (va ("gfx/inva%i_rlaunch", i + 1), TEX_UPLOAD | TEX_ALPHA);
-		sb_weapons[2 + i][5] = Image_Load (va ("gfx/inva%i_srlaunch", i + 1), TEX_UPLOAD | TEX_ALPHA);
-		sb_weapons[2 + i][6] = Image_Load (va ("gfx/inva%i_lightng", i + 1), TEX_UPLOAD | TEX_ALPHA);
+		sb_weapons[2 + i][0] = HUD_LoadIMG (va ("gfx/inva%i_shotgun", i + 1));
+		sb_weapons[2 + i][1] = HUD_LoadIMG (va ("gfx/inva%i_sshotgun", i + 1));
+		sb_weapons[2 + i][2] = HUD_LoadIMG (va ("gfx/inva%i_nailgun", i + 1));
+		sb_weapons[2 + i][3] = HUD_LoadIMG (va ("gfx/inva%i_snailgun", i + 1));
+		sb_weapons[2 + i][4] = HUD_LoadIMG (va ("gfx/inva%i_rlaunch", i + 1));
+		sb_weapons[2 + i][5] = HUD_LoadIMG (va ("gfx/inva%i_srlaunch", i + 1));
+		sb_weapons[2 + i][6] = HUD_LoadIMG (va ("gfx/inva%i_lightng", i + 1));
 	}
 
-	sb_ammo[0] = Image_Load ("gfx/sb_shells", TEX_UPLOAD | TEX_ALPHA);
-	sb_ammo[1] = Image_Load ("gfx/sb_nails", TEX_UPLOAD | TEX_ALPHA);
-	sb_ammo[2] = Image_Load ("gfx/sb_rocket", TEX_UPLOAD | TEX_ALPHA);
-	sb_ammo[3] = Image_Load ("gfx/sb_cells", TEX_UPLOAD | TEX_ALPHA);
+	sb_ammo[0] = HUD_LoadIMG ("gfx/sb_shells");
+	sb_ammo[1] = HUD_LoadIMG ("gfx/sb_nails");
+	sb_ammo[2] = HUD_LoadIMG ("gfx/sb_rocket");
+	sb_ammo[3] = HUD_LoadIMG ("gfx/sb_cells");
 
-	sb_armor[0] = Image_Load ("gfx/sb_armor1", TEX_UPLOAD | TEX_ALPHA);
-	sb_armor[1] = Image_Load ("gfx/sb_armor2", TEX_UPLOAD | TEX_ALPHA);
-	sb_armor[2] = Image_Load ("gfx/sb_armor3", TEX_UPLOAD | TEX_ALPHA);
+	sb_armor[0] = HUD_LoadIMG ("gfx/sb_armor1");
+	sb_armor[1] = HUD_LoadIMG ("gfx/sb_armor2");
+	sb_armor[2] = HUD_LoadIMG ("gfx/sb_armor3");
 
-	sb_items[0] = Image_Load ("gfx/sb_key1", TEX_UPLOAD | TEX_ALPHA);
-	sb_items[1] = Image_Load ("gfx/sb_key2", TEX_UPLOAD | TEX_ALPHA);
-	sb_items[2] = Image_Load ("gfx/sb_invis", TEX_UPLOAD | TEX_ALPHA);
-	sb_items[3] = Image_Load ("gfx/sb_invuln", TEX_UPLOAD | TEX_ALPHA);
-	sb_items[4] = Image_Load ("gfx/sb_suit", TEX_UPLOAD | TEX_ALPHA);
-	sb_items[5] = Image_Load ("gfx/sb_quad", TEX_UPLOAD | TEX_ALPHA);
+	sb_items[0] = HUD_LoadIMG ("gfx/sb_key1");
+	sb_items[1] = HUD_LoadIMG ("gfx/sb_key2");
+	sb_items[2] = HUD_LoadIMG ("gfx/sb_invis");
+	sb_items[3] = HUD_LoadIMG ("gfx/sb_invuln");
+	sb_items[4] = HUD_LoadIMG ("gfx/sb_suit");
+	sb_items[5] = HUD_LoadIMG ("gfx/sb_quad");
 
-	sb_sigil[0] = Image_Load ("gfx/sb_sigil1", TEX_UPLOAD | TEX_ALPHA);
-	sb_sigil[1] = Image_Load ("gfx/sb_sigil2", TEX_UPLOAD | TEX_ALPHA);
-	sb_sigil[2] = Image_Load ("gfx/sb_sigil3", TEX_UPLOAD | TEX_ALPHA);
-	sb_sigil[3] = Image_Load ("gfx/sb_sigil4", TEX_UPLOAD | TEX_ALPHA);
+	sb_sigil[0] = HUD_LoadIMG ("gfx/sb_sigil1");
+	sb_sigil[1] = HUD_LoadIMG ("gfx/sb_sigil2");
+	sb_sigil[2] = HUD_LoadIMG ("gfx/sb_sigil3");
+	sb_sigil[3] = HUD_LoadIMG ("gfx/sb_sigil4");
 
-	sb_faces[4][0] = Image_Load ("gfx/face1", TEX_UPLOAD | TEX_ALPHA);
-	sb_faces[4][1] = Image_Load ("gfx/face_p1", TEX_UPLOAD | TEX_ALPHA);
-	sb_faces[3][0] = Image_Load ("gfx/face2", TEX_UPLOAD | TEX_ALPHA);
-	sb_faces[3][1] = Image_Load ("gfx/face_p2", TEX_UPLOAD | TEX_ALPHA);
-	sb_faces[2][0] = Image_Load ("gfx/face3", TEX_UPLOAD | TEX_ALPHA);
-	sb_faces[2][1] = Image_Load ("gfx/face_p3", TEX_UPLOAD | TEX_ALPHA);
-	sb_faces[1][0] = Image_Load ("gfx/face4", TEX_UPLOAD | TEX_ALPHA);
-	sb_faces[1][1] = Image_Load ("gfx/face_p4", TEX_UPLOAD | TEX_ALPHA);
-	sb_faces[0][0] = Image_Load ("gfx/face5", TEX_UPLOAD | TEX_ALPHA);
-	sb_faces[0][1] = Image_Load ("gfx/face_p5", TEX_UPLOAD | TEX_ALPHA);
+	sb_faces[4][0] = HUD_LoadIMG ("gfx/face1");
+	sb_faces[4][1] = HUD_LoadIMG ("gfx/face_p1");
+	sb_faces[3][0] = HUD_LoadIMG ("gfx/face2");
+	sb_faces[3][1] = HUD_LoadIMG ("gfx/face_p2");
+	sb_faces[2][0] = HUD_LoadIMG ("gfx/face3");
+	sb_faces[2][1] = HUD_LoadIMG ("gfx/face_p3");
+	sb_faces[1][0] = HUD_LoadIMG ("gfx/face4");
+	sb_faces[1][1] = HUD_LoadIMG ("gfx/face_p4");
+	sb_faces[0][0] = HUD_LoadIMG ("gfx/face5");
+	sb_faces[0][1] = HUD_LoadIMG ("gfx/face_p5");
 
-	sb_face_invis = Image_Load ("gfx/face_invis", TEX_UPLOAD | TEX_ALPHA);
-	sb_face_invuln = Image_Load ("gfx/face_invul2", TEX_UPLOAD | TEX_ALPHA);
-	sb_face_invis_invuln = Image_Load ("gfx/face_inv2", TEX_UPLOAD | TEX_ALPHA);
-	sb_face_quad = Image_Load ("gfx/face_quad", TEX_UPLOAD | TEX_ALPHA);
+	sb_face_invis = HUD_LoadIMG ("gfx/face_invis");
+	sb_face_invuln = HUD_LoadIMG ("gfx/face_invul2");
+	sb_face_invis_invuln = HUD_LoadIMG ("gfx/face_inv2");
+	sb_face_quad = HUD_LoadIMG ("gfx/face_quad");
 
 	Cmd_AddCommand ("+showscores", HUD_ShowScores);
 	Cmd_AddCommand ("-showscores", HUD_DontShowScores);
 	Cmd_AddCommand ("+showteamscores", HUD_ShowTeamScores);
 	Cmd_AddCommand ("-showteamscores", HUD_DontShowScores);
 
-	sb_sbar = Image_Load ("gfx/sbar", TEX_UPLOAD | TEX_ALPHA);
-	sb_ibar = Image_Load ("gfx/ibar", TEX_UPLOAD | TEX_ALPHA);
-	sb_scorebar = Image_Load ("gfx/scorebar", TEX_UPLOAD | TEX_ALPHA);
+	sb_sbar = HUD_LoadIMG ("gfx/sbar");
+	sb_ibar = HUD_LoadIMG ("gfx/ibar");
+	sb_scorebar = HUD_LoadIMG ("gfx/scorebar");
 
 	//MED 01/04/97 added new hipnotic weapons
 	switch (ccl.game_type) {
 		case GAME_HIPNOTIC:
-			hsb_weapons[0][0] = Image_Load ("gfx/inv_laser", TEX_UPLOAD | TEX_ALPHA);
-			hsb_weapons[0][1] = Image_Load ("gfx/inv_mjolnir", TEX_UPLOAD | TEX_ALPHA);
-			hsb_weapons[0][2] = Image_Load ("gfx/inv_gren_prox", TEX_UPLOAD | TEX_ALPHA);
-			hsb_weapons[0][3] = Image_Load ("gfx/inv_prox_gren", TEX_UPLOAD | TEX_ALPHA);
-			hsb_weapons[0][4] = Image_Load ("gfx/inv_prox", TEX_UPLOAD | TEX_ALPHA);
+			hsb_weapons[0][0] = HUD_LoadIMG ("gfx/inv_laser");
+			hsb_weapons[0][1] = HUD_LoadIMG ("gfx/inv_mjolnir");
+			hsb_weapons[0][2] = HUD_LoadIMG ("gfx/inv_gren_prox");
+			hsb_weapons[0][3] = HUD_LoadIMG ("gfx/inv_prox_gren");
+			hsb_weapons[0][4] = HUD_LoadIMG ("gfx/inv_prox");
 
-			hsb_weapons[1][0] = Image_Load ("gfx/inv2_laser", TEX_UPLOAD | TEX_ALPHA);
-			hsb_weapons[1][1] = Image_Load ("gfx/inv2_mjolnir", TEX_UPLOAD | TEX_ALPHA);
-			hsb_weapons[1][2] = Image_Load ("gfx/inv2_gren_prox", TEX_UPLOAD | TEX_ALPHA);
-			hsb_weapons[1][3] = Image_Load ("gfx/inv2_prox_gren", TEX_UPLOAD | TEX_ALPHA);
-			hsb_weapons[1][4] = Image_Load ("gfx/inv2_prox", TEX_UPLOAD | TEX_ALPHA);
+			hsb_weapons[1][0] = HUD_LoadIMG ("gfx/inv2_laser");
+			hsb_weapons[1][1] = HUD_LoadIMG ("gfx/inv2_mjolnir");
+			hsb_weapons[1][2] = HUD_LoadIMG ("gfx/inv2_gren_prox");
+			hsb_weapons[1][3] = HUD_LoadIMG ("gfx/inv2_prox_gren");
+			hsb_weapons[1][4] = HUD_LoadIMG ("gfx/inv2_prox");
 
 			for (i = 0; i < 5; i++)
 			{
 				hsb_weapons[2 + i][0] =
-					Image_Load (va ("gfx/inva%i_laser", i + 1), TEX_UPLOAD | TEX_ALPHA);
+					HUD_LoadIMG (va ("gfx/inva%i_laser", i + 1));
 				hsb_weapons[2 + i][1] =
-					Image_Load (va ("gfx/inva%i_mjolnir", i + 1), TEX_UPLOAD | TEX_ALPHA);
+					HUD_LoadIMG (va ("gfx/inva%i_mjolnir", i + 1));
 				hsb_weapons[2 + i][2] =
-					Image_Load (va ("gfx/inva%i_gren_prox", i + 1), TEX_UPLOAD | TEX_ALPHA);
+					HUD_LoadIMG (va ("gfx/inva%i_gren_prox", i + 1));
 				hsb_weapons[2 + i][3] =
-					Image_Load (va ("gfx/inva%i_prox_gren", i + 1), TEX_UPLOAD | TEX_ALPHA);
-				hsb_weapons[2 + i][4] = Image_Load (va ("gfx/inva%i_prox", i + 1), TEX_UPLOAD | TEX_ALPHA);
+					HUD_LoadIMG (va ("gfx/inva%i_prox_gren", i + 1));
+				hsb_weapons[2 + i][4] =
+					HUD_LoadIMG (va ("gfx/inva%i_prox", i + 1));
 			}
 
-			hsb_items[0] = Image_Load ("gfx/sb_wsuit", TEX_UPLOAD | TEX_ALPHA);
-			hsb_items[1] = Image_Load ("gfx/sb_eshld", TEX_UPLOAD | TEX_ALPHA);
+			hsb_items[0] = HUD_LoadIMG ("gfx/sb_wsuit");
+			hsb_items[1] = HUD_LoadIMG ("gfx/sb_eshld");
 			break;
 		case GAME_ROGUE:
-			rsb_invbar[0] = Image_Load ("gfx/r_invbar1", TEX_UPLOAD | TEX_ALPHA);
-			rsb_invbar[1] = Image_Load ("gfx/r_invbar2", TEX_UPLOAD | TEX_ALPHA);
+			rsb_invbar[0] = HUD_LoadIMG ("gfx/r_invbar1");
+			rsb_invbar[1] = HUD_LoadIMG ("gfx/r_invbar2");
 
-			rsb_weapons[0] = Image_Load ("gfx/r_lava", TEX_UPLOAD | TEX_ALPHA);
-			rsb_weapons[1] = Image_Load ("gfx/r_superlava", TEX_UPLOAD | TEX_ALPHA);
-			rsb_weapons[2] = Image_Load ("gfx/r_gren", TEX_UPLOAD | TEX_ALPHA);
-			rsb_weapons[3] = Image_Load ("gfx/r_multirock", TEX_UPLOAD | TEX_ALPHA);
-			rsb_weapons[4] = Image_Load ("gfx/r_plasma", TEX_UPLOAD | TEX_ALPHA);
+			rsb_weapons[0] = HUD_LoadIMG ("gfx/r_lava");
+			rsb_weapons[1] = HUD_LoadIMG ("gfx/r_superlava");
+			rsb_weapons[2] = HUD_LoadIMG ("gfx/r_gren");
+			rsb_weapons[3] = HUD_LoadIMG ("gfx/r_multirock");
+			rsb_weapons[4] = HUD_LoadIMG ("gfx/r_plasma");
 
-			rsb_items[0] = Image_Load ("gfx/r_shield1", TEX_UPLOAD | TEX_ALPHA);
-			rsb_items[1] = Image_Load ("gfx/r_agrav1", TEX_UPLOAD | TEX_ALPHA);
+			rsb_items[0] = HUD_LoadIMG ("gfx/r_shield1");
+			rsb_items[1] = HUD_LoadIMG ("gfx/r_agrav1");
 
 			// PGM 01/19/97 - team color border
-			rsb_teambord = Image_Load ("gfx/r_teambord", TEX_UPLOAD | TEX_ALPHA);
+			rsb_teambord = HUD_LoadIMG ("gfx/r_teambord");
 			// PGM 01/19/97 - team color border
 
-			rsb_ammo[0] = Image_Load ("gfx/r_ammolava", TEX_UPLOAD | TEX_ALPHA);
-			rsb_ammo[1] = Image_Load ("gfx/r_ammomulti", TEX_UPLOAD | TEX_ALPHA);
-			rsb_ammo[2] = Image_Load ("gfx/r_ammoplasma", TEX_UPLOAD | TEX_ALPHA);
+			rsb_ammo[0] = HUD_LoadIMG ("gfx/r_ammolava");
+			rsb_ammo[1] = HUD_LoadIMG ("gfx/r_ammomulti");
+			rsb_ammo[2] = HUD_LoadIMG ("gfx/r_ammoplasma");
 			break;
 		default:
 			break;

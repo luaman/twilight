@@ -119,7 +119,6 @@ int				fps_count;
 
 static qboolean	scr_initialized;			/* ready to draw */
 
-static image_t   *scr_ram;
 static image_t   *scr_net;
 static image_t   *scr_turtle;
 
@@ -449,7 +448,6 @@ SCR_Init (void)
 	Cmd_AddCommand ("sizeup", SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown", SCR_SizeDown_f);
 
-	scr_ram = Image_Load ("gfx/ram", TEX_UPLOAD | TEX_ALPHA);
 	scr_net = Image_Load ("gfx/net", TEX_UPLOAD | TEX_ALPHA);
 	scr_turtle = Image_Load ("gfx/turtle", TEX_UPLOAD | TEX_ALPHA);
 
@@ -471,6 +469,9 @@ SCR_DrawTurtle (void)
 		return;
 	}
 
+	if (!scr_turtle)
+		return;
+
 	count++;
 	if (count < 3)
 		return;
@@ -485,6 +486,8 @@ SCR_DrawNet (void)
 		UPDATE_BACKUP - 1)
 		return;
 	if (ccls.demoplayback)
+		return;
+	if (!scr_net)
 		return;
 
 	Draw_Img (64, 0, scr_net);

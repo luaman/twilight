@@ -36,6 +36,7 @@
 #define TEX_REPLACE		BIT(3)
 #define TEX_UPLOAD		BIT(4)
 #define TEX_KEEPRAW		BIT(5)
+#define TEX_NEED		BIT(6)
 
 
 #define IMG_QPAL	0
