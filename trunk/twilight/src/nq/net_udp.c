@@ -54,6 +54,13 @@ static const char rcsid[] =
 #endif
 #endif
 #include <errno.h>
+// LordHavoc: winsock uses WSAGetLastError instead of errno, errno is never set by winsock functions
+#ifdef _WIN32
+#ifdef errno
+#undef errno
+#endif
+#define errno WSAGetLastError()
+#endif
 
 #ifdef __sun__
 #include <sys/filio.h>
