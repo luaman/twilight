@@ -4,7 +4,7 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-SUBDIRS=include src nq qw qw-server doc gamecode debian tools
+SUBDIRS=include src nq qw qw-server doc gamecode tools
 
 EXTRA_DIST= \
 	COPYING.BSD \
