@@ -115,7 +115,7 @@ const char	**Cmd_CompleteBuildList (const char *partial);
 // More console completion stuff
 
 int         Cmd_Argc (void);
-const char       *Cmd_Argv (int arg);
+const char       *Cmd_Argv (const int arg);
 const char       *Cmd_Args (void);
 
 // The functions that execute commands get their parameters with these

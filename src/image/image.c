@@ -87,7 +87,6 @@ Image_Init (void)
 	for (i = 0; i < count; i++)
 		exts[i] = exts_real;
 	exts[i] = NULL;
-
 }
 
 image_t *
@@ -96,7 +95,7 @@ Image_Load (char *name, int flags)
 	const char	*names[2] = {name, NULL};
 	image_t		*ret;
 
-	ret = Image_Load_Multi (names, flags);
+	ret = Image_Load_Multi (names, flags & ~TEX_NEED);
 	if (!ret) {
 		if (flags & TEX_NEED)
 			Sys_Error ("Image_Load: Unable to load %s\n", name);
@@ -117,11 +116,11 @@ Image_Load_Multi (const char **names, int flags)
 	file = FS_FindFiles_Complex (names, exts);
 
 	if (!file)
-		return NULL;
+		goto end;
 
 	rw = file->open(file, 0);
 	if (!rw)
-		return NULL;
+		goto end;
 
 	for (search = img_search; search; search = search->next)
 		if (!strcasecmp(file->ext, search->ext))
@@ -135,6 +134,12 @@ Image_Load_Multi (const char **names, int flags)
 				img->file = file;
 				return img;
 			}
+
+end:
+	if (flags & TEX_NEED)
+		Sys_Error ("Image_Load_Multi: Unable to load %s\n", names[0]);
+	else
+		Com_DPrintf ("Image_Load_Multi: Unable to load %s\n", names[0]);
 
 	return NULL;
 }
