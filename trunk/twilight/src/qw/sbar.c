@@ -389,9 +389,8 @@ Sbar_SortFrags ()
 	scoreboardlines = 0;
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		if (cl.players[i].name[0]) {
-
 			if (cl.players[i].spectator)
-				continue;
+				cl.players[i].frags = -999;
 
 			fragsort[scoreboardlines] = i;
 			scoreboardlines++;
