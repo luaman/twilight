@@ -218,12 +218,12 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 void
 R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 {
-	int         t;
-	int         i, j, size;
-	Uint8      *lightmap;
-	unsigned    scale;
-	int         maps;
-	unsigned   *bl;
+	int			t;
+	int			i, j, size;
+	Uint8		*lightmap;
+	unsigned	scale;
+	int			maps;
+	unsigned	*bl;
 
 	surf->cached_dlight = (surf->dlightframe == r_framecount);
 	size = surf->smax * surf->tmax;

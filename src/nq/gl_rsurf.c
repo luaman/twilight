@@ -37,32 +37,32 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "glquake.h"
 
-int         lightmap_textures;
-int         skytexturenum;
+int		lightmap_textures;
+int		skytexturenum;
 
-int         lightmap_bytes = 3;				// 1, 2, or 4
+int		lightmap_bytes = 3;				// 1, 2, or 4
 
-unsigned    blocklights[18 * 18 * 3];
+unsigned blocklights[18 * 18 * 3];
 
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128
 
 #define	MAX_LIGHTMAPS	64
-int         active_lightmaps;
+int		active_lightmaps;
 
 typedef struct glRect_s {
 	unsigned char l, t, w, h;
 } glRect_t;
 
-glpoly_t   *lightmap_polys[MAX_LIGHTMAPS];
-qboolean    lightmap_modified[MAX_LIGHTMAPS];
-glRect_t    lightmap_rectchange[MAX_LIGHTMAPS];
+glpoly_t	*lightmap_polys[MAX_LIGHTMAPS];
+qboolean	lightmap_modified[MAX_LIGHTMAPS];
+glRect_t	lightmap_rectchange[MAX_LIGHTMAPS];
 
-int         allocated[MAX_LIGHTMAPS][BLOCK_WIDTH];
+int			allocated[MAX_LIGHTMAPS][BLOCK_WIDTH];
 
 // the lightmap texture data needs to be kept in
 // main memory so texsubimage can update properly
-Uint8       lightmaps[4 * MAX_LIGHTMAPS * BLOCK_WIDTH * BLOCK_HEIGHT];
+Uint8		lightmaps[4 * MAX_LIGHTMAPS * BLOCK_WIDTH * BLOCK_HEIGHT];
 
 // For gl_texsort 0
 msurface_t *skychain = NULL;
@@ -71,8 +71,8 @@ msurface_t *waterchain = NULL;
 glpoly_t	*fullbright_polys[MAX_GLTEXTURES];
 qboolean	drawfullbrights = false;
 
-void        R_RenderDynamicLightmaps (msurface_t *fa);
-void		DrawGLPoly (glpoly_t *p);
+void	R_RenderDynamicLightmaps (msurface_t *fa);
+void	DrawGLPoly (glpoly_t *p);
 
 void 
 R_RenderFullbrights (void)
@@ -208,12 +208,12 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 void
 R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 {
-	int         t;
-	int         i, j, size;
-	Uint8      *lightmap;
-	unsigned    scale;
-	int         maps;
-	unsigned   *bl;
+	int			t;
+	int			i, j, size;
+	Uint8		*lightmap;
+	unsigned	scale;
+	int			maps;
+	unsigned	*bl;
 
 	surf->cached_dlight = (surf->dlightframe == r_framecount);
 	size = surf->smax * surf->tmax;
@@ -221,12 +221,12 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 
 	// set to full bright if no light data
 	if (/* r_fullbright->value || */!cl.worldmodel->lightdata) {
-		memset (blocklights, 255*256, size*lightmap_bytes*sizeof(int));
+		memset (blocklights, 255 * 256, size * lightmap_bytes * sizeof(int));
 		goto store;
 	}
 
 	// clear to no light
-	memset (blocklights, 0, size*lightmap_bytes*sizeof(int));
+	memset (blocklights, 0, size * lightmap_bytes * sizeof(int));
 
 	// add all the lightmaps
 	if (lightmap) {
@@ -1500,9 +1500,10 @@ with all the surfaces from all brush models
 void
 GL_BuildLightmaps (void)
 {
-	int         i, j;
-	model_t    *m;
-	extern qboolean isPermedia;
+	int			i, j;
+	model_t		*m;
+// not used yet
+//	extern qboolean isPermedia;
 
 	memset (allocated, 0, sizeof (allocated));
 
