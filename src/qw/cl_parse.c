@@ -1029,7 +1029,7 @@ CL_MuzzleFlash (void)
 
 	pl = &cl.frames[parsecountmod].playerstate[i - 1];
 
-	dl = CL_AllocDlight (i);
+	dl = CL_AllocDlight (-i);
 	VectorCopy (pl->origin, dl->origin);
 	AngleVectors (pl->viewangles, fv, rv, uv);
 
