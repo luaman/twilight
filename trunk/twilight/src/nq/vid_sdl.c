@@ -356,7 +356,7 @@ VID_Init_Cvars (void)
 	width_2d = Cvar_Get ("width_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
 	height_2d = Cvar_Get ("height_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
 	text_scale = Cvar_Get ("text_scale", "1", CVAR_ARCHIVE, &Size_Changed2D);
-	i_keypadmode = Cvar_Get ("i_keypadmode", "0", CVAR_NONE, &I_KeypadMode);
+	i_keypadmode = Cvar_Get ("i_keypadmode", "0", CVAR_ARCHIVE, &I_KeypadMode);
 	vid_mode = Cvar_Get ("vid_mode", "0", CVAR_NONE, NULL);
 	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
 	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE,
