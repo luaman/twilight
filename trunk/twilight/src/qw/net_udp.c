@@ -244,7 +244,8 @@ NET_GetLoopPacket (netsrc_t sock)
 }
 
 static void
-NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to){
+NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
+{
 	int     i;
 	loopback_t  *loop = &loopbacks[sock^1];
 
