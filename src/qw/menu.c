@@ -622,9 +622,12 @@ M_Options_Key (int k)
 	Fast dynamic lights		on/off
 	Shadows					on/fast/nice
 	Frame interpolation	    on/off
+	Texture Mode			see glmode_t modes[]
+	Light lerping			on/off
+	Particle torches		on/off
 */
 
-#define GFX_ITEMS	7
+#define GFX_ITEMS	9
 
 int gfx_cursor = 0;
 
@@ -663,11 +666,13 @@ M_Gfx_Draw (void)
 	y = 32;
 	M_Print (16, y, "         Affine models"); M_DrawCheckbox (220, y, gl_affinemodels->value); y += 8;
 	M_Print (16, y, "     Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->value); y += 8;
+	M_Print (16, y, "    Fullbright bmodels"); M_DrawCheckbox (220, y, gl_fb_bmodels->value); y += 8;
 	M_Print (16, y, "   Fast dynamic lights"); M_DrawCheckbox (220, y, gl_flashblend->value); y += 8;
 	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off"); y += 8;
 	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->value); y += 8;
 	M_Print (16, y, "          Texture mode"); M_Print (220, y, gl_texturemode->string); y += 8;
-	M_Print (16, y, "         Light lerping"); M_DrawCheckbox (220, y, r_lightlerp->value);
+	M_Print (16, y, "         Light lerping"); M_DrawCheckbox (220, y, r_lightlerp->value); y += 8;
+	M_Print (16, y, "      Particle torches"); M_DrawCheckbox (220, y, gl_particletorches->value);
 
 	// cursor
 	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (realtime * 4) & 1));
@@ -677,6 +682,8 @@ void
 M_Gfx_Set (void)
 {
 	int v = 0;
+
+	S_LocalSound ("misc/menu3.wav");
 
 	switch (gfx_cursor)
 	{
@@ -688,27 +695,30 @@ M_Gfx_Set (void)
 		case 1:
 			v = !(int)gl_fb_models->value;
 			Cvar_Set (gl_fb_models, va("%i", v));
+			break;
+
+		case 2:
 			v = !(int)gl_fb_bmodels->value;
 			Cvar_Set (gl_fb_bmodels, va("%i", v));
 			break;
 
-		case 2:
+		case 3:
 			v = !(int)gl_flashblend->value;
 			Cvar_Set (gl_flashblend, va("%i", v));
 			break;
 
-		case 3:
+		case 4:
 			v = (int)r_shadows->value + 1;
 			if (v > 2) v = 0;
 			Cvar_Set (r_shadows, va("%i", v));
 			break;
 
-		case 4:
+		case 5:
 			v = !(int)gl_im_animation->value;
 			Cvar_Set (gl_im_animation, va("%i", v));
 			break;
 
-		case 5:
+		case 6:
 			for (v = 0; v < 6; v++) {
 				if (strcasecmp (texmodes[v].name, gl_texturemode->string) == 0)
 					break;
@@ -719,9 +729,14 @@ M_Gfx_Set (void)
 			Cvar_Set (gl_texturemode, texmodes[v].name);
 			break;
 
-		case 6:
+		case 7:
 			v = !(int)r_lightlerp->value;
 			Cvar_Set (r_lightlerp, va("%i", v));
+			break;
+
+		case 8:
+			v = !(int)gl_particletorches->value;
+			Cvar_Set (gl_particletorches, va("%i", v));
 			break;
 
 		default:
