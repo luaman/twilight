@@ -493,51 +493,57 @@ void
 Draw_Crosshair (void)
 {
 	int         x, y;
+	double		dx, dy;
 	extern vrect_t scr_vrect;
 
-	if (crosshair->value == 2) {
-		x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
-		y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
-
-		qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->value]);
-		qglBindTexture (GL_TEXTURE_2D, cs_texture);
-
-		qglEnable (GL_BLEND);
-		VectorSet2 (varray[0].texcoord, 0, 0);
-		VectorSet2 (varray[0].vertex, x - 4, y - 4);
-		VectorSet2 (varray[1].texcoord, 1, 0);
-		VectorSet2 (varray[1].vertex, x + 12, y - 4);
-		VectorSet2 (varray[2].texcoord, 1, 1);
-		VectorSet2 (varray[2].vertex, x + 12, y + 12);
-		VectorSet2 (varray[3].texcoord, 0, 1);
-		VectorSet2 (varray[3].vertex, x - 4, y + 12);
-		qglDrawArrays (GL_QUADS, 0, 4);
-		qglColor3f (1, 1, 1);
-		qglDisable (GL_BLEND);
-
-	} else if (crosshair->value == 3) {
-		x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
-		y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
-
-		qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->value]);
-		qglBindTexture (GL_TEXTURE_2D, cs_square);
-
-		VectorSet2 (varray[0].texcoord, 0, 0);
-		VectorSet2 (varray[0].vertex, x - 4, y - 4);
-		VectorSet2 (varray[1].texcoord, 1, 0);
-		VectorSet2 (varray[1].vertex, x + 12, y - 4);
-		VectorSet2 (varray[2].texcoord, 1, 1);
-		VectorSet2 (varray[2].vertex, x + 12, y + 12);
-		VectorSet2 (varray[3].texcoord, 0, 1);
-		VectorSet2 (varray[3].vertex, x - 4, y + 12);
-		qglDrawArrays (GL_QUADS, 0, 4);
-		qglColor4f (1, 1, 1, 1);
+	x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
+	y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
+	if ((vid.conheight != vid.height) || (vid.conwidth != vid.width)) {
+		dx = (double) x / (double) vid.width;
+		dy = (double) y / (double) vid.height;
+		x = dx * vid.conwidth;
+		y = dy * vid.conheight;
 	}
-	else if (crosshair->value)
-		Draw_Character (
-				scr_vrect.x + scr_vrect.width / 2 - 4 +	cl_crossx->value,
-				scr_vrect.y + scr_vrect.height / 2 - 4 + cl_crossy->value,
-				'+');
+
+	switch ((int) crosshair->value) {
+		case 1:
+			Draw_Character (x, y, '+');
+			break;
+
+		case 2:
+			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->value]);
+			qglBindTexture (GL_TEXTURE_2D, cs_texture);
+
+			qglEnable (GL_BLEND);
+			VectorSet2 (varray[0].texcoord, 0, 0);
+			VectorSet2 (varray[0].vertex, x - 4, y - 4);
+			VectorSet2 (varray[1].texcoord, 1, 0);
+			VectorSet2 (varray[1].vertex, x + 12, y - 4);
+			VectorSet2 (varray[2].texcoord, 1, 1);
+			VectorSet2 (varray[2].vertex, x + 12, y + 12);
+			VectorSet2 (varray[3].texcoord, 0, 1);
+			VectorSet2 (varray[3].vertex, x - 4, y + 12);
+			qglDrawArrays (GL_QUADS, 0, 4);
+			qglColor3f (1, 1, 1);
+			qglDisable (GL_BLEND);
+			break;
+
+		case 3:
+			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->value]);
+			qglBindTexture (GL_TEXTURE_2D, cs_square);
+
+			VectorSet2 (varray[0].texcoord, 0, 0);
+			VectorSet2 (varray[0].vertex, x - 4, y - 4);
+			VectorSet2 (varray[1].texcoord, 1, 0);
+			VectorSet2 (varray[1].vertex, x + 12, y - 4);
+			VectorSet2 (varray[2].texcoord, 1, 1);
+			VectorSet2 (varray[2].vertex, x + 12, y + 12);
+			VectorSet2 (varray[3].texcoord, 0, 1);
+			VectorSet2 (varray[3].vertex, x - 4, y + 12);
+			qglDrawArrays (GL_QUADS, 0, 4);
+			qglColor4f (1, 1, 1, 1);
+			break;
+	}
 }
 
 
@@ -796,7 +802,7 @@ Draw_Fill (int x, int y, int w, int h, int c)
 {
 	qglDisable (GL_TEXTURE_2D);
 
-	qglColor4fv (d_8tofloattable[0]);
+	qglColor4fv (d_8tofloattable[c]);
 
 	VectorSet2 (varray[0].vertex, x, y);
 	VectorSet2 (varray[1].vertex, x + w, y);
