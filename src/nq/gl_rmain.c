@@ -98,6 +98,8 @@ cvar_t     *gl_nocolors;
 cvar_t     *gl_keeptjunctions;
 cvar_t     *gl_reporttjunctions;
 cvar_t     *gl_doubleeyes;
+cvar_t	   *gl_im_animation;
+cvar_t	   *gl_im_transform;
 
 extern cvar_t *gl_ztrick;
 
@@ -114,11 +116,15 @@ Returns true if the box is completely outside the frustom
 qboolean
 R_CullBox (vec3_t mins, vec3_t maxs)
 {
-	int         i;
+	if (BoxOnPlaneSide (mins, maxs, &frustum[0]) == 2)
+		return true;
+	if (BoxOnPlaneSide (mins, maxs, &frustum[1]) == 2)
+		return true;
+	if (BoxOnPlaneSide (mins, maxs, &frustum[2]) == 2)
+		return true;
+	if (BoxOnPlaneSide (mins, maxs, &frustum[3]) == 2)
+		return true;
 
-	for (i = 0; i < 4; i++)
-		if (BoxOnPlaneSide (mins, maxs, &frustum[i]) == 2)
-			return true;
 	return false;
 }
 
@@ -131,6 +137,89 @@ R_RotateForEntity (entity_t *e)
 	glRotatef (e->angles[1], 0, 0, 1);
 	glRotatef (-e->angles[0], 0, 1, 0);
 	glRotatef (e->angles[2], 1, 0, 0);
+}
+
+
+/*
+=============
+R_BlendedRotateForEntity
+
+fenix@io.com: model transform interpolation
+=============
+*/
+void R_BlendedRotateForEntity (entity_t *e)
+{
+	float timepassed;
+	float blend;
+	vec3_t d;
+	int i;
+
+	// positional interpolation
+	timepassed = realtime - e->translate_start_time;
+
+	if (e->translate_start_time == 0 || timepassed > 1)
+	{
+		e->translate_start_time = realtime;
+		VectorCopy (e->origin, e->origin1);
+		VectorCopy (e->origin, e->origin2);
+	}
+
+	if (!VectorCompare (e->origin, e->origin2))
+	{
+		e->translate_start_time = realtime;
+		VectorCopy (e->origin2, e->origin1);
+		VectorCopy (e->origin,  e->origin2);
+		blend = 0;
+	}
+	else
+	{
+		blend =  timepassed * 10;
+		if (cl.paused || blend > 1) blend = 1;
+	}
+
+	VectorSubtract (e->origin2, e->origin1, d);
+	glTranslatef (
+		e->origin1[0] + (blend * d[0]),
+		e->origin1[1] + (blend * d[1]),
+		e->origin1[2] + (blend * d[2]));
+
+	// orientation interpolation (Euler angles, yuck!)
+	timepassed = realtime - e->rotate_start_time;
+
+	if (e->rotate_start_time == 0 || timepassed > 1)
+	{
+		e->rotate_start_time = realtime;
+		VectorCopy (e->angles, e->angles1);
+		VectorCopy (e->angles, e->angles2);
+	}
+
+	if (!VectorCompare (e->angles, e->angles2))
+	{
+		e->rotate_start_time = realtime;
+		VectorCopy (e->angles2, e->angles1);
+		VectorCopy (e->angles,  e->angles2);
+		blend = 0;
+	}
+	else
+	{
+		blend = timepassed * 10;
+		if (cl.paused || blend > 1) blend = 1;
+	}
+
+	VectorSubtract (e->angles2, e->angles1, d);
+
+	// always interpolate along the shortest path
+	for (i = 0; i < 3; i++)
+	{
+		if (d[i] > 180)
+			d[i] -= 360;
+		else if (d[i] < -180)
+			d[i] += 360;
+	}
+
+	glRotatef ( e->angles1[1] + ( blend * d[1]), 0, 0, 1);
+	glRotatef (-e->angles1[0] + (-blend * d[0]), 0, 1, 0);
+	glRotatef ( e->angles1[2] + ( blend * d[2]), 1, 0, 0);
 }
 
 /*
@@ -279,7 +368,8 @@ float       r_avertexnormal_dots[SHADEDOT_QUANT][256] =
 
 float      *shadedots = r_avertexnormal_dots[0];
 
-int         lastposenum;
+int         lastposenum =  0;
+int			lastposenum0 = 0;
 
 /*
 =============
@@ -300,11 +390,9 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 	verts += posenum * paliashdr->poseverts;
 	order = (int *) ((byte *) paliashdr + paliashdr->commands);
 
-	while (1) {
+	while ((count = *order++)) 
+	{
 		// get the vertex count and primitive type
-		count = *order++;
-		if (!count)
-			break;						// done
 		if (count < 0) {
 			count = -count;
 			glBegin (GL_TRIANGLE_FAN);
@@ -327,6 +415,73 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 	}
 }
 
+/*
+=============
+GL_DrawAliasBlendedFrame
+
+fenix@io.com: model animation interpolation
+=============
+*/
+void 
+GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float blend)
+{
+	float       l;
+	trivertx_t	*verts1;
+	trivertx_t	*verts2;
+	int			*order;
+	int         count;
+	vec3_t      d;
+	
+	lastposenum0 = pose1;
+	lastposenum  = pose2;
+	
+	verts1 = (trivertx_t *)((byte *)paliashdr + paliashdr->posedata);
+	verts2 = verts1;
+	verts1 += pose1 * paliashdr->poseverts;
+	verts2 += pose2 * paliashdr->poseverts;
+	order = (int *)((byte *)paliashdr + paliashdr->commands);
+	
+	while ((count = *order++))
+	{
+		// get the vertex count and primitive type
+		if (count < 0)
+		{
+			count = -count;
+			glBegin (GL_TRIANGLE_FAN);
+		}
+		else
+		{
+			glBegin (GL_TRIANGLE_STRIP);
+		}
+		do
+		{
+			// texture coordinates come from the draw list
+			glTexCoord2f (((float *)order)[0], ((float *)order)[1]);
+			order += 2;
+
+			// normals and vertexes come from the frame list
+			// blend the light intensity from the two frames together
+			d[0] = shadedots[verts2->lightnormalindex] -
+				shadedots[verts1->lightnormalindex];
+
+			l = shadelight * (shadedots[verts1->lightnormalindex] + (blend * d[0]));
+			glColor3f (l, l, l);
+
+			VectorSubtract(verts2->v, verts1->v, d);
+
+			// blend the vertex positions from each frame together
+			glVertex3f (
+				verts1->v[0] + (blend * d[0]),
+				verts1->v[1] + (blend * d[1]),
+				verts1->v[2] + (blend * d[2]));
+
+			verts1++;
+			verts2++;
+		} while (--count);
+
+		glEnd ();
+	}
+}
 
 /*
 =============
@@ -353,18 +508,17 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 
 	height = -lheight + 1.0;
 
-	while (1) {
+	while ((count = *order++)) 
+	{
 		// get the vertex count and primitive type
-		count = *order++;
-		if (!count)
-			break;						// done
 		if (count < 0) {
 			count = -count;
 			glBegin (GL_TRIANGLE_FAN);
 		} else
 			glBegin (GL_TRIANGLE_STRIP);
 
-		do {
+		do 
+		{
 			// texture coordinates come from the draw list
 			// (skipped for shadows) glTexCoord2fv ((float *)order);
 			order += 2;
@@ -380,7 +534,7 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 			point[0] -= shadevector[0] * (point[2] + lheight);
 			point[1] -= shadevector[1] * (point[2] + lheight);
 			point[2] = height;
-//          height -= 0.001;
+
 			glVertex3fv (point);
 
 			verts++;
@@ -390,6 +544,81 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 	}
 }
 
+/*
+=============
+GL_DrawAliasBlendedShadow
+
+fenix@io.com: model animation interpolation
+=============
+*/
+void 
+GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t* e)
+{
+	trivertx_t* verts1;
+	trivertx_t* verts2;
+	int*        order;
+	vec3_t      point1;
+	vec3_t      point2;
+	vec3_t      d;
+	float       height;
+	float       lheight;
+	int         count;
+	float       blend;
+
+	blend = (realtime - e->frame_start_time) / e->frame_interval;
+
+	if (blend > 1) blend = 1;
+
+	lheight = e->origin[2] - lightspot[2];
+	height  = -lheight + 1.0;
+
+	verts1 = (trivertx_t *)((byte *)paliashdr + paliashdr->posedata);
+	verts2 = verts1;
+
+	verts1 += pose1 * paliashdr->poseverts;
+	verts2 += pose2 * paliashdr->poseverts;
+
+	order = (int *)((byte *)paliashdr + paliashdr->commands);
+
+	while ((count = *order++))
+	{
+		// get the vertex count and primitive type
+		if (count < 0)
+		{
+			count = -count;
+			glBegin (GL_TRIANGLE_FAN);
+		}
+		else
+		{
+			glBegin (GL_TRIANGLE_STRIP);
+		}
+		do
+		{
+			order += 2;
+			point1[0] = verts1->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
+			point1[1] = verts1->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
+			point1[2] = verts1->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
+			
+			point1[0] -= shadevector[0]*(point1[2]+lheight);
+			point1[1] -= shadevector[1]*(point1[2]+lheight);
+			point2[0] = verts2->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
+			point2[1] = verts2->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
+			point2[2] = verts2->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
+			point2[0] -= shadevector[0]*(point2[2]+lheight);
+			point2[1] -= shadevector[1]*(point2[2]+lheight);
+
+			VectorSubtract(point2, point1, d);
+
+			glVertex3f (point1[0] + (blend * d[0]),
+				point1[1] + (blend * d[1]),
+				height);
+
+			verts1++;
+			verts2++;
+		} while (--count);
+		glEnd ();
+	}      
+}
 
 
 /*
@@ -421,6 +650,55 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr)
 }
 
 
+/*
+=================
+R_SetupAliasBlendedFrame
+
+fenix@io.com: model animation interpolation
+=================
+*/
+void 
+R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t* e)
+{
+	int   pose;
+	int   numposes;
+	float blend;
+
+	if ((frame >= paliashdr->numframes) || (frame < 0))
+	{
+		Con_DPrintf ("R_AliasSetupFrame: no such frame %d\n", frame);
+		frame = 0;
+	}
+
+	pose = paliashdr->frames[frame].firstpose;
+	numposes = paliashdr->frames[frame].numposes;
+
+	if (numposes > 1)
+	{
+		e->frame_interval = paliashdr->frames[frame].interval;
+		pose += (int)(cl.time / e->frame_interval) % numposes;
+	}
+	else {
+		e->frame_interval = 0.1;
+	}
+
+	if (e->pose2 != pose)
+	{
+		e->frame_start_time = realtime;
+		e->pose1 = e->pose2;
+		e->pose2 = pose;
+		blend = 0;
+	}
+	else {
+		blend = (realtime - e->frame_start_time) / e->frame_interval;
+	}
+	
+	// wierd things start happening if blend passes 1
+	if (cl.paused || blend > 1) 
+		blend = 1;
+	
+	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend);
+}
 
 /*
 =================
@@ -457,13 +735,13 @@ R_DrawAliasModel (entity_t *e)
 	// 
 
 	if (!(clmodel->modflags & FLAG_FULLBRIGHT))
+	{
 		ambientlight = shadelight = R_LightPoint (currententity->origin);
 
-	// always give the gun some light
-	if (e == &cl.viewent && ambientlight < 24)
-		ambientlight = shadelight = 24;
+		// always give the gun some light
+		if (e == &cl.viewent && ambientlight < 24)
+			ambientlight = shadelight = 24;
 
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT)) {
 		for (lnum = 0; lnum < MAX_DLIGHTS; lnum++) {
 			if (cl_dlights[lnum].die >= cl.time) {
 				VectorSubtract (currententity->origin,
@@ -516,7 +794,11 @@ R_DrawAliasModel (entity_t *e)
 	GL_DisableMultitexture ();
 
 	glPushMatrix ();
-	R_RotateForEntity (e);
+
+	if (gl_im_transform->value[0] && !(clmodel->modflags & FLAG_NO_IM_FORM))
+		R_BlendedRotateForEntity (e);
+	else
+		R_RotateForEntity (e);
 
 	if ((clmodel->modflags & FLAG_DOUBLESIZE)
 			&& gl_doubleeyes->value[0]) {
@@ -552,7 +834,10 @@ R_DrawAliasModel (entity_t *e)
 	if (gl_affinemodels->value[0])
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
-	R_SetupAliasFrame (currententity->frame, paliashdr);
+	if (gl_im_animation->value[0] && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
+	else
+		R_SetupAliasFrame (currententity->frame, paliashdr);
 
 	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
@@ -573,11 +858,21 @@ R_DrawAliasModel (entity_t *e)
 		shadevector[2] = shadescale;
 
 		glPushMatrix ();
-		R_RotateForEntity (e);
+
+		if (gl_im_transform->value[0] && !(clmodel->modflags & FLAG_NO_IM_FORM))
+			R_BlendedRotateForEntity (e);
+		else
+            R_RotateForEntity (e);
+
 		glDisable (GL_TEXTURE_2D);
 		glEnable (GL_BLEND);
 		glColor4f (0, 0, 0, 0.5);
-		GL_DrawAliasShadow (paliashdr, lastposenum);
+
+		if (gl_im_animation->value[0] && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0, lastposenum, currententity);
+		else
+            GL_DrawAliasShadow (paliashdr, lastposenum);
+
 		glEnable (GL_TEXTURE_2D);
 		glDisable (GL_BLEND);
 		glColor4f (1, 1, 1, 1);
@@ -605,6 +900,10 @@ R_DrawEntitiesOnList (void)
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = cl_visedicts[i];
 
+		if (chase_active->value[0])
+			if (currententity == &cl_entities[cl.viewentity])
+				currententity->angles[0] *= 0.3;
+
 		switch (currententity->model->type) {
 			case mod_alias:
 				R_DrawAliasModel (currententity);
@@ -626,7 +925,9 @@ R_DrawEntitiesOnList (void)
 			case mod_sprite:
 				R_DrawSpriteModel (currententity);
 				break;
-			default:;
+
+			default:
+				break;
 		}
 	}
 }
@@ -639,63 +940,16 @@ R_DrawViewModel
 void
 R_DrawViewModel (void)
 {
-	float       ambient[4], diffuse[4];
-	int         j;
-	int         lnum;
-	vec3_t      dist;
-	float       add;
-	dlight_t   *dl;
-	int         ambientlight, shadelight;
-
-	if (!r_drawviewmodel->value[0])
-		return;
-
-	if (chase_active->value[0])
-		return;
-
-	if (envmap)
-		return;
-
-	if (!r_drawentities->value[0])
-		return;
-
-	if (cl.items & IT_INVISIBILITY)
-		return;
-
-	if (cl.stats[STAT_HEALTH] <= 0)
-		return;
-
 	currententity = &cl.viewent;
-	if (!currententity->model)
+
+	if (!r_drawviewmodel->value[0] ||
+		chase_active->value[0] ||
+		envmap ||
+		!r_drawentities->value[0] ||
+		cl.items & IT_INVISIBILITY ||
+		(cl.stats[STAT_HEALTH] <= 0) ||
+		!currententity->model)
 		return;
-
-	j = R_LightPoint (currententity->origin);
-
-	if (j < 24)
-		j = 24;							// always give some light on gun
-	ambientlight = j;
-	shadelight = j;
-
-// add dynamic lights       
-	for (lnum = 0; lnum < MAX_DLIGHTS; lnum++) {
-		dl = &cl_dlights[lnum];
-		if (!dl->radius)
-			continue;
-		if (!dl->radius)
-			continue;
-		if (dl->die < cl.time)
-			continue;
-
-		VectorSubtract (currententity->origin, dl->origin, dist);
-		add = dl->radius - VectorLength (dist);
-		if (add > 0)
-			ambientlight += add;
-	}
-
-	ambient[0] = ambient[1] = ambient[2] = ambient[3] =
-		(float) ambientlight * (1 / 128);
-	diffuse[0] = diffuse[1] = diffuse[2] = diffuse[3] =
-		(float) shadelight * (1 / 128);
 
 	// hack the depth range to prevent view model from poking into walls
 	glDepthRange (gldepthmin, gldepthmin + 0.3 * (gldepthmax - gldepthmin));

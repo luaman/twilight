@@ -1495,12 +1495,16 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 	mod->modflags = 0;
 
-	if (!Q_strncmp(mod->name, "progs/flame.mdl", 11) ||
-		!Q_strncmp(mod->name, "progs/bolt.mdl", 10) ||
+	if (!Q_strncmp(mod->name, "progs/flame.mdl", 11)) {
+		mod->modflags |= FLAG_FULLBRIGHT;
+		mod->modflags |= FLAG_NOSHADOW;
+	}
+	else if (!Q_strncmp(mod->name, "progs/bolt.mdl", 10) ||
 		!Q_strcmp(mod->name, "progs/laser.mdl") ||
 		!Q_strcmp (mod->name, "progs/lavaball.mdl")) {
 		mod->modflags |= FLAG_FULLBRIGHT;
 		mod->modflags |= FLAG_NOSHADOW;
+		mod->modflags |= FLAG_NO_IM_ANIM;
 	}
 	else if (!Q_strcmp(mod->name, "progs/missile.mdl") ||
 		!Q_strcmp(mod->name, "progs/grenade.mdl") ||
@@ -1508,13 +1512,22 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		!Q_strcmp(mod->name, "progs/s_spike.mdl") ||
 		!Q_strcmp(mod->name, "progs/zom_gib") ||
 		!Q_strncmp(mod->name, "progs/gib", 9) ||
-		!Q_strncmp(mod->name, "progs/h_", 8) ||
-		!Q_strncmp(mod->name, "progs/v_", 8)
-		) {
+		!Q_strncmp(mod->name, "progs/h_", 8))
+	{
+		mod->modflags |= FLAG_NO_IM_ANIM;
 		mod->modflags |= FLAG_NOSHADOW;
+	}
+	else if (!Q_strncmp(mod->name, "progs/v_", 8)) 
+	{
+		mod->modflags |= FLAG_NOSHADOW;
+		mod->modflags |= FLAG_NO_IM_FORM;
 	}
 	else if (!Q_strcmp(mod->name, "progs/eyes.mdl")) {
 		mod->modflags |= FLAG_DOUBLESIZE;
+		mod->modflags |= FLAG_NO_IM_ANIM;
+	}
+	else if (!Q_strcmp(mod->name, "progs/armor.mdl")) {
+		mod->modflags |= FLAG_NO_IM_ANIM;
 	}
 	// keys and runes are fullbright and do not cast shadows
 	else if (
@@ -1527,6 +1540,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		!Q_strncmp(mod->name, "progs/end", 9)) {
 		mod->modflags |= FLAG_FULLBRIGHT;
 		mod->modflags |= FLAG_NOSHADOW;
+		mod->modflags |= FLAG_NO_IM_ANIM;
 	}
 
 //

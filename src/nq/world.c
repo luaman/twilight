@@ -678,7 +678,7 @@ SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
 		VectorCopy (plane->normal, trace->plane.normal);
 		trace->plane.dist = plane->dist;
 	} else {
-		VectorSubtract (vec3_origin, plane->normal, trace->plane.normal);
+		VectorInverse (plane->normal, trace->plane.normal);
 		trace->plane.dist = -plane->dist;
 	}
 
@@ -768,7 +768,7 @@ SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs,
 		vec3_t      temp;
 
 		if (trace.fraction != 1) {
-			VectorSubtract (vec3_origin, ent->v.angles, a);
+			VectorInverse (ent->v.angles, a);
 			AngleVectors (a, forward, right, up);
 
 			VectorCopy (trace.endpos, temp);
