@@ -303,7 +303,7 @@ Draw_Init (void)
 {
 	image_t	   *img;
 
-	img = IMG_Load ("conchars");
+	img = Image_Load ("conchars");
 	if (!img)
 		Sys_Error ("Draw_Init: Unable to load conchars\n");
 	

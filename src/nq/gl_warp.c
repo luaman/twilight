@@ -472,12 +472,12 @@ R_LoadSkys (void)
 	for (i = 0; i < 6; i++) {
 		snprintf (name, sizeof (name), "env/%s%s",
 				r_skyname->string, suf[i]);
-		img = IMG_Load (name);
+		img = Image_Load (name);
 		if (!img)
 		{
 			snprintf (name, sizeof (name), "gfx/env/%s%s",
 					r_skyname->string, suf[i]);
-			img = IMG_Load (name);
+			img = Image_Load (name);
 		}
 
 		if (!img)

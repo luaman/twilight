@@ -42,7 +42,7 @@ static const char rcsid[] =
 #include "sys.h"
 
 image_t *
-IMG_Load (char *name)
+Image_Load (char *name)
 {
 	char woext[MAX_OSPATH];
 	char buf[MAX_OSPATH];
