@@ -46,6 +46,7 @@ static const char rcsid[] =
 #include "client.h"
 #include "common.h"
 #include "console.h"
+#include "strlib.h"
 #include "cvar.h"
 #include "net.h"
 

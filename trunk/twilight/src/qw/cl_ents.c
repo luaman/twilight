@@ -41,6 +41,7 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "host.h"
 #include "mathlib.h"
+#include "strlib.h"
 #include "pmove.h"
 #include "view.h"
 #include "sys.h"
@@ -78,7 +79,7 @@ CL_AllocDlight (int key)
 		dl = cl_dlights;
 		for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
 			if (dl->key == key) {
-				memset (dl, 0, sizeof (*dl));
+				Q_memset (dl, 0, sizeof (*dl));
 				dl->key = key;
 				return dl;
 			}

@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "bothdefs.h"
 #include "console.h"
 #include "gl_model.h"
+#include "strlib.h"
 
 /*
 =================================================================
@@ -315,7 +316,7 @@ GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 
 	cmds = Hunk_Alloc (numcommands * 4);
 	paliashdr->commands = (byte *) cmds - (byte *) paliashdr;
-	memcpy (cmds, commands, numcommands * 4);
+	Q_memcpy (cmds, commands, numcommands * 4);
 
 	verts = Hunk_Alloc (paliashdr->numposes * paliashdr->poseverts
 						* sizeof (trivertx_t));

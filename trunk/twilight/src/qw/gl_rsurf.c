@@ -37,7 +37,9 @@ static const char rcsid[] =
 #include "client.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "screen.h"
 #include "mathlib.h"
+#include "strlib.h"
 #include "sys.h"
 
 
@@ -323,10 +325,11 @@ R_TextureAnimation (texture_t *base)
 
 extern int  solidskytexture;
 extern int  alphaskytexture;
-extern float speedscale;				// for top sky and bottom sky
+extern float speedscale;							// for top sky and bottom sky
 
-void        DrawGLWaterPoly (glpoly_t *p);
-void        DrawGLWaterPolyLightmap (glpoly_t *p);
+void        DrawGLWaterPoly (glpoly_t *p);			// draws the underwater poly
+void        DrawGLWaterPolyLightmap (glpoly_t *p);	// draws the underwater poly lightmap
+void        DrawGLWaterPolyMTex (glpoly_t *p);		// draws the underwater poly & lightmap (gl_mtexable only!)
 
 lpMTexFUNC  qglMTexCoord2f = NULL;
 lpSelTexFUNC qglSelectTexture = NULL;
@@ -350,7 +353,6 @@ R_DrawSequentialPoly (msurface_t *s)
 	float      *v;
 	int         i;
 	texture_t  *t;
-	vec3_t      nv;
 	glRect_t   *theRect;
 
 	// 
@@ -475,8 +477,9 @@ R_DrawSequentialPoly (msurface_t *s)
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		return;
 	}
+
 	// 
-	// underwater warped with lightmap
+	// underwater optionally warped with lightmap
 	// 
 	R_RenderDynamicLightmaps (s);
 	if (gl_mtexable) {
@@ -493,34 +496,28 @@ R_DrawSequentialPoly (msurface_t *s)
 			lightmap_modified[i] = false;
 			theRect = &lightmap_rectchange[i];
 			qglTexSubImage2D (GL_TEXTURE_2D, 0, 0, theRect->t,
-							 BLOCK_WIDTH, theRect->h, gl_lightmap_format,
-							 GL_UNSIGNED_BYTE,
-							 lightmaps + (i * BLOCK_HEIGHT +
-										  theRect->t) * BLOCK_WIDTH *
-							 lightmap_bytes);
+							  BLOCK_WIDTH, theRect->h,
+							  gl_lightmap_format, GL_UNSIGNED_BYTE,
+							  lightmaps + (i * BLOCK_HEIGHT + theRect->t) *
+							  BLOCK_WIDTH * lightmap_bytes);
 			theRect->l = BLOCK_WIDTH;
 			theRect->t = BLOCK_HEIGHT;
 			theRect->h = 0;
 			theRect->w = 0;
 		}
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-		qglBegin (GL_TRIANGLE_FAN);
-		v = p->verts[0];
-		for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-			qglMTexCoord2f (gl_mtex_enum + 0, v[3], v[4]);
-			qglMTexCoord2f (gl_mtex_enum + 1, v[5], v[6]);
-
-			nv[0] =
-				v[0] + 8 * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-															   realtime);
-			nv[1] =
-				v[1] + 8 * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-															   realtime);
-			nv[2] = v[2];
-
-			qglVertex3fv (nv);
+		if (r_waterwarp->value > 0) {	// warping factor greater than 0
+			DrawGLWaterPolyMTex(p);
+		} else {						// no warping
+			qglBegin (GL_POLYGON);
+			v = p->verts[0];
+			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
+					qglMTexCoord2f (gl_mtex_enum + 0, v[3], v[4]);
+					qglMTexCoord2f (gl_mtex_enum + 1, v[5], v[6]);
+					qglVertex3fv (v);
+			}
+			qglEnd ();
 		}
-		qglEnd ();
 		qglDisable (GL_TEXTURE_2D);
 		GL_SelectTexture (0);
 
@@ -529,7 +526,17 @@ R_DrawSequentialPoly (msurface_t *s)
 
 		t = R_TextureAnimation (s->texinfo->texture);
 		qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
-		DrawGLWaterPoly (p);
+		if (r_waterwarp->value > 0) {	// water warp factor > 0, so warp
+			DrawGLWaterPoly(p);
+		} else {						// no water warp
+			qglBegin (GL_POLYGON);
+			v = p->verts[0];
+			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
+				qglTexCoord2f (v[3], v[4]);
+				qglVertex3fv (v);
+			}
+			qglEnd ();
+		}
 
 		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + s->lightmaptexturenum);
 		qglEnable (GL_BLEND);
@@ -540,7 +547,17 @@ R_DrawSequentialPoly (msurface_t *s)
 			qglColor3f (0, 0, 0);
 			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
-		DrawGLWaterPolyLightmap (p);
+		if (r_waterwarp->value > 0) {	// water warp factor > 0, so warp
+			DrawGLWaterPolyLightmap (p);
+		} else {						// no water warp
+			qglBegin (GL_POLYGON);
+			v = p->verts[0];
+			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
+				qglTexCoord2f (v[5], v[6]);
+				qglVertex3fv (v);
+			}
+			qglEnd ();
+		}
 		if (gl_lightmap_format == GL_LUMINANCE)
 			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		else if (gl_lightmap_format == GL_INTENSITY) {
@@ -554,31 +571,57 @@ R_DrawSequentialPoly (msurface_t *s)
 
 /*
 ================
+DrawGLWaterPolyMTex
+
+Warp the vertex coordinates
+for gl->mtexable mode, draws
+the lightmap as well
+================
+*/
+void
+DrawGLWaterPolyMTex (glpoly_t *p)
+{
+	int			i;
+	float		*v;
+	vec3_t		nv;
+	float		intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
+
+	qglBegin (GL_TRIANGLE_FAN);
+	v = p->verts[0];
+	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
+			qglMTexCoord2f (gl_mtex_enum + 0, v[3], v[4]);
+			qglMTexCoord2f (gl_mtex_enum + 1, v[5], v[6]);
+			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+			nv[2] = v[2];
+			qglVertex3fv (nv);
+	}
+	qglEnd ();
+}
+
+/*
+================
 DrawGLWaterPoly
 
 Warp the vertex coordinates
+for !gl->mtexable mode
 ================
 */
 void
 DrawGLWaterPoly (glpoly_t *p)
 {
-	int         i;
-	float      *v;
-	vec3_t      nv;
+	int			i;
+	float		*v;
+	vec3_t		nv;
+	float		intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
 
 	qglBegin (GL_TRIANGLE_FAN);
 	v = p->verts[0];
 	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
 		qglTexCoord2f (v[3], v[4]);
-
-		nv[0] =
-			v[0] + 8 * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-														   realtime);
-		nv[1] =
-			v[1] + 8 * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-														   realtime);
+		nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+		nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
 		nv[2] = v[2];
-
 		qglVertex3fv (nv);
 	}
 	qglEnd ();
@@ -587,23 +630,18 @@ DrawGLWaterPoly (glpoly_t *p)
 void
 DrawGLWaterPolyLightmap (glpoly_t *p)
 {
-	int         i;
-	float      *v;
-	vec3_t      nv;
+	int			i;
+	float		*v;
+	vec3_t		nv;
+	float		intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
 
 	qglBegin (GL_TRIANGLE_FAN);
 	v = p->verts[0];
 	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
 		qglTexCoord2f (v[5], v[6]);
-
-		nv[0] =
-			v[0] + 8 * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-														   realtime);
-		nv[1] =
-			v[1] + 8 * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-														   realtime);
+		nv[0] =	v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+		nv[1] =	v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
 		nv[2] = v[2];
-
 		qglVertex3fv (nv);
 	}
 	qglEnd ();
@@ -1028,7 +1066,7 @@ R_DrawBrushModel (entity_t *e)
 		return;
 
 	qglColor3f (1, 1, 1);
-	memset (lightmap_polys, 0, sizeof (lightmap_polys));
+	Q_memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
 	VectorSubtract (r_refdef.vieworg, e->origin, modelorg);
 	if (rotated) {
@@ -1218,7 +1256,7 @@ R_DrawWorld (void)
 {
 	entity_t    ent;
 
-	memset (&ent, 0, sizeof (ent));
+	Q_memset (&ent, 0, sizeof (ent));
 	ent.model = cl.worldmodel;
 
 	VectorCopy (r_refdef.vieworg, modelorg);
@@ -1227,10 +1265,10 @@ R_DrawWorld (void)
 	currenttexture = -1;
 
 	qglColor3f (1, 1, 1);
-	memset (lightmap_polys, 0, sizeof (lightmap_polys));
+	Q_memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
 	if (gl_fb_bmodels->value)
-		memset (fullbright_polys, 0, sizeof(fullbright_polys));
+		Q_memset (fullbright_polys, 0, sizeof(fullbright_polys));
 
 #ifdef QUAKE2
 	R_ClearSkyBox ();
@@ -1278,7 +1316,7 @@ R_MarkLeaves (void)
 
 	if (r_novis->value) {
 		vis = solid;
-		memset (solid, 0xff, (cl.worldmodel->numleafs + 7) >> 3);
+		Q_memset (solid, 0xff, (cl.worldmodel->numleafs + 7) >> 3);
 	} else
 		vis = Mod_LeafPVS (r_viewleaf, cl.worldmodel);
 
@@ -1502,7 +1540,7 @@ GL_BuildLightmaps (void)
 	int         i, j;
 	model_t    *m;
 
-	memset (allocated, 0, sizeof (allocated));
+	Q_memset (allocated, 0, sizeof (allocated));
 
 	r_framecount = 1;					// no dlightcache
 

@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "input.h"
 #include "mathlib.h"
+#include "strlib.h"
 
 cvar_t     *cl_nodelta;
 
@@ -490,7 +491,7 @@ CL_BaseMove (usercmd_t *cmd)
 {
 	CL_AdjustAngles ();
 
-	memset (cmd, 0, sizeof (*cmd));
+	Q_memset (cmd, 0, sizeof (*cmd));
 
 	VectorCopy (cl.viewangles, cmd->angles);
 	if (in_strafe.state & 1) {
