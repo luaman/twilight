@@ -37,20 +37,15 @@ static const char rcsid[] =
 #include <math.h>
 #include <time.h>
 
-#include "SDL_types.h"
-
-#include "bothdefs.h"
+#include "common.h"
 #include "mathlib.h"
 #include "strlib.h"
-#include "gl_model.h"
 
 void        Sys_Error (char *error, ...);
 
 vec3_t      vec3_origin = { 0, 0, 0 };
 
 /*-----------------------------------------------------------------*/
-
-// some q3 stuff here
 
 static float sintable[1024];
 
