@@ -3,3 +3,4 @@ Makefile.in
 config.h
 stamp-*
 .deps
+.DS_Store

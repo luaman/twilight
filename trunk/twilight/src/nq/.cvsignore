@@ -13,3 +13,4 @@ Release
 *.s
 *.map
 *.pdb
+.DS_Store

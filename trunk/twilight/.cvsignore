@@ -14,3 +14,4 @@ twilight-nq
 *.ncb
 *.opt
 *.plg
+.DS_Store

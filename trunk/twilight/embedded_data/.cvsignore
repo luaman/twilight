@@ -8,3 +8,4 @@ Release
 *.ncb
 *.opt
 *.plg
+.DS_Store
