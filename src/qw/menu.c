@@ -543,7 +543,7 @@ M_Options_Key (int k)
 				case 2:
 					Cbuf_AddText ("exec default.cfg\n");
 					break;
-				case 22:
+				case 21:
 					M_Menu_Gfx_f ();
 					break;
 				default:
