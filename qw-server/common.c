@@ -1301,6 +1301,7 @@ typedef struct {
 
 char        com_gamedir[MAX_OSPATH];
 char        com_basedir[MAX_OSPATH];
+char		com_sharedir[MAX_OSPATH];
 
 typedef struct searchpath_s {
 	char        filename[MAX_OSPATH];
@@ -1685,14 +1686,14 @@ COM_LoadPackFile (char *packfile)
 
 /*
 ================
-COM_AddGameDirectory
+COM_AddDirectory
 
 Sets com_gamedir, adds the directory to the head of the path,
 then loads and adds pak1.pak pak2.pak ... 
 ================
 */
 void
-COM_AddGameDirectory (char *dir)
+COM_AddDirectory (char *dir)
 {
 	int         i;
 	searchpath_t *search;
@@ -1700,11 +1701,14 @@ COM_AddGameDirectory (char *dir)
 	char        pakfile[MAX_OSPATH];
 	char       *p;
 
+	Con_Printf ("COM_AddDirectory: Adding %s\n", dir);
+
 	if ((p = strrchr (dir, '/')) != NULL)
 		strcpy (gamedirfile, ++p);
 	else
 		strcpy (gamedirfile, p);
 	strcpy (com_gamedir, dir);
+	Sys_mkdir (com_gamedir);
 
 //
 // add the directory to the search path
@@ -1732,6 +1736,27 @@ COM_AddGameDirectory (char *dir)
 
 /*
 ================
+COM_AddGameDirectory
+
+Wrapper for COM_AddDirectory
+================
+*/
+void
+COM_AddGameDirectory (char *dir)
+{
+	char *d = NULL;
+
+	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
+	COM_AddDirectory (va ("%s/%s", com_sharedir, dir));
+
+	d = va ("%s/%s", com_basedir, dir);
+	Sys_mkdir (d);
+	COM_AddDirectory (d);
+}
+
+
+/*
+================
 COM_Gamedir
 
 Sets the gamedir and path to a different directory.
@@ -1740,10 +1765,7 @@ Sets the gamedir and path to a different directory.
 void
 COM_Gamedir (char *dir)
 {
-	searchpath_t *search, *next;
-	int         i;
-	pack_t     *pak;
-	char        pakfile[MAX_OSPATH];
+	searchpath_t *next;
 
 	if (strstr (dir, "..") || strstr (dir, "/")
 		|| strstr (dir, "\\") || strstr (dir, ":")) {
@@ -1753,6 +1775,7 @@ COM_Gamedir (char *dir)
 
 	if (!strcmp (gamedirfile, dir))
 		return;							// still the same
+
 	strcpy (gamedirfile, dir);
 
 	// 
@@ -1777,29 +1800,7 @@ COM_Gamedir (char *dir)
 	if (!strcmp (dir, "id1") || !strcmp (dir, "qw"))
 		return;
 
-	sprintf (com_gamedir, "%s/%s", com_basedir, dir);
-
-	// 
-	// add the directory to the search path
-	// 
-	search = Z_Malloc (sizeof (searchpath_t));
-	strcpy (search->filename, com_gamedir);
-	search->next = com_searchpaths;
-	com_searchpaths = search;
-
-	// 
-	// add any pak files in the format pak0.pak pak1.pak, ...
-	// 
-	for (i = 0;; i++) {
-		sprintf (pakfile, "%s/pak%i.pak", com_gamedir, i);
-		pak = COM_LoadPackFile (pakfile);
-		if (!pak)
-			break;
-		search = Z_Malloc (sizeof (searchpath_t));
-		search->pack = pak;
-		search->next = com_searchpaths;
-		com_searchpaths = search;
-	}
+	COM_AddGameDirectory (dir);
 }
 
 /*
@@ -1814,7 +1815,7 @@ COM_InitFilesystem (void)
 
 //
 // -basedir <path>
-// Overrides the system supplied base directory (under id1)
+// Overrides the system supplied base directory
 //
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
@@ -1823,10 +1824,20 @@ COM_InitFilesystem (void)
 		strcpy (com_basedir, host_parms.basedir);
 
 //
+// -sharedir <path>
+// Overrides the system supplied share directory
+//
+	i = COM_CheckParm ("-sharedir");
+	if (i && i < com_argc - 1)
+		strcpy (com_sharedir, com_argv[i + 1]);
+	else
+		strcpy (com_sharedir, host_parms.sharedir);
+
+//
 // start up with id1 by default
 //
-	COM_AddGameDirectory (va ("%s/id1", com_basedir));
-	COM_AddGameDirectory (va ("%s/qw", com_basedir));
+	COM_AddGameDirectory ("id1");
+	COM_AddGameDirectory ("qw");
 
 	// any set gamedirs will be freed up to here
 	com_base_searchpaths = com_searchpaths;
