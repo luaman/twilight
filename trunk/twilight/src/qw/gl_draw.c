@@ -311,8 +311,7 @@ Draw_Init (void)
 		if (draw_chars[i] == 0)
 			draw_chars[i] = 255;            /* proper transparent color */
 	 
-	char_texture = GL_LoadTexture ("charset", img->width, img->height,
-			img->pixels, false, true, 8);
+	char_texture = R_LoadTexture ("charset", img, false, true);
 
 	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true, 8);
 	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata,
