@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "server.h"
 #include "strlib.h"
 #include "sys.h"
+#include "cvar.h"
 
 /*
 =============================================================================
@@ -508,8 +509,9 @@ SV_WriteEntitiesToClient (client_t *client, sizebuf_t *msg)
 		if (i == ent->num_leafs)
 			continue;					// not visible
 
-		if (SV_AddNailUpdate (ent))
-			continue;					// added to the special update list
+		if (!sv_nailhack->value)
+			if (SV_AddNailUpdate (ent))
+				continue;					// added to the special update list
 
 		// add to the packetentities
 		if (pack->num_entities == MAX_PACKET_ENTITIES)

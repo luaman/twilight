@@ -93,6 +93,8 @@ cvar_t     *temp1;
 cvar_t     *coop;
 cvar_t     *skill;
 
+cvar_t	   *sv_nailhack;
+
 FILE       *sv_logfile;
 FILE       *sv_fraglogfile;
 
@@ -1364,6 +1366,8 @@ SV_InitLocal (void)
 			NULL);
 	sv_friction = Cvar_Get ("sv_friction", "4", CVAR_NONE, NULL);
 	sv_waterfriction = Cvar_Get ("sv_waterfriction", "4", CVAR_NONE, NULL);
+
+	sv_nailhack = Cvar_Get ("sv_nailhack", "0", CVAR_NONE, NULL);
 
 	filterban = Cvar_Get ("filterban", "1", CVAR_NONE, NULL);
 

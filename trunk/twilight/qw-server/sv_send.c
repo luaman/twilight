@@ -65,7 +65,7 @@ char        outputbuf[8000];
 
 redirect_t  sv_redirected;
 
-extern cvar_t sv_phs;
+extern cvar_t *sv_phs;	// Vic: it was 'cvar_t sv_phs'
 
 /*
 ==================
@@ -364,7 +364,7 @@ SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 
 	ent = NUM_FOR_EDICT (entity);
 
-	if ((channel & 8) || !sv_phs.value)	// no PHS flag
+	if ((channel & 8) || !sv_phs->value)	// no PHS flag
 	{
 		if (channel & 8)
 			reliable = true;			// sounds that break the phs are
