@@ -251,7 +251,6 @@ extern GLfloat  c_array[MAX_VERTEX_ARRAYS][4];
 extern GLuint vindices[MAX_VERTEX_INDICES];
 
 void        R_DrawWorld (void);
-void        R_RenderBrushPoly (msurface_t *fa, texture_t *t);
 void        R_DrawWaterSurfaces (void);
 void        R_DrawParticles (void);
 void        V_CalcBlend (void);
