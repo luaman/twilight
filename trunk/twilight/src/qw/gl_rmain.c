@@ -46,7 +46,6 @@ static const char rcsid[] =
 #include "sys.h"
 
 
-vec3_t      modelorg, r_entorigin;
 entity_t   *currententity;
 
 int         r_visframecount;			// bumped when going to a new PVS
@@ -780,19 +779,15 @@ R_DrawAliasModel (entity_t *e)
 	int			texture, fb_texture, skinnum;
 	dlight_t	*l;
 
-	VectorCopy (e->origin, r_entorigin);
-
 	if (e != &cl.viewent) {
 		vec3_t      mins, maxs;
 
-		VectorAdd (r_entorigin, clmodel->mins, mins);
-		VectorAdd (r_entorigin, clmodel->maxs, maxs);
+		VectorAdd (e->origin, clmodel->mins, mins);
+		VectorAdd (e->origin, clmodel->maxs, maxs);
 
 		if (R_CullBox (mins, maxs))
 			return;
 	}
-
-	VectorSubtract (r_origin, r_entorigin, modelorg);
 
 	// 
 	// get lighting information

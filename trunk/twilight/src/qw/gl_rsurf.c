@@ -46,11 +46,6 @@ static const char rcsid[] =
 
 int         skytexturenum;
 
-#ifndef GL_RGBA4
-#define	GL_RGBA4	0
-#endif
-
-
 int         lightmap_bytes = 3;				// 1, 3, or 4
 
 int         lightmap_textures;
@@ -832,14 +827,11 @@ R_DrawBrushModel (entity_t *e)
 	msurface_t *psurf;
 	float       dot;
 	mplane_t   *pplane;
-	model_t    *clmodel;
+	model_t    *clmodel = e->model;
 	qboolean    rotated;
 	texture_t	*t;
-
-	currententity = e;
-
-	clmodel = e->model;
-
+	vec3_t		modelorg;
+	
 	if (e->angles[0] || e->angles[1] || e->angles[2]) {
 		rotated = true;
 		for (i = 0; i < 3; i++) {
@@ -973,7 +965,7 @@ R_RecursiveWorldNode (mnode_t *node)
 
 // find which side of the node we are on
 	plane = node->plane;
-	dot = PlaneDiff (modelorg, plane);
+	dot = PlaneDiff (r_refdef.vieworg, plane);
 
 	if (dot >= 0)
 		side = 0;
@@ -1034,8 +1026,6 @@ R_DrawWorld (void)
 
 	memset (&ent, 0, sizeof (ent));
 	ent.model = cl.worldmodel;
-
-	VectorCopy (r_refdef.vieworg, modelorg);
 
 	currententity = &ent;
 
