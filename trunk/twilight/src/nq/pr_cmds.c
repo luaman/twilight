@@ -928,8 +928,15 @@ PF_Find (void)
 	e = G_EDICTNUM (OFS_PARM0);
 	f = G_INT (OFS_PARM1);
 	s = G_STRING (OFS_PARM2);
+
 	if (!s)
 		PR_RunError ("PF_Find: bad search string");
+
+	if (!*s)
+	{
+		RETURN_EDICT (sv.edicts);
+		return;
+	}
 
 	for (e++; e < sv.num_edicts; e++) {
 		ed = EDICT_NUM ((Sint32) e);
