@@ -73,7 +73,6 @@ particle_new (ptype_t type, vec3_t org, vec3_t vel, float die, int color,
 	particle_t *part;
 
 	if (numparticles >= r_maxparticles) {
-/*		Con_Printf("FAILED PARTICLE ALLOC! %d %d\n", numparticles, r_maxparticles); */
 		return NULL;
 	}
 
@@ -445,8 +444,7 @@ R_Torch (entity_t *ent, qboolean torch2)
 	if (realtime + 2 < ent->time_left)
 		ent->time_left = 0;
 	
-	if (realtime > ent->time_left)
-	{
+	if (realtime > ent->time_left) {
 		VectorSet (pvel, (rand() & 3) - 2, (rand() & 3) - 2, 0);
 		VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
 
@@ -459,7 +457,7 @@ R_Torch (entity_t *ent, qboolean torch2)
 				return;
 			else {
 				if (ent->frame)
-					p->scale = 20;
+					p->scale = 30;
 				else
 					p->scale = 10;
 			}
@@ -471,12 +469,8 @@ R_Torch (entity_t *ent, qboolean torch2)
 				p->scale = 10;
 		}
 
-		if (p == NULL)
-			return;
-		else {
-			p->alpha = 0.5;
-			VectorSet (p->color, 227.0 / 255.0, 151.0 / 255.0, 79.0 / 255.0);
-		}
+		p->alpha = 0.5;
+		VectorSet (p->color, 227.0 / 255.0, 151.0 / 255.0, 79.0 / 255.0);
 
 		ent->time_left = realtime + 0.05;
 	}
@@ -514,7 +508,7 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 					porg[j] = start[j] + ((Q_rand () % 6) - 3);
 				break;
 
-			case 1:					// smoke smoke
+			case 1:					// smoke
 				pramp = (Q_rand () & 3) + 2;
 				pcolor = ramp3[(int) pramp];
 				ptype = pt_fire;
@@ -629,10 +623,7 @@ R_DrawParticles (void)
 		activeparticles++;
 
 		// hack a scale up to keep particles from disapearing
-		scale =
-			(p->org[0] - r_origin[0]) * vpn[0] + (p->org[1] -
-												  r_origin[1]) * vpn[1]
-			+ (p->org[2] - r_origin[2]) * vpn[2];
+		scale = (p->org[0] - r_origin[0]) * vpn[0] + (p->org[1] - r_origin[1]) * vpn[1] + (p->org[2] - r_origin[2]) * vpn[2];
 
 		if (scale < 20)
 			scale = p->scale;
@@ -720,6 +711,8 @@ R_DrawParticles (void)
 
 	if (therearetorches)
 	{
+		float scale2;
+
 		qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 		for (k = 0, p = particles; k < numparticles; k++, p++) {
@@ -728,13 +721,8 @@ R_DrawParticles (void)
 			maxparticle = k;
 			activeparticles++;
 
-			// hack a scale up to keep particles from disapearing
-			scale = (p->org[0] - r_origin[0]) * vpn[0] + (p->org[1] - r_origin[1]) * vpn[1] + (p->org[2] - r_origin[2]) * vpn[2];
-
-			if (scale < 20)
-				scale = p->scale;
-			else
-				scale = p->scale + scale * 0.004;
+			scale = p->scale * -0.25;
+			scale2 = p->scale * 0.75;
 
 			VectorSet4(c_array[vnum + 0], p->color[0], p->color[1], p->color[2], p->alpha);
 			VectorSet4(c_array[vnum + 1], p->color[0], p->color[1], p->color[2], p->alpha);
@@ -742,9 +730,11 @@ R_DrawParticles (void)
 			VectorSet2(tc_array[vnum + 0], 0, 0);
 			VectorSet2(tc_array[vnum + 1], 1, 0);
 			VectorSet2(tc_array[vnum + 2], 0, 1);
-			VectorSet3(v_array[vnum + 0], p->org[0], p->org[1], p->org[2]);
-			VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale, p->org[1] + up[1] * scale, p->org[2] + up[2] * scale);
-			VectorSet3(v_array[vnum + 2], p->org[0] + right[0] * scale, p->org[1] + right[1] * scale, p->org[2] + right[2] * scale);
+			VectorSet3(v_array[vnum + 0], p->org[0] + (up[0]+right[0])*scale, p->org[1] + (up[1]+right[1])*scale, p->org[2] + (up[2]+right[2])*scale);
+			VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale2 + right[0]*scale, p->org[1] + up[1] * scale2 + right[1]*scale, 
+				p->org[2] + up[2] * scale2 + right[2]*scale);
+			VectorSet3(v_array[vnum + 2], p->org[0] + up[0] * scale + right[0]*scale2, p->org[1] + up[1] * scale + right[1]*scale2, 
+				p->org[2] + up[2] * scale + right[2]*scale2);
 			vnum += 3;
 
 			if ((vnum + 3) >= MAX_VERTEX_ARRAYS) {
@@ -759,8 +749,7 @@ R_DrawParticles (void)
 				p->vel[2] += grav * 0.4;
 				if (p->alpha < 0 || p->scale < 0)
 					p->die = -1;
-			}
-			else {
+			} else {
 				p->alpha -= frametime * 64.0 / 255.0;
 				p->scale -= frametime * 4;
 				p->vel[2] += grav;
