@@ -109,6 +109,9 @@
 				RelativePath=".\dyngl.c">
 			</File>
 			<File
+				RelativePath=".\gl_alias.c">
+			</File>
+			<File
 				RelativePath=".\gl_arrays.c">
 			</File>
 			<File
@@ -139,6 +142,9 @@
 				RelativePath=".\pointers.c">
 			</File>
 			<File
+				RelativePath=".\r_part.c">
+			</File>
+			<File
 				RelativePath=".\sky.c">
 			</File>
 			<File
@@ -156,6 +162,9 @@
 			</File>
 			<File
 				RelativePath=".\dyngl.h">
+			</File>
+			<File
+				RelativePath=".\gl_alias.h">
 			</File>
 			<File
 				RelativePath=".\gl_arrays.h">
@@ -186,6 +195,9 @@
 			</File>
 			<File
 				RelativePath=".\pointers.h">
+			</File>
+			<File
+				RelativePath=".\r_part.h">
 			</File>
 			<File
 				RelativePath=".\sky.h">

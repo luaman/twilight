@@ -89,6 +89,14 @@ SOURCE=.\dyngl.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\gl_alias.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\gl_alias.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\gl_arrays.c
 # End Source File
 # Begin Source File
@@ -190,6 +198,14 @@ SOURCE=.\mod_sprite.h
 # Begin Source File
 
 SOURCE=.\pointers.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\r_part.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\r_part.h
 # End Source File
 # Begin Source File
 

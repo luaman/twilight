@@ -137,10 +137,6 @@ SOURCE=.\console.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_alias.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_draw.c
 # End Source File
 # Begin Source File
@@ -198,10 +194,6 @@ SOURCE=.\pmovetst.c
 # Begin Source File
 
 SOURCE=.\r_explosion.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\r_part.c
 # End Source File
 # Begin Source File
 
