@@ -43,8 +43,7 @@ extern float d_8tofloattable[256][4];
 
 extern cvar_t *gl_fb;
 
-extern void PAL_Init_Cvars (void);
-
-extern void PAL_Init (void);
+void PAL_Init_Cvars(void);
+void PAL_Init(void);
 
 #endif // __PALETTE_H

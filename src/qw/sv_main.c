@@ -875,8 +875,8 @@ typedef struct {
 
 #define	MAX_IPFILTERS	1024
 
-ipfilter_t  ipfilters[MAX_IPFILTERS];
-int         numipfilters;
+static ipfilter_t  ipfilters[MAX_IPFILTERS];
+static int         numipfilters;
 
 
 /*
@@ -884,7 +884,7 @@ int         numipfilters;
 StringToFilter
 =================
 */
-qboolean
+static qboolean
 StringToFilter (char *s, ipfilter_t * f)
 {
 	char        num[128];
@@ -1281,15 +1281,6 @@ static void
 SV_InitLocal (void)
 {
 	int         i;
-	extern cvar_t *sv_maxvelocity;
-	extern cvar_t *sv_gravity;
-	extern cvar_t *sv_stopspeed;
-	extern cvar_t *sv_spectatormaxspeed;
-	extern cvar_t *sv_accelerate;
-	extern cvar_t *sv_airaccelerate;
-	extern cvar_t *sv_wateraccelerate;
-	extern cvar_t *sv_friction;
-	extern cvar_t *sv_waterfriction;
 
 	// bound the size of the
 	sv_mintic = Cvar_Get ("sv_mintic", "0.03", CVAR_NONE, NULL);

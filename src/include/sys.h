@@ -27,8 +27,7 @@
 #ifndef __SYS_H
 #define __SYS_H
 
-extern int sys_memsize;
-extern void *sys_membase;
+#include "qtypes.h"
 
 // Types which may be active
 #define GAME_NQ_CLIENT	(1)
@@ -37,30 +36,22 @@ extern void *sys_membase;
 #define GAME_QW_SERVER	(1<<3)
 
 extern int sys_gametypes;
+extern int nostdout;
+extern char logname[128];
+extern double curtime;
+extern qboolean do_stdin;
 
-extern struct cvar_s *sys_logname;
-
-int Sys_FileTime (char *path);
-void Sys_mkdir (char *path);
-
-void Sys_DebugLog (char *file, char *fmt, ...);
-void Sys_Error (char *error, ...);
-
-void Sys_Printf (char *fmt, ...);
-
-void Sys_Quit (void);
-double Sys_DoubleTime (void);
-char *Sys_ConsoleInput (void);
-void Sys_Init (void);
-
-char *Sys_ExpandPath (char *str);
-
-
-// FIXME: Integrate this with the key code
-int  Sys_CheckClipboardPaste(int key);
-
-// FIXME: not in server
-void Sys_SendKeyEvents (void);
+void Sys_Printf(char *fmt, ...);
+void Sys_Quit(void);
+void Sys_Init(void);
+void Sys_Error(char *error, ...);
+int Sys_FileTime(char *path);
+void Sys_mkdir(char *path);
+void Sys_DebugLog(char *file, char *fmt, ...);
+double Sys_DoubleTime(void);
+char *Sys_ConsoleInput(void);
+int Sys_CheckClipboardPaste(int key);
+char *Sys_ExpandPath(char *str);
 
 #endif // __SYS_H
 

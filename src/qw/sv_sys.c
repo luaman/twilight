@@ -97,8 +97,6 @@ void SV_Init (void);
 
 static Uint32 sys_sleep;
 
-char *qdate = __DATE__;
-
 static cvar_t *sys_asciionly;
 static cvar_t *sys_extrasleep;
 cvar_t *sys_logname;
@@ -515,7 +513,6 @@ Sys_ExpandPath (char *str)
 #ifdef _CONSOLE 
 #undef main
 #endif
-extern void CL_Init (void);
 
 int
 main (int argc, char *argv[])

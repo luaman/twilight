@@ -58,12 +58,6 @@ static cvar_t			*sv_timekick_interval;
 
 static cvar_t			*sv_mapcheck;
 
-extern vec3_t	player_mins;
-
-extern int		fp_messages, fp_persecond, fp_secondsdead;
-extern char		fp_msg[];
-extern cvar_t	*pausable;
-
 /*
 ============================================================
 
@@ -655,12 +649,6 @@ static void
 SV_BeginDownload_f (void)
 {
 	char			*name, *p;
-	extern cvar_t	*allow_download;
-	extern cvar_t	*allow_download_skins;
-	extern cvar_t	*allow_download_models;
-	extern cvar_t	*allow_download_sounds;
-	extern cvar_t	*allow_download_maps;
-	extern int		file_from_pak;		// ZOID did file come from pak?
 
 	name = Cmd_Argv (1);
 	// hacked by zoid to allow more conrol over download

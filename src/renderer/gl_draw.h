@@ -34,7 +34,25 @@ typedef struct {
 	float	sl, tl, sh, th;
 } glpic_t;
 
-void Draw_Common_Init (void);
-void Draw_Box (int x, int y, int w, int h, int t, vec4_t color1, vec4_t color2);
+qpic_t *Draw_PicFromWad(char *name);
+qpic_t *Draw_CachePic(char *path);
+void Draw_Init_Cvars(void);
+void Draw_Init(void);
+void Draw_Character(float x, float y, int num, float text_size);
+void Draw_String_Len(float x, float y, char *str, int len, float text_size);
+void Draw_String(float x, float y, char *str, float text_size);
+void Draw_Alt_String_Len(float x, float y, char *str, int len, float text_size);void Draw_Alt_String(float x, float y, char *str, float text_size);
+void Draw_Conv_String_Len(float x, float y, char *str, int len, float text_size);
+void Draw_Conv_String(float x, float y, char *str, float text_size);
+void Draw_Pic(int x, int y, qpic_t *pic);
+void Draw_SubPic(int x, int y, qpic_t *pic, int srcx, int srcy, int width, int height);
+void Draw_TransPicTranslate(int x, int y, qpic_t *pic, Uint8 *translation);
+void Draw_Fill(int x, int y, int w, int h, vec4_t color);
+void Draw_Box(int x, int y, int w, int h, int t, vec4_t color1, vec4_t color2);
+void Draw_FadeScreen(void);
+void Draw_Disc(void);
+void Draw_Crosshair(void);
+void Draw_ConsoleBackground(int lines);
+void GL_Set2D(void);
 
 #endif // __GL_DRAW_H

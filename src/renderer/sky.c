@@ -45,8 +45,6 @@ static const char rcsid[] =
 #include "cmd.h"
 #include "strlib.h"
 
-extern model_t *loadmodel;
-
 static GLuint	skyboxtexnums[6];
 
 static GLuint	solidskytexture;
@@ -88,8 +86,6 @@ Sky_Emit_Chain (model_t *mod, chain_head_t *chain, qboolean arranged)
 
 /*
 ===============
-R_Draw_Fast_Sky_Chain
-
 Draws a sky chain as a fast sky.
 ===============
 */
@@ -110,8 +106,6 @@ Sky_Fast_Draw_Chain (model_t *mod, chain_head_t *chain)
 
 /*
 ===============
-R_Draw_Depth_Sky_Chain
-
 Draws a sky chain only in the depth buffer.
 ===============
 */
@@ -260,11 +254,6 @@ Sky_Sphere_Draw (void)
 	qglDepthMask (GL_TRUE);
 }
 
-/*
-==================
-R_LoadSkys
-==================
-*/
 static char       *suf[6] = { "rt", "bk", "lf", "ft", "up", "dn" };
 static qboolean
 Sky_LoadSkys (cvar_t *cvar)
@@ -299,11 +288,6 @@ Sky_LoadSkys (cvar_t *cvar)
 	return true;
 }
 
-/*
-==============
-R_SkyChanged
-==============
-*/
 static void
 Sky_Changed (cvar_t *unused)
 {
@@ -326,11 +310,6 @@ Sky_Changed (cvar_t *unused)
 	(tc_array(i, 0) = (s) * (254.0f/256.0f) + (1.0f/256.0f)),	\
 	(tc_array(i, 1) = (t) * (254.0f/256.0f) + (1.0f/256.0f)))
 
-/*
-==============
-R_DrawSkyBox
-==============
-*/
 void
 Sky_Box_Draw (void)
 {
@@ -405,8 +384,6 @@ Sky_Box_Draw (void)
 
 /*
 =============
-R_InitSky
-
 A sky texture is 256*128, with the right side being a masked overlay
 ==============
 */

@@ -37,12 +37,12 @@ typedef enum {
 extern cvar_t *r_skyname;
 extern sky_type_t	sky_type;
 
-void Sky_Init_Cvars (void);
-void Sky_Init (void);
-void Sky_InitSky (texture_t *unused, Uint8 *pixels);
-void Sky_Box_Draw (void);
-void Sky_Sphere_Draw (void);
-void Sky_Depth_Draw_Chain (model_t *mod, chain_head_t *chain);
-void Sky_Fast_Draw_Chain (model_t *mod, chain_head_t *chain);
+void Sky_Fast_Draw_Chain(model_t *mod, chain_head_t *chain);
+void Sky_Depth_Draw_Chain(model_t *mod, chain_head_t *chain);
+void Sky_Sphere_Draw(void);
+void Sky_Box_Draw(void);
+void Sky_InitSky(texture_t *unused, Uint8 *pixels);
+void Sky_Init(void);
+void Sky_Init_Cvars(void);
 
 #endif // __R_SKY_H

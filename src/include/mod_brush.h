@@ -296,5 +296,7 @@ typedef struct brushhdr_s {
 	Uint32			checksum2;
 } brushhdr_t;
 
+extern Uint8 *mod_base;
+
 #endif // __MOD_BRUSH_H
 

@@ -46,11 +46,6 @@ extern float	 bboxradius, bboxyawradius;
 	
 //=============================================================================
 
-/*
-=================
-Mod_LoadSpriteFrame
-=================
-*/
 static void *
 Mod_LoadSpriteFrame (void *pin, model_t *mod, mspriteframe_t **ppframe,
 		int framenum)
@@ -95,11 +90,6 @@ Mod_LoadSpriteFrame (void *pin, model_t *mod, mspriteframe_t **ppframe,
 }
 
 
-/*
-=================
-Mod_LoadSpriteGroup
-=================
-*/
 static void *
 Mod_LoadSpriteGroup (void *pin, model_t *mod, mspriteframe_t **ppframe,
 		int framenum)
@@ -149,11 +139,6 @@ Mod_LoadSpriteGroup (void *pin, model_t *mod, mspriteframe_t **ppframe,
 }
 
 
-/*
-=================
-Mod_LoadSpriteModel
-=================
-*/
 void
 Mod_LoadSpriteModel (model_t *mod, void *buffer, int flags)
 {
@@ -227,11 +212,6 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer, int flags)
 	mod->type = mod_sprite;
 }
 
-/*
-=================
-Mod_UnloadSpriteModel
-=================
-*/
 void
 Mod_UnloadSpriteModel (model_t *mod)
 {

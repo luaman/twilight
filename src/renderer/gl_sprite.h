@@ -30,8 +30,7 @@
 #include "qtypes.h"
 #include "gl_info.h"
 
-mspriteframe_t *R_GetSpriteFrame (entity_common_t *e);
-void R_DrawOpaqueSpriteModels (void);
+void R_DrawOpaqueSpriteModels(void);
 
 #endif // __GL_SPRITE_H
 

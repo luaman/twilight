@@ -40,8 +40,6 @@ static const char rcsid[] =
 #include "server.h"
 #include <math.h>
 
-extern Uint8 *mod_base;
-
 void Mod_UnloadBrushModel (model_t *mod);
 
 Uint8       mod_novis[MAX_MAP_LEAFS / 8];

@@ -65,7 +65,7 @@ static int pr_xstatement;
 
 Uint pr_argc;
 
-char *pr_opnames[] =
+static char *pr_opnames[] =
 {
 	"DONE",
 
@@ -153,9 +153,6 @@ char *pr_opnames[] =
 	"BITAND",
 	"BITOR"
 };
-
-extern char *PR_GlobalString (int ofs);
-extern char *PR_GlobalStringNoContents (int ofs);
 
 
 //=============================================================================

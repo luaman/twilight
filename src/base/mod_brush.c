@@ -40,14 +40,6 @@ static const char rcsid[] =
 #include "model.h"
 #include "mod_brush.h"
 
-// Supplied by the renderer.
-extern void Mod_RUnloadBrushModel (model_t *mod);
-extern void Mod_LoadTextures (lump_t *l, model_t *mod);
-extern void Mod_LoadLighting (lump_t *l, model_t *mod);
-extern void Mod_LoadTexinfo (lump_t *l, model_t *mod);
-extern void Mod_LoadRFaces (lump_t *l, model_t *mod);
-extern void Mod_MakeChains (model_t *mod);
-
 Uint8	*mod_base;
 
 static Uint8 mod_novis[MAX_MAP_LEAFS / 8];

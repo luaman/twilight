@@ -48,6 +48,9 @@
 extern size_t com_argc;
 extern char **com_argv;
 
+extern int file_from_pak;
+extern char gamedirfile[MAX_OSPATH];
+
 void Cmdline_Init (int argc, char *argv[]);
 int COM_CheckParm (char *parm);
 

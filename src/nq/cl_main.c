@@ -63,8 +63,6 @@ cvar_t		*cl_maxfps;
 cvar_t		*cl_mapname;
 cvar_t		*cl_verstring;
 
-cvar_t		*show_fps;
-
 client_static_t	 cls;
 client_state_t	 cl;
 memzone_t		*cl_zone;
@@ -74,8 +72,6 @@ entity_t	cl_entities[MAX_EDICTS];
 entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
 lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
 dlight_t	cl_dlights[MAX_DLIGHTS];
-
-extern Uint	r_framecount;
 
 void
 CL_ClearState (void)
@@ -409,7 +405,6 @@ CL_RelinkEntities (void)
 	int         i;
 	float       frac;
 	dlight_t   *dl;
-	extern		cvar_t *gl_flashblend, *gl_oldlights;
 
 // determine partial update time    
 	frac = CL_LerpPoint ();
@@ -634,8 +629,6 @@ void
 CL_Init_Cvars (void)
 {
 	CCL_Init_Cvars ();
-
-	show_fps = Cvar_Get ("show_fps", "0", CVAR_NONE, NULL);
 
 	_cl_name = Cvar_Get ("_cl_name", "player", CVAR_ARCHIVE, NULL);
 	_cl_color = Cvar_Get ("_cl_color", "0", CVAR_ARCHIVE, NULL);

@@ -50,8 +50,6 @@ skin_t *Skin_Load (char *skin_name);
 
 cvar_t *noskins;
 
-extern model_t	*player_model;
-
 static memzone_t *skin_zone;
 
 static char allskins[128];

@@ -30,6 +30,9 @@
 #include "info.h"
 #include "net.h"
 #include "protocol.h"
+#include "progs.h"
+#include "model.h"
+#include "quakedef.h"
 
 #define	QW_SERVER
 
@@ -42,6 +45,8 @@ typedef enum {
 	ss_loading,							// spawning level edicts
 	ss_active							// actively running
 } server_state_t;
+
+typedef enum { RD_NONE, RD_CLIENT, RD_PACKET } redirect_t;
 
 // some qc commands are only valid before the server has finished
 // initializing (precache commands, static sounds / objects, etc)
@@ -337,144 +342,194 @@ typedef struct {
 
 //============================================================================
 
-extern struct cvar_s *sv_mintic, *sv_maxtic;
-extern struct cvar_s *sv_maxspeed;
-extern struct cvar_s *sv_nailhack;
+/* sv_ccmds.c */
+extern int fp_messages;
+extern int fp_persecond;
+extern int fp_secondsdead;
+extern char fp_msg[255];
 
-extern netadr_t master_adr[MAX_MASTERS];	// address of the master server
+void SV_SendServerInfoChange(char *key, char *value);
+void SV_InitOperatorCommands(void);
 
-extern struct cvar_s *spawn;
-extern struct cvar_s *teamplay;
-extern struct cvar_s *deathmatch;
-extern struct cvar_s *coop;
-extern struct cvar_s *skill;
-extern struct cvar_s *fraglimit;
-extern struct cvar_s *timelimit;
 
-extern server_static_t svs;				// persistant server info
-extern server_t sv;						// local server
+/* sv_ents.c */
+extern int fatbytes;
+extern Uint8 fatpvs[32767 / 8];
+extern edict_t *nails[32];
+extern int numnails;
+
+void SV_WriteEntitiesToClient(client_t *client, sizebuf_t *msg);
+
+
+/* sv_init.c */
+extern server_static_t svs;
+extern server_t sv;
 extern memzone_t *sv_zone;
+extern char localmodels[256][5];
+extern char localinfo[32768 + 1];
 
+int SV_ModelIndex(char *name);
+void SV_FlushSignon(void);
+void SV_SpawnServer(char *server);
+
+
+/* sv_main.c */
+extern qboolean host_initialized;
+extern double host_frametime;
+extern int host_hunklevel;
+extern netadr_t master_adr[MAX_MASTERS];
 extern client_t *host_client;
-
-extern struct edict_s *sv_player;
-
-extern char localmodels[MAX_MODELS][5];	// inline model names for precache
-
-extern char localinfo[MAX_LOCALINFO_STRING + 1];
-
-extern int  host_hunklevel;
-extern FILE *sv_logfile;
+extern cvar_t *sv_mintic;
+extern cvar_t *sv_maxtic;
+extern cvar_t *allow_download;
+extern cvar_t *allow_download_skins;
+extern cvar_t *allow_download_models;
+extern cvar_t *allow_download_sounds;
+extern cvar_t *allow_download_maps;
+extern cvar_t *sv_highchars;
+extern cvar_t *sv_phs;
+extern cvar_t *pausable;
+extern cvar_t *sv_aim;
+extern cvar_t *teamplay;
+extern cvar_t *deathmatch;
+extern cvar_t *coop;
+extern cvar_t *skill;
+extern cvar_t *sv_nailhack;
 extern FILE *sv_fraglogfile;
+extern int current_skill;
 
-extern	int		current_skill;
-
-//===========================================================
-
-//
-// sv_main.c
-//
-void        SV_Shutdown (void);
-void        SV_Frame (float time);
-void        SV_FinalMessage (char *message);
-void        SV_DropClient (client_t *drop);
-void        SV_Error (char *error, ...);
-
-int         SV_CalcPing (client_t *cl);
-void        SV_FullClientUpdate (client_t *client, sizebuf_t *buf);
-
-int         SV_ModelIndex (char *name);
-
-qboolean    SV_CheckBottom (struct edict_s *ent);
-qboolean    SV_movestep (struct edict_s *ent, vec3_t move, qboolean relink);
-
-void        SV_MoveToGoal (void);
-
-void        SV_Physics_Client (struct edict_s *ent);
-
-void        SV_InitOperatorCommands (void);
-
-void        SV_SendServerinfo (client_t *client);
-void        SV_ExtractFromUserinfo (client_t *cl);
+qboolean ServerPaused(void);
+void SV_Shutdown(void);
+void SV_Error(char *error, ...);
+void SV_FinalMessage(char *message);
+void SV_DropClient(client_t *drop);
+int SV_CalcPing(client_t *cl);
+void SV_FullClientUpdate(client_t *client, sizebuf_t *buf);
+void SV_FullClientUpdateToClient(client_t *client, client_t *cl);
+int Rcon_Validate(void);
+void Cmd_ForwardToServer(void);
+void SV_Frame(float time);
+void Master_Heartbeat(void);
+void Master_Shutdown(void);
+void SV_ExtractFromUserinfo(client_t *cl);
+void SV_Init(void);
 
 
-void        Master_Heartbeat (void);
-void        Master_Packet (void);
+/* sv_model.c */
+extern Uint8 mod_novis[32767 / 8];
+extern unsigned *model_checksum;
 
-void        SV_FullClientUpdateToClient (client_t *client, client_t *cl);
-
-//
-// sv_init.c
-//
-void        SV_SpawnServer (char *server);
-void        SV_FlushSignon (void);
-
-
-//
-// sv_phys.c
-//
-void        SV_ProgStartFrame (void);
-void        SV_Physics (void);
-qboolean    SV_RunThink (struct edict_s *ent);
-void        SV_RunNewmis (void);
-void        SV_SetMoveVars (void);
-
-//
-// sv_send.c
-//
-void        SV_SendClientMessages (void);
-
-void        SV_Multicast (vec3_t origin, int to);
-void        SV_StartSound (struct edict_s *entity, int channel, char *sample,
-						   int volume, float attenuation);
-void        SV_ClientPrintf (client_t *cl, int level, char *fmt, ...);
-void        SV_BroadcastPrintf (int level, char *fmt, ...);
-void        SV_BroadcastCommand (char *fmt, ...);
-void        SV_SendMessagesToAll (void);
-void        SV_FindModelNumbers (void);
-
-//
-// sv_user.c
-//
-void        SV_ExecuteClientMessage (client_t *cl);
-void        SV_UserInit (void);
-void        SV_TogglePause (const char *msg);
+void Mod_UnloadModel(model_t *mod);
+model_t *Mod_LoadModel(model_t *mod, int flags);
+void Mod_RUnloadBrushModel(model_t *mod);
+void Mod_LoadTextures(lump_t *l, model_t *mod);
+void Mod_LoadLighting(lump_t *l, model_t *mod);
+void Mod_LoadTexinfo(lump_t *l, model_t *mod);
+void Mod_LoadRFaces(lump_t *l, model_t *mod);
+void Mod_MakeChains(model_t *mod);
 
 
-//
-// svonly.c
-//
-typedef enum { RD_NONE, RD_CLIENT, RD_PACKET } redirect_t;
-void        SV_BeginRedirect (redirect_t rd);
-void        SV_EndRedirect (void);
+/* sv_move.c */
+extern int c_yes;
+extern int c_no;
 
-//
-// sv_ents.c
-//
-void        SV_WriteEntitiesToClient (client_t *client, sizebuf_t *msg);
-
-//
-// sv_nchan.c
-//
-
-void        ClientReliableCheckBlock (client_t *cl, int maxsize);
-void        ClientReliable_FinishWrite (client_t *cl);
-void        ClientReliableWrite_Begin (client_t *cl, int c, int maxsize);
-void        ClientReliableWrite_Angle (client_t *cl, float f);
-void        ClientReliableWrite_Angle16 (client_t *cl, float f);
-void        ClientReliableWrite_Byte (client_t *cl, int c);
-void        ClientReliableWrite_Char (client_t *cl, int c);
-void        ClientReliableWrite_Float (client_t *cl, float f);
-void        ClientReliableWrite_Coord (client_t *cl, float f);
-void        ClientReliableWrite_Long (client_t *cl, int c);
-void        ClientReliableWrite_Short (client_t *cl, int c);
-void        ClientReliableWrite_String (client_t *cl, char *s);
-void        ClientReliableWrite_SZ (client_t *cl, void *data, int len);
-
-void		SV_SendServerInfoChange (char *key, char *value);
+qboolean SV_CheckBottom(edict_t *ent);
+qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink);
+void SV_MoveToGoal(void);
 
 
-qboolean ServerPaused (void);
+/* sv_nchan.c */
+void ClientReliableCheckBlock(client_t *cl, int maxsize);
+void ClientReliableWrite_Begin(client_t *cl, int c, int maxsize);
+void ClientReliable_FinishWrite(client_t *cl);
+void ClientReliableWrite_Angle(client_t *cl, float f);
+void ClientReliableWrite_Angle16(client_t *cl, float f);
+void ClientReliableWrite_Byte(client_t *cl, int c);
+void ClientReliableWrite_Char(client_t *cl, int c);
+void ClientReliableWrite_Float(client_t *cl, float f);
+void ClientReliableWrite_Coord(client_t *cl, float f);
+void ClientReliableWrite_Long(client_t *cl, int c);
+void ClientReliableWrite_Short(client_t *cl, int c);
+void ClientReliableWrite_String(client_t *cl, char *s);
+void ClientReliableWrite_SZ(client_t *cl, void *data, int len);
+
+
+/* sv_null.c */
+extern cvar_t *sv_highchars;
+extern qboolean do_stdin;
+extern qboolean stdin_ready;
+
+qboolean ServerPaused(void);
+
+
+/* sv_phys.c */
+extern cvar_t *sv_maxvelocity;
+extern cvar_t *sv_gravity;
+extern cvar_t *sv_stopspeed;
+extern cvar_t *sv_maxspeed;
+extern cvar_t *sv_spectatormaxspeed;
+extern cvar_t *sv_accelerate;
+extern cvar_t *sv_airaccelerate;
+extern cvar_t *sv_wateraccelerate;
+extern cvar_t *sv_friction;
+extern cvar_t *sv_waterfriction;
+
+qboolean SV_RunThink(edict_t *ent);
+void SV_ProgStartFrame(void);
+void SV_RunNewmis(void);
+void SV_Physics(void);
+void SV_SetMoveVars(void);
+
+
+/* sv_send.c */
+extern redirect_t sv_redirected;
+extern int sv_nailmodel;
+extern int sv_supernailmodel;
+extern int sv_playermodel;
+
+void SV_BeginRedirect(redirect_t rd);
+void SV_EndRedirect(void);
+void SV_ClientPrintf(client_t *cl, int level, char *fmt, ...);
+void SV_BroadcastPrintf(int level, char *fmt, ...);
+void SV_BroadcastCommand(char *fmt, ...);
+void SV_Multicast(vec3_t origin, int to);
+void SV_StartSound(edict_t *entity, int channel, char *sample, int volume, float attenuation);
+void SV_FindModelNumbers(void);
+void SV_SendClientMessages(void);
+void SV_SendMessagesToAll(void);
+
+
+/* sv_sys.c */
+extern cvar_t *sys_logname;
+extern int sys_gametypes;
+extern char logname[128];
+extern double curtime;
+extern qboolean do_stdin;
+extern qboolean stdin_ready;
+
+void Sys_Printf(char *fmt, ...);
+void Sys_Quit(void);
+void Sys_ESCallback(cvar_t *cvar);
+void Sys_Init(void);
+void Sys_Error(char *error, ...);
+int Sys_FileTime(char *path);
+void Sys_mkdir(char *path);
+void Sys_DebugLog(char *file, char *fmt, ...);
+double Sys_DoubleTime(void);
+char *Sys_ConsoleInput(void);
+char *Sys_ExpandPath(char *str);
+
+
+/* sv_user.c */
+extern edict_t *sv_player;
+extern usercmd_t cmd;
+extern cvar_t *cl_rollspeed;
+extern cvar_t *cl_rollangle;
+
+void SV_TogglePause(const char *msg);
+float V_CalcRoll(vec3_t angles, vec3_t velocity);
+void SV_ExecuteClientMessage(client_t *cl);
+void SV_UserInit(void);
 
 #endif // __SERVER_H
 

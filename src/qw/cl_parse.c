@@ -130,15 +130,11 @@ static char       *svc_strings[] = {
 	"NEW PROTOCOL"
 };
 
-extern model_t *player_model;
-
 static int         oldparsecountmod;
 int         parsecountmod;
 double      parsecounttime;
 
 int         cl_spikeindex, cl_playerindex, cl_flagindex;
-
-extern void CL_ParseStatic (void);
 
 //=============================================================================
 
@@ -241,7 +237,6 @@ Model_NextDownload (void)
 {
 	char       *s;
 	int         i;
-	extern char gamedirfile[];
 	char mapname[MAX_QPATH] = { 0 };
 
 	if (cls.downloadnumber == 0) {
@@ -573,7 +568,6 @@ CL_ParseServerData (void)
 	FILE       *f;
 	char        fn[MAX_OSPATH];
 	qboolean    cflag = false;
-	extern char gamedirfile[MAX_OSPATH];
 	int         protover;
 
 	Com_DPrintf ("Serverdata packet received.\n");

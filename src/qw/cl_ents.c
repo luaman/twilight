@@ -51,14 +51,6 @@ entity_t	cl_player_entities[MAX_CLIENTS];
 
 static int	entity_frame = 0;
 
-extern cvar_t *cl_predict_players;
-extern cvar_t *cl_solid_players;
-
-extern int  cl_spikeindex, cl_playerindex, cl_flagindex;
-
-extern void CL_ParseBaseline (entity_state_t *es);
-extern entity_t   *CL_NewTempEntity (void);
-
 //============================================================
 
 /*
@@ -696,10 +688,8 @@ typedef struct {
 } projectile_t;
 
 #define	MAX_PROJECTILES	32
-projectile_t cl_projectiles[MAX_PROJECTILES];
-int         cl_num_projectiles;
-
-extern int  cl_spikeindex;
+static projectile_t cl_projectiles[MAX_PROJECTILES];
+static int         cl_num_projectiles;
 
 void
 CL_ClearProjectiles (void)
@@ -813,8 +803,6 @@ CL_ParseStatic (void)
 CL_ParsePlayerinfo
 ===================
 */
-extern int  parsecountmod;
-extern double parsecounttime;
 void
 CL_ParsePlayerinfo (void)
 {
@@ -1116,7 +1104,6 @@ CL_SetSolidPlayers ()
 	player_state_t	*state;
 	physent_t		*pent;
 	frame_t			*frame;
-	extern vec3_t	player_mins, player_maxs;
 
 	if (!cl_solid_players->ivalue || !cl_predict_players->ivalue)
 		return;

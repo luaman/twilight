@@ -56,6 +56,7 @@ static const char rcsid[] =
 #include "view.h"
 #include "wad.h"
 #include "cpu.h"
+#include "surface.h"
 
 /*
 
@@ -625,8 +626,6 @@ Host_ServerFrame (void)
 // send all messages to the clients
 	SV_SendClientMessages ();
 }
-
-int fps_count = 0;
 
 /*
 ==================

@@ -34,8 +34,8 @@
 
 extern cvar_t *r_wateralpha;
 extern cvar_t *r_waterripple;
-extern void R_Init_Liquid ();
-extern void R_Init_Liquid_Cvars ();
-extern void R_Draw_Liquid_Chain (model_t *mod, chain_head_t *chain, qboolean arranged);
+void R_Init_Liquid_Cvars(void);
+void R_Init_Liquid(void);
+void R_Draw_Liquid_Chain(model_t *mod, chain_head_t *chain, qboolean arranged);
 
 #endif // __R_LIQUID_H

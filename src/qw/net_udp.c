@@ -70,6 +70,7 @@ static const char rcsid[] =
 #include "net.h"
 #include "strlib.h"
 #include "sys.h"
+#include "server.h"
 
 
 netadr_t    net_local_adr;
@@ -434,9 +435,6 @@ NET_Sleep (int msec)
 {
 	fd_set			fdset;
 	struct timeval	timeout;
-#ifndef _WIN32
-	extern qboolean do_stdin, stdin_ready;
-#endif
 
 	FD_ZERO (&fdset);
 

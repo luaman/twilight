@@ -115,20 +115,20 @@ extern enum {
 
 typedef enum { key_game, key_console, key_message, key_menu } keydest_t;
 
+extern char key_lines[32][256];
+extern int key_linepos;
+extern int edit_line;
+extern int history_line;
 extern keydest_t key_dest;
-extern char *keybindings[8][256];
-extern int	key_count;				// incremented every key event
-extern int	key_lastpress;
-
-extern char chat_buffer[];
-extern unsigned chat_bufferlen;
+extern void Key_ClearEditLine(int edit_line);
 extern qboolean chat_team;
+extern char chat_buffer[256];
+extern Uint32 chat_bufferlen;
 
-void Key_Event (int key, qboolean down);
-void Key_Init_Cvars (void);
-void Key_Init (void);
-void Key_WriteBindings (FILE * f);
-void Key_ClearEditLine (int edit_line);
+void Key_WriteBindings(FILE *f);
+void Key_Init(void);
+void Key_Init_Cvars(void);
+void Key_Event(int key, qboolean down);
 
 #endif // __KEYS_H
 

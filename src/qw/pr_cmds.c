@@ -43,8 +43,6 @@ static const char rcsid[] =
 #define RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
 #define RETURN_STRING(s) (((int *)pr_globals)[OFS_RETURN] = PR_SetString(s))
 
-extern cvar_t *sv_aim;
-
 static char engine_extensions[] =
 "DP_QC_ETOS "
 "DP_QC_FINDFLOAT "

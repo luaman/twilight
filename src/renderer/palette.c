@@ -36,8 +36,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "host.h"
 #include "gl_info.h"
-
-extern qboolean VID_Inited;
+#include "video.h"
 
 Uint32 d_palette_raw[256];
 Uint32 d_palette_base[256];

@@ -27,28 +27,22 @@
 #ifndef __SCREEN_H
 #define __SCREEN_H
 
-void SCR_Init_Cvars (void);
-void SCR_Init (void);
-
-void SCR_UpdateScreen (void);
-
-void SCR_SizeUp (void);
-void SCR_SizeDown (void);
-void SCR_CenterPrint (char *str);
-
-void SCR_BeginLoadingPlaque (void);
-void SCR_EndLoadingPlaque (void);
-
-int SCR_ModalMessage (char *text);
+#include "qtypes.h"
+#include "video.h"
 
 extern float scr_con_current;
-extern float scr_conlines;		/* lines of console to display */
-
+extern int clearconsole;
+extern viddef_t vid;
 extern qboolean scr_disabled_for_loading;
+extern float scr_centertime_off;
 
-extern struct cvar_s *scr_viewsize;
-extern struct cvar_s *r_brightness;
-extern struct cvar_s *r_contrast;
+void SCR_CenterPrint(char *str);
+void SCR_Init_Cvars(void);
+void SCR_Init(void);
+void SCR_BeginLoadingPlaque(void);
+void SCR_EndLoadingPlaque(void);
+int MipColor(int r, int g, int b);
+void SCR_UpdateScreen(void);
 
 #endif // __SCREEN_H
 

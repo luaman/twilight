@@ -42,9 +42,7 @@ static const char rcsid[] =
 #include "sky.h"
 #include "mdfour.h"
 #include "dyngl.h"
-
-extern texture_t *r_notexture;
-extern texture_t *r_notexture_water;
+#include "gl_main.h"
 
 
 /*
@@ -55,14 +53,6 @@ extern texture_t *r_notexture_water;
 ===============================================================================
 */
 
-extern Uint8	*mod_base;
-
-
-/*
-=================
-Mod_LoadTextures
-=================
-*/
 void
 Mod_LoadTextures (lump_t *l, model_t *mod)
 {
@@ -248,11 +238,6 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 	}
 }
 
-/*
-=================
-Mod_LoadLighting
-=================
-*/
 void
 Mod_LoadLighting (lump_t *l, model_t *mod)
 {
@@ -303,11 +288,6 @@ Mod_LoadLighting (lump_t *l, model_t *mod)
 	}
 }
 
-/*
-=================
-Mod_LoadTexinfo
-=================
-*/
 void
 Mod_LoadTexinfo (lump_t *l, model_t *mod)
 {
@@ -354,8 +334,6 @@ Mod_LoadTexinfo (lump_t *l, model_t *mod)
 
 /*
 ================
-CalcSurfaceExtents
-
 Fills in s->texturemins[] and s->extents[]
 ================
 */
@@ -408,11 +386,6 @@ CalcSurfaceExtents (msurface_t *s, model_t *mod)
 	s->tmax = bmaxs[1] - bmins[1] + 1;
 }
 
-/*
-=================
-Mod_LoadRFaces
-=================
-*/
 void
 Mod_LoadRFaces (lump_t *l, model_t *mod)
 {
@@ -481,17 +454,6 @@ Mod_LoadRFaces (lump_t *l, model_t *mod)
 	}
 }
 
-extern Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
-extern int lightmap_bytes;				// 1, 3, or 4
-extern int gl_lightmap_format;
-extern qboolean colorlights;
-extern qboolean AllocLightBlockForSurf (int *allocated, int num, msurface_t *surf, memzone_t *zone);
-
-/*
-=================
-Mod_MakeChains
-=================
-*/
 void
 Mod_MakeChains (model_t *mod)
 {

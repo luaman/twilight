@@ -30,7 +30,9 @@
 #include "qtypes.h"
 #include "gl_info.h"
 
-void R_DrawOpaqueAliasModels (entity_common_t *ents[],int num_ents, qboolean viewent);
+extern float r_avertexnormals[162][3];
+
+void R_DrawOpaqueAliasModels(entity_common_t *ents[], int num_ents, qboolean viewent);
 
 #endif // __GL_ALIAS_H
 

@@ -67,8 +67,6 @@ static int			GLT_numcachepics;
 
 static Uint8		menuplyr_pixels[4096];
 
-extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
-
 static cvar_t *gl_constretch;
 extern cvar_t *cl_verstring;
 
@@ -76,6 +74,9 @@ static cvar_t *hud_chsize;
 static cvar_t *hud_chflash;
 static cvar_t *hud_chspeed;
 static cvar_t *hud_chalpha;
+
+static cvar_t *crosshair;
+static cvar_t *crosshaircolor;
 
 static GLuint   ch_textures[NUM_CROSSHAIRS];            // crosshair texture
 
@@ -157,6 +158,9 @@ Draw_Init_Cvars (void)
 	hud_chflash = Cvar_Get ("hud_chflash", "0.0", CVAR_ARCHIVE, NULL);
 	hud_chspeed = Cvar_Get ("hud_chspeed", "1.5", CVAR_ARCHIVE, NULL);
 	hud_chalpha = Cvar_Get ("hud_chalpha", "1.0", CVAR_ARCHIVE, NULL);
+
+	crosshair = Cvar_Get ("crosshair", "0", CVAR_ARCHIVE, NULL);
+	crosshaircolor = Cvar_Get ("crosshaircolor", "79", CVAR_ARCHIVE, NULL);
 }
 
 void

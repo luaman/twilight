@@ -43,7 +43,6 @@ static qboolean    sv_allow_cheats;
 
 int         fp_messages = 4, fp_persecond = 4, fp_secondsdead = 10;
 char        fp_msg[255] = { 0 };
-extern redirect_t sv_redirected;
 
 
 /*
@@ -727,7 +726,6 @@ SV_Gamedir_f
 Sets the gamedir and path to a different directory.
 ================
 */
-extern char        gamedirfile[MAX_OSPATH];
 static void
 SV_Gamedir_f (void)
 {

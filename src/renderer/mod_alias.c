@@ -83,11 +83,6 @@ Mod_CheckMinMaxVerts8 (Uint8 t[3])
 		bboxradius = dist;
 }
 
-/*
-=================
-Mod_LoadAliasFrame
-=================
-*/
 static void *
 Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame, model_t *mod)
 {
@@ -136,11 +131,6 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame, model_t *mod)
 }
 
 
-/*
-=================
-Mod_LoadAliasGroup
-=================
-*/
 static void *
 Mod_LoadAliasGroup (Uint8 *datapointer, maliasframedesc_t *frame, model_t *mod)
 {
@@ -200,11 +190,6 @@ Mod_LoadAliasGroup (Uint8 *datapointer, maliasframedesc_t *frame, model_t *mod)
 
 //=========================================================
 
-/*
-===============
-Mod_LoadAllSkins
-===============
-*/
 static Uint8 *
 Mod_LoadAllSkins (model_t *mod, Uint8 *datapointer, qboolean load)
 {
@@ -266,7 +251,7 @@ typedef struct
 	int		flags;
 } mflags_t;
 
-mflags_t modelflags[] =
+static mflags_t modelflags[] =
 {
 	// Regular Quake
 	{ "progs/flame.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_TORCH1 },
@@ -357,11 +342,6 @@ Mod_FindModelFlags(char *name)
 	return 0;
 }
 
-/*
-=================
-Mod_LoadAliasModel
-=================
-*/
 void
 Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 {
@@ -564,11 +544,6 @@ Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 	mod->alias = pheader;
 }
 
-/*
-=================
-Mod_UnloadAliasModel
-=================
- */
 void
 Mod_UnloadAliasModel (model_t *mod)
 {

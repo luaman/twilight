@@ -29,14 +29,6 @@
 
 #include "qtypes.h"
 
-extern const int GTF_smoke[8];
-extern const int GTF_rainsplash[16];
-extern const int GTF_dot;
-extern const int GTF_raindrop;
-extern const int GTF_bubble;
-extern const int GTF_lightning_beam;
-extern const int GTF_blooddecal[8];
-
 #define MAX_GT_FONT_TEXTURES 64
 // GTF_texture_t is a rectangle in the particlefonttexture
 typedef struct {
@@ -44,7 +36,16 @@ typedef struct {
 	float	s1, t1, s2, t2;
 } GTF_texture_t;
 
+extern const int GTF_smoke[8];
+extern const int GTF_rainsplash[16];
+extern const int GTF_dot;
+extern const int GTF_raindrop;
+extern const int GTF_bubble;
+extern const int GTF_lightning_beam;
+extern const int GTF_blooddecal[8];
 extern int GTF_texnum;
-extern GTF_texture_t GTF_texture[MAX_GT_FONT_TEXTURES];
+extern GTF_texture_t GTF_texture[64];
+
+void TNT_Init(void);
 
 #endif // __GEN_TEXTURES_H

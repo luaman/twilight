@@ -113,7 +113,8 @@ static cvar_t   *r_brightness;
 static cvar_t   *r_contrast;
 static cvar_t   *cl_avidemo;
 
-extern cvar_t	*crosshair;
+static cvar_t	*show_fps;
+int				fps_count;
 
 static qboolean	scr_initialized;			/* ready to draw */
 
@@ -122,8 +123,6 @@ static qpic_t   *scr_net;
 static qpic_t   *scr_turtle;
 
 int				clearconsole;
-
-viddef_t		vid;						/* global video state */
 
 qboolean		scr_disabled_for_loading;
 static qboolean	scr_drawloading;
@@ -198,9 +197,9 @@ CENTER PRINTING
 ===============================================================================
 */
 
-static char		scr_centerstring[1024];
+static char			scr_centerstring[1024];
 static float		scr_centertime_start;		/* for slow victory printing */
-static float		scr_centertime_off;
+float				scr_centertime_off;
 static int			scr_center_lines;
 static int			scr_erase_lines;
 static int			scr_erase_center;
@@ -433,6 +432,7 @@ SCR_Init_Cvars (void)
 	r_brightness = Cvar_Get ("r_brightness", "1", CVAR_ARCHIVE, NULL);
 	r_contrast = Cvar_Get ("r_contrast", "1", CVAR_ARCHIVE, NULL);
 	cl_avidemo = Cvar_Get ("cl_avidemo", "0", CVAR_NONE, &AvidemoChanged);
+	show_fps = Cvar_Get ("show_fps", "0", CVAR_NONE, NULL);
 }
 
 
@@ -492,10 +492,8 @@ SCR_DrawNet (void)
 static void
 SCR_DrawFPS (void)
 {
-	extern cvar_t	   *show_fps;
 	static double		lastframetime;
 	double				t;
-	extern int			fps_count;
 	static int			lastfps;
 	int					x, y, st_len;
 	char				st[80];
@@ -969,8 +967,7 @@ SCR_UpdateScreen (void)
 		HUD_FinaleOverlay ();
 		SCR_CheckDrawCenterString ();
 	} else {
-		if (crosshair->ivalue)
-			Draw_Crosshair ();
+		Draw_Crosshair ();
 
 		SCR_DrawNet ();
 		SCR_DrawFPS ();

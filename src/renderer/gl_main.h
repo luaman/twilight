@@ -30,33 +30,22 @@
 
 #include "qtypes.h"
 #include "cvar.h"
+#include "entities.h"
 
-extern Uint c_brush_polys, c_alias_polys;
-
-/*
- * view origin
- */
+extern Uint c_brush_polys;
+extern Uint c_alias_polys;
 extern vec3_t vup;
 extern vec3_t vpn;
 extern vec3_t vright;
 extern vec3_t r_origin;
-
-/*
- * screen size info
- */
 extern refdef_t r_refdef;
-
 extern texture_t *r_notexture;
 extern texture_t *r_notexture_water;
-
 extern int d_lightstylevalue[256];
-
-
 extern cvar_t *r_drawentities;
 extern cvar_t *r_drawviewmodel;
 extern cvar_t *r_dynamic;
 extern cvar_t *r_stainmaps;
-
 extern cvar_t *gl_clear;
 extern cvar_t *gl_polyblend;
 extern cvar_t *gl_flashblend;
@@ -65,14 +54,12 @@ extern cvar_t *gl_finish;
 extern cvar_t *gl_im_transform;
 extern cvar_t *gl_oldlights;
 extern cvar_t *gl_colorlights;
-
 extern qboolean colorlights;
 
-
-extern void R_RenderView (void);
-extern void R_Init_Cvars (void);
-extern void R_Init (void);
-extern void R_NewMap (void);
+void R_RenderView(void);
+void R_Init_Cvars(void);
+void R_Init(void);
+void R_NewMap(void);
 
 #endif // __gl_main_h
 

@@ -87,8 +87,6 @@ static cvar_t *v_centerspeed;
 
 static float v_dmg_time, v_dmg_roll, v_dmg_pitch;
 
-extern int in_forward, in_forward2, in_back;
-
 static frame_t *view_frame;
 static player_state_t *view_message;
 

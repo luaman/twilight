@@ -41,8 +41,7 @@ static const char rcsid[] =
 #include "dyngl.h"
 #include "gl_arrays.h"
 #include "gl_info.h"
-
-extern void FractalNoise (Uint8 *noise, int size, int startgrid);
+#include "noise.h"
 
 #define MAX_EXPLOSIONS 128
 #define EXPLOSIONGRID 8
