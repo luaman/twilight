@@ -1006,7 +1006,7 @@ PR_LoadProgs (void)
 	Con_DPrintf ("Programs occupy %iK.\n", com_filesize / 1024);
 
 	for (i = 0; i < com_filesize; i++)
-		CRC_ProcessByte (&pr_crc, ((byte *) progs)[i]);
+		CRC_ProcessByte (&pr_crc, ((Uint8 *) progs)[i]);
 
 // byte swap the header
 	for (i = 0; i < sizeof (*progs) / 4; i++)
@@ -1019,13 +1019,13 @@ PR_LoadProgs (void)
 		Sys_Error
 			("progs.dat system vars have been modified, progdefs.h is out of date");
 
-	pr_functions = (dfunction_t *) ((byte *) progs + progs->ofs_functions);
+	pr_functions = (dfunction_t *) ((Uint8 *) progs + progs->ofs_functions);
 	pr_strings = (char *) progs + progs->ofs_strings;
-	pr_globaldefs = (ddef_t *) ((byte *) progs + progs->ofs_globaldefs);
-	pr_fielddefs = (ddef_t *) ((byte *) progs + progs->ofs_fielddefs);
-	pr_statements = (dstatement_t *) ((byte *) progs + progs->ofs_statements);
+	pr_globaldefs = (ddef_t *) ((Uint8 *) progs + progs->ofs_globaldefs);
+	pr_fielddefs = (ddef_t *) ((Uint8 *) progs + progs->ofs_fielddefs);
+	pr_statements = (dstatement_t *) ((Uint8 *) progs + progs->ofs_statements);
 
-	pr_global_struct = (globalvars_t *) ((byte *) progs + progs->ofs_globals);
+	pr_global_struct = (globalvars_t *) ((Uint8 *) progs + progs->ofs_globals);
 	pr_globals = (float *) pr_global_struct;
 
 	pr_edict_size =
@@ -1108,7 +1108,7 @@ EDICT_NUM (int n)
 {
 	if (n < 0 || n >= sv.max_edicts)
 		Sys_Error ("EDICT_NUM: bad number %i", n);
-	return (edict_t *) ((byte *) sv.edicts + (n) * pr_edict_size);
+	return (edict_t *) ((Uint8 *) sv.edicts + (n) * pr_edict_size);
 }
 
 int
@@ -1116,7 +1116,7 @@ NUM_FOR_EDICT (edict_t *e)
 {
 	int         b;
 
-	b = (byte *) e - (byte *) sv.edicts;
+	b = (Uint8 *) e - (Uint8 *) sv.edicts;
 	b = b / pr_edict_size;
 
 	if (b < 0 || b >= sv.num_edicts)

@@ -368,7 +368,7 @@ typedef struct {
 	unsigned    data;					// unbounded
 } pcx_t;
 
-byte       *pcx_rgb;
+Uint8      *pcx_rgb;
 
 /*
 ============
@@ -379,8 +379,8 @@ void
 LoadPCX (FILE * f)
 {
 	pcx_t      *pcx, pcxbuf;
-	byte        palette[768];
-	byte       *pix;
+	Uint8       palette[768];
+	Uint8      *pix;
 	int         x, y;
 	int         dataByte, runLength;
 	int         count;
@@ -457,13 +457,13 @@ LoadTGABuffer
 =============
 */
 void
-LoadTGABuffer (byte *buffer, byte **pic, int *width, int *height)
+LoadTGABuffer (Uint8 *buffer, Uint8 **pic, int *width, int *height)
 {
 	int         columns, rows, numPixels;
-	byte       *pixbuf;
+	Uint8      *pixbuf;
 	int         row, column;
 	TargaHeader	targa_header;
-	byte		*targa_rgba, *buf_p;
+	Uint8		*targa_rgba, *buf_p;
 
 	*pic = NULL;
 
@@ -652,7 +652,7 @@ LoadTGABuffer (byte *buffer, byte **pic, int *width, int *height)
 	}
 }
 
-byte       *image_rgba = NULL;
+Uint8      *image_rgba = NULL;
 
 /*
 =============
@@ -662,7 +662,7 @@ LoadTGA
 void
 LoadTGA (char *name, int *width, int *height)
 {
-	byte *buf = COM_LoadTempFile (name);
+	Uint8 *buf = COM_LoadTempFile (name);
 
 	if (buf) {
 		LoadTGABuffer (buf, &image_rgba, width, height);
@@ -1051,13 +1051,13 @@ void
 R_InitSky (texture_t *mt)
 {
 	int         i, j, p;
-	byte       *src;
+	Uint8      *src;
 	unsigned    trans[128 * 128];
 	unsigned    transpix;
 	int         r, g, b;
 	unsigned   *rgba;
 
-	src = (byte *) mt + mt->offsets[0];
+	src = (Uint8 *) mt + mt->offsets[0];
 
 	// make an average value for the back to avoid
 	// a fringe on the top level
@@ -1068,15 +1068,15 @@ R_InitSky (texture_t *mt)
 			p = src[i * 256 + j + 128];
 			rgba = &d_8to24table[p];
 			trans[(i * 128) + j] = *rgba;
-			r += ((byte *) rgba)[0];
-			g += ((byte *) rgba)[1];
-			b += ((byte *) rgba)[2];
+			r += ((Uint8 *) rgba)[0];
+			g += ((Uint8 *) rgba)[1];
+			b += ((Uint8 *) rgba)[2];
 		}
 
-	((byte *) & transpix)[0] = r / (128 * 128);
-	((byte *) & transpix)[1] = g / (128 * 128);
-	((byte *) & transpix)[2] = b / (128 * 128);
-	((byte *) & transpix)[3] = 0;
+	((Uint8 *) & transpix)[0] = r / (128 * 128);
+	((Uint8 *) & transpix)[1] = g / (128 * 128);
+	((Uint8 *) & transpix)[2] = b / (128 * 128);
+	((Uint8 *) & transpix)[3] = 0;
 
 
 	if (!solidskytexture)

@@ -308,7 +308,7 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 		int		i, k, l, m, c;
 		msurface_t *surf, **mark;
 		mleaf_t *leaf;
-		byte	*in = pvsleaf->compressed_vis;
+		Uint8	*in = pvsleaf->compressed_vis;
 		int		row = (model->numleafs+7)>>3;
 		float	low[3], high[3], radius, dist, maxdist;
 
@@ -482,7 +482,7 @@ RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	int         s, t, ds, dt;
 	int         i;
 	mtexinfo_t *tex;
-	byte       *lightmap;
+	Uint8      *lightmap;
 	unsigned    scale;
 	int         maps;
 

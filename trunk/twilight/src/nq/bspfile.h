@@ -194,7 +194,7 @@ typedef struct {
 	short       texinfo;
 
 // lighting info
-	byte        styles[MAXLIGHTMAPS];
+	Uint8       styles[MAXLIGHTMAPS];
 	int         lightofs;				// start of [numstyles*surfsize]
 										// samples
 } dface_t;
@@ -220,7 +220,7 @@ typedef struct {
 	unsigned short firstmarksurface;
 	unsigned short nummarksurfaces;
 
-	byte        ambient_level[NUM_AMBIENTS];
+	Uint8       ambient_level[NUM_AMBIENTS];
 } dleaf_t;
 
 
@@ -238,13 +238,13 @@ extern int  nummodels;
 extern dmodel_t dmodels[MAX_MAP_MODELS];
 
 extern int  visdatasize;
-extern byte dvisdata[MAX_MAP_VISIBILITY];
+extern Uint8 dvisdata[MAX_MAP_VISIBILITY];
 
 extern int  lightdatasize;
-extern byte dlightdata[MAX_MAP_LIGHTING];
+extern Uint8 dlightdata[MAX_MAP_LIGHTING];
 
 extern int  texdatasize;
-extern byte dtexdata[MAX_MAP_MIPTEX];	// (dmiptexlump_t)
+extern Uint8 dtexdata[MAX_MAP_MIPTEX];	// (dmiptexlump_t)
 
 extern int  entdatasize;
 extern char dentdata[MAX_MAP_ENTSTRING];
@@ -280,8 +280,8 @@ extern int  numsurfedges;
 extern int  dsurfedges[MAX_MAP_SURFEDGES];
 
 
-void        DecompressVis (byte * in, byte * decompressed);
-int         CompressVis (byte * vis, byte * dest);
+void        DecompressVis (Uint8 * in, Uint8 * decompressed);
+int         CompressVis (Uint8 * vis, Uint8 * dest);
 
 void        LoadBSPFile (char *filename);
 void        WriteBSPFile (char *filename);

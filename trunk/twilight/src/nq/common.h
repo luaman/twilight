@@ -36,7 +36,7 @@ typedef struct sizebuf_s {
 	qboolean    allowoverflow;			// if false, do a Sys_Error
 	qboolean    overflowed;				// set to true if the buffer size
 										// failed
-	byte       *data;
+	Uint8      *data;
 	int         maxsize;
 	int         cursize;
 } sizebuf_t;
@@ -63,7 +63,7 @@ void        InsertLinkAfter (link_t *l, link_t *after);
 // (type *)STRUCT_FROM_LINK(link_t *link, type, member)
 // ent = STRUCT_FROM_LINK(link,entity_t,order)
 // FIXME: remove this mess!
-#define	STRUCT_FROM_LINK(l,t,m) ((t *)((byte *)l - (int)&(((t *)0)->m)))
+#define	STRUCT_FROM_LINK(l,t,m) ((t *)((Uint8 *)l - (int)&(((t *)0)->m)))
 
 //============================================================================
 
@@ -163,9 +163,9 @@ int         COM_OpenFile (char *filename, int *hndl);
 int         COM_FOpenFile (char *filename, FILE ** file);
 void        COM_CloseFile (int h);
 
-byte       *COM_LoadStackFile (char *path, void *buffer, int bufsize);
-byte       *COM_LoadTempFile (char *path);
-byte       *COM_LoadHunkFile (char *path);
+Uint8      *COM_LoadStackFile (char *path, void *buffer, int bufsize);
+Uint8      *COM_LoadTempFile (char *path);
+Uint8      *COM_LoadHunkFile (char *path);
 void        COM_LoadCacheFile (char *path, struct cache_user_s *cu);
 
 

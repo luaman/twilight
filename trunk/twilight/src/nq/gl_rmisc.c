@@ -49,7 +49,7 @@ void
 R_InitTextures (void)
 {
 	int         x, y, m;
-	byte       *dest;
+	Uint8      *dest;
 
 // create a simple checkerboard texture for the default
 	r_notexture_mip =
@@ -63,7 +63,7 @@ R_InitTextures (void)
 	r_notexture_mip->offsets[3] = r_notexture_mip->offsets[2] + 4 * 4;
 
 	for (m = 0; m < 4; m++) {
-		dest = (byte *) r_notexture_mip + r_notexture_mip->offsets[m];
+		dest = (Uint8 *) r_notexture_mip + r_notexture_mip->offsets[m];
 		for (y = 0; y < (16 >> m); y++)
 			for (x = 0; x < (16 >> m); x++) {
 				if ((y < (8 >> m)) ^ (x < (8 >> m)))
@@ -74,7 +74,7 @@ R_InitTextures (void)
 	}
 }
 
-byte        dottexture[8][8] = {
+Uint8       dottexture[8][8] = {
 	{0, 1, 1, 0, 0, 0, 0, 0}
 	,
 	{1, 1, 1, 1, 0, 0, 0, 0}
@@ -96,7 +96,7 @@ void
 R_InitParticleTexture (void)
 {
 	int         x, y;
-	byte        data[8][8][4];
+	Uint8       data[8][8][4];
 
 	// 
 	// particle texture
@@ -206,16 +206,16 @@ void
 R_TranslatePlayerSkin (int playernum)
 {
 	int         top, bottom;
-	byte        translate[256];
+	Uint8       translate[256];
 	unsigned    translate32[256];
 	int         i, j, s;
 	model_t    *model;
 	aliashdr_t *paliashdr;
-	byte       *original;
+	Uint8      *original;
 	unsigned    pixels[512 * 256], *out;
 	unsigned    scaled_width, scaled_height;
 	int         inwidth, inheight;
-	byte       *inrow;
+	Uint8      *inrow;
 	unsigned    frac, fracstep;
 
 	top = cl.scores[playernum].colors & 0xf0;
@@ -253,10 +253,10 @@ R_TranslatePlayerSkin (int playernum)
 		|| currententity->skinnum >= paliashdr->numskins) {
 		Con_Printf ("(%d): Invalid player skin #%d\n", playernum,
 					currententity->skinnum);
-		original = (byte *) paliashdr + paliashdr->texels[0];
+		original = (Uint8 *) paliashdr + paliashdr->texels[0];
 	} else
 		original =
-			(byte *) paliashdr + paliashdr->texels[currententity->skinnum];
+			(Uint8 *) paliashdr + paliashdr->texels[currententity->skinnum];
 	if (s & 3)
 		Sys_Error ("R_TranslateSkin: s&3");
 
@@ -267,21 +267,6 @@ R_TranslatePlayerSkin (int playernum)
 	// instead of sending it through gl_upload 8
 	qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
 
-#if 0
-	byte        translated[320 * 200];
-
-	for (i = 0; i < s; i += 4) {
-		translated[i] = translate[original[i]];
-		translated[i + 1] = translate[original[i + 1]];
-		translated[i + 2] = translate[original[i + 2]];
-		translated[i + 3] = translate[original[i + 3]];
-	}
-
-
-	// don't mipmap these, because it takes too long
-	GL_Upload8 (translated, paliashdr->skinwidth, paliashdr->skinheight, false,
-				false, true);
-#else
 	scaled_width = gl_max_size->value < 512 ? gl_max_size->value : 512;
 	scaled_height = gl_max_size->value < 256 ? gl_max_size->value : 256;
 
@@ -313,8 +298,6 @@ R_TranslatePlayerSkin (int playernum)
 
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-#endif
-
 }
 
 

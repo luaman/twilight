@@ -36,7 +36,7 @@ typedef struct {
 	float       sidemove;
 	float       upmove;
 #ifdef QUAKE2
-	byte        lightlevel;
+	Uint8       lightlevel;
 #endif
 } usercmd_t;
 
@@ -50,7 +50,7 @@ typedef struct {
 	float       entertime;
 	int         frags;
 	int         colors;					// two 4 bit fields
-	byte        translations[VID_GRADES * 256];
+	Uint8       translations[VID_GRADES * 256];
 } scoreboard_t;
 
 typedef struct {

@@ -55,10 +55,10 @@ extern float gldepthmin, gldepthmax;
 
 void        GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 						 int alpha);
-void        GL_Upload8 (byte * data, int width, int height, qboolean mipmap,
+void        GL_Upload8 (Uint8 * data, int width, int height, qboolean mipmap,
 						int alpha);
 int         GL_LoadTexture (char *identifier, int width, int height,
-							byte * data, qboolean mipmap, int alpha);
+							Uint8 * data, qboolean mipmap, int alpha);
 int         GL_FindTexture (char *identifier);
 
 typedef struct {
@@ -103,7 +103,7 @@ typedef struct surfcache_s {
 	unsigned    height;					// DEBUG only needed for debug
 	float       mipscale;
 	struct texture_s *texture;			// checked for animating textures
-	byte        data[4];				// width*height elements
+	Uint8       data[4];				// width*height elements
 } surfcache_t;
 
 
@@ -261,8 +261,8 @@ void        R_DrawBrushModel (entity_t *e);
 int         R_LightPoint (vec3_t p);
 void        GL_BuildLightmaps (void);
 void        R_ClearParticles (void);
-void        GL_Upload8_EXT (byte * data, int width, int height, qboolean mipmap,
-							qboolean alpha);
+void        GL_Upload8_EXT (Uint8 * data, int width, int height,
+							qboolean mipmap, qboolean alpha);
 void        R_InitParticles (void);
 void        R_StoreEfrags (efrag_t **ppefrag);
 void		R_MarkLights (dlight_t *light, int bit, model_t *model);

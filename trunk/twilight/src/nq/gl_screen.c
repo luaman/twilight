@@ -666,7 +666,7 @@ SCR_ScreenShot_f
 void
 SCR_ScreenShot_f (void)
 {
-	byte       *buffer;
+	Uint8      *buffer;
 	char        pcxname[80];
 	char        checkname[MAX_OSPATH];
 	int         i, c, temp;

@@ -32,7 +32,7 @@
 #define VID_GRADES	(1 << VID_CBITS)
 
 // a pixel can be one, two, or four bytes
-typedef byte pixel_t;
+typedef Uint8 pixel_t;
 
 typedef struct vrect_s {
 	int         x, y, width, height;

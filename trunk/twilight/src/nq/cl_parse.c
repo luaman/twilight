@@ -169,7 +169,7 @@ CL_KeepaliveMessage (void)
 	static float lastmsg;
 	int         ret;
 	sizebuf_t   old;
-	byte        olddata[8192];
+	Uint8       olddata[8192];
 
 	if (sv.active)
 		return;							// no need if server is local
@@ -612,7 +612,7 @@ CL_NewTranslation (int slot)
 {
 	int         i, j;
 	int         top, bottom;
-	byte       *dest, *source;
+	Uint8      *dest, *source;
 
 	if (slot > cl.maxclients)
 		Sys_Error ("CL_NewTranslation: slot > cl.maxclients");
@@ -903,9 +903,9 @@ CL_ParseServerMessage (void)
 				cl.looptrack = MSG_ReadByte ();
 				if ((cls.demoplayback || cls.demorecording)
 					&& (cls.forcetrack != -1))
-					CDAudio_Play ((byte) cls.forcetrack, true);
+					CDAudio_Play ((Uint8) cls.forcetrack, true);
 				else
-					CDAudio_Play ((byte) cl.cdtrack, true);
+					CDAudio_Play ((Uint8) cl.cdtrack, true);
 				break;
 
 			case svc_intermission:

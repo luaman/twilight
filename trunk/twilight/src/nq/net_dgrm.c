@@ -91,7 +91,7 @@ static int  myDriverLevel;
 struct {
 	unsigned int length;
 	unsigned int sequence;
-	byte        data[MAX_DATAGRAM];
+	Uint8       data[MAX_DATAGRAM];
 } packetBuffer;
 
 extern int  m_return_state;
@@ -101,11 +101,11 @@ extern char m_return_reason[32];
 
 
 #ifdef DEBUG
-char       *
+char *
 StrAddr (struct qsockaddr *addr)
 {
 	static char buf[34];
-	byte       *p = (byte *) addr;
+	Uint8      *p = (Uint8 *) addr;
 	int         n;
 
 	for (n = 0; n < 16; n++)
@@ -206,7 +206,7 @@ Datagram_SendMessage (qsocket_t * sock, sizebuf_t *data)
 	sock->canSend = false;
 
 	if (sfunc.
-		Write (sock->socket, (byte *) & packetBuffer, packetLen,
+		Write (sock->socket, (Uint8 *) & packetBuffer, packetLen,
 			   &sock->addr) == -1)
 		return -1;
 
@@ -239,7 +239,7 @@ SendMessageNext (qsocket_t * sock)
 	sock->sendNext = false;
 
 	if (sfunc.
-		Write (sock->socket, (byte *) & packetBuffer, packetLen,
+		Write (sock->socket, (Uint8 *) & packetBuffer, packetLen,
 			   &sock->addr) == -1)
 		return -1;
 
@@ -272,7 +272,7 @@ ReSendMessage (qsocket_t * sock)
 	sock->sendNext = false;
 
 	if (sfunc.
-		Write (sock->socket, (byte *) & packetBuffer, packetLen,
+		Write (sock->socket, (Uint8 *) & packetBuffer, packetLen,
 			   &sock->addr) == -1)
 		return -1;
 
@@ -320,7 +320,7 @@ Datagram_SendUnreliableMessage (qsocket_t * sock, sizebuf_t *data)
 	memcpy (packetBuffer.data, data->data, data->cursize);
 
 	if (sfunc.
-		Write (sock->socket, (byte *) & packetBuffer, packetLen,
+		Write (sock->socket, (Uint8 *) & packetBuffer, packetLen,
 			   &sock->addr) == -1)
 		return -1;
 
@@ -345,11 +345,8 @@ Datagram_GetMessage (qsocket_t * sock)
 
 	while (1) {
 		length =
-			sfunc.Read (sock->socket, (byte *) & packetBuffer, NET_DATAGRAMSIZE,
-						&readaddr);
-
-//  if ((Q_rand() & 255) > 220)
-//      continue;
+			sfunc.Read (sock->socket, (Uint8 *) & packetBuffer,
+					NET_DATAGRAMSIZE, &readaddr);
 
 		if (length == 0)
 			break;
@@ -433,8 +430,8 @@ Datagram_GetMessage (qsocket_t * sock)
 		if (flags & NETFLAG_DATA) {
 			packetBuffer.length = BigLong (NET_HEADERSIZE | NETFLAG_ACK);
 			packetBuffer.sequence = BigLong (sequence);
-			sfunc.Write (sock->socket, (byte *) & packetBuffer, NET_HEADERSIZE,
-						 &readaddr);
+			sfunc.Write (sock->socket, (Uint8 *) & packetBuffer,
+					NET_HEADERSIZE, &readaddr);
 
 			if (sequence != sock->receiveSequence) {
 				receivedDuplicateCount++;
@@ -536,7 +533,7 @@ Test_Poll (void)
 	int         colors;
 	int         frags;
 	int         connectTime;
-	byte        playerNumber;
+	Uint8       playerNumber;
 
 	net_landriverlevel = testDriver;
 

@@ -27,9 +27,9 @@
 #ifndef __QTYPES_H
 #define __QTYPES_H
 
-typedef unsigned char byte;
+#include <SDL_types.h>
 
-#define _DEF_BYTE_
+typedef unsigned char byte;
 
 // KJB Undefined true and false defined in SciTech's DEBUG.H header
 #undef true

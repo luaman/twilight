@@ -38,7 +38,7 @@ void        Draw_DebugChar (char num);
 void        Draw_Pic (int x, int y, qpic_t *pic);
 void        Draw_TransPic (int x, int y, qpic_t *pic);
 void        Draw_TransPicTranslate (int x, int y, qpic_t *pic,
-									byte * translation);
+									Uint8 * translation);
 void        Draw_ConsoleBackground (int lines);
 void        Draw_BeginDisc (void);
 void        Draw_EndDisc (void);
