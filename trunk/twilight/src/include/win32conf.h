@@ -22,6 +22,8 @@
 
 #define GL_LIBRARY		"opengl32.dll"
 
+#undef HAVE_SNPRINTF
+
 #define HAVE__SNPRINTF 1
 
 #define HAVE__STRICMP 1
