@@ -59,15 +59,6 @@ cvar_t		*_cl_color;
 cvar_t		*cl_shownet;
 cvar_t		*cl_nolerp;
 
-cvar_t		*lookspring;
-cvar_t		*lookstrafe;
-cvar_t		*sensitivity;
-
-cvar_t		*m_pitch;
-cvar_t		*m_yaw;
-cvar_t		*m_forward;
-cvar_t		*m_side;
-
 cvar_t		*show_fps;
 
 client_static_t cls;
