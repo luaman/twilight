@@ -275,7 +275,7 @@ void PR_RunError (char *error, ...)
 
 	pr_depth = 0;	// dump the stack so host_error can shutdown functions
 
-	Sys_Error ("Program error");
+	Host_Error ("Program error");
 }
 
 /*
