@@ -124,37 +124,53 @@ Mod_LeafPVS (mleaf_t *leaf, model_t *model)
 static void
 Mod_LoadVisibility (lump_t *l, model_t *mod)
 {
-	if (!l->filelen) {
-		mod->brush->visdata = NULL;
-		return;
-	}
-	mod->brush->visdata = Zone_Alloc (mod->zone, l->filelen);
-	memcpy (mod->brush->visdata, mod_base + l->fileofs, l->filelen);
-}
-
-
-static void
-Mod_LoadEntities (lump_t *l, model_t *mod)
-{
 	fs_file_t	*file;
 	SDL_RWops	*rw;
 	char		*base_name, *tmp;
 
-	if (!l->filelen) {
-		mod->brush->entities = NULL;
-		return;
-	}
+	l = l;
+
+	mod->brush->visdata = NULL;
 
 	base_name = Zstrdup (tempzone, mod->name);
 	if ((tmp = strrchr (base_name, '.')))
 		*tmp = '\0';
 
-	file = FS_FindFile (va("%s.ent", base_name));
-	rw = file->open (file, 0);
+	if (!(file = FS_FindFile (va("%s.vis", base_name))))
+		goto end;
+	if (!(rw = file->open (file, 0)))
+		goto end;
+
+	mod->brush->visdata = Zone_Alloc (mod->zone, file->len);
+	SDL_RWread (rw, mod->brush->visdata, file->len, 1);
+	SDL_RWclose (rw);
+end:
+	Zone_Free (base_name);
+}
+
+
+static void
+Mod_LoadEntities (model_t *mod)
+{
+	fs_file_t	*file;
+	SDL_RWops	*rw;
+	char		*base_name, *tmp;
+
+	mod->brush->entities = NULL;
+
+	base_name = Zstrdup (tempzone, mod->name);
+	if ((tmp = strrchr (base_name, '.')))
+		*tmp = '\0';
+
+	if (!(file = FS_FindFile (va("%s.ent", base_name))))
+		goto end;
+	if (!(rw = file->open (file, 0)))
+		goto end;
 
 	mod->brush->entities = Zone_Alloc (mod->zone, file->len);
 	SDL_RWread (rw, mod->brush->entities, file->len, 1);
 	SDL_RWclose (rw);
+end:
 	Zone_Free (base_name);
 }
 
@@ -320,41 +336,58 @@ Mod_LoadNodes (lump_t *l, model_t *mod)
 static void
 Mod_LoadLeafs (lump_t *l, model_t *mod)
 {
-	dleaf_t    *in;
-	mleaf_t    *out;
-	int         i, j, count, p;
+	dleaf_t		in;
+	mleaf_t		*out;
+	int			i, j, count, p;
+	fs_file_t	*file;
+	SDL_RWops	*rw;
+	char		*base_name, *tmp;
+	
+	l = l;
 
-	in = (void *) (mod_base + l->fileofs);
-	if (l->filelen % sizeof (*in))
+	base_name = Zstrdup (tempzone, mod->name);
+	if ((tmp = strrchr (base_name, '.')))
+		*tmp = '\0';
+
+	if (!(file = FS_FindFile (va("%s.leaf", base_name))))
+		goto end;
+	if (!(rw = file->open (file, 0)))
+		goto end;
+
+	if (file->len % sizeof (in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", mod->name);
-	count = l->filelen / sizeof (*in);
+	count = file->len / sizeof (in);
 	out = Zone_Alloc (mod->zone, count * sizeof (*out));
 
 	mod->brush->leafs = out;
 	mod->brush->numleafs = count;
 
-	for (i = 0; i < count; i++, in++, out++) {
+	for (i = 0; i < count; i++, out++) {
+		SDL_RWread (rw, &in, sizeof (in), 1);
 		for (j = 0; j < 3; j++) {
-			out->mins[j] = LittleShort (in->mins[j]);
-			out->maxs[j] = LittleShort (in->maxs[j]);
+			out->mins[j] = LittleShort (in.mins[j]);
+			out->maxs[j] = LittleShort (in.maxs[j]);
 		}
 
-		p = LittleLong (in->contents);
+		p = LittleLong (in.contents);
 		out->contents = p;
 
 		out->firstmarksurface = mod->brush->marksurfaces +
-			LittleShort (in->firstmarksurface);
-		out->nummarksurfaces = LittleShort (in->nummarksurfaces);
+			LittleShort (in.firstmarksurface);
+		out->nummarksurfaces = LittleShort (in.nummarksurfaces);
 
-		p = LittleLong (in->visofs);
+		p = LittleLong (in.visofs);
 		if (p == -1 || !mod->brush->visdata)
 			out->compressed_vis = NULL;
 		else
 			out->compressed_vis = mod->brush->visdata + p;
 
 		for (j = 0; j < 4; j++)
-			out->ambient_sound_level[j] = in->ambient_level[j];
+			out->ambient_sound_level[j] = in.ambient_level[j];
 	}
+	SDL_RWclose (rw);
+end:
+	Zone_Free (base_name);
 }
 
 static void
@@ -584,7 +617,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer, int flags)
 	Mod_LoadLeafs (&header->lumps[LUMP_LEAFS], mod);
 	Mod_LoadNodes (&header->lumps[LUMP_NODES], mod);
 	Mod_LoadClipnodes (&header->lumps[LUMP_CLIPNODES], mod);
-	Mod_LoadEntities (&header->lumps[LUMP_ENTITIES], mod);
+	Mod_LoadEntities (mod);
 	Mod_LoadSubmodels (&header->lumps[LUMP_MODELS], mod);
 
 	Mod_MakeHull0 (mod);

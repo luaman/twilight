@@ -206,14 +206,14 @@ typedef struct {
 /* leaf 0 is the generic CONTENTS_SOLID leaf, used for all solid areas
    all other leafs need visibility info */
 typedef struct {
-	int			contents;
-	int			visofs;			/* -1 = no visibility info */
+	Sint32		contents;
+	Sint32		visofs;			/* -1 = no visibility info */
 
-	short int	mins[3];		/* for frustum culling */
-	short int	maxs[3];
+	Sint16		mins[3];		/* for frustum culling */
+	Sint16		maxs[3];
 
-	unsigned short int	firstmarksurface;
-	unsigned short int	nummarksurfaces;
+	Uint16		firstmarksurface;
+	Uint16		nummarksurfaces;
 
 	Uint8		ambient_level[NUM_AMBIENTS];
 } dleaf_t;

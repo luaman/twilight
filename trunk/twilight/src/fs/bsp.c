@@ -110,7 +110,7 @@ FSB_Open_LMP_File (fs_file_t *file, Uint32 flags)
 }
 
 static SDL_RWops *
-FSB_Open_ENT_File (fs_file_t *file, Uint32 flags)
+FSB_Open_RAW_File (fs_file_t *file, Uint32 flags)
 {
 	fsb_file_t	*b_file = file->fs_data;
 	fsb_group_t	*bsp = file->group->fs_data;
@@ -189,7 +189,25 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 		fsb_file->ofs = header.lumps[LUMP_ENTITIES].fileofs;
 
 		size = header.lumps[LUMP_ENTITIES].filelen;
-		FS_Add_File (group, va("%s.ent", base_name), size, FSB_Open_ENT_File, fsb_file);
+		FS_Add_File (group, va("%s.ent", base_name), size, FSB_Open_RAW_File, fsb_file);
+	}
+
+	if (header.lumps[LUMP_VISIBILITY].fileofs &&
+			header.lumps[LUMP_VISIBILITY].filelen) {
+		fsb_file = Zone_Alloc (fs_zone, sizeof(fsb_file_t));
+		fsb_file->ofs = header.lumps[LUMP_VISIBILITY].fileofs;
+
+		size = header.lumps[LUMP_VISIBILITY].filelen;
+		FS_Add_File (group, va("%s.vis", base_name), size, FSB_Open_RAW_File, fsb_file);
+	}
+
+	if (header.lumps[LUMP_LEAFS].fileofs &&
+			header.lumps[LUMP_LEAFS].filelen) {
+		fsb_file = Zone_Alloc (fs_zone, sizeof(fsb_file_t));
+		fsb_file->ofs = header.lumps[LUMP_LEAFS].fileofs;
+
+		size = header.lumps[LUMP_LEAFS].filelen;
+		FS_Add_File (group, va("%s.leaf", base_name), size, FSB_Open_RAW_File, fsb_file);
 	}
 	SDL_RWclose(rw);
 	return true;
