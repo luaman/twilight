@@ -396,8 +396,10 @@ VID_Init (unsigned char *palette)
 
 	vid.recalc_refdef = true;		// force a surface cache flush
 
-	if (use_mouse)
+	if (use_mouse) {
 		SDL_ShowCursor (0);
+		SDL_WM_GrabInput (SDL_GRAB_ON);
+	}
 }
 
 void

@@ -83,14 +83,6 @@ static int  sdl_flags = SDL_OPENGL;
 
 /*-----------------------------------------------------------------------*/
 
-//int       texture_mode = GL_NEAREST;
-//int       texture_mode = GL_NEAREST_MIPMAP_NEAREST;
-//int       texture_mode = GL_NEAREST_MIPMAP_LINEAR;
-int         texture_mode = GL_LINEAR;
-
-//int       texture_mode = GL_LINEAR_MIPMAP_NEAREST;
-//int       texture_mode = GL_LINEAR_MIPMAP_LINEAR;
-
 int         texture_extension_number = 1;
 
 float       gldepthmin, gldepthmax;
@@ -420,8 +412,10 @@ VID_Init (unsigned char *palette)
 
 	vid.recalc_refdef = true;		// force a surface cache flush
 
-	if (use_mouse)
+	if (use_mouse) {
 		SDL_ShowCursor (0);
+		SDL_WM_GrabInput (SDL_GRAB_ON);
+	}
 }
 
 void
@@ -697,12 +691,12 @@ IN_WindowedMouse (cvar_t *cvar)
 
 	if (sdl_flags & SDL_FULLSCREEN)
 	{
-		_windowed_mouse->flags |= CVAR_ROM;
-		_windowed_mouse->value = 1;
+		cvar->flags |= CVAR_ROM;
+		cvar->value = 1;
 		return;
 	}
 
-	if (!_windowed_mouse->value)
+	if (!cvar->value)
 		SDL_WM_GrabInput (SDL_GRAB_OFF);
 	else
 		SDL_WM_GrabInput (SDL_GRAB_ON);
