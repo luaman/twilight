@@ -47,8 +47,6 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <signal.h>
 
-#include "TGL_funcs.h"
-
 #include "client.h"
 #include "console.h"
 #include "cvar.h"
