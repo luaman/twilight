@@ -641,6 +641,33 @@ SCR_DrawConsole (void)
 	}
 }
 
+void
+SCR_DrawFPS (void)
+{
+	extern cvar_t *show_fps;
+	static double lastframetime;
+	double      t;
+	extern int  fps_count;
+	static int  lastfps;
+	int         x, y;
+	char        st[80];
+
+	if (!show_fps->value)
+		return;
+
+	t = Sys_FloatTime ();
+	if ((t - lastframetime) >= 1.0) {
+		lastfps = fps_count;
+		fps_count = 0;
+		lastframetime = t;
+	}
+
+	snprintf (st, sizeof (st), "%3d FPS", lastfps);
+	x = vid.width - strlen (st) * 8 - 8;
+	y = vid.height - sb_lines - 8;
+//  Draw_TileClear(x, y, strlen(st) * 8, 8);
+	Draw_String (x, y, st);
+}
 
 /* 
 ============================================================================== 
@@ -649,15 +676,6 @@ SCR_DrawConsole (void)
  
 ============================================================================== 
 */
-
-typedef struct _TargaHeader {
-	unsigned char id_length, colormap_type, image_type;
-	unsigned short colormap_index, colormap_length;
-	unsigned char colormap_size;
-	unsigned short x_origin, y_origin, width, height;
-	unsigned char pixel_size, attributes;
-} TargaHeader;
-
 
 /* 
 ================== 
@@ -970,6 +988,7 @@ SCR_UpdateScreen (void)
 
 		SCR_DrawRam ();
 		SCR_DrawNet ();
+		SCR_DrawFPS ();
 		SCR_DrawTurtle ();
 		SCR_DrawPause ();
 		SCR_CheckDrawCenterString ();

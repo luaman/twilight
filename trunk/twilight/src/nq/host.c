@@ -647,6 +647,7 @@ Host_ServerFrame (void)
 
 #endif
 
+int fps_count = 0;
 
 /*
 ==================
@@ -748,6 +749,7 @@ _Host_Frame (float time)
 	}
 
 	host_framecount++;
+	fps_count++;
 }
 
 void
