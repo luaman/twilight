@@ -35,7 +35,6 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "gl_textures.h"
 #include "image.h"
-#include "light.h"
 #include "mathlib.h"
 #include "matrixlib.h"
 #include "strlib.h"
@@ -209,7 +208,7 @@ R_BuildLightList (void)
 		VectorCopy (cd->origin, rd->origin);
 		VectorScale (cd->color, cd->radius * 128.0f, rd->light);
 		rd->light[3] = 1.0f;
-		rd->cullradius = (1.0f / 128.0f) * sqrt (DotProduct (rd->light, rd->light));
+		rd->cullradius = (1.0f / 128.0f) * VectorLength(rd->light);
 
 		// clamp radius to avoid overflowing division table in lightmap code
 		if (rd->cullradius > 2048.0f)
@@ -664,26 +663,25 @@ RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 	}
 }
 
-vec3_t lightcolor;
-
-int R_LightPoint (vec3_t p)
+void
+R_LightPoint (vec3_t p, vec3_t out)
 {
 	vec3_t end;
 
 	if (!r_worldmodel->brush->lightdata)
 	{
-		lightcolor[0] = lightcolor[1] = lightcolor[2] = 255;
-		return 255;
+		out[0] = out[1] = out[2] = 1;
+		return;
 	}
 
 	end[0] = p[0];
 	end[1] = p[1];
 	end[2] = p[2] - 2048;
-	lightcolor[0] = lightcolor[1] = lightcolor[2] = 0;
+	out[0] = out[1] = out[2] = 0;
 
-	RecursiveLightPoint (lightcolor, r_worldmodel->brush->nodes, p, end);
+	RecursiveLightPoint (out, r_worldmodel->brush->nodes, p, end);
 
-	return 255;
+	return;
 }
 
 

@@ -11,10 +11,10 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 lib_LIBRARIES=libtwilight_image.a
 
 noinst_HEADERS= \
-	image.h pcx.h qlmp.h tga.h
+	image.h pcx.h qlmp.h sdlimage.h tga.h
 
 libtwilight_image_a_SOURCES= \
-	image.c pcx.c qlmp.c tga.c
+	image.c pcx.c qlmp.c sdlimage.c tga.c
 
 EXTRA_DIST = \
 	twilight_image.dsp twilight_image.vcproj

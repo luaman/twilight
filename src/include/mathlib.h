@@ -117,6 +117,7 @@ float Q_RSqrt(double number);
 #define VectorScale(a,b,c) ((c)[0]=(a)[0]*(b),(c)[1]=(a)[1]*(b),(c)[2]=(a)[2]*(b))
 #define VectorSlide(a,b,c) ((c)[0]=(a)[0]+(b),(c)[1]=(a)[1]+(b),(c)[2]=(a)[2]+(b))
 #define VectorMA(a,b,c,d) ((d)[0]=(a)[0]+(b)*(c)[0],(d)[1]=(a)[1]+(b)*(c)[1],(d)[2]=(a)[2]+(b)*(c)[2])
+#define VectorMI(a,b,c) ((c)[0]+=(a)[0]*(b),(c)[1]+=(a)[1]*(b),(c)[2]+=(a)[2]*(b))
 #define VectorCompare(a,b) (((a)[0]==(b)[0])&&((a)[1]==(b)[1])&&((a)[2]==(b)[2]))
 #define VectorClear(a)		((a)[0]=(a)[1]=(a)[2]=0)
 #define VectorLength(v)		(Q_sqrt(DotProduct(v,v)))

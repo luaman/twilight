@@ -29,6 +29,32 @@
 
 #include "qtypes.h"
 #include "gl_info.h"
+#include "model.h"
+#include "matrixlib.h"
+
+// Light sources are points, use this to pretend they are not
+#define LIGHTOFFSET (32 * 32)
+
+// Note that you can't simply change this value (yet)
+#define MAX_DLIGHTS 32
+
+typedef struct
+{
+	vec3_t	origin;
+
+	// only for culling comparisons
+	vec_t	cullradius;
+
+	// only for culling comparisons, squared version
+	vec_t	cullradius2;
+
+	// the brightness of the light
+	vec4_t	light;
+
+	// to avoid sudden brightness change at cullradius, subtract this
+	vec_t	lightsubtract;
+} rdlight_t;
+
 
 typedef struct {
 	int         key;                    // so entities can reuse same entry
@@ -41,7 +67,7 @@ typedef struct {
 } dlight_t;
 
 extern int dlightdivtable[32768];
-extern rdlight_t r_dlight[32];
+extern rdlight_t r_dlight[MAX_DLIGHTS];
 extern int r_numdlights;
 extern mplane_t *lightplane;
 extern vec3_t lightspot;
@@ -56,7 +82,7 @@ void R_InitBubble(void);
 void R_MarkLightsNoVis(vec3_t lightorigin, rdlight_t *rd, int bit, model_t *mod, mnode_t *node);
 void R_MarkLights(rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix);
 void R_PushDlights(void);
-int R_LightPoint(vec3_t p);
+void R_LightPoint (vec3_t p, vec3_t out);
 void GL_UpdateLightmap(model_t *mod, msurface_t *fa, matrix4x4_t *invmatrix);
 
 #endif // __GL_RLIGHT_H

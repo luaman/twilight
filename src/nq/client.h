@@ -30,7 +30,6 @@
 #include "cclient.h"
 #include "qtypes.h"
 #include "common.h"
-#include "light.h"
 #include "render.h"
 #include "zone.h"
 
