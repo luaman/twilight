@@ -57,9 +57,9 @@ static const char rcsid[] =
 HWND        mainwindow;
 #endif
 
-unsigned short d_8to16table[256];
-unsigned    d_8to24table[256];
-unsigned char d_15to8table[65536];
+unsigned short	d_8to16table[256];
+unsigned		d_8to24table[256];
+unsigned char	d_15to8table[65536];
 
 cvar_t     *vid_mode;
 cvar_t     *m_filter;

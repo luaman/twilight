@@ -749,6 +749,7 @@ CL_Init (void)
 {
 	SZ_Alloc (&cls.message, 1024);
 
+	CL_InitInputCvars ();
 	CL_InitInput ();
 	CL_InitTEnts ();
 

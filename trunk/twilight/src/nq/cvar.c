@@ -127,6 +127,8 @@ Cvar_Set (cvar_t *var, const char *value)
 	Q_strcpy (var->string, value);
 	
 	var->value = Q_atof (var->string);
+
+	//	Con_Printf("var->value was: %s\n",var->value);
 	if (var->callback)
 		var->callback (var);
 	
@@ -232,8 +234,7 @@ Cvar_Find (const char *name)
 {
 	cvar_list_t	   *v = cvars;
 
-	while (v)
-	{
+	while (v) {
 		if (Q_strcasecmp (name, v->var->name) == 0)
 			return v->var;
 		v = v->next;
