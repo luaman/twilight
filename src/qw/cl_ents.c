@@ -333,16 +333,16 @@ CL_ParsePacketEntities (qboolean delta)
 			FlushEntityPacket ();
 			return;
 		}
-		cl.validsequence = cls.netchan.incoming_sequence;
 		oldp = &cl.frames[oldpacket & UPDATE_MASK].packet_entities;
 	} else {
 		// this is a full update that we can
 		// start delta compressing from now
 		oldp = &dummy;
 		dummy.num_entities = 0;
-		cl.validsequence = cls.netchan.incoming_sequence;
 		full = true;
 	}
+
+	cl.validsequence = cls.netchan.incoming_sequence;
 
 	oldindex = 0;
 	newindex = 0;
@@ -448,11 +448,20 @@ CL_LinkPacketEntities (void)
 	float				autorotate;
 	int					pnum;
 	dlight_t			*dl;
+	float				frac, f;
 
 	pack =
-		&cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK].packet_entities;
+		&cl.frames[cl.validsequence & UPDATE_MASK].packet_entities;
 
 	autorotate = anglemod (100 * cl.time);
+
+	if ( cls.timedemo )
+		frac = 1.0;
+	else {
+		frac = min ( realtime - cls.latency + 0.02, realtime ); 
+		frac = 1.0 - ( frac - cl.frames[cl.validsequence & UPDATE_MASK].senttime );
+		frac = bound ( 0, frac, 1 );
+	}
 
 	for (pnum = 0; pnum < pack->num_entities; pnum++) {
 		s1 = &pack->entities[pnum];
@@ -472,8 +481,10 @@ CL_LinkPacketEntities (void)
 
 		if (ent->prev.entity_frame != (entity_frame - 1)) {
 			memset (ent, 0, sizeof (*ent));
+			f = 1.0;
 		} else {
 			ent->times++;
+			f = frac;
 		}
 
 		if (!s1->modelindex)
@@ -483,8 +494,11 @@ CL_LinkPacketEntities (void)
 			Sys_Error ("ERROR! Out of entitys!\n");
 		cl_vis_entities[cl_num_vis_entities++] = ent;
 
-		VectorCopy (s1->origin, ent->cur.origin);
-		VectorCopy (s1->angles, ent->cur.angles);
+		VectorInterpolate ( ent->prev.origin, f, s1->origin,
+			ent->cur.origin );
+		AngleInterpolate ( ent->prev.angles, f, s1->angles,
+			ent->cur.angles );
+
 		ent->cur.skinnum = s1->skinnum;
 		ent->cur.frame = s1->frame;
 		ent->cur.effects = s1->effects;
