@@ -73,8 +73,13 @@ FSD_Open_File (fs_file_t *file, Uint32 flags)
 		if (file->group->flags & FS_READ_ONLY) {
 			Com_Printf ("Refusing to open '%s' in write mode.\n", name);
 			rw = NULL;
-		} else
-			rw = SDL_RWFromFile (name, (flags & FSF_ASCII) ? "w" : "wb");
+		} else {
+			FILE		*file;
+			if ((file = fopen (name, (flags & FSF_ASCII) ? "w" : "wb")))
+				rw = SDL_RWFromFP (file, 1);
+			else
+				rw = NULL;
+		}
 	} else
 		rw = SDL_RWFromFile (name, (flags & FSF_ASCII) ? "r" : "rb");
 
