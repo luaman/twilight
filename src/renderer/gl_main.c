@@ -219,7 +219,6 @@ Called by R_RenderView, possibily repeatedly.
 static void
 R_Render3DView (void)
 {
-	R_VisEntities ();
 	R_DrawSkyEntities ();
 
 	R_PushDlights ();
@@ -277,6 +276,7 @@ R_RenderView (void)
 
 	R_SetupGL ();
 
+	R_VisEntities ();
 	R_MoveExplosions ();
 	R_MoveParticles ();
 
