@@ -309,8 +309,9 @@ Draw_Init (void)
 
 	// hack the version number directly into the pic
 	snprintf (ver, sizeof (ver), "twilight %-7s", VERSION);
-	dest = cb->data + 320 * 186 + 320 - 11 - 8 * Q_strlen (ver);
 	y = Q_strlen (ver);
+	dest = cb->data + 320 * 186 + 320 - 11 - 8 * y;
+
 	for (x = 0; x < y; x++)
 		Draw_CharToConback (ver[x], dest + (x << 3));
 

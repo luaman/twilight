@@ -34,7 +34,6 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "math.h"
 #include "quakedef.h"
 
 /*
@@ -288,7 +287,7 @@ BuildGammaTable (float g)
 	}
 
 	for (i = 0; i < 256; i++) {
-		inf = 255 * pow ((i + 0.5) / 255.5, g) + 0.5;
+		inf = 255 * Q_pow ((i + 0.5) / 255.5, g) + 0.5;
 		if (inf < 0)
 			inf = 0;
 		if (inf > 255)

@@ -56,7 +56,6 @@ sfx_t      *cl_sfx_rail;
 model_t	   *cl_bolt1_mod;
 model_t	   *cl_bolt2_mod;
 model_t	   *cl_bolt3_mod;
-model_t	   *cl_beam_mod;
 
 /*
 =================
@@ -82,9 +81,6 @@ CL_InitTEnts (void)
 	cl_bolt1_mod = Mod_ForName ("progs/bolt.mdl", true);
 	cl_bolt2_mod = Mod_ForName ("progs/bolt2.mdl", true);
 	cl_bolt3_mod = Mod_ForName ("progs/bolt3.mdl", true);
-
-	if (rogue)	// FIXME: Does SoA have this tent too?
-		cl_beam_mod = Mod_ForName ("progs/beam.mdl", true);
 }
 
 /*
@@ -253,7 +249,7 @@ CL_ParseTEnt (void)
 
 // PGM 01/21/97 
 		case TE_BEAM:					// grappling hook beam
-			CL_ParseBeam (cl_beam_mod);
+			CL_ParseBeam (Mod_ForName ("progs/beam.mdl", true));
 			break;
 // PGM 01/21/97
 

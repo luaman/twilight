@@ -555,7 +555,10 @@ Con_DrawNotify (void)
 	char       *text;
 	int         i;
 	float       time;
+	char       *s;
+	int         skip;
 	extern char chat_buffer[];
+	extern int  chat_bufferlen;
 
 	v = 0;
 	for (i = con_current - NUM_CON_TIMES + 1; i <= con_current; i++) {
@@ -578,19 +581,26 @@ Con_DrawNotify (void)
 		v += 8;
 	}
 
-
 	if (key_dest == key_message) {
 		clearnotify = 0;
 		scr_copytop = 1;
 
-		x = 0;
-
-		Draw_String (8, v, "say:");
-		while (chat_buffer[x]) {
-			Draw_Character ((x + 5) << 3, v, chat_buffer[x]);
-			x++;
+		if (team_message) {
+			Draw_String (8, v, "say_team:");
+			skip = 11;
+		} else {
+			Draw_String (8, v, "say:");
+			skip = 5;
 		}
-		Draw_Character ((x + 5) << 3, v,
+
+		s = chat_buffer;
+
+		if (chat_bufferlen > (vid.width >> 3) - (skip + 1))
+			s += chat_bufferlen - ((vid.width >> 3) - (skip + 1));
+
+		Draw_String (skip << 3, v, s);
+
+		Draw_Character ((Q_strlen(s) + skip) << 3, v,
 						10 + ((int) (realtime * con_cursorspeed) & 1));
 		v += 8;
 	}

@@ -109,7 +109,6 @@ int
 CL_GetMessage (void)
 {
 	int         r, i;
-	float       f;
 
 	if (cls.demoplayback) {
 		// decide if it is time to grab the next message 
@@ -130,9 +129,11 @@ CL_GetMessage (void)
 		// get the next message
 		fread (&net_message.cursize, 4, 1, cls.demofile);
 		VectorCopy (cl.mviewangles[0], cl.mviewangles[1]);
+
+		fread (cl.mviewangles[0], 12, 1, cls.demofile);
+
 		for (i = 0; i < 3; i++) {
-			r = fread (&f, 4, 1, cls.demofile);
-			cl.mviewangles[0][i] = LittleFloat (f);
+			cl.mviewangles[0][i] = LittleFloat (cl.mviewangles[0][i]);
 		}
 
 		net_message.cursize = LittleLong (net_message.cursize);

@@ -333,12 +333,11 @@ Key_Console (int key)
 
 char        chat_buffer[32];
 qboolean    team_message = false;
+int			chat_bufferlen = 0;
 
 void
 Key_Message (int key)
 {
-	static int  chat_bufferlen = 0;
-
 	if (key == K_ENTER) {
 		if (team_message)
 			Cbuf_AddText ("say_team \"");
