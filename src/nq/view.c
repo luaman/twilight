@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include "host.h"
 #include "mathlib.h"
 #include "screen.h"
+#include "strlib.h"
 
 /*
 

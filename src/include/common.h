@@ -197,11 +197,6 @@ void        COM_FileBase (char *in, char *out);
 void        COM_DefaultExtension (char *path, char *extension);
 qboolean	COM_CheckFile (char *fname);
 
-char       *va (char *format, ...);
-
-// does a varargs printf into a temp buffer
-
-
 //============================================================================
 
 extern int  com_filesize;

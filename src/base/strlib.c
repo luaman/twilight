@@ -34,6 +34,10 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
+
 #include "strlib.h"
 #include "zone.h"
 
@@ -141,3 +145,26 @@ CopyString (const char *string)
 	memcpy (out, string, length);
 	return out;
 }
+
+
+/*
+============
+va
+
+does a varargs printf into a temp buffer, so I don't need to have
+varargs versions of all text functions.
+============
+*/
+char *
+va (char *format, ...)
+{
+        va_list     argptr;
+        static char string[4096];
+
+        va_start (argptr, format);
+        vsnprintf (string, sizeof (string), format, argptr);
+        va_end (argptr);
+
+        return string;
+}
+
