@@ -5,7 +5,7 @@
 set -e
 
 echo "Setting up your build system..."
-if [ ! -e ChangeLog ]; then
+if [ ! -f ChangeLog ]; then
 	touch ChangeLog
 fi
 aclocal
