@@ -1293,6 +1293,7 @@ AddLinksToPmove (areanode_t *node)
 
 			VectorCopy (check->v.origin, pe->origin);
 			pe->info = NUM_FOR_EDICT (check);
+			pe->id = -1;
 			if (check->v.solid == SOLID_BSP)
 				pe->model = sv.models[(int) (check->v.modelindex)];
 			else 
@@ -1353,7 +1354,8 @@ AddAllEntsToPmove (void)
 			pe = &pmove.physents[pmove.numphysent];
 
 			VectorCopy (check->v.origin, pe->origin);
-			pmove.physents[pmove.numphysent].info = e;
+			pe->info = e;
+			pe->id = -1;
 			if (check->v.solid == SOLID_BSP)
 				pe->model = sv.models[(int) (check->v.modelindex)];
 			else {
@@ -1483,9 +1485,11 @@ SV_RunCmd__clear:
 	pmove.waterjumptime = sv_player->v.teleport_time;
 	pmove.numphysent = 1;
 	pmove.physents[0].model = sv.worldmodel;
+	pmove.physents[0].id = -1;
 	pmove.cmd = *ucmd;
 	pmove.dead = sv_player->v.health <= 0;
 	pmove.oldbuttons = host_client->oldbuttons;
+	pmove.player_id = -1;
 
 	movevars.entgravity = host_client->entgravity;
 	movevars.maxspeed = host_client->maxspeed;

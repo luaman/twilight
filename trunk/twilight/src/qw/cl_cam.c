@@ -100,7 +100,7 @@ Cam_Lock (int playernum)
 	locked = false;
 }
 
-trace_t
+trace_t *
 Cam_DoTrace (vec3_t vec1, vec3_t vec2)
 {
 	VectorCopy (vec1, pmove.origin);
@@ -113,7 +113,7 @@ Cam_TryFlyby (player_state_t * self, player_state_t * player, vec3_t vec,
 			  qboolean checkvis)
 {
 	vec3_t		v;
-	trace_t	trace;
+	trace_t		*trace;
 	float		len;
 
 	Vector2Angles (vec, v);
@@ -125,21 +125,21 @@ Cam_TryFlyby (player_state_t * self, player_state_t * player, vec3_t vec,
 	// fake a player move
 	trace = Cam_DoTrace (player->origin, v);
 
-	if ( /* trace.inopen || */ trace.inwater)
+	if ( /* trace.inopen || */ trace->inwater)
 		return 9999;
 
-	VectorCopy (trace.endpos, vec);
-	len = VectorDistance (trace.endpos, player->origin);
+	VectorCopy (trace->endpos, vec);
+	len = VectorDistance (trace->endpos, player->origin);
 
 	if (len < 32 || len > 800)
 		return 9999;
 
 	if (checkvis) {
 		trace = Cam_DoTrace (self->origin, vec);
-		if (trace.fraction != 1 || trace.inwater)
+		if (trace->fraction != 1 || trace->inwater)
 			return 9999;
 
-		len = VectorDistance (trace.endpos, self->origin);
+		len = VectorDistance (trace->endpos, self->origin);
 	}
 
 	return len;
@@ -149,13 +149,13 @@ Cam_TryFlyby (player_state_t * self, player_state_t * player, vec3_t vec,
 static qboolean
 Cam_IsVisible (player_state_t * player, vec3_t vec)
 {
-	trace_t   trace;
+	trace_t		*trace;
 	vec3_t      v;
 	float       d;
 
 	trace = Cam_DoTrace (player->origin, vec);
 
-	if (trace.fraction != 1 || /* trace.inopen || */ trace.inwater)
+	if (trace->fraction != 1 || /* trace.inopen || */ trace->inwater)
 		return false;
 
 	// check distance, don't let the player get too far away or too close

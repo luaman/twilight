@@ -1356,16 +1356,13 @@ Host_Frame (double time)
 	} else
 		CL_SendCmd ();
 
-	if (cls.state >= ca_onserver)
-	{
-		// Set up prediction for other players
-		CL_SetUpPlayerPrediction (false);
+	if (cls.state == ca_active) {
 
-		// do client side motion prediction
+		// Set players solid.
+		CL_SetSolidPlayers ();
+
+		// Predict ourself.
 		CL_PredictMove ();
-
-		// Set up prediction for other players
-		CL_SetUpPlayerPrediction (true);
 
 		// build a refresh entity list
 		CL_EmitEntities ();

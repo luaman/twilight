@@ -25,6 +25,8 @@
 static const char rcsid[] =
 	"$Id$";
 
+#include <SDL.h>
+
 #include "twiconfig.h"
 
 #include "quakedef.h"
@@ -57,47 +59,7 @@ extern int  cl_spikeindex, cl_playerindex, cl_flagindex;
 extern void CL_ParseBaseline (entity_state_t *es);
 extern entity_t   *CL_NewTempEntity (void);
 
-static struct predicted_player {
-	int         flags;
-	qboolean    active;
-	vec3_t      origin;					// predicted origin
-} predicted_players[MAX_CLIENTS];
-
 //============================================================
-
-
-entity_t *traceline_entity[MAX_EDICTS];
-int traceline_entities;
-
-/*
-================
-CL_ScanForBModels
-================
-*/
-void
-CL_ScanForBModels (void)
-{
-	int			i;
-	entity_t	*ent;
-	model_t		*model;
-
-	traceline_entities = 0;
-	for (i = 1; i < MAX_EDICTS; i++)
-	{
-		ent = &cl_network_entities[i];
-		model = ent->model;
-		// look for embedded brush models only
-		if (model && model->name[0] == '*')
-		{
-			if (model->type == mod_brush)
-			{
-				traceline_entity[traceline_entities++] = ent;
-				Mod_MinsMaxs (model, ent->cur.origin, ent->cur.angles, ent->mins, ent->maxs);
-			}
-		}
-	}
-}
-
 
 /*
 ===============
@@ -366,7 +328,13 @@ CL_ParsePacketEntities (qboolean delta)
 		full = true;
 	}
 
-	cl.validsequence = cls.netchan.incoming_sequence;
+	// first update is the final signon stage
+	if ((cl.validsequence = cls.netchan.incoming_sequence) &&
+			cls.state == ca_onserver) {		
+		cls.state = ca_active;
+		SDL_WM_SetCaption (va("Twilight QWCL: %s", cls.servername),
+				"Twilight QWCL");
+	}
 
 	oldindex = 0;
 	newindex = 0;
@@ -1008,7 +976,6 @@ CL_LinkPlayers (void)
 	entity_t   *ent;
 	int         msec;
 	frame_t    *frame;
-	int         oldphysent;
 	vec3_t      org, angles;
 
 	playertime = cls.realtime - cls.latency + 0.02;
@@ -1073,17 +1040,13 @@ CL_LinkPlayers (void)
 
 		// only predict half the move to minimize overruns
 		msec = 500 * (playertime - state->state_time);
-		if (msec <= 0 || (!cl_predict_players->ivalue))
-		{
+		if (msec <= 0 || (!cl_predict_players->ivalue)) {
 			CL_UpdateAndLerp_Origin (ent, state->origin, cls.realtime);
 		} else {
 			// predict players movement
 			state->command.msec = min (state->command.msec, 255);
 
-			oldphysent = pmove.numphysent;
-			CL_SetSolidPlayers (j);
-			CL_PredictUsercmd (state, &exact, &state->command, false);
-			pmove.numphysent = oldphysent;
+			CL_PredictUsercmd (j, state, &exact, &state->command, false);
 			VectorCopy (exact.origin, ent->cur.origin);
 			CL_UpdateAndLerp_Origin (ent, exact.origin, cls.realtime);
 		}
@@ -1110,14 +1073,16 @@ Builds all the pmove physents for the current frame
 void
 CL_SetSolidEntities (void)
 {
-	int         i;
-	frame_t    *frame;
-	packet_entities_t *pak;
-	entity_state_t *state;
+	int					i;
+	frame_t				*frame;
+	packet_entities_t	*pak;
+	entity_state_t		*state;
+	physent_t			*pent;
 
 	pmove.physents[0].model = cl.worldmodel;
 	VectorClear (pmove.physents[0].origin);
-	pmove.physents[0].info = 0;
+	pmove.physents[0].id = -1;
+	pmove.physents[0].info = __LINE__;
 	pmove.numphysent = 1;
 
 	frame = &cl.frames[parsecountmod];
@@ -1131,75 +1096,13 @@ CL_SetSolidEntities (void)
 		if (!cl.model_precache[state->modelindex])
 			continue;
 		if (cl.model_precache[state->modelindex]->hulls[1].firstclipnode) {
-			pmove.physents[pmove.numphysent].model =
-				cl.model_precache[state->modelindex];
-			VectorCopy (state->origin, pmove.physents[pmove.numphysent].origin);
-			pmove.numphysent++;
-		}
-	}
-
-}
-
-/*
-===
-Calculate the new position of players, without other player clipping
-
-We do this to set up real player prediction.
-Players are predicted twice, first without clipping other players,
-then with clipping against them.
-This sets up the first phase.
-===
-*/
-void
-CL_SetUpPlayerPrediction (qboolean dopred)
-{
-	int         j;
-	player_state_t *state;
-	player_state_t exact;
-	double      playertime;
-	int         msec;
-	frame_t    *frame;
-	struct predicted_player *pplayer;
-
-	playertime = cls.realtime - cls.latency + 0.02;
-	if (playertime > cls.realtime)
-		playertime = cls.realtime;
-
-	frame = &cl.frames[cl.parsecount & UPDATE_MASK];
-
-	for (j = 0, pplayer = predicted_players, state = frame->playerstate;
-		 j < MAX_CLIENTS; j++, pplayer++, state++) {
-
-		pplayer->active = false;
-
-		if (state->messagenum != cl.parsecount)
-			continue;					// not present this frame
-
-		if (!state->modelindex)
-			continue;
-
-		pplayer->active = true;
-		pplayer->flags = state->flags;
-
-		// note that the local player is special, since he moves locally
-		// we use his last predicted postition
-		if (j == cl.playernum) {
-			VectorCopy (cl.frames[cls.netchan.outgoing_sequence & UPDATE_MASK].
-						playerstate[cl.playernum].origin, pplayer->origin);
-		} else {
-			// only predict half the move to minimize overruns
-			msec = 500 * (playertime - state->state_time);
-			if (msec <= 0 ||
-				(!cl_predict_players->ivalue) || !dopred)
-			{
-				VectorCopy (state->origin, pplayer->origin);
-			} else {
-				// predict players movement
-				state->command.msec = min (state->command.msec, 255);
-
-				CL_PredictUsercmd (state, &exact, &state->command, false);
-				VectorCopy (exact.origin, pplayer->origin);
-			}
+			if (pmove.numphysent >= MAX_PHYSENTS)
+				return;
+			pent = &pmove.physents[pmove.numphysent++];
+			pent->model = cl.model_precache[state->modelindex];
+			VectorCopy (state->origin, pent->origin);
+			pent->id = -1;
+			pent->info = __LINE__;
 		}
 	}
 }
@@ -1209,43 +1112,50 @@ CL_SetUpPlayerPrediction (qboolean dopred)
 CL_SetSolid
 
 Builds all the pmove physents for the current frame
-Note that CL_SetUpPlayerPrediction() must be called first!
 pmove must be setup with world and solid entity hulls before calling
 (via CL_PredictMove)
 ===============
 */
 void
-CL_SetSolidPlayers (int playernum)
+CL_SetSolidPlayers ()
 {
-	int         j;
-	extern vec3_t player_mins;
-	extern vec3_t player_maxs;
-	struct predicted_player *pplayer;
-	physent_t  *pent;
+	int				i;
+	player_state_t	*state;
+	physent_t		*pent;
+	frame_t			*frame;
+	extern vec3_t	player_mins, player_maxs;
 
-	if (!cl_solid_players->ivalue)
+	if (!cl_solid_players->ivalue || !cl_predict_players->ivalue)
 		return;
 
-	pent = &pmove.physents[pmove.numphysent];
+	frame = &cl.frames[cl.parsecount & UPDATE_MASK];
 
-	for (j = 0, pplayer = predicted_players; j < MAX_CLIENTS; j++, pplayer++) {
-
-		if (!pplayer->active)
-			continue;					// not present this frame
-
-		// the player object never gets added
-		if (j == playernum)
+	for (i = 0, state = frame->playerstate; i < MAX_CLIENTS; i++, state++) {
+		if (pmove.numphysent >= MAX_PHYSENTS)
+			return;
+		// If not present this frame, skip it
+		if (state->messagenum != cl.parsecount)
 			continue;
 
-		if (pplayer->flags & PF_DEAD)
+		if (!state->modelindex)
+			continue;
+
+		if (state->flags & PF_DEAD)
 			continue;					// dead players aren't solid
 
-		pent->model = 0;
-		VectorCopy (pplayer->origin, pent->origin);
+		// note that the local player is special, since he moves locally
+		// we use his last predicted postition
+		pent = &pmove.physents[pmove.numphysent++];
+		if (i == cl.playernum)
+			VectorCopy (cl.frames[cls.netchan.outgoing_sequence & UPDATE_MASK].
+						playerstate[cl.playernum].origin, pent->origin);
+		else
+			VectorCopy (state->origin, pent->origin);
+		pent->id = i;
+		pent->model = NULL;
+		pent->info = __LINE__;
 		VectorCopy (player_mins, pent->mins);
 		VectorCopy (player_maxs, pent->maxs);
-		pmove.numphysent++;
-		pent++;
 	}
 }
 
@@ -1278,6 +1188,7 @@ CL_EmitEntities (void)
 {
 	if (cls.state != ca_active)
 		return;
+
 	if (!cl.validsequence)
 		return;
 
@@ -1291,7 +1202,6 @@ CL_EmitEntities (void)
 	CL_LinkProjectiles ();
 	CL_LinkStaticEntites ();
 	CL_LinkPacketEntities ();
-	CL_ScanForBModels ();
 	CL_UpdateTEnts ();
 }
 

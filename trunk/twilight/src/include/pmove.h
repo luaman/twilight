@@ -45,14 +45,13 @@ typedef struct
 
 	// for client or server to identify
 	int				info;
+	// Don't collide with objects with the same id, unless id == -1.
+	int				id;
 } physent_t;
 
 
 typedef struct
 {
-	// for debugging prints
-	int			sequence;
-
 	// player state
 	vec3_t		origin;
 	vec3_t		angles;
@@ -61,6 +60,7 @@ typedef struct
 	float		waterjumptime;
 	qboolean	dead;
 	int			spectator;
+	int			player_id;
 
 	// world state
 	int			numphysent;
@@ -106,7 +106,7 @@ int PM_HullPointContents (struct hull_s *hull, int num, vec3_t p);
 
 int PM_PointContents (vec3_t point);
 qboolean PM_TestPlayerPosition (vec3_t point);
-trace_t PM_PlayerMove (vec3_t start, vec3_t stop);
+trace_t *PM_PlayerMove (vec3_t start, vec3_t stop);
 
 #endif // __PMOVE_H
 

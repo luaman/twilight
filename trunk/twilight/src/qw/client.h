@@ -491,11 +491,7 @@ void CL_ClearTEnts (void);
 /*
  * cl_ents.c
  */
-extern entity_t *traceline_entity[MAX_EDICTS];
-extern int traceline_entities;
-
-void CL_ScanForBModels (void);
-void CL_SetSolidPlayers (int playernum);
+void CL_SetSolidPlayers (void);
 void CL_SetUpPlayerPrediction (qboolean dopred);
 void CL_EmitEntities (void);
 void CL_ClearProjectiles (void);
@@ -518,7 +514,7 @@ qboolean CL_UpdateAndLerp_Frame (entity_t *ent, int frame, float frame_time);
  */
 void CL_InitPrediction (void);
 void CL_PredictMove (void);
-void CL_PredictUsercmd (player_state_t * from, player_state_t * to,
+void CL_PredictUsercmd (int id, player_state_t * from, player_state_t * to,
 		usercmd_t *u, qboolean spectator);
 
 /*

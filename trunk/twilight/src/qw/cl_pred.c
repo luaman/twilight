@@ -39,39 +39,6 @@ static const char rcsid[] =
 cvar_t     *cl_nopred;
 cvar_t     *cl_pushlatency;
 
-/*
-=================
-CL_NudgePosition
-
-If pmove.origin is in a solid position,
-try nudging slightly on all axis to
-allow for the cut precision of the net coordinates
-=================
-*/
-void
-CL_NudgePosition (void)
-{
-	vec3_t      base;
-	int         x, y;
-
-	if (PM_HullPointContents (&cl.model_precache[1]->hulls[1], 0, pmove.origin)
-		== CONTENTS_EMPTY)
-		return;
-
-	VectorCopy (pmove.origin, base);
-	for (x = -1; x <= 1; x++) {
-		for (y = -1; y <= 1; y++) {
-			pmove.origin[0] = base[0] + x * 1.0 / 8;
-			pmove.origin[1] = base[1] + y * 1.0 / 8;
-			if (PM_HullPointContents
-				(&cl.model_precache[1]->hulls[1], 0,
-				 pmove.origin) == CONTENTS_EMPTY)
-				return;
-		}
-	}
-
-	Com_DPrintf ("CL_NudgePosition: stuck\n");
-}
 
 /*
 ==============
@@ -79,9 +46,10 @@ CL_PredictUsercmd
 ==============
 */
 void
-CL_PredictUsercmd (player_state_t * from, player_state_t * to, usercmd_t *u,
-				   qboolean spectator)
+CL_PredictUsercmd (int id, player_state_t * from, player_state_t * to,
+		usercmd_t *u, qboolean spectator)
 {
+#if 1
 	// split up very long moves
 	if (u->msec > 50) {
 		player_state_t temp;
@@ -90,15 +58,17 @@ CL_PredictUsercmd (player_state_t * from, player_state_t * to, usercmd_t *u,
 		split = *u;
 		split.msec /= 2;
 
-		CL_PredictUsercmd (from, &temp, &split, spectator);
-		CL_PredictUsercmd (&temp, to, &split, spectator);
+		CL_PredictUsercmd (id, from, &temp, &split, spectator);
+		CL_PredictUsercmd (id, &temp, to, &split, spectator);
 		return;
 	}
+#endif
 
 	VectorCopy (from->origin, pmove.origin);
 	VectorCopy (u->angles, pmove.angles);
 	VectorCopy (from->velocity, pmove.velocity);
 
+	pmove.player_id = id;
 	pmove.oldbuttons = from->oldbuttons;
 	pmove.waterjumptime = from->waterjumptime;
 	pmove.dead = cl.stats[STAT_HEALTH] <= 0;
@@ -123,6 +93,7 @@ CL_PredictUsercmd (player_state_t * from, player_state_t * to, usercmd_t *u,
 /*
 ==============
 CL_PredictMove
+Predict our own movement.
 ==============
 */
 void
@@ -131,7 +102,6 @@ CL_PredictMove (void)
 	int         i;
 	float       f;
 	frame_t    *from, *to = NULL;
-	int         oldphysent;
 
 	if (cl_pushlatency->fvalue > 0)
 		Cvar_Set (cl_pushlatency, "0");
@@ -159,43 +129,24 @@ CL_PredictMove (void)
 	// this is the last frame received from the server
 	from = &cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK];
 
-	// we can now render a frame
-	if (cls.state == ca_onserver) {		
-		// first update is the final signon stage
-		char        text[1024] = { 0 };
-
-		cls.state = ca_active;
-		snprintf (text, sizeof (text), "Twilight QWCL: %s", cls.servername);
-		SDL_WM_SetCaption (text, "Twilight QWCL");
-	}
-
 	if (cl_nopred->ivalue) {
 		VectorCopy (from->playerstate[cl.playernum].velocity, cl.simvel);
 		VectorCopy (from->playerstate[cl.playernum].origin, cl.simorg);
 		return;
 	}
 
-	// predict forward until cl.time <= to->senttime
-	oldphysent = pmove.numphysent;
-	CL_SetSolidPlayers (cl.playernum);
-
 	for (i = 1; i < UPDATE_BACKUP - 1 && cls.netchan.incoming_sequence + i <
 		 cls.netchan.outgoing_sequence; i++) {
 		to = &cl.frames[(cls.netchan.incoming_sequence + i) & UPDATE_MASK];
-		CL_PredictUsercmd (&from->playerstate[cl.playernum],
+		CL_PredictUsercmd (cl.playernum, &from->playerstate[cl.playernum],
 			&to->playerstate[cl.playernum], &to->cmd, cl.spectator);
 		if (to->senttime >= cl.time)
 			break;
 		from = to;
 	}
 
-	pmove.numphysent = oldphysent;
-
 	if (i == UPDATE_BACKUP - 1 || !to)
-		return;							// net hasn't deliver packets in a long 
-
-	// 
-	// time...
+		return;				// net hasn't deliver packets in a long time...
 
 	// now interpolate some fraction of the final frame
 	if (to->senttime == from->senttime)
@@ -205,13 +156,12 @@ CL_PredictMove (void)
 		f = bound (0, f, 1);
 	}
 
-	for (i = 0; i < 3; i++) {
-		if (fabs (from->playerstate[cl.playernum].origin[i] - to->playerstate[cl.playernum].origin[i]) > 128) {
-			// teleported, so don't lerp
-			VectorCopy (to->playerstate[cl.playernum].velocity, cl.simvel);
-			VectorCopy (to->playerstate[cl.playernum].origin, cl.simorg);
-			return;
-		}
+	if (VectorDistance_fast (from->playerstate[cl.playernum].origin,
+				to->playerstate[cl.playernum].origin) > (128 * 128)) {
+		// teleported, so don't lerp
+		VectorCopy (to->playerstate[cl.playernum].velocity, cl.simvel);
+		VectorCopy (to->playerstate[cl.playernum].origin, cl.simorg);
+		return;
 	}
 
 	Lerp_Vectors (from->playerstate[cl.playernum].origin,
