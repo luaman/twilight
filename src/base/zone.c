@@ -535,17 +535,6 @@ Hunk_AllocName (size_t size, char *name)
 	return (void *) (h + 1);
 }
 
-/*
-===================
-Hunk_Alloc
-===================
-*/
-void       *
-Hunk_Alloc (size_t size)
-{
-	return Hunk_AllocName (size, "unknown");
-}
-
 size_t
 Hunk_LowMark (void)
 {

@@ -168,7 +168,7 @@ Zone block
 
 extern size_t hunk_size;
 
-void       *Hunk_Alloc (size_t size);		// returns 0 filled memory
+// returns 0 filled memory
 void       *Hunk_AllocName (size_t size, char *name);
 
 void       *Hunk_HighAllocName (size_t size, char *name);
