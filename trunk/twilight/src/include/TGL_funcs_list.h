@@ -17,11 +17,6 @@
 #define UNDEF_TWIGL_DONT_NEED
 #endif
 
-#ifndef TWIGL_NEED
-#define TWIGL_NEED(ret, func, params)
-#define UNDEF_TWIGL_NEED
-#endif
-
 TWIGL_DONT_NEED (void, glAccum, (GLenum op, GLfloat value));
 TWIGL_DONT_NEED (void, glActiveTextureARB, (GLenum texture));
 TWIGL_NEED (void, glAlphaFunc, (GLenum func, GLclampf ref));
@@ -502,6 +497,3 @@ TWIGL_DONT_NEED (void, glWindowPos4svMESA, (const GLshort * p));
 #undef TWIGL_DONT_NEED
 #endif
 
-#ifdef UNDEF_TWIGL_NEED
-#undef TWIGL_DONT_NEED
-#endif

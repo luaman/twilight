@@ -229,10 +229,6 @@ void        R_TranslatePlayerSkin (int playernum);
 // note: ARB supports up to 32 units, but only 2 are currently used in this engine
 #endif
 
-#ifndef _WIN32
-#define APIENTRY						/* */
-#endif
-
 typedef void (APIENTRY * lpMTexFUNC) (GLenum, GLfloat, GLfloat);
 typedef void (APIENTRY * lpSelTexFUNC) (GLenum);
 extern lpMTexFUNC qglMTexCoord2f;
