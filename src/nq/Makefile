@@ -18,7 +18,7 @@ LDFLAGS= `sdl-config --libs` -lGL
 
 all: twilight-nq
 
-frost-nq: $(OBJECTS)
+twilight-nq: $(OBJECTS)
 	gcc $(LDFLAGS) -o $@ $^
 
 .SUFFIXES: .c .o
