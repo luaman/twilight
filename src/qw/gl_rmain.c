@@ -122,6 +122,7 @@ cvar_t     *gl_finish;
 cvar_t	   *gl_im_animation;
 cvar_t	   *gl_fb_models;
 cvar_t	   *gl_fb_bmodels;
+cvar_t	   *gl_oldlights;
 
 extern cvar_t *gl_ztrick;
 extern cvar_t *scr_fov;

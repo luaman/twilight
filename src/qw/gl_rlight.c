@@ -298,7 +298,7 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 {
 	mleaf_t *pvsleaf = Mod_PointInLeaf (light->origin, model);
 	
-	if (!pvsleaf->compressed_vis)
+	if (!pvsleaf->compressed_vis || gl_oldlights->value)
 	{
 		// no vis info, so make all visible
 		R_MarkLightsNoVis(light, bit, model->nodes + model->hulls[0].firstclipnode);

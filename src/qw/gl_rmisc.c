@@ -161,6 +161,8 @@ R_Init_Cvars (void)
 	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_NONE, NULL);
 	gl_fb_bmodels = Cvar_Get ("gl_fb_bmodels", "1", CVAR_NONE, NULL);
 
+	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
+
 	if (gl_mtexable)
 		Cvar_Set (gl_texsort, "0");
 }

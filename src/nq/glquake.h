@@ -205,6 +205,7 @@ extern cvar_t *gl_im_animation;
 extern cvar_t *gl_im_transform;
 extern cvar_t *gl_fb_models;
 extern cvar_t *gl_fb_bmodels;
+extern cvar_t *gl_oldlights;
 
 extern int  gl_lightmap_format;
 extern int  gl_solid_format;

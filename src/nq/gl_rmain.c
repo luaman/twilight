@@ -116,6 +116,7 @@ cvar_t	   *gl_im_transform;
 cvar_t	   *r_maxedges, *r_maxsurfs;		// Shrak
 cvar_t	   *gl_fb_models;
 cvar_t	   *gl_fb_bmodels;
+cvar_t	   *gl_oldlights;
 
 extern cvar_t *gl_ztrick;
 
