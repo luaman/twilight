@@ -35,43 +35,98 @@ static const char rcsid[] =
 #include "tga.h"
 #include "sys.h"
 #include "sdlimage.h"
+#include "fs.h"
+#include "gl_textures.h"
+
+memzone_t			*img_zone;
+img_search_t		*img_search;
+static char			**exts_real;
+static char			***exts;
+
+void
+Image_Init (void)
+{
+	img_search_t	*search;
+	int				i, count = 0;
+
+	img_zone = Zone_AllocZone ("Image");
+
+	search = Zone_Alloc (img_zone, sizeof(img_search_t));
+	search->ext = Zstrdup(img_zone, "tga");
+	search->load = TGA_Load;
+	search->next = img_search;
+	count++;
+	img_search = search;
+
+	search = Zone_Alloc (img_zone, sizeof(img_search_t));
+	search->ext = Zstrdup(img_zone, "pcx");
+	search->load = PCX_Load;
+	search->next = img_search;
+	count++;
+	img_search = search;
+
+	search = Zone_Alloc (img_zone, sizeof(img_search_t));
+	search->ext = Zstrdup(img_zone, "lmp");
+	search->load = QLMP_Load;
+	search->next = img_search;
+	count++;
+	img_search = search;
+
+	count += Image_InitSDL ();
+
+	exts = Zone_Alloc (img_zone, sizeof (char *) * (count + 1));
+	exts_real = Zone_Alloc (img_zone, sizeof (char *) * (count + 1));
+
+	for (i = 0, search = img_search;
+			i < count && search;
+			i++, search = search->next) {
+		exts_real[i] = search->ext;
+	}
+	exts_real[i] = NULL;
+
+	for (i = 0; i < count; i++)
+		exts[i] = exts_real;
+	exts[i] = NULL;
+
+}
 
 image_t *
-Image_Load (char *name)
+Image_Load (char *name, int flags)
 {
-	char woext[MAX_OSPATH];
-	char buf[MAX_OSPATH];
-	char *p;
-	image_t *img;
+	const char	*names[2] = {name, NULL};
 
-	if (!name)
-		Sys_Error ("IMG_Load: Attempt to load NULL image");
+	return Image_Load_Multi (names, flags);
+}
 
-	// FIXME: HACK HACK HACK.
-	Image_InitSDL ();
+image_t *
+Image_Load_Multi (const char **names, int flags)
+{
+	image_t			*img;
+	img_search_t	*search;
+	fs_file_t		*file;
+	SDL_RWops		*rw;
 
-	strlcpy(woext, name, MAX_OSPATH);
-	COM_StripExtension (woext, woext);
+	file = FS_FindFiles_Complex (names, exts);
 
-	// Concession for win32, # is used because DarkPlaces uses it
-	for (p = woext; *p; p++)
-		if (*p == '*')
-			*p = '#';
+	if (!file)
+		return NULL;
 
-	if ((img = Image_FromSDL(woext)))
-		return img;
+	rw = file->open(file, false);
+	if (!rw)
+		return NULL;
 
-	snprintf (buf, MAX_OSPATH, "%s.tga", woext);
-	if ((img = TGA_Load (buf)))
-		return img;
-
-	snprintf (buf, MAX_OSPATH, "%s.pcx", woext);
-	if ((img = PCX_Load (buf)))
-		return img;
-
-	snprintf (buf, MAX_OSPATH, "%s.lmp", woext);
-	if ((img = QLMP_Load (buf)))
-		return img;
+	for (search = img_search; search; search = search->next)
+		if (!strcasecmp(file->ext, search->ext))
+			if ((img = search->load(file, rw))) {
+				if (flags & TEX_UPLOAD)
+					GLT_Load_image (file->name_base, img, flags);
+				if (!(flags & TEX_KEEPRAW)) {
+					Zone_Free (img->pixels);
+					img->pixels = NULL;
+				}
+				img->file = file;
+				return img;
+			}
 
 	return NULL;
 }

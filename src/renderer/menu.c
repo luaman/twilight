@@ -71,62 +71,62 @@ M_PrintAlt (int cx, int cy, char *str)
 }
 
 void
-M_DrawPic (int x, int y, qpic_t *pic)
+M_DrawImg (int x, int y, image_t *img)
 {
-	Draw_Pic (x + ((vid.width_2d - 320) >> 1), y, pic);
+	Draw_Img (x + ((vid.width_2d - 320) >> 1), y, img);
 }
 
 
 void
 M_DrawTextBox (int x, int y, int width, int lines)
 {
-	qpic_t     *p;
+	image_t     *p;
 	int         cx, cy;
 	int         n;
 
 	// draw left side
 	cx = x;
 	cy = y;
-	p = Draw_CachePic ("gfx/box_tl.lmp");
-	M_DrawPic (cx, cy, p);
-	p = Draw_CachePic ("gfx/box_ml.lmp");
+	p = Draw_CacheImg ("gfx/box_tl");
+	M_DrawImg (cx, cy, p);
+	p = Draw_CacheImg ("gfx/box_ml");
 	for (n = 0; n < lines; n++) {
 		cy += 8;
-		M_DrawPic (cx, cy, p);
+		M_DrawImg (cx, cy, p);
 	}
-	p = Draw_CachePic ("gfx/box_bl.lmp");
-	M_DrawPic (cx, cy + 8, p);
+	p = Draw_CacheImg ("gfx/box_bl");
+	M_DrawImg (cx, cy + 8, p);
 
 	// draw middle
 	cx += 8;
 	while (width > 0) {
 		cy = y;
-		p = Draw_CachePic ("gfx/box_tm.lmp");
-		M_DrawPic (cx, cy, p);
-		p = Draw_CachePic ("gfx/box_mm.lmp");
+		p = Draw_CacheImg ("gfx/box_tm");
+		M_DrawImg (cx, cy, p);
+		p = Draw_CacheImg ("gfx/box_mm");
 		for (n = 0; n < lines; n++) {
 			cy += 8;
 			if (n == 1)
-				p = Draw_CachePic ("gfx/box_mm2.lmp");
-			M_DrawPic (cx, cy, p);
+				p = Draw_CacheImg ("gfx/box_mm2");
+			M_DrawImg (cx, cy, p);
 		}
-		p = Draw_CachePic ("gfx/box_bm.lmp");
-		M_DrawPic (cx, cy + 8, p);
+		p = Draw_CacheImg ("gfx/box_bm");
+		M_DrawImg (cx, cy + 8, p);
 		width -= 2;
 		cx += 16;
 	}
 
 	// draw right side
 	cy = y;
-	p = Draw_CachePic ("gfx/box_tr.lmp");
-	M_DrawPic (cx, cy, p);
-	p = Draw_CachePic ("gfx/box_mr.lmp");
+	p = Draw_CacheImg ("gfx/box_tr");
+	M_DrawImg (cx, cy, p);
+	p = Draw_CacheImg ("gfx/box_mr");
 	for (n = 0; n < lines; n++) {
 		cy += 8;
-		M_DrawPic (cx, cy, p);
+		M_DrawImg (cx, cy, p);
 	}
-	p = Draw_CachePic ("gfx/box_br.lmp");
-	M_DrawPic (cx, cy + 8, p);
+	p = Draw_CacheImg ("gfx/box_br");
+	M_DrawImg (cx, cy + 8, p);
 }
 
 //=============================================================================
@@ -165,9 +165,9 @@ static Uint8	trans_table_ident[256];
 static Uint8	trans_table_cur[256];
 
 static void
-M_DrawTransPicTranslate (int x, int y, qpic_t *pic)
+M_DrawTransImgTranslate (int x, int y, image_t *img)
 {
-	Draw_TransPicTranslate (x + ((vid.width_2d - 320) >> 1), y, pic,
+	Draw_TransImgTranslate (x + ((vid.width_2d - 320) >> 1), y, img,
 			trans_table_cur);
 }
 
@@ -338,15 +338,15 @@ M_Do_Draw (menu_t *menu, int current)
 				M_Print(div_x + 28, y, item->u.text_entry.cvar->svalue);
 				M_Print(div_x + 32 + (8 * item->u.text_entry.max_len), y, "]");
 				break;
-			case m_qpic:
+			case m_img:
 				{
 					int					j, from, to;
-					menu_item_qpic_t	*qpic = &item->u.qpic;
-					menu_qpic_trans_t	*trans;
+					menu_item_img_t		*img = &item->u.img;
+					menu_img_trans_t	*trans;
 
 					M_Trans_Table_New ();
-					for (j = 0; j < qpic->n_trans; j++) {
-						trans = &qpic->trans[j];
+					for (j = 0; j < img->n_trans; j++) {
+						trans = &img->trans[j];
 						if (trans->from_cvar) from = trans->from_cvar->ivalue;
 						else from = trans->from;
 						from >>= trans->from_shift;
@@ -359,7 +359,7 @@ M_Do_Draw (menu_t *menu, int current)
 
 						M_Trans_Table_Trans(from, to);
 					}
-					M_DrawTransPicTranslate(div_x + qpic->x, y + qpic->y, qpic->qpic);
+					M_DrawTransImgTranslate(div_x + img->x, y + img->y, img->img);
 				}
 				break;
 		}
@@ -560,7 +560,7 @@ M_Handle_Key (menu_item_t *item, int key)
 			}
 			break;
 		case m_text:
-		case m_qpic:
+		case m_img:
 			break;
 	}
 }

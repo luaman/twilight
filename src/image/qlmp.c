@@ -42,14 +42,15 @@ QLMP_LoadQPic (Uint8 *buf)
 	image_t	   *img;
 	Uint32		numpixels;
 
-	img = malloc (sizeof(image_t));
+	img = Zone_Alloc (img_zone, sizeof(image_t));
 	
 	img->width = LittleLong (*(Uint32 *)buf);
 	buf += 4;
 	img->height = LittleLong (*(Uint32 *)buf);
 	buf += 4;
 
-	if ((unsigned)img->width > 4096 || (unsigned)img->height > 4096)
+	if (img->width > 4096 || img->height > 4096 ||
+			img->width < 1 || img->height < 1)
 	{
 		Com_Printf ("QLMP_Load: invalid size (%ix%i)\n",
 				img->width, img->height);
@@ -58,7 +59,7 @@ QLMP_LoadQPic (Uint8 *buf)
 	}
 
 	numpixels = img->width * img->height;
-	img->pixels = malloc (numpixels * sizeof (Uint8));
+	img->pixels = Zone_Alloc (img_zone, numpixels * sizeof (Uint8));
 	memcpy (img->pixels, buf, numpixels);
 
 	img->type = IMG_QPAL;
@@ -76,8 +77,8 @@ QLMP_LoadFont (Uint8 *buf)
 	Uint32		i;
 	image_t	   *img;
 
-	img = malloc (sizeof (image_t));
-	img->pixels = malloc (CONCHARS_SIZE * sizeof (Uint8));
+	img = Zone_Alloc (img_zone, sizeof (image_t));
+	img->pixels = Zone_Alloc (img_zone, CONCHARS_SIZE * sizeof (Uint8));
 
 	img->width = CONCHARS_W;
 	img->height = CONCHARS_H;
@@ -97,32 +98,20 @@ QLMP_LoadFont (Uint8 *buf)
 }
 
 image_t *
-QLMP_Load (char *name)
+QLMP_Load (fs_file_t *file, SDL_RWops *rw)
 {
-	image_t		*image;
-	Uint8		*buf = COM_LoadTempFile (name, false);
-	qboolean	need_free = true;
+	image_t	*image;
+	Uint8	*buf;
 
-	if (!buf)
-	{
-		COM_StripExtension (name, name);
-		buf = W_GetLumpName (name);
-		need_free = false;
-	}
-
-	if (buf)
-	{
-		if (strncasecmp ("conchars.lmp", name, 12))
-			image = QLMP_LoadFont (buf);
-		else
-			image = QLMP_LoadQPic (buf);
-
-		if (need_free)
-			Zone_Free (buf);
-
-		return image;
-	}
+	buf = Zone_Alloc (tempzone, file->len);
+	SDL_RWread (rw, buf, file->len, 1);
+	SDL_RWclose (rw);
+	if (!strcasecmp ("gfx/conchars", file->name_base))
+		image = QLMP_LoadFont (buf);
+	else
+		image = QLMP_LoadQPic (buf);
+	Zone_Free (buf);
+	return image;
 
 	return NULL;
 }
-

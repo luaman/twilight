@@ -115,6 +115,7 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 			memcpy (mtdata, mtdata + (32 * 31), 32);
 		}
 
+		Com_Printf("maps/%s/%s\n", mod->name, dmiptex->name);
 		if (!strncmp (dmiptex->name, "sky", 3))
 			Sky_InitSky (tx, mtdata);
 		else

@@ -29,6 +29,7 @@
 #include "twiconfig.h"
 #include "qtypes.h"
 #include "hash.h"
+#include "zone.h"
 
 struct fs_file_s;
 struct fs_new_s;
@@ -37,6 +38,7 @@ typedef SDL_RWops *(fs_open_t) (struct fs_file_s *, qboolean write);
 typedef struct fs_group_s {
 	char				*id;
 	hash_t				*files;
+	Uint				path_num;
 
 	qboolean			(*open_new) (struct fs_group_s *, struct fs_new_s *);
 	void				(*close_new) (struct fs_group_s *, struct fs_new_s *);
@@ -69,6 +71,7 @@ extern fs_group_t	*fs_paths;
 void FS_Init (void);
 
 void FS_Add_File (fs_group_t *group, const char *name, size_t len, fs_open_t *open, void *fs_data);
+fs_file_t *FS_FindFiles_Complex (const char **names, char ***exts);
 fs_file_t *FS_FindFile_Complex (const char *name, char **exts);
 fs_file_t *FS_FindFile (const char *name);
 void FS_AddPath (const char *path, const char *id);

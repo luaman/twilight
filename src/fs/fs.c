@@ -35,6 +35,7 @@ static const char rcsid[] =
 #include "crc.h"
 #include "dir.h"
 #include "pak.h"
+#include "wad.h"
 #include "cmd.h"
 
 memzone_t	*fs_zone;
@@ -74,10 +75,24 @@ FS_MangleName (const char *name)
 			while (name[i] == '/' || name[i] == '\\' || name[i] == ':') i++;
 			new[j++] = '/';
 		} else
-			new[j++] = name[i++];
+			new[j++] = tolower(name[i++]);
 	}
 	new[j] = '\0';
 	return new;
+}
+
+fs_file_t *
+FS_FindFiles_Complex (const char **names, char ***exts)
+{
+	int			i;
+	fs_file_t	*best = NULL, *cur = NULL;
+
+	for (i = 0; names[i]; i++)
+		if ((cur = FS_FindFile_Complex (names[i], exts[i])))
+			if (!best || cur->group->path_num > best->group->path_num)
+				best = cur;
+
+	return best;
 }
 
 fs_file_t *
@@ -124,9 +139,12 @@ FS_FindFile (const char *name)
 static void
 FS_AddGroup (fs_group_t *group)
 {
+	static int	num = 0;
+
 	if (!group)
 		return;
 
+	group->path_num = num++;
 	group->next = fs_paths;
 	fs_paths = group;
 }
@@ -155,6 +173,8 @@ FS_Add_File (fs_group_t *group, const char *name, size_t len,
 	if (file->ext) {
 		if (!strcasecmp("pak", file->ext))
 			FS_AddGroup (FSP_New_Group (file, group, name));
+		if (!strcasecmp("wad", file->ext))
+			FS_AddGroup (FSW_New_Group (file, group, name));
 	}
 }
 

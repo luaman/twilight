@@ -265,24 +265,18 @@ Sky_LoadSkys (cvar_t *cvar)
 	for (i = 0; i < 6; i++) {
 		snprintf (name, sizeof (name), "env/%s%s",
 				cvar->svalue, suf[i]);
-		img = Image_Load (name);
+		img = Image_Load (name, TEX_UPLOAD);
 		if (!img)
 		{
 			snprintf (name, sizeof (name), "gfx/env/%s%s",
 					cvar->svalue, suf[i]);
-			img = Image_Load (name);
+			img = Image_Load (name, TEX_UPLOAD);
 		}
 
 		if (!img)
 			return false;
-		if ((img->width != 256) || (img->height != 256))
-		{
-			free (img->pixels);
-			free (img);
-			return false;
-		}
 
-		skyboxtexnums[i] = GLT_Load_image(va("%s#%d", name, i), img, NULL, 0);
+		skyboxtexnums[i] = img->texnum;
 	}
 
 	return true;

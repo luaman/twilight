@@ -28,8 +28,8 @@
 
 #include "image.h"
 
-void Image_InitSDL ();
-image_t * Image_FromSDL (char *name);
+int Image_InitSDL (void);
+image_t * Image_FromSDL (fs_file_t *file, SDL_RWops *rw);
 
 #endif // __SDL_IMAGE_H
 

@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include "sdlimage.h"
 #include "strlib.h"
 #include "sys.h"
+#include "fs.h"
 
 /* SDL interprets each pixel as a 32-bit number, so our masks must depend
 *        on the endianness (byte order) of the machine */
@@ -63,144 +64,97 @@ extern DECLSPEC void SDL_UnloadObject(void *handle);
  */
 static qboolean		loaded;
 
-typedef DECLSPEC SDL_Surface * SDLCALL (IMG_Load) (SDL_RWops *);
+typedef DECLSPEC SDL_Surface * SDLCALL (IMG_SDL_Load) (SDL_RWops *);
 
-static IMG_Load		*sdl_IMG_LoadBMP_RW;
-static IMG_Load		*sdl_IMG_LoadPNM_RW;
-static IMG_Load		*sdl_IMG_LoadXPM_RW;
-static IMG_Load		*sdl_IMG_LoadPCX_RW;
-static IMG_Load		*sdl_IMG_LoadJPG_RW;
-static IMG_Load		*sdl_IMG_LoadTIF_RW;
-static IMG_Load		*sdl_IMG_LoadPNG_RW;
-static IMG_Load		*sdl_IMG_LoadTGA_RW;
-static IMG_Load		*sdl_IMG_LoadLBM_RW;
 static void			*sdl_handle;
 
-void
+typedef struct img_sdl_search_s {
+	char			*ext;
+	char			*load_name;
+	IMG_SDL_Load	*load;
+} img_sdl_search_t;
+
+static img_sdl_search_t	search[] = {
+	{"bmp", "IMG_LoadBMP_RW", NULL},
+	{"jpg", "IMG_LoadJPG_RW", NULL},
+	{"lbm", "IMG_LoadLBM_RW", NULL},
+	{"pcx", "IMG_LoadPCX_RW", NULL},
+	{"png", "IMG_LoadPNG_RW", NULL},
+	{"pnm", "IMG_LoadPNM_RW", NULL},
+	{"tga", "IMG_LoadTGA_RW", NULL},
+	{"tif", "IMG_LoadTIF_RW", NULL},
+	{"xpm", "IMG_LoadXPM_RW", NULL},
+	{NULL, NULL, NULL},
+};
+
+int
 Image_InitSDL ()
 {
+	img_search_t	*i_search;
+	int i, cnt = 0;
+
 	if (loaded)
-		return;
+		return 0;
 
 	sdl_handle = SDL_LoadObject("libSDL_image.so");
 	if (!sdl_handle) {
 		Com_Printf("Error! %s\n", SDL_GetError ());
-		return;
+		return 0;
 	}
-	sdl_IMG_LoadBMP_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadBMP_RW");
-	sdl_IMG_LoadPNM_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadPNM_RW");
-	sdl_IMG_LoadXPM_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadXPM_RW");
-	sdl_IMG_LoadPCX_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadPCX_RW");
-	sdl_IMG_LoadJPG_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadJPG_RW");
-	sdl_IMG_LoadTIF_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadTIF_RW");
-	sdl_IMG_LoadPNG_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadPNG_RW");
-	sdl_IMG_LoadTGA_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadTGA_RW");
-	sdl_IMG_LoadLBM_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadLBM_RW");
 
-	if (!(sdl_IMG_LoadBMP_RW && sdl_IMG_LoadPNM_RW && sdl_IMG_LoadXPM_RW &&
-				sdl_IMG_LoadPCX_RW && sdl_IMG_LoadJPG_RW &&
-				sdl_IMG_LoadTIF_RW && sdl_IMG_LoadPNG_RW &&
-				sdl_IMG_LoadTGA_RW && sdl_IMG_LoadLBM_RW)) {
-		Com_Printf("Error! %s\n", SDL_GetError ());
-		return;
+	for (i = 0; search[i].load_name; i++) {
+		search[i].load = SDL_LoadFunction(sdl_handle, search[i].load_name);
+		if (search[i].load) {
+			i_search = Zone_Alloc (img_zone, sizeof (img_search_t));
+			i_search->ext = Zstrdup (img_zone, search[i].ext);
+			i_search->load = Image_FromSDL;
+			i_search->next = img_search;
+			img_search = i_search;
+			cnt++;
+		} else
+			Com_Printf("Unable to find %s (%s).\n",
+					search[i].load_name, SDL_GetError ());
 	}
 
 	loaded = true;
+
+	return cnt;
 }
 
 image_t *
-Image_FromSDL (char *name)
+Image_FromSDL (fs_file_t *file, SDL_RWops *rw)
 {
 	SDL_Surface	*surf, *rgb_surf;
-	SDL_RWops	*file;
+	int			i;
 	image_t		*image = NULL;
-	Uint8		*buf;
 
 	if (!loaded)
 		return NULL;
 
-	if ((buf = COM_LoadTempFile (va("%s.png", name), false))) {
-		file = SDL_RWFromMem (buf, com_filesize);
-		if ((surf = sdl_IMG_LoadPNG_RW (file)))
-			goto convert;
-		goto cleanup;
-	}
+	for (i = 0; search[i].ext; i++) {
+		if (!strcasecmp(file->ext, search[i].ext)) {
+			if ((surf = search[i].load(rw))) {
+				rgb_surf = SDL_CreateRGBSurface (SDL_SWSURFACE, surf->w,
+						surf->h, 32, rmask, gmask, bmask, amask);
+				SDL_BlitSurface (surf, &surf->clip_rect, rgb_surf,
+						&surf->clip_rect);
+				image = Zone_Alloc (img_zone, sizeof(image_t));
+				image->width = rgb_surf->w;
+				image->height = rgb_surf->h;
+				image->type = IMG_RGBA;
+				image->pixels = Zone_Alloc(img_zone, image->width * image->height * 4);
 
-	if ((buf = COM_LoadTempFile (va("%s.tga", name), false))) {
-		file = SDL_RWFromMem (buf, com_filesize);
-		if ((surf = sdl_IMG_LoadTGA_RW (file)))
-			goto convert;
-		goto cleanup;
+				memcpy (image->pixels, rgb_surf->pixels,
+						4 * rgb_surf->w * rgb_surf->h);
+				SDL_FreeSurface (rgb_surf);
+				SDL_FreeSurface (surf);
+				return image;
+			} else
+				Sys_Error ("Bad file!\n");
+			break;
+		}
 	}
-
-	if ((buf = COM_LoadTempFile (va("%s.jpg", name), false))) {
-		file = SDL_RWFromMem (buf, com_filesize);
-		if ((surf = sdl_IMG_LoadJPG_RW (file)))
-			goto convert;
-		goto cleanup;
-	}
-
-	if ((buf = COM_LoadTempFile (va("%s.tif", name), false))) {
-		file = SDL_RWFromMem (buf, com_filesize);
-		if ((surf = sdl_IMG_LoadTIF_RW (file)))
-			goto convert;
-		goto cleanup;
-	}
-
-	if ((buf = COM_LoadTempFile (va("%s.bmp", name), false))) {
-		file = SDL_RWFromMem (buf, com_filesize);
-		if ((surf = sdl_IMG_LoadBMP_RW (file)))
-			goto convert;
-		goto cleanup;
-	}
-
-	if ((buf = COM_LoadTempFile (va("%s.pnm", name), false))) {
-		file = SDL_RWFromMem (buf, com_filesize);
-		if ((surf = sdl_IMG_LoadPNM_RW (file)))
-			goto convert;
-		goto cleanup;
-	}
-
-	if ((buf = COM_LoadTempFile (va("%s.xpm", name), false))) {
-		file = SDL_RWFromMem (buf, com_filesize);
-		if ((surf = sdl_IMG_LoadXPM_RW (file)))
-			goto convert;
-		goto cleanup;
-	}
-
-	if ((buf = COM_LoadTempFile (va("%s.pcx", name), false))) {
-		file = SDL_RWFromMem (buf, com_filesize);
-		if ((surf = sdl_IMG_LoadPCX_RW (file)))
-			goto convert;
-		goto cleanup;
-	}
-
-	if ((buf = COM_LoadTempFile (va("%s.lbm", name), false))) {
-		file = SDL_RWFromMem (buf, com_filesize);
-		if ((surf = sdl_IMG_LoadLBM_RW (file)))
-			goto convert;
-		goto cleanup;
-	}
+	SDL_RWclose (rw);
 
 	return NULL;
-
-convert:
-	rgb_surf = SDL_CreateRGBSurface (SDL_SWSURFACE, surf->w, surf->h, 32,
-			rmask, gmask, bmask, amask);
-	SDL_BlitSurface (surf, &surf->clip_rect, rgb_surf, &surf->clip_rect);
-	image = malloc (sizeof(image_t));
-	image->width = rgb_surf->w;
-	image->height = rgb_surf->h;
-	image->type = IMG_RGBA;
-	image->pixels = malloc(image->width * image->height * 4);
-
-	memcpy (image->pixels, rgb_surf->pixels, 4 * rgb_surf->w * rgb_surf->h);
-	SDL_FreeSurface (rgb_surf);
-
-cleanup:
-	SDL_FreeSurface (surf);
-	SDL_FreeRW (file);
-	Zone_Free (buf);
-
-	return image;
 }

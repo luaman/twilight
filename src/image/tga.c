@@ -57,7 +57,7 @@ TGA_LoadBuffer (Uint8 *buffer)
 	Uint8		red, green, blue, alphabyte;
 	image_t		*img;
 
-	img = malloc (sizeof(image_t));
+	img = Zone_Alloc (img_zone, sizeof(image_t));
 
 	buf_p = buffer;
 
@@ -97,7 +97,7 @@ TGA_LoadBuffer (Uint8 *buffer)
 	img->width = columns;
 	img->height = rows;
 
-	targa_rgba = malloc (numPixels*4);
+	targa_rgba = Zone_Alloc (img_zone, numPixels*4);
 	img->pixels = targa_rgba;
 
 	if (targa_header.id_length != 0)
@@ -258,22 +258,21 @@ TGA_LoadBuffer (Uint8 *buffer)
 	return img;
 }
 
-
 image_t *
-TGA_Load (char *name)
+TGA_Load (fs_file_t *file, SDL_RWops *rw)
 {
 	image_t	*image;
-	Uint8	*buf = COM_LoadTempFile (name, false);
+	Uint8	*buf;
 
-	if (buf) {
-		image = TGA_LoadBuffer (buf);
-		Zone_Free (buf);
-		return image;
-	}
+	buf = Zone_Alloc (tempzone, file->len);
+	SDL_RWread (rw, buf, file->len, 1);
+	SDL_RWclose (rw);
+	image = TGA_LoadBuffer (buf);
+	Zone_Free (buf);
+	return image;
 
 	return NULL;
 }
-
 
 
 qboolean

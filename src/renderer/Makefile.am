@@ -10,6 +10,7 @@ INCLUDES= \
 	-I$(top_srcdir)/src/renderer \
 	-I$(top_srcdir)/src/client \
 	-I$(top_srcdir)/src/image \
+	-I$(top_srcdir)/src/fs \
 	-I$(top_srcdir)/src/sound
 
 
