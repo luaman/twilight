@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "mathlib.h"
 #include "tga.h"
+#include "pcx.h"
 #include "sys.h"
 
 extern model_t *loadmodel;
@@ -368,25 +369,34 @@ R_LoadSkys (void)
 {
 	int   i, w, h;
 	char  name[64];
-	Uint8  *image_rgba = NULL;
+	Uint8  *image_buf = NULL;
 
 	for (i = 0; i < 6; i++) {
 		snprintf (name, sizeof (name), "gfx/env/%s%s.tga", r_skybox->string, suf[i]);
 
-		TGA_Load (name, &image_rgba, &w, &h);
+		TGA_Load (name, &image_buf, &w, &h);
 
-		if (!image_rgba)
-			return false;
-		if ((w != 256) || (h != 256)) {
-			free (image_rgba);
-			return false;
-		}
+		if (!image_buf || 
+			((w != 256) || (h != 256))) {
+
+			name[0] = 0;
+			snprintf (name, sizeof (name), "gfx/env/%s%s.pcx", r_skybox->string, suf[i]);
+
+			PCX_Load (name, &image_buf, &w, &h);
+
+			if (!image_buf)
+				return false;
+			if ((w != 256) || (h != 256)) {
+				free (image_buf);
+				return false;
+			}
+		} 
 
 		qglBindTexture (GL_TEXTURE_2D, skyboxtexnum+i);
-		qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_rgba);
+		qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_buf);
 
-		free (image_rgba);
-		image_rgba = NULL;
+		free (image_buf);
+		image_buf = NULL;
 
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

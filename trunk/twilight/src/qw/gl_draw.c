@@ -64,7 +64,7 @@ qpic_t		*draw_backtile;
 
 int         translate_texture;
 int         char_texture;
-int         cs_texture;						// crosshair texture
+int         cs_texture, cs_square;						// crosshair texture
 
 static Uint8 cs_data[64] = {
 	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
@@ -75,6 +75,25 @@ static Uint8 cs_data[64] = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+};
+
+static Uint8 cs_squaredata[8][8] = {
+	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
+	,
+	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
+	,
+	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
+	,
+	{0xff, 0xff, 0xff, 0xfe, 0xfe, 0xff, 0xff, 0xff}
+	,
+	{0xff, 0xff, 0xff, 0xfe, 0xfe, 0xff, 0xff, 0xff}
+	,
+	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
+	,
+	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
+	,
+	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
+	,
 };
 
 
@@ -293,6 +312,7 @@ Draw_Init (void)
 		GL_LoadTexture ("charset", 128, 128, draw_chars, false, true);
 
 	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
+	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata, false, true);
 
 	// save a texture slot for translated picture
 	translate_texture = texture_extension_number++;
@@ -473,7 +493,27 @@ Draw_Crosshair (void)
 		qglColor3f (1, 1, 1);
 		qglDisable (GL_BLEND);
 
-	} else if (crosshair->value)
+	} else if (crosshair->value == 3) {
+		x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
+		y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
+
+		pColor = (Uint8 *) &d_8to32table[(Uint8) crosshaircolor->value];
+		qglColor4ubv (pColor);
+		qglBindTexture (GL_TEXTURE_2D, cs_square);
+
+		qglBegin (GL_QUADS);
+		qglTexCoord2f (0, 0);
+		qglVertex2f (x - 4, y - 4);
+		qglTexCoord2f (1, 0);
+		qglVertex2f (x + 12, y - 4);
+		qglTexCoord2f (1, 1);
+		qglVertex2f (x + 12, y + 12);
+		qglTexCoord2f (0, 1);
+		qglVertex2f (x - 4, y + 12);
+		qglEnd ();
+		qglColor4f (1, 1, 1, 1);
+	}
+	else if (crosshair->value)
 		Draw_Character (
 				scr_vrect.x + scr_vrect.width / 2 - 4 +	cl_crossx->value,
 				scr_vrect.y + scr_vrect.height / 2 - 4 + cl_crossy->value,

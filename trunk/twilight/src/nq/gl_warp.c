@@ -364,17 +364,17 @@ R_LoadSkys (void)
 	Uint8  *image_buf = NULL;
 
 	for (i = 0; i < 6; i++) {
-		snprintf (name, sizeof (name), "gfx/env/%s%s.pcx", r_skybox->string, suf[i]);
+		snprintf (name, sizeof (name), "gfx/env/%s%s.tga", r_skybox->string, suf[i]);
 
-		PCX_Load (name, &image_buf, &w, &h);
+		TGA_Load (name, &image_buf, &w, &h);
 
 		if (!image_buf || 
 			((w != 256) || (h != 256))) {
 
 			name[0] = 0;
-			snprintf (name, sizeof (name), "gfx/env/%s%s.tga", r_skybox->string, suf[i]);
+			snprintf (name, sizeof (name), "gfx/env/%s%s.pcx", r_skybox->string, suf[i]);
 
-			TGA_Load (name, &image_buf, &w, &h);
+			PCX_Load (name, &image_buf, &w, &h);
 
 			if (!image_buf)
 				return false;

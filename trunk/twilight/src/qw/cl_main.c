@@ -1098,15 +1098,6 @@ CL_Init_Cvars (void)
 	cl_hudswap = Cvar_Get ("cl_hudswap", "0", CVAR_ARCHIVE, NULL);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
 
-	lookspring = Cvar_Get ("lookspring", "0", CVAR_ARCHIVE, NULL);
-	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE, NULL);
-	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE, NULL);
-
-	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE, NULL);
-	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_NONE, NULL);
-	m_forward = Cvar_Get ("m_forward", "1", CVAR_NONE, NULL);
-	m_side = Cvar_Get ("m_side", "0.8", CVAR_NONE, NULL);
-
 	entlatency = Cvar_Get ("entlatency", "20", CVAR_NONE, NULL);
 	cl_predict_players = Cvar_Get ("cl_predict_players", "1", CVAR_NONE, NULL);
 	cl_solid_players = Cvar_Get ("cl_solid_players", "1", CVAR_NONE, NULL);
