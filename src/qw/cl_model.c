@@ -648,9 +648,10 @@ Mod_MakeChains ()
 	int				 stain_size;
 	chain_head_t	lchains[MAX_LIGHTMAPS];
 	chain_head_t	schain;
-	chain_head_t	tchains[bheader->numtextures];
+	chain_head_t	*tchains;
 
-	memset (&tchains, 0, sizeof(tchains));
+	tchains = Zone_Alloc(tempzone, sizeof(chain_head_t) * bheader->numtextures);
+
 	memset (&lchains, 0, sizeof(lchains));
 	memset (&schain, 0, sizeof(schain));
 
@@ -771,6 +772,8 @@ Mod_MakeChains ()
 				Mod_RemakeChain (&tchains[i], NULL);
 		}
 	}
+
+	Zone_Free(tchains);
 }
 
 /*
