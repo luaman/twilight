@@ -110,6 +110,17 @@ AC_ARG_WITH(userconf,
 	with_userconf="$USERCONF")
 AC_DEFINE_UNQUOTED(USERCONF, "$with_userconf")
 
+dnl Allow partial builds
+AC_ARG_WITH(servers,
+	[  --without-servers       Disables dedicated servers],,
+	with_servers="yes")
+AM_CONDITIONAL(SERVERS, test "x$with_servers" != "xno")
+
+AC_ARG_WITH(clients,
+	[  --without-clients       Disables clients],,
+	with_clients="yes")
+AM_CONDITIONAL(CLIENTS, test "x$with_clients" != "xno")
+
 dnl Check for SDL, fatal if not found
 AM_PATH_SDL(1.2.0,
 	,
