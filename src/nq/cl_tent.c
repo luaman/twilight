@@ -38,6 +38,10 @@ sfx_t      *cl_sfx_imp;
 sfx_t      *cl_sfx_rail;
 #endif
 
+model_t	   *cl_bolt1_mod;
+model_t	   *cl_bolt2_mod;
+model_t	   *cl_bolt3_mod;
+
 /*
 =================
 CL_ParseTEnt
@@ -53,10 +57,15 @@ CL_InitTEnts (void)
 	cl_sfx_ric2 = S_PrecacheSound ("weapons/ric2.wav");
 	cl_sfx_ric3 = S_PrecacheSound ("weapons/ric3.wav");
 	cl_sfx_r_exp3 = S_PrecacheSound ("weapons/r_exp3.wav");
+
 #ifdef QUAKE2
 	cl_sfx_imp = S_PrecacheSound ("shambler/sattck1.wav");
 	cl_sfx_rail = S_PrecacheSound ("weapons/lstart.wav");
 #endif
+
+	cl_bolt1_mod = Mod_ForName ("progs/bolt.mdl", true);
+	cl_bolt2_mod = Mod_ForName ("progs/bolt2.mdl", true);
+	cl_bolt3_mod = Mod_ForName ("progs/bolt3.mdl", true);
 }
 
 /*
@@ -212,15 +221,15 @@ CL_ParseTEnt (void)
 			break;
 
 		case TE_LIGHTNING1:			// lightning bolts
-			CL_ParseBeam (Mod_ForName ("progs/bolt.mdl", true));
+			CL_ParseBeam (cl_bolt1_mod);
 			break;
 
 		case TE_LIGHTNING2:			// lightning bolts
-			CL_ParseBeam (Mod_ForName ("progs/bolt2.mdl", true));
+			CL_ParseBeam (cl_bolt2_mod);
 			break;
 
 		case TE_LIGHTNING3:			// lightning bolts
-			CL_ParseBeam (Mod_ForName ("progs/bolt3.mdl", true));
+			CL_ParseBeam (cl_bolt3_mod);
 			break;
 
 // PGM 01/21/97 
