@@ -8,7 +8,8 @@ SUBDIRS=include nq qw qw-server doc gamecode debian
 
 EXTRA_DIST= \
 	acconfig.h autogen.sh \
-	twilight.dsw
+	twilight.dsw \
+	twilight.spec
 
 ChangeLog:
 if CVS2CL

@@ -105,6 +105,7 @@ AC_DEFINE_UNQUOTED(GL_LIBRARY, "$with_opengl")
 
 AC_OUTPUT(
 	Makefile
+	twilight.spec
 	include/Makefile
 	nq/Makefile
 	qw/Makefile
