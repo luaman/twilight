@@ -364,7 +364,7 @@ Mod_LoadAliasModel
 =================
 */
 void
-Mod_LoadAliasModel (model_t *mod, void *buffer)
+Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 {
 	int					i, j, k, v;
 	float				s, t;
@@ -376,6 +376,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	daliasframetype_t	*pframetype;
 	qboolean			typeSingle = false;
 
+	flags = flags;
 	// Clear the arrays to NULL.
 	memset (vseams, 0, sizeof(vseams));
 	memset (vremap, 0, sizeof(vremap));

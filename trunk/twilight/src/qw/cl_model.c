@@ -41,17 +41,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-extern model_t	*loadmodel;
-
-void	Mod_UnloadAliasModel (model_t *mod);
-void	Mod_LoadAliasModel (model_t *mod, void *buffer);
-
-void	Mod_LoadBrushModel (model_t *mod, void *buffer);
-void	Mod_UnloadBrushModel (model_t *mod);
-
-void	Mod_LoadSpriteModel (model_t *mod, void *buffer);
-void	Mod_UnloadSpriteModel (model_t *mod);
-
 void
 Mod_UnloadModel (model_t *mod)
 {
@@ -60,14 +49,19 @@ Mod_UnloadModel (model_t *mod)
 
 	switch (mod->type) {
 		case mod_alias:
-			Mod_UnloadAliasModel (mod);
+			mod->type = mod_alias;
+			if (mod->modflags & FLAG_RENDER)
+				Mod_UnloadAliasModel (mod);
 			break;
 
 		case mod_sprite:
-			Mod_UnloadSpriteModel (mod);
+			mod->type = mod_sprite;
+			if (mod->modflags & FLAG_RENDER)
+				Mod_UnloadSpriteModel (mod);
 			break;
 
 		case mod_brush:
+			mod->type = mod_brush;
 			Mod_UnloadBrushModel (mod);
 			break;
 	}
@@ -82,7 +76,7 @@ Loads a model into the cache
 ==================
 */
 model_t *
-Mod_LoadModel (model_t *mod, qboolean crash)
+Mod_LoadModel (model_t *mod, int flags)
 {
 	void		*buf;
 
@@ -94,14 +88,10 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 //
 	buf = (unsigned *) COM_LoadTempFile (mod->name, true);
 	if (!buf) {
-		if (crash)
+		if (flags & FLAG_CRASH)
 			Host_EndGame ("Mod_LoadModel: %s not found", mod->name);
 		return NULL;
 	}
-//
-// allocate a new model
-//
-	loadmodel = mod;
 
 //
 // fill it in
@@ -112,36 +102,42 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 
 	switch (LittleLong (*(unsigned *) buf)) {
 		case IDPOLYHEADER:
-			Mod_LoadAliasModel (mod, buf);
-			// FIXME: This is a HACK!
-			if (!strcmp (loadmodel->name, "progs/player.mdl") ||
-					!strcmp (loadmodel->name, "progs/eyes.mdl")) {
-				int crc;
+			if (flags & FLAG_RENDER)
+			{
+				Mod_LoadAliasModel (mod, buf, flags);
+				// FIXME: This is a HACK!
+				if (!strcmp (mod->name, "progs/player.mdl") ||
+						!strcmp (mod->name, "progs/eyes.mdl")) {
+					int crc;
 
-				crc = CRC_Block (buf, com_filesize);
+					crc = CRC_Block (buf, com_filesize);
 
-				Info_SetValueForKey (cls.userinfo,
-						!strcmp (loadmodel->name, "progs/player.mdl")
-						? pmodel_name : emodel_name, va("%d", crc),
-						MAX_INFO_STRING);
+					Info_SetValueForKey (cls.userinfo,
+							!strcmp (mod->name, "progs/player.mdl")
+							? pmodel_name : emodel_name, va("%d", crc),
+							MAX_INFO_STRING);
 
-				if (cls.state >= ca_connected) {
-					MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-					SZ_Print (&cls.netchan.message, va("setinfo %s %d",
-								!strcmp (loadmodel->name, "progs/player.mdl") ?
-								pmodel_name : emodel_name, crc));
+					if (cls.state >= ca_connected) {
+						MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
+						SZ_Print (&cls.netchan.message, va("setinfo %s %d",
+									!strcmp (mod->name, "progs/player.mdl") ?
+									pmodel_name : emodel_name, crc));
+					}
 				}
 			}
 			break;
 
 		case IDSPRITEHEADER:
-			Mod_LoadSpriteModel (mod, buf);
+			if (flags & FLAG_RENDER)
+				Mod_LoadSpriteModel (mod, buf, flags);
 			break;
 
 		default:
-			Mod_LoadBrushModel (mod, buf);
+			Mod_LoadBrushModel (mod, buf, flags);
 			break;
 	}
+
+	mod->modflags |= flags;
 
 	Zone_Free (buf);
 	return mod;

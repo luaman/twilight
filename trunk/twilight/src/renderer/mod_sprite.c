@@ -39,7 +39,6 @@ static const char rcsid[] =
 #include "gl_textures.h"
 #include "mod_sprite.h"
 
-extern model_t	*loadmodel;
 extern vec3_t	 bboxmin, bboxmax;
 extern float	 bboxradius, bboxyawradius;
 
@@ -52,7 +51,8 @@ Mod_LoadSpriteFrame
 =================
 */
 void *
-Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
+Mod_LoadSpriteFrame (void *pin, model_t *mod, mspriteframe_t **ppframe,
+		int framenum)
 {
 	dspriteframe_t	*pinframe;
 	mspriteframe_t	*pspriteframe;
@@ -64,7 +64,7 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 	height = LittleLong (pinframe->height);
 	size = width * height;
 
-	pspriteframe = Zone_Alloc (loadmodel->zone, sizeof (mspriteframe_t));
+	pspriteframe = Zone_Alloc (mod->zone, sizeof (mspriteframe_t));
 
 	memset (pspriteframe, 0, sizeof (mspriteframe_t));
 
@@ -86,7 +86,7 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 		bboxradius = i;
 
 	pspriteframe->gl_texturenum =
-		GL_LoadTexture (va("%s_%i", loadmodel->name, framenum), width, height,
+		GL_LoadTexture (va("%s_%i", mod->name, framenum), width, height,
 				(Uint8 *) (pinframe + 1), TEX_MIPMAP|TEX_ALPHA, 8);
 
 	return (void *) ((Uint8 *) pinframe + sizeof (dspriteframe_t) + size);
@@ -99,7 +99,8 @@ Mod_LoadSpriteGroup
 =================
 */
 void *
-Mod_LoadSpriteGroup (void *pin, mspriteframe_t **ppframe, int framenum)
+Mod_LoadSpriteGroup (void *pin, model_t *mod, mspriteframe_t **ppframe,
+		int framenum)
 {
 	dspritegroup_t		*pingroup;
 	mspritegroup_t		*pspritegroup;
@@ -112,7 +113,7 @@ Mod_LoadSpriteGroup (void *pin, mspriteframe_t **ppframe, int framenum)
 
 	numframes = LittleLong (pingroup->numframes);
 
-	pspritegroup = Zone_Alloc (loadmodel->zone, sizeof (mspritegroup_t)
+	pspritegroup = Zone_Alloc (mod->zone, sizeof (mspritegroup_t)
 			+ (numframes - 1) * sizeof (pspritegroup->frames[0]));
 
 	pspritegroup->numframes = numframes;
@@ -121,7 +122,7 @@ Mod_LoadSpriteGroup (void *pin, mspriteframe_t **ppframe, int framenum)
 
 	pin_intervals = (dspriteinterval_t *) (pingroup + 1);
 
-	poutintervals = Zone_Alloc(loadmodel->zone,numframes * sizeof (float));
+	poutintervals = Zone_Alloc(mod->zone, numframes * sizeof (float));
 
 	pspritegroup->intervals = poutintervals;
 
@@ -138,7 +139,7 @@ Mod_LoadSpriteGroup (void *pin, mspriteframe_t **ppframe, int framenum)
 
 	for (i = 0; i < numframes; i++) {
 		ptemp =
-			Mod_LoadSpriteFrame (ptemp, &pspritegroup->frames[i],
+			Mod_LoadSpriteFrame (ptemp, mod, &pspritegroup->frames[i],
 								 framenum * 100 + i);
 	}
 
@@ -152,7 +153,7 @@ Mod_LoadSpriteModel
 =================
 */
 void
-Mod_LoadSpriteModel (model_t *mod, void *buffer)
+Mod_LoadSpriteModel (model_t *mod, void *buffer, int flags)
 {
 	int					i;
 	int					version;
@@ -161,6 +162,8 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 	int					numframes;
 	int					size;
 	dspriteframetype_t	*pframetype;
+
+	flags = flags;
 
 	pin = (dsprite_t *) buffer;
 
@@ -203,11 +206,11 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 
 		if (frametype == SPR_SINGLE) {
 			pframetype = (dspriteframetype_t *)
-				Mod_LoadSpriteFrame (pframetype + 1,
+				Mod_LoadSpriteFrame (pframetype + 1, mod,
 									 &psprite->frames[i].frameptr, i);
 		} else {
 			pframetype = (dspriteframetype_t *)
-				Mod_LoadSpriteGroup (pframetype + 1,
+				Mod_LoadSpriteGroup (pframetype + 1, mod,
 									 &psprite->frames[i].frameptr, i);
 		}
 	}

@@ -368,7 +368,7 @@ SV_SpawnServer (char *server)
 	sv.time = 1.0;
 
 	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
-	sv.worldmodel = Mod_ForName (sv.modelname, true);
+	sv.worldmodel = Mod_ForName (sv.modelname, FLAG_SUBMODELS | FLAG_CRASH);
 	SV_CalcPHS ();
 
 	// 
@@ -383,7 +383,7 @@ SV_SpawnServer (char *server)
 	sv.models[1] = sv.worldmodel;
 	for (i = 1; i < sv.worldmodel->brush->numsubmodels; i++) {
 		sv.model_precache[1 + i] = localmodels[i];
-		sv.models[i + 1] = Mod_ForName (localmodels[i], false);
+		sv.models[i + 1] = Mod_ForName (localmodels[i], 0);
 	}
 
 	// check player/eyes models for hacks

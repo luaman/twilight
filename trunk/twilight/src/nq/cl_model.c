@@ -39,17 +39,6 @@ static const char rcsid[] =
 #include "gl_textures.h"
 #include <math.h>
 
-extern model_t	*loadmodel;
-
-void	Mod_UnloadAliasModel (model_t *mod);
-void	Mod_LoadAliasModel (model_t *mod, void *buffer);
-
-void	Mod_LoadBrushModel (model_t *mod, void *buffer);
-void	Mod_UnloadBrushModel (model_t *mod);
-
-void	Mod_LoadSpriteModel (model_t *mod, void *buffer);
-void	Mod_UnloadSpriteModel (model_t *mod);
-
 void
 Mod_UnloadModel (model_t *mod)
 {
@@ -58,11 +47,13 @@ Mod_UnloadModel (model_t *mod)
 
 	switch (mod->type) {
 		case mod_alias:
-			Mod_UnloadAliasModel (mod);
+			if (mod->modflags & FLAG_RENDER)
+				Mod_UnloadAliasModel (mod);
 			break;
 
 		case mod_sprite:
-			Mod_UnloadSpriteModel (mod);
+			if (mod->modflags & FLAG_RENDER)
+				Mod_UnloadSpriteModel (mod);
 			break;
 
 		case mod_brush:
@@ -80,7 +71,7 @@ Loads a model into the cache
 ==================
 */
 model_t *
-Mod_LoadModel (model_t *mod, qboolean crash)
+Mod_LoadModel (model_t *mod, int flags)
 {
 	unsigned	*buf;
 
@@ -92,12 +83,10 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 //
 	buf = (unsigned *) COM_LoadTempFile (mod->name, true);
 	if (!buf) {
-		if (crash)
+		if (flags & FLAG_CRASH)
 			Host_EndGame ("Mod_LoadModel: %s not found", mod->name);
 		return NULL;
 	}
-
-	loadmodel = mod;
 
 //
 // fill it in
@@ -108,17 +97,24 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 
 	switch (LittleLong (*(unsigned *) buf)) {
 		case IDPOLYHEADER:
-			Mod_LoadAliasModel (mod, buf);
+			mod->type = mod_alias;
+			if (flags & FLAG_RENDER)
+				Mod_LoadAliasModel (mod, buf, flags);
 			break;
 
 		case IDSPRITEHEADER:
-			Mod_LoadSpriteModel (mod, buf);
+			mod->type = mod_sprite;
+			if (flags & FLAG_RENDER)
+				Mod_LoadSpriteModel (mod, buf, flags);
 			break;
 
 		default:
-			Mod_LoadBrushModel (mod, buf);
+			mod->type = mod_brush;
+			Mod_LoadBrushModel (mod, buf, flags);
 			break;
 	}
+
+	mod->modflags |= flags;
 
 	Zone_Free (buf);
 	return mod;

@@ -525,8 +525,10 @@ Host_ClearMemory (void)
 	Mod_ClearAll ();
 
 	cls.signon = 0;
-	Zone_EmptyZone (sv_zone);
-	Zone_EmptyZone (cl_zone);
+	if (sv_zone)
+		Zone_EmptyZone (sv_zone);
+	if (cl_zone)
+		Zone_EmptyZone (cl_zone);
 	memset (&sv, 0, sizeof (sv));
 	memset (&cl, 0, sizeof (cl));
 }
@@ -823,7 +825,7 @@ Host_Init ()
 	COM_Init_Cvars ();				// filesystem related variables
 	Con_Init_Cvars ();				// console related cvars
 	Key_Init_Cvars ();				// key related cvars
-	Mod_Init_Cvars();				// model related cvars
+	Surf_Init_Cvars();				// model related cvars
 	Chase_Init_Cvars ();			// chase camera related cvars
 	SCR_Init_Cvars ();				// screen(?) related cvars
 	VID_Init_Cvars();				// video related cvars
