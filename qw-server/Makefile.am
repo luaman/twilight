@@ -2,6 +2,8 @@
 #
 # This file is intended to be processed by automake
 
+INCLUDES= -I$(top_srcdir)/include
+
 bin_PROGRAMS=twilight-qwsv
 
 twilight_qwsv_SOURCES= \

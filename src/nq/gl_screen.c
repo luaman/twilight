@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // screen.c -- master for refresh, status bar, console, chat, notify, etc
 
 #include "quakedef.h"
+#include "glquake.h"
 
 /*
 
@@ -626,7 +627,7 @@ SCR_ScreenShot_f (void)
 	buffer[15] = glheight >> 8;
 	buffer[16] = 24;					// pixel size
 
-	glReadPixels (glx, gly, glwidth, glheight, GL_RGB, GL_UNSIGNED_BYTE,
+	qglReadPixels (glx, gly, glwidth, glheight, GL_RGB, GL_UNSIGNED_BYTE,
 				  buffer + 18);
 
 	// swap rgb to bgr

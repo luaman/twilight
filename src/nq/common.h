@@ -19,27 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // comndef.h  -- general definitions
 
-#if !defined BYTE_DEFINED
-typedef unsigned char byte;
+#ifndef _COMMON_H
+#define _COMMON_H
 
-#define BYTE_DEFINED 1
-#endif
-
-#undef true
-#undef false
-
-typedef enum { false, true } qboolean;
-
-#ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
-#ifndef bound
-#define bound(a,b,c) (max(a, min(b, c)))
-#endif
-
+#include "qtypes.h"
 
 //============================================================================
 
@@ -232,3 +215,5 @@ extern struct cvar_s *registered;
 
 extern qboolean standard_quake, rogue, hipnotic;
 
+
+#endif // _COMMON_H

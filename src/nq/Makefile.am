@@ -2,12 +2,14 @@
 #
 # This file is intended to be processed by automake
 
+INCLUDES= -I$(top_srcdir)/include
+
 bin_PROGRAMS=twilight-nq
 
 twilight_nq_SOURCES= \
 	chase.c cl_demo.c cl_input.c cl_main.c cl_parse.c cl_tent.c \
 	cmd.c cmd.h common.c common.h console.c console.h crc.c crc.h \
-	cvar.c cvar.h \
+	cvar.c cvar.h gl_funcs.c \
 	gl_draw.c gl_mesh.c gl_model.c gl_model.h spritegn.h modelgen.h \
 	gl_refrag.c gl_rlight.c gl_rmain.c anorms.h anorm_dots.h gl_rmisc.c \
 	gl_rsurf.c gl_screen.c screen.h gl_warp.c gl_warp_sin.h glquake.h \

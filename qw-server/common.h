@@ -19,15 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // comndef.h  -- general definitions
 
-typedef unsigned char byte;
+#ifndef _COMMON_H
+#define _COMMON_H
 
-#define _DEF_BYTE_
-
-// KJB Undefined true and false defined in SciTech's DEBUG.H header
-#undef true
-#undef false
-
-typedef enum { false, true } qboolean;
+#include "qtypes.h"
 
 #define	MAX_INFO_STRING	196
 #define	MAX_SERVERINFO_STRING	512
@@ -235,3 +230,5 @@ byte        COM_BlockSequenceCheckByte (byte * base, int length, int sequence,
 byte        COM_BlockSequenceCRCByte (byte * base, int length, int sequence);
 
 int         build_number (void);
+
+#endif // _COMMON_H

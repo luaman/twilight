@@ -23,6 +23,7 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "keys.h"
+#include "glquake.h"
 
 #ifdef _WIN32
 #include "winquake.h"

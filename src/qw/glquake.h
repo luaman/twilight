@@ -29,8 +29,9 @@ $Id$
 #include <windows.h>
 #endif
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include "TGL_defines.h"
+#include "TGL_types.h"
+#include "TGL_funcs.h"
 
 void        GL_BeginRendering (int *x, int *y, int *width, int *height);
 void        GL_EndRendering (void);
@@ -239,9 +240,6 @@ void        R_TranslatePlayerSkin (int playernum);
 #define GL_TEXTURE2_ARB					0x84C2
 #define GL_TEXTURE3_ARB					0x84C3
 // note: ARB supports up to 32 units, but only 2 are currently used in this engine
-#endif
-
-#ifdef _WIN32
 #endif
 
 typedef void (APIENTRY * lpMTexFUNC) (GLenum, GLfloat, GLfloat);

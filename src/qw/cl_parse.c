@@ -24,6 +24,7 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "keys.h"
+#include "glquake.h"
 
 char       *svc_strings[] = {
 	"svc_bad",

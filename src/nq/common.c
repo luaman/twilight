@@ -1377,7 +1377,9 @@ COM_FindFile (char *filename, int *handle, FILE ** file)
 				}
 		} else {
 			// check a file in the directory tree
-			if (strchr (filename, '/') || strchr (filename, '\\'))
+			if (filename[0] == '/' || filename[0] == '\\')
+				continue;
+			if (strstr (filename, ".."))
 				continue;
 
 			snprintf (netpath, sizeof (netpath), "%s/%s", search->filename,
