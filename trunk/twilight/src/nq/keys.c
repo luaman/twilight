@@ -193,7 +193,7 @@ CheckForCommand (void)
 	return true;
 }
 
-static void
+void
 Key_ClearEditLine (int edit_line)
 {
 	memset (key_lines[edit_line], '\0', MAX_INPUTLINE);

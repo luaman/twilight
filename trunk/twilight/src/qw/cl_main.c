@@ -1148,7 +1148,6 @@ CL_Init (void)
 	CL_InitPrediction ();
 	CL_InitCam ();
 	CL_InitSkins ();
-	GLT_Init ();
 	Pmove_Init ();
 	Team_Init ();
 

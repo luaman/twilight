@@ -36,6 +36,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "gl_textures.h"
+#include "gl_info.h"
 #include <math.h>
 #include "surface.h"
 #include "sky.h"
@@ -144,20 +145,16 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 			if (dmiptex->name[0] == '*')
 				// we don't brighten turb textures
 				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width,
-						tx->height, (Uint8 *)(mtdata), TEX_MIPMAP, 8);
+						tx->height, (Uint8 *)(mtdata), d_palette_raw,
+						TEX_MIPMAP, 8);
 			else
 			{
 				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width,
-						tx->height, (Uint8 *)(mtdata), TEX_MIPMAP, 8);
-
-				if (Img_HasFullbrights ((Uint8 *)(mtdata),
-							tx->width * tx->height))
-				{
-					tx->fb_texturenum = GL_LoadTexture (
-							va("@fb_%s", dmiptex->name),
-							tx->width, tx->height, (Uint8 *)(mtdata),
-							TEX_MIPMAP|TEX_FBMASK, 8);
-				}
+						tx->height, (Uint8 *)(mtdata), d_palette_base,
+						TEX_MIPMAP, 8);
+				tx->fb_texturenum = GL_LoadTexture (va("@fb_%s", dmiptex->name),
+						tx->width, tx->height, (Uint8 *)(mtdata),
+						d_palette_fb, TEX_MIPMAP, 8);
 			}
 		}
 	}

@@ -130,6 +130,7 @@ void Key_Init_Cvars (void);
 void Key_Init (void);
 void Key_WriteBindings (FILE * f);
 void Key_SetBinding (int keynum, char *binding);
+void Key_ClearEditLine (int edit_line);
 void Key_ClearStates (void);
 
 #endif // __KEYS_H

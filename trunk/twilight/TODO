@@ -16,8 +16,6 @@ Bugs we know about:
     (Can LH do this /please/?)
   - RC: Need to print out Id's Copyright message on engine startup.
     (Knghtbrd? What exactly needs to be printed?)
-  - RC: textures with fullbrights need their base color black, see below for
-    how this could be done simply...
   - RC: userpath is not properly created if it doesn't exist.  Needs to be.
   - RC: twilight should create ~/.twilight and ~/.twilight/id1 on demand (and
     any other mod directories as needed)
@@ -50,10 +48,9 @@ Bugs we know about:
 
 Stuff that isn't needed for 0.2, but would be nice:
 
-  - Cleanup of fullbright palette stuff.  Best solution seems to be to have
-    several copies of the palette, one full, one fullbright only, one pants,
-    one shirt, etc.  This would greatly simplify uploading fullbright
-    textures and removal of fullbrights from base textures.
+  - It should be possibile to override the colormap as to the number of
+    fullbrights, to say, 0. (Load time)
+  - Being able to restart the renderer would be useful.
   - clean up the menus, make sure all cvar graphics options
     are listed on the graphics options menu in both nq/qw
   - clean up the Cmd system

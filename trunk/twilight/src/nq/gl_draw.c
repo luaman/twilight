@@ -280,7 +280,7 @@ R_LoadPointer (const char *name, const char *data)
 	img.height = 32;
 	img.pixels = (Uint8 *)pixels;
 
-	return R_LoadTexture (name, &img, TEX_ALPHA);
+	return R_LoadTexture (name, &img, NULL, TEX_ALPHA);
 }
 
 /*
@@ -328,11 +328,13 @@ Draw_Init (void)
 	resamplezone = Zone_AllocZone("Texture Processing Buffers");
 	texturezone = Zone_AllocZone ("gltextures entries");
 
+	GLT_Init ();
+
 	img = Image_Load ("conchars");
 	if (!img)
 		Sys_Error ("Draw_Init: Unable to load conchars\n");
 	
-	char_texture = R_LoadTexture ("charset", img, TEX_ALPHA);
+	char_texture = R_LoadTexture ("charset", img, NULL, TEX_ALPHA);
 
 	// Keep track of the first crosshair texture
 	for (i = 0; i < NUM_CROSSHAIRS; i++)
@@ -670,7 +672,7 @@ Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
 			if (p == 255)
 				dest[u] = p;
 			else
-				dest[u] = d_8to32table[translation[p]];
+				dest[u] = d_palette_raw[translation[p]];
 		}
 	}
 
@@ -1095,8 +1097,6 @@ GL_MipMap (Uint8 *in, Uint8 *out, int width, int height)
 
 static int scaledsize = 0;
 static Uint32 *scaled, *scaled2;
-static int transsize = 0;
-static Uint32 *trans;
 
 static void
 AssertScaledBuffer (int scaled_width, int scaled_height)
@@ -1162,7 +1162,7 @@ GL_MipMapTexture (Uint32 *data, int width, int height, int samples)
 GL_Upload32
 ===============
 */
-void
+qboolean
 GL_Upload32 (Uint32 *data, int width, int height, int flags)
 {
 	int		 samples, scaled_width, scaled_height;
@@ -1213,6 +1213,8 @@ GL_Upload32 (Uint32 *data, int width, int height, int flags)
 
 	if (!gl_sgis_mipmap && (flags & TEX_MIPMAP))
 		GL_MipMapTexture (final, scaled_width, scaled_height, samples);
+
+	return true;
 }
 
 
@@ -1221,65 +1223,16 @@ GL_Upload32 (Uint32 *data, int width, int height, int flags)
 GL_Upload8
 ===============
 */
-void
-GL_Upload8 (Uint8 *data, int width, int height, unsigned *ttable, int flags)
+qboolean
+GL_Upload8 (Uint8 *data, int width, int height, Uint32 *palette, int flags)
 {
-	int i, s = width * height, p, noalpha;
-	Uint32 *table = ttable ? ttable : d_8to32table;
+	Uint32 *trans;
 
-	if (transsize < s)
-	{
-		transsize = s;
-		if (trans)
-			Zone_Free(trans);
-		trans = NULL;
-	}
+	trans = GLT_8to32_convert(data, width, height, palette);
+	if (!trans)
+		return false;
 
-	if (trans == NULL)
-		trans = Zone_Alloc(resamplezone, transsize * 4);
-
-	if (flags & TEX_FBMASK)
-	{
-		/*
-		 * this is a fullbright mask, so make all non-fullbright
-		 * colors transparent
-		 */
-		for (i = 0; i < s; i++)
-		{
-			p = *data++;
-			if (p < FIRST_FB)
-				trans[i] = 0;			/* transparent */
-			else
-				trans[i] = table[p];	/* fullbright */
-		}
-		flags |= TEX_ALPHA;
-	}
-	else if (TEX_ALPHA)
-	{
-		noalpha = true;
-		for (i = 0; i < s; i++)
-		{
-			p = *data++;
-			if (p == 255)
-				noalpha = false;
-			trans[i] = table[p];
-		}
-
-		if (noalpha)
-			flags &= ~TEX_ALPHA;
-	} else {
-		if (s & 3)
-			Host_EndGame ("GL_Upload8: s&3");
-		for (i = 0; i < s; i += 4)
-		{
-			trans[i] = table[data[i]];
-			trans[i + 1] = table[data[i + 1]];
-			trans[i + 2] = table[data[i + 2]];
-			trans[i + 3] = table[data[i + 3]];
-		}
-	}
-
-	GL_Upload32 (trans, width, height, flags);
+	return GL_Upload32 (trans, width, height, flags);
 }
 
 /*
@@ -1293,10 +1246,11 @@ FIXME: HACK HACK HACK - this is just a GL_LoadTexture for image_t's for now
 ================
 */
 int
-R_LoadTexture (const char *identifier, image_t *img, int flags)
+R_LoadTexture (const char *identifier, image_t *img, Uint32 *palette, int flags)
 {
-	gltexture_t *glt = NULL;
-	unsigned short crc = 0;
+	gltexture_t	*glt = NULL;
+	Uint16		crc = 0;
+	qboolean	ret = 0;
 
 	if (isDedicated)
 		return 0;
@@ -1340,17 +1294,21 @@ setuptexture:
 	switch (img->type)
 	{
 		case IMG_QPAL:
-			GL_Upload8 (img->pixels, img->width, img->height, NULL, flags);
+			ret = GL_Upload8 (img->pixels, img->width, img->height, palette,
+					flags);
 			break;
 		case IMG_RGBA:
-			GL_Upload32 ((Uint32 *) img->pixels, img->width, img->height,
+			ret = GL_Upload32 ((Uint32 *) img->pixels, img->width, img->height,
 					flags);
 			break;
 		default:
 			Sys_Error ("Bad bpp!");
 	}
+	if (ret)
+		return glt->texnum;
 
-	return glt->texnum;
+	GL_DeleteTexture (glt->texnum);
+	return 0;
 }
 
 
@@ -1361,10 +1319,11 @@ GL_LoadTexture
 */
 int
 GL_LoadTexture (const char *identifier, Uint width, Uint height, Uint8 *data,
-		int flags, int bpp)
+		Uint32 *palette, int flags, int bpp)
 {
-	gltexture_t *glt = NULL;
-	unsigned short crc = 0;
+	gltexture_t	*glt = NULL;
+	Uint16		crc = 0;
+	qboolean	ret = false;
 
 	if (isDedicated)
 		return 0;
@@ -1407,16 +1366,20 @@ setuptexture:
 
 	switch (bpp) {
 		case 8:
-			GL_Upload8 (data, width, height, NULL, flags);
+			ret = GL_Upload8 (data, width, height, palette, flags);
 			break;
 		case 32:
-			GL_Upload32 ((Uint32 *) data, width, height, flags);
+			ret = GL_Upload32 ((Uint32 *) data, width, height, flags);
 			break;
 		default:
 			Sys_Error ("Bad bpp!");
 	}
 
-	return glt->texnum;
+	if (ret)
+		return glt->texnum;
+
+	GL_DeleteTexture (glt->texnum);
+	return 0;
 }
 
 qboolean
@@ -1449,6 +1412,7 @@ GL_LoadPicTexture
 int
 GL_LoadPicTexture (qpic_t *pic)
 {
-	return GL_LoadTexture ("", pic->width, pic->height, pic->data, TEX_ALPHA, 8);
+	return GL_LoadTexture ("", pic->width, pic->height, pic->data, NULL,
+			TEX_ALPHA, 8);
 }
 
