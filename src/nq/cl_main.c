@@ -344,6 +344,45 @@ CL_AllocDlight (int key)
 	return dl;
 }
 
+/*
+===============
+CL_NewDlight
+===============
+*/
+void
+CL_NewDlight (int key, vec3_t org, float radius, float time,
+			  int type)
+{
+	dlight_t   *dl = CL_AllocDlight (key);
+
+	dl->radius = radius;
+	dl->die = cl.time + time;
+
+	if (type == 0) // Normal
+	{
+		dl->color[0] = 0.86;
+		dl->color[1] = 0.31;
+		dl->color[2] = 0.24;
+	} 
+	else if (type == 1) // Blue
+	{
+		dl->color[0] = 0.24;
+		dl->color[1] = 0.24;
+		dl->color[2] = 0.86;
+	} 
+	else if (type == 2) // Red
+	{
+		dl->color[0] = 0.86;
+		dl->color[1] = 0.24;
+		dl->color[2] = 0.24;
+	} 
+	else if (type == 3) // Purple
+	{
+		dl->color[0] = 0.86;
+		dl->color[1] = 0.24;
+		dl->color[2] = 0.86;
+	}
+}
 
 /*
 ===============
@@ -513,25 +552,57 @@ CL_RelinkEntities (void)
 
 		}
 
-// rotate binary objects locally
-		if (ent->model->flags & EF_ROTATE)
-			ent->angles[1] = bobjrotate;
+		if (ent->effects)
+		{
+			if (ent->effects & EF_BRIGHTFIELD)
+				R_EntityParticles (ent);
 
-		if (ent->effects & EF_BRIGHTFIELD)
-			R_EntityParticles (ent);
+			if (ent->effects & EF_MUZZLEFLASH) {
+				// don't draw our own muzzle flash if flashblending
+				if (i != cl.viewentity || chase_active->value || !gl_flashblend->value) {
+					vec3_t      fv, rv, uv;
 
-		if (ent->effects & EF_MUZZLEFLASH) {
-			// don't draw our own muzzle flash if flashblending
-			if (i != cl.viewentity || chase_active->value || !gl_flashblend->value) {
-				vec3_t      fv, rv, uv;
+					dl = CL_AllocDlight (i);
+					VectorCopy (ent->origin, dl->origin);
+					AngleVectors (ent->angles, fv, rv, uv);
+					VectorMA (dl->origin, 18, fv, dl->origin);
 
+					if (!gl_flashblend->value && !gl_oldlights->value)
+					{			
+						memset (&tr, 0, sizeof(tr));
+
+						VectorCopy (dl->origin, tr.endpos);
+
+						SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ent->origin, dl->origin, &tr);
+						
+						VectorCopy (tr.endpos, dl->origin);
+					}
+
+					dl->radius = 200 + (Q_rand () & 31);
+					dl->minlight = 32;
+					dl->die = cl.time + 0.1;
+				}
+			}
+
+			// spawn light flashes, even ones coming from invisible objects
+			if ((ent->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
+				CL_NewDlight (i, ent->origin,
+					  200 + (Q_rand () & 31), 0.1, 3);
+			else if (ent->effects & EF_BLUE)
+				CL_NewDlight (i, ent->origin,
+					  200 + (Q_rand () & 31), 0.1, 1);
+			else if (ent->effects & EF_RED)
+				CL_NewDlight (i, ent->origin,
+					  200 + (Q_rand () & 31), 0.1, 2);
+			else if (ent->effects & EF_BRIGHTLIGHT) {
 				dl = CL_AllocDlight (i);
 				VectorCopy (ent->origin, dl->origin);
-				AngleVectors (ent->angles, fv, rv, uv);
-				VectorMA (dl->origin, 18, fv, dl->origin);
+				dl->origin[2] += 16;
 
 				if (!gl_flashblend->value && !gl_oldlights->value)
-				{			
+				{
+					trace_t tr;
+					
 					memset (&tr, 0, sizeof(tr));
 
 					VectorCopy (dl->origin, tr.endpos);
@@ -541,58 +612,39 @@ CL_RelinkEntities (void)
 					VectorCopy (tr.endpos, dl->origin);
 				}
 
-				dl->radius = 200 + (Q_rand () & 31);
-				dl->minlight = 32;
-				dl->die = cl.time + 0.1;
+				dl->radius = 400 + (Q_rand () & 31);
+				dl->die = cl.time + 0.001;
+			}
+			else if (ent->effects & EF_DIMLIGHT) {
+				CL_NewDlight (i, ent->origin,
+					  200 + (Q_rand () & 31), 0.001, 0);
 			}
 		}
 
-		if (ent->effects & EF_BRIGHTLIGHT) {
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin, dl->origin);
-			dl->origin[2] += 16;
-
-			if (!gl_flashblend->value && !gl_oldlights->value)
-			{
-				trace_t tr;
-				
-				memset (&tr, 0, sizeof(tr));
-
-				VectorCopy (dl->origin, tr.endpos);
-
-				SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ent->origin, dl->origin, &tr);
-				
-				VectorCopy (tr.endpos, dl->origin);
-			}
-
-			dl->radius = 400 + (Q_rand () & 31);
-			dl->die = cl.time + 0.001;
+// rotate binary objects locally
+		if (ent->model->flags)
+		{
+			if (ent->model->flags & EF_ROTATE)
+				ent->angles[1] = bobjrotate;
+			if (ent->model->flags & EF_GIB)
+				R_RocketTrail (oldorg, ent->origin, 2);
+			else if (ent->model->flags & EF_ZOMGIB)
+				R_RocketTrail (oldorg, ent->origin, 4);
+			else if (ent->model->flags & EF_TRACER)
+				R_RocketTrail (oldorg, ent->origin, 3);
+			else if (ent->model->flags & EF_TRACER2)
+				R_RocketTrail (oldorg, ent->origin, 5);
+			else if (ent->model->flags & EF_ROCKET) {
+				R_RocketTrail (oldorg, ent->origin, 0);
+				dl = CL_AllocDlight (i);
+				VectorCopy (ent->origin, dl->origin);
+				dl->radius = 200;
+				dl->die = cl.time + 0.01;
+			} else if (ent->model->flags & EF_GRENADE)
+				R_RocketTrail (oldorg, ent->origin, 1);
+			else if (ent->model->flags & EF_TRACER3)
+				R_RocketTrail (oldorg, ent->origin, 6);
 		}
-		if (ent->effects & EF_DIMLIGHT) {
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin, dl->origin);
-			dl->radius = 200 + (Q_rand () & 31);
-			dl->die = cl.time + 0.001;
-		}
-
-		if (ent->model->flags & EF_GIB)
-			R_RocketTrail (oldorg, ent->origin, 2);
-		else if (ent->model->flags & EF_ZOMGIB)
-			R_RocketTrail (oldorg, ent->origin, 4);
-		else if (ent->model->flags & EF_TRACER)
-			R_RocketTrail (oldorg, ent->origin, 3);
-		else if (ent->model->flags & EF_TRACER2)
-			R_RocketTrail (oldorg, ent->origin, 5);
-		else if (ent->model->flags & EF_ROCKET) {
-			R_RocketTrail (oldorg, ent->origin, 0);
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin, dl->origin);
-			dl->radius = 200;
-			dl->die = cl.time + 0.01;
-		} else if (ent->model->flags & EF_GRENADE)
-			R_RocketTrail (oldorg, ent->origin, 1);
-		else if (ent->model->flags & EF_TRACER3)
-			R_RocketTrail (oldorg, ent->origin, 6);
 
 		ent->forcelink = false;
 
@@ -603,7 +655,6 @@ CL_RelinkEntities (void)
 			cl_visedicts[cl_numvisedicts++] = ent;
 		}
 	}
-
 }
 
 

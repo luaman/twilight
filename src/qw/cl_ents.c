@@ -119,21 +119,7 @@ void
 CL_NewDlight (int key, vec3_t org, float radius, float time,
 			  int type)
 {
-	dlight_t   *dl;
-	pmtrace_t	tr;
-
-	dl = CL_AllocDlight (key);
-	VectorCopy (org, dl->origin);
-
-	if (!gl_flashblend->value)
-	{
-		memset (&tr, 0, sizeof(tr));
-
-		VectorCopy (dl->origin, tr.endpos);
-		
-		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, org, dl->origin, &tr);
-		VectorCopy (tr.endpos, dl->origin);
-	}
+	dlight_t   *dl = CL_AllocDlight (key);
 
 	dl->radius = radius;
 	dl->die = cl.time + time;
@@ -365,7 +351,6 @@ CL_ParsePacketEntities (qboolean delta)
 		if (!word) {
 			while (oldindex < oldp->num_entities) {
 				// copy all the rest of the entities from the old packet
-//Con_Printf ("copy %i\n", oldp->entities[oldindex].number);
 				if (newindex >= MAX_PACKET_ENTITIES)
 					Host_EndGame
 						("CL_ParsePacketEntities: newindex == MAX_PACKET_ENTITIES");
@@ -386,7 +371,6 @@ CL_ParsePacketEntities (qboolean delta)
 				FlushEntityPacket ();
 				return;
 			}
-//Con_Printf ("copy %i\n", oldnum);
 			// copy one of the old entities over to the new packet unchanged
 			if (newindex >= MAX_PACKET_ENTITIES)
 				Host_EndGame
@@ -400,7 +384,6 @@ CL_ParsePacketEntities (qboolean delta)
 		}
 
 		if (newnum < oldnum) {			// new from baseline
-//Con_Printf ("baseline %i\n", newnum);
 			if (word & U_REMOVE) {
 				if (full) {
 					cl.validsequence = 0;
@@ -429,7 +412,6 @@ CL_ParsePacketEntities (qboolean delta)
 				oldindex++;
 				continue;
 			}
-//Con_Printf ("delta %i\n",newnum);
 			CL_ParseDelta (&oldp->entities[oldindex], &newp->entities[newindex],
 						   word);
 			newindex++;
@@ -473,22 +455,25 @@ CL_LinkPacketEntities (void)
 		s1 = &pack->entities[pnum];
 		s2 = s1;						// FIXME: no interpolation right now
 
-		// spawn light flashes, even ones coming from invisible objects
-		if ((s1->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
-			CL_NewDlight (s1->number, s1->origin,
-						  200 + (Q_rand () & 31), 0.1, 3);
-		else if (s1->effects & EF_BLUE)
-			CL_NewDlight (s1->number, s1->origin,
-						  200 + (Q_rand () & 31), 0.1, 1);
-		else if (s1->effects & EF_RED)
-			CL_NewDlight (s1->number, s1->origin,
-						  200 + (Q_rand () & 31), 0.1, 2);
-		else if (s1->effects & EF_BRIGHTLIGHT)
-			CL_NewDlight (s1->number, s1->origin,
-						  400 + (Q_rand () & 31), 0.1, 0);
-		else if (s1->effects & EF_DIMLIGHT)
-			CL_NewDlight (s1->number, s1->origin,
-						  200 + (Q_rand () & 31), 0.1, 0);
+		if (s1->effects)
+		{
+			// spawn light flashes, even ones coming from invisible objects
+			if ((s1->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
+				CL_NewDlight (s1->number, s1->origin,
+					  200 + (Q_rand () & 31), 0.1, 3);
+			else if (s1->effects & EF_BLUE)
+				CL_NewDlight (s1->number, s1->origin,
+					  200 + (Q_rand () & 31), 0.1, 1);
+			else if (s1->effects & EF_RED)
+				CL_NewDlight (s1->number, s1->origin,
+					  200 + (Q_rand () & 31), 0.1, 2);
+			else if (s1->effects & EF_BRIGHTLIGHT)
+				CL_NewDlight (s1->number, s1->origin,
+					  400 + (Q_rand () & 31), 0.1, 0);
+			else if (s1->effects & EF_DIMLIGHT)
+				CL_NewDlight (s1->number, s1->origin,
+					  200 + (Q_rand () & 31), 0.1, 0);
+		}
 
 		// if set to invisible, skip
 		if (!s1->modelindex)
@@ -576,24 +561,28 @@ CL_LinkPacketEntities (void)
 				VectorCopy (ent->origin, old_origin);
 				break;
 			}
-		if (model->flags & EF_ROCKET) {
-			R_RocketTrail (old_origin, ent->origin, 0);
-			dl = CL_AllocDlight (s1->number);
-			VectorCopy (ent->origin, dl->origin);
-			dl->radius = 200;
-			dl->die = cl.time + 0.1;
-		} else if (model->flags & EF_GRENADE)
-			R_RocketTrail (old_origin, ent->origin, 1);
-		else if (model->flags & EF_GIB)
-			R_RocketTrail (old_origin, ent->origin, 2);
-		else if (model->flags & EF_ZOMGIB)
-			R_RocketTrail (old_origin, ent->origin, 4);
-		else if (model->flags & EF_TRACER)
-			R_RocketTrail (old_origin, ent->origin, 3);
-		else if (model->flags & EF_TRACER2)
-			R_RocketTrail (old_origin, ent->origin, 5);
-		else if (model->flags & EF_TRACER3)
-			R_RocketTrail (old_origin, ent->origin, 6);
+
+		if (model->flags)
+		{
+			if (model->flags & EF_ROCKET) {
+				R_RocketTrail (old_origin, ent->origin, 0);
+				dl = CL_AllocDlight (s1->number);
+				VectorCopy (ent->origin, dl->origin);
+				dl->radius = 200;
+				dl->die = cl.time + 0.1;
+			} else if (model->flags & EF_GRENADE)
+				R_RocketTrail (old_origin, ent->origin, 1);
+			else if (model->flags & EF_GIB)
+				R_RocketTrail (old_origin, ent->origin, 2);
+			else if (model->flags & EF_ZOMGIB)
+				R_RocketTrail (old_origin, ent->origin, 4);
+			else if (model->flags & EF_TRACER)
+				R_RocketTrail (old_origin, ent->origin, 3);
+			else if (model->flags & EF_TRACER2)
+				R_RocketTrail (old_origin, ent->origin, 5);
+			else if (model->flags & EF_TRACER3)
+				R_RocketTrail (old_origin, ent->origin, 6);
+		}
 	}
 }
 
@@ -867,7 +856,7 @@ CL_LinkPlayers (void)
 			continue;
 
 		// spawn light flashes
-		if (!gl_flashblend->value || j != cl.playernum)
+		if (state->effects && (!gl_flashblend->value || j != cl.playernum))
 		{
 			if (j == cl.playernum)
 			{					// remember, VectorCopy is a macro!
@@ -887,6 +876,7 @@ CL_LinkPlayers (void)
 			else if (state->effects & EF_DIMLIGHT)
 				CL_NewDlight (j, org, 200 + (Q_rand () & 31), 0.1, 0);
 		}
+
 		// the player object never gets added
 		if (j == cl.playernum)
 			continue;
