@@ -714,11 +714,7 @@ R_BlendLightmaps (void)
 			theRect->w = 0;
 		}
 		for (; p; p = p->chain) {
-			if (((r_viewleaf->contents == CONTENTS_EMPTY
-				  && (p->flags & SURF_UNDERWATER))
-				 || (r_viewleaf->contents != CONTENTS_EMPTY
-					 && !(p->flags & SURF_UNDERWATER)))
-				&& !(p->flags & SURF_DONTWARP))
+			if (p->flags & SURF_UNDERWATER && r_waterwarp->value)
 				DrawGLWaterPolyLightmap (p);
 			else {
 				qglBegin (GL_POLYGON);
@@ -768,11 +764,7 @@ R_RenderBrushPoly (msurface_t *fa)
 		return;
 	}
 
-	if (((r_viewleaf->contents == CONTENTS_EMPTY
-		  && (fa->flags & SURF_UNDERWATER))
-		 || (r_viewleaf->contents != CONTENTS_EMPTY
-			 && !(fa->flags & SURF_UNDERWATER)))
-		&& !(fa->flags & SURF_DONTWARP))
+	if (fa->flags & SURF_UNDERWATER && r_waterwarp->value)
 		DrawGLWaterPoly (fa->polys);
 	else
 		DrawGLPoly (fa->polys);
