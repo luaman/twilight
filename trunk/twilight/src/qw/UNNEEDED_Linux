@@ -7,7 +7,5 @@ sys_null.c
 buildnum.c
 sys_wina.s
 math.s
-cd_null.c
-cd_win.c
 winquake.h
 snd_mixa.s

@@ -16,7 +16,7 @@ twilight_nq_SOURCES= \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
 	sys_linux.c sys.h vid_sdl.c vid.h \
 	snd_dma.c snd_mem.c snd_mix.c snd_linux.c sound.h \
-	cd_linux.c cdaudio.h \
+	cd_sdl.c cdaudio.h \
 	view.c view.h wad.c wad.h world.c world.h zone.c zone.h \
 	quakedef.h bspfile.h client.h draw.h input.h keys.h protocol.h \
 	render.h server.h

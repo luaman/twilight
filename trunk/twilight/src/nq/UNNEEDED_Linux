@@ -1,5 +1,3 @@
-cd_null.c
-cd_win.c
 conproc.c
 conproc.h
 math.s
