@@ -126,10 +126,10 @@ typedef struct model_s {
 
 //============================================================================
 
-void Mod_LoadTextures(lump_t *l, model_t *mod);
-void Mod_LoadLighting(lump_t *l, model_t *mod);
-void Mod_LoadTexinfo(lump_t *l, model_t *mod);
-void Mod_LoadRFaces(lump_t *l, model_t *mod);
+void Mod_LoadTextures(dlump_t *l, model_t *mod);
+void Mod_LoadLighting(dlump_t *l, model_t *mod);
+void Mod_LoadTexinfo(dlump_t *l, model_t *mod);
+void Mod_LoadRFaces(dlump_t *l, model_t *mod);
 void Mod_MakeChains(model_t *mod);
 void Mod_RUnloadBrushModel(model_t *mod);
 

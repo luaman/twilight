@@ -122,7 +122,7 @@ Mod_LeafPVS (mleaf_t *leaf, model_t *model)
 }
 
 static void
-Mod_LoadVisibility (lump_t *l, model_t *mod)
+Mod_LoadVisibility (dlump_t *l, model_t *mod)
 {
 	fs_file_t	*file;
 	SDL_RWops	*rw;
@@ -176,7 +176,7 @@ end:
 
 
 static void
-Mod_LoadVertexes (lump_t *l, model_t *mod)
+Mod_LoadVertexes (dlump_t *l, model_t *mod)
 {
 	dvertex_t  *in;
 	vertex_t  *out;
@@ -199,7 +199,7 @@ Mod_LoadVertexes (lump_t *l, model_t *mod)
 }
 
 static void
-Mod_LoadSubmodels (lump_t *l, model_t *mod)
+Mod_LoadSubmodels (dlump_t *l, model_t *mod)
 {
 	dmodel_t   *in;
 	dmodel_t   *out;
@@ -229,7 +229,7 @@ Mod_LoadSubmodels (lump_t *l, model_t *mod)
 }
 
 static void
-Mod_LoadEdges (lump_t *l, model_t *mod)
+Mod_LoadEdges (dlump_t *l, model_t *mod)
 {
 	dedge_t    *in;
 	medge_t    *out;
@@ -251,7 +251,7 @@ Mod_LoadEdges (lump_t *l, model_t *mod)
 }
 
 static void
-Mod_LoadFaces (lump_t *l, model_t *mod)
+Mod_LoadFaces (dlump_t *l, model_t *mod)
 {
 	dface_t		*in;
 	msurface_t	*out;
@@ -294,7 +294,7 @@ Mod_SetParent (mnode_t *node, mnode_t *parent)
 }
 
 static void
-Mod_LoadNodes (lump_t *l, model_t *mod)
+Mod_LoadNodes (dlump_t *l, model_t *mod)
 {
 	int         i, j, count, p;
 	dnode_t    *in;
@@ -334,7 +334,7 @@ Mod_LoadNodes (lump_t *l, model_t *mod)
 }
 
 static void
-Mod_LoadLeafs (lump_t *l, model_t *mod)
+Mod_LoadLeafs (dlump_t *l, model_t *mod)
 {
 	dleaf_t		in;
 	mleaf_t		*out;
@@ -391,7 +391,7 @@ end:
 }
 
 static void
-Mod_LoadClipnodes (lump_t *l, model_t *mod)
+Mod_LoadClipnodes (dlump_t *l, model_t *mod)
 {
 	dclipnode_t *in, *out;
 	int         i, count;
@@ -476,7 +476,7 @@ Mod_MakeHull0 (model_t *mod)
 }
 
 static void
-Mod_LoadMarksurfaces (lump_t *l, model_t *mod)
+Mod_LoadMarksurfaces (dlump_t *l, model_t *mod)
 {
 	Uint32		i, j, count;
 	short		*in;
@@ -500,7 +500,7 @@ Mod_LoadMarksurfaces (lump_t *l, model_t *mod)
 }
 
 static void
-Mod_LoadSurfedges (lump_t *l, model_t *mod)
+Mod_LoadSurfedges (dlump_t *l, model_t *mod)
 {
 	int         i, count;
 	int        *in, *out;
@@ -520,7 +520,7 @@ Mod_LoadSurfedges (lump_t *l, model_t *mod)
 
 
 static void
-Mod_LoadPlanes (lump_t *l, model_t *mod)
+Mod_LoadPlanes (dlump_t *l, model_t *mod)
 {
 	int         i, j;
 	mplane_t   *out;

@@ -65,34 +65,34 @@ typedef enum { ALIAS_SINGLE = 0, ALIAS_GROUP } aliasframetype_t;
 typedef enum { ALIAS_SKIN_SINGLE = 0, ALIAS_SKIN_GROUP } aliasskintype_t;
 
 typedef struct {
-	int         ident;
-	int         version;
-	vec3_t      scale;
-	vec3_t      scale_origin;
-	float       boundingradius;
-	vec3_t      eyeposition;
-	int         numskins;
-	int         skinwidth;
-	int         skinheight;
-	int         numverts;
-	int         numtris;
-	int         numframes;
-	synctype_t  synctype;
-	int         flags;
-	float       size;
-} mdl_t;
+	Sint32		ident;
+	Sint32		version;
+	vec3_t		scale;
+	vec3_t		scale_origin;
+	float		boundingradius;
+	vec3_t		eyeposition;
+	Sint32		numskins;
+	Sint32		skinwidth;
+	Sint32		skinheight;
+	Sint32		numverts;
+	Sint32		numtris;
+	Sint32		numframes;
+	synctype_t	synctype;
+	Sint32		flags;
+	float		size;
+} dmdl_t;
 
 // TODO: could be shorts
 
 typedef struct {
-	int         onseam;
-	int         s;
-	int         t;
-} stvert_t;
+	Sint32		onseam;
+	Sint32		s;
+	Sint32		t;
+} dstvert_t;
 
 typedef struct dtriangle_s {
-	int         facesfront;
-	int         vertindex[3];
+	Sint32		facesfront;
+	Sint32		vertindex[3];
 } dtriangle_t;
 
 #define DT_FACES_FRONT				0x0010
@@ -101,32 +101,32 @@ typedef struct dtriangle_s {
 // load this data
 
 typedef struct {
-	Uint8       v[3];
-	Uint8       lightnormalindex;
+	Uint8		v[3];
+	Uint8		lightnormalindex;
 } trivertx_t;
 
 typedef struct {
-	trivertx_t  bboxmin;				// lightnormal isn't used
-	trivertx_t  bboxmax;				// lightnormal isn't used
-	char        name[16];				// frame name from grabbing
+	trivertx_t	bboxmin;				// lightnormal isn't used
+	trivertx_t	bboxmax;				// lightnormal isn't used
+	char		name[16];				// frame name from grabbing
 } daliasframe_t;
 
 typedef struct {
-	int         numframes;
-	trivertx_t  bboxmin;				// lightnormal isn't used
-	trivertx_t  bboxmax;				// lightnormal isn't used
+	Sint32		numframes;
+	trivertx_t	bboxmin;				// lightnormal isn't used
+	trivertx_t	bboxmax;				// lightnormal isn't used
 } daliasgroup_t;
 
 typedef struct {
-	int         numskins;
+	Sint32		numskins;
 } daliasskingroup_t;
 
 typedef struct {
-	float       interval;
+	float		interval;
 } daliasinterval_t;
 
 typedef struct {
-	float       interval;
+	float		interval;
 } daliasskininterval_t;
 
 typedef struct {
