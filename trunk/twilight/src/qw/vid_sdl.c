@@ -207,8 +207,13 @@ CheckExtensions (void)
 		return;
 	}
 	gl_mtexable = DGL_HasExtension ("GL_ARB_multitexture");
-	gl_mtexcombine_arb = DGL_HasExtension ("GL_ARB_texture_env_combine");
-	gl_mtexcombine_ext = DGL_HasExtension ("GL_EXT_texture_env_combine");
+	if (gl_mtexable && COM_CheckParm ("-nomtexcombine")) {
+		gl_mtexcombine_arb = false;
+		gl_mtexcombine_ext = false;
+	} else {
+		gl_mtexcombine_arb = DGL_HasExtension ("GL_ARB_texture_env_combine");
+		gl_mtexcombine_ext = DGL_HasExtension ("GL_EXT_texture_env_combine");
+	}
 	if (gl_mtexable && gl_mtexcombine_arb)
 		Con_Printf ("GL_ARB_multitexture + GL_ARB_texture_env_combine.\n");
 	else if (gl_mtexable && gl_mtexcombine_ext)
