@@ -4,7 +4,7 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-SUBDIRS=src doc tools
+SUBDIRS=src doc
 
 EXTRA_DIST= \
 	COPYING.BSD \

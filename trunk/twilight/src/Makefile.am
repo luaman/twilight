@@ -7,7 +7,7 @@ AUTOMAKE_OPTIONS=gnu dist-zip
 if CLIENTS
 clients = image renderer sound
 endif
-SUBDIRS=include base $(clients) nq qw
+SUBDIRS=tools include base $(clients) nq qw
 
 
 noinst_HEADERS= \
