@@ -127,9 +127,9 @@ R_RenderDlight (dlight_t *light)
 		return;
 	}
 
-	qglBegin (GL_TRIANGLE_FAN);
 	qglColor3f (light->color[0] * 0.5, light->color[1] * 0.5,
 			light->color[2] * 0.5);
+	qglBegin (GL_TRIANGLE_FAN);
 
 	v_right[0] = v[1];
 	v_right[1] = -v[0];
@@ -147,7 +147,7 @@ R_RenderDlight (dlight_t *light)
 	VectorSubtract (light->origin, v, v);
 
 	qglVertex3fv (v);
-	qglColor3f (0, 0, 0);
+	qglColor3f(0, 0, 0);
 
 	for (i = 16; i >= 0; i--, bub_sin++, bub_cos++) 
 	{
@@ -175,10 +175,9 @@ R_RenderDlights (void)
 	if (!gl_flashblend->value)
 		return;
 
-	qglDepthMask (0);
+	qglDepthMask (GL_TRUE);
 	qglDisable (GL_TEXTURE_2D);
 	qglEnable (GL_BLEND);
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglBlendFunc (GL_ONE, GL_ONE);
 
 	l = cl_dlights;
@@ -192,7 +191,7 @@ R_RenderDlights (void)
 	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDepthMask (1);
+	qglDepthMask (GL_FALSE);
 }
 
 

@@ -287,6 +287,8 @@ void        R_DrawSkyChain (msurface_t *s);
 //
 int         GL_LoadPicTexture (qpic_t *pic);
 void        GL_Set2D (void);
+extern int	gl_filter_min;
+extern int	gl_filter_max;
 
 //
 // gl_rmain.c
