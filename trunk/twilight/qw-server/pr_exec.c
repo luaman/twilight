@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "progs.h"
 #include "server.h"
 #include "sys.h"
+#include "strlib.h"
 
 
 /*
@@ -175,7 +176,7 @@ PR_PrintStatement (dstatement_t *s)
 
 	if ((unsigned) s->op < sizeof (pr_opnames) / sizeof (pr_opnames[0])) {
 		Con_Printf ("%s ", pr_opnames[s->op]);
-		i = strlen (pr_opnames[s->op]);
+		i = Q_strlen (pr_opnames[s->op]);
 		for (; i < 10; i++)
 			Con_Printf (" ");
 	}
@@ -517,7 +518,7 @@ PR_ExecuteProgram (func_t fnum)
 				break;
 			case OP_EQ_S:
 				c->_float =
-					!strcmp (PR_GetString (a->string),
+					!Q_strcmp (PR_GetString (a->string),
 							 PR_GetString (b->string));
 				break;
 			case OP_EQ_E:

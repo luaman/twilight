@@ -10,13 +10,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -41,10 +41,28 @@ static const char rcsid[] =
 #include <conio.h>
 #include <direct.h>
 
-#include "server.h"
+#include "bothdefs.h"
+#include "common.h"
 #include "cvar.h"
+#include "mathlib.h"
+#include "server.h"
+#include "strlib.h"
+
+// FIXME: put this somewhere else
+void SV_Init (void);
 
 cvar_t     *sys_nostdout;
+
+int			sys_memsize = 0;
+void	   *sys_membase = NULL;
+
+/*
+===============================================================================
+
+				REQUIRED SYS FUNCTIONS
+
+===============================================================================
+*/
 
 /*
 ================
@@ -118,7 +136,7 @@ Sys_DoubleTime (void)
 		starttime = now;
 		return 0.0;
 	}
-	
+
 	if (now < starttime) // wrapped?
 		return (now / 1000.0) + (LONG_MAX - starttime / 1000.0);
 
@@ -262,7 +280,6 @@ char       *newargv[256];
 int
 main (int argc, char **argv)
 {
-	quakeparms_t parms;
 	double      newtime, time, oldtime;
 	struct timeval timeout;
 	fd_set      fdset;
@@ -270,23 +287,20 @@ main (int argc, char **argv)
 
 	COM_InitArgv (argc, argv);
 
-	parms.argc = com_argc;
-	parms.argv = com_argv;
-
-	parms.memsize = 16 * 1024 * 1024;
+	sys_memsize = 16 * 1024 * 1024;
 
 	if ((t = COM_CheckParm ("-heapsize")) != 0 && t + 1 < com_argc)
-		parms.memsize = Q_atoi (com_argv[t + 1]) * 1024;
+		sys_memsize = Q_atoi (com_argv[t + 1]) * 1024;
 
 	if ((t = COM_CheckParm ("-mem")) != 0 && t + 1 < com_argc)
-		parms.memsize = Q_atoi (com_argv[t + 1]) * 1024 * 1024;
+		sys_memsize = Q_atoi (com_argv[t + 1]) * 1024 * 1024;
 
-	parms.membase = malloc (parms.memsize);
+	sys_membase = malloc (sys_memsize);
 
-	if (!parms.membase)
+	if (!sys_membase)
 		Sys_Error ("Insufficient memory.\n");
 
-	SV_Init (&parms);
+	SV_Init ();
 
 // run one frame immediately for first heartbeat
 	SV_Frame (0.1);

@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "model.h"
 #include "pmove.h"
 #include "sys.h"
+#include "strlib.h"
 
 static hull_t box_hull;
 static dclipnode_t box_clipnodes[6];
@@ -379,7 +380,7 @@ PM_PlayerMove (vec3_t start, vec3_t end)
 	vec3_t      mins, maxs;
 
 // fill in a default trace
-	memset (&total, 0, sizeof (pmtrace_t));
+	Q_memset (&total, 0, sizeof (pmtrace_t));
 	total.fraction = 1;
 	total.ent = -1;
 	VectorCopy (end, total.endpos);
@@ -402,7 +403,7 @@ PM_PlayerMove (vec3_t start, vec3_t end)
 		VectorSubtract (end, offset, end_l);
 
 		// fill in a default trace
-		memset (&trace, 0, sizeof (pmtrace_t));
+		Q_memset (&trace, 0, sizeof (pmtrace_t));
 		trace.fraction = 1;
 		trace.allsolid = true;
 //      trace.startsolid = true;

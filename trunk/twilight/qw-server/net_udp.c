@@ -36,13 +36,6 @@ static const char rcsid[] =
 
 #include <stdio.h>
 
-#include "bothdefs.h"
-#include "common.h"
-#include "console.h"
-#include "net.h"
-#include "strlib.h"
-#include "sys.h"
-
 #include <sys/types.h>
 #ifdef WIN32
 #include <windows.h>
@@ -70,6 +63,13 @@ static const char rcsid[] =
 #ifdef NeXT
 #include <libc.h>
 #endif
+
+#include "bothdefs.h"
+#include "common.h"
+#include "console.h"
+#include "net.h"
+#include "strlib.h"
+#include "sys.h"
 
 netadr_t    net_local_adr;
 
