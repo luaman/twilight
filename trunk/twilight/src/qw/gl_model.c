@@ -39,6 +39,7 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "glquake.h"
+#include "mdfour.h"
 
 model_t    *loadmodel;
 char        loadname[32];				// for hunk tags
