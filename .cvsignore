@@ -11,3 +11,6 @@ autom4te.cache
 twilight-qwsv
 twilight-qw
 twilight-nq
+*.ncb
+*.opt
+*.plg

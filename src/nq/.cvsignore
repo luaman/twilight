@@ -4,3 +4,8 @@ Makefile.in
 .*.swp
 twilight-nq
 .deps
+Debug
+Release
+*.ncb
+*.opt
+*.plg
