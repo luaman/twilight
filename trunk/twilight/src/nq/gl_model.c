@@ -56,7 +56,8 @@ int         mod_numknown;
 
 cvar_t     *gl_subdivide_size;
 
-static		qboolean litloaded = false;
+// not used yet
+// static		qboolean litloaded = false;
 
 extern int	lightmap_bytes;
 
