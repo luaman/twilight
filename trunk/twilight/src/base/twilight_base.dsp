@@ -113,6 +113,10 @@ SOURCE=.\hash.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\loadso.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\lh_parser.c
 # End Source File
 # Begin Source File

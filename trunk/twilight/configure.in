@@ -90,12 +90,12 @@ AC_CHECK_FUNCS(
 	strlcat strlcpy \
 	snprintf _snprintf vsnprintf _vsnprintf \
 	strcasecmp _stricmp strncasecmp _strnicmp \
-	fcntl stat _stat mkdir _mkdir
+	fcntl stat _stat mkdir _mkdir dlopen
 )
 
 AC_CHECK_HEADERS(
 	unistd.h fcntl.h windef.h pwd.h sys/types.h sys/stat.h \
-	limits.h signal.h sys/time.h time.h execinfo.h
+	limits.h signal.h sys/time.h time.h execinfo.h dlfcn.h
 )
 
 dnl Let 'em figure this one out...
