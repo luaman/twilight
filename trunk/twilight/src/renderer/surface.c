@@ -298,90 +298,49 @@ SetupLightmapSettings ()
 }
 
 
-void
-AllocLightBlockForSurf (lightblock_t *block, msurface_t *surf)
+qboolean
+AllocLightBlockForSurf (int *allocated, int num, msurface_t *surf,
+		memzone_t *zone)
 {
-	int              w, h, i, j, num, best, best2;
-	lightsubblock_t *sub, *last;
-	chain_item_t    *c_item;
+	int              w, h, i, j, best, best2;
+
+	zone = zone;
 
 	/* We need to be aligned to 4 bytes due to GL. */
-	w = surf->smax;
-	if ((i = (w & 3)))
-		w += 4 - i;
+	surf->alignedwidth = surf->smax;
+	while ((surf->alignedwidth * lightmap_bytes) & 3)
+		surf->alignedwidth++;
+	w = surf->alignedwidth;
 	h = surf->tmax;
-	surf->alignedwidth = w;
 
-	sub = block->b;
-	if (!sub) {
-		sub = Zone_Alloc(tempzone, sizeof(lightsubblock_t));
-		block->b = sub;
-		block->num++;
-	}
-	last = sub;
+	best = LIGHTBLOCK_HEIGHT;
 
-	for (num = 0;;num++, sub = sub->next) {
-		if (!sub) {
-			sub = Zone_Alloc(tempzone, sizeof(lightsubblock_t));
-			last->next = sub;
-			block->num++;
-		}
-		last = sub;
+	for (i = 0; i < LIGHTBLOCK_WIDTH - w; i++)
+	{
+		best2 = 0;
 
-		best = LIGHTBLOCK_HEIGHT;
-
-		for (i = 0; i < LIGHTBLOCK_WIDTH - w; i++)
+		for (j = 0; j < w; j++)
 		{
-			best2 = 0;
-
-			for (j = 0; j < w; j++)
-			{
-				if (sub->allocated[i + j] >= best)
-					break;
-				if (sub->allocated[i + j] > best2)
-					best2 = sub->allocated[i + j];
-			}
-
-			if (j == w)
-			{
-				// this is a valid spot
-				surf->light_s = i;
-				surf->light_t = best = best2;
-			}
+			if (allocated[i + j] >= best)
+				break;
+			if (allocated[i + j] > best2)
+				best2 = allocated[i + j];
 		}
 
-		if (best + h > LIGHTBLOCK_HEIGHT)
-			continue;
-
-		/*
-		 * LordHavoc: clear texture to blank image, fragments are uploaded
-		 * using subimage
-		 */
-		if (!sub->allocated[0])
+		if (j == w)
 		{
-			memset(templight, 64, sizeof(templight));
-			qglGenTextures(1, &sub->chain.l_texnum);
-			qglBindTexture(GL_TEXTURE_2D, sub->chain.l_texnum);
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			qglTexImage2D (GL_TEXTURE_2D, 0, colorlights ? 3 : 1,
-					LIGHTBLOCK_WIDTH, LIGHTBLOCK_HEIGHT, 0, gl_lightmap_format,
-					GL_UNSIGNED_BYTE, templight);
+			// this is a valid spot
+			surf->light_s = i;
+			surf->light_t = best = best2;
 		}
-
-		for (i = 0; i < w; i++)
-			sub->allocated[surf->light_s + i] = best + h;
-
-		surf->lightmap_texnum = num;
-		break;
 	}
 
-	sub->chain.n_items++;
+	if (best + h > LIGHTBLOCK_HEIGHT)
+		return false;
 
-	c_item = Zone_Alloc(tempzone, sizeof(*c_item));
-	c_item->next = sub->chain.items;
-	sub->chain.items = c_item;
-	c_item->surf = surf;
-	c_item->head = &sub->chain;
-	surf->light_chain = c_item;
+	for (i = 0; i < w; i++)
+		allocated[surf->light_s + i] = best + h;
+
+	surf->lightmap_texnum = num;
+	return true;
 }

@@ -233,7 +233,7 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 	skin->indices = NULL;
 
 	if (bits) {
-		mskin = Zone_Alloc(glt_zone, (size_t) width * height);
+		mskin = Zone_Alloc(tempzone, (size_t) width * height);
 		if (!GLT_Mangle8(in, mskin, width, height, bits, color, bleach)) {
 			Zone_Free(mskin);
 			return;
@@ -242,7 +242,7 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 		mskin = in;
 
 
-	triangles = Zone_Alloc(glt_zone, sizeof(int) * amodel->numtris);
+	triangles = Zone_Alloc(tempzone, sizeof(int) * amodel->numtris);
 
 	if (tri_check) {
 		for (i = 0, numtris = 0; i < amodel->numtris; i++) {

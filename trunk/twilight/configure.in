@@ -78,6 +78,9 @@ AC_ARG_ENABLE(werror,
 AC_ARG_ENABLE(profile,
 	[  --enable-profile        Enable profiling with gprof],,
 	enable_profile=no)
+AC_ARG_ENABLE(dmalloc,
+	[  --enable-dmalloc        Enable debugging with dmalloc],,
+	enable_dmalloc=no)
 
 dnl Checks for functions and headers
 
@@ -189,6 +192,10 @@ if test "x$enable_werror" = "xyes"; then
 fi
 if test "x$enable_profile" = "xyes"; then
 	CFLAGS="$CFLAGS -pg -g"
+fi
+if test "x$enable_dmalloc" = "xyes"; then
+	CFLAGS="$CFLAGS -DDMALLOC_FUNC_CHECK -DDMALLOC"
+	LIBS="$LIBS -ldmalloc"
 fi
 CFLAGS="$CFLAGS $save_CFLAGS"
 

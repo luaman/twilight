@@ -479,7 +479,7 @@ GL_BuildLightmap (msurface_t *surf, brushhdr_t *brush)
 
 	// Bind your textures early and often - or at least early
 	qglBindTexture(GL_TEXTURE_2D, 
-			brush->lightblock->b[surf->lightmap_texnum].chain.l_texnum);
+			brush->lightblock.chains[surf->lightmap_texnum].l_texnum);
 
 	// Reset stuff here
 	surf->cached_light[0] = d_lightstylevalue[surf->styles[0]];
@@ -661,7 +661,6 @@ R_BlendLightmaps (brushhdr_t *brush)
 	msurface_t		*s;
 	glpoly_t		*p;
 	qboolean		 bound;
-	lightsubblock_t	*sub;
 
 	// don't bother writing Z
 	qglDepthMask (GL_FALSE);
@@ -670,10 +669,9 @@ R_BlendLightmaps (brushhdr_t *brush)
 
 	qglEnable (GL_BLEND);
 
-	for (sub = brush->lightblock->b, i = 0; i < brush->lightblock->num; 
-			i++, sub++)
+	for (i = 0; i < brush->lightblock.num; i++)
 	{
-		chain = &sub->chain;
+		chain = &brush->lightblock.chains[i];
 		bound = false;
 		if ((chain->visframe != r_framecount))
 			continue;
@@ -719,13 +717,11 @@ DrawTextureChains (brushhdr_t *brush, qboolean transform)
 	qboolean		bound;
 	chain_head_t	*chain;
 	chain_item_t	*c;
-	lightsubblock_t	*sub;
 
 	// LordHavoc: upload lightmaps early
-	for (sub = brush->lightblock->b, i = 0; i < brush->lightblock->num; 
-			i++, sub++)
+	for (i = 0; i < brush->lightblock.num; i++)
 	{
-		chain = &sub->chain;
+		chain = &brush->lightblock.chains[i];
 		if (!chain->n_items || (chain->visframe != r_framecount))
 			continue;
 
@@ -778,12 +774,10 @@ DrawTextureChains (brushhdr_t *brush, qboolean transform)
 						qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 						qglActiveTextureARB (GL_TEXTURE1_ARB);
 					}
-					qglBindTexture(GL_TEXTURE_2D, brush->lightblock->b[s->lightmap_texnum].chain.l_texnum);
+					qglBindTexture(GL_TEXTURE_2D, brush->lightblock.chains[s->lightmap_texnum].l_texnum);
 					R_RenderPolys (s->polys, true, true);
 				}
 		}
-
-		qglDisable (GL_TEXTURE_2D);
 
 		qglTexEnvi (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
 
@@ -816,12 +810,12 @@ DrawTextureChains (brushhdr_t *brush, qboolean transform)
 		}
 
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		R_BlendLightmaps (cl.worldmodel->extra.brush);
+		R_BlendLightmaps (brush);
 	}
 
 	// If the water is solid, draw here, if not, then later.
 	if (r_wateralpha->fvalue == 1)
-		R_DrawWaterTextureChains (cl.worldmodel->extra.brush, transform);
+		R_DrawWaterTextureChains (brush, transform);
 }
 
 /*
@@ -867,6 +861,9 @@ R_DrawBrushModelSkies (void)
 
 	R_Draw_Depth_Sky_Chain (&cl.worldmodel->extra.brush->sky_chain, modelorg);
 
+	if (!r_drawentities->ivalue)
+		return;
+
 	for (i = 0; i < r_refdef.num_entities; i++)
 	{
 		e = r_refdef.entities[i];
@@ -875,9 +872,11 @@ R_DrawBrushModelSkies (void)
 		if (e->model->type == mod_brush)
 		{
 			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
+			softwaretransformforbrushentity (e->origin, e->angles);
+			softwareuntransform(r_origin, modelorg);
 
 			if (R_CullBox (mins, maxs))
-				return;
+				continue;
 
 			qglPushMatrix ();
 			qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);

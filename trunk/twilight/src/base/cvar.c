@@ -35,6 +35,9 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "strlib.h"
 #include "zone.h"
+#ifdef DMALLOC
+#include "dmalloc.h"
+#endif
 
 typedef struct cvar_foreach_s {
 	cvar_t					   *var;

@@ -175,7 +175,6 @@ typedef struct chain_item_s {
 	Uint				 visframe;
 	msurface_t			*surf;
 	chain_head_t		*head;
-	struct chain_item_s	*next;
 } chain_item_t;
 		
 
@@ -231,26 +230,20 @@ typedef struct hull_s {
 	vec3_t		clip_size;
 } hull_t;
 
-#define LIGHTBLOCK_WIDTH	512
-#define LIGHTBLOCK_HEIGHT	512
+#define LIGHTBLOCK_WIDTH	256
+#define LIGHTBLOCK_HEIGHT	256
 #define MAX_LIGHTMAPS		256
-
-typedef struct lightsubblock_s {
-	int						 allocated[LIGHTBLOCK_WIDTH];
-	chain_head_t			 chain;
-	struct lightsubblock_s	*next;
-} lightsubblock_t;
 
 typedef struct lightblock_s {
 	Uint			 num;
-	lightsubblock_t	*b;
+	chain_head_t	*chains;
 } lightblock_t;
 
 typedef struct brushhdr_s {
 	qboolean		is_submodel;
 	Uint			firstmodelsurface, nummodelsurfaces;
 
-	lightblock_t	*lightblock;
+	lightblock_t	lightblock;
 
 	Uint32			numsubmodels;
 	dmodel_t		*submodels;

@@ -34,14 +34,19 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 #include "stdlib.h"
+#ifdef DMALLOC
+#include "dmalloc.h"
+#endif
 
 void Hunk_Print (qboolean all);
 memzone_t *zonechain = NULL;
 
 void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
 {
+#if 0
 	int i, j, k, needed, endbit, largest;
 	memclump_t *clump, **clumpchainpointer;
+#endif
 	memheader_t *mem;
 	if (zone == NULL)
 		Sys_Error("Zone_Alloc: zone == NULL (alloc at %s:%i)", filename, fileline);
@@ -49,6 +54,7 @@ void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
 		Sys_Error("Zone_Alloc: size <= 0 (alloc at %s:%i, zone %s, size %i)", filename, fileline, zone->name, size);
 	Com_DPrintf("Zone_Alloc: zone %s, file %s:%i, size %i bytes\n", zone->name, filename, fileline, size);
 	zone->totalsize += size;
+#if 0
 	if (size < 4096)
 	{
 		// clumping
@@ -104,6 +110,7 @@ choseclump:
 			clump->bits[j >> 5] |= (1 << (j & 31));
 	}
 	else
+#endif
 	{
 		// big allocations are not clumped
 		zone->realsize += sizeof(memheader_t) + size + sizeof(Uint32);
