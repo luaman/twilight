@@ -48,6 +48,13 @@ static const char rcsid[] =
 #include <fcntl.h>
 #endif
 
+#include "cvar.h"
+#include "screen.h"
+#include "sys.h"
+#include "mathlib.h"
+#include "host.h"
+#include "strlib.h"
+
 #define MINIMUM_WIN_MEMORY		0x0880000
 #define MAXIMUM_WIN_MEMORY		0x1000000
 
@@ -684,9 +691,6 @@ int main (int argc, char **argv)
 	}
 
 	Sys_Init ();
-
-// because sound is off until we become active
-	S_BlockSound ();
 
 	Sys_Printf ("Host_Init\n");
 	Host_Init ();

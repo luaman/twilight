@@ -272,7 +272,7 @@ GL_Init (void)
 
 	CheckMultiTextureExtensions ();
 
-	qglClearColor (1, 0, 0, 0);
+	qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
 	qglCullFace (GL_FRONT);
 	qglEnable (GL_TEXTURE_2D);
 

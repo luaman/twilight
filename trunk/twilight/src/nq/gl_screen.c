@@ -128,8 +128,6 @@ qpic_t     *scr_ram;
 qpic_t     *scr_net;
 qpic_t     *scr_turtle;
 
-int         scr_fullupdate;
-
 int         clearconsole;
 int         clearnotify;
 
@@ -320,17 +318,14 @@ CalcFov
 float
 CalcFov (float fov_x, float width, float height)
 {
-	float       a;
-	float       x;
+	float a;
+	float x;
 
 	if (fov_x < 1 || fov_x > 179)
 		Sys_Error ("Bad fov: %f", fov_x);
 
-	x = width / Q_tan (fov_x / 360 * M_PI);
-
-	a = Q_atan (height / x);
-
-	a = a * (360 / M_PI);
+	x = width / Q_tan (fov_x * (M_PI / 360));
+	a = Q_atan (height / x) * (360 / M_PI);
 
 	return a;
 }
@@ -351,7 +346,6 @@ SCR_CalcRefdef (void)
 	qboolean    full = false;
 
 
-	scr_fullupdate = 0;					// force a background redraw
 	vid.recalc_refdef = 0;
 
 //========================================
@@ -762,13 +756,11 @@ SCR_BeginLoadingPlaque (void)
 	scr_con_current = 0;
 
 	scr_drawloading = true;
-	scr_fullupdate = 0;
 	SCR_UpdateScreen ();
 	scr_drawloading = false;
 
 	scr_disabled_for_loading = true;
 	scr_disabled_time = realtime;
-	scr_fullupdate = 0;
 }
 
 /*
@@ -781,7 +773,6 @@ void
 SCR_EndLoadingPlaque (void)
 {
 	scr_disabled_for_loading = false;
-	scr_fullupdate = 0;
 	Con_ClearNotify ();
 }
 
@@ -839,7 +830,6 @@ SCR_ModalMessage (char *text)
 	scr_notifystring = text;
 
 // draw a fresh screen
-	scr_fullupdate = 0;
 	scr_drawdialog = true;
 	SCR_UpdateScreen ();
 	scr_drawdialog = false;
@@ -852,7 +842,6 @@ SCR_ModalMessage (char *text)
 	} while (key_lastpress != 'y' && key_lastpress != 'n'
 			 && key_lastpress != K_ESCAPE);
 
-	scr_fullupdate = 0;
 	SCR_UpdateScreen ();
 
 	return key_lastpress == 'y';
@@ -861,26 +850,6 @@ SCR_ModalMessage (char *text)
 
 //=============================================================================
 
-/*
-===============
-SCR_BringDownConsole
-
-Brings the console down and fades the palettes back to normal
-================
-*/
-void
-SCR_BringDownConsole (void)
-{
-	int         i;
-
-	scr_centertime_off = 0;
-
-	for (i = 0; i < 20 && scr_conlines != scr_con_current; i++)
-		SCR_UpdateScreen ();
-
-	cl.cshifts[0].percent = 0;			// no area contents palette on next
-	// frame
-}
 
 void
 SCR_TileClear (void)

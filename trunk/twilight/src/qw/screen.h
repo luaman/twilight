@@ -41,8 +41,6 @@ int         SCR_ModalMessage (char *text);
 extern float scr_con_current;
 extern float scr_conlines;			// lines of console to display
 
-extern int scr_fullupdate;			// set to 0 to force full redraw
-
 extern int clearnotify;				// set to 0 whenever notify text is
 									// drawn
 

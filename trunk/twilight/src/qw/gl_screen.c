@@ -132,8 +132,6 @@ qpic_t		*scr_ram;
 qpic_t		*scr_net;
 qpic_t		*scr_turtle;
 
-int         scr_fullupdate;
-
 int         clearconsole;
 int         clearnotify;
 
@@ -318,17 +316,14 @@ CalcFov
 float
 CalcFov (float fov_x, float width, float height)
 {
-	float       a;
-	float       x;
+	float x;
+	float a;
 
 	if (fov_x < 1 || fov_x > 179)
 		Sys_Error ("Bad fov: %f", fov_x);
 
-	x = width / Q_tan (fov_x / 360 * M_PI);
-
-	a = Q_atan (height / x);
-
-	a = a * 360 / M_PI;
+	x = width / Q_tan (fov_x * (M_PI / 360));
+	a = Q_atan (height / x) * (360 / M_PI);
 
 	return a;
 }
@@ -349,7 +344,6 @@ SCR_CalcRefdef (void)
 	qboolean    full = false;
 
 
-	scr_fullupdate = 0;					// force a background redraw
 	vid.recalc_refdef = 0;
 
 //========================================
@@ -693,15 +687,6 @@ SCR_DrawConsole (void)
  
 ============================================================================== 
 */
-
-typedef struct _TargaHeader {
-	unsigned char id_length, colormap_type, image_type;
-	unsigned short colormap_index, colormap_length;
-	unsigned char colormap_size;
-	unsigned short x_origin, y_origin, width, height;
-	unsigned char pixel_size, attributes;
-} TargaHeader;
-
 
 /* 
 ================== 
