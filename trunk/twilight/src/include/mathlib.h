@@ -76,6 +76,9 @@
 
 #define lhrandom(MIN,MAX) ((rand() & 32767) * (((MAX)-(MIN)) * (1.0f / 32767.0f)) + (MIN))
 #define invpow(base,number)	(log(number) / log(base))
+#define ispow2(x)			(!(((x) - 1) & (x)))
+int near_pow2_high (int x);
+int near_pow2_low (int x);
 
 struct mplane_s;
 

@@ -769,3 +769,29 @@ Vector2Angles (vec3_t in, vec3_t out)
 	out[2] = 0;
 }
 
+int
+near_pow2_high (int x)
+{
+	int y = 0;
+
+	if (ispow2(x))
+		return x;
+	for (y = 1; y < x; y <<= 1);
+
+	return y;
+}
+
+int
+near_pow2_low (int x)
+{
+	int y = 0;
+
+	if (ispow2(x))
+		return x;
+	for (y = 1; y < x; y <<= 1);
+
+	if (y > x)
+		y >>= 1;
+
+	return y;
+}
