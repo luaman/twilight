@@ -29,6 +29,7 @@
 
 #include "quakedef.h"
 #include "common.h"
+#include "info.h"
 #include "light.h"
 #include "net.h"
 #include "protocol.h"

@@ -23,7 +23,6 @@
 
 	$Id$
 */
-// comndef.h  -- general definitions
 
 #ifndef __COMMON_H
 #define __COMMON_H
@@ -44,11 +43,6 @@ extern char **com_argv;
 void COM_InitArgv (int argc, char **argv);
 int COM_CheckParm (char *parm);
 
-
-
-#define	MAX_INFO_STRING			196
-#define	MAX_SERVERINFO_STRING	512
-#define	MAX_LOCALINFO_STRING	32768
 
 extern struct cvar_s *fs_userconf;
 extern struct cvar_s *fs_userpath;
@@ -214,14 +208,6 @@ void Com_EndRedirect (void);
 
 extern struct cvar_s *registered;
 extern qboolean standard_quake, rogue, hipnotic;
-
-char *Info_ValueForKey (char *s, char *key);
-void Info_RemoveKey (char *s, char *key);
-void Info_RemovePrefixedKeys (char *start, char prefix);
-void Info_SetValueForKey (char *s, char *key, char *value, int maxsize);
-void Info_SetValueForStarKey (char *s, char *key, char *value,
-									 unsigned maxsize);
-void Info_Print (char *s);
 
 int	build_number (void);
 

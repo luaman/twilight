@@ -23,11 +23,11 @@
 
 	$Id$
 */
-// server.h
 
 #ifndef __SERVER_H
 #define __SERVER_H
 
+#include "info.h"
 #include "net.h"
 #include "protocol.h"
 
