@@ -89,7 +89,6 @@ typedef struct {
 
 void        S_Init_Cvars (void);
 void        S_Init (void);
-void        S_Startup (void);
 void        S_Shutdown (void);
 void        S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin,
 						  float fvol, float attenuation);
@@ -97,24 +96,14 @@ void        S_StaticSound (sfx_t *sfx, vec3_t origin, float vol,
 						   float attenuation);
 void        S_StopSound (int entnum, int entchannel);
 void        S_StopAllSounds (qboolean clear);
-void        S_ClearBuffer (void);
 void        S_Update (vec3_t origin, vec3_t v_forward, vec3_t v_right,
 					  vec3_t v_up);
 void        S_ExtraUpdate (void);
 
 sfx_t      *S_PrecacheSound (char *sample);
 void        S_TouchSound (char *sample);
-void        S_ClearPrecache (void);
-void        S_BeginPrecaching (void);
-void        S_EndPrecaching (void);
 void        S_PaintChannels (int endtime);
 void        S_InitPaintChannels (void);
-
-// picks a channel based on priorities, empty slots, number of channels
-channel_t  *SND_PickChannel (int entnum, int entchannel);
-
-// spatializes a channel
-void        SND_Spatialize (channel_t *ch);
 
 // initializes cycling through a DMA buffer and returns information on it
 qboolean    SNDDMA_Init (void);
@@ -169,12 +158,7 @@ extern int  snd_blocked;
 void		 S_LocalSound (char *s);
 sfx_t		*S_LoadSound (sfx_t *s);
 
-wavinfo_t   GetWavinfo (char *name, Uint8 *wav, int wavlength);
-
 void        SND_InitScaletable (void);
-
-void        S_AmbientOff (void);
-void        S_AmbientOn (void);
 
 extern int soundtime;
 

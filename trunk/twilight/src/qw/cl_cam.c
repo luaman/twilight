@@ -76,7 +76,7 @@ Cam_DrawPlayer (int playernum)
 	return true;
 }
 
-void
+static void
 Cam_Unlock (void)
 {
 	if (autocam) {
@@ -87,7 +87,7 @@ Cam_Unlock (void)
 	}
 }
 
-void
+static void
 Cam_Lock (int playernum)
 {
 	char	st[40];
@@ -100,7 +100,7 @@ Cam_Lock (int playernum)
 	locked = false;
 }
 
-trace_t *
+static trace_t *
 Cam_DoTrace (vec3_t vec1, vec3_t vec2)
 {
 	VectorCopy (vec1, pmove.origin);

@@ -36,9 +36,6 @@ void SCR_SizeUp (void);
 void SCR_SizeDown (void);
 void SCR_CenterPrint (char *str);
 
-void SCR_CaptureAviDemo (void);
-void AvidemoChanged(cvar_t *);
-
 int SCR_ModalMessage (char *text);
 
 extern float scr_con_current;

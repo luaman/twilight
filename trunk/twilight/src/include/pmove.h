@@ -102,8 +102,6 @@ struct hull_s;
 void PlayerMove (void);
 void Pmove_Init (void);
 
-int PM_HullPointContents (struct hull_s *hull, int num, vec3_t p);
-
 int PM_PointContents (vec3_t point);
 qboolean PM_TestPlayerPosition (vec3_t point);
 trace_t *PM_PlayerMove (vec3_t start, vec3_t stop);

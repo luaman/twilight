@@ -215,21 +215,6 @@ DYNAMIC LIGHTS BLEND RENDERING
 =============================================================================
 */
 
-void
-AddLightBlend (vec3_t v, float a2)
-{
-	float       a;
-
-	v_blend[3] = a = v_blend[3] + a2 * (1 - v_blend[3]);
-
-	a2 = a2 / a;
-	a = 1 - a2;
-
-	v_blend[0] = v_blend[0] * a + v[0] * a2;
-	v_blend[1] = v_blend[1] * a + v[1] * a2;
-	v_blend[2] = v_blend[2] * a + v[2] * a2;
-}
-
 float       bubble_sintable[17], bubble_costable[17];
 
 void
@@ -522,7 +507,7 @@ LIGHT SAMPLING
 mplane_t   *lightplane;
 vec3_t      lightspot;
 
-int
+static int
 RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 		vec3_t end)
 {

@@ -30,7 +30,6 @@
 int CDAudio_Init (void);
 void CDAudio_Init_Cvars (void);
 void CDAudio_Play (Uint8 track, qboolean looping);
-void CDAudio_Stop (void);
 void CDAudio_Pause (void);
 void CDAudio_Resume (void);
 void CDAudio_Shutdown (void);

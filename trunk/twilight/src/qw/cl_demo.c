@@ -35,7 +35,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "strlib.h"
 
-void CL_FinishTimeDemo (void);
+static void CL_FinishTimeDemo (void);
 
 /*
 ==============================================================================
@@ -127,7 +127,7 @@ CL_WriteDemoMessage
 Dumps the current net message, prefixed by the length and view angles
 ====================
 */
-void
+static void
 CL_WriteDemoMessage (sizebuf_t *msg)
 {
 	int		len;
@@ -157,7 +157,7 @@ CL_GetDemoMessage
   FIXME...
 ====================
 */
-qboolean
+static qboolean
 CL_GetDemoMessage (void)
 {
 	int			r, i, j;
@@ -322,7 +322,7 @@ CL_WriteDemoMessage
 Dumps the current net message, prefixed by the length and view angles
 ====================
 */
-void
+static void
 CL_WriteRecordDemoMessage (sizebuf_t *msg, int seq)
 {
 	int		len, i;
@@ -350,7 +350,7 @@ CL_WriteRecordDemoMessage (sizebuf_t *msg, int seq)
 	fflush (cls.demofile);
 }
 
-void
+static void
 CL_WriteSetDemoMessage (void)
 {
 	int		len;
@@ -728,7 +728,7 @@ CL_FinishTimeDemo
 
 ====================
 */
-void
+static void
 CL_FinishTimeDemo (void)
 {
 	int		frames;

@@ -34,6 +34,8 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
+static wavinfo_t GetWavinfo (char *name, Uint8 *wav, int wavlength);
+
 int         cache_full_cycle;
 
 Uint8      *S_Alloc (int size);
@@ -43,7 +45,7 @@ Uint8      *S_Alloc (int size);
 ResampleSfx
 ================
 */
-void
+static void
 ResampleSfx (sfx_t *sfx, int inrate, int inwidth, Uint8 *data)
 {
 	int         outcount;
@@ -176,7 +178,7 @@ Uint8      *iff_data;
 int         iff_chunk_len;
 char		*iff_name;
 
-short
+static short
 GetLittleShort (void)
 {
 	short       val = 0;
@@ -187,7 +189,7 @@ GetLittleShort (void)
 	return val;
 }
 
-int
+static int
 GetLittleLong (void)
 {
 	int         val = 0;
@@ -200,7 +202,7 @@ GetLittleLong (void)
 	return val;
 }
 
-void
+static void
 FindNextChunk (char *name)
 {
 	while (1) {
@@ -231,7 +233,7 @@ FindNextChunk (char *name)
 	}
 }
 
-void
+static void
 FindChunk (char *name)
 {
 	last_chunk = iff_data;
@@ -244,7 +246,7 @@ FindChunk (char *name)
 GetWavinfo
 ============
 */
-wavinfo_t
+static wavinfo_t
 GetWavinfo (char *name, Uint8 *wav, int wavlength)
 {
 	wavinfo_t   info;

@@ -353,7 +353,7 @@ Responds with all the info that qplug or qspy can see
 This message can be up to around 5k with worst case string lengths.
 ================
 */
-void
+static void
 SVC_Status (void)
 {
 	int         i;
@@ -391,7 +391,7 @@ SV_CheckLog
 */
 #define	LOG_HIGHWATER	4096
 #define	LOG_FLUSH		10*60
-void
+static void
 SV_CheckLog (void)
 {
 	sizebuf_t  *sz;
@@ -422,7 +422,7 @@ the same as the current sequence, an A2A_NACK will be returned
 instead of the data.
 ================
 */
-void
+static void
 SVC_Log (void)
 {
 	int         seq;
@@ -458,7 +458,7 @@ SVC_Ping
 Just responds with an acknowledgement
 ================
 */
-void
+static void
 SVC_Ping (void)
 {
 	char        data;
@@ -479,7 +479,7 @@ flood the server with invalid connection IPs.  With a
 challenge, they must give a valid IP address.
 =================
 */
-void
+static void
 SVC_GetChallenge (void)
 {
 	int         i;
@@ -518,7 +518,7 @@ SVC_DirectConnect
 A connection request that did not come from the master
 ==================
 */
-void
+static void
 SVC_DirectConnect (void)
 {
 	char        userinfo[1024];
@@ -743,7 +743,7 @@ Shift down the remaining args
 Redirect all printfs
 ===============
 */
-void
+static void
 SVC_RemoteCommand (void)
 {
 	int         i;
@@ -794,7 +794,7 @@ Clients that are in the game can still send
 connectionless packets.
 =================
 */
-void
+static void
 SV_ConnectionlessPacket (void)
 {
 	char       *s;
@@ -928,7 +928,7 @@ StringToFilter (char *s, ipfilter_t * f)
 SV_AddIP_f
 =================
 */
-void
+static void
 SV_AddIP_f (void)
 {
 	int         i;
@@ -953,7 +953,7 @@ SV_AddIP_f (void)
 SV_RemoveIP_f
 =================
 */
-void
+static void
 SV_RemoveIP_f (void)
 {
 	ipfilter_t  f;
@@ -977,7 +977,7 @@ SV_RemoveIP_f (void)
 SV_ListIP_f
 =================
 */
-void
+static void
 SV_ListIP_f (void)
 {
 	int         i;
@@ -995,7 +995,7 @@ SV_ListIP_f (void)
 SV_WriteIP_f
 =================
 */
-void
+static void
 SV_WriteIP_f (void)
 {
 	FILE       *f;
@@ -1026,7 +1026,7 @@ SV_WriteIP_f (void)
 SV_SendBan
 =================
 */
-void
+static void
 SV_SendBan (void)
 {
 	Netchan_OutOfBandPrint (NS_SERVER, net_from, "%c\nbanned.\n", A2C_PRINT);
@@ -1037,7 +1037,7 @@ SV_SendBan (void)
 SV_FilterPacket
 =================
 */
-qboolean
+static qboolean
 SV_FilterPacket (void)
 {
 	int         i;
@@ -1059,7 +1059,7 @@ SV_FilterPacket (void)
 SV_ReadPackets
 =================
 */
-void
+static void
 SV_ReadPackets (void)
 {
 	int         i;
@@ -1126,7 +1126,7 @@ for a few seconds to make sure any final reliable message gets resent
 if necessary
 ==================
 */
-void
+static void
 SV_CheckTimeouts (void)
 {
 	int         i;
@@ -1165,7 +1165,7 @@ SV_GetConsoleCommands
 Add them exactly as if they had been typed at the console
 ===================
 */
-void
+static void
 SV_GetConsoleCommands (void)
 {
 	char       *cmd;
@@ -1184,7 +1184,7 @@ SV_CheckVars
 
 ===================
 */
-void
+static void
 SV_CheckVars (void)
 {
 	static char *pw, *spw;
@@ -1277,7 +1277,7 @@ SV_Frame (float time)
 SV_InitLocal
 ===============
 */
-void
+static void
 SV_InitLocal (void)
 {
 	int         i;
@@ -1592,7 +1592,7 @@ SV_ExtractFromUserinfo (client_t *cl)
 SV_InitNet
 ====================
 */
-void
+static void
 SV_InitNet (void)
 {
 	Uint	port;

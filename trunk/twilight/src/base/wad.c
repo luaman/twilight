@@ -51,7 +51,7 @@ Space padding is so names can be printed nicely in tables.
 Can safely be performed in place.
 ==================
 */
-void
+static void
 W_CleanupName (char *in, char *out)
 {
 	int         i;
@@ -118,7 +118,7 @@ W_LoadWadFile (char *filename)
 W_GetLumpinfo
 =============
 */
-lumpinfo_t *
+static lumpinfo_t *
 W_GetLumpinfo (char *name)
 {
 	int         i;
@@ -146,19 +146,6 @@ W_GetLumpName (char *name)
 		return (void *) (wad_base + lump->filepos);
 
 	return NULL;
-}
-
-void       *
-W_GetLumpNum (int num)
-{
-	lumpinfo_t *lump;
-
-	if (num < 0 || num > wad_numlumps)
-		Sys_Error ("W_GetLumpNum: bad number: %i", num);
-
-	lump = wad_lumps + num;
-
-	return (void *) (wad_base + lump->filepos);
 }
 
 /*

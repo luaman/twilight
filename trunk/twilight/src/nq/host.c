@@ -182,7 +182,7 @@ Host_Error (char *error, ...)
 Host_FindMaxClients
 ================
 */
-void
+static void
 Host_FindMaxClients (void)
 {
 	Uint         i;
@@ -231,7 +231,7 @@ Host_FindMaxClients (void)
 Host_InitLocal_Cvars
 ======================
 */
-void
+static void
 Host_InitLocal_Cvars (void)
 {
 	// set for slow motion
@@ -268,7 +268,7 @@ Host_InitLocal_Cvars (void)
 Host_InitLocal
 ======================
 */
-void
+static void
 Host_InitLocal (void)
 {
 	Host_InitCommands ();
@@ -543,7 +543,7 @@ Host_FilterTime
 Returns false if the time is too short to run a frame
 ===================
 */
-qboolean
+static qboolean
 Host_FilterTime (float time)
 {
 	float		fps;
@@ -590,7 +590,7 @@ Host_GetConsoleCommands
 Add them exactly as if they had been typed at the console
 ===================
 */
-void
+static void
 Host_GetConsoleCommands (void)
 {
 	char       *cmd;
@@ -610,7 +610,7 @@ Host_ServerFrame
 
 ==================
 */
-void
+static void
 Host_ServerFrame (void)
 {
 // run the world state  
@@ -643,7 +643,7 @@ Host_Frame
 Runs all active servers
 ==================
 */
-void
+static void
 _Host_Frame (double time)
 {
 	static double time1 = 0;

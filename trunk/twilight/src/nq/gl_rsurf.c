@@ -173,7 +173,7 @@ R_AddDynamicLights (msurface_t *surf, matrix4x4_t *invmatrix)
 	return lit;
 }
 
-inline qboolean
+static inline qboolean
 R_StainBlendTexel (Sint64 k, int *icolor, Uint8 *bl)
 {
 	int			ratio, a;
@@ -203,7 +203,7 @@ R_StainBlendTexel (Sint64 k, int *icolor, Uint8 *bl)
 R_StainNode
 ===============
 */
-void
+static void
 R_StainNode (mnode_t *node, model_t *model, vec3_t origin, float radius,
 		int icolor[8])
 {

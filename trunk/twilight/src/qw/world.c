@@ -81,7 +81,7 @@ Set up the planes and clipnodes so that the six floats of a bounding box
 can just be stored out and get a proper hull_t structure.
 ===================
 */
-void
+static void
 SV_InitBoxHull (void)
 {
 	int         i;
@@ -118,7 +118,7 @@ To keep everything totally uniform, bounding boxes are turned into small
 BSP trees instead of being compared directly.
 ===================
 */
-hull_t     *
+static hull_t     *
 SV_HullForBox (vec3_t mins, vec3_t maxs)
 {
 	box_planes[0].dist = maxs[0];
@@ -143,7 +143,7 @@ Offset is filled in to contain the adjustment that must be added to the
 testing object's origin to get a point to use with the returned hull.
 ================
 */
-hull_t     *
+static hull_t     *
 SV_HullForEntity (edict_t *ent, vec3_t mins, vec3_t maxs, vec3_t offset)
 {
 	model_t    *model;
@@ -205,7 +205,7 @@ SV_CreateAreaNode
 
 ===============
 */
-areanode_t *
+static areanode_t *
 SV_CreateAreaNode (int depth, vec3_t mins, vec3_t maxs)
 {
 	areanode_t *anode;
@@ -282,7 +282,7 @@ SV_UnlinkEdict (edict_t *ent)
 SV_TouchLinks
 ====================
 */
-void
+static void
 SV_TouchLinks (edict_t *ent, areanode_t *node)
 {
 	link_t     *l, *next;
@@ -334,7 +334,7 @@ SV_FindTouchedLeafs
 
 ===============
 */
-void
+static void
 SV_FindTouchedLeafs (edict_t *ent, mnode_t *node)
 {
 	mplane_t   *splitplane;
@@ -464,7 +464,7 @@ SV_HullPointContents
 
 ==================
 */
-int
+static int
 SV_HullPointContents (hull_t *hull, int num, vec3_t p)
 {
 	float       d;
@@ -543,7 +543,7 @@ SV_RecursiveHullCheck
 
 ==================
 */
-qboolean
+static qboolean
 SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
 					   vec3_t p2, trace_t *trace)
 {
@@ -675,7 +675,7 @@ Handles selection or creation of a clipping hull, and offseting (and
 eventually rotation) of the end points
 ==================
 */
-trace_t
+static trace_t
 SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs,
 					 vec3_t end)
 {
@@ -720,7 +720,7 @@ SV_ClipToLinks
 Mins and maxs enclose the entire area swept by the move
 ====================
 */
-void
+static void
 SV_ClipToLinks (areanode_t *node, moveclip_t * clip)
 {
 	link_t     *l, *next;
@@ -798,7 +798,7 @@ SV_ClipToLinks (areanode_t *node, moveclip_t * clip)
 SV_MoveBounds
 ==================
 */
-void
+static void
 SV_MoveBounds (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
 			   vec3_t boxmins, vec3_t boxmaxs)
 {
@@ -858,65 +858,3 @@ SV_Move (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type,
 
 	return clip.trace;
 }
-
-//=============================================================================
-
-/*
-============
-SV_TestPlayerPosition
-
-============
-*/
-edict_t *
-SV_TestPlayerPosition (edict_t *ent, vec3_t origin)
-{
-	hull_t		*hull;
-	edict_t		*check;
-	vec3_t		boxmins, boxmaxs;
-	vec3_t		offset;
-	Uint		e;
-
-	// check world first
-	hull = &sv.worldmodel->hulls[1];
-	if (SV_HullPointContents (hull, hull->firstclipnode, origin)
-			!= CONTENTS_EMPTY)
-		return sv.edicts;
-
-	// check all entities
-	VectorAdd (origin, ent->v.mins, boxmins);
-	VectorAdd (origin, ent->v.maxs, boxmaxs);
-
-	check = NEXT_EDICT (sv.edicts);
-	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check))
-	{
-		if (check->free)
-			continue;
-		if (check->v.solid != SOLID_BSP &&
-			check->v.solid != SOLID_BBOX && check->v.solid != SOLID_SLIDEBOX)
-			continue;
-
-		if (boxmins[0] > check->v.absmax[0]
-				|| boxmins[1] > check->v.absmax[1]
-				|| boxmins[2] > check->v.absmax[2]
-				|| boxmaxs[0] < check->v.absmin[0]
-				|| boxmaxs[1] < check->v.absmin[1]
-				|| boxmaxs[2] < check->v.absmin[2])
-			continue;
-
-		if (check == ent)
-			continue;
-
-		// get the clipping hull
-		hull = SV_HullForEntity (check, ent->v.mins, ent->v.maxs, offset);
-
-		VectorSubtract (origin, offset, offset);
-
-		// test the point
-		if (SV_HullPointContents (hull, hull->firstclipnode, offset)
-				!= CONTENTS_EMPTY)
-			return check;
-	}
-
-	return NULL;
-}
-

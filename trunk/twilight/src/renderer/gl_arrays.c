@@ -32,7 +32,7 @@ static const char rcsid[] =
 #include "dyngl.h"
 #include "gl_arrays.h"
 
-memzone_t	*vzone;
+static memzone_t	*vzone;
 
 texcoord_t	*tc0_array_p;
 texcoord_t	*tc1_array_p;

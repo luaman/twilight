@@ -83,20 +83,18 @@ int         hipweapons[4] =
 //MED 01/04/97 added hipnotic items array
 qpic_t     *hsb_items[2];
 
-void        Sbar_MiniDeathmatchOverlay (void);
-void        Sbar_DeathmatchOverlay (void);
+static void        Sbar_MiniDeathmatchOverlay (void);
+static void        Sbar_DeathmatchOverlay (void);
 void        M_DrawPic (int x, int y, qpic_t *pic);
 
 cvar_t		*cl_sbar;
 
 /*
 ===============
-Sbar_ShowScores
-
 Tab key down
 ===============
 */
-void
+static void
 Sbar_ShowScores (void)
 {
 	if (sb_showscores)
@@ -106,12 +104,10 @@ Sbar_ShowScores (void)
 
 /*
 ===============
-Sbar_DontShowScores
-
 Tab key up
 ===============
 */
-void
+static void
 Sbar_DontShowScores (void)
 {
 	sb_showscores = false;
@@ -123,11 +119,6 @@ Sbar_Init_Cvars (void)
 	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, NULL);
 }
 
-/*
-===============
-Sbar_Init
-===============
-*/
 void
 Sbar_Init (void)
 {
@@ -277,25 +268,17 @@ Sbar_Init (void)
 
 // drawing routines are relative to the status bar location
 
-/*
-=============
-Sbar_DrawPic
-=============
-*/
-void
+static void
 Sbar_DrawPic (int x, int y, qpic_t *pic)
 {
 	Draw_Pic (x, y + (vid.height_2d - SBAR_HEIGHT), pic);
 }
 
 /*
-=============
-Sbar_DrawSubPic
-=============
 JACK: Draws a portion of the picture in the status bar.
 */
 
-void
+static void
 Sbar_DrawSubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
 				 int height)
 {
@@ -306,34 +289,22 @@ Sbar_DrawSubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
 
 /*
 ================
-Sbar_DrawCharacter
-
 Draws one solid graphics character
 ================
 */
-void
+static void
 Sbar_DrawCharacter (int x, int y, int num)
 {
 	Draw_Character (x + 4, y + vid.height_2d - SBAR_HEIGHT, num, 8);
 }
 
-/*
-================
-Sbar_DrawString
-================
-*/
-void
+static void
 Sbar_DrawString (int x, int y, char *str)
 {
 	Draw_String (x, y + vid.height_2d - SBAR_HEIGHT, str, 8);
 }
 
-/*
-=============
-Sbar_itoa
-=============
-*/
-int
+static int
 Sbar_itoa (int num, char *buf)
 {
 	char       *str;
@@ -362,12 +333,7 @@ Sbar_itoa (int num, char *buf)
 }
 
 
-/*
-=============
-Sbar_DrawNum
-=============
-*/
-void
+static void
 Sbar_DrawNum (int x, int y, int num, int digits, int color)
 {
 	char        str[12];
@@ -398,12 +364,7 @@ Sbar_DrawNum (int x, int y, int num, int digits, int color)
 int		fragsort[MAX_SCOREBOARD];
 int		scoreboardlines;
 
-/*
-===============
-Sbar_SortFrags
-===============
-*/
-void
+static void
 Sbar_SortFrags (void)
 {
 	int	i, j, k;
@@ -426,25 +387,8 @@ Sbar_SortFrags (void)
 			}
 }
 
-/*
-===============
-Sbar_UpdateScoreboard
-===============
-*/
-void
-Sbar_UpdateScoreboard (void)
-{
-	Sbar_SortFrags ();
-}
 
-
-
-/*
-===============
-Sbar_SoloScoreboard
-===============
-*/
-void
+static void
 Sbar_SoloScoreboard (void)
 {
 	char        str[80];
@@ -478,12 +422,7 @@ Sbar_SoloScoreboard (void)
 	}
 }
 
-/*
-===============
-Sbar_DrawScoreboard
-===============
-*/
-void
+static void
 Sbar_DrawScoreboard (void)
 {
 	Sbar_SoloScoreboard ();
@@ -494,12 +433,7 @@ Sbar_DrawScoreboard (void)
 
 //=============================================================================
 
-/*
-===============
-Sbar_DrawInventory
-===============
-*/
-void
+static void
 Sbar_DrawInventory (void)
 {
 	int			i, j, y;
@@ -693,12 +627,7 @@ Sbar_DrawInventory (void)
 
 //=============================================================================
 
-/*
-===============
-Sbar_DrawFrags
-===============
-*/
-void
+static void
 Sbar_DrawFrags (void)
 {
 	Sint32			k;
@@ -746,12 +675,7 @@ Sbar_DrawFrags (void)
 //=============================================================================
 
 
-/*
-===============
-Sbar_DrawFace
-===============
-*/
-void
+static void
 Sbar_DrawFace (void)
 {
 	int			f, anim;
@@ -819,11 +743,6 @@ Sbar_DrawFace (void)
 	Sbar_DrawPic (112, 0, sb_faces[f][anim]);
 }
 
-/*
-===============
-Sbar_Draw
-===============
-*/
 void
 Sbar_Draw (void)
 {
@@ -943,13 +862,7 @@ Sbar_Draw (void)
 
 //=============================================================================
 
-/*
-==================
-Sbar_IntermissionNumber
-
-==================
-*/
-void
+static void
 Sbar_IntermissionNumber (int x, int y, int num, int digits, int color)
 {
 	char        str[12];
@@ -975,13 +888,7 @@ Sbar_IntermissionNumber (int x, int y, int num, int digits, int color)
 	}
 }
 
-/*
-==================
-Sbar_DeathmatchOverlay
-
-==================
-*/
-void
+static void
 Sbar_DeathmatchOverlay (void)
 {
 	qpic_t     *pic;
@@ -1028,13 +935,7 @@ Sbar_DeathmatchOverlay (void)
 	}
 }
 
-/*
-==================
-Sbar_MiniDeathmatchOverlay
-
-==================
-*/
-void
+static void
 Sbar_MiniDeathmatchOverlay (void)
 {
 	Sint32			k, i, numlines;
@@ -1100,12 +1001,6 @@ Sbar_MiniDeathmatchOverlay (void)
 	}
 }
 
-/*
-==================
-Sbar_IntermissionOverlay
-
-==================
-*/
 void
 Sbar_IntermissionOverlay (void)
 {
@@ -1143,12 +1038,6 @@ Sbar_IntermissionOverlay (void)
 }
 
 
-/*
-==================
-Sbar_FinaleOverlay
-
-==================
-*/
 void
 Sbar_FinaleOverlay (void)
 {

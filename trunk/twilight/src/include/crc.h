@@ -28,9 +28,6 @@
 #ifndef __CRC_H
 #define __CRC_H
 
-void        CRC_Init (unsigned short *crcvalue);
-void        CRC_ProcessByte (unsigned short *crcvalue, Uint8 data);
-unsigned short CRC_Value (unsigned short crcvalue);
 unsigned short CRC_Block (Uint8 *start, size_t count);
 Uint8       COM_BlockSequenceCRCByte (Uint8 *base, size_t length, int sequence);
 

@@ -196,7 +196,8 @@ memzone_t *stringzone;
 // used only for hunk
 memzone_t *hunkzone;
 
-void Zone_PrintStats(void)
+static void
+Zone_PrintStats(void)
 {
 	int count = 0, size = 0;
 	memzone_t *zone;
@@ -219,7 +220,8 @@ void Zone_PrintStats(void)
 	}
 }
 
-void Zone_PrintList(int listallocations)
+static void
+Zone_PrintList(int listallocations)
 {
 	memzone_t *zone;
 	memheader_t *mem;
@@ -239,7 +241,8 @@ void Zone_PrintList(int listallocations)
 	}
 }
 
-void ZoneList_f(void)
+static void
+ZoneList_f(void)
 {
 	switch(Cmd_Argc())
 	{
@@ -261,7 +264,8 @@ void ZoneList_f(void)
 	}
 }
 
-void ZoneStats_f(void)
+static void
+ZoneStats_f(void)
 {
 	Zone_CheckSentinelsGlobal();
 	Zone_PrintStats();

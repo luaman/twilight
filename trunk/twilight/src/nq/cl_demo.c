@@ -36,7 +36,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-void CL_FinishTimeDemo (void);
+static void CL_FinishTimeDemo (void);
 
 /*
 ==============================================================================
@@ -83,7 +83,7 @@ CL_WriteDemoMessage
 Dumps the current net message, prefixed by the length and view angles
 ====================
 */
-void
+static void
 CL_WriteDemoMessage (void)
 {
 	int		len;
@@ -321,7 +321,7 @@ CL_FinishTimeDemo
 
 ====================
 */
-void
+static void
 CL_FinishTimeDemo (void)
 {
 	int		frames;

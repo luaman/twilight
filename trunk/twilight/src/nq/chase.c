@@ -61,12 +61,6 @@ Chase_Init (void)
 }
 
 void
-Chase_Reset (void)
-{
-	/* FIXME: for respawning and teleporting start position 12 units behind head */
-}
-
-void
 Chase_Update (void)
 {
 	int		i;

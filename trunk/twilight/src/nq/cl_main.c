@@ -269,7 +269,7 @@ CL_NextDemo (void)
 CL_PrintEntities_f
 ==============
 */
-void
+static void
 CL_PrintEntities_f (void)
 {
 	entity_t   *ent;
@@ -333,7 +333,7 @@ CL_AllocDlight (int key)
 CL_NewDlight
 ===============
 */
-void
+static void
 CL_NewDlight (int key, vec3_t org, int effects)
 {
 	dlight_t   *dl = CL_AllocDlight (key);
@@ -398,7 +398,7 @@ Determines the fraction between the last two messages that the objects
 should be put at.
 ===============
 */
-float
+static float
 CL_LerpPoint (void)
 {
 	float       f, frac;
@@ -706,6 +706,7 @@ CL_Init_Cvars (void)
 
 	CL_Input_Init_Cvars ();
 	CL_TEnts_Init_Cvars ();
+	Team_Init_Cvars ();
 }
 
 /*

@@ -70,7 +70,7 @@ next frame.  This allows commands like:
 bind g "impulse 5 ; +attack ; wait ; -attack ; impulse 2"
 ============
 */
-void
+static void
 Cmd_Wait_f (void)
 {
 	cmd_wait = true;
@@ -462,7 +462,7 @@ Cmd_StuffCmds_f (void)
 Cmd_Exec_f
 ===============
 */
-void
+static void
 Cmd_Exec_f (void)
 {
 	char		*f;
@@ -495,7 +495,7 @@ Cmd_Echo_f
 Just prints the rest of the line to the console
 ===============
 */
-void
+static void
 Cmd_Echo_f (void)
 {
 	int			i;
@@ -512,7 +512,7 @@ Cmd_Alias_f
 Creates a new command that executes a command string (possibly ; seperated)
 ===============
 */
-void
+static void
 Cmd_Alias_f (void)
 {
 	cmdalias_t	*a;
@@ -829,32 +829,6 @@ Cmd_CompleteBuildList (char *partial)
 
 	buf[bpos] = NULL;
 	return buf;
-}
-
-/*
-============
-Cmd_CompleteAlias
-
-Thanks for Taniwha's Help -EvilTypeGuy
-============
-*/
-char
-*Cmd_CompleteAlias (char * partial)
-{
-	static cmdalias_t	*alias;
-	size_t				len;
-
-	len = strlen(partial);
-
-	if (!len)
-		return NULL;
-
-	// Check aliases
-	for (alias = cmd_alias; alias; alias = alias->next)
-		if (!strncasecmp(partial, alias->name, len))
-			return alias->name;
-
-	return NULL;
 }
 
 /*

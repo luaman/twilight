@@ -46,16 +46,7 @@ Uint        net_numsockets = 0;
 qboolean    tcpipAvailable = false;
 
 int         net_hostport;
-int         DEFAULTnet_hostport = 26000;
-
-void        (*GetComPortConfig) (int portNumber, int *port, int *irq, int *baud,
-								 qboolean *useModem);
-void        (*SetComPortConfig) (int portNumber, int port, int irq, int baud,
-								 qboolean useModem);
-void        (*GetModemConfig) (int portNumber, char *dialType, char *clear,
-							   char *init, char *hangup);
-void        (*SetModemConfig) (int portNumber, char *dialType, char *clear,
-							   char *init, char *hangup);
+static int  DEFAULTnet_hostport = 26000;
 
 static qboolean listening = false;
 
@@ -307,7 +298,7 @@ PrintSlistTrailer (void)
 }
 
 
-void
+static void
 NET_Slist_f (void)
 {
 	if (slistInProgress)

@@ -219,13 +219,11 @@ CLIENT SPAWNING
 
 /*
 ================
-SV_SendServerinfo
-
 Sends the first message from the server to a connected client.
 This will be sent on the initial connection and upon each server load.
 ================
 */
-void
+static void
 SV_SendServerinfo (client_t *client)
 {
 	char      **s;
@@ -281,7 +279,7 @@ Initializes a client_t for a new net connection.  This will only be called
 once for a player each game, not once for each level change.
 ================
 */
-void
+static void
 SV_ConnectClient (int clientnum)
 {
 	edict_t				*ent;
@@ -402,7 +400,7 @@ crosses a waterline.
 int         fatbytes;
 Uint8       fatpvs[MAX_MAP_LEAFS / 8];
 
-void
+static void
 SV_AddToFatPVS (vec3_t org, mnode_t *node)
 {
 	int         i;
@@ -442,7 +440,7 @@ Calculates a PVS that is the inclusive or of all leafs within 8 pixels of the
 given point.
 =============
 */
-Uint8 *
+static Uint8 *
 SV_FatPVS (vec3_t org)
 {
 	fatbytes = (sv.worldmodel->brush->numleafs + 31) >> 3;
@@ -454,13 +452,7 @@ SV_FatPVS (vec3_t org)
 //=============================================================================
 
 
-/*
-=============
-SV_WriteEntitiesToClient
-
-=============
-*/
-void
+static void
 SV_WriteEntitiesToClient (edict_t *clent, sizebuf_t *msg)
 {
 	Uint32		e, i;
@@ -582,7 +574,7 @@ SV_CleanupEnts
 
 =============
 */
-void
+static void
 SV_CleanupEnts (void)
 {
 	Uint32		e;
@@ -727,12 +719,7 @@ SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 		MSG_WriteByte (msg, ent->v.weapon);
 }
 
-/*
-=======================
-SV_SendClientDatagram
-=======================
-*/
-qboolean
+static qboolean
 SV_SendClientDatagram (client_t *client)
 {
 	Uint8       buf[MAX_DATAGRAM];
@@ -763,12 +750,7 @@ SV_SendClientDatagram (client_t *client)
 	return true;
 }
 
-/*
-=======================
-SV_UpdateToReliableMessages
-=======================
-*/
-void
+static void
 SV_UpdateToReliableMessages (void)
 {
 	Uint32		i, j;
@@ -803,13 +785,11 @@ SV_UpdateToReliableMessages (void)
 
 /*
 =======================
-SV_SendNop
-
 Send a nop message without trashing or sending the accumulated client
 message buffer
 =======================
 */
-void
+static void
 SV_SendNop (client_t *client)
 {
 	sizebuf_t   msg;
@@ -933,7 +913,7 @@ SV_CreateBaseline
 
 ================
 */
-void
+static void
 SV_CreateBaseline (void)
 {
 	int			i;
@@ -984,12 +964,10 @@ SV_CreateBaseline (void)
 
 /*
 ================
-SV_SendReconnect
-
 Tell all the clients that the server is changing levels
 ================
 */
-void
+static void
 SV_SendReconnect (void)
 {
 	Uint8		data[128];

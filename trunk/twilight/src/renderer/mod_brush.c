@@ -359,7 +359,7 @@ CalcSurfaceExtents
 Fills in s->texturemins[] and s->extents[]
 ================
 */
-void
+static void
 CalcSurfaceExtents (msurface_t *s, model_t *mod)
 {
 	float		mins[2], maxs[2], val;
@@ -559,12 +559,6 @@ Mod_MakeChains (model_t *mod)
 		else
 			bheader->tex_chains[surf->texinfo->texture->tex_idx].n_items++;
 
-		/*
-		if (surf->flags & SURF_SUBDIVIDE)
-			CountSubdividedGLPolyFromEdges (surf, mod);
-		else
-			CountGLPolyFromEdges (surf, mod);
-		*/
 		bheader->numsets += surf->numedges;
 	}
 

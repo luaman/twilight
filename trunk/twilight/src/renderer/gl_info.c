@@ -77,7 +77,7 @@ int gl_tmus = 1;
 	Check for buggy OpenGL drivers.
 */
 
-void
+static void
 GLInfo_CheckDriverQuirks (void)
 {
 	/*
@@ -115,7 +115,7 @@ GLInfo_CheckDriverQuirks (void)
 	Check for the OpenGL extensions we use
 */
 
-void
+static void
 GLInfo_CheckExtensions (void)
 {
 	qboolean	gl_mtexcombine_arb = 0, gl_mtexcombine_ext = 0;
@@ -180,7 +180,7 @@ GLInfo_CheckExtensions (void)
 			gl_vbo ? "Yes" : "No");
 }
 
-void
+static void
 GL_Info_f (void)
 {
 	Com_Printf ("Frame Buffer: %d bpp, %d-%d-%d-%d, %s buffered\n",
@@ -198,7 +198,7 @@ GL_Info_f (void)
 
 /*
 ===============
-GL_Init_Cvars
+GLInfo_Init_Cvars
 ===============
 */
 void
@@ -213,7 +213,7 @@ GLInfo_Init_Cvars (void)
 
 /*
 ===============
-GL_Init
+GLInfo_Init
 ===============
 */
 void

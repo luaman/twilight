@@ -68,8 +68,8 @@ Uint type_size[8] =
 	sizeof (void *) / 4
 };
 
-extern ddef_t *ED_FieldAtOfs (int ofs);
-extern qboolean ED_ParseEpair (void *base, ddef_t *key, char *s);
+static ddef_t *ED_FieldAtOfs (int ofs);
+static qboolean ED_ParseEpair (void *base, ddef_t *key, char *s);
 
 cvar_t *nomonsters;
 cvar_t *gamecfg;
@@ -104,8 +104,8 @@ static gefv_cache gefvCache[GEFV_CACHESIZE] =
 	{NULL, ""}
 };
 
-extern ddef_t *ED_FindField (char *name);
-extern dfunction_t *ED_FindFunction (char *name);
+static ddef_t *ED_FindField (char *name);
+static dfunction_t *ED_FindFunction (char *name);
 
 // LordHavoc: in an effort to eliminate time wasted on GetEdictFieldValue...
 // these are defined as externs in progs.h
@@ -130,7 +130,8 @@ int eval_ping;
 int eval_movement;
 int eval_punchvector;
 
-int FindFieldOffset(char *field)
+static int
+FindFieldOffset(char *field)
 {
 	ddef_t *d;
 	d = ED_FindField (field);
@@ -139,7 +140,8 @@ int FindFieldOffset(char *field)
 	return d->ofs*4;
 }
 
-void FindEdictFieldOffsets(void)
+static void
+FindEdictFieldOffsets(void)
 {
 	eval_gravity = FindFieldOffset ("gravity");
 	eval_button3 = FindFieldOffset ("button3");
@@ -165,12 +167,10 @@ void FindEdictFieldOffsets(void)
 
 /*
 =================
-ED_ClearEdict
-
 Sets everything to NULL
 =================
 */
-void
+static void
 ED_ClearEdict (edict_t *e)
 {
 	memset (&e->v, 0, progs->entityfields * 4);
@@ -179,8 +179,6 @@ ED_ClearEdict (edict_t *e)
 
 /*
 =================
-ED_Alloc
-
 Either finds a free edict, or allocates a new one.
 Try to avoid reusing an entity that was recently freed, because it
 can cause the client to think the entity morphed into something else
@@ -218,8 +216,6 @@ ED_Alloc (void)
 
 /*
 =================
-ED_Free
-
 Marks the edict as free
 FIXME: walk all entities and NULL out references to this entity
 =================
@@ -246,12 +242,7 @@ ED_Free (edict_t *ed)
 
 //===========================================================================
 
-/*
-============
-ED_GlobalAtOfs
-============
-*/
-ddef_t *
+static ddef_t *
 ED_GlobalAtOfs (int ofs)
 {
 	ddef_t		*def;
@@ -266,12 +257,7 @@ ED_GlobalAtOfs (int ofs)
 	return NULL;
 }
 
-/*
-============
-ED_FieldAtOfs
-============
-*/
-ddef_t *
+static ddef_t *
 ED_FieldAtOfs (int ofs)
 {
 	ddef_t		*def;
@@ -286,12 +272,7 @@ ED_FieldAtOfs (int ofs)
 	return NULL;
 }
 
-/*
-============
-ED_FindField
-============
-*/
-ddef_t *
+static ddef_t *
 ED_FindField (char *name)
 {
 	ddef_t		*def;
@@ -307,12 +288,7 @@ ED_FindField (char *name)
 }
 
 
-/*
-============
-ED_FindGlobal
-============
-*/
-ddef_t *
+static ddef_t *
 ED_FindGlobal (char *name)
 {
 	ddef_t		*def;
@@ -328,12 +304,7 @@ ED_FindGlobal (char *name)
 }
 
 
-/*
-============
-ED_FindFunction
-============
-*/
-dfunction_t *
+static dfunction_t *
 ED_FindFunction (char *name)
 {
 	dfunction_t		*func;
@@ -350,14 +321,12 @@ ED_FindFunction (char *name)
 
 /*
 ============
-PR_ValueString
-
 Returns a string describing *data in a type specific manner
 =============
 */
-int NoCrash_NUM_FOR_EDICT(edict_t *e, char *filename, int fileline);
+static int NoCrash_NUM_FOR_EDICT(edict_t *e, char *filename, int fileline);
 
-char *
+static char *
 PR_ValueString (etype_t type, eval_t *val)
 {
 	static char		line[1024];
@@ -410,13 +379,11 @@ PR_ValueString (etype_t type, eval_t *val)
 
 /*
 ============
-PR_UglyValueString
-
 Returns a string describing *data in a type specific manner
 Easier to parse than PR_ValueString
 =============
 */
-char *
+static char *
 PR_UglyValueString (etype_t type, eval_t *val)
 {
 	static char		line[4096];
@@ -540,8 +507,6 @@ PR_GlobalStringNoContents (int ofs)
 
 /*
 =============
-ED_Print
-
 For debugging
 LordHavoc:
 	optimized this to print out much more quickly (tempstring)
@@ -595,8 +560,6 @@ ED_Print (edict_t *ed)
 
 /*
 =============
-ED_Write
-
 For savegames
 =============
 */
@@ -648,8 +611,6 @@ ED_PrintNum (Uint ent)
 
 /*
 =============
-ED_PrintEdicts
-
 For debugging, prints all the entities in the current server
 =============
 */
@@ -665,12 +626,10 @@ ED_PrintEdicts (void)
 
 /*
 =============
-ED_PrintEdict_f
-
 For debugging, prints a single edict
 =============
 */
-void
+static void
 ED_PrintEdict_f (void)
 {
 	Uint		i;
@@ -686,12 +645,10 @@ ED_PrintEdict_f (void)
 
 /*
 =============
-ED_Count
-
 For debugging
 =============
 */
-void
+static void
 ED_Count (void)
 {
 	Uint		i, active, models, solid, step;
@@ -729,11 +686,6 @@ FIXME: need to tag constants, doesn't really work
 ==============================================================================
 */
 
-/*
-=============
-ED_WriteGlobals
-=============
-*/
 void
 ED_WriteGlobals (FILE * f)
 {
@@ -762,11 +714,6 @@ ED_WriteGlobals (FILE * f)
 	fprintf (f, "}\n");
 }
 
-/*
-=============
-ED_ParseGlobals
-=============
-*/
 void
 ED_ParseGlobals (char *data)
 {
@@ -807,12 +754,7 @@ ED_ParseGlobals (char *data)
 //============================================================================
 
 
-/*
-=============
-ED_NewString
-=============
-*/
-char *
+static char *
 ED_NewString (char *string)
 {
 	char		*new, *new_p;
@@ -842,13 +784,11 @@ ED_NewString (char *string)
 
 /*
 =============
-ED_ParseEval
-
 Can parse either fields or globals
 returns false if error
 =============
 */
-qboolean
+static qboolean
 ED_ParseEpair (void *base, ddef_t *key, char *s)
 {
 	Uint			i;
@@ -915,8 +855,6 @@ ED_ParseEpair (void *base, ddef_t *key, char *s)
 
 /*
 ====================
-ED_ParseEdict
-
 Parses an edict out of the given string, returning the new position
 ed should be a properly initialized empty edict.
 Used for initial level load and for savegames.
@@ -1012,8 +950,6 @@ ED_ParseEdict (char *data, edict_t *ent)
 
 /*
 ================
-ED_LoadFromFile
-
 The entities are directly placed in the array, rather than allocated with
 ED_Alloc, because otherwise an error loading the map would have entity
 number references out of order.
@@ -1373,7 +1309,8 @@ PR_LoadProgs (void)
 	FindEdictFieldOffsets(); // LordHavoc: update field offset list
 }
 
-void PR_Fields_f (void)
+static void
+PR_Fields_f (void)
 {
 	Uint		i;
 
@@ -1392,7 +1329,8 @@ void PR_Fields_f (void)
 			progs->entityfields * 4 * MAX_EDICTS);
 }
 
-void PR_Globals_f (void)
+static void
+PR_Globals_f (void)
 {
 	Uint		i;
 
@@ -1471,7 +1409,7 @@ NUM_FOR_EDICT (edict_t *e, char *filename, int fileline)
 	return b;
 }
 
-int
+static int
 NoCrash_NUM_FOR_EDICT (edict_t *e, char *filename, int fileline)
 {
 	Uint		b;

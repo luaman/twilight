@@ -146,7 +146,7 @@ Netchan_OutOfBand
 Sends an out-of-band datagram
 ================
 */
-void
+static void
 Netchan_OutOfBand (netsrc_t sock, netadr_t adr, size_t length, Uint8 *data)
 {
 	sizebuf_t	send;

@@ -66,14 +66,11 @@ cvar_t *Cvar_Get (const char *name, const char *svalue, const int flags,
 				const cvar_callback callback);
 
 void Cvar_Set (cvar_t *var, const char *svalue);
-void Cvar_Set_f (void);
-void Cvar_Reset_f (void);
 
 cvar_t *Cvar_CreateTemp (const char *name, const char *svalue);
 
 void Cvar_Slide (cvar_t *var, const float change);
 
-void Cvar_Show (cvar_t *var);
 qboolean Cvar_LegacyCmd (void);
 
 cvar_t *Cvar_Find (const char *name);

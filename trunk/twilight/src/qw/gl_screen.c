@@ -130,13 +130,13 @@ viddef_t	vid;						/* global video state */
 qboolean	scr_drawloading;
 float		scr_disabled_time;
 
-void		SCR_ScreenShot_f (void);
-void		SCR_RSShot_f (void);
+static void		SCR_ScreenShot_f (void);
+static void		SCR_RSShot_f (void);
 
 Uint8	   *avibuffer;
 Uint32		aviframeno;
 
-void
+static void
 GL_BrightenScreen(void)
 {
 	float		f;
@@ -269,7 +269,7 @@ SCR_CenterPrint (char *str)
 }
 
 
-void
+static void
 SCR_DrawCenterString (void)
 {
 	char	   *start;
@@ -312,7 +312,7 @@ SCR_DrawCenterString (void)
 	}
 }
 
-void
+static void
 SCR_CheckDrawCenterString (void)
 {
 	if (scr_center_lines > scr_erase_lines)
@@ -382,7 +382,7 @@ SCR_SizeUp_f
 Keybinding command
 =================
 */
-void
+static void
 SCR_SizeUp_f (void)
 {
 	Cvar_Slide (scr_viewsize, 10);
@@ -396,7 +396,7 @@ SCR_SizeDown_f
 Keybinding command
 =================
 */
-void
+static void
 SCR_SizeDown_f (void)
 {
 	Cvar_Slide (scr_viewsize, -10);
@@ -421,6 +421,18 @@ SCR_fov_CB (cvar_t *cvar)
 		Cvar_Set (cvar, "1");
 	else if (cvar->fvalue > 170)
 		Cvar_Set (cvar, "170");
+}
+
+static void
+AvidemoChanged(cvar_t *cvar)
+{
+	if (cvar->ivalue) 
+		avibuffer = Zone_Alloc(tempzone, vid.width * vid.height * 3);
+	else {
+		if (avibuffer)
+			Zone_Free(avibuffer);
+		aviframeno = 0;
+	}
 }
 
 void
@@ -473,7 +485,7 @@ SCR_Init (void)
 SCR_DrawTurtle
 ==============
 */
-void
+static void
 SCR_DrawTurtle (void)
 {
 	static int		count;
@@ -498,7 +510,7 @@ SCR_DrawTurtle (void)
 SCR_DrawNet
 ==============
 */
-void
+static void
 SCR_DrawNet (void)
 {
 	if (cls.netchan.outgoing_sequence - cls.netchan.incoming_acknowledged <
@@ -510,7 +522,7 @@ SCR_DrawNet (void)
 	Draw_Pic (64, 0, scr_net);
 }
 
-void
+static void
 SCR_DrawFPS (void)
 {
 	extern cvar_t	   *show_fps;
@@ -545,7 +557,7 @@ SCR_DrawFPS (void)
 DrawPause
 ==============
 */
-void
+static void
 SCR_DrawPause (void)
 {
 	qpic_t	   *pic;
@@ -567,7 +579,7 @@ SCR_DrawPause (void)
 SCR_DrawLoading
 ==============
 */
-void
+static void
 SCR_DrawLoading (void)
 {
 	qpic_t	   *pic;
@@ -590,7 +602,7 @@ SCR_DrawLoading (void)
 SCR_SetUpToDrawConsole
 ==================
 */
-void
+static void
 SCR_SetUpToDrawConsole (void)
 {
 	Con_CheckResize ();
@@ -625,7 +637,7 @@ SCR_SetUpToDrawConsole (void)
 SCR_DrawConsole
 ==================
 */
-void
+static void
 SCR_DrawConsole (void)
 {
 	if (scr_con_current) {
@@ -651,7 +663,7 @@ SCR_DrawConsole (void)
 SCR_ScreenShot_f
 ================== 
 */
-void
+static void
 SCR_ScreenShot_f (void)
 {
 	Uint8		*buffer;
@@ -684,7 +696,7 @@ SCR_ScreenShot_f (void)
 	Zone_Free (buffer);
 }
 
-void
+static void
 SCR_CaptureAviDemo (void)
 {
 	double			t;
@@ -710,23 +722,12 @@ SCR_CaptureAviDemo (void)
 	}
 }
 
-void AvidemoChanged(cvar_t *cvar)
-{
-	if (cvar->ivalue) 
-		avibuffer = Zone_Alloc(tempzone, vid.width * vid.height * 3);
-	else {
-		if (avibuffer)
-			Zone_Free(avibuffer);
-		aviframeno = 0;
-	}
-}
-
 /* 
 ============== 
 WritePCXfile 
 ============== 
 */
-void
+static void
 WritePCXfile (char *filename, Uint8 *data, int width, int height,
 			  int rowbytes, Uint8 *palette, qboolean upload)
 {
@@ -849,7 +850,7 @@ rshot_fill (int x, int y, int w, int h)
 SCR_RSShot_f
 ================== 
 */
-void
+static void
 SCR_RSShot_f (void)
 {
 	int			x, y;
@@ -972,7 +973,7 @@ SCR_RSShot_f (void)
 char       *scr_notifystring;
 qboolean    scr_drawdialog;
 
-void
+static void
 SCR_DrawNotifyString (void)
 {
 	char	   *start;

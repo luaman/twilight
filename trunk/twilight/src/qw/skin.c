@@ -256,7 +256,7 @@ Skin_Skins_f
 Refind all skins, downloading if needed.
 ==========
 */
-void
+static void
 Skin_Skins_f (void)
 {
 #if 0
@@ -281,7 +281,7 @@ Skin_AllSkins_f
 Sets all skins to one specific one
 ==========
 */
-void
+static void
 Skin_AllSkins_f (void)
 {
 	strcpy (allskins, Cmd_Argv (1));

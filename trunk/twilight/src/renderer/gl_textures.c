@@ -43,6 +43,9 @@ static const char rcsid[] =
 #include "sys.h"
 #include "wad.h"
 
+static Uint32 * GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette, qboolean check_empty);
+static void GLT_FloodFill8 (Uint8 * skin, int skinwidth, int skinheight);
+static qboolean GLT_Skin_CheckForInvalidTexCoords(astvert_t *texcoords, int numverts, int width, int height);
 
 /*
  * Stuff for tracking of loaded textures.
@@ -245,7 +248,7 @@ GLT_DoSpan(double as, double at, double bs, double bt, span_t *span,
 	}
 }
 
-qboolean
+static qboolean
 GLT_TriangleCheck8 (Uint32 *tex, span_t *span, int width, int height,
 		astvert_t texcoords[3], Uint32 color)
 {
@@ -358,7 +361,7 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 	Zone_Free(triangles);
 }
 
-qboolean
+static qboolean
 GLT_Skin_CheckForInvalidTexCoords(astvert_t *texcoords, int numverts,
 		int width, int height)
 {
@@ -437,7 +440,7 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 	Zone_Free(iskin);
 }
 
-void
+static void
 GLT_Delete_Sub_Skin (skin_sub_t *sub)
 {
 	GLT_Delete(sub->texnum);
@@ -446,7 +449,7 @@ GLT_Delete_Sub_Skin (skin_sub_t *sub)
 	Zone_Free(sub);
 }
 
-void
+static void
 GLT_Delete_Indices (skin_indices_t *i)
 {
 	if (i->i)
@@ -483,7 +486,7 @@ GLT_Delete_Skin (skin_t *skin)
  * =========================================================================
  */
 
-Uint32 *
+static Uint32 *
 GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 		qboolean check_empty)
 {
@@ -563,7 +566,7 @@ typedef struct {
 	else if (pos[off] != 255) fdc = pos[off]; \
 }
 
-void
+static void
 GLT_FloodFill8 (Uint8 * skin, int skinwidth, int skinheight)
 {
 	Uint8		fillcolor = *skin;		// assume this is the pixel to fill
@@ -809,7 +812,7 @@ R_ResampleTextureLerpLineMMX (Uint8 *in, Uint8 *out, int inwidth, int outwidth,
 	}
 }
 
-void
+static void
 R_ResampleTextureMMX (void *indata, int inwidth, int inheight, void *outdata,
 		int outwidth, int outheight)
 {
@@ -930,7 +933,7 @@ R_ResampleTextureMMX (void *indata, int inwidth, int inheight, void *outdata,
 	}
 }
 
-void
+static void
 R_ResampleTextureMMX_EXT (void *indata, int inwidth, int inheight, void *outdata,
 		int outwidth, int outheight)
 {
@@ -1056,7 +1059,7 @@ R_ResampleTextureMMX_EXT (void *indata, int inwidth, int inheight, void *outdata
 }
 #endif
 
-void
+static void
 R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
 		int outwidth, int outheight)
 {
@@ -1078,7 +1081,7 @@ GL_MipMap
 Operates in place, quartering the size of the texture
 ================
 */
-void
+static void
 GL_MipMap (Uint8 *in, Uint8 *out, int width, int height)
 {
 	int i, j;

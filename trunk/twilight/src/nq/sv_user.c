@@ -67,11 +67,6 @@ qboolean	onground;
 usercmd_t	cmd;
 
 
-/*
-===============
-SV_SetIdealPitch
-===============
-*/
 #define	MAX_FORWARD	6
 void
 SV_SetIdealPitch (void)
@@ -135,13 +130,7 @@ SV_SetIdealPitch (void)
 }
 
 
-/*
-==================
-SV_UserFriction
-
-==================
-*/
-void
+static void
 SV_UserFriction (void)
 {
 	float      *vel;
@@ -182,13 +171,7 @@ SV_UserFriction (void)
 	}
 }
 
-/*
-==============
-SV_Accelerate
-==============
-*/
-
-void
+static void
 SV_Accelerate (void)
 {
 	int         i;
@@ -206,7 +189,7 @@ SV_Accelerate (void)
 		velocity[i] += accelspeed * wishdir[i];
 }
 
-void
+static void
 SV_AirAccelerate (vec3_t wishveloc)
 {
 	int         i;
@@ -228,7 +211,7 @@ SV_AirAccelerate (vec3_t wishveloc)
 }
 
 
-void
+static void
 DropPunchAngle (void)
 {
 	float	len;
@@ -252,13 +235,7 @@ DropPunchAngle (void)
 	}
 }
 
-/*
-===================
-SV_FreeMove
-
-===================
-*/
-void
+static void
 SV_FreeMove (void)
 {
 	int			i;
@@ -279,13 +256,7 @@ SV_FreeMove (void)
 	}
 }
 
-/*
-===================
-SV_WaterMove
-
-===================
-*/
-void
+static void
 SV_WaterMove (void)
 {
 	int         i;
@@ -343,7 +314,7 @@ SV_WaterMove (void)
 		velocity[i] += accelspeed * wishvel[i];
 }
 
-void
+static void
 SV_WaterJump (void)
 {
 	if (sv.time > sv_player->v.teleport_time || !sv_player->v.waterlevel) {
@@ -355,13 +326,7 @@ SV_WaterJump (void)
 }
 
 
-/*
-===================
-SV_AirMove
-
-===================
-*/
-void
+static void
 SV_AirMove (void)
 {
 	int			i;
@@ -408,13 +373,11 @@ SV_AirMove (void)
 
 /*
 ===================
-SV_ClientThink
-
 the move fields specify an intended velocity in pix/sec
 the angle fields specify an exact angular motion in degrees
 ===================
 */
-void
+static void
 SV_ClientThink (void)
 {
 	vec3_t		v_angle;
@@ -473,12 +436,7 @@ SV_ClientThink (void)
 }
 
 
-/*
-===================
-SV_ReadClientMove
-===================
-*/
-void
+static void
 SV_ReadClientMove (usercmd_t *move)
 {
 	int		i, bits;
@@ -542,12 +500,10 @@ SV_ReadClientMove (usercmd_t *move)
 
 /*
 ===================
-SV_ReadClientMessage
-
 Returns false if the client should be killed
 ===================
 */
-qboolean
+static qboolean
 SV_ReadClientMessage (void)
 {
 	int		ret;
@@ -641,11 +597,6 @@ SV_ReadClientMessage (void)
 }
 
 
-/*
-==================
-SV_RunClients
-==================
-*/
 void
 SV_RunClients (void)
 {

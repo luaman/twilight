@@ -81,7 +81,7 @@ Sends the first message from the server to a connected client.
 This will be sent on the initial connection and upon each server load.
 ================
 */
-void
+static void
 SV_New_f (void)
 {
 	char       *gamedir;
@@ -151,7 +151,7 @@ SV_New_f (void)
 SV_Soundlist_f
 ==================
 */
-void
+static void
 SV_Soundlist_f (void)
 {
 	char      **s;
@@ -205,7 +205,7 @@ SV_Soundlist_f (void)
 SV_Modellist_f
 ==================
 */
-void
+static void
 SV_Modellist_f (void)
 {
 	char      **s;
@@ -258,7 +258,7 @@ SV_Modellist_f (void)
 SV_PreSpawn_f
 ==================
 */
-void
+static void
 SV_PreSpawn_f (void)
 {
 	Sint32	buf;
@@ -325,7 +325,7 @@ SV_PreSpawn_f (void)
 SV_Spawn_f
 ==================
 */
-void
+static void
 SV_Spawn_f (void)
 {
 	int         i;
@@ -426,7 +426,7 @@ SV_Spawn_f (void)
 SV_SpawnSpectator
 ==================
 */
-void
+static void
 SV_SpawnSpectator (void)
 {
 	Uint		i;
@@ -453,7 +453,7 @@ SV_SpawnSpectator (void)
 SV_Begin_f
 ==================
 */
-void
+static void
 SV_Begin_f (void)
 {
 	unsigned    pmodel = 0, emodel = 0;
@@ -534,7 +534,7 @@ SV_Begin_f (void)
 SV_NextDownload_f
 ==================
 */
-void
+static void
 SV_NextDownload_f (void)
 {
 	Uint8       buffer[1024];
@@ -573,7 +573,7 @@ SV_NextDownload_f (void)
 SV_NextUpload
 ==================
 */
-void
+static void
 SV_NextUpload (void)
 {
 	int         percent;
@@ -651,7 +651,7 @@ SV_NextUpload (void)
 SV_BeginDownload_f
 ==================
 */
-void
+static void
 SV_BeginDownload_f (void)
 {
 	char			*name, *p;
@@ -726,7 +726,7 @@ SV_BeginDownload_f (void)
 SV_Say
 ==================
 */
-void
+static void
 SV_Say (qboolean team)
 {
 	client_t   *client;
@@ -823,7 +823,7 @@ SV_Say (qboolean team)
 SV_Say_f
 ==================
 */
-void
+static void
 SV_Say_f (void)
 {
 	SV_Say (false);
@@ -834,7 +834,7 @@ SV_Say_f (void)
 SV_Say_Team_f
 ==================
 */
-void
+static void
 SV_Say_Team_f (void)
 {
 	SV_Say (true);
@@ -852,7 +852,7 @@ The client is showing the scoreboard, so send new ping times for all
 clients
 =================
 */
-void
+static void
 SV_Pings_f (void)
 {
 	client_t   *client;
@@ -879,7 +879,7 @@ SV_Pings_f (void)
 SV_Kill_f
 ==================
 */
-void
+static void
 SV_Kill_f (void)
 {
 	if (sv_player->v.health <= 0) 
@@ -926,7 +926,7 @@ SV_TogglePause (const char *msg)
 SV_Pause_f
 ==================
 */
-void
+static void
 SV_Pause_f (void)
 {
 	char        st[sizeof (host_client->name) + 32];
@@ -960,7 +960,7 @@ SV_Drop_f
 The client is going to disconnect, so remove the connection immediately
 =================
 */
-void
+static void
 SV_Drop_f (void)
 {
 	SV_EndRedirect ();
@@ -976,7 +976,7 @@ SV_PTrack_f
 Change the bandwidth estimate for a client
 =================
 */
-void
+static void
 SV_PTrack_f (void)
 {
 	int         i;
@@ -1021,7 +1021,7 @@ SV_Rate_f
 Change the bandwidth estimate for a client
 =================
 */
-void
+static void
 SV_Rate_f (void)
 {
 	int         rate;
@@ -1048,7 +1048,7 @@ SV_Msg_f
 Change the message level for a client
 =================
 */
-void
+static void
 SV_Msg_f (void)
 {
 	if (Cmd_Argc () != 2) 
@@ -1071,7 +1071,7 @@ SV_SetInfo_f
 Allow clients to change userinfo
 ==================
 */
-void
+static void
 SV_SetInfo_f (void)
 {
 	int         i;
@@ -1123,13 +1123,13 @@ SV_ShowServerinfo_f
 Dumps the serverinfo info string
 ==================
 */
-void
+static void
 SV_ShowServerinfo_f (void)
 {
 	Info_Print (svs.info);
 }
 
-void
+static void
 SV_NoSnap_f (void)
 {
 	if (*host_client->uploadfn) 
@@ -1184,7 +1184,7 @@ ucmd_t      ucmds[] = {
 SV_ExecuteUserCommand
 ==================
 */
-void
+static void
 SV_ExecuteUserCommand (char *s)
 {
 	ucmd_t     *u;
@@ -1260,7 +1260,7 @@ AddLinksToPmove
 
 ====================
 */
-void
+static void
 AddLinksToPmove (areanode_t *node)
 {
 	link_t     *l, *next;
@@ -1318,64 +1318,6 @@ AddLinksToPmove (areanode_t *node)
 		AddLinksToPmove (node->children[1]);
 }
 
-
-/*
-================
-AddAllEntsToPmove
-
-For debugging
-================
-*/
-void
-AddAllEntsToPmove (void)
-{
-	Uint		e;
-	edict_t		*check;
-	Uint		i;
-	physent_t	*pe;
-	int			pl;
-
-	pl = EDICT_TO_PROG (sv_player);
-	check = NEXT_EDICT (sv.edicts);
-	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check))
-	{
-		if (check->free)
-			continue;
-		if (check->v.owner == pl)
-			continue;
-		if (check->v.solid == SOLID_BSP
-				|| check->v.solid == SOLID_BBOX
-				|| check->v.solid == SOLID_SLIDEBOX)
-		{
-			if (check == sv_player)
-				continue;
-
-			for (i = 0; i < 3; i++)
-				if (check->v.absmin[i] > pmove_maxs[i]
-						|| check->v.absmax[i] < pmove_mins[i])
-					break;
-			if (i != 3)
-				continue;
-			pe = &pmove.physents[pmove.numphysent];
-
-			VectorCopy (check->v.origin, pe->origin);
-			pe->info = e;
-			pe->id = -1;
-			if (check->v.solid == SOLID_BSP)
-				pe->model = sv.models[(int) (check->v.modelindex)];
-			else
-			{
-				pe->model = NULL;
-				VectorCopy (check->v.mins, pe->mins);
-				VectorCopy (check->v.maxs, pe->maxs);
-			}
-
-			if (++pmove.numphysent == MAX_PHYSENTS)
-				break;
-		}
-	}
-}
-
 /*
 ===========
 SV_PreRunCmd
@@ -1384,7 +1326,7 @@ Done before running a player command.  Clears the touch array
 */
 Uint8       playertouch[(MAX_EDICTS + 7) / 8];
 
-void
+static void
 SV_PreRunCmd (void)
 {
 	memset (playertouch, 0, sizeof (playertouch));
@@ -1395,7 +1337,7 @@ SV_PreRunCmd (void)
 SV_RunCmd
 ===========
 */
-void
+static void
 SV_RunCmd (usercmd_t *ucmd, qboolean inside)
 {
 	edict_t    *ent;
@@ -1549,7 +1491,7 @@ SV_PostRunCmd
 ===========
 Done after running a player command.
 */
-void
+static void
 SV_PostRunCmd (void)
 {
 	// run post-think

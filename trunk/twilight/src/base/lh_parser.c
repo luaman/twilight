@@ -9,7 +9,7 @@
 #include "mathlib.h"
 #include "lh_parser.h"
 
-qboolean
+static qboolean
 LHP_integer(char *text, int *value)
 {
 	int negative;
@@ -32,7 +32,7 @@ LHP_integer(char *text, int *value)
 	return true;
 }
 
-qboolean
+static qboolean
 LHP_double(char *text, double *value)
 {
 	int negative, negative2;
@@ -101,7 +101,7 @@ wordclassify(char *text, int *intvalue, double *doublevalue)
 	return flags;
 }
 
-void
+static void
 LHP_freecodewords(codeword_t *word)
 {
 	codeword_t *next;

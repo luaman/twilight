@@ -85,7 +85,6 @@ extern entity_t r_worldentity;
 
 void R_Init_Cvars (void);
 void R_Init (void);
-void R_InitTextures (void);
 
 // must set r_refdef first
 // called whenever r_refdef or vid change

@@ -129,12 +129,12 @@ qboolean	scr_disabled_for_loading;
 qboolean	scr_drawloading;
 float		scr_disabled_time;
 
-void		SCR_ScreenShot_f (void);
-
 Uint8	   *avibuffer;
 Uint32		aviframeno;
 
-void
+static void SCR_ScreenShot_f (void);
+
+static void
 GL_BrightenScreen(void)
 {
 	float		f;
@@ -206,8 +206,6 @@ int			scr_erase_center;
 
 /*
 ==============
-SCR_CenterPrint
-
 Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
@@ -267,7 +265,7 @@ SCR_CenterPrint (char *str)
 }
 
 
-void
+static void
 SCR_DrawCenterString (void)
 {
 	char	   *start;
@@ -310,7 +308,7 @@ SCR_DrawCenterString (void)
 	}
 }
 
-void
+static void
 SCR_CheckDrawCenterString (void)
 {
 	if (scr_center_lines > scr_erase_lines)
@@ -339,12 +337,6 @@ CalcFov (float fov_x, float width, float height)
 	return Q_atan (height / (width / Q_tan (fov_x/360*M_PI))) * 360 / M_PI;
 }
 
-/*
-=================
-SCR_CalcRefdef
-
-=================
-*/
 static void
 SCR_CalcRefdef (void)
 {
@@ -375,12 +367,10 @@ SCR_CalcRefdef (void)
 
 /*
 =================
-SCR_SizeUp_f
-
 Keybinding command
 =================
 */
-void
+static void
 SCR_SizeUp_f (void)
 {
 	Cvar_Slide (scr_viewsize, 10);
@@ -389,12 +379,10 @@ SCR_SizeUp_f (void)
 
 /*
 =================
-SCR_SizeDown_f
-
 Keybinding command
 =================
 */
-void
+static void
 SCR_SizeDown_f (void)
 {
 	Cvar_Slide (scr_viewsize, -10);
@@ -421,6 +409,18 @@ SCR_fov_CB (cvar_t *cvar)
 		Cvar_Set (cvar, "170");
 }
 
+static void
+AvidemoChanged(cvar_t *cvar)
+{
+	if (cvar->ivalue)
+		avibuffer = Zone_Alloc(tempzone, vid.width * vid.height * 3);
+	else {
+		if (avibuffer)
+			Zone_Free(avibuffer);
+		aviframeno = 0;
+	}
+}
+
 void
 SCR_Init_Cvars (void)
 {
@@ -439,11 +439,6 @@ SCR_Init_Cvars (void)
 }
 
 
-/*
-==================
-SCR_Init
-==================
-*/
 void
 SCR_Init (void)
 {
@@ -464,12 +459,7 @@ SCR_Init (void)
 
 
 
-/*
-==============
-SCR_DrawTurtle
-==============
-*/
-void
+static void
 SCR_DrawTurtle (void)
 {
 	static int		count;
@@ -489,12 +479,7 @@ SCR_DrawTurtle (void)
 	Draw_Pic (0, 0, scr_turtle);
 }
 
-/*
-==============
-SCR_DrawNet
-==============
-*/
-void
+static void
 SCR_DrawNet (void)
 {
 	if (host_realtime - cl.last_received_message < 0.3)
@@ -505,7 +490,7 @@ SCR_DrawNet (void)
 	Draw_Pic (64, 0, scr_net);
 }
 
-void
+static void
 SCR_DrawFPS (void)
 {
 	extern cvar_t	   *show_fps;
@@ -540,7 +525,7 @@ SCR_DrawFPS (void)
 DrawPause
 ==============
 */
-void
+static void
 SCR_DrawPause (void)
 {
 	qpic_t	   *pic;
@@ -557,12 +542,7 @@ SCR_DrawPause (void)
 }
 
 
-/*
-==============
-SCR_DrawLoading
-==============
-*/
-void
+static void
 SCR_DrawLoading (void)
 {
 	qpic_t	   *pic;
@@ -580,12 +560,7 @@ SCR_DrawLoading (void)
 /* ========================================================================= */
 
 
-/*
-==================
-SCR_SetUpToDrawConsole
-==================
-*/
-void
+static void
 SCR_SetUpToDrawConsole (void)
 {
 	Con_CheckResize ();
@@ -616,12 +591,7 @@ SCR_SetUpToDrawConsole (void)
 	}
 }
 
-/*
-==================
-SCR_DrawConsole
-==================
-*/
-void
+static void
 SCR_DrawConsole (void)
 {
 	if (scr_con_current) {
@@ -642,12 +612,7 @@ SCR_DrawConsole (void)
 ==============================================================================
 */
 
-/*
-==================
-SCR_ScreenShot_f
-==================
-*/
-void
+static void
 SCR_ScreenShot_f (void)
 {
 	Uint8		*buffer;
@@ -680,7 +645,7 @@ SCR_ScreenShot_f (void)
 	Zone_Free (buffer);
 }
 
-void
+static void
 SCR_CaptureAviDemo (void)
 {
 	double			t;
@@ -706,23 +671,6 @@ SCR_CaptureAviDemo (void)
 	}
 }
 
-void AvidemoChanged(cvar_t *cvar)
-{
-	if (cvar->ivalue)
-		avibuffer = Zone_Alloc(tempzone, vid.width * vid.height * 3);
-	else {
-		if (avibuffer)
-			Zone_Free(avibuffer);
-		aviframeno = 0;
-	}
-}
-
-/*
-===============
-SCR_BeginLoadingPlaque
-
-================
-*/
 void
 SCR_BeginLoadingPlaque (void)
 {
@@ -746,12 +694,6 @@ SCR_BeginLoadingPlaque (void)
 	scr_disabled_time = host_realtime;
 }
 
-/*
-===============
-SCR_EndLoadingPlaque
-
-================
-*/
 void
 SCR_EndLoadingPlaque (void)
 {
@@ -764,7 +706,7 @@ SCR_EndLoadingPlaque (void)
 char       *scr_notifystring;
 qboolean    scr_drawdialog;
 
-void
+static void
 SCR_DrawNotifyString (void)
 {
 	char	   *start;
@@ -797,8 +739,6 @@ SCR_DrawNotifyString (void)
 
 /*
 ==================
-SCR_UpdateScreen
-
 This is called every frame, and can also be called explicitly to flush
 text to the screen.
 

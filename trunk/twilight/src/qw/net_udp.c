@@ -105,7 +105,7 @@ loopback_t	loopbacks[2];
 
 //=============================================================================
 
-void
+static void
 NetadrToSockadr (netadr_t *a, struct sockaddr_in *s)
 {
 	memset (s, 0, sizeof (*s));
@@ -115,7 +115,7 @@ NetadrToSockadr (netadr_t *a, struct sockaddr_in *s)
 	s->sin_port = a->port;
 }
 
-void
+static void
 SockadrToNetadr (struct sockaddr_in *s, netadr_t *a)
 {
 	a->type = NA_IP;
@@ -221,11 +221,11 @@ LOOPBACK BUFFERS FOR LOCAL PLAYER
 =============================================================================
 */
 
-qboolean 
+static qboolean
 NET_GetLoopPacket (netsrc_t sock)
 {
-	int		i;
-	loopback_t	*loop = &loopbacks[sock];
+	int     i;
+	loopback_t  *loop = &loopbacks[sock];
 
 	if (loop->send - loop->get > MAX_LOOPBACK)
 		loop->get = loop->send - MAX_LOOPBACK;
@@ -243,11 +243,10 @@ NET_GetLoopPacket (netsrc_t sock)
 	return true;
 }
 
-void 
-NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
-{
-	int		i;
-	loopback_t	*loop = &loopbacks[sock^1];
+static void
+NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to){
+	int     i;
+	loopback_t  *loop = &loopbacks[sock^1];
 
 	to = to;
 
@@ -260,6 +259,7 @@ NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
 	memcpy (loop->msgs[i].data, data, length);
 	loop->msgs[i].datalen = length;
 }
+
 
 
 //=============================================================================
@@ -337,7 +337,7 @@ NET_SendPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
 
 //=============================================================================
 
-int
+static int
 UDP_OpenSocket (int port)
 {
 	int         newsocket;

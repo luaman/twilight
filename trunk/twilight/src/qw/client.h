@@ -380,13 +380,9 @@ extern float server_version;	// version of server we connected to
 dlight_t *CL_AllocDlight (int key);
 void CL_DecayLights (void);
 
-void CL_Init_Cvars (void);
-void CL_Init (void);
-
 void CL_EstablishConnection (char *host);
 
 void CL_Disconnect (void);
-void CL_Disconnect_f (void);
 void CL_NextDemo (void);
 qboolean CL_DemoBehind (void);
 
@@ -421,8 +417,6 @@ extern kbutton_t in_speed;
 
 #define freelook (m_freelook->ivalue || (in_mlook.state & 1))
 
-void CL_InputSetRepeatDelay (struct cvar_s *var);
-void CL_InputSetRepeatInterval (struct cvar_s *var);
 void CL_Input_Init_Cvars(void);
 void CL_Input_Init (void);
 void CL_SendCmd (void);
@@ -432,14 +426,9 @@ void CL_ParseTEnt (void);
 void CL_UpdateTEnts (void);
 
 void CL_ClearState (void);
-void CL_ReadPackets (void);
 
 int CL_ReadFromServer (void);
 void CL_WriteToServer (usercmd_t *cmd);
-void CL_BaseMove (usercmd_t *cmd);
-
-float CL_KeyState (kbutton_t *key);
-char *Key_KeynumToString (int keynum);
 
 /*
  * cl_demo.c
@@ -539,8 +528,6 @@ void CL_InitCam (void);
  */
 void CL_InitSkins (void);
 skin_t *Skin_Load (char *skin_name);
-void Skin_Skins_f (void);
-void Skin_AllSkins_f (void);
 void Skin_NextDownload (void);
 
 #define RSSHOT_WIDTH 320

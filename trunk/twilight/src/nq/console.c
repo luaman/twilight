@@ -98,7 +98,7 @@ Con_ToggleConsole_f (void)
 Con_Clear_f
 ================
 */
-void
+static void
 Con_Clear_f (void)
 {
 	int i;
@@ -130,7 +130,7 @@ Con_ClearNotify (void)
 Con_MessageMode_f
 ================
 */
-void
+static void
 Con_MessageMode_f (void)
 {
 	chat_team = false;
@@ -142,7 +142,7 @@ Con_MessageMode_f (void)
 Con_MessageMode2_f
 ================
 */
-void
+static void
 Con_MessageMode2_f (void)
 {
 	chat_team = true;
@@ -155,7 +155,7 @@ Con_Resize
 
 ================
 */
-void
+static void
 Con_Resize (console_t *con)
 {
 	int			width;
@@ -322,7 +322,7 @@ Con_DrawInput
 The input line scrolls horizontally if typing goes beyond the right edge
 ================
 */
-void
+static void
 Con_DrawInput (void)
 {
 	char		*text;
@@ -498,7 +498,7 @@ Con_DrawConsole (int lines)
 	MEGA Thanks to Taniwha
 
 */
-void
+static void
 Con_DisplayList(char **list)
 {
 	int			i = 0;

@@ -239,26 +239,6 @@ RecursiveHullCheckPoint (RecursiveHullCheckTraceInfo_t *t, int num)
 	}
 }
 
-void
-Collision_RoundUpToHullSize (const model_t *cmodel,
-		const vec3_t inmins, const vec3_t inmaxs,
-		vec3_t outmins, vec3_t outmaxs)
-{
-	vec3_t			size;
-	const hull_t	*hull;
-
-	VectorSubtract (inmaxs, inmins, size);
-	if (size[0] < 3)
-		hull = &cmodel->hulls[0]; // 0x0x0
-	else if (size[0] <= 32)
-		hull = &cmodel->hulls[1]; // 32x32x56
-	else
-		hull = &cmodel->hulls[2]; // 64x64x88
-
-	VectorCopy (inmins, outmins);
-	VectorAdd (inmins, hull->clip_size, outmaxs);
-}
-
 
 static hull_t box_hull;
 static dclipnode_t box_clipnodes[6];

@@ -171,7 +171,7 @@ keyname_t   keynames[] = {
 ==============================================================================
 */
 
-qboolean
+static qboolean
 CheckForCommand (void)
 {
 	char        command[128];
@@ -205,12 +205,10 @@ Key_ClearEditLine (int edit_line)
 
 /*
 ====================
-Key_Console
-
 Interactive line editing and console scrollback
 ====================
 */
-void
+static void
 Key_Console (int key)
 {
 	if (key == K_ENTER)
@@ -387,7 +385,7 @@ qboolean	chat_team;
 char		chat_buffer[MAX_INPUTLINE];
 Uint32		chat_bufferlen = 0;
 
-void
+static void
 Key_Message (int key)
 {
 
@@ -435,14 +433,12 @@ Key_Message (int key)
 
 /*
 ===================
-Key_StringToKeynum
-
 Returns a key number to be used to index keybindings[] by looking at
 the given string.  Single ascii characters return themselves, while
 the K_* names are matched up.
 ===================
 */
-int
+static int
 Key_StringToKeynum (char *str)
 {
 	keyname_t  *kn;
@@ -461,14 +457,12 @@ Key_StringToKeynum (char *str)
 
 /*
 ===================
-Key_KeynumToString
-
 Returns a string (either a single ascii char, or a K_* name) for the
 given keynum.
 FIXME: handle quote special (general escape sequence?)
 ===================
 */
-char       *
+static char       *
 Key_KeynumToString (int keynum)
 {
 	keyname_t  *kn;
@@ -490,12 +484,7 @@ Key_KeynumToString (int keynum)
 }
 
 
-/*
-===================
-Key_SetBinding
-===================
-*/
-void
+static void
 Key_SetBinding (int keynum, int bindmap, char *binding)
 {
 	char       *new;
@@ -517,12 +506,7 @@ Key_SetBinding (int keynum, int bindmap, char *binding)
 	keybindings[bindmap][keynum] = new;
 }
 
-/*
-===================
-Key_In_Unbind_f
-===================
-*/
-void
+static void
 Key_In_Unbind_f (void)
 {
 	int         b, m;
@@ -547,12 +531,7 @@ Key_In_Unbind_f (void)
 	Key_SetBinding (b, m, "");
 }
 
-/*
-===================
-Key_In_Bind_f
-===================
-*/
-void
+static void
 Key_In_Bind_f (void)
 {
 	int         i, c, b, m;
@@ -595,12 +574,7 @@ Key_In_Bind_f (void)
 	Key_SetBinding (b, m, cmd);
 }
 
-/*
-===================
-Key_In_Bindmap_f
-===================
-*/
-void
+static void
 Key_In_Bindmap_f (void)
 {
 	int         m1, m2, c;
@@ -628,12 +602,7 @@ Key_In_Bindmap_f (void)
 	key_bmap2 = m2;
 }
 
-/*
-===================
-Key_Unbind_f
-===================
-*/
-void
+static void
 Key_Unbind_f (void)
 {
 	int         b;
@@ -652,7 +621,7 @@ Key_Unbind_f (void)
 	Key_SetBinding (b, 0, "");
 }
 
-void
+static void
 Key_Unbindall_f (void)
 {
 	int         i, j;
@@ -664,12 +633,7 @@ Key_Unbindall_f (void)
 }
 
 
-/*
-===================
-Key_Bind_f
-===================
-*/
-void
+static void
 Key_Bind_f (void)
 {
 	int         i, c, b;
@@ -707,8 +671,6 @@ Key_Bind_f (void)
 
 /*
 ============
-Key_WriteBindings
-
 Writes lines containing "bind key value"
 ============
 */
@@ -729,11 +691,6 @@ Key_WriteBindings (FILE * f)
 }
 
 
-/*
-===================
-Key_Init
-===================
-*/
 void
 Key_Init (void)
 {
@@ -819,8 +776,6 @@ Key_Init_Cvars (void)
 
 /*
 ===================
-Key_Event
-
 Called by the system between frames for both key up and key down events
 Should NOT be called during an interrupt!
 ===================
@@ -957,21 +912,5 @@ Key_Event (int key, qboolean down)
 			break;
 		default:
 			Sys_Error ("Bad key_dest");
-	}
-}
-
-/*
-===================
-Key_ClearStates
-===================
-*/
-void
-Key_ClearStates (void)
-{
-	int         i;
-
-	for (i = 0; i < 256; i++) {
-		keydown[i] = false;
-		key_repeats[i] = false;
 	}
 }

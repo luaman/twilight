@@ -128,7 +128,7 @@ V_CalcBob
 
 ===============
 */
-float
+static float
 V_CalcBob (void)
 {
 	static double	bobtime;
@@ -201,7 +201,7 @@ Drifting is enabled when the center view key is hit, mlook is released and
 lookspring is non 0
 ===============
 */
-void
+static void
 V_DriftPitch (void)
 {
 	float	delta, move;
@@ -332,7 +332,7 @@ V_ParseDamage (void)
 V_cshift_f
 ==================
 */
-void
+static void
 V_cshift_f (void)
 {
 	cshift_empty.destcolor[0] = Q_atoi(Cmd_Argv (1));
@@ -348,7 +348,7 @@ V_BonusFlash_f
 When you run over an item, the server sends this command
 ==================
 */
-void
+static void
 V_BonusFlash_f (void)
 {
 	cl.cshifts[CSHIFT_BONUS].destcolor[0] = 215;
@@ -393,7 +393,7 @@ V_SetContentsColor (int contents)
 V_CalcPowerupCshift
 =============
 */
-void
+static void
 V_CalcPowerupCshift (void)
 {
 	if (cl.stats[STAT_ITEMS] & IT_QUAD) {
@@ -505,31 +505,12 @@ V_UpdatePalette (void)
 
 /*
 ==============
-V_BoundOffsets
-==============
-*/
-void
-V_BoundOffsets (void)
-{
-	vec3_t org;
-	
-	VectorCopy (cl.simorg, org);
-
-	/* absolutely bound refresh relative to entity clipping hull
-	   so the view can never be inside a solid wall */
-	r_refdef.vieworg[0] = bound(org[0] - 14, r_refdef.vieworg[0], org[0] + 14);
-	r_refdef.vieworg[1] = bound(org[1] - 14, r_refdef.vieworg[1], org[1] + 14);
-	r_refdef.vieworg[2] = bound(org[2] - 22, r_refdef.vieworg[2], org[2] + 30);
-}
-
-/*
-==============
 V_AddIdle
 
 Idle swaying
 ==============
 */
-void
+static void
 V_AddIdle (void)
 {
 	r_refdef.viewangles[ROLL] +=
@@ -560,7 +541,7 @@ V_CalcViewRoll
 Roll is induced by movement and damage
 ==============
 */
-void
+static void
 V_CalcViewRoll (void)
 {
 	float       side;
@@ -581,7 +562,7 @@ V_CalcIntermissionRefdef
 
 ==================
 */
-void
+static void
 V_CalcIntermissionRefdef (void)
 {
 	/* view is the weapon model (only visible from inside body) */
@@ -632,7 +613,7 @@ V_CalcRefdef
 
 ==================
 */
-void
+static void
 V_CalcRefdef (void)
 {
 	int				i;
@@ -740,7 +721,7 @@ V_CalcRefdef (void)
 DropPunchAngle
 =============
 */
-void
+static void
 DropPunchAngle (void)
 {
 	cl.punchangle -= 10 * host_frametime;

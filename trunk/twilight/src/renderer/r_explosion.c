@@ -81,7 +81,7 @@ int	explosiontexturefog;
 static cvar_t *r_explosionclip, *r_drawexplosions;
 static cvar_t *r_explosioncolor_r, *r_explosioncolor_g, *r_explosioncolor_b, *r_explosioncolor_a;
 
-int
+static int
 R_ExplosionVert (int column, int row)
 {
 	int			i;
@@ -235,7 +235,7 @@ R_NewExplosion (vec3_t org)
 	}
 }
 
-void
+static void
 R_MoveExplosion (explosion_t *e)
 {
 	int			i;
@@ -294,7 +294,7 @@ R_MoveExplosions (void)
 			R_MoveExplosion(&explosion[i]);
 }
 
-void
+static void
 R_DrawExplosion (explosion_t *e)
 {
 	int			i;

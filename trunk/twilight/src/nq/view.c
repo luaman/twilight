@@ -95,12 +95,6 @@ float v_dmg_time, v_dmg_roll, v_dmg_pitch;
 
 extern int in_forward, in_forward2, in_back;
 
-/*
-===============
-V_CalcRoll
-
-===============
-*/
 float
 V_CalcRoll (vec3_t angles, vec3_t velocity)
 {
@@ -125,13 +119,7 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 }
 
 
-/*
-===============
-V_CalcBob
-
-===============
-*/
-float
+static float
 V_CalcBob (void)
 {
 	float       bob;
@@ -184,8 +172,6 @@ V_StopPitchDrift (void)
 
 /*
 ===============
-V_DriftPitch
-
 Moves the client pitch angle towards cl.idealpitch sent by the server.
 
 If the user is adjusting pitch manually, either with lookup/lookdown,
@@ -195,7 +181,7 @@ Drifting is enabled when the center view key is hit, mlook is released and
 lookspring is non 0
 ===============
 */
-void
+static void
 V_DriftPitch (void)
 {
 	float	delta, move;
@@ -258,11 +244,6 @@ cshift_t    cshift_lava = { {255, 80, 0}, 150 };
 
 float       v_blend[4];					// rgba 0.0 - 1.0
 
-/*
-===============
-V_ParseDamage
-===============
-*/
 void
 V_ParseDamage (void)
 {
@@ -323,12 +304,7 @@ V_ParseDamage (void)
 	v_dmg_time = v_kicktime->fvalue;
 }
 
-/*
-==================
-V_cshift_f
-==================
-*/
-void
+static void
 V_cshift_f (void)
 {
 	cshift_empty.destcolor[0] = Q_atoi(Cmd_Argv (1));
@@ -339,12 +315,10 @@ V_cshift_f (void)
 
 /*
 ==================
-V_BonusFlash_f
-
 When you run over an item, the server sends this command
 ==================
 */
-void
+static void
 V_BonusFlash_f (void)
 {
 	cl.cshifts[CSHIFT_BONUS].destcolor[0] = 215;
@@ -355,8 +329,6 @@ V_BonusFlash_f (void)
 
 /*
 =============
-V_SetContentsColor
-
 Underwater, lava, etc each has a color shift
 =============
 */
@@ -384,12 +356,7 @@ V_SetContentsColor (int contents)
 	}
 }
 
-/*
-=============
-V_CalcPowerupCshift
-=============
-*/
-void
+static void
 V_CalcPowerupCshift (void)
 {
 	if (cl.items & IT_QUAD) {
@@ -416,11 +383,6 @@ V_CalcPowerupCshift (void)
 		cl.cshifts[CSHIFT_POWERUP].percent = 0;
 }
 
-/*
-=============
-V_CalcBlend
-=============
-*/
 void
 V_CalcBlend (void)
 {
@@ -456,11 +418,6 @@ V_CalcBlend (void)
 	v_blend[3] = bound(0, a				 , 1);
 }
 
-/*
-=============
-V_UpdatePalette
-=============
-*/
 void
 V_UpdatePalette (void)
 {
@@ -499,12 +456,7 @@ V_UpdatePalette (void)
 ==============================================================================
 */
 
-/*
-==============
-V_BoundOffsets
-==============
-*/
-void
+static void
 V_BoundOffsets (void)
 {
 	vec3_t org;
@@ -520,12 +472,10 @@ V_BoundOffsets (void)
 
 /*
 ==============
-V_AddIdle
-
 Idle swaying
 ==============
 */
-void
+static void
 V_AddIdle (void)
 {
 	r_refdef.viewangles[ROLL] +=
@@ -553,12 +503,10 @@ V_AddIdle (void)
 
 /*
 ==============
-V_CalcViewRoll
-
 Roll is induced by movement and damage
 ==============
 */
-void
+static void
 V_CalcViewRoll (void)
 {
 	float       side;
@@ -576,13 +524,7 @@ V_CalcViewRoll (void)
 		r_refdef.viewangles[ROLL] = 80; // dead view angle
 }
 
-/*
-==================
-V_CalcIntermissionRefdef
-
-==================
-*/
-void
+static void
 V_CalcIntermissionRefdef (void)
 {
 	/* ent is the player model (visible when out of body) */
@@ -601,11 +543,6 @@ V_CalcIntermissionRefdef (void)
 		v_iyaw_level->fvalue;
 }
 
-/*
-==================
-V_AddEntity
-==================
-*/
 void
 V_AddEntity ( entity_t *ent )
 {
@@ -617,24 +554,13 @@ V_AddEntity ( entity_t *ent )
 	r_refdef.entities[r_refdef.num_entities++] = &ent->common;
 }
 
-/*
-==================
-V_ClearEntities
-==================
-*/
 void
 V_ClearEntities ( void )
 {
 	r_refdef.num_entities = 0;
 }
 
-/*
-==================
-V_CalcRefdef
-
-==================
-*/
-void
+static void
 V_CalcRefdef (void)
 {
 	entity_t		*ent;
@@ -744,8 +670,6 @@ V_CalcRefdef (void)
 
 /*
 ==================
-V_RenderView
-
 The player's clipping box goes from (-16 -16 -24) to (16 16 32) from
 the entity origin, so any view position inside that will be valid
 ==================
@@ -787,11 +711,6 @@ V_Zoom_CB (cvar_t *var)
 }
 
 
-/*
-=============
-V_Init_Cvars
-=============
-*/
 void
 V_Init_Cvars (void)
 {
@@ -835,11 +754,6 @@ V_Init_Cvars (void)
 	v_centerspeed = Cvar_Get ("v_centerspeed", "500", CVAR_NONE, NULL);
 }
 
-/*
-=============
-V_Init
-=============
-*/
 void
 V_Init (void)
 {
