@@ -310,7 +310,6 @@ void
 VID_Init (unsigned char *palette)
 {
 	int         i;
-	char        gldir[MAX_OSPATH];
 	int         flags = SDL_OPENGL;
 	const		SDL_VideoInfo *info = NULL;
 
@@ -401,9 +400,6 @@ VID_Init (unsigned char *palette)
 	GammaChanged(v_gamma);
 
 	GL_Init ();
-
-	snprintf (gldir, sizeof (gldir), "%s/glquake", com_gamedir);
-	Sys_mkdir (gldir);
 
 	VID_InitTexGamma ();
 
