@@ -85,7 +85,7 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\dynogl.c
+SOURCE=.\dyngl.c
 # End Source File
 # Begin Source File
 
@@ -113,7 +113,11 @@ SOURCE=.\transform.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\dynogl.h
+SOURCE=.\dglfuncs.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dyngl.h
 # End Source File
 # Begin Source File
 
@@ -125,15 +129,7 @@ SOURCE=.\glquake.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\oglfuncs.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\opengl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\opengl_ext.h
+SOURCE=.\light.h
 # End Source File
 # Begin Source File
 
