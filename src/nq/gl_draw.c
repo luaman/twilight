@@ -559,6 +559,7 @@ Draw_Crosshair (void)
 //	else
 		VectorCopy (d_8tofloattable[color], base);
 	ofs = Q_sin (cl.time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
+	ofs = boundsign (ofs, hud_chflash->fvalue);
 	VectorSlide (d_8tofloattable[color], ofs, base);
 	base[3] = hud_chalpha->fvalue;
 	qglColor4fv (base);
