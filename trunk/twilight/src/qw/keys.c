@@ -50,36 +50,36 @@ key up events are sent even if in console mode
 
 char        key_lines[32][MAX_INPUTLINE];
 int         key_linepos;
-int         shift_down = false;
-int			ctrl_down = false;
-int         key_lastpress;
+static int         shift_down = false;
+static int			ctrl_down = false;
+static int         key_lastpress;
 
 int         edit_line = 0;
-int         history_line = 0;
+static int         history_line = 0;
 
 cvar_t	   *cl_chatmode;
 
 keydest_t   key_dest;
 
-int         key_count;					// incremented every key event
-int			key_bmap, key_bmap2;
+static int         key_count;					// incremented every key event
+static int			key_bmap, key_bmap2;
 
-char       *keybindings[8][256];
-qboolean    consolekeys[256];			// if true, can't be rebound while in
+static char       *keybindings[8][256];
+static qboolean    consolekeys[256];			// if true, can't be rebound while in
 										// console
-qboolean    menubound[256];				// if true, can't be rebound while in
+static qboolean    menubound[256];				// if true, can't be rebound while in
 										// menu
-int         keyshift[256];				// key to map to if shift held down in
+static int         keyshift[256];				// key to map to if shift held down in
 										// console
-int         key_repeats[256];			// if > 1, it is autorepeating
-qboolean    keydown[256];
+static int         key_repeats[256];			// if > 1, it is autorepeating
+static qboolean    keydown[256];
 
 typedef struct {
 	char       *name;
 	int         keynum;
 } keyname_t;
 
-keyname_t   keynames[] = {
+static keyname_t   keynames[] = {
 	{"TAB", K_TAB},
 	{"ENTER", K_ENTER},
 	{"ESCAPE", K_ESCAPE},

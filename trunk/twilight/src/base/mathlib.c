@@ -99,6 +99,7 @@ Q_cos(double x)
 	return 0;
 }
 
+#if 0
 double 
 Q_asin(double x)
 {
@@ -126,6 +127,7 @@ Q_asin(double x)
 
 	return inv ? degree : -degree;
 }
+#endif
 
 double 
 Q_atan2(double y, double x) 
@@ -567,16 +569,6 @@ VectorNormalizeFast (vec3_t v)
 	v[0] *= ilength;
 	v[1] *= ilength;
 	v[2] *= ilength;
-}
-
-int
-Q_log2 (int val)
-{
-	int         answer = 0;
-
-	while ((val >>= 1) != 0)
-		answer++;
-	return answer;
 }
 
 

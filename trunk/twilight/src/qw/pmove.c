@@ -39,9 +39,9 @@ movevars_t  movevars;
 
 playermove_t pmove;
 
-float       frametime;
+static float       frametime;
 
-vec3_t      forward, right, up;
+static vec3_t      forward, right, up;
 
 vec3_t      player_mins = { -16, -16, -24 };
 vec3_t      player_maxs = { 16, 16, 32 };

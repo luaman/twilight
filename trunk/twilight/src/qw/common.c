@@ -48,20 +48,18 @@ static const char rcsid[] =
 usercmd_t nullcmd;					// guarenteed to be zero
 
 cvar_t *fs_shareconf;
-cvar_t *fs_sharepath;
+static cvar_t *fs_sharepath;
 cvar_t *fs_userconf;
-cvar_t *fs_userpath;
-cvar_t *fs_gamename;
-cvar_t *game_name;
-cvar_t *registered;
+static cvar_t *fs_userpath;
+static cvar_t *fs_gamename;
+static cvar_t *game_name;
+static cvar_t *registered;
 
 static void COM_InitFilesystem (void);
 static void COM_Path_f (void);
 static void Com_PrintHex (char *str, int len);
 static void *SZ_GetSpace (sizebuf_t *buf, size_t length);
 
-
-qboolean standard_quake = true, rogue, hipnotic;
 
 char gamedirfile[MAX_OSPATH];
 
@@ -639,7 +637,7 @@ MSG_PrintPacket ()
 
 #define	MAXPRINTMSG	4096
 
-void (*rd_print) (char *) = NULL;
+static void (*rd_print) (char *) = NULL;
 
 void Com_BeginRedirect (void (*RedirectedPrint) (char *))
 {

@@ -88,7 +88,6 @@ void Math_Init (void);
 
 double Q_sin(double x);
 double Q_cos(double x);
-double Q_asin(double x);
 double Q_atan(double x);
 double Q_atan2(double y, double x);
 double Q_tan(double x);
@@ -167,8 +166,6 @@ void		VectorNormalizeFast (vec3_t v);
 void		Lerp_Vectors (vec3_t v1, float frac, vec3_t v2, vec3_t v);
 void		Lerp_Angles (vec3_t v1, vec_t frac, vec3_t v2, vec3_t v);
 void		Vector2Angles (vec3_t in, vec3_t out);
-
-int         Q_log2 (int val);
 
 void        AngleVectors (vec3_t angles, vec3_t forward, vec3_t right,
 						  vec3_t up);

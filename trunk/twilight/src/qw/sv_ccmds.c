@@ -39,7 +39,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 
-qboolean    sv_allow_cheats;
+static qboolean    sv_allow_cheats;
 
 int         fp_messages = 4, fp_persecond = 4, fp_secondsdead = 10;
 char        fp_msg[255] = { 0 };

@@ -64,34 +64,34 @@ static qboolean    snd_initialized = false;
 // pointer should go away
 dma_t *shm = 0;
 
-vec3_t      listener_origin;
-vec3_t      listener_forward;
-vec3_t      listener_right;
-vec3_t      listener_up;
-vec_t       sound_nominal_clip_dist = 1000.0;
+static vec3_t      listener_origin;
+static vec3_t      listener_forward;
+static vec3_t      listener_right;
+static vec3_t      listener_up;
+static vec_t       sound_nominal_clip_dist = 1000.0;
 
 int         soundtime;					// sample PAIRS
 int         paintedtime;				// sample PAIRS
 
 
 #define	MAX_SFX		512
-sfx_t      *known_sfx;					// hunk allocated [MAX_SFX]
-int         num_sfx;
+static sfx_t      *known_sfx;					// hunk allocated [MAX_SFX]
+static int         num_sfx;
 
 static sfx_t      *ambient_sfx[NUM_AMBIENTS];
 
-int         sound_started = 0;
+static int         sound_started = 0;
 
 cvar_t     *volume;
 
-cvar_t     *nosound;
+static cvar_t     *nosound;
 cvar_t     *precache;
 cvar_t     *loadas8bit;
 static cvar_t     *ambient_level;
 static cvar_t     *ambient_fade;
-cvar_t     *snd_noextraupdate;
-cvar_t     *snd_show;
-cvar_t     *_snd_mixahead;
+static cvar_t     *snd_noextraupdate;
+static cvar_t     *snd_show;
+static cvar_t     *_snd_mixahead;
 
 
 // ====================================================================

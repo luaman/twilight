@@ -52,13 +52,13 @@ cvar_t *noskins;
 
 extern model_t	*player_model;
 
-memzone_t *skin_zone;
+static memzone_t *skin_zone;
 
-char allskins[128];
+static char allskins[128];
 
 #define	MAX_CACHED_SKINS		128
-cached_skin_t skins[MAX_CACHED_SKINS];
-int numskins;
+static cached_skin_t skins[MAX_CACHED_SKINS];
+static int numskins;
 
 /*
 ==========

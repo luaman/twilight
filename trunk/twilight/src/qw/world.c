@@ -197,7 +197,7 @@ ENTITY AREA CHECKING
 
 
 areanode_t  sv_areanodes[AREA_NODES];
-int         sv_numareanodes;
+static int         sv_numareanodes;
 
 /*
 ===============

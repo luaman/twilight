@@ -578,8 +578,8 @@ Mod_MakeChains (model_t *mod)
 			qglGenTextures (1, &chain->l_texnum);
 			chain->flags = CHAIN_LIGHTMAP;
 			qglBindTexture(GL_TEXTURE_2D, chain->l_texnum);
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			qglTexImage2D (GL_TEXTURE_2D, 0, colorlights ? 3 : 1,
 					LIGHTBLOCK_WIDTH, LIGHTBLOCK_HEIGHT, 0, gl_lightmap_format,
 					GL_UNSIGNED_BYTE, templight);

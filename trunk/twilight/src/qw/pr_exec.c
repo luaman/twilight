@@ -50,17 +50,17 @@ typedef struct
 prstack_t;
 
 #define MAX_STACK_DEPTH 32
-prstack_t pr_stack[MAX_STACK_DEPTH];
-int pr_depth;
+static prstack_t pr_stack[MAX_STACK_DEPTH];
+static int pr_depth;
 
 #define LOCALSTACK_SIZE 2048
-int localstack[LOCALSTACK_SIZE];
-int localstack_used;
+static int localstack[LOCALSTACK_SIZE];
+static int localstack_used;
 
 
 qboolean pr_trace;
 dfunction_t *pr_xfunction;
-int pr_xstatement;
+static int pr_xstatement;
 
 
 Uint pr_argc;

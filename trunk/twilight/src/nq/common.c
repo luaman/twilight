@@ -43,7 +43,6 @@ static const char rcsid[] =
 #include "mathlib.h"
 
 static cvar_t *registered;
-cvar_t *cmdline;
 cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;
 cvar_t *fs_userconf;

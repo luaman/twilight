@@ -51,46 +51,46 @@ when crossing a water boudnary.
 
 */
 
-cvar_t *cl_rollspeed;
-cvar_t *cl_rollangle;
+static cvar_t *cl_rollspeed;
+static cvar_t *cl_rollangle;
 
-cvar_t *cl_bob;
-cvar_t *cl_bobcycle;
-cvar_t *cl_bobup;
+static cvar_t *cl_bob;
+static cvar_t *cl_bobcycle;
+static cvar_t *cl_bobup;
 
-cvar_t *v_kicktime;
-cvar_t *v_kickroll;
-cvar_t *v_kickpitch;
+static cvar_t *v_kicktime;
+static cvar_t *v_kickroll;
+static cvar_t *v_kickpitch;
 
-cvar_t *v_iyaw_cycle;
-cvar_t *v_iroll_cycle;
-cvar_t *v_ipitch_cycle;
-cvar_t *v_iyaw_level;
-cvar_t *v_iroll_level;
-cvar_t *v_ipitch_level;
+static cvar_t *v_iyaw_cycle;
+static cvar_t *v_iroll_cycle;
+static cvar_t *v_ipitch_cycle;
+static cvar_t *v_iyaw_level;
+static cvar_t *v_iroll_level;
+static cvar_t *v_ipitch_level;
 
-cvar_t *v_idlescale;
-cvar_t *v_zoom;
+static cvar_t *v_idlescale;
+static cvar_t *v_zoom;
 
 cvar_t *crosshair;
 cvar_t *crosshaircolor;
 
-cvar_t *cl_crossx;
-cvar_t *cl_crossy;
+static cvar_t *cl_crossx;
+static cvar_t *cl_crossy;
 
 cvar_t *gl_cshiftpercent;
 
-cvar_t *v_contentblend;
+static cvar_t *v_contentblend;
 
-cvar_t *v_centermove;
-cvar_t *v_centerspeed;
+static cvar_t *v_centermove;
+static cvar_t *v_centerspeed;
 
-float v_dmg_time, v_dmg_roll, v_dmg_pitch;
+static float v_dmg_time, v_dmg_roll, v_dmg_pitch;
 
 extern int in_forward, in_forward2, in_back;
 
-frame_t *view_frame;
-player_state_t *view_message;
+static frame_t *view_frame;
+static player_state_t *view_message;
 
 /*
 ===============
@@ -257,10 +257,10 @@ V_DriftPitch (void)
  
 ============================================================================== 
 */
-cshift_t    cshift_empty = { {130, 80, 50}, 0 };
-cshift_t    cshift_water = { {130, 80, 50}, 128 };
-cshift_t    cshift_slime = { {0, 25, 5}, 150 };
-cshift_t    cshift_lava = { {255, 80, 0}, 150 };
+static cshift_t    cshift_empty = { {130, 80, 50}, 0 };
+static cshift_t    cshift_water = { {130, 80, 50}, 128 };
+static cshift_t    cshift_slime = { {0, 25, 5}, 150 };
+static cshift_t    cshift_lava = { {255, 80, 0}, 150 };
 
 float       v_blend[4];					// rgba 0.0 - 1.0
 

@@ -80,12 +80,12 @@ static const char rcsid[] =
 #endif
 
 
-int nostdout = 0;
+static int nostdout = 0;
 
 char *qdate = __DATE__;
 
-cvar_t *sys_asciionly;
-cvar_t *sys_logname;
+static cvar_t *sys_asciionly;
+static cvar_t *sys_logname;
 
 int sys_gametypes;
 

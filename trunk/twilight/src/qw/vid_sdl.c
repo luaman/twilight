@@ -42,13 +42,13 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "sys.h"
 
-cvar_t *width_2d;
-cvar_t *height_2d;
-cvar_t *text_scale;
-cvar_t *i_keypadmode;
-cvar_t *m_filter;
-cvar_t *_windowed_mouse;
-cvar_t *gl_driver;
+static cvar_t *width_2d;
+static cvar_t *height_2d;
+static cvar_t *text_scale;
+static cvar_t *i_keypadmode;
+static cvar_t *m_filter;
+static cvar_t *_windowed_mouse;
+static cvar_t *gl_driver;
 
 qboolean VID_Inited;
 qboolean keypadmode = false;
@@ -93,11 +93,11 @@ GL_Init (void)
 
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 			GL_LINEAR_MIPMAP_NEAREST);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

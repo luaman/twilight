@@ -81,8 +81,8 @@ static cvar_t *v_zoom;
 cvar_t *crosshair;
 cvar_t *crosshaircolor;
 
-cvar_t *cl_crossx;
-cvar_t *cl_crossy;
+static cvar_t *cl_crossx;
+static cvar_t *cl_crossy;
 
 static cvar_t *gl_cshiftpercent;
 
@@ -359,22 +359,22 @@ V_SetContentsColor (int contents)
 static void
 V_CalcPowerupCshift (void)
 {
-	if (cl.items & IT_QUAD) {
+	if (cl.stats[STAT_ITEMS] & IT_QUAD) {
 		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 0;
 		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 0;
 		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 255;
 		cl.cshifts[CSHIFT_POWERUP].percent = 30;
-	} else if (cl.items & IT_SUIT) {
+	} else if (cl.stats[STAT_ITEMS] & IT_SUIT) {
 		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 0;
 		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 255;
 		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 0;
 		cl.cshifts[CSHIFT_POWERUP].percent = 20;
-	} else if (cl.items & IT_INVISIBILITY) {
+	} else if (cl.stats[STAT_ITEMS] & IT_INVISIBILITY) {
 		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 100;
 		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 100;
 		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 100;
 		cl.cshifts[CSHIFT_POWERUP].percent = 100;
-	} else if (cl.items & IT_INVULNERABILITY) {
+	} else if (cl.stats[STAT_ITEMS] & IT_INVULNERABILITY) {
 		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 255;
 		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 255;
 		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 0;
@@ -771,7 +771,7 @@ R_DrawViewModel (void)
 	cl.viewent.common.real_ent = &cl.viewent;
 
 	if (!r_drawviewmodel->ivalue || chase_active->ivalue ||
-			!r_drawentities->ivalue || cl.items & IT_INVISIBILITY ||
+			!r_drawentities->ivalue || cl.stats[STAT_ITEMS] & IT_INVISIBILITY ||
 			(cl.stats[STAT_HEALTH] <= 0) || !cl.viewent.common.model)
 		return;
 

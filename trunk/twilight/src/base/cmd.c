@@ -38,7 +38,7 @@ static const char rcsid[] =
 #include "zone.h"
 
 // this gets allocated as soon as Cmd_AddCommand needs it
-memzone_t *cmdzone = NULL;
+static memzone_t *cmdzone = NULL;
 
 #define MAX_ALIAS_NAME 32
 
@@ -50,14 +50,14 @@ typedef struct cmdalias_s
 }
 cmdalias_t;
 
-cmdalias_t *cmd_alias;
-qboolean cmd_wait;
-cvar_t *cl_warncmd;
+static cmdalias_t *cmd_alias;
+static qboolean cmd_wait;
+static cvar_t *cl_warncmd;
 
-char cmd_tokenbuffer[MAX_TOKENBUFFER];
+static char cmd_tokenbuffer[MAX_TOKENBUFFER];
 
-sizebuf_t *cmd_text;
-Uint8 cmd_text_buf[8192];
+static sizebuf_t *cmd_text;
+static Uint8 cmd_text_buf[8192];
 
 //=============================================================================
 

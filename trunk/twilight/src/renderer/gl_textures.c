@@ -171,9 +171,9 @@ Set_TextureMode_f (struct cvar_s *var)
 		if (glt->mipmap)
 		{
 			qglBindTexture (GL_TEXTURE_2D, glt->texnum);
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+			qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 					glt_filter_min);
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+			qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
 					glt_filter_mag);
 		}
 	}
@@ -1209,15 +1209,15 @@ GL_Upload32 (Uint32 *data, int width, int height, int flags)
 		final = data;
 
 	if (flags & TEX_MIPMAP) {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_min);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
+		qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_min);
+		qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
 		if (gl_sgis_mipmap)
-			qglTexParameterf (GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true);
+			qglTexParameteri (GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true);
 	} else {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_mag);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
+		qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_mag);
+		qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
 		if (gl_sgis_mipmap)
-			qglTexParameterf (GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, false);
+			qglTexParameteri (GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, false);
 	}
 
 	qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,

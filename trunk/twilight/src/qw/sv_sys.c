@@ -95,12 +95,12 @@ static const char rcsid[] =
 // FIXME: put this somewhere else
 void SV_Init (void);
 
-Uint32 sys_sleep;
+static Uint32 sys_sleep;
 
 char *qdate = __DATE__;
 
-cvar_t *sys_asciionly;
-cvar_t *sys_extrasleep;
+static cvar_t *sys_asciionly;
+static cvar_t *sys_extrasleep;
 cvar_t *sys_logname;
 
 int sys_gametypes;

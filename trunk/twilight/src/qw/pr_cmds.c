@@ -868,7 +868,7 @@ PF_dprint (void)
 	Com_Printf ("%s", PF_VarString (0));
 }
 
-char        pr_string_temp[128];
+static char        pr_string_temp[128];
 
 static void
 PF_ftos (void)
@@ -1926,7 +1926,7 @@ PF_checkextension (void)
 #define NULL100 NULL10, NULL10, NULL10, NULL10, NULL10, NULL10, NULL10, \
 		NULL10, NULL10, NULL10
 
-builtin_t pr_builtin[] =
+static builtin_t pr_builtin[] =
 {
 	NULL,					// #000 runtime error
 	PF_makevectors,			// #001

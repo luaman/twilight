@@ -118,11 +118,11 @@ location:
 						if (cl.stats[STAT_ARMOR] > 50)
 							bracket = 0;
 
-						if (cl.items & IT_ARMOR3)
+						if (cl.stats[STAT_ITEMS] & IT_ARMOR3)
 							t3[0] = 'R' | 0x80;
-						else if (cl.items & IT_ARMOR2)
+						else if (cl.stats[STAT_ITEMS] & IT_ARMOR2)
 							t3[0] = 'Y' | 0x80;
-						else if (cl.items & IT_ARMOR1)
+						else if (cl.stats[STAT_ITEMS] & IT_ARMOR1)
 							t3[0] = 'G' | 0x80;
 						else {
 							t2[0] = 'N' | 0x80;
@@ -141,11 +141,11 @@ location:
 					break;
 				case 'A':
 					bracket = 0;
-					if (cl.items & IT_ARMOR3)
+					if (cl.stats[STAT_ITEMS] & IT_ARMOR3)
 						t2[0] = 'R' | 0x80;
-					else if (cl.items & IT_ARMOR2)
+					else if (cl.stats[STAT_ITEMS] & IT_ARMOR2)
 						t2[0] = 'Y' | 0x80;
-					else if (cl.items & IT_ARMOR1)
+					else if (cl.stats[STAT_ITEMS] & IT_ARMOR1)
 						t2[0] = 'G' | 0x80;
 					else {
 						t2[0] = 'N' | 0x80;
