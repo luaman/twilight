@@ -422,7 +422,7 @@ VID_Init (unsigned char *palette)
 	if (i && i < (com_argc - 1))
 		Cvar_Set(height_2d, com_argv[i + 1]);
 
-	if (SDL_Init (SDL_INIT_VIDEO) != 0) {
+	if (SDL_InitSubSystem (SDL_INIT_VIDEO) != 0) {
 		Sys_Error ("Could not init SDL video: %s\n", SDL_GetError ());
 	}
 
