@@ -2,7 +2,7 @@
 
 Import ("env", "opts", "base_sources", "client_sources", "fs_sources")
 Import ("image_sources", "renderer_sources", "sound_sources")
-env.Append (CPPPATH = ["#/src/qw"])
+#env.Append (CPPPATH = ["#/src/qw"])
 
 if int(opts['clients']):
     qw_headers = Split("""net.h protocol.h render.h screen.h""")

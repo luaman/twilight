@@ -35,9 +35,9 @@ static const char rcsid[] =
 #include "dlight.h"
 #include "model.h"
 #include "mathlib.h"
-#include "sound.h"
+#include "sound/sound.h"
 #include "sys.h"
-#include "explosion.h"
+#include "renderer/explosion.h"
 
 entity_t    cl_temp_entities[MAX_TEMP_ENTITIES];
 beam_t      cl_beams[MAX_BEAMS];

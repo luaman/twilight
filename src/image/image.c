@@ -35,8 +35,8 @@ static const char rcsid[] =
 #include "tga.h"
 #include "sys.h"
 #include "sdlimage.h"
-#include "fs.h"
-#include "textures.h"
+#include "fs/fs.h"
+#include "renderer/textures.h"
 
 memzone_t			*img_zone;
 img_search_t		*img_search;

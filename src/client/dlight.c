@@ -28,7 +28,7 @@
 
 #include "qtypes.h"
 #include "dlight.h"
-#include "gl_light.h"
+#include "renderer/gl_light.h"
 
 dlight_t *
 CCL_AllocDlight (int key)

@@ -27,7 +27,7 @@
 #define __IMAGE_H
 
 #include "qtypes.h"
-#include "fs.h"
+#include "fs/fs.h"
 
 #define TEX_NONE		0
 #define TEX_ALPHA		BIT(0)

@@ -5,10 +5,9 @@
 AUTOMAKE_OPTIONS=foreign dist-zip
 
 INCLUDES =	\
+	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/include \
-	-I$(top_srcdir)/src/base \
-	-I$(top_srcdir)/src/renderer \
-	-I$(top_srcdir)/src/fs
+	-I$(top_srcdir)/src/base
 
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 

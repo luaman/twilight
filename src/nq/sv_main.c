@@ -37,10 +37,10 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "net.h"
 #include "server.h"
-#include "sound.h"
+#include "sound/sound.h"
 #include "sys.h"
 #include "world.h"
-#include "surface.h"
+#include "renderer/surface.h"
 
 server_t		 sv;
 server_static_t	 svs;

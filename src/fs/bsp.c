@@ -39,8 +39,8 @@ static const char rcsid[] =
 #include "sys.h"
 #include "rw_ops.h"
 #include "mod_brush_disk.h"
-#include "mod_alias_disk.h"
-#include "mod_sprite_disk.h"
+#include "renderer/mod_alias_disk.h"
+#include "renderer/mod_sprite_disk.h"
 	
 typedef struct fsb_group_s {
 	fs_file_t	*bsp;

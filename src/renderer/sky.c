@@ -39,7 +39,7 @@ static const char rcsid[] =
 #include "gl_main.h"
 #include "textures.h"
 #include "sky.h"
-#include "image.h"
+#include "image/image.h"
 #include "vis.h"
 
 #include "cvar.h"

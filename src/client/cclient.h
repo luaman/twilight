@@ -31,9 +31,9 @@
 #include "qtypes.h"
 #include "common.h"
 #include "dlight.h"
-#include "gl_info.h"
+#include "renderer/gl_info.h"
 #include "zone.h"
-#include "sound.h"
+#include "sound/sound.h"
 
 typedef struct {
 	int		length;

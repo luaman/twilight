@@ -67,7 +67,7 @@ unsigned long inet_addr (const char *cp);
 #include "keys.h"
 #include "net.h"
 #include "net_dgrm.h"
-#include "screen.h"
+#include "renderer/screen.h"
 #include "server.h"
 #include "strlib.h"
 #include "sys.h"

@@ -43,8 +43,8 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 #include "net.h"
-#include "fs.h"
-#include "rw_ops.h"
+#include "fs/fs.h"
+#include "fs/rw_ops.h"
 #include "host.h"
 	
 host_t		host;

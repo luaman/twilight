@@ -7,9 +7,7 @@ AUTOMAKE_OPTIONS=foreign dist-zip
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 
 INCLUDES = -I$(top_srcdir)/src/include \
-	-I$(top_srcdir)/src/fs \
-	-I$(top_srcdir)/src/renderer \
-	-I$(top_srcdir)/src/image \
+	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/client
 
 lib_LIBRARIES=libtwilight_base.a

@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 Import ("env", "opts")
-env.Append (CPPPATH = ["#/src/fs"])
+#env.Append (CPPPATH = ["#/src/fs"])
 
 fs_headers = Split("""bsp.h dir.h embedded.h embedded_data.h fs.h fs_hash.h
 	fs_new.h pak.h rw_ops.h wad.h""")
