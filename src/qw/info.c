@@ -213,7 +213,7 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 		// make sure we have enough room for new value
 		if (strlen (value) - strlen (v) + strlen (s) > maxsize)
 		{
-			Com_Printf ("Info string length exceeded\n");
+			Com_Printf ("TW: Info string length exceeded\n");
 			return;
 		}
 	}
@@ -225,7 +225,7 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 
 	if ((strlen (new) + strlen (s)) > maxsize)
 	{
-		Com_Printf ("Info string length exceeded\n");
+		Com_Printf ("TW: Info string length exceeded\n");
 		return;
 	}
 	// only copy ascii values

@@ -377,9 +377,6 @@ CL_ClearState (void)
 
 	CL_ClearTEnts ();
 
-	if (cl.worldmodel)
-		Mod_UnloadModel (cl.worldmodel);
-
 	// wipe the entire cl structure
 	memset (&cl, 0, sizeof (cl));
 

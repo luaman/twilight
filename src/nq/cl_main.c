@@ -89,8 +89,6 @@ CL_ClearState (void)
 		Host_ClearMemory ();
 
 // wipe the entire cl structure
-	if (cl.worldmodel)
-		Mod_UnloadModel (cl.worldmodel);
 	Zone_EmptyZone (cl_zone);
 	memset (&cl, 0, sizeof (cl));
 

@@ -148,9 +148,8 @@ Mod_ClearAll (void)
 	int         i;
 	model_t    *mod;
 
-	return;
 	for (i = 0, mod = mod_known; i < MAX_MOD_KNOWN; i++, mod++)
-		if (!mod->needload && mod->name[0])
+		if (!mod->needload && mod->name[0] && (mod->type == mod_brush))
 			Mod_UnloadModel (mod);
 }
 
