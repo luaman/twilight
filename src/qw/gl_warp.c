@@ -72,7 +72,7 @@ SubdividePolygon (int numverts, float *verts)
 
 	for (i = 0; i < 3; i++) {
 		m = (mins[i] + maxs[i]) * 0.5;
-		m = gl_subdivide_size.value * floor (m / gl_subdivide_size.value + 0.5);
+		m = gl_subdivide_size.value * Q_floor (m / gl_subdivide_size.value + 0.5);
 		if (maxs[i] - m < 8)
 			continue;
 		if (m - mins[i] < 8)
@@ -240,8 +240,7 @@ EmitSkyPolys (msurface_t *fa)
 			dir[2] *= 3;				// flatten the sphere
 
 			length = dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2];
-			length = sqrt (length);
-			length = 6 * 63 / length;
+			length = 6 * 63 * Q_RSqrt (length);
 
 			dir[0] *= length;
 			dir[1] *= length;
@@ -720,13 +719,13 @@ DrawSkyPolygon (int nump, vec3_t vecs)
 	return;
 #endif
 	// decide which face it maps to
-	VectorCopy (vec3_origin, v);
+	VectorClear (v);
 	for (i = 0, vp = vecs; i < nump; i++, vp += 3) {
 		VectorAdd (vp, v, v);
 	}
-	av[0] = fabs (v[0]);
-	av[1] = fabs (v[1]);
-	av[2] = fabs (v[2]);
+	av[0] = Q_fabs (v[0]);
+	av[1] = Q_fabs (v[1]);
+	av[2] = Q_fabs (v[2]);
 	if (av[0] > av[1] && av[0] > av[2]) {
 		if (v[0] < 0)
 			axis = 1;

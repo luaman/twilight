@@ -266,7 +266,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 			SV_Move (ent->v.origin, ent->v.mins, ent->v.maxs, end, false, ent);
 
 		if (trace.allsolid) {			// entity is trapped in another solid
-			VectorCopy (vec3_origin, ent->v.velocity);
+			VectorClear (ent->v.velocity);
 			return 3;
 		}
 
@@ -306,7 +306,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 
 		// cliped to another plane
 		if (numplanes >= MAX_CLIP_PLANES) {	// this shouldn't really happen
-			VectorCopy (vec3_origin, ent->v.velocity);
+			VectorClear (ent->v.velocity);
 			return 3;
 		}
 
@@ -332,7 +332,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 		} else {						// go along the crease
 			if (numplanes != 2) {
 //              Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
-				VectorCopy (vec3_origin, ent->v.velocity);
+				VectorClear (ent->v.velocity);
 				return 7;
 			}
 			CrossProduct (planes[0], planes[1], dir);
@@ -345,7 +345,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 // to avoid tiny occilations in sloping corners
 //
 		if (DotProduct (ent->v.velocity, primal_velocity) <= 0) {
-			VectorCopy (vec3_origin, ent->v.velocity);
+			VectorClear (ent->v.velocity);
 			return blocked;
 		}
 	}
@@ -592,7 +592,7 @@ SV_Physics_Pusher (edict_t *ent)
 			return;
 		VectorSubtract (ent->v.origin, oldorg, move);
 
-		l = Length (move);
+		l = VectorLength (move);
 		if (l > 1.0 / 64) {
 //  Con_Printf ("**** snap: %f\n", Length (l));
 			VectorCopy (oldorg, ent->v.origin);
@@ -737,8 +737,8 @@ SV_Physics_Toss (edict_t *ent)
 		if (ent->v.velocity[2] < 60 || ent->v.movetype != MOVETYPE_BOUNCE) {
 			ent->v.flags = (int) ent->v.flags | FL_ONGROUND;
 			ent->v.groundentity = EDICT_TO_PROG (trace.ent);
-			VectorCopy (vec3_origin, ent->v.velocity);
-			VectorCopy (vec3_origin, ent->v.avelocity);
+			VectorClear (ent->v.velocity);
+			VectorClear (ent->v.avelocity);
 		}
 	}
 // check for in water

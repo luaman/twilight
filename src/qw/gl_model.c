@@ -377,6 +377,14 @@ Mod_LoadTextures (lump_t *l)
 		// the pixels immediately follow the structures
 		memcpy (tx + 1, mt + 1, pixels);
 
+		// HACK HACK HACK
+		if (!strcmp(mt->name, "shot1sid") && mt->width==32 && mt->height==32
+			&& CRC_Block((byte*)(mt+1), mt->width*mt->height) == 65393)
+		{	// This texture in b_shell1.bsp has some of the first 32 pixels painted white.
+			// They are invisible in software, but look really ugly in GL. So we just copy
+			// 32 pixels from the bottom to make it look nice.
+			memcpy (tx+1, (byte *)(tx+1) + 32*31, 32);
+		}
 
 		if (!Q_strncmp (mt->name, "sky", 3))
 			R_InitSky (tx);
@@ -638,9 +646,9 @@ Mod_LoadTexinfo (lump_t *l)
 	for (i = 0; i < count; i++, in++, out++) {
 		for (j = 0; j < 8; j++)
 			out->vecs[0][j] = LittleFloat (in->vecs[0][j]);
-		len1 = Length (out->vecs[0]);
-		len2 = Length (out->vecs[1]);
-		len1 = (len1 + len2) / 2;
+		len1 = VectorLength (out->vecs[0]);
+		len2 = VectorLength (out->vecs[1]);
+		len1 = (len1 + len2) * 0.5f;
 		if (len1 < 0.32)
 			out->mipadjust = 4;
 		else if (len1 < 0.49)
@@ -653,7 +661,7 @@ Mod_LoadTexinfo (lump_t *l)
 		if (len1 + len2 < 0.001)
 			out->mipadjust = 1;			// don't crash
 		else
-			out->mipadjust = 1 / floor ((len1 + len2) / 2 + 0.1);
+			out->mipadjust = 1 / Q_floor ((len1 + len2) / 2 + 0.1);
 #endif
 
 		miptex = LittleLong (in->miptex);
@@ -714,8 +722,8 @@ CalcSurfaceExtents (msurface_t *s)
 	}
 
 	for (i = 0; i < 2; i++) {
-		bmins[i] = floor (mins[i] / 16);
-		bmaxs[i] = ceil (maxs[i] / 16);
+		bmins[i] = Q_floor (mins[i] / 16);
+		bmaxs[i] = Q_ceil (maxs[i] / 16);
 
 		s->texturemins[i] = bmins[i] * 16;
 		s->extents[i] = (bmaxs[i] - bmins[i]) * 16;
@@ -1114,10 +1122,10 @@ RadiusFromBounds (vec3_t mins, vec3_t maxs)
 
 	for (i = 0; i < 3; i++) {
 		corner[i] =
-			fabs (mins[i]) > fabs (maxs[i]) ? fabs (mins[i]) : fabs (maxs[i]);
+			Q_fabs (mins[i]) > Q_fabs (maxs[i]) ? Q_fabs (mins[i]) : Q_fabs (maxs[i]);
 	}
 
-	return Length (corner);
+	return VectorLength (corner);
 }
 
 /*
@@ -1532,6 +1540,51 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	if (version != ALIAS_VERSION)
 		Sys_Error ("%s has wrong version number (%i should be %i)",
 				   mod->name, version, ALIAS_VERSION);
+
+	mod->modflags = 0;
+
+	if (!Q_strcmp(mod->name, "progs/player.mdl")) {
+		mod->modflags |= FLAG_ALWAYSLIT;
+	}
+	else if (!Q_strncmp(mod->name, "progs/flame.mdl", 11)) {
+		mod->modflags |= FLAG_FULLBRIGHT;
+		mod->modflags |= FLAG_NOSHADOW;
+	}
+	else if (!Q_strncmp(mod->name, "progs/bolt.mdl", 10) ||
+		!Q_strcmp(mod->name, "progs/laser.mdl") ||
+		!Q_strcmp (mod->name, "progs/lavaball.mdl")) {
+		mod->modflags |= FLAG_FULLBRIGHT;
+		mod->modflags |= FLAG_NOSHADOW;
+	}
+	else if (!Q_strcmp(mod->name, "progs/missile.mdl") ||
+		!Q_strcmp(mod->name, "progs/grenade.mdl") ||
+		!Q_strcmp(mod->name, "progs/spike.mdl") ||
+		!Q_strcmp(mod->name, "progs/s_spike.mdl") ||
+		!Q_strcmp(mod->name, "progs/zom_gib") ||
+		!Q_strncmp(mod->name, "progs/gib", 9) ||
+		!Q_strncmp(mod->name, "progs/h_", 8))
+	{
+		mod->modflags |= FLAG_NOSHADOW;
+	}
+	else if (!Q_strncmp(mod->name, "progs/v_", 8)) 
+	{
+		mod->modflags |= FLAG_NOSHADOW;
+	}
+	else if (!Q_strcmp(mod->name, "progs/eyes.mdl")) {
+		mod->modflags |= FLAG_DOUBLESIZE;
+	}
+	// keys and runes are fullbright and do not cast shadows
+	else if (
+		!Q_strcmp(mod->name, "progs/w_s_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/m_s_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/b_s_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/w_g_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/m_g_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/b_g_key.mdl") ||
+		!Q_strncmp(mod->name, "progs/end", 9)) {
+		mod->modflags |= FLAG_FULLBRIGHT;
+		mod->modflags |= FLAG_NOSHADOW;
+	}
 
 //
 // allocate space for a working header, plus all the data except the frames,

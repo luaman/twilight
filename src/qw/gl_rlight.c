@@ -76,7 +76,7 @@ AddLightBlend (float r, float g, float b, float a2)
 float       bubble_sintable[17], bubble_costable[17];
 
 void
-R_InitBubble ()
+R_InitBubble (void)
 {
 	float       a;
 	int         i;
@@ -87,8 +87,8 @@ R_InitBubble ()
 
 	for (i = 16; i >= 0; i--) {
 		a = i / 16.0 * M_PI * 2;
-		*bub_sin++ = sin (a);
-		*bub_cos++ = cos (a);
+		*bub_sin++ = Q_sin (a);
+		*bub_cos++ = Q_cos (a);
 	}
 }
 
@@ -107,7 +107,7 @@ R_RenderDlight (dlight_t *light)
 	rad = light->radius * 0.35;
 
 	VectorSubtract (light->origin, r_origin, v);
-	if (Length (v) < rad) {				// view is inside the dlight
+	if (VectorLength (v) < rad) {				// view is inside the dlight
 		AddLightBlend (1, 0.5, 0, light->radius * 0.0003);
 		return;
 	}

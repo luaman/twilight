@@ -205,7 +205,7 @@ CL_PredictMove (void)
 	}
 
 	for (i = 0; i < 3; i++)
-		if (fabs (from->playerstate[cl.playernum].origin[i] - to->playerstate[cl.playernum].origin[i]) > 128) {	// teleported, 
+		if (Q_fabs (from->playerstate[cl.playernum].origin[i] - to->playerstate[cl.playernum].origin[i]) > 128) {	// teleported, 
 																												// 
 			// 
 			// so 

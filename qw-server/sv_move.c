@@ -234,8 +234,8 @@ SV_StepDirection (edict_t *ent, float yaw, float dist)
 	PF_changeyaw ();
 
 	yaw = yaw * M_PI * 2 / 360;
-	move[0] = cos (yaw) * dist;
-	move[1] = sin (yaw) * dist;
+	move[0] = Q_cos (yaw) * dist;
+	move[1] = Q_sin (yaw) * dist;
 	move[2] = 0;
 
 	VectorCopy (ent->v.origin, oldorigin);
@@ -312,7 +312,7 @@ SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 			return;
 	}
 // try other directions
-	if (((rand () & 3) & 1) || abs (deltay) > abs (deltax)) {
+	if (((Q_rand () & 3) & 1) || Q_abs (deltay) > Q_abs (deltax)) {
 		tdir = d[1];
 		d[1] = d[2];
 		d[2] = tdir;
@@ -331,7 +331,7 @@ SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 	if (olddir != DI_NODIR && SV_StepDirection (actor, olddir, dist))
 		return;
 
-	if (rand () & 1) {					/* randomly determine direction of
+	if (Q_rand () & 1) {					/* randomly determine direction of
 										   search */
 		for (tdir = 0; tdir <= 315; tdir += 45)
 			if (tdir != turnaround && SV_StepDirection (actor, tdir, dist))
@@ -401,7 +401,7 @@ SV_MoveToGoal (void)
 		return;
 
 // bump around...
-	if ((rand () & 3) == 1 || !SV_StepDirection (ent, ent->v.ideal_yaw, dist)) {
+	if ((Q_rand () & 3) == 1 || !SV_StepDirection (ent, ent->v.ideal_yaw, dist)) {
 		SV_NewChaseDir (ent, goal, dist);
 	}
 }

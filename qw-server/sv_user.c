@@ -406,8 +406,8 @@ SV_SpawnSpectator (void)
 	int         i;
 	edict_t    *e;
 
-	VectorCopy (vec3_origin, sv_player->v.origin);
-	VectorCopy (vec3_origin, sv_player->v.view_ofs);
+	VectorClear (sv_player->v.origin);
+	VectorClear (sv_player->v.view_ofs);
 	sv_player->v.view_ofs[2] = 22;
 
 	// search for an info_playerstart to spawn the spectator at
@@ -1220,7 +1220,7 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 	AngleVectors (angles, forward, right, up);
 	side = DotProduct (velocity, right);
 	sign = side < 0 ? -1 : 1;
-	side = fabs (side);
+	side = Q_fabs (side);
 
 	value = cl_rollangle.value;
 

@@ -959,7 +959,7 @@ M_Menu_Quit_f (void)
 	m_quit_prevstate = m_state;
 	m_state = m_quit;
 	m_entersound = true;
-	msgNumber = rand () & 7;
+	msgNumber = Q_rand () & 7;
 }
 
 

@@ -635,7 +635,7 @@ SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
 		VectorCopy (plane->normal, trace->plane.normal);
 		trace->plane.dist = plane->dist;
 	} else {
-		VectorSubtract (vec3_origin, plane->normal, trace->plane.normal);
+		VectorInverse (plane->normal, trace->plane.normal);
 		trace->plane.dist = -plane->dist;
 	}
 

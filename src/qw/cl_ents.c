@@ -431,19 +431,19 @@ CL_LinkPacketEntities (void)
 		// spawn light flashes, even ones coming from invisible objects
 		if ((s1->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
 			CL_NewDlight (s1->number, s1->origin[0], s1->origin[1],
-						  s1->origin[2], 200 + (rand () & 31), 0.1, 3);
+						  s1->origin[2], 200 + (Q_rand () & 31), 0.1, 3);
 		else if (s1->effects & EF_BLUE)
 			CL_NewDlight (s1->number, s1->origin[0], s1->origin[1],
-						  s1->origin[2], 200 + (rand () & 31), 0.1, 1);
+						  s1->origin[2], 200 + (Q_rand () & 31), 0.1, 1);
 		else if (s1->effects & EF_RED)
 			CL_NewDlight (s1->number, s1->origin[0], s1->origin[1],
-						  s1->origin[2], 200 + (rand () & 31), 0.1, 2);
+						  s1->origin[2], 200 + (Q_rand () & 31), 0.1, 2);
 		else if (s1->effects & EF_BRIGHTLIGHT)
 			CL_NewDlight (s1->number, s1->origin[0], s1->origin[1],
-						  s1->origin[2] + 16, 400 + (rand () & 31), 0.1, 0);
+						  s1->origin[2] + 16, 400 + (Q_rand () & 31), 0.1, 0);
 		else if (s1->effects & EF_DIMLIGHT)
 			CL_NewDlight (s1->number, s1->origin[0], s1->origin[1],
-						  s1->origin[2], 200 + (rand () & 31), 0.1, 0);
+						  s1->origin[2], 200 + (Q_rand () & 31), 0.1, 0);
 
 		// if set to invisible, skip
 		if (!s1->modelindex)
@@ -514,7 +514,7 @@ CL_LinkPacketEntities (void)
 			continue;					// not in last message
 
 		for (i = 0; i < 3; i++)
-			if (abs (old_origin[i] - ent->origin[i]) > 128) {	// no trail if
+			if (Q_abs (old_origin[i] - ent->origin[i]) > 128) {	// no trail if
 				// too far
 				VectorCopy (ent->origin, old_origin);
 				break;
@@ -784,8 +784,8 @@ CL_AddFlagModels (entity_t *ent, int team)
 		newent->origin[i] = ent->origin[i] - f * v_forward[i] + 22 * v_right[i];
 	newent->origin[2] -= 16;
 
-	VectorCopy (ent->angles, newent->angles)
-		newent->angles[2] -= 45;
+	VectorCopy (ent->angles, newent->angles);
+	newent->angles[2] -= 45;
 }
 
 /*
@@ -824,20 +824,20 @@ CL_LinkPlayers (void)
 		if (!gl_flashblend.value || j != cl.playernum) {
 			if ((state->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
 				CL_NewDlight (j + 1, state->origin[0], state->origin[1],
-							  state->origin[2], 200 + (rand () & 31), 0.1, 3);
+							  state->origin[2], 200 + (Q_rand () & 31), 0.1, 3);
 			else if (state->effects & EF_BLUE)
 				CL_NewDlight (j + 1, state->origin[0], state->origin[1],
-							  state->origin[2], 200 + (rand () & 31), 0.1, 1);
+							  state->origin[2], 200 + (Q_rand () & 31), 0.1, 1);
 			else if (state->effects & EF_RED)
 				CL_NewDlight (j + 1, state->origin[0], state->origin[1],
-							  state->origin[2], 200 + (rand () & 31), 0.1, 2);
+							  state->origin[2], 200 + (Q_rand () & 31), 0.1, 2);
 			else if (state->effects & EF_BRIGHTLIGHT)
 				CL_NewDlight (j + 1, state->origin[0], state->origin[1],
-							  state->origin[2] + 16, 400 + (rand () & 31), 0.1,
+							  state->origin[2] + 16, 400 + (Q_rand () & 31), 0.1,
 							  0);
 			else if (state->effects & EF_DIMLIGHT)
 				CL_NewDlight (j + 1, state->origin[0], state->origin[1],
-							  state->origin[2], 200 + (rand () & 31), 0.1, 0);
+							  state->origin[2], 200 + (Q_rand () & 31), 0.1, 0);
 		}
 		// the player object never gets added
 		if (j == cl.playernum)
@@ -919,7 +919,7 @@ CL_SetSolidEntities (void)
 	entity_state_t *state;
 
 	pmove.physents[0].model = cl.worldmodel;
-	VectorCopy (vec3_origin, pmove.physents[0].origin);
+	VectorClear (pmove.physents[0].origin);
 	pmove.physents[0].info = 0;
 	pmove.numphysent = 1;
 
