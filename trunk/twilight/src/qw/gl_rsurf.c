@@ -147,7 +147,11 @@ R_AddDynamicLights (msurface_t *surf)
 			continue;					// not lit by this light
 
 		rad = cl_dlights[lnum].radius;
+
 		dist = PlaneDiff (cl_dlights[lnum].origin, surf->plane);
+		// NQ uses the below statement, QW the above! Which one is right?
+		// dist = DotProduct (cl_dlights[lnum].origin, surf->plane->normal) - surf->plane->dist;
+
 		rad -= Q_fabs (dist);
 		minlight = cl_dlights[lnum].minlight;
 		if (rad < minlight)
@@ -241,11 +245,12 @@ R_BuildLightMap (msurface_t *surf, byte * dest, int stride)
 			bl = blocklights;
 			for (i = 0; i < tmax; i++, dest += stride) {
 				for (j = 0; j < smax; j++) {
-					t = *bl++;
-					t >>= 7;
-					if (t > 255)
-						t = 255;
-					dest[3] = 255 - t;
+					t = *bl++ >> 7;
+					t = min (t, 255);
+					dest[0] = 255 - t;
+					dest[1] = 255 - t;
+					dest[2] = 255 - t;
+					dest[3] = 255;
 					dest += 4;
 				}
 			}
@@ -256,10 +261,8 @@ R_BuildLightMap (msurface_t *surf, byte * dest, int stride)
 			bl = blocklights;
 			for (i = 0; i < tmax; i++, dest += stride) {
 				for (j = 0; j < smax; j++) {
-					t = *bl++;
-					t >>= 7;
-					if (t > 255)
-						t = 255;
+					t = *bl++ >> 7;
+					t = min (t, 255);
 					dest[j] = 255 - t;
 				}
 			}
@@ -637,10 +640,8 @@ R_BlendLightmaps (void)
 	float      *v;
 	glRect_t   *theRect;
 
-#if 0
-	if (r_fullbright->value)
-		return;
-#endif
+//	if (r_fullbright->value)
+//		return;
 	if (!gl_texsort->value)
 		return;
 
@@ -695,8 +696,8 @@ R_BlendLightmaps (void)
 	}
 
 	qglDisable (GL_BLEND);
-	qglColor3f (1, 1, 1);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglColor3f (1, 1, 1);
 
 	qglDepthMask (1);					// back to normal Z buffering
 }
@@ -887,14 +888,19 @@ R_DrawWaterSurfaces (void)
 	// 
 
 	qglLoadMatrixf (r_world_matrix);
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // this one only
+//	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//	NQ uses blendfunc, QW doesn't, which is right?
 	if (r_wateralpha->value < 1.0) {
 		qglEnable (GL_BLEND);
 		qglColor4f (1, 1, 1, r_wateralpha->value);
 	}
 	else
+	{
 		qglDisable (GL_BLEND);
+		qglColor3f (1, 1, 1); // Hmmmm, this might be important!!! Without it lava/water isn't lit right
+	}
 
 	if (!gl_texsort->value) {
 		if (!waterchain)
@@ -930,6 +936,7 @@ R_DrawWaterSurfaces (void)
 
 	}
 
+	// QW has a condition for the qglColor3f, NQ doesn't, which is right?
 	if (r_wateralpha->value < 1.0)
 		qglColor3f (1, 1, 1);
 	qglDisable (GL_BLEND);
