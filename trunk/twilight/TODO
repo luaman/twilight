@@ -1,0 +1,40 @@
+Project Twilight todo list
+--------------------------
+
+These things need to be done before public release:
+
+  - replacement md4.c, ours is a GPL violation
+
+  - Mercury's key system updates
+    - agree on names for KGT_*
+    - documentation of the new key system
+    - code needs porting to NQ
+    - new defaults for Id, mission packs, and anything else we find
+    - conversion tool for old configs
+
+  - Sys_ExpandPath, for twiddle expansion, / normalization, etc
+
+  - Dynamic OpenGL binding
+
+  - New Cvar system
+    - finish in NQ
+    - port to QW
+    - add callbacks where helpful
+    - convert from list to hash
+
+  - Documentation, we've changed enough that this is necessary
+
+  ? Other stuff, not required for release, rated 1-9 for importance
+    1 SDL audio, massive portability bonus to doing this now
+    1 Fix Targa loader
+    4 Menu overhaul, perhaps following tQER model for now
+    4 Console font
+    7 Knghtbrd's server console
+
+
+Stuff that can probably wait:
+
+  - Add PNG loader
+  - Zip archive support
+  - Enhance the binds menu for new features?
+
