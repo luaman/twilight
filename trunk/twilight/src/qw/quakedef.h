@@ -32,7 +32,6 @@
 
 //define    PARANOID            // speed sapping error checking
 
-#include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,6 +46,7 @@
 #include "sys.h"
 #include "zone.h"
 #include "mathlib.h"
+#include "strlib.h"
 #include "wad.h"
 #include "draw.h"
 #include "net.h"

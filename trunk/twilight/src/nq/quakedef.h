@@ -38,8 +38,6 @@
 #define	GAMENAME	"id1"
 #endif
 
-//#include <math.h>
-#include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -183,6 +181,7 @@
 #include "sys.h"
 #include "zone.h"
 #include "mathlib.h"
+#include "strlib.h"
 
 typedef struct {
 	vec3_t		origin;
