@@ -372,7 +372,7 @@ VID_Init (unsigned char *palette)
 		Sys_Error ("Could not get video information!\n");
     }
 
-	fprintf(stderr, "gl_driver->string: '%s'\n", gl_driver->string);
+	Sys_Printf ("Using OpenGL driver '%s'\n", gl_driver->string);
 	if (!DGL_LoadLibrary(gl_driver->string))
 		Sys_Error("%s\n", DGL_GetError());
 
