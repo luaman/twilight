@@ -47,6 +47,14 @@
 void        GL_BeginRendering (int *x, int *y, int *width, int *height);
 void        GL_EndRendering (void);
 
+GLint APIENTRY gluScaleImage( GLenum format,
+                              GLsizei widthin, GLsizei heightin,
+                              GLenum typein, const void *datain,
+                              GLsizei widthout, GLsizei heightout,
+                              GLenum typeout, void *dataout );
+int gluBuild2DMipmaps (GLenum target, GLint components, 
+						GLint width, GLint height, 
+						GLenum format, GLenum type, const void *data);
 
 extern int  texture_extension_number;
 extern int  texture_mode;

@@ -949,15 +949,15 @@ GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 
 	samples = alpha ? gl_alpha_format : gl_solid_format;
 
-#if 0
+#if 1
 	if (mipmap)
 		gluBuild2DMipmaps (GL_TEXTURE_2D, samples, width, height, GL_RGBA,
-						   GL_UNSIGNED_BYTE, trans);
+						   GL_UNSIGNED_BYTE, data);
 	else if (scaled_width == width && scaled_height == height)
 		qglTexImage2D (GL_TEXTURE_2D, 0, samples, width, height, 0, GL_RGBA,
-					  GL_UNSIGNED_BYTE, trans);
+					  GL_UNSIGNED_BYTE, data);
 	else {
-		gluScaleImage (GL_RGBA, width, height, GL_UNSIGNED_BYTE, trans,
+		gluScaleImage (GL_RGBA, width, height, GL_UNSIGNED_BYTE, data,
 					   scaled_width, scaled_height, GL_UNSIGNED_BYTE, scaled);
 		qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
 					  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
