@@ -284,7 +284,7 @@ M_ToggleMenu_f (void)
 		m_state = m_none;
 		return;
 	}
-	if (key_dest == key_console) {
+	if (key_dest == key_console && cl.worldmodel) {
 		Con_ToggleConsole_f ();
 	} else {
 		M_Menu_Main_f ();

@@ -659,14 +659,14 @@ Sys_SendKeyEvents (void)
 								   == SDL_MOUSEBUTTONDOWN);
 						break;
 					// FIXME: make this work
-//					case 4:
-//						Key_Event (KM_WHEEL_UP, 0, true);
-//						Key_Event (KM_WHEEL_UP, 0, false);
-//						break;
-//					case 5:
-//						Key_Event (KM_WHEEL_DOWN, 0, true);
-//						Key_Event (KM_WHEEL_DOWN, 0, false);
-//						break;
+					case 4:
+						Key_Event (K_MWHEELUP, true);
+						Key_Event (K_MWHEELUP, false);
+						break;
+					case 5:
+						Key_Event (K_MWHEELDOWN, true);
+						Key_Event (K_MWHEELDOWN, false);
+						break;
 				}
 				break;
 

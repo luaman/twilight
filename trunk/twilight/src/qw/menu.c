@@ -306,7 +306,7 @@ M_ToggleMenu_f (void)
 		key_dest = key_game;
 		m_state = m_none;
 		return;
-	} else if (key_dest == key_console) {
+	} else if (key_dest == key_console && cl.worldmodel) {
 		Con_ToggleConsole_f ();
 	} else {
 		M_Menu_Main_f ();

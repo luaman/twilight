@@ -656,6 +656,14 @@ Sys_SendKeyEvents (void)
 						Key_Event (K_MOUSE1 + but - 1, event.type
 								   == SDL_MOUSEBUTTONDOWN);
 						break;
+					case 4:
+						Key_Event (K_MWHEELUP, true);
+						Key_Event (K_MWHEELUP, false);
+						break;
+					case 5:
+						Key_Event (K_MWHEELDOWN, true);
+						Key_Event (K_MWHEELDOWN, false);
+						break;
 				}
 				break;
 
