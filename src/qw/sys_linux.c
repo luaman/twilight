@@ -41,10 +41,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 int         noconinput = 0;
 int         nostdout = 0;
 
-char       *basedir = USERPATH;
-char	   *sharedir = SHAREPATH;
-char       *cachedir = "/tmp";
-
 cvar_t      sys_linerefresh = { "sys_linerefresh", "0" };	// set for entity
 															// display
 
@@ -395,11 +391,6 @@ main (int c, char **v)
 	if (j)
 		parms.memsize = (int) (Q_atof (com_argv[j + 1]) * 1024 * 1024);
 	parms.membase = malloc (parms.memsize);
-
-	parms.basedir = basedir;
-	parms.sharedir = sharedir;
-// caching is disabled by default, use -cachedir to enable
-//  parms.cachedir = cachedir;
 
 	noconinput = COM_CheckParm ("-noconinput");
 	if (!noconinput)

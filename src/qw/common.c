@@ -1695,14 +1695,19 @@ then loads and adds pak1.pak pak2.pak ...
 ================
 */
 void
-COM_AddDirectory (char *dir)
+COM_AddDirectory (char *indir)
 {
 	int         i;
 	searchpath_t *search;
 	pack_t     *pak;
 	char        pakfile[MAX_OSPATH];
+	char        dir[MAX_OSPATH];
 	char       *p;
 
+	// LordHavoc: this function is called using va() sometimes,
+	// and va only stores one result,
+	// thus it can conflict with console logging.
+	Q_strcpy(dir, indir);
 	Con_Printf ("COM_AddDirectory: Adding %s\n", dir);
 
 	if ((p = Q_strrchr (dir, '/')) != NULL)
@@ -1751,9 +1756,13 @@ COM_AddGameDirectory (char *dir)
 	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
 	COM_AddDirectory (va ("%s/%s", com_sharedir, dir));
 
-	d = va ("%s/%s", com_basedir, dir);
-	Sys_mkdir (d);
-	COM_AddDirectory (d);
+	if (strcmp(com_basedir, com_sharedir))
+	{
+		// only do this if the share path is not the same as the base path
+		d = va ("%s/%s", com_basedir, dir);
+		Sys_mkdir (d);
+		COM_AddDirectory (d);
+	}
 }
 
 
@@ -1784,6 +1793,8 @@ COM_Gamedir (char *dir)
 	// free up any current game dir info
 	// 
 	while (com_searchpaths != com_base_searchpaths) {
+		if (com_searchpaths == NULL)
+			Sys_Error("Com_Gamedir: tried to free to base searchpath and hit NULL\n");
 		if (com_searchpaths->pack) {
 			fclose (com_searchpaths->pack->handle);
 			Z_Free (com_searchpaths->pack->files);
@@ -1815,6 +1826,13 @@ COM_InitFilesystem (void)
 {
 	int         i;
 
+#ifndef BASEPATH
+#define BASEPATH ""
+#endif
+#ifndef SHAREPATH
+#define SHAREPATH ""
+#endif
+
 //
 // -basedir <path>
 // Overrides the system supplied base directory
@@ -1823,7 +1841,7 @@ COM_InitFilesystem (void)
 	if (i && i < com_argc - 1)
 		Q_strcpy (com_basedir, com_argv[i + 1]);
 	else
-		Q_strcpy (com_basedir, host_parms.basedir);
+		Q_strcpy (com_basedir, BASEPATH);
 
 //
 // -sharedir <path>
@@ -1833,7 +1851,11 @@ COM_InitFilesystem (void)
 	if (i && i < com_argc - 1)
 		Q_strcpy (com_sharedir, com_argv[i + 1]);
 	else
-		Q_strcpy (com_sharedir, host_parms.sharedir);
+		Q_strcpy (com_sharedir, SHAREPATH);
+
+	// LordHavoc: fix for empty com_sharedir
+	if (!*com_sharedir)
+		strcpy(com_sharedir, com_basedir);
 
 //
 // start up with id1 by default

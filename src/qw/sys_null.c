@@ -120,7 +120,6 @@ void main (int argc, char **argv)
 
 	parms.memsize = 5861376;
 	parms.membase = malloc (parms.memsize);
-	parms.basedir = ".";
 
 	COM_InitArgv (argc, argv);
 
