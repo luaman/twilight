@@ -97,6 +97,10 @@ SOURCE=.\collision.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\cpu.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\crc.c
 # End Source File
 # Begin Source File
@@ -105,7 +109,15 @@ SOURCE=.\cvar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\locs.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\mathlib.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\matrixlib.c
 # End Source File
 # Begin Source File
 
@@ -141,7 +153,51 @@ SOURCE=.\zone.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=..\..\include\anorm_dots.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\anorms.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\bspfile.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\collision.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\console.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\cpu.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\include\crc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\gl_warp_sin.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\info.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\input.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\keys.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\locs.h
 # End Source File
 # Begin Source File
 
@@ -149,7 +205,59 @@ SOURCE=..\..\include\mathlib.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\include\matrixlib.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\menu.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\mod_brush.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\pmove.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\pr_comp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\quakedef.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\r_explosion.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\sbar.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\include\strlib.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\sys.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\teamplay.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\twiconfig.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\vid.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\view.h
 # End Source File
 # End Group
 # End Target
