@@ -420,6 +420,7 @@ Con_Printf (char *fmt, ...)
 // write it to the scrollable buffer
 	Con_Print (msg);
 
+#if 0
 // update the screen if the console is displayed
 	if (cls.signon != SIGNONS && !scr_disabled_for_loading) {
 		// protect against infinite loop if something in SCR_UpdateScreen calls
@@ -430,6 +431,7 @@ Con_Printf (char *fmt, ...)
 			inupdate = false;
 		}
 	}
+#endif
 }
 
 /*
