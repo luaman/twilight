@@ -253,14 +253,16 @@ static int q_randSeed = 0;
 void 
 Q_srand(unsigned seed)
 {
-	q_randSeed = seed;
+//	q_randSeed = seed;
+	srand(seed);
 }
 
 int	
 Q_rand(void)
 {
-	q_randSeed = (69069 * q_randSeed + 1);
-	return q_randSeed & 0x7fff;
+//	q_randSeed = (69069 * q_randSeed + 1);
+//	return q_randSeed & 0x7fff;
+	return rand();
 }
 
 ////////////////////////////////////////////////////////////////////////

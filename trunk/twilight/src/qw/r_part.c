@@ -419,8 +419,8 @@ R_LavaSplash (vec3_t org)
 
 	for (i = -16; i < 16; i++)
 		for (j = -16; j < 16; j++) {
-			pdie = 2 + (rand () & 31) * 0.02;
-			pcolor = 224 + (rand () & 7);
+			pdie = 2 + (Q_rand () & 31) * 0.02;
+			pcolor = 224 + (Q_rand () & 7);
 
 			dir[0] = j * 8 + (Q_rand () & 7);
 			dir[1] = i * 8 + (Q_rand () & 7);
@@ -491,21 +491,27 @@ R_Torch (entity_t *ent, qboolean torch2)
 		ent->time_left = 0;
 
 	if (realtime > ent->time_left) {
-		VectorSet (pvel, (rand() & 3) - 2, (rand() & 3) - 2, 0);
+		VectorSet (pvel, (Q_rand() & 3) - 2, (Q_rand() & 3) - 2, 0);
 		VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
 
 		if (torch2) { 
 			/* used for large torches (eg, start map near spawn) */
 			porg[2] = ent->origin[2] - 2;
-			VectorSet (pvel, (rand() & 7) - 4, (rand() & 7) - 4, 0);
+			VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
 
 			p = new_base_particle (pt_torch2, porg, pvel, color,
 					Q_rand () & 3, 15, 5);
+
+			if (ent->frame)
+				p->scale = 30;
+			else
+				p->scale = 10;
 
 		} else { 
 			/* wall torches */
 			p = new_base_particle (pt_torch, porg, pvel, color,
 					Q_rand () & 3, 5, 5);
+			p->scale = 10;
 		}
 
 		ent->time_left = realtime + 0.05;
@@ -654,7 +660,7 @@ R_Draw_Base_Particles (void)
 	float       dvel;
 	float       frametime;
 	vec3_t      up, right;
-	float		scale;
+	float		scale, scale2;
 
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
 
@@ -684,6 +690,13 @@ R_Draw_Base_Particles (void)
 		maxparticle = k;
 		activeparticles++;
 
+		VectorCopy4 (p->color, c_array[v_index + 0]);
+		VectorCopy4 (p->color, c_array[v_index + 1]);
+		VectorCopy4 (p->color, c_array[v_index + 2]);
+		VectorSet2(tc_array[v_index + 0], 0, 0);
+		VectorSet2(tc_array[v_index + 1], 1, 0);
+		VectorSet2(tc_array[v_index + 2], 0, 1);
+
 		if (p->scale < 0) {
 			scale = ((p->org[0] - r_origin[0]) * vpn[0]) + 
 				((p->org[1] - r_origin[1]) * vpn[1]) +
@@ -692,19 +705,20 @@ R_Draw_Base_Particles (void)
 				scale = -p->scale;
 			else
 				scale = (-p->scale) + scale * 0.004;
+
+			VectorSet3(v_array[v_index + 0], p->org[0], p->org[1], p->org[2]);
+			VectorMA (p->org, scale, up, v_array[v_index + 1]);
+			VectorMA (p->org, scale, right, v_array[v_index + 2]);
 		} else {
-			scale = p->scale;
+			scale = p->scale * -0.25;
+			scale2 = p->scale * 0.75;
+			VectorSet3(v_array[v_index + 0], p->org[0] + (up[0]+right[0])*scale, p->org[1] + (up[1]+right[1])*scale, p->org[2] + (up[2]+right[2])*scale);
+			VectorSet3(v_array[v_index + 1], p->org[0] + up[0] * scale2 + right[0]*scale, p->org[1] + up[1] * scale2 + right[1]*scale, 
+				p->org[2] + up[2] * scale2 + right[2]*scale);
+			VectorSet3(v_array[v_index + 2], p->org[0] + up[0] * scale + right[0]*scale2, p->org[1] + up[1] * scale + right[1]*scale2, 
+				p->org[2] + up[2] * scale + right[2]*scale2);
 		}
 
-		VectorCopy4 (p->color, c_array[v_index + 0]);
-		VectorCopy4 (p->color, c_array[v_index + 1]);
-		VectorCopy4 (p->color, c_array[v_index + 2]);
-		VectorSet2(tc_array[v_index + 0], 0, 0);
-		VectorSet2(tc_array[v_index + 1], 1, 0);
-		VectorSet2(tc_array[v_index + 2], 0, 1);
-		VectorSet3(v_array[v_index + 0], p->org[0], p->org[1], p->org[2]);
-		VectorMA (p->org, scale, up, v_array[v_index + 1]);
-		VectorMA (p->org, scale, right, v_array[v_index + 2]);
 		v_index += 3;
 
 		if ((v_index + 3) >= MAX_VERTEX_ARRAYS) {
