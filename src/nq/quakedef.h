@@ -28,10 +28,6 @@
 #ifndef __QUAKEDEF_H
 #define __QUAKEDEF_H
 
-#if defined(_WIN32) && _MSC_VERSION >= 800	/* MSVC 4.0 */
-#pragma warning( disable : 4244 4127 4201 4214 4514 4305 4115 4018)
-#endif
-
 #define	QUAKE_GAME						// as opposed to utilities
 
 //define    PARANOID            // speed sapping error checking
