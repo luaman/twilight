@@ -825,7 +825,7 @@ main (int argc, char *argv[])
 {
 	double		time, oldtime, newtime, base;
 	Uint	port;
-	Uint	p, i;
+	Uint	p;
 
 	SDL_Init (SDL_INIT_TIMER);
 	atexit (SDL_Quit);
@@ -860,6 +860,7 @@ main (int argc, char *argv[])
 		int lastmaxclients;
 		int lastclients;
 		int updatetitle;
+		Uint i;
 		
 		tmp = Info_ValueForKey (svs.info, "map");
 		if (strncmp(tmp, lastmap, sizeof(lastmap)))
