@@ -68,6 +68,7 @@ extern img_search_t		*img_search;
 void Image_Init (void);
 image_t *Image_Load (char *name, int flags);
 image_t *Image_Load_Multi (const char **names, int flags);
+void Image_Free (image_t *img, qboolean gl);
 
 #endif // __IMAGE_H
 
