@@ -37,7 +37,7 @@ static const char rcsid[] =
 #include "image.h"
 #include "mathlib.h"
 #include "strlib.h"
-#include "host.h"
+#include "sys.h"
 
 extern model_t *loadmodel;
 
@@ -46,7 +46,7 @@ int			skyboxtexnum;
 
 int         solidskytexture;
 int         alphaskytexture;
-float       speedscale, speedscale2;		// for top sky and bottom sky
+float		speedscale, speedscale2;	// for top sky and bottom sky
 
 msurface_t *warpface;
 
@@ -92,9 +92,9 @@ SubdividePolygon (int numverts, float *verts)
 	glpoly_t   *poly;
 
 	if (!numverts)
-		Host_EndGame ("numverts = 0!");
+		Sys_Error ("numverts = 0!");
 	if (numverts > 60)
-		Host_EndGame ("numverts = %i", numverts);
+		Sys_Error ("numverts = %i", numverts);
 
 	BoundPoly (numverts, verts, mins, maxs);
 
@@ -298,10 +298,10 @@ static void
 EmitSkyPolysMTEX (msurface_t *fa)
 {
 	glpoly_t   *p;
-	int			i;
-	float		s1, t1, s2, t2;
-	vec3_t		dir;
-	float		length;
+	int         i;
+	float       s1, t1, s2, t2;
+	vec3_t      dir;
+	float       length;
 
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglActiveTextureARB (GL_TEXTURE0_ARB);
@@ -311,10 +311,10 @@ EmitSkyPolysMTEX (msurface_t *fa)
 	qglEnable (GL_TEXTURE_2D);
 	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
 
-	for (p = fa->polys; p; p = p->next)
+	for (p = fa->polys; p; p = p->next) 
 	{
 		memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
-		for (i = 0; i < p->numverts; i++)
+		for (i = 0; i < p->numverts; i++) 
 		{
 			VectorSubtract (p->v[i].v, r_origin, dir);
 			dir[2] *= 3;				// flatten the sphere
@@ -392,6 +392,31 @@ EmitBothSkyLayersMTEX (msurface_t *fa)
 	EmitSkyPolysMTEX (fa);
 }
 
+static void
+R_DrawSkyBoxChain (msurface_t *s)
+{
+	glpoly_t	*p;
+	msurface_t	*fa;
+
+	if (!draw_skybox)
+		return;
+
+	qglDisable (GL_TEXTURE_2D);
+	qglEnable (GL_BLEND);
+	qglBlendFunc (GL_ZERO, GL_ONE);
+
+	for (fa = s; fa; fa = fa->texturechain)
+		for (p = fa->polys; p; p = p->next) {
+			memcpy (v_array_p, p->v, sizeof(vertex_t) * p->numverts);
+			TWI_PreVDrawCVA (0, p->numverts);
+			qglDrawArrays (GL_POLYGON, 0, p->numverts);
+			TWI_PostVDrawCVA ();
+		}
+
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDisable (GL_BLEND);
+	qglEnable (GL_TEXTURE_2D);
+}
 
 /*
 =================
@@ -409,7 +434,7 @@ R_DrawSkyChain (msurface_t *s)
 		qglDisable (GL_TEXTURE_2D);
 		qglColor4fv (d_8tofloattable[(Uint8) r_fastsky->ivalue - 1]);
 
-		for (fa=s ; fa ; fa=fa->texturechain){
+		for (fa = s; fa; fa = fa->texturechain){
 			for (p = fa->polys; p; p = p->next) {
 				memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
 
@@ -425,14 +450,14 @@ R_DrawSkyChain (msurface_t *s)
 	}
 
 	if (draw_skybox) {
-		R_DrawSkyboxChain (s);
+		R_DrawSkyBoxChain (s);
 		return;
 	}
 
 	for (fa = s; fa; fa = fa->texturechain) {
 		if (gl_mtex)
 			EmitBothSkyLayersMTEX (fa);
-		else
+		else 
 			EmitBothSkyLayers (fa);
 	}
 }
@@ -505,187 +530,6 @@ void R_SkyBoxChanged (cvar_t *cvar)
 		draw_skybox = false;
 }
 
-static int c_sky;
-static float skymins[2][6], skymaxs[2][6];
-
-static const vec3_t skyclip[6] = {
-	{  1,  1, 0 },
-	{  1, -1, 0 },
-	{  0, -1, 1 },
-	{  0,  1, 1 },
-	{  1,  0, 1 },
-	{ -1,  0, 1 } 
-};
-
-static const int st_to_vec[6][3] =
-{
-	{  3, -1, 2 },
-	{ -3,  1, 2 },
-
-	{  1,  3, 2 },
-	{ -1, -3, 2 },
-
-	{ -2, -1,  3 },		// 0 degrees yaw, look straight up
-	{  2, -1, -3 }		// look straight down
-};
-
-static const int vec_to_st[6][3] =
-{
-	{ -2, 3,  1 },
-	{  2, 3, -1 },
-
-	{  1, 3,  2 },
-	{ -1, 3, -2 },
-
-	{ -2, -1,  3 },
-	{ -2,  1, -3 }
-};
-
-void DrawSkyPolygon (int nump, vec3_t vecs)
-{
-	int		i,j;
-	vec3_t	v, av;
-	float	s, t, dv;
-	int		axis;
-	float	*vp;
-
-	c_sky++;
-
-	// decide which face it maps to
-	VectorClear (v);
-
-	for (i = 0, vp = vecs; i < nump; i++, vp += 3)
-		VectorAdd (vp, v, v);
-
-	av[0] = Q_fabs(v[0]);
-	av[1] = Q_fabs(v[1]);
-	av[2] = Q_fabs(v[2]);
-
-	if ((av[0] > av[1]) && (av[0] > av[2]))
-		axis = (v[0] < 0);
-	else if ((av[1] > av[2]) && (av[1] > av[0]))
-		axis = 2 + (v[1] < 0);
-	else
-		axis = 4 + (v[2] < 0);
-
-	// project new texture coords
-	for (i = 0; i < nump; i++, vecs += 3)
-	{
-		j = vec_to_st[axis][2];
-		dv = (j > 0) ? 1 / vecs[j - 1] : 1 / -vecs[-j - 1];
-		j = vec_to_st[axis][0];
-		s = (j < 0) ? -vecs[-j -1] * dv : vecs[j-1] * dv;
-		j = vec_to_st[axis][1];
-		t = (j < 0) ? -vecs[-j -1] * dv : vecs[j-1] * dv;
-
-		if (s < skymins[0][axis])
-			skymins[0][axis] = s;
-		if (t < skymins[1][axis])
-			skymins[1][axis] = t;
-		if (s > skymaxs[0][axis])
-			skymaxs[0][axis] = s;
-		if (t > skymaxs[1][axis])
-			skymaxs[1][axis] = t;
-	}
-}
-
-void ClipSkyPolygon (int nump, vec3_t vecs, int stage)
-{
-	float	*v;
-	qboolean	front, back;
-	float	d, e;
-	float	dists[MAX_CLIP_VERTS];
-	int		sides[MAX_CLIP_VERTS];
-	vec3_t	newv[2][MAX_CLIP_VERTS];
-	int		newc[2];
-	int		i, j;
-
-	if (nump > MAX_CLIP_VERTS-2)
-		Host_EndGame ("ClipSkyPolygon: MAX_CLIP_VERTS");
-
-	if (stage == 6)
-	{
-		// fully clipped, so draw it
-		DrawSkyPolygon (nump, vecs);
-		return;
-	}
-
-	front = back = false;
-
-	for (i = 0, v = vecs; i < nump; i++, v += 3)
-	{
-		d = DotProduct (v, skyclip[stage]);
-
-		if (d > ON_EPSILON)
-		{
-			front = true;
-			sides[i] = SIDE_FRONT;
-		}
-		else if (d < ON_EPSILON)
-		{
-			back = true;
-			sides[i] = SIDE_BACK;
-		}
-		else
-			sides[i] = SIDE_ON;
-
-		dists[i] = d;
-	}
-
-	if (!front || !back)
-	{
-		// not clipped
-		ClipSkyPolygon (nump, vecs, stage+1);
-		return;
-	}
-
-	// clip it
-	sides[i] = sides[0];
-	dists[i] = dists[0];
-	VectorCopy (vecs, (vecs+(i*3)));
-	newc[0] = newc[1] = 0;
-
-	for (i = 0, v = vecs; i < nump; i++, v += 3)
-	{
-		switch (sides[i])
-		{
-			case SIDE_FRONT:
-				VectorCopy (v, newv[0][newc[0]]);
-				newc[0]++;
-				break;
-			case SIDE_BACK:
-				VectorCopy (v, newv[1][newc[1]]);
-				newc[1]++;
-				break;
-			case SIDE_ON:
-				VectorCopy (v, newv[0][newc[0]]);
-				newc[0]++;
-				VectorCopy (v, newv[1][newc[1]]);
-				newc[1]++;
-				break;
-		}
-
-		if (sides[i] == SIDE_ON || sides[i+1] == SIDE_ON || sides[i+1] == sides[i])
-			continue;
-
-		d = dists[i] / (dists[i] - dists[i+1]);
-
-		for (j = 0; j < 3; j++)
-		{
-			e = v[j] + d*(v[j+3] - v[j]);
-			newv[0][newc[0]][j] = e;
-			newv[1][newc[1]][j] = e;
-		}
-
-		newc[0]++;
-		newc[1]++;
-	}
-
-	// continue
-	ClipSkyPolygon (newc[0], newv[0][0], stage+1);
-	ClipSkyPolygon (newc[1], newv[1][0], stage+1);
-}
-
 /*
 =================
 R_DrawSkyChain
@@ -698,8 +542,6 @@ void R_DrawSkyboxChain (msurface_t *s)
 	vec3_t		verts[MAX_CLIP_VERTS];
 	glpoly_t	*p;
 
-	c_sky = 0;
-
 	// calculate vertex values for sky box
 	for (fa = s; fa; fa = fa->texturechain)
 	{
@@ -707,88 +549,95 @@ void R_DrawSkyboxChain (msurface_t *s)
 		{
 			for (i = 0; i < p->numverts; i++)
 				VectorSubtract (p->v[i].v, r_origin, verts[i]);
-
-			ClipSkyPolygon (p->numverts, verts[0], 0);
 		}
 	}
 }
 
 
-/*
-==============
-R_ClearSkyBox
-==============
-*/
-void R_ClearSkyBox (void)
-{
-	int		i;
-
-	for (i = 0; i < 6; i++)
-	{
-		skymins[0][i] = skymins[1][i] = 9999;
-		skymaxs[0][i] = skymaxs[1][i] = -9999;
-	}
-}
-
-
-void MakeSkyVec (float s, float t, int axis, int i)
-{
-	vec3_t		v, b;
-	int			j, k;
-
-	VectorSet (b, s*4096.5, t*4096.5, 4096.5);
-
-	for (j = 0; j < 3; j++)
-	{
-		k = st_to_vec[axis][j];
-		v[j] = (k < 0) ? -b[-k - 1] : b[k - 1];
-		v[j] += r_origin[j];
-	}
-
-	// avoid bilerp seam
-	s = (s+1)*0.5;
-	t = (t+1)*0.5;
-
-	s = bound ((1.0/512), s, (511.0/512));
-	t = 1.0 - bound ((1.0/512), t, (511.0/512));
-
-	VectorSet2 (tc0_array_v(i), s, t);
-	VectorCopy (v, v_array_v(i));
-}
+#define SKYBOXVERT(i, x, y, z, s, t)							\
+	((v_array(i, 0) = (x) * 1024.0f + r_origin[0]),				\
+	(v_array(i, 1) = (y) * 1024.0f + r_origin[1]),				\
+	(v_array(i, 2) = (z) * 1024.0f + r_origin[2]),				\
+	(tc_array(i, 0) = (s) * (254.0f/256.0f) + (1.0f/256.0f)),	\
+	(tc_array(i, 1) = (t) * (254.0f/256.0f) + (1.0f/256.0f)))
 
 /*
 ==============
 R_DrawSkyBox
 ==============
 */
-static int skytexorder[6] = {0, 2, 1, 3, 4, 5};
-
-void R_DrawSkyBox (void)
+void
+R_DrawSkyBox (void)
 {
-	int		i;
-
 	if (!draw_skybox || (skytexturenum == -1))
 		return;
 
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	for (i = 0; i < 6; i++)
-	{
-		if (skymins[0][i] >= skymaxs[0][i]
-			|| skymins[1][i] >= skymaxs[1][i])
-			continue;
 
-		qglBindTexture (GL_TEXTURE_2D, skyboxtexnum+skytexorder[i]);
+	// Brute force method
 
-		MakeSkyVec (skymins[0][i], skymins[1][i], i, 0);
-		MakeSkyVec (skymins[0][i], skymaxs[1][i], i, 1);
-		MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, 2);
-		MakeSkyVec (skymaxs[0][i], skymins[1][i], i, 3);
+	// right
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 0);
+	SKYBOXVERT (0,  1,  1,  1, 1, 0);
+	SKYBOXVERT (1,  1,  1, -1, 1, 1);
+	SKYBOXVERT (2, -1,  1, -1, 0, 1);
+	SKYBOXVERT (3, -1,  1,  1, 0, 0);
+	TWI_PreVDraw (0, 4);
+	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 
-		TWI_PreVDraw (0, 4);
-		qglDrawArrays (GL_QUADS, 0, 4);
-		TWI_PostVDraw ();
-	}
+	// back
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 1);
+	SKYBOXVERT (0, -1,  1,  1, 1, 0);
+	SKYBOXVERT (1, -1,  1, -1, 1, 1);
+	SKYBOXVERT (2, -1, -1, -1, 0, 1);
+	SKYBOXVERT (3, -1, -1,  1, 0, 0);
+	TWI_PreVDraw (0, 4);
+	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
+
+	// left
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 2);
+	SKYBOXVERT (0, -1, -1,  1, 1, 0);
+	SKYBOXVERT (1, -1, -1, -1, 1, 1);
+	SKYBOXVERT (2,  1, -1, -1, 0, 1);
+	SKYBOXVERT (3,  1, -1,  1, 0, 0);
+	TWI_PreVDraw (0, 4);
+	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
+
+	// front
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 3);
+	SKYBOXVERT (0,  1, -1,  1, 1, 0);
+	SKYBOXVERT (1,  1, -1, -1, 1, 1);
+	SKYBOXVERT (2,  1,  1, -1, 0, 1);
+	SKYBOXVERT (3,  1,  1,  1, 0, 0);
+	TWI_PreVDraw (0, 4);
+	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
+
+	// up
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 4);
+	SKYBOXVERT (0,  1, -1,  1, 1, 0);
+	SKYBOXVERT (1,  1,  1,  1, 1, 1);
+	SKYBOXVERT (2, -1,  1,  1, 0, 1);
+	SKYBOXVERT (3, -1, -1,  1, 0, 0);
+	TWI_PreVDraw (0, 4);
+	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
+
+	// down
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 5);
+	SKYBOXVERT (0,  1,  1, -1, 1, 0);
+	SKYBOXVERT (1,  1, -1, -1, 1, 1);
+	SKYBOXVERT (2, -1, -1, -1, 0, 1);
+	SKYBOXVERT (3, -1,  1, -1, 0, 0);
+	TWI_PreVDraw (0, 4);
+	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
+
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglClear (GL_DEPTH_BUFFER_BIT);
 }
 
 
