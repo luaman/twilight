@@ -867,27 +867,28 @@ SV_TestPlayerPosition
 
 ============
 */
-edict_t    *
+edict_t *
 SV_TestPlayerPosition (edict_t *ent, vec3_t origin)
 {
-	hull_t     *hull;
-	edict_t    *check;
-	vec3_t      boxmins, boxmaxs;
-	vec3_t      offset;
-	int         e;
+	hull_t		*hull;
+	edict_t		*check;
+	vec3_t		boxmins, boxmaxs;
+	vec3_t		offset;
+	Uint		e;
 
-// check world first
+	// check world first
 	hull = &sv.worldmodel->extra.brush->hulls[1];
-	if (SV_HullPointContents (hull, hull->firstclipnode, origin) !=
-		CONTENTS_EMPTY)
+	if (SV_HullPointContents (hull, hull->firstclipnode, origin)
+			!= CONTENTS_EMPTY)
 		return sv.edicts;
 
-// check all entities
+	// check all entities
 	VectorAdd (origin, ent->v.mins, boxmins);
 	VectorAdd (origin, ent->v.maxs, boxmaxs);
 
 	check = NEXT_EDICT (sv.edicts);
-	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check)) {
+	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check))
+	{
 		if (check->free)
 			continue;
 		if (check->v.solid != SOLID_BSP &&
@@ -895,11 +896,11 @@ SV_TestPlayerPosition (edict_t *ent, vec3_t origin)
 			continue;
 
 		if (boxmins[0] > check->v.absmax[0]
-			|| boxmins[1] > check->v.absmax[1]
-			|| boxmins[2] > check->v.absmax[2]
-			|| boxmaxs[0] < check->v.absmin[0]
-			|| boxmaxs[1] < check->v.absmin[1]
-			|| boxmaxs[2] < check->v.absmin[2])
+				|| boxmins[1] > check->v.absmax[1]
+				|| boxmins[2] > check->v.absmax[2]
+				|| boxmaxs[0] < check->v.absmin[0]
+				|| boxmaxs[1] < check->v.absmin[1]
+				|| boxmaxs[2] < check->v.absmin[2])
 			continue;
 
 		if (check == ent)
@@ -911,8 +912,8 @@ SV_TestPlayerPosition (edict_t *ent, vec3_t origin)
 		VectorSubtract (origin, offset, offset);
 
 		// test the point
-		if (SV_HullPointContents (hull, hull->firstclipnode, offset) !=
-			CONTENTS_EMPTY)
+		if (SV_HullPointContents (hull, hull->firstclipnode, offset)
+				!= CONTENTS_EMPTY)
 			return check;
 	}
 

@@ -45,6 +45,8 @@ static const char rcsid[] =
 server_t    sv;
 server_static_t svs;
 
+cvar_t *sv_aim;
+
 char        localmodels[MAX_MODELS][5];	// inline model names for precache
 
 //============================================================================
@@ -67,7 +69,6 @@ SV_Init (void)
 	extern cvar_t *sv_maxspeed;
 	extern cvar_t *sv_accelerate;
 	extern cvar_t *sv_idealpitchscale;
-	extern cvar_t *sv_aim;
 	extern cvar_t *sv_jumpstep;
 	extern cvar_t *sv_stepheight;
 
@@ -275,12 +276,12 @@ once for a player each game, not once for each level change.
 void
 SV_ConnectClient (int clientnum)
 {
-	edict_t    *ent;
-	client_t   *client;
-	int         edictnum;
-	struct qsocket_s *netconnection;
-	int         i;
-	float       spawn_parms[NUM_SPAWN_PARMS];
+	edict_t				*ent;
+	client_t			*client;
+	Uint				edictnum;
+	struct qsocket_s	*netconnection;
+	int					i;
+	float				spawn_parms[NUM_SPAWN_PARMS];
 
 	client = svs.clients + clientnum;
 
@@ -930,7 +931,7 @@ SV_CreateBaseline (void)
 
 	for (entnum = 0; entnum < sv.num_edicts; entnum++) {
 		// get the current server version
-		svent = EDICT_NUM ((Sint32) entnum);
+		svent = EDICT_NUM (entnum);
 		if (svent->free)
 			continue;
 		if (entnum > svs.maxclients && !svent->v.modelindex)
@@ -1092,7 +1093,7 @@ SV_SpawnServer (char *server)
 	// leave slots at start for clients only
 	sv.num_edicts = svs.maxclients + 1;
 	for (i = 0; i < svs.maxclients; i++) {
-		ent = EDICT_NUM ((Sint32) i + 1);
+		ent = EDICT_NUM (i + 1);
 		svs.clients[i].edict = ent;
 	}
 

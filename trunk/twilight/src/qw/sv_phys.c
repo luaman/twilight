@@ -82,17 +82,18 @@ SV_CheckAllEnts
 void
 SV_CheckAllEnts (void)
 {
-	int         e;
-	edict_t    *check;
+	Uint		e;
+	edict_t		*check;
 
-// see if any solid entities are inside the final position
+	// see if any solid entities are inside the final position
 	check = NEXT_EDICT (sv.edicts);
-	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check)) {
+	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check))
+	{
 		if (check->free)
 			continue;
 		if (check->v.movetype == MOVETYPE_PUSH
-			|| check->v.movetype == MOVETYPE_NONE
-			|| check->v.movetype == MOVETYPE_NOCLIP)
+				|| check->v.movetype == MOVETYPE_NONE
+				|| check->v.movetype == MOVETYPE_NOCLIP)
 			continue;
 
 		if (SV_TestEntityPosition (check))
@@ -442,61 +443,64 @@ SV_Push
 qboolean
 SV_Push (edict_t *pusher, vec3_t move)
 {
-	int         i, e, savesolid;
-	edict_t    *check, *block;
-	vec3_t      mins, maxs;
-	vec3_t      pushorig;
-	int         num_moved;
-	edict_t    *moved_edict[MAX_EDICTS];
-	vec3_t      moved_from[MAX_EDICTS];
+	Uint		i, e, savesolid;
+	edict_t		*check, *block;
+	vec3_t		mins, maxs;
+	vec3_t		pushorig;
+	Uint		num_moved;
+	edict_t		*moved_edict[MAX_EDICTS];
+	vec3_t		moved_from[MAX_EDICTS];
 
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < 3; i++)
+	{
 		mins[i] = pusher->v.absmin[i] + move[i];
 		maxs[i] = pusher->v.absmax[i] + move[i];
 	}
 
 	VectorCopy (pusher->v.origin, pushorig);
 
-// move the pusher to it's final position
+	// move the pusher to it's final position
 
 	VectorAdd (pusher->v.origin, move, pusher->v.origin);
 	SV_LinkEdict (pusher, false);
 
-// see if any solid entities are inside the final position
+	// see if any solid entities are inside the final position
 	num_moved = 0;
 	check = NEXT_EDICT (sv.edicts);
-	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check)) {
+	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check))
+	{
 		if (check->free)
 			continue;
 		if (check->v.movetype == MOVETYPE_PUSH
-			|| check->v.movetype == MOVETYPE_NONE
-			|| check->v.movetype == MOVETYPE_NOCLIP)
+				|| check->v.movetype == MOVETYPE_NONE
+				|| check->v.movetype == MOVETYPE_NOCLIP)
 			continue;
 
 		savesolid = pusher->v.solid;
 
-		if (savesolid == SOLID_BSP || savesolid == SOLID_BBOX || savesolid == SOLID_SLIDEBOX)
+		if (savesolid == SOLID_BSP || savesolid == SOLID_BBOX
+				|| savesolid == SOLID_SLIDEBOX)
 		{
 			pusher->v.solid = SOLID_NOT;
 			block = SV_TestEntityPosition (check);
 			pusher->v.solid = savesolid;
 		}
-		else {
+		else
 			block = NULL;
-		}
 
 		if (block)
 			continue;
 
 		// if the entity is standing on the pusher, it will definately be moved
 		if (!(((int) check->v.flags & FL_ONGROUND)
-			  && PROG_TO_EDICT (check->v.groundentity) == pusher)) {
+			  && PROG_TO_EDICT (check->v.groundentity) == pusher))
+		{
 			if (check->v.absmin[0] >= maxs[0]
-				|| check->v.absmin[1] >= maxs[1]
-				|| check->v.absmin[2] >= maxs[2]
-				|| check->v.absmax[0] <= mins[0]
-				|| check->v.absmax[1] <= mins[1]
-				|| check->v.absmax[2] <= mins[2])
+					|| check->v.absmin[1] >= maxs[1]
+					|| check->v.absmin[2] >= maxs[2]
+					|| check->v.absmax[0] <= mins[0]
+					|| check->v.absmax[1] <= mins[1]
+					|| check->v.absmax[2] <= mins[2])
 				continue;
 
 			// see if the ent's bbox is inside the pusher's final position
@@ -511,23 +515,32 @@ SV_Push (edict_t *pusher, vec3_t move)
 		// try moving the contacted entity 
 		VectorAdd (check->v.origin, move, check->v.origin);
 		block = SV_TestEntityPosition (check);
-		if (!block) {					// pushed ok
+		if (!block)
+		{
+			// pushed ok
 			SV_LinkEdict (check, false);
 			continue;
 		}
+
 		// if it is ok to leave in the old position, do it
 		VectorSubtract (check->v.origin, move, check->v.origin);
 		block = SV_TestEntityPosition (check);
-		if (!block) {
+		if (!block)
+		{
 			num_moved--;
 			continue;
 		}
+
 		// if it is still inside the pusher, block
-		if (check->v.mins[0] == check->v.maxs[0]) {
+		if (check->v.mins[0] == check->v.maxs[0])
+		{
 			SV_LinkEdict (check, false);
 			continue;
 		}
-		if (check->v.solid == SOLID_NOT || check->v.solid == SOLID_TRIGGER) {	// corpse
+
+		if (check->v.solid == SOLID_NOT || check->v.solid == SOLID_TRIGGER)
+		{
+			// corpse
 			check->v.mins[0] = check->v.mins[1] = 0;
 			VectorCopy (check->v.mins, check->v.maxs);
 			SV_LinkEdict (check, false);
@@ -539,13 +552,15 @@ SV_Push (edict_t *pusher, vec3_t move)
 
 		// if the pusher has a "blocked" function, call it
 		// otherwise, just stay in place until the obstacle is gone
-		if (pusher->v.blocked) {
+		if (pusher->v.blocked)
+		{
 			pr_global_struct->self = EDICT_TO_PROG (pusher);
 			pr_global_struct->other = EDICT_TO_PROG (check);
 			PR_ExecuteProgram (pusher->v.blocked);
 		}
 		// move back any entities we already moved
-		for (i = 0; i < num_moved; i++) {
+		for (i = 0; i < num_moved; i++)
+		{
 			VectorCopy (moved_from[i], moved_edict[i]->v.origin);
 			SV_LinkEdict (moved_edict[i], false);
 		}
@@ -564,11 +579,12 @@ SV_PushMove
 void
 SV_PushMove (edict_t *pusher, float movetime)
 {
-	int         i;
-	vec3_t      move;
+	int			i;
+	vec3_t		move;
 
 	if (!pusher->v.velocity[0] && !pusher->v.velocity[1]
-		&& !pusher->v.velocity[2]) {
+			&& !pusher->v.velocity[2])
+	{
 		pusher->v.ltime += movetime;
 		return;
 	}
@@ -901,8 +917,8 @@ SV_Physics
 void
 SV_Physics (void)
 {
-	int         i;
-	edict_t    *ent;
+	Uint		i;
+	edict_t		*ent;
 
 	// don't bother running a frame if sys_ticrate seconds haven't passed
 	if (sv.old_time)

@@ -436,40 +436,47 @@ Host_Savegame_f
 void
 Host_Savegame_f (void)
 {
-	FILE	*f;
-	Uint32	i;
-	char	name[256], comment[SAVEGAME_COMMENT_LENGTH + 1];
+	FILE		*f;
+	Uint		i;
+	char		name[256], comment[SAVEGAME_COMMENT_LENGTH + 1];
 
 	if (cmd_source != src_command)
 		return;
 
-	if (!sv.active) {
+	if (!sv.active)
+	{
 		Com_Printf ("Not playing a local game.\n");
 		return;
 	}
 
-	if (cl.intermission) {
+	if (cl.intermission)
+	{
 		Com_Printf ("Can't save in intermission.\n");
 		return;
 	}
 
-	if (svs.maxclients != 1) {
+	if (svs.maxclients != 1)
+	{
 		Com_Printf ("Can't save multiplayer games.\n");
 		return;
 	}
 
-	if (Cmd_Argc () != 2) {
+	if (Cmd_Argc () != 2)
+	{
 		Com_Printf ("save <savename> : save a game\n");
 		return;
 	}
 
-	if (strstr (Cmd_Argv (1), "..")) {
+	if (strstr (Cmd_Argv (1), ".."))
+	{
 		Com_Printf ("Relative pathnames are not allowed.\n");
 		return;
 	}
 
-	for (i = 0; i < svs.maxclients; i++) {
-		if (svs.clients[i].active && (svs.clients[i].edict->v.health <= 0)) {
+	for (i = 0; i < svs.maxclients; i++)
+	{
+		if (svs.clients[i].active && (svs.clients[i].edict->v.health <= 0))
+		{
 			Com_Printf ("Can't savegame with a dead player\n");
 			return;
 		}
@@ -480,7 +487,8 @@ Host_Savegame_f (void)
 
 	Com_Printf ("Saving game to %s...\n", name);
 	f = fopen (name, "w");
-	if (!f) {
+	if (!f)
+	{
 		Com_Printf ("ERROR: couldn't open.\n");
 		return;
 	}
@@ -495,7 +503,8 @@ Host_Savegame_f (void)
 	fprintf (f, "%f\n", sv.time);
 
 	// write the light styles
-	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
+	for (i = 0; i < MAX_LIGHTSTYLES; i++)
+	{
 		if (sv.lightstyles[i])
 			fprintf (f, "%s\n", sv.lightstyles[i]);
 		else
@@ -503,8 +512,9 @@ Host_Savegame_f (void)
 	}
 
 	ED_WriteGlobals (f);
-	for (i = 0; i < sv.num_edicts; i++) {
-		ED_Write (f, EDICT_NUM ((Sint32) i));
+	for (i = 0; i < sv.num_edicts; i++)
+	{
+		ED_Write (f, EDICT_NUM (i));
 		fflush (f);
 	}
 	fclose (f);
@@ -522,15 +532,16 @@ Host_Loadgame_f (void)
 {
 	char        name[MAX_OSPATH], mapname[MAX_QPATH], str[32768], *start;
 	float       time, tfloat, spawn_parms[NUM_SPAWN_PARMS];
-	Sint32		entnum, version, r;
-	Uint32		i;
+	Sint		entnum, version, r;
+	Uint		i;
 	edict_t		*ent;
 	FILE		*f;
 
 	if (cmd_source != src_command)
 		return;
 
-	if (Cmd_Argc () != 2) {
+	if (Cmd_Argc () != 2)
+	{
 		Com_Printf ("load <savename> : load a game\n");
 		return;
 	}
@@ -540,28 +551,30 @@ Host_Loadgame_f (void)
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".sav");
 
-// we can't call SCR_BeginLoadingPlaque, because too much stack space has
-// been used.  The menu calls it before stuffing loadgame command
-//  SCR_BeginLoadingPlaque ();
+	// we can't call SCR_BeginLoadingPlaque, because too much stack space has
+	// been used.  The menu calls it before stuffing loadgame command
+	// SCR_BeginLoadingPlaque ();
 
 	Com_Printf ("Loading game from %s...\n", name);
 	f = fopen (name, "r");
-	if (!f) {
+	if (!f)
+	{
 		Com_Printf ("ERROR: couldn't open.\n");
 		return;
 	}
 
 	fscanf (f, "%i\n", &version);
-	if (version != SAVEGAME_VERSION) {
+	if (version != SAVEGAME_VERSION)
+	{
 		fclose (f);
 		Com_Printf ("Savegame is version %i, not %i\n", version,
-					SAVEGAME_VERSION);
+				SAVEGAME_VERSION);
 		return;
 	}
 	fscanf (f, "%s\n", str);
 	for (i = 0; i < NUM_SPAWN_PARMS; i++)
 		fscanf (f, "%f\n", &spawn_parms[i]);
-// this silliness is so we can load 1.06 save files, which have float skill values
+	// Quake 1.06 used float skill...
 	fscanf (f, "%f\n", &tfloat);
 	current_skill = (int) (tfloat + 0.1);
 	Cvar_Set (skill, va("%i", current_skill));
@@ -573,7 +586,8 @@ Host_Loadgame_f (void)
 
 	SV_SpawnServer (mapname);
 
-	if (!sv.active) {
+	if (!sv.active)
+	{
 		Com_Printf ("Couldn't load map\n");
 		return;
 	}
@@ -582,21 +596,25 @@ Host_Loadgame_f (void)
 
 	// load the light styles
 
-	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
+	for (i = 0; i < MAX_LIGHTSTYLES; i++)
+	{
 		fscanf (f, "%s\n", str);
 		sv.lightstyles[i] = Hunk_Alloc (strlen (str) + 1);
 		strcpy (sv.lightstyles[i], str);
 	}
 
 	// load the edicts out of the savegame file
-	entnum = -1;	// -1 is the globals
-	while (!feof (f)) {
-		for (i = 0; i < sizeof (str) - 1; i++) {
+	entnum = -1;						// -1 is the globals
+	while (!feof (f))
+	{
+		for (i = 0; i < sizeof (str) - 1; i++)
+		{
 			r = fgetc (f);
 			if (r == EOF || !r)
 				break;
 			str[i] = r;
-			if (r == '}') {
+			if (r == '}')
+			{
 				i++;
 				break;
 			}
@@ -607,15 +625,20 @@ Host_Loadgame_f (void)
 		start = str;
 		start = COM_Parse (str);
 		if (!com_token[0])
-			break;						// end of file
+			// end of file
+			break;
 		if (strcmp (com_token, "{"))
 			Sys_Error ("First token isn't a brace");
 
-		if (entnum == -1) {				// parse the global vars
+		if (entnum < 0)
+		{
+			// parse the global vars
 			ED_ParseGlobals (start);
-		} else {						// parse an edict
-
-			ent = EDICT_NUM (entnum);
+		}
+		else
+		{
+			// parse an edict
+			ent = EDICT_NUM ((Uint)entnum);
 			memset (&ent->v, 0, progs->entityfields * 4);
 			ent->free = false;
 			ED_ParseEdict (start, ent);
@@ -636,7 +659,8 @@ Host_Loadgame_f (void)
 	for (i = 0; i < NUM_SPAWN_PARMS; i++)
 		svs.clients->spawn_parms[i] = spawn_parms[i];
 
-	if (cls.state != ca_dedicated) {
+	if (cls.state != ca_dedicated)
+	{
 		CL_EstablishConnection ("local");
 		Host_Reconnect_f ();
 	}
@@ -1062,7 +1086,7 @@ Host_Spawn_f (void)
 	// in a state where it is expecting the client to correct the angle
 	// and it won't happen if the game was just loaded, so you wind up
 	// with a permanent head tilt
-	ent = EDICT_NUM (1 + (host_client - svs.clients));
+	ent = EDICT_NUM (1 + (Uint)(host_client - svs.clients));
 	MSG_WriteByte (&host_client->message, svc_setangle);
 	for (i = 0; i < 2; i++)
 		MSG_WriteAngle (&host_client->message, ent->v.angles[i]);
