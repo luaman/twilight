@@ -29,6 +29,8 @@ Bugs we know about:
     start part, and z7 for the 'night sky' surface wise and get
     /something/ drawn there, because right now we are not drawing
     anything at all.
+  - RC #3: We /REALLY/ need to build on win32 without requiring the
+    .net compiler.
 
   Driver related quirks:
   - Need a 3dfx quirk for limiting vertex array size.  We need the
