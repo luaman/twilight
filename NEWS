@@ -8,9 +8,8 @@ Last Updated: $Id$
 	This read-only Cvar can be set to cause a game other than id1 to be
 	loaded at startup time.  It's provided for truly total conversions
 	and for allowing both the full and shareware games to be installed
-	on the same machine. Start twilight this way to set the value:
-		twilight-X +set fs_gamename value
-		(Where X represents nq, qw or qwsv.)
+	on the same machine.  This Cvar must be set before the engine is
+	initialized.
 
 2001-09-13 05:36  Set configuration files
 	Two new Cvars, fs_shareconf and fs_userconf now exist which can be
@@ -24,7 +23,10 @@ Last Updated: $Id$
 
 2001-09-10 11:27  New Cvar, skybox
 	If you prefer skyboxes found in later games to the Quake sky, this
-	Cvar can be used to load one.
+	Cvar can be used to load one.  Place the six Targa images of a
+	Q2 style skybox into a mod's gfx/env/ directory and set the skybox
+	Cvar to the base name of the skybox, eg "set skybox snow2".  Set it
+	to an empty string to disable.
 
 2001-09-09 17:13  New Cvars for console display
 	The cl_verstring Cvar controls the program identification string
@@ -34,16 +36,27 @@ Last Updated: $Id$
 	top of the screen.  The latter is the default, for a nice effect.
 
 2001-09-09 05:25  Hardware gamma ramp support
-	The gamma Cvar now works differently than it used to, higher numbers
-	are brighter rather than darker.
-		v_gamma - overall gamma control, uses hardware gamma if available
-		v_tgamma - texture gamma control
 
-	the following control the 'ramping' of hardware gamma:
-		v_gammabias_b - blue ramping
-		v_gammabias_g - green ramping
-		v_gammabias_r - red ramping
-		FIXME: Explain better?
+	The scale used by the gamma Cvar was significantly different than is
+	by other software, most likely including your video drivers.  Higher
+	numbers now brighten the screen, with most monitors using a gamma
+	of about 2.0 on average.  We now support both software and hardware
+	gamma controls on this scale.  Here's a rundown of the Cvars used to
+	control the gamma:
+		v_hwgamma - 1 if hardware gamma is to be used
+		v_gamma - overall hardware gamma control
+		v_gammabias_r - hardware gamma, red channel
+		v_gammabias_g - hardware gamma, green channel
+		v_gammabias_b - hardware gamma, blue chanel
+		v_tgamma - texture (software) gamma control
+		v_tgammabias_r - texture gamma, red channel
+		v_tgammabias_g - texture gamma, green channel
+		v_tgammabias_b - texture gamma, blue channel
+
+	The texture gamma controls are read-only once the engine has started
+	up and must be set before then at this time.  [2001-09-17, the gamma
+	Cvar has been renamed v_gamma to keep from breaking old
+	configurations, this change is reflected above.]
 
 2001-09-08 10:39  New Cvar in NQ, show_fps
 	Added FPS counter to twilight-nq, works just like it does in QW.
@@ -52,11 +65,7 @@ Last Updated: $Id$
 	Dynamic lightmaps can now be generated using colored lighting.
 		gl_colorlights - 1 to use normal dynamic lighting
 			         0 to use dynamic lighting w/ color
-	This is a read only Cvar, for changes to take effect you'll have
-	to restart twilight-nq or twilight-qw, you can set this from
-	the command line by doing:
-		twilight-X +set gl_colorlights value
-		(Where X represents nq, qw)
+	This Cvar is read-only once the engine is initialized.
 
 2001-09-01 15:27  New commandline parameter, -bpp
 	Specifies the color depth in bits per pixel.  Note, most OpenGL
@@ -74,8 +83,8 @@ Last Updated: $Id$
 	systems and network drives.  fs_userpath sets the read-write
 	location which overrides fs_sharepath.  The -basedir parameter is
 	still supported and simply sets fs_userpath to the appropriate
-	value.  Both Cvars must be set before the game initializes using
-	+set on the command line.
+	value.  Both Cvars are read-only once the engine is initialized and
+	must be changed on the command line using +set.
 
 2001-08-25 19:35  Software brightness and contrast
 	Controls for brightness and contrast using OpenGL rendering tricks
@@ -98,9 +107,6 @@ Last Updated: $Id$
 	about eventually making it work someday, but that never happened and
 	isn't going to happen now, so it has been removed.
 
-2001-08-22 04:45  Support for +use has been added
-	FIXME: +use doesn't do anything useful yet, as far as I can tell...
-
 2001-08-21 21:57  Improved tab completion
 	The tab completion feature has been improved a bit and will now give
 	you a list of possible completions.
@@ -115,10 +121,12 @@ Last Updated: $Id$
 
 2001-08-19 13:06  New console command, set
 	The console command set allows you to change the value of a Cvar.
-	Its primary intended use in Quake is on the command line as +set,
-	which allows you to set the value of a Cvar, overriding the default
-	values for certain read-only Cvars which cannot be changed later,
-	such as gl_driver.
+	It is not required in NQ/QW for reasons of backward compatibility,
+	but is useful on the command line to set certain Cvars which may not
+	be modified after the engine is initialized, such as gl_driver.  An
+	example of how to use it:
+		twilight-nq +set gl_driver "libMesaGL.so.3"
+		twilight-qw +set gl_driver "3dfxogl.dll"
 
 2001-08-12 05:51  Dynamic OpenGL library loading
 	Project Twilight now supports a new Cvar to control which OpenGL
