@@ -66,11 +66,11 @@ Mod_Init
 Caches the data if needed
 ===============
 */
-void       *
+void *
 Mod_Extradata (model_t *mod)
 {
 	if (!mod->extra.ptr)
-		Sys_Error ("Mod_Extradata: No data!");
+		Sys_Error ("Mod_Extradata: %s has no data!", mod->name);
 
 	return mod->extra.ptr;
 }
@@ -80,29 +80,16 @@ Mod_Extradata (model_t *mod)
 Mod_PointInLeaf
 ===============
 */
-mleaf_t    *
+mleaf_t *
 Mod_PointInLeaf (vec3_t p, model_t *model)
 {
-	mnode_t    *node;
-	float       d;
-	mplane_t   *plane;
-
-	if (!model || !model->extra.brush->nodes)
-		Sys_Error ("Mod_PointInLeaf: bad model");
+	mnode_t		*node;
 
 	node = model->extra.brush->nodes;
-	while (1) {
-		if (node->contents < 0)
-			return (mleaf_t *) node;
-		plane = node->plane;
-		d = PlaneDiff (p, plane);
-		if (d > 0)
-			node = node->children[0];
-		else
-			node = node->children[1];
-	}
+	while (node->contents >= 0)
+		node = node->children[PlaneDiff (p, node->plane) <= 0];
 
-	return NULL;						// never reached
+	return (mleaf_t *) node;
 }
 
 
