@@ -170,8 +170,8 @@ typedef struct {
 
 typedef struct texinfo_s {
 	float		vecs[2][4];			/* [s/t][xyz offset] */
-	Sint16		miptex;
-	Sint16		flags;
+	Sint32		miptex;
+	Sint32		flags;
 } texinfo_t;
 
 #define	TEX_SPECIAL		1		/* sky or slime, no lightmap or 256 subdivision */
