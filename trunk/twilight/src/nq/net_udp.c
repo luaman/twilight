@@ -353,7 +353,7 @@ UDP_AddrToString (struct qsockaddr *addr)
 	int         haddr;
 
 	haddr = ntohl (((struct sockaddr_in *) addr)->sin_addr.s_addr);
-	sprintf (buffer, "%d.%d.%d.%d:%d", (haddr >> 24) & 0xff,
+	snprintf (buffer, sizeof(buffer), "%d.%d.%d.%d:%d", (haddr >> 24) & 0xff,
 			 (haddr >> 16) & 0xff, (haddr >> 8) & 0xff, haddr & 0xff,
 			 ntohs (((struct sockaddr_in *) addr)->sin_port));
 	return buffer;

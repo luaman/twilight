@@ -436,7 +436,7 @@ Host_SavegameComment (char *text)
 	for (i = 0; i < SAVEGAME_COMMENT_LENGTH; i++)
 		text[i] = ' ';
 	memcpy (text, cl.levelname, Q_strlen (cl.levelname));
-	sprintf (kills, "kills:%3i/%3i", cl.stats[STAT_MONSTERS],
+	snprintf (kills, sizeof(kills), "kills:%3i/%3i", cl.stats[STAT_MONSTERS],
 			 cl.stats[STAT_TOTALMONSTERS]);
 	memcpy (text + 22, kills, Q_strlen (kills));
 // convert space to _ to make stdio happy
@@ -495,7 +495,7 @@ Host_Savegame_f (void)
 		}
 	}
 
-	sprintf (name, "%s/%s", com_gamedir, Cmd_Argv (1));
+	snprintf (name, sizeof(name), "%s/%s", com_gamedir, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".sav");
 
 	Con_Printf ("Saving game to %s...\n", name);
@@ -563,7 +563,7 @@ Host_Loadgame_f (void)
 
 	cls.demonum = -1;					// stop demo loop in case this fails
 
-	sprintf (name, "%s/%s", com_gamedir, Cmd_Argv (1));
+	snprintf (name, sizeof(name), "%s/%s", com_gamedir, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".sav");
 
 // we can't call SCR_BeginLoadingPlaque, because too much stack space has
@@ -687,7 +687,7 @@ SaveGamestate ()
 	char        comment[SAVEGAME_COMMENT_LENGTH + 1];
 	edict_t    *ent;
 
-	sprintf (name, "%s/%s.gip", com_gamedir, sv.name);
+	snprintf (name, sizeof(name), "%s/%s.gip", com_gamedir, sv.name);
 
 	Con_Printf ("Saving game to %s...\n", name);
 	f = fopen (name, "w");
@@ -742,7 +742,7 @@ LoadGamestate (char *level, char *startspot)
 
 //  float   spawn_parms[NUM_SPAWN_PARMS];
 
-	sprintf (name, "%s/%s.gip", com_gamedir, level);
+	snprintf (name, sizeof(name), "%s/%s.gip", com_gamedir, level);
 
 	Con_Printf ("Loading game from %s...\n", name);
 	f = fopen (name, "r");
@@ -949,9 +949,9 @@ Host_Say (qboolean teamonly)
 	}
 // turn on color set 1
 	if (!fromServer)
-		sprintf (text, "%c%s: ", 1, save->name);
+		snprintf (text, sizeof(text), "%c%s: ", 1, save->name);
 	else
-		sprintf (text, "%c<%s> ", 1, hostname.string);
+		snprintf (text, sizeof(text), "%c<%s> ", 1, hostname.string);
 
 	j = sizeof (text) - 2 - Q_strlen (text);	// -2 for /n and null
 												// terminator

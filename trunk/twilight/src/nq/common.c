@@ -1135,7 +1135,6 @@ va
 
 does a varargs printf into a temp buffer, so I don't need to have
 varargs versions of all text functions.
-FIXME: make this buffer size safe someday
 ============
 */
 char       *
@@ -1145,7 +1144,7 @@ va (char *format, ...)
 	static char string[1024];
 
 	va_start (argptr, format);
-	vsprintf (string, format, argptr);
+	vsnprintf (string, sizeof(string), format, argptr);
 	va_end (argptr);
 
 	return string;
@@ -1252,7 +1251,7 @@ COM_WriteFile (char *filename, void *data, int len)
 	int         handle;
 	char        name[MAX_OSPATH];
 
-	sprintf (name, "%s/%s", com_gamedir, filename);
+	snprintf (name, sizeof(name), "%s/%s", com_gamedir, filename);
 
 	handle = Sys_FileOpenWrite (name);
 	if (handle == -1) {
@@ -1378,7 +1377,7 @@ COM_FindFile (char *filename, int *handle, FILE ** file)
 			if (strchr (filename, '/') || strchr (filename, '\\'))
 				continue;
 
-			sprintf (netpath, "%s/%s", search->filename, filename);
+			snprintf (netpath, sizeof(netpath), "%s/%s", search->filename, filename);
 
 			findtime = Sys_FileTime (netpath);
 			if (findtime == -1)
@@ -1649,7 +1648,7 @@ COM_AddDirectory (char *dir)
 // add any pak files in the format pak0.pak pak1.pak, ...
 //
 	for (i = 0;; i++) {
-		sprintf (pakfile, "%s/pak%i.pak", dir, i);
+		snprintf (pakfile, sizeof(pakfile), "%s/pak%i.pak", dir, i);
 		pak = COM_LoadPackFile (pakfile);
 		if (!pak)
 			break;

@@ -223,7 +223,7 @@ Con_Init (void)
 
 	if (con_debuglog) {
 		if (Q_strlen (com_gamedir) < (MAXGAMEDIRLEN - Q_strlen (t2))) {
-			sprintf (temp, "%s%s", com_gamedir, t2);
+			snprintf (temp, sizeof(temp), "%s%s", com_gamedir, t2);
 			unlink (temp);
 		}
 	}
@@ -354,7 +354,7 @@ Con_DebugLog (char *file, char *fmt, ...)
 	int         fd;
 
 	va_start (argptr, fmt);
-	vsprintf (data, fmt, argptr);
+	vsnprintf (data, sizeof(data), fmt, argptr);
 	va_end (argptr);
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
 	write (fd, data, Q_strlen (data));
@@ -370,7 +370,6 @@ Handles cursor positioning, line wrapping, etc
 ================
 */
 #define	MAXPRINTMSG	4096
-// FIXME: make a buffer size safe vsprintf?
 void
 Con_Printf (char *fmt, ...)
 {
@@ -379,7 +378,7 @@ Con_Printf (char *fmt, ...)
 	static qboolean inupdate;
 
 	va_start (argptr, fmt);
-	vsprintf (msg, fmt, argptr);
+	vsnprintf (msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
 
 // also echo to debugging console
@@ -391,7 +390,7 @@ Con_Printf (char *fmt, ...)
 		char msg2[MAX_OSPATH+32];
 		// LordHavoc: this used to use va(), but that was too dangerous,
 		// as Con_Printf and va() calls are often mixed.
-		sprintf(msg2, "%s/qconsole.log", com_gamedir);
+		snprintf(msg2, sizeof(msg2), "%s/qconsole.log", com_gamedir);
 		Sys_DebugLog (msg2, "%s", msg);
 	}
 
@@ -434,7 +433,7 @@ Con_DPrintf (char *fmt, ...)
 										// techie stuff...
 
 	va_start (argptr, fmt);
-	vsprintf (msg, fmt, argptr);
+	vsnprintf (msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
 
 	Con_Printf ("%s", msg);
@@ -456,7 +455,7 @@ Con_SafePrintf (char *fmt, ...)
 	int         temp;
 
 	va_start (argptr, fmt);
-	vsprintf (msg, fmt, argptr);
+	vsnprintf (msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
 
 	temp = scr_disabled_for_loading;
