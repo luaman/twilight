@@ -16,9 +16,9 @@ OPTIMIZATIONS= -O6 -ffast-math -funroll-loops -fomit-frame-pointer \
 
 LDFLAGS= `sdl-config --libs` -lGL
 
-all: frost
+all: frost-nq
 
-frost: $(OBJECTS)
+frost-nq: $(OBJECTS)
 	gcc $(LDFLAGS) -o $@ $^
 
 .SUFFIXES: .c .o
@@ -27,7 +27,7 @@ frost: $(OBJECTS)
 	gcc $(CFLAGS) $(OPTIMIZATIONS) -o $@ -c $<
 
 clean:
-	rm -f frost *.o
+	rm -f frost-nq *.o
 
 .PHONY: clean
 
