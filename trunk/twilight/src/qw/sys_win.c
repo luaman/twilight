@@ -206,6 +206,8 @@ Sys_Init (void)
 	// make sure the timer is high precision, otherwise
 	// NT gets 18ms resolution
 	timeBeginPeriod (1);
+
+	Math_Init();
 }
 
 

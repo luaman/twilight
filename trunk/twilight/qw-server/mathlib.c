@@ -19,13 +19,323 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // mathlib.c -- math primitives
 
+#include <SDL_types.h>
 #include <math.h>
+#include <time.h>
 #include "qwsvdef.h"
 
 void        Sys_Error (char *error, ...);
 
 vec3_t      vec3_origin = { 0, 0, 0 };
-int         nanmask = 255 << 23;
+/*-----------------------------------------------------------------*/
+
+// some q3 stuff here
+
+static float sintable[1024];
+
+static void 
+Math_BuildSinTable(void) 
+{
+	int i;
+
+	for (i = 0; i < 1024; i++)
+		sintable[i] = (float)sin(i * M_PI / 2048.0f);
+}
+
+double 
+Q_sin(double x)
+{
+	int	index = (int)(1024 * x / (M_PI * 0.5));
+	int	quad = index >> 10;
+
+	index &= 1023;
+	quad &= 3;
+
+	switch (quad) 
+	{
+		case 0:
+			return sintable[index];
+		case 1:
+			return sintable[1023-index];
+		case 2:
+			return -sintable[index];
+		case 3:
+			return -sintable[1023-index];
+	}
+
+	return 0;
+}
+
+double 
+Q_cos(double x) 
+{
+	int	index = (int)(1024 * x / (M_PI * 0.5));
+	int	quad = index >> 10;
+
+	index &= 1023;
+	quad &= 3;
+
+	switch (quad)
+	{
+		case 0:
+			return sintable[1023-index];
+		case 1:
+			return -sintable[index];
+		case 2:
+			return -sintable[1023-index];
+		case 3:
+			return sintable[index];
+	}
+
+	return 0;
+}
+
+double 
+Q_asin(double x)
+{
+	return x * (M_PI / 2048);
+}
+
+double 
+Q_atan2(double y, double x) 
+{
+	float	base = 0;
+	float	temp;
+	float	dir = 1;
+	float	test;
+	int		i;
+	double  x1 = x, y1 = y;
+
+	if (x1 < 0) 
+	{
+		if (y1 >= 0) 
+		{
+			// quad 1
+			base = M_PI * 0.5;
+			temp = x1;
+			x1 = y1;
+			y1 = -temp;
+		} 
+		else 
+		{
+			// quad 2
+			base = M_PI;
+			x1 = -x1;
+			y1 = -y1;
+		}
+	} 
+	else 
+	{
+		if (y1 < 0) 
+		{
+			// quad 3
+			base = 3 * M_PI * 0.5;
+			temp = x1;
+			x1 = -y1;
+			y1 = temp;
+		}
+	}
+
+	if (y1 > x1) 
+	{
+		base += M_PI*0.5;
+		temp = x1;
+		x1 = y1;
+		y1 = temp;
+		dir = -1;
+	} 
+	else 
+		dir = 1;
+
+	// calcualte angle in octant 0
+	if (x1 == 0) {
+		return base;
+	}
+
+	y1 /= x1;
+
+	for (i = 0; i < 512; i++)
+	{
+		test = sintable[i] / sintable[1023-i];
+		if (test > y1)
+			break;
+	}
+
+	return base + dir * i * (M_PI / 2048.0f);
+}
+
+double
+Q_atan(double x)
+{
+	float test, y = Q_fabs(x), dir = (x < 0) ? -1 : 1;
+	int i;
+
+	if (!x)
+		return 0;
+
+	for (i = 0; i < 512; i++)
+	{
+		test = sintable[i] / sintable[1023-i];
+		if (test > y)
+			break;
+	}
+
+	return dir * i * (M_PI / 2048.0f);
+}
+
+double 
+Q_tan(double x)
+{
+	int	index = (int)(1024 * x / (M_PI * 0.5));
+	int	quad = index >> 10;
+
+	index &= 1023;
+	quad &= 3;
+
+	switch (quad) 
+	{
+		case 0:
+		case 2:
+			return sintable[index] / sintable[1023-index];
+		case 1:
+		case 3:
+			return -sintable[1023-index] / sintable[index];
+	}
+
+	return 0;
+}
+
+double 
+Q_floor(double x)
+{
+	return floor(x);
+}
+
+double 
+Q_ceil(double x)
+{
+	return ceil(x);
+}
+
+float 
+Q_fabs( float f ) 
+{
+	float tmp = f;
+
+	return (tmp < 0) ? -tmp : tmp;
+}
+
+int 
+Q_abs(int x) 
+{
+	int tmp = x;
+
+	return (tmp < 0) ? -tmp : tmp;
+}
+
+static int q_randSeed = 0;
+
+void 
+Q_srand(unsigned seed)
+{
+	q_randSeed = seed;
+}
+
+int	
+Q_rand(void)
+{
+	q_randSeed = (69069 * q_randSeed + 1);
+	return q_randSeed & 0x7fff;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Square root with lookup table (http://www.nvidia.com/developer)
+////////////////////////////////////////////////////////////////////////
+
+#define FP_BITS(fp) (* (Uint32 *) &(fp))
+
+typedef union FastSqrtUnion
+{
+	float f;
+	unsigned int i;
+} FastSqrtUnion;
+
+static unsigned int iFastSqrtTable[0x10000];
+
+// Build the square root table
+static void 
+Math_BuildSqrtTable(void)
+{
+	unsigned int i;
+	FastSqrtUnion s;
+
+	// Build the fast square root table
+	for (i = 0; i <= 0x7FFF; i++)
+	{
+		// Build a float with the bit pattern i as mantissa
+		// and an exponent of 0, stored as 127
+		s.i = (i << 8) | (0x7F << 23);
+		s.f = (float) sqrt(s.f);
+    
+		// Take the square root then strip the first 7 bits of
+		// the mantissa into the table
+		iFastSqrtTable[i + 0x8000] = (s.i & 0x7FFFFF);
+    
+		// Repeat the process, this time with an exponent of 1, 
+		// stored as 128
+		s.i = (i << 8) | (0x80 << 23);
+		s.f = (float) sqrt(s.f);
+    
+		iFastSqrtTable[i] = (s.i & 0x7FFFFF);
+	}
+}
+
+float 
+Q_sqrt(float n)
+{
+	// Check for square root of 0
+	if (FP_BITS(n) == 0)
+		return 0.0;                 
+  
+	FP_BITS(n) = iFastSqrtTable[(FP_BITS(n) >> 8) & 0xFFFF] | 
+		((((FP_BITS(n) - 0x3F800000) >> 1) +
+		0x3F800000) & 0x7F800000);
+  
+	return n;
+}
+
+#define THREEHALFS	1.5f
+
+float 
+Q_RSqrt(float number)
+{
+	long i;
+	float x2, y;
+
+	x2 = number * 0.5f;
+	y = number;
+	i = * (long *) &y;						// evil floating point bit level hacking
+	i = 0x5f3759df - (i >> 1);             // what the fuck?
+	y = * (float *) &i;
+	y = y * (THREEHALFS - (x2 * y * y));   // 1st iteration
+
+	return y;
+}
+
+double
+Q_pow (double x, double y)
+{
+	return pow (x, y);
+}
+
+void 
+Math_Init (void)
+{
+	Math_BuildSqrtTable();
+	Math_BuildSinTable();
+
+	Q_srand (time(NULL));
+}
 
 /*-----------------------------------------------------------------*/
 
@@ -65,9 +375,9 @@ PerpendicularVector (vec3_t dst, const vec3_t src)
 	/* 
 	   ** find the smallest magnitude axially aligned vector */
 	for (pos = 0, i = 0; i < 3; i++) {
-		if (fabs (src[i]) < minelem) {
+		if (Q_fabs (src[i]) < minelem) {
 			pos = i;
-			minelem = fabs (src[i]);
+			minelem = Q_fabs (src[i]);
 		}
 	}
 	tempvec[0] = tempvec[1] = tempvec[2] = 0.0F;
@@ -79,7 +389,7 @@ PerpendicularVector (vec3_t dst, const vec3_t src)
 
 	/* 
 	   ** normalize the result */
-	VectorNormalize (dst);
+	VectorNormalizeFast (dst);
 }
 
 #ifdef _WIN32
@@ -130,10 +440,10 @@ RotatePointAroundVector (vec3_t dst, const vec3_t dir, const vec3_t point,
 	memset (zrot, 0, sizeof (zrot));
 	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
 
-	zrot[0][0] = cos (DEG2RAD (degrees));
-	zrot[0][1] = sin (DEG2RAD (degrees));
-	zrot[1][0] = -sin (DEG2RAD (degrees));
-	zrot[1][1] = cos (DEG2RAD (degrees));
+	zrot[0][0] = Q_cos (DEG2RAD (degrees));
+	zrot[0][1] = Q_sin (DEG2RAD (degrees));
+	zrot[1][0] = zrot[0][1];
+	zrot[1][1] = zrot[0][0];
 
 	R_ConcatRotations (m, zrot, tmpmat);
 	R_ConcatRotations (tmpmat, im, rot);
@@ -249,7 +559,6 @@ BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, mplane_t *p)
 			break;
 	}
 
-
 	sides = 0;
 	if (dist1 >= p->dist)
 		sides = 1;
@@ -272,14 +581,14 @@ AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	float       sr, sp, sy, cr, cp, cy;
 
 	angle = angles[YAW] * (M_PI * 2 / 360);
-	sy = sin (angle);
-	cy = cos (angle);
+	sy = Q_sin (angle);
+	cy = Q_cos (angle);
 	angle = angles[PITCH] * (M_PI * 2 / 360);
-	sp = sin (angle);
-	cp = cos (angle);
+	sp = Q_sin (angle);
+	cp = Q_cos (angle);
 	angle = angles[ROLL] * (M_PI * 2 / 360);
-	sr = sin (angle);
-	cr = cos (angle);
+	sr = Q_sin (angle);
+	cr = Q_cos (angle);
 
 	forward[0] = cp * cy;
 	forward[1] = cp * sy;
@@ -293,7 +602,7 @@ AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 }
 
 int
-VectorCompare (vec3_t v1, vec3_t v2)
+_VectorCompare (vec3_t v1, vec3_t v2)
 {
 	int         i;
 
@@ -305,7 +614,7 @@ VectorCompare (vec3_t v1, vec3_t v2)
 }
 
 void
-VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc)
+_VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc)
 {
 	vecc[0] = veca[0] + scale * vecb[0];
 	vecc[1] = veca[1] + scale * vecb[1];
@@ -344,38 +653,30 @@ _VectorCopy (vec3_t in, vec3_t out)
 }
 
 void
-CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
+_CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
 {
 	cross[0] = v1[1] * v2[2] - v1[2] * v2[1];
 	cross[1] = v1[2] * v2[0] - v1[0] * v2[2];
 	cross[2] = v1[0] * v2[1] - v1[1] * v2[0];
 }
 
-double      sqrt (double x);
-
-vec_t
-Length (vec3_t v)
+vec_t 
+VectorLength (vec3_t v)
 {
-	int         i;
-	float       length;
+	float length = v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
 
-	length = 0;
-	for (i = 0; i < 3; i++)
-		length += v[i] * v[i];
-	length = sqrt (length);				// FIXME
-
-	return length;
+	return length ? Q_sqrt(length) : 0;
 }
 
-float
+vec_t 
 VectorNormalize (vec3_t v)
 {
-	float       length, ilength;
+	float length, ilength;
 
-	length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-	length = sqrt (length);				// FIXME
+	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
 
 	if (length) {
+		length = Q_sqrt(length);
 		ilength = 1 / length;
 		v[0] *= ilength;
 		v[1] *= ilength;
@@ -383,25 +684,36 @@ VectorNormalize (vec3_t v)
 	}
 
 	return length;
-
 }
 
-void
-VectorInverse (vec3_t v)
+void 
+VectorNormalizeFast (vec3_t v)
 {
-	v[0] = -v[0];
-	v[1] = -v[1];
-	v[2] = -v[2];
+	float length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+
+	if (length) {
+		length = Q_RSqrt(length);
+		v[0] *= length;
+		v[1] *= length;
+		v[2] *= length;
+	}
 }
 
 void
-VectorScale (vec3_t in, vec_t scale, vec3_t out)
+_VectorInverse (vec3_t v, vec3_t t)
+{
+	t[0] = -v[0];
+	t[1] = -v[1];
+	t[2] = -v[2];
+}
+
+void
+_VectorScale (vec3_t in, vec_t scale, vec3_t out)
 {
 	out[0] = in[0] * scale;
 	out[1] = in[1] * scale;
 	out[2] = in[2] * scale;
 }
-
 
 int
 Q_log2 (int val)
@@ -498,24 +810,24 @@ FloorDivMod (double numer, double denom, int *quotient, int *rem)
 	if (denom <= 0.0)
 		Sys_Error ("FloorDivMod: bad denominator %d\n", denom);
 
-//  if ((floor(numer) != numer) || (floor(denom) != denom))
+//  if ((Q_floor(numer) != numer) || (Q_floor(denom) != denom))
 //      Sys_Error ("FloorDivMod: non-integer numer or denom %f %f\n",
 //              numer, denom);
 #endif
 
 	if (numer >= 0.0) {
 
-		x = floor (numer / denom);
+		x = Q_floor (numer / denom);
 		q = (int) x;
-		r = (int) floor (numer - (x * denom));
+		r = (int) Q_floor (numer - (x * denom));
 	} else {
 		// 
 		// perform operations with positive values, and fix mod to make
 		// floor-based
 		// 
-		x = floor (-numer / denom);
+		x = Q_floor (-numer / denom);
 		q = -(int) x;
-		r = (int) floor (-numer - (x * denom));
+		r = (int) Q_floor (-numer - (x * denom));
 		if (r != 0) {
 			q--;
 			r = (int) denom - r;

@@ -189,7 +189,7 @@ VID_SetPalette (unsigned char *palette)
 				r1 = (int) r - (int) pal[0];
 				g1 = (int) g - (int) pal[1];
 				b1 = (int) b - (int) pal[2];
-				dist = sqrt (((r1 * r1) + (g1 * g1) + (b1 * b1)));
+				dist = Q_sqrt (((r1 * r1) + (g1 * g1) + (b1 * b1)));
 				if (dist < bestdist) {
 					k = v;
 					bestdist = dist;
@@ -396,7 +396,7 @@ Check_Gamma (unsigned char *pal)
 		vid_gamma = Q_atof (com_argv[i + 1]);
 
 	for (i = 0; i < 768; i++) {
-		f = pow ((pal[i] + 1) / 256.0, vid_gamma);
+		f = Q_pow ((pal[i] + 1) / 256.0, vid_gamma);
 		inf = f * 255 + 0.5;
 		if (inf < 0)
 			inf = 0;

@@ -196,6 +196,10 @@ SOURCE=.\gl_warp.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\hash.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\keys.c
 # End Source File
 # Begin Source File
@@ -217,10 +221,6 @@ SOURCE=.\net_chan.c
 # Begin Source File
 
 SOURCE=.\net_wins.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\nonintel.c
 # End Source File
 # Begin Source File
 
@@ -341,6 +341,10 @@ SOURCE=.\gl_warp_sin.h
 # Begin Source File
 
 SOURCE=.\glquake.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\hash.h
 # End Source File
 # Begin Source File
 

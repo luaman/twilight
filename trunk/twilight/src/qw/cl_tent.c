@@ -192,10 +192,10 @@ CL_ParseTEnt (void)
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 10);
 
-			if (rand () % 5)
+			if (Q_rand () % 5)
 				S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
 			else {
-				rnd = rand () & 3;
+				rnd = Q_rand () & 3;
 				if (rnd == 1)
 					S_StartSound (-1, 0, cl_sfx_ric1, pos, 1, 1);
 				else if (rnd == 2)
@@ -210,10 +210,10 @@ CL_ParseTEnt (void)
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 20);
 
-			if (rand () % 5)
+			if (Q_rand () % 5)
 				S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
 			else {
-				rnd = rand () & 3;
+				rnd = Q_rand () & 3;
 				if (rnd == 1)
 					S_StartSound (-1, 0, cl_sfx_ric1, pos, 1, 1);
 				else if (rnd == 2)
@@ -375,12 +375,12 @@ CL_UpdateBeams (void)
 			else
 				pitch = 270;
 		} else {
-			yaw = (int) (atan2 (dist[1], dist[0]) * 180 / M_PI);
+			yaw = (int) (Q_atan2 (dist[1], dist[0]) * 180 / M_PI);
 			if (yaw < 0)
 				yaw += 360;
 
-			forward = sqrt (dist[0] * dist[0] + dist[1] * dist[1]);
-			pitch = (int) (atan2 (dist[2], forward) * 180 / M_PI);
+			forward = Q_sqrt (dist[0] * dist[0] + dist[1] * dist[1]);
+			pitch = (int) (Q_atan2 (dist[2], forward) * 180 / M_PI);
 			if (pitch < 0)
 				pitch += 360;
 		}
@@ -396,7 +396,7 @@ CL_UpdateBeams (void)
 			ent->model = b->model;
 			ent->angles[0] = pitch;
 			ent->angles[1] = yaw;
-			ent->angles[2] = rand () % 360;
+			ent->angles[2] = Q_rand () % 360;
 
 			for (i = 0; i < 3; i++)
 				org[i] += dist[i] * 30;

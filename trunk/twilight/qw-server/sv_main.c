@@ -494,7 +494,7 @@ SVC_GetChallenge (void)
 
 	if (i == MAX_CHALLENGES) {
 		// overwrite the oldest
-		svs.challenges[oldest].challenge = (rand () << 16) ^ rand ();
+		svs.challenges[oldest].challenge = (Q_rand () << 16) ^ Q_rand ();
 		svs.challenges[oldest].adr = net_from;
 		svs.challenges[oldest].time = realtime;
 		i = oldest;
@@ -1221,7 +1221,7 @@ SV_Frame (float time)
 	svs.stats.idle += start - end;
 
 // keep the random time dependent
-	rand ();
+	Q_rand ();
 
 // decide the simulation time
 	if (!sv.paused) {
@@ -1594,6 +1594,8 @@ SV_Init
 void
 SV_Init (quakeparms_t *parms)
 {
+	Math_Init();
+
 	COM_InitArgv (parms->argc, parms->argv);
 	COM_AddParm ("-game");
 	COM_AddParm ("qw");

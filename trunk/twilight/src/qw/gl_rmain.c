@@ -102,6 +102,8 @@ cvar_t      gl_finish = { "gl_finish", "0" };
 extern cvar_t gl_ztrick;
 extern cvar_t scr_fov;
 
+static float shadescale = 0.0;
+
 /*
 =================
 R_CullBox
@@ -223,9 +225,6 @@ R_DrawSpriteModel (entity_t *e)
 	GL_DisableMultitexture ();
 
 	GL_Bind (frame->gl_texturenum);
-
-	glEnable (GL_ALPHA_TEST);
-	glBegin (GL_QUADS);
 
 	glEnable (GL_ALPHA_TEST);
 	glBegin (GL_QUADS);
@@ -440,7 +439,6 @@ R_DrawAliasModel (entity_t *e)
 	model_t    *clmodel;
 	vec3_t      mins, maxs;
 	aliashdr_t *paliashdr;
-	float       an;
 	int         anim;
 
 	clmodel = currententity->model;
@@ -459,52 +457,48 @@ R_DrawAliasModel (entity_t *e)
 	// get lighting information
 	// 
 
-	ambientlight = shadelight = R_LightPoint (currententity->origin);
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT))
+	{
+		ambientlight = shadelight = R_LightPoint (currententity->origin);
 
-	// always give the gun some light
-	if (e == &cl.viewent && ambientlight < 24)
-		ambientlight = shadelight = 24;
+		// always give the gun some light
+		if (e == &cl.viewent && ambientlight < 24)
+			ambientlight = shadelight = 24;
 
-	for (lnum = 0; lnum < MAX_DLIGHTS; lnum++) {
-		if (cl_dlights[lnum].die >= cl.time) {
-			VectorSubtract (currententity->origin,
-							cl_dlights[lnum].origin, dist);
-			add = cl_dlights[lnum].radius - Length (dist);
+		for (lnum = 0; lnum < MAX_DLIGHTS; lnum++) {
+			if (cl_dlights[lnum].die >= cl.time) {
+				VectorSubtract (currententity->origin,
+								cl_dlights[lnum].origin, dist);
+				add = cl_dlights[lnum].radius - VectorLength (dist);
 
-			if (add > 0) {
-				ambientlight += add;
-				// ZOID models should be affected by dlights as well
-				shadelight += add;
+				if (add > 0) {
+					ambientlight += add;
+					// ZOID models should be affected by dlights as well
+					shadelight += add;
+				}
 			}
-		}
+		}		
+
+		// clamp lighting so it doesn't overbright as much
+		if (ambientlight > 128)
+			ambientlight = 128;
+		if (ambientlight + shadelight > 192)
+			shadelight = 192 - ambientlight;
 	}
-
-	// clamp lighting so it doesn't overbright as much
-	if (ambientlight > 128)
-		ambientlight = 128;
-	if (ambientlight + shadelight > 192)
-		shadelight = 192 - ambientlight;
-
-	// ZOID: never allow players to go totally black
-	if (!Q_strcmp (clmodel->name, "progs/player.mdl")) {
-		if (ambientlight < 8)
-			ambientlight = shadelight = 8;
-
-	} else if (!Q_strcmp (clmodel->name, "progs/flame2.mdl")
-			   || !Q_strcmp (clmodel->name, "progs/flame.mdl"))
+	else 
 		// HACK HACK HACK -- no fullbright colors, so make torches full light
 		ambientlight = shadelight = 256;
 
+	// ZOID: never allow players to go totally black
+	if (clmodel->modflags & FLAG_ALWAYSLIT) {
+		if (ambientlight < 8)
+			ambientlight = shadelight = 8;
+	}
+	
 	shadedots =
 		r_avertexnormal_dots[((int) (e->angles[1] * (SHADEDOT_QUANT / 360.0))) &
 							 (SHADEDOT_QUANT - 1)];
 	shadelight = shadelight / 200.0;
-
-	an = e->angles[1] / 180 * M_PI;
-	shadevector[0] = cos (-an);
-	shadevector[1] = sin (-an);
-	shadevector[2] = 1;
-	VectorNormalize (shadevector);
 
 	// 
 	// locate the proper data
@@ -522,7 +516,7 @@ R_DrawAliasModel (entity_t *e)
 	glPushMatrix ();
 	R_RotateForEntity (e);
 
-	if (!Q_strcmp (clmodel->name, "progs/eyes.mdl")) {
+	if (clmodel->modflags & FLAG_DOUBLESIZE) {
 		glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
 					  paliashdr->scale_origin[2] - (22 + 8));
 		// double size of eyes, since they are really hard to see in gl
@@ -567,7 +561,16 @@ R_DrawAliasModel (entity_t *e)
 
 	glPopMatrix ();
 
-	if (r_shadows.value) {
+	if (r_shadows.value && !(clmodel->modflags & FLAG_NOSHADOW)) {
+		float an = -e->angles[1] / 180 * M_PI;
+
+		if (!shadescale)
+			shadescale = Q_RSqrt(2);
+
+		shadevector[0] = Q_cos (an) * shadescale;
+		shadevector[1] = Q_sin (an) * shadescale;
+		shadevector[2] = shadescale;
+
 		glPushMatrix ();
 		R_RotateForEntity (e);
 		glDisable (GL_TEXTURE_2D);
@@ -579,7 +582,6 @@ R_DrawAliasModel (entity_t *e)
 		glColor4f (1, 1, 1, 1);
 		glPopMatrix ();
 	}
-
 }
 
 //==================================================================================
@@ -637,60 +639,16 @@ R_DrawViewModel
 void
 R_DrawViewModel (void)
 {
-	float       ambient[4], diffuse[4];
-	int         j;
-	int         lnum;
-	vec3_t      dist;
-	float       add;
-	dlight_t   *dl;
-	int         ambientlight, shadelight;
-
-	if (!r_drawviewmodel.value || !Cam_DrawViewModel ())
-		return;
-
-	if (envmap)
-		return;
-
-	if (!r_drawentities.value)
-		return;
-
-	if (cl.stats[STAT_ITEMS] & IT_INVISIBILITY)
-		return;
-
-	if (cl.stats[STAT_HEALTH] <= 0)
-		return;
-
 	currententity = &cl.viewent;
-	if (!currententity->model)
+
+	if (!r_drawviewmodel.value || 
+		!Cam_DrawViewModel () ||
+		envmap ||
+		!r_drawentities.value ||
+		(cl.stats[STAT_ITEMS] & IT_INVISIBILITY) ||
+		(cl.stats[STAT_HEALTH] <= 0) ||
+		!currententity->model)
 		return;
-
-	j = R_LightPoint (currententity->origin);
-
-	if (j < 24)
-		j = 24;							// always give some light on gun
-	ambientlight = j;
-	shadelight = j;
-
-// add dynamic lights       
-	for (lnum = 0; lnum < MAX_DLIGHTS; lnum++) {
-		dl = &cl_dlights[lnum];
-		if (!dl->radius)
-			continue;
-		if (!dl->radius)
-			continue;
-		if (dl->die < cl.time)
-			continue;
-
-		VectorSubtract (currententity->origin, dl->origin, dist);
-		add = dl->radius - Length (dist);
-		if (add > 0)
-			ambientlight += add;
-	}
-
-	ambient[0] = ambient[1] = ambient[2] = ambient[3] =
-		(float) ambientlight / 128;
-	diffuse[0] = diffuse[1] = diffuse[2] = diffuse[3] =
-		(float) shadelight / 128;
 
 	// hack the depth range to prevent view model from poking into walls
 	glDepthRange (gldepthmin, gldepthmin + 0.3 * (gldepthmax - gldepthmin));
@@ -839,7 +797,7 @@ MYgluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
 	GLdouble    xmin, xmax, ymin, ymax;
 
-	ymax = zNear * tan (fovy * M_PI / 360.0);
+	ymax = zNear * Q_tan (fovy * M_PI / 360.0);
 	ymin = -ymax;
 
 	xmin = ymin * aspect;
@@ -892,9 +850,9 @@ R_SetupGL (void)
 
 	glViewport (glx + x, gly + y2, w, h);
 	screenaspect = (float) r_refdef.vrect.width / r_refdef.vrect.height;
-//  yfov = 2*atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*180/M_PI;
-//  yfov = (2.0 * tan (scr_fov.value/360*M_PI)) / screenaspect;
-//  yfov = 2*atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*(scr_fov.value*2)/M_PI;
+//  yfov = 2*Q_atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*180/M_PI;
+//  yfov = (2.0 * Q_tan (scr_fov.value/360*M_PI)) / screenaspect;
+//  yfov = 2*Q_atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*(scr_fov.value*2)/M_PI;
 //    MYgluPerspective (yfov,  screenaspect,  4,  4096);
 	MYgluPerspective (r_refdef.fov_y, screenaspect, 4, 4096);
 
@@ -1043,8 +1001,8 @@ R_Mirror (void)
 	d = DotProduct (vpn, mirror_plane->normal);
 	VectorMA (vpn, -2 * d, mirror_plane->normal, vpn);
 
-	r_refdef.viewangles[0] = -asin (vpn[2]) / M_PI * 180;
-	r_refdef.viewangles[1] = atan2 (vpn[1], vpn[0]) / M_PI * 180;
+	r_refdef.viewangles[0] = -Q_asin (vpn[2]) / M_PI * 180;
+	r_refdef.viewangles[1] = Q_atan2 (vpn[1], vpn[0]) / M_PI * 180;
 	r_refdef.viewangles[2] = -r_refdef.viewangles[2];
 
 	ent = &cl_entities[cl.viewentity];

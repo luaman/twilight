@@ -1038,7 +1038,7 @@ CL_MuzzleFlash (void)
 	AngleVectors (pl->viewangles, fv, rv, uv);
 
 	VectorMA (dl->origin, 18, fv, dl->origin);
-	dl->radius = 200 + (rand () & 31);
+	dl->radius = 200 + (Q_rand () & 31);
 	dl->minlight = 32;
 	dl->die = cl.time + 0.1;
 	dl->color[0] = 0.2;
@@ -1251,7 +1251,7 @@ CL_ParseServerMessage (void)
 					cl.simorg[i] = MSG_ReadCoord ();
 				for (i = 0; i < 3; i++)
 					cl.simangles[i] = MSG_ReadAngle ();
-				VectorCopy (vec3_origin, cl.simvel);
+				VectorClear (cl.simvel);
 				break;
 
 			case svc_finale:

@@ -326,6 +326,11 @@ typedef enum { mod_brush, mod_sprite, mod_alias } modtype_t;
 #define	EF_TRACER2	64					// orange split trail + rotate
 #define	EF_TRACER3	128					// purple trail
 
+#define FLAG_FULLBRIGHT	1				// always fullbright
+#define FLAG_NOSHADOW	2				// do not draw shadow
+#define FLAG_DOUBLESIZE 4				// double sized model
+#define FLAG_ALWAYSLIT	32				// always has some light
+
 typedef struct model_s {
 	char        name[MAX_QPATH];
 	qboolean    needload;				// bmodels and sprites don't cache
@@ -336,6 +341,7 @@ typedef struct model_s {
 	synctype_t  synctype;
 
 	int         flags;
+	int			modflags;
 
 //
 // volume occupied by the model graphics
