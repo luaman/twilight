@@ -146,6 +146,7 @@ CL_PredictMove (void)
 	if (cl.paused)
 		return;
 
+	cl.oldtime = cl.time;
 	cl.time = realtime - cls.latency - cl_pushlatency->value * 0.001;
 	if (cl.time > realtime)
 		cl.time = realtime;

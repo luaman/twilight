@@ -266,7 +266,7 @@ typedef struct {
 	vec3_t		viewangles;
 
 	// the time that the client is rendering at.  always <= realtime
-	double		time;
+	double		time, oldtime;
 
 	// the client simulates or interpolates movement to get these values
 	vec3_t		simorg;

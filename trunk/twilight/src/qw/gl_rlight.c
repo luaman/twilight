@@ -205,7 +205,6 @@ R_RenderDlights (void)
 		return;
 
 	qglDisable (GL_TEXTURE_2D);
-	qglBlendFunc (GL_ONE, GL_ONE);
 	qglEnableClientState (GL_COLOR_ARRAY);
 
 	l = cl_dlights;
@@ -225,7 +224,6 @@ R_RenderDlights (void)
 
 	qglColor3f (1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDisableClientState (GL_COLOR_ARRAY);
 }
 
