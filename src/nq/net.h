@@ -23,7 +23,6 @@
 
 	$Id$
 */
-// net.h -- quake's interface to the networking layer
 
 #ifndef __NET_H
 #define __NET_H
@@ -248,21 +247,6 @@ typedef struct {
 
 extern int  hostCacheCount;
 extern hostcache_t hostcache[HOSTCACHESIZE];
-
-#if !defined(_WIN32 ) && !defined (__linux__) && !defined (__sun__)
-#ifndef htonl
-extern unsigned long htonl (unsigned long hostlong);
-#endif
-#ifndef htons
-extern unsigned short htons (unsigned short hostshort);
-#endif
-#ifndef ntohl
-extern unsigned long ntohl (unsigned long netlong);
-#endif
-#ifndef ntohs
-extern unsigned short ntohs (unsigned short netshort);
-#endif
-#endif
 
 
 //============================================================================

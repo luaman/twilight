@@ -25,6 +25,8 @@
 static const char rcsid[] =
 	"$Id$";
 
+#include "twiconfig.h"
+
 #include "mathlib.h"
 
 vec3_t softwaretransform_x;

@@ -50,7 +50,5 @@
 
 #define OGLDECL APIENTRY
 
-#include "compat.h"
-
 #endif // __WIN32CONF_H
 

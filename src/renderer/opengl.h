@@ -30,7 +30,7 @@
 
 #include "SDL_types.h"
 
-#ifdef WIN32
+#ifdef __WIN32
 # include <windows.h>  // for APIENTRY
 #endif
 

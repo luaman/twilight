@@ -22,17 +22,10 @@
 		Boston, MA  02111-1307, USA
 
 */
-/* common.c -- misc functions used in client and server */
 static const char rcsid[] =
 	"$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include <stdio.h>
 #include <stdlib.h>

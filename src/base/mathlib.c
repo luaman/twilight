@@ -22,17 +22,10 @@
 		Boston, MA  02111-1307, USA
 
 */
-// mathlib.c -- math primitives
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include <math.h>
 #include <time.h>
@@ -453,7 +446,7 @@ void VectorVectors(const vec3_t forward, vec3_t right, vec3_t up)
 	CrossProduct(right, forward, up);
 }
 
-#if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
+#if defined(__WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma optimize( "", off )
 #endif
 
@@ -515,7 +508,7 @@ RotatePointAroundVector (vec3_t dst, const vec3_t dir, const vec3_t point,
 	}
 }
 
-#if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
+#if defined(__WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma optimize( "", on )
 #endif
 

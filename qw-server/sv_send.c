@@ -22,17 +22,10 @@
 		Boston, MA  02111-1307, USA
 
 */
-// sv_main.c -- server main program
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -647,7 +640,7 @@ SV_UpdateToReliableMessages (void)
 	SZ_Clear (&sv.datagram);
 }
 
-#if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
+#if defined(__WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma optimize( "", off )
 #endif
 
@@ -736,7 +729,7 @@ SV_SendClientMessages (void)
 	}
 }
 
-#if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
+#if defined(__WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma optimize( "", on )
 #endif
 
@@ -762,3 +755,4 @@ SV_SendMessagesToAll (void)
 
 	SV_SendClientMessages ();
 }
+

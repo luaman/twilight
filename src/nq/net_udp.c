@@ -22,40 +22,33 @@
 		Boston, MA  02111-1307, USA
 
 */
-// net_udp.c
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
-#ifdef WIN32
-#include <winsock.h>
-#include <io.h>
-#define EWOULDBLOCK WSAEWOULDBLOCK
-#define ECONNREFUSED WSAECONNREFUSED
+#ifdef __WIN32
+# include <winsock.h>
+# include <io.h>
+# define EWOULDBLOCK WSAEWOULDBLOCK
+# define ECONNREFUSED WSAECONNREFUSED
 #else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <sys/param.h>
-#include <sys/ioctl.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <arpa/inet.h>
+# include <netdb.h>
+# include <sys/param.h>
+# include <sys/ioctl.h>
+# ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+# endif
 #endif
 #include <errno.h>
 // LordHavoc: winsock uses WSAGetLastError instead of errno, errno is never set by winsock functions
 
 #ifdef __sun__
-#include <sys/filio.h>
+# include <sys/filio.h>
 #endif
 
 #include <stdio.h>
@@ -66,11 +59,11 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-#ifdef _WIN32
-#ifdef errno
-#undef errno
-#endif
-#define errno WSAGetLastError()
+#ifdef __WIN32
+# ifdef errno
+#  undef errno
+# endif
+# define errno WSAGetLastError()
 #endif
 
 //extern int  gethostname (char *, int);
@@ -89,8 +82,8 @@ static unsigned long myAddr;
 
 //=============================================================================
 
-#ifdef WIN32
-#define MAXHOSTNAMELEN		256
+#ifdef __WIN32
+# define MAXHOSTNAMELEN		256
 #endif
 
 int
@@ -101,7 +94,7 @@ UDP_Init (void)
 	struct qsockaddr addr;
 	char       *colon;
 
-#ifdef _WIN32
+#ifdef __WIN32
 	WSADATA     winsockdata;
 	WORD        wVersionRequested;
 	int         r;
@@ -111,7 +104,7 @@ UDP_Init (void)
 	r = WSAStartup (MAKEWORD (1, 1), &winsockdata);
 	if (r)
 		Sys_Error ("Winsock initialization failed.");
-#endif /* _WIN32 */
+#endif /* __WIN32 */
 
 	// determine my name & address
 	gethostname (buf, MAXHOSTNAMELEN);
@@ -183,8 +176,8 @@ UDP_OpenSocket (int port)
 	struct sockaddr_in address;
 	int         i;
 
-#ifdef _WIN32
-#define ioctl ioctlsocket
+#ifdef __WIN32
+# define ioctl ioctlsocket
 	unsigned long _true = true;
 #else
 	int         _true = 1;
@@ -218,7 +211,7 @@ UDP_CloseSocket (int socket)
 {
 	if (socket == net_broadcastsocket)
 		net_broadcastsocket = 0;
-#ifdef _WIN32
+#ifdef __WIN32
 	return closesocket (socket);
 #else
 	return close (socket);

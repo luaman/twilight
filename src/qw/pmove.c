@@ -25,13 +25,7 @@
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include "quakedef.h"
 #include "bspfile.h"

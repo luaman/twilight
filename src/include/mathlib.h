@@ -23,7 +23,6 @@
 
 	$Id$
 */
-// mathlib.h
 
 #ifndef __MATHLIB_H
 #define __MATHLIB_H
@@ -40,7 +39,7 @@
 #include <stdlib.h>
 #endif
 
-#ifdef _WIN32
+#ifdef __WIN32
 # include <windows.h>	// for min() and max()
 #else
 

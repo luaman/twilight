@@ -22,23 +22,16 @@
 		Boston, MA  02111-1307, USA
 
 */
-// cl_main.c  -- client main loop
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <setjmp.h>  // FIXME: REMOVE THIS EVIL SHIT!
 
-#ifdef _WIN32
+#ifdef __WIN32
 # include "winsock.h"
 #else
 # include <netinet/in.h>

@@ -22,23 +22,10 @@
 		Boston, MA  02111-1307, USA
 
 */
-/* ZOID
- *
- * Player camera tracking in Spectator mode
- *
- * This takes over player controls for spectator automatic camera.
- * Player moves as a spectator, but the camera tracks and enemy player
- */
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include "quakedef.h"
 #include "client.h"

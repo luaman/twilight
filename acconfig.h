@@ -3,7 +3,6 @@
 
 	System configuration
 */
-/* Sigh. */
 #ifndef __CONFIG_H
 #define __CONFIG_H
 @TOP@
@@ -27,6 +26,5 @@
 #undef GL_LIBRARY
 
 @BOTTOM@
-
-#include "compat.h"
 #endif // __CONFIG_H
+

@@ -23,18 +23,10 @@
 		Boston, MA  02111-1307, USA
 
 */
-//  An implementation of MD4 designed for use in the samba SMB
-//  authentication protocol
 static const char rcsid[] =
 	"$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include "SDL_types.h"
 

@@ -25,29 +25,22 @@
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
-
+#include "twiconfig.h"
 
 #ifdef HAVE_LIMITS_H
-#include <limits.h>
+# include <limits.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+# include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
+# include <sys/stat.h>
 #endif
 #ifdef HAVE_DIRECT_H
-#include <direct.h>
+# include <direct.h>
 #endif
 #ifdef HAVE_TCHAR_H
-#include <tchar.h>
+# include <tchar.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,20 +52,19 @@ static const char rcsid[] =
 # include <fcntl.h>
 #endif
 #ifdef HAVE_PWD_H
-#include <pwd.h>
+# include <pwd.h>
 #endif
 #include <errno.h>
-#ifdef _WIN32
-#include <windows.h>
-#include <io.h>
-#include "conproc.h"
+#ifdef __WIN32
+# include <windows.h>
+# include <io.h>
+# include "conproc.h"
 #endif
 
 #include "SDL.h"
 
 #include "quakedef.h"
 #include "common.h"
-#include "compat.h"
 #include "cvar.h"
 #include "host.h"
 #include "mathlib.h"

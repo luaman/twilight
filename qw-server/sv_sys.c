@@ -25,14 +25,7 @@
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
-
+#include "twiconfig.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
@@ -66,10 +59,10 @@ static const char rcsid[] =
 #endif
 #include <errno.h>
 
-#ifdef _WIN32
+#ifdef __WIN32
 // Don't need windows.h till we have win32 GUI console
-#include <io.h>
-#include <conio.h>
+# include <io.h>
+# include <conio.h>
 #endif
 
 #include "SDL.h"
@@ -77,7 +70,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "common.h"
 #include "cvar.h"
-#include "compat.h"
 #include "mathlib.h"
 #include "strlib.h"
 #include "server.h"
@@ -193,7 +185,7 @@ Sys_Init (void)
 
 	Math_Init ();
 
-#ifdef _WIN32
+#ifdef __WIN32
 	if (COM_CheckParm ("-nopriority"))
 	{
 		Cvar_Set (sys_extrasleep, "0");
@@ -264,7 +256,7 @@ Sys_FileTime (char *path)
 void
 Sys_mkdir (char *path)
 {
-#ifdef _WIN32
+#ifdef __WIN32
 	_mkdir (path);
 #else
 	mkdir (path, 0777);
@@ -288,14 +280,14 @@ Sys_DoubleTime (void)
 	return epoch + (double)(now / 1000.0);
 }
 
-#ifndef _WIN32
+#ifndef __WIN32
 qboolean		do_stdin = true;
 qboolean		stdin_ready;
 #endif
 
 char *
 Sys_ConsoleInput (void)
-#ifndef _WIN32
+#ifndef __WIN32
 {
 	static char		text[256];
 	int				len;
@@ -435,7 +427,7 @@ main (int c, char **v)
 		// the only reason we have a timeout at all is so that if the last
 		// connected client times out, the message would not otherwise
 		// be printed until the next event.
-#ifndef _WIN32
+#ifndef __WIN32
 		NET_Sleep (10);
 #else
 		NET_Sleep (1);

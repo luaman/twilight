@@ -25,17 +25,11 @@
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include <stdio.h>
 #include <stdarg.h>
-#ifdef WIN32
+#ifdef __WIN32
 # include <windows.h>
 #endif
 #ifdef HAVE_UNISTD_H
@@ -47,7 +41,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 
 #ifndef TWILIGHT_QWSV
-#include "client.h"
+# include "client.h"
 #endif
 
 #include "common.h"
@@ -123,7 +117,7 @@ Netchan_Init_Cvars (void)
 	int		port;
 
 	// pick a port value that should be nice and random
-#ifdef _WIN32
+#ifdef __WIN32
 	port = ((int) (timeGetTime () * 1000) * time (NULL)) & 0xffff;
 #else
 	port = ((int) (getpid () + getuid () * 1000) * time (NULL)) & 0xffff;

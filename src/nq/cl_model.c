@@ -22,20 +22,10 @@
 		Boston, MA  02111-1307, USA
 
 */
-// models.c -- model loading and caching
 static const char rcsid[] =
     "$Id$";
 
-// models are the only shared resource between a client and server running
-// on the same machine.
-
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include "quakedef.h"
 #include "client.h"

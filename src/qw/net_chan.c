@@ -25,13 +25,7 @@
 static const char rcsid[] =
     "$Id$";
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#else
-# ifdef _WIN32
-#  include <win32conf.h>
-# endif
-#endif
+#include "twiconfig.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -42,14 +36,14 @@ static const char rcsid[] =
 #include <unistd.h>
 #endif
 
-#ifdef _WIN32
-#include <windows.h>	/* for timeGetTime() */
+#ifdef __WIN32
+# include <windows.h>	/* for timeGetTime() */
 #endif
 
 #include "quakedef.h"
 
 #ifndef TWILIGHT_QWSV
-#include "client.h"
+# include "client.h"
 #endif
 
 #include "common.h"
