@@ -26,6 +26,10 @@ Bugs we know about:
     bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.
     (Need some example bad BSPs.)
+  - running with an invalid hostname causes this error:
+    Error: Unable to resolve our own hostname: 'node1.nodex.com'
+    (twilight-nq on Linux/UNIX only)
+    (known to occur on most Linux distributions out of the box)
 
   Driver related quirks:
   - RC: Need a 3dfx quirk for limiting vertex array size.  We need the
