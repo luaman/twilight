@@ -140,12 +140,11 @@ Last Updated: $Id$
 	trivial cheat allowing players to be so fast they can outrun a
 	rocket can jump so high that they are literally flying.  Detecting
 	it is not an exact science since Win32 QWCL 2.30 contains a bug
-	which causes it to cheat in the same manner.  The Cvars to control
-	detection sensitivity are:
-		sv_timekick
-		sv_timekick_allowed
-		sv_timekick_interval
-		FIXME: explain cvars
+	which causes it to effectively cheat in the same manner whether a
+	person using it intends to or not.  The Cvars:
+		sv_timekick - 0 to disable or the number of strikes (3)
+		sv_timekick_allowed - msec fuzz value per second (200)
+		sv_timekick_interval - seconds between checks (30)
 
 2001-08-10 10:59  New graphics menu
 	A new menu for graphics options has been created under options to
