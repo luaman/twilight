@@ -281,7 +281,9 @@ Cvar_Archive (FILE *f)
 	v = cvars;
 	while (v)
 	{
-		fprintf (f, "set %s \"%s\"\n", v->var->name, v->var->string);
+		// Can't use set in legacy NQ/QW
+//		fprintf (f, "set %s \"%s\"\n", v->var->name, v->var->string);
+		fprintf (f, "%s \"%s\"\n", v->var->name, v->var->string);
 		v = v->next;
 	}
 }
