@@ -140,6 +140,13 @@ NET_CompareAdr (netadr_t a, netadr_t b)
 		(*(unsigned *)a.ip == *(unsigned *)b.ip && a.port == b.port));
 }
 
+qboolean 
+NET_IsLocalAddress (netadr_t a)
+{
+	return (*(unsigned *)net_from.ip != *(unsigned *)net_local_adr.ip
+			&& *(unsigned *)net_from.ip != htonl(INADDR_LOOPBACK));
+}
+
 char       *
 NET_AdrToString (netadr_t a)
 {
