@@ -509,21 +509,18 @@ Sbar_DrawInventory (void)
 	qboolean	headsup;
 	qboolean	hudswap;
 
-	headsup = !cl_sbar->ivalue;
+	headsup = !cl_sbar->ivalue && !game_rogue->ivalue && !game_hipnotic->ivalue;
 	hudswap = cl_hudswap->ivalue;
 
-	if (!headsup)
+	if (game_rogue->ivalue)
 	{
-		if (game_rogue->ivalue)
-		{
-			if (cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN)
-				Sbar_DrawPic (0, -24, rsb_invbar[0]);
-			else
-				Sbar_DrawPic (0, -24, rsb_invbar[1]);
-		}
+		if (cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN)
+			Sbar_DrawPic (0, -24, rsb_invbar[0]);
 		else
-			Sbar_DrawPic (0, -24, sb_ibar);
+			Sbar_DrawPic (0, -24, rsb_invbar[1]);
 	}
+	else if (!headsup)
+		Sbar_DrawPic (0, -24, sb_ibar);
 
 	// weapons
 	for (i = 0; i < 7; i++)
@@ -835,7 +832,7 @@ Sbar_Draw (void)
 		// console is full screen
 		return;
 
-	headsup = !cl_sbar->ivalue;
+	headsup = !cl_sbar->ivalue && !game_rogue->ivalue && !game_hipnotic->ivalue;
 
 	if (sb_lines > 24)
 	{
@@ -936,9 +933,9 @@ Sbar_Draw (void)
 				cl.stats[STAT_AMMO] <= 10);
 	}
 
-	if (sb_lines && vid.width_2d > 320 && !headsup)
-		Draw_TileClear (320, vid.height_2d - sb_lines, vid.width_2d - 320,
-				sb_lines);
+//	if (sb_lines && vid.width_2d > 320 && !headsup)
+//		Draw_TileClear (320, vid.height_2d - sb_lines, vid.width_2d - 320,
+//				sb_lines);
 
 	if (sb_lines > 0)
 	{
