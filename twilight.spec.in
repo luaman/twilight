@@ -1,49 +1,48 @@
 %define name	@PACKAGE@
 %define version @VERSION@
 %define release 1
-%define builddir $RPM_BUILD_DIR/%{name}-%{version}
+%define builddir ${RPM_BUILD_DIR}/%{name}-%{version}
 
 Name:		%{name}
 Version:	%{version}
 Release:	%{release}
 Vendor:		The Twilight Project 
-Packager:	The Twilight Project twilight-devel@lists.sourceforge.net
+Packager:	The Twilight Project <twilight-devel@lists.sourceforge.net>
 URL:		http://twilight.sf.net/
 Source:		%{name}-%{version}.tar.gz
 Group:		Amusement/Games
 Copyright:	GPL
-BuildRoot:	/var/tmp/%{name}-%{version}
+BuildRoot:	/var/tmp/%{name}-%{version}-root
+Requires:	SDL >= 1.2.0
+BuildPrereq:	SDL-devel >= 1.2.0
 Summary:	A 3D gaming engine based Quake using OpenGL and SDL.
+
 %description
 Project Twilight is a 3D gaming engine based Quake using OpenGL and SDL.
 It's meant to be faster and overall simpler than other projects have been
 without sacrifing the features we've come to expect from 3D games.
 
 %prep
-%setup -n %{name}-%{version} 
+%setup -q
 
 %build
 CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{_prefix}
 make
 
 %install
-if [ -d $RPM_BUILD_ROOT ]; then rm -rf $RPM_BUILD_ROOT; fi
-mkdir -p $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
-# Build the file-list automagically :)
-cd $RPM_BUILD_ROOT
-find . -type d | sed '1,2d;s,^\.,\%attr(-\,root\,root) \%dir ,' > $RPM_BUILD_DIR/file.list.%{name}
-find . -type f | sed 's,^\.,\%attr(-\,root\,root) ,' >> $RPM_BUILD_DIR/file.list.%{name}
-find . -type l | sed 's,^\.,\%attr(-\,root\,root) ,' >> $RPM_BUILD_DIR/file.list.%{name}
+rm -rf ${RPM_BUILD_ROOT}
+make install DESTDIR="$RPM_BUILD_ROOT"
 
 %clean
-rm -rf $RPM_BUILD_ROOT
-rm ../file.list.%{name}
+rm -rf ${RPM_BUILD_ROOT}
 
-%files -f ../file.list.%{name}
+%files
 %defattr(-, root, root)
-%doc README
+%doc AUTHORS ChangeLog COPYING COPYING.BSD INSTALL NEWS README THANKS
+%{_prefix}/bin/twilight-nq
+%{_prefix}/bin/twilight-qw
+%{_prefix}/bin/twilight-qwsv
 
 %changelog
-* Wed Sep 12 2001 Mathieu Olivier <molivier@users.sourceforge.net>
-- created spec file
+* Thu Sep 13 2001 Mathieu Olivier <molivier@users.sourceforge.net>
+- Creation
