@@ -38,9 +38,6 @@
 #include <dsound.h>
 #endif
 
-extern HINSTANCE global_hInstance;
-extern int  global_nCmdShow;
-
 #ifndef SERVERONLY
 
 extern LPDIRECTDRAW lpDD;

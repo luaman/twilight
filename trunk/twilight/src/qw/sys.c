@@ -320,24 +320,10 @@ Sys_ExpandPath (char *str)
 }
 #endif
 
-#ifdef _WIN32
-int
-WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-	int c = __argc;
-	char **v = __argv;
-#else
-int
 main (int c, char **v)
 {
-#endif
-
 	double      time, oldtime, newtime;
 	int         j;
-
-#ifdef _WIN32
-    SDL_RegisterApp("Twilight QWCL: disconnected", 0, GetModuleHandle(NULL));
-#endif
 
 	COM_InitArgv (c, v);
 
