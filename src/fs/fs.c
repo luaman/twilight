@@ -173,8 +173,12 @@ FS_AddGroup (fs_group_t *group)
 {
 	static int	num = 0;
 
+	Com_DFPrintf (DEBUG_FS, "AddGroup: %p\n");
 	if (!group)
 		return;
+
+	Com_DFPrintf (DEBUG_FS, "AddGroup: %s %s 0x%x\n", group->id, group->prefix,
+			group->flags);
 
 	group->path_num = num++;
 	group->next = fs_paths;
