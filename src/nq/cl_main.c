@@ -543,29 +543,25 @@ CL_RelinkEntities (void)
 		}
 
 // rotate binary objects locally
-		if (ent->model->flags)
-		{
-			if (ent->model->flags & EF_ROTATE) {
+		if (ent->model->flags) {
+			int flags = ent->model->flags;
+
+			if (flags & EF_ROTATE) {
+				flags &= ~EF_ROTATE;
 				ent->angles[1] = ANGLEMOD (100 * (cl.time + ent->syncbase));
 			}
-			if (ent->model->flags & EF_GIB)
-				R_RocketTrail (oldorg, ent->origin, 2);
-			else if (ent->model->flags & EF_ZOMGIB)
-				R_RocketTrail (oldorg, ent->origin, 4);
-			else if (ent->model->flags & EF_TRACER)
-				R_RocketTrail (oldorg, ent->origin, 3);
-			else if (ent->model->flags & EF_TRACER2)
-				R_RocketTrail (oldorg, ent->origin, 5);
-			else if (ent->model->flags & EF_ROCKET) {
-				R_RocketTrail (oldorg, ent->origin, 0);
+
+			if (flags & EF_ROCKET) {
+				flags &= ~EF_ROCKET;
+				R_RocketTrail (oldorg, ent->origin);
 				dl = CL_AllocDlight (i);
 				VectorCopy (ent->origin, dl->origin);
 				dl->radius = 200;
 				dl->die = cl.time + 0.01;
-			} else if (ent->model->flags & EF_GRENADE)
-				R_RocketTrail (oldorg, ent->origin, 1);
-			else if (ent->model->flags & EF_TRACER3)
-				R_RocketTrail (oldorg, ent->origin, 6);
+			}
+
+			if (flags)
+				R_ParticleTrail (oldorg, ent->origin, flags);
 		}
 
 		ent->forcelink = false;
