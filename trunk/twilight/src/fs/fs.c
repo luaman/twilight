@@ -270,8 +270,8 @@ FS_Free_Group (fs_group_t *group)
 		group->free(group);
 
 	Zone_Free (group->id);
-	Zone_Free (group);
 	Zone_Free (group->prefix);
+	Zone_Free (group);
 }
 
 void
