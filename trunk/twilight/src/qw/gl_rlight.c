@@ -128,7 +128,8 @@ R_RenderDlight (dlight_t *light)
 	}
 
 	qglBegin (GL_TRIANGLE_FAN);
-	qglColor3fv (light->color);
+	qglColor3f (light->color[0] * 0.5, light->color[1] * 0.5,
+			light->color[2] * 0.5);
 
 	v_right[0] = v[1];
 	v_right[1] = -v[0];
