@@ -69,13 +69,12 @@ R_AddDynamicLights (msurface_t *surf)
 	int				s, t, td, smax, tmax, smax3;
 	int				red, green, blue;
 	int				dist2, maxdist, maxdist2, maxdist3;
-	int				impacts, impactt, subtract;
+	int				impacts, impactt, subtract, k;
 	int				sdtable[256];
 	Uint			*bl;
 	rdlight_t		*rd;
 	float			dist;
 	vec3_t			impact, local;
-	Uint64			k;
 
 	lit = false;
 
@@ -151,13 +150,13 @@ R_AddDynamicLights (msurface_t *surf)
 				{
 					if (sdtable[s] < maxdist2)
 					{
-						k = dlightdivtable[(sdtable[s] + td) >> 7]
-							- subtract;
+						k = dlightdivtable[(sdtable[s] + td) >> 7] - subtract;
+						k >>= 8;
 						if (k > 0)
 						{
-							bl[0] += (red   * k) >> 8;
-							bl[1] += (green * k) >> 8;
-							bl[2] += (blue  * k) >> 8;
+							bl[0] += (red   * k);
+							bl[1] += (green * k);
+							bl[2] += (blue  * k);
 							lit = true;
 						}
 					}
@@ -172,14 +171,14 @@ R_AddDynamicLights (msurface_t *surf)
 }
 
 inline qboolean
-R_StainBlendTexel (Sint64 k, int *icolor, Uint8 *bl)
+R_StainBlendTexel (int k, int *icolor, Uint8 *bl)
 {
 	int			ratio, a;
 	int			cr, cg, cb, ca;
 
 	ratio = rand() & 255;
 	ca = (((icolor[7] - icolor[3]) * ratio) >> 8) + icolor[3];
-	a = (ca * k) >> 8;
+	a = (ca * k);
 
 	if (a > 0)
 	{
@@ -210,15 +209,14 @@ R_StainNode (mnode_t *node, model_t *model, vec3_t origin, float radius,
 	int				i, stained;
 	int				s, t, td, smax, tmax, smax3;
 	int				dist2, maxdist, maxdist2, maxdist3;
-	int				impacts, impactt, subtract;
+	int				impacts, impactt, subtract, k;
 	int				sdtable[256];
 	Uint8			*bl; 
 	vec3_t			impact;
-	Sint64			k;
 
 	// for comparisons to minimum acceptable light
 	// compensate for 4096 offset
-	maxdist = radius * radius + 4096;
+	maxdist = (radius * radius) + 4096;
 
 	// clamp radius to avoid exceeding 32768 entry division table
 	maxdist = min (maxdist, 4194304);
@@ -303,6 +301,7 @@ loc0:
 							{
 								k = dlightdivtable[(sdtable[s] + td) >> 7]
 									- subtract;
+								k >>= 8;
 								if (k > 0)
 									if (R_StainBlendTexel (k, icolor, bl))
 										stained = true;

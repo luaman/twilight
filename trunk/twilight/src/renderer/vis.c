@@ -123,6 +123,7 @@ Vis_RecursiveWorldNode (mnode_t *node, model_t *mod, vec3_t org)
 	mleaf_t			*pleaf;
 	double			 dot;
 
+vis_worldnode:
 	if (node->contents == CONTENTS_SOLID)
 		return;
 
@@ -177,8 +178,10 @@ Vis_RecursiveWorldNode (mnode_t *node, model_t *mod, vec3_t org)
 			}
 		}
 	}
+
 	/* recurse down the back side */
-	Vis_RecursiveWorldNode (node->children[!side], mod, org);
+	node = node->children[!side];
+	goto vis_worldnode;
 }
 
 void
