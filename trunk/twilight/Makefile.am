@@ -18,7 +18,7 @@ if CVS2CL
 else
 	$(top_srcdir)/tools/cvs2cl.pl
 endif
-	rm -f ChangeLog.bak
+	-rm -f ChangeLog.bak
 
 .PHONY: ChangeLog
 

@@ -42,7 +42,7 @@ typedef struct {
 	Uint8		data[0];				// unbounded
 } pcx_t;
 
-void PCX_Load (char *name, Uint8 **image_pcx, int *width, int *height);
+Uint8 **PCX_Load (char *name, Uint8 **image_pcx, int *width, int *height);
 
 #endif // __PCX_H
 

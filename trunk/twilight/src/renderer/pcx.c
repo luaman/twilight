@@ -131,7 +131,7 @@ PCX_LoadBuffer (Uint8 *buf, Uint8 **pic, int *width, int *height)
 PCX_Load
 ============
 */
-void
+Uint8 **
 PCX_Load (char *name, Uint8 **image_pcx, int *width, int *height)
 {
 	Uint8 *buf = COM_LoadTempFile (name);
@@ -142,4 +142,6 @@ PCX_Load (char *name, Uint8 **image_pcx, int *width, int *height)
 	else {
 		image_pcx = NULL;
 	}
+
+	return image_pcx;
 }
