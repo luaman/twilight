@@ -84,6 +84,7 @@ double Q_ceil(double x);
 float Q_fabs(float f);
 int Q_abs(int x);
 float Q_sqrt(float n);
+float Q_RSqrt(float number);
 void Q_srand(unsigned seed);
 int	Q_rand(void);
 double Q_pow(double x, double y);
