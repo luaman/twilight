@@ -7,7 +7,9 @@ NEWS for Project Twilight
 	This read-only Cvar can be set to cause a game other than id1 to be
 	loaded at startup time.  It's provided for truly total conversions
 	and for allowing both the full and shareware games to be installed
-	on the same machine.
+	on the same machine. Start twilight this way to set the value:
+		twilight-X +set fs_gamename value
+		(Where X represents nq, qw or qwsv.)
 
 2001-09-13 05:36  Set configuration files
 	Two new Cvars, fs_shareconf and fs_userconf now exist which can be
@@ -33,10 +35,17 @@ NEWS for Project Twilight
 2001-09-09 05:25  Hardware gamma ramp support
 	The gamma Cvar now works differently than it used to, higher numbers
 	are brighter rather than darker.
-		FIXME: Explain this and list Cvars
+		v_gamma - overall gamma control, uses hardware gamma if available
+		v_tgamma - texture gamma control
+
+	the following control the 'ramping' of hardware gamma:
+		v_gammabias_b - blue ramping
+		v_gammabias_g - green ramping
+		v_gammabias_r - red ramping
+		FIXME: Explain better?
 
 2001-09-08 10:39  New Cvar in NQ, show_fps
-	Adds FPS counter to twilight-nq, works just like it does in QW.
+	Added FPS counter to twilight-nq, works just like it does in QW.
 
 2001-09-08 08:31  Colored dynamic lighting
 	Dynamic lightmaps may now contain color.
@@ -63,19 +72,24 @@ NEWS for Project Twilight
 
 2001-08-25 19:35  Software brightness and contrast
 	Controls for brightness and contrast using OpenGL rendering tricks
-	has been added.  It tends to slow things down a bit, so hardware
-	controls should be preferred if available.
-		FIXME: Note Cvar names
+	have been added.  It lowers framerate a little, so the hardware
+	gamma control should be used instead if it works. However, a
+	combination of software brightness and hardware gamma can produce some
+	greatly improved visual acuity.
+		r_brightness - range of 1 to 5
+		r_contrast - range of .75 to 1 (.025 increments recommended)
 
 2001-08-25 07:59  Support for dynamic lights using PVS
 	Dynamic lights have been sped up dramatically by only drawing those
-	lights which fall within the PVS.
-		FIXME: Note the Cvar name
+	lights which fall within the current PVS (potentially viewable set -
+	what the player can potentially see on the screen currently).
+		gl_oldlights - 1 to use normal dynamic lights
+			       0 to use PVS dynamic lights
 
 2001-08-24 22:00  Support for shutter 3D glasses removed
 	It never worked in the first place.  There was a fixme in the code
 	about eventually making it work someday, but that never happened and
-	isn't going to happen now, so..
+	isn't going to happen now, so it has been removed.
 
 2001-08-22 04:45  Support for +use has been added
 		FIXME: I don't know what this is for, still..
@@ -87,15 +101,17 @@ NEWS for Project Twilight
 2001-08-21 13:40  Fullbright textures on models
 	Models and bmodels can now use fullbright pixels in their skins as
 	was always intended.  This is an important feature in some maps
-	where certain models you should always be able to see a glowing
-	light from were totally black.
-		FIXME: Note the Cvars
+	where certain models should always emit a glowing light, without this
+	they are completely dark.
+		gl_fb_bmodels - make medpacks/health, etc. fullbright
+		gl_fb_models - make level models fullbright (torches, etc.)
 
 2001-08-19 13:06  New console command, set
 	The console command set allows you to change the value of a Cvar.
 	Its primary intended use in Quake is on the command line as +set,
 	which allows you to set the value of a Cvar, overriding the default
-	values for certain read-only Cvars which cannot be changed later.
+	values for certain read-only Cvars which cannot be changed later,
+	such as gl_driver.
 
 2001-08-12 05:51  Dynamic OpenGL library loading
 	Project Twilight now supports a new Cvar to control which OpenGL
@@ -111,19 +127,23 @@ NEWS for Project Twilight
 	it is not an exact science since Win32 QWCL 2.30 contains a bug
 	which causes it to cheat in the same manner.  The Cvars to control
 	detection sensitivity are:
-		FIXME: Add Cvars here!
+		sv_timekick
+		sv_timekick_allowed
+		sv_timekick_interval
+		FIXME: explain cvars
 
 2001-08-10 10:59  New graphics menu
 	A new menu for graphics options has been created under options to
 	control many of the new settings which have been added that affect
-	the speed and prettyness of the engine.
+	the speed and visual quality of the engine.
 
 2001-08-09 04:51  Frame interpolation
-	Interpolation is the process if blending two network frames to
+	Interpolation is the process of blending two network frames to
 	smooth out animations.  This is on by default, but turning it off
 	will speed things up if the engine runs sluggishly.  The Cvars to
 	use are:
-		FIXME: Add Cvars here!
+		gl_im_animation	- smooth model animation
+		gl_im_transform - smooth model rotation (weapons, etc.)
 
 2001-08-08 15:48  cmdline param -lm_4 fixed [REMOVED]
 	The engine has always had support for RGBA lightmaps, they just
@@ -135,7 +155,7 @@ NEWS for Project Twilight
 	and automake.  We'll also support compiling with mingw32.
 
 2001-07-27 01:19  IPX support removed
-	IPX support only worked in win32 and was not stable.  Use TCPIP.
+	IPX support only worked in win32 and was not stable.  Use TCP/IP.
 
 2001-07-23 04:02  New cmdline param -sharedir [REMOVED]
 	If you want to install gamedata to a shared filesystem or a network
@@ -145,12 +165,13 @@ NEWS for Project Twilight
 
 2001-07-10 13:55  IDGODS back door removed
 	The original Quake featured a compile-time back door which slipped
-	in to at least one Id release.  To prevent it from ever happening in
-	Project Twilight, the code was removed.
+	in to at least one id Software release.  To prevent it from ever happening
+	in Project Twilight, the code was removed.
 
 2001-07-09 06:52  8-bit 3Dfx OpenGL support removed
-	It's not any faster on a Voodoo2, which is our low-end target.  It
-	is also extremely ugly.
+	8-bit 3Dfx OpenGL support was only faster on a Voodoo 1, it's not any
+	faster on a Voodoo2, which is our low-end target.  It is also extremely
+	ugly.
 
 2001-07-09 06:47  Pause message
 	A long-time bug in QW in which the pause messages were backwards has
