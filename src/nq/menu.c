@@ -1118,7 +1118,7 @@ M_Options_Key (int k)
 	Texture Mode			see glmode_t modes[]
 */
 
-#define GFX_ITEMS	8
+#define GFX_ITEMS	9
 
 int gfx_cursor = 0;
 
@@ -1162,7 +1162,8 @@ M_Gfx_Draw (void)
 	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off"); y += 8;
 	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->value); y += 8;
 	M_Print (16, y, "  Motion interpolation"); M_DrawCheckbox (220, y, gl_im_transform->value); y += 8;
-	M_Print (16, y, "          Texture Mode"); M_Print (220, y, gl_texturemode->string);
+	M_Print (16, y, "          Texture mode"); M_Print (220, y, gl_texturemode->string); y += 8;
+	M_Print (16, y, "         Light lerping"); M_DrawCheckbox (220, y, r_lightlerp->value);
 
 	// cursor
 	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (realtime * 4) & 1));
@@ -1221,6 +1222,11 @@ M_Gfx_Set (void)
 			if (v > 5)
 				v = 0;
 			Cvar_Set (gl_texturemode, texmodes[v].name);
+			break;
+
+		case 8:
+			v = !(int)r_lightlerp->value;
+			Cvar_Set (r_lightlerp, va("%i", v));
 			break;
 
 		default:

@@ -141,6 +141,7 @@ R_Init_Cvars (void)
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
 	r_novis = Cvar_Get ("r_novis", "0", CVAR_NONE, NULL);
 	r_netgraph = Cvar_Get ("r_netgraph", "0", CVAR_NONE, NULL);
+	r_lightlerp = Cvar_Get ("r_lightlerp", "1", CVAR_NONE, NULL);
 
 	r_skybox = Cvar_Get ("skybox", "", CVAR_NONE, &R_SkyBoxChanged);
 	r_fastsky = Cvar_Get ("r_fastsky", "0", CVAR_NONE, NULL);
