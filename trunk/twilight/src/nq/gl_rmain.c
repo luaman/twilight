@@ -118,6 +118,7 @@ cvar_t	   *gl_im_animation;
 cvar_t	   *gl_im_transform;
 cvar_t	   *r_maxedges, *r_maxsurfs;		// Shrak
 cvar_t	   *gl_fb_models;
+cvar_t	   *gl_fb_bmodels;
 
 extern cvar_t *gl_ztrick;
 
@@ -326,13 +327,10 @@ R_DrawSpriteModel (entity_t *e)
 		right = vright;
 	}
 
-	qglColor3f (1, 1, 1);
-
-	GL_DisableMultitexture ();
+	qglColor4f (1, 1, 1, 1);
 
 	qglBindTexture (GL_TEXTURE_2D, frame->gl_texturenum);
 
-	qglEnable (GL_ALPHA_TEST);
 	qglBegin (GL_QUADS);
 
 	qglTexCoord2f (0, 1);
@@ -356,8 +354,6 @@ R_DrawSpriteModel (entity_t *e)
 	qglVertex3fv (point);
 
 	qglEnd ();
-
-	qglDisable (GL_ALPHA_TEST);
 }
 
 /*
@@ -934,6 +930,21 @@ R_DrawAliasModel (entity_t *e)
 
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value) {
+		int	fb_texture = paliashdr->fb_texturenum[currententity->skinnum][anim];
+		if (fb_texture) {
+			qglEnable (GL_BLEND);
+			qglBindTexture (GL_TEXTURE_2D, fb_texture);
+
+			if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+				R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
+			else
+				R_SetupAliasFrame (currententity->frame, paliashdr);
+
+			qglDisable (GL_BLEND);
+		}
+	}
+
 	qglShadeModel (GL_FLAT);
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -989,7 +1000,7 @@ R_DrawEntitiesOnList
 =============
 */
 void
-R_DrawEntitiesOnList (void)
+R_DrawEntitiesOnList1 (void)
 {
 	int         i;
 
@@ -1017,12 +1028,54 @@ R_DrawEntitiesOnList (void)
 				break;
 		}
 	}
+}
+
+/*
+=============
+R_SetSpritesState
+=============
+*/
+void R_SetSpritesState (qboolean state)
+{
+	static qboolean r_state = false;
+
+	if (r_state == state)
+		return;
+
+	r_state = state;
+
+	if (state) 
+	{
+		qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		qglEnable (GL_BLEND);
+		qglDepthMask (GL_FALSE);
+	}
+	else
+	{
+		qglDisable (GL_BLEND);
+		qglDepthMask (GL_TRUE);
+		qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	}
+}
+
+/*
+=============
+R_DrawEntitiesOnList2
+=============
+*/
+void R_DrawEntitiesOnList2 (void)
+{
+	int         i;
+
+	if (!r_drawentities->value)
+		return;
 
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = cl_visedicts[i];
 
 		switch (currententity->model->type) {
 			case mod_sprite:
+				R_SetSpritesState (true);
 				R_DrawSpriteModel (currententity);
 				break;
 
@@ -1030,6 +1083,8 @@ R_DrawEntitiesOnList (void)
 				break;
 		}
 	}
+
+	R_SetSpritesState (false);
 }
 
 /*
@@ -1308,7 +1363,7 @@ R_RenderScene (void)
 	S_ExtraUpdate ();					// don't let sound get messed up if
 	// going slow
 
-	R_DrawEntitiesOnList ();
+	R_DrawEntitiesOnList1 ();
 
 	GL_DisableMultitexture ();
 
@@ -1477,6 +1532,7 @@ R_RenderView (void)
 	R_RenderScene ();
 	R_DrawViewModel ();
 	R_DrawWaterSurfaces ();
+	R_DrawEntitiesOnList2 ();
 
 //  More fog right here :)
 //  qglDisable(GL_FOG);
