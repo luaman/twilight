@@ -528,7 +528,7 @@ SVC_DirectConnect (void)
 
 	version = atoi (Cmd_Argv (1));
 	if (version != PROTOCOL_VERSION) {
-		Netchan_OutOfBandPrint (net_from, "%c\nServer is version %4.2f.\n",
+		Netchan_OutOfBandPrint (net_from, "%c\nServer is Twilight version %s.\n",
 								A2C_PRINT, VERSION);
 		Con_Printf ("* rejected connect from version %i\n", version);
 		return;
@@ -1347,7 +1347,7 @@ SV_InitLocal (void)
 	for (i = 0; i < MAX_MODELS; i++)
 		sprintf (localmodels[i], "*%i", i);
 
-	Info_SetValueForStarKey (svs.info, "*version", va ("%4.2f", VERSION),
+	Info_SetValueForStarKey (svs.info, "*version", va ("twilight %s", VERSION),
 							 MAX_SERVERINFO_STRING);
 
 	// init fraglog stuff
@@ -1629,7 +1629,7 @@ SV_Init (quakeparms_t *parms)
 	Con_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
 	Con_Printf ("%4.1f megabyte heap\n", parms->memsize / (1024 * 1024.0));
 
-	Con_Printf ("\nServer Version %4.2f (Build %04d)\n\n", VERSION,
+	Con_Printf ("\nTwilight Server Version %s (Build %04d)\n\n", VERSION,
 				build_number ());
 
 	Con_Printf ("======== QuakeWorld Initialized ========\n");
