@@ -625,22 +625,23 @@ A sky texture is 256*128, with the right side being a masked overlay
 ==============
 */
 void
-R_InitSky (texture_t *mt)
+R_InitSky (texture_t *mt, Uint8 *pixels)
 {
-	int         i, j, p;
-	Uint8      *src;
-	unsigned    trans[128 * 128];
-	int         r, g, b;
-	unsigned char rgba[4], transpix[4];
+	int			i, j, p;
+	Uint8		*src;
+	unsigned	trans[128 * 128];
+	int			r, g, b;
+	Uint8		rgba[4], transpix[4];
 
-	src = (Uint8 *) mt + mt->offsets[0];
+	src = pixels;
 
 	// make an average value for the back to avoid
 	// a fringe on the top level
 
 	r = g = b = 0;
 	for (i = 0; i < 128; i++)
-		for (j = 0; j < 128; j++) {
+		for (j = 0; j < 128; j++)
+		{
 			p = src[i * 256 + j + 128];
 			memcpy(rgba, &d_8to32table[p], sizeof(rgba));
 			memcpy(&trans[(i * 128) + j], rgba, sizeof(trans[0]));
@@ -665,7 +666,8 @@ R_InitSky (texture_t *mt)
 
 
 	for (i = 0; i < 128; i++)
-		for (j = 0; j < 128; j++) {
+		for (j = 0; j < 128; j++)
+		{
 			p = src[i * 256 + j];
 			if (p == 0)
 				memcpy(&trans[(i * 128) + j], &transpix, sizeof(trans[0]));
@@ -677,7 +679,7 @@ R_InitSky (texture_t *mt)
 		alphaskytexture = texture_extension_number++;
 	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 128, 128, 0, GL_RGBA,
-				  GL_UNSIGNED_BYTE, trans);
+			GL_UNSIGNED_BYTE, trans);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_mag);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
 }
