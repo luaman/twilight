@@ -149,9 +149,9 @@ static const char sys_charmap[256] =
 void
 Sys_Printf (char *fmt, ...)
 {
-	va_list	argptr;
-	char	text[2048];
-	char	*p;
+	va_list			argptr;
+	char			text[2048];
+	unsigned char	*p;
 
 	if (nostdout)
 		return;
