@@ -129,22 +129,26 @@ CL_NewDlight (int key, vec3_t org, float x, float y, float z, float radius, floa
 
 	dl->radius = radius;
 	dl->die = cl.time + time;
-	if (type == 0) {
-		dl->color[0] = 0.2;
-		dl->color[1] = 0.1;
-		dl->color[2] = 0.05;
-	} else if (type == 1) {
+	if (type == 0) // Normal
+	{
+		dl->color[0] = 0.86;
+		dl->color[1] = 0.31;
+		dl->color[2] = 0.24;
+	} else if (type == 1) // Blue
+	{
 		dl->color[0] = 0.05;
 		dl->color[1] = 0.05;
-		dl->color[2] = 0.3;
-	} else if (type == 2) {
+		dl->color[2] = 0.5;
+	} else if (type == 2) // Red
+	{
 		dl->color[0] = 0.5;
 		dl->color[1] = 0.05;
 		dl->color[2] = 0.05;
-	} else if (type == 3) {
+	} else if (type == 3) // Purple
+	{
 		dl->color[0] = 0.5;
 		dl->color[1] = 0.05;
-		dl->color[2] = 0.4;
+		dl->color[2] = 0.5;
 	}
 }
 
