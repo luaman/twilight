@@ -48,7 +48,19 @@ extern cvar_t *gl_colorlights;
 
 static msurface_t *warpface;
 
-extern cvar_t *gl_subdivide_size;
+cvar_t *gl_subdivide_size;
+
+/*
+===============
+Surf_Init_Cvars
+===============
+ */
+void
+Surf_Init_Cvars (void)
+{
+	gl_subdivide_size =Cvar_Get("gl_subdivide_size", "128", CVAR_ARCHIVE, NULL);
+}
+
 
 static void
 BoundPoly (int numverts, float *verts, vec3_t mins, vec3_t maxs)

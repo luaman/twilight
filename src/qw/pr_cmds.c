@@ -223,7 +223,7 @@ PF_setmodel (void)
 
 // if it is an inline model, get the size information for it
 	if (m[0] == '*') {
-		mod = Mod_ForName (m, true);
+		mod = Mod_ForName (m, FLAG_RENDER | FLAG_CRASH);
 		VectorCopy (mod->normalmins, e->v.mins);
 		VectorCopy (mod->normalmaxs, e->v.maxs);
 		VectorSubtract (mod->normalmaxs, mod->normalmins, e->v.size);

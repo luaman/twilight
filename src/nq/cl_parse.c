@@ -234,7 +234,6 @@ CL_ParseServerInfo (void)
 	int         nummodels, numsounds;
 	char        model_precache[MAX_MODELS][MAX_QPATH];
 	char        sound_precache[MAX_SOUNDS][MAX_QPATH];
-	extern		qboolean    ismap;
 
 	Com_DPrintf ("Serverinfo packet received.\n");
 //
@@ -302,21 +301,24 @@ CL_ParseServerInfo (void)
 //
 
 	for (i = 1; i < nummodels; i++) {
-		ismap = (i == 1);
-		cl.model_precache[i] = Mod_ForName (model_precache[i], true);
-
-		if (ismap)
+		if (i == 1)
 		{
 			char mapname[MAX_QPATH] = { 0 };
+
+			cl.model_precache[i] = Mod_ForName (model_precache[i],
+					FLAG_CRASH | FLAG_RENDER | FLAG_SUBMODELS);
 
 			strlcpy (mapname, COM_SkipPath (model_precache[i]), sizeof (mapname));
 			COM_StripExtension (mapname, mapname);
 			Cvar_Set (cl_mapname, mapname);
-		}
+		} else
+			cl.model_precache[i] = Mod_ForName (model_precache[i],
+					FLAG_CRASH | FLAG_RENDER);
+
 
 		if (!strcasecmp (model_precache[i], "progs/flame.mdl"))
 			if (!mdl_fire)
-				mdl_fire = Mod_ForName ("progs/fire.mdl", false);
+				mdl_fire = Mod_ForName ("progs/fire.mdl", FLAG_RENDER);
 
 		CL_KeepaliveMessage ();
 	}
@@ -580,14 +582,12 @@ CL_NewTranslation (int slot)
 {
 	Uint8	color;
 
-	color = cl.scores[slot].colors & 0xf0;
-	color = bound(0, color, 13) * 16;
+	color = cl.scores[slot].colors & 0xF0;
 	if (color < 128)
 		color += 15;
 	VectorCopy4 (d_8tofloattable[color], cl.scores[slot].colormap.top);
 
-	color = (cl.scores[slot].colors & 15) << 4;
-	color = bound(0, color, 13) * 16;
+	color = (cl.scores[slot].colors & 0x0F) << 4;
 	if (color < 128)
 		color += 15;
 	VectorCopy4 (d_8tofloattable[color], cl.scores[slot].colormap.bottom);

@@ -1467,7 +1467,7 @@ Host_Init (void)
 	COM_Init_Cvars ();				// basic cvars
 	Con_Init_Cvars ();				// all console related cvars
 	Key_Init_Cvars ();				// all key related cvars
-	Mod_Init_Cvars();				// all model related cvars
+	Surf_Init_Cvars();				// all model related cvars
 	Netchan_Init_Cvars ();			// all netchan related cvars
 	SCR_Init_Cvars ();				// all screen(?) related cvars
 	VID_Init_Cvars();				// all video related cvars

@@ -1050,7 +1050,6 @@ SV_SpawnServer (char *server)
 {
 	edict_t		*ent;
 	Uint32		i;
-	extern		qboolean ismap;
 
 	// let's not have any servers with no name
 	if (hostname->svalue[0] == 0)
@@ -1115,9 +1114,10 @@ SV_SpawnServer (char *server)
 	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
 
 	SetupLightmapSettings ();
-	ismap = true;
-	sv.worldmodel = Mod_ForName (sv.modelname, false);
-	ismap = false;
+	if (isDedicated)
+		sv.worldmodel = Mod_ForName (sv.modelname, FLAG_CRASH | FLAG_SUBMODELS);
+	else
+		sv.worldmodel = Mod_ForName (sv.modelname, FLAG_CRASH | FLAG_SUBMODELS | FLAG_RENDER);
 	if (!sv.worldmodel) {
 		Com_Printf ("Couldn't spawn server %s\n", sv.modelname);
 		sv.active = false;
@@ -1134,7 +1134,10 @@ SV_SpawnServer (char *server)
 	sv.model_precache[1] = sv.modelname;
 	for (i = 1; i < sv.worldmodel->brush->numsubmodels; i++) {
 		sv.model_precache[1 + i] = localmodels[i];
-		sv.models[i + 1] = Mod_ForName (localmodels[i], false);
+		if (isDedicated)
+			sv.models[i + 1] = Mod_ForName (localmodels[i], 0);
+		else
+			sv.models[i + 1] = Mod_ForName (localmodels[i], FLAG_RENDER);
 	}
 
 	// load the rest of the entities

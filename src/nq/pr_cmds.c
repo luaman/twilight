@@ -253,7 +253,12 @@ PF_setmodel (void)
 
 	if (m[0] == '*' || !strcmp(COM_FileExtension(m), "bsp"))
 	{
-		model_t *mod = Mod_ForName (m, true);
+		model_t *mod;
+		
+		if (isDedicated)
+			mod = Mod_ForName (m, FLAG_CRASH);
+		else
+			mod = Mod_ForName (m, FLAG_RENDER | FLAG_CRASH);
 
 		SetMinMaxSize (e, mod->normalmins, mod->normalmaxs);
 		VectorSubtract (mod->normalmaxs, mod->normalmins, e->v.size);
@@ -1094,7 +1099,10 @@ PF_precache_model (void)
 		if (!sv.model_precache[i])
 		{
 			sv.model_precache[i] = s;
-			sv.models[i] = Mod_ForName (s, true);
+			if (isDedicated)
+				sv.models[i] = Mod_ForName (s, FLAG_CRASH);
+			else
+				sv.models[i] = Mod_ForName (s, FLAG_RENDER | FLAG_CRASH);
 			return;
 		}
 		if (!strcmp (sv.model_precache[i], s))

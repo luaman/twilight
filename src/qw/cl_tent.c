@@ -290,19 +290,19 @@ CL_ParseTEnt (void)
 
 		case TE_LIGHTNING1:			// lightning bolts
 			if (!cl_bolt1_mod)
-				cl_bolt1_mod = Mod_ForName ("progs/bolt.mdl", true);
+				cl_bolt1_mod = Mod_ForName ("progs/bolt.mdl", FLAG_RENDER | FLAG_CRASH);
 			CL_ParseBeam (cl_bolt1_mod);
 			break;
 
 		case TE_LIGHTNING2:			// lightning bolts
 			if (!cl_bolt2_mod)
-				cl_bolt2_mod = Mod_ForName ("progs/bolt2.mdl", true);
+				cl_bolt2_mod = Mod_ForName ("progs/bolt2.mdl", FLAG_RENDER | FLAG_CRASH);
 			CL_ParseBeam (cl_bolt2_mod);
 			break;
 
 		case TE_LIGHTNING3:			// lightning bolts
 			if (!cl_bolt3_mod)
-				cl_bolt3_mod = Mod_ForName ("progs/bolt3.mdl", true);
+				cl_bolt3_mod = Mod_ForName ("progs/bolt3.mdl", FLAG_RENDER | FLAG_CRASH);
 			CL_ParseBeam (cl_bolt3_mod);
 			break;
 

@@ -18,8 +18,8 @@ if CLIENTS
 bin_PROGRAMS=twilight-nq
 twilight_nq_LDADD= \
 	$(top_builddir)/src/image/libtwilight_image.a \
-	$(top_builddir)/src/renderer/libtwilight_renderer.a \
 	$(top_builddir)/src/base/libtwilight_base.a \
+	$(top_builddir)/src/renderer/libtwilight_renderer.a \
 	$(top_builddir)/src/sound/libtwilight_sound.a
 endif
 

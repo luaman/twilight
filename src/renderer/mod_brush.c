@@ -42,30 +42,8 @@ static const char rcsid[] =
 #include "mdfour.h"
 #include "dyngl.h"
 
-extern model_t	*loadmodel;
-extern qboolean ismap;
 extern texture_t *r_notexture;
 extern texture_t *r_notexture_water;
-
-
-extern model_t *Mod_LoadModel (model_t *mod, qboolean crash);
-extern void Mod_UnloadModel (model_t *mod);
-
-void Mod_LoadBrushModel (model_t *mod, void *buffer);
-void Mod_UnloadBrushModel (model_t *mod);
-
-cvar_t	*gl_subdivide_size;
-
-/*
-===============
-Mod_Init_Cvars
-===============
-*/
-void
-Mod_Init_Cvars (void)
-{
-	gl_subdivide_size = Cvar_Get ("gl_subdivide_size", "128", CVAR_ARCHIVE, NULL);
-}
 
 qboolean 
 Img_HasFullbrights (Uint8 *pixels, int size)
@@ -88,8 +66,7 @@ Img_HasFullbrights (Uint8 *pixels, int size)
 ===============================================================================
 */
 
-brushhdr_t	*bheader;
-Uint8	*mod_base;
+extern Uint8	*mod_base;
 
 
 /*
@@ -98,7 +75,7 @@ Mod_LoadTextures
 =================
 */
 void
-Mod_LoadTextures (lump_t *l)
+Mod_LoadTextures (lump_t *l, model_t *mod)
 {
 	int				i, j, pixels, num, max, altmax;
 	miptex_t		*dmiptex;
@@ -107,6 +84,7 @@ Mod_LoadTextures (lump_t *l)
 	texture_t		*altanims[10];
 	dmiptexlump_t	*m;
 	Uint8			*mtdata;
+	brushhdr_t		*bheader = mod->brush;
 
 	if (!l->filelen)
 	{
@@ -119,7 +97,7 @@ Mod_LoadTextures (lump_t *l)
 
 	// Make room for the two r_notextures
 	bheader->numtextures = m->nummiptex + 2;
-	bheader->textures = Zone_Alloc (loadmodel->zone,
+	bheader->textures = Zone_Alloc (mod->zone,
 			bheader->numtextures * sizeof (*bheader->textures));
 
 	for (i = 0; i < m->nummiptex; i++)
@@ -136,7 +114,7 @@ Mod_LoadTextures (lump_t *l)
 		if ((dmiptex->width & 15) || (dmiptex->height & 15))
 			Host_EndGame ("Texture %s is not 16 aligned", dmiptex->name);
 		pixels = dmiptex->width * dmiptex->height * (85 / 64);
-		tx = Zone_Alloc (loadmodel->zone, sizeof (texture_t));
+		tx = Zone_Alloc (mod->zone, sizeof (texture_t));
 		tx->tex_idx = i;
 		bheader->textures[i] = tx;
 
@@ -291,19 +269,20 @@ Mod_LoadLighting
 =================
 */
 void
-Mod_LoadLighting (lump_t *l)
+Mod_LoadLighting (lump_t *l, model_t *mod)
 {
 	Uint		i;
 	Uint8		*in, *out, *data;
 	Uint8		d;
 	char		litfilename[MAX_OSPATH];
+	brushhdr_t	*bheader = mod->brush;
 
 	bheader->lightdata = NULL;
 
-	strcpy(litfilename, loadmodel->name);
+	strcpy(litfilename, mod->name);
 	COM_StripExtension(litfilename, litfilename);
 	COM_DefaultExtension(litfilename, ".lit");
-	data = (Uint8 *) COM_LoadZoneFile (litfilename, false, loadmodel->zone);
+	data = (Uint8 *) COM_LoadZoneFile (litfilename, false, mod->zone);
 
 	if (data)
 	{
@@ -326,7 +305,7 @@ Mod_LoadLighting (lump_t *l)
 	if (!l->filelen)
 		return;
 
-	bheader->lightdata = Zone_Alloc (loadmodel->zone, l->filelen*3);
+	bheader->lightdata = Zone_Alloc (mod->zone, l->filelen*3);
 	in = bheader->lightdata + l->filelen*2;
 	out = bheader->lightdata;
 	memcpy (in, mod_base + l->fileofs, l->filelen);
@@ -345,18 +324,19 @@ Mod_LoadTexinfo
 =================
 */
 void
-Mod_LoadTexinfo (lump_t *l)
+Mod_LoadTexinfo (lump_t *l, model_t *mod)
 {
 	texinfo_t	*in;
 	mtexinfo_t	*out;
 	Uint32		i, j, count;
 	Uint32		miptex;
+	brushhdr_t	*bheader = mod->brush;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
-		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
+		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s", mod->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->zone, count * sizeof (*out));
+	out = Zone_Alloc (mod->zone, count * sizeof (*out));
 
 	bheader->texinfo = out;
 	bheader->numtexinfo = count;
@@ -395,7 +375,7 @@ Fills in s->texturemins[] and s->extents[]
 ================
 */
 void
-CalcSurfaceExtents (msurface_t *s)
+CalcSurfaceExtents (msurface_t *s, model_t *mod)
 {
 	float		mins[2], maxs[2], val;
 	int			j, e;
@@ -403,6 +383,7 @@ CalcSurfaceExtents (msurface_t *s)
 	mvertex_t	*v;
 	mtexinfo_t	*tex;
 	int			bmins[2], bmaxs[2];
+	brushhdr_t	*bheader = mod->brush;
 
 	mins[0] = mins[1] = 999999;
 	maxs[0] = maxs[1] = -99999;
@@ -434,8 +415,8 @@ CalcSurfaceExtents (msurface_t *s)
 		s->texturemins[i] = bmins[i] * 16;
 		s->extents[i] = (bmaxs[i] - bmins[i]) * 16;
 		if (!(s->texinfo->flags & TEX_SPECIAL) && s->extents[i] > 512)
-			Host_Error (va ("Bad surface extents (s->extents[%i] is %i, s->texinfo->flags is %i)",
-						i, s->extents[i], s->texinfo->flags));
+			Host_Error ("Bad surface extents (extents[%d] is %d, flags is %d)",
+						i, s->extents[i], s->texinfo->flags);
 	}
 
 	s->smax = bmaxs[0] - bmins[0] + 1, 
@@ -444,22 +425,22 @@ CalcSurfaceExtents (msurface_t *s)
 
 /*
 =================
-Mod_LoadFaces
+Mod_LoadRFaces
 =================
 */
 void
-Mod_LoadFaces (lump_t *l)
+Mod_LoadRFaces (lump_t *l, model_t *mod)
 {
 	dface_t			*in;
 	msurface_t		*out;
 	int				i, j, count;
+	brushhdr_t		*bheader = mod->brush;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
-		Host_Error ("MOD_LoadBmodel: funny lump size in %s",
-				loadmodel->name);
+		Host_Error ("MOD_LoadBmodel: funny lump size in %s", mod->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->zone, count * sizeof (*out));
+	out = Zone_Alloc (mod->zone, count * sizeof (*out));
 
 	bheader->surfaces = out;
 	bheader->numsurfaces = count;
@@ -471,7 +452,7 @@ Mod_LoadFaces (lump_t *l)
 
 		if (out->numedges >= 256)
 			Host_EndGame ("MOD_LoadBmodel: Too many edges in surface for %s",
-					loadmodel->name);
+					mod->name);
 
 		if (LittleShort (in->side))
 			out->flags |= SURF_PLANEBACK;
@@ -480,7 +461,7 @@ Mod_LoadFaces (lump_t *l)
 
 		out->texinfo = bheader->texinfo + LittleShort (in->texinfo);
 
-		CalcSurfaceExtents (out);
+		CalcSurfaceExtents (out, mod);
 
 		if (!strncmp (out->texinfo->texture->name, "sky", 3))
 		{
@@ -527,7 +508,7 @@ Mod_MakeChains
 =================
 */
 void
-Mod_MakeChains ()
+Mod_MakeChains (model_t *mod)
 {
 	Uint			 i, first, last, tidx;
 	msurface_t		*surf;
@@ -538,9 +519,10 @@ Mod_MakeChains ()
 	int				*tchains_cur;
 	int				 allocated[LIGHTBLOCK_WIDTH];
 	int				*lchains_cur = NULL;
+	brushhdr_t		*bheader = mod->brush;
 
 	tchains_cur = Zone_Alloc(tempzone, sizeof(int) * bheader->numtextures);
-	bheader->tex_chains = Zone_Alloc (loadmodel->zone,
+	bheader->tex_chains = Zone_Alloc (mod->zone,
 			bheader->numtextures * sizeof (chain_head_t));
 
 	memset(&bheader->lightblock, 0, sizeof(lightblock_t));
@@ -571,16 +553,16 @@ Mod_MakeChains ()
 			if (!bheader->lightblock.num)
 				bheader->lightblock.num++;
 			if (!AllocLightBlockForSurf (allocated, bheader->lightblock.num - 1,
-						surf, loadmodel->zone))
+						surf, mod->zone))
 			{
 				bheader->lightblock.num++;
 				memset(allocated, 0, sizeof(allocated));
 				AllocLightBlockForSurf (allocated, bheader->lightblock.num - 1,
-						surf, loadmodel->zone);
+						surf, mod->zone);
 			}
 
 			stain_size = surf->smax * surf->tmax * 3;
-			surf->stainsamples = Zone_Alloc(loadmodel->zone,stain_size);
+			surf->stainsamples = Zone_Alloc(mod->zone,stain_size);
 			memset(surf->stainsamples, 255, stain_size);
 		}
 
@@ -591,9 +573,9 @@ Mod_MakeChains ()
 			bheader->tex_chains[surf->texinfo->texture->tex_idx].n_items++;
 
 		if (surf->flags & SURF_SUBDIVIDE)
-			BuildSubdividedGLPolyFromEdges (surf, loadmodel);
+			BuildSubdividedGLPolyFromEdges (surf, mod);
 		else
-			BuildGLPolyFromEdges (surf, loadmodel);
+			BuildGLPolyFromEdges (surf, mod);
 	}
 
 	/*
@@ -602,7 +584,7 @@ Mod_MakeChains ()
 	 */
 	if (bheader->lightblock.num)
 	{
-		bheader->lightblock.chains = Zone_Alloc (loadmodel->zone,
+		bheader->lightblock.chains = Zone_Alloc (mod->zone,
 				sizeof(chain_head_t) * bheader->lightblock.num);
 		lchains_cur = Zone_Alloc (tempzone,
 				sizeof(int) * bheader->lightblock.num);
@@ -628,14 +610,14 @@ Mod_MakeChains ()
 	{
 		bheader->sky_chain.n_items++;
 		bheader->sky_chain.flags = CHAIN_SKY;
-		bheader->sky_chain.items = Zone_Alloc(loadmodel->zone,
+		bheader->sky_chain.items = Zone_Alloc(mod->zone,
 				sizeof(chain_item_t) * bheader->sky_chain.n_items);
 	}
 
 	for (i = 0; i < bheader->numtextures; i++)
 		if (bheader->tex_chains[i].n_items)
 		{
-			bheader->tex_chains[i].items = Zone_Alloc (loadmodel->zone,
+			bheader->tex_chains[i].items = Zone_Alloc (mod->zone,
 						sizeof(chain_item_t) * bheader->tex_chains[i].n_items);
 		}
 
@@ -694,7 +676,7 @@ Mod_MakeChains ()
 	if (bheader->lightblock.num)
 	{
 		for (i = 0; i < bheader->lightblock.num; i++)
-			bheader->lightblock.chains[i].items = Zone_Alloc(loadmodel->zone, sizeof(chain_item_t) * bheader->lightblock.chains[i].n_items);
+			bheader->lightblock.chains[i].items = Zone_Alloc(mod->zone, sizeof(chain_item_t) * bheader->lightblock.chains[i].n_items);
 
 		for (i = first, surf = &bheader->surfaces[i]; i < last; i++, surf++)
 		{
@@ -713,191 +695,13 @@ Mod_MakeChains ()
 	Zone_Free(tchains_cur);
 }
 
-/*
-=================
-Mod_LoadBrushModel
-=================
-*/
 void
-Mod_LoadBrushModel (model_t *mod, void *buffer)
+Mod_RUnloadBrushModel (model_t *mod)
 {
-	Uint32		i;
-	dheader_t	*header;
-	dmodel_t	*bm;
-	model_t		*first;
-	char		name[10];
-
-	first = mod;
-	mod->zone = Zone_AllocZone(mod->name);
-	mod->brush = Zone_Alloc(mod->zone, sizeof(brushhdr_t));
-	mod->type = mod_brush;
-	bheader = mod->brush;
-
-	header = (dheader_t *) buffer;
-
-	i = LittleLong (header->version);
-	if (i != BSPVERSION)
-		Host_EndGame
-			("Mod_LoadBrushModel: %s has wrong version number (%i should be %i)",
-			 mod->name, i, BSPVERSION);
-
-	// swap all the lumps
-	mod_base = (Uint8 *) header;
-
-	for (i = 0; i < sizeof (dheader_t) / 4; i++)
-		((int *) header)[i] = LittleLong (((int *) header)[i]);
-
-	// checksum all of the map, except for entities
-	bheader->checksum = 0;
-	bheader->checksum2 = 0;
-
-	for (i = 0; i < HEADER_LUMPS; i++) {
-		if (i == LUMP_ENTITIES)
-			continue;
-		bheader->checksum ^= Com_BlockChecksum (mod_base + header->lumps[i].fileofs, header->lumps[i].filelen);
-
-		if (i == LUMP_VISIBILITY || i == LUMP_LEAFS || i == LUMP_NODES)
-			continue;
-		bheader->checksum2 ^=
-			Com_BlockChecksum (mod_base + header->lumps[i].fileofs,
-					header->lumps[i].filelen);
-	}
-
-	// load into heap
-	Mod_LoadVertexes (&header->lumps[LUMP_VERTEXES]);
-	Mod_LoadEdges (&header->lumps[LUMP_EDGES]);
-	Mod_LoadSurfedges (&header->lumps[LUMP_SURFEDGES]);
-	Mod_LoadTextures (&header->lumps[LUMP_TEXTURES]);			// Client only.
-	Mod_LoadLighting (&header->lumps[LUMP_LIGHTING]);			// Client only.
-	Mod_LoadPlanes (&header->lumps[LUMP_PLANES]);
-	Mod_LoadTexinfo (&header->lumps[LUMP_TEXINFO]);				// Client only.
-	Mod_LoadFaces (&header->lumps[LUMP_FACES]);
-	Mod_LoadMarksurfaces (&header->lumps[LUMP_MARKSURFACES]);
-	Mod_LoadVisibility (&header->lumps[LUMP_VISIBILITY]);
-	Mod_LoadLeafs (&header->lumps[LUMP_LEAFS]);
-	Mod_LoadNodes (&header->lumps[LUMP_NODES]);
-	Mod_LoadClipnodes (&header->lumps[LUMP_CLIPNODES]);
-	Mod_LoadEntities (&header->lumps[LUMP_ENTITIES]);
-	Mod_LoadSubmodels (&header->lumps[LUMP_MODELS]);
-
-	Mod_MakeHull0 ();
-
-	mod->numframes = 2;					// regular and alternate animation
-
-	//
-	// set up the submodels (FIXME: this is confusing)
-	//
-	Com_Printf ("%s: %d\n", mod->name, mod->brush->numsubmodels);
-
-	for (i = 0; i < mod->brush->numsubmodels; i++) {
-		int			l, k;
-		Uint		j;
-		float		dist, modelyawradius, modelradius, *vec;
-		msurface_t	*surf;
-
-		bm = &bheader->submodels[i];
-
-		mod->hulls[0].firstclipnode = bm->headnode[0];
-		for (j = 1; j < MAX_MAP_HULLS; j++) {
-			mod->hulls[j].firstclipnode = bm->headnode[j];
-			mod->hulls[j].lastclipnode = bheader->numclipnodes - 1;
-		}
-
-		bheader->firstmodelsurface = bm->firstface;
-		bheader->nummodelsurfaces = bm->numfaces;
-
-		Mod_MakeChains ();	// Client only.
-
-		mod->normalmins[0] = mod->normalmins[1] = mod->normalmins[2] = 1000000000.0f;
-		mod->normalmaxs[0] = mod->normalmaxs[1] = mod->normalmaxs[2] = -1000000000.0f;
-		modelyawradius = 0;
-		modelradius = 0;
-
-		// Calculate the bounding boxes, don't trust what the model says.
-		surf = &bheader->surfaces[bheader->firstmodelsurface];
-		for (j = 0; j < bheader->nummodelsurfaces; j++, surf++) {
-			for (k = 0; k < surf->numedges; k++) {
-				l = bheader->surfedges[k + surf->firstedge];
-				if (l > 0)
-					vec = bheader->vertexes[bheader->edges[l].v[0]].position;
-				else
-					vec = bheader->vertexes[bheader->edges[-l].v[1]].position;
-				if (mod->normalmins[0] > vec[0]) mod->normalmins[0] = vec[0];
-				if (mod->normalmins[1] > vec[1]) mod->normalmins[1] = vec[1];
-				if (mod->normalmins[2] > vec[2]) mod->normalmins[2] = vec[2];
-				if (mod->normalmaxs[0] < vec[0]) mod->normalmaxs[0] = vec[0];
-				if (mod->normalmaxs[1] < vec[1]) mod->normalmaxs[1] = vec[1];
-				if (mod->normalmaxs[2] < vec[2]) mod->normalmaxs[2] = vec[2];
-				dist = vec[0]*vec[0]+vec[1]*vec[1];
-				if (modelyawradius < dist)
-					modelyawradius = dist;
-				dist += vec[2]*vec[2];
-				if (modelradius < dist)
-					modelradius = dist;
-			}
-		}
-
-		modelyawradius = sqrt(modelyawradius);
-		modelradius = sqrt(modelradius);
-		mod->yawmins[0] = mod->yawmins[1] = -modelyawradius;
-		mod->yawmaxs[0] = mod->yawmaxs[1] = modelyawradius;
-		mod->yawmins[2] = mod->normalmins[2];
-		mod->yawmaxs[2] = mod->normalmaxs[2];
-		VectorSet(mod->rotatedmins, -modelradius, -modelradius, -modelradius);
-		VectorSet(mod->rotatedmaxs, modelradius, modelradius, modelradius);
-
-		bheader->numleafs = bm->visleafs;
-		mod->loaded = true;
-
-		if (ismap && (i < bheader->numsubmodels - 1))
-		{
-			// New name.
-			snprintf (name, sizeof(name), "*%d", i + 1);
-			// Get a struct for this model name.
-			loadmodel = Mod_FindName (name);
-			// If it was an old model then unload it first.
-			if (loadmodel->loaded)
-				Mod_UnloadModel (loadmodel); // FIXME
-			// Copy over the basic information.
-			*loadmodel = *mod;
-			strcpy (loadmodel->name, name);
-			// Allocate a new brush struct.
-			loadmodel->brush = Zone_Alloc(first->zone,
-					sizeof(brushhdr_t));
-			// Copy over the basics.
-			*loadmodel->brush = *mod->brush;
-
-			// And change the pointers for the next loop!
-			bheader = loadmodel->brush;
-			mod = loadmodel;
-			bheader->main_model = first;
-		}
-	}
-}
-
-/*
-=================
-Mod_UnloadBrushModel
-
-NOTE: Watch the 'unloading' variable, it is a simple lock to prevent
-an infinite loop!
-=================
-*/
-void
-Mod_UnloadBrushModel (model_t *mod)
-{
-	model_t			*sub;
-	Uint			 i;
-	static qboolean	 unloading = false;
+	Uint i;
 
 	for (i = 0; i < mod->brush->lightblock.num; i++)
 		qglDeleteTextures (1, &mod->brush->lightblock.chains[i].l_texnum);
-
-	if (mod->brush->main_model && !unloading)
-	{
-		Mod_UnloadModel (mod->brush->main_model);
-		return;
-	}
 
 	for (i = 0; i < (mod->brush->numtextures - 2); i++)	// Client only.
 	{
@@ -908,17 +712,5 @@ Mod_UnloadBrushModel (model_t *mod)
 			GL_DeleteTexture(mod->brush->textures[i]->gl_texturenum);
 		if (mod->brush->textures[i]->fb_texturenum)
 			GL_DeleteTexture(mod->brush->textures[i]->fb_texturenum);
-	}
-
-	if (!unloading)
-	{
-		unloading = true;
-		for (i = 1; i <= mod->brush->numsubmodels; i++) {
-			sub = Mod_FindName(va("*%d", i));
-			Mod_UnloadModel(sub); // FIXME
-		}
-		unloading = false;
-
-		Zone_FreeZone (&mod->zone);
 	}
 }

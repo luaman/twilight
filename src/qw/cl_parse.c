@@ -243,7 +243,6 @@ Model_NextDownload (void)
 	int         i;
 	extern char gamedirfile[];
 	char mapname[MAX_QPATH] = { 0 };
-	extern		qboolean    ismap;
 
 	if (cls.downloadnumber == 0) {
 		Com_Printf ("Checking models...\n");
@@ -265,9 +264,15 @@ Model_NextDownload (void)
 	for (i = 1; i < MAX_MODELS; i++) {
 		if (!cl.model_name[i][0])
 			break;
-		ismap = (i == 1);
 
-		cl.model_precache[i] = Mod_ForName (cl.model_name[i], false);
+		if (i == 1)
+		{
+			cl.model_precache[i] = Mod_ForName (cl.model_name[i], FLAG_RENDER | FLAG_SUBMODELS);
+			strncpy (mapname, COM_SkipPath (cl.model_precache[1]->name), MAX_QPATH);
+			COM_StripExtension (mapname, mapname);
+			Cvar_Set (cl_mapname, mapname);
+		} else
+			cl.model_precache[i] = Mod_ForName (cl.model_name[i], FLAG_RENDER);
 
 		if (!cl.model_precache[i]) {
 			Com_Printf ("\nThe required model file '%s' could not be found "
@@ -279,16 +284,9 @@ Model_NextDownload (void)
 			return;
 		}
 
-		if (ismap)
-		{
-			strncpy (mapname, COM_SkipPath (cl.model_precache[1]->name), MAX_QPATH);
-			COM_StripExtension (mapname, mapname);
-			Cvar_Set (cl_mapname, mapname);
-		}
-
 		if (!strcasecmp (cl.model_precache[i]->name, "progs/flame.mdl"))
 			if (!mdl_fire)
-				mdl_fire = Mod_ForName ("progs/fire.mdl", false);		
+				mdl_fire = Mod_ForName ("progs/fire.mdl", FLAG_RENDER);		
 	}
 
 	// all done
