@@ -38,6 +38,10 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 
+#ifdef WIN32
+# include "winconsole.h"
+#endif
+
 static memzone_t	*qsock_zone;
 qsocket_t  *net_activeSockets = NULL;
 qsocket_t  *net_freeSockets = NULL;
@@ -221,6 +225,11 @@ MaxPlayers_f (void)
 		Cvar_Set (deathmatch, "0");
 	else
 		Cvar_Set (deathmatch, "1");
+
+#ifdef WIN32
+	// tell the dedicated win32 console the max client count changed
+	WinCon_SetMaxClients (n);
+#endif
 }
 
 
@@ -248,6 +257,11 @@ NET_Port_f (void)
 		Cbuf_AddText ("listen 0\n");
 		Cbuf_AddText ("listen 1\n");
 	}
+
+#ifdef WIN32
+	// tell the win32 console the port number changed
+	WinCon_SetPort (n);
+#endif
 }
 
 
@@ -441,6 +455,9 @@ NET_CheckNewConnections (void)
 			continue;
 		ret = dfunc.CheckNewConnections ();
 		if (ret) {
+#ifdef WIN32
+	WinCon_SetConnectedClients(net_activeconnections);
+#endif
 			return ret;
 		}
 	}
@@ -694,6 +711,12 @@ NET_Init (void)
 	net_numsockets = svs.maxclientslimit;
 	if (ccls.state != ca_dedicated)
 		net_numsockets++;
+
+#ifdef WIN32
+	// update the dedicated console
+	WinCon_SetMaxClients (net_numsockets);
+	WinCon_SetPort (net_hostport);
+#endif
 
 	SetNetTime ();
 
