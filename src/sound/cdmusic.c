@@ -92,6 +92,25 @@ CDAudio_GetAudioDiskInfo (void)
 	return 0;
 }
 
+static void
+CDAudio_Stop (void)
+{
+	if (!cd_handle || !enabled)
+		return;
+
+	if (!playing)
+		return;
+
+	if (SDL_CDStop (cd_handle) < 0)
+		Com_DPrintf ("CDAudio_Stop: Unable to stop CD-ROM (%s)\n",
+					 SDL_GetError ());
+
+	wasPlaying = false;
+	playing = false;
+	pausetime = -1.0;
+	endOfTrack = -1.0;
+}
+
 void
 CDAudio_Play (Uint8 track, qboolean looping)
 {
@@ -152,25 +171,6 @@ CDAudio_Play (Uint8 track, qboolean looping)
 	
 	if (cdvolume == 0.0)
 		CDAudio_Pause ();
-}
-
-void
-CDAudio_Stop (void)
-{
-	if (!cd_handle || !enabled)
-		return;
-
-	if (!playing)
-		return;
-
-	if (SDL_CDStop (cd_handle) < 0)
-		Com_DPrintf ("CDAudio_Stop: Unable to stop CD-ROM (%s)\n",
-					 SDL_GetError ());
-
-	wasPlaying = false;
-	playing = false;
-	pausetime = -1.0;
-	endOfTrack = -1.0;
 }
 
 void
@@ -325,19 +325,6 @@ CD_f (void)
 
 		return;
 	}
-}
-
-void
-CDAudio_Bgmcallback (cvar_t *cvar)
-{
-	if (cdvolume) {
-		Cvar_Set (cvar, "0.0");
-		CDAudio_Pause ();
-	} else {
-		Cvar_Set (cvar, "1.0");
-		CDAudio_Resume ();
-	}
-	cdvolume = cvar->fvalue;
 }
 
 void

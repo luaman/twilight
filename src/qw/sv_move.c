@@ -239,7 +239,7 @@ facing it.
 ======================
 */
 void        PF_changeyaw (void);
-qboolean
+static qboolean
 SV_StepDirection (edict_t *ent, float yaw, float dist)
 {
 	vec3_t      move, oldorigin;
@@ -274,7 +274,7 @@ SV_FixCheckBottom
 
 ======================
 */
-void
+static void
 SV_FixCheckBottom (edict_t *ent)
 {
 	ent->v.flags = (int) ent->v.flags | FL_PARTIALGROUND;
@@ -289,7 +289,7 @@ SV_NewChaseDir
 ================
 */
 #define	DI_NODIR	-1
-void
+static void
 SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 {
 	float       deltax, deltay;
@@ -325,7 +325,7 @@ SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 			return;
 	}
 // try other directions
-	if (((rand () & 3) & 1) || Q_abs (deltay) > Q_abs (deltax)) {
+	if (((rand () & 3) & 1) || abs (deltay) > abs (deltax)) {
 		tdir = d[1];
 		d[1] = d[2];
 		d[2] = tdir;
@@ -374,7 +374,7 @@ SV_CloseEnough
 
 ======================
 */
-qboolean
+static qboolean
 SV_CloseEnough (edict_t *ent, edict_t *goal, float dist)
 {
 	int         i;

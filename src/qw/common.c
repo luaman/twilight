@@ -55,8 +55,10 @@ cvar_t *fs_gamename;
 cvar_t *game_name;
 cvar_t *registered;
 
-void COM_InitFilesystem (void);
-void COM_Path_f (void);
+static void COM_InitFilesystem (void);
+static void COM_Path_f (void);
+static void Com_PrintHex (char *str, int len);
+static void *SZ_GetSpace (sizebuf_t *buf, size_t length);
 
 
 qboolean standard_quake = true, rogue, hipnotic;
@@ -649,7 +651,7 @@ void Com_EndRedirect (void)
 	rd_print = NULL;
 }
 
-void Com_PrintHex (char *str, int len)
+static void Com_PrintHex (char *str, int len)
 {
 	char	c;
 	int		i;
@@ -755,7 +757,7 @@ SZ_Clear (sizebuf_t *buf)
 	buf->overflowed = false;
 }
 
-void *
+static void *
 SZ_GetSpace (sizebuf_t *buf, size_t length)
 {
 	void	   *data;
@@ -849,28 +851,6 @@ COM_StripExtension (char *in, char *out)
 		*last = '\0';
 }
 
-
-/*
-============
-COM_FileExtension
-============
-*/
-char *
-COM_FileExtension (char *in)
-{
-	static char		exten[8];
-	int				i;
-
-	while (*in && *in != '.')
-		in++;
-	if (!*in)
-		return "";
-	in++;
-	for (i = 0; i < 7 && *in; i++, in++)
-		exten[i] = *in;
-	exten[i] = 0;
-	return exten;
-}
 
 
 /*
@@ -977,7 +957,7 @@ COM_CheckFile
 
 ================
 */
-qboolean 
+static qboolean 
 COM_CheckFile (char *fname)
 {
 	FILE	   *h;
@@ -999,7 +979,7 @@ Looks for the pop.lmp file
 Sets the "registered" cvar.
 ================
 */
-void
+static void
 COM_CheckRegistered (void)
 {
 	if (!COM_CheckFile ("gfx/pop.lmp"))
@@ -1122,7 +1102,7 @@ COM_filelength (FILE * f)
 	return end;
 }
 
-int
+static int
 COM_FileOpenRead (char *path, FILE ** hndl)
 {
 	FILE	   *f;
@@ -1144,7 +1124,7 @@ COM_Path_f
 
 ============
 */
-void
+static void
 COM_Path_f (void)
 {
 	searchpath_t	   *s;
@@ -1213,44 +1193,6 @@ COM_CreatePath (char *path)
 			*ofs = '/';
 		}
 	}
-}
-
-
-/*
-===========
-COM_CopyFile
-
-Copies a file over from the net to the local cache, creating any directories
-needed.  This is for the convenience of developers using ISDN from home.
-===========
-*/
-void
-COM_CopyFile (char *netpath, char *cachepath)
-{
-	FILE	   *in, *out;
-	unsigned	remaining, count;
-	char		buf[4096];
-
-	remaining = COM_FileOpenRead (netpath, &in);
-	// create directories up to the cache file
-	COM_CreatePath (cachepath);
-	out = fopen (cachepath, "wb");
-	if (!out)
-		Sys_Error ("Error opening %s", cachepath);
-
-	while (remaining)
-	{
-		if (remaining < sizeof (buf))
-			count = remaining;
-		else
-			count = sizeof (buf);
-		fread (buf, 1, count, in);
-		fwrite (buf, 1, count, out);
-		remaining -= count;
-	}
-
-	fclose (in);
-	fclose (out);
 }
 
 
@@ -1413,7 +1355,7 @@ Loads the header and directory, adding the files at the beginning
 of the list so they override previous pack files.
 =================
 */
-pack_t     *
+static pack_t     *
 COM_LoadPackFile (char *packfile)
 {
 	dpackheader_t	header;
@@ -1471,7 +1413,7 @@ Sets com_gamedir, adds the directory to the head of the path,
 then loads and adds pak1.pak pak2.pak ...
 ================
 */
-void
+static void
 COM_AddDirectory (char *dir)
 {
 	int				i;
@@ -1518,7 +1460,7 @@ COM_AddGameDirectory
 Wrapper for COM_AddDirectory
 ================
 */
-void
+static void
 COM_AddGameDirectory (char *dir)
 {
 	char		buf[1024];
@@ -1592,7 +1534,7 @@ COM_Gamedir (char *dir)
 COM_InitFilesystem
 ================
 */
-void
+static void
 COM_InitFilesystem (void)
 {
 	Uint			i;

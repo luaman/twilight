@@ -264,11 +264,3 @@ Com_BlockChecksum (void *buffer, int length)
 				((Uint32 *)digest)[2] ^
 				((Uint32 *)digest)[3]);
 }
-
-
-void
-Com_BlockFullChecksum (void *buffer, int len, unsigned char *outbuf)
-{
-	mdfour (outbuf, (unsigned char *) buffer, len);
-}
-

@@ -112,7 +112,6 @@ int		Cmd_CompleteAliasCountPossible (char *partial);
 char	**Cmd_CompleteAliasBuildList (char *partial);
 int		Cmd_CompleteCountPossible (char *partial);
 char	**Cmd_CompleteBuildList (char *partial);
-char	*Cmd_CompleteAlias (char *partial);
 // More console completion stuff
 
 int         Cmd_Argc (void);

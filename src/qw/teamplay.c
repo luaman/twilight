@@ -231,7 +231,7 @@ Team_Init_Cvars (void)
 	cl_parsesay = Cvar_Get ("cl_parsesay", "0", CVAR_NONE, NULL);
 }
 
-void
+static void
 Team_loc (void)
 {
 	char		*desc = NULL;

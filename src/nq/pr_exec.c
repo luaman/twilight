@@ -155,12 +155,7 @@ char *PR_GlobalStringNoContents (int ofs);
 
 //=============================================================================
 
-/*
-=================
-PR_PrintStatement
-=================
-*/
-void
+static void
 PR_PrintStatement (dstatement_t *s)
 {
 	int         i;
@@ -190,12 +185,8 @@ PR_PrintStatement (dstatement_t *s)
 	Com_Printf ("\n");
 }
 
-/*
-============
-PR_StackTrace
-============
-*/
-void PR_StackTrace (void)
+static void
+PR_StackTrace (void)
 {
 	dfunction_t	*f;
 	int			i;
@@ -213,12 +204,6 @@ void PR_StackTrace (void)
 	}
 }
 
-/*
-============
-PR_Profile_f
-
-============
-*/
 void
 PR_Profile_f (void)
 {
@@ -254,8 +239,6 @@ PR_Profile_f (void)
 
 /*
 ============
-PR_RunError
-
 Aborts the currently executing function
 ============
 */
@@ -288,20 +271,16 @@ void PR_RunError (char *error, ...)
 
 /*
 ============================================================================
-PR_ExecuteProgram
-
 The interpretation main loop
 ============================================================================
 */
 
 /*
 ====================
-PR_EnterFunction
-
 Returns the new program statement counter
 ====================
 */
-int
+static int
 PR_EnterFunction (dfunction_t *f)
 {
 	Uint		i, j, c, o;
@@ -339,12 +318,7 @@ PR_EnterFunction (dfunction_t *f)
 	return f->first_statement - 1;		// offset the s++
 }
 
-/*
-====================
-PR_LeaveFunction
-====================
-*/
-int
+static int
 PR_LeaveFunction (void)
 {
 	int	i, c;
@@ -369,11 +343,6 @@ PR_LeaveFunction (void)
 }
 
 
-/*
-====================
-PR_ExecuteProgram
-====================
-*/
 // LordHavoc: optimized
 extern cvar_t *pr_boundscheck;
 #define OPA ((eval_t *)&pr_globals[(unsigned short int) st->a])

@@ -41,9 +41,6 @@ void SCR_EndLoadingPlaque (void);
 
 int SCR_ModalMessage (char *text);
 
-void SCR_CaptureAviDemo (void);
-void AvidemoChanged(cvar_t *);
-
 extern float scr_con_current;
 extern float scr_conlines;		/* lines of console to display */
 

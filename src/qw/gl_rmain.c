@@ -484,7 +484,7 @@ R_Render3DView
 Called by R_RenderView, possibily repeatedly.
 ================
 */
-void
+static void
 R_Render3DView (void)
 {
 	R_VisBrushModels ();
@@ -589,7 +589,7 @@ R_RenderView (void)
 R_InitTextures
 ==================
 */
-void
+static void
 R_InitTextures (void)
 {
 	int			x, y;

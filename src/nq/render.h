@@ -100,7 +100,6 @@ extern struct texture_s *r_notexture_water;
 
 void R_Init_Cvars (void);
 void R_Init (void);
-void R_InitTextures (void);
 
 // must set r_refdef first
 void R_RenderView (void);

@@ -41,7 +41,6 @@ void Sky_Init_Cvars (void);
 void Sky_Init (void);
 void Sky_InitSky (texture_t *unused, Uint8 *pixels);
 void Sky_Box_Draw (void);
-void Sky_Changed (cvar_t *unused);
 void Sky_Sphere_Draw (void);
 void Sky_Depth_Draw_Chain (model_t *mod, chain_head_t *chain);
 void Sky_Fast_Draw_Chain (model_t *mod, chain_head_t *chain);

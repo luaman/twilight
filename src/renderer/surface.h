@@ -29,9 +29,6 @@
 
 #include "model.h"
 
-void CountSubdividedGLPolyFromEdges (msurface_t *surf, model_t *model);
-void CountGLPolyFromEdges (msurface_t *surf, model_t *model);
-void BuildSubdividedGLPolyFromEdges (msurface_t *surf, model_t *model);
 void BuildGLPolyFromEdges (msurface_t *surf, model_t *model, int *count);
 void SetupLightmapSettings ();
 

@@ -167,7 +167,7 @@ char        soundlist_name[] =
 CL_Quit_f
 ==================
 */
-void
+static void
 CL_Quit_f (void)
 {
 	CL_Disconnect ();
@@ -179,7 +179,7 @@ CL_Quit_f (void)
 CL_Version_f
 ======================
 */
-void
+static void
 CL_Version_f (void)
 {
 	Com_Printf ("Version %s\n", VERSION);
@@ -195,7 +195,7 @@ CL_SendConnectPacket
 called when we get a challenge from the server
 ======================
 */
-void
+static void
 CL_SendConnectPacket (int challenge)
 {
 	netadr_t    adr;
@@ -243,7 +243,7 @@ Resend a connect message if the last one has timed out
 
 =================
 */
-void
+static void
 CL_CheckForResend (void)
 {
 	netadr_t    adr;
@@ -289,7 +289,7 @@ CL_Connect_f
 
 ================
 */
-void
+static void
 CL_Connect_f (void)
 {
 	char       *server;
@@ -316,7 +316,7 @@ CL_Rcon_f
   an unconnected command.
 =====================
 */
-void
+static void
 CL_Rcon_f (void)
 {
 	char        message[1024];
@@ -443,7 +443,7 @@ CL_Disconnect (void)
 
 }
 
-void
+static void
 CL_Disconnect_f (void)
 {
 	CL_Disconnect ();
@@ -458,7 +458,7 @@ user <name or userid>
 Dump userdata / masterdata for a user
 ====================
 */
-void
+static void
 CL_User_f (void)
 {
 	int         uid;
@@ -490,7 +490,7 @@ CL_Users_f
 Dump userids for all current players
 ====================
 */
-void
+static void
 CL_Users_f (void)
 {
 	int         i;
@@ -510,7 +510,7 @@ CL_Users_f (void)
 	Com_Printf ("%i total users\n", c);
 }
 
-void
+static void
 CL_Color_f (void)
 {
 	// just for quake compatability...
@@ -552,7 +552,7 @@ CL_FullServerinfo_f
 Sent by server when serverinfo changes
 ==================
 */
-void
+static void
 CL_FullServerinfo_f (void)
 {
 	char       *p;
@@ -585,7 +585,7 @@ Allow clients to change userinfo
 ==================
 Casey was here :)
 */
-void
+static void
 CL_FullInfo_f (void)
 {
 	char        key[512];
@@ -636,7 +636,7 @@ CL_SetInfo_f
 Allow clients to change userinfo
 ==================
 */
-void
+static void
 CL_SetInfo_f (void)
 {
 	if (Cmd_Argc () == 1) {
@@ -666,7 +666,7 @@ packet <destination> <contents>
 Contents allows \n escape character
 ====================
 */
-void
+static void
 CL_Packet_f (void)
 {
 	char        send[2048];
@@ -740,7 +740,7 @@ Just sent as a hint to the client that they should
 drop to full console
 =================
 */
-void
+static void
 CL_Changing_f (void)
 {
 	if (cls.download)					// don't change when downloading
@@ -761,7 +761,7 @@ CL_Reconnect_f
 The server is changing levels
 =================
 */
-void
+static void
 CL_Reconnect_f (void)
 {
 	if (cls.download)					// don't change when downloading
@@ -792,7 +792,7 @@ CL_ConnectionlessPacket
 Responses to broadcasts, etc
 =================
 */
-void
+static void
 CL_ConnectionlessPacket (void)
 {
 	char	*s, *cmd, data[6];
@@ -902,7 +902,7 @@ CL_ConnectionlessPacket (void)
 CL_ReadPackets
 =================
 */
-void
+static void
 CL_ReadPackets (void)
 {
 //  while (NET_GetPacket ())
@@ -946,7 +946,7 @@ CL_ReadPackets (void)
 CL_Download_f
 =====================
 */
-void
+static void
 CL_Download_f (void)
 {
 	char       *p, *q;
@@ -983,7 +983,7 @@ CL_Download_f (void)
 	SZ_Print (&cls.netchan.message, va ("download %s\n", Cmd_Argv (1)));
 }
 
-void 
+static void 
 CL_WriteConfig_f (void)
 {
 	if (Cmd_Argc () != 2) {
@@ -1023,7 +1023,7 @@ Cmd_ForwardToServer (void)
 }
 
 // don't forward the first argument
-void
+static void
 Cmd_ForwardToServer_f (void)
 {
 	if (cls.state == ca_disconnected) {
@@ -1045,7 +1045,7 @@ Cmd_ForwardToServer_f (void)
 	}
 }
 
-void
+static void
 Cmd_Say_f (void)
 {
 	char	*s;
@@ -1079,7 +1079,7 @@ Cmd_Say_f (void)
 CL_Init_Cvars
 =================
 */
-void
+static void
 CL_Init_Cvars (void)
 {
 	extern cvar_t	*noskins;
@@ -1123,6 +1123,7 @@ CL_Init_Cvars (void)
 	msg = Cvar_Get ("msg", "1", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
 
 	CL_TEnts_Init_Cvars ();
+	Team_Init_Cvars ();
 }
 
 /*
@@ -1130,7 +1131,7 @@ CL_Init_Cvars (void)
 CL_Init
 =================
 */
-void
+static void
 CL_Init (void)
 {
 	char			st[80];
@@ -1417,7 +1418,7 @@ simple_decrypt (char *buf, int len)
 		*buf++ ^= 0xff;
 }
 
-void
+static void
 Host_FixupModelNames (void)
 {
 	simple_decrypt (emodel_name, sizeof (emodel_name) - 1);

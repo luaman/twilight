@@ -84,7 +84,7 @@ SV_CreateAreaNode
 
 ===============
 */
-areanode_t *
+static areanode_t *
 SV_CreateAreaNode (int depth, vec3_t mins, vec3_t maxs)
 {
 	areanode_t *anode;
@@ -161,7 +161,7 @@ SV_UnlinkEdict (edict_t *ent)
 SV_TouchLinks
 ====================
 */
-void
+static void
 SV_TouchLinks (edict_t *ent, areanode_t *node)
 {
 	link_t     *l, *next;
@@ -207,13 +207,7 @@ SV_TouchLinks (edict_t *ent, areanode_t *node)
 }
 
 
-/*
-===============
-SV_FindTouchedLeafs
-
-===============
-*/
-void
+static void
 SV_FindTouchedLeafs (edict_t *ent, mnode_t *node)
 {
 	mplane_t   *splitplane;
@@ -471,12 +465,10 @@ SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs,
 
 /*
 ====================
-SV_ClipToLinks
-
 Mins and maxs enclose the entire area swept by the move
 ====================
 */
-void
+static void
 SV_ClipToLinks (areanode_t *node, moveclip_t * clip)
 {
 	link_t     *l;
@@ -576,7 +568,7 @@ SV_ClipToLinks (areanode_t *node, moveclip_t * clip)
 SV_MoveBounds
 ==================
 */
-void
+static void
 SV_MoveBounds (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
 			   vec3_t boxmins, vec3_t boxmaxs)
 {

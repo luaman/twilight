@@ -237,7 +237,7 @@ model_t *mdl_fire = NULL;
 Model_NextDownload
 =================
 */
-void
+static void
 Model_NextDownload (void)
 {
 	char       *s;
@@ -309,7 +309,7 @@ Model_NextDownload (void)
 Sound_NextDownload
 =================
 */
-void
+static void
 Sound_NextDownload (void)
 {
 	char       *s;
@@ -352,7 +352,7 @@ Sound_NextDownload (void)
 CL_RequestNextDownload
 ======================
 */
-void
+static void
 CL_RequestNextDownload (void)
 {
 	switch (cls.downloadtype) {
@@ -385,7 +385,7 @@ CL_ParseDownload
 A download message has been received from the server
 =====================
 */
-void
+static void
 CL_ParseDownload (void)
 {
 	int         size, percent;
@@ -563,7 +563,7 @@ CL_StopUpload (void)
 CL_ParseServerData
 ==================
 */
-void
+static void
 CL_ParseServerData (void)
 {
 	char       *str;
@@ -662,7 +662,7 @@ CL_ParseServerData (void)
 CL_ParseSoundlist
 ==================
 */
-void
+static void
 CL_ParseSoundlist (void)
 {
 	int         numsounds;
@@ -703,7 +703,7 @@ CL_ParseSoundlist (void)
 CL_ParseModellist
 ==================
 */
-void
+static void
 CL_ParseModellist (void)
 {
 	int         nummodels;
@@ -770,7 +770,7 @@ CL_ParseBaseline (entity_state_t *es)
 CL_ParseStaticSound
 ===================
 */
-void
+static void
 CL_ParseStaticSound (void)
 {
 	vec3_t      org;
@@ -801,7 +801,7 @@ ACTION MESSAGES
 CL_ParseStartSoundPacket
 ==================
 */
-void
+static void
 CL_ParseStartSoundPacket (void)
 {
 	vec3_t      pos;
@@ -846,7 +846,7 @@ CL_ParseClientdata
 Server information pertaining to this client only, sent every frame
 ==================
 */
-void
+static void
 CL_ParseClientdata (void)
 {
 	int         i;
@@ -884,7 +884,7 @@ CL_ParseClientdata (void)
 CL_ProcessUserInfo
 ==============
 */
-void
+static void
 CL_ProcessUserInfo (int slot, player_info_t *player)
 {
 	Uint8	color;
@@ -926,7 +926,7 @@ CL_ProcessUserInfo (int slot, player_info_t *player)
 CL_UpdateUserinfo
 ==============
 */
-void
+static void
 CL_UpdateUserinfo (void)
 {
 	int         slot;
@@ -950,7 +950,7 @@ CL_UpdateUserinfo (void)
 CL_SetInfo
 ==============
 */
-void
+static void
 CL_SetInfo (void)
 {
 	int         slot;
@@ -1024,7 +1024,7 @@ CL_ProcessServerInfo (void)
 CL_ServerInfo
 ==============
 */
-void
+static void
 CL_ServerInfo (void)
 {
 	char        key[MAX_MSGLEN];
@@ -1047,7 +1047,7 @@ CL_ServerInfo (void)
 CL_SetStat
 =====================
 */
-void
+static void
 CL_SetStat (int stat, int value)
 {
 	int         j;
@@ -1069,7 +1069,7 @@ CL_SetStat (int stat, int value)
 CL_MuzzleFlash
 ==============
 */
-void
+static void
 CL_MuzzleFlash (void)
 {
 	vec3_t      fv;

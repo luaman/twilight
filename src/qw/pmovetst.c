@@ -90,7 +90,7 @@ To keep everything totally uniform, bounding boxes are turned into small
 BSP trees instead of being compared directly.
 ===================
 */
-hull_t     *
+static hull_t     *
 PM_HullForBox (vec3_t mins, vec3_t maxs)
 {
 	box_planes[0].dist = maxs[0];
@@ -110,7 +110,7 @@ PM_HullPointContents
 
 ==================
 */
-int
+static int
 PM_HullPointContents (hull_t *hull, int num, vec3_t p)
 {
 	float       d;

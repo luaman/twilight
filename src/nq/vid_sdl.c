@@ -66,8 +66,8 @@ static int sdl_flags = SDL_OPENGL;
 
 /*-----------------------------------------------------------------------*/
 
-void I_KeypadMode (cvar_t *cvar);
-void IN_WindowedMouse (cvar_t *cvar);
+static void I_KeypadMode (cvar_t *cvar);
+static void IN_WindowedMouse (cvar_t *cvar);
 
 /*-----------------------------------------------------------------------*/
 void
@@ -81,7 +81,7 @@ VID_Shutdown (void)
 GL_Init
 ===============
 */
-void
+static void
 GL_Init (void)
 {
 	qglFinish ();
@@ -480,12 +480,6 @@ Sys_SendKeyEvents (void)
 
 
 void
-Force_CenterView_f (void)
-{
-	cl.viewangles[PITCH] = 0;
-}
-
-void
 IN_Init (void)
 {
 	mouse_x = 0.0f;
@@ -498,7 +492,7 @@ IN_Shutdown (void)
 {
 }
 
-void
+static void
 IN_WindowedMouse (cvar_t *cvar)
 {
 	cvar = cvar;
@@ -518,7 +512,7 @@ IN_WindowedMouse (cvar_t *cvar)
 		SDL_WM_GrabInput (SDL_GRAB_ON);
 }
 
-void
+static void
 I_KeypadMode (cvar_t *cvar)
 {
 	keypadmode = !!cvar->ivalue;

@@ -196,7 +196,6 @@ typedef int GLsizeiptrARB;
 #define DYNGL_EXT(ret, name, args, extension)								\
 	DYNGLCALL ret (DYNGLENTRY * q##name) args;
 #define DYNGL_WANT(ret, name, args, alt)									\
-	DYNGLCALL ret (DYNGLENTRY alt) args;									\
 	DYNGLCALL ret (DYNGLENTRY * q##name) args;
 #include "dglfuncs.h"
 #undef DYNGL_NEED

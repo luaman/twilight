@@ -85,7 +85,7 @@ kbutton_t   in_up, in_down;
 int         in_impulse;
 
 
-void
+static void
 KeyDown (kbutton_t *b)
 {
 	int         k;
@@ -115,7 +115,7 @@ KeyDown (kbutton_t *b)
 	b->state |= 1 + 2;					// down + impulse down
 }
 
-void
+static void
 KeyUp (kbutton_t *b)
 {
 	int         k;
@@ -148,25 +148,25 @@ KeyUp (kbutton_t *b)
 	b->state |= 4;						// impulse up
 }
 
-void
+static void
 IN_KLookDown (void)
 {
 	KeyDown (&in_klook);
 }
 
-void
+static void
 IN_KLookUp (void)
 {
 	KeyUp (&in_klook);
 }
 
-void
+static void
 IN_MLookDown (void)
 {
 	KeyDown (&in_mlook);
 }
 
-void
+static void
 IN_MLookUp (void)
 {
 	KeyUp (&in_mlook);
@@ -174,187 +174,187 @@ IN_MLookUp (void)
 		V_StartPitchDrift ();
 }
 
-void
+static void
 IN_UpDown (void)
 {
 	KeyDown (&in_up);
 }
 
-void
+static void
 IN_UpUp (void)
 {
 	KeyUp (&in_up);
 }
 
-void
+static void
 IN_DownDown (void)
 {
 	KeyDown (&in_down);
 }
 
-void
+static void
 IN_DownUp (void)
 {
 	KeyUp (&in_down);
 }
 
-void
+static void
 IN_LeftDown (void)
 {
 	KeyDown (&in_left);
 }
 
-void
+static void
 IN_LeftUp (void)
 {
 	KeyUp (&in_left);
 }
 
-void
+static void
 IN_RightDown (void)
 {
 	KeyDown (&in_right);
 }
 
-void
+static void
 IN_RightUp (void)
 {
 	KeyUp (&in_right);
 }
 
-void
+static void
 IN_ForwardDown (void)
 {
 	KeyDown (&in_forward);
 }
 
-void
+static void
 IN_ForwardUp (void)
 {
 	KeyUp (&in_forward);
 }
 
-void
+static void
 IN_BackDown (void)
 {
 	KeyDown (&in_back);
 }
 
-void
+static void
 IN_BackUp (void)
 {
 	KeyUp (&in_back);
 }
 
-void
+static void
 IN_LookupDown (void)
 {
 	KeyDown (&in_lookup);
 }
 
-void
+static void
 IN_LookupUp (void)
 {
 	KeyUp (&in_lookup);
 }
 
-void
+static void
 IN_LookdownDown (void)
 {
 	KeyDown (&in_lookdown);
 }
 
-void
+static void
 IN_LookdownUp (void)
 {
 	KeyUp (&in_lookdown);
 }
 
-void
+static void
 IN_MoveleftDown (void)
 {
 	KeyDown (&in_moveleft);
 }
 
-void
+static void
 IN_MoveleftUp (void)
 {
 	KeyUp (&in_moveleft);
 }
 
-void
+static void
 IN_MoverightDown (void)
 {
 	KeyDown (&in_moveright);
 }
 
-void
+static void
 IN_MoverightUp (void)
 {
 	KeyUp (&in_moveright);
 }
 
-void
+static void
 IN_SpeedDown (void)
 {
 	KeyDown (&in_speed);
 }
 
-void
+static void
 IN_SpeedUp (void)
 {
 	KeyUp (&in_speed);
 }
 
-void
+static void
 IN_StrafeDown (void)
 {
 	KeyDown (&in_strafe);
 }
 
-void
+static void
 IN_StrafeUp (void)
 {
 	KeyUp (&in_strafe);
 }
 
-void
+static void
 IN_AttackDown (void)
 {
 	KeyDown (&in_attack);
 }
 
-void
+static void
 IN_AttackUp (void)
 {
 	KeyUp (&in_attack);
 }
 
-void
+static void
 IN_UseDown (void)
 {
 	KeyDown (&in_use);
 }
 
-void
+static void
 IN_UseUp (void)
 {
 	KeyUp (&in_use);
 }
 
-void
+static void
 IN_JumpDown (void)
 {
 	KeyDown (&in_jump);
 }
 
-void
+static void
 IN_JumpUp (void)
 {
 	KeyUp (&in_jump);
 }
 
-void
+static void
 IN_Impulse (void)
 {
 	in_impulse = Q_atoi (Cmd_Argv (1));
@@ -376,7 +376,7 @@ Returns 0.25 if a key was pressed and released during the frame,
 1.0 if held for the entire time
 ===============
 */
-float
+static float
 CL_KeyState (kbutton_t *key)
 {
 	float       val;
@@ -442,7 +442,7 @@ CL_AdjustAngles
 Moves the local angle positions
 ================
 */
-void
+static void
 CL_AdjustAngles (void)
 {
 	float       speed;
@@ -489,7 +489,7 @@ CL_BaseMove
 Send the intended movement message to the server
 ================
 */
-void
+static void
 CL_BaseMove (usercmd_t *cmd)
 {
 	CL_AdjustAngles ();
@@ -537,7 +537,7 @@ MakeChar (int i)
 CL_FinishMove
 ==============
 */
-void
+static void
 CL_FinishMove (usercmd_t *cmd)
 {
 	int         i;
@@ -686,7 +686,25 @@ CL_SendCmd (void)
 	Netchan_Transmit (&cls.netchan, buf.cursize, buf.data);
 }
 
+/*
+	CL_InputSetRepeatDelay
+*/
+static void
+CL_InputSetRepeatDelay (struct cvar_s *var)
+{
+	SDL_EnableKeyRepeat(var->ivalue, (in_key_repeat_interval) ?
+			in_key_repeat_interval->ivalue : SDL_DEFAULT_REPEAT_INTERVAL);
+}
 
+/*
+	CL_InputSetRepeatDelay
+*/
+static void
+CL_InputSetRepeatInterval (struct cvar_s *var)
+{
+	SDL_EnableKeyRepeat((in_key_repeat_delay) ? in_key_repeat_delay->ivalue
+			: SDL_DEFAULT_REPEAT_DELAY, var->ivalue);
+}
 
 /*
 ============
@@ -766,34 +784,3 @@ CL_Input_Init_Cvars (void)
 			va ("%i", SDL_DEFAULT_REPEAT_INTERVAL), CVAR_ARCHIVE,
 			CL_InputSetRepeatInterval);
 }
-
-/*
-	CL_InputSetRepeatDelay
-*/
-void
-CL_InputSetRepeatDelay (struct cvar_s *var)
-{
-	SDL_EnableKeyRepeat(var->ivalue, (in_key_repeat_interval) ?
-			in_key_repeat_interval->ivalue : SDL_DEFAULT_REPEAT_INTERVAL);
-}
-
-/*
-	CL_InputSetRepeatDelay
-*/
-void
-CL_InputSetRepeatInterval (struct cvar_s *var)
-{
-	SDL_EnableKeyRepeat((in_key_repeat_delay) ? in_key_repeat_delay->ivalue
-			: SDL_DEFAULT_REPEAT_DELAY, var->ivalue);
-}
-
-/*
-============
-CL_ClearStates
-============
-*/
-void
-CL_ClearStates (void)
-{
-}
-

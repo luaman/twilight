@@ -74,7 +74,6 @@ typedef struct sizebuf_s {
 
 void SZ_Init (sizebuf_t *buf, Uint8 *data, size_t length);
 void SZ_Clear (sizebuf_t *buf);
-void *SZ_GetSpace (sizebuf_t *buf, size_t length);
 void SZ_Write (sizebuf_t *buf, void *data, size_t length);
 void SZ_Print (sizebuf_t *buf, char *data);	// strcats onto the sizebuf
 
@@ -185,7 +184,6 @@ void COM_Init (void);
 char *COM_SkipPath (char *pathname);
 void COM_StripExtension (char *in, char *out);
 void COM_DefaultExtension (char *path, char *extension);
-qboolean COM_CheckFile (char *fname);
 char *COM_FileExtension (char *in);
 
 //============================================================================
@@ -205,7 +203,6 @@ Uint8 *COM_LoadNamedFile (char *path, qboolean complain);
 void COM_CreatePath (char *path);
 void COM_Gamedir (char *dir);
 
-void Com_PrintHex (char *str, int len);
 void Com_Printf (const char *fmt, ...);
 void Com_DPrintf (const char *fmt, ...);
 void Com_DFPrintf (int level, const char *fmt, ...);

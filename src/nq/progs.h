@@ -115,8 +115,6 @@ void PR_Profile_f (void);
 edict_t *ED_Alloc (void);
 void ED_Free (edict_t *ed);
 
-char *ED_NewString (char *string);
-
 // returns a copy of the string allocated from the server's string heap
 
 void ED_Print (edict_t *ed);

@@ -328,9 +328,6 @@ void	CL_WriteToServer (usercmd_t *cmd);
 void	CL_BaseMove (usercmd_t *cmd);
 
 
-float	CL_KeyState (kbutton_t *key);
-char	*Key_KeynumToString (int keynum);
-
 //
 // cl_demo.c
 //
@@ -346,7 +343,6 @@ void	CL_TimeDemo_f (void);
 // cl_parse.c
 //
 void	CL_ParseServerMessage (void);
-void	CL_NewTranslation (int slot);
 void	CL_ParseEntityLump (char *entdata);
 
 //

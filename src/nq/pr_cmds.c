@@ -84,7 +84,7 @@ static char engine_extensions[] =
 ===============================================================================
 */
 
-char *
+static char *
 PF_VarString (Uint first)
 {
 	Uint			i;
@@ -100,15 +100,13 @@ PF_VarString (Uint first)
 
 /*
 =================
-PF_errror
-
 This is a TERMINAL error, which will kill off the entire server.
 Dumps self.
 
 error(value)
 =================
 */
-void
+static void
 PF_error (void)
 {
 	char		*s;
@@ -125,15 +123,13 @@ PF_error (void)
 
 /*
 =================
-PF_objerror
-
 Dumps out self, then an error message.  The program is aborted and self is
 removed, but the level can continue.
 
 objerror(value)
 =================
 */
-void
+static void
 PF_objerror (void)
 {
 	char		*s;
@@ -153,13 +149,11 @@ PF_objerror (void)
 
 /*
 ==============
-PF_makevectors
-
 Writes new values for v_forward, v_up, and v_right based on angles
 makevectors(vector)
 ==============
 */
-void
+static void
 PF_makevectors (void)
 {
 	AngleVectors (G_VECTOR (OFS_PARM0), pr_global_struct->v_forward,
@@ -168,14 +162,13 @@ PF_makevectors (void)
 
 /*
  * ==============
-PF_vectorvectors
-
 Writes new values for v_forward, v_up, and v_right based on the given
 forward vector
 vectorvectors(vector, vector)
 ==============
 */
-void PF_vectorvectors (void)
+static void
+PF_vectorvectors (void)
 {
 	VectorNormalize2(G_VECTOR(OFS_PARM0), pr_global_struct->v_forward);
 	VectorVectors(pr_global_struct->v_forward, pr_global_struct->v_right,
@@ -185,8 +178,6 @@ void PF_vectorvectors (void)
 
 /*
 =================
-PF_setorigin
-
 This is the only valid way to move an object without using the physics of the
 world (setting velocity and waiting).  Directly changing origin will not set
 internal links correctly, so clipping would be messed up.  This should be
@@ -195,7 +186,7 @@ called when an object is spawned, and then only if it is teleported.
 setorigin (entity, origin)
 =================
 */
-void
+static void
 PF_setorigin (void)
 {
 	edict_t		*e;
@@ -208,7 +199,7 @@ PF_setorigin (void)
 }
 
 
-void
+static void
 SetMinMaxSize (edict_t *e, float *min, float *max)
 {
 	int			i;
@@ -227,14 +218,12 @@ SetMinMaxSize (edict_t *e, float *min, float *max)
 
 /*
 =================
-PF_setsize
-
 the size box is rotated by the current angle
 
 setsize (entity, minvector, maxvector)
 =================
 */
-void
+static void
 PF_setsize (void)
 {
 	edict_t		*e;
@@ -249,12 +238,10 @@ PF_setsize (void)
 
 /*
 =================
-PF_setmodel
-
 setmodel(entity, model)
 =================
 */
-void
+static void
 PF_setmodel (void)
 {
 	edict_t		*e;
@@ -292,14 +279,12 @@ PF_setmodel (void)
 
 /*
 =================
-PF_bprint
-
 broadcast print to everyone on server
 
 bprint(value)
 =================
 */
-void
+static void
 PF_bprint (void)
 {
 	char       *s;
@@ -310,14 +295,12 @@ PF_bprint (void)
 
 /*
 =================
-PF_sprint
-
 single print to a specific client
 
 sprint(clientent, value)
 =================
 */
-void
+static void
 PF_sprint (void)
 {
 	char		*s;
@@ -342,14 +325,12 @@ PF_sprint (void)
 
 /*
 =================
-PF_centerprint
-
 single print to a specific client
 
 centerprint(clientent, value)
 =================
 */
-void
+static void
 PF_centerprint (void)
 {
 	char		*s;
@@ -374,12 +355,10 @@ PF_centerprint (void)
 
 /*
 =================
-PF_normalize
-
 vector normalize(vector)
 =================
 */
-void
+static void
 PF_normalize (void)
 {
 	float		*value1;
@@ -406,12 +385,10 @@ PF_normalize (void)
 
 /*
 =================
-PF_vlen
-
 scalar vlen(vector)
 =================
 */
-void
+static void
 PF_vlen (void)
 {
 	float		*value1;
@@ -426,12 +403,10 @@ PF_vlen (void)
 
 /*
 =================
-PF_vectoyaw
-
 float vectoyaw(vector)
 =================
 */
-void
+static void
 PF_vectoyaw (void)
 {
 	float		*value1;
@@ -454,12 +429,10 @@ PF_vectoyaw (void)
 
 /*
 =================
-PF_vectoangles
-
 vector vectoangles(vector)
 =================
 */
-void
+static void
 PF_vectoangles (void)
 {
 	float		*value1 = G_VECTOR (OFS_PARM0);
@@ -474,14 +447,12 @@ PF_vectoangles (void)
 
 /*
 =================
-PF_Random
-
 Returns a number from 0<= num < 1
 
 random()
 =================
 */
-void
+static void
 PF_random (void)
 {
 	float		num;
@@ -493,12 +464,10 @@ PF_random (void)
 
 /*
 =================
-PF_particle
-
 particle(origin, color, count)
 =================
 */
-void
+static void
 PF_particle (void)
 {
 	float		*org, *dir;
@@ -513,13 +482,7 @@ PF_particle (void)
 }
 
 
-/*
-=================
-PF_ambientsound
-
-=================
-*/
-void
+static void
 PF_ambientsound (void)
 {
 	char		**check;
@@ -558,8 +521,6 @@ PF_ambientsound (void)
 
 /*
 =================
-PF_sound
-
 Each entity can have eight independant sound sources, like voice,
 weapon, feet, etc.
 
@@ -571,7 +532,7 @@ Larger attenuations will drop off.
 
 =================
 */
-void
+static void
 PF_sound (void)
 {
 	char		*sample;
@@ -600,12 +561,10 @@ PF_sound (void)
 
 /*
 =================
-PF_break
-
 break()
 =================
 */
-void
+static void
 PF_break (void)
 {
 	Com_Printf ("break statement\n");
@@ -614,8 +573,6 @@ PF_break (void)
 
 /*
 =================
-PF_traceline
-
 Used for use tracing and shot targeting
 Traces are blocked by bbox and exact bsp entityes, and also slide box entities
 if the tryents flag is set.
@@ -623,7 +580,7 @@ if the tryents flag is set.
 traceline (vector1, vector2, tryents)
 =================
 */
-void
+static void
 PF_traceline (void)
 {
 	float		*v1, *v2;
@@ -654,8 +611,6 @@ PF_traceline (void)
 
 /*
 =================
-PF_tracebox
-
 Used for use tracing and shot targeting
 Traces are blocked by bbox and exact bsp entityes, and also slide box entities
 if the tryents flag is set.
@@ -663,7 +618,8 @@ if the tryents flag is set.
 tracebox (vector1, vector mins, vector maxs, vector2, tryents)
 =================
 */
-void PF_tracebox (void)
+static void
+PF_tracebox (void)
 {
 	float		*v1, *v2, *m1, *m2;
 	trace_t		trace;
@@ -695,7 +651,8 @@ void PF_tracebox (void)
 		pr_global_struct->trace_ent = EDICT_TO_PROG(sv.edicts);
 }
 
-void PF_tracetoss (void)
+static void
+PF_tracetoss (void)
 {
 	trace_t trace;
 	edict_t *ent;
@@ -723,25 +680,9 @@ void PF_tracetoss (void)
 		pr_global_struct->trace_ent = EDICT_TO_PROG(sv.edicts);
 }
 
-
-/*
-=================
-PF_checkpos
-
-Returns true if the given entity can move to the given position from it's
-current position by walking or rolling.
-FIXME: make work...
-scalar checkpos (entity, vector)
-=================
-*/
-void
-PF_checkpos (void)
-{
-}
-
 //============================================================================
 
-int
+static int
 PF_newcheckclient (Uint32 check)
 {
 	Uint32		i;
@@ -793,8 +734,6 @@ PF_newcheckclient (Uint32 check)
 
 /*
 =================
-PF_checkclient
-
 Returns a client (or object that has a client enemy) that would be a
 valid target.
 
@@ -806,7 +745,7 @@ it is not returned at all.
 name checkclient ()
 =================
 */
-void
+static void
 PF_checkclient (void)
 {
 	edict_t		*ent, *self;
@@ -851,14 +790,12 @@ PF_checkclient (void)
 
 /*
 =================
-PF_stuffcmd
-
 Sends text over to the client's execution buffer
 
 stuffcmd (clientent, value)
 =================
 */
-void
+static void
 PF_stuffcmd (void)
 {
 	Uint32		entnum;
@@ -878,14 +815,12 @@ PF_stuffcmd (void)
 
 /*
 =================
-PF_localcmd
-
 Sends text over to the client's execution buffer
 
 localcmd (string)
 =================
 */
-void
+static void
 PF_localcmd (void)
 {
 	char		*str;
@@ -896,12 +831,10 @@ PF_localcmd (void)
 
 /*
 =================
-PF_cvar
-
 float cvar (string)
 =================
 */
-void
+static void
 PF_cvar (void)
 {
 	char		*str;
@@ -917,12 +850,10 @@ PF_cvar (void)
 
 /*
 =================
-PF_cvar_set
-
 float cvar (string)
 =================
 */
-void
+static void
 PF_cvar_set (void)
 {
 	char		*name, *val;
@@ -940,14 +871,12 @@ PF_cvar_set (void)
 
 /*
 =================
-PF_findradius
-
 Returns a chain of entities that have origins within a spherical area
 
 findradius (origin, radius)
 =================
 */
-void
+static void
 PF_findradius (void)
 {
 	edict_t		*ent, *chain;
@@ -981,18 +910,13 @@ PF_findradius (void)
 }
 
 
-/*
-=========
-PF_dprint
-=========
-*/
-void
+static void
 PF_dprint (void)
 {
 	Com_DPrintf ("%s", PF_VarString (0));
 }
 
-void
+static void
 PF_ftos (void)
 {
 	float		v;
@@ -1006,7 +930,7 @@ PF_ftos (void)
 	G_INT (OFS_RETURN) = pr_string_temp - pr_strings;
 }
 
-void
+static void
 PF_fabs (void)
 {
 	float		v;
@@ -1015,7 +939,7 @@ PF_fabs (void)
 	G_FLOAT (OFS_RETURN) = fabs (v);
 }
 
-void
+static void
 PF_vtos (void)
 {
 	snprintf (pr_string_temp, sizeof (pr_string_temp), "'%5.1f %5.1f %5.1f'",
@@ -1024,7 +948,7 @@ PF_vtos (void)
 	G_INT (OFS_RETURN) = pr_string_temp - pr_strings;
 }
 
-void
+static void
 PF_etos (void)
 {
 	snprintf (pr_string_temp, sizeof (pr_string_temp), "entity %i",
@@ -1033,7 +957,7 @@ PF_etos (void)
 }
 
 
-void
+static void
 PF_Spawn (void)
 {
 	edict_t		*ed;
@@ -1042,7 +966,7 @@ PF_Spawn (void)
 	RETURN_EDICT (ed);
 }
 
-void
+static void
 PF_Remove (void)
 {
 	edict_t		*ed;
@@ -1053,7 +977,7 @@ PF_Remove (void)
 
 
 // entity (entity start, .string field, string match) find = #5;
-void
+static void
 PF_Find (void)
 {
 	Uint32		e;
@@ -1092,21 +1016,21 @@ PF_Find (void)
 	RETURN_EDICT (sv.edicts);
 }
 
-void
+static void
 PR_CheckEmptyString (char *s)
 {
 	if (s[0] <= ' ')
 		PR_RunError ("Bad string");
 }
 
-void
+static void
 PF_precache_file (void)
 {
 	// precache_file is only used to copy files with qcc, it does nothing
 	G_INT (OFS_RETURN) = G_INT (OFS_PARM0);
 }
 
-void
+static void
 PF_precache_sound (void)
 {
 	char		*s;
@@ -1133,7 +1057,7 @@ PF_precache_sound (void)
 	PR_RunError ("PF_precache_sound: overflow");
 }
 
-void
+static void
 PF_precache_model (void)
 {
 	char		*s;
@@ -1165,25 +1089,25 @@ PF_precache_model (void)
 }
 
 
-void
+static void
 PF_coredump (void)
 {
 	ED_PrintEdicts ();
 }
 
-void
+static void
 PF_traceon (void)
 {
 	pr_trace = true;
 }
 
-void
+static void
 PF_traceoff (void)
 {
 	pr_trace = false;
 }
 
-void
+static void
 PF_eprint (void)
 {
 	ED_PrintNum (G_EDICTNUM (OFS_PARM0));
@@ -1191,12 +1115,10 @@ PF_eprint (void)
 
 /*
 ===============
-PF_walkmove
-
 float(float yaw, float dist) walkmove
 ===============
 */
-void
+static void
 PF_walkmove (void)
 {
 	edict_t			*ent;
@@ -1235,12 +1157,10 @@ PF_walkmove (void)
 
 /*
 ===============
-PF_droptofloor
-
 void() droptofloor
 ===============
 */
-void
+static void
 PF_droptofloor (void)
 {
 	edict_t		*ent;
@@ -1268,12 +1188,10 @@ PF_droptofloor (void)
 
 /*
 ===============
-PF_lightstyle
-
 void(float style, string value) lightstyle
 ===============
 */
-void
+static void
 PF_lightstyle (void)
 {
 	int			style;
@@ -1300,7 +1218,7 @@ PF_lightstyle (void)
 		}
 }
 
-void
+static void
 PF_rint (void)
 {
 	float		f;
@@ -1312,25 +1230,20 @@ PF_rint (void)
 		G_FLOAT (OFS_RETURN) = (int) (f - 0.5);
 }
 
-void
+static void
 PF_floor (void)
 {
 	G_FLOAT (OFS_RETURN) = floor (G_FLOAT (OFS_PARM0));
 }
 
-void
+static void
 PF_ceil (void)
 {
 	G_FLOAT (OFS_RETURN) = ceil (G_FLOAT (OFS_PARM0));
 }
 
 
-/*
-=============
-PF_checkbottom
-=============
-*/
-void
+static void
 PF_checkbottom (void)
 {
 	edict_t		*ent;
@@ -1340,12 +1253,7 @@ PF_checkbottom (void)
 	G_FLOAT (OFS_RETURN) = SV_CheckBottom (ent);
 }
 
-/*
-=============
-PF_pointcontents
-=============
-*/
-void
+static void
 PF_pointcontents (void)
 {
 	float		*v;
@@ -1357,12 +1265,10 @@ PF_pointcontents (void)
 
 /*
 =============
-PF_nextent
-
 entity nextent(entity)
 =============
 */
-void
+static void
 PF_nextent (void)
 {
 	Uint32		i;
@@ -1388,13 +1294,11 @@ PF_nextent (void)
 
 /*
 =============
-PF_aim
-
 Pick a vector for the player to shoot along
 vector aim(entity, missilespeed)
 =============
 */
-void
+static void
 PF_aim (void)
 {
 	edict_t		*ent, *check, *bestent;
@@ -1470,8 +1374,6 @@ PF_aim (void)
 
 /*
 ==============
-PF_changeyaw
-
 This was a major timewaster in progs, so it was converted to C
 ==============
 */
@@ -1515,11 +1417,10 @@ PF_changeyaw (void)
 
 /*
 ==============
-PF_changepitch
 LordHavoc
 ==============
 */
-void
+static void
 PF_changepitch (void)
 {
 	edict_t		*ent;
@@ -1581,7 +1482,7 @@ MESSAGE WRITING
 ===============================================================================
 */
 
-sizebuf_t *
+static sizebuf_t *
 WriteDest (void)
 {
 	Uint		entnum;
@@ -1615,50 +1516,50 @@ WriteDest (void)
 	return NULL;
 }
 
-void
+static void
 PF_WriteByte (void)
 {
 	MSG_WriteByte (WriteDest (), G_FLOAT (OFS_PARM1));
 }
 
-void
+static void
 PF_WriteChar (void)
 {
 	MSG_WriteChar (WriteDest (), G_FLOAT (OFS_PARM1));
 }
 
-void
+static void
 PF_WriteShort (void)
 {
 	MSG_WriteShort (WriteDest (), G_FLOAT (OFS_PARM1));
 }
 
-void
+static void
 PF_WriteLong (void)
 {
 	MSG_WriteLong (WriteDest (), G_FLOAT (OFS_PARM1));
 }
 
-void
+static void
 PF_WriteAngle (void)
 {
 	MSG_WriteAngle (WriteDest (), G_FLOAT (OFS_PARM1));
 }
 
-void
+static void
 PF_WriteCoord (void)
 {
 	MSG_WriteCoord (WriteDest (), G_FLOAT (OFS_PARM1));
 }
 
-void
+static void
 PF_WriteString (void)
 {
 	MSG_WriteString (WriteDest (), G_STRING (OFS_PARM1));
 }
 
 
-void
+static void
 PF_WriteEntity (void)
 {
 	MSG_WriteShort (WriteDest (), G_EDICTNUM (OFS_PARM1));
@@ -1666,7 +1567,7 @@ PF_WriteEntity (void)
 
 //=============================================================================
 
-void
+static void
 PF_makestatic (void)
 {
 	edict_t		*ent;
@@ -1693,12 +1594,7 @@ PF_makestatic (void)
 
 //=============================================================================
 
-/*
-==============
-PF_setspawnparms
-==============
-*/
-void
+static void
 PF_setspawnparms (void)
 {
 	edict_t		*ent;
@@ -1717,12 +1613,7 @@ PF_setspawnparms (void)
 		(&pr_global_struct->parm1)[i] = client->spawn_parms[i];
 }
 
-/*
-==============
-PF_changelevel
-==============
-*/
-void
+static void
 PF_changelevel (void)
 {
 	char		*s;
@@ -1736,25 +1627,25 @@ PF_changelevel (void)
 	Cbuf_AddText (va ("changelevel %s\n", s));
 }
 
-void
+static void
 PF_sin (void)
 {
 	G_FLOAT(OFS_RETURN) = sin(G_FLOAT(OFS_PARM0));
 }   
 
-void
+static void
 PF_cos (void)
 {
 	G_FLOAT(OFS_RETURN) = cos(G_FLOAT(OFS_PARM0));
 }   
 
-void
+static void
 PF_sqrt (void)
 {
 	G_FLOAT(OFS_RETURN) = sqrt(G_FLOAT(OFS_PARM0));
 }   
 
-void
+static void
 PF_randomvec (void)
 {
 	vec3_t		temp;
@@ -1769,7 +1660,7 @@ PF_randomvec (void)
 	VectorCopy (temp, G_VECTOR(OFS_RETURN));
 }
 
-void
+static void
 PF_registercvar (void)
 {
 	char		*name, *value;
@@ -1800,12 +1691,10 @@ PF_registercvar (void)
 
 /*
 =================
-PF_min
-
 returns the minimum of two or more supplied floats
 =================
 */
-void
+static void
 PF_min (void)
 {
 	Uint		i;
@@ -1828,12 +1717,10 @@ PF_min (void)
 
 /*
 =================
-PF_max
-
 returns the maximum of two or more supplied floats
 =================
 */
-void
+static void
 PF_max (void)
 {
 	Uint		i;
@@ -1856,12 +1743,10 @@ PF_max (void)
 
 /*
 =================
-PF_bound
-
 returns float bounded within a supplied range
 =================
 */
-void
+static void
 PF_bound (void)
 {
 	    G_FLOAT(OFS_RETURN) = bound(G_FLOAT(OFS_PARM0), G_FLOAT(OFS_PARM1), G_FLOAT(OFS_PARM2));
@@ -1869,12 +1754,10 @@ PF_bound (void)
 
 /*
 =================
-PF_pow
-
 returns x raised to the y power
 =================
 */
-void
+static void
 PF_pow (void)
 {
 	G_FLOAT(OFS_RETURN) = pow(G_FLOAT(OFS_PARM0), G_FLOAT(OFS_PARM1));
@@ -1882,14 +1765,13 @@ PF_pow (void)
 
 /*
 =================
-PF_copyentity
-
 copies data from one entity to another
 
 copyentity(src, dst)
 =================
 */
-void PF_copyentity (void)
+static void
+PF_copyentity (void)
 {
 	edict_t *in, *out;
 
@@ -1900,15 +1782,14 @@ void PF_copyentity (void)
 
 /*
 =================
-PF_setcolor
-
 sets the color of a client and broadcasts the update to all connected
 clients
 
 setcolor(clientent, value)
 =================
 */
-void PF_setcolor (void)
+static void
+PF_setcolor (void)
 {
 	client_t *client;
 	Uint entnum, i;
@@ -1932,13 +1813,7 @@ void PF_setcolor (void)
 }
 
 
-/*
-=================
-PF_findfloat
-
-=================
-*/
-void
+static void
 PF_findfloat (void)
 {
 	Uint		e;
@@ -1967,7 +1842,8 @@ PF_findfloat (void)
 
 // chained search for strings in entity fields
 // entity(.string field, string match) findchain = #402;
-void PF_findchain (void)
+static void
+PF_findchain (void)
 {
 	Uint i;
 	int f;
@@ -2006,7 +1882,8 @@ void PF_findchain (void)
 
 // LordHavoc: chained search for float, int, and entity reference fields
 // entity(.string field, float match) findchainfloat = #403;
-void PF_findchainfloat (void)
+static void
+PF_findchainfloat (void)
 {
 	Uint i;
 	int f;
@@ -2035,7 +1912,7 @@ void PF_findchainfloat (void)
 	RETURN_EDICT(chain);
 }
 
-void
+static void
 PF_checkextension (void)
 {
 	int			len;
@@ -2063,7 +1940,7 @@ PF_checkextension (void)
 	G_FLOAT(OFS_RETURN) = false;
 }
 
-void
+static void
 PF_fixme (void)
 {
 	PR_RunError ("unimplemented builtin");

@@ -102,7 +102,7 @@ to the clients -- only the fields that differ from the
 baseline will be transmitted
 ================
 */
-void
+static void
 SV_CreateBaseline (void)
 {
 	int			i;
@@ -172,7 +172,7 @@ and each client for saving across the
 transition to another level
 ================
 */
-void
+static void
 SV_SaveSpawnparms (void)
 {
 	int         i, j;
@@ -206,7 +206,7 @@ Expands the PVS and calculates the PHS
 (Potentially Hearable Set)
 ================
 */
-void
+static void
 SV_CalcPHS (void)
 {
 	int         rowbytes, rowwords;
@@ -273,7 +273,7 @@ SV_CalcPHS (void)
 				vcount / num, count / num, num);
 }
 
-unsigned
+static unsigned
 SV_CheckModel (char *mdl)
 {
 	Uint8	*buf;

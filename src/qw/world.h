@@ -107,7 +107,5 @@ trace_t     SV_Move (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
 // passedict is explicitly excluded from clipping checks (normally NULL)
 
 
-struct edict_s    *SV_TestPlayerPosition (struct edict_s *ent, vec3_t origin);
-
 #endif // __WORLD_H
 

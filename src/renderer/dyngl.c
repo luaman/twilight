@@ -33,7 +33,7 @@ static const char rcsid[] =
  * officially by OpenGL 1.2, but may not exist in old/crappy drivers.  ;)
  */
 
-DYNGLCALL void DYNGLENTRY
+static void DYNGLENTRY
 Alt_glDrawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count,
 		GLenum type, const GLvoid *indices)
 {
@@ -45,7 +45,7 @@ Alt_glDrawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count,
 
 static matrix4x4_t	conv_matrix;
 
-DYNGLCALL void DYNGLENTRY
+static void DYNGLENTRY
 Alt_glLoadTransposeMatrixf (const GLfloat * m)
 {
 	if (qglLoadTransposeMatrixfARB)
@@ -57,7 +57,7 @@ Alt_glLoadTransposeMatrixf (const GLfloat * m)
 	}
 }
 
-DYNGLCALL void DYNGLENTRY
+static void DYNGLENTRY
 Alt_glMultTransposeMatrixf (const GLfloat * m)
 {
 	if (qglMultTransposeMatrixfARB)

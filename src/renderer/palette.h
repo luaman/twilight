@@ -42,33 +42,6 @@ extern Uint32 d_palette_bottom[256];
 extern float d_8tofloattable[256][4];
 
 extern cvar_t *gl_fb;
-extern cvar_t *v_hwgamma;
-
-extern cvar_t *v_black;
-extern cvar_t *v_black_r;
-extern cvar_t *v_black_b;
-extern cvar_t *v_black_g;
-extern cvar_t *v_grey;
-extern cvar_t *v_grey_r;
-extern cvar_t *v_grey_b;
-extern cvar_t *v_grey_g;
-extern cvar_t *v_white;
-extern cvar_t *v_white_r;
-extern cvar_t *v_white_b;
-extern cvar_t *v_white_g;
-
-extern cvar_t *v_tblack;
-extern cvar_t *v_tblack_r;
-extern cvar_t *v_tblack_b;
-extern cvar_t *v_tblack_g;
-extern cvar_t *v_tgrey;
-extern cvar_t *v_tgrey_r;
-extern cvar_t *v_tgrey_b;
-extern cvar_t *v_tgrey_g;
-extern cvar_t *v_twhite;
-extern cvar_t *v_twhite_r;
-extern cvar_t *v_twhite_b;
-extern cvar_t *v_twhite_g;
 
 extern void PAL_Init_Cvars (void);
 

@@ -266,7 +266,7 @@ R_LoadSkys
 ==================
 */
 char       *suf[6] = { "rt", "bk", "lf", "ft", "up", "dn" };
-qboolean
+static qboolean
 Sky_LoadSkys (cvar_t *cvar)
 {
 	int			i;
@@ -304,7 +304,7 @@ Sky_LoadSkys (cvar_t *cvar)
 R_SkyChanged
 ==============
 */
-void
+static void
 Sky_Changed (cvar_t *unused)
 {
 	unused = unused;

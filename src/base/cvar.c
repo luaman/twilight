@@ -36,6 +36,10 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "zone.h"
 
+static void Cvar_Show (cvar_t *var);
+static void Cvar_Set_f (void);
+static void Cvar_Reset_f (void);
+
 typedef struct cvar_foreach_s {
 	cvar_t					   *var;
 	struct cvar_foreach_s	   *next;
@@ -149,7 +153,7 @@ Cvar_Set (cvar_t *var, const char *svalue)
 		engine_callback (var);
 }
 
-void
+static void
 Cvar_Set_f (void)
 {
 	cvar_t	*var;
@@ -184,7 +188,7 @@ Cvar_Set_f (void)
 	return;
 }
 
-void
+static void
 Cvar_Reset_f (void)
 {
 	cvar_t	   *var;
@@ -410,6 +414,7 @@ Cvar_TabComplete (const char *partial)
 }
 
 
+#if 0
 void
 Cvar_Cleanup (void)
 {
@@ -437,6 +442,7 @@ Cvar_Cleanup (void)
 		Z_Free (t);
 	}
 }
+#endif
 
 
 void

@@ -54,7 +54,7 @@ crosses a waterline.
 int         fatbytes;
 Uint8       fatpvs[MAX_MAP_LEAFS / 8];
 
-void
+static void
 SV_AddToFatPVS (vec3_t org, mnode_t *node)
 {
 	int         i;
@@ -95,7 +95,7 @@ Calculates a PVS that is the inclusive or of all leafs within 8 pixels of the
 given point.
 =============
 */
-Uint8 *
+static Uint8 *
 SV_FatPVS (vec3_t org)
 {
 	fatbytes = (sv.worldmodel->brush->numleafs + 31) >> 3;
@@ -114,7 +114,7 @@ int         numnails;
 
 extern int  sv_nailmodel, sv_supernailmodel, sv_playermodel;
 
-qboolean
+static qboolean
 SV_AddNailUpdate (edict_t *ent)
 {
 	if (ent->v.modelindex != sv_nailmodel
@@ -127,7 +127,7 @@ SV_AddNailUpdate (edict_t *ent)
 	return true;
 }
 
-void
+static void
 SV_EmitNailUpdate (sizebuf_t *msg)
 {
 	Uint8       bits[6];				// [48 bits] xyzpy 12 12 12 4 8 
@@ -174,7 +174,7 @@ Writes part of a packetentities message.
 Can delta from either a baseline or a previous packet_entity
 ==================
 */
-void
+static void
 SV_WriteDelta (entity_state_t *from, entity_state_t *to, sizebuf_t *msg,
 			   qboolean force)
 {
@@ -270,7 +270,7 @@ Writes a delta update of a packet_entities_t to the message.
 
 =============
 */
-void
+static void
 SV_EmitPacketEntities (client_t *client, packet_entities_t *to, sizebuf_t *msg)
 {
 	edict_t    *ent;
@@ -336,7 +336,7 @@ SV_WritePlayersToClient
 
 =============
 */
-void
+static void
 SV_WritePlayersToClient (client_t *client, edict_t *clent, Uint8 *pvs,
 		sizebuf_t *msg)
 {

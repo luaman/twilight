@@ -388,15 +388,10 @@ int         SV_ModelIndex (char *name);
 qboolean    SV_CheckBottom (struct edict_s *ent);
 qboolean    SV_movestep (struct edict_s *ent, vec3_t move, qboolean relink);
 
-void        SV_WriteClientdataToMessage (client_t *client, sizebuf_t *msg);
-
 void        SV_MoveToGoal (void);
-
-void        SV_SaveSpawnparms (void);
 
 void        SV_Physics_Client (struct edict_s *ent);
 
-void        SV_ExecuteUserCommand (char *s);
 void        SV_InitOperatorCommands (void);
 
 void        SV_SendServerinfo (client_t *client);
@@ -420,12 +415,8 @@ void        SV_FlushSignon (void);
 //
 void        SV_ProgStartFrame (void);
 void        SV_Physics (void);
-void        SV_CheckVelocity (struct edict_s *ent);
-void        SV_AddGravity (struct edict_s *ent, float scale);
 qboolean    SV_RunThink (struct edict_s *ent);
-void        SV_Physics_Toss (struct edict_s *ent);
 void        SV_RunNewmis (void);
-void        SV_Impact (struct edict_s *e1, struct edict_s *e2);
 void        SV_SetMoveVars (void);
 
 //
@@ -456,11 +447,6 @@ void        SV_TogglePause (const char *msg);
 typedef enum { RD_NONE, RD_CLIENT, RD_PACKET } redirect_t;
 void        SV_BeginRedirect (redirect_t rd);
 void        SV_EndRedirect (void);
-
-//
-// sv_ccmds.c
-//
-void        SV_Status_f (void);
 
 //
 // sv_ents.c

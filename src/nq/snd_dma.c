@@ -42,13 +42,13 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-void        S_Play (void);
-void        S_PlayVol (void);
-void        S_SoundList (void);
-void        S_Update_ ();
+static void S_Play (void);
+static void S_PlayVol (void);
+static void S_SoundList (void);
+static void S_Update_ ();
 void        S_StopAllSounds (qboolean clear);
-void        S_StopAllSoundsC (void);
-void		CDAudio_Bgmcallback (cvar_t *cvar);
+static void S_StopAllSoundsC (void);
+static void S_ClearBuffer (void);
 
 // =======================================================================
 // Internal sound data & structures
@@ -59,7 +59,6 @@ channel_t   channels[MAX_CHANNELS];
 int         total_channels;
 
 int         snd_blocked = 0;
-static qboolean snd_ambient = 1;
 qboolean    snd_initialized = false;
 
 // pointer should go away
@@ -109,21 +108,7 @@ cvar_t     *_snd_mixahead;
 qboolean    fakedma = false;
 
 
-void
-S_AmbientOff (void)
-{
-	snd_ambient = false;
-}
-
-
-void
-S_AmbientOn (void)
-{
-	snd_ambient = true;
-}
-
-
-void
+static void
 S_SoundInfo_f (void)
 {
 	if (!sound_started || !shm) {
@@ -148,7 +133,7 @@ S_Startup
 ================
 */
 
-void
+static void
 S_Startup (void)
 {
 	int         rc;
@@ -284,7 +269,7 @@ S_FindName
 
 ==================
 */
-sfx_t      *
+static sfx_t      *
 S_FindName (char *name)
 {
 	int         i;
@@ -345,7 +330,7 @@ S_PrecacheSound (char *name)
 SND_PickChannel
 =================
 */
-channel_t  *
+static channel_t  *
 SND_PickChannel (int entnum, int entchannel)
 {
 	int         ch_idx;
@@ -390,7 +375,7 @@ SND_PickChannel (int entnum, int entchannel)
 SND_Spatialize
 =================
 */
-void
+static void
 SND_Spatialize (channel_t *ch)
 {
 	vec_t       dot;
@@ -541,13 +526,13 @@ S_StopAllSounds (qboolean clear)
 		S_ClearBuffer ();
 }
 
-void
+static void
 S_StopAllSoundsC (void)
 {
 	S_StopAllSounds (true);
 }
 
-void
+static void
 S_ClearBuffer (void)
 {
 	int         clear;
@@ -611,16 +596,13 @@ S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation)
 S_UpdateAmbientSounds
 ===================
 */
-void
+static void
 S_UpdateAmbientSounds (void)
 {
 	mleaf_t    *l;
 	float       vol;
 	int         ambient_channel;
 	channel_t  *chan;
-
-	if (!snd_ambient)
-		return;
 
 // calc ambient sound levels
 	if (!cl.worldmodel)
@@ -746,7 +728,7 @@ S_Update (vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 	S_Update_ ();
 }
 
-void
+static void
 GetSoundtime (void)
 {
 	int         samplepos;
@@ -784,7 +766,7 @@ S_ExtraUpdate (void)
 }
 
 
-void
+static void
 S_Update_ (void)
 {
 	Uint32	endtime;
@@ -820,7 +802,7 @@ console functions
 ===============================================================================
 */
 
-void
+static void
 S_Play (void)
 {
 	static int  hash = 345;
@@ -841,7 +823,7 @@ S_Play (void)
 	}
 }
 
-void
+static void
 S_PlayVol (void)
 {
 	static int  hash = 543;
@@ -864,7 +846,7 @@ S_PlayVol (void)
 	}
 }
 
-void
+static void
 S_SoundList (void)
 {
 	int         i;
@@ -903,22 +885,4 @@ S_LocalSound (char *sound)
 		return;
 	}
 	S_StartSound (cl.viewentity, -1, sfx, vec3_origin, 1, 1);
-}
-
-
-void
-S_ClearPrecache (void)
-{
-}
-
-
-void
-S_BeginPrecaching (void)
-{
-}
-
-
-void
-S_EndPrecaching (void)
-{
 }

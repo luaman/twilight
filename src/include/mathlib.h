@@ -92,8 +92,6 @@ double Q_asin(double x);
 double Q_atan(double x);
 double Q_atan2(double y, double x);
 double Q_tan(double x);
-float Q_fabs(float f);
-int Q_abs(int x);
 float Q_sqrt(double n);
 float Q_RSqrt(double number);
 
@@ -172,9 +170,6 @@ void		Vector2Angles (vec3_t in, vec3_t out);
 
 int         Q_log2 (int val);
 
-void        R_ConcatRotations (float in1[3][3], float in2[3][3],
-							   float out[3][3]);
-
 void        AngleVectors (vec3_t angles, vec3_t forward, vec3_t right,
 						  vec3_t up);
 void        AngleVectorsFLU (const vec3_t angles, vec3_t forward, vec3_t left,
@@ -189,8 +184,6 @@ int         BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
 void        VectorVectors(const vec3_t forward, vec3_t right, vec3_t up);
 void        RotatePointAroundVector (vec3_t dst, const vec3_t dir,
 									const vec3_t point, float degrees);
-
-float		RadiusFromBounds (vec3_t mins, vec3_t maxs);
 
 #define BOX_ON_PLANE_SIDE(emins, emaxs, p)	\
 	(((p)->type < 3)?						\

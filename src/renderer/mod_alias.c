@@ -89,7 +89,7 @@ Mod_CheckMinMaxVerts8 (Uint8 t[3])
 Mod_LoadAliasFrame
 =================
 */
-void *
+static void *
 Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame, model_t *mod)
 {
 	trivertx_t		*pinframe;
@@ -142,7 +142,7 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame, model_t *mod)
 Mod_LoadAliasGroup
 =================
 */
-void *
+static void *
 Mod_LoadAliasGroup (Uint8 *datapointer, maliasframedesc_t *frame, model_t *mod)
 {
 	daliasgroup_t		*pingroup;
@@ -206,7 +206,7 @@ Mod_LoadAliasGroup (Uint8 *datapointer, maliasframedesc_t *frame, model_t *mod)
 Mod_LoadAllSkins
 ===============
 */
-Uint8 *
+static Uint8 *
 Mod_LoadAllSkins (model_t *mod, Uint8 *datapointer, qboolean load)
 {
 	int					i, height, width, numgroups, numskins, numskins2;
@@ -338,7 +338,7 @@ mflags_t modelflags[] =
 
 static int nummflags = sizeof(modelflags) / sizeof(modelflags[0]) - 1;
 
-int
+static int
 Mod_FindModelFlags(char *name)
 {
 	int	i;

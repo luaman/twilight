@@ -56,8 +56,9 @@ cvar_t *game_mission;
 cvar_t *game_name;
 
 // prototypes used later in the file
-void COM_InitFilesystem (void);
-void COM_Path_f (void);
+static void COM_InitFilesystem (void);
+static void COM_Path_f (void);
+static void *SZ_GetSpace (sizebuf_t *buf, size_t length);
 
 
 /*
@@ -484,18 +485,6 @@ MSG_ReadAngle (void)
 
 #define	MAXPRINTMSG	4096
 
-void (*rd_print) (char *) = NULL;
-
-void Com_BeginRedirect (void (*RedirectedPrint) (char *))
-{
-	rd_print = RedirectedPrint;
-}
-
-void Com_EndRedirect (void)
-{
-	rd_print = NULL;
-}
-
 void Com_Printf (const char *fmt, ...)
 {
 	va_list     argptr;
@@ -505,11 +494,6 @@ void Com_Printf (const char *fmt, ...)
 	va_start (argptr, fmt);
 	vsnprintf (msg, sizeof (msg), fmt, argptr);
 	va_end (argptr);
-
-	if ( rd_print ) {
-		rd_print ( msg );
-		return;
-	}
 
 // also echo to debugging console
 	Sys_Printf ("%s", msg);				// also echo to debugging console
@@ -585,7 +569,7 @@ SZ_Clear (sizebuf_t *buf)
 	buf->overflowed = false;
 }
 
-void       *
+static void       *
 SZ_GetSpace (sizebuf_t *buf, size_t length)
 {
 	void       *data;
@@ -793,7 +777,7 @@ COM_CheckFile
 
 ================
 */
-qboolean
+static qboolean
 COM_CheckFile (char *fname)
 {
 	FILE *h;
@@ -816,7 +800,7 @@ Looks for the pop.lmp file
 Sets the "registered" cvar.
 ================
 */
-void
+static void
 COM_CheckRegistered (void)
 {
 	if (!COM_CheckFile ("gfx/pop.lmp"))
@@ -955,7 +939,7 @@ COM_filelength (FILE * f)
 	return end;
 }
 
-int
+static int
 COM_FileOpenRead (char *path, FILE ** hndl)
 {
 	FILE	   *f;
@@ -991,93 +975,6 @@ COM_Path_f (void)
 		else
 			Com_Printf ("%s\n", s->filename);
 	}
-}
-
-/*
-============
-COM_WriteFile
-
-The filename will be prefixed by the current game directory
-============
-*/
-void
-COM_WriteFile (char *filename, void *data, int len)
-{
-	FILE       *f;
-	char        name[MAX_OSPATH];
-
-	snprintf (name, sizeof (name), "%s/%s", com_gamedir, filename);
-
-	f = fopen (name, "wb");
-	if (!f) {
-		Sys_mkdir (com_gamedir);
-		f = fopen (name, "wb");
-		if (!f)
-			Sys_Error ("Error opening %s", filename);
-	}
-
-	Sys_Printf ("COM_WriteFile: %s\n", name);
-	fwrite (data, 1, len, f);
-	fclose (f);
-}
-
-
-/*
-============
-COM_CreatePath
-
-Only used for CopyFile
-============
-*/
-void
-COM_CreatePath (char *path)
-{
-	char       *ofs;
-
-	for (ofs = path + 1; *ofs; ofs++) {
-		if (*ofs == '/') {				// create the directory
-			*ofs = 0;
-			Sys_mkdir (path);
-			*ofs = '/';
-		}
-	}
-}
-
-
-/*
-===========
-COM_CopyFile
-
-Copies a file over from the net to the local cache, creating any directories
-needed.  This is for the convenience of developers using ISDN from home.
-===========
-*/
-void
-COM_CopyFile (char *netpath, char *cachepath)
-{
-	FILE		*in, *out;
-	Uint32		remaining, count;
-	char		buf[4096];
-
-	remaining = COM_FileOpenRead (netpath, &in);
-	// create directories up to the cache file
-	COM_CreatePath (cachepath);
-	out = fopen (cachepath, "wb");
-	if (!out)
-		Sys_Error ("Error opening %s", cachepath);
-
-	while (remaining) {
-		if (remaining < sizeof (buf))
-			count = remaining;
-		else
-			count = sizeof (buf);
-		fread (buf, 1, count, in);
-		fwrite (buf, 1, count, out);
-		remaining -= count;
-	}
-
-	fclose (in);
-	fclose (out);
 }
 
 
@@ -1241,7 +1138,7 @@ Loads the header and directory, adding the files at the beginning
 of the list so they override previous pack files.
 =================
 */
-pack_t     *
+static pack_t     *
 COM_LoadPackFile (char *packfile)
 {
 	dpackheader_t header;
@@ -1298,7 +1195,7 @@ Sets com_gamedir, adds the directory to the head of the path,
 then loads and adds pak1.pak pak2.pak ...
 ================
 */
-void
+static void
 COM_AddDirectory (char *dir)
 {
 	int         i;
@@ -1340,7 +1237,7 @@ COM_AddGameDirectory
 Wrapper for COM_AddDirectory
 ================
 */
-void
+static void
 COM_AddGameDirectory (char *dir)
 {
 	char		buf[1024];
@@ -1362,7 +1259,7 @@ COM_AddGameDirectory (char *dir)
 COM_InitFilesystem
 ================
 */
-void
+static void
 COM_InitFilesystem (void)
 {
 	Uint         i;

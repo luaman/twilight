@@ -215,7 +215,6 @@ typedef struct {
 extern int  net_numdrivers;
 extern net_driver_t net_drivers[MAX_NET_DRIVERS];
 
-extern int  DEFAULTnet_hostport;
 extern int  net_hostport;
 
 extern int  net_driverlevel;
@@ -324,8 +323,6 @@ extern qboolean tcpipAvailable;
 extern qboolean slistInProgress;
 extern qboolean slistSilent;
 extern qboolean slistLocal;
-
-void        NET_Slist_f (void);
 
 #endif // __NET_H
 

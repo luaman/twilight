@@ -66,8 +66,8 @@ Uint32 type_size[8] =
 	sizeof (void *) / 4
 };
 
-extern ddef_t *ED_FieldAtOfs (int ofs);
-extern qboolean ED_ParseEpair (void *base, ddef_t *key, char *s);
+static ddef_t *ED_FieldAtOfs (int ofs);
+static qboolean ED_ParseEpair (void *base, ddef_t *key, char *s);
 
 cvar_t *pr_checkextension;
 
@@ -99,7 +99,7 @@ ED_ClearEdict
 Sets everything to NULL
 =================
 */
-void
+static void
 ED_ClearEdict (edict_t *e)
 {
 	memset (&e->v, 0, progs->entityfields * 4);
@@ -186,7 +186,7 @@ ED_Free (edict_t *ed)
 ED_GlobalAtOfs
 ============
 */
-ddef_t *
+static ddef_t *
 ED_GlobalAtOfs (int ofs)
 {
 	ddef_t		*def;
@@ -206,7 +206,7 @@ ED_GlobalAtOfs (int ofs)
 ED_FieldAtOfs
 ============
 */
-ddef_t *
+static ddef_t *
 ED_FieldAtOfs (int ofs)
 {
 	ddef_t		*def;
@@ -226,7 +226,7 @@ ED_FieldAtOfs (int ofs)
 ED_FindField
 ============
 */
-ddef_t *
+static ddef_t *
 ED_FindField (char *name)
 {
 	ddef_t		*def;
@@ -244,31 +244,10 @@ ED_FindField (char *name)
 
 /*
 ============
-ED_FindGlobal
-============
-*/
-ddef_t *
-ED_FindGlobal (char *name)
-{
-	ddef_t		*def;
-	Uint		i;
-
-	for (i = 0; i < progs->numglobaldefs; i++)
-	{
-		def = &pr_globaldefs[i];
-		if (!strcmp (PR_GetString (def->s_name), name))
-			return def;
-	}
-	return NULL;
-}
-
-
-/*
-============
 ED_FindFunction
 ============
 */
-dfunction_t *
+static dfunction_t *
 ED_FindFunction (char *name)
 {
 	dfunction_t		*func;
@@ -322,7 +301,7 @@ PR_ValueString
 Returns a string describing *data in a type specific manner
 =============
 */
-char *
+static char *
 PR_ValueString (etype_t type, eval_t *val)
 {
 	static char		line[256];
@@ -360,58 +339,6 @@ PR_ValueString (etype_t type, eval_t *val)
 			break;
 		case ev_pointer:
 			snprintf (line, sizeof (line), "pointer");
-			break;
-		default:
-			snprintf (line, sizeof (line), "bad type %i", type);
-			break;
-	}
-
-	return line;
-}
-
-/*
-============
-PR_UglyValueString
-
-Returns a string describing *data in a type specific manner
-Easier to parse than PR_ValueString
-=============
-*/
-char *
-PR_UglyValueString (etype_t type, eval_t *val)
-{
-	static char		line[256];
-	ddef_t			*def;
-	dfunction_t		*f;
-
-	type &= ~DEF_SAVEGLOBAL;
-
-	switch (type)
-	{
-		case ev_string:
-			snprintf (line, sizeof (line), "%s", PR_GetString (val->string));
-			break;
-		case ev_entity:
-			snprintf (line, sizeof (line), "%i",
-					  NUM_FOR_EDICT (PROG_TO_EDICT (val->edict)));
-			break;
-		case ev_function:
-			f = pr_functions + val->function;
-			snprintf (line, sizeof (line), "%s", PR_GetString (f->s_name));
-			break;
-		case ev_field:
-			def = ED_FieldAtOfs (val->_int);
-			snprintf (line, sizeof (line), "%s", PR_GetString (def->s_name));
-			break;
-		case ev_void:
-			snprintf (line, sizeof (line), "void");
-			break;
-		case ev_float:
-			snprintf (line, sizeof (line), "%g", val->_float);
-			break;
-		case ev_vector:
-			snprintf (line, sizeof (line), "%g %g %g", val->vector[0],
-					  val->vector[1], val->vector[2]);
 			break;
 		default:
 			snprintf (line, sizeof (line), "bad type %i", type);
@@ -531,55 +458,6 @@ ED_Print (edict_t *ed)
 	}
 }
 
-/*
-=============
-ED_Write
-
-For savegames
-=============
-*/
-void
-ED_Write (FILE *f, edict_t *ed)
-{
-	ddef_t		*d;
-	int			*v;
-	Uint		i, j;
-	char		*name;
-	int			type;
-
-	fprintf (f, "{\n");
-
-	if (ed->free)
-	{
-		fprintf (f, "}\n");
-		return;
-	}
-
-	for (i = 1; i < progs->numfielddefs; i++)
-	{
-		d = &pr_fielddefs[i];
-		name = PR_GetString (d->s_name);
-		if (name[strlen (name) - 2] == '_')
-			// skip _x, _y, _z vars
-			continue;
-
-		v = (int *) ((char *) &ed->v + d->ofs * 4);
-
-		// if the value is still all 0, skip the field
-		type = d->type & ~DEF_SAVEGLOBAL;
-		for (j = 0; j < type_size[type]; j++)
-			if (v[j])
-				break;
-		if (j == type_size[type])
-			continue;
-
-		fprintf (f, "\"%s\" ", name);
-		fprintf (f, "\"%s\"\n", PR_UglyValueString (d->type, (eval_t *) v));
-	}
-
-	fprintf (f, "}\n");
-}
-
 void
 ED_PrintNum (int ent)
 {
@@ -613,7 +491,7 @@ ED_PrintEdict_f
 For debugging, prints a single edicy
 =============
 */
-void
+static void
 ED_PrintEdict_f (void)
 {
 	int			i;
@@ -630,7 +508,7 @@ ED_Count
 For debugging
 =============
 */
-void
+static void
 ED_Count (void)
 {
 	Uint		i;
@@ -660,98 +538,11 @@ ED_Count (void)
 }
 
 /*
-==============================================================================
-
-					ARCHIVING GLOBALS
-
-FIXME: need to tag constants, doesn't really work
-==============================================================================
-*/
-
-/*
-=============
-ED_WriteGlobals
-=============
-*/
-void
-ED_WriteGlobals (FILE *f)
-{
-	ddef_t		*def;
-	Uint		i;
-	char		*name;
-	int			type;
-
-	fprintf (f, "{\n");
-	for (i = 0; i < progs->numglobaldefs; i++)
-	{
-		def = &pr_globaldefs[i];
-		type = def->type;
-		if (!(def->type & DEF_SAVEGLOBAL))
-			continue;
-		type &= ~DEF_SAVEGLOBAL;
-
-		if (type != ev_string && type != ev_float && type != ev_entity)
-			continue;
-
-		name = PR_GetString (def->s_name);
-		fprintf (f, "\"%s\" ", name);
-		fprintf (f, "\"%s\"\n",
-				PR_UglyValueString (type, (eval_t *) &pr_globals[def->ofs]));
-	}
-	fprintf (f, "}\n");
-}
-
-/*
-=============
-ED_ParseGlobals
-=============
-*/
-void
-ED_ParseGlobals (char *data)
-{
-	char		keyname[64];
-	ddef_t		*key;
-
-	while (1)
-	{
-		// parse key
-		data = COM_Parse (data);
-		if (com_token[0] == '}')
-			break;
-		if (!data)
-			SV_Error ("ED_ParseEntity: EOF without closing brace");
-
-		strcpy (keyname, com_token);
-
-		// parse value 
-		data = COM_Parse (data);
-		if (!data)
-			SV_Error ("ED_ParseEntity: EOF without closing brace");
-
-		if (com_token[0] == '}')
-			SV_Error ("ED_ParseEntity: closing brace without data");
-
-		key = ED_FindGlobal (keyname);
-		if (!key)
-		{
-			Com_Printf ("%s is not a global\n", keyname);
-			continue;
-		}
-
-		if (!ED_ParseEpair ((void *) pr_globals, key, com_token))
-			SV_Error ("ED_ParseGlobals: parse error");
-	}
-}
-
-//============================================================================
-
-
-/*
 =============
 ED_NewString
 =============
 */
-char *
+static char *
 ED_NewString (char *string)
 {
 	char		*new, *new_p;
@@ -787,7 +578,7 @@ Can parse either fields or globals
 returns false if error
 =============
 */
-qboolean
+static qboolean
 ED_ParseEpair (void *base, ddef_t *key, char *s)
 {
 	int				i;
@@ -862,7 +653,7 @@ ed should be a properly initialized empty edict.
 Used for initial level load and for savegames.
 ====================
 */
-char *
+static char *
 ED_ParseEdict (char *data, edict_t *ent)
 {
 	ddef_t		*key;

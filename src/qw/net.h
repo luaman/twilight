@@ -123,7 +123,6 @@ extern int net_drop;					// packets dropped before this one
 void Netchan_Init (void);
 void Netchan_Init_Cvars (void);
 void Netchan_Transmit (netchan_t *chan, size_t length, Uint8 *data);
-void Netchan_OutOfBand(netsrc_t sock, netadr_t adr, size_t length, Uint8 *data);
 void Netchan_OutOfBandPrint (netsrc_t sock, netadr_t adr, char *format, ...);
 qboolean Netchan_Process (netchan_t *chan);
 void Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport);

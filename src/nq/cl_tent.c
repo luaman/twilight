@@ -79,7 +79,7 @@ CL_TEnts_Init (void)
 CL_ParseBeam
 =================
 */
-void
+static void
 CL_ParseBeam (model_t *m, qboolean lightning)
 {
 	int         ent;
@@ -328,7 +328,7 @@ CL_ParseTEnt (void)
 CL_NewTempEntity
 =================
 */
-entity_t   *
+static entity_t   *
 CL_NewTempEntity (void)
 {
 	entity_t   *ent;

@@ -515,6 +515,7 @@ Sys_ExpandPath (char *str)
 #ifdef _CONSOLE 
 #undef main
 #endif
+extern void CL_Init (void);
 
 int
 main (int argc, char *argv[])

@@ -107,41 +107,10 @@ CL_ClearTEnts (void)
 
 /*
 =================
-CL_AllocExplosion
-=================
-*/
-explosion_t *
-CL_AllocExplosion (void)
-{
-	int         i;
-	float       time;
-	int         index;
-
-	for (i = 0; i < MAX_EXPLOSIONS; i++) {
-		if (!cl_explosions[i].model)
-			return &cl_explosions[i];
-	}
-
-// find the oldest explosion
-	time = cl.time;
-	index = 0;
-
-	for (i = 0; i < MAX_EXPLOSIONS; i++) {
-		if (cl_explosions[i].start < time) {
-			time = cl_explosions[i].start;
-			index = i;
-		}
-	}
-
-	return &cl_explosions[index];
-}
-
-/*
-=================
 CL_ParseBeam
 =================
 */
-void
+static void
 CL_ParseBeam (model_t *m, qboolean lightning)
 {
 	int         ent;
@@ -396,7 +365,7 @@ CL_NewTempEntity (void)
 CL_UpdateBeams
 =================
 */
-void
+static void
 CL_UpdateBeams (void)
 {
 	int         i;
@@ -451,7 +420,7 @@ CL_UpdateBeams (void)
 CL_UpdateExplosions
 =================
 */
-void
+static void
 CL_UpdateExplosions (void)
 {
 	int         i;

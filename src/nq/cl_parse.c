@@ -103,7 +103,7 @@ CL_EntityNum
 This error checks and tracks the total number of entities
 ===============
 */
-entity_t   *
+static entity_t   *
 CL_EntityNum (int num)
 {
 	if (num >= cl.num_entities) {
@@ -121,7 +121,7 @@ CL_EntityNum (int num)
 CL_ParseStartSoundPacket
 ==================
 */
-void
+static void
 CL_ParseStartSoundPacket (void)
 {
 	vec3_t      pos;
@@ -168,7 +168,7 @@ When the client is taking a long time to load stuff, send keepalive messages
 so the server doesn't disconnect.
 ==================
 */
-void
+static void
 CL_KeepaliveMessage (void)
 {
 	float       time;
@@ -227,7 +227,7 @@ model_t		*mdl_fire = NULL;
 CL_ParseServerInfo
 ==================
 */
-void
+static void
 CL_ParseServerInfo (void)
 {
 	char       *str;
@@ -324,13 +324,10 @@ CL_ParseServerInfo (void)
 		CL_KeepaliveMessage ();
 	}
 
-	S_BeginPrecaching ();
-
 	for (i = 1; i < numsounds; i++) {
 		cl.sound_precache[i] = S_PrecacheSound (sound_precache[i]);
 		CL_KeepaliveMessage ();
 	}
-	S_EndPrecaching ();
 
 
 // local state
@@ -354,7 +351,7 @@ If an entities model or origin changes from frame to frame, it must be
 relinked.  Other attributes can change without relinking.
 ==================
 */
-void
+static void
 CL_ParseUpdate (int bits)
 {
 	int         i;
@@ -479,7 +476,7 @@ CL_ParseUpdate (int bits)
 CL_ParseBaseline
 ==================
 */
-void
+static void
 CL_ParseBaseline (entity_t *ent)
 {
 	int         i;
@@ -502,7 +499,7 @@ CL_ParseClientdata
 Server information pertaining to this client only
 ==================
 */
-void
+static void
 CL_ParseClientdata (int bits)
 {
 	int			i, j;
@@ -585,7 +582,7 @@ CL_ParseClientdata (int bits)
 CL_NewTranslation
 =====================
 */
-void
+static void
 CL_NewTranslation (int slot)
 {
 	Uint8	color;
@@ -606,7 +603,7 @@ CL_NewTranslation (int slot)
 CL_ParseStatic
 =====================
 */
-void
+static void
 CL_ParseStatic (void)
 {
 	entity_t   *ent;
@@ -637,7 +634,7 @@ CL_ParseStatic (void)
 CL_ParseStaticSound
 ===================
 */
-void
+static void
 CL_ParseStaticSound (void)
 {
 	vec3_t      org;

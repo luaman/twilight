@@ -115,7 +115,7 @@ CL_AllocDlight (int key)
 CL_NewDlight
 ===============
 */
-void
+static void
 CL_NewDlight (int key, vec3_t org, int effects)
 {
 	dlight_t   *dl = CL_AllocDlight (key);
@@ -190,7 +190,7 @@ CL_ParseDelta
 Can go from either a baseline or a previous packet_entity
 ==================
 */
-void
+static void
 CL_ParseDelta (entity_state_t *from, entity_state_t *to, int bits)
 {
 	int         i;
@@ -252,7 +252,7 @@ CL_ParseDelta (entity_state_t *from, entity_state_t *to, int bits)
 FlushEntityPacket
 =================
 */
-void
+static void
 FlushEntityPacket (void)
 {
 	int         word;
@@ -591,7 +591,7 @@ CL_LinkPacketEntities
 
 ===============
 */
-void
+static void
 CL_LinkPacketEntities (void)
 {
 	entity_t			*ent;
@@ -747,7 +747,7 @@ CL_LinkProjectiles
 
 =============
 */
-void
+static void
 CL_LinkProjectiles (void)
 {
 	int         i;
@@ -884,7 +884,7 @@ CL_AddFlagModels
 Called when the CTF flags are set
 ================
 */
-void
+static void
 CL_AddFlagModels (entity_t *ent, int team)
 {
 	int         i;
@@ -960,7 +960,7 @@ Create visible entities in the correct position
 for all current players
 =============
 */
-void
+static void
 CL_LinkPlayers (void)
 {
 	int         j;
@@ -1155,7 +1155,7 @@ CL_SetSolidPlayers ()
 	}
 }
 
-void
+static void
 CL_LinkStaticEntites (void)
 {
 	int		i;

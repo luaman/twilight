@@ -268,7 +268,8 @@ Mod_LoadEdges (lump_t *l, model_t *mod)
 	}
 }
 
-void Mod_LoadFaces (lump_t *l, model_t *mod)
+static void
+Mod_LoadFaces (lump_t *l, model_t *mod)
 {
 	dface_t		*in;
 	msurface_t	*out;

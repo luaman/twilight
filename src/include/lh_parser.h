@@ -56,7 +56,6 @@ typedef struct codetree_s
 
 extern codetree_t *LHP_parse(char *text, char *name, memzone_t *zone);
 extern void LHP_printcodetree_c(int indentlevel, codetree_t *code);
-extern void LHP_freecodewords(codeword_t *word);
 extern void LHP_freecodetree(codetree_t *code);
 
 
