@@ -266,10 +266,6 @@ SOURCE=.\view.c
 
 SOURCE=.\world.c
 # End Source File
-# Begin Source File
-
-SOURCE=.\zone.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -296,7 +292,7 @@ SOURCE=.\client.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmd.h
+SOURCE=..\include\cmd.h
 # End Source File
 # Begin Source File
 

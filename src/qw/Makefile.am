@@ -33,7 +33,7 @@ twilight_qw_SOURCES= \
 	keys.c keys.h mdfour.c \
 	menu.c net.h net_chan.c net_udp.c pmove.c pmovetst.c protocol.h \
 	r_explosion.c r_explosion.h r_part.c render.h sbar.c screen.h skin.c \
-	snd_dma.c sys.c vid_sdl.c view.c zone.c
+        snd_dma.c sys.c vid_sdl.c view.c
 
 EXTRA_DIST= \
 	qw.dsp

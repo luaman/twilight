@@ -27,7 +27,7 @@ twilight_qwsv_SOURCES= \
 	pr_cmds.c pr_edict.c pr_exec.c progdefs.h progs.h \
 	protocol.h server.h sv_ccmds.c \
 	sv_ents.c sv_init.c sv_main.c sv_model.c sv_move.c sv_nchan.c sv_phys.c \
-        sv_send.c sv_sys.c sv_user.c world.c world.h zone.c
+        sv_send.c sv_sys.c sv_user.c world.c world.h
 
 EXTRA_DIST= \
 	qwsv.dsp

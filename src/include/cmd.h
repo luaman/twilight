@@ -86,6 +86,8 @@ typedef enum {
 	src_command							// from the command buffer
 } cmd_source_t;
 
+extern cmd_source_t cmd_source;
+
 void        Cmd_Init (void);
 
 void        Cmd_AddCommand (char *cmd_name, xcommand_t function);
