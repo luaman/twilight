@@ -16,10 +16,11 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_NQ
 
 bin_PROGRAMS=twilight-nq
 twilight_nq_LDADD= \
-		   $(top_srcdir)/src/base/libtwilight_base.a \
-		   $(top_srcdir)/src/image/libtwilight_image.a \
-		   $(top_srcdir)/src/renderer/libtwilight_renderer.a \
-		   $(top_srcdir)/src/sound/libtwilight_sound.a
+	$(top_srcdir)/src/base/libtwilight_base.a \
+	$(top_srcdir)/src/image/libtwilight_image.a \
+	$(top_srcdir)/src/image/libjpeg/libjpeg.a \
+	$(top_srcdir)/src/renderer/libtwilight_renderer.a \
+	$(top_srcdir)/src/sound/libtwilight_sound.a
 
 if SYS_WIN32
 twilight_nq_sys_libs=-lwinmm -lwsock32

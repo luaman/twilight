@@ -18,6 +18,7 @@ bin_PROGRAMS=twilight-qw
 twilight_qw_LDADD= \
 	$(top_srcdir)/src/base/libtwilight_base.a \
 	$(top_srcdir)/src/image/libtwilight_image.a \
+	$(top_srcdir)/src/image/libjpeg/libjpeg.a \
 	$(top_srcdir)/src/renderer/libtwilight_renderer.a \
 	$(top_srcdir)/src/sound/libtwilight_sound.a
 

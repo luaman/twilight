@@ -89,6 +89,10 @@ SOURCE=.\image.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\jpeg.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\pcx.c
 # End Source File
 # Begin Source File
@@ -106,6 +110,10 @@ SOURCE=.\tga.c
 # Begin Source File
 
 SOURCE=.\image.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\jpeg.h
 # End Source File
 # Begin Source File
 
