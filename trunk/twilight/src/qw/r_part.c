@@ -35,11 +35,10 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
+#include "pmove.h"
 #include "r_explosion.h"
 
 memzone_t *part_zone;
-
-extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
 
 extern int part_tex_dot;
 extern int part_tex_spark;
@@ -832,7 +831,7 @@ R_Move_Base_Particles (void)
 		if (p->bounce && r_particle_physics->ivalue) {
 			vec3_t normal;
 			float dist;
-			if (TraceLine (oldorg, p->org, v, normal) < 1) {
+			if (TraceLine (cl.worldmodel, oldorg, p->org, v, normal) < 1) {
 				VectorCopy (v, p->org);
 				if (p->bounce < 0) {
 					p->die = -1;

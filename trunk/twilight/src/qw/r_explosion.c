@@ -35,12 +35,12 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "draw.h"
 #include "glquake.h"
-#include "mathlib.h"
-#include "strlib.h"
 #include "gl_textures.h"
+#include "mathlib.h"
+#include "pmove.h"
+#include "strlib.h"
 
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);
-extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
 
 #define MAX_EXPLOSIONS 128
 #define EXPLOSIONGRID 8
@@ -262,7 +262,8 @@ R_MoveExplosion (explosion_t *e)
 			VectorMA(e->vert[i], frametime, e->vertvel[i], end);
 			if (r_explosionclip->ivalue)
 			{
-				if (TraceLine(e->vert[i], end, impact, normal) < 1)
+				if (TraceLine
+						(cl.worldmodel, e->vert[i], end, impact, normal) < 1)
 				{
 					// clip velocity against the wall
 					dot = DotProduct(e->vertvel[i], normal) * -1.125f;

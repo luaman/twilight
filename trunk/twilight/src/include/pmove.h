@@ -30,72 +30,97 @@
 #include "model.h"
 #include "protocol.h"
 
-typedef struct {
-	vec3_t      normal;
-	float       dist;
+#define	MAX_PHYSENTS	32
+
+
+typedef struct
+{
+	vec3_t		normal;
+	float		dist;
 } pmplane_t;
 
-typedef struct {
-	qboolean    allsolid;				// if true, plane is not valid
-	qboolean    startsolid;				// if true, the initial point was in a
-	// solid area
-	qboolean    inopen, inwater;
-	float       fraction;				// time completed, 1.0 = didn't hit
-	// anything
-	vec3_t      endpos;					// final position
-	pmplane_t   plane;					// surface normal at impact
-	int         ent;					// entity the surface is on
+typedef struct
+{
+	// if true, plane is not valid
+	qboolean	allsolid;
+
+	// if true, the initial point was in a solid area
+	qboolean	startsolid;
+	qboolean	inopen, inwater;
+
+	// time completed, 1.0 = didn't hit anything
+	float		fraction;
+
+	// final position
+	vec3_t		endpos;
+
+	// surface normal at impact
+	pmplane_t	plane;
+
+	// entity the surface is on
+	int			ent;
 } pmtrace_t;
 
 
-#define	MAX_PHYSENTS	32
-typedef struct {
-	vec3_t      origin;
-	struct model_s    *model;					// only for bsp models
-	vec3_t      mins, maxs;				// only for non-bsp models
-	int         info;					// for client or server to identify
+typedef struct
+{
+	vec3_t			origin;
+
+	// only for bsp models
+	struct model_s	*model;
+
+	// only for non-bsp models
+	vec3_t			mins, maxs;
+
+	// for client or server to identify
+	int				info;
 } physent_t;
 
 
-typedef struct {
-	int         sequence;				// just for debugging prints
+typedef struct
+{
+	// for debugging prints
+	int			sequence;
 
 	// player state
-	vec3_t      origin;
-	vec3_t      angles;
-	vec3_t      velocity;
-	int         oldbuttons;
-	float       waterjumptime;
-	qboolean    dead;
-	int         spectator;
+	vec3_t		origin;
+	vec3_t		angles;
+	vec3_t		velocity;
+	int			oldbuttons;
+	float		waterjumptime;
+	qboolean	dead;
+	int			spectator;
 
 	// world state
-	int         numphysent;
-	physent_t   physents[MAX_PHYSENTS];	// 0 should be the world
+	int			numphysent;
+
+	// 0 should be the world
+	physent_t	physents[MAX_PHYSENTS];
 
 	// input
-	usercmd_t   cmd;
+	usercmd_t	cmd;
 
 	// results
-	int         numtouch;
-	int         touchindex[MAX_PHYSENTS];
+	int			numtouch;
+	int			touchindex[MAX_PHYSENTS];
 
-	int         groundent;
-	int         waterlevel;
-	int         watertype;
+	int			groundent;
+	int			waterlevel;
+	int			watertype;
 } playermove_t;
 
-typedef struct {
-	float       gravity;
-	float       stopspeed;
-	float       maxspeed;
-	float       spectatormaxspeed;
-	float       accelerate;
-	float       airaccelerate;
-	float       wateraccelerate;
-	float       friction;
-	float       waterfriction;
-	float       entgravity;
+typedef struct
+{
+	float		gravity;
+	float		stopspeed;
+	float		maxspeed;
+	float		spectatormaxspeed;
+	float		accelerate;
+	float		airaccelerate;
+	float		wateraccelerate;
+	float		friction;
+	float		waterfriction;
+	float		entgravity;
 } movevars_t;
 
 
@@ -103,17 +128,21 @@ extern movevars_t movevars;
 extern playermove_t pmove;
 struct hull_s;
 
-void        PlayerMove (void);
-void        Pmove_Init (void);
+void PlayerMove (void);
+void Pmove_Init (void);
 
-int         PM_HullPointContents (struct hull_s *hull, int num, vec3_t p);
+int PM_HullPointContents (struct hull_s *hull, int num, vec3_t p);
 
-int         PM_PointContents (vec3_t point);
-qboolean    PM_TestPlayerPosition (vec3_t point);
-pmtrace_t   PM_PlayerMove (vec3_t start, vec3_t stop);
+int PM_PointContents (vec3_t point);
+qboolean PM_TestPlayerPosition (vec3_t point);
+pmtrace_t PM_PlayerMove (vec3_t start, vec3_t stop);
 
-qboolean	PM_RecursiveHullCheck (struct hull_s *hull, int num, float p1f,
-				float p2f, vec3_t p1, vec3_t p2, pmtrace_t *trace);
+qboolean PM_RecursiveHullCheck (struct hull_s *hull, int num, float p1f,
+		float p2f, vec3_t p1, vec3_t p2, pmtrace_t *trace);
+
+float TraceLine (model_t *mdl, vec3_t start, vec3_t end, vec3_t impact,
+		vec3_t normal);
+	
 
 #endif // __PMOVE_H
 
