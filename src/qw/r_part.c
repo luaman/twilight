@@ -494,14 +494,16 @@ R_Torch (entity_t *ent, qboolean torch2)
 		VectorSet (pvel, (rand() & 3) - 2, (rand() & 3) - 2, 0);
 		VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
 
-		if (torch2) {
+		if (torch2) { 
+			/* used for large torches on start map to left and right of spawn, etc. */
 			porg[2] = ent->origin[2] - 2;
 			VectorSet (pvel, (rand() & 7) - 4, (rand() & 7) - 4, 0);
 
-			p = new_base_particle (pt_torch2, porg, pvel, color, Q_rand () & 3, (ent->frame) ? 30 : 10, realtime + 5);
+			p = new_base_particle (pt_torch2, porg, pvel, color, Q_rand () & 3, 15, realtime + 5);
 
-		} else {
-			p = new_base_particle (pt_torch, porg, pvel, color, Q_rand () & 3, 10, realtime + 5);
+		} else { 
+			/* wall torches w/ fire */
+			p = new_base_particle (pt_torch, porg, pvel, color, Q_rand () & 3, 5, realtime + 5);
 		}
 
 		ent->time_left = realtime + 0.05;
