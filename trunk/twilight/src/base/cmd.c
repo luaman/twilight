@@ -280,6 +280,21 @@ Cbuf_Execute (void)
 				break;
 		}
 
+		if (start != -1) {
+			size = i - start;
+			if (size && (size < sizeof(c_name))) {
+				memcpy(c_name, &text[start], size);
+				c_name[size] = '\0';
+				if ((cvar = Cvar_Find(c_name))) {
+					if ((cvar->s_len + j + 1) >= sizeof(line))
+						Sys_Error("Line too long!");
+					memcpy(&line[j], cvar->svalue, cvar->s_len);
+					j += cvar->s_len;
+					last = i;
+				}
+			}
+			start = -1;
+		}
 
 		size = i - last;
 		memcpy (&line[j], &text[last], size);

@@ -497,6 +497,16 @@ Menu_Parse_Menu (codetree_t *tree_base)
 				menu->title = Zstrdup(m_zone, word->string);
 			else
 				ERROR ();
+		} else if (!strcmp(word->string, "on_enter") && !code->child) {
+			if ((word = word->next) && word->flags & WORDFLAG_STRING)
+				menu->on_enter = Zstrdup(m_zone, word->string);
+			else
+				ERROR ();
+		} else if (!strcmp(word->string, "on_exit") && !code->child) {
+			if ((word = word->next) && word->flags & WORDFLAG_STRING)
+				menu->on_exit = Zstrdup(m_zone, word->string);
+			else
+				ERROR ();
 		} else if (!strcmp(word->string, "item") && code->child) {
 			if ((word = word->next))
 				i++;
@@ -608,6 +618,54 @@ M_Loadmenu_f (void)
 }
 
 static void
+M_First_Item (menu_t *menu)
+{
+	menu->item = 0;
+	while(menu->items[menu->item] && !MItem_Selectable(menu->items[menu->item]))
+		menu->item++;
+	if (!menu->items[menu->item])
+		menu->item = 0;
+}
+
+void
+M_Exit (qboolean new_menu)
+{
+	if (!m_menu)
+		return;
+
+	if (!new_menu) {
+		M_First_Item (m_menu);
+		if (m_menu->on_exit)
+			Cbuf_InsertText(m_menu->on_exit);
+	}
+
+	m_menu = NULL;
+	M_SetKeyDest ();
+}
+
+void
+M_Enter (menu_t *menu)
+{
+	if (!menu)
+		return;
+
+	if (m_menu)
+		M_Exit (true);
+
+	if (!menu->item)
+		M_First_Item (menu);
+
+	if (menu->on_enter) {
+		Cbuf_InsertText (menu->on_enter);
+		Cbuf_Execute ();
+	}
+
+	m_entersound = true;
+	m_menu = menu;
+	M_SetKeyDest ();
+}
+
+static void
 M_Menu_f (void)
 {
 	menu_t	*menu;
@@ -617,15 +675,7 @@ M_Menu_f (void)
 
 	for (menu = m_first; menu; menu = menu->next) {
 		if (!strcasecmp(id, menu->id)) {
-			m_entersound = true;
-			key_dest = key_menu;
-			m_menu = menu;
-			menu->item = 0;
-			while (m_menu->items[m_menu->item] &&
-					!MItem_Selectable(m_menu->items[m_menu->item]))
-				m_menu->item++;
-			if (!m_menu->items[m_menu->item])
-				m_menu->item = 0;
+			M_Enter (menu);
 			return;
 		}
 	}
