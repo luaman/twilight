@@ -1,14 +1,19 @@
 dnl	$Id$
 dnl
-dnl Process this file with autoconf to produce a configure script.
+dnl Process this file with ./bootstrap to produce a configure script.
+
+VERSION=0.1.99
+DEVEL_RELEASE=yes
 
 AC_PREREQ(2.13)
 AC_INIT(nq/sv_main.c)
 AC_REVISION($Revision$)
 
-VERSION=0.1.99
-DEVEL_RELEASE=yes
+dnl Checks for system type first
+AC_CANONICAL_HOST
+AC_CANONICAL_TARGET
 
+dnl Set up automake
 AM_INIT_AUTOMAKE(twilight,$VERSION)
 AM_CONFIG_HEADER(include/config.h)
 
@@ -24,9 +29,6 @@ if test "x$sysconfdir" = 'x${prefix}/etc' -a "$PDIR" = "/usr"; then
 else
 	eval EDIR="$sysconfdir"
 fi
-
-dnl Checkfs for system type
-AC_CANONICAL_HOST
 
 AC_MSG_CHECKING(Checking host type)
 case "${host}" in
