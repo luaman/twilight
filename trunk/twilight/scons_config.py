@@ -145,13 +145,14 @@ def do_configure (env):
 	check_funcs (conf, config_defs, ['strlcat', 'strlcpy', 'snprintf', \
 		'_snprintf', 'vsnprintf', '_vsnprintf', 'strcasecmp', '_stricmp', \
 		'strncasecmp', '_strnicmp', 'fcntl', 'stat', '_stat', 'mkdir', \
-		'_mkdir', 'SDL_LoadObject'])
+		'_mkdir', 'SDL_LoadObject', 'dlopen'])
 	check_cheaders (conf, config_defs, ['unistd.h', 'fcntl.h', 'windef.h', \
 		'pwd.h', 'sys/types.h', 'sys/stat.h', 'limits.h', 'signal.h', \
 		'sys/time.h', 'time.h', 'execinfo.h', 'dlfcn.h'])
 
-	if conf.CheckLib ('dl', 'dlopen', 1):
-		config_defs.set('HAVE_DLOPEN', 1)
+	if not config_defs.has_key('HAVE_DLOPEN'):
+		if conf.CheckLib ('dl', 'dlopen', 1):
+			config_defs.set('HAVE_DLOPEN', 1)
 	conf.Finish ()
 	print "\nWriting src/config.h"
 	write_c_defines ("#/src/config.h", config_defs)
@@ -170,6 +171,7 @@ def do_configure (env):
     Build platform              : """ + env['PLATFORM'] + """
     Compiler                    : """ + env['CC'] + """
     Compiler flags              : """ + string.join(env['CCFLAGS'], " ") + """
+    Libraries                   : """ + string.join(env['LIBS'], " ") + """
     Default OpenGL library      : """ + opts['libgl'] + """
 
   Path information
