@@ -34,7 +34,12 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+
+#include "bothdefs.h"
+#include "bspfile.h"
+#include "common.h"
+#include "mathlib.h"
 #include "progs.h"
 #include "server.h"
 #include "world.h"

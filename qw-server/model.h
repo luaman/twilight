@@ -27,8 +27,10 @@
 #ifndef __MODEL__
 #define __MODEL__
 
+#include "bspfile.h"
 #include "modelgen.h"
 #include "spritegn.h"
+#include "zone.h"
 
 /*
 

@@ -23,33 +23,17 @@
 
 	$Id$
 */
+//
+// console - sortof
+//
 
-#ifndef __QTYPES_H
-#define __QTYPES_H
+#ifndef __CONSOLE_H
+#define __CONSOLE_H
 
-typedef unsigned char byte;
+void        Con_Printf (char *fmt, ...);
+void        Con_DPrintf (char *fmt, ...);
 
-#define _DEF_BYTE_
+void        SV_Error (char *error, ...);
 
-// KJB Undefined true and false defined in SciTech's DEBUG.H header
-#undef true
-#undef false
-
-typedef enum { false, true } qboolean;
-
-#ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
-#ifndef bound
-#define bound(a,b,c) (max(a, min(b, c)))
-#endif
-
-typedef float vec_t;
-typedef vec_t vec3_t[3];
-typedef vec_t vec5_t[5];
-
-#endif // __QTYPES_H
+#endif // __CONSOLE_H
 

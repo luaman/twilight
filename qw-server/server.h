@@ -28,6 +28,9 @@
 #ifndef __SERVER_H
 #define __SERVER_H
 
+#include "net.h"
+#include "protocol.h"
+
 #define	QW_SERVER
 
 #define	MAX_MASTERS	8					// max recipients for heartbeat packets

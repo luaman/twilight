@@ -27,6 +27,8 @@
 #ifndef __PMOVE_H
 #define __PMOVE_H
 
+#include "protocol.h"
+
 typedef struct {
 	vec3_t      normal;
 	float       dist;

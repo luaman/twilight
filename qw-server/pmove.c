@@ -33,7 +33,9 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include "bothdefs.h"
+#include "bspfile.h"
+#include "mathlib.h"
 #include "model.h"
 #include "pmove.h"
 

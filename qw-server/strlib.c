@@ -82,7 +82,8 @@ Returns strlen(initial dst) + strlen(src); if retval >= siz,
 truncation occurred.
 ==================
 */
-size_t Q_strlcat (char *dst, const char *src, size_t siz)
+size_t
+Q_strlcat (char *dst, const char *src, size_t siz)
 {
 	register char *d = dst;
 	register const char *s = src;
@@ -121,7 +122,8 @@ will be copied.  Always NUL terminates (unless siz == 0).
 Returns strlen(src); if retval >= siz, truncation occurred.
 ==================
 */
-size_t Q_strlcpy (char *dst, const char *src, size_t siz)
+size_t
+Q_strlcpy (char *dst, const char *src, size_t siz)
 {
 	register char *d = dst;
 	register const char *s = src;
@@ -146,3 +148,4 @@ size_t Q_strlcpy (char *dst, const char *src, size_t siz)
 	return(s - src - 1);	/* count does not include NUL */
 }
 #endif // ifndef HAVE_STRLCPY
+

@@ -33,6 +33,7 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <stdio.h>
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/timeb.h>
@@ -40,7 +41,6 @@ static const char rcsid[] =
 #include <conio.h>
 #include <direct.h>
 
-#include "qwsvdef.h"
 #include "server.h"
 #include "cvar.h"
 

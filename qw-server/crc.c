@@ -34,7 +34,7 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include "bothdefs.h"
 #include "crc.h"
 
 // this is a 16 bit, non-reflected CRC using the polynomial 0x1021

@@ -34,13 +34,22 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include <ctype.h>
+
+#include "bothdefs.h"
 #include "cmd.h"
+#include "common.h"
+#include "console.h"
 #include "cvar.h"
+#include "mathlib.h"
 #include "model.h"
 #include "pmove.h"
 #include "progs.h"
 #include "server.h"
+#include "strlib.h"
+#include "sys.h"
 #include "world.h"
 
 edict_t    *sv_player;
@@ -161,13 +170,13 @@ SV_Soundlist_f (void)
 		return;
 	}
 	// handle the case of a level changing while a client was connecting
-	if (atoi (Cmd_Argv (1)) != svs.spawncount) {
+	if (Q_atoi (Cmd_Argv (1)) != svs.spawncount) {
 		Con_Printf ("SV_Soundlist_f from different level\n");
 		SV_New_f ();
 		return;
 	}
 
-	n = atoi (Cmd_Argv (2));
+	n = Q_atoi (Cmd_Argv (2));
 	if (n >= MAX_SOUNDS) {
 		SV_ClientPrintf (host_client, PRINT_HIGH,
 						 "SV_Soundlist_f: Invalid soundlist index\n");
@@ -215,13 +224,13 @@ SV_Modellist_f (void)
 		return;
 	}
 	// handle the case of a level changing while a client was connecting
-	if (atoi (Cmd_Argv (1)) != svs.spawncount) {
+	if (Q_atoi (Cmd_Argv (1)) != svs.spawncount) {
 		Con_Printf ("SV_Modellist_f from different level\n");
 		SV_New_f ();
 		return;
 	}
 
-	n = atoi (Cmd_Argv (2));
+	n = Q_atoi (Cmd_Argv (2));
 	if (n >= MAX_MODELS) {
 		SV_ClientPrintf (host_client, PRINT_HIGH,
 						 "SV_Modellist_f: Invalid modellist index\n");
@@ -268,19 +277,19 @@ SV_PreSpawn_f (void)
 		return;
 	}
 	// handle the case of a level changing while a client was connecting
-	if (atoi (Cmd_Argv (1)) != svs.spawncount) {
+	if (Q_atoi (Cmd_Argv (1)) != svs.spawncount) {
 		Con_Printf ("SV_PreSpawn_f from different level\n");
 		SV_New_f ();
 		return;
 	}
 
-	buf = atoi (Cmd_Argv (2));
+	buf = Q_atoi (Cmd_Argv (2));
 	if (buf >= sv.num_signon_buffers)
 		buf = 0;
 
 	if (!buf) {
 		// should be three numbers following containing checksums
-		check = atoi (Cmd_Argv (3));
+		check = Q_atoi (Cmd_Argv (3));
 
 //      Con_DPrintf("Client check = %d\n", check);
 
@@ -339,13 +348,13 @@ SV_Spawn_f (void)
 		return;
 	}
 // handle the case of a level changing while a client was connecting
-	if (atoi (Cmd_Argv (1)) != svs.spawncount) {
+	if (Q_atoi (Cmd_Argv (1)) != svs.spawncount) {
 		Con_Printf ("SV_Spawn_f from different level\n");
 		SV_New_f ();
 		return;
 	}
 
-	n = atoi (Cmd_Argv (2));
+	n = Q_atoi (Cmd_Argv (2));
 
 	// make sure n is valid
 	if (n < 0 || n > MAX_CLIENTS) {
@@ -464,7 +473,7 @@ SV_Begin_f (void)
 	host_client->state = cs_spawned;
 
 	// handle the case of a level changing while a client was connecting
-	if (atoi (Cmd_Argv (1)) != svs.spawncount) {
+	if (Q_atoi (Cmd_Argv (1)) != svs.spawncount) {
 		Con_Printf ("SV_Begin_f from different level\n");
 		SV_New_f ();
 		return;
@@ -510,8 +519,8 @@ SV_Begin_f (void)
 
 	// check he's not cheating
 
-	pmodel = atoi (Info_ValueForKey (host_client->userinfo, "pmodel"));
-	emodel = atoi (Info_ValueForKey (host_client->userinfo, "emodel"));
+	pmodel = Q_atoi (Info_ValueForKey (host_client->userinfo, "pmodel"));
+	emodel = Q_atoi (Info_ValueForKey (host_client->userinfo, "emodel"));
 
 	if (pmodel != sv.model_player_checksum || emodel != sv.eyes_player_checksum)
 		SV_BroadcastPrintf (PRINT_HIGH,
@@ -999,7 +1008,7 @@ SV_PTrack_f (void)
 		return;
 	}
 
-	i = atoi (Cmd_Argv (1));
+	i = Q_atoi (Cmd_Argv (1));
 	if (i < 0 || i >= MAX_CLIENTS || svs.clients[i].state != cs_spawned ||
 		svs.clients[i].spectator) {
 		SV_ClientPrintf (host_client, PRINT_HIGH, "Invalid client to track\n");
@@ -1035,7 +1044,7 @@ SV_Rate_f (void)
 		return;
 	}
 
-	rate = atoi (Cmd_Argv (1));
+	rate = Q_atoi (Cmd_Argv (1));
 	if (rate < 500)
 		rate = 500;
 	if (rate > 10000)
@@ -1062,7 +1071,7 @@ SV_Msg_f (void)
 		return;
 	}
 
-	host_client->messagelevel = atoi (Cmd_Argv (1));
+	host_client->messagelevel = Q_atoi (Cmd_Argv (1));
 
 	SV_ClientPrintf (host_client, PRINT_HIGH, "Msg level set to %i\n",
 					 host_client->messagelevel);

@@ -34,7 +34,14 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+
+#include "bothdefs.h"
+#include "common.h"
+#include "console.h"
+#include "net.h"
+#include "strlib.h"
+#include "sys.h"
 
 #include <sys/types.h>
 #ifdef WIN32
@@ -120,7 +127,7 @@ NET_AdrToString (netadr_t a)
 {
 	static char s[64];
 
-	snprintf (s, sizeof (s), "%i.%i.%i.%i:%i", a.ip[0], a.ip[1], a.ip[2],
+	Q_snprintf (s, sizeof (s), "%i.%i.%i.%i:%i", a.ip[0], a.ip[1], a.ip[2],
 			  a.ip[3], ntohs (a.port));
 
 	return s;
@@ -165,7 +172,7 @@ NET_StringToAdr (char *s, netadr_t *a)
 	for (colon = copy; *colon; colon++)
 		if (*colon == ':') {
 			*colon = 0;
-			sadr.sin_port = htons ((unsigned short) atoi (colon + 1));
+			sadr.sin_port = htons ((unsigned short) Q_atoi (colon + 1));
 		}
 
 	if (copy[0] >= '0' && copy[0] <= '9') {

@@ -33,15 +33,22 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+#include <stdarg.h>
+
+#include "bothdefs.h"
 #include "cmd.h"
+#include "common.h"
+#include "console.h"
 #include "cvar.h"
+#include "mathlib.h"
 #include "model.h"
 #include "pmove.h"
 #include "progs.h"
 #include "server.h"
-
-quakeparms_t host_parms;
+#include "strlib.h"
+#include "sys.h"
+#include "zone.h"
 
 qboolean    host_initialized;			// true if into command execution
 
@@ -364,8 +371,8 @@ SVC_Status (void)
 		cl = &svs.clients[i];
 		if ((cl->state == cs_connected || cl->state == cs_spawned)
 			&& !cl->spectator) {
-			top = atoi (Info_ValueForKey (cl->userinfo, "topcolor"));
-			bottom = atoi (Info_ValueForKey (cl->userinfo, "bottomcolor"));
+			top = Q_atoi (Info_ValueForKey (cl->userinfo, "topcolor"));
+			bottom = Q_atoi (Info_ValueForKey (cl->userinfo, "bottomcolor"));
 			top = (top < 0) ? 0 : ((top > 13) ? 13 : top);
 			bottom = (bottom < 0) ? 0 : ((bottom > 13) ? 13 : bottom);
 			ping = SV_CalcPing (cl);
@@ -425,7 +432,7 @@ SVC_Log (void)
 	char        data[MAX_DATAGRAM + 64];
 
 	if (Cmd_Argc () == 2)
-		seq = atoi (Cmd_Argv (1));
+		seq = Q_atoi (Cmd_Argv (1));
 	else
 		seq = -1;
 
@@ -532,7 +539,7 @@ SVC_DirectConnect (void)
 	int         version;
 	int         challenge;
 
-	version = atoi (Cmd_Argv (1));
+	version = Q_atoi (Cmd_Argv (1));
 	if (version != PROTOCOL_VERSION) {
 		Netchan_OutOfBandPrint (net_from,
 								"%c\nServer is Twilight version %s.\n",
@@ -541,9 +548,9 @@ SVC_DirectConnect (void)
 		return;
 	}
 
-	qport = atoi (Cmd_Argv (2));
+	qport = Q_atoi (Cmd_Argv (2));
 
-	challenge = atoi (Cmd_Argv (3));
+	challenge = Q_atoi (Cmd_Argv (3));
 
 	// note an extra byte is needed to replace spectator key
 	Q_strncpy (userinfo, Cmd_Argv (4), sizeof (userinfo) - 2);
@@ -899,7 +906,7 @@ StringToFilter (char *s, ipfilter_t * f)
 			num[j++] = *s++;
 		}
 		num[j] = 0;
-		b[i] = atoi (num);
+		b[i] = Q_atoi (num);
 		if (b[i] != 0)
 			m[i] = 255;
 
@@ -1566,7 +1573,7 @@ SV_ExtractFromUserinfo (client_t *cl)
 	// rate command
 	val = Info_ValueForKey (cl->userinfo, "rate");
 	if (strlen (val)) {
-		i = atoi (val);
+		i = Q_atoi (val);
 		if (i < 500)
 			i = 500;
 		if (i > 10000)
@@ -1576,7 +1583,7 @@ SV_ExtractFromUserinfo (client_t *cl)
 	// msg command
 	val = Info_ValueForKey (cl->userinfo, "msg");
 	if (strlen (val)) {
-		cl->messagelevel = atoi (val);
+		cl->messagelevel = Q_atoi (val);
 	}
 
 }
@@ -1598,7 +1605,7 @@ SV_InitNet (void)
 	port = PORT_SERVER;
 	p = COM_CheckParm ("-port");
 	if (p && p < com_argc) {
-		port = atoi (com_argv[p + 1]);
+		port = Q_atoi (com_argv[p + 1]);
 		Con_Printf ("Port: %i\n", port);
 	}
 	NET_Init (port);
@@ -1617,22 +1624,9 @@ SV_Init
 ====================
 */
 void
-SV_Init (quakeparms_t *parms)
+SV_Init (void)
 {
-	COM_InitArgv (parms->argc, parms->argv);
-	COM_AddParm ("-game");
-	COM_AddParm ("qw");
-
-	if (COM_CheckParm ("-minmemory"))
-		parms->memsize = MINIMUM_MEMORY;
-
-	host_parms = *parms;
-
-	if (parms->memsize < MINIMUM_MEMORY)
-		SV_Error ("Only %4.1f megs of memory reported, can't execute game",
-				  parms->memsize / (float) 0x100000);
-
-	Memory_Init (parms->membase, parms->memsize);
+	Memory_Init ();
 	Cbuf_Init ();
 	Cmd_Init ();
 	Cvar_Init ();
@@ -1660,7 +1654,7 @@ SV_Init (quakeparms_t *parms)
 	host_initialized = true;
 
 	Con_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
-	Con_Printf ("%4.1f megabyte heap\n", parms->memsize / (1024 * 1024.0));
+	Con_Printf ("%4.1f megabyte heap\n", sys_memsize / (1024 * 1024.0));
 
 	Con_Printf ("\nTwilight Server Version %s (Build %04d)\n\n", VERSION,
 				build_number ());

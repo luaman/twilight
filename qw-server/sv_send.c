@@ -34,11 +34,19 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+#include <stdarg.h>
+
+#include "bothdefs.h"
+#include "common.h"
+#include "console.h"
 #include "cvar.h"
+#include "mathlib.h"
 #include "model.h"
 #include "progs.h"
 #include "server.h"
+#include "strlib.h"
+#include "sys.h"
 
 #define CHAN_AUTO   0
 #define CHAN_WEAPON 1

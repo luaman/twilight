@@ -34,9 +34,17 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+#include <ctype.h>
+
+#include "bothdefs.h"
 #include "cmd.h"
+#include "common.h"
+#include "console.h"
 #include "cvar.h"
+#include "strlib.h"
+#include "sys.h"
+#include "zone.h"
 
 void        Cmd_ForwardToServer (void);
 
@@ -573,10 +581,6 @@ Cmd_AddCommand (char *cmd_name, xcommand_t function)
 {
 	cmd_function_t *cmd;
 	cvar_t *var;
-
-	if (host_initialized)				// because hunk allocation would get
-		// stomped
-		Sys_Error ("Cmd_AddCommand after host_initialized");
 
 // fail if the command is a variable name
 	var = Cvar_Find (cmd_name);

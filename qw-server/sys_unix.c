@@ -29,13 +29,19 @@ static const char rcsid[] =
 # include <config.h>
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 #include <limits.h>
 #include <pwd.h>
 #include <sys/types.h>
 
-#include "qwsvdef.h"
+#include "bothdefs.h"
+#include "common.h"
 #include "cvar.h"
+#include "mathlib.h"
 #include "server.h"
+#include "strlib.h"
 
 #ifdef NeXT
 #include <libc.h>
@@ -50,10 +56,16 @@ static const char rcsid[] =
 #include <sys/dir.h>
 #endif
 
+// FIXME: put this somewhere else
+void SV_Init (void);
+
 cvar_t     *sys_nostdout;
 cvar_t     *sys_extrasleep;
 
 qboolean    stdin_ready;
+
+int			sys_memsize = 0;
+void	   *sys_membase = NULL;
 
 /*
 ===============================================================================
@@ -280,27 +292,29 @@ int
 main (int argc, char *argv[])
 {
 	double      time, oldtime, newtime;
-	quakeparms_t parms;
 	fd_set      fdset;
 	extern int  net_socket;
 	struct timeval timeout;
 	int         j;
 
-	memset (&parms, 0, sizeof (parms));
-
 	COM_InitArgv (argc, argv);
-	parms.argc = com_argc;
-	parms.argv = com_argv;
 
-	parms.memsize = 16 * 1024 * 1024;
+	sys_memsize = 16 * 1024 * 1024;
 
 	j = COM_CheckParm ("-mem");
 	if (j)
-		parms.memsize = (int) (Q_atof (com_argv[j + 1]) * 1024 * 1024);
-	if ((parms.membase = malloc (parms.memsize)) == NULL)
-		Sys_Error ("Can't allocate %ld\n", parms.memsize);
+		sys_memsize = (int) (Q_atof (com_argv[j + 1]) * 1024 * 1024);
+	else
+		if (COM_CheckParm ("-minmemory"))
+			sys_memsize = MINIMUM_MEMORY;
+	if (sys_memsize < MINIMUM_MEMORY)
+		Sys_Error ("Only %4.1f megs of memory reported, can't execute game",
+				sys_memsize / (float) 0x100000);
+	
+	if ((sys_membase = malloc (sys_memsize)) == NULL)
+		Sys_Error ("Can't allocate %ld\n", sys_memsize);
 
-	SV_Init (&parms);
+	SV_Init ();
 
 // run one frame immediately for first heartbeat
 	SV_Frame (0.1);

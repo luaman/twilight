@@ -326,7 +326,8 @@ main (int c, char **v)
 		Sys_Error ("Only %4.1f megs of memory reported, can't execute game",
 				sys_memsize / (float) 0x100000);
 
-	sys_membase = malloc (sys_memsize);
+	if (!(sys_membase = malloc (sys_memsize)))
+			Sys_Error ("Can't allocate %ld\n", sys_memsize);
 
 	noconinput = COM_CheckParm ("-noconinput");
 	if (!noconinput)

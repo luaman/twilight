@@ -37,7 +37,9 @@ static const char rcsid[] =
 #include <SDL_types.h>
 #include <math.h>
 #include <time.h>
-#include "qwsvdef.h"
+
+#include "bothdefs.h"
+#include "mathlib.h"
 #include "model.h"
 
 void        Sys_Error (char *error, ...);
