@@ -51,17 +51,8 @@
 #include "zone.h"
 #include "mathlib.h"
 
-#include "cvar.h"
 #include "net.h"
 #include "protocol.h"
-#include "cmd.h"
-#include "model.h"
-#include "crc.h"
-#include "progs.h"
-
-#include "server.h"
-#include "world.h"
-#include "pmove.h"
 
 //=============================================================================
 
@@ -84,8 +75,8 @@ typedef struct {
 //
 extern quakeparms_t host_parms;
 
-extern cvar_t *sys_nostdout;
-extern cvar_t *developer;
+extern struct cvar_s *sys_nostdout;
+extern struct cvar_s *developer;
 
 extern qboolean host_initialized;		// true if into command execution
 extern double host_frametime;

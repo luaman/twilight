@@ -35,6 +35,10 @@ static const char rcsid[] =
 #endif
 
 #include "qwsvdef.h"
+#include "model.h"
+#include "progs.h"
+#include "server.h"
+#include "world.h"
 
 /*
 

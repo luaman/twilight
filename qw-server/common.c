@@ -37,6 +37,9 @@ static const char rcsid[] =
 #include <ctype.h>
 
 #include "qwsvdef.h"
+#include "cmd.h"
+#include "crc.h"
+#include "cvar.h"
 
 #define MAX_NUM_ARGVS	50
 #define NUM_SAFE_ARGVS	6

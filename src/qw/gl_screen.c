@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "keys.h"
 #include "menu.h"
 #include "sbar.h"
+#include "screen.h"
 
 #include <time.h>
 

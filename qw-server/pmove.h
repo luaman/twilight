@@ -48,7 +48,7 @@ typedef struct {
 #define	MAX_PHYSENTS	32
 typedef struct {
 	vec3_t      origin;
-	model_t    *model;					// only for bsp models
+	struct model_s    *model;					// only for bsp models
 	vec3_t      mins, maxs;				// only for non-bsp models
 	int         info;					// for client or server to identify
 } physent_t;
@@ -97,11 +97,12 @@ extern playermove_t pmove;
 extern int  onground;
 extern int  waterlevel;
 extern int  watertype;
+struct hull_s;
 
 void        PlayerMove (void);
 void        Pmove_Init (void);
 
-int         PM_HullPointContents (hull_t *hull, int num, vec3_t p);
+int         PM_HullPointContents (struct hull_s *hull, int num, vec3_t p);
 
 int         PM_PointContents (vec3_t point);
 qboolean    PM_TestPlayerPosition (vec3_t point);

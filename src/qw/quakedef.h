@@ -49,18 +49,13 @@
 #include "mathlib.h"
 #include "wad.h"
 #include "draw.h"
-#include "screen.h"
 #include "net.h"
 #include "protocol.h"
 #include "cmd.h"
 #include "render.h"
 #include "client.h"
 
-#include "gl_model.h"
-
 #include "console.h"
-#include "view.h"
-#include "pmove.h"
 
 //=============================================================================
 

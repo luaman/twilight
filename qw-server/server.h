@@ -69,7 +69,7 @@ typedef struct {
 	struct model_s *models[MAX_MODELS];
 
 	int         num_edicts;				// increases towards MAX_EDICTS
-	edict_t    *edicts;					// can NOT be array indexed, because
+	struct edict_s    *edicts;					// can NOT be array indexed, because
 	// edict_t is variable sized, but can
 	// be used to reference the world ent
 
@@ -151,7 +151,7 @@ typedef struct client_s {
 	float       maxspeed;				// localized maxspeed
 	float       entgravity;				// localized ent gravity
 
-	edict_t    *edict;					// EDICT_NUM(clientnum+1)
+	struct edict_s    *edict;					// EDICT_NUM(clientnum+1)
 	char        name[32];				// for printing to other people
 	// extracted from userinfo
 	int         messagelevel;			// for filtering printed messages
@@ -331,23 +331,23 @@ typedef struct {
 
 //============================================================================
 
-extern cvar_t *sv_mintic, *sv_maxtic;
-extern cvar_t *sv_maxspeed;
+extern struct cvar_s *sv_mintic, *sv_maxtic;
+extern struct cvar_s *sv_maxspeed;
 
 extern netadr_t master_adr[MAX_MASTERS];	// address of the master server
 
-extern cvar_t *spawn;
-extern cvar_t *teamplay;
-extern cvar_t *deathmatch;
-extern cvar_t *fraglimit;
-extern cvar_t *timelimit;
+extern struct cvar_s *spawn;
+extern struct cvar_s *teamplay;
+extern struct cvar_s *deathmatch;
+extern struct cvar_s *fraglimit;
+extern struct cvar_s *timelimit;
 
 extern server_static_t svs;				// persistant server info
 extern server_t sv;						// local server
 
 extern client_t *host_client;
 
-extern edict_t *sv_player;
+extern struct edict_s *sv_player;
 
 extern char localmodels[MAX_MODELS][5];	// inline model names for precache
 
@@ -372,8 +372,8 @@ void        SV_FullClientUpdate (client_t *client, sizebuf_t *buf);
 
 int         SV_ModelIndex (char *name);
 
-qboolean    SV_CheckBottom (edict_t *ent);
-qboolean    SV_movestep (edict_t *ent, vec3_t move, qboolean relink);
+qboolean    SV_CheckBottom (struct edict_s *ent);
+qboolean    SV_movestep (struct edict_s *ent, vec3_t move, qboolean relink);
 
 void        SV_WriteClientdataToMessage (client_t *client, sizebuf_t *msg);
 
@@ -381,7 +381,7 @@ void        SV_MoveToGoal (void);
 
 void        SV_SaveSpawnparms (void);
 
-void        SV_Physics_Client (edict_t *ent);
+void        SV_Physics_Client (struct edict_s *ent);
 
 void        SV_ExecuteUserCommand (char *s);
 void        SV_InitOperatorCommands (void);
@@ -407,12 +407,12 @@ void        SV_FlushSignon (void);
 //
 void        SV_ProgStartFrame (void);
 void        SV_Physics (void);
-void        SV_CheckVelocity (edict_t *ent);
-void        SV_AddGravity (edict_t *ent, float scale);
-qboolean    SV_RunThink (edict_t *ent);
-void        SV_Physics_Toss (edict_t *ent);
+void        SV_CheckVelocity (struct edict_s *ent);
+void        SV_AddGravity (struct edict_s *ent, float scale);
+qboolean    SV_RunThink (struct edict_s *ent);
+void        SV_Physics_Toss (struct edict_s *ent);
 void        SV_RunNewmis (void);
-void        SV_Impact (edict_t *e1, edict_t *e2);
+void        SV_Impact (struct edict_s *e1, struct edict_s *e2);
 void        SV_SetMoveVars (void);
 
 //
@@ -421,7 +421,7 @@ void        SV_SetMoveVars (void);
 void        SV_SendClientMessages (void);
 
 void        SV_Multicast (vec3_t origin, int to);
-void        SV_StartSound (edict_t *entity, int channel, char *sample,
+void        SV_StartSound (struct edict_s *entity, int channel, char *sample,
 						   int volume, float attenuation);
 void        SV_ClientPrintf (client_t *cl, int level, char *fmt, ...);
 void        SV_BroadcastPrintf (int level, char *fmt, ...);

@@ -38,6 +38,7 @@
 #include <windows.h>
 #endif
 
+#include "gl_model.h"
 #include "TGL_defines.h"
 #include "TGL_types.h"
 #include "TGL_funcs.h"

@@ -34,6 +34,10 @@ static const char rcsid[] =
 #endif
 
 #include "qwsvdef.h"
+#include "cmd.h"
+#include "cvar.h"
+#include "progs.h"
+#include "server.h"
 
 qboolean    sv_allow_cheats;
 

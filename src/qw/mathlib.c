@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include <SDL_types.h>
 #include <math.h>
 #include "quakedef.h"
+#include "gl_model.h"
 
 void        Sys_Error (char *error, ...);
 

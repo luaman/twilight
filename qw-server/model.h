@@ -176,7 +176,7 @@ typedef struct mleaf_s {
 	byte        ambient_sound_level[NUM_AMBIENTS];
 } mleaf_t;
 
-typedef struct {
+typedef struct hull_s {
 	dclipnode_t *clipnodes;
 	mplane_t   *planes;
 	int         firstclipnode;

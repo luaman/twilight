@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "glquake.h"
 #include "menu.h"
+#include "sbar.h"
 #include "TGL_defines.h"
 #include "TGL_types.h"
 #include "TGL_funcs.h"

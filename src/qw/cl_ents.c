@@ -37,6 +37,8 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "pmove.h"
+#include "view.h"
 
 extern cvar_t cl_predict_players;
 extern cvar_t cl_predict_players2;

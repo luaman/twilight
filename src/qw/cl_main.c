@@ -43,8 +43,11 @@ static const char rcsid[] =
 #include "input.h"
 #include "keys.h"
 #include "menu.h"
+#include "pmove.h"
 #include "sbar.h"
+#include "screen.h"
 #include "sound.h"
+#include "view.h"
 
 #ifdef _WIN32
 #include "winquake.h"

@@ -34,6 +34,8 @@ static const char rcsid[] =
 #endif
 
 #include "qwsvdef.h"
+#include "model.h"
+#include "pmove.h"
 
 
 movevars_t  movevars;

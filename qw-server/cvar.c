@@ -34,7 +34,9 @@ static const char rcsid[] =
 #endif
 
 #include "qwsvdef.h"
+#include "cmd.h"
 #include "cvar.h"
+#include "server.h"
 
 typedef struct cvar_foreach_s {
 	cvar_t					   *var;

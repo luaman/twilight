@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "cvar.h"
 #include "sbar.h"
+#include "screen.h"
 
 
 #define STAT_MINUS		10				// num frame for '-' stats digit

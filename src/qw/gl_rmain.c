@@ -36,7 +36,9 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "pmove.h"
 #include "sound.h"
+#include "view.h"
 
 entity_t    r_worldentity;
 
