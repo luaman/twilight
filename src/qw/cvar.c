@@ -207,7 +207,7 @@ Cvar_LegacyCmd (void)
 	cvar_t	   *var;
 
 	var = Cvar_Find (Cmd_Argv (0));
-	if (!var)
+	if (!var) 
 		return false;
 
 	if (Cmd_Argc () == 2)
@@ -221,7 +221,6 @@ Cvar_LegacyCmd (void)
 
 	return true;
 }
-
 
 cvar_t *
 Cvar_Find (const char *name)
