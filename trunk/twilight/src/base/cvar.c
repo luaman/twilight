@@ -232,17 +232,7 @@ Cvar_CreateTemp (const char *name, const char *value)
 void
 Cvar_Slide (cvar_t *var, const float change)
 {
-	static char		buf[128];
-
-	var->fvalue += change;
-	var->ivalue += (int)var->fvalue;
-	Z_Free (var->svalue);
-	snprintf (buf, sizeof (buf), "%f", var->fvalue);
-	var->svalue = Z_Malloc (strlen (buf) + 1);
-	strcpy (var->svalue, buf);
-
-	if (var->callback)
-		var->callback (var);
+	Cvar_Set (var, va ("%f", var->fvalue + change));
 }
 
 // NOTE: This function must match the flags in cvar.h
