@@ -73,7 +73,6 @@ Stuff that isn't needed for 0.2, but would be nice:
     + Grenade trails for alpha -1 models should be different than normal, the
       movie has a custom trail for the General's cigar.  I shit you not.
     + Anything else?  List it here..
-  - gl_colorlights can/should be made to work without +set
   - Transfusion support (Formerly BloodBath)
     + Custom sbar
     + Custom keybindings

@@ -1019,6 +1019,7 @@ SV_SpawnServer (const char *server)
 	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
 
 	SetupLightmapSettings ();
+
 	if (ccls.state == ca_dedicated)
 		sv.worldmodel = Mod_ForName (sv.modelname, FLAG_CRASH | FLAG_SUBMODELS);
 	else

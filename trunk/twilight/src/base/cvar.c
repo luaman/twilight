@@ -109,8 +109,11 @@ Cvar_Get (const char *name, const char *svalue, const int flags,
 
 	if (var)
 	{
-		// var exists, update flags and leave it alone
+		// var exists, update flags and callback and leave it alone
 		var->flags = flags;
+		var->callback = callback;
+		if (var->callback)
+			var->callback (var);
 		return var;
 	}
 

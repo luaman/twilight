@@ -164,6 +164,7 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 
 	SDL_RWseek (rw, header.lumps[LUMP_TEXTURES].fileofs, SEEK_SET);
 	SDL_RWread (rw, &nfiles, sizeof (Uint32), 1);
+	nfiles = LittleLong (nfiles);
 	offsets = Zone_Alloc (tempzone, sizeof (Uint32) * nfiles);
 	SDL_RWread (rw, offsets, sizeof (Uint32), nfiles);
 

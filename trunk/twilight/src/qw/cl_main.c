@@ -1231,31 +1231,37 @@ Host_Frame (double time)
 	static double	time2 = 0;
 	static double	time3 = 0;
 	int				pass1, pass2, pass3;
-	double			fps, time_diff;
+	double			fps, time_diff, frametime, max_time;
 
 	if (setjmp (host_abort))
 		return;							// something bad happened, or the
 	// server disconnected
 
 	// decide the simulation time
-	time_diff = time - old_realtime;
+	frametime = time - old_realtime;
 
-	if (cl_maxfps->fvalue)
-		fps = cl_maxfps->fvalue;
-	else
-		fps = rate->fvalue / 80.0f;
+	if (!ccls.timedemo) {
+		if (cl_maxfps->fvalue)
+			fps = cl_maxfps->fvalue;
+		else
+			fps = rate->fvalue / 80.0f;
 
-	fps = bound (30.0f, fps, 72.0f);
+		fps = bound (30.0f, fps, 72.0f);
+		max_time = 1.0 / fps;
+		time_diff = max_time - frametime;
 
-	if (!ccls.timedemo && ((time_diff) < (1.0 / fps))) {
-		SDL_Delay(1);
-		return;							// framerate is too high
+		if (time_diff > 0) {
+			if (time_diff > 0.010)
+				SDL_Delay(1);
+
+			return;							// framerate is too high
+		}
 	}
 
 	old_realtime = time;
-	ccls.realtime += time_diff;
-	r_realtime += time_diff;
-	host_frametime = time_diff;
+	ccls.realtime += frametime;
+	r_realtime += frametime;
+	host_frametime = frametime;
 	if (host_frametime > 0.2)
 		host_frametime = 0.2;
 
