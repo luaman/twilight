@@ -184,7 +184,7 @@ R_Init (void)
 	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);
 	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);
 
-	R_InitBubble();
+	R_InitBubble ();
 	R_InitParticles ();
 	R_InitParticleTexture ();
 	TNT_Init ();
@@ -229,8 +229,7 @@ R_TranslatePlayerSkin (int playernum)
 		translate[i] = i;
 
 	for (i = 0; i < 16; i++) {
-		if (top < 128)					// the artists made some backwards
-			// ranges.  sigh.
+		if (top < 128)					// the artists made some backwards ranges.  sigh.
 			translate[TOP_RANGE + i] = top + i;
 		else
 			translate[TOP_RANGE + i] = top + 15 - i;

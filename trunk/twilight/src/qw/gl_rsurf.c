@@ -638,9 +638,9 @@ R_DrawWaterSurfaces
 void
 R_DrawWaterSurfaces (void)
 {
-	int         i;
-	msurface_t *s;
-	texture_t  *t;
+	Uint32		i;
+	msurface_t	*s;
+	texture_t	*t;
 
 	/* 
 		go back to the world matrix
@@ -687,9 +687,9 @@ DrawTextureChainsMTex
 void
 DrawTextureChainsMTex (void)
 {
-	int         i;
-	msurface_t *s;
-	texture_t  *t, *st;
+	Uint32		i;
+	msurface_t	*s;
+	texture_t	*t, *st;
 
 	for (i = 0; i < cl.worldmodel->numtextures; i++) {
 		t = cl.worldmodel->textures[i];
@@ -699,7 +699,7 @@ DrawTextureChainsMTex (void)
 		if (!s)
 			continue;
 		st = R_TextureAnimation (s->texinfo->texture);
-		if (i == skytexturenum)
+		if (i == (Uint32)skytexturenum)
 			R_DrawSkyChain (s);
 		else {
 			if ((s->flags & SURF_DRAWTURB))
@@ -729,7 +729,7 @@ DrawTextureChainsMTex (void)
 		if (!s)
 			continue;
 		st = R_TextureAnimation (s->texinfo->texture);
-		if (i == skytexturenum)
+		if (i == (Uint32)skytexturenum)
 			R_DrawSkyChain (s);
 		else {
 			if ((s->flags & SURF_DRAWTURB))
@@ -764,9 +764,9 @@ DrawTextureChainsMTexCombine
 void
 DrawTextureChainsMTexCombine (void)
 {
-	int         i;
-	msurface_t *s;
-	texture_t  *t, *st;
+	Uint32		i;
+	msurface_t	*s;
+	texture_t	*t, *st;
 
 	for (i = 0; i < cl.worldmodel->numtextures; i++) {
 		t = cl.worldmodel->textures[i];
@@ -776,7 +776,7 @@ DrawTextureChainsMTexCombine (void)
 		if (!s)
 			continue;
 		st = R_TextureAnimation (s->texinfo->texture);
-		if (i == skytexturenum)
+		if (i == (Uint32)skytexturenum)
 			R_DrawSkyChain (s);
 		else {
 			if (s->flags & SURF_DRAWSKY) {
@@ -808,7 +808,7 @@ DrawTextureChainsMTexCombine (void)
 		if (!s)
 			continue;
 		st = R_TextureAnimation (s->texinfo->texture);
-		if (i != skytexturenum) {
+		if (i != (Uint32)skytexturenum) {
 			if ((s->flags & SURF_DRAWTURB))
 				continue;				/* draw translucent water later */
 
@@ -842,9 +842,9 @@ DrawTextureChains
 void
 DrawTextureChains (void)
 {
-	int         i;
-	msurface_t *s;
-	texture_t  *t, *st;
+	Uint32		i;
+	msurface_t	*s;
+	texture_t	*t, *st;
 
 	for (i = 0; i < cl.worldmodel->numtextures; i++) {
 		t = cl.worldmodel->textures[i];
@@ -854,7 +854,7 @@ DrawTextureChains (void)
 		if (!s)
 			continue;
 		st = R_TextureAnimation (s->texinfo->texture);
-		if (i == skytexturenum)
+		if (i == (Uint32)skytexturenum)
 			R_DrawSkyChain (s);
 		else {
 			if ((s->flags & SURF_DRAWTURB))
@@ -1160,10 +1160,10 @@ R_MarkLeaves
 void
 R_MarkLeaves (void)
 {
-	Uint8      *vis;
-	mnode_t    *node;
-	int         i;
-	Uint8       solid[4096];
+	Uint8		*vis;
+	mnode_t		*node;
+	Uint32		i;
+	Uint8		solid[4096];
 
 	if (r_oldviewleaf == r_viewleaf && !r_novis->value)
 		return;
@@ -1350,8 +1350,8 @@ with all the surfaces from all brush models
 void
 GL_BuildLightmaps (void)
 {
-	int         i, j;
-	model_t    *m;
+	Uint32	i, j;
+	model_t	*m;
 
 	memset (allocated, 0, sizeof (allocated));
 

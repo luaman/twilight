@@ -179,9 +179,9 @@ Mod_LoadBrushModel
 void
 Mod_LoadBrushModel (model_t *mod, void *buffer)
 {
-	int         i, j;
-	dheader_t  *header;
-	dmodel_t   *bm;
+	Uint32		i, j;
+	dheader_t	*header;
+	dmodel_t	*bm;
 
 	loadmodel->type = mod_brush;
 
@@ -193,14 +193,13 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 			("Mod_LoadBrushModel: %s has wrong version number (%i should be %i)",
 			 mod->name, i, BSPVERSION);
 
-// swap all the lumps
+	// swap all the lumps
 	mod_base = (Uint8 *) header;
 
 	for (i = 0; i < sizeof (dheader_t) / 4; i++)
 		((int *) header)[i] = LittleLong (((int *) header)[i]);
 
-// load into heap
-
+	// load into heap
 	mod->checksum = 0;
 	mod->checksum2 = 0;
 
