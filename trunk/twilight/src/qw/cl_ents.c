@@ -118,6 +118,8 @@ CL_NewDlight (int key, vec3_t org, float radius, float time,
 
 	if (!gl_flashblend->value)
 	{
+		memset (&tr, 0, sizeof(tr));
+
 		VectorCopy (dl->origin, tr.endpos);
 		
 		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, org, dl->origin, &tr);

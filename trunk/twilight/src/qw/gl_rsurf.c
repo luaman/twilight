@@ -49,14 +49,14 @@ int         skytexturenum;
 #endif
 
 
-int         lightmap_bytes = 3;				// 1, 2, or 4
+int         lightmap_bytes = 3;				// 1, 3, or 4
 
 int         lightmap_textures;
 
-unsigned    blocklights[18 * 18 * 3];
-
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128
+
+unsigned    blocklights[BLOCK_WIDTH * BLOCK_HEIGHT * 3];
 
 #define	MAX_LIGHTMAPS	256
 

@@ -68,6 +68,7 @@ static const char rcsid[] =
 #endif
 
 #include <SDL.h>
+#include <SDL_main.h>
 
 #include "common.h"
 #include "compat.h"

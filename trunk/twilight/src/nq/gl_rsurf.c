@@ -40,12 +40,12 @@ static const char rcsid[] =
 int		lightmap_textures;
 int		skytexturenum;
 
-int		lightmap_bytes = 3;				// 1, 2, or 4
-
-unsigned int blocklights[18 * 18 * 3];
+int		lightmap_bytes = 3;				// 1, 3, or 4
 
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128
+
+unsigned int blocklights[BLOCK_WIDTH * BLOCK_HEIGHT * 3];
 
 #define	MAX_LIGHTMAPS	256
 
@@ -1551,7 +1551,6 @@ GL_BuildLightmaps (void)
 				lightmap_bytes = 4;
 			}
 		}
-
 	}
 	else {
 		gl_lightmap_format = GL_LUMINANCE;

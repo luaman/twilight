@@ -1060,10 +1060,13 @@ CL_MuzzleFlash (void)
 	{
 		pmtrace_t tr;
 		
+		memset (&tr, 0, sizeof(tr));
+
+		VectorCopy (dl->origin, tr.endpos);
+
 		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, pl->origin, dl->origin, &tr);
 				
-		if (tr.endpos[0] && tr.endpos[1] && tr.endpos[2])
-			VectorCopy (tr.endpos, dl->origin);
+		VectorCopy (tr.endpos, dl->origin);
 	}
 
 	dl->radius = 200 + (Q_rand () & 31);
