@@ -207,10 +207,6 @@ extern char com_gamedir[MAX_OSPATH];
 
 void        COM_WriteFile (char *filename, void *data, int len);
 int         COM_FOpenFile (char *filename, FILE ** file);
-#ifdef TWILIGHT_NQ
-int         COM_OpenFile (char *filename, int *hndl);
-void        COM_CloseFile (int h);
-#endif
 
 Uint8      *COM_LoadStackFile (char *path, void *buffer, int bufsize);
 Uint8      *COM_LoadTempFile (char *path);
