@@ -205,7 +205,7 @@ SV_SendServerinfo (client_t *client)
 	MSG_WriteLong (&client->message, PROTOCOL_VERSION);
 	MSG_WriteByte (&client->message, svs.maxclients);
 
-	if (!coop->value[0] && deathmatch->value[0])
+	if (!coop->value && deathmatch->value)
 		MSG_WriteByte (&client->message, GAME_DEATHMATCH);
 	else
 		MSG_WriteByte (&client->message, GAME_COOP);
@@ -1058,11 +1058,11 @@ SV_SpawnServer (char *server)
 //
 // make cvars consistant
 //
-	if (coop->value[0])
+	if (coop->value)
 		Cvar_Set (deathmatch, "0");
-	if (deathmatch->value[0])
+	if (deathmatch->value)
 		Cvar_Set (coop, "0");
-	current_skill = (int) (skill->value[0] + 0.5);
+	current_skill = (int) (skill->value + 0.5);
 	if (current_skill < 0)
 		current_skill = 0;
 	if (current_skill > 3)
@@ -1150,10 +1150,10 @@ SV_SpawnServer (char *server)
 	ent->v.solid = SOLID_BSP;
 	ent->v.movetype = MOVETYPE_PUSH;
 
-	if (coop->value[0])
-		pr_global_struct->coop = coop->value[0];
+	if (coop->value)
+		pr_global_struct->coop = coop->value;
 	else
-		pr_global_struct->deathmatch = deathmatch->value[0];
+		pr_global_struct->deathmatch = deathmatch->value;
 
 	pr_global_struct->mapname = sv.name - pr_strings;
 #ifdef QUAKE2

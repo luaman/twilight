@@ -151,7 +151,7 @@ R_BuildLightMap (msurface_t *surf, byte * dest, int stride)
 	lightmap = surf->samples;
 
 // set to full bright if no light data
-	if (r_fullbright->value[0] || !cl.worldmodel->lightdata) {
+	if (r_fullbright->value || !cl.worldmodel->lightdata) {
 		for (i = 0; i < size; i++)
 			blocklights[i] = 255 * 256;
 		goto store;
@@ -661,9 +661,9 @@ R_BlendLightmaps (void)
 	float      *v;
 	glRect_t   *theRect;
 
-	if (r_fullbright->value[0])
+	if (r_fullbright->value)
 		return;
-	if (!gl_texsort->value[0])
+	if (!gl_texsort->value)
 		return;
 
 	glDepthMask (0);					// don't bother writing Z
@@ -779,7 +779,7 @@ R_RenderBrushPoly (msurface_t *fa)
 		|| fa->cached_dlight)			// dynamic previously
 	{
 	  dynamic:
-		if (r_dynamic->value[0]) {
+		if (r_dynamic->value) {
 			lightmap_modified[fa->lightmaptexturenum] = true;
 			theRect = &lightmap_rectchange[fa->lightmaptexturenum];
 			if (fa->light_t < theRect->t) {
@@ -841,7 +841,7 @@ R_RenderDynamicLightmaps (msurface_t *fa)
 		|| fa->cached_dlight)			// dynamic previously
 	{
 	  dynamic:
-		if (r_dynamic->value[0]) {
+		if (r_dynamic->value) {
 			lightmap_modified[fa->lightmaptexturenum] = true;
 			theRect = &lightmap_rectchange[fa->lightmaptexturenum];
 			if (fa->light_t < theRect->t) {
@@ -887,7 +887,6 @@ R_MirrorChain (msurface_t *s)
 }
 
 
-#if 0
 /*
 ================
 R_DrawWaterSurfaces
@@ -900,56 +899,7 @@ R_DrawWaterSurfaces (void)
 	msurface_t *s;
 	texture_t  *t;
 
-	if (r_wateralpha.value == 1.0)
-		return;
-
-	// 
-	// go back to the world matrix
-	// 
-	glLoadMatrixf (r_world_matrix);
-
-	glEnable (GL_BLEND);
-	glColor4f (1, 1, 1, r_wateralpha.value);
-	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-	for (i = 0; i < cl.worldmodel->numtextures; i++) {
-		t = cl.worldmodel->textures[i];
-		if (!t)
-			continue;
-		s = t->texturechain;
-		if (!s)
-			continue;
-		if (!(s->flags & SURF_DRAWTURB))
-			continue;
-
-		// set modulate mode explicitly
-		glBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
-
-		for (; s; s = s->texturechain)
-			R_RenderBrushPoly (s);
-
-		t->texturechain = NULL;
-	}
-
-	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-	glColor4f (1, 1, 1, 1);
-	glDisable (GL_BLEND);
-}
-#else
-/*
-================
-R_DrawWaterSurfaces
-================
-*/
-void
-R_DrawWaterSurfaces (void)
-{
-	int         i;
-	msurface_t *s;
-	texture_t  *t;
-
-	if (r_wateralpha->value[0] == 1.0 && gl_texsort->value[0])
+	if (r_wateralpha->value == 1.0 && gl_texsort->value)
 		return;
 
 	// 
@@ -958,13 +908,13 @@ R_DrawWaterSurfaces (void)
 
 	glLoadMatrixf (r_world_matrix);
 
-	if (r_wateralpha->value[0] < 1.0) {
+	if (r_wateralpha->value < 1.0) {
 		glEnable (GL_BLEND);
-		glColor4f (1, 1, 1, r_wateralpha->value[0]);
+		glColor4f (1, 1, 1, r_wateralpha->value);
 		glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
 
-	if (!gl_texsort->value[0]) {
+	if (!gl_texsort->value) {
 		if (!waterchain)
 			return;
 
@@ -998,7 +948,7 @@ R_DrawWaterSurfaces (void)
 
 	}
 
-	if (r_wateralpha->value[0] < 1.0) {
+	if (r_wateralpha->value < 1.0) {
 		glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 		glColor4f (1, 1, 1, 1);
@@ -1007,7 +957,6 @@ R_DrawWaterSurfaces (void)
 
 }
 
-#endif
 
 /*
 ================
@@ -1021,7 +970,7 @@ DrawTextureChains (void)
 	msurface_t *s;
 	texture_t  *t;
 
-	if (!gl_texsort->value[0]) {
+	if (!gl_texsort->value) {
 		GL_DisableMultitexture ();
 
 		if (skychain) {
@@ -1041,11 +990,11 @@ DrawTextureChains (void)
 			continue;
 		if (i == skytexturenum)
 			R_DrawSkyChain (s);
-		else if (i == mirrortexturenum && r_mirroralpha->value[0] != 1.0) {
+		else if (i == mirrortexturenum && r_mirroralpha->value != 1.0) {
 			R_MirrorChain (s);
 			continue;
 		} else {
-			if ((s->flags & SURF_DRAWTURB) && r_wateralpha->value[0] != 1.0)
+			if ((s->flags & SURF_DRAWTURB) && r_wateralpha->value != 1.0)
 				continue;				// draw translucent water later
 			for (; s; s = s->texturechain)
 				R_RenderBrushPoly (s);
@@ -1111,7 +1060,7 @@ R_DrawBrushModel (entity_t *e)
 
 // calculate dynamic lighting for bmodel if it's not an
 // instanced model
-	if (clmodel->firstmodelsurface != 0 && !gl_flashblend->value[0]) {
+	if (clmodel->firstmodelsurface != 0 && !gl_flashblend->value) {
 		for (k = 0; k < MAX_DLIGHTS; k++) {
 			if ((cl_dlights[k].die < cl.time) || (!cl_dlights[k].radius))
 				continue;
@@ -1138,7 +1087,7 @@ R_DrawBrushModel (entity_t *e)
 		// draw the polygon
 		if (((psurf->flags & SURF_PLANEBACK) && (dot < -BACKFACE_EPSILON)) ||
 			(!(psurf->flags & SURF_PLANEBACK) && (dot > BACKFACE_EPSILON))) {
-			if (gl_texsort->value[0])
+			if (gl_texsort->value)
 				R_RenderBrushPoly (psurf);
 			else
 				R_DrawSequentialPoly (psurf);
@@ -1248,7 +1197,7 @@ R_RecursiveWorldNode (mnode_t *node)
 					continue;			// wrong side
 
 				// if sorting by texture, just store it out
-				if (gl_texsort->value[0]) {
+				if (gl_texsort->value) {
 					if (!mirror
 						|| surf->texinfo->texture !=
 						cl.worldmodel->textures[mirrortexturenum]) {
@@ -1324,7 +1273,7 @@ R_MarkLeaves (void)
 	int         i;
 	byte        solid[4096];
 
-	if (r_oldviewleaf == r_viewleaf && !r_novis->value[0])
+	if (r_oldviewleaf == r_viewleaf && !r_novis->value)
 		return;
 
 	if (mirror)
@@ -1333,7 +1282,7 @@ R_MarkLeaves (void)
 	r_visframecount++;
 	r_oldviewleaf = r_viewleaf;
 
-	if (r_novis->value[0]) {
+	if (r_novis->value) {
 		vis = solid;
 		memset (solid, 0xff, (cl.worldmodel->numleafs + 7) >> 3);
 	} else
@@ -1620,7 +1569,7 @@ GL_BuildLightmaps (void)
 		}
 	}
 
-	if (!gl_texsort->value[0])
+	if (!gl_texsort->value)
 		GL_SelectTexture (1);
 
 	// 
@@ -1643,7 +1592,7 @@ GL_BuildLightmaps (void)
 					  i * BLOCK_WIDTH * BLOCK_HEIGHT * lightmap_bytes);
 	}
 
-	if (!gl_texsort->value[0])
+	if (!gl_texsort->value)
 		GL_SelectTexture (0);
 
 }

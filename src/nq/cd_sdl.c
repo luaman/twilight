@@ -328,7 +328,7 @@ CDAudio_Update (void)
 	if (!enabled)
 		return;
 
-	if (bgmvolume->value[0] != cdvolume) {
+	if (bgmvolume->value != cdvolume) {
 		if (cdvolume) {
 			Cvar_Set (bgmvolume, "0");
 			CDAudio_Pause ();
@@ -336,7 +336,7 @@ CDAudio_Update (void)
 			Cvar_Set (bgmvolume, "1");
 			CDAudio_Resume ();
 		}
-		cdvolume = bgmvolume->value[0];
+		cdvolume = bgmvolume->value;
 	}
 
 	if (playing && realtime > endOfTrack) {

@@ -145,7 +145,7 @@ void
 SCR_CenterPrint (char *str)
 {
 	Q_strncpy (scr_centerstring, str, sizeof (scr_centerstring) - 1);
-	scr_centertime_off = scr_centertime->value[0];
+	scr_centertime_off = scr_centertime->value;
 	scr_centertime_start = cl.time;
 
 // count the number of lines for centering
@@ -169,7 +169,7 @@ SCR_DrawCenterString (void)
 
 // the finale prints the characters one at a time
 	if (cl.intermission)
-		remaining = scr_printspeed->value[0]
+		remaining = scr_printspeed->value
 			* (cl.time - scr_centertime_start);
 	else
 		remaining = 9999;
@@ -272,22 +272,22 @@ SCR_CalcRefdef (void)
 //========================================
 
 // bound viewsize
-	if (scr_viewsize->value[0] < 30)
+	if (scr_viewsize->value < 30)
 		Cvar_Set (scr_viewsize, "30");
-	if (scr_viewsize->value[0] > 120)
+	if (scr_viewsize->value > 120)
 		Cvar_Set (scr_viewsize, "120");
 
 // bound field of view
-	if (scr_fov->value[0] < 10)
+	if (scr_fov->value < 10)
 		Cvar_Set (scr_fov, "10");
-	if (scr_fov->value[0] > 170)
+	if (scr_fov->value > 170)
 		Cvar_Set (scr_fov, "170");
 
 // intermission is always full screen   
 	if (cl.intermission)
 		size = 120;
 	else
-		size = scr_viewsize->value[0];
+		size = scr_viewsize->value;
 
 	if (size >= 120)
 		sb_lines = 0;					// no status bar at all
@@ -296,11 +296,11 @@ SCR_CalcRefdef (void)
 	else
 		sb_lines = 24 + 16 + 8;
 
-	if (scr_viewsize->value[0] >= 100.0) {
+	if (scr_viewsize->value >= 100.0) {
 		full = true;
 		size = 100.0;
 	} else
-		size = scr_viewsize->value[0];
+		size = scr_viewsize->value;
 	if (cl.intermission) {
 		full = true;
 		size = 100;
@@ -327,7 +327,7 @@ SCR_CalcRefdef (void)
 	else
 		r_refdef.vrect.y = (h - r_refdef.vrect.height) / 2;
 
-	r_refdef.fov_x = scr_fov->value[0];
+	r_refdef.fov_x = scr_fov->value;
 	r_refdef.fov_y =
 		CalcFov (r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height);
 
@@ -345,7 +345,7 @@ Keybinding command
 void
 SCR_SizeUp_f (void)
 {
-	Cvar_Set (scr_viewsize, va("%i", (int)scr_viewsize->value[0] + 10));
+	Cvar_Set (scr_viewsize, va("%i", (int)scr_viewsize->value + 10));
 	vid.recalc_refdef = 1;
 }
 
@@ -360,7 +360,7 @@ Keybinding command
 void
 SCR_SizeDown_f (void)
 {
-	Cvar_Set (scr_viewsize, va("%i", (int)scr_viewsize->value[0] - 10));
+	Cvar_Set (scr_viewsize, va("%i", (int)scr_viewsize->value - 10));
 	vid.recalc_refdef = 1;
 }
 
@@ -412,7 +412,7 @@ SCR_DrawRam
 void
 SCR_DrawRam (void)
 {
-	if (!scr_showram->value[0])
+	if (!scr_showram->value)
 		return;
 
 	if (!r_cache_thrash)
@@ -431,7 +431,7 @@ SCR_DrawTurtle (void)
 {
 	static int  count;
 
-	if (!scr_showturtle->value[0])
+	if (!scr_showturtle->value)
 		return;
 
 	if (host_frametime < 0.1) {
@@ -472,7 +472,7 @@ SCR_DrawPause (void)
 {
 	qpic_t     *pic;
 
-	if (!scr_showpause->value[0])			// turn off for screenshots
+	if (!scr_showpause->value)			// turn off for screenshots
 		return;
 
 	if (!cl.paused)
@@ -533,12 +533,12 @@ SCR_SetUpToDrawConsole (void)
 		scr_conlines = 0;				// none visible
 
 	if (scr_conlines < scr_con_current) {
-		scr_con_current -= scr_conspeed->value[0] * host_frametime;
+		scr_con_current -= scr_conspeed->value * host_frametime;
 		if (scr_conlines > scr_con_current)
 			scr_con_current = scr_conlines;
 
 	} else if (scr_conlines > scr_con_current) {
-		scr_con_current += scr_conspeed->value[0] * host_frametime;
+		scr_con_current += scr_conspeed->value * host_frametime;
 		if (scr_conlines < scr_con_current)
 			scr_con_current = scr_conlines;
 	}
@@ -836,7 +836,7 @@ SCR_UpdateScreen (void)
 		Con_Printf ("SCR_UpdateScreen: WARNING: gl_triplebuffer not inited\n");
 		return;
 	}
-	vid.numpages = 2 + gl_triplebuffer->value[0];
+	vid.numpages = 2 + gl_triplebuffer->value;
 
 	scr_copytop = 0;
 	scr_copyeverything = 0;
@@ -858,13 +858,13 @@ SCR_UpdateScreen (void)
 	// 
 	// determine size of refresh window
 	// 
-	if (oldfov != scr_fov->value[0]) {
-		oldfov = scr_fov->value[0];
+	if (oldfov != scr_fov->value) {
+		oldfov = scr_fov->value;
 		vid.recalc_refdef = true;
 	}
 
-	if (oldscreensize != scr_viewsize->value[0]) {
-		oldscreensize = scr_viewsize->value[0];
+	if (oldscreensize != scr_viewsize->value) {
+		oldscreensize = scr_viewsize->value;
 		vid.recalc_refdef = true;
 	}
 

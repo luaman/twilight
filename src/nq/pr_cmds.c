@@ -859,7 +859,7 @@ PF_cvar (void)
 	str = G_STRING (OFS_PARM0);
 	var = Cvar_Find (str);
 
-	G_FLOAT (OFS_RETURN) = var->value[0];
+	G_FLOAT (OFS_RETURN) = var->value;
 }
 
 /*
@@ -1388,7 +1388,7 @@ PF_aim (void)
 	VectorMA (start, 2048, dir, end);
 	tr = SV_Move (start, vec3_origin, vec3_origin, end, false, ent);
 	if (tr.ent && tr.ent->v.takedamage == DAMAGE_AIM
-		&& (!teamplay->value[0] || ent->v.team <= 0
+		&& (!teamplay->value || ent->v.team <= 0
 			|| ent->v.team != tr.ent->v.team)) {
 		VectorCopy (pr_global_struct->v_forward, G_VECTOR (OFS_RETURN));
 		return;
@@ -1396,7 +1396,7 @@ PF_aim (void)
 
 // try all possible entities
 	VectorCopy (dir, bestdir);
-	bestdist = sv_aim->value[0];
+	bestdist = sv_aim->value;
 	bestent = NULL;
 
 	check = NEXT_EDICT (sv.edicts);
@@ -1405,7 +1405,7 @@ PF_aim (void)
 			continue;
 		if (check == ent)
 			continue;
-		if (teamplay->value[0] && ent->v.team > 0
+		if (teamplay->value && ent->v.team > 0
 				&& ent->v.team == check->v.team)
 			continue;					// don't aim at teammate
 		for (j = 0; j < 3; j++)

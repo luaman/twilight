@@ -140,7 +140,7 @@ void
 IN_MLookUp (void)
 {
 	KeyUp (&in_mlook);
-	if (!(in_mlook.state & 1) && lookspring->value[0])
+	if (!(in_mlook.state & 1) && lookspring->value)
 		V_StartPitchDrift ();
 }
 
@@ -413,30 +413,30 @@ CL_AdjustAngles (void)
 	float       up, down;
 
 	if (in_speed.state & 1)
-		speed = host_frametime * cl_anglespeedkey->value[0];
+		speed = host_frametime * cl_anglespeedkey->value;
 	else
 		speed = host_frametime;
 
 	if (!(in_strafe.state & 1)) {
 		cl.viewangles[YAW] -=
-			speed * cl_yawspeed->value[0] * CL_KeyState (&in_right);
+			speed * cl_yawspeed->value * CL_KeyState (&in_right);
 		cl.viewangles[YAW] +=
-			speed * cl_yawspeed->value[0] * CL_KeyState (&in_left);
+			speed * cl_yawspeed->value * CL_KeyState (&in_left);
 		cl.viewangles[YAW] = anglemod (cl.viewangles[YAW]);
 	}
 	if (in_klook.state & 1) {
 		V_StopPitchDrift ();
 		cl.viewangles[PITCH] -=
-			speed * cl_pitchspeed->value[0] * CL_KeyState (&in_forward);
+			speed * cl_pitchspeed->value * CL_KeyState (&in_forward);
 		cl.viewangles[PITCH] +=
-			speed * cl_pitchspeed->value[0] * CL_KeyState (&in_back);
+			speed * cl_pitchspeed->value * CL_KeyState (&in_back);
 	}
 
 	up = CL_KeyState (&in_lookup);
 	down = CL_KeyState (&in_lookdown);
 
-	cl.viewangles[PITCH] -= speed * cl_pitchspeed->value[0] * up;
-	cl.viewangles[PITCH] += speed * cl_pitchspeed->value[0] * down;
+	cl.viewangles[PITCH] -= speed * cl_pitchspeed->value * up;
+	cl.viewangles[PITCH] += speed * cl_pitchspeed->value * down;
 
 	if (up || down)
 		V_StopPitchDrift ();
@@ -471,28 +471,28 @@ CL_BaseMove (usercmd_t *cmd)
 	Q_memset (cmd, 0, sizeof (*cmd));
 
 	if (in_strafe.state & 1) {
-		cmd->sidemove += cl_sidespeed->value[0] * CL_KeyState (&in_right);
-		cmd->sidemove -= cl_sidespeed->value[0] * CL_KeyState (&in_left);
+		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
+		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
 	}
 
-	cmd->sidemove += cl_sidespeed->value[0] * CL_KeyState (&in_moveright);
-	cmd->sidemove -= cl_sidespeed->value[0] * CL_KeyState (&in_moveleft);
+	cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
+	cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
 
-	cmd->upmove += cl_upspeed->value[0] * CL_KeyState (&in_up);
-	cmd->upmove -= cl_upspeed->value[0] * CL_KeyState (&in_down);
+	cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up);
+	cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
 
 	if (!(in_klook.state & 1)) {
-		cmd->forwardmove += cl_forwardspeed->value[0]
+		cmd->forwardmove += cl_forwardspeed->value
 			* CL_KeyState (&in_forward);
-		cmd->forwardmove -= cl_backspeed->value[0] * CL_KeyState (&in_back);
+		cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
 	}
 //
 // adjust for speed key
 //
 	if (in_speed.state & 1) {
-		cmd->forwardmove *= cl_movespeedkey->value[0];
-		cmd->sidemove *= cl_movespeedkey->value[0];
-		cmd->upmove *= cl_movespeedkey->value[0];
+		cmd->forwardmove *= cl_movespeedkey->value;
+		cmd->sidemove *= cl_movespeedkey->value;
+		cmd->upmove *= cl_movespeedkey->value;
 	}
 #ifdef QUAKE2
 	cmd->lightlevel = cl.light_level;

@@ -511,8 +511,8 @@ Host_FilterTime (float time)
 	host_frametime = realtime - oldrealtime;
 	oldrealtime = realtime;
 
-	if (host_framerate->value[0] > 0)
-		host_frametime = host_framerate->value[0];
+	if (host_framerate->value > 0)
+		host_frametime = host_framerate->value;
 	else {								// don't allow really long or short
 		// frames
 		if (host_frametime > 0.1)
@@ -700,12 +700,12 @@ _Host_Frame (float time)
 		CL_ReadFromServer ();
 	}
 // update video
-	if (host_speeds->value[0])
+	if (host_speeds->value)
 		time1 = Sys_FloatTime ();
 
 	SCR_UpdateScreen ();
 
-	if (host_speeds->value[0])
+	if (host_speeds->value)
 		time2 = Sys_FloatTime ();
 
 // update audio
@@ -717,7 +717,7 @@ _Host_Frame (float time)
 
 	CDAudio_Update ();
 
-	if (host_speeds->value[0]) {
+	if (host_speeds->value) {
 		pass1 = (time1 - time3) * 1000;
 		time3 = Sys_FloatTime ();
 		pass2 = (time2 - time1) * 1000;
@@ -737,7 +737,7 @@ Host_Frame (float time)
 	static int  timecount;
 	int         i, c, m;
 
-	if (!serverprofile->value[0]) {
+	if (!serverprofile->value) {
 		_Host_Frame (time);
 		return;
 	}

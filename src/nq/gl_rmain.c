@@ -514,7 +514,7 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 
 	height = -lheight + 1.0;
 
-	if (r_shadows->value[0] == 2)
+	if (r_shadows->value == 2)
 	{
 		// better shadowing, now takes angle of ground into account
 		// cast a traceline into the floor directly below the player
@@ -549,7 +549,7 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 			point[1] = verts->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
 			point[2] = verts->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
 
-			if (r_shadows->value[0] == 2)
+			if (r_shadows->value == 2)
 			{
 				point[0] -= shadevector[0] * point[0];
 				point[1] -= shadevector[1] * point[1];
@@ -620,7 +620,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
 
-	if (r_shadows->value[0] == 2)
+	if (r_shadows->value == 2)
 	{
 		// better shadowing, now takes angle of ground into account
 		// cast a traceline into the floor directly below the player
@@ -666,7 +666,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 
 			VectorSubtract(point2, point1, d);
 
-			if (r_shadows->value[0] == 2)
+			if (r_shadows->value == 2)
 			{	
 				point1[0] = point1[0] + (blend * d[0]);
 				point1[1] = point1[1] + (blend * d[1]);
@@ -811,7 +811,7 @@ R_DrawAliasModel (entity_t *e)
 	// get lighting information
 	// 
 
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || !gl_fb_models->value[0])
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || !gl_fb_models->value)
 	{
 		ambientlight = shadelight = R_LightPoint (currententity->origin);
 
@@ -849,7 +849,7 @@ R_DrawAliasModel (entity_t *e)
 			ambientlight = shadelight = 8;
 
 	// HACK HACK HACK -- no fullbright colors, so make torches full light
-	if ((clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value[0])
+	if ((clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value)
 		ambientlight = shadelight = 256;
 
 	shadedots =
@@ -872,13 +872,13 @@ R_DrawAliasModel (entity_t *e)
 
 	glPushMatrix ();
 
-	if (gl_im_transform->value[0] && !(clmodel->modflags & FLAG_NO_IM_FORM))
+	if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 		R_BlendedRotateForEntity (e);
 	else
 		R_RotateForEntity (e);
 
 	if ((clmodel->modflags & FLAG_DOUBLESIZE)
-			&& gl_doubleeyes->value[0]) {
+			&& gl_doubleeyes->value) {
 		glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
 					  paliashdr->scale_origin[2] - (22 + 8));
 		// double size of eyes, since they are really hard to see in gl
@@ -896,7 +896,7 @@ R_DrawAliasModel (entity_t *e)
 
 	// we can't dynamically colormap textures, so they are cached
 	// seperately for the players.  Heads are just uncolored.
-	if (currententity->colormap != vid.colormap && !gl_nocolors->value[0]) {
+	if (currententity->colormap != vid.colormap && !gl_nocolors->value) {
 		i = currententity - cl_entities;
 		if (i >= 1 && i <= cl.maxclients	/* && !Q_strcmp
 											   (currententity->model->name,
@@ -904,14 +904,14 @@ R_DrawAliasModel (entity_t *e)
 			glBindTexture (GL_TEXTURE_2D, playertextures - 1 + i);
 	}
 
-	if (gl_smoothmodels->value[0])
+	if (gl_smoothmodels->value)
 		glShadeModel (GL_SMOOTH);
 	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	if (gl_affinemodels->value[0])
+	if (gl_affinemodels->value)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
-	if (gl_im_animation->value[0] && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
 		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
 	else
 		R_SetupAliasFrame (currententity->frame, paliashdr);
@@ -919,12 +919,12 @@ R_DrawAliasModel (entity_t *e)
 	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	glShadeModel (GL_FLAT);
-	if (gl_affinemodels->value[0])
+	if (gl_affinemodels->value)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	glPopMatrix ();
 
-	if (r_shadows->value[0] && !(clmodel->modflags & FLAG_NOSHADOW)) {
+	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {
 		float an;
 
 		// no shadows if underwater - crashes
@@ -942,7 +942,7 @@ R_DrawAliasModel (entity_t *e)
 
 		glPushMatrix ();
 
-		if (gl_im_transform->value[0] && !(clmodel->modflags & FLAG_NO_IM_FORM))
+		if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 			R_BlendedRotateForEntity (e);
 		else
             R_RotateForEntity (e);
@@ -951,8 +951,9 @@ R_DrawAliasModel (entity_t *e)
 		glEnable (GL_BLEND);
 		glColor4f (0, 0, 0, 0.5);
 
-		if (gl_im_animation->value[0] && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0, lastposenum, currententity);
+		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0,
+					lastposenum, currententity);
 		else
             GL_DrawAliasShadow (paliashdr, lastposenum);
 
@@ -976,14 +977,14 @@ R_DrawEntitiesOnList (void)
 {
 	int         i;
 
-	if (!r_drawentities->value[0])
+	if (!r_drawentities->value)
 		return;
 
 	// draw sprites seperately, because of alpha blending
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = cl_visedicts[i];
 
-		if (chase_active->value[0])
+		if (chase_active->value)
 			if (currententity == &cl_entities[cl.viewentity])
 				currententity->angles[0] *= 0.3;
 
@@ -1025,10 +1026,10 @@ R_DrawViewModel (void)
 {
 	currententity = &cl.viewent;
 
-	if (!r_drawviewmodel->value[0] ||
-		chase_active->value[0] ||
+	if (!r_drawviewmodel->value ||
+		chase_active->value ||
 		envmap ||
-		!r_drawentities->value[0] ||
+		!r_drawentities->value ||
 		cl.items & IT_INVISIBILITY ||
 		(cl.stats[STAT_HEALTH] <= 0) ||
 		!currententity->model)
@@ -1049,7 +1050,7 @@ R_PolyBlend
 void
 R_PolyBlend (void)
 {
-	if (!gl_polyblend->value[0])
+	if (!gl_polyblend->value)
 		return;
 	if (!v_blend[3])
 		return;
@@ -1257,7 +1258,7 @@ R_SetupGL (void)
 	// 
 	// set drawing parms
 	// 
-	if (gl_cull->value[0])
+	if (gl_cull->value)
 		glEnable (GL_CULL_FACE);
 	else
 		glDisable (GL_CULL_FACE);
@@ -1298,11 +1299,6 @@ R_RenderScene (void)
 	R_RenderDlights ();
 
 	R_DrawParticles ();
-
-#ifdef GLTEST
-	Test_Draw ();
-#endif
-
 }
 
 
@@ -1314,18 +1310,18 @@ R_Clear
 void
 R_Clear (void)
 {
-	if (r_mirroralpha->value[0] != 1.0f) {
-		if (gl_clear->value[0])
+	if (r_mirroralpha->value != 1.0f) {
+		if (gl_clear->value)
 			glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		else
 			glClear (GL_DEPTH_BUFFER_BIT);
 		gldepthmin = 0.0f;
 		gldepthmax = 0.5f;
 		glDepthFunc (GL_LEQUAL);
-	} else if (gl_ztrick->value[0]) {
+	} else if (gl_ztrick->value) {
 		static int  trickframe;
 
-		if (gl_clear->value[0])
+		if (gl_clear->value)
 			glClear (GL_COLOR_BUFFER_BIT);
 
 		trickframe++;
@@ -1339,7 +1335,7 @@ R_Clear (void)
 			glDepthFunc (GL_GEQUAL);
 		}
 	} else {
-		if (gl_clear->value[0])
+		if (gl_clear->value)
 			glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		else
 			glClear (GL_DEPTH_BUFFER_BIT);
@@ -1410,7 +1406,7 @@ R_Mirror (void)
 
 	glLoadMatrixf (r_base_world_matrix);
 
-	glColor4f (1.0f, 1.0f, 1.0f, r_mirroralpha->value[0]);
+	glColor4f (1.0f, 1.0f, 1.0f, r_mirroralpha->value);
 	s = cl.worldmodel->textures[mirrortexturenum]->texturechain;
 	for (; s; s = s->texturechain)
 		R_RenderBrushPoly (s);
@@ -1432,13 +1428,13 @@ R_RenderView (void)
 	double      time1 = 0.0;
 	double      time2;
 
-	if (r_norefresh->value[0])
+	if (r_norefresh->value)
 		return;
 
 	if (!r_worldentity.model || !cl.worldmodel)
 		Sys_Error ("R_RenderView: NULL worldmodel");
 
-	if (r_speeds->value[0]) {
+	if (r_speeds->value) {
 		glFinish ();
 		time1 = Sys_FloatTime ();
 		c_brush_polys = 0;
@@ -1447,7 +1443,7 @@ R_RenderView (void)
 
 	mirror = false;
 
-	if (gl_finish->value[0])
+	if (gl_finish->value)
 		glFinish ();
 
 	R_Clear ();
@@ -1475,7 +1471,7 @@ R_RenderView (void)
 
 	R_PolyBlend ();
 
-	if (r_speeds->value[0]) {
+	if (r_speeds->value) {
 //      glFinish ();
 		time2 = Sys_FloatTime ();
 		Con_Printf ("%3i ms  %4i wpoly %4i epoly\n",

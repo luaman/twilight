@@ -75,9 +75,9 @@ Chase_Update (void)
 	// calc exact destination
 	for (i = 0; i < 3; i++)
 		chase_dest[i] = r_refdef.vieworg[i]
-			- forward[i] * chase_back->value[0]
-			- right[i] * chase_right->value[0];
-	chase_dest[2] = r_refdef.vieworg[2] + chase_up->value[0];
+			- forward[i] * chase_back->value
+			- right[i] * chase_right->value;
+	chase_dest[2] = r_refdef.vieworg[2] + chase_up->value;
 
 	// find the spot the player is looking at
 	VectorMA (r_refdef.vieworg, 4096, forward, dest);

@@ -12,7 +12,7 @@ Configuration Variables
     typedef struct cvar_s {
         char               *name;
         char               *string;
-        vec5_t              value;
+        float               value;
         int                 flags;
 
         void              (*callback) (struct cvar_s *var);
@@ -22,9 +22,8 @@ Configuration Variables
   Comparing this with the QW Cvar system illustrates a few differences
   right from the start.  First, the boolean values for archive and info
   are gone, replaced by a flags bitfield.  There is now a function which 
-  will be called when the Cvar changes, if defined.  And the floating
-  point value of the Cvar has been replaced by a five float vector.  But
-  the real change is in the API used to manipulate Cvars.
+  will be called when the Cvar changes, if defined.  The real change,
+  however, is in the API used to manipulate Cvars.
 
   To create a Cvar, declare a pointer for it
 
@@ -93,9 +92,8 @@ Configuration Variables
   Using a Cvar once you have created it is fairly straightforward.  If the
   Cvar contains a string, where you would have referred to var.string
   before, use var->string now.  If you would have referred to var.value,
-  you'd use var->value[0] instead.  Unused portions of the numeric vector
-  will contain 0.0, including the first element if a Cvar's string does
-  not contain numeric data.
+  you'd use var->value instead.  If the Cvar does not contain numeric data
+  the value will be 0.0.
 
 
   It is sometimes necessary to iterate through every Cvar, even though
