@@ -255,7 +255,7 @@ def do_configure (env):
 	handle_opts (conf, opts, config_defs, 1)
 
 	if env['PLATFORM'] == 'win32':
-		env.Append (LIBS = ['SDL_main', 'user32', 'ws2_32'])
+		env.Append (LIBS = ['SDLmain', 'user32', 'ws2_32'])
 
 	conf.Finish ()
 
