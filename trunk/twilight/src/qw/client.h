@@ -59,6 +59,7 @@ typedef struct {
 	float       waterjumptime;
 	int         onground;				// -1 = in air, else pmove entity
 	// number
+	int		number;
 	int         oldbuttons;
 } player_state_t;
 

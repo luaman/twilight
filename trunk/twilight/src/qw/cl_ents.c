@@ -513,22 +513,28 @@ CL_LinkPacketEntities (void)
 
 		// calculate origin
 		for (i = 0; i < 3; i++)
-			ent->origin[i] = s2->origin[i] +
-				f * (s1->origin[i] - s2->origin[i]);
-
-		// add automatic particle trails
-		if (!model->flags)
-			continue;
+			ent->origin[i] = s2->origin[i] + f * (s1->origin[i] - s2->origin[i]);
 
 		// scan the old entity display list for a matching
 		for (i = 0; i < cl_oldnumvisedicts; i++) {
 			if (cl_oldvisedicts[i].keynum == ent->keynum) {
+				ent->frame_start_time = cl_oldvisedicts[i].frame_start_time;
+				ent->frame_interval = cl_oldvisedicts[i].frame_interval;
+				ent->pose1 = cl_oldvisedicts[i].pose1;
+				ent->pose2 = cl_oldvisedicts[i].pose2;
 				VectorCopy (cl_oldvisedicts[i].origin, old_origin);
 				break;
 			}
 		}
-		if (i == cl_oldnumvisedicts)
-			continue;					// not in last message
+
+		if (i == cl_oldnumvisedicts) {	// not in last message, don't lerp 
+			ent->pose1 = ent->pose2 = -1;
+			continue;
+		}
+
+		// add automatic particle trails
+		if (!model->flags)
+			continue;
 
 		for (i = 0; i < 3; i++)
 			if (Q_abs (old_origin[i] - ent->origin[i]) > 128) {	// no trail if
@@ -682,6 +688,7 @@ CL_ParsePlayerinfo (void)
 
 	state = &cl.frames[parsecountmod].playerstate[num];
 
+	state->number = num;
 	flags = state->flags = MSG_ReadShort ();
 
 	state->messagenum = cl.parsecount;
@@ -816,7 +823,7 @@ for all current players
 void
 CL_LinkPlayers (void)
 {
-	int         j;
+	int         j, i;
 	player_info_t *info;
 	player_state_t *state;
 	player_state_t exact;
@@ -867,15 +874,28 @@ CL_LinkPlayers (void)
 			continue;
 
 		// grab an entity to fill in
-		if (cl_numvisedicts == MAX_VISEDICTS)
-			break;						// object list is full
-		ent = &cl_visedicts[cl_numvisedicts];
-		cl_numvisedicts++;
-		ent->keynum = 0;
+		if (cl_numvisedicts == MAX_VISEDICTS)	// object list is full
+			break;
 
+		ent = &cl_visedicts[cl_numvisedicts++];
+
+		ent->frame = state->frame;
+
+		// scan the old entity display list for a matching player
+		for (i = 0; i < cl_oldnumvisedicts; i++) {
+			if (cl_oldvisedicts[i].keynum == state->number) {
+				ent->frame_start_time = cl_oldvisedicts[i].frame_start_time;
+				ent->frame_interval = cl_oldvisedicts[i].frame_interval;
+				ent->pose1 = cl_oldvisedicts[i].pose1;
+				ent->pose2 = cl_oldvisedicts[i].pose2;
+				break;
+			}
+		}
+
+		ent->keynum = 0;
+//		ent->keynum = state->number;
 		ent->model = cl.model_precache[state->modelindex];
 		ent->skinnum = state->skinnum;
-		ent->frame = state->frame;
 		ent->colormap = info->translations;
 		if (state->modelindex == cl_playerindex)
 			ent->scoreboard = info;		// use custom skin

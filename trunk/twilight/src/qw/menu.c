@@ -692,8 +692,8 @@ M_Gfx_Draw (void)
 	M_Print (16, 40, "         Affine models");
 	M_DrawCheckbox (220, 40, gl_affinemodels->value);
 
-	M_Print (16, 48, "      Fullbright models");
-	M_DrawCheckbox (220, 48, gl_fb_models->value);
+/*	M_Print (16, 48, "      Fullbright models");
+	M_DrawCheckbox (220, 48, gl_fb_models->value); */
 
 	M_Print (16, 56, "   Fast dynamic lights");
 	M_DrawCheckbox (220, 56, gl_flashblend->value);
@@ -702,8 +702,8 @@ M_Gfx_Draw (void)
 	M_Print (220, 64, 
 		(r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off");
 
-	M_Print (16, 72, "   Frame interpolation");
-	M_DrawCheckbox (220, 72, gl_im_animation->value);
+/*	M_Print (16, 72, "   Frame interpolation");
+	M_DrawCheckbox (220, 72, gl_im_animation->value); */
 
 // cursor
 	M_DrawCharacter (200, 32 + gfx_cursor * 8,
@@ -727,10 +727,10 @@ M_Gfx_Set (void)
 			Cvar_Set (gl_affinemodels, va("%i", v));
 			break;
 
-		case 2:
+/*		case 2:
 			v = !(int)gl_fb_models->value;
 			Cvar_Set (gl_fb_models, va("%i", v));
-			break;
+			break; */
 
 		case 3:
 			v = !(int)gl_flashblend->value;
@@ -743,11 +743,11 @@ M_Gfx_Set (void)
 			Cvar_Set (r_shadows, va("%i", v));
 			break;
 
-		case 5:
+/*		case 5:
 			v = !(int)gl_im_animation->value;
 			Cvar_Set (gl_im_animation, va("%i", v));
 			break;
-			
+			*/
 		default:
 			break;
 	}
