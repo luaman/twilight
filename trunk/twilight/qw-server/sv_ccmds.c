@@ -33,11 +33,18 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+
+#include "bothdefs.h"
 #include "cmd.h"
+#include "common.h"
+#include "console.h"
 #include "cvar.h"
 #include "progs.h"
 #include "server.h"
+#include "strlib.h"
+#include "sys.h"
+#include "zone.h"
 
 qboolean    sv_allow_cheats;
 
@@ -185,7 +192,7 @@ SV_SetPlayer (void)
 	int         i;
 	int         idnum;
 
-	idnum = atoi (Cmd_Argv (1));
+	idnum = Q_atoi (Cmd_Argv (1));
 
 	for (i = 0, cl = svs.clients; i < MAX_CLIENTS; i++, cl++) {
 		if (!cl->state)
@@ -271,7 +278,7 @@ SV_Give_f (void)
 		return;
 
 	t = Cmd_Argv (2);
-	v = atoi (Cmd_Argv (3));
+	v = Q_atoi (Cmd_Argv (3));
 
 	switch (t[0]) {
 		case '2':
@@ -367,7 +374,7 @@ SV_Kick_f (void)
 	client_t   *cl;
 	int         uid;
 
-	uid = atoi (Cmd_Argv (1));
+	uid = Q_atoi (Cmd_Argv (1));
 
 	for (i = 0, cl = svs.clients; i < MAX_CLIENTS; i++, cl++) {
 		if (!cl->state)
@@ -707,9 +714,9 @@ SV_Floodprot_f (void)
 		return;
 	}
 
-	arg1 = atoi (Cmd_Argv (1));
-	arg2 = atoi (Cmd_Argv (2));
-	arg3 = atoi (Cmd_Argv (3));
+	arg1 = Q_atoi (Cmd_Argv (1));
+	arg2 = Q_atoi (Cmd_Argv (2));
+	arg3 = Q_atoi (Cmd_Argv (3));
 
 	if (arg1 <= 0 || arg2 <= 0 || arg3 <= 0) {
 		Con_Printf ("All values must be positive numbers\n");
@@ -844,7 +851,7 @@ SV_Snap_f (void)
 		return;
 	}
 
-	uid = atoi (Cmd_Argv (1));
+	uid = Q_atoi (Cmd_Argv (1));
 
 	SV_Snap (uid);
 }

@@ -34,12 +34,19 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+
+#include "bothdefs.h"
 #include "cmd.h"
+#include "common.h"
+#include "console.h"
 #include "crc.h"
+#include "mathlib.h"
 #include "progs.h"
 #include "server.h"
+#include "strlib.h"
 #include "world.h"
+#include "zone.h"
 
 dprograms_t *progs;
 dfunction_t *pr_functions;
@@ -758,7 +765,7 @@ ED_ParseEpair (void *base, ddef_t *key, char *s)
 			break;
 
 		case ev_float:
-			*(float *) d = atof (s);
+			*(float *) d = Q_atof (s);
 			break;
 
 		case ev_vector:
@@ -769,13 +776,13 @@ ED_ParseEpair (void *base, ddef_t *key, char *s)
 				while (*v && *v != ' ')
 					v++;
 				*v = 0;
-				((float *) d)[i] = atof (w);
+				((float *) d)[i] = Q_atof (w);
 				w = v = v + 1;
 			}
 			break;
 
 		case ev_entity:
-			*(int *) d = EDICT_TO_PROG (EDICT_NUM (atoi (s)));
+			*(int *) d = EDICT_TO_PROG (EDICT_NUM (Q_atoi (s)));
 			break;
 
 		case ev_field:

@@ -33,12 +33,18 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+
+#include "bothdefs.h"
 #include "cmd.h"
+#include "common.h"
+#include "console.h"
 #include "cvar.h"
+#include "mathlib.h"
 #include "model.h"
 #include "progs.h"
 #include "server.h"
+#include "strlib.h"
 #include "world.h"
 
 #define	RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
@@ -1237,7 +1243,7 @@ PF_aim (void)
 	i = NUM_FOR_EDICT (ent);
 	if (i > 0 && i < MAX_CLIENTS) {
 		noaim = Info_ValueForKey (svs.clients[i - 1].userinfo, "noaim");
-		if (atoi (noaim) > 0) {
+		if (Q_atoi (noaim) > 0) {
 			VectorCopy (pr_global_struct->v_forward, G_VECTOR (OFS_RETURN));
 			return;
 		}
@@ -1660,7 +1666,7 @@ PF_stof (void)
 
 	s = G_STRING (OFS_PARM0);
 
-	G_FLOAT (OFS_RETURN) = atof (s);
+	G_FLOAT (OFS_RETURN) = Q_atof (s);
 }
 
 

@@ -28,6 +28,10 @@
 #ifndef __SYS_H
 #define __SYS_H
 
+extern int sys_memsize;
+extern void *sys_membase;
+
+
 int         Sys_FileTime (char *path);
 
 void        Sys_mkdir (char *path);

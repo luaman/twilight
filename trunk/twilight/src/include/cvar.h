@@ -49,6 +49,8 @@ typedef struct cvar_s {
 	void			  (*callback) (struct cvar_s *var);
 } cvar_t;
 
+extern cvar_t *developer;
+
 typedef void (*cvar_callback) (struct cvar_s *var);
 
 void Cvar_Init (void);

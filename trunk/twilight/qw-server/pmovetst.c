@@ -33,9 +33,13 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include "bothdefs.h"
+#include "bspfile.h"
+#include "console.h"
+#include "mathlib.h"
 #include "model.h"
 #include "pmove.h"
+#include "sys.h"
 
 static hull_t box_hull;
 static dclipnode_t box_clipnodes[6];

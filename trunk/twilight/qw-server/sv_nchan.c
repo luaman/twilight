@@ -34,7 +34,11 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+
+#include "bothdefs.h"
+#include "common.h"
+#include "console.h"
 #include "server.h"
 
 // check to see if client block will fit, if not, rotate buffers

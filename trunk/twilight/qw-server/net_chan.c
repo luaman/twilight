@@ -33,14 +33,19 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <stdio.h>
+#include <stdarg.h>
 #ifndef WIN32
 #include <unistd.h>
 #endif
 #include <sys/types.h>
 #include <time.h>
 
-#include "qwsvdef.h"
+#include "bothdefs.h"
+#include "common.h"
+#include "console.h"
 #include "cvar.h"
+#include "net.h"
 
 #define	PACKET_HEADER	8
 

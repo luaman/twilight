@@ -34,8 +34,15 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+
+#include "bothdefs.h"
 #include "cmd.h"
+#include "common.h"
+#include "console.h"
+#include "strlib.h"
+#include "sys.h"
+#include "zone.h"
 
 #define	DYNAMIC_SIZE	0x20000
 
@@ -942,8 +949,8 @@ Memory_Init (void *buf, int size)
 	int         p;
 	int         zonesize = DYNAMIC_SIZE;
 
-	hunk_base = buf;
-	hunk_size = size;
+	hunk_base = sys_membase;
+	hunk_size = sys_memsize;
 	hunk_low_used = 0;
 	hunk_high_used = 0;
 
@@ -959,3 +966,4 @@ Memory_Init (void *buf, int size)
 	mainzone = Hunk_AllocName (zonesize, "zone");
 	Z_ClearZone (mainzone, zonesize);
 }
+

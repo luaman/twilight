@@ -33,12 +33,19 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "qwsvdef.h"
+#include <stdio.h>
+
+#include "bothdefs.h"
+#include "common.h"
+#include "console.h"
 #include "crc.h"
+#include "mathlib.h"
 #include "model.h"
 #include "progs.h"
 #include "server.h"
+#include "strlib.h"
 #include "world.h"
+#include "zone.h"
 
 server_static_t svs;					// persistant server info
 server_t    sv;							// local server
