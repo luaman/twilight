@@ -35,6 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include "common.h"
+#include "strlib.h"
 #include "sys.h"
 #include "wad.h"
 

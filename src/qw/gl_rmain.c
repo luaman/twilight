@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
+#include "strlib.h"
 #include "pmove.h"
 #include "sound.h"
 #include "view.h"
@@ -1296,7 +1297,7 @@ R_Mirror (void)
 	if (!mirror)
 		return;
 
-	memcpy (r_base_world_matrix, r_world_matrix, sizeof (r_base_world_matrix));
+	Q_memcpy (r_base_world_matrix, r_world_matrix, sizeof (r_base_world_matrix));
 
 	d = DotProduct (r_refdef.vieworg,
 					mirror_plane->normal) - mirror_plane->dist;

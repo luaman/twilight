@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include <sys/vt.h>
 #endif
 #include <stdarg.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
 

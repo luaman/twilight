@@ -41,7 +41,7 @@ static const char rcsid[] =
 #include "host.h"
 #include "pmove.h"
 #include "sys.h"
-
+#include "strlib.h"
 
 void        CL_FinishTimeDemo (void);
 
@@ -79,7 +79,7 @@ CL_StopPlayback (void)
 	if (cls.timedemo)
 		CL_FinishTimeDemo ();
 
-	memset (cl.cshifts, 0, sizeof(cl.cshifts));
+	Q_memset (cl.cshifts, 0, sizeof(cl.cshifts));
 	cl.stats[STAT_ITEMS] = 0;
 }
 
@@ -584,7 +584,7 @@ CL_Record_f (void)
 	for (i = 0; i < MAX_EDICTS; i++) {
 		es = cl_baselines + i;
 
-		if (memcmp (es, &blankes, sizeof (blankes))) {
+		if (Q_memcmp (es, &blankes, sizeof (blankes))) {
 			MSG_WriteByte (&buf, svc_spawnbaseline);
 			MSG_WriteShort (&buf, i);
 
