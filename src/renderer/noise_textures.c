@@ -102,21 +102,23 @@ static void
 TNT_InitSmokeParticleTexture (void)
 {
 	Uint8	d;
-	Uint8	data[32][32][4], noise1[32][32], noise2[32][32];
+	Uint8	data[32][32][4], noise1[32][32], noise2[32][32], noise3[32][32];
 	int		dx, x, y;
 
 	FractalNoise (&noise1[0][0], 32, 2);
 	FractalNoise (&noise2[0][0], 32, 4);
+	FractalNoise (&noise3[0][0], 32, 4);
 	for (y = 0; y < 32; y++)
 	{
 		for (x = 0; x < 32; x++) {
 			dx = x - 16;
 			d = (noise1[y][x] + noise2[y][x]) / 2;
 			if (d > 0) {
+				data[y][x][0] = data[y][x][1] = data[y][x][2] = noise3[y][x];
 				data[y][x][0] = 255;
 				data[y][x][1] = 255;
 				data[y][x][2] = 255;
-				data[y][x][3] = bound(0, (d - 64) * 2 + 64, 255);
+				data[y][x][3] = bound(0, (d - 96) * 2 + 64, 255);
 			} else {
 				data[y][x][0] = 255;
 				data[y][x][1] = 255;
