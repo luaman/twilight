@@ -223,5 +223,11 @@ int	build_number (void);
 
 void ExpandPath(cvar_t *var);
 
+#define DEBUG_VAR(x,c)	do {								\
+	Com_Printf("%s %d: %s, -", __FILE__, __LINE__, #x);		\
+	Com_Printf(c, x);										\
+	Com_Printf("-\n");										\
+} while (0)
+
 #endif // __COMMON_H
 
