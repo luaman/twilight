@@ -91,19 +91,19 @@ double Q_pow(double x, double y);
 
 #define PlaneDiff(point,plane) (((plane)->type < 3 ? (point)[(plane)->type] : DotProduct((point), (plane)->normal)) - (plane)->dist)
 
-#define CrossProduct(v1,v2,cross) (cross[0]=v1[1]*v2[2]-v1[2]*v2[1],cross[1]=v1[2]*v2[0]-v1[0]*v2[2],cross[2]=v1[0]*v2[1]-v1[1]*v2[0])
-#define DotProduct(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
-#define DotProduct2(x,y) (x[0]*y[0]+x[1]*y[1])	// this is for 2-dimensional vectors
+#define CrossProduct(v1,v2,cross) ((cross)[0]=(v1)[1]*(v2)[2]-(v1)[2]*(v2)[1],(cross)[1]=(v1)[2]*(v2)[0]-(v1)[0]*(v2)[2],(cross)[2]=(v1)[0]*(v2)[1]-(v1)[1]*(v2)[0])
+#define DotProduct(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
+#define DotProduct2(x,y) ((x)[0]*(y)[0]+(x)[1]*(y)[1])	// this is for 2-dimensional vectors
 
-#define VectorSet(v,a,b,c)	  (v[0]=a,v[1]=b,v[2]=c)
-#define VectorSubtract(a,b,c) (c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2])
-#define VectorAdd(a,b,c) (c[0]=a[0]+b[0],c[1]=a[1]+b[1],c[2]=a[2]+b[2])
-#define VectorCopy(a,b) (b[0]=a[0],b[1]=a[1],b[2]=a[2])
-#define VectorInverse(a,b) (b[0]=-a[0],b[1]=-a[1],b[2]=-a[2])
-#define VectorScale(a,b,c) (c[0]=a[0]*b,c[1]=a[1]*b,c[2]=a[2]*b)
-#define VectorMA(a,b,c,d) (d[0]=a[0]+b*c[0],d[1]=a[1]+b*c[1],d[2]=a[2]+b*c[2])
-#define VectorCompare(a,b) ((a[0]==b[0])&&(a[1]==b[1])&&(a[2]==b[2]))
-#define VectorClear(a)		(a[0]=a[1]=a[2]=0)
+#define VectorSet(v,a,b,c)	  ((v)[0]=(a),(v)[1]=(b),(v)[2]=(c))
+#define VectorSubtract(a,b,c) ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1],(c)[2]=(a)[2]-(b)[2])
+#define VectorAdd(a,b,c) ((c)[0]=(a)[0]+(b)[0],(c)[1]=(a)[1]+(b)[1],(c)[2]=(a)[2]+(b)[2])
+#define VectorCopy(a,b) ((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2])
+#define VectorInverse(a,b) ((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2])
+#define VectorScale(a,b,c) ((c)[0]=(a)[0]*(b),(c)[1]=(a)[1]*(b),(c)[2]=(a)[2]*(b))
+#define VectorMA(a,b,c,d) ((d)[0]=(a)[0]+(b)*(c)[0],(d)[1]=(a)[1]+(b)*(c)[1],(d)[2]=(a)[2]+(b)*(c)[2])
+#define VectorCompare(a,b) (((a)[0]==(b)[0])&&((a)[1]==(b)[1])&&((a)[2]==(b)[2]))
+#define VectorClear(a)		((a)[0]=(a)[1]=(a)[2]=0)
 #define VectorLength(v)		(Q_sqrt(DotProduct(v,v)))
 #define VectorLength2(v)	(Q_sqrt(DotProduct2(v,v)))
 
