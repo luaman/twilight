@@ -427,6 +427,10 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 	vec3_t      point;
 	float       height, lheight;
 	int         count;
+	pmtrace_t	downtrace;
+	vec3_t		downmove;
+	float		s1 = 0;
+	float		c1 = 0;
 
 	lheight = currententity->origin[2] - lightspot[2];
 
@@ -436,6 +440,21 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 	order = (int *) ((byte *) paliashdr + paliashdr->commands);
 
 	height = -lheight + 1.0;
+
+	if (r_shadows->value == 2)
+	{
+		// better shadowing, now takes angle of ground into account
+		// cast a traceline into the floor directly below the player
+		// and gets normals from this
+		VectorCopy (currententity->origin, downmove);
+		downmove[2] = downmove[2] - 4096;
+		memset (&downtrace, 0, sizeof(downtrace));
+		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, currententity->origin, downmove, &downtrace);
+
+		// calculate the all important angles to keep speed up
+		s1 = Q_sin( currententity->angles[1]/180*M_PI);
+		c1 = Q_cos( currententity->angles[1]/180*M_PI);
+	}
 
 	while ((count = *order++)) {
 		// get the vertex count and primitive type
@@ -458,10 +477,28 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 			point[2] =
 				verts->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
 
-			point[0] -= shadevector[0] * (point[2] + lheight);
-			point[1] -= shadevector[1] * (point[2] + lheight);
-			point[2] = height;
-//          height -= 0.001;
+			if (r_shadows->value == 2)
+			{
+				point[0] -= shadevector[0] * point[0];
+				point[1] -= shadevector[1] * point[1];
+				point[2] -= shadevector[2] * point[2];
+
+				// drop it down to floor
+				point[2] = point[2] - (currententity->origin[2] - downtrace.endpos[2]) ;
+
+				// now adjust the point with respect to all the normals of the tracepoint
+				point[2] += ((point[1] * (s1 * downtrace.plane.normal[0])) -
+					(point[0] * (c1 * downtrace.plane.normal[0])) -
+					(point[0] * (s1 * downtrace.plane.normal[1])) -
+					(point[1] * (c1 * downtrace.plane.normal[1]))
+					) + 20.2 - downtrace.plane.normal[2]*20.0;
+			}
+			else {
+				point[0] -= shadevector[0]*(point[2]+lheight);
+				point[1] -= shadevector[1]*(point[2]+lheight);
+				point[2] = height;
+			}
+
 			qglVertex3fv (point);
 
 			verts++;
@@ -483,6 +520,10 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 	vec3_t		point1, point2, d;
 	int 		*order, count;
 	float       height, lheight, blend;
+	pmtrace_t	downtrace;
+	vec3_t		downmove;
+	float		s1 = 0.0f;
+	float		c1 = 0.0f;
 
 	blend = (realtime - e->frame_start_time) / e->frame_interval;
 	blend = min (blend, 1);
@@ -496,6 +537,21 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 	verts2 += pose2 * paliashdr->poseverts;
 
 	order = (int *) ((byte *) paliashdr + paliashdr->commands);
+
+	if (r_shadows->value == 2)
+	{
+		// better shadowing, now takes angle of ground into account
+		// cast a traceline into the floor directly below the player
+		// and gets normals from this
+		VectorCopy (currententity->origin, downmove);
+		downmove[2] = downmove[2] - 4096;
+		memset (&downtrace, 0, sizeof(downtrace));
+		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, currententity->origin, downmove, &downtrace);
+
+		// calculate the all important angles to keep speed up
+		s1 = Q_sin( currententity->angles[1]/180*M_PI);
+		c1 = Q_cos( currententity->angles[1]/180*M_PI);
+	}
 
 	while ((count = *order++)) {
 		// get the vertex count and primitive type
@@ -525,7 +581,29 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 
 			VectorSubtract (point2, point1, d);
 
-			qglVertex3f (point1[0] + (blend * d[0]),	point1[1] + (blend * d[1]), height);
+			if (r_shadows->value == 2)
+			{	
+				point1[0] = point1[0] + (blend * d[0]);
+				point1[1] = point1[1] + (blend * d[1]);
+				point1[2] = point1[2] + (blend * d[2]);
+
+				// drop it down to floor
+				point1[2] =  - (currententity->origin[2] - downtrace.endpos[2]) ;
+
+				// now move the z-coordinate as appropriate
+				point1[2] += ((point1[1] * (s1 * downtrace.plane.normal[0])) -
+					(point1[0] * (c1 * downtrace.plane.normal[0])) -
+					(point1[0] * (s1 * downtrace.plane.normal[1])) -
+					(point1[1] * (c1 * downtrace.plane.normal[1]))
+					) + 20.2 - downtrace.plane.normal[2]*20.0;
+
+				qglVertex3fv (point1);
+			}
+			else {
+				qglVertex3f (point1[0] + (blend * d[0]),
+					point1[1] + (blend * d[1]),
+					height);
+			}
 
 			verts1++;
 			verts2++;
@@ -1172,6 +1250,8 @@ R_RenderScene (void)
 
 	R_MarkLeaves ();					// done here so we know if we're in
 	// water
+
+	R_PushDlights ();
 
 	R_DrawWorld ();						// adds static entities to the list
 
