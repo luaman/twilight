@@ -16,5 +16,5 @@ twilight_qwsv_SOURCES= \
 	sys_unix.c sys.h world.c world.h zone.c zone.h \
 	quakedef.h bothdefs.h bspfile.h protocol.h qwsvdef.h server.h 
 
-LDFLAGS=-lm
-CFLAGS=@CFLAGS@ -DSHAREPATH=\"$(SHAREPATH)\" -DUSERPATH=\"$(USERPATH)\"
+LDFLAGS=@SDL_LIBS@ -lm
+CFLAGS=@CFLAGS@ @SDL_CFLAGS@  -DSHAREPATH=\"$(SHAREPATH)\" -DUSERPATH=\"$(USERPATH)\"

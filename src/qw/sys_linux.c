@@ -136,6 +136,7 @@ Sys_Quit (void)
 void
 Sys_Init (void)
 {
+	Math_Init ();
 }
 
 void
