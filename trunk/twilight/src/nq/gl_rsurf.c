@@ -649,7 +649,7 @@ DrawTextureChains ()
 			if (!t)
 				continue;
 			s = t->texturechain;
-			if (!s)
+			if (!s || (s->flags & SURF_DRAWTURB))
 				continue;
 			st = R_TextureAnimation (t);
 
