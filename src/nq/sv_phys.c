@@ -1432,12 +1432,15 @@ SV_Physics_Step (edict_t *ent)
 						speed < sv_stopspeed.value ? sv_stopspeed.value : speed;
 					newspeed = speed - host_frametime * control * friction;
 
-					if (newspeed < 0)
-						newspeed = 0;
-					newspeed /= speed;
+					if (newspeed < 0) {
+						vel[0] = vel[1] = 0.0f;
+					}
+					else {
+						newspeed /= speed;
 
-					vel[0] = vel[0] * newspeed;
-					vel[1] = vel[1] * newspeed;
+						vel[0] = vel[0] * newspeed;
+						vel[1] = vel[1] * newspeed;
+					}
 				}
 			}
 
