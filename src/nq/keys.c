@@ -232,8 +232,11 @@ Key_Console (int key)
 		history_line = edit_line;
 		Key_ClearEditLine (edit_line);
 		if (cls.state == ca_disconnected)
-			// force an update, because the command may take some time
+		{
+			// Make sure the user's command is printed
 			SCR_UpdateScreen ();
+			SCR_UpdateScreen ();
+		}
 		return;
 	}
 

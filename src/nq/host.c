@@ -854,8 +854,6 @@ Host_Init ()
 //	Com_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
 	Com_Printf ("%4.1f megs RAM used.\n", hunk_size / (1024 * 1024.0));
 
-	R_InitTextures ();				// needed even for dedicated servers
-
 	if (cls.state != ca_dedicated) {
 		host_basepal = (Uint8 *) COM_LoadHunkFile ("gfx/palette.lmp", true);
 		if (!host_basepal)
