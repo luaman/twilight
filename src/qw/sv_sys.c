@@ -503,10 +503,6 @@ Sys_ExpandPath (char *str)
 	return buf;
 }
 
-#ifdef _CONSOLE 
-#undef main
-#endif
-
 int
 main (int argc, char *argv[])
 {
