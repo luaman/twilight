@@ -178,10 +178,6 @@ SOURCE=.\sv_user.c
 
 SOURCE=.\world.c
 # End Source File
-# Begin Source File
-
-SOURCE=.\zone.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 

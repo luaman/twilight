@@ -44,7 +44,7 @@ twilight_nq_SOURCES= \
 	snd_dma.c \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
 	sys.c vid_sdl.c \
-	view.c world.c world.h zone.c \
+        view.c world.c world.h \
 	$(twilight_nq_sys_sources)
 
 EXTRA_twilight_nq_SOURCES= \
