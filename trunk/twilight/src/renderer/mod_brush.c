@@ -46,18 +46,6 @@ static const char rcsid[] =
 extern texture_t *r_notexture;
 extern texture_t *r_notexture_water;
 
-qboolean 
-Img_HasFullbrights (Uint8 *pixels, int size)
-{
-    int	i;
-
-    for (i = 0; i < size; i++)
-        if (pixels[i] >= FIRST_FB)
-            return true;
-
-    return false;
-}
-
 
 /*
 ===============================================================================
