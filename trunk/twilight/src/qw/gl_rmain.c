@@ -1422,14 +1422,13 @@ R_RenderView (void)
 	qglEnable (GL_BLEND);
 	qglDepthMask (GL_FALSE);
 
-	R_DrawParticles ();
 	R_DrawEntitiesOnList2 ();
 	R_RenderDlights ();
+	transpolyrender ();
+	R_DrawParticles ();
 
 	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);
-
-	transpolyrender();
 
 	R_PolyBlend ();
 
