@@ -772,7 +772,8 @@ PF_cvar (void)
 
 	var = Cvar_Find (str);
 	if (!var)
-		var=Cvar_CreateTemp (str, "0");
+		var = Cvar_CreateTemp (str, "0");
+
 	G_FLOAT (OFS_RETURN) = var->value;
 }
 

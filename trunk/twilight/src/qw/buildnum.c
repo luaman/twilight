@@ -46,7 +46,7 @@ char       *mon[12] =
 };
 char        mond[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-// returns days since Oct 24 1996
+// returns days since Sep 08 2001
 int
 build_number (void)
 {
