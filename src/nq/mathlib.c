@@ -325,6 +325,25 @@ Q_sqrt(float n)
 	return n;
 }
 
+float 
+Q_RSqrt(float number)
+{
+	long i;
+	float x2, y;
+
+	if (number == 0.0)
+		return 0.0;
+
+	x2 = number * 0.5f;
+	y = number;
+	i = * (long *) &y;				// evil floating point bit level hacking
+	i = 0x5f3759df - (i >> 1);		// what the fuck?
+	y = * (float *) &i;
+	y = y * (1.5f - (x2 * y * y));	// this can be done a second time
+
+	return y;
+}
+
 double
 Q_pow (double x, double y)
 {
