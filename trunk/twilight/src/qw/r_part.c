@@ -529,12 +529,12 @@ R_RocketConeTrail (vec3_t start, vec3_t end, int type)
 	while (len > 0) {
 		lsub = 10;
 
-		VectorSet4 (color1, 0.7, 0.0, 0.0, 0.8);
-		VectorSet4 (color2, 0.15, 0.15, 0.15, 0);
+		VectorSet4 (color1, 0.8, 0.1, 0.1, 0.3);
+		VectorSet4 (color2, 0.05, 0.05, 0.05, 0.0);
 		VectorMA (cur, -7, vec, point1);
 		VectorMA (cur, lsub + 6, vec, point2);
 		new_cone_particle (pt_rtrail, point1, point2, vec3_origin, color1,
-				color2, 0, 2, 10);
+				color2, 0, 2, 15);
 		VectorMA (cur, lsub, vec, cur);
 		len -= lsub;
 	}
@@ -935,7 +935,7 @@ R_Draw_Cone_Particles (void)
 					p->die = -1;
 				break;
 			case pt_rtrail:
-				p->color1[3] -= frametime * 0.9;
+				p->color1[3] -= frametime * 0.5;
 				if (p->color1[3] <= 0)
 					p->die = -1;
 //				p->color1[0] -= frametime * 0.5;
