@@ -475,7 +475,7 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 			f = DotProduct (dist, dist) + LIGHTOFFSET;
 			if (f < rd->cullradius2)
 			{
-				f = (1.0f / f) - rd->lightsubtract;
+				f = ((1.0f / f) - rd->lightsubtract) * 200.0f;
 				if (f > 0)
 					VectorMA (lightcolor, f, rd->light, lightcolor);
 			}
