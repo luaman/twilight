@@ -740,8 +740,9 @@ R_DrawParticles (void)
 		qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 		for (k = 0, p = particles; k < numparticles; k++, p++) {
-			if (p->type != pt_torch && p->type != pt_torch2)
+			if ((p->type != pt_torch && p->type != pt_torch2) || p->die <= realtime)
 				continue;
+
 			maxparticle = k;
 			activeparticles++;
 
