@@ -115,6 +115,9 @@
 				RelativePath=".\collision.c">
 			</File>
 			<File
+				RelativePath=".\cpu.c">
+			</File>
+			<File
 				RelativePath=".\crc.c">
 			</File>
 			<File
@@ -151,6 +154,9 @@
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
+			<File
+				RelativePath="..\..\include\cpu.h">
+			</File>
 			<File
 				RelativePath="..\..\include\crc.h">
 			</File>
