@@ -36,10 +36,9 @@ static const char rcsid[] =
 #include "zone.h"
 
 /*
- * strlcat and strlcpy functions taken from OpenBSD
- * Copyright (C) 1998  Todd C. Miller
- * These functions are distributed under a 3-clause BSDish license, which
- * is distributed with this software in the file COPYING.BSD.
+ * strlcat and strlcpy functions taken from OpenBSD.  Intellectual property
+ * rights to these functions resides with Todd C. Miller.  They are included
+ * here under his license.  Please see doc/COPYING-strl.txt for details.
  */
 
 /*	$OpenBSD: strlcat.c,v 1.1.6.1 2001/05/14 22:32:48 niklas Exp $	*/
@@ -56,7 +55,7 @@ truncation occurred.
 ==================
 */
 size_t
-strlcat (char *dst, const char *src, size_t siz)
+strlcat(char *dst, const char *src, size_t siz)
 {
 	register char *d = dst;
 	register const char *s = src;
@@ -64,7 +63,7 @@ strlcat (char *dst, const char *src, size_t siz)
 	size_t dlen;
 
 	/* Find the end of dst and adjust bytes left but don't go past end */
-	while (*d != '\0' && n-- != 0)
+	while (n-- != 0 && *d != '\0')
 		d++;
 	dlen = d - dst;
 	n = siz - dlen;
@@ -97,7 +96,7 @@ Returns strlen(src); if retval >= siz, truncation occurred.
 ==================
 */
 size_t
-strlcpy (char *dst, const char *src, size_t siz)
+strlcpy(char *dst, const char *src, size_t siz)
 {
 	register char *d = dst;
 	register const char *s = src;
@@ -147,6 +146,9 @@ va
 
 does a varargs printf into a temp buffer, so I don't need to have
 varargs versions of all text functions.
+
+FIXME: This function is a hack.  A convenient hack it is, certainly, but it
+       should be phased out at some point because it is unsafe.
 ============
 */
 char *

@@ -39,6 +39,7 @@ Credits for Project: Twilight
    Forest Hale <lordhavoc@users.sourceforge.net>
    Tomas Jakobsson <tompsson@hotmail.com>
    Victor Luchits <vic@captured.com>
+   Todd C. Miller <Todd.Miller@courtesan.com>
    Jeremy Nelson <jnelson@acronet.net>
    Mathieu Olivier <molivier@users.sourceforge.net>
    John Popplewell <john@johnnypops.demon.co.uk>
