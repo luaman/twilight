@@ -13,8 +13,10 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 
 lib_LIBRARIES=libtwilight_fs.a
 
+BUILT_SOURCES=embedded_data.h
+
 noinst_HEADERS= \
-	dir.h embedded.h fs.h fs_hash.h fs_new.h pak.h rw_ops.h wad.h
+	embedded_data.h dir.h embedded.h fs.h fs_hash.h fs_new.h pak.h rw_ops.h wad.h
 
 libtwilight_fs_a_SOURCES= \
 	dir_posix.c embedded.c fs.c fs_hash.c fs_new.c pak.c rw_ops.c wad.c
@@ -22,3 +24,7 @@ libtwilight_fs_a_SOURCES= \
 EXTRA_DIST = \
 	twilight_image.dsp twilight_image.vcproj
 
+ed = $(top_srcdir)/embedded_data
+
+embedded_data.h: $(ed)/menu.mnu $(ed)/twilight.rc $(ed)/gfx/palette.lmp $(ed)/gfx/conchars.tga
+	$(top_srcdir)/src/tools/lhbin2c -strings -base=$(ed) menu.mnu twilight.rc gfx/palette.lmp gfx/conchars.tga > $@

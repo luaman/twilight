@@ -41,7 +41,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "rw_ops.h"
 
-#include "embedded_data.fs"
+#include "embedded_data.h"
 
 static void
 FSE_Free_File (fs_file_t *file)
