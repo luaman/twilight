@@ -797,4 +797,5 @@ OGL_EXT_DONT_WANT (void, glWindowPos4svMESA, (const GLshort *));
 
 #undef OGL_DONT_NEED
 #undef OGL_EXT_DONT_WANT
+#undef OGL_DONT_NEED_BUT
 
