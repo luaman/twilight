@@ -90,7 +90,8 @@ void _Zone_Free(void *data, char *filename, int fileline)
 	zone = mem->zone;
 	if (zone->single) {
 		zone->single = false;
-		return _Zone_FreeZone(&zone, filename, fileline);
+		_Zone_FreeZone(&zone, filename, fileline);
+		return;
 	}
 
 	Com_DPrintf("Zone_Free: zone %s, alloc %s:%i, free %s:%i, size %i bytes\n", zone->name, mem->filename, mem->fileline, filename, fileline, mem->size);

@@ -1221,7 +1221,7 @@ _Datagram_Connect (char *host)
 	struct qsockaddr readaddr;
 	qsocket_t	*sock;
 	int         newsock, control, reps;
-	Uint32		ret = 0;
+	Uint32		ret;
 	double		start_time;
 	char		*reason;
 

@@ -648,7 +648,7 @@ SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 
 	// stuff the sigil bits into the high bits of items for sbar, or else
 	// mix in items2
-	if ((val = GETEDICTFIELDVALUE (ent, eval_items2)) != NULL)
+	if ((val = GETEDICTFIELDVALUE (ent, eval_items2)))
 		items = (int) ent->v.items | ((int) val->_float << 23);
 	else
 		items =

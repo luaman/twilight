@@ -106,7 +106,7 @@ UDP_Init (void)
 
 	// determine my name & address
 	gethostname (buf, MAXHOSTNAMELEN);
-	if ((local = gethostbyname (buf)) == NULL)
+	if (!(local = gethostbyname (buf)))
 		Sys_Error ("Unable to resolve our own hostname: '%s'", buf);
 
 	myAddr = *(int *) local->h_addr_list[0];
@@ -248,7 +248,7 @@ UDP_Read (int socket, Uint8 *buf, int len, struct qsockaddr *addr)
 	int         addrlen = sizeof (struct qsockaddr);
 	int         ret;
 
-	ret = recvfrom (socket, (char *)buf, len, 0, (struct sockaddr *) addr, &addrlen);
+	ret = recvfrom (socket, (void *) buf, len, 0, (struct sockaddr *) addr, &addrlen);
 	if (ret == -1 && (errno == EWOULDBLOCK || errno == ECONNREFUSED))
 		return 0;
 	return ret;
@@ -298,7 +298,7 @@ UDP_Write (int socket, Uint8 *buf, int len, struct qsockaddr *addr)
 	int         ret;
 
 	ret =
-		sendto (socket, (const char *)buf, len, 0, (struct sockaddr *) addr,
+		sendto (socket, (const void *) buf, len, 0, (struct sockaddr *) addr,
 				sizeof (struct qsockaddr));
 	if (ret == -1 && errno == EWOULDBLOCK)
 		return 0;

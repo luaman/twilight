@@ -607,6 +607,10 @@ CL_ParseStatic (void)
 		Host_Error ("Too many static entities");
 	ent = &cl_static_entities[cl.num_statics++];
 	CL_ParseBaseline (ent);
+	if (!ent->baseline.modelindex) {
+		cl.num_statics--;
+		return;
+	}
 
 // copy it to the current state
 	ent->model = cl.model_precache[ent->baseline.modelindex];

@@ -910,7 +910,7 @@ Sbar_TeamOverlay (void)
 		// draw players
 		Draw_String (x + 104 + 88, y, va("%5i", tm->players), 8);
 
-		if (strncmp (cl.players[cl.playernum].team, tm->team, 16)) {
+		if (!strncmp (cl.players[cl.playernum].team, tm->team, 16)) {
 			Draw_Character (x + 104 - 8, y, 16, 8);
 			Draw_Character (x + 104 + 32, y, 17, 8);
 		}

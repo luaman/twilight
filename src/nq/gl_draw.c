@@ -61,9 +61,9 @@ cvar_t *hud_chalpha;
 qpic_t *draw_disc;
 qpic_t *draw_backtile;
 
-int		translate_texture;
-int		char_texture;
-int		ch_textures[NUM_CROSSHAIRS];			// crosshair texture
+GLuint	translate_texture;
+GLuint	char_texture;
+GLuint	ch_textures[NUM_CROSSHAIRS];			// crosshair texture
 
 typedef struct {
 	int		texnum;
@@ -339,7 +339,7 @@ Draw_Init (void)
 		ch_textures[i] = R_LoadPointer (va ("crosshair%i", i), crosshairs[i]);
 
 	/* save a texture slot for translated picture */
-	qglGenTextures (1, (GLuint *)&translate_texture);
+	qglGenTextures (1, &translate_texture);
 
 	/* get the other pics we need */
 	draw_disc = Draw_PicFromWad ("disc");
