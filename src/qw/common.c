@@ -1117,11 +1117,11 @@ COM_AddGameDirectory (const char *dir)
 
 	if (strcmp (fs_userpath->svalue, fs_sharepath->svalue))
 	{
-		snprintf (buf, sizeof (buf), "%s/%s", fs_userpath->svalue, dir);
-		Sys_mkdir (buf);
-
 		// only do this if the share path is not the same as the base path
 		COM_AddDirectory (buf, FS_READ_ONLY);
+
+		snprintf (buf, sizeof (buf), "%s/%s", fs_userpath->svalue, dir);
+		Sys_mkdir (buf);
 	}
 
 	COM_AddDirectory (buf, 0);
