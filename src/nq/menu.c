@@ -1057,7 +1057,7 @@ M_Net_Key (int k)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	15
+#define	OPTIONS_ITEMS	17
 
 #define	SLIDER_RANGE	10
 
@@ -1150,11 +1150,8 @@ M_AdjustSliders (int dir)
 			Cvar_Set (lookstrafe, va("%i", !lookstrafe->value));
 			break;
 
-		case 15:						// _windowed_mouse
+		case 14:						// _windowed_mouse
 			Cvar_Set (_windowed_mouse, va("%i", !_windowed_mouse->value));
-			break;
-
-		case 16:
 			break;
 	}
 }
@@ -1212,12 +1209,12 @@ M_Options_Draw (void)
 	M_Print (16, y, "          Invert Mouse"); M_DrawCheckbox (220, y, m_pitch->value < 0); y += 8;
 	M_Print (16, y, "            Lookspring"); M_DrawCheckbox (220, y, lookspring->value); y += 8;
 	M_Print (16, y, "            Lookstrafe"); M_DrawCheckbox (220, y, lookstrafe->value); y += 8;
-
-	if (vid_menudrawfn)
-		M_Print (16, y, "         Video Options"); y += 8;
-
 	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->value); y += 8;
 	M_Print (16, y, "      Graphics Options"); y += 8;
+
+	if (vid_menudrawfn) {
+		M_Print (16, y, "         Video Options"); y += 8;
+	}
 
 	// cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8, 12 + ((int) (realtime * 4) & 1));
@@ -1245,11 +1242,11 @@ M_Options_Key (int k)
 				case 2:
 					Cbuf_AddText ("exec default.cfg\n");
 					break;
-				case 12:
-					M_Menu_Video_f ();
-					break;
-				case 14:
+				case 15:
 					M_Menu_Gfx_f();
+					break;
+				case 16:
+					M_Menu_Video_f ();
 					break;
 				default:
 					M_AdjustSliders (1);
@@ -1280,16 +1277,16 @@ M_Options_Key (int k)
 			break;
 	}
 
-	if (options_cursor == 12 && vid_menudrawfn == NULL) {
-		if (k == K_UPARROW)
-			options_cursor = 11;
-		else
-			options_cursor = 13;
-	}
-
-	if (options_cursor == 15) {
+	if (options_cursor == 15 && vid_menudrawfn == NULL) {
 		if (k == K_UPARROW)
 			options_cursor = 14;
+		else
+			options_cursor = 0;
+	}
+
+	if (options_cursor == 16) {
+		if (k == K_UPARROW)
+			options_cursor = 15;
 		else
 			options_cursor = 0;
 	}
