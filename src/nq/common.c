@@ -837,8 +837,8 @@ COM_Init_Cvars (void)
 	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
 
 	// fs_shareconf/userconf have to be done in Host_Init
-	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, NULL);
-	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
+	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, ExpandPath);
+	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, ExpandPath);
 
 	fs_gamename = Cvar_Get ("fs_gamename", "id1", CVAR_ROM, NULL);
 
@@ -1296,15 +1296,13 @@ then loads and adds pak1.pak pak2.pak ...
 ================
 */
 void
-COM_AddDirectory (char *indir)
+COM_AddDirectory (char *dir)
 {
 	int         i;
 	searchpath_t *search;
 	pack_t     *pak;
 	char        pakfile[MAX_OSPATH];
-	char	   *dir;
 
-	dir = Sys_ExpandPath (indir);
 	strcpy (com_gamedir, dir);
 	Sys_mkdir (com_gamedir);
 
@@ -1408,3 +1406,12 @@ COM_InitFilesystem (void)
 		COM_AddGameDirectory (game_directory->svalue);
 }
 
+void
+ExpandPath(cvar_t *var)
+{
+	char *expanded;
+	
+	expanded = Sys_ExpandPath(var->svalue);
+	if (strcmp(expanded, var->svalue))
+		Cvar_Set(var, expanded);
+}

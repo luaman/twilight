@@ -1643,18 +1643,18 @@ SV_Init (void)
 	sv_zone = Zone_AllocZone ("server");
 
 	// These have to be here.
-	fs_shareconf = Cvar_Get ("fs_shareconf", SHARECONF, CVAR_ROM, NULL);
-	fs_userconf = Cvar_Get ("fs_userconf", USERCONF, CVAR_ROM, NULL);
+	fs_shareconf = Cvar_Get ("fs_shareconf", SHARECONF, CVAR_ROM, ExpandPath);
+	fs_userconf = Cvar_Get ("fs_userconf", USERCONF, CVAR_ROM, ExpandPath);
 
 	// execute +set as early as possible
 	// Yes, the repeated Cmd_StuffCmds_f/Cbuf_Execute_Sets are necessary!
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
-	Cbuf_InsertFile (Sys_ExpandPath (fs_shareconf->svalue));
+	Cbuf_InsertFile (fs_shareconf->svalue);
 	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
-	Cbuf_InsertFile (Sys_ExpandPath (fs_userconf->svalue));
+	Cbuf_InsertFile (fs_userconf->svalue);
 	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
