@@ -18,15 +18,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <time.h>
 
 #include "qwsvdef.h"
-
-#ifdef _WIN32
-#include "winquake.h"
-#endif
 
 #define	PACKET_HEADER	8
 
@@ -78,6 +76,10 @@ to the new value before sending out any replies.
 
 
 */
+
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 int         net_drop;
 cvar_t      showpackets = { "showpackets", "0" };
