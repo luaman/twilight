@@ -43,8 +43,12 @@ Bugs we know about:
     (Darkplaces does not have this problem, may be SDL related, very likely
      ATI related as well)
     (Reported by Dry-ice)
-  - RC: saved games are corrupt
+  - RC: twilight saved games are corrupt
     (Reported by Dry-ice)
+    (Reported by Peter Jay Salzman)
+  - RC: twilight should create ~/.twilight and ~/.twilight/id1 on demand (and
+    any other mod directories as needed)
+    (Reported by Peter Jay Salzman)
 
 
 Stuff that isn't needed for 0.2, but would be nice:
