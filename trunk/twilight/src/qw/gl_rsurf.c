@@ -582,7 +582,7 @@ DrawTextureChains ()
 		}
 	}
 
-	if (gl_mtex || gl_mtexcombine)
+	if (gl_mtex)
 	{
 		qglDisable (GL_BLEND);
 		if (gl_mtexcombine)
@@ -797,7 +797,7 @@ R_DrawBrushModel (entity_t *e)
 		if (psurf->visframe == r_framecount)
 		{
 			t = R_TextureAnimation(psurf->texinfo->texture);
-			if (gl_mtex || gl_mtexcombine)
+			if (gl_mtex)
 			{
 				if (texnum != t->gl_texturenum)
 				{
@@ -820,7 +820,7 @@ R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-	if (gl_mtex || gl_mtexcombine) {
+	if (gl_mtex) {
 		if (gl_mtexcombine)
 			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1.0);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);

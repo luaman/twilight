@@ -203,32 +203,32 @@ GammaChanged (cvar_t *cvar)
 void
 CheckExtensions (void)
 {
-	qboolean	gl_mtexable = 0, gl_mtexcombine_arb = 0, gl_mtexcombine_ext = 0;
+	qboolean	gl_mtexcombine_arb = 0, gl_mtexcombine_ext = 0;
 
 	if (!COM_CheckParm ("-nomtex")) {
-		gl_mtexable = DGL_HasExtension ("GL_ARB_multitexture");
+		gl_mtex = DGL_HasExtension ("GL_ARB_multitexture");
 	}
 	Con_Printf ("Checking for multitexture... %s\n",
-			gl_mtexable ? "GL_ARB_multitexture." : "no.");
+			gl_mtex ? "GL_ARB_multitexture." : "no.");
 
-	if (gl_mtexable && !COM_CheckParm ("-nomtexcombine")) {
-		gl_mtexcombine_arb = DGL_HasExtension ("GL_ARB_texture_env_combine");
-		gl_mtexcombine_ext = DGL_HasExtension ("GL_EXT_texture_env_combine");
-		Con_Printf ("Checking for texenv combine... ");
-		if (gl_mtexcombine_arb) {
-			Con_Printf ("GL_ARB_texture_env_combine.\n");
-			gl_mtexcombine = true;
-		} else if (gl_mtexcombine_ext) {
-			Con_Printf ("GL_EXT_texture_env_combine.\n");
-			gl_mtexcombine = true;
-		} else {
-			Con_Printf ("no.\n");
-		}
-	}
-
-	if (gl_mtexable && (!qglActiveTextureARB || !qglMultiTexCoord2fARB)) {
+	if (gl_mtex && (!qglActiveTextureARB || !qglMultiTexCoord2fARB)) {
 		Sys_Error ("Missing GL_ARB_multitexture functions. (%p %p)\n",
 				qglActiveTextureARB, qglMultiTexCoord2fARB);
+	}
+
+	if (gl_mtex && !COM_CheckParm ("-nomtexcombine")) {
+		gl_mtexcombine_arb = DGL_HasExtension ("GL_ARB_texture_env_combine");
+		gl_mtexcombine_ext = DGL_HasExtension ("GL_EXT_texture_env_combine");
+	}
+	Con_Printf ("Checking for texenv combine... ");
+	if (gl_mtex && gl_mtexcombine_arb) {
+		Con_Printf ("GL_ARB_texture_env_combine.\n");
+		gl_mtexcombine = true;
+	} else if (gl_mtex && gl_mtexcombine_ext) {
+		Con_Printf ("GL_EXT_texture_env_combine.\n");
+		gl_mtexcombine = true;
+	} else {
+		Con_Printf ("no.\n");
 	}
 
 	if (!COM_CheckParm ("-nocva"))
