@@ -324,7 +324,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 20 * cnt);
-			R_Stain (pos, 6 * cnt, 60, 60, 60, 32, 96, 96, 96, 32);
+			R_Stain (pos, 5 * cnt, 60, 60, 60, 72, 96, 96, 96, 72);
 			break;
 
 		case TE_BLOOD:					// bullets hitting body
