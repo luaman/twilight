@@ -42,6 +42,8 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
+extern void TNT_Init (void);
+
 //varray_t2f_c4f_v4f_t varray[MAX_VERTEX_ARRAYS];
 GLfloat	tc_array[MAX_VERTEX_ARRAYS][2];
 GLfloat	v_array[MAX_VERTEX_ARRAYS][3];
@@ -175,6 +177,7 @@ R_Init (void)
 	R_InitBubble ();
 	R_InitParticles ();
 	R_InitParticleTexture ();
+	TNT_Init ();
 
 	netgraphtexture = texture_extension_number;
 	texture_extension_number++;
