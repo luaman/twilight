@@ -29,7 +29,7 @@
 #define __RENDER_H
 
 #include "vid.h"
-#include "gl_model.h"
+#include "model.h"
 
 #define	TOP_RANGE		16				// soldier uniform colors
 #define	BOTTOM_RANGE	96

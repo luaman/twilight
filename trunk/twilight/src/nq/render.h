@@ -30,7 +30,7 @@
 
 #include "protocol.h"
 #include "vid.h"
-#include "gl_model.h"
+#include "model.h"
 
 #define	MAXCLIPPLANES	11
 

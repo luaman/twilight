@@ -66,6 +66,9 @@ cvar_t     *gl_subdivide_size;
 
 qboolean    isnotmap;
 
+void		GL_SubdivideSurface (msurface_t *fa);
+void        GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
+
 /*
 ===============
 Mod_Init_Cvars
@@ -975,7 +978,6 @@ Mod_LoadLeafs (lump_t *l)
 	dleaf_t    *in;
 	mleaf_t    *out;
 	int         i, j, count, p;
-	char        s[MAX_OSPATH];
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
@@ -985,10 +987,6 @@ Mod_LoadLeafs (lump_t *l)
 
 	loadmodel->leafs = out;
 	loadmodel->numleafs = count;
-	snprintf (s, sizeof (s), "maps/%s.bsp",
-			  Info_ValueForKey (cl.serverinfo, "map"));
-	if (!strcmp (s, loadmodel->name))
-		isnotmap = false;
 	for (i = 0; i < count; i++, in++, out++) {
 		for (j = 0; j < 3; j++) {
 			out->mins[j] = LittleShort (in->mins[j]);
@@ -1203,25 +1201,6 @@ Mod_LoadPlanes (lump_t *l)
 		out->type = LittleLong (in->type);
 		out->signbits = bits;
 	}
-}
-
-/*
-=================
-RadiusFromBounds
-=================
-*/
-float
-RadiusFromBounds (vec3_t mins, vec3_t maxs)
-{
-	int         i;
-	vec3_t      corner;
-
-	for (i = 0; i < 3; i++) {
-		corner[i] =
-			Q_fabs (mins[i]) > Q_fabs (maxs[i]) ? Q_fabs (mins[i]) : Q_fabs (maxs[i]);
-	}
-
-	return VectorLength (corner);
 }
 
 /*

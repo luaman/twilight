@@ -29,7 +29,7 @@
 #define __WORLD_H
 
 #include "common.h"
-#include "gl_model.h"
+#include "model.h"
 #include "progs.h"
 
 typedef struct {

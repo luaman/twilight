@@ -435,9 +435,5 @@ void        Mod_TouchModel (char *name);
 mleaf_t    *Mod_PointInLeaf (float *p, model_t *model);
 Uint8      *Mod_LeafPVS (mleaf_t *leaf, model_t *model);
 
-qboolean   Img_HasFullbrights (Uint8 *pixels, int size);
-void		GL_SubdivideSurface (msurface_t *fa);
-void        GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
-
 #endif // __MODEL__
 

@@ -36,7 +36,7 @@ static const char rcsid[] =
 #include "bothdefs.h"
 #include "bspfile.h"
 #include "mathlib.h"
-#include "gl_model.h"
+#include "model.h"
 #include "pmove.h"
 
 

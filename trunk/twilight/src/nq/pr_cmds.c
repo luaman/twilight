@@ -37,7 +37,7 @@ static const char rcsid[] =
 #include "cmd.h"
 #include "console.h"
 #include "cvar.h"
-#include "gl_model.h"
+#include "model.h"
 #include "host.h"
 #include "mathlib.h"
 #include "server.h"
@@ -269,7 +269,6 @@ PF_setmodel (void)
 {
 	edict_t    *e;
 	char       *m, **check;
-	model_t    *mod;
 	int         i;
 
 	e = G_EDICT (OFS_PARM0);
@@ -287,12 +286,14 @@ PF_setmodel (void)
 	e->v.model = m - pr_strings;
 	e->v.modelindex = i;				// SV_ModelIndex (m);
 
-	mod = sv.models[(int) e->v.modelindex];	// Mod_ForName (m, true);
-
-	if (mod)
+	if (m[0] == '*')
+	{
+		model_t *mod = Mod_ForName (m, true);
 		SetMinMaxSize (e, mod->mins, mod->maxs, true);
-	else
-		SetMinMaxSize (e, vec3_origin, vec3_origin, true);
+		VectorCopy (mod->maxs, e->v.maxs);
+		VectorSubtract (mod->maxs, mod->mins, e->v.size);
+		SV_LinkEdict (e, false);
+	}
 }
 
 /*
@@ -1079,7 +1080,7 @@ PF_precache_model (void)
 	for (i = 0; i < MAX_MODELS; i++) {
 		if (!sv.model_precache[i]) {
 			sv.model_precache[i] = s;
-			sv.models[i] = Mod_ForName (s, true);
+//			sv.models[i] = Mod_ForName (s, true);
 			return;
 		}
 		if (!strcmp (sv.model_precache[i], s))

@@ -37,7 +37,7 @@ static const char rcsid[] =
 #include "bspfile.h"
 #include "console.h"
 #include "mathlib.h"
-#include "gl_model.h"
+#include "model.h"
 #include "pmove.h"
 #include "sys.h"
 #include "strlib.h"
