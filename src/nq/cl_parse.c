@@ -311,11 +311,12 @@ CL_ParseServerInfo (void)
 					FLAG_CRASH | FLAG_RENDER);
 
 
-		if (!strcasecmp (model_precache[i], "progs/flame.mdl"))
+		if (!strcasecmp (model_precache[i], "progs/flame.mdl")) {
 			if (!mdl_torch)
 				mdl_torch = Mod_ForName ("progs/torch.mdl", FLAG_RENDER);
 			if (!mdl_torch)
 				mdl_torch = Mod_ForName ("progs/fire.mdl", FLAG_RENDER);
+		}
 
 		CL_KeepaliveMessage ();
 	}

@@ -95,10 +95,14 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 	if (depth > 32)
 		return;
 
-	full_path = zasprintf(fs_zone, "%s/%s/", g_dir->path, path);
+	if (path)
+		full_path = zasprintf(fs_zone, "%s/%s/", g_dir->path, path);
+	else
+		full_path = zasprintf(fs_zone, "%s/", g_dir->path);
+
 	dir = opendir (full_path);
 
-	Com_DFPrintf (DEBUG_FS, "Posix Add Dir: %s %d\n", full_path, dir);
+	Com_DFPrintf (DEBUG_FS, "Posix Add Dir: %s %p\n", full_path, dir);
 	if (!dir) {
 		Com_Printf("FSD_Add_Dir: Unable to open %s. (%s)\n", full_path, strerror(errno));
 		Zone_Free (full_path);
@@ -122,7 +126,10 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 			Zone_Free (f);
 			continue;
 		}
-		file = zasprintf(fs_zone, "%s/%s", path, tmp);
+		if (path)
+			file = zasprintf(fs_zone, "%s/%s", path, tmp);
+		else
+			file = zasprintf(fs_zone, "%s", tmp);
 		if (S_ISDIR(f_stat.st_mode))
 			FSD_Add_Dir (group, g_dir, file, depth + 1);
 		else
@@ -190,7 +197,7 @@ FSD_New_Group (const char *path, fs_group_t *parent, const char *id,
 
 	dir->path = Zstrdup (fs_zone, path);
 
-	FSD_Add_Dir (group, dir, "", 0);
+	FSD_Add_Dir (group, dir, NULL, 0);
 
 	return group;
 }

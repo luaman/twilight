@@ -135,7 +135,7 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 	if (header.version != BSPVERSION) {
 		if ((LittleLong(header.version) == IDPOLYHEADER) ||
 				LittleLong(header.version) == IDSPRITEHEADER) {
-			Com_Printf ("Very funny Tomaz, very funny.\n");
+			Com_DPrintf ("Very funny Tomaz, very funny.\n");
 		} else {
 			Com_Printf("WARNING: %s", file->name_base);
 			if (file->ext)
