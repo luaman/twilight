@@ -244,15 +244,6 @@ main (int argc, char *argv[])
 	if ((parms.membase = malloc (parms.memsize)) == NULL)
 		Sys_Error ("Can't allocate %ld\n", parms.memsize);
 
-	parms.basedir = USERPATH;
-	parms.sharedir = SHAREPATH;
-
-/*
-	if (Sys_FileTime ("id1/pak0.pak") != -1)
-	else
-		parms.basedir = "/raid/quake/v2";
-*/
-
 	SV_Init (&parms);
 
 // run one frame immediately for first heartbeat

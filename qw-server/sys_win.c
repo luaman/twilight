@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "qwsvdef.h"
 #include <winsock.h>
 #include <conio.h>
+#include <direct.h>
 
 
 cvar_t      sys_nostdout = { "sys_nostdout", "0" };
@@ -222,9 +223,6 @@ main (int argc, char **argv)
 
 	if (!parms.membase)
 		Sys_Error ("Insufficient memory.\n");
-
-	parms.basedir = ".";
-	parms.cachedir = NULL;
 
 	SV_Init (&parms);
 
