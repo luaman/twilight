@@ -354,9 +354,12 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 	float       len;
 	int         j, lsub;
 	particle_t *p;
+	static int  tracercount;
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
+	VectorScale (vec, 3, vec);
+
 	while (len > 0) {
 		lsub = 3;
 
@@ -407,26 +410,22 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 				break;
 			case 3:
 			case 5:		// tracer
-				{
-					static int  tracercount;
+				p->die = cl.time + 0.5;
+				p->type = pt_static;
+				if (type == 3)
+					p->color = 52 + ((tracercount & 4) << 1);
+				else
+					p->color = 230 + ((tracercount & 4) << 1);
 
-					p->die = cl.time + 0.5;
-					p->type = pt_static;
-					if (type == 3)
-						p->color = 52 + ((tracercount & 4) << 1);
-					else
-						p->color = 230 + ((tracercount & 4) << 1);
+				tracercount++;
 
-					tracercount++;
-
-					VectorCopy (start, p->org);
-					if (tracercount & 1) {
-						p->vel[0] = 30 * vec[1];
-						p->vel[1] = 30 * -vec[0];
-					} else {
-						p->vel[0] = 30 * -vec[1];
-						p->vel[1] = 30 * vec[0];
-					}
+				VectorCopy (start, p->org);
+				if (tracercount & 1) {
+					p->vel[0] = 30 * vec[1];
+					p->vel[1] = 30 * -vec[0];
+				} else {
+					p->vel[0] = 30 * -vec[1];
+					p->vel[1] = 30 * vec[0];
 				}
 				break;
 		}
@@ -500,21 +499,20 @@ R_DrawParticles (void)
 			(p->org[0] - r_origin[0]) * vpn[0] + (p->org[1] -
 												  r_origin[1]) * vpn[1]
 			+ (p->org[2] - r_origin[2]) * vpn[2];
+
 		if (scale < 20)
 			scale = 1;
 		else
 			scale = 1 + scale * 0.004;
+
 		at = (Uint8 *)&d_8to32table[(int) p->color];
+
 		if (p->type == pt_fire)
-			theAlpha = 255 * (6 - p->ramp) / 6;
-//          theAlpha = 192;
-//      else if (p->type==pt_explode || p->type==pt_explode2)
-//          theAlpha = 255*(8-p->ramp)/8;
+			theAlpha = 255 - p->ramp * (1 / 6);
 		else
 			theAlpha = 255;
+
 		qglColor4ub (at[0], at[1], at[2], theAlpha);
-//      qglColor3ubv (at);
-//      qglColor3ubv ((Uint8 *)&d_8to32table[(int)p->color]);
 		qglTexCoord2f (0, 0);
 		qglVertex3fv (p->org);
 		qglTexCoord2f (1, 0);
@@ -523,10 +521,7 @@ R_DrawParticles (void)
 		qglTexCoord2f (0, 1);
 		qglVertex3f (p->org[0] + right[0] * scale, p->org[1] + right[1] * scale,
 					p->org[2] + right[2] * scale);
-
-		p->org[0] += p->vel[0] * frametime;
-		p->org[1] += p->vel[1] * frametime;
-		p->org[2] += p->vel[2] * frametime;
+		VectorMA (p->org, frametime, p->vel, p->org);
 
 		switch (p->type) {
 			case pt_static:
