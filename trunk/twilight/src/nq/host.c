@@ -558,7 +558,7 @@ Host_FilterTime (float time)
 	if (newframetime < 0.001)
 		return false;
 
-	fps = cl_maxfps->value;
+	fps = cl_maxfps->fvalue;
 	if (cl.maxclients > 1) {
 		fps = bound (30.0f, fps, 72.0f);
 	} else if (fps) {
@@ -573,8 +573,8 @@ Host_FilterTime (float time)
 	host_frametime = newframetime;
 	oldrealtime = host_realtime;
 
-	if (host_framerate->value > 0)
-		host_frametime = host_framerate->value;
+	if (host_framerate->fvalue > 0)
+		host_frametime = host_framerate->fvalue;
 	else {								/* don't allow really long frames */
 		if (host_frametime > 0.1)
 			host_frametime = 0.1;
@@ -708,12 +708,12 @@ _Host_Frame (double time)
 		CL_ReadFromServer ();
 	}
 // update video
-	if (host_speeds->value)
+	if (host_speeds->ivalue)
 		time1 = Sys_DoubleTime ();
 
 	SCR_UpdateScreen ();
 
-	if (host_speeds->value)
+	if (host_speeds->ivalue)
 		time2 = Sys_DoubleTime ();
 
 // update audio
@@ -726,7 +726,7 @@ _Host_Frame (double time)
 	if (!isDedicated)
 		CDAudio_Update ();
 
-	if (host_speeds->value) {
+	if (host_speeds->ivalue) {
 		pass1 = (time1 - time3) * 1000;
 		time3 = Sys_DoubleTime ();
 		pass2 = (time2 - time1) * 1000;
@@ -748,7 +748,7 @@ Host_Frame (double time)
 	int				m;
 	Uint32			i, c;
 
-	if (!serverprofile->value) {
+	if (!serverprofile->ivalue) {
 		_Host_Frame (time);
 		return;
 	}
@@ -784,7 +784,7 @@ Host_CvarUserinfo (cvar_t *var)
 	{
 		if (sv.active)
 			SV_BroadcastPrintf ("\"%s\" changed to \"%s\"\n", var->name,
-					var->string);
+					var->svalue);
 	}
 }
 
@@ -811,11 +811,11 @@ Host_Init ()
 	// Yes, the repeated Cmd_StuffCmds_f/Cbuf_Execute_Sets are necessary!
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
-	Cbuf_InsertFile (fs_shareconf->string);
+	Cbuf_InsertFile (fs_shareconf->svalue);
 	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
-	Cbuf_InsertFile (fs_userconf->string);
+	Cbuf_InsertFile (fs_userconf->svalue);
 	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();

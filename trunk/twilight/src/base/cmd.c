@@ -374,7 +374,7 @@ Cmd_Exec_f (void)
 		return;
 	}
 
-	if (cl_warncmd->value || developer->value)
+	if (cl_warncmd->ivalue || developer->ivalue)
 		Com_Printf ("execing %s\n", Cmd_Argv (1));
 
 	Cbuf_InsertText (f);
@@ -820,7 +820,7 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 	}
 
 	// check cvars
-	if (!Cvar_LegacyCmd () && (cl_warncmd->value || developer->value))
+	if (!Cvar_LegacyCmd () && (cl_warncmd->ivalue || developer->ivalue))
 		Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
 }
 

@@ -114,10 +114,10 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 	sign = side < 0 ? -1 : 1;
 	side = Q_fabs(side);
 
-	value = cl_rollangle->value;
+	value = cl_rollangle->fvalue;
 
-	if (side < cl_rollspeed->value)
-		side = side * value / cl_rollspeed->value;
+	if (side < cl_rollspeed->fvalue)
+		side = side * value / cl_rollspeed->fvalue;
 	else
 		side = value;
 
@@ -145,23 +145,24 @@ V_CalcBob (void)
 	if (pmove.groundent == -1)
 		return bob;		/* just use old value */
 
-	if (!cl_bobcycle->value)
+	if (!cl_bobcycle->fvalue)
 		return bob = 0;
 
 	bobtime += host_frametime;
-	cycle = bobtime - (int) (bobtime / cl_bobcycle->value) * cl_bobcycle->value;
-	cycle /= cl_bobcycle->value;
-	if (cycle < cl_bobup->value)
-		cycle = M_PI * cycle / cl_bobup->value;
+	cycle = bobtime - (int) (bobtime / cl_bobcycle->fvalue)
+		* cl_bobcycle->fvalue;
+	cycle /= cl_bobcycle->fvalue;
+	if (cycle < cl_bobup->fvalue)
+		cycle = M_PI * cycle / cl_bobup->fvalue;
 	else
-		cycle = M_PI + M_PI * (cycle - cl_bobup->value)
-			/ (1.0 - cl_bobup->value);
+		cycle = M_PI + M_PI * (cycle - cl_bobup->fvalue)
+			/ (1.0 - cl_bobup->fvalue);
 
 	/* bob is proportional to simulated velocity in the xy plane
        (don't count Z, or jumping messes it up) */
 	vel = cl.frames[(cls.netchan.incoming_sequence)&UPDATE_MASK].playerstate[cl.playernum].velocity;
 
-	bob = VectorLength2(vel) * cl_bob->value;
+	bob = VectorLength2(vel) * cl_bob->fvalue;
 	bob = bob * (0.3 + 0.7 * Q_sin (cycle));
 	bob = bound(-7, bob, 4);
 
@@ -178,7 +179,7 @@ V_StartPitchDrift (void)
 		return;		/* something else is keeping it from drifting */
 
 	if (cl.nodrift || !cl.pitchvel) {
-		cl.pitchvel = v_centerspeed->value;
+		cl.pitchvel = v_centerspeed->fvalue;
 		cl.nodrift = false;
 		cl.driftmove = 0;
 	}
@@ -223,7 +224,7 @@ V_DriftPitch (void)
 		else
 			cl.driftmove += host_frametime;
 
-		if (cl.driftmove > v_centermove->value)
+		if (cl.driftmove > v_centermove->fvalue)
 			V_StartPitchDrift();
 
 		return;
@@ -237,7 +238,7 @@ V_DriftPitch (void)
 	}
 
 	move = host_frametime * cl.pitchvel;
-	cl.pitchvel += host_frametime * v_centerspeed->value;
+	cl.pitchvel += host_frametime * v_centerspeed->fvalue;
 
 	if (delta > 0) {
 		if (move > delta) {
@@ -323,12 +324,12 @@ V_ParseDamage (void)
 	AngleVectors(cl.simangles, forward, right, up);
 
 	side = DotProduct(from, right);
-	v_dmg_roll = count * side * v_kickroll->value;
+	v_dmg_roll = count * side * v_kickroll->fvalue;
 
 	side = DotProduct(from, forward);
-	v_dmg_pitch = count * side * v_kickpitch->value;
+	v_dmg_pitch = count * side * v_kickpitch->fvalue;
 
-	v_dmg_time = v_kicktime->value;
+	v_dmg_time = v_kicktime->fvalue;
 }
 
 /*
@@ -371,7 +372,7 @@ Underwater, lava, etc each has a color shift
 void
 V_SetContentsColor (int contents)
 {
-	if (!v_contentblend->value) {
+	if (!v_contentblend->ivalue) {
 		cl.cshifts[CSHIFT_CONTENTS] = cshift_empty;
 		return;
 	}
@@ -435,9 +436,9 @@ V_CalcBlend (void)
 	float	r = 0, g = 0, b = 0, a = 0, a2;
 	int		j;
 
-	if (gl_cshiftpercent->value) {
+	if (gl_cshiftpercent->fvalue) {
 		for (j = 0; j < NUM_CSHIFTS; j++)	 {
-			a2 = cl.cshifts[j].percent * gl_cshiftpercent->value * (1.0f / 25500.0f);
+			a2 = cl.cshifts[j].percent * gl_cshiftpercent->fvalue * (1.0f / 25500.0f);
 
 			if (!a2)
 				continue;
@@ -537,24 +538,24 @@ void
 V_AddIdle (void)
 {
 	r_refdef.viewangles[ROLL] +=
-		v_idlescale->value * Q_sin (cl.time * v_iroll_cycle->value) *
-		v_iroll_level->value;
+		v_idlescale->fvalue * Q_sin (cl.time * v_iroll_cycle->fvalue) *
+		v_iroll_level->fvalue;
 	r_refdef.viewangles[PITCH] +=
-		v_idlescale->value * Q_sin (cl.time * v_ipitch_cycle->value) *
-		v_ipitch_level->value;
+		v_idlescale->fvalue * Q_sin (cl.time * v_ipitch_cycle->fvalue) *
+		v_ipitch_level->fvalue;
 	r_refdef.viewangles[YAW] +=
-		v_idlescale->value * Q_sin (cl.time * v_iyaw_cycle->value) *
-		v_iyaw_level->value;
+		v_idlescale->fvalue * Q_sin (cl.time * v_iyaw_cycle->fvalue) *
+		v_iyaw_level->fvalue;
 
 	cl.viewent_angles[ROLL] -=
-		v_idlescale->value * Q_sin (cl.time * v_iroll_cycle->value) *
-		v_iroll_level->value;
+		v_idlescale->fvalue * Q_sin (cl.time * v_iroll_cycle->fvalue) *
+		v_iroll_level->fvalue;
 	cl.viewent_angles[PITCH] -=
-		v_idlescale->value * Q_sin (cl.time * v_ipitch_cycle->value) *
-		v_ipitch_level->value;
+		v_idlescale->fvalue * Q_sin (cl.time * v_ipitch_cycle->fvalue) *
+		v_ipitch_level->fvalue;
 	cl.viewent_angles[YAW] -=
-		v_idlescale->value * Q_sin (cl.time * v_iyaw_cycle->value) *
-		v_iyaw_level->value;
+		v_idlescale->fvalue * Q_sin (cl.time * v_iyaw_cycle->fvalue) *
+		v_iyaw_level->fvalue;
 }
 
 /*
@@ -573,8 +574,8 @@ V_CalcViewRoll (void)
 	r_refdef.viewangles[ROLL] += side;
 
 	if (v_dmg_time > 0) {
-		r_refdef.viewangles[ROLL] += v_dmg_time / v_kicktime->value * v_dmg_roll;
-		r_refdef.viewangles[PITCH] += v_dmg_time / v_kicktime->value * v_dmg_pitch;
+		r_refdef.viewangles[ROLL] += v_dmg_time / v_kicktime->fvalue * v_dmg_roll;
+		r_refdef.viewangles[PITCH] += v_dmg_time / v_kicktime->fvalue * v_dmg_pitch;
 		v_dmg_time -= host_frametime;
 	}
 }
@@ -595,12 +596,12 @@ V_CalcIntermissionRefdef (void)
 	VectorCopy(cl.simangles, r_refdef.viewangles);
 
 	/* always idle in intermission */
-	r_refdef.viewangles[ROLL] += Q_sin (cl.time * v_iroll_cycle->value) *
-		v_iroll_level->value;
-	r_refdef.viewangles[PITCH] += Q_sin (cl.time * v_ipitch_cycle->value) *
-		v_ipitch_level->value;
-	r_refdef.viewangles[YAW] += Q_sin (cl.time * v_iyaw_cycle->value) *
-		v_iyaw_level->value;
+	r_refdef.viewangles[ROLL] += Q_sin (cl.time * v_iroll_cycle->fvalue) *
+		v_iroll_level->fvalue;
+	r_refdef.viewangles[PITCH] += Q_sin (cl.time * v_ipitch_cycle->fvalue) *
+		v_ipitch_level->fvalue;
+	r_refdef.viewangles[YAW] += Q_sin (cl.time * v_iyaw_cycle->fvalue) *
+		v_iyaw_level->fvalue;
 }
 
 /*

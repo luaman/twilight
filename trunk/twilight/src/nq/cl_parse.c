@@ -656,7 +656,7 @@ CL_ParseStaticSound (void)
 
 
 #define SHOWNET(x)											\
-	if (cl_shownet->value==2)								\
+	if (cl_shownet->ivalue==2)								\
 		Com_Printf ("%3i:%s\n", msg_readcount-1, x);
 
 /*
@@ -673,9 +673,9 @@ CL_ParseServerMessage (void)
 //
 // if recording demos, copy the message out
 //
-	if (cl_shownet->value == 1)
+	if (cl_shownet->ivalue == 1)
 		Com_Printf ("%i ", net_message.cursize);
-	else if (cl_shownet->value == 2)
+	else if (cl_shownet->ivalue == 2)
 		Com_Printf ("------------------\n");
 
 	// unless the server says otherwise
@@ -713,7 +713,7 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_nop:
-//          Com_Printf ("svc_nop\n");
+//				Com_Printf ("svc_nop\n");
 				break;
 
 			case svc_time:

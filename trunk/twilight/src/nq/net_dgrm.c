@@ -884,7 +884,7 @@ _Datagram_CheckNewConnections (void)
 		MSG_WriteByte (&net_message, CCREP_SERVER_INFO);
 		dfunc.GetSocketAddr (acceptsock, &newaddr);
 		MSG_WriteString (&net_message, dfunc.AddrToString (&newaddr));
-		MSG_WriteString (&net_message, hostname->string);
+		MSG_WriteString (&net_message, hostname->svalue);
 		MSG_WriteString (&net_message, sv.name);
 		MSG_WriteByte (&net_message, net_activeconnections);
 		MSG_WriteByte (&net_message, svs.maxclients);
@@ -965,7 +965,7 @@ _Datagram_CheckNewConnections (void)
 		MSG_WriteByte (&net_message, CCREP_RULE_INFO);
 		if (var) {
 			MSG_WriteString (&net_message, var->name);
-			MSG_WriteString (&net_message, var->string);
+			MSG_WriteString (&net_message, var->svalue);
 		} else
 			Cvar_ForeachEnd (id);
 		*((int *) net_message.data) =

@@ -149,7 +149,7 @@ Sys_Printf (char *fmt, ...)
 	if (strlen (text) > sizeof (text))
 		Sys_Error ("memory overwrite in Sys_Printf");
 
-	if (sys_asciionly && sys_asciionly->value)
+	if (sys_asciionly && sys_asciionly->ivalue)
 		for (p = (unsigned char *) text; *p; p++)
 			putc (sys_charmap[*p], stdout);
 	else
@@ -170,12 +170,12 @@ Sys_Quit (void)
 void
 Sys_ESCallback (cvar_t *cvar)
 {
-	if (cvar->value < 0)
+	if (cvar->ivalue < 0)
 		Cvar_Set (cvar, "0");
-	else if (cvar->value > 1000000.0f)
+	else if (cvar->ivalue > 1000000)
 		Cvar_Set (cvar, "1000000");
 
-	sys_sleep = (Uint32)((cvar->value) * (1.0f / 1000.0f));
+	sys_sleep = (Uint32)((cvar->ivalue) * (1.0f / 1000.0f));
 }
 
 void
@@ -461,7 +461,7 @@ main (int c, char **v)
 		SV_Frame (time);
 		oldtime = newtime;
 
-		if (sys_extrasleep->value)
+		if (sys_extrasleep->ivalue)
 			SDL_Delay (sys_sleep);
 	}
 

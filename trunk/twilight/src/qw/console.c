@@ -232,9 +232,9 @@ Con_CheckResize (void)
 static void
 setlogname (cvar_t *con_logname)
 {
-	if (com_gamedir[0] && con_logname->string && con_logname->string[0])
+	if (com_gamedir[0] && con_logname->svalue && con_logname->svalue[0])
 		snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
-				con_logname->string);
+				con_logname->svalue);
 	else
 		logname[0] = '\0';
 }
@@ -448,7 +448,7 @@ Con_DrawNotify (void)
 		if (time == 0)
 			continue;
 		time = cls.realtime - time;
-		if (time > con_notifytime->value)
+		if (time > con_notifytime->fvalue)
 			continue;
 		text = con->text + (i % con_totallines) * con_linewidth;
 

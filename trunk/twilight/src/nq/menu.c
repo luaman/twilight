@@ -757,10 +757,10 @@ M_Menu_Setup_f (void)
 	key_dest = key_menu;
 	m_state = m_setup;
 	m_entersound = true;
-	strcpy (setup_myname, _cl_name->string);
-	strcpy (setup_hostname, hostname->string);
-	setup_top = setup_oldtop = ((int) _cl_color->value) >> 4;
-	setup_bottom = setup_oldbottom = ((int) _cl_color->value) & 15;
+	strcpy (setup_myname, _cl_name->svalue);
+	strcpy (setup_hostname, hostname->svalue);
+	setup_top = setup_oldtop = _cl_color->ivalue >> 4;
+	setup_bottom = setup_oldbottom = _cl_color->ivalue & 15;
 }
 
 
@@ -860,9 +860,9 @@ M_Setup_Key (int k)
 				goto forward;
 
 			// setup_cursor == 4 (OK)
-			if (strcmp (_cl_name->string, setup_myname) != 0)
+			if (strcmp (_cl_name->svalue, setup_myname) != 0)
 				Cbuf_AddText (va ("name \"%s\"\n", setup_myname));
-			if (strcmp (hostname->string, setup_hostname) != 0)
+			if (strcmp (hostname->svalue, setup_hostname) != 0)
 				Cvar_Set (hostname, setup_hostname);
 			if (setup_top != setup_oldtop || setup_bottom != setup_oldbottom)
 				Cbuf_AddText (va ("color %i %i\n", setup_top, setup_bottom));
@@ -938,42 +938,42 @@ M_AdjustSliders (int dir)
 
 	switch (options_cursor) {
 		case 3:						// screen size
-			t = scr_viewsize->value + (dir * 10.0f);
+			t = scr_viewsize->ivalue + (dir * 10.0f);
 			t = bound (30, t, 120);
 			Cvar_Set (scr_viewsize, va("%f", t));
 			break;
 		case 4:						// gamma
-			t = v_gamma->value + (dir * 0.05f);
+			t = v_gamma->fvalue + (dir * 0.05f);
 			t = bound (1.0, t, 2.0);
 			Cvar_Set (v_gamma, va("%f", t));
 			break;
 		case 5:						// software brightness
-			t = r_brightness->value + (dir * 0.25);
+			t = r_brightness->fvalue + (dir * 0.25);
 			t = bound (1, t, 5);
 			Cvar_Set (r_brightness, va("%f", t));
 			break;
 		case 6:						// software contrast (base brightness)
-			t = r_contrast->value + (dir * 0.025);
+			t = r_contrast->fvalue + (dir * 0.025);
 			t = bound (.75, t, 1);
 			Cvar_Set (r_contrast, va("%f", t));
 			break;
 		case 7:						// mouse speed
-			t = sensitivity->value + (dir * 0.5f);
+			t = sensitivity->fvalue + (dir * 0.5f);
 			t = bound (1, t, 11);
 			Cvar_Set (sensitivity, va("%f", t));
 			break;
 		case 8:						// music volume
 			// Slider doesn't work with SDL
-			Cvar_Set (bgmvolume, bgmvolume->value ? "0" : "1");
+			Cvar_Set (bgmvolume, bgmvolume->fvalue ? "0" : "1");
 			break;
 		case 9:						// sfx volume
-			t = volume->value + (dir * 0.1f);
+			t = volume->fvalue + (dir * 0.1f);
 			t = bound (0, t, 1);
 			Cvar_Set (volume, va("%f", t));
 			break;
 
 		case 10:						// always run
-			if (cl_forwardspeed->value > 200) {
+			if (cl_forwardspeed->fvalue > 200) {
 				Cvar_Set (cl_forwardspeed, "200");
 				Cvar_Set (cl_backspeed, "200");
 			} else {
@@ -983,28 +983,28 @@ M_AdjustSliders (int dir)
 			break;
 
 		case 11:						// invert mouse
-			t = -m_pitch->value;
+			t = -m_pitch->fvalue;
 			Cvar_Set (m_pitch, va("%f", t));
 			break;
 
 		case 12:						// lookspring
-			Cvar_Set (lookspring, va("%i", !lookspring->value));
+			Cvar_Set (lookspring, va("%i", !lookspring->ivalue));
 			break;
 
 		case 13:						// lookstrafe
-			Cvar_Set (lookstrafe, va("%i", !lookstrafe->value));
+			Cvar_Set (lookstrafe, va("%i", !lookstrafe->ivalue));
 			break;
 
 		case 14:
-			Cvar_Set (cl_sbar,  va ("%i", !(int)cl_sbar->value));
+			Cvar_Set (cl_sbar,  va ("%i", !cl_sbar->ivalue));
 			break;
 
 		case 15:
-			Cvar_Set (cl_hudswap, va ("%i", !(int)cl_hudswap->value));
+			Cvar_Set (cl_hudswap, va ("%i", !cl_hudswap->ivalue));
 			break;
 
 		case 16:						// _windowed_mouse
-			Cvar_Set (_windowed_mouse, va("%i", !_windowed_mouse->value));
+			Cvar_Set (_windowed_mouse, va("%i", !_windowed_mouse->ivalue));
 			break;
 	}
 }
@@ -1045,20 +1045,20 @@ M_Options_Draw (void)
 	M_Print (16, y, "         Go to console"); y += 8;
 	M_Print (16, y, "     Reset to defaults"); y += 8;
 
-	M_Print (16, y, "           Screen size"); M_DrawSlider (220, y, (scr_viewsize->value - 30) / (120 - 30)); y += 8;
-	M_Print (16, y, "        Hardware Gamma"); M_DrawSlider (220, y, v_gamma->value - 1.0); y += 8;
-	M_Print (16, y, "   Software Brightness"); M_DrawSlider (220, y, (r_brightness->value - 1) / 4); y += 8;
-	M_Print (16, y, "     Software Contrast"); M_DrawSlider (220, y, (r_contrast->value - 0.75) * 4); y += 8;
-	M_Print (16, y, "           Mouse Speed"); M_DrawSlider (220, y, (sensitivity->value - 1) / 10); y += 8;
-	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->value); y += 8;
-	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->value); y += 8;
-	M_Print (16, y, "            Always Run"); M_DrawCheckbox (220, y, cl_forwardspeed->value > 200); y += 8;
-	M_Print (16, y, "          Invert Mouse"); M_DrawCheckbox (220, y, m_pitch->value < 0); y += 8;
-	M_Print (16, y, "            Lookspring"); M_DrawCheckbox (220, y, lookspring->value); y += 8;
-	M_Print (16, y, "            Lookstrafe"); M_DrawCheckbox (220, y, lookstrafe->value); y += 8;
-	M_Print (16, y, "    Use old status bar"); M_DrawCheckbox (220, y, cl_sbar->value); y += 8;
-	M_Print (16, y, "      HUD on left side"); M_DrawCheckbox (220, y, cl_hudswap->value); y += 8;
-	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->value); y += 8;
+	M_Print (16, y, "           Screen size"); M_DrawSlider (220, y, (scr_viewsize->ivalue - 30) / (120 - 30)); y += 8;
+	M_Print (16, y, "        Hardware Gamma"); M_DrawSlider (220, y, v_gamma->fvalue - 1.0); y += 8;
+	M_Print (16, y, "   Software Brightness"); M_DrawSlider (220, y, (r_brightness->fvalue - 1) / 4); y += 8;
+	M_Print (16, y, "     Software Contrast"); M_DrawSlider (220, y, (r_contrast->fvalue - 0.75) * 4); y += 8;
+	M_Print (16, y, "           Mouse Speed"); M_DrawSlider (220, y, (sensitivity->fvalue - 1) / 10); y += 8;
+	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->fvalue); y += 8;
+	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->fvalue); y += 8;
+	M_Print (16, y, "            Always Run"); M_DrawCheckbox (220, y, cl_forwardspeed->fvalue > 200); y += 8;
+	M_Print (16, y, "          Invert Mouse"); M_DrawCheckbox (220, y, m_pitch->fvalue < 0); y += 8;
+	M_Print (16, y, "            Lookspring"); M_DrawCheckbox (220, y, lookspring->ivalue); y += 8;
+	M_Print (16, y, "            Lookstrafe"); M_DrawCheckbox (220, y, lookstrafe->ivalue); y += 8;
+	M_Print (16, y, "    Use old status bar"); M_DrawCheckbox (220, y, cl_sbar->ivalue); y += 8;
+	M_Print (16, y, "      HUD on left side"); M_DrawCheckbox (220, y, cl_hudswap->ivalue); y += 8;
+	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->ivalue); y += 8;
 	M_Print (16, y, "      Graphics Options"); y += 8;
 
 	if (vid_menudrawfn) {
@@ -1188,16 +1188,16 @@ M_Gfx_Draw (void)
 	M_DrawPic ((320 - p->width) / 2, 4, p);
 
 	y = 32;
-	M_Print (16, y, "         Affine models"); M_DrawCheckbox (220, y, gl_affinemodels->value); y += 8;
-	M_Print (16, y, "     Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->value); y += 8;
-	M_Print (16, y, "    Fullbright bmodels"); M_DrawCheckbox (220, y, gl_fb_bmodels->value); y += 8;
-	M_Print (16, y, "   Fast dynamic lights"); M_DrawCheckbox (220, y, gl_flashblend->value); y += 8;
-	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off"); y += 8;
-	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->value); y += 8;
-	M_Print (16, y, "  Motion interpolation"); M_DrawCheckbox (220, y, gl_im_transform->value); y += 8;
-	M_Print (16, y, "          Texture mode"); M_Print (220, y, gl_texturemode->string); y += 8;
-	M_Print (16, y, "         Light lerping"); M_DrawCheckbox (220, y, r_lightlerp->value); y += 8;
-	M_Print (16, y, "      Particle torches"); M_DrawCheckbox (220, y, gl_particletorches->value);
+	M_Print (16, y, "         Affine models"); M_DrawCheckbox (220, y, gl_affinemodels->ivalue); y += 8;
+	M_Print (16, y, "     Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->ivalue); y += 8;
+	M_Print (16, y, "    Fullbright bmodels"); M_DrawCheckbox (220, y, gl_fb_bmodels->ivalue); y += 8;
+	M_Print (16, y, "   Fast dynamic lights"); M_DrawCheckbox (220, y, gl_flashblend->ivalue); y += 8;
+	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->ivalue) ? (r_shadows->ivalue == 2 ? "nice" : "fast") : "off"); y += 8;
+	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->ivalue); y += 8;
+	M_Print (16, y, "  Motion interpolation"); M_DrawCheckbox (220, y, gl_im_transform->ivalue); y += 8;
+	M_Print (16, y, "          Texture mode"); M_Print (220, y, gl_texturemode->svalue); y += 8;
+	M_Print (16, y, "         Light lerping"); M_DrawCheckbox (220, y, r_lightlerp->ivalue); y += 8;
+	M_Print (16, y, "      Particle torches"); M_DrawCheckbox (220, y, gl_particletorches->ivalue);
 
 	// cursor
 	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (host_realtime * 4) & 1));
@@ -1213,45 +1213,45 @@ M_Gfx_Set (void)
 	switch (gfx_cursor)
 	{
 		case 0:
-			v = !(int)gl_affinemodels->value;
+			v = !gl_affinemodels->ivalue;
 			Cvar_Set (gl_affinemodels, va("%i", v));
 			break;
 
 		case 1:
-			v = !(int)gl_fb_models->value;
+			v = !gl_fb_models->ivalue;
 			Cvar_Set (gl_fb_models, va("%i", v));
 			break;
 
 		case 2:
-			v = !(int)gl_fb_bmodels->value;
+			v = !gl_fb_bmodels->ivalue;
 			Cvar_Set (gl_fb_bmodels, va("%i", v));
 			break;
 
 		case 3:
-			v = !(int)gl_flashblend->value;
+			v = !gl_flashblend->ivalue;
 			Cvar_Set (gl_flashblend, va("%i", v));
 			break;
 
 		case 4:
-			v = (int)r_shadows->value + 1;
+			v = r_shadows->ivalue + 1;
 			if (v > 2)
 				v = 0;
 			Cvar_Set (r_shadows, va("%i", v));
 			break;
 
 		case 5:
-			v = !(int)gl_im_animation->value;
+			v = !gl_im_animation->ivalue;
 			Cvar_Set (gl_im_animation, va("%i", v));
 			break;
 
 		case 6:
-			v = !(int)gl_im_transform->value;
+			v = !gl_im_transform->ivalue;
 			Cvar_Set (gl_im_transform, va("%i", v));
 			break;
 
 		case 7:
 			for (v = 0; v < 6; v++) {
-				if (strcasecmp (texmodes[v].name, gl_texturemode->string) == 0)
+				if (strcasecmp (texmodes[v].name, gl_texturemode->svalue) == 0)
 					break;
 			}
 			v++;
@@ -1261,12 +1261,12 @@ M_Gfx_Set (void)
 			break;
 
 		case 8:
-			v = !(int)r_lightlerp->value;
+			v = !r_lightlerp->ivalue;
 			Cvar_Set (r_lightlerp, va("%i", v));
 			break;
 
 		case 9:
-			v = !(int)gl_particletorches->value;
+			v = !gl_particletorches->ivalue;
 			Cvar_Set (gl_particletorches, va("%i", v));
 			break;
 
@@ -2084,7 +2084,7 @@ M_GameOptions_Draw (void)
 	M_Print (160, 56, va ("%i", maxplayers));
 
 	M_Print (0, 64, "        Game Type");
-	if (coop->value)
+	if (coop->ivalue)
 		M_Print (160, 64, "Cooperative");
 	else
 		M_Print (160, 64, "Deathmatch");
@@ -2093,7 +2093,7 @@ M_GameOptions_Draw (void)
 	if (rogue) {
 		char       *msg;
 
-		switch ((int) teamplay->value) {
+		switch (teamplay->ivalue) {
 			case 1:
 				msg = "No Friendly Fire";
 				break;
@@ -2120,7 +2120,7 @@ M_GameOptions_Draw (void)
 	} else {
 		char       *msg;
 
-		switch ((int) teamplay->value) {
+		switch (teamplay->ivalue) {
 			case 1:
 				msg = "No Friendly Fire";
 				break;
@@ -2135,26 +2135,26 @@ M_GameOptions_Draw (void)
 	}
 
 	M_Print (0, 80, "            Skill");
-	if (skill->value == 0)
+	if (skill->ivalue == 0)
 		M_Print (160, 80, "Easy difficulty");
-	else if (skill->value == 1)
+	else if (skill->ivalue == 1)
 		M_Print (160, 80, "Normal difficulty");
-	else if (skill->value == 2)
+	else if (skill->ivalue == 2)
 		M_Print (160, 80, "Hard difficulty");
 	else
 		M_Print (160, 80, "Nightmare difficulty");
 
 	M_Print (0, 88, "       Frag Limit");
-	if (fraglimit->value == 0)
+	if (fraglimit->ivalue == 0)
 		M_Print (160, 88, "none");
 	else
-		M_Print (160, 88, va ("%i frags", (int) fraglimit->value));
+		M_Print (160, 88, va ("%i frags", (int) fraglimit->ivalue));
 
 	M_Print (0, 96, "       Time Limit");
-	if (timelimit->value == 0)
+	if (timelimit->ivalue == 0)
 		M_Print (160, 96, "none");
 	else
-		M_Print (160, 96, va ("%i minutes", (int) timelimit->value));
+		M_Print (160, 96, va ("%i minutes", (int) timelimit->ivalue));
 
 	M_Print (0, 112, "         Episode");
 	// MED 01/06/97 added hipnotic episodes
@@ -2231,7 +2231,7 @@ M_NetStart_Change (int dir)
 			break;
 
 		case 2:
-			Cvar_Set (coop, coop->value ? "0" : "1");
+			Cvar_Set (coop, coop->ivalue ? "0" : "1");
 			break;
 
 		case 3:
@@ -2240,25 +2240,25 @@ M_NetStart_Change (int dir)
 			else
 				count = 2;
 
-			t = teamplay->value + dir;
+			t = teamplay->ivalue + dir;
 			t = bound (0, t, count);
 			Cvar_Set (teamplay, va("%i", t));
 			break;
 
 		case 4:
-			t = skill->value + dir;
+			t = skill->ivalue + dir;
 			t = bound (0, t, 3);
 			Cvar_Set (skill, va("%i", t));
 			break;
 
 		case 5:
-			t = fraglimit->value + dir * 10;
+			t = fraglimit->ivalue + dir * 10;
 			t = bound (0, t, 100);
 			Cvar_Set (fraglimit, va("%i", t));
 			break;
 
 		case 6:
-			t = timelimit->value + dir * 5;
+			t = timelimit->ivalue + dir * 5;
 			t = bound (0, t, 60);
 			Cvar_Set (timelimit, va("%i", t));
 			break;
@@ -2271,7 +2271,7 @@ M_NetStart_Change (int dir)
 			// PGM 03/02/97 added 1 for dmatch episode
 			else if (rogue)
 				count = 4;
-			else if (registered->value)
+			else if (registered->ivalue)
 				count = 7;
 			else
 				count = 2;

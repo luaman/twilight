@@ -356,7 +356,7 @@ SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 
 	ent = NUM_FOR_EDICT (entity);
 
-	if ((channel & 8) || !sv_phs->value)	// no PHS flag
+	if ((channel & 8) || !sv_phs->ivalue)	// no PHS flag
 	{
 		if (channel & 8)
 			reliable = true;			// sounds that break the phs are

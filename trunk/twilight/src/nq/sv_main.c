@@ -232,7 +232,7 @@ SV_SendServerinfo (client_t *client)
 	MSG_WriteLong (&client->message, PROTOCOL_VERSION);
 	MSG_WriteByte (&client->message, svs.maxclients);
 
-	if (!coop->value && deathmatch->value)
+	if (!coop->ivalue && deathmatch->ivalue)
 		MSG_WriteByte (&client->message, GAME_DEATHMATCH);
 	else
 		MSG_WriteByte (&client->message, GAME_COOP);
@@ -1042,7 +1042,7 @@ SV_SpawnServer (char *server)
 	extern		qboolean isnotmap;
 
 	// let's not have any servers with no name
-	if (hostname->string[0] == 0)
+	if (hostname->svalue[0] == 0)
 		Cvar_Set (hostname, "UNNAMED");
 	scr_centertime_off = 0;
 
@@ -1054,11 +1054,11 @@ SV_SpawnServer (char *server)
 		SV_SendReconnect ();
 
 	// make cvars consistent
-	if (coop->value)
+	if (coop->ivalue)
 		Cvar_Set (deathmatch, "0");
-	if (deathmatch->value)
+	if (deathmatch->ivalue)
 		Cvar_Set (coop, "0");
-	current_skill = (int) (skill->value + 0.5);
+	current_skill = skill->ivalue;
 	current_skill = bound (0, current_skill, 3);
 
 	Cvar_Set (skill, va("%i", current_skill));
@@ -1135,10 +1135,10 @@ SV_SpawnServer (char *server)
 	ent->v.solid = SOLID_BSP;
 	ent->v.movetype = MOVETYPE_PUSH;
 
-	if (coop->value)
-		pr_global_struct->coop = coop->value;
+	if (coop->ivalue)
+		pr_global_struct->coop = coop->ivalue;
 	else
-		pr_global_struct->deathmatch = deathmatch->value;
+		pr_global_struct->deathmatch = deathmatch->ivalue;
 
 	pr_global_struct->mapname = sv.name - pr_strings;
 

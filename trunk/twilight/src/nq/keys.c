@@ -220,7 +220,7 @@ Key_Console (int key)
 	{
 		if (key_lines[edit_line][1] == '\\' || key_lines[edit_line][1] == '/')
 			Cbuf_AddText (key_lines[edit_line] + 2);	// skip the >
-		else if (cl_chatmode->value && cls.state >= ca_connected)
+		else if (cl_chatmode->ivalue && cls.state >= ca_connected)
 		{
 			if (CheckForCommand ())
 				Cbuf_AddText (key_lines[edit_line] + 1);

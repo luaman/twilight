@@ -134,10 +134,10 @@ SV_CheckVelocity (edict_t *ent)
 	}
 
 	if (DotProduct(ent->v.velocity,ent->v.velocity) >
-		sv_maxvelocity->value*sv_maxvelocity->value)
+		sv_maxvelocity->fvalue * sv_maxvelocity->fvalue)
 	{
 		VectorNormalizeFast (ent->v.velocity);
-		VectorScale (ent->v.velocity, sv_maxvelocity->value, ent->v.velocity);
+		VectorScale (ent->v.velocity, sv_maxvelocity->fvalue, ent->v.velocity);
 	}
 }
 
@@ -915,10 +915,10 @@ SV_Physics (void)
 	if (sv.old_time)
 	{
 		host_frametime = sv.time - sv.old_time;
-		if (host_frametime < sv_mintic->value)
+		if (host_frametime < sv_mintic->fvalue)
 			return;
-		if (host_frametime > sv_maxtic->value)
-			host_frametime = sv_maxtic->value;
+		if (host_frametime > sv_maxtic->fvalue)
+			host_frametime = sv_maxtic->fvalue;
 		sv.old_time = sv.time;
 	}
 
@@ -953,14 +953,15 @@ SV_Physics (void)
 void
 SV_SetMoveVars (void)
 {
-	movevars.gravity = sv_gravity->value;
-	movevars.stopspeed = sv_stopspeed->value;
-	movevars.maxspeed = sv_maxspeed->value;
-	movevars.spectatormaxspeed = sv_spectatormaxspeed->value;
-	movevars.accelerate = sv_accelerate->value;
-	movevars.airaccelerate = sv_airaccelerate->value;
-	movevars.wateraccelerate = sv_wateraccelerate->value;
-	movevars.friction = sv_friction->value;
-	movevars.waterfriction = sv_waterfriction->value;
+	movevars.gravity = sv_gravity->fvalue;
+	movevars.stopspeed = sv_stopspeed->fvalue;
+	movevars.maxspeed = sv_maxspeed->fvalue;
+	movevars.spectatormaxspeed = sv_spectatormaxspeed->fvalue;
+	movevars.accelerate = sv_accelerate->fvalue;
+	movevars.airaccelerate = sv_airaccelerate->fvalue;
+	movevars.wateraccelerate = sv_wateraccelerate->fvalue;
+	movevars.friction = sv_friction->fvalue;
+	movevars.waterfriction = sv_waterfriction->fvalue;
 	movevars.entgravity = 1.0;
 }
+

@@ -150,22 +150,22 @@ GL_BrightenScreen(void)
 {
 	float		f;
 
-	if (r_brightness->value < 0.1f)
+	if (r_brightness->fvalue < 0.1f)
 		Cvar_Set (r_brightness, va("%f",0.1f));
-	if (r_brightness->value > 5.0f)
+	if (r_brightness->fvalue > 5.0f)
 		Cvar_Set (r_brightness, va("%f",5.0f));
 
-	if (r_contrast->value < 0.2f)
+	if (r_contrast->fvalue < 0.2f)
 		Cvar_Set (r_contrast, va("%f",0.2f));
-	if (r_contrast->value > 1.0f)
+	if (r_contrast->fvalue > 1.0f)
 		Cvar_Set (r_contrast, va("%f",1.0f));
 
-	if (r_brightness->value < 1.01f && r_contrast->value > 0.99f)
+	if (r_brightness->fvalue < 1.01f && r_contrast->fvalue > 0.99f)
 		return;
 
 	qglDisable (GL_TEXTURE_2D);
 	qglEnable (GL_BLEND);
-	f = r_brightness->value;
+	f = r_brightness->fvalue;
 	if (f >= 1.01f)
 	{
 		qglBlendFunc (GL_DST_COLOR, GL_ONE);
@@ -184,9 +184,9 @@ GL_BrightenScreen(void)
 		qglEnd ();
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
-	if (r_contrast->value <= 0.99f)
+	if (r_contrast->fvalue <= 0.99f)
 	{
-		qglColor4f (1, 1, 1, 1 - r_contrast->value);
+		qglColor4f (1, 1, 1, 1 - r_contrast->fvalue);
 		qglBegin (GL_TRIANGLES);
 		qglVertex2f (-5000, -5000);
 		qglVertex2f (10000, -5000);
@@ -231,7 +231,7 @@ SCR_CenterPrint (char *str)
 	int			i, j, l;
 
 	strlcpy (scr_centerstring, str, sizeof (scr_centerstring) - 1);
-	scr_centertime_off = scr_centertime->value;
+	scr_centertime_off = scr_centertime->ivalue;
 	scr_centertime_start = cl.time;
 
 	/* count the number of lines for centering */
@@ -243,7 +243,7 @@ SCR_CenterPrint (char *str)
 		s++;
 	}
 
-	if (!scr_logcprint->value)
+	if (!scr_logcprint->ivalue)
 		return;
 
 	// echo it to the console
@@ -289,7 +289,7 @@ SCR_DrawCenterString (void)
 
 	/* the finale prints the characters one at a time */
 	if (cl.intermission)
-		remaining = scr_printspeed->value * (cl.time - scr_centertime_start);
+		remaining = scr_printspeed->ivalue * (cl.time - scr_centertime_start);
 	else
 		remaining = 9999;
 
@@ -376,15 +376,15 @@ SCR_CalcRefdef (void)
 	vid.recalc_refdef = false;
 
 	/* intermission is always full screen */
-	if (scr_viewsize->value >= 120 || cl.intermission) {
+	if (scr_viewsize->ivalue >= 120 || cl.intermission) {
 		sb_lines = 0;
-	} else if (scr_viewsize->value >= 110) {
+	} else if (scr_viewsize->ivalue >= 110) {
 		sb_lines = 24;
 	} else {
 		sb_lines = 24 + 16 + 8;
 	}
 
-	if (cl_sbar->value)
+	if (cl_sbar->ivalue)
 		r_refdef.vrect.height = vid.height - sb_lines;
 	else
 		r_refdef.vrect.height = vid.height;
@@ -393,7 +393,7 @@ SCR_CalcRefdef (void)
 	r_refdef.vrect.x = 0;
 	r_refdef.vrect.y = 0;
 
-	r_refdef.fov_x = scr_fov->value;
+	r_refdef.fov_x = scr_fov->fvalue;
 	r_refdef.fov_y =
 		CalcFov (r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height);
 
@@ -433,9 +433,9 @@ static void
 SCR_viewsize_CB (cvar_t *cvar)
 {
 	/* bound viewsize */
-	if (cvar->value < 30) {
+	if (cvar->ivalue < 30) {
 		Cvar_Set (cvar, "30");
-	} else if (cvar->value > 120) {
+	} else if (cvar->ivalue > 120) {
 		Cvar_Set (cvar, "120");
 	} else {
 		vid.recalc_refdef = true;
@@ -446,9 +446,9 @@ static void
 SCR_fov_CB (cvar_t *cvar)
 {
 	/* bound field of view */
-	if (cvar->value < 1) {
+	if (cvar->fvalue < 1) {
 		Cvar_Set (cvar, "1");
-	} else if (cvar->value > 170) {
+	} else if (cvar->fvalue > 170) {
 		Cvar_Set (cvar, "170");
 	} else {
 		vid.recalc_refdef = true;
@@ -509,7 +509,7 @@ SCR_DrawTurtle (void)
 {
 	static int		count;
 
-	if (!scr_showturtle->value)
+	if (!scr_showturtle->ivalue)
 		return;
 
 	if (host_frametime < 0.1) {
@@ -551,7 +551,7 @@ SCR_DrawFPS (void)
 	int					x, y;
 	char				st[80];
 
-	if (!show_fps->value)
+	if (!show_fps->ivalue)
 		return;
 
 	t = Sys_DoubleTime ();
@@ -578,7 +578,7 @@ SCR_DrawPause (void)
 {
 	qpic_t	   *pic;
 
-	if (!scr_showpause->value)			/* turn off for screenshots */
+	if (!scr_showpause->ivalue)			/* turn off for screenshots */
 		return;
 
 	if (!cl.paused)
@@ -638,12 +638,12 @@ SCR_SetUpToDrawConsole (void)
 		scr_conlines = 0;					/* none visible */
 
 	if (scr_conlines < scr_con_current) {
-		scr_con_current -= scr_conspeed->value * host_frametime;
+		scr_con_current -= scr_conspeed->ivalue * host_frametime;
 		if (scr_conlines > scr_con_current)
 			scr_con_current = scr_conlines;
 
 	} else if (scr_conlines > scr_con_current) {
-		scr_con_current += scr_conspeed->value * host_frametime;
+		scr_con_current += scr_conspeed->ivalue * host_frametime;
 		if (scr_conlines < scr_con_current)
 			scr_con_current = scr_conlines;
 	}
@@ -856,7 +856,7 @@ SCR_UpdateScreen (void)
 		Sbar_FinaleOverlay ();
 		SCR_CheckDrawCenterString ();
 	} else {
-		if (crosshair->value)
+		if (crosshair->ivalue)
 			Draw_Crosshair ();
 
 		SCR_DrawNet ();

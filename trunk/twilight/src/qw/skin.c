@@ -94,7 +94,7 @@ Skin_Load (char *skin_name)
 		// use base until downloaded
 		return NULL;
 
-	if (noskins->value == 1)
+	if (noskins->ivalue == 1)
 		// JACK: So NOSKINS > 1 will show skins, but not download new ones.
 		return NULL;
 
@@ -231,7 +231,7 @@ Skin_NextDownload (void)
 		sc = &cl.players[cls.downloadnumber];
 		if (!sc->name[0] || !sc->skin_name[0])
 			continue;
-		if (noskins->value)
+		if (noskins->ivalue)
 			continue;
 		if (!CL_CheckOrDownloadFile (va ("skins/%s.pcx", sc->skin_name)))
 			return;						// started a download
@@ -302,7 +302,7 @@ CL_InitSkins (void)
 {
 	skin_zone = Zone_AllocZone("skins");
 
-	base_skin = Skin_Load(baseskin->string);
+	base_skin = Skin_Load(baseskin->svalue);
 
 	Cmd_AddCommand ("skins", Skin_Skins_f);
 	Cmd_AddCommand ("allskins", Skin_AllSkins_f);

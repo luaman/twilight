@@ -329,7 +329,7 @@ Mod_LoadLighting
 void
 Mod_LoadLighting (lump_t *l)
 {
-	if (!gl_colorlights->value)
+	if (!gl_colorlights->ivalue)
 	{
 		if (!l->filelen) {
 			loadmodel->lightdata = NULL;
@@ -543,9 +543,9 @@ Mod_LoadFaces (lump_t *l)
 
 		if (i == -1)
 			out->samples = NULL;
-		else if (!gl_colorlights->value)
+		else if (!gl_colorlights->ivalue)
 			out->samples = loadmodel->lightdata + i;
-		else if (gl_colorlights->value)
+		else if (gl_colorlights->ivalue)
 			out->samples = loadmodel->lightdata + i*3;
 
 		// set the drawing flags flag

@@ -1086,7 +1086,7 @@ CL_MuzzleFlash (void)
 	}
 
 	// don't draw our own muzzle flash if flashblending
-	if (i - 1 == cl.playernum && gl_flashblend->value)
+	if (i - 1 == cl.playernum && gl_flashblend->ivalue)
 		return;
 
 	pl = &cl.frames[parsecountmod].playerstate[i - 1];
@@ -1106,7 +1106,7 @@ CL_MuzzleFlash (void)
 }
 
 
-#define SHOWNET(x) if(cl_shownet->value==2) \
+#define SHOWNET(x) if(cl_shownet->ivalue==2) \
 	Com_Printf ("%3i:%s\n", msg_readcount-1, x);
 
 /*
@@ -1129,9 +1129,9 @@ CL_ParseServerMessage (void)
 //
 // if recording demos, copy the message out
 //
-	if (cl_shownet->value == 1)
+	if (cl_shownet->ivalue == 1)
 		Com_Printf ("%i ", net_message.cursize);
-	else if (cl_shownet->value == 2)
+	else if (cl_shownet->ivalue == 2)
 		Com_Printf ("------------------\n");
 
 

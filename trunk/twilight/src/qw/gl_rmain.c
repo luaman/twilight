@@ -449,7 +449,7 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 	vec3_t			top, bottom;
 	qboolean		has_top = false, has_bottom = false, has_fb = false;
 
-	if (gl_particletorches->value) {
+	if (gl_particletorches->ivalue) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
 			if (cl.time >= e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
@@ -476,7 +476,7 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 	/*
 	 * get lighting information
 	 */
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb_models->value) {
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb_models->ivalue) {
 		shadelight = R_LightPoint (e->cur.origin);
 
 		// always give the gun some light
@@ -518,7 +518,7 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 				lightcolor[2] = max (lightcolor[2], 8);
 			}
 		}
-	} else if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb_models->value) {
+	} else if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb_models->ivalue) {
 		if (!colorlights)
 			shadelight = 256;
 		else
@@ -563,7 +563,7 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 	 */
 	qglPushMatrix ();
 
-	if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM)) {
+	if (gl_im_transform->ivalue && !(clmodel->modflags & FLAG_NO_IM_FORM)) {
 		qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
 		qglRotatef (e->cur.angles[1], 0, 0, 1);
 		qglRotatef (-e->cur.angles[0], 0, 1, 0);
@@ -586,20 +586,20 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 	if (e->skin)
 		skin = e->skin;
 
-	if (e->colormap && !gl_nocolors->value) {
+	if (e->colormap && !gl_nocolors->ivalue) {
 		if ((has_top = !!skin->top[anim].num_indices))
 			VectorCopy(e->colormap->top, top);
 		if ((has_bottom = !!skin->bottom[anim].num_indices))
 			VectorCopy(e->colormap->bottom, bottom);
 	}
 
-	if (gl_fb_models->value)
+	if (gl_fb_models->ivalue)
 		has_fb = !!skin->fb[anim].num_indices;
 
-	if (gl_affinemodels->value)
+	if (gl_affinemodels->ivalue)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
-	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+	if (gl_im_animation->ivalue && !(clmodel->modflags & FLAG_NO_IM_ANIM))
 		R_SetupAliasBlendedFrame (paliashdr, e);
 	else
 		R_SetupAliasFrame (paliashdr, e);
@@ -641,7 +641,7 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 
 	TWI_PostVDrawCVA ();
 
-	if (gl_affinemodels->value)
+	if (gl_affinemodels->ivalue)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	qglPopMatrix ();
@@ -659,7 +659,7 @@ R_DrawEntitiesOnList (void)
 {
 	int			i;
 
-	if (!r_drawentities->value)
+	if (!r_drawentities->ivalue)
 		return;
 
 	for (i = 0; i < r_refdef.num_entities; i++) {
@@ -700,9 +700,9 @@ R_DrawViewModel (void)
 	viewent.model = cl.viewent_model;
 	currententity = &viewent;
 
-	if (!r_drawviewmodel->value ||
+	if (!r_drawviewmodel->ivalue ||
 		!Cam_DrawViewModel () ||
-		!r_drawentities->value ||
+		!r_drawentities->ivalue ||
 		(cl.stats[STAT_ITEMS] & IT_INVISIBILITY) ||
 		(cl.stats[STAT_HEALTH] <= 0) ||
 		!currententity->model) {
@@ -728,7 +728,7 @@ R_PolyBlend
 static void
 R_PolyBlend (void)
 {
-	if (!gl_polyblend->value)
+	if (!gl_polyblend->ivalue)
 		return;
 	if (v_blend[3] < 0.01f)
 		return;
@@ -826,7 +826,7 @@ R_SetupFrame (void)
 	// don't allow cheats in multiplayer
 	// FIXME: do this differently/elsewhere
 	if (!Q_atoi (Info_ValueForKey (cl.serverinfo, "watervis")))
-		if (r_wateralpha->value != 1)
+		if (r_wateralpha->ivalue != 1)
 			Cvar_Set (r_wateralpha, "1");
 
 	R_AnimateLight ();
@@ -924,7 +924,7 @@ R_SetupGL (void)
 	/*
 	 * set drawing parms
 	 */
-	if (gl_cull->value)
+	if (gl_cull->ivalue)
 		qglEnable (GL_CULL_FACE);
 	else
 		qglDisable (GL_CULL_FACE);
@@ -941,10 +941,10 @@ R_Clear
 static void
 R_Clear (void)
 {
-	if (gl_ztrick->value) {
+	if (gl_ztrick->ivalue) {
 		static int  trickframe;
 
-		if (gl_clear->value)
+		if (gl_clear->ivalue)
 			qglClear (GL_COLOR_BUFFER_BIT);
 
 		trickframe++;
@@ -958,7 +958,7 @@ R_Clear (void)
 			qglDepthFunc (GL_GEQUAL);
 		}
 	} else {
-		if (gl_clear->value)
+		if (gl_clear->ivalue)
 			qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		else
 			qglClear (GL_DEPTH_BUFFER_BIT);
@@ -1015,20 +1015,20 @@ R_RenderView (void)
 	double		time1 = 0.0;
 	double		time2;
 
-	if (r_norefresh->value)
+	if (r_norefresh->ivalue)
 		return;
 
 	if (!cl.worldmodel)
 		Host_EndGame ("R_RenderView: NULL worldmodel");
 
-	if (r_speeds->value)
+	if (r_speeds->ivalue)
 	{
 		qglFinish ();
 		time1 = Sys_DoubleTime ();
 		c_brush_polys = 0;
 		c_alias_polys = 0;
 	}
-	else if (gl_finish->value)
+	else if (gl_finish->ivalue)
 		qglFinish ();
 
 	R_Clear ();
@@ -1050,7 +1050,7 @@ R_RenderView (void)
 
 	R_PolyBlend ();
 
-	if (r_speeds->value)
+	if (r_speeds->ivalue)
 	{
 		time2 = Sys_DoubleTime ();
 		Com_Printf ("%3i ms  %4i wpoly %4i epoly\n",

@@ -43,13 +43,14 @@
 
 typedef struct cvar_s
 {
-	char			   *name;
-	char			   *string;
-	char			   *initstr;
-	float			   	value;
-	int					flags;
+	char		*name;
+	char		*initval;
+	char		*svalue;
+	float		fvalue;
+	int			ivalue;
+	int			flags;
 
-	void			  (*callback) (struct cvar_s *var);
+	void		(*callback) (struct cvar_s *var);
 } cvar_t;
 
 typedef void (*cvar_callback) (cvar_t *var);
@@ -59,14 +60,14 @@ extern cvar_t *developer;
 void Cvar_Init (const cvar_callback callback);
 void Cvar_Shutdown (void);
 
-cvar_t *Cvar_Get (const char *name, const char *value, const int flags,
+cvar_t *Cvar_Get (const char *name, const char *svalue, const int flags,
 				const cvar_callback callback);
 
-void Cvar_Set (cvar_t *var, const char *value);
+void Cvar_Set (cvar_t *var, const char *svalue);
 void Cvar_Set_f (void);
 void Cvar_Reset_f (void);
 
-cvar_t *Cvar_CreateTemp (const char *name, const char *value);
+cvar_t *Cvar_CreateTemp (const char *name, const char *svalue);
 
 void Cvar_Slide (cvar_t *var, const float change);
 

@@ -69,7 +69,7 @@ extern vec3_t	player_mins;
 
 extern int		fp_messages, fp_persecond, fp_secondsdead;
 extern char		fp_msg[];
-extern cvar_t	pausable;
+extern cvar_t	*pausable;
 
 /*
 ============================================================
@@ -290,7 +290,7 @@ SV_PreSpawn_f (void)
 		// should be three numbers following containing checksums
 		check = Q_atoi (Cmd_Argv (3));
 
-		if (sv_mapcheck->value && check != sv.worldmodel->checksum &&
+		if (sv_mapcheck->ivalue && check != sv.worldmodel->checksum &&
 			check != sv.worldmodel->checksum2) {
 			SV_ClientPrintf (host_client, PRINT_HIGH,
 							 "Map model file does not match (%s), %i != %i/%i.\n"
@@ -394,10 +394,10 @@ SV_Spawn_f (void)
 	val = GetEdictFieldValue (ent, "gravity");
 	if (val)
 		val->_float = 1.0;
-	host_client->maxspeed = sv_maxspeed->value;
+	host_client->maxspeed = sv_maxspeed->fvalue;
 	val = GetEdictFieldValue (ent, "maxspeed");
 	if (val)
-		val->_float = sv_maxspeed->value;
+		val->_float = sv_maxspeed->fvalue;
 
 //
 // force stats to be updated
@@ -658,30 +658,30 @@ SV_BeginDownload_f
 void
 SV_BeginDownload_f (void)
 {
-	char       *name, *p;
-	extern cvar_t allow_download;
-	extern cvar_t allow_download_skins;
-	extern cvar_t allow_download_models;
-	extern cvar_t allow_download_sounds;
-	extern cvar_t allow_download_maps;
-	extern int  file_from_pak;			// ZOID did file come from pak?
+	char			*name, *p;
+	extern cvar_t	*allow_download;
+	extern cvar_t	*allow_download_skins;
+	extern cvar_t	*allow_download_models;
+	extern cvar_t	*allow_download_sounds;
+	extern cvar_t	*allow_download_maps;
+	extern int		file_from_pak;		// ZOID did file come from pak?
 
 	name = Cmd_Argv (1);
-// hacked by zoid to allow more conrol over download
+	// hacked by zoid to allow more conrol over download
 	// first off, no .. or global allow check
-	if (strstr (name, "..") || !allow_download.value
+	if (strstr (name, "..") || !allow_download->ivalue
 		// leading dot is no good
 		|| *name == '.'
 		// leading slash bad as well, must be in subdir
 		|| *name == '/'
 		// next up, skin check
-		|| (strncmp (name, "skins/", 6) == 0 && !allow_download_skins.value)
+		|| (strncmp (name, "skins/", 6) == 0 && !allow_download_skins->ivalue)
 		// now models
-		|| (strncmp (name, "progs/", 6) == 0 && !allow_download_models.value)
+		|| (strncmp (name, "progs/", 6) == 0 && !allow_download_models->ivalue)
 		// now sounds
-		|| (strncmp (name, "sound/", 6) == 0 && !allow_download_sounds.value)
+		|| (strncmp (name, "sound/", 6) == 0 && !allow_download_sounds->ivalue)
 		// now maps (note special case for maps, must not be in pak)
-		|| (strncmp (name, "maps/", 6) == 0 && !allow_download_maps.value)
+		|| (strncmp (name, "maps/", 6) == 0 && !allow_download_maps->ivalue)
 		// MUST be in a subdirectory 
 		|| !strstr (name, "/")) {		// don't allow anything with .. path
 		ClientReliableWrite_Begin (host_client, svc_download, 4);
@@ -745,7 +745,7 @@ SV_Say (qboolean team)
 	if (team) 
 		strlcpy (t1, Info_ValueForKey (host_client->userinfo, "team"), sizeof (t1));
 
-	if (host_client->spectator && (!sv_spectalk->value || team))
+	if (host_client->spectator && (!sv_spectalk->ivalue || team))
 		snprintf (text, sizeof (text), "[SPEC] %s: ", host_client->name);
 	else if (team)
 		snprintf (text, sizeof (text), "(%s): ", host_client->name);
@@ -798,7 +798,7 @@ SV_Say (qboolean team)
 	for (j = 0, client = svs.clients; j < MAX_CLIENTS; j++, client++) {
 		if (client->state < cs_connected)	// Clients connecting can hear.
 			continue;
-		if (host_client->spectator && !sv_spectalk->value)
+		if (host_client->spectator && !sv_spectalk->ivalue)
 			if (!client->spectator)
 				continue;
 
@@ -935,7 +935,7 @@ SV_Pause_f (void)
 {
 	char        st[sizeof (host_client->name) + 32];
 
-	if (!pausable.value) 
+	if (!pausable->ivalue) 
 	{
 		SV_ClientPrintf (host_client, PRINT_HIGH, "Pause not allowed.\n");
 		return;
@@ -1241,10 +1241,10 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 	sign = side < 0 ? -1 : 1;
 	side = Q_fabs (side);
 
-	value = cl_rollangle->value;
+	value = cl_rollangle->fvalue;
 
-	if (side < cl_rollspeed->value)
-		side = side * value / cl_rollspeed->value;
+	if (side < cl_rollspeed->fvalue)
+		side = side * value / cl_rollspeed->fvalue;
 	else
 		side = value;
 
@@ -1402,7 +1402,7 @@ SV_RunCmd (usercmd_t *ucmd, qboolean inside)
 	int         i, n;
 	int         oldmsec;
 
-	if (!inside && sv_timekick->value) {
+	if (!inside && sv_timekick->ivalue) {
 		double	time_since;
 		int		time_allowed;
 
@@ -1411,15 +1411,15 @@ SV_RunCmd (usercmd_t *ucmd, qboolean inside)
 
 		host_client->msecs += ucmd->msec;
 		time_since = svs.realtime - host_client->msec_last_check;
-		if (time_since >= sv_timekick_interval->value) {
-			time_allowed = time_since * (1000 + sv_timekick_allowed->value);
+		if (time_since >= sv_timekick_interval->ivalue) {
+			time_allowed = time_since * (1000 + sv_timekick_allowed->ivalue);
 			if (host_client->msecs > time_allowed) {
 				host_client->msec_over++;
 				SV_BroadcastPrintf(PRINT_HIGH, "Temporal anomaly:\n"
 						"%f in %f for %s (%d/%d)\n", host_client->msecs,
 						time_since, host_client->name, host_client->msec_over,
-						sv_timekick->value);
-				if (host_client->msec_over >= sv_timekick->value) {
+						sv_timekick->ivalue);
+				if (host_client->msec_over >= sv_timekick->ivalue) {
 					SV_BroadcastPrintf(PRINT_HIGH,
 							"Kicked %s for time sync errors. (%d times)\n",
 							host_client->name, host_client->msec_over);

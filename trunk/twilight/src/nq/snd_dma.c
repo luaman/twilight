@@ -357,13 +357,13 @@ S_PrecacheSound (char *name)
 {
 	sfx_t      *sfx;
 
-	if (!sound_started || nosound->value)
+	if (!sound_started || nosound->ivalue)
 		return NULL;
 
 	sfx = S_FindName (name);
 
 // cache it in
-	if (precache->value)
+	if (precache->ivalue)
 		S_LoadSound (sfx);
 
 	return sfx;
@@ -487,7 +487,7 @@ S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol,
 	if (!sfx)
 		return;
 
-	if (nosound->value)
+	if (nosound->ivalue)
 		return;
 
 	vol = fvol * 255;
@@ -661,7 +661,7 @@ S_UpdateAmbientSounds (void)
 		return;
 
 	l = Mod_PointInLeaf (listener_origin, cl.worldmodel);
-	if (!l || !ambient_level->value) {
+	if (!l || !ambient_level->fvalue) {
 		for (ambient_channel = 0; ambient_channel < NUM_AMBIENTS;
 			 ambient_channel++)
 			channels[ambient_channel].sfx = NULL;
@@ -672,17 +672,17 @@ S_UpdateAmbientSounds (void)
 		chan = &channels[ambient_channel];
 		chan->sfx = ambient_sfx[ambient_channel];
 
-		vol = ambient_level->value * l->ambient_sound_level[ambient_channel];
+		vol = ambient_level->fvalue * l->ambient_sound_level[ambient_channel];
 		if (vol < 8)
 			vol = 0;
 
 		// don't adjust volume too fast
 		if (chan->master_vol < vol) {
-			chan->master_vol += host_frametime * ambient_fade->value;
+			chan->master_vol += host_frametime * ambient_fade->ivalue;
 			if (chan->master_vol > vol)
 				chan->master_vol = vol;
 		} else if (chan->master_vol > vol) {
-			chan->master_vol -= host_frametime * ambient_fade->value;
+			chan->master_vol -= host_frametime * ambient_fade->ivalue;
 			if (chan->master_vol < vol)
 				chan->master_vol = vol;
 		}
@@ -764,7 +764,7 @@ S_Update (vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 //
 // debugging output
 //
-	if (snd_show->value) {
+	if (snd_show->ivalue) {
 		total = 0;
 		ch = channels;
 		for (i = 0; i < total_channels; i++, ch++)
@@ -812,7 +812,7 @@ GetSoundtime (void)
 void
 S_ExtraUpdate (void)
 {
-	if (snd_noextraupdate->value)
+	if (snd_noextraupdate->ivalue)
 		return;							// don't pollute timings
 	S_Update_ ();
 }
@@ -837,7 +837,7 @@ S_Update_ (void)
 		paintedtime = soundtime;
 	}
 	// mix ahead of current position
-	endtime = soundtime + _snd_mixahead->value * shm->speed;
+	endtime = soundtime + _snd_mixahead->fvalue * shm->speed;
 	samps = shm->samples >> (shm->channels - 1);
 	if ((endtime - soundtime) > (Uint32)samps)
 		endtime = soundtime + samps;
@@ -928,7 +928,7 @@ S_LocalSound (char *sound)
 {
 	sfx_t      *sfx;
 
-	if (nosound->value)
+	if (nosound->ivalue)
 		return;
 	if (!sound_started)
 		return;

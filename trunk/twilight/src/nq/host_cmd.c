@@ -96,7 +96,7 @@ Host_Status_f (void)
 	} else
 		print = SV_ClientPrintf;
 
-	print ("host:    %s\n", hostname->string);
+	print ("host:    %s\n", hostname->svalue);
 	print ("version: %s\n", VERSION);
 	if (tcpipAvailable)
 		print ("tcp/ip:  %s\n", my_tcpip_address);
@@ -663,7 +663,7 @@ Host_Name_f (void)
 	char newName[16];
 
 	if (Cmd_Argc () == 1) {
-		Com_Printf ("\"name\" is \"%s\"\n", _cl_name->string);
+		Com_Printf ("\"name\" is \"%s\"\n", _cl_name->svalue);
 		return;
 	}
 	if (Cmd_Argc () == 2)
@@ -672,7 +672,7 @@ Host_Name_f (void)
 		strlcpy(newName, Cmd_Args (), 16);
 
 	if (cmd_source == src_command) {
-		if (strcmp (_cl_name->string, newName) == 0)
+		if (strcmp (_cl_name->svalue, newName) == 0)
 			return;
 		Cvar_Set (_cl_name, newName);
 		if (cls.state == ca_connected)
@@ -736,7 +736,7 @@ Host_Say (qboolean teamonly)
 	if (!fromServer)
 		snprintf (text, sizeof (text), "%c%s: ", 1, save->name);
 	else
-		snprintf (text, sizeof (text), "%c<%s> ", 1, hostname->string);
+		snprintf (text, sizeof (text), "%c<%s> ", 1, hostname->svalue);
 
 	j = sizeof (text) - 2 - strlen (text);	// -2 for /n and null
 	// terminator
@@ -749,7 +749,7 @@ Host_Say (qboolean teamonly)
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
 		if (!client || !client->active || !client->spawned)
 			continue;
-		if (teamplay->value && teamonly
+		if (teamplay->ivalue && teamonly
 			&& client->edict->v.team != save->edict->v.team)
 			continue;
 		host_client = client;
@@ -836,8 +836,8 @@ Host_Color_f (void)
 
 	if (Cmd_Argc () == 1) {
 		Com_Printf ("\"color\" is \"%i %i\"\n",
-				((int) _cl_color->value) >> 4,
-				((int) _cl_color->value) & 0x0f);
+				_cl_color->ivalue >> 4,
+				_cl_color->ivalue & 0x0f);
 		Com_Printf ("color <0-13> [0-13]\n");
 		return;
 	}
@@ -920,7 +920,7 @@ Host_Pause_f (void)
 		Cmd_ForwardToServer ();
 		return;
 	}
-	if (!pausable->value)
+	if (!pausable->ivalue)
 		SV_ClientPrintf ("Pause not allowed.\n");
 	else {
 		sv.paused ^= 1;
@@ -1152,7 +1152,7 @@ Host_Kick_f (void)
 			if (cls.state == ca_dedicated)
 				who = "Console";
 			else
-				who = _cl_name->string;
+				who = _cl_name->svalue;
 		else
 			who = save->name;
 

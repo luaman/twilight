@@ -320,11 +320,11 @@ SV_SpawnServer (char *server)
 	//
 	// make cvars consistent
 	//
-	if (coop->value)
+	if (coop->ivalue)
 		Cvar_Set (deathmatch, "0");
-	if (deathmatch->value)
+	if (deathmatch->ivalue)
 		Cvar_Set (coop, "0");
-	current_skill = (int) (skill->value + 0.5);
+	current_skill = skill->ivalue;
 	current_skill = bound (0, current_skill, 3);
 
 	Cvar_Set (skill, va("%i", current_skill));

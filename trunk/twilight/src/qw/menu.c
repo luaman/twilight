@@ -379,41 +379,42 @@ M_AdjustSliders (int dir)
 
 	switch (options_cursor) {
 		case 3:						// screen size
-			t = scr_viewsize->value + (dir * 10);
+			t = scr_viewsize->ivalue + (dir * 10);
 			t = bound (30, t, 120);
 			Cvar_Set (scr_viewsize,  va ("%f", t));
 			break;
 		case 4:						// gamma
-			t = v_gamma->value + (dir * 0.05);
+			t = v_gamma->ivalue + (dir * 0.05);
 			t = bound (1.0, t, 2.0);
 			Cvar_Set (v_gamma, va ("%f", t));
 			break;
 		case 5:						// software brightness
-			t = r_brightness->value + (dir * 0.25);
+			t = r_brightness->ivalue + (dir * 0.25);
 			t = bound (1, t, 5);
 			Cvar_Set (r_brightness, va("%f", t));
 			break;
 		case 6:						// software contrast (base brightness)
-			t = r_contrast->value + (dir * 0.025);
+			t = r_contrast->ivalue + (dir * 0.025);
 			t = bound (0.75, t, 1.0);
 			Cvar_Set (r_contrast, va("%f", t));
 			break;
 		case 7:						// mouse speed
-			t = sensitivity->value + (dir * 0.5);
+			t = sensitivity->ivalue + (dir * 0.5);
 			t = bound (1, t, 11);
 			Cvar_Set (sensitivity, va ("%f", t));
 			break;
 		case 8:						// music volume
-			Cvar_Set (bgmvolume,  va ("%i", !(int)bgmvolume->value));
+			// NOTE: sliding CD volume not possible with SDL
+			Cvar_Set (bgmvolume,  va ("%i", !bgmvolume->ivalue));
 			break;
 		case 9:						// sfx volume
-			t = volume->value + dir * 0.1;
+			t = volume->fvalue + dir * 0.1;
 			t = bound (0, t, 1);
 			Cvar_Set (volume, va ("%f", t));
 			break;
 
 		case 10:					// always run
-			if (cl_forwardspeed->value > 200) {
+			if (cl_forwardspeed->fvalue > 200) {
 				Cvar_Set (cl_forwardspeed, "200");
 				Cvar_Set (cl_backspeed, "200");
 			} else {
@@ -423,27 +424,27 @@ M_AdjustSliders (int dir)
 			break;
 
 		case 11:						// invert mouse
-			Cvar_Set (m_pitch,  va ("%f", -m_pitch->value));
+			Cvar_Set (m_pitch,  va ("%f", -m_pitch->fvalue));
 			break;
 
 		case 12:						// lookspring
-			Cvar_Set (lookspring,  va ("%i", !(int)lookspring->value));
+			Cvar_Set (lookspring,  va ("%i", !lookspring->ivalue));
 			break;
 
 		case 13:						// lookstrafe
-			Cvar_Set (lookstrafe,  va ("%i", !(int)lookstrafe->value));
+			Cvar_Set (lookstrafe,  va ("%i", !lookstrafe->ivalue));
 			break;
 
 		case 14:
-			Cvar_Set (cl_sbar,  va ("%i", !(int)cl_sbar->value));
+			Cvar_Set (cl_sbar,  va ("%i", !cl_sbar->ivalue));
 			break;
 
 		case 15:
-			Cvar_Set (cl_hudswap, va ("%i", !(int)cl_hudswap->value));
+			Cvar_Set (cl_hudswap, va ("%i", !cl_hudswap->ivalue));
 			break;
 
 		case 16:						// _windowed_mouse
-			Cvar_Set (_windowed_mouse, va ("%i", !(int)_windowed_mouse->value));
+			Cvar_Set (_windowed_mouse, va ("%i", !_windowed_mouse->ivalue));
 			break;
 	}
 }
@@ -486,20 +487,20 @@ M_Options_Draw (void)
 	M_Print (16, y, "         Go to console"); y += 8;
 	M_Print (16, y, "     Reset to defaults"); y += 8;
 
-	M_Print (16, y, "           Screen size"); M_DrawSlider (220, 56, (scr_viewsize->value - 30) / (120 - 30)); y += 8;
-	M_Print (16, y, "        Hardware Gamma"); M_DrawSlider (220, y, v_gamma->value - 1.0); y += 8;
-	M_Print (16, y, "   Software Brightness"); M_DrawSlider(220, y, (r_brightness->value - 1) / 4); y += 8;
-	M_Print (16, y, "     Software Contrast"); M_DrawSlider(220, y, (r_contrast->value - 0.75) * 4); y += 8;
-	M_Print (16, y, "           Mouse Speed"); M_DrawSlider (220, y, (sensitivity->value - 1) / 10); y += 8;
-	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->value); y += 8;
-	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->value); y += 8;
-	M_Print (16, y, "            Always Run"); M_DrawCheckbox (220, y, cl_forwardspeed->value > 200); y += 8;
-	M_Print (16, y, "          Invert Mouse"); M_DrawCheckbox (220, y, m_pitch->value < 0); y += 8;
-	M_Print (16, y, "            Lookspring"); M_DrawCheckbox (220, y, lookspring->value); y += 8;
-	M_Print (16, y, "            Lookstrafe"); M_DrawCheckbox (220, y, lookstrafe->value); y += 8;
-	M_Print (16, y, "    Use old status bar"); M_DrawCheckbox (220, y, cl_sbar->value); y += 8;
-	M_Print (16, y, "      HUD on left side"); M_DrawCheckbox (220, y, cl_hudswap->value); y += 8;
-	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->value); y += 8;
+	M_Print (16, y, "           Screen size"); M_DrawSlider (220, 56, (scr_viewsize->ivalue - 30) / (120 - 30)); y += 8;
+	M_Print (16, y, "        Hardware Gamma"); M_DrawSlider (220, y, v_gamma->fvalue - 1.0); y += 8;
+	M_Print (16, y, "   Software Brightness"); M_DrawSlider(220, y, (r_brightness->fvalue - 1) / 4); y += 8;
+	M_Print (16, y, "     Software Contrast"); M_DrawSlider(220, y, (r_contrast->fvalue - 0.75) * 4); y += 8;
+	M_Print (16, y, "           Mouse Speed"); M_DrawSlider (220, y, (sensitivity->fvalue - 1) / 10); y += 8;
+	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->ivalue); y += 8;
+	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->fvalue); y += 8;
+	M_Print (16, y, "            Always Run"); M_DrawCheckbox (220, y, cl_forwardspeed->fvalue > 200); y += 8;
+	M_Print (16, y, "          Invert Mouse"); M_DrawCheckbox (220, y, m_pitch->fvalue < 0); y += 8;
+	M_Print (16, y, "            Lookspring"); M_DrawCheckbox (220, y, lookspring->ivalue); y += 8;
+	M_Print (16, y, "            Lookstrafe"); M_DrawCheckbox (220, y, lookstrafe->ivalue); y += 8;
+	M_Print (16, y, "    Use old status bar"); M_DrawCheckbox (220, y, cl_sbar->ivalue); y += 8;
+	M_Print (16, y, "      HUD on left side"); M_DrawCheckbox (220, y, cl_hudswap->ivalue); y += 8;
+	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->ivalue); y += 8;
 	M_Print (16, y, "      Graphics Options"); y += 8;
 
 	if (vid_menudrawfn)
@@ -628,16 +629,16 @@ M_Gfx_Draw (void)
 	M_DrawPic ((320 - p->width) / 2, 4, p);
 
 	y = 32;
-	M_Print (16, y, "         Affine models"); M_DrawCheckbox (220, y, gl_affinemodels->value); y += 8;
-	M_Print (16, y, "     Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->value); y += 8;
-	M_Print (16, y, "    Fullbright bmodels"); M_DrawCheckbox (220, y, gl_fb_bmodels->value); y += 8;
-	M_Print (16, y, "   Fast dynamic lights"); M_DrawCheckbox (220, y, gl_flashblend->value); y += 8;
-	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off"); y += 8;
-	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->value); y += 8;
-	M_Print (16, y, "  Motion interpolation"); M_DrawCheckbox (220, y, gl_im_transform->value); y += 8;
-	M_Print (16, y, "          Texture mode"); M_Print (220, y, gl_texturemode->string); y += 8;
-	M_Print (16, y, "         Light lerping"); M_DrawCheckbox (220, y, r_lightlerp->value); y += 8;
-	M_Print (16, y, "      Particle torches"); M_DrawCheckbox (220, y, gl_particletorches->value);
+	M_Print (16, y, "         Affine models"); M_DrawCheckbox (220, y, gl_affinemodels->ivalue); y += 8;
+	M_Print (16, y, "     Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->ivalue); y += 8;
+	M_Print (16, y, "    Fullbright bmodels"); M_DrawCheckbox (220, y, gl_fb_bmodels->ivalue); y += 8;
+	M_Print (16, y, "   Fast dynamic lights"); M_DrawCheckbox (220, y, gl_flashblend->ivalue); y += 8;
+	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->ivalue) ? (r_shadows->ivalue == 2 ? "nice" : "fast") : "off"); y += 8;
+	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->ivalue); y += 8;
+	M_Print (16, y, "  Motion interpolation"); M_DrawCheckbox (220, y, gl_im_transform->ivalue); y += 8;
+	M_Print (16, y, "          Texture mode"); M_Print (220, y, gl_texturemode->svalue); y += 8;
+	M_Print (16, y, "         Light lerping"); M_DrawCheckbox (220, y, r_lightlerp->ivalue); y += 8;
+	M_Print (16, y, "      Particle torches"); M_DrawCheckbox (220, y, gl_particletorches->ivalue);
 
 	// cursor
 	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (cls.realtime * 4) & 1));
@@ -653,44 +654,44 @@ M_Gfx_Set (void)
 	switch (gfx_cursor)
 	{
 		case 0:
-			v = !(int)gl_affinemodels->value;
+			v = !gl_affinemodels->ivalue;
 			Cvar_Set (gl_affinemodels, va("%i", v));
 			break;
 
 		case 1:
-			v = !(int)gl_fb_models->value;
+			v = !gl_fb_models->ivalue;
 			Cvar_Set (gl_fb_models, va("%i", v));
 			break;
 
 		case 2:
-			v = !(int)gl_fb_bmodels->value;
+			v = !gl_fb_bmodels->ivalue;
 			Cvar_Set (gl_fb_bmodels, va("%i", v));
 			break;
 
 		case 3:
-			v = !(int)gl_flashblend->value;
+			v = !gl_flashblend->ivalue;
 			Cvar_Set (gl_flashblend, va("%i", v));
 			break;
 
 		case 4:
-			v = (int)r_shadows->value + 1;
+			v = r_shadows->ivalue + 1;
 			if (v > 2) v = 0;
 			Cvar_Set (r_shadows, va("%i", v));
 			break;
 
 		case 5:
-			v = !(int)gl_im_animation->value;
+			v = !gl_im_animation->ivalue;
 			Cvar_Set (gl_im_animation, va("%i", v));
 			break;
 
 		case 6:
-			v = !(int)gl_im_transform->value;
+			v = !gl_im_transform->ivalue;
 			Cvar_Set (gl_im_transform, va("%i", v));
 			break;
 
 		case 7:
 			for (v = 0; v < 6; v++) {
-				if (strcasecmp (texmodes[v].name, gl_texturemode->string) == 0)
+				if (strcasecmp (texmodes[v].name, gl_texturemode->svalue) == 0)
 					break;
 			}
 			v++;
@@ -700,12 +701,12 @@ M_Gfx_Set (void)
 			break;
 
 		case 8:
-			v = !(int)r_lightlerp->value;
+			v = !r_lightlerp->ivalue;
 			Cvar_Set (r_lightlerp, va("%i", v));
 			break;
 
 		case 9:
-			v = !(int)gl_particletorches->value;
+			v = !gl_particletorches->ivalue;
 			Cvar_Set (gl_particletorches, va("%i", v));
 			break;
 

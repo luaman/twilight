@@ -352,7 +352,7 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 		chan->cleartime = curtime;
 #endif
 
-	if (showpackets->value)
+	if (showpackets->ivalue)
 		Com_Printf ("--> s=%i(%i) a=%i(%i) %i\n", chan->outgoing_sequence,
 					send_reliable, chan->incoming_sequence,
 					chan->incoming_reliable_sequence, send.cursize);
@@ -393,7 +393,7 @@ Netchan_Process (netchan_t *chan)
 	sequence &= ~(1 << 31);
 	sequence_ack &= ~(1 << 31);
 
-	if (showpackets->value)
+	if (showpackets->ivalue)
 		Com_Printf ("<-- s=%i(%i) a=%i(%i) %i\n", sequence, reliable_message,
 					sequence_ack, reliable_ack, net_message.cursize);
 
@@ -401,7 +401,7 @@ Netchan_Process (netchan_t *chan)
 // discard stale or duplicated packets
 //
 	if (sequence <= (unsigned) chan->incoming_sequence) {
-		if (showdrop->value)
+		if (showdrop->ivalue)
 			Com_Printf ("%s:Out of order packet %i at %i\n",
 						NET_AdrToString (chan->remote_address)
 						, sequence, chan->incoming_sequence);
@@ -414,7 +414,7 @@ Netchan_Process (netchan_t *chan)
 	if (net_drop > 0) {
 		chan->drop_count += 1;
 
-		if (showdrop->value)
+		if (showdrop->ivalue)
 			Com_Printf ("%s:Dropped %i packets at %i\n",
 						NET_AdrToString (chan->remote_address)
 						, sequence - (chan->incoming_sequence + 1)

@@ -107,13 +107,13 @@ SNDDMA_Init (void)
 	if (COM_CheckParm ("-sndstereo"))
 		Cvar_Set (snd_channels, "2");
 
-	if (snd_rate->value == 0)
+	if (snd_rate->ivalue == 0)
 		return false;
 
 	// Here's what we want
 	memset (&desired, 0, sizeof(desired));
-	desired.freq = snd_rate->value;
-	switch ((int)snd_bits->value)
+	desired.freq = snd_rate->ivalue;
+	switch ((int)snd_bits->ivalue)
 	{
 		case 16:
 			desired.format = AUDIO_S16SYS;
@@ -123,11 +123,11 @@ SNDDMA_Init (void)
 			break;
 		default:
 			Com_Printf ("Unknown number of audio bits: %i\n",
-					(int)snd_bits->value);
+					(int)snd_bits->ivalue);
 			return false;
 	}
-	desired.channels = snd_channels->value;
-	desired.samples = snd_samples->value;
+	desired.channels = snd_channels->ivalue;
+	desired.samples = snd_samples->ivalue;
 	desired.callback = paint_audio;
 	desired.userdata = NULL;
 
@@ -166,7 +166,6 @@ SNDDMA_Init (void)
 		memcpy (&obtained, &desired, sizeof (desired));
 	}
 
-//	SDL_LockAudio();
 	SDL_PauseAudio (0);
 
 	/* Fill the audio DMA information block */

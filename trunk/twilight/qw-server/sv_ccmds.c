@@ -576,11 +576,8 @@ SV_Serverinfo_f (void)
 
 	// if this is a cvar, change it too 
 	var = Cvar_Find (Cmd_Argv (1));
-	if (var) {
-		Z_Free (var->string);			// free the old value string 
-		var->string = CopyString (Cmd_Argv (2));
-		var->value = Q_atof (var->string);
-	}
+	if (var)
+		Cvar_Set (var, Cmd_Argv (2));
 
 	SV_SendServerInfoChange (Cmd_Argv (1), Cmd_Argv (2));
 }

@@ -78,8 +78,8 @@ Cvar_Shutdown (void)
 		v = v->next;
 		if (t->var)
 		{
-			if (t->var->string)
-				Z_Free (t->var->string);
+			if (t->var->svalue)
+				Z_Free (t->var->svalue);
 			Z_Free (t->var);
 		}
 		Z_Free (t);
@@ -101,7 +101,7 @@ Cvar_InsertVar (cvar_t *var)
 
 
 cvar_t *
-Cvar_Get (const char *name, const char *value, const int flags,
+Cvar_Get (const char *name, const char *svalue, const int flags,
 				const cvar_callback callback)
 {
 	cvar_t	   *var;
@@ -112,12 +112,12 @@ Cvar_Get (const char *name, const char *value, const int flags,
 		var = Z_Malloc (sizeof(cvar_t));
 		var->name = Z_Malloc (strlen (name) + 1);
 		strcpy (var->name, name);
-		var->string = NULL;		// force Cvar to change
+		var->svalue = NULL;		// force Cvar to change
 		var->callback = callback;
-		var->initstr = Z_Malloc (strlen(value) + 1);
-		strcpy (var->initstr, value);
+		var->initval = Z_Malloc (strlen(svalue) + 1);
+		strcpy (var->initval, svalue);
 		Cvar_InsertVar (var);
-		Cvar_Set (var, value);
+		Cvar_Set (var, svalue);
 	}
 
 	var->flags = flags;		// we always throw out flags
@@ -126,19 +126,20 @@ Cvar_Get (const char *name, const char *value, const int flags,
 
 
 void
-Cvar_Set (cvar_t *var, const char *value)
+Cvar_Set (cvar_t *var, const char *svalue)
 {
-	if (var->string)
+	if (var->svalue)
 	{
-		if (strcasecmp (value, var->string) == 0)
+		if (strcasecmp (svalue, var->svalue) == 0)
 			return;
-		Z_Free (var->string);
+		Z_Free (var->svalue);
 	}
 
-	var->string = Z_Malloc (strlen(value) + 1);
-	strcpy (var->string, value);
+	var->svalue = Z_Malloc (strlen(svalue) + 1);
+	strcpy (var->svalue, svalue);
 	
-	var->value = Q_atof (var->string);
+	var->fvalue = Q_atof (var->svalue);
+	var->ivalue = Q_atoi (var->svalue);
 
 	if (var->callback)
 		var->callback (var);
@@ -207,7 +208,7 @@ Cvar_Reset_f (void)
 		return;
 	}
 
-	Cvar_Set (var, var->initstr);
+	Cvar_Set (var, var->initval);
 }
 
 cvar_t *
@@ -216,14 +217,15 @@ Cvar_CreateTemp (const char *name, const char *value)
 	cvar_t		   *var;
 
 	var = Cvar_Find (name);
-	if (var)	// the cvar already exists, and this shouldn't append
+	if (var)
+		// the cvar already exists, and this shouldn't append
 		return NULL;
 
 	// Var does not exist, create it
 	var = Z_Malloc (sizeof(cvar_t));
 	var->name = Z_Malloc (strlen (name) + 1);
 	strcpy (var->name, name);
-	var->string = NULL;		// force Cvar to change
+	var->svalue = NULL;					// force Cvar to change
 	var->callback = NULL;
 	Cvar_InsertVar (var);
 	Cvar_Set (var, value);
@@ -238,11 +240,12 @@ Cvar_Slide (cvar_t *var, const float change)
 {
 	static char		buf[128];
 
-	var->value += change;
-	Z_Free (var->string);
-	snprintf (buf, 128, "%f", var->value);
-	var->string = Z_Malloc (strlen (buf) + 1);
-	strcpy (var->string, buf);
+	var->fvalue += change;
+	var->ivalue += (int)var->fvalue;
+	Z_Free (var->svalue);
+	snprintf (buf, sizeof (buf), "%f", var->fvalue);
+	var->svalue = Z_Malloc (strlen (buf) + 1);
+	strcpy (var->svalue, buf);
 
 	if (var->callback)
 		var->callback (var);
@@ -286,7 +289,7 @@ Cvar_Show (cvar_t *var)
 	}
 
 	Com_Printf ("[%s] \"%s\" is \"%s\" (default: \"%s\")\n",
-			Cvar_FlagString (var), var->name, var->string, var->initstr);
+			Cvar_FlagString (var), var->name, var->svalue, var->initval);
 }
 
 
@@ -436,8 +439,8 @@ Cvar_Cleanup (void)
 		v = v->next;
 		if (t->var)
 		{
-			if (t->var->string)
-				Z_Free (t->var->string);
+			if (t->var->svalue)
+				Z_Free (t->var->svalue);
 			Z_Free (t->var);
 		}
 		Z_Free (t);
@@ -454,7 +457,7 @@ Cvar_WriteVars (FILE *f)
 	while (v)
 	{
 		if (v->var->flags & CVAR_ARCHIVE)
-			fprintf (f, "%s \"%s\"\n", v->var->name, v->var->string);
+			fprintf (f, "%s \"%s\"\n", v->var->name, v->var->svalue);
 		v = v->next;
 	}
 }

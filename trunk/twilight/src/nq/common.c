@@ -546,9 +546,9 @@ void Com_DPrintf (char *fmt, ...)
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
 
-	if (!developer || !developer->value)
-		return;							// don't confuse non-developers with
-	// techie stuff...
+	if (!developer || !developer->ivalue)
+		// don't confuse non-developers with techie stuff...
+		return;
 
 	va_start (argptr, fmt);
 	vsnprintf (msg, sizeof (msg), fmt, argptr);
@@ -1382,12 +1382,12 @@ COM_AddGameDirectory (char *dir)
 {
 	char		buf[1024];
 
-	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->string, dir);
+	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->svalue, dir);
 	COM_AddDirectory (buf);
 
-	if (strcmp (fs_userpath->string, fs_sharepath->string) != 0) {
+	if (strcmp (fs_userpath->svalue, fs_sharepath->svalue) != 0) {
 		// only do this if the share path is not the same as the base path
-		snprintf (buf, sizeof (buf), "%s/%s", fs_userpath->string, dir);
+		snprintf (buf, sizeof (buf), "%s/%s", fs_userpath->svalue, dir);
 		Sys_mkdir (buf);
 		COM_AddDirectory (buf);
 	}
@@ -1412,13 +1412,13 @@ COM_InitFilesystem (void)
 	if (i && i < com_argc - 1)
 		Cvar_Set (fs_userpath, com_argv[i + 1]);
 
-	Sys_mkdir (fs_userpath->string);
+	Sys_mkdir (fs_userpath->svalue);
 
 // Make sure fs_sharepath is set to something useful
-	if (!strlen (fs_sharepath->string))
-		Cvar_Set (fs_sharepath, fs_userpath->string);
+	if (!strlen (fs_sharepath->svalue))
+		Cvar_Set (fs_sharepath, fs_userpath->svalue);
 
-	COM_AddGameDirectory (fs_gamename->string);
+	COM_AddGameDirectory (fs_gamename->svalue);
 
 	// any set gamedirs will be freed up to here
 	com_base_searchpaths = com_searchpaths;

@@ -301,12 +301,10 @@ extern kbutton_t in_mlook, in_klook;
 extern kbutton_t in_strafe;
 extern kbutton_t in_speed;
 
-#define freelook (m_freelook->value || (in_mlook.state & 1))
+#define freelook (m_freelook->ivalue || (in_mlook.state & 1))
 
 void	CL_Input_Init (void);
 void	CL_Input_Init_Cvars (void);
-void	CL_InputSetRepeatDelay (struct cvar_s *var);
-void	CL_InputSetRepeatInterval (struct cvar_s *var);
 void	CL_SendCmd (void);
 void	CL_SendMove (usercmd_t *cmd);
 
