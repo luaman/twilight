@@ -53,7 +53,7 @@ void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
 		Sys_Error("Zone_Alloc: zone == NULL (alloc at %s:%i)", filename, fileline);
 	if (size <= 0)
 		Sys_Error("Zone_Alloc: size <= 0 (alloc at %s:%i, zone %s, size %i)", filename, fileline, zone->name, size);
-	Com_DPrintf("Zone_Alloc: zone %s, file %s:%i, size %i bytes\n", zone->name, filename, fileline, size);
+	Com_DFPrintf(DEBUG_ZONE, "Zone_Alloc: zone %s, file %s:%i, size %i bytes\n", zone->name, filename, fileline, size);
 	zone->totalsize += size;
 	zone->realsize += sizeof(memheader_t) + size + sizeof(Uint32);
 	mem = malloc(sizeof(memheader_t) + size + sizeof(Uint32));
@@ -94,7 +94,7 @@ void _Zone_Free(void *data, char *filename, int fileline)
 		return;
 	}
 
-	Com_DPrintf("Zone_Free: zone %s, alloc %s:%i, free %s:%i, size %i bytes\n", zone->name, mem->filename, mem->fileline, filename, fileline, mem->size);
+	Com_DFPrintf(DEBUG_ZONE, "Zone_Free: zone %s, alloc %s:%i, free %s:%i, size %i bytes\n", zone->name, mem->filename, mem->fileline, filename, fileline, mem->size);
 	for (memchainpointer = &zone->chain;*memchainpointer;memchainpointer = &(*memchainpointer)->chain)
 	{
 		if (*memchainpointer == mem)

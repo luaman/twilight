@@ -203,9 +203,14 @@ void COM_Gamedir (char *dir);
 void Com_PrintHex (char *str, int len);
 void Com_Printf (const char *fmt, ...);
 void Com_DPrintf (const char *fmt, ...);
+void Com_DFPrintf (int level, const char *fmt, ...);
 void Com_SafePrintf (char *fmt, ...);
 void Com_BeginRedirect (void (*RedirectedPrint) (char *));
 void Com_EndRedirect (void);
+
+/* Com_DFPrintf flags */
+#define DEBUG_DEFAULT	0x00000001
+#define DEBUG_ZONE	0x00000002
 
 extern struct cvar_s *registered;
 
