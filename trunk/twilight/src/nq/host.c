@@ -242,12 +242,12 @@ Host_InitLocal_Cvars (void)
 	sys_ticrate = Cvar_Get ("sys_ticrate", "0.05", CVAR_NONE, NULL);
 	serverprofile = Cvar_Get ("serverprofile", "0", CVAR_NONE, NULL);
 
-	fraglimit = Cvar_Get ("fraglimit", "0", CVAR_USERINFO, NULL);
-	timelimit = Cvar_Get ("timelimit", "0", CVAR_USERINFO, NULL);
-	teamplay = Cvar_Get ("teamplay", "0", CVAR_USERINFO, NULL);
+	fraglimit = Cvar_Get ("fraglimit", "0", CVAR_SERVERINFO, NULL);
+	timelimit = Cvar_Get ("timelimit", "0", CVAR_SERVERINFO, NULL);
+	teamplay = Cvar_Get ("teamplay", "0", CVAR_SERVERINFO, NULL);
 
 	samelevel = Cvar_Get ("samelevel", "0", CVAR_NONE, NULL);
-	noexit = Cvar_Get ("noexit", "0", CVAR_USERINFO, NULL);
+	noexit = Cvar_Get ("noexit", "0", CVAR_SERVERINFO, NULL);
 
 	developer = Cvar_Get ("developer", "0", CVAR_NONE, NULL);
 
@@ -774,7 +774,7 @@ Host_Frame (double time)
 static void
 Host_CvarUserinfo (cvar_t *var)
 {
-	if (var->flags & CVAR_USERINFO)
+	if (var->flags & CVAR_SERVERINFO)
 	{
 		if (sv.active)
 			SV_BroadcastPrintf ("\"%s\" changed to \"%s\"\n", var->name,
