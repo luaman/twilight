@@ -129,58 +129,68 @@ R_AddDynamicLights
 void
 R_AddDynamicLights (msurface_t *surf)
 {
-	int         lnum;
-	int         sd, td;
-	float       dist, rad, minlight;
-	vec3_t      impact, local;
-	int         s, t;
-	int         i;
-	int         smax, tmax;
-	mtexinfo_t *tex;
-
-	smax = (surf->extents[0] >> 4) + 1;
-	tmax = (surf->extents[1] >> 4) + 1;
-	tex = surf->texinfo;
-
-	for (lnum = 0; lnum < MAX_DLIGHTS; lnum++) {
+	int			lnum;
+	float		dist;
+	vec3_t		impact;
+	int			local[2];
+	int			s, t;
+	mtexinfo_t	*tex = surf->texinfo; 
+	int			sd, td;
+	int			_sd, _td;
+	int			irad, idist, iminlight;
+	unsigned	*dest; 
+	
+	for (lnum = 0; lnum < MAX_DLIGHTS; lnum++)
+	{
 		if (!(surf->dlightbits & (1 << lnum)))
-			continue;					// not lit by this light
-
-		rad = cl_dlights[lnum].radius;
-		dist = PlaneDiff(cl_dlights[lnum].origin, surf->plane);
-		rad -= Q_fabs (dist);
-		minlight = cl_dlights[lnum].minlight;
-		if (rad < minlight)
 			continue;
-		minlight = rad - minlight;
+		
+		// not lit by this light 
+		dist = PlaneDiff (cl_dlights[lnum].origin, surf->plane);
+		irad = (cl_dlights[lnum].radius - fabs(dist)) * 256;
+		iminlight = cl_dlights[lnum].minlight * 256;
 
-		for (i = 0; i < 3; i++) {
-			impact[i] = cl_dlights[lnum].origin[i] -
-				surf->plane->normal[i] * dist;
-		}
+		if (irad < iminlight)
+			continue;
 
-		local[0] = DotProduct (impact, tex->vecs[0]) + tex->vecs[0][3];
-		local[1] = DotProduct (impact, tex->vecs[1]) + tex->vecs[1][3];
+		iminlight = irad - iminlight; 
+		
+		VectorMA (cl_dlights[lnum].origin, -dist, surf->plane->normal, impact);
 
-		local[0] -= surf->texturemins[0];
-		local[1] -= surf->texturemins[1];
+		local[0] = (DotProduct (impact, tex->vecs[0]) +
+			tex->vecs[0][3] - surf->texturemins[0]) * 256;
+		local[1] = (DotProduct (impact, tex->vecs[1]) +
+			tex->vecs[1][3] - surf->texturemins[1]) * 256;
+		
+		_td = local[1];
+		dest = blocklights;
 
-		for (t = 0; t < tmax; t++) {
-			td = local[1] - t * 16;
+		for (t = 0; t < surf->tmax; t++)
+		{
+			td = _td;
+			_td -= 16*256;
 			if (td < 0)
 				td = -td;
-			for (s = 0; s < smax; s++) {
-				sd = local[0] - s * 16;
+			_sd = local[0];
+
+			for (s = 0; s < surf->smax; s++)
+			{
+				sd = _sd;
+				_sd -= 16*256;
 				if (sd < 0)
 					sd = -sd;
+
 				if (sd > td)
-					dist = sd + (td >> 1);
+					idist = sd + (td>>1);
 				else
-					dist = td + (sd >> 1);
-				if (dist < minlight)
-					blocklights[t * smax + s] += (rad - dist) * 256;
+					idist = td + (sd>>1);
+
+				if (idist < iminlight)
+					*dest += irad - idist;
+
+				dest++; 
 			}
-		}
+		} 
 	}
 }
 
@@ -195,7 +205,6 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 void
 R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 {
-	int         smax, tmax;
 	int         t;
 	int         i, j, size;
 	Uint8      *lightmap;
@@ -205,20 +214,17 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 
 	surf->cached_dlight = (surf->dlightframe == r_framecount);
 
-	smax = (surf->extents[0] >> 4) + 1;
-	tmax = (surf->extents[1] >> 4) + 1;
-	size = smax * tmax;
+	size = surf->smax * surf->tmax;
 	lightmap = surf->samples;
 
 // set to full bright if no light data
 	if (r_fullbright->value || !cl.worldmodel->lightdata) {
-		for (i = 0; i < size; i++)
-			blocklights[i] = 255 * 256;
+		memset (blocklights, 255*256, size*sizeof(int));
 		goto store;
 	}
+
 // clear to no light
-	for (i = 0; i < size; i++)
-		blocklights[i] = 0;
+	memset (blocklights, 0, size*sizeof(int));
 
 // add all the lightmaps
 	if (lightmap)
@@ -237,10 +243,10 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
   store:
 	switch (gl_lightmap_format) {
 		case GL_RGBA:
-			stride -= (smax << 2);
+			stride -= (surf->smax << 2);
 			bl = blocklights;
-			for (i = 0; i < tmax; i++, dest += stride) {
-				for (j = 0; j < smax; j++) {
+			for (i = 0; i < surf->tmax; i++, dest += stride) {
+				for (j = 0; j < surf->smax; j++) {
 					t = *bl++;
 					t >>= 7;
 					if (t > 255)
@@ -257,8 +263,8 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 		case GL_LUMINANCE:
 		case GL_INTENSITY:
 			bl = blocklights;
-			for (i = 0; i < tmax; i++, dest += stride) {
-				for (j = 0; j < smax; j++) {
+			for (i = 0; i < surf->tmax; i++, dest += stride) {
+				for (j = 0; j < surf->smax; j++) {
 					t = *bl++;
 					t >>= 7;
 					if (t > 255)
@@ -283,7 +289,7 @@ Returns the proper texture for a given time and base texture
 texture_t  *
 R_TextureAnimation (texture_t *base)
 {
-	int         reletive;
+	int         relative;
 	int         count;
 
 	if (currententity->frame) {
@@ -294,10 +300,10 @@ R_TextureAnimation (texture_t *base)
 	if (!base->anim_total)
 		return base;
 
-	reletive = (int) (cl.time * 10) % base->anim_total;
+	relative = (int) (cl.time * 10) % base->anim_total;
 
 	count = 0;
-	while (base->anim_min > reletive || base->anim_max <= reletive) {
+	while (base->anim_min > relative || base->anim_max <= relative) {
 		base = base->anim_next;
 		if (!base)
 			Sys_Error ("R_TextureAnimation: broken cycle");
@@ -720,7 +726,6 @@ R_RenderBrushPoly (msurface_t *fa)
 	Uint8      *base;
 	int         maps;
 	glRect_t   *theRect;
-	int         smax, tmax;
 
 	c_brush_polys++;
 
@@ -775,12 +780,11 @@ R_RenderBrushPoly (msurface_t *fa)
 					theRect->w += theRect->l - fa->light_s;
 				theRect->l = fa->light_s;
 			}
-			smax = (fa->extents[0] >> 4) + 1;
-			tmax = (fa->extents[1] >> 4) + 1;
-			if ((theRect->w + theRect->l) < (fa->light_s + smax))
-				theRect->w = (fa->light_s - theRect->l) + smax;
-			if ((theRect->h + theRect->t) < (fa->light_t + tmax))
-				theRect->h = (fa->light_t - theRect->t) + tmax;
+
+			if ((theRect->w + theRect->l) < (fa->light_s + fa->smax))
+				theRect->w = (fa->light_s - theRect->l) + fa->smax;
+			if ((theRect->h + theRect->t) < (fa->light_t + fa->tmax))
+				theRect->h = (fa->light_t - theRect->t) + fa->tmax;
 			base =
 				lightmaps +
 				fa->lightmaptexturenum * lightmap_bytes * BLOCK_WIDTH *
@@ -805,7 +809,6 @@ R_RenderDynamicLightmaps (msurface_t *fa)
 	Uint8      *base;
 	int         maps;
 	glRect_t   *theRect;
-	int         smax, tmax;
 
 	c_brush_polys++;
 
@@ -837,12 +840,11 @@ R_RenderDynamicLightmaps (msurface_t *fa)
 					theRect->w += theRect->l - fa->light_s;
 				theRect->l = fa->light_s;
 			}
-			smax = (fa->extents[0] >> 4) + 1;
-			tmax = (fa->extents[1] >> 4) + 1;
-			if ((theRect->w + theRect->l) < (fa->light_s + smax))
-				theRect->w = (fa->light_s - theRect->l) + smax;
-			if ((theRect->h + theRect->t) < (fa->light_t + tmax))
-				theRect->h = (fa->light_t - theRect->t) + tmax;
+
+			if ((theRect->w + theRect->l) < (fa->light_s + fa->smax))
+				theRect->w = (fa->light_s - theRect->l) + fa->smax;
+			if ((theRect->h + theRect->t) < (fa->light_t + fa->tmax))
+				theRect->h = (fa->light_t - theRect->t) + fa->tmax;
 			base =
 				lightmaps +
 				fa->lightmaptexturenum * lightmap_bytes * BLOCK_WIDTH *
@@ -1460,17 +1462,13 @@ GL_CreateSurfaceLightmap
 void
 GL_CreateSurfaceLightmap (msurface_t *surf)
 {
-	int         smax, tmax;
 	Uint8      *base;
 
 	if (surf->flags & (SURF_DRAWSKY | SURF_DRAWTURB))
 		return;
 
-	smax = (surf->extents[0] >> 4) + 1;
-	tmax = (surf->extents[1] >> 4) + 1;
-
 	surf->lightmaptexturenum =
-		AllocBlock (smax, tmax, &surf->light_s, &surf->light_t);
+		AllocBlock (surf->smax, surf->tmax, &surf->light_s, &surf->light_t);
 	base =
 		lightmaps +
 		surf->lightmaptexturenum * lightmap_bytes * BLOCK_WIDTH * BLOCK_HEIGHT;

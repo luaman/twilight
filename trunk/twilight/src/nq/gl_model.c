@@ -776,6 +776,9 @@ CalcSurfaceExtents (msurface_t *s)
 		if (!(tex->flags & TEX_SPECIAL) && s->extents[i] > 512 /* 256 */ )
 			Sys_Error ("Bad surface extents");
 	}
+
+	s->smax = bmaxs[0] - bmins[0] + 1, 
+	s->tmax = bmaxs[1] - bmins[1] + 1;
 }
 
 
