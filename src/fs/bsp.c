@@ -133,7 +133,7 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 	SDL_RWops		*rw;
 	Uint32			i, nfiles, size;
 	Uint32			*offsets;
-	miptex_t		miptex;
+	dmiptex_t		miptex;
 	char			*base_name;
 
 	rw = file->open(file, 0);

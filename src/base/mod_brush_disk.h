@@ -67,7 +67,7 @@
 
 typedef struct {
 	Uint32	fileofs, filelen;
-} lump_t;
+} dlump_t;
 
 #define	LUMP_ENTITIES		0
 #define	LUMP_PLANES			1
@@ -96,7 +96,7 @@ typedef struct {
 
 typedef struct {
 	Sint32	version;
-	lump_t	lumps[HEADER_LUMPS];
+	dlump_t	lumps[HEADER_LUMPS];
 } dheader_t;
 
 typedef struct {
@@ -109,7 +109,7 @@ typedef struct miptex_s {
 	char	name[16];
 	Uint32	width, height;
 	Uint32	offsets[MIPLEVELS];		/* four mip maps stored */
-} miptex_t;
+} dmiptex_t;
 
 
 typedef struct {

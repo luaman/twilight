@@ -53,10 +53,10 @@ static const char rcsid[] =
 */
 
 void
-Mod_LoadTextures (lump_t *l, model_t *mod)
+Mod_LoadTextures (dlump_t *l, model_t *mod)
 {
 	int				i, j, num, max, altmax, what;
-	miptex_t		*dmiptex;
+	dmiptex_t		*dmiptex;
 	texture_t		*tx, *tx2;
 	texture_t		*anims[10];
 	texture_t		*altanims[10];
@@ -94,7 +94,7 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 		m->dataofs[i] = LittleLong (m->dataofs[i]);
 		if (m->dataofs[i] == -1)
 			continue;
-		dmiptex = (miptex_t *) ((Uint8 *) m + m->dataofs[i]);
+		dmiptex = (dmiptex_t *) ((Uint8 *) m + m->dataofs[i]);
 		for (j = 0; j < MIPLEVELS; j++)
 			dmiptex->offsets[j] = LittleLong (dmiptex->offsets[j]);
 
@@ -289,7 +289,7 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 }
 
 void
-Mod_LoadLighting (lump_t *l, model_t *mod)
+Mod_LoadLighting (dlump_t *l, model_t *mod)
 {
 	Uint		i;
 	Uint8		*in, *out, *data;
@@ -339,7 +339,7 @@ Mod_LoadLighting (lump_t *l, model_t *mod)
 }
 
 void
-Mod_LoadTexinfo (lump_t *l, model_t *mod)
+Mod_LoadTexinfo (dlump_t *l, model_t *mod)
 {
 	texinfo_t	*in;
 	mtexinfo_t	*out;
@@ -437,7 +437,7 @@ CalcSurfaceExtents (msurface_t *s, model_t *mod)
 }
 
 void
-Mod_LoadRFaces (lump_t *l, model_t *mod)
+Mod_LoadRFaces (dlump_t *l, model_t *mod)
 {
 	dface_t			*in;
 	msurface_t		*out;

@@ -347,9 +347,9 @@ Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 {
 	int					i, j, k, v;
 	float				s, t;
-	mdl_t				*pinmodel;
+	dmdl_t				*pinmodel;
 	Uint8				*datapointer, *skindata;
-	stvert_t			*pinstverts;
+	dstvert_t			*pinstverts;
 	dtriangle_t			*pintriangles;
 	int					version, numframes, numseams;
 	daliasframetype_t	*pframetype;
@@ -359,8 +359,8 @@ Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 
 	datapointer = buffer;
 
-	pinmodel = (mdl_t *) datapointer;
-	datapointer += sizeof(mdl_t);
+	pinmodel = (dmdl_t *) datapointer;
+	datapointer += sizeof(dmdl_t);
 
 	version = LittleLong (pinmodel->version);
 	if (version != ALIAS_VERSION)
@@ -434,8 +434,8 @@ Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 //
 // load base s and t vertices
 //
-	pinstverts = (stvert_t *) datapointer;
-	datapointer += sizeof(stvert_t) * numinverts;
+	pinstverts = (dstvert_t *) datapointer;
+	datapointer += sizeof(dstvert_t) * numinverts;
 
 	for (i = 0, numseams = 0; i < numinverts; i++) {
 		vremap[i] = i + numseams;
