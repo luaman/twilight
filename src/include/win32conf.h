@@ -46,6 +46,8 @@
 
 #define HAVE___INLINE 1
 
+#define HAVE_LIMITS_H 1
+
 #define OGLDECL APIENTRY
 
 #include "compat.h"
