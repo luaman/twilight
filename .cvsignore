@@ -20,4 +20,8 @@ twilight-nq
 *.map
 *.pdb
 *.pyc
+.sconsign
+.sconf_temp
+*.i
+*.s
 .DS_Store
