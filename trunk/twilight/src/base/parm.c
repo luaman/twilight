@@ -35,12 +35,12 @@
 #include "strlib.h"
 
 #define MAX_NUM_ARGVS   50
-#define NUM_SAFE_ARGVS  6
+#define NUM_SAFE_ARGVS  5
 
 static char *largv[MAX_NUM_ARGVS + NUM_SAFE_ARGVS + 1];
 static char *argvdummy = " ";
 static char *safeargvs[NUM_SAFE_ARGVS] =
-	{ "-stdvid", "-nolan", "-nosound", "-nocdaudio", "-nojoy", "-nomouse" };
+	{ "-nocdaudio", "-nolan", "-nomouse", "-nosound", "-window" };
 
 int         com_argc;
 char      **com_argv;
