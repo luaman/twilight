@@ -94,7 +94,6 @@ cvar_t     *m_side;
 
 cvar_t     *entlatency;
 cvar_t     *cl_predict_players;
-cvar_t     *cl_predict_players2;
 cvar_t     *cl_solid_players;
 
 cvar_t     *localid;
@@ -1109,7 +1108,6 @@ CL_Init_Cvars (void)
 
 	entlatency = Cvar_Get ("entlatency", "20", CVAR_NONE, NULL);
 	cl_predict_players = Cvar_Get ("cl_predict_players", "1", CVAR_NONE, NULL);
-	cl_predict_players2 = Cvar_Get ("cl_predict_players2", "1", CVAR_NONE, NULL);
 	cl_solid_players = Cvar_Get ("cl_solid_players", "1", CVAR_NONE, NULL);
 
 	localid = Cvar_Get ("localid", "", CVAR_NONE, NULL);
