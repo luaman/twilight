@@ -215,6 +215,8 @@ extract_line (char *line)
 	char       *text;
 	int         quotes;
 
+	Con_Printf("\n==============================\n");
+	
 	// find a \n or ; line break
 	text = (char *) cmd_text.data;
 	quotes = 0;
@@ -237,10 +239,12 @@ extract_line (char *line)
 	if (i == cmd_text.cursize)
 		cmd_text.cursize = 0;
 	else {
-		i++;
+		i += 2;
 		cmd_text.cursize -= i;
 		memcpy (text, text + i, cmd_text.cursize);
 	}
+	Con_Printf("LINE: %s TEXT: %s",line,text);
+	Con_Printf("==============================\n");
 }
 
 /*
@@ -254,14 +258,17 @@ Cbuf_Execute_Sets (void)
 	char	line[1024] = { 0 };
 
 	while (cmd_text.cursize) {
+		Con_Printf("CMD_TEXT.CURSIZE: %d\n",cmd_text.cursize);
 		extract_line (line);
 		// execute the command line
-		if (strncmp (line, "set", 3) && isspace ((int) line[3])) {
-			// Con_DPrintf ("+%s\n",line);
-			Cmd_ExecuteString (line);	// FIXME: unification with NQ someday of core?
-		} else if (strncmp (line, "setrom", 6) && isspace ((int) line[6])) {
-			// Con_DPrintf ("+%s\n",line);
-			Cmd_ExecuteString (line);	// FIXME: unification with NQ someday of core?
+		Con_Printf ("\n======================\n");
+		Con_Printf ("Cbuf_Execute_Sets TESTING: %s\n",line);
+		Con_Printf ("======================\n");
+		if (strncmp (line, "set", 3) == 0 && isspace ((int) line[3])) {
+			Con_Printf ("\n======================\n");
+			Con_Printf ("Cbuf_Execute_Sets SUCCEEDED: %s\n",line);
+			Con_Printf ("======================\n");
+			Cmd_ExecuteString (line);
 		}
 	}
 }
@@ -725,8 +732,8 @@ FIXME: lookupnoadd the token to speed search?
 void
 Cmd_ExecuteString (char *text)
 {
-	cmd_function_t *cmd;
-	cmdalias_t *a;
+	cmd_function_t	*cmd;
+	cmdalias_t		*a;
 
 	Cmd_TokenizeString (text);
 
