@@ -38,11 +38,9 @@ static const char rcsid[] =
 #include "vis.h"
 #include "matrixlib.h"
 #include "palette.h"
+#include "gl_light.h"
 
 void R_DrawOpaqueAliasModels (entity_common_t *ents[],int num_ents, qboolean viewent);
-extern vec3_t lightcolor;
-
-extern model_t *mdl_fire;
 
 #define NUMVERTEXNORMALS	162
 float r_avertexnormals[NUMVERTEXNORMALS][3] = {
@@ -78,12 +76,6 @@ static matrix4x4_t	*matrix;
 
 #include "host.h"
 
-/*
-=================
-R_SetupAliasFrame
-
-=================
-*/
 static void
 R_SetupAliasFrame (aliashdr_t *paliashdr, entity_common_t *e)
 {
@@ -225,12 +217,6 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_common_t *e)
 }
 
 
-/*
-=================
-R_SetupAliasModel
-
-=================
-*/
 static void
 R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 {
@@ -239,6 +225,7 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 	rdlight_t	*rd;
 	vec3_t		dist;
 	float		f;
+	extern model_t *mdl_fire;
 
 	draw = false;
 
@@ -488,11 +475,6 @@ R_DrawAliasModelNV ()
 
 //============================================================================
 
-/*
-=============
-R_DrawOpaqueAliasModels
-=============
-*/
 void
 R_DrawOpaqueAliasModels (entity_common_t *ents[],int num_ents, qboolean viewent)
 {

@@ -44,15 +44,9 @@ static const char rcsid[] =
 #include "cclient.h"
 #include "entities.h"
 #include "gl_light.h"
+#include "gl_main.h"
 
 #define BACKFACE_EPSILON 0.01
-
-extern cvar_t *r_stainmaps;
-extern cvar_t *r_drawentities;
-extern cvar_t *r_dynamic;
-extern cvar_t *gl_flashblend;
-extern Uint c_brush_polys;
-extern int dlightdivtable[32768];
 
 static inline qboolean
 R_StainBlendTexel (Sint64 k, int *icolor, Uint8 *bl)

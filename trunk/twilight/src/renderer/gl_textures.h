@@ -33,17 +33,18 @@
 #include "image.h"
 #include "wad.h"
 
-extern void R_ResampleTexture (void *id, int iw, int ih, void *od, int ow, int oh);
-extern void GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name, int width, int height, int frames, float interval);
-extern void GLT_Delete_Skin (skin_t *skin);
-extern void GLT_Init_Cvars ();
-extern void GLT_Init ();
-extern int GLT_Load_Raw (const char *identifier, Uint width, Uint height, Uint8 *data, Uint32 *palette, int flags, int bpp);
-extern int GLT_Load_image(const char *identifier, image_t *img, Uint32 *palette, int flags);
-extern int GLT_Load_Pixmap (const char *name, const char *data);
-extern int GLT_Load_qpic (qpic_t *pic);
-extern qboolean GLT_Delete (GLuint texnum);
-extern qboolean GL_Upload32 (Uint32 *data, int width, int height, int flags);
+void GLT_Init_Cvars(void);
+void GLT_Init(void);
+void GLT_Skin_Parse(Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name, int width, int height, int frames, float interval);
+void GLT_Delete_Skin(skin_t *skin);
+void R_ResampleTexture(void *id, int iw, int ih, void *od, int ow, int oh);
+qboolean GL_Upload32(Uint32 *data, int width, int height, int flags);
+qboolean GL_Upload8(Uint8 *data, int width, int height, Uint32 *palette, int flags);
+int GLT_Load_Raw(const char *identifier, Uint width, Uint height, Uint8 *data, Uint32 *palette, int flags, int bpp);
+int GLT_Load_image(const char *identifier, image_t *img, Uint32 *palette, int flags);
+int GLT_Load_Pixmap(const char *name, const char *data);
+int GLT_Load_qpic(qpic_t *pic);
+qboolean GLT_Delete(GLuint texnum);
 
 extern int		glt_solid_format;
 extern int		glt_alpha_format;

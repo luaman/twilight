@@ -29,7 +29,15 @@
 
 #include "model.h"
 
-void BuildGLPolyFromEdges (msurface_t *surf, model_t *model, int *count);
-void SetupLightmapSettings ();
+void Surf_Init_Cvars(void);
+void BuildGLPolyFromEdges(msurface_t *surf, model_t *model, int *count);
+void SetupLightmapSettings(void);
+qboolean AllocLightBlockForSurf(int *allocated, int num, msurface_t *surf, memzone_t *zone);
+
+extern Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
+extern int lightmap_bytes;
+extern int lightmap_shift;
+extern int gl_lightmap_format;
+extern cvar_t *gl_subdivide_size;
 
 #endif // __R_SURFACE_H

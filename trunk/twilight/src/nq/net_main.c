@@ -497,8 +497,6 @@ returns -1 if connection is invalid
 =================
 */
 
-extern void PrintStats (qsocket_t * s);
-
 int
 NET_GetMessage (qsocket_t * sock)
 {

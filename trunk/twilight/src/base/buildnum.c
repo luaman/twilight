@@ -30,7 +30,7 @@ static const char rcsid[] =
 #include <stdlib.h>
 #include "strlib.h"
 
-extern char *qdate;
+char *qdate = __DATE__;
 
 char *mon[12] =
 	{ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",

@@ -55,18 +55,6 @@ char        localmodels[MAX_MODELS][5];	// inline model names for precache
 void
 SV_Init_Cvars (void)
 {
-	extern cvar_t *sv_maxvelocity;
-	extern cvar_t *sv_gravity;
-	extern cvar_t *sv_nostep;
-	extern cvar_t *sv_friction;
-	extern cvar_t *sv_edgefriction;
-	extern cvar_t *sv_stopspeed;
-	extern cvar_t *sv_maxspeed;
-	extern cvar_t *sv_accelerate;
-	extern cvar_t *sv_idealpitchscale;
-	extern cvar_t *sv_jumpstep;
-	extern cvar_t *sv_stepheight;
-
 	sv_maxvelocity = Cvar_Get ("sv_maxvelocity", "2000", CVAR_SERVERINFO,
 			NULL);
 	sv_gravity = Cvar_Get ("sv_gravity", "800", CVAR_SERVERINFO, NULL);
@@ -1016,13 +1004,9 @@ SV_SaveSpawnparms (void)
 
 /*
 ================
-SV_SpawnServer
-
 This is called at the start of each level
 ================
 */
-extern float scr_centertime_off;
-
 void
 SV_SpawnServer (char *server)
 {
@@ -1032,7 +1016,6 @@ SV_SpawnServer (char *server)
 	// let's not have any servers with no name
 	if (hostname->svalue[0] == 0)
 		Cvar_Set (hostname, "UNNAMED");
-	scr_centertime_off = 0;
 
 	Com_DPrintf ("SpawnServer: %s\n", server);
 	svs.changelevel_issued = false;		// now safe to issue another

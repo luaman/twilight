@@ -38,8 +38,7 @@ static const char rcsid[] =
 #include "zone.h"
 #include "gen_textures.h"
 #include "gl_textures.h"
-
-extern void FractalNoise (Uint8 *noise, int size, int startgrid);
+#include "noise.h"
 
 static void GTF_Init (void);
 static int TNT_InitLightningBeamTexture (void);

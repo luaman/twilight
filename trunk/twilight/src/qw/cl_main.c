@@ -60,6 +60,7 @@ static const char rcsid[] =
 #include "common.h"
 #include "cpu.h"
 #include "hud.h"
+#include "net.h"
 
 void        Cmd_ForwardToServer (void);
 
@@ -100,10 +101,6 @@ static cvar_t		*host_speeds;
 cvar_t		*show_fps;
 
 
-extern cvar_t *cl_hightrack;
-extern cvar_t *qport;
-
-
 static qboolean allowremotecmd = true;
 
 
@@ -126,8 +123,6 @@ int			host_hunklevel;
 
 Uint8		*host_basepal;
 Uint8		*host_colormap;
-
-netadr_t	master_adr;					// address of the master server
 
 int			fps_count = 0;
 
@@ -1087,8 +1082,6 @@ CL_Init_Cvars
 static void
 CL_Init_Cvars (void)
 {
-	extern cvar_t	*noskins;
-
 	CCL_Init_Cvars ();
 
 	// set for running times
@@ -1139,7 +1132,7 @@ CL_Init_Cvars (void)
 CL_Init
 =================
 */
-static void
+void
 CL_Init (void)
 {
 	char			st[80];

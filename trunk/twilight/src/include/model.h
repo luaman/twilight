@@ -32,9 +32,9 @@
 #include "modelgen.h"
 #include "spritegn.h"
 #include "zone.h"
-#include "../renderer/mod_alias.h"		// FIXME: HACK HACK HACK!
+#include "mod_alias.h"
 #include "mod_brush.h"
-#include "../renderer/mod_sprite.h"		// FIXME: HACK HACK HACK!
+#include "mod_sprite.h"
 
 /*
 
@@ -121,6 +121,7 @@ typedef struct model_s {
 // additional model data
 //
 	memzone_t	*zone;
+
 	brushhdr_t	*brush;
 	aliashdr_t	*alias;
 	msprite_t	*sprite;
@@ -128,29 +129,34 @@ typedef struct model_s {
 
 //============================================================================
 
-void        Surf_Init_Cvars (void);
-void        Mod_Init (void);
-void        Mod_ClearAll (void);
-model_t    *Mod_ForName (char *name, int flags);
-void        Mod_TouchModel (char *name);
+void Mod_LoadTextures(lump_t *l, model_t *mod);
+void Mod_LoadLighting(lump_t *l, model_t *mod);
+void Mod_LoadTexinfo(lump_t *l, model_t *mod);
+void Mod_LoadRFaces(lump_t *l, model_t *mod);
+void Mod_MakeChains(model_t *mod);
+void Mod_RUnloadBrushModel(model_t *mod);
 
-mleaf_t    *Mod_PointInLeaf (float *p, model_t *model);
-Uint8      *Mod_LeafPVS (mleaf_t *leaf, model_t *model);
+void Mod_LoadAliasModel(model_t *mod, void *buffer, int flags);
+void Mod_UnloadAliasModel(model_t *mod);
 
-void		Mod_UnloadModel (model_t *mod);
-model_t		*Mod_LoadModel (model_t *mod, int flags);
+void Mod_LoadSpriteModel(model_t *mod, void *buffer, int flags);
+void Mod_UnloadSpriteModel(model_t *mod);
 
-model_t    *Mod_FindName (char *name);
-qboolean	Mod_MinsMaxs (model_t *mod, vec3_t org, vec3_t ang, vec3_t mins, vec3_t maxs);
+void Mod_Init(void);
+void Mod_ClearAll(void);
+model_t *Mod_FindName(char *name);
+void Mod_TouchModel(char *name);
+model_t *Mod_ForName(char *name, int flags);
 
-extern void Mod_UnloadAliasModel (model_t *mod);
-extern void Mod_LoadAliasModel (model_t *mod, void *buffer, int flags);
+void Mod_Brush_Init(void);
+mleaf_t *Mod_PointInLeaf(vec3_t p, model_t *model);
+Uint8 *Mod_LeafPVS(mleaf_t *leaf, model_t *model);
+void Mod_LoadBrushModel(model_t *mod, void *buffer, int flags);
+void Mod_UnloadBrushModel(model_t *mod);
 
-extern void Mod_LoadBrushModel (model_t *mod, void *buffer, int flags);
-extern void Mod_UnloadBrushModel (model_t *mod);
-
-extern void Mod_LoadSpriteModel (model_t *mod, void *buffer, int flags);
-extern void Mod_UnloadSpriteModel (model_t *mod);
+void Mod_UnloadModel(model_t *mod);
+model_t *Mod_LoadModel(model_t *mod, int flags);
+qboolean Mod_MinsMaxs(model_t *mod, vec3_t org, vec3_t ang, vec3_t mins, vec3_t maxs);
 
 
 #endif // __MODEL__

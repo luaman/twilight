@@ -68,7 +68,6 @@ cvar_t *sv_stepheight;
 
 #define	MOVE_EPSILON	0.01
 
-extern trace_t SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end);
 static void SV_Physics_Toss (edict_t *ent);
 
 static void

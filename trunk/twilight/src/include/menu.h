@@ -137,22 +137,23 @@ extern memzone_t	*m_zone;
 extern qboolean		m_entersound;
 
 
-extern void M_Keydown (int key);
-extern void M_Draw (void);
-extern void M_ToggleMenu_f (void);
-extern void M_DrawPic (int x, int y, qpic_t *pic);
-extern void M_DrawTextBox (int x, int y, int width, int lines);
-extern void M_Exit (qboolean new_menu);
+void M_DrawPic(int x, int y, qpic_t *pic);
+void M_DrawTextBox(int x, int y, int width, int lines);
+void M_SetKeyDest(void);
+void M_ToggleMenu_f(void);
+void M_Draw(void);
+void M_Keydown(int key);
+void M_Renderer_Init_Cvars(void);
+void M_Renderer_Init(void);
 
+void Menu_Delete_Item(menu_item_t *item);
+void Menu_Delete_Menu(menu_t *menu);
+void M_Exit(qboolean new_menu);
+void M_Base_Init_Cvars(void);
+void M_Base_Init(void);
 
-extern void M_Init (void);
-extern void M_Init_Cvars(void);
-extern void M_Base_Init (void);
-extern void M_Base_Init_Cvars (void);
-extern void M_Renderer_Init (void);
-extern void M_Renderer_Init_Cvars (void);
-extern void M_SetKeyDest (void);
-
+void M_Init_Cvars(void);
+void M_Init(void);
 
 extern inline control_type_t
 MItem_Control (menu_item_t *item)

@@ -34,12 +34,12 @@ extern Uint		 vis_framecount;
 extern mleaf_t	*vis_viewleaf, *vis_oldviewleaf;
 extern model_t	*vis_model;
 
-extern void Vis_Init (void);
-extern void Vis_Init_Cvars (void);
-extern void Vis_NewVisParams (model_t *mod, vec3_t org, vec3_t up, vec3_t right, vec3_t point, float fov_x, float fov_y);
-extern qboolean Vis_CullBox (vec3_t mins, vec3_t maxs);
-extern void Vis_RecursiveWorldNode (mnode_t *node, model_t *mod, vec3_t org);
-extern void Vis_MarkLeaves (model_t *mod);
+void Vis_Init_Cvars(void);
+void Vis_Init(void);
+void Vis_NewVisParams(model_t *mod, vec3_t org, vec3_t up, vec3_t right, vec3_t point, float fov_x, float fov_y);
+qboolean Vis_CullBox(vec3_t emins, vec3_t emaxs);
+void Vis_RecursiveWorldNode(mnode_t *node, model_t *mod, vec3_t org);
+void Vis_MarkLeaves(model_t *mod);
 
 #endif // __VIS_H
 

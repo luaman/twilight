@@ -55,6 +55,8 @@ static cvar_t *i_keypadmode;
 static cvar_t *_windowed_mouse;
 static cvar_t *gl_driver;
 
+viddef_t	vid;
+
 qboolean VID_Inited;
 static qboolean keypadmode = false;
 
@@ -77,11 +79,6 @@ VID_Shutdown (void)
 	DynGL_CloseLibrary ();
 }
 
-/*
-===============
-GL_Init
-===============
-*/
 static void
 GL_Init (void)
 {

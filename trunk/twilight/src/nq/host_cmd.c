@@ -42,8 +42,6 @@ static const char rcsid[] =
 #include "sys.h"
 #include "world.h"
 
-extern cvar_t *pausable;
-
 int         current_skill;
 
 /*
@@ -51,8 +49,6 @@ int         current_skill;
 Host_Quit_f
 ==================
 */
-
-extern void M_Menu_Quit_f (void);
 
 static void
 Host_Quit_f (void)

@@ -279,31 +279,55 @@ extern float server_version;	// version of server we connected to
 /*
  * cl_main
  */
-dlight_t *CL_AllocDlight (int key);
-void CL_DecayLights (void);
-
-void CL_EstablishConnection (char *host);
-
-void CL_Disconnect (void);
-void CL_NextDemo (void);
-qboolean CL_DemoBehind (void);
-
-void CL_BeginServerConnect (void);
 
 #define MAX_STATIC_ENTITIES	128
 #define MAX_TMP_ENTITIES	1024
 
-extern int cl_num_static_entities;
-extern entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
+extern cvar_t *cl_shownet;
+extern cvar_t *cl_maxfps;
+extern cvar_t *cl_mapname;
+extern cvar_t *cl_verstring;
+extern cvar_t *cl_predict_players;
+extern cvar_t *cl_solid_players;
+extern cvar_t *localid;
+extern cvar_t *password;
+extern cvar_t *name;
+extern cvar_t *skin;
+extern cvar_t *show_fps;
+extern client_static_t cls;
+extern client_state_t cl;
+extern entity_state_t cl_baselines[768];
+extern lightstyle_t cl_lightstyle[64];
+extern dlight_t cl_dlights[32];
+extern double connect_time;
+extern qboolean host_initialized;
+extern qboolean nomaster;
+extern double host_frametime;
+extern int host_framecount;
+extern int host_hunklevel;
+extern Uint8 *host_basepal;
+extern Uint8 *host_colormap;
+extern int fps_count;
+extern char emodel_name[];
+extern char pmodel_name[];
+extern char prespawn_name[];
+extern char modellist_name[];
+extern char soundlist_name[];
+extern int nopacketcount;
 
-extern int cl_num_tmp_entities;
-extern entity_t	cl_tmp_entities[MAX_TMP_ENTITIES];
-
-extern entity_t	cl_network_entities[MAX_EDICTS];
-extern entity_t	cl_player_entities[MAX_CLIENTS];
-
-extern char	emodel_name[], pmodel_name[], prespawn_name[], modellist_name[],
-			soundlist_name[];
+void CL_BeginServerConnect(void);
+void CL_ClearState(void);
+void CL_Disconnect(void);
+void CL_NextDemo(void);
+void Cmd_ForwardToServer(void);
+void Host_EndGame(char *message, ...);
+void Host_Error(char *error, ...);
+void Host_WriteConfiguration(char *name);
+void Host_Frame(double time);
+void Host_Init(void);
+void Host_Shutdown(void);
+void CL_UpdatePings(void);
+void CL_Init (void);
 
 /*
  * cl_input
@@ -350,17 +374,26 @@ void CL_TimeDemo_f (void);
  */
 #define NET_TIMINGS 256
 #define NET_TIMINGSMASK 255
-extern int packet_latency[NET_TIMINGS];
-int CL_CalcNet (void);
-void CL_ParseServerMessage (void);
-void CL_NewTranslation (int slot);
-qboolean CL_CheckOrDownloadFile (char *filename);
-qboolean CL_IsUploading (void);
-void CL_NextUpload (void);
-void CL_StartUpload (Uint8 *data, int size);
-void CL_StopUpload (void);
-void CL_ParseEntityLump (char *entdata);
-void CL_ProcessServerInfo (void);
+extern int nopacketcount;
+extern int parsecountmod;
+extern double parsecounttime;
+extern int cl_spikeindex;
+extern int cl_playerindex;
+extern int cl_flagindex;
+extern int packet_latency[256];
+extern int CL_CalcNet(void);
+extern model_t *mdl_fire;
+
+qboolean CL_CheckOrDownloadFile(char *filename);
+void CL_NextUpload(void);
+void CL_StartUpload(Uint8 *data, int size);
+qboolean CL_IsUploading(void);
+void CL_StopUpload(void);
+void CL_ParseBaseline(entity_state_t *es);
+void CL_ProcessServerInfo(void);
+void CL_ParseServerMessage(void);
+void CL_ParseEntityLump(char *entdata);
+
 
 /*
  * view.c
@@ -377,27 +410,44 @@ void V_SetContentsColor (int contents);
 /*
  * cl_tent
  */
-void CL_TEnts_Init_Cvars (void);
-void CL_TEnts_Init (void);
-void CL_ClearTEnts (void);
+extern int nopacketcount;
+
+void CL_TEnts_Init_Cvars(void);
+void CL_TEnts_Init(void);
+void CL_ClearTEnts(void);
+void CL_ParseTEnt(void);
+entity_t *CL_NewTempEntity(void);
+void CL_UpdateTEnts(void);
+
 
 /*
  * cl_ents.c
  */
-void CL_SetSolidPlayers (void);
-void CL_SetUpPlayerPrediction (qboolean dopred);
-void CL_EmitEntities (void);
-void CL_ClearProjectiles (void);
-void CL_ParseProjectiles (void);
-void CL_ParsePacketEntities (qboolean delta);
-void CL_SetSolidEntities (void);
-void CL_ParsePlayerinfo (void);
-void CL_Update_Matrices (entity_t *ent);
-void CL_Update_Matrices_C (entity_common_t *ent);
-qboolean CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time);
-void CL_Lerp_OriginAngles (entity_t *ent);
-qboolean CL_Update_Frame (entity_t *e, int frame, float frame_time);
-qboolean CL_Update_Frame_C (entity_common_t *e, int frame, float frame_time);
+extern int nopacketcount;
+extern int cl_num_static_entities;
+extern entity_t cl_static_entities[128];
+extern int cl_num_tmp_entities;
+extern entity_t cl_tmp_entities[1024];
+extern entity_t cl_network_entities[768];
+extern entity_t cl_player_entities[32];
+
+dlight_t *CL_AllocDlight(int key);
+void CL_DecayLights(void);
+void CL_ParsePacketEntities(qboolean delta);
+void CL_Update_Matrices(entity_t *ent);
+void CL_Update_Matrices_C(entity_common_t *ent);
+qboolean CL_Update_OriginAngles(entity_t *ent, vec3_t origin, vec3_t angles, float time);
+void CL_Lerp_OriginAngles(entity_t *ent);
+qboolean CL_Update_Frame(entity_t *e, int frame, float frame_time);
+qboolean CL_Update_Frame_C(entity_common_t *e, int frame, float frame_time);
+void CL_ClearProjectiles(void);
+void CL_ParseProjectiles(void);
+void CL_ParseStatic(void);
+void CL_ParsePlayerinfo(void);
+void CL_SetSolidEntities(void);
+void CL_SetSolidPlayers(void);
+void CL_EmitEntities(void);
+
 
 /*
  * cl_pred.c
@@ -426,9 +476,11 @@ void CL_InitCam (void);
 /*
  * skin.c
  */
-void CL_InitSkins (void);
-skin_t *Skin_Load (char *skin_name);
-void Skin_NextDownload (void);
+extern cvar_t *noskins;
+
+skin_t *Skin_Load(char *skin_name);
+void Skin_NextDownload(void);
+void CL_InitSkins(void);
 
 #define RSSHOT_WIDTH 320
 #define RSSHOT_HEIGHT 200

@@ -49,8 +49,6 @@ static const char rcsid[] =
 
 /*
 ================
-M_DrawCharacter
-
 Draws one solid graphics character
 ================
 */
@@ -212,11 +210,6 @@ M_SetKeyDest (void)
 		key_dest = key_console;
 }
 
-/*
-================
-M_ToggleMenu_f
-================
-*/
 void
 M_ToggleMenu_f (void)
 {

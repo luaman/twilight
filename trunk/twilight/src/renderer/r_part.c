@@ -41,8 +41,10 @@ static const char rcsid[] =
 #include "gl_info.h"
 #include "r_part.h"
 #include "vis.h"
+#include "gl_alias.h"
+#include "gl_brush.h"
 
-extern void R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1, int cr2, int cg2, int cb2, int ca2);
+extern cvar_t *cl_mapname;
 
 static inline void
 VecRBetween (vec3_t c1, vec3_t c2, vec3_t out)
@@ -248,11 +250,6 @@ Part_CB (cvar_t *cvar)
 	Part_AllocArrays ();
 }
 
-/*
-===============
-R_InitParticles
-===============
-*/
 void
 R_InitParticles (void)
 {
@@ -267,14 +264,7 @@ R_InitParticles (void)
 	Part_AllocArrays ();
 }
 
-/*
-===============
-R_EntityParticles
-===============
-*/
-
 #define NUMVERTEXNORMALS 162
-extern float r_avertexnormals[NUMVERTEXNORMALS][3];
 static vec3_t avelocities[NUMVERTEXNORMALS];
 #define beamlength 16.0f
 
@@ -315,11 +305,6 @@ R_EntityParticles (entity_common_t *ent)
 	}
 }
 
-/*
-===============
-R_ClearParticles
-===============
-*/
 void
 R_ClearParticles (void)
 {
@@ -330,7 +315,6 @@ R_ClearParticles (void)
 void
 R_ReadPointFile_f (void)
 {
-	extern cvar_t	*cl_mapname;
 	FILE			*f;
 	vec3_t			org;
 	int				r, c;
@@ -368,8 +352,6 @@ R_ReadPointFile_f (void)
 
 /*
 ===============
-R_ParseParticleEffect
-
 Parse an effect out of the server message
 ===============
 */
@@ -390,12 +372,6 @@ R_ParseParticleEffect (void)
 	R_RunParticleEffect (org, dir, color, count);
 }
 
-/*
-===============
-R_ParticleExplosion2
-
-===============
-*/
 void
 R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength)
 {
@@ -416,12 +392,6 @@ R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength)
 	}
 }
 
-/*
-===============
-R_BlobExplosion
-
-===============
-*/
 void
 R_BlobExplosion (vec3_t org)
 {
@@ -453,12 +423,6 @@ R_BlobExplosion (vec3_t org)
 	}
 }
 
-/*
-===============
-R_RunParticleEffect
-
-===============
-*/
 void
 R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 {
@@ -491,12 +455,6 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 }
 
 
-/*
-===============
-R_LavaSplash
-
-===============
-*/
 void
 R_LavaSplash (vec3_t org)
 {
@@ -527,12 +485,6 @@ R_LavaSplash (vec3_t org)
 	}
 }
 
-/*
-==========
-R_Torch
-
-==========
-*/
 void 
 R_Torch (entity_common_t *ent, qboolean torch2)
 {
@@ -781,11 +733,6 @@ tracer:
 	}
 }
 
-/*
-===============
-R_Move_Base_Particles
-===============
-*/
 static void
 R_Move_Base_Particles (void)
 {
@@ -932,11 +879,6 @@ R_Move_Base_Particles (void)
 }
 
 
-/*
-===============
-R_Draw_Base_Particles
-===============
-*/
 static void
 R_Draw_Base_Particles (void)
 {
@@ -1010,13 +952,6 @@ R_Draw_Base_Particles (void)
 	}
 }
 
-extern float bubble_sintable[17], bubble_costable[17];
-
-/*
-===============
-R_Move_XBeam_Particles
-===============
-*/
 static void
 R_Move_XBeam_Particles (void)
 {
@@ -1145,11 +1080,6 @@ DrawXBeam (xbeam_particle_t *p)
 	v_index += 12;
 }
 
-/*
-===============
-R_Draw_XBeam_Particles
-===============
-*/
 static void
 R_Draw_XBeam_Particles (void)
 {
@@ -1193,11 +1123,6 @@ R_Draw_XBeam_Particles (void)
 	}
 }
 
-/*
-===============
-R_MoveParticles
-===============
-*/
 void
 R_MoveParticles (void)
 {
@@ -1205,11 +1130,6 @@ R_MoveParticles (void)
 	R_Move_XBeam_Particles();
 }
 
-/*
-===============
-R_DrawParticles
-===============
-*/
 void
 R_DrawParticles (void)
 {

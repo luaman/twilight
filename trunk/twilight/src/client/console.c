@@ -43,8 +43,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-extern void Size_Changed2D (cvar_t *cvar);
-
 static memzone_t *con_zone;
 
 int con_ormask;
@@ -60,11 +58,6 @@ static cvar_t *con_notifytime;
 static double con_cleartime;
 
 static int con_vislines;
-
-extern char key_lines[32][MAX_INPUTLINE];
-extern int edit_line;
-extern int key_linepos;
-
 
 qboolean con_initialized;
 

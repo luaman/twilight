@@ -42,8 +42,6 @@ static const char rcsid[] =
 
 #define RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
 
-extern cvar_t *sv_aim;
-
 Uint8 checkpvs[MAX_MAP_LEAFS / 8];
 
 #define	MAX_CHECK 16
@@ -55,8 +53,6 @@ static char pr_string_temp[128];
 #define	MSG_ONE			1				// reliable to one (msg_entity)
 #define	MSG_ALL			2				// reliable to all
 #define	MSG_INIT		3				// write to the init string
-
-extern int SV_ModelIndex (char *name);
 
 static char engine_extensions[] =
 "DP_QC_CHANGEPITCH "

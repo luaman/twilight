@@ -48,14 +48,13 @@ static const char rcsid[] =
 #include "vis.h"
 #include "r_part.h"
 #include "gl_brush.h"
+#include "gl_light.h"
+#include "gen_textures.h"
 
-// FIXME - These need to be in a header somewhere
-extern void TNT_Init (void);
-extern void R_InitBubble (void);
-extern void GL_EndRendering (void);
+// FIXME: These /NEED/ to move to headers.
 extern void V_SetContentsColor (int contents);
-extern void R_DrawViewModel (void);
 extern void CL_ParseEntityLump (char *entdata);
+extern void R_DrawViewModel (void);
 
 
 Uint c_brush_polys, c_alias_polys;
@@ -96,10 +95,7 @@ cvar_t *gl_im_transform;
 cvar_t *gl_oldlights;
 cvar_t *gl_colorlights;
 
-extern vec3_t lightcolor;
 qboolean colorlights = true;
-
-//static float shadescale = 0.0;
 
 extern model_t *mdl_fire;
 
@@ -455,6 +451,9 @@ void
 R_NewMap (void)
 {
 	Uint32			i;
+	extern float	scr_centertime_off;
+
+	scr_centertime_off = 0;
 
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value

@@ -31,26 +31,21 @@
 #include "gl_info.h"
 #include "entities.h"
 
-void R_Torch (entity_common_t *ent, qboolean torch2);
-
-void R_ParseParticleEffect (void);
-void R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count);
-void R_RocketTrail (vec3_t start, vec3_t end);
-void R_Lightning (vec3_t start, vec3_t end, float die);
-void R_ParticleTrail (entity_common_t *ent);
-
-void R_EntityParticles (entity_common_t *ent);
-void R_BlobExplosion (vec3_t org);
-void R_ParticleExplosion (vec3_t org);
-void R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength);
-void R_LavaSplash (vec3_t org);
-void R_RailTrail (vec3_t start, vec3_t end);
-
-void R_InitParticles (void);
-void R_ClearParticles (void);
-void R_MoveParticles (void);
-void R_DrawParticles (void);
-void R_ReadPointFile_f (void);
+void R_InitParticles(void);
+void R_EntityParticles(entity_common_t *ent);
+void R_ClearParticles(void);
+void R_ReadPointFile_f(void);
+void R_ParseParticleEffect(void);
+void R_ParticleExplosion2(vec3_t org, int colorStart, int colorLength);
+void R_BlobExplosion(vec3_t org);
+void R_RunParticleEffect(vec3_t org, vec3_t dir, int color, int count);
+void R_LavaSplash(vec3_t org);
+void R_Torch(entity_common_t *ent, qboolean torch2);
+void R_RailTrail(vec3_t start, vec3_t end);
+void R_Lightning(vec3_t start, vec3_t end, float die);
+void R_ParticleTrail(entity_common_t *ent);
+void R_MoveParticles(void);
+void R_DrawParticles(void);
 
 #endif // __R_PART_H
 

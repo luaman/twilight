@@ -57,8 +57,6 @@ R_Init_Liquid ()
 
 /*
 =============
-EmitWaterPolys
-
 Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */

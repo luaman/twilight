@@ -391,7 +391,6 @@ CL_Record_f (void)
 	player_info_t	*player;
 	user_info_t		*user;
 	entity_state_t	*es, blankes;
-	extern char		gamedirfile[];
 
 	c = Cmd_Argc ();
 	if (c != 2) {

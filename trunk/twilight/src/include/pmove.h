@@ -97,6 +97,8 @@ typedef struct
 
 extern movevars_t movevars;
 extern playermove_t pmove;
+extern vec3_t player_mins;
+extern vec3_t player_maxs;
 struct hull_s;
 
 void PlayerMove (void);

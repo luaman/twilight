@@ -46,20 +46,12 @@ static const char rcsid[] =
 #include "vis.h"
 #include "gl_light.h"
 #include "sys.h"
+#include "surface.h"
+#include "gl_main.h"
 
 extern lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
 extern dlight_t cl_dlights[MAX_DLIGHTS];
-extern int d_lightstylevalue[256];
 
-extern cvar_t *r_dynamic;
-extern cvar_t *gl_oldlights;
-extern cvar_t *gl_flashblend;
-extern int d_lightstylevalue[256];
-
-extern int lightmap_bytes;				// 1, 3, or 4
-extern int lightmap_shift;
-
-extern Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
 static Uint32 blocklights[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 3];
 
 int dlightdivtable[32768];
@@ -174,11 +166,6 @@ R_DrawCoronas (void)
 	qglEnable (GL_DEPTH_TEST);
 }
 
-/*
-==================
-R_AnimateLight
-==================
-*/
 void
 R_AnimateLight (void)
 {
@@ -201,11 +188,6 @@ R_AnimateLight (void)
 }
 
 
-/*
-==================
-R_BuildLightList
-==================
-*/
 void
 R_BuildLightList (void)
 {
@@ -276,11 +258,6 @@ DYNAMIC LIGHTS
 =============================================================================
 */
 
-/*
-=============
-R_MarkLightsNoVis
-=============
-*/
 void
 R_MarkLightsNoVis (vec3_t lightorigin, rdlight_t *rd,
 		int bit, model_t *mod, mnode_t *node)
@@ -383,11 +360,6 @@ loc0:
 	}
 }
 
-/*
-=============
-R_MarkLights
-=============
-*/
 void
 R_MarkLights (rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix)
 {
@@ -508,11 +480,6 @@ R_MarkLights (rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix)
 }
 
 
-/*
-=============
-R_PushDlights
-=============
-*/
 void
 R_PushDlights (void)
 {

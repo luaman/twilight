@@ -33,9 +33,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "info.h"
 #include "strlib.h"
-
-// FIXME: Put this someplace and include the proper header!
-extern cvar_t *sv_highchars;
+#include "server.h"
 
 /*
 ===============

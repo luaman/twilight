@@ -66,11 +66,6 @@ static const char rcsid[] =
 # define errno WSAGetLastError()
 #endif
 
-//extern int  gethostname (char *, int);
-//extern int  close (int);
-
-extern cvar_t *hostname;
-
 static int  net_acceptsocket = -1;		// socket for fielding new connections
 static int  net_controlsocket;
 static int  net_broadcastsocket = 0;

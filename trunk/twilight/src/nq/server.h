@@ -186,64 +186,79 @@ typedef struct client_s {
 
 //============================================================================
 
-extern struct cvar_s *teamplay;
-extern struct cvar_s *skill;
-extern struct cvar_s *deathmatch;
-extern struct cvar_s *coop;
-extern struct cvar_s *fraglimit;
-
-extern server_static_t svs;				// persistant server info
-extern server_t sv;						// local server
-extern memzone_t *sv_zone;
-
-extern client_t *host_client;
-
-extern jmp_buf host_abortserver;
-
+extern qboolean host_initialized;
+extern double host_frametime;
 extern double host_time;
+extern double host_realtime;
+extern double oldrealtime;
+extern int host_framecount;
+extern client_t *host_client;
+extern Uint8 *host_basepal;
+extern Uint8 *host_colormap;
+extern cvar_t *teamplay;
+extern cvar_t *skill;
+extern cvar_t *deathmatch;
+extern cvar_t *coop;
+extern cvar_t *pausable;
+extern int fps_count;
+extern int current_skill;
+extern qboolean noclip_anglehack;
 
+extern server_t sv;
+extern server_static_t svs;
+extern memzone_t *sv_zone;
+extern char localmodels[256][5];
+extern Uint8 fatpvs[32767 / 8];
+extern int fatbytes;
+
+extern cvar_t *sv_aim;
+extern cvar_t *sv_friction;
+extern cvar_t *sv_stopspeed;
+extern cvar_t *sv_gravity;
+extern cvar_t *sv_maxvelocity;
+extern cvar_t *sv_nostep;
+extern cvar_t *sv_jumpstep;
+extern cvar_t *sv_stepheight;
 extern edict_t *sv_player;
+extern cvar_t *sv_edgefriction;
+extern cvar_t *sv_idealpitchscale;
+extern cvar_t *sv_maxspeed;
+extern cvar_t *sv_accelerate;
+
 
 //===========================================================
 
-void SV_Init_Cvars (void);
-void SV_Init (void);
-
-void SV_StartParticle (vec3_t org, vec3_t dir, int color, int count);
-void SV_StartSound (edict_t *entity, int channel, char *sample,
-						   int volume, float attenuation);
-
-void SV_DropClient (qboolean crash);
-
-void SV_SendClientMessages (void);
-void SV_ClearDatagram (void);
-
-int SV_ModelIndex (char *name);
-
-void SV_SetIdealPitch (void);
-
-void SV_AddUpdates (void);
-
-void SV_AddClientToServer (struct qsocket_s *ret);
-
-void SV_ClientPrintf (const char *fmt, ...);
-void SV_BroadcastPrintf (char *fmt, ...);
-
-void SV_Physics (void);
-
-extern trace_t SV_Trace_Toss (edict_t *ent, edict_t *ignore);
-
-qboolean SV_CheckBottom (edict_t *ent);
-qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink);
-
-void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg);
-
-void SV_MoveToGoal (void);
-
-void SV_CheckForNewClients (void);
-void SV_RunClients (void);
-void SV_SaveSpawnparms ();
-void SV_SpawnServer (char *server);
+void Host_EndGame(char *message, ...);
+void Host_Error(char *error, ...);
+void Host_WriteConfiguration(char *name);
+void SV_ClientPrintf(const char *fmt, ...);
+void SV_BroadcastPrintf(char *fmt, ...);
+void Host_ClientCommands(char *fmt, ...);
+void SV_DropClient(qboolean crash);
+void Host_ShutdownServer(qboolean crash);
+void Host_ClearMemory(void);
+void Host_Frame(double time);
+void Host_Init(void);
+void Host_Shutdown(void);
+void Host_InitCommands(void);
+void SV_Init_Cvars(void);
+void SV_Init(void);
+void SV_StartParticle(vec3_t org, vec3_t dir, int color, int count);
+void SV_StartSound(edict_t *entity, int channel, char *sample, int volume, float attenuation);
+void SV_CheckForNewClients(void);
+void SV_ClearDatagram(void);
+void SV_WriteClientdataToMessage(edict_t *ent, sizebuf_t *msg);
+void SV_SendClientMessages(void);
+int SV_ModelIndex(char *name);
+void SV_SaveSpawnparms(void);
+void SV_SpawnServer(char *server);
+qboolean SV_CheckBottom(edict_t *ent);
+qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink);
+void SV_MoveToGoal(void);
+void SV_Physics(void);
+trace_t SV_Trace_Toss(edict_t *tossent, edict_t *ignore);
+void SV_SetIdealPitch(void);
+void SV_RunClients(void);
 
 #endif // __SERVER_H
 

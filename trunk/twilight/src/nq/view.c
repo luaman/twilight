@@ -78,12 +78,6 @@ static cvar_t *v_ipitch_level;
 static cvar_t *v_idlescale;
 static cvar_t *v_zoom;
 
-cvar_t *crosshair;
-cvar_t *crosshaircolor;
-
-static cvar_t *cl_crossx;
-static cvar_t *cl_crossy;
-
 static cvar_t *gl_cshiftpercent;
 
 static cvar_t *v_contentblend;
@@ -92,8 +86,6 @@ static cvar_t *v_centermove;
 static cvar_t *v_centerspeed;
 
 static float v_dmg_time, v_dmg_roll, v_dmg_pitch;
-
-extern int in_forward, in_forward2, in_back;
 
 float
 V_CalcRoll (vec3_t angles, vec3_t velocity)
@@ -722,12 +714,6 @@ V_Init_Cvars (void)
 	v_idlescale = Cvar_Get ("v_idlescale", "0", CVAR_NONE, NULL);
 
 	v_zoom = Cvar_Get ("v_zoom", "1", CVAR_NONE, V_Zoom_CB);
-
-	crosshair = Cvar_Get ("crosshair", "0", CVAR_ARCHIVE, NULL);
-	crosshaircolor = Cvar_Get ("crosshaircolor", "79", CVAR_ARCHIVE, NULL);
-
-	cl_crossx = Cvar_Get ("cl_crossx", "0", CVAR_ARCHIVE, NULL);
-	cl_crossy = Cvar_Get ("cl_crossy", "0", CVAR_ARCHIVE, NULL);
 
 	gl_cshiftpercent = Cvar_Get ("gl_cshiftpercent", "100", CVAR_NONE, NULL);
 

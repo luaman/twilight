@@ -90,11 +90,11 @@ typedef struct {
 
 extern refdef_t	r_refdef;
 
-extern void R_AddEntity (entity_common_t *ent);
-extern void R_ClearEntities (void);
-extern void R_VisEntities (void);
-extern void R_DrawSkyEntities (void);
-extern void R_DrawOpaqueEntities (void);
-extern void R_DrawAddEntities (void);
+void R_AddEntity(entity_common_t *ent);
+void R_ClearEntities(void);
+void R_VisEntities(void);
+void R_DrawSkyEntities(void);
+void R_DrawOpaqueEntities(void);
+void R_DrawAddEntities(void);
 
 #endif // __ENTITIES_H

@@ -82,8 +82,6 @@ static const char rcsid[] =
 
 static int nostdout = 0;
 
-char *qdate = __DATE__;
-
 static cvar_t *sys_asciionly;
 static cvar_t *sys_logname;
 
@@ -381,10 +379,6 @@ Sys_ConsoleInput (void)
 {
 	return NULL;
 }
-
-extern int key_linepos;
-extern char key_lines[32][MAX_INPUTLINE];
-extern int edit_line;
 
 int
 Sys_CheckClipboardPaste(int key)

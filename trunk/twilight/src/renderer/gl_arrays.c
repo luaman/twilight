@@ -54,11 +54,6 @@ GLint		MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
 cvar_t *gl_varray_size;
 cvar_t *gl_iarray_size;
 
-/*
-===============
-R_Init_Cvars
-===============
-*/
 void
 GLArrays_Init_Cvars (void)
 {
@@ -66,11 +61,6 @@ GLArrays_Init_Cvars (void)
 	gl_iarray_size = Cvar_Get ("gl_iarray_size", "2048", CVAR_ARCHIVE | CVAR_ROM, NULL);
 }
 
-/*
-===============
-R_Init
-===============
-*/
 void
 GLArrays_Init (void)
 {

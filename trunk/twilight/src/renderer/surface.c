@@ -36,36 +36,22 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "sys.h"
 #include "gl_info.h"
+#include "gl_main.h"
 
 Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
 
 int lightmap_bytes;				// 1, 3, or 4
 int lightmap_shift;
 int gl_lightmap_format = GL_RGB;
-extern qboolean colorlights;
-
-extern cvar_t *gl_colorlights;
-
-//static msurface_t *warpface;
 
 cvar_t *gl_subdivide_size;
 
-/*
-===============
-Surf_Init_Cvars
-===============
- */
 void
 Surf_Init_Cvars (void)
 {
 	gl_subdivide_size =Cvar_Get("gl_subdivide_size", "128", CVAR_ARCHIVE, NULL);
 }
 
-/*
-================
-BuildGLPolyFromEdges
-================
- */
 void
 BuildGLPolyFromEdges (msurface_t *surf, model_t *model, int *count)
 {

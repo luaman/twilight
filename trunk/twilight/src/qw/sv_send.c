@@ -57,8 +57,6 @@ Com_Printf redirection
 static char        sv_outputbuf[MAX_MSGLEN - 1];
 redirect_t  sv_redirected;
 
-extern cvar_t *sv_phs;	// Vic: it was 'cvar_t sv_phs'
-
 /*
 ==================
 SV_FlushRedirect

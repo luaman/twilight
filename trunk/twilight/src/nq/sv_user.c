@@ -44,12 +44,10 @@ static const char rcsid[] =
 
 edict_t			*sv_player;
 
-extern cvar_t	*sv_friction;
 cvar_t			*sv_edgefriction;
 cvar_t			*sv_idealpitchscale;
 cvar_t			*sv_maxspeed;
 cvar_t			*sv_accelerate;
-extern cvar_t	*sv_stopspeed;
 
 static vec3_t forward, right, up;
 

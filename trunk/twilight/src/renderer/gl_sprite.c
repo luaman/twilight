@@ -40,7 +40,7 @@ static const char rcsid[] =
 #include "palette.h"
 #include "cclient.h"
 
-mspriteframe_t *
+static mspriteframe_t *
 R_GetSpriteFrame (entity_common_t *e)
 {
 	msprite_t		*psprite;

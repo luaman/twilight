@@ -193,11 +193,6 @@ GL_Info_f (void)
 }
 
 
-/*
-===============
-GLInfo_Init_Cvars
-===============
-*/
 void
 GLInfo_Init_Cvars (void)
 {
@@ -208,11 +203,6 @@ GLInfo_Init_Cvars (void)
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
 }
 
-/*
-===============
-GLInfo_Init
-===============
-*/
 void
 GLInfo_Init (void)
 {

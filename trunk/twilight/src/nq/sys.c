@@ -85,8 +85,6 @@ int nostdout = 0;
 
 static Uint32 sys_sleep;
 
-char *qdate = __DATE__;
-
 static cvar_t *sys_asciionly;
 static cvar_t *sys_extrasleep;
 static cvar_t *sys_logname;
@@ -479,10 +477,6 @@ Sys_ConsoleInput (void)
 
 
 // FIXME: Sys_CheckClipboardPaste is the wrong way to do this, fix it!
-
-extern int key_linepos;
-extern char key_lines[32][MAX_INPUTLINE];
-extern int edit_line;
 
 int
 Sys_CheckClipboardPaste(int key)

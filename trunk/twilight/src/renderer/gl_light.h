@@ -40,7 +40,24 @@ typedef struct {
 	float       color[3];
 } dlight_t;
 
-void GL_UpdateLightmap (model_t *mod, msurface_t *fa, matrix4x4_t *invmatrix);
+extern int dlightdivtable[32768];
+extern rdlight_t r_dlight[32];
+extern int r_numdlights;
+extern mplane_t *lightplane;
+extern vec3_t lightspot;
+extern vec3_t lightcolor;
+
+void R_InitSurf(void);
+void R_InitLightTextures(void);
+void R_DrawCoronas(void);
+void R_AnimateLight(void);
+void R_BuildLightList(void);
+void R_InitBubble(void);
+void R_MarkLightsNoVis(vec3_t lightorigin, rdlight_t *rd, int bit, model_t *mod, mnode_t *node);
+void R_MarkLights(rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix);
+void R_PushDlights(void);
+int R_LightPoint(vec3_t p);
+void GL_UpdateLightmap(model_t *mod, msurface_t *fa, matrix4x4_t *invmatrix);
 
 #endif // __GL_RLIGHT_H
 

@@ -30,18 +30,16 @@
 #include "qtypes.h"
 #include "gl_info.h"
 
-extern void R_InitSurf (void);
-extern void R_DrawOpaqueAliasModels (entity_common_t *ents[], int num_ents, qboolean viewent);
-extern void R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1, int cr2, int cg2, int cb2, int ca2);
-extern void R_DrawBrushDepthSkies (void);
-extern void R_DrawLiquidTextureChains (model_t *mod, qboolean arranged);
-extern void R_DrawTextureChains (model_t *mod, int frame, matrix4x4_t *matrix, matrix4x4_t *invmatrix);
-extern void R_VisBrushModel (entity_common_t *e);
-extern void R_DrawOpaqueBrushModel (entity_common_t *e);
-extern void R_DrawAddBrushModel (entity_common_t *e);
-extern qboolean R_VisBrushModels (void);
-extern void R_DrawOpaqueBrushModels (void);
-extern void R_DrawAddBrushModels (void);
+void R_Stain(vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1, int cr2, int cg2, int cb2, int ca2);
+void R_DrawBrushDepthSkies(void);
+void R_DrawLiquidTextureChains(model_t *mod, qboolean arranged);
+void R_DrawTextureChains(model_t *mod, int frame, matrix4x4_t *matrix, matrix4x4_t *invmatrix);
+void R_VisBrushModel(entity_common_t *e);
+void R_DrawOpaqueBrushModel(entity_common_t *e);
+void R_DrawAddBrushModel(entity_common_t *e);
+qboolean R_VisBrushModels(void);
+void R_DrawOpaqueBrushModels(void);
+void R_DrawAddBrushModels(void);
 
 #endif // __GL_BRUSH_H
 

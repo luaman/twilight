@@ -344,7 +344,6 @@ PR_LeaveFunction (void)
 
 
 // LordHavoc: optimized
-extern cvar_t *pr_boundscheck;
 #define OPA ((eval_t *)&pr_globals[(unsigned short int) st->a])
 #define OPB ((eval_t *)&pr_globals[(unsigned short int) st->b])
 #define OPC ((eval_t *)&pr_globals[(unsigned short int) st->c])
