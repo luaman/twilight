@@ -27,7 +27,6 @@
 #ifndef __dynogl_h
 #define __dynogl_h
 
-void DGL_SetError (char *err);
 char *DGL_GetError (void);
 qboolean DGL_LoadLibrary (char *name);
 void DGL_CloseLibrary (void);

@@ -65,18 +65,6 @@ static char dgl_error[DYNGL_ERROR_SIZE];
 static qboolean dgl_loaded = false;
 static const char *dgl_extensions;
 
-/*
-	DGL_SetError
-
-	Sets the last error string in a somewhat abstract fashion.
-*/
-void
-DGL_SetError (char *err)
-{
-	strncpy (dgl_error, err, DYNGL_ERROR_SIZE);
-	return;
-}
-
 
 /*
 	DGL_GetError
@@ -102,7 +90,8 @@ DGL_LoadLibrary (char *name)
 {
 	if (SDL_GL_LoadLibrary(name) == -1)
 	{
-		DGL_SetError (va("DGL_LoadLibrary: Can't load %s", name));
+		snprintf (dgl_error, DYNGL_ERROR_SIZE,
+				"DGL_LoadLibrary: Can't load %s", name);
 		dgl_loaded = false;
 		return false;
 	}
@@ -144,13 +133,15 @@ DGL_GetFuncs (void)
 {
 	if (!dgl_loaded)
 	{
-		DGL_SetError ("DGL_GetFuncs: no OpenGL library loaded");
+		snprintf (dgl_error, DYNGL_ERROR_SIZE,
+				"DGL_GetFuncs: no OpenGL library loaded");
 		return false;
 	}
 
 #define OGL_NEED(ret, name, args)									\
 	if (!(q##name = SDL_GL_GetProcAddress(#name))) {				\
-		DGL_SetError (va("DGL_GetFuncs: can't find %s", #name));	\
+		snprintf (dgl_error, DYNGL_ERROR_SIZE,						\
+				"DGL_GetFuncs: can't find %s", #name);				\
 		return false;												\
 	}
 #define OGL_EXT_WANT(ret, name, args)								\
