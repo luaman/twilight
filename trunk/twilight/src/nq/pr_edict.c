@@ -1169,7 +1169,7 @@ PR_LoadProgs (void)
 	Zone_EmptyZone (progs_memzone);
 	Zone_EmptyZone (edictstring_memzone);
 
-	temp = COM_LoadZoneFile ("progs.dat", false);
+	temp = COM_LoadAllocFile ("progs.dat", false);
 	if (!temp)
 		Host_Error ("PR_LoadProgs: couldn't load progs.dat");
 

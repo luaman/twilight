@@ -54,8 +54,9 @@ cvar_t *game_rogue;
 cvar_t *game_hipnotic;
 cvar_t *game_mission;
 
-void        COM_InitFilesystem (void);
-void        COM_Path_f (void);
+// prototypes used later in the file
+void COM_InitFilesystem (void);
+void COM_Path_f (void);
 
 
 /*
@@ -1132,35 +1133,32 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 	return -1;
 }
 
+cache_user_t *loadcache;
+Uint8 *loadbuf;
+int loadsize;
+
 /*
 ============
 COM_LoadFile
 
 Filename are reletive to the quake directory.
-Allways appends a 0 byte to the loaded data.
+Always appends a 0 byte to the loaded data.
 ============
 */
-cache_user_t *loadcache;
-Uint8        *loadbuf;
-int           loadsize;
 Uint8 *
 COM_LoadFile (char *path, int usehunk, qboolean complain)
 {
-	FILE       *h;
-	Uint8      *buf;
-	int         len;
+	FILE		*h;
+	Uint8		*buf = NULL;
+	int			len;
 
-	buf = NULL;							// quiet compiler warning
-
-// look for it in the filesystem or pack files
+	// look for it in the filesystem or pack files
 	len = com_filesize = COM_FOpenFile (path, &h, complain);
 	if (!h)
 		return NULL;
 
-	switch (usehunk) {
-		case 0:
-			buf = Z_Malloc (len + 1);
-			break;
+	switch (usehunk)
+	{
 		case 1:
 			buf = Hunk_AllocName (len + 1, path);
 			break;
@@ -1172,6 +1170,9 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 				buf = Hunk_TempAlloc (len + 1);
 			else
 				buf = loadbuf;
+			break;
+		case 6:
+			buf = Zone_Alloc (tempzone, len + 1);
 			break;
 		default:
 			Sys_Error ("COM_LoadFile: bad usehunk");
@@ -1188,12 +1189,6 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 	fclose (h);
 
 	return buf;
-}
-
-Uint8 *
-COM_LoadZoneFile (char *path, qboolean complain)
-{
-	return COM_LoadFile (path, 0, complain);
 }
 
 Uint8 *
@@ -1219,6 +1214,12 @@ COM_LoadStackFile (char *path, void *buffer, int bufsize, qboolean complain)
 	buf = COM_LoadFile (path, 4, complain);
 
 	return buf;
+}
+
+Uint8 *
+COM_LoadAllocFile (char *path, qboolean complain)
+{
+	return COM_LoadFile (path, 6, complain);
 }
 
 /*
