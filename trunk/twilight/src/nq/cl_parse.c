@@ -234,7 +234,7 @@ CL_ParseServerInfo (void)
 	int         nummodels, numsounds;
 	char        model_precache[MAX_MODELS][MAX_QPATH];
 	char        sound_precache[MAX_SOUNDS][MAX_QPATH];
-	extern		qboolean    isnotmap;
+	extern		qboolean    ismap;
 
 	Com_DPrintf ("Serverinfo packet received.\n");
 //
@@ -302,10 +302,10 @@ CL_ParseServerInfo (void)
 //
 
 	for (i = 1; i < nummodels; i++) {
-		isnotmap = (i != 1);
+		ismap = (i == 1);
 		cl.model_precache[i] = Mod_ForName (model_precache[i], true);
 
-		if (!isnotmap)
+		if (ismap)
 		{
 			char mapname[MAX_QPATH] = { 0 };
 

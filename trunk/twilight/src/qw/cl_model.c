@@ -55,7 +55,7 @@ void	Mod_UnloadSpriteModel (model_t *mod);
 void
 Mod_UnloadModel (model_t *mod)
 {
-	if (!mod->needload)
+	if (!mod->loaded)
 		return;
 
 	switch (mod->type) {
@@ -72,7 +72,6 @@ Mod_UnloadModel (model_t *mod)
 			break;
 	}
 	memset(mod, 0, sizeof(model_t));
-	mod->needload = true;
 }
 
 /*
@@ -87,7 +86,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 {
 	void		*buf;
 
-	if (!mod->needload) {
+	if (mod->loaded) {
 		return mod;					// not cached at all
 	}
 //
@@ -109,7 +108,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 //
 
 // call the apropriate loader
-	mod->needload = false;
+	mod->loaded = true;
 
 	switch (LittleLong (*(unsigned *) buf)) {
 		case IDPOLYHEADER:

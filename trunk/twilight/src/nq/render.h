@@ -287,7 +287,7 @@ void R_DrawBrushDepthSkies (void);
 void R_VisWorld (void);
 void R_DrawWorld (void);
 void R_DrawLiquidTextureChains (model_t *mod);
-void R_DrawTextureChains (model_t *mod, vec3_t origin);
+void R_DrawTextureChains (model_t *mod, vec3_t origin, int frame);
 void GL_BuildLightmaps (void);
 
 #endif // __RENDER_H

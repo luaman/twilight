@@ -1050,7 +1050,7 @@ SV_SpawnServer (char *server)
 {
 	edict_t		*ent;
 	Uint32		i;
-	extern		qboolean isnotmap;
+	extern		qboolean ismap;
 
 	// let's not have any servers with no name
 	if (hostname->svalue[0] == 0)
@@ -1115,9 +1115,9 @@ SV_SpawnServer (char *server)
 	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
 
 	SetupLightmapSettings ();
-	isnotmap = false;
+	ismap = true;
 	sv.worldmodel = Mod_ForName (sv.modelname, false);
-	isnotmap = true;
+	ismap = false;
 	if (!sv.worldmodel) {
 		Com_Printf ("Couldn't spawn server %s\n", sv.modelname);
 		sv.active = false;
