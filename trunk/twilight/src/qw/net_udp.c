@@ -231,6 +231,12 @@ NET_GetPacket (void)
 			return false;
 		if (errno == ECONNREFUSED)
 			return false;
+#ifdef _WIN32
+		// LordHavoc: never could figure out why recvfrom was returning this
+		// (no such file or directory), but had to workaround it...
+		if (errno == ENOENT)
+			return false;
+#endif
 		Sys_Printf ("NET_GetPacket: %s\n", strerror (errno));
 		return false;
 	}
