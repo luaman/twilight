@@ -428,7 +428,7 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 static void
 GL_BuildLightmap (msurface_t *surf)
 {
-	int			i, j, size, size2, shift, stride;
+	int			i, j, size, size3, shift, stride;
 	Uint8	   *lightmap, *dest, *stain;
 	Uint32		scale, *bl;
 
@@ -443,20 +443,17 @@ GL_BuildLightmap (msurface_t *surf)
 	surf->cached_light[3] = d_lightstylevalue[surf->styles[3]];
 
 	size = surf->smax * surf->tmax;
-	if (colorlights)
-		size2 = size * 3;
-	else
-		size2 = size;
+	size3 = size * 3;
 
 	lightmap = surf->samples;
 
 	// set to full bright if no light data
 	if (!cl.worldmodel->lightdata)
-		memset (blocklights, 255, size2	* sizeof(Uint32));
+		memset (blocklights, 255, size3	* sizeof(Uint32));
 	else
 	{
 		// clear to no light
-		memset (blocklights, 0, size2 * sizeof(Uint32));
+		memset (blocklights, 0, size3 * sizeof(Uint32));
 
 		// add all the dynamic lights
 		if (surf->dlightframe == r_framecount)
@@ -471,7 +468,7 @@ GL_BuildLightmap (msurface_t *surf)
 				scale = d_lightstylevalue[surf->styles[i]];
 				bl = blocklights;
 
-				for (j = 0; j < size2; j++)
+				for (j = 0; j < size3; j++)
 					*bl++ += *lightmap++ * scale;
 			}
 		}
@@ -484,7 +481,7 @@ GL_BuildLightmap (msurface_t *surf)
 	{
 		stain = surf->stainsamples;
 		if (stain)
-			for (bl = blocklights, i = 0; i < size2; i++)
+			for (bl = blocklights, i = 0; i < size3; i++)
 				if (stain[i] < 255)
 					bl[i] = (bl[i] * stain[i]) >> 8;
 	}
