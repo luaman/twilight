@@ -23,5 +23,26 @@
 
 */
 
-void
-PCX_Load (char *name, Uint8 **image_pcx, int *width, int *height);
+#ifndef __PCX_H
+#define __PCX_H
+
+typedef struct {
+	Sint8       manufacturer;
+	Sint8       version;
+	Sint8       encoding;
+	Sint8       bits_per_pixel;
+	Uint16		xmin, ymin, xmax, ymax;
+	Uint16		hres, vres;
+	Uint8		palette[48];
+	Uint8		reserved;
+	Sint8		color_planes;
+	Uint16		bytes_per_line;
+	Uint16		palette_type;
+	Sint8		filler[58];
+	Uint8		data[0];				// unbounded
+} pcx_t;
+
+void PCX_Load (char *name, Uint8 **image_pcx, int *width, int *height);
+
+#endif // __PCX_H
+

@@ -38,34 +38,35 @@ static const char rcsid[] =
 #include "cmd.h"
 #include "console.h"
 #include "cvar.h"
+#include "pcx.h"
 #include "strlib.h"
 #include "sys.h"
 
 
-cvar_t     *baseskin;
-cvar_t     *noskins;
+cvar_t *baseskin;
+cvar_t *noskins;
 
-char        allskins[128];
+char allskins[128];
 
 #define	MAX_CACHED_SKINS		128
-skin_t      skins[MAX_CACHED_SKINS];
-int         numskins;
+player_skin_t skins[MAX_CACHED_SKINS];
+int numskins;
 
 /*
 ================
 Skin_Find
 
-  Determines the best skin for the given scoreboard
-  slot, and sets scoreboard->skin
-
+Determines the best skin for the given scoreboard
+slot, and sets scoreboard->skin
 ================
 */
 void
 Skin_Find (player_info_t *sc)
 {
-	skin_t     *skin;
-	int         i;
-	char        name[128], *s;
+	player_skin_t   *skin;
+	int				i;
+	char			name[128];
+	char		   *s;
 
 	if (allskins[0])
 		strcpy (name, allskins);
@@ -90,8 +91,8 @@ Skin_Find (player_info_t *sc)
 		}
 	}
 
-	if (numskins == MAX_CACHED_SKINS) {	// ran out of spots, so flush
-		// everything
+	if (numskins == MAX_CACHED_SKINS) {
+		// ran out of spots, so flush everything
 		Skin_Skins_f ();
 		return;
 	}
@@ -113,22 +114,23 @@ Returns a pointer to the skin bitmap, or NULL to use the default
 ==========
 */
 Uint8 *
-Skin_Cache (skin_t *skin)
+Skin_Cache (player_skin_t *skin)
 {
-	char        name[MAX_OSPATH];
-	Uint8      *raw;
-	Uint8      *out, *pix;
-	pcx_t      *pcx;
-	int         x, y;
-	int         dataByte;
-	int         runLength;
+	char		name[MAX_OSPATH];
+	Uint8	   *raw;
+	Uint8	   *out, *pix;
+	pcx_t	   *pcx;
+	int			x, y;
+	int			dataByte;
+	int			runLength;
 
 	if (cls.downloadtype == dl_skin)
-		return NULL;					// use base until downloaded
+		// use base until downloaded
+		return NULL;
 
-	if (noskins->value == 1)				// JACK: So NOSKINS > 1 will show
-		// skins, but
-		return NULL;					// not download new ones.
+	if (noskins->value == 1)
+		// JACK: So NOSKINS > 1 will show skins, but not download new ones.
+		return NULL;
 
 	if (skin->failedload)
 		return NULL;
@@ -137,9 +139,9 @@ Skin_Cache (skin_t *skin)
 	if (out)
 		return out;
 
-//
-// load the pic from disk
-//
+	/*
+	 * load the pic from disk
+	 */
 	snprintf (name, sizeof (name), "skins/%s.pcx", skin->name);
 	raw = COM_LoadTempFile (name);
 	if (!raw) {
@@ -151,9 +153,10 @@ Skin_Cache (skin_t *skin)
 			return NULL;
 		}
 	}
-//
-// parse the PCX file
-//
+	
+	/*
+	 * parse the PCX file
+	 */
 	pcx = (pcx_t *) raw;
 	raw = pcx->data;
 
@@ -242,8 +245,8 @@ Skin_NextDownload
 void
 Skin_NextDownload (void)
 {
-	player_info_t *sc;
-	int         i;
+	player_info_t	   *sc;
+	int					i;
 
 	if (cls.downloadnumber == 0)
 		Con_Printf ("Checking skins...\n");
@@ -289,7 +292,7 @@ Refind all skins, downloading if needed.
 void
 Skin_Skins_f (void)
 {
-	int         i;
+	int			i;
 
 	for (i = 0; i < numskins; i++) {
 		if (skins[i].cache.data)
@@ -316,3 +319,4 @@ Skin_AllSkins_f (void)
 	strcpy (allskins, Cmd_Argv (1));
 	Skin_Skins_f ();
 }
+
