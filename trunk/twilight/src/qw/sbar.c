@@ -73,8 +73,6 @@ qpic_t     *sb_face_invis_invuln;
 qboolean    sb_showscores;
 qboolean    sb_showteamscores;
 
-int         sb_lines;					// scan lines to draw
-
 void        Sbar_DeathmatchOverlay (int start);
 void        Sbar_TeamOverlay (void);
 void        Sbar_MiniDeathmatchOverlay (void);
@@ -535,7 +533,7 @@ Sbar_DrawInventory (void)
 	qboolean    headsup;
 	qboolean    hudswap;
 
-	headsup = !(cl_sbar->value || scr_viewsize->value < 100);
+	headsup = !cl_sbar->value;
 	hudswap = cl_hudswap->value;
 
 	if (!headsup)
@@ -722,7 +720,7 @@ Sbar_DrawNormal
 void
 Sbar_DrawNormal (void)
 {
-	if (cl_sbar->value || scr_viewsize->value < 100)
+	if (cl_sbar->value)
 		Sbar_DrawPic (0, 0, sb_sbar);
 
 // armor
@@ -771,7 +769,7 @@ Sbar_Draw (void)
 	qboolean    headsup;
 	char        st[512];
 
-	headsup = !(cl_sbar->value || scr_viewsize->value < 100);
+	headsup = !cl_sbar->value;
 
 	if (scr_con_current == vid.height)
 		return;							// console is full screen

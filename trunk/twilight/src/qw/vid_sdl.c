@@ -84,14 +84,6 @@ static int  sdl_flags = SDL_OPENGL;
 
 /*-----------------------------------------------------------------------*/
 
-//int       texture_mode = GL_NEAREST;
-//int       texture_mode = GL_NEAREST_MIPMAP_NEAREST;
-//int       texture_mode = GL_NEAREST_MIPMAP_LINEAR;
-int         texture_mode = GL_LINEAR;
-
-//int       texture_mode = GL_LINEAR_MIPMAP_NEAREST;
-//int       texture_mode = GL_LINEAR_MIPMAP_LINEAR;
-
 int         texture_extension_number = 1;
 
 float       gldepthmin, gldepthmax;
@@ -272,21 +264,6 @@ GL_Init (void)
 
 	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
-
-/*
-=================
-GL_BeginRendering
-
-=================
-*/
-void
-GL_BeginRendering (int *x, int *y, int *width, int *height)
-{
-	*x = *y = 0;
-	*width = scr_width;
-	*height = scr_height;
-}
-
 
 void
 GL_EndRendering (void)

@@ -748,7 +748,7 @@ int R_LightPoint (vec3_t p)
 		return r;
 	}
 	else {
-		if (/* r_fullbright->value || */!cl.worldmodel->lightdata)
+		if (!cl.worldmodel->lightdata)
 		{
 			lightcolor[0] = lightcolor[1] = lightcolor[2] = 255;
 			return 255;

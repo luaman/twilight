@@ -41,9 +41,6 @@ static const char rcsid[] =
 #include "sys.h"
 
 
-mnode_t    *r_pefragtopnode;
-
-
 //===========================================================================
 
 /*
@@ -118,9 +115,6 @@ R_SplitEntityOnNode (mnode_t *node)
 // add an efrag if the node is a leaf
 
 	if (node->contents < 0) {
-		if (!r_pefragtopnode)
-			r_pefragtopnode = node;
-
 		leaf = (mleaf_t *) node;
 
 // grab an efrag off the free list
@@ -150,12 +144,6 @@ R_SplitEntityOnNode (mnode_t *node)
 	splitplane = node->plane;
 	sides = BOX_ON_PLANE_SIDE (r_emins, r_emaxs, splitplane);
 
-	if (sides == 3) {
-		// split on this plane
-		// if this is the first splitter of this bmodel, remember it
-		if (!r_pefragtopnode)
-			r_pefragtopnode = node;
-	}
 // recurse down the contacted sides
 	if (sides & 1)
 		R_SplitEntityOnNode (node->children[0]);
@@ -183,7 +171,6 @@ R_AddEfrags (entity_t *ent)
 	r_addent = ent;
 
 	lastlink = &ent->efrag;
-	r_pefragtopnode = NULL;
 
 	entmodel = ent->model;
 
@@ -193,8 +180,6 @@ R_AddEfrags (entity_t *ent)
 	}
 
 	R_SplitEntityOnNode (cl.worldmodel->nodes);
-
-	ent->topnode = r_pefragtopnode;
 }
 
 

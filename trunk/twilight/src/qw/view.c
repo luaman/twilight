@@ -766,14 +766,7 @@ V_CalcRefdef (void)
 
 // fudge position around to keep amount of weapon visible
 // roughly equal with different FOV
-	if (scr_viewsize->value == 110)
-		view->origin[2] += 1;
-	else if (scr_viewsize->value == 100)
-		view->origin[2] += 2;
-	else if (scr_viewsize->value == 90)
-		view->origin[2] += 1;
-	else if (scr_viewsize->value == 80)
-		view->origin[2] += 0.5;
+	view->origin[2] += 2;
 
 	if (view_message->flags & (PF_GIB | PF_DEAD))
 		view->model = NULL;
