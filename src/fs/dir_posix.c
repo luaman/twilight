@@ -147,8 +147,10 @@ FSD_Open_New (fs_group_t *group, fs_new_t *new)
 		close (fd);
 		return false;
 	}
-	new->rw = SDL_RWFromFP (file, 1);
-	return true;
+	if ((new->rw = SDL_RWFromFP (file, 1)))
+		return true;
+	else
+		return false;
 }
 
 void
