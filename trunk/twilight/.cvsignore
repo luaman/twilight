@@ -3,7 +3,6 @@ Makefile.in
 aclocal.m4
 config.*
 configure
-ChangeLog
 twilight-*.zip
 twilight-*.tar.gz
 twilight.spec

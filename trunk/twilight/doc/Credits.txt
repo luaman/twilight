@@ -1,0 +1,53 @@
+Credits for Project: Twilight
+-----------------------------
+
+ First and foremost, we would like to thank the people from Id Software for
+ bringing Quake(R) and QuakeWorld(R) to the world in the first place.  The
+ source code included an incomplete list of those responsible, here they
+ are:
+
+      Adrian Carmack            John Romero
+      American McGee            Kevin Cloud
+      Barrett Alexander         Michael Abrash
+      Christian Antkow          Mike Wilson
+      Dave Kirsch               Nine Inch Nails
+      Donna Jackson             Paul Steed
+      Jack Mathews              Sandy Petersen
+      Jay Wilbur                Shawn Green
+      John Carmack              Tim Willits
+      John Cash                 Todd Hollenshead
+
+
+ But even beyond that, we'd like to thank John Carmack and Dave Kirsch for
+ their work to bring us the release of the source code under the GNU GPL,
+ and of course for answering our silly questions with lots of good advice
+ (such as the reassurance that we're crazy, for example..)
+
+
+ Project: Twilight makes extensive use of Sam Lantinga's Simple Directmedia
+ Layer, a library designed to make cross-platform multimedia development
+ practical.  Thanks Sam!  Without SDL, we might have started to believe
+ Dave's assertions about our sanity long ago.
+
+ And last, but absolutely not least, the people who have contributed code
+ directly to Project: Twilight at one point or another (whether they know
+ about it or not.)  Thanks guys!
+
+   Joseph Carter <knghtbrd@efn.org>
+   Bill Currie <bill@taniwha.org>
+   Zephaniah E. Hull <warp@whitestar.soark.net>
+   Forest Hale <lordhavoc@users.sourceforge.net>
+   Tomas Jakobsson <tompsson@hotmail.com>
+   Victor Luchits <vic@captured.com>
+   Jeremy Nelson <jnelson@acronet.net>
+   Mathieu Olivier <molivier@users.sourceforge.net>
+   John Popplewell <john@johnnypops.demon.co.uk>
+   Jeff Teunissen <deek@d2dc.net>
+   Zinx Verituse <zinx@magenet.net>
+   Shawn Walker <eviltypeguy@icculus.org>
+   Jason Wilkins <fenix@io.com>
+   Ben Winslow <rain@bluecherry.net>
+
+
+Quake(R) and QuakeWorld(R) are registered trademarks of Id Software, Inc.
+

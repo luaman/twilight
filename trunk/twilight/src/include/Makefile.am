@@ -2,7 +2,7 @@
 #
 # This file is intended to be processed by automake
 
-AUTOMAKE_OPTIONS=gnu dist-zip
+AUTOMAKE_OPTIONS=foreign dist-zip
 
 noinst_HEADERS= \
 	anorm_dots.h anorms.h bspfile.h common.h crc.h cvar.h \

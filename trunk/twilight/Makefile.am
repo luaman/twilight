@@ -2,13 +2,12 @@
 #
 # This file is intended to be processed by automake
 
-AUTOMAKE_OPTIONS=gnu dist-zip
+AUTOMAKE_OPTIONS=foreign dist-zip
 
 SUBDIRS=src doc
 
 EXTRA_DIST= \
-	COPYING.BSD \
-	acconfig.h bootstrap \
+	bootstrap \
 	twilight.dsw \
 	twilight.spec
 
@@ -27,10 +26,4 @@ endif
 if SERVERS
 	${INSTALL} $(tbs)/qw/twilight-qwsv@EXEEXT@ $(top_builddir)
 endif
-
-ChangeLog:
-	$(top_srcdir)/tools/cvs2cl.pl
-	-rm -f ChangeLog.bak
-
-.PHONY: ChangeLog
 
