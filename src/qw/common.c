@@ -1049,6 +1049,17 @@ COM_AddParm (char *parm)
 	largv[com_argc++] = parm;
 }
 
+/*
+================
+COM_Init_Cvars
+================
+*/
+void
+COM_Init_Cvars (void)
+{
+	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
+	COM_CheckRegistered ();
+}
 
 /*
 ================
@@ -1079,11 +1090,8 @@ COM_Init (void)
 		LittleFloat = FloatSwap;
 	}
 
-	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
 	Cmd_AddCommand ("path", COM_Path_f);
-
 	COM_InitFilesystem ();
-	COM_CheckRegistered ();
 }
 
 

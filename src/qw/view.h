@@ -28,14 +28,15 @@
 #ifndef __VIEW_H
 #define __VIEW_H
 
-extern cvar_t *v_gamma;
-extern cvar_t *lcd_x;
-extern float v_blend[4];
+extern cvar_t	*v_gamma;
+extern cvar_t	*lcd_x;
+extern float	v_blend[4];
 
-void        V_Init (void);
-void        V_RenderView (void);
-float       V_CalcRoll (vec3_t angles, vec3_t velocity);
-void        V_UpdatePalette (void);
+void		V_Init_Cvars (void);
+void		V_Init (void);
+void		V_RenderView (void);
+float		V_CalcRoll (vec3_t angles, vec3_t velocity);
+void		V_UpdatePalette (void);
 
 #endif // __VIEW_H
 

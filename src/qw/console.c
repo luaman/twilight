@@ -223,6 +223,17 @@ Con_CheckResize (void)
 
 /*
 ================
+Con_Init_Cvars
+================
+*/
+void
+Con_Init_Cvars (void)
+{
+	con_notifytime = Cvar_Get ("con_notifytime", "3", CVAR_NONE, NULL);
+}
+
+/*
+================
 Con_Init
 ================
 */
@@ -236,11 +247,6 @@ Con_Init (void)
 	Con_CheckResize ();
 
 	Con_Printf ("Console initialized.\n");
-
-//
-// register our commands
-//
-	con_notifytime = Cvar_Get ("con_notifytime", "3", CVAR_NONE, NULL);
 
 	Cmd_AddCommand ("toggleconsole", Con_ToggleConsole_f);
 	Cmd_AddCommand ("messagemode", Con_MessageMode_f);

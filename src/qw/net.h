@@ -111,6 +111,7 @@ typedef struct {
 
 extern int  net_drop;					// packets dropped before this one
 
+void        Netchan_Init_Cvars (void);
 void        Netchan_Init (void);
 void        Netchan_Transmit (netchan_t *chan, int length, byte * data);
 void        Netchan_OutOfBand (netadr_t adr, int length, byte * data);

@@ -147,6 +147,11 @@ Sbar_Changed (void)
 	sb_updates = 0;						// update next frame
 }
 
+void
+Sbar_Init_Cvars (void)
+{
+}
+
 /*
 ===============
 Sbar_Init

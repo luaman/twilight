@@ -1038,35 +1038,15 @@ CL_Download_f (void)
 
 /*
 =================
-CL_Init
+CL_Init_Cvars
 =================
 */
 void
-CL_Init (void)
+CL_Init_Cvars (void)
 {
-	extern cvar_t *baseskin;
-	extern cvar_t *noskins;
-	char        st[80];
+	extern cvar_t	*baseskin;
+	extern cvar_t	*noskins;
 
-	cls.state = ca_disconnected;
-
-	Info_SetValueForKey (cls.userinfo, "name", "unnamed", MAX_INFO_STRING);
-	Info_SetValueForKey (cls.userinfo, "topcolor", "0", MAX_INFO_STRING);
-	Info_SetValueForKey (cls.userinfo, "bottomcolor", "0", MAX_INFO_STRING);
-	Info_SetValueForKey (cls.userinfo, "rate", "2500", MAX_INFO_STRING);
-	Info_SetValueForKey (cls.userinfo, "msg", "1", MAX_INFO_STRING);
-	snprintf (st, sizeof (st), "%s-%04d", VERSION, build_number ());
-	Info_SetValueForStarKey (cls.userinfo, "*ver", st, MAX_INFO_STRING);
-
-	CL_InitInput ();
-	CL_InitTEnts ();
-	CL_InitPrediction ();
-	CL_InitCam ();
-	Pmove_Init ();
-
-//
-// register our commands
-//
 	// set for running times
 	host_speeds = Cvar_Get ("host_speeds", "0", CVAR_NONE, NULL);
 	show_fps = Cvar_Get ("show_fps", "0", CVAR_NONE, NULL);
@@ -1107,10 +1087,8 @@ CL_Init (void)
 	m_side = Cvar_Get ("m_side", "0.8", CVAR_NONE, NULL);
 
 	entlatency = Cvar_Get ("entlatency", "20", CVAR_NONE, NULL);
-	cl_predict_players = Cvar_Get ("cl_predict_players", "1",
-			CVAR_NONE, NULL);
-	cl_predict_players2 = Cvar_Get ("cl_predict_players2", "1",
-			CVAR_NONE, NULL);
+	cl_predict_players = Cvar_Get ("cl_predict_players", "1", CVAR_NONE, NULL);
+	cl_predict_players2 = Cvar_Get ("cl_predict_players2", "1", CVAR_NONE, NULL);
 	cl_solid_players = Cvar_Get ("cl_solid_players", "1", CVAR_NONE, NULL);
 
 	localid = Cvar_Get ("localid", "", CVAR_NONE, NULL);
@@ -1127,13 +1105,43 @@ CL_Init (void)
 	team = Cvar_Get ("team", "", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
 	skin = Cvar_Get ("skin", "", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
 	topcolor = Cvar_Get ("topcolor", "0", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
-	bottomcolor = Cvar_Get ("bottomcolor", "0", CVAR_ARCHIVE|CVAR_USERINFO,
-			NULL);
+	bottomcolor = Cvar_Get ("bottomcolor", "0", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
 	rate = Cvar_Get ("rate", "2500", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
 	noaim = Cvar_Get ("noaim", "0", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
 	msg = Cvar_Get ("msg", "1", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
+}
 
+/*
+=================
+CL_Init
+=================
+*/
+void
+CL_Init (void)
+{
+	char			st[80];
 
+	cls.state = ca_disconnected;
+
+	Info_SetValueForKey (cls.userinfo, "name", "unnamed", MAX_INFO_STRING);
+	Info_SetValueForKey (cls.userinfo, "topcolor", "0", MAX_INFO_STRING);
+	Info_SetValueForKey (cls.userinfo, "bottomcolor", "0", MAX_INFO_STRING);
+	Info_SetValueForKey (cls.userinfo, "rate", "2500", MAX_INFO_STRING);
+	Info_SetValueForKey (cls.userinfo, "msg", "1", MAX_INFO_STRING);
+	snprintf (st, sizeof (st), "%s-%04d", VERSION, build_number ());
+	Info_SetValueForStarKey (cls.userinfo, "*ver", st, MAX_INFO_STRING);
+
+	CL_Input_Init_Cvars ();			// initialize all cl_input related cvars
+	CL_Input_Init ();				// setup input system, add related commands
+
+	CL_InitTEnts ();
+	CL_InitPrediction ();
+	CL_InitCam ();
+	Pmove_Init ();
+
+	//
+	// register our commands
+	//
 	Cmd_AddCommand ("version", CL_Version_f);
 
 	Cmd_AddCommand ("changing", CL_Changing_f);
@@ -1167,9 +1175,9 @@ CL_Init (void)
 	Cmd_AddCommand ("nextul", CL_NextUpload);
 	Cmd_AddCommand ("stopul", CL_StopUpload);
 
-//
-// forward to server commands
-//
+	//
+	// forward to server commands
+	//
 	Cmd_AddCommand ("kill", NULL);
 	Cmd_AddCommand ("pause", NULL);
 	Cmd_AddCommand ("say", NULL);
@@ -1433,29 +1441,48 @@ Host_Init (quakeparms_t *parms)
 				   parms->memsize / (float) 0x100000);
 
 	Memory_Init (parms->membase, parms->memsize);
-	Cbuf_Init ();
-	Cvar_Init ();
-	Cmd_Init ();
-	V_Init ();
+	Cvar_Init ();		// add all cvar related manipulation commands and set developer cvar
 
-	COM_Init ();
-	SCR_InitCvars ();
+	Cbuf_Init ();		// initialize cmd_text buffer
+	Cmd_Init ();		// setup the basic commands we need for the system
 
-	Host_FixupModelNames ();
+	// execute +set as early as possible
+	Cmd_StuffCmds_f ();
+	Cbuf_Execute_Sets ();
 
-	NET_Init (PORT_CLIENT);
-	Netchan_Init ();
+	COM_Init_Cvars ();				// initialize basic cvars
+	COM_Init ();					// setup and initialize filesystem, endianess, add related commands
+
+	Con_Init_Cvars ();				// initialize all console related cvars
+
+	Key_Init_Cvars ();				// initialize all key related cvars
+
+	Host_FixupModelNames ();		// fix model names (how?)
+	Mod_Init_Cvars();				// initialize all model related cvars
+	Mod_Init ();					// setup models, add related commands
+
+	Netchan_Init_Cvars ();			// initialize all netchan related cvars
+
+	VID_Init_Cvars();				// initialize all video related cvars
+
+	V_Init_Cvars();					// initialize all view related cvars
+	V_Init ();						// setup view, add related commands
+
+	SCR_Init_Cvars ();				// initialize all screen(?) related cvars
+
+	NET_Init (PORT_CLIENT);			// setup net sockets and identify host
+	Netchan_Init ();				// setup netchan
 
 	W_LoadWadFile ("gfx.wad");
-	Key_Init ();
-	Con_Init ();
-	M_Init ();
-	Mod_Init ();
+	Key_Init ();					// setup keysym structures, add related commands
+	Con_Init ();					// setup and initialize console, add related commands
+	M_Init_Cvars ();				// initialize all menu related cvars
+	M_Init ();						// setup menu, add related commands
+
+	R_InitTextures ();				// setup texture system defaults
 
 //  Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
 	Con_Printf ("%4.1f megs RAM used.\n", parms->memsize / (1024 * 1024.0));
-
-	R_InitTextures ();
 
 	host_basepal = (byte *) COM_LoadHunkFile ("gfx/palette.lmp");
 	if (!host_basepal)
@@ -1465,16 +1492,29 @@ Host_Init (quakeparms_t *parms)
 		Sys_Error ("Couldn't load gfx/colormap.lmp");
 
 	VID_Init (host_basepal);
-	Draw_Init ();
-	SCR_Init ();
-	R_Init ();
-	S_Init ();
+	Draw_Init_Cvars ();				// initialize all draw system related cvars
+	Draw_Init ();					// setup draw system, add related commands
+
+	SCR_Init ();					// setup and initialize screen(?), add related commands
+
+	R_Init_Cvars ();				// initialize all rendering system related cvars
+	R_Init ();						// setup rendering system, add related commands
+
+	S_Init_Cvars ();				// initialize all sound system related cvars
+	S_Init ();						// setup sound system, add related commands
 
 	cls.state = ca_disconnected;
-	CDAudio_Init ();
-	Sbar_Init ();
-	CL_Init ();
-	IN_Init ();
+	CDAudio_Init_Cvars ();			// initialize all cdaudio related cvars
+	CDAudio_Init ();				// setup cdaudio system, add related commands
+
+	Sbar_Init_Cvars ();				// initialize all statusbar related cvars
+	Sbar_Init ();					// setup statusbar, add related commands
+
+	CL_Init_Cvars ();				// initialize all cl_* related cvars
+	CL_Init ();						// setup client, add related commands
+
+	IN_Init_Cvars ();				// initialize all input related cvars
+	IN_Init ();						// setup input
 
 	Cbuf_InsertText ("exec quake.rc\n");
 	Cbuf_AddText

@@ -951,6 +951,53 @@ V_RenderView (void)
 
 /*
 =============
+V_Init_Cvars
+=============
+*/
+void
+V_Init_Cvars (void)
+{
+	// FIXME: make this work sometime...
+	lcd_x = Cvar_Get ("lcd_x", "0", CVAR_NONE, NULL);
+
+	cl_rollspeed = Cvar_Get ("cl_rollspeed", "200", CVAR_NONE, NULL);
+	cl_rollangle = Cvar_Get ("cl_rollangle", "2.0", CVAR_NONE, NULL);
+
+	cl_bob = Cvar_Get ("cl_bob", "0.02", CVAR_NONE, NULL);
+	cl_bobcycle = Cvar_Get ("cl_bobcycle", "0.6", CVAR_NONE, NULL);
+	cl_bobup = Cvar_Get ("cl_bobup", "0.5", CVAR_NONE, NULL);
+
+	v_kicktime = Cvar_Get ("v_kicktime", "0.5", CVAR_NONE, NULL);
+	v_kickroll = Cvar_Get ("v_kickroll", "0.6", CVAR_NONE, NULL);
+	v_kickpitch = Cvar_Get ("v_kickpitch", "0.6", CVAR_NONE, NULL);
+
+	v_iyaw_cycle = Cvar_Get ("v_iyaw_cycle", "2", CVAR_NONE, NULL);
+	v_iroll_cycle = Cvar_Get ("v_iroll_cycle", "0.5", CVAR_NONE, NULL);
+	v_ipitch_cycle = Cvar_Get ("v_ipitch_cycle", "1", CVAR_NONE, NULL);
+	v_iyaw_level = Cvar_Get ("v_iyaw_level", "0.3", CVAR_NONE, NULL);
+	v_iroll_level = Cvar_Get ("v_iroll_level", "0.1", CVAR_NONE, NULL);
+	v_ipitch_level = Cvar_Get ("v_ipitch_level", "0.3", CVAR_NONE, NULL);
+
+	v_idlescale = Cvar_Get ("v_idlescale", "0", CVAR_NONE, NULL);
+
+	crosshair = Cvar_Get ("crosshair", "0", CVAR_ARCHIVE, NULL);
+	crosshaircolor = Cvar_Get ("crosshaircolor", "79", CVAR_ARCHIVE, NULL);
+
+	cl_crossx = Cvar_Get ("cl_crossx", "0", CVAR_ARCHIVE, NULL);
+	cl_crossy = Cvar_Get ("cl_crossy", "0", CVAR_ARCHIVE, NULL);
+
+	gl_cshiftpercent = Cvar_Get ("gl_cshiftpercent", "100", CVAR_NONE, NULL);
+
+	v_contentblend = Cvar_Get ("v_contentblend", "1", CVAR_NONE, NULL);
+
+	v_gamma = Cvar_Get ("gamma", "1", CVAR_ARCHIVE, NULL);
+
+	v_centermove = Cvar_Get ("v_centermove", "0.15", CVAR_NONE, NULL);
+	v_centerspeed = Cvar_Get ("v_centerspeed", "500", CVAR_NONE, NULL);
+}
+
+/*
+=============
 V_Init
 =============
 */

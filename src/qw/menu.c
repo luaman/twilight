@@ -1275,6 +1275,10 @@ M_Quit_Draw (void)
 //=============================================================================
 /* Menu Subsystem */
 
+void
+M_Init_Cvars (void)
+{
+}
 
 void
 M_Init (void)

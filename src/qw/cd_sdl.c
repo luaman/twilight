@@ -362,6 +362,11 @@ CDAudio_Update (void)
 	}
 }
 
+void
+CDAudio_Init_Cvars(void)
+{
+}
+
 int
 CDAudio_Init (void)
 {

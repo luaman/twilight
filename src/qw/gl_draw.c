@@ -267,6 +267,24 @@ Draw_TextureMode_f (void)
 
 /*
 ===============
+Draw_Init_Cvars
+===============
+*/
+void
+Draw_Init_Cvars (void)
+{
+	gl_nobind = Cvar_Get ("gl_nobind", "0", CVAR_NONE, NULL);
+	gl_max_size = Cvar_Get ("gl_max_size", "1024", CVAR_NONE, NULL);
+	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
+
+	// 3dfx can only handle 256 wide textures
+	if (!Q_strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
+		!Q_strncasecmp ((char *) gl_renderer, "Mesa", 4))
+		Cvar_Set (gl_max_size, "256");
+}
+
+/*
+===============
 Draw_Init
 ===============
 */
@@ -282,15 +300,6 @@ Draw_Init (void)
 	int         start;
 	byte       *ncdata;
 
-	gl_nobind = Cvar_Get ("gl_nobind", "0", CVAR_NONE, NULL);
-	gl_max_size = Cvar_Get ("gl_max_size", "1024", CVAR_NONE, NULL);
-	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
-
-	// 3dfx can only handle 256 wide textures
-	if (!Q_strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
-		!Q_strncasecmp ((char *) gl_renderer, "Mesa", 4))
-		Cvar_Set (gl_max_size, "256");
-
 	Cmd_AddCommand ("gl_texturemode", &Draw_TextureMode_f);
 
 	// load the console background and the charset
@@ -305,7 +314,7 @@ Draw_Init (void)
 	// now turn them into textures
 	char_texture =
 		GL_LoadTexture ("charset", 128, 128, draw_chars, false, true);
-//  Draw_CrosshairAdjust();
+	//  Draw_CrosshairAdjust();
 	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
 
 	start = Hunk_LowMark ();

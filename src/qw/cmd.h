@@ -59,6 +59,7 @@ void        Cbuf_InsertText (char *text);
 // commands.
 
 void        Cbuf_Execute (void);
+void		Cbuf_Execute_Sets (void);
 
 // Pulls off \n terminated lines of text from the command buffer and sends
 // them through Cmd_ExecuteString.  Stops when the buffer is empty.

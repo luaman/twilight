@@ -26,6 +26,8 @@
 static const char rcsid[] =
     "$Id$";
 
+#include <ctype.h>
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #else
@@ -202,6 +204,64 @@ Cbuf_Execute (void)
 			// for next frame
 			cmd_wait = false;
 			break;
+		}
+	}
+}
+
+static void
+extract_line (char *line)
+{
+	int         i;
+	char       *text;
+	int         quotes;
+
+	// find a \n or ; line break
+	text = (char *) cmd_text.data;
+	quotes = 0;
+	for (i = 0; i < cmd_text.cursize; i++) {
+		if (text[i] == '"')
+			quotes++;
+		if (!(quotes & 1) && text[i] == ';')
+			break;						// don't break if inside a quoted
+										// string
+		if (text[i] == '\n' || text[i] == '\r')
+			break;
+	}
+
+	memcpy (line, text, i);
+	line[i] = '\0';
+	// delete the text from the command buffer and move remaining commands
+	// down this is necessary because commands (exec, alias) can insert
+	// data at the beginning of the text buffer
+
+	if (i == cmd_text.cursize)
+		cmd_text.cursize = 0;
+	else {
+		i++;
+		cmd_text.cursize -= i;
+		memcpy (text, text + i, cmd_text.cursize);
+	}
+}
+
+/*
+
+	Cbuf_Execute
+
+*/
+void
+Cbuf_Execute_Sets (void)
+{
+	char	line[1024] = { 0 };
+
+	while (cmd_text.cursize) {
+		extract_line (line);
+		// execute the command line
+		if (strncmp (line, "set", 3) && isspace ((int) line[3])) {
+			// Con_DPrintf ("+%s\n",line);
+			Cmd_ExecuteString (line);	// FIXME: unification with NQ someday of core?
+		} else if (strncmp (line, "setrom", 6) && isspace ((int) line[6])) {
+			// Con_DPrintf ("+%s\n",line);
+			Cmd_ExecuteString (line);	// FIXME: unification with NQ someday of core?
 		}
 	}
 }
@@ -732,9 +792,7 @@ Cmd_Init
 void
 Cmd_Init (void)
 {
-//
-// register our commands
-//
+	// register our commands
 	Cmd_AddCommand ("stuffcmds", Cmd_StuffCmds_f);
 	Cmd_AddCommand ("exec", Cmd_Exec_f);
 	Cmd_AddCommand ("echo", Cmd_Echo_f);
@@ -742,3 +800,4 @@ Cmd_Init (void)
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
 	Cmd_AddCommand ("cmd", Cmd_ForwardToServer_f);
 }
+
