@@ -1,3 +1,29 @@
+/*
+	$RCSfile$
+
+	Copyright (C) 2002  Forest Hale
+
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+
+	See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to:
+	
+		Free Software Foundation, Inc.
+		59 Temple Place - Suite 330
+		Boston, MA  02111-1307, USA
+*/
+static const char rcsid[] =
+	"$Id$";
+
 #include "qtypes.h"
 #include "collision.h"
 #include "model.h"
@@ -7,17 +33,17 @@
 typedef struct
 {
 	// the hull we're tracing through
-	const hull_t *hull;
+	const hull_t	*hull;
 
 	// the trace structure to fill in
-	trace_t *trace;
+	trace_t			*trace;
 
 	// start and end of the trace (in model space)
-	dvec3_t start;
-	dvec3_t end;
+	dvec3_t			start;
+	dvec3_t			end;
 
 	// end - start
-	dvec3_t dist;
+	dvec3_t			dist;
 }
 RecursiveHullCheckTraceInfo_t;
 
@@ -35,15 +61,15 @@ RecursiveHullCheck (RecursiveHullCheckTraceInfo_t *t, int num, double p1f,
 	// status variables, these don't need to be saved on the stack when
 	// recursing...  but are because this should be thread-safe
 	// (note: tracing against a bbox is not thread-safe, yet)
-	int ret;
-	mplane_t *plane;
-	double t1, t2;
+	int			ret;
+	mplane_t	*plane;
+	double		t1, t2;
 
 	// variables that need to be stored on the stack when recursing
-	dclipnode_t *node;
-	int side;
-	double midf;
-	dvec3_t	mid;
+	dclipnode_t	*node;
+	int			side;
+	double		midf;
+	dvec3_t		mid;
 
 	// LordHavoc: a goto!  everyone flee in terror... :)
 loc0:
@@ -148,10 +174,13 @@ loc0:
 		return ret;
 
 	// front is air and back is solid, this is the impact point...
-	if (side) {
+	if (side)
+	{
 		t->trace->plane.dist = -plane->dist;
 		VectorNegate (plane->normal, t->trace->plane.normal);
-	} else {
+	}
+	else
+	{
 		t->trace->plane.dist = plane->dist;
 		VectorCopy (plane->normal, t->trace->plane.normal);
 	}
@@ -172,6 +201,7 @@ loc0:
 static void
 RecursiveHullCheckPoint (RecursiveHullCheckTraceInfo_t *t, int num)
 {
+	// If you can read this, you understand BSP trees
 	while (num >= 0)
 		num = t->hull->clipnodes[num].children[((t->hull->planes[t->hull->clipnodes[num].planenum].type < 3) ? (t->start[t->hull->planes[t->hull->clipnodes[num].planenum].type]) : (DotProduct(t->hull->planes[t->hull->clipnodes[num].planenum].normal, t->start))) < t->hull->planes[t->hull->clipnodes[num].planenum].dist];
 
@@ -207,46 +237,26 @@ RecursiveHullCheckPoint (RecursiveHullCheckTraceInfo_t *t, int num)
 	}
 }
 
-float
-TraceLine_Raw (hull_t *hull, vec3_t start, vec3_t end, trace_t *trace)
+void
+Collision_RoundUpToHullSize (const model_t *cmodel,
+		const vec3_t inmins, const vec3_t inmaxs,
+		vec3_t outmins, vec3_t outmaxs)
 {
-	RecursiveHullCheckTraceInfo_t rhc;
+	vec3_t			size;
+	const hull_t	*hull;
 
-	// Set the defaults for the trace.
-	memset (trace, 0, sizeof(trace_t));
-
-	rhc.trace = trace;
-
-	rhc.trace->fraction = 1;
-	rhc.trace->allsolid = true;
-
-	rhc.hull = hull;
-	VectorCopy(start, rhc.start);
-	VectorCopy(end, rhc.end);
-	VectorCopy(rhc.end, rhc.trace->endpos);
-	VectorSubtract(rhc.end, rhc.start, rhc.dist);
-	if (DotProduct(rhc.dist, rhc.dist) > 0.00001)
-		RecursiveHullCheck(&rhc, hull->firstclipnode, 0, 1, rhc.start, rhc.end);
+	VectorSubtract (inmaxs, inmins, size);
+	if (size[0] < 3)
+		hull = &cmodel->hulls[0]; // 0x0x0
+	else if (size[0] <= 32)
+		hull = &cmodel->hulls[1]; // 32x32x56
 	else
-		RecursiveHullCheckPoint (&rhc, hull->firstclipnode);
+		hull = &cmodel->hulls[2]; // 64x64x88
 
-	return (float)trace->fraction;
+	VectorCopy (inmins, outmins);
+	VectorAdd (inmins, hull->clip_size, outmaxs);
 }
 
-float
-TraceLine (model_t *mdl, vec3_t start, vec3_t end, vec3_t impact, vec3_t normal)
-{
-	trace_t trace;
-
-	TraceLine_Raw (mdl->hulls, start, end, &trace);
-
-	if (impact)
-		VectorCopy (trace.endpos, impact);
-	if (normal)
-		VectorCopy (trace.plane.normal, normal);
-
-	return trace.fraction;
-}
 
 static hull_t box_hull;
 static dclipnode_t box_clipnodes[6];
@@ -255,18 +265,19 @@ static mplane_t box_planes[6];
 void
 Collision_Init (void)
 {
-	int		i;
-	int		side;
+	int			i;
+	int			side;
 
-	//Set up the planes and clipnodes so that the six floats of a bounding box
-	//can just be stored out and get a proper hull_t structure.
+	// Set up the planes and clipnodes so that the six floats of a bounding
+	// box can just be stored out and get a proper hull_t structure.
 
 	box_hull.clipnodes = box_clipnodes;
 	box_hull.planes = box_planes;
 	box_hull.firstclipnode = 0;
 	box_hull.lastclipnode = 5;
 
-	for (i = 0; i < 6; i++) {
+	for (i = 0; i < 6; i++)
+	{
 		box_clipnodes[i].planenum = i;
 
 		side = i & 1;
@@ -287,7 +298,7 @@ static hull_t *
 HullForBBoxEntity (const vec3_t corigin, const vec3_t cmins, const vec3_t cmaxs,
 		const vec3_t mins, const vec3_t maxs, vec3_t offset)
 {
-	vec3_t hullmins, hullmaxs;
+	vec3_t		hullmins, hullmaxs;
 
 	// create a temp hull from bounding box sizes
 	VectorCopy (corigin, offset);
@@ -309,12 +320,14 @@ static const hull_t *
 HullForBrushModel (const model_t *cmodel, const vec3_t corigin,
 		const vec3_t mins, const vec3_t maxs, vec3_t offset)
 {
-	vec3_t size;
-	const hull_t *hull;
+	vec3_t			size;
+	const hull_t	*hull;
 
 	// decide which clipping hull to use, based on the size
 	// explicit hulls in the BSP model
 	VectorSubtract (maxs, mins, size);
+
+	// FIXME: Hulls are evil.
 	if (size[0] < 3)
 		hull = &cmodel->hulls[0]; // 0x0x0
 	else if (size[0] <= 32)
@@ -348,7 +361,8 @@ Collision_ClipTrace (trace_t *trace, void *cent, const model_t *cmodel,
 	rhc.trace->fraction = 1;
 	rhc.trace->allsolid = true;
 
-	if (cmodel && cmodel->type == mod_brush) {
+	if (cmodel && cmodel->type == mod_brush)
+	{
 		// brush model
 
 		// get the clipping hull
@@ -361,30 +375,33 @@ Collision_ClipTrace (trace_t *trace, void *cent, const model_t *cmodel,
 		if (cangles[0] || cangles[1] || cangles[2])
 		{
 			AngleVectorsFLU (cangles, forward, left, up);
-			VectorCopy(startd, tempd);
+			VectorCopy (startd, tempd);
 			startd[0] = DotProduct (tempd, forward);
 			startd[1] = DotProduct (tempd, left);
 			startd[2] = DotProduct (tempd, up);
-			VectorCopy(endd, tempd);
+			VectorCopy (endd, tempd);
 			endd[0] = DotProduct (tempd, forward);
 			endd[1] = DotProduct (tempd, left);
 			endd[2] = DotProduct (tempd, up);
 		}
 
 		// trace a line through the appropriate clipping hull
-		VectorCopy(startd, rhc.start);
-		VectorCopy(endd, rhc.end);
-		VectorCopy(rhc.end, rhc.trace->endpos);
-		VectorSubtract(rhc.end, rhc.start, rhc.dist);
-		if (DotProduct(rhc.dist, rhc.dist) > 0.00001)
-			RecursiveHullCheck (&rhc, rhc.hull->firstclipnode, 0, 1, rhc.start, rhc.end);
+		VectorCopy (startd, rhc.start);
+		VectorCopy (endd, rhc.end);
+		VectorCopy (rhc.end, rhc.trace->endpos);
+		VectorSubtract (rhc.end, rhc.start, rhc.dist);
+		if (DotProduct (rhc.dist, rhc.dist) > 0.00001)
+			RecursiveHullCheck (&rhc, rhc.hull->firstclipnode, 0, 1,
+					rhc.start, rhc.end);
 		else
 			RecursiveHullCheckPoint (&rhc, rhc.hull->firstclipnode);
 
 		// if we hit, unrotate endpos and normal, and store the entity we hit
-		if (rhc.trace->fraction != 1) {
+		if (rhc.trace->fraction != 1)
+		{
 			// rotate endpos back to world frame of reference
-			if (cangles[0] || cangles[1] || cangles[2]) {
+			if (cangles[0] || cangles[1] || cangles[2])
+			{
 				VectorNegate (cangles, offset);
 				AngleVectorsFLU (offset, forward, left, up);
 
@@ -398,32 +415,83 @@ Collision_ClipTrace (trace_t *trace, void *cent, const model_t *cmodel,
 				rhc.trace->plane.normal[1] = DotProduct (tempd, left);
 				rhc.trace->plane.normal[2] = DotProduct (tempd, up);
 			}
-			// fix offset
 			rhc.trace->ent = (void *) cent;
-		} else if (rhc.trace->allsolid || rhc.trace->startsolid)
+		}
+		else if (rhc.trace->allsolid || rhc.trace->startsolid)
 			rhc.trace->ent = (void *) cent;
+
+		// fix offset
 		VectorAdd (rhc.trace->endpos, offset, rhc.trace->endpos);
-	} else {
+	}
+	else
+	{
 		// bounding box
-		rhc.hull = HullForBBoxEntity(corigin, cmins, cmaxs, mins, maxs, offset);
+		rhc.hull = HullForBBoxEntity (corigin, cmins, cmaxs, mins, maxs,
+				offset);
 
 		// trace a line through the generated clipping hull
-		VectorSubtract(start, offset, rhc.start);
-		VectorSubtract(end, offset, rhc.end);
-		VectorCopy(rhc.end, rhc.trace->endpos);
-		VectorSubtract(rhc.end, rhc.start, rhc.dist);
-		if (DotProduct(rhc.dist, rhc.dist) > 0.00001)
+		VectorSubtract (start, offset, rhc.start);
+		VectorSubtract (end, offset, rhc.end);
+		VectorCopy (rhc.end, rhc.trace->endpos);
+		VectorSubtract (rhc.end, rhc.start, rhc.dist);
+		if (DotProduct (rhc.dist, rhc.dist) > 0.00001)
 			RecursiveHullCheck (&rhc, rhc.hull->firstclipnode, 0, 1,
 					rhc.start, rhc.end);
 		else
 			RecursiveHullCheckPoint (&rhc, rhc.hull->firstclipnode);
 
 		// if we hit, store the entity we hit
-		if (rhc.trace->fraction != 1) {
+		if (rhc.trace->fraction != 1)
+		{
 			// fix offset
 			VectorAdd (rhc.trace->endpos, offset, rhc.trace->endpos);
 			rhc.trace->ent = (void *) cent;
-		} else if (rhc.trace->allsolid || rhc.trace->startsolid)
+		}
+		else if (rhc.trace->allsolid || rhc.trace->startsolid)
 			rhc.trace->ent = (void *) cent;
 	}
 }
+
+float
+TraceLine_Raw (hull_t *hull, vec3_t start, vec3_t end, trace_t *trace)
+{
+	RecursiveHullCheckTraceInfo_t rhc;
+
+	// Set the defaults for the trace.
+	memset (trace, 0, sizeof(trace_t));
+
+	rhc.trace = trace;
+
+	rhc.trace->fraction = 1;
+	rhc.trace->allsolid = true;
+
+	rhc.hull = hull;
+	VectorCopy (start, rhc.start);
+	VectorCopy (end, rhc.end);
+	VectorCopy (rhc.end, rhc.trace->endpos);
+	VectorSubtract (rhc.end, rhc.start, rhc.dist);
+	if (DotProduct (rhc.dist, rhc.dist) > 0.00001)
+		RecursiveHullCheck (&rhc, hull->firstclipnode, 0, 1,
+				rhc.start, rhc.end);
+	else
+		RecursiveHullCheckPoint (&rhc, hull->firstclipnode);
+
+	return (float)trace->fraction;
+}
+
+float
+TraceLine (model_t *mdl, vec3_t start, vec3_t end, vec3_t impact,
+		vec3_t normal)
+{
+	trace_t		trace;
+
+	TraceLine_Raw (mdl->hulls, start, end, &trace);
+
+	if (impact)
+		VectorCopy (trace.endpos, impact);
+	if (normal)
+		VectorCopy (trace.plane.normal, normal);
+
+	return trace.fraction;
+}
+
