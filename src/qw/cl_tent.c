@@ -380,8 +380,6 @@ CL_NewTempEntity (void)
 
 	memset (ent, 0, sizeof (*ent));
 
-	ent->times = -1;
-
 	return ent;
 }
 
@@ -423,11 +421,11 @@ CL_UpdateBeams (void)
 			ent = CL_NewTempEntity ();
 			if (!ent)
 				return;
-			VectorCopy (org, ent->cur.origin);
+			ang[2] = Q_rand () % 360;
 			ent->model = b->model;
-			ent->cur.angles[0] = ang[0];
-			ent->cur.angles[1] = ang[1];
-			ent->cur.angles[2] = Q_rand () % 360;
+			CL_Update_Origin(ent, org, cls.realtime);
+			CL_Update_Angles(ent, ang, cls.realtime);
+			CL_Update_Frame(ent, 0, cls.realtime);
 
 			for (i = 0; i < 3; i++)
 				org[i] += dist[i] * 30;

@@ -145,6 +145,9 @@ V_CalcBob (void)
 	if (onground == -1)
 		return bob;		/* just use old value */
 
+	if (!cl_bobcycle->value)
+		return bob = 0;
+
 	bobtime += host_frametime;
 	cycle = bobtime - (int) (bobtime / cl_bobcycle->value) * cl_bobcycle->value;
 	cycle /= cl_bobcycle->value;
@@ -552,13 +555,13 @@ V_AddIdle (void)
 		v_idlescale->value * Q_sin (cl.time * v_iyaw_cycle->value) *
 		v_iyaw_level->value;
 
-	cl.viewent.cur.angles[ROLL] -=
+	cl.viewent_angles[ROLL] -=
 		v_idlescale->value * Q_sin (cl.time * v_iroll_cycle->value) *
 		v_iroll_level->value;
-	cl.viewent.cur.angles[PITCH] -=
+	cl.viewent_angles[PITCH] -=
 		v_idlescale->value * Q_sin (cl.time * v_ipitch_cycle->value) *
 		v_ipitch_level->value;
-	cl.viewent.cur.angles[YAW] -=
+	cl.viewent_angles[YAW] -=
 		v_idlescale->value * Q_sin (cl.time * v_iyaw_cycle->value) *
 		v_iyaw_level->value;
 }
@@ -595,7 +598,7 @@ void
 V_CalcIntermissionRefdef (void)
 {
 	/* view is the weapon model (only visible from inside body) */
-	cl.viewent.model = NULL;
+	cl.viewent_model = NULL;
 
 	VectorCopy(cl.simorg, r_refdef.vieworg);
 	VectorCopy(cl.simangles, r_refdef.viewangles);
@@ -644,7 +647,6 @@ V_CalcRefdef
 void
 V_CalcRefdef (void)
 {
-	entity_t		*view;
 	int				i;
 	vec3_t			forward, right, up;
 
@@ -652,9 +654,6 @@ V_CalcRefdef (void)
 	static float	oldz = 0;
 
 	V_DriftPitch();
-
-	/* view is the weapon model (only visible from inside body) */
-	view = &cl.viewent;
 
 	bob = V_CalcBob();
 
@@ -688,38 +687,37 @@ V_CalcRefdef (void)
 	AngleVectors (cl.simangles, forward, right, up);
 
 	/* set up gun position */
-	VectorCopy (cl.simangles, view->cur.angles);
+	VectorCopy (cl.simangles, cl.viewent_angles);
 
 	/* set up gun angles */
-	view->cur.angles[YAW] = r_refdef.viewangles[YAW];
-	view->cur.angles[PITCH] = -r_refdef.viewangles[PITCH];
+	cl.viewent_angles[YAW] = r_refdef.viewangles[YAW];
+	cl.viewent_angles[PITCH] = -r_refdef.viewangles[PITCH];
 
-	VectorCopy (cl.simorg, view->cur.origin);
-	view->cur.origin[2] += 22;
+	VectorCopy (cl.simorg, cl.viewent_origin);
+	cl.viewent_origin[2] += 22;
 
 	for (i = 0; i < 3; i++) {
-		view->cur.origin[i] += forward[i] * bob * 0.4;
+		cl.viewent_origin[i] += forward[i] * bob * 0.4;
 	}
 
-	view->cur.origin[2] += bob;
+	cl.viewent_origin[2] += bob;
 
 	/* fudge position around to keep amount of weapon visible
 	   roughly equal with different FOV */
-	view->cur.origin[2] += 2;
+	cl.viewent_origin[2] += 2;
 
 	if (view_message->flags & (PF_GIB | PF_DEAD))
-		view->model = NULL;
+		cl.viewent_model = NULL;
 	else {
 		model_t *model = cl.model_precache[cl.stats[STAT_WEAPON]];
 
-		if (view->model != model)
+		if (cl.viewent_model != model)
 		{
-			view->model = model;
-			view->times = 0;
+			cl.viewent_model = model;
 		}
 	}
 
-	view->cur.frame = view_message->weaponframe;
+	cl.viewent_frame = view_message->weaponframe;
 
 	/* set up the refresh position */
 	r_refdef.viewangles[PITCH] += cl.punchangle;
@@ -736,7 +734,7 @@ V_CalcRefdef (void)
 		if (cl.simorg[2] - oldz > 12)
 			oldz = cl.simorg[2] - 12;
 		r_refdef.vieworg[2] += oldz - cl.simorg[2];
-		view->cur.origin[2] += oldz - cl.simorg[2];
+		cl.viewent_origin[2] += oldz - cl.simorg[2];
 	} else
 		oldz = cl.simorg[2];
 }

@@ -552,7 +552,7 @@ CL_Record_f (void)
 
 		MSG_WriteByte (&buf, ent->cur.frame);
 		MSG_WriteByte (&buf, 0);
-		MSG_WriteByte (&buf, ent->cur.skinnum);
+		MSG_WriteByte (&buf, ent->skinnum);
 		for (j = 0; j < 3; j++) {
 			MSG_WriteCoord (&buf, ent->cur.origin[j]);
 			MSG_WriteAngle (&buf, ent->cur.angles[j]);

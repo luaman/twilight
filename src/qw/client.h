@@ -316,7 +316,10 @@ typedef struct {
 
 	int			cdtrack;				// cd audio
 
-	entity_t	viewent;				// weapon model
+	vec3_t		viewent_origin;
+	vec3_t		viewent_angles;
+	int			viewent_frame;
+	model_t		*viewent_model;
 
 	// all player information
 	player_info_t players[MAX_CLIENTS];
@@ -504,6 +507,15 @@ void CL_ParseProjectiles (void);
 void CL_ParsePacketEntities (qboolean delta);
 void CL_SetSolidEntities (void);
 void CL_ParsePlayerinfo (void);
+qboolean CL_Update_Origin (entity_t *ent, vec3_t origin, float origin_time);
+void CL_Lerp_Origin (entity_t *ent, vec3_t origin, float origin_time);
+qboolean CL_UpdateAndLerp_Origin (entity_t *ent, vec3_t origin, float origin_time);
+qboolean CL_Update_Angles (entity_t *ent, vec3_t angles, float angles_time);
+void CL_Lerp_Angles (entity_t *ent, vec3_t angles, float angles_time);
+qboolean CL_UpdateAndLerp_Angles (entity_t *ent, vec3_t angles, float angles_time);
+qboolean CL_Update_Frame (entity_t *e, int frame, float frame_time);
+void CL_Lerp_Frame (entity_t *e, int frame, float frame_time);
+qboolean CL_UpdateAndLerp_Frame (entity_t *ent, int frame, float frame_time);
 
 /*
  * cl_pred.c
