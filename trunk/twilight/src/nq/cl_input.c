@@ -1,5 +1,5 @@
 /*
-	$RCSfile$ -- builds an intended movement command to send to the server
+	$RCSfile$
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
