@@ -103,7 +103,7 @@ GLInfo_CheckDriverQuirks (void)
 		if (!strcmp (gl_version, "1.3.3717 WinXP Release") || strstr(gl_version, "3.7.6"))
 		{
 			DynGL_BadExtension ("GL_SGIS_generate_mipmap");
-			Com_Printf ("Disabling GL_SGIS_generate_mipmap due to buggy ATI driver version.");
+			Com_Printf ("Disabling GL_SGIS_generate_mipmap due to buggy ATI driver version.\n");
 		}
 	}
 	if (!strcmp (gl_renderer, "Mesa DRI Voodoo3 20010501 x86/MMX")) {
