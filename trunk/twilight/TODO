@@ -18,8 +18,10 @@ New stuff slated for 0.2.0:
 stuff slate for EvilTypeGuy for 0.2.0:
   - clean up the menus, make sure all cvar graphics options
     are listed on the graphics options menu in both nq/qw
-  - clean up the Cmd system, make sure that all the _init,
-    init_cvars routines are still clean and proper
+  - clean up the Cmd system
+  - fix torch scaling, it's scaling by distance again or
+    something like that, must fix by copying old scaling
+    method from NQ to QW...
 
 Would be nice but is not strictly needed:
 
