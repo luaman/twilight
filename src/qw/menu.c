@@ -356,42 +356,42 @@ M_Menu_Options_f (void)
 void
 M_AdjustSliders (int dir)
 {
-	float		t;
+	float	t;
 
 	S_LocalSound ("misc/menu3.wav");
 
 	switch (options_cursor) {
 		case 3:						// screen size
-			t = scr_viewsize->ivalue + (dir * 10);
+			t = scr_viewsize->ivalue + (dir * 10.0f);
 			t = bound (30, t, 120);
-			Cvar_Set (scr_viewsize,  va ("%f", t));
+			Cvar_Set (scr_viewsize, va ("%f", t));
 			break;
 		case 4:						// gamma
-			t = v_gamma->ivalue + (dir * 0.05);
+			t = v_gamma->fvalue + (dir * 0.05f);
 			t = bound (1.0, t, 2.0);
 			Cvar_Set (v_gamma, va ("%f", t));
 			break;
 		case 5:						// software brightness
-			t = r_brightness->ivalue + (dir * 0.25);
+			t = r_brightness->fvalue + (dir * 0.25);
 			t = bound (1, t, 5);
-			Cvar_Set (r_brightness, va("%f", t));
+			Cvar_Set (r_brightness, va ("%f", t));
 			break;
 		case 6:						// software contrast (base brightness)
-			t = r_contrast->ivalue + (dir * 0.025);
-			t = bound (0.75, t, 1.0);
-			Cvar_Set (r_contrast, va("%f", t));
+			t = r_contrast->fvalue + (dir * 0.025);
+			t = bound (0.75, t, 1);
+			Cvar_Set (r_contrast, va ("%f", t));
 			break;
 		case 7:						// mouse speed
-			t = sensitivity->ivalue + (dir * 0.5);
+			t = sensitivity->fvalue + (dir * 0.5f);
 			t = bound (1, t, 11);
 			Cvar_Set (sensitivity, va ("%f", t));
 			break;
 		case 8:						// music volume
 			// NOTE: sliding CD volume not possible with SDL
-			Cvar_Set (bgmvolume,  va ("%i", !bgmvolume->ivalue));
+			Cvar_Set (bgmvolume, bgmvolume->fvalue ? "0" : "1");
 			break;
 		case 9:						// sfx volume
-			t = volume->fvalue + dir * 0.1;
+			t = volume->fvalue + (dir * 0.1f);
 			t = bound (0, t, 1);
 			Cvar_Set (volume, va ("%f", t));
 			break;
@@ -407,19 +407,20 @@ M_AdjustSliders (int dir)
 			break;
 
 		case 11:						// invert mouse
-			Cvar_Set (m_pitch,  va ("%f", -m_pitch->fvalue));
+			t = -m_pitch->fvalue;
+			Cvar_Set (m_pitch, va ("%f", t));
 			break;
 
 		case 12:						// lookspring
-			Cvar_Set (lookspring,  va ("%i", !lookspring->ivalue));
+			Cvar_Set (lookspring, va ("%i", !lookspring->ivalue));
 			break;
 
 		case 13:						// lookstrafe
-			Cvar_Set (lookstrafe,  va ("%i", !lookstrafe->ivalue));
+			Cvar_Set (lookstrafe, va ("%i", !lookstrafe->ivalue));
 			break;
 
 		case 14:
-			Cvar_Set (cl_sbar,  va ("%i", !cl_sbar->ivalue));
+			Cvar_Set (cl_sbar, va ("%i", !cl_sbar->ivalue));
 			break;
 
 		case 15:
@@ -438,10 +439,8 @@ M_DrawSlider (int x, int y, float range)
 {
 	int         i;
 
-	if (range < 0)
-		range = 0;
-	if (range > 1)
-		range = 1;
+	range = bound (0, range, 1);
+
 	M_DrawCharacter (x - 8, y, 128);
 	for (i = 0; i < SLIDER_RANGE; i++)
 		M_DrawCharacter (x + i * 8, y, 129);
@@ -470,12 +469,12 @@ M_Options_Draw (void)
 	M_Print (16, y, "         Go to console"); y += 8;
 	M_Print (16, y, "     Reset to defaults"); y += 8;
 
-	M_Print (16, y, "           Screen size"); M_DrawSlider (220, 56, (scr_viewsize->ivalue - 30) / (120 - 30)); y += 8;
+	M_Print (16, y, "           Screen size"); M_DrawSlider (220, y, (scr_viewsize->ivalue - 30) / (120 - 30)); y += 8;
 	M_Print (16, y, "        Hardware Gamma"); M_DrawSlider (220, y, v_gamma->fvalue - 1.0); y += 8;
-	M_Print (16, y, "   Software Brightness"); M_DrawSlider(220, y, (r_brightness->fvalue - 1) / 4); y += 8;
-	M_Print (16, y, "     Software Contrast"); M_DrawSlider(220, y, (r_contrast->fvalue - 0.75) * 4); y += 8;
+	M_Print (16, y, "   Software Brightness"); M_DrawSlider (220, y, (r_brightness->fvalue - 1) / 4); y += 8;
+	M_Print (16, y, "     Software Contrast"); M_DrawSlider (220, y, (r_contrast->fvalue - 0.75) * 4); y += 8;
 	M_Print (16, y, "           Mouse Speed"); M_DrawSlider (220, y, (sensitivity->fvalue - 1) / 10); y += 8;
-	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->ivalue); y += 8;
+	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->fvalue); y += 8;
 	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->fvalue); y += 8;
 	M_Print (16, y, "            Always Run"); M_DrawCheckbox (220, y, cl_forwardspeed->fvalue > 200); y += 8;
 	M_Print (16, y, "          Invert Mouse"); M_DrawCheckbox (220, y, m_pitch->fvalue < 0); y += 8;
@@ -1061,7 +1060,6 @@ M_SinglePlayer_Draw (void)
 	qpic_t     *p;
 
 	M_DrawPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp"));
-//  M_DrawPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 	p = Draw_CachePic ("gfx/ttl_sgl.lmp");
 	M_DrawPic ((320 - p->width) / 2, 4, p);
 //  M_DrawPic (72, 32, Draw_CachePic ("gfx/sp_menu.lmp") );
@@ -1091,7 +1089,6 @@ M_MultiPlayer_Draw (void)
 	qpic_t     *p;
 
 	M_DrawPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp"));
-//  M_DrawPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 	p = Draw_CachePic ("gfx/p_multi.lmp");
 	M_DrawPic ((320 - p->width) / 2, 4, p);
 //  M_DrawPic (72, 32, Draw_CachePic ("gfx/sp_menu.lmp") );
