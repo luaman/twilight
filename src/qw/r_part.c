@@ -39,9 +39,9 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "glquake.h"
 
-#define MAX_PARTICLES			4096	// default max # of particles at one
+#define MAX_PARTICLES			2048	// default max # of particles at one
 										// time
-#define ABSOLUTE_MIN_PARTICLES	512		// no fewer than this no matter what's
+#define ABSOLUTE_MIN_PARTICLES	2		// no fewer than this no matter what's
 										// on the command line
 
 typedef enum {
@@ -73,7 +73,7 @@ particle_new (ptype_t type, vec3_t org, vec3_t vel, float die, int color,
 	particle_t *part;
 
 	if (numparticles >= r_maxparticles) {
-		Con_Printf("FAILED PARTICLE ALLOC! %d %d\n", numparticles, r_maxparticles);
+/*		Con_Printf("FAILED PARTICLE ALLOC! %d %d\n", numparticles, r_maxparticles); */
 		return NULL;
 	}
 
@@ -158,12 +158,9 @@ R_EntityParticles (entity_t *ent)
 		forward[0] = cp * cy;
 		forward[1] = cp * sy;
 		forward[2] = -sp;
-		org[0] = ent->origin[0] + r_avertexnormals[i][0] * dist +
-			forward[0] * beamlength;
-		org[1] = ent->origin[1] + r_avertexnormals[i][1] * dist +
-			forward[1] * beamlength;
-		org[2] = ent->origin[2] + r_avertexnormals[i][2] * dist +
-			forward[2] * beamlength;
+		org[0] = ent->origin[0] + r_avertexnormals[i][0] * dist + forward[0] * beamlength;
+		org[1] = ent->origin[1] + r_avertexnormals[i][1] * dist + forward[1] * beamlength;
+		org[2] = ent->origin[2] + r_avertexnormals[i][2] * dist + forward[2] * beamlength;
 		particle_new(pt_explode, org, r_origin, realtime + 0.01, 0x6f, 0);
 	}
 }
@@ -458,18 +455,28 @@ R_Torch (entity_t *ent, qboolean torch2)
 			VectorSet (pvel, (rand() & 7) - 4, (rand() & 7) - 4, 0);
 			p = particle_new(pt_torch2, porg, pvel, realtime + 5, 0, Q_rand () & 3);
 
-			if (ent->frame)
-				p->scale = 20;
+			if (p == NULL)
+				return;
+			else {
+				if (ent->frame)
+					p->scale = 20;
+				else
+					p->scale = 10;
+			}
+		} else {
+			p = particle_new(pt_torch, porg, pvel, realtime + 5, 0, Q_rand () & 3);
+			if (p == NULL)
+				return;
 			else
 				p->scale = 10;
 		}
-		else {
-			p = particle_new(pt_torch, porg, pvel, realtime + 5, 0, Q_rand () & 3);
-			p->scale = 10;
-		}
 
-		p->alpha = 0.5;
-		VectorSet (p->color, 227.0 / 255.0, 151.0 / 255.0, 79.0 / 255.0);
+		if (p == NULL)
+			return;
+		else {
+			p->alpha = 0.5;
+			VectorSet (p->color, 227.0 / 255.0, 151.0 / 255.0, 79.0 / 255.0);
+		}
 
 		ent->time_left = realtime + 0.05;
 	}
@@ -639,12 +646,8 @@ R_DrawParticles (void)
 		VectorSet2(tc_array[vnum + 1], 1, 0);
 		VectorSet2(tc_array[vnum + 2], 0, 1);
 		VectorSet3(v_array[vnum + 0], p->org[0], p->org[1], p->org[2]);
-		VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale,
-					p->org[1] + up[1] * scale,
-					p->org[2] + up[2] * scale);
-		VectorSet3(v_array[vnum + 2], p->org[0] + right[0] * scale,
-					p->org[1] + right[1] * scale,
-					p->org[2] + right[2] * scale);
+		VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale, p->org[1] + up[1] * scale, p->org[2] + up[2] * scale);
+		VectorSet3(v_array[vnum + 2], p->org[0] + right[0] * scale, p->org[1] + right[1] * scale, p->org[2] + right[2] * scale);
 		vnum += 3;
 
 		if ((vnum + 3) >= MAX_VERTEX_ARRAYS) {
@@ -705,6 +708,8 @@ R_DrawParticles (void)
 			case pt_slowgrav:
 				p->vel[2] -= grav;
 				break;
+			default:
+				break;
 		}
 	}
 
@@ -724,10 +729,7 @@ R_DrawParticles (void)
 			activeparticles++;
 
 			// hack a scale up to keep particles from disapearing
-			scale =
-				(p->org[0] - r_origin[0]) * vpn[0] + (p->org[1] -
-													  r_origin[1]) * vpn[1]
-				+ (p->org[2] - r_origin[2]) * vpn[2];
+			scale = (p->org[0] - r_origin[0]) * vpn[0] + (p->org[1] - r_origin[1]) * vpn[1] + (p->org[2] - r_origin[2]) * vpn[2];
 
 			if (scale < 20)
 				scale = p->scale;
@@ -741,12 +743,8 @@ R_DrawParticles (void)
 			VectorSet2(tc_array[vnum + 1], 1, 0);
 			VectorSet2(tc_array[vnum + 2], 0, 1);
 			VectorSet3(v_array[vnum + 0], p->org[0], p->org[1], p->org[2]);
-			VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale,
-						p->org[1] + up[1] * scale,
-						p->org[2] + up[2] * scale);
-			VectorSet3(v_array[vnum + 2], p->org[0] + right[0] * scale,
-						p->org[1] + right[1] * scale,
-						p->org[2] + right[2] * scale);
+			VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale, p->org[1] + up[1] * scale, p->org[2] + up[2] * scale);
+			VectorSet3(v_array[vnum + 2], p->org[0] + right[0] * scale, p->org[1] + right[1] * scale, p->org[2] + right[2] * scale);
 			vnum += 3;
 
 			if ((vnum + 3) >= MAX_VERTEX_ARRAYS) {
