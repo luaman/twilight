@@ -26,10 +26,10 @@ libtwilight_renderer_a_SOURCES= \
 	liquid.c liquid.h \
 	menu.c \
 	mod_alias.c mod_alias.h \
-	mod_brush.c mod_brush.h \
+	mod_brush.c \
 	mod_sprite.c mod_sprite.h \
-	noise.c gen_textures.c \
-	palette.c \
+	noise.c gen_textures.c gen_textures.h \
+	palette.c palette.h \
 	r_explosion.c \
 	r_part.c r_part.h \
 	sky.c sky.h surface.c surface.h \

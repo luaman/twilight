@@ -14,7 +14,7 @@ EXTRA_DIST= \
 	TODO.txt
 
 ChangeLog:
-	$(top_srcdir)/tools/cvs2cl.pl
+	$(top_srcdir)/src/tools/cvs2cl.pl
 	-rm -f ChangeLog.bak
 
 .PHONY: ChangeLog
