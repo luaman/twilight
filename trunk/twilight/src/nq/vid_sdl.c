@@ -282,6 +282,8 @@ void CheckMultiTextureExtensions(void)
 #else
 void CheckMultiTextureExtensions(void)
 {
+	void	   *dlhand;
+
 	Con_Printf ("Checking for multitexture... ");
 	if (COM_CheckParm ("-nomtex"))
 	{
