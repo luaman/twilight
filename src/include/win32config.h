@@ -5,7 +5,7 @@
 */
 
 #if _MSC_VER >= 800	/* MSVC 4.0 */
-#pragma warning( disable : 4244 4127 4201 4214 4514 4305 4115 4018)
+#pragma warning( disable : 4018 4115 4127 4200 4201 4211 4214 4244 4305 4514 4706)
 #endif
 
 #define VERSION			"0.1.99"
