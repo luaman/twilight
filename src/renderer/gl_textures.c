@@ -296,12 +296,6 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 	for (i = 0; i < frames; i++, data += s) {
 		memcpy(iskin, data, s);
 
-#define TOP_MASK	(BIT(1))
-#define BOTTOM_MASK	(BIT(6))
-#define TEAM_MASK	(TOP_MASK | BOTTOM_MASK)
-#define FB_MASK		(BIT(14) | BIT(15))
-#define BASE_MASK	(0xFFFF - (TOP_MASK | BOTTOM_MASK | FB_MASK))
-
 		GLT_FloodFillSkin8 (iskin, width, height);
 
 		GLT_Skin_SubParse (amodel, &skin->base[i], iskin, width, height,
