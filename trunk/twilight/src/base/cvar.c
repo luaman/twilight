@@ -61,7 +61,8 @@ Cvar_Init (const cvar_callback callback)
 
 	developer = Cvar_Get ("developer", "0", CVAR_NONE, NULL);
 
-	Cmd_AddCommand ("set", Cvar_Set_f);
+	Cmd_AddCommand ("set", &Cvar_Set_f);
+	Cmd_AddCommand ("reset", &Cvar_Reset_f);
 }
 
 
@@ -103,7 +104,7 @@ cvar_t *
 Cvar_Get (const char *name, const char *value, const int flags,
 				const cvar_callback callback)
 {
-	cvar_t		   *var;
+	cvar_t	   *var;
 
 	var = Cvar_Find (name);
 	if (!var)	// Var does not exist, create it
@@ -113,6 +114,8 @@ Cvar_Get (const char *name, const char *value, const int flags,
 		strcpy (var->name, name);
 		var->string = NULL;		// force Cvar to change
 		var->callback = callback;
+		var->initstr = Z_Malloc (strlen(value) + 1);
+		strcpy (var->initstr, value);
 		Cvar_InsertVar (var);
 		Cvar_Set (var, value);
 	}
@@ -179,6 +182,33 @@ Cvar_Set_f (void)
 	return;
 }
 
+void
+Cvar_Reset_f (void)
+{
+	cvar_t	   *var;
+
+	if (Cmd_Argc () != 2)
+	{
+		Com_Printf ("usage: reset <Cvar>\n");
+		return;
+	}
+
+	var = Cvar_Find (Cmd_Argv(1));
+
+	if (!var)
+	{
+		Com_Printf ("Cvar \"%s\" does not exist.\n", Cmd_Argv (1));
+		return;
+	}
+
+	if (var->flags & CVAR_ROM)
+	{
+		Com_Printf ("Cvar \"%s\" is read-only.\n", var->name);
+		return;
+	}
+
+	Cvar_Set (var, var->initstr);
+}
 
 cvar_t *
 Cvar_CreateTemp (const char *name, const char *value)
@@ -218,6 +248,33 @@ Cvar_Slide (cvar_t *var, const float change)
 		var->callback (var);
 }
 
+// NOTE: This function must match the flags in cvar.h
+static char *
+Cvar_FlagString (cvar_t *var)
+{
+	static char		str[6];
+	int				i = 0;
+
+	if (var)
+	{
+		if (var->flags & CVAR_ARCHIVE)
+			str[i++] = 'a';
+
+		if (var->flags & CVAR_ROM)
+			str[i++] = 'r';
+
+		if (var->flags & CVAR_USER)
+			str[i++] = 'u';
+		else if (var->flags & CVAR_TEMP)
+			str[i++] = 't';
+
+		if (var->flags & (CVAR_USERINFO|CVAR_SERVERINFO))
+			str[i++] = 'i';
+	}
+	
+	str[i] = '\0';
+	return str;
+}
 
 void
 Cvar_Show (cvar_t *var)
@@ -228,7 +285,8 @@ Cvar_Show (cvar_t *var)
 		return;
 	}
 
-	Com_Printf ("[] \"%s\" is \"%s\"\n", var->name, var->string);
+	Com_Printf ("[%s] \"%s\" is \"%s\" (default: \"%s\")\n",
+			Cvar_FlagString (var), var->name, var->string, var->initstr);
 }
 
 
@@ -395,8 +453,6 @@ Cvar_WriteVars (FILE *f)
 	v = cvars;
 	while (v)
 	{
-		// Can't use set in legacy NQ/QW
-//		fprintf (f, "set %s \"%s\"\n", v->var->name, v->var->string);
 		if (v->var->flags & CVAR_ARCHIVE)
 			fprintf (f, "%s \"%s\"\n", v->var->name, v->var->string);
 		v = v->next;
