@@ -196,6 +196,9 @@ R_Init (void)
 
 	// fullbright skins
 	texture_extension_number += MAX_CLIENTS;
+
+	skyboxtexnum = texture_extension_number;
+	texture_extension_number += 6;
 }
 
 int fb_skins[MAX_CLIENTS];

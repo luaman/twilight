@@ -41,6 +41,7 @@ static const char rcsid[] =
 extern model_t *loadmodel;
 
 int         skytexturenum;
+int			skyboxtexnum;
 
 int         solidskytexture;
 int         alphaskytexture;
@@ -346,8 +347,6 @@ R_DrawSkyChain (msurface_t *s)
 =================================================================
 */
 
-static int skytex[6];
-
 void        GL_SelectTexture (GLenum target);
 
 /*
@@ -364,9 +363,6 @@ R_LoadSkys (void)
 	Uint8  *image_rgba = NULL;
 	extern int numgltextures;
 
-	if (numgltextures == MAX_GLTEXTURES)
-		Sys_Error ("GL_LoadTexture: numgltextures == MAX_GLTEXTURES");
-
 	for (i = 0; i < 6; i++) {
 		snprintf (name, sizeof (name), "gfx/env/%s%s.tga", r_skybox->string, suf[i]);
 
@@ -379,9 +375,7 @@ R_LoadSkys (void)
 			return false;
 		}
 
-		skytex[i] = texture_extension_number++;
-
-		qglBindTexture (GL_TEXTURE_2D, skytex[i]);
+		qglBindTexture (GL_TEXTURE_2D, skyboxtexnum+i);
 		qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_rgba);
 
 		free (image_rgba);
@@ -420,42 +414,42 @@ R_DrawSkyBox
 
 void R_SkyBox(void)
 {
-	qglBindTexture(GL_TEXTURE_2D, skytex[3]); // front
+	qglBindTexture(GL_TEXTURE_2D, skyboxtexnum+3); // front
 	qglBegin(GL_QUADS);
 	R_SkyBoxPolyVec(1, 0,  1, -1,  1);
 	R_SkyBoxPolyVec(1, 1,  1, -1, -1);
 	R_SkyBoxPolyVec(0, 1,  1,  1, -1);
 	R_SkyBoxPolyVec(0, 0,  1,  1,  1);
 	qglEnd();
-	qglBindTexture(GL_TEXTURE_2D, skytex[1]); // back
+	qglBindTexture(GL_TEXTURE_2D, skyboxtexnum+1); // back
 	qglBegin(GL_QUADS);
 	R_SkyBoxPolyVec(1, 0, -1,  1,  1);
 	R_SkyBoxPolyVec(1, 1, -1,  1, -1);
 	R_SkyBoxPolyVec(0, 1, -1, -1, -1);
 	R_SkyBoxPolyVec(0, 0, -1, -1,  1);
 	qglEnd();
-	qglBindTexture(GL_TEXTURE_2D, skytex[0]); // right
+	qglBindTexture(GL_TEXTURE_2D, skyboxtexnum); // right
 	qglBegin(GL_QUADS);
 	R_SkyBoxPolyVec(1, 0,  1,  1,  1);
 	R_SkyBoxPolyVec(1, 1,  1,  1, -1);
 	R_SkyBoxPolyVec(0, 1, -1,  1, -1);
 	R_SkyBoxPolyVec(0, 0, -1,  1,  1);
 	qglEnd();
-	qglBindTexture(GL_TEXTURE_2D, skytex[2]); // left
+	qglBindTexture(GL_TEXTURE_2D, skyboxtexnum+2); // left
 	qglBegin(GL_QUADS);
 	R_SkyBoxPolyVec(1, 0, -1, -1,  1);
 	R_SkyBoxPolyVec(1, 1, -1, -1, -1);
 	R_SkyBoxPolyVec(0, 1,  1, -1, -1);
 	R_SkyBoxPolyVec(0, 0,  1, -1,  1);
 	qglEnd();
-	qglBindTexture(GL_TEXTURE_2D, skytex[4]); // up
+	qglBindTexture(GL_TEXTURE_2D, skyboxtexnum+4); // up
 	qglBegin(GL_QUADS);
 	R_SkyBoxPolyVec(1, 0,  1, -1,  1);
 	R_SkyBoxPolyVec(1, 1,  1,  1,  1);
 	R_SkyBoxPolyVec(0, 1, -1,  1,  1);
 	R_SkyBoxPolyVec(0, 0, -1, -1,  1);
 	qglEnd();
-	qglBindTexture(GL_TEXTURE_2D, skytex[5]); // down
+	qglBindTexture(GL_TEXTURE_2D, skyboxtexnum+5); // down
 	qglBegin(GL_QUADS);
 	R_SkyBoxPolyVec(1, 0,  1,  1, -1);
 	R_SkyBoxPolyVec(1, 1,  1, -1, -1);

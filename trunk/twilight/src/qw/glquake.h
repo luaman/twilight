@@ -192,6 +192,8 @@ extern int  particletexture;
 extern int  netgraphtexture;			// netgraph texture
 extern int  playertextures;
 
+extern int  skyboxtexnum;
+
 extern int  skytexturenum;				// index in cl.loadmodel, not gl
 
 										// texture object
