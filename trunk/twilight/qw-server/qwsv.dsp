@@ -96,10 +96,6 @@ SOURCE=.\common.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\cvar.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\mdfour.c
 # End Source File
 # Begin Source File
