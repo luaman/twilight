@@ -172,10 +172,8 @@ R_AddDynamicLights (msurface_t *surf)
 		
 		VectorMA (cl_dlights[lnum].origin, -dist, surf->plane->normal, impact);
 
-		local[0] = (DotProduct (impact, tex->vecs[0]) +
-			tex->vecs[0][3] - surf->texturemins[0]) * 256;
-		local[1] = (DotProduct (impact, tex->vecs[1]) +
-			tex->vecs[1][3] - surf->texturemins[1]) * 256;
+		local[0] = (DotProduct (impact, tex->vecs[0]) + tex->vecs[0][3] - surf->texturemins[0]) * 256;
+		local[1] = (DotProduct (impact, tex->vecs[1]) + tex->vecs[1][3] - surf->texturemins[1]) * 256;
 		
 		_td = local[1];
 		dest = blocklights;
@@ -183,30 +181,30 @@ R_AddDynamicLights (msurface_t *surf)
 		for (t = 0; t < surf->tmax; t++)
 		{
 			td = _td;
-			_td -= 16*256;
+			_td -= 16 * 256;
+
 			if (td < 0)
 				td = -td;
+
 			_sd = local[0];
 
 			for (s = 0; s < surf->smax; s++)
 			{
 				sd = _sd;
-				_sd -= 16*256;
+				_sd -= 16 * 256;
 				if (sd < 0)
 					sd = -sd;
 
 				if (sd > td)
-					idist = sd + (td>>1);
+					idist = sd + (td >> 1);
 				else
-					idist = td + (sd>>1);
+					idist = td + (sd >> 1);
 
 				if (idist < iminlight) {
 					br = irad - idist;
 					switch (lightmap_bytes) {
 						case 1:
-							*dest += br * ((cl_dlights[lnum].color[0] +
-											cl_dlights[lnum].color[1] +
-											cl_dlights[lnum].color[2]) / 3);
+							*dest += br * ((cl_dlights[lnum].color[0] + cl_dlights[lnum].color[1] + cl_dlights[lnum].color[2]) / 3);
 							break;
 						case 3:
 						case 4:
@@ -316,7 +314,7 @@ store:
 
 		case GL_RGBA:
 
-			stride -= (surf->smax * 4);
+			stride -= (surf->smax << 2);
 			bl = blocklights;
 
 			for (i = 0; i < surf->tmax; i++, dest += stride) {
@@ -1303,15 +1301,15 @@ BuildSurfaceDisplayList (msurface_t *fa)
 		*/
 		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
 		s -= fa->texturemins[0];
-		s += fa->light_s * 16;
+		s += fa->light_s << 4;
 		s += 8;
-		s /= BLOCK_WIDTH * 16;			/* fa->texinfo->texture->width; */
+		s /= BLOCK_WIDTH << 4;			/* fa->texinfo->texture->width; */
 
 		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
 		t -= fa->texturemins[1];
-		t += fa->light_t * 16;
+		t += fa->light_t << 4;
 		t += 8;
-		t /= BLOCK_HEIGHT * 16;			/* fa->texinfo->texture->height; */
+		t /= BLOCK_HEIGHT << 4;			/* fa->texinfo->texture->height; */
 
 		poly->verts[i][5] = s;
 		poly->verts[i][6] = t;
