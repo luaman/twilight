@@ -35,6 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include <malloc.h>
+#include <stdarg.h>
 #include "quakedef.h"
 #include "cmd.h"
 #include "common.h"

@@ -664,7 +664,7 @@ Host_Name_f (void)
 	char       *newName;
 
 	if (Cmd_Argc () == 1) {
-		Com_Printf ("\"name\" is \"%s\"\n", _cl_name->string[0]);
+		Com_Printf ("\"name\" is \"%s\"\n", _cl_name->string);
 		return;
 	}
 	if (Cmd_Argc () == 2)
