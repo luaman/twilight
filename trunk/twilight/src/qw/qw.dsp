@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "../include" /I "../src/renderer" /I "../SDL/include" /I "../src/sound" /I "../src/image" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../base" /I "../client" /I "../fs" /I "../image" /I "../include" /I "../renderer" /I "../sound" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "HAVE_SDL_H" /D "WANT_CLIENTS" /D "WANT_SERVERS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x419 /d "NDEBUG"
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../include" /I "../src/renderer" /I "../SDL/include" /I "../src/sound" /I "../src/image" /D "_DEBUG" /D "GLQUAKE" /D "WIN32" /D "_WINDOWS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../base" /I "../client" /I "../fs" /I "../image" /I "../include" /I "../renderer" /I "../sound" /D "_DEBUG" /D "GLQUAKE" /D "WIN32" /D "_WINDOWS" /D "HAVE_SDL_H" /D "WANT_CLIENTS" /D "WANT_SERVERS" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x419 /d "_DEBUG"
@@ -133,43 +133,11 @@ SOURCE=.\common.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\console.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_draw.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_ngraph.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_rlight.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_rmain.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_rsurf.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_screen.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\info.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\keys.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\base\locs.c
 # End Source File
 # Begin Source File
 
@@ -193,14 +161,6 @@ SOURCE=.\pmovetst.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\r_explosion.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\sbar.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\skin.c
 # End Source File
 # Begin Source File
@@ -217,204 +177,8 @@ SOURCE=.\sys.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\teamplay.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\vid_sdl.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\view.c
 # End Source File
-# End Group
-# Begin Group "Header Files"
-
-# PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=..\include\anorm_dots.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\anorms.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\bothdefs.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\bspfile.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\client.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\cmd.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\common.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\compat.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\console.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\crc.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\cvar.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\draw.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_poly.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\gl_warp_sin.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\hash.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\host.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\input.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\keys.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\mathlib.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\mdfour.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\menu.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\modelgen.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\net.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\pcx.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\pmove.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\pr_comp.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\protocol.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\qtypes.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\r_explosion.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\render.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\sbar.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\screen.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\sound.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\spritegn.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\strlib.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\tga.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TGL_defines.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TGL_funcs.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TGL_funcs_list.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TGL_types.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vid.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\view.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wad.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\win32config.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\zone.h
-# End Source File
-# End Group
-# Begin Group "Resource Files"
-
-# PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # End Group
 # End Target
 # End Project

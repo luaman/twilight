@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "../../include" /I "../image" /I "../../SDL/include" /D "WIN32" /D "NDEBUG" /D "_LIB" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../base" /I "../client" /I "../fs" /I "../image" /I "../include" /I "../renderer" /I "../sound" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "HAVE_SDL_H" /YX /FD /c
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
 # ADD RSC /l 0x40c /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../image" /I "../../SDL/include" /D "WIN32" /D "_DEBUG" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../base" /I "../client" /I "../fs" /I "../image" /I "../include" /I "../renderer" /I "../sound" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "HAVE_SDL_H" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x40c /d "_DEBUG"
 # ADD RSC /l 0x40c /d "_DEBUG"
 BSC32=bscmake.exe
@@ -89,6 +89,10 @@ SOURCE=.\dyngl.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\entities.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\gen_textures.c
 # End Source File
 # Begin Source File
@@ -101,7 +105,27 @@ SOURCE=.\gl_arrays.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\gl_brush.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\gl_draw.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\gl_info.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\gl_light.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\gl_main.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\gl_sprite.c
 # End Source File
 # Begin Source File
 
@@ -110,6 +134,10 @@ SOURCE=.\gl_textures.c
 # Begin Source File
 
 SOURCE=.\liquid.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\menu.c
 # End Source File
 # Begin Source File
 
@@ -129,7 +157,15 @@ SOURCE=.\noise.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\palette.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\pointers.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\r_explosion.c
 # End Source File
 # Begin Source File
 
@@ -145,75 +181,11 @@ SOURCE=.\surface.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\video.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\vis.c
-# End Source File
-# End Group
-# Begin Group "Header Files"
-
-# PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=.\dglfuncs.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\dyngl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\gen_textures.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_alias.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_arrays.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_info.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_textures.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\light.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\liquid.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\mod_alias.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\mod_sprite.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\pointers.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\r_part.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\sky.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\surface.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\vis.h
 # End Source File
 # End Group
 # End Target
