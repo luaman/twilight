@@ -365,6 +365,13 @@ R_DrawSequentialPoly (msurface_t *s)
 
 			GL_Bind (lightmap_textures + s->lightmaptexturenum);
 			glEnable (GL_BLEND);
+			if (gl_lightmap_format == GL_LUMINANCE)
+				glBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+			else if (gl_lightmap_format == GL_INTENSITY) {
+				glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+				glColor4f (0, 0, 0, 1);
+				glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			}
 			glBegin (GL_POLYGON);
 			v = p->verts[0];
 			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
@@ -373,6 +380,12 @@ R_DrawSequentialPoly (msurface_t *s)
 			}
 			glEnd ();
 
+			if (gl_lightmap_format == GL_LUMINANCE)
+				glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			else if (gl_lightmap_format == GL_INTENSITY) {
+				glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+				glColor4f (1, 1, 1, 1);
+			}
 			glDisable (GL_BLEND);
 		}
 
@@ -464,7 +477,20 @@ R_DrawSequentialPoly (msurface_t *s)
 
 		GL_Bind (lightmap_textures + s->lightmaptexturenum);
 		glEnable (GL_BLEND);
+		if (gl_lightmap_format == GL_LUMINANCE)
+			glBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+		else if (gl_lightmap_format == GL_INTENSITY) {
+			glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			glColor4f (0, 0, 0, 1);
+			glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
 		DrawGLWaterPolyLightmap (p);
+		if (gl_lightmap_format == GL_LUMINANCE)
+			glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		else if (gl_lightmap_format == GL_INTENSITY) {
+			glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			glColor4f (1, 1, 1, 1);
+		}
 		glDisable (GL_BLEND);
 	}
 }
