@@ -200,34 +200,64 @@ Sky_Sphere_Draw (void)
 	qglPushMatrix ();
 	qglTranslatef(r_origin[0], r_origin[1], r_origin[2]);
 	qglMatrixMode (GL_TEXTURE);
-	qglPushMatrix ();
-
-	speedscale = r_time * (8.0 / 128.0);
-	speedscale -= floor(speedscale);
 
 	qglVertexPointer (3, GL_FLOAT, 0, Sky_Sphere_Verts);
 	qglTexCoordPointer (2, GL_FLOAT, 0, Sky_Sphere_Texcoords);
 
-	qglTranslatef (speedscale, speedscale, 0);
-	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
+	if (!gl_mtex) {
+		speedscale = r_time * (8.0 / 128.0);
+		speedscale -= floor(speedscale);
 
-	qglDrawElements (GL_TRIANGLES, Sky_Sphere_Numele, GL_UNSIGNED_INT,
-			Sky_Sphere_Elements);
+		qglPushMatrix ();
+		qglTranslatef (speedscale, speedscale, 0);
+		qglBindTexture (GL_TEXTURE_2D, solidskytexture);
 
-	qglEnable (GL_BLEND);
+		qglDrawElements (GL_TRIANGLES, Sky_Sphere_Numele, GL_UNSIGNED_INT,
+				Sky_Sphere_Elements);
 
-	qglTranslatef (speedscale, speedscale, 0);
-	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
+		qglEnable (GL_BLEND);
 
-	qglDrawElements (GL_TRIANGLES, Sky_Sphere_Numele, GL_UNSIGNED_INT,
-			Sky_Sphere_Elements);
+		qglTranslatef (speedscale, speedscale, 0);
+		qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
 
-	qglDisable (GL_BLEND);
+		qglDrawElements (GL_TRIANGLES, Sky_Sphere_Numele, GL_UNSIGNED_INT,
+				Sky_Sphere_Elements);
+
+		qglDisable (GL_BLEND);
+		qglPopMatrix ();
+	} else {
+		speedscale = r_time * (8.0 / 128.0);
+		speedscale -= floor(speedscale);
+
+		qglPushMatrix ();
+		qglTranslatef (speedscale, speedscale, 0);
+		qglBindTexture (GL_TEXTURE_2D, solidskytexture);
+
+		qglActiveTextureARB (GL_TEXTURE1_ARB);
+		qglClientActiveTextureARB (GL_TEXTURE1_ARB);
+		qglTexCoordPointer (2, GL_FLOAT, 0, Sky_Sphere_Texcoords);
+		qglClientActiveTextureARB (GL_TEXTURE0_ARB);
+		qglPushMatrix ();
+		speedscale *= 2;
+
+		qglTranslatef (speedscale, speedscale, 0);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+		qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
+		qglEnable (GL_TEXTURE_2D);
+
+		qglDrawElements (GL_TRIANGLES, Sky_Sphere_Numele, GL_UNSIGNED_INT,
+				Sky_Sphere_Elements);
+
+		qglDisable (GL_TEXTURE_2D);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		qglPopMatrix ();
+		qglActiveTextureARB (GL_TEXTURE0_ARB);
+		qglPopMatrix ();
+	}
 
 	GLArrays_Reset_TC ();
 	GLArrays_Reset_Vertex ();
 
-	qglPopMatrix ();
 	qglMatrixMode (GL_MODELVIEW);
 	qglPopMatrix ();
 	qglDepthMask (GL_TRUE);
