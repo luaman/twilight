@@ -48,6 +48,7 @@ static const char rcsid[] =
 #include "console.h"
 #include "cvar.h"
 #include "net.h"
+#include "strlib.h"
 
 #define	PACKET_HEADER	8
 
@@ -172,7 +173,7 @@ Netchan_OutOfBandPrint (netadr_t adr, char *format, ...)
 	va_end (argptr);
 
 
-	Netchan_OutOfBand (adr, strlen (string), (byte *) string);
+	Netchan_OutOfBand (adr, Q_strlen (string), (byte *) string);
 }
 
 
