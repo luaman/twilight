@@ -122,7 +122,7 @@ typedef struct {
 	float       die;					// stop lighting after this time
 	float       decay;					// drop this each second
 	float       minlight;				// don't add when contributing less
-	float       color[4];
+	float       color[3];
 } dlight_t;
 
 typedef struct {
