@@ -367,6 +367,7 @@ R_PolyBlend (void)
 
 	qglColor4fv (whitev);
 	qglDisable (GL_BLEND);
+	qglEnable (GL_DEPTH_TEST);
 	qglEnable (GL_TEXTURE_2D);
 }
 
@@ -520,12 +521,14 @@ R_Render3DView (void)
 	R_VisWorld ();
 	R_VisEntitiesOnList ();
 
+	VectorCopy (r_origin, modelorg);
 	if (draw_skybox) {
 		R_DrawSkyBox ();
 		R_DrawBrushModelSkies ();
 	}
 	
 	// adds static entities to the list
+	VectorCopy (r_origin, modelorg);
 	R_DrawWorld ();
 
 	R_DrawEntitiesOnList ();

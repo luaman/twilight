@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "surface.h"
 #include "sky.h"
 #include "mdfour.h"
+#include "dyngl.h"
 
 extern model_t	*loadmodel;
 extern qboolean isnotmap;
@@ -440,11 +441,6 @@ CalcSurfaceExtents (msurface_t *s)
 	s->tmax = bmaxs[1] - bmins[1] + 1;
 }
 
-
-extern int lightmap_bytes;				// 1, 3, or 4
-extern void AllocLightBlockForSurf (lightblock_t *block, msurface_t *surf);
-extern int AllocLightBlock (lightblock_t *block, int w, int h, int *x, int *y);
-
 /*
 =================
 Mod_LoadFaces
@@ -516,66 +512,11 @@ Mod_LoadFaces (lump_t *l)
 	}
 }
 
-chain_head_t *
-Mod_RemakeChain (chain_head_t *in, chain_head_t *out)
-{
-	Uint			 i;
-	chain_head_t	*chain;
-	chain_item_t	*c, *next;
-
-	if (!in->n_items)
-		return NULL;
-
-	if (!out)
-		chain = Zone_Alloc (loadmodel->extrazone, sizeof(chain_head_t));
-	else
-		chain = out;
-
-	*chain = *in;
-
-	chain->items = Zone_Alloc (loadmodel->extrazone,
-			sizeof(chain_item_t) * chain->n_items);
-	for (c = in->items, i = 0; c; c = next, i++) {
-		next = c->next;
-		chain->items[i].head = chain;
-		chain->items[i].surf = c->surf;
-		chain->items[i].next = &chain->items[i + 1];
-		if (c->surf->tex_chain == c)
-			c->surf->tex_chain = &chain->items[i];
-		if (c->surf->light_chain == c)
-			c->surf->light_chain = &chain->items[i];
-		Zone_Free(c);
-	}
-	chain->items[i].next = NULL;
-
-	return chain;
-}
-
-lightblock_t *
-Mod_RemakeLBlock (lightblock_t *in)
-{
-	lightblock_t	*block;
-	lightsubblock_t	*in_sub, *sub, *next;
-
-	block = Zone_Alloc(loadmodel->extrazone, sizeof(lightblock_t));
-	block->b = Zone_Alloc(loadmodel->extrazone,
-			sizeof(lightsubblock_t) * in->num);
-	block->num = in->num;
-
-	sub = block->b;
-	next = sub;
-	for (in_sub = in->b; next; in_sub = next, sub++) {
-		next = in_sub->next;
-
-		*sub = *in_sub;
-		Mod_RemakeChain (&in_sub->chain, &sub->chain);
-		Zone_Free(in_sub);
-		if (next)
-			sub->next = sub + 1;
-	}
-
-	return block;
-}
+extern Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
+extern int lightmap_bytes;				// 1, 3, or 4
+extern int gl_lightmap_format;
+extern qboolean colorlights;
+extern qboolean AllocLightBlockForSurf (int *allocated, int num, msurface_t *surf, memzone_t *zone);
 
 /*
 =================
@@ -585,18 +526,24 @@ Mod_MakeChains
 void
 Mod_MakeChains ()
 {
-	Uint			 i, first, last;
-	msurface_t		*surf, *s;
+	Uint			 i, first, last, tnum;
+	msurface_t		*surf;
 	chain_head_t	*chain;
-	chain_item_t	*c_item, *c;
+	chain_item_t	*c_item;
 	int				 stain_size;
-	chain_head_t	 *schain;
-	chain_head_t	*tchains;
-	lightblock_t	 *lblock;
+	int				 schain_count, schain_cur;
+	int				*tchains_count, *tchains_cur;
+	lightblock_t	*lblock;
+	int				 allocated[LIGHTBLOCK_WIDTH];
+	int				*lchains_cur = NULL;
 
-	tchains = Zone_Alloc(tempzone, sizeof(chain_head_t) * bheader->numtextures);
-	schain = Zone_Alloc(tempzone, sizeof(chain_head_t));
-	lblock = Zone_Alloc(tempzone, sizeof(lightblock_t));
+	tchains_count = Zone_Alloc(tempzone, sizeof(int) * bheader->numtextures);
+	tchains_cur = Zone_Alloc(tempzone, sizeof(int) * bheader->numtextures);
+	lblock = &bheader->lightblock;
+
+	memset(&bheader->lightblock, 0, sizeof(lightblock_t));
+	memset(&bheader->sky_chain, 0, sizeof(chain_head_t));
+	memset(allocated, 0, sizeof(allocated));
 
 	first = bheader->firstmodelsurface;
 	last = first + bheader->nummodelsurfaces;
@@ -604,7 +551,9 @@ Mod_MakeChains ()
 	bheader->tex_chains = Zone_Alloc (loadmodel->extrazone,
 			bheader->numtextures * sizeof (*bheader->tex_chains));
 
-	for (i = first, surf = &bheader->surfaces[i]; i < last; i++) {
+	schain_count = 0;
+
+	for (i = first, surf = &bheader->surfaces[i]; i < last; i++, surf++) {
 		/*
 		 * If we are lightmapped then we need to do some stuff:
 		 * We need to allocate the lightmap space in the lightmap scrap.
@@ -613,7 +562,16 @@ Mod_MakeChains ()
 		 * (Used for non-mtex and for early updating of the lightmaps.)
 		 */
 		if (!(surf->flags & SURF_NOLIGHTMAP)) {
-			AllocLightBlockForSurf (lblock, surf);
+			if (!lblock->num)
+				lblock->num++;
+			if (!AllocLightBlockForSurf (allocated, lblock->num - 1, surf,
+						loadmodel->extrazone))
+			{
+				lblock->num++;
+				memset(allocated, 0, sizeof(allocated));
+				AllocLightBlockForSurf (allocated, lblock->num - 1, surf,
+						loadmodel->extrazone);
+			}
 
 			stain_size = surf->smax * surf->tmax * 3;
 			surf->stainsamples = Zone_Alloc(loadmodel->extrazone,stain_size);
@@ -621,80 +579,109 @@ Mod_MakeChains ()
 		}
 
 		// Sky chain
+		if (surf->flags & SURF_SKY)
+			schain_count++;
+		else
+			tchains_count[surf->texinfo->texture->texnum]++;
+
+		if (surf->flags & SURF_SUBDIVIDE)
+			BuildSubdividedGLPolyFromEdges (surf, loadmodel);
+		else
+			BuildGLPolyFromEdges (surf, loadmodel);
+	}
+
+	if (lblock->num) {
+		lblock->chains = Zone_Alloc (loadmodel->extrazone,
+				sizeof(chain_head_t) * lblock->num);
+		lchains_cur = Zone_Alloc (tempzone, sizeof(int) * lblock->num);
+		for (i = 0; i < lblock->num; i++) {
+			chain = &lblock->chains[i];
+			qglGenTextures(1, &chain->l_texnum);
+			chain->flags = CHAIN_LIGHTMAP;
+			qglBindTexture(GL_TEXTURE_2D, chain->l_texnum);
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			memset(templight, 64, sizeof(templight));
+			qglTexImage2D (GL_TEXTURE_2D, 0, colorlights ? 3 : 1,
+					LIGHTBLOCK_WIDTH, LIGHTBLOCK_HEIGHT, 0, gl_lightmap_format,
+					GL_UNSIGNED_BYTE, templight);
+		}
+	}
+
+	if (schain_count) {
+		chain = &bheader->sky_chain;
+		chain->n_items = schain_count;
+		chain->flags = CHAIN_SKY;
+		chain->items = Zone_Alloc(loadmodel->extrazone,
+				sizeof(chain_item_t) * chain->n_items);
+	}
+	for (i = 0; i < bheader->numtextures; i++)
+		if (tchains_count[i]) {
+			chain = bheader->tex_chains[i] =
+				Zone_Alloc (loadmodel->extrazone, sizeof(chain_head_t));
+			chain->n_items = tchains_count[i];
+			chain->items = Zone_Alloc (loadmodel->extrazone,
+						sizeof(chain_item_t) * chain->n_items + 1);
+		}
+	schain_cur = 0;
+
+	for (i = first, surf = &bheader->surfaces[i]; i < last; i++, surf++) {
+		if (!(surf->flags & SURF_NOLIGHTMAP))
+			lblock->chains[surf->lightmap_texnum].n_items++;
+
 		if (surf->flags & SURF_SKY) {
-			chain = schain;
-			chain->n_items++;
+			chain = &bheader->sky_chain;
 
-			chain->flags |= CHAIN_SKY;
-			chain->flags &= ~CHAIN_NORMAL;
-
-			c_item = Zone_Alloc(tempzone, sizeof(*c_item));
-			c_item->next = chain->items;
-			chain->items = c_item;
+			c_item = &chain->items[schain_cur++];
 			c_item->surf = surf;
 			c_item->head = chain;
 		} else {
-			// Add to the texture chain.
-			chain = &tchains[surf->texinfo->texture->texnum];
-			// Lazy allocation of the chain structs.
-			if (!chain->n_items++) {
+			tnum = surf->texinfo->texture->texnum;
+			chain = bheader->tex_chains[tnum];
+
+			/*
+			 * If this is the first item in the chain set the texture and
+			 * flags.
+			 */
+			if (!chain->texture) {
 				chain->texture = surf->texinfo->texture;
 				// Some flags to let us know what kind of chain this is.
 				if (chain->texture->gl_texturenum)
 					chain->flags |= CHAIN_NORMAL;
 				if (chain->texture->fb_texturenum)
 					chain->flags |= CHAIN_FB;
+				// If we are a liquid then we should /not/ be drawn normally.
+				if (surf->flags & SURF_LIQUID) {
+					chain->flags |= CHAIN_LIQUID;
+					chain->flags &= ~CHAIN_NORMAL;
+				}
 			}
-			// If we are a liquid then we should /not/ be drawn normally.
-			if (surf->flags & SURF_LIQUID) {
-				chain->flags |= CHAIN_LIQUID;
-				chain->flags &= ~CHAIN_NORMAL;
-			}
-
-			/*
-			 * If there are other textures on this chain then try to group us
-			 * with other surfaces which use the same lightmap scrap.
-			 */
-			c_item = Zone_Alloc(tempzone, sizeof(*c_item));
-			c_item->next = chain->items;
+			c_item = &chain->items[tchains_cur[tnum]++];
 			c_item->surf = surf;
 			c_item->head = chain;
-
-			if ((c = chain->items)) {
-				while (c->next && (c->surf->lightmap_texnum != surf->lightmap_texnum))
-					c = c->next;
-				c_item->next = c->next;
-				c->next = c_item;
-			} else {
-				chain->items = c_item;
-			}
 		}
 		surf->tex_chain = c_item;
-
-		if (surf->flags & SURF_SUBDIVIDE)
-			BuildSubdividedGLPolyFromEdges (surf, loadmodel);
-		else
-			BuildGLPolyFromEdges (surf, loadmodel);
-
-		surf++;
 	}
 
-	if (lblock->num)
-		bheader->lightblock = Mod_RemakeLBlock (lblock);
-	Zone_Free (lblock);
+	if (lblock->num) {
+		for (i = 0; i < lblock->num; i++)
+			lblock->chains[i].items = Zone_Alloc(loadmodel->extrazone,
+					sizeof(chain_item_t) * lblock->chains[i].n_items);
 
-	if (schain->n_items)
-		Mod_RemakeChain (schain, &bheader->sky_chain);
-	Zone_Free (schain);
+		for (i = first, surf = &bheader->surfaces[i]; i < last; i++, surf++) {
+			if (!(surf->flags & SURF_NOLIGHTMAP)) {
+				chain = &lblock->chains[surf->lightmap_texnum];
 
-	for (i = 0; i < bheader->numtextures; i++)
-		if (tchains[i].n_items) {
-			s = tchains[i].items[0].surf;
-			bheader->tex_chains[s->texinfo->texture->texnum] =
-				Mod_RemakeChain (&tchains[i], NULL);
+				c_item = &chain->items[lchains_cur[surf->lightmap_texnum]++];
+				c_item->surf = surf;
+				c_item->head = chain;
+				surf->light_chain = c_item;
+			}
 		}
-
-	Zone_Free(tchains);
+		Zone_Free(lchains_cur);
+	}
+	Zone_Free(tchains_cur);
+	Zone_Free(tchains_count);
 }
 
 /*

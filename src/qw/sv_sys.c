@@ -81,6 +81,9 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "server.h"
 #include "sys.h"
+#ifdef DMALLOC
+#include "dmalloc.h"
+#endif
 
 // LordHavoc: for win32 which does not have PATH_MAX defined without POSIX
 // (and that disables lots of other useful stuff)
@@ -192,10 +195,13 @@ Sys_ESCallback (cvar_t *cvar)
 static void
 setlogname (cvar_t *sys_logname)
 {
-	if (com_gamedir[0] && sys_logname->svalue && sys_logname->svalue[0])
-		snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
-				sys_logname->svalue);
-	else
+	if (sys_logname->svalue && sys_logname->svalue[0]) {
+		if (com_gamedir[0])
+			snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
+					sys_logname->svalue);
+		else    // FIXME: HACK HACK HACK!
+			snprintf (logname, MAX_OSPATH, "id1/%s.log", sys_logname->svalue);
+	} else
 		logname[0] = '\0';
 }
 
