@@ -9,9 +9,9 @@
 #define WANT_CLIENTS 1
 #define WANT_SERVERS 1
 
-#define USERPATH "~/Library/Preferences/twilight"
+#define USERPATH "~/Library/Application Support/twilight"
 #define SHAREPATH "/Library/Application Support/twilight"
-#define USERCONF "~/Library/Preferences/twilightrc"
+#define USERCONF "~/Library/Preferences/twilight.conf"
 #define SHARECONF "/Library/Preferences/twilight.conf"
 
 #define GL_LIBRARY "system-provided"
