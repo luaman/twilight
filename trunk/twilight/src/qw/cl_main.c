@@ -824,11 +824,9 @@ CL_ConnectionlessPacket (void)
 				return;
 			}
 
-			cmd = MSG_ReadString ();
+			cmd = strdup(MSG_ReadString ());
 
 			s = MSG_ReadString ();
-			Com_Printf("A2C_CLIENT_COMMAND: '%s' '%s'\n", cmd, s);
-			MSG_PrintPacket ();
 
 			// Strip off any whitespace.
 			while (*s && isspace (*s))
@@ -842,6 +840,7 @@ CL_ConnectionlessPacket (void)
 						"been set.  You may need to upgrade your server "
 						"browser.\n");
 				Com_Printf ("===========================\n");
+				free (cmd);
 				return;
 			}
 
@@ -851,11 +850,13 @@ CL_ConnectionlessPacket (void)
 					("Invalid localid on command packet: |%s| != |%s|\n",
 					 s, localid->svalue);
 				Com_Printf ("===========================\n");
+				free (cmd);
 				return;
 			}
 
 			Cbuf_AddText (cmd);
 			allowremotecmd = false;
+			free (cmd);
 			return;
 		case A2C_PRINT:				// print command from somewhere
 			Com_Printf ("print\n");
