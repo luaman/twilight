@@ -115,12 +115,12 @@ union flint {
 # define LittleShort(x) (x)
 # define LittleLong(x) (x)
 # define LittleFloat(x) (x)
-# define BigShort(x) SDL_SwapBE16(x)
-# define BigLong(x) SDL_SwapBE32(x)
+# define BigShort(x) (Sint16)SDL_SwapBE16(x)
+# define BigLong(x) (Sint32)SDL_SwapBE32(x)
 # define BigFloat(x) ((union flint)SDL_SwapBE32(((union flint)(x)).i)).fp
 #else
-# define LittleShort(x) SDL_SwapLE16(x)
-# define LittleLong(x) SDL_SwapLE32(x)
+# define LittleShort(x) (Sint16)SDL_SwapLE16(x)
+# define LittleLong(x) (Sint32)SDL_SwapLE32(x)
 # define LittleFloat(x) ((union flint)SDL_SwapLE32(((union flint)(x)).i)).fp
 # define BigShort(x) (x)
 # define BigLong(x) (x)
