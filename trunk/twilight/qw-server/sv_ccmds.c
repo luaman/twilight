@@ -561,7 +561,7 @@ SV_Serverinfo_f (void)
 						 MAX_SERVERINFO_STRING);
 
 	// if this is a cvar, change it too 
-	var = Cvar_FindVar (Cmd_Argv (1));
+	var = Cvar_Find (Cmd_Argv (1));
 	if (var) {
 		Z_Free (var->string);			// free the old value string 
 		var->string = CopyString (Cmd_Argv (2));

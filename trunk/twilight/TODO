@@ -4,10 +4,8 @@ Project Twilight todo list
 These things need to be done before first public release:
 
   - replacement md4.c, ours is a GPL violation
-  - Make SDL_CDStatus calls less often for win32
   - Sys_ExpandPath, for twiddle expansion, / normalization, etc
   - Dynamic OpenGL binding
-  - Port new Cvar system to QW
   - Documentation, we've changed enough that this is necessary
 
 

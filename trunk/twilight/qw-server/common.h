@@ -159,6 +159,13 @@ void        MSG_ReadDeltaUsercmd (struct usercmd_s *from,
 
 #endif
 
+// FIXME: do this with auto*
+#ifdef _WIN32
+#define Q_snprintf _snprintf
+#else
+#define Q_snprintf snprintf
+#endif
+
 int         Q_atoi (char *str);
 float       Q_atof (char *str);
 
@@ -209,7 +216,7 @@ void        COM_LoadCacheFile (char *path, struct cache_user_s *cu);
 void        COM_CreatePath (char *path);
 void        COM_Gamedir (char *dir);
 
-extern struct cvar_s registered;
+extern struct cvar_s *registered;
 extern qboolean standard_quake, rogue, hipnotic;
 
 char       *Info_ValueForKey (char *s, char *key);

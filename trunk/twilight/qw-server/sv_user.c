@@ -25,11 +25,11 @@ edict_t    *sv_player;
 
 usercmd_t   cmd;
 
-cvar_t      cl_rollspeed = { "cl_rollspeed", "200" };
-cvar_t      cl_rollangle = { "cl_rollangle", "2.0" };
-cvar_t      sv_spectalk = { "sv_spectalk", "1" };
+cvar_t     *cl_rollspeed;
+cvar_t     *cl_rollangle;
+cvar_t     *sv_spectalk;
 
-cvar_t      sv_mapcheck = { "sv_mapcheck", "1" };
+cvar_t     *sv_mapcheck;
 
 extern vec3_t player_mins;
 
@@ -258,7 +258,7 @@ SV_PreSpawn_f (void)
 
 //      Con_DPrintf("Client check = %d\n", check);
 
-		if (sv_mapcheck.value && check != sv.worldmodel->checksum &&
+		if (sv_mapcheck->value && check != sv.worldmodel->checksum &&
 			check != sv.worldmodel->checksum2) {
 			SV_ClientPrintf (host_client, PRINT_HIGH,
 							 "Map model file does not match (%s), %i != %i/%i.\n"
@@ -362,10 +362,10 @@ SV_Spawn_f (void)
 	val = GetEdictFieldValue (ent, "gravity");
 	if (val)
 		val->_float = 1.0;
-	host_client->maxspeed = sv_maxspeed.value;
+	host_client->maxspeed = sv_maxspeed->value;
 	val = GetEdictFieldValue (ent, "maxspeed");
 	if (val)
-		val->_float = sv_maxspeed.value;
+		val->_float = sv_maxspeed->value;
 
 //
 // force stats to be updated
@@ -741,7 +741,7 @@ SV_Say (qboolean team)
 		t1[31] = 0;
 	}
 
-	if (host_client->spectator && (!sv_spectalk.value || team))
+	if (host_client->spectator && (!sv_spectalk->value || team))
 		snprintf (text, sizeof (text), "[SPEC] %s: ", host_client->name);
 	else if (team)
 		snprintf (text, sizeof (text), "(%s): ", host_client->name);
@@ -792,7 +792,7 @@ SV_Say (qboolean team)
 	for (j = 0, client = svs.clients; j < MAX_CLIENTS; j++, client++) {
 		if (client->state != cs_spawned)
 			continue;
-		if (host_client->spectator && !sv_spectalk.value)
+		if (host_client->spectator && !sv_spectalk->value)
 			if (!client->spectator)
 				continue;
 
@@ -1222,10 +1222,10 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 	sign = side < 0 ? -1 : 1;
 	side = Q_fabs (side);
 
-	value = cl_rollangle.value;
+	value = cl_rollangle->value;
 
-	if (side < cl_rollspeed.value)
-		side = side * value / cl_rollspeed.value;
+	if (side < cl_rollspeed->value)
+		side = side * value / cl_rollspeed->value;
 	else
 		side = value;
 
@@ -1697,8 +1697,10 @@ SV_UserInit
 void
 SV_UserInit (void)
 {
-	Cvar_RegisterVariable (&cl_rollspeed);
-	Cvar_RegisterVariable (&cl_rollangle);
-	Cvar_RegisterVariable (&sv_spectalk);
-	Cvar_RegisterVariable (&sv_mapcheck);
+	cl_rollspeed = Cvar_Get ("cl_rollspeed", "200", CVAR_NONE, NULL);
+	cl_rollangle = Cvar_Get ("cl_rollangle", "2.0", CVAR_NONE, NULL);
+	sv_spectalk = Cvar_Get ("sv_spectalk", "1", CVAR_NONE, NULL);
+
+	sv_mapcheck = Cvar_Get ("sv_mapcheck", "1", CVAR_NONE, NULL);
 }
+

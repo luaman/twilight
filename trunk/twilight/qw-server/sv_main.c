@@ -35,52 +35,33 @@ netadr_t    master_adr[MAX_MASTERS];	// address of group servers
 
 client_t   *host_client;				// current client
 
-cvar_t      sv_mintic = { "sv_mintic", "0.03" };	// bound the size of the
-cvar_t      sv_maxtic = { "sv_maxtic", "0.1" };	// physics time tic 
-
-cvar_t      developer = { "developer", "0" };	// show extra messages
-
-cvar_t      timeout = { "timeout", "65" };	// seconds without any message
-cvar_t      zombietime = { "zombietime", "2" };	// seconds to sink messages
-
-											// after disconnect
-
-cvar_t      rcon_password = { "rcon_password", "" };	// password for remote
-
-														// server commands
-cvar_t      password = { "password", "" };	// password for entering the game
-cvar_t      spectator_password = { "spectator_password", "" };	// password for 
-																// 
-																// entering as
-																// a sepctator
-
-cvar_t      allow_download = { "allow_download", "1" };
-cvar_t      allow_download_skins = { "allow_download_skins", "1" };
-cvar_t      allow_download_models = { "allow_download_models", "1" };
-cvar_t      allow_download_sounds = { "allow_download_sounds", "1" };
-cvar_t      allow_download_maps = { "allow_download_maps", "1" };
-
-cvar_t      sv_highchars = { "sv_highchars", "1" };
-
-cvar_t      sv_phs = { "sv_phs", "1" };
-
-cvar_t      pausable = { "pausable", "1" };
-
-
-//
-// game rules mirrored in svs.info
-//
-cvar_t      fraglimit = { "fraglimit", "0", false, true };
-cvar_t      timelimit = { "timelimit", "0", false, true };
-cvar_t      teamplay = { "teamplay", "0", false, true };
-cvar_t      samelevel = { "samelevel", "0", false, true };
-cvar_t      maxclients = { "maxclients", "8", false, true };
-cvar_t      maxspectators = { "maxspectators", "8", false, true };
-cvar_t      deathmatch = { "deathmatch", "1", false, true };	// 0, 1, or 2
-cvar_t      spawn = { "spawn", "0", false, true };
-cvar_t      watervis = { "watervis", "0", false, true };
-
-cvar_t      hostname = { "hostname", "unnamed", false, true };
+cvar_t     *sv_mintic;
+cvar_t     *sv_maxtic;
+cvar_t     *timeout;
+cvar_t     *zombietime;
+cvar_t     *rcon_password;
+cvar_t     *password;
+cvar_t     *spectator_password;
+cvar_t     *allow_download;
+cvar_t     *allow_download_skins;
+cvar_t     *allow_download_models;
+cvar_t     *allow_download_sounds;
+cvar_t     *allow_download_maps;
+cvar_t     *sv_highchars;
+cvar_t     *sv_phs;
+cvar_t     *pausable;
+cvar_t     *sv_aim;
+cvar_t     *fraglimit;
+cvar_t     *timelimit;
+cvar_t     *teamplay;
+cvar_t     *samelevel;
+cvar_t     *maxclients;
+cvar_t     *maxspectators;
+cvar_t     *deathmatch;
+cvar_t     *spawn;
+cvar_t     *watervis;
+cvar_t     *hostname;
+cvar_t     *filterban;
 
 FILE       *sv_logfile;
 FILE       *sv_fraglogfile;
@@ -564,7 +545,9 @@ SVC_DirectConnect (void)
 	// check for password or spectator_password
 	s = Info_ValueForKey (userinfo, "spectator");
 	if (s[0] && strcmp (s, "0")) {
-		if (spectator_password.string[0] && Q_strcasecmp (spectator_password.string, "none") && strcmp (spectator_password.string, s)) {	// failed
+		if (spectator_password->string[0]
+				&& Q_strcasecmp (spectator_password->string, "none")
+				&& strcmp (spectator_password->string, s)) {	// failed
 			Con_Printf ("%s:spectator password failed\n",
 						NET_AdrToString (net_from));
 			Netchan_OutOfBandPrint (net_from,
@@ -577,9 +560,9 @@ SVC_DirectConnect (void)
 		spectator = true;
 	} else {
 		s = Info_ValueForKey (userinfo, "password");
-		if (password.string[0] &&
-			Q_strcasecmp (password.string, "none") &&
-			strcmp (password.string, s)) {
+		if (password->string[0] &&
+			Q_strcasecmp (password->string, "none") &&
+			strcmp (password->string, s)) {
 			Con_Printf ("%s:password failed\n", NET_AdrToString (net_from));
 			Netchan_OutOfBandPrint (net_from,
 									"%c\nserver requires a password\n\n",
@@ -599,7 +582,7 @@ SVC_DirectConnect (void)
 	newcl->userid = userid;
 
 	// works properly
-	if (!sv_highchars.value) {
+	if (!sv_highchars->value) {
 		byte       *p, *q;
 
 		for (p = (byte *) newcl->userinfo, q = (byte *) userinfo;
@@ -642,15 +625,16 @@ SVC_DirectConnect (void)
 	}
 
 	// if at server limits, refuse connection
-	if (maxclients.value > MAX_CLIENTS)
-		Cvar_SetValue ("maxclients", MAX_CLIENTS);
-	if (maxspectators.value > MAX_CLIENTS)
-		Cvar_SetValue ("maxspectators", MAX_CLIENTS);
-	if (maxspectators.value + maxclients.value > MAX_CLIENTS)
-		Cvar_SetValue ("maxspectators",
-					   MAX_CLIENTS - maxspectators.value + maxclients.value);
-	if ((spectator && spectators >= (int) maxspectators.value)
-		|| (!spectator && clients >= (int) maxclients.value)) {
+	if (maxclients->value > MAX_CLIENTS)
+		Cvar_Set (maxclients, va ("%i", MAX_CLIENTS));
+	if (maxspectators->value > MAX_CLIENTS)
+		Cvar_Set (maxspectators, va ("%i", MAX_CLIENTS));
+	if (maxspectators->value + maxclients->value > MAX_CLIENTS)
+		Cvar_Set (maxspectators, va ("%i",
+					   MAX_CLIENTS - maxspectators->value
+					   + maxclients->value));
+	if ((spectator && spectators >= (int) maxspectators->value)
+		|| (!spectator && clients >= (int) maxclients->value)) {
 		Con_Printf ("%s:full connect\n", NET_AdrToString (adr));
 		Netchan_OutOfBandPrint (adr, "%c\nserver is full\n\n", A2C_PRINT);
 		return;
@@ -714,10 +698,10 @@ SVC_DirectConnect (void)
 int
 Rcon_Validate (void)
 {
-	if (!strlen (rcon_password.string))
+	if (!strlen (rcon_password->string))
 		return 0;
 
-	if (strcmp (Cmd_Argv (1), rcon_password.string))
+	if (strcmp (Cmd_Argv (1), rcon_password->string))
 		return 0;
 
 	return 1;
@@ -863,7 +847,6 @@ typedef struct {
 ipfilter_t  ipfilters[MAX_IPFILTERS];
 int         numipfilters;
 
-cvar_t      filterban = { "filterban", "1" };
 
 /*
 =================
@@ -1040,9 +1023,9 @@ SV_FilterPacket (void)
 
 	for (i = 0; i < numipfilters; i++)
 		if ((in & ipfilters[i].mask) == ipfilters[i].compare)
-			return filterban.value;
+			return filterban->value;
 
-	return !filterban.value;
+	return !filterban->value;
 }
 
 //============================================================================
@@ -1131,7 +1114,7 @@ SV_CheckTimeouts (void)
 	float       droptime;
 	int         nclients;
 
-	droptime = realtime - timeout.value;
+	droptime = realtime - timeout->value;
 	nclients = 0;
 
 	for (i = 0, cl = svs.clients; i < MAX_CLIENTS; i++, cl++) {
@@ -1145,7 +1128,7 @@ SV_CheckTimeouts (void)
 			}
 		}
 		if (cl->state == cs_zombie &&
-			realtime - cl->connection_started > zombietime.value) {
+				realtime - cl->connection_started > zombietime->value) {
 			cl->state = cs_free;		// can now be reused
 		}
 	}
@@ -1187,10 +1170,10 @@ SV_CheckVars (void)
 	static char *pw, *spw;
 	int         v;
 
-	if (password.string == pw && spectator_password.string == spw)
+	if (password->string == pw && spectator_password->string == spw)
 		return;
-	pw = password.string;
-	spw = spectator_password.string;
+	pw = password->string;
+	spw = spectator_password->string;
 
 	v = 0;
 	if (pw && pw[0] && strcmp (pw, "none"))
@@ -1278,69 +1261,86 @@ void
 SV_InitLocal (void)
 {
 	int         i;
-	extern cvar_t sv_maxvelocity;
-	extern cvar_t sv_gravity;
-	extern cvar_t sv_aim;
-	extern cvar_t sv_stopspeed;
-	extern cvar_t sv_spectatormaxspeed;
-	extern cvar_t sv_accelerate;
-	extern cvar_t sv_airaccelerate;
-	extern cvar_t sv_wateraccelerate;
-	extern cvar_t sv_friction;
-	extern cvar_t sv_waterfriction;
+	extern cvar_t *sv_maxvelocity;
+	extern cvar_t *sv_gravity;
+	extern cvar_t *sv_stopspeed;
+	extern cvar_t *sv_spectatormaxspeed;
+	extern cvar_t *sv_accelerate;
+	extern cvar_t *sv_airaccelerate;
+	extern cvar_t *sv_wateraccelerate;
+	extern cvar_t *sv_friction;
+	extern cvar_t *sv_waterfriction;
 
 	SV_InitOperatorCommands ();
 	SV_UserInit ();
 
-	Cvar_RegisterVariable (&rcon_password);
-	Cvar_RegisterVariable (&password);
-	Cvar_RegisterVariable (&spectator_password);
+	// bound the size of the
+	sv_mintic = Cvar_Get ("sv_mintic", "0.03", CVAR_NONE, NULL);
+	// physics time tic 
+	sv_maxtic = Cvar_Get ("sv_maxtic", "0.1", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&sv_mintic);
-	Cvar_RegisterVariable (&sv_maxtic);
+	// seconds without any message
+	timeout = Cvar_Get ("timeout", "65", CVAR_NONE, NULL);
+	// seconds to sink messages after disconnect
+	zombietime = Cvar_Get ("zombietime", "2", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&fraglimit);
-	Cvar_RegisterVariable (&timelimit);
-	Cvar_RegisterVariable (&teamplay);
-	Cvar_RegisterVariable (&samelevel);
-	Cvar_RegisterVariable (&maxclients);
-	Cvar_RegisterVariable (&maxspectators);
-	Cvar_RegisterVariable (&hostname);
-	Cvar_RegisterVariable (&deathmatch);
-	Cvar_RegisterVariable (&spawn);
-	Cvar_RegisterVariable (&watervis);
+	// password for remote server commands
+	rcon_password = Cvar_Get ("rcon_password", "", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&developer);
+	// password for entering the game
+	password = Cvar_Get ("password", "", CVAR_NONE, NULL);
+	// password for entering as a sepctator
+	spectator_password = Cvar_Get ("spectator_password", "", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&timeout);
-	Cvar_RegisterVariable (&zombietime);
+	allow_download = Cvar_Get ("allow_download", "1", CVAR_NONE, NULL);
+	allow_download_skins = Cvar_Get ("allow_download_skins", "1",
+			CVAR_NONE, NULL);
+	allow_download_models = Cvar_Get ("allow_download_models", "1",
+			CVAR_NONE, NULL);
+	allow_download_sounds = Cvar_Get ("allow_download_sounds", "1",
+			CVAR_NONE, NULL);
+	allow_download_maps = Cvar_Get ("allow_download_maps", "1",
+			CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&sv_maxvelocity);
-	Cvar_RegisterVariable (&sv_gravity);
-	Cvar_RegisterVariable (&sv_stopspeed);
-	Cvar_RegisterVariable (&sv_maxspeed);
-	Cvar_RegisterVariable (&sv_spectatormaxspeed);
-	Cvar_RegisterVariable (&sv_accelerate);
-	Cvar_RegisterVariable (&sv_airaccelerate);
-	Cvar_RegisterVariable (&sv_wateraccelerate);
-	Cvar_RegisterVariable (&sv_friction);
-	Cvar_RegisterVariable (&sv_waterfriction);
+	sv_highchars = Cvar_Get ("sv_highchars", "1", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&sv_aim);
+	sv_phs = Cvar_Get ("sv_phs", "1", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&filterban);
+	pausable = Cvar_Get ("pausable", "1", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&allow_download);
-	Cvar_RegisterVariable (&allow_download_skins);
-	Cvar_RegisterVariable (&allow_download_models);
-	Cvar_RegisterVariable (&allow_download_sounds);
-	Cvar_RegisterVariable (&allow_download_maps);
+	sv_aim = Cvar_Get ("sv_aim", "2", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&sv_highchars);
+	sv_maxvelocity = Cvar_Get ("sv_maxvelocity", "2000", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&sv_phs);
+	sv_gravity = Cvar_Get ("sv_gravity", "800", CVAR_NONE, NULL);
+	sv_stopspeed = Cvar_Get ("sv_stopspeed", "100", CVAR_NONE, NULL);
+	sv_maxspeed = Cvar_Get ("sv_maxspeed", "320", CVAR_NONE, NULL);
+	sv_spectatormaxspeed = Cvar_Get ("sv_spectatormaxspeed", "500",
+			CVAR_NONE, NULL);
+	sv_accelerate = Cvar_Get ("sv_accelerate", "10", CVAR_NONE, NULL);
+	sv_airaccelerate = Cvar_Get ("sv_airaccelerate", "0.7", CVAR_NONE, NULL);
+	sv_wateraccelerate = Cvar_Get ("sv_wateraccelerate", "10", CVAR_NONE,
+			NULL);
+	sv_friction = Cvar_Get ("sv_friction", "4", CVAR_NONE, NULL);
+	sv_waterfriction = Cvar_Get ("sv_waterfriction", "4", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&pausable);
+	filterban = Cvar_Get ("filterban", "1", CVAR_NONE, NULL);
+
+//
+// game rules mirrored in svs.info
+//
+	fraglimit = Cvar_Get ("fraglimit", "0", CVAR_SERVERINFO, NULL);
+	timelimit = Cvar_Get ("timelimit", "0", CVAR_SERVERINFO, NULL);
+	teamplay = Cvar_Get ("teamplay", "0", CVAR_SERVERINFO, NULL);
+	samelevel = Cvar_Get ("samelevel", "0", CVAR_SERVERINFO, NULL);
+	maxclients = Cvar_Get ("maxclients", "8", CVAR_SERVERINFO, NULL);
+	maxspectators = Cvar_Get ("maxspectators", "8", CVAR_SERVERINFO, NULL);
+	// 0, 1, or 2
+	deathmatch = Cvar_Get ("deathmatch", "1", CVAR_SERVERINFO, NULL);
+	spawn = Cvar_Get ("spawn", "0", CVAR_SERVERINFO, NULL);
+	watervis = Cvar_Get ("watervis", "0", CVAR_SERVERINFO, NULL);
+
+	hostname = Cvar_Get ("hostname", "unnamed", CVAR_SERVERINFO, NULL);
 
 	Cmd_AddCommand ("addip", SV_AddIP_f);
 	Cmd_AddCommand ("removeip", SV_RemoveIP_f);
@@ -1612,6 +1612,8 @@ SV_Init (quakeparms_t *parms)
 	Memory_Init (parms->membase, parms->memsize);
 	Cbuf_Init ();
 	Cmd_Init ();
+	Cvar_Init ();
+	Sys_Init ();
 
 	COM_Init ();
 
@@ -1621,7 +1623,6 @@ SV_Init (quakeparms_t *parms)
 	SV_InitNet ();
 
 	SV_InitLocal ();
-	Sys_Init ();
 	Pmove_Init ();
 
 	Hunk_AllocName (0, "-HOST_HUNKLEVEL-");
@@ -1649,3 +1650,4 @@ SV_Init (quakeparms_t *parms)
 	if (sv.state == ss_dead)
 		SV_Error ("Couldn't spawn a server");
 }
+

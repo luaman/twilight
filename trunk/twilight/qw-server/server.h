@@ -318,16 +318,16 @@ typedef struct {
 
 //============================================================================
 
-extern cvar_t sv_mintic, sv_maxtic;
-extern cvar_t sv_maxspeed;
+extern cvar_t *sv_mintic, *sv_maxtic;
+extern cvar_t *sv_maxspeed;
 
 extern netadr_t master_adr[MAX_MASTERS];	// address of the master server
 
-extern cvar_t spawn;
-extern cvar_t teamplay;
-extern cvar_t deathmatch;
-extern cvar_t fraglimit;
-extern cvar_t timelimit;
+extern cvar_t *spawn;
+extern cvar_t *teamplay;
+extern cvar_t *deathmatch;
+extern cvar_t *fraglimit;
+extern cvar_t *timelimit;
 
 extern server_static_t svs;				// persistant server info
 extern server_t sv;						// local server
@@ -458,3 +458,5 @@ void        ClientReliableWrite_Long (client_t *cl, int c);
 void        ClientReliableWrite_Short (client_t *cl, int c);
 void        ClientReliableWrite_String (client_t *cl, char *s);
 void        ClientReliableWrite_SZ (client_t *cl, void *data, int len);
+
+void		SV_SendServerInfoChange (char *key, char *value);
