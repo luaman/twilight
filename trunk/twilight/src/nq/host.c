@@ -122,7 +122,7 @@ Host_EndGame (char *message, ...)
 	va_start (argptr, message);
 	vsnprintf (string, sizeof (string), message, argptr);
 	va_end (argptr);
-	Com_DPrintf ("Host_EndGame: %s\n", string);
+	Com_Printf ("Host_EndGame: %s\n", string);
 
 	if (sv.active)
 		Host_ShutdownServer (false);

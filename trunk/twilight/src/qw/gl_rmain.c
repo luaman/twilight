@@ -31,7 +31,10 @@ static const char rcsid[] =
 #include "client.h"
 #include "cmd.h"
 #include "cvar.h"
+#include "draw.h"
 #include "glquake.h"
+#include "gl_textures.h"
+#include "image.h"
 #include "mathlib.h"
 #include "sound.h"
 #include "strlib.h"
@@ -80,7 +83,8 @@ refdef_t r_refdef;
 
 mleaf_t *r_viewleaf, *r_oldviewleaf;
 
-texture_t *r_notexture_mip;
+texture_t *r_notexture;
+texture_t *r_notexture_water;
 
 int d_lightstylevalue[256];				// 8.8 fraction of base light value
 
@@ -960,30 +964,45 @@ R_InitTextures
 void
 R_InitTextures (void)
 {
-	int         x, y, m;
-	Uint8      *dest;
+	int			x, y;
+	Uint8		pixels[16][16][4];
+	image_t		img;
 
-// create a simple checkerboard texture for the default
-	r_notexture_mip =
-		Hunk_AllocName (sizeof (texture_t) + 16 * 16 + 8 * 8 + 4 * 4 + 2 * 2,
-						"notexture");
+	img.width = 16;
+	img.height = 16;
+	img.pixels = (Uint8 *)&pixels;
+	img.type = IMG_RGBA;
 
-	r_notexture_mip->width = r_notexture_mip->height = 16;
-	r_notexture_mip->offsets[0] = sizeof (texture_t);
-	r_notexture_mip->offsets[1] = r_notexture_mip->offsets[0] + 16 * 16;
-	r_notexture_mip->offsets[2] = r_notexture_mip->offsets[1] + 8 * 8;
-	r_notexture_mip->offsets[3] = r_notexture_mip->offsets[2] + 4 * 4;
-
-	for (m = 0; m < 4; m++) {
-		dest = (Uint8 *) r_notexture_mip + r_notexture_mip->offsets[m];
-		for (y = 0; y < (16 >> m); y++)
-			for (x = 0; x < (16 >> m); x++) {
-				if ((y < (8 >> m)) ^ (x < (8 >> m)))
-					*dest++ = 0;
-				else
-					*dest++ = 0xff;
+	for (y = 0; y < 16; y++)
+	{
+		for (x = 0; x < 16; x++)
+		{
+			if ((y < 8) ^ (x < 8))
+			{
+				pixels[y][x][0] = 128;
+				pixels[y][x][1] = 128;
+				pixels[y][x][2] = 128;
+				pixels[y][x][3] = 255;
 			}
+			else
+			{
+				pixels[y][x][0] = 64;
+				pixels[y][x][1] = 64;
+				pixels[y][x][2] = 64;
+				pixels[y][x][3] = 255;
+			}
+		}
 	}
+
+	r_notexture = Hunk_AllocName (sizeof (texture_t), "notexture");
+	strcpy (r_notexture->name, "notexture");
+	r_notexture->width = img.width;
+	r_notexture->height = img.height;
+	r_notexture->gl_texturenum = R_LoadTexture (r_notexture->name, &img,
+			TEX_MIPMAP);
+
+	r_notexture_water = Hunk_AllocName (sizeof (texture_t), "notexturewater");
+	*r_notexture_water = *r_notexture;
 }
 
 /*

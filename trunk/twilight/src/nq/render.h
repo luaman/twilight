@@ -103,7 +103,8 @@ typedef struct {
 extern refdef_t r_refdef;
 extern vec3_t r_origin, vpn, vright, vup;
 
-extern struct texture_s *r_notexture_mip;
+extern struct texture_s *r_notexture;
+extern struct texture_s *r_notexture_water;
 
 void R_Init_Cvars (void);
 void R_Init (void);
@@ -116,7 +117,7 @@ void R_RenderView (void);
 void R_ViewChanged (vrect_t *pvrect, int lineadj, float aspect);
 
 // called at level load
-void R_InitSky (struct texture_s *mt);
+void R_InitSky (struct texture_s *mt, Uint8 *pixels);
 
 void R_InitSurf (void);
 

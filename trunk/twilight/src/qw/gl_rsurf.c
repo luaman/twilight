@@ -601,13 +601,14 @@ R_TextureAnimation
 Returns the proper texture for a given time and base texture
 ===============
 */
-static texture_t  *
+static texture_t *
 R_TextureAnimation (texture_t *base)
 {
-	int			reletive;
+	int			relative;
 	int			count;
 
-	if (currententity->cur.frame) {
+	if (currententity->cur.frame)
+	{
 		if (base->alternate_anims)
 			base = base->alternate_anims;
 	}
@@ -615,10 +616,11 @@ R_TextureAnimation (texture_t *base)
 	if (!base->anim_total)
 		return base;
 
-	reletive = (int) (cl.time * 10) % base->anim_total;
+	relative = (int) (cl.time * 10) % base->anim_total;
 
 	count = 0;
-	while (base->anim_min > reletive || base->anim_max <= reletive) {
+	while (base->anim_min > relative || base->anim_max <= relative)
+	{
 		base = base->anim_next;
 		if (!base)
 			Host_EndGame ("R_TextureAnimation: broken cycle");
@@ -746,8 +748,8 @@ static void
 DrawTextureChains (void)
 {
 	unsigned int	i;
-	msurface_t	   *s;
-	texture_t	   *t, *st;
+	msurface_t		*s;
+	texture_t		*t, *st;
 
 	// LordHavoc: upload lightmaps early
 	for (i = 0; i < cl.worldmodel->numtextures; i++)
@@ -906,32 +908,23 @@ R_DrawBrushModel
 void
 R_DrawBrushModel (entity_t *e)
 {
-	int				i, k, texnum, rotated;
+	int				i, k, texnum;
 	vec3_t			mins, maxs;
-	msurface_t	   *psurf;
+	msurface_t		*psurf;
 	float			dot, wateralpha = r_wateralpha->fvalue;
-	model_t		   *clmodel = e->model;
-	texture_t	   *t, *st;
+	model_t			*clmodel = e->model;
+	texture_t		*t, *st;
 	vec3_t			modelorg;
 
-	rotated = Mod_MinsMaxs (clmodel, e->cur.origin, e->cur.angles, mins, maxs);
+	Mod_MinsMaxs (clmodel, e->cur.origin, e->cur.angles, mins, maxs);
 
 	if (R_CullBox (mins, maxs))
 		return;
 
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
-	VectorSubtract (r_origin, e->cur.origin, modelorg);
-	if (rotated) {
-		vec3_t      temp;
-		vec3_t      forward, right, up;
-
-		VectorCopy (modelorg, temp);
-		AngleVectors (e->cur.angles, forward, right, up);
-		modelorg[0] = DotProduct (temp, forward);
-		modelorg[1] = -DotProduct (temp, right);
-		modelorg[2] = DotProduct (temp, up);
-	}
+	softwaretransformforbrushentity (e->cur.origin, e->cur.angles);
+	softwareuntransform(r_origin, modelorg);
 
 	/*
 	 * LordHavoc: decide which surfs are visible and update lightmaps, then
@@ -955,7 +948,8 @@ R_DrawBrushModel (entity_t *e)
 	}
 
 	// calculate dynamic lighting for bmodel if it's not an instanced model
-	if (clmodel->firstmodelsurface != 0 && !gl_flashblend->ivalue) {
+	if (clmodel->firstmodelsurface != 0 && !gl_flashblend->ivalue)
+	{
 		for (k = 0; k < r_numdlights; k++)
 			R_MarkLightsNoVis (&r_dlight[k], 1 << k,
 					clmodel->nodes + clmodel->hulls[0].firstclipnode);
@@ -971,7 +965,7 @@ R_DrawBrushModel (entity_t *e)
 	qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
 
 	qglRotatef (e->cur.angles[1], 0, 0, 1);
-	qglRotatef (e->cur.angles[0], 0, 1, 0);	// stupid quake bug
+	qglRotatef (e->cur.angles[0], 0, 1, 0);
 	qglRotatef (e->cur.angles[2], 1, 0, 0);
 
 	// for transpoly water
@@ -1008,7 +1002,8 @@ R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-	if (gl_mtexcombine) {
+	if (gl_mtexcombine)
+	{
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
 		qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
 		qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
@@ -1024,12 +1019,15 @@ R_DrawBrushModel (entity_t *e)
 		qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_ARB, GL_PREVIOUS_ARB);
 		qglTexEnvi (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 4);
 		qglEnable (GL_TEXTURE_2D);
-	} else if (gl_mtex) {
+	}
+	else if (gl_mtex)
+	{
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		qglActiveTextureARB (GL_TEXTURE1_ARB);
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglEnable (GL_TEXTURE_2D);
-	} else
+	}
+	else
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	texnum = -1;
@@ -1049,7 +1047,9 @@ R_DrawBrushModel (entity_t *e)
 					qglActiveTextureARB (GL_TEXTURE1_ARB);
 				}
 				R_RenderBrushPolyMTex (psurf, t);
-			} else {
+			}
+			else
+			{
 				if (texnum != t->gl_texturenum)
 				{
 					texnum = t->gl_texturenum;
@@ -1060,14 +1060,17 @@ R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-	if (gl_mtex) {
+	if (gl_mtex)
+	{
 		if (gl_mtexcombine)
 			qglTexEnvi (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglDisable (GL_TEXTURE_2D);
 		qglActiveTextureARB (GL_TEXTURE0_ARB);
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	} else {
+	}
+	else
+	{
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		R_BlendLightmaps ();
 	}
@@ -1258,21 +1261,24 @@ AllocBlock (int w, int h, int *x, int *y)
 	int			best, best2;
 	int			texnum;
 
-	for (texnum = 0; texnum < MAX_LIGHTMAPS; texnum++) {
+	for (texnum = 0; texnum < MAX_LIGHTMAPS; texnum++)
+	{
 		best = BLOCK_HEIGHT;
 
 		for (i = 0; i < BLOCK_WIDTH - w; i++)
 		{
 			best2 = 0;
 
-			for (j = 0; j < w; j++) {
+			for (j = 0; j < w; j++)
+			{
 				if (allocated[texnum][i + j] >= best)
 					break;
 				if (allocated[texnum][i + j] > best2)
 					best2 = allocated[texnum][i + j];
 			}
 			
-			if (j == w) {
+			if (j == w)
+			{
 				// this is a valid spot
 				*x = i;
 				*y = best = best2;
@@ -1303,7 +1309,7 @@ AllocBlock (int w, int h, int *x, int *y)
 		return texnum;
 	}
 
-	Host_EndGame ("AllocBlock: full");
+	Host_Error ("AllocBlock: full");
 	return 0;
 }
 

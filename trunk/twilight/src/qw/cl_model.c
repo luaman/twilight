@@ -161,8 +161,10 @@ Mod_LoadTextures (lump_t *l)
 	texture_t		*anims[10];
 	texture_t		*altanims[10];
 	dmiptexlump_t	*m;
+	Uint8			*mtdata;
 
-	if (!l->filelen) {
+	if (!l->filelen)
+	{
 		loadmodel->textures = NULL;
 		return;
 	}
@@ -170,12 +172,13 @@ Mod_LoadTextures (lump_t *l)
 
 	m->nummiptex = LittleLong (m->nummiptex);
 
-	loadmodel->numtextures = m->nummiptex;
-	loadmodel->textures =
-		Hunk_AllocName (m->nummiptex * sizeof (*loadmodel->textures),
-				loadmodel->name);
+	// Make room for the two r_notextures
+	loadmodel->numtextures = m->nummiptex + 2;
+	loadmodel->textures = Hunk_AllocName (loadmodel->numtextures
+			* sizeof (*loadmodel->textures), loadmodel->name);
 
-	for (i = 0; i < m->nummiptex; i++) {
+	for (i = 0; i < m->nummiptex; i++)
+	{
 		m->dataofs[i] = LittleLong (m->dataofs[i]);
 		if (m->dataofs[i] == -1)
 			continue;
@@ -188,52 +191,68 @@ Mod_LoadTextures (lump_t *l)
 		if ((dmiptex->width & 15) || (dmiptex->height & 15))
 			Host_EndGame ("Texture %s is not 16 aligned", dmiptex->name);
 		pixels = dmiptex->width * dmiptex->height * (85 / 64);
-		tx = Hunk_AllocName (sizeof (texture_t) + pixels, loadmodel->name);
+		tx = Hunk_AllocName (sizeof (texture_t), loadmodel->name);
 		loadmodel->textures[i] = tx;
 
 		memcpy (tx->name, dmiptex->name, sizeof (tx->name));
 		tx->width = dmiptex->width;
 		tx->height = dmiptex->height;
-		for (j = 0; j < MIPLEVELS; j++)
-			tx->offsets[j] =
-				dmiptex->offsets[j] + sizeof (texture_t) - sizeof (miptex_t);
-		// the pixels immediately follow the structures
-		memcpy (tx + 1, dmiptex + 1, pixels);
 
-		// HACK HACK HACK
-		if (!strcmp(dmiptex->name, "shot1sid") && dmiptex->width==32 && dmiptex->height==32
-			&& CRC_Block((Uint8*)(dmiptex+1), dmiptex->width*dmiptex->height) == 65393)
-		{	// This texture in b_shell1.bsp has some of the first 32 pixels painted white.
-			// They are invisible in software, but look really ugly in GL. So we just copy
-			// 32 pixels from the bottom to make it look nice.
-			memcpy (tx+1, (Uint8 *)(tx+1) + 32*31, 32);
+		mtdata = (Uint8 *)(dmiptex) + dmiptex->offsets[0];
+
+		// Gross hack: Fix the shells Quake1 shells box
+		if (!strcmp(dmiptex->name, "shot1sid")
+				&& dmiptex->width == 32 && dmiptex->height == 32
+				&& CRC_Block((Uint8 *)(dmiptex + 1),
+					dmiptex->width * dmiptex->height) == 65393)
+		{
+			// This texture in b_shell1.bsp has some of the first 32 pixels
+			// painted white.  They are invisible in software, but look really
+			// ugly in GL. So we just copy 32 pixels from the bottom to make
+			// it look nice.
+			memcpy (mtdata, mtdata + (32 * 31), 32);
 		}
 
 		if (!strncmp (dmiptex->name, "sky", 3))
-			R_InitSky (tx);
-		else {
-			if (dmiptex->name[0] == '*')	// we don't brighten turb textures
-				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width, tx->height, (Uint8 *)(tx+1), TEX_MIPMAP, 8);
-			else {
-				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width, tx->height, (Uint8 *)(tx+1), TEX_MIPMAP, 8);
+			R_InitSky (tx, mtdata);
+		else
+		{
+			if (dmiptex->name[0] == '*')
+				// we don't brighten turb textures
+				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width,
+						tx->height, (Uint8 *)(mtdata), TEX_MIPMAP, 8);
+			else
+			{
+				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width,
+						tx->height, (Uint8 *)(mtdata), TEX_MIPMAP, 8);
 
-				if (Img_HasFullbrights((Uint8 *)(tx+1), tx->width*tx->height)) {
-					tx->fb_texturenum = GL_LoadTexture (va("@fb_%s", dmiptex->name), tx->width, tx->height,
-									(Uint8 *) (tx + 1), TEX_MIPMAP|TEX_FBMASK, 8);
+				if (Img_HasFullbrights((Uint8 *)(mtdata),
+							tx->width * tx->height))
+				{
+					tx->fb_texturenum = GL_LoadTexture (
+							va("@fb_%s", dmiptex->name),
+							tx->width, tx->height, (Uint8 *)(mtdata),
+							TEX_MIPMAP|TEX_FBMASK, 8);
 				}
 			}
 		}
 	}
 
+	// Add the r_notextures to the list
+	loadmodel->textures[i++] = r_notexture;
+	loadmodel->textures[i] = r_notexture_water;
+
 //
 // sequence the animations
 //
-	for (i = 0; i < m->nummiptex; i++) {
+	for (i = 0; i < m->nummiptex; i++)
+	{
 		tx = loadmodel->textures[i];
 		if (!tx || tx->name[0] != '+')
 			continue;
 		if (tx->anim_next)
-			continue;					// already sequenced
+			// already sequenced
+			continue;
 
 		// find the number of frames in the animation
 		memset (anims, 0, sizeof (anims));
@@ -243,20 +262,25 @@ Mod_LoadTextures (lump_t *l)
 		altmax = 0;
 		if (max >= 'a' && max <= 'z')
 			max -= 'a' - 'A';
-		if (max >= '0' && max <= '9') {
+		if (max >= '0' && max <= '9')
+		{
 			max -= '0';
 			altmax = 0;
 			anims[max] = tx;
 			max++;
-		} else if (max >= 'A' && max <= 'J') {
+		}
+		else if (max >= 'A' && max <= 'J')
+		{
 			altmax = max - 'A';
 			max = 0;
 			altanims[altmax] = tx;
 			altmax++;
-		} else
-			Host_EndGame ("Bad animating texture %s", tx->name);
+		}
+		else
+			Host_Error ("Bad animating texture %s", tx->name);
 
-		for (j = i + 1; j < m->nummiptex; j++) {
+		for (j = i + 1; j < m->nummiptex; j++)
+		{
 			tx2 = loadmodel->textures[j];
 			if (!tx2 || tx2->name[0] != '+')
 				continue;
@@ -266,23 +290,28 @@ Mod_LoadTextures (lump_t *l)
 			num = tx2->name[1];
 			if (num >= 'a' && num <= 'z')
 				num -= 'a' - 'A';
-			if (num >= '0' && num <= '9') {
+			if (num >= '0' && num <= '9')
+			{
 				num -= '0';
 				anims[num] = tx2;
 				if (num + 1 > max)
 					max = num + 1;
-			} else if (num >= 'A' && num <= 'J') {
+			}
+			else if (num >= 'A' && num <= 'J')
+			{
 				num = num - 'A';
 				altanims[num] = tx2;
 				if (num + 1 > altmax)
 					altmax = num + 1;
-			} else
-				Host_EndGame ("Bad animating texture %s", tx->name);
+			}
+			else
+				Host_Error ("Bad animating texture %s", tx->name);
 		}
 
 #define	ANIM_CYCLE	2
 		// link them all together
-		for (j = 0; j < max; j++) {
+		for (j = 0; j < max; j++)
+		{
 			tx2 = anims[j];
 			if (!tx2)
 				Host_EndGame ("Missing frame %i of %s", j, tx->name);
@@ -293,7 +322,8 @@ Mod_LoadTextures (lump_t *l)
 			if (altmax)
 				tx2->alternate_anims = altanims[0];
 		}
-		for (j = 0; j < altmax; j++) {
+		for (j = 0; j < altmax; j++)
+		{
 			tx2 = altanims[j];
 			if (!tx2)
 				Host_EndGame ("Missing frame %i of %s", j, tx->name);
@@ -391,17 +421,19 @@ Mod_LoadTexinfo (lump_t *l)
 		miptex = LittleLong (in->miptex);
 		out->flags = LittleLong (in->flags);
 
-		if (!loadmodel->textures) {
-			out->texture = r_notexture_mip;	// checkerboard texture
-			out->flags = 0;
-		} else {
+		out->texture = NULL;
+		if (loadmodel->textures)
+		{
 			if (miptex >= loadmodel->numtextures)
-				Host_EndGame ("miptex >= loadmodel->numtextures");
+				Host_Error ("miptex >= loadmodel->numtextures");
 			out->texture = loadmodel->textures[miptex];
-			if (!out->texture) {
-				out->texture = r_notexture_mip;	// texture not found
-				out->flags = 0;
-			}
+		}
+		if (!out->texture)
+		{
+			if (out->flags & TEX_SPECIAL)
+				out->texture = r_notexture_water;
+			else
+				out->texture = r_notexture;
 		}
 	}
 }
@@ -451,8 +483,8 @@ CalcSurfaceExtents (msurface_t *s)
 
 		s->texturemins[i] = bmins[i] * 16;
 		s->extents[i] = (bmaxs[i] - bmins[i]) * 16;
-		if (!(tex->flags & TEX_SPECIAL) && s->extents[i] > 512 /* 256 */ )
-			Host_EndGame ("Bad surface extents");
+		if (!(s->texinfo->flags & TEX_SPECIAL) && s->extents[i] > 512)
+			Host_Error ("Bad surface extents");
 	}
 
 	s->smax = bmaxs[0] - bmins[0] + 1, 
@@ -476,7 +508,7 @@ Mod_LoadFaces (lump_t *l)
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
-		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s",
+		Host_Error ("MOD_LoadBmodel: funny lump size in %s",
 				loadmodel->name);
 	count = l->filelen / sizeof (*in);
 	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
@@ -529,6 +561,20 @@ Mod_LoadFaces (lump_t *l)
 
 		// is it water?
 		if (out->texinfo->texture->name[0] == '*')
+		{
+			out->flags |= (SURF_DRAWTURB | SURF_DRAWTILED);
+			for (i = 0; i < 2; i++)
+			{
+				out->extents[i] = 16384;
+				out->texturemins[i] = -8192;
+			}
+			// cut up polygon for warps
+			GL_SubdivideSurface (out);
+			continue;
+		}
+
+		// is it special?
+		if (out->texinfo->flags & TEX_SPECIAL)
 		{
 			out->flags |= (SURF_DRAWTURB | SURF_DRAWTILED);
 			for (i = 0; i < 2; i++)
@@ -1081,20 +1127,20 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	numinverts = LittleLong (pinmodel->numverts);
 
 	if (numinverts <= 0)
-		Host_EndGame ("model %s has no vertices", mod->name);
+		Host_Error ("model %s has no vertices", mod->name);
 
 	if (numinverts > MAXALIASVERTS)
-		Host_EndGame ("model %s has too many vertices", mod->name);
+		Host_Error ("model %s has too many vertices", mod->name);
 
 	pheader->numtris = LittleLong (pinmodel->numtris);
 
 	if (pheader->numtris <= 0)
-		Host_EndGame ("model %s has no triangles", mod->name);
+		Host_Error ("model %s has no triangles", mod->name);
 
 	pheader->numframes = LittleLong (pinmodel->numframes);
 	numframes = pheader->numframes;
 	if (numframes < 1)
-		Host_EndGame ("Mod_LoadAliasModel: Invalid # of frames: %d\n", numframes);
+		Host_Error ("Mod_LoadAliasModel: Invalid # of frames: %d\n", numframes);
 
 	pheader->size = LittleFloat (pinmodel->size) * ALIAS_BASE_SIZE_RATIO;
 	mod->synctype = LittleLong (pinmodel->synctype);
@@ -1132,7 +1178,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	pheader->numverts = numinverts + numseams;
 
 	if (pheader->numverts > MAX_VERTEX_ARRAYS)
-		Sys_Error("Model %s too big for vertex arrays! (%d %d)", mod->name,
+		Host_Error ("Model %s too big for vertex arrays! (%d %d)", mod->name,
 				pheader->numverts, MAX_VERTEX_ARRAYS);
 
 	pheader->tcarray = Zone_Alloc(mod->extrazone, pheader->numverts * sizeof(astvert_t));

@@ -1212,9 +1212,7 @@ Host_EndGame (char *message, ...)
 	va_start (argptr, message);
 	vsnprintf (string, sizeof (string), message, argptr);
 	va_end (argptr);
-	Com_Printf ("\n===========================\n");
 	Com_Printf ("Host_EndGame: %s\n", string);
-	Com_Printf ("===========================\n\n");
 
 	CL_Disconnect ();
 
