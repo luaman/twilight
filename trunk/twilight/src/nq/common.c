@@ -64,8 +64,6 @@ cvar_t *fs_userconf;
 cvar_t *fs_userpath;
 cvar_t *fs_gamename;
 
-qboolean    com_modified;				// set true if using non-id files
-
 //static char com_basedir[MAX_OSPATH];
 //static char com_sharedir[MAX_OSPATH];
 
@@ -74,10 +72,6 @@ qboolean    proghack;
 qboolean    msg_suppress_1 = 0;
 
 void        COM_InitFilesystem (void);
-
-// if a packfile directory differs from this, it is assumed to be hacked
-#define PAK0_COUNT              339
-#define PAK0_CRC                32981
 
 char        com_token[1024];
 int         com_argc;
@@ -1380,7 +1374,6 @@ COM_LoadPackFile (char *packfile)
 	pack_t     *pack;
 	int         packhandle;
 	dpackfile_t info[MAX_FILES_IN_PACK];
-	unsigned short crc;
 
 	if (Sys_FileOpenRead (packfile, &packhandle) == -1) {
 //              Con_Printf ("Couldn't open %s\n", packfile);
@@ -1398,19 +1391,10 @@ COM_LoadPackFile (char *packfile)
 	if (numpackfiles > MAX_FILES_IN_PACK)
 		Sys_Error ("%s has %i files", packfile, numpackfiles);
 
-	if (numpackfiles != PAK0_COUNT)
-		com_modified = true;			// not the original file
-
 	newfiles = Hunk_AllocName (numpackfiles * sizeof (packfile_t), "packfile");
 
 	Sys_FileSeek (packhandle, header.dirofs);
 	Sys_FileRead (packhandle, (void *) info, header.dirlen);
-
-// crc the directory to check for modifications
-	crc = CRC_Block ((Uint8 *)info, header.dirlen);
-
-	if (crc != PAK0_CRC)
-		com_modified = true;
 
 // parse the directory
 	for (i = 0; i < numpackfiles; i++) {
@@ -1542,17 +1526,14 @@ COM_InitFilesystem (void)
 // Adds basedir/gamedir as an override game
 //
 	i = COM_CheckParm ("-game");
-	if (i && i < com_argc - 1) {
-		com_modified = true;
+	if (i && i < com_argc - 1)
 		COM_AddGameDirectory (com_argv[i + 1]);
-	}
 //
 // -path <dir or packfile> [<dir or packfile>] ...
 // Fully specifies the exact serach path, overriding the generated one
 //
 	i = COM_CheckParm ("-path");
 	if (i) {
-		com_modified = true;
 		com_searchpaths = NULL;
 		while (++i < com_argc) {
 			if (!com_argv[i] || com_argv[i][0] == '+' || com_argv[i][0] == '-')
