@@ -451,6 +451,7 @@ R_DrawParticles (void)
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
 
 	qglEnable (GL_BLEND);
+	qglDepthMask (GL_FALSE);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglBegin (GL_TRIANGLES);
@@ -576,5 +577,6 @@ R_DrawParticles (void)
 
 	qglColor3f (1, 1, 1);
 	qglEnd ();
+	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);
 }
