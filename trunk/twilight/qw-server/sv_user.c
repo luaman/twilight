@@ -142,6 +142,12 @@ SV_Soundlist_f (void)
 	}
 
 	n = atoi (Cmd_Argv (2));
+	if (n >= MAX_SOUNDS) {
+		SV_ClientPrintf (host_client, PRINT_HIGH, 
+			"SV_Soundlist_f: Invalid soundlist index\n");
+		SV_DropClient (host_client);
+		return;
+	}
 
 //NOTE:  This doesn't go through ClientReliableWrite since it's before the user
 //spawns.  These functions are written to not overflow
@@ -191,6 +197,12 @@ SV_Modellist_f (void)
 	}
 
 	n = atoi (Cmd_Argv (2));
+	if (n >= MAX_MODELS) {
+		SV_ClientPrintf (host_client, PRINT_HIGH, 
+			"SV_Modellist_f: Invalid modellist index\n");
+		SV_DropClient (host_client);
+		return;
+	}
 
 //NOTE:  This doesn't go through ClientReliableWrite since it's before the user
 //spawns.  These functions are written to not overflow
