@@ -375,8 +375,8 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 		c = *in++;
 		if (c)
 		{
-			l = model->numleafs - (k << 3);
-			l = max (l, 8);
+			l = model->numleafs + 1 - (k << 3);
+			l = min (l, 8);
 			for (i=0 ; i<l ; i++)
 			{
 				if (c & (1<<i))
