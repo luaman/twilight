@@ -439,34 +439,23 @@ The input line scrolls horizontally if typing goes beyond the right edge
 void
 Con_DrawInput (void)
 {
-	int         y;
-	int         i;
 	char       *text;
 
 	if (key_dest != key_console && cls.state == ca_active)
-		return;							// don't draw anything (always draw if 
-	// not active)
+		// don't draw anything (always draw if not active)
+		return;
 
 	text = key_lines[edit_line];
 
-// add the cursor frame
-	text[key_linepos] = 10 + ((int) (realtime * con_cursorspeed) & 1);
-
-// fill out remainder with spaces
-	for (i = key_linepos + 1; i < con_linewidth; i++)
-		text[i] = ' ';
-
-//  prestep if horizontally scrolling
+	// prestep if horizontally scrolling
 	if (key_linepos >= con_linewidth)
 		text += 1 + key_linepos - con_linewidth;
 
-// draw it
-	y = con_vislines - 22;
-
+	// draw it
 	Draw_String_Len(1 << 3, con_vislines - 22, text, con_linewidth);
 
-// remove cursor
-	key_lines[edit_line][key_linepos] = 0;
+	if ((int) (realtime * con_cursorspeed) & 1)
+		Draw_Character ((1 + key_linepos) << 3, con_vislines - 22, 11);
 }
 
 

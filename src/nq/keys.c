@@ -39,6 +39,7 @@ static const char rcsid[] =
 #include "console.h"
 #include "cvar.h"
 #include "keys.h"
+#include "mathlib.h"
 #include "menu.h"
 #include "screen.h"
 #include "strlib.h"
@@ -196,29 +197,6 @@ CheckForCommand (void)
 	return true;
 }
 
-void
-CompleteCommand (void)
-{
-	char       *cmd, *s;
-
-	s = key_lines[edit_line] + 1;
-	if (*s == '\\' || *s == '/')
-		s++;
-
-	cmd = Cmd_CompleteCommand (s);
-	if (!cmd)
-		cmd = Cvar_TabComplete (s);
-	if (cmd) {
-		key_lines[edit_line][1] = '/';
-		strcpy (key_lines[edit_line] + 2, cmd);
-		key_linepos = strlen (cmd) + 2;
-		key_lines[edit_line][key_linepos] = ' ';
-		key_linepos++;
-		key_lines[edit_line][key_linepos] = 0;
-		return;
-	}
-}
-
 /*
 ====================
 Key_Console
@@ -229,8 +207,8 @@ Interactive line editing and console scrollback
 void
 Key_Console (int key)
 {
-	if (key == K_ENTER) {				// backslash text are commands, else
-										// chat
+	if (key == K_ENTER)
+	{
 		if (key_lines[edit_line][1] == '\\' || key_lines[edit_line][1] == '/')
 			Cbuf_AddText (key_lines[edit_line] + 2);	// skip the >
 		else if (cl_chatmode->value && cls.state >= ca_connected)
@@ -250,25 +228,33 @@ Key_Console (int key)
 		edit_line = (edit_line + 1) & 31;
 		history_line = edit_line;
 		key_lines[edit_line][0] = ']';
+		key_lines[edit_line][1] = '\0';
 		key_linepos = 1;
 		if (cls.state == ca_disconnected)
-			SCR_UpdateScreen ();		// force an update, because the command
-		// may take some time
+			// force an update, because the command may take some time
+			SCR_UpdateScreen ();
 		return;
 	}
 
 	// Command Line Completion
-	if (key == K_TAB) {
+	if (key == K_TAB)
 		Con_CompleteCommandLine();
-	}
 
-	if (key == K_BACKSPACE || key == K_LEFTARROW) {
+	if (key == K_LEFTARROW)
+	{
 		if (key_linepos > 1)
 			key_linepos--;
 		return;
 	}
 
-	if (key == K_UPARROW) {
+	if (key == K_RIGHTARROW)
+	{
+		if (key_lines[edit_line][key_linepos])
+			key_linepos++;
+	}
+
+	if (key == K_UPARROW)
+	{
 		do {
 			history_line = (history_line - 1) & 31;
 		} while (history_line != edit_line && !key_lines[history_line][1]);
@@ -279,7 +265,8 @@ Key_Console (int key)
 		return;
 	}
 
-	if (key == K_DOWNARROW) {
+	if (key == K_DOWNARROW)
+	{
 		if (history_line == edit_line)
 			return;
 		do {
@@ -296,36 +283,70 @@ Key_Console (int key)
 		return;
 	}
 
-	if (key == K_PGUP || key == K_MWHEELUP) {
+	if (key == K_BACKSPACE)
+	{
+		if (key_linepos > 1)
+		{
+			strcpy (key_lines[edit_line] + key_linepos - 1,
+					key_lines[edit_line] + key_linepos);
+			key_linepos--;
+		}
+		return;
+	}
+
+	if (key == K_DEL)
+	{
+		if ((unsigned)key_linepos < strlen (key_lines[edit_line]))
+			strcpy (key_lines[edit_line] + key_linepos,
+					key_lines[edit_line] + key_linepos + 1);
+	}
+
+	if (key == K_PGUP || key == K_MWHEELUP)
+	{
 		con->display -= 2;
 		return;
 	}
 
-	if (key == K_PGDN || key == K_MWHEELDOWN) {
+	if (key == K_PGDN || key == K_MWHEELDOWN)
+	{
 		con->display += 2;
 		if (con->display > con->current)
 			con->display = con->current;
 		return;
 	}
 
-	if (key == K_HOME) {
+	if (key == K_HOME)
+	{
 		con->display = con->current - con_totallines + 10;
 		return;
 	}
 
-	if (key == K_END) {
+	if (key == K_END)
+	{
 		con->display = con->current;
 		return;
 	}
+
 	// There was some clipboard stuff here, but it was not portable
 
 	if (key < 32 || key > 127)
 		return;							// non printable
 
-	if (key_linepos < MAX_INPUTLINE - 1) {
-		key_lines[edit_line][key_linepos] = key;
-		key_linepos++;
-		key_lines[edit_line][key_linepos] = 0;
+	if (key_linepos < MAX_INPUTLINE - 1)
+	{
+		int			i;
+
+		i = strlen (key_lines[edit_line]) - 1;
+		i = min (i, MAX_INPUTLINE - 2);
+
+		// insert a character here
+		for (; i >= key_linepos; i--)
+			key_lines[edit_line][i + 1] = key_lines[edit_line][i];
+
+		// XXX
+//		if (!key_lines[edit_line][key_linepos])
+//			key_lines[edit_line][key_linepos + 1] = '\0';
+		key_lines[edit_line][key_linepos++] = key;
 	}
 
 }
@@ -589,6 +610,7 @@ Key_Init (void)
 	consolekeys[K_UPARROW] = true;
 	consolekeys[K_DOWNARROW] = true;
 	consolekeys[K_BACKSPACE] = true;
+	consolekeys[K_DEL] = true;
 	consolekeys[K_HOME] = true;
 	consolekeys[K_END] = true;
 	consolekeys[K_PGUP] = true;
