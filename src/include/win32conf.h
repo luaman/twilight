@@ -8,6 +8,8 @@
 
 #define SHAREPATH ""
 
+#define APIENTRY __stdcall
+
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
 #define strcasecmp _strcmpi
