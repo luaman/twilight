@@ -63,7 +63,7 @@ Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
 static void
-EmitWaterPolys (model_t *mod, glpoly_t *p)
+EmitWaterPolys (model_t *mod, glpoly_t *p, qboolean arranged)
 {
 	brushhdr_t	*brush = mod->brush;
 
@@ -73,20 +73,26 @@ EmitWaterPolys (model_t *mod, glpoly_t *p)
 
 	for (; p; p = p->next)
 	{
-		memcpy(v_array_v(0), B_Vert_v(brush, p->start),
-				sizeof(vertex_t) * p->numverts);
-		memcpy(tc0_array_v(0), B_TC_v(brush, 0, p->start),
-				sizeof(texcoord_t) * p->numverts);
-		TWI_PreVDrawCVA (0, p->numverts);
-		qglDrawArrays (GL_TRIANGLE_FAN, 0, p->numverts);
-		TWI_PostVDrawCVA ();
+		if (!arranged) {
+			memcpy(v_array_v(0), B_Vert_v(brush, p->start),
+					sizeof(vertex_t) * p->numverts);
+			memcpy(tc0_array_v(0), B_TC_v(brush, 0, p->start),
+					sizeof(texcoord_t) * p->numverts);
+			TWI_PreVDrawCVA (0, p->numverts);
+			qglDrawArrays (GL_TRIANGLE_FAN, 0, p->numverts);
+			TWI_PostVDrawCVA ();
+		} else {
+			TWI_PreVDrawCVA (p->start, p->numverts);
+			qglDrawArrays (GL_TRIANGLE_FAN, p->start, p->numverts);
+			TWI_PostVDrawCVA ();
+		}
 	}
 	qglPopMatrix ();
 	qglMatrixMode (GL_MODELVIEW);
 }
 
 void
-R_Draw_Liquid_Chain (model_t *mod, chain_head_t *chain)
+R_Draw_Liquid_Chain (model_t *mod, chain_head_t *chain, qboolean arranged)
 {
 	Uint			 i;
 	chain_item_t	*c;
@@ -100,7 +106,7 @@ R_Draw_Liquid_Chain (model_t *mod, chain_head_t *chain)
 				bound = true;
 				qglBindTexture (GL_TEXTURE_2D, chain->texture->gl_texturenum);
 			}
-			EmitWaterPolys (mod, c[i].surf->polys);
+			EmitWaterPolys (mod, c[i].surf->polys, arranged);
 		}
 	}
 }

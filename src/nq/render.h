@@ -238,7 +238,7 @@ void R_DrawAddBrushModel (entity_common_t *e);
 void R_DrawBrushDepthSkies (void);
 void R_VisWorld (void);
 void R_DrawWorld (void);
-void R_DrawLiquidTextureChains (model_t *mod);
+void R_DrawLiquidTextureChains (model_t *mod, qboolean arranged);
 void R_DrawTextureChains (model_t *mod, int frame, matrix4x4_t *matrix, matrix4x4_t *invmatrix);
 void GL_BuildLightmaps (void);
 

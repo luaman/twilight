@@ -643,7 +643,7 @@ R_RenderBrushPolys (glpoly_t *p)
 }
 
 void
-R_DrawLiquidTextureChains (model_t *mod)
+R_DrawLiquidTextureChains (model_t *mod, qboolean arranged)
 {
 	Uint			 i;
 	brushhdr_t		*brush = mod->brush;
@@ -656,7 +656,7 @@ R_DrawLiquidTextureChains (model_t *mod)
 				|| !(chain->flags & CHAIN_LIQUID))
 			continue;
 
-		R_Draw_Liquid_Chain (mod, chain);
+		R_Draw_Liquid_Chain (mod, chain, arranged);
 	}
 }
 
@@ -674,6 +674,16 @@ R_DrawTextureChains (model_t *mod, int frame,
 	chain_head_t	*chain;
 	chain_item_t	*c;
 	brushhdr_t		*brush = mod->brush;
+
+	if (gl_vbo) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_VERTS]);
+		qglVertexPointer (3, GL_FLOAT, 0, 0);
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC0]);
+		qglTexCoordPointer (2, GL_FLOAT, 0, 0);
+	} else {
+		qglVertexPointer (3, GL_FLOAT, 0, brush->verts);
+		qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[0]);
+	}
 	
 	if (matrix) {
 		qglPushMatrix ();
@@ -698,16 +708,6 @@ R_DrawTextureChains (model_t *mod, int frame,
 
 	if (sky_type == SKY_FAST && brush->sky_chain.visframe == vis_framecount)
 		Sky_Fast_Draw_Chain (mod, &brush->sky_chain);
-
-	if (gl_vbo) {
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_VERTS]);
-		qglVertexPointer (3, GL_FLOAT, 0, 0);
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC0]);
-		qglTexCoordPointer (2, GL_FLOAT, 0, 0);
-	} else {
-		qglVertexPointer (3, GL_FLOAT, 0, brush->verts);
-		qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[0]);
-	}
 
 	if (gl_mtex)
 	{
@@ -830,6 +830,12 @@ R_DrawTextureChains (model_t *mod, int frame,
 			}
 		}
 
+		if (gl_vbo) {
+			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC0]);
+			qglTexCoordPointer (2, GL_FLOAT, 0, 0);
+		} else
+			qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[0]);
+
 		qglDisable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -843,12 +849,6 @@ R_DrawTextureChains (model_t *mod, int frame,
 		qglDepthMask (GL_FALSE);	// don't bother writing Z
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
-
-		if (gl_vbo) {
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC0]);
-			qglTexCoordPointer (2, GL_FLOAT, 0, 0);
-		} else
-			qglTexCoordPointer (2, GL_FLOAT, 0, brush->tcoords[0]);
 
 		for (i = 0; i < brush->numtextures; i++)
 		{
@@ -875,11 +875,15 @@ R_DrawTextureChains (model_t *mod, int frame,
 		qglDepthMask (GL_TRUE);
 	}
 
-	GLArrays_Set_Default ();
-
 	// If the water is solid, draw here, if not, then later.
 	if (r_wateralpha->fvalue == 1)
-		R_DrawLiquidTextureChains (mod);
+		R_DrawLiquidTextureChains (mod, true);
+
+	if (gl_vbo)
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
+	GLArrays_Reset_Vertex ();
+	GLArrays_Reset_TC ();
 
 	if (matrix)
 		qglPopMatrix ();
@@ -971,7 +975,7 @@ R_DrawAddBrushModel (entity_common_t *e)
 
 	qglMultTransposeMatrixf ((GLfloat *) &e->matrix);
 
-	R_DrawLiquidTextureChains (mod);
+	R_DrawLiquidTextureChains (mod, false);
 
 	qglPopMatrix ();
 }

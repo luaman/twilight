@@ -317,7 +317,7 @@ R_DrawAddBrushModels ()
 
 	qglColor4f (1, 1, 1, r_wateralpha->fvalue);
 
-	R_DrawLiquidTextureChains (cl.worldmodel);
+	R_DrawLiquidTextureChains (cl.worldmodel, false);
 
 	if (!r_drawentities->ivalue) {
 		qglColor4fv (whitev);
