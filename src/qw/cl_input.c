@@ -360,6 +360,12 @@ IN_Impulse (void)
 	in_impulse = Q_atoi (Cmd_Argv (1));
 }
 
+static void
+IN_CenterView (void)
+{
+	cl.viewangles[PITCH] = 0;
+}
+
 /*
 ===============
 CL_KeyState
@@ -471,7 +477,8 @@ CL_AdjustAngles (void)
 	if (up || down)
 		V_StopPitchDrift ();
 
-	cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
+	// KB: Allow looking straight up/down
+	cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90);
 	cl.viewangles[ROLL] = bound (-50, cl.viewangles[ROLL], 50);
 }
 
@@ -724,6 +731,7 @@ CL_Input_Init (void)
 	Cmd_AddCommand ("-klook", IN_KLookUp);
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
+	Cmd_AddCommand ("force_centerview", IN_CenterView);
 	SDL_EnableKeyRepeat(in_key_repeat_delay->ivalue,
 			in_key_repeat_interval->ivalue);
 }
