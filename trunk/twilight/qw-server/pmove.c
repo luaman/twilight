@@ -248,7 +248,7 @@ PM_GroundMove (void)
 	float       downdist, updist;
 
 	pmove.velocity[2] = 0;
-	if (!pmove.velocity[0] && !pmove.velocity[1] && !pmove.velocity[2])
+	if (!pmove.velocity[0] && !pmove.velocity[1])
 		return;
 
 	// first try just moving to the destination 
@@ -339,13 +339,14 @@ PM_Friction (void)
 
 	vel = pmove.velocity;
 
-	speed = VectorLength (vel);
+	speed = DotProduct (vel, vel);
 	if (speed < 1) {
 		vel[0] = 0;
 		vel[1] = 0;
 		return;
 	}
 
+	speed = Q_sqrt (speed);
 	friction = movevars.friction;
 
 // if the leading edge is over a dropoff, increase friction
@@ -373,13 +374,18 @@ PM_Friction (void)
 	}
 // scale the velocity
 	newspeed = speed - drop;
-	if (newspeed < 0)
-		newspeed = 0;
-	newspeed /= speed;
 
-	vel[0] = vel[0] * newspeed;
-	vel[1] = vel[1] * newspeed;
-	vel[2] = vel[2] * newspeed;
+	if (newspeed < 0) {
+		newspeed = 0;
+		VectorClear (vel);
+	}
+	else {
+		newspeed /= speed;
+
+		vel[0] = vel[0] * newspeed;
+		vel[1] = vel[1] * newspeed;
+		vel[2] = vel[2] * newspeed;
+	}
 }
 
 
@@ -789,11 +795,15 @@ SpectatorMove (void)
 
 		// scale the velocity
 		newspeed = speed - drop;
-		if (newspeed < 0)
-			newspeed = 0;
-		newspeed /= speed;
 
-		VectorScale (pmove.velocity, newspeed, pmove.velocity);
+		if (newspeed < 0) {
+			newspeed = 0;
+			VectorClear (pmove.velocity);
+		}
+		else {
+			newspeed /= speed;
+			VectorScale (pmove.velocity, newspeed, pmove.velocity);
+		}
 	}
 
 	// accelerate
@@ -828,7 +838,6 @@ SpectatorMove (void)
 
 	for (i = 0; i < 3; i++)
 		pmove.velocity[i] += accelspeed * wishdir[i];
-
 
 	// move
 	VectorMA (pmove.origin, frametime, pmove.velocity, pmove.origin);

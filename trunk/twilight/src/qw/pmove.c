@@ -248,7 +248,8 @@ PM_GroundMove (void)
 	float       downdist, updist;
 
 	pmove.velocity[2] = 0;
-	if (!pmove.velocity[0] && !pmove.velocity[1] && !pmove.velocity[2])
+
+	if (!pmove.velocity[0] && !pmove.velocity[1])
 		return;
 
 	// first try just moving to the destination 
@@ -374,13 +375,18 @@ PM_Friction (void)
 	}
 // scale the velocity
 	newspeed = speed - drop;
-	if (newspeed < 0)
-		newspeed = 0;
-	newspeed /= speed;
 
-	vel[0] = vel[0] * newspeed;
-	vel[1] = vel[1] * newspeed;
-	vel[2] = vel[2] * newspeed;
+	if (newspeed < 0) {
+		newspeed = 0;
+		VectorClear (newspeed);
+	}
+	else {
+		newspeed /= speed;
+
+		vel[0] = vel[0] * newspeed;
+		vel[1] = vel[1] * newspeed;
+		vel[2] = vel[2] * newspeed;
+	}
 }
 
 
@@ -793,11 +799,16 @@ SpectatorMove (void)
 
 		// scale the velocity
 		newspeed = speed - drop;
-		if (newspeed < 0)
-			newspeed = 0;
-		newspeed /= speed;
 
-		VectorScale (pmove.velocity, newspeed, pmove.velocity);
+		if (newspeed < 0) {
+			newspeed = 0;
+			VectorClear (pmove.velocity);
+		}
+		else {
+			newspeed /= speed;
+
+			VectorScale (pmove.velocity, newspeed, pmove.velocity);
+		}
 	}
 
 	// accelerate
