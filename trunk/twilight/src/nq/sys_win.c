@@ -231,30 +231,6 @@ Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
 }
 
 
-#if !id386
-
-void
-Sys_SetFPCW (void)
-{
-}
-
-void
-Sys_PushFPCW_SetHigh (void)
-{
-}
-
-void
-Sys_PopFPCW (void)
-{
-}
-
-void
-MaskExceptions (void)
-{
-}
-
-#endif
-
 /*
 ================
 Sys_Init

@@ -54,7 +54,6 @@ BRUSH MODELS
 //
 // in memory representation
 //
-// !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct {
 	vec3_t      position;
 } mvertex_t;
@@ -65,7 +64,6 @@ typedef struct {
 
 
 // plane_t structure
-// !!! if this is changed, it must be changed in asm_i386.h too !!!
 typedef struct mplane_s {
 	vec3_t      normal;
 	float       dist;
@@ -97,7 +95,6 @@ typedef struct texture_s {
 #define SURF_UNDERWATER		0x80
 #define SURF_DONTWARP		0x100
 
-// !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct {
 	unsigned short v[2];
 	unsigned int cachededgeoffset;
@@ -193,7 +190,6 @@ typedef struct mleaf_s {
 	byte        ambient_sound_level[NUM_AMBIENTS];
 } mleaf_t;
 
-// !!! if this is changed, it must be changed in asm_i386.h too !!!
 typedef struct {
 	dclipnode_t *clipnodes;
 	mplane_t   *planes;
@@ -273,7 +269,6 @@ typedef struct {
 	maliasgroupframedesc_t frames[1];
 } maliasgroup_t;
 
-// !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct mtriangle_s {
 	int         facesfront;
 	int         vertindex[3];
