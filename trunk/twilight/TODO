@@ -5,6 +5,9 @@ These things need to be done before public release:
 
   - replacement md4.c, ours is a GPL violation
 
+  - consult guys at #SDL about SDL_CDStatus since it is very slow in
+    Windows and lags on all computers
+
   - Sys_ExpandPath, for twiddle expansion, / normalization, etc
 
   - Dynamic OpenGL binding
