@@ -52,6 +52,7 @@ extern struct cvar_s *hostname;
 typedef enum {NS_CLIENT, NS_SERVER} netsrc_t;
 
 void        NET_Init (void);
+void		NET_Sleep (int msec);
 void        NET_Shutdown (void);
 qboolean    NET_GetPacket (netsrc_t sock);
 void        NET_SendPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to);

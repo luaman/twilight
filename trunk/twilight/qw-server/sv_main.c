@@ -91,12 +91,16 @@ cvar_t     *watervis;
 cvar_t     *hostname;
 cvar_t     *filterban;
 cvar_t     *temp1;
+cvar_t     *coop;
+cvar_t     *skill;
 
 FILE       *sv_logfile;
 FILE       *sv_fraglogfile;
 
 void        SV_AcceptClient (netadr_t adr, int userid, char *userinfo);
 void        Master_Shutdown (void);
+
+int			current_skill;
 
 //============================================================================
 
@@ -1370,6 +1374,8 @@ SV_InitLocal (void)
 	deathmatch = Cvar_Get ("deathmatch", "1", CVAR_SERVERINFO, NULL);
 	spawn = Cvar_Get ("spawn", "0", CVAR_SERVERINFO, NULL);
 	watervis = Cvar_Get ("watervis", "0", CVAR_SERVERINFO, NULL);
+	coop = Cvar_Get ("coop", "0", CVAR_SERVERINFO, NULL);
+	skill = Cvar_Get ("skill", "0", CVAR_SERVERINFO, NULL);
 
 	hostname = Cvar_Get ("hostname", "unnamed", CVAR_SERVERINFO, NULL);
 

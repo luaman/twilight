@@ -578,6 +578,8 @@ CL_FullServerinfo_f (void)
 			server_version = v;
 		}
 	}
+
+	CL_ProcessServerInfo ();
 }
 
 /*

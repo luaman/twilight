@@ -46,6 +46,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "world.h"
 #include "zone.h"
+#include "cvar.h"
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
@@ -935,11 +936,24 @@ ED_LoadFromFile (char *data)
 		data = ED_ParseEdict (data, ent);
 
 // remove things from different skill levels or deathmatch
-		if (((int) ent->v.spawnflags & SPAWNFLAG_NOT_DEATHMATCH)) {
+		if (deathmatch->value)
+		{
+			if (((int)ent->v.spawnflags & SPAWNFLAG_NOT_DEATHMATCH))
+			{
+				ED_Free (ent);
+				inhibit++;
+				continue;
+			}
+		}
+		else if ((current_skill == 0 && ((int)ent->v.spawnflags & SPAWNFLAG_NOT_EASY))
+				|| (current_skill == 1 && ((int)ent->v.spawnflags & SPAWNFLAG_NOT_MEDIUM))
+				|| (current_skill >= 2 && ((int)ent->v.spawnflags & SPAWNFLAG_NOT_HARD)) )
+		{
 			ED_Free (ent);
 			inhibit++;
 			continue;
 		}
+
 //
 // immediately call spawn function
 //
@@ -984,11 +998,14 @@ PR_LoadProgs (void)
 	for (i = 0; i < GEFV_CACHESIZE; i++)
 		gefvCache[i].field[0] = 0;
 
-	progs = (dprograms_t *) COM_LoadHunkFile ("qwprogs.dat");
+	if (!deathmatch->value)
+		progs = (dprograms_t *)COM_LoadHunkFile ("spprogs.dat");
 	if (!progs)
-		progs = (dprograms_t *) COM_LoadHunkFile ("progs.dat");
+		progs = (dprograms_t *)COM_LoadHunkFile ("qwprogs.dat");
 	if (!progs)
-		SV_Error ("PR_LoadProgs: couldn't load progs.dat");
+		progs = (dprograms_t *)COM_LoadHunkFile ("progs.dat");
+	if (!progs)
+		SV_Error ("PR_LoadProgs: couldn't load qwprogs.dat");
 	Con_DPrintf ("Programs occupy %iK.\n", com_filesize / 1024);
 
 	// add prog crc to the serverinfo

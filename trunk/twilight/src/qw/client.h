@@ -171,6 +171,7 @@ typedef enum {
 	dl_single
 } dltype_t;								// download type
 
+
 /*
  * the client_static_t structure is persistant through an arbitrary number
  * of server connections
@@ -222,6 +223,9 @@ typedef struct {
 
 extern client_static_t cls;
 
+// these determine which intermission screen plays
+typedef enum { GAME_COOP, GAME_DEATHMATCH } gametype_t;
+
 /*
  * the client_state_t structure is wiped completely at every server signon
  */
@@ -245,6 +249,8 @@ typedef struct {
 	int			movemessages;
 
 	int			spectator;
+
+	gametype_t	gametype;
 
 	double		last_ping_request;		// while showing scoreboard
 	double		last_servermessage;
@@ -466,6 +472,7 @@ void CL_NextUpload (void);
 void CL_StartUpload (Uint8 *data, int size);
 void CL_StopUpload (void);
 void CL_ParseEntityLump (char *entdata);
+void CL_ProcessServerInfo (void);
 
 /*
  * view.c

@@ -52,6 +52,7 @@ extern struct cvar_s *hostname;
 typedef enum {NS_CLIENT, NS_SERVER} netsrc_t;
 
 void        NET_Init (void);
+void		NET_Sleep (int msec);
 void        NET_Shutdown (void);
 qboolean    NET_GetPacket (netsrc_t sock);
 void        NET_SendPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to);
@@ -122,8 +123,8 @@ typedef struct {
 
 extern int  net_drop;					// packets dropped before this one
 
-void        Netchan_Init_Cvars (void);
 void        Netchan_Init (void);
+void        Netchan_Init_Cvars (void);
 void        Netchan_Transmit (netchan_t *chan, int length, Uint8 *data);
 void		Netchan_OutOfBand (netsrc_t sock, netadr_t adr, int length, Uint8 *data);
 void        Netchan_OutOfBandPrint (netsrc_t sock, netadr_t adr, char *format, ...);

@@ -898,7 +898,7 @@ CL_NewTranslation (int slot)
 
 /*
 ==============
-CL_UpdateUserinfo
+CL_ProcessUserInfo
 ==============
 */
 void
@@ -978,6 +978,26 @@ CL_SetInfo (void)
 
 /*
 ==============
+CL_ProcessServerInfo
+==============
+*/
+void
+CL_ProcessServerInfo (void)
+{
+	char *s;
+	int  val;
+
+	s = Info_ValueForKey (cl.serverinfo, "*deathmatch");
+	if (!*s)
+		val = 0;
+	else
+		val = Q_atoi (s);
+
+	cl.gametype = val ? GAME_DEATHMATCH : GAME_COOP;
+}
+
+/*
+==============
 CL_ServerInfo
 ==============
 */
@@ -986,7 +1006,7 @@ CL_ServerInfo (void)
 {
 	char        key[MAX_MSGLEN];
 	char        value[MAX_MSGLEN];
-
+	
 	strncpy (key, MSG_ReadString (), sizeof (key) - 1);
 	key[sizeof (key) - 1] = 0;
 	strncpy (value, MSG_ReadString (), sizeof (value) - 1);
@@ -995,6 +1015,8 @@ CL_ServerInfo (void)
 	Con_DPrintf ("SERVERINFO: %s=%s\n", key, value);
 
 	Info_SetValueForKey (cl.serverinfo, key, value, MAX_SERVERINFO_STRING);
+
+	CL_ProcessServerInfo ();
 }
 
 /*
@@ -1021,6 +1043,26 @@ CL_SetStat (int stat, int value)
 
 /*
 ==============
+CL_BoundDlight
+==============
+*/
+void
+CL_BoundDlight (dlight_t *dl, vec3_t ownerorg)
+{
+	pmtrace_t tr;
+
+	if (gl_flashblend->value || gl_oldlights->value)
+		return;
+
+	memset (&tr, 0, sizeof(tr));
+	VectorCopy (dl->origin, tr.endpos);
+	PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ownerorg, dl->origin, &tr);
+	VectorCopy (tr.endpos, dl->origin);
+}
+
+
+/*
+==============
 CL_MuzzleFlash
 ==============
 */
@@ -1034,8 +1076,34 @@ CL_MuzzleFlash (void)
 
 	i = MSG_ReadShort ();
 
-	if ((unsigned) (i - 1) >= MAX_CLIENTS)
+	if ((unsigned)(i-1) >= MAX_CLIENTS)
+	{
+		entity_state_t	*ent;
+		int	j, num_ent;
+
+		// a monster firing
+		num_ent = cl.frames[cls.netchan.incoming_sequence&UPDATE_MASK].packet_entities.num_entities;
+		for (j=0; j<num_ent; j++)
+		{
+			ent = &cl.frames[cls.netchan.incoming_sequence&UPDATE_MASK].packet_entities.entities[j];
+			if (ent->number == i)
+			{
+				dl = CL_AllocDlight (-i);
+				AngleVectors (ent->angles, fv, NULL, NULL);
+				VectorMA (ent->origin, 18, fv, dl->origin);
+				CL_BoundDlight (dl, ent->origin);
+
+				dl->radius = 200 + (rand()&31);
+				dl->minlight = 32;
+				dl->die = cl.time + 0.1;
+				dl->color[0] = 0.2;
+				dl->color[1] = 0.1;
+				dl->color[2] = 0.05;
+				break;
+			}
+		}
 		return;
+	}
 
 	// don't draw our own muzzle flash if flashblending
 	if (i - 1 == cl.playernum && gl_flashblend->value)
@@ -1047,19 +1115,7 @@ CL_MuzzleFlash (void)
 	VectorCopy (pl->origin, dl->origin);
 	AngleVectors (pl->viewangles, fv, NULL, NULL);
 	VectorMA (dl->origin, 18, fv, dl->origin);
-
-	if (!gl_flashblend->value && !gl_oldlights->value)
-	{
-		pmtrace_t tr;
-		
-		memset (&tr, 0, sizeof(tr));
-
-		VectorCopy (dl->origin, tr.endpos);
-
-		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, pl->origin, dl->origin, &tr);
-				
-		VectorCopy (tr.endpos, dl->origin);
-	}
+	CL_BoundDlight (dl, pl->origin);
 
 	dl->radius = 200 + (Q_rand () & 31);
 	dl->minlight = 32;

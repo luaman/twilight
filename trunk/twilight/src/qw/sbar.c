@@ -380,21 +380,22 @@ int         scoreboardteams;
 Sbar_SortFrags
 ===============
 */
-void
+int
 Sbar_SortFrags (qboolean includespec)
 {
-	int         i, j, k;
+	int         i, j, k, p = 0;
 
 // sort by frags
 	scoreboardlines = 0;
 	for (i = 0; i < MAX_CLIENTS; i++) {
-		if (cl.players[i].name[0] && (!cl.players[i].spectator
-					|| includespec))
-		{
-			fragsort[scoreboardlines] = i;
-			scoreboardlines++;
-			if (cl.players[i].spectator)
-				cl.players[i].frags = -999;
+		if (cl.players[i].name[0]) {
+			p++;
+
+			if ((!cl.players[i].spectator
+				|| includespec)) {
+				fragsort[scoreboardlines] = i;
+				scoreboardlines++;
+			}
 		}
 	}
 
@@ -406,6 +407,8 @@ Sbar_SortFrags (qboolean includespec)
 				fragsort[j] = fragsort[j + 1];
 				fragsort[j + 1] = k;
 			}
+
+	return p;
 }
 
 void
@@ -494,16 +497,37 @@ Sbar_SoloScoreboard (void)
 {
 	char        str[80];
 	int         minutes, seconds, tens, units;
+	int         l;
+	double		time;
 
-	Sbar_DrawPic (0, 0, sb_scorebar);
+	if (cl.gametype != GAME_DEATHMATCH)
+	{
+		snprintf (str, sizeof (str), "Monsters:%3i /%3i", cl.stats[STAT_MONSTERS],
+				  cl.stats[STAT_TOTALMONSTERS]);
+		Sbar_DrawString (8, 4, str);
 
-	// time
-	minutes = cl.time / 60;
-	seconds = cl.time - 60 * minutes;
+		snprintf (str, sizeof (str), "Secrets :%3i /%3i", cl.stats[STAT_SECRETS],
+				  cl.stats[STAT_TOTALSECRETS]);
+		Sbar_DrawString (8, 12, str);
+	}
+
+// time
+	time = cls.realtime;
+	if (cl.gametype != GAME_DEATHMATCH)
+		time -= cl.players[cl.playernum].entertime;
+	minutes = time / 60;
+	seconds = time - 60 * minutes;
 	tens = seconds / 10;
 	units = seconds - 10 * tens;
 	snprintf (str, sizeof (str), "Time :%3i:%i%i", minutes, tens, units);
 	Sbar_DrawString (184, 4, str);
+
+// draw level name
+	if (cl.gametype != GAME_DEATHMATCH)
+	{
+		l = strlen (cl.levelname);
+		Sbar_DrawString (232 - l * 4, 12, cl.levelname);
+	}
 }
 
 //=============================================================================
@@ -612,6 +636,9 @@ Sbar_DrawFrags (void)
 	int         x, y, f;
 	char        num[12];
 	player_info_t *s;
+
+	if (cl.gametype != GAME_DEATHMATCH)
+		return;
 
 	Sbar_SortFrags (false);
 
@@ -780,8 +807,10 @@ Sbar_Draw (void)
 				Sbar_DrawString (160 - 14 * 8 + 4, 12,
 								 "Press [ATTACK] for AutoCamera");
 			} else {
-				if (sb_showscores || cl.stats[STAT_HEALTH] <= 0)
+				if (sb_showscores || cl.stats[STAT_HEALTH] <= 0) {
+					Sbar_DrawPic (0, 0, sb_scorebar);
 					Sbar_SoloScoreboard ();
+				}
 				else
 					Sbar_DrawNormal ();
 
@@ -789,8 +818,10 @@ Sbar_Draw (void)
 						  cl.players[spec_track].name);
 				Sbar_DrawString (0, -8, st);
 			}
-		} else if (sb_showscores || cl.stats[STAT_HEALTH] <= 0)
+		} else if (sb_showscores || cl.stats[STAT_HEALTH] <= 0) {
+			Sbar_DrawPic (0, 0, sb_scorebar);
 			Sbar_SoloScoreboard ();
+		}
 		else
 			Sbar_DrawNormal ();
 	}
@@ -812,7 +843,8 @@ Sbar_Draw (void)
 		Draw_TileClear (320, vid.conheight - sb_lines, vid.conwidth - 320, sb_lines);
 
 	if (sb_lines > 0)
-		Sbar_MiniDeathmatchOverlay ();
+		if (cl.gametype == GAME_DEATHMATCH)
+			Sbar_MiniDeathmatchOverlay ();
 }
 
 //=============================================================================
@@ -963,6 +995,14 @@ Sbar_DeathmatchOverlay (int start)
 	Sint32			teamplay;
 	char			team[5];
 	Sint32			skip = 10;
+	Sint32			coop;
+
+	coop = Q_atoi (Info_ValueForKey (cl.serverinfo, "coop"));
+
+	// scores   
+	if ( !coop && (Sbar_SortFrags (true) == 1) ) {
+		return;
+	}
 
 	if (largegame)
 		skip = 8;
@@ -980,8 +1020,6 @@ Sbar_DeathmatchOverlay (int start)
 		pic = Draw_CachePic ("gfx/ranking.lmp");
 		Draw_Pic (160 - pic->width / 2, 0, pic);
 	}
-	// scores   
-	Sbar_SortFrags (true);
 
 	// draw the text
 	l = scoreboardlines;
@@ -1241,11 +1279,40 @@ Sbar_IntermissionOverlay
 void
 Sbar_IntermissionOverlay (void)
 {
-	if (Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0
-		&& !sb_showscores)
-		Sbar_TeamOverlay ();
-	else
-		Sbar_DeathmatchOverlay (0);
+	if ( cl.gametype != GAME_DEATHMATCH )
+	{
+		qpic_t     *pic;
+		int         dig;
+		int         num;
+
+		pic = Draw_CachePic ("gfx/complete.lmp");
+		Draw_Pic (64, 24, pic);
+
+		pic = Draw_CachePic ("gfx/inter.lmp");
+		Draw_Pic (0, 56, pic);
+
+	// time
+		dig = cl.completed_time / 60;
+		Sbar_IntermissionNumber (160, 64, dig, 3, 0);
+		num = cl.completed_time - dig * 60;
+		Draw_Pic (234, 64, sb_colon);
+		Draw_Pic (246, 64, sb_nums[0][num / 10]);
+		Draw_Pic (266, 64, sb_nums[0][num % 10]);
+
+		Sbar_IntermissionNumber (160, 104, cl.stats[STAT_SECRETS], 3, 0);
+		Draw_Pic (232, 104, sb_slash);
+		Sbar_IntermissionNumber (240, 104, cl.stats[STAT_TOTALSECRETS], 3, 0);
+
+		Sbar_IntermissionNumber (160, 144, cl.stats[STAT_MONSTERS], 3, 0);
+		Draw_Pic (232, 144, sb_slash);
+		Sbar_IntermissionNumber (240, 144, cl.stats[STAT_TOTALMONSTERS], 3, 0);
+	} else {
+		if (Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0
+			&& !sb_showscores)
+			Sbar_TeamOverlay ();
+		else
+			Sbar_DeathmatchOverlay (0);
+	}
 }
 
 
