@@ -1526,16 +1526,17 @@ Wrapper for COM_AddDirectory
 void
 COM_AddGameDirectory (char *dir)
 {
-	char       *d = NULL;
+	char		buf[1024];
 
 	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
-	COM_AddDirectory (va ("%s/%s", fs_sharepath->string, dir));
+	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->string, dir);
+	COM_AddDirectory (buf);
 
 	if (strcmp (fs_userpath->string, fs_sharepath->string) != 0) {
 		// only do this if the share path is not the same as the base path
-		d = va ("%s/%s", fs_userpath->string, dir);
-		Sys_mkdir (d);
-		COM_AddDirectory (d);
+		snprintf (buf, sizeof (buf), "%s/%s", fs_userpath->string, dir);
+		Sys_mkdir (buf);
+		COM_AddDirectory (buf);
 	}
 }
 
