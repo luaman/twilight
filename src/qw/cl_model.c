@@ -53,6 +53,8 @@ static const char rcsid[] =
 
 extern model_t	*loadmodel;
 
+extern qboolean isnotmap;
+
 void	Mod_LoadSpriteModel (model_t *mod, void *buffer);
 void	Mod_LoadBrushModel (model_t *mod, void *buffer);
 void	Mod_LoadAliasModel (model_t *mod, void *buffer);
@@ -60,13 +62,7 @@ model_t	*Mod_LoadModel (model_t *mod, qboolean crash);
 
 Uint8	mod_novis[MAX_MAP_LEAFS / 8];
 
-#define	MAX_MOD_KNOWN	512
-model_t	mod_known[MAX_MOD_KNOWN];
-int		mod_numknown;
-
 cvar_t	*gl_subdivide_size;
-
-qboolean	isnotmap;
 
 void	GL_SubdivideSurface (msurface_t *fa);
 

@@ -46,7 +46,7 @@ model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
 
 Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 
-#define	MAX_MOD_KNOWN	512
+#define	MAX_MOD_KNOWN	1024
 model_t     mod_known[MAX_MOD_KNOWN];
 int         mod_numknown;
 
@@ -182,31 +182,41 @@ Mod_FindName
 
 ==================
 */
-model_t    *
+model_t *
 Mod_FindName (char *name)
 {
-	int         i;
-	model_t    *mod;
+	int			i;
+	model_t		*mod, *freemod;
 
 	if (!name[0])
 		Sys_Error ("Mod_ForName: NULL name");
 
-//
-// search the currently loaded models
-//
-	for (i = 0, mod = mod_known; i < mod_numknown; i++, mod++)
-		if (!strcmp (mod->name, name))
-			break;
-
-	if (i == mod_numknown) {
-		if (mod_numknown == MAX_MOD_KNOWN)
-			Sys_Error ("mod_numknown == MAX_MOD_KNOWN");
-		strcpy (mod->name, name);
-		mod->needload = true;
-		mod_numknown++;
+	/*
+	 * search the currently loaded models
+	 */
+	freemod = NULL;
+	for (i = 0, mod = mod_known; i < MAX_MOD_KNOWN; i++, mod++)
+	{
+		if (mod->name[0])
+		{
+			if (!strcmp (mod->name, name))
+				return mod;
+		}
+		else if (freemod == NULL)
+			freemod = mod;
 	}
 
-	return mod;
+	if (freemod)
+	{
+		mod_numknown++;
+		mod = freemod;
+		strcpy (mod->name, name);
+		mod->needload = true;
+		return mod;
+	}
+
+	Sys_Error ("Mod_FindName: ran out of models\n");
+	return NULL;
 }
 
 /*
