@@ -222,30 +222,29 @@ GLT_Skin_IndicesFromSkins (aliashdr_t *amodel, int num_skins,
 {
 	int			alias_numtris = amodel->numtris;
 	mtriangle_t	*alias_tris = amodel->triangles;
-	Uint8		*tris;
+	Uint32		*tris;
 	int			i, j, numtris;
 
-	tris = Zone_Alloc(tempzone, sizeof(Uint8) * alias_numtris);
+	tris = Zone_Alloc(tempzone, sizeof(Uint32) * ((alias_numtris / 32) + 1));
 
 	for (i = 0; i < num_skins; i++)
 		for (j = 0; j < skins[i]->num_tris; j++)
-			tris[skins[i]->tris[j]] = true;
+			tris[skins[i]->tris[j] / 32] |= BIT(skins[i]->tris[j] % 32);
 
 	for (i = numtris = 0; i < alias_numtris; i++)
-		if (tris[i])
+		if (tris[i/32] & BIT(i%32))
 			numtris++;
 
 	if (numtris) {
 		indices->num = numtris * 3;
 		indices->i = Zone_Alloc(glt_zone, sizeof(int) * numtris * 3);
-		for (i = j = 0; i < alias_numtris; i++) {
-			if (tris[i]) {
+		for (i = j = 0; i < alias_numtris; i++)
+			if (tris[i/32] & BIT(i%32)) {
 				indices->i[(j * 3) + 0] = alias_tris[i].vertindex[0];
 				indices->i[(j * 3) + 1] = alias_tris[i].vertindex[1];
 				indices->i[(j * 3) + 2] = alias_tris[i].vertindex[2];
 				j++;
 			}
-		}
 	}
 
 	Zone_Free(tris);
