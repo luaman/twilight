@@ -155,6 +155,7 @@ float MSG_ReadCoord (void);
 float MSG_ReadAngle (void);
 float MSG_ReadAngle16 (void);
 void MSG_ReadDeltaUsercmd (struct usercmd_s *from, struct usercmd_s *cmd);
+void MSG_PrintPacket (void);
 
 //============================================================================
 
