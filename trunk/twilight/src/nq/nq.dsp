@@ -164,10 +164,6 @@ SOURCE=.\keys.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\base\locs.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\menu.c
 # End Source File
 # Begin Source File
@@ -256,83 +252,11 @@ SOURCE=.\world.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\include\anorm_dots.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\anorms.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\bothdefs.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\bspfile.h
+SOURCE=.\cl_console.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\client.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\cmd.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\common.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\compat.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\console.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\crc.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\cvar.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\draw.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\host.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\input.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\keys.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\mathlib.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\mdfour.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\menu.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\model.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\modelgen.h
 # End Source File
 # Begin Source File
 
@@ -352,15 +276,7 @@ SOURCE=.\net_udp.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\pcx.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\pmove.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\pr_comp.h
+SOURCE=.\pr_execprogram.h
 # End Source File
 # Begin Source File
 
@@ -376,19 +292,7 @@ SOURCE=.\protocol.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\qtypes.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\r_explosion.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\render.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\sbar.h
 # End Source File
 # Begin Source File
 
@@ -400,63 +304,7 @@ SOURCE=.\server.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\sound.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\spritegn.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\strlib.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\sys.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\tga.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TGL_defines.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TGL_funcs.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TGL_funcs_list.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\TGL_types.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vid.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\view.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\wad.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\win32config.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\world.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\zone.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

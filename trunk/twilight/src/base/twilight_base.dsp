@@ -165,7 +165,15 @@ SOURCE=..\..\include\bspfile.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\include\cmd.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\include\collision.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\common.h
 # End Source File
 # Begin Source File
 
@@ -181,7 +189,19 @@ SOURCE=..\..\include\crc.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\include\cvar.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\draw.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\include\gl_warp_sin.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\host.h
 # End Source File
 # Begin Source File
 
@@ -209,6 +229,10 @@ SOURCE=..\..\include\matrixlib.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\include\mdfour.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\include\menu.h
 # End Source File
 # Begin Source File
@@ -217,11 +241,23 @@ SOURCE=..\..\include\mod_brush.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\include\model.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\modelgen.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\include\pmove.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\include\pr_comp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\qtypes.h
 # End Source File
 # Begin Source File
 
@@ -234,6 +270,10 @@ SOURCE=..\..\include\r_explosion.h
 # Begin Source File
 
 SOURCE=..\..\include\sbar.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\spritegn.h
 # End Source File
 # Begin Source File
 
@@ -258,6 +298,18 @@ SOURCE=..\..\include\vid.h
 # Begin Source File
 
 SOURCE=..\..\include\view.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\wad.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\win32config.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\include\zone.h
 # End Source File
 # End Group
 # End Target

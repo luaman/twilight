@@ -89,11 +89,11 @@ SOURCE=.\dyngl.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_alias.c
+SOURCE=.\gen_textures.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_alias.h
+SOURCE=.\gl_alias.c
 # End Source File
 # Begin Source File
 
@@ -129,11 +129,11 @@ SOURCE=.\noise.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\noise_textures.c
+SOURCE=.\pointers.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\pointers.c
+SOURCE=.\r_part.c
 # End Source File
 # Begin Source File
 
@@ -161,6 +161,14 @@ SOURCE=.\dyngl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\gen_textures.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\gl_alias.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\gl_arrays.h
 # End Source File
 # Begin Source File
@@ -170,10 +178,6 @@ SOURCE=.\gl_info.h
 # Begin Source File
 
 SOURCE=.\gl_textures.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\glquake.h
 # End Source File
 # Begin Source File
 
@@ -189,19 +193,11 @@ SOURCE=.\mod_alias.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mod_brush.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\mod_sprite.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\pointers.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\r_part.c
 # End Source File
 # Begin Source File
 

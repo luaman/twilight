@@ -179,18 +179,6 @@ SOURCE=.\world.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\client.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\console.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\keys.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\net.h
 # End Source File
 # Begin Source File
@@ -200,22 +188,6 @@ SOURCE=.\progdefs.h
 # Begin Source File
 
 SOURCE=.\progs.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\protocol.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\r_explosion.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\render.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\screen.h
 # End Source File
 # Begin Source File
 
