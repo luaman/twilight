@@ -36,11 +36,9 @@ static const char rcsid[] =
 
 #include "SDL.h"
 
-#include <stdarg.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <signal.h>
-#include <math.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
 #include "client.h"
 #include "console.h"
@@ -113,32 +111,6 @@ VID_Shutdown (void)
 	SDL_Quit ();
 }
 
-#ifndef WIN32
-void
-signal_handler (int sig)
-{
-	printf ("Received signal %d, exiting...\n", sig);
-	Sys_Quit ();
-	exit (0);
-}
-#endif
-
-void
-InitSig (void)
-{
-#ifndef WIN32
-	signal (SIGHUP, signal_handler);
-	signal (SIGINT, signal_handler);
-	signal (SIGQUIT, signal_handler);
-	signal (SIGILL, signal_handler);
-	signal (SIGTRAP, signal_handler);
-	signal (SIGIOT, signal_handler);
-	signal (SIGBUS, signal_handler);
-	signal (SIGFPE, signal_handler);
-	signal (SIGSEGV, signal_handler);
-	signal (SIGTERM, signal_handler);
-#endif
-}
 
 #define GAMMA(c, g, b, n)	(Q_pow((double) c / n, (double) 1 / g) * BIT(b))
 #define BUILD_GAMMA_RAMP(ramp, gamma, type, n) do {							\
@@ -418,8 +390,6 @@ VID_Init (unsigned char *palette)
 	vid.width = scr_width;
 	vid.bpp = scr_bpp;
 	vid.aspect = ((float) vid.height / (float) vid.width) * (4.0 / 3.0);
-
-	InitSig ();							// trap evil signals
 
 	VID_Inited = true;
 	GammaChanged(v_gamma);
