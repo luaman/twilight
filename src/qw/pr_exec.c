@@ -565,9 +565,9 @@ PR_ExecuteProgram (func_t fnum)
 				b->_int = a->_int;
 				break;
 			case OP_STORE_V:
-				b->vector[0] = a->vector[0];
-				b->vector[1] = a->vector[1];
-				b->vector[2] = a->vector[2];
+				b->ivector[0] = a->ivector[0];
+				b->ivector[1] = a->ivector[1];
+				b->ivector[2] = a->ivector[2];
 				break;
 
 			case OP_STOREP_F:
@@ -690,43 +690,3 @@ PR_ExecuteProgram (func_t fnum)
 		}
 	}
 }
-
-/*----------------------*/
-
-char *pr_strtbl[MAX_PRSTR];
-int num_prstr;
-
-char *
-PR_GetString (int num)
-{
-	if (num < 0)
-		return pr_strtbl[-num];
-
-	return pr_strings + num;
-}
-
-int
-PR_SetString (char *s)
-{
-	int			i;
-
-	if (s - pr_strings < 0)
-	{
-		for (i = 0; i <= num_prstr; i++)
-			if (pr_strtbl[i] == s)
-				break;
-
-		if (i < num_prstr)
-			return -i;
-
-		if (num_prstr == MAX_PRSTR - 1)
-			Sys_Error ("MAX_PRSTR");
-
-		num_prstr++;
-		pr_strtbl[num_prstr] = s;
-		return -num_prstr;
-	}
-
-	return (int) (s - pr_strings);
-}
-

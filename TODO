@@ -15,15 +15,6 @@ Bugs we know about:
     (Need some example bad BSPs.)
   - rocket trails (and presumably some other kinds of particle) keep
     spawning while paused
-  - RC #0: Bogus player names in death messages?
-    (Test by doing impulse 9 and blowing self up with RL)
-    (Happens for LordHavoc, also happens for |Rain| but not consistently)
-
-    There seems to be a heisenbug somewhere in the progs code--I've seen
-    the name problem, I've crashed nq by going through the 'Normal' teleporter
-    in start.bsp a few times, and infokey() on localinfo variables seems to
-    be failing.
-
   - RC #3: We /REALLY/ need to build on win32 without requiring the
     .net compiler.
 

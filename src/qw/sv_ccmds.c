@@ -395,7 +395,7 @@ SV_Status_f (void)
 	Com_Printf ("net address      : %s\n", NET_AdrToString (net_local_adr));
 	Com_Printf ("cpu utilization  : %3i%%\n", (int) cpu);
 	Com_Printf ("avg response time: %i ms\n", (int) avg);
-	Com_Printf ("packets/frame    : %5.2f (%d)\n", pak, num_prstr);
+	Com_Printf ("packets/frame    : %5.2f\n", pak);
 
 // min fps lat drp
 	if (sv_redirected != RD_NONE) {

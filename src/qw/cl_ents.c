@@ -610,11 +610,11 @@ CL_LinkPacketEntities (void)
 		ent = &cl_network_entities[state->number];
 
 		if ((ent->entity_frame != (entity_frame - 1)) ||
-				(ent->modelindex != state->modelindex)) {
+				(ent->modelindex != state->modelindex) ||
+				(VectorDistance_fast(ent->msg_origins[0], state->origin) > sq(512)))
 			memset (ent, 0, sizeof (*ent));
-		} else {
+		else
 			ent->times++;
-		}
 
 		if (!state->modelindex)
 			continue;		// Yes, it IS correct, go away.
