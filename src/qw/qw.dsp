@@ -265,7 +265,7 @@ SOURCE=.\client.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmd.h
+SOURCE=..\include\cmd.h
 # End Source File
 # Begin Source File
 

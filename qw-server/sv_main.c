@@ -1656,7 +1656,7 @@ SV_Init (void)
 	Memory_Init ();
 	Cvar_Init (&SV_CvarServerinfo);
 	Cbuf_Init ();
-	Cmd_Init ();
+	Cmd_Init (NULL);
 	Sys_Init ();
 
 	// These have to be here.

@@ -44,8 +44,6 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 
-void Cmd_ForwardToServer_f (void);
-
 #define	MAX_ALIAS_NAME	32
 
 typedef struct cmdalias_s
@@ -872,7 +870,7 @@ Cmd_Init
 ============
 */
 void
-Cmd_Init (void)
+Cmd_Init (xcommand_t CmdForwardToServer)
 {
 	// register our commands
 	Cmd_AddCommand ("stuffcmds", Cmd_StuffCmds_f);
@@ -881,6 +879,8 @@ Cmd_Init (void)
 	Cmd_AddCommand ("alias", Cmd_Alias_f);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
 	Cmd_AddCommand ("crash", Cmd_Crash_f);
-	Cmd_AddCommand ("cmd", Cmd_ForwardToServer_f);
+
+	if (CmdForwardToServer)
+		Cmd_AddCommand ("cmd", CmdForwardToServer);
 }
 

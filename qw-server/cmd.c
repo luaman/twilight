@@ -753,7 +753,7 @@ Cmd_Init
 ============
 */
 void
-Cmd_Init (void)
+Cmd_Init (xcommand_t CmdForwardToServer)
 {
 	/*
 	 * register our commands
@@ -763,5 +763,8 @@ Cmd_Init (void)
 	Cmd_AddCommand ("echo", Cmd_Echo_f);
 	Cmd_AddCommand ("alias", Cmd_Alias_f);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
+	
+	if (CmdForwardToServer)
+		Cmd_AddCommand ("cmd", CmdForwardToServer);
 }
 
