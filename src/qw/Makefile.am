@@ -14,7 +14,7 @@ twilight_qw_SOURCES= \
 	net.h net_chan.c net_udp.c \
 	nonintel.c pmove.c pmove.h pmovetst.c r_part.c sbar.c sbar.h skin.c \
 	snd_dma.c snd_mem.c \
-	snd_mix.c snd_linux.c sound.h cd_linux.c cdaudio.h \
+	snd_mix.c snd_linux.c sound.h cd_sdl.c cdaudio.h \
 	sys_linux.c sys.h vid_sdl.c vid.h \
 	view.c view.h wad.c wad.h zone.c zone.h \
 	buildnum.c \
