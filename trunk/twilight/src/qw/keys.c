@@ -1001,8 +1001,6 @@ Key_Hash_SetBind (kgt_t kgt, knum_t key, char *bind)
 	data = (kh_data_t *) malloc(sizeof(kh_data_t));
 	data->key = key;
 	data->bind = strdup(bind);
-	Con_Printf("bind %p '%s' data->bind %p '%s'\n", bind, bind, data->bind,
-				data->bind);
 
 	hash_add(keybindings[kgt], data);
 }
