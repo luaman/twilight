@@ -297,7 +297,8 @@ R_DrawBrushDepthSkies (void)
 	brushhdr_t	*brush;
 	entity_common_t	*e;
 
-	Sky_Depth_Draw_Chain (r.worldmodel, &r.worldmodel->brush->sky_chain);
+	if (r.worldmodel->brush->sky_chain.visframe == vis_framecount)
+		Sky_Depth_Draw_Chain (r.worldmodel, &r.worldmodel->brush->sky_chain);
 
 	if (!r_drawentities->ivalue)
 		return;
@@ -311,6 +312,9 @@ R_DrawBrushDepthSkies (void)
 		{
 			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
 			if (Vis_CullBox (mins, maxs))
+				continue;
+
+			if (brush->sky_chain.visframe != vis_framecount)
 				continue;
 
 			Matrix4x4_Transform(&e->invmatrix, r.origin, org);
@@ -363,13 +367,9 @@ R_DrawTextureChains (model_t *mod, int frame,
 	chain_item_t	*c;
 	brushhdr_t		*brush = mod->brush;
 
-	if (gl_vbo)
-		TWI_ChangeVDrawArraysVBO (brush->numsets, 0,
-				brush->vbo_objects[VBO_VERTS], brush->vbo_objects[VBO_TC0],
-				brush->vbo_objects[VBO_TC1], 0, 0);
-	else
-		TWI_ChangeVDrawArrays (brush->numsets, 1, brush->verts,
-				brush->tcoords[0], brush->tcoords[1], NULL, NULL);
+	TWI_ChangeVDrawArraysALL (brush->numsets, 1, brush->verts, &brush->vbo[VBO_VERTS],
+			brush->tcoords[0], &brush->vbo[VBO_TC0],
+			brush->tcoords[1], &brush->vbo[VBO_TC1]);
 	
 	if (matrix) {
 		qglPushMatrix ();
@@ -483,13 +483,8 @@ R_DrawTextureChains (model_t *mod, int frame,
 		qglBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
 
 
-		if (gl_vbo)
-			TWI_ChangeVDrawArraysVBO (brush->numsets, 0,
-					brush->vbo_objects[VBO_VERTS], brush->vbo_objects[VBO_TC1],
-					0, 0, 0);
-		else
-			TWI_ChangeVDrawArrays (brush->numsets, 1, brush->verts,
-					brush->tcoords[1], NULL, NULL, NULL);
+		TWI_ChangeVDrawArraysALL (brush->numsets, 1, brush->verts, &brush->vbo[VBO_VERTS],
+				brush->tcoords[1], &brush->vbo[VBO_TC1], NULL, NULL);
 
 		qglEnable (GL_BLEND);
 		for (i = 0; i < brush->lightblock.num; i++)
@@ -507,13 +502,8 @@ R_DrawTextureChains (model_t *mod, int frame,
 			}
 		}
 
-		if (gl_vbo)
-			TWI_ChangeVDrawArraysVBO (brush->numsets, 0,
-					brush->vbo_objects[VBO_VERTS], brush->vbo_objects[VBO_TC0],
-					0, 0, 0);
-		else
-			TWI_ChangeVDrawArrays (brush->numsets, 1, brush->verts,
-					brush->tcoords[0], NULL, NULL, NULL);
+		TWI_ChangeVDrawArraysALL (brush->numsets, 1, brush->verts, &brush->vbo[VBO_VERTS],
+				brush->tcoords[0], &brush->vbo[VBO_TC0], NULL, NULL);
 
 		qglDisable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -558,10 +548,7 @@ R_DrawTextureChains (model_t *mod, int frame,
 	if (r_wateralpha->fvalue == 1 || !(gl_allow & GLA_WATERALPHA))
 		R_DrawLiquidTextureChains (mod, true);
 
-	if (gl_vbo)
-		TWI_ChangeVDrawArraysVBO (brush->numsets, 0, 0, 0, 0, 0, 0);
-	else
-		TWI_ChangeVDrawArrays (brush->numsets, 0, NULL, NULL, NULL, NULL, NULL);
+	TWI_ChangeVDrawArraysALL (brush->numsets, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
 	if (matrix)
 		qglPopMatrix ();
@@ -681,7 +668,7 @@ R_VisBrushModels (void)
 }
 
 void
-R_DrawOpaqueBrushModels ()
+R_DrawOpaqueBrushModels (void)
 {
 	entity_common_t	*ce;
 	vec3_t			mins, maxs;

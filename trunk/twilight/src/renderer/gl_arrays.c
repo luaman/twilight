@@ -49,13 +49,15 @@ colorub_t	*scub_array_p;
 GLuint		v_index, i_index;
 qboolean	va_locked;
 
-void		*_varray, *_tc0array, *_tc1array, *_carray;
+varray_type_t _vtype, _tc0type, _tc1type, _ctype;
+varray_t _varray, _tc0array, _tc1array, _carray;
 
 GLuint		MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
 
 cvar_t *gl_varray_size;
 cvar_t *gl_iarray_size;
 cvar_t *gl_copy_arrays;
+cvar_t *gl_vbo_v, *gl_vbo_tc, *gl_vbo_c;
 
 void
 GLArrays_Init_Cvars (void)
@@ -63,6 +65,9 @@ GLArrays_Init_Cvars (void)
 	gl_varray_size = Cvar_Get ("gl_varray_size", "2048", CVAR_ARCHIVE | CVAR_ROM, NULL);
 	gl_iarray_size = Cvar_Get ("gl_iarray_size", "2048", CVAR_ARCHIVE | CVAR_ROM, NULL);
 	gl_copy_arrays = Cvar_Get ("gl_copy_arrays", "0", CVAR_ARCHIVE, NULL);
+	gl_vbo_v = Cvar_Get ("gl_vbo_v", "1", CVAR_ARCHIVE, NULL);
+	gl_vbo_tc = Cvar_Get ("gl_vbo_tc", "1", CVAR_ARCHIVE, NULL);
+	gl_vbo_c = Cvar_Get ("gl_vbo_c", "1", CVAR_ARCHIVE, NULL);
 }
 
 void

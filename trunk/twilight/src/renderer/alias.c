@@ -331,8 +331,8 @@ R_DrawAliasModel ()
 {
 	qglPushMatrix ();
 
-	TWI_ChangeVDrawArrays (paliashdr->numverts, 1, NULL, paliashdr->tcarray,
-			NULL, NULL, NULL);
+	TWI_ChangeVDrawArraysALL (paliashdr->numverts, 1, NULL, NULL, paliashdr->tcarray, NULL,
+			NULL, NULL);
 
 	qglMultTransposeMatrixf ((GLfloat *) &matrix);
 
@@ -345,8 +345,8 @@ R_DrawAliasModel ()
 		qglEnable (GL_BLEND);
 		qglDepthMask (GL_FALSE);
 
-		TWI_ChangeVDrawArrays (paliashdr->numverts, 0, NULL, paliashdr->tcarray,
-				NULL, NULL, NULL);
+		TWI_ChangeVDrawArraysALL (paliashdr->numverts, 0, NULL, NULL, paliashdr->tcarray, NULL,
+				NULL, NULL);
 
 		if (has_top)
 			R_DrawSubSkin (paliashdr, &skin->top[anim], top);
@@ -367,7 +367,7 @@ R_DrawAliasModel ()
 		qglDisable (GL_BLEND);
 	}
 
-	TWI_ChangeVDrawArrays(paliashdr->numverts, 0, NULL, NULL, NULL, NULL, NULL);
+	TWI_ChangeVDrawArraysALL(paliashdr->numverts, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
 	qglPopMatrix ();
 }
@@ -395,7 +395,7 @@ R_DrawAliasModelNV ()
 {
 	qglPushMatrix ();
 
-	TWI_ChangeVDrawArrays(paliashdr->numverts, 1, NULL, paliashdr->tcarray, paliashdr->tcarray, NULL, NULL);
+	TWI_ChangeVDrawArraysALL(paliashdr->numverts, 1, NULL, NULL, paliashdr->tcarray, NULL, paliashdr->tcarray, NULL);
 
 	qglMultTransposeMatrixf ((GLfloat *) &matrix);
 
@@ -437,7 +437,7 @@ R_DrawAliasModelNV ()
 		qglDisable (GL_BLEND);
 	}
 
-	TWI_ChangeVDrawArrays(paliashdr->numverts, 0, NULL, NULL, NULL, NULL, NULL);
+	TWI_ChangeVDrawArraysALL(paliashdr->numverts, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
 	qglPopMatrix ();
 }
