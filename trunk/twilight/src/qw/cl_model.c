@@ -156,7 +156,7 @@ void
 Mod_LoadTextures (lump_t *l)
 {
 	int				i, j, pixels, num, max, altmax;
-	miptex_t		*mt;
+	miptex_t		*dmiptex;
 	texture_t		*tx, *tx2;
 	texture_t		*anims[10];
 	texture_t		*altanims[10];
@@ -179,46 +179,46 @@ Mod_LoadTextures (lump_t *l)
 		m->dataofs[i] = LittleLong (m->dataofs[i]);
 		if (m->dataofs[i] == -1)
 			continue;
-		mt = (miptex_t *) ((Uint8 *) m + m->dataofs[i]);
-		mt->width = LittleLong (mt->width);
-		mt->height = LittleLong (mt->height);
+		dmiptex = (miptex_t *) ((Uint8 *) m + m->dataofs[i]);
+		dmiptex->width = LittleLong (dmiptex->width);
+		dmiptex->height = LittleLong (dmiptex->height);
 		for (j = 0; j < MIPLEVELS; j++)
-			mt->offsets[j] = LittleLong (mt->offsets[j]);
+			dmiptex->offsets[j] = LittleLong (dmiptex->offsets[j]);
 
-		if ((mt->width & 15) || (mt->height & 15))
-			Host_EndGame ("Texture %s is not 16 aligned", mt->name);
-		pixels = mt->width * mt->height * (85 / 64);
+		if ((dmiptex->width & 15) || (dmiptex->height & 15))
+			Host_EndGame ("Texture %s is not 16 aligned", dmiptex->name);
+		pixels = dmiptex->width * dmiptex->height * (85 / 64);
 		tx = Hunk_AllocName (sizeof (texture_t) + pixels, loadmodel->name);
 		loadmodel->textures[i] = tx;
 
-		memcpy (tx->name, mt->name, sizeof (tx->name));
-		tx->width = mt->width;
-		tx->height = mt->height;
+		memcpy (tx->name, dmiptex->name, sizeof (tx->name));
+		tx->width = dmiptex->width;
+		tx->height = dmiptex->height;
 		for (j = 0; j < MIPLEVELS; j++)
 			tx->offsets[j] =
-				mt->offsets[j] + sizeof (texture_t) - sizeof (miptex_t);
+				dmiptex->offsets[j] + sizeof (texture_t) - sizeof (miptex_t);
 		// the pixels immediately follow the structures
-		memcpy (tx + 1, mt + 1, pixels);
+		memcpy (tx + 1, dmiptex + 1, pixels);
 
 		// HACK HACK HACK
-		if (!strcmp(mt->name, "shot1sid") && mt->width==32 && mt->height==32
-			&& CRC_Block((Uint8*)(mt+1), mt->width*mt->height) == 65393)
+		if (!strcmp(dmiptex->name, "shot1sid") && dmiptex->width==32 && dmiptex->height==32
+			&& CRC_Block((Uint8*)(dmiptex+1), dmiptex->width*dmiptex->height) == 65393)
 		{	// This texture in b_shell1.bsp has some of the first 32 pixels painted white.
 			// They are invisible in software, but look really ugly in GL. So we just copy
 			// 32 pixels from the bottom to make it look nice.
 			memcpy (tx+1, (Uint8 *)(tx+1) + 32*31, 32);
 		}
 
-		if (!strncmp (mt->name, "sky", 3))
+		if (!strncmp (dmiptex->name, "sky", 3))
 			R_InitSky (tx);
 		else {
-			if (mt->name[0] == '*')	// we don't brighten turb textures
-				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (Uint8 *)(tx+1), TEX_MIPMAP, 8);
+			if (dmiptex->name[0] == '*')	// we don't brighten turb textures
+				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width, tx->height, (Uint8 *)(tx+1), TEX_MIPMAP, 8);
 			else {
-				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (Uint8 *)(tx+1), TEX_MIPMAP, 8);
+				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width, tx->height, (Uint8 *)(tx+1), TEX_MIPMAP, 8);
 
 				if (Img_HasFullbrights((Uint8 *)(tx+1), tx->width*tx->height)) {
-					tx->fb_texturenum = GL_LoadTexture (va("@fb_%s", mt->name), tx->width, tx->height,
+					tx->fb_texturenum = GL_LoadTexture (va("@fb_%s", dmiptex->name), tx->width, tx->height,
 									(Uint8 *) (tx + 1), TEX_MIPMAP|TEX_FBMASK, 8);
 				}
 			}
