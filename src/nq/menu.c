@@ -2534,8 +2534,6 @@ M_Draw (void)
 			S_ExtraUpdate ();
 		} else
 			Draw_FadeScreen ();
-
-		scr_fullupdate = 0;
 	} else {
 		m_recursiveDraw = false;
 	}

@@ -892,7 +892,6 @@ Sbar_TeamOverlay (void)
 	}
 
 	scr_copyeverything = 1;
-	scr_fullupdate = 0;
 
 	pic = Draw_CachePic ("gfx/ranking.lmp");
 	Draw_Pic (160 - pic->width / 2, 0, pic);
@@ -995,7 +994,6 @@ Sbar_DeathmatchOverlay (int start)
 	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
 
 	scr_copyeverything = 1;
-	scr_fullupdate = 0;
 
 	if (!start) {
 		pic = Draw_CachePic ("gfx/ranking.lmp");
@@ -1145,7 +1143,6 @@ Sbar_MiniDeathmatchOverlay (void)
 	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
 
 	scr_copyeverything = 1;
-	scr_fullupdate = 0;
 
 // scores   
 	Sbar_SortFrags (false);
@@ -1266,7 +1263,6 @@ void
 Sbar_IntermissionOverlay (void)
 {
 	scr_copyeverything = 1;
-	scr_fullupdate = 0;
 
 	if (Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0
 		&& !sb_showscores)

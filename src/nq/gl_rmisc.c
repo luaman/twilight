@@ -151,7 +151,7 @@ R_Init_Cvars (void)
 	r_skybox = Cvar_Get ("skybox", "", CVAR_NONE, &R_SkyBoxChanged);
 
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
-	gl_clear = Cvar_Get ("gl_clear", "0", CVAR_NONE, NULL);
+	gl_clear = Cvar_Get ("gl_clear", "1", CVAR_NONE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
 	gl_texsort = Cvar_Get ("gl_texsort", "1", CVAR_NONE, NULL);
 	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_NONE, NULL);

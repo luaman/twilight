@@ -264,7 +264,7 @@ SOURCE=.\snd_mix.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\snd_win.c
+SOURCE=.\snd_sdl.c
 # End Source File
 # Begin Source File
 

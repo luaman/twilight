@@ -49,7 +49,7 @@ cvar_t *snd_channels;
 cvar_t *snd_samples;
 
 static dma_t the_shm;
-static int snd_inited;
+static qboolean snd_inited;
 
 static void
 paint_audio (void *unused, Uint8 *stream, int len)
@@ -60,9 +60,9 @@ paint_audio (void *unused, Uint8 *stream, int len)
 
 	if (shm)
 	{
-		streamsamples = len / (shm->samplebits / 8);
-		sampleposbytes = shm->samplepos * (shm->samplebits / 8);
-		samplesbytes = shm->samples * (shm->samplebits / 8);
+		streamsamples = len / (shm->samplebits >> 3);
+		sampleposbytes = shm->samplepos * (shm->samplebits >> 3);
+		samplesbytes = shm->samples * (shm->samplebits >> 3);
 
 		shm->samplepos += streamsamples;
 		while (shm->samplepos >= shm->samples)
@@ -89,7 +89,7 @@ SNDDMA_Init (void)
 	SDL_AudioSpec	obtained;
 	qboolean		supported;
 
-	snd_inited = 0;
+	snd_inited = false;
 
 	snd_bits = Cvar_Get ("snd_bits", "16", CVAR_ROM, NULL);
 	snd_rate = Cvar_Get ("snd_rate", "11025", CVAR_ROM, NULL);
@@ -109,9 +109,10 @@ SNDDMA_Init (void)
 		Cvar_Set (snd_channels, "2");
 
 	if (snd_rate->value == 0)
-		return 0;
+		return false;
 
 	// Here's what we want
+	memset (&desired, 0, sizeof(desired));
 	desired.freq = snd_rate->value;
 	switch ((int)snd_bits->value)
 	{
@@ -124,11 +125,12 @@ SNDDMA_Init (void)
 		default:
 			Con_Printf ("Unknown number of audio bits: %i\n",
 					(int)snd_bits->value);
-			return 0;
+			return false;
 	}
 	desired.channels = snd_channels->value;
 	desired.samples = snd_samples->value;
 	desired.callback = paint_audio;
+	desired.userdata = NULL;
 
 	// See what we got
 	if (SDL_OpenAudio (&desired, &obtained) < 0) {
@@ -160,7 +162,7 @@ SNDDMA_Init (void)
 		// SDL will convert for us - I wouldn't count on it being fast.
 		if (SDL_OpenAudio (&desired, NULL) < 0) {
 			Con_Printf ("Couldn't open SDL audio: %s\n", SDL_GetError ());
-			return 0;
+			return false;
 		}
 		memcpy (&obtained, &desired, sizeof (desired));
 	}
@@ -174,17 +176,17 @@ SNDDMA_Init (void)
 	shm->samplebits = (obtained.format & 0xFF);
 	shm->speed = obtained.freq;
 	shm->channels = obtained.channels;
-	shm->samples = obtained.samples * 16;
+	shm->samples = obtained.samples << 4;
 	shm->samplepos = 0;
 	shm->submission_chunk = 1;
-	shm->buffer = Z_Malloc (shm->samples * (shm->samplebits / 8));
+	shm->buffer = Z_Malloc (shm->samples * (shm->samplebits >> 3));
 	if (!shm->buffer)
 	{
 		Sys_Error ("Failed to allocate buffer for sound!\n");
 	}
 
-	snd_inited = 1;
-	return 1;
+	snd_inited = true;
+	return true;
 }
 
 int
@@ -200,7 +202,7 @@ SNDDMA_Shutdown (void)
 		SDL_PauseAudio (1);
 		SDL_UnlockAudio ();
 		SDL_CloseAudio ();
-		snd_inited = 0;
+		snd_inited = false;
 		shm = NULL;
 	}
 }

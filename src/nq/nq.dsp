@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 comctl32.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib sdl.lib sdlmain.lib /nologo /subsystem:windows /debug /machine:I386 /nodefaultlib:"msvcrt" /out:"d:\quake\tw-nq.exe" /pdbtype:sept /libpath:"../SDL/lib"
+# ADD LINK32 comctl32.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib sdl.lib sdlmain.lib /nologo /subsystem:windows /profile /debug /machine:I386 /nodefaultlib:"msvcrt" /out:"d:\quake\tw-nq.exe" /libpath:"../SDL/lib"
 
 !ENDIF 
 
@@ -268,7 +268,7 @@ SOURCE=.\snd_mix.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\snd_win.c
+SOURCE=.\snd_sdl.c
 # End Source File
 # Begin Source File
 
