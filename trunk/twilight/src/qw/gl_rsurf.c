@@ -288,7 +288,7 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 	// bound, invert, and shift
 store:
 	if (gl_mtexable) {
-		if (gl_mtexcombine_arb || gl_mtexcombine_ext) { 
+		if (gl_mtexcombine_arb || gl_mtexcombine_ext) {
 			shift = 9;
 		} else {
 			shift = 7;
