@@ -741,7 +741,8 @@ IN_Move (usercmd_t *cmd)
 
 	if (freelook && !(in_strafe.state & 1)) {
 		cl.viewangles[PITCH] += m_pitch->fvalue * mouse_y;
-		cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
+		// KB: Allow looking straight up/down
+		cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90);
 	} else {
 		if (in_strafe.state & 1)
 			cmd->upmove -= m_forward->fvalue * mouse_y;
