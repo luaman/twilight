@@ -1090,12 +1090,22 @@ M_AdjustSliders (int dir)
 			t = bound (0.5, t, 1.0);
 			Cvar_Set (v_gamma, va("%f", t));
 			break;
-		case 5:						// mouse speed
+		case 5:						// software brightness
+			t = r_brightness->value + dir * 0.25;
+			t = bound (1, t, 5);
+			Cvar_Set (r_brightness, va("%f", t));
+			break;
+		case 6:						// software contrast (base brightness)
+			t = r_contrast->value + dir * 0.08;
+			t = bound (.2, t, 1);
+			Cvar_Set (r_contrast, va("%f", t));
+			break;
+		case 7:						// mouse speed
 			t = sensitivity->value + (dir * 0.5f);
 			t = bound (1, t, 11);
 			Cvar_Set (sensitivity, va("%f", t));
 			break;
-		case 6:						// music volume
+		case 8:						// music volume
 #if 0 // Not with SDL  --KB
 #ifdef _WIN32
 			bgmvolume.value += dir * 1.0;
@@ -1111,13 +1121,13 @@ M_AdjustSliders (int dir)
 			Cvar_Set (bgmvolume, bgmvolume->value ? "0" : "1");
 #endif
 			break;
-		case 7:						// sfx volume
+		case 9:						// sfx volume
 			t = volume->value + (dir * 0.1f);
 			t = bound (0, t, 1);
 			Cvar_Set (volume, va("%f", t));
 			break;
 
-		case 8:						// always run
+		case 10:						// always run
 			if (cl_forwardspeed->value > 200) {
 				Cvar_Set (cl_forwardspeed, "200");
 				Cvar_Set (cl_backspeed, "200");
@@ -1127,24 +1137,24 @@ M_AdjustSliders (int dir)
 			}
 			break;
 
-		case 9:						// invert mouse
+		case 11:						// invert mouse
 			t = -m_pitch->value;
 			Cvar_Set (m_pitch, va("%f", t));
 			break;
 
-		case 10:						// lookspring
+		case 12:						// lookspring
 			Cvar_Set (lookspring, va("%i", !lookspring->value));
 			break;
 
-		case 11:						// lookstrafe
+		case 13:						// lookstrafe
 			Cvar_Set (lookstrafe, va("%i", !lookstrafe->value));
 			break;
 
-		case 13:						// _windowed_mouse
+		case 15:						// _windowed_mouse
 			Cvar_Set (_windowed_mouse, va("%i", !_windowed_mouse->value));
 			break;
 
-		case 14:
+		case 16:
 			break;
 	}
 }
@@ -1173,67 +1183,44 @@ M_DrawCheckbox (int x, int y, int on)
 	else
 		M_DrawCharacter (x, y, 129);
 #endif
-
 	M_Print (x, y, (on) ? "on" : "off");
 }
 
 void
 M_Options_Draw (void)
 {
-	float       r;
-	qpic_t     *p;
+	int 	y;
+	qpic_t	*p;
 
 	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp"));
 	p = Draw_CachePic ("gfx/p_option.lmp");
 	M_DrawPic ((320 - p->width) / 2, 4, p);
 
-	M_Print (16, 32, "    Customize controls");
-	M_Print (16, 40, "         Go to console");
-	M_Print (16, 48, "     Reset to defaults");
+	y = 32;
+	M_Print (16, y, "    Customize controls"); y += 8;
+	M_Print (16, y, "         Go to console"); y += 8;
+	M_Print (16, y, "     Reset to defaults"); y += 8;
 
-	M_Print (16, 56, "           Screen size");
-	r = (scr_viewsize->value - 30) / (120 - 30);
-	M_DrawSlider (220, 56, r);
-
-	M_Print (16, 64, "            Brightness");
-	r = (1.0 - v_gamma->value) / 0.5;
-	M_DrawSlider (220, 64, r);
-
-	M_Print (16, 72, "           Mouse Speed");
-	r = (sensitivity->value - 1) / 10;
-	M_DrawSlider (220, 72, r);
-
-	M_Print (16, 80, "       CD Music Volume");
-	r = bgmvolume->value;
-	M_DrawSlider (220, 80, r);
-
-	M_Print (16, 88, "          Sound Volume");
-	r = volume->value;
-	M_DrawSlider (220, 88, r);
-
-	M_Print (16, 96, "            Always Run");
-	M_DrawCheckbox (220, 96, cl_forwardspeed->value > 200);
-
-	M_Print (16, 104, "          Invert Mouse");
-	M_DrawCheckbox (220, 104, m_pitch->value < 0);
-
-	M_Print (16, 112, "            Lookspring");
-	M_DrawCheckbox (220, 112, lookspring->value);
-
-	M_Print (16, 120, "            Lookstrafe");
-	M_DrawCheckbox (220, 120, lookstrafe->value);
+	M_Print (16, y, "           Screen size"); M_DrawSlider (220, y, (scr_viewsize->value - 30) / (120 - 30)); y += 8;
+	M_Print (16, y, "   Hardware Brightness"); M_DrawSlider (220, y, (1.0 - v_gamma->value) / 0.5); y += 8;
+	M_Print (16, y, "   Software Brightness"); M_DrawSlider(220, y, (r_brightness->value - 1) / 4);y += 8;
+	M_Print (16, y, "     Software Contrast"); M_DrawSlider(220, y, (r_contrast->value - 0.2) / 0.8);y += 8;
+	M_Print (16, y, "           Mouse Speed"); M_DrawSlider (220, y, (sensitivity->value - 1) / 10); y += 8;
+	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->value); y += 8;
+	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->value); y += 8;
+	M_Print (16, y, "            Always Run"); M_DrawCheckbox (220, y, cl_forwardspeed->value > 200); y += 8;
+	M_Print (16, y, "          Invert Mouse"); M_DrawCheckbox (220, y, m_pitch->value < 0); y += 8;
+	M_Print (16, y, "            Lookspring"); M_DrawCheckbox (220, y, lookspring->value); y += 8;
+	M_Print (16, y, "            Lookstrafe"); M_DrawCheckbox (220, y, lookstrafe->value); y += 8;
 
 	if (vid_menudrawfn)
-		M_Print (16, 128, "         Video Options");
+		M_Print (16, y, "         Video Options"); y += 8;
 
-	M_Print (16, 136, "             Use Mouse");
-	M_DrawCheckbox (220, 136, _windowed_mouse->value);
+	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->value); y += 8;
+	M_Print (16, y, "      Graphics Options"); y += 8;
 
-	M_Print (16, 144, "      Graphics Options");
-
-// cursor
-	M_DrawCharacter (200, 32 + options_cursor * 8,
-					 12 + ((int) (realtime * 4) & 1));
+	// cursor
+	M_DrawCharacter (200, 32 + options_cursor * 8, 12 + ((int) (realtime * 4) & 1));
 }
 
 
@@ -1365,7 +1352,7 @@ M_Gfx_Draw (void)
 	M_Print (16, 80, "  Motion interpolation");
 	M_DrawCheckbox (220, 80, gl_im_transform->value);
 
-// cursor
+	// cursor
 	M_DrawCharacter (200, 32 + gfx_cursor * 8,
 					 12 + ((int) (realtime * 4) & 1));
 }
