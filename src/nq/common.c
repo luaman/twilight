@@ -379,7 +379,7 @@ MSG_WriteCoord (sizebuf_t *sb, float f)
 void
 MSG_WriteAngle (sizebuf_t *sb, float f)
 {
-	MSG_WriteByte (sb, ((int) f * 256 / 360) & 255);
+	MSG_WriteByte (sb, (int) (f * (256.0f / 360.0f) + 0.5f) & 255);
 }
 
 //

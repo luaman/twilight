@@ -55,14 +55,10 @@ sfx_t      *cl_sfx_ric2;
 sfx_t      *cl_sfx_ric3;
 sfx_t      *cl_sfx_r_exp3;
 
-#ifdef QUAKE2
-sfx_t      *cl_sfx_imp;
-sfx_t      *cl_sfx_rail;
-#endif
-
-model_t	   *cl_bolt1_mod;
-model_t	   *cl_bolt2_mod;
-model_t	   *cl_bolt3_mod;
+model_t	   *cl_bolt1_mod = NULL;
+model_t	   *cl_bolt2_mod = NULL;
+model_t	   *cl_bolt3_mod = NULL;
+model_t	   *cl_beam_mod = NULL;
 
 /*
 =================
@@ -79,15 +75,6 @@ CL_InitTEnts (void)
 	cl_sfx_ric2 = S_PrecacheSound ("weapons/ric2.wav");
 	cl_sfx_ric3 = S_PrecacheSound ("weapons/ric3.wav");
 	cl_sfx_r_exp3 = S_PrecacheSound ("weapons/r_exp3.wav");
-
-#ifdef QUAKE2
-	cl_sfx_imp = S_PrecacheSound ("shambler/sattck1.wav");
-	cl_sfx_rail = S_PrecacheSound ("weapons/lstart.wav");
-#endif
-
-	cl_bolt1_mod = Mod_ForName ("progs/bolt.mdl", true);
-	cl_bolt2_mod = Mod_ForName ("progs/bolt2.mdl", true);
-	cl_bolt3_mod = Mod_ForName ("progs/bolt3.mdl", true);
 }
 
 /*
@@ -244,20 +231,28 @@ CL_ParseTEnt (void)
 			break;
 
 		case TE_LIGHTNING1:			// lightning bolts
+			if (!cl_bolt1_mod)
+				cl_bolt1_mod = Mod_ForName ("progs/bolt.mdl", true);
 			CL_ParseBeam (cl_bolt1_mod);
 			break;
 
 		case TE_LIGHTNING2:			// lightning bolts
+			if (!cl_bolt2_mod)
+				cl_bolt2_mod = Mod_ForName ("progs/bolt2.mdl", true);
 			CL_ParseBeam (cl_bolt2_mod);
 			break;
 
 		case TE_LIGHTNING3:			// lightning bolts
+			if (!cl_bolt3_mod)
+				cl_bolt3_mod = Mod_ForName ("progs/bolt3.mdl", true);
 			CL_ParseBeam (cl_bolt3_mod);
 			break;
 
 // PGM 01/21/97 
 		case TE_BEAM:					// grappling hook beam
-			CL_ParseBeam (Mod_ForName ("progs/beam.mdl", true));
+			if (!cl_beam_mod)
+				cl_beam_mod = Mod_ForName ("progs/beam.mdl", true);
+			CL_ParseBeam (cl_beam_mod);
 			break;
 // PGM 01/21/97
 
@@ -289,33 +284,6 @@ CL_ParseTEnt (void)
 			dl->decay = 300;
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 			break;
-
-#ifdef QUAKE2
-		case TE_IMPLOSION:
-			pos[0] = MSG_ReadCoord ();
-			pos[1] = MSG_ReadCoord ();
-			pos[2] = MSG_ReadCoord ();
-			S_StartSound (-1, 0, cl_sfx_imp, pos, 1, 1);
-			break;
-
-		case TE_RAILTRAIL:
-			pos[0] = MSG_ReadCoord ();
-			pos[1] = MSG_ReadCoord ();
-			pos[2] = MSG_ReadCoord ();
-			endpos[0] = MSG_ReadCoord ();
-			endpos[1] = MSG_ReadCoord ();
-			endpos[2] = MSG_ReadCoord ();
-			S_StartSound (-1, 0, cl_sfx_rail, pos, 1, 1);
-			S_StartSound (-1, 1, cl_sfx_r_exp3, endpos, 1, 1);
-			R_RocketTrail (pos, endpos, 0 + 128);
-			R_ParticleExplosion (endpos);
-			dl = CL_AllocDlight (-1);
-			VectorCopy (endpos, dl->origin);
-			dl->radius = 350;
-			dl->die = cl.time + 0.5;
-			dl->decay = 300;
-			break;
-#endif
 
 		default:
 			Sys_Error ("CL_ParseTEnt: bad type");
