@@ -40,14 +40,13 @@ static const char rcsid[] =
 #include "opengl_ext.h"
 
 #include "quakedef.h"
+#include "client.h"
 #include "cvar.h"
 #include "glquake.h"
-#include "host.h"
 #include "image.h"
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
-#include "client.h"
 
 extern model_t *loadmodel;
 

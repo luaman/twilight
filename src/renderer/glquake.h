@@ -221,11 +221,6 @@ extern int gl_filter_max;
 qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 
 /*
- * gl_refrag.c
- */
-void R_StoreEfrags (efrag_t **ppefrag);
-
-/*
  * gl_rsurf.c
  */
 void R_DrawBrushModel (entity_t *e);

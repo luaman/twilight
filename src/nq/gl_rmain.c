@@ -100,7 +100,6 @@ cvar_t *gl_nocolors;
 cvar_t *gl_finish;
 cvar_t *gl_im_animation;
 cvar_t *gl_im_transform;
-cvar_t *r_maxedges, *r_maxsurfs;		// Shrak
 cvar_t *gl_fb_models;
 cvar_t *gl_fb_bmodels;
 cvar_t *gl_oldlights;
@@ -868,8 +867,7 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
 		e->frame_interval = 0.1;
 	}
 
-	if (e->lastmodel == e->model && !(!e->pose1 && !e->pose2))
-	{
+	if (e->lastmodel == e->model && !(!e->pose1 && !e->pose2)) {
 		if (e->pose2 != pose) {
 			e->frame_start_time = cl.time;
 			e->pose1 = e->pose2;
@@ -878,9 +876,7 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
 		} else {
 			blend = (cl.time - e->frame_start_time) / e->frame_interval;
 		}
-	}
-	else
-	{
+	} else {
 		e->lastmodel = e->model;
 		e->frame_start_time = cl.time;
 		e->pose1 = pose;
@@ -915,9 +911,9 @@ R_DrawAliasModel (entity_t *e)
 
 	if (gl_particletorches->value) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
-			if (cl.time > e->time_left) {
+			if (cl.time >= e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
-				e->time_left = cl.time + 0.05;
+				e->time_left = cl.time + 0.10;
 			}
 			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_fire)
 				clmodel = mdl_fire;
@@ -1070,8 +1066,8 @@ R_DrawAliasModel (entity_t *e)
 
 	anim = (int) (cl.time * 10) & 3;
 	skinnum = e->skinnum;
-	texture = paliashdr->gl_texturenum[e->skinnum][anim];
-	fb_texture = paliashdr->fb_texturenum[e->skinnum][anim];
+	texture = paliashdr->gl_texturenum[skinnum][anim];
+	fb_texture = paliashdr->fb_texturenum[skinnum][anim];
 
 	/*
 	 * we can't dynamically colormap textures, so they are cached seperately
@@ -1522,8 +1518,6 @@ R_RenderView (void)
 	R_SetFrustum ();
 
 	R_SetupGL ();
-
-	transpolyclear();
 
 	R_MoveExplosions ();
 	R_MoveParticles ();

@@ -48,21 +48,6 @@ static const char rcsid[] =
 
 extern void TNT_Init (void);
 
-/*
-typedef GLfloat tc_array_t[MAX_VERTEX_ARRAYS][2];
-typedef GLfloat v_array_t[MAX_VERTEX_ARRAYS][3];
-typedef GLfloat c_array_t[MAX_VERTEX_ARRAYS][4];
-
-tc_array_t	tc_arrays[2];
-v_array_t	v_arrays[2];
-c_array_t	c_arrays[2];
-
-tc_array_t	*tc_array;
-v_array_t	*v_array;
-c_array_t	*c_array;
-*/
-
-
 GLfloat	tc_arrays[2][MAX_VERTEX_ARRAYS][2];
 GLfloat	v_arrays[2][MAX_VERTEX_ARRAYS][3];
 GLfloat	c_arrays[2][MAX_VERTEX_ARRAYS][4];
