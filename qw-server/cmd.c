@@ -68,10 +68,26 @@ next frame.  This allows commands like:
 bind g "impulse 5 ; +attack ; wait ; -attack ; impulse 2"
 ============
 */
-void
+static void
 Cmd_Wait_f (void)
 {
 	cmd_wait = true;
+}
+
+/*
+============
+Cmd_Crash_f
+
+Look, up in the sky!  It's a bird!  It's a plane!  *CRASH*
+============
+*/
+static void
+Cmd_Crash_f (void)
+{
+	if (!developer->value)
+		Com_Printf ("I wouldn't do that if I were you...\n");
+	else
+		*(int *)NULL = BigLong (0x55303052); // W00T
 }
 
 /*
@@ -322,7 +338,8 @@ Cmd_StuffCmds_f (void)
 
 	// build the combined string to parse from
 	s = 0;
-	for (i = 1; i < com_argc; i++) {
+	for (i = 1; i < com_argc; i++)
+	{
 		if (!com_argv[i])
 			// NEXTSTEP nulls out -NXHost
 			continue;
@@ -333,9 +350,11 @@ Cmd_StuffCmds_f (void)
 
 	text = Z_Malloc (s + 1);
 	text[0] = 0;
-	for (i = 1; i < com_argc; i++) {
+	for (i = 1; i < com_argc; i++)
+	{
 		if (!com_argv[i])
-			continue;					// NEXTSTEP nulls out -NXHost
+			// NEXTSTEP nulls out -NXHost
+			continue;
 		strcat (text, com_argv[i]);
 		if (i != com_argc - 1)
 			strcat (text, " ");
@@ -345,8 +364,10 @@ Cmd_StuffCmds_f (void)
 	build = Z_Malloc (s + 1);
 	build[0] = 0;
 
-	for (i = 0; i < s - 1; i++) {
-		if (text[i] == '+') {
+	for (i = 0; i < s - 1; i++)
+	{
+		if (text[i] == '+')
+		{
 			i++;
 
 			for (j = i; (text[j] != '+') && (text[j] != '-') && (text[j] != 0);
@@ -568,10 +589,9 @@ Cmd_TokenizeString (char *text)
 
 	while (1)
 	{
-		// skip whitespace up to a /n
-		while (*text && *text <= ' ' && *text != '\n') {
+		// skip whitespace up to a \n
+		while (*text && *text <= ' ' && *text != '\n')
 			text++;
-		}
 
 		if (*text == '\n')
 		{
@@ -595,7 +615,7 @@ Cmd_TokenizeString (char *text)
 			size_t length = strlen (com_token) + 1;
 			cmd_argv[cmd_argc] = Z_Malloc (length);
 			memcpy (cmd_argv[cmd_argc], com_token, length);
-			cmd_argc++;
+			cmd_argc++;					// VERY important :)
 		}
 	}
 
@@ -617,7 +637,7 @@ Cmd_AddCommand (char *cmd_name, xcommand_t function)
 	var = Cvar_Find (cmd_name);
 	if (var)
 	{
-		Com_Printf ("Cmd_AddCommand: %s already defined as a var\n", cmd_name);
+		Com_Printf ("Cmd_AddCommand: %s already defined as a Cvar\n", cmd_name);
 		return;
 	}
 
@@ -763,7 +783,8 @@ Cmd_Init (xcommand_t CmdForwardToServer)
 	Cmd_AddCommand ("echo", Cmd_Echo_f);
 	Cmd_AddCommand ("alias", Cmd_Alias_f);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
-	
+	Cmd_AddCommand ("crash", Cmd_Crash_f);
+
 	if (CmdForwardToServer)
 		Cmd_AddCommand ("cmd", CmdForwardToServer);
 }

@@ -54,12 +54,12 @@ static const char rcsid[] =
 
 usercmd_t nullcmd;					// guarenteed to be zero
 
-cvar_t *registered;
 cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;
 cvar_t *fs_userconf;
 cvar_t *fs_userpath;
 cvar_t *fs_gamename;
+cvar_t *registered;
 
 void COM_InitFilesystem (void);
 void COM_Path_f (void);
@@ -136,7 +136,6 @@ InsertLinkAfter (link_t *l, link_t *after)
 
 ============================================================================
 */
-
 
 int
 Q_atoi (char *str)
@@ -370,7 +369,7 @@ MSG_WriteCoord (sizebuf_t *sb, float f)
 void
 MSG_WriteAngle (sizebuf_t *sb, float f)
 {
-	MSG_WriteByte (sb, Q_rint(f * (256.0f / 360.0f)) & 255);
+	MSG_WriteByte (sb, Q_rint (f * (256.0f / 360.0f)) & 255);
 }
 
 void
@@ -635,6 +634,7 @@ MSG_ReadDeltaUsercmd (usercmd_t *from, usercmd_t *move)
 	move->msec = MSG_ReadByte ();
 }
 
+
 //===========================================================================
 
 #define	MAXPRINTMSG	4096
@@ -744,7 +744,8 @@ SZ_GetSpace (sizebuf_t *buf, int length)
 {
 	void	   *data;
 
-	if (buf->cursize + length > buf->maxsize) {
+	if (buf->cursize + length > buf->maxsize)
+	{
 		if (!buf->allowoverflow)
 			Sys_Error ("SZ_GetSpace: overflow without allowoverflow set (%d)",
 					buf->maxsize);
@@ -752,6 +753,7 @@ SZ_GetSpace (sizebuf_t *buf, int length)
 		if (length > buf->maxsize)
 			Sys_Error ("SZ_GetSpace: %i is > full buffer size", length);
 
+		// because Com_Printf may be redirected
 		Sys_Printf ("SZ_GetSpace: overflow\n");
 		SZ_Clear (buf);
 		buf->overflowed = true;
@@ -831,6 +833,7 @@ COM_StripExtension (char *in, char *out)
 		*last = '\0';
 }
 
+
 /*
 ============
 COM_FileExtension
@@ -852,6 +855,7 @@ COM_FileExtension (char *in)
 	exten[i] = 0;
 	return exten;
 }
+
 
 /*
 ============
@@ -994,13 +998,12 @@ COM_CheckFile
 qboolean 
 COM_CheckFile (char *fname)
 {
-	FILE *h;
+	FILE	   *h;
 
 	COM_FOpenFile (fname, &h, false);
 
-	if (!h) {
+	if (!h)
 		return false;
-	}
 
 	fclose (h);
 	return true;
@@ -1035,7 +1038,7 @@ COM_Init_Cvars (void)
 {
 	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
 
-	// fs_shareconf/userconf have to be done in Host_Init
+	// fs_shareconf/userconf can't be done here
 	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, NULL);
 	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
 
@@ -1051,21 +1054,11 @@ void
 COM_Init (void)
 {
 	Cmd_AddCommand ("path", COM_Path_f);
+
 	COM_InitFilesystem ();
 	COM_CheckRegistered ();
 }
 
-/// just for debugging
-int
-memsearch (Uint8 *start, int count, int search)
-{
-	int         i;
-
-	for (i = 0; i < count; i++)
-		if (start[i] == search)
-			return i;
-	return -1;
-}
 
 /*
 =============================================================================
@@ -1118,9 +1111,8 @@ char com_gamedir[MAX_OSPATH];
 
 typedef struct searchpath_s
 {
-	char        filename[MAX_OSPATH];
-	pack_t     *pack;					// only one of filename / pack will be
-	// used
+	char		filename[MAX_OSPATH];
+	pack_t	   *pack;			// only one of filename / pack will be used
 	struct searchpath_s *next;
 } searchpath_t;
 
@@ -1152,7 +1144,8 @@ COM_FileOpenRead (char *path, FILE ** hndl)
 	FILE	   *f;
 
 	f = fopen (path, "rb");
-	if (!f) {
+	if (!f)
+	{
 		*hndl = NULL;
 		return -1;
 	}
@@ -1277,33 +1270,35 @@ COM_CopyFile (char *netpath, char *cachepath)
 }
 
 
-int         file_from_pak;				// global indicating file came from
-
-										// pack file ZOID
+int file_from_pak;						// last file came from pack
 
 int
 COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 {
-	searchpath_t *search;
-	char        netpath[MAX_OSPATH];
-	pack_t     *pak;
-	int         i;
-	int         findtime;
+	searchpath_t   *search;
+	char			netpath[MAX_OSPATH];
+	pack_t		   *pak;
+	int				i;
+	int				findtime;
 
 	file_from_pak = 0;
 
-//
-// search through the path, one element at a time
-//
-	for (search = com_searchpaths; search; search = search->next) {
+	/*
+	 * search through the path, one element at a time
+	 */
+	for (search = com_searchpaths; search; search = search->next)
+	{
 		// is the element a pak file?
-		if (search->pack) {
+		if (search->pack)
+		{
 			// look through all the pak file elements
 			pak = search->pack;
 			for (i = 0; i < pak->numfiles; i++)
-				if (!strcmp (pak->files[i].name, filename)) {	// found it!
+				if (!strcmp (pak->files[i].name, filename))
+				{
+					// found it!
 					Com_DPrintf ("PackFile: %s : %s\n", pak->filename,
-								 filename);
+							filename);
 					// open a new file on the pakfile
 					*file = fopen (pak->filename, "rb");
 					if (!*file)
@@ -1343,6 +1338,11 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 	return -1;
 }
 
+
+cache_user_t *loadcache;
+Uint8 *loadbuf;
+int loadsize;
+
 /*
 ============
 COM_LoadFile
@@ -1351,28 +1351,24 @@ Filename are reletive to the quake directory.
 Allways appends a 0 byte to the loaded data.
 ============
 */
-cache_user_t *loadcache;
-Uint8        *loadbuf;
-int           loadsize;
 Uint8 *
 COM_LoadFile (char *path, int usehunk, qboolean complain)
 {
-	FILE       *h;
-	Uint8      *buf;
-	char        base[32];
-	int         len;
+	FILE	   *h;
+	Uint8	   *buf = NULL;				// silence compiler warning
+	char		base[32];
+	int			len;
 
-	buf = NULL;							// quiet compiler warning
-
-// look for it in the filesystem or pack files
+	// look for it in the filesystem or pack files
 	len = com_filesize = COM_FOpenFile (path, &h, complain);
 	if (!h)
 		return NULL;
 
-// extract the filename base name for hunk tag
+	// extract the filename base name for hunk tag
 	COM_FileBase (path, base);
 
-	switch (usehunk) {
+	switch (usehunk)
+	{
 		case 0:
 			buf = Z_Malloc (len + 1);
 			break;
@@ -1594,24 +1590,29 @@ COM_Gamedir (char *dir)
 	searchpath_t *next;
 
 	if (strstr (dir, "..") || strstr (dir, "/")
-		|| strstr (dir, "\\") || strstr (dir, ":")) {
+		|| strstr (dir, "\\") || strstr (dir, ":"))
+	{
 		Com_Printf ("Gamedir should be a single filename, not a path\n");
 		return;
 	}
 
 	if (!strcmp (gamedirfile, dir))
-		return;							// still the same
+		// still the same
+		return;
 
 	strcpy (gamedirfile, dir);
 
-	// 
-	// free up any current game dir info
-	// 
-	while (com_searchpaths != com_base_searchpaths) {
+	/*
+	 * free up any current game dir info
+	 */
+	while (com_searchpaths != com_base_searchpaths)
+	{
 		if (com_searchpaths == NULL)
-			Sys_Error ("Com_Gamedir: tried to free to base searchpath and"
-					" hit NULL\n");
-		if (com_searchpaths->pack) {
+			Sys_Error ("Com_Gamedir: tried to free to base searchpath and "
+					"hit NULL\n");
+
+		if (com_searchpaths->pack)
+		{
 			fclose (com_searchpaths->pack->handle);
 			Z_Free (com_searchpaths->pack->files);
 			Z_Free (com_searchpaths->pack);
@@ -1621,9 +1622,9 @@ COM_Gamedir (char *dir)
 		com_searchpaths = next;
 	}
 
-	// 
-	// flush all data, so it will be forced to reload
-	// 
+	/*
+	 * flush all data, so it will be forced to reload
+	 */
 	Cache_Flush ();
 
 	if (!strcmp (dir, fs_gamename->string) || !strcmp (dir, "qw"))
@@ -1640,19 +1641,16 @@ COM_InitFilesystem
 void
 COM_InitFilesystem (void)
 {
-	int         i;
+	int			i;
 
-//
-// -basedir <path>
-// Overrides the system supplied base directory
-//
+	// -basedir <path>, now the same as fs_userpath
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
 		Cvar_Set (fs_userpath, com_argv[i + 1]);
 
 	Sys_mkdir (fs_userpath->string);
 
-// Make sure fs_sharepath is set to something useful
+	// Make sure fs_sharepath is set to something useful
 	if (!strlen (fs_sharepath->string))
 		Cvar_Set (fs_sharepath, fs_userpath->string);
 
@@ -1752,14 +1750,16 @@ Info_RemoveKey (char *s, char *key)
 		s++;
 
 		o = value;
-		while (*s != '\\' && *s) {
+		while (*s != '\\' && *s)
+		{
 			if (!*s)
 				return;
 			*o++ = *s++;
 		}
 		*o = 0;
 
-		if (!strcmp (key, pkey)) {
+		if (!strcmp (key, pkey))
+		{
 			memmove (start, s, strlen(s) + 1);		// remove this part
 			return;
 		}
@@ -1819,28 +1819,33 @@ Info_RemovePrefixedKeys (char *start, char prefix)
 void
 Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 {
-	char        new[1024], *v;
-	int         c;
+	char		new[1024], *v;
+	int			c;
 
-	if (strstr (key, "\\") || strstr (value, "\\")) {
+	if (strstr (key, "\\") || strstr (value, "\\"))
+	{
 		Com_Printf ("Can't use keys or values with a \\\n");
 		return;
 	}
 
-	if (strstr (key, "\"") || strstr (value, "\"")) {
+	if (strstr (key, "\"") || strstr (value, "\""))
+	{
 		Com_Printf ("Can't use keys or values with a \"\n");
 		return;
 	}
 
-	if (strlen (key) > 63 || strlen (value) > 63) {
+	if (strlen (key) > 63 || strlen (value) > 63)
+	{
 		Com_Printf ("Keys and values must be < 64 characters.\n");
 		return;
 	}
-	// this next line is kinda trippy
-	if (*(v = Info_ValueForKey (s, key))) {
-		// key exists, make sure we have enough room for new value, if we
-		// don't change it!
-		if (strlen (value) - strlen (v) + strlen (s) > maxsize) {
+
+	v = Info_ValueForKey (s, key);
+	if (v && *v)
+	{
+		// make sure we have enough room for new value
+		if (strlen (value) - strlen (v) + strlen (s) > maxsize)
+		{
 			Com_Printf ("Info string length exceeded\n");
 			return;
 		}
@@ -1851,17 +1856,20 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 
 	snprintf (new, sizeof (new), "\\%s\\%s", key, value);
 
-	if ((strlen (new) + strlen (s)) > maxsize) {
+	if ((strlen (new) + strlen (s)) > maxsize)
+	{
 		Com_Printf ("Info string length exceeded\n");
 		return;
 	}
 	// only copy ascii values
 	s += strlen (s);
 	v = new;
-	while (*v) {
+	while (*v)
+	{
 		c = (unsigned char) *v++;
 		// client only allows highbits on name
-		if (strcasecmp (key, "name") != 0) {
+		if (strcasecmp (key, "name") != 0)
+		{
 			c &= 127;
 			if (c < 32 || c > 127)
 				continue;
@@ -1869,8 +1877,7 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 			if (strcasecmp (key, "team") == 0)
 				c = tolower (c);
 		}
-//      c &= 127;       // strip high bits
-		if (c > 13)						// && c < 127)
+		if (c > 13)
 			*s++ = c;
 	}
 	*s = 0;

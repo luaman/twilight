@@ -743,10 +743,11 @@ SZ_GetSpace (sizebuf_t *buf, int length)
 {
 	void	   *data;
 
-	if (buf->cursize + length > buf->maxsize) {
+	if (buf->cursize + length > buf->maxsize)
+	{
 		if (!buf->allowoverflow)
 			Sys_Error ("SZ_GetSpace: overflow without allowoverflow set (%d)",
-					   buf->maxsize);
+					buf->maxsize);
 
 		if (length > buf->maxsize)
 			Sys_Error ("SZ_GetSpace: %i is > full buffer size", length);
@@ -813,7 +814,8 @@ COM_SkipPath (char *pathname)
 COM_StripExtension
 ============
 */
-void COM_StripExtension (char *in, char *out)
+void
+COM_StripExtension (char *in, char *out)
 {
 	char *last = NULL;
 
@@ -825,6 +827,7 @@ void COM_StripExtension (char *in, char *out)
 			last = NULL;
 		*out++ = *in++;
 	}
+
 	if (last)
 		*last = '\0';
 }
@@ -852,6 +855,7 @@ COM_FileExtension (char *in)
 	return exten;
 }
 
+
 /*
 ============
 COM_FileBase
@@ -860,21 +864,28 @@ COM_FileBase
 void
 COM_FileBase (char *in, char *out)
 {
-	char	   *s, *s2;
+	char *slash, *dot;
+	char *s;
 
-	s = in + strlen (in) - 1;
-
-	while (s != in && *s != '.')
-		s--;
-
-	for (s2 = s; *s2 && *s2 != '/' && s2 > in; s2--);
-
-	if (s - s2 < 2)
-		strcpy (out, "?model?");
+	slash = in;
+	dot = NULL;
+	s = in;
+	while(*s)
+	{
+		if (*s == '/')
+			slash = s + 1;
+		if (*s == '.')
+			dot = s;
+		s++;
+	}
+	if (dot == NULL)
+		dot = s;
+	if (dot - slash < 2)
+		strcpy (out,"?model?");
 	else {
-		s--;
-		strncpy (out, s2 + 1, s - s2);
-		out[s - s2] = 0;
+		while (slash < dot)
+			*out++ = *slash++;
+		*out++ = 0;
 	}
 }
 
@@ -908,6 +919,7 @@ COM_DefaultExtension (char *path, char *extension)
 //============================================================================
 
 char com_token[1024];
+
 
 /*
 ==============
@@ -1000,16 +1012,14 @@ COM_CheckFile (char *fname)
 ================
 COM_CheckRegistered
 
-Looks for the pop.txt file and verifies it.
+Looks for the pop.lmp file
 Sets the "registered" cvar.
-Immediately exits out if an alternate game was attempted to be started without
-being registered.
 ================
 */
 void
 COM_CheckRegistered (void)
 {
-	if (!COM_CheckFile("gfx/pop.lmp"))
+	if (!COM_CheckFile ("gfx/pop.lmp"))
 		return;
 
 	Cvar_Set (registered, "1");
@@ -1027,6 +1037,7 @@ COM_Init_Cvars (void)
 {
 	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
 
+	// fs_shareconf/userconf can't be done here
 	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, NULL);
 	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
 
@@ -1047,18 +1058,6 @@ COM_Init (void)
 	COM_CheckRegistered ();
 }
 
-
-/// just for debugging
-int
-memsearch (Uint8 *start, int count, int search)
-{
-	int         i;
-
-	for (i = 0; i < count; i++)
-		if (start[i] == search)
-			return i;
-	return -1;
-}
 
 /*
 =============================================================================
@@ -1111,8 +1110,8 @@ char com_gamedir[MAX_OSPATH];
 
 typedef struct searchpath_s
 {
-	char        filename[MAX_OSPATH];
-	pack_t     *pack;		// only one of filename / pack will be used
+	char		filename[MAX_OSPATH];
+	pack_t	   *pack;			// only one of filename / pack will be used
 	struct searchpath_s *next;
 } searchpath_t;
 
@@ -1269,16 +1268,8 @@ COM_CopyFile (char *netpath, char *cachepath)
 	fclose (out);
 }
 
-/*
-===========
-COM_FindFile
 
-Finds the file in the search path.
-Sets com_filesize and one of handle or file
-===========
-*/
-int file_from_pak;						// global indicating file came from
-										// pack file ZOID
+int file_from_pak;						// last file came from pack
 
 int
 COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
@@ -1305,7 +1296,7 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 				if (!strcmp (pak->files[i].name, filename))
 				{
 					// found it!
-					Sys_Printf ("PackFile: %s : %s\n", pak->filename,
+					Com_DPrintf ("PackFile: %s : %s\n", pak->filename,
 							filename);
 					// open a new file on the pakfile
 					*file = fopen (pak->filename, "rb");
@@ -1319,6 +1310,14 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 		} else {
 			// check a file in the directory tree
 
+			// FIXME: Client does a continue in both cases, should we here?
+			if (filename[0] == '/' || filename[0] == '\\')
+				Com_Printf ("COM_FOpenFile: Called with filename \"%s\"\n",
+						filename);
+			if (strstr (filename, ".."))
+				Com_Printf ("COM_FOpenFile: Called with filename \"%s\"\n",
+						filename);
+
 			snprintf (netpath, sizeof (netpath), "%s/%s", search->filename,
 					  filename);
 
@@ -1326,7 +1325,7 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 			if (findtime == -1)
 				continue;
 
-			Sys_Printf ("FindFile: %s\n", netpath);
+			Com_DPrintf ("FindFile: %s\n", netpath);
 
 			*file = fopen (netpath, "rb");
 			return COM_filelength (*file);
@@ -1342,6 +1341,11 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 	return -1;
 }
 
+
+cache_user_t *loadcache;
+Uint8 *loadbuf;
+int loadsize;
+
 /*
 ============
 COM_LoadFile
@@ -1350,15 +1354,11 @@ Filename are reletive to the quake directory.
 Allways appends a 0 byte to the loaded data.
 ============
 */
-cache_user_t *loadcache;
-Uint8*loadbuf;
-int loadsize;
-
 Uint8 *
 COM_LoadFile (char *path, int usehunk, qboolean complain)
 {
 	FILE	   *h;
-	Uint8	   *buf = NULL;
+	Uint8	   *buf = NULL;				// silence compiler warning
 	char		base[32];
 	int			len;
 
@@ -1609,6 +1609,10 @@ COM_Gamedir (char *dir)
 	 */
 	while (com_searchpaths != com_base_searchpaths)
 	{
+		if (com_searchpaths == NULL)
+			Sys_Error ("Com_Gamedir: tried to free to base searchpath and "
+					"hit NULL\n");
+
 		if (com_searchpaths->pack)
 		{
 			fclose (com_searchpaths->pack->handle);
@@ -1645,6 +1649,8 @@ COM_InitFilesystem (void)
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
 		Cvar_Set (fs_userpath, com_argv[i + 1]);
+
+	Sys_mkdir (fs_userpath->string);
 
 	// Make sure fs_sharepath is set to something useful
 	if (!strlen (fs_sharepath->string))
@@ -1756,7 +1762,7 @@ Info_RemoveKey (char *s, char *key)
 
 		if (!strcmp (key, pkey))
 		{
- 			memmove (start, s, strlen(s) + 1);		// remove this part
+			memmove (start, s, strlen(s) + 1);		// remove this part
 			return;
 		}
 
@@ -1812,12 +1818,13 @@ Info_RemovePrefixedKeys (char *start, char prefix)
 }
 
 
+extern cvar_t *sv_highchars;
+
 void
 Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 {
-	char			new[1024], *v;
-	int				c;
-	extern cvar_t	sv_highchars;
+	char		new[1024], *v;
+	int			c;
 
 	if (strstr (key, "\\") || strstr (value, "\\"))
 	{
@@ -1864,13 +1871,13 @@ Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 	while (*v)
 	{
 		c = (unsigned char) *v++;
-		if (!sv_highchars.value) {
+		if (!sv_highchars->value)
+		{
 			c &= 127;
 			if (c < 32 || c > 127)
 				continue;
 		}
 		if (c > 13)
-			// && c < 127)
 			*s++ = c;
 	}
 	*s = 0;
