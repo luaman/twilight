@@ -462,7 +462,7 @@ CL_RelinkEntities (void)
 //
 // interpolate player info
 //
-	VectorInterpolate (cl.mvelocity[1], frac, cl.mvelocity[0], cl.velocity);
+	Lerp_Vectors (cl.mvelocity[1], frac, cl.mvelocity[0], cl.velocity);
 
 	if (cls.demoplayback) {
 		// interpolate the angles 

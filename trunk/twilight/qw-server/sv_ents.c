@@ -149,11 +149,13 @@ SV_EmitNailUpdate (sizebuf_t *msg)
 
 	for (n = 0; n < numnails; n++) {
 		ent = nails[n];
-		x = (int) (ent->v.origin[0] + 4096) >> 1;
-		y = (int) (ent->v.origin[1] + 4096) >> 1;
-		z = (int) (ent->v.origin[2] + 4096) >> 1;
-		p = (int) (16 * ent->v.angles[0] / 360) & 15;
-		yaw = (int) (256 * ent->v.angles[1] / 360) & 255;
+		x = (int) (ent->v.origin[0] + 4096 + 1) >> 1;
+		y = (int) (ent->v.origin[1] + 4096 + 1) >> 1;
+		z = (int) (ent->v.origin[2] + 4096 + 1) >> 1;
+//		p = (int) (16 * ent->v.angles[0] / 360) & 15;
+//		yaw = (int) (256 * ent->v.angles[1] / 360) & 255;
+		p = Q_rint (ent->v.angles[0] * (16.0 / 360.0)) & 15;
+		yaw = Q_rint (ent->v.angles[1] * (256.0 / 360.0)) & 255;
 
 		bits[0] = x;
 		bits[1] = (x >> 8) | (y << 4);

@@ -824,7 +824,8 @@ RadiusFromBounds (vec3_t mins, vec3_t maxs)
 	return VectorLength (corner);
 }
 
-void VectorInterpolate (vec3_t v1, float frac, vec3_t v2, vec3_t v)
+void 
+Lerp_Vectors (vec3_t v1, float frac, vec3_t v2, vec3_t v)
 {
 	if (frac < 0.01) {
 		VectorCopy (v1, v);
@@ -839,7 +840,8 @@ void VectorInterpolate (vec3_t v1, float frac, vec3_t v2, vec3_t v)
 	v[2] = v1[2] + (vec_t)frac * (v2[2] - v1[2]);
 }
 
-void AngleInterpolate (vec3_t v1, vec_t frac, vec3_t v2, vec3_t v)
+void 
+Lerp_Angles (vec3_t v1, vec_t frac, vec3_t v2, vec3_t v)
 {
 	vec3_t	d;
 	int i;
@@ -870,28 +872,29 @@ void AngleInterpolate (vec3_t v1, vec_t frac, vec3_t v2, vec3_t v)
 	v[2] = v1[2] + frac * d[2];
 }
 
-void Vector2Angles (vec3_t in, vec3_t out)
+void 
+Vector2Angles (vec3_t in, vec3_t out)
 {
-	vec_t y, p;
+	vec_t yaw, pitch;
 
 	if (!in[0] && !in[1])
 	{
-		y = 0;
-		p = (in[2] > 0) ? 90 : 270;
+		yaw = 0;
+		pitch = (in[2] > 0) ? 90 : 270;
 	}
 	else
 	{
-		y = Q_atan2 (in[1], in[0]) * 180 / M_PI;
-		if (y < 0)
-			y += 360;
+		yaw = Q_atan2 (in[1], in[0]) * 180 / M_PI;
+		if (yaw < 0)
+			yaw += 360;
 
-		p = Q_atan2 (in[2], VectorLength2 (in)) * 180 / M_PI;
-		if (p < 0)
-			p += 360;
+		pitch = Q_atan2 (in[2], VectorLength2 (in)) * 180 / M_PI;
+		if (pitch < 0)
+			pitch += 360;
 	}
 
-	out[0] = p;
-	out[1] = y;
+	out[0] = pitch;
+	out[1] = yaw;
 	out[2] = 0;
 }
 

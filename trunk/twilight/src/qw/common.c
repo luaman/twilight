@@ -50,6 +50,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "zone.h"
+#include "mathlib.h"
 
 usercmd_t   nullcmd;					// guarenteed to be zero
 
@@ -350,19 +351,21 @@ MSG_WriteString (sizebuf_t *sb, char *s)
 void
 MSG_WriteCoord (sizebuf_t *sb, float f)
 {
+	// Vic: FIXME, it should be Q_rint
+	// leave it for now because of old prediction
 	MSG_WriteShort (sb, (int) (f * 8));
 }
 
 void
 MSG_WriteAngle (sizebuf_t *sb, float f)
 {
-	MSG_WriteByte (sb, (int) (f * (256.0f / 360.0f) + 0.5f) & 255);
+	MSG_WriteByte (sb, Q_rint(f * (256.0f / 360.0f)) & 255);
 }
 
 void
 MSG_WriteAngle16 (sizebuf_t *sb, float f)
 {
-	MSG_WriteShort (sb, (int) (f * (65536.0f / 360.0f) + 0.5f) & 65535);
+	MSG_WriteShort (sb, Q_rint(f * (65536.0f / 360.0f)) & 65535);
 }
 
 void
