@@ -195,7 +195,6 @@ R_Init (void)
 	qglVertexPointer (3, GL_FLOAT, sizeof(v_array[0]), v_array[0]);
 
 	qglDisableClientState (GL_COLOR_ARRAY);
-//	qglEnableClientState (GL_COLOR_ARRAY);
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 }
@@ -209,27 +208,25 @@ R_TranslatePlayerSkin
 Translates a skin texture by the per-player color lookup
 ===============
 */
+#define PIXELS_BUFFER_SIZE	512 * 256 * sizeof(Uint32)
 void
 R_TranslatePlayerSkin (int playernum)
 {
-	int		top, bottom;
-	Uint8		translate[256];
-	unsigned	translate32[256];
-	int		i, j;
-	Uint8		*original;
-#define PIXELS_BUFFER_SIZE	512*256*sizeof(unsigned)
-	unsigned	*pixels;
-//	static unsigned	pixels[512*256];
-	unsigned	*out;
-	unsigned	scaled_width, scaled_height;
-	int		inwidth, inheight;
-	int		tinwidth, tinheight;
-	Uint8		*inrow;
-	unsigned	frac, fracstep;
+	Sint32			top, bottom;
+	Uint8			translate[256];
+	Uint32			translate32[256];
+	Uint32			i, j;
+	Uint8			*original;
+	Uint32			*pixels, *out;
+	Uint32			scaled_width, scaled_height;
+	Sint32			inwidth, inheight;
+	Uint32			tinwidth, tinheight;
+	Uint8			*inrow;
+	Uint32			frac, fracstep;
 	player_info_t	*player;
 	extern Uint8	player_8bit_texels[320*200];
-	extern int 		player_8bit_width, player_8bit_height;
-	char s[512];
+	extern Sint32	player_8bit_width, player_8bit_height;
+	char			s[512];
 
 	player = &cl.players[playernum];
 	if (!player->name[0])
@@ -260,14 +257,14 @@ R_TranslatePlayerSkin (int playernum)
 		for (i=0 ; i<16 ; i++)
 		{
 			if (top < 128)	// the artists made some backwards ranges.  sigh.
-				translate[TOP_RANGE+i] = top+i;
+				translate[TOP_RANGE+i] = top + i;
 			else
-				translate[TOP_RANGE+i] = top+15-i;
+				translate[TOP_RANGE+i] = top + 15 - i;
 					
 			if (bottom < 128)
-				translate[BOTTOM_RANGE+i] = bottom+i;
+				translate[BOTTOM_RANGE+i] = bottom + i;
 			else
-				translate[BOTTOM_RANGE+i] = bottom+15-i;
+				translate[BOTTOM_RANGE+i] = bottom + 15 - i;
 		}
 
 		//
@@ -279,8 +276,9 @@ R_TranslatePlayerSkin (int playernum)
 
 		if (!player->skin)
 			Skin_Find(player);
+
 		if ((original = Skin_Cache(player->skin)) != NULL) {
-			//skin data width
+			// skin data width
 			inwidth = 320;
 			inheight = 200;
 		} else {
@@ -318,19 +316,19 @@ R_TranslatePlayerSkin (int playernum)
 		out = pixels;
 		memset(pixels, 0, PIXELS_BUFFER_SIZE);
 		fracstep = tinwidth*0x10000/scaled_width;
-		for (i=0 ; i<scaled_height ; i++, out += scaled_width)
+		for (i=0 ; i < scaled_height; i++, out += scaled_width)
 		{
-			inrow = original + inwidth*(i*tinheight/scaled_height);
+			inrow = original + inwidth * (i * tinheight / scaled_height);
 			frac = fracstep >> 1;
-			for (j=0 ; j<scaled_width ; j+=4)
+			for (j = 0; j < scaled_width; j += 4)
 			{
-				out[j] = translate32[inrow[frac>>16]];
+				out[j] = translate32[inrow[frac >> 16]];
 				frac += fracstep;
-				out[j+1] = translate32[inrow[frac>>16]];
+				out[j+1] = translate32[inrow[frac >> 16]];
 				frac += fracstep;
-				out[j+2] = translate32[inrow[frac>>16]];
+				out[j+2] = translate32[inrow[frac >> 16]];
 				frac += fracstep;
-				out[j+3] = translate32[inrow[frac>>16]];
+				out[j+3] = translate32[inrow[frac >> 16]];
 				frac += fracstep;
 			}
 		}
@@ -342,28 +340,27 @@ R_TranslatePlayerSkin (int playernum)
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		if (Img_HasFullbrights ((Uint8 *)original, inwidth*inheight))
-		{
+		if (Img_HasFullbrights ((Uint8 *)original, inwidth*inheight)) {
 			fb_skins[playernum] = playertextures + playernum + MAX_CLIENTS;
 
 			qglBindTexture (GL_TEXTURE_2D, fb_skins[playernum]);
 
 			out = pixels;
 			memset(pixels, 0, PIXELS_BUFFER_SIZE);
-			fracstep = tinwidth*0x10000/scaled_width;
-			for (i=0 ; i<scaled_height ; i++, out += scaled_width)
+			fracstep = tinwidth * 0x10000 / scaled_width;
+			for (i = 0; i < scaled_height; i++, out += scaled_width)
 			{
-				inrow = original + inwidth*(i*tinheight/scaled_height);
+				inrow = original + inwidth * (i * tinheight / scaled_height);
 				frac = fracstep >> 1;
-				for (j=0 ; j<scaled_width ; j+=4)
+				for (j = 0; j < scaled_width; j+=4)
 				{
-					if (out[j] < 224) out[j] = 0; else out[j] = d_8to32table[inrow[frac>>16]];
+					if (out[j] < 224) out[j] = 0; else out[j] = d_8to32table[inrow[frac >> 16]];
 					frac += fracstep;
-					if (out[j+1] < 224) out[j+1] = 0; else out[j+1] = d_8to32table[inrow[frac>>16]];
+					if (out[j + 1] < 224) out[j + 1] = 0; else out[j+1] = d_8to32table[inrow[frac >> 16]];
 					frac += fracstep;
-					if (out[j+2] < 224) out[j+2] = 0; else out[j+2] = d_8to32table[inrow[frac>>16]];
+					if (out[j + 2] < 224) out[j + 2] = 0; else out[j+2] = d_8to32table[inrow[frac >> 16]];
 					frac += fracstep;
-					if (out[j+3] < 224) out[j+3] = 0; else out[j+3] = d_8to32table[inrow[frac>>16]];
+					if (out[j + 3] < 224) out[j + 3] = 0; else out[j+3] = d_8to32table[inrow[frac >> 16]];
 					frac += fracstep;
 				}
 			}	
@@ -374,8 +371,7 @@ R_TranslatePlayerSkin (int playernum)
 
 			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		}
-		else {
+		} else {
 			fb_skins[playernum] = 0;
 		}
 
@@ -392,14 +388,14 @@ R_NewMap
 void
 R_NewMap (void)
 {
-	int         i;
-	extern int r_dlightframecount;
+	Uint32			i;
+	extern Sint32	r_dlightframecount;
 
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
 
-// clear out efrags in case the level hasn't been reloaded
-// FIXME: is this one short?
+	// clear out efrags in case the level hasn't been reloaded
+	// FIXME: is this one short?
 	for (i = 0; i < cl.worldmodel->numleafs; i++)
 		cl.worldmodel->leafs[i].efrags = NULL;
 
