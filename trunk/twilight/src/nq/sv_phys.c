@@ -442,41 +442,108 @@ SV_PushEntity (edict_t *ent, vec3_t push)
 }
 
 
+model_t *SV_GetModelFromEdict(edict_t *e)
+{
+	int i = e->v.modelindex;
+	if (i <= 0 || i >= MAX_MODELS)
+		return NULL;
+	return sv.models[i];
+}
+
 /*
 ============
 SV_PushMoveAndRotate
 
 ============
 */
-void SV_PushMoveAndRotate (edict_t *pusher, float movetime, vec3_t amove, vec3_t move)
+void SV_PushMoveAndRotate (edict_t *pusher, float movetime, vec3_t pusheramove, vec3_t pushermove)
 {
-	int			i, savesolid;
+	int			i, savesolid, onground;
 	Uint32		e;
 	edict_t		*check, *block;
-	vec3_t		pushorig, pushangles, entorig;
+	vec3_t		pushorigin, pushangles;
 	int			num_moved;
 	edict_t		*moved_edict[MAX_EDICTS];
-	vec3_t		moved_from[MAX_EDICTS];
-	vec3_t		org, org2, mins, maxs;
-	vec3_t		forward, right, up, move2;
+	vec3_t		moved_from[MAX_EDICTS], moved_fromangles[MAX_EDICTS];
+	vec3_t		org, org2, mins, maxs, move2;
+	vec3_t		origin1, forward1, left1, up1, origin2, forward2, left2, up2, origin3, forward3, left3, up3, start, end, offset, start_l, end_l, end2;
+	float		pushltime, frac, ifrac;
+	model_t		*pushermodel;
+	hull_t		*hull;
 
-	VectorSubtract (vec3_origin, amove, org);
-	AngleVectors (org, forward, right, up);
-
-	for (i=0 ; i<3 ; i++)
+	pushermodel = SV_GetModelFromEdict(pusher);
+	if (pushermodel == NULL)
 	{
-		mins[i] = pusher->v.absmin[i] + move[i];
-		maxs[i] = pusher->v.absmax[i] + move[i];
+		VectorAdd (pusher->v.angles, pusheramove, pusher->v.angles);
+		VectorAdd (pusher->v.origin, pushermove, pusher->v.origin);
+		pusher->v.ltime += movetime;
+		SV_LinkEdict (pusher, false);
+		return;
 	}
 
-	VectorCopy (pusher->v.origin, pushorig);
+	// save the pusher info for restoring later
+	VectorCopy (pusher->v.origin, pushorigin);
 	VectorCopy (pusher->v.angles, pushangles);
+	pushltime = pusher->v.ltime;
+
+	VectorCopy(pushermove, origin3);
+	AngleVectors (pusheramove, forward3, left3, up3);
+
+	VectorCopy(pusher->v.origin, origin1);
+	AngleVectors (pusher->v.angles, forward1, left1, up1);
 
 	// move the pusher to it's final position
-
-	VectorAdd (pusher->v.angles, amove, pusher->v.angles);
-	VectorAdd (pusher->v.origin, move, pusher->v.origin);
+	VectorAdd (pusher->v.angles, pusheramove, pusher->v.angles);
+	VectorAdd (pusher->v.origin, pushermove, pusher->v.origin);
 	pusher->v.ltime += movetime;
+
+	VectorCopy(pusher->v.origin, origin2);
+	AngleVectors (pusher->v.angles, forward2, left2, up2);
+
+	// make them left instead of right
+	VectorNegate(left1, left1);
+	VectorNegate(left2, left2);
+	VectorNegate(left3, left3);
+
+	// LordHavoc: sweep the whole move and rotation
+	for (i = 0;i < 8;i++)
+	{
+		org[0] = (i & 1) ? pushermodel->maxs[0] : pushermodel->mins[0];
+		org[1] = (i & 2) ? pushermodel->maxs[1] : pushermodel->mins[1];
+		org[2] = (i & 4) ? pushermodel->maxs[2] : pushermodel->mins[2];
+
+		org2[0] = org[0] * forward1[0] + org[1] * left1[0] + org[2] * up1[0] + origin1[0];
+		org2[1] = org[0] * forward1[1] + org[1] * left1[1] + org[2] * up1[1] + origin1[1];
+		org2[2] = org[0] * forward1[2] + org[1] * left1[2] + org[2] * up1[2] + origin1[2];
+		if (i == 0)
+		{
+			mins[0] = maxs[0] = org2[0];
+			mins[1] = maxs[1] = org2[1];
+			mins[2] = maxs[2] = org2[2];
+		}
+		else
+		{
+			if (mins[0] > org2[0]) mins[0] = org2[0];
+			if (mins[1] > org2[1]) mins[1] = org2[1];
+			if (mins[2] > org2[2]) mins[2] = org2[2];
+			if (maxs[0] < org2[0]) maxs[0] = org2[0];
+			if (maxs[1] < org2[1]) maxs[1] = org2[1];
+			if (maxs[2] < org2[2]) maxs[2] = org2[2];
+		}
+
+		org2[0] = org[0] * forward2[0] + org[1] * left2[0] + org[2] * up2[0] + origin2[0];
+		org2[1] = org[0] * forward2[1] + org[1] * left2[1] + org[2] * up2[1] + origin2[1];
+		org2[2] = org[0] * forward2[2] + org[1] * left2[2] + org[2] * up2[2] + origin2[2];
+		if (mins[0] > org2[0]) mins[0] = org2[0];
+		if (mins[1] > org2[1]) mins[1] = org2[1];
+		if (mins[2] > org2[2]) mins[2] = org2[2];
+		if (maxs[0] < org2[0]) maxs[0] = org2[0];
+		if (maxs[1] < org2[1]) maxs[1] = org2[1];
+		if (maxs[2] < org2[2]) maxs[2] = org2[2];
+	}
+	mins[0] -= 1;mins[1] -= 1;mins[2] -= 1;
+	maxs[0] += 1;maxs[1] += 1;maxs[2] += 1;
+
 	SV_LinkEdict (pusher, false);
 
 	// see if any solid entities are inside the final position
@@ -487,85 +554,168 @@ void SV_PushMoveAndRotate (edict_t *pusher, float movetime, vec3_t amove, vec3_t
 		if (check->free)
 			continue;
 		if (check->v.movetype == MOVETYPE_PUSH
-		|| check->v.movetype == MOVETYPE_NONE
-		|| check->v.movetype == MOVETYPE_NOCLIP)
+		 || check->v.movetype == MOVETYPE_NONE
+		 || check->v.movetype == MOVETYPE_NOCLIP)
 			continue;
 
-	// if the entity is standing on the pusher, it will definately be moved
-		if ( ! ( ((int)check->v.flags & FL_ONGROUND)
-		&& PROG_TO_EDICT(check->v.groundentity) == pusher) )
+retrymove:;
+
+		// if the entity is standing on the pusher, it will definitely be moved
+		onground = ((int)check->v.flags & FL_ONGROUND) && PROG_TO_EDICT(check->v.groundentity) == pusher;
+
+		if (!onground)
 		{
-			if ( check->v.absmin[0] >= maxs[0]
-			|| check->v.absmin[1] >= maxs[1]
-			|| check->v.absmin[2] >= maxs[2]
-			|| check->v.absmax[0] <= mins[0]
-			|| check->v.absmax[1] <= mins[1]
-			|| check->v.absmax[2] <= mins[2] )
+			if (check->v.absmin[0] > maxs[0]
+			 || check->v.absmin[1] > maxs[1]
+			 || check->v.absmin[2] > maxs[2]
+			 || check->v.absmax[0] < mins[0]
+			 || check->v.absmax[1] < mins[1]
+			 || check->v.absmax[2] < mins[2])
 				continue;
 
-		// see if the ent's bbox is inside the pusher's final position
+			// see if the ent's bbox is inside the pusher's final position
 			if (!SV_TestEntityPosition (check))
 				continue;
 		}
 
-	// remove the onground flag for non-players
+		// transform into pusher's world for current position
+		VectorSubtract (check->v.origin, origin1, org);
+//		start[0] = org[0] * forward1[0] + org[1] * left1   [1] + org[2] * up1     [2];
+//		start[1] = org[0] * forward1[1] + org[1] * left1   [1] + org[2] * up1     [2];
+//		start[2] = org[0] * forward1[2] + org[1] * left1   [1] + org[2] * up1     [2];
+		start[0] = org[0] * forward1[0] + org[1] * forward1[1] + org[2] * forward1[2];
+		start[1] = org[0] * left1   [0] + org[1] * left1   [1] + org[2] * left1   [2];
+		start[2] = org[0] * up1     [0] + org[1] * up1     [1] + org[2] * up1     [2];
+
+		// transform into pusher's world for new position
+		VectorSubtract (check->v.origin, origin2, org);
+//		end[0]   = org[0] * forward2[0] + org[1] * left2   [1] + org[2] * up2     [2];
+//		end[1]   = org[0] * forward2[1] + org[1] * left2   [1] + org[2] * up2     [2];
+//		end[2]   = org[0] * forward2[2] + org[1] * left2   [1] + org[2] * up2     [2];
+		end[0]   = org[0] * forward2[0] + org[1] * forward2[1] + org[2] * forward2[2];
+		end[1]   = org[0] * left2   [0] + org[1] * left2   [1] + org[2] * left2   [2];
+		end[2]   = org[0] * up2     [0] + org[1] * up2     [1] + org[2] * up2     [2];
+
+		// check if it impacts pusher
+		hull = SV_HullForEntity (pusher, check->v.mins, check->v.maxs, offset);
+
+		VectorSubtract (start, offset, start_l);
+		VectorSubtract (end, offset, end_l);
+
+		if (onground)
+			frac = 0;
+		else
+		{
+			frac = 0;
+			/*
+			trace_t trace;
+			memset (&trace, 0, sizeof (trace_t));
+			trace.fraction = 1;
+			trace.allsolid = true;
+			VectorCopy (end_l, trace.endpos);
+			SV_RecursiveHullCheck(hull, hull->firstclipnode, 0, 1, start_l, end_l, &trace);
+			if (trace.startsolid)
+				frac = 0;
+			else if (trace.fraction == 1)
+				continue; // no collision, ignore
+			else
+				frac = trace.fraction;
+			*/
+		}
+
+		VectorCopy (check->v.origin, moved_from[num_moved]);
+		VectorCopy (check->v.angles, moved_fromangles[num_moved]);
+		moved_edict[num_moved++] = check;
+
+		ifrac = 1 - frac;
+
+		VectorSubtract(check->v.origin, origin1, org);
+		end2[0] = (org[0] * forward3[0] + org[1] * left3[0] + org[2] * up3[0] + origin2[0]) * ifrac + check->v.origin[0] * frac;
+		end2[1] = (org[0] * forward3[1] + org[1] * left3[1] + org[2] * up3[1] + origin2[1]) * ifrac + check->v.origin[1] * frac;
+		end2[2] = (org[0] * forward3[2] + org[1] * left3[2] + org[2] * up3[2] + origin2[2]) * ifrac + check->v.origin[2] * frac;
+
+		/*
+		VectorAdd(trace.endpos, offset, trace.endpos);
+		// transform impact point back into worldspace
+///		org[0] = trace.endpos[0] * forward1[0] + trace.endpos[1] * forward1[1] + trace.endpos[2] * forward1[2];
+///		org[1] = trace.endpos[0] * left1   [0] + trace.endpos[1] * left1   [1] + trace.endpos[2] * left1   [2];
+///		org[2] = trace.endpos[0] * up1     [0] + trace.endpos[1] * up1     [1] + trace.endpos[2] * up1     [2];
+		org[0] = trace.endpos[0] * forward2[0] + trace.endpos[1] * left2   [0] + trace.endpos[2] * up2     [0];
+		org[1] = trace.endpos[0] * forward2[1] + trace.endpos[1] * left2   [1] + trace.endpos[2] * up2     [1];
+		org[2] = trace.endpos[0] * forward2[2] + trace.endpos[1] * left2   [2] + trace.endpos[2] * up2     [2];
+//		start2[0] = org[0] + origin1[0];
+//		start2[1] = org[1] + origin1[1];
+//		start2[2] = org[2] + origin1[2];
+
+		// rotate the move
+//		end2[0] = (org[0] * forward3[0] + org[1] * forward3[1] + org[2] * forward3[2] + origin3[0]) * intersectionfraction + origin1[0];
+//		end2[1] = (org[0] * left3   [0] + org[1] * left3   [1] + org[2] * left3   [2] + origin3[1]) * intersectionfraction + origin1[1];
+//		end2[2] = (org[0] * up3     [0] + org[1] * up3     [1] + org[2] * up3     [2] + origin3[2]) * intersectionfraction + origin1[2];
+		end2[0] = (org[0] * forward3[0] + org[1] * left3   [0] + org[2] * up3     [0] + origin3[0]) * intersectionfraction + origin1[0];
+		end2[1] = (org[0] * forward3[1] + org[1] * left3   [1] + org[2] * up3     [1] + origin3[1]) * intersectionfraction + origin1[1];
+		end2[2] = (org[0] * forward3[2] + org[1] * left3   [2] + org[2] * up3     [2] + origin3[2]) * intersectionfraction + origin1[2];
+		*/
+
+		// remove the onground flag for non-players
 		if (check->v.movetype != MOVETYPE_WALK)
 			check->v.flags = (int)check->v.flags & ~FL_ONGROUND;
-		
-		VectorCopy (check->v.origin, entorig);
-		VectorCopy (check->v.origin, moved_from[num_moved]);
-		moved_edict[num_moved] = check;
-		num_moved++;
 
-		// calculate destination position
-		VectorAdd (check->v.origin, move, org);		// add regular move
-		check->v.angles[YAW] += amove[YAW];		// FIXME?
+		// LordHavoc: not sure if this is really the best way to do it, I didn't write this line
+		check->v.angles[YAW] += pusheramove[YAW] * ifrac;
 
-		VectorSubtract (org, pusher->v.origin, org);
-		org2[0] = DotProduct (org, forward);
-		org2[1] = -DotProduct (org, right);
-		org2[2] = DotProduct (org, up);
-		VectorSubtract (org2, org, move2);
-		VectorAdd (move, move2, move2);
-
-		// try moving the contacted entity 
 		savesolid = pusher->v.solid;
-		if (savesolid == SOLID_BSP			// everything that blocks: bsp models = map brushes = doors, plats, etc.
-			|| savesolid == SOLID_BBOX		// normally boxes
-			|| savesolid == SOLID_SLIDEBOX )// normally monsters
+		block = NULL;
+		if (savesolid == SOLID_BSP		// doors
+		 || savesolid == SOLID_BBOX		// items, shots (should not be pushing)
+		 || savesolid == SOLID_SLIDEBOX)// characters (should not be pushing)
 		{
+			// try to move the object to the new position
 			pusher->v.solid = SOLID_NOT;
+			VectorSubtract(end2, check->v.origin, move2);
 			SV_PushEntity (check, move2);
 			pusher->v.solid = savesolid;
 
-			// if it is still inside the pusher, block
-			block = SV_TestEntityPosition (check);
+			// LordHavoc: ignore gibs here instead of in the if (block) code
+			if (check->v.mins[0] != check->v.maxs[0]
+			 || check->v.mins[1] != check->v.maxs[1])
+			{
+				// if it is still inside the pusher, block
+				block = SV_TestEntityPosition (check);
+			}
 		}
-		else
-			block = NULL;
+
+		if (block && (check->v.solid == SOLID_NOT || check->v.solid == SOLID_TRIGGER))
+		{
+			// corpse
+			// LordHavoc: this is evil, engine should not tinker with QC stuff
+			check->v.mins[0] = check->v.mins[1] = 0;
+			VectorCopy (check->v.mins, check->v.maxs);
+			SV_LinkEdict (check, false);
+
+			// retry the move
+			num_moved--;
+			VectorCopy (moved_from[num_moved], check->v.origin);
+			VectorCopy (moved_fromangles[num_moved], check->v.angles);
+			goto retrymove;
+		}
 
 		if (block)
-		{	// fail the move
-			if (check->v.mins[0] == check->v.maxs[0])
-				continue;
-			if (check->v.solid == SOLID_NOT || check->v.solid == SOLID_TRIGGER)
-			{	// corpse
-				check->v.mins[0] = check->v.mins[1] = 0;
-				VectorCopy (check->v.mins, check->v.maxs);
-				continue;
-			}
-
-			check->v.angles[YAW] -= amove[YAW];
-			VectorCopy (entorig, check->v.origin);
-			SV_LinkEdict (check, true);
-
-			VectorCopy (pushorig, pusher->v.origin);
+		{
+			// fail the move
+			VectorCopy (pushorigin, pusher->v.origin);
 			VectorCopy (pushangles, pusher->v.angles);
+			pusher->v.ltime = pushltime;
 			SV_LinkEdict (pusher, false);
 
-			pusher->v.ltime -= movetime;
+			// move back entities
+			for (i=0 ; i<num_moved ; i++)
+			{
+				VectorCopy (moved_from[i], moved_edict[i]->v.origin);
+				VectorCopy (moved_fromangles[i], moved_edict[i]->v.angles);
+				SV_LinkEdict (moved_edict[i], false);
+			}
 
-			// if the pusher has a "blocked" function, call it
+			// if the pusher has a "blocked" function, call it.
 			// otherwise, just stay in place until the obstacle is gone
 			if (pusher->v.blocked)
 			{
@@ -573,19 +723,8 @@ void SV_PushMoveAndRotate (edict_t *pusher, float movetime, vec3_t amove, vec3_t
 				pr_global_struct->other = EDICT_TO_PROG(check);
 				PR_ExecuteProgram (pusher->v.blocked);
 			}
-			
-		// move back any entities we already moved
-			for (i=0 ; i<num_moved ; i++)
-			{
-				VectorCopy (moved_from[i], moved_edict[i]->v.origin);
-				moved_edict[i]->v.angles[YAW] -= amove[YAW];
-				SV_LinkEdict (moved_edict[i], false);
-			}
+
 			return;
-		}
-		else
-		{
-			VectorAdd (check->v.angles, amove, check->v.angles);
 		}
 	}
 }
@@ -601,40 +740,29 @@ void SV_Physics_Pusher (edict_t *ent)
 	float	thinktime;
 	float	oldltime;
 	float	movetime;
-	vec3_t	move = {0, 0, 0}, amove = {0, 0, 0};
+	vec3_t	move, amove;
 
 	oldltime = ent->v.ltime;
-	
+
 	thinktime = ent->v.nextthink;
-	if (thinktime < ent->v.ltime + host_frametime)
-	{
-		movetime = thinktime - ent->v.ltime;
-		if (movetime < 0)
-			movetime = 0;
-	}
-	else
-		movetime = host_frametime;
+	// LordHavoc: don't try turning this into a bound, because I think thinktime - ent->v.ltime can be negative
+	movetime = host_frametime;
+	if (movetime > (thinktime - ent->v.ltime))
+		movetime = (thinktime - ent->v.ltime);
+	if (movetime < 0)
+		movetime = 0;
 
 	if (movetime)
 	{
-		qboolean moved = false;
+		VectorScale (ent->v.avelocity, movetime, amove);
+		VectorScale (ent->v.velocity, movetime, move);
 
-		if (ent->v.avelocity[0] || ent->v.avelocity[1] || ent->v.avelocity[2]) {
-			VectorScale (ent->v.avelocity, movetime, amove);
-			moved = true;
-		}
-
-		if (ent->v.velocity[0] || ent->v.velocity[1] || ent->v.velocity[2]) {
-			VectorScale (ent->v.velocity, movetime, move);
-			moved = true;
-		}
-
-		if (moved)
+		if (amove[0] || amove[1] || amove[2] || move[0] || move[1] || move[2])
 			SV_PushMoveAndRotate (ent, movetime, amove, move);
 		else
 			ent->v.ltime += movetime;
 	}
-		
+
 	if (thinktime > oldltime && thinktime <= ent->v.ltime)
 	{
 		ent->v.nextthink = 0;
@@ -645,7 +773,6 @@ void SV_Physics_Pusher (edict_t *ent)
 		if (ent->free)
 			return;
 	}
-
 }
 
 
