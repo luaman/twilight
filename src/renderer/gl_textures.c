@@ -43,35 +43,6 @@ memzone_t	*glt_zone;
 static Uint32 *trans;
 static int trans_size;
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-Uint32 *
-GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
-		qboolean check_empty)
-{
-	int i, size, count = 0;
-
-	if (!palette)
-		palette = d_palette_raw;
-
-	size = width * height;
-	if (size > trans_size)
-	{
-		if (trans)
-			Zone_Free(trans);
-		trans = Zone_Alloc(glt_zone, size * sizeof(Uint32));
-		trans_size = size;
-	}
-
-	for (i = 0; i < size; i++)
-		if ((trans[i] = palette[data[i]]) != d_palette_empty)
-			count++;
-
-	if (!count && check_empty)
-		return NULL;
-	else
-		return trans;
-}
-#else
 Uint32 *
 GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 		qboolean check_empty)
@@ -92,7 +63,7 @@ GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 	}
 
 	for (i = 0; i < size;) {
-		d = ((Uint32 *) data)[i >> 2];
+		d = LittleLong(((Uint32 *) data)[i >> 2]);
 
 		t = palette[d & 0xFF];
 		if ((trans[i++] = t) != d_palette_empty)
@@ -122,7 +93,6 @@ GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 	else
 		return trans;
 }
-#endif
 
 /*
 =================

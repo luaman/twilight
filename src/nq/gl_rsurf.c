@@ -405,7 +405,7 @@ GL_BuildLightmap (model_t *mod, msurface_t *surf, matrix4x4_t *invmatrix)
 {
 	int			 i, j, size3, stride;
 	Uint8		*lightmap, *dest, *stain;
-	Uint32		 scale, *bl;
+	Uint32		 scale, *bl, l32;
 	brushhdr_t	*brush = mod->brush;
 
 	// Bind your textures early and often - or at least early
@@ -446,7 +446,16 @@ GL_BuildLightmap (model_t *mod, msurface_t *surf, matrix4x4_t *invmatrix)
 				scale = d_lightstylevalue[surf->styles[i]];
 				bl = blocklights;
 
-				for (j = 0; j < size3; j++)
+				j = 0;
+				for (; (j + 4) <= size3; j += 4) {
+					l32 = *((Uint32 *) &lightmap[j]);
+					l32 = LittleLong(l32);
+					bl[j + 0] += ((l32 >> 0) & 0xFF) * scale;
+					bl[j + 1] += ((l32 >> 8) & 0xFF) * scale;
+					bl[j + 2] += ((l32 >> 16) & 0xFF) * scale;
+					bl[j + 3] += ((l32 >> 24) & 0xFF) * scale;
+				}
+				for (; j < size3; j++)
 					bl[j] += lightmap[j] * scale;
 				lightmap += j;
 			}
@@ -485,10 +494,11 @@ GL_BuildLightmap (model_t *mod, msurface_t *surf, matrix4x4_t *invmatrix)
 			{
 				for (j = 0; j < surf->smax; j++)
 				{
-					dest[0] = min ((bl[0] * stain[0]) >> lightmap_shift, 255);
-					dest[1] = min ((bl[1] * stain[1]) >> lightmap_shift, 255);
-					dest[2] = min ((bl[2] * stain[2]) >> lightmap_shift, 255);
-					dest[3] = 255;
+					l32 = min ((bl[0] * stain[0]) >> lightmap_shift, 255);
+					l32 |= min ((bl[1] * stain[1]) >> lightmap_shift, 255)<< 8;
+					l32 |= min ((bl[2] * stain[2]) >> lightmap_shift, 255)<< 16;
+					l32 |= 255 << 24;
+					*((Uint32 *) dest) = l32;
 					bl += 3;
 					dest += 4;
 					stain += 3;

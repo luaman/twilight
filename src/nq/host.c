@@ -55,6 +55,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "view.h"
 #include "wad.h"
+#include "cpu.h"
 
 /*
 
@@ -847,6 +848,7 @@ Host_Init ()
 	W_LoadWadFile ("gfx.wad");
 	Key_Init ();					// setup keysyms
 	Con_Init ();					// setup console, add related commands
+	CPU_Init ();
 	M_Init ();						// setup menu, add related commands
 	PR_Init ();						// setup pr_* edicts, add related commands
 	Mod_Init ();					// setup models, add related commands
