@@ -38,6 +38,7 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "client.h"
+#include "cmd.h"
 #include "console.h"
 #include "cvar.h"
 #include "keys.h"
@@ -232,8 +233,18 @@ CheckExtensions (void)
 
 	if (!COM_CheckParm ("-nocva"))
 		gl_cva = DGL_HasExtension ("GL_EXT_compiled_vertex_array");
-	Con_Printf ("Checking for CVA support... %s\n",
-			gl_cva ? "GL_EXT_compiled_vertex_array" : "None");
+
+	Con_Printf ("Checking for compiled vertex arrays... %s\n",
+			gl_cva ? "GL_EXT_compiled_vertex_array." : "no.");
+}
+
+void
+GL_Info_f (void)
+{
+	Con_Printf ("GL_VENDOR: %s\n", gl_vendor);
+	Con_Printf ("GL_RENDERER: %s\n", gl_renderer);
+	Con_Printf ("GL_VERSION: %s\n", gl_version);
+	Con_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
 }
 
 
@@ -245,18 +256,13 @@ GL_Init
 void
 GL_Init (void)
 {
-	Con_Printf ("Forcing glFinish\n");
 	qglFinish();
 
 	gl_vendor = qglGetString (GL_VENDOR);
-	Con_Printf ("GL_VENDOR: %s\n", gl_vendor);
 	gl_renderer = qglGetString (GL_RENDERER);
-	Con_Printf ("GL_RENDERER: %s\n", gl_renderer);
 
 	gl_version = qglGetString (GL_VERSION);
-	Con_Printf ("GL_VERSION: %s\n", gl_version);
 	gl_extensions = qglGetString (GL_EXTENSIONS);
-	Con_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
 
 	CheckExtensions ();
 
@@ -418,6 +424,8 @@ VID_Init (unsigned char *palette)
 		SDL_ShowCursor (0);
 		SDL_WM_GrabInput (SDL_GRAB_ON);
 	}
+
+	Cmd_AddCommand ("gl_info", &GL_Info_f);
 }
 
 void
