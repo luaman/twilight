@@ -458,7 +458,7 @@ CL_AdjustAngles (void)
 			speed * cl_yawspeed->value * CL_KeyState (&in_right);
 		cl.viewangles[YAW] +=
 			speed * cl_yawspeed->value * CL_KeyState (&in_left);
-		cl.viewangles[YAW] = anglemod (cl.viewangles[YAW]);
+		cl.viewangles[YAW] = ANGLEMOD (cl.viewangles[YAW]);
 	}
 	if (in_klook.state & 1) {
 		V_StopPitchDrift ();
