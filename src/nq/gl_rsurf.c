@@ -131,8 +131,9 @@ R_AddDynamicLights (msurface_t *surf)
 
 	lit = false;
 
-	smax = (surf->extents[0] >> 4) + 1;
-	tmax = (surf->extents[1] >> 4) + 1;
+	smax = surf->smax;
+	tmax = surf->tmax;
+	smax3 = smax * 3;
 
 	for (lnum = 0; lnum < r_numdlights; lnum++)
 	{
@@ -140,7 +141,7 @@ R_AddDynamicLights (msurface_t *surf)
 			continue;                   // not lit by this light
 
 		VectorCopy (r_dlight[lnum].origin, local);
-		dist = DotProduct (local, surf->plane->normal) - surf->plane->dist;
+		dist = PlaneDiff (local, surf->plane);
 		
 		// for comparisons to minimum acceptable light
 		// compensate for LIGHTOFFSET
@@ -151,7 +152,19 @@ R_AddDynamicLights (msurface_t *surf)
 		if (dist2 >= maxdist)
 			continue;
 
-		VectorMA (local, -dist, surf->plane->normal, impact);
+		if (surf->plane->type < 3)
+		{
+			impact[0] = local[0];
+			impact[1] = local[1];
+			impact[2] = local[2];
+			impact[surf->plane->type] -= dist;
+		}
+		else
+		{
+			impact[0] = local[0] - surf->plane->normal[0] * dist;
+			impact[1] = local[1] - surf->plane->normal[1] * dist;
+			impact[2] = local[2] - surf->plane->normal[2] * dist;
+		}
 
 		impacts = DotProduct (impact, surf->texinfo->vecs[0])
 			+ surf->texinfo->vecs[0][3] - surf->texturemins[0];
@@ -176,7 +189,6 @@ R_AddDynamicLights (msurface_t *surf)
 		blue = r_dlight[lnum].light[2];
 		subtract = (int) (r_dlight[lnum].lightsubtract * 4194304.0f);
 		bl = blocklights;
-		smax3 = smax * 3;
 
 		i = impactt;
 		for (t = 0; t < tmax; t++, i -= 16)
@@ -285,7 +297,19 @@ loc0:
 	{
 		maxdist3 = maxdist - dist2;
 
-		VectorMA (origin, -ndist, node->plane->normal, impact);
+		if (node->plane->type < 3)
+		{
+			impact[0] = origin[0];
+			impact[1] = origin[1];
+			impact[2] = origin[2];
+			impact[node->plane->type] -= ndist;
+		}
+		else
+		{
+			impact[0] = origin[0] - node->plane->normal[0] * ndist;
+			impact[1] = origin[1] - node->plane->normal[1] * ndist;
+			impact[2] = origin[2] - node->plane->normal[2] * ndist;
+		}
 
 		surf = model->surfaces + node->firstsurface;
 		endsurf = surf + node->numsurfaces;
@@ -293,8 +317,8 @@ loc0:
 		{
 			if (surf->stainsamples)
 			{
-				smax = (surf->extents[0] >> 4) + 1;
-				tmax = (surf->extents[1] >> 4) + 1;
+				smax = surf->smax;
+				tmax = surf->tmax;
 
 				impacts = DotProduct (impact, surf->texinfo->vecs[0])
 					+ surf->texinfo->vecs[0][3] - surf->texturemins[0];
