@@ -6,15 +6,15 @@ Missing stuff needed for 0.2:
 We're almost there for 0.2, there are a number of bugs left which need to be
 fixed before release, they're marked RC below.
 
+We need to verify that we actually still start under windows 95 compiled
+with MSVC 4. (If we don't, then Sys_mkdir needs fixing.)
+
 Bugs we know about:
 
   - RC #2: Fix net_udp (line 112) so we don't resolve non-network
     connections.  (Non-trivial)
   - RC #4: Need to print out Id's Copyright message on engine startup.
     (Knghtbrd? What exactly needs to be printed?)
-  - RC #5: We should create directories as needed, such as the userpath
-    (~/.twilight/) and gamedirs (~/.twilight/id1 and others).
-    (Reported by Peter Jay Salzman)
   - RC #7: We need to fix the console to not destroy the contents on
     resize, this is /required/ for #4. (And is thus the hard part.)
   - lights do not react to moving bmodels, untransforming into the
