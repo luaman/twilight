@@ -116,16 +116,19 @@ fi
 AC_DEFINE_UNQUOTED(OGLDECL, $OGLDECL)
 
 dnl let the user choose the default OpenGL library
-AC_ARG_WITH(opengl,
-	[  --with-opengl           Default name of your OpenGL library
+AC_ARG_WITH(libgl,
+	[  --with-libgl            Default name of your OpenGL library
                           (only affects value of the gl_driver Cvar)],,
-[if test "$SYS" = "Win32"; then
-	with_opengl="opengl32.dll"
-else
-	with_opengl="libGL.so.1"
+	[with_libgl=yes])
+if test "x$with_libgl" = "xyes" -o "x$with_libgl" = "xno"; then
+	if test "$SYS" = "Win32"; then
+		with_libgl="opengl32.dll"
+	else
+		with_libgl="libGL.so.1"
+	fi
 fi
-])
-AC_DEFINE_UNQUOTED(GL_LIBRARY, "$with_opengl")
+
+AC_DEFINE_UNQUOTED(GL_LIBRARY, "$with_libgl")
 
 
 AC_OUTPUT(
@@ -153,7 +156,7 @@ AC_MSG_RESULT([
     Compiler used               : $CC
     Compiler flags              : $CFLAGS
     SDL version                 : $SDLVER
-    Default OpenGL library      : $with_opengl
+    Default OpenGL library      : $with_libgl
 
   Path information
     Installation prefix         : $PDIR
