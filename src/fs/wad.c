@@ -99,19 +99,19 @@ FSW_Free_File (fs_file_t *file)
 }
 
 static SDL_RWops *
-FSW_Open_File (fs_file_t *file, qboolean write)
+FSW_Open_File (fs_file_t *file, Uint32 flags)
 {
 	fsw_file_t	*p_file;
 	fsw_group_t	*wad;
 	SDL_RWops	*rw;
 
-	if (write)
+	if (flags & FSF_WRITE)
 		return NULL;
 
 	p_file = file->fs_data;
 	wad = file->group->fs_data;
 
-	rw = LimitFromRW(wad->wad->open(wad->wad, false), p_file->ofs, p_file->ofs + file->len);
+	rw = LimitFromRW(wad->wad->open(wad->wad, 0), p_file->ofs, p_file->ofs + file->len);
 	return rw;
 }
 
@@ -124,7 +124,8 @@ FSW_Add_Wad (fs_group_t *group, fsw_group_t *wad, fs_file_t *file)
 	SDL_RWops		*rw;
 	int				i;
 
-	rw = file->open(file, false);
+	if (!(rw = file->open(file, 0)))
+		return false;
 
 	wad->wad = file;
 
@@ -165,6 +166,8 @@ FSW_New_Group (fs_file_t *in, fs_group_t *parent, const char *id)
 	group->fs_data = wad;
 	group->free = FSW_Free;
 	group->free_file = FSW_Free_File;
+	if (parent)
+		group->flags |= parent->flags;
 
 	if (FSW_Add_Wad (group, wad, in))
 		return group;

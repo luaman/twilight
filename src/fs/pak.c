@@ -77,19 +77,19 @@ FSP_Free_File (fs_file_t *file)
 }
 
 static SDL_RWops *
-FSP_Open_File (fs_file_t *file, qboolean write)
+FSP_Open_File (fs_file_t *file, Uint32 flags)
 {
 	fsp_file_t	*p_file;
 	fsp_group_t	*pak;
 	SDL_RWops	*rw;
 
-	if (write)
+	if (flags & FSF_WRITE)
 		return NULL;
 
 	p_file = file->fs_data;
 	pak = file->group->fs_data;
 
-	rw = LimitFromRW(pak->pak->open(pak->pak, false), p_file->ofs, p_file->ofs + file->len);
+	rw = LimitFromRW(pak->pak->open(pak->pak, 0), p_file->ofs, p_file->ofs + file->len);
 	return rw;
 }
 
@@ -102,7 +102,7 @@ FSP_Add_Pak (fs_group_t *group, fsp_group_t *pak, fs_file_t *file)
 	SDL_RWops		*rw;
 	int				i, nfiles;
 
-	rw = file->open(file, false);
+	rw = file->open(file, 0);
 
 	pak->pak = file;
 
@@ -144,6 +144,9 @@ FSP_New_Group (fs_file_t *in, fs_group_t *parent, const char *id)
 	group->fs_data = pak;
 	group->free = FSP_Free;
 	group->free_file = FSP_Free_File;
+	if (parent)
+		group->flags |= parent->flags;
+	group->flags |= FS_NO_UPLOAD;
 
 	if (FSP_Add_Pak (group, pak, in))
 		return group;

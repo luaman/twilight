@@ -269,7 +269,7 @@ Host_WriteConfiguration (const char *name)
 		COM_DefaultExtension (fname, ".cfg", sizeof (fname));
 
 		if ((file = FS_FindFile (fname)))
-			rw = file->open(file, true);
+			rw = file->open(file, FSF_WRITE);
 
 		if (!rw)
 			rw = FS_Open_New (fname);

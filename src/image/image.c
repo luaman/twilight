@@ -111,7 +111,7 @@ Image_Load_Multi (const char **names, int flags)
 	if (!file)
 		return NULL;
 
-	rw = file->open(file, false);
+	rw = file->open(file, 0);
 	if (!rw)
 		return NULL;
 

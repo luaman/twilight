@@ -30,15 +30,22 @@
 #include "qtypes.h"
 #include "hash.h"
 #include "zone.h"
+#include "mathlib.h"
 
 struct fs_file_s;
 struct fs_new_s;
-typedef SDL_RWops *(fs_open_t) (struct fs_file_s *, qboolean write);
+typedef SDL_RWops *(fs_open_t) (struct fs_file_s *, Uint32 flags);
+
+#define FSF_WRITE										BIT(0)
+
+#define FS_READ_ONLY									BIT(0)
+#define FS_NO_UPLOAD									BIT(1)
 
 typedef struct fs_group_s {
 	char				*id;
 	hash_t				*files;
 	Uint				path_num;
+	Uint32				flags;
 
 	qboolean			(*open_new) (struct fs_group_s *, struct fs_new_s *);
 	void				(*close_new) (struct fs_group_s *, struct fs_new_s *);
@@ -74,7 +81,7 @@ void FS_Add_File (fs_group_t *group, const char *name, size_t len, fs_open_t *op
 fs_file_t *FS_FindFiles_Complex (const char **names, char ***exts);
 fs_file_t *FS_FindFile_Complex (const char *name, char **exts);
 fs_file_t *FS_FindFile (const char *name);
-void FS_AddPath (const char *path, const char *id);
+void FS_AddPath (const char *path, const char *id, const Uint32 flags);
 
 fs_group_t * FS_Alloc_Group (fs_group_t *parent, const char *id);
 void FS_Free_Group (fs_group_t *group);

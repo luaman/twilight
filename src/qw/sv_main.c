@@ -940,7 +940,7 @@ SV_WriteIP_f (void)
 	Com_Printf ("Writing listip.cfg.\n");
 
 	if ((file = FS_FindFile ("listip.cfg")))
-		rw = file->open(file, true);
+		rw = file->open(file, FSF_WRITE);
 
 	if (!rw)
 		rw = FS_Open_New ("listip.cfg");
