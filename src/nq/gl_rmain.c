@@ -768,7 +768,8 @@ R_SetupAliasFrame
 =================
 */
 static void
-R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, qboolean fb)
+R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
+		qboolean fb)
 {
 	int			pose, numposes;
 	float		interval;
@@ -785,6 +786,9 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, qboolean fb)
 		interval = paliashdr->frames[frame].interval;
 		pose += (int) (cl.time / interval) % numposes;
 	}
+
+	e->pose1 = e->pose2 = pose;
+	e->frame_start_time = cl.time;
 
 	GL_DrawAliasFrame (paliashdr, pose, fb);
 }
@@ -1053,7 +1057,7 @@ R_DrawAliasModel (entity_t *e)
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
 		R_SetupAliasBlendedFrame (e->frame, paliashdr, e, false);
 	else
-		R_SetupAliasFrame (e->frame, paliashdr, false);
+		R_SetupAliasFrame (e->frame, paliashdr, e, false);
 
 	if (fb_texture) {
 		qglEnable (GL_BLEND);
@@ -1062,7 +1066,7 @@ R_DrawAliasModel (entity_t *e)
 		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 			R_SetupAliasBlendedFrame (e->frame, paliashdr, e, true);
 		else
-			R_SetupAliasFrame (e->frame, paliashdr, true);
+			R_SetupAliasFrame (e->frame, paliashdr, e, true);
 
 		qglDisable (GL_BLEND);
 	}
