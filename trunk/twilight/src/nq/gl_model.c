@@ -330,6 +330,17 @@ Mod_ForName (char *name, qboolean crash)
 	return Mod_LoadModel (mod, crash);
 }
 
+static qboolean 
+HasFullbrights (byte *pixels, int size)
+{
+    int i;
+
+    for (i = 0; i < size; i++)
+        if (pixels[i] >= 224)
+            return true;
+
+    return false;
+}
 
 /*
 ===============================================================================
@@ -407,9 +418,18 @@ Mod_LoadTextures (lump_t *l)
 			R_InitSky (tx);
 		else {
 			texture_mode = GL_LINEAR_MIPMAP_NEAREST;	// _LINEAR;
-			tx->gl_texturenum =
-				GL_LoadTexture (mt->name, tx->width, tx->height,
-								(byte *) (tx + 1), true, false);
+
+			if (mt->name[0] == '*')	// we don't brighten turb textures
+				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false);
+			else {
+				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false);
+
+				if (HasFullbrights((byte *)(tx+1), tx->width*tx->height)) {
+					tx->fb_texturenum = GL_LoadTexture (va("@fb_%s", mt->name), tx->width, tx->height,
+									(byte *) (tx + 1), true, 2);
+				}
+			}
+
 			texture_mode = GL_LINEAR;
 		}
 	}
@@ -1437,6 +1457,7 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			memcpy (texels, (byte *) (pskintype + 1), s);
 			// }
 			snprintf (name, sizeof (name), "%s_%i", loadmodel->name, i);
+
 			pheader->gl_texturenum[i][0] =
 				pheader->gl_texturenum[i][1] =
 				pheader->gl_texturenum[i][2] =
@@ -1444,6 +1465,16 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 				GL_LoadTexture (name, pheader->skinwidth,
 								pheader->skinheight, (byte *) (pskintype + 1),
 								true, false);
+
+			if (HasFullbrights((byte *)(pskintype + 1),	pheader->skinwidth*pheader->skinheight))
+				pheader->fb_texturenum[i][0] = pheader->fb_texturenum[i][1] =
+				pheader->fb_texturenum[i][2] = pheader->fb_texturenum[i][3] =
+					GL_LoadTexture (va("@fb_%s", name), pheader->skinwidth, 
+					pheader->skinheight, (byte *)(pskintype + 1), true, 2);
+			else
+				pheader->fb_texturenum[i][0] = pheader->fb_texturenum[i][1] =
+				pheader->fb_texturenum[i][2] = pheader->fb_texturenum[i][3] = 0;
+
 			pskintype = (daliasskintype_t *) ((byte *) (pskintype + 1) + s);
 		} else {
 			// animating skin group.  yuck.
@@ -1468,6 +1499,14 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 					GL_LoadTexture (name, pheader->skinwidth,
 									pheader->skinheight, (byte *) (pskintype),
 									true, false);
+
+				if (HasFullbrights((byte *)(pskintype),	pheader->skinwidth*pheader->skinheight))
+					pheader->fb_texturenum[i][j&3] =
+					GL_LoadTexture (va("@fb_%s", name), pheader->skinwidth, 
+					pheader->skinheight, (byte *)(pskintype), true, 2);
+				else
+					pheader->fb_texturenum[i][j&3] = 0;
+
 				pskintype = (daliasskintype_t *) ((byte *) (pskintype) + s);
 			}
 			k = j;
@@ -1502,20 +1541,20 @@ mflags_t modelflags[] =
 	{ "progs/s_spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/zom_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 
-	// keys and runes are fullbright and do not cast shadows
-	{ "progs/w_s_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/m_s_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/b_s_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/w_g_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/m_g_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/b_g_key.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/end.mdl", 9, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	// keys and runes do not cast shadows
+	{ "progs/w_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/m_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/b_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/w_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/m_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/b_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/end.mdl", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 
 	// Dissolution of Eternity
 	{ "progs/lavalball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },	
-	{ "progs/beam.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/firball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/lspike.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/beam.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/fireball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/lspike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/plasma.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/sphere.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/statgib.mdl", 13, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
@@ -1536,11 +1575,11 @@ mflags_t modelflags[] =
 	{ "progs/gor1_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/gor2_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/xhairo", 12, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM|FLAG_DOUBLESIZE },
-	{ "progs/bluankey.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/bluplkey.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/gldankey.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/gldplkey.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/chip", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/bluankey.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/bluplkey.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/gldankey.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/gldplkey.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/chip", 10, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 
 	// Common
 	{ "progs/v_", 8, FLAG_NOSHADOW|FLAG_NO_IM_FORM },

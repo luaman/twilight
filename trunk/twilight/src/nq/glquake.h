@@ -41,11 +41,11 @@ extern int  texture_mode;
 extern float gldepthmin, gldepthmax;
 
 void        GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
-						 qboolean alpha);
+						 int alpha);
 void        GL_Upload8 (byte * data, int width, int height, qboolean mipmap,
-						qboolean alpha);
+						int alpha);
 int         GL_LoadTexture (char *identifier, int width, int height,
-							byte * data, qboolean mipmap, qboolean alpha);
+							byte * data, qboolean mipmap, int alpha);
 int         GL_FindTexture (char *identifier);
 
 typedef struct {
@@ -74,6 +74,7 @@ extern int  glx, gly, glwidth, glheight;
 
 #define BACKFACE_EPSILON	0.01
 
+#define	MAX_GLTEXTURES	1024
 
 void        R_TimeRefresh_f (void);
 void        R_ReadPointFile_f (void);
@@ -192,6 +193,7 @@ extern cvar_t *gl_doubleeyes;
 extern cvar_t *gl_im_animation;
 extern cvar_t *gl_im_transform;
 extern cvar_t *gl_fb_models;
+extern cvar_t *gl_fb_bmodels;
 
 extern int  gl_lightmap_format;
 extern int  gl_solid_format;
