@@ -46,7 +46,7 @@
 
 #define HAVE_LIMITS_H 1
 
-#define OGLDECL APIENTRY
+#define DYNGLENTRY APIENTRY
 
 #define inline __inline
 
