@@ -680,7 +680,7 @@ CL_InitInput
 ============
 */
 void
-CL_InitInput (void)
+CL_Input_Init (void)
 {
 	Cmd_AddCommand ("+moveup", IN_UpDown);
 	Cmd_AddCommand ("-moveup", IN_UpUp);
@@ -717,7 +717,11 @@ CL_InitInput (void)
 	Cmd_AddCommand ("-klook", IN_KLookUp);
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
+}
 
+void
+CL_Input_Init_Cvars (void)
+{
 	cl_nodelta = Cvar_Get ("cl_nodelta", "0", CVAR_NONE, NULL);
 }
 

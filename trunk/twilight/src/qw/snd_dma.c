@@ -177,6 +177,33 @@ S_Startup (void)
 	sound_started = 1;
 }
 
+/*
+================
+S_Init_Cvars
+================
+*/
+void
+S_Init_Cvars (void)
+{
+	bgmvolume = Cvar_Get ("bgmvolume", "1", CVAR_ARCHIVE, NULL);
+	volume = Cvar_Get ("volume", "0.7", CVAR_ARCHIVE, NULL);
+
+	ambient_level = Cvar_Get ("ambient_level", "0.3", CVAR_NONE, NULL);
+	ambient_fade = Cvar_Get ("ambient_fade", "100", CVAR_NONE, NULL);
+
+	nosound = Cvar_Get ("nosound", "0", CVAR_NONE, NULL);
+	precache = Cvar_Get ("precache", "1", CVAR_NONE, NULL);
+	loadas8bit = Cvar_Get ("loadas8bit", "0", CVAR_NONE, NULL);
+	bgmbuffer = Cvar_Get ("bgmbuffer", "4096", CVAR_NONE, NULL);
+	snd_noextraupdate = Cvar_Get ("snd_noextraupdate", "0", CVAR_NONE, NULL);
+	snd_show = Cvar_Get ("snd_show", "0", CVAR_NONE, NULL);
+	_snd_mixahead = Cvar_Get ("_snd_mixahead", "0.1", CVAR_ARCHIVE, NULL);
+
+	if (host_parms.memsize < 0x800000) {
+		Cvar_Set (loadas8bit, "1");
+		Con_Printf ("loading all sounds as 8bit\n");
+	}
+}
 
 /*
 ================
@@ -200,26 +227,6 @@ S_Init (void)
 	Cmd_AddCommand ("stopsound", S_StopAllSoundsC);
 	Cmd_AddCommand ("soundlist", S_SoundList);
 	Cmd_AddCommand ("soundinfo", S_SoundInfo_f);
-
-	bgmvolume = Cvar_Get ("bgmvolume", "1", CVAR_ARCHIVE, NULL);
-	volume = Cvar_Get ("volume", "0.7", CVAR_ARCHIVE, NULL);
-
-	nosound = Cvar_Get ("nosound", "0", CVAR_NONE, NULL);
-	precache = Cvar_Get ("precache", "1", CVAR_NONE, NULL);
-	loadas8bit = Cvar_Get ("loadas8bit", "0", CVAR_NONE, NULL);
-	bgmbuffer = Cvar_Get ("bgmbuffer", "4096", CVAR_NONE, NULL);
-	ambient_level = Cvar_Get ("ambient_level", "0.3", CVAR_NONE, NULL);
-	ambient_fade = Cvar_Get ("ambient_fade", "100", CVAR_NONE, NULL);
-	snd_noextraupdate = Cvar_Get ("snd_noextraupdate", "0", CVAR_NONE, NULL);
-	snd_show = Cvar_Get ("snd_show", "0", CVAR_NONE, NULL);
-	_snd_mixahead = Cvar_Get ("_snd_mixahead", "0.1", CVAR_ARCHIVE, NULL);
-
-	if (host_parms.memsize < 0x800000) {
-		Cvar_Set (loadas8bit, "1");
-		Con_Printf ("loading all sounds as 8bit\n");
-	}
-
-
 
 	snd_initialized = true;
 

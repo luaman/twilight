@@ -668,6 +668,12 @@ Key_Init (void)
 
 }
 
+void
+Key_Init_Cvars (void)
+{
+}
+
+
 /*
 ===================
 Key_Event

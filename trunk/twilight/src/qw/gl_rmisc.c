@@ -188,16 +188,12 @@ R_Envmap_f (void)
 
 /*
 ===============
-R_Init
+R_Init_Cvars
 ===============
 */
 void
-R_Init (void)
+R_Init_Cvars (void)
 {
-	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);
-	Cmd_AddCommand ("envmap", R_Envmap_f);
-	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);
-
 	r_norefresh = Cvar_Get ("r_norefresh", "0", CVAR_NONE, NULL);
 	r_drawentities = Cvar_Get ("r_drawentities", "1", CVAR_NONE, NULL);
 	r_drawviewmodel = Cvar_Get ("r_drawviewmodel", "1", CVAR_NONE, NULL);
@@ -221,8 +217,7 @@ R_Init (void)
 	gl_playermip = Cvar_Get ("gl_playermip", "0", CVAR_NONE, NULL);
 	gl_nocolors = Cvar_Get ("gl_nocolors", "0", CVAR_NONE, NULL);
 	gl_keeptjunctions = Cvar_Get ("gl_keeptjunctions", "1", CVAR_NONE, NULL);
-	gl_reporttjunctions = Cvar_Get ("gl_reporttjunctions", "0", CVAR_NONE,
-			NULL);
+	gl_reporttjunctions = Cvar_Get ("gl_reporttjunctions", "0", CVAR_NONE, NULL);
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
 
 	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_NONE, NULL);
@@ -231,6 +226,19 @@ R_Init (void)
 
 	if (gl_mtexable)
 		Cvar_Set (gl_texsort, "0");
+}
+
+/*
+===============
+R_Init
+===============
+*/
+void
+R_Init (void)
+{
+	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);
+	Cmd_AddCommand ("envmap", R_Envmap_f);
+	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);
 
 	R_InitBubble ();
 

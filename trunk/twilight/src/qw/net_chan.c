@@ -96,21 +96,21 @@ to the new value before sending out any replies.
 
 */
 
-int         net_drop;
-cvar_t     *showpackets;
-cvar_t     *showdrop;
-cvar_t     *qport;
+int			net_drop;
+cvar_t		*showpackets;
+cvar_t		*showdrop;
+cvar_t		*qport;
 
 /*
 ===============
-Netchan_Init
+Netchan_Init_Cvars
 
 ===============
 */
 void
-Netchan_Init (void)
+Netchan_Init_Cvars (void)
 {
-	int         port;
+	int		port;
 
 	// pick a port value that should be nice and random
 #ifdef _WIN32
@@ -126,6 +126,17 @@ Netchan_Init (void)
 
 /*
 ===============
+Netchan_Init
+
+===============
+*/
+void
+Netchan_Init (void)
+{
+}
+
+/*
+===============
 Netchan_OutOfBand
 
 Sends an out-of-band datagram
@@ -134,10 +145,10 @@ Sends an out-of-band datagram
 void
 Netchan_OutOfBand (netadr_t adr, int length, byte * data)
 {
-	sizebuf_t   send;
-	byte        send_buf[MAX_MSGLEN + PACKET_HEADER];
+	sizebuf_t	send;
+	byte		send_buf[MAX_MSGLEN + PACKET_HEADER];
 
-// write the packet header
+	// write the packet header
 	send.data = send_buf;
 	send.maxsize = sizeof (send_buf);
 	send.cursize = 0;
@@ -145,7 +156,7 @@ Netchan_OutOfBand (netadr_t adr, int length, byte * data)
 	MSG_WriteLong (&send, -1);			// -1 sequence means out of band
 	SZ_Write (&send, data, length);
 
-// send the datagram
+	// send the datagram
 	// zoid, no input in demo playback mode
 	if (!cls.demoplayback)
 		NET_SendPacket (send.cursize, send.data, adr);

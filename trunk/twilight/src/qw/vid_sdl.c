@@ -377,6 +377,15 @@ Check_Gamma (unsigned char *pal)
 	memcpy (pal, palette, sizeof (palette));
 }
 
+void
+VID_Init_Cvars (void)
+{
+	vid_mode = Cvar_Get ("vid_mode", "0", CVAR_NONE, NULL);
+	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
+	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE, NULL);
+	gl_ztrick = Cvar_Get ("gl_ztrick", "1", CVAR_NONE, NULL);
+	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
+}
 
 void
 VID_Init (unsigned char *palette)
@@ -384,13 +393,6 @@ VID_Init (unsigned char *palette)
 	int         i;
 	char        gldir[MAX_OSPATH];
 	int         flags = SDL_OPENGL;
-
-	vid_mode = Cvar_Get ("vid_mode", "0", CVAR_NONE, NULL);
-	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
-	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE, NULL);
-	gl_ztrick = Cvar_Get ("gl_ztrick", "1", CVAR_NONE, NULL);
-
-	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
 
 	vid.maxwarpwidth = WARP_WIDTH;
 	vid.maxwarpheight = WARP_HEIGHT;
@@ -737,6 +739,11 @@ void
 Force_CenterView_f (void)
 {
 	cl.viewangles[PITCH] = 0;
+}
+
+void
+IN_Init_Cvars (void)
+{
 }
 
 void

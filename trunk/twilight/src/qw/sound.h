@@ -85,6 +85,7 @@ typedef struct {
 	// file start
 } wavinfo_t;
 
+void        S_Init_Cvars (void);
 void        S_Init (void);
 void        S_Startup (void);
 void        S_Shutdown (void);
