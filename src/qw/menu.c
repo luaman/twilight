@@ -53,6 +53,8 @@ static const char rcsid[] =
 #include "winquake.h"
 #endif
 
+extern cvar_t *gl_texturemode;
+
 void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
 
@@ -656,9 +658,23 @@ M_Options_Key (int k)
 	Frame interpolation	    on/off
 */
 
-#define GFX_ITEMS	5
+#define GFX_ITEMS	6
 
 int gfx_cursor = 0;
+
+typedef struct {
+	char       *name;
+	int         minimize, maximize;
+} glmode_t;
+
+glmode_t    texmodes[] = {
+	{"GL_NEAREST", GL_NEAREST, GL_NEAREST},
+	{"GL_LINEAR", GL_LINEAR, GL_LINEAR},
+	{"GL_NEAREST_MIPMAP_NEAREST", GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST},
+	{"GL_LINEAR_MIPMAP_NEAREST", GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR},
+	{"GL_NEAREST_MIPMAP_LINEAR", GL_NEAREST_MIPMAP_LINEAR, GL_NEAREST},
+	{"GL_LINEAR_MIPMAP_LINEAR", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR}
+};
 
 void
 M_Menu_Gfx_f (void)
@@ -683,7 +699,8 @@ M_Gfx_Draw (void)
 	M_Print (16, y, "     Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->value); y += 8;
 	M_Print (16, y, "   Fast dynamic lights"); M_DrawCheckbox (220, y, gl_flashblend->value); y += 8;
 	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off"); y += 8;
-	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->value);
+	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->value); y += 8;
+	M_Print (16, y, "          Texture Mode"); M_Print (220, y, gl_texturemode->string);
 
 	// cursor
 	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (realtime * 4) & 1));
@@ -722,6 +739,17 @@ M_Gfx_Set (void)
 		case 4:
 			v = !(int)gl_im_animation->value;
 			Cvar_Set (gl_im_animation, va("%i", v));
+			break;
+
+		case 5:
+			for (v = 0; v < 6; v++) {
+				if (Q_strcasecmp (texmodes[v].name, gl_texturemode->string) == 0)
+					break;
+			}
+			v++;
+			if (v > 5)
+				v = 0;
+			Cvar_Set (gl_texturemode, texmodes[v].name);
 			break;
 
 		default:
