@@ -2,7 +2,6 @@
 
 Import ("env", "opts", "base_sources", "client_sources", "fs_sources")
 Import ("image_sources", "renderer_sources", "sound_sources")
-#env.Append (CPPPATH = ["#/src/nq"])
 
 nq_headers = Split("""chase.h cl_console.h client.h net.h net_dgram.h
 	net_loop.h net_udp.h pr_execprogram.h progdefs.h progs.h protocol.h
