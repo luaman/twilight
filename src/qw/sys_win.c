@@ -40,7 +40,13 @@ static const char rcsid[] =
 #include <errno.h>
 #include <fcntl.h>
 
-#include "quakedef.h"
+#include "common.h"
+#include "console.h"
+#include "mathlib.h"
+#include "strlib.h"
+#include "host.h"
+#include "sys.h"
+#include "client.h"
 #include "winquake.h"
 
 #define MINIMUM_WIN_MEMORY	0x0c00000
