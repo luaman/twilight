@@ -66,10 +66,6 @@ int         cnttextures[2] = { -1, -1 };	// cached
 int         particletexture;			// little dot for particles
 int         playertextures;				// up to 16 color translated skins
 
-int         mirrortexturenum;			// quake texturenum, not gltexturenum
-qboolean    mirror;
-mplane_t   *mirror_plane;
-
 //
 // view origin
 //
@@ -102,7 +98,6 @@ cvar_t     *r_speeds;
 cvar_t     *r_fullbright;
 cvar_t     *r_lightmap;
 cvar_t     *r_shadows;
-cvar_t     *r_mirroralpha;
 cvar_t     *r_wateralpha;
 cvar_t     *r_dynamic;
 cvar_t     *r_novis;
@@ -1035,9 +1030,10 @@ R_DrawAliasModel (entity_t *e)
 		GL_SelectTexture (0);
 	}
 
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
 	if (fb_texture && !gl_mtexable) {
 		qglEnable (GL_BLEND);
-		qglBlendFunc(GL_ONE, GL_ONE);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
 		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
@@ -1364,14 +1360,7 @@ R_SetupGL (void)
 //  yfov = 2*atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*180/M_PI;
 	MYgluPerspective (r_refdef.fov_y, screenaspect, 4, 8193);
 
-	if (mirror) {
-		if (mirror_plane->normal[2])
-			qglScalef (1, -1, 1);
-		else
-			qglScalef (-1, 1, 1);
-		qglCullFace (GL_BACK);
-	} else
-		qglCullFace (GL_FRONT);
+	qglCullFace (GL_FRONT);
 
 	qglMatrixMode (GL_MODELVIEW);
 	qglLoadIdentity ();
@@ -1439,15 +1428,7 @@ R_Clear
 void
 R_Clear (void)
 {
-	if (r_mirroralpha->value != 1.0f) {
-		if (gl_clear->value)
-			qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		else
-			qglClear (GL_DEPTH_BUFFER_BIT);
-		gldepthmin = 0.0f;
-		gldepthmax = 0.5f;
-		qglDepthFunc (GL_LEQUAL);
-	} else if (gl_ztrick->value) {
+	if (gl_ztrick->value) {
 		static int  trickframe;
 
 		if (gl_clear->value)
@@ -1477,74 +1458,6 @@ R_Clear (void)
 }
 
 /*
-=============
-R_Mirror
-=============
-*/
-void
-R_Mirror (void)
-{
-	float       d;
-	msurface_t *s;
-	entity_t   *ent;
-
-	if (!mirror)
-		return;
-
-	memcpy (r_base_world_matrix, r_world_matrix, sizeof (r_base_world_matrix));
-
-	d = DotProduct (r_refdef.vieworg,
-					mirror_plane->normal) - mirror_plane->dist;
-	VectorMA (r_refdef.vieworg, -2 * d, mirror_plane->normal, r_refdef.vieworg);
-
-	d = DotProduct (vpn, mirror_plane->normal);
-	VectorMA (vpn, -2 * d, mirror_plane->normal, vpn);
-
-	r_refdef.viewangles[0] = -Q_asin (vpn[2]) / M_PI * 180;
-	r_refdef.viewangles[1] = Q_atan2 (vpn[1], vpn[0]) / M_PI * 180;
-	r_refdef.viewangles[2] = -r_refdef.viewangles[2];
-
-	ent = &cl_entities[cl.viewentity];
-	if (cl_numvisedicts < MAX_VISEDICTS) {
-		cl_visedicts[cl_numvisedicts] = ent;
-		cl_numvisedicts++;
-	}
-
-	gldepthmin = 0.5f;
-	gldepthmax = 1.0f;
-	qglDepthRange (gldepthmin, gldepthmax);
-	qglDepthFunc (GL_LEQUAL);
-
-	R_RenderScene ();
-	R_DrawWaterSurfaces ();
-
-	gldepthmin = 0.0f;
-	gldepthmax = 0.5f;
-	qglDepthRange (gldepthmin, gldepthmax);
-	qglDepthFunc (GL_LEQUAL);
-
-	// blend on top
-	qglEnable (GL_BLEND);
-	qglMatrixMode (GL_PROJECTION);
-	if (mirror_plane->normal[2])
-		qglScalef (1.0f, -1.0f, 1.0f);
-	else
-		qglScalef (-1.0f, 1.0f, 1.0f);
-	qglCullFace (GL_FRONT);
-	qglMatrixMode (GL_MODELVIEW);
-
-	qglLoadMatrixf (r_base_world_matrix);
-
-	qglColor4f (1.0f, 1.0f, 1.0f, r_mirroralpha->value);
-	s = cl.worldmodel->textures[mirrortexturenum]->texturechain;
-	for (; s; s = s->texturechain)
-		R_RenderBrushPoly (s);
-	cl.worldmodel->textures[mirrortexturenum]->texturechain = NULL;
-	qglDisable (GL_BLEND);
-	qglColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-}
-
-/*
 ================
 R_RenderView
 
@@ -1569,8 +1482,6 @@ R_RenderView (void)
 		c_brush_polys = 0;
 		c_alias_polys = 0;
 	}
-
-	mirror = false;
 
 	if (gl_finish->value)
 		qglFinish ();
@@ -1603,9 +1514,6 @@ R_RenderView (void)
 //  More fog right here :)
 //  qglDisable(GL_FOG);
 //  End of all fog code...
-
-	// render mirror view
-	R_Mirror ();
 
 	R_PolyBlend ();
 
