@@ -64,3 +64,21 @@ CL_Init (void)
 	memset (&cls, 0, sizeof(client_static_t));
 }
 
+void
+M_ToggleMenu_f(void)
+{
+}
+
+void
+M_SetKeyDest(void)
+{
+}
+
+qpic_t *
+Draw_CachePic(char *path)
+{
+	path = path;
+	
+	return NULL;
+}
+

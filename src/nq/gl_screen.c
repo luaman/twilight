@@ -123,8 +123,6 @@ qpic_t	   *scr_turtle;
 int			clearconsole;
 int			clearnotify;
 
-int			sb_lines;
-
 viddef_t	vid;						/* global video state */
 
 qboolean	scr_disabled_for_loading;

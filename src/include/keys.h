@@ -30,7 +30,7 @@
 //
 // these are the key numbers that should be passed to Key_Event
 //
-enum {
+extern enum {
 	K_TAB			= 9,
 	K_ENTER			= 13,
 	K_ESCAPE		= 27,
