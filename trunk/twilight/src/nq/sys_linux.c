@@ -234,7 +234,7 @@ Sys_DebugLog (char *file, char *fmt, ...)
 
 
 double
-Sys_FloatTime (void)
+Sys_DoubleTime (void)
 {
 	struct timeval tp;
 	struct timezone tzp;
@@ -373,10 +373,10 @@ main (int c, char **v)
 
 	Sys_Init ();
 
-	oldtime = Sys_FloatTime () - 0.1;
+	oldtime = Sys_DoubleTime () - 0.1;
 	while (1) {
 // find time spent rendering last frame
-		newtime = Sys_FloatTime ();
+		newtime = Sys_DoubleTime ();
 		time = newtime - oldtime;
 
 		if (cls.state == ca_dedicated) {	// play vcrfiles at max speed

@@ -313,6 +313,7 @@ Draw_Init (void)
 	// now turn them into textures
 	char_texture =
 		GL_LoadTexture ("charset", 128, 128, draw_chars, false, true);
+
 	//  Draw_CrosshairAdjust();
 	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
 
@@ -332,8 +333,8 @@ Draw_Init (void)
 	conback->height = cb->height;
 	ncdata = cb->data;
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	gl = (glpic_t *) conback->data;
 	gl->texnum =
@@ -502,7 +503,7 @@ Draw_Crosshair (void)
 		x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
 		y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
 
-		pColor = (unsigned char *) &d_8to24table[(Uint8) crosshaircolor->value];
+		pColor = (Uint8 *) &d_8to24table[(Uint8) crosshaircolor->value];
 		qglColor4ubv (pColor);
 		qglBindTexture (GL_TEXTURE_2D, cs_texture);
 
@@ -516,6 +517,7 @@ Draw_Crosshair (void)
 		qglTexCoord2f (0, 1);
 		qglVertex2f (x - 4, y + 12);
 		qglEnd ();
+		qglColor4f (1, 1, 1, 1);
 
 	} else if (crosshair->value)
 		Draw_Character (

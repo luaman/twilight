@@ -922,6 +922,7 @@ R_DrawAliasModel (entity_t *e)
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
+	qglColor3f (1, 1, 1);
 	qglPopMatrix ();
 
 	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {

@@ -64,6 +64,7 @@ static const char rcsid[] =
 #include <errno.h>
 #ifdef _WIN32
 #include <windows.h>
+#include <io.h>
 #endif
 
 #include <SDL.h>
@@ -205,27 +206,15 @@ Sys_DebugLog (char *file, char *fmt, ...)
 {
 	va_list     argptr;
 	static char data[1024];
-
-#ifdef _WIN32
-	FILE		*fd;
-#else
 	int         fd;
-#endif
 
 	va_start (argptr, fmt);
 	vsnprintf (data, sizeof (data), fmt, argptr);
 	va_end (argptr);
 
-#ifdef _WIN32
-	fd = fopen (file, "at");
-	fprintf (fd, data);
-	fclose (fd);
-#else
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
 	write (fd, data, strlen (data));
 	close (fd);
-#endif
-
 }
 
 
@@ -344,6 +333,10 @@ main (int c, char **v)
 
 	double      time, oldtime, newtime;
 	int         j;
+
+#ifdef _WIN32
+    SDL_RegisterApp("Twilight QWCL: disconnected", 0, GetModuleHandle(NULL));
+#endif
 
 	COM_InitArgv (c, v);
 

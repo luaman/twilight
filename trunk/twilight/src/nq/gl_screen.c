@@ -110,8 +110,6 @@ cvar_t		*r_brightness;
 cvar_t		*r_contrast;
 cvar_t		*r_waterwarp;
 
-extern cvar_t crosshair;
-
 qboolean    scr_initialized;			// ready to draw
 
 qpic_t     *scr_ram;
@@ -137,6 +135,8 @@ qboolean    block_drawing;
 
 void        SCR_ScreenShot_f (void);
 void        GL_BrightenScreen (void);
+
+extern cvar_t *crosshair;
 
 void
 GL_BrightenScreen(void)
@@ -655,7 +655,7 @@ SCR_DrawFPS (void)
 	if (!show_fps->value)
 		return;
 
-	t = Sys_FloatTime ();
+	t = Sys_DoubleTime ();
 	if ((t - lastframetime) >= 1.0) {
 		lastfps = fps_count;
 		fps_count = 0;
@@ -982,9 +982,8 @@ SCR_UpdateScreen (void)
 		Sbar_FinaleOverlay ();
 		SCR_CheckDrawCenterString ();
 	} else {
-		if (crosshair.value)
-			Draw_Character (scr_vrect.x + scr_vrect.width / 2,
-							scr_vrect.y + scr_vrect.height / 2, '+');
+		if (crosshair->value)
+			Draw_Crosshair ();
 
 		SCR_DrawRam ();
 		SCR_DrawNet ();
