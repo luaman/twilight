@@ -10,13 +10,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -100,7 +100,7 @@ over areas they shouldn't.
 The "cache directory" is only used during development to save network
 bandwidth, especially over ISDN / T1 lines.  If there is a cache directory
 specified, when a file is found by the normal search path, it will be mirrored
-into the cache directory, then opened there.  
+into the cache directory, then opened there.
 */
 
 //============================================================================
@@ -715,7 +715,7 @@ COM_StripExtension
 void COM_StripExtension (char *in, char *out)
 {
 	char *last = NULL;
-	
+
 	while (*in) {
 		if (*in == '.')
 			last = in;
@@ -1453,7 +1453,7 @@ COM_LoadPackFile (char *packfile)
 COM_AddDirectory
 
 Sets com_gamedir, adds the directory to the head of the path,
-then loads and adds pak1.pak pak2.pak ... 
+then loads and adds pak1.pak pak2.pak ...
 ================
 */
 void
@@ -1510,16 +1510,17 @@ Wrapper for COM_AddDirectory
 void
 COM_AddGameDirectory (char *dir)
 {
-	char       *d = NULL;
+	char		buf[1024];
 
 	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
-	COM_AddDirectory (va ("%s/%s", fs_sharepath->string, dir));
+	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->string, dir);
+	COM_AddDirectory (buf);
 
 	if (strcmp (fs_userpath->string, fs_sharepath->string) != 0) {
 		// only do this if the share path is not the same as the base path
-		d = va ("%s/%s", fs_userpath->string, dir);
-		Sys_mkdir (d);
-		COM_AddDirectory (d);
+		snprintf (buf, sizeof (buf), "%s/%s", fs_userpath->string, dir);
+		Sys_mkdir (buf);
+		COM_AddDirectory (buf);
 	}
 }
 
@@ -1547,9 +1548,9 @@ COM_Gamedir (char *dir)
 
 	strcpy (gamedirfile, dir);
 
-	// 
+	//
 	// free up any current game dir info
-	// 
+	//
 	while (com_searchpaths != com_base_searchpaths) {
 		if (com_searchpaths->pack) {
 			fclose (com_searchpaths->pack->handle);
@@ -1561,9 +1562,9 @@ COM_Gamedir (char *dir)
 		com_searchpaths = next;
 	}
 
-	// 
+	//
 	// flush all data, so it will be forced to reload
-	// 
+	//
 	Cache_Flush ();
 
 	if (!strcmp (dir, fs_gamename->string) || !strcmp (dir, "qw"))

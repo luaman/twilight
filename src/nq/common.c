@@ -10,13 +10,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -114,7 +114,7 @@ The file "parms.txt" will be read out of the game directory and appended to
 the current command line arguments to allow different games to initialize
 startup parms differently.  This could be used to add a "-sspeed 22050" for
 the high quality sound edition.  Because they are added at the end, they will
-not override an explicit setting on the original command line.  
+not override an explicit setting on the original command line.
 */
 
 //============================================================================
@@ -1150,8 +1150,8 @@ COM_FindFile (char *filename, int *handle, FILE ** file)
 // search through the path, one element at a time
 //
 	search = com_searchpaths;
-	if (proghack) {						// gross hack to use quake 1 progs with 
-										// 
+	if (proghack) {						// gross hack to use quake 1 progs with
+										//
 		// quake 2 maps
 		if (!strcmp (filename, "progs.dat"))
 			search = search->next;
@@ -1419,7 +1419,7 @@ COM_LoadPackFile (char *packfile)
 COM_AddDirectory
 
 Sets com_gamedir, adds the directory to the head of the path,
-then loads and adds pak1.pak pak2.pak ... 
+then loads and adds pak1.pak pak2.pak ...
 ================
 */
 void
@@ -1474,14 +1474,17 @@ Wrapper for COM_AddDirectory
 void
 COM_AddGameDirectory (char *dir)
 {
-	char       *d = NULL;
+	char		buf[1024];
 
-	COM_AddDirectory (va ("%s/%s", fs_sharepath->string, dir));
+	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
+	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->string, dir);
+	COM_AddDirectory (buf);
 
 	if (strcmp (fs_userpath->string, fs_sharepath->string) != 0) {
-		d = va ("%s/%s", fs_userpath->string, dir);
-		Sys_mkdir (d);
-		COM_AddDirectory (d);
+		// only do this if the share path is not the same as the base path
+		snprintf (buf, sizeof (buf), "%s/%s", fs_userpath->string, dir);
+		Sys_mkdir (buf);
+		COM_AddDirectory (buf);
 	}
 }
 
