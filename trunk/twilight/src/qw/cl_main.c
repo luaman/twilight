@@ -1309,6 +1309,7 @@ Host_Frame (double time)
 	static double time1 = 0;
 	static double time2 = 0;
 	static double time3 = 0;
+	static int skipped = 0;
 	int         pass1, pass2, pass3;
 	float       fps;
 
@@ -1328,8 +1329,13 @@ Host_Frame (double time)
 
 	fps = bound (30.0f, fps, 72.0f);
 
-	if (!cls.timedemo && ((cls.realtime - oldrealtime) < (1.0 / fps)))
+	if (!cls.timedemo && ((cls.realtime - oldrealtime) < (1.0 / fps))) {
+		if (skipped < 1)
+			SDL_Delay(1);
+		skipped++;
 		return;							// framerate is too high
+	}
+	skipped = 0;
 
 	host_frametime = cls.realtime - oldrealtime;
 	oldrealtime = cls.realtime;

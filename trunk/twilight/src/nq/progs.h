@@ -38,6 +38,7 @@ typedef union eval_s
 	float       _float;
 	float       vector[3];
 	func_t      function;
+	int         ivector[3];
 	int         _int;
 	int         edict;
 }

@@ -1098,8 +1098,6 @@ PR_LoadProgs (void)
 	pr_fielddefs = (ddef_t *) ((Uint8 *) progs + progs->ofs_fielddefs);
 	pr_statements = (dstatement_t *) ((Uint8 *) progs + progs->ofs_statements);
 
-	num_prstr = 0;
-
 	pr_global_struct = (globalvars_t *) ((Uint8 *) progs + progs->ofs_globals);
 	pr_globals = (float *) pr_global_struct;
 

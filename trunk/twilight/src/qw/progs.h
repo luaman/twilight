@@ -37,6 +37,7 @@ typedef union eval_s
 	float       _float;
 	float       vector[3];
 	func_t      function;
+	int         ivector[3];
 	int         _int;
 	int         edict;
 }
@@ -154,13 +155,9 @@ eval_t *GetEdictFieldValue (edict_t *ed, char *field);
 //
 // PR Strings stuff
 //
-#define MAX_PRSTR 1024
 
-extern char *pr_strtbl[MAX_PRSTR];
-extern int num_prstr;
-
-char *PR_GetString (int num);
-int PR_SetString (char *s);
+#define PR_GetString(num)	(pr_strings + (num))
+#define PR_SetString(s)		((int) ((s) - (pr_strings)))
 
 #endif // __PROGS_H
 
