@@ -101,6 +101,9 @@ cvar_t     *gl_doubleeyes;
 
 extern cvar_t *gl_ztrick;
 
+static float shadescale = 0.0;
+
+
 /*
 =================
 R_CullBox
@@ -435,7 +438,6 @@ R_DrawAliasModel (entity_t *e)
 	model_t    *clmodel;
 	vec3_t      mins, maxs;
 	aliashdr_t *paliashdr;
-	float       an;
 	int         anim;
 
 	clmodel = currententity->model;
@@ -454,31 +456,34 @@ R_DrawAliasModel (entity_t *e)
 	// get lighting information
 	// 
 
-	ambientlight = shadelight = R_LightPoint (currententity->origin);
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT))
+		ambientlight = shadelight = R_LightPoint (currententity->origin);
 
 	// always give the gun some light
 	if (e == &cl.viewent && ambientlight < 24)
 		ambientlight = shadelight = 24;
 
-	for (lnum = 0; lnum < MAX_DLIGHTS; lnum++) {
-		if (cl_dlights[lnum].die >= cl.time) {
-			VectorSubtract (currententity->origin,
-							cl_dlights[lnum].origin, dist);
-			add = cl_dlights[lnum].radius - VectorLength (dist);
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT)) {
+		for (lnum = 0; lnum < MAX_DLIGHTS; lnum++) {
+			if (cl_dlights[lnum].die >= cl.time) {
+				VectorSubtract (currententity->origin,
+								cl_dlights[lnum].origin, dist);
+				add = cl_dlights[lnum].radius - VectorLength (dist);
 
-			if (add > 0) {
-				ambientlight += add;
-				// ZOID models should be affected by dlights as well
-				shadelight += add;
+				if (add > 0) {
+					ambientlight += add;
+					// ZOID models should be affected by dlights as well
+					shadelight += add;
+				}
 			}
 		}
-	}
 
-	// clamp lighting so it doesn't overbright as much
-	if (ambientlight > 128)
-		ambientlight = 128;
-	if (ambientlight + shadelight > 192)
-		shadelight = 192 - ambientlight;
+		// clamp lighting so it doesn't overbright as much
+		if (ambientlight > 128)
+			ambientlight = 128;
+		if (ambientlight + shadelight > 192)
+			shadelight = 192 - ambientlight;
+	}
 
 	// ZOID: never allow players to go totally black
 	i = currententity - cl_entities;
@@ -489,20 +494,13 @@ R_DrawAliasModel (entity_t *e)
 			ambientlight = shadelight = 8;
 
 	// HACK HACK HACK -- no fullbright colors, so make torches full light
-	if (!Q_strcmp (clmodel->name, "progs/flame2.mdl")
-		|| !Q_strcmp (clmodel->name, "progs/flame.mdl"))
+	if (clmodel->modflags & FLAG_FULLBRIGHT)
 		ambientlight = shadelight = 256;
 
 	shadedots =
 		r_avertexnormal_dots[((int) (e->angles[1] * (SHADEDOT_QUANT / 360.0))) &
 							 (SHADEDOT_QUANT - 1)];
-	shadelight = shadelight / 200.0;
-
-	an = e->angles[1] / 180 * M_PI;
-	shadevector[0] = Q_cos (-an);
-	shadevector[1] = Q_sin (-an);
-	shadevector[2] = 1;
-	VectorNormalizeFast (shadevector);
+	shadelight = shadelight * (1.0 / 200.0);
 
 	// 
 	// locate the proper data
@@ -520,11 +518,11 @@ R_DrawAliasModel (entity_t *e)
 	glPushMatrix ();
 	R_RotateForEntity (e);
 
-	if (!Q_strcmp (clmodel->name, "progs/eyes.mdl") 
+	if ((clmodel->modflags & FLAG_DOUBLESIZE)
 			&& gl_doubleeyes->value[0]) {
 		glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
 					  paliashdr->scale_origin[2] - (22 + 8));
-// double size of eyes, since they are really hard to see in gl
+		// double size of eyes, since they are really hard to see in gl
 		glScalef (paliashdr->scale[0] * 2, paliashdr->scale[1] * 2,
 				  paliashdr->scale[2] * 2);
 	} else {
@@ -564,7 +562,16 @@ R_DrawAliasModel (entity_t *e)
 
 	glPopMatrix ();
 
-	if (r_shadows->value[0]) {
+	if (r_shadows->value[0] && !(clmodel->modflags & FLAG_NOSHADOW)) {
+		float an = -e->angles[1] * (M_PI / 180);
+
+		if (!shadescale)
+			shadescale = Q_RSqrt(2);
+
+		shadevector[0] = Q_cos (an) * shadescale;
+		shadevector[1] = Q_sin (an) * shadescale;
+		shadevector[2] = shadescale;
+
 		glPushMatrix ();
 		R_RotateForEntity (e);
 		glDisable (GL_TEXTURE_2D);
