@@ -100,9 +100,6 @@ typedef struct {
 	float	sl, tl, sh, th;
 } glpic_t;
 
-Uint8	conback_buffer[sizeof (qpic_t) + sizeof (glpic_t)];
-qpic_t	*conback = (qpic_t *) &conback_buffer;
-
 int		gl_lightmap_format = GL_RGB;
 int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
