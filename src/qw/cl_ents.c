@@ -627,7 +627,7 @@ CL_LinkPacketEntities (void)
 
 	pack = &cl.frames[cl.validsequence & UPDATE_MASK].packet_entities;
 
-	autorotate = anglemod (100 * cl.time);
+	autorotate = ANGLEMOD (100 * cl.time);
 
 	for (pnum = 0; pnum < pack->num_entities; pnum++) {
 		state = &pack->entities[pnum];

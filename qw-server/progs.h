@@ -58,7 +58,7 @@ typedef struct edict_s {
 // other fields from progs come immediately after
 } edict_t;
 
-#define	EDICT_FROM_AREA(l) STRUCT_FROM_LINK(l,edict_t,area)
+#define	EDICT_FROM_AREA(l) ((edict_t *)((Uint8 *)l - (int)&(((edict_t *)0)->area)))
 
 //============================================================================
 
