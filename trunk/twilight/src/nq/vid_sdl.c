@@ -122,11 +122,13 @@ VID_Build_Gamma_Ramp8 (Uint8 *ramp, int n, double gam, double con, double bri)
 	invgam = 1.0 / gam;
 
 	for (i_d = i = 0; i < n; i++, i_d++) {
-		ramp[i] = bound_bits((Q_pow(i_d * i_s, invgam) * con + bri) * BIT(8),8);    }
+		ramp[i] = bound_bits((Q_pow(i_d * i_s, invgam) * con + bri) * BIT(8),8);
+	}
 }
 
 static void
-VID_Build_Gamma_Ramp16 (Uint16 *ramp, int n, double gam, double con, double bri){
+VID_Build_Gamma_Ramp16 (Uint16 *ramp, int n, double gam, double con, double bri)
+{
 	int i;
 	double i_d, i_s, invgam;
 
@@ -134,7 +136,8 @@ VID_Build_Gamma_Ramp16 (Uint16 *ramp, int n, double gam, double con, double bri)
 	invgam = 1.0 / gam;
 
 	for (i_d = i = 0; i < n; i++, i_d++) {
-		ramp[i]=bound_bits((Q_pow(i_d * i_s, invgam) * con + bri) * BIT(16),16);    }
+		ramp[i]=bound_bits((Q_pow(i_d * i_s, invgam) * con + bri) * BIT(16),16);
+	}
 }
 
 static void
@@ -289,7 +292,7 @@ GL_Init (void)
 
 	CheckExtensions ();
 
-	qglClearColor (0.1f, 0.1f, 0.1f, 0.5f);
+	qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
 	qglCullFace (GL_FRONT);
 	qglEnable (GL_TEXTURE_2D);
 
@@ -342,12 +345,11 @@ Size_Changed2D (cvar_t *cvar)
 
 	width = bound (320, width, (int) vid.width);
 
-
 	width &= 0xfff8;                /* make it a multiple of eight */
 
 	/* pick a conheight that matches with correct aspect */
 	if (height == -1)
-		height = width * 3 / 4;
+		height = width * (vid.width / vid.height);
 
 	height = bound (240, height, (int) vid.height);
 
@@ -386,6 +388,7 @@ VID_Init (unsigned char *palette)
 {
 	int         i;
 	const		SDL_VideoInfo *info = NULL;
+	char		sdl_driver[256];
 
 	/* interpret command-line params */
 
@@ -438,6 +441,7 @@ VID_Init (unsigned char *palette)
 	Sys_Printf ("Using OpenGL driver '%s'\n", gl_driver->svalue);
 	if (!DGL_LoadLibrary(gl_driver->svalue))
 		Sys_Error("%s\n", DGL_GetError());
+	Com_DPrintf ("VID_Init: DGL_LoadLibrary successful.\n");
 
 	i = COM_CheckParm ("-bpp");
 	if (i && i < com_argc - 1)
@@ -457,21 +461,26 @@ VID_Init (unsigned char *palette)
 	if (SDL_SetVideoMode (vid.width, vid.height, vid.bpp, sdl_flags) == NULL) {
 		Sys_Error ("Could not init video mode: %s", SDL_GetError ());
 	}
+	Com_DPrintf ("VID_Init: SDL_SetVideoMode successful.\n");
 
 	if (!DGL_GetFuncs())
 		Sys_Error("%s\n", DGL_GetError());
+	Com_DPrintf ("VID_Init: DGL_GetFuncs successful.\n");
 
 	SDL_WM_SetCaption ("Twilight NetQuake", "twilight");
+	Com_DPrintf ("VID_Init: Window caption set.\n");
 
 	VID_Inited = true;
 	GammaChanged(v_gamma);
 	Size_Changed2D(NULL);
 
 	GL_Init ();
+	Com_DPrintf ("VID_Init: GL_Init successful.\n");
 
 	VID_InitTexGamma ();
 
-	Com_SafePrintf ("Video mode %dx%d initialized.\n", vid.width, vid.height);
+	Com_SafePrintf ("Video mode %dx%d initialized: %s\n", vid.width, vid.height,
+			SDL_VideoDriverName(sdl_driver, sizeof(sdl_driver)));
 
 	vid.recalc_refdef = true;	/* force a surface cache flush */
 

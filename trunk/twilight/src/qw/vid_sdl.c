@@ -347,7 +347,7 @@ Size_Changed2D (cvar_t *cvar)
 
 	/* pick a conheight that matches with correct aspect */
 	if (height == -1)
-		height = width * 3 / 4;
+		height = width * (vid.width / vid.height);
 
 	height = bound (240, height, (int) vid.height);
 
