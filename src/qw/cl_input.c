@@ -77,13 +77,14 @@ state bit 2 is edge triggered on the down to up transition
 */
 
 
-kbutton_t   in_mlook, in_klook, in_strafe;
-static kbutton_t   in_left, in_right, in_forward, in_back;
-static kbutton_t   in_lookup, in_lookdown, in_moveleft, in_moveright;
-static kbutton_t   in_speed, in_use, in_jump, in_attack;
-static kbutton_t   in_up, in_down;
+static kbutton_t in_klook;
+static kbutton_t in_left, in_right, in_forward, in_back;
+static kbutton_t in_lookup, in_lookdown, in_moveleft, in_moveright;
+static kbutton_t in_speed, in_use, in_jump, in_attack;
+static kbutton_t in_up, in_down;
+kbutton_t in_strafe, in_mlook;
 
-static int         in_impulse;
+static int in_impulse;
 
 
 static void
@@ -100,7 +101,8 @@ KeyDown (kbutton_t *b)
 		k = -1;
 
 	if (k == b->down[0] || k == b->down[1])
-		return;							// repeating key
+		// repeating key
+		return;
 
 	if (!b->down[0])
 		b->down[0] = k;
@@ -112,8 +114,11 @@ KeyDown (kbutton_t *b)
 	}
 
 	if (b->state & 1)
-		return;							// still down
-	b->state |= 1 + 2;					// down + impulse down
+		// still down
+		return;
+
+	// down + impulse down
+	b->state |= 1 + 2;
 }
 
 static void
@@ -126,9 +131,9 @@ KeyUp (kbutton_t *b)
 	if (c[0])
 		k = Q_atoi (c);
 	else {
-		// typed manually at the console, assume for unsticking, so clear all
+		// typed manually at the console, assume for unsticking, clear all
 		b->down[0] = b->down[1] = 0;
-		b->state = 4;					// impulse up
+		b->state = 4;
 		return;
 	}
 
@@ -421,17 +426,17 @@ CL_KeyState (kbutton_t *key)
 
 //==========================================================================
 
-cvar_t     *cl_upspeed;
-cvar_t     *cl_forwardspeed;
-cvar_t     *cl_backspeed;
-cvar_t     *cl_sidespeed;
+cvar_t *cl_upspeed;
+cvar_t *cl_forwardspeed;
+cvar_t *cl_backspeed;
+cvar_t *cl_sidespeed;
 
-cvar_t     *cl_movespeedkey;
+cvar_t *cl_movespeedkey;
 
-cvar_t     *cl_yawspeed;
-cvar_t     *cl_pitchspeed;
+cvar_t *cl_yawspeed;
+cvar_t *cl_pitchspeed;
 
-cvar_t     *cl_anglespeedkey;
+cvar_t *cl_anglespeedkey;
 
 
 /*
@@ -504,8 +509,8 @@ CL_BaseMove (usercmd_t *cmd)
 	cmd->upmove -= cl_upspeed->fvalue * CL_KeyState (&in_down);
 
 	if (!(in_klook.state & 1)) {
-		cmd->forwardmove +=
-			cl_forwardspeed->fvalue * CL_KeyState (&in_forward);
+		cmd->forwardmove += cl_forwardspeed->fvalue
+			* CL_KeyState (&in_forward);
 		cmd->forwardmove -= cl_backspeed->fvalue * CL_KeyState (&in_back);
 	}
 	//
@@ -671,26 +676,6 @@ CL_SendCmd (void)
 	Netchan_Transmit (&cls.netchan, buf.cursize, buf.data);
 }
 
-/*
-	CL_InputSetRepeatDelay
-*/
-static void
-CL_InputSetRepeatDelay (struct cvar_s *var)
-{
-	SDL_EnableKeyRepeat(var->ivalue, (in_key_repeat_interval) ?
-			in_key_repeat_interval->ivalue : SDL_DEFAULT_REPEAT_INTERVAL);
-}
-
-/*
-	CL_InputSetRepeatDelay
-*/
-static void
-CL_InputSetRepeatInterval (struct cvar_s *var)
-{
-	SDL_EnableKeyRepeat((in_key_repeat_delay) ? in_key_repeat_delay->ivalue
-			: SDL_DEFAULT_REPEAT_DELAY, var->ivalue);
-}
-
 void
 CL_Input_Init (void)
 {
@@ -734,6 +719,20 @@ CL_Input_Init (void)
 			in_key_repeat_interval->ivalue);
 }
 
+static void
+InputSetRepeatDelay (struct cvar_s *var)
+{
+	SDL_EnableKeyRepeat(var->ivalue, (in_key_repeat_interval) ?
+			in_key_repeat_interval->ivalue : SDL_DEFAULT_REPEAT_INTERVAL);
+}
+
+static void
+InputSetRepeatInterval (struct cvar_s *var)
+{
+	SDL_EnableKeyRepeat((in_key_repeat_delay) ? in_key_repeat_delay->ivalue
+			: SDL_DEFAULT_REPEAT_DELAY, var->ivalue);
+}
+
 void
 CL_Input_Init_Cvars (void)
 {
@@ -760,10 +759,10 @@ CL_Input_Init_Cvars (void)
 	cl_nodelta = Cvar_Get ("cl_nodelta", "0", CVAR_NONE, NULL);
 	in_key_repeat_delay = Cvar_Get ("in_key_repeat_delay",
 			va ("%i", SDL_DEFAULT_REPEAT_DELAY), CVAR_ARCHIVE,
-			CL_InputSetRepeatDelay);
+			InputSetRepeatDelay);
 	in_key_repeat_interval = Cvar_Get ("in_key_repeat_interval",
 			va ("%i", SDL_DEFAULT_REPEAT_INTERVAL), CVAR_ARCHIVE,
-			CL_InputSetRepeatInterval);
+			InputSetRepeatInterval);
 }
 
 void
@@ -795,7 +794,8 @@ IN_Move (usercmd_t *cmd)
 	{
 		cl.viewangles[PITCH] += m_pitch->fvalue * mouse_y;
 		// KB: Allow looking straight up/down
-		cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90 - ANG16_DELTA);
+		cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH],
+				90 - ANG16_DELTA);
 	}
 	else
 	{
