@@ -305,11 +305,11 @@ Draw_Init (void)
 
 	/* now turn them into textures */
 	char_texture = GL_LoadTexture ("charset", 128, 128, draw_chars, false,
-			true);
+			true, 8);
 
-	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
+	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true, 8);
 	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata,
-			false, true);
+			false, true, 8);
 
 	/* save a texture slot for translated picture */
 	translate_texture = texture_extension_number++;
@@ -1231,7 +1231,7 @@ GL_LoadTexture
 */
 int
 GL_LoadTexture (char *identifier, int width, int height, Uint8 *data,
-		qboolean mipmap, int alpha)
+		qboolean mipmap, int alpha, int bpp)
 {
 	int         i;
 	gltexture_t *glt;
@@ -1269,7 +1269,16 @@ setuptexture:
 
 	qglBindTexture (GL_TEXTURE_2D, glt->texnum);
 
-	GL_Upload8 (data, width, height, mipmap, alpha, NULL);
+	switch (bpp) {
+		case 8:
+			GL_Upload8 (data, width, height, mipmap, alpha, NULL);
+			break;
+		case 32:
+			GL_Upload32 ((Uint32 *) data, width, height, mipmap, alpha);
+			break;
+		default:
+			return 0;
+	}
 
 	return glt->texnum;
 }
@@ -1282,6 +1291,6 @@ GL_LoadPicTexture
 int
 GL_LoadPicTexture (qpic_t *pic)
 {
-	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true);
+	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true, 8);
 }
 

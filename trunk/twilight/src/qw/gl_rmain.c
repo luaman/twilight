@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "view.h"
+#include "r_explosion.h"
 
 entity_t *currententity;
 int r_framecount;						// used for dlight push checking
@@ -1380,6 +1381,8 @@ R_RenderView (void)
 	R_DrawEntitiesOnList ();
 
 	R_DrawViewModel ();
+	R_MoveExplosions ();
+	R_DrawExplosions ();
 
 	qglEnable (GL_BLEND);
 	qglDepthMask (GL_FALSE);

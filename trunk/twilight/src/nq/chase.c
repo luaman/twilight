@@ -40,6 +40,8 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "world.h"
 
+extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
+
 cvar_t      *chase_back;
 cvar_t      *chase_up;
 cvar_t      *chase_right;
@@ -73,23 +75,11 @@ Chase_Reset (void)
 }
 
 void
-TraceLine (vec3_t start, vec3_t end, vec3_t impact)
-{
-	trace_t	trace;
-
-	memset (&trace, 0, sizeof (trace));
-	VectorCopy (end, trace.endpos);
-	SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, start, end, &trace);
-
-	VectorCopy (trace.endpos, impact);
-}
-
-void
 Chase_Update (void)
 {
 	int		i;
 	float	dist;
-	vec3_t	forward, up, right, dest, stop;
+	vec3_t	forward, up, right, dest, stop, normal;
 
 
 	// if can't see player, reset
@@ -103,7 +93,7 @@ Chase_Update (void)
 
 	// find the spot the player is looking at
 	VectorMA (r_refdef.vieworg, 4096, forward, dest);
-	TraceLine (r_refdef.vieworg, dest, stop);
+	TraceLine (r_refdef.vieworg, dest, stop, normal);
 
 	// calculate pitch to look at the same spot from camera
 	VectorSubtract (stop, r_refdef.vieworg, stop);
@@ -115,7 +105,7 @@ Chase_Update (void)
 	r_refdef.viewangles[PITCH] = -Q_atan (stop[2] / dist) / M_PI * 180;
 
 	// move towards destination
-	TraceLine(r_refdef.vieworg, chase_dest, stop);
+	TraceLine(r_refdef.vieworg, chase_dest, stop, normal);
 
 	VectorCopy(stop, chase_dest);
 

@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
+#include "r_explosion.h"
 
 extern void TNT_Init (void);
 
@@ -149,6 +150,8 @@ R_Init (void)
 	R_InitBubble ();
 	R_InitParticles ();
 	TNT_Init ();
+	R_Explosion_Init ();
+
 
 	netgraphtexture = texture_extension_number;
 	texture_extension_number++;
@@ -387,6 +390,7 @@ R_NewMap (void)
 			skytexturenum = i;
 		cl.worldmodel->textures[i]->texturechain = NULL;
 	}
+	r_explosion_newmap ();
 }
 
 

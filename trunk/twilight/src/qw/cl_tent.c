@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sound.h"
 #include "sys.h"
+#include "r_explosion.h"
 
 #define	MAX_BEAMS	8
 typedef struct {
@@ -198,7 +199,7 @@ CL_ParseTEnt (void)
 	vec3_t      pos;
 	dlight_t   *dl;
 	int         rnd;
-	explosion_t *ex;
+//	explosion_t *ex;
 	int         cnt;
 
 	type = MSG_ReadByte ();
@@ -262,6 +263,7 @@ CL_ParseTEnt (void)
 			pos[0] = MSG_ReadCoord ();
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
+//			R_NewExplosion (pos);
 			R_ParticleExplosion (pos);
 
 			// light
@@ -278,6 +280,7 @@ CL_ParseTEnt (void)
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 
 			// sprite
+#if 0
 			ex = CL_AllocExplosion ();
 			VectorCopy (pos, ex->origin);
 			ex->start = cl.time;
@@ -286,6 +289,7 @@ CL_ParseTEnt (void)
 				cl_expl_mod = Mod_ForName ("progs/s_explod.spr", true);
 
 			ex->model = cl_expl_mod;
+#endif
 			break;
 
 		case TE_TAREXPLOSION:			// tarbaby explosion

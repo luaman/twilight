@@ -34,8 +34,10 @@ twilight_qw_SOURCES= \
 		     gl_rmain.c gl_rmisc.c gl_rsurf.c gl_screen.c	\
 		     gl_warp.c						\
 		     keys.c mdfour.c menu.c net_chan.c net_udp.c	\
-		     pmove.c pmovetst.c r_part.c sbar.c sys.c skin.c	\
-		     snd_dma.c vid_sdl.c view.c zone.c
+		     pmove.c pmovetst.c					\
+		     r_part.c r_explosion.c				\
+		     sbar.c sys.c skin.c snd_dma.c vid_sdl.c view.c	\
+		     zone.c
 
 EXTRA_DIST= \
 	qw.dsp
