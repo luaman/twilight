@@ -19,6 +19,7 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 lib_LIBRARIES=libtwilight_renderer.a
 
 libtwilight_renderer_a_SOURCES= \
+	anorms.-h anorm_dots.-h \
 	dyngl.c dyngl.h dglfuncs.h \
 	entities.c entities.h \
 	gl_alias.c gl_alias.h \
@@ -38,7 +39,7 @@ libtwilight_renderer_a_SOURCES= \
 	mod_sprite.c mod_sprite.h \
 	noise.c gen_textures.c gen_textures.h \
 	palette.c palette.h \
-	r_explosion.c \
+	r_explosion.c r_explosion.h \
 	r_part.c r_part.h \
 	sky.c sky.h \
 	surface.c surface.h \

@@ -40,7 +40,7 @@ static const char rcsid[] =
 #include "rw_ops.h"
 #include "bspfile.h"
 #include "modelgen.h"
-#include "spritegn.h"
+#include "spritegen.h"
 	
 typedef struct fsb_group_s {
 	fs_file_t	*bsp;
