@@ -46,7 +46,7 @@ model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
 
 Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 
-#define	MAX_MOD_KNOWN	1024
+#define	MAX_MOD_KNOWN 4096
 model_t     mod_known[MAX_MOD_KNOWN];
 int         mod_numknown;
 
