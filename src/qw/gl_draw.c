@@ -43,15 +43,14 @@ static const char rcsid[] =
 #include "console.h"
 #include "crc.h"
 #include "cvar.h"
+#include "draw.h"
 #include "glquake.h"
 #include "host.h"
 #include "strlib.h"
 #include "sys.h"
-#include "draw.h"
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
-cvar_t		*gl_nobind;
 cvar_t		*gl_max_size;
 cvar_t		*gl_picmip;
 cvar_t		*gl_constretch;
@@ -273,7 +272,6 @@ Draw_Init_Cvars
 void
 Draw_Init_Cvars (void)
 {
-	gl_nobind = Cvar_Get ("gl_nobind", "0", CVAR_NONE, NULL);
 	gl_max_size = Cvar_Get ("gl_max_size", "1024", CVAR_NONE, NULL);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
 	gl_constretch = Cvar_Get ("gl_constretch", "1", CVAR_ARCHIVE, NULL);
@@ -285,7 +283,7 @@ Draw_Init_Cvars (void)
 
 	// 3dfx can only handle 256 wide textures
 	if (!strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
-		!strncasecmp ((char *) gl_renderer, "Mesa", 4))
+			!strncasecmp ((char *) gl_renderer, "Mesa", 4))
 		Cvar_Set (gl_max_size, "256");
 }
 
@@ -533,6 +531,7 @@ Draw_Crosshair (void)
 			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->value]);
 			qglBindTexture (GL_TEXTURE_2D, cs_square);
 
+			qglEnable (GL_BLEND);
 			VectorSet2 (tc_array[0], 0, 0);
 			VectorSet2 (v_array[0], x - 4, y - 4);
 			VectorSet2 (tc_array[1], 1, 0);
@@ -543,6 +542,7 @@ Draw_Crosshair (void)
 			VectorSet2 (v_array[3], x - 4, y + 12);
 			qglDrawArrays (GL_QUADS, 0, 4);
 			qglColor4f (1, 1, 1, 1);
+			qglDisable (GL_BLEND);
 			break;
 	}
 }
@@ -745,7 +745,13 @@ Draw_ConsoleBackground (int lines)
 	else
 		ofs = (float) ((vid.conheight - lines) / vid.conheight);
 
-	qglColor4f (1.0f, 1.0f, 1.0f, alpha);
+	if (alpha != 1.0f)
+	{
+		qglColor4f (1.0f, 1.0f, 1.0f, alpha);
+		qglEnable (GL_BLEND);
+	} else
+		qglColor3f (1.0f, 1.0f, 1.0f);
+
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
 	VectorSet2 (tc_array[0], gl->sl, gl->tl + ofs);
 	VectorSet2 (v_array[0], 0, 0);
@@ -762,6 +768,8 @@ Draw_ConsoleBackground (int lines)
 		Draw_Alt_String (vid.conwidth - strlen (cl_verstring->string) * 8 - 11,
 				lines - 14, cl_verstring->string);
 	}
+	if (alpha != 1.0f)
+		qglDisable (GL_BLEND);
 	
 	qglColor3f (1.0f, 1.0f, 1.0f);
 }

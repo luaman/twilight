@@ -6,8 +6,6 @@ Bugs we know about:
   - Damm can demonstrate lightmap corruption consistantly with certain
     maps at certain times.  He can't reproduce it at will, but it does
     happen.
-  - Some OpenGL state changes lost in QW, particularly things like alpha
-    in the console and in crosshairs is missing.
   - QF asks for models as eg, /progs/backpack.mdl - totally incompatible
     with 2.40.  No idea if it works with Id's stuff, but there are just
     enough QF servers out there that we have to make it work.
