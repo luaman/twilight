@@ -36,7 +36,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "strlib.h"
-#include "console.h"
 #include "mathlib.h"
 #include "server.h"
 #include "sys.h"
@@ -683,7 +682,7 @@ SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
 		if (frac < 0) {
 			trace->fraction = midf;
 			VectorCopy (mid, trace->endpos);
-			Con_DPrintf ("backup past 0\n");
+			Com_DPrintf ("backup past 0\n");
 			return false;
 		}
 		midf = p1f + (p2f - p1f) * frac;

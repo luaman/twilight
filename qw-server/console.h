@@ -30,9 +30,6 @@
 #ifndef __CONSOLE_H
 #define __CONSOLE_H
 
-void        Con_Printf (char *fmt, ...);
-void        Con_DPrintf (char *fmt, ...);
-
 void        SV_Error (char *error, ...);
 
 #endif // __CONSOLE_H

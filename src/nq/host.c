@@ -126,7 +126,7 @@ Host_EndGame (char *message, ...)
 	va_start (argptr, message);
 	vsnprintf (string, sizeof (string), message, argptr);
 	va_end (argptr);
-	Con_DPrintf ("Host_EndGame: %s\n", string);
+	Com_DPrintf ("Host_EndGame: %s\n", string);
 
 	if (sv.active)
 		Host_ShutdownServer (false);
@@ -165,7 +165,7 @@ Host_Error (char *error, ...)
 	va_start (argptr, error);
 	vsnprintf (string, sizeof (string), error, argptr);
 	va_end (argptr);
-	Con_Printf ("Host_Error: %s\n", string);
+	Com_Printf ("Host_Error: %s\n", string);
 
 	if (sv.active)
 		Host_ShutdownServer (false);
@@ -304,11 +304,11 @@ Host_WriteConfiguration (char *name)
 
 		f = fopen (fname, "wt");
 		if (!f) {
-			Con_Printf ("Couldn't write %s.\n", fname);
+			Com_Printf ("Couldn't write %s.\n", fname);
 			return;
 		}
 
-		Con_Printf ("Writing %s\n", fname);
+		Com_Printf ("Writing %s\n", fname);
 
 		Key_WriteBindings (f);
 		Cvar_WriteVars (f);
@@ -497,7 +497,7 @@ Host_ShutdownServer (qboolean crash)
 	MSG_WriteByte (&buf, svc_disconnect);
 	count = NET_SendToAll (&buf, 5);
 	if (count)
-		Con_Printf
+		Com_Printf
 			("Host_ShutdownServer: NET_SendToAll failed for %u clients\n",
 			 count);
 
@@ -525,7 +525,7 @@ not reinitialize anything.
 void
 Host_ClearMemory (void)
 {
-	Con_DPrintf ("Clearing memory\n");
+	Com_DPrintf ("Clearing memory\n");
 	Mod_ClearAll ();
 	if (host_hunklevel)
 		Hunk_FreeToLowMark (host_hunklevel);
@@ -778,7 +778,7 @@ _Host_Frame (double time)
 		time3 = Sys_DoubleTime ();
 		pass2 = (time2 - time1) * 1000;
 		pass3 = (time3 - time2) * 1000;
-		Con_Printf ("%3i tot %3i server %3i gfx %3i snd\n",
+		Com_Printf ("%3i tot %3i server %3i gfx %3i snd\n",
 					pass1 + pass2 + pass3, pass1, pass2, pass3);
 	}
 
@@ -819,7 +819,7 @@ Host_Frame (double time)
 			c++;
 	}
 
-	Con_Printf ("serverprofile: %2i clients %2i msec\n", c, m);
+	Com_Printf ("serverprofile: %2i clients %2i msec\n", c, m);
 }
 
 //============================================================================
@@ -899,8 +899,8 @@ Host_Init ()
 
 	V_Init ();						// setup view, add related commands
 
-//	Con_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
-	Con_Printf ("%4.1f megs RAM used.\n", sys_memsize / (1024 * 1024.0));
+//	Com_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
+	Com_Printf ("%4.1f megs RAM used.\n", sys_memsize / (1024 * 1024.0));
 
 	R_InitTextures ();				// needed even for dedicated servers
 
@@ -955,7 +955,7 @@ Host_Shutdown (void)
 	}
 	isdown = true;
 
-// keep Con_Printf from trying to update the screen
+// keep Com_Printf from trying to update the screen
 	scr_disabled_for_loading = true;
 
 	Host_WriteConfiguration ("config");

@@ -40,7 +40,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "keys.h"
 #include "glquake.h"
@@ -185,7 +184,7 @@ GammaChanged (cvar_t *cvar)
 		if (SDL_SetGammaRamp(hw_gamma_ramps[0], hw_gamma_ramps[1],
 			hw_gamma_ramps[2]) < 0) {
 			/* No hardware gamma support, turn off and set ROM. */
-			Con_Printf("No hardware gamma support: Disabling. (%s)\n",
+			Com_Printf("No hardware gamma support: Disabling. (%s)\n",
 						SDL_GetError());
 			Cvar_Set(v_hwgamma, "0");
 			v_hwgamma->flags |= CVAR_ROM;
@@ -210,12 +209,12 @@ CheckExtensions (void)
 	if (!COM_CheckParm ("-nomtex")) {
 		gl_mtex = DGL_HasExtension ("GL_ARB_multitexture");
 	}
-	Con_Printf ("Checking for multitexture: ");
+	Com_Printf ("Checking for multitexture: ");
 	if (gl_mtex) {
 		qglGetIntegerv (GL_MAX_TEXTURE_UNITS_ARB, &gl_tmus);
-		Con_Printf ("GL_ARB_multitexture. (%d TMUs)\n", gl_tmus);
+		Com_Printf ("GL_ARB_multitexture. (%d TMUs)\n", gl_tmus);
 	} else
-		Con_Printf ("no.\n");
+		Com_Printf ("no.\n");
 
 	if (gl_mtex && (!qglActiveTextureARB || !qglMultiTexCoord2fARB)) {
 		Sys_Error ("Missing GL_ARB_multitexture functions. (%p %p)\n",
@@ -226,31 +225,31 @@ CheckExtensions (void)
 		gl_mtexcombine_arb = DGL_HasExtension ("GL_ARB_texture_env_combine");
 		gl_mtexcombine_ext = DGL_HasExtension ("GL_EXT_texture_env_combine");
 	}
-	Con_Printf ("Checking for texenv combine: ");
+	Com_Printf ("Checking for texenv combine: ");
 	if (gl_mtex && gl_mtexcombine_arb) {
-		Con_Printf ("GL_ARB_texture_env_combine.\n");
+		Com_Printf ("GL_ARB_texture_env_combine.\n");
 		gl_mtexcombine = true;
 	} else if (gl_mtex && gl_mtexcombine_ext) {
-		Con_Printf ("GL_EXT_texture_env_combine.\n");
+		Com_Printf ("GL_EXT_texture_env_combine.\n");
 		gl_mtexcombine = true;
 	} else {
-		Con_Printf ("no.\n");
+		Com_Printf ("no.\n");
 	}
 
 	if (!COM_CheckParm ("-nocva"))
 		gl_cva = DGL_HasExtension ("GL_EXT_compiled_vertex_array");
 
-	Con_Printf ("Checking for compiled vertex arrays... %s\n",
+	Com_Printf ("Checking for compiled vertex arrays... %s\n",
 			gl_cva ? "GL_EXT_compiled_vertex_array." : "no.");
 }
 
 void
 GL_Info_f (void)
 {
-	Con_Printf ("GL_VENDOR: %s\n", gl_vendor);
-	Con_Printf ("GL_RENDERER: %s\n", gl_renderer);
-	Con_Printf ("GL_VERSION: %s\n", gl_version);
-	Con_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
+	Com_Printf ("GL_VENDOR: %s\n", gl_vendor);
+	Com_Printf ("GL_RENDERER: %s\n", gl_renderer);
+	Com_Printf ("GL_VERSION: %s\n", gl_version);
+	Com_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
 }
 		
 
@@ -424,7 +423,7 @@ VID_Init (unsigned char *palette)
 
 	VID_InitTexGamma ();
 
-	Con_SafePrintf ("Video mode %dx%d initialized.\n", vid.width, vid.height);
+	Com_SafePrintf ("Video mode %dx%d initialized.\n", vid.width, vid.height);
 
 	vid.recalc_refdef = true;	/* force a surface cache flush */
 

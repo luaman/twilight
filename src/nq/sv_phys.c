@@ -38,7 +38,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "strlib.h"
-#include "console.h"
 #include "cvar.h"
 #include "host.h"
 #include "mathlib.h"
@@ -99,7 +98,7 @@ SV_CheckAllEnts (void)
 			continue;
 
 		if (SV_TestEntityPosition (check))
-			Con_Printf ("entity in invalid position\n");
+			Com_Printf ("entity in invalid position\n");
 	}
 }
 
@@ -118,12 +117,12 @@ SV_CheckVelocity (edict_t *ent)
 //
 	for (i = 0; i < 3; i++) {
 		if (IS_NAN (ent->v.velocity[i])) {
-			Con_Printf ("Got a NaN velocity on %s\n",
+			Com_Printf ("Got a NaN velocity on %s\n",
 						pr_strings + ent->v.classname);
 			ent->v.velocity[i] = 0;
 		}
 		if (IS_NAN (ent->v.origin[i])) {
-			Con_Printf ("Got a NaN origin on %s\n",
+			Com_Printf ("Got a NaN origin on %s\n",
 						pr_strings + ent->v.classname);
 			ent->v.origin[i] = 0;
 		}
@@ -350,7 +349,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 			VectorCopy (new_velocity, ent->v.velocity);
 		} else {						// go along the crease
 			if (numplanes != 2) {
-//              Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
+//              Com_Printf ("clip velocity, numplanes == %i\n",numplanes);
 				VectorClear (ent->v.velocity);
 				return 7;
 			}
@@ -808,7 +807,7 @@ SV_CheckStuck (edict_t *ent)
 	VectorCopy (ent->v.origin, org);
 	VectorCopy (ent->v.oldorigin, ent->v.origin);
 	if (!SV_TestEntityPosition (ent)) {
-		Con_DPrintf ("Unstuck.\n");
+		Com_DPrintf ("Unstuck.\n");
 		SV_LinkEdict (ent, true);
 		return;
 	}
@@ -820,14 +819,14 @@ SV_CheckStuck (edict_t *ent)
 				ent->v.origin[1] = org[1] + j;
 				ent->v.origin[2] = org[2] + z;
 				if (!SV_TestEntityPosition (ent)) {
-					Con_DPrintf ("Unstuck.\n");
+					Com_DPrintf ("Unstuck.\n");
 					SV_LinkEdict (ent, true);
 					return;
 				}
 			}
 
 	VectorCopy (org, ent->v.origin);
-	Con_DPrintf ("player is stuck.\n");
+	Com_DPrintf ("player is stuck.\n");
 }
 
 
@@ -966,7 +965,7 @@ SV_TryUnstick (edict_t *ent, vec3_t oldvel)
 
 		if (Q_fabs (oldorg[1] - ent->v.origin[1]) > 4
 			|| Q_fabs (oldorg[0] - ent->v.origin[0]) > 4) {
-//Con_DPrintf ("unstuck!\n");
+//Com_DPrintf ("unstuck!\n");
 			return clip;
 		}
 // go back to the original pos and try again

@@ -37,7 +37,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "common.h"
-#include "console.h"
 #include "crc.h"
 #include "mathlib.h"
 #include "model.h"
@@ -217,7 +216,7 @@ SV_CalcPHS (void)
 	Uint8      *scan;
 	int         count, vcount;
 
-	Con_Printf ("Building PHS...\n");
+	Com_Printf ("Building PHS...\n");
 
 	num = sv.worldmodel->numleafs;
 	rowwords = (num + 31) >> 5;
@@ -270,7 +269,7 @@ SV_CalcPHS (void)
 				count++;
 	}
 
-	Con_Printf ("Average leafs visible / hearable / total: %i / %i / %i\n",
+	Com_Printf ("Average leafs visible / hearable / total: %i / %i / %i\n",
 				vcount / num, count / num, num);
 }
 
@@ -307,7 +306,7 @@ SV_SpawnServer (char *server)
 	edict_t		*ent;
 	Uint32		i;
 
-	Con_DPrintf ("SpawnServer: %s\n", server);
+	Com_DPrintf ("SpawnServer: %s\n", server);
 
 	SV_SaveSpawnparms ();
 
@@ -442,5 +441,5 @@ SV_SpawnServer (char *server)
 	sv.signon_buffer_size[sv.num_signon_buffers - 1] = sv.signon.cursize;
 
 	Info_SetValueForKey (svs.info, "map", sv.name, MAX_SERVERINFO_STRING);
-	Con_DPrintf ("Server spawned.\n");
+	Com_DPrintf ("Server spawned.\n");
 }

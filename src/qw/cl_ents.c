@@ -36,7 +36,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "client.h"
-#include "console.h"
 #include "cvar.h"
 #include "glquake.h"
 #include "host.h"
@@ -292,7 +291,7 @@ FlushEntityPacket (void)
 	int         word;
 	entity_state_t olde, newe;
 
-	Con_DPrintf ("FlushEntityPacket\n");
+	Com_DPrintf ("FlushEntityPacket\n");
 
 	memset (&olde, 0, sizeof (olde));
 
@@ -342,7 +341,7 @@ CL_ParsePacketEntities (qboolean delta)
 		oldpacket = cl.frames[newpacket].delta_sequence;
 
 		if ((from & UPDATE_MASK) != (oldpacket & UPDATE_MASK))
-			Con_DPrintf ("WARNING: from mismatch\n");
+			Com_DPrintf ("WARNING: from mismatch\n");
 	} else
 		oldpacket = -1;
 
@@ -395,7 +394,7 @@ CL_ParsePacketEntities (qboolean delta)
 
 		while (newnum > oldnum) {
 			if (full) {
-				Con_Printf ("WARNING: oldcopy on full update");
+				Com_Printf ("WARNING: oldcopy on full update");
 				FlushEntityPacket ();
 				return;
 			}
@@ -415,7 +414,7 @@ CL_ParsePacketEntities (qboolean delta)
 			if (word & U_REMOVE) {
 				if (full) {
 					cl.validsequence = 0;
-					Con_Printf ("WARNING: U_REMOVE on full update\n");
+					Com_Printf ("WARNING: U_REMOVE on full update\n");
 					FlushEntityPacket ();
 					return;
 				}
@@ -434,7 +433,7 @@ CL_ParsePacketEntities (qboolean delta)
 			// delta from previous
 			if (full) {
 				cl.validsequence = 0;
-				Con_Printf ("WARNING: delta on full update");
+				Com_Printf ("WARNING: delta on full update");
 			}
 			if (word & U_REMOVE) {
 				oldindex++;

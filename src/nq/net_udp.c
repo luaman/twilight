@@ -61,7 +61,6 @@ static const char rcsid[] =
 #include <stdio.h>
 
 #include "quakedef.h"
-#include "console.h"
 #include "cvar.h"
 #include "net.h"
 #include "strlib.h"
@@ -139,7 +138,7 @@ UDP_Init (void)
 	if (colon)
 		*colon = 0;
 
-	Con_Printf ("UDP Initialized\n");
+	Com_Printf ("UDP Initialized\n");
 	tcpipAvailable = true;
 
 	return net_controlsocket;
@@ -201,7 +200,7 @@ UDP_OpenSocket (int port)
 //ZOID -- check for interface binding option
 	if ((i = COM_CheckParm ("-ip")) != 0 && i < com_argc) {
 		address.sin_addr.s_addr = inet_addr (com_argv[i + 1]);
-		Con_Printf ("Binding to IP Interface Address of %s\n",
+		Com_Printf ("Binding to IP Interface Address of %s\n",
 					inet_ntoa (address.sin_addr));
 	} else
 		address.sin_addr.s_addr = INADDR_ANY;
@@ -348,7 +347,7 @@ UDP_Broadcast (int socket, Uint8 *buf, int len)
 			Sys_Error ("Attempted to use multiple broadcasts sockets\n");
 		ret = UDP_MakeSocketBroadcastCapable (socket);
 		if (ret == -1) {
-			Con_Printf ("Unable to make socket broadcast capable\n");
+			Com_Printf ("Unable to make socket broadcast capable\n");
 			return ret;
 		}
 	}

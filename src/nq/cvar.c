@@ -38,7 +38,6 @@ static const char rcsid[] =
 #include "qtypes.h"
 #include "cmd.h"
 #include "common.h"
-#include "console.h"
 #include "cvar.h"
 #include "strlib.h"
 #include "zone.h"
@@ -152,7 +151,7 @@ Cvar_Set_f (void)
 
 	if (Cmd_Argc () < 2 || Cmd_Argc () > 3)
 	{
-		Con_Printf ("usage: set <Cvar> [value]\n");
+		Com_Printf ("usage: set <Cvar> [value]\n");
 		return;
 	}
 
@@ -172,7 +171,7 @@ Cvar_Set_f (void)
 	
 	if (var->flags & CVAR_ROM)
 	{
-		Con_Printf ("Cvar \"%s\" is read-only.\n", var->name);
+		Com_Printf ("Cvar \"%s\" is read-only.\n", var->name);
 		return;
 	}
 	
@@ -225,11 +224,11 @@ Cvar_Show (cvar_t *var)
 {
 	if (!var)
 	{
-		Con_Printf ("Cvar does not exist.\n");
+		Com_Printf ("Cvar does not exist.\n");
 		return;
 	}
 
-	Con_Printf ("[] \"%s\" is \"%s\"\n", var->name, var->string);
+	Com_Printf ("[] \"%s\" is \"%s\"\n", var->name, var->string);
 }
 
 
@@ -248,7 +247,7 @@ Cvar_LegacyCmd (void)
 		if (!(var->flags & CVAR_ROM))
 			Cvar_Set (var, Cmd_Argv (1));
 		else
-			Con_Printf ("Cvar \"%s\" is read-only.\n", var->name);
+			Com_Printf ("Cvar \"%s\" is read-only.\n", var->name);
 	} else
 		Cvar_Show (var);
 

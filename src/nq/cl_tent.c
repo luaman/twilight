@@ -37,7 +37,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "strlib.h"
 #include "client.h"
-#include "console.h"
 #include "model.h"
 #include "mathlib.h"
 #include "sound.h"
@@ -124,7 +123,7 @@ CL_ParseBeam (model_t *m)
 		}
 	}
 
-	Con_Printf ("CL_ParseBeam: beam list overflow!\n");
+	Com_Printf ("CL_ParseBeam: beam list overflow!\n");
 }
 
 /*

@@ -69,7 +69,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "common.h"
-#include "console.h"
 #include "net.h"
 #include "strlib.h"
 #include "sys.h"
@@ -360,7 +359,7 @@ UDP_OpenSocket (int port)
 //ZOID -- check for interface binding option
 	if ((i = COM_CheckParm ("-ip")) != 0 && i < com_argc) {
 		address.sin_addr.s_addr = inet_addr (com_argv[i + 1]);
-		Con_Printf ("Binding to IP Interface Address of %s\n",
+		Com_Printf ("Binding to IP Interface Address of %s\n",
 					inet_ntoa (address.sin_addr));
 	} else
 		address.sin_addr.s_addr = INADDR_ANY;

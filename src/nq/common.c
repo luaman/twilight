@@ -491,7 +491,83 @@ MSG_ReadAngle (void)
 	return MSG_ReadChar () * (360.0 / 256);
 }
 
+//===========================================================================
 
+#define	MAXPRINTMSG	4096
+
+void (*rd_print) (char *) = NULL;
+
+void Com_BeginRedirect (void (*RedirectedPrint) (char *))
+{
+	rd_print = RedirectedPrint;
+}
+
+void Com_EndRedirect (void)
+{
+	rd_print = NULL;
+}
+
+void Com_Printf (char *fmt, ...)
+{
+	va_list     argptr;
+	char        msg[MAXPRINTMSG];
+#ifndef TWILIGHT_QWSV
+	extern char	logname[MAX_OSPATH];
+#else
+	extern FILE *sv_logfile;
+#endif
+
+	va_start (argptr, fmt);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
+	va_end (argptr);
+
+	if ( rd_print ) {
+		rd_print ( msg );
+		return;
+	}
+
+// also echo to debugging console
+	Sys_Printf ("%s", msg);				// also echo to debugging console
+
+// log all messages to file
+	if (logname[0])
+		Sys_DebugLog (logname, "%s", msg);
+
+	if (!con_initialized)
+		return;
+
+// write it to the scrollable buffer
+	Con_Print (msg);
+}
+
+void Com_DPrintf (char *fmt, ...)
+{
+	va_list     argptr;
+	char        msg[MAXPRINTMSG];
+
+	if (!developer->value)
+		return;							// don't confuse non-developers with
+	// techie stuff...
+
+	va_start (argptr, fmt);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
+	va_end (argptr);
+
+	Com_Printf ("%s", msg);
+}
+
+void
+Com_SafePrintf (char *fmt, ...)
+{
+	va_list     argptr;
+	char        msg[1024];
+
+	va_start (argptr, fmt);
+	vsnprintf (msg, sizeof (msg), fmt, argptr);
+	va_end (argptr);
+
+	Con_SafePrint (msg);
+}
 
 //===========================================================================
 
@@ -781,7 +857,7 @@ COM_CheckRegistered (void)
 		return;
 
 	Cvar_Set (registered, "1");
-	Con_Printf ("Playing registered version.\n");
+	Com_Printf ("Playing registered version.\n");
 }
 
 
@@ -927,15 +1003,15 @@ COM_Path_f (void)
 {
 	searchpath_t *s;
 
-	Con_Printf ("Current search path:\n");
+	Com_Printf ("Current search path:\n");
 	for (s = com_searchpaths; s; s = s->next) {
 		if (s == com_base_searchpaths)
-			Con_Printf ("----------\n");
+			Com_Printf ("----------\n");
 		if (s->pack)
-			Con_Printf ("%s (%i files)\n", s->pack->filename,
+			Com_Printf ("%s (%i files)\n", s->pack->filename,
 						s->pack->numfiles);
 		else
-			Con_Printf ("%s\n", s->filename);
+			Com_Printf ("%s\n", s->filename);
 	}
 }
 
@@ -1052,7 +1128,7 @@ COM_FOpenFile (char *filename, FILE ** file)
 			pak = search->pack;
 			for (i = 0; i < pak->numfiles; i++)
 				if (!strcmp (pak->files[i].name, filename)) {	// found it!
-					Con_DPrintf ("PackFile: %s : %s\n", pak->filename,
+					Com_DPrintf ("PackFile: %s : %s\n", pak->filename,
 								 filename);
 					// open a new file on the pakfile
 					*file = fopen (pak->filename, "rb");
@@ -1077,7 +1153,7 @@ COM_FOpenFile (char *filename, FILE ** file)
 			if (findtime == -1)
 				continue;
 
-			Con_DPrintf ("FindFile: %s\n", netpath);
+			Com_DPrintf ("FindFile: %s\n", netpath);
 
 			*file = fopen (netpath, "rb");
 			return COM_filelength (*file);
@@ -1246,7 +1322,7 @@ COM_LoadPackFile (char *packfile)
 	pack->numfiles = numpackfiles;
 	pack->files = newfiles;
 
-	Con_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
+	Com_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
 	return pack;
 }
 
@@ -1308,7 +1384,7 @@ COM_AddGameDirectory (char *dir)
 {
 	char		buf[1024];
 
-	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
+	Com_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
 	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->string, dir);
 	COM_AddDirectory (buf);
 

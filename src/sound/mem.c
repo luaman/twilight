@@ -41,10 +41,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-// FIXME: console.h is not yet common
-void Con_Printf (char *fmt, ...);
-void Con_DPrintf (char *fmt, ...);
-
 int         cache_full_cycle;
 
 Uint8      *S_Alloc (int size);
@@ -138,13 +134,13 @@ S_LoadSound (sfx_t *s)
 	data = COM_LoadStackFile (namebuffer, stackbuf, sizeof (stackbuf));
 
 	if (!data) {
-		Con_Printf ("Couldn't load %s\n", namebuffer);
+		Com_Printf ("Couldn't load %s\n", namebuffer);
 		return NULL;
 	}
 
 	info = GetWavinfo (s->name, data, com_filesize);
 	if (info.channels != 1) {
-		Con_Printf ("%s is a stereo sample\n", s->name);
+		Com_Printf ("%s is a stereo sample\n", s->name);
 		return NULL;
 	}
 
@@ -231,7 +227,7 @@ FindNextChunk (char *name)
 //          Sys_Error ("FindNextChunk: %i length is past the 1 meg sanity limit", iff_chunk_len);
 		data_p -= 8;
 		if (iff_end - data_p < 8 + iff_chunk_len) {
-			Con_DPrintf("Corrupt sound file '%s'.\n", iff_name);
+			Com_DPrintf("Corrupt sound file '%s'.\n", iff_name);
 			data_p = NULL;
 			return;
 		}
@@ -274,7 +270,7 @@ GetWavinfo (char *name, Uint8 *wav, int wavlength)
 // find "RIFF" chunk
 	FindChunk ("RIFF");
 	if (!(data_p && !strncmp (data_p + 8, "WAVE", 4))) {
-		Con_Printf ("Missing RIFF/WAVE chunks\n");
+		Com_Printf ("Missing RIFF/WAVE chunks\n");
 		return info;
 	}
 // get "fmt " chunk
@@ -282,13 +278,13 @@ GetWavinfo (char *name, Uint8 *wav, int wavlength)
 
 	FindChunk ("fmt ");
 	if (!data_p) {
-		Con_Printf ("Missing fmt chunk\n");
+		Com_Printf ("Missing fmt chunk\n");
 		return info;
 	}
 	data_p += 8;
 	format = GetLittleShort ();
 	if (format != 1) {
-		Con_Printf ("Microsoft PCM format only\n");
+		Com_Printf ("Microsoft PCM format only\n");
 		return info;
 	}
 
@@ -319,7 +315,7 @@ GetWavinfo (char *name, Uint8 *wav, int wavlength)
 // find data chunk
 	FindChunk ("data");
 	if (!data_p) {
-		Con_Printf ("Missing data chunk\n");
+		Com_Printf ("Missing data chunk\n");
 		return info;
 	}
 

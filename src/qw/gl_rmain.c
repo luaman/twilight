@@ -35,7 +35,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "client.h"
-#include "console.h"
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
@@ -249,7 +248,7 @@ R_GetSpriteFrame (entity_t *e)
 	frame = e->cur.frame;
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
-		Con_Printf ("R_DrawSprite: no such frame %d\n", frame);
+		Com_Printf ("R_DrawSprite: no such frame %d\n", frame);
 		frame = 0;
 	}
 
@@ -810,7 +809,7 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
 	float		interval;
 
 	if ((frame >= paliashdr->numframes) || (frame < 0)) {
-		Con_DPrintf ("R_AliasSetupFrame: no such frame %d\n", frame);
+		Com_DPrintf ("R_AliasSetupFrame: no such frame %d\n", frame);
 		frame = 0;
 	}
 
@@ -844,7 +843,7 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
 	float		blend;
 
 	if ((frame >= paliashdr->numframes) || (frame < 0)) {
-		Con_DPrintf ("R_AliasSetupFrame: no such frame %d\n", frame);
+		Com_DPrintf ("R_AliasSetupFrame: no such frame %d\n", frame);
 		frame = 0;
 	}
 
@@ -1544,7 +1543,7 @@ R_RenderView (void)
 	if (r_speeds->value)
 	{
 		time2 = Sys_DoubleTime ();
-		Con_Printf ("%3i ms  %4i wpoly %4i epoly\n",
+		Com_Printf ("%3i ms  %4i wpoly %4i epoly\n",
 					(int) ((time2 - time1) * 1000), c_brush_polys,
 					c_alias_polys);
 	}

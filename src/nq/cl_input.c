@@ -39,7 +39,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "client.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "host.h"
 #include "mathlib.h"
@@ -111,7 +110,7 @@ KeyDown (kbutton_t *b)
 	else if (!b->down[1])
 		b->down[1] = k;
 	else {
-		Con_Printf ("Three keys down for a button!\n");
+		Com_Printf ("Three keys down for a button!\n");
 		return;
 	}
 
@@ -593,7 +592,7 @@ CL_SendMove (usercmd_t *cmd)
 		return;
 
 	if (NET_SendUnreliableMessage (cls.netcon, &buf) == -1) {
-		Con_Printf ("CL_SendMove: lost server connection\n");
+		Com_Printf ("CL_SendMove: lost server connection\n");
 		CL_Disconnect ();
 	}
 }

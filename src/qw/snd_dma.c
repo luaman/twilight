@@ -38,7 +38,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "cmd.h"
 #include "client.h"
-#include "console.h"
 #include "cvar.h"
 #include "model.h"
 #include "host.h"
@@ -135,18 +134,18 @@ void
 S_SoundInfo_f (void)
 {
 	if (!sound_started || !shm) {
-		Con_Printf ("sound system not started\n");
+		Com_Printf ("sound system not started\n");
 		return;
 	}
 
-	Con_Printf ("%5d stereo\n", shm->channels - 1);
-	Con_Printf ("%5d samples\n", shm->samples);
-	Con_Printf ("%5d samplepos\n", shm->samplepos);
-	Con_Printf ("%5d samplebits\n", shm->samplebits);
-	Con_Printf ("%5d submission_chunk\n", shm->submission_chunk);
-	Con_Printf ("%5d speed\n", shm->speed);
-	Con_Printf ("0x%x dma buffer\n", shm->buffer);
-	Con_Printf ("%5d total_channels\n", total_channels);
+	Com_Printf ("%5d stereo\n", shm->channels - 1);
+	Com_Printf ("%5d samples\n", shm->samples);
+	Com_Printf ("%5d samplepos\n", shm->samplepos);
+	Com_Printf ("%5d samplebits\n", shm->samplebits);
+	Com_Printf ("%5d submission_chunk\n", shm->submission_chunk);
+	Com_Printf ("%5d speed\n", shm->speed);
+	Com_Printf ("0x%x dma buffer\n", shm->buffer);
+	Com_Printf ("%5d total_channels\n", total_channels);
 }
 
 
@@ -200,7 +199,7 @@ S_Init_Cvars (void)
 
 	if (sys_memsize < 0x800000) {
 		Cvar_Set (loadas8bit, "1");
-		Con_Printf ("loading all sounds as 8bit\n");
+		Com_Printf ("loading all sounds as 8bit\n");
 	}
 }
 
@@ -213,7 +212,7 @@ void
 S_Init (void)
 {
 
-//  Con_Printf("\nSound Initialization\n");
+//  Com_Printf("\nSound Initialization\n");
 
 	if (COM_CheckParm ("-nosound"))
 		return;
@@ -251,7 +250,7 @@ S_Init (void)
 		shm->submission_chunk = 1;
 		shm->buffer = Hunk_AllocName (1 << 16, "shmbuf");
 	}
-//  Con_Printf ("Sound sampling rate: %i\n", shm->speed);
+//  Com_Printf ("Sound sampling rate: %i\n", shm->speed);
 
 	// provides a tick sound until washed clean
 
@@ -612,7 +611,7 @@ S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation)
 		return;
 
 	if (total_channels == MAX_CHANNELS) {
-		Con_Printf ("total_channels == MAX_CHANNELS\n");
+		Com_Printf ("total_channels == MAX_CHANNELS\n");
 		return;
 	}
 
@@ -624,7 +623,7 @@ S_StaticSound (sfx_t *sfx, vec3_t origin, float vol, float attenuation)
 		return;
 
 	if (sc->loopstart == -1) {
-		Con_Printf ("Sound %s not looped\n", sfx->name);
+		Com_Printf ("Sound %s not looped\n", sfx->name);
 		return;
 	}
 
@@ -769,12 +768,12 @@ S_Update (vec3_t origin, vec3_t forward, vec3_t right, vec3_t up)
 		ch = channels;
 		for (i = 0; i < total_channels; i++, ch++)
 			if (ch->sfx && (ch->leftvol || ch->rightvol)) {
-				// Con_Printf ("%3i %3i %s\n", ch->leftvol, ch->rightvol,
+				// Com_Printf ("%3i %3i %s\n", ch->leftvol, ch->rightvol,
 				// ch->sfx->name);
 				total++;
 			}
 
-		Con_Printf ("----(%i)----\n", total);
+		Com_Printf ("----(%i)----\n", total);
 	}
 // mix some sound
 	S_Update_ ();
@@ -833,7 +832,7 @@ S_Update_ (void)
 
 	// check to make sure that we haven't overshot
 	if (paintedtime < soundtime) {
-		// Con_Printf ("S_Update_ : overflow\n");
+		// Com_Printf ("S_Update_ : overflow\n");
 		paintedtime = soundtime;
 	}
 	// mix ahead of current position
@@ -914,12 +913,12 @@ S_SoundList (void)
 		size = sc->length * sc->width * (sc->stereo + 1);
 		total += size;
 		if (sc->loopstart >= 0)
-			Con_Printf ("L");
+			Com_Printf ("L");
 		else
-			Con_Printf (" ");
-		Con_Printf ("(%2db) %6i : %s\n", sc->width * 8, size, sfx->name);
+			Com_Printf (" ");
+		Com_Printf ("(%2db) %6i : %s\n", sc->width * 8, size, sfx->name);
 	}
-	Con_Printf ("Total resident: %i\n", total);
+	Com_Printf ("Total resident: %i\n", total);
 }
 
 
@@ -935,7 +934,7 @@ S_LocalSound (char *sound)
 
 	sfx = S_PrecacheSound (sound);
 	if (!sfx) {
-		Con_Printf ("S_LocalSound: can't cache %s\n", sound);
+		Com_Printf ("S_LocalSound: can't cache %s\n", sound);
 		return;
 	}
 	S_StartSound (cl.viewentity, -1, sfx, vec3_origin, 1, 1);

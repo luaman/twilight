@@ -37,8 +37,8 @@ static const char rcsid[] =
 #include <windows.h>
 #include "conproc.h"
 #include "quakedef.h"
-#include "console.h"
 #include "strlib.h"
+#include "common.h"
 
 HANDLE      heventDone;
 HANDLE      hfileBuffer;
@@ -75,14 +75,14 @@ InitConProc (HANDLE hFile, HANDLE heventParent, HANDLE heventChild)
 	heventDone = CreateEvent (NULL, FALSE, FALSE, NULL);
 
 	if (!heventDone) {
-		Con_SafePrintf ("Couldn't create heventDone\n");
+		Com_SafePrintf ("Couldn't create heventDone\n");
 		return;
 	}
 
 	if (!CreateThread (NULL,
 					   0, (LPTHREAD_START_ROUTINE) RequestProc, 0, 0, &dwID)) {
 		CloseHandle (heventDone);
-		Con_SafePrintf ("Couldn't create QHOST thread\n");
+		Com_SafePrintf ("Couldn't create QHOST thread\n");
 		return;
 	}
 // save off the input/output handles.
@@ -124,7 +124,7 @@ RequestProc (DWORD dwNichts)
 
 		// hfileBuffer is invalid.  Just leave.
 		if (!pBuffer) {
-			Con_SafePrintf ("Invalid hfileBuffer\n");
+			Com_SafePrintf ("Invalid hfileBuffer\n");
 			break;
 		}
 

@@ -78,7 +78,7 @@ extern int	key_linepos;
 
 qboolean	con_initialized;
 
-static char	logname[MAX_OSPATH] = "";
+char	logname[MAX_OSPATH] = "";
 
 void
 Key_ClearTyping (void)
@@ -269,7 +269,7 @@ Con_Init (void)
 	con_linewidth = -1;
 	Con_CheckResize ();
 
-	Con_Printf ("Console initialized.\n");
+	Com_Printf ("Console initialized.\n");
 
 	Cmd_AddCommand ("toggleconsole", Con_ToggleConsole_f);
 	Cmd_AddCommand ("messagemode", Con_MessageMode_f);
@@ -368,59 +368,20 @@ Con_Print (char *txt)
 
 
 /*
-================
-Con_Printf
+==================
+Con_SafePrintf
 
-Handles cursor positioning, line wrapping, etc
-================
-*/
-#define	MAXPRINTMSG	4096
-void
-Con_Printf (char *fmt, ...)
-{
-	va_list     argptr;
-	char        msg[MAXPRINTMSG];
-
-	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof (msg), fmt, argptr);
-	va_end (argptr);
-
-// also echo to debugging console
-	Sys_Printf ("%s", msg);				// also echo to debugging console
-
-// log all messages to file
-	if (logname[0])
-		Sys_DebugLog (logname, "%s", msg);
-
-	if (!con_initialized)
-		return;
-
-// write it to the scrollable buffer
-	Con_Print (msg);
-}
-
-/*
-================
-Con_DPrintf
-
-A Con_Printf that only shows up if the "developer" cvar is set
-================
+Okay to call even when the screen can't be updated
+==================
 */
 void
-Con_DPrintf (char *fmt, ...)
+Con_SafePrint (char *fmt)
 {
-	va_list     argptr;
-	char        msg[MAXPRINTMSG];
-
-	if (!developer->value)
-		return;							// don't confuse non-developers with
-	// techie stuff...
-
-	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof (msg), fmt, argptr);
-	va_end (argptr);
-
-	Con_Printf ("%s", msg);
+	qboolean temp = scr_disabled_for_loading;
+	
+	scr_disabled_for_loading = true;
+	Com_Printf (fmt);		// Vic: I know, it's weird...
+	scr_disabled_for_loading = temp;
 }
 
 /*
@@ -582,30 +543,6 @@ Con_DrawConsole (int lines)
 }
 
 /*
-==================
-Con_SafePrintf
-
-Okay to call even when the screen can't be updated
-==================
-*/
-void
-Con_SafePrintf (char *fmt, ...)
-{
-	va_list     argptr;
-	char        msg[1024];
-	int         temp;
-
-	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof (msg), fmt, argptr);
-	va_end (argptr);
-
-	temp = scr_disabled_for_loading;
-	scr_disabled_for_loading = true;
-	Con_Printf ("%s", msg);
-	scr_disabled_for_loading = temp;
-}
-
-/*
 	Con_DisplayList
 
 	New function for tab-completion system
@@ -634,20 +571,20 @@ Con_DisplayList(char **list)
 	while (*list) {
 		len = strlen(*list);
 		if (pos + maxlen >= width) {
-			Con_Printf("\n");
+			Com_Printf("\n");
 			pos = 0;
 		}
 
-		Con_Printf("%s", *list);
+		Com_Printf("%s", *list);
 		for (i = 0; i < (maxlen - len); i++)
-			Con_Printf(" ");
+			Com_Printf(" ");
 
 		pos += maxlen;
 		list++;
 	}
 
 	if (pos)
-		Con_Printf("\n\n");
+		Com_Printf("\n\n");
 }
 
 /*
@@ -678,7 +615,7 @@ Con_CompleteCommandLine (void)
 	a = Cmd_CompleteAliasCountPossible(s);
 	
 	if (!(c + v + a)) {	// No possible matches, let the user know they're insane
-		Con_Printf("\n\nNo matching aliases, commands, or cvars were found.\n\n");
+		Com_Printf("\n\nNo matching aliases, commands, or cvars were found.\n\n");
 		return;
 	}
 	
@@ -715,24 +652,24 @@ Con_CompleteCommandLine (void)
 				cmd_len++;
 		} while (i == 3);
 		// 'quakebar'
-		Con_Printf("\n\35");
+		Com_Printf("\n\35");
 		for (i = 0; i < con_linewidth - 4; i++)
-			Con_Printf("\36");
-		Con_Printf("\37\n");
+			Com_Printf("\36");
+		Com_Printf("\37\n");
 
 		// Print Possible Commands
 		if (c) {
-			Con_Printf("%i possible command%s\n", c, (c > 1) ? "s: " : ":");
+			Com_Printf("%i possible command%s\n", c, (c > 1) ? "s: " : ":");
 			Con_DisplayList(list[0]);
 		}
 		
 		if (v) {
-			Con_Printf("%i possible variable%s\n", v, (v > 1) ? "s: " : ":");
+			Com_Printf("%i possible variable%s\n", v, (v > 1) ? "s: " : ":");
 			Con_DisplayList(list[1]);
 		}
 		
 		if (a) {
-			Con_Printf("%i possible aliases%s\n", a, (a > 1) ? "s: " : ":");
+			Com_Printf("%i possible aliases%s\n", a, (a > 1) ? "s: " : ":");
 			Con_DisplayList(list[2]);
 		}
 	}

@@ -36,7 +36,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "pcx.h"
 #include "strlib.h"
@@ -145,7 +144,7 @@ Skin_Cache (player_skin_t *skin)
 	snprintf (name, sizeof (name), "skins/%s.pcx", skin->name);
 	raw = COM_LoadTempFile (name);
 	if (!raw) {
-		Con_Printf ("Couldn't load skin %s\n", name);
+		Com_Printf ("Couldn't load skin %s\n", name);
 		snprintf (name, sizeof (name), "skins/%s.pcx", baseskin->string);
 		raw = COM_LoadTempFile (name);
 		if (!raw) {
@@ -174,7 +173,7 @@ Skin_Cache (player_skin_t *skin)
 		|| pcx->encoding != 1
 		|| pcx->bits_per_pixel != 8 || pcx->xmax >= 320 || pcx->ymax >= 200) {
 		skin->failedload = true;
-		Con_Printf ("Bad skin %s\n", name);
+		Com_Printf ("Bad skin %s\n", name);
 		return NULL;
 	}
 
@@ -190,7 +189,7 @@ Skin_Cache (player_skin_t *skin)
 			if (raw - (Uint8 *) pcx > com_filesize) {
 				Cache_Free (&skin->cache);
 				skin->failedload = true;
-				Con_Printf ("Skin %s was malformed.  You should delete it.\n",
+				Com_Printf ("Skin %s was malformed.  You should delete it.\n",
 							name);
 				return NULL;
 			}
@@ -201,7 +200,7 @@ Skin_Cache (player_skin_t *skin)
 				if (raw - (Uint8 *) pcx > com_filesize) {
 					Cache_Free (&skin->cache);
 					skin->failedload = true;
-					Con_Printf
+					Com_Printf
 						("Skin %s was malformed.  You should delete it.\n",
 						 name);
 					return NULL;
@@ -214,7 +213,7 @@ Skin_Cache (player_skin_t *skin)
 			if (runLength + x > pcx->xmax + 2) {
 				Cache_Free (&skin->cache);
 				skin->failedload = true;
-				Con_Printf ("Skin %s was malformed.  You should delete it.\n",
+				Com_Printf ("Skin %s was malformed.  You should delete it.\n",
 							name);
 				return NULL;
 			}
@@ -227,7 +226,7 @@ Skin_Cache (player_skin_t *skin)
 	if (raw - (Uint8 *) pcx > com_filesize) {
 		Cache_Free (&skin->cache);
 		skin->failedload = true;
-		Con_Printf ("Skin %s was malformed.  You should delete it.\n", name);
+		Com_Printf ("Skin %s was malformed.  You should delete it.\n", name);
 		return NULL;
 	}
 
@@ -249,7 +248,7 @@ Skin_NextDownload (void)
 	int					i;
 
 	if (cls.downloadnumber == 0)
-		Con_Printf ("Checking skins...\n");
+		Com_Printf ("Checking skins...\n");
 	cls.downloadtype = dl_skin;
 
 	for (; cls.downloadnumber != MAX_CLIENTS; cls.downloadnumber++) {

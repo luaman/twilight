@@ -39,7 +39,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "host.h"
 #include "strlib.h"
@@ -119,7 +118,7 @@ Cbuf_AddText (char *text)
 	l = strlen (text);
 
 	if (cmd_text.cursize + l >= cmd_text.maxsize) {
-		Con_Printf ("Cbuf_AddText: overflow\n");
+		Com_Printf ("Cbuf_AddText: overflow\n");
 		return;
 	}
 
@@ -376,17 +375,17 @@ Cmd_Exec_f (void)
 	int         mark;
 
 	if (Cmd_Argc () != 2) {
-		Con_Printf ("exec <filename> : execute a script file\n");
+		Com_Printf ("exec <filename> : execute a script file\n");
 		return;
 	}
 
 	mark = Hunk_LowMark ();
 	f = (char *) COM_LoadHunkFile (Cmd_Argv (1));
 	if (!f) {
-		Con_Printf ("couldn't exec %s\n", Cmd_Argv (1));
+		Com_Printf ("couldn't exec %s\n", Cmd_Argv (1));
 		return;
 	}
-	Con_Printf ("execing %s\n", Cmd_Argv (1));
+	Com_Printf ("execing %s\n", Cmd_Argv (1));
 
 	Cbuf_InsertText (f);
 	Hunk_FreeToLowMark (mark);
@@ -406,8 +405,8 @@ Cmd_Echo_f (void)
 	int         i;
 
 	for (i = 1; i < Cmd_Argc (); i++)
-		Con_Printf ("%s ", Cmd_Argv (i));
-	Con_Printf ("\n");
+		Com_Printf ("%s ", Cmd_Argv (i));
+	Com_Printf ("\n");
 }
 
 /*
@@ -426,15 +425,15 @@ Cmd_Alias_f (void)
 	char       *s;
 
 	if (Cmd_Argc () == 1) {
-		Con_Printf ("Current alias commands:\n");
+		Com_Printf ("Current alias commands:\n");
 		for (a = cmd_alias; a; a = a->next)
-			Con_Printf ("%s : %s\n", a->name, a->value);
+			Com_Printf ("%s : %s\n", a->name, a->value);
 		return;
 	}
 
 	s = Cmd_Argv (1);
 	if (strlen (s) >= MAX_ALIAS_NAME) {
-		Con_Printf ("Alias name is too long\n");
+		Com_Printf ("Alias name is too long\n");
 		return;
 	}
 	// if the alias already exists, reuse it
@@ -616,14 +615,14 @@ Cmd_AddCommand (char *cmd_name, xcommand_t function)
 	// fail if the command is a variable name
 	var = Cvar_Find (cmd_name);
 	if (var) {
-		Con_Printf ("\"%s\" already defined as a Cvar\n",
+		Com_Printf ("\"%s\" already defined as a Cvar\n",
 				cmd_name);
 		return;
 	}
 	// fail if the command already exists
 	for (cmd = cmd_functions; cmd; cmd = cmd->next) {
 		if (!strcmp (cmd_name, cmd->name)) {
-			Con_Printf ("\"%s\" already defined\n", cmd_name);
+			Com_Printf ("\"%s\" already defined\n", cmd_name);
 			return;
 		}
 	}
@@ -852,7 +851,7 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 
 	// check cvars
 	if (!Cvar_LegacyCmd ())
-		Con_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
+		Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
 
 }
 
@@ -868,7 +867,7 @@ void
 Cmd_ForwardToServer (void)
 {
 	if (cls.state != ca_connected) {
-		Con_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
+		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
 		return;
 	}
 

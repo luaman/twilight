@@ -39,7 +39,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "common.h"
-#include "console.h"
 #include "cvar.h"
 #include "mathlib.h"
 #include "model.h"
@@ -57,7 +56,7 @@ static const char rcsid[] =
 /*
 =============================================================================
 
-Con_Printf redirection
+Com_Printf redirection
 
 =============================================================================
 */
@@ -97,13 +96,22 @@ SV_FlushRedirect (void)
 	outputbuf[0] = 0;
 }
 
+void
+SV_RedirectedPrint (char *msg)
+{
+	// add to redirected message
+	if (strlen (msg) + strlen (outputbuf) > sizeof (outputbuf) - 1)
+		SV_FlushRedirect ();
+
+	strcat (outputbuf, msg);
+}
 
 /*
 ==================
 SV_BeginRedirect
 
-  Send Con_Printf data to the remote client
-  instead of the console
+Send Com_Printf data to the remote client
+instead of the console
 ==================
 */
 void
@@ -111,6 +119,7 @@ SV_BeginRedirect (redirect_t rd)
 {
 	sv_redirected = rd;
 	outputbuf[0] = 0;
+	Com_BeginRedirect (SV_RedirectedPrint);
 }
 
 void
@@ -118,61 +127,7 @@ SV_EndRedirect (void)
 {
 	SV_FlushRedirect ();
 	sv_redirected = RD_NONE;
-}
-
-
-/*
-================
-Con_Printf
-
-Handles cursor positioning, line wrapping, etc
-================
-*/
-#define	MAXPRINTMSG	4096
-void
-Con_Printf (char *fmt, ...)
-{
-	va_list     argptr;
-	char        msg[MAXPRINTMSG];
-
-	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof (msg), fmt, argptr);
-	va_end (argptr);
-
-	// add to redirected message
-	if (sv_redirected) {
-		if (strlen (msg) + strlen (outputbuf) > sizeof (outputbuf) - 1)
-			SV_FlushRedirect ();
-		strcat (outputbuf, msg);
-		return;
-	}
-
-	Sys_Printf ("%s", msg);				// also echo to debugging console
-	if (sv_logfile)
-		fprintf (sv_logfile, "%s", msg);
-}
-
-/*
-================
-Con_DPrintf
-
-A Con_Printf that only shows up if the "developer" cvar is set
-================
-*/
-void
-Con_DPrintf (char *fmt, ...)
-{
-	va_list     argptr;
-	char        msg[MAXPRINTMSG];
-
-	if (!developer->value)
-		return;
-
-	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof (msg), fmt, argptr);
-	va_end (argptr);
-
-	Con_Printf ("%s", msg);
+	Com_EndRedirect ();
 }
 
 /*
@@ -342,7 +297,6 @@ SV_Multicast (vec3_t origin, int to)
 			// -1 is because pvs rows are 1 based, not 0 based like leafs
 			leafnum = leaf - sv.worldmodel->leafs - 1;
 			if (!(mask[leafnum >> 3] & (1 << (leafnum & 7)))) {
-//              Con_Printf ("supressed multicast\n");
 				continue;
 			}
 		}
@@ -404,7 +358,7 @@ SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 			break;
 
 	if (sound_num == MAX_SOUNDS || !sv.sound_precache[sound_num]) {
-		Con_Printf ("SV_StartSound: %s not precacheed\n", sample);
+		Com_Printf ("SV_StartSound: %s not precacheed\n", sample);
 		return;
 	}
 
@@ -613,7 +567,7 @@ SV_SendClientDatagram (client_t *client)
 	// copy the accumulated multicast datagram
 	// for this client out to the message
 	if (client->datagram.overflowed)
-		Con_Printf ("WARNING: datagram overflowed for %s\n", client->name);
+		Com_Printf ("WARNING: datagram overflowed for %s\n", client->name);
 	else
 		SZ_Write (&msg, client->datagram.data, client->datagram.cursize);
 	SZ_Clear (&client->datagram);
@@ -623,7 +577,7 @@ SV_SendClientDatagram (client_t *client)
 		SV_UpdateClientStats (client);
 
 	if (msg.overflowed) {
-		Con_Printf ("WARNING: msg overflowed for %s\n", client->name);
+		Com_Printf ("WARNING: msg overflowed for %s\n", client->name);
 		SZ_Clear (&msg);
 	}
 	// send the datagram
@@ -740,7 +694,7 @@ SV_SendClientMessages (void)
 			if (c->netchan.message.cursize + c->backbuf_size[0] <
 				c->netchan.message.maxsize) {
 
-				Con_DPrintf ("%s: backbuf %d bytes\n",
+				Com_DPrintf ("%s: backbuf %d bytes\n",
 							 c->name, c->backbuf_size[0]);
 
 				// it'll fit
@@ -770,7 +724,7 @@ SV_SendClientMessages (void)
 			SZ_Clear (&c->netchan.message);
 			SZ_Clear (&c->datagram);
 			SV_BroadcastPrintf (PRINT_HIGH, "%s overflowed\n", c->name);
-			Con_Printf ("WARNING: reliable overflow for %s\n", c->name);
+			Com_Printf ("WARNING: reliable overflow for %s\n", c->name);
 			SV_DropClient (c);
 			c->send_message = true;
 			c->netchan.cleartime = 0;	// don't choke this message

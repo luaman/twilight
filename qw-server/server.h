@@ -376,6 +376,7 @@ void        SV_Shutdown (void);
 void        SV_Frame (float time);
 void        SV_FinalMessage (char *message);
 void        SV_DropClient (client_t *drop);
+void        SV_Error (char *error, ...);
 
 int         SV_CalcPing (client_t *cl);
 void        SV_FullClientUpdate (client_t *client, sizebuf_t *buf);

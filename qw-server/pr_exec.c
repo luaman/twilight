@@ -38,7 +38,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "common.h"
-#include "console.h"
 #include "progs.h"
 #include "server.h"
 #include "sys.h"
@@ -175,28 +174,28 @@ PR_PrintStatement (dstatement_t *s)
 	int         i;
 
 	if ((unsigned) s->op < sizeof (pr_opnames) / sizeof (pr_opnames[0])) {
-		Con_Printf ("%s ", pr_opnames[s->op]);
+		Com_Printf ("%s ", pr_opnames[s->op]);
 		i = strlen (pr_opnames[s->op]);
 		for (; i < 10; i++)
-			Con_Printf (" ");
+			Com_Printf (" ");
 	}
 
 	if (s->op == OP_IF || s->op == OP_IFNOT)
-		Con_Printf ("%sbranch %i", PR_GlobalString (s->a), s->b);
+		Com_Printf ("%sbranch %i", PR_GlobalString (s->a), s->b);
 	else if (s->op == OP_GOTO) {
-		Con_Printf ("branch %i", s->a);
+		Com_Printf ("branch %i", s->a);
 	} else if ((unsigned) (s->op - OP_STORE_F) < 6) {
-		Con_Printf ("%s", PR_GlobalString (s->a));
-		Con_Printf ("%s", PR_GlobalStringNoContents (s->b));
+		Com_Printf ("%s", PR_GlobalString (s->a));
+		Com_Printf ("%s", PR_GlobalStringNoContents (s->b));
 	} else {
 		if (s->a)
-			Con_Printf ("%s", PR_GlobalString (s->a));
+			Com_Printf ("%s", PR_GlobalString (s->a));
 		if (s->b)
-			Con_Printf ("%s", PR_GlobalString (s->b));
+			Com_Printf ("%s", PR_GlobalString (s->b));
 		if (s->c)
-			Con_Printf ("%s", PR_GlobalStringNoContents (s->c));
+			Com_Printf ("%s", PR_GlobalStringNoContents (s->c));
 	}
-	Con_Printf ("\n");
+	Com_Printf ("\n");
 }
 
 /*
@@ -211,7 +210,7 @@ PR_StackTrace (void)
 	int         i;
 
 	if (pr_depth == 0) {
-		Con_Printf ("<NO STACK>\n");
+		Com_Printf ("<NO STACK>\n");
 		return;
 	}
 
@@ -220,9 +219,9 @@ PR_StackTrace (void)
 		f = pr_stack[i].f;
 
 		if (!f) {
-			Con_Printf ("<NO FUNCTION>\n");
+			Com_Printf ("<NO FUNCTION>\n");
 		} else
-			Con_Printf ("%12s : %s\n", PR_GetString (f->s_file),
+			Com_Printf ("%12s : %s\n", PR_GetString (f->s_file),
 						PR_GetString (f->s_name));
 	}
 }
@@ -255,7 +254,7 @@ PR_Profile_f (void)
 		}
 		if (best) {
 			if (num < 10)
-				Con_Printf ("%7i %s\n", best->profile,
+				Com_Printf ("%7i %s\n", best->profile,
 							PR_GetString (best->s_name));
 			num++;
 			best->profile = 0;
@@ -283,7 +282,7 @@ PR_RunError (char *error, ...)
 
 	PR_PrintStatement (pr_statements + pr_xstatement);
 	PR_StackTrace ();
-	Con_Printf ("%s\n", string);
+	Com_Printf ("%s\n", string);
 
 	pr_depth = 0;						// dump the stack so SV_Error can
 	// shutdown functions

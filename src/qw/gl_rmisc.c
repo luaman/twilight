@@ -38,7 +38,6 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "client.h"
 #include "cmd.h"
-#include "console.h"
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
@@ -149,7 +148,7 @@ R_LoadSky_f (void)
 {
 	if (Cmd_Argc() != 2)
 	{
-		Con_Printf ("loadsky <name> : load a skybox\n");
+		Com_Printf ("loadsky <name> : load a skybox\n");
 	}
 
 	Cvar_Set (r_skyname, Cmd_Argv(1));
@@ -451,7 +450,7 @@ R_TimeRefresh_f (void)
 	qglFinish ();
 	stop = Sys_DoubleTime ();
 	time = stop - start;
-	Con_Printf ("%f seconds (%f fps)\n", time, 128 / time);
+	Com_Printf ("%f seconds (%f fps)\n", time, 128 / time);
 
 	GL_EndRendering ();
 }
