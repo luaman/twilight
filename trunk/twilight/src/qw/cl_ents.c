@@ -44,6 +44,10 @@ extern cvar_t cl_predict_players;
 extern cvar_t cl_predict_players2;
 extern cvar_t cl_solid_players;
 
+extern int  cl_spikeindex, cl_playerindex, cl_flagindex;
+
+entity_t   *CL_NewTempEntity (void);
+
 static struct predicted_player {
 	int         flags;
 	qboolean    active;
@@ -296,22 +300,15 @@ CL_ParsePacketEntities (qboolean delta)
 
 	full = false;
 	if (oldpacket != -1) {
-		if (cls.netchan.outgoing_sequence - oldpacket >= UPDATE_BACKUP - 1) {	// we 
-																				// 
-			// 
-			// can't 
-			// use 
-			// this, 
-			// it 
-			// is 
-			// too 
-			// old
+		if (cls.netchan.outgoing_sequence - oldpacket >= UPDATE_BACKUP - 1) {
+			// we can't use this, it is too old
 			FlushEntityPacket ();
 			return;
 		}
 		cl.validsequence = cls.netchan.incoming_sequence;
 		oldp = &cl.frames[oldpacket & UPDATE_MASK].packet_entities;
-	} else {							// this is a full update that we can
+	} else {
+		// this is a full update that we can
 		// start delta compressing from now
 		oldp = &dummy;
 		dummy.num_entities = 0;
@@ -325,17 +322,15 @@ CL_ParsePacketEntities (qboolean delta)
 
 	while (1) {
 		word = (unsigned short) MSG_ReadShort ();
-		if (msg_badread) {				// something didn't parse right...
+		if (msg_badread) {
+			// something didn't parse right...
 			Host_EndGame ("msg_badread in packetentities");
 			return;
 		}
 
 		if (!word) {
-			while (oldindex < oldp->num_entities) {	// copy all the rest of the 
-													// 
-				// 
-				// entities from the old
-				// packet
+			while (oldindex < oldp->num_entities) {
+				// copy all the rest of the entities from the old packet
 //Con_Printf ("copy %i\n", oldp->entities[oldindex].number);
 				if (newindex >= MAX_PACKET_ENTITIES)
 					Host_EndGame
@@ -390,7 +385,8 @@ CL_ParsePacketEntities (qboolean delta)
 			continue;
 		}
 
-		if (newnum == oldnum) {			// delta from previous
+		if (newnum == oldnum) {
+			// delta from previous
 			if (full) {
 				cl.validsequence = 0;
 				Con_Printf ("WARNING: delta on full update");
@@ -476,7 +472,7 @@ CL_LinkPacketEntities (void)
 
 		// set colormap
 		if (s1->colormap && (s1->colormap < MAX_CLIENTS)
-			&& !Q_strcmp (ent->model->name, "progs/player.mdl")) {
+			&& s1->modelindex == cl_playerindex) {
 			ent->colormap = cl.players[s1->colormap - 1].translations;
 			ent->scoreboard = &cl.players[s1->colormap - 1];
 		} else {
@@ -540,8 +536,8 @@ CL_LinkPacketEntities (void)
 			continue;
 
 		for (i = 0; i < 3; i++)
-			if (Q_abs (old_origin[i] - ent->origin[i]) > 128) {	// no trail if
-				// too far
+			if (Q_abs (old_origin[i] - ent->origin[i]) > 128) {
+				// no trail if too far
 				VectorCopy (ent->origin, old_origin);
 				break;
 			}
@@ -661,10 +657,6 @@ CL_LinkProjectiles (void)
 }
 
 //========================================
-
-extern int  cl_spikeindex, cl_playerindex, cl_flagindex;
-
-entity_t   *CL_NewTempEntity (void);
 
 /*
 ===================

@@ -108,7 +108,6 @@ cvar_t     *r_netgraph;
 cvar_t     *gl_clear;
 cvar_t     *gl_cull;
 cvar_t     *gl_texsort;
-cvar_t     *gl_smoothmodels;
 cvar_t     *gl_affinemodels;
 cvar_t     *gl_polyblend;
 cvar_t     *gl_flashblend;
@@ -742,18 +741,15 @@ R_DrawAliasModel (entity_t *e)
 			qglBindTexture (GL_TEXTURE_2D, playertextures + i);
 	}
 
-	if (gl_smoothmodels->value)
-		qglShadeModel (GL_SMOOTH);
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
-	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM)) {/* && !torch) { */
+	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
-	} else {
+	else
 		R_SetupAliasFrame (currententity->frame, paliashdr);
-	}
 
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
@@ -783,8 +779,6 @@ R_DrawAliasModel (entity_t *e)
 		}
 	}
 
-/* FIXME: Should this be completely removed with gl_smoothmodels cvar too? */
-	qglShadeModel (GL_FLAT);
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
