@@ -55,6 +55,9 @@ qboolean    isDedicated;
 
 int         nostdout = 0;
 
+int			sys_memsize = 0;
+void	   *sys_membase = NULL;
+
 // =======================================================================
 // General routines
 // =======================================================================
@@ -336,32 +339,26 @@ main (int c, char **v)
 {
 
 	double      time, oldtime, newtime;
-	quakeparms_t parms;
 	int         j;
 
-//  static char cwd[1024];
-
-//  signal(SIGFPE, floating_point_exception_handler);
 	signal (SIGFPE, SIG_IGN);
 
-	memset (&parms, 0, sizeof (parms));
-
 	COM_InitArgv (c, v);
-	parms.argc = com_argc;
-	parms.argv = com_argv;
 
-	parms.memsize = 16 * 1024 * 1024;
+	sys_memsize = 16 * 1024 * 1024;
 
 	j = COM_CheckParm ("-mem");
 	if (j)
-		parms.memsize = (int) (Q_atof (com_argv[j + 1]) * 1024 * 1024);
-	parms.membase = malloc (parms.memsize);
+		sys_memsize = (int) (Q_atof (com_argv[j + 1]) * 1024 * 1024);
+	else
+		if (COM_CheckParm ("-minmemory"))
+			sys_memsize = MINIMUM_MEMORY;
+	if (sys_memsize < MINIMUM_MEMORY)
+		Sys_Error ("Only %4.1f megs of memory reported, can't execute game",
+				sys_memsize / (float) 0x100000);
 
-	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
-
-	Host_Init (&parms);
-
-	Sys_Init ();
+	if (!(sys_membase = malloc (sys_memsize)))
+			Sys_Error ("Can't allocate %ld\n", sys_memsize);
 
 	if (COM_CheckParm ("-nostdout"))
 		nostdout = 1;
@@ -369,6 +366,10 @@ main (int c, char **v)
 		fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
 		printf ("Project Twilight -- Version %s\n", VERSION);
 	}
+
+	Host_Init ();
+
+	Sys_Init ();
 
 	oldtime = Sys_FloatTime () - 0.1;
 	while (1) {

@@ -75,6 +75,9 @@ static HANDLE heventChild;
 
 void        Sys_InitFloatTime (void);
 
+int			sys_memsize = 0;
+void	   *sys_membase = NULL;
+
 volatile int sys_checksum;
 
 
@@ -610,7 +613,8 @@ int WINAPI
 WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 		 int nCmdShow)
 {
-	quakeparms_t parms;
+	int			pargc;
+	char		**pargv;
 	double      time, oldtime, newtime;
 	MEMORYSTATUS lpBuffer;
 	int         t;
@@ -625,16 +629,16 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	lpBuffer.dwLength = sizeof (MEMORYSTATUS);
 	GlobalMemoryStatus (&lpBuffer);
 
-	parms.argc = 1;
+	pargc = 1;
 	argv[0] = empty_string;
 
-	while (*lpCmdLine && (parms.argc < MAX_NUM_ARGVS)) {
+	while (*lpCmdLine && (pargc < MAX_NUM_ARGVS)) {
 		while (*lpCmdLine && ((*lpCmdLine <= 32) || (*lpCmdLine > 126)))
 			lpCmdLine++;
 
 		if (*lpCmdLine) {
-			argv[parms.argc] = lpCmdLine;
-			parms.argc++;
+			argv[pargc] = lpCmdLine;
+			pargc++;
 
 			while (*lpCmdLine && ((*lpCmdLine > 32) && (*lpCmdLine <= 126)))
 				lpCmdLine++;
@@ -647,51 +651,36 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 		}
 	}
 
-	parms.argv = argv;
+	pargv = argv;
 
-	COM_InitArgv (parms.argc, parms.argv);
-
-	parms.argc = com_argc;
-	parms.argv = com_argv;
+	COM_InitArgv (pargc, pargv);
 
 	isDedicated = (COM_CheckParm ("-dedicated") != 0);
-
-	/* 
-	   if (!isDedicated) { hwnd_dialog = CreateDialog(hInstance,
-	   MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
-
-	   if (hwnd_dialog) { if (GetWindowRect (hwnd_dialog, &rect)) { if
-	   (rect.left > (rect.top * 2)) { SetWindowPos (hwnd_dialog, 0, (rect.left
-	   / 2) - ((rect.right - rect.left) / 2), rect.top, 0, 0, SWP_NOZORDER |
-	   SWP_NOSIZE); } }
-
-	   ShowWindow (hwnd_dialog, SW_SHOWDEFAULT); UpdateWindow (hwnd_dialog);
-	   SetForegroundWindow (hwnd_dialog); } } */
 
 // take the greater of all the available memory or half the total memory,
 // but at least 8 Mb and no more than 16 Mb, unless they explicitly
 // request otherwise
-	parms.memsize = lpBuffer.dwAvailPhys;
+	sys_memsize = lpBuffer.dwAvailPhys;
 
-	if (parms.memsize < MINIMUM_WIN_MEMORY)
-		parms.memsize = MINIMUM_WIN_MEMORY;
+	if (sys_memsize < MINIMUM_WIN_MEMORY)
+		sys_memsize = MINIMUM_WIN_MEMORY;
 
-	if (parms.memsize < (lpBuffer.dwTotalPhys >> 1))
-		parms.memsize = lpBuffer.dwTotalPhys >> 1;
+	if (sys_memsize < (lpBuffer.dwTotalPhys >> 1))
+		sys_memsize = lpBuffer.dwTotalPhys >> 1;
 
-	if (parms.memsize > MAXIMUM_WIN_MEMORY)
-		parms.memsize = MAXIMUM_WIN_MEMORY;
+	if (sys_memsize > MAXIMUM_WIN_MEMORY)
+		sys_memsize = MAXIMUM_WIN_MEMORY;
 
 	if (COM_CheckParm ("-heapsize")) {
 		t = COM_CheckParm ("-heapsize") + 1;
 
 		if (t < com_argc)
-			parms.memsize = Q_atoi (com_argv[t]) * 1024;
+			sys_memsize = Q_atoi (com_argv[t]) * 1024;
 	}
 
-	parms.membase = malloc (parms.memsize);
+	sys_membase = malloc (sys_memsize);
 
-	if (!parms.membase)
+	if (!sys_membase)
 		Sys_Error ("Not enough memory free; check disk space\n");
 
 	tevent = CreateEvent (NULL, FALSE, FALSE, NULL);
@@ -732,7 +721,7 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	S_BlockSound ();
 
 	Sys_Printf ("Host_Init\n");
-	Host_Init (&parms);
+	Host_Init ();
 
 	oldtime = Sys_FloatTime ();
 
