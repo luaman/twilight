@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "../include" /I "../SDL/include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "TWILIGHT_NQ" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../include" /I "../src/renderer" /I "../SDL/include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "TWILIGHT_NQ" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x419 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../include" /I "../SDL/include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "TWILIGHT_NQ" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../include" /I "../src/renderer" /I "../SDL/include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "TWILIGHT_NQ" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x419 /d "_DEBUG"
@@ -145,10 +145,6 @@ SOURCE=.\cvar.c
 # Begin Source File
 
 SOURCE=.\gl_draw.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_funcs.c
 # End Source File
 # Begin Source File
 

@@ -14,6 +14,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name twilight_base
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name twilight_renderer
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -28,6 +31,9 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name twilight_base
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name twilight_renderer
     End Project Dependency
 }}}
 
@@ -49,6 +55,18 @@ Package=<4>
 ###############################################################################
 
 Project: "twilight_base"=.\src\base\twilight_base.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "twilight_renderer"=.\src\renderer\twilight_renderer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
