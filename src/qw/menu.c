@@ -1096,7 +1096,7 @@ M_SinglePlayer_Draw (void)
 }
 
 void
-M_SinglePlayer_Key (key_t key)
+M_SinglePlayer_Key (int key)
 {
 	if (key == K_ESCAPE || key == K_ENTER)
 		m_state = m_main;
@@ -1129,7 +1129,7 @@ M_MultiPlayer_Draw (void)
 }
 
 void
-M_MultiPlayer_Key (key_t key)
+M_MultiPlayer_Key (int key)
 {
 	if (key == K_ESCAPE || key == K_ENTER)
 		m_state = m_main;
