@@ -52,7 +52,7 @@ extern int file_from_pak;
 extern char gamedirfile[MAX_OSPATH];
 
 void Cmdline_Init (int argc, char *argv[]);
-int COM_CheckParm (char *parm);
+int COM_CheckParm (const char *parm);
 
 
 extern struct cvar_s *fs_userconf;

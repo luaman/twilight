@@ -82,7 +82,7 @@ static GLuint   ch_textures[NUM_CROSSHAIRS];            // crosshair texture
 
 
 qpic_t     *
-Draw_PicFromWad (char *name)
+Draw_PicFromWad (const char *name)
 {
 	qpic_t     *p;
 	glpic_t    *gl;
@@ -104,7 +104,7 @@ Draw_PicFromWad (char *name)
 
 
 qpic_t     *
-Draw_CachePic (char *path)
+Draw_CachePic (const char *path)
 {
 	cachepic_t *pic;
 	int         i;
@@ -236,7 +236,7 @@ Draw_Character (float x, float y, int num, float text_size)
 }
 
 void
-Draw_String_Len (float x, float y, char *str, int len, float text_size)
+Draw_String_Len (float x, float y, const char *str, int len, float text_size)
 {
 	float	frow, fcol, size = 0.0625;
 	int		num, i;
@@ -282,14 +282,14 @@ Draw_String_Len (float x, float y, char *str, int len, float text_size)
 }
 
 void
-Draw_String (float x, float y, char *str, float text_size)
+Draw_String (float x, float y, const char *str, float text_size)
 {
 	Draw_String_Len (x, y, str, strlen(str), text_size);
 }
 
 
 void
-Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size)
+Draw_Alt_String_Len (float x, float y, const char *str, int len, float text_size)
 {
 	float	frow, fcol, size = 0.0625;
 	int		num, i;
@@ -339,13 +339,13 @@ Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size)
 }
 
 void
-Draw_Alt_String (float x, float y, char *str, float text_size)
+Draw_Alt_String (float x, float y, const char *str, float text_size)
 {
 	Draw_Alt_String_Len (x, y, str, strlen(str), text_size);
 }
 
 void
-Draw_Conv_String_Len (float x, float y, char *str, int len, float text_size)
+Draw_Conv_String_Len (float x, float y, const char *str, int len, float text_size)
 {
 	float	frow, fcol, size = 0.0625;
 	int		num, i;
@@ -405,18 +405,18 @@ Draw_Conv_String_Len (float x, float y, char *str, int len, float text_size)
 }
 
 void
-Draw_Conv_String (float x, float y, char *str, float text_size)
+Draw_Conv_String (float x, float y, const char *str, float text_size)
 {
 	Draw_Conv_String_Len (x, y, str, strlen(str), text_size);
 }
 
 
 void
-Draw_Pic (int x, int y, qpic_t *pic)
+Draw_Pic (int x, int y, const qpic_t *pic)
 {
-	glpic_t	   *gl;
+	const glpic_t	   *gl;
 
-	gl = (glpic_t *) pic->data;
+	gl = (const glpic_t *) pic->data;
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
 	qglEnable (GL_BLEND);
 
@@ -437,14 +437,14 @@ Draw_Pic (int x, int y, qpic_t *pic)
 
 
 void
-Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
+Draw_SubPic (int x, int y, const qpic_t *pic, int srcx, int srcy, int width,
 		int height)
 {
-	glpic_t	   *gl;
-	float		newsl, newtl, newsh, newth;
-	float		oldglwidth, oldglheight;
+	const glpic_t	*gl;
+	float			newsl, newtl, newsh, newth;
+	float			oldglwidth, oldglheight;
 
-	gl = (glpic_t *) pic->data;
+	gl = (const glpic_t *) pic->data;
 
 	oldglwidth = gl->sh - gl->sl;
 	oldglheight = gl->th - gl->tl;
@@ -476,7 +476,7 @@ Only used for the player color selection menu
 =============
 */
 void
-Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
+Draw_TransPicTranslate (int x, int y, const qpic_t *pic, const Uint8 *translation)
 {
 	int         v, u, c;
 	unsigned    trans[64 * 64], *dest;

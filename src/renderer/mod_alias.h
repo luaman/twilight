@@ -114,7 +114,7 @@ typedef struct {
 	int         numskins;
 	int         skinwidth;
 	int         skinheight;
-	int         numverts;
+	GLuint		numverts;
 	int         numtris;
 	int         numframes;
 	synctype_t  synctype;

@@ -30,7 +30,7 @@
 #include "common.h"
 
 #define	MAX_MSGLEN		8000
-#define	MAX_DATAGRAM	1024
+#define	MAX_DATAGRAM	4096
 
 struct qsockaddr {
 	short       sa_family;

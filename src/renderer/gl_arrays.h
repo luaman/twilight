@@ -28,9 +28,12 @@
 #ifndef __GL_ARRAYS_H
 #define __GL_ARRAYS_H
 
+#include <string.h>
+
 #include "mathlib.h"
 #include "dyngl.h"
 #include "gl_info.h"
+#include "sys.h"
 
 // Vertex array stuff.
 
@@ -64,9 +67,10 @@ extern colorub_t	*scub_array_p;
 #ifndef SERVER_ONLY
 extern GLuint *vindices;
 
-extern GLint	v_index, i_index;
+extern GLuint	v_index, i_index;
 extern qboolean	va_locked;
-extern GLint	MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
+extern GLuint	MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
+extern cvar_t	*gl_copy_arrays;
 extern memzone_t *vzone;
 
 extern float_int_t *FtoUB_tmp;
@@ -113,6 +117,184 @@ TWI_FtoUB (GLfloat *in, GLubyte *out, int num)
 		out[i + 2] = (Uint8) min(FtoUB_tmp[i + 2].i & 0x7FFFFF, 255);
 		out[i + 3] = (Uint8) min(FtoUB_tmp[i + 3].i & 0x7FFFFF, 255);
 	}
+}
+
+extern void *_varray, *_tc0array, *_tc1array, *_carray;
+
+extern inline void
+TWI_ChangeVDrawArrays_p (vertex_t *v, texcoord_t *tc0,
+		texcoord_t *tc1, colorub_t *cub, colorf_t *cf)
+{
+	if (v && v != _varray) {
+		qglVertexPointer (3, GL_FLOAT, sizeof(vertex_t), v);
+		_varray = v;
+	} else if (!v && _varray) {
+		qglVertexPointer (3, GL_FLOAT, sizeof(vertex_t), v_array_p);
+		_varray = NULL;
+	}
+
+	if (tc0 && tc0 != _tc0array) {
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), tc0);
+		_tc0array = tc0;
+	} else if (!tc0 && _tc0array) {
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), tc0_array_p);
+		_tc0array = NULL;
+	}
+	if (tc1 && (tc1 != _tc1array) && gl_mtex) {
+		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), tc1);
+		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+		_tc1array = tc1;
+	} else if (!tc1 && _tc1array) {
+		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), tc1_array_p);
+		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+		_tc1array = NULL;
+	}
+
+	if (cub && cub != _carray) {
+		qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(colorub_t), cub);
+		_carray = cub;
+	}
+	if (cub && cf != _carray) {
+		qglColorPointer (4, GL_FLOAT, sizeof(colorf_t), cf);
+		_carray = cf;
+	}
+	if (!cub && !cf && _carray) {
+		qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(colorub_t), cub_array_p);
+		_carray = NULL;
+	}
+}
+
+extern inline void
+TWI_ChangeVDrawArrays_m (GLuint num, vertex_t *v, texcoord_t *tc0,
+		texcoord_t *tc1, colorub_t *cub, colorf_t *cf)
+{
+	if (num >= MAX_VERTEX_ARRAYS)
+		Sys_Error("ErrrrrK!");
+
+	if (v && v != _varray) {
+		memcpy (v_array_p, v, sizeof (vertex_t) * num);
+		_varray = v;
+	} else if (!v && _varray) {
+		_varray = NULL;
+	}
+
+	if (tc0 && tc0 != _tc0array) {
+		memcpy (tc0_array_p, tc0, sizeof (texcoord_t) * num);
+		_tc0array = tc0;
+	} else if (!tc0 && _tc0array) {
+		_tc0array = NULL;
+	}
+	if (tc1 && (tc1 != _tc1array) && gl_mtex) {
+		memcpy (tc1_array_p, tc1, sizeof (texcoord_t) * num);
+		_tc1array = tc1;
+	} else if (!tc1 && _tc1array) {
+		_tc1array = NULL;
+	}
+
+	if (cub && cub != _carray) {
+		memcpy (cub_array_p, cub, sizeof (colorub_t) * num);
+		_carray = cub;
+	}
+	if (cf && cf != _carray) {
+		TWI_FtoUB(cf->v, cub_array_p->v, num * 4);
+		_carray = cf;
+	}
+	if (!cub && !cf && _carray) {
+		_carray = NULL;
+	}
+}
+
+extern inline void
+TWI_ChangeVDrawArrays (GLuint num, qboolean cva, vertex_t *v, texcoord_t *tc0,
+		texcoord_t *tc1, colorub_t *cub, colorf_t *cf)
+{
+	if (gl_cva && va_locked) {
+		qglUnlockArraysEXT ();
+		va_locked = false;
+	}
+
+	if (!num)
+		return;
+
+	if (gl_copy_arrays->ivalue)
+		TWI_ChangeVDrawArrays_m (num, v, tc0, tc1, cub, cf);
+	else
+		TWI_ChangeVDrawArrays_p (v, tc0, tc1, cub, cf);
+
+	if (gl_cva && cva) {
+		qglLockArraysEXT (0, num);
+		va_locked = 1;
+	}
+}
+
+extern inline void
+TWI_ChangeVDrawArraysVBO (GLuint num, qboolean cva, GLuint v, GLuint tc0,
+		GLuint tc1, GLuint cub, GLuint cf)
+{
+	if (gl_cva && va_locked) {
+		qglUnlockArraysEXT ();
+		va_locked = false;
+	}
+
+	if (!num)
+		return;
+
+	if (v && v != (GLuint) _varray) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, v);
+		qglVertexPointer (3, GL_FLOAT, sizeof(vertex_t), 0);
+		_varray = (void *) v;
+	} else if (!v && _varray) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		qglVertexPointer (3, GL_FLOAT, sizeof(vertex_t), v_array_p);
+		_varray = NULL;
+	}
+
+	if (tc0 && tc0 != (GLuint) _tc0array) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, tc0);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), 0);
+		_tc0array = (void *) tc0;
+	} else if (!tc0 && _tc0array) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), tc0_array_p);
+		_tc0array = NULL;
+	}
+	if (tc1 && (tc1 != (GLuint) _tc1array) && gl_mtex) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, tc1);
+		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), 0);
+		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+		_tc1array = (void *) tc1;
+	} else if (!tc1 && _tc1array) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), tc1_array_p);
+		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+		_tc1array = NULL;
+	}
+
+	if (cub && cub != (GLuint) _carray) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, cub);
+		qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(colorub_t), 0);
+		_carray = (void *) cub;
+	}
+	if (cf && cf != (GLuint) _carray) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, cf);
+		qglColorPointer (4, GL_FLOAT, sizeof(colorf_t), 0);
+		_carray = (void *) cub;
+	}
+	if (!cub && !cf && _carray) {
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(colorub_t), cub_array_p);
+		_carray = NULL;
+	}
+
+	if (gl_cva && cva) {
+		qglLockArraysEXT (0, num);
+		va_locked = 1;
+	}
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
 
 extern inline void

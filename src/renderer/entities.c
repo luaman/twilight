@@ -30,6 +30,7 @@ static const char rcsid[] =
 #include "SDL.h"
 
 #include <string.h>
+#include <unistd.h>
 
 #include "entities.h"
 #include "host.h"
@@ -73,11 +74,11 @@ void
 R_DrawSkyEntities (void)
 {
 	if (sky_type != SKY_FAST && need_sky) {
+		R_DrawBrushDepthSkies ();
 		if (sky_type == SKY_BOX)
 			Sky_Box_Draw ();
 		else if (sky_type == SKY_SPHERE)
 			Sky_Sphere_Draw ();
-		R_DrawBrushDepthSkies ();
 	}
 }
 

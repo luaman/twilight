@@ -31,7 +31,6 @@ static const char rcsid[] =
 
 #include "cpu.h"
 #include "crc.h"
-#include "draw.h"
 #include "dyngl.h"
 #include "gl_info.h"
 #include "gl_textures.h"
