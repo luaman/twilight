@@ -387,7 +387,13 @@ Con_Printf (char *fmt, ...)
 
 // log all messages to file
 	if (con_debuglog)
-		Con_DebugLog (va ("%s/qconsole.log", com_gamedir), "%s", msg);
+	{
+		char msg2[MAX_OSPATH+32];
+		// LordHavoc: this used to use va(), but that was too dangerous,
+		// as Con_Printf and va() calls are often mixed.
+		sprintf(msg2, "%s/qconsole.log", com_gamedir);
+		Sys_DebugLog (msg2, "%s", msg);
+	}
 
 	if (!con_initialized)
 		return;
