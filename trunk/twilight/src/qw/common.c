@@ -10,13 +10,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -53,12 +53,12 @@ static const char rcsid[] =
 
 usercmd_t   nullcmd;					// guarenteed to be zero
 
+cvar_t *registered;
 cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;
 cvar_t *fs_userconf;
 cvar_t *fs_userpath;
 cvar_t *fs_gamename;
-cvar_t *registered;
 
 qboolean    msg_suppress_1 = 0;
 
@@ -92,7 +92,7 @@ over areas they shouldn't.
 The "cache directory" is only used during development to save network
 bandwidth, especially over ISDN / T1 lines.  If there is a cache directory
 specified, when a file is found by the normal search path, it will be mirrored
-into the cache directory, then opened there.  
+into the cache directory, then opened there.
 */
 
 //============================================================================
@@ -639,13 +639,12 @@ SZ_GetSpace (sizebuf_t *buf, int length)
 	if (buf->cursize + length > buf->maxsize) {
 		if (!buf->allowoverflow)
 			Sys_Error ("SZ_GetSpace: overflow without allowoverflow set (%d)",
-					   buf->maxsize);
+					buf->maxsize);
 
 		if (length > buf->maxsize)
 			Sys_Error ("SZ_GetSpace: %i is > full buffer size", length);
 
-		Sys_Printf ("SZ_GetSpace: overflow\n");	// because Con_Printf may be
-		// redirected
+		Sys_Printf ("SZ_GetSpace: overflow\n");
 		SZ_Clear (buf);
 		buf->overflowed = true;
 	}
@@ -770,8 +769,7 @@ COM_FileBase (char *in, char *out)
 		dot = s;
 	if (dot - slash < 2)
 		strcpy (out,"?model?");
-	else
-	{
+	else {
 		while (slash < dot)
 			*out++ = *slash++;
 		*out++ = 0;
@@ -893,16 +891,14 @@ COM_CheckFile (char *fname)
 ================
 COM_CheckRegistered
 
-Looks for the pop.txt file and verifies it.
+Looks for the pop.lmp file
 Sets the "registered" cvar.
-Immediately exits out if an alternate game was attempted to be started without
-being registered.
 ================
 */
 void
 COM_CheckRegistered (void)
 {
-	if (!COM_CheckFile("gfx/pop.lmp"))
+	if (!COM_CheckFile ("gfx/pop.lmp"))
 		return;
 
 	Cvar_Set (registered, "1");
@@ -1015,8 +1011,8 @@ COM_filelength
 int
 COM_filelength (FILE * f)
 {
-	int         pos;
-	int         end;
+	int			pos;
+	int			end;
 
 	pos = ftell (f);
 	fseek (f, 0, SEEK_END);
@@ -1029,7 +1025,7 @@ COM_filelength (FILE * f)
 int
 COM_FileOpenRead (char *path, FILE ** hndl)
 {
-	FILE       *f;
+	FILE	   *f;
 
 	f = fopen (path, "rb");
 	if (!f) {
@@ -1151,14 +1147,7 @@ COM_CopyFile (char *netpath, char *cachepath)
 	fclose (out);
 }
 
-/*
-===========
-COM_FindFile
 
-Finds the file in the search path.
-Sets com_filesize and one of handle or file
-===========
-*/
 int         file_from_pak;				// global indicating file came from
 
 										// pack file ZOID
@@ -1377,7 +1366,7 @@ COM_LoadPackFile (char *packfile)
 COM_AddDirectory
 
 Sets com_gamedir, adds the directory to the head of the path,
-then loads and adds pak1.pak pak2.pak ... 
+then loads and adds pak1.pak pak2.pak ...
 ================
 */
 void
@@ -1517,6 +1506,8 @@ COM_InitFilesystem (void)
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
 		Cvar_Set (fs_userpath, com_argv[i + 1]);
+
+	Sys_mkdir (fs_userpath->string);
 
 // Make sure fs_sharepath is set to something useful
 	if (!strlen (fs_sharepath->string))
