@@ -42,17 +42,17 @@ static const char rcsid[] =
 #include "r_explosion.h"
 #include "strlib.h"
 #include "sys.h"
-#include "texture.h"
+#include "gl_textures.h"
 
 // FIXME
 extern void TNT_Init (void);
 
-GLfloat tc_arrays[2][MAX_VERTEX_ARRAYS][2];
-GLfloat v_arrays[2][MAX_VERTEX_ARRAYS][3];
-GLfloat c_arrays[2][MAX_VERTEX_ARRAYS][4];
+texcoord_t	*tc_array_p;
+vertex_t	*v_array_p;
+color_t		*c_array_p;
+GLuint		*vindices;
 
-GLuint vindices[MAX_VERTEX_INDICES];
-GLuint v_index, i_index, va_index;
+GLuint v_index, i_index;
 qboolean va_locked;
 
 void R_InitBubble (void);
@@ -189,91 +189,21 @@ R_Init (void)
 	TNT_Init ();
 	R_Explosion_Init ();
 
-	playertextures = texture_extension_number;
-	texture_extension_number += MAX_CLIENTS;
-
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
 
-	va_index = 0;
+	tc_array_p = Zone_Alloc(tempzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
+	v_array_p = Zone_Alloc(tempzone, MAX_VERTEX_ARRAYS * sizeof(vertex_t));
+	c_array_p = Zone_Alloc(tempzone, MAX_VERTEX_ARRAYS * sizeof(color_t));
+	vindices = Zone_Alloc(tempzone, MAX_VERTEX_INDICES * sizeof(GLuint));
 
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array[0]), tc_array[0]);
-	qglColorPointer (4, GL_FLOAT, sizeof(c_array[0]), c_array[0]);
-	qglVertexPointer (3, GL_FLOAT, sizeof(v_array[0]), v_array[0]);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array_v(0)), tc_array_p);
+	qglColorPointer (4, GL_FLOAT, sizeof(c_array_v(0)), c_array_p);
+	qglVertexPointer (3, GL_FLOAT, sizeof(v_array_v(0)), v_array_p);
 
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-}
-
-/*
-===============
-R_TranslatePlayerSkin
-
-Translates a skin texture by the per-player color lookup
-===============
-*/
-void
-R_TranslatePlayerSkin (int playernum)
-{
-	Sint32		top, bottom;
-	Uint8		translate[256];
-	Uint32		translate32[256];
-	Sint32		i, s;
-	model_t		*model;
-	aliashdr_t	*paliashdr;
-	Uint8		*original;
-
-	top = cl.scores[playernum].colors & 0xf0;
-	bottom = (cl.scores[playernum].colors & 15) << 4;
-
-	for (i = 0; i < 256; i++)
-		translate[i] = i;
-
-	for (i = 0; i < 16; i++) {
-		if (top < 128)					// the artists made some backwards ranges.  sigh.
-			translate[TOP_RANGE + i] = top + i;
-		else
-			translate[TOP_RANGE + i] = top + 15 - i;
-
-		if (bottom < 128)
-			translate[BOTTOM_RANGE + i] = bottom + i;
-		else
-			translate[BOTTOM_RANGE + i] = bottom + 15 - i;
-	}
-
-	// 
-	// locate the original skin pixels
-	// 
-	currententity = &cl_entities[1 + playernum];
-	model = currententity->model;
-	if (!model)
-		return;							// player doesn't have a model yet
-	if (model->type != mod_alias)
-		return;							// only translate skins on alias models
-
-	paliashdr = (aliashdr_t *) Mod_Extradata (model);
-	s = paliashdr->skinwidth * paliashdr->skinheight;
-	if (currententity->skinnum < 0
-		|| currententity->skinnum >= paliashdr->numskins) {
-		Com_Printf ("(%d): Invalid player skin #%d\n", playernum,
-					currententity->skinnum);
-		original = (Uint8 *) paliashdr + paliashdr->texels[0];
-	} else
-		original =
-			(Uint8 *) paliashdr + paliashdr->texels[currententity->skinnum];
-
-	if (s & 3)
-		Sys_Error ("R_TranslateSkin: s&3");
-
-	for (i = 0; i < 256; i++)
-		translate32[i] = d_8to32table[translate[i]];
-
-	qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
-	GL_Upload8 (original, paliashdr->skinwidth, paliashdr->skinheight,
-			translate32, TEX_MIPMAP);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 /*

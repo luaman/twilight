@@ -39,6 +39,11 @@
 
 //=============================================================================
 
+typedef struct colormap_s {
+	vec3_t	top;
+	vec3_t	bottom;
+} colormap_t;
+
 typedef struct entity_s {
 	qboolean    forcelink;				// model changed
 
@@ -52,7 +57,7 @@ typedef struct entity_s {
 	struct model_s *model;				// NULL = no model
 	int         frame;
 	float       syncbase;				// for client-side animations
-	Uint8      *colormap;
+	colormap_t	*colormap;
 	int         effects;				// light, particals, etc
 	int         skinnum;				// for Alias models
 	int         visframe;				// last frame this entity was

@@ -66,6 +66,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "view.h"
 #include "sys.h"
+#include "gl_textures.h"
 
 #include "keys.h"
 
@@ -1152,6 +1153,8 @@ CL_Init (void)
 	CL_InitTEnts ();
 	CL_InitPrediction ();
 	CL_InitCam ();
+	CL_InitSkins ();
+	GLT_Init ();
 	Pmove_Init ();
 
 	//
@@ -1166,9 +1169,6 @@ CL_Init (void)
 	Cmd_AddCommand ("stop", CL_Stop_f);
 	Cmd_AddCommand ("playdemo", CL_PlayDemo_f);
 	Cmd_AddCommand ("timedemo", CL_TimeDemo_f);
-
-	Cmd_AddCommand ("skins", Skin_Skins_f);
-	Cmd_AddCommand ("allskins", Skin_AllSkins_f);
 
 	Cmd_AddCommand ("quit", CL_Quit_f);
 
@@ -1499,7 +1499,8 @@ Host_Init (void)
 	NET_Init ();
 
 	// setup net sockets and identify host
-	NET_OpenSocket (NS_CLIENT, PORT_CLIENT);
+//	NET_OpenSocket (NS_CLIENT, PORT_CLIENT);
+	NET_OpenSocket (NS_CLIENT, PORT_ANY);
 
 	Netchan_Init ();				// setup netchan
 

@@ -571,6 +571,12 @@ CL_Update_Frame (entity_t *e, int frame, float frame_time)
 
 	if (e->model->type == mod_alias) {
 		paliashdr = (aliashdr_t *) Mod_Extradata (e->model);
+		if (paliashdr->numframes <= e->to.frame) {
+			Com_Printf("INVALID FRAME %d FOR MODEL %s!\n", e->to.frame,
+					e->model->name);
+			e->cur.frame = e->to.frame = e->from.frame = 0;
+		}
+
 		if (paliashdr->frames[e->from.frame].numposes > 1)
 			e->from.frame_interval = paliashdr->frames[e->from.frame].interval;
 		else
@@ -667,9 +673,9 @@ CL_LinkPacketEntities (void)
 		// set colormap
 		if (state->colormap && (state->colormap < MAX_CLIENTS)
 			&& state->modelindex == cl_playerindex) {
-			ent->scoreboard = &cl.players[state->colormap - 1];
+			ent->colormap = &cl.players[state->colormap - 1].colormap;
 		} else {
-			ent->scoreboard = NULL;
+			ent->colormap = NULL;
 		}
 
 		// rotate binary objects locally
@@ -812,15 +818,19 @@ CL_ParseStatic (void)
 		Host_EndGame ("Too many static entities");
 	ent = &cl_static_entities[cl_num_static_entities++];
 
-// copy it to the current state
+	// copy it to the current state
+	memset (ent, 0, sizeof(*ent));
+
 	ent->model = cl.model_precache[es.modelindex];
-	ent->to.frame = es.frame;
+	ent->to.frame = ent->from.frame = ent->cur.frame = es.frame;
 	ent->skinnum = es.skinnum;
-	ent->time_left = 0;
-	VectorClear (ent->last_light);
 
 	VectorCopy (es.origin, ent->to.origin);
 	VectorCopy (es.angles, ent->to.angles);
+	VectorCopy (es.origin, ent->cur.origin);
+	VectorCopy (es.angles, ent->cur.angles);
+	VectorCopy (es.origin, ent->from.origin);
+	VectorCopy (es.angles, ent->from.angles);
 }
 
 
@@ -1036,10 +1046,13 @@ CL_LinkPlayers (void)
 		ent->skinnum = state->skinnum;
 
 		ent->model = cl.model_precache[state->modelindex];
-		if (state->modelindex == cl_playerindex)
-			ent->scoreboard = info;		// use custom skin
-		else
-			ent->scoreboard = NULL;
+		if (state->modelindex == cl_playerindex) {
+			ent->colormap = &info->colormap;	// Use custom colormap.
+			ent->skin = info->skin;				// Use custom skin.
+		} else {
+			ent->colormap = NULL;
+			ent->skin = NULL;
+		}
 
 		// 
 		// angles
@@ -1232,12 +1245,12 @@ CL_LinkStaticEntites (void)
 	int		i;
 
 	for (i = 0; i < cl_num_static_entities; i++) {
-		V_AddEntity ( &cl_static_entities[i] );
 		cl_static_entities[i].times++;
 
-		CL_Update_Angles (&cl_static_entities[i], cl_static_entities[i].cur.angles, cls.realtime);
-		CL_Update_Origin (&cl_static_entities[i], cl_static_entities[i].cur.origin, cls.realtime);
-		CL_Update_Frame (&cl_static_entities[i], cl_static_entities[i].cur.frame, cls.realtime);
+		CL_Update_Angles (&cl_static_entities[i], cl_static_entities[i].to.angles, cls.realtime);
+		CL_Update_Origin (&cl_static_entities[i], cl_static_entities[i].to.origin, cls.realtime);
+		CL_Update_Frame (&cl_static_entities[i], cl_static_entities[i].to.frame, cls.realtime);
+		V_AddEntity ( &cl_static_entities[i] );
 	}
 }
 

@@ -113,10 +113,7 @@ CL_EntityNum (int num)
 	if (num >= cl.num_entities) {
 		if (num >= MAX_EDICTS)
 			Host_Error ("CL_EntityNum: %i is an invalid number", num);
-		while (cl.num_entities <= num) {
-			cl_entities[cl.num_entities].colormap = vid.colormap;
-			cl.num_entities++;
-		}
+		cl.num_entities = num + 1;
 	}
 
 	return &cl_entities[num];
@@ -418,8 +415,6 @@ CL_ParseUpdate (int bits)
 				ent->syncbase = 0.0;
 		} else
 			forcelink = true;			// hack to make null model players work
-		if (num > 0 && num <= cl.maxclients)
-			R_TranslatePlayerSkin (num - 1);
 	}
 
 	ent->frame = (bits & U_FRAME) ? 
@@ -429,11 +424,11 @@ CL_ParseUpdate (int bits)
 		MSG_ReadByte() : ent->baseline.colormap;
 
 	if (!i)
-		ent->colormap = vid.colormap;
+		ent->colormap = NULL;
 	else {
 		if (i > cl.maxclients)
 			Sys_Error ("i >= cl.maxclients");
-		ent->colormap = cl.scores[i - 1].translations;
+		ent->colormap = &cl.scores[i - 1].colormap;
 	}
 
 	skin = (bits & U_SKIN) ? 
@@ -441,8 +436,6 @@ CL_ParseUpdate (int bits)
 
 	if (skin != ent->skinnum) {
 		ent->skinnum = skin;
-		if (num > 0 && num <= cl.maxclients)
-			R_TranslatePlayerSkin (num - 1);
 	}
 
 	ent->effects = (bits & U_EFFECTS) ? 
@@ -592,34 +585,19 @@ CL_NewTranslation
 void
 CL_NewTranslation (int slot)
 {
-	int         i, j;
-	int         top, bottom;
-	Uint8      *dest, *source;
+	Uint8	color;
 
-	if (slot > cl.maxclients)
-		Sys_Error ("CL_NewTranslation: slot > cl.maxclients");
-	dest = cl.scores[slot].translations;
-	source = vid.colormap;
-	memcpy (dest, vid.colormap, sizeof (cl.scores[slot].translations));
-	top = cl.scores[slot].colors & 0xf0;
-	bottom = (cl.scores[slot].colors & 15) << 4;
-	R_TranslatePlayerSkin (slot);
+	color = cl.scores[slot].colors & 0xf0;
+	color = bound(0, color, 13) * 16;
+	if (color < 128)
+		color += 15;
+	VectorCopy(d_8tofloattable[color], cl.scores[slot].colormap.top);
 
-	for (i = 0; i < VID_GRADES; i++, dest += 256, source += 256)
-	{
-		// the artists made some backwards ranges.  sigh.
-		if (top < 128)
-			memcpy (dest + TOP_RANGE, source + top, 16);
-		else
-			for (j = 0; j < 16; j++)
-				dest[TOP_RANGE + j] = source[top + 15 - j];
-
-		if (bottom < 128)
-			memcpy (dest + BOTTOM_RANGE, source + bottom, 16);
-		else
-			for (j = 0; j < 16; j++)
-				dest[BOTTOM_RANGE + j] = source[bottom + 15 - j];
-	}
+	color = (cl.scores[slot].colors & 15) << 4;
+	color = bound(0, color, 13) * 16;
+	if (color < 128)
+		color += 15;
+	VectorCopy(d_8tofloattable[color], cl.scores[slot].colormap.bottom);
 }
 
 /*
@@ -642,7 +620,7 @@ CL_ParseStatic (void)
 	ent->frame = ent->baseline.frame;
 	ent->pose1 = 0;
 	ent->pose2 = 0;
-	ent->colormap = vid.colormap;
+	ent->colormap = NULL;
 	ent->skinnum = ent->baseline.skin;
 	ent->effects = ent->baseline.effects;
 	ent->frame_start_time = 0;

@@ -48,6 +48,7 @@ static const char rcsid[] =
 #include "server.h"
 #include "sound.h"
 #include "world.h"
+#include "gl_textures.h"
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.
@@ -733,6 +734,7 @@ CL_Init (void)
 	CL_Input_Init_Cvars ();
 	CL_Input_Init ();
 	CL_InitTEnts ();
+	GLT_Init ();
 
 	//
 	// register our commands

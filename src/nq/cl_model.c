@@ -22,9 +22,12 @@
 		Boston, MA  02111-1307, USA
 
 */
-// cl_model.c -- client model loading
+// models.c -- model loading and caching
 static const char rcsid[] =
     "$Id$";
+
+// models are the only shared resource between a client and server running
+// on the same machine.
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -35,7 +38,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
-#include "common.h"
+#include "client.h"
 #include "crc.h"
 #include "cvar.h"
 #include "draw.h"
@@ -44,21 +47,27 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
-#include "texture.h"
-
+#include "gl_textures.h"
 
 extern model_t	*loadmodel;
-extern char		loadname[32];				// for hunk tags
+extern char	loadname[32];				// for hunk tags
 
 void	Mod_LoadSpriteModel (model_t *mod, void *buffer);
 void	Mod_LoadBrushModel (model_t *mod, void *buffer);
 void	Mod_LoadAliasModel (model_t *mod, void *buffer);
 model_t	*Mod_LoadModel (model_t *mod, qboolean crash);
 
-void	GL_SubdivideSurface (msurface_t *fa);
+Uint8	mod_novis[MAX_MAP_LEAFS / 8];
+
+#define	MAX_MOD_KNOWN	512
+model_t	mod_known[MAX_MOD_KNOWN];
+int		mod_numknown;
 
 cvar_t	*gl_subdivide_size;
 
+qboolean	isnotmap;
+
+void	GL_SubdivideSurface (msurface_t *fa);
 
 /*
 ===============
@@ -70,6 +79,7 @@ Mod_Init_Cvars (void)
 {
 	gl_subdivide_size = Cvar_Get ("gl_subdivide_size", "128", CVAR_ARCHIVE, NULL);
 }
+
 
 /*
 ==================
@@ -94,7 +104,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 			sizeof (stackbuf), true);
 	if (!buf) {
 		if (crash)
-			Sys_Error ("Mod_LoadModel: %s not found", mod->name);
+			Host_EndGame ("Mod_LoadModel: %s not found", mod->name);
 		return NULL;
 	}
 //
@@ -128,14 +138,6 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 	return mod;
 }
 
-/*
-==============================================================================
-
-					BRUSHMODEL LOADING
-
-==============================================================================
-*/
-
 qboolean 
 Img_HasFullbrights (Uint8 *pixels, int size)
 {
@@ -148,7 +150,16 @@ Img_HasFullbrights (Uint8 *pixels, int size)
     return false;
 }
 
-extern Uint8      *mod_base;
+
+/*
+===============================================================================
+
+					BRUSHMODEL LOADING
+
+===============================================================================
+*/
+
+Uint8	*mod_base;
 
 
 /*
@@ -189,7 +200,7 @@ Mod_LoadTextures (lump_t *l)
 			mt->offsets[j] = LittleLong (mt->offsets[j]);
 
 		if ((mt->width & 15) || (mt->height & 15))
-			Sys_Error ("Texture %s is not 16 aligned", mt->name);
+			Host_EndGame ("Texture %s is not 16 aligned", mt->name);
 		pixels = mt->width * mt->height * (85 / 64);
 		tx = Hunk_AllocName (sizeof (texture_t) + pixels, loadname);
 		loadmodel->textures[i] = tx;
@@ -257,7 +268,7 @@ Mod_LoadTextures (lump_t *l)
 			altanims[altmax] = tx;
 			altmax++;
 		} else
-			Sys_Error ("Bad animating texture %s", tx->name);
+			Host_EndGame ("Bad animating texture %s", tx->name);
 
 		for (j = i + 1; j < m->nummiptex; j++) {
 			tx2 = loadmodel->textures[j];
@@ -280,7 +291,7 @@ Mod_LoadTextures (lump_t *l)
 				if (num + 1 > altmax)
 					altmax = num + 1;
 			} else
-				Sys_Error ("Bad animating texture %s", tx->name);
+				Host_EndGame ("Bad animating texture %s", tx->name);
 		}
 
 #define	ANIM_CYCLE	2
@@ -288,7 +299,7 @@ Mod_LoadTextures (lump_t *l)
 		for (j = 0; j < max; j++) {
 			tx2 = anims[j];
 			if (!tx2)
-				Sys_Error ("Missing frame %i of %s", j, tx->name);
+				Host_EndGame ("Missing frame %i of %s", j, tx->name);
 			tx2->anim_total = max * ANIM_CYCLE;
 			tx2->anim_min = j * ANIM_CYCLE;
 			tx2->anim_max = (j + 1) * ANIM_CYCLE;
@@ -299,7 +310,7 @@ Mod_LoadTextures (lump_t *l)
 		for (j = 0; j < altmax; j++) {
 			tx2 = altanims[j];
 			if (!tx2)
-				Sys_Error ("Missing frame %i of %s", j, tx->name);
+				Host_EndGame ("Missing frame %i of %s", j, tx->name);
 			tx2->anim_total = altmax * ANIM_CYCLE;
 			tx2->anim_min = j * ANIM_CYCLE;
 			tx2->anim_max = (j + 1) * ANIM_CYCLE;
@@ -328,10 +339,10 @@ Mod_LoadLighting (lump_t *l)
 		memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
 	}
 	else {
-		int		i;
-		Uint8	*in, *out, *data;
-		Uint8	d;
-		char	litfilename[MAX_OSPATH];
+		int i;
+		Uint8 *in, *out, *data;
+		Uint8 d;
+		char litfilename[MAX_OSPATH];
 
 		loadmodel->lightdata = NULL;
 
@@ -391,7 +402,7 @@ Mod_LoadTexinfo (lump_t *l)
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
-		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
+		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
 	out = Hunk_AllocName (count * sizeof (*out), loadname);
 
@@ -422,7 +433,7 @@ Mod_LoadTexinfo (lump_t *l)
 			out->flags = 0;
 		} else {
 			if (miptex >= loadmodel->numtextures)
-				Sys_Error ("miptex >= loadmodel->numtextures");
+				Host_EndGame ("miptex >= loadmodel->numtextures");
 			out->texture = loadmodel->textures[miptex];
 			if (!out->texture) {
 				out->texture = r_notexture_mip;	// texture not found
@@ -478,12 +489,13 @@ CalcSurfaceExtents (msurface_t *s)
 		s->texturemins[i] = bmins[i] * 16;
 		s->extents[i] = (bmaxs[i] - bmins[i]) * 16;
 		if (!(tex->flags & TEX_SPECIAL) && s->extents[i] > 512 /* 256 */ )
-			Sys_Error ("Bad surface extents");
+			Host_EndGame ("Bad surface extents");
 	}
 
 	s->smax = bmaxs[0] - bmins[0] + 1, 
 	s->tmax = bmaxs[1] - bmins[1] + 1;
 }
+
 
 /*
 =================
@@ -500,7 +512,7 @@ Mod_LoadFaces (lump_t *l)
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
-		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
+		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
 	out = Hunk_AllocName (count * sizeof (*out), loadname);
 
@@ -536,7 +548,6 @@ Mod_LoadFaces (lump_t *l)
 		else if (gl_colorlights->value)
 			out->samples = loadmodel->lightdata + i*3;
 
-
 		// set the drawing flags flag
 
 		if (!strncmp (out->texinfo->texture->name, "sky", 3))	// sky
@@ -556,6 +567,7 @@ Mod_LoadFaces (lump_t *l)
 			GL_SubdivideSurface (out);	// cut up polygon for warps
 			continue;
 		}
+
 	}
 }
 
@@ -571,7 +583,6 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 	dheader_t	*header;
 	dmodel_t	*bm;
 	char		name[10];
-	extern qboolean isnotmap;
 
 	loadmodel->type = mod_brush;
 
@@ -579,18 +590,17 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	i = LittleLong (header->version);
 	if (i != BSPVERSION)
-		Sys_Error
+		Host_EndGame
 			("Mod_LoadBrushModel: %s has wrong version number (%i should be %i)",
 			 mod->name, i, BSPVERSION);
 
-// swap all the lumps
+	// swap all the lumps
 	mod_base = (Uint8 *) header;
 
 	for (i = 0; i < sizeof (dheader_t) / 4; i++)
 		((int *) header)[i] = LittleLong (((int *) header)[i]);
 
-// load into heap
-
+	// load into heap
 	Mod_LoadVertexes (&header->lumps[LUMP_VERTEXES]);
 	Mod_LoadEdges (&header->lumps[LUMP_EDGES]);
 	Mod_LoadSurfedges (&header->lumps[LUMP_SURFEDGES]);
@@ -611,9 +621,9 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	mod->numframes = 2;					// regular and alternate animation
 
-//
-// set up the submodels (FIXME: this is confusing)
-//
+	//
+	// set up the submodels (FIXME: this is confusing)
+	//
 	for (i = 0; i < mod->numsubmodels; i++) {
 		bm = &mod->submodels[i];
 
@@ -633,10 +643,10 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 		mod->numleafs = bm->visleafs;
 
-		if (!isnotmap && (i < mod->numsubmodels - 1)) 
-		{	
+		if (!isnotmap && (i < mod->numsubmodels - 1))
+		{
 			// duplicate the basic information
-			strlcpy (name, va("*%i", i + 1), sizeof(name));
+			strncpy (name, va("*%i", i + 1), sizeof(name));
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);
@@ -653,12 +663,16 @@ ALIAS MODELS
 ==============================================================================
 */
 
-aliashdr_t *pheader;
+aliashdr_t	*pheader;
 
 qboolean	vseams[MAXALIASVERTS];
-mtriangle_t triangles[MAXALIASTRIS];
+int			vremap[MAXALIASVERTS];
+mtriangle_t	triangles[MAXALIASTRIS];
+int			numinverts;
 
-float		aliasbboxmin[3], aliasbboxmax[3];
+model_t	*player_model;
+
+float	aliasbboxmin[3], aliasbboxmax[3];
 
 /*
 =================
@@ -666,11 +680,12 @@ Mod_LoadAliasFrame
 =================
 */
 void *
-Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame)
+Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame, model_t *mod)
 {
 	trivertx_t		*pinframe;
 	int				i, j;
 	daliasframe_t	*pdaliasframe;
+	maliaspose_t	*pose;
 
 	pdaliasframe = (daliasframe_t *) pin;
 
@@ -690,18 +705,22 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame)
 
 	pinframe = (trivertx_t *) (pdaliasframe + 1);
 
-	frame->poses = Zone_Alloc(tempzone, sizeof(maliaspose_t));
-	frame->poses->normal_indices = Zone_Alloc(tempzone, pheader->numverts * 2* sizeof(Uint8));
-	frame->poses->vertices = Zone_Alloc(tempzone, pheader->numverts * 2* sizeof(avertex_t));
+	frame->poses = Zone_Alloc(mod->extrazone, sizeof(maliaspose_t));
 
-	for (i = 0; i < pheader->numverts; i++) {
-		frame->poses->normal_indices[i] = pinframe->lightnormalindex;
-		VectorCopy(pinframe->v, frame->poses->vertices[i].v);
+	pose = frame->poses;
+
+	frame->poses->normal_indices = Zone_Alloc(mod->extrazone, pheader->numverts * sizeof(Uint8));
+	frame->poses->vertices = Zone_Alloc(mod->extrazone, pheader->numverts * sizeof(avertex_t));
+
+
+	for (i = 0; i < numinverts; i++) {
+		j = vremap[i];
+		pose->normal_indices[j] = pinframe->lightnormalindex;
+		VectorCopy(pinframe->v, pose->vertices[j].v);
 
 		if (vseams[i]) {
-			j = pheader->numverts + i;
-			frame->poses->normal_indices[j] = pinframe->lightnormalindex;
-			VectorCopy(pinframe->v, frame->poses->vertices[j].v);
+			pose->normal_indices[j + 1] = pinframe->lightnormalindex;
+			VectorCopy(pinframe->v, pose->vertices[j + 1].v);
 		}
 
 		pinframe++;
@@ -717,15 +736,17 @@ Mod_LoadAliasGroup
 =================
 */
 void *
-Mod_LoadAliasGroup (void *pin, maliasframedesc_t *frame)
+Mod_LoadAliasGroup (Uint8 *datapointer, maliasframedesc_t *frame, model_t *mod)
 {
 	daliasgroup_t		*pingroup;
 	int					i, j, k, numframes;
 	daliasinterval_t	*pin_intervals;
 	maliaspose_t		*pose;
-	trivertx_t			*pinframe;
+	daliasframe_t		*pinframe;
+	trivertx_t			*vertices;
 
-	pingroup = (daliasgroup_t *) pin;
+	pingroup = (daliasgroup_t *) datapointer;
+	datapointer += sizeof (daliasgroup_t);
 
 	numframes = LittleLong (pingroup->numframes);
 
@@ -742,218 +763,100 @@ Mod_LoadAliasGroup (void *pin, maliasframedesc_t *frame)
 			aliasbboxmax[i] = (float)frame->bboxmax.v[i];
 	}
 
-	pin_intervals = (daliasinterval_t *) (pingroup + 1);
+	pin_intervals = (daliasinterval_t *) datapointer;
+	datapointer += sizeof(daliasinterval_t) * numframes;
 
 	frame->interval = LittleFloat (pin_intervals->interval);
 
-	pin_intervals += numframes;
-
-	pinframe = (trivertx_t *) (((daliasframe_t *) pin_intervals));
-
-	frame->poses = Zone_Alloc(tempzone, numframes * sizeof(maliaspose_t));
+	frame->poses = Zone_Alloc(mod->extrazone, numframes * sizeof(maliaspose_t));
 
 	for (i = 0; i < numframes; i++) {
 		pose = &frame->poses[i];
 
-		pinframe = (trivertx_t *) ((daliasframe_t *) pinframe + 1);
+		pinframe = (daliasframe_t *) datapointer;
+		datapointer += sizeof(daliasframe_t);
+		vertices = (trivertx_t *) datapointer;
+		datapointer += sizeof(trivertx_t) * numinverts;
 
-		pose->normal_indices = Zone_Alloc(tempzone, pheader->numverts * 2* sizeof(Uint8));
-		pose->vertices = Zone_Alloc(tempzone, pheader->numverts * 2* sizeof(avertex_t));
+		pose->normal_indices = Zone_Alloc(mod->extrazone, pheader->numverts * sizeof(Uint8));
+		pose->vertices = Zone_Alloc(mod->extrazone, pheader->numverts * sizeof(avertex_t));
 
-		for (j = 0; j < pheader->numverts; j++) {
-			frame->poses->normal_indices[j] = pinframe[j].lightnormalindex;
-			VectorCopy(pinframe[j].v, frame->poses->vertices[j].v);
+		for (j = 0; j < numinverts; j++) {
+			k = vremap[j];
+			pose->normal_indices[k] = vertices[j].lightnormalindex;
+			VectorCopy(vertices[j].v, pose->vertices[k].v);
 
 			if (vseams[j]) {
-				k = pheader->numverts + j;
-				frame->poses->normal_indices[k] = pinframe[j].lightnormalindex;
-				VectorCopy(pinframe[j].v, frame->poses->vertices[k].v);
+				pose->normal_indices[k + 1] = vertices[j].lightnormalindex;
+				VectorCopy(vertices[j].v, pose->vertices[k + 1].v);
 			}
 		}
-		pinframe += pheader->numverts;
 	}
 
-	return (void *) pinframe;
+	return (void *) datapointer;
 }
 
 //=========================================================
-
-/*
-=================
-Mod_FloodFillSkin
-
-Fill background pixels so mipmapping doesn't have haloes - Ed
-=================
-*/
-
-typedef struct {
-	short	x, y;
-} floodfill_t;
-
-extern unsigned d_8to32table[];
-
-// must be a power of 2
-#define FLOODFILL_FIFO_SIZE 0x1000
-#define FLOODFILL_FIFO_MASK (FLOODFILL_FIFO_SIZE - 1)
-
-#define FLOODFILL_STEP( off, dx, dy ) \
-{ \
-	if (pos[off] == fillcolor) \
-	{ \
-		pos[off] = 255; \
-		fifo[inpt].x = x + (dx), fifo[inpt].y = y + (dy); \
-		inpt = (inpt + 1) & FLOODFILL_FIFO_MASK; \
-	} \
-	else if (pos[off] != 255) fdc = pos[off]; \
-}
-
-void
-Mod_FloodFillSkin (Uint8 *skin, int skinwidth, int skinheight)
-{
-	Uint8		fillcolor = *skin;		// assume this is the pixel to fill
-	floodfill_t	fifo[FLOODFILL_FIFO_SIZE];
-	int			inpt = 0, outpt = 0;
-	int			filledcolor = -1;
-	int			i;
-
-	if (filledcolor == -1) {
-		filledcolor = 0;
-		// attempt to find opaque black
-		for (i = 0; i < 256; ++i)
-			if (d_8to32table[i] == (255 << 0))	// alpha 1.0
-			{
-				filledcolor = i;
-				break;
-			}
-	}
-	// can't fill to filled color or to transparent color (used as visited
-	// marker)
-	if ((fillcolor == filledcolor) || (fillcolor == 255)) {
-		// printf( "not filling skin from %d to %d\n", fillcolor, filledcolor
-		// );
-		return;
-	}
-
-	fifo[inpt].x = 0, fifo[inpt].y = 0;
-	inpt = (inpt + 1) & FLOODFILL_FIFO_MASK;
-
-	while (outpt != inpt) {
-		int         x = fifo[outpt].x, y = fifo[outpt].y;
-		int         fdc = filledcolor;
-		Uint8      *pos = &skin[x + skinwidth * y];
-
-		outpt = (outpt + 1) & FLOODFILL_FIFO_MASK;
-
-		if (x > 0)
-			FLOODFILL_STEP (-1, -1, 0);
-		if (x < skinwidth - 1)
-			FLOODFILL_STEP (1, 1, 0);
-		if (y > 0)
-			FLOODFILL_STEP (-skinwidth, 0, -1);
-		if (y < skinheight - 1)
-			FLOODFILL_STEP (skinwidth, 0, 1);
-		skin[x + skinwidth * y] = fdc;
-	}
-}
 
 /*
 ===============
 Mod_LoadAllSkins
 ===============
 */
-void *
-Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
+Uint8 *
+Mod_LoadAllSkins (model_t *mod, Uint8 *datapointer, qboolean load)
 {
-	int						i, j, k;
-	char					name[32];
-	unsigned				s;
-	Uint8					*skin, *texels;
-	daliasskingroup_t		*pinskingroup;
-	int						groupskins;
-	daliasskininterval_t	*pinskinintervals;
+	int					i, height, width, numgroups, numskins, numskins2;
+	unsigned int		s;
+	float				interval;
+	daliasskintype_t	*pskintype;
 
-	skin = (Uint8 *) (pskintype + 1);
+	numgroups = pheader->numskins;
 
-	if (numskins < 1 || numskins > MAX_SKINS)
-		Sys_Error ("Mod_LoadAliasModel: Invalid # of skins: %d\n", numskins);
+	if (numgroups < 1 || numgroups > MAX_SKINS)
+		Host_EndGame("Mod_LoadAliasModel: Invalid # of skins: %d\n", numgroups);
 
-	s = pheader->skinwidth * pheader->skinheight;
+	height = pheader->skinheight;
+	width = pheader->skinwidth;
+	s = width * height;
 
-	for (i = 0; i < numskins; i++) {
-		if (pskintype->type == ALIAS_SKIN_SINGLE) {
-			Mod_FloodFillSkin (skin, pheader->skinwidth, pheader->skinheight);
+	if (load)
+		pheader->skins = Zone_Alloc(mod->extrazone, sizeof(skin_t) * numgroups);
 
-			texels = Hunk_AllocName (s, loadname);
-			pheader->texels[i] = texels - (Uint8 *) pheader;
-			memcpy (texels, (Uint8 *) (pskintype + 1), s);
+	for (i = 0; i < numgroups; i++) {
+		pskintype = (daliasskintype_t *) datapointer;
+		datapointer += sizeof(daliasskintype_t);
+		if (pskintype->type) {
+			daliasskingroup_t	*group = (daliasskingroup_t *) datapointer;
+			daliasskininterval_t *time = (daliasskininterval_t *) datapointer;
+			datapointer += sizeof(daliasskingroup_t);
 
-			snprintf (name, sizeof (name), "%s_%i", loadmodel->name, i);
-
-			pheader->gl_texturenum[i][0] =
-				pheader->gl_texturenum[i][1] =
-				pheader->gl_texturenum[i][2] =
-				pheader->gl_texturenum[i][3] =
-				GL_LoadTexture (name, pheader->skinwidth,
-								pheader->skinheight, (Uint8 *) (pskintype + 1),
-								TEX_MIPMAP, 8);
-
-			if (Img_HasFullbrights((Uint8 *)(pskintype + 1),
-						pheader->skinwidth*pheader->skinheight))
-				pheader->fb_texturenum[i][0] = pheader->fb_texturenum[i][1] =
-				pheader->fb_texturenum[i][2] = pheader->fb_texturenum[i][3] =
-					GL_LoadTexture (va("@fb_%s", name), pheader->skinwidth, 
-					pheader->skinheight, (Uint8 *)(pskintype + 1), TEX_MIPMAP|TEX_FBMASK, 8);
-			else
-				pheader->fb_texturenum[i][0] = pheader->fb_texturenum[i][1] =
-				pheader->fb_texturenum[i][2] = pheader->fb_texturenum[i][3] = 0;
-
-			pskintype = (daliasskintype_t *) ((Uint8 *) (pskintype + 1) + s);
-		} else {
-			// animating skin group.  yuck.
-			pskintype++;
-			pinskingroup = (daliasskingroup_t *) pskintype;
-			groupskins = LittleLong (pinskingroup->numskins);
-			pinskinintervals = (daliasskininterval_t *) (pinskingroup + 1);
-
-			pskintype = (void *) (pinskinintervals + groupskins);
-
-			for (j = 0; j < groupskins; j++) {
-				Mod_FloodFillSkin (skin, pheader->skinwidth,
-								   pheader->skinheight);
-				if (j == 0) {
-					texels = Hunk_AllocName (s, loadname);
-					pheader->texels[i] = texels - (Uint8 *) pheader;
-					memcpy (texels, (Uint8 *) (pskintype), s);
-				}
-				snprintf (name, sizeof (name), "%s_%i_%i", loadmodel->name, i,
-						  j);
-				pheader->gl_texturenum[i][j & 3] =
-					GL_LoadTexture (name, pheader->skinwidth,
-									pheader->skinheight, (Uint8 *) (pskintype),
-									TEX_MIPMAP, 8);
-
-				if (Img_HasFullbrights((Uint8 *)(pskintype),
-							pheader->skinwidth*pheader->skinheight))
-					pheader->fb_texturenum[i][j&3] =
-					GL_LoadTexture (va("@fb_%s", name), pheader->skinwidth, 
-					pheader->skinheight, (Uint8 *)(pskintype), TEX_MIPMAP|TEX_FBMASK, 8);
-				else
-					pheader->fb_texturenum[i][j&3] = 0;
-
-				pskintype = (daliasskintype_t *) ((Uint8 *) (pskintype) + s);
+			numskins2 = numskins = group->numskins;
+			interval = time->interval;
+			datapointer += sizeof(daliasskininterval_t) * numskins;
+			if ((interval - 0.00005) <= 0) {
+				Com_Printf("Broken alias model skin group: %s %d, %d %f\n",
+						mod->name, i, numskins, interval);
+				interval = 1;
 			}
-			k = j;
-			for ( /* */ ; j < 4; j++)
-				pheader->gl_texturenum[i][j & 3] =
-					pheader->gl_texturenum[i][j - k];
+		} else {
+			numskins2 = numskins = 1;
+			interval = 1;
 		}
+
+		if (load) {
+			GLT_Skin_Parse(datapointer, &pheader->skins[i], pheader,
+					va("%s/skins/%d", mod->name, i), width, height, numskins,
+					interval);
+		}
+		datapointer += s * numskins2;
 	}
 
-	return (void *) pskintype;
+	return datapointer;
 }
 
-//=========================================================================
 
+//=========================================================================
 typedef struct
 {
 	char	*name;
@@ -969,12 +872,14 @@ mflags_t modelflags[] =
 	{ "progs/fire.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/bolt.mdl", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
 	{ "progs/laser.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/gib", 9, FLAG_NOSHADOW },
 	{ "progs/missile.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/grenade.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/spike.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/s_spike.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/zom_gib.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/player.mdl", 0, FLAG_PLAYER },
+	{ "progs/v_spike.mdl", 0, FLAG_NO_IM_FORM },
 	{ "progs/boss.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/oldone.mdl", 0, FLAG_NOSHADOW },
 
@@ -988,7 +893,7 @@ mflags_t modelflags[] =
 	{ "progs/end.mdl", 9, FLAG_NOSHADOW },
 
 	// Dissolution of Eternity
-	{ "progs/lavalball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },	
+	{ "progs/lavalball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
 	{ "progs/beam.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/fireball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
 	{ "progs/lspike.mdl", 0, FLAG_NOSHADOW },
@@ -1019,14 +924,10 @@ mflags_t modelflags[] =
 	{ "progs/chip", 10, FLAG_NOSHADOW },
 
 	// Common
+	{ "progs/v_nail.mdl", 0, FLAG_NO_IM_ANIM|FLAG_NO_IM_FORM|FLAG_NOSHADOW },
+	{ "progs/v_light.mdl", 0, FLAG_NO_IM_ANIM|FLAG_NO_IM_FORM|FLAG_NOSHADOW },
 	{ "progs/v_", 8, FLAG_NOSHADOW|FLAG_NO_IM_FORM },
-	{ "progs/g_", 8, 0 },
-	{ "progs/h_", 8, FLAG_NOSHADOW },
-	{ "progs/gib", 9, FLAG_NOSHADOW },
-
-	// double size of eyes, since they are really hard to see in gl
 	{ "progs/eyes.mdl", 0, FLAG_EYES|FLAG_DOUBLESIZE },
-	{ "progs/armor.mdl", 0, 0 },
 
 	// end of list
 	{ NULL }
@@ -1062,32 +963,39 @@ Mod_LoadAliasModel
 void
 Mod_LoadAliasModel (model_t *mod, void *buffer)
 {
-	int					i, j, s, t, v;
+	int					i, j, k, v;
+	float				s, t;
 	mdl_t				*pinmodel;
+	Uint8				*datapointer, *skindata;
 	stvert_t			*pinstverts;
 	dtriangle_t			*pintriangles;
-	int					version, numframes;
+	int					version, numframes, numseams;
 	daliasframetype_t	*pframetype;
-	daliasskintype_t	*pskintype;
 	qboolean			typeSingle = false;
 
 	// Clear the arrays to NULL.
 	memset (vseams, 0, sizeof(vseams));
+	memset (vremap, 0, sizeof(vremap));
 
-	pinmodel = (mdl_t *) buffer;
+	datapointer = buffer;
+
+	pinmodel = (mdl_t *) datapointer;
+	datapointer += sizeof(mdl_t);
 
 	version = LittleLong (pinmodel->version);
 	if (version != ALIAS_VERSION)
-		Sys_Error ("%s has wrong version number (%i should be %i)",
+		Host_EndGame ("%s has wrong version number (%i should be %i)",
 				   mod->name, version, ALIAS_VERSION);
 
 	mod->modflags = Mod_FindModelFlags(mod->name);
+
 
 //
 // allocate space for a working header, plus all the data except the frames,
 // skin and group info
 //
-	pheader = Zone_Alloc(tempzone, sizeof(aliashdr_t));
+	mod->extrazone = Zone_AllocZone(mod->name);
+	pheader = Zone_Alloc(mod->extrazone, sizeof(aliashdr_t));
 
 	mod->flags = LittleLong (pinmodel->flags);
 
@@ -1100,26 +1008,26 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	pheader->skinheight = LittleLong (pinmodel->skinheight);
 
 	if (pheader->skinheight > MAX_LBM_HEIGHT)
-		Sys_Error ("model %s has a skin taller than %d", mod->name,
+		Host_EndGame ("model %s has a skin taller than %d", mod->name,
 				   MAX_LBM_HEIGHT);
 
-	pheader->numverts = LittleLong (pinmodel->numverts);
+	numinverts = LittleLong (pinmodel->numverts);
 
-	if (pheader->numverts <= 0)
-		Sys_Error ("model %s has no vertices", mod->name);
+	if (numinverts <= 0)
+		Host_EndGame ("model %s has no vertices", mod->name);
 
-	if (pheader->numverts > MAXALIASVERTS)
-		Sys_Error ("model %s has too many vertices", mod->name);
+	if (numinverts > MAXALIASVERTS)
+		Host_EndGame ("model %s has too many vertices", mod->name);
 
 	pheader->numtris = LittleLong (pinmodel->numtris);
 
 	if (pheader->numtris <= 0)
-		Sys_Error ("model %s has no triangles", mod->name);
+		Host_EndGame ("model %s has no triangles", mod->name);
 
 	pheader->numframes = LittleLong (pinmodel->numframes);
 	numframes = pheader->numframes;
 	if (numframes < 1)
-		Sys_Error ("Mod_LoadAliasModel: Invalid # of frames: %d\n", numframes);
+		Host_EndGame ("Mod_LoadAliasModel: Invalid # of frames: %d\n", numframes);
 
 	pheader->size = LittleFloat (pinmodel->size) * ALIAS_BASE_SIZE_RATIO;
 	mod->synctype = LittleLong (pinmodel->synctype);
@@ -1130,75 +1038,92 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		pheader->scale_origin[i] = LittleFloat (pinmodel->scale_origin[i]);
 		pheader->eyeposition[i] = LittleFloat (pinmodel->eyeposition[i]);
 	}
+	if (mod->modflags & FLAG_EYES)
+		pheader->scale_origin[2] -= 30;
 
+	if (mod->modflags & FLAG_DOUBLESIZE)
+		VectorScale(pheader->scale, 2, pheader->scale);
 
 //
 // load the skins
 //
-	pskintype = (daliasskintype_t *) &pinmodel[1];
-	pskintype = Mod_LoadAllSkins (pheader->numskins, pskintype);
+	skindata = datapointer;
+	datapointer = Mod_LoadAllSkins (mod, skindata, false);
 
 //
 // load base s and t vertices
 //
-	pinstverts = (stvert_t *) pskintype;
+	pinstverts = (stvert_t *) datapointer;
+	datapointer += sizeof(stvert_t) * numinverts;
 
-	pheader->tcarray = Zone_Alloc(tempzone, pheader->numverts * 2 * sizeof(astvert_t));
-	for (i = 0, j = 0; i < pheader->numverts; i++) {
-		s = LittleLong (pinstverts[i].s);
-		t = LittleLong (pinstverts[i].t);
-		pheader->tcarray[i].s = (s + 0.5) / pheader->skinwidth;
-		pheader->tcarray[i].t = (t + 0.5) / pheader->skinheight;
-		vseams[i] = LittleLong (pinstverts[i].onseam); 
+	for (i = 0, numseams = 0; i < numinverts; i++) {
+		vremap[i] = i + numseams;
+		if ((vseams[i] = LittleLong (pinstverts[i].onseam)))
+			numseams++;
+	}
 
+	pheader->numverts = numinverts + numseams;
+
+	pheader->tcarray = Zone_Alloc(mod->extrazone, pheader->numverts * sizeof(astvert_t));
+	for (i = 0, j = 0; i < numinverts; i++) {
+		j = vremap[i];
+
+		s = LittleLong (pinstverts[i].s) + 0.5;
+		t = LittleLong (pinstverts[i].t) + 0.5;
+		pheader->tcarray[j].s = s / pheader->skinwidth;
+		pheader->tcarray[j].t = t / pheader->skinheight;
 		if (vseams[i]) {	// Duplicate for back texture.
-			j = i + pheader->numverts;
 			s += pheader->skinwidth / 2;
-			pheader->tcarray[j].s = (s + 0.5) / pheader->skinwidth;
-			pheader->tcarray[j].t = (t + 0.5) / pheader->skinheight;
+			pheader->tcarray[j + 1].s = s / pheader->skinwidth;
+			pheader->tcarray[j + 1].t = t / pheader->skinheight;
 		}
 	}
 
 //
 // load triangle lists
 //
-	pintriangles = (dtriangle_t *) &pinstverts[pheader->numverts];
+	pintriangles = (dtriangle_t *) datapointer;
+	datapointer += sizeof(dtriangle_t) * pheader->numtris;
 
-	pheader->indices = Zone_Alloc(tempzone, pheader->numtris *3* sizeof(GLint));
+	pheader->triangles = Zone_Alloc(mod->extrazone,
+			pheader->numtris * sizeof(mtriangle_t));
 
 	for (i = 0; i < pheader->numtris; i++) {
 		int facesfront = LittleLong (pintriangles[i].facesfront);
 
 		for (j = 0; j < 3; j++) {
 			v = LittleLong (pintriangles[i].vertindex[j]);
+			k = vremap[v];
 			if (vseams[v] && !facesfront)
-				v = pheader->numverts + v;
-			pheader->indices[(i * 3) + j] = v;
+				pheader->triangles[i].vertindex[j] = k + 1;
+			else
+				pheader->triangles[i].vertindex[j] = k;
 		}
 	}
 
-//
-// load the frames
-//
-	pframetype = (daliasframetype_t *) &pintriangles[pheader->numtris];
+/*
+ * load the frames
+ */
+	aliasbboxmin[0] = aliasbboxmin[1] = aliasbboxmin[2] = 255;
+	aliasbboxmax[0] = aliasbboxmax[1] = aliasbboxmax[2] = 0;
 
-	aliasbboxmin[0] = aliasbboxmin[1] = aliasbboxmin[2] = 255.0f;
-	aliasbboxmax[0] = aliasbboxmax[1] = aliasbboxmax[2] = -255.0f;
-
-	pheader->frames = Zone_Alloc(tempzone, numframes* sizeof(maliasframedesc_t));
+	pheader->frames = Zone_Alloc(mod->extrazone, numframes* sizeof(maliasframedesc_t));
 
 	for (i = 0; i < numframes; i++) {
 		aliasframetype_t frametype;
 
-		frametype = LittleLong (pframetype->type);
+		pframetype = (daliasframetype_t *) &pintriangles[pheader->numtris];
+		datapointer += sizeof(daliasframetype_t);
 
+		frametype = LittleLong (pframetype->type);
+ 
 		if (frametype == ALIAS_SINGLE) {
 			typeSingle = true;
-			pframetype = (daliasframetype_t *)
-				Mod_LoadAliasFrame (pframetype + 1, &pheader->frames[i]);
+			datapointer =
+				Mod_LoadAliasFrame (datapointer, &pheader->frames[i], mod);
 		} else {
-			pframetype = (daliasframetype_t *)
-				Mod_LoadAliasGroup (pframetype + 1, &pheader->frames[i]);
+			datapointer =
+				Mod_LoadAliasGroup (datapointer, &pheader->frames[i], mod);
 		}
 	}
 
@@ -1210,14 +1135,17 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		mod->maxs[i] = aliasbboxmax[i] * pheader->scale[i] + pheader->scale_origin[i];
 	}
 
-	// Vic: automatically detect models 
-	// that should not be interpolated
-	if (numframes == 1)
-		if (typeSingle)
-			if (!(mod->modflags & FLAG_NO_IM_ANIM))
-				mod->modflags |= FLAG_NO_IM_ANIM;
+/*
+ * Actually load the skins, now that we have the triangle and texcoord data.
+ */
+	Mod_LoadAllSkins (mod, skindata, true);
 
-	pheader->numverts *= 2;
+	// Don't bother to lerp models with only one frame.
+	if ((numframes == 1) && typeSingle)
+		mod->modflags |= FLAG_NO_IM_ANIM;
+
+	if (mod->modflags & FLAG_PLAYER)
+		player_model = mod;
 
 	mod->extradata = pheader;
 }
@@ -1261,7 +1189,7 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 
 	snprintf (name, sizeof (name), "%s_%i", loadmodel->name, framenum);
 	pspriteframe->gl_texturenum =
-		GL_LoadTexture (name, width, height, (Uint8 *) (pinframe + 1), 
+		GL_LoadTexture (name, width, height, (Uint8 *) (pinframe + 1),
 				TEX_MIPMAP|TEX_ALPHA, 8);
 
 	return (void *) ((Uint8 *) pinframe + sizeof (dspriteframe_t) + size);
@@ -1305,7 +1233,7 @@ Mod_LoadSpriteGroup (void *pin, mspriteframe_t **ppframe, int framenum)
 	for (i = 0; i < numframes; i++) {
 		*poutintervals = LittleFloat (pin_intervals->interval);
 		if (*poutintervals <= 0.0)
-			Sys_Error ("Mod_LoadSpriteGroup: interval<=0");
+			Host_EndGame ("Mod_LoadSpriteGroup: interval<=0");
 
 		poutintervals++;
 		pin_intervals++;
@@ -1343,7 +1271,7 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 
 	version = LittleLong (pin->version);
 	if (version != SPRITE_VERSION)
-		Sys_Error ("%s has wrong version number "
+		Host_EndGame ("%s has wrong version number "
 				   "(%i should be %i)", mod->name, version, SPRITE_VERSION);
 
 	numframes = LittleLong (pin->numframes);
@@ -1370,7 +1298,7 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 // load the frames
 //
 	if (numframes < 1)
-		Sys_Error ("Mod_LoadSpriteModel: Invalid # of frames: %d\n", numframes);
+		Host_EndGame ("Mod_LoadSpriteModel: Invalid # of frames: %d\n", numframes);
 
 	mod->numframes = numframes;
 
@@ -1395,4 +1323,3 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 
 	mod->type = mod_sprite;
 }
-

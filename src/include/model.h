@@ -282,6 +282,22 @@ typedef struct mtriangle_s {
 	int         vertindex[3];
 } mtriangle_t;
 
+typedef struct skin_sub_s {
+	int	texnum;
+	int	num_indices;
+	int	*indices;
+} skin_sub_t;
+
+typedef struct skin_s {
+	int			frames;
+	float		interval;
+	skin_sub_t	*raw;
+	skin_sub_t	*base;
+	skin_sub_t	*normal;
+	skin_sub_t	*fb;
+	skin_sub_t	*top;
+	skin_sub_t	*bottom;
+} skin_t;
 
 #define	MAX_SKINS	32
 typedef struct {
@@ -303,14 +319,11 @@ typedef struct {
 
 	int         numposes;
 	int         poseverts;
-	Uint32		*indices;				// Vertex indices for GL.
-	astvert_t			*tcarray;				// Texcoord array.
-	maliasframedesc_t	*frames;		// Frames.
-	int         gl_texturenum[MAX_SKINS][4];
-	int			fb_texturenum[MAX_SKINS][4];// index of fullbright mask or 0
-#ifdef TWILIGHT_NQ
-	int         texels[MAX_SKINS];		// only for player skins
-#endif
+	mtriangle_t	*triangles;			// Triangle list.
+	astvert_t	*tcarray;			// Texcoord array.
+	maliasframedesc_t	*frames;	// Frames.
+
+	skin_t		*skins;
 } aliashdr_t;
 
 #define	MAXALIASVERTS	1024
@@ -418,8 +431,8 @@ typedef struct model_s {
 //
 // additional model data
 //
+	memzone_t	*extrazone;
 	void		*extradata;
-
 } model_t;
 
 //============================================================================

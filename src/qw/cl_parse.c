@@ -135,6 +135,8 @@ char       *svc_strings[] = {
 	"NEW PROTOCOL"
 };
 
+extern model_t *player_model;
+
 int         oldparsecountmod;
 int         parsecountmod;
 double      parsecounttime;
@@ -883,20 +885,6 @@ CL_ParseClientdata (void)
 }
 
 /*
-=====================
-CL_NewTranslation
-=====================
-*/
-void
-CL_NewTranslation (int slot)
-{
-	if (slot > MAX_CLIENTS)
-		Host_EndGame ("CL_NewTranslation: slot > MAX_CLIENTS");
-
-	R_TranslatePlayerSkin (slot);
-}
-
-/*
 ==============
 CL_ProcessUserInfo
 ==============
@@ -904,18 +892,33 @@ CL_ProcessUserInfo
 void
 CL_ProcessUserInfo (int slot, player_info_t *player)
 {
+	Uint8	color;
+
 	strncpy (player->name, Info_ValueForKey (player->userinfo, "name"),
 			   sizeof (player->name) - 1);
-	player->topcolor =
-		Q_atoi (Info_ValueForKey (player->userinfo, "topcolor"));
-	player->bottomcolor =
-		Q_atoi (Info_ValueForKey (player->userinfo, "bottomcolor"));
+
+	color = Q_atoi (Info_ValueForKey (player->userinfo, "topcolor"));
+	color = bound(0, color, 13) * 16;
+	if (color < 128)
+		color += 15;
+	VectorCopy(d_8tofloattable[color], player->colormap.top);
+
+	color = Q_atoi (Info_ValueForKey (player->userinfo, "bottomcolor"));
+	color = bound(0, color, 13) * 16;
+	if (color < 128)
+		color += 15;
+	VectorCopy(d_8tofloattable[color], player->colormap.bottom);
+
 	if (Info_ValueForKey (player->userinfo, "*spectator")[0])
 		player->spectator = true;
 	else
 		player->spectator = false;
 
-	CL_NewTranslation (slot);
+	strlcpy(player->skin_name, Info_ValueForKey (player->userinfo, "skin"),
+			sizeof(player->skin_name));
+
+	if (cls.state == ca_active)
+		player->skin = Skin_Load(player->skin_name);
 }
 
 /*

@@ -160,12 +160,14 @@ char *
 va (char *format, ...)
 {
 	va_list     argptr;
-	static char string[4096];
+	static int  refcount = 0;
+	static char string[8][4096];
 	
+	refcount = (refcount + 1) % 8;
 	va_start (argptr, format);
-	vsnprintf (string, sizeof (string), format, argptr);
+	vsnprintf (string[refcount], sizeof (string[refcount]), format, argptr);
 	va_end (argptr);
 	
-	return string;
+	return string[refcount];
 }
 

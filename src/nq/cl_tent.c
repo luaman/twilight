@@ -317,8 +317,6 @@ CL_NewTempEntity (void)
 	num_temp_entities++;
 
 	V_AddEntity ( ent );
-
-	ent->colormap = vid.colormap;
 	return ent;
 }
 

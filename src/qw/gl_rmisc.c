@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "cmd.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "opengl_ext.h"
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
@@ -47,12 +48,12 @@ static const char rcsid[] =
 
 extern void TNT_Init (void);
 
-GLfloat	tc_arrays[2][MAX_VERTEX_ARRAYS][2];
-GLfloat	v_arrays[2][MAX_VERTEX_ARRAYS][3];
-GLfloat	c_arrays[2][MAX_VERTEX_ARRAYS][4];
+texcoord_t	*tc_array_p;
+vertex_t	*v_array_p;
+color_t		*c_array_p;
+GLuint		*vindices;
 
-GLuint vindices[MAX_VERTEX_INDICES];
-GLuint v_index, i_index, va_index;
+GLuint v_index, i_index;
 qboolean va_locked;
 
 void R_InitBubble (void);
@@ -175,205 +176,21 @@ R_Init (void)
 	netgraphtexture = texture_extension_number;
 	texture_extension_number++;
 
-	playertextures = texture_extension_number;
-	texture_extension_number += MAX_CLIENTS;
-
-	// fullbright skins
-	texture_extension_number += MAX_CLIENTS;
-
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
 
-	va_index = 0;
+	tc_array_p = Zone_Alloc(tempzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
+	v_array_p = Zone_Alloc(tempzone, MAX_VERTEX_ARRAYS * sizeof(vertex_t));
+	c_array_p = Zone_Alloc(tempzone, MAX_VERTEX_ARRAYS * sizeof(color_t));
+	vindices = Zone_Alloc(tempzone, MAX_VERTEX_INDICES * sizeof(GLuint));
 
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array[0]), tc_array[0]);
-	qglColorPointer (4, GL_FLOAT, sizeof(c_array[0]), c_array[0]);
-	qglVertexPointer (3, GL_FLOAT, sizeof(v_array[0]), v_array[0]);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array_v(0)), tc_array_p);
+	qglColorPointer (4, GL_FLOAT, sizeof(c_array_v(0)), c_array_p);
+	qglVertexPointer (3, GL_FLOAT, sizeof(v_array_v(0)), v_array_p);
 
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-}
-
-int fb_skins[MAX_CLIENTS];
-
-/*
-===============
-R_TranslatePlayerSkin
-
-Translates a skin texture by the per-player color lookup
-===============
-*/
-#define PIXELS_BUFFER_SIZE	512 * 256 * sizeof(Uint32)
-void
-R_TranslatePlayerSkin (int playernum)
-{
-	Sint32			top, bottom;
-	Uint8			translate[256];
-	Uint32			translate32[256];
-	Uint32			i, j;
-	Uint8			*original;
-	Uint32			*pixels, *out;
-	Uint32			scaled_width, scaled_height;
-	Sint32			inwidth, inheight;
-	Uint32			tinwidth, tinheight;
-	Uint8			*inrow;
-	Uint32			frac, fracstep;
-	player_info_t	*player;
-	extern Uint8	player_8bit_texels[320*200];
-	extern Sint32	player_8bit_width, player_8bit_height;
-	char			s[512];
-
-	player = &cl.players[playernum];
-	if (!player->name[0])
-		return;
-	
-	pixels = malloc(PIXELS_BUFFER_SIZE);
-	
-	strcpy(s, Info_ValueForKey(player->userinfo, "skin"));
-	COM_StripExtension(s, s);
-	if (player->skin && strcasecmp(s, player->skin->name))
-		player->skin = NULL;
-
-	if (player->_topcolor != player->topcolor ||
-		player->_bottomcolor != player->bottomcolor || !player->skin) {
-		player->_topcolor = player->topcolor;
-		player->_bottomcolor = player->bottomcolor;
-
-		top = player->topcolor;
-		bottom = player->bottomcolor;
-		top = (top < 0) ? 0 : ((top > 13) ? 13 : top);
-		bottom = (bottom < 0) ? 0 : ((bottom > 13) ? 13 : bottom);
-		top *= 16;
-		bottom *= 16;
-
-		for (i=0 ; i<256 ; i++)
-			translate[i] = i;
-
-		for (i=0 ; i<16 ; i++)
-		{
-			if (top < 128)	// the artists made some backwards ranges.  sigh.
-				translate[TOP_RANGE+i] = top + i;
-			else
-				translate[TOP_RANGE+i] = top + 15 - i;
-					
-			if (bottom < 128)
-				translate[BOTTOM_RANGE+i] = bottom + i;
-			else
-				translate[BOTTOM_RANGE+i] = bottom + 15 - i;
-		}
-
-		//
-		// locate the original skin pixels
-		//
-		// real model width
-		tinwidth = 296;
-		tinheight = 194;
-
-		if (!player->skin)
-			Skin_Find(player);
-
-		if ((original = Skin_Cache(player->skin)) != NULL) {
-			// skin data width
-			inwidth = 320;
-			inheight = 200;
-		} else {
-			original = player_8bit_texels;
-			inwidth = player_8bit_width;
-			inheight = player_8bit_height;
-		}
-
-		// because this happens during gameplay, do it fast
-		// instead of sending it through gl_upload 8
-		qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
-
-		for (scaled_width = 1; scaled_width < tinwidth; scaled_width <<= 1);
-		for (scaled_height = 1; scaled_height < tinheight; scaled_height <<= 1);
-
-		// always scale player textures down to 512x256
-		scaled_width = min (scaled_width, 512);
-		scaled_height = min (scaled_height, 256);
-
-		// allow users to crunch sizes down even more if they want
-		scaled_width >>= (int)gl_playermip->value;
-		scaled_height >>= (int)gl_playermip->value;
-
-		// and also clip them to gl_max_size
-		scaled_width = min (scaled_width, gl_max_size->value);
-		scaled_height = min (scaled_height, gl_max_size->value);
-
-		// don't allow 0x0 textures, they don't work well.
-		scaled_width = max (scaled_width, 1);
-		scaled_height = max (scaled_height, 1);
-
-		for (i=0 ; i<256 ; i++)
-			translate32[i] = d_8to32table[translate[i]];
-
-		out = pixels;
-		memset(pixels, 0, PIXELS_BUFFER_SIZE);
-		fracstep = tinwidth*0x10000/scaled_width;
-		for (i=0 ; i < scaled_height; i++, out += scaled_width)
-		{
-			inrow = original + inwidth * (i * tinheight / scaled_height);
-			frac = fracstep >> 1;
-			for (j = 0; j < scaled_width; j += 4)
-			{
-				out[j] = translate32[inrow[frac >> 16]];
-				frac += fracstep;
-				out[j+1] = translate32[inrow[frac >> 16]];
-				frac += fracstep;
-				out[j+2] = translate32[inrow[frac >> 16]];
-				frac += fracstep;
-				out[j+3] = translate32[inrow[frac >> 16]];
-				frac += fracstep;
-			}
-		}
-
-		qglTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, 
-			scaled_width, scaled_height, 0, GL_RGBA, 
-			GL_UNSIGNED_BYTE, pixels);
-
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		if (Img_HasFullbrights ((Uint8 *)original, inwidth*inheight)) {
-			fb_skins[playernum] = playertextures + playernum + MAX_CLIENTS;
-
-			qglBindTexture (GL_TEXTURE_2D, fb_skins[playernum]);
-
-			out = pixels;
-			memset(pixels, 0, PIXELS_BUFFER_SIZE);
-			fracstep = tinwidth * 0x10000 / scaled_width;
-			for (i = 0; i < scaled_height; i++, out += scaled_width)
-			{
-				inrow = original + inwidth * (i * tinheight / scaled_height);
-				frac = fracstep >> 1;
-				for (j = 0; j < scaled_width; j+=4)
-				{
-					if (out[j] < 224) out[j] = 0; else out[j] = d_8to32table[inrow[frac >> 16]];
-					frac += fracstep;
-					if (out[j + 1] < 224) out[j + 1] = 0; else out[j+1] = d_8to32table[inrow[frac >> 16]];
-					frac += fracstep;
-					if (out[j + 2] < 224) out[j + 2] = 0; else out[j+2] = d_8to32table[inrow[frac >> 16]];
-					frac += fracstep;
-					if (out[j + 3] < 224) out[j + 3] = 0; else out[j+3] = d_8to32table[inrow[frac >> 16]];
-					frac += fracstep;
-				}
-			}	
-
-			qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, 
-				scaled_width, scaled_height, 0, GL_RGBA, 
-				GL_UNSIGNED_BYTE, pixels);
-
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		} else {
-			fb_skins[playernum] = 0;
-		}
-
-	}
-	
-	free(pixels);
 }
 
 /*

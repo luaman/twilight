@@ -44,7 +44,7 @@ void        Draw_TransPicTranslate (int x, int y, struct qpic_s *pic,
 void        Draw_ConsoleBackground (int lines);
 void        Draw_Disc (void);
 void        Draw_TileClear (int x, int y, int w, int h);
-void        Draw_Fill (int x, int y, int w, int h, int c);
+void        Draw_Fill (int x, int y, int w, int h, vec3_t color);
 void        Draw_FadeScreen (void);
 void        Draw_String (int x, int y, char *str);
 void        Draw_String_Len (int x, int y, char *str, int len);

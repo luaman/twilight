@@ -734,7 +734,8 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 	pcx_t	   *pcx;
 	Uint8	   *pack;
 
-	pcx = Hunk_TempAlloc (width * height * 2 + 1000);
+	// Worst case is twice the size of the image.
+	pcx = Zone_Alloc(tempzone, sizeof(pcx_t) + ((width * height) * 2) + 769); 
 	if (pcx == NULL) {
 		Com_Printf ("SCR_ScreenShot_f: not enough memory\n");
 		return;
@@ -750,16 +751,12 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 	pcx->ymax = LittleShort ((short) (height - 1));
 	pcx->hres = LittleShort ((short) width);
 	pcx->vres = LittleShort ((short) height);
-	memset (pcx->palette, 0, sizeof (pcx->palette));
 	pcx->color_planes = 1;				/* chunky image */
 	pcx->bytes_per_line = LittleShort ((short) width);
 	pcx->palette_type = LittleShort (2);	/* not a grey scale */
-	memset (pcx->filler, 0, sizeof (pcx->filler));
 
 	/* pack the image */
 	pack = pcx->data;
-
-	data += rowbytes * (height - 1);
 
 	for (i = 0; i < height; i++) {
 		for (j = 0; j < width; j++) {
@@ -770,9 +767,6 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 				*pack++ = *data++;
 			}
 		}
-
-		data += rowbytes - width;
-		data -= rowbytes * 2;
 	}
 
 	/* write the palette */
@@ -787,6 +781,7 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 		CL_StartUpload ((void *) pcx, length);
 	else
 		COM_WriteFile (filename, pcx, length);
+	Zone_Free(pcx);
 }
 
 

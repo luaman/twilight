@@ -39,7 +39,7 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "mathlib.h"
 #include "strlib.h"
-#include "texture.h"
+#include "gl_textures.h"
 
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
@@ -213,8 +213,8 @@ void R_DrawExplosion(explosion_t *e)
 	int i;
 	float r, g, b, a;
 
-	memcpy (&v_array[v_index], &e->vert[0][0], sizeof(float[3]) * EXPLOSIONVERTS);
-	memcpy (&tc_array[v_index], &explosiontexcoords[0][0], sizeof(float[2]) * EXPLOSIONVERTS);
+	memcpy (&v_array_v(v_index), &e->vert[0][0], sizeof(float[3]) * EXPLOSIONVERTS);
+	memcpy (&tc_array_v(v_index), &explosiontexcoords[0][0], sizeof(float[2]) * EXPLOSIONVERTS);
 	for (i = 0; i < EXPLOSIONINDICES; i++) {
 		vindices[i_index + i] = explosiontris[0][i] + v_index;
 	}
@@ -225,7 +225,7 @@ void R_DrawExplosion(explosion_t *e)
 	a = r_explosioncolor_a->value * e->alpha;
 
 	for (i = 0; i < EXPLOSIONVERTS; i++)
-		VectorSet4(c_array[v_index + i], r, g, b, a);
+		VectorSet4(c_array_v(v_index + i), r, g, b, a);
 
 	v_index += EXPLOSIONVERTS;
 	i_index += EXPLOSIONINDICES;

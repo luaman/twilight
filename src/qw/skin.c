@@ -41,88 +41,54 @@ static const char rcsid[] =
 #include "pcx.h"
 #include "strlib.h"
 #include "sys.h"
+#include "glquake.h"
+#include "draw.h"
+#include "gl_textures.h"
+#include "mathlib.h"
+#include <errno.h>
 
+typedef struct {
+	char		name[128];
+	skin_t		*skin;
+} cached_skin_t;
+
+skin_t *Skin_Load (char *skin_name);
 
 cvar_t *baseskin;
 cvar_t *noskins;
 
+extern model_t	*player_model;
+
+skin_t	*base_skin;
+
+memzone_t *skin_zone;
+
 char allskins[128];
 
 #define	MAX_CACHED_SKINS		128
-player_skin_t skins[MAX_CACHED_SKINS];
+cached_skin_t skins[MAX_CACHED_SKINS];
 int numskins;
 
 /*
-================
-Skin_Find
+==========
+Skin_Load
 
-Determines the best skin for the given scoreboard
-slot, and sets scoreboard->skin
-================
+Returns a pointer to the skin struct, or NULL to use the default
+==========
 */
-void
-Skin_Find (player_info_t *sc)
+skin_t *
+Skin_Load (char *skin_name)
 {
-	player_skin_t   *skin;
+	char			name[MAX_OSPATH];
+	Uint8			*raw;
+	Uint8			*out, *pix, *tmp, *in, *final;
+	pcx_t			*pcx;
 	int				i;
-	char			name[128];
-	char		   *s;
-
-	if (allskins[0])
-		strcpy (name, allskins);
-	else {
-		s = Info_ValueForKey (sc->userinfo, "skin");
-		if (s && s[0])
-			strcpy (name, s);
-		else
-			strcpy (name, baseskin->string);
-	}
-
-	if (strstr (name, "..") || *name == '.')
-		strcpy (name, "base");
-
-	COM_StripExtension (name, name);
-
-	for (i = 0; i < numskins; i++) {
-		if (!strcmp (name, skins[i].name)) {
-			sc->skin = &skins[i];
-			Skin_Cache (sc->skin);
-			return;
-		}
-	}
-
-	if (numskins == MAX_CACHED_SKINS) {
-		// ran out of spots, so flush everything
-		Skin_Skins_f ();
-		return;
-	}
-
-	skin = &skins[numskins];
-	sc->skin = skin;
-	numskins++;
-
-	memset (skin, 0, sizeof (*skin));
-	strncpy (skin->name, name, sizeof (skin->name) - 1);
-}
-
-
-/*
-==========
-Skin_Cache
-
-Returns a pointer to the skin bitmap, or NULL to use the default
-==========
-*/
-Uint8 *
-Skin_Cache (player_skin_t *skin)
-{
-	char		name[MAX_OSPATH];
-	Uint8	   *raw;
-	Uint8	   *out, *pix;
-	pcx_t	   *pcx;
-	int			x, y;
-	int			dataByte;
-	int			runLength;
+	int				x, y;
+	int				dataByte;
+	int				runLength;
+	cached_skin_t	*cached;
+	skin_t			*skin;
 
 	if (cls.downloadtype == dl_skin)
 		// use base until downloaded
@@ -132,26 +98,27 @@ Skin_Cache (player_skin_t *skin)
 		// JACK: So NOSKINS > 1 will show skins, but not download new ones.
 		return NULL;
 
-	if (skin->failedload)
-		return NULL;
+	snprintf (name, sizeof (name), "skins/%s.pcx", skin_name);
+	for (i = 0; i < numskins; i++) {
+		if (!strcmp (name, skins[i].name)) {
+			if (skins[i].skin)
+				return skins[i].skin;
+			else
+				return base_skin;
+		}
+	}
 
-	out = Cache_Check (&skin->cache);
-	if (out)
-		return out;
+	cached = &skins[numskins++];
+	memset (cached, 0, sizeof (*cached));
+	strncpy (cached->name, name, sizeof (cached->name) - 1);
 
 	/*
 	 * load the pic from disk
 	 */
-	snprintf (name, sizeof (name), "skins/%s.pcx", skin->name);
 	raw = COM_LoadTempFile (name, true);
 	if (!raw) {
 		Com_Printf ("Couldn't load skin %s\n", name);
-		snprintf (name, sizeof (name), "skins/%s.pcx", baseskin->string);
-		raw = COM_LoadTempFile (name, true);
-		if (!raw) {
-			skin->failedload = true;
-			return NULL;
-		}
+		return NULL;
 	}
 	
 	/*
@@ -172,39 +139,35 @@ Skin_Cache (player_skin_t *skin)
 	if (pcx->manufacturer != 0x0a
 		|| pcx->version != 5
 		|| pcx->encoding != 1
-		|| pcx->bits_per_pixel != 8 || pcx->xmax >= 320 || pcx->ymax >= 200) {
-		skin->failedload = true;
+		|| pcx->bits_per_pixel != 8 || pcx->xmax < 296 || pcx->ymax < 194) {
 		Com_Printf ("Bad skin %s\n", name);
-		return NULL;
+		return base_skin;
 	}
 
-	out = Cache_Alloc (&skin->cache, 320 * 200, skin->name);
-	if (!out)
-		Sys_Error ("Skin_Cache: couldn't allocate");
+	tmp = Zone_Alloc (skin_zone, (pcx->xmax + 1) * (pcx->ymax + 1));
+	if (!tmp)
+		Sys_Error ("Skin_Load: couldn't allocate");
 
-	pix = out;
-	memset (out, 0, 320 * 200);
+	pix = tmp;
 
-	for (y = 0; y < pcx->ymax; y++, pix += 320) {
+	for (y = 0; y < pcx->ymax; y++, pix += pcx->xmax) {
 		for (x = 0; x <= pcx->xmax;) {
 			if (raw - (Uint8 *) pcx > com_filesize) {
-				Cache_Free (&skin->cache);
-				skin->failedload = true;
+				Zone_Free (tmp);
 				Com_Printf ("Skin %s was malformed.  You should delete it.\n",
 							name);
-				return NULL;
+				return base_skin;
 			}
 			dataByte = *raw++;
 
 			if ((dataByte & 0xC0) == 0xC0) {
 				runLength = dataByte & 0x3F;
 				if (raw - (Uint8 *) pcx > com_filesize) {
-					Cache_Free (&skin->cache);
-					skin->failedload = true;
+					Zone_Free (tmp);
 					Com_Printf
 						("Skin %s was malformed.  You should delete it.\n",
 						 name);
-					return NULL;
+					return base_skin;
 				}
 				dataByte = *raw++;
 			} else
@@ -212,11 +175,10 @@ Skin_Cache (player_skin_t *skin)
 
 			// skin sanity check
 			if (runLength + x > pcx->xmax + 2) {
-				Cache_Free (&skin->cache);
-				skin->failedload = true;
+				Zone_Free (tmp);
 				Com_Printf ("Skin %s was malformed.  You should delete it.\n",
 							name);
-				return NULL;
+				return base_skin;
 			}
 			while (runLength-- > 0)
 				pix[x++] = dataByte;
@@ -225,15 +187,28 @@ Skin_Cache (player_skin_t *skin)
 	}
 
 	if (raw - (Uint8 *) pcx > com_filesize) {
-		Cache_Free (&skin->cache);
-		skin->failedload = true;
+		Zone_Free (tmp);
 		Com_Printf ("Skin %s was malformed.  You should delete it.\n", name);
-		return NULL;
+		return base_skin;
 	}
 
-	skin->failedload = false;
+	final = Zone_Alloc (skin_zone, 296 * 194);
+	out = final;
+	in = tmp;
 
-	return out;
+	for (y = 0; y < 194; y++, in += pcx->xmax, out += 296)
+		for (x = 0; x < 296; x++)
+			out[x] = in[x];
+
+	skin = Zone_Alloc(skin_zone, sizeof(skin_t));
+
+	GLT_Skin_Parse(final, skin, Mod_Extradata(player_model), name, 296, 194, 1, 1);
+	Zone_Free (tmp);
+	Zone_Free (final);
+
+	cached->skin = skin;
+
+	return skin;
 }
 
 
@@ -254,12 +229,11 @@ Skin_NextDownload (void)
 
 	for (; cls.downloadnumber != MAX_CLIENTS; cls.downloadnumber++) {
 		sc = &cl.players[cls.downloadnumber];
-		if (!sc->name[0])
+		if (!sc->name[0] || !sc->skin_name[0])
 			continue;
-		Skin_Find (sc);
 		if (noskins->value)
 			continue;
-		if (!CL_CheckOrDownloadFile (va ("skins/%s.pcx", sc->skin->name)))
+		if (!CL_CheckOrDownloadFile (va ("skins/%s.pcx", sc->skin_name)))
 			return;						// started a download
 	}
 
@@ -268,19 +242,16 @@ Skin_NextDownload (void)
 	// now load them in for real
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		sc = &cl.players[i];
-		if (!sc->name[0])
+		if (!sc->name[0] || !sc->skin_name[0])
 			continue;
-		Skin_Cache (sc->skin);
-		sc->skin = NULL;
+		sc->skin = Skin_Load (sc->skin_name);
 	}
 
 	if (cls.state != ca_active) {		// get next signon phase
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message, va ("begin %i", cl.servercount));
-		Cache_Report ();				// print remaining memory
 	}
 }
-
 
 /*
 ==========
@@ -292,13 +263,14 @@ Refind all skins, downloading if needed.
 void
 Skin_Skins_f (void)
 {
+#if 0
 	int			i;
 
 	for (i = 0; i < numskins; i++) {
-		if (skins[i].cache.data)
-			Cache_Free (&skins[i].cache);
+		/* FIXME: Free the GL textures here! */
 	}
 	numskins = 0;
+#endif
 
 	cls.downloadnumber = 0;
 	cls.downloadtype = dl_skin;
@@ -320,3 +292,18 @@ Skin_AllSkins_f (void)
 	Skin_Skins_f ();
 }
 
+/*
+=================
+CL_InitSkins
+=================
+*/
+void
+CL_InitSkins (void)
+{
+	skin_zone = Zone_AllocZone("skins");
+
+	base_skin = Skin_Load(baseskin->string);
+
+	Cmd_AddCommand ("skins", Skin_Skins_f);
+	Cmd_AddCommand ("allskins", Skin_AllSkins_f);
+}

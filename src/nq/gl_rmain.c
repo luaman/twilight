@@ -37,12 +37,12 @@ static const char rcsid[] =
 #include "client.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "opengl_ext.h"
 #include "mathlib.h"
 #include "sound.h"
 #include "strlib.h"
 #include "sys.h"
 #include "view.h"
-#include "world.h"
 #include "r_explosion.h"
 #include "host.h"
 
@@ -50,7 +50,6 @@ entity_t *currententity;
 int r_framecount;						// used for dlight push checking
 static mplane_t frustum[4];
 int c_brush_polys, c_alias_polys;
-int playertextures;						// up to 16 color translated skins
 
 /*
  * view origin
@@ -114,7 +113,6 @@ qboolean colorlights = true;
 
 int gl_wireframe = 0;
 
-int lastposenum = 0, lastposenum0 = 0;
 extern model_t *mdl_fire;
 
 /*
@@ -253,19 +251,19 @@ R_DrawSpriteModels ()
 			right = vright;
 		}
 
-		VectorSet2(tc_array[v_index + 0], 0, 1);
-		VectorSet2(tc_array[v_index + 1], 0, 0);
-		VectorSet2(tc_array[v_index + 2], 1, 0);
-		VectorSet2(tc_array[v_index + 3], 1, 1);
+		VectorSet2(tc_array_v(v_index + 0), 0, 1);
+		VectorSet2(tc_array_v(v_index + 1), 0, 0);
+		VectorSet2(tc_array_v(v_index + 2), 1, 0);
+		VectorSet2(tc_array_v(v_index + 3), 1, 1);
 
-		VectorTwiddle (e->origin, up, f->down,  right, f->left, 1,
-				v_array[v_index + 0]);
-		VectorTwiddle (e->origin, up, f->up,    right, f->left, 1,
-				v_array[v_index + 1]);
-		VectorTwiddle (e->origin, up, f->up,    right, f->right, 1,
-				v_array[v_index + 2]);
-		VectorTwiddle (e->origin, up, f->down,  right, f->right, 1,
-				v_array[v_index + 3]);
+		VectorTwiddle (e->origin, up, f->down,	right, f->left, 1,
+				v_array_v(v_index + 0));
+		VectorTwiddle (e->origin, up, f->up,	right, f->left, 1,
+				v_array_v(v_index + 1));
+		VectorTwiddle (e->origin, up, f->up,	right, f->right, 1,
+				v_array_v(v_index + 2));
+		VectorTwiddle (e->origin, up, f->down,	right, f->right, 1,
+				v_array_v(v_index + 3));
 
 		v_index += 4;
 		if ((v_index + 4) >= MAX_VERTEX_ARRAYS) {
@@ -301,7 +299,7 @@ float r_avertexnormals[NUMVERTEXNORMALS][3] = {
 };
 
 vec3_t shadevector;
-float shadelight, ambientlight;
+float shadelight;
 
 // precalculated dot products for quantized angles
 #define SHADEDOT_QUANT 16
@@ -310,114 +308,7 @@ float       r_avertexnormal_dots[SHADEDOT_QUANT][256] =
            ;
 
 float *shadedots = r_avertexnormal_dots[0];
-float *shadedots2 = r_avertexnormal_dots[0];
-float lightlerpoffset;
-
-#if 0
-/*
-=================
-GL_DrawAliasShadow
-
-Standard shadow drawing
-=================
-*/
-extern vec3_t lightspot;
-
-static void
-GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
-{
-	trivertx_t	   *verts;
-	int			   *order;
-	vec3_t			point;
-	float			height, lheight;
-	int				count;
-	trace_t			downtrace;
-	vec3_t			downmove;
-	float			s1 = 0;
-	float			c1 = 0;
-
-	lheight = currententity->origin[2] - lightspot[2];
-
-	height = 0;
-	verts = (trivertx_t *) ((Uint8 *) paliashdr + paliashdr->posedata);
-	verts += posenum * paliashdr->poseverts;
-	order = (int *) ((Uint8 *) paliashdr + paliashdr->commands);
-
-	height = -lheight + 1.0;
-
-	if (r_shadows->value == 2)
-	{
-		/*
-		 * better shadowing, now takes angle of ground into account cast a
-		 * traceline into the floor directly below the player and gets
-		 * normals from this
-		 */
-		VectorCopy (currententity->origin, downmove);
-		downmove[2] = downmove[2] - 4096;
-		memset (&downtrace, 0, sizeof(downtrace));
-		SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1,
-				currententity->origin, downmove, &downtrace);
-
-		// calculate the all important angles to keep speed up
-		s1 = Q_sin(currententity->angles[1] / 180 * M_PI);
-		c1 = Q_cos(currententity->angles[1] / 180 * M_PI);
-	}
-
-	while ((count = *order++)) {
-		// get the vertex count and primitive type
-		if (count < 0) {
-			count = -count;
-			qglBegin (GL_TRIANGLE_FAN);
-		} else
-			qglBegin (GL_TRIANGLE_STRIP);
-
-		do {
-			order += 2;
-
-			// normals and vertexes come from the frame list
-			point[0] = verts->v[0] * paliashdr->scale[0]
-				+ paliashdr->scale_origin[0];
-			point[1] = verts->v[1] * paliashdr->scale[1]
-				+ paliashdr->scale_origin[1];
-			point[2] = verts->v[2] * paliashdr->scale[2]
-				+ paliashdr->scale_origin[2];
-
-			if (r_shadows->value == 2)
-			{
-				point[0] -= shadevector[0] * point[0];
-				point[1] -= shadevector[1] * point[1];
-				point[2] -= shadevector[2] * point[2];
-
-				// drop it down to floor
-				point[2] = point[2] - (currententity->origin[2]
-						- downtrace.endpos[2]);
-
-				/*
-				 * now adjust the point with respect to all the normals of
-				 * the tracepoint
-				 */
-				point[2] += ((point[1] * (s1 * downtrace.plane.normal[0])) -
-					(point[0] * (c1 * downtrace.plane.normal[0])) -
-					(point[0] * (s1 * downtrace.plane.normal[1])) -
-					(point[1] * (c1 * downtrace.plane.normal[1]))
-					) + 20.2 - downtrace.plane.normal[2]*20.0;
-			} else {
-				point[0] -= shadevector[0]*(point[2]+lheight);
-				point[1] -= shadevector[1]*(point[2]+lheight);
-				point[2] = height;
-			}
-
-			qglVertex3fv (point);
-
-			verts++;
-		} while (--count);
-
-		qglEnd ();
-	}
-}
-#endif
-
-
+GLfloat acolors[MAX_VERTEX_ARRAYS][4];
 
 
 /*
@@ -429,35 +320,60 @@ R_SetupAliasFrame
 static void
 R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 {
-	float				l, interval;
+	float				l;
 	int					pose_num, i;
 	maliasframedesc_t	*frame;
 	maliaspose_t		*pose;
 
 	frame = &paliashdr->frames[e->frame];
 
-	if (frame->numposes > 1) {
-		interval = paliashdr->frames[e->frame].interval;
-		pose_num = (int) (cl.time / interval) % frame->numposes;
-	} else
+	if (frame->numposes > 1)
+		pose_num = (int) (cl.time / e->frame_interval) % frame->numposes;
+	else
 		pose_num = 0;
 
 	pose = &frame->poses[pose_num];
 
 	for (i = 0; i < paliashdr->numverts; i++) {
-		VectorCopy(pose->vertices[i].v, v_array[i]);
-		tc_array[i][0] = paliashdr->tcarray[i].s;
-		tc_array[i][1] = paliashdr->tcarray[i].t;
+		VectorCopy(pose->vertices[i].v, v_array_v(i));
+		tc_array(i, 0) = paliashdr->tcarray[i].s;
+		tc_array(i, 1) = paliashdr->tcarray[i].t;
 
 		l = shadedots[pose->normal_indices[i]] * shadelight;
 		if (colorlights) {
-			VectorScale(lightcolor, l, c_array[i]);
-			c_array[i][3] = 1;
-		} else
-			VectorSet4(c_array[i], l, l, l, 1);
+			VectorScale(lightcolor, l, c_array_v(i));
+			VectorScale(lightcolor, l, acolors[i]);
+			c_array(i, 3) = acolors[i][3] = 1;
+		} else {
+			VectorSet4(c_array_v(i), l, l, l, 1);
+			VectorSet4(acolors[i], l, l, l, 1);
+		}
 	}
 }
 
+/*
+=================
+R_DrawSubSkin
+
+=================
+*/
+void
+R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec3_t *color)
+{
+	int			i;
+
+	if (color) {
+		TWI_PreVDrawCVA (0, paliashdr->numverts);
+		for (i = 0; i < paliashdr->numverts; i++) {
+			VectorMultiply(acolors[i], *color, c_array_v(i));
+		}
+		TWI_PostVDrawCVA ();
+	}
+
+	qglBindTexture (GL_TEXTURE_2D, skin->texnum);
+	qglDrawRangeElements(GL_TRIANGLES, 0, paliashdr->numverts,
+			skin->num_indices, GL_UNSIGNED_INT, skin->indices);
+}
 
 /*
 =================
@@ -466,16 +382,16 @@ R_DrawAliasModel
 =================
 */
 static void
-R_DrawAliasModel (entity_t *e)
+R_DrawAliasModel (entity_t *e, qboolean viewent)
 {
-	int				i;
-	int				lnum;
+	int				lnum, anim;
 	float			add;
 	model_t		   *clmodel = e->model;
 	aliashdr_t	   *paliashdr;
-	int				anim;
-	int				texture, fb_texture, skinnum;
 	dlight_t	   *l;
+	skin_t			*skin;
+	vec3_t			top, bottom;
+	qboolean		has_top = false, has_bottom = false, has_fb = false;
 
 	if (gl_particletorches->value) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
@@ -490,32 +406,28 @@ R_DrawAliasModel (entity_t *e)
 		}
 	}
 
-	if (e != &cl.viewent) {
+	if (!viewent) {
 		vec3_t      mins, maxs;
 
 		VectorAdd (e->origin, clmodel->mins, mins);
 		VectorAdd (e->origin, clmodel->maxs, maxs);
 
 		if (R_CullBox (mins, maxs)) {
-			e->pose1 = e->pose2 = 0;
 			return;
 		}
-	}
+	} 
 
 	/*
 	 * get lighting information
 	 */
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb_models->value)
-	{
-		ambientlight = shadelight = R_LightPoint (e->origin);
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb_models->value) {
+		shadelight = R_LightPoint (e->origin);
 
 		// always give the gun some light
-		if (!colorlights) {
-			if (e == &cl.viewent && ambientlight < 24)
-				ambientlight = shadelight = 24;
-		} else {
-			if (e == &cl.viewent)
-			{
+		if (viewent) {
+			if (!colorlights && (shadelight < 24)) {
+				shadelight = 24;
+			} else {
 				lightcolor[0] = max (lightcolor[0], 24);
 				lightcolor[1] = max (lightcolor[1], 24);
 				lightcolor[2] = max (lightcolor[2], 24);
@@ -532,42 +444,27 @@ R_DrawAliasModel (entity_t *e)
 				add = 8 * l->radius * l->radius / add; 
 
 				if (!colorlights) {
-					ambientlight += add;
-					// ZOID: models should be affected by dlights as well
 					shadelight += add;
 				} else {
-					lightcolor[0] += add * l->color[0];
-					lightcolor[1] += add * l->color[1];
-					lightcolor[2] += add * l->color[2];
+					VectorMA(lightcolor, add, l->color, lightcolor);
 				}
 			}
 		}
 
-		if (!colorlights)
-		{
-			// clamp lighting so it doesn't overbright as much
-			ambientlight = min (ambientlight, 128);
-			if (ambientlight + shadelight > 192)
-				shadelight = 192 - ambientlight;
+		// ZOID: never allow players to go totally black
+		if (clmodel->modflags & FLAG_PLAYER) {
+			if (!colorlights) {
+				if (shadelight < 8)
+					shadelight = 8;
+			} else {
+				lightcolor[0] = max (lightcolor[0], 8);
+				lightcolor[1] = max (lightcolor[1], 8);
+				lightcolor[2] = max (lightcolor[2], 8);
+			}
 		}
-	}
-
-	// ZOID: never allow players to go totally black
-	if (clmodel->modflags & FLAG_PLAYER) {
+	} else if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb_models->value) {
 		if (!colorlights)
-		{
-			if (ambientlight < 8)
-				ambientlight = shadelight = 8;
-		} else {
-			lightcolor[0] = max (lightcolor[0], 8);
-			lightcolor[1] = max (lightcolor[1], 8);
-			lightcolor[2] = max (lightcolor[2], 8);
-		}
-	}
-
-	if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb_models->value) {
-		if (!colorlights)
-			ambientlight = shadelight = 256;
+			shadelight = 256;
 		else
 			lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
 	}
@@ -615,93 +512,70 @@ R_DrawAliasModel (entity_t *e)
 	qglRotatef (-e->angles[0], 0, 1, 0);
 	qglRotatef (e->angles[2], 1, 0, 0);
 
-	if ( clmodel->flags & FLAG_EYES ) {
-		qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
-	} else {
-		qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+	qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
+			paliashdr->scale_origin[2]);
+
+	qglScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+
+	skin = &paliashdr->skins[e->skinnum % paliashdr->numskins];
+	anim = (int) (cl.time / skin->interval) % skin->frames;
+
+	if (e->colormap && !gl_nocolors->value) {
+		if ((has_top = !!skin->top[anim].num_indices))
+			VectorCopy(e->colormap->top, top);
+		if ((has_bottom = !!skin->bottom[anim].num_indices))
+			VectorCopy(e->colormap->bottom, bottom);
 	}
 
-	if ( clmodel->flags & FLAG_DOUBLESIZE ) {
-		qglScalef (paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
-	} else {
-		qglScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
-	}
-
-	anim = (int) (cl.time * 10) & 3;
-	skinnum = e->skinnum;
-	texture = paliashdr->gl_texturenum[skinnum][anim];
-	fb_texture = paliashdr->fb_texturenum[skinnum][anim];
-
-	/*
-	 * we can't dynamically colormap textures, so they are cached seperately
-	 * for the players.  Heads are just uncolored.
-	 */
-	if (e->colormap != vid.colormap && !gl_nocolors->value) {
-		i = e - cl_entities;
-		if (i >= 1 && i <= cl.maxclients)
-			texture = playertextures - 1 + i;
-	}
+	if (gl_fb_models->value)
+		has_fb = !!skin->fb[anim].num_indices;
 
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-
-	if (!gl_fb_models->value)
-		fb_texture = 0;
-
-	qglBindTexture (GL_TEXTURE_2D, texture);
 
 	R_SetupAliasFrame (paliashdr, e);
 
 	TWI_PreVDrawCVA (0, paliashdr->numverts);
 
 	qglEnableClientState (GL_COLOR_ARRAY);
-	qglDrawElements(GL_TRIANGLES, paliashdr->numtris * 3, GL_UNSIGNED_INT,
-			paliashdr->indices);
+
+	if (!has_fb && !has_top && !has_bottom)
+		R_DrawSubSkin (paliashdr, &skin->raw[anim], NULL);
+	else if (!has_top || !has_bottom)
+		R_DrawSubSkin (paliashdr, &skin->normal[anim], NULL);
+	else
+		R_DrawSubSkin (paliashdr, &skin->base[anim], NULL);
+
+	if (has_top || has_bottom || has_fb) {
+		qglEnable (GL_BLEND);
+		qglDepthMask (GL_FALSE);
+		qglBlendFunc (GL_ONE, GL_ONE);
+	}
+
+	if (has_top)
+		R_DrawSubSkin (paliashdr, &skin->top[anim], &top);
+
+	if (has_bottom)
+		R_DrawSubSkin (paliashdr, &skin->bottom[anim], &bottom);
+
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglColor3f (1, 1, 1);
 
-	if (fb_texture) {
-		qglBindTexture (GL_TEXTURE_2D, fb_texture);
-		qglEnable (GL_BLEND);
-		qglDrawElements(GL_TRIANGLES, paliashdr->numtris * 3, GL_UNSIGNED_INT,
-				paliashdr->indices);
+	if (has_fb)
+		R_DrawSubSkin (paliashdr, &skin->fb[anim], NULL);
+
+	if (has_top || has_bottom || has_fb) {
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		qglDepthMask (GL_TRUE);
 		qglDisable (GL_BLEND);
 	}
 
 	TWI_PostVDrawCVA ();
-	v_index = 0;
 
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	qglPopMatrix ();
-
-#if 0
-	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {
-		float an = -e->angles[1] * (M_PI / 180);
-
-		if (!shadescale)
-			shadescale = 1 / Q_sqrt(2);
-
-		shadevector[0] = Q_cos (an) * shadescale;
-		shadevector[1] = Q_sin (an) * shadescale;
-		shadevector[2] = shadescale;
-
-		qglPushMatrix ();
-
-		qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
-		qglRotatef (e->angles[1], 0, 0, 1);
-
-		qglDisable (GL_TEXTURE_2D);
-		qglEnable (GL_BLEND);
-		qglColor4f (0, 0, 0, 0.5);
-		GL_DrawAliasShadow (paliashdr, lastposenum);
-		qglDisable (GL_BLEND);
-		qglColor4f (1, 1, 1, 1);
-		qglEnable (GL_TEXTURE_2D);
-		qglPopMatrix ();
-	}
-#endif
 }
 
 //============================================================================
@@ -737,7 +611,7 @@ R_DrawEntitiesOnList (void)
 				currententity->angles[0] *= 0.3;
 
 		if (currententity->model->type == mod_alias)
-			R_DrawAliasModel (currententity);
+			R_DrawAliasModel (currententity, false);
 	}
 }
 
@@ -750,18 +624,14 @@ static void
 R_DrawViewModel (void)
 {
 	currententity = &cl.viewent;
-
-	if (!r_drawviewmodel->value ||
-		chase_active->value ||
-		!r_drawentities->value ||
-		cl.items & IT_INVISIBILITY ||
-		(cl.stats[STAT_HEALTH] <= 0) ||
-		!currententity->model)
+	if (!r_drawviewmodel->value || chase_active->value ||
+			!r_drawentities->value || cl.items & IT_INVISIBILITY ||
+			(cl.stats[STAT_HEALTH] <= 0) || !currententity->model)
 		return;
 
 	// hack the depth range to prevent view model from poking into walls
 	qglDepthRange (gldepthmin, gldepthmin + 0.3 * (gldepthmax - gldepthmin));
-	R_DrawAliasModel (currententity);
+	R_DrawAliasModel (currententity, true);
 	qglDepthRange (gldepthmin, gldepthmax);
 }
 
@@ -1059,7 +929,7 @@ R_RenderView (void)
 		return;
 
 	if (!cl.worldmodel)
-		Sys_Error ("R_RenderView: NULL worldmodel");
+		Host_EndGame ("R_RenderView: NULL worldmodel");
 
 	if (r_speeds->value)
 	{
@@ -1108,7 +978,7 @@ R_RenderView (void)
 		else if (gl_wireframe == 2)
 			qglDisable (GL_POLYGON_OFFSET_LINE);
 	}
-			
+
 	R_PolyBlend ();
 
 	if (r_speeds->value)

@@ -492,15 +492,6 @@ Sbar_SortTeams (void)
 			}
 }
 
-int
-Sbar_ColorForMap (int m)
-{
-	m = (m < 0) ? 0 : ((m > 13) ? 13 : m);
-
-	m *= 16;
-	return m < 128 ? m + 8 : m + 8;
-}
-
 
 /*
 ===============
@@ -647,10 +638,10 @@ void
 Sbar_DrawFrags (void)
 {
 	int         i, k, l;
-	int         top, bottom;
 	int         x, y, f;
 	char        num[12];
 	player_info_t *s;
+	vec3_t		color;
 
 	if (cl.gametype != GAME_DEATHMATCH)
 		return;
@@ -672,18 +663,10 @@ Sbar_DrawFrags (void)
 			continue;
 
 		// draw background
-		top = s->topcolor;
-		bottom = s->bottomcolor;
-		top = (top < 0) ? 0 : ((top > 13) ? 13 : top);
-		bottom = (bottom < 0) ? 0 : ((bottom > 13) ? 13 : bottom);
-
-		top = Sbar_ColorForMap (top);
-		bottom = Sbar_ColorForMap (bottom);
-
-//      Draw_Fill (xofs + x*8 + 10, y, 28, 4, top);
-//      Draw_Fill (xofs + x*8 + 10, y+4, 28, 3, bottom);
-		Draw_Fill (x * 8 + 10, y, 28, 4, top);
-		Draw_Fill (x * 8 + 10, y + 4, 28, 3, bottom);
+		VectorScale(s->colormap.top, 0.5, color);
+		Draw_Fill (x * 8 + 10, y, 28, 4, color);
+		VectorScale(s->colormap.bottom, 0.5, color);
+		Draw_Fill (x * 8 + 10, y + 4, 28, 3, color);
 
 		// draw number
 		f = s->frags;
@@ -1000,7 +983,6 @@ Sbar_DeathmatchOverlay (int start)
 {
 	qpic_t			*pic;
 	Sint32			i, k, l;
-	Sint32			top, bottom;
 	Uint32			x, y, f;
 	char			num[12];
 	player_info_t	*s;
@@ -1011,6 +993,7 @@ Sbar_DeathmatchOverlay (int start)
 	char			team[5];
 	Sint32			skip = 10;
 	Sint32			coop;
+	vec3_t			color;
 
 	coop = Q_atoi (Info_ValueForKey (cl.serverinfo, "coop"));
 
@@ -1106,16 +1089,13 @@ Sbar_DeathmatchOverlay (int start)
 		Draw_String (x + 64, y, num);
 
 		// draw background
-		top = s->topcolor;
-		bottom = s->bottomcolor;
-		top = Sbar_ColorForMap (top);
-		bottom = Sbar_ColorForMap (bottom);
-
+		VectorScale(s->colormap.top, 0.5, color);
 		if (largegame)
-			Draw_Fill (x + 104, y + 1, 40, 3, top);
+			Draw_Fill (x + 104, y + 1, 40, 3, color);
 		else
-			Draw_Fill (x + 104, y, 40, 4, top);
-		Draw_Fill (x + 104, y + 4, 40, 4, bottom);
+			Draw_Fill (x + 104, y, 40, 4, color);
+		VectorScale(s->colormap.bottom, 0.5, color);
+		Draw_Fill (x + 104, y + 4, 40, 4, color);
 
 		// draw number
 		f = s->frags;
@@ -1161,7 +1141,6 @@ void
 Sbar_MiniDeathmatchOverlay (void)
 {
 	Sint32			i, k;
-	Sint32			top, bottom;
 	Uint32			x, y, f;
 	char        	num[12];
 	player_info_t	*s;
@@ -1170,6 +1149,7 @@ Sbar_MiniDeathmatchOverlay (void)
 	Sint32			numlines;
 	char			name[16 + 1];
 	team_t			*tm;
+	vec3_t			color;
 
 	if (vid.conwidth < 512 || !sb_lines)
 		return;							// not enuff room
@@ -1212,13 +1192,10 @@ Sbar_MiniDeathmatchOverlay (void)
 			continue;
 
 		// draw ping
-		top = s->topcolor;
-		bottom = s->bottomcolor;
-		top = Sbar_ColorForMap (top);
-		bottom = Sbar_ColorForMap (bottom);
-
-		Draw_Fill (x, y + 1, 40, 3, top);
-		Draw_Fill (x, y + 4, 40, 4, bottom);
+		VectorScale (s->colormap.top, 0.5, color);
+		Draw_Fill (x, y + 1, 40, 3, color);
+		VectorScale (s->colormap.bottom, 0.5, color);
+		Draw_Fill (x, y + 4, 40, 4, color);
 
 		// draw number
 		f = s->frags;
