@@ -556,8 +556,7 @@ ED_Print (edict_t *ed)
 {
 	int		*v, i, j, l, type;
 	ddef_t	*d;
-	char	*name;
-	char    tempstring[8192], tempstring2[260]; // temporary string buffers
+	char	*name, *value, tab[16];
 
 	if (ed->free) {
 		Com_Printf ("FREE\n");
@@ -583,36 +582,15 @@ ED_Print (edict_t *ed)
 		if (j == type_size[type])
 			continue;
 
-		if (strlen (name) > 256)
-		{
-			strncpy (tempstring2, name, 256);
-			tempstring2[256] = tempstring2[257] = tempstring2[258] = '.';
-			tempstring2[259] = 0;
-			name = tempstring2;
-		}
-		strcat (tempstring, name);
-		for (l = strlen (name); l < 14; l++)
-			strcat (tempstring, " ");
-		strcat (tempstring, " ");
+		value = PR_ValueString (d->type, (eval_t *)v);
+		l = strlen (name);
+		
+		for (j = 0; l < 15; j++, l++)
+			tab[j] = ' ';
+		tab[j] = '\0';
 
-		name = PR_ValueString (d->type, (eval_t *)v);
-		if (strlen (name) > 256)
-		{
-			strncpy (tempstring2, name, 256);
-			tempstring2[256] = tempstring2[257] = tempstring2[258] = '.';
-			tempstring2[259] = 0;
-			name = tempstring2;
-		}
-		strcat (tempstring, name);
-		strcat (tempstring, "\n");
-		if (strlen (tempstring) >= 4096)
-		{
-			Com_Printf ("%s", tempstring);
-			tempstring[0] = 0;
-		}
+		Com_Printf("%s%s%s\n", name, tab, value);
 	}
-	if (tempstring[0])
-		Com_Printf ("%s", tempstring);
 }
 
 /*

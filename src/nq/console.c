@@ -52,6 +52,8 @@ static const char rcsid[] =
 
 extern void Size_Changed2D (cvar_t *cvar);
 
+memzone_t	*con_zone;
+
 int			con_ormask;
 console_t  *con;
 
@@ -268,7 +270,9 @@ Con_Init (void)
 	if (COM_CheckParm ("-condebug"))
 		Cvar_Set (con_logname, "qconsole");
 
-	con = malloc (sizeof (console_t));
+	con_zone = Zone_AllocZone ("console");
+
+	con = Zone_Alloc (con_zone, sizeof(console_t));
 	con_linewidth = -1;
 	con->current = 0;	// these *MUST*
 	con->x = 0;			// be initialized
