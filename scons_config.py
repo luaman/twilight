@@ -96,11 +96,11 @@ def check_cheaders (conf, defs, headers):
 
 def handle_opts (conf, opts, config_defs):
 	ccflags = opts['CFLAGS']
-	if opts['bitchiness']:
+	if int(opts['bitchiness']):
 		ccflags += ' -Wcast-qual -Wsign-compare -W'
-	if opts['werror']:
+	if int(opts['werror']):
 		ccflags += ' -Werror'
-	if opts['profile']:
+	if int(opts['profile']):
 		ccflags += ' -pg -g'
 	conf.env.Replace (CCFLAGS = Split (ccflags))
 	conf.env.Replace (CC = opts['CC'])
