@@ -3,10 +3,10 @@ Project Twilight todo list
 
 These things should be done before first public release:
 
-  - Add Cvars fs_sharepath and fs_userpath
+  - Add Cvars fs_sharepath and fs_userpath [Knghtbrd]
   - Global config file support
   - Website updates
-    - MySQL-based news
+    - MySQL-based news [CoderJoe]
     - Important non-project files
     - Releases page
     - Credits page
@@ -18,25 +18,25 @@ These things should be done before first public release:
     - Debian
     - RPM
     ? Something for win32?
-  - Working gamma/brightness support
-  - Working mousewheel support
+  - Hardware gamma/brightness support [EvilTypeGuy]
+  - Working mousewheel support [EvilTypeGuy]
 
 
 Would be nice but is not strictly needed, in importance order:
 
-  - Rid ourselves of the monolithic header
+  - Rid ourselves of the monolithic header in NQ
   - Merge QW server into QW client ala NQ
-  - Produce a dedicated server for NQ
-  - Nightly CVS snapshots
+  - Test -dedicated to make sure there are no nasty surprises [LordHavoc]
+  - sv_model.c for NQ [LordHavoc]
+  - Build a seperate dedicated server in NQ [LordHavoc]
+  - Nightly CVS snapshots [Knghtbrd]
   - Prettiness features all around
-  - Console font
+  - Console font [Knghtbrd]
   - Menu overhaul
   - Knghtbrd's server console
   - Make water warping optional, and the intensity of it
     controllable via cvars, and menu, most likely off
     by default for QW, and on by default for NQ
-  - Hardware gamma/brightness support
-    (we currently have software based)
 
 Stuff that can wait:
 
