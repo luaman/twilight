@@ -494,7 +494,7 @@ Server information pertaining to this client only
 void
 CL_ParseClientdata (int bits)
 {
-	int         i, j;
+	int			i, j;
 
 	cl.viewheight = (bits & SU_VIEWHEIGHT) ? 
 		MSG_ReadChar() : DEFAULT_VIEWHEIGHT;
@@ -504,7 +504,8 @@ CL_ParseClientdata (int bits)
 
 	VectorCopy (cl.mvelocity[0], cl.mvelocity[1]);
 
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < 3; i++)
+	{
 		cl.punchangle[i] = (bits & (SU_PUNCH1 << i)) ?
 			MSG_ReadChar() : 0;
 		cl.mvelocity[0][i] = (bits & (SU_VELOCITY1 << i)) ?
@@ -514,7 +515,9 @@ CL_ParseClientdata (int bits)
 // [always sent]    if (bits & SU_ITEMS)
 	i = MSG_ReadLong ();
 
-	if (cl.items != i) {				// set flash times
+	if (cl.items != i)
+	{
+		// set flash times
 		for (j = 0; j < 32; j++)
 			if ((i & (1 << j)) && !(cl.items & (1 << j)))
 				cl.item_gettime[j] = cl.time;
@@ -529,43 +532,40 @@ CL_ParseClientdata (int bits)
 
 	i = (bits & SU_ARMOR) ? MSG_ReadByte() : 0;
 
-	if (cl.stats[STAT_ARMOR] != i) {
+	if (cl.stats[STAT_ARMOR] != i)
 		cl.stats[STAT_ARMOR] = i;
-	}
 
 	i = (bits & SU_WEAPON) ? MSG_ReadByte() : 0;
 
-	if (cl.stats[STAT_WEAPON] != i) {
+	if (cl.stats[STAT_WEAPON] != i)
 		cl.stats[STAT_WEAPON] = i;
-	}
 
 	i = MSG_ReadShort ();
-	if (cl.stats[STAT_HEALTH] != i) {
+	if (cl.stats[STAT_HEALTH] != i)
 		cl.stats[STAT_HEALTH] = i;
-	}
 
 	i = MSG_ReadByte ();
-	if (cl.stats[STAT_AMMO] != i) {
+	if (cl.stats[STAT_AMMO] != i)
 		cl.stats[STAT_AMMO] = i;
-	}
 
-	for (i = 0; i < 4; i++) {
+	for (i = 0; i < 4; i++)
+	{
 		j = MSG_ReadByte ();
-		if (cl.stats[STAT_SHELLS + i] != j) {
+		if (cl.stats[STAT_SHELLS + i] != j)
 			cl.stats[STAT_SHELLS + i] = j;
-		}
 	}
 
 	i = MSG_ReadByte ();
 
-	if (standard_quake) {
-		if (cl.stats[STAT_ACTIVEWEAPON] != i) {
-			cl.stats[STAT_ACTIVEWEAPON] = i;
-		}
-	} else {
-		if (cl.stats[STAT_ACTIVEWEAPON] != (1 << i)) {
+	if (game_mission->ivalue)
+	{
+		if (cl.stats[STAT_ACTIVEWEAPON] != (1 << i))
 			cl.stats[STAT_ACTIVEWEAPON] = (1 << i);
-		}
+	}
+	else
+	{
+		if (cl.stats[STAT_ACTIVEWEAPON] != i)
+			cl.stats[STAT_ACTIVEWEAPON] = i;
 	}
 }
 

@@ -49,12 +49,13 @@ cvar_t *fs_sharepath;
 cvar_t *fs_userconf;
 cvar_t *fs_userpath;
 cvar_t *fs_gamename;
+cvar_t *game_directory;
+cvar_t *game_rogue;
+cvar_t *game_hipnotic;
+cvar_t *game_mission;
 
 void        COM_InitFilesystem (void);
 void        COM_Path_f (void);
-
-
-qboolean    standard_quake = true, rogue, hipnotic;
 
 
 /*
@@ -813,6 +814,16 @@ COM_Init_Cvars (void)
 	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
 
 	fs_gamename = Cvar_Get ("fs_gamename", "id1", CVAR_ROM, NULL);
+
+	game_directory = Cvar_Get ("game_directory", "", CVAR_ROM, NULL);
+
+	// HACK HACK HACK: Quake mission pack support
+	// game_rogue    - Dissolusion of Eternity sbar/menus/cheats
+	// game_hipnotic - Scourge of Armagon sbar/menus/cheats
+	// game_mission  - Use the rogue/hipnotic network protocol
+	game_mission = Cvar_Get ("game_mission", "0", CVAR_NONE, NULL);
+	game_rogue = Cvar_Get ("game_rogue", "0", CVAR_NONE, NULL);
+	game_hipnotic = Cvar_Get ("game_hipnotic", "0", CVAR_NONE, NULL);
 }
 
 /*
@@ -1367,25 +1378,26 @@ COM_InitFilesystem (void)
 	// any set gamedirs will be freed up to here
 	com_base_searchpaths = com_searchpaths;
 
-	if (COM_CheckParm ("-rogue"))
-	{
-		rogue = true;
-		standard_quake = false;
-		COM_AddGameDirectory ("rogue");
-	}
-	if (COM_CheckParm ("-hipnotic"))
-	{
-		hipnotic = true;
-		standard_quake = false;
-		COM_AddGameDirectory ("hipnotic");
-	}
-
-//
-// -game <gamedir>
-// Adds basedir/gamedir as an override game
-//
 	i = COM_CheckParm ("-game");
 	if (i && i < com_argc - 1)
-		COM_AddGameDirectory (com_argv[i + 1]);
+		Cvar_Set (game_directory, com_argv[i + 1]);
+
+	if (COM_CheckParm ("-rogue"))
+	{
+		Cvar_Set (game_directory, "rogue");
+		Cvar_Set (game_rogue, "1");
+	}
+
+	if (COM_CheckParm ("-hipnotic"))
+	{
+		Cvar_Set (game_directory, "hipnotic");
+		Cvar_Set (game_hipnotic, "1");
+	}
+
+	if (game_rogue->ivalue || game_hipnotic->ivalue)
+		Cvar_Set (game_mission, "1");
+
+	if (game_directory->svalue[0])
+		COM_AddGameDirectory (game_directory->svalue);
 }
 
