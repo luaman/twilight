@@ -115,20 +115,15 @@ SV_Logfile_f
 void
 SV_Logfile_f (void)
 {
-	char        name[MAX_OSPATH];
-
-	if (sv_logfile) {
+	if (sys_logname->svalue)
+	{
 		Com_Printf ("File logging off.\n");
-		fclose (sv_logfile);
-		sv_logfile = NULL;
+		Cvar_Set (sys_logname, "");
 		return;
 	}
 
-	snprintf (name, sizeof (name), "%s/qconsole.log", com_gamedir);
-	Com_Printf ("Logging text to %s.\n", name);
-	sv_logfile = fopen (name, "w");
-	if (!sv_logfile)
-		Com_Printf ("failed.\n");
+	Com_Printf ("Logging text to %s/qconsole.log.\n", com_gamedir);
+	Cvar_Set (sys_logname, "qconsole");
 }
 
 

@@ -28,25 +28,28 @@ static const char rcsid[] =
 #include "twiconfig.h"
 
 #ifdef HAVE_LIMITS_H
-#include <limits.h>
+# include <limits.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+# include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
+# include <sys/stat.h>
+#endif
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
 #endif
 #ifdef HAVE_DIRECT_H
-#include <direct.h>
+# include <direct.h>
 #endif
 #ifdef HAVE_TCHAR_H
-#include <tchar.h>
+# include <tchar.h>
 #endif
 #ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
+# include <sys/time.h>
 #endif
 #ifdef HAVE_TIME_H
-#include <time.h>
+# include <time.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,7 +58,7 @@ static const char rcsid[] =
 # include <unistd.h>
 #endif
 #ifdef HAVE_PWD_H
-#include <pwd.h>
+# include <pwd.h>
 #endif
 #include <errno.h>
 
@@ -71,6 +74,7 @@ static const char rcsid[] =
 #include "SDL.h"
 
 #include "quakedef.h"
+#include "client.h"
 #include "common.h"
 #include "cvar.h"
 #include "mathlib.h"
@@ -91,8 +95,13 @@ Uint32		sys_sleep;
 
 char       *qdate = __DATE__;
 
-cvar_t	   *sys_asciionly;
-cvar_t	   *sys_extrasleep;
+cvar_t *sys_asciionly;
+cvar_t *sys_extrasleep;
+cvar_t *sys_logname;
+
+int sys_gametypes;
+
+char logname[MAX_OSPATH] = "";
 
 double		curtime;
 
@@ -179,12 +188,23 @@ Sys_ESCallback (cvar_t *cvar)
 	sys_sleep = (Uint32)((cvar->ivalue) * (1.0f / 1000.0f));
 }
 
+static void
+setlogname (cvar_t *sys_logname)
+{
+	if (com_gamedir[0] && sys_logname->svalue && sys_logname->svalue[0])
+		snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
+				sys_logname->svalue);
+	else
+		logname[0] = '\0';
+}
+
 void
 Sys_Init (void)
 {
 	sys_extrasleep = Cvar_Get ("sys_extrasleep", "0", CVAR_NONE,
 			&Sys_ESCallback);
 	sys_asciionly = Cvar_Get ("sys_asciionly", "1", CVAR_ARCHIVE, NULL);
+	sys_logname = Cvar_Get ("sys_logname", "", CVAR_NONE, &setlogname);
 
 	Math_Init ();
 
@@ -296,6 +316,23 @@ Sys_mkdir (char *path)
 }
 
 
+void
+Sys_DebugLog (char *file, char *fmt, ...)
+{
+	va_list     argptr;
+	static char data[1024];
+	int         fd;
+
+	va_start (argptr, fmt);
+	vsnprintf (data, sizeof (data), fmt, argptr);
+	va_end (argptr);
+
+	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
+	write (fd, data, strlen (data));
+	close (fd);
+}
+
+
 double
 Sys_DoubleTime (void)
 {
@@ -312,10 +349,8 @@ Sys_DoubleTime (void)
 	return epoch + (double)(now / 1000.0);
 }
 
-#ifndef _WIN32
 qboolean		do_stdin = true;
 qboolean		stdin_ready;
-#endif
 
 char *
 Sys_ConsoleInput (void)
@@ -448,8 +483,14 @@ main (int c, char **v)
 	SDL_Init (SDL_INIT_TIMER);
 	atexit (SDL_Quit);
 
+	sys_gametypes = GAME_QW_SERVER;
+
 	COM_InitArgv (c, v);
 
+	if (COM_CheckParm ("-condebug"))
+		Cvar_Set (sys_logname, "qconsole");
+
+	CL_Init ();							// Inits cls for net_chan.c
 	SV_Init ();
 
 	SV_Frame (0.1);

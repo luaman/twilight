@@ -117,7 +117,7 @@ typedef enum {
 										// 
 	// not in game yet
 	cs_spawned							// client is fully in game
-} client_state_t;
+} sv_client_state_t;
 
 typedef struct {
 	// received from client
@@ -131,7 +131,7 @@ typedef struct {
 #define MAX_BACK_BUFFERS 4
 
 typedef struct client_s {
-	client_state_t state;
+	sv_client_state_t state;
 
 	int         spectator;				// non-interactive
 
@@ -485,6 +485,9 @@ void        ClientReliableWrite_String (client_t *cl, char *s);
 void        ClientReliableWrite_SZ (client_t *cl, void *data, int len);
 
 void		SV_SendServerInfoChange (char *key, char *value);
+
+
+qboolean ServerPaused (void);
 
 #endif // __SERVER_H
 
