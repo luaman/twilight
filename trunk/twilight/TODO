@@ -21,12 +21,11 @@ Bugs we know about:
     or else it will crash because of no vertex arrays.
   - RC: userpath is not properly created if it doesn't exist.  Needs to be.
   - RC: Interpolation is broken in both NQ/QW.
-  - Damm can demonstrate lightmap corruption consistantly with certain
-    maps at certain times.  He can't reproduce it at will, but it does
-    happen.
   - RC: Need to print out Id's Copyright message on engine startup.
   - RC: Need a 3dfx quirk for limiting vertex array size.  We need the
     output of the OpenGL strings in Win32 for this.
+  - RC: textures with fullbrights need their base color black, see below for
+    how this could be done simply...
   - lights do not react to moving bmodels, untransforming into the
     bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.
@@ -41,6 +40,10 @@ Bugs we know about:
 
 Stuff that isn't needed for 0.2, but would be nice:
 
+  - Cleanup of fullbright palette stuff.  Best solution seems to be to have
+    several copies of the palette, one full, one fullbright only, one pants,
+    one shirt, etc.  This would greatly simplify uploading fullbright
+    textures and removal of fullbrights from base textures.
   - clean up the menus, make sure all cvar graphics options
     are listed on the graphics options menu in both nq/qw
   - clean up the Cmd system
@@ -75,7 +78,7 @@ Stuff that isn't needed for 0.2, but would be nice:
       movie has a custom trail for the General's cigar.  I shit you not.
     + Anything else?  List it here..
   - gl_colorlights can/should be made to work without +set
-  - BloodBath support
+  - Transfusion support
     + Custom sbar
     + Custom keybindings
     + builtin to register Cvars
