@@ -15,7 +15,7 @@ def check_func_flag (context, flag):
 	ret = context.TryCompile ("""
 int """ + flag + """ test (int a, int b)
 {
-    return a + b;
+	return a + b;
 }
 """, ".c")
 	context.Result (ret);
@@ -95,6 +95,24 @@ int main (int argc, char *argv[])
 		context.Result (0)
 		return (0, [])
 
+def check_lflag (context, lflag, add = 1):
+	context.Message('Checking to see if linker flag ' + lflag + ' works ... ')
+	old_flags = context.env['LINKFLAGS']
+	context.env['LINKFLAGS'] = lflag
+	ret = context.TryCompile ("""
+	int main (int argc, char *argv[]) {
+		return 0;
+	}
+""", ".c")
+
+	context.env['LINKFLAGS'] = old_flags
+
+	if (ret and add):
+		context.env.Append (LINKFLAGS = [lflag])
+
+	context.Result (ret)
+	return ret
+
 def check_cflag (context, cflag, add = 1):
 	context.Message('Checking to see if compiler flag ' + cflag + ' works ... ')
 	old_flags = context.env['CCFLAGS']
@@ -173,31 +191,29 @@ def handle_opts (conf, opts, config_defs, destructive):
 		conf.env.Replace (CC = opts['CC'])
 		conf.env.Replace (CCFLAGS = Split (opts['CFLAGS']))
 		if ('gcc' in env['TOOLS']):
-		    if int(opts['optimize']):
+			if int(opts['optimize']):
 				conf.cflag ('-O2')
-		    if int(opts['debug']):
+			if int(opts['debug']):
 				conf.cflag ('-g')
-				env.Append (LINKFLAGS = ['-g'])
-		    if int(opts['warnings']):
+			if int(opts['warnings']):
 				conf.cflag ('-Wall')
-		    if int(opts['bitchiness']):
-			    conf.cflag ('-Wcast-qual')
-			    conf.cflag ('-Wsign-compare')
-			    conf.cflag ('-W')
-		    if int(opts['profile']):
-				env.Append (LINKFLAGS = ['-g', '-pg'])
-				conf.cflag ('-g')
+			if int(opts['bitchiness']):
+				conf.cflag ('-Wcast-qual')
+				conf.cflag ('-Wsign-compare')
+				conf.cflag ('-W')
+			if int(opts['profile']):
+				conf.lflag ('-pg')
 				conf.cflag ('-pg')
-		    if int(opts['save-temps']):
-			    conf.cflag ('-save-temps', 1)
-		    else:
-			    conf.cflag ('-pipe', 1)
-		    conf.cflag ('-fno-strict-aliasing', 1)
-		    conf.cflag ('-finline', 1)
+			if int(opts['save-temps']):
+				conf.cflag ('-save-temps', 1)
+			else:
+				conf.cflag ('-pipe', 1)
+			conf.cflag ('-fno-strict-aliasing', 1)
+			conf.cflag ('-finline', 1)
 		if ('msvc' in env['TOOLS']):
-		    env.Append (LINKFLAGS = ['/subsystem:windows'])
-		    if int(opts['optimize']):
-			env.Append (CCFLAGS = ['/G5', '/MD'])
+			env.Append (LINKFLAGS = ['/subsystem:windows'])
+			if int(opts['optimize']):
+				env.Append (CCFLAGS = ['/G5', '/MD'])
 
 		config_defs.set('SDL_IMAGE_LIBRARY', '"' + opts['sdl_image'] + '"')
 		config_defs.set('USERPATH', '"' + opts['userpath'] + '"')
@@ -225,7 +241,7 @@ def do_configure (env):
 	config_defs.set('VERSION', '"0.2.02.cvs"')
 	opts.args (ARGUMENTS)
 	opts.save('config_opts.py')
-	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag, 'func_flag' : check_func_flag}
+	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag, 'lflag' : check_lflag, 'func_flag' : check_func_flag}
 	conf = Configure(env, custom_tests = tests)
 	handle_opts (conf, opts, config_defs, 0)
 
@@ -237,7 +253,7 @@ def do_configure (env):
 		sdl_ver = ret[1]
 	else:
 		if (opts['sdl_include']):
-		    env.Append (CPPPATH = [opts['sdl_include']])
+			env.Append (CPPPATH = [opts['sdl_include']])
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		if not config_defs.has_key ('HAVE_SDL_H'):
 			print "Twilight requires SDL 1.2.5. (None found.)"
@@ -286,7 +302,7 @@ def do_configure (env):
 	env_defs.set ('CC', env['CC'])
 	env_defs.set ('LIBS', env['LIBS'])
 	if env.has_key ('CPPPATH'):
-	    env_defs.set ('CPPPATH', env['CPPPATH'])
+		env_defs.set ('CPPPATH', env['CPPPATH'])
 	if env.has_key ('CPPDEFINES'):
 		env_defs.set ('CPPDEFINES', env['CPPDEFINES'])
 	if env.has_key ('LINKFLAGS'):
@@ -304,12 +320,12 @@ def do_configure (env):
     Compiler                    : """ + env['CC'] + """
     Compiler flags              : """ + string.join(env['CCFLAGS'], " ")
 	if (env.has_key ('LINKFLAGS') and env['LINKFLAGS']):
-	    print """\
+		print """\
     Link flags                  : """ + string.join(env['LINKFLAGS'], " ")
 	print """\
     Libraries                   : """ + string.join(env['LIBS'], " ")
 	if (env.has_key ('LIBPATH') and env['LIBPATH']):
-	    print """\
+		print """\
     Lib path                    : """ + string.join(env['LIBPATH'], " ")
 	print """\
     Default OpenGL library      : """ + opts['libgl'] + """
