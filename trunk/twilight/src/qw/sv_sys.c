@@ -826,6 +826,16 @@ main (int argc, char *argv[])
 	double		time, oldtime, newtime, base;
 	Uint	port;
 	Uint	p;
+#ifdef _WIN32
+	MSG msg;
+	char *tmp = NULL;
+	char lastmap[1024] = "";
+	char wintitle[1024] = "";
+	int lastmaxclients = 0;
+	int lastclients = 0;
+	int updatetitle = 0;
+	Uint i;
+#endif
 
 	SDL_Init (SDL_INIT_TIMER);
 	atexit (SDL_Quit);
@@ -853,15 +863,6 @@ main (int argc, char *argv[])
 	while (1)
 	{
 #ifdef _WIN32
-		MSG msg;
-		char *tmp = NULL;
-		char lastmap[1024];
-		char wintitle[1024];
-		int lastmaxclients = 0;
-		int lastclients = 0;
-		int updatetitle;
-		Uint i;
-		
 		tmp = Info_ValueForKey (svs.info, "map");
 		if (strncmp(tmp, lastmap, sizeof(lastmap)))
 		{
