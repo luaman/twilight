@@ -342,7 +342,7 @@ Con_DrawInput (void)
 			con_linewidth, con->tsize);
 
 	if ((int) (cls.realtime * con_cursorspeed) & 1)
-		Draw_Character ((min(1 + key_linepos, con_linewidth)) * con->tsize,
+		Draw_Character (min(1 + key_linepos, con_linewidth) * con->tsize,
 				con_vislines - (con->tsize * 2.65), 11, con->tsize);
 }
 
