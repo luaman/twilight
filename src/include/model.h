@@ -96,7 +96,7 @@ typedef struct model_s {
 
 //
 // volume occupied by the model graphics
-//      
+//
 	vec3_t		rotatedmins;
 	vec3_t		rotatedmaxs;
 	vec3_t		normalmins;
@@ -110,13 +110,9 @@ typedef struct model_s {
 // additional model data
 //
 	memzone_t	*zone;
-	union {						// FIXME: Hack?
-		brushhdr_t	*brush;
-		aliashdr_t	*alias;
-		msprite_t	*sprite;
-		void		*ptr;
-	};
-//	void		*extradata;
+	brushhdr_t	*brush;
+	aliashdr_t	*alias;
+	msprite_t	*sprite;
 } model_t;
 
 //============================================================================
