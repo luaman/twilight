@@ -1814,7 +1814,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	pframetype = (daliasframetype_t *) &pintriangles[pheader->numtris];
 
 	aliasbboxmin[0] = aliasbboxmin[1] = aliasbboxmin[2] = 255;
-	aliasbboxmax[0] = aliasbboxmax[1] = aliasbboxmax[2] = -255;
+	aliasbboxmax[0] = aliasbboxmax[1] = aliasbboxmax[2] = 0;
 
 	for (i = 0; i < numframes; i++) {
 		aliasframetype_t frametype;
