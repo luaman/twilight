@@ -278,7 +278,7 @@ float       (*LittleFloat) (float l);
 short
 ShortSwap (short l)
 {
-	byte        b1, b2;
+	Uint8       b1, b2;
 
 	b1 = l & 255;
 	b2 = (l >> 8) & 255;
@@ -295,7 +295,7 @@ ShortNoSwap (short l)
 int
 LongSwap (int l)
 {
-	byte        b1, b2, b3, b4;
+	Uint8       b1, b2, b3, b4;
 
 	b1 = l & 255;
 	b2 = (l >> 8) & 255;
@@ -316,7 +316,7 @@ FloatSwap (float f)
 {
 	union {
 		float       f;
-		byte        b[4];
+		Uint8       b[4];
 	} dat1     , dat2;
 
 
@@ -350,7 +350,7 @@ Handles byte ordering and avoids alignment errors
 void
 MSG_WriteChar (sizebuf_t *sb, int c)
 {
-	byte       *buf;
+	Uint8      *buf;
 
 #ifdef PARANOID
 	if (c < -128 || c > 127)
@@ -364,7 +364,7 @@ MSG_WriteChar (sizebuf_t *sb, int c)
 void
 MSG_WriteByte (sizebuf_t *sb, int c)
 {
-	byte       *buf;
+	Uint8      *buf;
 
 #ifdef PARANOID
 	if (c < 0 || c > 255)
@@ -378,7 +378,7 @@ MSG_WriteByte (sizebuf_t *sb, int c)
 void
 MSG_WriteShort (sizebuf_t *sb, int c)
 {
-	byte       *buf;
+	Uint8      *buf;
 
 #ifdef PARANOID
 	if (c < ((short) 0x8000) || c > (short) 0x7fff)
@@ -393,7 +393,7 @@ MSG_WriteShort (sizebuf_t *sb, int c)
 void
 MSG_WriteLong (sizebuf_t *sb, int c)
 {
-	byte       *buf;
+	Uint8      *buf;
 
 	buf = SZ_GetSpace (sb, 4);
 	buf[0] = c & 0xff;
@@ -588,7 +588,7 @@ float
 MSG_ReadFloat (void)
 {
 	union {
-		byte        b[4];
+		Uint8       b[4];
 		float       f;
 		int         l;
 	} dat;
@@ -747,14 +747,11 @@ SZ_Print (sizebuf_t *buf, char *data)
 	len = strlen (data) + 1;
 
 	if (!buf->cursize || buf->data[buf->cursize - 1])
-		memcpy ((byte *) SZ_GetSpace (buf, len), data, len);	// no trailing
-	// 0
+		// no trailing 0
+		memcpy ((Uint8 *) SZ_GetSpace (buf, len), data, len);
 	else
-		memcpy ((byte *) SZ_GetSpace (buf, len - 1) - 1, data, len);	// write 
-																		// 
-	// over 
-	// trailing 
-	// 0
+		// write over trailing 0
+		memcpy ((Uint8 *) SZ_GetSpace (buf, len - 1) - 1, data, len);
 }
 
 
@@ -1054,7 +1051,7 @@ COM_Init
 void
 COM_Init (void)
 {
-	byte        swaptest[2] = { 1, 0 };
+	Uint8       swaptest[2] = { 1, 0 };
 
 // set the byte swapping variables in a portable manner 
 	if (*(short *) swaptest == 1) {
@@ -1107,7 +1104,7 @@ va (char *format, ...)
 
 /// just for debugging
 int
-memsearch (byte * start, int count, int search)
+memsearch (Uint8 *start, int count, int search)
 {
 	int         i;
 
@@ -1395,13 +1392,13 @@ Allways appends a 0 byte to the loaded data.
 ============
 */
 cache_user_t *loadcache;
-byte       *loadbuf;
+Uint8        *loadbuf;
 int         loadsize;
-byte       *
+Uint8 *
 COM_LoadFile (char *path, int usehunk)
 {
 	FILE       *h;
-	byte       *buf;
+	Uint8      *buf;
 	char        base[32];
 	int         len;
 
@@ -1434,20 +1431,20 @@ COM_LoadFile (char *path, int usehunk)
 	if (!buf)
 		Sys_Error ("COM_LoadFile: not enough space for %s", path);
 
-	((byte *) buf)[len] = 0;
+	((Uint8 *) buf)[len] = 0;
 	fread (buf, 1, len, h);
 	fclose (h);
 
 	return buf;
 }
 
-byte       *
+Uint8 *
 COM_LoadHunkFile (char *path)
 {
 	return COM_LoadFile (path, 1);
 }
 
-byte       *
+Uint8 *
 COM_LoadTempFile (char *path)
 {
 	return COM_LoadFile (path, 2);
@@ -1461,12 +1458,12 @@ COM_LoadCacheFile (char *path, struct cache_user_s *cu)
 }
 
 // uses temp hunk if larger than bufsize
-byte       *
+Uint8 *
 COM_LoadStackFile (char *path, void *buffer, int bufsize)
 {
-	byte       *buf;
+	Uint8      *buf;
 
-	loadbuf = (byte *) buffer;
+	loadbuf = (Uint8 *) buffer;
 	loadsize = bufsize;
 	buf = COM_LoadFile (path, 4);
 
@@ -1519,11 +1516,11 @@ COM_LoadPackFile (char *packfile)
 	fread (&info, 1, header.dirlen, packhandle);
 
 // crc the directory to check for modifications
-	crc = CRC_Block ((byte *) info, header.dirlen);
+	crc = CRC_Block ((Uint8 *) info, header.dirlen);
 
 //  CRC_Init (&crc);
 //  for (i=0 ; i<header.dirlen ; i++)
-//      CRC_ProcessByte (&crc, ((byte *)info)[i]);
+//      CRC_ProcessByte (&crc, ((Uint8 *)info)[i]);
 	if (crc != PAK0_CRC)
 		com_modified = true;
 
@@ -1956,7 +1953,7 @@ Info_Print (char *s)
 	}
 }
 
-static byte chktbl[1024 + 4] = {
+static Uint8 chktbl[1024 + 4] = {
 	0x78, 0xd2, 0x94, 0xe3, 0x41, 0xec, 0xd6, 0xd5, 0xcb, 0xfc, 0xdb, 0x8a,
 	0x4b, 0xcc, 0x85, 0x01,
 	0x23, 0xd2, 0xe5, 0xf2, 0x29, 0xa7, 0x45, 0x94, 0x4a, 0x62, 0xe3, 0xa5,
@@ -2034,12 +2031,12 @@ COM_BlockSequenceCRCByte
 For proxy protecting
 ====================
 */
-byte
-COM_BlockSequenceCRCByte (byte * base, int length, int sequence)
+Uint8
+COM_BlockSequenceCRCByte (Uint8 *base, int length, int sequence)
 {
 	unsigned short crc;
-	byte       *p;
-	byte        chkb[60 + 4];
+	Uint8      *p;
+	Uint8       chkb[60 + 4];
 
 	p = chktbl + (sequence % (sizeof (chktbl) - 8));
 

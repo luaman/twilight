@@ -46,8 +46,8 @@
 #define	TYP_MIPTEX		68
 
 typedef struct qpic_s {
-	int         width, height;
-	byte        data[4];				// variably sized
+	Uint32      width, height;
+	Uint8       data[4];				// variably sized
 } qpic_t;
 
 
@@ -70,7 +70,7 @@ typedef struct {
 
 extern int  wad_numlumps;
 extern lumpinfo_t *wad_lumps;
-extern byte *wad_base;
+extern Uint8 *wad_base;
 
 void        W_LoadWadFile (char *filename);
 void        W_CleanupName (char *in, char *out);

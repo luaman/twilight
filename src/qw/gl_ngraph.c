@@ -43,13 +43,13 @@ static const char rcsid[] =
 #include "TGL_types.h"
 #include "TGL_funcs.h"
 
-extern byte *draw_chars;				// 8*8 graphic characters
+extern Uint8 *draw_chars;				// 8*8 graphic characters
 
 int         netgraphtexture;			// netgraph texture
 
 #define NET_GRAPHHEIGHT 32
 
-static byte ngraph_texels[NET_GRAPHHEIGHT][NET_TIMINGS];
+static Uint8 ngraph_texels[NET_GRAPHHEIGHT][NET_TIMINGS];
 
 static void
 R_LineGraph (int x, int h)
@@ -76,17 +76,17 @@ R_LineGraph (int x, int h)
 		if (i & 1)
 			ngraph_texels[NET_GRAPHHEIGHT - i - 1][x] = 0xff;
 		else
-			ngraph_texels[NET_GRAPHHEIGHT - i - 1][x] = (byte) color;
+			ngraph_texels[NET_GRAPHHEIGHT - i - 1][x] = (Uint8) color;
 
 	for (; i < s; i++)
-		ngraph_texels[NET_GRAPHHEIGHT - i - 1][x] = (byte) 0xff;
+		ngraph_texels[NET_GRAPHHEIGHT - i - 1][x] = (Uint8) 0xff;
 }
 
 void
 Draw_CharToNetGraph (int x, int y, int num)
 {
 	int         row, col;
-	byte       *source;
+	Uint8      *source;
 	int         drawline;
 	int         nx;
 

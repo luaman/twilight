@@ -23,6 +23,7 @@ twilight_nq_SOURCES= \
 	gl_draw.c gl_mesh.c gl_model.c gl_model.h spritegn.h modelgen.h \
 	gl_refrag.c gl_rlight.c gl_rmain.c anorms.h anorm_dots.h gl_rmisc.c \
 	gl_rsurf.c gl_screen.c screen.h gl_warp.c gl_warp_sin.h glquake.h \
+	gl_proc.c \
 	r_part.c sbar.c sbar.h \
 	host.c host_cmd.c keys.c mathlib.c menu.c menu.h \
 	net.h net_bsd.c net_dgrm.c net_dgrm.h net_loop.c net_loop.h \
@@ -33,6 +34,7 @@ twilight_nq_SOURCES= \
 	sys.h vid_sdl.c vid.h \
 	snd_dma.c snd_mem.c snd_mix.c sound.h \
 	cd_sdl.c cdaudio.h \
+	pcx.c tga.c \
 	view.c view.h wad.c wad.h world.c world.h zone.c zone.h \
 	quakedef.h bspfile.h client.h draw.h input.h keys.h protocol.h \
 	render.h server.h $(twilight_nq_sys)

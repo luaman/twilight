@@ -50,7 +50,7 @@ typedef struct entity_s {
 	vec3_t      angles;
 	struct model_s *model;				// NULL = no model
 	int         frame;
-	byte       *colormap;
+	Uint8      *colormap;
 	int         skinnum;				// for Alias models
 
 	struct player_info_s *scoreboard;	// identify player

@@ -31,7 +31,7 @@
 #define	PORT_ANY	-1
 
 typedef struct {
-	byte        ip[4];
+	Uint8       ip[4];
 	unsigned short port;
 	unsigned short pad;
 } netadr_t;
@@ -99,10 +99,10 @@ typedef struct {
 
 // reliable staging and holding areas
 	sizebuf_t   message;				// writing buffer to send to server
-	byte        message_buf[MAX_MSGLEN];
+	Uint8       message_buf[MAX_MSGLEN];
 
 	int         reliable_length;
-	byte        reliable_buf[MAX_MSGLEN];	// unacked reliable message
+	Uint8       reliable_buf[MAX_MSGLEN];	// unacked reliable message
 
 // time and size data to calculate bandwidth
 	int         outgoing_size[MAX_LATENT];
@@ -113,8 +113,8 @@ extern int  net_drop;					// packets dropped before this one
 
 void        Netchan_Init_Cvars (void);
 void        Netchan_Init (void);
-void        Netchan_Transmit (netchan_t *chan, int length, byte * data);
-void        Netchan_OutOfBand (netadr_t adr, int length, byte * data);
+void        Netchan_Transmit (netchan_t *chan, int length, Uint8 *data);
+void        Netchan_OutOfBand (netadr_t adr, int length, Uint8 *data);
 void        Netchan_OutOfBandPrint (netadr_t adr, char *format, ...);
 qboolean    Netchan_Process (netchan_t *chan);
 void        Netchan_Setup (netchan_t *chan, netadr_t adr, int qport);

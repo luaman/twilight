@@ -96,21 +96,21 @@ void        ED_ParseGlobals (char *data);
 void        ED_LoadFromFile (char *data);
 
 //define EDICT_NUM(n) ((edict_t *)(sv.edicts+ (n)*pr_edict_size))
-//define NUM_FOR_EDICT(e) (((byte *)(e) - sv.edicts)/pr_edict_size)
+//define NUM_FOR_EDICT(e) (((Uint8 *)(e) - sv.edicts)/pr_edict_size)
 
 edict_t    *EDICT_NUM (int n);
 int         NUM_FOR_EDICT (edict_t *e);
 
-#define	NEXT_EDICT(e) ((edict_t *)( (byte *)e + pr_edict_size))
+#define	NEXT_EDICT(e) ((edict_t *)( (Uint8 *)e + pr_edict_size))
 
-#define	EDICT_TO_PROG(e) ((byte *)e - (byte *)sv.edicts)
-#define PROG_TO_EDICT(e) ((edict_t *)((byte *)sv.edicts + e))
+#define	EDICT_TO_PROG(e) ((Uint8 *)e - (Uint8 *)sv.edicts)
+#define PROG_TO_EDICT(e) ((edict_t *)((Uint8 *)sv.edicts + e))
 
 //============================================================================
 
 #define	G_FLOAT(o) (pr_globals[o])
 #define	G_INT(o) (*(int *)&pr_globals[o])
-#define	G_EDICT(o) ((edict_t *)((byte *)sv.edicts+ *(int *)&pr_globals[o]))
+#define	G_EDICT(o) ((edict_t *)((Uint8 *)sv.edicts+ *(int *)&pr_globals[o]))
 #define G_EDICTNUM(o) NUM_FOR_EDICT(G_EDICT(o))
 #define	G_VECTOR(o) (&pr_globals[o])
 #define	G_STRING(o) (PR_GetString(*(string_t *)&pr_globals[o]))

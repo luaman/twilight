@@ -57,7 +57,7 @@ void        Mod_LoadBrushModel (model_t *mod, void *buffer);
 void        Mod_LoadAliasModel (model_t *mod, void *buffer);
 model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
 
-byte        mod_novis[MAX_MAP_LEAFS / 8];
+Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 
 #define	MAX_MOD_KNOWN	256
 model_t     mod_known[MAX_MOD_KNOWN];
@@ -114,12 +114,12 @@ Mod_PointInLeaf (vec3_t p, model_t *model)
 Mod_DecompressVis
 ===================
 */
-byte       *
-Mod_DecompressVis (byte * in, model_t *model)
+Uint8 *
+Mod_DecompressVis (Uint8 *in, model_t *model)
 {
-	static byte decompressed[MAX_MAP_LEAFS / 8];
+	static Uint8 decompressed[MAX_MAP_LEAFS / 8];
 	int         c;
-	byte       *out;
+	Uint8      *out;
 	int         row;
 
 	row = (model->numleafs + 7) >> 3;
@@ -154,7 +154,7 @@ Mod_DecompressVis (byte * in, model_t *model)
 	return decompressed;
 }
 
-byte       *
+Uint8 *
 Mod_LeafPVS (mleaf_t *leaf, model_t *model)
 {
 	if (leaf == model->leafs)
@@ -224,7 +224,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 {
 	void       *d;
 	unsigned   *buf;
-	byte        stackbuf[1024];			// avoid dirtying the cache heap
+	Uint8       stackbuf[1024];			// avoid dirtying the cache heap
 
 	if (!mod->needload) {
 		if (mod->type == mod_alias) {
@@ -289,7 +289,7 @@ Mod_ForName (char *name, qboolean crash)
 ===============================================================================
 */
 
-byte       *mod_base;
+Uint8      *mod_base;
 
 
 /*
@@ -323,7 +323,7 @@ Mod_LoadTextures (lump_t *l)
 		m->dataofs[i] = LittleLong (m->dataofs[i]);
 		if (m->dataofs[i] == -1)
 			continue;
-		mt = (miptex_t *) ((byte *) m + m->dataofs[i]);
+		mt = (miptex_t *) ((Uint8 *) m + m->dataofs[i]);
 		mt->width = LittleLong (mt->width);
 		mt->height = LittleLong (mt->height);
 		for (j = 0; j < MIPLEVELS; j++)
@@ -1058,7 +1058,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 			 mod->name, i, BSPVERSION);
 
 // swap all the lumps
-	mod_base = (byte *) header;
+	mod_base = (Uint8 *) header;
 
 	for (i = 0; i < sizeof (dheader_t) / 4; i++)
 		((int *) header)[i] = LittleLong (((int *) header)[i]);

@@ -98,7 +98,7 @@ void
 CL_WriteDemoCmd (usercmd_t *pcmd)
 {
 	float       fl, ang[3];
-	byte        c;
+	Uint8       c;
 	usercmd_t   cmd;
 
 //Con_Printf("write: %ld bytes, %4.4f\n", msg->cursize, realtime);
@@ -142,7 +142,7 @@ CL_WriteDemoMessage (sizebuf_t *msg)
 {
 	int         len;
 	float       fl;
-	byte        c;
+	Uint8       c;
 
 //Con_Printf("write: %ld bytes, %4.4f\n", msg->cursize, realtime);
 
@@ -174,7 +174,7 @@ CL_GetDemoMessage (void)
 {
 	int         r, i, j;
 	float       demotime;
-	byte        c;
+	Uint8       c;
 	usercmd_t  *pcmd;
 
 	// read the time from the packet
@@ -343,7 +343,7 @@ CL_WriteRecordDemoMessage (sizebuf_t *msg, int seq)
 	int         len;
 	int         i;
 	float       fl;
-	byte        c;
+	Uint8       c;
 
 //Con_Printf("write: %ld bytes, %4.4f\n", msg->cursize, realtime);
 
@@ -374,7 +374,7 @@ CL_WriteSetDemoMessage (void)
 {
 	int         len;
 	float       fl;
-	byte        c;
+	Uint8       c;
 
 //Con_Printf("write: %ld bytes, %4.4f\n", msg->cursize, realtime);
 

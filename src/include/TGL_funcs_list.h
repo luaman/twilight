@@ -182,7 +182,7 @@ TWIGL_NEED (void, glGetFloatv, (GLenum pname, GLfloat * params));
 TWIGL_DONT_NEED (void, glGetHistogram, (GLenum target, GLboolean reset, GLenum format, GLenum type, GLvoid * values));
 TWIGL_DONT_NEED (void, glGetHistogramParameterfv, (GLenum target, GLenum pname, GLfloat * params));
 TWIGL_DONT_NEED (void, glGetHistogramParameteriv, (GLenum target, GLenum pname, GLint * params));
-TWIGL_DONT_NEED (void, glGetIntegerv, (GLenum pname, GLint * params));
+TWIGL_NEED (void, glGetIntegerv, (GLenum pname, GLint * params));
 TWIGL_DONT_NEED (void, glGetLightfv, (GLenum light, GLenum pname, GLfloat * params));
 TWIGL_DONT_NEED (void, glGetLightiv, (GLenum light, GLenum pname, GLint * params));
 TWIGL_DONT_NEED (void, glGetMapdv, (GLenum target, GLenum query, GLdouble * v));
@@ -317,7 +317,7 @@ TWIGL_DONT_NEED (void, glPixelMapfv, (GLenum map, GLint mapsize, const GLfloat *
 TWIGL_DONT_NEED (void, glPixelMapuiv, (GLenum map, GLint mapsize, const GLuint * values));
 TWIGL_DONT_NEED (void, glPixelMapusv, (GLenum map, GLint mapsize, const GLushort * values));
 TWIGL_DONT_NEED (void, glPixelStoref, (GLenum pname, GLfloat param));
-TWIGL_DONT_NEED (void, glPixelStorei, (GLenum pname, GLint param));
+TWIGL_NEED (void, glPixelStorei, (GLenum pname, GLint param));
 TWIGL_DONT_NEED (void, glPixelTransferf, (GLenum pname, GLfloat param));
 TWIGL_DONT_NEED (void, glPixelTransferi, (GLenum pname, GLint param));
 TWIGL_DONT_NEED (void, glPixelZoom, (GLfloat xfactor, GLfloat yfactor));

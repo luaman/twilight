@@ -40,7 +40,7 @@ void        Draw_SubPic (int x, int y, struct qpic_s *pic,
 void        Draw_Pic (int x, int y, struct qpic_s *pic);
 void        Draw_TransPic (int x, int y, struct qpic_s *pic);
 void        Draw_TransPicTranslate (int x, int y, struct qpic_s *pic,
-									byte * translation);
+									Uint8 *translation);
 void        Draw_ConsoleBackground (int lines);
 void        Draw_BeginDisc (void);
 void        Draw_EndDisc (void);

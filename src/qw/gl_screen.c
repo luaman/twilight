@@ -711,7 +711,7 @@ SCR_ScreenShot_f
 void
 SCR_ScreenShot_f (void)
 {
-	byte       *buffer;
+	Uint8      *buffer;
 	char        pcxname[80];
 	char        checkname[MAX_OSPATH];
 	int         i, c, temp;
@@ -759,12 +759,12 @@ WritePCXfile
 ============== 
 */
 void
-WritePCXfile (char *filename, byte * data, int width, int height,
-			  int rowbytes, byte * palette, qboolean upload)
+WritePCXfile (char *filename, Uint8 *data, int width, int height,
+			  int rowbytes, Uint8 *palette, qboolean upload)
 {
 	int         i, j, length;
 	pcx_t      *pcx;
-	byte       *pack;
+	Uint8      *pack;
 
 	pcx = Hunk_TempAlloc (width * height * 2 + 1000);
 	if (pcx == NULL) {
@@ -813,7 +813,7 @@ WritePCXfile (char *filename, byte * data, int width, int height,
 		*pack++ = *palette++;
 
 // write output file 
-	length = pack - (byte *) pcx;
+	length = pack - (Uint8 *) pcx;
 
 	if (upload)
 		CL_StartUpload ((void *) pcx, length);
@@ -860,13 +860,13 @@ MipColor (int r, int g, int b)
 }
 
 // from gl_draw.c
-byte       *draw_chars;					// 8*8 graphic characters
+Uint8      *draw_chars;					// 8*8 graphic characters
 
 void
-SCR_DrawCharToSnap (int num, byte * dest, int width)
+SCR_DrawCharToSnap (int num, Uint8 *dest, int width)
 {
 	int         row, col;
-	byte       *source;
+	Uint8      *source;
 	int         drawline;
 	int         x;
 
@@ -889,9 +889,9 @@ SCR_DrawCharToSnap (int num, byte * dest, int width)
 }
 
 void
-SCR_DrawStringToSnap (const char *s, byte * buf, int x, int y, int width)
+SCR_DrawStringToSnap (const char *s, Uint8 *buf, int x, int y, int width)
 {
-	byte       *dest;
+	Uint8      *dest;
 	const unsigned char *p;
 
 	dest = buf + ((y * width) + x);

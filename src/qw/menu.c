@@ -194,14 +194,14 @@ M_DrawPic (int x, int y, qpic_t *pic)
 	Draw_Pic (x + ((vid.width - 320) >> 1), y, pic);
 }
 
-byte        identityTable[256];
-byte        translationTable[256];
+Uint8       identityTable[256];
+Uint8       translationTable[256];
 
 void
 M_BuildTranslationTable (int top, int bottom)
 {
 	int         j;
-	byte       *dest, *source;
+	Uint8      *dest, *source;
 
 	for (j = 0; j < 256; j++)
 		identityTable[j] = j;

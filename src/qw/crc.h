@@ -29,9 +29,9 @@
 #define __CRC_H
 
 void        CRC_Init (unsigned short *crcvalue);
-void        CRC_ProcessByte (unsigned short *crcvalue, byte data);
+void        CRC_ProcessByte (unsigned short *crcvalue, Uint8 data);
 unsigned short CRC_Value (unsigned short crcvalue);
-unsigned short CRC_Block (byte * start, int count);
+unsigned short CRC_Block (Uint8 *start, int count);
 
 #endif // __CRC_H
 

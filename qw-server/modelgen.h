@@ -101,8 +101,8 @@ typedef struct dtriangle_s {
 // load this data
 
 typedef struct {
-	byte        v[3];
-	byte        lightnormalindex;
+	Uint8       v[3];
+	Uint8       lightnormalindex;
 } trivertx_t;
 
 typedef struct {

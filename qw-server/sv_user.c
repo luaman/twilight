@@ -544,7 +544,7 @@ SV_NextDownload_f
 void
 SV_NextDownload_f (void)
 {
-	byte        buffer[1024];
+	Uint8       buffer[1024];
 	int         r;
 	int         percent;
 	int         size;
@@ -1388,7 +1388,7 @@ SV_PreRunCmd
 ===========
 Done before running a player command.  Clears the touch array
 */
-byte        playertouch[(MAX_EDICTS + 7) / 8];
+Uint8       playertouch[(MAX_EDICTS + 7) / 8];
 
 void
 SV_PreRunCmd (void)
@@ -1588,7 +1588,7 @@ SV_ExecuteClientMessage (client_t *cl)
 	vec3_t      o;
 	qboolean    move_issued = false;	// only allow one move command
 	int         checksumIndex;
-	byte        checksum, calculatedChecksum;
+	Uint8       checksum, calculatedChecksum;
 	int         seq_hash;
 
 	// calc ping time
@@ -1647,7 +1647,7 @@ SV_ExecuteClientMessage (client_t *cl)
 				move_issued = true;
 
 				checksumIndex = MSG_GetReadCount ();
-				checksum = (byte) MSG_ReadByte ();
+				checksum = (Uint8) MSG_ReadByte ();
 
 				// read loss percentage
 				cl->lossage = MSG_ReadByte ();

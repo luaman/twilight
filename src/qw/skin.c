@@ -111,12 +111,12 @@ Skin_Cache
 Returns a pointer to the skin bitmap, or NULL to use the default
 ==========
 */
-byte       *
+Uint8 *
 Skin_Cache (skin_t *skin)
 {
 	char        name[MAX_OSPATH];
-	byte       *raw;
-	byte       *out, *pix;
+	Uint8      *raw;
+	Uint8      *out, *pix;
 	pcx_t      *pcx;
 	int         x, y;
 	int         dataByte;
@@ -183,7 +183,7 @@ Skin_Cache (skin_t *skin)
 
 	for (y = 0; y < pcx->ymax; y++, pix += 320) {
 		for (x = 0; x <= pcx->xmax;) {
-			if (raw - (byte *) pcx > com_filesize) {
+			if (raw - (Uint8 *) pcx > com_filesize) {
 				Cache_Free (&skin->cache);
 				skin->failedload = true;
 				Con_Printf ("Skin %s was malformed.  You should delete it.\n",
@@ -194,7 +194,7 @@ Skin_Cache (skin_t *skin)
 
 			if ((dataByte & 0xC0) == 0xC0) {
 				runLength = dataByte & 0x3F;
-				if (raw - (byte *) pcx > com_filesize) {
+				if (raw - (Uint8 *) pcx > com_filesize) {
 					Cache_Free (&skin->cache);
 					skin->failedload = true;
 					Con_Printf
@@ -220,7 +220,7 @@ Skin_Cache (skin_t *skin)
 
 	}
 
-	if (raw - (byte *) pcx > com_filesize) {
+	if (raw - (Uint8 *) pcx > com_filesize) {
 		Cache_Free (&skin->cache);
 		skin->failedload = true;
 		Con_Printf ("Skin %s was malformed.  You should delete it.\n", name);

@@ -53,7 +53,7 @@ void
 R_InitTextures (void)
 {
 	int         x, y, m;
-	byte       *dest;
+	Uint8      *dest;
 
 // create a simple checkerboard texture for the default
 	r_notexture_mip =
@@ -67,7 +67,7 @@ R_InitTextures (void)
 	r_notexture_mip->offsets[3] = r_notexture_mip->offsets[2] + 4 * 4;
 
 	for (m = 0; m < 4; m++) {
-		dest = (byte *) r_notexture_mip + r_notexture_mip->offsets[m];
+		dest = (Uint8 *) r_notexture_mip + r_notexture_mip->offsets[m];
 		for (y = 0; y < (16 >> m); y++)
 			for (x = 0; x < (16 >> m); x++) {
 				if ((y < (8 >> m)) ^ (x < (8 >> m)))
@@ -78,7 +78,7 @@ R_InitTextures (void)
 	}
 }
 
-byte        dottexture[8][8] = {
+Uint8       dottexture[8][8] = {
 	{0, 1, 1, 0, 0, 0, 0, 0}
 	,
 	{1, 1, 1, 1, 0, 0, 0, 0}
@@ -100,7 +100,7 @@ void
 R_InitParticleTexture (void)
 {
 	int         x, y;
-	byte        data[8][8][4];
+	Uint8       data[8][8][4];
 
 	// 
 	// particle texture
@@ -206,18 +206,18 @@ void
 R_TranslatePlayerSkin (int playernum)
 {
 	int         top, bottom;
-	byte        translate[256];
+	Uint8       translate[256];
 	unsigned    translate32[256];
 	int         i, j;
-	byte       *original;
+	Uint8      *original;
 	unsigned    pixels[512 * 256], *out;
 	unsigned    scaled_width, scaled_height;
 	int         inwidth, inheight;
 	int         tinwidth, tinheight;
-	byte       *inrow;
+	Uint8      *inrow;
 	unsigned    frac, fracstep;
 	player_info_t *player;
-	extern byte player_8bit_texels[320 * 200];
+	extern Uint8 player_8bit_texels[320 * 200];
 	char        s[512];
 
 	player = &cl.players[playernum];
@@ -315,7 +315,7 @@ R_TranslatePlayerSkin (int playernum)
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		if (Img_HasFullbrights ((byte *)original, inwidth*inheight))
+		if (Img_HasFullbrights ((Uint8 *)original, inwidth*inheight))
 		{
 			fb_skins[playernum] = playertextures + playernum + MAX_CLIENTS;
 

@@ -76,7 +76,7 @@ int         net_socket;					// non blocking, for receives
 int         net_send_socket;			// blocking, for sends
 
 #define	MAX_UDP_PACKET	8192
-byte        net_message_buffer[MAX_UDP_PACKET];
+Uint8       net_message_buffer[MAX_UDP_PACKET];
 
 //int         gethostname (char *, int);
 int         close (int);

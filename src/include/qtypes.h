@@ -29,8 +29,6 @@
 
 #include <SDL_types.h>
 
-typedef unsigned char byte;
-
 // KJB Undefined true and false defined in SciTech's DEBUG.H header
 #undef true
 #undef false

@@ -35,9 +35,14 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <sdl.h>
+#include <stdlib.h>
+#include <SDL.h>
+
 #include "quakedef.h"
+#include "common.h"
+#include "console.h"
 #include "pcx.h"
+#include "sys.h"
 
 typedef struct {
 	char        manufacturer;

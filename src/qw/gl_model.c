@@ -56,7 +56,7 @@ void        Mod_LoadBrushModel (model_t *mod, void *buffer);
 void        Mod_LoadAliasModel (model_t *mod, void *buffer);
 model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
 
-byte        mod_novis[MAX_MAP_LEAFS / 8];
+Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 
 #define	MAX_MOD_KNOWN	512
 model_t     mod_known[MAX_MOD_KNOWN];
@@ -145,13 +145,13 @@ Mod_PointInLeaf (vec3_t p, model_t *model)
 Mod_DecompressVis
 ===================
 */
-byte       *
-Mod_DecompressVis (byte * in, model_t *model)
+Uint8 *
+Mod_DecompressVis (Uint8 *in, model_t *model)
 {
-	static byte decompressed[MAX_MAP_LEAFS / 8];
-	int         c;
-	byte       *out;
-	int         row;
+	static Uint8 decompressed[MAX_MAP_LEAFS / 8];
+	int          c;
+	Uint8       *out;
+	int          row;
 
 	row = (model->numleafs + 7) >> 3;
 	out = decompressed;
@@ -185,7 +185,7 @@ Mod_DecompressVis (byte * in, model_t *model)
 	return decompressed;
 }
 
-byte       *
+Uint8 *
 Mod_LeafPVS (mleaf_t *leaf, model_t *model)
 {
 	if (leaf == model->leafs)
@@ -273,7 +273,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 {
 	void       *d;
 	unsigned   *buf;
-	byte        stackbuf[1024];			// avoid dirtying the cache heap
+	Uint8       stackbuf[1024];			// avoid dirtying the cache heap
 
 	if (!mod->needload) {
 		if (mod->type == mod_alias) {
@@ -348,7 +348,7 @@ Mod_ForName (char *name, qboolean crash)
 }
 
 qboolean 
-Img_HasFullbrights (byte *pixels, int size)
+Img_HasFullbrights (Uint8 *pixels, int size)
 {
     int i;
 
@@ -368,7 +368,7 @@ Img_HasFullbrights (byte *pixels, int size)
 ===============================================================================
 */
 
-byte       *mod_base;
+Uint8      *mod_base;
 
 
 /*
@@ -402,7 +402,7 @@ Mod_LoadTextures (lump_t *l)
 		m->dataofs[i] = LittleLong (m->dataofs[i]);
 		if (m->dataofs[i] == -1)
 			continue;
-		mt = (miptex_t *) ((byte *) m + m->dataofs[i]);
+		mt = (miptex_t *) ((Uint8 *) m + m->dataofs[i]);
 		mt->width = LittleLong (mt->width);
 		mt->height = LittleLong (mt->height);
 		for (j = 0; j < MIPLEVELS; j++)
@@ -425,11 +425,11 @@ Mod_LoadTextures (lump_t *l)
 
 		// HACK HACK HACK
 		if (!strcmp(mt->name, "shot1sid") && mt->width==32 && mt->height==32
-			&& CRC_Block((byte*)(mt+1), mt->width*mt->height) == 65393)
+			&& CRC_Block((Uint8*)(mt+1), mt->width*mt->height) == 65393)
 		{	// This texture in b_shell1.bsp has some of the first 32 pixels painted white.
 			// They are invisible in software, but look really ugly in GL. So we just copy
 			// 32 pixels from the bottom to make it look nice.
-			memcpy (tx+1, (byte *)(tx+1) + 32*31, 32);
+			memcpy (tx+1, (Uint8 *)(tx+1) + 32*31, 32);
 		}
 
 		if (!strncmp (mt->name, "sky", 3))
@@ -438,13 +438,13 @@ Mod_LoadTextures (lump_t *l)
 			texture_mode = GL_LINEAR_MIPMAP_NEAREST;	// _LINEAR;
 
 			if (mt->name[0] == '*')	// we don't brighten turb textures
-				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false);
+				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (Uint8 *)(tx+1), true, false);
 			else {
-				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false);
+				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (Uint8 *)(tx+1), true, false);
 
-				if (Img_HasFullbrights((byte *)(tx+1), tx->width*tx->height)) {
+				if (Img_HasFullbrights((Uint8 *)(tx+1), tx->width*tx->height)) {
 					tx->fb_texturenum = GL_LoadTexture (va("@fb_%s", mt->name), tx->width, tx->height,
-									(byte *) (tx + 1), true, 2);
+									(Uint8 *) (tx + 1), true, 2);
 				}
 			}
 
@@ -1206,7 +1206,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 			 mod->name, i, BSPVERSION);
 
 // swap all the lumps
-	mod_base = (byte *) header;
+	mod_base = (Uint8 *) header;
 
 	for (i = 0; i < sizeof (dheader_t) / 4; i++)
 		((int *) header)[i] = LittleLong (((int *) header)[i]);
@@ -1303,7 +1303,7 @@ mtriangle_t triangles[MAXALIASTRIS];
 trivertx_t *poseverts[MAXALIASFRAMES];
 int         posenum;
 
-byte        player_8bit_texels[320 * 200];
+Uint8       player_8bit_texels[320 * 200];
 
 /*
 =================
@@ -1418,9 +1418,9 @@ extern unsigned d_8to24table[];
 }
 
 void
-Mod_FloodFillSkin (byte * skin, int skinwidth, int skinheight)
+Mod_FloodFillSkin (Uint8 * skin, int skinwidth, int skinheight)
 {
-	byte        fillcolor = *skin;		// assume this is the pixel to fill
+	Uint8       fillcolor = *skin;		// assume this is the pixel to fill
 	floodfill_t fifo[FLOODFILL_FIFO_SIZE];
 	int         inpt = 0, outpt = 0;
 	int         filledcolor = -1;
@@ -1450,7 +1450,7 @@ Mod_FloodFillSkin (byte * skin, int skinwidth, int skinheight)
 	while (outpt != inpt) {
 		int         x = fifo[outpt].x, y = fifo[outpt].y;
 		int         fdc = filledcolor;
-		byte       *pos = &skin[x + skinwidth * y];
+		Uint8      *pos = &skin[x + skinwidth * y];
 
 		outpt = (outpt + 1) & FLOODFILL_FIFO_MASK;
 
@@ -1477,12 +1477,12 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 	int         i, j, k;
 	char        name[32];
 	int         s;
-	byte       *skin;
+	Uint8      *skin;
 	daliasskingroup_t *pinskingroup;
 	int         groupskins;
 	daliasskininterval_t *pinskinintervals;
 
-	skin = (byte *) (pskintype + 1);
+	skin = (Uint8 *) (pskintype + 1);
 
 	if (numskins < 1 || numskins > MAX_SKINS)
 		Sys_Error ("Mod_LoadAliasModel: Invalid # of skins: %d\n", numskins);
@@ -1498,7 +1498,7 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			if (!strcmp (loadmodel->name, "progs/player.mdl")) {
 				if (s > sizeof (player_8bit_texels))
 					Sys_Error ("Player skin too large");
-				memcpy (player_8bit_texels, (byte *) (pskintype + 1), s);
+				memcpy (player_8bit_texels, (Uint8 *) (pskintype + 1), s);
 			}
 			snprintf (name, sizeof (name), "%s_%i", loadmodel->name, i);
 			pheader->gl_texturenum[i][0] =
@@ -1506,19 +1506,19 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 				pheader->gl_texturenum[i][2] =
 				pheader->gl_texturenum[i][3] =
 				GL_LoadTexture (name, pheader->skinwidth,
-								pheader->skinheight, (byte *) (pskintype + 1),
+								pheader->skinheight, (Uint8 *) (pskintype + 1),
 								true, false);
 
-			if (Img_HasFullbrights((byte *)(pskintype + 1),	pheader->skinwidth*pheader->skinheight))
+			if (Img_HasFullbrights((Uint8 *)(pskintype + 1),	pheader->skinwidth*pheader->skinheight))
 				pheader->fb_texturenum[i][0] = pheader->fb_texturenum[i][1] =
 				pheader->fb_texturenum[i][2] = pheader->fb_texturenum[i][3] =
 					GL_LoadTexture (va("@fb_%s", name), pheader->skinwidth, 
-					pheader->skinheight, (byte *)(pskintype + 1), true, 2);
+					pheader->skinheight, (Uint8 *)(pskintype + 1), true, 2);
 			else
 				pheader->fb_texturenum[i][0] = pheader->fb_texturenum[i][1] =
 				pheader->fb_texturenum[i][2] = pheader->fb_texturenum[i][3] = 0;
 
-			pskintype = (daliasskintype_t *) ((byte *) (pskintype + 1) + s);
+			pskintype = (daliasskintype_t *) ((Uint8 *) (pskintype + 1) + s);
 		} else {
 			// animating skin group.  yuck.
 			pskintype++;
@@ -1535,17 +1535,17 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 						  j);
 				pheader->gl_texturenum[i][j & 3] =
 					GL_LoadTexture (name, pheader->skinwidth,
-									pheader->skinheight, (byte *) (pskintype),
+									pheader->skinheight, (Uint8 *) (pskintype),
 									true, false);
 
-				if (Img_HasFullbrights((byte *)(pskintype),	pheader->skinwidth*pheader->skinheight))
+				if (Img_HasFullbrights((Uint8 *)(pskintype),	pheader->skinwidth*pheader->skinheight))
 					pheader->fb_texturenum[i][j&3] =
 					GL_LoadTexture (va("@fb_%s", name), pheader->skinwidth, 
-					pheader->skinheight, (byte *)(pskintype), true, 2);
+					pheader->skinheight, (Uint8 *)(pskintype), true, 2);
 				else
 					pheader->fb_texturenum[i][j&3] = 0;
 
-				pskintype = (daliasskintype_t *) ((byte *) (pskintype) + s);
+				pskintype = (daliasskintype_t *) ((Uint8 *) (pskintype) + s);
 			}
 			k = j;
 			for ( /* */ ; j < 4; j++)
@@ -1643,7 +1643,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	if (!strcmp (loadmodel->name, "progs/player.mdl") ||
 		!strcmp (loadmodel->name, "progs/eyes.mdl")) {
 		unsigned short crc;
-		byte       *p;
+		Uint8      *p;
 		int         len;
 		char        st[40];
 
@@ -1847,10 +1847,10 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 
 	snprintf (name, sizeof (name), "%s_%i", loadmodel->name, framenum);
 	pspriteframe->gl_texturenum =
-		GL_LoadTexture (name, width, height, (byte *) (pinframe + 1), true,
+		GL_LoadTexture (name, width, height, (Uint8 *) (pinframe + 1), true,
 						true);
 
-	return (void *) ((byte *) pinframe + sizeof (dspriteframe_t) + size);
+	return (void *) ((Uint8 *) pinframe + sizeof (dspriteframe_t) + size);
 }
 
 

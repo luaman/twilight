@@ -54,7 +54,7 @@ cvar_t		*gl_max_size;
 cvar_t		*gl_picmip;
 cvar_t		*gl_texturemode;
 
-byte		*draw_chars;					// 8*8 graphic characters
+Uint8		*draw_chars;					// 8*8 graphic characters
 qpic_t		*draw_disc;
 qpic_t		*draw_backtile;
 
@@ -62,7 +62,7 @@ int         translate_texture;
 int         char_texture;
 int         cs_texture;						// crosshair texture
 
-static byte cs_data[64] = {
+static Uint8 cs_data[64] = {
 	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
@@ -79,7 +79,7 @@ typedef struct {
 	float       sl, tl, sh, th;
 } glpic_t;
 
-byte        conback_buffer[sizeof (qpic_t) + sizeof (glpic_t)];
+Uint8       conback_buffer[sizeof (qpic_t) + sizeof (glpic_t)];
 qpic_t     *conback = (qpic_t *) &conback_buffer;
 
 int         gl_lightmap_format = 4;
@@ -110,14 +110,14 @@ int         numgltextures;
 typedef struct cachepic_s {
 	char        name[MAX_QPATH];
 	qpic_t      pic;
-	byte        padding[32];			// for appended glpic
+	Uint8       padding[32];			// for appended glpic
 } cachepic_t;
 
 #define	MAX_CACHED_PICS		128
 cachepic_t  menu_cachepics[MAX_CACHED_PICS];
 int         menu_numcachepics;
 
-byte        menuplyr_pixels[4096];
+Uint8       menuplyr_pixels[4096];
 
 int         pic_texels;
 int         pic_count;
@@ -191,10 +191,10 @@ Draw_CachePic (char *path)
 
 
 void
-Draw_CharToConback (int num, byte * dest)
+Draw_CharToConback (int num, Uint8 *dest)
 {
 	int         row, col;
-	byte       *source;
+	Uint8      *source;
 	int         drawline;
 	int         x;
 
@@ -294,12 +294,12 @@ Draw_Init (void)
 {
 	int         i;
 	qpic_t     *cb;
-	byte       *dest;
+	Uint8      *dest;
 	int         x;
 	char        ver[40];
 	glpic_t    *gl;
 	int         start;
-	byte       *ncdata;
+	Uint8      *ncdata;
 
 	// load the console background and the charset
 	// by hand, because we need to write the version
@@ -502,7 +502,7 @@ Draw_Crosshair (void)
 		x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
 		y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
 
-		pColor = (unsigned char *) &d_8to24table[(byte) crosshaircolor->value];
+		pColor = (unsigned char *) &d_8to24table[(Uint8) crosshaircolor->value];
 		qglColor4ubv (pColor);
 		qglBindTexture (GL_TEXTURE_2D, cs_texture);
 
@@ -655,11 +655,11 @@ Only used for the player color selection menu
 =============
 */
 void
-Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte * translation)
+Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
 {
 	int         v, u, c;
 	unsigned    trans[64 * 64], *dest;
-	byte       *src;
+	Uint8      *src;
 	int         p;
 
 	qglBindTexture (GL_TEXTURE_2D, translate_texture);
@@ -963,10 +963,10 @@ Operates in place, quartering the size of the texture
 ================
 */
 void
-GL_MipMap (byte * in, int width, int height)
+GL_MipMap (Uint8 *in, int width, int height)
 {
 	int         i, j;
-	byte       *out;
+	Uint8      *out;
 
 	width <<= 2;
 	height >>= 1;
@@ -989,21 +989,21 @@ Mipping for 8 bit textures
 ================
 */
 void
-GL_MipMap8Bit (byte * in, int width, int height)
+GL_MipMap8Bit (Uint8 *in, int width, int height)
 {
 	int         i, j;
-	byte       *out;
+	Uint8      *out;
 	unsigned short r, g, b;
-	byte       *at1, *at2, *at3, *at4;
+	Uint8      *at1, *at2, *at3, *at4;
 
 	height >>= 1;
 	out = in;
 	for (i = 0; i < height; i++, in += width)
 		for (j = 0; j < width; j += 2, out += 1, in += 2) {
-			at1 = (byte *) & d_8to24table[in[0]];
-			at2 = (byte *) & d_8to24table[in[1]];
-			at3 = (byte *) & d_8to24table[in[width + 0]];
-			at4 = (byte *) & d_8to24table[in[width + 1]];
+			at1 = (Uint8 *) & d_8to24table[in[0]];
+			at2 = (Uint8 *) & d_8to24table[in[1]];
+			at3 = (Uint8 *) & d_8to24table[in[width + 0]];
+			at4 = (Uint8 *) & d_8to24table[in[width + 1]];
 
 			r = (at1[0] + at2[0] + at3[0] + at4[0]);
 			r >>= 5;
@@ -1079,7 +1079,7 @@ GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 
 		miplevel = 0;
 		while (scaled_width > 1 || scaled_height > 1) {
-			GL_MipMap ((byte *) scaled, scaled_width, scaled_height);
+			GL_MipMap ((Uint8 *) scaled, scaled_width, scaled_height);
 			scaled_width >>= 1;
 			scaled_height >>= 1;
 			if (scaled_width < 1)
@@ -1110,7 +1110,7 @@ GL_Upload8
 ===============
 */
 void
-GL_Upload8 (byte * data, int width, int height, qboolean mipmap, qboolean alpha)
+GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, qboolean alpha)
 {
 	static unsigned trans[640 * 480];	// FIXME, temporary
 	int         i, s;
@@ -1164,7 +1164,7 @@ GL_LoadTexture
 ================
 */
 int
-GL_LoadTexture (char *identifier, int width, int height, byte * data,
+GL_LoadTexture (char *identifier, int width, int height, Uint8 *data,
 				qboolean mipmap, int alpha)
 {
 	int         i;
