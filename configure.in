@@ -42,6 +42,8 @@ case "${host}" in
 		# Having both of these is kinda silly in win32...
 		SHARECONF="~/twilight.conf"
 		USERCONF="~/twilight.rc"
+		SHAREPATH="."
+		USERPATH="."
 		;;
 	*)
 		# Default to POSIX compliant system
@@ -49,6 +51,8 @@ case "${host}" in
 
 		SHARECONF="$EDIR/twilight.conf"
 		USERCONF="~/.twilightrc"
+		SHAREPATH="$DDIR/games/twilight"
+		USERPATH="~/.twilight"
 		;;
 esac
 AC_MSG_RESULT($SYS)
@@ -99,25 +103,25 @@ AC_MSG_RESULT(no)
 
 dnl userpath/sharepath config
 AC_ARG_WITH(sharepath,
-	[  --with-sharepath        Default shared data path [DATADIR/games/twilight]],,
-	with_sharepath="$DDIR/games/twilight")
+	[  --with-sharepath        Default shared data path (DATADIR/games/twilight)],,
+	with_sharepath="$SHAREPATH")
 AC_DEFINE_UNQUOTED(SHAREPATH, "$with_sharepath",
 	[Location of read-only (shared) gamedata])
 
 AC_ARG_WITH(userpath,
-	[  --with-userpath         Default user data path [\$HOME/.twilight]],,
-	with_userpath="~/.twilight")
+	[  --with-userpath         Default user data path (~/.twilight)],,
+	with_userpath="$USERPATH")
 AC_DEFINE_UNQUOTED(USERPATH, "$with_userpath",
 	[Location of user-modifyable gamedata])
 
 AC_ARG_WITH(shareconf,
-	[  --with-shareconf        Default shared config [$SHARECONF]],,
+	[  --with-shareconf        Default shared config (ETCDIR/twilight.conf)],,
 	with_shareconf="$SHARECONF")
 AC_DEFINE_UNQUOTED(SHARECONF, "$with_shareconf",
 	[Location of read-only (shared) configuration file])
 
 AC_ARG_WITH(userconf,
-	[  --with-userconf         Default shared config [$USERCONF]],,
+	[  --with-userconf         Default user config (~/.twilightrc)],,
 	with_userconf="$USERCONF")
 AC_DEFINE_UNQUOTED(USERCONF, "$with_userconf",
 	[Location of user-modifyable configuration file])
