@@ -27,10 +27,7 @@
 #ifndef __MODEL__
 #define __MODEL__
 
-#include "bspfile.h"
 #include "common.h"
-#include "modelgen.h"
-#include "spritegen.h"
 #include "zone.h"
 #include "mod_alias.h"
 #include "mod_brush.h"

@@ -522,7 +522,13 @@
 				RelativePath="mod_alias.h">
 			</File>
 			<File
+				RelativePath="mod_alias_disk.h">
+			</File>
+			<File
 				RelativePath="mod_sprite.h">
+			</File>
+			<File
+				RelativePath="mod_sprite_disk.h">
 			</File>
 			<File
 				RelativePath=".\palette.h">
