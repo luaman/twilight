@@ -379,10 +379,7 @@ SCR_CalcRefdef (void)
 		sb_lines = 24 + 16 + 8;
 	}
 
-	if (cl_sbar->ivalue)
-		r_refdef.vrect.height = vid.height - sb_lines;
-	else
-		r_refdef.vrect.height = vid.height;
+	r_refdef.vrect.height = vid.height;
 
 	r_refdef.vrect.width = vid.width;
 	r_refdef.vrect.x = 0;
