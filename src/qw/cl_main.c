@@ -60,8 +60,8 @@ static const char rcsid[] =
 #include "view.h"
 #include "sys.h"
 #include "gl_textures.h"
-
 #include "keys.h"
+#include "teamplay.h"
 
 void        Cmd_ForwardToServer (void);
 
@@ -196,11 +196,11 @@ CL_Version_f (void)
 =======================
 CL_SendConnectPacket
 
-called by CL_Connect_f and CL_CheckResend
+called when we get a challenge from the server
 ======================
 */
 void
-CL_SendConnectPacket (void)
+CL_SendConnectPacket (int challenge)
 {
 	netadr_t    adr;
 	char        data[2048];
@@ -234,7 +234,7 @@ CL_SendConnectPacket (void)
 
 //  Com_Printf ("Connecting to %s...\n", cls.servername);
 	snprintf (data, sizeof (data), "%c%c%c%cconnect %i %i %i \"%s\"\n",
-			  255, 255, 255, 255, PROTOCOL_VERSION, cls.qport, cls.challenge,
+			  255, 255, 255, 255, PROTOCOL_VERSION, cls.qport, challenge,
 			  cls.userinfo);
 	NET_SendPacket (NS_CLIENT, strlen (data), data, adr);
 }
@@ -795,8 +795,8 @@ Responses to broadcasts, etc
 void
 CL_ConnectionlessPacket (void)
 {
-	char       *s;
-	int         c;
+	char	*s, *cmd, data[6];
+	Uint8	c;
 
 	MSG_BeginReading ();
 	MSG_ReadLong ();					// skip the -1
@@ -806,109 +806,88 @@ CL_ConnectionlessPacket (void)
 	if (!cls.demoplayback)
 		Com_Printf ("%s: ", NET_AdrToString (net_from));
 
-	if (c == S2C_CONNECTION) {
-		Com_Printf ("connection\n");
-		if (cls.state >= ca_connected) {
-			if (!cls.demoplayback)
-				Com_Printf ("Dup connect received.  Ignored.\n");
+	switch (c) {
+		case S2C_CONNECTION:
+			Com_Printf ("connection\n");
+			if (cls.state >= ca_connected) {
+				if (!cls.demoplayback)
+					Com_Printf ("Dup connect received.  Ignored.\n");
+				return;
+			}
+			Netchan_Setup (NS_CLIENT, &cls.netchan, net_from, cls.qport);
+			MSG_WriteChar (&cls.netchan.message, clc_stringcmd);
+			MSG_WriteString (&cls.netchan.message, "new");
+			cls.state = ca_connected;
+			Com_Printf ("Connected.\n");
+			allowremotecmd = false;		// localid required now for remote cmds
 			return;
-		}
-		Netchan_Setup (NS_CLIENT, &cls.netchan, net_from, cls.qport);
-		MSG_WriteChar (&cls.netchan.message, clc_stringcmd);
-		MSG_WriteString (&cls.netchan.message, "new");
-		cls.state = ca_connected;
-		Com_Printf ("Connected.\n");
-		allowremotecmd = false;			// localid required now for remote cmds
-		return;
-	}
+		case A2C_CLIENT_COMMAND: 		// remote command from gui front end
 
-	// remote command from gui front end
-	if (c == A2C_CLIENT_COMMAND) {
-		char        cmdtext[2048];
+			Com_Printf ("client command\n");
 
-		Com_Printf ("client command\n");
+			if (!NET_IsLocalAddress (net_from)) {
+				Com_Printf ("Command packet from remote host. Ignored.\n");
+				return;
+			}
 
-		if (!NET_IsLocalAddress (net_from)) {
-			Com_Printf ("Command packet from remote host. Ignored.\n");
-			return;
-		}
-		s = MSG_ReadString ();
+			cmd = MSG_ReadString ();
 
-		strncpy (cmdtext, s, sizeof (cmdtext) - 1);
-		cmdtext[sizeof (cmdtext) - 1] = 0;
+			s = MSG_ReadString ();
 
-		s = MSG_ReadString ();
+			// Strip off any whitespace.
+			while (*s && isspace (*s))
+				s++;
+			while (*s && isspace (s[strlen (s) - 1]))
+				s[strlen (s) - 1] = 0;
 
-		while (*s && isspace (*s))
-			s++;
-		while (*s && isspace (s[strlen (s) - 1]))
-			s[strlen (s) - 1] = 0;
-
-		if (!allowremotecmd
-			&& (!*localid->svalue || strcmp (localid->svalue, s))) {
-			if (!*localid->svalue) {
+			if (!allowremotecmd && !*localid->svalue) {
 				Com_Printf ("===========================\n");
-				Com_Printf ("Command packet received from local host, but no "
-							"localid has been set.  You may need to upgrade your server "
-							"browser.\n");
+				Com_Printf ("Command packet received but no localid has "
+						"been set.  You may need to upgrade your server "
+						"browser.\n");
 				Com_Printf ("===========================\n");
 				return;
 			}
-			Com_Printf ("===========================\n");
-			Com_Printf
-				("Invalid localid on command packet received from local host. "
-				 "\n|%s| != |%s|\n"
-				 "You may need to reload your server browser and QuakeWorld.\n",
-				 s, localid->svalue);
-			Com_Printf ("===========================\n");
-			Cvar_Set (localid, "");
+
+			if (!allowremotecmd && strcmp (localid->svalue, s)) {
+				Com_Printf ("===========================\n");
+				Com_Printf
+					("Invalid localid on command packet: |%s| != |%s|\n",
+					 s, localid->svalue);
+				Com_Printf ("===========================\n");
+				return;
+			}
+
+			Cbuf_AddText (cmd);
+			allowremotecmd = false;
 			return;
-		}
+		case A2C_PRINT:				// print command from somewhere
+			Com_Printf ("print\n");
 
-		Cbuf_AddText (cmdtext);
-		allowremotecmd = false;
-		return;
-	}
+			s = MSG_ReadString ();
+			Con_Print (s);
+			return;
+		case A2A_PING:				// ping from somewhere
+			Com_Printf ("ping\n");
 
-	// print command from somewhere
-	if (c == A2C_PRINT) {
-		Com_Printf ("print\n");
+			data[0] = 0xff;
+			data[1] = 0xff;
+			data[2] = 0xff;
+			data[3] = 0xff;
+			data[4] = A2A_ACK;
+			data[5] = 0;
 
-		s = MSG_ReadString ();
-		Con_Print (s);
-		return;
-	}
+			NET_SendPacket (NS_CLIENT, 6, &data, net_from);
+			return;
+		case S2C_CHALLENGE:
+			Com_Printf ("challenge\n");
 
-	// ping from somewhere
-	if (c == A2A_PING) {
-		char        data[6];
-
-		Com_Printf ("ping\n");
-
-		data[0] = 0xff;
-		data[1] = 0xff;
-		data[2] = 0xff;
-		data[3] = 0xff;
-		data[4] = A2A_ACK;
-		data[5] = 0;
-
-		NET_SendPacket (NS_CLIENT, 6, &data, net_from);
-		return;
-	}
-
-	if (c == S2C_CHALLENGE) {
-		Com_Printf ("challenge\n");
-
-		s = MSG_ReadString ();
-		cls.challenge = Q_atoi (s);
-		CL_SendConnectPacket ();
-		return;
-	}
-
-	if (c == svc_disconnect) {
-		if (cls.demoplayback)
-			Host_EndGame ("End of demo");
-		return;
+			CL_SendConnectPacket (Q_atoi (MSG_ReadString ()));
+			return;
+		case svc_disconnect:
+			if (cls.demoplayback)
+				Host_EndGame ("End of demo");
+			return;
 	}
 
 	Com_Printf ("unknown: %c\n", c);
@@ -940,12 +919,6 @@ CL_ReadPackets (void)
 		// 
 		// packet from server
 		// 
-		if (!cls.demoplayback &&
-			!NET_CompareAdr (net_from, cls.netchan.remote_address)) {
-			Com_DPrintf ("%s:sequenced packet without connection\n",
-						 NET_AdrToString (net_from));
-			continue;
-		}
 		if (!Netchan_Process (&cls.netchan))
 			continue;					// wasn't accepted for some reason
 		CL_ParseServerMessage ();
@@ -963,6 +936,7 @@ CL_ReadPackets (void)
 }
 
 //=============================================================================
+
 
 /*
 =====================
@@ -1068,6 +1042,35 @@ Cmd_ForwardToServer_f (void)
 	}
 }
 
+void
+Cmd_Say_f (void)
+{
+	char	*s;
+
+	if (cls.state == ca_disconnected) {
+		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
+		return;
+	}
+
+	if (cls.demoplayback)
+		return;							// not really connected
+
+	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
+	SZ_Print (&cls.netchan.message, Cmd_Argv (0));
+	if (Cmd_Argc () > 1) {
+		SZ_Print (&cls.netchan.message, " ");
+		s = Team_ParseSay (Cmd_Args ());
+		if (*s && *s < 32 && *s != 10) {
+			// otherwise the server would eat leading characters
+			// less than 32 or greater than 127
+			SZ_Print (&cls.netchan.message, "\"");
+			SZ_Print (&cls.netchan.message, s);
+			SZ_Print (&cls.netchan.message, "\"");
+		} else
+			SZ_Print (&cls.netchan.message, s);
+	}
+}
+
 /*
 =================
 CL_Init_Cvars
@@ -1147,6 +1150,7 @@ CL_Init (void)
 	CL_InitSkins ();
 	GLT_Init ();
 	Pmove_Init ();
+	Team_Init ();
 
 	//
 	// register our commands
@@ -1188,8 +1192,8 @@ CL_Init (void)
 	//
 	Cmd_AddCommand ("kill", NULL);
 	Cmd_AddCommand ("pause", NULL);
-	Cmd_AddCommand ("say", NULL);
-	Cmd_AddCommand ("say_team", NULL);
+	Cmd_AddCommand ("say", Cmd_Say_f);
+	Cmd_AddCommand ("say_team", Cmd_Say_f);
 	Cmd_AddCommand ("serverinfo", NULL);
 }
 

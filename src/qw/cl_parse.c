@@ -45,6 +45,7 @@ static const char rcsid[] =
 #include "sound.h"
 #include "strlib.h"
 #include "sys.h"
+#include "teamplay.h"
 
 char       *svc_strings[] = {
 	"svc_bad",
@@ -294,6 +295,7 @@ Model_NextDownload (void)
 	cl.worldmodel = cl.model_precache[1];
 
 	R_NewMap ();
+	Team_NewMap ();
 	Hunk_Check ();						// make sure nothing is hurt
 
 	// done with modellist, request first of static signon messages

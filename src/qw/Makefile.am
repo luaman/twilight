@@ -41,7 +41,7 @@ twilight_qw_SOURCES= \
 	info.c keys.c keys.h mdfour.c \
 	menu.c net.h net_chan.c net_udp.c pmove.c pmovetst.c protocol.h \
 	r_explosion.c r_explosion.h r_part.c render.h sbar.c screen.h skin.c \
-        snd_dma.c sv_null.c sys.c vid_sdl.c view.c
+	snd_dma.c sv_null.c teamplay.c sys.c vid_sdl.c view.c
 
 libqwsv_a_SOURCES= \
 	info.c

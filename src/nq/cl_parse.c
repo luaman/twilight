@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "sound.h"
 #include "strlib.h"
 #include "sys.h"
+#include "teamplay.h"
 
 char       *svc_strings[] = {
 	"svc_bad",
@@ -335,6 +336,7 @@ CL_ParseServerInfo (void)
 	cl_entities[0].model = cl.worldmodel = cl.model_precache[1];
 
 	R_NewMap ();
+	Team_NewMap ();
 
 	Hunk_Check ();						// make sure nothing is hurt
 
