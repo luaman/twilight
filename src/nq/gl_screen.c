@@ -115,6 +115,7 @@ cvar_t	   *scr_showram;
 cvar_t	   *scr_showturtle;
 cvar_t	   *scr_showpause;
 cvar_t	   *scr_printspeed;
+cvar_t	   *scr_logcprint;
 cvar_t	   *gl_triplebuffer;
 cvar_t	   *r_brightness;
 cvar_t	   *r_contrast;
@@ -224,17 +225,55 @@ for a few moments
 void
 SCR_CenterPrint (char *str)
 {
+	char	   *s;
+	char		line[64];
+	int			i, j, l;
+
 	strlcpy (scr_centerstring, str, sizeof (scr_centerstring) - 1);
 	scr_centertime_off = scr_centertime->value;
 	scr_centertime_start = cl.time;
 
 	/* count the number of lines for centering */
 	scr_center_lines = 1;
-	while (*str) {
-		if (*str == '\n')
+	s = str;
+	while (*s) {
+		if (*s == '\n')
 			scr_center_lines++;
-		str++;
+		s++;
 	}
+
+	if (!scr_logcprint->value)
+		return;
+
+	// echo it to the console
+	Con_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
+
+	s = str;
+	do
+	{
+		// scan the width of the line
+		for (l=0 ; l<40 ; l++)
+			if (s[l] == '\n' || !s[l])
+				break;
+		for (i=0 ; i<(40-l)/2 ; i++)
+			line[i] = ' ';
+
+		for (j=0 ; j<l ; j++)
+			line[i++] = s[j];
+
+		line[i] = '\n';
+		line[i+1] = 0;
+		Con_Printf ("%s", line);
+
+		while (*s && *s != '\n')
+			s++;
+
+		if (!*s)
+			break;
+		s++;        // skip the \n
+	} while (1);
+	Con_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
+	Con_ClearNotify ();
 }
 
 
@@ -426,6 +465,7 @@ SCR_Init_Cvars (void)
 	scr_showturtle = Cvar_Get ("showturtle", "0", CVAR_NONE, NULL);
 	scr_showpause = Cvar_Get ("showpause", "1", CVAR_NONE, NULL);
 	scr_printspeed = Cvar_Get ("scr_printspeed", "8", CVAR_NONE, NULL);
+	scr_logcprint = Cvar_Get ("scr_logcprint", "0", CVAR_ARCHIVE, NULL);
 	gl_triplebuffer = Cvar_Get ("gl_triplebuffer", "1", CVAR_ARCHIVE, NULL);
 	r_brightness = Cvar_Get ("r_brightness", "1", CVAR_ARCHIVE, NULL);
 	r_contrast = Cvar_Get ("r_contrast", "1", CVAR_ARCHIVE, NULL);
