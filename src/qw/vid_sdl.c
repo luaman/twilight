@@ -112,16 +112,33 @@ VID_Shutdown (void)
 	SDL_Quit ();
 }
 
+static void
+VID_Build_Gamma_Ramp8 (Uint8 *ramp, int n, double gam, double con, double bri)
+{
+	int	i;
+	double i_d, i_s, invgam;
 
-#define GAMMA(c, g, b, n)	(Q_pow((double) c / n, (double) 1 / g) * BIT(b))
-#define BUILD_GAMMA_RAMP(ramp, gamma, type, n) do {							\
-		int _i, _bits;														\
-		_bits = sizeof(type) * 8;											\
-		for (_i = 0; _i < n; _i++) {										\
-			ramp[_i] = (type)bound_bits(GAMMA(_i, gamma, _bits, n), _bits);	\
-		}																	\
-	} while (0)
+	i_s = 1.0 / n;
+	invgam = 1.0 / gam;
 
+	for (i_d = i = 0; i < n; i++, i_d++) {
+		ramp[i] = bound_bits((Q_pow(i_d * i_s, invgam) * con + bri) * BIT(8),8);
+	}
+}
+
+static void
+VID_Build_Gamma_Ramp16 (Uint16 *ramp, int n, double gam, double con, double bri)
+{
+	int	i;
+	double i_d, i_s, invgam;
+
+	i_s = 1.0 / n;
+	invgam = 1.0 / gam;
+
+	for (i_d = i = 0; i < n; i++, i_d++) {
+		ramp[i]=bound_bits((Q_pow(i_d * i_s, invgam) * con + bri) * BIT(16),16);
+	}
+}
 
 static void
 VID_InitTexGamma (void)
@@ -135,9 +152,9 @@ VID_InitTexGamma (void)
 	tex[1] = v_tgamma->fvalue + v_tgammabias_g->fvalue;
 	tex[2] = v_tgamma->fvalue + v_tgammabias_b->fvalue;
 
-	BUILD_GAMMA_RAMP(tex_gamma_ramps[0], tex[0], Uint8, 256);
-	BUILD_GAMMA_RAMP(tex_gamma_ramps[1], tex[1], Uint8, 256);
-	BUILD_GAMMA_RAMP(tex_gamma_ramps[2], tex[2], Uint8, 256);
+	VID_Build_Gamma_Ramp8(tex_gamma_ramps[0], 256, tex[0], 1, 0);
+	VID_Build_Gamma_Ramp8(tex_gamma_ramps[1], 256, tex[1], 1, 0);
+	VID_Build_Gamma_Ramp8(tex_gamma_ramps[2], 256, tex[2], 1, 0);
 
 	/* 8 8 8 encoding */
 	pal = host_basepal;
@@ -181,9 +198,10 @@ GammaChanged (cvar_t *cvar)
 	hw[2] = v_gamma->fvalue + v_gammabias_b->fvalue;
 
 	if (v_hwgamma->ivalue == 1) {
-		BUILD_GAMMA_RAMP(hw_gamma_ramps[0], hw[0], Uint16, 256);
-		BUILD_GAMMA_RAMP(hw_gamma_ramps[1], hw[1], Uint16, 256);
-		BUILD_GAMMA_RAMP(hw_gamma_ramps[2], hw[2], Uint16, 256);
+		VID_Build_Gamma_Ramp16(hw_gamma_ramps[0], 256, hw[0], 1, 0);
+		VID_Build_Gamma_Ramp16(hw_gamma_ramps[1], 256, hw[1], 1, 0);
+		VID_Build_Gamma_Ramp16(hw_gamma_ramps[2], 256, hw[2], 1, 0);
+								
 
 		if (SDL_SetGammaRamp(hw_gamma_ramps[0], hw_gamma_ramps[1],
 			hw_gamma_ramps[2]) < 0) {
