@@ -117,9 +117,15 @@ AM_CONDITIONAL(CVS2CL, test "x$CVS2CL" != "x")
 
 AC_OUTPUT(
 	Makefile
+	include/Makefile
 	nq/Makefile
 	qw/Makefile
 	qw-server/Makefile
+	doc/Makefile
+	doc/olddoc/Makefile
+	gamecode/Makefile
+	gamecode/progs/Makefile
+	tools/Makefile
 )
 
 AC_MSG_RESULT([
