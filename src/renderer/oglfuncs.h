@@ -36,6 +36,11 @@
 #error "oglfuncs.h included without OGL_EXT_WANT"
 #endif
 
+#ifndef OGL_NEED_BUT
+#error "oglfuncs.h included without OGL_NEED_BUT"
+#endif
+
+
 OGL_DONT_NEED (void, glAccum, (GLenum op, GLfloat value));
 OGL_EXT_WANT (void, glActiveTextureARB, (GLenum));
 OGL_NEED (void, glAlphaFunc, (GLenum func, GLclampf ref));
@@ -196,7 +201,7 @@ OGL_EXT_DONT_WANT (void, glDrawArraysEXT, (GLenum, GLint, GLsizei));
 OGL_NEED (void, glDrawBuffer, (GLenum mode));
 OGL_NEED (void, glDrawElements, (GLenum mode, GLsizei count, GLenum type, const GLvoid * indices));
 OGL_DONT_NEED (void, glDrawPixels, (GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * pixels));
-OGL_NEED (void, glDrawRangeElements, (GLenum, GLuint, GLuint, GLsizei, GLenum, const GLvoid *));
+OGL_NEED_BUT (void, glDrawRangeElements, (GLenum, GLuint, GLuint, GLsizei, GLenum, const GLvoid *), WRAP_glDrawRangeElements);
 OGL_EXT_DONT_WANT (void, glDrawRangeElementsEXT, (GLenum, GLuint, GLuint, GLsizei, GLenum, const GLvoid *));
 OGL_DONT_NEED (void, glEdgeFlag, (GLboolean flag));
 OGL_DONT_NEED (void, glEdgeFlagPointer, (GLsizei stride, const GLvoid * ptr));

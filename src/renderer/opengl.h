@@ -83,9 +83,11 @@ typedef double			GLclampd;		/* double precision float in [0,1] */
 #endif
 
 #define OGL_NEED(ret, name, args)	extern ret (OGLDECL * q##name) args
+#define OGL_NEED_BUT(ret, name, args, fake)	extern ret (OGLDECL * q##name) args
 #define OGL_EXT_WANT(ret, name, args)	extern ret (OGLDECL * q##name) args
 #include "oglfuncs.h"
 #undef OGL_EXT_WANT
+#undef OGL_NEED_BUT
 #undef OGL_NEED
 
 
