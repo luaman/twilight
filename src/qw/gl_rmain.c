@@ -62,10 +62,6 @@ int         c_brush_polys, c_alias_polys;
 int         particletexture;			// little dot for particles
 int         playertextures;				// up to 16 color translated skins
 
-int         mirrortexturenum;			// quake texturenum, not gltexturenum
-qboolean    mirror;
-mplane_t   *mirror_plane;
-
 //
 // view origin
 //
@@ -98,7 +94,6 @@ cvar_t     *r_speeds;
 cvar_t     *r_fullbright;
 cvar_t     *r_lightmap;
 cvar_t     *r_shadows;
-cvar_t     *r_mirroralpha;
 cvar_t     *r_wateralpha;
 cvar_t     *r_dynamic;
 cvar_t     *r_novis;
@@ -106,7 +101,6 @@ cvar_t     *r_netgraph;
 
 cvar_t     *gl_clear;
 cvar_t     *gl_cull;
-cvar_t     *gl_texsort;
 cvar_t     *gl_affinemodels;
 cvar_t     *gl_polyblend;
 cvar_t     *gl_flashblend;
@@ -941,18 +935,13 @@ R_DrawAliasModel (entity_t *e)
 	mtex = fb_texture && gl_mtexable;
 
 	if (mtex) {
-		qglActiveTextureARB (GL_TEXTURE0_ARB);
 		qglBindTexture (GL_TEXTURE_2D, texture);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglActiveTextureARB (GL_TEXTURE1_ARB);
 		qglEnable (GL_TEXTURE_2D);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-	}
-	else
-	{
+	} else {
 		qglBindTexture (GL_TEXTURE_2D, texture);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
 
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
@@ -962,6 +951,7 @@ R_DrawAliasModel (entity_t *e)
 		R_SetupAliasFrame (currententity->frame, paliashdr, mtex);
 
 	if (mtex) {
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglDisable (GL_TEXTURE_2D);
 		qglActiveTextureARB (GL_TEXTURE0_ARB);
 	}
@@ -969,6 +959,7 @@ R_DrawAliasModel (entity_t *e)
 	if (fb_texture && !gl_mtexable) {
 		qglEnable (GL_BLEND);
 		qglBlendFunc(GL_ONE, GL_ONE);
+//		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
 		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
@@ -977,6 +968,8 @@ R_DrawAliasModel (entity_t *e)
 		else
 			R_SetupAliasFrame (currententity->frame, paliashdr, false);
 
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglDisable (GL_BLEND);
 	}
 
@@ -1033,14 +1026,12 @@ R_DrawEntitiesOnList (void)
 
 	// LordHavoc: draw brush models, models, and sprites separately because
 	// of different states
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = &cl_visedicts[i];
 
 		if (currententity->model->type == mod_brush)
 			R_DrawBrushModel (currententity);
 	}
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = &cl_visedicts[i];
@@ -1289,14 +1280,7 @@ R_SetupGL (void)
 	screenaspect = (float) r_refdef.vrect.width / r_refdef.vrect.height;
 	MYgluPerspective (r_refdef.fov_y, screenaspect, 4, 8193);
 
-	if (mirror) {
-		if (mirror_plane->normal[2])
-			qglScalef (1, -1, 1);
-		else
-			qglScalef (-1, 1, 1);
-		qglCullFace (GL_BACK);
-	} else
-		qglCullFace (GL_FRONT);
+	qglCullFace (GL_FRONT);
 
 	qglMatrixMode (GL_MODELVIEW);
 	qglLoadIdentity ();
@@ -1363,15 +1347,7 @@ R_Clear
 void
 R_Clear (void)
 {
-	if (r_mirroralpha->value != 1.0) {
-		if (gl_clear->value)
-			qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		else
-			qglClear (GL_DEPTH_BUFFER_BIT);
-		gldepthmin = 0;
-		gldepthmax = 0.5;
-		qglDepthFunc (GL_LEQUAL);
-	} else if (gl_ztrick->value) {
+	if (gl_ztrick->value) {
 		static int  trickframe;
 
 		if (gl_clear->value)
@@ -1425,8 +1401,6 @@ R_RenderView (void)
 		c_brush_polys = 0;
 		c_alias_polys = 0;
 	}
-
-	mirror = false;
 
 	if (gl_finish->value)
 		qglFinish ();

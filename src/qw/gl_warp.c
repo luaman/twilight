@@ -229,7 +229,10 @@ EmitWaterPolys (msurface_t *fa)
 	float      *v;
 	int         i;
 	float       s, t, os, ot;
+	texture_t  *tex;
 
+	tex = R_TextureAnimation (fa->texinfo->texture);
+	qglBindTexture (GL_TEXTURE_2D, tex->gl_texturenum);
 
 	for (p = fa->polys; p; p = p->next) {
 		qglBegin (GL_POLYGON);
