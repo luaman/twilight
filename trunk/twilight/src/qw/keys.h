@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _KEYS_H
 #define _KEYS_H
 
-#include <SDL/SDL_keysym.h>
+#include <SDL_keysym.h>
 
 typedef enum {
 	KM_BUTTON1 = SDLK_LAST + 1,
