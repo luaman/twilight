@@ -30,6 +30,7 @@
 
 #include <setjmp.h>
 #include "client.h"
+#include "collision.h"
 #include "progs.h"
 #include "net.h"
 
@@ -231,6 +232,8 @@ void SV_ClientPrintf (const char *fmt, ...);
 void SV_BroadcastPrintf (char *fmt, ...);
 
 void SV_Physics (void);
+
+extern trace_t SV_Trace_Toss (edict_t *ent, edict_t *ignore);
 
 qboolean SV_CheckBottom (edict_t *ent);
 qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink);

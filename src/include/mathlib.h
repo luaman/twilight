@@ -160,6 +160,8 @@ void        _VectorInverse (vec3_t v, vec3_t t);
 void        _VectorScale (vec3_t in, vec_t scale, vec3_t out);
 
 vec_t       VectorNormalize (vec3_t v);	// returns vector length
+#define VectorNormalize2(v,dest) {float ilength = (float) sqrt(DotProduct(v,v));if (ilength) ilength = 1.0f / ilength;dest[0] = v[0] * ilength;dest[1] = v[1] * ilength;dest[2] = v[2] * ilength;}
+
 void		VectorNormalizeFast (vec3_t v);
 void		Lerp_Vectors (vec3_t v1, float frac, vec3_t v2, vec3_t v);
 void		Lerp_Angles (vec3_t v1, vec_t frac, vec3_t v2, vec3_t v);
