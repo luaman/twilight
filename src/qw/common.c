@@ -85,17 +85,26 @@ char        gamedirfile[MAX_OSPATH];
 /*
 
 
-All of Quake's data access is through a hierchal file system, but the contents of the file system can be transparently merged from several sources.
+All of Quake's data access is through a hierchal file system, but the contents
+of the file system can be transparently merged from several sources.
 
-The "base directory" is the path to the directory holding the quake.exe and all game directories.  The sys_* files pass this to host_init in quakeparms_t->basedir.  This can be overridden with the "-basedir" command line parm to allow code debugging in a different directory.  The base directory is
-only used during filesystem initialization.
+The "base directory" is the path to the directory holding the quake.exe and
+all game directories.  The sys_* files pass this to host_init in
+quakeparms_t->basedir.  This can be overridden with the "-basedir" command
+line parm to allow code debugging in a different directory.  The base
+directory is only used during filesystem initialization.
 
-The "game directory" is the first tree on the search path and directory that all generated files (savegames, screenshots, demos, config files) will be saved to.  This can be overridden with the "-game" command line parameter.  The game directory can never be changed while quake is executing.  This is a precacution against having a malicious server instruct clients to write files over areas they shouldn't.
+The "game directory" is the first tree on the search path and directory that
+all generated files (savegames, screenshots, demos, config files) will be
+saved to.  This can be overridden with the "-game" command line parameter.
+The game directory can never be changed while quake is executing.  This is a
+precacution against having a malicious server instruct clients to write files
+over areas they shouldn't.
 
-The "cache directory" is only used during development to save network bandwidth, especially over ISDN / T1 lines.  If there is a cache directory
+The "cache directory" is only used during development to save network
+bandwidth, especially over ISDN / T1 lines.  If there is a cache directory
 specified, when a file is found by the normal search path, it will be mirrored
-into the cache directory, then opened there.
-	
+into the cache directory, then opened there.  
 */
 
 //============================================================================
@@ -955,8 +964,8 @@ COM_CheckParm (char *parm)
 
 	for (i = 1; i < com_argc; i++) {
 		if (!com_argv[i])
-			continue;					// NEXTSTEP sometimes clears appkit
-		// vars.
+			// NEXTSTEP sometimes clears appkit vars.
+			continue;
 		if (!strcmp (parm, com_argv[i]))
 			return i;
 	}
@@ -1015,8 +1024,7 @@ COM_InitArgv (int argc, char **argv)
 
 	if (safe) {
 		// force all the safe-mode switches. Note that we reserved extra space
-		// in
-		// case we need to add these, so we don't need an overflow check
+		// in case we need to add these, so we don't need an overflow check
 		for (i = 0; i < NUM_SAFE_ARGVS; i++) {
 			largv[com_argc] = safeargvs[i];
 			com_argc++;
@@ -1302,8 +1310,8 @@ COM_CopyFile (char *netpath, char *cachepath)
 	char        buf[4096];
 
 	remaining = COM_FileOpenRead (netpath, &in);
-	COM_CreatePath (cachepath);			// create directories up to the cache
-	// file
+	// create directories up to the cache file
+	COM_CreatePath (cachepath);
 	out = fopen (cachepath, "wb");
 	if (!out)
 		Sys_Error ("Error opening %s", cachepath);
@@ -1661,8 +1669,8 @@ COM_Gamedir (char *dir)
 	// 
 	while (com_searchpaths != com_base_searchpaths) {
 		if (com_searchpaths == NULL)
-			Sys_Error
-				("Com_Gamedir: tried to free to base searchpath and hit NULL\n");
+			Sys_Error ("Com_Gamedir: tried to free to base searchpath and"
+					" hit NULL\n");
 		if (com_searchpaths->pack) {
 			fclose (com_searchpaths->pack->handle);
 			Z_Free (com_searchpaths->pack->files);
@@ -1885,7 +1893,6 @@ Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
 	// this next line is kinda trippy
 	if (*(v = Info_ValueForKey (s, key))) {
 		// key exists, make sure we have enough room for new value, if we
-		// don't,
 		// don't change it!
 		if (strlen (value) - strlen (v) + strlen (s) > maxsize) {
 			Con_Printf ("Info string length exceeded\n");
@@ -2078,3 +2085,4 @@ COM_BlockSequenceCRCByte (Uint8 *base, int length, int sequence)
 
 	return crc;
 }
+

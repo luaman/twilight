@@ -79,22 +79,35 @@ qboolean    standard_quake = true, rogue, hipnotic;
 /*
 
 
-All of Quake's data access is through a hierchal file system, but the contents of the file system can be transparently merged from several sources.
+All of Quake's data access is through a hierchal file system, but the contents
+of the file system can be transparently merged from several sources.
 
-The "base directory" is the path to the directory holding the quake.exe and all game directories.  The sys_* files pass this to host_init in quakeparms_t->basedir.  This can be overridden with the "-basedir" command line parm to allow code debugging in a different directory.  The base directory is
-only used during filesystem initialization.
+The "base directory" is the path to the directory holding the quake.exe and
+all game directories.  The sys_* files pass this to host_init in
+quakeparms_t->basedir.  This can be overridden with the "-basedir" command
+line parm to allow code debugging in a different directory.  The base
+directory is only used during filesystem initialization.
 
-The "game directory" is the first tree on the search path and directory that all generated files (savegames, screenshots, demos, config files) will be saved to.  This can be overridden with the "-game" command line parameter.  The game directory can never be changed while quake is executing.  This is a precacution against having a malicious server instruct clients to write files over areas they shouldn't.
+The "game directory" is the first tree on the search path and directory that
+all generated files (savegames, screenshots, demos, config files) will be
+saved to.  This can be overridden with the "-game" command line parameter.
+The game directory can never be changed while quake is executing.  This is a
+precacution against having a malicious server instruct clients to write files
+over areas they shouldn't.
 
-The "cache directory" is only used during development to save network bandwidth, especially over ISDN / T1 lines.  If there is a cache directory
+The "cache directory" is only used during development to save network
+bandwidth, especially over ISDN / T1 lines.  If there is a cache directory
 specified, when a file is found by the normal search path, it will be mirrored
 into the cache directory, then opened there.
 
 
 
 FIXME:
-The file "parms.txt" will be read out of the game directory and appended to the current command line arguments to allow different games to initialize startup parms differently.  This could be used to add a "-sspeed 22050" for the high quality sound edition.  Because they are added at the end, they will not override an explicit setting on the original command line.
-	
+The file "parms.txt" will be read out of the game directory and appended to
+the current command line arguments to allow different games to initialize
+startup parms differently.  This could be used to add a "-sspeed 22050" for
+the high quality sound edition.  Because they are added at the end, they will
+not override an explicit setting on the original command line.  
 */
 
 //============================================================================

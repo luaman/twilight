@@ -133,7 +133,10 @@ PF_makevectors (void)
 =================
 PF_setorigin
 
-This is the only valid way to move an object without using the physics of the world (setting velocity and waiting).  Directly changing origin will not set internal links correctly, so clipping would be messed up.  This should be called when an object is spawned, and then only if it is teleported.
+This is the only valid way to move an object without using the physics of the
+world (setting velocity and waiting).  Directly changing origin will not set
+internal links correctly, so clipping would be messed up.  This should be
+called when an object is spawned, and then only if it is teleported.
 
 setorigin (entity, origin)
 =================
@@ -1994,3 +1997,4 @@ builtin_t   pr_builtin[] = {
 
 builtin_t  *pr_builtins = pr_builtin;
 int         pr_numbuiltins = sizeof (pr_builtin) / sizeof (pr_builtin[0]);
+

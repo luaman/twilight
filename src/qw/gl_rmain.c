@@ -135,7 +135,8 @@ static float shadescale = 0.0;
 
 int lastposenum = 0, lastposenum0 = 0;
 
-qboolean PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, pmtrace_t *trace);
+qboolean PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f,
+		vec3_t p1, vec3_t p2, pmtrace_t *trace);
 
 /*
 =================
@@ -216,8 +217,7 @@ R_GetSpriteFrame (entity_t *currententity)
 		time = cl.time + currententity->syncbase;
 
 		// when loading in Mod_LoadSpriteGroup, we guaranteed all interval
-		// values
-		// are positive, so we don't have to worry about division by 0
+		// values are positive, so we don't have to worry about division by 0
 		targettime = time - ((int) (time / fullinterval)) * fullinterval;
 
 		for (i = 0; i < (numframes - 1); i++) {
@@ -252,11 +252,13 @@ R_DrawSpriteModel (entity_t *e)
 	frame = R_GetSpriteFrame (e);
 	psprite = currententity->model->cache.data;
 
-	if (psprite->type == SPR_ORIENTED) {	// bullet marks on walls
+	if (psprite->type == SPR_ORIENTED) {
+		// bullet marks on walls
 		AngleVectors (currententity->angles, v_forward, v_right, v_up);
 		up = v_up;
 		right = v_right;
-	} else {							// normal sprite
+	} else {
+		// normal sprite
 		up = vup;
 		right = vright;
 	}
@@ -372,7 +374,8 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 	Interpolated model drawing
 */
 void
-GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float blend)
+GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
+		float blend)
 {
 	float       l;
 	trivertx_t *verts1;
@@ -408,10 +411,12 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 
 			// normals and vertexes come from the frame list
 			// blend the light intensity from the two frames together
-			d[0] = shadedots[verts2->lightnormalindex] - shadedots[verts1->lightnormalindex];
+			d[0] = shadedots[verts2->lightnormalindex]
+				- shadedots[verts1->lightnormalindex];
 
 			if (!colorlights) {
-				l = shadelight * (shadedots[verts1->lightnormalindex] + (blend * d[0]));
+				l = shadelight * (shadedots[verts1->lightnormalindex]
+						+ (blend * d[0]));
 				qglColor3f (l, l, l);
 			}
 			else {
@@ -470,7 +475,8 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 		VectorCopy (currententity->origin, downmove);
 		downmove[2] = downmove[2] - 4096;
 		memset (&downtrace, 0, sizeof(downtrace));
-		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, currententity->origin, downmove, &downtrace);
+		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1,
+				currententity->origin, downmove, &downtrace);
 
 		// calculate the all important angles to keep speed up
 		s1 = Q_sin( currententity->angles[1]/180*M_PI);
@@ -505,9 +511,11 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 				point[2] -= shadevector[2] * point[2];
 
 				// drop it down to floor
-				point[2] = point[2] - (currententity->origin[2] - downtrace.endpos[2]) ;
+				point[2] = point[2] - (currententity->origin[2]
+						- downtrace.endpos[2]);
 
-				// now adjust the point with respect to all the normals of the tracepoint
+				// now adjust the point with respect to all the normals of
+				// the tracepoint
 				point[2] += ((point[1] * (s1 * downtrace.plane.normal[0])) -
 					(point[0] * (c1 * downtrace.plane.normal[0])) -
 					(point[0] * (s1 * downtrace.plane.normal[1])) -
@@ -535,7 +543,8 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 	Interpolated shadow drawing
 */
 void
-GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t *e)
+GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
+		entity_t *e)
 {
 	trivertx_t	*verts1, *verts2;
 	vec3_t		point1, point2, d;
@@ -568,7 +577,8 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 		VectorCopy (currententity->origin, downmove);
 		downmove[2] = downmove[2] - 4096;
 		memset (&downtrace, 0, sizeof(downtrace));
-		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, currententity->origin, downmove, &downtrace);
+		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1,
+				currententity->origin, downmove, &downtrace);
 
 		// calculate the all important angles to keep speed up
 		s1 = Q_sin( currententity->angles[1]/180*M_PI);
@@ -587,16 +597,22 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 		do {
 			order += 2;
 
-			point1[0] =	verts1->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
-			point1[1] =	verts1->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
-			point1[2] =	verts1->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
+			point1[0] =	verts1->v[0] * paliashdr->scale[0]
+				+ paliashdr->scale_origin[0];
+			point1[1] =	verts1->v[1] * paliashdr->scale[1]
+				+ paliashdr->scale_origin[1];
+			point1[2] =	verts1->v[2] * paliashdr->scale[2]
+				+ paliashdr->scale_origin[2];
 
 			point1[0] -= shadevector[0] * (point1[2] + lheight);
 			point1[1] -= shadevector[1] * (point1[2] + lheight);
 
-			point2[0] =	verts2->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
-			point2[1] =	verts2->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
-			point2[2] =	verts2->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
+			point2[0] =	verts2->v[0] * paliashdr->scale[0]
+				+ paliashdr->scale_origin[0];
+			point2[1] =	verts2->v[1] * paliashdr->scale[1]
+				+ paliashdr->scale_origin[1];
+			point2[2] =	verts2->v[2] * paliashdr->scale[2]
+				+ paliashdr->scale_origin[2];
 
 			point2[0] -= shadevector[0] * (point2[2] + lheight);
 			point2[1] -= shadevector[1] * (point2[2] + lheight);
@@ -610,7 +626,8 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 				point1[2] = point1[2] + (blend * d[2]);
 
 				// drop it down to floor
-				point1[2] =  - (currententity->origin[2] - downtrace.endpos[2]) ;
+				point1[2] =  - (currententity->origin[2]
+						- downtrace.endpos[2]);
 
 				// now move the z-coordinate as appropriate
 				point1[2] += ((point1[1] * (s1 * downtrace.plane.normal[0])) -
@@ -711,7 +728,8 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e)
 	} else {
 		blend = (realtime - e->frame_start_time) / e->frame_interval;
 	}
-	// Con_DPrintf ("numposes: %d, poses: %d %d\n", numposes, e->pose1, e->pose2);
+//	Con_DPrintf ("numposes: %d, poses: %d %d\n", numposes, e->pose1,
+//			e->pose2);
 
 	// wierd things start happening if blend passes 1
 	if (cl.paused || blend > 1)
@@ -780,7 +798,8 @@ R_DrawAliasModel (entity_t *e)
 				VectorSubtract (currententity->origin,
 							cl_dlights[lnum].origin,
 							dist);
-				add = (cl_dlights[lnum].radius * cl_dlights[lnum].radius * 8) / (DotProduct (dist, dist));	// FIXME Deek
+				add = (cl_dlights[lnum].radius * cl_dlights[lnum].radius * 8)
+					/ (DotProduct (dist, dist));	// FIXME Deek
 
 				if (add > 0) {
 					if (!colorlights)
@@ -832,9 +851,8 @@ R_DrawAliasModel (entity_t *e)
 			lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
 	}
 
-	shadedots =
-		r_avertexnormal_dots[((int) (e->angles[1] * (SHADEDOT_QUANT / 360.0))) &
-							 (SHADEDOT_QUANT - 1)];
+	shadedots = r_avertexnormal_dots[((int) (e->angles[1]
+				* (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
 
 	if (!colorlights)
 		shadelight = shadelight * (1.0 / 200.0);
@@ -869,7 +887,8 @@ R_DrawAliasModel (entity_t *e)
 	}
 
 	anim = (int) (cl.time * 10) & 3;
-	qglBindTexture (GL_TEXTURE_2D, paliashdr->gl_texturenum[currententity->skinnum][anim]);
+	qglBindTexture (GL_TEXTURE_2D,
+			paliashdr->gl_texturenum[currententity->skinnum][anim]);
 
 	// we can't dynamically colormap textures, so they are cached
 	// seperately for the players.  Heads are just uncolored.
@@ -889,7 +908,8 @@ R_DrawAliasModel (entity_t *e)
 	qglDisable(GL_BLEND);
 
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
-		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
+		R_SetupAliasBlendedFrame (currententity->frame, paliashdr,
+				currententity);
 	else
 		R_SetupAliasFrame (currententity->frame, paliashdr);
 
@@ -904,14 +924,17 @@ R_DrawAliasModel (entity_t *e)
 				fb_texture = fb_skins[i];
 		}
 		else
-			fb_texture = paliashdr->fb_texturenum[currententity->skinnum][anim];
+			fb_texture =
+				paliashdr->fb_texturenum[currententity->skinnum][anim];
 
 		if (fb_texture) {
 			qglEnable (GL_BLEND);
 			qglBindTexture (GL_TEXTURE_2D, fb_texture);
 
-			if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-				R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
+			if (gl_im_animation->value &&
+					!(clmodel->modflags & FLAG_NO_IM_ANIM))
+				R_SetupAliasBlendedFrame (currententity->frame, paliashdr,
+						currententity);
 			else
 				R_SetupAliasFrame (currententity->frame, paliashdr);
 
@@ -943,7 +966,8 @@ R_DrawAliasModel (entity_t *e)
 		qglEnable (GL_BLEND);
 		qglColor4f (0, 0, 0, 0.5);
 		if (gl_im_animation->value) {
-			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0, lastposenum, currententity);
+			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0, lastposenum,
+					currententity);
 		} else {
 			GL_DrawAliasShadow (paliashdr, lastposenum);
 		}
@@ -954,7 +978,7 @@ R_DrawAliasModel (entity_t *e)
 	}
 }
 
-//==================================================================================
+//===========================================================================
 
 /*
 =============
@@ -969,7 +993,8 @@ R_DrawEntitiesOnList (void)
 	if (!r_drawentities->value)
 		return;
 
-	// LordHavoc: draw brush models, models, and sprites separately because of different states
+	// LordHavoc: draw brush models, models, and sprites separately because
+	// of different states
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = &cl_visedicts[i];
@@ -1388,3 +1413,4 @@ R_RenderView (void)
 					c_alias_polys);
 	}
 }
+

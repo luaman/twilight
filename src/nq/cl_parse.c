@@ -256,8 +256,8 @@ CL_ParseServerInfo (void)
 	strncpy (cl.levelname, str, sizeof (cl.levelname) - 1);
 
 // seperate the printfs so the server message can have a color
-	Con_Printf
-		("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
+	Con_Printf ("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36"
+			"\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
 	Con_Printf ("%c%s\n", 2, str);
 
 //
@@ -623,9 +623,10 @@ CL_NewTranslation (int slot)
 	bottom = (cl.scores[slot].colors & 15) << 4;
 	R_TranslatePlayerSkin (slot);
 
-	for (i = 0; i < VID_GRADES; i++, dest += 256, source += 256) {
-		if (top < 128)					// the artists made some backwards
-			// ranges.  sigh.
+	for (i = 0; i < VID_GRADES; i++, dest += 256, source += 256)
+	{
+		// the artists made some backwards ranges.  sigh.
+		if (top < 128)
 			memcpy (dest + TOP_RANGE, source + top, 16);
 		else
 			for (j = 0; j < 16; j++)
@@ -691,7 +692,9 @@ CL_ParseStaticSound (void)
 }
 
 
-#define SHOWNET(x) if(cl_shownet->value==2)Con_Printf ("%3i:%s\n", msg_readcount-1, x);
+#define SHOWNET(x)											\
+	if (cl_shownet->value==2)								\
+		Con_Printf ("%3i:%s\n", msg_readcount-1, x);
 
 /*
 =====================
@@ -712,7 +715,9 @@ CL_ParseServerMessage (void)
 	else if (cl_shownet->value == 2)
 		Con_Printf ("------------------\n");
 
-	cl.onground = false;				// unless the server says otherwise 
+	// unless the server says otherwise
+	cl.onground = false;
+
 //
 // parse the message
 //
@@ -761,9 +766,8 @@ CL_ParseServerMessage (void)
 			case svc_version:
 				i = MSG_ReadLong ();
 				if (i != PROTOCOL_VERSION)
-					Host_Error
-						("CL_ParseServerMessage: Server is protocol %i instead of %i\n",
-						 i, PROTOCOL_VERSION);
+					Host_Error ("CL_ParseServerMessage: Server is protocol"
+							" %i instead of %i\n", i, PROTOCOL_VERSION);
 				break;
 
 			case svc_disconnect:
@@ -787,7 +791,8 @@ CL_ParseServerMessage (void)
 
 			case svc_serverinfo:
 				CL_ParseServerInfo ();
-				vid.recalc_refdef = true;	// leave intermission full screen
+				// leave intermission full screen
+				vid.recalc_refdef = true;
 				break;
 
 			case svc_setangle:
@@ -820,8 +825,8 @@ CL_ParseServerMessage (void)
 				Sbar_Changed ();
 				i = MSG_ReadByte ();
 				if (i >= cl.maxclients)
-					Host_Error
-						("CL_ParseServerMessage: svc_updatename > MAX_SCOREBOARD");
+					Host_Error ("CL_ParseServerMessage: svc_updatename >"
+							" MAX_SCOREBOARD");
 				strcpy (cl.scores[i].name, MSG_ReadString ());
 				break;
 
@@ -829,8 +834,8 @@ CL_ParseServerMessage (void)
 				Sbar_Changed ();
 				i = MSG_ReadByte ();
 				if (i >= cl.maxclients)
-					Host_Error
-						("CL_ParseServerMessage: svc_updatefrags > MAX_SCOREBOARD");
+					Host_Error ("CL_ParseServerMessage: svc_updatefrags >"
+							" MAX_SCOREBOARD");
 				cl.scores[i].frags = MSG_ReadShort ();
 				break;
 
@@ -838,8 +843,8 @@ CL_ParseServerMessage (void)
 				Sbar_Changed ();
 				i = MSG_ReadByte ();
 				if (i >= cl.maxclients)
-					Host_Error
-						("CL_ParseServerMessage: svc_updatecolors > MAX_SCOREBOARD");
+					Host_Error ("CL_ParseServerMessage: svc_updatecolors >"
+							" MAX_SCOREBOARD");
 				cl.scores[i].colors = MSG_ReadByte ();
 				CL_NewTranslation (i);
 				break;
@@ -874,7 +879,8 @@ CL_ParseServerMessage (void)
 			case svc_signonnum:
 				i = MSG_ReadByte ();
 				if (i <= cls.signon)
-					Host_Error ("Received signon %i when at %i", i, cls.signon);
+					Host_Error ("Received signon %i when at %i", i,
+							cls.signon);
 				cls.signon = i;
 				CL_SignonReply ();
 				break;
@@ -934,3 +940,4 @@ CL_ParseServerMessage (void)
 		}
 	}
 }
+

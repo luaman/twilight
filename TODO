@@ -4,6 +4,7 @@ Project Twilight todo list
 These things should be done before first public release:
 
   - Global config file support
+  - Screenshots are getting saved here as ~/.tga, this is a bug.
   - Website updates
     - Releases page
     - CVS walktrhoughs
