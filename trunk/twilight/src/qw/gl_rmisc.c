@@ -114,8 +114,6 @@ R_InitParticleTexture (void)
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 8, 8, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, data);
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
@@ -283,8 +281,6 @@ R_TranslatePlayerSkin (int playernum)
 	extern byte player_8bit_texels[320 * 200];
 	char        s[512];
 
-	GL_DisableMultitexture ();
-
 	player = &cl.players[playernum];
 	if (!player->name[0])
 		return;
@@ -377,7 +373,6 @@ R_TranslatePlayerSkin (int playernum)
 					  scaled_width, scaled_height, 0, GL_RGBA,
 					  GL_UNSIGNED_BYTE, pixels);
 
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -426,7 +421,6 @@ R_TranslatePlayerSkin (int playernum)
 				scaled_width, scaled_height, 0, GL_RGBA, 
 				GL_UNSIGNED_BYTE, pixels);
 
-			qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}

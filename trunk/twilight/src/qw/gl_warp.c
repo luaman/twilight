@@ -286,8 +286,6 @@ will have them chained together.
 void
 EmitBothSkyLayers (msurface_t *fa)
 {
-	GL_DisableMultitexture ();
-
 	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
 	speedscale = realtime * 8;
 	speedscale -= (int) speedscale & ~127;
@@ -314,8 +312,6 @@ void
 R_DrawSkyChain (msurface_t *s)
 {
 	msurface_t *fa;
-
-	GL_DisableMultitexture ();
 
 	// used when gl_texsort is on
 	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
@@ -1036,7 +1032,6 @@ R_DrawSkyBox (void)
 	}
 #if 0
 	qglDisable (GL_BLEND);
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglColor4f (1, 1, 1, 0.5);
 	qglEnable (GL_DEPTH_TEST);
 #endif

@@ -787,7 +787,6 @@ R_DrawAliasModel (entity_t *e)
 	// draw all the triangles
 	// 
 
-	GL_DisableMultitexture ();
 	qglPushMatrix ();
 	R_RotateForEntity (e, false);
 
@@ -819,17 +818,15 @@ R_DrawAliasModel (entity_t *e)
 			qglBindTexture (GL_TEXTURE_2D, playertextures + i);
 	}
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+
+	qglDisable(GL_BLEND);
 
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
 	else
 		R_SetupAliasFrame (currententity->frame, paliashdr);
-
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	if (!(clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value) {
 		int	fb_texture = 0;
@@ -895,33 +892,6 @@ R_DrawAliasModel (entity_t *e)
 
 /*
 =============
-R_SetSpritesState
-=============
-*/
-void R_SetSpritesState (qboolean state)
-{
-	static qboolean r_state = false;
-
-	if (r_state == state)
-		return;
-
-	r_state = state;
-
-	if (state) 
-	{
-		GL_DisableMultitexture ();
-//		qglEnable (GL_ALPHA_TEST);
-//		qglDepthMask (GL_FALSE);
-	}
-	else
-	{
-//		qglDisable (GL_ALPHA_TEST);
-//		qglDepthMask (GL_TRUE);
-	}
-}
-
-/*
-=============
 R_DrawEntitiesOnList
 =============
 */
@@ -933,39 +903,37 @@ R_DrawEntitiesOnList (void)
 	if (!r_drawentities->value)
 		return;
 
-	// draw sprites seperately, because of alpha blending
+	// LordHavoc: draw brush models, models, and sprites separately because of different states
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = &cl_visedicts[i];
 
-		switch (currententity->model->type) {
-			case mod_alias:
-				R_DrawAliasModel (currententity);
-				break;
-
-			case mod_brush:
-				R_DrawBrushModel (currententity);
-				break;
-
-			default:
-				break;
-		}
+		if (currententity->model->type == mod_brush)
+			R_DrawBrushModel (currententity);
 	}
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
+	qglDisable(GL_BLEND);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = &cl_visedicts[i];
 
-		switch (currententity->model->type) {
-			case mod_sprite:
-				R_SetSpritesState (true);
-				R_DrawSpriteModel (currententity);
-				break;
-
-			default:
-				break;
-		}
+		if (currententity->model->type == mod_alias)
+			R_DrawAliasModel (currententity);
 	}
 
-	R_SetSpritesState (false);
+	qglEnable(GL_BLEND);
+//	qglEnable (GL_ALPHA_TEST);
+	qglDepthMask (GL_FALSE);
+	for (i = 0; i < cl_numvisedicts; i++) {
+		currententity = &cl_visedicts[i];
+
+		if (currententity->model->type == mod_sprite)
+			R_DrawSpriteModel (currententity);
+	}
+	qglDisable(GL_BLEND);
+//	qglDisable (GL_ALPHA_TEST);
+	qglDepthMask (GL_TRUE);
 }
 
 /*
@@ -1008,8 +976,6 @@ R_PolyBlend (void)
 		return;
 
 //Con_Printf("R_PolyBlend(): %4.2f %4.2f %4.2f %4.2f\n",v_blend[0], v_blend[1], v_blend[2], v_blend[3]);
-
-	GL_DisableMultitexture ();
 
 //	qglDisable (GL_ALPHA_TEST);
 	qglEnable (GL_BLEND);
@@ -1259,8 +1225,6 @@ R_RenderScene (void)
 	// going slow
 
 	R_DrawEntitiesOnList ();
-
-	GL_DisableMultitexture ();
 
 	R_RenderDlights ();
 }

@@ -504,7 +504,7 @@ Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 
 	gl = (glpic_t *) pic->data;
 //	qglDisable (GL_ALPHA_TEST);
-	qglEnable (GL_BLEND);
+//	qglEnable (GL_BLEND);
 //  qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 //  qglCullFace(GL_FRONT);
 	qglColor4f (1, 1, 1, alpha);
@@ -521,7 +521,7 @@ Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 	qglEnd ();
 	qglColor4f (1, 1, 1, 1);
 //	qglEnable (GL_ALPHA_TEST);
-	qglDisable (GL_BLEND);
+//	qglDisable (GL_BLEND);
 }
 
 
@@ -702,7 +702,7 @@ Draw_FadeScreen
 void
 Draw_FadeScreen (void)
 {
-	qglEnable (GL_BLEND);
+//	qglEnable (GL_BLEND);
 	qglDisable (GL_TEXTURE_2D);
 	qglColor4f (0, 0, 0, 0.8);
 	qglBegin (GL_QUADS);
@@ -715,7 +715,7 @@ Draw_FadeScreen (void)
 	qglEnd ();
 	qglColor4f (1, 1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
-	qglDisable (GL_BLEND);
+//	qglDisable (GL_BLEND);
 
 	Sbar_Changed ();
 }
@@ -775,7 +775,9 @@ GL_Set2D (void)
 
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
-	qglDisable (GL_BLEND);
+	qglEnable (GL_BLEND);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 //	qglEnable (GL_ALPHA_TEST);
 ////  qglDisable (GL_ALPHA_TEST);
 
@@ -1124,7 +1126,7 @@ GL_Upload8 (byte * data, int width, int height, qboolean mipmap, int alpha)
 		{
 			p = data[i];
 			if (p < 224)
-				trans[i] = table[p] & 0x00FFFFFF; // transparent 
+				trans[i] = 0; // transparent 
 			else
 				trans[i] = table[p];	// fullbright
 		}

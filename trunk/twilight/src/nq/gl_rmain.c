@@ -429,9 +429,8 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 				qglMTexCoord2f (gl_mtex_enum + 0, ((float *) order)[0], ((float *) order)[1]);
 				qglMTexCoord2f (gl_mtex_enum + 1, ((float *) order)[0], ((float *) order)[1]);
 			}
-			else {
+			else
 				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
-			}
 
 			order += 2;
 
@@ -444,9 +443,6 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 
 		qglEnd ();
 	}
-
-	if (mtex)
-		GL_DisableMultitexture();
 }
 
 /*
@@ -484,9 +480,7 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 			qglBegin (GL_TRIANGLE_FAN);
 		}
 		else
-		{
 			qglBegin (GL_TRIANGLE_STRIP);
-		}
 		do
 		{
 			// texture coordinates come from the draw list
@@ -494,9 +488,8 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 				qglMTexCoord2f (gl_mtex_enum + 0, ((float *) order)[0], ((float *) order)[1]);
 				qglMTexCoord2f (gl_mtex_enum + 1, ((float *) order)[0], ((float *) order)[1]);
 			}
-			else {
+			else
 				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
-			}
 
 			order += 2;
 
@@ -522,9 +515,6 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 
 		qglEnd ();
 	}
-
-	if (mtex)
-		GL_DisableMultitexture();
 }
 
 /*
@@ -915,12 +905,8 @@ R_DrawAliasModel (entity_t *e)
 
 	anim = (int) (cl.time * 10) & 3;
 
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value) {
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value)
 		fb_texture = paliashdr->fb_texturenum[currententity->skinnum][anim];
-	}
-
-	if (!fb_texture || !gl_mtexable)
-		GL_DisableMultitexture ();
 
 	qglPushMatrix ();
 
@@ -955,17 +941,20 @@ R_DrawAliasModel (entity_t *e)
 			texture = playertextures - 1 + i;
 	}
 
-	if (fb_texture) {
-		if (gl_mtexable) {
-			GL_SelectTexture (0);
-			qglBindTexture (GL_TEXTURE_2D, texture);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-			GL_EnableMultitexture();
-			qglBindTexture (GL_TEXTURE_2D, fb_texture);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-		}
+	// LordHavoc: this was originally two nested if's, then an else (doing an
+	//            else on the fb_texture, nothing happened if gl_mtexable was
+	//            off)...  don't ask how long it took to find that bug.
+	if (fb_texture && gl_mtexable) {
+		GL_SelectTexture (0);
+		qglBindTexture (GL_TEXTURE_2D, texture);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		GL_SelectTexture (1);
+		qglEnable (GL_TEXTURE_2D);
+		qglBindTexture (GL_TEXTURE_2D, fb_texture);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 	}
-	else {
+	else
+	{
 		qglBindTexture (GL_TEXTURE_2D, texture);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
@@ -978,8 +967,14 @@ R_DrawAliasModel (entity_t *e)
 	else
 		R_SetupAliasFrame (currententity->frame, paliashdr, (fb_texture && gl_mtexable));
 
+	if (fb_texture && gl_mtexable) {
+		qglDisable (GL_TEXTURE_2D);
+		GL_SelectTexture (0);
+	}
+
 	if (fb_texture && !gl_mtexable) {
 		qglEnable (GL_BLEND);
+		qglBlendFunc(GL_ONE, GL_ONE); //GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
 		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
@@ -1046,54 +1041,26 @@ R_DrawEntitiesOnList1 (void)
 	if (!r_drawentities->value)
 		return;
 
-	// draw sprites seperately, because of alpha blending
+	// LordHavoc: draw brush models, models, and sprites separatedly because of different states
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = cl_visedicts[i];
 
+		if (currententity->model->type == mod_brush)
+			R_DrawBrushModel (currententity);
+	}
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	for (i = 0; i < cl_numvisedicts; i++) {
+		currententity = cl_visedicts[i];
+
+		// LordHavoc: uhh, shouldn't this be done in the chase cam code?
 		if (chase_active->value)
 			if (currententity == &cl_entities[cl.viewentity])
 				currententity->angles[0] *= 0.3;
 
-		switch (currententity->model->type) {
-			case mod_alias:
-				R_DrawAliasModel (currententity);
-				break;
-
-			case mod_brush:
-				R_DrawBrushModel (currententity);
-				break;
-
-			default:
-				break;
-		}
-	}
-}
-
-/*
-=============
-R_SetSpritesState
-=============
-*/
-void R_SetSpritesState (qboolean state)
-{
-	static qboolean r_state = false;
-
-	if (r_state == state)
-		return;
-
-	r_state = state;
-
-	if (state) 
-	{
-		qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		qglEnable (GL_BLEND);
-		qglDepthMask (GL_FALSE);
-	}
-	else
-	{
-		qglDisable (GL_BLEND);
-		qglDepthMask (GL_TRUE);
-		qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		if (currententity->model->type == mod_alias)
+			R_DrawAliasModel (currententity);
 	}
 }
 
@@ -1109,21 +1076,18 @@ void R_DrawEntitiesOnList2 (void)
 	if (!r_drawentities->value)
 		return;
 
+	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglEnable (GL_BLEND);
+	qglDepthMask (GL_FALSE);
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = cl_visedicts[i];
 
-		switch (currententity->model->type) {
-			case mod_sprite:
-				R_SetSpritesState (true);
-				R_DrawSpriteModel (currententity);
-				break;
-
-			default:
-				break;
-		}
+		if (currententity->model->type == mod_sprite)
+			R_DrawSpriteModel (currententity);
 	}
-
-	R_SetSpritesState (false);
+	qglDisable (GL_BLEND);
+	qglDepthMask (GL_TRUE);
 }
 
 /*
@@ -1164,8 +1128,6 @@ R_PolyBlend (void)
 		return;
 	if (!v_blend[3])
 		return;
-
-	GL_DisableMultitexture ();
 
 //	qglDisable (GL_ALPHA_TEST);
 	qglEnable (GL_BLEND);
@@ -1406,7 +1368,7 @@ R_RenderScene (void)
 
 	R_DrawEntitiesOnList1 ();
 
-	GL_DisableMultitexture ();
+	R_DrawViewModel ();
 
 	R_RenderDlights ();
 }
@@ -1569,7 +1531,6 @@ R_RenderView (void)
 ********************************************/
 
 	R_RenderScene ();
-	R_DrawViewModel ();
 	R_DrawWaterSurfaces ();
 	R_DrawParticles ();
 	R_DrawEntitiesOnList2 ();

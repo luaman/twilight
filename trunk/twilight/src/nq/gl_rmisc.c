@@ -115,8 +115,6 @@ R_InitParticleTexture (void)
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 8, 8, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, data);
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
@@ -286,8 +284,6 @@ R_TranslatePlayerSkin (int playernum)
 	byte       *inrow;
 	unsigned    frac, fracstep;
 
-	GL_DisableMultitexture ();
-
 	top = cl.scores[playernum].colors & 0xf0;
 	bottom = (cl.scores[playernum].colors & 15) << 4;
 
@@ -381,7 +377,6 @@ R_TranslatePlayerSkin (int playernum)
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, scaled_width,
 				  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 #endif
