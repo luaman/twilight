@@ -110,6 +110,11 @@ AC_DEFINE_UNQUOTED(USERPATH, "$with_userpath")
 
 CFLAGS="-Wall -Werror $CFLAGS"
 
+
+
+AC_CHECK_PROG(CVS2CL, cvs2cl, cvs2cl)
+AM_CONDITIONAL(CVS2CL, test "x$CVS2CL" != "x")
+
 AC_OUTPUT(
 	Makefile
 	nq/Makefile
@@ -119,6 +124,7 @@ AC_OUTPUT(
 
 AC_MSG_RESULT([
   Project Twilight v$VERSION configuration:
+    Compiler used               : $CC
     Compiler flags              : $CFLAGS
     SDL version                 : $SDLVER
     Default OpenGL library      : $with_opengl
