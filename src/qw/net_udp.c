@@ -378,18 +378,6 @@ UDP_OpenSocket (int port)
 void
 NET_OpenSocket (netsrc_t sock, int port)
 {
-#ifdef _WIN32
-	WSADATA     winsockdata;
-	WORD        wVersionRequested;
-	int         r;
-
-	wVersionRequested = MAKEWORD (1, 1);
-
-	r = WSAStartup (MAKEWORD (1, 1), &winsockdata);
-	if (r)
-		Sys_Error ("Winsock initialization failed.");
-#endif /* _WIN32 */
-
 	// 
 	// open the single socket to be used for all communications
 	// 
@@ -401,6 +389,20 @@ NET_Init (void)
 {
 	if (net_initialized)
 		return;
+
+#ifdef _WIN32
+	{
+		WSADATA     winsockdata;
+		WORD        wVersionRequested;
+		int         r;
+
+		wVersionRequested = MAKEWORD (1, 1);
+
+		r = WSAStartup (MAKEWORD (1, 1), &winsockdata);
+		if (r)
+			Sys_Error ("Winsock initialization failed.");
+	}
+#endif /* _WIN32 */
 
 	// 
 	// init the message buffer
@@ -455,6 +457,10 @@ NET_Shutdown (void)
 		closesocket (ip_sockets[NS_SERVER]);
 #else
 		close (ip_sockets[NS_SERVER]);
+#endif
+
+#ifdef _WIN32
+		WSACleanup();
 #endif
 }
 
