@@ -839,6 +839,37 @@ void VectorInterpolate (vec3_t v1, float frac, vec3_t v2, vec3_t v)
 	v[2] = v1[2] + (vec_t)frac * (v2[2] - v1[2]);
 }
 
+void AngleInterpolate (vec3_t v1, vec_t frac, vec3_t v2, vec3_t v)
+{
+	vec3_t	d;
+	int i;
+
+	if (frac < (1.0/255.0)) 
+	{
+		VectorCopy (v1, v);
+		return;
+	} 
+	else if (frac > (1-(1.0/255.0))) 
+	{
+		VectorCopy (v2, v);
+		return;
+	}
+
+	for (i = 0; i < 3; i++)
+	{
+		d[i] = v2[i] - v1[i];
+
+		if (d[i] > 180)
+			d[i] -= 360;
+		else if (d[i] < -180)
+			d[i] += 360;
+	}
+
+	v[0] = v1[0] + frac * d[0];
+	v[1] = v1[1] + frac * d[1];
+	v[2] = v1[2] + frac * d[2];
+}
+
 void Vector2Angles (vec3_t in, vec3_t out)
 {
 	vec_t y, p;
