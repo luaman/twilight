@@ -283,6 +283,7 @@ void _Zone_CheckSentinelsZone(memzone_t *zone, char *filename, int fileline)
 void _Zone_CheckSentinelsGlobal(char *filename, int fileline)
 {
 	memzone_t *zone;
+	Com_Printf ("CheckSenttinelsGlobal: %s %i\n", filename, fileline);
 	for (zone = zonechain;zone;zone = zone->next)
 		_Zone_CheckSentinelsZone(zone, filename, fileline);
 }
