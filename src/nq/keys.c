@@ -51,9 +51,7 @@ key up events are sent even if in console mode
 
 */
 
-
-#define		MAXCMDLINE	256
-char        key_lines[32][MAXCMDLINE];
+char        key_lines[32][MAX_INPUTLINE];
 int         key_linepos;
 int         shift_down = false;
 int         key_lastpress;
@@ -318,7 +316,7 @@ Key_Console (int key)
 	if (key < 32 || key > 127)
 		return;							// non printable
 
-	if (key_linepos < MAXCMDLINE - 1) {
+	if (key_linepos < MAX_INPUTLINE - 1) {
 		key_lines[edit_line][key_linepos] = key;
 		key_linepos++;
 		key_lines[edit_line][key_linepos] = 0;
@@ -329,7 +327,7 @@ Key_Console (int key)
 //============================================================================
 
 qboolean	chat_team;
-char		chat_buffer[MAXCMDLINE];
+char		chat_buffer[MAX_INPUTLINE];
 Uint32		chat_bufferlen = 0;
 
 void
