@@ -116,7 +116,7 @@ location:
 						VectorCopy (cl.simorg, last_recorded_location);
 						t1 = location->name;
 					} else
-						snprintf (t2, sizeof (t2), "Unknown!\n");
+						snprintf (t2, sizeof (t2), "Unknown!");
 					break;
 				case 'a':
 					if (bracket) {

@@ -61,15 +61,11 @@ static int ramp2[8] = { 0x6f, 0x6e, 0x6d, 0x6c, 0x6b, 0x6a, 0x68, 0x66 };
 
 typedef enum
 {
-	pt_static,
-	pt_grav,
-	pt_slowgrav,
+	pt_normal,
 	pt_fire,
 	pt_explode, pt_explode2,
 	pt_blob, pt_blob2,
-	pt_torch, pt_torch2,
-	pt_teleport1, pt_teleport2,
-	pt_rtrail, pt_rtrail_ring, pt_railtrail, pt_lightning
+	pt_lightning
 }
 ptype_t;
 
@@ -358,7 +354,7 @@ R_ReadPointFile_f (void)
 			break;
 
 		c++;
-		p = new_base_particle_oc (pt_static, org, r_origin, (-c) & 15, 0, -1,
+		p = new_base_particle_oc (pt_normal, org, r_origin, (-c) & 15, 0, -1,
 			99999, 0);
 		if (!p)
 			return;
@@ -486,7 +482,7 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 			porg[j] = org[j] + ((rand () & 15) - 8);
 			pvel[j] = dir[j] * 15;	// + (rand()%300)-150;
 		}
-		p = new_base_particle_oc (pt_grav, porg, pvel, pcolor, 0, 1, pdie, 0);
+		p = new_base_particle_oc (pt_normal, porg, pvel, pcolor, 0, 1, pdie, 0);
 		if (!p)
 			return;
 		p->alphadie = 2;
@@ -525,7 +521,7 @@ R_LavaSplash (vec3_t org)
 			VectorNormalizeFast (dir);
 			vel = 50 + (rand () & 63);
 			VectorScale (dir, vel, pvel);
-			new_base_particle_oc (pt_grav, porg, pvel, pcolor, 0, -1, pdie, 0);
+			new_base_particle_oc (pt_normal,porg, pvel, pcolor, 0, -1, pdie, 0);
 		}
 	}
 }
@@ -556,7 +552,7 @@ R_Torch (entity_common_t *ent, qboolean torch2)
 		// used for large torches (eg, start map near spawn)
 		porg[2] = ent->origin[2] - 2;
 		VectorSet (pvel, (rand() & 7) - 4, (rand() & 7) - 4, 0);
-		p = new_base_particle (pt_torch2, porg, pvel, color, rand () & 3,
+		p = new_base_particle (pt_normal, porg, pvel, color, rand () & 3,
 			ent->frame[0] ? 30 : 10, 5, 0);
 		if (!p)
 			return;
@@ -566,7 +562,7 @@ R_Torch (entity_common_t *ent, qboolean torch2)
 	}
 	else {
 		// wall torches
-		p = new_base_particle (pt_torch, porg, pvel, color, rand () & 3,
+		p = new_base_particle (pt_normal, porg, pvel, color, rand () & 3,
 			10, 5, 0);
 		if (!p)
 			return;
@@ -602,7 +598,7 @@ R_RailTrail (vec3_t start, vec3_t end)
 	while (len > 0)
 	{
 		VectorCopy (d_8tofloattable[(rand() & 3) + 225], color); color[3] = 0.5;
-		p = new_base_particle (pt_railtrail, start, vec3_origin, color,
+		p = new_base_particle (pt_normal, start, vec3_origin, color,
 			0, 2.5, 1.0, 0);
 		if (!p)
 			return;
@@ -612,7 +608,7 @@ R_RailTrail (vec3_t start, vec3_t end)
 		VectorMA (start, 4, right, org);
 		VectorScale (right, 8, vel);
 		VectorCopy (d_8tofloattable[(rand() & 7) + 206], color); color[3] = 0.5;
-		p = new_base_particle (pt_railtrail, org, vel, color,
+		p = new_base_particle (pt_normal, org, vel, color,
 				0, 5.0, 1.0, 0);
 		if (!p)
 			return;
@@ -653,8 +649,7 @@ R_ParticleTrail (entity_common_t *ent)
 {
 	vec3_t		vec, pvel, start, end, c1, c2;
 	float		len;
-	int			j, lsub, pcolor, dec, type;
-	static int	tracercount;
+	int			j, dec, type;
 	base_particle_t *p;
 
 	if (!ent->trail_times++) {
@@ -682,11 +677,10 @@ R_ParticleTrail (entity_common_t *ent)
 		
 	while (len >= 0)
 	{
-		pcolor = 0;
-		lsub = 3;
+		dec = 3;
 		VectorClear(pvel);
 
-		p = new_base_particle_oc(pt_static, start, pvel, 0, 0, -1, 2, 0);
+		p = new_base_particle_oc(pt_normal, start, pvel, 0, 0, -1, 2, 0);
 		if (!p)
 			return;
 
@@ -694,8 +688,7 @@ R_ParticleTrail (entity_common_t *ent)
 		{
 			case EF_ROCKET:
 				dec = 3;
-				pcolor = 0;
-				p->type = pt_static;
+				p->texnum = GTF_smoke[rand()&7];
 				p->vel[0] = lhrandom(-5, 5);
 				p->vel[1] = lhrandom(-5, 5);
 				p->vel[2] = lhrandom(-5, 5);
@@ -707,11 +700,12 @@ R_ParticleTrail (entity_common_t *ent)
 				p->color[3] = 0.245;
 				p->alphadie = 0.2696;
 				p->scale_change = 7;
+				p->gravity = -1;
 
-				p = new_base_particle_oc(pt_static, start,pvel, 0, 0, -1, 2, 0);
+				p = new_base_particle_oc(pt_normal, start,pvel, 0, 0, -1, 2, 0);
 				if (!p)
 					return;
-				p->type = pt_static;
+				p->texnum = GTF_smoke[rand()&7];
 				p->vel[0] = lhrandom(-5, 5);
 				p->vel[1] = lhrandom(-5, 5);
 				p->vel[2] = lhrandom(-5, 5);
@@ -722,12 +716,12 @@ R_ParticleTrail (entity_common_t *ent)
 				VecRBetween(c1, c2, p->color);
 				p->color[3] = 0.565;
 				p->alphadie = 3.0196;
+				p->gravity = -1;
 
 				break;
 			case EF_GRENADE: // smoke
 				dec = 3;
-				pcolor = 0;
-				p->type = pt_static;
+				p->texnum = GTF_smoke[rand()&7];
 				p->vel[0] = lhrandom(-5, 5);
 				p->vel[1] = lhrandom(-5, 5);
 				p->vel[2] = lhrandom(-5, 5);
@@ -739,61 +733,50 @@ R_ParticleTrail (entity_common_t *ent)
 				p->color[3] = 0.196;
 				p->scale_change = 7;
 				p->alphadie = 0.216;
+				p->gravity = -1;
 				break;
 
 			case EF_ZOMGIB:
 				// slight blood
-				lsub += 3;
+				dec += 3;
 			case EF_GIB:
 				// blood
-				p->type = pt_grav;
-				pcolor = 0x40 + (rand () & 3);
+				VecRBetween(d_8tofloattable[64],d_8tofloattable[67],p->color);
 				for (j = 0; j < 3; j++)
 					p->org[j] = start[j] + ((rand () % 6) - 3);
 				R_Stain (start, 32, 64, 32, 32, 32, 192, 64, 64, 32);
 				break;
 
-			case EF_TRACER:
-			case EF_TRACER2:
-				// tracer
-				p->die = r_time + 0.5;
-				p->type = pt_static;
+			case EF_TRACER:		// Voor trail, yellowish.
+				VecRBetween(d_8tofloattable[52],d_8tofloattable[60],p->color);
+				goto tracer;
+
+			case EF_TRACER2:	// Hell knight, fiery.
+				VectorSet(c1, 0.188, 0.063, 0.000);
+				VectorSet(c2, 0.314, 0.125, 0.000);
+				VecRBetween(c1, c2, p->color);
+				goto tracer;
+
+			case EF_TRACER3:	// Voor trail, purple.
+				VectorSet(p->color, 0.314, 0.125, 0.188);
+				goto tracer;
+
+tracer:
+				dec = 6;
+				p->vel[0] = lhrandom(-8, 8);
+				p->vel[1] = lhrandom(-8, 8);
+				p->vel[2] = lhrandom(-8, 8);
+				p->scale = dec;
+				p->die = r_time + 9999;
+				p->color[3] = 0.501;
+				p->alphadie = 1.505;
+				p->scale_change = 0;
 				p->gravity = 0;
-				if (type == EF_TRACER)
-					pcolor = 52 + ((tracercount & 4) << 1);
-				else
-					pcolor = 230 + ((tracercount & 4) << 1);
-
-				tracercount++;
-
-				VectorCopy (start, p->org);
-				if (tracercount & 1)
-				{
-					p->vel[0] = 30 * vec[1];
-					p->vel[1] = 30 * -vec[0];
-				}
-				else
-				{
-					p->vel[0] = 30 * -vec[1];
-					p->vel[1] = 30 * vec[0];
-				}
-				break;
-
-			case EF_TRACER3:
-				// voor trail
-				pcolor = 9 * 16 + 8 + (rand () & 3);
-				p->type = pt_static;
-				p->gravity = 0;
-				p->die = r_time + 0.3;
-				for (j = 0; j < 3; j++)
-					p->org[j] = start[j] + ((rand () & 15) - 8);
 				break;
 		}
-		if (pcolor)
-			VectorCopy4 (d_8tofloattable[pcolor], p->color);	
 
-		VectorMA (start, lsub, vec, start);
-		len -= lsub;
+		VectorMA (start, dec, vec, start);
+		len -= dec;
 	}
 }
 
