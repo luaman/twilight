@@ -29,15 +29,18 @@ static const char rcsid[] =
 # include <config.h>
 #endif
 
-#include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <pwd.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <sys/ipc.h>

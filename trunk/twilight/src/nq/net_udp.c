@@ -49,16 +49,14 @@ static const char rcsid[] =
 #include <netdb.h>
 #include <sys/param.h>
 #include <sys/ioctl.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #endif
 #include <errno.h>
 
 #ifdef __sun__
 #include <sys/filio.h>
-#endif
-
-#ifdef NeXT
-#include <libc.h>
 #endif
 
 //extern int  gethostname (char *, int);
@@ -488,3 +486,4 @@ UDP_SetSocketPort (struct qsockaddr *addr, int port)
 }
 
 //=============================================================================
+
