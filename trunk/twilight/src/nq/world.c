@@ -394,10 +394,10 @@ SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 
 		max = 0;
 		for (i = 0; i < 3; i++) {
-			v = fabs (ent->v.mins[i]);
+			v = Q_fabs (ent->v.mins[i]);
 			if (v > max)
 				max = v;
-			v = fabs (ent->v.maxs[i]);
+			v = Q_fabs (ent->v.maxs[i]);
 			if (v > max)
 				max = v;
 		}

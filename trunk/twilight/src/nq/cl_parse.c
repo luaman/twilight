@@ -375,7 +375,7 @@ CL_ParseUpdate (int bits)
 		// or randomized
 		if (model) {
 			if (model->synctype == ST_RAND)
-				ent->syncbase = (float) (rand () & 0x7fff) / 0x7fff;
+				ent->syncbase = (float) (Q_rand () & 0x7fff) / 0x7fff;
 			else
 				ent->syncbase = 0.0;
 		} else

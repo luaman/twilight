@@ -288,6 +288,8 @@ Sys_Init (void)
 	pfreq = 1.0 / (double) lowpart;
 
 	Sys_InitFloatTime ();
+
+	Init_Mathlib();
 }
 
 

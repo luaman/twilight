@@ -333,7 +333,7 @@ Datagram_GetMessage (qsocket_t * sock)
 			sfunc.Read (sock->socket, (byte *) & packetBuffer, NET_DATAGRAMSIZE,
 						&readaddr);
 
-//  if ((rand() & 255) > 220)
+//  if ((Q_rand() & 255) > 220)
 //      continue;
 
 		if (length == 0)

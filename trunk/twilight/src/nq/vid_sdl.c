@@ -186,7 +186,7 @@ VID_SetPalette (unsigned char *palette)
 				r1 = (int) r - (int) pal[0];
 				g1 = (int) g - (int) pal[1];
 				b1 = (int) b - (int) pal[2];
-				dist = sqrt (((r1 * r1) + (g1 * g1) + (b1 * b1)));
+				dist = Q_sqrt (((r1 * r1) + (g1 * g1) + (b1 * b1)));
 				if (dist < bestdist) {
 					k = v;
 					bestdist = dist;

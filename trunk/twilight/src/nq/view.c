@@ -93,7 +93,7 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 	AngleVectors (angles, forward, right, up);
 	side = DotProduct (velocity, right);
 	sign = side < 0 ? -1 : 1;
-	side = fabs (side);
+	side = Q_fabs (side);
 
 	value = cl_rollangle->value[0];
 //  if (cl.inwater)
@@ -134,10 +134,10 @@ V_CalcBob (void)
 // (don't count Z, or jumping messes it up)
 
 	bob =
-		sqrt (cl.velocity[0] * cl.velocity[0] +
+		Q_sqrt (cl.velocity[0] * cl.velocity[0] +
 			  cl.velocity[1] * cl.velocity[1]) * cl_bob->value[0];
 //Con_Printf ("speed: %5.1f\n", Length(cl.velocity));
-	bob = bob * 0.3 + bob * 0.7 * sin (cycle);
+	bob = bob * 0.3 + bob * 0.7 * Q_sin (cycle);
 	if (bob > 4)
 		bob = 4;
 	else if (bob < -7)
@@ -199,7 +199,7 @@ V_DriftPitch (void)
 	}
 // don't count small mouse motion
 	if (cl.nodrift) {
-		if (fabs (cl.cmd.forwardmove) < cl_forwardspeed->value[0])
+		if (Q_fabs (cl.cmd.forwardmove) < cl_forwardspeed->value[0])
 			cl.driftmove = 0;
 		else
 			cl.driftmove += host_frametime;
@@ -658,13 +658,13 @@ CalcGunAngle (void)
 	cl.viewent.angles[PITCH] = -(r_refdef.viewangles[PITCH] + pitch);
 
 	cl.viewent.angles[ROLL] -=
-		v_idlescale->value[0] * sin (cl.time * v_iroll_cycle->value[0]) *
+		v_idlescale->value[0] * Q_sin (cl.time * v_iroll_cycle->value[0]) *
 		v_iroll_level->value[0];
 	cl.viewent.angles[PITCH] -=
-		v_idlescale->value[0] * sin (cl.time * v_ipitch_cycle->value[0]) *
+		v_idlescale->value[0] * Q_sin (cl.time * v_ipitch_cycle->value[0]) *
 		v_ipitch_level->value[0];
 	cl.viewent.angles[YAW] -=
-		v_idlescale->value[0] * sin (cl.time * v_iyaw_cycle->value[0]) *
+		v_idlescale->value[0] * Q_sin (cl.time * v_iyaw_cycle->value[0]) *
 		v_iyaw_level->value[0];
 }
 
@@ -708,13 +708,13 @@ void
 V_AddIdle (void)
 {
 	r_refdef.viewangles[ROLL] +=
-		v_idlescale->value[0] * sin (cl.time * v_iroll_cycle->value[0]) *
+		v_idlescale->value[0] * Q_sin (cl.time * v_iroll_cycle->value[0]) *
 		v_iroll_level->value[0];
 	r_refdef.viewangles[PITCH] +=
-		v_idlescale->value[0] * sin (cl.time * v_ipitch_cycle->value[0]) *
+		v_idlescale->value[0] * Q_sin (cl.time * v_ipitch_cycle->value[0]) *
 		v_ipitch_level->value[0];
 	r_refdef.viewangles[YAW] +=
-		v_idlescale->value[0] * sin (cl.time * v_iyaw_cycle->value[0]) *
+		v_idlescale->value[0] * Q_sin (cl.time * v_iyaw_cycle->value[0]) *
 		v_iyaw_level->value[0];
 }
 
