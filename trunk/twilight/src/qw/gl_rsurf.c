@@ -251,13 +251,10 @@ GL_BuildLightmap (msurface_t *surf)
 
 	/* bound, invert, and shift */
 store:
-	if (gl_mtexable)
-	{
-		if (gl_mtexcombine_arb || gl_mtexcombine_ext)
-			shift = 9;
-		else
-			shift = 7;
-	}
+	if (gl_mtexcombine)
+		shift = 9;
+	else if (gl_mtex)
+		shift = 7;
 	else
 		shift = 8;
 
@@ -585,10 +582,10 @@ DrawTextureChains ()
 		}
 	}
 
-	if (gl_mtexable)
+	if (gl_mtex || gl_mtexcombine)
 	{
 		qglDisable (GL_BLEND);
-		if (gl_mtexcombine_arb || gl_mtexcombine_ext)
+		if (gl_mtexcombine)
 		{
 			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
 			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
@@ -628,7 +625,7 @@ DrawTextureChains ()
 		}
 
 		qglDisable (GL_TEXTURE_2D);
-		if (gl_mtexcombine_arb || gl_mtexcombine_ext)
+		if (gl_mtexcombine)
 			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1.0);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglDisable (GL_TEXTURE_2D);
@@ -777,28 +774,21 @@ R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-	if (gl_mtexable)
-	{
-		if (gl_mtexcombine_arb || gl_mtexcombine_ext)
-		{
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
-			qglActiveTextureARB (GL_TEXTURE1_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 4.0);
-		}
-		else
-		{
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			qglActiveTextureARB (GL_TEXTURE1_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		}
-	}
-	else
+	if (gl_mtexcombine) {
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+		qglActiveTextureARB (GL_TEXTURE1_ARB);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 4.0);
+	} else if (gl_mtex) {
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		qglActiveTextureARB (GL_TEXTURE1_ARB);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	} else
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	texnum = -1;
@@ -807,7 +797,7 @@ R_DrawBrushModel (entity_t *e)
 		if (psurf->visframe == r_framecount)
 		{
 			t = R_TextureAnimation(psurf->texinfo->texture);
-			if (gl_mtexable)
+			if (gl_mtex || gl_mtexcombine)
 			{
 				if (texnum != t->gl_texturenum)
 				{
@@ -830,17 +820,14 @@ R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-	if (gl_mtexable)
-	{
-		if (gl_mtexcombine_arb || gl_mtexcombine_ext)
+	if (gl_mtex || gl_mtexcombine) {
+		if (gl_mtexcombine)
 			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1.0);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglDisable (GL_TEXTURE_2D);
 		qglActiveTextureARB (GL_TEXTURE0_ARB);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	}
-	else
-	{
+	} else {
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		R_BlendLightmaps ();
 	}

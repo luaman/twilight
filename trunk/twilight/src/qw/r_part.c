@@ -44,12 +44,12 @@ static const char rcsid[] =
 #define ABSOLUTE_MIN_PARTICLES	2		// no fewer than this no matter what's
 										// on the command line
 
-cvar_t *r_particles;
-
 extern int part_tex_dot;
 extern int part_tex_spark;
 extern int part_tex_smoke;
 extern int part_tex_smoke_ring;
+
+static cvar_t *r_particles, *r_base_particles, *r_cone_particles;
 
 static int	ramp1[8] = { 0x6f, 0x6d, 0x6b, 0x69, 0x67, 0x65, 0x63, 0x61 };
 static int	ramp2[8] = { 0x6f, 0x6e, 0x6d, 0x6c, 0x6b, 0x6a, 0x68, 0x66 };
@@ -159,6 +159,10 @@ void
 R_InitParticles (void)
 {
 	int         i;
+
+	r_particles = Cvar_Get ("r_particles", "1", CVAR_NONE, NULL);
+	r_base_particles = Cvar_Get ("r_base_particles", "1", CVAR_NONE, NULL);
+	r_cone_particles = Cvar_Get ("r_cone_particles", "1", CVAR_NONE, NULL);
 
 	i = COM_CheckParm ("-particles");
 
@@ -750,8 +754,6 @@ R_Draw_Base_Particles (void)
 
 extern float    bubble_sintable[17], bubble_costable[17];
 
-#define RANGE_ELEMENTS	0
-
 /*
 ===============
 R_Draw_Cone_Particles
@@ -769,7 +771,6 @@ R_Draw_Cone_Particles (void)
 
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke);
-//	qglDisable (GL_TEXTURE_2D);
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
 
@@ -831,14 +832,11 @@ R_Draw_Cone_Particles (void)
 
 		if (((i_index + (17 * 3)) >= MAX_VERTEX_INDICES) ||
 				(v_index + 17) >= MAX_VERTEX_ARRAYS) {
-#if RANGE_ELEMENTS
-			qglDrawRangeElements(GL_TRIANGLES, 0, v_index, i_index, GL_UNSIGNED_INT, vindices);
-			Con_Printf("v_index %d, i_index %d\n", v_index, i_index);
-#else
-			qglLockArraysEXT (0, v_index);
+			if (gl_cva)
+				qglLockArraysEXT (0, v_index);
 			qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
-			qglUnlockArraysEXT ();
-#endif
+			if (gl_cva)
+				qglUnlockArraysEXT ();
 			v_index = 0;
 			i_index = 0;
 		}
@@ -898,14 +896,11 @@ R_Draw_Cone_Particles (void)
 	}
 
 	if (v_index || i_index) {
-#if RANGE_ELEMENTS
-		qglDrawRangeElements(GL_TRIANGLES, 0, v_index, i_index, GL_UNSIGNED_INT, vindices);
-		Con_Printf("v_index %d, i_index %d\n", v_index, i_index);
-#else
-		qglLockArraysEXT (0, v_index);
+		if (gl_cva)
+			qglLockArraysEXT (0, v_index);
 		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
-		qglUnlockArraysEXT ();
-#endif
+		if (gl_cva)
+			qglUnlockArraysEXT ();
 		v_index = 0;
 		i_index = 0;
 	}
@@ -919,7 +914,6 @@ R_Draw_Cone_Particles (void)
 	}
 	num_cone_particles = activeparticles;
 
-//	qglEnable (GL_TEXTURE_2D);
 	if (gl_cull->value)
 		qglEnable (GL_CULL_FACE);
 }
