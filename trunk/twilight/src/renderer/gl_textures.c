@@ -1053,7 +1053,7 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
 		int outwidth, int outheight)
 {
 #ifdef HAVE_MMX
-	if (cpu_flags & CPU_MMX_EXT)
+	if ((cpu_flags & CPU_MMX_EXT) && (inwidth != 1) && (inheight != 1) && (outwidth != 1) && (outheight != 1))
 		R_ResampleTextureMMX_EXT (indata, inwidth, inheight, outdata, outwidth, outheight);
 	else if (cpu_flags & CPU_MMX)
 		R_ResampleTextureMMX (indata, inwidth, inheight, outdata, outwidth, outheight);
