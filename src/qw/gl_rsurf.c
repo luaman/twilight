@@ -151,8 +151,7 @@ R_AddDynamicLights (msurface_t *surf)
 			continue;					// not lit by this light
 
 		rad = cl_dlights[lnum].radius;
-		dist = DotProduct (cl_dlights[lnum].origin, surf->plane->normal) -
-			surf->plane->dist;
+		dist = PlaneDiff (cl_dlights[lnum].origin, surf->plane);
 		rad -= Q_fabs (dist);
 		minlight = cl_dlights[lnum].minlight;
 		if (rad < minlight)
@@ -1094,7 +1093,7 @@ R_DrawBrushModel (entity_t *e)
 		// find which side of the node we are on
 		pplane = psurf->plane;
 
-		dot = DotProduct (modelorg, pplane->normal) - pplane->dist;
+		dot = PlaneDiff (modelorg, pplane);
 
 		// draw the polygon
 		if (((psurf->flags & SURF_PLANEBACK) && (dot < -BACKFACE_EPSILON)) ||
@@ -1166,21 +1165,7 @@ R_RecursiveWorldNode (mnode_t *node)
 
 // find which side of the node we are on
 	plane = node->plane;
-
-	switch (plane->type) {
-		case PLANE_X:
-			dot = modelorg[0] - plane->dist;
-			break;
-		case PLANE_Y:
-			dot = modelorg[1] - plane->dist;
-			break;
-		case PLANE_Z:
-			dot = modelorg[2] - plane->dist;
-			break;
-		default:
-			dot = DotProduct (modelorg, plane->normal) - plane->dist;
-			break;
-	}
+	dot = PlaneDiff (modelorg, plane);
 
 	if (dot >= 0)
 		side = 0;

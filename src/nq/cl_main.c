@@ -565,7 +565,7 @@ CL_RelinkEntities (void)
 					memset (&tr, 0, sizeof(tr));
 					SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ent->origin, dl->origin, &tr);
 					
-					if (tr.endpos[0 && tr.endpos[1] && tr.endpos[2])
+					if (tr.endpos[0] && tr.endpos[1] && tr.endpos[2])
 						VectorCopy (tr.endpos, dl->origin);
 				}
 

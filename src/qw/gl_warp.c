@@ -259,8 +259,7 @@ EmitSkyPolys (msurface_t *fa)
 			VectorSubtract (v, r_origin, dir);
 			dir[2] *= 3;				// flatten the sphere
 
-			length = dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2];
-			length = 6 * 63 * Q_RSqrt (length);
+			length = 6 * 63 * VectorLength(dir);
 
 			dir[0] *= length;
 			dir[1] *= length;

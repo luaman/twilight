@@ -145,7 +145,7 @@ SV_UserFriction (void)
 
 	vel = velocity;
 
-	speed = Q_sqrt (vel[0] * vel[0] + vel[1] * vel[1]);
+	speed = VectorLength2(vel);
 	if (!speed)
 		return;
 

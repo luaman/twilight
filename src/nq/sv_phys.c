@@ -1421,7 +1421,7 @@ SV_Physics_Step (edict_t *ent)
 		if (wasonground)
 			if (!(ent->v.health <= 0.0 && !SV_CheckBottom (ent))) {
 				vel = ent->v.velocity;
-				speed = Q_sqrt (vel[0] * vel[0] + vel[1] * vel[1]);
+				speed = VectorLength2 (vel);
 				if (speed) {
 					friction = sv_friction.value;
 

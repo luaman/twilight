@@ -493,8 +493,8 @@ RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 
 // FIXME: optimize for axial
 	plane = node->plane;
-	front = DotProduct (start, plane->normal) - plane->dist;
-	back = DotProduct (end, plane->normal) - plane->dist;
+	front = PlaneDiff (start, plane);
+	back = PlaneDiff (end, plane);
 	side = front < 0;
 
 	if ((back < 0) == side)
