@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "../../include" /I "../../SDL/include" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../../include" /I "../image" /I "../../SDL/include" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
 # ADD RSC /l 0x40c /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../../SDL/include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../../include" /I "../image" /I "../../SDL/include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x40c /d "_DEBUG"
 # ADD RSC /l 0x40c /d "_DEBUG"
 BSC32=bscmake.exe
@@ -89,6 +89,10 @@ SOURCE=.\dynogl.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\gl_textures.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\noise.c
 # End Source File
 # Begin Source File
@@ -109,6 +113,10 @@ SOURCE=.\dynogl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\gl_textures.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\glquake.h
 # End Source File
 # Begin Source File
@@ -118,6 +126,14 @@ SOURCE=.\oglfuncs.h
 # Begin Source File
 
 SOURCE=.\opengl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\opengl_ext.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\pointers.h
 # End Source File
 # Begin Source File
 
