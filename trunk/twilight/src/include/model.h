@@ -121,7 +121,7 @@ typedef struct glpoly_s {
 typedef struct msurface_s {
 	// should be drawn if visframe == r_framecount (set by WorldNode
 	// functions)
-	int					visframe;
+	Uint				visframe;
 
 	// the node plane this is on, backwards if SURF_PLANEBACK flag set
 	mplane_t			*plane;
@@ -150,7 +150,7 @@ typedef struct msurface_s {
 	mtexinfo_t			*texinfo;
 
 	// dynamic lighting info
-	int					dlightframe, lightframe, lightmappedframe;
+	Uint				dlightframe, lightframe, lightmappedframe;
 	int					dlightbits;
 
 	int					lightmaptexturenum;
@@ -173,8 +173,8 @@ typedef struct msurface_s {
 typedef struct mnode_s {
 // common with leaf
 	int         contents;				// 0, to differentiate from leafs
-	int         visframe;				// determined visible by WorldNode
-	int			pvsframe;				// set by MarkLeaves
+	Uint        visframe;				// determined visible by WorldNode
+	Uint		pvsframe;				// set by MarkLeaves
 
 	vec3_t      mins;					// for bounding box culling
 	vec3_t		maxs;					// for bounding box culling
@@ -194,8 +194,8 @@ typedef struct mnode_s {
 typedef struct mleaf_s {
 // common with node
 	int         contents;				// wil be a negative contents number
-	int         visframe;				// determined visible by WorldNode
-	int			pvsframe;				// set by MarkLeaves
+	Uint        visframe;				// determined visible by WorldNode
+	Uint		pvsframe;				// set by MarkLeaves
 
 	vec3_t      mins;					// for bounding box culling
 	vec3_t		maxs;					// for bounding box culling

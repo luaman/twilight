@@ -72,7 +72,7 @@ entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
 lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
 dlight_t	cl_dlights[MAX_DLIGHTS];
 
-extern int	r_framecount;
+extern Uint	r_framecount;
 
 /*
 =====================

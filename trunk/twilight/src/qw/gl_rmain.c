@@ -49,7 +49,7 @@ extern void R_SkyBoxChanged (cvar_t *cvar);
 void R_DrawViewModel (void);
 void R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 
-int r_framecount;						// used for dlight push checking
+Uint r_framecount;						// used for dlight push checking
 static mplane_t frustum[4];
 int c_brush_polys, c_alias_polys;
 
