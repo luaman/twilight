@@ -827,25 +827,21 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e,
 		e->frame_interval = 0.1;
 	}
 
-	if (e->lastmodel == e->model)
+	if (e->lastmodel == e->model && !(!e->pose1 && !e->pose2))
 	{
 		if (e->pose2 != pose) {
-			e->frame_start_time = realtime;
-			if (e->pose2 == -1) {
-				e->pose1 = pose;
-			} else {
-				e->pose1 = e->pose2;
-			}
+			e->frame_start_time = cl.time;
+			e->pose1 = e->pose2;
 			e->pose2 = pose;
 			blend = 0;
 		} else {
-			blend = (realtime - e->frame_start_time) / e->frame_interval;
+			blend = (cl.time - e->frame_start_time) / e->frame_interval;
 		}
 	}
 	else
 	{
 		e->lastmodel = e->model;
-		e->frame_start_time = realtime;
+		e->frame_start_time = cl.time;
 		e->pose1 = pose;
 		e->pose2 = pose;
 		blend = 0;
@@ -896,7 +892,7 @@ R_DrawAliasModel (entity_t *e)
 		VectorAdd (e->origin, clmodel->maxs, maxs);
 
 		if (R_CullBox (mins, maxs)) {
-			e->pose1 = e->pose2 = -1;
+			e->pose1 = e->pose2 = 0;
 			return;
 		}
 	}
