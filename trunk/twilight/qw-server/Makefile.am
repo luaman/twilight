@@ -21,7 +21,7 @@ twilight_qwsv_sys_libs=
 endif
 
 twilight_qwsv_SOURCES= \
-	cmd.c cmd.h common.c console.h \
+	cmd.h common.c console.h \
 	mdfour.c net.h net_chan.c net_udp.c \
 	pmove.c pmovetst.c \
 	pr_cmds.c pr_edict.c pr_exec.c progdefs.h progs.h \
