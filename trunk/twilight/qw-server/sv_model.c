@@ -57,10 +57,6 @@ model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
 
 Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 
-#define	MAX_MOD_KNOWN	256
-model_t     mod_known[MAX_MOD_KNOWN];
-int         mod_numknown;
-
 texture_t   r_notexture_mip;
 
 unsigned   *model_checksum;
