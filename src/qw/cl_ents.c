@@ -592,6 +592,7 @@ CL_LinkPacketEntities (void)
 	int					pnum, flags;
 	dlight_t			*dl;
 	qboolean			moved;
+	vec3_t				angles;
 
 	pack = &cl.frames[cl.validsequence & UPDATE_MASK].packet_entities;
 
@@ -624,10 +625,6 @@ CL_LinkPacketEntities (void)
 		ent->modelindex = state->modelindex;
 		ent->model = model = cl.model_precache[state->modelindex];	// Model.
 
-		moved = CL_Update_OriginAngles (ent, state->origin, state->angles, cl.time);
-		CL_Lerp_OriginAngles (ent);
-		CL_Update_Frame (ent, state->frame, cl.time);
-
 		ent->skinnum = state->skinnum;
 		ent->effects = state->effects;
 		ent->entity_frame = entity_frame;
@@ -645,8 +642,13 @@ CL_LinkPacketEntities (void)
 		// rotate binary objects locally
 		if (flags & EF_ROTATE) {
 			flags &= ~EF_ROTATE;
-			VectorSet (ent->angles, 0, autorotate, 0);
-		}
+			VectorSet (angles, 0, autorotate, 0);
+		} else
+			VectorCopy(state->angles, angles);
+
+		moved = CL_Update_OriginAngles (ent, state->origin, angles, cl.time);
+		CL_Lerp_OriginAngles (ent);
+		CL_Update_Frame (ent, state->frame, cl.time);
 
 		V_AddEntity ( ent );
 

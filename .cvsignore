@@ -13,4 +13,5 @@ twilight-*.zip
 twilight-*.tar.gz
 twilight.spec
 autom4te.cache
+.*.swp
 

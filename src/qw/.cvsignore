@@ -1,6 +1,7 @@
 Makefile
 Makefile.in
 *.o
+.*.swp
 twilight-qw
 twilight-qwsv
 .deps

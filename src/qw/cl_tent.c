@@ -211,7 +211,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 226, 20);
-			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
+			R_Stain (pos, 32, 64, 64, 64, 32, 192, 192, 192, 32);
 			S_StartSound (-1, 0, cl_sfx_knighthit, pos, 1, 1);
 			break;
 
@@ -220,7 +220,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 10);
-			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
+			R_Stain (pos, 32, 64, 64, 64, 32, 192, 192, 192, 32);
 
 			if (rand () % 5)
 				S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
@@ -240,7 +240,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 20);
-			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
+			R_Stain (pos, 32, 64, 64, 64, 32, 192, 192, 192, 32);
 
 			if (rand () % 5)
 				S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
@@ -271,7 +271,7 @@ CL_ParseTEnt (void)
 			dl->color[0] = 1.25f;
 			dl->color[1] = 1.0f;
 			dl->color[2] = 0.5f;
-			R_Stain (pos, 96, 60, 60, 60, 128, 128, 128, 128, 128);
+			R_Stain (pos, 96, 64, 64, 64, 128, 192, 192, 192, 192);
 
 			// sound
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
@@ -283,7 +283,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_BlobExplosion (pos);
-			R_Stain (pos, 96, 60, 60, 60, 128, 128, 128, 128, 128);
+			R_Stain (pos, 96, 64, 64, 64, 128, 192, 192, 192, 192);
 
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 			break;
@@ -333,7 +333,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 20 * cnt);
-			R_Stain (pos, 5 * cnt, 60, 60, 60, 72, 96, 96, 96, 72);
+			R_Stain (pos, 5 * cnt, 64, 64, 64, 72, 192, 192, 192, 72);
 			break;
 
 		case TE_BLOOD:					// bullets hitting body
