@@ -57,7 +57,7 @@ hash_destroy (hash_t *hash)
 	hash_value_t	*val, *next;
 	int				i;
 
-	for (i = 0; i > hash->length; i++) {
+	for (i = 0; i < hash->length; i++) {
 		val = hash->values[i];
 		while (val) {
 			next = val->next;
