@@ -215,8 +215,6 @@ extract_line (char *line)
 	char       *text;
 	int         quotes;
 
-	Con_Printf("\n==============================\n");
-	
 	// find a \n or ; line break
 	text = (char *) cmd_text.data;
 	quotes = 0;
@@ -243,8 +241,6 @@ extract_line (char *line)
 		cmd_text.cursize -= i;
 		memcpy (text, text + i, cmd_text.cursize);
 	}
-	Con_Printf("LINE: %s TEXT: %s",line,text);
-	Con_Printf("==============================\n");
 }
 
 /*
@@ -258,16 +254,9 @@ Cbuf_Execute_Sets (void)
 	char	line[1024] = { 0 };
 
 	while (cmd_text.cursize) {
-		Con_Printf("CMD_TEXT.CURSIZE: %d\n",cmd_text.cursize);
 		extract_line (line);
 		// execute the command line
-		Con_Printf ("\n======================\n");
-		Con_Printf ("Cbuf_Execute_Sets TESTING: %s\n",line);
-		Con_Printf ("======================\n");
 		if (strncmp (line, "set", 3) == 0 && isspace ((int) line[3])) {
-			Con_Printf ("\n======================\n");
-			Con_Printf ("Cbuf_Execute_Sets SUCCEEDED: %s\n",line);
-			Con_Printf ("======================\n");
 			Cmd_ExecuteString (line);
 		}
 	}
