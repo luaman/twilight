@@ -758,9 +758,12 @@ Con_CompleteCommandLine (void)
 	v = Cvar_CompleteCountPossible(s);
 	a = Cmd_CompleteAliasCountPossible(s);
 	
-	if (!(c + v + a))	// No possible matches
+	if (!(c + v + a)) {	// No possible matches, let the user know they're insane
+		S_LocalSound ("misc/talk.wav");
+		Con_Printf("\n\nNo matching aliases, commands, or cvars were found.\n\n");
 		return;
-	
+	}
+
 	if (c + v + a == 1) {
 		if (c)
 			list[0] = Cmd_CompleteBuildList(s);
