@@ -86,7 +86,6 @@ cvar_t *r_waterripple;
 cvar_t *r_dynamic;
 cvar_t *r_novis;
 cvar_t *r_netgraph;
-cvar_t *r_lightlerp;
 
 cvar_t *gl_clear;
 cvar_t *gl_cull;
