@@ -1428,7 +1428,7 @@ PR_Init_Cvars (void)
 	saved2 = Cvar_Get ("saved2", "0", CVAR_ARCHIVE, NULL);
 	saved3 = Cvar_Get ("saved3", "0", CVAR_ARCHIVE, NULL);
 	saved4 = Cvar_Get ("saved4", "0", CVAR_ARCHIVE, NULL);
-	pr_boundscheck = Cvar_Get ("pr_boundscheck", "0", CVAR_ARCHIVE, NULL);
+	pr_boundscheck = Cvar_Get ("pr_boundscheck", "1", CVAR_ARCHIVE, NULL);
 	pr_checkextension = Cvar_Get ("pr_checkextension", "1", CVAR_ROM, NULL);
 }
 
