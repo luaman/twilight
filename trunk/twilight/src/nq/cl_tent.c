@@ -206,8 +206,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_NewExplosion (pos);
-//			R_ParticleExplosion (pos);
-//
+
 			dl = CL_AllocDlight (0);
 			VectorCopy (pos, dl->origin);
 			dl->radius = 350;

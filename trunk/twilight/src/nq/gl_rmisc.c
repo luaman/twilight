@@ -280,4 +280,3 @@ R_TimeRefresh_f (void)
 
 	GL_EndRendering ();
 }
-

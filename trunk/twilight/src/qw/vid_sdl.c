@@ -386,6 +386,7 @@ VID_Init (unsigned char *palette)
 {
 	int         i;
 	const		SDL_VideoInfo *info = NULL;
+	char		sdl_driver[256];
 
 	/* interpret command-line params */
 
@@ -476,7 +477,8 @@ VID_Init (unsigned char *palette)
 
 	VID_InitTexGamma ();
 
-	Com_Printf ("Video mode %dx%d initialized.\n", vid.width, vid.height);
+	Com_Printf ("Video mode %dx%d initialized: %s.\n", vid.width, vid.height,
+			SDL_VideoDriverName(sdl_driver, sizeof(sdl_driver)));
 
 	vid.recalc_refdef = true;	/* force a surface cache flush */
 

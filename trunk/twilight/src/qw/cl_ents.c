@@ -628,7 +628,7 @@ CL_LinkPacketEntities (void)
 	entity_state_t		*state;
 	model_t				*model;
 	float				autorotate;
-	int					pnum;
+	int					pnum, flags;
 	dlight_t			*dl;
 	qboolean			moved;
 
@@ -679,9 +679,13 @@ CL_LinkPacketEntities (void)
 			ent->colormap = NULL;
 		}
 
+		flags = model->flags;
+
 		// rotate binary objects locally
-		if (model->flags & EF_ROTATE)
+		if (flags & EF_ROTATE) {
+			flags &= ~EF_ROTATE;
 			VectorSet (ent->cur.angles, 0, autorotate, 0);
+		}
 
 		V_AddEntity ( ent );
 
@@ -689,24 +693,17 @@ CL_LinkPacketEntities (void)
 		if (!model->flags || !ent->times || !moved)
 			continue;
 
-		if (model->flags & EF_ROCKET) {
-			R_RocketTrail (ent->from.origin, ent->to.origin, 0);
+		if (flags & EF_ROCKET) {
+			flags &= ~EF_ROCKET;
+			R_RocketTrail (ent->from.origin, ent->to.origin);
 			dl = CL_AllocDlight (state->number);
 			VectorCopy (ent->cur.origin, dl->origin);
 			dl->radius = 200;
 			dl->die = cl.time + 0.1;
-		} else if (model->flags & EF_GRENADE)
-			R_RocketTrail (ent->from.origin, ent->to.origin, 1);
-		else if (model->flags & EF_GIB)
-			R_RocketTrail (ent->from.origin, ent->to.origin, 2);
-		else if (model->flags & EF_ZOMGIB)
-			R_RocketTrail (ent->from.origin, ent->to.origin, 4);
-		else if (model->flags & EF_TRACER)
-			R_RocketTrail (ent->from.origin, ent->to.origin, 3);
-		else if (model->flags & EF_TRACER2)
-			R_RocketTrail (ent->from.origin, ent->to.origin, 5);
-		else if (model->flags & EF_TRACER3)
-			R_RocketTrail (ent->from.origin, ent->to.origin, 6);
+		}
+
+		if (flags)
+			R_ParticleTrail (ent->from.origin, ent->to.origin, flags);
 	}
 }
 
