@@ -563,7 +563,6 @@ Mod_LoadFaces (lump_t *l)
 			GL_SubdivideSurface (out);	// cut up polygon for warps
 			continue;
 		}
-
 	}
 }
 
@@ -671,7 +670,7 @@ mtriangle_t triangles[MAXALIASTRIS];
 trivertx_t *poseverts[MAXALIASFRAMES];
 int         posenum;
 
-int			aliasbboxmin[3], aliasbboxmax[3];
+float		aliasbboxmin[3], aliasbboxmax[3];
 
 /*
 =================
@@ -698,9 +697,9 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame)
 		frame->bboxmax.v[i] = pdaliasframe->bboxmax.v[i];
 
 		if (frame->bboxmin.v[i] < aliasbboxmin[i])
-			aliasbboxmin[i] = frame->bboxmin.v[i];
+			aliasbboxmin[i] = (float)frame->bboxmin.v[i];
 		if (frame->bboxmax.v[i] > aliasbboxmax[i])
-			aliasbboxmax[i] = frame->bboxmax.v[i];
+			aliasbboxmax[i] = (float)frame->bboxmax.v[i];
 	}
 
 	pinframe = (trivertx_t *) (pdaliasframe + 1);
@@ -740,9 +739,9 @@ Mod_LoadAliasGroup (void *pin, maliasframedesc_t *frame)
 		frame->bboxmax.v[i] = pingroup->bboxmax.v[i];
 
 		if (frame->bboxmin.v[i] < aliasbboxmin[i])
-			aliasbboxmin[i] = frame->bboxmin.v[i];
+			aliasbboxmin[i] = (float)frame->bboxmin.v[i];
 		if (frame->bboxmax.v[i] > aliasbboxmax[i])
-			aliasbboxmax[i] = frame->bboxmax.v[i];
+			aliasbboxmax[i] = (float)frame->bboxmax.v[i];
 	}
 
 	pin_intervals = (daliasinterval_t *) (pingroup + 1);
@@ -954,64 +953,64 @@ mflags_t modelflags[] =
 	{ "progs/flame.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_TORCH1 },
 	{ "progs/flame2.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_TORCH2 },
 	{ "progs/fire.mdl", 0, FLAG_NOSHADOW },
-	{ "progs/bolt.mdl", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/laser.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/missile.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/grenade.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/s_spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/zom_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/bolt.mdl", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/laser.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/missile.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/grenade.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/spike.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/s_spike.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/zom_gib.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/player.mdl", 0, FLAG_PLAYER },
 	{ "progs/boss.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/oldone.mdl", 0, FLAG_NOSHADOW },
 
 	// keys and runes do not cast shadows
-	{ "progs/w_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/m_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/b_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/w_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/m_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/b_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/end.mdl", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/w_s_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/m_s_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/b_s_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/w_g_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/m_g_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/b_g_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/end.mdl", 9, FLAG_NOSHADOW },
 
 	// Dissolution of Eternity
-	{ "progs/lavalball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },	
-	{ "progs/beam.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/fireball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/lspike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/plasma.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/sphere.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/statgib.mdl", 13, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/wrthgib.mdl", 13, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/eelgib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/eelhead.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/timegib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/merveup.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/rockup.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/rocket.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/lavalball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },	
+	{ "progs/beam.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/fireball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/lspike.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/plasma.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/sphere.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/statgib.mdl", 13, FLAG_NOSHADOW },
+	{ "progs/wrthgib.mdl", 13, FLAG_NOSHADOW },
+	{ "progs/eelgib.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/eelhead.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/timegib.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/merveup.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/rockup.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/rocket.mdl", 0, FLAG_NOSHADOW },
 
 	// Shrak
-	{ "progs/shelcase.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/flare.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/bone.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/spine.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/spidleg.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/gor1_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/gor2_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/xhairo", 12, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM|FLAG_DOUBLESIZE },
-	{ "progs/bluankey.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/bluplkey.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/gldankey.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/gldplkey.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/chip", 10, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/shelcase.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/flare.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/bone.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/spine.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/spidleg.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/gor1_gib.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/gor2_gib.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/xhairo", 12, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_DOUBLESIZE },
+	{ "progs/bluankey.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/bluplkey.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/gldankey.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/gldplkey.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/chip", 10, FLAG_NOSHADOW },
 
 	// Common
 	{ "progs/v_", 8, FLAG_NOSHADOW|FLAG_NO_IM_FORM },
-	{ "progs/g_", 8, FLAG_NO_IM_ANIM },
-	{ "progs/h_", 8, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/gib", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/eyes.mdl", 0, FLAG_DOUBLESIZE|FLAG_NO_IM_ANIM },
-	{ "progs/armor.mdl", 0, FLAG_NO_IM_ANIM },
+	{ "progs/g_", 8, 0 },
+	{ "progs/h_", 8, FLAG_NOSHADOW },
+	{ "progs/gib", 9, FLAG_NOSHADOW },
+	{ "progs/eyes.mdl", 0, FLAG_DOUBLESIZE },
+	{ "progs/armor.mdl", 0, 0 },
 
 	// end of list
 	{ NULL }
@@ -1156,8 +1155,8 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	posenum = 0;
 	pframetype = (daliasframetype_t *) &pintriangles[pheader->numtris];
 
-	aliasbboxmin[0] = aliasbboxmin[1] = aliasbboxmin[2] = 255;
-	aliasbboxmax[0] = aliasbboxmax[1] = aliasbboxmax[2] = 0;
+	aliasbboxmin[0] = aliasbboxmin[1] = aliasbboxmin[2] = 255.0f;
+	aliasbboxmax[0] = aliasbboxmax[1] = aliasbboxmax[2] = -255.0f;
 
 	for (i = 0; i < numframes; i++) {
 		aliasframetype_t frametype;
@@ -1182,6 +1181,12 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		mod->mins[i] = aliasbboxmin[i] * pheader->scale[i] + pheader->scale_origin[i];
 		mod->maxs[i] = aliasbboxmax[i] * pheader->scale[i] + pheader->scale_origin[i];
 	}
+
+	// Vic: automatically detect models 
+	// that should not be interpolated
+	if (mod->numframes == 1)
+		if (!mod->modflags & FLAG_NO_IM_ANIM)
+			mod->modflags |= FLAG_NO_IM_ANIM;
 
 	// 
 	// build the draw lists

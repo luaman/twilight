@@ -700,7 +700,7 @@ int			posenum;
 Uint8	player_8bit_texels[320 * 200];
 int		player_8bit_width = 296, player_8bit_height = 194;
 
-Uint8	aliasbboxmin[3], aliasbboxmax[3];
+float	aliasbboxmin[3], aliasbboxmax[3];
 
 /*
 =================
@@ -726,9 +726,9 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame)
 		frame->bboxmax.v[i] = pdaliasframe->bboxmax.v[i];
 
 		if (frame->bboxmin.v[i] < aliasbboxmin[i])
-			aliasbboxmin[i] = frame->bboxmin.v[i];
+			aliasbboxmin[i] = (float)frame->bboxmin.v[i];
 		if (frame->bboxmax.v[i] > aliasbboxmax[i])
-			aliasbboxmax[i] = frame->bboxmax.v[i];
+			aliasbboxmax[i] = (float)frame->bboxmax.v[i];
 	}
 
 	pinframe = (trivertx_t *) (pdaliasframe + 1);
@@ -768,9 +768,9 @@ Mod_LoadAliasGroup (void *pin, maliasframedesc_t *frame)
 		frame->bboxmax.v[i] = pingroup->bboxmax.v[i];
 
 		if (frame->bboxmin.v[i] < aliasbboxmin[i])
-			aliasbboxmin[i] = frame->bboxmin.v[i];
+			aliasbboxmin[i] = (float)frame->bboxmin.v[i];
 		if (frame->bboxmax.v[i] > aliasbboxmax[i])
-			aliasbboxmax[i] = frame->bboxmax.v[i];
+			aliasbboxmax[i] = (float)frame->bboxmax.v[i];
 	}
 
 	pin_intervals = (daliasinterval_t *) (pingroup + 1);
@@ -979,33 +979,33 @@ mflags_t modelflags[] =
 	{ "progs/flame.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_TORCH1 },
 	{ "progs/flame2.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_TORCH2 },
 	{ "progs/fire.mdl", 0, FLAG_NOSHADOW },
-	{ "progs/bolt.mdl", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/laser.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/gib", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/missile.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/grenade.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/s_spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/zom_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/bolt.mdl", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/laser.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/gib", 9, FLAG_NOSHADOW },
+	{ "progs/missile.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/grenade.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/spike.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/s_spike.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/zom_gib.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/player.mdl", 0, FLAG_PLAYER },
-	{ "progs/v_spike.mdl", 0, FLAG_NO_IM_ANIM|FLAG_NO_IM_FORM },
+	{ "progs/v_spike.mdl", 0, FLAG_NO_IM_FORM },
 	{ "progs/boss.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/oldone.mdl", 0, FLAG_NOSHADOW },
 
 	// keys and runes do not cast shadows
-	{ "progs/w_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/m_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/b_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/w_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/m_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/b_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/end.mdl", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/w_s_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/m_s_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/b_s_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/w_g_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/m_g_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/b_g_key.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/end.mdl", 9, FLAG_NOSHADOW },
 
 	// Common
 	{ "progs/v_", 8, FLAG_NOSHADOW|FLAG_NO_IM_FORM },
-	{ "progs/eyes.mdl", 0, FLAG_DOUBLESIZE|FLAG_NO_IM_ANIM },
-	{ "progs/armor.mdl", 0, FLAG_NO_IM_ANIM },
-	{ "progs/g_", 8, FLAG_NO_IM_ANIM },
+	{ "progs/eyes.mdl", 0, FLAG_DOUBLESIZE },
+	{ "progs/armor.mdl", 0, 0 },
+	{ "progs/g_", 8, 0 },
 
 	// end of list
 	{ NULL }
@@ -1200,6 +1200,12 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		mod->mins[i] = aliasbboxmin[i] * pheader->scale[i] + pheader->scale_origin[i];
 		mod->maxs[i] = aliasbboxmax[i] * pheader->scale[i] + pheader->scale_origin[i];
 	}
+
+	// Vic: automatically detect models 
+	// that should not be interpolated
+	if (mod->numframes == 1)
+		if (!mod->modflags & FLAG_NO_IM_ANIM)
+			mod->modflags |= FLAG_NO_IM_ANIM;
 
 	// 
 	// build the draw lists
