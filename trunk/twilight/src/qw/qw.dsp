@@ -156,6 +156,10 @@ SOURCE=.\gl_draw.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\gl_funcs.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\gl_mesh.c
 # End Source File
 # Begin Source File
@@ -324,7 +328,7 @@ SOURCE=.\crc.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cvar.h
+SOURCE=..\include\cvar.h
 # End Source File
 # Begin Source File
 
@@ -384,6 +388,10 @@ SOURCE=.\protocol.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\qtypes.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\quakeasm.h
 # End Source File
 # Begin Source File
@@ -416,6 +424,22 @@ SOURCE=.\sys.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\TGL_defines.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\TGL_funcs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\TGL_funcs_list.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\TGL_types.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\vid.h
 # End Source File
 # Begin Source File
@@ -428,7 +452,7 @@ SOURCE=.\wad.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32config.h
+SOURCE=..\include\win32conf.h
 # End Source File
 # Begin Source File
 
