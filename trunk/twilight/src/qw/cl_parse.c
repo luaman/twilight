@@ -212,7 +212,7 @@ CL_CheckOrDownloadFile (char *filename)
 	return false;
 }
 
-model_t *mdl_fire = NULL;
+model_t *mdl_torch = NULL;
 
 static void
 Model_NextDownload (void)
@@ -262,8 +262,8 @@ Model_NextDownload (void)
 		}
 
 		if (!strcasecmp (cl.model_precache[i]->name, "progs/flame.mdl"))
-			if (!mdl_fire)
-				mdl_fire = Mod_ForName ("progs/fire.mdl", FLAG_RENDER);		
+			if (!mdl_torch)
+				mdl_torch = Mod_ForName ("progs/torch.mdl", FLAG_RENDER);		
 	}
 
 	// all done

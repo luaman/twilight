@@ -52,7 +52,7 @@
 # include "sdlstub.h"
 #endif
 
-#ifndef __FUNCTION__
+#ifndef __GNUC__
 #define __FUNCTION__	"Not A Clue!"
 #endif
 

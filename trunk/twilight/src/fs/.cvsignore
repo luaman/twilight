@@ -1,7 +1,6 @@
 Makefile
 Makefile.in
 .*.swp
-embedded_data.h
 .deps
 Debug
 Release
