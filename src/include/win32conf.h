@@ -8,7 +8,8 @@
 
 #define SHAREPATH ""
 
-#define APIENTRY __stdcall
+// This is done by win32, we don't need to do it
+//define APIENTRY __stdcall
 
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
