@@ -112,7 +112,7 @@ int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
 
 int		gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
-int		gl_filter_max = GL_LINEAR;
+int		gl_filter_mag = GL_LINEAR;
 
 
 int		texels;
@@ -219,7 +219,7 @@ Draw_CachePic (char *path)
 
 typedef struct {
 	char       *name;
-	int         minimize, maximize;
+	int         minimize, magnify;
 } glmode_t;
 
 glmode_t    modes[] = {
@@ -256,7 +256,7 @@ Set_TextureMode_f (struct cvar_s *var)
 	}
 
 	gl_filter_min = modes[i].minimize;
-	gl_filter_max = modes[i].maximize;
+	gl_filter_mag = modes[i].magnify;
 
 	/* change all the existing mipmap texture objects */
 	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
@@ -265,7 +265,7 @@ Set_TextureMode_f (struct cvar_s *var)
 			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 					gl_filter_min);
 			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-					gl_filter_max);
+					gl_filter_mag);
 		}
 	}
 }
@@ -665,8 +665,8 @@ Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
 		}
 	}
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_mag);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 64, 64, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, trans);
 
@@ -1124,22 +1124,26 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 	static Uint32	scaled[1024 * 512];	/* [512*256]; */
 	Uint32			scaled_width, scaled_height;
 
-	for (scaled_width = 1; scaled_width < width; scaled_width <<= 1);
-	for (scaled_height = 1; scaled_height < height; scaled_height <<= 1);
+	// OpenGL textures are power of two
+	scaled_width = 1;
+	while (scaled_width < width)
+		scaled_width <<= 1;
 
+	scaled_height = 1;
+	while (scaled_height < height)
+		scaled_height <<= 1;
+
+	// Apply gl_picmip, a setting of one cuts texture memory usage 75%!
 	scaled_width >>= (int) gl_picmip->value;
 	scaled_height >>= (int) gl_picmip->value;
 
-	// and also clip them to gl_max_size
-	scaled_width = min (scaled_width, gl_max_size->value);
-	scaled_height = min (scaled_height, gl_max_size->value);
-
-	// don't allow 0x0 textures, they don't work well.
-	scaled_width = max (scaled_width, 1);
-	scaled_height = max (scaled_height, 1);
+	// Clip textures to a sane value
+	scaled_width = bound (1, scaled_width, gl_max_size->value);
+	scaled_height = bound (1, scaled_height, gl_max_size->value);
 
 	if (scaled_width * scaled_height > sizeof (scaled) / 4)
-		Sys_Error ("GL_LoadTexture: too big");
+		Sys_Error ("GL_Upload32: cannot upload, %ix%i is too big",
+				scaled_width, scaled_height);
 
 	samples = alpha ? gl_alpha_format : gl_solid_format;
 
@@ -1153,9 +1157,9 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 					scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-					gl_filter_max);
+					gl_filter_mag);
 			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-					gl_filter_max);
+					gl_filter_mag);
 		}
 		memcpy (scaled, data, width * height * 4);
 	} else
@@ -1186,10 +1190,10 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 	if (mipmap)
 	{
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
 	} else {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_mag);
+		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
 	}
 }
 

@@ -121,8 +121,8 @@ R_NetGraph (void)
 				  NET_TIMINGS, NET_GRAPHHEIGHT, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, ngraph_pixels);
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_mag);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
 
 	x = 8;
 	VectorSet2 (tc_array[0], 0, 0);
