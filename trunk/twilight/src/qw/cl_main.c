@@ -29,6 +29,7 @@ static const char rcsid[] =
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>	/* for free() */
 #include <setjmp.h>  // FIXME: REMOVE THIS EVIL SHIT!
 
 #include "SDL.h"
