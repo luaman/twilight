@@ -64,6 +64,19 @@ CL_ScanForBModels (void)
 	}
 }
 
+void
+CL_Update_Matrices (entity_t *ent)
+{
+	Matrix4x4_CreateFromQuakeEntity(&ent->matrix, ent->origin, ent->angles, 1);
+	if (ent->model && ent->model->alias)
+	{
+		aliashdr_t	*alias = ent->model->alias;
+		Matrix4x4_ConcatTranslate(&ent->matrix, alias->scale_origin);
+		Matrix4x4_ConcatScale3(&ent->matrix, alias->scale);
+	}
+	Matrix4x4_Invert_Simple(&ent->invmatrix, &ent->matrix);
+}
+
 qboolean
 CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time)
 {
@@ -108,16 +121,7 @@ CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time)
 			ent->angles[PITCH] = -ent->angles[PITCH];
 
 		if (!ent->lerping)
-		{
-			Matrix4x4_CreateFromQuakeEntity(&ent->matrix, ent->origin, ent->angles, 1);
-			if (ent->model && ent->model->alias)
-			{
-				aliashdr_t	*alias = ent->model->alias;
-				Matrix4x4_ConcatTranslate(&ent->matrix, alias->scale_origin);
-				Matrix4x4_ConcatScale3(&ent->matrix, alias->scale);
-			}
-			Matrix4x4_Invert_Simple(&ent->invmatrix, &ent->matrix);
-		}
+			CL_Update_Matrices (ent);
 	}
 
 	return changed;
@@ -151,14 +155,7 @@ CL_Lerp_OriginAngles (entity_t *ent)
 		if (ent->model && ent->model->alias)
 			ent->angles[PITCH] = -ent->angles[PITCH];
 
-		Matrix4x4_CreateFromQuakeEntity(&ent->matrix, ent->origin, ent->angles, 1);
-		if (ent->model && ent->model->alias)
-		{
-			aliashdr_t	*alias = ent->model->alias;
-			Matrix4x4_ConcatTranslate(&ent->matrix, alias->scale_origin);
-			Matrix4x4_ConcatScale3(&ent->matrix, alias->scale);
-		}
-		Matrix4x4_Invert_Simple(&ent->invmatrix, &ent->matrix);
+		CL_Update_Matrices (ent);
 	}
 }
 
