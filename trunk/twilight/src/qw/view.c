@@ -158,7 +158,7 @@ V_CalcBob (void)
 	vel = cl.frames[(cls.netchan.incoming_sequence)&UPDATE_MASK].playerstate[cl.playernum].velocity;
 
 	bob = VectorLength2(vel) * cl_bob->value;
-	bob = bob * 0.3 + bob * 0.7 * Q_sin (cycle);
+	bob = bob * (0.3 + 0.7 * Q_sin (cycle));
 	bob = bound(-7, bob, 4);
 
 	return bob;
@@ -428,13 +428,8 @@ V_CalcBlend
 void
 V_CalcBlend (void)
 {
-	float	r, g, b, a, a2;
+	float	r = 0, g = 0, b = 0, a = 0, a2;
 	int		j;
-
-	r = 0;
-	g = 0;
-	b = 0;
-	a = 0;
 
 	if (gl_cshiftpercent->value) {
 		for (j = 0; j < NUM_CSHIFTS; j++)	 {
@@ -474,20 +469,15 @@ void
 V_UpdatePalette (void)
 {
 	int			i, j;
-	qboolean	new;
 
 	V_CalcPowerupCshift();
 
-	new = false;
-
 	for (i = 0; i < NUM_CSHIFTS; i++) {
 		if (cl.cshifts[i].percent != cl.prev_cshifts[i].percent) {
-			new = true;
 			cl.prev_cshifts[i].percent = cl.cshifts[i].percent;
 		}
 		for (j = 0; j < 3; j++)
 			if (cl.cshifts[i].destcolor[j] != cl.prev_cshifts[i].destcolor[j]) {
-				new = true;
 				cl.prev_cshifts[i].destcolor[j] = cl.cshifts[i].destcolor[j];
 			}
 	}
@@ -524,47 +514,14 @@ angledelta (float a)
 
 /*
 ==================
-CalcGunAngle
+V_CalcGunAngle
 ==================
 */
 void
-CalcGunAngle (void)
+V_CalcGunAngle (void)
 {
-	float			yaw, pitch, move;
-	static float	oldyaw = 0;
-	static float	oldpitch = 0;
-
-	yaw = r_refdef.viewangles[YAW];
-	pitch = -r_refdef.viewangles[PITCH];
-
-	yaw = angledelta (yaw - r_refdef.viewangles[YAW]) * 0.4;
-	yaw = bound (-10, yaw, 10);
-
-	pitch = angledelta (-pitch - r_refdef.viewangles[PITCH]) * 0.4;
-	pitch = bound (-10, pitch, 10);
-
-	move = host_frametime * 20;
-	if (yaw > oldyaw) {
-		if (oldyaw + move < yaw)
-			yaw = oldyaw + move;
-	} else {
-		if (oldyaw - move > yaw)
-			yaw = oldyaw - move;
-	}
-
-	if (pitch > oldpitch) {
-		if (oldpitch + move < pitch)
-			pitch = oldpitch + move;
-	} else {
-		if (oldpitch - move > pitch)
-			pitch = oldpitch - move;
-	}
-
-	oldyaw = yaw;
-	oldpitch = pitch;
-
-	cl.viewent.cur.angles[YAW] = r_refdef.viewangles[YAW] + yaw;
-	cl.viewent.cur.angles[PITCH] = -(r_refdef.viewangles[PITCH] + pitch);
+	cl.viewent.cur.angles[YAW] = r_refdef.viewangles[YAW];
+	cl.viewent.cur.angles[PITCH] = -r_refdef.viewangles[PITCH];
 }
 
 /*
@@ -637,7 +594,6 @@ V_CalcViewRoll (void)
 		r_refdef.viewangles[PITCH] += v_dmg_time / v_kicktime->value * v_dmg_pitch;
 		v_dmg_time -= host_frametime;
 	}
-
 }
 
 /*
@@ -694,10 +650,6 @@ V_CalcRefdef (void)
 
 	r_refdef.vieworg[2] += bob;
 
-
-
-
-
 	/* never let it sit exactly on a node line, because a water plane can
 	   dissapear when viewed with the eye exactly on it.
 	   the server protocol only specifies to 1/8 pixel, so add 1/16 in each axis */
@@ -726,7 +678,7 @@ V_CalcRefdef (void)
 	/* set up gun position */
 	VectorCopy (cl.simangles, view->cur.angles);
 
-	CalcGunAngle();
+	V_CalcGunAngle();
 
 	VectorCopy (cl.simorg, view->cur.origin);
 	view->cur.origin[2] += 22;
@@ -793,8 +745,6 @@ extern vrect_t scr_vrect;
 void
 V_RenderView (void)
 {
-//  if (cl.simangles[ROLL])
-//      Sys_Error ("cl.simangles[ROLL]");   // DEBUG
 	cl.simangles[ROLL] = 0;				// FIXME @@@ 
 
 	if (cls.state != ca_active)
