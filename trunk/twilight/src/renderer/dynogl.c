@@ -58,11 +58,11 @@ static const char rcsid[] =
 #undef OGL_NEED
 
 
-void
+void OGLDECL
 WRAP_glDrawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count,
 		GLenum type, const GLvoid *indices)
 {
-	return qglDrawElements (mode, count, type, indices);
+	qglDrawElements (mode, count, type, indices);
 }
 
 #define DYNGL_ERROR_SIZE 2048
