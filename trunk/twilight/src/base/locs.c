@@ -35,6 +35,8 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "zone.h"
 #include "sys.h"
+#include "fs.h"
+#include "rw_ops.h"
 
 #define LOC_BSIZE	128
 
@@ -206,27 +208,30 @@ loc_newmap (const char *worldname)
 void
 loc_write (const char *worldname)
 {
-	char	*name;
-	FILE	*f;
-	int		i;
+	char		*name;
+	fs_file_t	*file;
+	SDL_RWops	*rw = NULL;
+	int			i;
 
 	name = loc_locfile (worldname);
-	f = fopen(va("%s/%s", com_gamedir, name), "w");
-	if (!f) {
-		Sys_mkdir (com_gamedir);
-		f = fopen(va("%s/%s", com_gamedir, name), "w");
-		if (!f) {
-			free (name);
-			Sys_Error ("Error opening %s/%s for writing loc file.",
-					com_gamedir, name);
-		}
+	if ((file = FS_FindFile (name)))
+		rw = file->open(file, FSF_WRITE);
+
+	if (!rw)
+		rw = FS_Open_New (name);
+
+	if (!rw)
+	{
+		Com_Printf ("Error opening %s for writing loc file.", name);
+		free (name);
+		return;
 	}
 	free (name);
 
 	for (i = 0; i < num_locs; i++)
-		fprintf(f, "%d %d %d %s\n", (int) locs[i]->where[0] * 8,
+		RWprintf(rw, "%d %d %d %s\n", (int) locs[i]->where[0] * 8,
 				(int) locs[i]->where[1] * 8, (int) locs[i]->where[2] * 8,
 				locs[i]->name);
 
-	fclose (f);
+	SDL_RWclose (rw);
 }
