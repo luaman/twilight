@@ -51,25 +51,25 @@ static const char rcsid[] =
 #include "sys.h"
 #include "world.h"
 
-edict_t    *sv_player;
+edict_t			*sv_player;
 
-usercmd_t   cmd;
+usercmd_t		cmd;
 
-cvar_t     *cl_rollspeed;
-cvar_t     *cl_rollangle;
-cvar_t     *sv_spectalk;
+cvar_t			*cl_rollspeed;
+cvar_t			*cl_rollangle;
+cvar_t			*sv_spectalk;
 
-cvar_t     *sv_timekick;
-cvar_t     *sv_timekick_allowed;
-cvar_t     *sv_timekick_interval;
+cvar_t			*sv_timekick;
+cvar_t			*sv_timekick_allowed;
+cvar_t			*sv_timekick_interval;
 
-cvar_t     *sv_mapcheck;
+cvar_t			*sv_mapcheck;
 
-extern vec3_t player_mins;
+extern vec3_t	player_mins;
 
-extern int  fp_messages, fp_persecond, fp_secondsdead;
-extern char fp_msg[];
-extern cvar_t pausable;
+extern int		fp_messages, fp_persecond, fp_secondsdead;
+extern char		fp_msg[];
+extern cvar_t	pausable;
 
 /*
 ============================================================

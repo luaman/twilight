@@ -36,28 +36,28 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 
-edict_t    *sv_player;
+edict_t			*sv_player;
 
-extern cvar_t *sv_friction;
-cvar_t     *sv_edgefriction;
-cvar_t     *sv_idealpitchscale;
-cvar_t     *sv_maxspeed;
-cvar_t     *sv_accelerate;
-extern cvar_t *sv_stopspeed;
+extern cvar_t	*sv_friction;
+cvar_t			*sv_edgefriction;
+cvar_t			*sv_idealpitchscale;
+cvar_t			*sv_maxspeed;
+cvar_t			*sv_accelerate;
+extern cvar_t	*sv_stopspeed;
 
 static vec3_t forward, right, up;
 
-vec3_t      wishdir;
-float       wishspeed;
+vec3_t		wishdir;
+float		wishspeed;
 
 // world
-float      *angles;
-float      *origin;
-float      *velocity;
+float		*angles;
+float		*origin;
+float		*velocity;
 
-qboolean    onground;
+qboolean	onground;
 
-usercmd_t   cmd;
+usercmd_t	cmd;
 
 
 /*

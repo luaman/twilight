@@ -1001,8 +1001,8 @@ M_Options_Draw (void)
 
 	M_Print (16, y, "           Screen size"); M_DrawSlider (220, y, (scr_viewsize->value - 30) / (120 - 30)); y += 8;
 	M_Print (16, y, "        Hardware Gamma"); M_DrawSlider (220, y, v_gamma->value - 1.0); y += 8;
-	M_Print (16, y, "   Software Brightness"); M_DrawSlider(220, y, (r_brightness->value - 1) / 4); y += 8;
-	M_Print (16, y, "     Software Contrast"); M_DrawSlider(220, y, (r_contrast->value - 0.75) * 4); y += 8;
+	M_Print (16, y, "   Software Brightness"); M_DrawSlider (220, y, (r_brightness->value - 1) / 4); y += 8;
+	M_Print (16, y, "     Software Contrast"); M_DrawSlider (220, y, (r_contrast->value - 0.75) * 4); y += 8;
 	M_Print (16, y, "           Mouse Speed"); M_DrawSlider (220, y, (sensitivity->value - 1) / 10); y += 8;
 	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->value); y += 8;
 	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->value); y += 8;

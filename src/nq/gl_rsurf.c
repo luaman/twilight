@@ -1566,8 +1566,7 @@ GL_BuildLightmaps (void)
 				lightmap_bytes = 4;
 			}
 		}
-	}
-	else {
+	} else {
 		gl_lightmap_format = GL_LUMINANCE;
 		lightmap_bytes = 1;
 		colorlights = false;
