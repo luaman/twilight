@@ -82,7 +82,7 @@ Con_ToggleConsole_f (void)
 
 	if (key_dest == key_console)
 	{
-		if (cls.state == ca_active)
+		if (ccl.state == ca_active)
 			key_dest = key_game;
 	}
 	else
@@ -325,7 +325,7 @@ Con_DrawInput (void)
 {
 	char		*text;
 
-	if (key_dest != key_console && cls.state == ca_active)
+	if (key_dest != key_console && ccl.state == ca_active)
 		// don't draw anything (always draw if not active)
 		return;
 

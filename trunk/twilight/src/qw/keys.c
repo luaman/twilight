@@ -217,7 +217,7 @@ Key_Console (int key)
 	{
 		if (key_lines[edit_line][1] == '\\' || key_lines[edit_line][1] == '/')
 			Cbuf_AddText (key_lines[edit_line] + 2);	// skip the >
-		else if (cl_chatmode->ivalue && cls.state >= ca_connected)
+		else if (cl_chatmode->ivalue && ccl.state >= ca_connected)
 		{
 			if (CheckForCommand ())
 				Cbuf_AddText (key_lines[edit_line] + 1);
@@ -234,7 +234,7 @@ Key_Console (int key)
 		edit_line = (edit_line + 1) & 31;
 		history_line = edit_line;
 		Key_ClearEditLine (edit_line);
-		if (cls.state == ca_disconnected)
+		if (ccl.state == ca_disconnected)
 		{
 			// Make sure the user's command is printed
 			SCR_UpdateScreen ();
@@ -921,7 +921,7 @@ Key_Event (int key, qboolean down)
 	if ((key_dest == key_menu && menubound[key])
 		|| (key_dest == key_console && !consolekeys[key])
 		|| (key_dest == key_game
-			&& (cls.state == ca_active || !consolekeys[key]))) {
+			&& (ccl.state == ca_active || !consolekeys[key]))) {
 		if (!(kb = keybindings[key_bmap][key]))
 			kb = keybindings[key_bmap2][key];
 		if (kb) {

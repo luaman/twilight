@@ -728,10 +728,10 @@ NET_Init (void)
 	}
 	net_hostport = DEFAULTnet_hostport;
 
-	if (COM_CheckParm ("-listen") || cls.state == ca_dedicated)
+	if (COM_CheckParm ("-listen") || ccl.state == ca_dedicated)
 		listening = true;
 	net_numsockets = svs.maxclientslimit;
-	if (cls.state != ca_dedicated)
+	if (ccl.state != ca_dedicated)
 		net_numsockets++;
 
 	SetNetTime ();

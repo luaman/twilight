@@ -123,7 +123,7 @@ Host_EndGame (char *message, ...)
 	if (sv.active)
 		Host_ShutdownServer (false);
 
-	if (cls.state == ca_dedicated)
+	if (ccl.state == ca_dedicated)
 		Sys_Error ("Host_EndGame: %s\n", string);	// dedicated servers exit
 
 	if (cls.demonum != -1)
@@ -162,7 +162,7 @@ Host_Error (char *error, ...)
 	if (sv.active)
 		Host_ShutdownServer (false);
 
-	if (cls.state == ca_dedicated)
+	if (ccl.state == ca_dedicated)
 		Sys_Error ("Host_Error: %s\n", string);	// dedicated servers exit
 
 	CL_Disconnect ();
@@ -187,21 +187,21 @@ Host_FindMaxClients (void)
 
 	i = COM_CheckParm ("-dedicated");
 	if (i) {
-		cls.state = ca_dedicated;
+		ccl.state = ca_dedicated;
 		isDedicated = true;
 		if (i != (com_argc - 1)) {
 			svs.maxclients = Q_atoi (com_argv[i + 1]);
 		} else
 			svs.maxclients = 16;
 	} else {
-		cls.state = ca_disconnected;
+		ccl.state = ca_disconnected;
 		r_worldmodel = NULL;
 		isDedicated = false;
 	}
 
 	i = COM_CheckParm ("-listen");
 	if (i) {
-		if (cls.state == ca_dedicated)
+		if (ccl.state == ca_dedicated)
 			Sys_Error ("Only one of -dedicated or -listen can be specified");
 		if (i != (com_argc - 1))
 			svs.maxclients = Q_atoi (com_argv[i + 1]);
@@ -453,7 +453,7 @@ Host_ShutdownServer (qboolean crash)
 	sv.active = false;
 
 // stop all client sounds immediately
-	if (cls.state == ca_connected)
+	if (ccl.state == ca_connected)
 		CL_Disconnect ();
 
 // flush any pending messages - like the score!!!
@@ -698,9 +698,9 @@ _Host_Frame (double time)
 	host_time += host_frametime;
 
 // fetch results from server
-	if (cls.state == ca_connected) {
+	if (ccl.state >= ca_connected)
 		CL_ReadFromServer ();
-	}
+
 // update video
 	if (host_speeds->ivalue)
 		time1 = Sys_DoubleTime ();
@@ -711,7 +711,7 @@ _Host_Frame (double time)
 		time2 = Sys_DoubleTime ();
 
 // update audio
-	if (cls.signon == SIGNONS) {
+	if (ccl.state == ca_active) {
 		S_Update (r_origin, vpn, vright, vup);
 		CL_DecayLights ();
 	} else
@@ -850,7 +850,7 @@ Host_Init ()
 
 //	Com_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
 
-	if (cls.state != ca_dedicated) {
+	if (ccl.state != ca_dedicated) {
 		host_basepal = COM_LoadNamedFile ("gfx/palette.lmp", true);
 		if (!host_basepal)
 			Sys_Error ("Couldn't load gfx/palette.lmp");
@@ -908,8 +908,7 @@ Host_Shutdown (void)
 	S_Shutdown ();
 	IN_Shutdown ();
 
-	if (cls.state != ca_dedicated) {
+	if (ccl.state != ca_dedicated)
 		VID_Shutdown ();
-	}
 }
 

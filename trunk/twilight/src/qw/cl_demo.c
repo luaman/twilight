@@ -65,7 +65,7 @@ CL_StopPlayback (void)
 
 	fclose (cls.demofile);
 	cls.demofile = NULL;
-	cls.state = ca_disconnected;
+	ccl.state = ca_disconnected;
 	cls.demoplayback = 0;
 
 	if (cls.timedemo)
@@ -180,12 +180,12 @@ CL_GetDemoMessage (void)
 				   SEEK_SET);
 			return 0;					// already read this frame's message
 		}
-		if (!cls.td_starttime && cls.state == ca_active) {
+		if (!cls.td_starttime && ccl.state == ca_active) {
 			cls.td_starttime = Sys_DoubleTime ();
 			cls.td_startframe = host_framecount;
 		}
 		cls.realtime = demotime;			// warp
-	} else if (!cl.paused && cls.state >= ca_onserver) {
+	} else if (!cl.paused && ccl.state >= ca_onserver) {
 		// always grab until fully connected
 		if (cls.realtime + 1.0 < demotime) {
 			// too far back
@@ -203,8 +203,8 @@ CL_GetDemoMessage (void)
 	} else
 		cls.realtime = demotime;	// we're warping
 
-	if (cls.state < ca_demostart)
-		Host_Error ("CL_GetDemoMessage: cls.state != ca_active");
+	if (ccl.state < ca_demostart)
+		Host_Error ("CL_GetDemoMessage: ccl.state != ca_active");
 
 	// get the msg type
 	fread (&c, sizeof (c), 1, cls.demofile);
@@ -399,7 +399,7 @@ CL_Record_f (void)
 		return;
 	}
 
-	if (cls.state != ca_active) {
+	if (ccl.state != ca_active) {
 		Com_Printf ("You must be connected to record.\n");
 		return;
 	}
@@ -719,7 +719,7 @@ CL_PlayDemo_f (void)
 	}
 
 	cls.demoplayback = true;
-	cls.state = ca_demostart;
+	ccl.state = ca_demostart;
 	Netchan_Setup (NS_CLIENT, &cls.netchan, net_from, 0);
 	cls.realtime = 0;
 }
@@ -763,7 +763,7 @@ CL_TimeDemo_f (void)
 
 	CL_PlayDemo_f ();
 
-	if (cls.state != ca_demostart)
+	if (ccl.state != ca_demostart)
 		return;
 
 	// cls.td_starttime will be grabbed at the second frame of the demo, so

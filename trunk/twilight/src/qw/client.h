@@ -109,19 +109,6 @@ typedef struct {
 #define	MAX_DEMONAME	16
 
 typedef enum {
-	// full screen console with no connection
-	ca_disconnected,
-	// starting up a demo
-	ca_demostart,
-	// netchan_t established, waiting for svc_serverdata
-	ca_connected,
-	// processing data lists, donwloading, etc
-	ca_onserver,
-	// everything is in, so frames can be rendered
-	ca_active
-} cactive_t;
-
-typedef enum {
 	dl_none,
 	dl_model,
 	dl_sound,
@@ -135,9 +122,6 @@ typedef enum {
  * of server connections
  */
 typedef struct {
-	// connection information
-	cactive_t	state;
-
 	// network stuff
 	netchan_t	netchan;
 

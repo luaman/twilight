@@ -675,9 +675,7 @@ SCR_BeginLoadingPlaque (void)
 {
 	S_StopAllSounds (true);
 
-	if (cls.state != ca_connected)
-		return;
-	if (cls.signon != SIGNONS)
+	if (ccl.state != ca_active)
 		return;
 
 	/* redraw with no console and the loading plaque */

@@ -980,7 +980,7 @@ SV_SendReconnect (void)
 	MSG_WriteString (&msg, "reconnect\n");
 	NET_SendToAll (&msg, 5);
 
-	if (cls.state != ca_dedicated)
+	if (ccl.state != ca_dedicated)
 		Cmd_ExecuteString ("reconnect\n", src_command);
 }
 

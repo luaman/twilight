@@ -330,8 +330,8 @@ CL_ParsePacketEntities (qboolean delta)
 
 	// first update is the final signon stage
 	if ((cl.validsequence = cls.netchan.incoming_sequence) &&
-			cls.state == ca_onserver) {		
-		cls.state = ca_active;
+			ccl.state == ca_onserver) {		
+		ccl.state = ca_active;
 		SDL_WM_SetCaption (va("Twilight QWCL: %s", cls.servername),
 				"Twilight QWCL");
 	}
@@ -1184,7 +1184,7 @@ Made up of: clients, packet_entities, nails, and tents
 void
 CL_EmitEntities (void)
 {
-	if (cls.state != ca_active)
+	if (ccl.state != ca_active)
 		return;
 
 	if (!cl.validsequence)

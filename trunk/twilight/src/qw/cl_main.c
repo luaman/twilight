@@ -205,7 +205,7 @@ CL_SendConnectPacket (int challenge)
 //       Now, adds lookup time to the connect time.
 //       Should I add it to realtime instead?!?!
 
-	if (cls.state != ca_disconnected)
+	if (ccl.state != ca_disconnected)
 		return;
 
 	t1 = Sys_DoubleTime ();
@@ -251,7 +251,7 @@ CL_CheckForResend (void)
 
 	if (connect_time == -1)
 		return;
-	if (cls.state != ca_disconnected)
+	if (ccl.state != ca_disconnected)
 		return;
 	if (connect_time && cls.realtime - connect_time < 5.0)
 		return;
@@ -344,7 +344,7 @@ CL_Rcon_f (void)
 		strcat (message, " ");
 	}
 
-	if (cls.state >= ca_connected)
+	if (ccl.state >= ca_connected)
 		to = cls.netchan.remote_address;
 	else {
 		if (!strlen (rcon_address->svalue)) {
@@ -422,7 +422,7 @@ CL_Disconnect (void)
 // if running a local server, shut it down
 	if (cls.demoplayback)
 		CL_StopPlayback ();
-	else if (cls.state != ca_disconnected) {
+	else if (ccl.state != ca_disconnected) {
 		if (cls.demorecording)
 			CL_Stop_f ();
 
@@ -432,7 +432,7 @@ CL_Disconnect (void)
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
 
-		cls.state = ca_disconnected;
+		ccl.state = ca_disconnected;
 
 		cls.demoplayback = cls.demorecording = cls.timedemo = false;
 	}
@@ -658,7 +658,7 @@ CL_SetInfo_f (void)
 
 	Info_SetValueForKey (cls.userinfo, Cmd_Argv (1), Cmd_Argv (2),
 						 MAX_INFO_STRING);
-	if (cls.state >= ca_connected)
+	if (ccl.state >= ca_connected)
 		Cmd_ForwardToServer ();
 }
 
@@ -753,7 +753,7 @@ CL_Changing_f (void)
 
 	S_StopAllSounds (true);
 	ccl.intermission = 0;
-	cls.state = ca_connected;			// not active anymore, but not
+	ccl.state = ca_connected;			// not active anymore, but not
 	// disconnected
 	Com_Printf ("\nChanging map...\n");
 }
@@ -774,7 +774,7 @@ CL_Reconnect_f (void)
 
 	S_StopAllSounds (true);
 
-	if (cls.state == ca_connected) {
+	if (ccl.state == ca_connected) {
 		Com_Printf ("reconnecting...\n");
 		MSG_WriteChar (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message, "new");
@@ -814,7 +814,7 @@ CL_ConnectionlessPacket (void)
 	switch (c) {
 		case S2C_CONNECTION:
 			Com_Printf ("connection\n");
-			if (cls.state >= ca_connected) {
+			if (ccl.state >= ca_connected) {
 				if (!cls.demoplayback)
 					Com_Printf ("Dup connect received.  Ignored.\n");
 				return;
@@ -822,7 +822,7 @@ CL_ConnectionlessPacket (void)
 			Netchan_Setup (NS_CLIENT, &cls.netchan, net_from, cls.qport);
 			MSG_WriteChar (&cls.netchan.message, clc_stringcmd);
 			MSG_WriteString (&cls.netchan.message, "new");
-			cls.state = ca_connected;
+			ccl.state = ca_connected;
 			Com_Printf ("Connected.\n");
 			allowremotecmd = false;		// localid required now for remote cmds
 			return;
@@ -934,7 +934,7 @@ CL_ReadPackets (void)
 	// 
 	// check timeout
 	// 
-	if (cls.state >= ca_connected
+	if (ccl.state >= ca_connected
 		&& cls.realtime - cls.netchan.last_received > cl_timeout->fvalue) {
 		Com_Printf ("\nServer connection timed out. (%f %f %f)\n", cls.realtime,
 				cls.netchan.last_received, cl_timeout->fvalue);
@@ -955,7 +955,7 @@ CL_Download_f (void)
 {
 	char       *p, *q;
 
-	if (cls.state == ca_disconnected) {
+	if (ccl.state == ca_disconnected) {
 		Com_Printf ("Must be connected.\n");
 		return;
 	}
@@ -1010,7 +1010,7 @@ so when they are typed in at the console, they will need to be forwarded.
 void
 Cmd_ForwardToServer (void)
 {
-	if (cls.state == ca_disconnected) {
+	if (ccl.state == ca_disconnected) {
 		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
 		return;
 	}
@@ -1030,7 +1030,7 @@ Cmd_ForwardToServer (void)
 static void
 Cmd_ForwardToServer_f (void)
 {
-	if (cls.state == ca_disconnected) {
+	if (ccl.state == ca_disconnected) {
 		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
 		return;
 	}
@@ -1054,7 +1054,7 @@ Cmd_Say_f (void)
 {
 	char	*s;
 
-	if (cls.state == ca_disconnected) {
+	if (ccl.state == ca_disconnected) {
 		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
 		return;
 	}
@@ -1146,7 +1146,7 @@ CL_Init (void)
 	ccl.max_users = MAX_CLIENTS;
 	ccl.users = Zone_Alloc(ccl_zone, sizeof(*ccl.users) * ccl.max_users);
 
-	cls.state = ca_disconnected;
+	ccl.state = ca_disconnected;
 	r_worldmodel = NULL;
 
 	Info_SetValueForKey (cls.userinfo, "name", "unnamed", MAX_INFO_STRING);
@@ -1374,12 +1374,12 @@ Host_Frame (double time)
 
 	// send intentions now
 	// resend a connection request if necessary
-	if (cls.state == ca_disconnected) {
+	if (ccl.state == ca_disconnected) {
 		CL_CheckForResend ();
 	} else
 		CL_SendCmd ();
 
-	if (cls.state == ca_active) {
+	if (ccl.state == ca_active) {
 
 		// Set players solid.
 		CL_SetSolidPlayers ();
@@ -1401,7 +1401,7 @@ Host_Frame (double time)
 		time2 = Sys_DoubleTime ();
 
 	// update audio
-	if (cls.state == ca_active) {
+	if (ccl.state == ca_active) {
 		S_Update (r_origin, vpn, vright, vup);
 		CL_DecayLights ();
 	} else
@@ -1448,7 +1448,7 @@ Host_CvarUserinfo (cvar_t *var)
 	{
 		Info_SetValueForKey (cls.userinfo, var->name, var->svalue,
 				MAX_INFO_STRING);
-		if (cls.state >= ca_connected)
+		if (ccl.state >= ca_connected)
 		{
 			MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 			SZ_Print (&cls.netchan.message,
@@ -1543,7 +1543,7 @@ Host_Init (void)
 
 	S_Init ();						// setup sound system, add related commands
 
-	cls.state = ca_disconnected;
+	ccl.state = ca_disconnected;
 	CDAudio_Init_Cvars ();			// initialize all cdaudio related cvars
 	CDAudio_Init ();				// setup cdaudio system, add related commands
 
@@ -1599,7 +1599,7 @@ Host_Shutdown (void)
 void
 CL_UpdatePings (void)
 {
-	if ((cls.state == ca_active) && ((cls.realtime - cl.last_ping_request) > 5)) {
+	if ((ccl.state == ca_active) && ((cls.realtime - cl.last_ping_request) > 5)) {
 		cl.last_ping_request = cls.realtime;
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		SZ_Print (&cls.netchan.message, "pings");
