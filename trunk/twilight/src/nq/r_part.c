@@ -73,7 +73,7 @@ particle_new (ptype_t type, vec3_t org, vec3_t vel, float die, int color,
 	particle_t *part;
 
 	if (numparticles >= r_maxparticles) {
-		Con_Printf("FAILED PARTICLE ALLOC! %d %d\n", numparticles, r_maxparticles);
+		Con_DPrintf("FAILED PARTICLE ALLOC! %d %d\n", numparticles, r_maxparticles);
 		return NULL;
 	}
 
@@ -471,7 +471,7 @@ R_Torch (entity_t *ent, qboolean torch2)
 		p->alpha = 0.5;
 		VectorSet (p->color, 227.0 / 255.0, 151.0 / 255.0, 79.0 / 255.0);
 
-		ent->time_left = realtime + 0.1;
+		ent->time_left = realtime + 0.05;
 	}
 }
 
@@ -585,11 +585,11 @@ R_DrawParticles (void)
 	float       frametime;
 	vec3_t      up, right;
 	float       scale;
+	qboolean	therearetorches = false;
 
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
 	qglEnableClientState (GL_COLOR_ARRAY);
-	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	VectorScale (vup, 1.5, up);
 	VectorScale (vright, 1.5, right);
@@ -613,6 +613,12 @@ R_DrawParticles (void)
 			freeparticles[j++] = p;
 			continue;
 		}
+		if (p->type == pt_torch || p->type == pt_torch2) {
+			if (!therearetorches)
+				therearetorches = true;
+			continue;
+		}
+
 		maxparticle = k;
 		activeparticles++;
 
@@ -700,22 +706,6 @@ R_DrawParticles (void)
 			case pt_slowgrav:
 				p->vel[2] -= grav;
 				break;
-
-			case pt_torch:
-				p->alpha -= frametime * 64.0 / 255.0;
-				p->scale -= frametime * 2;
-				p->vel[2] += grav * 0.4;
-				if (p->alpha < 0 || p->scale < 0)
-					p->die = -1;
-				break;
-
-			case pt_torch2:
-				p->alpha -= frametime * 64.0 / 255.0;
-				p->scale -= frametime * 4;
-				p->vel[2] += grav;
-				if (p->alpha < 0 || p->scale < 0)
-					p->die = -1;
-				break;
 		}
 	}
 
@@ -724,7 +714,69 @@ R_DrawParticles (void)
 		vnum = 0;
 	}
 
-	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (therearetorches)
+	{
+		qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+		for (k = 0, p = particles; k < numparticles; k++, p++) {
+			if (p->type != pt_torch && p->type != pt_torch2)
+				continue;
+			maxparticle = k;
+			activeparticles++;
+
+			// hack a scale up to keep particles from disapearing
+			scale =
+				(p->org[0] - r_origin[0]) * vpn[0] + (p->org[1] -
+													  r_origin[1]) * vpn[1]
+				+ (p->org[2] - r_origin[2]) * vpn[2];
+
+			if (scale < 20)
+				scale = p->scale;
+			else
+				scale = p->scale + scale * 0.004;
+
+			VectorSet4(c_array[vnum + 0], p->color[0], p->color[1], p->color[2], p->alpha);
+			VectorSet4(c_array[vnum + 1], p->color[0], p->color[1], p->color[2], p->alpha);
+			VectorSet4(c_array[vnum + 2], p->color[0], p->color[1], p->color[2], p->alpha);
+			VectorSet2(tc_array[vnum + 0], 0, 0);
+			VectorSet2(tc_array[vnum + 1], 1, 0);
+			VectorSet2(tc_array[vnum + 2], 0, 1);
+			VectorSet3(v_array[vnum + 0], p->org[0], p->org[1], p->org[2]);
+			VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale,
+						p->org[1] + up[1] * scale,
+						p->org[2] + up[2] * scale);
+			VectorSet3(v_array[vnum + 2], p->org[0] + right[0] * scale,
+						p->org[1] + right[1] * scale,
+						p->org[2] + right[2] * scale);
+			vnum += 3;
+
+			if ((vnum + 3) >= MAX_VERTEX_ARRAYS) {
+				qglDrawArrays (GL_TRIANGLES, 0, vnum);
+				vnum = 0;
+			}
+			VectorMA (p->org, frametime, p->vel, p->org);
+
+			if (p->type == pt_torch) {
+				p->alpha -= frametime * 64.0 / 255.0;
+				p->scale -= frametime * 2;
+				p->vel[2] += grav * 0.4;
+				if (p->alpha < 0 || p->scale < 0)
+					p->die = -1;
+			}
+			else {
+				p->alpha -= frametime * 64.0 / 255.0;
+				p->scale -= frametime * 4;
+				p->vel[2] += grav;
+				if (p->alpha < 0 || p->scale < 0)
+					p->die = -1;
+			}
+		}
+
+		if (vnum) {
+			qglDrawArrays (GL_TRIANGLES, 0, vnum);
+			vnum = 0;
+		}
+	}
 
 	k = 0;
 	while (maxparticle >= activeparticles) {
