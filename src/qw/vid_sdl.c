@@ -366,6 +366,11 @@ VID_Init (unsigned char *palette)
 		Sys_Error ("Could not get video information!\n");
     }
 
+	fprintf(stderr, "gl_driver->string: '%s'\n", gl_driver->string);
+	if (SDL_GL_LoadLibrary(gl_driver->string) == -1) {
+		Sys_Error("Can't load lib %s: %s\n", gl_driver->string, SDL_GetError());
+	}
+
 	if ((i = COM_CheckParm ("-bpp")) != 0)
 		scr_bpp = Q_atoi (com_argv[i + 1]);
 	else
