@@ -291,9 +291,19 @@ Sys_Printf (const char *fmt, ...)
 }
 
 void
-Sys_Quit (void)
+Sys_Quit (int ret)
 {
-	exit (0);
+#ifdef _WIN32
+	ShowWindow(hMainWnd, SW_HIDE);
+	DestroyWindow(hLogWnd);
+	DestroyWindow(hEntryWnd);
+	DestroyWindow(hClearBtn);
+	DestroyWindow(hQuitBtn);
+	DestroyWindow(hMainWnd);
+	DeleteObject(console_font);
+	FreeLibrary(hRichEditDLL);
+#endif
+	exit (ret);
 }
 
 void
@@ -407,7 +417,7 @@ Sys_Error (const char *error, ...)
 	fprintf (stderr, "Error: %s\n", text);
 
 	Sys_BackTrace (2);
-	exit (1);
+	Sys_Quit (1);
 }
 
 

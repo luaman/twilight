@@ -171,14 +171,14 @@ Sys_Printf (const char *fmt, ...)
 }
 
 void
-Sys_Quit (void)
+Sys_Quit (int ret)
 {
 	Host_Shutdown ();
 #ifdef HAVE_FCNTL
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 #endif
 	SDL_Quit ();
-	exit (0);
+	exit (ret);
 }
 
 static void
@@ -318,7 +318,7 @@ Sys_Error (const char *error, ...)
 
 	Sys_BackTrace (2);
 	SDL_Quit ();
-	exit (1);
+	Sys_Quit (1);
 }
 
 /*

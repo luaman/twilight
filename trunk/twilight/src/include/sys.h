@@ -42,7 +42,7 @@ extern double curtime;
 extern qboolean do_stdin;
 
 void Sys_Printf(const char *fmt, ...);
-void Sys_Quit(void);
+void Sys_Quit(int ret);
 void Sys_Init(void);
 void Sys_Error(const char *error, ...);
 int Sys_FileTime(const char *path);
