@@ -335,7 +335,7 @@ M_Main_Key (int key)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	22
+#define	OPTIONS_ITEMS	23
 
 #define	SLIDER_RANGE	10
 
@@ -432,28 +432,32 @@ M_AdjustSliders (int dir)
 			Cvar_Set (m_freelook, va ("%i", !m_freelook->ivalue));
 			break;
 
-		case 15:						// invert mouse
+		case 15:					// mouse filter (smooth input)
+			Cvar_Set (m_filter, va ("%i", !m_filter->ivalue));
+			break;
+
+		case 16:						// invert mouse
 			t = -m_pitch->fvalue;
 			Cvar_Set (m_pitch, va ("%f", t));
 			break;
 
-		case 16:						// lookspring
+		case 17:						// lookspring
 			Cvar_Set (lookspring, va ("%i", !lookspring->ivalue));
 			break;
 
-		case 17:						// lookstrafe
+		case 18:						// lookstrafe
 			Cvar_Set (lookstrafe, va ("%i", !lookstrafe->ivalue));
 			break;
 
-		case 18:
+		case 19:
 			Cvar_Set (cl_sbar, va ("%i", !cl_sbar->ivalue));
 			break;
 
-		case 19:
+		case 20:
 			Cvar_Set (cl_hudswap, va ("%i", !cl_hudswap->ivalue));
 			break;
 
-		case 20:						// _windowed_mouse
+		case 21:						// _windowed_mouse
 			Cvar_Set (_windowed_mouse, va ("%i", !_windowed_mouse->ivalue));
 			break;
 	}
@@ -510,6 +514,7 @@ M_Options_Draw (void)
 	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->fvalue); y += 8;
 	M_Print (16, y, "            Always Run"); M_DrawCheckbox (220, y, cl_forwardspeed->fvalue > 200); y += 8;
 	M_Print (16, y, "            Mouse Look"); M_DrawCheckbox (220, y, m_freelook->ivalue); y += 8;
+	M_Print (16, y, "    Smooth Mouse Input"); M_DrawCheckbox (220, y, m_filter->ivalue); y += 8;
 	M_Print (16, y, "          Invert Mouse"); M_DrawCheckbox (220, y, m_pitch->fvalue < 0); y += 8;
 	M_Print (16, y, "            Lookspring"); M_DrawCheckbox (220, y, lookspring->ivalue); y += 8;
 	M_Print (16, y, "            Lookstrafe"); M_DrawCheckbox (220, y, lookstrafe->ivalue); y += 8;
@@ -544,7 +549,7 @@ M_Options_Key (int k)
 				case 2:
 					Cbuf_AddText ("exec default.cfg\n");
 					break;
-				case 20:
+				case 22:
 					M_Menu_Gfx_f ();
 					break;
 				default:

@@ -352,6 +352,7 @@ extern struct cvar_s *m_forward;
 extern struct cvar_s *m_side;
 
 extern struct cvar_s *m_freelook;
+extern struct cvar_s *m_filter;
 
 extern struct cvar_s *_windowed_mouse;
 
