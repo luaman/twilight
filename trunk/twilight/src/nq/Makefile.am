@@ -11,10 +11,8 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_NQ
 bin_PROGRAMS=twilight-nq
 
 if SYS_WIN32
-twilight_nq_sys=sys_win.c conproc.c conproc.h
 twilight_nq_sys_libs=-lwinmm -lwsock32
 else
-twilight_nq_sys=sys_linux.c
 twilight_nq_sys_libs=
 endif
 
@@ -39,7 +37,7 @@ twilight_nq_SOURCES= \
 	view.c wad.c world.c world.h zone.c \
 	buildnum.c \
 	quakedef.h bspfile.h client.h keys.h protocol.h \
-	render.h server.h $(twilight_nq_sys)
+	render.h server.h sys.c
 
 EXTRA_twilight_nq_SOURCES= \
 	sys_win.c conproc.c conproc.h \
