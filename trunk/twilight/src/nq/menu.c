@@ -1040,11 +1040,7 @@ M_Net_Key (int k)
 //=============================================================================
 /* OPTIONS MENU */
 
-#ifdef _WIN32
 #define	OPTIONS_ITEMS	15
-#else
-#define	OPTIONS_ITEMS	14
-#endif
 
 #define	SLIDER_RANGE	10
 
