@@ -550,26 +550,21 @@ Sys_SendKeyEvents (void)
 						Key_Event (KM_BUTTON1 + but - 1, 0, event.type
 								   == SDL_MOUSEBUTTONDOWN);
 						break;
+					case 4:
+						Key_Event(KM_WHEEL_UP, 0, true);
+						Key_Event(KM_WHEEL_UP, 0, false);
+						break;
+					case 5:
+						Key_Event(KM_WHEEL_DOWN, 0, true);
+						Key_Event(KM_WHEEL_DOWN, 0, false);
+						break;
 				}
 				break;
 
 			case SDL_MOUSEMOTION:
 				if (_windowed_mouse.value) {
-					if ((event.motion.x != (vid.width / 2))
-						|| (event.motion.y != (vid.height / 2))) {
-						mouse_x = event.motion.xrel * 5;
-						mouse_y = event.motion.yrel * 5;
-						if ((event.motion.x <
-							 ((vid.width / 2) - (vid.width / 4)))
-							|| (event.motion.x >
-								((vid.width / 2) + (vid.width / 4)))
-							|| (event.motion.y <
-								((vid.height / 2) - (vid.height / 4)))
-							|| (event.motion.y >
-								((vid.height / 2) + (vid.height / 4)))) {
-							SDL_WarpMouse ((Uint16) (vid.width / 2), (Uint16) (vid.height / 2));
-						}
-					}
+					mouse_x = event.motion.xrel * 5;
+					mouse_y = event.motion.yrel * 5;
 				}
 				break;
 

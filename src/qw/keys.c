@@ -502,8 +502,10 @@ Key_Game (knum_t key, short unicode)
 		if (kb[0] == '+') {
 			snprintf (cmd, sizeof(cmd), "%s %d\n", kb, key);
 			Cbuf_AddText (cmd);
-		} else
+		} else {
+			snprintf (cmd, sizeof(cmd), "%s\n", kb);
 			Cbuf_AddText (cmd);
+		}
 	}
 }
 
