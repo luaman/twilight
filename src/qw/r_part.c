@@ -141,7 +141,7 @@ new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 }
 	
 inline base_particle_t *
-new_base_particle_oc (ptype_t type, vec3_t org, vec3_t vel, Uint8 color,
+new_base_particle_oc (ptype_t type, vec3_t org, vec3_t vel, int color,
 		float ramp, float scale, float die)
 {
 	vec4_t	vcolor;
@@ -517,8 +517,10 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 	static int  tracercount;
 	ptype_t		ptype;
 
-	if (type == 0)
-		return R_RocketConeTrail (start, end, type);
+	if (type == 0) {
+		R_RocketConeTrail (start, end, type);
+		return;
+	}
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
