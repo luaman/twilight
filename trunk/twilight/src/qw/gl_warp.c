@@ -229,24 +229,19 @@ Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
 void
-EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform)
+EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 {
 	glpoly_t   *p;
 	float	   *v;
 	float		temp[3];
 	int			i, texnum;
-	Uint8		cr, cg, cb, ca;
 	float		s, t, os, ot;
 
-	cr = 255;
-	cg = 255;
-	cb = 255;
-	ca = (Uint8) (bound(0.0f, r_wateralpha->value * 255.0f, 255.0f));
 	texnum = tex->gl_texturenum;
 
 	for (p = fa->polys; p; p = p->next)
 	{
-		transpolybegin(texnum, 0, TPOLYTYPE_ALPHA);
+		qglBegin (GL_POLYGON);
 		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 			os = v[3];
@@ -263,9 +258,11 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform)
 			else
 				VectorCopy(v, temp);
 
-			transpolyvertub(temp[0], temp[1], temp[2], s, t, cr, cg, cb, ca);
+			qglColor4f(1, 1, 1, alpha);
+			qglTexCoord2f (s, t);
+			qglVertex3fv (temp);
 		}
-		transpolyend();
+		qglEnd ();
 	}
 }
 

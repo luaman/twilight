@@ -144,7 +144,10 @@ transpolyrender (void)
 	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// set up the vertex array
-	qglInterleavedArrays(GL_T2F_C4UB_V3F, sizeof(transvert[0]), transvert);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(transvert[0]), &transvert[0].s);
+	qglColorPointer (4, GL_FLOAT, sizeof(transvert[0]), &transvert[0].r);
+	qglVertexPointer (3, GL_FLOAT, sizeof(transvert[0]), &transvert[0].v);
+	qglEnableClientState(GL_COLOR_ARRAY);
 
 	transpolylistindex = 0;
 	transvertindices = 0;

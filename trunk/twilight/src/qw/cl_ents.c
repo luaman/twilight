@@ -131,38 +131,30 @@ CL_NewDlight
 ===============
 */
 void
-CL_NewDlight (int key, vec3_t org, float radius, float time,
-			  int type)
+CL_NewDlight (int key, vec3_t org, int effects)
 {
 	dlight_t   *dl = CL_AllocDlight (key);
 
-	dl->radius = radius;
-	dl->die = cl.time + time;
+	if (effects & EF_BRIGHTLIGHT)
+		dl->radius = 400 + (Q_rand () & 31);
+	else
+		dl->radius = 200 + (Q_rand () & 31);
+
+	dl->die = cl.time + 0.1;
 	VectorCopy (org, dl->origin);
 
-	if (type == 0) // Normal
-	{
+	dl->color[0] = 0.44;
+	dl->color[1] = 0.34;
+	dl->color[2] = 0.24;
+
+	if (effects & EF_RED)
 		dl->color[0] = 0.86;
-		dl->color[1] = 0.31;
-		dl->color[2] = 0.24;
-	} 
-	else if (type == 1) // Blue
-	{
-		dl->color[0] = 0.24;
-		dl->color[1] = 0.24;
+	if (effects & EF_BLUE)
 		dl->color[2] = 0.86;
-	} 
-	else if (type == 2) // Red
-	{
-		dl->color[0] = 0.86;
-		dl->color[1] = 0.24;
-		dl->color[2] = 0.24;
-	} 
-	else if (type == 3) // Purple
-	{
-		dl->color[0] = 0.86;
-		dl->color[1] = 0.24;
-		dl->color[2] = 0.86;
+
+	if (!(effects & (EF_LIGHTMASK - EF_DIMLIGHT))) {
+		dl->color[0] += 0.20;
+		dl->color[1] += 0.10;
 	}
 }
 
@@ -465,23 +457,9 @@ CL_LinkPacketEntities (void)
 	for (pnum = 0; pnum < pack->num_entities; pnum++) {
 		s1 = &pack->entities[pnum];
 
-		if (s1->effects) {
+		if (s1->effects & EF_LIGHTMASK) {
 			// spawn light flashes, even ones coming from invisible objects
-			if ((s1->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
-				CL_NewDlight (s1->number, s1->origin,
-					  200 + (Q_rand () & 31), 0.1, 3);
-			else if (s1->effects & EF_BLUE)
-				CL_NewDlight (s1->number, s1->origin,
-					  200 + (Q_rand () & 31), 0.1, 1);
-			else if (s1->effects & EF_RED)
-				CL_NewDlight (s1->number, s1->origin,
-					  200 + (Q_rand () & 31), 0.1, 2);
-			else if (s1->effects & EF_BRIGHTLIGHT)
-				CL_NewDlight (s1->number, s1->origin,
-					  400 + (Q_rand () & 31), 0.1, 0);
-			else if (s1->effects & EF_DIMLIGHT)
-				CL_NewDlight (s1->number, s1->origin,
-					  200 + (Q_rand () & 31), 0.1, 0);
+			CL_NewDlight (s1->number, s1->origin, s1->effects);
 		}
 
 		if (s1->number >= MAX_EDICTS) {
@@ -854,23 +832,14 @@ CL_LinkPlayers (void)
 		}
 
 		// spawn light flashes
-		if (state->effects && (!gl_flashblend->value || j != cl.playernum))
+		if ((state->effects & EF_LIGHTMASK) &&
+				(!gl_flashblend->value || j != cl.playernum))
 		{
 			if (j == cl.playernum)
 				VectorCopy (cl.simorg, org);
 			else
 				VectorCopy (state->origin, org);
-
-			if ((state->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
-				CL_NewDlight (j, org, 200 + (Q_rand () & 31), 0.1, 3);
-			else if (state->effects & EF_BLUE)
-				CL_NewDlight (j, org, 200 + (Q_rand () & 31), 0.1, 1);
-			else if (state->effects & EF_RED)
-				CL_NewDlight (j, org, 200 + (Q_rand () & 31), 0.1, 2);
-			else if (state->effects & EF_BRIGHTLIGHT)
-				CL_NewDlight (j, org, 400 + (Q_rand () & 31), 0.1, 0);
-			else if (state->effects & EF_DIMLIGHT)
-				CL_NewDlight (j, org, 200 + (Q_rand () & 31), 0.1, 0);
+			CL_NewDlight (j, org, state->effects);
 		}
 
 		// the player object never gets added

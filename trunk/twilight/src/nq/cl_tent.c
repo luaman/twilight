@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "sound.h"
 #include "sys.h"
+#include "r_explosion.h"
 
 int         num_temp_entities;
 entity_t    cl_temp_entities[MAX_TEMP_ENTITIES];
@@ -205,7 +206,9 @@ CL_ParseTEnt (void)
 			pos[0] = MSG_ReadCoord ();
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
-			R_ParticleExplosion (pos);
+			R_NewExplosion (pos);
+//			R_ParticleExplosion (pos);
+//
 			dl = CL_AllocDlight (0);
 			VectorCopy (pos, dl->origin);
 			dl->radius = 350;

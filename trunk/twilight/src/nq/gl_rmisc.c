@@ -42,16 +42,19 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "strlib.h"
 #include "sys.h"
+#include "r_explosion.h"
 
 // FIXME
 extern cvar_t *gl_im_transform;
 extern void TNT_Init (void);
 
-GLfloat	tc_array[MAX_VERTEX_ARRAYS][2];
-GLfloat	v_array[MAX_VERTEX_ARRAYS][3];
-GLfloat	c_array[MAX_VERTEX_ARRAYS][4];
+GLfloat tc_arrays[2][MAX_VERTEX_ARRAYS][2];
+GLfloat v_arrays[2][MAX_VERTEX_ARRAYS][3];
+GLfloat c_arrays[2][MAX_VERTEX_ARRAYS][4];
+
 GLuint vindices[MAX_VERTEX_INDICES];
-GLuint v_index, i_index;
+GLuint v_index, i_index, va_index;
+qboolean va_locked;
 
 void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
@@ -155,12 +158,15 @@ R_Init (void)
 	R_InitBubble ();
 	R_InitParticles ();
 	TNT_Init ();
+	R_Explosion_Init ();
 
 	playertextures = texture_extension_number;
 	texture_extension_number += MAX_CLIENTS;
 
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
+
+	va_index = 0;
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array[0]), tc_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(c_array[0]), c_array[0]);
@@ -254,11 +260,6 @@ R_NewMap (void)
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
 
-	// clear out efrags in case the level hasn't been reloaded
-	// FIXME: is this one short?
-	for (i = 0; i < cl.worldmodel->numleafs; i++)
-		cl.worldmodel->leafs[i].efrags = NULL;
-
 	r_viewleaf = NULL;
 	R_ClearParticles ();
 
@@ -275,6 +276,7 @@ R_NewMap (void)
 			skytexturenum = i;
 		cl.worldmodel->textures[i]->texturechain = NULL;
 	}
+	r_explosion_newmap ();
 }
 
 

@@ -370,7 +370,9 @@ Draw_Character (int x, int y, int num)
 	VectorSet2 (v_array[2], x + 8, y + 8);
 	VectorSet2 (tc_array[3], fcol, frow + size);
 	VectorSet2 (v_array[3], x, y + 8);
+	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 
 	qglDisable (GL_BLEND);
 }
@@ -413,14 +415,18 @@ Draw_String_Len (int x, int y, char *str, int len)
 			vnum += 4;
 			if ((vnum + 4) >= MAX_VERTEX_ARRAYS)
 			{
+				TWI_PreVDraw (0, vnum);
 				qglDrawArrays (GL_QUADS, 0, vnum);
+				TWI_PostVDraw ();
 				vnum = 0;
 			}
 		}
 	}
 	if (vnum)
 	{
+		TWI_PreVDraw (0, vnum);
 		qglDrawArrays (GL_QUADS, 0, vnum);
+		TWI_PostVDraw ();
 		vnum = 0;
 	}
 	qglDisable (GL_BLEND);
@@ -476,14 +482,18 @@ Draw_Alt_String_Len (int x, int y, char *str, int len)
 			vnum += 4;
 			if ((vnum + 4) >= MAX_VERTEX_ARRAYS)
 			{
+				TWI_PreVDraw (0, vnum);
 				qglDrawArrays (GL_QUADS, 0, vnum);
+				TWI_PostVDraw ();
 				vnum = 0;
 			}
 		}
 	}
 	if (vnum)
 	{
+		TWI_PreVDraw (0, vnum);
 		qglDrawArrays (GL_QUADS, 0, vnum);
+		TWI_PostVDraw ();
 		vnum = 0;
 	}
 	qglDisable (GL_BLEND);
@@ -536,7 +546,9 @@ Draw_Crosshair (void)
 			VectorSet2 (v_array[2], x + 12, y + 12);
 			VectorSet2 (tc_array[3], 0, 1);
 			VectorSet2 (v_array[3], x - 4, y + 12);
+			TWI_PreVDraw (0, 4);
 			qglDrawArrays (GL_QUADS, 0, 4);
+			TWI_PostVDraw ();
 			qglColor3f (1, 1, 1);
 			qglDisable (GL_BLEND);
 			break;
@@ -554,7 +566,9 @@ Draw_Crosshair (void)
 			VectorSet2 (v_array[2], x + 12, y + 12);
 			VectorSet2 (tc_array[3], 0, 1);
 			VectorSet2 (v_array[3], x - 4, y + 12);
+			TWI_PreVDraw (0, 4);
 			qglDrawArrays (GL_QUADS, 0, 4);
+			TWI_PostVDraw ();
 			qglColor3f (1, 1, 1);
 			qglDisable (GL_BLEND);
 			break;
@@ -584,7 +598,9 @@ Draw_Pic (int x, int y, qpic_t *pic)
 	VectorSet2 (v_array[2], x + pic->width, y + pic->height);
 	VectorSet2 (tc_array[3], gl->sl, gl->th);
 	VectorSet2 (v_array[3], x, y + pic->height);
+	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 
 	qglDisable (GL_BLEND);
 }
@@ -618,7 +634,9 @@ Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
 	VectorSet2 (v_array[2], x + width, y + height);
 	VectorSet2 (tc_array[3], newsl, newth);
 	VectorSet2 (v_array[3], x, y + height);
+	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 }
 
 
@@ -667,7 +685,9 @@ Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
 	VectorSet2 (v_array[2], x + pic->width, y + pic->height);
 	VectorSet2 (tc_array[3], 0, 1);
 	VectorSet2 (v_array[3], x, y + pic->height);
+	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 	qglDisable (GL_BLEND);
 }
 
@@ -718,7 +738,9 @@ Draw_ConsoleBackground (int lines)
 	VectorSet2 (v_array[2], vid.conwidth, lines);
 	VectorSet2 (tc_array[3], gl->sl, gl->th);
 	VectorSet2 (v_array[3], 0, lines);
+	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 
 	/* hack the version number directly into the pic */
 	Draw_Alt_String (vid.conwidth - strlen (cl_verstring->string) * 8 - 14,
@@ -751,7 +773,9 @@ Draw_TileClear (int x, int y, int w, int h)
 	VectorSet2 (v_array[2], x + w, y + h);
 	VectorSet2 (tc_array[3], x / 64.0, (y + h) / 64.0);
 	VectorSet2 (v_array[3], x, y + h);
+	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 }
 
 
@@ -773,7 +797,9 @@ Draw_Fill (int x, int y, int w, int h, int c)
 	VectorSet2 (v_array[1], x + w, y);
 	VectorSet2 (v_array[2], x + w, y + h);
 	VectorSet2 (v_array[3], x, y + h);
+	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 
 	qglColor3f (1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
@@ -798,7 +824,9 @@ Draw_FadeScreen (void)
 	VectorSet2 (v_array[1], vid.conwidth, 0);
 	VectorSet2 (v_array[2], vid.conwidth, vid.conheight);
 	VectorSet2 (v_array[3], 0, vid.conheight);
+	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
 
 	qglColor3f (1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);

@@ -571,13 +571,13 @@ R_Torch (entity_t *ent, qboolean torch2)
 	}
 }
 
-void 
+void
 R_RailTrail (vec3_t start, vec3_t end)
 {
-	vec3_t		vec, org, vel, right;
-	vec4_t		color;
-	float		len, roll = 0.0f;
-	float       sr, sp, sy, cr, cp, cy;
+	vec3_t	vec, org, vel, right;
+	vec4_t	color;
+	float	len, roll = 0.0f;
+	float	sr, sp, sy, cr, cp, cy;
 
 	VectorSubtract (end, start, vec);
 	Vector2Angles (vec, org);
@@ -598,15 +598,15 @@ R_RailTrail (vec3_t start, vec3_t end)
 	{
 		VectorCopy (d_8tofloattable[(rand() & 3) + 225], color); color[3] = 0.5;
 		new_base_particle (pt_railtrail, start, vec3_origin, color,
-			0, 2.5, 1.0);
+				0, 2.5, 1.0);
 
 		VectorMA (start, 4, right, org);
 		VectorScale (right, 8, vel);
 		VectorCopy (d_8tofloattable[(rand() & 7) + 206], color); color[3] = 0.5;
 		new_base_particle (pt_railtrail, org, vel, color,
-			0, 5.0, 1.0);
+				0, 5.0, 1.0);
 
-		roll += 7.5 * (M_PI / 180.0); 
+		roll += 7.5 * (M_PI / 180.0);
 
 		if (roll > 2*M_PI)
 			roll -= 2*M_PI;
@@ -747,11 +747,12 @@ R_Draw_Base_Particles (void)
 	float				time1, time2, time3;
 	float				grav, dvel;
 	float				frametime;
-	float				scale, *corner;
+	float				scale;
+	float				*corner;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
 
-	frametime = cl.time - cl.oldtime;
+	frametime = host_frametime;
 	time1 = frametime * 5;
 	time2 = frametime * 10;
 	time3 = frametime * 15;
@@ -783,15 +784,6 @@ R_Draw_Base_Particles (void)
 			goto R_Draw_Base_Particles__physics;
 #endif
 
-		VectorCopy4 (p->color, c_array[v_index + 0]);
-		VectorCopy4 (p->color, c_array[v_index + 1]);
-		VectorCopy4 (p->color, c_array[v_index + 2]);
-		VectorCopy4 (p->color, c_array[v_index + 3]);
-		VectorSet2(tc_array[v_index + 0], 1, 1);
-		VectorSet2(tc_array[v_index + 1], 0, 1);
-		VectorSet2(tc_array[v_index + 2], 0, 0);
-		VectorSet2(tc_array[v_index + 3], 1, 0);
-
 		if (p->scale < 0) {
 			scale = ((p->org[0] - r_origin[0]) * vpn[0]) + 
 				((p->org[1] - r_origin[1]) * vpn[1]) +
@@ -804,6 +796,15 @@ R_Draw_Base_Particles (void)
 			scale = p->scale;
 		}
 
+		VectorCopy4 (p->color, c_array[v_index + 0]);
+		VectorCopy4 (p->color, c_array[v_index + 1]);
+		VectorCopy4 (p->color, c_array[v_index + 2]);
+		VectorCopy4 (p->color, c_array[v_index + 3]);
+		VectorSet2(tc_array[v_index + 0], 1, 1);
+		VectorSet2(tc_array[v_index + 1], 0, 1);
+		VectorSet2(tc_array[v_index + 2], 0, 0);
+		VectorSet2(tc_array[v_index + 3], 1, 0);
+
 		corner = v_array[v_index];
 		VectorTwiddleS (p->org, vup, vright, scale * -0.5, v_array[v_index]);
 		VectorTwiddle (corner, vup, scale, vright, 0    , 1,v_array[v_index+1]);
@@ -813,7 +814,9 @@ R_Draw_Base_Particles (void)
 		v_index += 4;
 
 		if ((v_index + 4) >= MAX_VERTEX_ARRAYS) {
+			TWI_PreVDrawCVA (0, v_index);
 			qglDrawArrays (GL_QUADS, 0, v_index);
+			TWI_PostVDrawCVA ();
 			v_index = 0;
 		}
 
@@ -878,14 +881,14 @@ R_Draw_Base_Particles__physics:
 				p->color[3] -= (frametime * 64 / 255);
 				p->scale -= frametime * 2;
 				p->vel[2] += grav * 0.4;
-				if (p->scale < 0)
+				if (p->scale <= 0)
 					p->die = -1;
 				break;
 			case pt_torch2:
 				p->color[3] -= (frametime * 64 / 255);
 				p->scale -= frametime * 4;
 				p->vel[2] += grav;
-				if (p->scale < 0)
+				if (p->scale <= 0)
 					p->die = -1;
 				break;
 			case pt_railtrail:
@@ -902,7 +905,9 @@ R_Draw_Base_Particles__physics:
 	}
 
 	if (v_index) {
+		TWI_PreVDrawCVA (0, v_index);
 		qglDrawArrays (GL_QUADS, 0, v_index);
+		TWI_PostVDrawCVA ();
 		v_index = 0;
 	}
 
@@ -938,7 +943,7 @@ R_Draw_Tube_Particles (void)
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
 
-	frametime = cl.time - cl.oldtime;
+	frametime = host_frametime;
 
 	activeparticles = 0;
 	maxparticle = -1;
@@ -1003,11 +1008,9 @@ R_Draw_Tube_Particles (void)
 
 		if (((i_index + (17 * 4)) >= MAX_VERTEX_INDICES) ||
 				(v_index + 32) >= MAX_VERTEX_ARRAYS) {
-			if (gl_cva)
-				qglLockArraysEXT (0, v_index);
+			TWI_PreVDrawCVA (0, v_index);
 			qglDrawElements(GL_QUADS, i_index, GL_UNSIGNED_INT, vindices);
-			if (gl_cva)
-				qglUnlockArraysEXT ();
+			TWI_PostVDrawCVA ();
 			v_index = 0;
 			i_index = 0;
 		}
@@ -1034,11 +1037,9 @@ R_Draw_Tube_Particles (void)
 	}
 
 	if (v_index || i_index) {
-		if (gl_cva)
-			qglLockArraysEXT (0, v_index);
+		TWI_PreVDrawCVA (0, v_index);
 		qglDrawElements(GL_QUADS, i_index, GL_UNSIGNED_INT, vindices);
-		if (gl_cva)
-			qglUnlockArraysEXT ();
+		TWI_PostVDrawCVA ();
 		v_index = 0;
 		i_index = 0;
 	}
@@ -1076,7 +1077,7 @@ R_Draw_Cone_Particles (void)
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
 
-	frametime = cl.time - cl.oldtime;
+	frametime = host_frametime;
 	teletime = frametime * 120;
 
 	activeparticles = 0;
@@ -1131,11 +1132,9 @@ R_Draw_Cone_Particles (void)
 
 		if (((i_index + (17 * 3)) >= MAX_VERTEX_INDICES) ||
 				(v_index + 17) >= MAX_VERTEX_ARRAYS) {
-			if (gl_cva)
-				qglLockArraysEXT (0, v_index);
+			TWI_PreVDrawCVA (0, v_index);
 			qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
-			if (gl_cva)
-				qglUnlockArraysEXT ();
+			TWI_PostVDrawCVA ();
 			v_index = 0;
 			i_index = 0;
 		}
@@ -1195,11 +1194,9 @@ R_Draw_Cone_Particles (void)
 	}
 
 	if (v_index || i_index) {
-		if (gl_cva)
-			qglLockArraysEXT (0, v_index);
+		TWI_PreVDrawCVA (0, v_index);
 		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
-		if (gl_cva)
-			qglUnlockArraysEXT ();
+		TWI_PostVDrawCVA ();
 		v_index = 0;
 		i_index = 0;
 	}

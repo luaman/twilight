@@ -665,12 +665,11 @@ CL_ParseStatic (void)
 	ent->frame_start_time = 0;
 	ent->translate_start_time = 0;
 	ent->rotate_start_time = 0;
+	ent->time_left = 0;
 	VectorClear (ent->last_light);
 
 	VectorCopy (ent->baseline.origin, ent->origin);
 	VectorCopy (ent->baseline.angles, ent->angles);
-
-	R_AddEfrags (ent);
 }
 
 /*

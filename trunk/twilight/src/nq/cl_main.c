@@ -71,7 +71,6 @@ client_static_t cls;
 client_state_t cl;
 
 // FIXME: put these on hunk?
-efrag_t		cl_efrags[MAX_EFRAGS];
 entity_t	cl_entities[MAX_EDICTS];
 entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
 lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
@@ -79,6 +78,8 @@ dlight_t	cl_dlights[MAX_DLIGHTS];
 
 int			cl_numvisedicts;
 entity_t	*cl_visedicts[MAX_VISEDICTS];
+
+extern int	r_framecount;
 
 /*
 =====================
@@ -89,8 +90,6 @@ CL_ClearState
 void
 CL_ClearState (void)
 {
-	int	i;
-
 	if (!sv.active)
 		Host_ClearMemory ();
 
@@ -100,20 +99,11 @@ CL_ClearState (void)
 	SZ_Clear (&cls.message);
 
 // clear other arrays   
-	memset (cl_efrags, 0, sizeof (cl_efrags));
 	memset (cl_entities, 0, sizeof (cl_entities));
 	memset (cl_dlights, 0, sizeof (cl_dlights));
 	memset (cl_lightstyle, 0, sizeof (cl_lightstyle));
 	memset (cl_temp_entities, 0, sizeof (cl_temp_entities));
 	memset (cl_beams, 0, sizeof (cl_beams));
-
-//
-// allocate the efrags and chain together into a free list
-//
-	cl.free_efrags = cl_efrags;
-	for (i = 0; i < MAX_EFRAGS - 1; i++)
-		cl.free_efrags[i].entnext = &cl.free_efrags[i + 1];
-	cl.free_efrags[i].entnext = NULL;
 }
 
 /*
@@ -350,38 +340,30 @@ CL_NewDlight
 ===============
 */
 void
-CL_NewDlight (int key, vec3_t org, float radius, float time,
-			  int type)
+CL_NewDlight (int key, vec3_t org, int effects)
 {
 	dlight_t   *dl = CL_AllocDlight (key);
 
-	dl->radius = radius;
-	dl->die = cl.time + time;
+	if (effects & EF_BRIGHTLIGHT)
+		dl->radius = 400 + (Q_rand () & 31);
+	else
+		dl->radius = 200 + (Q_rand () & 31);
+
+	dl->die = cl.time + 0.1;
 	VectorCopy (org, dl->origin);
 
-	if (type == 0) // Normal
-	{
+	dl->color[0] = 0.44;
+	dl->color[1] = 0.34;
+	dl->color[2] = 0.24;
+
+	if (effects & EF_RED)
 		dl->color[0] = 0.86;
-		dl->color[1] = 0.31;
-		dl->color[2] = 0.24;
-	} 
-	else if (type == 1) // Blue
-	{
-		dl->color[0] = 0.24;
-		dl->color[1] = 0.24;
+	if (effects & EF_BLUE)
 		dl->color[2] = 0.86;
-	} 
-	else if (type == 2) // Red
-	{
-		dl->color[0] = 0.86;
-		dl->color[1] = 0.24;
-		dl->color[2] = 0.24;
-	} 
-	else if (type == 3) // Purple
-	{
-		dl->color[0] = 0.86;
-		dl->color[1] = 0.24;
-		dl->color[2] = 0.86;
+
+	if (!(effects & (EF_LIGHTMASK - EF_DIMLIGHT))) {
+		dl->color[0] += 0.20;
+		dl->color[1] += 0.10;
 	}
 }
 
@@ -496,11 +478,8 @@ CL_RelinkEntities (void)
 
 // start on the entity after the world
 	for (i = 1, ent = cl_entities + 1; i < cl.num_entities; i++, ent++) {
-		if (!ent->model) {				// empty slot
-			if (ent->forcelink)
-				R_RemoveEfrags (ent);	// just became empty
+		if (!ent->model)				// empty slot
 			continue;
-		}
 // if the object wasn't included in the last packet, remove it
 		if (ent->msgtime != cl.mtime[0]) {
 			ent->model = NULL;
@@ -580,39 +559,8 @@ CL_RelinkEntities (void)
 			}
 
 			// spawn light flashes, even ones coming from invisible objects
-			if ((ent->effects & (EF_BLUE | EF_RED)) == (EF_BLUE | EF_RED))
-				CL_NewDlight (i, ent->origin,
-					  200 + (Q_rand () & 31), 0.1, 3);
-			else if (ent->effects & EF_BLUE)
-				CL_NewDlight (i, ent->origin,
-					  200 + (Q_rand () & 31), 0.1, 1);
-			else if (ent->effects & EF_RED)
-				CL_NewDlight (i, ent->origin,
-					  200 + (Q_rand () & 31), 0.1, 2);
-			else if (ent->effects & EF_BRIGHTLIGHT) {
-				dl = CL_AllocDlight (i);
-				VectorCopy (ent->origin, dl->origin);
-				dl->origin[2] += 16;
-
-				if (!gl_flashblend->value && !gl_oldlights->value)
-				{
-					trace_t tr;
-					
-					memset (&tr, 0, sizeof(tr));
-
-					VectorCopy (dl->origin, tr.endpos);
-
-					SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ent->origin, dl->origin, &tr);
-					
-					VectorCopy (tr.endpos, dl->origin);
-				}
-
-				dl->radius = 400 + (Q_rand () & 31);
-				dl->die = cl.time + 0.001;
-			}
-			else if (ent->effects & EF_DIMLIGHT) {
-				CL_NewDlight (i, ent->origin,
-					  200 + (Q_rand () & 31), 0.001, 0);
+			if (ent->effects & EF_LIGHTMASK) {
+				CL_NewDlight (i, ent->origin, ent->effects);
 			}
 		}
 
@@ -650,6 +598,13 @@ CL_RelinkEntities (void)
 		if (cl_numvisedicts < MAX_VISEDICTS) {
 			cl_visedicts[cl_numvisedicts++] = ent;
 		}
+	}
+
+	for (i = 0; i < cl.num_statics; i++) {
+		cl_static_entities[i].visframe = r_framecount;
+		if (cl_numvisedicts >= MAX_VISEDICTS)
+			continue;
+		cl_visedicts[cl_numvisedicts++] = &cl_static_entities[i];
 	}
 }
 

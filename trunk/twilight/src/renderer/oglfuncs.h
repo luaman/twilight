@@ -38,7 +38,7 @@
 
 OGL_DONT_NEED (void, glAccum, (GLenum op, GLfloat value));
 OGL_EXT_WANT (void, glActiveTextureARB, (GLenum));
-OGL_DONT_NEED (void, glAlphaFunc, (GLenum func, GLclampf ref));
+OGL_NEED (void, glAlphaFunc, (GLenum func, GLclampf ref));
 OGL_EXT_DONT_WANT (void, glApplyTextureEXT, (GLenum));
 OGL_DONT_NEED (GLboolean, glAreTexturesResident, (GLsizei n, const GLuint * textures, GLboolean * residences));
 OGL_EXT_DONT_WANT (GLboolean, glAreTexturesResidentEXT, (GLsizei, const GLuint *, GLboolean *));

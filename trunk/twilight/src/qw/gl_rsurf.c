@@ -590,16 +590,6 @@ DrawTextureChains ()
 			R_DrawSkyChain (s);
 			t->texturechain = NULL;
 		}
-		else if (s->flags & SURF_DRAWTURB)
-		{
-			/*
-			 * Lordhavoc: handle water here because it is just making
-			 * transpolys, not really drawing
-			 */
-			for (; s; s = s->texturechain)
-				EmitWaterPolys (s, st, false);
-			t->texturechain = NULL;
-		}
 	}
 
 	if (gl_mtex)
@@ -631,7 +621,7 @@ DrawTextureChains ()
 			if (!t)
 				continue;
 			s = t->texturechain;
-			if (!s)
+			if (!s || (s->flags & SURF_DRAWTURB))
 				continue;
 			st = R_TextureAnimation (t);
 			qglActiveTextureARB (GL_TEXTURE0_ARB);
@@ -680,6 +670,50 @@ DrawTextureChains ()
 }
 
 /*
+================
+R_DrawWaterTextureChains
+================
+*/
+void
+R_DrawWaterTextureChains ()
+{
+	unsigned int	i;
+	msurface_t	   *s;
+	texture_t	   *t, *st;
+	float			wateralpha = r_wateralpha->value;
+
+	if (wateralpha != 1) {
+		qglEnable (GL_BLEND);
+		qglDepthMask (GL_FALSE);
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
+	}
+
+	for (i = 0; i < cl.worldmodel->numtextures; i++)
+	{
+		t = cl.worldmodel->textures[i];
+		if (!t)
+			continue;
+		s = t->texturechain;
+		if (!(s && (s->flags & SURF_DRAWTURB)))
+			continue;
+		st = R_TextureAnimation (t);
+
+		qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
+		for (; s; s = s->texturechain)
+			EmitWaterPolys (s, st, false, wateralpha);
+
+		t->texturechain = NULL;
+	}
+
+	if (wateralpha != 1) {
+		qglDepthMask (GL_TRUE);
+		qglDisable (GL_BLEND);
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		qglColor3f(1, 1, 1);
+	}
+}
+
+/*
 =================
 R_DrawBrushModel
 =================
@@ -690,7 +724,7 @@ R_DrawBrushModel (entity_t *e)
 	int				i, k, texnum, rotated;
 	vec3_t			mins, maxs;
 	msurface_t	   *psurf;
-	float			dot;
+	float			dot, wateralpha = r_wateralpha->value;
 	model_t		   *clmodel = e->model;
 	texture_t	   *t;
 	vec3_t			modelorg;
@@ -796,7 +830,8 @@ R_DrawBrushModel (entity_t *e)
 			if (psurf->flags & SURF_DRAWTURB)
 			{
 				EmitWaterPolys (psurf,
-						R_TextureAnimation(psurf->texinfo->texture), true);
+						R_TextureAnimation(psurf->texinfo->texture), true,
+						wateralpha);
 				psurf->visframe = -1;
 			}
 		}

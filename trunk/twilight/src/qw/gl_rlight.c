@@ -175,11 +175,9 @@ R_RenderDlight (dlight_t *light)
 
 		if (((v_index + 3) >= MAX_VERTEX_ARRAYS) ||
 				((i_index + 3) >= MAX_VERTEX_INDICES)) {
-			if (gl_cva)
-				qglLockArraysEXT (0, v_index);
+			TWI_PreVDrawCVA (0, v_index);
 			qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
-			if (gl_cva)
-				qglUnlockArraysEXT ();
+			TWI_PostVDrawCVA ();
 			v_index = 0;
 			i_index = 0;
 			memcpy(v_array[v_index], v_array[vcenter], sizeof(*v_array));
@@ -218,7 +216,9 @@ R_RenderDlights (void)
 	}
 
 	if (v_index || i_index) {
+		TWI_PreVDrawCVA (0, v_index);
 		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
+		TWI_PostVDrawCVA ();
 		v_index = 0;
 		i_index = 0;
 	}

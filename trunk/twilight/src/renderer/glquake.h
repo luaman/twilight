@@ -154,20 +154,56 @@ extern qboolean gl_mtexcombine;
 
 #define MAX_VERTEX_ARRAYS	1024
 #define MAX_VERTEX_INDICES	(MAX_VERTEX_ARRAYS * 4)
-extern GLfloat tc_array[MAX_VERTEX_ARRAYS][2];
-extern GLfloat v_array[MAX_VERTEX_ARRAYS][3];
-extern GLfloat c_array[MAX_VERTEX_ARRAYS][4];
+GLfloat v_arrays[2][MAX_VERTEX_ARRAYS][3];
+
+GLfloat tc_arrays[2][MAX_VERTEX_ARRAYS][2];
+GLfloat v_arrays[2][MAX_VERTEX_ARRAYS][3];
+GLfloat c_arrays[2][MAX_VERTEX_ARRAYS][4];
+
+#define tc_array (tc_arrays[va_index])
+#define v_array (v_arrays[va_index])
+#define c_array (c_arrays[va_index])
 
 extern GLuint vindices[MAX_VERTEX_INDICES];
 
-extern GLuint v_index, i_index;
+extern GLuint v_index, i_index, va_index;
+extern qboolean va_locked;
 
+extern void inline TWI_PreVDrawCVA (GLint min, GLint max)
+{
+	if (gl_cva) {
+		qglLockArraysEXT (min, max);
+		va_locked = 1;
+	}
+}
+
+extern void inline TWI_PostVDrawCVA ()
+{
+	if (va_locked)
+		qglUnlockArraysEXT ();
+}
+
+extern void inline TWI_PreVDraw (GLint min, GLint max)
+{
+	/*
+	if (gl_cva && va_locked) {
+		qglUnlockArraysEXT ();
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array[0]), tc_array[0]);
+		qglColorPointer (4, GL_FLOAT, sizeof(c_array[0]), c_array[0]);
+		qglVertexPointer (3, GL_FLOAT, sizeof(v_array[0]), v_array[0]);
+	}
+	*/
+}
+
+extern void inline TWI_PostVDraw ()
+{
+}
 
 /*
  * gl_warp.c
  */
 void EmitBothSkyLayers (msurface_t *fa);
-void EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform);
+void EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform,float alpha);
 void R_DrawSkyChain (msurface_t *s);
 
 /*
@@ -191,6 +227,7 @@ void R_StoreEfrags (efrag_t **ppefrag);
  */
 void R_DrawBrushModel (entity_t *e);
 void R_DrawWorld (void);
+void R_DrawWaterTextureChains (void);
 void GL_BuildLightmaps (void);
 
 /*

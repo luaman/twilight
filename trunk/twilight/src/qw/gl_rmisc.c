@@ -46,12 +46,28 @@ static const char rcsid[] =
 
 extern void TNT_Init (void);
 
-//varray_t2f_c4f_v4f_t varray[MAX_VERTEX_ARRAYS];
-GLfloat	tc_array[MAX_VERTEX_ARRAYS][2];
-GLfloat	v_array[MAX_VERTEX_ARRAYS][3];
-GLfloat	c_array[MAX_VERTEX_ARRAYS][4];
+/*
+typedef GLfloat tc_array_t[MAX_VERTEX_ARRAYS][2];
+typedef GLfloat v_array_t[MAX_VERTEX_ARRAYS][3];
+typedef GLfloat c_array_t[MAX_VERTEX_ARRAYS][4];
+
+tc_array_t	tc_arrays[2];
+v_array_t	v_arrays[2];
+c_array_t	c_arrays[2];
+
+tc_array_t	*tc_array;
+v_array_t	*v_array;
+c_array_t	*c_array;
+*/
+
+
+GLfloat	tc_arrays[2][MAX_VERTEX_ARRAYS][2];
+GLfloat	v_arrays[2][MAX_VERTEX_ARRAYS][3];
+GLfloat	c_arrays[2][MAX_VERTEX_ARRAYS][4];
+
 GLuint vindices[MAX_VERTEX_INDICES];
-GLuint v_index, i_index;
+GLuint v_index, i_index, va_index;
+qboolean va_locked;
 
 void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
@@ -164,6 +180,8 @@ R_Init (void)
 
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
+
+	va_index = 0;
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array[0]), tc_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(c_array[0]), c_array[0]);
