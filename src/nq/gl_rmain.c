@@ -32,16 +32,15 @@ static const char rcsid[] =
 #include "cmd.h"
 #include "cvar.h"
 #include "draw.h"
-#include "glquake.h"
 #include "gl_textures.h"
+#include "host.h"
 #include "image.h"
 #include "mathlib.h"
+#include "r_explosion.h"
 #include "sound.h"
 #include "strlib.h"
 #include "sys.h"
 #include "view.h"
-#include "r_explosion.h"
-#include "host.h"
 
 // FIXME - These need to be in a header somewhere
 extern void TNT_Init (void);

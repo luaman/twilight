@@ -30,13 +30,12 @@ static const char rcsid[] =
 #include <stdlib.h>	/* for rand() and calloc() */
 
 #include "quakedef.h"
+#include "collision.h"
 #include "common.h"
 #include "client.h"
 #include "cvar.h"
-#include "glquake.h"
 #include "mathlib.h"
 #include "r_explosion.h"
-#include "collision.h"
 
 memzone_t *part_zone;
 

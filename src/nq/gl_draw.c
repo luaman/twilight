@@ -31,18 +31,17 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "client.h"
+#include "console.h"
 #include "crc.h"
 #include "cvar.h"
 #include "draw.h"
-#include "glquake.h"
 #include "host.h"
+#include "gl_textures.h"
 #include "image.h"
 #include "mathlib.h"
 #include "pointers.h"
 #include "strlib.h"
 #include "sys.h"
-#include "gl_textures.h"
-#include "console.h"
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 

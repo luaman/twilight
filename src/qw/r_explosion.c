@@ -31,14 +31,13 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "client.h"
+#include "collision.h"
 #include "common.h"
 #include "cvar.h"
 #include "draw.h"
-#include "glquake.h"
+#include "gl_textures.h"
 #include "mathlib.h"
 #include "strlib.h"
-#include "gl_textures.h"
-#include "collision.h"
 #include "sys.h"
 
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);

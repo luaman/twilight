@@ -32,10 +32,9 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "common.h"
 #include "client.h"
-#include "cvar.h"
-#include "glquake.h"
-#include "mathlib.h"
 #include "collision.h"
+#include "cvar.h"
+#include "mathlib.h"
 #include "r_explosion.h"
 
 memzone_t *part_zone;

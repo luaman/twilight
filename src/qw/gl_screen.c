@@ -36,7 +36,6 @@ static const char rcsid[] =
 #include "console.h"
 #include "cvar.h"
 #include "draw.h"
-#include "glquake.h"
 #include "host.h"
 #include "image.h"
 #include "keys.h"
