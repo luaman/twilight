@@ -410,13 +410,13 @@ Sbar_DrawNum (int x, int y, int num, int digits, int color)
 
 //=============================================================================
 
-int         fragsort[MAX_SCOREBOARD];
+int		fragsort[MAX_SCOREBOARD];
 
-char        scoreboardtext[MAX_SCOREBOARD][20];
-int         scoreboardtop[MAX_SCOREBOARD];
-int         scoreboardbottom[MAX_SCOREBOARD];
-int         scoreboardcount[MAX_SCOREBOARD];
-int         scoreboardlines;
+char	scoreboardtext[MAX_SCOREBOARD][20];
+int		scoreboardtop[MAX_SCOREBOARD];
+int		scoreboardbottom[MAX_SCOREBOARD];
+int		scoreboardcount[MAX_SCOREBOARD];
+Uint32	scoreboardlines;
 
 /*
 ===============
@@ -426,9 +426,10 @@ Sbar_SortFrags
 void
 Sbar_SortFrags (void)
 {
-	int         i, j, k;
+	Uint32	i, j;
+	Sint32	k;
 
-// sort by frags
+	// sort by frags
 	scoreboardlines = 0;
 	for (i = 0; i < cl.maxclients; i++) {
 		if (cl.scores[i].name[0]) {
@@ -460,13 +461,13 @@ Sbar_UpdateScoreboard
 void
 Sbar_UpdateScoreboard (void)
 {
-	int         i, k;
-	int         top, bottom;
-	scoreboard_t *s;
+	Sint32			k;
+	Uint32			i, top, bottom;
+	scoreboard_t	*s;
 
 	Sbar_SortFrags ();
 
-// draw the text
+	// draw the text
 	memset (scoreboardtext, 0, sizeof (scoreboardtext));
 
 	for (i = 0; i < scoreboardlines; i++) {
@@ -721,16 +722,14 @@ Sbar_DrawFrags
 void
 Sbar_DrawFrags (void)
 {
-	int         i, k, l;
-	int         top, bottom;
-	int         x, y, f;
-	int         xofs;
-	char        num[12];
-	scoreboard_t *s;
+	Sint32			k;
+	Uint32			i, l, top, bottom, x, y, f, xofs;
+	char			num[12];
+	scoreboard_t	*s;
 
 	Sbar_SortFrags ();
 
-// draw the text
+	// draw the text
 	l = scoreboardlines <= 4 ? scoreboardlines : 4;
 
 	x = 23;
@@ -738,6 +737,7 @@ Sbar_DrawFrags (void)
 		xofs = 0;
 	else
 		xofs = (vid.width - 320) >> 1;
+
 	y = vid.height - SBAR_HEIGHT - 23;
 
 	for (i = 0; i < l; i++) {
@@ -1077,22 +1077,20 @@ Sbar_DeathmatchOverlay
 void
 Sbar_MiniDeathmatchOverlay (void)
 {
-	int         i, k, l;
-	int         top, bottom;
-	int         x, y, f;
-	char        num[12];
-	scoreboard_t *s;
-	int         numlines;
+	Sint32			k;
+	Uint32			i, l, x, y, f, top, bottom, numlines;
+	char			num[12];
+	scoreboard_t	*s;
 
 	if (vid.width < 512 || !sb_lines)
 		return;
 
 	scr_copyeverything = 1;
 
-// scores
+	// scores
 	Sbar_SortFrags ();
 
-// draw the text
+	// draw the text
 	l = scoreboardlines;
 	y = vid.height - sb_lines;
 	numlines = sb_lines / 8;
@@ -1115,7 +1113,7 @@ Sbar_MiniDeathmatchOverlay (void)
 		i = 0;
 
 	x = 324;
-	for ( /* */ ; i < scoreboardlines && y < vid.height - 8; i++) {
+	for (; i < scoreboardlines && y < vid.height - 8; i++) {
 		k = fragsort[i];
 		s = &cl.scores[k];
 		if (!s->name[0])

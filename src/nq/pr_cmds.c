@@ -273,7 +273,7 @@ PF_setmodel (void)
 	e = G_EDICT (OFS_PARM0);
 	m = G_STRING (OFS_PARM1);
 
-// check to see if model was properly precached
+	// check to see if model was properly precached
 	for (i = 0, check = sv.model_precache; *check; i++, check++)
 		if (!strcmp (*check, m))
 			break;
@@ -324,9 +324,9 @@ sprint(clientent, value)
 void
 PF_sprint (void)
 {
-	char       *s;
-	client_t   *client;
-	int         entnum;
+	char		*s;
+	client_t	*client;
+	Uint32		entnum;
 
 	entnum = G_EDICTNUM (OFS_PARM0);
 	s = PF_VarString (1);
@@ -355,9 +355,9 @@ centerprint(clientent, value)
 void
 PF_centerprint (void)
 {
-	char       *s;
-	client_t   *client;
-	int         entnum;
+	char		*s;
+	client_t	*client;
+	Uint32		entnum;
 
 	entnum = G_EDICTNUM (OFS_PARM0);
 	s = PF_VarString (1);
@@ -691,16 +691,15 @@ PF_checkpos (void)
 Uint8       checkpvs[MAX_MAP_LEAFS / 8];
 
 int
-PF_newcheckclient (int check)
+PF_newcheckclient (Uint32 check)
 {
-	int         i;
-	Uint8      *pvs;
-	edict_t    *ent;
-	mleaf_t    *leaf;
-	vec3_t      org;
+	Uint32		i;
+	Uint8		*pvs;
+	edict_t		*ent;
+	mleaf_t		*leaf;
+	vec3_t		org;
 
-// cycle to the next one
-
+	// cycle to the next one
 	if (check < 1)
 		check = 1;
 	if (check > svs.maxclients)
@@ -718,7 +717,7 @@ PF_newcheckclient (int check)
 		ent = EDICT_NUM (i);
 
 		if (i == check)
-			break;						// didn't find anything else
+			break;		// didn't find anything else
 
 		if (ent->free)
 			continue;
@@ -806,9 +805,9 @@ stuffcmd (clientent, value)
 void
 PF_stuffcmd (void)
 {
-	int         entnum;
-	char       *str;
-	client_t   *old;
+	Uint32		entnum;
+	char		*str;
+	client_t	*old;
 
 	entnum = G_EDICTNUM (OFS_PARM0);
 	if (entnum < 1 || entnum > svs.maxclients)
@@ -895,11 +894,10 @@ findradius (origin, radius)
 void
 PF_findradius (void)
 {
-	edict_t    *ent, *chain;
-	float       rad;
-	float      *org;
-	vec3_t      eorg;
-	int         i, j;
+	edict_t		*ent, *chain;
+	float		rad, *org;
+	vec3_t		eorg;
+	Uint32		i, j;
 
 	chain = (edict_t *) sv.edicts;
 
@@ -995,10 +993,10 @@ PF_Remove (void)
 void
 PF_Find (void)
 {
-	int         e;
-	int         f;
-	char       *s, *t;
-	edict_t    *ed;
+	Uint32		e;
+	int			f;
+	char		*s, *t;
+	edict_t		*ed;
 
 	e = G_EDICTNUM (OFS_PARM0);
 	f = G_INT (OFS_PARM1);
@@ -1197,18 +1195,18 @@ void(float style, string value) lightstyle
 void
 PF_lightstyle (void)
 {
-	int         style;
-	char       *val;
-	client_t   *client;
-	int         j;
+	int			style;
+	char		*val;
+	client_t	*client;
+	Uint32		j;
 
 	style = G_FLOAT (OFS_PARM0);
 	val = G_STRING (OFS_PARM1);
 
-// change the string in sv
+	// change the string in sv
 	sv.lightstyles[style] = val;
 
-// send message to all clients on this server
+	// send message to all clients on this server
 	if (sv.state != ss_active)
 		return;
 
@@ -1285,8 +1283,8 @@ entity nextent(entity)
 void
 PF_nextent (void)
 {
-	int         i;
-	edict_t    *ent;
+	Uint32		i;
+	edict_t		*ent;
 
 	i = G_EDICTNUM (OFS_PARM0);
 	while (1) {
@@ -1314,12 +1312,11 @@ vector aim(entity, missilespeed)
 void
 PF_aim (void)
 {
-	edict_t    *ent, *check, *bestent;
-	vec3_t      start, dir, end, bestdir;
-	int         i, j;
-	trace_t     tr;
-	float       dist, bestdist;
-	float       speed;
+	edict_t		*ent, *check, *bestent;
+	vec3_t		start, dir, end, bestdir;
+	Uint32		i, j;
+	trace_t		tr;
+	float		dist, bestdist, speed;
 
 	ent = G_EDICT (OFS_PARM0);
 	speed = G_FLOAT (OFS_PARM1);
@@ -1327,7 +1324,7 @@ PF_aim (void)
 	VectorCopy (ent->v.origin, start);
 	start[2] += 20;
 
-// try sending a trace straight
+	// try sending a trace straight
 	VectorCopy (pr_global_struct->v_forward, dir);
 	VectorMA (start, 2048, dir, end);
 	tr = SV_Move (start, vec3_origin, vec3_origin, end, false, ent);
@@ -1338,7 +1335,7 @@ PF_aim (void)
 		return;
 	}
 
-// try all possible entities
+	// try all possible entities
 	VectorCopy (dir, bestdir);
 	bestdist = sv_aim->value;
 	bestent = NULL;
@@ -1435,9 +1432,9 @@ MESSAGE WRITING
 sizebuf_t  *
 WriteDest (void)
 {
-	int         entnum;
-	int         dest;
-	edict_t    *ent;
+	Uint32		entnum;
+	int			dest;
+	edict_t		*ent;
 
 	dest = G_FLOAT (OFS_PARM0);
 	switch (dest) {
@@ -1552,9 +1549,9 @@ PF_setspawnparms
 void
 PF_setspawnparms (void)
 {
-	edict_t    *ent;
-	int         i;
-	client_t   *client;
+	edict_t		*ent;
+	Uint32		i;
+	client_t	*client;
 
 	ent = G_EDICT (OFS_PARM0);
 	i = NUM_FOR_EDICT (ent);

@@ -460,7 +460,8 @@ char       *
 MSG_ReadString (void)
 {
 	static char string[2048];
-	int         l, c;
+	Uint32		l;
+	Sint32		c;
 
 	l = 0;
 	do {
@@ -1010,9 +1011,9 @@ needed.  This is for the convenience of developers using ISDN from home.
 void
 COM_CopyFile (char *netpath, char *cachepath)
 {
-	FILE       *in, *out;
-	int         remaining, count;
-	char        buf[4096];
+	FILE		*in, *out;
+	Uint32		remaining, count;
+	char		buf[4096];
 
 	remaining = COM_FileOpenRead (netpath, &in);
 	// create directories up to the cache file

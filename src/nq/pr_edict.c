@@ -115,8 +115,8 @@ angles and bad trails.
 edict_t    *
 ED_Alloc (void)
 {
-	int         i;
-	edict_t    *e;
+	Uint32		i;
+	edict_t		*e;
 
 	for (i = svs.maxclients + 1; i < sv.num_edicts; i++) {
 		e = EDICT_NUM (i);
@@ -568,7 +568,7 @@ For debugging, prints all the entities in the current server
 void
 ED_PrintEdicts (void)
 {
-	int         i;
+	Uint32		i;
 
 	Con_Printf ("%i entities\n", sv.num_edicts);
 	for (i = 0; i < sv.num_edicts; i++)
@@ -585,7 +585,7 @@ For debugging, prints a single edicy
 void
 ED_PrintEdict_f (void)
 {
-	int         i;
+	Uint32		i;
 
 	i = Q_atoi (Cmd_Argv (1));
 	if (i >= sv.num_edicts) {
@@ -605,9 +605,8 @@ For debugging
 void
 ED_Count (void)
 {
-	int         i;
-	edict_t    *ent;
-	int         active, models, solid, step;
+	Uint32		i, active, models, solid, step;
+	edict_t		*ent;
 
 	active = models = solid = step = 0;
 	for (i = 0; i < sv.num_edicts; i++) {
@@ -1002,9 +1001,9 @@ PR_LoadProgs
 void
 PR_LoadProgs (void)
 {
-	int         i;
+	Sint32	i;
 
-// flush the non-C variable lookup cache
+	// flush the non-C variable lookup cache
 	for (i = 0; i < GEFV_CACHESIZE; i++)
 		gefvCache[i].field[0] = 0;
 
@@ -1015,8 +1014,8 @@ PR_LoadProgs (void)
 
 	pr_crc = CRC_Block ((Uint8 *) progs, com_filesize);
 
-// byte swap the header
-	for (i = 0; i < sizeof (*progs) / 4; i++)
+	// byte swap the header
+	for (i = 0; i < (Sint32)sizeof (*progs) / 4; i++)
 		((int *) progs)[i] = LittleLong (((int *) progs)[i]);
 
 	if (progs->version != PROG_VERSION)
@@ -1038,7 +1037,7 @@ PR_LoadProgs (void)
 	pr_edict_size =
 		progs->entityfields * 4 + sizeof (edict_t) - sizeof (entvars_t);
 
-// byte swap the lumps
+	// byte swap the lumps
 	for (i = 0; i < progs->numstatements; i++) {
 		pr_statements[i].op = LittleShort (pr_statements[i].op);
 		pr_statements[i].a = LittleShort (pr_statements[i].a);
@@ -1121,7 +1120,7 @@ EDICT_NUM (int n)
 int
 NUM_FOR_EDICT (edict_t *e)
 {
-	int         b;
+	Uint32	b;
 
 	b = (Uint8 *) e - (Uint8 *) sv.edicts;
 	b = b / pr_edict_size;

@@ -206,7 +206,7 @@ typedef struct {
 
 	char        levelname[40];			// for display on solo scoreboard
 	int         viewentity;				// cl_entitites[cl.viewentity] = player
-	int         maxclients;
+	Uint8		maxclients;
 	int         gametype;
 
 // refresh related state

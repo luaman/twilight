@@ -83,10 +83,10 @@ SV_CheckAllEnts
 void
 SV_CheckAllEnts (void)
 {
-	int         e;
-	edict_t    *check;
+	Uint32		e;
+	edict_t		*check;
 
-// see if any solid entities are inside the final position
+	// see if any solid entities are inside the final position
 	check = NEXT_EDICT (sv.edicts);
 	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check)) {
 		if (check->free)
@@ -448,7 +448,8 @@ SV_PushMoveAndRotate
 */
 void SV_PushMoveAndRotate (edict_t *pusher, float movetime, vec3_t amove, vec3_t move)
 {
-	int			i, e, savesolid;
+	int			i, savesolid;
+	Uint32		e;
 	edict_t		*check, *block;
 	vec3_t		pushorig, pushangles, entorig;
 	int			num_moved;
@@ -469,17 +470,17 @@ void SV_PushMoveAndRotate (edict_t *pusher, float movetime, vec3_t amove, vec3_t
 	VectorCopy (pusher->v.origin, pushorig);
 	VectorCopy (pusher->v.angles, pushangles);
 
-// move the pusher to it's final position
+	// move the pusher to it's final position
 
 	VectorAdd (pusher->v.angles, amove, pusher->v.angles);
 	VectorAdd (pusher->v.origin, move, pusher->v.origin);
 	pusher->v.ltime += movetime;
 	SV_LinkEdict (pusher, false);
 
-// see if any solid entities are inside the final position
+	// see if any solid entities are inside the final position
 	num_moved = 0;
 	check = NEXT_EDICT(sv.edicts);
-	for (e=1 ; e<sv.num_edicts ; e++, check = NEXT_EDICT(check))
+	for (e = 1 ; e < sv.num_edicts; e++, check = NEXT_EDICT(check))
 	{
 		if (check->free)
 			continue;
@@ -1218,20 +1219,20 @@ SV_Physics
 void
 SV_Physics (void)
 {
-	int         i;
+	Uint32         i;
 	edict_t    *ent;
 
-// let the progs know that a new frame has started
+	// let the progs know that a new frame has started
 	pr_global_struct->self = EDICT_TO_PROG (sv.edicts);
 	pr_global_struct->other = EDICT_TO_PROG (sv.edicts);
 	pr_global_struct->time = sv.time;
 	PR_ExecuteProgram (pr_global_struct->StartFrame);
 
-//SV_CheckAllEnts ();
+	//SV_CheckAllEnts ();
 
-//
-// treat each object in turn
-//
+	//
+	// treat each object in turn
+	//
 	ent = sv.edicts;
 	for (i = 0; i < sv.num_edicts; i++, ent = NEXT_EDICT (ent)) {
 		if (ent->free)

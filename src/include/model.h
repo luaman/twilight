@@ -345,8 +345,7 @@ typedef enum { mod_brush, mod_sprite, mod_alias } modtype_t;
 
 typedef struct model_s {
 	char        name[MAX_QPATH];
-	qboolean    needload;				// bmodels and sprites don't cache
-	// normally
+	qboolean    needload;				// bmodels and sprites don't cache normally
 
 	modtype_t   type;
 	int         numframes;
@@ -370,58 +369,57 @@ typedef struct model_s {
 //
 // brush model
 //
-	int         firstmodelsurface, nummodelsurfaces;
+	int			firstmodelsurface, nummodelsurfaces;
 
-	int         numsubmodels;
-	dmodel_t   *submodels;
+	Uint32		numsubmodels;
+	dmodel_t	*submodels;
 
-	int         numplanes;
-	mplane_t   *planes;
+	Uint32		numplanes;
+	mplane_t	*planes;
 
-	int         numleafs;				// number of visible leafs, not
-	// counting 0
-	mleaf_t    *leafs;
+	Uint32		numleafs;			// number of visible leafs, not counting 0
+	mleaf_t		*leafs;
 
-	int         numvertexes;
-	mvertex_t  *vertexes;
+	Uint32		numvertexes;
+	mvertex_t	*vertexes;
 
-	int         numedges;
-	medge_t    *edges;
+	Uint32		numedges;
+	medge_t		*edges;
 
-	int         numnodes;
-	mnode_t    *nodes;
+	Uint32		numnodes;
+	mnode_t		*nodes;
 
-	int         numtexinfo;
-	mtexinfo_t *texinfo;
+	Uint32		numtexinfo;
+	mtexinfo_t	*texinfo;
 
-	int         numsurfaces;
-	msurface_t *surfaces;
+	Uint32		numsurfaces;
+	msurface_t	*surfaces;
 
-	int         numsurfedges;
-	int        *surfedges;
+	Uint32		numsurfedges;
+	int			*surfedges;
 
-	int         numclipnodes;
-	dclipnode_t *clipnodes;
+	Uint32		numclipnodes;
+	dclipnode_t	*clipnodes;
 
-	int         nummarksurfaces;
-	msurface_t **marksurfaces;
+	Uint32		nummarksurfaces;
+	msurface_t	**marksurfaces;
 
-	hull_t      hulls[MAX_MAP_HULLS];
+	hull_t		hulls[MAX_MAP_HULLS];
 
-	int         numtextures;
-	texture_t **textures;
+	Uint32		numtextures;
+	texture_t	**textures;
 
-	Uint8      *visdata;
-	Uint8      *lightdata;
-	char       *entities;
+	Uint8		*visdata;
+	Uint8		*lightdata;
+	char		*entities;
 
-	unsigned    checksum;
-	unsigned    checksum2;
+	Uint32		checksum;
+	Uint32		checksum2;
 
 //
 // additional model data
 //
-	cache_user_t cache;					// only access through Mod_Extradata
+	cache_user_t cache;				// only access through Mod_Extradata
 
 } model_t;
 

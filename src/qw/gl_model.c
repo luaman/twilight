@@ -1212,9 +1212,9 @@ Mod_LoadBrushModel
 void
 Mod_LoadBrushModel (model_t *mod, void *buffer)
 {
-	int         i, j;
-	dheader_t  *header;
-	dmodel_t   *bm;
+	Uint32		i, j;
+	dheader_t	*header;
+	dmodel_t	*bm;
 	char        name[10];
 
 	loadmodel->type = mod_brush;
@@ -1227,13 +1227,13 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 			("Mod_LoadBrushModel: %s has wrong version number (%i should be %i)",
 			 mod->name, i, BSPVERSION);
 
-// swap all the lumps
+	// swap all the lumps
 	mod_base = (Uint8 *) header;
 
 	for (i = 0; i < sizeof (dheader_t) / 4; i++)
 		((int *) header)[i] = LittleLong (((int *) header)[i]);
 
-// checksum all of the map, except for entities
+	// checksum all of the map, except for entities
 	mod->checksum = 0;
 	mod->checksum2 = 0;
 
@@ -1250,9 +1250,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 							   header->lumps[i].filelen);
 	}
 
-
-// load into heap
-
+	// load into heap
 	Mod_LoadVertexes (&header->lumps[LUMP_VERTEXES]);
 	Mod_LoadEdges (&header->lumps[LUMP_EDGES]);
 	Mod_LoadSurfedges (&header->lumps[LUMP_SURFEDGES]);
@@ -1273,9 +1271,9 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	mod->numframes = 2;					// regular and alternate animation
 
-//
-// set up the submodels (FIXME: this is confusing)
-//
+	//
+	// set up the submodels (FIXME: this is confusing)
+	//
 	for (i = 0; i < mod->numsubmodels; i++) {
 		bm = &mod->submodels[i];
 

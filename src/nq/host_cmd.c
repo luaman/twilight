@@ -81,12 +81,10 @@ Host_Status_f
 void
 Host_Status_f (void)
 {
-	client_t   *client;
-	int         seconds;
-	int         minutes;
-	int         hours = 0;
-	int         j;
-	void        (*print) (char *fmt, ...);
+	client_t	*client;
+	int         seconds, minutes, hours = 0;
+	Uint32		j;
+	void		(*print) (char *fmt, ...);
 
 	if (cmd_source == src_command) {
 		if (!sv.active) {
@@ -227,9 +225,9 @@ Host_Ping_f
 void
 Host_Ping_f (void)
 {
-	int         i, j;
-	float       total;
-	client_t   *client;
+	Uint32		i, j;
+	float		total;
+	client_t	*client;
 
 	if (cmd_source == src_command) {
 		Cmd_ForwardToServer ();
@@ -445,10 +443,10 @@ Host_Savegame_f
 void
 Host_Savegame_f (void)
 {
-	char        name[256];
-	FILE       *f;
-	int         i;
-	char        comment[SAVEGAME_COMMENT_LENGTH + 1];
+	char	name[256];
+	FILE	*f;
+	Uint32	i;
+	char	comment[SAVEGAME_COMMENT_LENGTH + 1];
 
 	if (cmd_source != src_command)
 		return;
@@ -504,15 +502,13 @@ Host_Savegame_f (void)
 	fprintf (f, "%s\n", sv.name);
 	fprintf (f, "%f\n", sv.time);
 
-// write the light styles
-
+	// write the light styles
 	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
 		if (sv.lightstyles[i])
 			fprintf (f, "%s\n", sv.lightstyles[i]);
 		else
 			fprintf (f, "m\n");
 	}
-
 
 	ED_WriteGlobals (f);
 	for (i = 0; i < sv.num_edicts; i++) {
@@ -532,16 +528,12 @@ Host_Loadgame_f
 void
 Host_Loadgame_f (void)
 {
-	char        name[MAX_OSPATH];
-	FILE       *f;
-	char        mapname[MAX_QPATH];
-	float       time, tfloat;
-	char        str[32768], *start;
-	int         i, r;
-	edict_t    *ent;
-	int         entnum;
-	int         version;
-	float       spawn_parms[NUM_SPAWN_PARMS];
+	char        name[MAX_OSPATH], mapname[MAX_QPATH], str[32768], *start;
+	float       time, tfloat, spawn_parms[NUM_SPAWN_PARMS];
+	Sint32		entnum, version, r;
+	Uint32		i;
+	edict_t		*ent;
+	FILE		*f;
 
 	if (cmd_source != src_command)
 		return;
@@ -596,7 +588,7 @@ Host_Loadgame_f (void)
 	sv.paused = true;					// pause until all clients connect
 	sv.loadgame = true;
 
-// load the light styles
+	// load the light styles
 
 	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
 		fscanf (f, "%s\n", str);
@@ -604,8 +596,8 @@ Host_Loadgame_f (void)
 		strcpy (sv.lightstyles[i], str);
 	}
 
-// load the edicts out of the savegame file
-	entnum = -1;						// -1 is the globals
+	// load the edicts out of the savegame file
+	entnum = -1;	// -1 is the globals
 	while (!feof (f)) {
 		for (i = 0; i < sizeof (str) - 1; i++) {
 			r = fgetc (f);
@@ -713,10 +705,10 @@ Host_Version_f (void)
 void
 Host_Say (qboolean teamonly)
 {
-	client_t   *client;
-	client_t   *save;
-	int         j;
-	char       *p;
+	client_t	*client;
+	client_t	*save;
+	Uint32		j;
+	char		*p;
 	unsigned char text[64];
 	qboolean    fromServer = false;
 
@@ -787,11 +779,9 @@ Host_Say_Team_f (void)
 void
 Host_Tell_f (void)
 {
-	client_t   *client;
-	client_t   *save;
-	int         j;
-	char       *p;
-	char        text[64];
+	client_t	*client, *save;
+	Uint32		j;
+	char		*p, text[64];
 
 	if (cmd_source == src_command) {
 		Cmd_ForwardToServer ();
@@ -806,12 +796,12 @@ Host_Tell_f (void)
 
 	p = Cmd_Args ();
 
-// remove quotes if present
+	// remove quotes if present
 	if (*p == '"') {
 		p++;
 		p[strlen (p) - 1] = 0;
 	}
-// check length & truncate if necessary
+	// check length & truncate if necessary
 	j = sizeof (text) - 2 - strlen (text);	// -2 for /n and null
 	// terminator
 	if (strlen (p) > j)
@@ -976,9 +966,9 @@ Host_Spawn_f
 void
 Host_Spawn_f (void)
 {
-	int         i;
-	client_t   *client;
-	edict_t    *ent;
+	Uint32		i;
+	client_t	*client;
+	edict_t		*ent;
 
 	if (cmd_source == src_command) {
 		Con_Printf ("spawn is not valid from the console\n");
@@ -1119,7 +1109,7 @@ Host_Kick_f (void)
 	char       *who;
 	char       *message = NULL;
 	client_t   *save;
-	int         i;
+	Uint32		i;
 	qboolean    byNumber = false;
 
 	if (cmd_source == src_command) {

@@ -330,9 +330,9 @@ Key_Console (int key)
 
 //============================================================================
 
-qboolean    chat_team;
-char        chat_buffer[MAXCMDLINE];
-int         chat_bufferlen = 0;
+qboolean	chat_team;
+char		chat_buffer[MAXCMDLINE];
+Uint32		chat_bufferlen = 0;
 
 void
 Key_Message (int key)

@@ -330,12 +330,12 @@ SV_CheckForNewClients
 void
 SV_CheckForNewClients (void)
 {
-	struct qsocket_s *ret;
-	int         i;
+	struct qsocket_s	*ret;
+	Uint32				i;
 
-//
-// check for new connections
-//
+	//
+	// check for new connections
+	//
 	while (1) {
 		ret = NET_CheckNewConnections ();
 		if (!ret)
@@ -454,25 +454,25 @@ SV_WriteEntitiesToClient
 void
 SV_WriteEntitiesToClient (edict_t *clent, sizebuf_t *msg)
 {
-	int         e, i;
-	int         bits;
-	Uint8      *pvs;
-	vec3_t      org;
-	float       miss;
-	edict_t    *ent;
+	Uint32		e, i;
+	int			bits;
+	Uint8		*pvs;
+	vec3_t		org;
+	float		miss;
+	edict_t		*ent;
 
-// find the client's PVS
+	// find the client's PVS
 	VectorAdd (clent->v.origin, clent->v.view_ofs, org);
 	pvs = SV_FatPVS (org);
 
-// send over all entities (excpet the client) that touch the pvs
+	// send over all entities (excpet the client) that touch the pvs
 	ent = NEXT_EDICT (sv.edicts);
 	for (e = 1; e < sv.num_edicts; e++, ent = NEXT_EDICT (ent)) {
 
-// ignore if not touching a PV leaf
+	// ignore if not touching a PV leaf
 		if (ent != clent)				// clent is ALLWAYS sent
 		{
-// ignore ents without visible models
+	// ignore ents without visible models
 			if (!ent->v.modelindex || !pr_strings[ent->v.model])
 				continue;
 
@@ -488,7 +488,7 @@ SV_WriteEntitiesToClient (edict_t *clent, sizebuf_t *msg)
 			Con_Printf ("packet overflow\n");
 			return;
 		}
-// send an update
+		// send an update
 		bits = 0;
 
 		for (i = 0; i < 3; i++) {
@@ -576,8 +576,8 @@ SV_CleanupEnts
 void
 SV_CleanupEnts (void)
 {
-	int         e;
-	edict_t    *ent;
+	Uint32		e;
+	edict_t		*ent;
 
 	ent = NEXT_EDICT (sv.edicts);
 	for (e = 1; e < sv.num_edicts; e++, ent = NEXT_EDICT (ent)) {
@@ -764,10 +764,10 @@ SV_UpdateToReliableMessages
 void
 SV_UpdateToReliableMessages (void)
 {
-	int         i, j;
-	client_t   *client;
+	Uint32		i, j;
+	client_t	*client;
 
-// check for changes to be sent over the reliable streams
+	// check for changes to be sent over the reliable streams
 	for (i = 0, host_client = svs.clients; i < svs.maxclients;
 		 i++, host_client++) {
 		if (host_client->old_frags != host_client->edict->v.frags) {
@@ -828,12 +828,12 @@ SV_SendClientMessages
 void
 SV_SendClientMessages (void)
 {
-	int         i;
+	Uint32	i;
 
-// update frags, names, etc
+	// update frags, names, etc
 	SV_UpdateToReliableMessages ();
 
-// build individual updates
+	// build individual updates
 	for (i = 0, host_client = svs.clients; i < svs.maxclients;
 		 i++, host_client++) {
 		if (!host_client->active)
@@ -930,9 +930,9 @@ SV_CreateBaseline
 void
 SV_CreateBaseline (void)
 {
-	int         i;
-	edict_t    *svent;
-	int         entnum;
+	int			i;
+	edict_t		*svent;
+	Uint32		entnum;
 
 	for (entnum = 0; entnum < sv.num_edicts; entnum++) {
 		// get the current server version
@@ -1013,7 +1013,7 @@ transition to another level
 void
 SV_SaveSpawnparms (void)
 {
-	int         i, j;
+	Uint32		i, j;
 
 	svs.serverflags = pr_global_struct->serverflags;
 
@@ -1043,8 +1043,8 @@ extern float scr_centertime_off;
 void
 SV_SpawnServer (char *server)
 {
-	edict_t    *ent;
-	int         i;
+	edict_t		*ent;
+	Uint32		i;
 	extern		qboolean isnotmap;
 
 	// let's not have any servers with no name
@@ -1055,15 +1055,15 @@ SV_SpawnServer (char *server)
 	Con_DPrintf ("SpawnServer: %s\n", server);
 	svs.changelevel_issued = false;		// now safe to issue another
 
-//
-// tell all connected clients that we are going to a new level
-//
+	//
+	// tell all connected clients that we are going to a new level
+	//
 	if (sv.active) {
 		SV_SendReconnect ();
 	}
-//
-// make cvars consistant
-//
+	//
+	// make cvars consistent
+	//
 	if (coop->value)
 		Cvar_Set (deathmatch, "0");
 	if (deathmatch->value)
@@ -1073,19 +1073,19 @@ SV_SpawnServer (char *server)
 
 	Cvar_Set (skill, va("%i", current_skill));
 
-//
-// set up the new server
-//
+	//
+	// set up the new server
+	//
 	Host_ClearMemory ();
 
 	memset (&sv, 0, sizeof (sv));
 
 	strcpy (sv.name, server);
 
-// load progs to get entity field count
+	// load progs to get entity field count
 	PR_LoadProgs ();
 
-// allocate server memory
+	// allocate server memory
 	sv.max_edicts = MAX_EDICTS;
 
 	sv.edicts = Hunk_AllocName (sv.max_edicts * pr_edict_size, "edicts");
@@ -1102,7 +1102,7 @@ SV_SpawnServer (char *server)
 	sv.signon.cursize = 0;
 	sv.signon.data = sv.signon_buf;
 
-// leave slots at start for clients only
+	// leave slots at start for clients only
 	sv.num_edicts = svs.maxclients + 1;
 	for (i = 0; i < svs.maxclients; i++) {
 		ent = EDICT_NUM (i + 1);
@@ -1126,9 +1126,9 @@ SV_SpawnServer (char *server)
 	}
 	sv.models[1] = sv.worldmodel;
 
-//
-// clear world interaction links
-//
+	//
+	// clear world interaction links
+	//
 	SV_ClearWorld ();
 
 	sv.sound_precache[0] = pr_strings;

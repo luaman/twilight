@@ -603,9 +603,9 @@ Mod_LoadMarksurfaces
 void
 Mod_LoadMarksurfaces (lump_t *l)
 {
-	int         i, j, count;
-	short      *in;
-	msurface_t **out;
+	Uint32		i, j, count;
+	short		*in;
+	msurface_t	**out;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))

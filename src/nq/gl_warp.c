@@ -664,10 +664,8 @@ R_ClearSkyBox
 */
 void R_ClearSkyBox (void)
 {
-	int		i;
-
-	for (i = 0; i < 6; i++)
-	{
+	Uint8	i;
+	for (i = 0; i < 6; i++) {
 		skymins[0][i] = skymins[1][i] = 9999;
 		skymaxs[0][i] = skymaxs[1][i] = -9999;
 	}
@@ -689,11 +687,11 @@ void MakeSkyVec (float s, float t, int axis)
 	}
 
 	// avoid bilerp seam
-	s = (s+1)*0.5;
-	t = (t+1)*0.5;
+	s = (s + 1) * 0.5;
+	t = (t + 1 )* 0.5;
 
-	s = bound ((1.0/512), s, (511.0/512));
-	t = 1.0 - bound ((1.0/512), t, (511.0/512));
+	s = bound ((1.0 / 512), s, (511.0 / 512));
+	t = 1.0 - bound ((1.0 / 512), t, (511.0 / 512));
 
 	qglTexCoord2f (s, t);
 	qglVertex3fv (v);
@@ -708,7 +706,7 @@ static int skytexorder[6] = {0, 2, 1, 3, 4, 5};
 
 void R_DrawSkyBox (void)
 {
-	int		i;
+	Uint8	i;
 
 	if (!draw_skybox || (skytexturenum == -1))
 		return;

@@ -393,11 +393,11 @@ Mod_LoadTexinfo
 void
 Mod_LoadTexinfo (lump_t *l)
 {
-	texinfo_t  *in;
-	mtexinfo_t *out;
-	int         i, j, count;
-	int         miptex;
-	float       len1, len2;
+	texinfo_t	*in;
+	mtexinfo_t	*out;
+	Uint32		i, j, count;
+	Uint32		miptex;
+	float		len1, len2;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
@@ -592,10 +592,10 @@ Mod_LoadBrushModel
 void
 Mod_LoadBrushModel (model_t *mod, void *buffer)
 {
-	int         i, j;
-	dheader_t  *header;
-	dmodel_t   *bm;
-	char        name[10];
+	Uint32		i, j;
+	dheader_t	*header;
+	dmodel_t	*bm;
+	char		name[10];
 	extern qboolean isnotmap;
 
 	loadmodel->type = mod_brush;

@@ -78,13 +78,13 @@ PollProcedure slistSendProcedure = { NULL, 0.0, Slist_Send };
 PollProcedure slistPollProcedure = { NULL, 0.0, Slist_Poll };
 
 
-sizebuf_t   net_message;
-int         net_activeconnections = 0;
+sizebuf_t	net_message;
+Uint32		net_activeconnections = 0;
 
-int         messagesSent = 0;
-int         messagesReceived = 0;
-int         unreliableMessagesSent = 0;
-int         unreliableMessagesReceived = 0;
+int			messagesSent = 0;
+int			messagesReceived = 0;
+int			unreliableMessagesSent = 0;
+int			unreliableMessagesReceived = 0;
 
 cvar_t     *net_messagetimeout;
 cvar_t     *hostname;
@@ -647,11 +647,11 @@ NET_CanSendMessage (qsocket_t * sock)
 int
 NET_SendToAll (sizebuf_t *data, int blocktime)
 {
-	double      start;
-	int         i;
-	int         count = 0;
-	qboolean    state1[MAX_SCOREBOARD];
-	qboolean    state2[MAX_SCOREBOARD];
+	double		start;
+	Uint32		i;
+	int			count = 0;
+	qboolean	state1[MAX_SCOREBOARD];
+	qboolean	state2[MAX_SCOREBOARD];
 
 	for (i = 0, host_client = svs.clients; i < svs.maxclients;
 		 i++, host_client++) {
