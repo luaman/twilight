@@ -442,7 +442,7 @@ RotatePointAroundVector (vec3_t dst, const vec3_t dir, const vec3_t point,
 
 	zrot[0][0] = Q_cos (DEG2RAD (degrees));
 	zrot[0][1] = Q_sin (DEG2RAD (degrees));
-	zrot[1][0] = zrot[0][1];
+	zrot[1][0] = -zrot[0][1];
 	zrot[1][1] = zrot[0][0];
 
 	R_ConcatRotations (m, zrot, tmpmat);
