@@ -350,15 +350,15 @@ R_TeleportSplash (vec3_t org)
 void
 R_RocketTrail (vec3_t start, vec3_t end, int type)
 {
-	vec3_t      vec;
+	vec3_t      vec, avec;
 	float       len;
-	int         j;
+	int         j, lsub;
 	particle_t *p;
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 	while (len > 0) {
-		len -= 3;
+		lsub = 3;
 
 		if (!free_particles)
 			return;
@@ -370,60 +370,70 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 		VectorClear (p->vel);
 		p->die = cl.time + 2;
 
-		if (type == 4) {				// slight blood
-			p->type = pt_slowgrav;
-			p->color = 67 + (Q_rand () & 3);
-			for (j = 0; j < 3; j++)
-				p->org[j] = start[j] + ((Q_rand () % 6) - 3);
-			len -= 3;
-		} else if (type == 2) {			// blood
-			p->type = pt_slowgrav;
-			p->color = 67 + (Q_rand () & 3);
-			for (j = 0; j < 3; j++)
-				p->org[j] = start[j] + ((Q_rand () % 6) - 3);
-		} else if (type == 6) {			// voor trail
-			p->color = 9 * 16 + 8 + (Q_rand () & 3);
-			p->type = pt_static;
-			p->die = cl.time + 0.3;
-			for (j = 0; j < 3; j++)
-				p->org[j] = start[j] + ((Q_rand () & 15) - 8);
-		} else if (type == 1) {			// smoke smoke
-			p->ramp = (Q_rand () & 3) + 2;
-			p->color = ramp3[(int) p->ramp];
-			p->type = pt_fire;
-			for (j = 0; j < 3; j++)
-				p->org[j] = start[j] + ((Q_rand () % 6) - 3);
-		} else if (type == 0) {			// rocket trail
-			p->ramp = (Q_rand () & 3);
-			p->color = ramp3[(int) p->ramp];
-			p->type = pt_fire;
-			for (j = 0; j < 3; j++)
-				p->org[j] = start[j] + ((Q_rand () % 6) - 3);
-		} else if (type == 3 || type == 5) {	// tracer
-			static int  tracercount;
+		switch (type) {
+			case 4:		// slight blood
+				p->type = pt_slowgrav;
+				p->color = 67 + (Q_rand () & 3);
+				for (j = 0; j < 3; j++)
+					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
+				lsub += 3;
+				break;
+			case 2:		// blood
+				p->type = pt_slowgrav;
+				p->color = 67 + (Q_rand () & 3);
+				for (j = 0; j < 3; j++)
+					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
+				break;
+			case 6:		// voor trail
+				p->color = 9 * 16 + 8 + (Q_rand () & 3);
+				p->type = pt_static;
+				p->die = cl.time + 0.3;
+				for (j = 0; j < 3; j++)
+					p->org[j] = start[j] + ((Q_rand () & 15) - 8);
+				break;
+			case 1:		// smoke smoke
+				p->ramp = (Q_rand () & 3) + 2;
+				p->color = ramp3[(int) p->ramp];
+				p->type = pt_fire;
+				for (j = 0; j < 3; j++)
+					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
+				break;
+			case 0:		// rocket trail
+				p->ramp = (Q_rand () & 3);
+				p->color = ramp3[(int) p->ramp];
+				p->type = pt_fire;
+				for (j = 0; j < 3; j++)
+					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
+				break;
+			case 3:
+			case 5:		// tracer
+				{
+					static int  tracercount;
 
-			p->die = cl.time + 0.5;
-			p->type = pt_static;
-			if (type == 3)
-				p->color = 52 + ((tracercount & 4) << 1);
-			else
-				p->color = 230 + ((tracercount & 4) << 1);
+					p->die = cl.time + 0.5;
+					p->type = pt_static;
+					if (type == 3)
+						p->color = 52 + ((tracercount & 4) << 1);
+					else
+						p->color = 230 + ((tracercount & 4) << 1);
 
-			tracercount++;
+					tracercount++;
 
-			VectorCopy (start, p->org);
-			if (tracercount & 1) {
-				p->vel[0] = 30 * vec[1];
-				p->vel[1] = 30 * -vec[0];
-			} else {
-				p->vel[0] = 30 * -vec[1];
-				p->vel[1] = 30 * vec[0];
-			}
-
+					VectorCopy (start, p->org);
+					if (tracercount & 1) {
+						p->vel[0] = 30 * vec[1];
+						p->vel[1] = 30 * -vec[0];
+					} else {
+						p->vel[0] = 30 * -vec[1];
+						p->vel[1] = 30 * vec[0];
+					}
+				}
+				break;
 		}
 
-
-		VectorAdd (start, vec, start);
+		VectorScale(vec, lsub, avec);
+		VectorAdd (start, avec, start);
+		len -= lsub;
 	}
 }
 
@@ -449,8 +459,6 @@ R_DrawParticles (void)
 	float       scale;
 
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
-	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	qglBegin (GL_TRIANGLES);
 
