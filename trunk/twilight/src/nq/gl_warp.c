@@ -264,7 +264,25 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 			qglVertex3fv (temp);
 		}
 		qglEnd ();
+	}
+}
 
+/*
+=============
+EmitWaterTris
+
+r_showtris logic specifically for liquids
+=============
+*/
+void
+EmitWaterTris (msurface_t *fa)
+{
+	glpoly_t   *p;
+	float	   *v;
+	int			i;
+
+	for (p = fa->polys; p; p = p->next)
+	{
 		if (!(cl.maxclients > 1) && r_showtris->value) {
 			qglDisable (GL_TEXTURE_2D);
 			qglDisable (GL_DEPTH_TEST);
@@ -288,7 +306,6 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 		}
 	}
 }
-
 
 /*
 =============

@@ -460,7 +460,6 @@ R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 	float		*v;
 	vec3_t		nv;
 	float		intensity = max (0, r_waterwarp->value);
-	glpoly_t	*p;
 
 	c_brush_polys++;
 
@@ -489,32 +488,6 @@ R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 			qglVertex3fv (v);
 		}
 		qglEnd ();
-
-		if (!(cl.maxclients > 1) && r_showtris->value) {
-			qglDisable (GL_TEXTURE_2D);
-			qglActiveTextureARB (GL_TEXTURE0_ARB);
-			qglDisable (GL_TEXTURE_2D);
-
-			qglDisable (GL_DEPTH_TEST);
-			qglColor4f (1,1,1,1);
-
-			p = fa->polys;
-			for (i = 2 ; i < p->numverts; i++)
-			{
-				qglBegin (GL_LINE_STRIP);
-				qglVertex3fv (p->verts[0]);
-				qglVertex3fv (p->verts[i - 1]);
-				qglVertex3fv (p->verts[i]);
-				qglVertex3fv (p->verts[0]);
-				qglEnd ();
-			}
-
-			qglEnable (GL_DEPTH_TEST);
-
-			qglEnable (GL_TEXTURE_2D);
-			qglActiveTextureARB (GL_TEXTURE1_ARB);
-			qglEnable (GL_TEXTURE_2D);
-		}
 	}
 
 	// add the poly to the proper fullbright chain
@@ -523,6 +496,45 @@ R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 		fa->polys->fb_chain = fullbright_polys[t->fb_texturenum];
 		fullbright_polys[t->fb_texturenum] = fa->polys;
 		drawfullbrights = true;
+	}
+}
+
+/*
+================
+R_RenderTris
+================
+*/
+static void
+R_RenderTris (msurface_t *fa)
+{
+	int			i;
+	glpoly_t	*p;
+
+	qglDisable (GL_TEXTURE_2D);
+	if (gl_mtex) {
+		qglActiveTextureARB (GL_TEXTURE0_ARB);
+		qglDisable (GL_TEXTURE_2D);
+	}
+
+	qglDisable (GL_DEPTH_TEST);
+	qglColor4f (1,1,1,1);
+
+	p = fa->polys;
+	for (i = 2 ; i < p->numverts; i++)
+	{
+		qglBegin (GL_LINE_STRIP);
+		qglVertex3fv (p->verts[0]);
+		qglVertex3fv (p->verts[i - 1]);
+		qglVertex3fv (p->verts[i]);
+		qglVertex3fv (p->verts[0]);
+		qglEnd ();
+	}
+
+	qglEnable (GL_DEPTH_TEST);
+	qglEnable (GL_TEXTURE_2D);
+	if (gl_mtex) {
+		qglActiveTextureARB (GL_TEXTURE1_ARB);
+		qglEnable (GL_TEXTURE_2D);
 	}
 }
 
@@ -654,13 +666,30 @@ DrawTextureChains ()
 
 			for (; s; s = s->texturechain)
 				R_RenderBrushPolyMTex (s, st);
+		}
+
+		for (i = 0; i < cl.worldmodel->numtextures; i++)
+		{
+			t = cl.worldmodel->textures[i];
+			if (!t)
+				continue;
+			s = t->texturechain;
+			if (!s || (s->flags & SURF_DRAWTURB))
+				continue;
+
+			if (!(cl.maxclients > 1) && r_showtris->value) {
+				for (; s; s = s->texturechain)
+					R_RenderTris (s);
+			}
 
 			t->texturechain = NULL;
 		}
 
 		qglDisable (GL_TEXTURE_2D);
+
 		if (gl_mtexcombine)
 			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1.0);
+
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglDisable (GL_TEXTURE_2D);
 		qglActiveTextureARB (GL_TEXTURE0_ARB);
@@ -683,6 +712,21 @@ DrawTextureChains ()
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 			for (; s; s = s->texturechain)
 				R_RenderBrushPoly (s, st);
+		}
+
+		for (i = 0; i < cl.worldmodel->numtextures; i++)
+		{
+			t = cl.worldmodel->textures[i];
+			if (!t)
+				continue;
+			s = t->texturechain;
+			if (!s || (s->flags & SURF_DRAWTURB))
+				continue;
+
+			if (!(cl.maxclients > 1) && r_showtris->value) {
+				for (; s; s = s->texturechain)
+					R_RenderTris (s);
+			}
 
 			t->texturechain = NULL;
 		}
@@ -724,8 +768,25 @@ R_DrawWaterTextureChains ()
 		for (; s; s = s->texturechain)
 			EmitWaterPolys (s, st, false, wateralpha);
 
+	}
+
+	for (i = 0; i < cl.worldmodel->numtextures; i++)
+	{
+		t = cl.worldmodel->textures[i];
+		if (!t)
+			continue;
+		s = t->texturechain;
+		if (!(s && (s->flags & SURF_DRAWTURB)))
+			continue;
+
+		if (!(cl.maxclients > 1) && r_showtris->value) {
+			for (; s; s = s->texturechain)
+				EmitWaterTris (s);
+		}
+
 		t->texturechain = NULL;
 	}
+
 	if (wateralpha != 1.0f)
 		qglColor3f (1.0f, 1.0f, 1.0f);
 }
@@ -849,6 +910,19 @@ R_DrawBrushModel (entity_t *e)
 				EmitWaterPolys (psurf,
 						R_TextureAnimation(psurf->texinfo->texture), true,
 						wateralpha);
+//				psurf->visframe = -1;
+			}
+		}
+	}
+
+	for (i = 0, psurf = &clmodel->surfaces[clmodel->firstmodelsurface];
+			i < clmodel->nummodelsurfaces; i++, psurf++)
+	{
+		if (psurf->visframe == r_framecount)
+		{
+			if (psurf->flags & SURF_DRAWTURB)
+			{
+				EmitWaterTris (psurf);
 				psurf->visframe = -1;
 			}
 		}
@@ -898,6 +972,14 @@ R_DrawBrushModel (entity_t *e)
 				}
 				R_RenderBrushPoly (psurf, t);
 			}
+		}
+	}
+
+	if (!(cl.maxclients > 1) && r_showtris->value) {
+		for (i = 0, psurf = &clmodel->surfaces[clmodel->firstmodelsurface];
+				i < clmodel->nummodelsurfaces; i++, psurf++) {
+			if (psurf->visframe == r_framecount)
+				R_RenderTris (psurf);
 		}
 	}
 
