@@ -59,8 +59,6 @@ cvar_t *fs_userpath;
 cvar_t *fs_gamename;
 cvar_t *registered;
 
-qboolean    msg_suppress_1 = 0;
-
 void        COM_InitFilesystem (void);
 void        COM_Path_f (void);
 
