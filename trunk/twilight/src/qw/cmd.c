@@ -551,8 +551,7 @@ Cmd_TokenizeString (char *text)
 			text++;
 		}
 
-		if (*text == '\n') {			// a newline seperates commands in the
-			// buffer
+		if (*text == '\n') {	// a newline seperates commands in the buffer
 			text++;
 			break;
 		}
