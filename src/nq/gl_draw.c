@@ -52,20 +52,21 @@ static const char rcsid[] =
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
-cvar_t	*gl_max_size;
-cvar_t	*gl_picmip;
-cvar_t	*gl_constretch;
-cvar_t	*gl_texturemode;
-cvar_t	*cl_verstring;					/* FIXME: Move this? */
-cvar_t	*r_lerpimages;
+cvar_t *gl_max_size;
+cvar_t *gl_picmip;
+cvar_t *gl_constretch;
+cvar_t *gl_texturemode;
+cvar_t *cl_verstring;					/* FIXME: Move this? */
+cvar_t *r_lerpimages;
+cvar_t *r_colormiplevels;
 
 cvar_t *hud_chsize;
 cvar_t *hud_chflash;
 cvar_t *hud_chspeed;
 cvar_t *hud_chalpha;
 
-qpic_t	*draw_disc;
-qpic_t	*draw_backtile;
+qpic_t *draw_disc;
+qpic_t *draw_backtile;
 
 int         translate_texture;
 int         char_texture;
@@ -308,6 +309,7 @@ Draw_Init_Cvars (void)
 	cl_verstring = Cvar_Get ("cl_verstring",
 			"Project Twilight v" VERSION " NQ", CVAR_NONE, NULL);
 	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
+	r_colormiplevels = Cvar_Get ("r_colormiplevels", "0", CVAR_NONE, NULL);
 
 	hud_chsize = Cvar_Get ("hud_chsize", "0.5", CVAR_ARCHIVE, NULL);
 	hud_chflash = Cvar_Get ("hud_chflash", "0.0", CVAR_ARCHIVE, NULL);
@@ -1134,6 +1136,7 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags)
 {
 	int				samples;
 	static Uint32	scaled[1024 * 512];	/* [512*256]; */
+	static Uint32	scaled2[1024 * 512];
 	Uint32			scaled_width, scaled_height;
 
 	// OpenGL textures are power of two
@@ -1183,19 +1186,33 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags)
 	if (flags & TEX_MIPMAP)
 	{
 		int miplevel = 0;
+		unsigned	channel, i;
 
 		while (scaled_width > 1 || scaled_height > 1)
 		{
+
 			GL_MipMap ((Uint8 *) scaled, scaled_width, scaled_height);
+
 			scaled_width >>= 1;
 			scaled_height >>= 1;
-
 			scaled_width = max (scaled_width, 1);
 			scaled_height = max (scaled_height, 1);
 
 			miplevel++;
-			qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
-						  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+
+			if (r_colormiplevels->ivalue)
+			{
+				memcpy (scaled2, scaled, scaled_width * scaled_height * 4);
+				channel = (miplevel % 4) - 1;
+				for (i = 0; i < (scaled_width * scaled_height); i++)
+					scaled2[i] &= (0xff << (channel * 8));
+
+				qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
+						scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled2);
+			} else {
+				qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
+						scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+			}
 		}
 	}
 
