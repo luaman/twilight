@@ -1,10 +1,7 @@
 /*
-	mdfour.h
+	$RCSfile$
 
-	an implementation of MD4 designed for use in the SMB authentication
-	protocol
-
-	Copyright (C) Andrew Tridgell 1997-1998
+	Copyright (C) 1997-1998  Andrew Tridgell
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -13,20 +10,24 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-
+	
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
-*/
 
-#ifndef _MDFOUR_H
-#define _MDFOUR_H
+	$Id$
+*/
+//	an implementation of MD4 designed for use in the SMB authentication
+//	protocol
+
+#ifndef __MDFOUR_H
+#define __MDFOUR_H
 
 #ifndef int32
 #define int32 int
@@ -50,5 +51,5 @@ void mdfour_update(struct mdfour *md, unsigned char *in, int n); //old: MD4Updat
 void mdfour_result(struct mdfour *md, unsigned char *out); // old: MD4Final
 void mdfour(unsigned char *out, unsigned char *in, int n);
 
-#endif	// _MDFOUR_H
+#endif	// __MDFOUR_H
 
