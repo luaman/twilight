@@ -54,6 +54,29 @@ FS_Path_f (void)
 	}
 }
 
+static void
+FS_DumpPath_f (void)
+{
+	fs_group_t		*cur;
+	fs_file_t		*file;
+	hash_value_t	*val;
+	int				i;
+
+	for (cur = fs_paths; cur; cur = cur->next) {
+		Com_Printf("%s (%d files)\n", cur->id, cur->files->n_values);
+		for (i = 0; i < cur->files->length; i++) {
+			for (val = cur->files->values[i]; val; val = val->next) {
+				file = val->data;
+				if (file->ext)
+					Com_Printf("  %s.%s (%d)\n", file->name_base, file->ext,
+							file->len);
+				else
+					Com_Printf("  %s (%d)\n", file->name_base, file->len);
+			}
+		}
+	}
+}
+
 void
 FS_Init (void)
 {
@@ -61,6 +84,7 @@ FS_Init (void)
 	fs_paths = NULL;
 
 	Cmd_AddCommand ("path", FS_Path_f);
+	Cmd_AddCommand ("dumppath", FS_DumpPath_f);
 	FS_AddGroup(FSE_New_Group ("*Embedded*"));
 }
 
@@ -164,7 +188,10 @@ FS_Add_File (fs_group_t *group, const char *name, size_t len,
 
 	file = Zone_Alloc(fs_zone, sizeof(fs_file_t));
 	file->fs_data = fs_data;
-	file->name_base = FS_MangleName (name);
+	if (group->prefix)
+		file->name_base = FS_MangleName (va("%s/%s", group->prefix, name));
+	else
+		file->name_base = FS_MangleName (name);
 	file->ext = strrchr(file->name_base, '.');
 	if (file->ext) {
 		file->ext[0] = '\0';
@@ -202,6 +229,7 @@ fs_group_t *
 FS_Alloc_Group (fs_group_t *parent, const char *id)
 {
 	fs_group_t	*group;
+	char		*t0, *t1, *t2;
 
 	group = Zone_Alloc (fs_zone, sizeof (fs_group_t));
 	group->files = hash_create (10, (do_compare_t *) FSH_compare, (do_index_t *) FSH_hash, (do_free_t *) FSH_free);
@@ -213,6 +241,16 @@ FS_Alloc_Group (fs_group_t *parent, const char *id)
 		parent->subs = group;
 	} else
 		group->id = FS_MangleName(id);
+
+	t0 = Zstrdup (tempzone, group->id);
+	if ((t1 = strchr (t0, '/'))) {
+		t1++;
+		if ((t2 = strrchr (t1, '/'))) {
+			*t2 = '\0';
+			group->prefix = Zstrdup (fs_zone, t1);
+		}
+	}
+	Zone_Free (t0);
 
 	return group;
 }

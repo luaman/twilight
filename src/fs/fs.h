@@ -43,6 +43,7 @@ typedef SDL_RWops *(fs_open_t) (struct fs_file_s *, Uint32 flags);
 
 typedef struct fs_group_s {
 	char				*id;
+	char				*prefix;
 	hash_t				*files;
 	Uint				path_num;
 	Uint32				flags;
