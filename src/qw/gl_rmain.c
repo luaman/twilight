@@ -581,7 +581,8 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
 	float		c1 = 0.0f;
 
 	blend = (realtime - e->frame_start_time) / e->frame_interval;
-	blend = min (blend, 1);
+	if (blend < 1)
+		blend = 1;
 
 	lheight = e->origin[2] - lightspot[2];
 	height = -lheight + 1.0;
