@@ -1,7 +1,7 @@
 /*
-	$Id$
+	$RCSfile$
 
-	Copyright (C) 2001  Joseph Carter
+	Copyright (C) 1996-1997  Id Software, Inc.
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -20,10 +20,17 @@
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
-*/
 
-#if HAVE_CONFIG_H
+*/
+static const char rcsid[] =
+    "$Id$";
+
+#ifdef HAVE_CONFIG_H
 # include <config.h>
+#else
+# ifdef _WIN32
+#  include <win32conf.h>
+# endif
 #endif
 
 #include "quakedef.h"

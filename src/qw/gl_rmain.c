@@ -1,25 +1,37 @@
 /*
-Copyright (C) 1996-1997 Id Software, Inc.
+	$RCSfile$
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+	Copyright (C) 1996-1997  Id Software, Inc.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
 
-See the GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+	See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to:
+	
+		Free Software Foundation, Inc.
+		59 Temple Place - Suite 330
+		Boston, MA  02111-1307, USA
 
 */
-
 static const char rcsid[] =
 	"$Id$";
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#else
+# ifdef _WIN32
+#  include <win32conf.h>
+# endif
+#endif
 
 #include "quakedef.h"
 #include "glquake.h"
@@ -104,33 +116,6 @@ cvar_t     *gl_finish;
 cvar_t	   *gl_im_animation;
 cvar_t	   *gl_fb_models;
 
-#if 0
-cvar_t      r_norefresh = { "r_norefresh", "0" };
-cvar_t      r_drawentities = { "r_drawentities", "1" };
-cvar_t      r_drawviewmodel = { "r_drawviewmodel", "1" };
-cvar_t      r_speeds = { "r_speeds", "0" };
-cvar_t      r_fullbright = { "r_fullbright", "0" };
-cvar_t      r_lightmap = { "r_lightmap", "0" };
-cvar_t      r_shadows = { "r_shadows", "0" };
-cvar_t      r_mirroralpha = { "r_mirroralpha", "1" };
-cvar_t      r_wateralpha = { "r_wateralpha", "1" };
-cvar_t      r_dynamic = { "r_dynamic", "1" };
-cvar_t      r_novis = { "r_novis", "0" };
-cvar_t      r_netgraph = { "r_netgraph", "0" };
-
-cvar_t      gl_clear = { "gl_clear", "0" };
-cvar_t      gl_cull = { "gl_cull", "1" };
-cvar_t      gl_texsort = { "gl_texsort", "1" };
-cvar_t      gl_smoothmodels = { "gl_smoothmodels", "1" };
-cvar_t      gl_affinemodels = { "gl_affinemodels", "0" };
-cvar_t      gl_polyblend = { "gl_polyblend", "1" };
-cvar_t      gl_flashblend = { "gl_flashblend", "1" };
-cvar_t      gl_playermip = { "gl_playermip", "0" };
-cvar_t      gl_nocolors = { "gl_nocolors", "0" };
-cvar_t      gl_keeptjunctions = { "gl_keeptjunctions", "1" };
-cvar_t      gl_reporttjunctions = { "gl_reporttjunctions", "0" };
-cvar_t      gl_finish = { "gl_finish", "0" };
-#endif
 
 extern cvar_t *gl_ztrick;
 extern cvar_t *scr_fov;

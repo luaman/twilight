@@ -1,2 +1,3 @@
-config.h.in
+config.*
 stamp-h.in
+stamp-h
