@@ -600,6 +600,7 @@ R_InitTextures (void)
 	int			x, y;
 	Uint8		pixels[16][16][4];
 	image_t		img;
+	extern memzone_t *texturezone;
 
 	img.width = 16;
 	img.height = 16;
@@ -628,14 +629,14 @@ R_InitTextures (void)
 		}
 	}
 
-	r_notexture = Hunk_AllocName (sizeof (texture_t), "notexture");
+	r_notexture = Zone_Alloc (texturezone, sizeof(texture_t));
 	strcpy (r_notexture->name, "notexture");
 	r_notexture->width = img.width;
 	r_notexture->height = img.height;
 	r_notexture->gl_texturenum = R_LoadTexture (r_notexture->name, &img,
 			TEX_MIPMAP);
 
-	r_notexture_water = Hunk_AllocName (sizeof (texture_t), "notexturewater");
+	r_notexture_water = Zone_Alloc (texturezone, sizeof(texture_t));
 	*r_notexture_water = *r_notexture;
 
 	R_InitLightTextures ();

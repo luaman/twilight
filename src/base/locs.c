@@ -160,9 +160,9 @@ loc_parse (char *line)
 void
 loc_load (char *file)
 {
-	char	*data, *p;
+	char	*orig, *data, *p;
 
-	data = COM_LoadTempFile (file, 1);
+	orig = data = COM_LoadTempFile (file, 1);
 	if (!data)
 		return;
 
@@ -174,6 +174,7 @@ loc_load (char *file)
 		loc_parse(data);
 		data = p;
 	}
+	Zone_Free (orig);
 }
 
 char *

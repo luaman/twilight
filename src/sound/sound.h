@@ -39,18 +39,15 @@ typedef struct {
 } portable_samplepair_t;
 
 typedef struct sfx_s {
-	char        name[MAX_QPATH];
-	cache_user_t cache;
+	char		 name[MAX_QPATH];
+	qboolean	 loaded;
+	int			 length;
+	int			 loopstart;
+	int			 speed;
+	int			 width;
+	int			 stereo;
+	Uint8		*data;
 } sfx_t;
-
-typedef struct {
-	int         length;
-	int         loopstart;
-	int         speed;
-	int         width;
-	int         stereo;
-	Uint8       data[1];				// variable sized
-} sfxcache_t;
 
 typedef struct {
 	qboolean    gamealive;
@@ -150,6 +147,7 @@ extern int  total_channels;
 // number of times S_Update() is called per second.
 //
 
+extern memzone_t *snd_zone;
 extern qboolean fakedma;
 extern int  fakedma_updates;
 extern int  paintedtime;
@@ -168,8 +166,8 @@ extern qboolean snd_initialized;
 
 extern int  snd_blocked;
 
-void        S_LocalSound (char *s);
-sfxcache_t *S_LoadSound (sfx_t *s);
+void		 S_LocalSound (char *s);
+sfx_t		*S_LoadSound (sfx_t *s);
 
 wavinfo_t   GetWavinfo (char *name, Uint8 *wav, int wavlength);
 

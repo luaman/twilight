@@ -103,6 +103,8 @@ typedef struct {
 	int         num_signon_buffers;
 	int         signon_buffer_size[MAX_SIGNON_BUFFERS];
 	Uint8       signon_buffers[MAX_SIGNON_BUFFERS][MAX_DATAGRAM];
+
+	memzone_t	*zone;
 } server_t;
 
 

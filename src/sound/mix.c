@@ -164,17 +164,17 @@ CHANNEL MIXING
 ===============================================================================
 */
 
-void        SND_PaintChannelFrom8 (channel_t *ch, sfxcache_t *sc, int endtime);
-void        SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int endtime);
+void        SND_PaintChannelFrom8 (channel_t *ch, sfx_t *sfx, int endtime);
+void        SND_PaintChannelFrom16 (channel_t *ch, sfx_t *sfx, int endtime);
 
 void
 S_PaintChannels (int endtime)
 {
-	int         i;
-	int         end;
-	channel_t  *ch;
-	sfxcache_t *sc;
-	int         ltime, count;
+	int			 i;
+	int			 end;
+	channel_t	*ch;
+	sfx_t		*sfx;
+	int			 ltime, count;
 
 	while (paintedtime < endtime) {
 		// if paintbuffer is smaller than DMA buffer
@@ -193,8 +193,8 @@ S_PaintChannels (int endtime)
 				continue;
 			if (!ch->leftvol && !ch->rightvol)
 				continue;
-			sc = S_LoadSound (ch->sfx);
-			if (!sc)
+			sfx = S_LoadSound (ch->sfx);
+			if (!sfx || !sfx->loaded)
 				continue;
 
 			ltime = paintedtime;
@@ -206,18 +206,18 @@ S_PaintChannels (int endtime)
 					count = end - ltime;
 
 				if (count > 0) {
-					if (sc->width == 1)
-						SND_PaintChannelFrom8 (ch, sc, count);
+					if (sfx->width == 1)
+						SND_PaintChannelFrom8 (ch, sfx, count);
 					else
-						SND_PaintChannelFrom16 (ch, sc, count);
+						SND_PaintChannelFrom16 (ch, sfx, count);
 
 					ltime += count;
 				}
 				// if at end of loop, restart
 				if (ltime >= ch->end) {
-					if (sc->loopstart >= 0) {
-						ch->pos = sc->loopstart;
-						ch->end = ltime + sc->length - ch->pos;
+					if (sfx->loopstart >= 0) {
+						ch->pos = sfx->loopstart;
+						ch->end = ltime + sfx->length - ch->pos;
 					} else {			// channel just stopped
 						ch->sfx = NULL;
 						break;
@@ -245,12 +245,11 @@ SND_InitScaletable (void)
 
 
 void
-SND_PaintChannelFrom8 (channel_t *ch, sfxcache_t *sc, int count)
+SND_PaintChannelFrom8 (channel_t *ch, sfx_t *sfx, int count)
 {
-	int         data;
-	int        *lscale, *rscale;
-	unsigned char *sfx;
-	int         i;
+	int			 data, i;
+	int			*lscale, *rscale;
+	Uint8		*sdata;
 
 	if (ch->leftvol > 255)
 		ch->leftvol = 255;
@@ -259,10 +258,10 @@ SND_PaintChannelFrom8 (channel_t *ch, sfxcache_t *sc, int count)
 
 	lscale = snd_scaletable[ch->leftvol >> 3];
 	rscale = snd_scaletable[ch->rightvol >> 3];
-	sfx = (signed char *) sc->data + ch->pos;
+	sdata = sfx->data + ch->pos;
 
 	for (i = 0; i < count; i++) {
-		data = sfx[i];
+		data = sdata[i];
 		paintbuffer[i].left += lscale[data];
 		paintbuffer[i].right += rscale[data];
 	}
@@ -272,20 +271,20 @@ SND_PaintChannelFrom8 (channel_t *ch, sfxcache_t *sc, int count)
 
 
 void
-SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count)
+SND_PaintChannelFrom16 (channel_t *ch, sfx_t *sfx, int count)
 {
-	int         data;
-	int         left, right;
-	int         leftvol, rightvol;
-	signed short *sfx;
-	int         i;
+	int			 data;
+	int			 left, right;
+	int			 leftvol, rightvol;
+	Sint16		*sdata;
+	int			 i;
 
 	leftvol = ch->leftvol;
 	rightvol = ch->rightvol;
-	sfx = (signed short *) sc->data + ch->pos;
+	sdata = (signed short *) sfx->data + ch->pos;
 
 	for (i = 0; i < count; i++) {
-		data = sfx[i];
+		data = sdata[i];
 		left = (data * leftvol) >> 8;
 		right = (data * rightvol) >> 8;
 		paintbuffer[i].left += left;

@@ -27,9 +27,11 @@
 #ifndef __CLIENT_H
 #define __CLIENT_H
 
+#include "qtypes.h"
 #include "common.h"
 #include "light.h"
 #include "render.h"
+#include "zone.h"
 
 typedef struct {
 	vec3_t	viewangles;
@@ -217,6 +219,8 @@ typedef struct {
 
 	// frag scoreboard
 	scoreboard_t	*scores;				// [cl.maxclients]
+
+	memzone_t		*zone;
 } client_state_t;
 
 

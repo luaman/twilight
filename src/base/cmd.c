@@ -398,7 +398,6 @@ void
 Cmd_Exec_f (void)
 {
 	char		*f;
-	size_t		mark;
 
 	if (Cmd_Argc () != 2)
 	{
@@ -406,8 +405,7 @@ Cmd_Exec_f (void)
 		return;
 	}
 
-	mark = Hunk_LowMark ();
-	f = (char *) COM_LoadHunkFile (Cmd_Argv (1), true);
+	f = COM_LoadTempFile (Cmd_Argv (1), true);
 	if (!f)
 	{
 		Com_Printf ("couldn't exec %s\n", Cmd_Argv (1));
@@ -418,7 +416,7 @@ Cmd_Exec_f (void)
 		Com_Printf ("execing %s\n", Cmd_Argv (1));
 
 	Cbuf_InsertText (f);
-	Hunk_FreeToLowMark (mark);
+	Zone_Free (f);
 }
 
 

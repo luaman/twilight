@@ -1308,11 +1308,6 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 	return -1;
 }
 
-
-cache_user_t *loadcache;
-Uint8 *loadbuf;
-int loadsize;
-
 /*
 ============
 COM_LoadFile
@@ -1321,8 +1316,8 @@ Filename are reletive to the quake directory.
 Always appends a 0 byte to the loaded data.
 ============
 */
-Uint8 *
-COM_LoadFile (char *path, int usehunk, qboolean complain)
+static Uint8 *
+COM_LoadFile (char *path, qboolean complain, int type, memzone_t *zone)
 {
 	FILE		*h;
 	Uint8		*buf = NULL;
@@ -1333,25 +1328,19 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 	if (!h)
 		return NULL;
 
-	switch (usehunk)
+	switch (type)
 	{
-		case 1:
-			buf = Hunk_AllocName (len + 1, path);
+		case 0:			// Zone passed to us.
+			buf = Zone_Alloc (zone, len + 1);
 			break;
-		case 2:
-			buf = Hunk_TempAlloc (len + 1);
+		case 1:			// Temp zone.
+			buf = Zone_AllocName (va("tempzone/%s", path), len + 1);
 			break;
-		case 4:
-			if (len + 1 > loadsize)
-				buf = Hunk_TempAlloc (len + 1);
-			else
-				buf = loadbuf;
-			break;
-		case 6:
-			buf = Zone_Alloc (tempzone, len + 1);
+		case 2:			// Named alloc.
+			buf = Zone_AllocName (path, len + 1);
 			break;
 		default:
-			Sys_Error ("COM_LoadFile: bad usehunk");
+			Sys_Error ("Bad type in COM_LoadFile!");
 			break;
 	}
 
@@ -1368,36 +1357,22 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 }
 
 Uint8 *
-COM_LoadHunkFile (char *path, qboolean complain)
+COM_LoadZoneFile (char *path, qboolean complain, memzone_t *zone)
 {
-	return COM_LoadFile (path, 1, complain);
+	return COM_LoadFile (path, complain, 0, zone);
 }
 
 Uint8 *
 COM_LoadTempFile (char *path, qboolean complain)
 {
-	return COM_LoadFile (path, 2, complain);
-}
-
-// uses temp hunk if larger than bufsize
-Uint8 *
-COM_LoadStackFile (char *path, void *buffer, int bufsize, qboolean complain)
-{
-	Uint8      *buf;
-
-	loadbuf = (Uint8 *) buffer;
-	loadsize = bufsize;
-	buf = COM_LoadFile (path, 4, complain);
-
-	return buf;
+	return COM_LoadFile (path, complain, 1, NULL);
 }
 
 Uint8 *
-COM_LoadAllocFile (char *path, qboolean complain)
+COM_LoadNamedFile (char *path, qboolean complain)
 {
-	return COM_LoadFile (path, 6, complain);
+	return COM_LoadFile (path, complain, 2, NULL);
 }
-
 
 /*
 =================
@@ -1579,11 +1554,6 @@ COM_Gamedir (char *dir)
 		Z_Free (com_searchpaths);
 		com_searchpaths = next;
 	}
-
-	/*
-	 * flush all data, so it will be forced to reload
-	 */
-	Cache_Flush ();
 
 	if (!strcmp (dir, fs_gamename->svalue) || !strcmp (dir, "qw"))
 		return;

@@ -218,7 +218,7 @@ Host_FindMaxClients (void)
 	if (svs.maxclientslimit < 4)
 		svs.maxclientslimit = 4;
 	svs.clients =
-		Hunk_AllocName (svs.maxclientslimit * sizeof (client_t), "clients");
+		Zone_AllocName ("clients", svs.maxclientslimit * sizeof (client_t));
 
 	if (svs.maxclients > 1)
 		Cvar_Set (deathmatch, "1");
@@ -500,10 +500,10 @@ Host_ShutdownServer (qboolean crash)
 		if (host_client->active)
 			SV_DropClient (crash);
 
-//
-// clear structures
-//
-	memset (&sv, 0, sizeof (sv));
+	// Clear the structs.
+	Host_ClearMemory ();
+
+	// clear structures
 	memset (svs.clients, 0, svs.maxclientslimit * sizeof (client_t));
 }
 
@@ -519,12 +519,15 @@ not reinitialize anything.
 void
 Host_ClearMemory (void)
 {
-	Com_DPrintf ("Clearing memory\n");
+	if (!cl.zone && !sv.zone)		// Nothing to clear.
+		return;
+
+	Com_DPrintf ("Clearing memory %p %p\n", sv.zone, cl.zone);
 	Mod_ClearAll ();
-	if (host_hunklevel)
-		Hunk_FreeToLowMark (host_hunklevel);
 
 	cls.signon = 0;
+	Zone_FreeZone (&sv.zone);
+	Zone_FreeZone (&cl.zone);
 	memset (&sv, 0, sizeof (sv));
 	memset (&cl, 0, sizeof (cl));
 }
@@ -851,13 +854,12 @@ Host_Init ()
 	V_Init ();						// setup view, add related commands
 
 //	Com_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
-	Com_Printf ("%4.1f megs RAM used.\n", hunk_size / (1024 * 1024.0));
 
 	if (cls.state != ca_dedicated) {
-		host_basepal = (Uint8 *) COM_LoadHunkFile ("gfx/palette.lmp", true);
+		host_basepal = COM_LoadNamedFile ("gfx/palette.lmp", true);
 		if (!host_basepal)
 			Sys_Error ("Couldn't load gfx/palette.lmp");
-		host_colormap = (Uint8 *) COM_LoadHunkFile ("gfx/colormap.lmp", true);
+		host_colormap = COM_LoadNamedFile ("gfx/colormap.lmp", true);
 		if (!host_colormap)
 			Sys_Error ("Couldn't load gfx/colormap.lmp");
 
@@ -875,9 +877,6 @@ Host_Init ()
 	}
 
 	Cbuf_InsertText ("exec quake.rc\n");
-
-	Hunk_AllocName (0, "-HOST_HUNKLEVEL-");
-	host_hunklevel = Hunk_LowMark ();
 
 	host_initialized = true;
 

@@ -374,12 +374,11 @@ CL_ClearState (void)
 
 	Com_DPrintf ("Clearing memory\n");
 	Mod_ClearAll ();
-	if (host_hunklevel)					// FIXME: check this...
-		Hunk_FreeToLowMark (host_hunklevel);
 
 	CL_ClearTEnts ();
 
-// wipe the entire cl structure
+	// wipe the entire cl structure
+	Zone_FreeZone (&cl.zone);
 	memset (&cl, 0, sizeof (cl));
 
 	// We don't get this from the server, that'd take a new protocol
@@ -1501,12 +1500,11 @@ Host_Init (void)
 	M_Init ();						// setup menu, add related commands
 
 	Com_Printf ("Exe: "__TIME__" "__DATE__"\n");
-	Com_Printf ("%4.1f megs RAM used.\n", hunk_size / (1024 * 1024.0));
 
-	host_basepal = (Uint8 *) COM_LoadHunkFile ("gfx/palette.lmp", true);
+	host_basepal = COM_LoadNamedFile ("gfx/palette.lmp", true);
 	if (!host_basepal)
 		Sys_Error ("Couldn't load gfx/palette.lmp");
-	host_colormap = (Uint8 *) COM_LoadHunkFile ("gfx/colormap.lmp", true);
+	host_colormap = COM_LoadNamedFile ("gfx/colormap.lmp", true);
 	if (!host_colormap)
 		Sys_Error ("Couldn't load gfx/colormap.lmp");
 
@@ -1534,9 +1532,6 @@ Host_Init (void)
 	Cbuf_AddText
 		("echo Type connect <internet address> or use GameSpy to connect to a game.\n");
 	Cbuf_AddText ("cl_warncmd 1\n");
-
-	Hunk_AllocName (0, "-HOST_HUNKLEVEL-");
-	host_hunklevel = Hunk_LowMark ();
 
 	host_initialized = true;
 

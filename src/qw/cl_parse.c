@@ -296,7 +296,6 @@ Model_NextDownload (void)
 
 	R_NewMap ();
 	Team_NewMap ();
-	Hunk_Check ();						// make sure nothing is hurt
 	Zone_CheckSentinelsGlobal ();		// Make sure /nothing/ is hurt.
 
 	// done with modellist, request first of static signon messages
@@ -580,6 +579,8 @@ CL_ParseServerData (void)
 // wipe the client_state_t struct
 //
 	CL_ClearState ();
+
+	cl.zone = Zone_AllocZone ("client");
 
 // parse protocol version number
 // allow 2.2 and 2.29 demos to play

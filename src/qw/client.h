@@ -319,6 +319,8 @@ typedef struct {
 	// all player information
 	player_info_t	players[MAX_CLIENTS];
 	int				frags_updated;
+
+	memzone_t	*zone;
 } client_state_t;
 
 

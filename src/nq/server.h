@@ -46,19 +46,18 @@ typedef struct {
 typedef enum { ss_loading, ss_active } server_state_t;
 
 typedef struct {
-	qboolean		active;					// false if only a net client
+	qboolean		active;			// false if only a net client
 
 	qboolean		paused;
-	qboolean		loadgame;				// handle connections specially
+	qboolean		loadgame;		// handle connections specially
 
 	double			time;
 
-	Uint			lastcheck;				// used by PF_checkclient
+	Uint			lastcheck;		// used by PF_checkclient
 	double			lastchecktime;
 
-	char			name[64];				// map name
-	char			modelname[64];			// maps/<name>.bsp, for
-											// model_precache[0]
+	char			name[64];		// map name
+	char			modelname[64];	// maps/<name>.bsp, for model_precache[0]
 	struct model_s	*worldmodel;
 	char			*model_precache[MAX_MODELS];	// NULL terminated
 	struct model_s	*models[MAX_MODELS];
@@ -66,11 +65,11 @@ typedef struct {
 	char			*lightstyles[MAX_LIGHTSTYLES];
 	Uint			num_edicts;
 	Uint			max_edicts;
-	edict_t			*edicts;					// can NOT be array indexed, because
-												// edict_t is variable sized, but can
-												// be used to reference the world ent
+	/* Can NOT be array indexed, because edict_t is variable sized,
+	 * but can be used to reference the world ent. */
+	edict_t			*edicts;
 
-	server_state_t state;						// some actions are only valid during load
+	server_state_t state;			// some actions are only valid during load
 
 	sizebuf_t		datagram;
 	Uint8			datagram_buf[MAX_DATAGRAM];
@@ -80,6 +79,9 @@ typedef struct {
 
 	sizebuf_t		signon;
 	Uint8			signon_buf[8192];
+
+	memzone_t		*zone;
+	/* Everything in the struct should be allocated in this. */
 } server_t;
 
 

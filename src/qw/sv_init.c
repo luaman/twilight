@@ -221,7 +221,7 @@ SV_CalcPHS (void)
 	rowwords = (num + 31) >> 5;
 	rowbytes = rowwords * 4;
 
-	sv.pvs = Hunk_AllocName (rowbytes * num, "PVS");
+	sv.pvs = Zone_Alloc (sv.zone, rowbytes * num);
 	scan = sv.pvs;
 	vcount = 0;
 	for (i = 0; i < num; i++, scan += rowbytes) {
@@ -237,7 +237,7 @@ SV_CalcPHS (void)
 	}
 
 
-	sv.phs = Hunk_AllocName (rowbytes * num, "PHS");
+	sv.phs = Zone_Alloc (sv.zone, rowbytes * num);
 	count = 0;
 	scan = sv.pvs;
 	dest = (unsigned *) sv.phs;
@@ -275,16 +275,12 @@ SV_CalcPHS (void)
 unsigned
 SV_CheckModel (char *mdl)
 {
-	Uint8       stackbuf[1024];			// avoid dirtying the cache heap
-	Uint8      *buf;
-	unsigned short crc;
+	Uint8	*buf;
+	Uint16	 crc;
 
-//  int len;
-
-	buf = (Uint8 *) COM_LoadStackFile (mdl, stackbuf, sizeof (stackbuf), true);
+	buf = (Uint8 *) COM_LoadTempFile (mdl, true);
 	crc = CRC_Block (buf, com_filesize);
-//  for (len = com_filesize; len; len--, buf++)
-//      CRC_ProcessByte(&crc, *buf);
+	Zone_Free (buf);
 
 	return crc;
 }
@@ -314,7 +310,6 @@ SV_SpawnServer (char *server)
 	sv.state = ss_dead;
 
 	Mod_ClearAll ();
-	Hunk_FreeToLowMark (host_hunklevel);
 
 	//
 	// make cvars consistent
@@ -329,7 +324,11 @@ SV_SpawnServer (char *server)
 	Cvar_Set (skill, va("%i", current_skill));
 
 	// wipe the entire per-level structure
+	if (sv.zone)
+		Zone_EmptyZone (sv.zone);
 	memset (&sv, 0, sizeof (sv));
+	if (!sv.zone)
+		sv.zone = Zone_AllocZone ("server");
 
 	SZ_Init (&sv.datagram, sv.datagram_buf, 
 		sizeof (sv.datagram_buf));
@@ -356,7 +355,7 @@ SV_SpawnServer (char *server)
 	PR_LoadProgs ();
 
 	// allocate edicts
-	sv.edicts = Hunk_AllocName (MAX_EDICTS * pr_edict_size, "edicts");
+	sv.edicts = Zone_Alloc (sv.zone, MAX_EDICTS * pr_edict_size);
 
 	// leave slots at start for clients only
 	sv.num_edicts = MAX_CLIENTS + 1;
