@@ -13,7 +13,6 @@
 #define USERPATH		"."
 
 #define SHAREPATH		"."
-
 #define USERCONF		"~/twilight.rc"
 
 #define SHARECONF		"~/twilight.conf"
