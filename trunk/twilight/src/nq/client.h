@@ -272,7 +272,7 @@ extern struct cvar_s *m_pitch;
 extern struct cvar_s *m_yaw;
 extern struct cvar_s *m_forward;
 extern struct cvar_s *m_side;
-
+extern struct cvar_s *m_freelook;
 
 #define	MAX_TEMP_ENTITIES	64			// lightning bolts, etc
 #define	MAX_STATIC_ENTITIES	128			// torches, etc
@@ -324,6 +324,8 @@ typedef struct {
 extern kbutton_t in_mlook, in_klook;
 extern kbutton_t in_strafe;
 extern kbutton_t in_speed;
+
+#define freelook (m_freelook->value || (in_mlook.state & 1))
 
 void	CL_InitInput (void);
 void	CL_InitInputCvars (void);

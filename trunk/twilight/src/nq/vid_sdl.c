@@ -742,15 +742,15 @@ IN_Move (usercmd_t *cmd)
 	mouse_y *= sensitivity->value;
 
 	if ((in_strafe.state & 1) || (lookstrafe->value
-				&& (in_mlook.state & 1)))
+				&& freelook))
 		cmd->sidemove += m_side->value * mouse_x;
 	else
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
 
-	if (in_mlook.state & 1)
+	if (freelook)
 		V_StopPitchDrift ();
 
-	if ((in_mlook.state & 1) && !(in_strafe.state & 1)) {
+	if (freelook && !(in_strafe.state & 1)) {
 		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
 		cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
 	} else {

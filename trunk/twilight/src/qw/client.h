@@ -344,6 +344,8 @@ extern struct cvar_s *m_yaw;
 extern struct cvar_s *m_forward;
 extern struct cvar_s *m_side;
 
+extern struct cvar_s *m_freelook;
+
 extern struct cvar_s *_windowed_mouse;
 
 extern struct cvar_s *name;
@@ -404,6 +406,8 @@ typedef struct {
 extern kbutton_t in_mlook, in_klook;
 extern kbutton_t in_strafe;
 extern kbutton_t in_speed;
+
+#define freelook (m_freelook->value || (in_strafe.state & 1))
 
 void	CL_InputSetRepeatDelay (struct cvar_s *var);
 void	CL_InputSetRepeatInterval (struct cvar_s *var);

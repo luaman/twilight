@@ -54,6 +54,16 @@ cvar_t     *cl_nodelta;
 cvar_t     *in_key_repeat_delay;
 cvar_t     *in_key_repeat_interval;
 
+cvar_t		*lookspring;
+cvar_t		*lookstrafe;
+cvar_t		*sensitivity;
+
+cvar_t		*m_pitch;
+cvar_t		*m_yaw;
+cvar_t		*m_forward;
+cvar_t		*m_side;
+cvar_t		*m_freelook;
+
 /*
 ===============================================================================
 
@@ -170,7 +180,7 @@ void
 IN_MLookUp (void)
 {
 	KeyUp (&in_mlook);
-	if (!(in_mlook.state & 1) && lookspring->value)
+	if (!freelook && lookspring->value)
 		V_StartPitchDrift ();
 }
 
@@ -750,6 +760,7 @@ CL_Input_Init_Cvars (void)
 	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_NONE, NULL);
 	m_forward = Cvar_Get ("m_forward", "1", CVAR_NONE, NULL);
 	m_side = Cvar_Get ("m_side", "0.8", CVAR_NONE, NULL);
+	m_freelook = Cvar_Get ("freelook", "0", CVAR_NONE, NULL);
 
 	cl_nodelta = Cvar_Get ("cl_nodelta", "0", CVAR_NONE, NULL);
 	in_key_repeat_delay = Cvar_Get ("in_key_repeat_delay",

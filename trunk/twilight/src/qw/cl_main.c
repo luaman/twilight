@@ -84,15 +84,6 @@ cvar_t		*cl_sbar;
 cvar_t		*cl_hudswap;
 cvar_t		*cl_maxfps;
 
-cvar_t		*lookspring;
-cvar_t		*lookstrafe;
-cvar_t		*sensitivity;
-
-cvar_t		*m_pitch;
-cvar_t		*m_yaw;
-cvar_t		*m_forward;
-cvar_t		*m_side;
-
 cvar_t		*entlatency;
 cvar_t		*cl_predict_players;
 cvar_t		*cl_solid_players;
