@@ -185,8 +185,6 @@ extern mleaf_t *r_viewleaf, *r_oldviewleaf;
 extern texture_t *r_notexture_mip;
 extern int  d_lightstylevalue[256];		// 8.8 fraction of base light value
 
-extern int  currenttexture;
-extern int  cnttextures[2];
 extern int  particletexture;
 extern int  netgraphtexture;			// netgraph texture
 extern int  playertextures;
@@ -269,8 +267,6 @@ void        R_TranslatePlayerSkin (int playernum);
 
 typedef void (APIENTRY * lpMTexFUNC) (GLenum, GLfloat, GLfloat);
 typedef void (APIENTRY * lpSelTexFUNC) (GLenum);
-extern lpMTexFUNC qglMTexCoord2f;
-extern lpSelTexFUNC qglSelectTexture;
 
 extern qboolean gl_mtexable;
 

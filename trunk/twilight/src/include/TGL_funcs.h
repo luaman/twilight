@@ -32,7 +32,9 @@
 #include "TGL_defines.h"
 
 #define TWIGL_NEED(ret, name, args)	extern ret (APIENTRY * q##name) args
+#define TWIGL_EXT_WANT(ret, name, args)	extern ret (APIENTRY * q##name) args
 #include "TGL_funcs_list.h"
+#undef TWIGL_EXT_WANT
 #undef TWIGL_NEED
 
 qboolean GLF_Init (void);
