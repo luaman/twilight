@@ -32,7 +32,10 @@
 
 #include "SDL_endian.h"
 
-#include "quakedef.h"
+#include "qtypes.h"
+
+#define MAX_QPATH       64              // max length of a quake game pathname
+#define MAX_OSPATH      128             // max length of a filesystem pathname
 
 // FIXME: now in src/base/parm.c - remove this at some point
 

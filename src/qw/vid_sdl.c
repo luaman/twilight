@@ -40,6 +40,7 @@ static const char rcsid[] =
 
 #include "SDL.h"
 
+#include "quakedef.h"
 #include "client.h"
 #include "console.h"
 #include "cvar.h"

@@ -4,7 +4,10 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-INCLUDES= -I$(top_srcdir)/include -I$(top_srcdir)/src/renderer
+INCLUDES= \
+	-I$(top_srcdir)/include \
+	-I$(top_srcdir)/src/renderer
+
 LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_nq_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_NQ
 
@@ -20,7 +23,8 @@ twilight_nq_sys_libs=
 endif
 
 twilight_nq_SOURCES= \
-        chase.c cl_demo.c cl_input.c cl_main.c cl_model.c cl_parse.c cl_tent.c \
+	chase.c \
+	cl_demo.c cl_input.c cl_main.c cl_model.c cl_parse.c cl_tent.c \
 	cmd.c cmd.h common.c console.c console.h \
 	cvar.c \
         gl_draw.c \
@@ -33,7 +37,7 @@ twilight_nq_SOURCES= \
 	pr_cmds.c pr_edict.c pr_exec.c progs.h progdefs.h \
 	progdefs.q1 \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
-	sys.h vid_sdl.c \
+	vid_sdl.c \
 	snd_dma.c snd_mem.c snd_mix.c snd_sdl.c \
 	cd_sdl.c \
 	pcx.c tga.c \
