@@ -17,9 +17,9 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 if CLIENTS
 clients=twilight-qw
 twilight_qw_LDADD= \
-	$(top_builddir)/src/image/libtwilight_image.a \
 	$(top_builddir)/src/base/libtwilight_base.a \
 	$(top_builddir)/src/renderer/libtwilight_renderer.a \
+	$(top_builddir)/src/image/libtwilight_image.a \
 	$(top_builddir)/src/sound/libtwilight_sound.a
 endif
 
@@ -45,7 +45,7 @@ twilight_qw_SOURCES= \
 	gl_rmain.c gl_rsurf.c gl_screen.c \
 	info.c keys.c \
 	menu.c net.h net_chan.c net_udp.c pmove.c pmovetst.c protocol.h \
-	r_explosion.c render.h sbar.c screen.h skin.c \
+	render.h sbar.c screen.h skin.c \
 	snd_dma.c sv_null.c teamplay.c sys.c vid_sdl.c view.c
 
 twilight_qwsv_SOURCES= \

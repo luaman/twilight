@@ -36,6 +36,7 @@ static const char rcsid[] =
 
 #include "dyngl.h"
 #include "gl_arrays.h"
+#include "gl_textures.h"
 #include "sky.h"
 #include "image.h"
 #include "vis.h"
@@ -411,10 +412,10 @@ R_InitSky (texture_t *unused, Uint8 *pixels)
 		qglGenTextures(1, &solidskytexture);
 
 	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
-	qglTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, 128, 128, 0, GL_RGBA,
+	qglTexImage2D (GL_TEXTURE_2D, 0, glt_solid_format, 128, 128, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, trans);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_mag);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_mag);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
 
 
 	for (i = 0; i < 128; i++)
@@ -431,10 +432,10 @@ R_InitSky (texture_t *unused, Uint8 *pixels)
 		qglGenTextures(1, &alphaskytexture);
 
 	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
-	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 128, 128, 0, GL_RGBA,
+	qglTexImage2D (GL_TEXTURE_2D, 0, glt_alpha_format, 128, 128, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, trans);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_mag);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_mag);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
 }
 
 /*

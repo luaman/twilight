@@ -132,15 +132,15 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 		{
 			if (dmiptex->name[0] == '*')
 				// we don't brighten turb textures
-				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width,
+				tx->gl_texturenum = GLT_Load_Raw (dmiptex->name, tx->width,
 						tx->height, (Uint8 *)(mtdata), d_palette_raw,
 						TEX_MIPMAP | TEX_FORCE, 8);
 			else
 			{
-				tx->gl_texturenum = GL_LoadTexture (dmiptex->name, tx->width,
+				tx->gl_texturenum = GLT_Load_Raw (dmiptex->name, tx->width,
 						tx->height, (Uint8 *)(mtdata), d_palette_base,
 						TEX_MIPMAP | TEX_FORCE, 8);
-				tx->fb_texturenum = GL_LoadTexture (va("@fb_%s", dmiptex->name),
+				tx->fb_texturenum = GLT_Load_Raw (va("@fb_%s", dmiptex->name),
 						tx->width, tx->height, (Uint8 *)(mtdata),
 						d_palette_fb, TEX_MIPMAP, 8);
 			}
@@ -694,8 +694,8 @@ Mod_RUnloadBrushModel (model_t *mod)
 			continue;
 
 		if (mod->brush->textures[i]->gl_texturenum)
-			GL_DeleteTexture(mod->brush->textures[i]->gl_texturenum);
+			GLT_Delete(mod->brush->textures[i]->gl_texturenum);
 		if (mod->brush->textures[i]->fb_texturenum)
-			GL_DeleteTexture(mod->brush->textures[i]->fb_texturenum);
+			GLT_Delete(mod->brush->textures[i]->fb_texturenum);
 	}
 }

@@ -28,6 +28,8 @@
 #ifndef __WAD_H
 #define __WAD_H
 
+#include "qtypes.h"
+
 //===============
 //   TYPES
 //===============

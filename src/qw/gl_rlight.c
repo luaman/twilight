@@ -73,7 +73,7 @@ R_InitLightTextures (void)
 	img.height = 32;
 	img.type = IMG_RGBA;
 	img.pixels = (Uint8 *)pixels;
-	corona_texture = R_LoadTexture ("dlcorona", &img, NULL, TEX_ALPHA);
+	corona_texture = GLT_Load_image ("dlcorona", &img, NULL, TEX_ALPHA);
 }
 
 void

@@ -33,6 +33,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "menu.h"
 #include "sbar.h"
+#include "gl_textures.h"
 
 int         netgraphtexture;			// netgraph texture
 
@@ -109,12 +110,12 @@ R_NetGraph (void)
 
 	qglBindTexture (GL_TEXTURE_2D, netgraphtexture);
 
-	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format,
+	qglTexImage2D (GL_TEXTURE_2D, 0, glt_alpha_format,
 				  NET_TIMINGS, NET_GRAPHHEIGHT, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, ngraph_pixels);
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_mag);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glt_filter_mag);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glt_filter_mag);
 
 	x = 8;
 	VectorSet2 (tc_array_v(0), 0, 0);

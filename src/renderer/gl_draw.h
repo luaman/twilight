@@ -24,40 +24,16 @@
 	$Id$
 */
 
-#ifndef __VID_H
-#define __VID_H
+#ifndef __GL_DRAW_H
+#define __GL_DRAW_H
 
 #include "qtypes.h"
 
-typedef struct vrect_s
-{
-	int			x, y;
-	int			width, height;
-} vrect_t;
+typedef struct {
+	int		texnum;
+	float	sl, tl, sh, th;
+} glpic_t;
 
-typedef struct
-{
-	Uint32		width;
-	Uint32		height;
-	Uint32		width_2d;
-	Uint32		height_2d;
+extern void Draw_Common_Init (void);
 
-	Uint32		bpp;
-} viddef_t;
-
-extern viddef_t vid;					// global video state
-extern Uint32 d_palette_raw[256];
-extern Uint32 d_palette_base[256];
-extern Uint32 d_palette_fb[256];
-extern Uint32 d_palette_base_team[256];
-extern Uint32 d_palette_top[256];
-extern Uint32 d_palette_bottom[256];
-extern float d_8tofloattable[256][4];
-
-
-void VID_Init_Cvars (void);
-void VID_Init (unsigned char *palette);
-void VID_Shutdown (void);
-
-#endif // __VID_H
-
+#endif // __GL_DRAW_H

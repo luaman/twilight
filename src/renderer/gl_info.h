@@ -93,9 +93,6 @@ extern Uint32	d_palette_fb[256];
 extern Uint32	d_palette_base_team[256];
 extern Uint32	d_palette_top[256];
 extern Uint32	d_palette_bottom[256];
-extern int		gl_solid_format;
-extern int		gl_alpha_format;
-extern int		gl_filter_mag;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 #define d_palette_empty	0x000000FF
