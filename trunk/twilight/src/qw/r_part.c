@@ -40,10 +40,8 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "mathlib.h"
 
-#define MAX_PARTICLES			2048	// default max # of particles at one
-										// time
-#define ABSOLUTE_MIN_PARTICLES	2		// no fewer than this no matter what's
-										// on the command line
+#define MAX_PARTICLES			2048	// default max # of particles
+#define ABSOLUTE_MIN_PARTICLES	2		// no fewer than this no matter what
 
 extern int part_tex_dot;
 extern int part_tex_spark;
@@ -52,42 +50,52 @@ extern int part_tex_smoke_ring;
 
 static cvar_t *r_particles, *r_base_particles, *r_cone_particles;
 
-static int	ramp1[8] = { 0x6f, 0x6d, 0x6b, 0x69, 0x67, 0x65, 0x63, 0x61 };
-static int	ramp2[8] = { 0x6f, 0x6e, 0x6d, 0x6c, 0x6b, 0x6a, 0x68, 0x66 };
-static int	ramp3[8] = { 0x6d, 0x6b, 6, 5, 4, 3 };
+static int ramp1[8] = { 0x6f, 0x6d, 0x6b, 0x69, 0x67, 0x65, 0x63, 0x61 };
+static int ramp2[8] = { 0x6f, 0x6e, 0x6d, 0x6c, 0x6b, 0x6a, 0x68, 0x66 };
+static int ramp3[8] = { 0x6d, 0x6b, 6, 5, 4, 3 };
 
 typedef enum {
-	pt_static, pt_grav, pt_slowgrav, pt_fire, pt_explode, pt_explode2, pt_blob,
-		pt_blob2, pt_torch, pt_torch2, pt_teleport1, pt_teleport2, pt_rtrail
+	pt_static,
+	pt_grav,
+	pt_slowgrav,
+	pt_fire,
+	pt_explode, pt_explode2,
+	pt_blob, pt_blob2,
+	pt_torch, pt_torch2,
+	pt_teleport1, pt_teleport2,
+	pt_rtrail
 } ptype_t;
 
 typedef struct {
-	vec3_t	org1;
-	vec3_t	org2;
-	vec3_t	org3;	// Some effects need a base origin.
-	vec3_t	normal;
-	vec4_t	color1;
-	vec4_t	color2;
-	float	scale;
-	float	ramp;
-	float	die;
-	ptype_t	type;
+	// Some effects need a base origin.
+	vec3_t		org1;
+	vec3_t		org2;
+	vec3_t		org3;
+
+	vec3_t		normal;
+	vec4_t		color1;
+	vec4_t		color2;
+	float		scale;
+	float		ramp;
+	float		die;
+	ptype_t		type;
 } cone_particle_t;
 
-static cone_particle_t	*cone_particles, **free_cone_particles;
-static int				num_cone_particles, max_cone_particles;
+static cone_particle_t *cone_particles, **free_cone_particles;
+static int num_cone_particles, max_cone_particles;
 
 inline qboolean
 new_cone_particle (ptype_t type, vec3_t org1, vec3_t org2, vec3_t org3,
 		vec4_t color1, vec4_t color2, float ramp, float scale, float die)
 {
-	cone_particle_t *p;
-	vec3_t	normal;
+	cone_particle_t	   *p;
+	vec3_t				normal;
 
 	if (num_cone_particles >= max_cone_particles) {
 		// Out of particles.
 		return false;
 	}
+
 	p = &cone_particles[num_cone_particles++];
 	p->type = type;
 	VectorCopy (org1, p->org1);
@@ -107,26 +115,27 @@ new_cone_particle (ptype_t type, vec3_t org1, vec3_t org2, vec3_t org3,
 }
 	
 typedef struct {
-	vec3_t	org;
-	vec3_t	vel;
-	vec4_t	color;
-	float	scale;
-	float	ramp;
-	float	die;
-	ptype_t	type;
+	vec3_t		org;
+	vec3_t		vel;
+	vec4_t		color;
+	float		scale;
+	float		ramp;
+	float		die;
+	ptype_t		type;
 } base_particle_t;
 
-static base_particle_t	*base_particles, **free_base_particles;
-static int				num_base_particles, max_base_particles;
+static base_particle_t *base_particles, **free_base_particles;
+static int num_base_particles, max_base_particles;
 
 inline qboolean
 new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 		float ramp, float scale, float die)
 {
-	base_particle_t *p;
+	base_particle_t	   *p;
 
 	if (num_base_particles >= max_base_particles)
-		return false; // Out of particles.
+		// Out of particles.
+		return false;
 
 	p = &base_particles[num_base_particles++];
 	p->type = type;
@@ -144,9 +153,9 @@ inline qboolean
 new_base_particle_oc (ptype_t type, vec3_t org, vec3_t vel, int color,
 		float ramp, float scale, float die)
 {
-	vec4_t	vcolor;
-	VectorCopy4 (d_8tofloattable[color], vcolor);
-	
+	vec4_t		vcolor;
+
+	VectorCopy4 (d_8tofloattable[color], vcolor);	
 	return new_base_particle (type, org, vel, vcolor, ramp, scale, die);
 }
 	
@@ -158,7 +167,7 @@ R_InitParticles
 void
 R_InitParticles (void)
 {
-	int         i;
+	int			i;
 
 	r_particles = Cvar_Get ("r_particles", "1", CVAR_NONE, NULL);
 	r_base_particles = Cvar_Get ("r_base_particles", "1", CVAR_NONE, NULL);
@@ -193,17 +202,17 @@ R_EntityParticles
 
 #define NUMVERTEXNORMALS	162
 extern float r_avertexnormals[NUMVERTEXNORMALS][3];
-vec3_t      avelocities[NUMVERTEXNORMALS];
-float       beamlength = 16;
+vec3_t avelocities[NUMVERTEXNORMALS];
+float beamlength = 16;
 
 void
 R_EntityParticles (entity_t *ent)
 {
-	int         i;
-	float       angle;
-	float       sr, sp, sy, cr, cp, cy;
-	vec3_t      forward, org;
-	float       dist = 64;
+	int			i;
+	float		angle;
+	float		sr, sp, sy, cr, cp, cy;
+	vec3_t		forward, org;
+	float		dist = 64;
 
 	if (!avelocities[0][0]) {
 		for (i = 0; i < NUMVERTEXNORMALS * 3; i++)
@@ -224,9 +233,12 @@ R_EntityParticles (entity_t *ent)
 		forward[0] = cp * cy;
 		forward[1] = cp * sy;
 		forward[2] = -sp;
-		org[0] = ent->origin[0] + r_avertexnormals[i][0] * dist + forward[0] * beamlength;
-		org[1] = ent->origin[1] + r_avertexnormals[i][1] * dist + forward[1] * beamlength;
-		org[2] = ent->origin[2] + r_avertexnormals[i][2] * dist + forward[2] * beamlength;
+		org[0] = ent->origin[0] + r_avertexnormals[i][0] * dist + forward[0]
+			* beamlength;
+		org[1] = ent->origin[1] + r_avertexnormals[i][1] * dist + forward[1]
+			* beamlength;
+		org[2] = ent->origin[2] + r_avertexnormals[i][2] * dist + forward[2]
+			* beamlength;
 		new_base_particle_oc(pt_explode, org, r_origin, 0x6f, 0, -1, 0.01);
 	}
 }
@@ -248,12 +260,12 @@ R_ClearParticles (void)
 void
 R_ReadPointFile_f (void)
 {
-	FILE       *f;
-	vec3_t      org;
-	int         r;
-	int         c;
-	char        name[MAX_OSPATH];
-	extern cvar_t *cl_mapname;
+	FILE			   *f;
+	vec3_t				org;
+	int					r;
+	int					c;
+	char				name[MAX_OSPATH];
+	extern cvar_t	   *cl_mapname;
 
 	snprintf (name, sizeof (name), "maps/%s.pts", cl_mapname->string);
 
@@ -288,8 +300,8 @@ Parse an effect out of the server message
 void
 R_ParseParticleEffect (void)
 {
-	vec3_t      org, dir;
-	int         i, count, msgcount, color;
+	vec3_t		org, dir;
+	int			i, count, msgcount, color;
 
 	for (i = 0; i < 3; i++)
 		org[i] = MSG_ReadCoord ();
@@ -311,8 +323,8 @@ R_ParticleExplosion
 void
 R_ParticleExplosion (vec3_t org)
 {
-	int		i, j, type;
-	vec3_t	porg, vel;
+	int			i, j, type;
+	vec3_t		porg, vel;
 
 	for (i = 0; i < 1024; i++) {
 		type = (i & 1) ? pt_explode : pt_explode2;
@@ -333,9 +345,9 @@ R_ParticleExplosion2
 void
 R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength)
 {
-	int		i, j;
-	int		colorMod = 0, color;
-	vec3_t	porg, vel;
+	int			i, j;
+	int			colorMod = 0, color;
+	vec3_t		porg, vel;
 
 	for (i = 0; i < 512; i++) {
 		color = colorStart + (colorMod % colorLength);
@@ -357,10 +369,10 @@ R_BlobExplosion
 void
 R_BlobExplosion (vec3_t org)
 {
-	int		i, j, color;
-	float	pdie;
-	vec3_t	porg, pvel;
-	ptype_t	ptype;
+	int			i, j, color;
+	float		pdie;
+	vec3_t		porg, pvel;
+	ptype_t		ptype;
 
 	for (i = 0; i < 1024; i++) {
 		pdie = 1 + (Q_rand () & 8) * 0.05;
@@ -389,9 +401,9 @@ R_RunParticleEffect
 void
 R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 {
-	int		i, j, pcolor;
-	float	pdie;
-	vec3_t	porg, pvel;
+	int			i, j, pcolor;
+	float		pdie;
+	vec3_t		porg, pvel;
 
 	for (i = 0; i < count; i++) {
 		pdie = 0.1 * (Q_rand () % 5);
@@ -414,9 +426,9 @@ R_LavaSplash
 void
 R_LavaSplash (vec3_t org)
 {
-	int         i, j, pcolor;
-	float       vel, pdie;
-	vec3_t      dir, porg, pvel;
+	int			i, j, pcolor;
+	float		vel, pdie;
+	vec3_t		dir, porg, pvel;
 
 	for (i = -16; i < 16; i++)
 		for (j = -16; j < 16; j++) {
@@ -447,9 +459,8 @@ R_TeleportSplash
 void
 R_TeleportSplash (vec3_t org)
 {
-	vec3_t	porg_top, porg_bottom;
-	vec4_t	color1, color2;
-
+	vec3_t		porg_top, porg_bottom;
+	vec4_t		color1, color2;
 
 	org[2] += 4;
 
@@ -479,8 +490,8 @@ R_Torch
 void 
 R_Torch (entity_t *ent, qboolean torch2)
 {
-	vec3_t	porg, pvel;
-	vec4_t	color;
+	vec3_t		porg, pvel;
+	vec4_t		color;
 
 	if (!r_particles->value)
 		return;
@@ -491,13 +502,13 @@ R_Torch (entity_t *ent, qboolean torch2)
 	VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
 
 	if (torch2) { 
-		/* used for large torches (eg, start map near spawn) */
+		// used for large torches (eg, start map near spawn)
 		porg[2] = ent->origin[2] - 2;
 		VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
 		new_base_particle (pt_torch2, porg, pvel, color,
 				Q_rand () & 3, ent->frame ? 30 : 10, 5);
 	} else { 
-		/* wall torches */
+		// wall torches
 		new_base_particle (pt_torch, porg, pvel, color,
 				Q_rand () & 3, 10, 5);
 	}
@@ -506,11 +517,11 @@ R_Torch (entity_t *ent, qboolean torch2)
 void
 R_RocketConeTrail (vec3_t start, vec3_t end, int type)
 {
-	vec3_t      vec;
+	vec3_t		vec;
 	vec3_t		point1, point2, cur;
 	vec4_t		color1, color2;
-	float       len;
-	int         lsub;
+	float		len;
+	int			lsub;
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
@@ -533,10 +544,10 @@ R_RocketConeTrail (vec3_t start, vec3_t end, int type)
 void
 R_RocketTrail (vec3_t start, vec3_t end, int type)
 {
-	vec3_t      vec, avec, porg, pvel;
-	float       len, pdie, pramp;
-	int         j, lsub, pcolor;
-	static int  tracercount;
+	vec3_t		vec, avec, porg, pvel;
+	float		len, pdie, pramp;
+	int			j, lsub, pcolor;
+	static int	tracercount;
 	ptype_t		ptype;
 
 	if (type == 0) {
@@ -628,12 +639,12 @@ R_Draw_Base_Particles
 static void
 R_Draw_Base_Particles (void)
 {
-	base_particle_t *p;
-	int         i, j, k, activeparticles, maxparticle;
-	float       time1, time2, time3;
-	float       grav, dvel;
-	float       frametime;
-	float		scale, *corner;
+	base_particle_t	   *p;
+	int					i, j, k, activeparticles, maxparticle;
+	float				time1, time2, time3;
+	float				grav, dvel;
+	float				frametime;
+	float				scale, *corner;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
 
@@ -710,7 +721,8 @@ R_Draw_Base_Particles (void)
 				if (p->ramp >= 8)
 					p->die = -1;
 				else
-					VectorCopy (d_8tofloattable[ramp1[(int) p->ramp]],p->color);
+					VectorCopy (d_8tofloattable[ramp1[(int) p->ramp]],
+							p->color);
 				for (i = 0; i < 3; i++)
 					p->vel[i] += p->vel[i] * dvel;
 				p->vel[2] -= grav;
@@ -721,7 +733,8 @@ R_Draw_Base_Particles (void)
 				if (p->ramp >= 8)
 					p->die = -1;
 				else
-					VectorCopy (d_8tofloattable[ramp2[(int) p->ramp]],p->color);
+					VectorCopy (d_8tofloattable[ramp2[(int) p->ramp]],
+							p->color);
 				for (i = 0; i < 3; i++)
 					p->vel[i] -= p->vel[i] * frametime;
 				p->vel[2] -= grav;
@@ -779,7 +792,7 @@ R_Draw_Base_Particles (void)
 	num_base_particles = activeparticles;
 }
 
-extern float    bubble_sintable[17], bubble_costable[17];
+extern float bubble_sintable[17], bubble_costable[17];
 
 /*
 ===============
@@ -789,13 +802,12 @@ R_Draw_Cone_Particles
 static void
 R_Draw_Cone_Particles (void)
 {
-	cone_particle_t *p;
-	int		i, i2, j, k, activeparticles, maxparticle;
-	int		v_center, v_first, v_last;
-	float	frametime, teletime;
-	vec3_t	v_up, v_right;
-	float	*bub_sin, *bub_cos;
-
+	cone_particle_t	   *p;
+	int					i, i2, j, k, activeparticles, maxparticle;
+	int					v_center, v_first, v_last;
+	float				frametime, teletime;
+	vec3_t				v_up, v_right;
+	float			   *bub_sin, *bub_cos;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke);
 	if (gl_cull->value)
@@ -811,9 +823,11 @@ R_Draw_Cone_Particles (void)
 	i_index = 0;
 
 	for (k = 0, p = cone_particles; k < num_cone_particles; k++, p++) {
-		// LordHavoc: this is probably no longer necessary, as it is
-		// checked at the end, but could still happen on weird particle
-		// effects, left for safety...
+		/*
+		 * LordHavoc: this is probably no longer necessary, as it is checked
+		 * at the end, but could still happen on weird particle effects, left
+		 * for safety...
+		 */
 		if (p->die <= realtime) {
 			free_cone_particles[j++] = p;
 			continue;

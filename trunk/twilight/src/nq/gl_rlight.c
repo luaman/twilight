@@ -41,10 +41,10 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
+#include "strlib.h"
 #include "view.h"
 
 int         r_dlightframecount;
-
 
 /*
 ==================
@@ -106,6 +106,7 @@ R_InitBubble (void)
 				*bub_cos = bubble_costable;
 
 	// additional accuracy here
+	// NOTE: We REALLY want to use the real sin and cos in this case.
 	for (i = 16; i >= 0; i--) {
 		a = i * (M_PI / 8.0);
 		*bub_sin++ = sin (a);
@@ -113,12 +114,13 @@ R_InitBubble (void)
 	}
 }
 
+
 void
 R_RenderDlight (dlight_t *light)
 {
-	int     i, j;
+	int     i, j, vcenter, vlast = -1;
 	vec3_t  v, v_right, v_up;
-	float	*bub_sin = bubble_sintable, 
+	float	*bub_sin = bubble_sintable,
 			*bub_cos = bubble_costable;
 	float   rad = light->radius * 0.35, length;
 
@@ -129,9 +131,6 @@ R_RenderDlight (dlight_t *light)
 		AddLightBlend (1, 0.5, 0, light->radius * 0.0003);
 		return;
 	}
-
-	qglBegin (GL_TRIANGLE_FAN);
-	qglColor3fv (light->color);
 
 	v_right[0] = v[1];
 	v_right[1] = -v[0];
@@ -148,8 +147,13 @@ R_RenderDlight (dlight_t *light)
 	}
 	VectorSubtract (light->origin, v, v);
 
-	qglVertex3fv (v);
-	qglColor3f (0, 0, 0);
+	VectorSet3 (v_array[v_index], v[0], v[1], v[2]);
+	c_array[v_index][0] = light->color[0] * 0.5;
+	c_array[v_index][1] = light->color[1] * 0.5;
+	c_array[v_index][2] = light->color[2] * 0.5;
+	c_array[v_index][3] = 1;
+	vcenter = v_index;
+	v_index++;
 
 	for (i = 16; i >= 0; i--, bub_sin++, bub_cos++) 
 	{
@@ -157,12 +161,35 @@ R_RenderDlight (dlight_t *light)
 			v[j] = light->origin[j] + (v_right[j] * (*bub_cos) +
 				+ v_up[j] * (*bub_sin)) * rad;
 
-		qglVertex3fv (v);
+		VectorSet4 (c_array[v_index], 0, 0, 0, 0);
+		VectorSet3 (v_array[v_index], v[0], v[1], v[2]);
+		if (vlast != -1) {
+			vindices[i_index + 0] = vcenter;
+			vindices[i_index + 1] = vlast;
+			vindices[i_index + 2] = v_index;
+			i_index += 3;
+		}
+		vlast = v_index;
+		v_index++;
+
+		if (((v_index + 3) >= MAX_VERTEX_ARRAYS) ||
+				((i_index + 3) >= MAX_VERTEX_INDICES)) {
+			if (gl_cva)
+				qglLockArraysEXT (0, v_index);
+			qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
+			if (gl_cva)
+				qglUnlockArraysEXT ();
+			v_index = 0;
+			i_index = 0;
+			memcpy(v_array[v_index], v_array[vcenter], sizeof(*v_array));
+			memcpy(c_array[v_index], c_array[vcenter], sizeof(*c_array));
+			vcenter = v_index++;
+			memcpy(v_array[v_index], v_array[vlast], sizeof(*v_array));
+			memcpy(c_array[v_index], c_array[vlast], sizeof(*c_array));
+			vlast = v_index++;
+		}
 	}
-
-	qglEnd ();
 }
-
 
 /*
 =============
@@ -178,21 +205,27 @@ R_RenderDlights (void)
 	if (!gl_flashblend->value)
 		return;
 
-	// advanced yet for this frame
 	qglDisable (GL_TEXTURE_2D);
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglBlendFunc (GL_ONE, GL_ONE);
+	qglEnableClientState (GL_COLOR_ARRAY);
 
-	for (i = 0, l = cl_dlights; i < MAX_DLIGHTS; i++, l++) {
+	l = cl_dlights;
+	for (i = 0; i < MAX_DLIGHTS; i++, l++) {
 		if (l->die < cl.time || !l->radius)
 			continue;
-
 		R_RenderDlight (l);
+	}
+
+	if (v_index || i_index) {
+		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
+		v_index = 0;
+		i_index = 0;
 	}
 
 	qglColor3f (1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDisableClientState (GL_COLOR_ARRAY);
 }
 
 
@@ -236,13 +269,15 @@ R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node)
 			node = node->children[1];
 			continue;
 		}
-			
+
 		// mark the polygons
 		maxdist = light->radius*light->radius;
 		surf = cl.worldmodel->surfaces + node->firstsurface;
 
 		for (i = 0; i < node->numsurfaces; i++, surf++)
 		{
+			if (surf->visframe != r_framecount)
+				continue;
 			for (j = 0; j < 3; j++)
 				impact[j] = light->origin[j] - surf->plane->normal[j]*dist;
 
@@ -250,17 +285,17 @@ R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node)
 			l = DotProduct (impact, surf->texinfo->vecs[0])
 				+ surf->texinfo->vecs[0][3] - surf->texturemins[0];
 			s = l+0.5;
-			if (s < 0) 
+			if (s < 0)
 				s = 0;
-			else if (s > surf->extents[0]) 
+			else if (s > surf->extents[0])
 				s = surf->extents[0];
 			s = l - s;
 			l = DotProduct (impact, surf->texinfo->vecs[1])
 				+ surf->texinfo->vecs[1][3] - surf->texturemins[1];
 			t = l+0.5;
-			if (t < 0) 
+			if (t < 0)
 				t = 0;
-			else if (t > surf->extents[1]) 
+			else if (t > surf->extents[1])
 				t = surf->extents[1];
 			t = l - t;
 			// compare to minimum light
@@ -300,17 +335,17 @@ R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node)
 	}
 }
 
-void 
+void
 R_MarkLights (dlight_t *light, int bit, model_t *model)
 {
 	mleaf_t *pvsleaf = Mod_PointInLeaf (light->origin, model);
-	int		i, k, l, m, c;
-	msurface_t *surf, **mark;
-	mleaf_t *leaf;
-	Uint8	*in = pvsleaf->compressed_vis;
-	int		row = (model->numleafs+7)>>3;
-	float	low[3], high[3], radius, dist, maxdist;
-	
+	int				i, k, l, m, c;
+	msurface_t	   *surf, **mark;
+	mleaf_t		   *leaf;
+	Uint8		   *in = pvsleaf->compressed_vis;
+	int				row = (model->numleafs+7)>>3;
+	float			low[3], high[3], radius, dist, maxdist;
+
 	if (!pvsleaf->compressed_vis || gl_oldlights->value)
 	{
 		// no vis info, so make all visible
@@ -346,18 +381,18 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 				if (c & (1<<i))
 				{
 					leaf = &model->leafs[(k << 3)+i+1];
-					if (leaf->visframe != r_visframecount)
+					if (leaf->visframe != r_framecount)
 						continue;
 					if (leaf->contents == CONTENTS_SOLID)
 						continue;
 					// if out of the light radius, skip
 					if (leaf->mins[0] > high[0]
-							|| leaf->maxs[0] < low[0]
-							|| leaf->mins[1] > high[1]
-							|| leaf->maxs[1] < low[1]
-							|| leaf->mins[2] > high[2]
-							|| leaf->maxs[2] < low[2])
-						continue; 
+						|| leaf->maxs[0] < low[0]
+						|| leaf->mins[1] > high[1]
+						|| leaf->maxs[1] < low[1]
+						|| leaf->mins[2] > high[2]
+						|| leaf->maxs[2] < low[2])
+						continue;
 					if ((m = leaf->nummarksurfaces))
 					{
 						mark = leaf->firstmarksurface;
@@ -366,8 +401,10 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 
 							if (surf->lightframe == r_dlightframecount)
 								continue;
-
 							surf->lightframe = r_dlightframecount;
+							if (surf->visframe != r_framecount)
+								continue;
+
 							dist = PlaneDiff(light->origin, surf->plane);
 							if (surf->flags & SURF_PLANEBACK)
 								dist = -dist;
@@ -460,10 +497,11 @@ R_PushDlights (void)
 	if (gl_flashblend->value)
 		return;
 
-	for (i = 0, l = cl_dlights; i < MAX_DLIGHTS; i++, l++) {
+	l = cl_dlights;
+
+	for (i = 0; i < MAX_DLIGHTS; i++, l++) {
 		if (l->die < cl.time || !l->radius)
 			continue;
-
 		R_MarkLights (l, 1 << i, cl.worldmodel);
 	}
 }
@@ -545,6 +583,9 @@ RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 			continue;
 		dt = t - surf->texturemins[1];
 		if (dt > surf->extents[1])
+			continue;
+
+		if (ds > surf->extents[0] || dt > surf->extents[1])
 			continue;
 
 		if (!surf->samples)
@@ -755,7 +796,7 @@ int R_LightPoint (vec3_t p)
 		return r;
 	}
 	else {
-		if (/* r_fullbright->value || */!cl.worldmodel->lightdata)
+		if (!cl.worldmodel->lightdata)
 		{
 			lightcolor[0] = lightcolor[1] = lightcolor[2] = 255;
 			return 255;

@@ -24,7 +24,7 @@
 */
 // r_misc.c
 static const char rcsid[] =
-    "$Id$";
+	"$Id$";
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -43,18 +43,21 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-GLfloat tc_array[MAX_VERTEX_ARRAYS][2];
-GLfloat v_array[MAX_VERTEX_ARRAYS][3];
-GLfloat c_array[MAX_VERTEX_ARRAYS][4];
-unsigned int vindices[MAX_VERTEX_INDICES];
+// FIXME
+extern cvar_t *gl_im_transform;
+extern void TNT_Init (void);
+
+GLfloat	tc_array[MAX_VERTEX_ARRAYS][2];
+GLfloat	v_array[MAX_VERTEX_ARRAYS][3];
+GLfloat	c_array[MAX_VERTEX_ARRAYS][4];
+GLuint vindices[MAX_VERTEX_INDICES];
+GLuint v_index, i_index;
 
 void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
-void R_TimeRefresh_f (void);
-extern void TNT_Init (void);
+static void R_TimeRefresh_f (void);
 
-// FIXME
-extern cvar_t *gl_im_transform;
+qboolean Img_HasFullbrights (Uint8 *pixels, int size);
 
 /*
 ==================
@@ -90,34 +93,6 @@ R_InitTextures (void)
 	}
 }
 
-void
-R_InitParticleTexture (void)
-{
-	int     x,y,d;
-	float   dx, dy;
-	Uint8    data[64][64][4];
-	
-	// 
-	// particle texture
-	// 
-	particletexture = texture_extension_number++;
-	qglBindTexture(GL_TEXTURE_2D, particletexture);
-	
-	for (x=0 ; x<64; x++) {
-		for (y=0 ; y<64 ; y++) {
-			data[y][x][0] = data[y][x][1] = data[y][x][2] = 255;
-			dx = x - 16; dy = y - 16;
-			d = (255 - (dx*dx+dy*dy));
-			if (d < 0) d = 0;
-			data[y][x][3] = (Uint8) d;
-		}
-	}
-
-	qglTexImage2D (GL_TEXTURE_2D, 0, 4, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-}
-
 /*
 ===============
 R_Init_Cvars
@@ -126,7 +101,6 @@ R_Init_Cvars
 void
 R_Init_Cvars (void)
 {
-	extern cvar_t *gl_finish;
 	extern cvar_t *r_maxedges, *r_maxsurfs;		// Shrak
 
 	r_norefresh = Cvar_Get ("r_norefresh", "0", CVAR_NONE, NULL);
@@ -142,7 +116,6 @@ R_Init_Cvars (void)
 	r_skybox = Cvar_Get ("skybox", "", CVAR_NONE, &R_SkyBoxChanged);
 	r_fastsky = Cvar_Get ("r_fastsky", "0", CVAR_NONE, NULL);
 
-	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
 	gl_clear = Cvar_Get ("gl_clear", "1", CVAR_NONE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
 	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_NONE, NULL);
@@ -150,6 +123,7 @@ R_Init_Cvars (void)
 	gl_flashblend = Cvar_Get ("gl_flashblend", "1", CVAR_NONE, NULL);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", CVAR_NONE, NULL);
 	gl_nocolors = Cvar_Get ("gl_nocolors", "0", CVAR_NONE, NULL);
+	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
 
 	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_NONE, NULL);
 	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_NONE, NULL);
@@ -159,14 +133,12 @@ R_Init_Cvars (void)
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
 
-	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
-
 	r_maxedges = Cvar_Get ("r_maxedges", "0", CVAR_NONE, NULL);	// Shrak
 	r_maxsurfs = Cvar_Get ("r_maxsurfs", "0", CVAR_NONE, NULL); // Shrak
 
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 
-	r_particles = Cvar_Get ("r_particles", "1", CVAR_NONE, NULL);
+	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
 }
 
 /*
@@ -182,11 +154,10 @@ R_Init (void)
 
 	R_InitBubble ();
 	R_InitParticles ();
-	R_InitParticleTexture ();
 	TNT_Init ();
 
 	playertextures = texture_extension_number;
-	texture_extension_number += 16;
+	texture_extension_number += MAX_CLIENTS;
 
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
@@ -269,7 +240,6 @@ R_TranslatePlayerSkin (int playernum)
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-
 /*
 ===============
 R_NewMap
@@ -278,14 +248,14 @@ R_NewMap
 void
 R_NewMap (void)
 {
-	Uint32		i;
-	extern int	r_dlightframecount;
+	Uint32			i;
+	extern Sint32	r_dlightframecount;
 
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
 
-// clear out efrags in case the level hasn't been reloaded
-// FIXME: is this one short?
+	// clear out efrags in case the level hasn't been reloaded
+	// FIXME: is this one short?
 	for (i = 0; i < cl.worldmodel->numleafs; i++)
 		cl.worldmodel->leafs[i].efrags = NULL;
 
@@ -315,11 +285,14 @@ R_TimeRefresh_f
 For program optimization
 ====================
 */
-void
+static void
 R_TimeRefresh_f (void)
 {
 	int         i;
 	float       start, stop, time;
+
+	if (cls.state != ca_connected)
+		return;
 
 	qglFinish ();
 
@@ -338,7 +311,3 @@ R_TimeRefresh_f (void)
 	GL_EndRendering ();
 }
 
-void
-D_FlushCaches (void)
-{
-}

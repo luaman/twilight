@@ -27,42 +27,29 @@
 #ifndef __SCREEN_H
 #define __SCREEN_H
 
-void		SCR_Init_Cvars (void);
-void		SCR_Init (void);
+void SCR_Init_Cvars (void);
+void SCR_Init (void);
 
-void		SCR_UpdateScreen (void);
+void SCR_UpdateScreen (void);
 
+void SCR_SizeUp (void);
+void SCR_SizeDown (void);
+void SCR_CenterPrint (char *str);
 
-void        SCR_SizeUp (void);
-void        SCR_SizeDown (void);
-void        SCR_CenterPrint (char *str);
+void SCR_BeginLoadingPlaque (void);
+void SCR_EndLoadingPlaque (void);
 
-void        SCR_BeginLoadingPlaque (void);
-void        SCR_EndLoadingPlaque (void);
-
-int         SCR_ModalMessage (char *text);
+int SCR_ModalMessage (char *text);
 
 extern float scr_con_current;
-extern float scr_conlines;				// lines of console to display
+extern float scr_conlines;		/* lines of console to display */
 
-extern int  sb_lines;
-
-extern int  clearnotify;				// set to 0 whenever notify text is
-										// drawn
+extern int clearnotify;			/* set to 0 whenever notify text is drawn */
 extern qboolean scr_disabled_for_loading;
-extern qboolean scr_skipupdate;
 
 extern struct cvar_s *scr_viewsize;
 extern struct cvar_s *r_brightness;
 extern struct cvar_s *r_contrast;
-
-// only the refresh window will be updated unless these variables are flagged 
-extern int  scr_copytop;
-extern int  scr_copyeverything;
-
-extern qboolean block_drawing;
-
-void        SCR_UpdateWholeScreen (void);
 
 #endif // __SCREEN_H
 

@@ -878,8 +878,6 @@ Sbar_Draw (void)
 
 	headsup = !cl_sbar->value;
 
-	scr_copyeverything = 1;
-
 	if (sb_lines > 24) {
 		Sbar_DrawInventory ();
 		if (!headsup && cl.maxclients != 1)
@@ -1024,8 +1022,6 @@ Sbar_DeathmatchOverlay (void)
 	char        num[12];
 	scoreboard_t *s;
 
-	scr_copyeverything = 1;
-
 	pic = Draw_CachePic ("gfx/ranking.lmp");
 	M_DrawPic ((320 - pic->width) / 2, 8, pic);
 
@@ -1086,8 +1082,6 @@ Sbar_MiniDeathmatchOverlay (void)
 
 	if (vid.width < 512 || !sb_lines)
 		return;
-
-	scr_copyeverything = 1;
 
 	// scores
 	Sbar_SortFrags ();
@@ -1163,8 +1157,6 @@ Sbar_IntermissionOverlay (void)
 	int         dig;
 	int         num;
 
-	scr_copyeverything = 1;
-
 	if (cl.gametype == GAME_DEATHMATCH) {
 		Sbar_DeathmatchOverlay ();
 		return;
@@ -1205,8 +1197,6 @@ void
 Sbar_FinaleOverlay (void)
 {
 	qpic_t     *pic;
-
-	scr_copyeverything = 1;
 
 	pic = Draw_CachePic ("gfx/finale.lmp");
 	Draw_Pic ((vid.width - pic->width) / 2, 16, pic);

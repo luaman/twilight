@@ -29,7 +29,7 @@
 
 // disable data conversion warnings
 #ifdef __WIN32
-# if _MSC_VER >= 800	/* MSVC 4.0 */
+# if _MSC_VER >= 800 // MSVC 4.0
 #  pragma warning(disable : 4244)			// MIPS
 #  pragma warning(disable : 4136)			// X86
 #  pragma warning(disable : 4051)			// ALPHA
@@ -50,11 +50,9 @@
 #include "transform.h"
 
 qboolean GLF_Init (void);
+void GL_EndRendering (void);
 
-void        GL_EndRendering (void);
-
-extern int  texture_extension_number;
-
+extern int texture_extension_number;
 extern float gldepthmin, gldepthmax;
 
 void GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
@@ -62,52 +60,51 @@ void GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 void GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, 
 						int alpha, unsigned *ttable);
 
-extern int  glx, gly;
+extern int glx, gly;
 
 // r_local.h -- private refresh defs
 
+/*
+ * normalizing factor so player model works out to about 1 pixel per triangle
+ */
 #define ALIAS_BASE_SIZE_RATIO		(1.0 / 11.0)
-					// normalizing factor so player model works out to about
-					// 1 pixel per triangle
-#define	MAX_LBM_HEIGHT		480
+#define MAX_LBM_HEIGHT				480
 
-#define BACKFACE_EPSILON	0.01
+#define BACKFACE_EPSILON			0.01
 
 
-void        R_ReadPointFile_f (void);
+void R_ReadPointFile_f (void);
 
-//====================================================
+//============================================================================
 
 
 extern entity_t *currententity;
-extern int  r_framecount;
-extern int  c_brush_polys, c_alias_polys;
+extern int r_framecount;
+extern int c_brush_polys, c_alias_polys;
 
 
-//
-// view origin
-//
+/*
+ * view origin
+ */
 extern vec3_t vup;
 extern vec3_t vpn;
 extern vec3_t vright;
 extern vec3_t r_origin;
 
-//
-// screen size info
-//
+/*
+ * screen size info
+ */
 extern refdef_t r_refdef;
 extern mleaf_t *r_viewleaf, *r_oldviewleaf;
 extern texture_t *r_notexture_mip;
-extern int  d_lightstylevalue[256];		// 8.8 fraction of base light value
+extern int d_lightstylevalue[256];		// 8.8 fraction of base light value
 
-extern int  particletexture;
-extern int  netgraphtexture;			// netgraph texture
-extern int  playertextures;
+extern int netgraphtexture;				// netgraph texture
+extern int playertextures;
 
-extern int  skyboxtexnum;
+extern int skyboxtexnum;
 
-extern int  skytexturenum;				// index in cl.loadmodel, not gl
-										// texture object
+extern int skytexturenum;				// in cl.loadmodel, not GL texture
 
 extern struct cvar_s *r_norefresh;
 extern struct cvar_s *r_drawentities;
@@ -138,9 +135,9 @@ extern struct cvar_s *gl_colorlights;
 extern struct cvar_s *gl_particletorches;
 extern struct cvar_s *r_particles;
 
-extern int  gl_lightmap_format;
-extern int  gl_solid_format;
-extern int  gl_alpha_format;
+extern int gl_lightmap_format;
+extern int gl_solid_format;
+extern int gl_alpha_format;
 extern qboolean colorlights;
 
 extern struct cvar_s *gl_max_size;
@@ -153,7 +150,7 @@ extern const char *gl_renderer;
 extern const char *gl_version;
 extern const char *gl_extensions;
 
-void        R_TranslatePlayerSkin (int playernum);
+void R_TranslatePlayerSkin (int playernum);
 
 extern qboolean gl_cva;
 extern qboolean gl_mtex;
@@ -163,56 +160,49 @@ extern qboolean gl_mtexcombine;
 
 #define MAX_VERTEX_ARRAYS	1024
 #define MAX_VERTEX_INDICES	(MAX_VERTEX_ARRAYS * 4)
-extern GLfloat	tc_array[MAX_VERTEX_ARRAYS][2];
-extern GLfloat	v_array[MAX_VERTEX_ARRAYS][3];
-extern GLfloat	c_array[MAX_VERTEX_ARRAYS][4];
+extern GLfloat tc_array[MAX_VERTEX_ARRAYS][2];
+extern GLfloat v_array[MAX_VERTEX_ARRAYS][3];
+extern GLfloat c_array[MAX_VERTEX_ARRAYS][4];
 
 extern GLuint vindices[MAX_VERTEX_INDICES];
 
 extern GLuint v_index, i_index;
 
+
 /*
-extern varray_t2f_c4f_v4f_t varray[MAX_VERTEX_ARRAYS];
-typedef struct varray_t2f_c4f_v4f_s {
-	GLfloat		texcoord[2];
-	GLfloat		color[4];
-	GLfloat		vertex[4];
-} varray_t2f_c4f_v4f_t;
-*/
+ * gl_warp.c
+ */
+void EmitBothSkyLayers (msurface_t *fa);
+void EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform);
+void R_DrawSkyChain (msurface_t *s);
 
-//
-// gl_warp.c
-//
-void        EmitBothSkyLayers (msurface_t *fa);
-void        EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform);
-void        R_DrawSkyChain (msurface_t *s);
+/*
+ * gl_draw.c
+ */
+extern int gl_filter_min;
+extern int gl_filter_max;
 
-//
-// gl_draw.c
-//
-extern int	gl_filter_min;
-extern int	gl_filter_max;
+/*
+ * gl_rmain.c
+ */
+qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 
-//
-// gl_rmain.c
-//
-qboolean    R_CullBox (vec3_t mins, vec3_t maxs);
+/*
+ * gl_refrag.c
+ */
+void R_StoreEfrags (efrag_t **ppefrag);
 
-//
-// gl_refrag.c
-//
-void        R_StoreEfrags (efrag_t **ppefrag);
+/*
+ * gl_rsurf.c
+ */
+void R_DrawBrushModel (entity_t *e);
+void R_DrawWorld (void);
+void GL_BuildLightmaps (void);
 
-//
-// gl_rsurf.c
-//
-void        R_DrawBrushModel (entity_t *e);
-void        R_DrawWorld (void);
-void        GL_BuildLightmaps (void);
-
-//
-// gl_ngraph.c
-//
-void        R_NetGraph (void);
+/*
+ * gl_ngraph.c
+ */
+void R_NetGraph (void);
 
 #endif // __GLQUAKE_H
+

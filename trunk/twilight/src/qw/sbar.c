@@ -764,8 +764,6 @@ Sbar_Draw (void)
 	if (scr_con_current == vid.conheight)
 		return;							// console is full screen
 
-	scr_copyeverything = 1;
-
 // top line
 	if (sb_lines > 24) {
 		if (!cl.spectator || autocam == CAM_TRACK)
@@ -879,8 +877,6 @@ Sbar_TeamOverlay (void)
 		return;
 	}
 
-	scr_copyeverything = 1;
-
 	pic = Draw_CachePic ("gfx/ranking.lmp");
 	Draw_Pic (160 - pic->width / 2, 0, pic);
 
@@ -979,8 +975,6 @@ Sbar_DeathmatchOverlay (int start)
 	}
 
 	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
-
-	scr_copyeverything = 1;
 
 	if (!start) {
 		pic = Draw_CachePic ("gfx/ranking.lmp");
@@ -1129,8 +1123,6 @@ Sbar_MiniDeathmatchOverlay (void)
 
 	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
 
-	scr_copyeverything = 1;
-
 	// scores   
 	Sbar_SortFrags (false);
 	if (vid.conwidth >= 640)
@@ -1249,8 +1241,6 @@ Sbar_IntermissionOverlay
 void
 Sbar_IntermissionOverlay (void)
 {
-	scr_copyeverything = 1;
-
 	if (Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0
 		&& !sb_showscores)
 		Sbar_TeamOverlay ();
@@ -1269,8 +1259,6 @@ void
 Sbar_FinaleOverlay (void)
 {
 	qpic_t     *pic;
-
-	scr_copyeverything = 1;
 
 	pic = Draw_CachePic ("gfx/finale.lmp");
 	Draw_Pic ((vid.conwidth - pic->width) / 2, 16, pic);

@@ -2566,8 +2566,6 @@ M_Draw (void)
 		return;
 
 	if (!m_recursiveDraw) {
-		scr_copyeverything = 1;
-
 		if (scr_con_current) {
 			Draw_ConsoleBackground (vid.height);
 			S_ExtraUpdate ();

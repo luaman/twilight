@@ -34,6 +34,8 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <math.h>
+
 #include "quakedef.h"
 #include "client.h"
 #include "cvar.h"
@@ -41,7 +43,6 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "view.h"
-#include <math.h>
 
 int         r_dlightframecount;
 
@@ -374,8 +375,7 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 		if (c)
 		{
 			l = model->numleafs - (k << 3);
-			if (l > 8)
-				l = 8;
+			l = max (l, 8);
 			for (i=0 ; i<l ; i++)
 			{
 				if (c & (1<<i))
