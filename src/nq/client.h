@@ -63,8 +63,6 @@ typedef struct {
 #define	MAX_EFRAGS		640
 
 #define	MAX_MAPSTRING	2048
-#define	MAX_DEMOS		8
-#define	MAX_DEMONAME	16
 
 //
 // the client_static_t structure is persistant through an arbitrary number
@@ -75,21 +73,7 @@ typedef struct {
 	char				mapstring[MAX_QPATH];
 	char				spawnparms[MAX_MAPSTRING];	// to restart a level
 
-	// demo loop control
-	int					demonum;					// -1 = don't play demos
-	char				demos[MAX_DEMOS][MAX_DEMONAME];	// when not playing
-
-	// demo recording info must be here, because record is started before
-	// entering a map (and clearing client_state_t)
-	qboolean			demorecording;
-	qboolean			demoplayback;
-	qboolean			timedemo;
-	int					forcetrack;				// -1 = use normal cd track
-	FILE				*demofile;
-	int					td_lastframe;			// to meter out one message a frame
-	int					td_startframe;			// host_framecount at start
-	float				td_starttime;			// realtime at second frame of timedemo
-
+	int					forcetrack;
 
 	// connection information
 	int					signon;					// 0 to SIGNONS
@@ -97,8 +81,6 @@ typedef struct {
 	sizebuf_t			message;				// writing buffer to send to server
 
 	Uint8				msg_buf[1024];
-
-	double				realtime;
 } client_static_t;
 
 extern client_static_t cls;

@@ -119,7 +119,7 @@ Con_ClearNotify
 void
 Con_ClearNotify (void)
 {
-	con_cleartime = cls.realtime;
+	con_cleartime = ccls.realtime;
 }
 
 
@@ -240,7 +240,7 @@ Con_Linefeed (void)
 		line->text = NULL;
 		line->length = 0;
 	}
-	line->time = cls.realtime;
+	line->time = ccls.realtime;
 	con->current_raw++;
 	return line;
 }
@@ -339,7 +339,7 @@ Con_DrawInput (void)
 	Draw_String_Len(con->tsize, con_vislines - (con->tsize * 2.75), text,
 			con_linewidth, con->tsize);
 
-	if ((int) (cls.realtime * con_cursorspeed) & 1)
+	if ((int) (ccls.realtime * con_cursorspeed) & 1)
 		Draw_Character (min(1 + key_linepos, con_linewidth) * con->tsize,
 				con_vislines - (con->tsize * 2.65), 11, con->tsize);
 }
@@ -376,7 +376,7 @@ Con_DrawNotify (void)
 	char		*s;
 	Uint		skip;
 
-	kill_time = max(con_cleartime, cls.realtime - con_notifytime->fvalue);
+	kill_time = max(con_cleartime, ccls.realtime - con_notifytime->fvalue);
 
 	Con_FindLine (con, con_linewidth, NUM_CON_TIMES, &line, &line_pos);
 	line_pos_max = -1 + (con->raw_lines[line % CON_LINES].length + con_linewidth - 1) / con_linewidth;
@@ -420,7 +420,7 @@ Con_DrawNotify (void)
 		Draw_String (skip * con->tsize, y, s, con->tsize);
 
 		Draw_Character ((strlen(s) + skip) * con->tsize, y,
-				10 + ((int) (cls.realtime * con_cursorspeed) & 1),
+				10 + ((int) (ccls.realtime * con_cursorspeed) & 1),
 				con->tsize);
 		y += con->tsize;
 	}

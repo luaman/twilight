@@ -403,8 +403,8 @@ CL_UpdateBeams (void)
 				return;
 			ang[2] = rand () % 360;
 			ent->common.model = b->model;
-			CL_Update_OriginAngles(ent, org, ang, cls.realtime);
-			CL_Update_Frame(ent, 0, cls.realtime);
+			CL_Update_OriginAngles(ent, org, ang, ccls.realtime);
+			CL_Update_Frame(ent, 0, ccls.realtime);
 
 			for (i = 0; i < 3; i++)
 				org[i] += dist[i] * 30;
@@ -440,8 +440,8 @@ CL_UpdateExplosions (void)
 		if (!ent)
 			return;
 		ent->common.model = ex->model;
-		CL_Update_OriginAngles(ent, ex->origin, vec3_origin, cls.realtime);
-		CL_Update_Frame (ent, f, cls.realtime);
+		CL_Update_OriginAngles(ent, ex->origin, vec3_origin, ccls.realtime);
+		CL_Update_Frame (ent, f, ccls.realtime);
 	}
 }
 

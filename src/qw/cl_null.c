@@ -38,6 +38,7 @@ static const char rcsid[] =
  */
 
 // net_chan depends on cls (for now)
+client_common_static_t ccls;
 client_static_t cls;
 
 // Functions that don't actually exist

@@ -583,7 +583,7 @@ CL_SendMove (usercmd_t *cmd)
 	//
 	// deliver the message
 	//
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return;
 
 	//

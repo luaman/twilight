@@ -124,10 +124,10 @@ CL_Disconnect (void)
 	S_StopAllSounds (true);
 
 // if running a local server, shut it down
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		CL_StopPlayback ();
 	else if (ccls.state >= ca_connected) {
-		if (cls.demorecording)
+		if (ccls.demorecording)
 			CL_Stop_f ();
 
 		Com_DPrintf ("Sending clc_disconnect\n");
@@ -142,9 +142,9 @@ CL_Disconnect (void)
 			Host_ShutdownServer (false);
 	}
 
-	cls.demoplayback = cls.timedemo = false;
+	ccls.demoplayback = ccls.timedemo = false;
 	cls.signon = 0;
-	r_worldmodel = NULL;
+	ccl.worldmodel = r_worldmodel = NULL;
 }
 
 void
@@ -171,7 +171,7 @@ CL_EstablishConnection (char *host)
 	if (ccls.state == ca_dedicated)
 		return;
 
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return;
 
 	CL_Disconnect ();
@@ -181,7 +181,7 @@ CL_EstablishConnection (char *host)
 		Host_Error ("CL_Connect: connect failed\n");
 	Com_DPrintf ("CL_EstablishConnection: connected to %s\n", host);
 
-	cls.demonum = -1;					// not in the demo loop now
+	ccls.demonum = -1;					// not in the demo loop now
 	ccls.state = ca_connected;
 	cls.signon = 0;						// need all the signon messages before
 	// playing
@@ -247,23 +247,23 @@ CL_NextDemo (void)
 {
 	char        str[1024];
 
-	if (cls.demonum == -1)
+	if (ccls.demonum == -1)
 		return;							// don't play demos
 
 	SCR_BeginLoadingPlaque ();
 
-	if (!cls.demos[cls.demonum][0] || cls.demonum == MAX_DEMOS) {
-		cls.demonum = 0;
-		if (!cls.demos[cls.demonum][0]) {
+	if (!ccls.demos[ccls.demonum][0] || ccls.demonum == MAX_DEMOS) {
+		ccls.demonum = 0;
+		if (!ccls.demos[ccls.demonum][0]) {
 			Com_Printf ("No demos listed with startdemos\n");
-			cls.demonum = -1;
+			ccls.demonum = -1;
 			return;
 		}
 	}
 
-	snprintf (str, sizeof (str), "playdemo %s\n", cls.demos[cls.demonum]);
+	snprintf (str, sizeof (str), "playdemo %s\n", ccls.demos[ccls.demonum]);
 	Cbuf_InsertText (str);
-	cls.demonum++;
+	ccls.demonum++;
 }
 
 /*
@@ -407,7 +407,7 @@ CL_LerpPoint (void)
 
 	f = cl.mtime[0] - cl.mtime[1];
 
-	if (!f || cl_nolerp->ivalue || cls.timedemo || sv.active) {
+	if (!f || cl_nolerp->ivalue || ccls.timedemo || sv.active) {
 		ccl.time = cl.mtime[0];
 		r_time = ccl.time;
 		r_frametime = ccl.time - ccl.oldtime;
@@ -463,7 +463,7 @@ CL_RelinkEntities (void)
 //
 	Lerp_Vectors (cl.mvelocity[1], frac, cl.mvelocity[0], cl.velocity);
 
-	if (cls.demoplayback) {
+	if (ccls.demoplayback) {
 		// interpolate the angles
 		Lerp_Angles (cl.mviewangles[1], frac, cl.mviewangles[0], cl.viewangles);
 	}
@@ -576,10 +576,10 @@ CL_ReadFromServer (void)
 
 		cl.last_received_message = host_realtime;
 		CL_ParseServerMessage ();
-	} while (ret && ccls.state >= ca_connected);
 
-	if (cl_shownet->ivalue)
-		Com_Printf ("\n");
+		if (cl_shownet->ivalue)
+			Com_Printf ("\n");
+	} while (ret && ccls.state >= ca_connected);
 
 	CL_RelinkEntities ();
     CL_ScanForBModels ();
@@ -601,7 +601,7 @@ CL_SendCmd (void)
 {
 	usercmd_t   cmd;
 
-	if (ccls.state != ca_active)
+	if (ccls.state < ca_connected)
 		return;
 
 	if (cls.signon == SIGNONS) {
@@ -616,7 +616,7 @@ CL_SendCmd (void)
 
 	}
 
-	if (cls.demoplayback) {
+	if (ccls.demoplayback) {
 		SZ_Clear (&cls.message);
 		return;
 	}
@@ -652,7 +652,7 @@ Cmd_ForwardToServer (void)
 		return;
 	}
 
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return;							// not really connected
 
 	MSG_WriteByte (&cls.message, clc_stringcmd);

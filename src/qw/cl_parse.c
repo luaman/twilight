@@ -202,14 +202,14 @@ CL_CheckOrDownloadFile (char *filename)
 	}
 
 	// ZOID - can't download when recording
-	if (cls.demorecording) {
+	if (ccls.demorecording) {
 		Com_Printf ("Unable to download %s in record mode.\n",
 					cls.downloadname);
 		return true;
 	}
 
 	// ZOID - can't download when playback
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return true;
 
 	strcpy (cls.downloadname, filename);
@@ -396,7 +396,7 @@ CL_ParseDownload (void)
 	size = MSG_ReadShort ();
 	percent = MSG_ReadByte ();
 
-	if (cls.demoplayback) {
+	if (ccls.demoplayback) {
 		if (size > 0)
 			msg_readcount += size;
 		return;							// not in demo playback
@@ -582,7 +582,7 @@ CL_ParseServerData (void)
 // allow 2.2 and 2.29 demos to play
 	protover = MSG_ReadLong ();
 	if (protover != PROTOCOL_VERSION &&
-		!(cls.demoplayback
+		!(ccls.demoplayback
 		  && (protover == 26 || protover == 27 || protover == 28)))
 		Host_EndGame ("Server returned version %i, not %i\n"
 				"You probably need to upgrade.\n"
@@ -862,7 +862,7 @@ CL_ParseClientdata (void)
 	frame = &cl.frames[i];
 	parsecounttime = cl.frames[i].senttime;
 
-	frame->receivedtime = cls.realtime;
+	frame->receivedtime = ccls.realtime;
 
 // calculate latency
 	latency = frame->receivedtime - frame->senttime;
@@ -935,6 +935,7 @@ CL_UpdateUserinfo (void)
 {
 	int         slot;
 	player_info_t *player;
+	user_info_t	*user;
 
 	slot = MSG_ReadByte ();
 	if (slot >= MAX_CLIENTS)
@@ -942,7 +943,8 @@ CL_UpdateUserinfo (void)
 			("CL_ParseServerMessage: svc_updateuserinfo > MAX_SCOREBOARD");
 
 	player = &cl.players[slot];
-	player->userid = MSG_ReadLong ();
+	user = &ccl.users[slot];
+	user->user_id = MSG_ReadLong ();
 	strncpy (player->userinfo, MSG_ReadString (),
 			   sizeof (player->userinfo) - 1);
 
@@ -1150,7 +1152,7 @@ CL_ParseServerMessage (void)
 	int         i, j;
 
 	received_framecount = host_framecount;
-	cl.last_servermessage = cls.realtime;
+	cl.last_servermessage = ccls.realtime;
 	CL_ClearProjectiles ();
 
 //
@@ -1333,7 +1335,7 @@ CL_ParseServerMessage (void)
 
 			case svc_intermission:
 				ccl.intermission = 1;
-				ccl.completed_time = cls.realtime;
+				ccl.completed_time = ccls.realtime;
 				for (i = 0; i < 3; i++)
 					cl.simorg[i] = MSG_ReadCoord ();
 				for (i = 0; i < 3; i++)
@@ -1343,7 +1345,7 @@ CL_ParseServerMessage (void)
 
 			case svc_finale:
 				ccl.intermission = 2;
-				ccl.completed_time = cls.realtime;
+				ccl.completed_time = ccls.realtime;
 				SCR_CenterPrint (MSG_ReadString ());
 				break;
 

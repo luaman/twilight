@@ -604,13 +604,13 @@ CL_SendCmd (void)
 	int         lost;
 	int         seq_hash;
 
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return;							// sendcmds come from the demo
 
 	// save this command off for prediction
 	i = cls.netchan.outgoing_sequence & UPDATE_MASK;
 	cmd = &cl.frames[i].cmd;
-	cl.frames[i].senttime = cls.realtime;
+	cl.frames[i].senttime = ccls.realtime;
 	cl.frames[i].receivedtime = -1;		// we haven't gotten a reply yet
 
 //  seq_hash = (cls.netchan.outgoing_sequence & 0xffff) ; // ^ QW_CHECK_HASH;
@@ -668,7 +668,7 @@ CL_SendCmd (void)
 		cl.validsequence = 0;
 
 	if (cl.validsequence && !cl_nodelta->ivalue &&
-			ccls.state == ca_active && !cls.demorecording) {
+			ccls.state == ca_active && !ccls.demorecording) {
 		cl.frames[cls.netchan.outgoing_sequence & UPDATE_MASK].delta_sequence =
 			cl.validsequence;
 		MSG_WriteByte (&buf, clc_delta);
@@ -677,7 +677,7 @@ CL_SendCmd (void)
 		cl.frames[cls.netchan.outgoing_sequence & UPDATE_MASK].delta_sequence =
 			-1;
 
-	if (cls.demorecording)
+	if (ccls.demorecording)
 		CL_WriteDemoCmd (cmd);
 
 	//

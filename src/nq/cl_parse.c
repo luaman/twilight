@@ -179,7 +179,7 @@ CL_KeepaliveMessage (void)
 
 	if (sv.active)
 		return;							// no need if server is local
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return;
 
 // read messages from server, should just be nops
@@ -605,7 +605,7 @@ CL_NewTranslation (int slot, int colors)
 	user->color_bottom = color;
 	VectorCopy4 (d_8tofloattable[color], user->color_map.bottom);
 
-	snprintf(user->team, sizeof(user->team), "$%d$", colors & 0x0F);
+	snprintf(user->team, sizeof(user->team), "%d", colors & 0x0F);
 	ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 }
 
@@ -876,7 +876,7 @@ CL_ParseServerMessage (void)
 			case svc_cdtrack:
 				cl.cdtrack = MSG_ReadByte ();
 				cl.looptrack = MSG_ReadByte ();
-				if ((cls.demoplayback || cls.demorecording)
+				if ((ccls.demoplayback || ccls.demorecording)
 					&& (cls.forcetrack != -1))
 					CDAudio_Play ((Uint8) cls.forcetrack, true);
 				else

@@ -421,9 +421,11 @@ HUD_SortFrags (void)
 		for (j = 0; j < n_users - 1 - i; j++) {
 			u1 = &ccl.users[fragsort[j]];
 			if (u1->flags & USER_SPECTATOR) f1 = -9999;
+			else if (!u1->name[0]) f1 = -9999;
 			else f1 = u1->frags;
 			u2 = &ccl.users[fragsort[j + 1]];
 			if (u2->flags & USER_SPECTATOR) f2 = -9999;
+			else if (!u2->name[0]) f2 = -9999;
 			else f2 = u2->frags;
 			if (f1 < f2) {
 				k = fragsort[j];

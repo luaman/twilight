@@ -973,8 +973,8 @@ CL_LinkPlayers (void)
 	frame_t    *frame;
 	vec3_t      org, angles;
 
-	playertime = cls.realtime - cls.latency + 0.02;
-	playertime = min (playertime, cls.realtime);
+	playertime = ccls.realtime - cls.latency + 0.02;
+	playertime = min (playertime, ccls.realtime);
 
 	frame = &cl.frames[cl.parsecount & UPDATE_MASK];
 
@@ -1165,9 +1165,9 @@ CL_LinkStaticEntites (void)
 
 		CL_Update_OriginAngles (&cl_static_entities[i],
 				cl_static_entities[i].msg_origins[0],
-				cl_static_entities[i].msg_angles[0], cls.realtime);
+				cl_static_entities[i].msg_angles[0], ccls.realtime);
 		CL_Update_Frame (&cl_static_entities[i],
-				cl_static_entities[i].common.frame[0], cls.realtime);
+				cl_static_entities[i].common.frame[0], ccls.realtime);
 		V_AddEntity ( &cl_static_entities[i] );
 	}
 }

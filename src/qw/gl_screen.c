@@ -514,7 +514,7 @@ SCR_DrawNet (void)
 	if (cls.netchan.outgoing_sequence - cls.netchan.incoming_acknowledged <
 		UPDATE_BACKUP - 1)
 		return;
-	if (cls.demoplayback)
+	if (ccls.demoplayback)
 		return;
 
 	Draw_Pic (64, 0, scr_net);

@@ -126,7 +126,7 @@ Host_EndGame (char *message, ...)
 	if (ccls.state == ca_dedicated)
 		Sys_Error ("Host_EndGame: %s\n", string);	// dedicated servers exit
 
-	if (cls.demonum != -1)
+	if (ccls.demonum != -1)
 		CL_NextDemo ();
 	else
 		CL_Disconnect ();
@@ -166,7 +166,7 @@ Host_Error (char *error, ...)
 		Sys_Error ("Host_Error: %s\n", string);	// dedicated servers exit
 
 	CL_Disconnect ();
-	cls.demonum = -1;
+	ccls.demonum = -1;
 
 	inerror = false;
 
@@ -194,7 +194,7 @@ Host_FindMaxClients (void)
 			svs.maxclients = 16;
 	} else {
 		ccls.state = ca_disconnected;
-		r_worldmodel = NULL;
+		ccl.worldmodel = r_worldmodel = NULL;
 	}
 
 	i = COM_CheckParm ("-listen");
@@ -542,7 +542,7 @@ Host_FilterTime (float time)
 	float		newframetime;
 
 	host_realtime += time;
-	cls.realtime = host_realtime;
+	ccls.realtime = host_realtime;
 	r_realtime = host_realtime;
 
 	/* if the frame time is below 0.001, don't even bother computing anything */
@@ -559,7 +559,7 @@ Host_FilterTime (float time)
 
 	/* eviltypeguy - added && cl.maxclients > 1 to allow uncapped framerate
 	   when playing singleplayer quake, possible NetQuake breakage? */
-	if ((!cls.timedemo && fps) && (newframetime < (1.0 / fps)))
+	if ((!ccls.timedemo && fps) && (newframetime < (1.0 / fps)))
 		return false;					/* framerate is too high */
 
 	host_frametime = newframetime;
