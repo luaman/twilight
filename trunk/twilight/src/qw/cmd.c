@@ -34,7 +34,7 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <stdlib.h>
+#include <stdio.h>
 
 #include "quakedef.h"
 #include "cmd.h"
@@ -70,13 +70,20 @@ next frame.  This allows commands like:
 bind g "impulse 5 ; +attack ; wait ; -attack ; impulse 2"
 ============
 */
-void
+static void
 Cmd_Wait_f (void)
 {
 	cmd_wait = true;
 }
 
-void
+/*
+============
+Cmd_Crash_f
+
+Look, up in the sky!  It's a bird!  It's a plane!  *CRASH*
+============
+*/
+static void
 Cmd_Crash_f (void)
 {
 	if (!developer->value)
@@ -221,7 +228,7 @@ Cbuf_Execute (void)
 		if (cmd_wait)
 		{
 			/*
-			 * skip out while text still remains in  buffer, leaving it for
+			 * skip out while text still remains in buffer, leaving it for
 			 * next frame
 			 */
 			cmd_wait = false;
@@ -269,16 +276,17 @@ extract_line (char *line)
 }
 
 /*
-
-	Cbuf_Execute
-
+============
+Cbuf_Execute_Sets
+============
 */
 void
 Cbuf_Execute_Sets (void)
 {
-	char	line[1024] = { 0 };
+	char		line[1024] = "";
 
-	while (cmd_text.cursize) {
+	while (cmd_text.cursize)
+	{
 		extract_line (line);
 		// execute the command line
 		if (strncmp (line, "set", 3) == 0 && isspace ((int) line[3])) {
@@ -326,15 +334,17 @@ quake -nosound +cmd amlev1
 void
 Cmd_StuffCmds_f (void)
 {
-	int         i, j;
-	int         s;
-	char       *text, *build, c;
+	int			i, j;
+	int			s;
+	char	   *text, *build, c;
 
-// build the combined string to parse from
+	// build the combined string to parse from
 	s = 0;
-	for (i = 1; i < com_argc; i++) {
+	for (i = 1; i < com_argc; i++)
+	{
 		if (!com_argv[i])
-			continue;					// NEXTSTEP nulls out -NXHost
+			// NEXTSTEP nulls out -NXHost
+			continue;
 		s += strlen (com_argv[i]) + 1;
 	}
 	if (!s)
@@ -342,20 +352,24 @@ Cmd_StuffCmds_f (void)
 
 	text = Z_Malloc (s + 1);
 	text[0] = 0;
-	for (i = 1; i < com_argc; i++) {
+	for (i = 1; i < com_argc; i++)
+	{
 		if (!com_argv[i])
-			continue;					// NEXTSTEP nulls out -NXHost
+			// NEXTSTEP nulls out -NXHost
+			continue;
 		strcat (text, com_argv[i]);
 		if (i != com_argc - 1)
 			strcat (text, " ");
 	}
 
-// pull out the commands
+	// pull out the commands
 	build = Z_Malloc (s + 1);
 	build[0] = 0;
 
-	for (i = 0; i < s - 1; i++) {
-		if (text[i] == '+') {
+	for (i = 0; i < s - 1; i++)
+	{
+		if (text[i] == '+')
+		{
 			i++;
 
 			for (j = i; (text[j] != '+') && (text[j] != '-') && (text[j] != 0);
@@ -387,17 +401,20 @@ Cmd_Exec_f
 void
 Cmd_Exec_f (void)
 {
-	char       *f;
-	int         mark;
+	char	   *f;
+	int			mark;
 
-	if (Cmd_Argc () != 2) {
+	if (Cmd_Argc () != 2)
+	{
 		Com_Printf ("exec <filename> : execute a script file\n");
 		return;
 	}
+
 	// FIXME: is this safe freeing the hunk here???
 	mark = Hunk_LowMark ();
 	f = (char *) COM_LoadHunkFile (Cmd_Argv (1), true);
-	if (!f) {
+	if (!f)
+	{
 		Com_Printf ("couldn't exec %s\n", Cmd_Argv (1));
 		return;
 	}
@@ -563,22 +580,24 @@ Parses the given string into command line tokens.
 void
 Cmd_TokenizeString (char *text)
 {
-	int         i;
+	int			i;
 
-// clear the args from the last string
+	// clear the args from the last string
 	for (i = 0; i < cmd_argc; i++)
 		Z_Free (cmd_argv[i]);
 
 	cmd_argc = 0;
 	cmd_args = NULL;
 
-	while (1) {
-// skip whitespace up to a /n
-		while (*text && *text <= ' ' && *text != '\n') {
+	while (1)
+	{
+		// skip whitespace up to a \n
+		while (*text && *text <= ' ' && *text != '\n')
 			text++;
-		}
 
-		if (*text == '\n') {	// a newline seperates commands in the buffer
+		if (*text == '\n')
+		{
+			// a newline seperates commands in the buffer
 			text++;
 			break;
 		}
@@ -598,7 +617,7 @@ Cmd_TokenizeString (char *text)
 			size_t length = strlen (com_token) + 1;
 			cmd_argv[cmd_argc] = Z_Malloc (length);
 			memcpy (cmd_argv[cmd_argc], com_token, length);
-			cmd_argc++; // VERY important :)
+			cmd_argc++;					// VERY important :)
 		}
 	}
 
@@ -613,19 +632,22 @@ Cmd_AddCommand
 void
 Cmd_AddCommand (char *cmd_name, xcommand_t function)
 {
-	cmd_function_t *cmd;
-	cvar_t *var;
+	cmd_function_t	   *cmd;
+	cvar_t			   *var;
 
-// fail if the command is a variable name
+	// fail if the command is a variable name
 	var = Cvar_Find (cmd_name);
-	if (var) {
-		Com_Printf ("Cmd_AddCommand: %s already defined as a Cvar\n",
-				cmd_name);
+	if (var)
+	{
+		Com_Printf ("Cmd_AddCommand: %s already defined as a Cvar\n", cmd_name);
 		return;
 	}
-// fail if the command already exists
-	for (cmd = cmd_functions; cmd; cmd = cmd->next) {
-		if (!strcmp (cmd_name, cmd->name)) {
+
+	// fail if the command already exists
+	for (cmd = cmd_functions; cmd; cmd = cmd->next)
+	{
+		if (!strcmp (cmd_name, cmd->name))
+		{
 			Com_Printf ("Cmd_AddCommand: %s already defined\n", cmd_name);
 			return;
 		}
@@ -828,19 +850,22 @@ FIXME: lookupnoadd the token to speed search?
 void
 Cmd_ExecuteString (char *text, cmd_source_t src)
 {
-	cmd_function_t	*cmd;
-	cmdalias_t		*a;
+	cmd_function_t	   *cmd;
+	cmdalias_t		   *a;
 
 	cmd_source = src;
 	Cmd_TokenizeString (text);
 
-// execute the command line
+	// execute the command line
 	if (!Cmd_Argc ())
-		return;							// no tokens
+		// no tokens
+		return;
 
-// check functions
-	for (cmd = cmd_functions; cmd; cmd = cmd->next) {
-		if (!strcasecmp (cmd_argv[0], cmd->name)) {
+	// check functions
+	for (cmd = cmd_functions; cmd; cmd = cmd->next)
+	{
+		if (!strcasecmp (cmd_argv[0], cmd->name))
+		{
 			if (!cmd->function)
 				Cmd_ForwardToServer ();
 			else
@@ -849,15 +874,17 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 		}
 	}
 
-// check alias
-	for (a = cmd_alias; a; a = a->next) {
-		if (!strcasecmp (cmd_argv[0], a->name)) {
+	// check alias
+	for (a = cmd_alias; a; a = a->next)
+	{
+		if (!strcasecmp (cmd_argv[0], a->name))
+		{
 			Cbuf_InsertText (a->value);
 			return;
 		}
 	}
 
-// check cvars
+	// check cvars
 	if (!Cvar_LegacyCmd () && (cl_warncmd->value || developer->value))
 		Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
 
@@ -872,7 +899,9 @@ Cmd_Init
 void
 Cmd_Init (xcommand_t CmdForwardToServer)
 {
-	// register our commands
+	/*
+	 * register our commands
+	 */
 	Cmd_AddCommand ("stuffcmds", Cmd_StuffCmds_f);
 	Cmd_AddCommand ("exec", Cmd_Exec_f);
 	Cmd_AddCommand ("echo", Cmd_Echo_f);
