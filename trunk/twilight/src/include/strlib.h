@@ -34,7 +34,7 @@
 # ifdef HAVE__STRICMP
 #  define strcasecmp(s1, s2) _stricmp((s1), (s2))
 # else
-#  error "Don't strcasecmp equivalent"
+#  error "Don't have strcasecmp equivalent"
 # endif
 #endif
 
