@@ -418,9 +418,7 @@ Key_Console (knum_t key, short unicode)
 	if (Key_Game (key, unicode))
 		return;
 
-	if (unicode == '
-' || key == SDLK_RETURN) {
-		// backslash text are commands, else chat
+	if (unicode == '^M' || key == SDLK_RETURN) {				// backslash text are commands, else
 		if (key_lines[edit_line][1] == '\\' || key_lines[edit_line][1] == '/')
 			Cbuf_AddText (key_lines[edit_line] + 2);	// skip the >
 		else if (CheckForCommand ())

@@ -772,7 +772,7 @@ M_Keys_Draw (void)
 void
 M_Keys_Key (int k)
 {
-	char        cmd[80];
+//	char        cmd[80];
 	int         keys[2];
 
 	if (bind_grab) {					// defining a key
