@@ -15,7 +15,7 @@ SUBDIRS=include src doc tools $(clients) $(servers)
 
 EXTRA_DIST= \
 	COPYING.BSD \
-	acconfig.h autogen.sh \
+	acconfig.h bootstrap \
 	twilight.dsw \
 	twilight.spec
 
