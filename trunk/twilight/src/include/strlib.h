@@ -58,5 +58,9 @@ size_t strlcpy (char* dst, const char* src, size_t siz);
 #endif
 
 
+// Duplicate a string (memory allocated with Z_Malloc)
+char *CopyString (const char *string);
+
+
 #endif // __STRLIB_H
 

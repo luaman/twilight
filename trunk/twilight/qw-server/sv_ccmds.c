@@ -553,7 +553,6 @@ SV_Serverinfo_f
   Examine or change the serverinfo string
 ===========
 */
-char       *CopyString (char *s);
 void
 SV_Serverinfo_f (void)
 {
@@ -596,7 +595,6 @@ SV_Serverinfo_f
   Examine or change the serverinfo string
 ===========
 */
-char       *CopyString (char *s);
 void
 SV_Localinfo_f (void)
 {

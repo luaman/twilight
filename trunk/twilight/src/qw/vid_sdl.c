@@ -11,13 +11,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -369,7 +369,7 @@ VID_Init (unsigned char *palette)
 	}
 
     info = SDL_GetVideoInfo();
-	
+
 	if (!info) {
 		Sys_Error ("Could not get video information!\n");
     }
@@ -688,7 +688,7 @@ IN_Shutdown (void)
 {
 }
 
-void 
+void
 IN_WindowedMouse (cvar_t *cvar)
 {
 	if (!use_mouse)
@@ -725,7 +725,7 @@ IN_Move
 void
 IN_Move (usercmd_t *cmd)
 {
-	if (m_filter->value && 
+	if (m_filter->value &&
 		((mouse_x != old_mouse_x) ||
 		(mouse_y != old_mouse_y))) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;

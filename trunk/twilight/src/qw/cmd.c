@@ -417,18 +417,6 @@ Cmd_Alias_f
 Creates a new command that executes a command string (possibly ; seperated)
 ===============
 */
-
-char       *
-CopyString (char *in)
-{
-	char       *out;
-	size_t     length = strlen (in) + 1;
-
-	out = Z_Malloc (length);
-	memcpy (out, in, length);
-	return out;
-}
-
 void
 Cmd_Alias_f (void)
 {
@@ -468,11 +456,11 @@ Cmd_Alias_f (void)
 	cmd[0] = 0;							// start out with a null string
 	c = Cmd_Argc ();
 	for (i = 2; i < c; i++) {
-		strcat (cmd, Cmd_Argv (i));
+		strlcat (cmd, Cmd_Argv (i), sizeof (cmd));
 		if (i != c)
-			strcat (cmd, " ");
+			strlcat (cmd, " ", sizeof (cmd));
 	}
-	strcat (cmd, "\n");
+	strlcat (cmd, "\n", sizeof (cmd));
 
 	a->value = CopyString (cmd);
 }
