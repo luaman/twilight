@@ -4,5 +4,8 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-SUBDIRS=base image renderer sound
+if CLIENTS
+clients = image renderer sound
+endif
+SUBDIRS=base $(clients)
 

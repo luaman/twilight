@@ -4,7 +4,14 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-SUBDIRS=include src nq qw qw-server doc tools
+if CLIENTS
+clients = nq qw
+endif
+if SERVERS
+servers = qw-server
+endif
+
+SUBDIRS=include src doc tools $(clients) $(servers)
 
 EXTRA_DIST= \
 	COPYING.BSD \
