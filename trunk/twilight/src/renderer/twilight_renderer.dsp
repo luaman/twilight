@@ -105,6 +105,10 @@ SOURCE=.\pcx.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\qlmp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\tga.c
 # End Source File
 # Begin Source File
@@ -142,6 +146,10 @@ SOURCE=.\opengl.h
 # Begin Source File
 
 SOURCE=.\pcx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\qlmp.h
 # End Source File
 # Begin Source File
 

@@ -29,11 +29,11 @@ static const char rcsid[] =
 # include <config.h>
 #else
 # ifdef _WIN32
-#  include <w32conf.h>
+#  include <win32conf.h>
 # endif
 #endif
 
-#include <stdlib.h>
+#include <malloc.h>
 #include "SDL.h"
 
 #include "common.h"
