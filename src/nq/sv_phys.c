@@ -910,7 +910,8 @@ SV_WalkMove (edict_t *ent)
 	VectorCopy (ent->v.velocity, nostepvel);
 
 	// try moving up and forward to go up a step
-	VectorCopy (oldorg, ent->v.origin);	// back to start pos
+	// back to start pos
+	VectorCopy (oldorg, ent->v.origin);
 
 	VectorClear (upmove);
 	VectorClear (downmove);
@@ -931,8 +932,9 @@ SV_WalkMove (edict_t *ent)
 
 	// check for stuckness, possibly due to the limited precision of floats
 	// in the clipping hulls
-	if (clip && fabs (oldorg[1] - ent->v.origin[1]) < 0.03125
-			&& fabs (oldorg[0] - ent->v.origin[0]) < 0.03125)
+	if (clip
+	 && fabs (oldorg[1] - ent->v.origin[1]) < 0.03125
+	 && fabs (oldorg[0] - ent->v.origin[0]) < 0.03125)
 		// stepping up didn't make any progress
 		clip = SV_TryUnstick (ent, oldvel);
 
@@ -943,12 +945,17 @@ SV_WalkMove (edict_t *ent)
 	// move down
 	downtrace = SV_PushEntity (ent, downmove, vec3_origin);	// FIXME: don't link?
 
-	if (downtrace.plane.normal[2] > 0.7) {
-		if (ent->v.solid == SOLID_BSP) {
+	if (downtrace.plane.normal[2] > 0.7)
+	{
+		// LordHavoc: disabled this so you can walk on monsters/players
+		//if (ent->v.solid == SOLID_BSP)
+		{
 			ent->v.flags = (int) ent->v.flags | FL_ONGROUND;
 			ent->v.groundentity = EDICT_TO_PROG (downtrace.ent);
 		}
-	} else {
+	}
+	else
+	{
 		// if the push down didn't end up on good ground, use the move without
 		// the step up.  This happens near wall / slope combinations, and can
 		// cause the player to hop up higher on a slope too steep to climb  
@@ -979,7 +986,8 @@ SV_Physics_Client (edict_t *ent, int num)
 	SV_CheckVelocity (ent);
 
 	// decide which move function to call
-	switch ((int) ent->v.movetype) {
+	switch ((int) ent->v.movetype)
+	{
 		case MOVETYPE_NONE:
 			if (!SV_RunThink (ent))
 				return;
@@ -1111,23 +1119,29 @@ SV_CheckWaterTransition
 void
 SV_CheckWaterTransition (edict_t *ent)
 {
-	int cont = SV_PointContents (ent->v.origin);
-
-	if (!ent->v.watertype) {
+	int cont;
+	cont = SV_PointContents (ent->v.origin);
+	if (!ent->v.watertype)
+	{
 		// just spawned here
 		ent->v.watertype = cont;
 		ent->v.waterlevel = 1;
 		return;
 	}
 
-	if (cont <= CONTENTS_WATER) {
-		if (ent->v.watertype == CONTENTS_EMPTY)	// just crossed into water
+	if (cont <= CONTENTS_WATER)
+	{
+		if (ent->v.watertype == CONTENTS_EMPTY && cont != CONTENTS_LAVA)
+			// just crossed into water
 			SV_StartSound (ent, 0, "misc/h2ohit1.wav", 255, 1);
 
 		ent->v.watertype = cont;
 		ent->v.waterlevel = 1;
-	} else {
-		if (ent->v.watertype != CONTENTS_EMPTY) // just crossed into water
+	}
+	else
+	{
+		if (ent->v.watertype != CONTENTS_EMPTY && ent->v.watertype != CONTENTS_LAVA)
+			// just crossed into water
 			SV_StartSound (ent, 0, "misc/h2ohit1.wav", 255, 1);
 
 		ent->v.watertype = CONTENTS_EMPTY;
@@ -1146,7 +1160,6 @@ void SV_Physics_Toss (edict_t *ent)
 {
 	trace_t	trace;
 	vec3_t	move;
-	float	backoff;
 	edict_t	*groundentity;
 
 	// regular thinking
@@ -1171,11 +1184,8 @@ void SV_Physics_Toss (edict_t *ent)
 	SV_CheckVelocity (ent);
 
 	// add gravity
-	if (ent->v.movetype != MOVETYPE_FLY
-		&& ent->v.movetype != MOVETYPE_BOUNCEMISSILE // LordHavoc: enabled MOVETYPE_BOUNCEMISSILE
-		&& ent->v.movetype != MOVETYPE_FLYMISSILE) {
+	if (ent->v.movetype == MOVETYPE_TOSS || ent->v.movetype == MOVETYPE_BOUNCE)
 		SV_AddGravity (ent);
-	}
 
 	// move angles
 	VectorMA (ent->v.angles, host_frametime, ent->v.avelocity, ent->v.angles);
@@ -1183,39 +1193,46 @@ void SV_Physics_Toss (edict_t *ent)
 	// move origin
 	VectorScale (ent->v.velocity, host_frametime, move);
 	trace = SV_PushEntity (ent, move, vec3_origin);
-	if (trace.fraction == 1)
-		return;
 	if (ent->free)
 		return;
 
-	if (ent->v.movetype == MOVETYPE_BOUNCE)
-		backoff = 1.5;
-	else if (ent->v.movetype == MOVETYPE_BOUNCEMISSILE)
-		backoff = 2.0;
-	else
-		backoff = 1;
-
-	ClipVelocity (ent->v.velocity, trace.plane.normal, ent->v.velocity, backoff);
-
-	// stop if on ground
-	if (trace.plane.normal[2] > 0.7) {
-		// LordHavoc: fixed grenades not bouncing when fired down a slope
-//		if (fabs(ent->v.velocity[2]) < 60 ||
-//			(ent->v.movetype != MOVETYPE_BOUNCE &&
-//			 ent->v.movetype != MOVETYPE_BOUNCEMISSILE)) {
-		if (ent->v.velocity[2] < 60 ||
-			(ent->v.movetype != MOVETYPE_BOUNCE &&
-			 ent->v.movetype != MOVETYPE_BOUNCEMISSILE)) {
-
-			ent->v.flags = (int)ent->v.flags | FL_ONGROUND;
-			ent->v.groundentity = EDICT_TO_PROG(trace.ent);
-			VectorClear (ent->v.velocity);
-			VectorClear (ent->v.avelocity);
+	if (trace.fraction < 1)
+	{
+		if (ent->v.movetype == MOVETYPE_BOUNCEMISSILE)
+		{
+			ClipVelocity (ent->v.velocity, trace.plane.normal, ent->v.velocity, 2.0);
+			ent->v.flags = (int)ent->v.flags & ~FL_ONGROUND;
+		}
+		else if (ent->v.movetype == MOVETYPE_BOUNCE)
+		{
+			ClipVelocity (ent->v.velocity, trace.plane.normal, ent->v.velocity, 1.5);
+			// LordHavoc: fixed grenades not bouncing when fired down a slope
+			//if (trace.plane.normal[2] > 0.7 && DotProduct(trace.plane.normal, ent->v.velocity) < 60)
+			// LordHavoc: disabled fix in twilight for quake 'authenticity'
+			if (trace.plane.normal[2] > 0.7 && ent->v.velocity[2] < 60)
+			{
+				ent->v.flags = (int)ent->v.flags | FL_ONGROUND;
+				ent->v.groundentity = EDICT_TO_PROG(trace.ent);
+				VectorClear (ent->v.velocity);
+				VectorClear (ent->v.avelocity);
+			}
+			else
+				ent->v.flags = (int)ent->v.flags & ~FL_ONGROUND;
 		}
 		else
-			ent->v.flags = (int)ent->v.flags & ~FL_ONGROUND;
-	} else
-		ent->v.flags = (int)ent->v.flags & ~FL_ONGROUND;
+		{
+			ClipVelocity (ent->v.velocity, trace.plane.normal, ent->v.velocity, 1.0);
+			if (trace.plane.normal[2] > 0.7)
+			{
+				ent->v.flags = (int)ent->v.flags | FL_ONGROUND;
+				ent->v.groundentity = EDICT_TO_PROG(trace.ent);
+				VectorClear (ent->v.velocity);
+				VectorClear (ent->v.avelocity);
+			}
+			else
+				ent->v.flags = (int)ent->v.flags & ~FL_ONGROUND;
+		}
+	}
 
 	// check for in water
 	SV_CheckWaterTransition (ent);
@@ -1243,28 +1260,49 @@ will fall if the floor is pulled out from under them.
 void
 SV_Physics_Step (edict_t *ent)
 {
-	qboolean	hitsound;
+	int flags, fall, hitsound;
 
-	// freefall if not onground
-	if (!((int) ent->v.flags & (FL_ONGROUND | FL_FLY | FL_SWIM))) {
-		if (ent->v.velocity[2] < sv_gravity->ivalue * -0.1)
+	// freefall if not fly/swim
+	fall = true;
+	flags = (int)ent->v.flags;
+	if (flags & (FL_FLY | FL_SWIM))
+	{
+		if (flags & FL_FLY)
+			fall = false;
+		else if ((flags & FL_SWIM) && SV_PointContents(ent->v.origin) != CONTENTS_EMPTY)
+			fall = false;
+	}
+	if (fall && (flags & FL_ONGROUND) && ent->v.groundentity == 0)
+		fall = false;
+
+	if (fall)
+	{
+		if (ent->v.velocity[2] < sv_gravity->fvalue*-0.1)
+		{
 			hitsound = true;
+			if (flags & FL_ONGROUND)
+				hitsound = false;
+		}
 		else
 			hitsound = false;
 
 		SV_AddGravity (ent);
 		SV_CheckVelocity (ent);
 		SV_FlyMove (ent, host_frametime, NULL);
-		SV_LinkEdict (ent, true);
+		SV_LinkEdict (ent, false);
 
-		if ((int) ent->v.flags & FL_ONGROUND)	// just hit ground
+		// just hit ground
+		if ((int)ent->v.flags & FL_ONGROUND)
 		{
+			VectorClear(ent->v.velocity);
 			if (hitsound)
 				SV_StartSound (ent, 0, "demon/dland2.wav", 255, 1);
 		}
 	}
-	// regular thinking
+
+// regular thinking
 	SV_RunThink (ent);
+
 	SV_CheckWaterTransition (ent);
 }
 
@@ -1370,7 +1408,7 @@ trace_t SV_Trace_Toss (edict_t *tossent, edict_t *ignore)
 		gravity = val->_float;
 	else
 		gravity = 1.0;
-	gravity *= sv_gravity->ivalue * 0.05;
+	gravity *= sv_gravity->fvalue * 0.05;
 
 	// LordHavoc: sanity check; never trace more than 10 seconds
 	for (i = 0; i < 200; i++)  {
