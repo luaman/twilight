@@ -117,7 +117,9 @@ cvar_t     *gl_nocolors;
 cvar_t     *gl_keeptjunctions;
 cvar_t     *gl_reporttjunctions;
 cvar_t     *gl_finish;
-cvar_t *gl_im_animation;
+cvar_t	   *gl_im_animation;
+cvar_t	   *gl_fb_models;
+cvar_t	   *gl_fb_bmodels;
 
 extern cvar_t *gl_ztrick;
 extern cvar_t *scr_fov;
@@ -138,24 +140,32 @@ Returns true if the box is completely outside the frustom
 qboolean
 R_CullBox (vec3_t mins, vec3_t maxs)
 {
-	int         i;
+	if (BoxOnPlaneSide (mins, maxs, &frustum[0]) == 2)
+		return true;
+	if (BoxOnPlaneSide (mins, maxs, &frustum[1]) == 2)
+		return true;
+	if (BoxOnPlaneSide (mins, maxs, &frustum[2]) == 2)
+		return true;
+	if (BoxOnPlaneSide (mins, maxs, &frustum[3]) == 2)
+		return true;
 
-	for (i = 0; i < 4; i++)
-		if (BoxOnPlaneSide (mins, maxs, &frustum[i]) == 2)
-			return true;
 	return false;
 }
 
 
 void
-R_RotateForEntity (entity_t *e)
+R_RotateForEntity (entity_t *e, qboolean shadow)
 {
 	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
 
 	qglRotatef (e->angles[1], 0, 0, 1);
-	qglRotatef (-e->angles[0], 0, 1, 0);
-	// ZOID: fixed z angle
-	qglRotatef (e->angles[2], 1, 0, 0);
+
+	if (!shadow)
+	{
+		qglRotatef (-e->angles[0], 0, 1, 0);
+		// ZOID: fixed z angle
+		qglRotatef (e->angles[2], 1, 0, 0);
+	}
 }
 
 /*
@@ -244,13 +254,8 @@ R_DrawSpriteModel (entity_t *e)
 		right = vright;
 	}
 
-	qglColor3f (1, 1, 1);
-
-	GL_DisableMultitexture ();
-
 	qglBindTexture (GL_TEXTURE_2D, frame->gl_texturenum);
 
-	qglEnable (GL_ALPHA_TEST);
 	qglBegin (GL_QUADS);
 
 	qglTexCoord2f (0, 1);
@@ -274,8 +279,6 @@ R_DrawSpriteModel (entity_t *e)
 	qglVertex3fv (point);
 
 	qglEnd ();
-
-	qglDisable (GL_ALPHA_TEST);
 }
 
 /*
@@ -325,11 +328,8 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 	verts += posenum * paliashdr->poseverts;
 	order = (int *) ((byte *) paliashdr + paliashdr->commands);
 
-	while (1) {
+	while ((count = *order++)) {
 		// get the vertex count and primitive type
-		count = *order++;
-		if (!count)
-			break;						// done
 		if (count < 0) {
 			count = -count;
 			qglBegin (GL_TRIANGLE_FAN);
@@ -358,7 +358,7 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 	Interpolated model drawing
 */
 void
-GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float blend, qboolean fb)
+GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float blend)
 {
 	float       l;
 	trivertx_t *verts1;
@@ -380,7 +380,6 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 
 	while ((count = *order++)) {
 		// get the vertex count and primitive type
-
 		if (count < 0) {
 			count = -count;
 			qglBegin (GL_TRIANGLE_FAN);
@@ -393,18 +392,12 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 			qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
 			order += 2;
 
-			if (fb) {
-				qglColor4f (1, 1, 1, 1);
-			} else {
-				// normals and vertexes come from the frame list
-				// blend the light intensity from the two frames together
-				d[0] = shadedots[verts2->lightnormalindex] - shadedots[verts1->lightnormalindex];
+			// normals and vertexes come from the frame list
+			// blend the light intensity from the two frames together
+			d[0] = shadedots[verts2->lightnormalindex] - shadedots[verts1->lightnormalindex];
 
-/*				l = shadelight * (shadedots[verts1->lightnormalindex] + (blend * d[0]));
-				qglColor4f (shadecolor[0] * l, shadecolor[1] * l, shadecolor[2] * l, modelalpha); */
-				l = shadelight * (shadedots[verts1->lightnormalindex] + (blend * d[0]));
-				qglColor4f (1, 1, 1, 1);
-			}
+			l = shadelight * (shadedots[verts1->lightnormalindex] + (blend * d[0]));
+			qglColor3f (l, l, l);
 
 			VectorSubtract (verts2->v, verts1->v, d);
 
@@ -447,7 +440,6 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 
 	while ((count = *order++)) {
 		// get the vertex count and primitive type
-
 		if (count < 0) {
 			count = -count;
 			qglBegin (GL_TRIANGLE_FAN);
@@ -508,7 +500,6 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 
 	while ((count = *order++)) {
 		// get the vertex count and primitive type
-
 		if (count < 0) {
 			count = -count;
 			qglBegin (GL_TRIANGLE_FAN);
@@ -581,7 +572,7 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr)
 
 */
 void
-R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolean fb)
+R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e)
 {
 	int 	pose, numposes;
 	float	blend;
@@ -627,7 +618,7 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolea
 	if (cl.paused || blend > 1)
 		blend = 1;
 
-	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend, fb);
+	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend);
 }
 
 
@@ -657,7 +648,6 @@ R_DrawAliasModel (entity_t *e)
 	if (R_CullBox (mins, maxs))
 		return;
 
-
 	VectorCopy (currententity->origin, r_entorigin);
 	VectorSubtract (r_origin, r_entorigin, modelorg);
 
@@ -665,7 +655,7 @@ R_DrawAliasModel (entity_t *e)
 	// get lighting information
 	// 
 
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT))
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || !gl_fb_models->value)
 	{
 		ambientlight = shadelight = R_LightPoint (currententity->origin);
 
@@ -699,7 +689,7 @@ R_DrawAliasModel (entity_t *e)
 		ambientlight = shadelight = 256;
 
 	// ZOID: never allow players to go totally black
-	if (clmodel->modflags & FLAG_ALWAYSLIT) {
+	if (clmodel->modflags & FLAG_PLAYER) {
 		if (ambientlight < 8)
 			ambientlight = shadelight = 8;
 	}
@@ -722,7 +712,7 @@ R_DrawAliasModel (entity_t *e)
 
 	GL_DisableMultitexture ();
 	qglPushMatrix ();
-	R_RotateForEntity (e);
+	R_RotateForEntity (e, false);
 
 	if (clmodel->modflags & FLAG_DOUBLESIZE) {
 		qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
@@ -759,14 +749,41 @@ R_DrawAliasModel (entity_t *e)
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
-	if (gl_im_animation->value) {/* && !torch) { */
-		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity, false);
+	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM)) {/* && !torch) { */
+		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
 	} else {
 		R_SetupAliasFrame (currententity->frame, paliashdr);
 	}
 
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value) {
+		int	fb_texture = 0;
+		
+		if ((clmodel->modflags & FLAG_PLAYER) && currententity->scoreboard)
+		{
+			i = currententity->scoreboard - cl.players;
+
+			if (i >= 0 && i < MAX_CLIENTS)
+				fb_texture = fb_skins[i];
+		}
+		else
+			fb_texture = paliashdr->fb_texturenum[currententity->skinnum][anim];
+
+		if (fb_texture) {
+			qglEnable (GL_BLEND);
+			qglBindTexture (GL_TEXTURE_2D, fb_texture);
+
+			if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+				R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
+			else
+				R_SetupAliasFrame (currententity->frame, paliashdr);
+
+			qglDisable (GL_BLEND);
+		}
+	}
+
+/* FIXME: Should this be completely removed with gl_smoothmodels cvar too? */
 	qglShadeModel (GL_FLAT);
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -785,7 +802,7 @@ R_DrawAliasModel (entity_t *e)
 
 		qglPushMatrix ();
 
-		R_RotateForEntity (e);
+		R_RotateForEntity (e, true);
 
 		qglDisable (GL_TEXTURE_2D);
 		qglEnable (GL_BLEND);
@@ -803,6 +820,33 @@ R_DrawAliasModel (entity_t *e)
 }
 
 //==================================================================================
+
+/*
+=============
+R_SetSpritesState
+=============
+*/
+void R_SetSpritesState (qboolean state)
+{
+	static qboolean r_state = false;
+
+	if (r_state == state)
+		return;
+
+	r_state = state;
+
+	if (state) 
+	{
+		GL_DisableMultitexture ();
+		qglEnable (GL_ALPHA_TEST);
+//		qglDepthMask (GL_FALSE);
+	}
+	else
+	{
+		qglDisable (GL_ALPHA_TEST);
+//		qglDepthMask (GL_TRUE);
+	}
+}
 
 /*
 =============
@@ -840,6 +884,7 @@ R_DrawEntitiesOnList (void)
 
 		switch (currententity->model->type) {
 			case mod_sprite:
+				R_SetSpritesState (true);
 				R_DrawSpriteModel (currententity);
 				break;
 
@@ -847,6 +892,8 @@ R_DrawEntitiesOnList (void)
 				break;
 		}
 	}
+
+	R_SetSpritesState (false);
 }
 
 /*

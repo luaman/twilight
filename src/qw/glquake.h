@@ -38,6 +38,8 @@
 #include <windows.h>
 #endif
 
+#define	MAX_GLTEXTURES	1024
+
 #include "gl_model.h"
 #include "TGL_defines.h"
 #include "TGL_types.h"
@@ -59,7 +61,7 @@ void        GL_Upload8 (byte * data, int width, int height, qboolean mipmap,
 void        GL_Upload8_EXT (byte * data, int width, int height, qboolean mipmap,
 							qboolean alpha);
 int         GL_LoadTexture (char *identifier, int width, int height,
-							byte * data, qboolean mipmap, qboolean alpha);
+							byte * data, qboolean mipmap, int alpha);
 int         GL_FindTexture (char *identifier);
 
 typedef struct {
@@ -215,6 +217,7 @@ extern struct cvar_s *gl_nocolors;
 extern struct cvar_s *gl_finish;
 extern struct cvar_s *gl_im_animation;
 extern struct cvar_s *gl_fb_models;
+extern struct cvar_s *gl_fb_bmodels;
 
 extern int  gl_lightmap_format;
 extern int  gl_solid_format;
@@ -281,7 +284,6 @@ void        GL_Set2D (void);
 // gl_rmain.c
 //
 qboolean    R_CullBox (vec3_t mins, vec3_t maxs);
-void        R_RotateForEntity (entity_t *e);
 
 //
 // gl_rlight.c

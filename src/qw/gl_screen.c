@@ -91,8 +91,6 @@ console is:
 
 */
 
-qboolean    scr_skipupdate = 0;
-
 int         glx, gly, glwidth, glheight;
 
 // only the refresh window will be updated unless these variables are flagged 
@@ -135,8 +133,6 @@ vrect_t     scr_vrect;
 qboolean    scr_disabled_for_loading;
 qboolean    scr_drawloading;
 float       scr_disabled_time;
-
-qboolean    block_drawing;
 
 void        SCR_ScreenShot_f (void);
 void        SCR_RSShot_f (void);
@@ -1057,9 +1053,6 @@ needs almost the entire 256k of stack space!
 void
 SCR_UpdateScreen (void)
 {
-	if (block_drawing)
-		return;
-
 	scr_copytop = 0;
 	scr_copyeverything = 0;
 

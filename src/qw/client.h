@@ -533,5 +533,7 @@ void		Skin_NextDownload (void);
 #define RSSHOT_WIDTH 320
 #define RSSHOT_HEIGHT 200
 
+extern	int fb_skins[MAX_CLIENTS];
+
 #endif // __CLIENT_H
 

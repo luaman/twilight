@@ -223,7 +223,8 @@ R_Init_Cvars (void)
 
 	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_NONE, NULL);
 
-/*	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_NONE, NULL); */
+	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_NONE, NULL);
+	gl_fb_bmodels = Cvar_Get ("gl_fb_bmodels", "1", CVAR_NONE, NULL);
 
 	if (gl_mtexable)
 		Cvar_Set (gl_texsort, "0");
@@ -251,7 +252,12 @@ R_Init (void)
 
 	playertextures = texture_extension_number;
 	texture_extension_number += MAX_CLIENTS;
+
+	// fullbright skins
+	texture_extension_number += MAX_CLIENTS;
 }
+
+int fb_skins[MAX_CLIENTS];
 
 /*
 ===============
@@ -341,23 +347,6 @@ R_TranslatePlayerSkin (int playernum)
 		// instead of sending it through gl_upload 8
 		qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
 
-#if 0
-		s = 320 * 200;
-		byte        translated[320 * 200];
-
-		for (i = 0; i < s; i += 4) {
-			translated[i] = translate[original[i]];
-			translated[i + 1] = translate[original[i + 1]];
-			translated[i + 2] = translate[original[i + 2]];
-			translated[i + 3] = translate[original[i + 3]];
-		}
-
-
-		// don't mipmap these, because it takes too long
-		GL_Upload8 (translated, paliashdr->skinwidth, paliashdr->skinheight,
-					false, false, true);
-#endif
-
 		scaled_width = min (gl_max_size->value, 512);
 		scaled_height = min (gl_max_size->value, 256);
 		// allow users to crunch sizes down even more if they want
@@ -392,6 +381,59 @@ R_TranslatePlayerSkin (int playernum)
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		if (Img_HasFullbrights ((byte *)original, inwidth*inheight))
+		{
+			fb_skins[playernum] = playertextures + playernum + MAX_CLIENTS;
+
+			qglBindTexture (GL_TEXTURE_2D, fb_skins[playernum]);
+
+			out = pixels;
+			memset(pixels, 0, sizeof(pixels));
+			fracstep = tinwidth*0x10000/scaled_width;
+
+			// make all non-fullbright colors transparent
+			for (i=0 ; i<scaled_height ; i++, out += scaled_width)
+			{
+				inrow = original + inwidth*(i*tinheight/scaled_height);
+				frac = fracstep >> 1;
+				for (j=0 ; j<scaled_width ; j+=4)
+				{
+					if (inrow[frac>>16] < 224)
+						out[j] = translate32[inrow[frac>>16]] & 0x00FFFFFF; // transparent 
+					else
+						out[j] = translate32[inrow[frac>>16]]; // fullbright 
+
+					frac += fracstep;
+					if (inrow[frac>>16] < 224)
+						out[j+1] = translate32[inrow[frac>>16]] & 0x00FFFFFF; // transparent 
+					else
+						out[j+1] = translate32[inrow[frac>>16]]; // fullbright 
+					frac += fracstep;
+					if (inrow[frac>>16] < 224)
+						out[j+2] = translate32[inrow[frac>>16]] & 0x00FFFFFF; // transparent 
+					else
+						out[j+2] = translate32[inrow[frac>>16]]; // fullbright 
+					frac += fracstep;
+					if (inrow[frac>>16] < 224)
+						out[j+3] = translate32[inrow[frac>>16]] & 0x00FFFFFF; // transparent 
+					else
+						out[j+3] = translate32[inrow[frac>>16]]; // fullbright 
+					frac += fracstep;
+				}
+			}
+
+			qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 
+				scaled_width, scaled_height, 0, GL_RGBA, 
+				GL_UNSIGNED_BYTE, pixels);
+
+			qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
+		else {
+			fb_skins[playernum] = 0;
+		}
 	}
 }
 

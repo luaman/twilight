@@ -1045,7 +1045,7 @@ CL_MuzzleFlash (void)
 	if ((unsigned) (i - 1) >= MAX_CLIENTS)
 		return;
 
-	// don't draw our own muzzle flash in gl if flashblending
+	// don't draw our own muzzle flash if flashblending
 	if (i - 1 == cl.playernum && gl_flashblend->value)
 		return;
 
