@@ -91,7 +91,12 @@ Cvar_CompleteVariable (char *partial)
 	if (!len)
 		return NULL;
 
-// check functions
+	// check exact match
+	for (cvar = cvar_vars; cvar; cvar = cvar->next)
+		if (!Q_strcmp (partial, cvar->name))
+			return cvar->name;
+
+	// check partial match
 	for (cvar = cvar_vars; cvar; cvar = cvar->next)
 		if (!Q_strncmp (partial, cvar->name, len))
 			return cvar->name;
@@ -119,17 +124,17 @@ Cvar_Set (char *var_name, char *value)
 	}
 
 	changed = Q_strcmp (var->string, value);
+	if (var->info && changed) {
+		if (sv.active)
+			SV_BroadcastPrintf ("\"%s\" changed to \"%s\"\n", var->name,
+								var->string);
+	}
 
 	Z_Free (var->string);				// free the old value string
 
 	var->string = Z_Malloc (Q_strlen (value) + 1);
 	Q_strcpy (var->string, value);
 	var->value = Q_atof (var->string);
-	if (var->server && changed) {
-		if (sv.active)
-			SV_BroadcastPrintf ("\"%s\" changed to \"%s\"\n", var->name,
-								var->string);
-	}
 }
 
 /*
@@ -157,7 +162,7 @@ Adds a freestanding variable to the variable list.
 void
 Cvar_RegisterVariable (cvar_t *variable)
 {
-	char       *oldstr;
+	char		value[512];
 
 // first check to see if it has already been defined
 	if (Cvar_FindVar (variable->name)) {
@@ -170,15 +175,17 @@ Cvar_RegisterVariable (cvar_t *variable)
 		Con_Printf ("Cvar_RegisterVariable: %s is a command\n", variable->name);
 		return;
 	}
-// copy the value off, because future sets will Z_Free it
-	oldstr = variable->string;
-	variable->string = Z_Malloc (Q_strlen (variable->string) + 1);
-	Q_strcpy (variable->string, oldstr);
-	variable->value = Q_atof (variable->string);
 
 // link the variable in
 	variable->next = cvar_vars;
 	cvar_vars = variable;
+
+// copy the value off, because future sets will Z_Free it
+	Q_strcpy (value, variable->string);
+	variable->string = Z_Malloc (1);
+
+// set it through the function to be consistant
+	Cvar_Set (variable->name, value);
 }
 
 /*

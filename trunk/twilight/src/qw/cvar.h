@@ -57,11 +57,9 @@ typedef struct cvar_s {
 	char       *name;
 	char       *string;
 	qboolean    archive;				// set to true to cause it to be saved
-	// to vars.rc
+										// to vars.rc
 	qboolean    info;					// added to serverinfo or userinfo when 
-										// 
-	// 
-	// changed
+										// changed
 	float       value;
 	struct cvar_s *next;
 } cvar_t;
