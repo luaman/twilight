@@ -32,7 +32,7 @@
 
 TWIGL_DONT_NEED (void, glAccum, (GLenum op, GLfloat value));
 TWIGL_DONT_NEED (void, glActiveTextureARB, (GLenum texture));
-TWIGL_NEED (void, glAlphaFunc, (GLenum func, GLclampf ref));
+TWIGL_DONT_NEED (void, glAlphaFunc, (GLenum func, GLclampf ref));
 TWIGL_DONT_NEED (GLboolean, glAreTexturesResident, (GLsizei n, const GLuint * textures, GLboolean * residences));
 TWIGL_DONT_NEED (GLboolean, glAreTexturesResidentEXT, (GLsizei n, const GLuint * textures, GLboolean * residences));
 TWIGL_DONT_NEED (void, glArrayElement, (GLint i));

@@ -579,7 +579,7 @@ Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 	glpic_t    *gl;
 
 	gl = (glpic_t *) pic->data;
-	qglDisable (GL_ALPHA_TEST);
+//	qglDisable (GL_ALPHA_TEST);
 	qglEnable (GL_BLEND);
 //  qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglCullFace (GL_FRONT);
@@ -596,7 +596,7 @@ Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 	qglVertex2f (x, y + pic->height);
 	qglEnd ();
 	qglColor4f (1, 1, 1, 1);
-	qglEnable (GL_ALPHA_TEST);
+//	qglEnable (GL_ALPHA_TEST);
 	qglDisable (GL_BLEND);
 }
 
@@ -870,8 +870,8 @@ GL_Set2D (void)
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
 	qglDisable (GL_BLEND);
-	qglEnable (GL_ALPHA_TEST);
-//  qglDisable (GL_ALPHA_TEST);
+//	qglEnable (GL_ALPHA_TEST);
+////  qglDisable (GL_ALPHA_TEST);
 
 	qglColor4f (1, 1, 1, 1);
 }

@@ -264,8 +264,8 @@ GL_Init (void)
 	qglCullFace (GL_FRONT);
 	qglEnable (GL_TEXTURE_2D);
 
-	qglEnable (GL_ALPHA_TEST);
-	qglAlphaFunc (GL_GREATER, 0.666);
+//	qglEnable (GL_ALPHA_TEST);
+//	qglAlphaFunc (GL_GREATER, 0.666);
 
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 
