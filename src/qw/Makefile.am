@@ -9,10 +9,10 @@ INCLUDES= -I$(top_srcdir)/include
 bin_PROGRAMS=twilight-qw
 
 if SYS_WIN32
-twilight_nq_sys=snd_win.c
+twilight_nq_sys=winquake.h
 twilight_nq_sys_libs=-lwinmm -lwsock32
 else
-twilight_nq_sys=snd_linux.c
+twilight_nq_sys=
 twilight_nq_sys_libs=
 endif
 
@@ -28,7 +28,7 @@ twilight_qw_SOURCES= \
 	keys.c mathlib.c mdfour.c mdfour.h menu.c menu.h \
 	net.h net_chan.c net_udp.c strlib.c \
 	pmove.c pmove.h pmovetst.c r_part.c sbar.c sbar.h skin.c \
-	snd_dma.c snd_mem.c \
+	snd_dma.c snd_mem.c snd_sdl.c\
 	snd_mix.c sound.h cd_sdl.c cdaudio.h \
 	pcx.c tga.c \
 	sys.h vid_sdl.c vid.h \
@@ -38,8 +38,8 @@ twilight_qw_SOURCES= \
 	render.h sys.c $(twilight_nq_sys)
 
 EXTRA_twilight_qw_SOURCES= \
-	snd_win.c winquake.h \
-	snd_linux.c
+	winquake.h
+
 
 EXTRA_DIST= \
 	qw.dsp

@@ -180,5 +180,7 @@ void        SNDDMA_Submit (void);
 void        S_AmbientOff (void);
 void        S_AmbientOn (void);
 
+extern int soundtime;
+
 #endif // __SOUND_H
 
