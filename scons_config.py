@@ -255,6 +255,8 @@ def do_configure (env):
 	env_defs.set ('CPPPATH', env['CPPPATH'])
 	if env.has_key ('CPPDEFINES'):
 		env_defs.set ('CPPDEFINES', env['CPPDEFINES'])
+	if env.has_key ('LINKFLAGS'):
+		env_defs.set ('LINKFLAGS', env['LINKFLAGS'])
 	env_defs.save('config_env.py')
 	config_defs.save('config_defs.py')
 
@@ -265,6 +267,7 @@ def do_configure (env):
     SDL version                 : """ + repr(sdl_ver) + """
     Compiler                    : """ + env['CC'] + """
     Compiler flags              : """ + string.join(env['CCFLAGS'], " ") + """
+	Link flags                  : """ + string.join(env['LINKFLAGS'], " ") + """
     Libraries                   : """ + string.join(env['LIBS'], " ") + """
     Default OpenGL library      : """ + opts['libgl'] + """
 
@@ -301,6 +304,8 @@ def load_configure (env):
 		env.Replace (CPPPATH = env_defs['CPPPATH'])
 	if env_defs.has_key('CPPDEFINES'):
 		env.Replace (CPPDEFINES = env_defs['CPPDEFINES'])
+	if env_defs.has_key('LINKFLAGS'):
+		env.Replace (LINKFLAGS = env_defs['LINKFLAGS'])
 	building = 1
 
 env = Environment ()
