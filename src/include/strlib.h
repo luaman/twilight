@@ -29,6 +29,8 @@
 
 #include <string.h>
 #include <ctype.h>
+#include "twiconfig.h"
+#include "zone.h"
 
 #ifndef HAVE_STRCASECMP
 # ifdef HAVE__STRICMP
@@ -58,8 +60,7 @@ size_t strlcpy (char* dst, const char* src, size_t siz);
 #endif
 
 
-// Duplicate a string (memory allocated with Z_Malloc)
-char *CopyString (const char *string);
+char *Zstrdup (memzone_t *zone, const char *string);
 
 // does a varargs printf into a temp buffer
 char *va (char *format, ...);
