@@ -558,7 +558,6 @@ SV_PushMove (edict_t *pusher, float movetime)
 
 }
 
-#ifdef QUAKE2
 /*
 ============
 SV_PushRotate
@@ -607,7 +606,7 @@ SV_PushRotate (edict_t *pusher, float movetime)
 			continue;
 		if (check->v.movetype == MOVETYPE_PUSH
 			|| check->v.movetype == MOVETYPE_NONE
-			|| check->v.movetype == MOVETYPE_FOLLOW
+//			|| check->v.movetype == MOVETYPE_FOLLOW
 			|| check->v.movetype == MOVETYPE_NOCLIP)
 			continue;
 
@@ -687,7 +686,6 @@ SV_PushRotate (edict_t *pusher, float movetime)
 
 
 }
-#endif
 
 /*
 ================
@@ -712,15 +710,14 @@ SV_Physics_Pusher (edict_t *ent)
 	} else
 		movetime = host_frametime;
 
-	if (movetime) {
-#ifdef QUAKE2
-		if (ent->v.avelocity[0] || ent->v.avelocity[1] || ent->v.avelocity[2])
-			SV_PushRotate (ent, movetime);
-		else
-#endif
-			SV_PushMove (ent, movetime);	// advances ent->v.ltime if not
-											// blocked
-	}
+//#ifdef QUAKE2
+	if (ent->v.avelocity[0] || ent->v.avelocity[1] || ent->v.avelocity[2])
+		SV_PushRotate (ent, movetime);
+//		else
+//#endif
+	if (movetime)
+		SV_PushMove (ent, movetime);	// advances ent->v.ltime if not
+										// blocked
 
 	if (thinktime > oldltime && thinktime <= ent->v.ltime) {
 		ent->v.nextthink = 0;
