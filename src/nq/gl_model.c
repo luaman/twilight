@@ -882,9 +882,7 @@ Mod_LoadFaces (lump_t *l)
 		if (!strncmp (out->texinfo->texture->name, "sky", 3))	// sky
 		{
 			out->flags |= (SURF_DRAWSKY | SURF_DRAWTILED);
-#ifndef QUAKE2
 			GL_SubdivideSurface (out);	// cut up polygon for warps
-#endif
 			continue;
 		}
 

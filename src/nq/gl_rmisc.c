@@ -197,6 +197,9 @@ R_Init (void)
 
 	playertextures = texture_extension_number;
 	texture_extension_number += 16;
+
+	skyboxtexnum = texture_extension_number;
+	texture_extension_number += 6;
 }
 
 /*

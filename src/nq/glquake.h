@@ -184,6 +184,8 @@ extern int  playertextures;
 extern int  skytexturenum;				// index in cl.loadmodel, not gl
 										// texture object
 
+extern int  skyboxtexnum;
+
 extern cvar_t *r_norefresh;
 extern cvar_t *r_drawentities;
 extern cvar_t *r_drawworld;
