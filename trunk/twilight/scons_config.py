@@ -40,7 +40,7 @@ def check_SDL_headers (context):
 
 int main (int argc, char *argv[])
 {
-	printf("%d.%d.%d", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
+	printf("%d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
 	exit (0);
 }
 """)
