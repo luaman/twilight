@@ -221,6 +221,7 @@ float       turbsin[] = {
 };
 
 #define TURBSCALE (256.0 / (2 * M_PI))
+#define TURBSIN(f, s) turbsin[((int)(((f)*(s) + cl.time) * TURBSCALE) & 255)]
 
 /*
 =============
@@ -236,34 +237,53 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 	float	   *v;
 	float		temp[3];
 	int			i, texnum;
-	float		s, t, os, ot;
+	float		s, t;
 
 	texnum = tex->gl_texturenum;
 
-	for (p = fa->polys; p; p = p->next)
-	{
-		qglBegin (GL_TRIANGLE_FAN);
-		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
+	if (r_waterripple->value) {
+		for (p = fa->polys; p; p = p->next)
 		{
-			os = v[3];
-			ot = v[4];
+			qglBegin (GL_TRIANGLE_FAN);
+			for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
+			{
+				if (transform)
+					softwaretransform(v, temp);
+				else
+					VectorCopy(v, temp);
 
-			s = os + turbsin[(int) ((ot * 0.125 + cl.time) * TURBSCALE) & 255];
-			s *= (1.0 / 64);
+				temp[2] += r_waterripple->value * TURBSIN(temp[0], 1/32.0f) *
+					TURBSIN(temp[1], 1/32.0f) * (1/64.0f);
 
-			t = ot + turbsin[(int) ((os * 0.125 + cl.time) * TURBSCALE) & 255];
-			t *= (1.0 / 64);
+				s = (temp[3] + v[3]) * (1/64.0f);
+				t = (temp[4] + v[4]) * (1/64.0f);
 
-			if (transform)
-				softwaretransform(v, temp);
-			else
-				VectorCopy(v, temp);
-
-			qglColor4f(1, 1, 1, alpha);
-			qglTexCoord2f (s, t);
-			qglVertex3fv (temp);
+				qglColor4f(1, 1, 1, alpha);
+				qglTexCoord2f (s, t);
+				qglVertex3fv (temp);
+			}
+			qglEnd ();
 		}
-		qglEnd ();
+	} else {
+		for (p = fa->polys; p; p = p->next)
+		{
+			qglBegin (GL_TRIANGLE_FAN);
+			for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
+			{
+				s = (v[3] + TURBSIN(v[4], 0.125)) * (1/64.0f);
+				t = (v[4] + TURBSIN(v[3], 0.125)) * (1/64.0f);
+
+				if (transform)
+					softwaretransform(v, temp);
+				else
+					VectorCopy(v, temp);
+
+				qglColor4f(1, 1, 1, alpha);
+				qglTexCoord2f (s, t);
+				qglVertex3fv (temp);
+			}
+			qglEnd ();
+		}
 	}
 }
 

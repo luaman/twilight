@@ -107,6 +107,7 @@ extern struct cvar_s *r_speeds;
 extern struct cvar_s *r_waterwarp;
 extern struct cvar_s *r_shadows;
 extern struct cvar_s *r_wateralpha;
+extern struct cvar_s *r_waterripple;
 extern struct cvar_s *r_dynamic;
 extern struct cvar_s *r_novis;
 extern struct cvar_s *r_netgraph;

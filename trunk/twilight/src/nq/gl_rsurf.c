@@ -818,6 +818,7 @@ void
 R_DrawBrushModel (entity_t *e)
 {
 	int				i, k, texnum, rotated;
+	unsigned int	show_tris = 0;
 	vec3_t			mins, maxs;
 	msurface_t	   *psurf;
 	float			dot, wateralpha = r_wateralpha->value;
@@ -839,6 +840,9 @@ R_DrawBrushModel (entity_t *e)
 
 	if (R_CullBox (mins, maxs))
 		return;
+
+	if (!(cl.maxclients > 1) && r_showtris->value)
+		show_tris = 1;
 
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
@@ -928,11 +932,13 @@ R_DrawBrushModel (entity_t *e)
 				EmitWaterPolys (psurf,
 						R_TextureAnimation(psurf->texinfo->texture), true,
 						wateralpha);
-//				psurf->visframe = -1;
+				if (!show_tris)
+					psurf->visframe = -1;
 			}
 		}
 	}
 
+	if (show_tris) {
 	for (i = 0, psurf = &clmodel->surfaces[clmodel->firstmodelsurface];
 			i < clmodel->nummodelsurfaces; i++, psurf++)
 	{
@@ -942,6 +948,7 @@ R_DrawBrushModel (entity_t *e)
 			{
 				EmitWaterTris (psurf);
 				psurf->visframe = -1;
+				}
 			}
 		}
 	}
