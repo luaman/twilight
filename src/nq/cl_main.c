@@ -335,21 +335,16 @@ CL_NewDlight (int key, vec3_t org, int effects)
 void
 CL_DecayLights (void)
 {
-	int         i;
-	dlight_t   *dl;
-	float       time;
+	int			i;
+	dlight_t	*dl;
+	float		time;
 
 	time = ccl.time - ccl.oldtime;
 
-	dl = cl_dlights;
-	for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
-		if (dl->die < ccl.time || !dl->radius)
-			continue;
-
-		dl->radius -= time * dl->decay;
-		if (dl->radius < 0)
-			dl->radius = 0;
-	}
+	for (i = 0, dl = cl_dlights;i < MAX_DLIGHTS;i++, dl++)
+		if (dl->radius)
+			dl->radius = (ccl.time < dl->die) ?
+				max(0, dl->radius - time * dl->decay) : 0;
 }
 
 
