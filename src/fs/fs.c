@@ -189,6 +189,7 @@ FS_Add_File (fs_group_t *group, const char *name, size_t len,
 
 	file = Zone_Alloc(fs_zone, sizeof(fs_file_t));
 	file->fs_data = fs_data;
+	Com_DFPrintf (DEBUG_FS, "New file: (%s) %s\n", group->prefix, name);
 	if (group->prefix)
 		file->name_base = FS_MangleName (va("%s/%s", group->prefix, name));
 	else
@@ -218,6 +219,7 @@ FS_Add_File (fs_group_t *group, const char *name, size_t len,
 void
 FS_AddPath (const char *path, const char *id, const Uint32 flags)
 {
+	Com_DFPrintf (DEBUG_FS, "New Path: %s %s %x\n", path, id, flags);
 	if (!id) {
 		if ((id = strrchr(path, '/')))
 			id++;

@@ -203,8 +203,9 @@ void Com_BeginRedirect (void (*RedirectedPrint) (char *));
 void Com_EndRedirect (void);
 
 /* Com_DFPrintf flags */
-#define DEBUG_DEFAULT	0x00000001
-#define DEBUG_ZONE	0x00000002
+#define DEBUG_DEFAULT			BIT(0)
+#define DEBUG_ZONE				BIT(1)
+#define DEBUG_FS				BIT(2)
 
 extern struct cvar_s *registered;
 
