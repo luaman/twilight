@@ -17,7 +17,7 @@ lib_LIBRARIES=libtwilight_base.a
 libtwilight_base_a_SOURCES= \
 	buildnum.c cpu.c cmd.c collision.c crc.c cvar.c lh_parser.c mathlib.c \
 	matrixlib.c menu.c mdfour.c model.c mod_brush.c parm.c strlib.c \
-	zone.c locs.c sdlstub.c sdlstub.h hash.c hash.h
+	zone.c locs.c sdlstub.c sdlstub.h hash.c hash.h loadso.c loadso.h
 
 EXTRA_DIST = \
 	twilight_base.dsp twilight_base.vcproj

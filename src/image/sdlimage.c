@@ -31,6 +31,7 @@ static const char rcsid[] =
 #include <stdlib.h>
 
 #include "SDL.h"
+#include "loadso.h"
 
 #include "quakedef.h"
 #include "common.h"
@@ -40,7 +41,6 @@ static const char rcsid[] =
 #include "sys.h"
 #include "fs.h"
 
-#ifdef HAVE_SDL_LOADOBJ
 /* SDL interprets each pixel as a 32-bit number, so our masks must depend
 *        on the endianness (byte order) of the machine */
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -54,10 +54,6 @@ static const char rcsid[] =
 #define bmask		0x00ff0000
 #define amask		0xff000000
 #endif
-
-extern DECLSPEC void *SDL_LoadObject(const char *sofile);
-extern DECLSPEC void *SDL_LoadFunction(void *handle, const char *name);
-extern DECLSPEC void SDL_UnloadObject(void *handle);
 
 
 /*
@@ -97,14 +93,13 @@ Image_InitSDL ()
 	if (loaded)
 		return 0;
 
-	sdl_handle = SDL_LoadObject(SDL_IMAGE_LIBRARY);
+	sdl_handle = TWI_LoadObject(SDL_IMAGE_LIBRARY);
 	if (!sdl_handle) {
-		Com_Printf("Error! %s\n", SDL_GetError ());
 		return 0;
 	}
 
 	for (i = 0; search[i].load_name; i++) {
-		search[i].load = SDL_LoadFunction(sdl_handle, search[i].load_name);
+		search[i].load = TWI_LoadFunction(sdl_handle, search[i].load_name);
 		if (search[i].load) {
 			i_search = Zone_Alloc (img_zone, sizeof (img_search_t));
 			i_search->ext = Zstrdup (img_zone, search[i].ext);
@@ -113,8 +108,7 @@ Image_InitSDL ()
 			img_search = i_search;
 			cnt++;
 		} else
-			Com_Printf("Unable to find %s (%s).\n",
-					search[i].load_name, SDL_GetError ());
+			Com_Printf("Unable to find %s.\n", search[i].load_name);
 	}
 
 	loaded = true;
@@ -159,11 +153,3 @@ Image_FromSDL (fs_file_t *file, SDL_RWops *rw)
 
 	return NULL;
 }
-#else
-int
-Image_InitSDL ()
-{
-	Com_Printf ("Unable to load SDL_Image due to lack of SDL_LoadObject\n");
-	return 0;
-}
-#endif

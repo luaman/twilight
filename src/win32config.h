@@ -19,6 +19,7 @@
 #define SHARECONF		"~/twilight.conf"
 
 #define GL_LIBRARY		"opengl32.dll"
+#define SDL_IMAGE_LIBRARY	"libSDL_image-1.2.dll"
 
 #undef HAVE_SNPRINTF
 
