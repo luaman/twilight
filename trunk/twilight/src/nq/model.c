@@ -1,5 +1,5 @@
 /*
-	$RCSfile$
+	$RCSfile$ -- model loading and caching
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -22,7 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// model.c -- model loading and caching
 static const char rcsid[] =
     "$Id$";
 
@@ -37,6 +36,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "common.h"
 #include "mathlib.h"
+#include "strlib.h"
 #include "model.h"
 
 model_t    *loadmodel;
