@@ -266,7 +266,14 @@ CL_ParseTEnt (void)
 			pos[0] = MSG_ReadCoord ();
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
-			R_TeleportSplash (pos);
+			dl = CL_AllocDlight (0);
+			VectorCopy (pos, dl->origin);
+			dl->radius = 1000;
+			dl->die = cl.time + 99;
+			dl->decay = 3000;
+			dl->color[0] = 1.25f;
+			dl->color[1] = 1.25f;
+			dl->color[2] = 1.25f;
 			break;
 
 		case TE_EXPLOSION2:			// color mapped explosion
