@@ -1237,6 +1237,23 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 
 	file_from_pak = 0;
 
+	if ((i = strchr (filename, '\\')))
+	{
+		Com_Printf ("COM_FOpenFile: %s should use / to seperate paths, fixing it\n",
+				filename);
+		do
+			filename[i] = '/';
+		while ((i = strchr (filename, '\\')));
+	}
+	if (filename[0] == '/')
+	{
+		Com_Printf ("COM_FOpenFile: %s should not begin with /, correcting it\n",
+				filename);
+		do
+			filename++;
+		while (filename[0] == '/');
+	}
+
 	/*
 	 * search through the path, one element at a time
 	 */
@@ -1264,14 +1281,8 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 				}
 		} else {
 			// check a file in the directory tree
-
-			// FIXME: Client does a continue in both cases, should we here?
-			if (filename[0] == '/' || filename[0] == '\\')
-				Com_Printf ("COM_FOpenFile: Called with filename \"%s\"\n",
-						filename);
 			if (strstr (filename, ".."))
-				Com_Printf ("COM_FOpenFile: Called with filename \"%s\"\n",
-						filename);
+				continue;
 
 			snprintf (netpath, sizeof (netpath), "%s/%s", search->filename,
 					  filename);
