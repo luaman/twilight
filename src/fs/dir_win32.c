@@ -102,13 +102,13 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 
 	while (!_findnext (dir, &n_file)) {
 fire:
-		if (!strcmp(".", n_file->name) || !strcmp("..", n_file->name))
+		if (!strcmp(".", n_file.name) || !strcmp("..", n_file.name))
 			continue;
-		file = zasprintf(fs_zone, "%s/%s", path, n_file->name);
-		if (n_file->attrib & _A_SUBDIR)
+		file = zasprintf(fs_zone, "%s/%s", path, n_file.name);
+		if (n_file.attrib & _A_SUBDIR)
 			FSD_Add_Dir (group, g_dir, file, depth + 1);
 		else
-			FS_Add_File (group, file, n_file->size, FSD_Open_File, NULL);
+			FS_Add_File (group, file, n_file.size, FSD_Open_File, NULL);
 		Zone_Free (file);
 	}
 	_findclose (dir);

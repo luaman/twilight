@@ -27,8 +27,6 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
-#include <unistd.h>
-
 #include "cvar.h"
 #include "sys.h"
 #include "gl_info.h"

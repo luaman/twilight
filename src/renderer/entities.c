@@ -30,7 +30,6 @@ static const char rcsid[] =
 #include "SDL.h"
 
 #include <string.h>
-#include <unistd.h>
 
 #include "entities.h"
 #include "host.h"
