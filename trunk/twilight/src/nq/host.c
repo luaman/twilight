@@ -39,6 +39,7 @@ static const char rcsid[] =
 #include "cdaudio.h"
 #include "cmd.h"
 #include "console.h"
+#include "client.h"
 #include "cvar.h"
 #include "draw.h"
 #include "gl_model.h"
@@ -54,6 +55,7 @@ static const char rcsid[] =
 #include "sound.h"
 #include "sys.h"
 #include "view.h"
+#include "wad.h"
 
 /*
 

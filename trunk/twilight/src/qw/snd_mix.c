@@ -41,7 +41,7 @@ static const char rcsid[] =
 #include "sound.h"
 
 #ifdef _WIN32
-#include "winquake.h"
+#include <windows.h>
 #else
 #define DWORD	unsigned long
 #define LPVOID	void *

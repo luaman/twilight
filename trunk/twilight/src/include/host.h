@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) #YEAR#  #AUTHOR#
+	Copyright (C) 1996-1997  Id Software, Inc.
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -23,16 +23,16 @@
 
 	$Id$
 */
+// host.h
 
 #ifndef __HOST_H
 #define __HOST_H
 
-extern qboolean noclip_anglehack;
-
 extern struct cvar_s *sys_ticrate;
 extern struct cvar_s *sys_nostdout;
 
-extern qboolean host_initialized;		// true if into command execution
+extern struct cvar_s *password;
+
 extern double host_frametime;
 extern Uint8 *host_basepal;
 extern Uint8 *host_colormap;
@@ -41,27 +41,28 @@ extern double realtime;					// not bounded in any way, changed at
 
 										// start of every frame, never reset
 
-void		Host_ClearMemory (void);
-void		Host_ServerFrame (void);
-void		Host_InitCommands (void);
-void		Host_Init (void);
-void		Host_Shutdown (void);
-void		Host_Error (char *error, ...);
-void		Host_EndGame (char *message, ...);
-void		Host_Frame (float time);
-void		Host_Quit_f (void);
-void		Host_ClientCommands (char *fmt, ...);
-void		Host_ShutdownServer (qboolean crash);
+void Host_ClearMemory (void);
+void Host_ServerFrame (void);
+void Host_InitCommands (void);
+void Host_Init (void);
+void Host_Shutdown (void);
+void Host_Error (char *error, ...);
+void Host_EndGame (char *message, ...);
+void Host_Frame (float time);
+void Host_Quit_f (void);
+void Host_ClientCommands (char *fmt, ...);
+void Host_ShutdownServer (qboolean crash);
 
-extern qboolean msg_suppress_1;			// suppresses resolution and cache size 
+#ifdef TWILIGHT_NQ
+extern qboolean noclip_anglehack;
+extern qboolean host_initialized;		// true if into command execution
+extern qboolean msg_suppress_1;	// suppresses resolution and cache size 
 										// console output
-										// an fullscreen DIB focus gain/loss
-extern int	current_skill;				// skill level for currently loaded
-										// level (in case
-										// the user changes the cvar while the
-										// level is
-										// running, this reflects the level
-										// actually in use)
+/*
+ * skill level for currently loaded level (in case the user changes the
+ *cvar while the level is running, this reflects the level actually in use)
+ */
+extern int	current_skill;
 
 extern qboolean isDedicated;
 
@@ -76,6 +77,6 @@ void		Chase_Init_Cvars (void);
 void		Chase_Init (void);
 void		Chase_Reset (void);
 void		Chase_Update (void);
-
+#endif /* TWILIGHT_NQ */
 #endif // __HOST_H
 

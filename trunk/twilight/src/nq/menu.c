@@ -48,10 +48,7 @@ static const char rcsid[] =
 #include "sound.h"
 #include "strlib.h"
 #include "view.h"
-
-#ifdef _WIN32
-#include "winquake.h"
-#endif
+#include "wad.h"
 
 // FIXME: do this right
 extern cvar_t *_windowed_mouse;

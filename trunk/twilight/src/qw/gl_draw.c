@@ -46,7 +46,7 @@ static const char rcsid[] =
 #include "host.h"
 #include "strlib.h"
 #include "sys.h"
-
+#include "draw.h"
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
@@ -377,7 +377,7 @@ Draw_Character (int x, int y, int num)
 Draw_String
 ================
 */
-volatile void
+void
 Draw_String (int x, int y, char *str)
 {
 	float       frow, fcol, size = 0.0625;

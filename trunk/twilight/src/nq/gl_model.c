@@ -348,7 +348,7 @@ Mod_ForName (char *name, qboolean crash)
 	return Mod_LoadModel (mod, crash);
 }
 
-static qboolean 
+qboolean 
 Img_HasFullbrights (Uint8 *pixels, int size)
 {
     int i;

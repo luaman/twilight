@@ -41,10 +41,9 @@ typedef struct vrect_s {
 
 typedef struct {
 	pixel_t    *colormap;				// 256 * VID_GRADES size
-										// window
 	unsigned    width;
 	unsigned    height;
-	float       aspect;					// width / height -- < 0 is taller than 
+	float       aspect;					// width / height -- < 0 is taller than
 										// wide
 	qboolean    recalc_refdef;			// if true, recalc vid-based stuff
 	unsigned    conwidth;
@@ -55,16 +54,8 @@ typedef struct {
 
 extern viddef_t vid;					// global video state
 extern unsigned d_8to32table[256];
-extern void (*vid_menudrawfn) (void);
-extern void (*vid_menukeyfn) (int key);
-
-void        VID_SetPalette (unsigned char *palette);
 
 // called at startup and after any gamma correction
-
-void        VID_ShiftPalette (unsigned char *palette);
-
-// called for bonus and pain flashes, and for underwater color changes
 
 void        VID_Init_Cvars (void);
 void        VID_Init (unsigned char *palette);
@@ -76,15 +67,6 @@ void        VID_Init (unsigned char *palette);
 void        VID_Shutdown (void);
 
 // Called at shutdown
-
-void        VID_Update (vrect_t *rects);
-
-// flushes the given rectangles from the view buffer to the screen
-
-int         VID_SetMode (int modenum, unsigned char *palette);
-
-// sets the mode; only used by the Quake engine for resetting to mode 0 (the
-// base mode) on memory allocation failures
 
 #endif // __VID_H
 

@@ -32,7 +32,11 @@
 
 #include "SDL_endian.h"
 
+#ifndef TWILIGHT_NQ
 #include "bothdefs.h"
+#else
+#include "quakedef.h"
+#endif
 #include "qtypes.h"
 
 #define	MAX_INFO_STRING	196
@@ -55,6 +59,10 @@ typedef struct sizebuf_s {
 	int         cursize;
 } sizebuf_t;
 
+#ifdef TWILIGHT_NQ
+void        SZ_Alloc (sizebuf_t *buf, int startsize);
+void        SZ_Free (sizebuf_t *buf);
+#endif
 void        SZ_Clear (sizebuf_t *buf);
 void       *SZ_GetSpace (sizebuf_t *buf, int length);
 void        SZ_Write (sizebuf_t *buf, void *data, int length);
@@ -202,7 +210,10 @@ extern char com_gamedir[MAX_OSPATH];
 
 void        COM_WriteFile (char *filename, void *data, int len);
 int         COM_FOpenFile (char *filename, FILE ** file);
-void        COM_CloseFile (FILE * h);
+#ifdef TWILIGHT_NQ
+int         COM_OpenFile (char *filename, int *hndl);
+void        COM_CloseFile (int h);
+#endif
 
 Uint8      *COM_LoadStackFile (char *path, void *buffer, int bufsize);
 Uint8      *COM_LoadTempFile (char *path);

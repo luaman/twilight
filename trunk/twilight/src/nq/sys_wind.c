@@ -32,10 +32,9 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "strlib.h"
-#include "winquake.h"
 #include "errno.h"
-#include <sys\types.h>
-#include <sys\timeb.h>
+#include <sys/types.h>
+#include <sys/timeb.h>
 
 
 /*

@@ -69,8 +69,6 @@ void        GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 						 qboolean alpha);
 void        GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, 
 						int alpha, unsigned *ttable);
-int         GL_LoadTexture (char *identifier, int width, int height,
-							Uint8 *data, qboolean mipmap, int alpha);
 int         GL_FindTexture (char *identifier);
 
 typedef struct {
@@ -266,7 +264,6 @@ extern qboolean gl_mtexable;
 //
 // gl_warp.c
 //
-void        GL_SubdivideSurface (msurface_t *fa);
 void        EmitBothSkyLayers (msurface_t *fa);
 void        EmitWaterPolys (msurface_t *fa);
 void        EmitSkyPolys (msurface_t *fa);
@@ -275,8 +272,6 @@ void        R_DrawSkyChain (msurface_t *s);
 //
 // gl_draw.c
 //
-int         GL_LoadPicTexture (qpic_t *pic);
-void        GL_Set2D (void);
 extern int	gl_filter_min;
 extern int	gl_filter_max;
 
@@ -298,11 +293,6 @@ int         R_LightPoint (vec3_t p);
 // gl_refrag.c
 //
 void        R_StoreEfrags (efrag_t **ppefrag);
-
-//
-// gl_mesh.c
-//
-void        GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
 
 //
 // gl_rsurf.c

@@ -46,7 +46,7 @@ static const char rcsid[] =
 #include "mdfour.h"
 #include "strlib.h"
 #include "sys.h"
-
+#include "draw.h"
 
 model_t    *loadmodel;
 char        loadname[32];				// for hunk tags

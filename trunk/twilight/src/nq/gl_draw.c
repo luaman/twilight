@@ -47,6 +47,7 @@ static const char rcsid[] =
 #include "host.h"
 #include "strlib.h"
 #include "sys.h"
+#include "wad.h"
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 

@@ -48,10 +48,6 @@ static const char rcsid[] =
 #include "pmove.h"
 #include "strlib.h"
 
-#ifdef _WIN32
-#include "winquake.h"
-#endif
-
 #define	PM_SPECTATORMAXSPEED	500
 #define	PM_STOPSPEED	100
 #define	PM_MAXSPEED			320

@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "sbar.h"
 #include "screen.h"
 #include "server.h"
+#include "wad.h"
 
 
 #define STAT_MINUS		10				// num frame for '-' stats digit
