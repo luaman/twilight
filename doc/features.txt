@@ -1,0 +1,138 @@
+Note, this is only user visible changes, the majority of our changes
+have been non-user visible, so if you are a programmer this list is not
+what you are looking for.
+
+Portability:
+  SDL based, should work on Windows, and all POSIX compliant operating
+  systems, including Linux. (Requires OpenGL.)
+
+Skies:
+  Full support for both skyboxes, old style sky sphere, and simple
+  colored sky polygons. (The latter has one use, it is /fast/.)
+
+Overbright support:
+  We support 2x overbright for single texture, 4x overbright for
+  multi-texture with GL_ARB_texture_env_combine, and unfortunately no
+  overbright for mtex without combine support.
+
+Particles:
+  The particle engine has changed quite a bit, with effects that we
+  believe to look quite a bit better.
+
+Lighting:
+  Twilight has full support for colored lighting, both static from .lit
+  files, and from colored dynamic lights.
+
+Fullbright colors:
+  Twilight has full support for fullbright colors on both alias models
+  are brush models, this can be turned off with the gl_fb cvar.
+
+Image formats:
+  Twilight has support for loading a number of image formats.
+    - Without SDL_Image: tga (limited), pcx, and lmp.
+    - With SDL_Image: tga, png, jpg, pnm, tiff, xpm, bmp, lbm, pcx, and
+      lmp.
+  All images that we attempt to load from pak files and wads can be
+  loaded in any of the supported image formats, this includes the font,
+  the console background, and the HUD elements.
+
+Textures:
+  Twilight has support for external brush model textures in all
+  supported image formats. [0]
+
+Alias model team colors:
+  If a teamcolor is assigned to an alias model, it will be rendered
+  correctly with the teamcolor.
+
+Explosions:
+  The Twilight explosion effect is quite different then the stock quake
+  explosion effect. [1]
+  Twilight has /greatly/ enhanced explosion effects.
+
+Lightning:
+  Twilight has some /very/ cool looking lightning effects.
+
+Interpolation:
+  Twilight has full alias model interpolation support.
+
+Crosshairs:
+  Twilight has several new crosshairs, and the ability to color the
+  crosshair both by cvar, or by the player's pants color.
+
+Water warping:
+  While underwater Twilight uses a very different distortion effect,
+  that we consider to be greatly superior.
+
+Team messages:
+  Twilight has support for % expansion of a number of variables in a
+  manner similar to Qizmo (This defaults off, the cl_parsesay cvar
+  controls this):
+   %%: Used to give a single % in the message.
+   %a: Current armor value.
+   %A: Current armor type. (R, Y, G, or 'NONE!')
+   %h: Current health value.
+   %[a]: Roughly equilivant to '%Aa:%a', with brackets around it if the
+         armor is equal to or below 50.
+   %[h]: Roughly equilivant to 'h:%h', with brackets around it if the
+         health is equal to or below 50.
+
+   Location messages (see below)
+   %d: Location of last death.
+   %r: Last reported location.
+   %l: Current location.
+
+Location files:
+  Twilight has support for Qizmo style .loc files, it can load them,
+  modify them, and create them. [2]
+
+Score board:
+  The Twilight scoreboard is quite different then the Quake scoreboard,
+  among many other things, there is one per team, with the border color
+  being the average of the pants color of all members of the team.
+
+Menus:
+  The Twilight menu is a very customizable thing, that is still being
+  worked on.  It is also quite different then the Quake menu.
+
+Stability:
+  One of the main goals of Twilight is to be stable, and if you are able
+  to crash Twilight, be it client or server, we would very much like to
+  hear about it, so please report all problems to
+  twilight-devel@icculus.org.
+
+Fallback:
+  In the event of being unable to locate any gamedata at all, Twilight
+  will still start and give you a basic usable console.
+
+Probably a lot more:
+  To be blunt, I'm probably forgetting quite a bit, and would thus
+  appreciate reminders of Twilight features that I am not mentioning.
+  Please send corrections and additions to twilight-devel@icculus.org.
+
+
+0: The search path is:
+    maps/<map>/<texture>,
+    override/<map>/<texture>,
+    textures/<map>/<texture>,
+    override/<texture>,
+    textures/<texture>.
+   If the image is a quake palette .lmp, then it is used for
+   fullbright colors as well, otherwise we try looking for the
+   image with _luma or _glow added to the name.
+   (This is to our knowledge compatible with current external
+   texturing projects.)
+
+1: The effect is from LordHavoc's DarkPlaces, and is controlled by a
+   number of cvars:
+     r_drawexplosions (Controls if the explosions are drawn.)
+     r_explosionclip (Controls if the explosion vertices are bound by
+                      the world geometry.)
+     r_explosioncolor_[rgba] (Controls the explosion colors.)
+
+2: 'loc add <description>' adds a marker at your corrent location, with
+   the given description.
+   'loc rename <description>' changes the description of the nearest
+   marker.
+   'loc delete' deletes the nearest marker.
+   'loc move' moves the nearest marker to your current location.
+   'loc save' saves the current marker locations to 'maps/<map>.loc'

@@ -227,7 +227,7 @@ Team_loc (void)
 	location_t	*loc;
 
 	if (Cmd_Argc () == 1) {
-		Com_Printf ("loc <add|delete|rename|move|save|zsave> [<description>] :Modifies location data, add|rename take <description> parameter\n");
+		Com_Printf ("loc <add|delete|rename|move|save> [<description>] :Modifies location data, add|rename take <description> parameter\n");
 		return;
 	}
 
