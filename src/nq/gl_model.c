@@ -1114,7 +1114,7 @@ RadiusFromBounds (vec3_t mins, vec3_t maxs)
 
 	for (i = 0; i < 3; i++) {
 		corner[i] =
-			fabs (mins[i]) > Q_fabs (maxs[i]) ? Q_fabs (mins[i]) : Q_fabs (maxs[i]);
+			Q_fabs (mins[i]) > Q_fabs (maxs[i]) ? Q_fabs (mins[i]) : Q_fabs (maxs[i]);
 	}
 
 	return VectorLength (corner);
