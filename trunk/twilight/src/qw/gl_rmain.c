@@ -48,7 +48,6 @@ static const char rcsid[] =
 
 entity_t   *currententity;
 
-int         r_visframecount;			// bumped when going to a new PVS
 int         r_framecount;				// used for dlight push checking
 
 static mplane_t    frustum[4];
@@ -81,7 +80,6 @@ texture_t  *r_notexture_mip;
 int         d_lightstylevalue[256];		// 8.8 fraction of base light value
 
 
-void        R_MarkLeaves (void);
 void		R_Torch (entity_t *ent, qboolean torch2);
 
 cvar_t     *r_norefresh;
@@ -912,7 +910,7 @@ R_DrawAliasModel (entity_t *e)
 		shadelight = 1;
 	}
 
-	// 
+	//
 	// locate the proper data
 	// 
 	paliashdr = (aliashdr_t *) Mod_Extradata (clmodel);
@@ -1338,11 +1336,6 @@ R_RenderScene (void)
 
 	R_SetupGL ();
 
-	R_MarkLeaves ();					// done here so we know if we're in
-	// water
-
-	R_PushDlights ();
-
 	R_DrawWorld ();						// adds static entities to the list
 
 	S_ExtraUpdate ();					// don't let sound get messed up if
@@ -1420,10 +1413,11 @@ R_RenderView (void)
 
 	R_Clear ();
 
+	transpolyclear();
+
 	// render normal view
 	R_RenderScene ();
 	R_DrawViewModel ();
-	R_DrawWaterSurfaces ();
 
 	qglEnable (GL_BLEND);
 	qglDepthMask (GL_FALSE);
@@ -1434,6 +1428,8 @@ R_RenderView (void)
 
 	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);
+
+	transpolyrender();
 
 	R_PolyBlend ();
 

@@ -121,7 +121,7 @@ R_RenderDlight (dlight_t *light)
 {
 	int     i, j, vcenter, vlast = -1;
 	vec3_t  v, v_right, v_up;
-	float	*bub_sin = bubble_sintable, 
+	float	*bub_sin = bubble_sintable,
 			*bub_cos = bubble_costable;
 	float   rad = light->radius * 0.35, length;
 
@@ -266,13 +266,15 @@ R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node)
 			node = node->children[1];
 			continue;
 		}
-			
+
 		// mark the polygons
 		maxdist = light->radius*light->radius;
 		surf = cl.worldmodel->surfaces + node->firstsurface;
 
 		for (i = 0; i < node->numsurfaces; i++, surf++)
 		{
+			if (surf->visframe != r_framecount)
+				continue;
 			for (j = 0; j < 3; j++)
 				impact[j] = light->origin[j] - surf->plane->normal[j]*dist;
 
@@ -280,17 +282,17 @@ R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node)
 			l = DotProduct (impact, surf->texinfo->vecs[0])
 				+ surf->texinfo->vecs[0][3] - surf->texturemins[0];
 			s = l+0.5;
-			if (s < 0) 
+			if (s < 0)
 				s = 0;
-			else if (s > surf->extents[0]) 
+			else if (s > surf->extents[0])
 				s = surf->extents[0];
 			s = l - s;
 			l = DotProduct (impact, surf->texinfo->vecs[1])
 				+ surf->texinfo->vecs[1][3] - surf->texturemins[1];
 			t = l+0.5;
-			if (t < 0) 
+			if (t < 0)
 				t = 0;
-			else if (t > surf->extents[1]) 
+			else if (t > surf->extents[1])
 				t = surf->extents[1];
 			t = l - t;
 			// compare to minimum light
@@ -330,7 +332,7 @@ R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node)
 	}
 }
 
-void 
+void
 R_MarkLights (dlight_t *light, int bit, model_t *model)
 {
 	mleaf_t *pvsleaf = Mod_PointInLeaf (light->origin, model);
@@ -340,7 +342,7 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 	Uint8		   *in = pvsleaf->compressed_vis;
 	int				row = (model->numleafs+7)>>3;
 	float			low[3], high[3], radius, dist, maxdist;
-	
+
 	if (!pvsleaf->compressed_vis || gl_oldlights->value)
 	{
 		// no vis info, so make all visible
@@ -377,7 +379,7 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 				if (c & (1<<i))
 				{
 					leaf = &model->leafs[(k << 3)+i+1];
-					if (leaf->visframe != r_visframecount)
+					if (leaf->visframe != r_framecount)
 						continue;
 					if (leaf->contents == CONTENTS_SOLID)
 						continue;
@@ -388,7 +390,7 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 						|| leaf->maxs[1] < low[1]
 						|| leaf->mins[2] > high[2]
 						|| leaf->maxs[2] < low[2])
-						continue; 
+						continue;
 					if ((m = leaf->nummarksurfaces))
 					{
 						mark = leaf->firstmarksurface;
@@ -397,8 +399,10 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 
 							if (surf->lightframe == r_dlightframecount)
 								continue;
-
 							surf->lightframe = r_dlightframecount;
+							if (surf->visframe != r_framecount)
+								continue;
+
 							dist = PlaneDiff(light->origin, surf->plane);
 							if (surf->flags & SURF_PLANEBACK)
 								dist = -dist;

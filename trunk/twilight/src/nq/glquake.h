@@ -193,6 +193,7 @@ extern struct cvar_s *gl_fb_bmodels;
 extern struct cvar_s *gl_oldlights;
 extern struct cvar_s *gl_colorlights;
 extern struct cvar_s *gl_particletorches;
+extern struct cvar_s *r_particles;
 
 extern int  gl_lightmap_format;
 extern int  gl_solid_format;
