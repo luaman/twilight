@@ -47,7 +47,6 @@ static const char rcsid[] =
 
 
 int			menu_errors;
-int			m_item;
 menu_t		*m_menu;
 menu_t		*m_first;
 memzone_t	*m_zone;
@@ -470,7 +469,7 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 void
 Menu_Parse_Menu (codetree_t *tree_base)
 {
-	menu_t			*menu;
+	menu_t			*menu, *tmenu;
 	int				 i = 0;
 	codetree_t		*code = tree_base;
 	codeword_t		*word;
@@ -521,6 +520,14 @@ Menu_Parse_Menu (codetree_t *tree_base)
 	}
 	menu->items[i] = NULL;
 
+	for (tmenu = m_first; tmenu; tmenu = tmenu->next) {
+		if (!strcasecmp(menu->id, tmenu->id)) {
+			Com_Printf("ERROR! Menu '%s' already defined!\n", menu->id);
+			Menu_Delete_Menu(menu);
+			return;
+		}
+	}
+
 	menu->next = m_first;
 	m_first = menu;
 #undef ERROR
@@ -550,6 +557,29 @@ Menu_Parse_Menus (codetree_t *tree_base)
 			ERROR ();
 	}
 #undef ERROR
+}
+
+void
+M_Deletemenu_f (void)
+{
+	menu_t	*menu, **last;
+	char	*id;
+
+	id = Cmd_Args ();
+	last = &m_first;
+
+	for (menu = m_first; menu; last = &menu->next, menu = menu->next) {
+		if (!strcasecmp(id, menu->id)) {
+			if (m_menu == menu)
+				M_ToggleMenu_f ();
+
+			*last = menu->next;
+			Menu_Delete_Menu(menu);
+			return;
+		}
+	}
+
+	Com_Printf("ERROR: Menu %s not found!\n", id);
 }
 
 void
@@ -590,12 +620,12 @@ M_Menu_f (void)
 			m_entersound = true;
 			key_dest = key_menu;
 			m_menu = menu;
-			m_item = 0;
-			while (m_menu->items[m_item] &&
-					!MItem_Selectable(m_menu->items[m_item]))
-				m_item++;
-			if (!m_menu->items[m_item])
-				m_item = 0;
+			menu->item = 0;
+			while (m_menu->items[m_menu->item] &&
+					!MItem_Selectable(m_menu->items[m_menu->item]))
+				m_menu->item++;
+			if (!m_menu->items[m_menu->item])
+				m_menu->item = 0;
 			return;
 		}
 	}
@@ -614,6 +644,7 @@ M_Base_Init (void)
 {
 	Cmd_AddCommand ("menu", M_Menu_f);
 	Cmd_AddCommand ("loadmenu", M_Loadmenu_f);
+	Cmd_AddCommand ("deletemenu", M_Deletemenu_f);
 
 	m_zone = Zone_AllocZone ("Menus");
 }

@@ -126,10 +126,10 @@ typedef struct menu_item_s {
 typedef struct menu_s {
 	char			*id, *title;
 	menu_item_t		**items;
+	int				 item;
 	struct menu_s	*next;
 } menu_t;
 
-extern int			m_item;
 extern menu_t		*m_menu;
 extern menu_t		*m_first;
 extern memzone_t	*m_zone;

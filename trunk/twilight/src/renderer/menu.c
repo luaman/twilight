@@ -406,7 +406,7 @@ M_Draw (void)
 
 	S_ExtraUpdate ();
 
-	M_Do_Draw (m_menu, m_item);
+	M_Do_Draw (m_menu, m_menu->item);
 }
 
 
@@ -586,7 +586,7 @@ void
 M_Keydown (int key)
 {
 	menu_t		*menu = m_menu;
-	menu_item_t	*item = menu->items[m_item];
+	menu_item_t	*item = menu->items[menu->item];
 	int			 start;
 
 	if (!menu)
@@ -599,25 +599,25 @@ M_Keydown (int key)
 
 		case K_DOWNARROW:
 			S_LocalSound ("misc/menu1.wav");
-			start = m_item;
+			start = menu->item;
 down_start:
-			if (!menu->items[++m_item])
-				m_item = 0;
-			if ((m_item != start) &&
-					!MItem_Selectable(menu->items[m_item]))
+			if (!menu->items[++menu->item])
+				menu->item = 0;
+			if ((menu->item != start) &&
+					!MItem_Selectable(menu->items[menu->item]))
 				goto down_start;
 			break;
 
 		case K_UPARROW:
 			S_LocalSound ("misc/menu1.wav");
-			start = m_item;
+			start = menu->item;
 up_start:
-			if (--m_item < 0) {
-				while (menu->items[++m_item]);
-				m_item--;
+			if (--menu->item < 0) {
+				while (menu->items[++menu->item]);
+				menu->item--;
 			}
-			if ((m_item != start) &&
-					!MItem_Selectable(menu->items[m_item]))
+			if ((menu->item != start) &&
+					!MItem_Selectable(menu->items[menu->item]))
 				goto up_start;
 			break;
 
