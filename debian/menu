@@ -1,0 +1,9 @@
+?package(twilight):needs=X11 section=Games/Arcade \
+  title="Twilight NetQuake" command="/usr/bin/twilight-nq"
+
+?package(twilight):needs=X11 section=Games/Arcade \
+  title="Twilight QW" command="/usr/bin/twilight-qw"
+
+?package(twilight):needs=text section=Games/Arcade \
+  title="Twilight QWSV" command="/usr/bin/twilight-qwsv"
+

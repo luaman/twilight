@@ -6,13 +6,10 @@ These things should be done before first public release:
   - Global config file support
   - Website updates
     - Releases page
-    - Credits page
     - CVS walktrhoughs
   - Packaging scripts
-    - Debian
     - RPM
     ? Something for win32?
-  - Hardware gamma/brightness support [Mercury]
 
 
 Would be nice but is not strictly needed, in importance order:

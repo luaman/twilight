@@ -4,7 +4,7 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-SUBDIRS=include nq qw qw-server doc gamecode
+SUBDIRS=include nq qw qw-server doc gamecode debian
 
 EXTRA_DIST= \
 	acconfig.h autogen.sh \

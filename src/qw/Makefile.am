@@ -18,7 +18,7 @@ endif
 
 twilight_qw_SOURCES= \
 	cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c cl_parse.c \
-	cl_pred.c cl_tent.c client.h \
+	cl_pred.c cl_tent.c client.h host.h \
 	cmd.c cmd.h common.c common.h console.c console.h crc.c crc.h \
 	cvar.c gl_funcs.c \
 	gl_draw.c gl_mesh.c gl_model.c gl_model.h modelgen.h spritegn.h \
