@@ -6,7 +6,7 @@ AC_PREREQ(2.13)
 AC_INIT(nq/sv_main.c)
 AC_REVISION($Revision$)
 
-AM_INIT_AUTOMAKE(twilight,0.0.9)
+AM_INIT_AUTOMAKE(twilight,0.1.0)
 AM_CONFIG_HEADER(include/config.h)
 
 
