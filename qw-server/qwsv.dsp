@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "../include" /I "../SDL/include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../include" /I "../SDL/include" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "TWILIGHT_QWSV" /YX /FD /c
 # ADD BASE RSC /l 0x419 /d "NDEBUG"
 # ADD RSC /l 0x419 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -66,7 +66,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../include" /I "../SDL/include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../include" /I "../SDL/include" /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "TWILIGHT_QWSV" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x419 /d "_DEBUG"
 # ADD RSC /l 0x419 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -200,7 +200,11 @@ SOURCE=.\zone.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\bothdefs.h
+SOURCE=..\include\anorm_dots.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\anorms.h
 # End Source File
 # Begin Source File
 
@@ -208,31 +212,35 @@ SOURCE=.\bspfile.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\cdaudio.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmd.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\common.h
+SOURCE=.\console.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\compat.h
+SOURCE=..\include\draw.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\crc.h
+SOURCE=..\include\gl_warp_sin.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\cvar.h
+SOURCE=..\include\host.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\mathlib.h
+SOURCE=..\include\input.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mdfour.h
+SOURCE=..\include\menu.h
 # End Source File
 # Begin Source File
 
@@ -240,19 +248,11 @@ SOURCE=.\model.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\modelgen.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\net.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\pmove.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\pr_comp.h
+SOURCE=..\include\pcx.h
 # End Source File
 # Begin Source File
 
@@ -268,15 +268,15 @@ SOURCE=.\protocol.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\sbar.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\server.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\spritegn.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\strlib.h
+SOURCE=..\include\sound.h
 # End Source File
 # Begin Source File
 
@@ -284,15 +284,39 @@ SOURCE=.\sys.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\win32conf.h
+SOURCE=..\include\tga.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\TGL_defines.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\TGL_funcs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\TGL_funcs_list.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\TGL_types.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\vid.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\view.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\wad.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\world.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\zone.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

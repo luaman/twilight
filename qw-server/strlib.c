@@ -35,6 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include "strlib.h"
+#include "zone.h"
 
 /*
  * strlcat and strlcpy functions taken from OpenBSD
@@ -124,3 +125,19 @@ strlcpy (char *dst, const char *src, size_t siz)
 }
 #endif // ifndef HAVE_STRLCPY
 
+
+/*
+==================
+CopyString
+
+Duplicate a string (memory allocated with Z_Malloc)
+==================
+*/
+char*
+CopyString (const char *string)
+{
+	size_t length = strlen (string) + 1;
+	char *out = Z_Malloc (length);
+	memcpy (out, string, length);
+	return out;
+}

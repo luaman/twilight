@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "../include" /I "../SDL/include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "GLQUAKE" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../include" /I "../SDL/include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "TWILIGHT_NQ" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x419 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../include" /I "../SDL/include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "GLQUAKE" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "../include" /I "../SDL/include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "TWILIGHT_NQ" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x419 /d "_DEBUG"
@@ -324,11 +324,15 @@ SOURCE=.\zone.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\anorm_dots.h
+SOURCE=..\include\anorm_dots.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\anorms.h
+SOURCE=..\include\anorms.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\bothdefs.h
 # End Source File
 # Begin Source File
 
@@ -336,7 +340,7 @@ SOURCE=.\bspfile.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cdaudio.h
+SOURCE=..\include\cdaudio.h
 # End Source File
 # Begin Source File
 
@@ -348,7 +352,7 @@ SOURCE=.\cmd.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\common.h
+SOURCE=..\include\common.h
 # End Source File
 # Begin Source File
 
@@ -364,7 +368,7 @@ SOURCE=.\console.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\crc.h
+SOURCE=..\include\crc.h
 # End Source File
 # Begin Source File
 
@@ -372,11 +376,15 @@ SOURCE=..\include\cvar.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\draw.h
+SOURCE=..\include\draw.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_model.h
+SOURCE=..\include\gl_model.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\gl_warp_sin.h
 # End Source File
 # Begin Source File
 
@@ -384,7 +392,11 @@ SOURCE=.\glquake.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\input.h
+SOURCE=..\include\host.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\input.h
 # End Source File
 # Begin Source File
 
@@ -396,11 +408,15 @@ SOURCE=..\include\mathlib.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\menu.h
+SOURCE=..\include\mdfour.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\modelgen.h
+SOURCE=..\include\menu.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\modelgen.h
 # End Source File
 # Begin Source File
 
@@ -424,7 +440,11 @@ SOURCE=..\include\pcx.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\pr_comp.h
+SOURCE=..\include\pmove.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\pr_comp.h
 # End Source File
 # Begin Source File
 
@@ -444,10 +464,6 @@ SOURCE=..\include\qtypes.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\quakeasm.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\quakedef.h
 # End Source File
 # Begin Source File
@@ -456,7 +472,7 @@ SOURCE=.\render.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\sbar.h
+SOURCE=..\include\sbar.h
 # End Source File
 # Begin Source File
 
@@ -468,15 +484,15 @@ SOURCE=.\server.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\sound.h
+SOURCE=..\include\sound.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\spritegn.h
+SOURCE=..\include\spritegn.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\strlib.h
+SOURCE=..\include\strlib.h
 # End Source File
 # Begin Source File
 
@@ -504,15 +520,15 @@ SOURCE=..\include\TGL_types.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\vid.h
+SOURCE=..\include\vid.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\view.h
+SOURCE=..\include\view.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\wad.h
+SOURCE=..\include\wad.h
 # End Source File
 # Begin Source File
 
@@ -520,15 +536,11 @@ SOURCE=..\include\win32conf.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\winquake.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\world.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\zone.h
+SOURCE=..\include\zone.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
