@@ -55,10 +55,7 @@ static HANDLE hFile;
 static HANDLE heventParent;
 static HANDLE heventChild;
 
-void        MaskExceptions (void);
 void        Sys_InitFloatTime (void);
-void        Sys_PushFPCW_SetHigh (void);
-void        Sys_PopFPCW (void);
 
 volatile int sys_checksum;
 
@@ -214,21 +211,6 @@ SYSTEM IO
 
 ===============================================================================
 */
-
-/*
-================
-Sys_MakeCodeWriteable
-================
-*/
-void
-Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
-{
-	DWORD       flOldProtect;
-
-	if (!VirtualProtect
-		((LPVOID) startaddr, length, PAGE_READWRITE, &flOldProtect))
-		Sys_Error ("Protection change failed\n");
-}
 
 
 /*
@@ -741,3 +723,4 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	/* return success of application */
 	return TRUE;
 }
+
