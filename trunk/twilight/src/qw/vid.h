@@ -41,7 +41,6 @@ typedef struct vrect_s {
 
 typedef struct {
 	pixel_t    *colormap;				// 256 * VID_GRADES size
-	int         fullbright;				// index of first fullbright color
 	unsigned    width;
 	unsigned    height;
 	float       aspect;					// width / height -- < 0 is taller than
@@ -49,6 +48,8 @@ typedef struct {
 	int         recalc_refdef;			// if true, recalc vid-based stuff
 	unsigned    conwidth;
 	unsigned    conheight;
+
+	int			bpp;
 } viddef_t;
 
 extern viddef_t vid;					// global video state

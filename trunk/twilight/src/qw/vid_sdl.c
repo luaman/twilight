@@ -79,7 +79,7 @@ static float old_mouse_x, old_mouse_y;
 static int  old_windowed_mouse;
 static int	use_mouse = false;
 
-static int  scr_width = 640, scr_height = 480;
+static int  scr_width = 640, scr_height = 480, scr_bpp = 15;
 
 /*-----------------------------------------------------------------------*/
 
@@ -163,8 +163,6 @@ VID_SetPalette (unsigned char *palette)
 	int         k;
 	unsigned short i;
 	unsigned   *table;
-	FILE       *f;
-	char        s[MAX_OSPATH];
 	float       dist, bestdist;
 	static qboolean palflag = false;
 
@@ -188,37 +186,24 @@ VID_SetPalette (unsigned char *palette)
 		return;
 	palflag = true;
 
-	COM_FOpenFile ("glquake/15to8.pal", &f);
-	if (f) {
-		fread (d_15to8table, 1 << 15, 1, f);
-		fclose (f);
-	} else {
-		for (i = 0; i < (1 << 15); i++) {
-			/* Maps 000000000000000 000000000011111 = Red = 0x1F
-			   000001111100000 = Blue = 0x03E0 111110000000000 = Grn = 0x7C00 */
-			r = ((i & 0x1F) << 3) + 4;
-			g = ((i & 0x03E0) >> 2) + 4;
-			b = ((i & 0x7C00) >> 7) + 4;
-			pal = (unsigned char *) d_8to24table;
-			for (v = 0, k = 0, bestdist = 10000.0; v < 256; v++, pal += 4) {
-				r1 = (int) r - (int) pal[0];
-				g1 = (int) g - (int) pal[1];
-				b1 = (int) b - (int) pal[2];
-				dist = Q_sqrt (((r1 * r1) + (g1 * g1) + (b1 * b1)));
-				if (dist < bestdist) {
-					k = v;
-					bestdist = dist;
-				}
+	for (i = 0; i < (1 << 15); i++) {
+	/* Maps 000000000000000 000000000011111 = Red = 0x1F
+		000001111100000 = Blue = 0x03E0 111110000000000 = Grn = 0x7C00 */
+		r = ((i & 0x1F) << 3) + 4;
+		g = ((i & 0x03E0) >> 2) + 4;
+		b = ((i & 0x7C00) >> 7) + 4;
+		pal = (unsigned char *) d_8to24table;
+		for (v = 0, k = 0, bestdist = 10000.0; v < 256; v++, pal += 4) {
+			r1 = (int) r - (int) pal[0];
+			g1 = (int) g - (int) pal[1];
+			b1 = (int) b - (int) pal[2];
+			dist = Q_sqrt (((r1 * r1) + (g1 * g1) + (b1 * b1)));
+			if (dist < bestdist) {
+				k = v;
+				bestdist = dist;
 			}
-			d_15to8table[i] = k;
 		}
-		snprintf (s, sizeof (s), "%s/glquake", com_gamedir);
-		Sys_mkdir (s);
-		snprintf (s, sizeof (s), "%s/glquake/15to8.pal", com_gamedir);
-		if ((f = fopen (s, "wb")) != NULL) {
-			fwrite (d_15to8table, 1 << 15, 1, f);
-			fclose (f);
-		}
+		d_15to8table[i] = k;
 	}
 }
 
@@ -263,6 +248,9 @@ GL_Init
 void
 GL_Init (void)
 {
+	Con_Printf ("Forcing glFinish\n");
+	qglFinish();
+
 	gl_vendor = qglGetString (GL_VENDOR);
 	Con_Printf ("GL_VENDOR: %s\n", gl_vendor);
 	gl_renderer = qglGetString (GL_RENDERER);
@@ -273,16 +261,11 @@ GL_Init (void)
 	gl_extensions = qglGetString (GL_EXTENSIONS);
 	Con_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
 
-//  Con_Printf ("%s %s\n", gl_renderer, gl_version);
-
 	CheckMultiTextureExtensions ();
 
 	qglClearColor (1, 0, 0, 0);
 	qglCullFace (GL_FRONT);
 	qglEnable (GL_TEXTURE_2D);
-
-//	qglEnable (GL_ALPHA_TEST);
-//	qglAlphaFunc (GL_GREATER, 0.666);
 
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 
@@ -294,9 +277,6 @@ GL_Init (void)
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-	Con_Printf ("Forcing glFinish\n");
-	qglFinish();
 }
 
 /*
@@ -340,11 +320,8 @@ Check_Gamma (unsigned char *pal)
 	for (i = 0; i < 768; i++) {
 		f = Q_pow ((pal[i] + 1) / 256.0, vid_gamma);
 		inf = f * 255 + 0.5;
-		if (inf < 0)
-			inf = 0;
-		if (inf > 255)
-			inf = 255;
-		palette[i] = inf;
+		inf = bound (0, inf, 255);
+		palette[i] = (byte)inf;
 	}
 
 	memcpy (pal, palette, sizeof (palette));
@@ -366,9 +343,9 @@ VID_Init (unsigned char *palette)
 	int         i;
 	char        gldir[MAX_OSPATH];
 	int         flags = SDL_OPENGL;
+	const		SDL_VideoInfo *info = NULL;
 
 	vid.colormap = host_colormap;
-	vid.fullbright = 256 - LittleLong (*((int *) vid.colormap + 2048));
 
 // interpret command-line params
 
@@ -413,29 +390,41 @@ VID_Init (unsigned char *palette)
 		vid.conwidth = scr_width;
 
 	if (SDL_Init (SDL_INIT_VIDEO) != 0) {
-		fprintf (stderr, "Error 1: %s\n", SDL_GetError ());
-		exit (1);
+		Sys_Error ("Could not init SDL video: %s\n", SDL_GetError ());
 	}
-	if (!GLF_Init())
-		Sys_Error ("Could not init the libGL!\n");
 
-	// We want at least 4444 (16 bit RGBA)
+    info = SDL_GetVideoInfo();
+	
+	if (!info) {
+		Sys_Error ("Could not get video information!\n");
+    }
+
+	if ((i = COM_CheckParm ("-bpp")) != 0)
+		scr_bpp = Q_atoi (com_argv[i + 1]);
+	else
+		scr_bpp = info->vfmt->BitsPerPixel;
+
+	if (!GLF_Init()) {
+		Sys_Error ("Could not init the libGL!\n");
+	}
+
+	// We want at least 444 (16 bit RGB)
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 4);
+	if (scr_bpp == 32) SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 4);
 
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
 
 	if (SDL_SetVideoMode (scr_width, scr_height, 16, flags) == NULL) {
-		fprintf (stderr, "Error: %s\n", SDL_GetError ());
-		exit (1);
+		Sys_Error ("Could not init video mode: %s", SDL_GetError ());
 	}
+
 	SDL_WM_SetCaption ("Twilight QWCL", "twilight");
 
 	vid.height = scr_height;
 	vid.width = scr_width;
-
 	vid.aspect = ((float) vid.height / (float) vid.width) * (4.0 / 3.0);
 
 	InitSig ();							// trap evil signals
@@ -777,10 +766,7 @@ IN_Move (usercmd_t *cmd)
 
 	if ((in_mlook.state & 1) && !(in_strafe.state & 1)) {
 		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
-		if (cl.viewangles[PITCH] > 80)
-			cl.viewangles[PITCH] = 80;
-		if (cl.viewangles[PITCH] < -70)
-			cl.viewangles[PITCH] = -70;
+		cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
 	} else {
 		if (in_strafe.state & 1)
 			cmd->upmove -= m_forward->value * mouse_y;

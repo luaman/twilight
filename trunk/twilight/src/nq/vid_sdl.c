@@ -74,7 +74,7 @@ static float old_mouse_x, old_mouse_y;
 static int  old_windowed_mouse;
 static int  use_mouse = false;
 
-static int  scr_width = 640, scr_height = 480;
+static int  scr_width = 640, scr_height = 480, scr_bpp = 15;
 
 /*-----------------------------------------------------------------------*/
 
@@ -115,13 +115,13 @@ D_EndDirectRect (int x, int y, int width, int height)
 {
 }
 
-
 void
 VID_Shutdown (void)
 {
 	SDL_Quit ();
 }
 
+#ifndef WIN32
 void
 signal_handler (int sig)
 {
@@ -129,6 +129,7 @@ signal_handler (int sig)
 	Sys_Quit ();
 	exit (0);
 }
+#endif
 
 void
 InitSig (void)
@@ -246,6 +247,9 @@ GL_Init
 void
 GL_Init (void)
 {
+	Con_Printf ("Forcing glFinish\n");
+	qglFinish();
+
 	gl_vendor = qglGetString (GL_VENDOR);
 	Con_Printf ("GL_VENDOR: %s\n", gl_vendor);
 	gl_renderer = qglGetString (GL_RENDERER);
@@ -256,16 +260,11 @@ GL_Init (void)
 	gl_extensions = qglGetString (GL_EXTENSIONS);
 	Con_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
 
-//  Con_Printf ("%s %s\n", gl_renderer, gl_version);
-
 	CheckMultiTextureExtensions ();
 
 	qglClearColor (1, 0, 0, 0);
 	qglCullFace (GL_FRONT);
 	qglEnable (GL_TEXTURE_2D);
-
-//	qglEnable (GL_ALPHA_TEST);
-//	qglAlphaFunc (GL_GREATER, 0.666);
 
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 
@@ -277,9 +276,6 @@ GL_Init (void)
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-	Con_Printf ("Forcing glFinish\n");
-	qglFinish();
 }
 
 /*
@@ -323,11 +319,8 @@ Check_Gamma (unsigned char *pal)
 	for (i = 0; i < 768; i++) {
 		f = Q_pow ((pal[i] + 1) / 256.0, vid_gamma);
 		inf = f * 255 + 0.5;
-		if (inf < 0)
-			inf = 0;
-		if (inf > 255)
-			inf = 255;
-		palette[i] = inf;
+		inf = bound (0, inf, 255);
+		palette[i] = (byte)inf;
 	}
 
 	memcpy (pal, palette, sizeof (palette));
@@ -349,11 +342,9 @@ VID_Init (unsigned char *palette)
 	int         i;
 	char        gldir[MAX_OSPATH];
 	int         flags = SDL_OPENGL;
+	const		SDL_VideoInfo *info = NULL;
 
-	vid.maxwarpwidth = WARP_WIDTH;
-	vid.maxwarpheight = WARP_HEIGHT;
 	vid.colormap = host_colormap;
-	vid.fullbright = 256 - LittleLong (*((int *) vid.colormap + 2048));
 
 	// interpret command-line params
 
@@ -398,32 +389,43 @@ VID_Init (unsigned char *palette)
 		vid.conwidth = scr_width;
 
 	if (SDL_Init (SDL_INIT_VIDEO) != 0) {
-		fprintf (stderr, "Error: %s\n", SDL_GetError ());
-		exit (1);
+		Sys_Error ("Could not init SDL video: %s\n", SDL_GetError ());
 	}
-	if (!GLF_Init())
-		Sys_Error ("Could not init the libGL!\n");
 
-	// We want at least 4444 (16 bit RGBA)
+    info = SDL_GetVideoInfo();
+	
+	if (!info) {
+		Sys_Error ("Could not get video information!\n");
+    }
+
+	if ((i = COM_CheckParm ("-bpp")) != 0)
+		scr_bpp = Q_atoi (com_argv[i + 1]);
+	else
+		scr_bpp = info->vfmt->BitsPerPixel;
+
+	if (!GLF_Init()) {
+		Sys_Error ("Could not init the libGL!\n");
+	}
+
+	// We want at least 444 (16 bit RGB)
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 4);
-//	SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 4);
+	if (scr_bpp == 32) SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 4);
 
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
-
-	if (SDL_SetVideoMode (scr_width, scr_height, 16, flags) == NULL) {
-		fprintf (stderr, "Error: %s\n", SDL_GetError ());
-		exit (1);
+	
+	if (SDL_SetVideoMode (scr_width, scr_height, scr_bpp, flags) == NULL) {
+		Sys_Error ("Could not init video mode: %s", SDL_GetError ());
 	}
+
 	SDL_WM_SetCaption ("Twilight NetQuake", "twilight");
 
 	vid.height = scr_height;
 	vid.width = scr_width;
-
+	vid.bpp = scr_bpp;
 	vid.aspect = ((float) vid.height / (float) vid.width) * (4.0 / 3.0);
-	vid.numpages = 2;
 
 	InitSig ();							// trap evil signals
 
@@ -756,10 +758,7 @@ IN_Move (usercmd_t *cmd)
 
 	if ((in_mlook.state & 1) && !(in_strafe.state & 1)) {
 		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
-		if (cl.viewangles[PITCH] > 80)
-			cl.viewangles[PITCH] = 80;
-		if (cl.viewangles[PITCH] < -70)
-			cl.viewangles[PITCH] = -70;
+		cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
 	} else {
 		if ((in_strafe.state & 1) && noclip_anglehack)
 			cmd->upmove -= m_forward->value * mouse_y;
