@@ -72,7 +72,7 @@ typedef struct memzone_s
 
 void *_Zone_Alloc(memzone_t *zone, const size_t size, const char *filename, const int fileline);
 void *_Zone_AllocName(const char *name, const size_t size, const char *filename, const int fileline);
-void _Zone_Free(void *data, const char *filename, int fileline);
+void _Zone_Free(void *data, const char *filename, const int fileline);
 memzone_t *_Zone_AllocZone(const char *name, const char *filename, const int fileline);
 void _Zone_FreeZone(memzone_t **zone, const char *filename, const int fileline);
 void _Zone_EmptyZone(memzone_t *zone, const char *filename, const int fileline);
