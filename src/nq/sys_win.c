@@ -83,7 +83,7 @@ FILE IO
 ===============================================================================
 */
 
-#define	MAX_HANDLES		10
+#define	MAX_HANDLES		100
 FILE       *sys_handles[MAX_HANDLES];
 
 int
