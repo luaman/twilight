@@ -111,7 +111,7 @@ int		gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
 int		gl_filter_max = GL_LINEAR;
 
 
-int         texels;
+int		texels;
 
 typedef struct {
 	int         texnum;
@@ -125,8 +125,8 @@ gltexture_t gltextures[MAX_GLTEXTURES];
 int         numgltextures;
 
 
-/* ============================================================================= */
-/*  Support Routines */
+/* ========================================================================= */
+/* Support Routines */
 
 typedef struct cachepic_s {
 	char	name[MAX_QPATH];
@@ -254,8 +254,10 @@ Set_TextureMode_f (struct cvar_s *var)
 	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
 		if (glt->mipmap) {
 			qglBindTexture (GL_TEXTURE_2D, glt->texnum);
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+					gl_filter_min);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+					gl_filter_max);
 		}
 	}
 }
@@ -271,12 +273,15 @@ Draw_Init_Cvars (void)
 	gl_max_size = Cvar_Get ("gl_max_size", "1024", CVAR_NONE, NULL);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
 	gl_constretch = Cvar_Get ("gl_constretch", "1", CVAR_ARCHIVE, NULL);
-	gl_texturemode = Cvar_Get ("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE, Set_TextureMode_f);
-	cl_verstring = Cvar_Get ("cl_verstring", "Project Twilight v" VERSION " NQ", CVAR_NONE, NULL);
+	gl_texturemode = Cvar_Get ("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST",
+			CVAR_ARCHIVE, Set_TextureMode_f);
+	cl_verstring = Cvar_Get ("cl_verstring",
+			"Project Twilight v" VERSION " NQ", CVAR_NONE, NULL);
 	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
 
 	/* 3dfx can only handle 256 wide textures */
-	if (!strncasecmp (gl_renderer, "3dfx", 4) || !strncasecmp (gl_renderer, "Mesa", 4))
+	if (!strncasecmp (gl_renderer, "3dfx", 4) ||
+			!strncasecmp (gl_renderer, "Mesa", 4))
 		Cvar_Set (gl_max_size, "256");
 }
 
@@ -300,10 +305,12 @@ Draw_Init (void)
 			draw_chars[i] = 255;		/* proper transparent color */
 
 	/* now turn them into textures */
-	char_texture = GL_LoadTexture ("charset", 128, 128, draw_chars, false, true);
+	char_texture = GL_LoadTexture ("charset", 128, 128, draw_chars, false,
+			true);
 
 	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
-	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata, false, true);
+	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata,
+			false, true);
 
 	/* save a texture slot for translated picture */
 	translate_texture = texture_extension_number++;
@@ -373,7 +380,7 @@ Draw_String_Len (int x, int y, char *str, int len)
 	int		num, i, vnum;
 
 	if (y <= -8)
-		return;						/* totally off screen */
+		return;							/* totally off screen */
 	if (!str || !str[0])
 		return;
 
@@ -382,8 +389,10 @@ Draw_String_Len (int x, int y, char *str, int len)
 	qglEnable (GL_BLEND);
 	vnum = 0;
 
-	for (i = 0; *str && (i < len); i++, x += 8) {
-		if ((num = *str++) != 32) {	/* Skip drawing spaces. */
+	for (i = 0; *str && (i < len); i++, x += 8)
+	{
+		if ((num = *str++) != 32)		/* Skip drawing spaces */
+		{
 			frow = (float) (num >> 4) * size;
 			fcol = (float) (num & 15) * size;
 			VectorSet2 (tc_array[vnum + 0], fcol, frow);
@@ -402,7 +411,8 @@ Draw_String_Len (int x, int y, char *str, int len)
 			}
 		}
 	}
-	if (vnum) {
+	if (vnum)
+	{
 		qglDrawArrays (GL_QUADS, 0, vnum);
 		vnum = 0;
 	}
@@ -492,14 +502,16 @@ Draw_Crosshair (void)
 
 	x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
 	y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
-	if ((vid.conheight != vid.height) || (vid.conwidth != vid.width)) {
+	if ((vid.conheight != vid.height) || (vid.conwidth != vid.width))
+	{
 		dx = (double) x / (double) vid.width;
 		dy = (double) y / (double) vid.height;
 		x = dx * vid.conwidth;
 		y = dy * vid.conheight;
 	}
 
-	switch ((int) crosshair->value) {
+	switch ((int) crosshair->value)
+	{
 		case 1:
 			Draw_Character (x, y, '+');
 			break;
@@ -551,7 +563,7 @@ Draw_Pic
 void
 Draw_Pic (int x, int y, qpic_t *pic)
 {
-	glpic_t	*gl;
+	glpic_t	   *gl;
 
 	gl = (glpic_t *) pic->data;
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
@@ -572,11 +584,12 @@ Draw_Pic (int x, int y, qpic_t *pic)
 
 
 void
-Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width, int height)
+Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
+		int height)
 {
-	glpic_t	*gl;
-	float	newsl, newtl, newsh, newth;
-	float	oldglwidth, oldglheight;
+	glpic_t	   *gl;
+	float		newsl, newtl, newsh, newth;
+	float		oldglwidth, oldglheight;
 
 	gl = (glpic_t *) pic->data;
 
@@ -682,7 +695,8 @@ Draw_ConsoleBackground (int lines)
 	else
 		ofs = (float) ((vid.conheight - lines) / vid.conheight);
 
-	if (alpha != 1.0f) {
+	if (alpha != 1.0f)
+	{
 		qglColor4f (1.0f, 1.0f, 1.0f, alpha);
 		qglEnable (GL_BLEND);
 	} else
@@ -700,7 +714,8 @@ Draw_ConsoleBackground (int lines)
 	qglDrawArrays (GL_QUADS, 0, 4);
 
 	/* hack the version number directly into the pic */
-	Draw_Alt_String (vid.conwidth - strlen (cl_verstring->string) * 8 - 14, lines - 14, cl_verstring->string);
+	Draw_Alt_String (vid.conwidth - strlen (cl_verstring->string) * 8 - 14,
+			lines - 14, cl_verstring->string);
 
 	if (alpha != 1.0f)
 		qglDisable (GL_BLEND);
@@ -745,7 +760,7 @@ Draw_Fill (int x, int y, int w, int h, int c)
 {
 	qglDisable (GL_TEXTURE_2D);
 
-	qglColor4fv(d_8tofloattable[c]);
+	qglColor4fv (d_8tofloattable[c]);
 
 	VectorSet2 (v_array[0], x, y);
 	VectorSet2 (v_array[1], x + w, y);
@@ -757,7 +772,7 @@ Draw_Fill (int x, int y, int w, int h, int c)
 	qglEnable (GL_TEXTURE_2D);
 }
 
-/* ============================================================================= */
+/* ========================================================================= */
 
 /*
 ================
@@ -783,7 +798,7 @@ Draw_FadeScreen (void)
 	qglDisable (GL_BLEND);
 }
 
-/* ============================================================================= */
+/* ========================================================================= */
 
 /*
 ================
@@ -829,7 +844,7 @@ GL_Set2D (void)
 	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
-/* ==================================================================== */
+/* ========================================================================= */
 
 /*
 ================
@@ -842,13 +857,16 @@ R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth, int outwidth)
 	int		j, xi, oldx = 0, f, fstep, endx;
 	fstep = (int) (inwidth*65536.0f/outwidth);
 	endx = (inwidth-1);
-	for (j = 0,f = 0;j < outwidth;j++, f += fstep) {
+	for (j = 0,f = 0;j < outwidth;j++, f += fstep)
+	{
 		xi = (int) f >> 16;
-		if (xi != oldx) {
+		if (xi != oldx)
+		{
 			in += (xi - oldx) * 4;
 			oldx = xi;
 		}
-		if (xi < endx) {
+		if (xi < endx)
+		{
 			int lerp = f & 0xFFFF;
 			*out++ = (Uint8) ((((in[4] - in[0]) * lerp) >> 16) + in[0]);
 			*out++ = (Uint8) ((((in[5] - in[1]) * lerp) >> 16) + in[1]);
@@ -871,9 +889,11 @@ R_ResampleTexture
 ================
 */
 void
-R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata, int outwidth, int outheight)
+R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
+		int outwidth, int outheight)
 {
-	if (r_lerpimages->value) {
+	if (r_lerpimages->value)
+	{
 		int		i, j, yi, oldy, f, fstep, endy = (inheight-1);
 		Uint8	*inrow, *out, *row1, *row2;
 		out = outdata;
@@ -886,11 +906,14 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata, int o
 		R_ResampleTextureLerpLine (inrow, row1, inwidth, outwidth);
 		R_ResampleTextureLerpLine (inrow + inwidth*4, row2, inwidth,
 				outwidth);
-		for (i = 0, f = 0;i < outheight;i++,f += fstep) {
+		for (i = 0, f = 0;i < outheight;i++,f += fstep)
+		{
 			yi = f >> 16;
-			if (yi < endy) {
+			if (yi < endy)
+			{
 				int lerp = f & 0xFFFF;
-				if (yi != oldy) {
+				if (yi != oldy)
+				{
 					inrow = (Uint8 *)indata + inwidth*4*yi;
 					if (yi == oldy+1)
 						memcpy(row1, row2, outwidth*4);
@@ -902,59 +925,92 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata, int o
 					oldy = yi;
 				}
 				j = outwidth - 4;
-				while(j >= 0) {
-					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16) + row1[ 0]);
-					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16) + row1[ 1]);
-					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16) + row1[ 2]);
-					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16) + row1[ 3]);
-					out[ 4] = (Uint8) ((((row2[ 4] - row1[ 4]) * lerp) >> 16) + row1[ 4]);
-					out[ 5] = (Uint8) ((((row2[ 5] - row1[ 5]) * lerp) >> 16) + row1[ 5]);
-					out[ 6] = (Uint8) ((((row2[ 6] - row1[ 6]) * lerp) >> 16) + row1[ 6]);
-					out[ 7] = (Uint8) ((((row2[ 7] - row1[ 7]) * lerp) >> 16) + row1[ 7]);
-					out[ 8] = (Uint8) ((((row2[ 8] - row1[ 8]) * lerp) >> 16) + row1[ 8]);
-					out[ 9] = (Uint8) ((((row2[ 9] - row1[ 9]) * lerp) >> 16) + row1[ 9]);
-					out[10] = (Uint8) ((((row2[10] - row1[10]) * lerp) >> 16) + row1[10]);
-					out[11] = (Uint8) ((((row2[11] - row1[11]) * lerp) >> 16) + row1[11]);
-					out[12] = (Uint8) ((((row2[12] - row1[12]) * lerp) >> 16) + row1[12]);
-					out[13] = (Uint8) ((((row2[13] - row1[13]) * lerp) >> 16) + row1[13]);
-					out[14] = (Uint8) ((((row2[14] - row1[14]) * lerp) >> 16) + row1[14]);
-					out[15] = (Uint8) ((((row2[15] - row1[15]) * lerp) >> 16) + row1[15]);
+				while(j >= 0)
+				{
+					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16)
+							+ row1[ 0]);
+					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16)
+							+ row1[ 1]);
+					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16)
+							+ row1[ 2]);
+					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16)
+							+ row1[ 3]);
+					out[ 4] = (Uint8) ((((row2[ 4] - row1[ 4]) * lerp) >> 16)
+							+ row1[ 4]);
+					out[ 5] = (Uint8) ((((row2[ 5] - row1[ 5]) * lerp) >> 16)
+							+ row1[ 5]);
+					out[ 6] = (Uint8) ((((row2[ 6] - row1[ 6]) * lerp) >> 16)
+							+ row1[ 6]);
+					out[ 7] = (Uint8) ((((row2[ 7] - row1[ 7]) * lerp) >> 16)
+							+ row1[ 7]);
+					out[ 8] = (Uint8) ((((row2[ 8] - row1[ 8]) * lerp) >> 16)
+							+ row1[ 8]);
+					out[ 9] = (Uint8) ((((row2[ 9] - row1[ 9]) * lerp) >> 16)
+							+ row1[ 9]);
+					out[10] = (Uint8) ((((row2[10] - row1[10]) * lerp) >> 16)
+							+ row1[10]);
+					out[11] = (Uint8) ((((row2[11] - row1[11]) * lerp) >> 16)
+							+ row1[11]);
+					out[12] = (Uint8) ((((row2[12] - row1[12]) * lerp) >> 16)
+							+ row1[12]);
+					out[13] = (Uint8) ((((row2[13] - row1[13]) * lerp) >> 16)
+							+ row1[13]);
+					out[14] = (Uint8) ((((row2[14] - row1[14]) * lerp) >> 16)
+							+ row1[14]);
+					out[15] = (Uint8) ((((row2[15] - row1[15]) * lerp) >> 16)
+							+ row1[15]);
 					out += 16;
 					row1 += 16;
 					row2 += 16;
 					j -= 4;
 				}
-				if (j & 2) {
-					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16) + row1[ 0]);
-					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16) + row1[ 1]);
-					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16) + row1[ 2]);
-					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16) + row1[ 3]);
-					out[ 4] = (Uint8) ((((row2[ 4] - row1[ 4]) * lerp) >> 16) + row1[ 4]);
-					out[ 5] = (Uint8) ((((row2[ 5] - row1[ 5]) * lerp) >> 16) + row1[ 5]);
-					out[ 6] = (Uint8) ((((row2[ 6] - row1[ 6]) * lerp) >> 16) + row1[ 6]);
-					out[ 7] = (Uint8) ((((row2[ 7] - row1[ 7]) * lerp) >> 16) + row1[ 7]);
-					out  += 8;
+				if (j & 2)
+				{
+					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16)
+							+ row1[ 0]);
+					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16)
+							+ row1[ 1]);
+					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16)
+							+ row1[ 2]);
+					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16)
+							+ row1[ 3]);
+					out[ 4] = (Uint8) ((((row2[ 4] - row1[ 4]) * lerp) >> 16)
+							+ row1[ 4]);
+					out[ 5] = (Uint8) ((((row2[ 5] - row1[ 5]) * lerp) >> 16)
+							+ row1[ 5]);
+					out[ 6] = (Uint8) ((((row2[ 6] - row1[ 6]) * lerp) >> 16)
+							+ row1[ 6]);
+					out[ 7] = (Uint8) ((((row2[ 7] - row1[ 7]) * lerp) >> 16)
+							+ row1[ 7]);
+					out += 8;
 					row1 += 8;
 					row2 += 8;
 				}
-				if (j & 1) {
-					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16) + row1[ 0]);
-					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16) + row1[ 1]);
-					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16) + row1[ 2]);
-					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16) + row1[ 3]);
-					out  += 4;
+				if (j & 1)
+				{
+					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16)
+							+ row1[ 0]);
+					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16)
+							+ row1[ 1]);
+					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16)
+							+ row1[ 2]);
+					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16)
+							+ row1[ 3]);
+					out += 4;
 					row1 += 4;
 					row2 += 4;
 				}
 				row1 -= outwidth*4;
 				row2 -= outwidth*4;
 			} else {
-				if (yi != oldy) {
+				if (yi != oldy)
+				{
 					inrow = (Uint8 *)indata + inwidth * 4 * yi;
 					if (yi == oldy+1)
 						memcpy(row1, row2, outwidth * 4);
 					else
-						R_ResampleTextureLerpLine (inrow, row1, inwidth, outwidth);
+						R_ResampleTextureLerpLine (inrow, row1, inwidth,
+								outwidth);
 					oldy = yi;
 				}
 				memcpy(out, row1, outwidth * 4);
@@ -970,11 +1026,13 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata, int o
 		out = outdata;
 
 		fracstep = inwidth*0x10000/outwidth;
-		for (i = 0;i < outheight;i++) {
-			inrow = (int *)indata + inwidth * ( i * inheight / outheight);
+		for (i = 0;i < outheight;i++)
+		{
+			inrow = (int *)indata + inwidth * (i * inheight / outheight);
 			frac = fracstep >> 1;
 			j = outwidth - 4;
-			while (j >= 0) {
+			while (j >= 0)
+			{
 				out[0] = inrow[frac >> 16];frac += fracstep;
 				out[1] = inrow[frac >> 16];frac += fracstep;
 				out[2] = inrow[frac >> 16];frac += fracstep;
@@ -982,12 +1040,14 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata, int o
 				out += 4;
 				j -= 4;
 			}
-			if (j & 2) {
+			if (j & 2)
+			{
 				out[0] = inrow[frac >> 16];frac += fracstep;
 				out[1] = inrow[frac >> 16];frac += fracstep;
 				out += 2;
 			}
-			if (j & 1) {
+			if (j & 1)
+			{
 				out[0] = inrow[frac >> 16];frac += fracstep;
 				out += 1;
 			}
@@ -1012,8 +1072,10 @@ GL_MipMap (Uint8 *in, int width, int height)
 	width <<= 2;
 	height >>= 1;
 	out = in;
-	for (i = 0; i < height; i++, in += width) {
-		for (j = 0; j < width; j += 8, out += 4, in += 8) {
+	for (i = 0; i < height; i++, in += width)
+	{
+		for (j = 0; j < width; j += 8, out += 4, in += 8)
+		{
 			out[0] = (in[0] + in[4] + in[width + 0] + in[width + 4]) >> 2;
 			out[1] = (in[1] + in[5] + in[width + 1] + in[width + 5]) >> 2;
 			out[2] = (in[2] + in[6] + in[width + 2] + in[width + 6]) >> 2;
@@ -1033,7 +1095,7 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 			 qboolean alpha)
 {
 	int				samples;
-	static Uint32	scaled[1024 * 512];	/* [512 * 256]; */
+	static Uint32	scaled[1024 * 512];	/* [512*256]; */
 	Uint32			scaled_width, scaled_height;
 
 	for (scaled_width = 1; scaled_width < width; scaled_width <<= 1);
@@ -1054,37 +1116,44 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 
 	texels += scaled_width * scaled_height;
 
-	if (scaled_width == width && scaled_height == height) {
-		if (!mipmap) {
-			qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	if (scaled_width == width && scaled_height == height)
+	{
+		if (!mipmap)
+		{
+			qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width,
+					scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+					gl_filter_max);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+					gl_filter_max);
 		}
 		memcpy (scaled, data, width * height * 4);
 	} else
-		R_ResampleTexture (data, width, height, scaled, scaled_width, scaled_height);
+		R_ResampleTexture (data, width, height, scaled, scaled_width,
+				scaled_height);
 
 	qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
 				  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-	if (mipmap) {
+	if (mipmap)
+	{
 		int miplevel = 0;
 
-		while (scaled_width > 1 || scaled_height > 1) {
+		while (scaled_width > 1 || scaled_height > 1)
+		{
 			GL_MipMap ((Uint8 *) scaled, scaled_width, scaled_height);
 			scaled_width >>= 1;
 			scaled_height >>= 1;
-			if (scaled_width < 1)
-				scaled_width = 1;
-			if (scaled_height < 1)
-				scaled_height = 1;
+			scaled_width = min (scaled_width, 1);
+			scaled_height = min (scaled_height, 1);
 			miplevel++;
 			qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
 						  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 		}
 	}
 
-	if (mipmap) {
+	if (mipmap)
+	{
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 	} else {
@@ -1100,7 +1169,8 @@ GL_Upload8
 ===============
 */
 void
-GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsigned *ttable)
+GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha,
+		unsigned *ttable)
 {
 	static unsigned trans[640 * 480];	/* FIXME, temporary */
 	int         i, s = width * height;
@@ -1108,18 +1178,26 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsi
 	int         p;
 	unsigned	*table = ttable ? ttable : d_8to32table;
 
-	if (alpha == 2) {
-		/* this is a fullbright mask, so make all non-fullbright colors transparent */
-		for (i = 0; i < s; i++) {
+	if (alpha == 2)
+	{
+		/*
+		 * this is a fullbright mask, so make all non-fullbright
+		 * colors transparent
+		 */
+		for (i = 0; i < s; i++)
+		{
 			p = *data++;
 			if (p < 224)
 				trans[i] = 0;			/* transparent */
 			else
 				trans[i] = table[p];	/* fullbright */
 		}
-	} else if (alpha) {
+	}
+	else if (alpha)
+	{
 		noalpha = true;
-		for (i = 0; i < s; i++) {
+		for (i = 0; i < s; i++)
+		{
 			p = *data++;
 			if (p == 255)
 				noalpha = false;
@@ -1131,7 +1209,8 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsi
 	} else {
 		if (s & 3)
 			Sys_Error ("GL_Upload8: s&3");
-		for (i = 0; i < s; i += 4) {
+		for (i = 0; i < s; i += 4)
+		{
 			trans[i] = table[data[i]];
 			trans[i + 1] = table[data[i + 1]];
 			trans[i + 2] = table[data[i + 2]];
@@ -1148,7 +1227,8 @@ GL_LoadTexture
 ================
 */
 int
-GL_LoadTexture (char *identifier, int width, int height, Uint8 *data, qboolean mipmap, int alpha)
+GL_LoadTexture (char *identifier, int width, int height, Uint8 *data,
+		qboolean mipmap, int alpha)
 {
 	int         i;
 	gltexture_t *glt;
@@ -1158,11 +1238,14 @@ GL_LoadTexture (char *identifier, int width, int height, Uint8 *data, qboolean m
 		return 0;
 
 	/* see if the texture is already present */
-	if (identifier[0]) {
+	if (identifier[0])
+	{
 		crc = CRC_Block (data, width*height);
 
-		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
-			if (!strcmp (identifier, glt->identifier)) {
+		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++)
+		{
+			if (!strcmp (identifier, glt->identifier))
+			{
 				if (width == glt->width && height == glt->height
 						&& crc == glt->crc)
 					return gltextures[i].texnum;
@@ -1200,22 +1283,5 @@ int
 GL_LoadPicTexture (qpic_t *pic)
 {
 	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true);
-}
-
-/****************************************/
-
-static GLenum oldtarget = 0;
-
-void
-GL_SelectTexture (GLenum target)
-{
-	if (!gl_mtexable)
-		return;
-	qglActiveTextureARB (GL_TEXTURE0_ARB + target);
-	if (target == oldtarget)
-		return;
-	cnttextures[oldtarget] = currenttexture;
-	currenttexture = cnttextures[target];
-	oldtarget = target;
 }
 

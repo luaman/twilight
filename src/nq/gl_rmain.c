@@ -864,7 +864,6 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolea
 	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend, mtex);
 }
 
-void        GL_SelectTexture (GLenum target);
 
 /*
 =================
@@ -1081,10 +1080,10 @@ R_DrawAliasModel (entity_t *e)
 	//            else on the fb_texture, nothing happened if gl_mtexable was
 	//            off)...  don't ask how long it took to find that bug.
 	if (fb_texture && gl_mtexable) {
-		GL_SelectTexture (0);
+		qglActiveTextureARB (GL_TEXTURE0_ARB);
 		qglBindTexture (GL_TEXTURE_2D, texture);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		GL_SelectTexture (1);
+		qglActiveTextureARB (GL_TEXTURE1_ARB);
 		qglEnable (GL_TEXTURE_2D);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
@@ -1105,7 +1104,7 @@ R_DrawAliasModel (entity_t *e)
 
 	if (fb_texture && gl_mtexable) {
 		qglDisable (GL_TEXTURE_2D);
-		GL_SelectTexture (0);
+		qglActiveTextureARB (GL_TEXTURE0_ARB);
 	}
 
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
