@@ -697,6 +697,20 @@ SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
 	return false;
 }
 
+float
+TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal)
+{
+	trace_t trace;
+
+	memset (&trace, 0, sizeof (trace));
+	VectorCopy (end, trace.endpos);
+	SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, start, end, &trace);
+
+	VectorCopy (trace.endpos, impact);
+	VectorCopy (trace.plane.normal, normal);
+	return trace.fraction;
+}
+
 
 /*
 ==================

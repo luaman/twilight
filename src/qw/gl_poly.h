@@ -74,10 +74,10 @@ extern int currenttransvert;
 	{\
 		transvert[currenttransvert].s = (vs);\
 		transvert[currenttransvert].t = (vt);\
-		transvert[currenttransvert].r = (byte) (bound(0, (int) (vr), 255));\
-		transvert[currenttransvert].g = (byte) (bound(0, (int) (vg), 255));\
-		transvert[currenttransvert].b = (byte) (bound(0, (int) (vb), 255));\
-		transvert[currenttransvert].a = (byte) (bound(0, (int) (va), 255));\
+		transvert[currenttransvert].r = (Uint8) (bound(0, (int) (vr), 255));\
+		transvert[currenttransvert].g = (Uint8) (bound(0, (int) (vg), 255));\
+		transvert[currenttransvert].b = (Uint8) (bound(0, (int) (vb), 255));\
+		transvert[currenttransvert].a = (Uint8) (bound(0, (int) (va), 255));\
 		transvert[currenttransvert].v[0] = (vx);\
 		transvert[currenttransvert].v[1] = (vy);\
 		transvert[currenttransvert].v[2] = (vz);\

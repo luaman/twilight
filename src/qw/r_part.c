@@ -39,6 +39,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
+#include "client.h"
 
 #define MAX_PARTICLES			2048	// default max # of particles
 #define ABSOLUTE_MIN_PARTICLES	2		// no fewer than this no matter what
@@ -326,7 +327,7 @@ R_ParticleExplosion (vec3_t org)
 	int			i, j, type;
 	vec3_t		porg, vel;
 
-	for (i = 0; i < 1024; i++) {
+	for (i = 0; i < 512; i++) {
 		type = (i & 1) ? pt_explode : pt_explode2;
 		for (j = 0; j < 3; j++) {
 			porg[j] = org[j] + ((Q_rand () % 32) - 16);
@@ -529,12 +530,12 @@ R_RocketConeTrail (vec3_t start, vec3_t end, int type)
 	VectorCopy (start, cur);
 
 	while (len > 0) {
-		lsub = 10;
+		lsub = 15;
 
 		VectorSet4 (color1, 0.8, 0.1, 0.1, 0.3);
 		VectorSet4 (color2, 0.05, 0.05, 0.05, 0.0);
-		VectorMA (cur, -7, vec, point1);
-		VectorMA (cur, lsub + 6, vec, point2);
+		VectorMA (cur, -10, vec, point1);
+		VectorMA (cur, lsub + 9, vec, point2);
 		new_cone_particle (pt_rtrail, point1, point2, vec3_origin, color1,
 				color2, 0, 2, 15);
 		VectorMA (cur, lsub, vec, cur);
@@ -632,6 +633,7 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 	}
 }
 
+//#define MOD_POINTINLEAF
 /*
 ===============
 R_Draw_Base_Particles
@@ -640,6 +642,9 @@ R_Draw_Base_Particles
 static void
 R_Draw_Base_Particles (void)
 {
+#ifdef MOD_POINTINLEAF
+	mleaf_t				*mleaf;
+#endif
 	base_particle_t	   *p;
 	int					i, j, k, activeparticles, maxparticle;
 	float				time1, time2, time3;
@@ -669,6 +674,17 @@ R_Draw_Base_Particles (void)
 
 		maxparticle = k;
 		activeparticles++;
+
+#ifdef MOD_POINTINLEAF
+		mleaf = Mod_PointInLeaf(p->org, cl.worldmodel);
+		if ((mleaf->contents == CONTENTS_SOLID) ||
+				(mleaf->contents == CONTENTS_SKY)) {
+			p->die = -1;
+			goto R_Draw_Base_Particles__physics;
+		}
+		if (mleaf->visframe != r_framecount)
+			goto R_Draw_Base_Particles__physics;
+#endif
 
 		VectorCopy4 (p->color, c_array[v_index + 0]);
 		VectorCopy4 (p->color, c_array[v_index + 1]);
@@ -703,6 +719,10 @@ R_Draw_Base_Particles (void)
 			qglDrawArrays (GL_QUADS, 0, v_index);
 			v_index = 0;
 		}
+
+#ifdef MOD_POINTINLEAF
+R_Draw_Base_Particles__physics:
+#endif
 		VectorMA (p->org, frametime, p->vel, p->org);
 
 		switch (p->type) {
@@ -824,11 +844,6 @@ R_Draw_Cone_Particles (void)
 	i_index = 0;
 
 	for (k = 0, p = cone_particles; k < num_cone_particles; k++, p++) {
-		/*
-		 * LordHavoc: this is probably no longer necessary, as it is checked
-		 * at the end, but could still happen on weird particle effects, left
-		 * for safety...
-		 */
 		if (p->die <= realtime) {
 			free_cone_particles[j++] = p;
 			continue;

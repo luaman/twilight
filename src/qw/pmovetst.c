@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "pmove.h"
 #include "sys.h"
 #include "strlib.h"
+#include "client.h"
 
 static hull_t box_hull;
 static dclipnode_t box_clipnodes[6];
@@ -312,6 +313,21 @@ PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
 
 	return false;
 }
+
+float
+TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal)
+{
+	pmtrace_t trace;
+
+	memset (&trace, 0, sizeof (trace));
+	VectorCopy (end, trace.endpos);
+	PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, start, end, &trace);
+
+	VectorCopy (trace.endpos, impact);
+	VectorCopy (trace.plane.normal, normal);
+	return trace.fraction;
+}
+
 
 
 /*
