@@ -188,7 +188,7 @@ R_Init (void)
 	R_InitBubble();
 	R_InitParticles ();
 	R_InitParticleTexture ();
-//	TNT_Init ();
+	TNT_Init ();
 
 	playertextures = texture_extension_number;
 	texture_extension_number += 16;
@@ -201,7 +201,7 @@ R_Init (void)
 	qglVertexPointer (3, GL_FLOAT, sizeof(v_array[0]), v_array[0]);
 
 	qglDisableClientState (GL_COLOR_ARRAY);
-//	qglEnableClientState (GL_COLOR_ARRAY);
+	qglEnableClientState (GL_COLOR_ARRAY);
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 }
@@ -285,8 +285,8 @@ R_NewMap
 void
 R_NewMap (void)
 {
-	int         i;
-	extern int r_dlightframecount;
+	Uint32		i;
+	extern int	r_dlightframecount;
 
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value

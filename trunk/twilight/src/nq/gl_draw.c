@@ -276,7 +276,7 @@ Draw_Init_Cvars (void)
 	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
 
 	/* 3dfx can only handle 256 wide textures */
-	if (!strncasecmp ((char *) gl_renderer, "3dfx", 4) || !strncasecmp ((char *) gl_renderer, "Mesa", 4))
+	if (!strncasecmp (gl_renderer, "3dfx", 4) || !strncasecmp (gl_renderer, "Mesa", 4))
 		Cvar_Set (gl_max_size, "256");
 }
 
@@ -1029,12 +1029,12 @@ GL_Upload32
 ===============
 */
 void
-GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
+GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 			 qboolean alpha)
 {
 	int				samples;
 	static Uint32	scaled[1024 * 512];	/* [512 * 256]; */
-	int				scaled_width, scaled_height;
+	Uint32			scaled_width, scaled_height;
 
 	for (scaled_width = 1; scaled_width < width; scaled_width <<= 1);
 	for (scaled_height = 1; scaled_height < height; scaled_height <<= 1);

@@ -342,9 +342,9 @@ Sends text to all active clients
 void
 SV_BroadcastPrintf (char *fmt, ...)
 {
-	va_list     argptr;
-	char        string[1024];
-	int         i;
+	va_list		argptr;
+	char		string[1024];
+	Uint32		i;
 
 	va_start (argptr, fmt);
 	vsnprintf (string, sizeof (string), fmt, argptr);
@@ -390,8 +390,8 @@ void
 SV_DropClient (qboolean crash)
 {
 	int         saveSelf;
-	int         i;
-	client_t   *client;
+	Uint32		i;
+	client_t	*client;
 
 	if (!crash) {
 		// send any final messages (don't check for errors)
@@ -447,11 +447,10 @@ This only happens at the end of a game, not between levels
 void
 Host_ShutdownServer (qboolean crash)
 {
-	int         i;
-	int         count;
-	sizebuf_t   buf;
-	char        message[4];
-	double      start;
+	Uint32		i, count;
+	sizebuf_t	buf;
+	char		message[4];
+	double		start;
 
 	if (!sv.active)
 		return;
@@ -775,10 +774,11 @@ _Host_Frame (float time)
 void
 Host_Frame (float time)
 {
-	double      time1, time2;
-	static double timetotal;
-	static int  timecount;
-	int         i, c, m;
+	double			time1, time2;
+	static double	timetotal;
+	static int		timecount;
+	int				m;
+	Uint32			i, c;
 
 	if (!serverprofile->value) {
 		_Host_Frame (time);

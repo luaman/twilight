@@ -822,25 +822,25 @@ S_ExtraUpdate (void)
 void
 S_Update_ (void)
 {
-	unsigned    endtime;
+	Uint32	endtime;
 	int         samps;
 
 	if (!sound_started || (snd_blocked > 0))
 		return;
 
 	SDL_LockAudio ();
-// Updates DMA time
+	// Updates DMA time
 	GetSoundtime ();
 
-// check to make sure that we haven't overshot
+	// check to make sure that we haven't overshot
 	if (paintedtime < soundtime) {
 		// Con_Printf ("S_Update_ : overflow\n");
 		paintedtime = soundtime;
 	}
-// mix ahead of current position
+	// mix ahead of current position
 	endtime = soundtime + _snd_mixahead->value * shm->speed;
 	samps = shm->samples >> (shm->channels - 1);
-	if (endtime - soundtime > samps)
+	if ((endtime - soundtime) > (Uint32)samps)
 		endtime = soundtime + samps;
 
 	S_PaintChannels (endtime);

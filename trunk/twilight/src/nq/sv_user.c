@@ -594,7 +594,7 @@ SV_RunClients
 void
 SV_RunClients (void)
 {
-	int         i;
+	Uint32	i;
 
 	for (i = 0, host_client = svs.clients; i < svs.maxclients;
 		 i++, host_client++) {
@@ -613,7 +613,7 @@ SV_RunClients (void)
 			memset (&host_client->cmd, 0, sizeof (host_client->cmd));
 			continue;
 		}
-// always pause in single player if in console or menus
+		// always pause in single player if in console or menus
 		if (!sv.paused && (svs.maxclients > 1 || key_dest == key_game))
 			SV_ClientThink ();
 	}

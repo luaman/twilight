@@ -713,7 +713,7 @@ Sbar_DrawNormal (void)
 	if (cl_sbar->value)
 		Sbar_DrawPic (0, 0, sb_sbar);
 
-// armor
+	// armor
 	if (cl.stats[STAT_ITEMS] & IT_INVULNERABILITY) {
 		Sbar_DrawNum (24, 0, 666, 3, 1);
 		Sbar_DrawPic (0, 0, draw_disc);
@@ -728,14 +728,14 @@ Sbar_DrawNormal (void)
 			Sbar_DrawPic (0, 0, sb_armor[0]);
 	}
 
-// face
+	// face
 	Sbar_DrawFace ();
 
-// health
+	// health
 	Sbar_DrawNum (136, 0, cl.stats[STAT_HEALTH], 3,
 				  cl.stats[STAT_HEALTH] <= 25);
 
-// ammo icon
+	// ammo icon
 	if (cl.stats[STAT_ITEMS] & IT_SHELLS)
 		Sbar_DrawPic (224, 0, sb_ammo[0]);
 	else if (cl.stats[STAT_ITEMS] & IT_NAILS)

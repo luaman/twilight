@@ -32,7 +32,7 @@
 #include "progs.h"
 
 typedef struct {
-	int         maxclients;
+	Uint32		maxclients;
 	int         maxclientslimit;
 	struct client_s *clients;			// [maxclients]
 	int         serverflags;			// episode completion information
@@ -44,41 +44,40 @@ typedef struct {
 typedef enum { ss_loading, ss_active } server_state_t;
 
 typedef struct {
-	qboolean    active;					// false if only a net client
+	qboolean		active;					// false if only a net client
 
-	qboolean    paused;
-	qboolean    loadgame;				// handle connections specially
+	qboolean		paused;
+	qboolean		loadgame;				// handle connections specially
 
-	double      time;
+	double			time;
 
-	int         lastcheck;				// used by PF_checkclient
-	double      lastchecktime;
+	int				lastcheck;				// used by PF_checkclient
+	double			lastchecktime;
 
-	char        name[64];				// map name
-	char        modelname[64];			// maps/<name>.bsp, for
-										// model_precache[0]
-	struct model_s *worldmodel;
-	char       *model_precache[MAX_MODELS];	// NULL terminated
-	struct model_s *models[MAX_MODELS];
-	char       *sound_precache[MAX_SOUNDS];	// NULL terminated
-	char       *lightstyles[MAX_LIGHTSTYLES];
-	int         num_edicts;
-	int         max_edicts;
-	edict_t    *edicts;					// can NOT be array indexed, because
-	// edict_t is variable sized, but can
-	// be used to reference the world ent
-	server_state_t state;				// some actions are only valid during
-										// load
+	char			name[64];				// map name
+	char			modelname[64];			// maps/<name>.bsp, for
+											// model_precache[0]
+	struct model_s	*worldmodel;
+	char			*model_precache[MAX_MODELS];	// NULL terminated
+	struct model_s	*models[MAX_MODELS];
+	char			*sound_precache[MAX_SOUNDS];	// NULL terminated
+	char			*lightstyles[MAX_LIGHTSTYLES];
+	Uint32			num_edicts;
+	int				max_edicts;
+	edict_t    		*edicts;					// can NOT be array indexed, because
+												// edict_t is variable sized, but can
+												// be used to reference the world ent
 
-	sizebuf_t   datagram;
-	Uint8       datagram_buf[MAX_DATAGRAM];
+	server_state_t state;						// some actions are only valid during load
 
-	sizebuf_t   reliable_datagram;		// copied to all clients at end of
-										// frame
-	Uint8       reliable_datagram_buf[MAX_DATAGRAM];
+	sizebuf_t		datagram;
+	Uint8			datagram_buf[MAX_DATAGRAM];
 
-	sizebuf_t   signon;
-	Uint8       signon_buf[8192];
+	sizebuf_t		reliable_datagram;			// copied to all clients at end of frame
+	Uint8			reliable_datagram_buf[MAX_DATAGRAM];
+
+	sizebuf_t		signon;
+	Uint8			signon_buf[8192];
 } server_t;
 
 

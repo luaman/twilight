@@ -46,20 +46,17 @@
 #include "client.h"
 #include "mathlib.h"
 
-void        GL_BeginRendering (int *x, int *y, int *width, int *height);
-void        GL_EndRendering (void);
+void	GL_BeginRendering (int *x, int *y, int *width, int *height);
+void	GL_EndRendering (void);
 
 extern int  texture_extension_number;
 
 extern float gldepthmin, gldepthmax;
 
-void        GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
-						 qboolean alpha);
-void		GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, 
-						int alpha, unsigned *table);
-int         GL_LoadTexture (char *identifier, int width, int height,
-							Uint8 * data, qboolean mipmap, int alpha);
-int         GL_FindTexture (char *identifier);
+void	GL_Upload32 (unsigned *data, Uint32 width, Uint32 height, qboolean mipmap, qboolean alpha);
+void	GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsigned *table);
+int		GL_LoadTexture (char *identifier, int width, int height, Uint8 * data, qboolean mipmap, int alpha);
+int		GL_FindTexture (char *identifier);
 
 typedef struct {
 	float       x, y, z;

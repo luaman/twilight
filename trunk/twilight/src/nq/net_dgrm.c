@@ -341,29 +341,19 @@ Datagram_SendUnreliableMessage (qsocket_t * sock, sizebuf_t *data)
 int
 Datagram_GetMessage (qsocket_t * sock)
 {
-	unsigned int length;
-	unsigned int flags;
-	int         ret = 0;
-	struct qsockaddr readaddr;
-	unsigned int sequence;
-	unsigned int count;
+	Uint32	length, flags, sequence, count;
+	int		ret = 0;
+	struct	qsockaddr readaddr;
 
 	if (!sock->canSend)
 		if ((net_time - sock->lastSendTime) > 1.0)
 			ReSendMessage (sock);
 
 	while (1) {
-		length =
-			sfunc.Read (sock->socket, (Uint8 *) & packetBuffer,
-					NET_DATAGRAMSIZE, &readaddr);
+		length = dfunc.Read (sock->socket, (Uint8 *) & packetBuffer, NET_DATAGRAMSIZE, &readaddr);
 
 		if (length == 0)
 			break;
-
-		if (length == -1) {
-			Con_Printf ("Read error\n");
-			return -1;
-		}
 
 		if (sfunc.AddrCompare (&readaddr, &sock->addr) != 0) {
 #ifdef DEBUG
@@ -535,21 +525,19 @@ static void
 Test_Poll (void)
 {
 	struct qsockaddr clientaddr;
-	int         control;
-	int         len;
-	char        name[32];
-	char        address[64];
-	int         colors;
-	int         frags;
-	int         connectTime;
-	Uint8       playerNumber;
+	int			control;
+	Uint32		len;
+	char		name[32];
+	char		address[64];
+	int			colors;
+	int			frags;
+	int			connectTime;
+	Uint8		playerNumber;
 
 	net_landriverlevel = testDriver;
 
 	while (1) {
-		len =
-			dfunc.Read (testSocket, net_message.data, net_message.maxsize,
-						&clientaddr);
+		len = dfunc.Read (testSocket, net_message.data, net_message.maxsize, &clientaddr);
 		if (len < sizeof (int))
 			break;
 
@@ -560,9 +548,9 @@ Test_Poll (void)
 		MSG_ReadLong ();
 		if (control == -1)
 			break;
-		if ((control & (~NETFLAG_LENGTH_MASK)) != NETFLAG_CTL)
+		if (((Uint32)control & (~NETFLAG_LENGTH_MASK)) != NETFLAG_CTL)
 			break;
-		if ((control & NETFLAG_LENGTH_MASK) != len)
+		if (((Uint32)control & NETFLAG_LENGTH_MASK) != len)
 			break;
 
 		if (MSG_ReadByte () != CCREP_PLAYER_INFO)
@@ -666,9 +654,8 @@ Test2_Poll (void)
 {
 	struct qsockaddr clientaddr;
 	int         control;
-	int         len;
-	char        name[256];
-	char        value[256];
+	Uint32		len;
+	char        name[256], value[256];
 
 	net_landriverlevel = test2Driver;
 	name[0] = 0;
@@ -686,9 +673,9 @@ Test2_Poll (void)
 	MSG_ReadLong ();
 	if (control == -1)
 		goto Error;
-	if ((control & (~NETFLAG_LENGTH_MASK)) != NETFLAG_CTL)
+	if (((Uint32)control & (~NETFLAG_LENGTH_MASK)) != NETFLAG_CTL)
 		goto Error;
-	if ((control & NETFLAG_LENGTH_MASK) != len)
+	if (((Uint32)control & NETFLAG_LENGTH_MASK) != len)
 		goto Error;
 
 	if (MSG_ReadByte () != CCREP_RULE_INFO)
@@ -857,7 +844,7 @@ _Datagram_CheckNewConnections (void)
 	int         acceptsock;
 	qsocket_t  *sock;
 	qsocket_t  *s;
-	int         len;
+	Uint32		len;
 	int         command;
 	int         control;
 	int         ret;
@@ -880,9 +867,9 @@ _Datagram_CheckNewConnections (void)
 	MSG_ReadLong ();
 	if (control == -1)
 		return NULL;
-	if ((control & (~NETFLAG_LENGTH_MASK)) != NETFLAG_CTL)
+	if (((Uint32)control & (~NETFLAG_LENGTH_MASK)) != NETFLAG_CTL)
 		return NULL;
-	if ((control & NETFLAG_LENGTH_MASK) != len)
+	if (((Uint32)control & NETFLAG_LENGTH_MASK) != len)
 		return NULL;
 
 	command = MSG_ReadByte ();
@@ -910,10 +897,10 @@ _Datagram_CheckNewConnections (void)
 	}
 
 	if (command == CCREQ_PLAYER_INFO) {
-		int         playerNumber;
-		int         activeNumber;
-		int         clientNumber;
-		client_t   *client;
+		int			playerNumber;
+		int			activeNumber;
+		Uint32		clientNumber;
+		client_t	*client;
 
 		playerNumber = MSG_ReadByte ();
 		activeNumber = -1;
@@ -1130,12 +1117,10 @@ Datagram_CheckNewConnections (void)
 static void
 _Datagram_SearchForHosts (qboolean xmit)
 {
-	int         ret;
-	int         n;
-	int         i;
+	Uint32		ret;
+	int			n, i, control;
 	struct qsockaddr readaddr;
 	struct qsockaddr myaddr;
-	int         control;
 
 	dfunc.GetSocketAddr (dfunc.controlSock, &myaddr);
 	if (xmit) {
@@ -1172,9 +1157,9 @@ _Datagram_SearchForHosts (qboolean xmit)
 		MSG_ReadLong ();
 		if (control == -1)
 			continue;
-		if ((control & (~NETFLAG_LENGTH_MASK)) != NETFLAG_CTL)
+		if (((Uint32)control & (~NETFLAG_LENGTH_MASK)) != NETFLAG_CTL)
 			continue;
-		if ((control & NETFLAG_LENGTH_MASK) != ret)
+		if (((Uint32)control & NETFLAG_LENGTH_MASK) != ret)
 			continue;
 
 		if (MSG_ReadByte () != CCREP_SERVER_INFO)
@@ -1242,13 +1227,11 @@ _Datagram_Connect (char *host)
 {
 	struct qsockaddr sendaddr;
 	struct qsockaddr readaddr;
-	qsocket_t  *sock;
-	int         newsock;
-	int         ret;
-	int         reps;
-	double      start_time;
-	int         control;
-	char       *reason;
+	qsocket_t	*sock;
+	int         newsock, control, reps;
+	Uint32		ret;
+	double		start_time;
+	char		*reason;
 
 	// see if we can resolve the host name
 	if (dfunc.GetAddrFromName (host, &sendaddr) == -1)
@@ -1316,11 +1299,11 @@ _Datagram_Connect (char *host)
 					ret = 0;
 					continue;
 				}
-				if ((control & (~NETFLAG_LENGTH_MASK)) != NETFLAG_CTL) {
+				if (((Uint32)control & (~NETFLAG_LENGTH_MASK)) != NETFLAG_CTL) {
 					ret = 0;
 					continue;
 				}
-				if ((control & NETFLAG_LENGTH_MASK) != ret) {
+				if (((Uint32)control & NETFLAG_LENGTH_MASK) != ret) {
 					ret = 0;
 					continue;
 				}
@@ -1336,13 +1319,6 @@ _Datagram_Connect (char *host)
 
 	if (ret == 0) {
 		reason = "No Response";
-		Con_Printf ("%s\n", reason);
-		strcpy (m_return_reason, reason);
-		goto ErrorReturn;
-	}
-
-	if (ret == -1) {
-		reason = "Network Error";
 		Con_Printf ("%s\n", reason);
 		strcpy (m_return_reason, reason);
 		goto ErrorReturn;
