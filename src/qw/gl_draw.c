@@ -1,5 +1,5 @@
 /*
-	$RCSfile$
+	$RCSfile$ -- this is the only file outside the refresh that touches the vid buffer
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -22,8 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// draw.c -- this is the only file outside the refresh that touches the
-// vid buffer
 static const char rcsid[] =
     "$Id$";
 
@@ -55,16 +53,16 @@ cvar_t		*gl_max_size;
 cvar_t		*gl_picmip;
 cvar_t		*gl_constretch;
 cvar_t		*gl_texturemode;
-cvar_t		*cl_verstring;					// FIXME: Move this?
+cvar_t		*cl_verstring;					/* FIXME: Move this? */
 cvar_t		*r_lerpimages;
 
-Uint8		*draw_chars;					// 8*8 graphic characters
+Uint8		*draw_chars;					/* 8*8 graphic characters */
 qpic_t		*draw_disc;
 qpic_t		*draw_backtile;
 
 int         translate_texture;
 int         char_texture;
-int         cs_texture, cs_square;						// crosshair texture
+int         cs_texture, cs_square;			/* crosshair texture */
 
 static Uint8 cs_data[64] = {
 	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
@@ -127,13 +125,13 @@ gltexture_t gltextures[MAX_GLTEXTURES];
 int         numgltextures;
 
 
-//=============================================================================
+/* ============================================================================= */
 /* Support Routines */
 
 typedef struct cachepic_s {
 	char        name[MAX_QPATH];
 	qpic_t      pic;
-	Uint8       padding[32];			// for appended glpic
+	Uint8       padding[32];			/* for appended glpic */
 } cachepic_t;
 
 #define	MAX_CACHED_PICS		128
@@ -185,17 +183,17 @@ Draw_CachePic (char *path)
 	menu_numcachepics++;
 	strcpy (pic->name, path);
 
-//
-// load the pic from disk
-//
+/*
+	load the pic from disk
+*/
 	dat = (qpic_t *) COM_LoadTempFile (path);
 	if (!dat)
 		Sys_Error ("Draw_CachePic: failed to load %s", path);
 	SwapPic (dat);
 
-	// HACK HACK HACK --- we need to keep the bytes for
-	// the translatable player picture just for the menu
-	// configuration dialog
+	/*	HACK HACK HACK --- we need to keep the bytes for
+		the translatable player picture just for the menu
+		configuration dialog */
 	if (!strcmp (path, "gfx/menuplyr.lmp"))
 		memcpy (menuplyr_pixels, dat->data, dat->width * dat->height);
 
@@ -254,7 +252,7 @@ Set_TextureMode_f (struct cvar_s *var)
 	gl_filter_min = modes[i].minimize;
 	gl_filter_max = modes[i].maximize;
 
-	// change all the existing mipmap texture objects
+	/* change all the existing mipmap texture objects */
 	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
 		if (glt->mipmap) {
 			qglBindTexture (GL_TEXTURE_2D, glt->texnum);
@@ -281,7 +279,7 @@ Draw_Init_Cvars (void)
 			"Project Twilight v" VERSION " QW", CVAR_NONE, NULL);
 	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
 
-	// 3dfx can only handle 256 wide textures
+	/* 3dfx can only handle 256 wide textures */
 	if (!strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
 			!strncasecmp ((char *) gl_renderer, "Mesa", 4))
 		Cvar_Set (gl_max_size, "256");
@@ -297,28 +295,28 @@ Draw_Init (void)
 {
 	int         i;
 
-	// load the console background and the charset
-	// by hand, because we need to write the version
-	// string into the background before turning
-	// it into a texture
+	/*	load the console background and the charset
+		by hand, because we need to write the version
+		string into the background before turning
+		it into a texture */
 	draw_chars = W_GetLumpName ("conchars");
 	for (i = 0; i < 256 * 64; i++)
 		if (draw_chars[i] == 0)
-			draw_chars[i] = 255;		// proper transparent color
+			draw_chars[i] = 255;		/* proper transparent color */
 
-	// now turn them into textures
+	/* now turn them into textures */
 	char_texture =
 		GL_LoadTexture ("charset", 128, 128, draw_chars, false, true);
 
 	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
 	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata, false, true);
 
-	// save a texture slot for translated picture
+	/* save a texture slot for translated picture */
 	translate_texture = texture_extension_number++;
 
-	// 
-	// get the other pics we need
-	// 
+	/* 
+		get the other pics we need
+	*/
 	draw_disc = Draw_PicFromWad ("disc");
 	draw_backtile = Draw_PicFromWad ("backtile");
 }
@@ -341,12 +339,12 @@ Draw_Character (int x, int y, int num)
 	float       frow, fcol, size;
 
 	if (num == 32)
-		return;							// space
+		return;							/* space */
 
 	num &= 255;
 
 	if (y <= -8)
-		return;							// totally off screen
+		return;							/* totally off screen */
 
 	row = num >> 4;
 	col = num & 15;
@@ -383,7 +381,7 @@ Draw_String_Len (int x, int y, char *str, int len)
 	int		num, i, vnum;
 
 	if (y <= -8)
-		return;							// totally off screen
+		return;							/* totally off screen */
 	if (!str || !str[0])
 		return;
 
@@ -394,7 +392,7 @@ Draw_String_Len (int x, int y, char *str, int len)
 
 	for (i = 0; *str && (i < len); i++, x += 8)
 	{
-		if ((num = *str++) != 32)		// Skip drawing spaces.
+		if ((num = *str++) != 32)		/* Skip drawing spaces */
 		{
 			frow = (float) (num >> 4) * size;
 			fcol = (float) (num & 15) * size;
@@ -446,7 +444,7 @@ Draw_Alt_String_Len (int x, int y, char *str, int len)
 	int		num, i, vnum;
 
 	if (y <= -8)
-		return;							// totally off screen
+		return;							/* totally off screen */
 	if (!str || !str[0])
 		return;
 
@@ -716,7 +714,7 @@ Draw_ConsoleBackground (int lines)
 	VectorSet2 (v_array[3], 0, lines);
 	qglDrawArrays (GL_QUADS, 0, 4);
 
-	// hack the version number directly into the pic
+	/* hack the version number directly into the pic */
 	if (!cls.download) {
 		Draw_Alt_String (vid.conwidth - strlen (cl_verstring->string) * 8 - 11,
 				lines - 14, cl_verstring->string);
@@ -776,7 +774,7 @@ Draw_Fill (int x, int y, int w, int h, int c)
 	qglEnable (GL_TEXTURE_2D);
 }
 
-//=============================================================================
+/* ============================================================================= */
 
 /*
 ================
@@ -802,7 +800,7 @@ Draw_FadeScreen (void)
 	qglDisable (GL_BLEND);
 }
 
-//=============================================================================
+/* ============================================================================= */
 
 /*
 ================
@@ -848,7 +846,7 @@ GL_Set2D (void)
 	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
-//====================================================================
+/* ==================================================================== */
 
 /*
 ================
@@ -878,7 +876,7 @@ R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth,
 			*out++ = (Uint8) ((((in[6] - in[2]) * lerp) >> 16) + in[2]);
 			*out++ = (Uint8) ((((in[7] - in[3]) * lerp) >> 16) + in[3]);
 		}
-		else // last pixel of the line has no pixel to lerp to
+		else /* last pixel of the line has no pixel to lerp to */
 		{
 			*out++ = in[0];
 			*out++ = in[1];
@@ -1031,7 +1029,7 @@ R_ResampleTexture (void *indata, int inwidth, int inheight,
 	{
 		int i, j;
 		unsigned frac, fracstep;
-		// relies on int32 being 4 bytes
+		/* relies on int32 being 4 bytes */
 		Uint32 *inrow, *out;
 		out = outdata;
 
@@ -1103,7 +1101,7 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 			 qboolean alpha)
 {
 	int         samples;
-	static Uint32 scaled[1024 * 512];	// [512*256];
+	static Uint32 scaled[1024 * 512];	/* [512*256]; */
 	int         scaled_width, scaled_height;
 
 	for (scaled_width = 1; scaled_width < width; scaled_width <<= 1);
@@ -1181,7 +1179,7 @@ GL_Upload8
 void
 GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsigned *ttable)
 {
-	static unsigned trans[640 * 480];	// FIXME, temporary
+	static unsigned trans[640 * 480];	/* FIXME, temporary */
 	int         i, s = width * height;
 	qboolean    noalpha;
 	int         p;
@@ -1189,15 +1187,15 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsi
 
 	if (alpha == 2)
 	{
-	// this is a fullbright mask, so make all non-fullbright
-	// colors transparent
+	/*	this is a fullbright mask, so make all non-fullbright
+		colors transparent */
 		for (i = 0; i < s; i++)
 		{
 			p = *data++;
 			if (p < 224)
-				trans[i] = 0;			// transparent 
+				trans[i] = 0;			/* transparent */
 			else
-				trans[i] = table[p];	// fullbright
+				trans[i] = table[p];	/* fullbright */
 		}
 	}
 	else if (alpha)
@@ -1241,7 +1239,7 @@ GL_LoadTexture (char *identifier, int width, int height, Uint8 *data,
 	gltexture_t *glt;
 	unsigned short crc = 0;
 
-	// see if the texture is already present
+	/* see if the texture is already present */
 	if (identifier[0])
 	{
 		crc = CRC_Block (data, width*height);
@@ -1254,7 +1252,7 @@ GL_LoadTexture (char *identifier, int width, int height, Uint8 *data,
 						&& crc == glt->crc)
 					return gltextures[i].texnum;
 				else
-					// reload the texture into the same slot
+					/* reload the texture into the same slot */
 					goto setuptexture;
 			}
 		}
