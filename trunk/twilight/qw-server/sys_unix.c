@@ -76,8 +76,9 @@ Sys_mkdir (char *path)
 {
 	if (mkdir (path, 0777) != -1)
 		return;
-	if (errno != EEXIST)
-		Sys_Error ("mkdir %s: %s", path, strerror (errno));
+	// FIXME: put this back
+//	if (errno != EEXIST)
+//		Sys_Error ("mkdir %s: %s", path, strerror (errno));
 }
 
 
@@ -243,7 +244,8 @@ main (int argc, char *argv[])
 	if ((parms.membase = malloc (parms.memsize)) == NULL)
 		Sys_Error ("Can't allocate %ld\n", parms.memsize);
 
-	parms.basedir = ".";
+	parms.basedir = USERPATH;
+	parms.sharedir = SHAREPATH;
 
 /*
 	if (Sys_FileTime ("id1/pak0.pak") != -1)
