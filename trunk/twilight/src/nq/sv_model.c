@@ -34,26 +34,20 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include "sys.h"
 #include "quakedef.h"
-#include "console.h"
-#include "crc.h"
 #include "cvar.h"
 #include "glquake.h"
-#include "host.h"
 #include "strlib.h"
-#include "sys.h"
-
 
 extern model_t    *loadmodel;
 extern char        loadname[32];				// for hunk tags
 extern Uint8      *mod_base;
 
 model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
-void        Mod_LoadAliasModel (model_t *mod, void *buffer);
-void        Mod_LoadSpriteModel (model_t *mod, void *buffer);
 void        Mod_LoadBrushModel (model_t *mod, void *buffer);
 
-vec3_t		mod_mins, mod_maxs;
+cvar_t		*gl_subdivide_size;
 
 /*
 ===============
@@ -63,6 +57,7 @@ Mod_Init_Cvars
 void
 Mod_Init_Cvars (void)
 {
+	gl_subdivide_size = NULL;		// FIXME?
 }
 
 /*

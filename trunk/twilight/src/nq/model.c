@@ -34,14 +34,10 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
-#include "console.h"
-#include "crc.h"
-#include "cvar.h"
-#include "glquake.h"
-#include "host.h"
-#include "strlib.h"
 #include "sys.h"
+#include "common.h"
+#include "mathlib.h"
+#include "model.h"
 
 model_t    *loadmodel;
 char        loadname[32];				// for hunk tags
@@ -690,22 +686,3 @@ Mod_LoadPlanes (lump_t *l)
 	}
 }
 
-
-//=============================================================================
-
-/*
-================
-Mod_Print
-================
-*/
-void
-Mod_Print (void)
-{
-	int         i;
-	model_t    *mod;
-
-	Con_Printf ("Cached models:\n");
-	for (i = 0, mod = mod_known; i < mod_numknown; i++, mod++) {
-		Con_Printf ("%8p : %s\n", mod->cache.data, mod->name);
-	}
-}

@@ -45,7 +45,6 @@
 
 #include "client.h"
 #include "mathlib.h"
-#include "render.h"
 
 void        GL_BeginRendering (int *x, int *y, int *width, int *height);
 void        GL_EndRendering (void);
