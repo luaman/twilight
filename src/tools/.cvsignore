@@ -8,3 +8,5 @@ config.sub
 depcomp
 lhbin2c
 .deps
+*.o
+.*.swp
