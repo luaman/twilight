@@ -344,10 +344,10 @@ Sys_FileTime (char *path)
 void
 Sys_mkdir (char *path)
 {
-#if defined(HAVE_MKDIR)
-#define do_mkdir(x)	mkdir(x, 0777)
-#elif defined(HAVE__MKDIR)
+#if defined(HAVE__MKDIR)	/* FIXME: ordering hack to compile with mingw */
 #define do_mkdir(x)	_mkdir(x)
+#elif defined(HAVE_MKDIR)
+#define do_mkdir(x)	mkdir(x, 0777)
 #else
 # error "Need either POSIX mkdir or Win32 _mkdir"
 #endif

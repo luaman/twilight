@@ -227,8 +227,11 @@ Sys_BackTrace (int fd)
 	void		*array[128];
 	int			size;
 
-	size = backtrace (array, sizeof(array)/sizeof(array[0]));
+	memset (array, 0, sizeof(array));
+	size = backtrace (array, sizeof(array) / sizeof(array[0]));
 	backtrace_symbols_fd (array, size, fd);
+#else
+	fd = fd;	// Make it referenced.
 #endif
 }
 
@@ -297,10 +300,10 @@ Sys_FileTime (char *path)
 void
 Sys_mkdir (char *path)
 {
-#if defined(HAVE_MKDIR)
-#define do_mkdir(x) mkdir(x, 0777)
-#elif defined(HAVE__MKDIR)
-#define do_mkdir(x) _mkdir(x)
+#if defined(HAVE__MKDIR)	/* FIXME: ordering hack to compile with mingw */
+#define do_mkdir(x)	_mkdir(x)
+#elif defined(HAVE_MKDIR)
+#define do_mkdir(x)	mkdir(x, 0777)
 #else
 # error "Need either POSIX mkdir or Win32 _mkdir"
 #endif

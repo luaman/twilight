@@ -433,7 +433,9 @@ NET_Sleep (int msec)
 {
 	fd_set			fdset;
 	struct timeval	timeout;
+#ifndef _WIN32
 	extern qboolean do_stdin, stdin_ready;
+#endif
 
 	FD_ZERO (&fdset);
 

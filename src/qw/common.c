@@ -1596,8 +1596,10 @@ COM_InitFilesystem (void)
 
 	// -basedir <path>, now the same as fs_userpath
 	i = COM_CheckParm ("-basedir");
-	if (i && i < com_argc - 1)
+	if (i && i < com_argc - 1) {
 		Cvar_Set (fs_userpath, com_argv[i + 1]);
+		Cvar_Set (fs_sharepath, com_argv[i + 1]);
+	}
 
 	Sys_mkdir (fs_userpath->svalue);
 
