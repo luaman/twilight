@@ -34,7 +34,6 @@ static const char rcsid[] =
 #endif
 
 #include <stdlib.h>
-
 #include "strlib.h"
 
 extern char *qdate;
