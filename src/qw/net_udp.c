@@ -80,7 +80,7 @@ netadr_t    net_local_adr;
 netadr_t    net_from;
 sizebuf_t   net_message;
 
-static int  ip_sockets[2];		// non blocking, for receives
+int			ip_sockets[2];		// non blocking, for receives
 
 #define	MAX_UDP_PACKET	8192
 Uint8       net_message_buffer[MAX_UDP_PACKET];
@@ -222,12 +222,11 @@ LOOPBACK BUFFERS FOR LOCAL PLAYER
 =============================================================================
 */
 
-qboolean NET_GetLoopPacket (netsrc_t sock)
+qboolean 
+NET_GetLoopPacket (netsrc_t sock)
 {
 	int		i;
-	loopback_t	*loop;
-
-	loop = &loopbacks[sock];
+	loopback_t	*loop = &loopbacks[sock];
 
 	if (loop->send - loop->get > MAX_LOOPBACK)
 		loop->get = loop->send - MAX_LOOPBACK;
@@ -245,13 +244,11 @@ qboolean NET_GetLoopPacket (netsrc_t sock)
 	return true;
 }
 
-
-void NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
+void 
+NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
 {
 	int		i;
-	loopback_t	*loop;
-
-	loop = &loopbacks[sock^1];
+	loopback_t	*loop = &loopbacks[sock^1];
 
 	i = loop->send & (MAX_LOOPBACK-1);
 	loop->send++;
