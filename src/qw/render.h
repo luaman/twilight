@@ -69,19 +69,11 @@ typedef struct entity_s {
 	// that splits bmodel, or NULL if
 	// not split
 
-	/* Variables used for interpolation */
-	/* FIXME: A lot of these variables can be reused */
-	float       frame_start_time;
-	float       frame_interval;
-	int         pose1;
-	int         pose2;
-	float       translate_start_time;
-	vec3_t      origin1;
-	vec3_t      origin2;
-	float       rotate_start_time;
-	vec3_t      angles1;
-	vec3_t      angles2;
-
+	// Animation interpolation
+	float                   frame_start_time;
+	float                   frame_interval;
+	int                     pose1; 
+	int                     pose2;
 } entity_t;
 
 typedef struct {

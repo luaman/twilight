@@ -222,7 +222,7 @@ R_Init_Cvars (void)
 
 	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_NONE, NULL);
 
-	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_NONE, NULL);
+/*	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_NONE, NULL); */
 
 	if (gl_mtexable)
 		Cvar_Set (gl_texsort, "0");
