@@ -473,9 +473,17 @@ void
 NET_Shutdown (void)
 {
 	if (ip_sockets[NS_CLIENT] != -1)
+#ifdef _WIN32
+		closesocket (ip_sockets[NS_CLIENT]);
+#else
 		close (ip_sockets[NS_CLIENT]);
+#endif
 
 	if (ip_sockets[NS_SERVER] != -1)
+#ifdef _WIN32
+		closesocket (ip_sockets[NS_SERVER]);
+#else
 		close (ip_sockets[NS_SERVER]);
+#endif
 }
 

@@ -797,18 +797,16 @@ M_FindKeysForCommand (char *command, int *twokeys)
 {
 	int		count;
 	int		j;
-	int		l;
 	char	*b;
 
 	twokeys[0] = twokeys[1] = -1;
-	l = strlen (command);
 	count = 0;
 
 	for (j = 0; j < 256; j++) {
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!strncmp (b, command, l)) {
+		if (!strcmp (b, command)) {
 			twokeys[count] = j;
 			count++;
 			if (count == 2)
