@@ -68,7 +68,6 @@ paint_audio (void *unused, Uint8 *stream, int len)
 		shm->samplepos += streamsamples;
 		while (shm->samplepos >= shm->samples)
 			shm->samplepos -= shm->samples;
-		S_PaintChannels (soundtime + streamsamples);
 
 		if (shm->samplepos + streamsamples <= shm->samples)
 			memcpy (stream, shm->buffer + sampleposbytes, len);
@@ -168,7 +167,7 @@ SNDDMA_Init (void)
 		memcpy (&obtained, &desired, sizeof (desired));
 	}
 
-	SDL_LockAudio();
+//	SDL_LockAudio();
 	SDL_PauseAudio (0);
 
 	/* Fill the audio DMA information block */
@@ -206,19 +205,5 @@ SNDDMA_Shutdown (void)
 		snd_inited = false;
 		shm = NULL;
 	}
-}
-
-/*
-
-	SNDDMA_Submit
-
-	Send sound to device if buffer isn't really the dma buffer
-
-*/
-void
-SNDDMA_Submit (void)
-{
-	SDL_UnlockAudio();
-	SDL_LockAudio();
 }
 
