@@ -37,7 +37,7 @@ twilight_qw_SOURCES= \
 	cl_model.c cl_parse.c cl_pred.c cl_tent.c client.h \
 	cmd.h common.c console.c console.h \
 	gl_draw.c gl_ngraph.c gl_rlight.c \
-	gl_rmain.c gl_rmisc.c gl_rsurf.c gl_screen.c gl_warp.c \
+	gl_rmain.c gl_rsurf.c gl_screen.c gl_warp.c \
 	info.c keys.c keys.h mdfour.c \
 	menu.c net.h net_chan.c net_udp.c pmove.c pmovetst.c protocol.h \
 	r_explosion.c r_explosion.h r_part.c render.h sbar.c screen.h skin.c \
