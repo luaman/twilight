@@ -274,6 +274,29 @@ R_DrawSpriteModels ()
 
 /*
 =============
+R_VisEntitiesOnList
+=============
+*/
+static void
+R_VisEntitiesOnList (void)
+{
+	entity_t	*e;
+	Uint		i;
+
+	if (!r_drawentities->ivalue)
+		return;
+
+	for (i = 0; i < r_refdef.num_entities; i++) {
+		e = r_refdef.entities[i];
+
+		if (e->model->type == mod_brush)
+			R_VisBrushModel (e);
+	}
+}
+
+
+/*
+=============
 R_DrawEntitiesOnList
 =============
 */
@@ -490,6 +513,9 @@ Called by R_RenderView, possibily repeatedly.
 void
 R_Render3DView (void)
 {
+	R_VisWorld ();
+	R_VisEntitiesOnList ();
+
 	if (draw_skybox) {
 		R_DrawSkyBox ();
 

@@ -619,12 +619,6 @@ R_TextureAnimation (texture_t *base)
 	int			relative;
 	int			count;
 
-	if (currententity->frame)
-	{
-		if (base->alt_anims)
-			base = base->alt_anims;
-	}
-
 	if (!base->anim_total)
 		return base;
 
@@ -866,6 +860,8 @@ R_DrawBrushModelSkies (void)
 	brushhdr_t		*brush;
 	entity_t		*e;
 
+	R_Draw_Depth_Sky_Chain (&cl.worldmodel->extra.brush->sky_chain, modelorg);
+
 	for (i = 0; i < r_refdef.num_entities; i++)
 	{
 		e = r_refdef.entities[i];
@@ -894,13 +890,13 @@ R_DrawBrushModelSkies (void)
 
 /*
 =================
-R_DrawBrushModel
+R_VisBrushModel
 =================
 */
 void
-R_DrawBrushModel (entity_t *e)
+R_VisBrushModel (entity_t *e)
 {
-	Uint			i, k;
+	Uint			i;
 	vec3_t			mins, maxs;
 	msurface_t		*psurf;
 	float			dot;
@@ -941,6 +937,28 @@ R_DrawBrushModel (entity_t *e)
 			}
 		}
 	}
+}
+
+/*
+=================
+R_DrawBrushModel
+=================
+*/
+void
+R_DrawBrushModel (entity_t *e)
+{
+	Uint			k;
+	vec3_t			mins, maxs;
+	model_t			*clmodel = e->model;
+	brushhdr_t		*brush = clmodel->extra.brush;
+
+	Mod_MinsMaxs (clmodel, e->origin, e->angles, mins, maxs);
+
+	if (R_CullBox (mins, maxs))
+		return;
+
+	softwaretransformforbrushentity (e->origin, e->angles);
+	softwareuntransform(r_origin, modelorg);
 
 	// calculate dynamic lighting for bmodel if it's not an instanced model
 	if (brush->firstmodelsurface && !gl_flashblend->ivalue)
@@ -1104,23 +1122,26 @@ R_MarkLeaves (void)
 
 /*
 =============
+R_VisWorld
+=============
+*/
+void
+R_VisWorld (void)
+{
+	VectorCopy (r_origin, modelorg);
+
+	R_MarkLeaves ();
+	R_RecursiveWorldNode (cl.worldmodel->extra.brush->nodes);
+}
+
+/*
+=============
 R_DrawWorld
 =============
 */
 void
 R_DrawWorld (void)
 {
-	entity_t    ent;
-
-	memset (&ent, 0, sizeof (ent));
-	ent.model = cl.worldmodel;
-
-	VectorCopy (r_origin, modelorg);
-	currententity = &ent;
-
-	R_MarkLeaves ();
-	R_RecursiveWorldNode (cl.worldmodel->extra.brush->nodes);
-
 	R_PushDlights ();
 
 	DrawTextureChains (cl.worldmodel->extra.brush, false);

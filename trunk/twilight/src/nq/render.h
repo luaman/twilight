@@ -284,8 +284,10 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 /*
  * gl_rsurf.c
  */
+void R_VisBrushModel (entity_t *e);
 void R_DrawBrushModel (entity_t *e);
 void R_DrawBrushModelSkies (void);
+void R_VisWorld (void);
 void R_DrawWorld (void);
 void R_DrawWaterTextureChains (brushhdr_t *brush, qboolean transform);
 void GL_BuildLightmaps (void);

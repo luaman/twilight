@@ -49,7 +49,6 @@ extern void R_InitBubble (void);
 void R_DrawViewModel (void);
 void R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 
-entity_t *currententity;
 static mplane_t frustum[4];
 Uint c_brush_polys, c_alias_polys;
 
@@ -286,6 +285,28 @@ R_DrawSpriteModels ()
 
 /*
 =============
+R_VisEntitiesOnList
+=============
+*/
+static void
+R_VisEntitiesOnList (void)
+{
+	entity_t	*e;
+	Uint		i;
+
+	if (!r_drawentities->ivalue)
+		return;
+
+	for (i = 0; i < r_refdef.num_entities; i++) {
+		e = r_refdef.entities[i];
+
+		if (e->model->type == mod_brush)
+			R_VisBrushModel (e);
+	}
+}
+
+/*
+=============
 R_DrawEntitiesOnList
 =============
 */
@@ -496,6 +517,9 @@ Called by R_RenderView, possibily repeatedly.
 void
 R_Render3DView (void)
 {
+	R_VisWorld ();
+	R_VisEntitiesOnList ();
+
 	if (draw_skybox) {
 		R_DrawSkyBox ();
 		R_DrawBrushModelSkies ();
