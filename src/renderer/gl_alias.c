@@ -71,7 +71,7 @@ static vec4_t		top, bottom;
 static skin_t		*skin;
 static vec_t		*mod_origin, *mod_angles;
 static aliashdr_t	*paliashdr;
-static matrix4x4_t	*matrix;
+static matrix4x4_t	matrix;
 
 #include "host.h"
 
@@ -209,15 +209,26 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 
 	draw = false;
 
+	/*
+	 * locate the proper data
+	 */
+	paliashdr = clmodel->alias;
+	matrix = e->matrix;
+
 	if (gl_particletorches->ivalue) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
 			if (r_time >= e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
 				e->time_left = r_time + 0.10;
 			}
-			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_fire)
+			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_fire) {
 				clmodel = mdl_fire;
-			else
+				paliashdr = clmodel->alias;
+				Matrix4x4_CreateFromQuakeEntity(&matrix,e->origin,e->angles,1);
+				Matrix4x4_ConcatTranslate(&matrix, paliashdr->scale_origin);
+				Matrix4x4_ConcatScale3(&matrix, paliashdr->scale);
+
+			} else
 				return;
 		}
 	}
@@ -278,12 +289,6 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 		VectorCopy (lightcolor, e->last_light);
 	}
 
-	/*
-	 * locate the proper data
-	 */
-	paliashdr = clmodel->alias;
-	matrix = &e->matrix;
-
 //	c_alias_polys += paliashdr->numtris;
 
 	if (!(skin = e->skin))
@@ -330,7 +335,7 @@ R_DrawAliasModel ()
 	TWI_ChangeVDrawArrays (paliashdr->numverts, 1, NULL, paliashdr->tcarray,
 			NULL, NULL, NULL);
 
-	qglMultTransposeMatrixf ((GLfloat *) matrix);
+	qglMultTransposeMatrixf ((GLfloat *) &matrix);
 
 	if (!has_top && !has_bottom)
 		R_DrawSubSkin (paliashdr, &skin->base[anim], NULL);
@@ -393,7 +398,7 @@ R_DrawAliasModelNV ()
 
 	TWI_ChangeVDrawArrays(paliashdr->numverts, 1, NULL, paliashdr->tcarray, paliashdr->tcarray, NULL, NULL);
 
-	qglMultTransposeMatrixf ((GLfloat *) matrix);
+	qglMultTransposeMatrixf ((GLfloat *) &matrix);
 
 	if (has_fb) {
 		qglCombinerOutputNV (GL_COMBINER0_NV, GL_RGB, GL_SPARE0_NV, GL_SPARE1_NV, GL_DISCARD_NV, GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE);

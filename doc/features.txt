@@ -112,6 +112,10 @@ Console Cvar substitution:
   In the console using $cvar will replace the '$cvar' with the value of
   the cvar in question.
 
+Particle Torches:
+  Twilight has a rather nice looking particle effect for torches.
+  gl_particletorches 1 to enable it.
+
 0: The search path is:
     maps/<map>/<texture>,
     override/<map>/<texture>,
