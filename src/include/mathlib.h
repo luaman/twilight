@@ -41,7 +41,9 @@ typedef int fixed16_t;
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
 
-#ifndef HAVE_WINDEF_H
+#ifdef _WIN32
+# include <windows.h>	// for min() and max()
+#else
 
 # ifndef max
 #  define max(a,b) ((a) > (b) ? (a) : (b))
