@@ -269,7 +269,7 @@ Host_WriteConfiguration (const char *name)
 			rw = file->open(file, FSF_WRITE);
 
 		if (!rw)
-			rw = FS_Open_New (fname);
+			rw = FS_Open_New (fname, FSF_ASCII);
 
 		if (!rw) {
 			Com_Printf ("Couldn't write %s.\n", fname);

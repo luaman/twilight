@@ -242,7 +242,7 @@ CL_Record_f (void)
 	COM_DefaultExtension (name, ".dem", sizeof(name));
 
 	Com_Printf ("recording to %s.\n", name);
-	ccls.demofile = FS_Open_New (name);
+	ccls.demofile = FS_Open_New (name, 0);
 	if (!ccls.demofile) {
 		Com_Printf ("ERROR: couldn't create %s.\n", name);
 		return;

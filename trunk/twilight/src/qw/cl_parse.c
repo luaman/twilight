@@ -385,7 +385,7 @@ CL_ParseDownload (void)
 	if (!cls.download) {
 		COM_CreatePath (name);
 
-		cls.download = FS_Open_New (name);
+		cls.download = FS_Open_New (name, 0);
 
 		if (!cls.download) {
 			msg_readcount += size;

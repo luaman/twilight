@@ -900,7 +900,7 @@ CL_Download_f (void)
 
 	strlcpy_s (cls.downloadname, Cmd_Argv (1));
 
-	cls.download = FS_Open_New (cls.downloadname);
+	cls.download = FS_Open_New (cls.downloadname, 0);
 	cls.downloadtype = dl_single;
 
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
@@ -1196,7 +1196,7 @@ Host_WriteConfiguration (const char *name)
 			rw = file->open(file, FSF_WRITE);
 
 		if (!rw)
-			rw = FS_Open_New (fname);
+			rw = FS_Open_New (fname, FSF_ASCII);
 
 		if (!rw) {
 			Com_Printf ("Couldn't write %s.\n", fname);
