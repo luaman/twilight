@@ -280,7 +280,7 @@ EmitSkyPolys (msurface_t *fa)
 			VectorSubtract (v, r_origin, dir);
 			dir[2] *= 3;				// flatten the sphere
 
-			length = 6 * 63 * Q_RSqrt(DotProduct(dir,dir));
+			length = 6 * 63 * Q_RSqrt (DotProduct(dir,dir));
 
 			dir[0] *= length;
 			dir[1] *= length;
@@ -801,3 +801,4 @@ R_InitSky (texture_t *mt)
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 }
+

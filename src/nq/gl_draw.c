@@ -1,5 +1,5 @@
 /*
-	$RCSfile$ -- this is the only file outside the refresh that touches the vid buffer
+	$RCSfile$
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
