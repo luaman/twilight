@@ -46,6 +46,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
+#include "texture.h"
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
@@ -308,11 +309,11 @@ Draw_Init (void)
 	if (!img)
 		Sys_Error ("Draw_Init: Unable to load conchars\n");
 	
-	char_texture = R_LoadTexture ("charset", img, false, true);
+	char_texture = R_LoadTexture ("charset", img, TEX_ALPHA);
 
-	cs_texture = GL_LoadTexture ("crosshair", 16, 16, cs_data, false, true, 8);
+	cs_texture = GL_LoadTexture ("crosshair", 16, 16, cs_data, TEX_ALPHA, 8);
 	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata,
-			false, true, 8);
+			TEX_ALPHA, 8);
 
 	/* save a texture slot for translated picture */
 	translate_texture = texture_extension_number++;
@@ -1117,8 +1118,7 @@ GL_Upload32
 ===============
 */
 void
-GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
-			 qboolean alpha)
+GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags)
 {
 	int				samples;
 	static Uint32	scaled[1024 * 512];	/* [512*256]; */
@@ -1145,13 +1145,13 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 		Sys_Error ("GL_Upload32: cannot upload, %ix%i is too big",
 				scaled_width, scaled_height);
 
-	samples = alpha ? gl_alpha_format : gl_solid_format;
+	samples = (flags & TEX_ALPHA) ? gl_alpha_format : gl_solid_format;
 
 	texels += scaled_width * scaled_height;
 
 	if (scaled_width == width && scaled_height == height)
 	{
-		if (!mipmap)
+		if (flags ^ TEX_MIPMAP)
 		{
 			qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width,
 					scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -1168,7 +1168,7 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 
 	qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
 				  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-	if (mipmap)
+	if (flags & TEX_MIPMAP)
 	{
 		int miplevel = 0;
 
@@ -1187,7 +1187,7 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 		}
 	}
 
-	if (mipmap)
+	if (flags & TEX_MIPMAP)
 	{
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
@@ -1204,8 +1204,7 @@ GL_Upload8
 ===============
 */
 void
-GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha,
-		unsigned *ttable)
+GL_Upload8 (Uint8 *data, int width, int height, unsigned *ttable, int flags)
 {
 	static unsigned trans[640 * 480];	/* FIXME, temporary */
 	int         i, s = width * height;
@@ -1213,7 +1212,7 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha,
 	int         p;
 	unsigned	*table = ttable ? ttable : d_8to32table;
 
-	if (alpha == 2)
+	if (flags & TEX_FBMASK)
 	{
 		/*
 		 * this is a fullbright mask, so make all non-fullbright
@@ -1227,8 +1226,9 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha,
 			else
 				trans[i] = table[p];	/* fullbright */
 		}
+		flags |= TEX_ALPHA;
 	}
-	else if (alpha)
+	else if (TEX_ALPHA)
 	{
 		noalpha = true;
 		for (i = 0; i < s; i++)
@@ -1239,8 +1239,8 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha,
 			trans[i] = table[p];
 		}
 
-		if (alpha && noalpha)
-			alpha = false;
+		if (noalpha)
+			flags &= ~TEX_ALPHA;
 	} else {
 		if (s & 3)
 			Sys_Error ("GL_Upload8: s&3");
@@ -1253,7 +1253,7 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha,
 		}
 	}
 
-	GL_Upload32 (trans, width, height, mipmap, alpha);
+	GL_Upload32 (trans, width, height, flags);
 }
 
 /*
@@ -1267,7 +1267,7 @@ FIXME: HACK HACK HACK - this is just a GL_LoadTexture for image_t's for now
 ================
 */
 int
-R_LoadTexture (char *identifier, image_t *img, qboolean mipmap, int alpha)
+R_LoadTexture (char *identifier, image_t *img, int flags)
 {
 	int         i;
 	gltexture_t *glt;
@@ -1304,7 +1304,7 @@ R_LoadTexture (char *identifier, image_t *img, qboolean mipmap, int alpha)
 setuptexture:
 	glt->width = img->width;
 	glt->height = img->height;
-	glt->mipmap = mipmap;
+	glt->mipmap = flags & TEX_MIPMAP;
 	glt->crc = crc;
 
 	qglBindTexture (GL_TEXTURE_2D, glt->texnum);
@@ -1312,12 +1312,11 @@ setuptexture:
 	switch (img->type)
 	{
 		case IMG_QPAL:
-			GL_Upload8 (img->pixels, img->width, img->height, mipmap, alpha,
-					NULL);
+			GL_Upload8 (img->pixels, img->width, img->height, NULL, flags);
 			break;
 		case IMG_RGBA:
 			GL_Upload32 ((Uint32 *) img->pixels, img->width, img->height,
-					mipmap, alpha);
+					flags);
 			break;
 		default:
 			return 0;
@@ -1327,7 +1326,6 @@ setuptexture:
 }
 
 
-
 /*
 ================
 GL_LoadTexture
@@ -1335,7 +1333,7 @@ GL_LoadTexture
 */
 int
 GL_LoadTexture (char *identifier, int width, int height, Uint8 *data,
-		qboolean mipmap, int alpha, int bpp)
+		int flags, int bpp)
 {
 	int         i;
 	gltexture_t *glt;
@@ -1371,17 +1369,17 @@ GL_LoadTexture (char *identifier, int width, int height, Uint8 *data,
 setuptexture:
 	glt->width = width;
 	glt->height = height;
-	glt->mipmap = mipmap;
+	glt->mipmap = flags & TEX_MIPMAP;
 	glt->crc = crc;
 
 	qglBindTexture (GL_TEXTURE_2D, glt->texnum);
 
 	switch (bpp) {
 		case 8:
-			GL_Upload8 (data, width, height, mipmap, alpha, NULL);
+			GL_Upload8 (data, width, height, NULL, flags);
 			break;
 		case 32:
-			GL_Upload32 ((Uint32 *) data, width, height, mipmap, alpha);
+			GL_Upload32 ((Uint32 *) data, width, height, flags);
 			break;
 		default:
 			return 0;
@@ -1389,6 +1387,7 @@ setuptexture:
 
 	return glt->texnum;
 }
+
 
 /*
 ================
@@ -1398,6 +1397,6 @@ GL_LoadPicTexture
 int
 GL_LoadPicTexture (qpic_t *pic)
 {
-	return GL_LoadTexture ("", pic->width, pic->height, pic->data, false, true, 8);
+	return GL_LoadTexture ("", pic->width, pic->height, pic->data, TEX_ALPHA, 8);
 }
 

@@ -55,12 +55,11 @@ struct qpic_s     *Draw_CachePic (char *path);
 void        Draw_Crosshair (void);
 
 int         GL_LoadTexture (char *identifier, int width, int height,
-				Uint8 *data, qboolean mipmap, int alpha, int bpp);
+				Uint8 *data, int flags, int bpp);
 int         GL_LoadPicTexture (struct qpic_s *pic);
 void        GL_Set2D (void);
 
-int R_LoadTexture (char *identifier, image_t *img, qboolean mipmap,
-		int alpha);	
+int R_LoadTexture (char *identifier, image_t *img, int flags);
 
 #endif // __DRAW_H
 

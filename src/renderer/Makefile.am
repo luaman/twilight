@@ -10,7 +10,7 @@ lib_LIBRARIES=libtwilight_renderer.a
 
 noinst_HEADERS= \
 	dynogl.h opengl.h opengl_ext.h oglfuncs.h \
-	glquake.h transform.h
+	glquake.h transform.h texture.h
 
 libtwilight_renderer_a_SOURCES= \
 	dynogl.c \
