@@ -270,7 +270,13 @@ Draw_Init_Cvars
 void
 Draw_Init_Cvars (void)
 {
-	gl_max_size = Cvar_Get ("gl_max_size", "1024", CVAR_NONE, NULL);
+	int max_tex_size = 0;
+	
+	qglGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_tex_size);
+	if (!max_tex_size)
+		max_tex_size = 1024;
+
+	gl_max_size = Cvar_Get ("gl_max_size", va("%d", max_tex_size), CVAR_NONE, NULL);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
 	gl_constretch = Cvar_Get ("gl_constretch", "1", CVAR_ARCHIVE, NULL);
 	gl_texturemode = Cvar_Get ("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST",
@@ -278,11 +284,6 @@ Draw_Init_Cvars (void)
 	cl_verstring = Cvar_Get ("cl_verstring",
 			"Project Twilight v" VERSION " QW", CVAR_NONE, NULL);
 	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
-
-	/* 3dfx can only handle 256 wide textures */
-	if (!strncasecmp (gl_renderer, "3dfx", 4) ||
-			!strncasecmp (gl_renderer, "Mesa", 4))
-		Cvar_Set (gl_max_size, "256");
 }
 
 /*
