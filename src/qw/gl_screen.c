@@ -188,22 +188,21 @@ GL_BrightenScreen(void)
 		}
 		qglEnd ();
 	}
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	if (r_contrast->value <= 0.99f)
 	{
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			qglColor4f (1, 1, 1, 1 - r_contrast->value);
+		qglColor4f (1, 1, 1, 1 - r_contrast->value);
 		qglBegin (GL_TRIANGLES);
 		qglVertex2f (-5000, -5000);
 		qglVertex2f (10000, -5000);
 		qglVertex2f (-5000, 10000);
 		qglEnd ();
 	}
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	qglEnable (GL_CULL_FACE);
-	qglEnable (GL_DEPTH_TEST);
-	qglDisable (GL_BLEND);
+	qglColor3f (1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
+	qglEnable (GL_CULL_FACE);
+	qglDisable (GL_BLEND);
 }
 
 /*
@@ -1137,6 +1136,8 @@ SCR_UpdateScreen (void)
 		oldsbar = cl_sbar->value;
 		vid.recalc_refdef = true;
 	}
+
+	qglEnable (GL_DEPTH_TEST);
 
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 

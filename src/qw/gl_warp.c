@@ -395,10 +395,9 @@ R_LoadSkys (void)
 		free (image_rgba);
 		image_rgba = NULL;
 
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 	}
-
 	return true;
 }
 
@@ -486,7 +485,6 @@ void R_DrawSkyBox (void)
 
 	qglDepthMask(GL_TRUE);
 	qglEnable (GL_DEPTH_TEST);
-	qglColor4f (1,1,1,1);
 }
 
 //===============================================================
@@ -535,8 +533,8 @@ R_InitSky (texture_t *mt)
 	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, 128, 128, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, trans);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 
 
 	for (i = 0; i < 128; i++)
@@ -553,6 +551,6 @@ R_InitSky (texture_t *mt)
 	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 128, 128, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, trans);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 }

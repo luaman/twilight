@@ -100,11 +100,7 @@ R_RenderFullbrights (void)
 
 	depthdelta = -1.0/8192;
 
-	// hack depth range to prevent flickering of fullbrights
-//	qglDepthRange (gldepthmin + depthdelta, gldepthmax + depthdelta);
-
 	qglEnable (GL_BLEND);
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	for (i = 1; i < MAX_GLTEXTURES; i++) {
 		if (!fullbright_polys[i])
@@ -121,7 +117,6 @@ R_RenderFullbrights (void)
 	qglDisable (GL_BLEND);
 	
 	qglDepthMask (GL_TRUE);
-//	qglDepthRange (gldepthmin, gldepthmax);
 
 	drawfullbrights = false;
 }
@@ -426,7 +421,6 @@ R_DrawSequentialPoly (msurface_t *s)
 			qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
 			// Binds lightmap to texenv 1
 			GL_SelectTexture (1);
-			qglEnable (GL_TEXTURE_2D);
 			qglBindTexture (GL_TEXTURE_2D, lightmap_textures + s->lightmaptexturenum);
 			i = s->lightmaptexturenum;
 			if (lightmap_modified[i]) {
@@ -452,7 +446,7 @@ R_DrawSequentialPoly (msurface_t *s)
 				qglVertex3fv (v);
 			}
 			qglEnd ();
-			qglDisable (GL_TEXTURE_2D);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			GL_SelectTexture (0);
 		} else {
 			p = s->polys;
@@ -472,9 +466,7 @@ R_DrawSequentialPoly (msurface_t *s)
 			if (gl_lightmap_format == GL_LUMINANCE)
 				qglBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 			else if (gl_lightmap_format == GL_INTENSITY) {
-				qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 				qglColor4f (0, 0, 0, 1);
-				qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			}
 			qglBegin (GL_POLYGON);
 			v = p->verts[0];
@@ -487,8 +479,7 @@ R_DrawSequentialPoly (msurface_t *s)
 			if (gl_lightmap_format == GL_LUMINANCE)
 				qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			else if (gl_lightmap_format == GL_INTENSITY) {
-				qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-				qglColor4f (1, 1, 1, 1);
+				qglColor3f (1, 1, 1);
 			}
 			qglDisable (GL_BLEND);
 		}
@@ -506,17 +497,14 @@ R_DrawSequentialPoly (msurface_t *s)
 	// 
 
 	if (s->flags & SURF_DRAWTURB) {
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglBindTexture (GL_TEXTURE_2D, s->texinfo->texture->gl_texturenum);
 		EmitWaterPolys (s);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		return;
 	}
 	// 
 	// subdivided sky warp
 	// 
 	if (s->flags & SURF_DRAWSKY) {
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglBindTexture (GL_TEXTURE_2D, solidskytexture);
 		speedscale = realtime * 8;
 		speedscale -= (int) speedscale & ~127;
@@ -530,7 +518,6 @@ R_DrawSequentialPoly (msurface_t *s)
 		EmitSkyPolys (s);
 
 		qglDisable (GL_BLEND);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		return;
 	}
 
@@ -545,7 +532,6 @@ R_DrawSequentialPoly (msurface_t *s)
 		GL_SelectTexture (0);
 		qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
 		GL_SelectTexture (1);
-		qglEnable (GL_TEXTURE_2D);
 		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + s->lightmaptexturenum);
 		i = s->lightmaptexturenum;
 		if (lightmap_modified[i]) {
@@ -574,7 +560,7 @@ R_DrawSequentialPoly (msurface_t *s)
 			}
 			qglEnd ();
 		}
-		qglDisable (GL_TEXTURE_2D);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		GL_SelectTexture (0);
 
 	} else {
@@ -599,9 +585,7 @@ R_DrawSequentialPoly (msurface_t *s)
 		if (gl_lightmap_format == GL_LUMINANCE)
 			qglBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 		else if (gl_lightmap_format == GL_INTENSITY) {
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			qglColor3f (0, 0, 0);
-			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 		if (r_waterwarp->value > 0) {	// water warp factor > 0, so warp
 			DrawGLWaterPolyLightmap (p);
@@ -617,7 +601,6 @@ R_DrawSequentialPoly (msurface_t *s)
 		if (gl_lightmap_format == GL_LUMINANCE)
 			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		else if (gl_lightmap_format == GL_INTENSITY) {
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			qglColor3f (1, 1, 1);
 		}
 		qglDisable (GL_BLEND);
@@ -742,11 +725,10 @@ R_BlendLightmaps (void)
 	if (!gl_texsort->value)
 		return;
 
-	qglDepthMask (0);					// don't bother writing Z
+	qglDepthMask (GL_FALSE);					// don't bother writing Z
 
 	qglBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglEnable (GL_BLEND);
 
 	for (i = 0; i < MAX_LIGHTMAPS; i++) {
@@ -785,9 +767,8 @@ R_BlendLightmaps (void)
 
 	qglDisable (GL_BLEND);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglColor3f (1, 1, 1);
 
-	qglDepthMask (1);					// back to normal Z buffering
+	qglDepthMask (GL_TRUE);					// back to normal Z buffering
 }
 
 /*
@@ -969,17 +950,9 @@ R_DrawWaterSurfaces (void)
 
 	qglLoadMatrixf (r_world_matrix);
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // this one only
-//	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//	NQ uses blendfunc, QW doesn't, which is right?
 	if (r_wateralpha->value < 1.0) {
 		qglEnable (GL_BLEND);
 		qglColor4f (1, 1, 1, r_wateralpha->value);
-	}
-	else
-	{
-		qglDisable (GL_BLEND);
-		qglColor3f (1, 1, 1); // Hmmmm, this might be important!!! Without it lava/water isn't lit right
 	}
 
 	if (!gl_texsort->value) {
@@ -1017,9 +990,10 @@ R_DrawWaterSurfaces (void)
 	}
 
 	// QW has a condition for the qglColor3f, NQ doesn't, which is right?
-	if (r_wateralpha->value < 1.0)
+	if (r_wateralpha->value < 1.0) {
 		qglColor3f (1, 1, 1);
-	qglDisable (GL_BLEND);
+		qglDisable (GL_BLEND);
+	}
 
 }
 
@@ -1104,7 +1078,6 @@ R_DrawBrushModel (entity_t *e)
 	if (R_CullBox (mins, maxs))
 		return;
 
-	qglColor3f (1, 1, 1);
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
 	VectorSubtract (r_refdef.vieworg, e->origin, modelorg);
@@ -1303,7 +1276,6 @@ R_DrawWorld (void)
 	currententity = &ent;
 	currenttexture = -1;
 
-	qglColor3f (1, 1, 1);
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
 	if (gl_fb_bmodels->value)
@@ -1637,8 +1609,8 @@ GL_BuildLightmaps (void)
 		lightmap_rectchange[i].w = 0;
 		lightmap_rectchange[i].h = 0;
 		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + i);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 		qglTexImage2D (GL_TEXTURE_2D, 0, lightmap_bytes, BLOCK_WIDTH,
 					  BLOCK_HEIGHT, 0, gl_lightmap_format, GL_UNSIGNED_BYTE,
 					  lightmaps +

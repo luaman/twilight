@@ -366,6 +366,7 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 
 		qglEnd ();
 	}
+	qglColor3f(1, 1, 1);
 }
 
 /*
@@ -436,6 +437,7 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 		} while (--count);
 		qglEnd ();
 	}
+	qglColor3f(1, 1, 1);
 }
 
 /*
@@ -905,8 +907,6 @@ R_DrawAliasModel (entity_t *e)
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
-	qglDisable(GL_BLEND);
-
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 		R_SetupAliasBlendedFrame (currententity->frame, paliashdr,
 				currententity);
@@ -945,7 +945,6 @@ R_DrawAliasModel (entity_t *e)
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-	qglColor3f (1, 1, 1);
 	qglPopMatrix ();
 
 	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {
@@ -971,9 +970,9 @@ R_DrawAliasModel (entity_t *e)
 		} else {
 			GL_DrawAliasShadow (paliashdr, lastposenum);
 		}
-		qglEnable (GL_TEXTURE_2D);
 		qglDisable (GL_BLEND);
 		qglColor4f (1, 1, 1, 1);
+		qglEnable (GL_TEXTURE_2D);
 		qglPopMatrix ();
 	}
 }
@@ -1004,8 +1003,6 @@ R_DrawEntitiesOnList (void)
 	}
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	qglDisable(GL_BLEND);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = &cl_visedicts[i];
 
@@ -1087,6 +1084,7 @@ R_PolyBlend (void)
 	qglVertex3f (10, 100, -100);
 	qglEnd ();
 
+	qglColor3f(1, 1, 1);
 	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
 //	qglEnable (GL_ALPHA_TEST);

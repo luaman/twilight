@@ -144,11 +144,10 @@ R_NetGraph (void)
 				  NET_TIMINGS, NET_GRAPHHEIGHT, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, ngraph_pixels);
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 
 	x = 8;
-	qglColor3f (1, 1, 1);
 	qglBegin (GL_QUADS);
 	qglTexCoord2f (0, 0);
 	qglVertex2f (x, y);

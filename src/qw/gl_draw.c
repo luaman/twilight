@@ -290,9 +290,6 @@ Draw_Init (void)
 
 	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
 	// save a texture slot for translated picture
 	translate_texture = texture_extension_number++;
 
@@ -335,6 +332,7 @@ Draw_Character (int x, int y, int num)
 	fcol = col * 0.0625;
 	size = 0.0625;
 
+	qglEnable(GL_BLEND);
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
 	qglBegin (GL_QUADS);
@@ -347,6 +345,7 @@ Draw_Character (int x, int y, int num)
 	qglTexCoord2f (fcol, frow + size);
 	qglVertex2f (x, y + 8);
 	qglEnd ();
+	qglDisable(GL_BLEND);
 }
 
 /*
@@ -354,11 +353,11 @@ Draw_Character (int x, int y, int num)
 Draw_String
 ================
 */
-void
+volatile void
 Draw_String (int x, int y, char *str)
 {
-	float       frow, fcol;
-	int         num;
+	float       frow, fcol, size = 0.0625;
+	int         num, i;
 
 	if (y <= -8)
 		return;							// totally off screen
@@ -367,29 +366,33 @@ Draw_String (int x, int y, char *str)
 
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
-	qglBegin (GL_QUADS);
 
+	i = 0;
+	qglEnable (GL_BLEND);
+	qglBegin (GL_QUADS);
 	while (*str)						// stop rendering when out of
 		// characters
 	{
+		i++;
 		if ((num = *str++) != 32)		// skip spaces
 		{
-			frow = (float) (num >> 4) * 0.0625;
-			fcol = (float) (num & 15) * 0.0625;
+			frow = (float) (num >> 4) * size;
+			fcol = (float) (num & 15) * size;
 			qglTexCoord2f (fcol, frow);
 			qglVertex2f (x, y);
-			qglTexCoord2f (fcol + 0.0625, frow);
+			qglTexCoord2f (fcol + size, frow);
 			qglVertex2f (x + 8, y);
-			qglTexCoord2f (fcol + 0.0625, frow + 0.0625);
+			qglTexCoord2f (fcol + size, frow + size);
 			qglVertex2f (x + 8, y + 8);
-			qglTexCoord2f (fcol, frow + 0.0625);
+			qglTexCoord2f (fcol, frow + size);
 			qglVertex2f (x, y + 8);
 		}
 
 		x += 8;
 	}
-
 	qglEnd ();
+	qglDisable (GL_BLEND);
+
 }
 
 
@@ -411,6 +414,7 @@ Draw_Alt_String (int x, int y, char *str)
 
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
+	qglEnable (GL_BLEND);
 	qglBegin (GL_QUADS);
 
 	while (*str)						// stop rendering when out of
@@ -433,6 +437,7 @@ Draw_Alt_String (int x, int y, char *str)
 	}
 
 	qglEnd ();
+	qglDisable (GL_BLEND);
 }
 
 void
@@ -450,6 +455,7 @@ Draw_Crosshair (void)
 		qglColor4ubv (pColor);
 		qglBindTexture (GL_TEXTURE_2D, cs_texture);
 
+		qglEnable (GL_BLEND);
 		qglBegin (GL_QUADS);
 		qglTexCoord2f (0, 0);
 		qglVertex2f (x - 4, y - 4);
@@ -460,7 +466,8 @@ Draw_Crosshair (void)
 		qglTexCoord2f (0, 1);
 		qglVertex2f (x - 4, y + 12);
 		qglEnd ();
-		qglColor4f (1, 1, 1, 1);
+		qglColor3f (1, 1, 1);
+		qglDisable (GL_BLEND);
 
 	} else if (crosshair->value)
 		Draw_Character (
@@ -495,8 +502,8 @@ Draw_Pic (int x, int y, qpic_t *pic)
 	glpic_t    *gl;
 
 	gl = (glpic_t *) pic->data;
-	qglColor4f (1, 1, 1, 1);
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
+	qglEnable (GL_BLEND);
 	qglBegin (GL_QUADS);
 	qglTexCoord2f (gl->sl, gl->tl);
 	qglVertex2f (x, y);
@@ -506,6 +513,7 @@ Draw_Pic (int x, int y, qpic_t *pic)
 	qglVertex2f (x + pic->width, y + pic->height);
 	qglTexCoord2f (gl->sl, gl->th);
 	qglVertex2f (x, y + pic->height);
+	qglDisable (GL_BLEND);
 	qglEnd ();
 }
 
@@ -521,9 +529,7 @@ Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 
 	gl = (glpic_t *) pic->data;
 //	qglDisable (GL_ALPHA_TEST);
-//	qglEnable (GL_BLEND);
-//  qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglCullFace (GL_FRONT);
+	qglEnable (GL_BLEND);
 	qglColor4f (1, 1, 1, alpha);
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
 	qglBegin (GL_QUADS);
@@ -536,9 +542,9 @@ Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 	qglTexCoord2f (gl->sl, gl->th);
 	qglVertex2f (x, y + pic->height);
 	qglEnd ();
-	qglColor4f (1, 1, 1, 1);
+	qglColor3f (1, 1, 1);
 //	qglEnable (GL_ALPHA_TEST);
-//	qglDisable (GL_BLEND);
+	qglDisable (GL_BLEND);
 }
 
 void
@@ -560,7 +566,6 @@ Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
 	newtl = gl->tl + (srcy * oldglheight) / pic->height;
 	newth = newtl + (height * oldglheight) / pic->height;
 
-	qglColor4f (1, 1, 1, 1);
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
 	qglBegin (GL_QUADS);
 	qglTexCoord2f (newsl, newtl);
@@ -623,13 +628,11 @@ Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
 		}
 	}
 
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 64, 64, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, trans);
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	qglColor3f (1, 1, 1);
 	qglBegin (GL_QUADS);
 	qglTexCoord2f (0, 0);
 	qglVertex2f (x, y);
@@ -707,7 +710,6 @@ refresh window.
 void
 Draw_TileClear (int x, int y, int w, int h)
 {
-	qglColor3f (1, 1, 1);
 	qglBindTexture (GL_TEXTURE_2D, *(int *) draw_backtile->data);
 	qglBegin (GL_QUADS);
 	qglTexCoord2f (x / 64.0, y / 64.0);
@@ -760,7 +762,7 @@ Draw_FadeScreen
 void
 Draw_FadeScreen (void)
 {
-//	qglEnable (GL_BLEND);
+	qglEnable (GL_BLEND);
 	qglDisable (GL_TEXTURE_2D);
 	qglColor4f (0, 0, 0, 0.8);
 	qglBegin (GL_QUADS);
@@ -771,9 +773,9 @@ Draw_FadeScreen (void)
 	qglVertex2f (0, vid.height);
 
 	qglEnd ();
-	qglColor4f (1, 1, 1, 1);
+	qglColor3f (1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
-//	qglDisable (GL_BLEND);
+	qglDisable (GL_BLEND);
 }
 
 //=============================================================================
@@ -831,13 +833,6 @@ GL_Set2D (void)
 
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
-	qglEnable (GL_BLEND);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-//	qglEnable (GL_ALPHA_TEST);
-////  qglDisable (GL_ALPHA_TEST);
-
-	qglColor4f (1, 1, 1, 1);
 }
 
 //====================================================================
@@ -976,7 +971,6 @@ GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 
 	samples = alpha ? gl_alpha_format : gl_solid_format;
 
-#if 1
 	if (mipmap)
 		gluBuild2DMipmaps (GL_TEXTURE_2D, samples, width, height, GL_RGBA,
 						   GL_UNSIGNED_BYTE, data);
@@ -989,42 +983,6 @@ GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 		qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
 					  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 	}
-#else
-	texels += scaled_width * scaled_height;
-
-	if (scaled_width == width && scaled_height == height) {
-		if (!mipmap) {
-			qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width,
-						  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			goto done;
-		}
-		memcpy (scaled, data, width * height * 4);
-	} else
-		GL_ResampleTexture (data, width, height, scaled, scaled_width,
-							scaled_height);
-
-	qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
-				  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-	if (mipmap) {
-		int         miplevel;
-
-		miplevel = 0;
-		while (scaled_width > 1 || scaled_height > 1) {
-			GL_MipMap ((Uint8 *) scaled, scaled_width, scaled_height);
-			scaled_width >>= 1;
-			scaled_height >>= 1;
-			if (scaled_width < 1)
-				scaled_width = 1;
-			if (scaled_height < 1)
-				scaled_height = 1;
-			miplevel++;
-			qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
-						  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-		}
-	}
-  done:;
-#endif
-
 
 	if (mipmap) {
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
