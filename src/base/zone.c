@@ -291,3 +291,30 @@ void Zone_Init_Commands (void)
 	Cmd_AddCommand ("zonestats", ZoneStats_f);
 	Cmd_AddCommand ("zonelist", ZoneList_f);
 }
+
+
+//============================================================================
+
+#include <stdarg.h>
+
+//Zone Allocating String Print Formatted
+char *
+zasprintf (memzone_t *zone, const char *format, ...)
+{
+	size_t length;
+	va_list argptr;
+	char *p;
+	char text[4096];
+
+	va_start (argptr, format);
+	length = vsnprintf (text, sizeof (text), format, argptr);
+	// note: assumes Zone_Alloc clears memory to zero
+	p = Zone_Alloc(zone, length + 1);
+	if (length > sizeof(text))
+		length = vsprintf (p, format, argptr);
+	else
+		memcpy(p, text, length);
+	va_end (argptr);
+
+	return p;
+}
