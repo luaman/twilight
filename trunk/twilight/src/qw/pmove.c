@@ -339,13 +339,14 @@ PM_Friction (void)
 
 	vel = pmove.velocity;
 
-	speed = VectorLength (vel);
+	speed = DotProduct (vel,vel);
 	if (speed < 1) {
 		vel[0] = 0;
 		vel[1] = 0;
 		return;
 	}
 
+	speed = Q_sqrt(speed);
 	friction = movevars.friction;
 
 // if the leading edge is over a dropoff, increase friction
@@ -781,7 +782,7 @@ SpectatorMove (void)
 	if (speed < 1) {
 		VectorClear (pmove.velocity);
 	} else {
-		speed = VectorLength (pmove.velocity);
+		speed = Q_sqrt (speed);
 		drop = 0;
 
 		friction = movevars.friction * 1.5;	// extra friction
