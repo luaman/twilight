@@ -787,7 +787,7 @@ R_Draw_Base_Particles (void)
 		qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 		for (k = 0, p = base_particles; k < num_base_particles; k++, p++) {
-			if (p->type != pt_torch && p->type != pt_torch2)
+			if ((p->type != pt_torch && p->type != pt_torch2) || p->die <= realtime)
 				continue;
 			maxparticle = k;
 			activeparticles++;
