@@ -402,16 +402,15 @@ CL_ParseUpdate (int bits)
 
 		baseline = ent->baseline;
 		memset(ent, 0, sizeof(*ent));
-		ent->common.real_ent = ent;
 		ent->baseline = baseline;
 		ent->common.model = model;
 		// automatic animation (torches, etc) can be either all together
 		// or randomized
 		if (model) {
 			if (model->synctype == ST_RAND)
-				ent->syncbase = (float) (rand () & 0x7fff) / 0x7fff;
+				ent->common.syncbase = (float) (rand () & 0x7fff) / 0x7fff;
 			else
-				ent->syncbase = 0.0;
+				ent->common.syncbase = 0.0;
 		} else
 			forcelink = true;			// hack to make null model players work
 	}

@@ -52,9 +52,6 @@ R_GetSpriteFrame (entity_common_t *e)
 	psprite = e->model->sprite;
 	frame = e->frame[0];
 
-	if (!e->real_ent)
-		Sys_Error("No real ent! EVIL!\n");
-
 	if ((frame >= psprite->numframes) || (frame < 0)) {
 		Com_Printf ("R_DrawSprite: no such frame %d\n", frame);
 		frame = 0;
@@ -68,7 +65,7 @@ R_GetSpriteFrame (entity_common_t *e)
 		numframes = pspritegroup->numframes;
 		fullinterval = pintervals[numframes - 1];
 
-		time = ccl.time;// + e->real_ent->syncbase;
+		time = r_time + e->syncbase;
 
 		/*
 		 * when loading in Mod_LoadSpriteGroup, we guaranteed all interval

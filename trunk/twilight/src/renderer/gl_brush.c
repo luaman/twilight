@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include "vis.h"
 #include "cclient.h"
 #include "entities.h"
+#include "gl_light.h"
 
 #define BACKFACE_EPSILON 0.01
 
@@ -51,136 +52,7 @@ extern cvar_t *r_drawentities;
 extern cvar_t *r_dynamic;
 extern cvar_t *gl_flashblend;
 extern Uint c_brush_polys;
-extern int d_lightstylevalue[256];
-
-extern int lightmap_bytes;				// 1, 3, or 4
-extern int lightmap_shift;
-
-extern Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
-static Uint32 blocklights[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 3];
-
-static int dlightdivtable[32768];
-
-void
-R_InitSurf (void)
-{
-	int			i;
-
-	dlightdivtable[0] = 4194304;
-	for (i = 1;i < 32768;i++)
-		dlightdivtable[i] = 4194304 / (i << 7);
-}
-
-static int
-R_AddDynamicLights (msurface_t *surf, matrix4x4_t *invmatrix)
-{
-	int				i, lnum, lit;
-	int				s, t, td, smax, tmax, smax3;
-	int				red, green, blue;
-	int				dist2, maxdist, maxdist2, maxdist3;
-	int				impacts, impactt, subtract, k;
-	int				sdtable[256];
-	Uint			*bl;
-	rdlight_t		*rd;
-	float			dist;
-	vec3_t			impact, local;
-
-	lit = false;
-
-	smax = surf->smax;
-	tmax = surf->tmax;
-	smax3 = smax * 3;
-
-	for (lnum = 0; lnum < r_numdlights; lnum++)
-	{
-		if (!(surf->dlightbits & (1 << (lnum & 31))))
-			continue;                   // not lit by this light
-
-		rd = &r_dlight[lnum];
-
-		if (invmatrix)
-			Matrix4x4_Transform(invmatrix, rd->origin, local);
-		else
-			VectorCopy (rd->origin, local);
-		dist = PlaneDiff (local, surf->plane);
-		
-		// for comparisons to minimum acceptable light
-		// compensate for LIGHTOFFSET
-		maxdist = (int) rd->cullradius2 + LIGHTOFFSET;
-		
-		dist2 = dist * dist;
-		dist2 += LIGHTOFFSET;
-		if (dist2 >= maxdist)
-			continue;
-
-		if (surf->plane->type < 3)
-		{
-			impact[0] = local[0];
-			impact[1] = local[1];
-			impact[2] = local[2];
-			impact[surf->plane->type] -= dist;
-		}
-		else
-		{
-			impact[0] = local[0] - surf->plane->normal[0] * dist;
-			impact[1] = local[1] - surf->plane->normal[1] * dist;
-			impact[2] = local[2] - surf->plane->normal[2] * dist;
-		}
-
-		impacts = DotProduct (impact, surf->texinfo->vecs[0])
-			+ surf->texinfo->vecs[0][3] - surf->texturemins[0];
-		impactt = DotProduct (impact, surf->texinfo->vecs[1])
-			+ surf->texinfo->vecs[1][3] - surf->texturemins[1];
-
-		s = bound(0, impacts, smax * 16) - impacts;
-		t = bound(0, impactt, tmax * 16) - impactt;
-		i = s * s + t * t + dist2;
-		if (i > maxdist)
-			continue;
-
-		// reduce calculations
-		for (s = 0, i = impacts; s < smax; s++, i -= 16)
-			sdtable[s] = i * i + dist2;
-
-		maxdist3 = maxdist - dist2;
-
-		// convert to 8.8 blocklights format
-		red = (rd->light[0] * (1.0/256.0));
-		green = (rd->light[1] * (1.0/256.0));
-		blue = (rd->light[2] * (1.0/256.0));
-		subtract = (int) (rd->lightsubtract * 4194304.0f);
-		bl = blocklights;
-
-		i = impactt;
-		for (t = 0; t < tmax; t++, i -= 16)
-		{
-			td = i * i;
-			// make sure some part of it is visible on this line
-			if (td < maxdist3)
-			{
-				maxdist2 = maxdist - td;
-				for (s = 0; s < smax; s++)
-				{
-					if (sdtable[s] < maxdist2)
-					{
-						k = dlightdivtable[(sdtable[s] + td) >> 7] - subtract;
-						if (k > 0)
-						{
-							bl[0] += (red   * k);
-							bl[1] += (green * k);
-							bl[2] += (blue  * k);
-							lit = true;
-						}
-					}
-					bl += 3;
-				}
-			}
-			else // skip line
-				bl += smax3;
-		}
-	}
-	return lit;
-}
+extern int dlightdivtable[32768];
 
 static inline qboolean
 R_StainBlendTexel (Sint64 k, int *icolor, Uint8 *bl)
@@ -371,7 +243,7 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 	icolor[6] = cb2;
 	icolor[7] = ca2;
 
-	model = ccl.worldmodel;
+	model = r_worldmodel;
 	R_StainNode(model->brush->nodes + model->hulls[0].firstclipnode,
 			model, origin, radius, icolor);
 
@@ -394,158 +266,6 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 
 /*
 ===============
-Combine and scale multiple lightmaps into the 8.8 format in blocklights
-===============
-*/
-static void
-GL_BuildLightmap (model_t *mod, msurface_t *surf, matrix4x4_t *invmatrix)
-{
-	int			 i, j, size3, stride;
-	Uint8		*lightmap, *dest, *stain;
-	Uint32		 scale, *bl, l32;
-	brushhdr_t	*brush = mod->brush;
-
-	// Bind your textures early and often - or at least early
-	qglBindTexture (GL_TEXTURE_2D, brush->lightblock.chains[surf->lightmap_texnum].l_texnum);
-
-	// Reset stuff here
-	surf->cached_light[0] = d_lightstylevalue[surf->styles[0]];
-	surf->cached_light[1] = d_lightstylevalue[surf->styles[1]];
-	surf->cached_light[2] = d_lightstylevalue[surf->styles[2]];
-	surf->cached_light[3] = d_lightstylevalue[surf->styles[3]];
-
-	size3 = surf->smax * surf->tmax * 3;
-
-	lightmap = surf->samples;
-
-	// set to full bright if no light data
-	if (!brush->lightdata)
-	{
-		bl = blocklights;
-		for (i = 0;i < size3;i++)
-			bl[i] = 255*256;			
-	}
-	else
-	{
-		// clear to no light
-		memset (blocklights, 0, size3 * sizeof(Uint32));
-
-		// add all the dynamic lights
-		if (surf->dlightframe == r_framecount)
-			if (R_AddDynamicLights (surf, invmatrix))
-				surf->cached_dlight = 1;
-
-		// add all the lightmaps
-		if (lightmap)
-		{
-			for (i = 0; i < MAXLIGHTMAPS && surf->styles[i] != 255; i++)
-			{
-				scale = d_lightstylevalue[surf->styles[i]];
-				bl = blocklights;
-
-				j = 0;
-				for (; (j + 4) <= size3; j += 4) {
-					l32 = *((Uint32 *) &lightmap[j]);
-					l32 = LittleLong(l32);
-					bl[j + 0] += ((l32 >> 0) & 0xFF) * scale;
-					bl[j + 1] += ((l32 >> 8) & 0xFF) * scale;
-					bl[j + 2] += ((l32 >> 16) & 0xFF) * scale;
-					bl[j + 3] += ((l32 >> 24) & 0xFF) * scale;
-				}
-				for (; j < size3; j++)
-					bl[j] += lightmap[j] * scale;
-				lightmap += j;
-			}
-		}
-	}
-
-	bl = blocklights;
-	dest = templight;
-	stain = surf->stainsamples;
-
-	// bound, invert, and shift
-	stride = surf->alignedwidth * lightmap_bytes;
-
-	switch (gl_lightmap_format)
-	{
-		case GL_RGB:
-			stride -= surf->smax * 3;
-			for (i = 0; i < surf->tmax; i++, dest += stride)
-			{
-				for (j = 0; j < surf->smax; j++)
-				{
-					dest[0] = min ((bl[0] * stain[0]) >> lightmap_shift, 255);
-					dest[1] = min ((bl[1] * stain[1]) >> lightmap_shift, 255);
-					dest[2] = min ((bl[2] * stain[2]) >> lightmap_shift, 255);
-					bl += 3;
-					dest += 3;
-					stain += 3;
-				}
-			}
-
-			break;
-
-		case GL_RGBA:
-			stride -= surf->smax * 4;
-			for (i = 0; i < surf->tmax; i++, dest += stride)
-			{
-				for (j = 0; j < surf->smax; j++)
-				{
-					l32 = min ((bl[0] * stain[0]) >> lightmap_shift, 255);
-					l32 |= min ((bl[1] * stain[1]) >> lightmap_shift, 255)<< 8;
-					l32 |= min ((bl[2] * stain[2]) >> lightmap_shift, 255)<< 16;
-					l32 |= 255 << 24;
-					*((Uint32 *) dest) = l32;
-					bl += 3;
-					dest += 4;
-					stain += 3;
-				}
-			}
-
-			break;
-
-		case GL_LUMINANCE:
-			stride -= surf->smax;
-
-			for (i = 0; i < surf->tmax; i++, dest += stride)
-			{
-				for (j = 0; j < surf->smax; j++)
-				{
-					// 85 / 256 == 0.33203125, close enough
-					scale = ((bl[0] + bl[1] + bl[2]) * 85) >> lightmap_shift;
-					*dest++ = min (scale, 255);
-					bl += 3;
-				}
-			}
-			break;
-
-		default:
-			Sys_Error ("Bad lightmap format - your compiler sucks!");
-	}
-
-	qglTexSubImage2D (GL_TEXTURE_2D, 0, surf->light_s, surf->light_t,
-			surf->alignedwidth, surf->tmax, gl_lightmap_format,
-			GL_UNSIGNED_BYTE, templight);
-}
-
-static void
-GL_UpdateLightmap (model_t *mod, msurface_t *fa, matrix4x4_t *invmatrix)
-{
-	if (!r_dynamic->ivalue)
-		return;
-
-	if (fa->dlightframe == r_framecount // dynamic lighting
-			|| fa->cached_dlight // previously lit
-			|| d_lightstylevalue[fa->styles[0]] != fa->cached_light[0]
-			|| d_lightstylevalue[fa->styles[1]] != fa->cached_light[1]
-			|| d_lightstylevalue[fa->styles[2]] != fa->cached_light[2]
-			|| d_lightstylevalue[fa->styles[3]] != fa->cached_light[3])
-		GL_BuildLightmap(mod, fa, invmatrix);
-}
-
-
-/*
-===============
 Returns the proper texture for a given time and base texture
 ===============
 */
@@ -561,7 +281,7 @@ R_TextureAnimation (texture_t *base, int frame)
 	if (!base->anim_total)
 		return base;
 
-	relative = (int) (ccl.time * 10) % base->anim_total;
+	relative = (int) (r_time * 10) % base->anim_total;
 
 	count = 0;
 	while (base->anim_min > relative || base->anim_max <= relative)
@@ -584,7 +304,7 @@ R_DrawBrushDepthSkies (void)
 	brushhdr_t	*brush;
 	entity_common_t	*e;
 
-	Sky_Depth_Draw_Chain (ccl.worldmodel, &ccl.worldmodel->brush->sky_chain);
+	Sky_Depth_Draw_Chain (r_worldmodel, &r_worldmodel->brush->sky_chain);
 
 	if (!r_drawentities->ivalue)
 		return;
@@ -954,9 +674,9 @@ R_VisBrushModels (void)
 
 	// First off, the world.
 
-	Vis_MarkLeaves (ccl.worldmodel);
-	Vis_RecursiveWorldNode (ccl.worldmodel->brush->nodes,ccl.worldmodel,r_origin);
-	if (ccl.worldmodel->brush->sky_chain.visframe == vis_framecount)
+	Vis_MarkLeaves (r_worldmodel);
+	Vis_RecursiveWorldNode (r_worldmodel->brush->nodes,r_worldmodel,r_origin);
+	if (r_worldmodel->brush->sky_chain.visframe == vis_framecount)
 		sky = true;
 
 	// Now everything else.
@@ -987,7 +707,7 @@ R_DrawOpaqueBrushModels ()
 	vec3_t			mins, maxs;
 	int				i;
 
-	R_DrawTextureChains (ccl.worldmodel, 0, NULL, NULL);
+	R_DrawTextureChains (r_worldmodel, 0, NULL, NULL);
 
 	if (!r_drawentities->ivalue)
 		return;
@@ -1017,7 +737,7 @@ R_DrawAddBrushModels ()
 
 	qglColor4f (1, 1, 1, r_wateralpha->fvalue);
 
-	R_DrawLiquidTextureChains (ccl.worldmodel, false);
+	R_DrawLiquidTextureChains (r_worldmodel, false);
 
 	if (!r_drawentities->ivalue) {
 		qglColor4fv (whitev);

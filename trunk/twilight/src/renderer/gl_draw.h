@@ -34,6 +34,7 @@ typedef struct {
 	float	sl, tl, sh, th;
 } glpic_t;
 
-extern void Draw_Common_Init (void);
+void Draw_Common_Init (void);
+void Draw_Box (int x, int y, int w, int h, int t, vec4_t color1, vec4_t color2);
 
 #endif // __GL_DRAW_H

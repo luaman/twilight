@@ -75,8 +75,7 @@ typedef struct entity_common_s {
 	// For torches.
 	float			time_left;
 
-	// FIXME: HACK! HACK! HACK!
-	struct entity_s *real_ent;
+	float			syncbase;
 } entity_common_t;
 
 typedef struct {

@@ -16,7 +16,7 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -32,13 +32,11 @@ static const char rcsid[] =
 #include "client.h"
 #include "cmd.h"
 #include "console.h"
-#include "cl_console.h"
 #include "cvar.h"
 #include "draw.h"
 #include "host.h"
 #include "image.h"
 #include "keys.h"
-#include "mathlib.h"
 #include "menu.h"
 #include "hud.h"
 #include "screen.h"
@@ -46,7 +44,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "tga.h"
-#include "wad.h"
 
 /*
 
@@ -91,44 +88,44 @@ console is:
 	notify lines
 	half
 	full
-	
+
 
 */
 
-float		scr_con_current;
-static float		scr_conlines;				/* lines of console to display */
+float			scr_con_current;
+static float	scr_conlines;				/* lines of console to display */
 
-static cvar_t	   *scr_viewsize;
-static cvar_t	   *scr_fov;
-static cvar_t	   *scr_conspeed;
-static cvar_t	   *scr_centertime;
-static cvar_t	   *scr_showram;
-static cvar_t	   *scr_showturtle;
-static cvar_t	   *scr_showpause;
-static cvar_t	   *scr_printspeed;
-static cvar_t	   *scr_logcprint;
-static cvar_t	   *r_brightness;
-static cvar_t	   *r_contrast;
-static cvar_t	   *cl_avidemo;
+static cvar_t   *scr_viewsize;
+static cvar_t   *scr_fov;
+static cvar_t   *scr_conspeed;
+static cvar_t   *scr_centertime;
+static cvar_t   *scr_showram;
+static cvar_t   *scr_showturtle;
+static cvar_t   *scr_showpause;
+static cvar_t   *scr_printspeed;
+static cvar_t   *scr_logcprint;
+static cvar_t   *r_brightness;
+static cvar_t   *r_contrast;
+static cvar_t   *cl_avidemo;
 
-extern cvar_t *crosshair;
+extern cvar_t	*crosshair;
 
 static qboolean	scr_initialized;			/* ready to draw */
 
-static qpic_t	   *scr_ram;
-static qpic_t	   *scr_net;
-static qpic_t	   *scr_turtle;
+static qpic_t   *scr_ram;
+static qpic_t   *scr_net;
+static qpic_t   *scr_turtle;
 
-static int			clearconsole;
+static int		clearconsole;
 
-viddef_t	vid;						/* global video state */
+viddef_t		vid;						/* global video state */
 
-qboolean	scr_disabled_for_loading;
+qboolean		scr_disabled_for_loading;
 static qboolean	scr_drawloading;
-static float		scr_disabled_time;
+static float	scr_disabled_time;
 
-static Uint8	   *avibuffer;
-static Uint32		aviframeno;
+static Uint8	*avibuffer;
+static Uint32	 aviframeno;
 
 static void SCR_ScreenShot_f (void);
 
@@ -324,11 +321,6 @@ SCR_CheckDrawCenterString (void)
 
 /* ========================================================================= */
 
-/*
-====================
-CalcFov
-====================
-*/
 static float
 CalcFov (float fov_x, float width, float height)
 {
@@ -480,7 +472,7 @@ SCR_DrawTurtle (void)
 static void
 SCR_DrawNet (void)
 {
-	if (host_realtime - cl.last_received_message < 0.3)
+	if (ccls.realtime - cl.last_received_message < 0.3)
 		return;
 	if (ccls.demoplayback)
 		return;
@@ -518,11 +510,6 @@ SCR_DrawFPS (void)
 }
 
 
-/*
-==============
-DrawPause
-==============
-*/
 static void
 SCR_DrawPause (void)
 {
@@ -655,7 +642,7 @@ SCR_CaptureAviDemo (void)
 		return;
 
 	lastframetime = t;
-	
+
 	snprintf (filename, sizeof (filename), "%s/twavi%06d.tga", com_gamedir, aviframeno);
 	aviframeno++;
 
@@ -686,7 +673,7 @@ SCR_BeginLoadingPlaque (void)
 	scr_drawloading = false;
 
 	scr_disabled_for_loading = true;
-	scr_disabled_time = host_realtime;
+	scr_disabled_time = ccls.realtime;
 }
 
 void
@@ -736,16 +723,13 @@ SCR_DrawNotifyString (void)
 ==================
 This is called every frame, and can also be called explicitly to flush
 text to the screen.
-
-WARNING: be very careful calling this from elsewhere, because the refresh
-needs almost the entire 256k of stack space!
 ==================
 */
 void
 SCR_UpdateScreen (void)
 {
 	if (scr_disabled_for_loading) {
-		if (host_realtime - scr_disabled_time > 60) {
+		if (ccls.realtime - scr_disabled_time > 60) {
 			scr_disabled_for_loading = false;
 			Com_Printf ("load failed.\n");
 		} else
@@ -812,4 +796,3 @@ SCR_UpdateScreen (void)
 	// (note: this does not wait for anything to finish, it just empties the buffer)
 	qglFlush();
 }
-

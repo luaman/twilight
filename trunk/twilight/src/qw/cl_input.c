@@ -38,21 +38,22 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "crc.h"
 
-cvar_t     *cl_nodelta;
+static cvar_t	*cl_nodelta;
 
 // cvars
-static cvar_t     *in_key_repeat_delay;
-static cvar_t     *in_key_repeat_interval;
+static cvar_t	*in_key_repeat_delay;
+static cvar_t	*in_key_repeat_interval;
 
-cvar_t		*lookspring;
-cvar_t		*lookstrafe;
-cvar_t		*sensitivity;
+static cvar_t	*lookspring;
+static cvar_t	*lookstrafe;
+static cvar_t	*sensitivity;
 
-cvar_t		*m_pitch;
-cvar_t		*m_yaw;
-cvar_t		*m_forward;
-cvar_t		*m_side;
-cvar_t		*m_freelook;
+static cvar_t	*m_filter;
+static cvar_t	*m_pitch;
+static cvar_t	*m_yaw;
+static cvar_t	*m_forward;
+static cvar_t	*m_side;
+static cvar_t	*m_freelook;
 
 /*
 ===============================================================================
@@ -770,6 +771,7 @@ CL_Input_Init_Cvars (void)
 	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE, NULL);
 	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE, NULL);
 
+	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
 	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE, NULL);
 	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_ARCHIVE, NULL);
 	m_forward = Cvar_Get ("m_forward", "1", CVAR_ARCHIVE, NULL);
@@ -784,3 +786,46 @@ CL_Input_Init_Cvars (void)
 			va ("%i", SDL_DEFAULT_REPEAT_INTERVAL), CVAR_ARCHIVE,
 			CL_InputSetRepeatInterval);
 }
+
+void
+IN_Move (usercmd_t *cmd)
+{
+	if (m_filter->fvalue) {
+		static float old_mouse_x, old_mouse_y;
+		if ((mouse_x != old_mouse_x) || (mouse_y != old_mouse_y)) {
+			mouse_x = (mouse_x + old_mouse_x) * 0.5;
+			mouse_y = (mouse_y + old_mouse_y) * 0.5;
+		}
+
+		old_mouse_x = mouse_x;
+		old_mouse_y = mouse_y;
+	}
+
+	mouse_x *= sensitivity->fvalue * cl.viewzoom;
+	mouse_y *= sensitivity->fvalue * cl.viewzoom;
+
+	if ((in_strafe.state & 1) || (lookstrafe->ivalue && freelook))
+		cmd->sidemove += m_side->fvalue * mouse_x;
+	else
+		cl.viewangles[YAW] -= m_yaw->fvalue * mouse_x;
+
+	if (freelook)
+		V_StopPitchDrift ();
+
+	if (freelook && !(in_strafe.state & 1))
+	{
+		cl.viewangles[PITCH] += m_pitch->fvalue * mouse_y;
+		// KB: Allow looking straight up/down
+		cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90 - ANG16_DELTA);
+	}
+	else
+	{
+		if (in_strafe.state & 1)
+			cmd->upmove -= m_forward->fvalue * mouse_y;
+		else
+			cmd->forwardmove -= m_forward->fvalue * mouse_y;
+	}
+
+	mouse_x = mouse_y = 0.0;
+}
+

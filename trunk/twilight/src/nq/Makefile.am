@@ -50,7 +50,7 @@ twilight_nq_SOURCES= \
 	render.h screen.h server.h \
 	snd_dma.c \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
-	sys.c teamplay.c vid_sdl.c \
+	sys.c teamplay.c \
         view.c world.c world.h \
 	$(twilight_nq_sys_sources)
 

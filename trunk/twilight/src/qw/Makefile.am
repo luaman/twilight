@@ -50,7 +50,7 @@ twilight_qw_SOURCES= \
 	info.c \
 	menu.c net.h net_chan.c net_udp.c pmove.c pmovetst.c protocol.h \
 	render.h screen.h skin.c \
-	snd_dma.c sv_null.c teamplay.c sys.c vid_sdl.c view.c
+	snd_dma.c sv_null.c teamplay.c sys.c view.c
 
 twilight_qwsv_SOURCES= \
 	cl_null.c common.c info.c net_chan.c net_udp.c pmove.c \
