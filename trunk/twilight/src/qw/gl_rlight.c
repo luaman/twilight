@@ -511,106 +511,7 @@ mplane_t   *lightplane;
 vec3_t      lightspot;
 
 int
-RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
-{
-	int         r;
-	float       front, back, frac;
-	int         side;
-	mplane_t   *plane;
-	vec3_t      mid;
-	msurface_t *surf;
-	int         s, t, ds, dt;
-	int         i;
-	mtexinfo_t *tex;
-	Uint8      *lightmap;
-	unsigned    scale;
-	int         maps;
-
-	if (node->contents < 0)
-		return -1;						// didn't hit anything
-
-// calculate mid point
-
-// FIXME: optimize for axial
-	plane = node->plane;
-	front = PlaneDiff (start, plane);
-	back = PlaneDiff (end, plane);
-	side = front < 0;
-
-	if ((back < 0) == side)
-		return RecursiveLightPoint (node->children[side], start, end);
-
-	frac = front / (front - back);
-	mid[0] = start[0] + (end[0] - start[0]) * frac;
-	mid[1] = start[1] + (end[1] - start[1]) * frac;
-	mid[2] = start[2] + (end[2] - start[2]) * frac;
-
-// go down front side   
-	r = RecursiveLightPoint (node->children[side], start, mid);
-	if (r >= 0)
-		return r;						// hit something
-
-	if ((back < 0) == side)
-		return -1;						// didn't hit anuthing
-
-// check for impact on this node
-	VectorCopy (mid, lightspot);
-	lightplane = plane;
-
-	surf = cl.worldmodel->surfaces + node->firstsurface;
-	for (i = 0; i < node->numsurfaces; i++, surf++) {
-		if (surf->flags & SURF_DRAWTILED)
-			continue;					// no lightmaps
-
-		tex = surf->texinfo;
-
-		s = DotProduct (mid, tex->vecs[0]) + tex->vecs[0][3];
-		if (s < surf->texturemins[0])
-			continue;
-		t = DotProduct (mid, tex->vecs[1]) + tex->vecs[1][3];
-		if (t < surf->texturemins[1])
-			continue;
-		ds = s - surf->texturemins[0];
-		if (ds > surf->extents[0])
-			continue;
-		dt = t - surf->texturemins[1];
-		if (dt > surf->extents[1])
-			continue;
-
-		if (ds > surf->extents[0] || dt > surf->extents[1])
-			continue;
-
-		if (!surf->samples)
-			return 0;
-
-		ds >>= 4;
-		dt >>= 4;
-
-		lightmap = surf->samples;
-		r = 0;
-		if (lightmap) {
-
-			lightmap += dt * surf->smax + ds;
-
-			for (maps = 0; maps < MAXLIGHTMAPS && surf->styles[maps] != 255;
-				 maps++) {
-				scale = d_lightstylevalue[surf->styles[maps]];
-				r += *lightmap * scale;
-				lightmap += surf->smax * surf->tmax;
-			}
-
-			r >>= 8;
-		}
-
-		return r;
-	}
-
-// go down back side
-	return RecursiveLightPoint (node->children[!side], mid, end);
-}
-
-int
-RecursiveColorLightPoint (vec3_t color, mnode_t *node, vec3_t start,
+RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 		vec3_t end)
 {
 	float		front, back, frac;
@@ -643,7 +544,7 @@ RecursiveColorLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 	mid[2] = start[2] + (end[2] - start[2])*frac;
 	
 	// go down front side
-	if (RecursiveColorLightPoint (color, node->children[front < 0], start, mid))
+	if (RecursiveLightPoint (color, node->children[front < 0], start, mid))
 		return true; // hit something
 	else
 	{
@@ -758,7 +659,7 @@ RecursiveColorLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 		}
 
 		// go down back side
-		return RecursiveColorLightPoint (color, node->children[front >= 0],
+		return RecursiveLightPoint (color, node->children[front >= 0],
 				mid, end);
 	}
 }
@@ -769,39 +670,19 @@ int R_LightPoint (vec3_t p)
 {
 	vec3_t end;
 
-	if (!colorlights)
+	if (!cl.worldmodel->lightdata)
 	{
-		int         r;
-
-		if (!cl.worldmodel->lightdata)
-			return 255;
-
-		end[0] = p[0];
-		end[1] = p[1];
-		end[2] = p[2] - 2048;
-
-		r = RecursiveLightPoint (cl.worldmodel->nodes, p, end);
-
-		if (r == -1)
-			r = 0;
-
-		return r;
-	}
-	else {
-		if (!cl.worldmodel->lightdata)
-		{
-			lightcolor[0] = lightcolor[1] = lightcolor[2] = 255;
-			return 255;
-		}
-		
-		end[0] = p[0];
-		end[1] = p[1];
-		end[2] = p[2] - 2048;
-		lightcolor[0] = lightcolor[1] = lightcolor[2] = 0;
-
-		RecursiveColorLightPoint (lightcolor, cl.worldmodel->nodes, p, end);
-
+		lightcolor[0] = lightcolor[1] = lightcolor[2] = 255;
 		return 255;
 	}
+
+	end[0] = p[0];
+	end[1] = p[1];
+	end[2] = p[2] - 2048;
+	lightcolor[0] = lightcolor[1] = lightcolor[2] = 0;
+
+	RecursiveLightPoint (lightcolor, cl.worldmodel->nodes, p, end);
+
+	return 255;
 }
 

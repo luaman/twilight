@@ -331,14 +331,9 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 		tc_array(i, 1) = paliashdr->tcarray[i].t;
 
 		l = shadedots[pose->normal_indices[i]] * shadelight;
-		if (colorlights) {
-			VectorScale(lightcolor, l, c_array_v(i));
-			VectorScale(lightcolor, l, acolors[i]);
-			c_array(i, 3) = acolors[i][3] = 1;
-		} else {
-			VectorSet4(c_array_v(i), l, l, l, 1);
-			VectorSet4(acolors[i], l, l, l, 1);
-		}
+		VectorScale(lightcolor, l, c_array_v(i));
+		VectorScale(lightcolor, l, acolors[i]);
+		c_array(i, 3) = acolors[i][3] = 1;
 	}
 }
 
@@ -389,14 +384,9 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 			shadedots[pose_from->normal_indices[i]];
 		l = shadelight * (shadedots[pose_from->normal_indices[i]]
 				+ (e->frame_blend * d));
-		if (colorlights) {
-			VectorScale(lightcolor, l, c_array_v(i));
-			VectorScale(lightcolor, l, acolors[i]);
-			c_array(i, 3) = acolors[i][3] = 1;
-		} else {
-			VectorSet4(c_array_v(i), l, l, l, 1);
-			VectorSet4(acolors[i], l, l, l, 1);
-		}
+		VectorScale(lightcolor, l, c_array_v(i));
+		VectorScale(lightcolor, l, acolors[i]);
+		c_array(i, 3) = acolors[i][3] = 1;
 	}
 }
 
@@ -473,13 +463,9 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 
 		// always give the gun some light
 		if (viewent) {
-			if (!colorlights && (shadelight < 24)) {
-				shadelight = 24;
-			} else {
-				lightcolor[0] = max (lightcolor[0], 24);
-				lightcolor[1] = max (lightcolor[1], 24);
-				lightcolor[2] = max (lightcolor[2], 24);
-			}
+			lightcolor[0] = max (lightcolor[0], 24);
+			lightcolor[1] = max (lightcolor[1], 24);
+			lightcolor[2] = max (lightcolor[2], 24);
 		}
 
 		for (lnum = 0, l = &cl_dlights[0]; lnum < MAX_DLIGHTS; lnum++, l++) {
@@ -491,57 +477,34 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 			if (add <= l->radius * l->radius) {
 				add = 8 * l->radius * l->radius / add; 
 
-				if (!colorlights) {
-					shadelight += add;
-				} else {
-					VectorMA(lightcolor, add, l->color, lightcolor);
-				}
+				VectorMA(lightcolor, add, l->color, lightcolor);
 			}
 		}
 
 		// ZOID: never allow players to go totally black
 		if (clmodel->modflags & FLAG_PLAYER) {
-			if (!colorlights) {
-				if (shadelight < 8)
-					shadelight = 8;
-			} else {
-				lightcolor[0] = max (lightcolor[0], 8);
-				lightcolor[1] = max (lightcolor[1], 8);
-				lightcolor[2] = max (lightcolor[2], 8);
-			}
+			lightcolor[0] = max (lightcolor[0], 8);
+			lightcolor[1] = max (lightcolor[1], 8);
+			lightcolor[2] = max (lightcolor[2], 8);
 		}
 	} else if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb_models->ivalue) {
-		if (!colorlights)
-			shadelight = 256;
-		else
-			lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
+		lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
 	}
 
 	shadedots = r_avertexnormal_dots[((int) (e->cur.angles[1]
 				* (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
 
-	if (!colorlights) {
-		shadelight = shadelight * (1.0 / 200.0);
+	VectorScale(lightcolor, 1.0f / 200.0f, lightcolor);
 
-		if (!e->last_light[0])
-			e->last_light[0] = shadelight;
-		else {
-			shadelight = (shadelight + e->last_light[0])*0.5f;
-			e->last_light[0] = shadelight;
-		}
-	} else {
-		VectorScale(lightcolor, 1.0f / 200.0f, lightcolor);
-
-		if (!e->last_light[0] && !e->last_light[1] && !e->last_light[2])
-			VectorCopy (lightcolor, e->last_light);
-		else {
-			VectorAdd (lightcolor, e->last_light, lightcolor);
-			VectorScale (lightcolor, 0.5f, lightcolor);
-			VectorCopy (lightcolor, e->last_light);
-		}
-
-		shadelight = 1;
+	if (!e->last_light[0] && !e->last_light[1] && !e->last_light[2])
+		VectorCopy (lightcolor, e->last_light);
+	else {
+		VectorAdd (lightcolor, e->last_light, lightcolor);
+		VectorScale (lightcolor, 0.5f, lightcolor);
+		VectorCopy (lightcolor, e->last_light);
 	}
+
+	shadelight = 1;
 
 	/*
 	 * locate the proper data
