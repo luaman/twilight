@@ -64,8 +64,8 @@ void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
 
 enum { m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup,
-	m_options, m_video, m_keys, m_help, m_quit, m_lanconfig,
-	m_gameoptions, m_search, m_slist, m_gfx
+	m_options, m_keys, m_help, m_quit, m_lanconfig, m_gameoptions, m_search,
+	m_slist, m_gfx, m_kbsthingy
 } m_state;
 
 void        M_Menu_Main_f (void);
@@ -76,7 +76,6 @@ void        M_Menu_MultiPlayer_f (void);
 void        M_Menu_Setup_f (void);
 void        M_Menu_Options_f (void);
 void        M_Menu_Keys_f (void);
-void        M_Menu_Video_f (void);
 void		M_Menu_Gfx_f (void);
 void        M_Menu_Help_f (void);
 void        M_Menu_Quit_f (void);
@@ -93,7 +92,6 @@ void        M_MultiPlayer_Draw (void);
 void        M_Setup_Draw (void);
 void        M_Options_Draw (void);
 void        M_Keys_Draw (void);
-void        M_Video_Draw (void);
 void        M_Help_Draw (void);
 void        M_Quit_Draw (void);
 void        M_LanConfig_Draw (void);
@@ -109,13 +107,19 @@ void        M_MultiPlayer_Key (int key);
 void        M_Setup_Key (int key);
 void        M_Options_Key (int key);
 void        M_Keys_Key (int key);
-void        M_Video_Key (int key);
 void        M_Help_Key (int key);
 void        M_Quit_Key (int key);
 void        M_LanConfig_Key (int key);
 void        M_GameOptions_Key (int key);
 void        M_Search_Key (int key);
 void        M_ServerList_Key (int key);
+
+
+// XXX KB's Thingy(TM)
+void M_Menu_KB_f (void);
+void M_KB_Draw (void);
+void M_KB_Key (int key);
+
 
 qboolean    m_entersound;				// play after drawing a frame, so
 
@@ -1060,10 +1064,7 @@ M_Options_Draw (void)
 	M_Print (16, y, "      HUD on left side"); M_DrawCheckbox (220, y, cl_hudswap->ivalue); y += 8;
 	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->ivalue); y += 8;
 	M_Print (16, y, "      Graphics Options"); y += 8;
-
-	if (vid_menudrawfn) {
-		M_Print (16, y, "         Video Options"); y += 8;
-	}
+	M_Print (16, y, "       KB's Thingy(TM)"); y += 8;
 
 	// cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8, 12 + ((int) (host_realtime * 4) & 1));
@@ -1095,7 +1096,7 @@ M_Options_Key (int k)
 					M_Menu_Gfx_f();
 					break;
 				case 18:
-					M_Menu_Video_f ();
+					M_Menu_KB_f ();
 					break;
 				default:
 					M_AdjustSliders (1);
@@ -1124,13 +1125,6 @@ M_Options_Key (int k)
 		case K_RIGHTARROW:
 			M_AdjustSliders (1);
 			break;
-	}
-
-	if (options_cursor == 18) {
-		if (k == K_UPARROW)
-			options_cursor = 17;
-		else
-			options_cursor = 0;
 	}
 }
 
@@ -1495,30 +1489,6 @@ M_Keys_Key (int k)
 	}
 }
 
-//=============================================================================
-/* VIDEO MENU */
-
-void
-M_Menu_Video_f (void)
-{
-	key_dest = key_menu;
-	m_state = m_video;
-	m_entersound = true;
-}
-
-
-void
-M_Video_Draw (void)
-{
-	(*vid_menudrawfn) ();
-}
-
-
-void
-M_Video_Key (int key)
-{
-	(*vid_menukeyfn) (key);
-}
 
 //=============================================================================
 /* HELP MENU */
@@ -2552,7 +2522,6 @@ M_Init (void)
 	Cmd_AddCommand ("menu_setup", M_Menu_Setup_f);
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
 	Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
-	Cmd_AddCommand ("menu_video", M_Menu_Video_f);
 	Cmd_AddCommand ("help", M_Menu_Help_f);
 	Cmd_AddCommand ("menu_quit", M_Menu_Quit_f);
 }
@@ -2610,10 +2579,6 @@ M_Draw (void)
 			M_Keys_Draw ();
 			break;
 
-		case m_video:
-			M_Video_Draw ();
-			break;
-
 		case m_help:
 			M_Help_Draw ();
 			break;
@@ -2640,6 +2605,10 @@ M_Draw (void)
 
 		case m_gfx:
 			M_Gfx_Draw ();
+			break;
+
+		case m_kbsthingy:
+			M_KB_Draw ();
 			break;
 	}
 
@@ -2691,10 +2660,6 @@ M_Keydown (int key)
 			M_Keys_Key (key);
 			return;
 
-		case m_video:
-			M_Video_Key (key);
-			return;
-
 		case m_help:
 			M_Help_Key (key);
 			return;
@@ -2722,6 +2687,10 @@ M_Keydown (int key)
 		case m_gfx:
 			M_Gfx_Key (key);
 			return;
+
+		case m_kbsthingy:
+			M_KB_Key (key);
+			return;
 	}
 }
 
@@ -2734,5 +2703,52 @@ M_ConfigureNetSubsystem (void)
 	Cbuf_AddText ("stopdemo\n");
 
 	net_hostport = lanConfig_port;
+}
+
+
+// ==========================================================================
+//
+// XXX KB's Thingy(TM)
+//
+// Menusystem tweak playground
+//
+// ==========================================================================
+
+void
+M_Menu_KB_f (void)
+{
+	key_dest = key_menu;
+	m_state = m_kbsthingy;
+	m_entersound = true;
+}
+
+void
+M_KB_Draw (void)
+{
+	qpic_t		*p;
+
+	M_DrawPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp"));
+	p = Draw_CachePic ("gfx/p_option.lmp");
+	M_DrawPic ((320 - p->width) / 2, 4, p);
+
+
+	M_Print (44, 32, "       KB's Thingy(TM)");
+	M_Print (44, 40, "    Menusystem playground");
+
+	M_Print (44, 52, "   Press Escape, this menu");
+	M_Print (44, 60, "   does nothing (for now.)");
+}
+
+void
+M_KB_Key (int key)
+{
+	switch (key) {
+		case K_ESCAPE:
+			M_Menu_Options_f ();
+			break;
+
+		default:
+			break;
+	}
 }
 

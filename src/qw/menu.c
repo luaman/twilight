@@ -56,8 +56,8 @@ void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
 
 enum { m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup,
-	m_options, m_video, m_keys, m_help, m_quit, m_serialconfig,
-	m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist, m_gfx
+	m_options, m_keys, m_help, m_quit, m_serialconfig, m_modemconfig,
+	m_lanconfig, m_gameoptions, m_search, m_slist, m_gfx
 } m_state;
 
 void        M_Menu_Main_f (void);
@@ -68,7 +68,6 @@ void        M_Menu_MultiPlayer_f (void);
 void        M_Menu_Setup_f (void);
 void        M_Menu_Options_f (void);
 void        M_Menu_Keys_f (void);
-void        M_Menu_Video_f (void);
 void		M_Menu_Gfx_f (void);
 void        M_Menu_Help_f (void);
 void        M_Menu_Quit_f (void);
@@ -87,7 +86,6 @@ void        M_MultiPlayer_Draw (void);
 void        M_Setup_Draw (void);
 void        M_Options_Draw (void);
 void        M_Keys_Draw (void);
-void        M_Video_Draw (void);
 void        M_Help_Draw (void);
 void        M_Quit_Draw (void);
 void        M_SerialConfig_Draw (void);
@@ -105,7 +103,6 @@ void        M_MultiPlayer_Key (int key);
 void        M_Setup_Key (int key);
 void        M_Options_Key (int key);
 void        M_Keys_Key (int key);
-void        M_Video_Key (int key);
 void        M_Help_Key (int key);
 void        M_Quit_Key (int key);
 void        M_SerialConfig_Key (int key);
@@ -355,7 +352,7 @@ M_Main_Key (int key)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	19
+#define	OPTIONS_ITEMS	18
 
 #define	SLIDER_RANGE	10
 
@@ -503,10 +500,6 @@ M_Options_Draw (void)
 	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->ivalue); y += 8;
 	M_Print (16, y, "      Graphics Options"); y += 8;
 
-	if (vid_menudrawfn)
-		M_Print (16, y, "         Video Options"); y += 8;
-
-
 	// cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8, 12 + ((int) (cls.realtime * 4) & 1));
 }
@@ -536,9 +529,6 @@ M_Options_Key (int k)
 				case 17:
 					M_Menu_Gfx_f ();
 					break;
-				case 18:
-					M_Menu_Video_f ();
-					break;
 				default:
 					M_AdjustSliders (1);
 					break;
@@ -566,13 +556,6 @@ M_Options_Key (int k)
 		case K_RIGHTARROW:
 			M_AdjustSliders (1);
 			break;
-	}
-
-	if (options_cursor == 18) {
-		if (k == K_UPARROW)
-			options_cursor = 17;
-		else
-			options_cursor = 0;
 	}
 }
 
@@ -937,31 +920,6 @@ M_Keys_Key (int k)
 }
 
 //=============================================================================
-/* VIDEO MENU */
-
-void
-M_Menu_Video_f (void)
-{
-	key_dest = key_menu;
-	m_state = m_video;
-	m_entersound = true;
-}
-
-
-void
-M_Video_Draw (void)
-{
-	(*vid_menudrawfn) ();
-}
-
-
-void
-M_Video_Key (int key)
-{
-	(*vid_menukeyfn) (key);
-}
-
-//=============================================================================
 /* HELP MENU */
 
 int         help_page;
@@ -1245,7 +1203,6 @@ M_Init (void)
 	Cmd_AddCommand ("menu_main", M_Menu_Main_f);
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
 	Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
-	Cmd_AddCommand ("menu_video", M_Menu_Video_f);
 	Cmd_AddCommand ("help", M_Menu_Help_f);
 	Cmd_AddCommand ("menu_quit", M_Menu_Quit_f);
 }
@@ -1301,10 +1258,6 @@ M_Draw (void)
 
 		case m_keys:
 			M_Keys_Draw ();
-			break;
-
-		case m_video:
-			M_Video_Draw ();
 			break;
 
 		case m_help:
@@ -1390,10 +1343,6 @@ M_Keydown (int key)
 
 		case m_keys:
 			M_Keys_Key (key);
-			return;
-
-		case m_video:
-			M_Video_Key (key);
 			return;
 
 		case m_help:
