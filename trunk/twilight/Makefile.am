@@ -4,12 +4,8 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-if CLIENTS
 clients = nq qw
-endif
-if SERVERS
 servers = qw-server
-endif
 
 SUBDIRS=include src doc tools $(clients) $(servers)
 

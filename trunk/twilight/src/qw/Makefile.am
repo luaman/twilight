@@ -14,17 +14,20 @@ INCLUDES= \
 LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_qw_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 
+if CLIENTS
 bin_PROGRAMS=twilight-qw
-
-# FIXME: while -qwsv builds in a different directory, we need a way to export
-# the needed objects to it.  This library needs to go away.
-lib_LIBRARIES=libqwsv.a
-
 twilight_qw_LDADD= \
 	$(top_builddir)/src/base/libtwilight_base.a \
 	$(top_builddir)/src/image/libtwilight_image.a \
 	$(top_builddir)/src/renderer/libtwilight_renderer.a \
 	$(top_builddir)/src/sound/libtwilight_sound.a
+endif
+
+if SERVERS
+# FIXME: while -qwsv builds in a different directory, we need a way to export
+# the needed objects to it.  This library needs to go away.
+lib_LIBRARIES=libqwsv.a
+endif
 
 if SYS_WIN32
 twilight_qw_sys_libs=-lwinmm -lwsock32
