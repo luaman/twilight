@@ -175,14 +175,14 @@ Draw_CachePic (char *path)
 			return &pic->pic;
 
 	if (menu_numcachepics == MAX_CACHED_PICS)
-		Sys_Error ("menu_numcachepics == MAX_CACHED_PICS");
+		Host_EndGame ("menu_numcachepics == MAX_CACHED_PICS");
 	menu_numcachepics++;
 	strcpy (pic->name, path);
 
 	/* load the pic from disk */
 	dat = (qpic_t *) COM_LoadTempFile (path, true);
 	if (!dat)
-		Sys_Error ("Draw_CachePic: failed to load %s", path);
+		Host_EndGame ("Draw_CachePic: failed to load %s", path);
 	SwapPic (dat);
 
 	/*	HACK HACK HACK --- we need to keep the bytes for
@@ -1135,7 +1135,7 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 	scaled_height = max (scaled_height, 1);
 
 	if (scaled_width * scaled_height > sizeof (scaled) / 4)
-		Sys_Error ("GL_LoadTexture: too big");
+		Host_EndGame ("GL_LoadTexture: too big");
 
 	samples = alpha ? gl_alpha_format : gl_solid_format;
 
@@ -1235,7 +1235,7 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha,
 			alpha = false;
 	} else {
 		if (s & 3)
-			Sys_Error ("GL_Upload8: s&3");
+			Host_EndGame ("GL_Upload8: s&3");
 		for (i = 0; i < s; i += 4)
 		{
 			trans[i] = table[data[i]];

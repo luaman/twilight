@@ -355,7 +355,7 @@ CalcFov (float fov_x, float width, float height)
 	float		a;
 
 	if (fov_x < 1 || fov_x > 179)
-		Sys_Error ("Bad fov: %f", fov_x);
+		Host_EndGame ("Bad fov: %f", fov_x);
 
 	x = width / Q_tan (fov_x * (M_PI / 360));
 	a = Q_atan (height / x) * (360 / M_PI);

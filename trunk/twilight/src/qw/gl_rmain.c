@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "view.h"
 #include "r_explosion.h"
+#include "host.h"
 
 entity_t *currententity;
 int r_framecount;						// used for dlight push checking
@@ -1509,7 +1510,7 @@ R_RenderView (void)
 		return;
 
 	if (!cl.worldmodel)
-		Sys_Error ("R_RenderView: NULL worldmodel");
+		Host_EndGame ("R_RenderView: NULL worldmodel");
 
 	if (r_speeds->value)
 	{

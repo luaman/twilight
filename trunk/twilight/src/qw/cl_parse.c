@@ -891,7 +891,7 @@ void
 CL_NewTranslation (int slot)
 {
 	if (slot > MAX_CLIENTS)
-		Sys_Error ("CL_NewTranslation: slot > MAX_CLIENTS");
+		Host_EndGame ("CL_NewTranslation: slot > MAX_CLIENTS");
 
 	R_TranslatePlayerSkin (slot);
 }
@@ -1030,7 +1030,7 @@ CL_SetStat (int stat, int value)
 	int         j;
 
 	if (stat < 0 || stat >= MAX_CL_STATS)
-		Sys_Error ("CL_SetStat: %i is invalid", stat);
+		Host_EndGame ("CL_SetStat: %i is invalid", stat);
 
 	if (stat == STAT_ITEMS) {			// set flash times
 		for (j = 0; j < 32; j++)
@@ -1214,7 +1214,7 @@ CL_ParseServerMessage (void)
 			case svc_lightstyle:
 				i = MSG_ReadByte ();
 				if (i >= MAX_LIGHTSTYLES)
-					Sys_Error ("svc_lightstyle > MAX_LIGHTSTYLES");
+					Host_EndGame ("svc_lightstyle > MAX_LIGHTSTYLES");
 				strcpy (cl_lightstyle[i].map, MSG_ReadString ());
 				cl_lightstyle[i].length = strlen (cl_lightstyle[i].map);
 				break;

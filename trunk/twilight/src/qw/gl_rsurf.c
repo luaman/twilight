@@ -40,7 +40,7 @@ static const char rcsid[] =
 #include "opengl_ext.h"
 #include "mathlib.h"
 #include "strlib.h"
-#include "sys.h"
+#include "host.h"
 
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128
@@ -310,7 +310,7 @@ store:
 			break;
 
 		default:
-			Sys_Error ("Bad lightmap format");
+			Host_EndGame ("Bad lightmap format");
 	}
 
 	qglTexSubImage2D (GL_TEXTURE_2D, 0, surf->light_s, surf->light_t,
@@ -371,9 +371,9 @@ R_TextureAnimation (texture_t *base)
 	while (base->anim_min > reletive || base->anim_max <= reletive) {
 		base = base->anim_next;
 		if (!base)
-			Sys_Error ("R_TextureAnimation: broken cycle");
+			Host_EndGame ("R_TextureAnimation: broken cycle");
 		if (++count > 100)
-			Sys_Error ("R_TextureAnimation: infinite cycle");
+			Host_EndGame ("R_TextureAnimation: infinite cycle");
 	}
 
 	return base;
@@ -1145,7 +1145,7 @@ AllocBlock (int w, int h, int *x, int *y)
 		return texnum;
 	}
 
-	Sys_Error ("AllocBlock: full");
+	Host_EndGame ("AllocBlock: full");
 	return 0;
 }
 

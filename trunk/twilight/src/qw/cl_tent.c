@@ -40,8 +40,8 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "sound.h"
-#include "sys.h"
 #include "r_explosion.h"
+#include "host.h"
 
 #define	MAX_BEAMS	8
 typedef struct {
@@ -356,7 +356,7 @@ CL_ParseTEnt (void)
 			break;
 
 		default:
-			Sys_Error ("CL_ParseTEnt: bad type");
+			Host_EndGame ("CL_ParseTEnt: bad type");
 	}
 }
 
@@ -372,7 +372,7 @@ CL_NewTempEntity (void)
 	entity_t   *ent;
 
 	if ((cl_num_tmp_entities + 1) >= MAX_ENTITIES)
-		Sys_Error ("Out of entities!");
+		Host_EndGame ("Out of entities!");
 
 	ent = &cl_tmp_entities[cl_num_tmp_entities++];
 

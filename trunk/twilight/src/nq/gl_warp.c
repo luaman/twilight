@@ -55,7 +55,7 @@ int			skyboxtexnum;
 
 int         solidskytexture;
 int         alphaskytexture;
-float       speedscale;					// for top sky and bottom sky
+float		speedscale, speedscale2;	// for top sky and bottom sky
 
 msurface_t *warpface;
 
@@ -301,6 +301,62 @@ EmitSkyPolys (msurface_t *fa)
 }
 
 /*
+=============
+EmitSkyPolys
+=============
+*/
+static void
+EmitSkyPolysMTEX (msurface_t *fa)
+{
+	glpoly_t   *p;
+	float      *v;
+	int         i;
+	float       s1, t1, s2, t2;
+	vec3_t      dir;
+	float       length;
+
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglActiveTextureARB (GL_TEXTURE0_ARB);
+	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
+	qglActiveTextureARB (GL_TEXTURE1_ARB);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	qglEnable (GL_TEXTURE_2D);
+	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
+
+	for (p = fa->polys; p; p = p->next) 
+	{
+		qglBegin (GL_POLYGON);
+
+		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE) 
+		{
+			VectorSubtract (v, r_origin, dir);
+			dir[2] *= 3;				// flatten the sphere
+
+			length = 6 * 63 * Q_RSqrt (DotProduct(dir,dir));
+
+			dir[0] *= length;
+			dir[1] *= length;
+
+			s1 = (speedscale + dir[0]) * (1.0 / 128);
+			t1 = (speedscale + dir[1]) * (1.0 / 128);
+
+			s2 = (speedscale2 + dir[0]) * (1.0 / 128);
+			t2 = (speedscale2 + dir[1]) * (1.0 / 128);
+
+			qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, s1, t1);
+			qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, s2, t2);
+			qglVertex3fv (v);
+		}
+
+		qglEnd ();
+	}
+
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglDisable (GL_TEXTURE_2D);
+	qglActiveTextureARB (GL_TEXTURE0_ARB);
+}
+
+/*
 ===============
 EmitBothSkyLayers
 
@@ -316,6 +372,7 @@ EmitBothSkyLayers (msurface_t *fa)
 		return;
 
 	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
+
 	speedscale = cl.time * 8;
 	speedscale -= (int) speedscale & ~127;
 
@@ -323,12 +380,26 @@ EmitBothSkyLayers (msurface_t *fa)
 
 	qglEnable (GL_BLEND);
 	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
+
 	speedscale = cl.time * 16;
 	speedscale -= (int) speedscale & ~127;
 
 	EmitSkyPolys (fa);
+}
 
-	qglDisable (GL_BLEND);
+void
+EmitBothSkyLayersMTEX (msurface_t *fa)
+{
+	if (draw_skybox)
+		return;
+
+	speedscale = cl.time * 8;
+	speedscale -= (int) speedscale & ~127;
+
+	speedscale2 = cl.time * 16;
+	speedscale2 -= (int) speedscale2 & ~127;
+
+	EmitSkyPolysMTEX (fa);
 }
 
 /*
@@ -369,8 +440,12 @@ R_DrawSkyChain (msurface_t *s)
 		return;
 	}
 
-	for (fa = s; fa; fa = fa->texturechain)
-		EmitBothSkyLayers (fa);
+	for (fa = s; fa; fa = fa->texturechain) {
+		if (gl_mtex)
+			EmitBothSkyLayersMTEX (fa);
+		else 
+			EmitBothSkyLayers (fa);
+	}
 }
 
 /*
