@@ -857,8 +857,8 @@ main (int argc, char *argv[])
 		char *tmp = NULL;
 		char lastmap[1024];
 		char wintitle[1024];
-		int lastmaxclients;
-		int lastclients;
+		int lastmaxclients = 0;
+		int lastclients = 0;
 		int updatetitle;
 		Uint i;
 		
