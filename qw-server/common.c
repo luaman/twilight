@@ -664,7 +664,7 @@ void Com_PrintHex (char *str, int len)
 	Com_Printf("\n");
 }
 
-void Com_Printf (char *fmt, ...)
+void Com_Printf (const char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
@@ -687,7 +687,7 @@ void Com_Printf (char *fmt, ...)
 		fprintf (sv_logfile, "%s", msg);
 }
 
-void Com_DPrintf (char *fmt, ...)
+void Com_DPrintf (const char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];

@@ -926,13 +926,15 @@ SV_WalkMove (edict_t *ent)
 	ent->v.velocity[2] = 0;
 	clip = SV_FlyMove (ent, host_frametime, &steptrace);
 
+	if (sv_jumpstep->ivalue || ent->v.movetype == MOVETYPE_FLY)
+		ent->v.velocity[2] += oldvel[2];
+
 	// check for stuckness, possibly due to the limited precision of floats
 	// in the clipping hulls
-	if (clip) {
-		if (fabs (oldorg[1] - ent->v.origin[1]) < 0.03125 &&
-				fabs (oldorg[0] - ent->v.origin[0]) < 0.03125)	// stepping up didn't make any progress
-			clip = SV_TryUnstick (ent, oldvel);
-	}
+	if (clip && fabs (oldorg[1] - ent->v.origin[1]) < 0.03125
+			&& fabs (oldorg[0] - ent->v.origin[0]) < 0.03125)
+		// stepping up didn't make any progress
+		clip = SV_TryUnstick (ent, oldvel);
 
 	// extra friction based on view angle
 	if (clip & 2)

@@ -90,7 +90,7 @@
  */
 SDL_bool DynGL_LoadLibrary (char *name);
 void DynGL_CloseLibrary (void);
-SDL_bool DynGL_GetFunctions (void);
+SDL_bool DynGL_GetFunctions (void (*errfunc)(const char *fmt, ...));
 SDL_bool DynGL_HasExtension (char *ext);
 void DynGL_BadExtension (char *ext);
 
