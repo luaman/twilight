@@ -51,8 +51,6 @@ when crossing a water boudnary.
 
 */
 
-cvar_t     *lcd_x;
-
 cvar_t     *cl_rollspeed;
 cvar_t     *cl_rollangle;
 
@@ -855,9 +853,6 @@ V_Init_Cvars
 void
 V_Init_Cvars (void)
 {
-	// FIXME: make this work sometime...
-	lcd_x = Cvar_Get ("lcd_x", "0", CVAR_NONE, NULL);
-
 	cl_rollspeed = Cvar_Get ("cl_rollspeed", "200", CVAR_NONE, NULL);
 	cl_rollangle = Cvar_Get ("cl_rollangle", "2.0", CVAR_NONE, NULL);
 
@@ -903,9 +898,6 @@ V_Init (void)
 	Cmd_AddCommand ("v_cshift", V_cshift_f);
 	Cmd_AddCommand ("bf", V_BonusFlash_f);
 	Cmd_AddCommand ("centerview", V_StartPitchDrift);
-
-	// FIXME: make this work sometime...
-	lcd_x = Cvar_Get ("lcd_x", "0", CVAR_NONE, NULL);
 
 	cl_rollspeed = Cvar_Get ("cl_rollspeed", "200", CVAR_NONE, NULL);
 	cl_rollangle = Cvar_Get ("cl_rollangle", "2.0", CVAR_NONE, NULL);
