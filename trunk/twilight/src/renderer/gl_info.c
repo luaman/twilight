@@ -71,7 +71,7 @@ GLInfo_CheckDriverQuirks (void)
 {
 	if (strstr (gl_vendor, "NVIDIA")) {		// nVidia drivers.
 		DynGL_BadExtension ("GL_EXT_compiled_vertex_array");
-		Com_Printf ("Disabiling GL_EXT_compiled_vertex_array due to buggy nVidia driver.\n");
+		Com_Printf ("Disabling GL_EXT_compiled_vertex_array due to buggy nVidia driver.\n");
 	}
 
 	if (!strcmp (gl_vendor, "ATI Technologies Inc."))	// ATI drivers.
@@ -79,7 +79,7 @@ GLInfo_CheckDriverQuirks (void)
 		if (!strcmp (gl_version, "1.3.3224 Win2000 Release"))
 		{
 			DynGL_BadExtension ("GL_SGIS_generate_mipmap");
-			Com_Printf ("Disabiling GL_SGIS_generate_mipmap due to buggy ATI driver version.");
+			Com_Printf ("Disabling GL_SGIS_generate_mipmap due to buggy ATI driver version.");
 		}
 	}
 }
