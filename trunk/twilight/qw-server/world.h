@@ -42,7 +42,7 @@ typedef struct {
 	// anything
 	vec3_t      endpos;					// final position
 	plane_t     plane;					// surface normal at impact
-	edict_t    *ent;					// entity the surface is on
+	struct edict_s    *ent;					// entity the surface is on
 } trace_t;
 
 
@@ -68,13 +68,13 @@ void        SV_ClearWorld (void);
 
 // called after the world model has been loaded, before linking any entities
 
-void        SV_UnlinkEdict (edict_t *ent);
+void        SV_UnlinkEdict (struct edict_s *ent);
 
 // call before removing an entity, and before trying to move one,
 // so it doesn't clip against itself
 // flags ent->v.modified
 
-void        SV_LinkEdict (edict_t *ent, qboolean touch_triggers);
+void        SV_LinkEdict (struct edict_s *ent, qboolean touch_triggers);
 
 // Needs to be called any time an entity changes origin, mins, maxs, or solid
 // flags ent->v.modified
@@ -86,10 +86,10 @@ int         SV_PointContents (vec3_t p);
 // returns the CONTENTS_* value from the world at the given point.
 // does not check any entities at all
 
-edict_t    *SV_TestEntityPosition (edict_t *ent);
+struct edict_s    *SV_TestEntityPosition (struct edict_s *ent);
 
 trace_t     SV_Move (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
-					 int type, edict_t *passedict);
+					 int type, struct edict_s *passedict);
 // mins and maxs are reletive
 
 // if the entire move stays in a solid volume, trace.allsolid will be set
@@ -103,7 +103,7 @@ trace_t     SV_Move (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
 // passedict is explicitly excluded from clipping checks (normally NULL)
 
 
-edict_t    *SV_TestPlayerPosition (edict_t *ent, vec3_t origin);
+struct edict_s    *SV_TestPlayerPosition (struct edict_s *ent, vec3_t origin);
 
 #endif // __WORLD_H
 

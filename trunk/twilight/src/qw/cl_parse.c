@@ -39,6 +39,8 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "keys.h"
 #include "glquake.h"
+#include "pmove.h"
+#include "screen.h"
 #include "sound.h"
 
 char       *svc_strings[] = {

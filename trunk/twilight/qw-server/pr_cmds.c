@@ -34,6 +34,12 @@ static const char rcsid[] =
 #endif
 
 #include "qwsvdef.h"
+#include "cmd.h"
+#include "cvar.h"
+#include "model.h"
+#include "progs.h"
+#include "server.h"
+#include "world.h"
 
 #define	RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
 #define	RETURN_STRING(s) (((int *)pr_globals)[OFS_RETURN] = PR_SetString(s))

@@ -35,6 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include "qwsvdef.h"
+#include "cmd.h"
 
 #define	DYNAMIC_SIZE	0x20000
 

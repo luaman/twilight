@@ -34,6 +34,12 @@ static const char rcsid[] =
 #endif
 
 #include "qwsvdef.h"
+#include "cmd.h"
+#include "cvar.h"
+#include "model.h"
+#include "pmove.h"
+#include "progs.h"
+#include "server.h"
 
 quakeparms_t host_parms;
 

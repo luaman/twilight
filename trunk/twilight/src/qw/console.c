@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "cvar.h"
 #include "keys.h"
+#include "screen.h"
 
 int         con_ormask;
 console_t   con_main;

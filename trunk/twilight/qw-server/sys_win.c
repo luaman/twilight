@@ -36,11 +36,12 @@ static const char rcsid[] =
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/timeb.h>
-#include "qwsvdef.h"
 #include <winsock.h>
 #include <conio.h>
 #include <direct.h>
 
+#include "qwsvdef.h"
+#include "cvar.h"
 
 cvar_t     *sys_nostdout;
 

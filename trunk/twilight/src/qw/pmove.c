@@ -34,6 +34,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "pmove.h"
 
 
 movevars_t  movevars;

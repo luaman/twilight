@@ -32,7 +32,10 @@ static const char rcsid[] =
 #include <limits.h>
 #include <pwd.h>
 #include <sys/types.h>
+
 #include "qwsvdef.h"
+#include "cvar.h"
+#include "server.h"
 
 #ifdef NeXT
 #include <libc.h>

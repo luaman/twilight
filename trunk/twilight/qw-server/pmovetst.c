@@ -34,6 +34,8 @@ static const char rcsid[] =
 #endif
 
 #include "qwsvdef.h"
+#include "model.h"
+#include "pmove.h"
 
 static hull_t box_hull;
 static dclipnode_t box_clipnodes[6];

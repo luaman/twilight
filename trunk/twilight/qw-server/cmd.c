@@ -35,6 +35,8 @@ static const char rcsid[] =
 #endif
 
 #include "qwsvdef.h"
+#include "cmd.h"
+#include "cvar.h"
 
 void        Cmd_ForwardToServer (void);
 

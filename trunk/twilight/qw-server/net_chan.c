@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include <time.h>
 
 #include "qwsvdef.h"
+#include "cvar.h"
 
 #define	PACKET_HEADER	8
 

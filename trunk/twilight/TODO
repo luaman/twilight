@@ -23,7 +23,6 @@ These things need to be done before first public release:
 
 Would be nice but is not strictly needed, in importance order:
 
-  - Rebuild Frosty's (irc bot's) source and put it in CVS
   - MySQL-based news
   - Fix targa loader
   - Mac port

@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "view.h"
 
 int         r_dlightframecount;
 

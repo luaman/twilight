@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include <math.h>
 #include <time.h>
 #include "qwsvdef.h"
+#include "model.h"
 
 void        Sys_Error (char *error, ...);
 

@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "keys.h"
 #include "menu.h"
+#include "screen.h"
 
 /*
 

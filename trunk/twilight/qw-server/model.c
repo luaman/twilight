@@ -39,6 +39,7 @@ static const char rcsid[] =
 
 #include "qwsvdef.h"
 #include "mdfour.h"
+#include "model.h"
 
 model_t    *loadmodel;
 char        loadname[32];				// for hunk tags
