@@ -47,7 +47,11 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+
+#ifndef TWILIGHT_QWSV
 #include "client.h"
+#endif
+
 #include "common.h"
 #include "console.h"
 #include "strlib.h"
@@ -165,7 +169,9 @@ Netchan_OutOfBand (netsrc_t sock, netadr_t adr, int length, Uint8 *data)
 
 	// send the datagram
 	// zoid, no input in demo playback mode
+#ifndef TWILIGHT_QWSV
 	if ( !cls.demoplayback )
+#endif
 		NET_SendPacket (sock, send.cursize, send.data, adr);
 }
 
@@ -185,7 +191,6 @@ Netchan_OutOfBandPrint (netsrc_t sock, netadr_t adr, char *format, ...)
 	va_start (argptr, format);
 	vsnprintf (string, sizeof (string), format, argptr);
 	va_end (argptr);
-
 
 	Netchan_OutOfBand (sock, adr, strlen (string), (Uint8 *) string);
 }
@@ -300,7 +305,8 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 	MSG_WriteLong (&send, w2);
 
 	// send the qport if we are a client
-	MSG_WriteShort (&send, cls.qport);
+	if (chan->sock == NS_CLIENT)
+		MSG_WriteShort (&send, chan->qport);
 
 // copy the reliable message to the packet first
 	if (send_reliable) {
@@ -317,7 +323,9 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 	chan->outgoing_time[i] = curtime;
 
 	// zoid, no input in demo playback mode
+#ifndef TWILIGHT_QWSV
 	if ( !cls.demoplayback )
+#endif
 		NET_SendPacket (chan->sock, send.cursize, send.data, chan->remote_address);
 
 	if (chan->cleartime < curtime)
@@ -344,14 +352,21 @@ Netchan_Process (netchan_t *chan)
 {
 	unsigned    sequence, sequence_ack;
 	unsigned    reliable_ack, reliable_message;
+	int         qport;
 
+#ifndef TWILIGHT_QWSV
 	if (!cls.demoplayback && !NET_CompareAdr (net_from, chan->remote_address))
 		return false;
+#endif
 
 // get sequence numbers     
 	MSG_BeginReading ();
 	sequence = MSG_ReadLong ();
 	sequence_ack = MSG_ReadLong ();
+
+	// read the qport if we are a server
+	if ( chan->sock == NS_SERVER )
+		qport = MSG_ReadShort ();
 
 	reliable_message = sequence >> 31;
 	reliable_ack = sequence_ack >> 31;
@@ -416,4 +431,5 @@ Netchan_Process (netchan_t *chan)
 
 	return true;
 }
+
 

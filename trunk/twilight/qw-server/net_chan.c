@@ -45,11 +45,16 @@ static const char rcsid[] =
 #include <time.h>
 
 #include "quakedef.h"
+
+#ifndef TWILIGHT_QWSV
+#include "client.h"
+#endif
+
 #include "common.h"
 #include "console.h"
+#include "strlib.h"
 #include "cvar.h"
 #include "net.h"
-#include "strlib.h"
 
 #define	PACKET_HEADER	8
 
@@ -102,21 +107,21 @@ to the new value before sending out any replies.
 
 */
 
-int         net_drop;
-cvar_t     *showpackets;
-cvar_t     *showdrop;
-cvar_t     *qport;
+int			net_drop;
+cvar_t		*showpackets;
+cvar_t		*showdrop;
+cvar_t		*qport;
 
 /*
 ===============
-Netchan_Init
+Netchan_Init_Cvars
 
 ===============
 */
 void
-Netchan_Init (void)
+Netchan_Init_Cvars (void)
 {
-	int         port;
+	int		port;
 
 	// pick a port value that should be nice and random
 #ifdef _WIN32
@@ -132,6 +137,17 @@ Netchan_Init (void)
 
 /*
 ===============
+Netchan_Init
+
+===============
+*/
+void
+Netchan_Init (void)
+{
+}
+
+/*
+===============
 Netchan_OutOfBand
 
 Sends an out-of-band datagram
@@ -140,18 +156,21 @@ Sends an out-of-band datagram
 void
 Netchan_OutOfBand (netsrc_t sock, netadr_t adr, int length, Uint8 *data)
 {
-	sizebuf_t   send;
-	Uint8       send_buf[MAX_MSGLEN + PACKET_HEADER];
+	sizebuf_t	send;
+	Uint8		send_buf[MAX_MSGLEN + PACKET_HEADER];
 
-// write the packet header
+	// write the packet header
 	SZ_Init (&send, send_buf, sizeof(send_buf));
 
 	MSG_WriteLong (&send, -1);			// -1 sequence means out of band
 	SZ_Write (&send, data, length);
 
-// send the datagram
+	// send the datagram
 	// zoid, no input in demo playback mode
-	NET_SendPacket (sock, send.cursize, send.data, adr);
+#ifndef TWILIGHT_QWSV
+	if ( !cls.demoplayback )
+#endif
+		NET_SendPacket (sock, send.cursize, send.data, adr);
 }
 
 /*
@@ -170,7 +189,6 @@ Netchan_OutOfBandPrint (netsrc_t sock, netadr_t adr, char *format, ...)
 	va_start (argptr, format);
 	vsnprintf (string, sizeof (string), format, argptr);
 	va_end (argptr);
-
 
 	Netchan_OutOfBand (sock, adr, strlen (string), (Uint8 *) string);
 }
@@ -191,12 +209,13 @@ Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 	chan->sock = sock;
 	chan->remote_address = adr;
 	chan->last_received = curtime;
-	chan->qport = qport;
 
 	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
 	chan->message.allowoverflow = true;
 
-	chan->rate = 1.0 / 2500.0;
+	chan->qport = qport;
+
+	chan->rate = 1.0 / 2500;
 }
 
 
@@ -230,7 +249,6 @@ Netchan_CanReliable (netchan_t *chan)
 	return Netchan_CanPacket (chan);
 }
 
-qboolean    ServerPaused (void);
 
 /*
 ===============
@@ -284,6 +302,10 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 	MSG_WriteLong (&send, w1);
 	MSG_WriteLong (&send, w2);
 
+	// send the qport if we are a client
+	if (chan->sock == NS_CLIENT)
+		MSG_WriteShort (&send, chan->qport);
+
 // copy the reliable message to the packet first
 	if (send_reliable) {
 		SZ_Write (&send, chan->reliable_buf, chan->reliable_length);
@@ -298,21 +320,21 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 	chan->outgoing_size[i] = send.cursize;
 	chan->outgoing_time[i] = curtime;
 
-	NET_SendPacket (chan->sock, send.cursize, send.data, chan->remote_address);
+	// zoid, no input in demo playback mode
+#ifndef TWILIGHT_QWSV
+	if ( !cls.demoplayback )
+#endif
+		NET_SendPacket (chan->sock, send.cursize, send.data, chan->remote_address);
 
 	if (chan->cleartime < curtime)
 		chan->cleartime = curtime + send.cursize * chan->rate;
 	else
 		chan->cleartime += send.cursize * chan->rate;
 
-	if (ServerPaused ())
-		chan->cleartime = curtime;
-
 	if (showpackets->value)
 		Con_Printf ("--> s=%i(%i) a=%i(%i) %i\n", chan->outgoing_sequence,
 					send_reliable, chan->incoming_sequence,
 					chan->incoming_reliable_sequence, send.cursize);
-
 }
 
 /*
@@ -330,8 +352,10 @@ Netchan_Process (netchan_t *chan)
 	unsigned    reliable_ack, reliable_message;
 	int         qport;
 
-	if (!NET_CompareAdr (net_from, chan->remote_address))
+#ifndef TWILIGHT_QWSV
+	if (!cls.demoplayback && !NET_CompareAdr (net_from, chan->remote_address))
 		return false;
+#endif
 
 // get sequence numbers     
 	MSG_BeginReading ();
@@ -339,7 +363,8 @@ Netchan_Process (netchan_t *chan)
 	sequence_ack = MSG_ReadLong ();
 
 	// read the qport if we are a server
-	qport = MSG_ReadShort ();
+	if ( chan->sock == NS_SERVER )
+		qport = MSG_ReadShort ();
 
 	reliable_message = sequence >> 31;
 	reliable_ack = sequence_ack >> 31;
@@ -404,4 +429,5 @@ Netchan_Process (netchan_t *chan)
 
 	return true;
 }
+
 
