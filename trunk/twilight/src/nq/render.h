@@ -40,6 +40,7 @@
 #include "matrixlib.h"
 #include "r_part.h"
 #include "gl_alias.h"
+#include "entities.h"
 
 
 #define	MAXCLIPPLANES	11
@@ -78,21 +79,6 @@ typedef struct entity_s {
 	entity_common_t	common;
 } entity_t;
 
-typedef struct {
-	vec3_t      vieworg;
-	vec3_t      viewangles;
-
-	float       fov_x, fov_y;
-
-	int			num_entities;
-	entity_common_t	*entities[MAX_EDICTS];
-} refdef_t;
-
-
-//
-// refresh
-//
-extern refdef_t r_refdef;
 extern vec3_t r_origin, vpn, vright, vup;
 
 extern struct texture_s *r_notexture;

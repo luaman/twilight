@@ -662,7 +662,7 @@ CL_LinkPacketEntities (void)
 		CL_Lerp_OriginAngles (ent);
 		CL_Update_Frame (ent, state->frame, ccl.time);
 
-		V_AddEntity ( ent );
+		R_AddEntity ( &ent->common );
 
 		// add automatic particle trails
 		if (!model->flags || !ent->times || !moved)
@@ -1012,7 +1012,7 @@ CL_LinkPlayers (void)
 		if (!Cam_DrawPlayer (j))
 			continue;
 
-		V_AddEntity ( ent );
+		R_AddEntity ( &ent->common );
 
 		ent->times++;
 
@@ -1168,7 +1168,7 @@ CL_LinkStaticEntites (void)
 				cl_static_entities[i].msg_angles[0], ccls.realtime);
 		CL_Update_Frame (&cl_static_entities[i],
 				cl_static_entities[i].common.frame[0], ccls.realtime);
-		V_AddEntity ( &cl_static_entities[i] );
+		R_AddEntity ( &cl_static_entities[i].common );
 	}
 }
 
@@ -1190,7 +1190,7 @@ CL_EmitEntities (void)
 	if (!cl.validsequence)
 		return;
 
-	V_ClearEntities ();
+	R_ClearEntities ();
 
 	cl_num_tmp_entities = 0;
 

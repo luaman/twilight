@@ -94,250 +94,6 @@ cvar_t *gl_colorlights;
 qboolean colorlights = true;
 
 /*
-=============================================================
-
-  SPRITE MODELS
-
-=============================================================
-*/
-
-/*
-================
-R_GetSpriteFrame
-================
-*/
-static mspriteframe_t *
-R_GetSpriteFrame (entity_common_t *e)
-{
-	msprite_t		   *psprite;
-	mspritegroup_t	   *pspritegroup;
-	mspriteframe_t	   *pspriteframe;
-	int					i, numframes, frame;
-	float			   *pintervals, fullinterval, targettime, time;
-
-	if (!e->real_ent)
-		Sys_Error("No real ent! EVIL!\n");
-
-	psprite = e->model->sprite;
-	frame = e->frame[0];
-
-	if ((frame >= psprite->numframes) || (frame < 0)) {
-		Com_Printf ("R_DrawSprite: no such frame %d\n", frame);
-		frame = 0;
-	}
-
-	if (psprite->frames[frame].type == SPR_SINGLE) {
-		pspriteframe = psprite->frames[frame].frameptr;
-	} else {
-		pspritegroup = (mspritegroup_t *) psprite->frames[frame].frameptr;
-		pintervals = pspritegroup->intervals;
-		numframes = pspritegroup->numframes;
-		fullinterval = pintervals[numframes - 1];
-
-		time = ccl.time;
-
-		/*
-		 * when loading in Mod_LoadSpriteGroup, we guaranteed all interval
-		 * values are positive, so we don't have to worry about division by 0
-		 */
-		targettime = time - ((int) (time / fullinterval)) * fullinterval;
-
-		for (i = 0; i < (numframes - 1); i++) {
-			if (pintervals[i] > targettime)
-				break;
-		}
-
-		pspriteframe = pspritegroup->frames[i];
-	}
-
-	return pspriteframe;
-}
-
-
-/*
-=================
-R_DrawSpriteModel
-
-=================
-*/
-static void
-R_DrawOpaqueSpriteModels ()
-{
-	mspriteframe_t	   *f;
-	float			   *up, *right;
-	vec3_t				v_forward, v_right, v_up;
-	msprite_t		   *psprite;
-	entity_common_t	   *e;
-	int					i, last_tex;
-
-	last_tex = -1;
-	v_index = 0;
-
-	qglEnable (GL_ALPHA_TEST);
-
-	for (i = 0; i < r_refdef.num_entities; i++) {
-		e = r_refdef.entities[i];
-
-		if (e->model->type != mod_sprite)
-			continue;
-
-		/*
-		 * don't even bother culling, because it's just a single polygon without
-		 * a surface cache
-		 */
-		f = R_GetSpriteFrame (e);
-		psprite = e->model->sprite;
-
-		if (last_tex != f->gl_texturenum) {
-			if (v_index) {
-				TWI_PreVDrawCVA (0, v_index);
-				qglDrawArrays (GL_QUADS, 0, v_index);
-				TWI_PostVDrawCVA ();
-				v_index = 0;
-			}
-			last_tex = f->gl_texturenum;
-			qglBindTexture (GL_TEXTURE_2D, last_tex);
-		}
-
-		if (psprite->type == SPR_ORIENTED) {
-			// bullet marks on walls
-			AngleVectors (e->angles, v_forward, v_right, v_up);
-			up = v_up;
-			right = v_right;
-		} else {
-			// normal sprite
-			up = vup;
-			right = vright;
-		}
-
-		VectorSet2(tc_array_v(v_index + 0), 0, 1);
-		VectorSet2(tc_array_v(v_index + 1), 0, 0);
-		VectorSet2(tc_array_v(v_index + 2), 1, 0);
-		VectorSet2(tc_array_v(v_index + 3), 1, 1);
-
-		VectorTwiddle (e->origin, up, f->down,	right, f->left, 1,
-				v_array_v(v_index + 0));
-		VectorTwiddle (e->origin, up, f->up,	right, f->left, 1,
-				v_array_v(v_index + 1));
-		VectorTwiddle (e->origin, up, f->up,	right, f->right, 1,
-				v_array_v(v_index + 2));
-		VectorTwiddle (e->origin, up, f->down,	right, f->right, 1,
-				v_array_v(v_index + 3));
-
-		v_index += 4;
-		if ((v_index + 4) >= MAX_VERTEX_ARRAYS) {
-			TWI_PreVDrawCVA (0, v_index);
-			qglDrawArrays (GL_QUADS, 0, v_index);
-			TWI_PostVDrawCVA ();
-			v_index = 0;
-		}
-	}
-
-	if (v_index) {
-		TWI_PreVDrawCVA (0, v_index);
-		qglDrawArrays (GL_QUADS, 0, v_index);
-		TWI_PostVDrawCVA ();
-		v_index = 0;
-	}
-	qglDisable (GL_ALPHA_TEST);
-}
-
-//============================================================================
-
- /*
-=============
-R_VisEntitiesOnList
-=============
-  */
-static void
-R_VisBrushModels (void)
-{
-	entity_common_t	*e;
-	vec3_t			 mins, maxs;
-	int				 i;
-
-	// First off, the world.
-
-	Vis_MarkLeaves (ccl.worldmodel);
-	Vis_RecursiveWorldNode (ccl.worldmodel->brush->nodes,ccl.worldmodel,r_origin);
-
-	// Now everything else.
-
-	if (!r_drawentities->ivalue)
-		return;
-
-	for (i = 0; i < r_refdef.num_entities; i++) {
-		e = r_refdef.entities[i];
-
-		if (e->model->type == mod_brush) {
-			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
-			if (Vis_CullBox (mins, maxs))
-				continue;
-			R_VisBrushModel (e);
-		}
-	}
-}
-
-static void
-R_DrawOpaqueBrushModels ()
-{
-	entity_common_t	*e;
-	vec3_t			 mins, maxs;
-	int				 i;
-
-	R_DrawTextureChains (ccl.worldmodel, 0, NULL, NULL);
-
-	if (!r_drawentities->ivalue)
-		return;
-
-	for (i = 0; i < r_refdef.num_entities; i++) {
-		e = r_refdef.entities[i];
-
-		if (e->model->type == mod_brush) {
-			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
-			if (Vis_CullBox (mins, maxs))
-				continue;
-
-			R_DrawOpaqueBrushModel (e);
-		}
-	}
-}
-
-static void
-R_DrawAddBrushModels ()
-{
-	entity_common_t	*e;
-	vec3_t			 mins, maxs;
-	int				 i;
-
-	if (r_wateralpha->fvalue == 1)
-		return;
-
-	qglColor4f (1, 1, 1, r_wateralpha->fvalue);
-
-	R_DrawLiquidTextureChains (ccl.worldmodel, false);
-
-	if (!r_drawentities->ivalue) {
-		qglColor4fv (whitev);
-		return;
-	}
-
-	for (i = 0; i < r_refdef.num_entities; i++) {
-		e = r_refdef.entities[i];
-
-		if (e->model->type == mod_brush) {
-			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
-			if (Vis_CullBox (mins, maxs))
-				continue;
-
-			R_DrawAddBrushModel (e);
-		}
-	}
-
-	qglColor4fv (whitev);
-}
-
-/*
 ============
 R_PolyBlend
 ============
@@ -486,26 +242,12 @@ Called by R_RenderView, possibily repeatedly.
 static void
 R_Render3DView (void)
 {
-	R_VisBrushModels ();
-
-	if (sky_type != SKY_FAST) {
-		if (sky_type == SKY_BOX)
-			Sky_Box_Draw ();
-		else if (sky_type == SKY_SPHERE)
-			Sky_Sphere_Draw ();
-		R_DrawBrushDepthSkies ();
-	}
+	R_VisEntities ();
+	R_DrawSkyEntities ();
 
 	R_PushDlights ();
 
-	// adds static entities to the list
-	R_DrawOpaqueBrushModels ();
-
-	// FIXME: For GL_NV_occlusion_query support we should do the tests here.
-	// R_VisAliasModels ();
-	R_DrawOpaqueSpriteModels ();
-	// FIXME: Any way to avoid the arguments sanely?
-	R_DrawOpaqueAliasModels (r_refdef.entities, r_refdef.num_entities, false);
+	R_DrawOpaqueEntities ();
 
 	R_DrawViewModel ();
 
@@ -513,13 +255,11 @@ R_Render3DView (void)
 	qglDepthMask (GL_FALSE);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
 
+	R_DrawAddEntities ();
+
 	R_DrawExplosions ();
 	R_DrawParticles ();
 	R_DrawCoronas ();
-
-	R_DrawAddBrushModels ();
-//	R_DrawAddAliasModels ();		// FIXME: None exist.
-//	R_DrawAddSpriteModels ();		// FIXME: None exist.
 	
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (GL_TRUE);

@@ -583,32 +583,6 @@ V_CalcIntermissionRefdef (void)
 
 /*
 ==================
-V_AddEntity
-==================
-*/
-void
-V_AddEntity ( entity_t *ent )
-{
-	if ( r_refdef.num_entities >= MAX_ENTITIES ) {
-		Host_EndGame ("ERROR! Out of entitys!");
-	}
-
-	r_refdef.entities[r_refdef.num_entities++] = &ent->common;
-}
-
-/*
-==================
-V_ClearEntities
-==================
-*/
-void 
-V_ClearEntities ( void )
-{
-	r_refdef.num_entities = 0;
-}
-
-/*
-==================
 V_CalcRefdef
 
 ==================

@@ -30,7 +30,6 @@ static const char rcsid[] =
 #include <stdlib.h>
 
 #include "quakedef.h"
-#include "client.h"
 #include "cvar.h"
 #include "host.h"
 #include "mathlib.h"
@@ -38,6 +37,21 @@ static const char rcsid[] =
 #include "sys.h"
 #include "sky.h"
 #include "liquid.h"
+#include "gl_info.h"
+#include "light.h"
+#include "gl_arrays.h"
+#include "vis.h"
+#include "cclient.h"
+#include "entities.h"
+
+#define BACKFACE_EPSILON 0.01
+
+extern cvar_t *r_stainmaps;
+extern cvar_t *r_drawentities;
+extern cvar_t *r_dynamic;
+extern cvar_t *gl_flashblend;
+extern Uint c_brush_polys;
+extern int d_lightstylevalue[256];
 
 extern int lightmap_bytes;				// 1, 3, or 4
 extern int lightmap_shift;
@@ -57,11 +71,6 @@ R_InitSurf (void)
 		dlightdivtable[i] = 4194304 / (i << 7);
 }
 
-/*
-===============
-R_AddDynamicLights
-===============
-*/
 static int
 R_AddDynamicLights (msurface_t *surf, matrix4x4_t *invmatrix)
 {
@@ -198,11 +207,6 @@ R_StainBlendTexel (Sint64 k, int *icolor, Uint8 *bl)
 		return false;
 }
 
-/*
-===============
-R_StainNode
-===============
-*/
 static void
 R_StainNode (mnode_t *node, model_t *model, vec3_t origin, float radius,
 		int icolor[8])
@@ -345,11 +349,6 @@ loc0:
 }
 
 
-/*
-===============
-R_Stain
-===============
-*/
 void
 R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 		int cr2, int cg2, int cb2, int ca2)
@@ -377,9 +376,9 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 			model, origin, radius, icolor);
 
 	// look for embedded bmodels
-	for (n = 1; n < MAX_EDICTS; n++)
+	for (n = 0; n < r_refdef.num_entities; n++)
 	{
-		ent = &cl_network_entities[n].common;
+		ent = r_refdef.entities[n];
 		model = ent->model;
 		if (model && model->name[0] == '*')
 		{
@@ -395,8 +394,6 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 
 /*
 ===============
-R_BuildLightmap
-
 Combine and scale multiple lightmaps into the 8.8 format in blocklights
 ===============
 */
@@ -549,8 +546,6 @@ GL_UpdateLightmap (model_t *mod, msurface_t *fa, matrix4x4_t *invmatrix)
 
 /*
 ===============
-R_TextureAnimation
-
 Returns the proper texture for a given time and base texture
 ===============
 */
@@ -580,15 +575,6 @@ R_TextureAnimation (texture_t *base, int frame)
 
 	return base;
 }
-
-
-/*
-=============================================================
-
-	BRUSH MODELS
-
-=============================================================
-*/
 
 void
 R_DrawBrushDepthSkies (void)
@@ -626,12 +612,6 @@ R_DrawBrushDepthSkies (void)
 	}
 }
 
-/*
-================
-R_RenderBrushPolys
-================
-*/
-
 static inline void
 R_RenderBrushPolys (glpoly_t *p)
 {
@@ -660,11 +640,6 @@ R_DrawLiquidTextureChains (model_t *mod, qboolean arranged)
 	}
 }
 
-/*
-================
-R_DrawTextureChains
-================
-*/
 void
 R_DrawTextureChains (model_t *mod, int frame,
 		matrix4x4_t *matrix, matrix4x4_t *invmatrix)
@@ -892,11 +867,6 @@ R_DrawTextureChains (model_t *mod, int frame,
 		qglPopMatrix ();
 }
 
-/*
-=================
-R_VisBrushModel
-=================
-*/
 void
 R_VisBrushModel (entity_common_t *e)
 {
@@ -939,11 +909,6 @@ R_VisBrushModel (entity_common_t *e)
 	}
 }
 
-/*
-=================
-R_DrawOpaqueBrushModel
-=================
-*/
 void
 R_DrawOpaqueBrushModel (entity_common_t *e)
 {
@@ -964,11 +929,6 @@ R_DrawOpaqueBrushModel (entity_common_t *e)
 	R_DrawTextureChains(mod, e->frame[0], &e->matrix, &e->invmatrix);
 }
 
-/*
-=================
-R_DrawAddBrushModel
-=================
-*/
 void
 R_DrawAddBrushModel (entity_common_t *e)
 {
@@ -981,4 +941,93 @@ R_DrawAddBrushModel (entity_common_t *e)
 	R_DrawLiquidTextureChains (mod, false);
 
 	qglPopMatrix ();
+}
+
+
+void
+R_VisBrushModels (void)
+{
+	entity_common_t	*ce;
+	vec3_t			mins, maxs;
+	int				i;
+
+	// First off, the world.
+
+	Vis_MarkLeaves (ccl.worldmodel);
+	Vis_RecursiveWorldNode (ccl.worldmodel->brush->nodes,ccl.worldmodel,r_origin);
+
+	// Now everything else.
+
+	if (!r_drawentities->ivalue)
+		return;
+
+	for (i = 0; i < r_refdef.num_entities; i++) {
+		ce = r_refdef.entities[i];
+
+		if (ce->model->type == mod_brush) {
+			Mod_MinsMaxs (ce->model, ce->origin, ce->angles, mins, maxs);
+			if (Vis_CullBox (mins, maxs))
+				continue;
+			R_VisBrushModel (ce);
+		}
+	}
+}
+
+void
+R_DrawOpaqueBrushModels ()
+{
+	entity_common_t	*ce;
+	vec3_t			mins, maxs;
+	int				i;
+
+	R_DrawTextureChains (ccl.worldmodel, 0, NULL, NULL);
+
+	if (!r_drawentities->ivalue)
+		return;
+
+	for (i = 0; i < r_refdef.num_entities; i++) {
+		ce = r_refdef.entities[i];
+
+		if (ce->model->type == mod_brush) {
+			Mod_MinsMaxs (ce->model, ce->origin, ce->angles, mins, maxs);
+			if (Vis_CullBox (mins, maxs))
+				continue;
+
+			R_DrawOpaqueBrushModel (ce);
+		}
+	}
+}
+
+void
+R_DrawAddBrushModels ()
+{
+	entity_common_t	*ce;
+	vec3_t			mins, maxs;
+	int				i;
+
+	if (r_wateralpha->fvalue == 1)
+		return;
+
+	qglColor4f (1, 1, 1, r_wateralpha->fvalue);
+
+	R_DrawLiquidTextureChains (ccl.worldmodel, false);
+
+	if (!r_drawentities->ivalue) {
+		qglColor4fv (whitev);
+		return;
+	}
+
+	for (i = 0; i < r_refdef.num_entities; i++) {
+		ce = r_refdef.entities[i];
+
+		if (ce->model->type == mod_brush) {
+			Mod_MinsMaxs (ce->model, ce->origin, ce->angles, mins, maxs);
+			if (Vis_CullBox (mins, maxs))
+				continue;
+
+			R_DrawAddBrushModel (ce);
+		}
+	}
+
+	qglColor4fv (whitev);
 }

@@ -456,7 +456,7 @@ CL_RelinkEntities (void)
 // determine partial update time    
 	frac = CL_LerpPoint ();
 
-	V_ClearEntities ();
+	R_ClearEntities ();
 
 //
 // interpolate player info
@@ -545,13 +545,13 @@ CL_RelinkEntities (void)
 		if (i == cl.viewentity && !chase_active->ivalue)
 			continue;
 
-		V_AddEntity ( ent );
+		R_AddEntity ( &ent->common );
 	}
 
 	for (i = 0; i < cl.num_statics; i++) {
 		cl_static_entities[i].visframe = vis_framecount;
 
-		V_AddEntity ( &cl_static_entities[i] );
+		R_AddEntity ( &cl_static_entities[i].common );
 	}
 }
 
