@@ -396,7 +396,7 @@ M_Draw (void)
 
 
 static void
-M_Handle_Key (menu_item_t *item, int key)
+M_Handle_Key (menu_item_t *item, int key, char ascii)
 {
 	S_LocalSound ("misc/menu3.wav");
 	switch (item->type) {
@@ -548,9 +548,10 @@ M_Handle_Key (menu_item_t *item, int key)
 				menu_item_text_entry_t	*text = &item->u.text_entry;
 
 				i = text->cvar->s_len;
-				if ((key >= text->min_valid) && (key <= text->max_valid)) {
+				if ((ascii >= text->min_valid) && (ascii <= text->max_valid)) {
 					if ((i + 1) <= text->max_len)
-						Cvar_Set(text->cvar, va("%s%c",text->cvar->svalue,key));
+						Cvar_Set(text->cvar,
+								va("%s%c", text->cvar->svalue, ascii));
 				} else if (key == K_BACKSPACE || key == K_LEFTARROW) {
 					if (i >= 1) {
 						str = strdup(text->cvar->svalue);
@@ -568,7 +569,7 @@ M_Handle_Key (menu_item_t *item, int key)
 }
 
 void
-M_Keydown (int key)
+M_Keydown (int key, char ascii)
 {
 	menu_t		*menu = m_menu;
 	menu_item_t	*item = menu->items[menu->item];
@@ -607,7 +608,7 @@ up_start:
 			break;
 
 		default:
-			M_Handle_Key (item, key);
+			M_Handle_Key (item, key, ascii);
 			break;
 	}
 }

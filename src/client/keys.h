@@ -131,7 +131,7 @@ extern Uint32 chat_bufferlen;
 void Key_WriteBindings(SDL_RWops *rw);
 void Key_Init(void);
 void Key_Init_Cvars(void);
-void Key_Event(int key, qboolean down);
+void Key_Event(int key, char ascii, qboolean down);
 
 #endif // __KEYS_H
 

@@ -101,6 +101,10 @@ SOURCE=.\hud.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\input.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\keys.c
 # End Source File
 # Begin Source File

@@ -33,6 +33,8 @@ void		IN_Init (void);
 
 void		IN_Shutdown (void);
 
+void		IN_SendKeyEvents (void);
+
 // add additional movement on top of the keyboard move cmd
 void		IN_Move (usercmd_t *cmd);
 

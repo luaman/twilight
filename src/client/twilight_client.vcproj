@@ -130,6 +130,9 @@
 				RelativePath=".\hud.c">
 			</File>
 			<File
+				RelativePath=".\input.c">
+			</File>
+			<File
 				RelativePath=".\keys.c">
 			</File>
 		</Filter>

@@ -49,7 +49,6 @@ key up events are sent even if in console mode
 
 char		key_lines[32][MAX_INPUTLINE];
 int			key_linepos;
-static int	shift_down = false;
 static int	ctrl_down = false;
 static int	key_lastpress;
 
@@ -68,8 +67,6 @@ static qboolean		consolekeys[256];	// if true, can't be rebound while in
 										// console
 static qboolean		menubound[256];		// if true, can't be rebound while in
 										// menu
-static int			keyshift[256];		// key to map to if shift held down in
-										// console
 static Uint			key_repeats[256];	// if > 1, it is autorepeating
 static qboolean		keydown[256];
 
@@ -208,7 +205,7 @@ Interactive line editing and console scrollback
 ====================
 */
 static void
-Key_Console (int key)
+Key_Console (int key, char ascii)
 {
 	if (key == K_ENTER)
 	{
@@ -359,7 +356,7 @@ Key_Console (int key)
 	if (Sys_CheckClipboardPaste(key))
 		return;
 
-	if (key < 32 || key > 127)
+	if (!ascii)
 		return;							// non printable
 
 	if (key_linepos < MAX_INPUTLINE - 1)
@@ -373,7 +370,7 @@ Key_Console (int key)
 		for (; i >= key_linepos; i--)
 			key_lines[edit_line][i + 1] = key_lines[edit_line][i];
 
-		key_lines[edit_line][key_linepos++] = key;
+		key_lines[edit_line][key_linepos++] = ascii;
 	}
 
 }
@@ -385,7 +382,7 @@ char		chat_buffer[MAX_INPUTLINE];
 Uint32		chat_bufferlen = 0;
 
 static void
-Key_Message (int key)
+Key_Message (int key, char ascii)
 {
 
 	if (key == K_ENTER) {
@@ -409,9 +406,6 @@ Key_Message (int key)
 		return;
 	}
 
-	if (key < 32 || key > 127)
-		return;							// non printable
-
 	if (key == K_BACKSPACE) {
 		if (chat_bufferlen) {
 			chat_bufferlen--;
@@ -423,7 +417,10 @@ Key_Message (int key)
 	if (chat_bufferlen == sizeof (chat_buffer) - 1)
 		return;							// all full
 
-	chat_buffer[chat_bufferlen++] = key;
+	if (!ascii)
+		return;							// non printable
+
+	chat_buffer[chat_bufferlen++] = ascii;
 	chat_buffer[chat_bufferlen] = 0;
 }
 
@@ -445,7 +442,7 @@ Key_StringToKeynum (const char *str)
 	if (!str || !str[0])
 		return -1;
 	if (!str[1])
-		return str[0];
+		return tolower(str[0]);
 
 	for (kn = keynames; kn->name; kn++) {
 		if (!strcasecmp (str, kn->name))
@@ -724,32 +721,6 @@ Key_Init (void)
 	consolekeys['`'] = false;
 	consolekeys['~'] = false;
 
-	for (i = 0; i < 256; i++)
-		keyshift[i] = i;
-	for (i = 'a'; i <= 'z'; i++)
-		keyshift[i] = i - 'a' + 'A';
-	keyshift['1'] = '!';
-	keyshift['2'] = '@';
-	keyshift['3'] = '#';
-	keyshift['4'] = '$';
-	keyshift['5'] = '%';
-	keyshift['6'] = '^';
-	keyshift['7'] = '&';
-	keyshift['8'] = '*';
-	keyshift['9'] = '(';
-	keyshift['0'] = ')';
-	keyshift['-'] = '_';
-	keyshift['='] = '+';
-	keyshift[','] = '<';
-	keyshift['.'] = '>';
-	keyshift['/'] = '?';
-	keyshift[';'] = ':';
-	keyshift['\''] = '"';
-	keyshift['['] = '{';
-	keyshift[']'] = '}';
-	keyshift['`'] = '~';
-	keyshift['\\'] = '|';
-
 	menubound[K_ESCAPE] = true;
 	for (i = 0; i < 12; i++)
 		menubound[K_F1 + i] = true;
@@ -780,12 +751,10 @@ Should NOT be called during an interrupt!
 ===================
 */
 void
-Key_Event (int key, qboolean down)
+Key_Event (int key, char ascii, qboolean down)
 {
 	const char	*kb;
 	char		cmd[1024];
-
-//	Com_Printf ("%d : %d %d : %d\n", key, key_bmap, key_bmap2, down);
 
 	keydown[key] = down;
 
@@ -808,9 +777,6 @@ Key_Event (int key, qboolean down)
 		}
 	}
 
-	if (key == K_SHIFT)
-		shift_down = down;
-
 	if (key == K_CTRL)
 		ctrl_down = down;
 
@@ -822,10 +788,10 @@ Key_Event (int key, qboolean down)
 			return;
 		switch (key_dest) {
 			case key_message:
-				Key_Message (key);
+				Key_Message (key, ascii);
 				break;
 			case key_menu:
-				M_Keydown (key);
+				M_Keydown (key, ascii);
 				break;
 			case key_game:
 			case key_console:
@@ -852,14 +818,6 @@ Key_Event (int key, qboolean down)
 		if (kb && kb[0] == '+') {
 			snprintf (cmd, sizeof(cmd), "-%s %i\n", kb + 1, key);
 			Cbuf_AddText (cmd);
-		}
-		if (keyshift[key] != key) {
-			if (!(kb = keybindings[key_bmap][keyshift[key]]))
-				kb = keybindings[key_bmap2][keyshift[key]];
-			if (kb && kb[0] == '+') {
-				snprintf (cmd, sizeof(cmd), "-%s %i\n", kb + 1, key);
-				Cbuf_AddText (cmd);
-			}
 		}
 		return;
 	}
@@ -897,20 +855,17 @@ Key_Event (int key, qboolean down)
 		return;							// other systems only care about key
 										// down events
 
-	if (shift_down)
-		key = keyshift[key];
-
 	switch (key_dest) {
 		case key_message:
-			Key_Message (key);
+			Key_Message (key, ascii);
 			break;
 		case key_menu:
-			M_Keydown (key);
+			M_Keydown (key, ascii);
 			break;
 
 		case key_game:
 		case key_console:
-			Key_Console (key);
+			Key_Console (key, ascii);
 			break;
 		default:
 			Sys_Error ("Bad key_dest");
