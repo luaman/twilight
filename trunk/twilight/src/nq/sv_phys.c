@@ -63,6 +63,8 @@ cvar_t *sv_stopspeed;
 cvar_t *sv_gravity;
 cvar_t *sv_maxvelocity;
 cvar_t *sv_nostep;
+cvar_t *sv_jumpstep;
+cvar_t *sv_stepheight;
 
 #define	MOVE_EPSILON	0.01
 
@@ -371,9 +373,13 @@ SV_AddGravity
 void
 SV_AddGravity (edict_t *ent)
 {
-	float       ent_gravity;
-	eval_t     *val;
+	float		ent_gravity;
+	eval_t		*val;
 
+	// Don't let entities fall out of the map
+	if (SV_TestEntityPosition (ent))
+		return;
+	
 	val = GETEDICTFIELDVALUE (ent, eval_gravity);
 	if (val && val->_float)
 		ent_gravity = val->_float;
@@ -864,7 +870,6 @@ SV_WalkMove
 Only used by players
 ======================
 */
-#define	STEPSIZE	18
 void
 SV_WalkMove (edict_t *ent)
 {
@@ -884,11 +889,16 @@ SV_WalkMove (edict_t *ent)
 	if (!(clip & 2))
 		return;	// move didn't block on a step
 
-	if (!oldonground && ent->v.waterlevel == 0)
-		return;	// don't stair up while jumping
+	if (ent->v.movetype != MOVETYPE_FLY)
+	{
+		if (!oldonground && ent->v.waterlevel == 0 && !sv_jumpstep->ivalue)
+			// don't stair up while jumping
+			return;
 
-	if (ent->v.movetype != MOVETYPE_WALK)
-		return;	// gibbed by a trigger
+		if (ent->v.movetype != MOVETYPE_WALK)
+			// gibbed by a trigger
+			return;
+	}
 
 	if (sv_nostep->ivalue)
 		return;
@@ -904,8 +914,8 @@ SV_WalkMove (edict_t *ent)
 
 	VectorClear (upmove);
 	VectorClear (downmove);
-	upmove[2] = STEPSIZE;
-	downmove[2] = -STEPSIZE + oldvel[2] * host_frametime;
+	upmove[2] = sv_stepheight->fvalue;
+	downmove[2] = -sv_stepheight->fvalue + oldvel[2] * host_frametime;
 
 	// move up
 	SV_PushEntity (ent, upmove, vec3_origin);	// FIXME: don't link?
@@ -991,7 +1001,8 @@ SV_Physics_Client (edict_t *ent, int num)
 			if (!SV_RunThink (ent))
 				return;
 			SV_CheckWater (ent);
-			SV_FlyMove (ent, host_frametime, NULL);
+//			SV_FlyMove (ent, host_frametime, NULL);
+			SV_WalkMove (ent);
 			break;
 
 		case MOVETYPE_NOCLIP:
