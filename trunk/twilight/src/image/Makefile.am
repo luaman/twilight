@@ -16,3 +16,6 @@ noinst_HEADERS= \
 libtwilight_image_a_SOURCES= \
 	image.c pcx.c qlmp.c tga.c
 
+EXTRA_DIST = \
+	twilight_image.dsp twilight_image.vcproj
+

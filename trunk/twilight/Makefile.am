@@ -9,6 +9,7 @@ SUBDIRS=src doc
 EXTRA_DIST= \
 	bootstrap \
 	twilight.dsw \
+	twilight.sln \
 	twilight.spec
 
 tbs = $(top_builddir)/src

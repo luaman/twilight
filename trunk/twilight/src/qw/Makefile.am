@@ -59,4 +59,5 @@ twilight_qwsv_SOURCES= \
 	
 
 EXTRA_DIST= \
-	qw.dsp
+	qw.dsp qw.vcproj
+

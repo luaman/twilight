@@ -14,3 +14,6 @@ libtwilight_sound_a_SOURCES= \
 	cdaudio.h sound.h \
 	cdmusic.c mem.c mix.c target.c
 
+EXTRA_DIST = \
+	twilight_sound.dsp twilight_sound.vcproj
+

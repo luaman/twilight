@@ -35,3 +35,6 @@ libtwilight_renderer_a_SOURCES= \
 	sky.c sky.h surface.c surface.h \
 	light.h vis.c vis.h pointers.c pointers.h
 
+EXTRA_DIST = \
+	twilight_renderer.dsp twilight_renderer.vcproj
+

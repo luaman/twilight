@@ -52,5 +52,5 @@ twilight_nq_SOURCES= \
 	$(twilight_nq_sys_sources)
 
 EXTRA_DIST= \
-	nq.dsp
+	nq.dsp nq.vcproj
 
