@@ -457,6 +457,9 @@ R_DrawParticles (void)
 	vec3_t      up, right;
 	float       scale;
 
+	if (!active_particles)
+		return;
+
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
 
 	qglBegin (GL_TRIANGLES);
