@@ -157,12 +157,8 @@ VID_InitTexGamma (void)
 		d_8to32table[i] = (r << 0) + (g << 8) + (b << 16) + (255 << 24);
 #endif
 	}
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	d_8to32table[255] &= 0xffffff00;		// 255 is transparent
-#else
-	d_8to32table[255] &= 0x00ffffff;		// 255 is transparent
-#endif
-	VectorSet4 (d_8tofloattable[255], 1, 1, 1, 0);
+	d_8to32table[255] = 0x00000000;		// 255 is transparent
+	VectorSet4 (d_8tofloattable[255], 0, 0, 0, 0);
 }
 
 static void

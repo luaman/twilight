@@ -55,7 +55,7 @@ extern int  texture_extension_number;
 extern float gldepthmin, gldepthmax;
 
 void        GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
-						 int alpha);
+						 qboolean alpha);
 void		GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, 
 						int alpha, unsigned *table);
 int         GL_LoadTexture (char *identifier, int width, int height,
@@ -231,6 +231,16 @@ extern lpMTexFUNC qglMTexCoord2f;
 extern lpSelTexFUNC qglSelectTexture;
 
 extern qboolean gl_mtexable;
+
+// Vertex array stuff.
+
+#define MAX_VERTEX_ARRAYS   1024
+#define MAX_VERTEX_INDICES  (MAX_VERTEX_ARRAYS * 3)
+extern GLfloat  tc_array[MAX_VERTEX_ARRAYS][2];
+extern GLfloat  v_array[MAX_VERTEX_ARRAYS][3];
+extern GLfloat  c_array[MAX_VERTEX_ARRAYS][4];
+
+extern GLuint vindices[MAX_VERTEX_INDICES];
 
 void        R_DrawWorld (void);
 void        R_RenderBrushPoly (msurface_t *fa);

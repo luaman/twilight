@@ -1305,3 +1305,4 @@ GL_BuildLightmaps (void)
 					  i * BLOCK_WIDTH * BLOCK_HEIGHT * lightmap_bytes);
 	}
 }
+

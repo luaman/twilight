@@ -96,6 +96,7 @@ static Uint8 cs_squaredata[8][8] = {
 	,
 };
 
+
 typedef struct {
 	int         texnum;
 	float       sl, tl, sh, th;
@@ -123,7 +124,7 @@ typedef struct {
 } gltexture_t;
 
 gltexture_t gltextures[MAX_GLTEXTURES];
-int         numgltextures = 0;
+int         numgltextures;
 
 
 //=============================================================================
@@ -282,7 +283,7 @@ Draw_Init_Cvars (void)
 
 	// 3dfx can only handle 256 wide textures
 	if (!strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
-		strstr ((char *) gl_renderer, "Glide"))
+			!strncasecmp ((char *) gl_renderer, "Mesa", 4))
 		Cvar_Set (gl_max_size, "256");
 }
 
@@ -311,9 +312,6 @@ Draw_Init (void)
 
 	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
 	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata, false, true);
-
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	// save a texture slot for translated picture
 	translate_texture = texture_extension_number++;
@@ -357,18 +355,71 @@ Draw_Character (int x, int y, int num)
 	fcol = col * 0.0625;
 	size = 0.0625;
 
+	qglEnable (GL_BLEND);
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (fcol, frow);
-	qglVertex2f (x, y);
-	qglTexCoord2f (fcol + size, frow);
-	qglVertex2f (x + 8, y);
-	qglTexCoord2f (fcol + size, frow + size);
-	qglVertex2f (x + 8, y + 8);
-	qglTexCoord2f (fcol, frow + size);
-	qglVertex2f (x, y + 8);
-	qglEnd ();
+	VectorSet2 (tc_array[0], fcol, frow);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], fcol + size, frow);
+	VectorSet2 (v_array[1], x + 8, y);
+	VectorSet2 (tc_array[2], fcol + size, frow + size);
+	VectorSet2 (v_array[2], x + 8, y + 8);
+	VectorSet2 (tc_array[3], fcol, frow + size);
+	VectorSet2 (v_array[3], x, y + 8);
+	qglDrawArrays (GL_QUADS, 0, 4);
+
+	qglDisable (GL_BLEND);
+}
+
+/*
+================
+Draw_String_Len
+================
+*/
+void
+Draw_String_Len (int x, int y, char *str, int len)
+{
+	float	frow, fcol, size = 0.0625;
+	int		num, i, vnum;
+
+	if (y <= -8)
+		return;							// totally off screen
+	if (!str || !str[0])
+		return;
+
+	qglBindTexture (GL_TEXTURE_2D, char_texture);
+
+	qglEnable (GL_BLEND);
+	vnum = 0;
+
+	for (i = 0; *str && (i < len); i++, x += 8)
+	{
+		if ((num = *str++) != 32)		// Skip drawing spaces.
+		{
+			frow = (float) (num >> 4) * size;
+			fcol = (float) (num & 15) * size;
+			VectorSet2 (tc_array[vnum + 0], fcol, frow);
+			VectorSet2 (v_array[vnum + 0], x, y);
+			VectorSet2 (tc_array[vnum + 1], fcol + size, frow);
+			VectorSet2 (v_array[vnum + 1], x + 8, y);
+			VectorSet2 (tc_array[vnum + 2], fcol + size, frow + size);
+			VectorSet2 (v_array[vnum + 2], x + 8, y + 8);
+			VectorSet2 (tc_array[vnum + 3], fcol, frow + size);
+			VectorSet2 (v_array[vnum + 3], x, y + 8);
+			vnum += 4;
+			if ((vnum + 4) >= MAX_VERTEX_ARRAYS)
+			{
+				qglDrawArrays (GL_QUADS, 0, vnum);
+				vnum = 0;
+			}
+		}
+	}
+	if (vnum)
+	{
+		qglDrawArrays (GL_QUADS, 0, vnum);
+		vnum = 0;
+	}
+	qglDisable (GL_BLEND);
 }
 
 /*
@@ -379,8 +430,20 @@ Draw_String
 void
 Draw_String (int x, int y, char *str)
 {
-	float       frow, fcol;
-	int         num;
+	Draw_String_Len (x, y, str, strlen(str));
+}
+
+
+/*
+================
+Draw_Alt_String_Len
+================
+*/
+void
+Draw_Alt_String_Len (int x, int y, char *str, int len)
+{
+	float	frow, fcol, size = 0.0625;
+	int		num, i, vnum;
 
 	if (y <= -8)
 		return;							// totally off screen
@@ -389,31 +452,38 @@ Draw_String (int x, int y, char *str)
 
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
-	qglBegin (GL_QUADS);
+	qglEnable (GL_BLEND);
+	vnum = 0;
 
-	while (*str)						// stop rendering when out of
-										// characters
+	for (i = 0; *str && (i < len); i++, x += 8)
 	{
-		if ((num = *str++) != 32)		// skip spaces
+		if ((num = *str++ | 0x80) != (32 | 0x80))
 		{
-			frow = (float) (num >> 4) * 0.0625;
-			fcol = (float) (num & 15) * 0.0625;
-			qglTexCoord2f (fcol, frow);
-			qglVertex2f (x, y);
-			qglTexCoord2f (fcol + 0.0625, frow);
-			qglVertex2f (x + 8, y);
-			qglTexCoord2f (fcol + 0.0625, frow + 0.0625);
-			qglVertex2f (x + 8, y + 8);
-			qglTexCoord2f (fcol, frow + 0.0625);
-			qglVertex2f (x, y + 8);
+			frow = (float) (num >> 4) * size;
+			fcol = (float) (num & 15) * size;
+			VectorSet2 (tc_array[vnum + 0], fcol, frow);
+			VectorSet2 (v_array[vnum + 0], x, y);
+			VectorSet2 (tc_array[vnum + 1], fcol + size, frow);
+			VectorSet2 (v_array[vnum + 1], x + 8, y);
+			VectorSet2 (tc_array[vnum + 2], fcol + size, frow + size);
+			VectorSet2 (v_array[vnum + 2], x + 8, y + 8);
+			VectorSet2 (tc_array[vnum + 3], fcol, frow + size);
+			VectorSet2 (v_array[vnum + 3], x, y + 8);
+			vnum += 4;
+			if ((vnum + 4) >= MAX_VERTEX_ARRAYS)
+			{
+				qglDrawArrays (GL_QUADS, 0, vnum);
+				vnum = 0;
+			}
 		}
-
-		x += 8;
 	}
-
-	qglEnd ();
+	if (vnum)
+	{
+		qglDrawArrays (GL_QUADS, 0, vnum);
+		vnum = 0;
+	}
+	qglDisable (GL_BLEND);
 }
-
 
 /*
 ================
@@ -423,137 +493,70 @@ Draw_Alt_String
 void
 Draw_Alt_String (int x, int y, char *str)
 {
-	float       frow, fcol;
-	int         num;
-
-	if (y <= -8)
-		return;							// totally off screen
-	if (!str || !str[0])
-		return;
-
-	qglBindTexture (GL_TEXTURE_2D, char_texture);
-
-	qglBegin (GL_QUADS);
-
-	while (*str)						// stop rendering when out of
-										// characters
-	{
-		if ((num = *str++ | 0x80) != (32 | 0x80)) {
-			frow = (float) (num >> 4) * 0.0625;
-			fcol = (float) (num & 15) * 0.0625;
-			qglTexCoord2f (fcol, frow);
-			qglVertex2f (x, y);
-			qglTexCoord2f (fcol + 0.0625, frow);
-			qglVertex2f (x + 8, y);
-			qglTexCoord2f (fcol + 0.0625, frow + 0.0625);
-			qglVertex2f (x + 8, y + 8);
-			qglTexCoord2f (fcol, frow + 0.0625);
-			qglVertex2f (x, y + 8);
-		}
-
-		x += 8;
-	}
-
-	qglEnd ();
+	Draw_Alt_String_Len (x, y, str, strlen(str));
 }
 
 void
 Draw_Crosshair (void)
 {
 	int         x, y;
+	double		dx, dy;
 	extern vrect_t scr_vrect;
 	unsigned char *pColor;
 
-	if (crosshair->value == 2) {
-		x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
-		y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
-
-		pColor = (Uint8 *) &d_8to32table[(Uint8) crosshaircolor->value];
-		qglColor4ubv (pColor);
-		qglBindTexture (GL_TEXTURE_2D, cs_texture);
-
-		qglBegin (GL_QUADS);
-		qglTexCoord2f (0, 0);
-		qglVertex2f (x - 4, y - 4);
-		qglTexCoord2f (1, 0);
-		qglVertex2f (x + 12, y - 4);
-		qglTexCoord2f (1, 1);
-		qglVertex2f (x + 12, y + 12);
-		qglTexCoord2f (0, 1);
-		qglVertex2f (x - 4, y + 12);
-		qglEnd ();
-		qglColor4f (1, 1, 1, 1);
+	x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
+	y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
+	pColor = (Uint8 *) &d_8to32table[(Uint8) crosshaircolor->value];
+	if ((vid.conheight != vid.height) || (vid.conwidth != vid.width))
+	{
+		dx = (double) x / (double) vid.width;
+		dy = (double) y / (double) vid.height;
+		x = dx * vid.conwidth;
+		y = dy * vid.conheight;
 	}
-	else if (crosshair->value == 3) {
-		x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
-		y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
 
-		pColor = (Uint8 *) &d_8to32table[(Uint8) crosshaircolor->value];
-		qglColor4ubv (pColor);
-		qglBindTexture (GL_TEXTURE_2D, cs_square);
+	switch ((int) crosshair->value)
+	{
+		case 1:
+			Draw_Character (x, y, '+');
+			break;
 
-		qglBegin (GL_QUADS);
-		qglTexCoord2f (0, 0);
-		qglVertex2f (x - 4, y - 4);
-		qglTexCoord2f (1, 0);
-		qglVertex2f (x + 12, y - 4);
-		qglTexCoord2f (1, 1);
-		qglVertex2f (x + 12, y + 12);
-		qglTexCoord2f (0, 1);
-		qglVertex2f (x - 4, y + 12);
-		qglEnd ();
-		qglColor4f (1, 1, 1, 1);
-	} else if (crosshair->value)
-		Draw_Character (
-				scr_vrect.x + scr_vrect.width / 2 - 4 +	cl_crossx->value,
-				scr_vrect.y + scr_vrect.height / 2 - 4 + cl_crossy->value,
-				'+');
-}
+		case 2:
+			qglColor4ubv (pColor);
+			qglBindTexture (GL_TEXTURE_2D, cs_texture);
 
-/*
-================
-Draw_DebugChar
+			qglEnable (GL_BLEND);
+			VectorSet2 (tc_array[0], 0, 0);
+			VectorSet2 (v_array[0], x - 4, y - 4);
+			VectorSet2 (tc_array[1], 1, 0);
+			VectorSet2 (v_array[1], x + 12, y - 4);
+			VectorSet2 (tc_array[2], 1, 1);
+			VectorSet2 (v_array[2], x + 12, y + 12);
+			VectorSet2 (tc_array[3], 0, 1);
+			VectorSet2 (v_array[3], x - 4, y + 12);
+			qglDrawArrays (GL_QUADS, 0, 4);
+			qglColor3f (1, 1, 1);
+			qglDisable (GL_BLEND);
+			break;
 
-Draws a single character directly to the upper right corner of the screen.
-This is for debugging lockups by drawing different chars in different parts
-of the code.
-================
-*/
-void
-Draw_DebugChar (char num)
-{
-}
+		case 3:
+			qglColor4ubv (pColor);
+			qglBindTexture (GL_TEXTURE_2D, cs_square);
 
-/*
-=============
-Draw_AlphaPic
-=============
-*/
-void
-Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
-{
-	glpic_t    *gl;
-
-	gl = (glpic_t *) pic->data;
-//	qglDisable (GL_ALPHA_TEST);
-//	qglEnable (GL_BLEND);
-//  qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//  qglCullFace(GL_FRONT);
-	qglColor4f (1, 1, 1, alpha);
-	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (gl->sl, gl->tl);
-	qglVertex2f (x, y);
-	qglTexCoord2f (gl->sh, gl->tl);
-	qglVertex2f (x + pic->width, y);
-	qglTexCoord2f (gl->sh, gl->th);
-	qglVertex2f (x + pic->width, y + pic->height);
-	qglTexCoord2f (gl->sl, gl->th);
-	qglVertex2f (x, y + pic->height);
-	qglEnd ();
-	qglColor4f (1, 1, 1, 1);
-//	qglEnable (GL_ALPHA_TEST);
-//	qglDisable (GL_BLEND);
+			qglEnable (GL_BLEND);
+			VectorSet2 (tc_array[0], 0, 0);
+			VectorSet2 (v_array[0], x - 4, y - 4);
+			VectorSet2 (tc_array[1], 1, 0);
+			VectorSet2 (v_array[1], x + 12, y - 4);
+			VectorSet2 (tc_array[2], 1, 1);
+			VectorSet2 (v_array[2], x + 12, y + 12);
+			VectorSet2 (tc_array[3], 0, 1);
+			VectorSet2 (v_array[3], x - 4, y + 12);
+			qglDrawArrays (GL_QUADS, 0, 4);
+			qglColor3f (1, 1, 1);
+			qglDisable (GL_BLEND);
+			break;
+	}
 }
 
 
@@ -568,165 +571,22 @@ Draw_Pic (int x, int y, qpic_t *pic)
 	glpic_t    *gl;
 
 	gl = (glpic_t *) pic->data;
-	qglColor4f (1, 1, 1, 1);
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (gl->sl, gl->tl);
-	qglVertex2f (x, y);
-	qglTexCoord2f (gl->sh, gl->tl);
-	qglVertex2f (x + pic->width, y);
-	qglTexCoord2f (gl->sh, gl->th);
-	qglVertex2f (x + pic->width, y + pic->height);
-	qglTexCoord2f (gl->sl, gl->th);
-	qglVertex2f (x, y + pic->height);
-	qglEnd ();
+	qglEnable (GL_BLEND);
+
+	VectorSet2 (tc_array[0], gl->sl, gl->tl);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], gl->sh, gl->tl);
+	VectorSet2 (v_array[1], x + pic->width, y);
+	VectorSet2 (tc_array[2], gl->sh, gl->th);
+	VectorSet2 (v_array[2], x + pic->width, y + pic->height);
+	VectorSet2 (tc_array[3], gl->sl, gl->th);
+	VectorSet2 (v_array[3], x, y + pic->height);
+	qglDrawArrays (GL_QUADS, 0, 4);
+
+	qglDisable (GL_BLEND);
 }
 
-
-/*
-=============
-Draw_TransPic
-=============
-*/
-void
-Draw_TransPic (int x, int y, qpic_t *pic)
-{
-	if (x < 0 || (unsigned) (x + pic->width) > vid.width || y < 0 ||
-		(unsigned) (y + pic->height) > vid.height) {
-		Sys_Error ("Draw_TransPic: bad coordinates");
-	}
-
-	Draw_Pic (x, y, pic);
-}
-
-
-/*
-=============
-Draw_TransPicTranslate
-
-Only used for the player color selection menu
-=============
-*/
-void
-Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 * translation)
-{
-	int         v, u, c;
-	unsigned    trans[64 * 64], *dest;
-	Uint8      *src;
-	int         p;
-
-	qglBindTexture (GL_TEXTURE_2D, translate_texture);
-
-	c = pic->width * pic->height;
-
-	dest = trans;
-	for (v = 0; v < 64; v++, dest += 64) {
-		src = &menuplyr_pixels[((v * pic->height) >> 6) * pic->width];
-		for (u = 0; u < 64; u++) {
-			p = src[(u * pic->width) >> 6];
-			if (p == 255)
-				dest[u] = p;
-			else
-				dest[u] = d_8to32table[translation[p]];
-		}
-	}
-
-	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 64, 64, 0, GL_RGBA,
-				  GL_UNSIGNED_BYTE, trans);
-
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	qglColor3f (1, 1, 1);
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (0, 0);
-	qglVertex2f (x, y);
-	qglTexCoord2f (1, 0);
-	qglVertex2f (x + pic->width, y);
-	qglTexCoord2f (1, 1);
-	qglVertex2f (x + pic->width, y + pic->height);
-	qglTexCoord2f (0, 1);
-	qglVertex2f (x, y + pic->height);
-	qglEnd ();
-}
-
-
-/*
-================
-Draw_ConsoleBackground
-
-================
-*/
-void
-Draw_ConsoleBackground (int lines)
-{
-	int         y;
-	qpic_t	   *conback;
-	glpic_t	   *gl;
-	float		alpha;
-	float		ofs;
-
-	conback = Draw_CachePic ("gfx/conback.lmp");
-	gl = (glpic_t *) conback->data;
-
-	y = (vid.height * 3) >> 2;
-
-	if (cls.state != ca_connected || lines > y)
-		alpha = 1.0;
-	else
-		alpha = (float) (0.6 * lines / y);
-
-	if (gl_constretch->value)
-		ofs = 0.0f;
-	else
-		ofs = (float) ((vid.conheight - lines) / vid.conheight);
-
-	qglColor4f (1.0f, 1.0f, 1.0f, alpha);
-
-	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (gl->sl, gl->tl + ofs);
-	qglVertex2f (0, 0);
-	qglTexCoord2f (gl->sh, gl->tl + ofs);
-	qglVertex2f (vid.conwidth, 0);
-	qglTexCoord2f (gl->sh, gl->th);
-	qglVertex2f (vid.conwidth, lines);
-	qglTexCoord2f (gl->sl, gl->th);
-	qglVertex2f (0, lines);
-	qglEnd ();
-
-	// hack the version number directly into the pic
-	Draw_Alt_String (vid.conwidth - strlen (cl_verstring->string) * 8 - 14,
-			lines - 14, cl_verstring->string);
-
-	qglColor3f (1.0f, 1.0f, 1.0f);
-}
-
-
-/*
-=============
-Draw_TileClear
-
-This repeats a 64*64 tile graphic to fill the screen around a sized down
-refresh window.
-=============
-*/
-void
-Draw_TileClear (int x, int y, int w, int h)
-{
-	qglColor3f (1, 1, 1);
-	qglBindTexture (GL_TEXTURE_2D, *(int *) draw_backtile->data);
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (x / 64.0, y / 64.0);
-	qglVertex2f (x, y);
-	qglTexCoord2f ((x + w) / 64.0, y / 64.0);
-	qglVertex2f (x + w, y);
-	qglTexCoord2f ((x + w) / 64.0, (y + h) / 64.0);
-	qglVertex2f (x + w, y + h);
-	qglTexCoord2f (x / 64.0, (y + h) / 64.0);
-	qglVertex2f (x, y + h);
-	qglEnd ();
-}
 
 void
 Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
@@ -748,17 +608,150 @@ Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
 	newth = newtl + (height * oldglheight) / pic->height;
 
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (newsl, newtl);
-	qglVertex2f (x, y);
-	qglTexCoord2f (newsh, newtl);
-	qglVertex2f (x + width, y);
-	qglTexCoord2f (newsh, newth);
-	qglVertex2f (x + width, y + height);
-	qglTexCoord2f (newsl, newth);
-	qglVertex2f (x, y + height);
-	qglEnd ();
+	VectorSet2 (tc_array[0], newsl, newtl);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], newsh, newtl);
+	VectorSet2 (v_array[1], x + width, y);
+	VectorSet2 (tc_array[2], newsh, newth);
+	VectorSet2 (v_array[2], x + width, y + height);
+	VectorSet2 (tc_array[3], newsl, newth);
+	VectorSet2 (v_array[3], x, y + height);
+	qglDrawArrays (GL_QUADS, 0, 4);
 }
+
+
+/*
+=============
+Draw_TransPicTranslate
+
+Only used for the player color selection menu
+=============
+*/
+void
+Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
+{
+	int         v, u, c;
+	unsigned    trans[64 * 64], *dest;
+	Uint8      *src;
+	int         p;
+
+	qglEnable (GL_BLEND);
+	qglBindTexture (GL_TEXTURE_2D, translate_texture);
+
+	c = pic->width * pic->height;
+
+	dest = trans;
+	for (v = 0; v < 64; v++, dest += 64) {
+		src = &menuplyr_pixels[((v * pic->height) >> 6) * pic->width];
+		for (u = 0; u < 64; u++) {
+			p = src[(u * pic->width) >> 6];
+			if (p == 255)
+				dest[u] = p;
+			else
+				dest[u] = d_8to32table[translation[p]];
+		}
+	}
+
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 64, 64, 0, GL_RGBA,
+				  GL_UNSIGNED_BYTE, trans);
+
+	VectorSet2 (tc_array[0], 0, 0);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], 1, 0);
+	VectorSet2 (v_array[1], x + pic->width, y);
+	VectorSet2 (tc_array[2], 1, 1);
+	VectorSet2 (v_array[2], x + pic->width, y + pic->height);
+	VectorSet2 (tc_array[3], 0, 1);
+	VectorSet2 (v_array[3], x, y + pic->height);
+	qglDrawArrays (GL_QUADS, 0, 4);
+	qglDisable (GL_BLEND);
+}
+
+
+/*
+================
+Draw_ConsoleBackground
+
+================
+*/
+void
+Draw_ConsoleBackground (int lines)
+{
+	int         y;
+	qpic_t	   *conback;
+	glpic_t	   *gl;
+	float		alpha;
+	float		ofs;
+
+	conback = Draw_CachePic ("gfx/conback.lmp");
+	gl = (glpic_t *) conback->data;
+
+	y = (vid.conheight * 3) >> 2;
+
+	if (cls.state != ca_connected || lines > y)
+		alpha = 1.0;
+	else
+		alpha = (float) (0.6 * lines / y);
+
+	if (gl_constretch->value)
+		ofs = 0.0f;
+	else
+		ofs = (float) ((vid.conheight - lines) / vid.conheight);
+
+	if (alpha != 1.0f)
+	{
+		qglColor4f (1.0f, 1.0f, 1.0f, alpha);
+		qglEnable (GL_BLEND);
+	} else
+		qglColor3f (1.0f, 1.0f, 1.0f);
+
+	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
+	VectorSet2 (tc_array[0], gl->sl, gl->tl + ofs);
+	VectorSet2 (v_array[0], 0, 0);
+	VectorSet2 (tc_array[1], gl->sh, gl->tl + ofs);
+	VectorSet2 (v_array[1], vid.conwidth, 0);
+	VectorSet2 (tc_array[2], gl->sh, gl->th);
+	VectorSet2 (v_array[2], vid.conwidth, lines);
+	VectorSet2 (tc_array[3], gl->sl, gl->th);
+	VectorSet2 (v_array[3], 0, lines);
+	qglDrawArrays (GL_QUADS, 0, 4);
+
+	// hack the version number directly into the pic
+	Draw_Alt_String (vid.conwidth - strlen (cl_verstring->string) * 8 - 14,
+			lines - 14, cl_verstring->string);
+
+	if (alpha != 1.0f)
+		qglDisable (GL_BLEND);
+
+	qglColor3f (1.0f, 1.0f, 1.0f);
+}
+
+
+/*
+=============
+Draw_TileClear
+
+This repeats a 64*64 tile graphic to fill the screen around a sized down
+refresh window.
+=============
+*/
+void
+Draw_TileClear (int x, int y, int w, int h)
+{
+	qglBindTexture (GL_TEXTURE_2D, *(int *) draw_backtile->data);
+	VectorSet2 (tc_array[0], x / 64.0, y / 64.0);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (tc_array[1], (x + w) / 64.0, y / 64.0);
+	VectorSet2 (v_array[1], x + w, y);
+	VectorSet2 (tc_array[2], (x + w) / 64.0, (y + h) / 64.0);
+	VectorSet2 (v_array[2], x + w, y + h);
+	VectorSet2 (tc_array[3], x / 64.0, (y + h) / 64.0);
+	VectorSet2 (v_array[3], x, y + h);
+	qglDrawArrays (GL_QUADS, 0, 4);
+}
+
 
 /*
 =============
@@ -772,20 +765,14 @@ Draw_Fill (int x, int y, int w, int h, int c)
 {
 	qglDisable (GL_TEXTURE_2D);
 
-	// Save this for lighthalf later
-//	qglColor3f (((Uint8 *)&d_8to32table[c])[0] / 255.0,
-//			((Uint8 *)&d_8to32table[c])[1] / 255.0,
-//			((Uint8 *)&d_8to32table[c])[2] / 255.0);
 	qglColor4ubv((Uint8 *)&d_8to32table[c]);
 
-	qglBegin (GL_QUADS);
+	VectorSet2 (v_array[0], x, y);
+	VectorSet2 (v_array[1], x + w, y);
+	VectorSet2 (v_array[2], x + w, y + h);
+	VectorSet2 (v_array[3], x, y + h);
+	qglDrawArrays (GL_QUADS, 0, 4);
 
-	qglVertex2f (x, y);
-	qglVertex2f (x + w, y);
-	qglVertex2f (x + w, y + h);
-	qglVertex2f (x, y + h);
-
-	qglEnd ();
 	qglColor3f (1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
 }
@@ -801,55 +788,41 @@ Draw_FadeScreen
 void
 Draw_FadeScreen (void)
 {
-//	qglEnable (GL_BLEND);
+	qglEnable (GL_BLEND);
 	qglDisable (GL_TEXTURE_2D);
 	qglColor4f (0, 0, 0, 0.8);
-	qglBegin (GL_QUADS);
 
-	qglVertex2f (0, 0);
-	qglVertex2f (vid.width, 0);
-	qglVertex2f (vid.width, vid.height);
-	qglVertex2f (0, vid.height);
+	VectorSet2 (v_array[0], 0, 0);
+	VectorSet2 (v_array[1], vid.conwidth, 0);
+	VectorSet2 (v_array[2], vid.conwidth, vid.conheight);
+	VectorSet2 (v_array[3], 0, vid.conheight);
+	qglDrawArrays (GL_QUADS, 0, 4);
 
-	qglEnd ();
-	qglColor4f (1, 1, 1, 1);
+	qglColor3f (1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
-//	qglDisable (GL_BLEND);
+	qglDisable (GL_BLEND);
 }
 
 //=============================================================================
 
 /*
 ================
-Draw_BeginDisc
+Draw_Disc
 
 Draws the little blue disc in the corner of the screen.
 Call before beginning any disc IO.
 ================
 */
 void
-Draw_BeginDisc (void)
+Draw_Disc (void)
 {
 	if (!draw_disc)
 		return;
 	qglDrawBuffer (GL_FRONT);
-	Draw_Pic (vid.width - 24, 0, draw_disc);
+	Draw_Pic (vid.conwidth - 24, 0, draw_disc);
 	qglDrawBuffer (GL_BACK);
 }
 
-
-/*
-================
-Draw_EndDisc
-
-Erases the disc icon.
-Call after completing any disc IO
-================
-*/
-void
-Draw_EndDisc (void)
-{
-}
 
 /*
 ================
@@ -861,48 +834,28 @@ Setup as if the screen was 320*200
 void
 GL_Set2D (void)
 {
-	qglViewport (glx, gly, glwidth, glheight);
+	qglViewport (glx, gly, vid.width, vid.height);
 
 	qglMatrixMode (GL_PROJECTION);
 	qglLoadIdentity ();
-	qglOrtho (0, vid.width, vid.height, 0, -99999, 99999);
+	qglOrtho (0, vid.conwidth, vid.conheight, 0, -99999, 99999);
 
 	qglMatrixMode (GL_MODELVIEW);
 	qglLoadIdentity ();
 
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
-	qglEnable (GL_BLEND);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-//	qglEnable (GL_ALPHA_TEST);
-////  qglDisable (GL_ALPHA_TEST);
-
-	qglColor4f (1, 1, 1, 1);
 }
 
 //====================================================================
 
 /*
 ================
-GL_FindTexture
+R_ResampleTextureLerpLine
 ================
 */
-int
-GL_FindTexture (char *identifier)
-{
-	int         i;
-	gltexture_t *glt;
-
-	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
-		if (!strcmp (identifier, glt->identifier))
-			return gltextures[i].texnum;
-	}
-
-	return -1;
-}
-
-void R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth,
+void
+R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth,
 		int outwidth)
 {
 	int		j, xi, oldx = 0, f, fstep, endx;
@@ -934,12 +887,14 @@ void R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth,
 	}
 }
 
+
 /*
 ================
 R_ResampleTexture
 ================
 */
-void R_ResampleTexture (void *indata, int inwidth, int inheight,
+void
+R_ResampleTexture (void *indata, int inwidth, int inheight,
 		void *outdata, int outwidth, int outheight)
 {
 	if (r_lerpimages->value)
@@ -1109,6 +1064,7 @@ void R_ResampleTexture (void *indata, int inwidth, int inheight,
 	}
 }
 
+
 /*
 ================
 GL_MipMap
@@ -1135,19 +1091,18 @@ GL_MipMap (Uint8 *in, int width, int height)
 	}
 }
 
+
 /*
 ===============
 GL_Upload32
 ===============
 */
-
-/* WARNING this is not reentrant! */
-static Uint32 scaled[1024 * 512];	// [512*256];
 void
 GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
-			 int alpha)
+			 qboolean alpha)
 {
 	int         samples;
+	static Uint32 scaled[1024 * 512];	// [512*256];
 	int         scaled_width, scaled_height;
 
 	for (scaled_width = 1; scaled_width < width; scaled_width <<= 1);
@@ -1168,16 +1123,18 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 
 	texels += scaled_width * scaled_height;
 
-	if (scaled_width == width && scaled_height == height) {
-		if (!mipmap) {
+	if (scaled_width == width && scaled_height == height)
+	{
+		if (!mipmap)
+		{
 			qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width,
 						  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
-			return;
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+					gl_filter_max);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+					gl_filter_max);
 		}
-
 		memcpy (scaled, data, width * height * 4);
 	} else
 		R_ResampleTexture (data, width, height, scaled, scaled_width,
@@ -1185,11 +1142,12 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 
 	qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
 				  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-
-	if (mipmap) {
+	if (mipmap)
+	{
 		int miplevel = 0;
 
-		while (scaled_width > 1 || scaled_height > 1) {
+		while (scaled_width > 1 || scaled_height > 1)
+		{
 			GL_MipMap ((Uint8 *) scaled, scaled_width, scaled_height);
 			scaled_width >>= 1;
 			scaled_height >>= 1;
@@ -1203,7 +1161,8 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 		}
 	}
 
-	if (mipmap) {
+	if (mipmap)
+	{
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 	} else {
@@ -1212,16 +1171,16 @@ GL_Upload32 (Uint32 *data, int width, int height, qboolean mipmap,
 	}
 }
 
+
 /*
 ===============
 GL_Upload8
 ===============
 */
-/* WARNING this is not reentrant! */
-static unsigned trans[640 * 480];	// FIXME, temporary
 void
 GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsigned *ttable)
 {
+	static unsigned trans[640 * 480];	// FIXME, temporary
 	int         i, s = width * height;
 	qboolean    noalpha;
 	int         p;
@@ -1235,16 +1194,16 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsi
 		{
 			p = *data++;
 			if (p < 224)
-				trans[i] = 0; // transparent 
+				trans[i] = 0;			// transparent 
 			else
 				trans[i] = table[p];	// fullbright
 		}
 	}
-	else if (alpha) {
-	// if there are no transparent pixels, make it a 3 component
-	// texture even if it was specified as otherwise
+	else if (alpha)
+	{
 		noalpha = true;
-		for (i = 0; i < s; i++) {
+		for (i = 0; i < s; i++)
+		{
 			p = *data++;
 			if (p == 255)
 				noalpha = false;
@@ -1256,7 +1215,8 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha, unsi
 	} else {
 		if (s & 3)
 			Sys_Error ("GL_Upload8: s&3");
-		for (i = 0; i < s; i += 4) {
+		for (i = 0; i < s; i += 4)
+		{
 			trans[i] = table[data[i]];
 			trans[i + 1] = table[data[i + 1]];
 			trans[i + 2] = table[data[i + 2]];
@@ -1284,25 +1244,25 @@ GL_LoadTexture (char *identifier, int width, int height, Uint8 *data,
 		return 0;
 
 	// see if the texture is already present
-	if (identifier[0]) {
+	if (identifier[0])
+	{
 		crc = CRC_Block (data, width*height);
 
-		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
-			if (!strcmp (identifier, glt->identifier)) {
-
-				if (width == glt->width && height == glt->height && crc == glt->crc)
+		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++)
+		{
+			if (!strcmp (identifier, glt->identifier))
+			{
+				if (width == glt->width && height == glt->height
+						&& crc == glt->crc)
 					return gltextures[i].texnum;
 				else
-					goto setuptexture;	// reload the texture into the same slot	
+					// reload the texture into the same slot
+					goto setuptexture;
 			}
 		}
-	}
-	else {
+	} else {
 		glt = &gltextures[numgltextures];
 	}
-
-	if (numgltextures == MAX_GLTEXTURES)
-		Sys_Error ("GL_LoadTexture: numgltextures == MAX_GLTEXTURES");
 
 	numgltextures++;
 	strcpy (glt->identifier, identifier);
@@ -1348,3 +1308,4 @@ GL_SelectTexture (GLenum target)
 	currenttexture = cnttextures[target];
 	oldtarget = target;
 }
+
