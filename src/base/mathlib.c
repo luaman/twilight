@@ -609,7 +609,7 @@ void
 AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
 	float       angle;
-	float       sr, sp, sy, cr, cp, cy;
+	float       sr = 0.0f, sp, sy, cr = 0.0f, cp, cy;
 
 	angle = angles[0] * (M_PI * 2 / 360);
 	sp = sin (angle);
