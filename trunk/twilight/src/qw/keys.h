@@ -22,6 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // these are the key numbers that should be passed to Key_Event
 //
 
+#ifndef _KEYS_H
+#define _KEYS_H
+
 #include <SDL/SDL_keysym.h>
 
 typedef enum {
@@ -61,3 +64,5 @@ void        Key_Init (void);
 void        Key_WriteBindings (FILE * f);
 void        Key_SetBinding (kgt_t target, knum_t keynum, char *binding);
 void        Key_ClearStates (void);
+
+#endif
