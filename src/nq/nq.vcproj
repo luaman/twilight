@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../include,../client,../image,../renderer,../sound,../../../SDL/include,../src/sound,../src/image"
+				AdditionalIncludeDirectories="../,../base,../client,../fs,../image,../include,../renderer,../sound"
 				PreprocessorDefinitions="_DEBUG;WIN32;_WINDOWS;HAVE_SDL_H"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -38,10 +38,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="wsock32.lib sdl.lib sdlmain.lib"
-				OutputFile="tw-nq-debug.exe"
+				OutputFile="../../tw-nq-debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="../../../SDL/lib"
+				AdditionalLibraryDirectories="../SDL/lib"
 				IgnoreDefaultLibraryNames="libc.lib,libcd.lib,msvcrt.lib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\Debug/tw-nq-debug.pdb"
@@ -87,8 +87,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				OptimizeForProcessor="3"
-				AdditionalIncludeDirectories="../include,../client,../image,../renderer,../sound,../../../SDL/include,../src/sound,../src/image"
+				AdditionalIncludeDirectories="../,../base,../client,../fs,../image,../include,../renderer,../sound"
 				PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;HAVE_SDL_H"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -106,10 +105,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="wsock32.lib sdl.lib sdlmain.lib"
-				OutputFile="tw-nq.exe"
+				OutputFile="../../tw-nq.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="../../../SDL/lib"
+				AdditionalLibraryDirectories="../SDL/lib"
 				IgnoreDefaultLibraryNames="libc.lib"
 				ProgramDatabaseFile=".\Release/tw-nq.pdb"
 				SubSystem="2"
@@ -691,23 +690,20 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="teamplay.c">
+				RelativePath="..\twilight.rc">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
+						Name="VCResourceCompilerTool"
 						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"/>
+						AdditionalIncludeDirectories="\CVS\twilight\twilight\src"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions=""
+						AdditionalIncludeDirectories="\CVS\twilight\twilight\src"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -751,53 +747,9 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl">
-			<File
-				RelativePath="client.h">
-			</File>
-			<File
-				RelativePath="net.h">
-			</File>
-			<File
-				RelativePath="net_dgrm.h">
-			</File>
-			<File
-				RelativePath="net_loop.h">
-			</File>
-			<File
-				RelativePath="net_udp.h">
-			</File>
-			<File
-				RelativePath="pr_execprogram.h">
-			</File>
-			<File
-				RelativePath="progdefs.h">
-			</File>
-			<File
-				RelativePath="progs.h">
-			</File>
-			<File
-				RelativePath="protocol.h">
-			</File>
-			<File
-				RelativePath="render.h">
-			</File>
-			<File
-				RelativePath="screen.h">
-			</File>
-			<File
-				RelativePath="server.h">
-			</File>
-			<File
-				RelativePath="world.h">
-			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
-		</Filter>
+		<File
+			RelativePath="..\twilight.ico">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

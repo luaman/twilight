@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../include,../client,../image,../sound,../../../SDL/include"
+				AdditionalIncludeDirectories="../,../base,../client,../fs,../image,../include,../renderer,../sound"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;HAVE_SDL_H"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -71,8 +71,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				OptimizeForProcessor="3"
-				AdditionalIncludeDirectories="../include,../client,../image,../sound,../../../SDL/include"
+				AdditionalIncludeDirectories="../,../base,../client,../fs,../image,../include,../renderer,../sound"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;HAVE_SDL_H"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -120,6 +119,66 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
+				RelativePath="alias.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="brush.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="draw.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="dyngl.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -140,10 +199,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\entities.c">
-			</File>
-			<File
-				RelativePath="gen_textures.c">
+				RelativePath="entities.c">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -163,7 +219,27 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="gl_alias.c">
+				RelativePath="explosion.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="gen_textures.c">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -203,12 +279,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\gl_brush.c">
-			</File>
-			<File
-				RelativePath=".\gl_draw.c">
-			</File>
-			<File
 				RelativePath="gl_info.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -229,16 +299,27 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\gl_light.c">
+				RelativePath="gl_light.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\gl_main.c">
-			</File>
-			<File
-				RelativePath=".\gl_sprite.c">
-			</File>
-			<File
-				RelativePath="gl_textures.c">
+				RelativePath="gl_main.c">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -278,7 +359,24 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\menu.c">
+				RelativePath="menu.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="mod_alias.c">
@@ -361,7 +459,24 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\palette.c">
+				RelativePath="palette.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="pointers.c">
@@ -382,9 +497,6 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\r_explosion.c">
 			</File>
 			<File
 				RelativePath="r_part.c">
@@ -427,6 +539,26 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="sprite.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="surface.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -447,7 +579,44 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\video.c">
+				RelativePath="textures.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="video.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="vis.c">
@@ -468,88 +637,6 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl">
-			<File
-				RelativePath="dglfuncs.h">
-			</File>
-			<File
-				RelativePath="dyngl.h">
-			</File>
-			<File
-				RelativePath=".\entities.h">
-			</File>
-			<File
-				RelativePath="gen_textures.h">
-			</File>
-			<File
-				RelativePath="gl_alias.h">
-			</File>
-			<File
-				RelativePath="gl_arrays.h">
-			</File>
-			<File
-				RelativePath=".\gl_brush.h">
-			</File>
-			<File
-				RelativePath=".\gl_draw.h">
-			</File>
-			<File
-				RelativePath="gl_info.h">
-			</File>
-			<File
-				RelativePath=".\gl_light.h">
-			</File>
-			<File
-				RelativePath=".\gl_main.h">
-			</File>
-			<File
-				RelativePath=".\gl_sprite.h">
-			</File>
-			<File
-				RelativePath="gl_textures.h">
-			</File>
-			<File
-				RelativePath="light.h">
-			</File>
-			<File
-				RelativePath="liquid.h">
-			</File>
-			<File
-				RelativePath="mod_alias.h">
-			</File>
-			<File
-				RelativePath="mod_alias_disk.h">
-			</File>
-			<File
-				RelativePath="mod_sprite.h">
-			</File>
-			<File
-				RelativePath="mod_sprite_disk.h">
-			</File>
-			<File
-				RelativePath=".\palette.h">
-			</File>
-			<File
-				RelativePath="pointers.h">
-			</File>
-			<File
-				RelativePath="r_part.h">
-			</File>
-			<File
-				RelativePath="sky.h">
-			</File>
-			<File
-				RelativePath="surface.h">
-			</File>
-			<File
-				RelativePath=".\video.h">
-			</File>
-			<File
-				RelativePath="vis.h">
 			</File>
 		</Filter>
 	</Files>

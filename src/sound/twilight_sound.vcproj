@@ -21,11 +21,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				OptimizeForProcessor="3"
-				AdditionalIncludeDirectories="../include,../../../SDL/include"
+				AdditionalIncludeDirectories="../,../include,../base"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;HAVE_SDL_H"
 				StringPooling="TRUE"
-				RuntimeLibrary="4"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\Release/twilight_sound.pch"
@@ -72,10 +71,10 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../include,../../../SDL/include"
+				AdditionalIncludeDirectories="../,../include,../base"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;HAVE_SDL_H"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\Debug/twilight_sound.pch"
 				AssemblerListingLocation=".\Debug/"
@@ -198,16 +197,6 @@
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl">
-			<File
-				RelativePath="cdaudio.h">
-			</File>
-			<File
-				RelativePath="sound.h">
 			</File>
 		</Filter>
 	</Files>

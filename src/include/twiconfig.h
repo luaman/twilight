@@ -56,7 +56,7 @@
 # include "sdlstub.h"
 #endif
 
-#ifndef __GNUC__
+#if !defined(__GNUC__) && (!defined(_MSC_VER) || _MSC_VER < 1300)
 #define __FUNCTION__	"Not A Clue!"
 #endif
 
