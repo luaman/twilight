@@ -61,7 +61,9 @@ static char *argvdummy = " ";
 static char *safeargvs[NUM_SAFE_ARGVS] =
 	{ "-stdvid", "-nolan", "-nosound", "-nocdaudio", "-nojoy", "-nomouse" };
 
+cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;
+cvar_t *fs_userconf;
 cvar_t *fs_userpath;
 cvar_t *registered;
 
