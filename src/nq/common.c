@@ -1707,7 +1707,7 @@ COM_InitFilesystem (void)
 	if (i && i < com_argc - 1)
 		Q_strcpy (com_basedir, com_argv[i + 1]);
 	else
-		Q_strcpy (com_basedir, BASEPATH);
+		Q_strcpy (com_basedir, USERPATH);
 
 	j = Q_strlen (com_basedir);
 

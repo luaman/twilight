@@ -1821,7 +1821,7 @@ COM_InitFilesystem (void)
 	if (i && i < com_argc - 1)
 		strcpy (com_basedir, com_argv[i + 1]);
 	else
-		strcpy (com_basedir, BASEPATH);
+		strcpy (com_basedir, USERPATH);
 
 //
 // -sharedir <path>

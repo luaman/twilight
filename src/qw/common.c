@@ -1501,8 +1501,14 @@ COM_FOpenFile (char *filename, FILE ** file)
 				}
 		} else {
 			// check a file in the directory tree
+			if (filename[0] == '/' || filename[0] == '\\')
+				continue;
+			if (strstr(filename, ".."))
+				continue;
+			/*
 			if (strchr (filename, '/') || strchr (filename, '\\'))
 				continue;
+				*/
 
 			snprintf (netpath, sizeof(netpath), "%s/%s", search->filename, filename);
 
@@ -1834,7 +1840,7 @@ COM_InitFilesystem (void)
 	if (i && i < com_argc - 1)
 		Q_strcpy (com_basedir, com_argv[i + 1]);
 	else
-		Q_strcpy (com_basedir, BASEPATH);
+		Q_strcpy (com_basedir, USERPATH);
 
 //
 // -sharedir <path>
