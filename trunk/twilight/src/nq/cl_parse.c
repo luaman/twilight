@@ -330,7 +330,8 @@ CL_ParseServerInfo (void)
 		{
 			char mapname[MAX_QPATH] = { 0 };
 
-			COM_StripExtension (COM_SkipPath (model_precache[i]), mapname);
+			strncpy (mapname, COM_SkipPath (model_precache[i]), MAX_QPATH);
+			COM_StripExtension (mapname, mapname);
 			Cvar_Set (cl_mapname, mapname);
 		}
 

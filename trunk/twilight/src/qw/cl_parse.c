@@ -281,7 +281,8 @@ Model_NextDownload (void)
 	// all done
 	cl.worldmodel = cl.model_precache[1];
 
-	COM_StripExtension (COM_SkipPath (cl.worldmodel->name), mapname);
+	strncpy (mapname, COM_SkipPath (cl.worldmodel->name), MAX_QPATH);
+	COM_StripExtension (mapname, mapname);
 	Cvar_Set (cl_mapname, mapname);
 
 	R_NewMap ();
