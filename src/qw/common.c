@@ -1099,7 +1099,6 @@ static void
 COM_AddDirectory (const char *dir, Uint32 flags)
 {
 	strlcpy_s (com_gamedir, dir);
-	Sys_mkdir (com_gamedir);
 
 	FS_AddPath (dir, NULL, flags);
 }
@@ -1118,10 +1117,11 @@ COM_AddGameDirectory (const char *dir)
 
 	if (strcmp (fs_userpath->svalue, fs_sharepath->svalue))
 	{
-		// only do this if the share path is not the same as the base path
-		COM_AddDirectory (buf, FS_READ_ONLY);
 		snprintf (buf, sizeof (buf), "%s/%s", fs_userpath->svalue, dir);
 		Sys_mkdir (buf);
+
+		// only do this if the share path is not the same as the base path
+		COM_AddDirectory (buf, FS_READ_ONLY);
 	}
 
 	COM_AddDirectory (buf, 0);
