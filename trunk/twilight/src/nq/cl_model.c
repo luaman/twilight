@@ -47,18 +47,18 @@ static const char rcsid[] =
 #include "sys.h"
 
 
-extern model_t    *loadmodel;
-extern char        loadname[32];				// for hunk tags
+extern model_t	*loadmodel;
+extern char		loadname[32];				// for hunk tags
 
-model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
-void        Mod_LoadAliasModel (model_t *mod, void *buffer);
-void        Mod_LoadSpriteModel (model_t *mod, void *buffer);
-void        Mod_LoadBrushModel (model_t *mod, void *buffer);
+model_t	*Mod_LoadModel (model_t *mod, qboolean crash);
+void	Mod_LoadAliasModel (model_t *mod, void *buffer);
+void	Mod_LoadSpriteModel (model_t *mod, void *buffer);
+void	Mod_LoadBrushModel (model_t *mod, void *buffer);
 
-void		GL_SubdivideSurface (msurface_t *fa);
-void        GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
+void	GL_SubdivideSurface (msurface_t *fa);
+void	GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
 
-cvar_t     *gl_subdivide_size;
+cvar_t	*gl_subdivide_size;
 
 
 /*
@@ -79,12 +79,12 @@ Mod_LoadModel
 Loads a model into the cache
 ==================
 */
-model_t    *
+model_t *
 Mod_LoadModel (model_t *mod, qboolean crash)
 {
-	void       *d;
-	unsigned   *buf;
-	Uint8       stackbuf[1024];			// avoid dirtying the cache heap
+	void		*d;
+	unsigned	*buf;
+	Uint8		stackbuf[1024];			// avoid dirtying the cache heap
 
 	if (!mod->needload) {
 		if (mod->type == mod_alias) {
@@ -146,7 +146,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 qboolean 
 Img_HasFullbrights (Uint8 *pixels, int size)
 {
-    int i;
+    int	i;
 
     for (i = 0; i < size; i++)
         if (pixels[i] >= 224)
@@ -166,12 +166,12 @@ Mod_LoadTextures
 void
 Mod_LoadTextures (lump_t *l)
 {
-	int         i, j, pixels, num, max, altmax;
-	miptex_t   *mt;
-	texture_t  *tx, *tx2;
-	texture_t  *anims[10];
-	texture_t  *altanims[10];
-	dmiptexlump_t *m;
+	int				i, j, pixels, num, max, altmax;
+	miptex_t		*mt;
+	texture_t		*tx, *tx2;
+	texture_t		*anims[10];
+	texture_t		*altanims[10];
+	dmiptexlump_t	*m;
 
 	if (!l->filelen) {
 		loadmodel->textures = NULL;
@@ -335,10 +335,10 @@ Mod_LoadLighting (lump_t *l)
 		memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
 	}
 	else {
-		int i;
-		Uint8 *in, *out, *data;
-		Uint8 d;
-		char litfilename[MAX_OSPATH];
+		int		i;
+		Uint8	*in, *out, *data;
+		Uint8	d;
+		char	litfilename[MAX_OSPATH];
 
 		loadmodel->lightdata = NULL;
 
@@ -449,11 +449,11 @@ Fills in s->texturemins[] and s->extents[]
 void
 CalcSurfaceExtents (msurface_t *s)
 {
-	float       mins[2], maxs[2], val;
-	int         i, j, e;
-	mvertex_t  *v;
-	mtexinfo_t *tex;
-	int         bmins[2], bmaxs[2];
+	float		mins[2], maxs[2], val;
+	int			i, j, e;
+	mvertex_t	*v;
+	mtexinfo_t	*tex;
+	int			bmins[2], bmaxs[2];
 
 	mins[0] = mins[1] = 999999;
 	maxs[0] = maxs[1] = -99999;
@@ -500,10 +500,10 @@ Mod_LoadFaces
 void
 Mod_LoadFaces (lump_t *l)
 {
-	dface_t    *in;
-	msurface_t *out;
-	int         i, count, surfnum;
-	int         planenum, side;
+	dface_t		*in;
+	msurface_t	*out;
+	int			i, count, surfnum;
+	int			planenum, side;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
@@ -681,9 +681,9 @@ Mod_LoadAliasFrame
 void *
 Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame)
 {
-	trivertx_t *pinframe;
-	int         i;
-	daliasframe_t *pdaliasframe;
+	trivertx_t		*pinframe;
+	int				i;
+	daliasframe_t	*pdaliasframe;
 
 	pdaliasframe = (daliasframe_t *) pin;
 
@@ -719,13 +719,13 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame)
 Mod_LoadAliasGroup
 =================
 */
-void       *
+void *
 Mod_LoadAliasGroup (void *pin, maliasframedesc_t *frame)
 {
-	daliasgroup_t *pingroup;
-	int         i, numframes;
-	daliasinterval_t *pin_intervals;
-	void       *ptemp;
+	daliasgroup_t		*pingroup;
+	int					i, numframes;
+	daliasinterval_t	*pin_intervals;
+	void				*ptemp;
 
 	pingroup = (daliasgroup_t *) pin;
 
@@ -773,7 +773,7 @@ Fill background pixels so mipmapping doesn't have haloes - Ed
 */
 
 typedef struct {
-	short       x, y;
+	short	x, y;
 } floodfill_t;
 
 extern unsigned d_8to32table[];
@@ -796,11 +796,11 @@ extern unsigned d_8to32table[];
 void
 Mod_FloodFillSkin (Uint8 *skin, int skinwidth, int skinheight)
 {
-	Uint8       fillcolor = *skin;		// assume this is the pixel to fill
-	floodfill_t fifo[FLOODFILL_FIFO_SIZE];
-	int         inpt = 0, outpt = 0;
-	int         filledcolor = -1;
-	int         i;
+	Uint8		fillcolor = *skin;		// assume this is the pixel to fill
+	floodfill_t	fifo[FLOODFILL_FIFO_SIZE];
+	int			inpt = 0, outpt = 0;
+	int			filledcolor = -1;
+	int			i;
 
 	if (filledcolor == -1) {
 		filledcolor = 0;
@@ -847,17 +847,17 @@ Mod_FloodFillSkin (Uint8 *skin, int skinwidth, int skinheight)
 Mod_LoadAllSkins
 ===============
 */
-void       *
+void *
 Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 {
-	int         i, j, k;
-	char        name[32];
-	int         s;
-	Uint8      *skin;
-	Uint8      *texels;
-	daliasskingroup_t *pinskingroup;
-	int         groupskins;
-	daliasskininterval_t *pinskinintervals;
+	int						i, j, k;
+	char					name[32];
+	int						s;
+	Uint8					*skin;
+	Uint8					*texels;
+	daliasskingroup_t		*pinskingroup;
+	int						groupskins;
+	daliasskininterval_t	*pinskinintervals;
 
 	skin = (Uint8 *) (pskintype + 1);
 
@@ -1022,7 +1022,7 @@ static int nummflags = sizeof(modelflags) / sizeof(modelflags[0]) - 1;
 int
 Mod_FindModelFlags(char *name)
 {
-	int i;
+	int	i;
 
 	for (i = 0; i < nummflags; i++)
 	{
@@ -1047,15 +1047,15 @@ Mod_LoadAliasModel
 void
 Mod_LoadAliasModel (model_t *mod, void *buffer)
 {
-	int         i, j;
-	mdl_t      *pinmodel;
-	stvert_t   *pinstverts;
-	dtriangle_t *pintriangles;
-	int         version, numframes;
-	int         size;
-	daliasframetype_t *pframetype;
-	daliasskintype_t *pskintype;
-	int         start, end, total;
+	int					i, j;
+	mdl_t				*pinmodel;
+	stvert_t			*pinstverts;
+	dtriangle_t			*pintriangles;
+	int					version, numframes;
+	int					size;
+	daliasframetype_t	*pframetype;
+	daliasskintype_t	*pskintype;
+	int					start, end, total;
 
 	start = Hunk_LowMark ();
 
@@ -1233,10 +1233,10 @@ StripLength
 int
 StripLength (int starttri, int startv)
 {
-	int         m1, m2;
-	int         j;
-	mtriangle_t *last, *check;
-	int         k;
+	int			m1, m2;
+	int			j;
+	mtriangle_t	*last, *check;
+	int			k;
 
 	used[starttri] = 2;
 
@@ -1301,10 +1301,10 @@ FanLength
 int
 FanLength (int starttri, int startv)
 {
-	int         m1, m2;
-	int         j;
-	mtriangle_t *last, *check;
-	int         k;
+	int			m1, m2;
+	int			j;
+	mtriangle_t	*last, *check;
+	int			k;
 
 	used[starttri] = 2;
 
@@ -1371,15 +1371,15 @@ for the model, which holds for all frames
 int
 BuildTris (void)
 {
-	int         i, j, k;
-	int         startv;
-	float       s, t;
-	int         len, bestlen;
-	int         besttype = 0;			// shut up gcc
-	int         bestverts[MAXALIASVERTS];
-	int         besttris[MAXALIASVERTS];
-	int         type;
-	int			numcommands = 0;
+	int		i, j, k;
+	int		startv;
+	float	s, t;
+	int		len, bestlen;
+	int		besttype = 0;			// shut up gcc
+	int		bestverts[MAXALIASVERTS];
+	int		besttris[MAXALIASVERTS];
+	int		type;
+	int		numcommands = 0;
 
 	// 
 	// build tristrips
@@ -1455,9 +1455,9 @@ GL_MakeAliasModelDisplayLists
 void
 GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 {
-	int         i, j;
-	int        *cmds;
-	trivertx_t *verts;
+	int			i, j;
+	int			*cmds;
+	trivertx_t	*verts;
 	int			numcommands = BuildTris ();	// trifans or lists
 
 	// save the data out
@@ -1483,13 +1483,13 @@ GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 Mod_LoadSpriteFrame
 =================
 */
-void       *
+void *
 Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 {
-	dspriteframe_t *pinframe;
-	mspriteframe_t *pspriteframe;
-	int         width, height, size, origin[2];
-	char        name[64];
+	dspriteframe_t	*pinframe;
+	mspriteframe_t	*pspriteframe;
+	int				width, height, size, origin[2];
+	char			name[64];
 
 	pinframe = (dspriteframe_t *) pin;
 
@@ -1527,15 +1527,15 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 Mod_LoadSpriteGroup
 =================
 */
-void       *
+void *
 Mod_LoadSpriteGroup (void *pin, mspriteframe_t **ppframe, int framenum)
 {
-	dspritegroup_t *pingroup;
-	mspritegroup_t *pspritegroup;
-	int         i, numframes;
-	dspriteinterval_t *pin_intervals;
-	float      *poutintervals;
-	void       *ptemp;
+	dspritegroup_t		*pingroup;
+	mspritegroup_t		*pspritegroup;
+	int					i, numframes;
+	dspriteinterval_t	*pin_intervals;
+	float				*poutintervals;
+	void				*ptemp;
 
 	pingroup = (dspritegroup_t *) pin;
 
@@ -1585,13 +1585,13 @@ Mod_LoadSpriteModel
 void
 Mod_LoadSpriteModel (model_t *mod, void *buffer)
 {
-	int         i;
-	int         version;
-	dsprite_t  *pin;
-	msprite_t  *psprite;
-	int         numframes;
-	int         size;
-	dspriteframetype_t *pframetype;
+	int					i;
+	int					version;
+	dsprite_t			*pin;
+	msprite_t			*psprite;
+	int					numframes;
+	int					size;
+	dspriteframetype_t	*pframetype;
 
 	pin = (dsprite_t *) buffer;
 
