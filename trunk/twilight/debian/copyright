@@ -1,3 +1,38 @@
+This package was debianized by Joseph Carter <knghtbrd@debian.org> on
+Fri, 24 Aug 2001 13:16:29 -0700.
+
+It was downloaded from http://twilight.sourceforge.net/
+
+Copyright:
+
+    This Copyright notice applies to the source code, except where noted
+    otherwise:
+
+	Copyright (C) 1996-1997  Id Software, Inc
+
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+
+	See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to:
+	
+		Free Software Foundation, Inc.
+		59 Temple Place - Suite 330
+		Boston, MA  02111-1307, USA
+
+    The GNU GPL can be found in /usr/share/common-licenses/GPL for Debian
+    systems.  It may also be found at http://www.gnu.org/licenses/gpl.txt
+
+    Some of the code is under this BSDish license:
+
 			    The 3-clause BDSish license
 
 	Redistribution and use in source and binary forms, with or without

@@ -1,0 +1,14 @@
+Source: twilight
+Section: contrib/games
+Priority: optional
+Maintainer: Joseph Carter <knghtbrd@debian.org>
+Build-Depends: debhelper (>> 3.0.0)
+Standards-Version: 3.5.6
+
+Package: twilight
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: 3D gaming engine based on Quake(R)
+ Project Twilight is nifty, etc.  You want to download it.
+ FIXME: Write a description that is not pathetic!
+

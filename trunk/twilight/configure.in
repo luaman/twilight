@@ -114,6 +114,7 @@ AC_OUTPUT(
 	gamecode/Makefile
 	gamecode/progs/Makefile
 	tools/Makefile
+	debian/Makefile
 )
 
 AC_MSG_RESULT([
