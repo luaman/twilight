@@ -155,7 +155,7 @@ R_CullBox (vec3_t mins, vec3_t maxs)
 R_GetSpriteFrame
 ================
 */
-mspriteframe_t *
+static mspriteframe_t *
 R_GetSpriteFrame (entity_t *currententity)
 {
 	msprite_t  *psprite;
@@ -204,7 +204,7 @@ R_DrawSpriteModel
 
 =================
 */
-void
+static void
 R_DrawSpriteModel (entity_t *e)
 {
 //	vec3_t      point;
@@ -314,7 +314,7 @@ int         lastposenum;
 GL_DrawAliasFrame
 =============
 */
-void
+static void
 GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean fb)
 {
 	float       l;
@@ -393,7 +393,7 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean fb)
 
 	Interpolated model drawing
 */
-void
+static void
 GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 		float blend, qboolean fb)
 {
@@ -492,7 +492,7 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 */
 extern vec3_t lightspot;
 
-void
+static void
 GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 {
 	trivertx_t *verts;
@@ -589,7 +589,7 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
          
 	Interpolated shadow drawing
 */
-void
+static void
 GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
 		entity_t *e)
 {
@@ -707,7 +707,7 @@ R_SetupAliasFrame
 
 =================
 */
-void
+static void
 R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, qboolean fb)
 {
 	int         pose, numposes;
@@ -735,7 +735,7 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, qboolean fb)
 
 
 */
-void
+static void
 R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolean fb)
 {
 	int 	pose, numposes;
@@ -804,7 +804,7 @@ R_DrawAliasModel
 
 =================
 */
-void
+static void
 R_DrawAliasModel (entity_t *e)
 {
 	int         i;
@@ -816,6 +816,16 @@ R_DrawAliasModel (entity_t *e)
 	int			texture, fb_texture, skinnum;
 	dlight_t	*l;
 
+	if (gl_particletorches->value) {
+		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
+			if ((realtime + 2) > e->time_left) {
+				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
+				e->time_left = realtime + 0.05;
+			}
+			return;
+		}
+	}
+
 	if (e != &cl.viewent) {
 		vec3_t      mins, maxs;
 
@@ -824,14 +834,6 @@ R_DrawAliasModel (entity_t *e)
 
 		if (R_CullBox (mins, maxs))
 			return;
-	}
-
-	if (gl_particletorches->value) {
-		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2))
-		{
-			R_Torch(e, clmodel->modflags & FLAG_TORCH2);
-			return;
-		}
 	}
 
 	// 
@@ -1057,7 +1059,7 @@ R_DrawAliasModel (entity_t *e)
 R_DrawEntitiesOnList
 =============
 */
-void
+static void
 R_DrawEntitiesOnList (void)
 {
 	int         i;
@@ -1091,7 +1093,7 @@ R_DrawEntitiesOnList (void)
 R_DrawViewModel
 =============
 */
-void
+static void
 R_DrawViewModel (void)
 {
 	currententity = &cl.viewent;
@@ -1116,7 +1118,7 @@ R_DrawViewModel (void)
 R_PolyBlend
 ============
 */
-void
+static void
 R_PolyBlend (void)
 {
 	if (!gl_polyblend->value)
@@ -1151,7 +1153,7 @@ R_PolyBlend (void)
 }
 
 
-int
+static int
 SignbitsForPlane (mplane_t *out)
 {
 	int         bits, j;
@@ -1167,7 +1169,7 @@ SignbitsForPlane (mplane_t *out)
 }
 
 
-void
+static void
 R_SetFrustum (void)
 {
 	int         i;
@@ -1215,7 +1217,7 @@ R_SetFrustum (void)
 R_SetupFrame
 ===============
 */
-void
+static void
 R_SetupFrame (void)
 {
 // don't allow cheats in multiplayer
@@ -1265,7 +1267,7 @@ MYgluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 R_SetupGL
 =============
 */
-void
+static void
 R_SetupGL (void)
 {
 	float		screenaspect;
@@ -1333,7 +1335,7 @@ void R_DrawSkyBox (void);
 R_Clear
 =============
 */
-void
+static void
 R_Clear (void)
 {
 	if (gl_ztrick->value) {

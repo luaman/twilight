@@ -77,7 +77,7 @@ typedef struct {
 static cone_particle_t	*cone_particles, **free_cone_particles;
 static int				num_cone_particles, max_cone_particles;
 
-inline cone_particle_t *
+inline qboolean
 new_cone_particle (ptype_t type, vec3_t org1, vec3_t org2, vec3_t org3,
 		vec4_t color1, vec4_t color2, float ramp, float scale, float die)
 {
@@ -86,7 +86,7 @@ new_cone_particle (ptype_t type, vec3_t org1, vec3_t org2, vec3_t org3,
 
 	if (num_cone_particles >= max_cone_particles) {
 		// Out of particles.
-		return NULL;
+		return false;
 	}
 	p = &cone_particles[num_cone_particles++];
 	p->type = type;
@@ -103,7 +103,7 @@ new_cone_particle (ptype_t type, vec3_t org1, vec3_t org2, vec3_t org3,
 	VectorNormalize (normal);
 	VectorCopy (normal, p->normal);
 
-	return p;
+	return true;
 }
 	
 typedef struct {
@@ -119,14 +119,14 @@ typedef struct {
 static base_particle_t	*base_particles, **free_base_particles;
 static int				num_base_particles, max_base_particles;
 
-inline base_particle_t *
+inline qboolean
 new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 		float ramp, float scale, float die)
 {
 	base_particle_t *p;
 
 	if (num_base_particles >= max_base_particles)
-		return NULL; // Out of particles.
+		return false; // Out of particles.
 
 	p = &base_particles[num_base_particles++];
 	p->type = type;
@@ -137,10 +137,10 @@ new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 	p->die = realtime + die;
 	p->scale = scale;
 
-	return p;
+	return true;
 }
 	
-inline base_particle_t *
+inline qboolean
 new_base_particle_oc (ptype_t type, vec3_t org, vec3_t vel, int color,
 		float ramp, float scale, float die)
 {
@@ -479,37 +479,26 @@ R_Torch
 void 
 R_Torch (entity_t *ent, qboolean torch2)
 {
-	base_particle_t	*p;
-	vec3_t			porg, pvel;
-	vec4_t			color;
+	vec3_t	porg, pvel;
+	vec4_t	color;
 
 	if (!r_particles->value)
 		return;
 
-	VectorSet4 (color, 227.0 / 255.0, 151.0 / 255.0, 79.0 / 255.0, .5);
+	VectorSet4 (color, 0.88, 0.95, 0.31, 0.5);
+	VectorSet (pvel, (Q_rand() & 3) - 2, (Q_rand() & 3) - 2, 0);
+	VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
 
-	if (realtime + 2 < ent->time_left)
-		ent->time_left = 0;
-
-	if (realtime > ent->time_left) {
-		VectorSet (pvel, (Q_rand() & 3) - 2, (Q_rand() & 3) - 2, 0);
-		VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
-
-		if (torch2) { 
-			/* used for large torches (eg, start map near spawn) */
-			porg[2] = ent->origin[2] - 2;
-			VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
-
-			p = new_base_particle (pt_torch2, porg, pvel, color,
-					Q_rand () & 3, ent->frame? 30: 10, 5);
-
-		} else { 
-			/* wall torches */
-			p = new_base_particle (pt_torch, porg, pvel, color,
-					Q_rand () & 3, 10, 5);
-		}
-
-		ent->time_left = realtime + 0.05;
+	if (torch2) { 
+		/* used for large torches (eg, start map near spawn) */
+		porg[2] = ent->origin[2] - 2;
+		VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
+		new_base_particle (pt_torch2, porg, pvel, color,
+				Q_rand () & 3, ent->frame ? 30 : 10, 5);
+	} else { 
+		/* wall torches */
+		new_base_particle (pt_torch, porg, pvel, color,
+				Q_rand () & 3, 10, 5);
 	}
 }
 

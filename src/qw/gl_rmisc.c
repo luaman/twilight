@@ -54,7 +54,7 @@ GLuint v_index, i_index;
 
 void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
-void R_TimeRefresh_f (void);
+static void R_TimeRefresh_f (void);
 
 qboolean Img_HasFullbrights (Uint8 *pixels, int size);
 
@@ -92,7 +92,7 @@ R_InitTextures (void)
 	}
 }
 
-void
+static void
 R_InitParticleTexture (void)
 {
 	int     x,y,d;
@@ -426,7 +426,7 @@ R_TimeRefresh_f
 For program optimization
 ====================
 */
-void
+static void
 R_TimeRefresh_f (void)
 {
 	int         i;

@@ -784,10 +784,12 @@ R_DrawBrushModel (entity_t *e)
 		qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 4.0);
+		qglEnable (GL_TEXTURE_2D);
 	} else if (gl_mtex) {
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		qglActiveTextureARB (GL_TEXTURE1_ARB);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		qglEnable (GL_TEXTURE_2D);
 	} else
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
