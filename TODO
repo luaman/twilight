@@ -7,6 +7,7 @@ Missing stuff needed for 0.2:
     this out to disk so we don't have to regenerate it all the time.  Also
     be sure to avoid the glquake corrupt model mesh problem - regenerate the
     file if it doesn't match the model..  (This one's yours, Zeph)
+    (Actually, the triangulation is under half of the load time. :/)
 
 We're almost there for 0.2, there are a number of bugs left which need to be
 fixed before release, they're marked RC below.
