@@ -217,20 +217,6 @@ typedef struct {
 
 //=============================================================================
 
-// the host system specifies the base of the directory tree, the
-// command line parms passed to the program, and the amount of memory
-// available for the program to use
-
-typedef struct {
-	int			argc;
-	char		**argv;
-	void		*membase;
-	int			memsize;
-} quakeparms_t;
-
-
-//=============================================================================
-
 
 
 extern qboolean noclip_anglehack;
@@ -239,7 +225,6 @@ extern qboolean noclip_anglehack;
 //
 // host
 //
-extern quakeparms_t host_parms;
 
 extern cvar_t *sys_ticrate;
 extern cvar_t *sys_nostdout;
