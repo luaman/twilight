@@ -794,27 +794,9 @@ Host_Init
 ====================
 */
 void
-Host_Init (quakeparms_t *parms)
+Host_Init ()
 {
-
-	if (standard_quake)
-		minimum_memory = MINIMUM_MEMORY;
-	else
-		minimum_memory = MINIMUM_MEMORY_LEVELPAK;
-
-	if (COM_CheckParm ("-minmemory"))
-		parms->memsize = minimum_memory;
-
-	host_parms = *parms;
-
-	if (parms->memsize < minimum_memory)
-		Sys_Error ("Only %4.1f megs of memory available, can't execute game",
-				   parms->memsize / (float) 0x100000);
-
-	com_argc = parms->argc;
-	com_argv = parms->argv;
-
-	Memory_Init (parms->membase, parms->memsize);
+	Memory_Init ();
 	Cvar_Init ();		// add all cvar related manipulation commands and set developer cvar
 	Cbuf_Init ();		// initialize cmd_text buffer
 	Cmd_Init ();		// setup the basic commands we need for the system
@@ -856,8 +838,8 @@ Host_Init (quakeparms_t *parms)
 
 	V_Init ();						// setup view, add related commands
 
-	Con_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
-	Con_Printf ("%4.1f megabyte heap\n", parms->memsize / (1024 * 1024.0));
+//	Con_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
+	Con_Printf ("%4.1f megs RAM used.\n", sys_memsize / (1024 * 1024.0));
 
 	R_InitTextures ();				// needed even for dedicated servers
 

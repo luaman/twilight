@@ -55,7 +55,6 @@ static const char rcsid[] =
 #include "sys.h"
 
 
-int         noconinput = 0;
 int         nostdout = 0;
 
 int			sys_memsize = 0;
@@ -325,7 +324,6 @@ main (int c, char **v)
 	else
 		if (COM_CheckParm ("-minmemory"))
 			sys_memsize = MINIMUM_MEMORY;
-
 	if (sys_memsize < MINIMUM_MEMORY)
 		Sys_Error ("Only %4.1f megs of memory reported, can't execute game",
 				sys_memsize / (float) 0x100000);
@@ -333,8 +331,7 @@ main (int c, char **v)
 	if (!(sys_membase = malloc (sys_memsize)))
 			Sys_Error ("Can't allocate %ld\n", sys_memsize);
 
-	noconinput = COM_CheckParm ("-noconinput");
-	if (!noconinput)
+	if (!COM_CheckParm ("-noconinput"))
 		fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
 
 	if (COM_CheckParm ("-nostdout"))

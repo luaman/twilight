@@ -196,7 +196,7 @@ S_Init_Cvars (void)
 	snd_show = Cvar_Get ("snd_show", "0", CVAR_NONE, NULL);
 	_snd_mixahead = Cvar_Get ("_snd_mixahead", "0.1", CVAR_ARCHIVE, NULL);
 
-	if (host_parms.memsize < 0x800000) {
+	if (sys_memsize < 0x800000) {
 		Cvar_Set (loadas8bit, "1");
 		Con_Printf ("loading all sounds as 8bit\n");
 	}
@@ -211,7 +211,7 @@ void
 S_Init (void)
 {
 
-	Con_Printf ("\nSound Initialization\n");
+//  Con_Printf("\nSound Initialization\n");
 
 	if (COM_CheckParm ("-nosound"))
 		return;
@@ -249,8 +249,7 @@ S_Init (void)
 		shm->submission_chunk = 1;
 		shm->buffer = Hunk_AllocName (1 << 16, "shmbuf");
 	}
-
-	Con_Printf ("Sound sampling rate: %i\n", shm->speed);
+//  Con_Printf ("Sound sampling rate: %i\n", shm->speed);
 
 	// provides a tick sound until washed clean
 
@@ -262,6 +261,7 @@ S_Init (void)
 
 	S_StopAllSounds (true);
 }
+
 
 // =======================================================================
 // Shutdown sound engine
@@ -388,12 +388,10 @@ SND_PickChannel (int entnum, int entchannel)
 	for (ch_idx = NUM_AMBIENTS; ch_idx < NUM_AMBIENTS + MAX_DYNAMIC_CHANNELS;
 		 ch_idx++) {
 		if (entchannel != 0				// channel 0 never overrides
-			&& channels[ch_idx].entnum == entnum && (channels[ch_idx].entchannel == entchannel || entchannel == -1)) {	// always 
-																														// override 
-																														// sound 
-																														// from 
-																														// same 
-																														// entity
+			&& channels[ch_idx].entnum == entnum
+			&& (channels[ch_idx].entchannel == entchannel
+				|| entchannel == -1)) {	// always override sound
+										// from same entity
 			first_to_die = ch_idx;
 			break;
 		}
@@ -599,10 +597,10 @@ S_ClearBuffer (void)
 
 #ifdef _WIN32
 	if (pDSBuf) {
-		DWORD	dwSize;
-		LPVOID	pData;
-		int	reps;
-		HRESULT	hresult;
+		DWORD       dwSize;
+		LPVOID	    pData;
+		int         reps;
+		HRESULT     hresult;
 
 		reps = 0;
 
@@ -705,9 +703,7 @@ S_UpdateAmbientSounds (void)
 		return;
 	}
 
-	for (ambient_channel = 0;
-			ambient_channel < NUM_AMBIENTS;
-			ambient_channel++) {
+	for (ambient_channel = 0; ambient_channel < NUM_AMBIENTS; ambient_channel++) {
 		chan = &channels[ambient_channel];
 		chan->sfx = ambient_sfx[ambient_channel];
 
@@ -831,11 +827,7 @@ GetSoundtime (void)
 
 // it is possible to miscount buffers if it has wrapped twice between
 // calls to S_Update.  Oh well.
-#ifdef __sun__
-	soundtime = SNDDMA_GetSamples ();
-#else
 	samplepos = SNDDMA_GetDMAPos ();
-
 
 	if (samplepos < oldsamplepos) {
 		buffers++;						// buffer wrapped
@@ -850,7 +842,6 @@ GetSoundtime (void)
 	oldsamplepos = samplepos;
 
 	soundtime = buffers * fullsamples + samplepos / shm->channels;
-#endif
 }
 
 void
@@ -860,6 +851,7 @@ S_ExtraUpdate (void)
 		return;							// don't pollute timings
 	S_Update_ ();
 }
+
 
 void
 S_Update_ (void)

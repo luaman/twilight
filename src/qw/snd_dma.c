@@ -845,7 +845,7 @@ GetSoundtime (void)
 		buffers++;						// buffer wrapped
 
 		if (paintedtime > 0x40000000) {	// time to chop things off to avoid 32
-			// bit limits
+										// bit limits
 			buffers = 0;
 			paintedtime = fullsamples;
 			S_StopAllSounds (true);
@@ -863,7 +863,6 @@ S_ExtraUpdate (void)
 		return;							// don't pollute timings
 	S_Update_ ();
 }
-
 
 
 void

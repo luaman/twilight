@@ -36,7 +36,7 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 
-#define	DYNAMIC_SIZE	0xc000
+#define	DYNAMIC_SIZE	0x20000
 
 #define	ZONEID	0x1d4a11
 #define MINFRAGMENT	64
@@ -429,7 +429,14 @@ Hunk_AllocName (int size, char *name)
 	size = sizeof (hunk_t) + ((size + 15) & ~15);
 
 	if (hunk_size - hunk_low_used - hunk_high_used < size)
-		Sys_Error ("Hunk_Alloc: failed on %i bytes", size);
+//      Sys_Error ("Hunk_Alloc: failed on %i bytes",size);
+#ifdef _WIN32
+		Sys_Error
+			("Not enough RAM allocated.  Try starting using \"-heapsize 16000\" on the QuakeWorld command line.");
+#else
+		Sys_Error
+			("Not enough RAM allocated.  Try starting using \"-mem 16\" on the QuakeWorld command line.");
+#endif
 
 	h = (hunk_t *) (hunk_base + hunk_low_used);
 	hunk_low_used += size;
@@ -929,13 +936,13 @@ Memory_Init
 ========================
 */
 void
-Memory_Init (void *buf, int size)
+Memory_Init (void)
 {
 	int         p;
 	int         zonesize = DYNAMIC_SIZE;
 
-	hunk_base = buf;
-	hunk_size = size;
+	hunk_base = sys_membase;
+	hunk_size = sys_memsize;
 	hunk_low_used = 0;
 	hunk_high_used = 0;
 

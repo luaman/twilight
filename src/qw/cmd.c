@@ -27,6 +27,7 @@ static const char rcsid[] =
     "$Id$";
 
 #include <ctype.h>
+#include <stdlib.h>
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
