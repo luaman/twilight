@@ -169,15 +169,12 @@ void R_BlendedRotateForEntity (entity_t *e, qboolean shadow)
 	}
 	else
 	{
-		blend =  timepassed * 10;
+		blend = timepassed * 10;
 		if (cl.paused || blend > 1) blend = 1;
 	}
 
-	VectorSubtract (e->origin2, e->origin1, d);
-	qglTranslatef (
-		e->origin1[0] + (blend * d[0]),
-		e->origin1[1] + (blend * d[1]),
-		e->origin1[2] + (blend * d[2]));
+	VectorInterpolate (e->origin1, blend, e->origin2, d);
+	qglTranslatef (d[0], d[1], d[2]);
 
 	// orientation interpolation (Euler angles, yuck!)
 	timepassed = realtime - e->rotate_start_time;
@@ -213,7 +210,7 @@ void R_BlendedRotateForEntity (entity_t *e, qboolean shadow)
 			d[i] += 360;
 	}
 
-	qglRotatef ( e->angles1[1] + ( blend * d[1]), 0, 0, 1);
+	qglRotatef (e->angles1[1] + (blend * d[1]), 0, 0, 1);
 
 	if (!shadow)
 	{
@@ -236,7 +233,7 @@ R_GetSpriteFrame
 ================
 */
 static mspriteframe_t *
-R_GetSpriteFrame (entity_t *currententity)
+R_GetSpriteFrame (entity_t *e)
 {
 	msprite_t		   *psprite;
 	mspritegroup_t	   *pspritegroup;
@@ -244,8 +241,8 @@ R_GetSpriteFrame (entity_t *currententity)
 	int					i, numframes, frame;
 	float			   *pintervals, fullinterval, targettime, time;
 
-	psprite = currententity->model->cache.data;
-	frame = currententity->frame;
+	psprite = e->model->cache.data;
+	frame = e->frame;
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
 		Con_Printf ("R_DrawSprite: no such frame %d\n", frame);
@@ -260,7 +257,7 @@ R_GetSpriteFrame (entity_t *currententity)
 		numframes = pspritegroup->numframes;
 		fullinterval = pintervals[numframes - 1];
 
-		time = cl.time + currententity->syncbase;
+		time = cl.time + e->syncbase;
 
 		/*
 		 * when loading in Mod_LoadSpriteGroup, we guaranteed all interval
@@ -455,7 +452,7 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 	trivertx_t	   *verts2;
 	int			   *order;
 	int				count;
-	vec3_t			d;
+	vec3_t			d, v1, v2;
 
 	lastposenum0 = pose1;
 	lastposenum = pose2;
@@ -527,12 +524,12 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 							l*lightcolor[2]);
 			}
 
-			VectorSubtract (verts2->v, verts1->v, d);
-
 			// blend the vertex positions from each frame together
-			qglVertex3f (verts1->v[0] + (blend * d[0]),
-					verts1->v[1] + (blend * d[1]),
-					verts1->v[2] + (blend * d[2]));
+			VectorCopy (verts1->v, v1);
+			VectorCopy (verts2->v, v2);
+			VectorInterpolate (v1, blend, v2, d);
+
+			qglVertex3fv (d);
 
 			verts1++;
 			verts2++;
@@ -1010,7 +1007,7 @@ R_DrawAliasModel (entity_t *e)
 	 */
 	qglPushMatrix ();
 
-	if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
+	if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM) && (e != &cl.viewent))
 		R_BlendedRotateForEntity (e, false);
 	else {
 		qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
@@ -1055,7 +1052,7 @@ R_DrawAliasModel (entity_t *e)
 
 	qglBindTexture (GL_TEXTURE_2D, texture);
 
-	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
+	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
 		R_SetupAliasBlendedFrame (e->frame, paliashdr, e, false);
 	else
 		R_SetupAliasFrame (e->frame, paliashdr, false);

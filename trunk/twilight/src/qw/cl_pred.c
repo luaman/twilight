@@ -187,14 +187,11 @@ CL_PredictMove (void)
 	oldphysent = pmove.numphysent;
 	CL_SetSolidPlayers (cl.playernum);
 
-//  to = &cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK];
-
 	for (i = 1; i < UPDATE_BACKUP - 1 && cls.netchan.incoming_sequence + i <
 		 cls.netchan.outgoing_sequence; i++) {
 		to = &cl.frames[(cls.netchan.incoming_sequence + i) & UPDATE_MASK];
-		CL_PredictUsercmd (&from->playerstate[cl.playernum]
-						   , &to->playerstate[cl.playernum], &to->cmd,
-						   cl.spectator);
+		CL_PredictUsercmd (&from->playerstate[cl.playernum],
+			&to->playerstate[cl.playernum], &to->cmd, cl.spectator);
 		if (to->senttime >= cl.time)
 			break;
 		from = to;
@@ -204,7 +201,7 @@ CL_PredictMove (void)
 
 	if (i == UPDATE_BACKUP - 1 || !to)
 		return;							// net hasn't deliver packets in a long 
-										// 
+
 	// 
 	// time...
 
@@ -225,14 +222,10 @@ CL_PredictMove (void)
 		}
 	}
 
-	for (i = 0; i < 3; i++) {
-		cl.simorg[i] = from->playerstate[cl.playernum].origin[i]
-			+ f * (to->playerstate[cl.playernum].origin[i] -
-				   from->playerstate[cl.playernum].origin[i]);
-		cl.simvel[i] = from->playerstate[cl.playernum].velocity[i]
-			+ f * (to->playerstate[cl.playernum].velocity[i] -
-				   from->playerstate[cl.playernum].velocity[i]);
-	}
+	VectorInterpolate (from->playerstate[cl.playernum].origin,
+		f, to->playerstate[cl.playernum].origin, cl.simorg);
+	VectorInterpolate (from->playerstate[cl.playernum].velocity,
+		f, to->playerstate[cl.playernum].velocity, cl.simvel);
 }
 
 

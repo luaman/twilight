@@ -805,129 +805,6 @@ R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3])
 		in1[2][2] * in2[2][2];
 }
 
-
-/*
-================
-R_ConcatTransforms
-================
-*/
-void
-R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4])
-{
-	out[0][0] = in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] +
-		in1[0][2] * in2[2][0];
-	out[0][1] = in1[0][0] * in2[0][1] + in1[0][1] * in2[1][1] +
-		in1[0][2] * in2[2][1];
-	out[0][2] = in1[0][0] * in2[0][2] + in1[0][1] * in2[1][2] +
-		in1[0][2] * in2[2][2];
-	out[0][3] = in1[0][0] * in2[0][3] + in1[0][1] * in2[1][3] +
-		in1[0][2] * in2[2][3] + in1[0][3];
-	out[1][0] = in1[1][0] * in2[0][0] + in1[1][1] * in2[1][0] +
-		in1[1][2] * in2[2][0];
-	out[1][1] = in1[1][0] * in2[0][1] + in1[1][1] * in2[1][1] +
-		in1[1][2] * in2[2][1];
-	out[1][2] = in1[1][0] * in2[0][2] + in1[1][1] * in2[1][2] +
-		in1[1][2] * in2[2][2];
-	out[1][3] = in1[1][0] * in2[0][3] + in1[1][1] * in2[1][3] +
-		in1[1][2] * in2[2][3] + in1[1][3];
-	out[2][0] = in1[2][0] * in2[0][0] + in1[2][1] * in2[1][0] +
-		in1[2][2] * in2[2][0];
-	out[2][1] = in1[2][0] * in2[0][1] + in1[2][1] * in2[1][1] +
-		in1[2][2] * in2[2][1];
-	out[2][2] = in1[2][0] * in2[0][2] + in1[2][1] * in2[1][2] +
-		in1[2][2] * in2[2][2];
-	out[2][3] = in1[2][0] * in2[0][3] + in1[2][1] * in2[1][3] +
-		in1[2][2] * in2[2][3] + in1[2][3];
-}
-
-
-/*
-===================
-FloorDivMod
-
-Returns mathematically correct (floor-based) quotient and remainder for
-numer and denom, both of which should contain no fractional part. The
-quotient must fit in 32 bits.
-====================
-*/
-
-void
-FloorDivMod (double numer, double denom, int *quotient, int *rem)
-{
-	int         q, r;
-	double      x;
-
-#ifndef PARANOID
-	if (denom <= 0.0)
-		Sys_Error ("FloorDivMod: bad denominator %d\n", denom);
-
-//  if ((Q_floor(numer) != numer) || (Q_floor(denom) != denom))
-//      Sys_Error ("FloorDivMod: non-integer numer or denom %f %f\n",
-//              numer, denom);
-#endif
-
-	if (numer >= 0.0) {
-
-		x = Q_floor (numer / denom);
-		q = (int) x;
-		r = (int) Q_floor (numer - (x * denom));
-	} else {
-		// 
-		// perform operations with positive values, and fix mod to make
-		// floor-based
-		// 
-		x = Q_floor (-numer / denom);
-		q = -(int) x;
-		r = (int) Q_floor (-numer - (x * denom));
-		if (r != 0) {
-			q--;
-			r = (int) denom - r;
-		}
-	}
-
-	*quotient = q;
-	*rem = r;
-}
-
-
-/*
-===================
-GreatestCommonDivisor
-====================
-*/
-int
-GreatestCommonDivisor (int i1, int i2)
-{
-	if (i1 > i2) {
-		if (i2 == 0)
-			return (i1);
-		return GreatestCommonDivisor (i2, i1 % i2);
-	} else {
-		if (i1 == 0)
-			return (i2);
-		return GreatestCommonDivisor (i1, i2 % i1);
-	}
-}
-
-
-/*
-===================
-Invert24To16
-
-Inverts an 8.24 value to a 16.16 value
-====================
-*/
-
-fixed16_t
-Invert24To16 (fixed16_t val)
-{
-	if (val < 256)
-		return (0xFFFFFFFF);
-
-	return (fixed16_t)
-		(((double) 0x10000 * (double) 0x1000000 / (double) val) + 0.5);
-}
-
 /*
 =================
 RadiusFromBounds
@@ -947,3 +824,17 @@ RadiusFromBounds (vec3_t mins, vec3_t maxs)
 	return VectorLength (corner);
 }
 
+void VectorInterpolate (vec3_t v1, float frac, vec3_t v2, vec3_t v)
+{
+	if (frac < 0.01) {
+		VectorCopy (v1, v);
+		return;
+	} else if (frac > 0.99f) {
+		VectorCopy (v2, v);
+		return;
+	}
+
+	v[0] = v1[0] + (vec_t)frac * (v2[0] - v1[0]);
+	v[1] = v1[1] + (vec_t)frac * (v2[1] - v1[1]);
+	v[2] = v1[2] + (vec_t)frac * (v2[2] - v1[2]);
+}
