@@ -350,7 +350,7 @@ Datagram_GetMessage (qsocket_t * sock)
 			ReSendMessage (sock);
 
 	while (1) {
-		length = dfunc.Read (sock->socket, (Uint8 *) & packetBuffer, NET_DATAGRAMSIZE, &readaddr);
+		length = sfunc.Read (sock->socket, (Uint8 *) & packetBuffer, NET_DATAGRAMSIZE, &readaddr);
 
 		if (length == 0)
 			break;
