@@ -35,6 +35,8 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cdaudio.h"
+#include "console.h"
 #include "glquake.h"
 
 char       *svc_strings[] = {

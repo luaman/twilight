@@ -38,6 +38,8 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "console.h"
+#include "crc.h"
 #include "glquake.h"
 
 model_t    *loadmodel;

@@ -38,6 +38,8 @@ static const char rcsid[] =
 #include <stdlib.h>
 
 #include "quakedef.h"
+#include "console.h"
+#include "crc.h"
 #include "glquake.h"
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;

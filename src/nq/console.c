@@ -34,17 +34,19 @@ static const char rcsid[] =
 # endif
 #endif
 
-#ifdef WIN32
-#include <io.h>
+#ifdef _WIN32
+# include <io.h>
 #endif
 
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+# include <unistd.h>
 #endif
 #ifdef HAVE_FCNTL_H
-#include <fcntl.h>
+# include <fcntl.h>
 #endif
+
 #include "quakedef.h"
+#include "console.h"
 
 int         con_linewidth;
 

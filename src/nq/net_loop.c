@@ -35,6 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "console.h"
 #include "net_loop.h"
 
 qboolean    localconnectpending = false;
