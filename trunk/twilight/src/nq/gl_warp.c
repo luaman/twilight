@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "strlib.h"
 #include "host.h"
 #include "pcx.h"
 #include "tga.h"
@@ -146,9 +147,9 @@ SubdividePolygon (int numverts, float *verts)
 		return;
 	}
 
-	poly =
-		Hunk_Alloc (sizeof (glpoly_t) +
-					(numverts - 4) * VERTEXSIZE * sizeof (float));
+	poly = Hunk_Alloc (sizeof (glpoly_t)); 
+	poly->verts = Hunk_Alloc (numverts * sizeof (pvertex_t));
+
 	poly->next = warpface->polys;
 	warpface->polys = poly;
 	poly->numverts = numverts;
@@ -721,9 +722,8 @@ R_InitSky (texture_t *mt)
 	int         i, j, p;
 	Uint8       *src;
 	unsigned    trans[128 * 128];
-	unsigned    transpix;
 	int         r, g, b;
-	unsigned   *rgba;
+	unsigned char rgba[4], transpix[4];
 
 	src = (Uint8 *) mt + mt->offsets[0];
 
@@ -734,17 +734,17 @@ R_InitSky (texture_t *mt)
 	for (i = 0; i < 128; i++)
 		for (j = 0; j < 128; j++) {
 			p = src[i * 256 + j + 128];
-			rgba = &d_8to32table[p];
-			trans[(i * 128) + j] = *rgba;
+			memcpy(rgba, &d_8to32table[p], sizeof(rgba));
+			memcpy(&trans[(i * 128) + j], rgba, sizeof(trans[0]));
 			r += ((Uint8 *) rgba)[0];
 			g += ((Uint8 *) rgba)[1];
 			b += ((Uint8 *) rgba)[2];
 		}
 
-	((Uint8 *) & transpix)[0] = r / (128 * 128);
-	((Uint8 *) & transpix)[1] = g / (128 * 128);
-	((Uint8 *) & transpix)[2] = b / (128 * 128);
-	((Uint8 *) & transpix)[3] = 0;
+	transpix[0] = r / (128 * 128);
+	transpix[1] = g / (128 * 128);
+	transpix[2] = b / (128 * 128);
+	transpix[3] = 0;
 
 
 	if (!solidskytexture)
@@ -760,9 +760,9 @@ R_InitSky (texture_t *mt)
 		for (j = 0; j < 128; j++) {
 			p = src[i * 256 + j];
 			if (p == 0)
-				trans[(i * 128) + j] = transpix;
+				memcpy(&trans[(i * 128) + j], &transpix, sizeof(trans[0]));
 			else
-				trans[(i * 128) + j] = d_8to32table[p];
+				memcpy(&trans[(i * 128) + j], &d_8to32table[p], sizeof(trans[0]));
 		}
 
 	if (!alphaskytexture)

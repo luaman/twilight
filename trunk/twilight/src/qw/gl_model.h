@@ -118,13 +118,15 @@ typedef struct {
 
 #define	VERTEXSIZE	7
 
+typedef float pvertex_t[VERTEXSIZE];
+
 typedef struct glpoly_s {
 	struct glpoly_s *next;
 	struct glpoly_s *chain;
 	struct glpoly_s	*fb_chain;
 	int         numverts;
 	int         flags;					// for SURF_UNDERWATER
-	float       verts[4][VERTEXSIZE];	// variable sized (xyz s1t1 s2t2)
+	pvertex_t	*verts;					// variable sized (xyz s1t1 s2t2)
 } glpoly_t;
 
 typedef struct msurface_s {

@@ -453,7 +453,8 @@ R_DrawParticles (void)
 	float       time1;
 	float       dvel;
 	float       frametime;
-	unsigned char *at;
+	// unsigned char *at;
+	Uint32	    at;
 	unsigned char theAlpha;
 	vec3_t      up, right;
 	float       scale;
@@ -504,7 +505,7 @@ R_DrawParticles (void)
 			scale = 1;
 		else
 			scale = 1 + scale * 0.004;
-		at = (Uint8 *) & d_8to32table[(int) p->color];
+		at = d_8to32table[(int) p->color];
 		if (p->type == pt_fire)
 			theAlpha = 255 * (6 - p->ramp) / 6;
 //          theAlpha = 192;
@@ -512,7 +513,7 @@ R_DrawParticles (void)
 //          theAlpha = 255*(8-p->ramp)/8;
 		else
 			theAlpha = 255;
-		qglColor4ub (*at, *(at + 1), *(at + 2), theAlpha);
+		qglColor4ub (at & 0xff, (at >> 8) & 0xff, (at >> 16) & 0xff, theAlpha);
 //      qglColor3ubv (at);
 //      qglColor3ubv ((Uint8 *)&d_8to32table[(int)p->color]);
 		qglTexCoord2f (0, 0);

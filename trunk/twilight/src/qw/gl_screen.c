@@ -717,7 +717,7 @@ SCR_ScreenShot_f (void)
 			break;						// file doesn't exist
 	}
 	if (i == 100) {
-		Con_Printf ("SCR_ScreenShot_f: Couldn't create a PCX file\n");
+		Con_Printf ("SCR_ScreenShot_f: Couldn't create a TGA file\n");
 		return;
 	}
 
@@ -725,11 +725,11 @@ SCR_ScreenShot_f (void)
 	buffer = malloc (glwidth * glheight * 3);
 
 	qglReadPixels (glx, gly, glwidth, glheight, GL_RGB, GL_UNSIGNED_BYTE,
-				  buffer + 18);
+				  buffer);
 
 	// swap rgb to bgr
-	c = 18 + glwidth * glheight * 3;
-	for (i = 18; i < c; i += 3) {
+	c = glwidth * glheight * 3;
+	for (i = 0; i < c; i += 3) {
 		temp = buffer[i];
 		buffer[i] = buffer[i + 2];
 		buffer[i + 2] = temp;
@@ -777,7 +777,7 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 	memset (pcx->filler, 0, sizeof (pcx->filler));
 
 // pack the image
-	pack = &pcx->data;
+	pack = pcx->data;
 
 	data += rowbytes * (height - 1);
 

@@ -903,8 +903,7 @@ R_DrawAliasModel (entity_t *e)
 	}
 
 	// ZOID: never allow players to go totally black
-	i = currententity - cl_entities;
-	if (i >= 1 && i <= cl.maxclients) {
+	if (clmodel->modflags & FLAG_PLAYER) {
 		if (!colorlights)
 		{
 			if (ambientlight < 8)

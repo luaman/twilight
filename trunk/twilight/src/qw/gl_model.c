@@ -408,7 +408,7 @@ Mod_LoadTextures (lump_t *l)
 
 		if ((mt->width & 15) || (mt->height & 15))
 			Sys_Error ("Texture %s is not 16 aligned", mt->name);
-		pixels = mt->width * mt->height / 64 * 85;
+		pixels = mt->width * mt->height * (85 / 64);
 		tx = Hunk_AllocName (sizeof (texture_t) + pixels, loadname);
 		loadmodel->textures[i] = tx;
 
@@ -747,7 +747,8 @@ Mod_LoadTexinfo (lump_t *l)
 
 	for (i = 0; i < count; i++, in++, out++) {
 		for (j = 0; j < 8; j++)
-			out->vecs[0][j] = LittleFloat (in->vecs[0][j]);
+			out->vecs[j / 4][j % 4] = 
+				LittleFloat (in->vecs[j/4][j % 4]);
 		len1 = VectorLength (out->vecs[0]);
 		len2 = VectorLength (out->vecs[1]);
 		len1 = (len1 + len2) * 0.5f;
@@ -1006,7 +1007,7 @@ Mod_LoadLeafs (lump_t *l)
 		out->nummarksurfaces = LittleShort (in->nummarksurfaces);
 
 		p = LittleLong (in->visofs);
-		if (p == -1)
+		if (p == -1 || !loadmodel->visdata)
 			out->compressed_vis = NULL;
 		else
 			out->compressed_vis = loadmodel->visdata + p;

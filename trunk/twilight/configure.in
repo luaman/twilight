@@ -62,7 +62,7 @@ AC_CHECK_FUNCS(
 
 AC_CHECK_HEADERS(
 	unistd.h fcntl.h windef.h pwd.h sys/types.h sys/stat.h \
-	limits.h signal.h
+	limits.h signal.h sys/time.h time.h
 )
 
 dnl Checks for paths

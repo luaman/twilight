@@ -748,7 +748,8 @@ Mod_LoadTexinfo (lump_t *l)
 
 	for (i = 0; i < count; i++, in++, out++) {
 		for (j = 0; j < 8; j++)
-			out->vecs[0][j] = LittleFloat (in->vecs[0][j]);
+			out->vecs[j / 4][j % 4] = 
+				LittleFloat (in->vecs[j/4][j % 4]);
 		len1 = VectorLength (out->vecs[0]);
 		len2 = VectorLength (out->vecs[1]);
 		len1 = (len1 + len2) * 0.5f;
@@ -1004,7 +1005,7 @@ Mod_LoadLeafs (lump_t *l)
 		out->nummarksurfaces = LittleShort (in->nummarksurfaces);
 
 		p = LittleLong (in->visofs);
-		if (p == -1)
+		if (p == -1 || !loadmodel->visdata)
 			out->compressed_vis = NULL;
 		else
 			out->compressed_vis = loadmodel->visdata + p;
@@ -1607,6 +1608,7 @@ mflags_t modelflags[] =
 	{ "progs/spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/s_spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/zom_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/player.mdl", 0, FLAG_PLAYER },
 	{ "progs/boss.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/oldone.mdl", 0, FLAG_NOSHADOW },
 

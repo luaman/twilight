@@ -529,7 +529,7 @@ typedef struct {
 	unsigned short	bytes_per_line;
 	unsigned short	palette_type;
 	char			filler[58];
-	unsigned char	data;				// unbounded
+	unsigned char	data[0];			// unbounded
 } pcx_t;
 
 
