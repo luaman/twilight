@@ -41,12 +41,12 @@ static const char rcsid[] =
 #include "keys.h"
 #include "mathlib.h"
 #include "sys.h"
+#include "gl_info.h"
+#include "gl_arrays.h"
 
 
 Uint32 d_8to32table[256];
 float d_8tofloattable[256][4];
-
-GLfloat whitev[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 cvar_t *width_2d;
 cvar_t *height_2d;
@@ -78,24 +78,11 @@ static float old_mouse_x, old_mouse_y;
 static qboolean use_mouse = false;
 
 static int sdl_flags = SDL_OPENGL;
-int red_size, green_size, blue_size, alpha_size;
-int doublebuffer, buffer_size, depth_size, stencil_size;
-int accum_red_size, accum_green_size, accum_blue_size, accum_alpha_size;
 
 
 /*-----------------------------------------------------------------------*/
 
 int texture_extension_number = 1;
-
-const char *gl_vendor;
-const char *gl_renderer;
-const char *gl_version;
-const char *gl_extensions;
-
-qboolean gl_cva = false;
-qboolean gl_mtex = false;
-qboolean gl_mtexcombine = false;
-int gl_tmus = 1;
 
 void I_KeypadMode (cvar_t *cvar);
 void IN_WindowedMouse (cvar_t *cvar);
@@ -211,88 +198,6 @@ GammaChanged (cvar_t *cvar)
 		SDL_SetGamma (hw[0], hw[1], hw[2]);
 }
 
-
-/*
-	CheckDriverQuirks
-
-	Check for buggy OpenGL drivers.
-*/
-
-void
-CheckDriverQuirks (void)
-{
-	if (strstr(gl_vendor, "NVIDIA")) {		// nVidia drivers.
-		DynGL_BadExtension("GL_EXT_compiled_vertex_array");
-		Com_Printf("Disabiling GL_EXT_compiled_vertex_array due to buggy drivers.");
-	}
-}
-
-
-/*
-	CheckExtensions
-
-	Check for the OpenGL extensions we use
-*/
-
-void
-CheckExtensions (void)
-{
-	qboolean	gl_mtexcombine_arb = 0, gl_mtexcombine_ext = 0;
-
-	if (!COM_CheckParm ("-nomtex"))
-		gl_mtex = DynGL_HasExtension ("GL_ARB_multitexture");
-
-	Com_Printf ("Checking for multitexture: ");
-	if (gl_mtex)
-	{
-		qglGetIntegerv (GL_MAX_TEXTURE_UNITS_ARB, &gl_tmus);
-		Com_Printf ("GL_ARB_multitexture. (%d TMUs)\n", gl_tmus);
-	}
-	else
-		Com_Printf ("no.\n");
-
-	if (gl_mtex && !COM_CheckParm ("-nomtexcombine"))
-	{
-		gl_mtexcombine_arb = DynGL_HasExtension ("GL_ARB_texture_env_combine");
-		gl_mtexcombine_ext = DynGL_HasExtension ("GL_EXT_texture_env_combine");
-	}
-	Com_Printf ("Checking for texenv combine: ");
-	if (gl_mtex && gl_mtexcombine_arb)
-	{
-		Com_Printf ("GL_ARB_texture_env_combine.\n");
-		gl_mtexcombine = true;
-	}
-	else if (gl_mtex && gl_mtexcombine_ext)
-	{
-		Com_Printf ("GL_EXT_texture_env_combine.\n");
-		gl_mtexcombine = true;
-	}
-	else
-		Com_Printf ("no.\n");
-
-	if (!COM_CheckParm ("-nocva"))
-		gl_cva = DynGL_HasExtension ("GL_EXT_compiled_vertex_array");
-
-	Com_Printf ("Checking for compiled vertex arrays: %s\n",
-			gl_cva ? "GL_EXT_compiled_vertex_array." : "no.");
-}
-
-void
-GL_Info_f (void)
-{
-	Com_Printf ("Frame Buffer: %d bpp, %d-%d-%d-%d, %s buffered\n",
-			buffer_size, red_size, green_size, blue_size, alpha_size,
-			doublebuffer ? "double" : "single");
-	Com_Printf ("Accum Buffer: %d-%d-%d-%d\n", accum_red_size, accum_green_size,
-			accum_blue_size, accum_alpha_size);
-	Com_Printf ("Depth bits: %d. Stencil bits: %d\n", depth_size, stencil_size);
-	Com_Printf ("GL_VENDOR: %s\n", gl_vendor);
-	Com_Printf ("GL_RENDERER: %s\n", gl_renderer);
-	Com_Printf ("GL_VERSION: %s\n", gl_version);
-	Com_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
-}
-
-
 /*
 ===============
 GL_Init
@@ -302,15 +207,8 @@ void
 GL_Init (void)
 {
 	qglFinish ();
-
-	gl_vendor = qglGetString (GL_VENDOR);
-	gl_renderer = qglGetString (GL_RENDERER);
-
-	gl_version = qglGetString (GL_VERSION);
-	gl_extensions = qglGetString (GL_EXTENSIONS);
-
-	CheckDriverQuirks ();
-	CheckExtensions ();
+	GLInfo_Init ();
+	GLArrays_Init ();
 
 	qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
 	qglCullFace (GL_FRONT);
@@ -382,6 +280,8 @@ Size_Changed2D (cvar_t *cvar)
 void
 VID_Init_Cvars (void)
 {
+	GLArrays_Init_Cvars ();
+
 	width_2d = Cvar_Get ("width_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
 	height_2d = Cvar_Get ("height_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
 	text_scale = Cvar_Get ("text_scale", "1", CVAR_ARCHIVE, &Size_Changed2D);
@@ -495,19 +395,6 @@ VID_Init (unsigned char *palette)
 		Sys_Error ("%s\n", SDL_GetError ());
 	Com_DPrintf ("VID_Init: DynGL_GetFuncs successful.\n");
 
-	SDL_GL_GetAttribute (SDL_GL_RED_SIZE, &red_size);
-	SDL_GL_GetAttribute (SDL_GL_GREEN_SIZE, &green_size);
-	SDL_GL_GetAttribute (SDL_GL_BLUE_SIZE, &blue_size);
-	SDL_GL_GetAttribute (SDL_GL_ALPHA_SIZE, &alpha_size);
-	SDL_GL_GetAttribute (SDL_GL_DOUBLEBUFFER, &doublebuffer);
-	SDL_GL_GetAttribute (SDL_GL_BUFFER_SIZE, &buffer_size);
-	SDL_GL_GetAttribute (SDL_GL_DEPTH_SIZE, &depth_size);
-	SDL_GL_GetAttribute (SDL_GL_STENCIL_SIZE, &stencil_size);
-	SDL_GL_GetAttribute (SDL_GL_ACCUM_RED_SIZE, &accum_red_size);
-	SDL_GL_GetAttribute (SDL_GL_ACCUM_GREEN_SIZE, &accum_green_size);
-	SDL_GL_GetAttribute (SDL_GL_ACCUM_BLUE_SIZE, &accum_blue_size);
-	SDL_GL_GetAttribute (SDL_GL_ACCUM_ALPHA_SIZE, &accum_alpha_size);
-
 	SDL_WM_SetCaption ("Twilight NetQuake", "twilight");
 	Com_DPrintf ("VID_Init: Window caption set.\n");
 
@@ -515,27 +402,19 @@ VID_Init (unsigned char *palette)
 	GammaChanged (v_gamma);
 	Size_Changed2D (NULL);
 
+	Com_Printf ("Video mode %dx%d initialized: %s.\n", vid.width, vid.height,
+			SDL_VideoDriverName(sdl_driver, sizeof(sdl_driver)));
+
 	GL_Init ();
 	Com_DPrintf ("VID_Init: GL_Init successful.\n");
 
 	VID_InitTexGamma ();
-
-	Com_Printf ("Video mode %dx%d initialized: %s.\n", vid.width, vid.height,
-			SDL_VideoDriverName(sdl_driver, sizeof(sdl_driver)));
-	Com_Printf ("Frame Buffer: %d bpp, %d-%d-%d-%d, %s buffered\n",
-			buffer_size, red_size, green_size, blue_size, alpha_size,
-			doublebuffer ? "double" : "single");
-	Com_Printf ("Accum Buffer: %d-%d-%d-%d\n", accum_red_size, accum_green_size,
-			accum_blue_size, accum_alpha_size);
-	Com_Printf ("Depth bits: %d. Stencil bits: %d\n", depth_size, stencil_size);
 
 	if (use_mouse)
 	{
 		SDL_ShowCursor (0);
 		SDL_WM_GrabInput (SDL_GRAB_ON);
 	}
-
-	Cmd_AddCommand ("gl_info", &GL_Info_f);
 }
 
 void

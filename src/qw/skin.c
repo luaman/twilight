@@ -130,8 +130,8 @@ Skin_Load (char *skin_name)
 	if (pcx->manufacturer != 0x0a
 		|| pcx->version != 5
 		|| pcx->encoding != 1
-		|| pcx->bits_per_pixel != 8 || pcx->xmax < 296 || pcx->ymax < 194) {
-		Com_Printf ("Bad skin %s\n", name);
+		|| pcx->bits_per_pixel != 8 || pcx->xmax < 295 || pcx->ymax < 193) {
+		Com_Printf ("Bad skin %s, %dx%d\n", name, pcx->xmax, pcx->ymax);
 		return NULL;
 	}
 
@@ -183,17 +183,17 @@ Skin_Load (char *skin_name)
 		return NULL;
 	}
 
-	final = Zone_Alloc (skin_zone, 296 * 194);
+	final = Zone_Alloc (skin_zone, 295 * 193);
 	out = final;
 	in = tmp;
 
-	for (y = 0; y < 194; y++, in += pcx->xmax, out += 296)
-		for (x = 0; x < 296; x++)
+	for (y = 0; y < 193; y++, in += pcx->xmax, out += 295)
+		for (x = 0; x < 295; x++)
 			out[x] = in[x];
 
 	skin = Zone_Alloc(skin_zone, sizeof(skin_t));
 
-	GLT_Skin_Parse(final, skin, Mod_Extradata(player_model), name, 296, 194, 1, 1);
+	GLT_Skin_Parse(final, skin, Mod_Extradata(player_model), name, 295, 193, 1, 1);
 	Zone_Free (tmp);
 	Zone_Free (final);
 

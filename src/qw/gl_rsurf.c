@@ -603,13 +603,12 @@ Returns the proper texture for a given time and base texture
 ===============
 */
 static texture_t *
-R_TextureAnimation (texture_t *base)
+R_TextureAnimation (texture_t *base, int frame)
 {
 	int			relative;
 	int			count;
 
-	if (currententity->cur.frame)
-	{
+	if (frame) {
 		if (base->alternate_anims)
 			base = base->alternate_anims;
 	}
@@ -775,7 +774,7 @@ DrawTextureChains (void)
 		s = t->texturechain;
 		if (!s)
 			continue;
-		st = R_TextureAnimation (s->texinfo->texture);
+		st = R_TextureAnimation (s->texinfo->texture, 0);
 		if (s->flags & SURF_DRAWSKY)
 		{
 			R_DrawSkyChain (s);
@@ -818,7 +817,7 @@ DrawTextureChains (void)
 			s = t->texturechain;
 			if (!s || (s->flags & SURF_DRAWTURB))
 				continue;
-			st = R_TextureAnimation (t);
+			st = R_TextureAnimation (t, 0);
 			qglActiveTextureARB (GL_TEXTURE0_ARB);
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 			qglActiveTextureARB (GL_TEXTURE1_ARB);
@@ -849,7 +848,7 @@ DrawTextureChains (void)
 			s = t->texturechain;
 			if (!s || (s->flags & SURF_DRAWTURB))
 				continue;
-			st = R_TextureAnimation (t);
+			st = R_TextureAnimation (t, 0);
 
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 			for (; s; s = s->texturechain)
@@ -889,7 +888,7 @@ R_DrawWaterTextureChains (void)
 		s = t->texturechain;
 		if (!(s && (s->flags & SURF_DRAWTURB)))
 			continue;
-		st = R_TextureAnimation (t);
+		st = R_TextureAnimation (t, 0);
 
 		qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 		for (; s; s = s->texturechain)
@@ -1061,7 +1060,7 @@ R_DrawBrushModel (entity_t *e)
 		{
 			if (psurf->flags & SURF_DRAWTURB)
 			{
-				st = R_TextureAnimation (psurf->texinfo->texture);
+				st = R_TextureAnimation (psurf->texinfo->texture, e->cur.frame);
 				qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 				EmitWaterPolys (psurf, st, true, wateralpha);
 				psurf->visframe = -1;
@@ -1103,7 +1102,7 @@ R_DrawBrushModel (entity_t *e)
 	{
 		if (psurf->visframe == r_framecount)
 		{
-			t = R_TextureAnimation(psurf->texinfo->texture);
+			t = R_TextureAnimation(psurf->texinfo->texture, e->cur.frame);
 			if (gl_mtex)
 			{
 				if (texnum != t->gl_texturenum)
@@ -1288,13 +1287,7 @@ R_DrawWorld
 void
 R_DrawWorld (void)
 {
-	entity_t    ent;
-
-	memset (&ent, 0, sizeof (ent));
-	ent.model = cl.worldmodel;
-
 	VectorCopy (r_origin, modelorg);
-	currententity = &ent;
 
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 

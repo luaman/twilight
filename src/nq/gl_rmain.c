@@ -46,26 +46,13 @@ static const char rcsid[] =
 extern void TNT_Init (void);
 extern void R_InitBubble (void);
 extern void R_SkyBoxChanged (cvar_t *cvar);
+void R_DrawViewModel (void);
+void R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 
 entity_t *currententity;
 int r_framecount;						// used for dlight push checking
 static mplane_t frustum[4];
 int c_brush_polys, c_alias_polys;
-
-memzone_t *vzone;
-
-texcoord_t	*tc0_array_p;
-texcoord_t	*tc1_array_p;
-vertex_t	*v_array_p;
-colorf_t	*cf_array_p;
-colorub_t	*cub_array_p;
-GLuint		*vindices;
-float_int_t	*FtoUB_tmp;
-
-GLint		v_index, i_index;
-qboolean	va_locked;
-
-GLint		MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
 
 /*
  * view origin
@@ -297,260 +284,6 @@ R_DrawSpriteModels ()
 	qglDisable (GL_ALPHA_TEST);
 }
 
-/*
-=============================================================
-
-  ALIAS MODELS
-
-=============================================================
-*/
-
-
-#define NUMVERTEXNORMALS	162
-
-float r_avertexnormals[NUMVERTEXNORMALS][3] = {
-#include "anorms.h"
-};
-
-vec3_t shadevector;
-float shadelight;
-
-// precalculated dot products for quantized angles
-#define SHADEDOT_QUANT 16
-float       r_avertexnormal_dots[SHADEDOT_QUANT][256] =
-#include "anorm_dots.h"
-           ;
-
-float *shadedots = r_avertexnormal_dots[0];
-
-/*
-=================
-R_SetupAliasFrame
-
-=================
-*/
-static void
-R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
-{
-	float				l;
-	int					pose_num, i;
-	maliasframedesc_t	*frame;
-	maliaspose_t		*pose;
-
-	frame = &paliashdr->frames[e->frame];
-
-	if (frame->numposes > 1)
-		pose_num = (int) (cl.time / frame->interval) % frame->numposes;
-	else
-		pose_num = 0;
-
-	pose = &frame->poses[pose_num];
-
-	for (i = 0; i < paliashdr->numverts; i++) {
-		VectorCopy(pose->vertices[i].v, v_array_v(i));
-		tc_array(i, 0) = paliashdr->tcarray[i].s;
-		tc_array(i, 1) = paliashdr->tcarray[i].t;
-
-		l = shadedots[pose->normal_indices[i]] * shadelight;
-		VectorScale(lightcolor, l, cf_array_v(i));
-		cf_array(i, 3) = 1;
-	}
-	TWI_FtoUB (cf_array_v(0), c_array_v(0), paliashdr->numverts * 4);
-}
-
-/*
-=================
-R_DrawSubSkin
-
-=================
-*/
-void
-R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec4_t *color)
-{
-	if (color)
-		TWI_FtoUBMod(cf_array_v(0), c_array_v(0), color, paliashdr->numverts*4);
-
-	qglBindTexture (GL_TEXTURE_2D, skin->texnum);
-	qglDrawRangeElements(GL_TRIANGLES, 0, paliashdr->numverts,
-			skin->num_indices, GL_UNSIGNED_INT, skin->indices);
-}
-
-/*
-=================
-R_DrawAliasModel
-
-=================
-*/
-static void
-R_DrawAliasModel (entity_t *e, qboolean viewent)
-{
-	int				lnum, anim;
-	model_t			*clmodel = e->model;
-	aliashdr_t		*paliashdr;
-	rdlight_t		*rd;
-	skin_t			*skin;
-	vec4_t			top, bottom;
-	vec3_t			dist;
-	float			f;
-	qboolean		has_top = false, has_bottom = false, has_fb = false;
-
-	if (gl_particletorches->ivalue) {
-		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
-			if (cl.time >= e->time_left) {
-				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
-				e->time_left = cl.time + 0.10;
-			}
-			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_fire)
-				clmodel = mdl_fire;
-			else
-				return;
-		}
-	}
-
-	if (!viewent) {
-		vec3_t      mins, maxs;
-
-		Mod_MinsMaxs (clmodel, e->origin, e->angles, mins, maxs);
-
-		if (R_CullBox (mins, maxs)) {
-			return;
-		}
-	} 
-
-	/*
-	 * get lighting information
-	 */
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb_models->ivalue) {
-		shadelight = R_LightPoint (e->origin);
-
-		// always give the gun some light
-		if (viewent) {
-			lightcolor[0] = max (lightcolor[0], 24);
-			lightcolor[1] = max (lightcolor[1], 24);
-			lightcolor[2] = max (lightcolor[2], 24);
-		}
-
-		for (lnum = 0; lnum < r_numdlights; lnum++)
-		{
-			rd = r_dlight + lnum;
-			VectorSubtract (e->origin, rd->origin, dist);
-			f = DotProduct (dist, dist) + LIGHTOFFSET;
-			if (f < rd->cullradius2)
-			{
-				f = ((1.0f / f) - rd->lightsubtract) * 200.0f;
-				if (f > 0)
-					VectorMA (lightcolor, f, rd->light, lightcolor);
-			}
-		}
-
-		// ZOID: never allow players to go totally black
-		if (clmodel->modflags & FLAG_PLAYER) {
-			lightcolor[0] = max (lightcolor[0], 8);
-			lightcolor[1] = max (lightcolor[1], 8);
-			lightcolor[2] = max (lightcolor[2], 8);
-		}
-	}
-	else if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb_models->ivalue)
-		lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
-
-	shadedots = r_avertexnormal_dots[((int) (e->angles[1]
-				* (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
-
-	VectorScale(lightcolor, 1.0f / 200.0f, lightcolor);
-
-	if (!e->last_light[0] && !e->last_light[1] && !e->last_light[2])
-		VectorCopy (lightcolor, e->last_light);
-	else {
-		VectorAdd (lightcolor, e->last_light, lightcolor);
-		VectorScale (lightcolor, 0.5f, lightcolor);
-		VectorCopy (lightcolor, e->last_light);
-	}
-
-	shadelight = 1;
-
-	/*
-	 * locate the proper data
-	 */
-	paliashdr = (aliashdr_t *) Mod_Extradata (clmodel);
-
-	c_alias_polys += paliashdr->numtris;
-
-	/*
-	 * draw all the triangles
-	 */
-	qglPushMatrix ();
-
-	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
-	qglRotatef (e->angles[1], 0, 0, 1);
-	qglRotatef (-e->angles[0], 0, 1, 0);
-	qglRotatef (e->angles[2], 1, 0, 0);
-
-	qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
-			paliashdr->scale_origin[2]);
-
-	qglScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
-
-	skin = &paliashdr->skins[e->skinnum % paliashdr->numskins];
-	anim = (int) (cl.time / skin->interval) % skin->frames;
-
-	if (e->colormap && !gl_nocolors->ivalue) {
-		if ((has_top = !!skin->top[anim].num_indices))
-			VectorCopy4 (e->colormap->top, top);
-		if ((has_bottom = !!skin->bottom[anim].num_indices))
-			VectorCopy4 (e->colormap->bottom, bottom);
-	}
-
-	if (gl_fb_models->ivalue)
-		has_fb = !!skin->fb[anim].num_indices;
-
-	if (gl_affinemodels->ivalue)
-		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-
-	R_SetupAliasFrame (paliashdr, e);
-
-	TWI_PreVDrawCVA (0, paliashdr->numverts);
-
-	qglEnableClientState (GL_COLOR_ARRAY);
-
-	if (!has_fb && !has_top && !has_bottom)
-		R_DrawSubSkin (paliashdr, &skin->raw[anim], NULL);
-	else if (!has_top || !has_bottom)
-		R_DrawSubSkin (paliashdr, &skin->normal[anim], NULL);
-	else
-		R_DrawSubSkin (paliashdr, &skin->base[anim], NULL);
-
-	if (has_top || has_bottom || has_fb) {
-		qglEnable (GL_BLEND);
-		qglDepthMask (GL_FALSE);
-		qglBlendFunc (GL_ONE, GL_ONE);
-	}
-
-	if (has_top)
-		R_DrawSubSkin (paliashdr, &skin->top[anim], &top);
-
-	if (has_bottom)
-		R_DrawSubSkin (paliashdr, &skin->bottom[anim], &bottom);
-
-	qglDisableClientState (GL_COLOR_ARRAY);
-	qglColor4fv (whitev);
-
-	if (has_fb)
-		R_DrawSubSkin (paliashdr, &skin->fb[anim], NULL);
-
-	if (has_top || has_bottom || has_fb) {
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		qglDepthMask (GL_TRUE);
-		qglDisable (GL_BLEND);
-	}
-
-	TWI_PostVDrawCVA ();
-
-	if (gl_affinemodels->ivalue)
-		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-	qglPopMatrix ();
-}
-
 //============================================================================
 
 /*
@@ -561,51 +294,22 @@ R_DrawEntitiesOnList
 static void
 R_DrawEntitiesOnList (void)
 {
+	entity_t	*e;
 	int			i;
 
 	if (!r_drawentities->ivalue)
 		return;
 
 	for (i = 0; i < r_refdef.num_entities; i++) {
-		currententity = r_refdef.entities[i];
+		e = r_refdef.entities[i];
 
-		if (currententity->model->type == mod_brush)
-			R_DrawBrushModel (currententity);
+		if (e->model->type == mod_brush)
+			R_DrawBrushModel (e);
 	}
 
 	R_DrawSpriteModels ();
 
-	for (i = 0; i < r_refdef.num_entities; i++) {
-		currententity = r_refdef.entities[i];
-
-		// LordHavoc: uhh, shouldn't this be done in the chase cam code?
-		if (chase_active->ivalue)
-			if (currententity == &cl_entities[cl.viewentity])
-				currententity->angles[0] *= 0.3;
-
-		if (currententity->model->type == mod_alias)
-			R_DrawAliasModel (currententity, false);
-	}
-}
-
-/*
-=============
-R_DrawViewModel
-=============
-*/
-static void
-R_DrawViewModel (void)
-{
-	currententity = &cl.viewent;
-	if (!r_drawviewmodel->ivalue || chase_active->ivalue ||
-			!r_drawentities->ivalue || cl.items & IT_INVISIBILITY ||
-			(cl.stats[STAT_HEALTH] <= 0) || !currententity->model)
-		return;
-
-	// hack the depth range to prevent view model from poking into walls
-	qglDepthRange (0.0f, 0.3f);
-	R_DrawAliasModel (currententity, true);
-	qglDepthRange (0.0f, 1.0f);
+	R_DrawAliasModels (r_refdef.entities, r_refdef.num_entities, false);
 }
 
 
@@ -1009,9 +713,6 @@ R_Init_Cvars (void)
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 
 	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
-
-	gl_varray_size = Cvar_Get ("gl_varray_size", "2048", CVAR_ARCHIVE | CVAR_ROM, NULL);
-	gl_iarray_size = Cvar_Get ("gl_iarray_size", "2048", CVAR_ARCHIVE | CVAR_ROM, NULL);
 }
 
 /*
@@ -1071,40 +772,12 @@ R_Init
 void
 R_Init (void)
 {
-	vzone = Zone_AllocZone ("Vertex Arrays");
-
 	Cmd_AddCommand ("timerefresh", &R_TimeRefresh_f);
 	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
 	Cmd_AddCommand ("loadsky", &R_LoadSky_f);
 
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
-
-	MAX_VERTEX_ARRAYS = gl_varray_size->ivalue;
-	MAX_VERTEX_INDICES = gl_iarray_size->ivalue;
-
-	tc0_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
-	tc1_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
-	v_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(vertex_t));
-	vindices = Zone_Alloc(vzone, MAX_VERTEX_INDICES * sizeof(GLuint));
-	cf_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(colorf_t));
-	cub_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(colorub_t));
-	FtoUB_tmp = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(float_int_t) * 4);
-
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc0_array_v(0)), tc0_array_p);
-	qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(c_array_v(0)), cub_array_p);
-	qglVertexPointer (3, GL_FLOAT, sizeof(v_array_v(0)), v_array_p);
-
-	qglDisableClientState (GL_COLOR_ARRAY);
-	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-	if (gl_mtex) {
-		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof(tc1_array_v(0)), tc1_array_p);
-		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
-	}
 
 	R_InitTextures ();
 	R_InitBubble ();

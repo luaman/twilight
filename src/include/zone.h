@@ -27,6 +27,8 @@
 #ifndef __ZONE_H
 #define __ZONE_H
 
+#include "qtypes.h"
+
 #define ZONENAMESIZE 128				// to help avoid wasted pages
 #define MEMCLUMPSIZE (65536 - 1536)		// smallest unit we care about
 #define MEMUNIT 8

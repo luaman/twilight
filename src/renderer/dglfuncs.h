@@ -90,6 +90,7 @@ DYNGL_NEED (void, glPushMatrix, (void))
 DYNGL_NEED (void, glReadPixels, (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid * pixels))
 DYNGL_NEED (void, glRotatef, (GLfloat angle, GLfloat x, GLfloat y, GLfloat z))
 DYNGL_NEED (void, glScalef, (GLfloat x, GLfloat y, GLfloat z))
+DYNGL_EXT (void, glSecondaryColorPointerEXT, (GLint size, GLenum type, GLsizei stride, const GLvoid * pointer), "GL_EXT_secondary_color")
 DYNGL_NEED (void, glTexCoordPointer, (GLint size, GLenum type, GLsizei stride, const GLvoid * ptr))
 DYNGL_NEED (void, glTexEnvi, (GLenum target, GLenum pname, GLint param))
 DYNGL_NEED (void, glTexImage2D, (GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid * pixels))
@@ -100,6 +101,11 @@ DYNGL_EXT (void, glUnlockArraysEXT, (void), "GL_EXT_compiled_vertex_array")
 DYNGL_NEED (void, glVertex2f, (GLfloat x, GLfloat y))
 DYNGL_NEED (void, glVertexPointer, (GLint size, GLenum type, GLsizei stride, const GLvoid * ptr))
 DYNGL_NEED (void, glViewport, (GLint x, GLint y, GLsizei width, GLsizei height))
+
+DYNGL_EXT (void, glCombinerParameterfvNV, (GLenum pname, const GLfloat * params), "GL_NV_register_combiners")
+DYNGL_EXT (void, glCombinerInputNV, (GLenum stage, GLenum portion, GLenum variable, GLenum input, GLenum mapping, GLenum componentUsage), "GL_NV_register_combiners")
+DYNGL_EXT (void, glCombinerOutputNV, (GLenum stage, GLenum portion, GLenum abOutput, GLenum cdOutput, GLenum sumOutput, GLenum scale, GLenum bias, GLboolean abDotProduct, GLboolean cdDotProduct, GLboolean muxSum), "GL_NV_register_combiners")
+DYNGL_EXT (void, glFinalCombinerInputNV, (GLenum variable, GLenum input, GLenum mapping, GLenum componentUsage), "GL_NV_register_combiners")
 
 #undef DYNGL_DONT_NEED
 #undef DYNGL_DONT_EXT

@@ -293,7 +293,8 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 
 	skin->raw = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->base = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
-	skin->normal = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
+	skin->base_team = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
+	skin->top_bottom = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->fb = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->top = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
 	skin->bottom = Zone_Alloc(glt_zone, sizeof(skin_sub_t) * frames);
@@ -303,27 +304,36 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 	for (i = 0; i < frames; i++, data += s) {
 		memcpy(iskin, data, s);
 
+#define TOP_MASK	(BIT(1))
+#define BOTTOM_MASK	(BIT(6))
+#define TEAM_MASK	(TOP_MASK | BOTTOM_MASK)
+#define FB_MASK		(BIT(14) | BIT(15))
+#define BASE_MASK	(0xFFFF - (TOP_MASK | BOTTOM_MASK | FB_MASK))
+
 		GLT_FloodFillSkin8 (iskin, width, height);
 
 		GLT_Skin_SubParse (amodel, &skin->raw[i], iskin, width, height, 0,
 				0, false, false, va("%s_raw", name));
 
 		GLT_Skin_SubParse (amodel, &skin->base[i], iskin, width, height,
-				0xFFFF - (BIT(1) | BIT(6) | BIT(14) | BIT(15)),
-				0, false, false, va("%s_base", name));
+				BASE_MASK, 0, false, false, va("%s_base", name));
 
-		GLT_Skin_SubParse (amodel, &skin->normal[i], iskin, width, height,
-				0xFFFF - (BIT(14) | BIT(15)),
-				0, false, false, va("%s_normal", name));
+		GLT_Skin_SubParse (amodel, &skin->base_team[i], iskin, width, height,
+				BASE_MASK | TEAM_MASK,
+				0, false, false, va("%s_base_team", name));
+
+		GLT_Skin_SubParse (amodel, &skin->top_bottom[i], iskin, width, height,
+				TOP_MASK | BOTTOM_MASK,
+				0, true, true, va("%s_top_bottom", name));
 
 		GLT_Skin_SubParse (amodel, &skin->fb[i], iskin, width, height,
-				BIT(14) | BIT(15), 0, false, true, va("%s_fb", name));
+				FB_MASK, 0, false, true, va("%s_fb", name));
 
 		GLT_Skin_SubParse (amodel, &skin->top[i], iskin, width, height,
-				BIT(1), 0, true, true, va("%s_top", name));
+				TOP_MASK, 0, true, true, va("%s_top", name));
 
 		GLT_Skin_SubParse (amodel, &skin->bottom[i], iskin, width, height,
-				BIT(6), 0, true, true, va("%s_bottom", name));
+				BOTTOM_MASK, 0, true, true, va("%s_bottom", name));
 	}
 
 	Zone_Free(iskin);
