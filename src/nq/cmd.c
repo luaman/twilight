@@ -45,7 +45,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 
-void        Cmd_ForwardToServer (void);
+void        Cmd_ForwardToServer_f (void);
 
 #define	MAX_ALIAS_NAME	32
 
@@ -492,25 +492,6 @@ static cmd_function_t *cmd_functions;	// possible commands to execute
 
 /*
 ============
-Cmd_Init
-============
-*/
-void
-Cmd_Init (void)
-{
-//
-// register our commands
-//
-	Cmd_AddCommand ("stuffcmds", Cmd_StuffCmds_f);
-	Cmd_AddCommand ("exec", Cmd_Exec_f);
-	Cmd_AddCommand ("echo", Cmd_Echo_f);
-	Cmd_AddCommand ("alias", Cmd_Alias_f);
-	Cmd_AddCommand ("cmd", Cmd_ForwardToServer);
-	Cmd_AddCommand ("wait", Cmd_Wait_f);
-}
-
-/*
-============
 Cmd_Argc
 ============
 */
@@ -855,33 +836,21 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 
 }
 
-
 /*
-===================
-Cmd_ForwardToServer
-
-Sends the entire command line over to the server
-===================
+============
+Cmd_Init
+============
 */
 void
-Cmd_ForwardToServer (void)
+Cmd_Init (void)
 {
-	if (cls.state != ca_connected) {
-		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
-		return;
-	}
-
-	if (cls.demoplayback)
-		return;							// not really connected
-
-	MSG_WriteByte (&cls.message, clc_stringcmd);
-	if (strcasecmp (Cmd_Argv (0), "cmd") != 0) {
-		SZ_Print (&cls.message, Cmd_Argv (0));
-		SZ_Print (&cls.message, " ");
-	}
-	if (Cmd_Argc () > 1)
-		SZ_Print (&cls.message, Cmd_Args ());
-	else
-		SZ_Print (&cls.message, "\n");
+//
+// register our commands
+//
+	Cmd_AddCommand ("stuffcmds", Cmd_StuffCmds_f);
+	Cmd_AddCommand ("exec", Cmd_Exec_f);
+	Cmd_AddCommand ("echo", Cmd_Echo_f);
+	Cmd_AddCommand ("alias", Cmd_Alias_f);
+	Cmd_AddCommand ("cmd", Cmd_ForwardToServer_f);
+	Cmd_AddCommand ("wait", Cmd_Wait_f);
 }
-

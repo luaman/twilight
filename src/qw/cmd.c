@@ -37,16 +37,14 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
-#include "client.h"
 #include "cmd.h"
 #include "common.h"
 #include "cvar.h"
 #include "strlib.h"
 #include "sys.h"
 #include "zone.h"
-	
 
-void        Cmd_ForwardToServer (void);
+void Cmd_ForwardToServer_f (void);
 
 #define	MAX_ALIAS_NAME	32
 
@@ -212,7 +210,7 @@ Cbuf_Execute (void)
 		}
 
 // execute the command line
-		Cmd_ExecuteString (line);
+		Cmd_ExecuteString (line, src_command);
 
 		if (cmd_wait) {					// skip out while text still remains in 
 										// 
@@ -274,7 +272,7 @@ Cbuf_Execute_Sets (void)
 		extract_line (line);
 		// execute the command line
 		if (strncmp (line, "set", 3) == 0 && isspace ((int) line[3])) {
-			Cmd_ExecuteString (line);
+			Cmd_ExecuteString (line, src_command);
 		}
 	}
 }
@@ -495,6 +493,7 @@ static char *cmd_argv[MAX_ARGS];
 static char *cmd_null_string = "";
 static char *cmd_args = NULL;
 
+cmd_source_t cmd_source;
 
 
 static cmd_function_t *cmd_functions;	// possible commands to execute
@@ -802,57 +801,6 @@ Cmd_CompleteAliasBuildList (char *partial)
 }
 
 /*
-===================
-Cmd_ForwardToServer
-
-adds the current command line as a clc_stringcmd to the client message.
-things like godmode, noclip, etc, are commands directed to the server,
-so when they are typed in at the console, they will need to be forwarded.
-===================
-*/
-void
-Cmd_ForwardToServer (void)
-{
-	if (cls.state == ca_disconnected) {
-		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
-		return;
-	}
-
-	if (cls.demoplayback)
-		return;							// not really connected
-
-	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-	SZ_Print (&cls.netchan.message, Cmd_Argv (0));
-	if (Cmd_Argc () > 1) {
-		SZ_Print (&cls.netchan.message, " ");
-		SZ_Print (&cls.netchan.message, Cmd_Args ());
-	}
-}
-
-// don't forward the first argument
-void
-Cmd_ForwardToServer_f (void)
-{
-	if (cls.state == ca_disconnected) {
-		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
-		return;
-	}
-
-	if (strcasecmp (Cmd_Argv (1), "snap") == 0) {
-		Cbuf_InsertText ("snap\n");
-		return;
-	}
-
-	if (cls.demoplayback)
-		return;							// not really connected
-
-	if (Cmd_Argc () > 1) {
-		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-		SZ_Print (&cls.netchan.message, Cmd_Args ());
-	}
-}
-
-/*
 ============
 Cmd_ExecuteString
 
@@ -861,11 +809,12 @@ FIXME: lookupnoadd the token to speed search?
 ============
 */
 void
-Cmd_ExecuteString (char *text)
+Cmd_ExecuteString (char *text, cmd_source_t src)
 {
 	cmd_function_t	*cmd;
 	cmdalias_t		*a;
 
+	cmd_source = src;
 	Cmd_TokenizeString (text);
 
 // execute the command line

@@ -481,6 +481,7 @@ static char *cmd_argv[MAX_ARGS];
 static char *cmd_null_string = "";
 static char *cmd_args = NULL;
 
+cmd_source_t cmd_source;
 
 
 static cmd_function_t *cmd_functions;	// possible commands to execute
@@ -665,11 +666,6 @@ Cmd_CompleteCommand (char *partial)
 	return NULL;
 }
 
-void
-Cmd_ForwardToServer (void)
-{
-}
-
 /*
 ============
 Cmd_ExecuteString
@@ -679,11 +675,12 @@ FIXME: lookupnoadd the token to speed search?
 ============
 */
 void
-Cmd_ExecuteString (char *text)
+Cmd_ExecuteString (char *text, cmd_source_t src)
 {
 	cmd_function_t *cmd;
 	cmdalias_t *a;
 
+	cmd_source = src;
 	Cmd_TokenizeString (text);
 
 // execute the command line
