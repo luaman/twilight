@@ -25,8 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "winquake.h"
 #endif
 
-cvar_t      cl_nopred = { "cl_nopred", "0" };
-cvar_t      cl_pushlatency = { "pushlatency", "-999" };
+cvar_t     *cl_nopred;
+cvar_t     *cl_pushlatency;
 
 extern frame_t *view_frame;
 
@@ -125,13 +125,13 @@ CL_PredictMove (void)
 	frame_t    *from, *to = NULL;
 	int         oldphysent;
 
-	if (cl_pushlatency.value > 0)
-		Cvar_Set ("pushlatency", "0");
+	if (cl_pushlatency->value > 0)
+		Cvar_Set (cl_pushlatency, "0");
 
 	if (cl.paused)
 		return;
 
-	cl.time = realtime - cls.latency - cl_pushlatency.value * 0.001;
+	cl.time = realtime - cls.latency - cl_pushlatency->value * 0.001;
 	if (cl.time > realtime)
 		cl.time = realtime;
 
@@ -160,7 +160,7 @@ CL_PredictMove (void)
 		SDL_WM_SetCaption (text, "Twilight QWCL");
 	}
 
-	if (cl_nopred.value) {
+	if (cl_nopred->value) {
 		VectorCopy (from->playerstate[cl.playernum].velocity, cl.simvel);
 		VectorCopy (from->playerstate[cl.playernum].origin, cl.simorg);
 		return;
@@ -233,6 +233,6 @@ CL_InitPrediction
 void
 CL_InitPrediction (void)
 {
-	Cvar_RegisterVariable (&cl_pushlatency);
-	Cvar_RegisterVariable (&cl_nopred);
+	cl_nopred = Cvar_Get ("cl_nopred", "0", CVAR_NONE, NULL);
+	cl_pushlatency = Cvar_Get ("pushlatency", "-999", CVAR_NONE, NULL);
 }

@@ -40,51 +40,55 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 qboolean    noclip_anglehack;			// remnant from old quake
 
 
-cvar_t      rcon_password = { "rcon_password", "", false };
+cvar_t     *rcon_password;
+cvar_t     *rcon_address;
 
-cvar_t      rcon_address = { "rcon_address", "" };
+cvar_t     *cl_timeout;
+cvar_t     *cl_shownet;
 
-cvar_t      cl_timeout = { "cl_timeout", "60" };
+cvar_t     *cl_sbar;
+cvar_t     *cl_hudswap;
+cvar_t     *cl_maxfps;
 
-cvar_t      cl_shownet = { "cl_shownet", "0" };	// can be 0, 1, or 2
+cvar_t     *lookspring;
+cvar_t     *lookstrafe;
+cvar_t     *sensitivity;
 
-cvar_t      cl_sbar = { "cl_sbar", "0", true };
-cvar_t      cl_hudswap = { "cl_hudswap", "0", true };
-cvar_t      cl_maxfps = { "cl_maxfps", "0", true };
+cvar_t     *m_pitch;
+cvar_t     *m_yaw;
+cvar_t     *m_forward;
+cvar_t     *m_side;
 
-cvar_t      lookspring = { "lookspring", "0", true };
-cvar_t      lookstrafe = { "lookstrafe", "0", true };
-cvar_t      sensitivity = { "sensitivity", "3", true };
+cvar_t     *entlatency;
+cvar_t     *cl_predict_players;
+cvar_t     *cl_predict_players2;
+cvar_t     *cl_solid_players;
 
-cvar_t      m_pitch = { "m_pitch", "0.022", true };
-cvar_t      m_yaw = { "m_yaw", "0.022" };
-cvar_t      m_forward = { "m_forward", "1" };
-cvar_t      m_side = { "m_side", "0.8" };
-
-cvar_t      entlatency = { "entlatency", "20" };
-cvar_t      cl_predict_players = { "cl_predict_players", "1" };
-cvar_t      cl_predict_players2 = { "cl_predict_players2", "1" };
-cvar_t      cl_solid_players = { "cl_solid_players", "1" };
-
-cvar_t      localid = { "localid", "" };
-
-static qboolean allowremotecmd = true;
+cvar_t     *localid;
 
 //
 // info mirrors
 //
-cvar_t      password = { "password", "", false, true };
-cvar_t      spectator = { "spectator", "", false, true };
-cvar_t      name = { "name", "unnamed", true, true };
-cvar_t      team = { "team", "", true, true };
-cvar_t      skin = { "skin", "", true, true };
-cvar_t      topcolor = { "topcolor", "0", true, true };
-cvar_t      bottomcolor = { "bottomcolor", "0", true, true };
-cvar_t      rate = { "rate", "2500", true, true };
-cvar_t      noaim = { "noaim", "0", true, true };
-cvar_t      msg = { "msg", "1", true, true };
+cvar_t     *password;
+cvar_t     *spectator;
+cvar_t     *name;
+cvar_t     *team;
+cvar_t     *skin;
+cvar_t     *topcolor;
+cvar_t     *bottomcolor;
+cvar_t     *rate;
+cvar_t     *noaim;
+cvar_t     *msg;
 
-extern cvar_t cl_hightrack;
+cvar_t     *host_speeds;
+cvar_t     *show_fps;
+
+
+extern cvar_t *cl_hightrack;
+extern cvar_t *qport;
+
+
+static qboolean allowremotecmd = true;
 
 
 client_static_t cls;
@@ -121,10 +125,6 @@ byte       *host_basepal;
 byte       *host_colormap;
 
 netadr_t    master_adr;					// address of the master server
-
-cvar_t      host_speeds = { "host_speeds", "0" };	// set for running times
-cvar_t      show_fps = { "show_fps", "0" };	// set for running times
-cvar_t      developer = { "developer", "0" };
 
 int         fps_count;
 
@@ -225,7 +225,7 @@ CL_SendConnectPacket (void)
 
 	connect_time = realtime + t2 - t1;	// for retransmit requests
 
-	cls.qport = Cvar_VariableValue ("qport");
+	cls.qport = qport->value;
 
 	Info_SetValueForStarKey (cls.userinfo, "*ip", NET_AdrToString (adr),
 							 MAX_INFO_STRING);
@@ -330,7 +330,7 @@ CL_Rcon_f (void)
 	int         i;
 	netadr_t    to;
 
-	if (!rcon_password.string) {
+	if (!rcon_password->string) {
 		Con_Printf ("You must set 'rcon_password' before\n"
 					"issuing an rcon command.\n");
 		return;
@@ -344,7 +344,7 @@ CL_Rcon_f (void)
 
 	Q_strcat (message, "rcon ");
 
-	Q_strcat (message, rcon_password.string);
+	Q_strcat (message, rcon_password->string);
 	Q_strcat (message, " ");
 
 	for (i = 1; i < Cmd_Argc (); i++) {
@@ -355,14 +355,14 @@ CL_Rcon_f (void)
 	if (cls.state >= ca_connected)
 		to = cls.netchan.remote_address;
 	else {
-		if (!Q_strlen (rcon_address.string)) {
+		if (!Q_strlen (rcon_address->string)) {
 			Con_Printf ("You must either be connected,\n"
 						"or set the 'rcon_address' cvar\n"
 						"to issue rcon commands\n");
 
 			return;
 		}
-		NET_StringToAdr (rcon_address.string, &to);
+		NET_StringToAdr (rcon_address->string, &to);
 	}
 
 	NET_SendPacket (Q_strlen (message) + 1, message, to);
@@ -554,9 +554,9 @@ CL_Color_f (void)
 		bottom = 13;
 
 	snprintf (num, sizeof (num), "%i", top);
-	Cvar_Set ("topcolor", num);
+	Cvar_Set (topcolor, num);
 	snprintf (num, sizeof (num), "%i", bottom);
-	Cvar_Set ("bottomcolor", num);
+	Cvar_Set (bottomcolor, num);
 }
 
 /*
@@ -856,8 +856,8 @@ CL_ConnectionlessPacket (void)
 			s[Q_strlen (s) - 1] = 0;
 
 		if (!allowremotecmd
-			&& (!*localid.string || Q_strcmp (localid.string, s))) {
-			if (!*localid.string) {
+			&& (!*localid->string || Q_strcmp (localid->string, s))) {
+			if (!*localid->string) {
 				Con_Printf ("===========================\n");
 				Con_Printf ("Command packet received from local host, but no "
 							"localid has been set.  You may need to upgrade your server "
@@ -870,9 +870,9 @@ CL_ConnectionlessPacket (void)
 				("Invalid localid on command packet received from local host. "
 				 "\n|%s| != |%s|\n"
 				 "You may need to reload your server browser and QuakeWorld.\n",
-				 s, localid.string);
+				 s, localid->string);
 			Con_Printf ("===========================\n");
-			Cvar_Set ("localid", "");
+			Cvar_Set (localid, "");
 			return;
 		}
 
@@ -969,7 +969,7 @@ CL_ReadPackets (void)
 	// check timeout
 	// 
 	if (cls.state >= ca_connected
-		&& realtime - cls.netchan.last_received > cl_timeout.value) {
+		&& realtime - cls.netchan.last_received > cl_timeout->value) {
 		Con_Printf ("\nServer connection timed out.\n");
 		CL_Disconnect ();
 		return;
@@ -1029,8 +1029,8 @@ CL_Init
 void
 CL_Init (void)
 {
-	extern cvar_t baseskin;
-	extern cvar_t noskins;
+	extern cvar_t *baseskin;
+	extern cvar_t *noskins;
 	char        st[80];
 
 	cls.state = ca_disconnected;
@@ -1052,59 +1052,71 @@ CL_Init (void)
 //
 // register our commands
 //
-	Cvar_RegisterVariable (&show_fps);
-	Cvar_RegisterVariable (&host_speeds);
-	Cvar_RegisterVariable (&developer);
+	// set for running times
+	host_speeds = Cvar_Get ("host_speeds", "0", CVAR_NONE, NULL);
+	show_fps = Cvar_Get ("show_fps", "0", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&cl_warncmd);
-	Cvar_RegisterVariable (&cl_upspeed);
-	Cvar_RegisterVariable (&cl_forwardspeed);
-	Cvar_RegisterVariable (&cl_backspeed);
-	Cvar_RegisterVariable (&cl_sidespeed);
-	Cvar_RegisterVariable (&cl_movespeedkey);
-	Cvar_RegisterVariable (&cl_yawspeed);
-	Cvar_RegisterVariable (&cl_pitchspeed);
-	Cvar_RegisterVariable (&cl_anglespeedkey);
-	Cvar_RegisterVariable (&cl_shownet);
-	Cvar_RegisterVariable (&cl_sbar);
-	Cvar_RegisterVariable (&cl_hudswap);
-	Cvar_RegisterVariable (&cl_maxfps);
-	Cvar_RegisterVariable (&cl_timeout);
-	Cvar_RegisterVariable (&lookspring);
-	Cvar_RegisterVariable (&lookstrafe);
-	Cvar_RegisterVariable (&sensitivity);
+	cl_warncmd = Cvar_Get ("cl_warncmd", "0", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&m_pitch);
-	Cvar_RegisterVariable (&m_yaw);
-	Cvar_RegisterVariable (&m_forward);
-	Cvar_RegisterVariable (&m_side);
+	cl_upspeed = Cvar_Get ("cl_upspeed", "200", CVAR_NONE, NULL);
+	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", CVAR_ARCHIVE, NULL);
+	cl_backspeed = Cvar_Get ("cl_backspeed", "200", CVAR_ARCHIVE, NULL);
+	cl_sidespeed = Cvar_Get ("cl_sidespeed", "350", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&rcon_password);
-	Cvar_RegisterVariable (&rcon_address);
+	cl_movespeedkey = Cvar_Get ("cl_movespeedkey", "2.0", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&entlatency);
-	Cvar_RegisterVariable (&cl_predict_players2);
-	Cvar_RegisterVariable (&cl_predict_players);
-	Cvar_RegisterVariable (&cl_solid_players);
+	cl_yawspeed = Cvar_Get ("cl_yawspeed", "140", CVAR_NONE, NULL);
+	cl_pitchspeed = Cvar_Get ("cl_pitchspeed", "150", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&localid);
+	cl_anglespeedkey = Cvar_Get ("cl_anglespeedkey", "1.5", CVAR_NONE, NULL);
 
-	Cvar_RegisterVariable (&baseskin);
-	Cvar_RegisterVariable (&noskins);
+	rcon_password = Cvar_Get ("rcon_password", "", CVAR_NONE, NULL);
+	rcon_address = Cvar_Get ("rcon_address", "", CVAR_NONE, NULL);
+
+	cl_timeout = Cvar_Get ("cl_timeout", "60", CVAR_NONE, NULL);
+
+	// can be 0, 1, or 2
+	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);
+
+	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, NULL);
+	cl_hudswap = Cvar_Get ("cl_hudswap", "0", CVAR_ARCHIVE, NULL);
+	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
+
+	lookspring = Cvar_Get ("lookspring", "0", CVAR_ARCHIVE, NULL);
+	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE, NULL);
+	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE, NULL);
+
+	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE, NULL);
+	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_NONE, NULL);
+	m_forward = Cvar_Get ("m_forward", "1", CVAR_NONE, NULL);
+	m_side = Cvar_Get ("m_side", "0.8", CVAR_NONE, NULL);
+
+	entlatency = Cvar_Get ("entlatency", "20", CVAR_NONE, NULL);
+	cl_predict_players = Cvar_Get ("cl_predict_players", "1",
+			CVAR_NONE, NULL);
+	cl_predict_players2 = Cvar_Get ("cl_predict_players2", "1",
+			CVAR_NONE, NULL);
+	cl_solid_players = Cvar_Get ("cl_solid_players", "1", CVAR_NONE, NULL);
+
+	localid = Cvar_Get ("localid", "", CVAR_NONE, NULL);
+
+	baseskin = Cvar_Get ("baseskin", "base", CVAR_NONE, NULL);
+	noskins = Cvar_Get ("noskins", "0", CVAR_NONE, NULL);
 
 	// 
 	// info mirrors
 	// 
-	Cvar_RegisterVariable (&name);
-	Cvar_RegisterVariable (&password);
-	Cvar_RegisterVariable (&spectator);
-	Cvar_RegisterVariable (&skin);
-	Cvar_RegisterVariable (&team);
-	Cvar_RegisterVariable (&topcolor);
-	Cvar_RegisterVariable (&bottomcolor);
-	Cvar_RegisterVariable (&rate);
-	Cvar_RegisterVariable (&msg);
-	Cvar_RegisterVariable (&noaim);
+	password = Cvar_Get ("password", "", CVAR_USERINFO, NULL);
+	spectator = Cvar_Get ("spectator", "", CVAR_USERINFO, NULL);
+	name = Cvar_Get ("name", "unnamed", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
+	team = Cvar_Get ("team", "", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
+	skin = Cvar_Get ("skin", "", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
+	topcolor = Cvar_Get ("topcolor", "0", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
+	bottomcolor = Cvar_Get ("bottomcolor", "0", CVAR_ARCHIVE|CVAR_USERINFO,
+			NULL);
+	rate = Cvar_Get ("rate", "2500", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
+	noaim = Cvar_Get ("noaim", "0", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
+	msg = Cvar_Get ("msg", "1", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
 
 
 	Cmd_AddCommand ("version", CL_Version_f);
@@ -1229,7 +1241,7 @@ Host_WriteConfiguration (void)
 		}
 
 		Key_WriteBindings (f);
-		Cvar_WriteVariables (f);
+		Cvar_WriteVars (f);
 
 		fclose (f);
 	}
@@ -1292,10 +1304,10 @@ Host_Frame (float time)
 	if (oldrealtime > realtime)
 		oldrealtime = 0;
 
-	if (cl_maxfps.value)
-		fps = max (30.0, min (cl_maxfps.value, 72.0));
+	if (cl_maxfps->value)
+		fps = max (30.0, min (cl_maxfps->value, 72.0));
 	else
-		fps = max (30.0, min (rate.value / 80.0, 72.0));
+		fps = max (30.0, min (rate->value / 80.0, 72.0));
 
 	if (!cls.timedemo && realtime - oldrealtime < 1.0 / fps)
 		return;							// framerate is too high
@@ -1337,12 +1349,12 @@ Host_Frame (float time)
 	CL_EmitEntities ();
 
 	// update video
-	if (host_speeds.value)
+	if (host_speeds->value)
 		time1 = Sys_DoubleTime ();
 
 	SCR_UpdateScreen ();
 
-	if (host_speeds.value)
+	if (host_speeds->value)
 		time2 = Sys_DoubleTime ();
 
 	// update audio
@@ -1354,7 +1366,7 @@ Host_Frame (float time)
 
 	CDAudio_Update ();
 
-	if (host_speeds.value) {
+	if (host_speeds->value) {
 		pass1 = (time1 - time3) * 1000;
 		time3 = Sys_DoubleTime ();
 		pass2 = (time2 - time1) * 1000;
@@ -1407,10 +1419,12 @@ Host_Init (quakeparms_t *parms)
 
 	Memory_Init (parms->membase, parms->memsize);
 	Cbuf_Init ();
+	Cvar_Init ();
 	Cmd_Init ();
 	V_Init ();
 
 	COM_Init ();
+	SCR_InitCvars ();
 
 	Host_FixupModelNames ();
 

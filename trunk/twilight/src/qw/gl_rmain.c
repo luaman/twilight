@@ -73,6 +73,33 @@ int         d_lightstylevalue[256];		// 8.8 fraction of base light value
 
 void        R_MarkLeaves (void);
 
+cvar_t     *r_norefresh;
+cvar_t     *r_drawentities;
+cvar_t     *r_drawviewmodel;
+cvar_t     *r_speeds;
+cvar_t     *r_fullbright;
+cvar_t     *r_lightmap;
+cvar_t     *r_shadows;
+cvar_t     *r_mirroralpha;
+cvar_t     *r_wateralpha;
+cvar_t     *r_dynamic;
+cvar_t     *r_novis;
+cvar_t     *r_netgraph;
+
+cvar_t     *gl_clear;
+cvar_t     *gl_cull;
+cvar_t     *gl_texsort;
+cvar_t     *gl_smoothmodels;
+cvar_t     *gl_affinemodels;
+cvar_t     *gl_polyblend;
+cvar_t     *gl_flashblend;
+cvar_t     *gl_playermip;
+cvar_t     *gl_nocolors;
+cvar_t     *gl_keeptjunctions;
+cvar_t     *gl_reporttjunctions;
+cvar_t     *gl_finish;
+
+#if 0
 cvar_t      r_norefresh = { "r_norefresh", "0" };
 cvar_t      r_drawentities = { "r_drawentities", "1" };
 cvar_t      r_drawviewmodel = { "r_drawviewmodel", "1" };
@@ -98,9 +125,10 @@ cvar_t      gl_nocolors = { "gl_nocolors", "0" };
 cvar_t      gl_keeptjunctions = { "gl_keeptjunctions", "1" };
 cvar_t      gl_reporttjunctions = { "gl_reporttjunctions", "0" };
 cvar_t      gl_finish = { "gl_finish", "0" };
+#endif
 
-extern cvar_t gl_ztrick;
-extern cvar_t scr_fov;
+extern cvar_t *gl_ztrick;
+extern cvar_t *scr_fov;
 
 static float shadescale = 0.0;
 
@@ -534,7 +562,7 @@ R_DrawAliasModel (entity_t *e)
 
 	// we can't dynamically colormap textures, so they are cached
 	// seperately for the players.  Heads are just uncolored.
-	if (currententity->scoreboard && !gl_nocolors.value) {
+	if (currententity->scoreboard && !gl_nocolors->value) {
 		i = currententity->scoreboard - cl.players;
 		if (!currententity->scoreboard->skin) {
 			Skin_Find (currententity->scoreboard);
@@ -544,11 +572,11 @@ R_DrawAliasModel (entity_t *e)
 			GL_Bind (playertextures + i);
 	}
 
-	if (gl_smoothmodels.value)
+	if (gl_smoothmodels->value)
 		glShadeModel (GL_SMOOTH);
 	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	if (gl_affinemodels.value)
+	if (gl_affinemodels->value)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
 	R_SetupAliasFrame (currententity->frame, paliashdr);
@@ -556,12 +584,12 @@ R_DrawAliasModel (entity_t *e)
 	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	glShadeModel (GL_FLAT);
-	if (gl_affinemodels.value)
+	if (gl_affinemodels->value)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	glPopMatrix ();
 
-	if (r_shadows.value && !(clmodel->modflags & FLAG_NOSHADOW)) {
+	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {
 		float an = -e->angles[1] / 180 * M_PI;
 
 		if (!shadescale)
@@ -596,7 +624,7 @@ R_DrawEntitiesOnList (void)
 {
 	int         i;
 
-	if (!r_drawentities.value)
+	if (!r_drawentities->value)
 		return;
 
 	// draw sprites seperately, because of alpha blending
@@ -641,10 +669,10 @@ R_DrawViewModel (void)
 {
 	currententity = &cl.viewent;
 
-	if (!r_drawviewmodel.value || 
+	if (!r_drawviewmodel->value || 
 		!Cam_DrawViewModel () ||
 		envmap ||
-		!r_drawentities.value ||
+		!r_drawentities->value ||
 		(cl.stats[STAT_ITEMS] & IT_INVISIBILITY) ||
 		(cl.stats[STAT_HEALTH] <= 0) ||
 		!currententity->model)
@@ -665,7 +693,7 @@ R_PolyBlend
 void
 R_PolyBlend (void)
 {
-	if (!gl_polyblend.value)
+	if (!gl_polyblend->value)
 		return;
 	if (!v_blend[3])
 		return;
@@ -763,10 +791,14 @@ void
 R_SetupFrame (void)
 {
 // don't allow cheats in multiplayer
-	r_fullbright.value = 0;
-	r_lightmap.value = 0;
+	if (r_fullbright->value || r_lightmap->value)
+	{
+		Cvar_Set (r_fullbright, "0");
+		Cvar_Set (r_lightmap, "0");
+	}
 	if (!atoi (Info_ValueForKey (cl.serverinfo, "watervis")))
-		r_wateralpha.value = 1;
+		if (r_wateralpha->value != 1)
+			Cvar_Set (r_wateralpha, "1");
 
 	R_AnimateLight ();
 
@@ -881,7 +913,7 @@ R_SetupGL (void)
 	// 
 	// set drawing parms
 	// 
-	if (gl_cull.value)
+	if (gl_cull->value)
 		glEnable (GL_CULL_FACE);
 	else
 		glDisable (GL_CULL_FACE);
@@ -922,11 +954,6 @@ R_RenderScene (void)
 	R_RenderDlights ();
 
 	R_DrawParticles ();
-
-#ifdef GLTEST
-	Test_Draw ();
-#endif
-
 }
 
 
@@ -938,18 +965,18 @@ R_Clear
 void
 R_Clear (void)
 {
-	if (r_mirroralpha.value != 1.0) {
-		if (gl_clear.value)
+	if (r_mirroralpha->value != 1.0) {
+		if (gl_clear->value)
 			glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		else
 			glClear (GL_DEPTH_BUFFER_BIT);
 		gldepthmin = 0;
 		gldepthmax = 0.5;
 		glDepthFunc (GL_LEQUAL);
-	} else if (gl_ztrick.value) {
+	} else if (gl_ztrick->value) {
 		static int  trickframe;
 
-		if (gl_clear.value)
+		if (gl_clear->value)
 			glClear (GL_COLOR_BUFFER_BIT);
 
 		trickframe++;
@@ -963,7 +990,7 @@ R_Clear (void)
 			glDepthFunc (GL_GEQUAL);
 		}
 	} else {
-		if (gl_clear.value)
+		if (gl_clear->value)
 			glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		else
 			glClear (GL_DEPTH_BUFFER_BIT);
@@ -1059,13 +1086,13 @@ R_RenderView (void)
 {
 	double      time1 = 0, time2;
 
-	if (r_norefresh.value)
+	if (r_norefresh->value)
 		return;
 
 	if (!r_worldentity.model || !cl.worldmodel)
 		Sys_Error ("R_RenderView: NULL worldmodel");
 
-	if (r_speeds.value) {
+	if (r_speeds->value) {
 		glFinish ();
 		time1 = Sys_DoubleTime ();
 		c_brush_polys = 0;
@@ -1074,7 +1101,7 @@ R_RenderView (void)
 
 	mirror = false;
 
-	if (gl_finish.value)
+	if (gl_finish->value)
 		glFinish ();
 
 	R_Clear ();
@@ -1089,7 +1116,7 @@ R_RenderView (void)
 
 	R_PolyBlend ();
 
-	if (r_speeds.value) {
+	if (r_speeds->value) {
 //      glFinish ();
 		time2 = Sys_DoubleTime ();
 		Con_Printf ("%3i ms  %4i wpoly %4i epoly\n",

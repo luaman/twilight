@@ -74,10 +74,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "glquake.h"
 
-#ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
 
 //=============================================================================
 
@@ -106,11 +102,11 @@ extern qboolean noclip_anglehack;
 //
 extern quakeparms_t host_parms;
 
-extern cvar_t sys_ticrate;
-extern cvar_t sys_nostdout;
-extern cvar_t developer;
+extern cvar_t *sys_ticrate;
+extern cvar_t *sys_nostdout;
+extern cvar_t *developer;
 
-extern cvar_t password;
+extern cvar_t *password;
 
 extern qboolean host_initialized;		// true if into command execution
 extern double host_frametime;

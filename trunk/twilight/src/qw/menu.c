@@ -395,34 +395,29 @@ M_Menu_Options_f (void)
 void
 M_AdjustSliders (int dir)
 {
+	float		t;
+
 	S_LocalSound ("misc/menu3.wav");
 
 	switch (options_cursor) {
 		case 3:						// screen size
-			scr_viewsize.value += dir * 10;
-			if (scr_viewsize.value < 30)
-				scr_viewsize.value = 30;
-			if (scr_viewsize.value > 120)
-				scr_viewsize.value = 120;
-			Cvar_SetValue ("viewsize", scr_viewsize.value);
+			t = scr_viewsize->value + dir * 10;
+			t = bound (30, t, 120);
+			Cvar_Set (scr_viewsize,  va ("%f", t));
 			break;
 		case 4:						// gamma
-			v_gamma.value -= dir * 0.05;
-			if (v_gamma.value < 0.5)
-				v_gamma.value = 0.5;
-			if (v_gamma.value > 1)
-				v_gamma.value = 1;
-			Cvar_SetValue ("gamma", v_gamma.value);
+			t = v_gamma->value - dir * 0.05;
+			t = bound (0.5, t, 1);
+			Cvar_Set (v_gamma, va ("%f", t));
 			break;
 		case 5:						// mouse speed
-			sensitivity.value += dir * 0.5;
-			if (sensitivity.value < 1)
-				sensitivity.value = 1;
-			if (sensitivity.value > 11)
-				sensitivity.value = 11;
-			Cvar_SetValue ("sensitivity", sensitivity.value);
+			t = sensitivity->value + dir * 0.5;
+			t = bound (1, t, 11);
+			Cvar_Set (sensitivity, va ("%f", t));
 			break;
 		case 6:						// music volume
+			Cvar_Set (bgmvolume,  va ("%i", !(int)bgmvolume->value));
+#if 0
 #ifdef _WIN32
 			bgmvolume.value += dir * 1.0;
 #else
@@ -433,47 +428,45 @@ M_AdjustSliders (int dir)
 			if (bgmvolume.value > 1)
 				bgmvolume.value = 1;
 			Cvar_SetValue ("bgmvolume", bgmvolume.value);
+#endif
 			break;
 		case 7:						// sfx volume
-			volume.value += dir * 0.1;
-			if (volume.value < 0)
-				volume.value = 0;
-			if (volume.value > 1)
-				volume.value = 1;
-			Cvar_SetValue ("volume", volume.value);
+			t = volume->value + dir * 0.1;
+			t = bound (0, t, 1);
+			Cvar_Set (volume, va ("%f", t));
 			break;
 
 		case 8:						// always run
-			if (cl_forwardspeed.value > 200) {
-				Cvar_SetValue ("cl_forwardspeed", 200);
-				Cvar_SetValue ("cl_backspeed", 200);
+			if (cl_forwardspeed->value > 200) {
+				Cvar_Set (cl_forwardspeed, "200");
+				Cvar_Set (cl_backspeed, "200");
 			} else {
-				Cvar_SetValue ("cl_forwardspeed", 400);
-				Cvar_SetValue ("cl_backspeed", 400);
+				Cvar_Set (cl_forwardspeed, "400");
+				Cvar_Set (cl_backspeed, "400");
 			}
 			break;
 
 		case 9:						// invert mouse
-			Cvar_SetValue ("m_pitch", -m_pitch.value);
+			Cvar_Set (m_pitch,  va ("%f", -m_pitch->value));
 			break;
 
 		case 10:						// lookspring
-			Cvar_SetValue ("lookspring", !lookspring.value);
+			Cvar_Set (lookspring,  va ("%i", !(int)lookspring->value));
 			break;
 
 		case 11:						// lookstrafe
-			Cvar_SetValue ("lookstrafe", !lookstrafe.value);
+			Cvar_Set (lookstrafe,  va ("%i", !(int)lookstrafe->value));
 			break;
 
 		case 12:
-			Cvar_SetValue ("cl_sbar", !cl_sbar.value);
+			Cvar_Set (cl_sbar,  va ("%i", !(int)cl_sbar->value));
 			break;
 
 		case 13:
-			Cvar_SetValue ("cl_hudswap", !cl_hudswap.value);
+			Cvar_Set (cl_hudswap, va ("%i", !(int)cl_hudswap->value));
 
 		case 15:						// _windowed_mouse
-			Cvar_SetValue ("_windowed_mouse", !_windowed_mouse.value);
+			Cvar_Set (_windowed_mouse, va ("%i", !(int)_windowed_mouse->value));
 			break;
 	}
 }
@@ -525,48 +518,48 @@ M_Options_Draw (void)
 	M_Print (16, 48, "     Reset to defaults");
 
 	M_Print (16, 56, "           Screen size");
-	r = (scr_viewsize.value - 30) / (120 - 30);
+	r = (scr_viewsize->value - 30) / (120 - 30);
 	M_DrawSlider (220, 56, r);
 
 	M_Print (16, 64, "            Brightness");
-	r = (1.0 - v_gamma.value) / 0.5;
+	r = (1.0 - v_gamma->value) / 0.5;
 	M_DrawSlider (220, 64, r);
 
 	M_Print (16, 72, "           Mouse Speed");
-	r = (sensitivity.value - 1) / 10;
+	r = (sensitivity->value - 1) / 10;
 	M_DrawSlider (220, 72, r);
 
 	M_Print (16, 80, "       CD Music Volume");
-	r = bgmvolume.value;
+	r = bgmvolume->value;
 	M_DrawSlider (220, 80, r);
 
 	M_Print (16, 88, "          Sound Volume");
-	r = volume.value;
+	r = volume->value;
 	M_DrawSlider (220, 88, r);
 
 	M_Print (16, 96, "            Always Run");
-	M_DrawCheckbox (220, 96, cl_forwardspeed.value > 200);
+	M_DrawCheckbox (220, 96, cl_forwardspeed->value > 200);
 
 	M_Print (16, 104, "          Invert Mouse");
-	M_DrawCheckbox (220, 104, m_pitch.value < 0);
+	M_DrawCheckbox (220, 104, m_pitch->value < 0);
 
 	M_Print (16, 112, "            Lookspring");
-	M_DrawCheckbox (220, 112, lookspring.value);
+	M_DrawCheckbox (220, 112, lookspring->value);
 
 	M_Print (16, 120, "            Lookstrafe");
-	M_DrawCheckbox (220, 120, lookstrafe.value);
+	M_DrawCheckbox (220, 120, lookstrafe->value);
 
 	M_Print (16, 128, "    Use old status bar");
-	M_DrawCheckbox (220, 128, cl_sbar.value);
+	M_DrawCheckbox (220, 128, cl_sbar->value);
 
 	M_Print (16, 136, "      HUD on left side");
-	M_DrawCheckbox (220, 136, cl_hudswap.value);
+	M_DrawCheckbox (220, 136, cl_hudswap->value);
 
 	if (vid_menudrawfn)
 		M_Print (16, 144, "         Video Options");
 
 	M_Print (16, 152, "             Use Mouse");
-	M_DrawCheckbox (220, 152, _windowed_mouse.value);
+	M_DrawCheckbox (220, 152, _windowed_mouse->value);
 
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8,
@@ -627,11 +620,11 @@ M_Options_Key (int k)
 			break;
 	}
 
-	if (options_cursor == 14 && vid_menudrawfn == NULL) {
+	if (options_cursor == 14) {
 		if (k == K_UPARROW)
 			options_cursor = 13;
 		else
-			options_cursor = 0;
+			options_cursor = 15;
 	}
 }
 
@@ -1320,3 +1313,4 @@ M_Keydown (int key)
 			return;
 	}
 }
+

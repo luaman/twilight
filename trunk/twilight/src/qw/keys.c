@@ -171,7 +171,7 @@ CheckForCommand (void)
 
 	cmd = Cmd_CompleteCommand (command);
 	if (!cmd || Q_strcmp (cmd, command))
-		cmd = Cvar_CompleteVariable (command);
+		cmd = Cvar_TabComplete (command);
 	if (!cmd || Q_strcmp (cmd, command))
 		return false;					// just a chat message
 	return true;
@@ -188,7 +188,7 @@ CompleteCommand (void)
 
 	cmd = Cmd_CompleteCommand (s);
 	if (!cmd)
-		cmd = Cvar_CompleteVariable (s);
+		cmd = Cvar_TabComplete (s);
 	if (cmd) {
 		key_lines[edit_line][1] = '/';
 		Q_strcpy (key_lines[edit_line] + 2, cmd);

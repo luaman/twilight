@@ -35,7 +35,7 @@ cmdalias_t *cmd_alias;
 
 qboolean    cmd_wait;
 
-cvar_t      cl_warncmd = { "cl_warncmd", "0" };
+cvar_t     *cl_warncmd;
 
 //=============================================================================
 
@@ -287,7 +287,7 @@ Cmd_Exec_f (void)
 		Con_Printf ("couldn't exec %s\n", Cmd_Argv (1));
 		return;
 	}
-	if (!Cvar_Command () && (cl_warncmd.value || developer.value))
+	if (cl_warncmd->value || developer->value)
 		Con_Printf ("execing %s\n", Cmd_Argv (1));
 
 	Cbuf_InsertText (f);
@@ -504,14 +504,17 @@ void
 Cmd_AddCommand (char *cmd_name, xcommand_t function)
 {
 	cmd_function_t *cmd;
+	cvar_t *var;
 
 	if (host_initialized)				// because hunk allocation would get
 		// stomped
 		Sys_Error ("Cmd_AddCommand after host_initialized");
 
 // fail if the command is a variable name
-	if (Cvar_VariableString (cmd_name)[0]) {
-		Con_Printf ("Cmd_AddCommand: %s already defined as a var\n", cmd_name);
+	var = Cvar_Find (cmd_name);
+	if (var) {
+		Con_Printf ("Cmd_AddCommand: %s already defined as a Cvar\n",
+				cmd_name);
 		return;
 	}
 // fail if the command already exists
@@ -676,7 +679,7 @@ Cmd_ExecuteString (char *text)
 	}
 
 // check cvars
-	if (!Cvar_Command () && (cl_warncmd.value || developer.value))
+	if (!Cvar_LegacyCmd () && (cl_warncmd->value || developer->value))
 		Con_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
 
 }
