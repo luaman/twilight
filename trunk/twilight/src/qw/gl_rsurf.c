@@ -307,7 +307,7 @@ store:
 		case GL_LUMINANCE:
 			bl = blocklights;
 
-			for (i = 0; i < surf->tmax; i++, dest += stride)
+			for (i = 0; i < surf->tmax; i++, dest += stride, bl += surf->smax)
 				for (j = 0; j < surf->smax; j++)
 					dest[j] = (Uint8) (min(bl[j], (128 * 255)) >> 7);
 
