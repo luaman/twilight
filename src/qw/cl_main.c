@@ -828,6 +828,7 @@ CL_ConnectionlessPacket (void)
 
 			s = MSG_ReadString ();
 			Com_Printf("A2C_CLIENT_COMMAND: '%s' '%s'\n", cmd, s);
+			MSG_PrintPacket ();
 
 			// Strip off any whitespace.
 			while (*s && isspace (*s))
