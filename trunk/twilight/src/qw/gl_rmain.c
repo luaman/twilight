@@ -1199,7 +1199,7 @@ R_DrawViewModel (void)
 	R_DrawAliasModel (currententity);
 	qglDepthRange (gldepthmin, gldepthmax);
 
-	currententity->times = 0;
+	currententity->times = -1;
 }
 
 

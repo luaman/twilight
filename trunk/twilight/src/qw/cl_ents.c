@@ -511,11 +511,6 @@ CL_LinkPacketEntities (void)
 
 		V_AddEntity ( ent );
 
-		Lerp_Vectors ( ent->prev.origin, f, s1->origin,
-			ent->cur.origin );
-		Lerp_Angles ( ent->prev.angles, f, s1->angles,
-			ent->cur.angles );
-
 		ent->cur.skinnum = s1->skinnum;
 		ent->cur.frame = s1->frame;
 		ent->cur.effects = s1->effects;
@@ -529,7 +524,7 @@ CL_LinkPacketEntities (void)
 			ent->scoreboard = NULL;
 		}
 
-		ent->model = model = cl.model_precache[s1->modelindex];	// Model.
+		model = cl.model_precache[s1->modelindex];	// Model.
 
 		/*
 		 * Vic: prevent interpolating frames
@@ -541,6 +536,11 @@ CL_LinkPacketEntities (void)
 			ent->model = model;
 			ent->times = 0;
 		}
+
+		Lerp_Vectors ( ent->prev.origin, f, s1->origin,
+			ent->cur.origin );
+		Lerp_Angles ( ent->prev.angles, f, s1->angles,
+			ent->cur.angles );
 
 		// rotate binary objects locally
 		if (model->flags & EF_ROTATE) {
