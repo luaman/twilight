@@ -73,7 +73,6 @@ cvar_t		*cl_hudswap;
 cvar_t		*cl_maxfps;
 cvar_t		*cl_mapname;
 
-cvar_t		*entlatency;
 cvar_t		*cl_predict_players;
 cvar_t		*cl_solid_players;
 
@@ -1098,7 +1097,6 @@ CL_Init_Cvars (void)
 
 	cl_mapname = Cvar_Get ("cl_mapname", "", CVAR_ROM, NULL);
 
-	entlatency = Cvar_Get ("entlatency", "20", CVAR_NONE, NULL);
 	cl_predict_players = Cvar_Get ("cl_predict_players", "1", CVAR_NONE, NULL);
 	cl_solid_players = Cvar_Get ("cl_solid_players", "1", CVAR_NONE, NULL);
 

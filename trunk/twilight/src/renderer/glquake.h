@@ -150,10 +150,6 @@ extern qboolean gl_mtexcombine;
 
 // Vertex array stuff.
 
-// LordHavoc: MAX_VERTEX_INDICES beyond 1024 crashs 3DFX drivers on windows!
-#define MAX_VERTEX_ARRAYS	1024
-#define MAX_VERTEX_INDICES	1024
-
 extern texcoord_t	*tc0_array_p;
 extern texcoord_t	*tc1_array_p;
 extern vertex_t		*v_array_p;
@@ -177,13 +173,37 @@ extern colorub_t	*cub_array_p;
 
 extern GLuint *vindices;
 
-extern GLuint v_index, i_index;
-extern qboolean va_locked;
+extern GLint	v_index, i_index;
+extern qboolean	va_locked;
+extern GLint	MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
 extern memzone_t *vzone;
 
 extern float_int_t *FtoUB_tmp;
 
-extern void inline TWI_FtoUB (GLfloat *in, GLubyte *out, int num)
+extern void inline
+TWI_FtoUBMod (GLfloat *in, GLubyte *out, vec4_t *mod, int num)
+{
+	int		i;
+
+	// shift float to have 8bit fraction at base of number
+	for (i = 0; i < num; i += 4) {
+		FtoUB_tmp[i    ].f = (in[i    ] * (*mod)[0]) + 32768.0f;
+		FtoUB_tmp[i + 1].f = (in[i + 1] * (*mod)[1]) + 32768.0f;
+		FtoUB_tmp[i + 2].f = (in[i + 2] * (*mod)[2]) + 32768.0f;
+		FtoUB_tmp[i + 3].f = (in[i + 3] * (*mod)[3]) + 32768.0f;
+	}
+
+	// then read as integer and kill float bits...
+	for (i = 0; i < num; i += 4) {
+		out[i    ] = (Uint8) min(FtoUB_tmp[i    ].i & 0x7FFFFF, 255);
+		out[i + 1] = (Uint8) min(FtoUB_tmp[i + 1].i & 0x7FFFFF, 255);
+		out[i + 2] = (Uint8) min(FtoUB_tmp[i + 2].i & 0x7FFFFF, 255);
+		out[i + 3] = (Uint8) min(FtoUB_tmp[i + 3].i & 0x7FFFFF, 255);
+	}
+}
+
+extern void inline
+TWI_FtoUB (GLfloat *in, GLubyte *out, int num)
 {
 	int		i;
 
