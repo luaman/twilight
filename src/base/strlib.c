@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include <string.h>
 #include <stdarg.h>
 
+#include "qtypes.h"
 #include "strlib.h"
 #include "zone.h"
 

@@ -27,6 +27,49 @@
 #ifndef __ZONE_H
 #define __ZONE_H
 
+#define POOLNAMESIZE 128				// to help avoid wasted pages
+#define MEMCLUMPSIZE (65536 - 1536)		// smallest unit we care about
+#define MEMUNIT 8
+#define MEMBITS (MEMCLUMPSIZE / MEMUNIT)
+#define MEMBITINTS (MEMBITS / 32)
+#define MEMCLUMP_SENTINEL 0xDEADF00D
+
+typedef struct memheader_s
+{
+	struct memheader_s *chain;			// next memheader in this pool
+	struct mempool_s   *pool;			// the parent pool
+	struct memclump_s  *clump;			// parent clump, if any
+	int					size;			// allocated size, excludes header
+	char			   *filename;		// source file of this alloc
+	int					fileline;		// line of alloc in source file
+	int					sentinel1;		// MEMCLUMP_SENTINEL
+	// followed by data and another MEMCLUMP_SENTINEL
+} memheader_t;
+
+typedef struct memclump_s
+{
+	Uint8				block[MEMCLUMPSIZE];	// contents of the clump
+	int					sentinel1;				// MEMCLUMP_SENTINEL
+	int					bits[MEMBITINTS];		// used to mark allocations
+	int					sentinel2; 				// MEMCLUMP_SENTINEL
+	int					blocksinuse;			// pool usage refcount
+	int					largestavailable;		// updated on alloc/free
+	struct memclump_s  *chain;					// next clump in chain
+} memclump_t;
+
+typedef struct mempool_s
+{
+	struct memheader_s *chain;				// chain of individual allocs
+	struct memclump_s  *clumpchain;			// clain of clumps, if any
+	int					totalsize;			// total size of allocs
+	int					realsize;			// actual malloc size of pool
+	int					lastchecktime;		// last display time
+	char				name[POOLNAMESIZE];	// name of this pool
+	struct mempool_s   *next;				// next pool in list
+} mempool_t;
+
+// XXX
+
 /*
  memory allocation
 

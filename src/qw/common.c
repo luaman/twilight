@@ -1378,9 +1378,6 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 		case 2:
 			buf = Hunk_TempAlloc (len + 1);
 			break;
-		case 3:
-			buf = Cache_Alloc (loadcache, len + 1, base);
-			break;
 		case 4:
 			if (len + 1 > loadsize)
 				buf = Hunk_TempAlloc (len + 1);
