@@ -36,7 +36,10 @@ DYNGLCALL void DYNGLENTRY
 Alt_glDrawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count,
 		GLenum type, const GLvoid *indices)
 {
-	qglDrawElements (mode, count, type, indices);
+	if (qglDrawRangeElementsEXT)
+		qglDrawRangeElementsEXT (mode, start, end, count, type, indices);
+	else
+		qglDrawElements (mode, count, type, indices);
 }
 
 
