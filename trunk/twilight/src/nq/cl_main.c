@@ -569,22 +569,6 @@ CL_RelinkEntities (void)
 			dl->radius = 200 + (Q_rand () & 31);
 			dl->die = cl.time + 0.001;
 		}
-#ifdef QUAKE2
-
-		if (ent->effects & EF_DARKLIGHT) {
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin, dl->origin);
-			dl->radius = 200.0 + (Q_rand () & 31);
-			dl->die = cl.time + 0.001;
-			dl->dark = true;
-		}
-		if (ent->effects & EF_LIGHT) {
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin, dl->origin);
-			dl->radius = 200;
-			dl->die = cl.time + 0.001;
-		}
-#endif
 
 		if (ent->model->flags & EF_GIB)
 			R_RocketTrail (oldorg, ent->origin, 2);
@@ -610,13 +594,8 @@ CL_RelinkEntities (void)
 		if (i == cl.viewentity && !chase_active->value)
 			continue;
 
-#ifdef QUAKE2
-		if (ent->effects & EF_NODRAW)
-			continue;
-#endif
 		if (cl_numvisedicts < MAX_VISEDICTS) {
-			cl_visedicts[cl_numvisedicts] = ent;
-			cl_numvisedicts++;
+			cl_visedicts[cl_numvisedicts++] = ent;
 		}
 	}
 

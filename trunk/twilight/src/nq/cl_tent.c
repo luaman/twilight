@@ -137,9 +137,6 @@ CL_ParseTEnt (void)
 	int         type;
 	vec3_t      pos;
 
-#ifdef QUAKE2
-	vec3_t      endpos;
-#endif
 	dlight_t   *dl;
 	int         rnd;
 	int         colorStart, colorLength;

@@ -27,11 +27,7 @@
 #ifndef __PROGDEFS_H
 #define __PROGDEFS_H
 
-#ifdef QUAKE2
-# include "progdefs.q2"
-#else
-# include "progdefs.q1"
-#endif
+#include "progdefs.q1"
 
 #endif // __PROGDEFS_H
 
