@@ -249,6 +249,9 @@ Netchan_CanReliable (netchan_t *chan)
 	return Netchan_CanPacket (chan);
 }
 
+#ifdef TWILIGHT_QWSV
+qboolean    ServerPaused (void);
+#endif
 
 /*
 ===============
@@ -303,7 +306,7 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 	MSG_WriteLong (&send, w2);
 
 	// send the qport if we are a client
-	if (chan->sock == NS_CLIENT)
+	if ( chan->sock == NS_CLIENT )
 		MSG_WriteShort (&send, chan->qport);
 
 // copy the reliable message to the packet first
@@ -331,6 +334,11 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 	else
 		chan->cleartime += send.cursize * chan->rate;
 
+#ifdef TWILIGHT_QWSV
+	if (ServerPaused ())
+		chan->cleartime = curtime;
+#endif
+
 	if (showpackets->value)
 		Con_Printf ("--> s=%i(%i) a=%i(%i) %i\n", chan->outgoing_sequence,
 					send_reliable, chan->incoming_sequence,
@@ -350,12 +358,12 @@ Netchan_Process (netchan_t *chan)
 {
 	unsigned    sequence, sequence_ack;
 	unsigned    reliable_ack, reliable_message;
-	int         qport;
 
 #ifndef TWILIGHT_QWSV
-	if (!cls.demoplayback && !NET_CompareAdr (net_from, chan->remote_address))
-		return false;
+	if (!cls.demoplayback)
 #endif
+		if (!NET_CompareAdr (net_from, chan->remote_address))
+			return false;
 
 // get sequence numbers     
 	MSG_BeginReading ();
@@ -364,7 +372,7 @@ Netchan_Process (netchan_t *chan)
 
 	// read the qport if we are a server
 	if ( chan->sock == NS_SERVER )
-		qport = MSG_ReadShort ();
+		MSG_ReadShort ();
 
 	reliable_message = sequence >> 31;
 	reliable_ack = sequence_ack >> 31;
