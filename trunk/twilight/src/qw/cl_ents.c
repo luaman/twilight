@@ -981,7 +981,7 @@ CL_LinkPlayers (void)
 				(!gl_flashblend->ivalue || j != ccl.player_num))
 		{
 			if (j == ccl.player_num)
-				VectorCopy (cl.simorg, org);
+				VectorCopy (ccl.player_origin, org);
 			else
 				VectorCopy (state->origin, org);
 			CL_NewDlight (j, org, state->effects);

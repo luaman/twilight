@@ -132,7 +132,7 @@ V_CalcBob (void)
 	/* bob is proportional to velocity in the xy plane
 	   (don't count Z, or jumping messes it up) */
 
-	bob = Q_sqrt (cl.velocity[0] * cl.velocity[0] + cl.velocity[1] * cl.velocity[1]) * cl_bob->fvalue;
+	bob = VectorLength2 (ccl.player_velocity) * cl_bob->fvalue;
 	bob = bob * 0.3 + bob * 0.7 * Q_sin (cycle);
 	bob = bound (-7, bob, 4);
 
@@ -503,7 +503,7 @@ V_CalcViewRoll (void)
 {
 	float       side;
 
-	side = V_CalcRoll (cl_entities[cl.viewentity].common.angles, cl.velocity);
+	side = V_CalcRoll (cl_entities[cl.viewentity].common.angles, ccl.player_velocity);
 	r_refdef.viewangles[ROLL] += side;
 
 	if (v_dmg_time > 0) {
@@ -638,6 +638,9 @@ V_CalcRefdef (void)
 
 	CL_Update_OriginAngles(view, origin, angles, cl.mtime[1]);
 	CL_Update_Frame(view, ccl.stats[STAT_WEAPONFRAME], cl.mtime[1]);
+
+	VectorCopy(ent->common.origin, ccl.player_origin);
+	VectorCopy(ent->common.angles, ccl.player_angles);
 
 	if (chase_active->ivalue)
 		Chase_Update();

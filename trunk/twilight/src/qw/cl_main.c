@@ -1048,7 +1048,7 @@ Cmd_ForwardToServer_f (void)
 static void
 Cmd_Say_f (void)
 {
-	char	*s;
+	const char	*s;
 
 	if (ccls.state == ca_disconnected) {
 		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));

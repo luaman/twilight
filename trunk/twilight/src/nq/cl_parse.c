@@ -556,8 +556,11 @@ CL_ParseClientdata (int bits)
 		ccl.stats[STAT_WEAPON] = i;
 
 	i = MSG_ReadShort ();
-	if (ccl.stats[STAT_HEALTH] != i)
+	if (ccl.stats[STAT_HEALTH] != i) {
 		ccl.stats[STAT_HEALTH] = i;
+		if (i <= 0)
+			Team_Dead ();
+	}
 
 	i = MSG_ReadByte ();
 	if (ccl.stats[STAT_AMMO] != i)

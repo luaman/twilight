@@ -25,6 +25,7 @@ twilight_nq_LDADD= \
 	$(top_builddir)/src/renderer/libtwilight_renderer.a \
 	$(top_builddir)/src/image/libtwilight_image.a \
 	$(top_builddir)/src/client/libtwilight_client.a \
+	$(top_builddir)/src/base/libtwilight_base.a \
 	$(top_builddir)/src/sound/libtwilight_sound.a
 endif
 
@@ -50,7 +51,7 @@ twilight_nq_SOURCES= \
 	render.h screen.h server.h \
 	snd_dma.c \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
-	sys.c teamplay.c \
+	sys.c \
         view.c world.c world.h \
 	$(twilight_nq_sys_sources)
 

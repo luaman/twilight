@@ -136,7 +136,7 @@ CL_ParseBeam (model_t *m, qboolean lightning)
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
 			if (b->entity == cl.viewentity)
-				VectorSubtract(cl.simorg, start, b->diff);
+				VectorSubtract(ccl.player_origin, start, b->diff);
 			return;
 		}
 	}
@@ -151,7 +151,7 @@ CL_ParseBeam (model_t *m, qboolean lightning)
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
 			if (b->entity == cl.viewentity)
-				VectorSubtract(cl.simorg, start, b->diff);
+				VectorSubtract(ccl.player_origin, start, b->diff);
 			return;
 		}
 	}
@@ -380,7 +380,7 @@ CL_UpdateBeams (void)
 
 		// if coming from the player, update the start position
 		if (b->entity == cl.viewentity) {
-			VectorAdd (cl.simorg, b->diff, b->start);
+			VectorAdd (ccl.player_origin, b->diff, b->start);
 		}
 
 		if (b->lightning) {

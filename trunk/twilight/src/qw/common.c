@@ -781,13 +781,13 @@ SZ_GetSpace (sizebuf_t *buf, size_t length)
 }
 
 void
-SZ_Write (sizebuf_t *buf, void *data, size_t length)
+SZ_Write (sizebuf_t *buf, const void *data, size_t length)
 {
 	memcpy (SZ_GetSpace (buf, length), data, length);
 }
 
 void
-SZ_Print (sizebuf_t *buf, char *data)
+SZ_Print (sizebuf_t *buf, const char *data)
 {
 	int			len;
 

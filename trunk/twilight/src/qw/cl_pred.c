@@ -127,14 +127,14 @@ CL_PredictMove (void)
 		UPDATE_BACKUP - 1)
 		return;
 
-	VectorCopy (cl.viewangles, cl.simangles);
+	VectorCopy (cl.viewangles, ccl.player_angles);
 
 	// this is the last frame received from the server
 	from = &cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK];
 
 	if (cl_nopred->ivalue) {
-		VectorCopy (from->playerstate[ccl.player_num].velocity, cl.simvel);
-		VectorCopy (from->playerstate[ccl.player_num].origin, cl.simorg);
+		VectorCopy (from->playerstate[ccl.player_num].velocity, ccl.player_velocity);
+		VectorCopy (from->playerstate[ccl.player_num].origin, ccl.player_origin);
 		return;
 	}
 
@@ -162,15 +162,15 @@ CL_PredictMove (void)
 	if (VectorDistance_fast (from->playerstate[ccl.player_num].origin,
 				to->playerstate[ccl.player_num].origin) > (128 * 128)) {
 		// teleported, so don't lerp
-		VectorCopy (to->playerstate[ccl.player_num].velocity, cl.simvel);
-		VectorCopy (to->playerstate[ccl.player_num].origin, cl.simorg);
+		VectorCopy (to->playerstate[ccl.player_num].velocity, ccl.player_velocity);
+		VectorCopy (to->playerstate[ccl.player_num].origin, ccl.player_origin);
 		return;
 	}
 
 	Lerp_Vectors (from->playerstate[ccl.player_num].origin,
-		f, to->playerstate[ccl.player_num].origin, cl.simorg);
+		f, to->playerstate[ccl.player_num].origin, ccl.player_origin);
 	Lerp_Vectors (from->playerstate[ccl.player_num].velocity,
-		f, to->playerstate[ccl.player_num].velocity, cl.simvel);
+		f, to->playerstate[ccl.player_num].velocity, ccl.player_velocity);
 }
 
 

@@ -180,11 +180,6 @@ typedef struct {
 	 */
 	vec3_t			viewangles;
 
-	// the client simulates or interpolates movement to get these values
-	vec3_t			simorg;
-	vec3_t			simvel;
-	vec3_t			simangles;
-
 	// pitch drifting vars
 	float			pitchvel;
 	qboolean		nodrift;
