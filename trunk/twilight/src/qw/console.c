@@ -50,37 +50,33 @@ static const char rcsid[] =
 #include "sys.h"
 
 
-int         con_ormask;
-console_t   con_main;
-console_t   con_chat;
-console_t  *con;						// point to either con_main or con_chat
+int			con_ormask;
+console_t  *con;
 
-int         con_linewidth;				// characters across screen
-int         con_totallines;				// total lines in console scrollback
+int			con_linewidth;				// characters across screen
+int			con_totallines;				// total lines in console scrollback
 
-float       con_cursorspeed = 4;
+float		con_cursorspeed = 4;
 
 
-cvar_t     *con_notifytime;
+cvar_t	   *con_notifytime;
+cvar_t	   *con_logname;
 
 #define	NUM_CON_TIMES 4
-float       con_times[NUM_CON_TIMES];	// realtime time the line was generated
+float		con_times[NUM_CON_TIMES];	// realtime the line was generated
 
-								// for transparent notify lines
-
-int         con_vislines;
-int         con_notifylines;			// scan lines to clear for notify lines
-
-qboolean    con_debuglog;
+int			con_vislines;
+int			con_notifylines;			// scan lines to clear for notify lines
 
 #define		MAXCMDLINE	256
-extern char key_lines[32][MAXCMDLINE];
-extern int  edit_line;
-extern int  key_linepos;
+extern char	key_lines[32][MAXCMDLINE];
+extern int	edit_line;
+extern int	key_linepos;
 
 
-qboolean    con_initialized;
+qboolean	con_initialized;
 
+static char	logname[MAX_OSPATH] = "";
 
 void
 Key_ClearTyping (void)
@@ -118,8 +114,10 @@ Con_Clear_f
 void
 Con_Clear_f (void)
 {
-	memset (con_main.text, ' ', CON_TEXTSIZE);
-	memset (con_chat.text, ' ', CON_TEXTSIZE);
+	if (!con)
+		return;
+
+	memset (con->text, ' ', CON_TEXTSIZE);
 }
 
 
@@ -229,10 +227,14 @@ If the line width has changed, reformat the buffer.
 void
 Con_CheckResize (void)
 {
-	Con_Resize (&con_main);
-	Con_Resize (&con_chat);
+	Con_Resize (con);
 }
 
+static void
+setlogname (cvar_t *con_logname)
+{
+	snprintf (logname, MAX_OSPATH, "%s/%s", com_gamedir, con_logname->string);
+}
 
 /*
 ================
@@ -243,6 +245,7 @@ void
 Con_Init_Cvars (void)
 {
 	con_notifytime = Cvar_Get ("con_notifytime", "3", CVAR_NONE, NULL);
+	con_logname = Cvar_Get ("con_logname", "", CVAR_NONE, &setlogname);
 }
 
 /*
@@ -253,9 +256,10 @@ Con_Init
 void
 Con_Init (void)
 {
-	con_debuglog = COM_CheckParm ("-condebug");
+	if (COM_CheckParm ("-condebug"))
+		Cvar_Set (con_logname, "qconsole.log");
 
-	con = &con_main;
+	con = malloc (sizeof (console_t));
 	con_linewidth = -1;
 	Con_CheckResize ();
 
@@ -379,14 +383,8 @@ Con_Printf (char *fmt, ...)
 	Sys_Printf ("%s", msg);				// also echo to debugging console
 
 // log all messages to file
-	if (con_debuglog) {
-		char        msg2[MAX_OSPATH + 32];
-
-		// LordHavoc: this used to use va(), but that was too dangerous,
-		// as Con_Printf and va() calls are often mixed.
-		snprintf (msg2, sizeof (msg2), "%s/qconsole.log", com_gamedir);
-		Sys_DebugLog (msg2, "%s", msg);
-	}
+	if (logname[0])
+		Sys_DebugLog (logname, "%s", msg);
 
 	if (!con_initialized)
 		return;
