@@ -50,14 +50,22 @@ static const char rcsid[] =
 	glue functions for fear of namespace conflicts.
  */
 #define OGL_NEED(ret, name, args) ret (OGLDECL * q##name) args = NULL;
+#define OGL_NEED_BUT(ret, name, args, fake)	ret (OGLDECL * q##name) args = NULL;
 #define OGL_EXT_WANT(ret, name, args) ret (OGLDECL * q##name) args = NULL;
 #include "oglfuncs.h"
 #undef OGL_EXT_WANT
+#undef OGL_NEED_BUT
 #undef OGL_NEED
 
-#define DYNGL_ERROR_SIZE 2048
 
-    
+void
+WRAP_glDrawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count,
+		GLenum type, const GLvoid *indices)
+{
+	return qglDrawElements (mode, count, type, indices);
+}
+
+#define DYNGL_ERROR_SIZE 2048
 static char dgl_error[DYNGL_ERROR_SIZE];
 static qboolean dgl_loaded = false;
 static const char *dgl_extensions;
@@ -141,11 +149,19 @@ DGL_GetFuncs (void)
 				"DGL_GetFuncs: can't find %s", #name);				\
 		return false;												\
 	}
+#define OGL_NEED_BUT(ret, name, args, fake)							\
+	if (!(q##name = SDL_GL_GetProcAddress(#name))) {				\
+		q##name = &fake;											\
+		snprintf (dgl_error, DYNGL_ERROR_SIZE,						\
+				"DGL_GetFuncs: can't find %s, using fake.", #name);	\
+	}
+	
 #define OGL_EXT_WANT(ret, name, args)								\
 	q##name = SDL_GL_GetProcAddress(#name);
 
 #include "oglfuncs.h"
 #undef OGL_EXT_WANT
+#undef OGL_NEED_BUT
 #undef OGL_NEED
 
 	return true;
