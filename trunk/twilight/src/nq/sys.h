@@ -37,12 +37,6 @@ int         Sys_FileTime (char *path);
 void        Sys_mkdir (char *path);
 
 //
-// memory protection
-//
-void        Sys_MakeCodeWriteable (unsigned long startaddr,
-								   unsigned long length);
-
-//
 // system IO
 //
 void        Sys_DebugLog (char *file, char *fmt, ...);
@@ -70,6 +64,3 @@ void        Sys_SendKeyEvents (void);
 
 // Perform Key_Event () callbacks until the input que is empty
 
-void        Sys_LowFPPrecision (void);
-void        Sys_HighFPPrecision (void);
-void        Sys_SetFPCW (void);

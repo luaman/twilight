@@ -156,11 +156,6 @@ SYSTEM IO
 ===============================================================================
 */
 
-void
-Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
-{
-}
-
 
 void
 Sys_DebugLog (char *file, char *fmt, ...)
@@ -220,16 +215,6 @@ Sys_Sleep (void)
 {
 }
 
-
-void
-Sys_HighFPPrecision (void)
-{
-}
-
-void
-Sys_LowFPPrecision (void)
-{
-}
 
 char       *
 Sys_ConsoleInput (void)
@@ -325,3 +310,4 @@ main (int argc, char **argv)
 	/* return success of application */
 	return TRUE;
 }
+

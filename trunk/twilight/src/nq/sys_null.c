@@ -152,11 +152,6 @@ SYSTEM IO
 ===============================================================================
 */
 
-void
-Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
-{
-}
-
 
 void
 Sys_Error (char *error, ...)
@@ -209,15 +204,6 @@ Sys_Sleep (void)
 {
 }
 
-void
-Sys_HighFPPrecision (void)
-{
-}
-
-void
-Sys_LowFPPrecision (void)
-{
-}
 
 //=============================================================================
 
@@ -240,3 +226,4 @@ main (int argc, char **argv)
 		Host_Frame (0.1);
 	}
 }
+

@@ -23,64 +23,9 @@ qboolean    isDedicated;
 
 int         nostdout = 0;
 
-cvar_t      sys_linerefresh = { "sys_linerefresh", "0" };	// set for entity
-															// display
-
 // =======================================================================
 // General routines
 // =======================================================================
-
-void
-Sys_DebugNumber (int y, int val)
-{
-}
-
-/*
-void Sys_Printf (char *fmt, ...)
-{
-	va_list		argptr;
-	char		text[1024];
-	
-	va_start (argptr, fmt);
-	vsnprintf (text, sizeof(text), fmt, argptr);
-	va_end (argptr);
-	fprintf(stderr, "%s", text);
-	
-	Con_Print (text);
-}
-
-void Sys_Printf (char *fmt, ...)
-{
-
-    va_list     argptr;
-    char        text[1024], *t_p;
-    int         l, r;
-
-	if (nostdout)
-		return;
-
-    va_start (argptr, fmt);
-    vsnprintf (text, sizeof(text), fmt, argptr);
-    va_end (argptr);
-
-    l = Q_strlen(text);
-    t_p = text;
-
-// make sure everything goes through, even though we are non-blocking
-    while (l)
-    {
-        r = write (1, text, l);
-        if (r != l)
-            sleep (0);
-        if (r > 0)
-        {
-            t_p += r;
-            l -= r;
-        }
-    }
-
-}
-*/
 
 void
 Sys_Printf (char *fmt, ...)
@@ -250,28 +195,6 @@ Sys_DebugLog (char *file, char *fmt, ...)
 	close (fd);
 }
 
-void
-Sys_EditFile (char *filename)
-{
-
-	char        cmd[256];
-	char       *term;
-	char       *editor;
-
-	term = getenv ("TERM");
-	if (term && !Q_strcmp (term, "xterm")) {
-		editor = getenv ("VISUAL");
-		if (!editor)
-			editor = getenv ("EDITOR");
-		if (!editor)
-			editor = getenv ("EDIT");
-		if (!editor)
-			editor = "vi";
-		snprintf (cmd, sizeof (cmd), "xterm -e %s %s", editor, filename);
-		system (cmd);
-	}
-
-}
 
 double
 Sys_FloatTime (void)
@@ -302,10 +225,6 @@ alarm_handler (int x)
 	oktogo = 1;
 }
 
-void
-Sys_LineRefresh (void)
-{
-}
 
 void
 floating_point_exception_handler (int whatever)
@@ -403,36 +322,7 @@ main (int c, char **v)
 
 		Host_Frame (time);
 
-// graphic debugging aids
-		if (sys_linerefresh.value)
-			Sys_LineRefresh ();
 	}
-
-}
-
-
-/*
-================
-Sys_MakeCodeWriteable
-================
-*/
-void
-Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
-{
-
-	int         r;
-	unsigned long addr;
-	int         psize = getpagesize ();
-
-	addr = (startaddr & ~(psize - 1)) - psize;
-
-//  fprintf(stderr, "writable code %lx(%lx)-%lx, length=%lx\n", startaddr,
-//          addr, startaddr+length, length);
-
-	r = mprotect ((char *) addr, length + startaddr - addr + psize, 7);
-
-	if (r < 0)
-		Sys_Error ("Protection change failed\n");
 
 }
 
