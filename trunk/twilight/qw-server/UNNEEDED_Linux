@@ -1,4 +1,3 @@
 sys_win.c
-quakeasm.h
 math.s
 worlda.s
