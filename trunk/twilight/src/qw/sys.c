@@ -72,6 +72,7 @@ static const char rcsid[] =
 
 #include "SDL.h"
 
+#include "quakedef.h"
 #include "common.h"
 #include "compat.h"
 #include "host.h"

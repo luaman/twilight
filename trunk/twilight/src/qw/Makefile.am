@@ -31,14 +31,14 @@ twilight_qw_SOURCES= \
 	gl_draw.c gl_mesh.c gl_model.c \
 	gl_ngraph.c gl_refrag.c gl_rlight.c gl_rmain.c \
 	gl_rmisc.c gl_rsurf.c gl_screen.c screen.h gl_warp.c \
-	glquake.h hash.c hash.h \
+	glquake.h \
 	keys.c mdfour.c menu.c \
 	net.h net_chan.c net_udp.c \
 	pmove.c pmovetst.c r_part.c sbar.c skin.c \
 	snd_dma.c snd_mem.c snd_sdl.c\
 	snd_mix.c cd_sdl.c \
 	pcx.c tga.c \
-	sys.h vid_sdl.c \
+	vid_sdl.c \
 	view.c wad.c zone.c \
         bspfile.h keys.h protocol.h \
 	render.h sys.c
