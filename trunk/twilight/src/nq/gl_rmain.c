@@ -500,6 +500,9 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 	vec3_t      point;
 	float       height, lheight;
 	int         count;
+	trace_t		downtrace;
+	vec3_t		downmove;
+	float		s1, c1;
 
 	lheight = currententity->origin[2] - lightspot[2];
 
@@ -509,6 +512,21 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 	order = (int *) ((byte *) paliashdr + paliashdr->commands);
 
 	height = -lheight + 1.0;
+
+	if (r_shadows->value[0] == 2)
+	{
+		// better shadowing, now takes angle of ground into account
+		// cast a traceline into the floor directly below the player
+		// and gets normals from this
+		VectorCopy (currententity->origin, downmove);
+		downmove[2] = downmove[2] - 4096;
+		memset (&downtrace, 0, sizeof(downtrace));
+		SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, currententity->origin, downmove, &downtrace);
+
+		// calculate the all important angles to keep speed up
+		s1 = Q_sin( currententity->angles[1]/180*M_PI);
+		c1 = Q_cos( currententity->angles[1]/180*M_PI);
+	}
 
 	while ((count = *order++)) 
 	{
@@ -526,16 +544,31 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 			order += 2;
 
 			// normals and vertexes come from the frame list
-			point[0] =
-				verts->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
-			point[1] =
-				verts->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
-			point[2] =
-				verts->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
+			point[0] = verts->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
+			point[1] = verts->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
+			point[2] = verts->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
 
-			point[0] -= shadevector[0] * (point[2] + lheight);
-			point[1] -= shadevector[1] * (point[2] + lheight);
-			point[2] = height;
+			if (r_shadows->value[0] == 2)
+			{
+				point[0] -= shadevector[0] * point[0];
+				point[1] -= shadevector[1] * point[1];
+				point[2] -= shadevector[2] * point[2];
+
+				// drop it down to floor
+				point[2] = point[2] - (currententity->origin[2] - downtrace.endpos[2]) ;
+
+				// now adjust the point with respect to all the normals of the tracepoint
+				point[2] += ((point[1] * (s1 * downtrace.plane.normal[0])) -
+					(point[0] * (c1 * downtrace.plane.normal[0])) -
+					(point[0] * (s1 * downtrace.plane.normal[1])) -
+					(point[1] * (c1 * downtrace.plane.normal[1]))
+					) + 20.2 - downtrace.plane.normal[2]*20.0;
+			}
+			else {
+				point[0] -= shadevector[0]*(point[2]+lheight);
+				point[1] -= shadevector[1]*(point[2]+lheight);
+				point[2] = height;
+			}
 
 			glVertex3fv (point);
 
@@ -556,9 +589,9 @@ fenix@io.com: model animation interpolation
 void 
 GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t* e)
 {
-	trivertx_t* verts1;
-	trivertx_t* verts2;
-	int*        order;
+	trivertx_t	*verts1;
+	trivertx_t	*verts2;
+	int			*order;
 	vec3_t      point1;
 	vec3_t      point2;
 	vec3_t      d;
@@ -566,6 +599,9 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 	float       lheight;
 	int         count;
 	float       blend;
+	trace_t		downtrace;
+	vec3_t		downmove;
+	float		s1, c1;
 
 	blend = (realtime - e->frame_start_time) / e->frame_interval;
 
@@ -582,6 +618,21 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
 
+	if (r_shadows->value[0] == 2)
+	{
+		// better shadowing, now takes angle of ground into account
+		// cast a traceline into the floor directly below the player
+		// and gets normals from this
+		VectorCopy (currententity->origin, downmove);
+		downmove[2] = downmove[2] - 4096;
+		memset (&downtrace, 0, sizeof(downtrace));
+		SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, currententity->origin, downmove, &downtrace);
+
+		// calculate the all important angles to keep speed up
+		s1 = Q_sin( currententity->angles[1]/180*M_PI);
+		c1 = Q_cos( currententity->angles[1]/180*M_PI);
+	}
+
 	while ((count = *order++))
 	{
 		// get the vertex count and primitive type
@@ -597,6 +648,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 		do
 		{
 			order += 2;
+
 			point1[0] = verts1->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
 			point1[1] = verts1->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
 			point1[2] = verts1->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
@@ -606,14 +658,35 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 			point2[0] = verts2->v[0] * paliashdr->scale[0] + paliashdr->scale_origin[0];
 			point2[1] = verts2->v[1] * paliashdr->scale[1] + paliashdr->scale_origin[1];
 			point2[2] = verts2->v[2] * paliashdr->scale[2] + paliashdr->scale_origin[2];
+
 			point2[0] -= shadevector[0]*(point2[2]+lheight);
 			point2[1] -= shadevector[1]*(point2[2]+lheight);
 
 			VectorSubtract(point2, point1, d);
 
-			glVertex3f (point1[0] + (blend * d[0]),
-				point1[1] + (blend * d[1]),
-				height);
+			if (r_shadows->value[0] == 2)
+			{	
+				point1[0] = point1[0] + (blend * d[0]);
+				point1[1] = point1[1] + (blend * d[1]);
+				point1[2] = point1[2] + (blend * d[2]);
+
+				// drop it down to floor
+				point1[2] =  - (currententity->origin[2] - downtrace.endpos[2]) ;
+
+				// now move the z-coordinate as appropriate
+				point1[2] += ((point1[1] * (s1 * downtrace.plane.normal[0])) -
+					(point1[0] * (c1 * downtrace.plane.normal[0])) -
+					(point1[0] * (s1 * downtrace.plane.normal[1])) -
+					(point1[1] * (c1 * downtrace.plane.normal[1]))
+					) + 20.2 - downtrace.plane.normal[2]*20.0;
+
+				glVertex3fv (point1);
+			}
+			else {
+				glVertex3f (point1[0] + (blend * d[0]),
+					point1[1] + (blend * d[1]),
+					height);
+			}
 
 			verts1++;
 			verts2++;
@@ -850,13 +923,19 @@ R_DrawAliasModel (entity_t *e)
 	glPopMatrix ();
 
 	if (r_shadows->value[0] && !(clmodel->modflags & FLAG_NOSHADOW)) {
-		float an = -e->angles[1] * (M_PI / 180);
+		float an;
+
+		// no shadows if underwater - crashes
+//		if (SV_PointContents(e->origin) <= CONTENTS_WATER)
+//			return;
 
 		if (!shadescale)
 			shadescale = Q_RSqrt(2);
 
+		an = e->angles[1] * (M_PI / 180);
+
 		shadevector[0] = Q_cos (an) * shadescale;
-		shadevector[1] = Q_sin (an) * shadescale;
+		shadevector[1] = -Q_sin (an) * shadescale;
 		shadevector[2] = shadescale;
 
 		glPushMatrix ();
