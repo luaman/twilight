@@ -150,7 +150,7 @@ void        _VectorScale (vec3_t in, vec_t scale, vec3_t out);
 vec_t       VectorNormalize (vec3_t v);	// returns vector length
 void		VectorNormalizeFast (vec3_t v);
 void		VectorInterpolate (vec3_t v1, float frac, vec3_t v2, vec3_t v);
-
+void		AngleInterpolate (vec3_t v1, vec_t frac, vec3_t v2, vec3_t v);
 void		Vector2Angles (vec3_t in, vec3_t out);
 
 int         Q_log2 (int val);
