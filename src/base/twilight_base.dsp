@@ -93,6 +93,10 @@ SOURCE=.\crc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\cvar.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\mathlib.c
 # End Source File
 # Begin Source File
