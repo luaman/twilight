@@ -149,9 +149,9 @@ static const char sys_charmap[256] =
 void
 Sys_Printf (char *fmt, ...)
 {
-	va_list			argptr;
-	unsigned char	text[2048];
-	unsigned char	*p;
+	va_list	argptr;
+	char	text[2048];
+	char	*p;
 
 	if (nostdout)
 		return;
@@ -277,6 +277,7 @@ Sys_BackTrace (int fd)
 	size = backtrace (array, sizeof(array) / sizeof(array[0]));
 	backtrace_symbols_fd (array, size, fd);
 #endif
+	fd = 0;	// make fd a referenced parameter
 }
 
 void
@@ -516,12 +517,12 @@ Sys_ExpandPath (char *str)
 		if (*s == '/' || *s == '\0')
 		{                           
 			/* Current user's home directory */
-			if ((p = getenv("HOME")))
+			if ((p = getenv("HOME")) != NULL)
 				strncpy(buf, p, PATH_MAX);
 #ifdef _WIN32
-			else if ((p = getenv("USERPROFILE")))
+			else if ((p = getenv("USERPROFILE")) != NULL)
 				strncpy(buf, p, PATH_MAX);
-			else if ((p = getenv("WINDIR")))
+			else if ((p = getenv("WINDIR")) != NULL)
 				strncpy(buf, p, PATH_MAX);
 #endif /* _WIN32 */
 			else

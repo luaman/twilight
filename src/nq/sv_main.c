@@ -648,7 +648,7 @@ SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 
 	// stuff the sigil bits into the high bits of items for sbar, or else
 	// mix in items2
-	if ((val = GETEDICTFIELDVALUE (ent, eval_items2)))
+	if ((val = GETEDICTFIELDVALUE (ent, eval_items2)) != NULL)
 		items = (int) ent->v.items | ((int) val->_float << 23);
 	else
 		items =
@@ -992,8 +992,8 @@ Tell all the clients that the server is changing levels
 void
 SV_SendReconnect (void)
 {
-	char        data[128];
-	sizebuf_t   msg;
+	Uint8		data[128];
+	sizebuf_t	msg;
 
 	SZ_Init (&msg, data, sizeof(data));
 	SZ_Clear (&msg);

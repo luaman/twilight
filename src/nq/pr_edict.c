@@ -571,7 +571,7 @@ ED_Print (edict_t *ed)
 			// skip _x, _y, _z vars
 			continue;
 			
-		v = (int *)((char *)&ed->v + d->ofs * 4);
+		v = (Uint *)((char *)&ed->v + d->ofs * 4);
 
 		// if the value is still all 0, skip the field
 		type = d->type & ~DEF_SAVEGLOBAL;
@@ -623,7 +623,7 @@ ED_Write (FILE *f, edict_t *ed)
 			// skip _x, _y, _z vars
 			continue;
 
-		v = (int *) ((char *) &ed->v + d->ofs * 4);
+		v = (Uint *) ((char *) &ed->v + d->ofs * 4);
 
 		// if the value is still all 0, skip the field
 		type = d->type & ~DEF_SAVEGLOBAL;

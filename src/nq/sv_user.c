@@ -241,7 +241,7 @@ DropPunchAngle (void)
 		len = 0;
 	VectorScale (sv_player->v.punchangle, len, sv_player->v.punchangle);
 
-	if ((val = GETEDICTFIELDVALUE(sv_player, eval_punchvector)))
+	if ((val = GETEDICTFIELDVALUE(sv_player, eval_punchvector)) != NULL)
 	{
 		len = VectorNormalize (val->vector);
 		
@@ -502,7 +502,7 @@ SV_ReadClientMove (usercmd_t *move)
 //	if (sv_predict->fvalue && (svs.maxclients > 1) && (!sv.paused)) 
 //		host_client->latency = host_client->ping;
 
-	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_ping)))
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_ping)) != NULL)
 		val->_float = host_client->ping * 1000.0;
 
 	// read current angles  
@@ -515,7 +515,7 @@ SV_ReadClientMove (usercmd_t *move)
 	move->forwardmove = MSG_ReadShort ();
 	move->sidemove = MSG_ReadShort ();
 	move->upmove = MSG_ReadShort ();
-	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_movement)))
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_movement)) != NULL)
 	{
 		val->vector[0] = move->forwardmove;
 		val->vector[1] = move->sidemove;
@@ -528,12 +528,12 @@ SV_ReadClientMove (usercmd_t *move)
 	host_client->edict->v.button2 = (bits & 2) >> 1;
 	host_client->edict->v.button1 = (bits & 4) >> 2;
 	// LordHavoc: added 6 new buttons
-	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button3))) val->_float = ((bits >> 2) & 1);
-	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button4))) val->_float = ((bits >> 3) & 1);
-	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button5))) val->_float = ((bits >> 4) & 1);
-	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button6))) val->_float = ((bits >> 5) & 1);
-	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button7))) val->_float = ((bits >> 6) & 1);
-	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button8))) val->_float = ((bits >> 7) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button3)) != NULL) val->_float = ((bits >> 2) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button4)) != NULL) val->_float = ((bits >> 3) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button5)) != NULL) val->_float = ((bits >> 4) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button6)) != NULL) val->_float = ((bits >> 5) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button7)) != NULL) val->_float = ((bits >> 6) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button8)) != NULL) val->_float = ((bits >> 7) & 1);
 
 	i = MSG_ReadByte ();
 	if (i)

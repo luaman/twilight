@@ -160,18 +160,18 @@ loc_parse (char *line)
 void
 loc_load (char *file)
 {
-	char	*orig, *data, *p;
+	Uint8	*orig, *data, *p;
 
-	orig = data = COM_LoadTempFile (file, 1);
+	orig = data = COM_LoadTempFile(file, 1);
 	if (!data)
 		return;
 
-	while ((p = strpbrk(data, "\n\r"))) {
+	while ((p = (Uint8 *)strpbrk((const char*)data, "\n\r")) != NULL) {
 		while (*p == '\n' || *p == '\r') {
 			*p = '\0';
 			p++;
 		}
-		loc_parse(data);
+		loc_parse((char *)data);
 		data = p;
 	}
 	Zone_Free (orig);
