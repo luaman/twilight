@@ -930,11 +930,7 @@ R_DrawAliasModel (entity_t *e)
 			e->pose1 = e->pose2 = 0;
 			return;
 		}
-	} else {
-		// Vic: fix gun model not being interpolated
-		e->times = r_framecount;
-	}
-
+	} 
 
 	/*
 	 * get lighting information
@@ -1201,13 +1197,17 @@ R_DrawViewModel (void)
 		!r_drawentities->value ||
 		(cl.stats[STAT_ITEMS] & IT_INVISIBILITY) ||
 		(cl.stats[STAT_HEALTH] <= 0) ||
-		!currententity->model)
+		!currententity->model) {
+		currententity->times = 0;
 		return;
+	}
 
 	// hack the depth range to prevent view model from poking into walls
 	qglDepthRange (gldepthmin, gldepthmin + 0.3 * (gldepthmax - gldepthmin));
 	R_DrawAliasModel (currententity);
 	qglDepthRange (gldepthmin, gldepthmax);
+
+	currententity->times = 0;
 }
 
 
