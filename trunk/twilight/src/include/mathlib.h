@@ -113,6 +113,8 @@ double Q_pow(double x, double y);
 #define VectorLength(v)		(Q_sqrt(DotProduct(v,v)))
 #define VectorLength2(v)	(Q_sqrt(DotProduct2(v,v)))
 
+#define VectorNegate(a,b)	((b)[0]=-(a)[0],(b)[1]=-(a)[1],(b)[2]=-(a)[2])
+
 #define VectorTwiddleS(base, a, b, mod, to)			(\
 		((to)[0]=(base)[0]+(((a)[0]+(b)[0])*mod)),	\
 		((to)[1]=(base)[1]+(((a)[1]+(b)[1])*mod)),	\
