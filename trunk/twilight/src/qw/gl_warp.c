@@ -369,7 +369,6 @@ R_LoadSkys (void)
 	int   i, w, h;
 	char  name[64];
 	Uint8  *image_rgba = NULL;
-	extern int numgltextures;
 
 	for (i = 0; i < 6; i++) {
 		snprintf (name, sizeof (name), "gfx/env/%s%s.tga", r_skybox->string, suf[i]);
