@@ -10,7 +10,7 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
@@ -27,6 +27,7 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -50,7 +51,6 @@ int con_ormask;
 console_t *con;
 
 int con_linewidth;						// characters across screen
-int con_totallines;						// total lines in console scrollback
 
 float con_cursorspeed = 4;
 
@@ -58,7 +58,7 @@ float con_cursorspeed = 4;
 cvar_t *con_notifytime;
 
 #define NUM_CON_TIMES 4
-float con_times[NUM_CON_TIMES];			// realtime the line was generated
+double con_cleartime;
 
 int con_vislines;
 int con_notifylines;					// scan lines to clear for notify lines
@@ -99,10 +99,15 @@ Con_Clear_f
 void
 Con_Clear_f (void)
 {
+	int i;
 	if (!con)
 		return;
 
-	memset (con->text, ' ', CON_TEXTSIZE);
+	for (i = 0; i < CON_LINES; i++)
+		if (con->raw_lines[i].text)
+			Zone_Free(con->raw_lines[i].text);
+
+	memset (con->raw_lines, 0, sizeof(con->raw_lines));
 }
 
 
@@ -114,10 +119,7 @@ Con_ClearNotify
 void
 Con_ClearNotify (void)
 {
-	int			i;
-
-	for (i = 0; i < NUM_CON_TIMES; i++)
-		con_times[i] = 0;
+	con_cleartime = cls.realtime;
 }
 
 
@@ -154,56 +156,14 @@ Con_Resize
 void
 Con_Resize (console_t *con)
 {
-	int			i, j, width, oldwidth, oldtotallines, numlines, numchars;
-	char		tbuf[CON_TEXTSIZE];
+	int			width;
 
 	width = (vid.width_2d / con->tsize) - 2;
 
-	if (width == con_linewidth)
-		return;
-
-	if (width < 1)
-	{
-		// video hasn't been initialised yet
+	if (width < 1) // video hasn't been initialised yet
 		width = 38;
-		con_linewidth = width;
-		con_totallines = CON_TEXTSIZE / con_linewidth;
-		memset (con->text, ' ', CON_TEXTSIZE);
-	}
-	else
-	{
-		oldwidth = con_linewidth;
-		con_linewidth = width;
-		oldtotallines = con_totallines;
-		con_totallines = CON_TEXTSIZE / con_linewidth;
-		numlines = oldtotallines;
 
-		if (con_totallines < numlines)
-			numlines = con_totallines;
-
-		numchars = oldwidth;
-
-		if (con_linewidth < numchars)
-			numchars = con_linewidth;
-
-		memcpy (tbuf, con->text, CON_TEXTSIZE);
-		memset (con->text, ' ', CON_TEXTSIZE);
-
-		for (i = 0; i < numlines; i++)
-		{
-			for (j = 0; j < numchars; j++)
-			{
-				con->text[(con_totallines - 1 - i) * con_linewidth + j] =
-					tbuf[((con->current - i + oldtotallines)
-							% oldtotallines) * oldwidth + j];
-			}
-		}
-
-		Con_ClearNotify ();
-	}
-
-	con->current = con_totallines - 1;
-	con->display = con->current;
+	con_linewidth = width;
 }
 
 
@@ -246,19 +206,21 @@ Con_Init (void)
 
 	// these must be initialised here
 	con_linewidth = -1;
-	con->current = 0;
+	con->current_raw = 0;
 	con->x = 0;
-	con->display = 0;
+	con->display = 1;
 
 	Size_Changed2D (NULL);
+	con_initialized = true;
 
 	Com_Printf ("Console initialized.\n");
+	Com_Printf ("Quake is Copyright 1996,1997  Id Software, Inc.\n");
+	Com_Printf ("See CVS logs for list of Twilight copyright holders.\n");
 
 	Cmd_AddCommand ("toggleconsole", Con_ToggleConsole_f);
 	Cmd_AddCommand ("messagemode", Con_MessageMode_f);
 	Cmd_AddCommand ("messagemode2", Con_MessageMode2_f);
 	Cmd_AddCommand ("clear", Con_Clear_f);
-	con_initialized = true;
 }
 
 
@@ -267,15 +229,20 @@ Con_Init (void)
 Con_Linefeed
 ===============
 */
-void
+static con_line_t *
 Con_Linefeed (void)
 {
-	con->x = 0;
-	if (con->display == con->current)
-		con->display++;
-	con->current++;
-	memset (&con->text[(con->current % con_totallines) * con_linewidth],
-			' ', con_linewidth);
+	con_line_t	*line;
+
+	line = &con->raw_lines[con->current_raw % CON_LINES];
+	if (line->text) {
+		Zone_Free(line->text);
+		line->text = NULL;
+		line->length = 0;
+	}
+	line->time = cls.realtime;
+	con->current_raw++;
+	return line;
 }
 
 /*
@@ -290,8 +257,9 @@ If no console is visible, the notify window will pop up.
 void
 Con_Print (char *txt)
 {
-	int			y, c, l, mask;
-	static int	cr;
+	int			mask;
+	char		c;
+	con_line_t	*line;
 
 	if (!con_initialized)
 		return;
@@ -305,53 +273,32 @@ Con_Print (char *txt)
 	else
 		mask = 0;
 
-	while ((c = *txt))
+	while ((c = *txt++))
 	{
-		// count word length
-		for (l = 0; l < con_linewidth; l++)
-			if (txt[l] <= ' ')
-				break;
-
-		// word wrap
-		if (l != con_linewidth && (con->x + l > con_linewidth))
-			con->x = 0;
-
-		txt++;
-
-		if (cr)
-		{
-			con->current--;
-			cr = false;
-		}
-
-
-		if (!con->x)
-		{
-			Con_Linefeed ();
-			// mark time for transparent overlay
-			if (con->current >= 0)
-				con_times[con->current % NUM_CON_TIMES] = cls.realtime;
-		}
-
 		switch (c)
 		{
-			case '\n':
-				con->x = 0;
-				break;
-
 			case '\r':
 				con->x = 0;
-				cr = 1;
 				break;
-
+			case '\n':
+				con->tmp_line[con->x++] = '\0';
+				line = Con_Linefeed();
+				line->text = Zone_Alloc(con_zone, con->x);
+				line->length = con->x;
+				memcpy(line->text, con->tmp_line, con->x);
+				con->x = 0;
+				break;
 			default:
-				// display character and advance
-				y = con->current % con_totallines;
-				con->text[y * con_linewidth + con->x] = c | mask | con_ormask;
-				con->x++;
-				if (con->x >= con_linewidth)
-					con->x = 0;
+				con->tmp_line[con->x++] = c | mask | con_ormask;
+				con->tmp_line[con->x] = '\0';
 				break;
+		}
+		if (con->x >= sizeof(con->tmp_line)) {
+			line = Con_Linefeed();
+			line->text = Zone_Alloc(con_zone, con->x);
+			line->length = con->x;
+			memcpy(line->text, con->tmp_line, con->x);
+			con->x = 0;
 		}
 	}
 }
@@ -397,6 +344,20 @@ Con_DrawInput (void)
 				con_vislines - (con->tsize * 2.65), 11, con->tsize);
 }
 
+static void
+Con_FindLine (console_t *con, int line_len, int line,
+		int *r_line, int *r_line_pos)
+{
+	int		i, pos;
+
+	pos = 0;
+	for (i = con->current_raw - 1; (pos < line) && i >= 0; i--) {
+		pos += (con->raw_lines[i % CON_LINES].length + line_len - 1) / line_len;
+	}
+	*r_line_pos = pos - line;
+	*r_line = i + 1;
+}
+
 
 /*
 ================
@@ -408,33 +369,33 @@ Draws the last few lines of output transparently over the game top
 void
 Con_DrawNotify (void)
 {
-	int			v;
+	int			i, y, line, line_pos, line_pos_max;
+	con_line_t	*l;
 	char		*text;
-	int			i;
-	float		time;
+	double		kill_time;
 	char		*s;
 	Uint		skip;
 
-	v = 0;
-	for (i = con->current - NUM_CON_TIMES + 1; i <= con->current; i++)
+	kill_time = max(con_cleartime, cls.realtime - con_notifytime->fvalue);
+
+	Con_FindLine (con, con_linewidth, NUM_CON_TIMES, &line, &line_pos);
+	line_pos_max = -1 + (con->raw_lines[line % CON_LINES].length + con_linewidth - 1) / con_linewidth;
+	for (i = y = 0; i < NUM_CON_TIMES; i++, line_pos++)
 	{
-		if (i < 0)
+		if (line_pos > line_pos_max) {
+			line++;
+			line_pos_max = -1 + (con->raw_lines[line % CON_LINES].length + con_linewidth - 1) / con_linewidth;
+			line_pos = 0;
+		}
+		if ((line_pos < 0) || ((con->current_raw - line) > CON_LINES))
 			continue;
-		time = con_times[i % NUM_CON_TIMES];
-		if (time == 0)
+		l = &con->raw_lines[line % CON_LINES];
+		if (!l->text || !l->length || (l->time <= kill_time))
 			continue;
-		time = cls.realtime - time;
-		if (time > con_notifytime->fvalue)
-			continue;
-		text = con->text + (i % con_totallines) * con_linewidth;
-
-		clearnotify = 0;
-
-		Draw_String_Len(con->tsize, v, text, con_linewidth, con->tsize);
-
-		v += con->tsize;
+		text = &l->text[line_pos * con_linewidth];
+		Draw_String_Len(con->tsize, y, text, con_linewidth, con->tsize);
+		y += con->tsize;
 	}
-
 
 	if (key_dest == key_message)
 	{
@@ -442,12 +403,12 @@ Con_DrawNotify (void)
 
 		if (chat_team)
 		{
-			Draw_String (con->tsize, v, "say_team:", con->tsize);
+			Draw_String (con->tsize, y, "say_team:", con->tsize);
 			skip = 11;
 		}
 		else
 		{
-			Draw_String (con->tsize, v, "say:", con->tsize);
+			Draw_String (con->tsize, y, "say:", con->tsize);
 			skip = 5;
 		}
 
@@ -456,16 +417,13 @@ Con_DrawNotify (void)
 			s += chat_bufferlen -
 				((int) (vid.width_2d / con->tsize) - (skip + 1));
 
-		Draw_String (skip * con->tsize, v, s, con->tsize);
+		Draw_String (skip * con->tsize, y, s, con->tsize);
 
-		Draw_Character ((strlen(s) + skip) * con->tsize, v,
+		Draw_Character ((strlen(s) + skip) * con->tsize, y,
 				10 + ((int) (cls.realtime * con_cursorspeed) & 1),
 				con->tsize);
-		v += con->tsize;
+		y += con->tsize;
 	}
-
-	if (v > con_notifylines)
-		con_notifylines = v;
 }
 
 /*
@@ -478,12 +436,11 @@ Draws the console with the solid background
 void
 Con_DrawConsole (int lines)
 {
-	Uint		i;
-	int			x, y;
-	int			j, n;
-	Uint		rows;
+	Uint		i, rows;
+	int			x, y, line, line_pos;
+	con_line_t	*l;
 	char		*text;
-	int			row;
+	int			j, n;
 	char		dlbar[1024];
 
 	if (lines <= 0)
@@ -500,7 +457,7 @@ Con_DrawConsole (int lines)
 	y = lines - (con->tsize * 3.75);
 
 	// draw from the bottom up
-	if (con->display != con->current)
+	if (con->display != 1)
 	{
 		// draw arrows to show the buffer is backscrolled
 		for (x = 0; x < con_linewidth; x += 4)
@@ -510,17 +467,21 @@ Con_DrawConsole (int lines)
 		rows--;
 	}
 
-	row = con->display;
-	for (i = 0; i < rows; i++, y -= con->tsize, row--)
+	Con_FindLine (con, con_linewidth, con->display, &line, &line_pos);
+	for (i = 0; i < rows; i++, y -= con->tsize, line_pos--)
 	{
-		if (row < 0)
+		if (line_pos < 0) {
+			line--;
+			line_pos = -1 + (con->raw_lines[line % CON_LINES].length + con_linewidth - 1) / con_linewidth;
+		}
+		if (line < 0)
 			break;
-		if (con->current - row >= con_totallines)
-			// past scrollback wrap point
-			break;
-
-		text = con->text + (row % con_totallines) * con_linewidth;
-
+		if ((line_pos < 0) || ((con->current_raw - line) > CON_LINES))
+			continue;
+		l = &con->raw_lines[line % CON_LINES];
+		if (!l->text || !l->length)
+			continue;
+		text = &l->text[line_pos * con_linewidth];
 		Draw_String_Len(con->tsize, y, text, con_linewidth, con->tsize);
 	}
 
@@ -562,7 +523,7 @@ Con_DrawConsole (int lines)
 		dlbar[i] = 0;
 
 		snprintf (dlbar + strlen (dlbar), sizeof (dlbar) - strlen (dlbar),
-				  " %02d%%", cls.downloadpercent);
+				" %02d%%", cls.downloadpercent);
 
 		// draw it
 		y = con_vislines - 22 + con->tsize;
@@ -572,6 +533,7 @@ Con_DrawConsole (int lines)
 	// draw the input prompt, user text, and cursor if desired
 	Con_DrawInput ();
 }
+
 
 /*
 	Con_DisplayList
