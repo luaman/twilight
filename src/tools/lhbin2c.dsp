@@ -90,3 +90,10 @@ SOURCE=.\lhbin2c.c
 # End Group
 # End Target
 # End Project
+gin Source File
+
+SOURCE=.\lhbin2c.c
+# End Source File
+# End Group
+# End Target
+# End Project
