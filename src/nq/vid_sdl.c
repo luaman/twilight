@@ -232,9 +232,9 @@ CheckExtensions (void)
 	} else
 		Com_Printf ("no.\n");
 
-	if (gl_mtex && (!qglActiveTextureARB || !qglMultiTexCoord2fARB)) {
+	if (gl_mtex && (!qglActiveTextureARB || !qglClientActiveTextureARB)) {
 		Sys_Error ("Missing GL_ARB_multitexture functions. (%p %p)\n",
-				qglActiveTextureARB, qglMultiTexCoord2fARB);
+				qglActiveTextureARB, qglClientActiveTextureARB);
 	}
 
 	if (gl_mtex && !COM_CheckParm ("-nomtexcombine")) {

@@ -71,9 +71,8 @@ R_InitSurf (void)
 static void
 R_RenderFullbrights (void)
 {
-	int				i, j;
+	int				i;
 	glpoly_t	   *p;
-	float		   *v;
 
 	if (!drawfullbrights || !gl_fb_bmodels->ivalue)
 		return;
@@ -90,14 +89,12 @@ R_RenderFullbrights (void)
 
 		for (p = fullbright_polys[i]; p; p = p->fb_chain)
 		{
-			qglBegin (GL_POLYGON);
-			v = p->verts[0];
-			for (j = 0; j < p->numverts; j++, v += VERTEXSIZE)
-			{
-				qglTexCoord2f (v[3], v[4]);
-				qglVertex3fv (v);
-			}
-			qglEnd ();
+			memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
+			memcpy(tc0_array_p, p->tc, sizeof(texcoord_t) * p->numverts);
+
+			TWI_PreVDrawCVA (0, p->numverts);
+			qglDrawArrays (GL_POLYGON, 0, p->numverts);
+			TWI_PostVDrawCVA ();
 		}
 
 		fullbright_polys[i] = NULL;
@@ -573,7 +570,7 @@ GL_UpdateLightmap (msurface_t *fa)
 	if (fa->lightmappedframe != r_framecount)
 	{
 		fa->lightmappedframe = r_framecount;
-		fa->polys->chain = lightmap_polys[fa->lightmaptexturenum];
+		fa->polys->lchain = lightmap_polys[fa->lightmaptexturenum];
 		lightmap_polys[fa->lightmaptexturenum] = fa->polys;
 	}
 
@@ -645,7 +642,6 @@ R_BlendLightmaps (void)
 {
 	int			i, j;
 	glpoly_t   *p;
-	vec3_t		nv;
 	float	   *v;
 	float		intensity = max (0, r_waterwarp->fvalue);
 
@@ -661,28 +657,29 @@ R_BlendLightmaps (void)
 		if (!p)
 			continue;
 		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + i);
-		for (; p; p = p->chain) {
+		for (; p; p = p->lchain) {
 			if (p->flags & SURF_UNDERWATER && r_waterwarp->fvalue) {
-				qglBegin (GL_TRIANGLE_FAN);
-				v = p->verts[0];
-				for (j = 0; j < p->numverts; j++, v += VERTEXSIZE) {
-					qglTexCoord2f (v[5], v[6]);
-					nv[0] =	v[0] + intensity * Q_sin (v[1] * 0.05 + cls.realtime)
+				memcpy(tc0_array_p, p->ltc, sizeof(texcoord_t) * p->numverts);
+				for (j = 0; j < p->numverts; j++) {
+					v = p->v[j].v;
+					v_array(j, 0) = v[0] + intensity
+						* Q_sin (v[1] * 0.05 + cls.realtime)
 						* Q_sin (v[2] * 0.05 + cls.realtime);
-					nv[1] =	v[1] + intensity * Q_sin (v[0] * 0.05 + cls.realtime)
+					v_array(j, 1) = v[1] + intensity
+						* Q_sin (v[0] * 0.05 + cls.realtime)
 						* Q_sin (v[2] * 0.05 + cls.realtime);
-					nv[2] = v[2];
-					qglVertex3fv (nv);
+					v_array(j, 2) = v[2];
 				}
-				qglEnd ();
+				TWI_PreVDrawCVA (0, p->numverts);
+				qglDrawArrays (GL_TRIANGLE_FAN, 0, p->numverts);
+				TWI_PostVDrawCVA ();
 			} else {
-				qglBegin (GL_POLYGON);
-				v = p->verts[0];
-				for (j = 0; j < p->numverts; j++, v += VERTEXSIZE) {
-					qglTexCoord2f (v[5], v[6]);
-					qglVertex3fv (v);
-				}
-				qglEnd ();
+				memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
+				memcpy(tc0_array_p, p->ltc, sizeof(texcoord_t) * p->numverts);
+
+				TWI_PreVDrawCVA (0, p->numverts);
+				qglDrawArrays (GL_POLYGON, 0, p->numverts);
+				TWI_PostVDrawCVA ();
 			}
 		}
 	}
@@ -703,8 +700,7 @@ static void
 R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 {
 	int			i;
-	float	   *v;
-	vec3_t		nv;
+	float		*v;
 	float		intensity = max (0, r_waterwarp->fvalue);
 
 	c_brush_polys++;
@@ -712,28 +708,33 @@ R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 	qglBindTexture(GL_TEXTURE_2D, lightmap_textures + fa->lightmaptexturenum);
 
 	if (fa->flags & SURF_UNDERWATER && r_waterwarp->fvalue) {
-		qglBegin (GL_TRIANGLE_FAN);
-		v = fa->polys->verts[0];
-		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
-			qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, v[3], v[4]);
-			qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, v[5], v[6]);
-			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + cls.realtime)
+		memcpy(tc0_array_p, fa->polys->tc,
+				sizeof(texcoord_t) * fa->polys->numverts);
+		memcpy(tc1_array_p, fa->polys->ltc,
+				sizeof(texcoord_t) * fa->polys->numverts);
+		for (i = 0; i < fa->polys->numverts; i++) {
+			v = fa->polys->v[i].v;
+			v_array(i, 0) = v[0] + intensity
+				* Q_sin (v[1] * 0.05 + cls.realtime)
 				* Q_sin (v[2] * 0.05 + cls.realtime);
-			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + cls.realtime)
+			v_array(i, 1) = v[1] + intensity
+				* Q_sin (v[0] * 0.05 + cls.realtime)
 				* Q_sin (v[2] * 0.05 + cls.realtime);
-			nv[2] = v[2];
-			qglVertex3fv (nv);
+			v_array(i, 2) = v[2];
 		}
-		qglEnd ();
+		TWI_PreVDrawCVA (0, fa->polys->numverts);
+		qglDrawArrays (GL_TRIANGLE_FAN, 0, fa->polys->numverts);
+		TWI_PostVDrawCVA ();
 	} else {
-		qglBegin (GL_POLYGON);
-		v = fa->polys->verts[0];
-		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
-			qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, v[3], v[4]);
-			qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, v[5], v[6]);
-			qglVertex3fv (v);
-		}
-		qglEnd ();
+		memcpy(v_array_p, fa->polys->v, sizeof(vertex_t) * fa->polys->numverts);
+		memcpy(tc0_array_p, fa->polys->tc,
+				sizeof(texcoord_t) * fa->polys->numverts);
+		memcpy(tc1_array_p, fa->polys->ltc,
+				sizeof(texcoord_t) * fa->polys->numverts);
+
+		TWI_PreVDrawCVA (0, fa->polys->numverts);
+		qglDrawArrays (GL_POLYGON, 0, fa->polys->numverts);
+		TWI_PostVDrawCVA ();
 	}
 
 	// add the poly to the proper fullbright chain
@@ -754,33 +755,35 @@ static void
 R_RenderBrushPoly (msurface_t *fa, texture_t *t)
 {
 	int		i;
-	vec3_t	nv;
 	float	*v;
 	float	intensity = max (0, r_waterwarp->fvalue);
 
 	c_brush_polys++;
 
 	if (fa->flags & SURF_UNDERWATER && r_waterwarp->fvalue) {
-		qglBegin (GL_TRIANGLE_FAN);
-		v = fa->polys->verts[0];
-		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
-			qglTexCoord2f (v[3], v[4]);
-			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + cls.realtime)
+		memcpy(tc0_array_p, fa->polys->tc,
+				sizeof(texcoord_t) * fa->polys->numverts);
+		for (i = 0; i < fa->polys->numverts; i++) {
+			v = fa->polys->v[i].v;
+			v_array(i, 0) = v[0] + intensity
+				* Q_sin (v[1] * 0.05 + cls.realtime)
 				* Q_sin (v[2] * 0.05 + cls.realtime);
-			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + cls.realtime)
+			v_array(i, 1) = v[1] + intensity
+				* Q_sin (v[0] * 0.05 + cls.realtime)
 				* Q_sin (v[2] * 0.05 + cls.realtime);
-			nv[2] = v[2];
-			qglVertex3fv (nv);
+			v_array(i, 2) = v[2];
 		}
-		qglEnd ();
+		TWI_PreVDrawCVA (0, fa->polys->numverts);
+		qglDrawArrays (GL_TRIANGLE_FAN, 0, fa->polys->numverts);
+		TWI_PostVDrawCVA ();
 	} else {
-		qglBegin (GL_POLYGON);
-		v = fa->polys->verts[0];
-		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
-			qglTexCoord2f (v[3], v[4]);
-			qglVertex3fv (v);
-		}
-		qglEnd ();
+		memcpy(v_array_p, fa->polys->v, sizeof(vertex_t) * fa->polys->numverts);
+		memcpy(tc0_array_p, fa->polys->tc,
+				sizeof(texcoord_t) * fa->polys->numverts);
+
+		TWI_PreVDrawCVA (0, fa->polys->numverts);
+		qglDrawArrays (GL_POLYGON, 0, fa->polys->numverts);
+		TWI_PostVDrawCVA ();
 	}
 
 	// add the poly to the proper lightmap chain
@@ -837,7 +840,6 @@ DrawTextureChains (void)
 
 	if (gl_mtex)
 	{
-		qglDisable (GL_BLEND);
 		if (gl_mtexcombine)
 		{
 			qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
@@ -1410,7 +1412,9 @@ BuildSurfaceDisplayList (msurface_t *fa)
 	 * draw texture
 	 */
 	poly = Hunk_Alloc (sizeof (glpoly_t));
-	poly->verts = Hunk_Alloc (lnumverts * sizeof (pvertex_t));
+	poly->tc = Hunk_Alloc (lnumverts * sizeof (texcoord_t));
+	poly->ltc = Hunk_Alloc (lnumverts * sizeof (texcoord_t));
+	poly->v = Hunk_Alloc (lnumverts * sizeof (vertex_t));
 
 	poly->next = fa->polys;
 	poly->flags = fa->flags;
@@ -1427,15 +1431,16 @@ BuildSurfaceDisplayList (msurface_t *fa)
 			r_pedge = &pedges[-lindex];
 			vec = r_pcurrentvertbase[r_pedge->v[1]].position;
 		}
+		VectorCopy (vec, poly->v[i].v);
+
 		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
 		s /= fa->texinfo->texture->width;
 
 		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
 		t /= fa->texinfo->texture->height;
 
-		VectorCopy (vec, poly->verts[i]);
-		poly->verts[i][3] = s;
-		poly->verts[i][4] = t;
+		poly->tc[i].v[0] = s;
+		poly->tc[i].v[1] = t;
 
 		/*
 		 * lightmap texture coordinates
@@ -1452,8 +1457,8 @@ BuildSurfaceDisplayList (msurface_t *fa)
 		t += 8;
 		t /= BLOCK_HEIGHT << 4;			// fa->texinfo->texture->height;
 
-		poly->verts[i][5] = s;
-		poly->verts[i][6] = t;
+		poly->ltc[i].v[0] = s;
+		poly->ltc[i].v[1] = t;
 	}
 }
 

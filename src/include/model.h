@@ -109,17 +109,15 @@ typedef struct {
 	int         flags;
 } mtexinfo_t;
 
-#define	VERTEXSIZE	7
-
-typedef float pvertex_t[VERTEXSIZE];
-
 typedef struct glpoly_s {
-	struct glpoly_s *next;
-	struct glpoly_s *chain;
-	struct glpoly_s	*fb_chain;
+	struct glpoly_s *next;				// Next in texture chain.
+	struct glpoly_s *lchain;			// Next in lightmap chain.
+	struct glpoly_s	*fb_chain;			// Next in FB chain.
 	int         numverts;
 	int         flags;					// for SURF_UNDERWATER
-	pvertex_t	*verts;					// variable sized (xyz s1t1 s2t2)
+	vertex_t	*v;						// Vertices
+	texcoord_t	*tc;					// Texcoords
+	texcoord_t	*ltc;					// Lightmap texcoords
 } glpoly_t;
 
 typedef struct msurface_s {

@@ -497,6 +497,10 @@ Mod_LoadFaces (lump_t *l)
 		out->numedges = LittleShort (in->numedges);
 		out->flags = 0;
 
+		if (out->numedges >= 256)
+			Host_EndGame ("MOD_LoadBmodel: Too many edges in surface for %s",
+					loadmodel->name);
+
 		planenum = LittleShort (in->planenum);
 		side = LittleShort (in->side);
 		if (side)

@@ -92,7 +92,6 @@ SubdividePolygon (int numverts, float *verts)
 	float       dist[64];
 	float       frac;
 	glpoly_t   *poly;
-	float       s, t;
 
 	if (!numverts)
 		Sys_Error ("numverts = 0!");
@@ -149,17 +148,16 @@ SubdividePolygon (int numverts, float *verts)
 	}
 
 	poly = Hunk_Alloc (sizeof (glpoly_t)); 
-	poly->verts = Hunk_Alloc (numverts * sizeof (pvertex_t));
+	poly->tc = Hunk_Alloc (numverts * sizeof (texcoord_t));
+	poly->v = Hunk_Alloc (numverts * sizeof (vertex_t));
 
 	poly->next = warpface->polys;
 	warpface->polys = poly;
 	poly->numverts = numverts;
 	for (i = 0; i < numverts; i++, verts += 3) {
-		VectorCopy (verts, poly->verts[i]);
-		s = DotProduct (verts, warpface->texinfo->vecs[0]);
-		t = DotProduct (verts, warpface->texinfo->vecs[1]);
-		poly->verts[i][3] = s;
-		poly->verts[i][4] = t;
+		VectorCopy (verts, poly->v[i].v);
+		poly->tc[i].v[0] = DotProduct (verts, warpface->texinfo->vecs[0]);
+		poly->tc[i].v[1] = DotProduct (verts, warpface->texinfo->vecs[1]);
 	}
 }
 
@@ -224,7 +222,6 @@ void
 EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 {
 	glpoly_t   *p;
-	float	   *v;
 	float		temp[3];
 	int			i;
 	float		s, t, ripple;
@@ -235,25 +232,26 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 
 	for (p = fa->polys; p; p = p->next)
 	{
-		qglBegin (GL_TRIANGLE_FAN);
-		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
+		for (i = 0; i < p->numverts; i++)
 		{
 			if (transform)
-				softwaretransform(v, temp);
+				softwaretransform(p->v[i].v, temp);
 			else
-				VectorCopy(v, temp);
+				VectorCopy(p->v[i].v, temp);
 
 			if (ripple)
 				temp[2] += ripple * TURBSIN(temp[0], 1/32.0f) *
 					TURBSIN(temp[1], 1/32.0f) * (1/64.0f);
 
-			s = (v[3] + TURBSIN(v[4], 0.125)) * (1/64.0f);
-			t = (v[4] + TURBSIN(v[3], 0.125)) * (1/64.0f);
+			s = (p->tc[i].v[0] + TURBSIN(p->tc[i].v[1], 0.125)) * (1/64.0f);
+			t = (p->tc[i].v[1] + TURBSIN(p->tc[i].v[0], 0.125)) * (1/64.0f);
 
-			qglTexCoord2f (s, t);
-			qglVertex3fv (temp);
+			VectorSet2 (tc0_array_v(i), s, t);
+			VectorCopy (temp, v_array_v(i));
 		}
-		qglEnd ();
+		TWI_PreVDrawCVA (0, p->numverts);
+		qglDrawArrays (GL_TRIANGLE_FAN, 0, p->numverts);
+		TWI_PostVDrawCVA ();
 	}
 }
 
@@ -266,16 +264,15 @@ static void
 EmitSkyPolys (msurface_t *fa)
 {
 	glpoly_t   *p;
-	float      *v;
 	int         i;
 	float       s, t;
 	vec3_t      dir;
 	float       length;
 
 	for (p = fa->polys; p; p = p->next) {
-		qglBegin (GL_POLYGON);
-		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE) {
-			VectorSubtract (v, r_origin, dir);
+		memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
+		for (i = 0; i < p->numverts; i++) {
+			VectorSubtract (p->v[i].v, r_origin, dir);
 			dir[2] *= 3;				// flatten the sphere
 
 			length = 6 * 63 * Q_RSqrt (DotProduct(dir,dir));
@@ -286,23 +283,23 @@ EmitSkyPolys (msurface_t *fa)
 			s = (speedscale + dir[0]) * (1.0 / 128);
 			t = (speedscale + dir[1]) * (1.0 / 128);
 
-			qglTexCoord2f (s, t);
-			qglVertex3fv (v);
+			VectorSet2(tc0_array_v(i), s, t);
 		}
-		qglEnd ();
+		TWI_PreVDrawCVA (0, p->numverts);
+		qglDrawArrays (GL_POLYGON, 0, p->numverts);
+		TWI_PostVDrawCVA ();
 	}
 }
 
 /*
 =============
-EmitSkyPolys
+EmitSkyPolysMTEX
 =============
 */
 static void
 EmitSkyPolysMTEX (msurface_t *fa)
 {
 	glpoly_t   *p;
-	float      *v;
 	int         i;
 	float       s1, t1, s2, t2;
 	vec3_t      dir;
@@ -318,11 +315,10 @@ EmitSkyPolysMTEX (msurface_t *fa)
 
 	for (p = fa->polys; p; p = p->next) 
 	{
-		qglBegin (GL_POLYGON);
-
-		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE) 
+		memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
+		for (i = 0; i < p->numverts; i++) 
 		{
-			VectorSubtract (v, r_origin, dir);
+			VectorSubtract (p->v[i].v, r_origin, dir);
 			dir[2] *= 3;				// flatten the sphere
 
 			length = 6 * 63 * Q_RSqrt (DotProduct(dir,dir));
@@ -336,12 +332,13 @@ EmitSkyPolysMTEX (msurface_t *fa)
 			s2 = (speedscale2 + dir[0]) * (1.0 / 128);
 			t2 = (speedscale2 + dir[1]) * (1.0 / 128);
 
-			qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, s1, t1);
-			qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, s2, t2);
-			qglVertex3fv (v);
+			VectorSet2(tc0_array_v(i), s1, t1);
+			VectorSet2(tc1_array_v(i), s2, t2);
 		}
 
-		qglEnd ();
+		TWI_PreVDrawCVA (0, p->numverts);
+		qglDrawArrays (GL_POLYGON, 0, p->numverts);
+		TWI_PostVDrawCVA ();
 	}
 
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -378,6 +375,7 @@ EmitBothSkyLayers (msurface_t *fa)
 	speedscale -= (int) speedscale & ~127;
 
 	EmitSkyPolys (fa);
+	qglDisable (GL_BLEND);
 }
 
 void
@@ -407,19 +405,17 @@ R_DrawSkyChain (msurface_t *s)
 
 	if (r_fastsky->ivalue) {
 		glpoly_t	*p;
-		float		*v;
-		int			i;
 
 		qglDisable (GL_TEXTURE_2D);
 		qglColor4fv (d_8tofloattable[(Uint8) r_fastsky->ivalue - 1]);
 
 		for (fa = s; fa; fa = fa->texturechain){
 			for (p = fa->polys; p; p = p->next) {
-				qglBegin (GL_POLYGON);
-				for (i = 0,v = p->verts[0] ; i < p->numverts ; i++, v+=VERTEXSIZE)
-					qglVertex3fv (v);
+				memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
 
-				qglEnd ();
+				TWI_PreVDrawCVA (0, p->numverts);
+				qglDrawArrays (GL_POLYGON, 0, p->numverts);
+				TWI_PostVDrawCVA ();
 			}
 		}
 
@@ -710,7 +706,7 @@ void R_DrawSkyboxChain (msurface_t *s)
 		for (p = fa->polys; p; p = p->next)
 		{
 			for (i = 0; i < p->numverts; i++)
-				VectorSubtract (p->verts[i], r_origin, verts[i]);
+				VectorSubtract (p->v[i].v, r_origin, verts[i]);
 
 			ClipSkyPolygon (p->numverts, verts[0], 0);
 		}
@@ -735,7 +731,7 @@ void R_ClearSkyBox (void)
 }
 
 
-void MakeSkyVec (float s, float t, int axis)
+void MakeSkyVec (float s, float t, int axis, int i)
 {
 	vec3_t		v, b;
 	int			j, k;
@@ -756,8 +752,8 @@ void MakeSkyVec (float s, float t, int axis)
 	s = bound ((1.0/512), s, (511.0/512));
 	t = 1.0 - bound ((1.0/512), t, (511.0/512));
 
-	qglTexCoord2f (s, t);
-	qglVertex3fv (v);
+	VectorSet2 (tc0_array_v(i), s, t);
+	VectorCopy (v, v_array_v(i));
 }
 
 /*
@@ -783,12 +779,14 @@ void R_DrawSkyBox (void)
 
 		qglBindTexture (GL_TEXTURE_2D, skyboxtexnum+skytexorder[i]);
 
-		qglBegin (GL_QUADS);
-		MakeSkyVec (skymins[0][i], skymins[1][i], i);
-		MakeSkyVec (skymins[0][i], skymaxs[1][i], i);
-		MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i);
-		MakeSkyVec (skymaxs[0][i], skymins[1][i], i);
-		qglEnd ();
+		MakeSkyVec (skymins[0][i], skymins[1][i], i, 0);
+		MakeSkyVec (skymins[0][i], skymaxs[1][i], i, 1);
+		MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, 2);
+		MakeSkyVec (skymaxs[0][i], skymins[1][i], i, 3);
+
+		TWI_PreVDraw (0, 4);
+		qglDrawArrays (GL_QUADS, 0, 4);
+		TWI_PostVDraw ();
 	}
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
