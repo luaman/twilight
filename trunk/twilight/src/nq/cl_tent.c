@@ -113,15 +113,16 @@ CL_ParseBeam (model_t *m)
 	end[2] = MSG_ReadCoord ();
 
 // override any beam with the same entity
-	for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++)
+	for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++) {
 		if (b->entity == ent) {
-			b->entity = ent;
 			b->model = m;
 			b->endtime = cl.time + 0.2;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
 			return;
 		}
+	}
+
 // find a free beam
 	for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++) {
 		if (!b->model || b->endtime < cl.time) {
@@ -133,7 +134,8 @@ CL_ParseBeam (model_t *m)
 			return;
 		}
 	}
-	Con_Printf ("beam list overflow!\n");
+
+	Con_Printf ("CL_ParseBeam: beam list overflow!\n");
 }
 
 /*
@@ -372,6 +374,7 @@ CL_UpdateTEnts (void)
 		if (b->entity == cl.viewentity) {
 			VectorCopy (cl_entities[cl.viewentity].origin, b->start);
 		}
+
 		// calculate pitch and yaw
 		VectorSubtract (b->end, b->start, dist);
 
