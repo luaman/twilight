@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "common.h"
 #include "console.h"
 #include "pcx.h"
+#include "strlib.c"
 #include "sys.h"
 
 typedef struct {
