@@ -285,27 +285,25 @@ Cbuf_InsertFile (char *path)
 {
 	FILE		*f;
 	char		*text;
-	size_t		mark, size;
+	size_t		size;
 
-    mark = Hunk_LowMark ();
 	f = fopen (path, "rb");
-	if (!f)
+	if (f)
 	{
+		size = COM_filelength (f);
+		text = Zone_Alloc(tempzone, size);
+		if (text)
+		{
+			fread (text, size, 1, f);
+			Cbuf_InsertText (text);
+			Zone_Free(text);
+		}
+		else
+			Sys_Printf ("Cbuf_InsertFile: Allocation failed for %s\n", path);
+		fclose (f);
+	}
+	else
 		Sys_Printf ("Cbuf_InsertFile: Couldn't open %s\n", path);
-		return;
-	}
-	size = COM_filelength (f);
-	text = Hunk_Alloc (size);
-	if (!text)
-	{
-		Sys_Printf ("Cbuf_InsertFile: Allocation failed for %s\n", path);
-		return;
-	}
-	fread (text, size, 1, f);
-	fclose (f);
-
-	Cbuf_InsertText (text);
-	Hunk_FreeToLowMark (mark);
 }
 
 /*
