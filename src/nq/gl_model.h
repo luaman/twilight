@@ -116,13 +116,15 @@ typedef struct {
 
 #define	VERTEXSIZE	7
 
+typedef float pvertex_t[VERTEXSIZE];
+
 typedef struct glpoly_s {
 	struct glpoly_s *next;
 	struct glpoly_s *chain;
 	struct glpoly_s	*fb_chain;
 	int         numverts;
 	int         flags;					// for SURF_UNDERWATER
-	float       verts[4][VERTEXSIZE];	// variable sized (xyz s1t1 s2t2)
+	pvertex_t	*verts;					// variable sized (xyz s1t1 s2t2)
 } glpoly_t;
 
 typedef struct msurface_s {
@@ -341,6 +343,7 @@ typedef enum { mod_brush, mod_sprite, mod_alias } modtype_t;
 #define FLAG_DOUBLESIZE 4				// double sized model
 #define FLAG_NO_IM_ANIM 8				// do not interpolate frames (1 frame only)
 #define FLAG_NO_IM_FORM 16				// do not interpolate angles or position (weapons)
+#define FLAG_PLAYER		32				// always has some light
 
 typedef struct model_s {
 	char        name[MAX_QPATH];

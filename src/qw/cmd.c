@@ -200,7 +200,7 @@ Cbuf_Execute (void)
 		else {
 			i++;
 			cmd_text.cursize -= i;
-			memcpy (text, text + i, cmd_text.cursize);
+			memmove (text, text + i, cmd_text.cursize);
 		}
 
 // execute the command line
@@ -655,9 +655,9 @@ Cmd_CompleteCommand
 char       *
 Cmd_CompleteCommand (char *partial)
 {
-	cmd_function_t *cmd;
+	static cmd_function_t *cmd;
 	int         len;
-	cmdalias_t *a;
+	static cmdalias_t *a;
 
 	len = strlen (partial);
 
@@ -739,7 +739,7 @@ Cmd_CompleteBuildList (char *partial)
 char
 *Cmd_CompleteAlias (char * partial)
 {
-	cmdalias_t	*alias;
+	static cmdalias_t	*alias;
 	int			len;
 
 	len = strlen(partial);

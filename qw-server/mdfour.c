@@ -38,7 +38,8 @@ static const char rcsid[] =
 
 #include "SDL_types.h"
 
-#include "strlib.h"						/* XoXus: needed for memset / memcpy */
+#include "common.h"
+#include "strlib.h"						/* XoXus: needed for memset call */
 #include "mdfour.h"
 
 /* NOTE: This code makes no attempt to be fast!
@@ -253,14 +254,18 @@ mdfour (unsigned char *out, unsigned char *in, int n)
 Uint32
 Com_BlockChecksum (void *buffer, int length)
 {
-	int         digest[4];
-	unsigned    val;
+	Uint8		digest[16];
 
 	mdfour ((unsigned char *) digest, (unsigned char *) buffer, length);
 
-	val = digest[0] ^ digest[1] ^ digest[2] ^ digest[3];
-
-	return val;
+	/*
+	 * This is intentional.  digest can't be 4 Uint32s because of
+	 * possible alignment issues.
+	 */
+	return LittleLong(((Uint32 *)digest)[0] ^
+				((Uint32 *)digest)[1] ^
+				((Uint32 *)digest)[2] ^
+				((Uint32 *)digest)[3]);
 }
 
 

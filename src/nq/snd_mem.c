@@ -184,7 +184,7 @@ Uint8      *iff_end;
 Uint8      *last_chunk;
 Uint8      *iff_data;
 int         iff_chunk_len;
-
+char		*iff_name;
 
 short
 GetLittleShort (void)
@@ -230,6 +230,11 @@ FindNextChunk (char *name)
 //      if (iff_chunk_len > 1024*1024)
 //          Sys_Error ("FindNextChunk: %i length is past the 1 meg sanity limit", iff_chunk_len);
 		data_p -= 8;
+		if ((iff_end - data_p) < 8 + ((iff_chunk_len + 1) & ~1)) {
+			Con_DPrintf("Corrupt sound file '%s'.\n", iff_name);
+			data_p = NULL;
+			return;
+		}
 		last_chunk = data_p + 8 + ((iff_chunk_len + 1) & ~1);
 		if (!strncmp (data_p, name, 4))
 			return;
@@ -278,6 +283,7 @@ GetWavinfo (char *name, Uint8 *wav, int wavlength)
 	if (!wav)
 		return info;
 
+	iff_name = name;
 	iff_data = wav;
 	iff_end = wav + wavlength;
 

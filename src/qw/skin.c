@@ -154,7 +154,7 @@ Skin_Cache (skin_t *skin)
 // parse the PCX file
 //
 	pcx = (pcx_t *) raw;
-	raw = &pcx->data;
+	raw = pcx->data;
 
 	pcx->xmax = LittleShort (pcx->xmax);
 	pcx->xmin = LittleShort (pcx->xmin);

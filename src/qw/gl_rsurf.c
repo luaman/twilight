@@ -82,7 +82,7 @@ qboolean	drawfullbrights = false;
 void        R_RenderDynamicLightmaps (msurface_t *fa);
 void		DrawGLPoly (glpoly_t *p);
 
-extern void inline
+void inline
 R_UploadModifiedLightmap (int lightmapnum)
 {
 	glRect_t	*theRect;
@@ -1115,9 +1115,9 @@ BuildSurfaceDisplayList (msurface_t *fa)
 	// 
 	// draw texture
 	// 
-	poly =
-		Hunk_Alloc (sizeof (glpoly_t) +
-					(lnumverts - 4) * VERTEXSIZE * sizeof (float));
+	poly = Hunk_Alloc (sizeof (glpoly_t)); 
+	poly->verts = Hunk_Alloc (lnumverts * sizeof (pvertex_t));
+	
 	poly->next = fa->polys;
 	poly->flags = fa->flags;
 	fa->polys = poly;

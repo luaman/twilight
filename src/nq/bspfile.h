@@ -101,7 +101,7 @@ typedef struct {
 
 typedef struct {
 	int         nummiptex;
-	int         dataofs[4];				// [nummiptex]
+	int         dataofs[0];				// [nummiptex]
 } dmiptexlump_t;
 
 #define	MIPLEVELS	4
