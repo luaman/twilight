@@ -113,7 +113,8 @@ typedef struct {
 //
 // client_state_t should hold all pieces of the client state
 //
-#define	MAX_DLIGHTS		32
+#define	MAX_DLIGHTS		MAX_CLIENTS	<< 1
+
 typedef struct {
 	int         key;					// so entities can reuse same entry
 	vec3_t      origin;
