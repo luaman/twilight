@@ -9,26 +9,52 @@ opts = My_Options ();
 config_defs = My_Options ()
 building = 0
 
-def check_SDL (context, ver):
-	context.Message ('Checking for SDL ' + repr(ver) + ' ... ')
+def check_SDL_config (context):
+	context.Message ('Checking for sdl-config ... ')
 
 	# Version.
 	try:
 		sdl_ver_str = os.popen("sdl-config --version").read().strip()
 		sdl_ver = map(int, sdl_ver_str.split("."))
-	except:
+		context.Result (repr(sdl_ver))
+		return (1, sdl_ver)
+	except: # Ok, we don't have sdl-config, let's get desperate.
 		context.Result (0)
-		return 0
+		return (0, [])
 
-	if ver > sdl_ver:
-		context.Result (repr(sdl_ver) + " (failed)")
-		return 0
+#	if ver > sdl_ver:
+#		context.Result (repr(sdl_ver) + " (failed)")
+#		return 0
 
 	# Ok, sdl-config exists, and reports a usable version.
-	ParseConfig (context.env, "sdl-config --cflags")
-	ParseConfig (context.env, "sdl-config --libs")
-	context.Result (1)
-	return 1
+#	ParseConfig (context.env, "sdl-config --cflags")
+#	ParseConfig (context.env, "sdl-config --libs")
+#	context.Result (1)
+#	return 1
+
+def check_SDL_headers (context):
+	context.Message ('Checking for SDL headers ... ')
+	ret = context.TryRun ("""
+#include "SDL_version.h"
+#include <stdio.h>
+
+int main (int argc, char *argv[])
+{
+	printf("%d.%d.%d", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
+	exit (0);
+}
+""")
+	if ret[0]:
+		ver = map (int, ret[1].strip.split("."))
+		context.Result (repr(ver))
+		return (1, ver)
+	else:
+		context.Result (0)
+		return (0, [])
+
+	sdl_ver = context.SDL_config ()
+
+	return sdl_ver
 
 def check_cflag (context, cflag, add = 1):
 	context.Message('Checking to see if compiler flag ' + cflag + ' works ... ')
@@ -134,12 +160,28 @@ def do_configure (env):
 	conf_base ()
 	opts.args (ARGUMENTS)
 	opts.save('config_opts.py')
-	conf = Configure(env, custom_tests = {'SDL' : check_SDL, 'cflag' : check_cflag})
+	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag}
+	conf = Configure(env, custom_tests = tests)
 	handle_opts (conf, opts, config_defs)
-	if conf.SDL ([1, 2, 5]):
-		config_defs.set('HAVE_SDL_H', 1)
+
+	ret = conf.SDL_config ()
+	sdl_ver = [0, 0, 0]
+	if ret[0]:
+		ParseConfig (env, "sdl-config --cflags --libs")
+		check_cheaders (conf, config_defs, ['SDL.h'])
+		sdl_ver = ret[1]
 	else:
-		print "Dying, we need SDL 1.2.5 or greater."
+		check_cheaders (conf, config_defs, ['SDL.h'])
+		if not config_defs.has_key ('HAVE_SDL_H'):
+			print "Twilight requires SDL 1.2.5. (None found.)"
+			Exit (1)
+		ret = conf.SDL_headers ()
+		if ret[0]:
+			sdl_ver = ret[1]
+			env.Append (LIBS = ['SDL'])
+
+	if [1, 2, 5] > sdl_ver:
+		print "Twilight requires SDL 1.2.5. (" + repr (sdl_ver) + " found)"
 		Exit (1)
 
 	check_funcs (conf, config_defs, ['strlcat', 'strlcpy', 'snprintf', \
