@@ -98,6 +98,13 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 	full_path = zasprintf(fs_zone, "%s/%s/", g_dir->path, path);
 	dir = opendir (full_path);
 
+	Com_DFPrintf (DEBUG_FS, "Posix Add Dir: %s %d\n", full_path, dir);
+	if (!dir) {
+		Com_Printf("FSD_Add_Dir: Unable to open %s. (%s)\n", full_path, strerror(errno));
+		Zone_Free (full_path);
+		return;
+	}
+
 	while ((dirent = readdir(dir))) {
 		if (!strcmp(".", dirent->d_name) || !strcmp("..", dirent->d_name))
 			continue;

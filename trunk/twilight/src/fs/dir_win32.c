@@ -94,6 +94,9 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 
 	tmp = zasprintf(fs_zone, "%s/%s/*", g_dir->path, path);
 	dir = _findfirst (tmp, &n_file);
+
+	Com_DFPrintf (DEBUG_FS, "Win32 Add Dir: %s %d\n", tmp, dir);
+
 	Zone_Free (tmp);
 	if (dir != -1)
 		goto fire;
