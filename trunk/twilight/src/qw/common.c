@@ -38,8 +38,6 @@ cvar_t      registered = { "registered", "0" };
 
 qboolean    com_modified;				// set true if using non-id files
 
-int         static_registered = 1;		// only for startup check, then set
-
 qboolean    msg_suppress_1 = 0;
 
 void        COM_InitFilesystem (void);
@@ -1123,30 +1121,16 @@ void
 COM_CheckRegistered (void)
 {
 	FILE       *h;
-	unsigned short check[128];
-	int         i;
 
 	COM_FOpenFile ("gfx/pop.lmp", &h);
-	static_registered = 0;
 
 	if (!h) {
-		Con_Printf ("Playing shareware version.\n");
-// FIXME DEBUG -- only temporary
-		if (com_modified)
-			Sys_Error
-				("You must have the registered version to play QuakeWorld");
 		return;
 	}
 
-	fread (check, 1, sizeof (check), h);
 	fclose (h);
 
-	for (i = 0; i < 128; i++)
-		if (pop[i] != (unsigned short) BigShort (check[i]))
-			Sys_Error ("Corrupted data file.");
-
 	Cvar_Set ("registered", "1");
-	static_registered = 1;
 	Con_Printf ("Playing registered version.\n");
 }
 
@@ -1516,11 +1500,8 @@ COM_FOpenFile (char *filename, FILE ** file)
 				}
 		} else {
 			// check a file in the directory tree
-			if (!static_registered) {	// if not a registered version, don't
-										// ever go beyond base
-				if (strchr (filename, '/') || strchr (filename, '\\'))
-					continue;
-			}
+			if (strchr (filename, '/') || strchr (filename, '\\'))
+				continue;
 
 			sprintf (netpath, "%s/%s", search->filename, filename);
 

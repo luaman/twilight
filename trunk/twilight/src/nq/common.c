@@ -37,8 +37,6 @@ qboolean    com_modified;				// set true if using non-id files
 
 qboolean    proghack;
 
-int         static_registered = 1;		// only for startup check, then set
-
 qboolean    msg_suppress_1 = 0;
 
 void        COM_InitFilesystem (void);
@@ -56,24 +54,6 @@ char        com_cmdline[CMDLINE_LENGTH];
 
 qboolean    standard_quake = true, rogue, hipnotic;
 
-// this graphic needs to be in the pak file to use registered features
-unsigned short pop[] = {
-	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-		0x0000, 0x6600, 0x0000, 0x0000, 0x0000, 0x6600, 0x0000, 0x0000, 0x0066,
-		0x0000, 0x0000, 0x0000, 0x0000, 0x0067, 0x0000, 0x0000, 0x6665, 0x0000,
-		0x0000, 0x0000, 0x0000, 0x0065, 0x6600, 0x0063, 0x6561, 0x0000, 0x0000,
-		0x0000, 0x0000, 0x0061, 0x6563, 0x0064, 0x6561, 0x0000, 0x0000, 0x0000,
-		0x0000, 0x0061, 0x6564, 0x0064, 0x6564, 0x0000, 0x6469, 0x6969, 0x6400,
-		0x0064, 0x6564, 0x0063, 0x6568, 0x6200, 0x0064, 0x6864, 0x0000, 0x6268,
-		0x6563, 0x0000, 0x6567, 0x6963, 0x0064, 0x6764, 0x0063, 0x6967, 0x6500,
-		0x0000, 0x6266, 0x6769, 0x6a68, 0x6768, 0x6a69, 0x6766, 0x6200, 0x0000,
-		0x0062, 0x6566, 0x6666, 0x6666, 0x6666, 0x6562, 0x0000, 0x0000, 0x0000,
-		0x0062, 0x6364, 0x6664, 0x6362, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-		0x0062, 0x6662, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0061,
-		0x6661, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x6500,
-		0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x6400, 0x0000,
-		0x0000, 0x0000
-};
 
 /*
 
@@ -1016,10 +996,8 @@ COM_CheckParm (char *parm)
 ================
 COM_CheckRegistered
 
-Looks for the pop.txt file and verifies it.
+Looks for the pop.lmp file
 Sets the "registered" cvar.
-Immediately exits out if an alternate game was attempted to be started without
-being registered.
 ================
 */
 void
@@ -1027,33 +1005,16 @@ COM_CheckRegistered (void)
 {
 	int         h;
 	unsigned short check[128];
-	int         i;
 
 	COM_OpenFile ("gfx/pop.lmp", &h);
-	static_registered = 0;
 
 	if (h == -1) {
-#if WINDED
-		Sys_Error
-			("This dedicated server requires a full registered copy of Quake");
-#endif
-		Con_Printf ("Playing shareware version.\n");
-		if (com_modified)
-			Sys_Error
-				("You must have the registered version to use modified games");
 		return;
 	}
 
-	Sys_FileRead (h, check, sizeof (check));
 	COM_CloseFile (h);
 
-	for (i = 0; i < 128; i++)
-		if (pop[i] != (unsigned short) BigShort (check[i]))
-			Sys_Error ("Corrupted data file.");
-
-	Cvar_Set ("cmdline", com_cmdline);
 	Cvar_Set ("registered", "1");
-	static_registered = 1;
 	Con_Printf ("Playing registered version.\n");
 }
 
@@ -1156,6 +1117,8 @@ COM_Init (char *basedir)
 	Cvar_RegisterVariable (&registered);
 	Cvar_RegisterVariable (&cmdline);
 	Cmd_AddCommand ("path", COM_Path_f);
+
+	Cvar_Set ("cmdline", com_cmdline);
 
 	COM_InitFilesystem ();
 	COM_CheckRegistered ();
@@ -1410,11 +1373,8 @@ COM_FindFile (char *filename, int *handle, FILE ** file)
 				}
 		} else {
 			// check a file in the directory tree
-			if (!static_registered) {	// if not a registered version, don't
-										// ever go beyond base
-				if (strchr (filename, '/') || strchr (filename, '\\'))
-					continue;
-			}
+			if (strchr (filename, '/') || strchr (filename, '\\'))
+				continue;
 
 			sprintf (netpath, "%s/%s", search->filename, filename);
 
