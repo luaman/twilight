@@ -33,6 +33,8 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <stdlib.h>	/* for rand() and calloc() */
+
 #include "quakedef.h"
 #include "common.h"
 #include "console.h"

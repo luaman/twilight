@@ -35,6 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>	/* for malloc() */
 
 #include "opengl_ext.h"
 
