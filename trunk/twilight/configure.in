@@ -2,14 +2,21 @@ dnl	$Id$
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
+AC_PREREQ(2.13)
 AC_INIT(nq/sv_main.c)
+AC_REVISION($Revision$)
+
 AM_INIT_AUTOMAKE(twilight,0.0.0)
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(include/config.h)
 
 dnl Checks for programs
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_INLINE
+AC_C_CONST
 
 dnl Custom macros (move these to a seperate file?)
 AC_DEFUN(TL_CHECK_LIB,[
@@ -33,24 +40,26 @@ AM_PATH_SDL(1.2.0,
 	,
 	AC_MSG_ERROR([SDL 1.2 or above is required to build $PACKAGE])
 )
+SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"
 
+test "$prefix" = "NONE" && prefix="$ac_default_prefix"
+test "x$exec_prefix" = "xNONE" && exec_prefix="$prefix"
 
-dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_INLINE
+eval PDIR="$prefix"
+eval DDIR="$datadir"
+eval BDIR="$bindir"
 
 dnl userpath/sharepath config
-AC_ARG_WITH(share-path,
+AC_ARG_WITH(sharepath,
 	[  --with-share-path       set default shared data path [DATADIR/games/twilight]],,
-	with_share_path=\${datadir}/games/twilight)
-SHAREPATH="$with_share_path"
-AC_SUBST(SHAREPATH)
+	with_sharepath="$DDIR/games/twilight")
+AC_DEFINE_UNQUOTED(SHAREPATH, "$with_sharepath")
 
 dnl XXX FIXME: make this a little more sane..
-AC_ARG_WITH(user-path,
-	[  --with-user-path        set default user data path [\$HOME/.twilight]],,
-	with_user_path="$HOME/.twilight")
-USERPATH="$with_user_path"
-AC_SUBST(USERPATH)
+AC_ARG_WITH(userpath,
+	[  --with-userpath         set default user data path [\$HOME/.twilight]],,
+	with_userpath="~/.twilight")
+AC_DEFINE_UNQUOTED(USERPATH, "$with_userpath")
 
 CFLAGS="-Wall -Werror $CFLAGS"
 
@@ -61,10 +70,17 @@ AC_OUTPUT(
 	qw-server/Makefile
 )
 
-echo "*** Configuration details follow"
-echo "    VERSION   = $VERSION"
-echo "    CFLAGS    = $CFLAGS"
-echo "    SHAREPATH = $SHAREPATH"
-echo "    USERPATH  = $USERPATH"
-echo "*** You're ready to run make"
+AC_MSG_RESULT([
+  Project Twilight v$VERSION configuration:
+    Compiler flags              : $CFLAGS
+    SDL version                 : $SDLVER
+
+  Path information
+    Installation prefix         : $PDIR
+    Binaries install to         : $BDIR
+    Shared (read-only) data in  : $with_sharepath
+    User (writable) data in     : $with_userpath
+
+You are now ready to run make.
+])
 

@@ -1,5 +1,5 @@
 /*
-	$Id$
+	$RCSfile$
 
 	Copyright (C) 2001  Joseph Carter
 
@@ -20,10 +20,17 @@
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
-*/
 
-#if HAVE_CONFIG_H
+*/
+static const char rcsid[] =
+    "$Id$";
+
+#ifdef HAVE_CONFIG_H
 # include <config.h>
+#else
+# ifdef _WIN32
+#  include <win32conf.h>
+# endif
 #endif
 
 #include "quakedef.h"

@@ -26,5 +26,6 @@ twilight_qw_SOURCES= \
 	quakedef.h bothdefs.h bspfile.h draw.h input.h keys.h protocol.h \
 	render.h
 
-LDFLAGS=@SDL_LIBS@ -lm
-CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DSHAREPATH=\"$(SHAREPATH)\" -DUSERPATH=\"$(USERPATH)\"
+LDFLAGS=@SDL_LIBS@ @LIBS@ -lm
+CFLAGS=@CFLAGS@ @SDL_CFLAGS@
+

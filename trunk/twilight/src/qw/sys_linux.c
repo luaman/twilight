@@ -1,22 +1,34 @@
 /*
-Copyright (C) 1996-1997 Id Software, Inc.
+	$RCSfile$
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+	Copyright (C) 1996-1997  Id Software, Inc.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
 
-See the GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+	See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to:
+	
+		Free Software Foundation, Inc.
+		59 Temple Place - Suite 330
+		Boston, MA  02111-1307, USA
 
 */
+static const char rcsid[] =
+    "$Id$";
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -41,10 +53,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 int         noconinput = 0;
 int         nostdout = 0;
 
-cvar_t      sys_linerefresh = { "sys_linerefresh", "0" };	// set for entity
-
-															// display
-
 // =======================================================================
 // General routines
 // =======================================================================
@@ -54,52 +62,6 @@ Sys_DebugNumber (int y, int val)
 {
 }
 
-/*
-void Sys_Printf (char *fmt, ...)
-{
-	va_list		argptr;
-	char		text[1024];
-	
-	va_start (argptr, fmt);
-	vsnprintf (text, sizeof(text), fmt, argptr);
-	va_end (argptr);
-	fprintf(stderr, "%s", text);
-	
-	Con_Print (text);
-}
-
-void Sys_Printf (char *fmt, ...)
-{
-
-    va_list     argptr;
-    char        text[1024], *t_p;
-    int         l, r;
-
-    if (nostdout)
-        return;
-
-    va_start (argptr,fmt);
-    vsnprintf (text, sizeof(text), fmt, argptr);
-    va_end (argptr);
-
-    l = Q_strlen(text);
-    t_p = text;
-
-// make sure everything goes through, even though we are non-blocking
-    while (l)
-    {
-        r = write (1, text, l);
-        if (r != l)
-            sleep (0);
-        if (r > 0)
-        {
-            t_p += r;
-            l -= r;
-        }
-    }
-
-}
-*/
 
 void
 Sys_Printf (char *fmt, ...)

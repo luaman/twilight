@@ -1,27 +1,42 @@
 /*
-Copyright (C) 1996-1997 Id Software, Inc.
+	$RCSfile$
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+	Copyright (C) 1996-1997  Id Software, Inc.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
 
-See the GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+	See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to:
+	
+		Free Software Foundation, Inc.
+		59 Temple Place - Suite 330
+		Boston, MA  02111-1307, USA
 
 */
+static const char rcsid[] =
+    "$Id$";
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#else
+# ifdef _WIN32
+#  include <win32conf.h>
+# endif
+#endif
 
 #include "quakedef.h"
 
-cvar_t      baseskin = { "baseskin", "base" };
-cvar_t      noskins = { "noskins", "0" };
+cvar_t     *baseskin;
+cvar_t     *noskins;
 
 char        allskins[128];
 
@@ -52,7 +67,7 @@ Skin_Find (player_info_t *sc)
 		if (s && s[0])
 			Q_strcpy (name, s);
 		else
-			Q_strcpy (name, baseskin.string);
+			Q_strcpy (name, baseskin->string);
 	}
 
 	if (Q_strstr (name, "..") || *name == '.')
@@ -104,7 +119,7 @@ Skin_Cache (skin_t *skin)
 	if (cls.downloadtype == dl_skin)
 		return NULL;					// use base until downloaded
 
-	if (noskins.value == 1)				// JACK: So NOSKINS > 1 will show
+	if (noskins->value == 1)				// JACK: So NOSKINS > 1 will show
 		// skins, but
 		return NULL;					// not download new ones.
 
@@ -122,7 +137,7 @@ Skin_Cache (skin_t *skin)
 	raw = COM_LoadTempFile (name);
 	if (!raw) {
 		Con_Printf ("Couldn't load skin %s\n", name);
-		snprintf (name, sizeof (name), "skins/%s.pcx", baseskin.string);
+		snprintf (name, sizeof (name), "skins/%s.pcx", baseskin->string);
 		raw = COM_LoadTempFile (name);
 		if (!raw) {
 			skin->failedload = true;
@@ -223,7 +238,7 @@ Skin_NextDownload (void)
 		if (!sc->name[0])
 			continue;
 		Skin_Find (sc);
-		if (noskins.value)
+		if (noskins->value)
 			continue;
 		if (!CL_CheckOrDownloadFile (va ("skins/%s.pcx", sc->skin->name)))
 			return;						// started a download
