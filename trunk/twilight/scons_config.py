@@ -267,7 +267,7 @@ def do_configure (env):
     SDL version                 : """ + repr(sdl_ver) + """
     Compiler                    : """ + env['CC'] + """
     Compiler flags              : """ + string.join(env['CCFLAGS'], " ") + """
-	Link flags                  : """ + string.join(env['LINKFLAGS'], " ") + """
+    Link flags                  : """ + string.join(env['LINKFLAGS'], " ") + """
     Libraries                   : """ + string.join(env['LIBS'], " ") + """
     Default OpenGL library      : """ + opts['libgl'] + """
 
