@@ -163,7 +163,7 @@ SV_RunThink (edict_t *ent)
 	pr_global_struct->time = thinktime;
 	pr_global_struct->self = EDICT_TO_PROG (ent);
 	pr_global_struct->other = EDICT_TO_PROG (sv.edicts);
-	PR_ExecuteProgram (ent->v.think);
+	PR_ExecuteProgram (ent->v.think, "NULL think function.");
 	return !ent->free;
 }
 
@@ -186,13 +186,13 @@ SV_Impact (edict_t *e1, edict_t *e2)
 	if (e1->v.touch && e1->v.solid != SOLID_NOT) {
 		pr_global_struct->self = EDICT_TO_PROG (e1);
 		pr_global_struct->other = EDICT_TO_PROG (e2);
-		PR_ExecuteProgram (e1->v.touch);
+		PR_ExecuteProgram (e1->v.touch, "");
 	}
 
 	if (e2->v.touch && e2->v.solid != SOLID_NOT) {
 		pr_global_struct->self = EDICT_TO_PROG (e2);
 		pr_global_struct->other = EDICT_TO_PROG (e1);
-		PR_ExecuteProgram (e2->v.touch);
+		PR_ExecuteProgram (e2->v.touch, "");
 	}
 
 	pr_global_struct->self = old_self;
@@ -384,7 +384,7 @@ SV_AddGravity (edict_t *ent)
 	float       ent_gravity;
 	eval_t     *val;
 
-	val = GetEdictFieldValue (ent, "gravity");
+	val = GETEDICTFIELDVALUE (ent, eval_gravity);
 	if (val && val->_float)
 		ent_gravity = val->_float;
 	else
@@ -720,7 +720,7 @@ retrymove:;
 			{
 				pr_global_struct->self = EDICT_TO_PROG(pusher);
 				pr_global_struct->other = EDICT_TO_PROG(check);
-				PR_ExecuteProgram (pusher->v.blocked);
+				PR_ExecuteProgram (pusher->v.blocked, "");
 			}
 
 			return;
@@ -768,7 +768,7 @@ void SV_Physics_Pusher (edict_t *ent)
 		pr_global_struct->time = sv.time;
 		pr_global_struct->self = EDICT_TO_PROG(ent);
 		pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
-		PR_ExecuteProgram (ent->v.think);
+		PR_ExecuteProgram (ent->v.think, "NULL think function.");
 		if (ent->free)
 			return;
 	}
@@ -1091,7 +1091,7 @@ SV_Physics_Client (edict_t *ent, int num)
 //  
 	pr_global_struct->time = sv.time;
 	pr_global_struct->self = EDICT_TO_PROG (ent);
-	PR_ExecuteProgram (pr_global_struct->PlayerPreThink);
+	PR_ExecuteProgram (pr_global_struct->PlayerPreThink, "QC function PlayerPreThink is missing.");
 
 //
 // do a move
@@ -1146,7 +1146,7 @@ SV_Physics_Client (edict_t *ent, int num)
 
 	pr_global_struct->time = sv.time;
 	pr_global_struct->self = EDICT_TO_PROG (ent);
-	PR_ExecuteProgram (pr_global_struct->PlayerPostThink);
+	PR_ExecuteProgram (pr_global_struct->PlayerPostThink, "QC function PlayerPostThink is missing.");
 }
 
 //============================================================================
@@ -1354,7 +1354,7 @@ SV_Physics (void)
 	pr_global_struct->self = EDICT_TO_PROG (sv.edicts);
 	pr_global_struct->other = EDICT_TO_PROG (sv.edicts);
 	pr_global_struct->time = sv.time;
-	PR_ExecuteProgram (pr_global_struct->StartFrame);
+	PR_ExecuteProgram (pr_global_struct->StartFrame, "QC function StartFrame is missing.");
 
 	//SV_CheckAllEnts ();
 

@@ -444,10 +444,9 @@ Host_Savegame_f
 void
 Host_Savegame_f (void)
 {
-	char	name[256];
 	FILE	*f;
 	Uint32	i;
-	char	comment[SAVEGAME_COMMENT_LENGTH + 1];
+	char	name[256], comment[SAVEGAME_COMMENT_LENGTH + 1];
 
 	if (cmd_source != src_command)
 		return;
@@ -513,7 +512,7 @@ Host_Savegame_f (void)
 
 	ED_WriteGlobals (f);
 	for (i = 0; i < sv.num_edicts; i++) {
-		ED_Write (f, EDICT_NUM (i));
+		ED_Write (f, EDICT_NUM ((Sint32) i));
 		fflush (f);
 	}
 	fclose (f);
@@ -895,7 +894,7 @@ Host_Kill_f (void)
 
 	pr_global_struct->time = sv.time;
 	pr_global_struct->self = EDICT_TO_PROG (sv_player);
-	PR_ExecuteProgram (pr_global_struct->ClientKill);
+	PR_ExecuteProgram (pr_global_struct->ClientKill, "QC function ClientKill is missing.");
 }
 
 void Host_WriteConfig_f (void)
@@ -988,8 +987,13 @@ Host_Spawn_f (void)
 		Com_Printf ("Spawn not valid -- already spawned\n");
 		return;
 	}
-// run the entrance script
-	if (sv.loadgame) {					// loaded games are fully inited
+
+	// LordHavoc: moved this above the QC calls at FrikaC's request
+	// send all current names, colors, and frag counts
+	SZ_Clear (&host_client->message);
+
+	// run the entrance script
+	if (sv.loadgame) {	// loaded games are fully inited
 		// already
 		// if this is the last client to be connected, unpause
 		sv.paused = false;
@@ -998,7 +1002,7 @@ Host_Spawn_f (void)
 		ent = host_client->edict;
 
 		memset (&ent->v, 0, progs->entityfields * 4);
-		ent->v.colormap = NUM_FOR_EDICT (ent);
+		ent->v.colormap = NUM_FOR_EDICT (ent, __FILE__, __LINE__);
 		ent->v.team = (host_client->colors & 15) + 1;
 		ent->v.netname = host_client->name - pr_strings;
 
@@ -1011,20 +1015,16 @@ Host_Spawn_f (void)
 
 		pr_global_struct->time = sv.time;
 		pr_global_struct->self = EDICT_TO_PROG (sv_player);
-		PR_ExecuteProgram (pr_global_struct->ClientConnect);
+		PR_ExecuteProgram (pr_global_struct->ClientConnect, "QC function ClientConnect is missing.");
 
 		if ((Sys_DoubleTime () - host_client->netconnection->connecttime) <=
 			sv.time)
 			Sys_Printf ("%s entered the game\n", host_client->name);
 
-		PR_ExecuteProgram (pr_global_struct->PutClientInServer);
+		PR_ExecuteProgram (pr_global_struct->PutClientInServer, "QC function PutClientInServer is missing.");
 	}
 
-
-// send all current names, colors, and frag counts
-	SZ_Clear (&host_client->message);
-
-// send time of update
+	// send time of update
 	MSG_WriteByte (&host_client->message, svc_time);
 	MSG_WriteFloat (&host_client->message, sv.time);
 
@@ -1040,16 +1040,14 @@ Host_Spawn_f (void)
 		MSG_WriteByte (&host_client->message, client->colors);
 	}
 
-// send all current light styles
+	// send all current light styles
 	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
 		MSG_WriteByte (&host_client->message, svc_lightstyle);
 		MSG_WriteByte (&host_client->message, (char) i);
 		MSG_WriteString (&host_client->message, sv.lightstyles[i]);
 	}
 
-//
-// send some stats
-//
+	// send some stats
 	MSG_WriteByte (&host_client->message, svc_updatestat);
 	MSG_WriteByte (&host_client->message, STAT_TOTALSECRETS);
 	MSG_WriteLong (&host_client->message, pr_global_struct->total_secrets);
@@ -1067,16 +1065,16 @@ Host_Spawn_f (void)
 	MSG_WriteLong (&host_client->message, pr_global_struct->killed_monsters);
 
 
-//
-// send a fixangle
-// Never send a roll angle, because savegames can catch the server
-// in a state where it is expecting the client to correct the angle
-// and it won't happen if the game was just loaded, so you wind up
-// with a permanent head tilt
+	// send a fixangle
+	// Never send a roll angle, because savegames can catch the server
+	// in a state where it is expecting the client to correct the angle
+	// and it won't happen if the game was just loaded, so you wind up
+	// with a permanent head tilt
 	ent = EDICT_NUM (1 + (host_client - svs.clients));
 	MSG_WriteByte (&host_client->message, svc_setangle);
 	for (i = 0; i < 2; i++)
 		MSG_WriteAngle (&host_client->message, ent->v.angles[i]);
+
 	MSG_WriteAngle (&host_client->message, 0);
 
 	SV_WriteClientdataToMessage (sv_player, &host_client->message);
@@ -1251,7 +1249,7 @@ Host_Give_f (void)
 
 		case 's':
 			if (rogue) {
-				val = GetEdictFieldValue (sv_player, "ammo_shells1");
+				val = GETEDICTFIELDVALUE (sv_player, eval_ammo_shells1);
 				if (val)
 					val->_float = v;
 			}
@@ -1260,7 +1258,7 @@ Host_Give_f (void)
 			break;
 		case 'n':
 			if (rogue) {
-				val = GetEdictFieldValue (sv_player, "ammo_nails1");
+				val = GETEDICTFIELDVALUE (sv_player, eval_ammo_nails1);
 				if (val) {
 					val->_float = v;
 					if (sv_player->v.weapon <= IT_LIGHTNING)
@@ -1272,7 +1270,7 @@ Host_Give_f (void)
 			break;
 		case 'l':
 			if (rogue) {
-				val = GetEdictFieldValue (sv_player, "ammo_lava_nails");
+				val = GETEDICTFIELDVALUE (sv_player, eval_ammo_lava_nails);
 				if (val) {
 					val->_float = v;
 					if (sv_player->v.weapon > IT_LIGHTNING)
@@ -1282,7 +1280,7 @@ Host_Give_f (void)
 			break;
 		case 'r':
 			if (rogue) {
-				val = GetEdictFieldValue (sv_player, "ammo_rockets1");
+				val = GETEDICTFIELDVALUE (sv_player, eval_ammo_rockets1);
 				if (val) {
 					val->_float = v;
 					if (sv_player->v.weapon <= IT_LIGHTNING)
@@ -1294,7 +1292,7 @@ Host_Give_f (void)
 			break;
 		case 'm':
 			if (rogue) {
-				val = GetEdictFieldValue (sv_player, "ammo_multi_rockets");
+				val = GETEDICTFIELDVALUE (sv_player, eval_ammo_multi_rockets);
 				if (val) {
 					val->_float = v;
 					if (sv_player->v.weapon > IT_LIGHTNING)
@@ -1307,7 +1305,7 @@ Host_Give_f (void)
 			break;
 		case 'c':
 			if (rogue) {
-				val = GetEdictFieldValue (sv_player, "ammo_cells1");
+				val = GETEDICTFIELDVALUE (sv_player, eval_ammo_cells1);
 				if (val) {
 					val->_float = v;
 					if (sv_player->v.weapon <= IT_LIGHTNING)
@@ -1319,7 +1317,7 @@ Host_Give_f (void)
 			break;
 		case 'p':
 			if (rogue) {
-				val = GetEdictFieldValue (sv_player, "ammo_plasma");
+				val = GETEDICTFIELDVALUE (sv_player, eval_ammo_plasma);
 				if (val) {
 					val->_float = v;
 					if (sv_player->v.weapon > IT_LIGHTNING)

@@ -227,7 +227,7 @@ SetMinMaxSize (edict_t *e, float *min, float *max, qboolean rotate)
 		}
 	}
 
-// set derived values
+	// set derived values
 	VectorCopy (rmin, e->v.mins);
 	VectorCopy (rmax, e->v.maxs);
 	VectorSubtract (max, min, e->v.size);
@@ -534,7 +534,7 @@ PF_ambientsound (void)
 	vol = G_FLOAT (OFS_PARM2);
 	attenuation = G_FLOAT (OFS_PARM3);
 
-// check to see if samp was properly precached
+	// check to see if samp was properly precached
 	for (soundnum = 0, check = sv.sound_precache; *check; check++, soundnum++)
 		if (!strcmp (*check, samp))
 			break;
@@ -543,8 +543,8 @@ PF_ambientsound (void)
 		Com_Printf ("no precache: %s\n", samp);
 		return;
 	}
-// add an svc_spawnambient command to the level signon packet
 
+	// add an svc_spawnambient command to the level signon packet
 	MSG_WriteByte (&sv.signon, svc_spawnstaticsound);
 	for (i = 0; i < 3; i++)
 		MSG_WriteCoord (&sv.signon, pos[i]);
@@ -671,7 +671,7 @@ PF_checkpos (void)
 
 //============================================================================
 
-Uint8       checkpvs[MAX_MAP_LEAFS / 8];
+Uint8 checkpvs[MAX_MAP_LEAFS / 8];
 
 int
 PF_newcheckclient (Uint32 check)
@@ -697,7 +697,7 @@ PF_newcheckclient (Uint32 check)
 		if (i == svs.maxclients + 1)
 			i = 1;
 
-		ent = EDICT_NUM (i);
+		ent = EDICT_NUM ((Sint32) i);
 
 		if (i == check)
 			break;		// didn't find anything else
@@ -747,18 +747,20 @@ PF_checkclient (void)
 	int         l;
 	vec3_t      view;
 
-// find a new check if on a new frame
+	// find a new check if on a new frame
 	if (sv.time - sv.lastchecktime >= 0.1) {
 		sv.lastcheck = PF_newcheckclient (sv.lastcheck);
 		sv.lastchecktime = sv.time;
 	}
-// return check if it might be visible  
+
+	// return check if it might be visible  
 	ent = EDICT_NUM (sv.lastcheck);
 	if (ent->free || ent->v.health <= 0) {
 		RETURN_EDICT (sv.edicts);
 		return;
 	}
-// if current entity can't possibly see the check entity, return 0
+
+	// if current entity can't possibly see the check entity, return 0
 	self = PROG_TO_EDICT (pr_global_struct->self);
 	VectorAdd (self->v.origin, self->v.view_ofs, view);
 	leaf = Mod_PointInLeaf (view, sv.worldmodel);
@@ -768,7 +770,8 @@ PF_checkclient (void)
 		RETURN_EDICT (sv.edicts);
 		return;
 	}
-// might be able to see it
+
+	// might be able to see it
 	c_invis++;
 	RETURN_EDICT (ent);
 }
@@ -988,7 +991,7 @@ PF_Find (void)
 		PR_RunError ("PF_Find: bad search string");
 
 	for (e++; e < sv.num_edicts; e++) {
-		ed = EDICT_NUM (e);
+		ed = EDICT_NUM ((Sint32) e);
 		if (ed->free)
 			continue;
 		t = E_STRING (ed, f);
@@ -1124,14 +1127,14 @@ PF_walkmove (void)
 	move[1] = Q_sin (yaw) * dist;
 	move[2] = 0;
 
-// save program state, because SV_movestep may call other progs
+	// save program state, because SV_movestep may call other progs
 	oldf = pr_xfunction;
 	oldself = pr_global_struct->self;
 
 	G_FLOAT (OFS_RETURN) = SV_movestep (ent, move, true);
 
 
-// restore program state
+	// restore program state
 	pr_xfunction = oldf;
 	pr_global_struct->self = oldself;
 }
@@ -1276,7 +1279,7 @@ PF_nextent (void)
 			RETURN_EDICT (sv.edicts);
 			return;
 		}
-		ent = EDICT_NUM (i);
+		ent = EDICT_NUM ((Sint32) i);
 		if (!ent->free) {
 			RETURN_EDICT (ent);
 			return;
@@ -1373,7 +1376,7 @@ PF_changeyaw (void)
 	float       ideal, current, move, speed;
 
 	ent = PROG_TO_EDICT (pr_global_struct->self);
-	current = anglemod (ent->v.angles[1]);
+	current = ANGLEMOD (ent->v.angles[1]);
 	ideal = ent->v.ideal_yaw;
 	speed = ent->v.yaw_speed;
 
@@ -1395,7 +1398,63 @@ PF_changeyaw (void)
 			move = -speed;
 	}
 
-	ent->v.angles[1] = anglemod (current + move);
+	ent->v.angles[1] = ANGLEMOD (current + move);
+}
+
+/*
+==============
+LordHavoc
+PF_changepitch
+==============
+*/
+void PF_changepitch (void)
+{
+	edict_t	*ent;
+	eval_t	*val;
+	float	ideal, current, move, speed;
+	
+	ent = G_EDICT(OFS_PARM0);
+	current = ANGLEMOD ( ent->v.angles[0] );
+	if ((val = GETEDICTFIELDVALUE (ent, eval_idealpitch)))
+		ideal = val->_float;
+	else
+	{
+		PR_RunError ("PF_changepitch: .float idealpitch and .float pitch_speed must be defined to use changepitch");
+		return;
+	}
+	if ((val = GETEDICTFIELDVALUE (ent, eval_pitch_speed)))
+		speed = val->_float;
+	else
+	{
+		PR_RunError ("PF_changepitch: .float idealpitch and .float pitch_speed must be defined to use changepitch");
+		return;
+	}
+	
+	if (current == ideal)
+		return;
+	move = ideal - current;
+	if (ideal > current)
+	{
+		if (move >= 180)
+			move = move - 360;
+	}
+	else
+	{
+		if (move <= -180)
+			move = move + 360;
+	}
+	if (move > 0)
+	{
+		if (move > speed)
+			move = speed;
+	}
+	else
+	{
+		if (move < -speed)
+			move = -speed;
+	}
+	
+	ent->v.angles[0] = ANGLEMOD (current + move);
 }
 
 
@@ -1426,7 +1485,7 @@ WriteDest (void)
 
 		case MSG_ONE:
 			ent = PROG_TO_EDICT (pr_global_struct->msg_entity);
-			entnum = NUM_FOR_EDICT (ent);
+			entnum = NUM_FOR_EDICT (ent, __FILE__, __LINE__);
 			if (entnum < 1 || entnum > svs.maxclients)
 				PR_RunError ("WriteDest: not a client");
 			return &svs.clients[entnum - 1].message;
@@ -1537,7 +1596,7 @@ PF_setspawnparms (void)
 	client_t	*client;
 
 	ent = G_EDICT (OFS_PARM0);
-	i = NUM_FOR_EDICT (ent);
+	i = NUM_FOR_EDICT (ent, __FILE__, __LINE__);
 	if (i < 1 || i > svs.maxclients)
 		PR_RunError ("Entity is not a client");
 
@@ -1556,9 +1615,9 @@ PF_changelevel
 void
 PF_changelevel (void)
 {
-	char       *s;
+	char	*s;
 
-// make sure we don't issue two changelevels
+	// make sure we don't issue two changelevels
 	if (svs.changelevel_issued)
 		return;
 	svs.changelevel_issued = true;
@@ -1680,6 +1739,6 @@ builtin_t   pr_builtin[] = {
 	PF_setspawnparms
 };
 
-builtin_t  *pr_builtins = pr_builtin;
-int         pr_numbuiltins = sizeof (pr_builtin) / sizeof (pr_builtin[0]);
+builtin_t *pr_builtins = pr_builtin;
+int pr_numbuiltins = sizeof (pr_builtin) / sizeof (pr_builtin[0]);
 
