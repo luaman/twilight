@@ -42,7 +42,8 @@ static const char rcsid[] =
 #include "sys.h"
 
 
-extern void R_InitBubble ();
+extern void R_InitBubble (void);
+void R_SkyBoxChanged (cvar_t *cvar);
 
 /*
 ==================
@@ -143,6 +144,8 @@ R_Init_Cvars (void)
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
 	r_novis = Cvar_Get ("r_novis", "0", CVAR_NONE, NULL);
 	r_netgraph = Cvar_Get ("r_netgraph", "0", CVAR_NONE, NULL);
+
+	r_skybox = Cvar_Get ("skybox", "", CVAR_NONE, &R_SkyBoxChanged);
 
 	gl_clear = Cvar_Get ("gl_clear", "0", CVAR_NONE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);

@@ -1356,7 +1356,7 @@ R_SetupGL (void)
 	qglViewport (glx + x, gly + y2, w, h);
 	screenaspect = (float) r_refdef.vrect.width / r_refdef.vrect.height;
 //  yfov = 2*atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*180/M_PI;
-	MYgluPerspective (r_refdef.fov_y, screenaspect, 4, 4096);
+	MYgluPerspective (r_refdef.fov_y, screenaspect, 4, 8193);
 
 	if (mirror) {
 		if (mirror_plane->normal[2])
@@ -1393,6 +1393,8 @@ R_SetupGL (void)
 	qglEnable (GL_DEPTH_TEST);
 }
 
+void R_DrawSkyBox (void);
+
 /*
 ================
 R_RenderScene
@@ -1408,6 +1410,8 @@ R_RenderScene (void)
 	R_SetFrustum ();
 
 	R_SetupGL ();
+
+	R_DrawSkyBox ();
 
 	R_MarkLeaves ();					// done here so we know if we're in
 	// water

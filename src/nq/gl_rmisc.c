@@ -38,7 +38,7 @@ static const char rcsid[] =
 #include "glquake.h"
 
 void R_InitBubble (void);
-
+void R_SkyBoxChanged (cvar_t *cvar);
 
 /*
 ==================
@@ -141,6 +141,8 @@ R_Init_Cvars (void)
 	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
 	r_novis = Cvar_Get ("r_novis", "0", CVAR_NONE, NULL);
+
+	r_skybox = Cvar_Get ("skybox", "", CVAR_NONE, &R_SkyBoxChanged);
 
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
 	gl_clear = Cvar_Get ("gl_clear", "0", CVAR_NONE, NULL);
@@ -344,9 +346,6 @@ R_NewMap (void)
 			mirrortexturenum = i;
 		cl.worldmodel->textures[i]->texturechain = NULL;
 	}
-#ifdef QUAKE2
-	R_LoadSkys ();
-#endif
 }
 
 
