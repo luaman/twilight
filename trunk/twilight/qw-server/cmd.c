@@ -162,7 +162,7 @@ Cbuf_Execute (void)
 	int         quotes;
 
 	while (cmd_text.cursize) {
-// find a \n or ; line break
+		// find a \n or ; line break
 		text = (char *) cmd_text.data;
 
 		quotes = 0;
@@ -180,9 +180,9 @@ Cbuf_Execute (void)
 		memcpy (line, text, i);
 		line[i] = 0;
 
-// delete the text from the command buffer and move remaining commands down
-// this is necessary because commands (exec, alias) can insert data at the
-// beginning of the text buffer
+		// delete the text from the command buffer and move remaining commands down
+		// this is necessary because commands (exec, alias) can insert data at the
+		// beginning of the text buffer
 
 		if (i == cmd_text.cursize)
 			cmd_text.cursize = 0;
@@ -192,7 +192,7 @@ Cbuf_Execute (void)
 			Q_memcpy (text, text + i, cmd_text.cursize);
 		}
 
-// execute the command line
+		// execute the command line
 		Cmd_ExecuteString (line);
 
 		if (cmd_wait) {					// skip out while text still remains in 
@@ -201,6 +201,60 @@ Cbuf_Execute (void)
 			// for next frame
 			cmd_wait = false;
 			break;
+		}
+	}
+}
+
+static void
+extract_line (char *line)
+{
+	int         i;
+	char       *text;
+	int         quotes;
+
+	// find a \n or ; line break
+	text = (char *) cmd_text.data;
+	quotes = 0;
+	for (i = 0; i < cmd_text.cursize; i++) {
+		if (text[i] == '"')
+			quotes++;
+		if (!(quotes & 1) && text[i] == ';')
+			break;						// don't break if inside a quoted
+										// string
+		if (text[i] == '\n' || text[i] == '\r')
+			break;
+	}
+
+	memcpy (line, text, i);
+	line[i] = '\0';
+	// delete the text from the command buffer and move remaining commands
+	// down this is necessary because commands (exec, alias) can insert
+	// data at the beginning of the text buffer
+
+	if (i == cmd_text.cursize)
+		cmd_text.cursize = 0;
+	else {
+		i += 2;
+		cmd_text.cursize -= i;
+		memcpy (text, text + i, cmd_text.cursize);
+	}
+}
+
+/*
+
+	Cbuf_Execute_Sets
+
+*/
+void
+Cbuf_Execute_Sets (void)
+{
+	char	line[1024] = { 0 };
+
+	while (cmd_text.cursize) {
+		extract_line (line);
+		// execute the command line
+		if (Q_strncmp (line, "set", 3) == 0 && isspace ((int) line[3])) {
+			Cmd_ExecuteString (line);
 		}
 	}
 }
@@ -230,7 +284,7 @@ Cmd_StuffCmds_f (void)
 	int         s;
 	char       *text, *build, c;
 
-// build the combined string to parse from
+	// build the combined string to parse from
 	s = 0;
 	for (i = 1; i < com_argc; i++) {
 		if (!com_argv[i])
@@ -250,7 +304,7 @@ Cmd_StuffCmds_f (void)
 			Q_strcat (text, " ");
 	}
 
-// pull out the commands
+	// pull out the commands
 	build = Z_Malloc (s + 1);
 	build[0] = 0;
 
