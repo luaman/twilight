@@ -1497,19 +1497,19 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 	if (!Q_strncmp(mod->name, "progs/flame.mdl", 11) ||
 		!Q_strncmp(mod->name, "progs/bolt.mdl", 10) ||
+		!Q_strcmp(mod->name, "progs/laser.mdl") ||
 		!Q_strcmp (mod->name, "progs/lavaball.mdl")) {
 		mod->modflags |= FLAG_FULLBRIGHT;
 		mod->modflags |= FLAG_NOSHADOW;
 	}
-	else if ((!Q_strcmp(mod->name, "progs/missile.mdl")) ||
-		(!Q_strcmp(mod->name, "progs/grenade.mdl")) ||
-		(!Q_strcmp(mod->name, "progs/laser.mdl")) ||
-		(!Q_strcmp(mod->name, "progs/spike.mdl")) ||
-		(!Q_strcmp(mod->name, "progs/s_spike.mdl")) ||
-		(!Q_strcmp(mod->name, "progs/zom_gib")) ||
-		(!Q_strncmp(mod->name, "progs/gib", 9)) ||
-		(!Q_strncmp(mod->name, "progs/h_", 8)) ||
-		(!Q_strncmp(mod->name, "progs/v_", 8))
+	else if (!Q_strcmp(mod->name, "progs/missile.mdl") ||
+		!Q_strcmp(mod->name, "progs/grenade.mdl") ||
+		!Q_strcmp(mod->name, "progs/spike.mdl") ||
+		!Q_strcmp(mod->name, "progs/s_spike.mdl") ||
+		!Q_strcmp(mod->name, "progs/zom_gib") ||
+		!Q_strncmp(mod->name, "progs/gib", 9) ||
+		!Q_strncmp(mod->name, "progs/h_", 8) ||
+		!Q_strncmp(mod->name, "progs/v_", 8)
 		) {
 		mod->modflags |= FLAG_NOSHADOW;
 	}
