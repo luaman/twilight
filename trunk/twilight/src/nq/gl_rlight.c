@@ -63,7 +63,7 @@ R_AnimateLight (void)
 		k = i % cl_lightstyle[j].length;
 		k = cl_lightstyle[j].map[k] - 'a';
 		k = k * 22;
-		d_lightstylevalue[j] = k * 22;
+		d_lightstylevalue[j] = k;
 	}
 }
 
