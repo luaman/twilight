@@ -1,6 +1,5 @@
 /*
-	noise_textures.c
-
+	$RCSFile$
 	Dynamic texture generation.
 
 	Copyright (C) 2000-2001   Zephaniah E. Hull.
@@ -25,9 +24,15 @@
 
 	$Id$
 */
+static const char rcsid[] =
+    "$Id$";
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+# include <config.h>
+#else
+# ifdef _WIN32
+#  include <win32conf.h>
+# endif
 #endif
 
 #include <stdlib.h>
