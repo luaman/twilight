@@ -52,6 +52,3 @@
 #define DYNGLENTRY APIENTRY
 
 #define inline __inline
-
-/* foo */
-
