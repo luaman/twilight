@@ -248,7 +248,7 @@ Q_abs(int x)
 	return (tmp < 0) ? -tmp : tmp;
 }
 
-static int q_randSeed = 0;
+//static int q_randSeed = 0;
 
 void 
 Q_srand(unsigned seed)

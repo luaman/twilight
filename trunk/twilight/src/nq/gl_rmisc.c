@@ -35,6 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "client.h"
 #include "cmd.h"
 #include "console.h"
 #include "cvar.h"
@@ -51,6 +52,9 @@ void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
 void R_TimeRefresh_f (void);
 extern void TNT_Init (void);
+
+// FIXME
+extern cvar_t *gl_im_transform;
 
 /*
 ==================
@@ -129,8 +133,6 @@ R_Init_Cvars (void)
 	r_drawentities = Cvar_Get ("r_drawentities", "1", CVAR_NONE, NULL);
 	r_drawviewmodel = Cvar_Get ("r_drawviewmodel", "1", CVAR_NONE, NULL);
 	r_speeds = Cvar_Get ("r_speeds", "0", CVAR_NONE, NULL);
-	r_fullbright = Cvar_Get ("r_fullbright", "0", CVAR_NONE, NULL);
-	r_lightmap = Cvar_Get ("r_lightmap", "0", CVAR_NONE, NULL);
 	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_NONE, NULL);
 	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
@@ -143,16 +145,11 @@ R_Init_Cvars (void)
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
 	gl_clear = Cvar_Get ("gl_clear", "1", CVAR_NONE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
-	gl_texsort = Cvar_Get ("gl_texsort", "1", CVAR_NONE, NULL);
 	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_NONE, NULL);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", CVAR_NONE, NULL);
 	gl_flashblend = Cvar_Get ("gl_flashblend", "1", CVAR_NONE, NULL);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", CVAR_NONE, NULL);
 	gl_nocolors = Cvar_Get ("gl_nocolors", "0", CVAR_NONE, NULL);
-
-	gl_reporttjunctions = Cvar_Get ("gl_reporttjunctions", "0", CVAR_NONE, NULL);
-
-	gl_doubleeyes = Cvar_Get ("gl_doubleeys", "1", CVAR_NONE, NULL);
 
 	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_NONE, NULL);
 	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_NONE, NULL);
@@ -170,9 +167,6 @@ R_Init_Cvars (void)
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 
 	r_particles = Cvar_Get ("r_particles", "1", CVAR_NONE, NULL);
-
-	if (gl_mtexable)
-		Cvar_Set (gl_texsort, "0");
 }
 
 /*
@@ -289,9 +283,6 @@ R_NewMap (void)
 
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
-
-	memset (&r_worldentity, 0, sizeof (r_worldentity));
-	r_worldentity.model = cl.worldmodel;
 
 // clear out efrags in case the level hasn't been reloaded
 // FIXME: is this one short?

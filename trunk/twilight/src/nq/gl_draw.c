@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include "draw.h"
 #include "glquake.h"
 #include "host.h"
+#include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
 #include "wad.h"
@@ -64,15 +65,23 @@ int         translate_texture;
 int         char_texture;
 int         cs_texture, cs_square;		/* crosshair texture */
 
-static Uint8 cs_data[64] = {
-	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
-	0xfe, 0xff, 0xfe, 0xff, 0xfe, 0xff, 0xfe, 0xff,
-	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+static Uint8 cs_data[256] = {
+255, 255, 255, 255, 255, 255, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255,
+254, 254, 255, 255, 254, 254, 255, 255, 254, 254, 255, 255, 254, 254, 255, 255,
+254, 254, 255, 255, 254, 254, 255, 255, 254, 254, 255, 255, 254, 254, 255, 255,
+255, 255, 255, 255, 255, 255, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
 };
 
 static Uint8 cs_squaredata[8][8] = {
@@ -306,7 +315,7 @@ Draw_Init (void)
 	char_texture = GL_LoadTexture ("charset", 128, 128, draw_chars, false,
 			true);
 
-	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
+	cs_texture = GL_LoadTexture ("crosshair", 16, 16, cs_data, false, true);
 	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata,
 			false, true);
 
@@ -838,8 +847,6 @@ GL_Set2D (void)
 
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
-
-	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
 /* ========================================================================= */

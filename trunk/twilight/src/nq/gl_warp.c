@@ -41,9 +41,13 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "strlib.h"
 #include "host.h"
+#include "mathlib.h"
 #include "pcx.h"
 #include "tga.h"
 #include "sys.h"
+
+// FIXME
+texture_t *R_TextureAnimation (texture_t *base);
 
 extern model_t *loadmodel;
 
@@ -308,7 +312,7 @@ EmitBothSkyLayers (msurface_t *fa)
 	if (draw_skybox)
 		return;
 
-	if (gl_mtexable)
+	if (gl_mtex)
 	{
 		qglActiveTextureARB (GL_TEXTURE1_ARB);
 		qglDisable (GL_TEXTURE_2D);
@@ -328,7 +332,7 @@ EmitBothSkyLayers (msurface_t *fa)
 
 	EmitSkyPolys (fa);
 
-	if (gl_mtexable)
+	if (gl_mtex)
 	{
 		qglActiveTextureARB (GL_TEXTURE1_ARB);
 		qglEnable (GL_TEXTURE_2D);

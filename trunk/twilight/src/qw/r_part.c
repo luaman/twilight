@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include "console.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "mathlib.h"
 
 #define MAX_PARTICLES			2048	// default max # of particles at one
 										// time

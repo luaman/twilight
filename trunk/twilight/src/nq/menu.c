@@ -41,6 +41,7 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "host.h"
 #include "keys.h"
+#include "mathlib.h"
 #include "menu.h"
 #include "net.h"
 #include "screen.h"
@@ -54,6 +55,7 @@ static const char rcsid[] =
 // FIXME: do this right
 extern cvar_t *_windowed_mouse;
 extern cvar_t *gl_texturemode;
+extern cvar_t *gl_im_transform;
 
 void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
