@@ -380,13 +380,13 @@ crosses a waterline.
 */
 
 int         fatbytes;
-byte        fatpvs[MAX_MAP_LEAFS / 8];
+Uint8       fatpvs[MAX_MAP_LEAFS / 8];
 
 void
 SV_AddToFatPVS (vec3_t org, mnode_t *node)
 {
 	int         i;
-	byte       *pvs;
+	Uint8      *pvs;
 	mplane_t   *plane;
 	float       d;
 
@@ -422,7 +422,7 @@ Calculates a PVS that is the inclusive or of all leafs within 8 pixels of the
 given point.
 =============
 */
-byte       *
+Uint8 *
 SV_FatPVS (vec3_t org)
 {
 	fatbytes = (sv.worldmodel->numleafs + 31) >> 3;
@@ -445,7 +445,7 @@ SV_WriteEntitiesToClient (edict_t *clent, sizebuf_t *msg)
 {
 	int         e, i;
 	int         bits;
-	byte       *pvs;
+	Uint8      *pvs;
 	vec3_t      org;
 	float       miss;
 	edict_t    *ent;
@@ -728,7 +728,7 @@ SV_SendClientDatagram
 qboolean
 SV_SendClientDatagram (client_t *client)
 {
-	byte        buf[MAX_DATAGRAM];
+	Uint8       buf[MAX_DATAGRAM];
 	sizebuf_t   msg;
 
 	msg.data = buf;
@@ -807,7 +807,7 @@ void
 SV_SendNop (client_t *client)
 {
 	sizebuf_t   msg;
-	byte        buf[4];
+	Uint8       buf[4];
 
 	msg.data = buf;
 	msg.maxsize = sizeof (buf);

@@ -68,7 +68,7 @@ int         allocated[MAX_LIGHTMAPS][BLOCK_WIDTH];
 
 // the lightmap texture data needs to be kept in
 // main memory so texsubimage can update properly
-byte        lightmaps[4 * MAX_LIGHTMAPS * BLOCK_WIDTH * BLOCK_HEIGHT];
+Uint8       lightmaps[4 * MAX_LIGHTMAPS * BLOCK_WIDTH * BLOCK_HEIGHT];
 
 // For gl_texsort 0
 msurface_t *skychain = NULL;
@@ -193,12 +193,12 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 ===============
 */
 void
-R_BuildLightMap (msurface_t *surf, byte * dest, int stride)
+R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 {
 	int         smax, tmax;
 	int         t;
 	int         i, j, size;
-	byte       *lightmap;
+	Uint8      *lightmap;
 	unsigned    scale;
 	int         maps;
 	unsigned   *bl;
@@ -675,12 +675,6 @@ R_BlendLightmaps (void)
 		if (lightmap_modified[i]) {
 			lightmap_modified[i] = false;
 			theRect = &lightmap_rectchange[i];
-//          qglTexImage2D (GL_TEXTURE_2D, 0, lightmap_bytes
-//          , BLOCK_WIDTH, BLOCK_HEIGHT, 0, 
-//          gl_lightmap_format, GL_UNSIGNED_BYTE, lightmaps+i*BLOCK_WIDTH*BLOCK_HEIGHT*lightmap_bytes);
-//          qglTexImage2D (GL_TEXTURE_2D, 0, lightmap_bytes
-//              , BLOCK_WIDTH, theRect->h, 0, 
-//              gl_lightmap_format, GL_UNSIGNED_BYTE, lightmaps+(i*BLOCK_HEIGHT+theRect->t)*BLOCK_WIDTH*lightmap_bytes);
 			qglTexSubImage2D (GL_TEXTURE_2D, 0, 0, theRect->t,
 							 BLOCK_WIDTH, theRect->h, gl_lightmap_format,
 							 GL_UNSIGNED_BYTE,
@@ -723,7 +717,7 @@ void
 R_RenderBrushPoly (msurface_t *fa)
 {
 	texture_t  *t;
-	byte       *base;
+	Uint8      *base;
 	int         maps;
 	glRect_t   *theRect;
 	int         smax, tmax;
@@ -808,7 +802,7 @@ Multitexture
 void
 R_RenderDynamicLightmaps (msurface_t *fa)
 {
-	byte       *base;
+	Uint8      *base;
 	int         maps;
 	glRect_t   *theRect;
 	int         smax, tmax;
@@ -1258,10 +1252,10 @@ R_MarkLeaves
 void
 R_MarkLeaves (void)
 {
-	byte       *vis;
+	Uint8      *vis;
 	mnode_t    *node;
 	int         i;
-	byte        solid[4096];
+	Uint8       solid[4096];
 
 	if (r_oldviewleaf == r_viewleaf && !r_novis->value)
 		return;
@@ -1467,7 +1461,7 @@ void
 GL_CreateSurfaceLightmap (msurface_t *surf)
 {
 	int         smax, tmax;
-	byte       *base;
+	Uint8      *base;
 
 	if (surf->flags & (SURF_DRAWSKY | SURF_DRAWTURB))
 		return;

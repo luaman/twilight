@@ -408,9 +408,9 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 
 	lastposenum = posenum;
 
-	verts = (trivertx_t *) ((byte *) paliashdr + paliashdr->posedata);
+	verts = (trivertx_t *) ((Uint8 *) paliashdr + paliashdr->posedata);
 	verts += posenum * paliashdr->poseverts;
-	order = (int *) ((byte *) paliashdr + paliashdr->commands);
+	order = (int *) ((Uint8 *) paliashdr + paliashdr->commands);
 
 	while ((count = *order++)) 
 	{
@@ -464,11 +464,11 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 	lastposenum0 = pose1;
 	lastposenum  = pose2;
 	
-	verts1 = (trivertx_t *)((byte *)paliashdr + paliashdr->posedata);
+	verts1 = (trivertx_t *)((Uint8 *)paliashdr + paliashdr->posedata);
 	verts2 = verts1;
 	verts1 += pose1 * paliashdr->poseverts;
 	verts2 += pose2 * paliashdr->poseverts;
-	order = (int *)((byte *)paliashdr + paliashdr->commands);
+	order = (int *)((Uint8 *)paliashdr + paliashdr->commands);
 	
 	while ((count = *order++))
 	{
@@ -539,9 +539,9 @@ GL_DrawAliasShadow (aliashdr_t *paliashdr, int posenum)
 	lheight = currententity->origin[2] - lightspot[2];
 
 	height = 0;
-	verts = (trivertx_t *) ((byte *) paliashdr + paliashdr->posedata);
+	verts = (trivertx_t *) ((Uint8 *) paliashdr + paliashdr->posedata);
 	verts += posenum * paliashdr->poseverts;
-	order = (int *) ((byte *) paliashdr + paliashdr->commands);
+	order = (int *) ((Uint8 *) paliashdr + paliashdr->commands);
 
 	height = -lheight + 1.0;
 
@@ -643,13 +643,13 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2, entity_t
 	lheight = e->origin[2] - lightspot[2];
 	height  = -lheight + 1.0;
 
-	verts1 = (trivertx_t *)((byte *)paliashdr + paliashdr->posedata);
+	verts1 = (trivertx_t *)((Uint8 *)paliashdr + paliashdr->posedata);
 	verts2 = verts1;
 
 	verts1 += pose1 * paliashdr->poseverts;
 	verts2 += pose2 * paliashdr->poseverts;
 
-	order = (int *)((byte *)paliashdr + paliashdr->commands);
+	order = (int *)((Uint8 *)paliashdr + paliashdr->commands);
 
 	if (r_shadows->value == 2)
 	{

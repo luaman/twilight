@@ -38,7 +38,7 @@ static const char rcsid[] =
 
 int         cache_full_cycle;
 
-byte       *S_Alloc (int size);
+Uint8      *S_Alloc (int size);
 
 /*
 ================
@@ -46,7 +46,7 @@ ResampleSfx
 ================
 */
 void
-ResampleSfx (sfx_t *sfx, int inrate, int inwidth, byte * data)
+ResampleSfx (sfx_t *sfx, int inrate, int inwidth, Uint8 *data)
 {
 	int         outcount;
 	int         srcsample;
@@ -110,12 +110,12 @@ sfxcache_t *
 S_LoadSound (sfx_t *s)
 {
 	char        namebuffer[256];
-	byte       *data;
+	Uint8      *data;
 	wavinfo_t   info;
 	int         len;
 	float       stepscale;
 	sfxcache_t *sc;
-	byte        stackbuf[1 * 1024];		// avoid dirtying the cache heap
+	Uint8       stackbuf[1 * 1024];		// avoid dirtying the cache heap
 
 // see if still in memory
 	sc = Cache_Check (&s->cache);
@@ -173,10 +173,10 @@ WAV loading
 */
 
 
-byte       *data_p;
-byte       *iff_end;
-byte       *last_chunk;
-byte       *iff_data;
+Uint8      *data_p;
+Uint8      *iff_end;
+Uint8      *last_chunk;
+Uint8      *iff_data;
 int         iff_chunk_len;
 
 
@@ -260,7 +260,7 @@ GetWavinfo
 ============
 */
 wavinfo_t
-GetWavinfo (char *name, byte * wav, int wavlength)
+GetWavinfo (char *name, Uint8 *wav, int wavlength)
 {
 	wavinfo_t   info;
 	int         i;

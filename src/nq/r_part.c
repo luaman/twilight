@@ -701,7 +701,7 @@ R_DrawParticles (void)
 			scale = 1;
 		else
 			scale = 1 + scale * 0.004;
-		qglColor3ubv ((byte *) & d_8to24table[(int) p->color]);
+		qglColor3ubv ((Uint8 *) & d_8to24table[(int) p->color]);
 		qglTexCoord2f (0, 0);
 		qglVertex3fv (p->org);
 		qglTexCoord2f (1, 0);
