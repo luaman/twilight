@@ -419,8 +419,8 @@ Key_Console (knum_t key, short unicode)
 		return;
 
 	if (unicode == '
-') {				// backslash text are commands, else
-		// chat
+' || key == SDLK_RETURN) {
+		// backslash text are commands, else chat
 		if (key_lines[edit_line][1] == '\\' || key_lines[edit_line][1] == '/')
 			Cbuf_AddText (key_lines[edit_line] + 2);	// skip the >
 		else if (CheckForCommand ())
@@ -542,7 +542,7 @@ Key_Message (knum_t key, short unicode)
 		return;
 	}
 
-	if (unicode == '\e') {
+	if (unicode == '\x1b' || key == SDLK_ESCAPE) {
 		key_dest = key_game;
 		game_target = KGT_DEFAULT;
 		chat_bufferlen = 0;
@@ -884,7 +884,7 @@ Key_Event (knum_t key, short unicode, qboolean down)
 //
 // handle escape specialy, so the user can never unbind it
 //
-	if (unicode == '\e') {
+	if (unicode == '\x1b' || key == SDLK_ESCAPE) {
 		if (!down || (keydown[key] > 1))
 			return;
 		switch (key_dest) {
