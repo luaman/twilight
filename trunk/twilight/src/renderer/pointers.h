@@ -27,7 +27,7 @@
 #ifndef __POINTERS_H
 #define __POINTERS_H
 
-#define NUM_CROSSHAIRS 8
+#define NUM_CROSSHAIRS 9
 
 extern char *crosshairs[NUM_CROSSHAIRS];
 
