@@ -637,6 +637,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     /* main window message loop */
 	while (1)
 	{
+		scr_skipupdate = 0;
 	// yield the CPU for a little while when paused, minimized, or not the focus
 		if ((cl.paused && !ActiveApp) || Minimized || block_drawing)
 		{

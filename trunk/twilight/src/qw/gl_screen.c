@@ -71,6 +71,7 @@ console is:
 
 */
 
+qboolean    scr_skipupdate = 0;
 
 int         glx, gly, glwidth, glheight;
 
