@@ -924,7 +924,13 @@ Host_Name_f (void)
 void
 Host_Version_f (void)
 {
+	static int b_n = 0;
+	
+	if (!b_n)
+		b_n = build_number();
+
 	Con_Printf ("Version %s\n", VERSION);
+	Con_Printf ("Build: %i\n", b_n);
 	Con_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
 }
 
