@@ -302,7 +302,6 @@ CL_PlayDemo_f (void)
 	}
 
 	cls.demoplayback = true;
-	// --KB-- Is this right?
 	ccl.state = ca_connected;
 	cls.forcetrack = 0;
 
