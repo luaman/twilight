@@ -10,13 +10,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -27,48 +27,74 @@
 #ifndef __ZONE_H
 #define __ZONE_H
 
-#define POOLNAMESIZE 128				// to help avoid wasted pages
+#define ZONENAMESIZE 128				// to help avoid wasted pages
 #define MEMCLUMPSIZE (65536 - 1536)		// smallest unit we care about
 #define MEMUNIT 8
 #define MEMBITS (MEMCLUMPSIZE / MEMUNIT)
 #define MEMBITINTS (MEMBITS / 32)
+#define MEMHEADER_SENTINEL 0xABADCAFE
 #define MEMCLUMP_SENTINEL 0xDEADF00D
 
 typedef struct memheader_s
 {
-	struct memheader_s *chain;			// next memheader in this pool
-	struct mempool_s   *pool;			// the parent pool
+	struct memheader_s *chain;			// next memheader in this zone
+	struct memzone_s   *zone;			// the parent zone
 	struct memclump_s  *clump;			// parent clump, if any
 	int					size;			// allocated size, excludes header
 	char			   *filename;		// source file of this alloc
 	int					fileline;		// line of alloc in source file
-	int					sentinel1;		// MEMCLUMP_SENTINEL
+	Uint32				sentinel1;		// MEMCLUMP_SENTINEL
 	// followed by data and another MEMCLUMP_SENTINEL
 } memheader_t;
 
 typedef struct memclump_s
 {
 	Uint8				block[MEMCLUMPSIZE];	// contents of the clump
-	int					sentinel1;				// MEMCLUMP_SENTINEL
+	Uint32				sentinel1;				// MEMCLUMP_SENTINEL
 	int					bits[MEMBITINTS];		// used to mark allocations
-	int					sentinel2; 				// MEMCLUMP_SENTINEL
-	int					blocksinuse;			// pool usage refcount
+	Uint32				sentinel2; 				// MEMCLUMP_SENTINEL
+	int					blocksinuse;			// zone usage refcount
 	int					largestavailable;		// updated on alloc/free
 	struct memclump_s  *chain;					// next clump in chain
 } memclump_t;
 
-typedef struct mempool_s
+typedef struct memzone_s
 {
 	struct memheader_s *chain;				// chain of individual allocs
 	struct memclump_s  *clumpchain;			// clain of clumps, if any
 	int					totalsize;			// total size of allocs
-	int					realsize;			// actual malloc size of pool
-	int					lastchecktime;		// last display time
-	char				name[POOLNAMESIZE];	// name of this pool
-	struct mempool_s   *next;				// next pool in list
-} mempool_t;
+	int					realsize;			// actual malloc size of zone
+	int					lastchecksize;		// last listed size (for detecting leaks)
+	char				name[ZONENAMESIZE];	// name of this zone
+	struct memzone_s   *next;				// next zone in list
+} memzone_t;
 
-// XXX
+#define Zone_Alloc(zone,size) _Zone_Alloc(zone, size, __FILE__, __LINE__)
+#define Zone_Free(mem) _Zone_Free(mem, __FILE__, __LINE__)
+#define Zone_CheckSentinels(data) _Zone_CheckSentinels(data, __FILE__, __LINE__)
+#define Zone_CheckSentinelsGlobal() _Zone_CheckSentinelsGlobal(__FILE__, __LINE__)
+#define Zone_AllocZone(name) _Zone_AllocZone(name, __FILE__, __LINE__)
+#define Zone_FreeZone(zone) _Zone_FreeZone(zone, __FILE__, __LINE__)
+#define Zone_EmptyZone(zone) _Zone_EmptyZone(zone, __FILE__, __LINE__)
+
+void *_Zone_Alloc(memzone_t *zone, int size, char *filename, int fileline);
+void _Zone_Free(void *data, char *filename, int fileline);
+memzone_t *_Zone_AllocZone(char *name, char *filename, int fileline);
+void _Zone_FreeZone(memzone_t **zone, char *filename, int fileline);
+void _Zone_EmptyZone(memzone_t *zone, char *filename, int fileline);
+void _Zone_CheckSentinels(void *data, char *filename, int fileline);
+void _Zone_CheckSentinelsGlobal(char *filename, int fileline);
+
+void Zone_Init (void);
+void Zone_Init_Commands (void);
+
+// used for temporary allocations
+extern memzone_t *tempzone;
+
+extern memzone_t *stringzone;
+#define Z_Malloc(size) Zone_Alloc(stringzone,size)
+#define Z_Free(data) Zone_Free(data)
+
 
 /*
  memory allocation
@@ -136,15 +162,7 @@ Zone block
 
 */
 
-void        Memory_Init (void);
-
-void        Z_Free (void *ptr);
-void       *Z_Malloc (int size);		// returns 0 filled memory
-void       *Z_TagMalloc (int size, int tag);
-
-void        Z_DumpHeap (void);
-void        Z_CheckHeap (void);
-int         Z_FreeMemory (void);
+extern int hunk_size;
 
 void       *Hunk_Alloc (int size);		// returns 0 filled memory
 void       *Hunk_AllocName (int size, char *name);

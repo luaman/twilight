@@ -1460,11 +1460,12 @@ Host_Init
 void
 Host_Init (void)
 {
-	Memory_Init ();
+	Zone_Init ();
 	Cvar_Init (&Host_CvarUserinfo);		// Cvar system
 	Cbuf_Init ();						// Command buffer
 	Cmd_Init (&Cmd_ForwardToServer_f);	// Command system
 	Sys_Init ();						// System system =)
+	Zone_Init_Commands ();
 
 	// These have to be here.
 	fs_shareconf = Cvar_Get ("fs_shareconf", SHARECONF, CVAR_ROM, NULL);
@@ -1520,7 +1521,7 @@ Host_Init (void)
 	R_InitTextures ();				// setup texture system defaults
 
 	Com_Printf ("Exe: "__TIME__" "__DATE__"\n");
-	Com_Printf ("%4.1f megs RAM used.\n", sys_memsize / (1024 * 1024.0));
+	Com_Printf ("%4.1f megs RAM used.\n", hunk_size / (1024 * 1024.0));
 
 	host_basepal = (Uint8 *) COM_LoadHunkFile ("gfx/palette.lmp", true);
 	if (!host_basepal)
@@ -1562,7 +1563,7 @@ Host_Init (void)
 	Com_Printf ("\nClient Version %s (Build %04d)\n\n", VERSION,
 				build_number ());
 
-	Com_Printf ("ÄÅÅÅÅÅÅ QuakeWorld Initialized ÅÅÅÅÅÅÇ\n");
+	Com_Printf (" QuakeWorld Initialized \n");
 }
 
 

@@ -197,7 +197,7 @@ S_Init_Cvars (void)
 	snd_show = Cvar_Get ("snd_show", "0", CVAR_NONE, NULL);
 	_snd_mixahead = Cvar_Get ("_snd_mixahead", "0.1", CVAR_ARCHIVE, NULL);
 
-	if (sys_memsize < 0x800000) {
+	if (hunk_size < 0x800000) {
 		Cvar_Set (loadas8bit, "1");
 		Com_Printf ("loading all sounds as 8bit\n");
 	}
