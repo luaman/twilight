@@ -30,6 +30,8 @@
 
 #include <stdio.h>
 
+#include <SDL_byteorder.h>
+
 #include "bothdefs.h"
 #include "qtypes.h"
 
@@ -94,15 +96,59 @@ void        InsertLinkAfter (link_t *l, link_t *after);
 #define Q_MINFLOAT ((int)0x7fffffff)
 
 //============================================================================
+// Byte order macros
 
-extern qboolean bigendien;
+// These macros _MUST_ sign extend.
 
-extern short (*BigShort) (short l);
-extern short (*LittleShort) (short l);
-extern int  (*BigLong) (int l);
-extern int  (*LittleLong) (int l);
-extern float (*BigFloat) (float l);
-extern float (*LittleFloat) (float l);
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+# define swap_short LittleShort
+# define BigShort(x) ((Sint16)(x))
+
+# define swap_long LittleLong
+# define BigLong(x) ((Sint32)(x))
+
+# define swap_float LittleFloat
+# define BigFloat(x) (x)
+#else
+# define swap_short BigShort
+# define LittleShort(x) ((Sint16)(x))
+
+# define swap_long BigLong
+# define LittleLong(x) ((Sint32)(x))
+
+# define swap_float BigFloat
+# define LittleFloat(x) (x)
+#endif
+
+static inline Sint16 swap_short(Sint16 x)
+{
+	return (x >> 8) | (x << 8);
+}
+
+static inline Sint32 swap_long(Sint32 x)
+{
+	return	(x >> 24) |
+		((x & 0x00ff0000) >> 8) |
+		((x & 0x0000ff00) << 8) |
+		(x << 24);
+}
+
+static inline float swap_float(float f)
+{
+	Uint32 x;
+	
+	x = *(Uint32*)&f;
+	x =	(x >> 24) |
+		((x & 0x00ff0000) >> 8) |
+		((x & 0x0000ff00) << 8) |
+		(x << 24);
+	f = *(float*)&x;
+	return f;
+}
+
+#undef swap_short
+#undef swap_long
+#undef swap_float
 
 //============================================================================
 
