@@ -240,7 +240,7 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 
 	for (p = fa->polys; p; p = p->next)
 	{
-		qglBegin (GL_POLYGON);
+		qglBegin (GL_TRIANGLE_FAN);
 		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 			os = v[3];
