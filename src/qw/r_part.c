@@ -35,6 +35,7 @@ static const char rcsid[] =
 
 #include "client.h"
 #include "console.h"
+#include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
 
@@ -79,6 +80,74 @@ R_InitParticles (void)
 		Hunk_AllocName (r_numparticles * sizeof (particle_t), "particles");
 }
 
+/*
+===============
+R_EntityParticles
+===============
+*/
+
+#define NUMVERTEXNORMALS	162
+extern float r_avertexnormals[NUMVERTEXNORMALS][3];
+vec3_t      avelocities[NUMVERTEXNORMALS];
+float       beamlength = 16;
+vec3_t      avelocity = { 23, 7, 3 };
+float       partstep = 0.01;
+float       timescale = 0.01;
+
+void
+R_EntityParticles (entity_t *ent)
+{
+	int         count = 50;
+	int         i;
+	particle_t *p;
+	float       angle;
+	float       sr, sp, sy, cr, cp, cy;
+	vec3_t      forward;
+	float       dist = 64;
+
+	if (!avelocities[0][0]) {
+		for (i = 0; i < NUMVERTEXNORMALS * 3; i++)
+			avelocities[0][i] = (Q_rand () & 255) * 0.01;
+	}
+
+	for (i = 0; i < NUMVERTEXNORMALS; i++) {
+		angle = cl.time * avelocities[i][0];
+		sy = Q_sin (angle);
+		cy = Q_cos (angle);
+		angle = cl.time * avelocities[i][1];
+		sp = Q_sin (angle);
+		cp = Q_cos (angle);
+		angle = cl.time * avelocities[i][2];
+		sr = Q_sin (angle);
+		cr = Q_cos (angle);
+
+		forward[0] = cp * cy;
+		forward[1] = cp * sy;
+		forward[2] = -sp;
+
+		if (!free_particles)
+			return;
+		p = free_particles;
+		free_particles = p->next;
+		p->next = active_particles;
+		active_particles = p;
+
+		p->die = cl.time + 0.01;
+		p->color = 0x6f;
+		p->type = pt_explode;
+
+		p->org[0] =
+			ent->origin[0] + r_avertexnormals[i][0] * dist +
+			forward[0] * beamlength;
+		p->org[1] =
+			ent->origin[1] + r_avertexnormals[i][1] * dist +
+			forward[1] * beamlength;
+		p->org[2] =
+			ent->origin[2] + r_avertexnormals[i][2] * dist +
+			forward[2] * beamlength;
+	}
+}
+
 
 /*
 ===============
@@ -109,7 +178,7 @@ R_ReadPointFile_f (void)
 	particle_t *p;
 	char        name[MAX_OSPATH];
 
-// FIXME    snprintf (name, sizeof(name), "maps/%s.pts", sv.name);
+	snprintf (name, sizeof (name), "maps/%s.pts", cl_mapname->string);
 
 	COM_FOpenFile (name, &f);
 	if (!f) {
@@ -147,6 +216,30 @@ R_ReadPointFile_f (void)
 
 /*
 ===============
+R_ParseParticleEffect
+
+Parse an effect out of the server message
+===============
+*/
+void
+R_ParseParticleEffect (void)
+{
+	vec3_t      org, dir;
+	int         i, count, msgcount, color;
+
+	for (i = 0; i < 3; i++)
+		org[i] = MSG_ReadCoord ();
+	for (i = 0; i < 3; i++)
+		dir[i] = MSG_ReadChar () * (1.0 / 16);
+	msgcount = MSG_ReadByte ();
+	color = MSG_ReadByte ();
+	count = (msgcount == 255) ? 1024 : msgcount;
+
+	R_RunParticleEffect (org, dir, color, count);
+}
+
+/*
+===============
 R_ParticleExplosion
 
 ===============
@@ -180,6 +273,39 @@ R_ParticleExplosion (vec3_t org)
 				p->org[j] = org[j] + ((Q_rand () % 32) - 16);
 				p->vel[j] = (Q_rand () % 512) - 256;
 			}
+		}
+	}
+}
+
+/*
+===============
+R_ParticleExplosion2
+
+===============
+*/
+void
+R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength)
+{
+	int         i, j;
+	particle_t *p;
+	int         colorMod = 0;
+
+	for (i = 0; i < 512; i++) {
+		if (!free_particles)
+			return;
+		p = free_particles;
+		free_particles = p->next;
+		p->next = active_particles;
+		active_particles = p;
+
+		p->die = cl.time + 0.3;
+		p->color = colorStart + (colorMod % colorLength);
+		colorMod++;
+
+		p->type = pt_blob;
+		for (j = 0; j < 3; j++) {
+			p->org[j] = org[j] + ((Q_rand () % 32) - 16);
+			p->vel[j] = (Q_rand () % 512) - 256;
 		}
 	}
 }
@@ -235,14 +361,6 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int         i, j;
 	particle_t *p;
-	int         scale;
-
-	if (count > 130)
-		scale = 3;
-	else if (count > 20)
-		scale = 2;
-	else
-		scale = 1;
 
 	for (i = 0; i < count; i++) {
 		if (!free_particles)
@@ -252,12 +370,31 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 		p->next = active_particles;
 		active_particles = p;
 
-		p->die = cl.time + 0.1 * (Q_rand () % 5);
-		p->color = (color & ~7) + (Q_rand () & 7);
-		p->type = pt_grav;
-		for (j = 0; j < 3; j++) {
-			p->org[j] = org[j] + scale * ((Q_rand () & 15) - 8);
-			p->vel[j] = dir[j] * 15;	// + (Q_rand()%300)-150;
+		if (count == 1024) {			// rocket explosion
+			p->die = cl.time + 5;
+			p->color = ramp1[0];
+			p->ramp = Q_rand () & 3;
+			if (i & 1) {
+				p->type = pt_explode;
+				for (j = 0; j < 3; j++) {
+					p->org[j] = org[j] + ((Q_rand () % 32) - 16);
+					p->vel[j] = (Q_rand () % 512) - 256;
+				}
+			} else {
+				p->type = pt_explode2;
+				for (j = 0; j < 3; j++) {
+					p->org[j] = org[j] + ((Q_rand () % 32) - 16);
+					p->vel[j] = (Q_rand () % 512) - 256;
+				}
+			}
+		} else {
+			p->die = cl.time + 0.1 * (Q_rand () % 5);
+			p->color = (color & ~7) + (Q_rand () & 7);
+			p->type = pt_slowgrav;
+			for (j = 0; j < 3; j++) {
+				p->org[j] = org[j] + ((Q_rand () & 15) - 8);
+				p->vel[j] = dir[j] * 15;	// + (Q_rand()%300)-150;
+			}
 		}
 	}
 }
@@ -287,9 +424,9 @@ R_LavaSplash (vec3_t org)
 				p->next = active_particles;
 				active_particles = p;
 
-				p->die = cl.time + 2 + (Q_rand () & 31) * 0.02;
-				p->color = 224 + (Q_rand () & 7);
-				p->type = pt_grav;
+				p->die = cl.time + 2 + (rand () & 31) * 0.02;
+				p->color = 224 + (rand () & 7);
+				p->type = pt_slowgrav;
 
 				dir[0] = j * 8 + (Q_rand () & 7);
 				dir[1] = i * 8 + (Q_rand () & 7);
@@ -331,7 +468,7 @@ R_TeleportSplash (vec3_t org)
 
 				p->die = cl.time + 0.2 + (Q_rand () & 7) * 0.02;
 				p->color = 7 + (Q_rand () & 7);
-				p->type = pt_grav;
+				p->type = pt_slowgrav;
 
 				dir[0] = j * 8;
 				dir[1] = i * 8;
@@ -352,7 +489,7 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 {
 	vec3_t      vec, avec;
 	float       len;
-	int         j, lsub;
+	int         j,lsub;
 	particle_t *p;
 	static int  tracercount;
 
@@ -374,42 +511,31 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 		p->die = cl.time + 2;
 
 		switch (type) {
-			case 4:		// slight blood
-				p->type = pt_slowgrav;
-				p->color = 67 + (Q_rand () & 3);
-				for (j = 0; j < 3; j++)
-					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
-				lsub += 3;
-				break;
-			case 2:		// blood
-				p->type = pt_slowgrav;
-				p->color = 67 + (Q_rand () & 3);
-				for (j = 0; j < 3; j++)
-					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
-				break;
-			case 6:		// voor trail
-				p->color = 9 * 16 + 8 + (Q_rand () & 3);
-				p->type = pt_static;
-				p->die = cl.time + 0.3;
-				for (j = 0; j < 3; j++)
-					p->org[j] = start[j] + ((Q_rand () & 15) - 8);
-				break;
-			case 1:		// smoke smoke
-				p->ramp = (Q_rand () & 3) + 2;
-				p->color = ramp3[(int) p->ramp];
-				p->type = pt_fire;
-				for (j = 0; j < 3; j++)
-					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
-				break;
-			case 0:		// rocket trail
+			case 0:					// rocket trail
 				p->ramp = (Q_rand () & 3);
 				p->color = ramp3[(int) p->ramp];
 				p->type = pt_fire;
 				for (j = 0; j < 3; j++)
 					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
 				break;
+
+			case 1:					// smoke smoke
+				p->ramp = (Q_rand () & 3) + 2;
+				p->color = ramp3[(int) p->ramp];
+				p->type = pt_fire;
+				for (j = 0; j < 3; j++)
+					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
+				break;
+
+			case 2:					// blood
+				p->type = pt_grav;
+				p->color = 67 + (Q_rand () & 3);
+				for (j = 0; j < 3; j++)
+					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
+				break;
+
 			case 3:
-			case 5:		// tracer
+			case 5:					// tracer
 				p->die = cl.time + 0.5;
 				p->type = pt_static;
 				if (type == 3)
@@ -427,6 +553,22 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 					p->vel[0] = 30 * -vec[1];
 					p->vel[1] = 30 * vec[0];
 				}
+				break;
+
+			case 4:					// slight blood
+				p->type = pt_grav;
+				p->color = 67 + (Q_rand () & 3);
+				for (j = 0; j < 3; j++)
+					p->org[j] = start[j] + ((Q_rand () % 6) - 3);
+				lsub += 3;
+				break;
+
+			case 6:					// voor trail
+				p->color = 9 * 16 + 8 + (Q_rand () & 3);
+				p->type = pt_static;
+				p->die = cl.time + 0.3;
+				for (j = 0; j < 3; j++)
+					p->org[j] = start[j] + ((Q_rand () & 15) - 8);
 				break;
 		}
 
@@ -452,21 +594,22 @@ R_DrawParticles (void)
 	float       time1;
 	float       dvel;
 	float       frametime;
-	Uint8		*at;
-	unsigned char theAlpha;
 	vec3_t      up, right;
 	float       scale;
+	Uint8		theAlpha, *at;
+	extern	double host_frametime;
 
 	if (!active_particles)
 		return;
 
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
 
+	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglBegin (GL_TRIANGLES);
 
 	VectorScale (vup, 1.5, up);
 	VectorScale (vright, 1.5, right);
-
 	frametime = host_frametime;
 	time3 = frametime * 15;
 	time2 = frametime * 10;				// 15;
@@ -572,13 +715,13 @@ R_DrawParticles (void)
 				p->vel[2] -= grav;
 				break;
 
-			case pt_slowgrav:
 			case pt_grav:
+			case pt_slowgrav:
 				p->vel[2] -= grav;
 				break;
 		}
 	}
 
-	qglColor3f (1, 1, 1);
 	qglEnd ();
+	qglColor3f (1, 1, 1);
 }

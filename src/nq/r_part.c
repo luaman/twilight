@@ -33,10 +33,11 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "glquake.h"
+#include "client.h"
 #include "console.h"
 #include "cvar.h"
-#include "server.h"
+#include "glquake.h"
+#include "mathlib.h"
 
 #define MAX_PARTICLES			2048	// default max # of particles at one
 										// time
@@ -177,7 +178,7 @@ R_ReadPointFile_f (void)
 	particle_t *p;
 	char        name[MAX_OSPATH];
 
-	snprintf (name, sizeof (name), "maps/%s.pts", sv.name);
+	snprintf (name, sizeof (name), "maps/%s.pts", cl_mapname->string);
 
 	COM_FOpenFile (name, &f);
 	if (!f) {
@@ -583,8 +584,6 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 R_DrawParticles
 ===============
 */
-extern cvar_t *sv_gravity;
-
 void
 R_DrawParticles (void)
 {
@@ -615,7 +614,7 @@ R_DrawParticles (void)
 	time3 = frametime * 15;
 	time2 = frametime * 10;				// 15;
 	time1 = frametime * 5;
-	grav = frametime * sv_gravity->value * 0.05;
+	grav = frametime * 800 * 0.05;
 	dvel = 4 * frametime;
 
 	for (;;) {

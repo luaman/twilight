@@ -60,6 +60,8 @@ cvar_t		*_cl_color;
 cvar_t		*cl_shownet;
 cvar_t		*cl_nolerp;
 
+cvar_t		*cl_mapname;
+
 cvar_t		*show_fps;
 
 client_static_t cls;
@@ -700,6 +702,8 @@ CL_Init_Cvars (void)
 	// cl_shownet can be 0, 1, or 2
 	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);
 	cl_nolerp = Cvar_Get ("cl_nolerp", "0", CVAR_NONE, NULL);
+
+	cl_mapname = Cvar_Get ("cl_mapname", "", CVAR_ROM, NULL);
 }
 
 /*

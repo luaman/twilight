@@ -358,6 +358,7 @@ Host_Restart_f (void)
 	if (cmd_source != src_command)
 		return;
 	strcpy (mapname, sv.name);		// must copy out, because it gets
+
 	// cleared
 	// in sv_spawnserver
 	SV_SpawnServer (mapname);

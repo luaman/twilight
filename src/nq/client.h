@@ -259,6 +259,8 @@ extern struct cvar_s *cl_anglespeedkey;
 extern struct cvar_s *cl_shownet;
 extern struct cvar_s *cl_nolerp;
 
+extern struct cvar_s *cl_mapname;
+
 extern struct cvar_s *cl_pitchdriftspeed;
 extern struct cvar_s *lookspring;
 extern struct cvar_s *lookstrafe;

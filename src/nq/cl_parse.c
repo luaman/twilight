@@ -320,10 +320,20 @@ CL_ParseServerInfo (void)
 	for (i = 1; i < nummodels; i++) {
 		isnotmap = (i != 1);
 		cl.model_precache[i] = Mod_ForName (model_precache[i], false);
+
 		if (cl.model_precache[i] == NULL) {
 			Con_Printf ("Model %s not found\n", model_precache[i]);
 			return;
 		}
+
+		if (!isnotmap)
+		{
+			char mapname[MAX_QPATH] = { 0 };
+
+			COM_StripExtension (COM_SkipPath (model_precache[i]), mapname);
+			Cvar_Set (cl_mapname, mapname);
+		}
+
 		CL_KeepaliveMessage ();
 	}
 

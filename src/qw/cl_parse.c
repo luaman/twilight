@@ -242,6 +242,7 @@ Model_NextDownload (void)
 	char       *s;
 	int         i;
 	extern char gamedirfile[];
+	char mapname[MAX_QPATH] = { 0 };
 
 	if (cls.downloadnumber == 0) {
 		Con_Printf ("Checking models...\n");
@@ -279,6 +280,10 @@ Model_NextDownload (void)
 
 	// all done
 	cl.worldmodel = cl.model_precache[1];
+
+	COM_StripExtension (COM_SkipPath (cl.worldmodel->name), mapname);
+	Cvar_Set (cl_mapname, mapname);
+
 	R_NewMap ();
 	Hunk_Check ();						// make sure nothing is hurt
 
