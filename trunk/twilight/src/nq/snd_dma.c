@@ -46,10 +46,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-#ifdef _WIN32
-# include "winquake.h"
-#endif
-
 void        S_Play (void);
 void        S_PlayVol (void);
 void        S_SoundList (void);

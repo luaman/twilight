@@ -39,13 +39,6 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "sound.h"
 
-#ifdef _WIN32
-#include "winquake.h"
-#else
-#define DWORD	unsigned long
-#define LPVOID	void *
-#endif
-
 #define	PAINTBUFFER_SIZE	512
 portable_samplepair_t paintbuffer[PAINTBUFFER_SIZE];
 int         snd_scaletable[32][256];
@@ -84,13 +77,13 @@ S_TransferStereo16 (int endtime)
 {
 	int         lpos;
 	int         lpaintedtime;
-	LPVOID	pbuf;
+	void	   *pbuf;
 
 	snd_vol = volume->value * 256;
 
 	snd_p = (int *) paintbuffer;
 	lpaintedtime = paintedtime;
-	pbuf = (DWORD *) shm->buffer;
+	pbuf = (Uint32 *) shm->buffer;
 
 	while (lpaintedtime < endtime) {
 		// handle recirculating buffer issues
@@ -122,7 +115,7 @@ S_TransferPaintBuffer (int endtime)
 	int         step;
 	int         val;
 	int         snd_vol;
-	LPVOID	pbuf;
+	void	   *pbuf;
 
 	if (shm->samplebits == 16 && shm->channels == 2) {
 		S_TransferStereo16 (endtime);
@@ -135,7 +128,7 @@ S_TransferPaintBuffer (int endtime)
 	out_idx = paintedtime * shm->channels & out_mask;
 	step = 3 - shm->channels;
 	snd_vol = volume->value * 256;
-	pbuf = (DWORD *) shm->buffer;
+	pbuf = (Uint32 *) shm->buffer;
 
 	if (shm->samplebits == 16) {
 		short      *out = (short *) pbuf;
