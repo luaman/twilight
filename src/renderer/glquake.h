@@ -44,7 +44,6 @@ qboolean GLF_Init (void);
 void GL_EndRendering (void);
 
 extern int texture_extension_number;
-extern float gldepthmin, gldepthmax;
 
 int GL_MangleImage8 (Uint8 *in, Uint8 *out, int width, int height, short mask,
 		        Uint8 to, qboolean bleach);

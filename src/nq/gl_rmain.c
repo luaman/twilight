@@ -94,8 +94,6 @@ cvar_t *gl_oldlights;
 cvar_t *gl_colorlights;
 cvar_t *gl_particletorches;
 
-extern cvar_t *gl_ztrick;
-
 extern vec3_t lightcolor;
 qboolean colorlights = true;
 
@@ -585,9 +583,9 @@ R_DrawViewModel (void)
 		return;
 
 	// hack the depth range to prevent view model from poking into walls
-	qglDepthRange (gldepthmin, gldepthmin + 0.3 * (gldepthmax - gldepthmin));
+	qglDepthRange (0.0f, 0.3f);
 	R_DrawAliasModel (currententity, true);
-	qglDepthRange (gldepthmin, gldepthmax);
+	qglDepthRange (0.0f, 1.0f);
 }
 
 
@@ -759,33 +757,11 @@ R_Clear
 static void
 R_Clear (void)
 {
-	if (gl_ztrick->ivalue) {
-		static int  trickframe;
-
-		if (gl_clear->ivalue)
-			qglClear (GL_COLOR_BUFFER_BIT);
-
-		trickframe++;
-		if (trickframe & 1) {
-			gldepthmin = 0.0f;
-			gldepthmax = 0.49999f;
-			qglDepthFunc (GL_LEQUAL);
-		} else {
-			gldepthmin = 1.0f;
-			gldepthmax = 0.5f;
-			qglDepthFunc (GL_GEQUAL);
-		}
-	} else {
-		if (gl_clear->ivalue)
-			qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		else
-			qglClear (GL_DEPTH_BUFFER_BIT);
-		gldepthmin = 0.0f;
-		gldepthmax = 1.0f;
-		qglDepthFunc (GL_LEQUAL);
-	}
-
-	qglDepthRange (gldepthmin, gldepthmax);
+	if (gl_clear->ivalue)
+		qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	else
+		qglClear (GL_DEPTH_BUFFER_BIT);
+	qglDepthFunc (GL_LEQUAL);
 }
 
 
