@@ -322,7 +322,6 @@ CDAudio_Update (void)
 			CDAudio_Resume ();
 		}
 	}
-
 	if (playing && lastchk < time (NULL)) {
 		lastchk = time (NULL) + 2;
 		curstat = SDL_CDStatus (cd_handle);

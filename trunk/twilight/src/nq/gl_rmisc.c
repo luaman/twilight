@@ -181,6 +181,7 @@ void
 R_Init (void)
 {
 	extern cvar_t *gl_finish;
+	extern cvar_t *r_maxedges, *r_maxsurfs;		// Shrak
 
 	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);
 	Cmd_AddCommand ("envmap", R_Envmap_f);
@@ -216,6 +217,11 @@ R_Init (void)
 
 	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_NONE, NULL);
 	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_NONE, NULL);
+
+	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_NONE, NULL);
+
+	r_maxedges = Cvar_Get ("r_maxedges", "0", CVAR_NONE, NULL);	// Shrak
+	r_maxsurfs = Cvar_Get ("r_maxsurfs", "0", CVAR_NONE, NULL); // Shrak
 
 	if (gl_mtexable)
 		Cvar_Set (gl_texsort, "0");

@@ -100,6 +100,8 @@ cvar_t     *gl_reporttjunctions;
 cvar_t     *gl_doubleeyes;
 cvar_t	   *gl_im_animation;
 cvar_t	   *gl_im_transform;
+cvar_t	   *r_maxedges, *r_maxsurfs;		// Shrak
+cvar_t	   *gl_fb_models;
 
 extern cvar_t *gl_ztrick;
 
@@ -734,7 +736,7 @@ R_DrawAliasModel (entity_t *e)
 	// get lighting information
 	// 
 
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT))
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || !gl_fb_models->value[0])
 	{
 		ambientlight = shadelight = R_LightPoint (currententity->origin);
 
@@ -772,7 +774,7 @@ R_DrawAliasModel (entity_t *e)
 			ambientlight = shadelight = 8;
 
 	// HACK HACK HACK -- no fullbright colors, so make torches full light
-	if (clmodel->modflags & FLAG_FULLBRIGHT)
+	if ((clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value[0])
 		ambientlight = shadelight = 256;
 
 	shadedots =
