@@ -1654,11 +1654,11 @@ SV_Init (void)
 	// Yes, the repeated Cmd_StuffCmds_f/Cbuf_Execute_Sets are necessary!
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
-	Cbuf_InsertFile (fs_shareconf->svalue);
+	Cbuf_InsertFile (Sys_ExpandPath (fs_shareconf->svalue));
 	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
-	Cbuf_InsertFile (fs_userconf->svalue);
+	Cbuf_InsertFile (Sys_ExpandPath (fs_userconf->svalue));
 	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
