@@ -1,5 +1,5 @@
 /*
-	$RCSfile$
+	$RCSfile$ -- builds an intended movement command to send to the server
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -22,7 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// cl.input.c  -- builds an intended movement command to send to the server
 static const char rcsid[] =
     "$Id$";
 
@@ -514,9 +513,9 @@ CL_BaseMove (usercmd_t *cmd)
 			* CL_KeyState (&in_forward);
 		cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
 	}
-//
-// adjust for speed key
-//
+	//
+	// adjust for speed key
+	//
 	if (in_speed.state & 1) {
 		cmd->forwardmove *= cl_movespeedkey->value;
 		cmd->sidemove *= cl_movespeedkey->value;
@@ -545,9 +544,9 @@ CL_SendMove (usercmd_t *cmd)
 
 	cl.cmd = *cmd;
 
-//
-// send the movement message
-//
+	//
+	// send the movement message
+	//
 	MSG_WriteByte (&buf, clc_move);
 
 	MSG_WriteFloat (&buf, cl.mtime[0]);	// so server can get ping times
@@ -559,9 +558,9 @@ CL_SendMove (usercmd_t *cmd)
 	MSG_WriteShort (&buf, cmd->sidemove);
 	MSG_WriteShort (&buf, cmd->upmove);
 
-//
-// send button bits
-//
+	//
+	// send button bits
+	//
 	bits = 0;
 
 	if (in_attack.state & 3)
@@ -581,16 +580,16 @@ CL_SendMove (usercmd_t *cmd)
 	MSG_WriteByte (&buf, in_impulse);
 	in_impulse = 0;
 
-//
-// deliver the message
-//
+	//
+	// deliver the message
+	//
 	if (cls.demoplayback)
 		return;
 
-//
-// always dump the first two message, because it may contain leftover inputs
-// from the last level
-//
+	//
+	// always dump the first two message, because it may contain leftover inputs
+	// from the last level
+	//
 	if (++cl.movemessages <= 2)
 		return;
 
@@ -675,10 +674,10 @@ CL_InitInputCvars (void)
 	m_freelook = Cvar_Get ("freelook", "0", CVAR_ARCHIVE, NULL);
 
 	in_key_repeat_delay = Cvar_Get ("in_key_repeat_delay",
-			va ("%i", SDL_DEFAULT_REPEAT_DELAY), CVAR_NONE,
+			va ("%i", SDL_DEFAULT_REPEAT_DELAY), CVAR_ARCHIVE,
 			CL_InputSetRepeatDelay);
 	in_key_repeat_interval = Cvar_Get ("in_key_repeat_interval",
-			va ("%i", SDL_DEFAULT_REPEAT_INTERVAL), CVAR_NONE,
+			va ("%i", SDL_DEFAULT_REPEAT_INTERVAL), CVAR_ARCHIVE,
 			CL_InputSetRepeatInterval);
 }
 
