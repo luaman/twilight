@@ -37,23 +37,33 @@ extern qboolean	con_initialized;
 extern byte		*con_chars;
 extern int		con_notifylines;		// scan lines to clear for notify lines
 
-void		Con_DrawCharacter (int cx, int line, int num);
+void Con_DrawCharacter (int cx, int line, int num);
 
-void		Con_CheckResize (void);
-void		Con_Init_Cvars (void);
-void		Con_Init (void);
-void		Con_DrawConsole (int lines, qboolean drawinput);
-void		Con_Print (char *txt);
-void		Con_Printf (char *fmt, ...);
-void		Con_DPrintf (char *fmt, ...);
-void		Con_SafePrintf (char *fmt, ...);
-void		Con_Clear_f (void);
-void		Con_DrawNotify (void);
-void		Con_ClearNotify (void);
-void		Con_ToggleConsole_f (void);
+void Con_CheckResize (void);
+void Con_Init_Cvars (void);
+void Con_Init (void);
+void Con_DrawConsole (int lines, qboolean drawinput);
+void Con_Print (char *txt);
+void Con_Printf (char *fmt, ...);
+void Con_DPrintf (char *fmt, ...);
+void Con_SafePrintf (char *fmt, ...);
+void Con_Clear_f (void);
+void Con_DrawNotify (void);
+void Con_ClearNotify (void);
+void Con_ToggleConsole_f (void);
 
-void		Con_NotifyBox (char *text);	// during startup for sound / cd
-										// warnings
+void Con_NotifyBox (char *text);	// during startup for sound / cd
+									// warnings
+
+// wrapper function to attempt to either complete the command line
+// or to list possible matches grouped by type
+// (i.e. will display possible variables, aliases, commands
+// that match what they've typed so far)
+void Con_CompleteCommandLine(void);
+
+// Generic libs/util/console.c function to display a list
+// formatted in columns on the console
+void Con_DisplayList(char **list);
 
 #endif // __CONSOLE_H
 

@@ -286,7 +286,7 @@ Cmd_StuffCmds_f (void)
 	int         s;
 	char       *text, *build, c;
 
-// build the combined string to parse from
+	// build the combined string to parse from
 	s = 0;
 	for (i = 1; i < com_argc; i++) {
 		if (!com_argv[i])
@@ -306,7 +306,7 @@ Cmd_StuffCmds_f (void)
 			Q_strcat (text, " ");
 	}
 
-// pull out the commands
+	// pull out the commands
 	build = Z_Malloc (s + 1);
 	build[0] = 0;
 
@@ -595,14 +595,14 @@ Cmd_AddCommand (char *cmd_name, xcommand_t function)
 		// stomped
 		Sys_Error ("Cmd_AddCommand after host_initialized");
 
-// fail if the command is a variable name
+	// fail if the command is a variable name
 	var = Cvar_Find (cmd_name);
 	if (var) {
 		Con_Printf ("\"%s\" already defined as a Cvar\n",
 				cmd_name);
 		return;
 	}
-// fail if the command already exists
+	// fail if the command already exists
 	for (cmd = cmd_functions; cmd; cmd = cmd->next) {
 		if (!Q_strcmp (cmd_name, cmd->name)) {
 			Con_Printf ("\"%s\" already defined\n", cmd_name);
@@ -653,12 +653,134 @@ Cmd_CompleteCommand (char *partial)
 	if (!len)
 		return NULL;
 
-// check functions
+	// check functions
 	for (cmd = cmd_functions; cmd; cmd = cmd->next)
 		if (!Q_strncmp (partial, cmd->name, len))
 			return cmd->name;
 
 	return NULL;
+}
+
+/*
+	Cmd_CompleteCountPossible
+	Thanks for Taniwha's Help -EvilTypeGuy
+*/
+int
+Cmd_CompleteCountPossible (char *partial)
+{
+	cmd_function_t	*cmd;
+	int				len;
+	int				h;
+	
+	h = 0;
+	len = Q_strlen(partial);
+	
+	if (!len)
+		return 0;
+	
+	// Loop through the command list and count all partial matches
+	for (cmd = cmd_functions; cmd; cmd = cmd->next)
+		if (!Q_strncasecmp(partial, cmd->name, len))
+			h++;
+
+	return h;
+}
+
+/*
+	Cmd_CompleteBuildList
+	Thanks for Taniwha's Help -EvilTypeGuy
+*/
+char	**
+Cmd_CompleteBuildList (char *partial)
+{
+	cmd_function_t	*cmd;
+	int				len = 0;
+	int				bpos = 0;
+	int				sizeofbuf = (Cmd_CompleteCountPossible (partial) + 1) * sizeof (char *);
+	char			**buf;
+
+	len = Q_strlen(partial);
+	buf = malloc(sizeofbuf + sizeof (char *));
+	// Loop through the alias list and print all matches
+	for (cmd = cmd_functions; cmd; cmd = cmd->next)
+		if (!Q_strncasecmp(partial, cmd->name, len))
+			buf[bpos++] = cmd->name;
+
+	buf[bpos] = NULL;
+	return buf;
+}
+
+/*
+	Cmd_CompleteAlias
+	Thanks for Taniwha's Help -EvilTypeGuy
+*/
+char
+*Cmd_CompleteAlias (char * partial)
+{
+	cmdalias_t	*alias;
+	int			len;
+
+	len = Q_strlen(partial);
+
+	if (!len)
+		return NULL;
+
+	// Check aliases
+	for (alias = cmd_alias; alias; alias = alias->next)
+		if (!Q_strncasecmp(partial, alias->name, len))
+			return alias->name;
+
+	return NULL;
+}
+
+/*
+	Cmd_CompleteAliasCountPossible
+	Thanks for Taniwha's Help -EvilTypeGuy
+*/
+int
+Cmd_CompleteAliasCountPossible (char *partial)
+{
+	cmdalias_t	*alias;
+	int			len;
+	int			h;
+
+	h = 0;
+
+	len = Q_strlen(partial);
+
+	if (!len)
+		return 0;
+
+	// Loop through the command list and count all partial matches
+	for (alias = cmd_alias; alias; alias = alias->next)
+		if (!Q_strncasecmp(partial, alias->name, len))
+			h++;
+
+	return h;
+}
+
+/*
+	Cmd_CompleteAliasBuildList
+	Thanks for Taniwha's Help -EvilTypeGuy
+*/
+char	**
+Cmd_CompleteAliasBuildList (char *partial)
+{
+	cmdalias_t	*alias;
+	int			len = 0;
+	int			bpos = 0;
+	int			sizeofbuf = (Cmd_CompleteAliasCountPossible (partial) + 1) * sizeof (char *);
+	char		**buf;
+
+	len = Q_strlen(partial);
+	buf = malloc(sizeofbuf + sizeof (char *));
+	// Loop through the alias list and print all matches
+	for (alias = cmd_alias; alias; alias = alias->next)
+		if (!Q_strncasecmp(partial, alias->name, len))
+			buf[bpos++] = alias->name;
+
+	buf[bpos] = NULL;
+	return buf;
 }
 
 /*
@@ -678,11 +800,11 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 	cmd_source = src;
 	Cmd_TokenizeString (text);
 
-// execute the command line
+	// execute the command line
 	if (!Cmd_Argc ())
-		return;							// no tokens
+		return;					// no tokens
 
-// check functions
+	// check functions
 	for (cmd = cmd_functions; cmd; cmd = cmd->next) {
 		if (!Q_strcasecmp (cmd_argv[0], cmd->name)) {
 			cmd->function ();
@@ -690,7 +812,7 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 		}
 	}
 
-// check alias
+	// check alias
 	for (a = cmd_alias; a; a = a->next) {
 		if (!Q_strcasecmp (cmd_argv[0], a->name)) {
 			Cbuf_InsertText (a->value);
@@ -698,7 +820,7 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 		}
 	}
 
-// check cvars
+	// check cvars
 	if (!Cvar_LegacyCmd ())
 		Con_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
 

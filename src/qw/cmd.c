@@ -661,6 +661,128 @@ Cmd_CompleteCommand (char *partial)
 }
 
 /*
+	Cmd_CompleteCountPossible
+	Thanks for Taniwha's Help -EvilTypeGuy
+*/
+int
+Cmd_CompleteCountPossible (char *partial)
+{
+	cmd_function_t	*cmd;
+	int				len;
+	int				h;
+	
+	h = 0;
+	len = Q_strlen(partial);
+	
+	if (!len)
+		return 0;
+	
+	// Loop through the command list and count all partial matches
+	for (cmd = cmd_functions; cmd; cmd = cmd->next)
+		if (!Q_strncasecmp(partial, cmd->name, len))
+			h++;
+
+	return h;
+}
+
+/*
+	Cmd_CompleteBuildList
+	Thanks for Taniwha's Help -EvilTypeGuy
+*/
+char	**
+Cmd_CompleteBuildList (char *partial)
+{
+	cmd_function_t	*cmd;
+	int				len = 0;
+	int				bpos = 0;
+	int				sizeofbuf = (Cmd_CompleteCountPossible (partial) + 1) * sizeof (char *);
+	char			**buf;
+
+	len = Q_strlen(partial);
+	buf = malloc(sizeofbuf + sizeof (char *));
+	// Loop through the alias list and print all matches
+	for (cmd = cmd_functions; cmd; cmd = cmd->next)
+		if (!Q_strncasecmp(partial, cmd->name, len))
+			buf[bpos++] = cmd->name;
+
+	buf[bpos] = NULL;
+	return buf;
+}
+
+/*
+	Cmd_CompleteAlias
+	Thanks for Taniwha's Help -EvilTypeGuy
+*/
+char
+*Cmd_CompleteAlias (char * partial)
+{
+	cmdalias_t	*alias;
+	int			len;
+
+	len = Q_strlen(partial);
+
+	if (!len)
+		return NULL;
+
+	// Check aliases
+	for (alias = cmd_alias; alias; alias = alias->next)
+		if (!Q_strncasecmp(partial, alias->name, len))
+			return alias->name;
+
+	return NULL;
+}
+
+/*
+	Cmd_CompleteAliasCountPossible
+	Thanks for Taniwha's Help -EvilTypeGuy
+*/
+int
+Cmd_CompleteAliasCountPossible (char *partial)
+{
+	cmdalias_t	*alias;
+	int			len;
+	int			h;
+
+	h = 0;
+
+	len = Q_strlen(partial);
+
+	if (!len)
+		return 0;
+
+	// Loop through the command list and count all partial matches
+	for (alias = cmd_alias; alias; alias = alias->next)
+		if (!Q_strncasecmp(partial, alias->name, len))
+			h++;
+
+	return h;
+}
+
+/*
+	Cmd_CompleteAliasBuildList
+	Thanks for Taniwha's Help -EvilTypeGuy
+*/
+char	**
+Cmd_CompleteAliasBuildList (char *partial)
+{
+	cmdalias_t	*alias;
+	int			len = 0;
+	int			bpos = 0;
+	int			sizeofbuf = (Cmd_CompleteAliasCountPossible (partial) + 1) * sizeof (char *);
+	char		**buf;
+
+	len = Q_strlen(partial);
+	buf = malloc(sizeofbuf + sizeof (char *));
+	// Loop through the alias list and print all matches
+	for (alias = cmd_alias; alias; alias = alias->next)
+		if (!Q_strncasecmp(partial, alias->name, len))
+			buf[bpos++] = alias->name;
+
+	buf[bpos] = NULL;
+	return buf;
+}
+
+/*
 ===================
 Cmd_ForwardToServer
 

@@ -179,7 +179,7 @@ Interactive line editing and console scrollback
 void
 Key_Console (int key)
 {
-	char       *cmd;
+//	char       *cmd;
 	int			i;
 
 	if (key == K_ENTER) {
@@ -243,18 +243,9 @@ Key_Console (int key)
 		return;
 	}
 	
-	if (key == K_TAB) {					// command completion
-		cmd = Cmd_CompleteCommand (key_lines[edit_line] + 1);
-		if (!cmd)
-			cmd = Cvar_TabComplete (key_lines[edit_line] + 1);
-		if (cmd) {
-			Q_strcpy (key_lines[edit_line] + 1, cmd);
-			key_linepos = Q_strlen (cmd) + 1;
-			key_lines[edit_line][key_linepos] = ' ';
-			key_linepos++;
-			key_lines[edit_line][key_linepos] = 0;
-			return;
-		}
+	// Command Line Completion
+	if (key == K_TAB) {
+		Con_CompleteCommandLine();
 	}
 
 	if (key == K_BACKSPACE || key == K_LEFTARROW) {

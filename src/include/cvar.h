@@ -67,6 +67,8 @@ qboolean Cvar_LegacyCmd (void);
 
 cvar_t *Cvar_Find (const char *name);
 
+int Cvar_CompleteCountPossible (char *partial);
+char **Cvar_CompleteBuildList (char *partial);
 char *Cvar_TabComplete (const char *partial);
 
 void Cvar_Cleanup (void);

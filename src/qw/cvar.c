@@ -242,6 +242,63 @@ Cvar_Find (const char *name)
 	return NULL;	// Cvar doesn't exist
 }
 
+/*
+	CVar_CompleteCountPossible
+
+	New function for tab-completion system
+	Added by EvilTypeGuy
+	Thanks to Fett erich@heintz.com
+
+*/
+int
+Cvar_CompleteCountPossible (char *partial)
+{
+	cvar_list_t	*v;
+	int			len;
+	int			h;
+	
+	h = 0;
+	len = Q_strlen(partial);
+	
+	if (!len)
+		return	0;
+	
+	// Loop through the cvars and count all possible matches
+	for (v = cvars; v; v = v->next)
+		if (!Q_strncasecmp(partial, v->var->name, len))
+			h++;
+	
+	return h;
+}
+
+/*
+	CVar_CompleteBuildList
+
+	New function for tab-completion system
+	Added by EvilTypeGuy
+	Thanks to Fett erich@heintz.com
+	Thanks to taniwha
+
+*/
+char	**
+Cvar_CompleteBuildList (char *partial)
+{
+	cvar_list_t	*v;
+	int			len = 0;
+	int			bpos = 0;
+	int			sizeofbuf = (Cvar_CompleteCountPossible (partial) + 1) * sizeof (char *);
+	char		**buf;
+
+	len = Q_strlen(partial);
+	buf = malloc(sizeofbuf + sizeof (char *));
+	// Loop through the alias list and print all matches
+	for (v = cvars; v; v = v->next)
+		if (!Q_strncasecmp(partial, v->var->name, len))
+			buf[bpos++] = v->var->name;
+
+	buf[bpos] = NULL;
+	return buf;
+}	
 
 // FIXME: Replace this mess with a bash-style complete
 char *
