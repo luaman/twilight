@@ -43,7 +43,7 @@ Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 model_t     mod_known[MAX_MOD_KNOWN];
 int         mod_numknown;
 
-qboolean    isnotmap;
+qboolean    ismap;
 
 
 /*
@@ -149,7 +149,7 @@ Mod_ClearAll (void)
 	model_t    *mod;
 
 	for (i = 0, mod = mod_known; i < MAX_MOD_KNOWN; i++, mod++)
-		if (!mod->needload && mod->name[0] && (mod->type == mod_brush))
+		if (mod->loaded && mod->name[0] && (mod->type == mod_brush))
 			Mod_UnloadModel (mod);
 }
 
@@ -188,7 +188,6 @@ Mod_FindName (char *name)
 		mod_numknown++;
 		mod = freemod;
 		strcpy (mod->name, name);
-		mod->needload = true;
 		return mod;
 	}
 

@@ -549,10 +549,13 @@ Returns the proper texture for a given time and base texture
 ===============
 */
 static texture_t *
-R_TextureAnimation (texture_t *base)
+R_TextureAnimation (texture_t *base, int frame)
 {
 	int			relative;
 	int			count;
+
+	if (frame && base->alt_anims)
+		base = base->alt_anims;
 
 	if (!base->anim_total)
 		return base;
@@ -672,7 +675,7 @@ R_DrawTextureChains
 ================
 */
 void
-R_DrawTextureChains (model_t *mod, vec3_t origin)
+R_DrawTextureChains (model_t *mod, vec3_t origin, int frame)
 {
 	Uint			 i, j;
 	texture_t		*st;
@@ -737,7 +740,7 @@ R_DrawTextureChains (model_t *mod, vec3_t origin)
 			if ((chain->visframe != vis_framecount)
 					|| !(chain->flags & CHAIN_NORMAL))
 				continue;
-			st = R_TextureAnimation (chain->texture);
+			st = R_TextureAnimation (chain->texture, frame);
 			qglActiveTextureARB (GL_TEXTURE0_ARB);
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 			qglActiveTextureARB (GL_TEXTURE1_ARB);
@@ -772,7 +775,7 @@ R_DrawTextureChains (model_t *mod, vec3_t origin)
 			if ((chain->visframe != vis_framecount)
 					|| !(chain->flags & CHAIN_NORMAL))
 				continue;
-			st = R_TextureAnimation (chain->texture);
+			st = R_TextureAnimation (chain->texture, frame);
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 
 			for (j = 0; j < chain->n_items; j++)
@@ -831,7 +834,7 @@ R_DrawTextureChains (model_t *mod, vec3_t origin)
 			if ((chain->visframe != vis_framecount)
 					|| !(chain->flags & CHAIN_NORMAL))
 				continue;
-			st = R_TextureAnimation (chain->texture);
+			st = R_TextureAnimation (chain->texture, frame);
 			if (!st->fb_texturenum)
 				continue;
 			qglBindTexture (GL_TEXTURE_2D, st->fb_texturenum);
@@ -929,7 +932,7 @@ R_DrawOpaqueBrushModel (entity_t *e)
 	qglRotatef (e->angles[0], 0, 1, 0);
 	qglRotatef (e->angles[2], 1, 0, 0);
 
-	R_DrawTextureChains (mod, e->origin);
+	R_DrawTextureChains (mod, e->origin, e->frame);
 
 	qglPopMatrix ();
 }

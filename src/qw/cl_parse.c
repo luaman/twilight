@@ -243,7 +243,7 @@ Model_NextDownload (void)
 	int         i;
 	extern char gamedirfile[];
 	char mapname[MAX_QPATH] = { 0 };
-	extern		qboolean    isnotmap;
+	extern		qboolean    ismap;
 
 	if (cls.downloadnumber == 0) {
 		Com_Printf ("Checking models...\n");
@@ -265,7 +265,7 @@ Model_NextDownload (void)
 	for (i = 1; i < MAX_MODELS; i++) {
 		if (!cl.model_name[i][0])
 			break;
-		isnotmap = (i != 1);
+		ismap = (i == 1);
 
 		cl.model_precache[i] = Mod_ForName (cl.model_name[i], false);
 
@@ -279,7 +279,7 @@ Model_NextDownload (void)
 			return;
 		}
 
-		if (!isnotmap)
+		if (ismap)
 		{
 			strncpy (mapname, COM_SkipPath (cl.model_precache[1]->name), MAX_QPATH);
 			COM_StripExtension (mapname, mapname);

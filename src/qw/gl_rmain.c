@@ -290,7 +290,7 @@ R_DrawOpaqueBrushModels ()
 	vec3_t		 mins, maxs;
 	int			 i;
 
-	R_DrawTextureChains (cl.worldmodel, r_origin);
+	R_DrawTextureChains (cl.worldmodel, r_origin, 0);
 
 	if (!r_drawentities->ivalue)
 		return;

@@ -43,7 +43,7 @@ static const char rcsid[] =
 #include "dyngl.h"
 
 extern model_t	*loadmodel;
-extern qboolean isnotmap;
+extern qboolean ismap;
 extern texture_t *r_notexture;
 extern texture_t *r_notexture_water;
 
@@ -767,10 +767,10 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 	Mod_LoadVertexes (&header->lumps[LUMP_VERTEXES]);
 	Mod_LoadEdges (&header->lumps[LUMP_EDGES]);
 	Mod_LoadSurfedges (&header->lumps[LUMP_SURFEDGES]);
-	Mod_LoadTextures (&header->lumps[LUMP_TEXTURES]);
-	Mod_LoadLighting (&header->lumps[LUMP_LIGHTING]);
+	Mod_LoadTextures (&header->lumps[LUMP_TEXTURES]);			// Client only.
+	Mod_LoadLighting (&header->lumps[LUMP_LIGHTING]);			// Client only.
 	Mod_LoadPlanes (&header->lumps[LUMP_PLANES]);
-	Mod_LoadTexinfo (&header->lumps[LUMP_TEXINFO]);
+	Mod_LoadTexinfo (&header->lumps[LUMP_TEXINFO]);				// Client only.
 	Mod_LoadFaces (&header->lumps[LUMP_FACES]);
 	Mod_LoadMarksurfaces (&header->lumps[LUMP_MARKSURFACES]);
 	Mod_LoadVisibility (&header->lumps[LUMP_VISIBILITY]);
@@ -784,11 +784,11 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	mod->numframes = 2;					// regular and alternate animation
 
-//	bheader->lightblock = Zone_Alloc(mod->zone, sizeof(lightblock_t));
-
 	//
 	// set up the submodels (FIXME: this is confusing)
 	//
+	Com_Printf ("%s: %d\n", mod->name, mod->brush->numsubmodels);
+
 	for (i = 0; i < mod->brush->numsubmodels; i++) {
 		int			l, k;
 		Uint		j;
@@ -806,7 +806,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		bheader->firstmodelsurface = bm->firstface;
 		bheader->nummodelsurfaces = bm->numfaces;
 
-		Mod_MakeChains ();
+		Mod_MakeChains ();	// Client only.
 
 		mod->normalmins[0] = mod->normalmins[1] = mod->normalmins[2] = 1000000000.0f;
 		mod->normalmaxs[0] = mod->normalmaxs[1] = mod->normalmaxs[2] = -1000000000.0f;
@@ -847,16 +847,16 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		VectorSet(mod->rotatedmaxs, modelradius, modelradius, modelradius);
 
 		bheader->numleafs = bm->visleafs;
-		mod->needload = false;
+		mod->loaded = true;
 
-		if (!isnotmap && (i < bheader->numsubmodels - 1))
+		if (ismap && (i < bheader->numsubmodels - 1))
 		{
 			// New name.
 			snprintf (name, sizeof(name), "*%d", i + 1);
 			// Get a struct for this model name.
 			loadmodel = Mod_FindName (name);
 			// If it was an old model then unload it first.
-			if (!loadmodel->needload)
+			if (loadmodel->loaded)
 				Mod_UnloadModel (loadmodel); // FIXME
 			// Copy over the basic information.
 			*loadmodel = *mod;
@@ -893,24 +893,14 @@ Mod_UnloadBrushModel (model_t *mod)
 	for (i = 0; i < mod->brush->lightblock.num; i++)
 		qglDeleteTextures (1, &mod->brush->lightblock.chains[i].l_texnum);
 
-	if (mod->brush->main_model)
+	if (mod->brush->main_model && !unloading)
 	{
-		if (unloading)
-			return;
-
-		unloading = true;
 		Mod_UnloadModel (mod->brush->main_model);
-		unloading = false;
-
 		return;
 	}
 
-	for (i = 1; i <= mod->brush->numsubmodels; i++) {
-		sub = Mod_FindName(va("*%d", i));
-		Mod_UnloadModel(sub); // FIXME
-	}
-
-	for (i = 0; i < (mod->brush->numtextures - 2); i++) {
+	for (i = 0; i < (mod->brush->numtextures - 2); i++)	// Client only.
+	{
 		if (!mod->brush->textures[i])	// There may be some NULL textures.
 			continue;
 
@@ -920,5 +910,15 @@ Mod_UnloadBrushModel (model_t *mod)
 			GL_DeleteTexture(mod->brush->textures[i]->fb_texturenum);
 	}
 
-	Zone_FreeZone (&mod->zone);
+	if (!unloading)
+	{
+		unloading = true;
+		for (i = 1; i <= mod->brush->numsubmodels; i++) {
+			sub = Mod_FindName(va("*%d", i));
+			Mod_UnloadModel(sub); // FIXME
+		}
+		unloading = false;
+
+		Zone_FreeZone (&mod->zone);
+	}
 }

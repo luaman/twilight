@@ -40,8 +40,6 @@ static const char rcsid[] =
 #include "mod_alias.h"
 #include "gl_arrays.h"
 
-extern qboolean isnotmap;
-
 /*
 ==============================================================================
 

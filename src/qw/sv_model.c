@@ -55,12 +55,11 @@ unsigned   *model_checksum;
 void
 Mod_UnloadModel (model_t *mod)
 {
-	if (mod->needload)
+	if (!mod->loaded)
 		return;
 
 	Mod_UnloadBrushModel (mod);
 	memset(mod, 0, sizeof(model_t));
-	mod->needload = true;
 }
 
 /*
@@ -75,7 +74,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 {
 	unsigned   *buf;
 
-	if (!mod->needload) {
+	if (mod->loaded) {
 		return mod;					// not cached at all
 	}
 //
@@ -97,7 +96,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 //
 
 // call the apropriate loader
-	mod->needload = false;
+	mod->loaded = true;
 
 	Mod_LoadBrushModel (mod, buf);
 
@@ -279,8 +278,6 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		VectorSet(mod->rotatedmaxs, modelradius, modelradius, modelradius);
 
 		bheader->numleafs = bm->visleafs;
-		mod->needload = false;
-
 		if ((i < bheader->numsubmodels - 1))
 		{
 			// New name.
@@ -288,7 +285,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 			// Get a struct for this model name.
 			loadmodel = Mod_FindName (name);
 			// If it was an old model then unload it first.
-			if (!loadmodel->needload)
+			if (loadmodel->loaded)
 				Mod_UnloadModel (loadmodel); // FIXME
 			// Copy over the basic information.
 			*loadmodel = *mod;
@@ -319,22 +316,21 @@ Mod_UnloadBrushModel (model_t *mod)
 	Uint			 i;
 	static qboolean	 unloading = false;
 
-	if (mod->brush->main_model)
+	if (mod->brush->main_model && !unloading)
 	{
-		if (unloading)
-			return;
-
-		unloading = true;
 		Mod_UnloadModel (mod->brush->main_model);
-		unloading = false;
-
 		return;
 	}
 
-	for (i = 1; i <= mod->brush->numsubmodels; i++) {
-		sub = Mod_FindName(va("*%d", i));
-		Mod_UnloadModel(sub); // FIXME
-	}
+	if (!unloading)
+	{
+		unloading = true;
+		for (i = 1; i <= mod->brush->numsubmodels; i++) {
+			sub = Mod_FindName(va("*%d", i));
+			Mod_UnloadModel(sub); // FIXME
+		}
+		unloading = false;
 
-	Zone_FreeZone (&mod->zone);
+		Zone_FreeZone (&mod->zone);
+	}
 }
