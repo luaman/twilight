@@ -136,8 +136,8 @@ NET_CompareBaseAdr (netadr_t a, netadr_t b)
 qboolean
 NET_CompareAdr (netadr_t a, netadr_t b)
 {
-	return ((a.type == NA_LOOPBACK && b.type == NA_LOOPBACK) ||
-		(*(unsigned *)a.ip == *(unsigned *)b.ip && a.port == b.port));
+	return (*(unsigned *)net_from.ip == *(unsigned *)net_local_adr.ip ||
+			*(unsigned *)net_from.ip == htonl(INADDR_LOOPBACK));
 }
 
 char       *

@@ -763,7 +763,6 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 	// check cvars
 	if (!Cvar_LegacyCmd () && (developer->value))
 		Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
-
 }
 
 

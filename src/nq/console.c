@@ -610,6 +610,8 @@ Con_CompleteCommandLine (void)
 	s = key_lines[edit_line] + 1;
 	if (*s == '\\' || *s == '/')
 		s++;
+	if (!*s)
+		return;
 
 	// Count number of possible matches
 	c = Cmd_CompleteCountPossible(s);

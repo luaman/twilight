@@ -79,6 +79,10 @@ typedef struct {
 	// results
 	int         numtouch;
 	int         touchindex[MAX_PHYSENTS];
+
+	int         groundent;
+	int         waterlevel;
+	int         watertype;
 } playermove_t;
 
 typedef struct {
@@ -97,9 +101,6 @@ typedef struct {
 
 extern movevars_t movevars;
 extern playermove_t pmove;
-extern int  onground;
-extern int  waterlevel;
-extern int  watertype;
 struct hull_s;
 
 void        PlayerMove (void);
