@@ -30,6 +30,8 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "SDL.h"
+
 #include "quakedef.h"
 #include "strlib.h"
 #include "cdaudio.h"
@@ -654,8 +656,11 @@ _Host_Frame (double time)
 
 // decide the simulation time
 	if (!Host_FilterTime (time))
+	{
+		SDL_Delay (1);
 		return;							// don't run too fast, or packets will
 	// flood out
+	}
 
 // get new key events
 	Sys_SendKeyEvents ();
