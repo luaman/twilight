@@ -16,10 +16,10 @@ lib_LIBRARIES=libtwilight_fs.a
 BUILT_SOURCES=embedded_data.h
 
 noinst_HEADERS= \
-	embedded_data.h dir.h embedded.h fs.h fs_hash.h fs_new.h pak.h rw_ops.h wad.h
+	embedded_data.h bsp.h dir.h embedded.h fs.h fs_hash.h fs_new.h pak.h rw_ops.h wad.h
 
 libtwilight_fs_a_SOURCES= \
-	dir_posix.c embedded.c fs.c fs_hash.c fs_new.c pak.c rw_ops.c wad.c
+	bsp.c dir_posix.c embedded.c fs.c fs_hash.c fs_new.c pak.c rw_ops.c wad.c
 
 EXTRA_DIST = \
 	twilight_image.dsp twilight_image.vcproj

@@ -55,20 +55,33 @@ static const char rcsid[] =
 void
 Mod_LoadTextures (lump_t *l, model_t *mod)
 {
-	int				i, j, pixels, num, max, altmax;
+	int				i, j, num, max, altmax, what;
 	miptex_t		*dmiptex;
 	texture_t		*tx, *tx2;
 	texture_t		*anims[10];
 	texture_t		*altanims[10];
 	dmiptexlump_t	*m;
-	Uint8			*mtdata;
 	brushhdr_t		*bheader = mod->brush;
+	char			*base_name, *map_name, *tmp;
+	char			*paths[11];
+	image_t			*img, *img2;
 
 	if (!l->filelen)
 	{
 		bheader->textures = NULL;
 		return;
 	}
+
+	base_name = Zstrdup (tempzone, mod->name);
+	if ((tmp = strrchr (base_name, '.')))
+		*tmp = '\0';
+	if ((tmp = strrchr (base_name, '/')))
+		map_name = tmp + 1;
+	else
+		map_name = base_name;
+
+	Com_Printf ("Map: %s\n", map_name);
+
 	m = (dmiptexlump_t *) (mod_base + l->fileofs);
 
 	m->nummiptex = LittleLong (m->nummiptex);
@@ -84,25 +97,82 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 		if (m->dataofs[i] == -1)
 			continue;
 		dmiptex = (miptex_t *) ((Uint8 *) m + m->dataofs[i]);
-		dmiptex->width = LittleLong (dmiptex->width);
-		dmiptex->height = LittleLong (dmiptex->height);
 		for (j = 0; j < MIPLEVELS; j++)
 			dmiptex->offsets[j] = LittleLong (dmiptex->offsets[j]);
 
 		if ((dmiptex->width & 15) || (dmiptex->height & 15))
 			Host_EndGame ("Texture %s is not 16 aligned", dmiptex->name);
-		pixels = dmiptex->width * dmiptex->height * (85 / 64);
 		tx = Zone_Alloc (mod->zone, sizeof (texture_t));
 		tx->tex_idx = i;
 		bheader->textures[i] = tx;
 
 		memcpy (tx->name, dmiptex->name, sizeof (tx->name));
+
+#define WHAT_SKY				0
+#define WHAT_WATER				1
+#define WHAT_NORMAL				2
+
+		if (tx->name[0] == '*')
+			what = WHAT_WATER;
+		else if (!strncasecmp (tx->name, "sky", 3))
+			what = WHAT_SKY;
+		else
+			what = WHAT_NORMAL;
+
 		tx->width = dmiptex->width;
 		tx->height = dmiptex->height;
 
-		mtdata = (Uint8 *)(dmiptex) + dmiptex->offsets[0];
+		paths[0] = zasprintf (tempzone, "%s/%s", base_name, tx->name);
+		paths[1] = zasprintf (tempzone, "override/%s/%s", map_name, tx->name);
+		paths[2] = zasprintf (tempzone, "textures/%s/%s", map_name, tx->name);
+		paths[3] = zasprintf (tempzone, "override/%s", tx->name);
+		paths[4] = zasprintf (tempzone, "textures/%s", tx->name);
+		paths[5] = NULL;
+		img = Image_Load_Multi ((const char **) paths, TEX_NEED | TEX_KEEPRAW);
+		tmp = img->file->name_base;
+
+		if (what == WHAT_SKY)
+			Sky_InitSky (img);
+		else if (what == WHAT_WATER)
+			tx->gl_texturenum = GLT_Load_image (tmp, img, NULL,
+					TEX_FORCE | TEX_MIPMAP);
+		else if (img->type == IMG_QPAL) {
+			tx->gl_texturenum = GLT_Load_image (tmp, img, d_palette_base,
+					TEX_MIPMAP | TEX_FORCE);
+			tx->fb_texturenum = GLT_Load_image (va("%s_glow", tmp), img,
+					d_palette_fb, TEX_MIPMAP);
+		} else {
+			tx->gl_texturenum = GLT_Load_image (tmp, img, d_palette_base,
+					TEX_MIPMAP | TEX_FORCE);
+			for (j = 0; paths[j]; j++)
+				Zone_Free (paths[j]);
+			paths[0] = zasprintf (tempzone, "%s/%s_glow", base_name, tx->name);
+			paths[1] = zasprintf (tempzone, "%s/%s_luma", base_name, tx->name);
+			paths[2] = zasprintf (tempzone, "override/%s/%s_glow", map_name, tx->name);
+			paths[3] = zasprintf (tempzone, "override/%s/%s_luma", map_name, tx->name);
+			paths[4] = zasprintf (tempzone, "textures/%s/%s_glow", map_name, tx->name);
+			paths[5] = zasprintf (tempzone, "textures/%s/%s_luma", map_name, tx->name);
+			paths[6] = zasprintf (tempzone, "override/%s_glow", tx->name);
+			paths[7] = zasprintf (tempzone, "override/%s_luma", tx->name);
+			paths[8] = zasprintf (tempzone, "textures/%s_glow", tx->name);
+			paths[9] = zasprintf (tempzone, "textures/%s_luma", tx->name);
+			paths[10] = NULL;
+			img2 = Image_Load_Multi ((const char **) paths, TEX_MIPMAP | TEX_UPLOAD);
+			if (img2) {
+				tx->fb_texturenum = img2->texnum;
+				Zone_Free (img2);
+			}
+		}
+		Zone_Free (img->pixels);
+		img->pixels = NULL;
+		Zone_Free (img);
+
+		for (j = 0; paths[j]; j++)
+			Zone_Free (paths[j]);
+
 
 		// Gross hack: Fix the shells Quake1 shells box
+		/*
 		if (!strcmp(dmiptex->name, "shot1sid")
 				&& dmiptex->width == 32 && dmiptex->height == 32
 				&& CRC_Block((Uint8 *)(dmiptex + 1),
@@ -114,26 +184,7 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 			// it look nice.
 			memcpy (mtdata, mtdata + (32 * 31), 32);
 		}
-
-		if (!strncmp (dmiptex->name, "sky", 3))
-			Sky_InitSky (tx, mtdata);
-		else
-		{
-			if (dmiptex->name[0] == '*')
-				// we don't brighten turb textures
-				tx->gl_texturenum = GLT_Load_Raw (dmiptex->name, tx->width,
-						tx->height, (Uint8 *)(mtdata), d_palette_raw,
-						TEX_MIPMAP | TEX_FORCE, 8);
-			else
-			{
-				tx->gl_texturenum = GLT_Load_Raw (dmiptex->name, tx->width,
-						tx->height, (Uint8 *)(mtdata), d_palette_base,
-						TEX_MIPMAP | TEX_FORCE, 8);
-				tx->fb_texturenum = GLT_Load_Raw (va("@fb_%s", dmiptex->name),
-						tx->width, tx->height, (Uint8 *)(mtdata),
-						d_palette_fb, TEX_MIPMAP, 8);
-			}
-		}
+		*/
 	}
 
 	// Add the r_notextures to the list
@@ -235,6 +286,8 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 				tx2->alt_anims = anims[0];
 		}
 	}
+
+	Zone_Free (base_name);
 }
 
 void

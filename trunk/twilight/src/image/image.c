@@ -40,8 +40,7 @@ static const char rcsid[] =
 
 memzone_t			*img_zone;
 img_search_t		*img_search;
-static char			**exts_real;
-static char			***exts;
+static char			**exts;
 
 void
 Image_Init (void)
@@ -75,17 +74,12 @@ Image_Init (void)
 	count += Image_InitSDL ();
 
 	exts = Zone_Alloc (img_zone, sizeof (char *) * (count + 1));
-	exts_real = Zone_Alloc (img_zone, sizeof (char *) * (count + 1));
 
 	for (i = 0, search = img_search;
 			i < count && search;
 			i++, search = search->next) {
-		exts_real[i] = search->ext;
+		exts[i] = search->ext;
 	}
-	exts_real[i] = NULL;
-
-	for (i = 0; i < count; i++)
-		exts[i] = exts_real;
 	exts[i] = NULL;
 }
 
@@ -126,7 +120,7 @@ Image_Load_Multi (const char **names, int flags)
 		if (!strcasecmp(file->ext, search->ext))
 			if ((img = search->load(file, rw))) {
 				if (flags & TEX_UPLOAD)
-					GLT_Load_image (file->name_base, img, flags);
+					GLT_Load_image (file->name_base, img, NULL, flags);
 				if (!(flags & TEX_KEEPRAW)) {
 					Zone_Free (img->pixels);
 					img->pixels = NULL;

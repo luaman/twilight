@@ -1427,6 +1427,7 @@ Host_Init (void)
 	Com_Printf ("Exe: "__TIME__" "__DATE__"\n");
 
 	Image_Init ();
+	VID_Init ();
 
 	Draw_Init_Cvars ();				// initialize all draw system related cvars
 	Draw_Init ();					// setup draw system, add related commands

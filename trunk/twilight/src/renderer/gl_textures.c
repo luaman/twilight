@@ -117,7 +117,7 @@ GLT_Init_Cvars ()
 {
 	int max_tex_size = 0;
 
-	qglGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_tex_size);
+	qglGetIntegerv (GL_MAX_TEXTURE_SIZE, &max_tex_size);
 	if (!max_tex_size)
 		max_tex_size = 1024;
 
@@ -1226,15 +1226,15 @@ FIXME: HACK HACK HACK - this is just a GL_LoadTexture for image_t's for now
 ================
 */
 int
-GLT_Load_image(const char *identifier, image_t *img, int flags)
+GLT_Load_image(const char *identifier, image_t *img, Uint32 *palette, int flags)
 {
 	switch (img->type) {
 		case IMG_QPAL:
 			return img->texnum = GLT_Load_Raw (identifier, img->width,
-					img->height, img->pixels, NULL, flags, 8);
+					img->height, img->pixels, palette, flags, 8);
 		case IMG_RGBA:
 			return img->texnum = GLT_Load_Raw (identifier, img->width,
-					img->height, img->pixels, NULL, flags, 32);
+					img->height, img->pixels, palette, flags, 32);
 		default:
 			Sys_Error ("Bad bpp!");
 	}
