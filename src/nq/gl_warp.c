@@ -34,6 +34,8 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <stdio.h>
+
 #include "opengl_ext.h"
 
 #include "quakedef.h"

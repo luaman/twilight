@@ -28,8 +28,11 @@
 #ifndef __SERVER_H
 #define __SERVER_H
 
+#include <setjmp.h>
+
 #include "client.h"
 #include "progs.h"
+#include "net.h"
 
 typedef struct {
 	Uint32		maxclients;
