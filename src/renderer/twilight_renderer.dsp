@@ -101,6 +101,10 @@ SOURCE=.\noise_textures.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\pointers.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\transform.c
 # End Source File
 # End Group
