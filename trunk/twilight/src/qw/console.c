@@ -44,29 +44,31 @@ static const char rcsid[] =
 
 extern void Size_Changed2D (cvar_t *cvar);
 
-int			con_ormask;
-console_t  *con;
+memzone_t *con_zone;
 
-int			con_linewidth;				// characters across screen
-int			con_totallines;				// total lines in console scrollback
+int con_ormask;
+console_t *con;
 
-float		con_cursorspeed = 4;
+int con_linewidth;						// characters across screen
+int con_totallines;						// total lines in console scrollback
 
-
-cvar_t	   *con_notifytime;
-
-#define	NUM_CON_TIMES 4
-float		con_times[NUM_CON_TIMES];	// realtime the line was generated
-
-int			con_vislines;
-int			con_notifylines;			// scan lines to clear for notify lines
-
-extern char	key_lines[32][MAX_INPUTLINE];
-extern int	edit_line;
-extern int	key_linepos;
+float con_cursorspeed = 4;
 
 
-qboolean	con_initialized;
+cvar_t *con_notifytime;
+
+#define NUM_CON_TIMES 4
+float con_times[NUM_CON_TIMES];			// realtime the line was generated
+
+int con_vislines;
+int con_notifylines;					// scan lines to clear for notify lines
+
+extern char key_lines[32][MAX_INPUTLINE];
+extern int edit_line;
+extern int key_linepos;
+
+
+qboolean con_initialized;
 
 void
 Key_ClearTyping (void)
@@ -85,13 +87,13 @@ Con_ToggleConsole_f (void)
 {
 	Key_ClearTyping ();
 
-	if (key_dest == key_console) {
-		if (cls.state == ca_active) {
+	if (key_dest == key_console)
+	{
+		if (cls.state == ca_active)
 			key_dest = key_game;
-		}
-	} else {
-		key_dest = key_console;
 	}
+	else
+		key_dest = key_console;
 
 	Con_ClearNotify ();
 }
@@ -119,7 +121,7 @@ Con_ClearNotify
 void
 Con_ClearNotify (void)
 {
-	int         i;
+	int			i;
 
 	for (i = 0; i < NUM_CON_TIMES; i++)
 		con_times[i] = 0;
@@ -159,21 +161,24 @@ Con_Resize
 void
 Con_Resize (console_t *con)
 {
-	int         i, j, width, oldwidth, oldtotallines, numlines, numchars;
-	char        tbuf[CON_TEXTSIZE];
+	int			i, j, width, oldwidth, oldtotallines, numlines, numchars;
+	char		tbuf[CON_TEXTSIZE];
 
 	width = (vid.width_2d / con->tsize) - 2;
 
 	if (width == con_linewidth)
 		return;
 
-	if (width < 1)						// video hasn't been initialized yet
+	if (width < 1)
 	{
+		// video hasn't been initialised yet
 		width = 38;
 		con_linewidth = width;
 		con_totallines = CON_TEXTSIZE / con_linewidth;
 		memset (con->text, ' ', CON_TEXTSIZE);
-	} else {
+	}
+	else
+	{
 		oldwidth = con_linewidth;
 		con_linewidth = width;
 		oldtotallines = con_totallines;
@@ -191,11 +196,13 @@ Con_Resize (console_t *con)
 		memcpy (tbuf, con->text, CON_TEXTSIZE);
 		memset (con->text, ' ', CON_TEXTSIZE);
 
-		for (i = 0; i < numlines; i++) {
-			for (j = 0; j < numchars; j++) {
+		for (i = 0; i < numlines; i++)
+		{
+			for (j = 0; j < numchars; j++)
+			{
 				con->text[(con_totallines - 1 - i) * con_linewidth + j] =
-					tbuf[((con->current - i + oldtotallines) %
-						  oldtotallines) * oldwidth + j];
+					tbuf[((con->current - i + oldtotallines)
+							% oldtotallines) * oldwidth + j];
 			}
 		}
 
@@ -240,11 +247,15 @@ Con_Init
 void
 Con_Init (void)
 {
-	con = malloc (sizeof (console_t));
+	con_zone = Zone_AllocZone ("console");
+
+	con = Zone_Alloc (con_zone, sizeof(console_t));
+
+	// these must be initialised here
 	con_linewidth = -1;
-	con->current = 0;	// these *MUST*
-	con->x = 0;			// be initialized
-	con->display = 0;	// here
+	con->current = 0;
+	con->x = 0;
+	con->display = 0;
 
 	Size_Changed2D (NULL);
 
@@ -270,8 +281,8 @@ Con_Linefeed (void)
 	if (con->display == con->current)
 		con->display++;
 	con->current++;
-	memset (&con->text[(con->current % con_totallines) * con_linewidth]
-			  , ' ', con_linewidth);
+	memset (&con->text[(con->current % con_totallines) * con_linewidth],
+			' ', con_linewidth);
 }
 
 /*
@@ -292,14 +303,17 @@ Con_Print (char *txt)
 	if (!con_initialized)
 		return;
 
-	if (txt[0] == 1 || txt[0] == 2) {
-		mask = 128;						// go to colored text
+	if (txt[0] == 1 || txt[0] == 2)
+	{
+		// go to colored text
+		mask = 128;
 		txt++;
-	} else
+	}
+	else
 		mask = 0;
 
-
-	while ((c = *txt)) {
+	while ((c = *txt))
+	{
 		// count word length
 		for (l = 0; l < con_linewidth; l++)
 			if (txt[l] <= ' ')
@@ -311,20 +325,23 @@ Con_Print (char *txt)
 
 		txt++;
 
-		if (cr) {
+		if (cr)
+		{
 			con->current--;
 			cr = false;
 		}
 
 
-		if (!con->x) {
+		if (!con->x)
+		{
 			Con_Linefeed ();
 			// mark time for transparent overlay
 			if (con->current >= 0)
 				con_times[con->current % NUM_CON_TIMES] = cls.realtime;
 		}
 
-		switch (c) {
+		switch (c)
+		{
 			case '\n':
 				con->x = 0;
 				break;
@@ -334,7 +351,8 @@ Con_Print (char *txt)
 				cr = 1;
 				break;
 
-			default:					// display character and advance
+			default:
+				// display character and advance
 				y = con->current % con_totallines;
 				con->text[y * con_linewidth + con->x] = c | mask | con_ormask;
 				con->x++;
@@ -342,7 +360,6 @@ Con_Print (char *txt)
 					con->x = 0;
 				break;
 		}
-
 	}
 }
 
@@ -366,7 +383,7 @@ The input line scrolls horizontally if typing goes beyond the right edge
 void
 Con_DrawInput (void)
 {
-	char       *text;
+	char		*text;
 
 	if (key_dest != key_console && cls.state == ca_active)
 		// don't draw anything (always draw if not active)
@@ -399,14 +416,15 @@ void
 Con_DrawNotify (void)
 {
 	int			v;
-	char	   *text;
+	char		*text;
 	int			i;
 	float		time;
-	char	   *s;
-	unsigned	skip;
+	char		*s;
+	Uint		skip;
 
 	v = 0;
-	for (i = con->current - NUM_CON_TIMES + 1; i <= con->current; i++) {
+	for (i = con->current - NUM_CON_TIMES + 1; i <= con->current; i++)
+	{
 		if (i < 0)
 			continue;
 		time = con_times[i % NUM_CON_TIMES];
@@ -425,13 +443,17 @@ Con_DrawNotify (void)
 	}
 
 
-	if (key_dest == key_message) {
+	if (key_dest == key_message)
+	{
 		clearnotify = 0;
 
-		if (chat_team) {
+		if (chat_team)
+		{
 			Draw_String (con->tsize, v, "say_team:", con->tsize);
 			skip = 11;
-		} else {
+		}
+		else
+		{
 			Draw_String (con->tsize, v, "say:", con->tsize);
 			skip = 5;
 		}
@@ -444,8 +466,8 @@ Con_DrawNotify (void)
 		Draw_String (skip * con->tsize, v, s, con->tsize);
 
 		Draw_Character ((strlen(s) + skip) * con->tsize, v,
-						10 + ((int) (cls.realtime * con_cursorspeed) & 1),
-						con->tsize);
+				10 + ((int) (cls.realtime * con_cursorspeed) & 1),
+				con->tsize);
 		v += con->tsize;
 	}
 
@@ -463,29 +485,30 @@ Draws the console with the solid background
 void
 Con_DrawConsole (int lines)
 {
-	unsigned	i;
-	int			j, x, y, n;
-	unsigned	rows;
-	char	   *text;
+	Uint		i;
+	int			x, y;
+	int			j, n;
+	Uint		rows;
+	char		*text;
 	int			row;
 	char		dlbar[1024];
 
 	if (lines <= 0)
 		return;
 
-// draw the background
+	// draw the background
 	Draw_ConsoleBackground (lines);
 
-// draw the text
 	con_vislines = lines;
 
-// changed to line things up better
-	rows = (lines - (con->tsize * 2.75)) / con->tsize;	// rows of text to draw
+	// rows of text to draw
+	rows = (lines - (con->tsize * 2.75)) / con->tsize;
 
 	y = lines - (con->tsize * 3.75);
 
-// draw from the bottom up
-	if (con->display != con->current) {
+	// draw from the bottom up
+	if (con->display != con->current)
+	{
 		// draw arrows to show the buffer is backscrolled
 		for (x = 0; x < con_linewidth; x += 4)
 			Draw_Character ((x + 1) * con->tsize, y, '^', con->tsize);
@@ -495,20 +518,22 @@ Con_DrawConsole (int lines)
 	}
 
 	row = con->display;
-	for (i = 0; i < rows; i++, y -= con->tsize, row--) {
+	for (i = 0; i < rows; i++, y -= con->tsize, row--)
+	{
 		if (row < 0)
 			break;
 		if (con->current - row >= con_totallines)
-			break;						// past scrollback wrap point
+			// past scrollback wrap point
+			break;
 
 		text = con->text + (row % con_totallines) * con_linewidth;
 
 		Draw_String_Len(con->tsize, y, text, con_linewidth, con->tsize);
 	}
 
-	// draw the download bar
-	// figure out width
-	if (cls.download) {
+	// draw the download bar if needed
+	if (cls.download)
+	{
 		if ((text = strrchr (cls.downloadname, '/')) != NULL)
 			text++;
 		else
@@ -517,12 +542,14 @@ Con_DrawConsole (int lines)
 		x = con_linewidth - ((con_linewidth * 7) / 40);
 		y = x - strlen (text) - con->tsize;
 		i = con_linewidth / 3;
-		if (strlen (text) > i) {
+		if (strlen (text) > i)
+		{
 			y = x - i - 11;
 			strncpy (dlbar, text, i);
 			dlbar[i] = 0;
 			strcat (dlbar, "...");
-		} else
+		}
+		else
 			strcpy (dlbar, text);
 		strcat (dlbar, ": ");
 		i = strlen (dlbar);
@@ -548,7 +575,8 @@ Con_DrawConsole (int lines)
 		y = con_vislines - 22 + con->tsize;
 		Draw_String(con->tsize, y, dlbar, con->tsize);
 	}
-// draw the input prompt, user text, and cursor if desired
+
+	// draw the input prompt, user text, and cursor if desired
 	Con_DrawInput ();
 }
 
@@ -563,14 +591,15 @@ Con_DrawConsole (int lines)
 void
 Con_DisplayList(char **list)
 {
-	int	i = 0;
-	int	pos = 0;
-	int	len = 0;
-	int	maxlen = 0;
-	int	width = (con_linewidth - 4);
-	char	**walk = list;
+	int			i = 0;
+	int			pos = 0;
+	int			len = 0;
+	int			maxlen = 0;
+	int			width = (con_linewidth - 4);
+	char		**walk = list;
 
-	while (*walk) {
+	while (*walk)
+	{
 		len = strlen(*walk);
 		if (len > maxlen)
 			maxlen = len;
@@ -578,9 +607,11 @@ Con_DisplayList(char **list)
 	}
 	maxlen += 1;
 
-	while (*list) {
+	while (*list)
+	{
 		len = strlen(*list);
-		if (pos + maxlen >= width) {
+		if (pos + maxlen >= width)
+		{
 			Com_Printf("\n");
 			pos = 0;
 		}
@@ -609,11 +640,11 @@ Con_DisplayList(char **list)
 void
 Con_CompleteCommandLine (void)
 {
-	char	*cmd = "";
-	char	*s;
-	int		c, v, a, i;
-	int		cmd_len;
-	char	**list[3] = {0, 0, 0};
+	char		*cmd = "";
+	char		*s;
+	int			c, v, a, i;
+	int			cmd_len;
+	char		**list[3] = {0, 0, 0};
 
 	s = key_lines[edit_line] + 1;
 	if (*s == '\\' || *s == '/')
@@ -626,12 +657,15 @@ Con_CompleteCommandLine (void)
 	v = Cvar_CompleteCountPossible(s);
 	a = Cmd_CompleteAliasCountPossible(s);
 	
-	if (!(c + v + a)) {	// No possible matches, let the user know they're insane
+	if (!(c + v + a))
+	{
+		// No possible matches, let the user know they're insane
 		Com_Printf("\n\nNo matching aliases, commands, or cvars were found.\n\n");
 		return;
 	}
 	
-	if (c + v + a == 1) {
+	if (c + v + a == 1)
+	{
 		if (c)
 			list[0] = Cmd_CompleteBuildList(s);
 		else if (v)
@@ -640,7 +674,9 @@ Con_CompleteCommandLine (void)
 			list[0] = Cmd_CompleteAliasBuildList(s);
 		cmd = *list[0];
 		cmd_len = strlen (cmd);
-	} else {
+	}
+	else
+	{
 		if (c)
 			cmd = *(list[0] = Cmd_CompleteBuildList(s));
 		if (v)
@@ -649,11 +685,14 @@ Con_CompleteCommandLine (void)
 			cmd = *(list[2] = Cmd_CompleteAliasBuildList(s));
 
 		cmd_len = strlen (s);
-		do {
-			for (i = 0; i < 3; i++) {
+		do
+		{
+			for (i = 0; i < 3; i++)
+			{
 				char ch = cmd[cmd_len];
 				char **l = list[i];
-				if (l) {
+				if (l)
+				{
 					while (*l && (*l)[cmd_len] == ch)
 						l++;
 					if (*l)
@@ -662,7 +701,8 @@ Con_CompleteCommandLine (void)
 			}
 			if (i == 3)
 				cmd_len++;
-		} while (i == 3);
+		}
+		while (i == 3);
 		// 'quakebar'
 		Com_Printf("\n\35");
 		for (i = 0; i < con_linewidth - 4; i++)
@@ -670,26 +710,31 @@ Con_CompleteCommandLine (void)
 		Com_Printf("\37\n");
 
 		// Print Possible Commands
-		if (c) {
+		if (c)
+		{
 			Com_Printf("%i possible command%s\n", c, (c > 1) ? "s: " : ":");
 			Con_DisplayList(list[0]);
 		}
 		
-		if (v) {
+		if (v)
+		{
 			Com_Printf("%i possible variable%s\n", v, (v > 1) ? "s: " : ":");
 			Con_DisplayList(list[1]);
 		}
 		
-		if (a) {
+		if (a)
+		{
 			Com_Printf("%i possible aliases%s\n", a, (a > 1) ? "s: " : ":");
 			Con_DisplayList(list[2]);
 		}
 	}
 	
-	if (cmd) {
+	if (cmd)
+	{
 		strlcpy(key_lines[edit_line] + 1, cmd, cmd_len + 1);
 		key_linepos = cmd_len + 1;
-		if (c + v + a == 1) {
+		if (c + v + a == 1)
+		{
 			key_lines[edit_line][key_linepos] = ' ';
 			key_linepos++;
 		}
