@@ -1148,7 +1148,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	for (i = 0; i < numframes; i++) {
 		aliasframetype_t frametype;
 
-		pframetype = (daliasframetype_t *) &pintriangles[pheader->numtris];
+		pframetype = (daliasframetype_t *) datapointer;
 		datapointer += sizeof(daliasframetype_t);
 
 		frametype = LittleLong (pframetype->type);
