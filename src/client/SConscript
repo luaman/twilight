@@ -1,0 +1,15 @@
+#! /usr/bin/python
+
+Import ("env", "opts")
+env.Append (CPPPATH = ["#/src/client"])
+
+client_headers = Split("""cclient.h console.h dlight.h hud.h keys.h teamplay.h
+	""")
+
+client_sources = Split("""cclient.c console.c dlight.c hud.c keys.c teamplay.c
+	""")
+
+client_headers = ['#/src/client/'+e for e in client_headers]
+client_sources = ['#/src/client/'+e for e in client_sources]
+
+Export ("client_headers", "client_sources")

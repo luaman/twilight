@@ -1,0 +1,33 @@
+#! /usr/bin/python
+
+Import ("env", "opts", "base_sources", "client_sources", "fs_sources")
+Import ("image_sources", "renderer_sources", "sound_sources")
+env.Append (CPPPATH = ["#/src/qw"])
+
+if opts['clients']:
+    qw_headers = Split("""net.h protocol.h render.h screen.h""")
+
+    qw_sources = Split("""cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c
+	    cl_model.c cl_parse.c cl_pred.c cl_tent.c common.c gl_screen.c
+	    info.c menu.c net_chan.c net_udp.c pmove.c pmovetst.c skin.c
+	    snd_dma.c sv_null.c sys.c view.c""")
+
+    qw_sources.extend (base_sources)
+    qw_sources.extend (client_sources)
+    qw_sources.extend (fs_sources)
+    qw_sources.extend (image_sources)
+    qw_sources.extend (renderer_sources)
+    qw_sources.extend (sound_sources)
+    env.Program (target = "twilight-qw", source = qw_sources)
+
+if opts['servers']:
+    qwsv_headers = Split("""progdefs.h progs.h server.h world.h""")
+    qwsv_sources = Split("""cl_null.c common.c info.c net_chan.c net_udp.c
+	    pmove.c pmovetst.c pr_cmds.c pr_edict.c pr_exec.c sv_ccmds.c
+	    sv_ents.c sv_init.c sv_main.c sv_model.c sv_move.c sv_nchan.c
+	    sv_phys.c sv_send.c sv_sys.c sv_user.c world.c""")
+    qwsv_sources.extend (base_sources)
+    qwsv_sources.extend (fs_sources)
+    env.Program (target = "twilight-qwsv", source = qwsv_sources)
+
+Export ("qw_headers", "qw_sources")

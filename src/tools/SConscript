@@ -1,0 +1,13 @@
+#! /usr/bin/python
+
+Import ("env", "opts")
+env.Append (CPPPATH = ["#/src/tools"])
+
+tools_headers = Split(""" """)
+
+tools_sources = Split("""lhbin2c.c""")
+
+tools_headers = ['#/src/tools/'+e for e in tools_headers]
+tools_sources = ['#/src/tools/'+e for e in tools_sources]
+
+Export ("tools_headers", "tools_sources")

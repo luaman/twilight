@@ -1,0 +1,13 @@
+#! /usr/bin/python
+
+Import ("env", "opts")
+env.Append (CPPPATH = ["#/src/sound"])
+
+sound_headers = Split("""cdaudio.h sound.h""")
+
+sound_sources = Split("""cdmusic.c mem.c mix.c target.c""")
+
+sound_headers = ['#/src/sound/'+e for e in sound_headers]
+sound_sources = ['#/src/sound/'+e for e in sound_sources]
+
+Export ("sound_headers", "sound_sources")
