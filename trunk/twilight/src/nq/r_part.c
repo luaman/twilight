@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "glquake.h"
 #include "mathlib.h"
+#include "host.h"
 
 #define MAX_PARTICLES			2048	// default max # of particles at one
 										// time
@@ -110,13 +111,13 @@ R_EntityParticles (entity_t *ent)
 	}
 
 	for (i = 0; i < NUMVERTEXNORMALS; i++) {
-		angle = cl.time * avelocities[i][0];
+		angle = realtime * avelocities[i][0];
 		sy = Q_sin (angle);
 		cy = Q_cos (angle);
-		angle = cl.time * avelocities[i][1];
+		angle = realtime * avelocities[i][1];
 		sp = Q_sin (angle);
 		cp = Q_cos (angle);
-		angle = cl.time * avelocities[i][2];
+		angle = realtime * avelocities[i][2];
 		sr = Q_sin (angle);
 		cr = Q_cos (angle);
 
@@ -131,7 +132,7 @@ R_EntityParticles (entity_t *ent)
 		p->next = active_particles;
 		active_particles = p;
 
-		p->die = cl.time + 0.01;
+		p->die = realtime + 0.01;
 		p->color = 0x6f;
 		p->type = pt_explode;
 
@@ -257,7 +258,7 @@ R_ParticleExplosion (vec3_t org)
 		p->next = active_particles;
 		active_particles = p;
 
-		p->die = cl.time + 5;
+		p->die = realtime + 5;
 		p->color = ramp1[0];
 		p->ramp = Q_rand () & 3;
 		if (i & 1) {
@@ -297,7 +298,7 @@ R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength)
 		p->next = active_particles;
 		active_particles = p;
 
-		p->die = cl.time + 0.3;
+		p->die = realtime + 0.3;
 		p->color = colorStart + (colorMod % colorLength);
 		colorMod++;
 
@@ -329,7 +330,7 @@ R_BlobExplosion (vec3_t org)
 		p->next = active_particles;
 		active_particles = p;
 
-		p->die = cl.time + 1 + (Q_rand () & 8) * 0.05;
+		p->die = realtime + 1 + (Q_rand () & 8) * 0.05;
 
 		if (i & 1) {
 			p->type = pt_blob;
@@ -370,7 +371,7 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 		active_particles = p;
 
 		if (count == 1024) {			// rocket explosion
-			p->die = cl.time + 5;
+			p->die = realtime + 5;
 			p->color = ramp1[0];
 			p->ramp = Q_rand () & 3;
 			if (i & 1) {
@@ -387,7 +388,7 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 				}
 			}
 		} else {
-			p->die = cl.time + 0.1 * (Q_rand () % 5);
+			p->die = realtime + 0.1 * (Q_rand () % 5);
 			p->color = (color & ~7) + (Q_rand () & 7);
 			p->type = pt_slowgrav;
 			for (j = 0; j < 3; j++) {
@@ -423,7 +424,7 @@ R_LavaSplash (vec3_t org)
 				p->next = active_particles;
 				active_particles = p;
 
-				p->die = cl.time + 2 + (rand () & 31) * 0.02;
+				p->die = realtime + 2 + (rand () & 31) * 0.02;
 				p->color = 224 + (rand () & 7);
 				p->type = pt_slowgrav;
 
@@ -465,7 +466,7 @@ R_TeleportSplash (vec3_t org)
 				p->next = active_particles;
 				active_particles = p;
 
-				p->die = cl.time + 0.2 + (Q_rand () & 7) * 0.02;
+				p->die = realtime + 0.2 + (Q_rand () & 7) * 0.02;
 				p->color = 7 + (Q_rand () & 7);
 				p->type = pt_slowgrav;
 
@@ -507,7 +508,7 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 		active_particles = p;
 
 		VectorClear (p->vel);
-		p->die = cl.time + 2;
+		p->die = realtime + 2;
 
 		switch (type) {
 			case 0:					// rocket trail
@@ -535,7 +536,7 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 
 			case 3:
 			case 5:					// tracer
-				p->die = cl.time + 0.5;
+				p->die = realtime + 0.5;
 				p->type = pt_static;
 				if (type == 3)
 					p->color = 52 + ((tracercount & 4) << 1);
@@ -565,7 +566,7 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 			case 6:					// voor trail
 				p->color = 9 * 16 + 8 + (Q_rand () & 3);
 				p->type = pt_static;
-				p->die = cl.time + 0.3;
+				p->die = realtime + 0.3;
 				for (j = 0; j < 3; j++)
 					p->org[j] = start[j] + ((Q_rand () & 15) - 8);
 				break;
@@ -596,7 +597,6 @@ R_DrawParticles (void)
 	vec3_t      up, right;
 	float       scale;
 	Uint8		theAlpha, *at;
-	extern	double host_frametime;
 
 	if (!active_particles)
 		return;
@@ -618,7 +618,7 @@ R_DrawParticles (void)
 
 	for (;;) {
 		kill = active_particles;
-		if (kill && kill->die < cl.time) {
+		if (kill && kill->die < realtime) {
 			active_particles = kill->next;
 			kill->next = free_particles;
 			free_particles = kill;
@@ -630,7 +630,7 @@ R_DrawParticles (void)
 	for (p = active_particles; p; p = p->next) {
 		for (;;) {
 			kill = p->next;
-			if (kill && kill->die < cl.time) {
+			if (kill && kill->die < realtime) {
 				p->next = kill->next;
 				kill->next = free_particles;
 				free_particles = kill;
