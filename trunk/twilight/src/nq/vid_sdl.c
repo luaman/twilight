@@ -50,11 +50,6 @@ static const char rcsid[] =
 #include "sys.h"
 
 
-#ifdef WIN32
-// LordHavoc: evil thing - DirectSound with SDL
-HWND        mainwindow;
-#endif
-
 unsigned		d_8to32table[256];
 
 cvar_t     *vid_mode;
@@ -440,11 +435,6 @@ VID_Init (unsigned char *palette)
 	if (use_mouse)
 		SDL_ShowCursor (0);
 
-#ifdef _WIN32
-	// LordHavoc: a dark incantation necessary for DirectSound with SDL
-	// (an evil which Loki clearly did not intend)
-	mainwindow = GetActiveWindow ();
-#endif
 }
 
 void
