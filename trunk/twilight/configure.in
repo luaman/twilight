@@ -9,6 +9,10 @@ AC_REVISION($Revision$)
 VERSION=0.1.99
 DEVEL_RELEASE=yes
 
+if test "x$DEVEL_RELEASE" = "xyes"; then
+	AC_DEFINE(DEVEL_RELEASE, 1, [Defined if this is a CVS snapshot])
+fi
+
 dnl Checks for system type first
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
