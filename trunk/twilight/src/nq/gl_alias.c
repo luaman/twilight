@@ -150,15 +150,16 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 			continue;
 		frame = &paliashdr->frames[e->frame[i]];
 		if (frame->numposes > 1) {
-			i1 = (int) (cl.time / e->frame_interval[i]) % frame->numposes;
-			i2 = (i1 + 1) % frame->numposes;
+			i1 = (int) (cl.time / e->frame_interval[i]);
 			frac = (cl.time / e->frame_interval[i]) - i1;
+			i1 %= frame->numposes;
+			i2 = (i1 + 1) % frame->numposes;
 			poses[num_frames] = &frame->poses[i1];
-			fracs[num_frames] = frac * e->frame_frac[i];
+			fracs[num_frames] = (1 - frac) * e->frame_frac[i];
 			if (fracs[num_frames] > (1.0/65536.0))
 				num_frames++;
 			poses[num_frames] = &frame->poses[i2];
-			fracs[num_frames] = (1 - frac) * e->frame_frac[i];
+			fracs[num_frames] = frac * e->frame_frac[i];
 			if (fracs[num_frames] > (1.0/65536.0))
 				num_frames++;
 		} else {

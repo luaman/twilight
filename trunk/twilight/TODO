@@ -17,6 +17,8 @@ Bugs we know about:
   - RC #5: We should create directories as needed, such as the userpath
     (~/.twilight/) and gamedirs (~/.twilight/id1 and others).
     (Reported by Peter Jay Salzman)
+  - RC #7: We need to fix the console to not destroy the contents on
+    resize, this is /required/ for #4. (And is thus the hard part.)
   - lights do not react to moving bmodels, untransforming into the
     bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.
