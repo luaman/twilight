@@ -15,9 +15,26 @@ INCLUDES = -I$(top_srcdir)/src/include \
 lib_LIBRARIES=libtwilight_base.a
 
 libtwilight_base_a_SOURCES= \
-	buildnum.c cpu.c cmd.c collision.c crc.c cvar.c lh_parser.c mathlib.c \
-	matrixlib.c menu.c mdfour.c model.c mod_brush.c parm.c strlib.c \
-	zone.c locs.c sdlstub.c sdlstub.h hash.c hash.h loadso.c loadso.h
+	buildnum.c \
+	cpu.c cpu.h \
+	cmd.c cmd.h \
+	collision.c collision.h \
+	crc.c crc.h \
+	cvar.c cvar.h \
+	lh_parser.c lh_parser.h \
+	mathlib.c mathlib.h \
+	matrixlib.c matrixlib.h \
+	menu.c menu.h \
+	mdfour.c mdfour.h \
+	model.c model.h modelgen.h spritegen.h \
+	mod_brush.c mod_brush.h bspfile.h \
+	parm.c \
+	strlib.c strlib.h \
+	locs.c locs.h \
+	sdlstub.c sdlstub.h \
+	hash.c hash.h \
+	loadso.c loadso.h \
+	zone.c zone.h
 
 EXTRA_DIST = \
 	twilight_base.dsp twilight_base.vcproj

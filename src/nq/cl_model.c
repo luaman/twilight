@@ -26,6 +26,7 @@ static const char rcsid[] =
     "$Id$";
 
 #include "twiconfig.h"
+#include <math.h>
 
 #include "quakedef.h"
 #include "client.h"
@@ -36,7 +37,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "gl_textures.h"
-#include <math.h>
 
 void
 Mod_UnloadModel (model_t *mod, qboolean keep)

@@ -29,7 +29,7 @@
 
 #include "bspfile.h"
 #include "common.h"
-#include "spritegn.h"
+#include "spritegen.h"
 #include "zone.h"
 
 /*

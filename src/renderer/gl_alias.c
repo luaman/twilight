@@ -42,13 +42,13 @@ static const char rcsid[] =
 
 #define NUMVERTEXNORMALS	162
 float r_avertexnormals[NUMVERTEXNORMALS][3] = {
-#include "anorms.h"
+#include "anorms.-h"
 };
 
 // precalculated dot products for quantized angles
 #define SHADEDOT_QUANT 16
 static float       r_avertexnormal_dots[SHADEDOT_QUANT][256] =
-#include "anorm_dots.h"
+#include "anorm_dots.-h"
            ;
 
 static float *shadedots = r_avertexnormal_dots[0];

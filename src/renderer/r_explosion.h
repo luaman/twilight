@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) 2002  Joseph Carter
+	Copyright (C) 2001	Forest Hale
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -27,14 +27,11 @@
 #ifndef __R_EXPLOSION_H
 #define __R_EXPLOSION_H
 
-#include "qtypes.h"
-
-void R_Explosion_Shutdown (void);
-void r_explosion_newmap(void);
-void R_Explosion_Init(void);
-void R_NewExplosion(vec3_t org);
-void R_MoveExplosions(void);
-void R_DrawExplosions(void);
-
+extern void R_Explosion_Init(void);
+extern void R_Explosion_Shutdown (void);
+extern void r_explosion_newmap(void);
+extern void R_DrawExplosions(void);
+extern void R_MoveExplosions(void);
+extern void R_NewExplosion(vec3_t org);
+	
 #endif // __R_EXPLOSION_H
-
