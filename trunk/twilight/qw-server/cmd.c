@@ -199,7 +199,7 @@ Cbuf_Execute (void)
 		}
 
 		// execute the command line
-		Cmd_ExecuteString (line);
+		Cmd_ExecuteString (line, src_command);
 
 		if (cmd_wait) {					// skip out while text still remains in 
 										// 
@@ -260,7 +260,7 @@ Cbuf_Execute_Sets (void)
 		extract_line (line);
 		// execute the command line
 		if (strncmp (line, "set", 3) == 0 && isspace ((int) line[3])) {
-			Cmd_ExecuteString (line);
+			Cmd_ExecuteString (line, src_command);
 		}
 	}
 }
