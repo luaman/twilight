@@ -60,7 +60,7 @@ TNT_Init (void)
 static void
 TNT_InitDotParticleTexture (void)
 {
-	Uint8	data[16][16][2];
+	Uint8	data[16][16][4];
 	int		x, y, dx2, dy, d;
 
 	for (x = 0; x < 16; x++) {
@@ -69,13 +69,18 @@ TNT_InitDotParticleTexture (void)
 		for (y = 0; y < 16; y++) {
 			dy = y - 8;
 			d = 255 - 4 * (dx2 + (dy * dy));
-			if (d<=0) {
+			if (d <= 0) {
 				d = 0;
 				data[y][x][0] = 0;
-			} else
+				data[y][x][1] = 0;
+				data[y][x][2] = 0;
+			} else {
 				data[y][x][0] = 255;
+				data[y][x][1] = 255;
+				data[y][x][2] = 255;
+			}
 
-			data[y][x][1] = (Uint8) d;
+			data[y][x][3] = (Uint8) d;
 		}
 	}
 
@@ -83,15 +88,14 @@ TNT_InitDotParticleTexture (void)
 	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	qglTexImage2D (GL_TEXTURE_2D, 0, 2, 16, 16, 0, GL_LUMINANCE_ALPHA,
-		      GL_UNSIGNED_BYTE, data);
+	qglTexImage2D (GL_TEXTURE_2D, 0, 4, 16, 16, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
 static void
 TNT_InitSmokeParticleTexture (void)
 {
 	Uint8	d;
-	Uint8	data[32][32][2], noise1[32][32], noise2[32][32];
+	Uint8	data[32][32][4], noise1[32][32], noise2[32][32];
 	int		dx, dy2, x, y, c;
 
 	FractalNoise (&noise1[0][0], 32, 4);
@@ -102,16 +106,20 @@ TNT_InitSmokeParticleTexture (void)
 		dy2 *= dy2;
 		for (x = 0; x < 32; x++) {
 			dx = x - 16;
-			c = 255 - (dx*dx + dy2);
+			c = 255 - (dx * dx + dy2);
 			if (c < 1)
 				c = 0;
 			d = (noise1[y][x] + noise2[y][x]) / 2;
 			if (d > 0) {
 				data[y][x][0] = 255;
-				data[y][x][1] = (d * c)/255;
+				data[y][x][1] = 255;
+				data[y][x][2] = 255;
+				data[y][x][3] = (d * c)/255;
 			} else {
 				data[y][x][0] = 255;
-				data[y][x][1] = 0;
+				data[y][x][1] = 255;
+				data[y][x][2] = 255;
+				data[y][x][3] = 0;
 			}
 		}
 	}
@@ -119,15 +127,14 @@ TNT_InitSmokeParticleTexture (void)
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	qglTexImage2D (GL_TEXTURE_2D, 0, 2, 32, 32, 0, GL_LUMINANCE_ALPHA,
-			GL_UNSIGNED_BYTE, data);
+	qglTexImage2D (GL_TEXTURE_2D, 0, 4, 32, 32, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
 static void
 TNT_InitSmokeRingParticleTexture (void)
 {
 	Uint8	d;
-	Uint8	data[32][32][2], noise1[32][32], noise2[32][32];
+	Uint8	data[32][32][4], noise1[32][32], noise2[32][32];
 	int		dx, dy, c, c2, x, y, b;
 
 	FractalNoise (&noise1[0][0], 32, 4);
@@ -143,15 +150,19 @@ TNT_InitSmokeRingParticleTexture (void)
 			c2 = (dx + dy);
 			if (c < 1) c = 0;
 			if (c2 < 1) c2 = 0;
-			b = (c * c2) * 512 / (255*255);
+			b = (c * c2) * 512 / (255 * 255);
 			if (b < 1) b = 0;
 			d = (noise1[y][x] + noise2[y][x]) / 2;
 			if (d > 0) {
 				data[y][x][0] = 255;
-				data[y][x][1] = (d * b)/255;
+				data[y][x][1] = 255;
+				data[y][x][2] = 255;
+				data[y][x][3] = (d * b)/255;
 			} else {
 				data[y][x][0] = 255;
-				data[y][x][1] = 0;
+				data[y][x][1] = 255;
+				data[y][x][2] = 255;
+				data[y][x][3] = 0;
 			}
 		}
 	}
@@ -159,6 +170,5 @@ TNT_InitSmokeRingParticleTexture (void)
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_ring);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	qglTexImage2D (GL_TEXTURE_2D, 0, 2, 32, 32, 0, GL_LUMINANCE_ALPHA,
-			GL_UNSIGNED_BYTE, data);
+	qglTexImage2D (GL_TEXTURE_2D, 0, 4, 32, 32, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
