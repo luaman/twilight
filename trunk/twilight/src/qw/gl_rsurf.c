@@ -741,6 +741,7 @@ DrawTextureChainsMTex (void)
 			if (s->flags & SURF_DRAWSKY)
 				break;
 
+			qglActiveTextureARB (GL_TEXTURE0_ARB);
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 			qglActiveTextureARB (GL_TEXTURE1_ARB);
 
