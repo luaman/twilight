@@ -116,7 +116,7 @@ R_NetGraph (void)
 	Draw_String (8, y, st);
 	y += 8;
 
-	GL_Bind (netgraphtexture);
+	glBindTexture (GL_TEXTURE_2D, netgraphtexture);
 
 	glTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format,
 				  NET_TIMINGS, NET_GRAPHHEIGHT, 0, GL_RGBA,

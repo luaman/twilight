@@ -211,7 +211,6 @@ extern const char *gl_version;
 extern const char *gl_extensions;
 
 void        R_TranslatePlayerSkin (int playernum);
-void        GL_Bind (int texnum);
 
 // Multitexture
 #define    TEXTURE0_SGIS				0x835E

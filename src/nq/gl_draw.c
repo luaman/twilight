@@ -27,7 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern unsigned char d_15to8table[65536];
 
-cvar_t     *gl_nobind;
 cvar_t     *gl_max_size;
 cvar_t     *gl_picmip;
 
@@ -67,17 +66,6 @@ typedef struct {
 gltexture_t gltextures[MAX_GLTEXTURES];
 int         numgltextures;
 
-
-void
-GL_Bind (int texnum)
-{
-	if (gl_nobind->value[0])
-		texnum = char_texture;
-	if (currenttexture == texnum)
-		return;
-	currenttexture = texnum;
-	glBindTexture (GL_TEXTURE_2D, texnum);
-}
 
 //=============================================================================
 /* Support Routines */
@@ -239,7 +227,7 @@ Draw_TextureMode_f (void)
 	// change all the existing mipmap texture objects
 	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
 		if (glt->mipmap) {
-			GL_Bind (glt->texnum);
+			glBindTexture (GL_TEXTURE_2D, glt->texnum);
 			glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 							 gl_filter_min);
 			glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
@@ -265,7 +253,6 @@ Draw_Init (void)
 	int         start;
 	byte       *ncdata;
 
-	gl_nobind = Cvar_Get ("gl_nobind", "0", CVAR_NONE, NULL);
 	gl_max_size = Cvar_Get ("gl_max_size", "1024", CVAR_NONE, NULL);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
 
@@ -303,37 +290,9 @@ Draw_Init (void)
 	for (x = 0; x < y; x++)
 		Draw_CharToConback (ver[x], dest + (x << 3));
 
-#if 0
-	conback->width = vid.conwidth;
-	conback->height = vid.conheight;
-
-	// scale console to vid size
-	dest = ncdata = Hunk_AllocName (vid.conwidth * vid.conheight, "conback");
-
-	for (y = 0; y < vid.conheight; y++, dest += vid.conwidth) {
-		src = cb->data + cb->width * (y * cb->height / vid.conheight);
-		if (vid.conwidth == cb->width)
-			memcpy (dest, src, vid.conwidth);
-		else {
-			f = 0;
-			fstep = cb->width * 0x10000 / vid.conwidth;
-			for (x = 0; x < vid.conwidth; x += 4) {
-				dest[x] = src[f >> 16];
-				f += fstep;
-				dest[x + 1] = src[f >> 16];
-				f += fstep;
-				dest[x + 2] = src[f >> 16];
-				f += fstep;
-				dest[x + 3] = src[f >> 16];
-				f += fstep;
-			}
-		}
-	}
-#else
 	conback->width = cb->width;
 	conback->height = cb->height;
 	ncdata = cb->data;
-#endif
 
 	glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -394,7 +353,7 @@ Draw_Character (int x, int y, int num)
 	fcol = col * 0.0625;
 	size = 0.0625;
 
-	GL_Bind (char_texture);
+	glBindTexture (GL_TEXTURE_2D, char_texture);
 
 	glBegin (GL_QUADS);
 	glTexCoord2f (fcol, frow);
@@ -424,7 +383,7 @@ Draw_String (int x, int y, char *str)
 	if (!str || !str[0])
 		return;
 
-	GL_Bind (char_texture);
+	glBindTexture (GL_TEXTURE_2D, char_texture);
 
 	glBegin (GL_QUADS);
 
@@ -468,7 +427,7 @@ Draw_Alt_String (int x, int y, char *str)
 	if (!str || !str[0])
 		return;
 
-	GL_Bind (char_texture);
+	glBindTexture (GL_TEXTURE_2D, char_texture);
 
 	glBegin (GL_QUADS);
 
@@ -524,7 +483,7 @@ Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 //  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 //  glCullFace(GL_FRONT);
 	glColor4f (1, 1, 1, alpha);
-	GL_Bind (gl->texnum);
+	glBindTexture (GL_TEXTURE_2D, gl->texnum);
 	glBegin (GL_QUADS);
 	glTexCoord2f (gl->sl, gl->tl);
 	glVertex2f (x, y);
@@ -553,7 +512,7 @@ Draw_Pic (int x, int y, qpic_t *pic)
 
 	gl = (glpic_t *) pic->data;
 	glColor4f (1, 1, 1, 1);
-	GL_Bind (gl->texnum);
+	glBindTexture (GL_TEXTURE_2D, gl->texnum);
 	glBegin (GL_QUADS);
 	glTexCoord2f (gl->sl, gl->tl);
 	glVertex2f (x, y);
@@ -599,7 +558,7 @@ Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte * translation)
 	byte       *src;
 	int         p;
 
-	GL_Bind (translate_texture);
+	glBindTexture (GL_TEXTURE_2D, translate_texture);
 
 	c = pic->width * pic->height;
 
@@ -666,7 +625,7 @@ void
 Draw_TileClear (int x, int y, int w, int h)
 {
 	glColor3f (1, 1, 1);
-	GL_Bind (*(int *) draw_backtile->data);
+	glBindTexture (GL_TEXTURE_2D, *(int *) draw_backtile->data);
 	glBegin (GL_QUADS);
 	glTexCoord2f (x / 64.0, y / 64.0);
 	glVertex2f (x, y);
@@ -1189,7 +1148,7 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 	glt->height = height;
 	glt->mipmap = mipmap;
 
-	GL_Bind (texture_extension_number);
+	glBindTexture (GL_TEXTURE_2D, texture_extension_number);
 
 	GL_Upload8 (data, width, height, mipmap, alpha);
 
