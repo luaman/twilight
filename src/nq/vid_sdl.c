@@ -728,8 +728,8 @@ IN_Move (usercmd_t *cmd)
 	old_mouse_x = mouse_x;
 	old_mouse_y = mouse_y;
 
-	mouse_x *= sensitivity->fvalue;
-	mouse_y *= sensitivity->fvalue;
+	mouse_x *= sensitivity->fvalue * cl.viewzoom;
+	mouse_y *= sensitivity->fvalue * cl.viewzoom;
 
 	if ((in_strafe.state & 1) || (lookstrafe->ivalue && freelook))
 		cmd->sidemove += m_side->fvalue * mouse_x;

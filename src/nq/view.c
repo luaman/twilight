@@ -51,46 +51,47 @@ when crossing a water boudnary.
 
 */
 
-cvar_t     *scr_ofsx;
-cvar_t     *scr_ofsy;
-cvar_t     *scr_ofsz;
+cvar_t *scr_ofsx;
+cvar_t *scr_ofsy;
+cvar_t *scr_ofsz;
 
-cvar_t     *cl_rollspeed;
-cvar_t     *cl_rollangle;
+cvar_t *cl_rollspeed;
+cvar_t *cl_rollangle;
 
-cvar_t     *cl_bob;
-cvar_t     *cl_bobcycle;
-cvar_t     *cl_bobup;
+cvar_t *cl_bob;
+cvar_t *cl_bobcycle;
+cvar_t *cl_bobup;
 
-cvar_t     *v_kicktime;
-cvar_t     *v_kickroll;
-cvar_t     *v_kickpitch;
+cvar_t *v_kicktime;
+cvar_t *v_kickroll;
+cvar_t *v_kickpitch;
 
-cvar_t     *v_iyaw_cycle;
-cvar_t     *v_iroll_cycle;
-cvar_t     *v_ipitch_cycle;
-cvar_t     *v_iyaw_level;
-cvar_t     *v_iroll_level;
-cvar_t     *v_ipitch_level;
+cvar_t *v_iyaw_cycle;
+cvar_t *v_iroll_cycle;
+cvar_t *v_ipitch_cycle;
+cvar_t *v_iyaw_level;
+cvar_t *v_iroll_level;
+cvar_t *v_ipitch_level;
 
-cvar_t     *v_idlescale;
+cvar_t *v_idlescale;
+cvar_t *v_zoom;
 
-cvar_t     *crosshair;
-cvar_t     *crosshaircolor;
+cvar_t *crosshair;
+cvar_t *crosshaircolor;
 
-cvar_t     *cl_crossx;
-cvar_t     *cl_crossy;
+cvar_t *cl_crossx;
+cvar_t *cl_crossy;
 
-cvar_t     *gl_cshiftpercent;
+cvar_t *gl_cshiftpercent;
 
-cvar_t     *v_contentblend;
+cvar_t *v_contentblend;
 
-cvar_t     *v_centermove;
-cvar_t     *v_centerspeed;
+cvar_t *v_centermove;
+cvar_t *v_centerspeed;
 
-float       v_dmg_time, v_dmg_roll, v_dmg_pitch;
+float v_dmg_time, v_dmg_roll, v_dmg_pitch;
 
-extern int  in_forward, in_forward2, in_back;
+extern int in_forward, in_forward2, in_back;
 
 /*
 ===============
@@ -672,6 +673,9 @@ V_CalcRefdef (void)
 	V_CalcViewRoll();
 	V_AddIdle();
 
+	if (v_zoom->fvalue != cl.viewzoom)
+		cl.viewzoom = SLIDE (cl.viewzoom, v_zoom->fvalue, 4 * host_frametime);
+
 	/* offsets */
 	angles[PITCH] = -ent->angles[PITCH]; /* because entity pitches are actually backward */
 	angles[YAW] = ent->angles[YAW];
@@ -763,6 +767,16 @@ V_RenderView (void)
 
 /* ============================================================================ */
 
+static void
+V_Zoom_CB (cvar_t *var)
+{
+	if (var->fvalue > 1.5f)
+		Cvar_Set (var, "1.5");
+	else if (var->fvalue < 0.05f)
+		Cvar_Set (var, "0.05");
+}
+
+
 /*
 =============
 V_Init_Cvars
@@ -794,6 +808,8 @@ V_Init_Cvars (void)
 	v_ipitch_level = Cvar_Get ("v_ipitch_level", "0.3", CVAR_NONE, NULL);
 
 	v_idlescale = Cvar_Get ("v_idlescale", "0", CVAR_NONE, NULL);
+
+	v_zoom = Cvar_Get ("v_zoom", "1", CVAR_NONE, V_Zoom_CB);
 
 	crosshair = Cvar_Get ("crosshair", "0", CVAR_ARCHIVE, NULL);
 	crosshaircolor = Cvar_Get ("crosshaircolor", "79", CVAR_ARCHIVE, NULL);
