@@ -88,6 +88,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=..\qw\cl_null.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\common.c
 # End Source File
 # Begin Source File
@@ -96,7 +100,7 @@ SOURCE=..\qw\info.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mdfour.c
+SOURCE=..\qw\mdfour.c
 # End Source File
 # Begin Source File
 
