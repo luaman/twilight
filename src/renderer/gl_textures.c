@@ -43,6 +43,7 @@ memzone_t	*glt_zone;
 static Uint32 *trans;
 static int trans_size;
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 Uint32 *
 GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 		qboolean check_empty)
@@ -70,6 +71,58 @@ GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 	else
 		return trans;
 }
+#else
+Uint32 *
+GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
+		qboolean check_empty)
+{
+	int i, size, count = 0;
+	Uint32	d, t;
+
+	if (!palette)
+		palette = d_palette_raw;
+
+	size = width * height;
+	if (size > trans_size)
+	{
+		if (trans)
+			Zone_Free(trans);
+		trans = Zone_Alloc(glt_zone, size * sizeof(Uint32));
+		trans_size = size;
+	}
+
+	for (i = 0; i < size;) {
+		d = ((Uint32 *) data)[i >> 2];
+
+		t = palette[d & 0xFF];
+		if ((trans[i++] = t) != d_palette_empty)
+			count++;
+
+		switch (size - i) {
+			default:
+			case 3:
+				t = palette[(d & 0xFF00) >> 8];
+				if ((trans[i++] = t) != d_palette_empty)
+					count++;
+			case 2:
+				t = palette[(d & 0xFF0000) >> 16];
+				if ((trans[i++] = t) != d_palette_empty)
+					count++;
+			case 1:
+				t = palette[(d & 0xFF000000) >> 24];
+				if ((trans[i++] = t) != d_palette_empty)
+					count++;
+			case 0:
+				break;
+		}
+	}
+
+	if (!count && check_empty)
+		return NULL;
+	else
+		return trans;
+}
+#endif
 
 /*
 =================
@@ -284,14 +337,11 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 
 	memset(skin, 0, sizeof(*skin));
 
-	Zone_CheckSentinelsGlobal();
 	mskin = GLT_8to32_convert(in, width, height, palette, tri_check);
-	Zone_CheckSentinelsGlobal();
 	if (!mskin)
 		return;
 
 	triangles = Zone_Alloc(glt_zone, sizeof(int) * amodel->numtris);
-	Zone_CheckSentinelsGlobal();
 
 	if (tri_check && (width > 1 || height > 1)) {
 		span = Zone_Alloc(tempzone, sizeof(span_t) * height);
@@ -306,7 +356,6 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 				numtris++;
 			}
 		}
-		Zone_CheckSentinelsGlobal();
 		Zone_Free (span);
 	} else {
 		numtris = amodel->numtris;
