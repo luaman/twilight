@@ -37,10 +37,12 @@ static const char rcsid[] =
  * should go in here.  It's just a stub.
  */
 
+#ifdef HAVE_SDL_H
 // net_chan depends on cls (for now)
 client_static_t cls;
+#endif
 
-// Funtions that don't actually exist
+// Functions that don't actually exist
 
 void
 Draw_Disc (void)
@@ -61,6 +63,8 @@ Con_Print (char *txt)
 void
 CL_Init (void)
 {
+#ifdef HAVE_SDL_H
 	memset (&cls, 0, sizeof(client_static_t));
+#endif
 }
 
