@@ -3,15 +3,9 @@ Makefile.in
 aclocal.m4
 config.*
 configure
-install-sh
-missing
-mkinstalldirs
-stamp-h
-stamp-h.in
 ChangeLog
 twilight-*.zip
 twilight-*.tar.gz
 twilight.spec
 autom4te.cache
 .*.swp
-
