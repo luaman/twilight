@@ -30,34 +30,37 @@
 #include "quakedef.h"
 #include "qtypes.h"
 #include "mathlib.h"
-#include "client.h"
+#include "cclient.h"
 #include "cvar.h"
 #include "cmd.h"
 #include "locs.h"
 #include "strlib.h"
 #include "sys.h"
+#include "teamplay.h"
 
-cvar_t	*cl_parsesay;
-static qboolean died = false, recorded_location = false;
-static vec3_t death_location, last_recorded_location;
+static cvar_t	*cl_parsesay;
+static qboolean	died = false, recorded_location = false;
+static vec3_t	death_location, last_recorded_location;
 
 /*
 ===================
 Team_ParseSay
 ===================
 */
-char *
+const char *
 Team_ParseSay (const char *s)
 {
 	static char			buf[1024];
-	unsigned int		i;
 	int					bracket;
 	char				chr, *t1, t2[128], t3[128];
 	location_t			*location;
 
-	i = 0;
+	if (!cl_parsesay->ivalue || !strchr(s, '%'))
+		return s;
 
-	while (*s && (i <= sizeof (buf))) {
+	buf[0] = '\0';
+
+	while (*s && (strlen(buf) < sizeof (buf))) {
 		if ((*s == '%') && (s[1] != '\0')) {
 			t1 = NULL;
 			memset (t2, '\0', sizeof (t2));
@@ -72,6 +75,7 @@ Team_ParseSay (const char *s)
 				chr = s[1];
 				s += 2;
 			}
+			location = NULL;
 
 			switch (chr) {
 				case '%':
@@ -79,10 +83,13 @@ Team_ParseSay (const char *s)
 					t2[1] = 0;
 					t1 = t2;
 					break;
+					// FIXME: Reimplement!
+#if 0
 				case 's':
 					bracket = 0;
 					t1 = skin->svalue;
 					break;
+#endif
 				case 'd':
 					bracket = 0;
 					if (died) {
@@ -107,12 +114,12 @@ Team_ParseSay (const char *s)
 					}
 					goto location;
 				case 'l':
-location:
 					bracket = 0;
-					location = loc_search (cl.simorg);
+					location = loc_search (ccl.player_origin);
+location:
 					if (location) {
 						recorded_location = true;
-						VectorCopy (cl.simorg, last_recorded_location);
+						VectorCopy (ccl.player_origin, last_recorded_location);
 						t1 = location->name;
 					} else
 						snprintf (t2, sizeof (t2), "Unknown!");
@@ -183,28 +190,20 @@ location:
 			}
 
 			if (bracket)
-				buf[i++] = 0x90;		// '['
+				strlcat(buf, "\x90", sizeof(buf));
 
-			if (t1) {
-				int			len;
-
-				len = strlen (t1);
-				if (i + len >= sizeof (buf))
-					continue;			// No more space in buffer, icky
+			if (t1)
 				strlcat (buf, t1, sizeof (buf));
-				i += len;
-			}
 
 			if (bracket)
-				buf[i++] = 0x91;		// ']'
+				strlcat(buf, "\x91", sizeof(buf));
 
 			continue;
 		}
 
-		buf[i++] = *s++;
+		strlcat(buf, va("%c", *s++), sizeof(buf));
 	}
 
-	buf[i] = 0;
 	return buf;
 }
 
@@ -212,7 +211,7 @@ void
 Team_Dead (void)
 {
 	died = true;
-	VectorCopy (cl.simorg, death_location);
+	VectorCopy (ccl.player_origin, death_location);
 }
 
 void
@@ -222,12 +221,6 @@ Team_NewMap (void)
 
 	died = false;
 	recorded_location = false;
-}
-
-void
-Team_Init_Cvars (void)
-{
-	cl_parsesay = Cvar_Get ("cl_parsesay", "0", CVAR_NONE, NULL);
 }
 
 static void
@@ -259,14 +252,14 @@ Team_loc (void)
 	
 	if (!strcasecmp (Cmd_Argv (1), "add")) {
 		if (Cmd_Argc () >= 3)
-			loc_new (cl.simorg, desc);
+			loc_new (ccl.player_origin, desc);
 		else
 			Com_Printf ("loc add <description> :marks the current location with the description and records the information into a loc file.\n");
 	}
 
 	if (!strcasecmp (Cmd_Argv (1), "rename")) {
 		if (Cmd_Argc () >= 3) {
-			loc = loc_search (cl.simorg);
+			loc = loc_search (ccl.player_origin);
 			if (loc)
 				strlcpy (loc->name, desc, sizeof(loc->name));
 		} else
@@ -275,7 +268,7 @@ Team_loc (void)
 	
 	if (!strcasecmp (Cmd_Argv (1), "delete")) {
 		if (Cmd_Argc () == 2) {
-			loc = loc_search (cl.simorg);
+			loc = loc_search (ccl.player_origin);
 			if (loc)
 				loc_delete (loc);
 		} else
@@ -284,12 +277,18 @@ Team_loc (void)
 	
 	if (!strcasecmp (Cmd_Argv (1), "move")) {
 		if (Cmd_Argc () == 2) {
-			loc = loc_search (cl.simorg);
+			loc = loc_search (ccl.player_origin);
 			if (loc)
-				VectorCopy(cl.simorg, loc->where);
+				VectorCopy(ccl.player_origin, loc->where);
 		} else
 			Com_Printf ("loc move :moves the nearest location marker to your current location\n");
 	}
+}
+
+void
+Team_Init_Cvars (void)
+{
+	cl_parsesay = Cvar_Get ("cl_parsesay", "0", CVAR_NONE, NULL);
 }
 
 void

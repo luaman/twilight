@@ -107,6 +107,9 @@ typedef struct client_common_s {
 	user_info_t		*users;
 	Uint32			user_flags;
 	int				player_num;
+	vec3_t			player_origin;
+	vec3_t			player_angles;
+	vec3_t			player_velocity;
 
 	Sint32			stats[MAX_CL_STATS];
 	float			items_gettime[32];

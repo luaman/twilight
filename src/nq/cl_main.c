@@ -414,7 +414,7 @@ CL_RelinkEntities (void)
 //
 // interpolate player info
 //
-	Lerp_Vectors (cl.mvelocity[1], frac, cl.mvelocity[0], cl.velocity);
+	Lerp_Vectors (cl.mvelocity[1], frac, cl.mvelocity[0], ccl.player_velocity);
 
 	if (ccls.demoplayback) {
 		// interpolate the angles
@@ -591,7 +591,7 @@ Sends the entire command line over to the server
 void
 Cmd_ForwardToServer (void)
 {
-	char *s;
+	const char *s;
 
 	if (ccls.state < ca_connected) {
 		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));

@@ -20,7 +20,8 @@ libtwilight_client_a_SOURCES= \
 	cclient.c cclient.h \
 	console.c console.h \
 	keys.c keys.h \
-	hud.c hud.h
+	hud.c hud.h \
+	teamplay.c teamplay.h
 
 EXTRA_DIST = \
 	twilight_client.dsp twilight_client.vcproj

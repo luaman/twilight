@@ -27,13 +27,11 @@
 #ifndef __TEAMPLAY_H
 #define __TEAMPLAY_H
 
-#include "qtypes.h"
-
-extern char *Team_ParseSay (const char *s);
-extern void Team_Dead (void);
-extern void Team_NewMap (void);
-extern void Team_Init_Cvars (void);
-extern void Team_Init (void);
+const char *Team_ParseSay (const char *s);
+void Team_Dead (void);
+void Team_NewMap (void);
+void Team_Init_Cvars (void);
+void Team_Init (void);
 
 #endif // __TEAMPLAY_H
 

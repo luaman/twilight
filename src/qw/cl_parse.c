@@ -1066,6 +1066,9 @@ CL_SetStat (int stat, int value)
 	}
 
 	ccl.stats[stat] = value;
+
+	if ((stat == STAT_HEALTH) && value <= 0)
+		Team_Dead ();
 }
 
 /*
@@ -1335,10 +1338,10 @@ CL_ParseServerMessage (void)
 				ccl.intermission = 1;
 				ccl.completed_time = ccls.realtime;
 				for (i = 0; i < 3; i++)
-					cl.simorg[i] = MSG_ReadCoord ();
+					ccl.player_origin[i] = MSG_ReadCoord ();
 				for (i = 0; i < 3; i++)
-					cl.simangles[i] = MSG_ReadAngle ();
-				VectorClear (cl.simvel);
+					ccl.player_angles[i] = MSG_ReadAngle ();
+				VectorClear (ccl.player_velocity);
 				break;
 
 			case svc_finale:

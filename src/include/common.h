@@ -77,8 +77,8 @@ typedef struct sizebuf_s {
 
 void SZ_Init (sizebuf_t *buf, Uint8 *data, size_t length);
 void SZ_Clear (sizebuf_t *buf);
-void SZ_Write (sizebuf_t *buf, void *data, size_t length);
-void SZ_Print (sizebuf_t *buf, char *data);	// strcats onto the sizebuf
+void SZ_Write (sizebuf_t *buf, const void *data, size_t length);
+void SZ_Print (sizebuf_t *buf, const char *data);	// strcats onto the sizebuf
 
 //============================================================================
 

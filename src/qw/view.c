@@ -311,10 +311,10 @@ V_ParseDamage (void)
 	}
 
 	/* calculate view angle kicks */
-	VectorSubtract(from, cl.simorg, from);
+	VectorSubtract(from, ccl.player_origin, from);
 	VectorNormalizeFast(from);
 
-	AngleVectors(cl.simangles, forward, right, up);
+	AngleVectors(ccl.player_angles, forward, right, up);
 
 	side = DotProduct(from, right);
 	v_dmg_roll = count * side * v_kickroll->fvalue;
@@ -544,7 +544,7 @@ V_CalcViewRoll (void)
 {
 	float       side;
 
-	side = V_CalcRoll (cl.simangles, cl.simvel);
+	side = V_CalcRoll (ccl.player_angles, ccl.player_velocity);
 	r_refdef.viewangles[ROLL] += side;
 
 	if (v_dmg_time > 0) {
@@ -567,8 +567,8 @@ V_CalcIntermissionRefdef (void)
 	memset (&cl.viewent, 0, sizeof (entity_t));
 	cl.viewent.times = -1;		// FIXME: HACK! DO NOT COPY ELSEWHERE!
 
-	VectorCopy(cl.simorg, r_refdef.vieworg);
-	VectorCopy(cl.simangles, r_refdef.viewangles);
+	VectorCopy(ccl.player_origin, r_refdef.vieworg);
+	VectorCopy(ccl.player_angles, r_refdef.viewangles);
 
 	/* always idle in intermission */
 	r_refdef.viewangles[ROLL] += Q_sin (ccl.time * v_iroll_cycle->fvalue) *
@@ -602,7 +602,7 @@ V_CalcRefdef (void)
 	bob = V_CalcBob();
 
 // refresh position from simulated origin
-	VectorCopy (cl.simorg, r_refdef.vieworg);
+	VectorCopy (ccl.player_origin, r_refdef.vieworg);
 
 	r_refdef.vieworg[2] += bob;
 
@@ -613,7 +613,7 @@ V_CalcRefdef (void)
 	r_refdef.vieworg[1] += 1.0 / 16;
 	r_refdef.vieworg[2] += 1.0 / 16;
 
-	VectorCopy(cl.simangles, r_refdef.viewangles);
+	VectorCopy(ccl.player_angles, r_refdef.viewangles);
 	V_CalcViewRoll();
 	V_AddIdle();
 
@@ -631,16 +631,16 @@ V_CalcRefdef (void)
 		cl.viewzoom = SLIDE (cl.viewzoom, v_zoom->fvalue, 4 * host_frametime);
 
 	/* offsets */
-	AngleVectors (cl.simangles, forward, right, up);
+	AngleVectors (ccl.player_angles, forward, right, up);
 
 	/* set up gun position */
-	VectorCopy (cl.simangles, cl.viewent_angles);
+	VectorCopy (ccl.player_angles, cl.viewent_angles);
 
 	/* set up gun angles */
 	cl.viewent_angles[YAW] = r_refdef.viewangles[YAW];
 	cl.viewent_angles[PITCH] = -r_refdef.viewangles[PITCH];
 
-	VectorCopy (cl.simorg, cl.viewent_origin);
+	VectorCopy (ccl.player_origin, cl.viewent_origin);
 	cl.viewent_origin[2] += 22;
 
 	for (i = 0; i < 3; i++) {
@@ -672,20 +672,20 @@ V_CalcRefdef (void)
 	r_refdef.viewangles[PITCH] += cl.punchangle;
 
 	/* smooth out stair step ups */
-	if (view_message->groundent && (cl.simorg[2] - oldz > 0)) {
+	if (view_message->groundent && (ccl.player_origin[2] - oldz > 0)) {
 		float	steptime;
 
 		steptime = host_frametime;
 
 		oldz += steptime * 80;
-		if (oldz > cl.simorg[2])
-			oldz = cl.simorg[2];
-		if (cl.simorg[2] - oldz > 12)
-			oldz = cl.simorg[2] - 12;
-		r_refdef.vieworg[2] += oldz - cl.simorg[2];
-		cl.viewent_origin[2] += oldz - cl.simorg[2];
+		if (oldz > ccl.player_origin[2])
+			oldz = ccl.player_origin[2];
+		if (ccl.player_origin[2] - oldz > 12)
+			oldz = ccl.player_origin[2] - 12;
+		r_refdef.vieworg[2] += oldz - ccl.player_origin[2];
+		cl.viewent_origin[2] += oldz - ccl.player_origin[2];
 	} else
-		oldz = cl.simorg[2];
+		oldz = ccl.player_origin[2];
 }
 
 /*
@@ -712,7 +712,7 @@ the entity origin, so any view position inside that will be valid
 void
 V_RenderView (void)
 {
-	cl.simangles[ROLL] = 0;				// FIXME @@@ 
+	ccl.player_angles[ROLL] = 0;				// FIXME @@@ 
 
 	if (ccls.state != ca_active)
 		return;
