@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) 2001  Joseph Carter
+	Copyright (C) 1996-1997  Id Software, Inc.
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -33,14 +33,11 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <stdio.h>
-
-#include "bothdefs.h"
+#include "qtypes.h"
 #include "cmd.h"
 #include "common.h"
 #include "console.h"
 #include "cvar.h"
-#include "server.h"
 #include "strlib.h"
 #include "zone.h"
 
@@ -51,13 +48,18 @@ typedef struct cvar_foreach_s {
 
 static cvar_list_t *cvars;
 
+cvar_callback engine_callback = NULL;
+
 cvar_t *developer;
 
 void
-Cvar_Init (void)
+Cvar_Init (const cvar_callback callback)
 {
 	cvars = NULL;
+	engine_callback = callback;
+
 	developer = Cvar_Get ("developer", "0", CVAR_NONE, NULL);
+
 	Cmd_AddCommand ("set", Cvar_Set_f);
 }
 
@@ -131,17 +133,14 @@ Cvar_Set (cvar_t *var, const char *value)
 
 	var->string = Z_Malloc (strlen(value) + 1);
 	strcpy (var->string, value);
+	
 	var->value = Q_atof (var->string);
+
 	if (var->callback)
 		var->callback (var);
 	
-	// QWism taken from QW code
-	if (var->flags & CVAR_SERVERINFO)
-	{
-		Info_SetValueForKey (svs.info, var->name, var->string,
-				MAX_SERVERINFO_STRING);
-		SV_SendServerInfoChange (var->name, var->string);
-	}
+	if (engine_callback)
+		engine_callback (var);
 }
 
 void
@@ -260,8 +259,7 @@ Cvar_Find (const char *name)
 {
 	cvar_list_t	   *v = cvars;
 
-	while (v)
-	{
+	while (v) {
 		if (strcasecmp (name, v->var->name) == 0)
 			return v->var;
 		v = v->next;
@@ -270,6 +268,63 @@ Cvar_Find (const char *name)
 	return NULL;	// Cvar doesn't exist
 }
 
+/*
+	CVar_CompleteCountPossible
+
+	New function for tab-completion system
+	Added by EvilTypeGuy
+	Thanks to Fett erich@heintz.com
+
+*/
+int
+Cvar_CompleteCountPossible (char *partial)
+{
+	cvar_list_t	*v;
+	int			len;
+	int			h;
+	
+	h = 0;
+	len = strlen(partial);
+	
+	if (!len)
+		return	0;
+	
+	// Loop through the cvars and count all possible matches
+	for (v = cvars; v; v = v->next)
+		if (!strncasecmp(partial, v->var->name, len))
+			h++;
+	
+	return h;
+}
+
+/*
+	CVar_CompleteBuildList
+
+	New function for tab-completion system
+	Added by EvilTypeGuy
+	Thanks to Fett erich@heintz.com
+	Thanks to taniwha
+
+*/
+char	**
+Cvar_CompleteBuildList (char *partial)
+{
+	cvar_list_t	*v;
+	int			len = 0;
+	int			bpos = 0;
+	int			sizeofbuf = (Cvar_CompleteCountPossible (partial) + 1) * sizeof (char *);
+	char		**buf;
+
+	len = strlen(partial);
+	buf = malloc(sizeofbuf + sizeof (char *));
+	// Loop through the alias list and print all matches
+	for (v = cvars; v; v = v->next)
+		if (!strncasecmp(partial, v->var->name, len))
+			buf[bpos++] = v->var->name;
+
+	buf[bpos] = NULL;
+	return buf;
+}	
 
 // FIXME: Replace this mess with a bash-style complete
 char *

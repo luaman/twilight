@@ -45,15 +45,14 @@ typedef struct cvar_s {
 	float			   	value;
 	int					flags;
 
-	// EVIL!  cvar_callback	   *callback; won't work here
 	void			  (*callback) (struct cvar_s *var);
 } cvar_t;
 
-typedef void (*cvar_callback) (struct cvar_s *var);
+typedef void (*cvar_callback) (cvar_t *var);
 
 extern cvar_t *developer;
 
-void Cvar_Init (void);
+void Cvar_Init (const cvar_callback callback);
 void Cvar_Shutdown (void);
 
 cvar_t *Cvar_Get (const char *name, const char *value, const int flags,

@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) 2001  Joseph Carter
+	Copyright (C) 1996-1997  Id Software, Inc.
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -25,8 +25,6 @@
 static const char rcsid[] =
     "$Id$";
 
-#include <stdlib.h>
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #else
@@ -35,11 +33,13 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "client.h"
+#include "qtypes.h"
 #include "cmd.h"
+#include "common.h"
 #include "console.h"
 #include "cvar.h"
 #include "strlib.h"
+#include "zone.h"
 
 typedef struct cvar_foreach_s {
 	cvar_t					   *var;
@@ -48,13 +48,18 @@ typedef struct cvar_foreach_s {
 
 static cvar_list_t *cvars;
 
+cvar_callback engine_callback = NULL;
+
 cvar_t *developer;
 
 void
-Cvar_Init (void)
+Cvar_Init (const cvar_callback callback)
 {
 	cvars = NULL;
+	engine_callback = callback;
+
 	developer = Cvar_Get ("developer", "0", CVAR_NONE, NULL);
+
 	Cmd_AddCommand ("set", Cvar_Set_f);
 }
 
@@ -128,21 +133,14 @@ Cvar_Set (cvar_t *var, const char *value)
 
 	var->string = Z_Malloc (strlen(value) + 1);
 	strcpy (var->string, value);
+	
 	var->value = Q_atof (var->string);
+
 	if (var->callback)
 		var->callback (var);
 	
-	// QWism taken from QW code
-	if (var->flags & CVAR_USERINFO)
-	{
-		Info_SetValueForKey (cls.userinfo, var->name, var->string,
-				MAX_INFO_STRING);
-		if (cls.state >= ca_connected) {
-			MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-			SZ_Print (&cls.netchan.message,
-					va ("setinfo \"%s\" \"%s\"\n", var->name, var->string));
-		}
-	}
+	if (engine_callback)
+		engine_callback (var);
 }
 
 void
@@ -240,7 +238,7 @@ Cvar_LegacyCmd (void)
 	cvar_t	   *var;
 
 	var = Cvar_Find (Cmd_Argv (0));
-	if (!var) 
+	if (!var)
 		return false;
 
 	if (Cmd_Argc () == 2)
@@ -255,13 +253,13 @@ Cvar_LegacyCmd (void)
 	return true;
 }
 
+
 cvar_t *
 Cvar_Find (const char *name)
 {
 	cvar_list_t	   *v = cvars;
 
-	while (v)
-	{
+	while (v) {
 		if (strcasecmp (name, v->var->name) == 0)
 			return v->var;
 		v = v->next;

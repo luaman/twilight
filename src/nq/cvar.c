@@ -33,11 +33,11 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "qtypes.h"
 #include "cmd.h"
+#include "common.h"
 #include "console.h"
 #include "cvar.h"
-#include "server.h"
 #include "strlib.h"
 #include "zone.h"
 
@@ -48,12 +48,15 @@ typedef struct cvar_foreach_s {
 
 static cvar_list_t *cvars;
 
+cvar_callback engine_callback = NULL;
+
 cvar_t *developer;
 
 void
-Cvar_Init (void)
+Cvar_Init (const cvar_callback callback)
 {
 	cvars = NULL;
+	engine_callback = callback;
 
 	developer = Cvar_Get ("developer", "0", CVAR_NONE, NULL);
 
@@ -133,17 +136,11 @@ Cvar_Set (cvar_t *var, const char *value)
 	
 	var->value = Q_atof (var->string);
 
-	//	Con_Printf("var->value was: %s\n",var->value);
 	if (var->callback)
 		var->callback (var);
 	
-	// NQism taken from NQ code
-	if (var->flags & CVAR_USERINFO)
-	{
-		if (sv.active)
-			SV_BroadcastPrintf ("\"%s\" changed to \"%s\"\n", var->name,
-					var->string);
-	}
+	if (engine_callback)
+		engine_callback (var);
 }
 
 void

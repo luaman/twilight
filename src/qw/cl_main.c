@@ -1389,6 +1389,21 @@ Host_FixupModelNames (void)
 
 //============================================================================
 
+static void
+Host_CvarUserinfo (cvar_t *var)
+{
+	if (var->flags & CVAR_USERINFO)
+	{
+		Info_SetValueForKey (cls.userinfo, var->name, var->string,
+				MAX_INFO_STRING);
+		if (cls.state >= ca_connected)
+		{
+			MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
+			SZ_Print (&cls.netchan.message,
+					va ("setinfo \"%s\" \"%s\"\n", var->name, var->string));
+		}
+	}
+}
 
 /*
 ====================
@@ -1399,9 +1414,9 @@ void
 Host_Init (void)
 {
 	Memory_Init ();
-	Cvar_Init ();		// add all cvar related manipulation commands and set developer cvar
-	Cbuf_Init ();		// initialize cmd_text buffer
-	Cmd_Init ();		// setup the basic commands we need for the system
+	Cvar_Init (&Host_CvarUserinfo);		// Cvar system
+	Cbuf_Init ();						// Command buffer
+	Cmd_Init ();						// Command system
 
 	// These have to be here.
 	fs_shareconf = Cvar_Get ("fs_shareconf", SHARECONF, CVAR_ROM, NULL);
@@ -1420,20 +1435,20 @@ Host_Init (void)
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
 
-	COM_Init_Cvars ();				// initialize basic cvars
-	Con_Init_Cvars ();				// initialize all console related cvars
-	Key_Init_Cvars ();				// initialize all key related cvars
-	Mod_Init_Cvars();				// initialize all model related cvars
-	Netchan_Init_Cvars ();			// initialize all netchan related cvars
-	SCR_Init_Cvars ();				// initialize all screen(?) related cvars
-	VID_Init_Cvars();				// initialize all video related cvars
-	V_Init_Cvars();					// initialize all view related cvars
-	M_Init_Cvars ();				// initialize all menu related cvars
-	R_Init_Cvars ();				// initialize all rendering system related cvars
-	Sbar_Init_Cvars ();				// initialize all statusbar related cvars
-	CL_Init_Cvars ();				// initialize all cl_* related cvars
-	S_Init_Cvars ();				// initialize all sound system related cvars
-	IN_Init_Cvars ();				// initialize all input related cvars
+	COM_Init_Cvars ();				// basic cvars
+	Con_Init_Cvars ();				// all console related cvars
+	Key_Init_Cvars ();				// all key related cvars
+	Mod_Init_Cvars();				// all model related cvars
+	Netchan_Init_Cvars ();			// all netchan related cvars
+	SCR_Init_Cvars ();				// all screen(?) related cvars
+	VID_Init_Cvars();				// all video related cvars
+	V_Init_Cvars();					// all view related cvars
+	M_Init_Cvars ();				// all menu related cvars
+	R_Init_Cvars ();				// all rendering system related cvars
+	Sbar_Init_Cvars ();				// all statusbar related cvars
+	CL_Init_Cvars ();				// all cl_* related cvars
+	S_Init_Cvars ();				// all sound system related cvars
+	IN_Init_Cvars ();				// all input related cvars
 
 	COM_Init ();					// setup and initialize filesystem, endianess, add related commands
 
