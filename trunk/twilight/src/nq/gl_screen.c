@@ -1,5 +1,5 @@
 /*
-	$RCSfile$
+	$RCSfile$ -- master for refresh, status bar, console, chat, notify, etc
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -22,7 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// screen.c -- master for refresh, status bar, console, chat, notify, etc
 static const char rcsid[] =
     "$Id$";
 
@@ -100,12 +99,12 @@ console is:
 
 int			glx, gly;
 
-// only the refresh window will be updated unless these variables are flagged 
+/* only the refresh window will be updated unless these variables are flagged  */
 int			scr_copytop;
 int			scr_copyeverything;
 
 float		scr_con_current;
-float		scr_conlines;				// lines of console to display
+float		scr_conlines;				/* lines of console to display */
 
 cvar_t		*scr_viewsize;
 cvar_t		*scr_fov;
@@ -122,7 +121,7 @@ cvar_t		*r_waterwarp;
 
 extern cvar_t *crosshair;
 
-qboolean    scr_initialized;			// ready to draw
+qboolean    scr_initialized;			/* ready to draw */
 
 qpic_t		*scr_ram;
 qpic_t		*scr_net;
@@ -133,7 +132,7 @@ int         clearnotify;
 
 int         sb_lines;
 
-viddef_t    vid;						// global video state
+viddef_t    vid;						/* global video state */
 
 vrect_t     scr_vrect;
 
@@ -207,7 +206,7 @@ CENTER PRINTING
 */
 
 char        scr_centerstring[1024];
-float       scr_centertime_start;		// for slow victory printing
+float       scr_centertime_start;		/* for slow victory printing */
 float       scr_centertime_off;
 int         scr_center_lines;
 int         scr_erase_lines;
@@ -228,7 +227,7 @@ SCR_CenterPrint (char *str)
 	scr_centertime_off = scr_centertime->value;
 	scr_centertime_start = cl.time;
 
-// count the number of lines for centering
+	/* count the number of lines for centering */
 	scr_center_lines = 1;
 	while (*str) {
 		if (*str == '\n')
@@ -247,7 +246,7 @@ SCR_DrawCenterString (void)
 	int         x, y;
 	int         remaining;
 
-// the finale prints the characters one at a time
+	/* the finale prints the characters one at a time */
 	if (cl.intermission)
 		remaining = scr_printspeed->value * (cl.time - scr_centertime_start);
 	else
@@ -262,7 +261,7 @@ SCR_DrawCenterString (void)
 		y = 48;
 
 	do {
-		// scan the width of the line
+		/* scan the width of the line */
 		for (l = 0; l < 40; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
@@ -280,7 +279,7 @@ SCR_DrawCenterString (void)
 
 		if (!*start)
 			break;
-		start++;						// skip the \n
+		start++;						/* skip the \n */
 	} while (1);
 }
 
@@ -301,7 +300,7 @@ SCR_CheckDrawCenterString (void)
 	SCR_DrawCenterString ();
 }
 
-//=============================================================================
+/* ============================================================================= */
 
 /*
 ====================
@@ -336,7 +335,7 @@ SCR_CalcRefdef (void)
 {
 	vid.recalc_refdef = false;
 
-	// intermission is always full screen   
+	/* intermission is always full screen */
 	if (scr_viewsize->value >= 120 || cl.intermission) {
 		sb_lines = 0;
 	} else if (scr_viewsize->value >= 110) {
@@ -389,11 +388,11 @@ SCR_SizeDown_f (void)
 	Cvar_Slide (scr_viewsize, -10);
 }
 
-//============================================================================
+/* ============================================================================ */
 static void
 SCR_viewsize_CB (cvar_t *cvar)
 {
-	// bound viewsize
+	/* bound viewsize */
 	if (cvar->value < 30) {
 		Cvar_Set (cvar, "30");
 	} else if (cvar->value > 120) {
@@ -406,7 +405,7 @@ SCR_viewsize_CB (cvar_t *cvar)
 static void
 SCR_fov_CB (cvar_t *cvar)
 {
-	// bound field of view
+	/* bound field of view */
 	if (cvar->value < 1) {
 		Cvar_Set (cvar, "1");
 	} else if (cvar->value > 170) {
@@ -420,7 +419,7 @@ void
 SCR_Init_Cvars (void)
 {
 	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE, SCR_viewsize_CB);
-	scr_fov = Cvar_Get ("fov", "90", CVAR_NONE, SCR_fov_CB);	// 10 - 170
+	scr_fov = Cvar_Get ("fov", "90", CVAR_NONE, SCR_fov_CB);	/* 10 - 170 */
 	scr_conspeed = Cvar_Get ("scr_conspeed", "300", CVAR_NONE, NULL);
 	scr_centertime = Cvar_Get ("scr_centertime", "2", CVAR_NONE, NULL);
 	scr_showram = Cvar_Get ("showram", "1", CVAR_NONE, NULL);
@@ -443,9 +442,9 @@ void
 SCR_Init (void)
 {
 
-//
-// register our commands
-//
+/*
+	register our commands
+*/
 	Cmd_AddCommand ("screenshot", SCR_ScreenShot_f);
 	Cmd_AddCommand ("sizeup", SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown", SCR_SizeDown_f);
@@ -524,7 +523,7 @@ SCR_DrawFPS (void)
 	snprintf (st, sizeof (st), "%3d FPS", lastfps);
 	x = vid.conwidth - strlen (st) * 8 - 8;
 	y = vid.conheight - sb_lines - 8;
-//  Draw_TileClear(x, y, strlen(st) * 8, 8);
+/*  Draw_TileClear(x, y, strlen(st) * 8, 8); */
 	Draw_String (x, y, st);
 }
 
@@ -539,7 +538,7 @@ SCR_DrawPause (void)
 {
 	qpic_t		*pic;
 
-	if (!scr_showpause->value)			// turn off for screenshots
+	if (!scr_showpause->value)			/* turn off for screenshots */
 		return;
 
 	if (!cl.paused)
@@ -572,7 +571,7 @@ SCR_DrawLoading (void)
 
 
 
-//=============================================================================
+/* ============================================================================= */
 
 
 /*
@@ -586,17 +585,17 @@ SCR_SetUpToDrawConsole (void)
 	Con_CheckResize ();
 
 	if (scr_drawloading)
-		return;							// never a console with loading plaque
+		return;								/* never a console with loading plaque */
 
-// decide on the height of the console
+	/* decide on the height of the console */
 	con_forcedup = !cl.worldmodel || cls.signon != SIGNONS;
 	if (con_forcedup) {
-		scr_conlines = vid.conheight;		// full screen
+		scr_conlines = vid.conheight;		/* full screen */
 		scr_con_current = scr_conlines;
 	} else if (key_dest == key_console)
-		scr_conlines = vid.conheight / 2;	// half screen
+		scr_conlines = vid.conheight / 2;	/* half screen */
 	else
-		scr_conlines = 0;				// none visible
+		scr_conlines = 0;					/* none visible */
 
 	if (scr_conlines < scr_con_current) {
 		scr_con_current -= scr_conspeed->value * host_frametime;
@@ -624,7 +623,7 @@ SCR_DrawConsole (void)
 		clearconsole = 0;
 	} else {
 		if (key_dest == key_game || key_dest == key_message)
-			Con_DrawNotify ();			// only draw notify in game
+			Con_DrawNotify ();			/* only draw notify in game */
 	}
 }
 
@@ -650,9 +649,9 @@ SCR_ScreenShot_f (void)
 	char        checkname[MAX_OSPATH];
 	int         i, c, temp;
 
-// 
-// find a file name to save it to 
-// 
+/* 
+	find a file name to save it to 
+*/
 	strcpy (pcxname, "quake00.tga");
 
 	for (i = 0; i <= 99; i++) {
@@ -660,7 +659,7 @@ SCR_ScreenShot_f (void)
 		pcxname[6] = i % 10 + '0';
 		snprintf (checkname, sizeof (checkname), "%s/%s", com_gamedir, pcxname);
 		if (Sys_FileTime (checkname) == -1)
-			break;						// file doesn't exist
+			break;						/* file doesn't exist */
 	}
 	if (i == 100) {
 		Con_Printf ("SCR_ScreenShot_f: Couldn't create a TGA file\n");
@@ -673,7 +672,7 @@ SCR_ScreenShot_f (void)
 	qglReadPixels (glx, gly, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE,
 				  buffer);
 
-	// swap rgb to bgr
+	/* swap rgb to bgr */
 	c = vid.width * vid.height * 3;
 	for (i = 0; i < c; i += 3) {
 		temp = buffer[i];
@@ -688,7 +687,7 @@ SCR_ScreenShot_f (void)
 }
 
 
-//=============================================================================
+/* ============================================================================= */
 
 
 /*
@@ -707,7 +706,7 @@ SCR_BeginLoadingPlaque (void)
 	if (cls.signon != SIGNONS)
 		return;
 
-// redraw with no console and the loading plaque
+	/* redraw with no console and the loading plaque */
 	Con_ClearNotify ();
 	scr_centertime_off = 0;
 	scr_con_current = 0;
@@ -733,7 +732,7 @@ SCR_EndLoadingPlaque (void)
 	Con_ClearNotify ();
 }
 
-//=============================================================================
+/* ============================================================================= */
 
 char       *scr_notifystring;
 qboolean    scr_drawdialog;
@@ -751,7 +750,7 @@ SCR_DrawNotifyString (void)
 	y = vid.conheight * 0.35;
 
 	do {
-		// scan the width of the line
+		/* scan the width of the line */
 		for (l = 0; l < 40; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
@@ -766,30 +765,30 @@ SCR_DrawNotifyString (void)
 
 		if (!*start)
 			break;
-		start++;						// skip the \n
+		start++;						/* skip the \n */
 	} while (1);
 }
 
-//=============================================================================
+/* ============================================================================= */
 
 
 void
 SCR_TileClear (void)
 {
 	if (r_refdef.vrect.x > 0) {
-		// left
+		/* left */
 		Draw_TileClear (0, 0, r_refdef.vrect.x, vid.height - sb_lines);
-		// right
+		/* right */
 		Draw_TileClear (r_refdef.vrect.x + r_refdef.vrect.width, 0,
 						vid.width - r_refdef.vrect.x + r_refdef.vrect.width,
 						vid.height - sb_lines);
 	}
 	if (r_refdef.vrect.y > 0) {
-		// top
+		/* top */
 		Draw_TileClear (r_refdef.vrect.x, 0,
 						r_refdef.vrect.x + r_refdef.vrect.width,
 						r_refdef.vrect.y);
-		// bottom
+		/* bottom */
 		Draw_TileClear (r_refdef.vrect.x,
 						r_refdef.vrect.y + r_refdef.vrect.height,
 						r_refdef.vrect.width,
@@ -824,25 +823,25 @@ SCR_UpdateScreen (void)
 	}
 
 	if (!scr_initialized || !con_initialized)
-		return;							// not initialized yet
+		return;							/* not initialized yet */
 
 	qglEnable (GL_DEPTH_TEST);
 
 	if (vid.recalc_refdef)
 		SCR_CalcRefdef ();
 
-//
-// do 3D refresh drawing, and then update the screen
-//
+	/*
+		do 3D refresh drawing, and then update the screen
+	*/
 	SCR_SetUpToDrawConsole ();
 
 	V_RenderView ();
 
 	GL_Set2D ();
 
-	// 
-	// draw any areas not covered by the refresh
-	// 
+	/*
+		draw any areas not covered by the refresh
+	*/
 	SCR_TileClear ();
 
 	if (scr_drawdialog) {
