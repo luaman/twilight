@@ -64,7 +64,7 @@ R_GetSpriteFrame (entity_common_t *e)
 		numframes = pspritegroup->numframes;
 		fullinterval = pintervals[numframes - 1];
 
-		time = r_time + e->syncbase;
+		time = ccl.time + e->syncbase;
 
 		/*
 		 * when loading in Mod_LoadSpriteGroup, we guaranteed all interval

@@ -39,8 +39,6 @@ static const char rcsid[] =
 #include "model.h"
 
 model_t *r_worldmodel;
-double r_time, r_frametime; // Current time, and time since last frame.
-double r_realtime;			// Current real time, NOT affected by pausing.
 Uint r_framecount;          // Current frame.
 
 GLfloat whitev[4] = { 1.0f, 1.0f, 1.0f, 1.0f };

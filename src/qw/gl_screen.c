@@ -115,7 +115,7 @@ static cvar_t   *r_contrast;
 static cvar_t   *cl_avidemo;
 
 static cvar_t	*show_fps;
-extern int		fps_capped0, fps_capped1;
+int				fps_capped0, fps_capped1;
 int				fps_count;
 
 static qboolean	scr_initialized;			/* ready to draw */
@@ -313,7 +313,7 @@ SCR_CheckDrawCenterString (void)
 	if (scr_center_lines > scr_erase_lines)
 		scr_erase_lines = scr_center_lines;
 
-	scr_centertime_off -= host_frametime;
+	scr_centertime_off -= host.frametime;
 
 	if (scr_centertime_off <= 0 && !ccl.intermission)
 		return;
@@ -463,7 +463,7 @@ SCR_DrawTurtle (void)
 	if (!scr_showturtle->ivalue)
 		return;
 
-	if (host_frametime < 0.1) {
+	if (host.frametime < 0.1) {
 		count = 0;
 		return;
 	}
@@ -496,7 +496,6 @@ static void
 SCR_DrawFPS (void)
 {
 	static double		lastframetime;
-	double				t;
 	static int			lastfps;
 	int					x, y, st_len;
 	char				st[80];
@@ -504,11 +503,10 @@ SCR_DrawFPS (void)
 	if (!show_fps->ivalue)
 		return;
 
-	t = Sys_DoubleTime ();
-	if ((t - lastframetime) >= 1.0) {
+	if ((host.time - lastframetime) >= 1.0) {
 		lastfps = fps_count;
 		fps_count = 0;
-		lastframetime = t;
+		lastframetime = host.time;
 	}
 
 	if (show_fps->ivalue == 2)
@@ -577,12 +575,12 @@ SCR_SetUpToDrawConsole (void)
 		scr_conlines = 0;					/* none visible */
 
 	if (scr_conlines < scr_con_current) {
-		scr_con_current -= scr_conspeed->fvalue * host_frametime;
+		scr_con_current -= scr_conspeed->fvalue * host.frametime;
 		if (scr_conlines > scr_con_current)
 			scr_con_current = scr_conlines;
 
 	} else if (scr_conlines > scr_con_current) {
-		scr_con_current += scr_conspeed->fvalue * host_frametime;
+		scr_con_current += scr_conspeed->fvalue * host.frametime;
 		if (scr_conlines < scr_con_current)
 			scr_con_current = scr_conlines;
 	}
@@ -644,16 +642,14 @@ SCR_ScreenShot_f (void)
 static void
 SCR_CaptureAviDemo (void)
 {
-	double			t;
 	static double	lastframetime;
 	char			filename[MAX_OSPATH];
 
 	/* check frame time */
-	t = Sys_DoubleTime ();
-	if ((t - lastframetime) < 1.0 / (double)cl_avidemo->ivalue)
+	if ((host.time - lastframetime) < 1.0 / (double)cl_avidemo->ivalue)
 		return;
 
-	lastframetime = t;
+	lastframetime = host.time;
 
 	snprintf (filename, sizeof (filename), "%s/twavi%06d.tga", com_gamedir, aviframeno);
 	aviframeno++;
@@ -685,7 +681,7 @@ SCR_BeginLoadingPlaque (void)
 	scr_drawloading = false;
 
 	scr_disabled_for_loading = true;
-	scr_disabled_time = ccls.realtime;
+	scr_disabled_time = host.time;
 }
 
 void
@@ -928,7 +924,7 @@ void
 SCR_UpdateScreen (void)
 {
 	if (scr_disabled_for_loading) {
-		if (ccls.realtime - scr_disabled_time > 60) {
+		if (host.time - scr_disabled_time > 60) {
 			scr_disabled_for_loading = false;
 			Com_Printf ("load failed.\n");
 		} else

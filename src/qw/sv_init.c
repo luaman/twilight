@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "world.h"
 #include "zone.h"
 #include "cvar.h"
+#include "host.h"
 
 server_static_t	 svs;					// persistant server info
 server_t		 sv;					// local server
@@ -407,7 +408,7 @@ SV_SpawnServer (char *server)
 	sv.state = ss_active;
 
 	// run two frames to allow everything to settle
-	host_frametime = 0.1;
+	host.frametime = 0.1;
 	SV_Physics ();
 	sv.time += 0.1;
 	SV_Physics ();

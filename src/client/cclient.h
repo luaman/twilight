@@ -125,7 +125,7 @@ typedef struct client_common_s {
 	int				intermission;
 	int				completed_time;
 
-	double			time, oldtime;
+	double			time, oldtime, basetime, frametime;
 
 	cshift_t		cshifts[NUM_CSHIFTS];	// color shifts for damage, powerups
 	cshift_t		prev_cshifts[NUM_CSHIFTS];	// and content types
@@ -145,7 +145,6 @@ extern client_common_t	 ccl;
 
 typedef struct client_common_static_s {
 	ca_state_t		state;
-	double			realtime;
 
 	// Demo loop control.
 	int				demonum;			// -1 = don't play demos

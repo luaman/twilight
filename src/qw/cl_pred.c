@@ -96,6 +96,7 @@ CL_PredictMove (void)
 	int         i;
 	float       f;
 	frame_t    *from, *to = NULL;
+	double		oldtime;
 
 	if (cl_pushlatency->fvalue > 0)
 		Cvar_Set (cl_pushlatency, "0");
@@ -103,13 +104,13 @@ CL_PredictMove (void)
 	if (cl.paused)
 		return;
 
+	oldtime = ccl.time;
 	ccl.oldtime = ccl.time;
-	ccl.time = ccls.realtime - cls.latency - cl_pushlatency->fvalue * 0.001;
-	if (ccl.time > ccls.realtime)
-		ccl.time = ccls.realtime;
+	ccl.time = ccl.basetime - cls.latency - cl_pushlatency->fvalue * 0.001;
+	if (ccl.time > ccl.basetime)
+		ccl.time = ccl.basetime;
 
-	r_time = ccl.time;
-	r_frametime = ccl.time - ccl.oldtime;
+	ccl.frametime = ccl.time - oldtime;
 
 	if (ccl.intermission)
 		return;

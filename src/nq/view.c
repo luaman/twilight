@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include "host.h"
 #include "console.h"
 #include "cl_console.h"
+#include "chase.h"
 
 /*
 
@@ -189,7 +190,7 @@ V_DriftPitch (void)
 		if (fabs(cl.cmd.forwardmove) < cl_forwardspeed->fvalue)
 			cl.driftmove = 0;
 		else
-			cl.driftmove += (ccl.time - ccl.oldtime);
+			cl.driftmove += ccl.frametime;
 
 		if (cl.driftmove > v_centermove->fvalue)
 			V_StartPitchDrift();
@@ -204,8 +205,8 @@ V_DriftPitch (void)
 		return;
 	}
 
-	move = (ccl.time - ccl.oldtime) * cl.pitchvel;
-	cl.pitchvel += (ccl.time - ccl.oldtime) * v_centerspeed->fvalue;
+	move = ccl.frametime * cl.pitchvel;
+	cl.pitchvel += ccl.frametime * v_centerspeed->fvalue;
 
 	if (delta > 0) {
 		if (move > delta) {
@@ -428,12 +429,12 @@ V_UpdatePalette (void)
 	}
 
 	/* drop the damage value */
-	ccl.cshifts[CSHIFT_DAMAGE].percent -= (ccl.time - ccl.oldtime) * 150;
+	ccl.cshifts[CSHIFT_DAMAGE].percent -= ccl.frametime * 150;
 	if (ccl.cshifts[CSHIFT_DAMAGE].percent <= 0)
 		ccl.cshifts[CSHIFT_DAMAGE].percent = 0;
 
 	/* drop the bonus value */
-	ccl.cshifts[CSHIFT_BONUS].percent -= (ccl.time - ccl.oldtime) * 100;
+	ccl.cshifts[CSHIFT_BONUS].percent -= ccl.frametime * 100;
 	if (ccl.cshifts[CSHIFT_BONUS].percent <= 0)
 		ccl.cshifts[CSHIFT_BONUS].percent = 0;
 
@@ -509,7 +510,7 @@ V_CalcViewRoll (void)
 	if (v_dmg_time > 0) {
 		r_refdef.viewangles[ROLL] += v_dmg_time / v_kicktime->fvalue * v_dmg_roll;
 		r_refdef.viewangles[PITCH] += v_dmg_time / v_kicktime->fvalue * v_dmg_pitch;
-		v_dmg_time -= (ccl.time - ccl.oldtime);
+		v_dmg_time -= ccl.frametime;
 	}
 
 	if (ccl.stats[STAT_HEALTH] <= 0)
@@ -580,7 +581,7 @@ V_CalcRefdef (void)
 	V_AddIdle();
 
 	if (v_zoom->fvalue != cl.viewzoom)
-		cl.viewzoom = SLIDE (cl.viewzoom, v_zoom->fvalue, 4 * host_frametime);
+		cl.viewzoom = SLIDE (cl.viewzoom, v_zoom->fvalue, 4 * host.frametime);
 
 	/* offsets */
 	angles[PITCH] = -ent->common.angles[PITCH]; /* because entity pitches are actually backward */
@@ -624,7 +625,7 @@ V_CalcRefdef (void)
 	if (cl.onground && (ent->common.origin[2] - oldz > 0)) {
 		float	steptime;
 
-		steptime = (ccl.time - ccl.oldtime);
+		steptime = ccl.frametime;
 
 		oldz += steptime * 80;
 		if (oldz > ent->common.origin[2])

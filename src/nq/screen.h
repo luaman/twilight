@@ -30,10 +30,11 @@
 #include "qtypes.h"
 #include "video.h"
 
-extern float scr_con_current;
-extern viddef_t vid;
-extern qboolean scr_disabled_for_loading;
-extern float scr_centertime_off;
+extern float	scr_con_current;
+extern viddef_t	vid;
+extern qboolean	scr_disabled_for_loading;
+extern float	scr_centertime_off;
+extern int		fps_count, fps_capped0, fps_capped1;
 
 void SCR_CenterPrint(const char *str);
 void SCR_Init_Cvars(void);

@@ -45,14 +45,9 @@ static const char rcsid[] =
 #include "net.h"
 #include "fs.h"
 #include "rw_ops.h"
-
-qboolean    host_initialized;			// true if into command execution
-
-										// (compatability)
-
-double      host_frametime;
-
-int         host_hunklevel;
+#include "host.h"
+	
+host_t		host;
 
 netadr_t    master_adr[MAX_MASTERS];	// address of group servers
 
@@ -1551,7 +1546,7 @@ SV_Init (void)
 
 	Cbuf_InsertText ("exec server.cfg\n");
 
-	host_initialized = true;
+	host.initialized = true;
 
 	Com_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
 

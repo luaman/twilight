@@ -40,6 +40,7 @@ extern float scr_con_current;
 extern float scr_conlines;		/* lines of console to display */
 
 extern qboolean scr_disabled_for_loading;
+extern int		fps_count, fps_capped0, fps_capped1;
 
 extern struct cvar_s *scr_viewsize;
 extern struct cvar_s *r_brightness;

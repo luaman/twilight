@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "crc.h"
+#include "host.h"
 
 static cvar_t	*cl_nodelta;
 
@@ -451,9 +452,9 @@ CL_AdjustAngles (void)
 	float       up, down;
 
 	if (in_speed.state & 1)
-		speed = host_frametime * cl_anglespeedkey->fvalue;
+		speed = host.frametime * cl_anglespeedkey->fvalue;
 	else
-		speed = host_frametime;
+		speed = host.frametime;
 
 	if (!(in_strafe.state & 1)) {
 		cl.viewangles[YAW] -=
@@ -560,7 +561,7 @@ CL_FinishMove (usercmd_t *cmd)
 	in_use.state &= ~2;
 
 	// send milliseconds of time to apply the move
-	ms = host_frametime * 1000;
+	ms = host.frametime * 1000;
 	if (ms > 200)
 		ms = 200;						// time was unreasonable
 	cmd->msec = ms;
@@ -600,7 +601,7 @@ CL_SendCmd (void)
 	// save this command off for prediction
 	i = cls.netchan.outgoing_sequence & UPDATE_MASK;
 	cmd = &cl.frames[i].cmd;
-	cl.frames[i].senttime = ccls.realtime;
+	cl.frames[i].senttime = ccl.time;
 	cl.frames[i].receivedtime = -1;		// we haven't gotten a reply yet
 
 //  seq_hash = (cls.netchan.outgoing_sequence & 0xffff) ; // ^ QW_CHECK_HASH;

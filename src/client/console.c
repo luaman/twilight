@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "video.h"
 #include "strlib.h"
 #include "sys.h"
+#include "host.h"
 
 static memzone_t *con_zone;
 
@@ -98,7 +99,7 @@ Con_Clear_f (void)
 void
 Con_ClearNotify (void)
 {
-	con_cleartime = ccls.realtime;
+	con_cleartime = host.time;
 }
 
 
@@ -196,7 +197,7 @@ Con_Linefeed (void)
 		line->text = NULL;
 		line->length = 0;
 	}
-	line->time = ccls.realtime;
+	line->time = host.time;
 	con->current_raw++;
 	return line;
 }
@@ -291,7 +292,7 @@ Con_DrawInput (void)
 	Draw_String_Len(con->tsize, con_vislines - (con->tsize * 2.75), text,
 			con_linewidth, con->tsize);
 
-	if ((int) (ccls.realtime * con_cursorspeed) & 1)
+	if ((int) (host.time * con_cursorspeed) & 1)
 		Draw_Character (min(1 + key_linepos, con_linewidth) * con->tsize,
 				con_vislines - (con->tsize * 2.65), 11, con->tsize);
 }
@@ -326,7 +327,7 @@ Con_DrawNotify (void)
 	char		*s;
 	Uint		skip;
 
-	kill_time = max(con_cleartime, ccls.realtime - con_notifytime->fvalue);
+	kill_time = max(con_cleartime, host.time - con_notifytime->fvalue);
 
 	Con_FindLine (con, con_linewidth, NUM_CON_TIMES, &line, &line_pos);
 	line_pos_max = -1 + (con->raw_lines[line % CON_LINES].length + con_linewidth - 1) / con_linewidth;
@@ -368,7 +369,7 @@ Con_DrawNotify (void)
 		Draw_String (skip * con->tsize, y, s, con->tsize);
 
 		Draw_Character ((strlen(s) + skip) * con->tsize, y,
-				10 + ((int) (ccls.realtime * con_cursorspeed) & 1),
+				10 + ((int) (host.time * con_cursorspeed) & 1),
 				con->tsize);
 		y += con->tsize;
 	}

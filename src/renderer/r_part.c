@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include "vis.h"
 #include "gl_alias.h"
 #include "gl_brush.h"
+#include "cclient.h"
 
 extern cvar_t *cl_mapname;
 
@@ -107,7 +108,7 @@ new_xbeam_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
 	VectorCopy (org1, p->org1);
 	VectorCopy (org2, p->org2);
 	VectorCopy4 (color, p->color);
-	p->die = r_time + die;
+	p->die = ccl.time + die;
 	p->thickness = thickness;
 	p->scroll = scroll;
 	p->repeat_scale = repeat_scale;
@@ -163,7 +164,7 @@ new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 	VectorCopy (vel, p->vel);
 	VectorCopy4 (color, p->color);
 	p->ramp = ramp;
-	p->die = r_time + die;
+	p->die = ccl.time + die;
 	p->alphadie = 0;
 	p->scale = scale;
 	p->scale_change = 0;
@@ -282,13 +283,13 @@ R_EntityParticles (entity_common_t *ent)
 	dist = 64;
 	for (i = 0; i < NUMVERTEXNORMALS; i++)
 	{
-		angle = r_time * avelocities[i][0];
+		angle = ccl.time * avelocities[i][0];
 		sy = Q_sin (angle);
 		cy = Q_cos (angle);
-		angle = r_time * avelocities[i][1];
+		angle = ccl.time * avelocities[i][1];
 		sp = Q_sin (angle);
 		cp = Q_cos (angle);
-		angle = r_time * avelocities[i][2];
+		angle = ccl.time * avelocities[i][2];
 		sr = Q_sin (angle);
 		cr = Q_cos (angle);
 
@@ -648,7 +649,7 @@ R_ParticleTrail (entity_common_t *ent)
 				p->vel[1] = lhrandom(-5, 5);
 				p->vel[2] = lhrandom(-5, 5);
 				p->scale = dec;
-				p->die = r_time + 9999;
+				p->die = ccl.time + 9999;
 				VectorSet(c1, 0.188, 0.188, 0.188);
 				VectorSet(c2, 0.376, 0.376, 0.376);
 				VecRBetween(c1, c2, p->color);
@@ -665,7 +666,7 @@ R_ParticleTrail (entity_common_t *ent)
 				p->vel[1] = lhrandom(-5, 5);
 				p->vel[2] = lhrandom(-5, 5);
 				p->scale = dec;
-				p->die = r_time + 9999;
+				p->die = ccl.time + 9999;
 				VectorSet(c1, 0.502, 0.063, 0.063);
 				VectorSet(c2, 1.000, 0.627, 0.125);
 				VecRBetween(c1, c2, p->color);
@@ -681,7 +682,7 @@ R_ParticleTrail (entity_common_t *ent)
 				p->vel[1] = lhrandom(-5, 5);
 				p->vel[2] = lhrandom(-5, 5);
 				p->scale = dec;
-				p->die = r_time + 9999;
+				p->die = ccl.time + 9999;
 				VectorSet(c1, 0.188, 0.188, 0.188);
 				VectorSet(c2, 0.376, 0.376, 0.376);
 				VecRBetween(c1, c2, p->color);
@@ -722,7 +723,7 @@ tracer:
 				p->vel[1] = lhrandom(-8, 8);
 				p->vel[2] = lhrandom(-8, 8);
 				p->scale = dec;
-				p->die = r_time + 9999;
+				p->die = ccl.time + 9999;
 				p->color[3] = 0.501;
 				p->alphadie = 1.505;
 				p->scale_change = 0;
@@ -747,8 +748,8 @@ R_Move_Base_Particles (void)
 	if (!max_base_particles)
 		return;
 
-	grav = r_frametime * 800 * 0.05;
-	dvel = 4 * r_frametime;
+	grav = ccl.frametime * 800 * 0.05;
+	dvel = 4 * ccl.frametime;
 
 	activeparticles = 0;
 	maxparticle = -1;
@@ -756,7 +757,7 @@ R_Move_Base_Particles (void)
 
 	for (k = 0, p = base_particles; k < num_base_particles; k++, p++)
 	{
-		if (p->die <= r_time)
+		if (p->die <= ccl.time)
 		{
 			free_base_particles[j++] = p;
 			continue;
@@ -781,7 +782,7 @@ R_Move_Base_Particles (void)
 		}
 #endif
 
-		VectorMA (p->org, r_frametime, p->vel, p->org);
+		VectorMA (p->org, ccl.frametime, p->vel, p->org);
 #if 1
 		if (p->bounce && r_particle_physics->ivalue)
 		{
@@ -809,13 +810,13 @@ R_Move_Base_Particles (void)
 		switch (p->type)
 		{
 			case pt_fire:
-				p->ramp += r_frametime * 5;
+				p->ramp += ccl.frametime * 5;
 				if (p->ramp >= 6)
 					p->die = -1;
 				break;
 
 			case pt_explode:
-				p->ramp += r_frametime * 10;
+				p->ramp += ccl.frametime * 10;
 				if (p->ramp >= 8)
 					p->die = -1;
 				else
@@ -825,13 +826,13 @@ R_Move_Base_Particles (void)
 				break;
 
 			case pt_explode2:
-				p->ramp += r_frametime * 15;
+				p->ramp += ccl.frametime * 15;
 				if (p->ramp >= 8)
 					p->die = -1;
 				else
 					VectorCopy(d_8tofloattable[ramp2[(int) p->ramp]], p->color);
 				for (i = 0; i < 3; i++)
-					p->vel[i] -= p->vel[i] * r_frametime;
+					p->vel[i] -= p->vel[i] * ccl.frametime;
 				break;
 
 			case pt_blob:
@@ -849,12 +850,12 @@ R_Move_Base_Particles (void)
 		}
 
 		if (p->alphadie) {
-			p->color[3] -= p->alphadie * r_frametime;
+			p->color[3] -= p->alphadie * ccl.frametime;
 			if (p->color[3] <= 0)
 				p->die = -1;
 		}
 		if (p->scale_change) {
-			p->scale += p->scale_change * r_frametime;
+			p->scale += p->scale_change * ccl.frametime;
 			if (p->scale <= 0)
 				p->die = -1;
 		}
@@ -862,7 +863,7 @@ R_Move_Base_Particles (void)
 			p->vel[2] -= p->gravity * grav;
 
 
-		if ((p->die <= r_time))
+		if ((p->die <= ccl.time))
 		{
 			free_base_particles[j++] = p;
 			continue;
@@ -874,7 +875,7 @@ R_Move_Base_Particles (void)
 	{
 		*free_base_particles[k++] = base_particles[maxparticle--];
 		while (maxparticle >= activeparticles
-				&& base_particles[maxparticle].die <= r_time)
+				&& base_particles[maxparticle].die <= ccl.time)
 			maxparticle--;
 	}
 	num_base_particles = activeparticles;
@@ -898,7 +899,7 @@ R_Draw_Base_Particles (void)
 
 	for (i = 0, p = base_particles; i < num_base_particles; i++, p++)
 	{
-		if (p->die <= r_time || !p->draw)
+		if (p->die <= ccl.time || !p->draw)
 			continue;
 
 		tex = &GTF_texture[p->texnum];
@@ -969,7 +970,7 @@ R_Move_XBeam_Particles (void)
 
 	for (i = 0, p = xbeam_particles; i < num_xbeam_particles; i++, p++)
 	{
-		if (p->die < r_time)
+		if (p->die < ccl.time)
 		{
 			free_xbeam_particles[j++] = p;
 			continue;
@@ -986,7 +987,7 @@ R_Move_XBeam_Particles (void)
 				break;
 		}
 
-		if (p->die <= r_time)
+		if (p->die <= ccl.time)
 		{
 			free_xbeam_particles[j++] = p;
 			continue;
@@ -998,7 +999,7 @@ R_Move_XBeam_Particles (void)
 	{
 		*free_xbeam_particles[i++] = xbeam_particles[maxparticle--];
 		while (maxparticle >= activeparticles &&
-				xbeam_particles[maxparticle].die <= r_time)
+				xbeam_particles[maxparticle].die <= ccl.time)
 			maxparticle--;
 	}
 	num_xbeam_particles = activeparticles;
@@ -1044,7 +1045,7 @@ DrawXBeam (xbeam_particle_t *p)
 	CrossProduct (p->normal, v_up, v_right);
 
 	// Calculate the T coordinates, scrolling. (Texcoords)
-	t1 = r_time * -p->scroll + p->repeat_scale * DotProduct(p->org1, p->normal);
+	t1 = ccl.time * -p->scroll + p->repeat_scale * DotProduct(p->org1, p->normal);
 	t1 = t1 - floor(t1);
 	t2 = t1 + p->repeat_scale * p->len;
 	
@@ -1097,7 +1098,7 @@ R_Draw_XBeam_Particles (void)
 
 	for (k = 0, p = xbeam_particles; k < num_xbeam_particles; k++, p++)
 	{
-		if (p->die < r_time)
+		if (p->die < ccl.time)
 			continue;
 
 		DrawXBeam (p);

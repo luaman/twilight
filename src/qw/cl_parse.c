@@ -770,7 +770,7 @@ CL_ParseClientdata (void)
 	frame = &cl.frames[i];
 	parsecounttime = cl.frames[i].senttime;
 
-	frame->receivedtime = ccls.realtime;
+	frame->receivedtime = host.time;
 
 // calculate latency
 	latency = frame->receivedtime - frame->senttime;
@@ -1022,8 +1022,8 @@ CL_ParseServerMessage (void)
 	char       *s;
 	int         i, j;
 
-	received_framecount = host_framecount;
-	cl.last_servermessage = ccls.realtime;
+	received_framecount = host.framecount;
+	cl.last_servermessage = host.time;
 	CL_ClearProjectiles ();
 
 //
@@ -1206,7 +1206,7 @@ CL_ParseServerMessage (void)
 
 			case svc_intermission:
 				ccl.intermission = 1;
-				ccl.completed_time = ccls.realtime;
+				ccl.completed_time = ccl.time;
 				for (i = 0; i < 3; i++)
 					ccl.player_origin[i] = MSG_ReadCoord ();
 				for (i = 0; i < 3; i++)
@@ -1216,7 +1216,7 @@ CL_ParseServerMessage (void)
 
 			case svc_finale:
 				ccl.intermission = 2;
-				ccl.completed_time = ccls.realtime;
+				ccl.completed_time = ccl.time;
 				SCR_CenterPrint (MSG_ReadString ());
 				break;
 

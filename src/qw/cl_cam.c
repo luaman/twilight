@@ -33,6 +33,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "pmove.h"
 #include "strlib.h"
+#include "host.h"
 
 #define	PM_SPECTATORMAXSPEED	500
 #define	PM_STOPSPEED			100
@@ -312,13 +313,13 @@ Cam_Track (usercmd_t *cmd)
 	self = frame->playerstate + ccl.player_num;
 
 	if (!locked || !Cam_IsVisible (player, desired_position)) {
-		if (!locked || ccls.realtime - cam_lastviewtime > 0.1) {
+		if (!locked || host.time - cam_lastviewtime > 0.1) {
 			if (!InitFlyby (self, player, true))
 				InitFlyby (self, player, false);
-			cam_lastviewtime = ccls.realtime;
+			cam_lastviewtime = host.time;
 		}
 	} else
-		cam_lastviewtime = ccls.realtime;
+		cam_lastviewtime = host.time;
 
 	// couldn't track for some reason
 	if (!locked || !autocam)

@@ -575,7 +575,7 @@ Sys_ExpandPath (char *str)
 int
 main (int argc, char *argv[])
 {
-	double		time, oldtime, newtime, base;
+	double		newtime, base;
 
 	sys_gametypes = GAME_NQ_CLIENT|GAME_NQ_SERVER;
 
@@ -591,16 +591,14 @@ main (int argc, char *argv[])
 	if (ccls.state != ca_dedicated && COM_CheckParm ("-nostdout"))
 		nostdout = 1;
 
-	oldtime = base = Sys_DoubleTime ();
+	base = Sys_DoubleTime ();
 	while (1)
 	{
 		// find time spent rendering last frame
 		newtime = Sys_DoubleTime ();
-		time = newtime - oldtime;
 		curtime = newtime - base;
 
-		Host_Frame (time);
-		oldtime = newtime;
+		Host_Frame (curtime);
 
 		if (ccls.state == ca_dedicated && sys_extrasleep->ivalue)
 			SDL_Delay (sys_sleep);

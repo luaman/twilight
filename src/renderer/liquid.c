@@ -39,6 +39,7 @@ static const char rcsid[] =
 #include "liquid.h"
 #include "gl_textures.h"
 #include "vis.h"
+#include "cclient.h"
 
 #include "cvar.h"
 
@@ -67,7 +68,7 @@ EmitWaterPolys (model_t *mod, glpoly_t *p, qboolean arranged)
 
 	qglMatrixMode (GL_TEXTURE);
 	qglPushMatrix ();
-	qglTranslatef (Q_sin(r_time) * 0.4f, Q_cos(r_time) * 0.06f, 0);
+	qglTranslatef (Q_sin(ccl.time) * 0.4f, Q_cos(ccl.time) * 0.06f, 0);
 
 	for (; p; p = p->next)
 	{

@@ -186,21 +186,12 @@ typedef struct client_s {
 
 //============================================================================
 
-extern qboolean host_initialized;
-extern double host_frametime;
-extern double host_time;
-extern double host_realtime;
-extern double oldrealtime;
-extern int host_framecount;
 extern client_t *host_client;
-extern Uint8 *host_basepal;
-extern Uint8 *host_colormap;
 extern cvar_t *teamplay;
 extern cvar_t *skill;
 extern cvar_t *deathmatch;
 extern cvar_t *coop;
 extern cvar_t *pausable;
-extern int fps_count;
 extern int current_skill;
 extern qboolean noclip_anglehack;
 

@@ -25,29 +25,18 @@
 */
 // host.h
 
-#ifndef __HOST_H
-#define __HOST_H
+#ifndef __CHASE_H
+#define __CHASE_H
 
-typedef struct host_s {
-	int		framecount;					// Incremented every frame, never reset.
-	int		initialized;				// True if into command execution.
-	double	time, oldtime, frametime;
-} host_t;
+//
+// chase
+//
+extern struct cvar_s *chase_active;
 
-extern host_t	host;
+void		Chase_Init_Cvars (void);
+void		Chase_Init (void);
+void		Chase_Reset (void);
+void		Chase_Update (void);
 
-void Host_ClearMemory (void);
-void Host_InitCommands (void);
-void Host_Init (void);
-void Host_Shutdown (void);
-void Host_Error (const char *error, ...);
-void Host_EndGame (const char *message, ...);
-void Host_Frame (double time);
-void Host_ClientCommands (const char *fmt, ...);
-void Host_ShutdownServer (qboolean crash);
-void Host_WriteConfiguration (const char *name);
-
-extern qboolean noclip_anglehack;
-
-#endif // __HOST_H
+#endif // __CHASE_H
 

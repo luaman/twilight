@@ -69,6 +69,7 @@ void        Cmd_ForwardToServer (void);
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.
 
+host_t host;
 
 static cvar_t		*rcon_password;
 static cvar_t		*rcon_address;
@@ -100,7 +101,6 @@ static cvar_t		*noaim;
 static cvar_t		*msg;
 
 static cvar_t		*host_speeds;
-int					fps_capped0, fps_capped1;
 
 
 static qboolean allowremotecmd = true;
@@ -114,15 +114,7 @@ lightstyle_t	cl_lightstyle[MAX_LIGHTSTYLES];
 
 double		connect_time = -1;			// for connection retransmits
 
-qboolean	host_initialized;			// true if into command execution
 qboolean	nomaster;
-
-double		host_frametime;
-int			host_framecount;
-
-int			host_hunklevel;
-
-int			fps_count = 0;
 
 static jmp_buf host_abort;
 
@@ -202,7 +194,7 @@ CL_SendConnectPacket (int challenge)
 		adr.port = BigShort (27500);
 	t2 = Sys_DoubleTime ();
 
-	connect_time = ccls.realtime + t2 - t1;	// for retransmit requests
+	connect_time = host.time + t2 - t1;	// for retransmit requests
 
 	cls.qport = qport->ivalue;
 
@@ -233,7 +225,7 @@ CL_CheckForResend (void)
 		return;
 	if (ccls.state != ca_disconnected)
 		return;
-	if (connect_time && ccls.realtime - connect_time < 5.0)
+	if (connect_time && host.time - connect_time < 5.0)
 		return;
 
 	t1 = Sys_DoubleTime ();
@@ -247,7 +239,7 @@ CL_CheckForResend (void)
 		adr.port = BigShort (27500);
 	t2 = Sys_DoubleTime ();
 
-	connect_time = ccls.realtime + t2 - t1;	// for retransmit requests
+	connect_time = host.time + t2 - t1;	// for retransmit requests
 
 	Com_Printf ("Connecting to %s...\n", cls.servername);
 	snprintf (data, sizeof (data), "%c%c%c%cgetchallenge\n", 255, 255, 255,
@@ -874,9 +866,9 @@ CL_ReadPackets (void)
 	// check timeout
 	// 
 	if (ccls.state >= ca_connected
-		&& ccls.realtime - cls.netchan.last_received > cl_timeout->fvalue) {
-		Com_Printf ("\nServer connection timed out. (%f %f %f)\n", ccls.realtime,
-				cls.netchan.last_received, cl_timeout->fvalue);
+		&& host.time - cls.netchan.last_received > cl_timeout->fvalue) {
+		Com_Printf ("\nServer connection timed out. (%f %f %f)\n",
+				host.time, cls.netchan.last_received, cl_timeout->fvalue);
 		CL_Disconnect ();
 	}
 }
@@ -1184,7 +1176,7 @@ Host_WriteConfiguration (const char *name)
 
 // dedicated servers initialize the host but don't parse and set the
 // config.cfg cvars
-	if (host_initialized) {
+	if (host.initialized) {
 		char fname[MAX_QPATH] = { 0 };
 
 		strlcpy_s (fname, name);
@@ -1224,19 +1216,18 @@ int         nopacketcount;
 void
 Host_Frame (double time)
 {
-	static double	old_realtime, old_time;
 	static double	time1 = 0;
 	static double	time2 = 0;
 	static double	time3 = 0;
 	int				pass1, pass2, pass3;
-	double			fps, frametime, min_time;
+	double			fps, min_time, wait;
 
 	if (setjmp (host_abort))
 		// something bad happened, or the server disconnected
 		return;
 
 	// decide the simulation time
-	frametime = time - old_realtime;
+	host.frametime = time - host.time;
 
 	if (!ccls.timedemo) {
 		if (cl_maxfps->fvalue)
@@ -1247,11 +1238,11 @@ Host_Frame (double time)
 		fps = bound (30.0f, fps, 72.0f);
 		min_time = 1.0f / fps;
 
-		if (time < (old_realtime + min_time)) {
+		if (host.frametime < min_time) {
 			fps_capped0++;
-			if (time < (old_realtime + min_time - 0.002)) {
-				float diff = (old_realtime + min_time) - time;
-				SDL_Delay(diff * 990);
+			if (host.frametime < (min_time - 0.002)) {
+				wait = (host.time + min_time) - time;
+				SDL_Delay(wait * 990);
 				fps_capped1++;
 			}
 
@@ -1260,25 +1251,15 @@ Host_Frame (double time)
 		}
 	}
 
-	old_realtime = time;
-	ccls.realtime += frametime;
-	r_realtime += frametime;
-	host_frametime = frametime;
-	if (host_frametime > 0.2)
-		host_frametime = 0.2;
+	host.oldtime = host.time;
+	host.time = time;
+	if (host.frametime > 0.2)
+		host.frametime = 0.2;
 
+	ccl.basetime += host.frametime;
 
 	// fetch results from server
 	CL_ReadPackets ();
-
-	if (old_time > ccls.realtime)
-		old_time = ccls.realtime;
-	else {
-		host_frametime = ccls.realtime - old_time;
-		old_time = ccls.realtime;
-		if (host_frametime > 0.2)
-			host_frametime = 0.2;
-	}
 
 	// get new key events
 	Sys_SendKeyEvents ();
@@ -1332,7 +1313,7 @@ Host_Frame (double time)
 					pass1 + pass2 + pass3, pass1, pass2, pass3);
 	}
 
-	host_framecount++;
+	host.framecount++;
 	fps_count++;
 	fps_capped0 = fps_capped1 = 0;
 }
@@ -1462,7 +1443,7 @@ Host_Init (void)
 		("echo Type connect <internet address> or use GameSpy to connect to a game.\n");
 	Cbuf_AddText ("cl_warncmd 1\n");
 
-	host_initialized = true;
+	host.initialized = true;
 
 	Com_Printf ("\nClient Version %s (Build %04d)\n\n", VERSION,
 				build_number ());
@@ -1501,8 +1482,8 @@ Host_Shutdown (void)
 void
 CL_UpdatePings (void)
 {
-	if ((ccls.state == ca_active) && ((ccls.realtime - cl.last_ping_request) > 5)) {
-		cl.last_ping_request = ccls.realtime;
+	if ((ccls.state == ca_active) && ((host.time - cl.last_ping_request) > 5)) {
+		cl.last_ping_request = host.time;
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		SZ_Print (&cls.netchan.message, "pings");
 	}
