@@ -173,6 +173,7 @@ extern struct cvar_s *registered;
 
 extern qboolean standard_quake, rogue, hipnotic;
 
+int         build_number (void);
 
 #endif // __COMMON_H
 
