@@ -428,11 +428,19 @@ NET_Sleep (int msec)
 	fd_set			fdset;
 	struct timeval	timeout;
 
+#ifndef _WIN32
+	#ifdef TWILIGHT_QWSV
+		extern qboolean do_stdin, stdin_ready;
+	#endif
+#endif
+
 	FD_ZERO (&fdset);
 
 #ifndef _WIN32
-	if (do_stdin)
-		FD_SET (0, &fdset);
+	#ifdef TWILIGHT_QWSV
+		if (do_stdin)
+			FD_SET (0, &fdset);
+	#endif
 #endif
 
 	FD_SET (ip_sockets[NS_SERVER], &fdset);
@@ -442,7 +450,9 @@ NET_Sleep (int msec)
 	select (ip_sockets[NS_SERVER] + 1, &fdset, NULL, NULL, &timeout);
 
 #ifndef _WIN32
-	stdin_ready = FD_ISSET (0, &fdset);
+	#ifdef TWILIGHT_QWSV
+		stdin_ready = FD_ISSET (0, &fdset);
+	#endif
 #endif
 }
 
