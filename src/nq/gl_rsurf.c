@@ -376,7 +376,6 @@ lpMTexFUNC  qglMTexCoord2f = NULL;
 lpSelTexFUNC qglSelectTexture = NULL;
 
 qboolean    mtexenabled = false;
-extern GLenum gl_mtex_enum;
 
 void        GL_SelectTexture (GLenum target);
 
@@ -433,8 +432,8 @@ R_DrawSequentialPoly (msurface_t *s)
 			qglBegin (GL_POLYGON);
 			v = p->verts[0];
 			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-				qglMTexCoord2f (gl_mtex_enum + 0, v[3], v[4]);
-				qglMTexCoord2f (gl_mtex_enum + 1, v[5], v[6]);
+				qglMTexCoord2f (GL_TEXTURE0_ARB + 0, v[3], v[4]);
+				qglMTexCoord2f (GL_TEXTURE0_ARB + 1, v[5], v[6]);
 				qglVertex3fv (v);
 			}
 			qglEnd ();
@@ -558,8 +557,8 @@ R_DrawSequentialPoly (msurface_t *s)
 			qglBegin (GL_POLYGON);
 			v = p->verts[0];
 			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-					qglMTexCoord2f (gl_mtex_enum + 0, v[3], v[4]);
-					qglMTexCoord2f (gl_mtex_enum + 1, v[5], v[6]);
+					qglMTexCoord2f (GL_TEXTURE0_ARB + 0, v[3], v[4]);
+					qglMTexCoord2f (GL_TEXTURE0_ARB + 1, v[5], v[6]);
 					qglVertex3fv (v);
 			}
 			qglEnd ();
@@ -638,8 +637,8 @@ DrawGLWaterPolyMTex (glpoly_t *p)
 	qglBegin (GL_TRIANGLE_FAN);
 	v = p->verts[0];
 	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-			qglMTexCoord2f (gl_mtex_enum + 0, v[3], v[4]);
-			qglMTexCoord2f (gl_mtex_enum + 1, v[5], v[6]);
+			qglMTexCoord2f (GL_TEXTURE0_ARB + 0, v[3], v[4]);
+			qglMTexCoord2f (GL_TEXTURE0_ARB + 1, v[5], v[6]);
 			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
 			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
 			nv[2] = v[2];

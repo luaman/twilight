@@ -382,8 +382,6 @@ float      *shadedots = r_avertexnormal_dots[0];
 int         lastposenum =  0;
 int			lastposenum0 = 0;
 
-extern GLenum gl_mtex_enum;
-
 /*
 =============
 GL_DrawAliasFrame
@@ -416,8 +414,8 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 			// texture coordinates come from the draw list
 
 			if (mtex) {
-				qglMTexCoord2f (gl_mtex_enum + 0, ((float *) order)[0], ((float *) order)[1]);
-				qglMTexCoord2f (gl_mtex_enum + 1, ((float *) order)[0], ((float *) order)[1]);
+				qglMTexCoord2f (GL_TEXTURE0_ARB + 0, ((float *) order)[0], ((float *) order)[1]);
+				qglMTexCoord2f (GL_TEXTURE0_ARB + 1, ((float *) order)[0], ((float *) order)[1]);
 			}
 			else
 				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
@@ -482,8 +480,8 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 		{
 			// texture coordinates come from the draw list
 			if (mtex) {
-				qglMTexCoord2f (gl_mtex_enum + 0, ((float *) order)[0], ((float *) order)[1]);
-				qglMTexCoord2f (gl_mtex_enum + 1, ((float *) order)[0], ((float *) order)[1]);
+				qglMTexCoord2f (GL_TEXTURE0_ARB + 0, ((float *) order)[0], ((float *) order)[1]);
+				qglMTexCoord2f (GL_TEXTURE0_ARB + 1, ((float *) order)[0], ((float *) order)[1]);
 			}
 			else
 				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);

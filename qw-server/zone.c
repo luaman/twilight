@@ -34,8 +34,6 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <stdio.h>
-
 #include "bothdefs.h"
 #include "cmd.h"
 #include "common.h"
@@ -168,7 +166,9 @@ Z_Malloc (int size)
 {
 	void       *buf;
 
-	Z_CheckHeap ();						// DEBUG
+#ifdef PARANOID
+	Z_CheckHeap ();
+#endif
 	buf = Z_TagMalloc (size, 1);
 	if (!buf)
 		Sys_Error ("Z_Malloc: failed on allocation of %i bytes", size);

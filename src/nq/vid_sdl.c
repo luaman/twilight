@@ -200,32 +200,37 @@ GammaChanged (cvar_t *cvar)
 /*
 	CheckMultiTextureExtensions
 
-	Check for ARB or SGIS multitexture support
+	Check for ARB multitexture support
 */
-GLenum      gl_mtex_enum = 0;
 
 void
 CheckMultiTextureExtensions (void)
 {
+	gl_mtexable = false;
 	Con_Printf ("Checking for multitexture... ");
-	if (COM_CheckParm ("-nomtex")) {
+	if (COM_CheckParm ("-nomtex"))
+	{
 		Con_Printf ("disabled\n");
 		return;
 	}
-	if (strstr (gl_extensions, "GL_ARB_multitexture")) {
-		Con_Printf ("GL_ARB_multitexture\n");
-		qglMTexCoord2f = SDL_GL_GetProcAddress ("glMultiTexCoord2fARB");
-		qglSelectTexture = SDL_GL_GetProcAddress ("glActiveTextureARB");
-		gl_mtex_enum = GL_TEXTURE0_ARB;
-		gl_mtexable = true;
-	} else if (strstr (gl_extensions, "GL_SGIS_multitexture")) {
-		Con_Printf ("GL_SGIS_multitexture\n");
-		qglMTexCoord2f = SDL_GL_GetProcAddress ("glMTexCoord2fSGIS");
-		qglSelectTexture = SDL_GL_GetProcAddress ("glSelectTextureSGIS");
-		gl_mtex_enum = TEXTURE0_SGIS;
-		gl_mtexable = true;
+	// FIXME: don't strstr for extensions!
+	if (strstr (gl_extensions, "GL_ARB_multitexture"))
+	{
+		if (qglActiveTextureARB && qglMultiTexCoord2fARB)
+		{
+			Con_Printf ("GL_ARB_multitexture\n");
+			qglMTexCoord2f = SDL_GL_GetProcAddress ("glMultiTexCoord2fARB");
+			qglSelectTexture = SDL_GL_GetProcAddress ("glActiveTextureARB");
+			gl_mtexable = true;
+		} else {
+			// Shouldn't happen - driver is fucked up or its author is!
+			Con_Printf ("no, but driver thinks otherwise\n");
+			Con_DPrintf ("qglActiveTextureARB is 0x%p, "
+					"qglMultiTexCoord2fARB is 0x%p\n",
+					qglActiveTextureARB, qglMultiTexCoord2fARB);
+		}
 	} else
-		Con_Printf ("none found\n");
+		Con_Printf ("no\n");
 }
 
 
