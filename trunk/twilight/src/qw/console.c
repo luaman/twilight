@@ -264,6 +264,10 @@ Con_Init (void)
 
 	con = malloc (sizeof (console_t));
 	con_linewidth = -1;
+	con->current = 0;	// these *MUST*
+	con->x = 0;			// be initialized
+	con->display = 0;	// here
+
 	Con_CheckResize ();
 
 	Com_Printf ("Console initialized.\n");
@@ -304,10 +308,8 @@ If no console is visible, the notify window will pop up.
 void
 Con_Print (char *txt)
 {
-	int         y;
-	int         c, l;
-	static int  cr;
-	int         mask;
+	int			y, c, l, mask;
+	static int	cr;
 
 	if (txt[0] == 1 || txt[0] == 2) {
 		mask = 128;						// go to colored text
