@@ -131,6 +131,7 @@ double Q_pow(double x, double y);
 		((to)[1]=(base)[1]+((((a1)[1]*(a2))+((b1)[1]*(b2)))*c)),	\
 		((to)[2]=(base)[2]+((((a1)[2]*(a2))+((b1)[2]*(b2)))*c)))
 
+#define sq(x)		(x * x)
 #define Q_rint(x)	((x) < 0 ? (int)((x)-0.5f) : (int)((x)+0.5f))
 
 /*
@@ -167,6 +168,8 @@ void        R_ConcatRotations (float in1[3][3], float in2[3][3],
 							   float out[3][3]);
 
 void        AngleVectors (vec3_t angles, vec3_t forward, vec3_t right,
+						  vec3_t up);
+void        AngleVectorsFLU (vec3_t angles, vec3_t forward, vec3_t left,
 						  vec3_t up);
 int         BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
 
