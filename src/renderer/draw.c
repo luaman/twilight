@@ -33,7 +33,7 @@ static const char rcsid[] =
 #include "video.h"
 #include "strlib.h"
 #include "pointers.h"
-#include "gl_textures.h"
+#include "textures.h"
 #include "gl_arrays.h"
 #include "image.h"
 #include "sys.h"
@@ -42,7 +42,7 @@ static const char rcsid[] =
 #include "qtypes.h"
 #include "mathlib.h"
 #include "gl_info.h"
-#include "gl_draw.h"
+#include "draw.h"
 #include "cclient.h"
 #include "console.h"
 

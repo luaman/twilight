@@ -37,7 +37,7 @@
 #include "gl_info.h"
 #include "entities.h"
 #include "gl_light.h"
-#include "gl_brush.h"
+#include "brush.h"
 #include "gl_main.h"
 
 

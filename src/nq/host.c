@@ -41,7 +41,7 @@ static const char rcsid[] =
 #include "client.h"
 #include "cvar.h"
 #include "dlight.h"
-#include "gl_draw.h"
+#include "draw.h"
 #include "model.h"
 #include "host.h"
 #include "input.h"

@@ -22,15 +22,15 @@ libtwilight_renderer_a_SOURCES= \
 	anorms.-h anorm_dots.-h \
 	dyngl.c dyngl.h dglfuncs.h \
 	entities.c entities.h \
-	gl_alias.c gl_alias.h \
+	alias.c alias.h \
 	gl_arrays.c gl_arrays.h \
-	gl_brush.c gl_brush.h \
-	gl_draw.c gl_draw.h \
-	gl_sprite.c gl_sprite.h \
+	brush.c brush.h \
+	draw.c draw.h \
+	sprite.c sprite.h \
 	gl_info.c gl_info.h \
 	gl_light.c gl_light.h \
 	gl_main.c gl_main.h \
-	gl_textures.c gl_textures.h \
+	textures.c textures.h \
 	liquid.c liquid.h \
 	video.c video.h \
 	menu.c \
@@ -39,7 +39,7 @@ libtwilight_renderer_a_SOURCES= \
 	mod_sprite.c mod_sprite.h \
 	noise.c gen_textures.c gen_textures.h \
 	palette.c palette.h \
-	r_explosion.c r_explosion.h \
+	explosion.c explosion.h \
 	r_part.c r_part.h \
 	sky.c sky.h \
 	surface.c surface.h \

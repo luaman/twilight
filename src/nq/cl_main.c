@@ -44,7 +44,7 @@ static const char rcsid[] =
 #include "server.h"
 #include "sound.h"
 #include "world.h"
-#include "gl_textures.h"
+#include "textures.h"
 #include "teamplay.h"
 #include "surface.h"
 #include "chase.h"

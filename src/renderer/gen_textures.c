@@ -37,7 +37,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "zone.h"
 #include "gen_textures.h"
-#include "gl_textures.h"
+#include "textures.h"
 #include "noise.h"
 
 static void GTF_Init (void);

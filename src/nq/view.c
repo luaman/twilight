@@ -37,7 +37,7 @@ static const char rcsid[] =
 #include "screen.h"
 #include "strlib.h"
 #include "sys.h"
-#include "gl_alias.h"
+#include "alias.h"
 
 /* NQ specific */
 #include "host.h"
