@@ -741,18 +741,30 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolea
 		e->frame_interval = 0.1;
 	}
 
-	if (e->pose2 != pose) {
-		e->frame_start_time = realtime;
-		if (e->pose2 == -1) {
-			e->pose1 = pose;
+	if (e->lastmodel == e->model) 
+	{
+		if (e->pose2 != pose) {
+			e->frame_start_time = realtime;
+			if (e->pose2 == -1) {
+				e->pose1 = pose;
+			} else {
+				e->pose1 = e->pose2;
+			}
+			e->pose2 = pose;
+			blend = 0;
 		} else {
-			e->pose1 = e->pose2;
+			blend = (realtime - e->frame_start_time) / e->frame_interval;
 		}
+	}
+	else
+	{
+		e->lastmodel = e->model;
+		e->frame_start_time = realtime;
+		e->pose1 = pose;
 		e->pose2 = pose;
 		blend = 0;
-	} else {
-		blend = (realtime - e->frame_start_time) / e->frame_interval;
 	}
+
 //	Con_DPrintf ("numposes: %d, poses: %d %d\n", numposes, e->pose1,
 //			e->pose2);
 
