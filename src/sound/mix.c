@@ -34,12 +34,13 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include <stdio.h>
+
+#include "qtypes.h"
 #include "common.h"
-#include "console.h"
-#include "strlib.h"
 #include "cvar.h"
 #include "sound.h"
+#include "strlib.h"
 
 #define	PAINTBUFFER_SIZE	512
 portable_samplepair_t paintbuffer[PAINTBUFFER_SIZE];
@@ -79,7 +80,7 @@ S_TransferStereo16 (int endtime)
 {
 	int         lpos;
 	int         lpaintedtime;
-	void		*pbuf;
+	void	   *pbuf;
 
 	snd_vol = volume->value * 256;
 
@@ -107,7 +108,6 @@ S_TransferStereo16 (int endtime)
 	}
 }
 
-
 void
 S_TransferPaintBuffer (int endtime)
 {
@@ -118,7 +118,7 @@ S_TransferPaintBuffer (int endtime)
 	int         step;
 	int         val;
 	int         snd_vol;
-	void		*pbuf;
+	void	   *pbuf;
 
 	if (shm->samplebits == 16 && shm->channels == 2) {
 		S_TransferStereo16 (endtime);
@@ -131,7 +131,6 @@ S_TransferPaintBuffer (int endtime)
 	out_idx = paintedtime * shm->channels & out_mask;
 	step = 3 - shm->channels;
 	snd_vol = volume->value * 256;
-
 	pbuf = (Uint32 *) shm->buffer;
 
 	if (shm->samplebits == 16) {

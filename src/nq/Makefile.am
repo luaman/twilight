@@ -6,7 +6,8 @@ AUTOMAKE_OPTIONS=gnu dist-zip
 
 INCLUDES= \
 	-I$(top_srcdir)/include \
-	-I$(top_srcdir)/src/renderer
+	-I$(top_srcdir)/src/renderer \
+	-I$(top_srcdir)/src/sound
 
 LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_nq_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_NQ
@@ -14,7 +15,8 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_NQ
 bin_PROGRAMS=twilight-nq
 twilight_nq_LDADD= \
 		   $(top_srcdir)/src/base/libtwilight_base.a \
-		   $(top_srcdir)/src/renderer/libtwilight_renderer.a
+		   $(top_srcdir)/src/renderer/libtwilight_renderer.a \
+		   $(top_srcdir)/src/sound/libtwilight_sound.a
 
 if SYS_WIN32
 twilight_nq_sys_libs=-lwinmm -lwsock32
@@ -38,8 +40,7 @@ twilight_nq_SOURCES= \
 	progdefs.q1 \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
 	vid_sdl.c \
-	snd_dma.c snd_mem.c snd_mix.c snd_sdl.c \
-	cd_sdl.c \
+	snd_dma.c \
 	pcx.c tga.c \
 	view.c wad.c world.c world.h zone.c \
         quakedef.h bspfile.h client.h keys.h protocol.h \

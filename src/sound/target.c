@@ -36,13 +36,15 @@ static const char rcsid[] =
 #include <SDL_audio.h>
 #include <SDL_byteorder.h>
 
-#include "strlib.h"
+#include "qtypes.h"
 #include "common.h"
-#include "console.h"
 #include "cvar.h"
 #include "sound.h"
 #include "sys.h"
-#include "zone.h"
+
+// console.h is not common
+void Con_Printf (char *fmt, ...);
+
 
 cvar_t *snd_bits;
 cvar_t *snd_rate;
@@ -135,7 +137,7 @@ SNDDMA_Init (void)
 	// See what we got
 	if (SDL_OpenAudio (&desired, &obtained) < 0) {
 		Con_Printf ("Couldn't open SDL audio: %s\n", SDL_GetError ());
-		return 0;
+		return false;
 	}
 
 	// Be sure it works
