@@ -24,6 +24,8 @@
 static const char rcsid[] =
 	"$Id$";
 
+#include "twiconfig.h"
+
 #include "qtypes.h"
 #include "collision.h"
 #include "model.h"
