@@ -58,7 +58,6 @@ cvar_t		*_maxplayers;
 cvar_t		*cl_shownet;
 cvar_t		*cl_nolerp;
 
-cvar_t		*cl_hudswap;
 cvar_t		*cl_maxfps;
 
 cvar_t		*cl_mapname;
@@ -92,6 +91,8 @@ CL_ClearState (void)
 // wipe the entire cl structure
 	Zone_EmptyZone (cl_zone);
 	memset (&cl, 0, sizeof (cl));
+	memset (&ccl, 0, sizeof (ccl));
+	ccl.user_flags = USER_FLAG_NO_TEAM_NAME;
 
 	// we don't get this from the server, that'd take a new protocol
 	cl.viewzoom = 1.0f;
@@ -315,7 +316,7 @@ CL_AllocDlight (int key)
 // then look for anything else
 	dl = cl_dlights;
 	for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
-		if (dl->die < cl.time) {
+		if (dl->die < ccl.time) {
 			memset (dl, 0, sizeof (*dl));
 			dl->key = key;
 			return dl;
@@ -339,7 +340,7 @@ CL_NewDlight (int key, vec3_t org, int effects)
 	dlight_t   *dl = CL_AllocDlight (key);
 
 	dl->radius = 1.0f;
-	dl->die = cl.time + 0.1f;
+	dl->die = ccl.time + 0.1f;
 	VectorCopy (org, dl->origin);
 
 	VectorClear (dl->color);
@@ -376,11 +377,11 @@ CL_DecayLights (void)
 	dlight_t   *dl;
 	float       time;
 
-	time = cl.time - cl.oldtime;
+	time = ccl.time - ccl.oldtime;
 
 	dl = cl_dlights;
 	for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
-		if (dl->die < cl.time || !dl->radius)
+		if (dl->die < ccl.time || !dl->radius)
 			continue;
 
 		dl->radius -= time * dl->decay;
@@ -406,9 +407,9 @@ CL_LerpPoint (void)
 	f = cl.mtime[0] - cl.mtime[1];
 
 	if (!f || cl_nolerp->ivalue || cls.timedemo || sv.active) {
-		cl.time = cl.mtime[0];
-		r_time = cl.time;
-		r_frametime = cl.time - cl.oldtime;
+		ccl.time = cl.mtime[0];
+		r_time = ccl.time;
+		r_frametime = ccl.time - ccl.oldtime;
 		return 1;
 	}
 
@@ -416,22 +417,22 @@ CL_LerpPoint (void)
 		cl.mtime[1] = cl.mtime[0] - 0.1;
 		f = 0.1;
 	}
-	frac = (cl.time - cl.mtime[1]) / f;
+	frac = (ccl.time - cl.mtime[1]) / f;
 
 	if (frac < 0) {
 		if (frac < -0.01) {
-			cl.time = cl.mtime[1];
+			ccl.time = cl.mtime[1];
 		}
 		frac = 0;
 	} else if (frac > 1) {
 		if (frac > 1.01) {
-			cl.time = cl.mtime[0];
+			ccl.time = cl.mtime[0];
 		}
 		frac = 1;
 	}
 
-	r_time = cl.time;
-	r_frametime = cl.time - cl.oldtime;
+	r_time = ccl.time;
+	r_frametime = ccl.time - ccl.oldtime;
 
 	return frac;
 }
@@ -479,7 +480,7 @@ CL_RelinkEntities (void)
 
 		CL_Lerp_OriginAngles (ent);
 
-		if (ent->effects && (cl.time - cl.oldtime))
+		if (ent->effects && (ccl.time - ccl.oldtime))
 		{
 			if (ent->effects & EF_BRIGHTFIELD)
 				R_EntityParticles (&ent->common);
@@ -497,7 +498,7 @@ CL_RelinkEntities (void)
 
 					if (!gl_flashblend->ivalue && !gl_oldlights->ivalue)
 					{
-						TraceLine(cl.worldmodel, ent->common.origin, dl->origin, impact, impactnormal);
+						TraceLine(ccl.worldmodel, ent->common.origin, dl->origin, impact, impactnormal);
 						VectorCopy(impact, dl->origin);
 					}
 
@@ -506,7 +507,7 @@ CL_RelinkEntities (void)
 					dl->color[0] = 0.5f;
 					dl->color[1] = 0.5f;
 					dl->color[2] = 0.4f;
-					dl->die = cl.time + 0.1;
+					dl->die = ccl.time + 0.1;
 				}
 			}
 
@@ -517,12 +518,12 @@ CL_RelinkEntities (void)
 		}
 
 // rotate binary objects locally
-		if (ent->common.model->flags && (cl.time - cl.oldtime)) {
+		if (ent->common.model->flags && (ccl.time - ccl.oldtime)) {
 			int flags = ent->common.model->flags;
 
 			if (flags & EF_ROTATE) {
 				flags &= ~EF_ROTATE;
-				ent->common.angles[YAW] = ANGLEMOD (100 * (cl.time + ent->syncbase));
+				ent->common.angles[YAW] = ANGLEMOD (100 * (ccl.time + ent->syncbase));
 				CL_Update_Matrices (ent);
 			}
 
@@ -530,7 +531,7 @@ CL_RelinkEntities (void)
 				dl = CL_AllocDlight (i);
 				VectorCopy (ent->common.origin, dl->origin);
 				dl->radius = 200;
-				dl->die = cl.time + 0.01;
+				dl->die = ccl.time + 0.01;
 				VectorSet (dl->color, 1.0f, 0.6f, 0.2f);
 			}
 
@@ -566,8 +567,8 @@ CL_ReadFromServer (void)
 {
 	int         ret;
 
-	cl.oldtime = cl.time;
-	cl.time += host_frametime;
+	ccl.oldtime = ccl.time;
+	ccl.time += host_frametime;
 
 	do {
 		ret = CL_GetMessage ();
@@ -689,6 +690,8 @@ CL_Init_Cvars
 void
 CL_Init_Cvars (void)
 {
+	CCL_Init_Cvars ();
+
 	show_fps = Cvar_Get ("show_fps", "0", CVAR_NONE, NULL);
 
 	_cl_name = Cvar_Get ("_cl_name", "player", CVAR_ARCHIVE, NULL);
@@ -699,7 +702,6 @@ CL_Init_Cvars (void)
 	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);
 	cl_nolerp = Cvar_Get ("cl_nolerp", "0", CVAR_NONE, NULL);
 
-	cl_hudswap = Cvar_Get ("cl_hudswap", "0", CVAR_ARCHIVE, NULL);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
 
 	cl_mapname = Cvar_Get ("cl_mapname", "", CVAR_ROM, NULL);
@@ -717,6 +719,8 @@ CL_Init
 void
 CL_Init (void)
 {
+	CCL_Init ();
+	ccl.user_flags = USER_FLAG_NO_TEAM_NAME;
 	cl_zone = Zone_AllocZone ("client");
 
 	SZ_Init (&cls.message, cls.msg_buf, sizeof(cls.msg_buf));
@@ -736,3 +740,7 @@ CL_Init (void)
 	Cmd_AddCommand ("timedemo", CL_TimeDemo_f);
 }
 
+void
+CL_UpdatePings (void)
+{
+}

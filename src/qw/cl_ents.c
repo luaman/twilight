@@ -91,7 +91,7 @@ CL_AllocDlight (int key)
 // then look for anything else
 	dl = cl_dlights;
 	for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
-		if (dl->die < cl.time) {
+		if (dl->die < ccl.time) {
 			memset (dl, 0, sizeof (*dl));
 			dl->key = key;
 			dl->color[0] = 0.2f; 
@@ -121,7 +121,7 @@ CL_NewDlight (int key, vec3_t org, int effects)
 	dlight_t   *dl = CL_AllocDlight (key);
 
 	dl->radius = 1.0f;
-	dl->die = cl.time + 0.1f;
+	dl->die = ccl.time + 0.1f;
 	VectorCopy (org, dl->origin);
 
 	VectorClear (dl->color);
@@ -165,7 +165,7 @@ CL_DecayLights (void)
 
 	dl = cl_dlights;
 	for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
-		if (dl->die < cl.time || !dl->radius)
+		if (dl->die < ccl.time || !dl->radius)
 			continue;
 
 		dl->radius -= host_frametime * dl->decay;
@@ -504,7 +504,7 @@ CL_Lerp_OriginAngles (entity_t *ent)
 	// Now lerp it.
 	if (ent->lerp_delta_time)
 	{
-		lerp = (cl.time - ent->lerp_start_time) / ent->lerp_delta_time;
+		lerp = (ccl.time - ent->lerp_start_time) / ent->lerp_delta_time;
 		if (lerp < 1)
 		{
 			VectorMA (ent->msg_origins[1], lerp, odelta, ent->common.origin);
@@ -554,7 +554,7 @@ CL_Update_Frame_C (entity_common_t *e, int frame, float frame_time)
 		goto CL_Update_Frame_frac;
 	} else {
 CL_Update_Frame_frac:
-		e->frame_frac[0] = (cl.time - e->frame_time[0]) * 10;
+		e->frame_frac[0] = (ccl.time - e->frame_time[0]) * 10;
 		e->frame_frac[0] = bound(0, e->frame_frac[0], 1);
 		e->frame_frac[1] = 1 - e->frame_frac[0];
 	}
@@ -606,7 +606,7 @@ CL_LinkPacketEntities (void)
 
 	pack = &cl.frames[cl.validsequence & UPDATE_MASK].packet_entities;
 
-	autorotate = ANGLEMOD (100 * cl.time);
+	autorotate = ANGLEMOD (100 * ccl.time);
 
 	for (pnum = 0; pnum < pack->num_entities; pnum++) {
 		state = &pack->entities[pnum];
@@ -641,9 +641,9 @@ CL_LinkPacketEntities (void)
 		ent->entity_frame = entity_frame;
 
 		// set colormap
-		if (state->colormap && (state->colormap < MAX_CLIENTS)
+		if (state->colormap && (state->colormap < ccl.max_users)
 			&& state->modelindex == cl_playerindex) {
-			ent->common.colormap = &cl.players[state->colormap - 1].colormap;
+			ent->common.colormap = &ccl.users[state->colormap - 1].color_map;
 		} else {
 			ent->common.colormap = NULL;
 		}
@@ -658,9 +658,9 @@ CL_LinkPacketEntities (void)
 			angles[YAW] = autorotate;
 		}
 
-		moved = CL_Update_OriginAngles (ent, state->origin, angles, cl.time);
+		moved = CL_Update_OriginAngles (ent, state->origin, angles, ccl.time);
 		CL_Lerp_OriginAngles (ent);
-		CL_Update_Frame (ent, state->frame, cl.time);
+		CL_Update_Frame (ent, state->frame, ccl.time);
 
 		V_AddEntity ( ent );
 
@@ -672,7 +672,7 @@ CL_LinkPacketEntities (void)
 			dl = CL_AllocDlight (state->number);
 			VectorCopy (ent->common.origin, dl->origin);
 			dl->radius = 200;
-			dl->die = cl.time + 0.1;
+			dl->die = ccl.time + 0.1;
 			VectorSet (dl->color, 1.0f, 0.6f, 0.2f);
 		}
 
@@ -764,8 +764,8 @@ CL_LinkProjectiles (void)
 
 		ent->common.model = cl.model_precache[pr->modelindex];
 
-		CL_Update_OriginAngles (ent, pr->origin, pr->angles, cl.time);
-		CL_Update_Frame (ent, 0, cl.time);
+		CL_Update_OriginAngles (ent, pr->origin, pr->angles, ccl.time);
+		CL_Update_Frame (ent, 0, ccl.time);
 	}
 }
 
@@ -948,8 +948,8 @@ CL_AddFlagModels (entity_t *ent, int team)
 	VectorCopy (ent->common.angles, angles);
 	angles[2] -= 45;
 
-	CL_Update_OriginAngles (newent, origin, angles, cl.time);
-	CL_Update_Frame (newent, 0, cl.time);
+	CL_Update_OriginAngles (newent, origin, angles, ccl.time);
+	CL_Update_Frame (newent, 0, ccl.time);
 }
 
 /*
@@ -964,7 +964,7 @@ static void
 CL_LinkPlayers (void)
 {
 	int         j;
-	player_info_t *info;
+	user_info_t *info;
 	player_state_t *state;
 	player_state_t exact;
 	double      playertime;
@@ -978,7 +978,7 @@ CL_LinkPlayers (void)
 
 	frame = &cl.frames[cl.parsecount & UPDATE_MASK];
 
-	for (j = 0, info = cl.players, state = frame->playerstate;
+	for (j = 0, info = ccl.users, state = frame->playerstate;
 			j < MAX_CLIENTS;
 			j++, info++, state++)
 	{
@@ -993,9 +993,9 @@ CL_LinkPlayers (void)
 
 		// spawn light flashes
 		if ((state->effects & EF_LIGHTMASK) &&
-				(!gl_flashblend->ivalue || j != cl.playernum))
+				(!gl_flashblend->ivalue || j != ccl.player_num))
 		{
-			if (j == cl.playernum)
+			if (j == ccl.player_num)
 				VectorCopy (cl.simorg, org);
 			else
 				VectorCopy (state->origin, org);
@@ -1003,7 +1003,7 @@ CL_LinkPlayers (void)
 		}
 
 		// the player object never gets added
-		if (j == cl.playernum)
+		if (j == ccl.player_num)
 			continue;
 
 		if (!state->modelindex)
@@ -1020,7 +1020,7 @@ CL_LinkPlayers (void)
 
 		ent->common.model = cl.model_precache[state->modelindex];
 		if (state->modelindex == cl_playerindex) {
-			ent->common.colormap = &info->colormap;	// Use custom colormap.
+			ent->common.colormap = &info->color_map;	// Use custom colormap.
 			ent->common.skin = info->skin;				// Use custom skin.
 		} else {
 			ent->common.colormap = NULL;
@@ -1037,18 +1037,18 @@ CL_LinkPlayers (void)
 		// only predict half the move to minimize overruns
 		msec = 500 * (playertime - state->state_time);
 		if (msec <= 0 || (!cl_predict_players->ivalue)) {
-			CL_Update_OriginAngles (ent, state->origin, angles, cl.time);
+			CL_Update_OriginAngles (ent, state->origin, angles, ccl.time);
 		} else {
 			// predict players movement
 			state->command.msec = min (state->command.msec, 255);
 
 			CL_PredictUsercmd (j, state, &exact, &state->command, false);
 			VectorCopy (exact.origin, ent->common.origin);
-			CL_Update_OriginAngles (ent, exact.origin, angles, cl.time);
+			CL_Update_OriginAngles (ent, exact.origin, angles, ccl.time);
 		}
 
 //		CL_Lerp_OriginAngles (ent);
-		CL_Update_Frame (ent, state->frame, cl.time);
+		CL_Update_Frame (ent, state->frame, ccl.time);
 
 		if (state->effects & EF_FLAG1)
 			CL_AddFlagModels (ent, 0);
@@ -1075,7 +1075,7 @@ CL_SetSolidEntities (void)
 	entity_state_t		*state;
 	physent_t			*pent;
 
-	pmove.physents[0].model = cl.worldmodel;
+	pmove.physents[0].model = ccl.worldmodel;
 	VectorClear (pmove.physents[0].origin);
 	pmove.physents[0].id = -1;
 	pmove.physents[0].info = __LINE__;
@@ -1142,9 +1142,9 @@ CL_SetSolidPlayers ()
 		// note that the local player is special, since he moves locally
 		// we use his last predicted postition
 		pent = &pmove.physents[pmove.numphysent++];
-		if (i == cl.playernum)
+		if (i == ccl.player_num)
 			VectorCopy (cl.frames[cls.netchan.outgoing_sequence & UPDATE_MASK].
-						playerstate[cl.playernum].origin, pent->origin);
+						playerstate[ccl.player_num].origin, pent->origin);
 		else
 			VectorCopy (state->origin, pent->origin);
 		pent->id = i;
@@ -1176,7 +1176,7 @@ CL_LinkStaticEntites (void)
 ===============
 CL_EmitEntities
 
-Builds the visedicts array for cl.time
+Builds the visedicts array for ccl.time
 
 Made up of: clients, packet_entities, nails, and tents
 ===============

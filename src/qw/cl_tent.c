@@ -131,7 +131,7 @@ CL_ParseBeam (model_t *m, qboolean lightning)
 	for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++) {
 		if (b->entity == ent) {
 			b->model = m;
-			b->endtime = cl.time + 0.3;
+			b->endtime = ccl.time + 0.3;
 			b->lightning = lightning;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
@@ -143,10 +143,10 @@ CL_ParseBeam (model_t *m, qboolean lightning)
 
 // find a free beam
 	for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++) {
-		if (!b->model || b->endtime < cl.time) {
+		if (!b->model || b->endtime < ccl.time) {
 			b->entity = ent;
 			b->model = m;
-			b->endtime = cl.time + 0.3;
+			b->endtime = ccl.time + 0.3;
 			b->lightning = lightning;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
@@ -244,7 +244,7 @@ CL_ParseTEnt (void)
 			dl = CL_AllocDlight (0);
 			VectorCopy (pos, dl->origin);
 			dl->radius = 350;
-			dl->die = cl.time + 0.5;
+			dl->die = ccl.time + 0.5;
 			dl->decay = 300;
 			dl->color[0] = 1.25f;
 			dl->color[1] = 1.0f;
@@ -298,7 +298,7 @@ CL_ParseTEnt (void)
 			dl = CL_AllocDlight (0);
 			VectorCopy (pos, dl->origin);
 			dl->radius = 1000;
-			dl->die = cl.time + 99;
+			dl->die = ccl.time + 99;
 			dl->decay = 3000;
 			dl->color[0] = 1.25f;
 			dl->color[1] = 1.25f;
@@ -376,7 +376,7 @@ CL_UpdateBeams (void)
 
 // update lightning
 	for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++) {
-		if (!b->model || b->endtime < cl.time)
+		if (!b->model || b->endtime < ccl.time)
 			continue;
 
 		// if coming from the player, update the start position
@@ -430,7 +430,7 @@ CL_UpdateExplosions (void)
 	for (i = 0, ex = cl_explosions; i < MAX_EXPLOSIONS; i++, ex++) {
 		if (!ex->model)
 			continue;
-		f = 10 * (cl.time - ex->start);
+		f = 10 * (ccl.time - ex->start);
 		if (f >= ex->model->numframes) {
 			ex->model = NULL;
 			continue;

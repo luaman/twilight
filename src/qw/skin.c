@@ -216,15 +216,15 @@ Skin_NextDownload
 void
 Skin_NextDownload (void)
 {
-	player_info_t	   *sc;
-	int					i;
+	user_info_t	   *sc;
+	int				i;
 
 	if (cls.downloadnumber == 0)
 		Com_Printf ("Checking skins...\n");
 	cls.downloadtype = dl_skin;
 
 	for (; cls.downloadnumber != MAX_CLIENTS; cls.downloadnumber++) {
-		sc = &cl.players[cls.downloadnumber];
+		sc = &ccl.users[cls.downloadnumber];
 		if (!sc->name[0] || !sc->skin_name[0])
 			continue;
 		if (noskins->ivalue)
@@ -237,7 +237,7 @@ Skin_NextDownload (void)
 
 	// now load them in for real
 	for (i = 0; i < MAX_CLIENTS; i++) {
-		sc = &cl.players[i];
+		sc = &ccl.users[i];
 		if (!sc->name[0] || !sc->skin_name[0])
 			continue;
 		sc->skin = Skin_Load (sc->skin_name);

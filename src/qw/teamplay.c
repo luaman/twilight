@@ -120,14 +120,14 @@ location:
 					break;
 				case 'a':
 					if (bracket) {
-						if (cl.stats[STAT_ARMOR] > 50)
+						if (ccl.stats[STAT_ARMOR] > 50)
 							bracket = 0;
 
-						if (cl.stats[STAT_ITEMS] & IT_ARMOR3)
+						if (ccl.stats[STAT_ITEMS] & IT_ARMOR3)
 							t3[0] = 'R' | 0x80;
-						else if (cl.stats[STAT_ITEMS] & IT_ARMOR2)
+						else if (ccl.stats[STAT_ITEMS] & IT_ARMOR2)
 							t3[0] = 'Y' | 0x80;
-						else if (cl.stats[STAT_ITEMS] & IT_ARMOR1)
+						else if (ccl.stats[STAT_ITEMS] & IT_ARMOR1)
 							t3[0] = 'G' | 0x80;
 						else {
 							t2[0] = 'N' | 0x80;
@@ -139,18 +139,18 @@ location:
 						}
 
 						snprintf (t2, sizeof (t2), "%sa:%i", t3,
-								cl.stats[STAT_ARMOR]);
+								ccl.stats[STAT_ARMOR]);
 					} else
 						snprintf (t2, sizeof (t2), "%i",
-								cl.stats[STAT_ARMOR]);
+								ccl.stats[STAT_ARMOR]);
 					break;
 				case 'A':
 					bracket = 0;
-					if (cl.stats[STAT_ITEMS] & IT_ARMOR3)
+					if (ccl.stats[STAT_ITEMS] & IT_ARMOR3)
 						t2[0] = 'R' | 0x80;
-					else if (cl.stats[STAT_ITEMS] & IT_ARMOR2)
+					else if (ccl.stats[STAT_ITEMS] & IT_ARMOR2)
 						t2[0] = 'Y' | 0x80;
-					else if (cl.stats[STAT_ITEMS] & IT_ARMOR1)
+					else if (ccl.stats[STAT_ITEMS] & IT_ARMOR1)
 						t2[0] = 'G' | 0x80;
 					else {
 						t2[0] = 'N' | 0x80;
@@ -162,13 +162,13 @@ location:
 					break;
 				case 'h':
 					if (bracket) {
-						if (cl.stats[STAT_HEALTH] > 50)
+						if (ccl.stats[STAT_HEALTH] > 50)
 							bracket = 0;
 						snprintf (t2, sizeof (t2), "h:%i",
-								cl.stats[STAT_HEALTH]);
+								ccl.stats[STAT_HEALTH]);
 					} else
 						snprintf (t2, sizeof (t2), "%i",
-								cl.stats[STAT_HEALTH]);
+								ccl.stats[STAT_HEALTH]);
 					break;
 				default:
 					bracket = 0;
@@ -219,7 +219,7 @@ Team_Dead (void)
 void
 Team_NewMap (void)
 {
-	loc_newmap (cl.worldmodel->name);
+	loc_newmap (ccl.worldmodel->name);
 
 	died = false;
 	recorded_location = false;
@@ -247,7 +247,7 @@ Team_loc (void)
 	
 	if (!strcasecmp (Cmd_Argv (1), "save")) {
 		if (Cmd_Argc () == 2) {
-			loc_write (cl.worldmodel->name);
+			loc_write (ccl.worldmodel->name);
 		} else {
 			Com_Printf ("loc save :saves locs from memory into a .loc file\n");
 		}

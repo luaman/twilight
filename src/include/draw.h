@@ -48,6 +48,8 @@ void Draw_String (float x, float y, char *str, float text_size);
 void Draw_String_Len (float x, float y, char *str, int len, float text_size);
 void Draw_Alt_String (float x, float y, char *str, float text_size);
 void Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size);
+void Draw_Conv_String (float x, float y, char *str, float text_size);
+void Draw_Conv_String_Len (float x, float y, char *str, int len, float text_size);
 struct qpic_s *Draw_PicFromWad (char *name);
 struct qpic_s *Draw_CachePic (char *path);
 void Draw_Crosshair (void);

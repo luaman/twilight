@@ -32,7 +32,7 @@ static const char rcsid[] =
 #include "draw.h"
 #include "mathlib.h"
 #include "menu.h"
-#include "sbar.h"
+#include "hud.h"
 #include "gl_textures.h"
 
 int         netgraphtexture;			// netgraph texture

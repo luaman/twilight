@@ -73,7 +73,7 @@ CL_StopPlayback (void)
 	if (cls.timedemo)
 		CL_FinishTimeDemo ();
 
-	memset (cl.cshifts, 0, sizeof(cl.cshifts));
+	memset (ccl.cshifts, 0, sizeof(ccl.cshifts));
 }
 
 /*
@@ -126,7 +126,7 @@ CL_GetMessage (void)
 				// so the bogus time on the first frame doesn't count
 				if (host_framecount == cls.td_startframe + 1)
 					cls.td_starttime = host_realtime;
-			} else if ( /* cl.time > 0 && */ cl.time <= cl.mtime[0]) {
+			} else if ( /* ccl.time > 0 && */ ccl.time <= cl.mtime[0]) {
 				return 0;				// don't need another message yet
 			}
 		}

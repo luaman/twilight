@@ -24,28 +24,28 @@
 	$Id$
 */
 
-#ifndef __SBAR_H
-#define __SBAR_H
+#ifndef __HUD_H
+#define __HUD_H
 
-#define	SBAR_HEIGHT		24
+#include "cvar.h"
 
-extern int sb_lines;			// scan lines to draw
-extern struct cvar_s *cl_sbar;
+extern int sb_lines;            // scan lines to draw
+extern cvar_t *cl_sbar;
 
-void		Sbar_Init_Cvars (void);
-void		Sbar_Init (void);
+void		HUD_Init_Cvars (void);
+void		HUD_Init (void);
 
 // call whenever any of the client stats represented on the sbar changes
 
-void		Sbar_Draw (void);
+void		HUD_Draw (void);
 
 // called every frame by screen
 
-void		Sbar_IntermissionOverlay (void);
+void		HUD_IntermissionOverlay (void);
 
 // called each frame after the level has been completed
 
-void		Sbar_FinaleOverlay (void);
+void		HUD_FinaleOverlay (void);
 
-#endif // __SBAR_H
+#endif // __HUD_H
 

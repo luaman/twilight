@@ -5,9 +5,12 @@
 AUTOMAKE_OPTIONS=foreign dist-zip
 
 if CLIENTS
-clients = image renderer sound
+clients = image renderer sound client
 endif
-SUBDIRS=tools include base $(clients) nq qw
+if SERVERS
+servers = server
+endif
+SUBDIRS=tools include base $(clients) $(servers) nq qw
 
 
 noinst_HEADERS= \

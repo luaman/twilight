@@ -337,6 +337,82 @@ Draw_Alt_String (float x, float y, char *str, float text_size)
 	Draw_Alt_String_Len (x, y, str, strlen(str), text_size);
 }
 
+/*
+================
+Draw_Conv_String_Len
+================
+*/
+void
+Draw_Conv_String_Len (float x, float y, char *str, int len, float text_size)
+{
+	float	frow, fcol, size = 0.0625;
+	int		num, i;
+
+	if (y <= -8)
+		return;							/* totally off screen */
+	if (!str || !str[0])
+		return;
+
+	qglBindTexture (GL_TEXTURE_2D, char_texture);
+
+	qglEnable (GL_BLEND);
+	v_index = 0;
+
+	for (i = 0; *str && (i < len); i++, x += text_size, str++)
+	{
+		switch (*str) {
+			case '(': num = 0x1d; break;
+			case '-': num = 0x1e; break;
+			case ')': num = 0x1f; break;
+			case '<': num = 0x80; break;
+			case '=': num = 0x81; break;
+			case '>': num = 0x82; break;
+			default: num = *str | 0x80; break;
+		}
+
+		if (num != (' ' | 0x80))
+		{
+			frow = (float) (num >> 4) * size;
+			fcol = (float) (num & 15) * size;
+			VectorSet2 (tc_array_v(v_index + 0), fcol, frow);
+			VectorSet2 (v_array_v(v_index + 0), x, y);
+			VectorSet2 (tc_array_v(v_index + 1), fcol + size, frow);
+			VectorSet2 (v_array_v(v_index + 1), x + text_size, y);
+			VectorSet2 (tc_array_v(v_index + 2), fcol + size, frow + size);
+			VectorSet2 (v_array_v(v_index + 2), x + text_size, y + text_size);
+			VectorSet2 (tc_array_v(v_index + 3), fcol, frow + size);
+			VectorSet2 (v_array_v(v_index + 3), x, y + text_size);
+			v_index += 4;
+			if ((v_index + 4) >= MAX_VERTEX_ARRAYS)
+			{
+				TWI_PreVDraw (0, v_index);
+				qglDrawArrays (GL_QUADS, 0, v_index);
+				TWI_PostVDraw ();
+				v_index = 0;
+			}
+		}
+	}
+	if (v_index)
+	{
+		TWI_PreVDraw (0, v_index);
+		qglDrawArrays (GL_QUADS, 0, v_index);
+		TWI_PostVDraw ();
+		v_index = 0;
+	}
+	qglDisable (GL_BLEND);
+}
+
+/*
+================
+Draw_Conv_String
+================
+*/
+void
+Draw_Conv_String (float x, float y, char *str, float text_size)
+{
+	Draw_Conv_String_Len (x, y, str, strlen(str), text_size);
+}
+
 
 /*
 =============

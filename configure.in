@@ -221,6 +221,8 @@ if test "x$with_mmx" = "xyes"; then
 	AC_COMPILE_IFELSE([int main (int argc, char **argv) { argc=argc; argv=argv; asm ("movq %%mm0, %%mm1" ::: "mm0", "mm1"); return 0; }], [AC_MSG_RESULT(yes); AC_DEFINE(HAVE_MMX, 1, [Defined if we have mmx support])], [AC_MSG_RESULT(no)])
 fi
 
+LDFLAGS=-Wl,-E
+
 
 AC_OUTPUT(
 	Makefile
@@ -231,6 +233,8 @@ AC_OUTPUT(
 	src/image/Makefile
 	src/renderer/Makefile
 	src/sound/Makefile
+	src/client/Makefile
+	src/server/Makefile
 	src/nq/Makefile
 	src/qw/Makefile
 	src/tools/Makefile

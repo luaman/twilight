@@ -9,7 +9,9 @@ INCLUDES= \
 	-I$(top_srcdir)/src/base \
 	-I$(top_srcdir)/src/image \
 	-I$(top_srcdir)/src/renderer \
-	-I$(top_srcdir)/src/sound
+	-I$(top_srcdir)/src/sound \
+	-I$(top_srcdir)/src/server \
+	-I$(top_srcdir)/src/client
 
 
 LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_nq_sys_libs)
@@ -22,6 +24,7 @@ twilight_nq_LDADD= \
 	$(top_builddir)/src/base/libtwilight_base.a \
 	$(top_builddir)/src/renderer/libtwilight_renderer.a \
 	$(top_builddir)/src/image/libtwilight_image.a \
+	$(top_builddir)/src/client/libtwilight_client.a \
 	$(top_builddir)/src/sound/libtwilight_sound.a
 endif
 
@@ -44,7 +47,7 @@ twilight_nq_SOURCES= \
 	net_main.c net_udp.c net_udp.h \
 	pr_cmds.c pr_edict.c pr_exec.c progs.h progdefs.h \
 	progdefs.q1 protocol.h pr_execprogram.h \
-	render.h sbar.c screen.h server.h \
+	render.h screen.h server.h \
 	snd_dma.c \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
 	sys.c teamplay.c vid_sdl.c \

@@ -38,6 +38,7 @@
 #endif
 #include "zone.h"
 #include "pmove.h"
+#include "cclient.h"
 
 /*
  * player_state_t is the information needed by a player entity
@@ -74,20 +75,6 @@ typedef struct {
 typedef struct player_info_s {
 	int			userid;
 	char		userinfo[MAX_INFO_STRING];
-
-	// scoreboard information
-	char		team[MAX_SCOREBOARDNAME];
-	char		name[MAX_SCOREBOARDNAME];
-	float		entertime;
-	int			frags;
-	int			ping;
-	Uint8		pl;
-	int			spectator;
-
-	// skin information
-	colormap_t	colormap;
-	char		skin_name[MAX_SKIN_NAME];
-	skin_t		*skin;
 } player_info_t;
 
 
@@ -115,29 +102,6 @@ typedef struct {
 	// true if the packet_entities delta was invalid
 	qboolean			invalid;
 } frame_t;
-
-
-typedef struct {
-	int	destcolor[3];
-	int	percent;		// 0-256 (yeah, someone's on drugs)
-} cshift_t;
-
-#define	CSHIFT_CONTENTS	0
-#define	CSHIFT_DAMAGE	1
-#define	CSHIFT_BONUS	2
-#define	CSHIFT_POWERUP	3
-#define	NUM_CSHIFTS		4
-
-
-/*
- * client_state_t should hold all pieces of the client state
- */
-typedef struct {
-	int		length;
-	char	map[MAX_STYLESTRING];
-} lightstyle_t;
-
-
 
 #define	MAX_EFRAGS		512
 
@@ -215,12 +179,6 @@ typedef struct {
 
 extern client_static_t cls;
 
-// these determine which intermission screen plays
-typedef enum { GAME_SINGLE, GAME_COOP, GAME_DEATHMATCH, GAME_TEAMS } gametype_t;
-
-#define FRAGS_SORTED		1
-#define FRAGS_TEAM_SORTED	2
-
 /*
  * the client_state_t structure is wiped completely at every server signon
  */
@@ -245,22 +203,11 @@ typedef struct {
 
 	int				spectator;
 
-	gametype_t		gametype;
-
 	double			last_ping_request;		// while showing scoreboard
 	double			last_servermessage;
 
 	// sentcmds[cl.netchan.outgoing_sequence & UPDATE_MASK] = cmd
 	frame_t			frames[UPDATE_BACKUP];
-
-	// information for local display
-	int				stats[MAX_CL_STATS];	// health, etc
-	float			item_gettime[32];		// cl.time of aquiring, for blinking
-	float			faceanimtime;			// use anim frame if cl.time < this
-
-	colormap_t		*colormap;				// The colormap for local display.
-	cshift_t		cshifts[NUM_CSHIFTS];	// color shifts for damage, powerups
-	cshift_t		prev_cshifts[NUM_CSHIFTS];	// and content types
 
 	/*
 	 * the client maintains its own idea of view angles, which are sent to
@@ -268,9 +215,6 @@ typedef struct {
 	 * times
 	 */
 	vec3_t			viewangles;
-
-	// the time that the client is rendering at.  always <= realtime
-	double			time, oldtime;
 
 	// the client simulates or interpolates movement to get these values
 	vec3_t			simorg;
@@ -290,9 +234,6 @@ typedef struct {
 
 	float			punchangle;				// yview kick from weapon firing
 
-	int				intermission;			// full screen, fixed view, etc
-	int         	completed_time;			// from time at intermission start
-
 	/*
 	 * information that is static for the entire time connected to a server
 	 */
@@ -302,12 +243,9 @@ typedef struct {
 	model_t			*model_precache[MAX_MODELS];
 	struct sfx_s	*sound_precache[MAX_SOUNDS];
 
-	char			levelname[40];			// for display on solo scoreboard
-	int				playernum;
 	int				viewentity;
 
 	// refresh related state
-	model_t			*worldmodel;			// cl_entitites[0].model
 	int				num_entities;			// bottom up in cl_entities array
 
 	int				cdtrack;				// cd audio

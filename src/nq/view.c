@@ -128,7 +128,7 @@ V_CalcBob (void)
 	if (!cl_bobcycle->fvalue)
 		return 0;
 
-	cycle = cl.time - (int)(cl.time / cl_bobcycle->fvalue)
+	cycle = ccl.time - (int)(ccl.time / cl_bobcycle->fvalue)
 		* cl_bobcycle->fvalue;
 	cycle /= cl_bobcycle->fvalue;
 	if (cycle < cl_bobup->fvalue)
@@ -152,7 +152,7 @@ V_CalcBob (void)
 void
 V_StartPitchDrift (void)
 {
-	if (cl.laststop == cl.time)
+	if (cl.laststop == ccl.time)
 		return;		/* something else is keeping it from drifting */
 
 	if (cl.nodrift || !cl.pitchvel) {
@@ -165,7 +165,7 @@ V_StartPitchDrift (void)
 void
 V_StopPitchDrift (void)
 {
-	cl.laststop = cl.time;
+	cl.laststop = ccl.time;
 	cl.nodrift = true;
 	cl.pitchvel = 0;
 }
@@ -197,7 +197,7 @@ V_DriftPitch (void)
 		if (fabs(cl.cmd.forwardmove) < cl_forwardspeed->fvalue)
 			cl.driftmove = 0;
 		else
-			cl.driftmove += (cl.time - cl.oldtime);
+			cl.driftmove += (ccl.time - ccl.oldtime);
 
 		if (cl.driftmove > v_centermove->fvalue)
 			V_StartPitchDrift();
@@ -212,8 +212,8 @@ V_DriftPitch (void)
 		return;
 	}
 
-	move = (cl.time - cl.oldtime) * cl.pitchvel;
-	cl.pitchvel += (cl.time - cl.oldtime) * v_centerspeed->fvalue;
+	move = (ccl.time - ccl.oldtime) * cl.pitchvel;
+	cl.pitchvel += (ccl.time - ccl.oldtime) * v_centerspeed->fvalue;
 
 	if (delta > 0) {
 		if (move > delta) {
@@ -265,26 +265,26 @@ V_ParseDamage (void)
 	if (count < 10)
 		count = 10;
 
-	cl.faceanimtime = cl.time + 0.2;	/* butt sbar face into pain frame */
+	ccl.faceanimtime = ccl.time + 0.2;	/* butt sbar face into pain frame */
 
-	cl.cshifts[CSHIFT_DAMAGE].percent += 3 * count;
-	if (cl.cshifts[CSHIFT_DAMAGE].percent < 0)
-		cl.cshifts[CSHIFT_DAMAGE].percent = 0;
-	if (cl.cshifts[CSHIFT_DAMAGE].percent > 150)
-		cl.cshifts[CSHIFT_DAMAGE].percent = 150;
+	ccl.cshifts[CSHIFT_DAMAGE].percent += 3 * count;
+	if (ccl.cshifts[CSHIFT_DAMAGE].percent < 0)
+		ccl.cshifts[CSHIFT_DAMAGE].percent = 0;
+	if (ccl.cshifts[CSHIFT_DAMAGE].percent > 150)
+		ccl.cshifts[CSHIFT_DAMAGE].percent = 150;
 
 	if (armor > blood) {
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 200;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 100;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 100;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 200;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 100;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 100;
 	} else if (armor) {
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 220;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 50;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 50;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 220;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 50;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 50;
 	} else {
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 255;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 0;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 0;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 255;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 0;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 0;
 	}
 
 	/* calculate view angle kicks */
@@ -321,10 +321,10 @@ When you run over an item, the server sends this command
 static void
 V_BonusFlash_f (void)
 {
-	cl.cshifts[CSHIFT_BONUS].destcolor[0] = 215;
-	cl.cshifts[CSHIFT_BONUS].destcolor[1] = 186;
-	cl.cshifts[CSHIFT_BONUS].destcolor[2] = 69;
-	cl.cshifts[CSHIFT_BONUS].percent = 50;
+	ccl.cshifts[CSHIFT_BONUS].destcolor[0] = 215;
+	ccl.cshifts[CSHIFT_BONUS].destcolor[1] = 186;
+	ccl.cshifts[CSHIFT_BONUS].destcolor[2] = 69;
+	ccl.cshifts[CSHIFT_BONUS].percent = 50;
 }
 
 /*
@@ -336,51 +336,51 @@ void
 V_SetContentsColor (int contents)
 {
 	if (!v_contentblend->ivalue) {
-		cl.cshifts[CSHIFT_CONTENTS] = cshift_empty;
+		ccl.cshifts[CSHIFT_CONTENTS] = cshift_empty;
 		return;
 	}
 
 	switch (contents) {
 		case CONTENTS_EMPTY:
-			cl.cshifts[CSHIFT_CONTENTS] = cshift_empty;
+			ccl.cshifts[CSHIFT_CONTENTS] = cshift_empty;
 			break;
 		case CONTENTS_LAVA:
-			cl.cshifts[CSHIFT_CONTENTS] = cshift_lava;
+			ccl.cshifts[CSHIFT_CONTENTS] = cshift_lava;
 			break;
 		case CONTENTS_SOLID:
 		case CONTENTS_SLIME:
-			cl.cshifts[CSHIFT_CONTENTS] = cshift_slime;
+			ccl.cshifts[CSHIFT_CONTENTS] = cshift_slime;
 			break;
 		default:
-			cl.cshifts[CSHIFT_CONTENTS] = cshift_water;
+			ccl.cshifts[CSHIFT_CONTENTS] = cshift_water;
 	}
 }
 
 static void
 V_CalcPowerupCshift (void)
 {
-	if (cl.stats[STAT_ITEMS] & IT_QUAD) {
-		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 0;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 0;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 255;
-		cl.cshifts[CSHIFT_POWERUP].percent = 30;
-	} else if (cl.stats[STAT_ITEMS] & IT_SUIT) {
-		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 0;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 255;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 0;
-		cl.cshifts[CSHIFT_POWERUP].percent = 20;
-	} else if (cl.stats[STAT_ITEMS] & IT_INVISIBILITY) {
-		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 100;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 100;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 100;
-		cl.cshifts[CSHIFT_POWERUP].percent = 100;
-	} else if (cl.stats[STAT_ITEMS] & IT_INVULNERABILITY) {
-		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 255;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 255;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 0;
-		cl.cshifts[CSHIFT_POWERUP].percent = 30;
+	if (ccl.stats[STAT_ITEMS] & IT_QUAD) {
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[0] = 0;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[1] = 0;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[2] = 255;
+		ccl.cshifts[CSHIFT_POWERUP].percent = 30;
+	} else if (ccl.stats[STAT_ITEMS] & IT_SUIT) {
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[0] = 0;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[1] = 255;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[2] = 0;
+		ccl.cshifts[CSHIFT_POWERUP].percent = 20;
+	} else if (ccl.stats[STAT_ITEMS] & IT_INVISIBILITY) {
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[0] = 100;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[1] = 100;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[2] = 100;
+		ccl.cshifts[CSHIFT_POWERUP].percent = 100;
+	} else if (ccl.stats[STAT_ITEMS] & IT_INVULNERABILITY) {
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[0] = 255;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[1] = 255;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[2] = 0;
+		ccl.cshifts[CSHIFT_POWERUP].percent = 30;
 	} else
-		cl.cshifts[CSHIFT_POWERUP].percent = 0;
+		ccl.cshifts[CSHIFT_POWERUP].percent = 0;
 }
 
 void
@@ -391,15 +391,15 @@ V_CalcBlend (void)
 
 	if (gl_cshiftpercent->ivalue) {
 		for (j = 0; j < NUM_CSHIFTS; j++) {
-			a2 = cl.cshifts[j].percent * gl_cshiftpercent->ivalue * (1.0f / 25500.0f);
+			a2 = ccl.cshifts[j].percent * gl_cshiftpercent->ivalue * (1.0f / 25500.0f);
 
 			if (!a2)
 				continue;
 			if (a2 > 1)
 				a2 = 1;
-			r += (cl.cshifts[j].destcolor[0]-r) * a2;
-			g += (cl.cshifts[j].destcolor[1]-g) * a2;
-			b += (cl.cshifts[j].destcolor[2]-b) * a2;
+			r += (ccl.cshifts[j].destcolor[0]-r) * a2;
+			g += (ccl.cshifts[j].destcolor[1]-g) * a2;
+			b += (ccl.cshifts[j].destcolor[2]-b) * a2;
 			a = 1 - (1 - a) * (1 - a2);
 		}
 
@@ -426,24 +426,24 @@ V_UpdatePalette (void)
 	V_CalcPowerupCshift();
 
 	for (i = 0; i < NUM_CSHIFTS; i++) {
-		if (cl.cshifts[i].percent != cl.prev_cshifts[i].percent) {
-			cl.prev_cshifts[i].percent = cl.cshifts[i].percent;
+		if (ccl.cshifts[i].percent != ccl.prev_cshifts[i].percent) {
+			ccl.prev_cshifts[i].percent = ccl.cshifts[i].percent;
 		}
 		for (j = 0; j < 3; j++)
-			if (cl.cshifts[i].destcolor[j] != cl.prev_cshifts[i].destcolor[j]) {
-				cl.prev_cshifts[i].destcolor[j] = cl.cshifts[i].destcolor[j];
+			if (ccl.cshifts[i].destcolor[j] != ccl.prev_cshifts[i].destcolor[j]) {
+				ccl.prev_cshifts[i].destcolor[j] = ccl.cshifts[i].destcolor[j];
 			}
 	}
 
 	/* drop the damage value */
-	cl.cshifts[CSHIFT_DAMAGE].percent -= (cl.time - cl.oldtime) * 150;
-	if (cl.cshifts[CSHIFT_DAMAGE].percent <= 0)
-		cl.cshifts[CSHIFT_DAMAGE].percent = 0;
+	ccl.cshifts[CSHIFT_DAMAGE].percent -= (ccl.time - ccl.oldtime) * 150;
+	if (ccl.cshifts[CSHIFT_DAMAGE].percent <= 0)
+		ccl.cshifts[CSHIFT_DAMAGE].percent = 0;
 
 	/* drop the bonus value */
-	cl.cshifts[CSHIFT_BONUS].percent -= (cl.time - cl.oldtime) * 100;
-	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
-		cl.cshifts[CSHIFT_BONUS].percent = 0;
+	ccl.cshifts[CSHIFT_BONUS].percent -= (ccl.time - ccl.oldtime) * 100;
+	if (ccl.cshifts[CSHIFT_BONUS].percent <= 0)
+		ccl.cshifts[CSHIFT_BONUS].percent = 0;
 
 	V_CalcBlend();
 }
@@ -479,24 +479,24 @@ static void
 V_AddIdle (void)
 {
 	r_refdef.viewangles[ROLL] +=
-		v_idlescale->fvalue * Q_sin (cl.time * v_iroll_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_iroll_cycle->fvalue) *
 		v_iroll_level->fvalue;
 	r_refdef.viewangles[PITCH] +=
-		v_idlescale->fvalue * Q_sin (cl.time * v_ipitch_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_ipitch_cycle->fvalue) *
 		v_ipitch_level->fvalue;
 	r_refdef.viewangles[YAW] +=
-		v_idlescale->fvalue * Q_sin (cl.time * v_iyaw_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_iyaw_cycle->fvalue) *
 		v_iyaw_level->fvalue;
 
 	/*
 	cl.viewent.angles[ROLL] -=
-		v_idlescale->fvalue * Q_sin (cl.time * v_iroll_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_iroll_cycle->fvalue) *
 		v_iroll_level->fvalue;
 	cl.viewent.angles[PITCH] -=
-		v_idlescale->fvalue * Q_sin (cl.time * v_ipitch_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_ipitch_cycle->fvalue) *
 		v_ipitch_level->fvalue;
 	cl.viewent.angles[YAW] -=
-		v_idlescale->fvalue * Q_sin (cl.time * v_iyaw_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_iyaw_cycle->fvalue) *
 		v_iyaw_level->fvalue;
 		*/
 }
@@ -517,10 +517,10 @@ V_CalcViewRoll (void)
 	if (v_dmg_time > 0) {
 		r_refdef.viewangles[ROLL] += v_dmg_time / v_kicktime->fvalue * v_dmg_roll;
 		r_refdef.viewangles[PITCH] += v_dmg_time / v_kicktime->fvalue * v_dmg_pitch;
-		v_dmg_time -= (cl.time - cl.oldtime);
+		v_dmg_time -= (ccl.time - ccl.oldtime);
 	}
 
-	if (cl.stats[STAT_HEALTH] <= 0)
+	if (ccl.stats[STAT_HEALTH] <= 0)
 		r_refdef.viewangles[ROLL] = 80; // dead view angle
 }
 
@@ -535,11 +535,11 @@ V_CalcIntermissionRefdef (void)
 	cl.viewent.common.model = NULL;
 
 	/* always idle in intermission */
-	r_refdef.viewangles[ROLL] += Q_sin (cl.time * v_iroll_cycle->fvalue) *
+	r_refdef.viewangles[ROLL] += Q_sin (ccl.time * v_iroll_cycle->fvalue) *
 		v_iroll_level->fvalue;
-	r_refdef.viewangles[PITCH] += Q_sin (cl.time * v_ipitch_cycle->fvalue) *
+	r_refdef.viewangles[PITCH] += Q_sin (ccl.time * v_ipitch_cycle->fvalue) *
 		v_ipitch_level->fvalue;
-	r_refdef.viewangles[YAW] += Q_sin (cl.time * v_iyaw_cycle->fvalue) *
+	r_refdef.viewangles[YAW] += Q_sin (ccl.time * v_iyaw_cycle->fvalue) *
 		v_iyaw_level->fvalue;
 }
 
@@ -580,7 +580,7 @@ V_CalcRefdef (void)
 	view = &cl.viewent;
 
 	/* Keep the colormap correct. */
-	cl.colormap = ent->common.colormap;
+	ccl.colormap = ent->common.colormap;
 
 	/* transform the view offset by the model's matrix to get the offset from
 	   model origin for the view */
@@ -636,10 +636,10 @@ V_CalcRefdef (void)
 	}
 
 	origin[2] += bob;
-	if (view->common.model != cl.model_precache[cl.stats[STAT_WEAPON]])
+	if (view->common.model != cl.model_precache[ccl.stats[STAT_WEAPON]])
 	{
 		memset(view, 0, sizeof(*view));
-		view->common.model = cl.model_precache[cl.stats[STAT_WEAPON]];
+		view->common.model = cl.model_precache[ccl.stats[STAT_WEAPON]];
 	}
 
 	/* set up the refresh position */
@@ -649,7 +649,7 @@ V_CalcRefdef (void)
 	if (cl.onground && (ent->common.origin[2] - oldz > 0)) {
 		float	steptime;
 
-		steptime = (cl.time - cl.oldtime);
+		steptime = (ccl.time - ccl.oldtime);
 
 		oldz += steptime * 80;
 		if (oldz > ent->common.origin[2])
@@ -662,7 +662,7 @@ V_CalcRefdef (void)
 		oldz = ent->common.origin[2];
 
 	CL_Update_OriginAngles(view, origin, angles, cl.mtime[1]);
-	CL_Update_Frame(view, cl.stats[STAT_WEAPONFRAME], cl.mtime[1]);
+	CL_Update_Frame(view, ccl.stats[STAT_WEAPONFRAME], cl.mtime[1]);
 
 	if (chase_active->ivalue)
 		Chase_Update();
@@ -682,14 +682,14 @@ V_RenderView (void)
 		return;
 
 	/* don't allow cheats in multiplayer */
-	if (cl.maxclients > 1)
+	if (ccl.max_users > 1)
 	{
 		Cvar_Set (scr_ofsx, "0");
 		Cvar_Set (scr_ofsy, "0");
 		Cvar_Set (scr_ofsz, "0");
 	}
 
-	if (cl.intermission)
+	if (ccl.intermission)
 		/* intermission / finale rendering */
 		V_CalcIntermissionRefdef ();
 	else
@@ -771,8 +771,8 @@ R_DrawViewModel (void)
 	cl.viewent.common.real_ent = &cl.viewent;
 
 	if (!r_drawviewmodel->ivalue || chase_active->ivalue ||
-			!r_drawentities->ivalue || cl.stats[STAT_ITEMS] & IT_INVISIBILITY ||
-			(cl.stats[STAT_HEALTH] <= 0) || !cl.viewent.common.model)
+			!r_drawentities->ivalue || ccl.stats[STAT_ITEMS] & IT_INVISIBILITY ||
+			(ccl.stats[STAT_HEALTH] <= 0) || !cl.viewent.common.model)
 		return;
 
 	// hack the depth range to prevent view model from poking into walls

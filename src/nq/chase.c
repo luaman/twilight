@@ -74,7 +74,7 @@ Chase_Update (void)
 
 	// find the spot the player is looking at
 	VectorMA (r_refdef.vieworg, 4096, forward, dest);
-	TraceLine (cl.worldmodel, r_refdef.vieworg, dest, stop, normal);
+	TraceLine (ccl.worldmodel, r_refdef.vieworg, dest, stop, normal);
 
 	// calculate pitch to look at the same spot from camera
 	VectorSubtract (stop, r_refdef.vieworg, stop);
@@ -86,7 +86,7 @@ Chase_Update (void)
 	r_refdef.viewangles[PITCH] = -Q_atan (stop[2] / dist) / M_PI * 180;
 
 	// move towards destination
-	TraceLine (cl.worldmodel, r_refdef.vieworg, chase_dest, stop, normal);
+	TraceLine (ccl.worldmodel, r_refdef.vieworg, chase_dest, stop, normal);
 
 	VectorCopy (stop, chase_dest);
 

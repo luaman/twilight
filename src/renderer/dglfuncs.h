@@ -50,6 +50,7 @@
 
 DYNGL_EXT (void, glActiveTextureARB, (GLenum), "GL_ARB_multitexture")
 DYNGL_NEED (void, glAlphaFunc, (GLenum func, GLclampf ref))
+DYNGL_NEED (void, glArrayElement, (GLint i))
 DYNGL_NEED (void, glBegin, (GLenum mode))
 DYNGL_NEED (void, glBindTexture, (GLenum target, GLuint texture))
 DYNGL_NEED (void, glBlendFunc, (GLenum sfactor, GLenum dfactor))
