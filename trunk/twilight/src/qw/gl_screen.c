@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // screen.c -- master for refresh, status bar, console, chat, notify, etc
 
 #include "quakedef.h"
+#include "keys.h"
 
 #include <time.h>
 
@@ -993,40 +994,6 @@ SCR_DrawNotifyString (void)
 		start++;						// skip the \n
 	} while (1);
 }
-
-/*
-==================
-SCR_ModalMessage
-
-Displays a text string in the center of the screen and waits for a Y or N
-keypress.  
-==================
-*/
-int
-SCR_ModalMessage (char *text)
-{
-	scr_notifystring = text;
-
-// draw a fresh screen
-	scr_fullupdate = 0;
-	scr_drawdialog = true;
-	SCR_UpdateScreen ();
-	scr_drawdialog = false;
-
-	S_ClearBuffer ();					// so dma doesn't loop current sound
-
-	do {
-		key_count = -1;					// wait for a key down and up
-		Sys_SendKeyEvents ();
-	} while (key_lastpress != 'y' && key_lastpress != 'n'
-			 && key_lastpress != K_ESCAPE);
-
-	scr_fullupdate = 0;
-	SCR_UpdateScreen ();
-
-	return key_lastpress == 'y';
-}
-
 
 //=============================================================================
 

@@ -1,0 +1,558 @@
+2001-07-30 02:00  knghtbrd
+
+	* configure.in, nq/win32config.h, qw/win32config.h,
+	qw-server/win32config.h: "fixed" win32 version number, not that it
+	matters much yet.  Also made SHAREPATH default to
+	${datadir}/games/twilight by default in unix.
+
+2001-07-30 01:56  mercury
+
+	* nq/common.c, nq/win32config.h, qw/common.c, qw/win32config.h,
+	qw-server/common.c, qw-server/win32config.h: Fixes for three bugs. 
+	Compile bug (BASEPATH vs USERPATH), init bug, and path search bug.
+
+2001-07-30 01:28  knghtbrd
+
+	* nq/vid_sdl.c, qw/vid_sdl.c: SDL_SetVideoMode should be called for
+	16 bpp which will actually only make sure you get at least that
+	much, not 32.  My bad, Voodoo2/3 users need not have me shot now.
+
+2001-07-29 12:48  zinx
+
+	* qw-server/: common.c, cvar.c, model.c, net_chan.c, net_udp.c,
+	pr_cmds.c, pr_edict.c, pr_exec.c, sv_ccmds.c, sv_init.c, sv_main.c,
+	sv_send.c, sv_user.c, sys_unix.c, sys_win.c: 
+	Last of the sprintf -> snprintf fixes.	again, strcat/strcpy and
+	all things other than sprintf were not looked at..
+
+2001-07-28 21:20  zinx
+
+	* autogen.sh, config.h.in: 
+	Yoink.. config.h.in doesn't belong in the repository ;)
+
+2001-07-28 19:40  mercury
+
+	* config.h.in: Here.
+
+2001-07-28 16:29  digiman
+
+	* qw/client.h: Doubled number of dlights since every player owns 2
+	of them: 1 for powerup and 1 for muzzleflash.
+
+2001-07-28 16:28  digiman
+
+	* nq/gl_rlight.c, qw/gl_rlight.c: Fixed an ugly typo in
+	AddLightBlend.
+
+2001-07-28 16:17  digiman
+
+	* nq/win32config.h: Added snprintf and vsnprintf definitions, so nq
+	compiles.
+
+2001-07-28 15:46  zinx
+
+	* qw/common.c: 
+	Made a typo.. Whoops. (newpath should be netpath)
+
+2001-07-28 15:42  zinx
+
+	* qw/: cl_cam.c, cl_demo.c, cl_main.c, cl_parse.c, cl_pred.c,
+	common.c, console.c, cvar.c, gl_draw.c, gl_model.c, gl_ngraph.c,
+	gl_screen.c, gl_warp.c, keys.c, menu.c, net_chan.c, net_udp.c,
+	net_wins.c, r_part.c, sbar.c, skin.c, sys_linux.c, sys_win.c,
+	vid_sdl.c: 
+	Changed all occurences of sprintf to snprintf in qw; strcat and
+	strcpy still need looked at by someone.
+
+2001-07-28 15:14  zinx
+
+	* nq/: cl_demo.c, cl_main.c, common.c, console.c, cvar.c,
+	gl_draw.c, gl_model.c, gl_screen.c, gl_warp.c, host.c, host_cmd.c,
+	keys.c, menu.c, net_dgrm.c, net_udp.c, pr_cmds.c, pr_edict.c,
+	pr_exec.c, r_part.c, sbar.c, sv_main.c, sys_linux.c, sys_win.c,
+	sys_wind.c, vid_sdl.c: 
+	Changed all occurences of sprintf to snprintf in nq; strcat and
+	strcpy still need looked at by someone.
+
+2001-07-28 10:27  digiman
+
+	* nq/gl_draw.c, qw/gl_draw.c: Greatly optimized Draw_String and
+	Draw_Alt_String as LordHavoc requested.
+
+2001-07-28 10:26  digiman
+
+	* nq/gl_mesh.c, qw/gl_mesh.c: Removed meshing of .mdl files, since
+	it doesn't improve loading time and can corrupt meshes for
+	different .mdl files with the same name in different folders (id1
+	and game).
+
+2001-07-28 10:25  digiman
+
+	* nq/nq.dsp: Added NormalQuake VC++ 6.0 project file.
+
+2001-07-28 05:41  lordhavoc
+
+	* qw-server/: net_chan.c, net_udp.c, sv_main.c, sys_unix.c,
+	sys_win.c: made QWSV work in win32
+	
+	note: weird bug found in NET_GetPacket with recvfrom returning
+	ENOENT (no such file or directory) instead of EWOULDBLOCK, worked
+	around but no logical explanation
+
+2001-07-28 05:38  lordhavoc
+
+	* qw/quakedef.h, qw/win32config.h, qw-server/qwsvdef.h,
+	qw-server/win32config.h: added win32config.h made win32config.h be
+	automatically included instead of config.h if HAVE_CONFIG_H is not
+	defined and the detected compiler is Visual C++ (compile out of the
+	box convenience)
+
+2001-07-28 05:37  lordhavoc
+
+	* nq/: draw.h, gl_draw.c, quakedef.h, sys_win.c, win32config.h:
+	added Draw_Alt_String (someone used it and it did not exist yet)
+	added win32config.h made win32config.h be automatically included
+	instead of config.h if HAVE_CONFIG_H is not defined and the
+	detected compiler is Visual C++ (compile out of the box
+	convenience) added back Sys_DebugLog (someone deleted it)
+
+2001-07-28 05:37  lordhavoc
+
+	* nq/console.c: changed Con_Printf to do the sprintf manually
+	instead of using va (safety reasons) when doing console logging
+
+2001-07-28 05:31  lordhavoc
+
+	* nq/common.c, qw/common.c, qw-server/common.c: removed BASEPATH
+	and SHAREPATH defaults now that config.h is used
+
+2001-07-27 18:39  digiman
+
+	* qw/cl_parse.c: In CL_MuzzleFlash, use CL_AllocDlight(-i) instead
+	of CL_AllocDlight(i) so that muzzleflashes don't interfere with
+	powerup glow (made by Tonik).
+
+2001-07-27 18:37  digiman
+
+	* qw/cl_ents.c: In CL_LinkPlayers: Fix the stupid bug with
+	playernum being used for dlight key instead of playernum+1. For
+	playernum 0 this was causing a noticeable slowdown because many
+	dlights were allocated instead of just one (made by Tonik: thanks
+	sturm)
+
+2001-07-27 18:28  digiman
+
+	* qw/menu.c, nq/menu.c: Changed things in M_Print and M_PrintWhite:
+	use Draw_Alt_String and Draw_String instead of M_DrawCharacter -
+	room for further GL improvements
+
+2001-07-27 18:26  digiman
+
+	* qw-server/sv_user.c: Fixed a security hole in SV_Soundlist_f and
+	SV_Modellist_f
+
+2001-07-27 18:11  digiman
+
+	* qw-server/sv_ccmds.c: Fixed a typo in SV_User_f; whitespace in
+	SV_Snap_f
+
+2001-07-27 17:12  knghtbrd
+
+	* nq/.cvsignore, qw/.cvsignore, qw-server/.cvsignore: Added .deps
+	to .cvsignore, .this and .that, etc.
+
+2001-07-27 17:08  knghtbrd
+
+	* AUTHORS, ChangeLog, NEWS, README, autogen.sh, nq/Makefile,
+	qw/Makefile, qw-server/Makefile: Added autogen.sh and the stub
+	files automake demands and remove the old Makefile's from CVS
+
+2001-07-27 13:22  zinx
+
+	* nq/gl_draw.c, nq/quakedef.h, nq/sys_linux.c, qw/bothdefs.h,
+	qw/gl_draw.c, qw/quakedef.h, qw-server/bothdefs.h,
+	qw-server/qwsvdef.h, qw-server/sv_main.c: 
+	Changed to work with config.h's VERSION
+
+2001-07-27 13:19  zinx
+
+	* .cvsignore, Makefile.am, configure.in, nq/.cvsignore,
+	nq/Makefile.am, qw/.cvsignore, qw/Makefile.am,
+	qw-server/.cvsignore, qw-server/Makefile.am: 
+	Initial autoconf/automake stuff, need to make twilight depend on
+	configure more..
+
+2001-07-27 13:05  knghtbrd
+
+	* nq/: UNNEEDED_Linux, menu.c, net_udp.c, net_win.c, net_wins.c,
+	net_wins.h, vid_sdl.c: -nq is fixed
+
+2001-07-27 12:41  zinx
+
+	* qw-server/sv_phys.c: 
+	Added a SV_LinkEdict to SV_Physics_None().. Fixes maps such as spc.
+
+2001-07-27 12:24  knghtbrd
+
+	* qw/: Makefile, buildnum.c, net_udp.c, vid_sdl.c: fixed QW
+	(probably..)
+
+2001-07-27 08:53  knghtbrd
+
+	* qw/cl_pred.c: Same problem - sdl.h -> SDL.h
+
+2001-07-27 08:52  knghtbrd
+
+	* qw/cl_main.c: Case matters
+
+2001-07-27 06:47  lordhavoc
+
+	* nq/: cd_linux.c, cd_win.c, cl_demo.c, cl_parse.c, cmd.c,
+	common.c, common.h, conproc.c, console.c, gl_draw.c, gl_mesh.c,
+	gl_model.c, gl_rmain.c, gl_rsurf.c, gl_screen.c, glquake.h, host.c,
+	host_cmd.c, keys.c, menu.c, net_udp.c, net_win.c, net_wins.c,
+	pr_cmds.c, pr_edict.c, pr_exec.c, quakedef.h, sbar.c, snd_dma.c,
+	snd_mem.c, sv_main.c, sys_linux.c, sys_null.c, sys_win.c,
+	sys_wind.c, vid.h, vid_sdl.c, view.c, wad.c, winquake.h, zone.c:
+	made NQ work in win32
+	
+	note: net_win.c, and net_wins.c are no longer necessary, net_bsd.c
+	and net_udp.c now work on win32
+	
+	carried over most (all?) of the fixes from the qwcl win32 porting
+	effort
+
+2001-07-27 06:38  lordhavoc
+
+	* qw/: gl_screen.c, screen.h, sys_win.c: placeholder fix for
+	scr_skipupdate
+
+2001-07-27 04:19  lordhavoc
+
+	* qw/: common.c, console.c, quakedef.h, sys_linux.c, sys_null.c,
+	sys_win.c: stripped lingering unused sharedir/basedir/cachedir
+	stuff (only uses com_sharedir and com_basedir now) fixed
+	com_sharedir default case (defaults to same as basedir) will not
+	add a directory twice if it matchs the basedir fixed use of va() in
+	Con_Printf when console logging (ruined tons of things, overwrote
+	com_gamedir during connect process, this bug took a couple hours to
+	track down) also removed va() use in COM_AddDirectory (unnecessary
+	armor plating now that I fixed Con_Printf, but worthy of keeping)
+	put in sanity error check on freeing of searchpath when switching
+	gamedir
+	
+	now works error-free in my testing
+
+2001-07-27 01:08  lordhavoc
+
+	* qw/: buildnum.c, cd_linux.c, cd_null.c, cd_win.c, cl_demo.c,
+	cl_ents.c, cl_main.c, cl_parse.c, cl_pred.c, cmd.c, common.c,
+	common.h, console.c, cvar.c, gl_draw.c, gl_mesh.c, gl_model.c,
+	gl_rmain.c, gl_rmisc.c, gl_rsurf.c, gl_screen.c, glquake.h, keys.c,
+	menu.c, net_chan.c, net_udp.c, net_wins.c, sbar.c, skin.c,
+	snd_dma.c, snd_mem.c, snd_win.c, sys_linux.c, sys_null.c,
+	sys_win.c, vid.h, vid_sdl.c, wad.c, winquake.h, zone.c: made
+	twilight qwcl work in win32
+	
+	changed all str functions to Q_str clipboard pasting into console
+	does not work (win32 only anyway) CD audio disabled in win32
+	
+	the workspace/makefile/etc is not included yet
+
+2001-07-23 07:33  knghtbrd
+
+	* nq/vid_sdl.c, qw/vid_sdl.c: Fix the captions
+
+2001-07-23 07:14  knghtbrd
+
+	* qw-server/: Makefile, common.c, qwsvdef.h, sys_unix.c: Sharedir
+	stuff - edit Makefile to change paths for now
+
+2001-07-23 07:02  knghtbrd
+
+	* nq/Makefile, nq/common.c, nq/quakedef.h, nq/sys_linux.c,
+	qw/Makefile, qw/common.c, qw/quakedef.h, qw/sys_linux.c: Sharepath
+	stuff works now - edit paths as necessary in Makefile's
+
+2001-07-23 03:03  knghtbrd
+
+	* nq/Makefile, qw/Makefile, qw-server/Makefile: Er, right, it helps
+	if you test before you commit
+
+2001-07-23 01:36  knghtbrd
+
+	* nq/Makefile, qw/Makefile, qw-server/Makefile: Change binary names
+
+2001-07-17 00:51  knghtbrd
+
+	* qw-server/UNNEEDED_Linux: quakeasm.h should have gone by now
+
+2001-07-11 06:20  knghtbrd
+
+	* nq/common.c: extra var
+
+2001-07-10 18:44  knghtbrd
+
+	* qw/Makefile: How the hell did I forget these?
+
+2001-07-10 17:33  knghtbrd
+
+	* qw/vid_sdl.c, nq/vid_sdl.c: zinx pointed out that
+	SDL_GL_SwapBuffers does a glFinish, so there's no point in doing a
+	glFlush before calling it.
+
+2001-07-10 16:55  knghtbrd
+
+	* nq/: host_cmd.c, net.h, net_main.c, quakedef.h, sv_main.c: Remove
+	IDGODS.  Bwahahaha, it's been 18 months since I've seen that.
+
+2001-07-10 16:49  knghtbrd
+
+	* qw/common.c, qw-server/common.c, nq/common.c: Modified the
+	registration check to not affect new datasets
+
+2001-07-10 14:15  knghtbrd
+
+	* doc/olddoc/: INSTALL, MANUAL.TXT, README, TECHINFO.TXT,
+	client-notes.txt, docs.txt, glqwcl-readme.txt, move.txt,
+	newnet.txt, qw2do.txt, qwchangelog.txt, qwcl-readme.txt,
+	qwexit.txt, qwrlnote.txt, release233_notes.txt, server-notes.txt:
+	Here are a few of the old docs Id included in the tree.  Some of it
+	may be useful at some point.
+
+2001-07-10 08:51  knghtbrd
+
+	* qw/UNNEEDED_Linux, qw-server/UNNEEDED_Linux: Removed files
+	unneeded for Linux or Win32 from QW.
+
+2001-07-10 08:01  knghtbrd
+
+	* nq/: Makefile, UNNEEDED_Linux, host.c, net_main.c, sys_linux.c:
+	With LordHavoc's help, files not needed for win32 or Linux or for
+	future plans have been removed.
+
+2001-07-09 09:52  knghtbrd
+
+	* nq/: gl_draw.c, gl_rmisc.c, menu.c, quakedef.h, vid.h, vid_sdl.c:
+	New version of vid_sdl.c with many things fixed. 
+	VID_{Lock,Unlock}Buffer, a softwareism, is gone now.  So are the
+	support functions for 8 bit 3dfx GL, they wouldn't have worked
+	right anyway since we ask for at least 16 in VID_Init.
+
+2001-07-09 09:47  knghtbrd
+
+	* qw-server/sv_user.c: Fixed the pause message bug
+
+2001-07-09 09:47  knghtbrd
+
+	* qw/: .indent.pro, UNNEEDED_Linux, anorm_dots.h, anorms.h,
+	bothdefs.h, bspfile.h, cd_linux.c, cdaudio.h, cl_cam.c, cl_demo.c,
+	cl_ents.c, cl_input.c, cl_main.c, cl_parse.c, cl_pred.c, cl_tent.c,
+	client.h, cmd.c, cmd.h, common.c, common.h, console.c, console.h,
+	crc.c, crc.h, cvar.c, cvar.h, draw.h, gl_draw.c, gl_mesh.c,
+	gl_model.c, gl_model.h, gl_ngraph.c, gl_refrag.c, gl_rlight.c,
+	gl_rmain.c, gl_rmisc.c, gl_rsurf.c, gl_screen.c, gl_warp.c,
+	gl_warp_sin.h, glquake.h, input.h, keys.c, keys.h, mathlib.c,
+	mathlib.h, md4.c, menu.c, menu.h, modelgen.h, net.h, net_chan.c,
+	net_udp.c, nonintel.c, pmove.c, pmove.h, pmovetst.c, protocol.h,
+	quakedef.h, r_part.c, render.h, sbar.c, sbar.h, screen.h, skin.c,
+	snd_dma.c, snd_linux.c, snd_mem.c, snd_mix.c, sound.h, spritegn.h,
+	sys.h, sys_linux.c, vid.h, view.c, view.h, wad.c, wad.h, zone.c,
+	zone.h: qwcl is now -Werror clean
+
+2001-07-09 00:42  knghtbrd
+
+	* qw-server/UNNEEDED_Linux: qwsv cruft list for Linux
+
+2001-07-08 23:20  knghtbrd
+
+	* qw-server/: .indent.pro, bothdefs.h, bspfile.h, cmd.c, cmd.h,
+	common.c, common.h, crc.c, crc.h, cvar.c, cvar.h, mathlib.c,
+	mathlib.h, md4.c, model.c, model.h, modelgen.h, net.h, net_chan.c,
+	net_udp.c, pmove.c, pmove.h, pmovetst.c, pr_cmds.c, pr_comp.h,
+	pr_edict.c, pr_exec.c, progdefs.h, progs.h, protocol.h, quakeasm.h,
+	qwsvdef.h, server.h, spritegn.h, sv_ccmds.c, sv_ents.c, sv_init.c,
+	sv_main.c, sv_move.c, sv_nchan.c, sv_phys.c, sv_send.c, sv_user.c,
+	sys.h, sys_unix.c, sys_win.c, world.c, world.h, zone.c, zone.h:
+	Forgot to indent the code
+
+2001-07-08 23:18  knghtbrd
+
+	* qw-server/: Makefile, bothdefs.h, bspfile.h, cmd.c, cmd.h,
+	common.c, common.h, crc.c, crc.h, cvar.c, cvar.h, mathlib.c,
+	mathlib.h, md4.c, model.h, modelgen.h, net.h, net_chan.c,
+	net_udp.c, pmove.c, pmove.h, pmovetst.c, pr_cmds.c, pr_comp.h,
+	progdefs.h, progs.h, protocol.h, qwsvdef.h, server.h, spritegn.h,
+	sv_main.c, sv_user.c, sys.h, sys_unix.c, world.h, zone.c, zone.h:
+	frost-qwsv builds and is -Werror clean
+
+2001-07-08 05:47  knghtbrd
+
+	* nq/: .indent.pro, Makefile, UNNEEDED_Linux, cd_linux.c, chase.c,
+	cl_demo.c, cl_input.c, cl_main.c, cl_parse.c, cl_tent.c, cmd.c,
+	common.c, console.c, crc.c, cvar.c, draw.h, gl_draw.c, gl_mesh.c,
+	gl_model.c, gl_model.h, gl_refrag.c, gl_rlight.c, gl_rmain.c,
+	gl_rmisc.c, gl_rsurf.c, gl_screen.c, gl_warp.c, glquake.h, host.c,
+	host_cmd.c, keys.c, mathlib.c, menu.c, net_bsd.c, net_dgrm.c,
+	net_loop.c, net_main.c, net_udp.c, quakedef.h, r_part.c, sbar.c,
+	snd_dma.c, sys_linux.c, vid.h, view.c, world.h: -Werror clean,
+	indent-formatted.
+
+2001-07-07 21:58  knghtbrd
+
+	* nq/UNNEEDED_Linux: r_local.h is not needed for GL...
+
+2001-07-07 20:59  knghtbrd
+
+	* nq/UNNEEDED_Linux: A listing of all the files NOT needed to build
+	NQ under Linux.  A similar list should be made for win32 and any
+	other platform Frost is ported to.  The intersections of these
+	files will get deleted when we're ready.
+
+2001-07-07 20:31  knghtbrd
+
+	* nq/: Makefile, vid_sdl.c: A little revisionist history,
+	s/frost/frost-nq/ for the binary name
+
+2001-07-07 18:51  knghtbrd
+
+	* nq/: Makefile, vid_sdl.c: Now works using SDL (only)	This is
+	current for tutorial 1, Compiling for Linux.
+
+2001-07-06 07:11  knghtbrd
+
+	* COPYING, readme.txt, gamecode/fixskins.sh,
+	gamecode/progs/buttons.qc, gamecode/progs/client.qc,
+	gamecode/progs/combat.qc, gamecode/progs/defs.qc,
+	gamecode/progs/doors.qc, gamecode/progs/files.dat,
+	gamecode/progs/items.qc, gamecode/progs/misc.qc,
+	gamecode/progs/models.qc, gamecode/progs/plats.qc,
+	gamecode/progs/player.qc, gamecode/progs/progdefs.h,
+	gamecode/progs/progs.src, gamecode/progs/server.qc,
+	gamecode/progs/spectate.qc, gamecode/progs/sprites.qc,
+	gamecode/progs/subs.qc, gamecode/progs/triggers.qc,
+	gamecode/progs/weapons.qc, gamecode/progs/world.qc, qw/bothdefs.h,
+	qw/cl_parse.c, qw/cmd.c, qw/cmd.h, qw/crc.c, qw/crc.h, qw/md4.c,
+	qw/net.h, qw/net_chan.c, qw/render.h, qw/sys_linux.c, qw/sys_win.c,
+	qw/anorm_dots.h, qw/anorms.h, qw/bspfile.h, qw/buildnum.c,
+	qw/cd_linux.c, qw/cd_null.c, qw/cd_win.c, qw/cdaudio.h,
+	qw/cl_cam.c, qw/cl_demo.c, qw/cl_ents.c, qw/cl_input.c,
+	qw/cl_main.c, qw/cl_pred.c, qw/cl_tent.c, qw/client.h, qw/common.c,
+	qw/common.h, qw/console.c, qw/console.h, qw/cvar.c, qw/cvar.h,
+	qw/draw.h, qw/gl_draw.c, qw/gl_mesh.c, qw/gl_model.c,
+	qw/gl_model.h, qw/gl_ngraph.c, qw/gl_refrag.c, qw/gl_rlight.c,
+	qw/gl_rmain.c, qw/gl_rmisc.c, qw/gl_rsurf.c, qw/gl_screen.c,
+	qw/gl_warp.c, qw/gl_warp_sin.h, qw/glquake.h, qw/input.h,
+	qw/keys.c, qw/keys.h, qw/math.s, qw/mathlib.c, qw/mathlib.h,
+	qw/menu.c, qw/menu.h, qw/modelgen.h, qw/net_udp.c, qw/net_wins.c,
+	qw/nonintel.c, qw/pmove.c, qw/pmove.h, qw/pmovetst.c,
+	qw/protocol.h, qw/quakeasm.h, qw/quakedef.h, qw/r_part.c,
+	qw/sbar.c, qw/sbar.h, qw/screen.h, qw/skin.c, qw/snd_dma.c,
+	qw/snd_linux.c, qw/snd_mem.c, qw/snd_mix.c, qw/snd_mixa.s,
+	qw/snd_win.c, qw/sound.h, qw/spritegn.h, qw/sys.h, qw/sys_dosa.s,
+	qw/sys_null.c, qw/sys_wina.s, qw/vid.h, qw/view.c, qw/view.h,
+	qw/wad.c, qw/wad.h, qw/winquake.h, qw/zone.c, qw/zone.h,
+	qw-server/pr_cmds.c, qw-server/pr_edict.c, qw-server/progdefs.h,
+	qw-server/qwsvdef.h, qw-server/sys.h, qw-server/sys_win.c,
+	nq/Makefile, nq/anorm_dots.h, nq/anorms.h, nq/bspfile.h,
+	nq/cl_demo.c, nq/cl_input.c, nq/cl_main.c, nq/cl_parse.c,
+	nq/cl_tent.c, nq/cmd.c, nq/cmd.h, nq/common.c, nq/common.h,
+	nq/conproc.c, nq/conproc.h, nq/console.c, nq/console.h, nq/crc.c,
+	nq/crc.h, nq/cvar.c, nq/cvar.h, nq/draw.h, nq/gl_draw.c,
+	nq/gl_rmain.c, nq/gl_rmisc.c, nq/gl_screen.c, nq/glquake.h,
+	nq/host.c, nq/mathlib.c, nq/mathlib.h, nq/net.h, nq/net_bsd.c,
+	nq/net_dgrm.c, nq/net_dgrm.h, nq/net_loop.c, nq/net_loop.h,
+	nq/net_main.c, nq/net_udp.c, nq/net_udp.h, nq/net_win.c,
+	nq/net_wins.c, nq/net_wins.h, nq/pr_cmds.c, nq/pr_comp.h,
+	nq/pr_edict.c, nq/pr_exec.c, nq/progdefs.h, nq/progdefs.q1,
+	nq/protocol.h, nq/quakeasm.h, nq/quakedef.h, nq/r_part.c,
+	nq/render.h, nq/screen.h, nq/snd_dma.c, nq/snd_mem.c, nq/snd_mix.c,
+	nq/snd_null.c, nq/snd_win.c, nq/sound.h, nq/spritegn.h, nq/sys.h,
+	nq/sys_dosa.s, nq/sys_linux.c, nq/sys_null.c, nq/sys_win.c,
+	nq/sys_wina.s, nq/sys_wind.c, nq/vid.h, nq/wad.c, nq/wad.h,
+	qw-server/math.s, qw-server/model.c, qw-server/pr_comp.h,
+	qw-server/pr_exec.c, qw-server/progs.h, qw-server/quakeasm.h,
+	qw-server/server.h, qw-server/sv_ccmds.c, qw-server/sv_ents.c,
+	qw-server/sv_init.c, qw-server/sv_main.c, qw-server/sv_move.c,
+	qw-server/sv_nchan.c, qw-server/sv_phys.c, qw-server/sv_send.c,
+	qw-server/sv_user.c, qw-server/sys_unix.c, qw-server/world.c,
+	qw-server/world.h, qw-server/worlda.s, nq/cd_linux.c, nq/cd_null.c,
+	nq/cd_win.c, nq/cdaudio.h, nq/chase.c, nq/client.h, nq/gl_mesh.c,
+	nq/gl_model.c, nq/gl_model.h, nq/gl_refrag.c, nq/gl_rlight.c,
+	nq/gl_rsurf.c, nq/gl_warp.c, nq/gl_warp_sin.h, nq/host_cmd.c,
+	nq/input.h, nq/keys.c, nq/keys.h, nq/math.s, nq/menu.c, nq/menu.h,
+	nq/modelgen.h, nq/progs.h, nq/sbar.c, nq/sbar.h, nq/server.h,
+	nq/snd_linux.c, nq/snd_mixa.s, nq/sv_main.c, nq/sv_move.c,
+	nq/sv_phys.c, nq/sv_user.c, nq/view.c, nq/view.h, nq/winquake.h,
+	nq/world.c, nq/world.h, nq/worlda.s, nq/zone.c, nq/zone.h: Initial
+	revision
+
+2001-07-06 07:11  knghtbrd
+
+	* COPYING, readme.txt, gamecode/fixskins.sh,
+	gamecode/progs/buttons.qc, gamecode/progs/client.qc,
+	gamecode/progs/combat.qc, gamecode/progs/defs.qc,
+	gamecode/progs/doors.qc, gamecode/progs/files.dat,
+	gamecode/progs/items.qc, gamecode/progs/misc.qc,
+	gamecode/progs/models.qc, gamecode/progs/plats.qc,
+	gamecode/progs/player.qc, gamecode/progs/progdefs.h,
+	gamecode/progs/progs.src, gamecode/progs/server.qc,
+	gamecode/progs/spectate.qc, gamecode/progs/sprites.qc,
+	gamecode/progs/subs.qc, gamecode/progs/triggers.qc,
+	gamecode/progs/weapons.qc, gamecode/progs/world.qc, qw/bothdefs.h,
+	qw/cl_parse.c, qw/cmd.c, qw/cmd.h, qw/crc.c, qw/crc.h, qw/md4.c,
+	qw/net.h, qw/net_chan.c, qw/render.h, qw/sys_linux.c, qw/sys_win.c,
+	qw/anorm_dots.h, qw/anorms.h, qw/bspfile.h, qw/buildnum.c,
+	qw/cd_linux.c, qw/cd_null.c, qw/cd_win.c, qw/cdaudio.h,
+	qw/cl_cam.c, qw/cl_demo.c, qw/cl_ents.c, qw/cl_input.c,
+	qw/cl_main.c, qw/cl_pred.c, qw/cl_tent.c, qw/client.h, qw/common.c,
+	qw/common.h, qw/console.c, qw/console.h, qw/cvar.c, qw/cvar.h,
+	qw/draw.h, qw/gl_draw.c, qw/gl_mesh.c, qw/gl_model.c,
+	qw/gl_model.h, qw/gl_ngraph.c, qw/gl_refrag.c, qw/gl_rlight.c,
+	qw/gl_rmain.c, qw/gl_rmisc.c, qw/gl_rsurf.c, qw/gl_screen.c,
+	qw/gl_warp.c, qw/gl_warp_sin.h, qw/glquake.h, qw/input.h,
+	qw/keys.c, qw/keys.h, qw/math.s, qw/mathlib.c, qw/mathlib.h,
+	qw/menu.c, qw/menu.h, qw/modelgen.h, qw/net_udp.c, qw/net_wins.c,
+	qw/nonintel.c, qw/pmove.c, qw/pmove.h, qw/pmovetst.c,
+	qw/protocol.h, qw/quakeasm.h, qw/quakedef.h, qw/r_part.c,
+	qw/sbar.c, qw/sbar.h, qw/screen.h, qw/skin.c, qw/snd_dma.c,
+	qw/snd_linux.c, qw/snd_mem.c, qw/snd_mix.c, qw/snd_mixa.s,
+	qw/snd_win.c, qw/sound.h, qw/spritegn.h, qw/sys.h, qw/sys_dosa.s,
+	qw/sys_null.c, qw/sys_wina.s, qw/vid.h, qw/view.c, qw/view.h,
+	qw/wad.c, qw/wad.h, qw/winquake.h, qw/zone.c, qw/zone.h,
+	qw-server/pr_cmds.c, qw-server/pr_edict.c, qw-server/progdefs.h,
+	qw-server/qwsvdef.h, qw-server/sys.h, qw-server/sys_win.c,
+	nq/Makefile, nq/anorm_dots.h, nq/anorms.h, nq/bspfile.h,
+	nq/cl_demo.c, nq/cl_input.c, nq/cl_main.c, nq/cl_parse.c,
+	nq/cl_tent.c, nq/cmd.c, nq/cmd.h, nq/common.c, nq/common.h,
+	nq/conproc.c, nq/conproc.h, nq/console.c, nq/console.h, nq/crc.c,
+	nq/crc.h, nq/cvar.c, nq/cvar.h, nq/draw.h, nq/gl_draw.c,
+	nq/gl_rmain.c, nq/gl_rmisc.c, nq/gl_screen.c, nq/glquake.h,
+	nq/host.c, nq/mathlib.c, nq/mathlib.h, nq/net.h, nq/net_bsd.c,
+	nq/net_dgrm.c, nq/net_dgrm.h, nq/net_loop.c, nq/net_loop.h,
+	nq/net_main.c, nq/net_udp.c, nq/net_udp.h, nq/net_win.c,
+	nq/net_wins.c, nq/net_wins.h, nq/pr_cmds.c, nq/pr_comp.h,
+	nq/pr_edict.c, nq/pr_exec.c, nq/progdefs.h, nq/progdefs.q1,
+	nq/protocol.h, nq/quakeasm.h, nq/quakedef.h, nq/r_part.c,
+	nq/render.h, nq/screen.h, nq/snd_dma.c, nq/snd_mem.c, nq/snd_mix.c,
+	nq/snd_null.c, nq/snd_win.c, nq/sound.h, nq/spritegn.h, nq/sys.h,
+	nq/sys_dosa.s, nq/sys_linux.c, nq/sys_null.c, nq/sys_win.c,
+	nq/sys_wina.s, nq/sys_wind.c, nq/vid.h, nq/wad.c, nq/wad.h,
+	qw-server/math.s, qw-server/model.c, qw-server/pr_comp.h,
+	qw-server/pr_exec.c, qw-server/progs.h, qw-server/quakeasm.h,
+	qw-server/server.h, qw-server/sv_ccmds.c, qw-server/sv_ents.c,
+	qw-server/sv_init.c, qw-server/sv_main.c, qw-server/sv_move.c,
+	qw-server/sv_nchan.c, qw-server/sv_phys.c, qw-server/sv_send.c,
+	qw-server/sv_user.c, qw-server/sys_unix.c, qw-server/world.c,
+	qw-server/world.h, qw-server/worlda.s, nq/cd_linux.c, nq/cd_null.c,
+	nq/cd_win.c, nq/cdaudio.h, nq/chase.c, nq/client.h, nq/gl_mesh.c,
+	nq/gl_model.c, nq/gl_model.h, nq/gl_refrag.c, nq/gl_rlight.c,
+	nq/gl_rsurf.c, nq/gl_warp.c, nq/gl_warp_sin.h, nq/host_cmd.c,
+	nq/input.h, nq/keys.c, nq/keys.h, nq/math.s, nq/menu.c, nq/menu.h,
+	nq/modelgen.h, nq/progs.h, nq/sbar.c, nq/sbar.h, nq/server.h,
+	nq/snd_linux.c, nq/snd_mixa.s, nq/sv_main.c, nq/sv_move.c,
+	nq/sv_phys.c, nq/sv_user.c, nq/view.c, nq/view.h, nq/winquake.h,
+	nq/world.c, nq/world.h, nq/worlda.s, nq/zone.c, nq/zone.h: Initial
+	checkin of frost, current as of tutorial 1: building quake-glx
+	under Linux.
+

@@ -1209,7 +1209,7 @@ Host_Error (char *error, ...)
 ===============
 Host_WriteConfiguration
 
-Writes key bindings and archived cvars to config.cfg
+Writes key bindings and archived cvars to config.tcf
 ===============
 */
 void
@@ -1218,9 +1218,9 @@ Host_WriteConfiguration (void)
 	FILE       *f;
 
 	if (host_initialized) {
-		f = fopen (va ("%s/config.cfg", com_gamedir), "w");
+		f = fopen (va ("%s/config.tcf", com_gamedir), "w");
 		if (!f) {
-			Con_Printf ("Couldn't write config.cfg.\n");
+			Con_Printf ("Couldn't write config.tcf.\n");
 			return;
 		}
 
@@ -1460,7 +1460,7 @@ Host_Init (quakeparms_t *parms)
 	IN_Init ();
 #endif
 
-	Cbuf_InsertText ("exec quake.rc\n");
+	Cbuf_InsertText ("exec quake.trc\n");
 	Cbuf_AddText
 		("echo Type connect <internet address> or use GameSpy to connect to a game.\n");
 	Cbuf_AddText ("cl_warncmd 1\n");
