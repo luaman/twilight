@@ -35,7 +35,8 @@
 
 #define UNUSED(x)	(x = x)				// for pesky compiler / lint warnings
 
-#define MAX_INPUTLINE 256
+#define MAX_INPUTLINE 25
+#define MAX_TOKENBUFFER 4096
 
 // up / down
 #define	PITCH	0

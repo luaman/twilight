@@ -92,7 +92,6 @@ void Zone_Init_Commands (void);
 
 // used for temporary allocations
 extern memzone_t *tempzone;
-
 extern memzone_t *stringzone;
 #define Z_Malloc(size) Zone_Alloc(stringzone,size)
 #define Z_Free(data) Zone_Free(data)

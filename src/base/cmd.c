@@ -35,6 +35,7 @@ static const char rcsid[] =
 
 #include <stdlib.h>		/* For malloc() */
 
+#include "quakedef.h"
 #include "common.h"
 #include "cmd.h"
 #include "cvar.h"
@@ -53,6 +54,8 @@ typedef struct cmdalias_s {
 cmdalias_t	*cmd_alias;
 qboolean	cmd_wait;
 cvar_t		*cl_warncmd;
+
+char cmd_tokenbuffer[MAX_TOKENBUFFER];
 
 //=============================================================================
 
@@ -79,7 +82,7 @@ Cmd_Wait_f (void)
 =============================================================================
 */
 
-sizebuf_t	cmd_text;
+sizebuf_t	*cmd_text;
 Uint8		cmd_text_buf[8192];
 
 /*
@@ -90,8 +93,9 @@ Cbuf_Init
 void
 Cbuf_Init (void)
 {
-	cmd_text.data = cmd_text_buf;
-	cmd_text.maxsize = sizeof (cmd_text_buf);
+	cmd_text = Zone_Alloc (stringzone, sizeof (sizebuf_t));
+	cmd_text->data = cmd_text_buf;
+	cmd_text->maxsize = sizeof (cmd_text_buf);
 }
 
 
@@ -108,12 +112,12 @@ Cbuf_AddText (char *text)
 	int	l;
 
 	l = strlen (text);
-	if (cmd_text.cursize + l >= cmd_text.maxsize) {
+	if (cmd_text->cursize + l >= cmd_text->maxsize) {
 		Com_Printf ("Cbuf_AddText: overflow\n");
 		return;
 	}
 
-	SZ_Write (&cmd_text, text, l);
+	SZ_Write (cmd_text, text, l);
 }
 
 /*
@@ -128,26 +132,19 @@ FIXME: actually change the command buffer to do less copying
 void
 Cbuf_InsertText (char *text)
 {
-	char	*temp = NULL;
-	int		templen;
+	sizebuf_t	*p;
+	char		*buf;
+	size_t		len;
 
-	// copy off any commands still remaining in the exec buffer
-	templen = cmd_text.cursize;
-	if (templen) {
-		temp = Z_Malloc (templen);
-		memcpy (temp, cmd_text.data, templen);
-		SZ_Clear (&cmd_text);
-	}
-
-	// add the entire text of the file
-	Cbuf_AddText (text);
-	SZ_Write (&cmd_text, "\n", 1);
-
-	// add the copied off data
-	if (templen) {
-		SZ_Write (&cmd_text, temp, templen);
-		Z_Free (temp);
-	}
+	len = strlen (text);
+	p = Zone_Alloc (stringzone, sizeof (sizebuf_t));
+	buf = Zone_Alloc (stringzone, len);
+	memcpy (buf, text, len);
+	p->cursize = len;
+	p->maxsize = len;
+	p->data = buf;
+	p->next = cmd_text;
+	cmd_text = p;
 }
 
 static void
@@ -157,9 +154,9 @@ extract_line (char *line)
 	char	*text;
 
 	// find a \n or ; line break
-	text = (char *) cmd_text.data;
+	text = (char *) cmd_text->data;
 	quotes = 0;
-	for (i = 0; i < cmd_text.cursize; i++) {
+	for (i = 0; i < cmd_text->cursize; i++) {
 		if (text[i] == '"')
 			quotes++;
 		if (!(quotes & 1) && text[i] == ';')
@@ -175,12 +172,12 @@ extract_line (char *line)
 	// delete the text from the command buffer and move remaining commands
 	// down this is necessary because commands (exec, alias) can insert
 	// data at the beginning of the text buffer
-	if (i == cmd_text.cursize)
-		cmd_text.cursize = 0;
+	if (i == cmd_text->cursize)
+		cmd_text->cursize = 0;
 	else {
 		i++;
-		cmd_text.cursize -= i;
-		memcpy (text, text + i, cmd_text.cursize);
+		cmd_text->cursize -= i;
+		memcpy (text, text + i, cmd_text->cursize);
 	}
 }
 
@@ -194,7 +191,7 @@ Cbuf_Execute_Sets (void)
 {
 	char	line[1024] = { 0 };
 
-	while (cmd_text.cursize) {
+	while (cmd_text->cursize) {
 		extract_line (line);
 		// execute the command line
 		if (strncmp (line, "set", 3) == 0 && isspace ((int) line[3]))
@@ -210,20 +207,34 @@ Cbuf_Execute
 void
 Cbuf_Execute (void)
 {
-	int		i, quotes;
-	char	*text, line[1024];
+	int			i, quotes;
+	char		*text, line[1024];
+	sizebuf_t	*p;
 
-	while (cmd_text.cursize) {
+	while (1)
+	{
+		if (!cmd_text->cursize)
+		{
+			if (cmd_text->next)
+			{
+				p = cmd_text->next;
+				Zone_Free (cmd_text->data);
+				Zone_Free (cmd_text);
+				cmd_text = p;
+				continue;
+			} else
+				break;
+		}
+
 		// find a \n or ; line break
-		text = (char *) cmd_text.data;
+		text = (char *) cmd_text->data;
 
 		quotes = 0;
-		for (i = 0; i < cmd_text.cursize; i++) {
+		for (i = 0; i < cmd_text->cursize; i++) {
 			if (text[i] == '"')
 				quotes++;
 			if (!(quotes & 1) && text[i] == ';')
-				break;					// don't break if inside a quoted
-			// string
+				break;					// don't break in a quoted string
 			if (text[i] == '\n')
 				break;
 		}
@@ -232,15 +243,15 @@ Cbuf_Execute (void)
 		memcpy (line, text, i);
 		line[i] = 0;
 
-		// delete the text from the command buffer and move remaining commands down
-		// this is necessary because commands (exec, alias) can insert data at the
-		// beginning of the text buffer
-		if (i == cmd_text.cursize)
-			cmd_text.cursize = 0;
+		// delete the text from the command buffer and move remaining commands
+		// down this is necessary because commands (exec, alias) can insert
+		// data at the beginning of the text buffer
+		if (i == cmd_text->cursize)
+			cmd_text->cursize = 0;
 		else {
 			i++;
-			cmd_text.cursize -= i;
-			memmove (text, text + i, cmd_text.cursize);
+			cmd_text->cursize -= i;
+			memmove (text, text + i, cmd_text->cursize);
 		}
 
 		// execute the command line
@@ -265,17 +276,16 @@ Cbuf_InsertFile
 void
 Cbuf_InsertFile (char *path)
 {
-	char	str[2048];
-	FILE	*f;
+	char		*text;
+	int			mark;
 
-	f = fopen (Sys_ExpandPath (path), "r");
-	if (!f)
+    mark = Hunk_LowMark ();
+	text = (char *) COM_LoadHunkFile (Cmd_Argv (1), true);
+	if (!text)
 		return;
-	
-	while (fgets (str, 2048, f) != NULL)
-		Cbuf_InsertText (str);
 
-	fclose (f);
+	Cbuf_InsertText (text);
+	Hunk_FreeToLowMark (mark);
 }
 
 /*
@@ -524,17 +534,13 @@ Parses the given string into command line tokens.
 void
 Cmd_TokenizeString (char *text)
 {
-	int	i;
-
-	// clear the args from the last string
-	for (i = 0; i < cmd_argc; i++)
-		Z_Free (cmd_argv[i]);
+	int			i = 0;
 
 	cmd_argc = 0;
 	cmd_args = NULL;
 
 	while (1) {
-		// skip whitespace up to a /n
+		// skip whitespace up to a \n
 		while (*text && *text <= ' ' && *text != '\n') {
 			text++;
 		}
@@ -557,7 +563,11 @@ Cmd_TokenizeString (char *text)
 
 		if (cmd_argc < MAX_ARGS) {
 			size_t length = strlen (com_token) + 1;
-			cmd_argv[cmd_argc] = Z_Malloc (length);
+			if (i + length > MAX_TOKENBUFFER)
+				Sys_Error ("Cmd_TokenizeString: token buffer too small for"
+						" %i characters", i + length);
+			cmd_argv[cmd_argc] = cmd_tokenbuffer + i;
+			i += length;
 			memcpy (cmd_argv[cmd_argc], com_token, length);
 			cmd_argc++;
 		}
