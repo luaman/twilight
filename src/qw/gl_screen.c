@@ -858,48 +858,23 @@ MipColor (int r, int g, int b)
 	return best;
 }
 
-/* FIXME: from gl_draw.c */
-extern Uint8 *draw_chars;
 
-void
-SCR_DrawCharToSnap (int num, Uint8 *dest, int width)
+// HACK: Probably this can/should be done elsewhere/differently...
+static void
+rshot_fill (int x, int y, int w, int h)
 {
-	int			row, col;
-	Uint8	   *source;
-	int			drawline;
-	int			x;
+	qglDisable (GL_TEXTURE_2D);
+	qglColor4fv (d_8tofloattable[98]);
 
-	row = num >> 4;
-	col = num & 15;
-	source = draw_chars + (row << 10) + (col << 3);
+	qglBegin (GL_QUADS);
+	qglVertex2f (x, y);
+	qglVertex2f (x + w, y);
+	qglVertex2f (x + w, y + h);
+	qglVertex2f (x, y + h);
+	qglEnd ();
 
-	drawline = 8;
-
-	while (drawline--) {
-		for (x = 0; x < 8; x++)
-			if (source[x])
-				dest[x] = source[x];
-			else
-				dest[x] = 98;
-		source += 128;
-		dest -= width;
-	}
-
-}
-
-void
-SCR_DrawStringToSnap (const char *s, Uint8 *buf, int x, int y, int width)
-{
-	Uint8		   *dest;
-	const Uint8	   *p;
-
-	dest = buf + ((y * width) + x);
-
-	p = (const unsigned char *) s;
-	while (*p) {
-		SCR_DrawCharToSnap (*p++, dest, width);
-		dest += 8;
-	}
+	qglColor3f (1.0f, 1.0f, 1.0f);
+	qglEnable (GL_TEXTURE_2D);
 }
 
 
@@ -922,6 +897,8 @@ SCR_RSShot_f (void)
 	float		fracw, frach;
 	char		st[80];
 	time_t		now;
+	int			textsize;
+	int			len;
 
 	if (CL_IsUploading ())
 		return;							/* already one pending */
@@ -930,6 +907,32 @@ SCR_RSShot_f (void)
 		return;							/* gotta be connected */
 
 	Com_Printf ("Remote screen shot requested.\n");
+
+	textsize = 8 * vid.width_2d / 320;
+
+	time (&now);
+	strncpy (st, ctime (&now), sizeof (st));
+	st[sizeof (st) - 1] = '\0';
+	len = strlen (st);
+	x = vid.width_2d - (len * textsize);
+	y = 0;
+	rshot_fill (x, y, vid.width_2d - x, textsize);
+	Draw_String_Len (x, y, st, len, textsize);
+
+	strncpy (st, cls.servername, sizeof (st));
+	st[sizeof (st) - 1] = '\0';
+	x = vid.width_2d - (len * textsize);
+	y += textsize;
+	rshot_fill (x, y, vid.width_2d - x, textsize);
+	Draw_String_Len (x, y, st, len, textsize);
+
+	strncpy (st, name->svalue, sizeof (st));
+	st[sizeof (st) - 1] = '\0';
+	x = vid.width_2d - (len * textsize);
+	y += textsize;
+	rshot_fill (x, y, vid.width_2d - x, textsize);
+	Draw_String_Len (x, y, st, len, textsize);
+	qglFinish ();
 
 	/*
 	 * save the pcx file
@@ -989,19 +992,6 @@ SCR_RSShot_f (void)
 			src += 3;
 		}
 	}
-
-	time (&now);
-	strcpy (st, ctime (&now));
-	st[strlen (st) - 1] = 0;
-	SCR_DrawStringToSnap (st, newbuf, w - strlen (st) * 8, h - 1, w);
-
-	strncpy (st, cls.servername, sizeof (st));
-	st[sizeof (st) - 1] = 0;
-	SCR_DrawStringToSnap (st, newbuf, w - strlen (st) * 8, h - 11, w);
-
-	strncpy (st, name->svalue, sizeof (st));
-	st[sizeof (st) - 1] = 0;
-	SCR_DrawStringToSnap (st, newbuf, w - strlen (st) * 8, h - 21, w);
 
 	WritePCXfile (pcxname, newbuf, w, h, w, host_basepal, true);
 
