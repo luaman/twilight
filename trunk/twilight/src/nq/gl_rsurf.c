@@ -42,7 +42,7 @@ int		skytexturenum;
 
 int		lightmap_bytes = 3;				// 1, 2, or 4
 
-unsigned blocklights[18 * 18 * 3];
+unsigned int blocklights[18 * 18 * 3];
 
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128
@@ -221,7 +221,7 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 
 	// set to full bright if no light data
 	if (/* r_fullbright->value || */!cl.worldmodel->lightdata) {
-		memset (blocklights, 255 * 256, size * lightmap_bytes * sizeof(int));
+		memset (blocklights, 255, size * lightmap_bytes * sizeof(int));
 		goto store;
 	}
 
