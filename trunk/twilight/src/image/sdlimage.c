@@ -87,20 +87,20 @@ Image_InitSDL ()
 		Com_Printf("Error! %s\n", SDL_GetError ());
 		return;
 	}
-	sdl_IMG_LoadBMP_RW = SDL_LoadFunction(twi_handle, "IMG_LoadBMP_RW");
-	sdl_IMG_LoadPNM_RW = SDL_LoadFunction(twi_handle, "IMG_LoadPNM_RW");
-	sdl_IMG_LoadXPM_RW = SDL_LoadFunction(twi_handle, "IMG_LoadXPM_RW");
-	sdl_IMG_LoadPCX_RW = SDL_LoadFunction(twi_handle, "IMG_LoadPCX_RW");
-	sdl_IMG_LoadJPG_RW = SDL_LoadFunction(twi_handle, "IMG_LoadJPG_RW");
-	sdl_IMG_LoadTIF_RW = SDL_LoadFunction(twi_handle, "IMG_LoadTIF_RW");
-	sdl_IMG_LoadPNG_RW = SDL_LoadFunction(twi_handle, "IMG_LoadPNG_RW");
-	sdl_IMG_LoadTGA_RW = SDL_LoadFunction(twi_handle, "IMG_LoadTGA_RW");
-	sdl_IMG_LoadLBM_RW = SDL_LoadFunction(twi_handle, "IMG_LoadLBM_RW");
+	sdl_IMG_LoadBMP_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadBMP_RW");
+	sdl_IMG_LoadPNM_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadPNM_RW");
+	sdl_IMG_LoadXPM_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadXPM_RW");
+	sdl_IMG_LoadPCX_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadPCX_RW");
+	sdl_IMG_LoadJPG_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadJPG_RW");
+	sdl_IMG_LoadTIF_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadTIF_RW");
+	sdl_IMG_LoadPNG_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadPNG_RW");
+	sdl_IMG_LoadTGA_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadTGA_RW");
+	sdl_IMG_LoadLBM_RW = SDL_LoadFunction(sdl_handle, "IMG_LoadLBM_RW");
 
-	if (!(sdl_IMG_LoadBMP_RW && twi_IMG_LoadPNM_RW && twi_IMG_LoadXPM_RW &&
-				sdl_IMG_LoadPCX_RW && twi_IMG_LoadJPG_RW &&
-				sdl_IMG_LoadTIF_RW && twi_IMG_LoadPNG_RW &&
-				sdl_IMG_LoadTGA_RW && twi_IMG_LoadLBM_RW)) {
+	if (!(sdl_IMG_LoadBMP_RW && sdl_IMG_LoadPNM_RW && sdl_IMG_LoadXPM_RW &&
+				sdl_IMG_LoadPCX_RW && sdl_IMG_LoadJPG_RW &&
+				sdl_IMG_LoadTIF_RW && sdl_IMG_LoadPNG_RW &&
+				sdl_IMG_LoadTGA_RW && sdl_IMG_LoadLBM_RW)) {
 		Com_Printf("Error! %s\n", SDL_GetError ());
 		return;
 	}
