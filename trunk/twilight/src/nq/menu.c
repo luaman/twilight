@@ -65,7 +65,7 @@ void        (*vid_menukeyfn) (int key);
 
 enum { m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup,
 	m_options, m_keys, m_help, m_quit, m_lanconfig, m_gameoptions, m_search,
-	m_slist, m_gfx, m_kbsthingy
+	m_slist, m_gfx
 } m_state;
 
 void        M_Menu_Main_f (void);
@@ -115,12 +115,6 @@ void        M_Search_Key (int key);
 void        M_ServerList_Key (int key);
 
 
-// XXX KB's Thingy(TM)
-void M_Menu_KB_f (void);
-void M_KB_Draw (void);
-void M_KB_Key (int key);
-
-
 qboolean    m_entersound;				// play after drawing a frame, so
 
 										// caching
@@ -146,25 +140,25 @@ Draws one solid graphics character
 void
 M_DrawCharacter (int cx, int line, int num)
 {
-	Draw_Character (cx + ((vid.width - 320) >> 1), line, num);
+	Draw_Character (cx + ((vid.conwidth - 320) >> 1), line, num);
 }
 
 void
 M_Print (int cx, int cy, char *str)
 {
-	Draw_Alt_String (cx + ((vid.width - 320) >> 1), cy, str);
+	Draw_Alt_String (cx + ((vid.conwidth - 320) >> 1), cy, str);
 }
 
 void
 M_PrintWhite (int cx, int cy, char *str)
 {
-	Draw_String (cx + ((vid.width - 320) >> 1), cy, str);
+	Draw_String (cx + ((vid.conwidth - 320) >> 1), cy, str);
 }
 
 void
 M_DrawPic (int x, int y, qpic_t *pic)
 {
-	Draw_Pic (x + ((vid.width - 320) >> 1), y, pic);
+	Draw_Pic (x + ((vid.conwidth - 320) >> 1), y, pic);
 }
 
 
@@ -228,7 +222,7 @@ M_BuildTranslationTable (int top, int bottom)
 void
 M_DrawTransPicTranslate (int x, int y, qpic_t *pic)
 {
-	Draw_TransPicTranslate (x + ((vid.width - 320) >> 1), y, pic,
+	Draw_TransPicTranslate (x + ((vid.conwidth - 320) >> 1), y, pic,
 			translationTable);
 }
 
@@ -1064,7 +1058,6 @@ M_Options_Draw (void)
 	M_Print (16, y, "      HUD on left side"); M_DrawCheckbox (220, y, cl_hudswap->ivalue); y += 8;
 	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->ivalue); y += 8;
 	M_Print (16, y, "      Graphics Options"); y += 8;
-	M_Print (16, y, "       KB's Thingy(TM)"); y += 8;
 
 	// cursor
 	M_DrawCharacter (200, 32 + options_cursor * 8, 12 + ((int) (host_realtime * 4) & 1));
@@ -1094,9 +1087,6 @@ M_Options_Key (int k)
 					break;
 				case 17:
 					M_Menu_Gfx_f();
-					break;
-				case 18:
-					M_Menu_KB_f ();
 					break;
 				default:
 					M_AdjustSliders (1);
@@ -2606,10 +2596,6 @@ M_Draw (void)
 		case m_gfx:
 			M_Gfx_Draw ();
 			break;
-
-		case m_kbsthingy:
-			M_KB_Draw ();
-			break;
 	}
 
 	if (m_entersound) {
@@ -2687,10 +2673,6 @@ M_Keydown (int key)
 		case m_gfx:
 			M_Gfx_Key (key);
 			return;
-
-		case m_kbsthingy:
-			M_KB_Key (key);
-			return;
 	}
 }
 
@@ -2703,52 +2685,5 @@ M_ConfigureNetSubsystem (void)
 	Cbuf_AddText ("stopdemo\n");
 
 	net_hostport = lanConfig_port;
-}
-
-
-// ==========================================================================
-//
-// XXX KB's Thingy(TM)
-//
-// Menusystem tweak playground
-//
-// ==========================================================================
-
-void
-M_Menu_KB_f (void)
-{
-	key_dest = key_menu;
-	m_state = m_kbsthingy;
-	m_entersound = true;
-}
-
-void
-M_KB_Draw (void)
-{
-	qpic_t		*p;
-
-	M_DrawPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp"));
-	p = Draw_CachePic ("gfx/p_option.lmp");
-	M_DrawPic ((320 - p->width) / 2, 4, p);
-
-
-	M_Print (44, 32, "       KB's Thingy(TM)");
-	M_Print (44, 40, "    Menusystem playground");
-
-	M_Print (44, 52, "   Press Escape, this menu");
-	M_Print (44, 60, "   does nothing (for now.)");
-}
-
-void
-M_KB_Key (int key)
-{
-	switch (key) {
-		case K_ESCAPE:
-			M_Menu_Options_f ();
-			break;
-
-		default:
-			break;
-	}
 }
 
