@@ -172,20 +172,13 @@ R_AddDynamicLights (msurface_t *surf)
 					if (br >= 4)
 					{
 						lit = true;
-						if (colorlights)
-						{
-							dest[s*3+0] += (int)(br * colorscale0) >> 8;
-							dest[s*3+1] += (int)(br * colorscale1) >> 8;
-							dest[s*3+2] += (int)(br * colorscale2) >> 8;
-						} else
-							dest[s] += (int)(br * colorscale) >> 8;
+						dest[s*3+0] += (int)(br * colorscale0) >> 8;
+						dest[s*3+1] += (int)(br * colorscale1) >> 8;
+						dest[s*3+2] += (int)(br * colorscale2) >> 8;
 					}
 				}
 			}
-			if (colorlights)
-				dest += surf->smax * 3;
-			else
-				dest += surf->smax;
+			dest += surf->smax * 3;
 		}
 	}
 	return lit;
@@ -215,13 +208,12 @@ GL_BuildLightmap (msurface_t *surf)
 	// set to full bright if no light data
 	if (!cl.worldmodel->lightdata)
 	{
-		memset (blocklights, 255, (colorlights ? 3 : 1) * size
-				* sizeof(Uint32));
+		memset (blocklights, 255, size * 3 * sizeof(Uint32));
 		goto store;
 	}
 
 	// clear to no light
-	memset (blocklights, 0, (colorlights ? 3 : 1) * size * sizeof(Uint32));
+	memset (blocklights, 0, size * 3 * sizeof(Uint32));
 
 	// add all the lightmaps
 	if (lightmap)
@@ -231,10 +223,7 @@ GL_BuildLightmap (msurface_t *surf)
 			scale = d_lightstylevalue[surf->styles[i]];
 			bl = blocklights;
 
-			shift = size;
-			if (colorlights)
-				shift *= 3;
-			for (j = 0;j < shift;j++)
+			for (j = 0; j < size * 3; j++)
 				*bl++ += *lightmap++ * scale;
 		}
 	}
@@ -266,9 +255,9 @@ store:
 	{
 		case GL_RGB:
 			stride -= surf->smax * 3;
-			for (i = 0;i < surf->tmax;i++, dest += stride)
+			for (i = 0; i < surf->tmax; i++, dest += stride)
 			{
-				for (j = 0;j < surf->smax; j++)
+				for (j = 0; j < surf->smax; j++)
 				{
 					dest[0] = bound (0, bl[0] >> shift, 255);
 					dest[1] = bound (0, bl[1] >> shift, 255);
@@ -282,9 +271,9 @@ store:
 
 		case GL_RGBA:
 			stride -= surf->smax * 4;
-			for (i = 0;i < surf->tmax;i++, dest += stride)
+			for (i = 0; i < surf->tmax; i++, dest += stride)
 			{
-				for (j = 0;j < surf->smax; j++)
+				for (j = 0; j < surf->smax; j++)
 				{
 					dest[0] = bound (0, bl[0] >> shift, 255);
 					dest[1] = bound (0, bl[1] >> shift, 255);
@@ -298,10 +287,21 @@ store:
 			break;
 
 		case GL_LUMINANCE:
-			for (i = 0;i < surf->tmax;i++, bl += surf->smax, dest += stride)
-				for (j = 0;j < surf->smax;j++)
-					dest[j] = bound (0, bl[j] >> shift, 255);
+			stride -= surf->smax;
 
+			// adjust shift for an extra divide by 256
+			shift += 8;
+
+			for (i = 0; i < surf->tmax; i++, dest += stride)
+			{
+				for (j = 0; j < surf->smax; j++)
+				{
+					// 85 / 256 == 0.33203125, close enough
+					scale = ((bl[0] + bl[1] + bl[2]) * 85) >> shift;
+					*dest++ = bound (0, scale, 255);
+					bl += 3;
+				}
+			}
 			break;
 
 		default:
@@ -1262,7 +1262,8 @@ GL_BuildLightmaps (void)
 		texture_extension_number += MAX_LIGHTMAPS;
 	}
 
-	switch ((int) gl_colorlights->ivalue) {
+	switch ((int) gl_colorlights->ivalue)
+	{
 		case 0:
 			gl_lightmap_format = GL_LUMINANCE;
 			lightmap_bytes = 1;
@@ -1281,7 +1282,8 @@ GL_BuildLightmaps (void)
 			break;
 	}
 
-	for (j = 1; j < MAX_MODELS; j++) {
+	for (j = 1; j < MAX_MODELS; j++)
+	{
 		m = cl.model_precache[j];
 		if (!m)
 			break;
