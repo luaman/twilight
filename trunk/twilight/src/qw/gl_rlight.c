@@ -34,6 +34,7 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <math.h>
 #include "quakedef.h"
 #include "glquake.h"
 
@@ -86,7 +87,6 @@ AddLightBlend (float r, float g, float b, float a2)
 	v_blend[0] = v_blend[0] * (1 - a2) + r * a2;
 	v_blend[1] = v_blend[1] * (1 - a2) + g * a2;
 	v_blend[2] = v_blend[2] * (1 - a2) + b * a2;
-//Con_Printf("AddLightBlend(): %4.2f %4.2f %4.2f %4.6f\n", v_blend[0], v_blend[1], v_blend[2], v_blend[3]);
 }
 
 float       bubble_sintable[17], bubble_costable[17];
@@ -96,56 +96,65 @@ R_InitBubble (void)
 {
 	float       a;
 	int         i;
-	float      *bub_sin, *bub_cos;
+	float       *bub_sin = bubble_sintable,
+				*bub_cos = bubble_costable;
 
-	bub_sin = bubble_sintable;
-	bub_cos = bubble_costable;
-
+	// additional accuracy here
 	for (i = 16; i >= 0; i--) {
 		a = i / 16.0 * M_PI * 2;
-		*bub_sin++ = Q_sin (a);
-		*bub_cos++ = Q_cos (a);
+		*bub_sin++ = sin (a);
+		*bub_cos++ = cos (a);
 	}
 }
+
 
 void
 R_RenderDlight (dlight_t *light)
 {
-	int         i, j;
-
-//  float   a;
-	vec3_t      v;
-	float       rad;
-	float      *bub_sin, *bub_cos;
-
-	bub_sin = bubble_sintable;
-	bub_cos = bubble_costable;
-	rad = light->radius * 0.35;
+	int     i, j;
+	vec3_t  v, v_right, v_up;
+	float	*bub_sin = bubble_sintable, 
+			*bub_cos = bubble_costable;
+	float   rad = light->radius * 0.35, length;
 
 	VectorSubtract (light->origin, r_origin, v);
-	if (VectorLength (v) < rad) {				// view is inside the dlight
+	length = VectorNormalize (v);
+
+	if (length < rad) {				// view is inside the dlight
 		AddLightBlend (1, 0.5, 0, light->radius * 0.0003);
 		return;
 	}
 
 	qglBegin (GL_TRIANGLE_FAN);
-//  qglColor3f (0.2,0.1,0.0);
-//  qglColor3f (0.2,0.1,0.05); // changed dimlight effect
-	qglColor4f (light->color[0], light->color[1], light->color[2],
-			   light->color[3]);
-	for (i = 0; i < 3; i++)
-		v[i] = light->origin[i] - vpn[i] * rad;
+	qglColor3fv (light->color);
+
+	v_right[0] = v[1];
+	v_right[1] = -v[0];
+	v_right[2] = 0;
+	VectorNormalizeFast (v_right);
+	CrossProduct (v_right, v, v_up);
+
+	if (length - rad > 8)
+		VectorScale (v, rad, v);
+	else {
+		// make sure the light bubble will not be clipped by
+		// near z clip plane
+		VectorScale (v, length-8, v);
+	}
+	VectorSubtract (light->origin, v, v);
+
 	qglVertex3fv (v);
 	qglColor3f (0, 0, 0);
-	for (i = 16; i >= 0; i--) {
-//      a = i/16.0 * M_PI*2;
+
+	for (i = 16; i >= 0; i--, bub_sin++, bub_cos++) 
+	{
 		for (j = 0; j < 3; j++)
-			v[j] = light->origin[j] + (vright[j] * (*bub_cos) +
-									   +vup[j] * (*bub_sin)) * rad;
-		bub_sin++;
-		bub_cos++;
+			v[j] = light->origin[j] + (v_right[j] * (*bub_cos) +
+				+ v_up[j] * (*bub_sin)) * rad;
+
 		qglVertex3fv (v);
 	}
+
 	qglEnd ();
 }
 
