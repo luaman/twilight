@@ -992,6 +992,8 @@ R_Render3DView (void)
 	qglDisable (GL_BLEND);
 }
 
+extern cvar_t *r_colormiplevels;
+
 /*
 ================
 R_RenderView
@@ -1004,6 +1006,9 @@ R_RenderView (void)
 {
 	double		time1 = 0.0;
 	double		time2;
+
+	// LordHavoc: temporary debugging
+	r_colormiplevels->ivalue &= 1;
 
 	if (r_norefresh->ivalue)
 		return;
