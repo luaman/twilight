@@ -1363,7 +1363,7 @@ COM_InitFilesystem (void)
 // -basedir <path>
 // Overrides the system supplied base directory
 //
-	i = COM_CheckParm ("-basedir");
+	i = COM_CheckParm ("-basedir"); // KB: Cvar
 	if (i && i < com_argc - 1)
 		Cvar_Set (fs_userpath, com_argv[i + 1]);
 
@@ -1378,17 +1378,17 @@ COM_InitFilesystem (void)
 	// any set gamedirs will be freed up to here
 	com_base_searchpaths = com_searchpaths;
 
-	i = COM_CheckParm ("-game");
+	i = COM_CheckParm ("-game"); // KB: Cvar
 	if (i && i < com_argc - 1)
 		Cvar_Set (game_directory, com_argv[i + 1]);
 
-	if (COM_CheckParm ("-rogue"))
+	if (COM_CheckParm ("-rogue")) // KB: Cvar
 	{
 		Cvar_Set (game_directory, "rogue");
 		Cvar_Set (game_rogue, "1");
 	}
 
-	if (COM_CheckParm ("-hipnotic"))
+	if (COM_CheckParm ("-hipnotic")) // KB: Cvar
 	{
 		Cvar_Set (game_directory, "hipnotic");
 		Cvar_Set (game_hipnotic, "1");
