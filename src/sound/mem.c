@@ -122,6 +122,14 @@ S_LoadSound (sfx_t *s)
 
 	info = GetWavinfo (s->name, data, com_filesize);
 
+	Com_DFPrintf (DEBUG_SOUND, "%s:\n", s->name);
+	Com_DFPrintf (DEBUG_SOUND, "  rate: %d\n", info.rate);
+	Com_DFPrintf (DEBUG_SOUND, "  width: %d\n", info.width);
+	Com_DFPrintf (DEBUG_SOUND, "  channels: %d\n", info.channels);
+	Com_DFPrintf (DEBUG_SOUND, "  loopstart: %d\n", info.loopstart);
+	Com_DFPrintf (DEBUG_SOUND, "  samples: %d\n", info.samples);
+	Com_DFPrintf (DEBUG_SOUND, "  dataofs: %d\n", info.dataofs);
+
 	if (info.channels != 1) {
 		Com_Printf ("%s is a stereo sample\n", s->name);
 		Zone_Free (data);
@@ -132,6 +140,12 @@ S_LoadSound (sfx_t *s)
 	len = info.samples / stepscale;
 
 	len = len * info.width * info.channels;
+
+	if (!len) {
+		Com_Printf ("%s is invalid.\n", s->name);
+		Zone_Free (data);
+		return NULL;
+	}
 
 	s->data = Zone_Alloc (snd_zone, len);
 	if (!s->data) {

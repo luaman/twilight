@@ -32,6 +32,7 @@
 #include "qtypes.h"
 #include "zone.h"
 #include "cvar.h"
+#include "mathlib.h"
 
 #define MAX_QPATH       64              // max length of a quake game pathname
 #define MAX_OSPATH      128             // max length of a filesystem pathname
@@ -206,6 +207,7 @@ void Com_EndRedirect (void);
 #define DEBUG_DEFAULT			BIT(0)
 #define DEBUG_ZONE				BIT(1)
 #define DEBUG_FS				BIT(2)
+#define DEBUG_SOUND				BIT(3)
 
 extern struct cvar_s *registered;
 
