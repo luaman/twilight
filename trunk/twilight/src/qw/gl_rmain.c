@@ -1020,19 +1020,27 @@ R_DrawEntitiesOnList (void)
 		if (currententity->model->type == mod_alias)
 			R_DrawAliasModel (currententity);
 	}
+}
 
-	qglEnable(GL_BLEND);
-//	qglEnable (GL_ALPHA_TEST);
-	qglDepthMask (GL_FALSE);
+/*
+=============
+R_DrawEntitiesOnList
+=============
+*/
+void
+R_DrawEntitiesOnList2 (void)
+{
+	int i;
+
+	if (!r_drawentities->value)
+		return;
+
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = &cl_visedicts[i];
 
 		if (currententity->model->type == mod_sprite)
 			R_DrawSpriteModel (currententity);
 	}
-	qglDisable(GL_BLEND);
-//	qglDisable (GL_ALPHA_TEST);
-	qglDepthMask (GL_TRUE);
 }
 
 /*
@@ -1251,10 +1259,6 @@ R_SetupGL (void)
 
 	qglViewport (glx + x, gly + y2, w, h);
 	screenaspect = (float) r_refdef.vrect.width / r_refdef.vrect.height;
-//  yfov = 2*Q_atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*180/M_PI;
-//  yfov = (2.0 * Q_tan (scr_fov.value/360*M_PI)) / screenaspect;
-//  yfov = 2*Q_atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*(scr_fov.value*2)/M_PI;
-//    MYgluPerspective (yfov,  screenaspect,  4,  4096);
 	MYgluPerspective (r_refdef.fov_y, screenaspect, 4, 8193);
 
 	if (mirror) {
@@ -1323,8 +1327,6 @@ R_RenderScene (void)
 	// going slow
 
 	R_DrawEntitiesOnList ();
-
-	R_RenderDlights ();
 }
 
 
@@ -1410,7 +1412,16 @@ R_RenderView (void)
 	R_RenderScene ();
 	R_DrawViewModel ();
 	R_DrawWaterSurfaces ();
+
+	qglEnable (GL_BLEND);
+	qglDepthMask (GL_FALSE);
+
 	R_DrawParticles ();
+	R_DrawEntitiesOnList2 ();
+	R_RenderDlights ();
+
+	qglDepthMask (GL_TRUE);
+	qglDisable (GL_BLEND);
 
 	R_PolyBlend ();
 

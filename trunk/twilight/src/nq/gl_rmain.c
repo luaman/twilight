@@ -1147,18 +1147,12 @@ void R_DrawEntitiesOnList2 (void)
 	if (!r_drawentities->value)
 		return;
 
-	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglEnable (GL_BLEND);
-	qglDepthMask (GL_FALSE);
 	for (i = 0; i < cl_numvisedicts; i++) {
 		currententity = cl_visedicts[i];
 
 		if (currententity->model->type == mod_sprite)
 			R_DrawSpriteModel (currententity);
 	}
-	qglDisable (GL_BLEND);
-	qglDepthMask (GL_TRUE);
 }
 
 /*
@@ -1438,8 +1432,6 @@ R_RenderScene (void)
 	R_DrawEntitiesOnList1 ();
 
 	R_DrawViewModel ();
-
-	R_RenderDlights ();
 }
 
 
@@ -1601,8 +1593,16 @@ R_RenderView (void)
 
 	R_RenderScene ();
 	R_DrawWaterSurfaces ();
+
+	qglEnable (GL_BLEND);
+	qglDepthMask (GL_FALSE);
+
 	R_DrawParticles ();
 	R_DrawEntitiesOnList2 ();
+	R_RenderDlights ();
+
+	qglDisable (GL_BLEND);
+	qglDepthMask (GL_TRUE);
 
 //  More fog right here :)
 //  qglDisable(GL_FOG);
