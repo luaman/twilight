@@ -278,13 +278,26 @@ Cbuf_InsertFile
 void
 Cbuf_InsertFile (char *path)
 {
+	FILE		*f;
 	char		*text;
-	int			mark;
+	int			mark, size;
 
     mark = Hunk_LowMark ();
-	text = (char *) COM_LoadHunkFile (Cmd_Argv (1), true);
-	if (!text)
+	f = fopen (path, "rb");
+	if (!f)
+	{
+		Sys_Printf ("Cbuf_InsertFile: Couldn't open %s\n", path);
 		return;
+	}
+	size = COM_filelength (f);
+	text = Hunk_Alloc (size);
+	if (!text)
+	{
+		Sys_Printf ("Cbuf_InsertFile: Allocation failed for %s\n", path);
+		return;
+	}
+	fread (text, size, 1, f);
+	fclose (f);
 
 	Cbuf_InsertText (text);
 	Hunk_FreeToLowMark (mark);

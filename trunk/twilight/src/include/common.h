@@ -197,6 +197,7 @@ extern char com_gamedir[MAX_OSPATH];
 void COM_WriteFile (char *filename, void *data, int len);
 int COM_FOpenFile (char *filename, FILE ** file, qboolean complain);
 
+int COM_filelength (FILE *f);
 Uint8 *COM_LoadStackFile (char *path, void *buffer, int bufsize,
 		qboolean complain);
 Uint8 *COM_LoadTempFile (char *path, qboolean complain);
