@@ -179,6 +179,7 @@ M_ModalMessage (char *text)
 	scr_drawdialog = true;
 	SCR_UpdateScreen ();
 	scr_drawdialog = false;
+	SCR_UpdateScreen ();
 
 	S_ClearBuffer ();			// so dma doesn't loop current sound
 
