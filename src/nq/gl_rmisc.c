@@ -452,7 +452,7 @@ R_TimeRefresh_f (void)
 
 	start = Sys_FloatTime ();
 	for (i = 0; i < 128; i++) {
-		r_refdef.viewangles[1] = i / 128.0 * 360.0;
+		r_refdef.viewangles[1] = i * (360.0 / 128.0);
 		R_RenderView ();
 	}
 
