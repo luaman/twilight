@@ -362,7 +362,7 @@ Sys_DoubleTime (void)
 
 	last = now;
 
-	return epoch + now / 1000.0;
+	return epoch + (double)(now / 1000.0);
 }
 
 char *

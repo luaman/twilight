@@ -36,8 +36,7 @@ twilight_qw_SOURCES= \
 	pcx.c tga.c \
 	sys.h vid_sdl.c \
 	view.c wad.c zone.c \
-	buildnum.c \
-	bspfile.h keys.h protocol.h \
+        bspfile.h keys.h protocol.h \
 	render.h sys.c
 
 

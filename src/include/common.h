@@ -231,11 +231,7 @@ void        Info_SetValueForStarKey (char *s, char *key, char *value,
 									 int maxsize);
 void        Info_Print (char *s);
 
-Uint8       COM_BlockSequenceCheckByte (Uint8 *base, int length, int sequence,
-										unsigned mapchecksum);
-Uint8       COM_BlockSequenceCRCByte (Uint8 *base, int length, int sequence);
-
-int         build_number (void);
+int			build_number (void);
 
 #endif // __COMMON_H
 

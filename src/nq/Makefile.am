@@ -38,8 +38,7 @@ twilight_nq_SOURCES= \
 	cd_sdl.c \
 	pcx.c tga.c \
 	view.c wad.c world.c world.h zone.c \
-	buildnum.c \
-	quakedef.h bspfile.h client.h keys.h protocol.h \
+        quakedef.h bspfile.h client.h keys.h protocol.h \
 	render.h server.h sys.c
 
 EXTRA_twilight_nq_SOURCES= \

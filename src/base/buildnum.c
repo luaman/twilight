@@ -37,8 +37,7 @@ static const char rcsid[] =
 
 #include "strlib.h"
 
-char       *qdate = __DATE__;
-char       *qtime = __TIME__;
+extern char *qdate;
 
 char       *mon[12] =
 	{ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
@@ -53,7 +52,6 @@ build_number (void)
 	int         m = 0;
 	int         d = 0;
 	int         y = 0;
-	int         hr, min;
 	static int  b = 0;
 
 	if (b != 0)
@@ -76,13 +74,6 @@ build_number (void)
 	}
 
 	b -= 36775;				// Sep 08 2001
-
-	hr = (qtime[0] - '0') * 10 + (qtime[1] - '0');
-	min = (qtime[3] - '0') * 10 + (qtime[4] - '0');
-//  sec = (qtime[6] - '0') * 10 + (qtime[7] - '0');
-
-	b *= 60 * 24;
-	b += hr * 60 + min;
 
 	return b;
 }
