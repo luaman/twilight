@@ -177,6 +177,29 @@ Cvar_Set_f (void)
 }
 
 
+cvar_t *
+Cvar_CreateTemp (const char *name, const char *value)
+{
+	cvar_t		   *var;
+
+	var = Cvar_Find (name);
+	if (var)	// the cvar already exists, and this shouldn't append
+		return NULL;
+
+	// Var does not exist, create it
+	var = Z_Malloc (sizeof(cvar_t));
+	var->name = Z_Malloc (Q_strlen (name) + 1);
+	Q_strcpy (var->name, name);
+	var->string = NULL;		// force Cvar to change
+	var->callback = NULL;
+	Cvar_InsertVar (var);
+	Cvar_Set (var, value);
+
+	var->flags = CVAR_TEMP;
+	return var;
+}
+
+
 void
 Cvar_Slide (cvar_t *var, const float change)
 {
@@ -335,6 +358,29 @@ Cvar_TabComplete (const char *partial)
 void
 Cvar_Cleanup (void)
 {
+	cvar_list_t	   *v, *t;
+
+	// clean cvars with the CVAR_TEMP flag
+	v = cvars;
+	while (v)
+	{
+		// if it's not a temporary cvar, skip it
+		if (! (v->var->flags & CVAR_TEMP))
+		{
+			v = v->next;
+			continue;
+		}
+
+		t = v;
+		v = v->next;
+		if (t->var)
+		{
+			if (t->var->string)
+				Z_Free (t->var->string);
+			Z_Free (t->var);
+		}
+		Z_Free (t);
+	}
 }
 
 

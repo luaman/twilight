@@ -771,6 +771,8 @@ PF_cvar (void)
 	str = G_STRING (OFS_PARM0);
 
 	var = Cvar_Find (str);
+	if (!var)
+		var=Cvar_CreateTemp (str, "0");
 	G_FLOAT (OFS_RETURN) = var->value;
 }
 
@@ -791,7 +793,10 @@ PF_cvar_set (void)
 	val = G_STRING (OFS_PARM1);
 
 	var = Cvar_Find (name);
-	Cvar_Set (var, val);
+	if (!var)
+		Cvar_CreateTemp (name, val);
+	else
+		Cvar_Set (var, val);
 }
 
 /*

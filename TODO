@@ -50,8 +50,6 @@ Stuff that can wait:
     - Replace Quake library functions with SDL functions
   - Cvar improvements
     - Convert from an unsorted list to a hash
-    - Implement CVAR_TEMP for progs-created vars
-    - Implement Cvar_Clean to delete CVAR_TEMPs that aren't CVAR_USER
     - Implement flag manipulation functions for internal use
     - Use Cvar callbacks for Cvar bounds checking and internal updates
   - Command-specific tab completion (set, map, etc)
