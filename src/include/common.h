@@ -224,7 +224,7 @@ void        Info_RemoveKey (char *s, char *key);
 void        Info_RemovePrefixedKeys (char *start, char prefix);
 void        Info_SetValueForKey (char *s, char *key, char *value, int maxsize);
 void        Info_SetValueForStarKey (char *s, char *key, char *value,
-									 int maxsize);
+									 unsigned maxsize);
 void        Info_Print (char *s);
 
 int			build_number (void);
