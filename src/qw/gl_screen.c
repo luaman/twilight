@@ -656,7 +656,7 @@ SCR_ScreenShot_f (void)
 	Uint8      *buffer;
 	char        pcxname[80];
 	char        checkname[MAX_OSPATH];
-	int         i, c, temp;
+	int         i;
 
 // 
 // find a file name to save it to 
@@ -678,16 +678,8 @@ SCR_ScreenShot_f (void)
 
 	buffer = malloc (vid.width * vid.height * 3);
 
-	qglReadPixels (glx, gly, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE,
+	qglReadPixels (glx, gly, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
 				  buffer);
-
-	// swap rgb to bgr
-	c = vid.width * vid.height * 3;
-	for (i = 0; i < c; i += 3) {
-		temp = buffer[i];
-		buffer[i] = buffer[i + 2];
-		buffer[i + 2] = temp;
-	}
 
 	if (TGA_Write (pcxname, vid.width, vid.height, 3, buffer))
 		Con_Printf ("Wrote %s\n", pcxname);
