@@ -693,7 +693,7 @@ _Host_Frame (float time)
 	// server disconnected
 
 // keep the random time dependent
-	rand ();
+	Q_rand ();
 
 // decide the simulation time
 	if (!Host_FilterTime (time))

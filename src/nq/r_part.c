@@ -394,8 +394,8 @@ R_LavaSplash (vec3_t org)
 	for (i = -16; i < 16; i++)
 		for (j = -16; j < 16; j++)
 			for (k = 0; k < 1; k++) {
-				pdie = realtime + 2 + (rand () & 31) * 0.02;
-				pcolor = 224 + (rand () & 7);
+				pdie = realtime + 2 + (Q_rand () & 31) * 0.02;
+				pcolor = 224 + (Q_rand () & 7);
 
 				dir[0] = j * 8 + (Q_rand () & 7);
 				dir[1] = i * 8 + (Q_rand () & 7);
@@ -466,13 +466,13 @@ R_Torch (entity_t *ent, qboolean torch2)
 		ent->time_left = 0;
 
 	if (realtime > ent->time_left) {
-		VectorSet (pvel, (rand() & 3) - 2, (rand() & 3) - 2, 0);
+		VectorSet (pvel, (Q_rand() & 3) - 2, (Q_rand() & 3) - 2, 0);
 		VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
 
 		if (torch2) {
 			porg[2] = ent->origin[2] - 2;
-			VectorSet (pvel, (rand() & 7) - 4, (rand() & 7) - 4, 0);
-			p = particle_new(pt_torch2, porg, pvel, realtime + 5, 0, Q_rand () & 3);
+			VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
+			p = particle_new (pt_torch2, porg, pvel, realtime + 5, 0, Q_rand () & 3);
 
 			if (p == NULL)
 				return;
@@ -483,7 +483,7 @@ R_Torch (entity_t *ent, qboolean torch2)
 					p->scale = 10;
 			}
 		} else {
-			p = particle_new(pt_torch, porg, pvel, realtime + 5, 0, Q_rand () & 3);
+			p = particle_new (pt_torch, porg, pvel, realtime + 5, 0, Q_rand () & 3);
 			if (p == NULL)
 				return;
 			else
