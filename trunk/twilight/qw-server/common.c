@@ -791,13 +791,21 @@ COM_SkipPath (char *pathname)
 COM_StripExtension
 ============
 */
-void
-COM_StripExtension (char *in, char *out)
+void COM_StripExtension (char *in, char *out)
 {
-	while (*in && *in != '.')
+	char *last;
+	
+	while (*in) {
+		if (*in == '.')
+			last = in;
+		if ((*in == '/') || (*in == '\\') || (*in == ':'))
+			last = NULL;
 		*out++ = *in++;
-	*out = 0;
+	}
+	if (last)
+		last = '\0';
 }
+
 
 /*
 ============
