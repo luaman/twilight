@@ -1228,6 +1228,8 @@ R_Move_Beam_Particles (void)
 		switch (p->type) {
 			case pt_rtrail:
 				p->ramp += frametime * p->rstep;
+				if (p->rstep > 0.0)
+					p->rstep -= frametime;
 
 				p->color[3] -= frametime * 0.4;
 				if (p->color[3] <= 0)
@@ -1260,12 +1262,15 @@ DrawBeam (vec3_t p1, vec3_t p2, vec3_t normal, vec4_t color, float scale,
 	vec3_t	v_up, v_right1, v_right2, v_diff;
 
 	VectorSubtract (r_origin, p1, v_diff);
+	VectorNormalizeFast (v_diff);
 	CrossProduct (normal, v_diff, v_right1);
-	VectorNormalizeFast (v_right1);
 
-	VectorSubtract (r_origin, p1, v_diff);
+	VectorSubtract (r_origin, p2, v_diff);
+	VectorNormalizeFast (v_diff);
 	CrossProduct (normal, v_diff, v_right2);
-	VectorNormalizeFast (v_right2);
+
+	if (DotProduct(normal, v_diff) > 0.99f)
+		return;
 
 	VectorCopy (normal, v_up);
 
@@ -1287,6 +1292,15 @@ DrawBeam (vec3_t p1, vec3_t p2, vec3_t normal, vec4_t color, float scale,
 	dp -= ramp;
 	VectorSet2 (tc_array_v(v_index + 2), 0, dp);
 	VectorSet2 (tc_array_v(v_index + 3), 1, dp);
+
+	vindices[i_index + 0] = v_index + 0;
+	vindices[i_index + 1] = v_index + 1;
+	vindices[i_index + 2] = v_index + 2;
+	vindices[i_index + 3] = v_index + 0;
+	vindices[i_index + 4] = v_index + 2;
+	vindices[i_index + 5] = v_index + 3;
+	i_index += 6;
+	v_index += 4;
 }
 
 /*
@@ -1305,6 +1319,7 @@ R_Draw_Beam_Particles (void)
 	maxparticle = -1;
 	j = 0;
 	v_index = 0;
+	i_index = 0;
 
 	for (k = 0, p = beam_particles; k < num_beam_particles; k++, p++) {
 		if (p->die <= cl.time) {
@@ -1317,20 +1332,22 @@ R_Draw_Beam_Particles (void)
 
 		DrawBeam (p->org1, p->org2, p->normal, p->color, p->scale, p->ramp);
 
-		v_index += 4;
-		if ((v_index + 4) > MAX_VERTEX_ARRAYS) {
-			TWI_PreVDraw (0, v_index);
-			qglDrawArrays (GL_QUADS, 0, v_index);
-			TWI_PostVDraw ();
+		if (((i_index + 6) > MAX_VERTEX_INDICES) ||
+				((v_index + 4) > MAX_VERTEX_ARRAYS)) {
+			TWI_PreVDrawCVA (0, v_index);
+			qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
+			TWI_PostVDrawCVA ();
 			v_index = 0;
+			i_index = 0;
 		}
 	}
 
-	if (v_index) {
-		TWI_PreVDraw (0, v_index);
-		qglDrawArrays (GL_QUADS, 0, v_index);
-		TWI_PostVDraw ();
+	if (v_index || i_index) {
+		TWI_PreVDrawCVA (0, v_index);
+		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
+		TWI_PostVDrawCVA ();
 		v_index = 0;
+		i_index = 0;
 	}
 
 	k = 0;
