@@ -297,7 +297,7 @@ typedef struct {
 	char			model_name[MAX_MODELS][MAX_QPATH];
 	char			sound_name[MAX_SOUNDS][MAX_QPATH];
 
-	struct model_s	*model_precache[MAX_MODELS];
+	model_t			*model_precache[MAX_MODELS];
 	struct sfx_s	*sound_precache[MAX_SOUNDS];
 
 	char			levelname[40];			// for display on solo scoreboard
@@ -305,7 +305,7 @@ typedef struct {
 	int				viewentity;
 
 	// refresh related state
-	struct model_s	*worldmodel;		// cl_entitites[0].model
+	model_t			*worldmodel;			// cl_entitites[0].model
 	int				num_entities;			// bottom up in cl_entities array
 
 	int				cdtrack;				// cd audio

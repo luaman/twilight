@@ -36,7 +36,9 @@ static const char rcsid[] =
 #include "dyngl.h"
 #include "cmd.h"
 #include "sys.h"
+#include "model.h"
 
+model_t *r_worldmodel;
 double r_time, r_frametime; // Current time, and time since last frame.
 Uint r_framecount;          // Current frame.
 
