@@ -339,7 +339,7 @@ Q_sqrt(float n)
 float 
 Q_RSqrt(float number)
 {
-	long i;
+	Sint32 i;
 	float x2, y;
 
 	if (number == 0.0)
@@ -347,7 +347,7 @@ Q_RSqrt(float number)
 
 	x2 = number * 0.5f;
 	y = number;
-	i = * (long *) &y;				// evil floating point bit level hacking
+	i = * (Sint32 *) &y;			// evil floating point bit level hacking
 	i = 0x5f3759df - (i >> 1);		// what the fuck?
 	y = * (float *) &i;
 	y = y * (1.5f - (x2 * y * y));	// this can be done a second time
