@@ -657,6 +657,7 @@ R_DrawParticles (void)
 	qglEnable (GL_BLEND);
 	qglDepthMask (GL_FALSE);
 	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglBegin (GL_TRIANGLES);
 
 	VectorScale (vup, 1.5, up);
@@ -773,6 +774,5 @@ R_DrawParticles (void)
 	qglEnd ();
 	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglColor3f (1, 1, 1);
 }

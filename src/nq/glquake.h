@@ -250,9 +250,6 @@ extern lpSelTexFUNC qglSelectTexture;
 
 extern qboolean gl_mtexable;
 
-void        GL_DisableMultitexture (void);
-void        GL_EnableMultitexture (void);
-
 void        R_DrawWorld (void);
 void        R_RenderBrushPoly (msurface_t *fa);
 void        R_DrawWaterSurfaces (void);

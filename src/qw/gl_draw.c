@@ -504,7 +504,6 @@ Draw_Crosshair (void)
 		x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
 		y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
 
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		pColor = (unsigned char *) &d_8to24table[(byte) crosshaircolor->value];
 		qglColor4ubv (pColor);
 		qglBindTexture (GL_TEXTURE_2D, cs_texture);
@@ -520,7 +519,6 @@ Draw_Crosshair (void)
 		qglVertex2f (x - 4, y + 12);
 		qglEnd ();
 
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	} else if (crosshair->value)
 		Draw_Character (
 				scr_vrect.x + scr_vrect.width / 2 - 4 +	cl_crossx->value,
@@ -580,7 +578,7 @@ Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 
 	gl = (glpic_t *) pic->data;
 //	qglDisable (GL_ALPHA_TEST);
-	qglEnable (GL_BLEND);
+//	qglEnable (GL_BLEND);
 //  qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglCullFace (GL_FRONT);
 	qglColor4f (1, 1, 1, alpha);
@@ -597,7 +595,7 @@ Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 	qglEnd ();
 	qglColor4f (1, 1, 1, 1);
 //	qglEnable (GL_ALPHA_TEST);
-	qglDisable (GL_BLEND);
+//	qglDisable (GL_BLEND);
 }
 
 void
@@ -798,7 +796,7 @@ Draw_FadeScreen
 void
 Draw_FadeScreen (void)
 {
-	qglEnable (GL_BLEND);
+//	qglEnable (GL_BLEND);
 	qglDisable (GL_TEXTURE_2D);
 	qglColor4f (0, 0, 0, 0.8);
 	qglBegin (GL_QUADS);
@@ -811,7 +809,7 @@ Draw_FadeScreen (void)
 	qglEnd ();
 	qglColor4f (1, 1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
-	qglDisable (GL_BLEND);
+//	qglDisable (GL_BLEND);
 }
 
 //=============================================================================
@@ -869,7 +867,9 @@ GL_Set2D (void)
 
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_CULL_FACE);
-	qglDisable (GL_BLEND);
+	qglEnable (GL_BLEND);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 //	qglEnable (GL_ALPHA_TEST);
 ////  qglDisable (GL_ALPHA_TEST);
 
