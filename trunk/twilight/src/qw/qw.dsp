@@ -145,10 +145,6 @@ SOURCE=.\gl_ngraph.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_poly.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_rlight.c
 # End Source File
 # Begin Source File
@@ -170,6 +166,10 @@ SOURCE=.\gl_screen.c
 # Begin Source File
 
 SOURCE=.\gl_warp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\info.c
 # End Source File
 # Begin Source File
 
@@ -218,6 +218,10 @@ SOURCE=.\skin.c
 # Begin Source File
 
 SOURCE=.\snd_dma.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\sv_null.c
 # End Source File
 # Begin Source File
 

@@ -140,10 +140,6 @@ SOURCE=.\gl_draw.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_poly.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_rlight.c
 # End Source File
 # Begin Source File

@@ -92,6 +92,10 @@ SOURCE=.\common.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\qw\info.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\mdfour.c
 # End Source File
 # Begin Source File
