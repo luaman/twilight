@@ -47,10 +47,10 @@ static const char rcsid[] =
 #include "console.h"
 
 image_t *draw_disc;
-static image_t *draw_backtile;
 
 static GLuint	translate_texture;
 static GLuint	char_texture;
+static GLuint	conback_texture;
 
 /* ========================================================================= */
 /* Support Routines */
@@ -91,15 +91,7 @@ Draw_CacheImg (char *path)
 
 	/* load the img from disk */
 
-	/*	HACK HACK HACK --- we need to keep the bytes for
-		the translatable player picture just for the menu
-		configuration dialog */
-	if (!strcmp (path, "gfx/menuplyr"))
-		img = Image_Load (path, TEX_ALPHA | TEX_UPLOAD | TEX_KEEPRAW);
-	else
-		img = Image_Load (path, TEX_ALPHA | TEX_UPLOAD);
-	if (!img)
-		Sys_Error ("Draw_CacheImg: failed to load %s", path);
+	img = Image_Load (path, TEX_ALPHA | TEX_UPLOAD | TEX_NEED);
 	GLT_cacheimgs[i] = img;
 
 	return img;
@@ -129,18 +121,21 @@ Draw_Init (void)
 
 	GLT_Init ();
 
-	img = Image_Load ("gfx/conchars", TEX_UPLOAD | TEX_ALPHA);
+	img = Image_Load ("gfx/conchars", TEX_UPLOAD | TEX_ALPHA | TEX_NEED);
 	if (!img)
 		Sys_Error ("Draw_Init: Unable to load conchars\n");
 
 	char_texture = img->texnum;
+
+	img = Image_Load ("gfx/conback", TEX_UPLOAD | TEX_ALPHA);
+	if (img)
+		conback_texture = img->texnum;
 
 	/* save a texture slot for translated picture */
 	qglGenTextures(1, &translate_texture);
 
 	/* get the other pics we need */
 	draw_disc = Image_Load ("gfx/disc", TEX_UPLOAD | TEX_ALPHA);
-	draw_backtile = Image_Load ("gfx/backtile", TEX_UPLOAD | TEX_ALPHA);
 
 	/* Keep track of the first crosshair texture */
 	for (i = 0; i < NUM_CROSSHAIRS; i++)
@@ -628,11 +623,8 @@ void
 Draw_ConsoleBackground (int lines)
 {
 	int		y;
-	image_t	*conback;
 	float	alpha;
 	float	ofs;
-
-	conback = Draw_CacheImg ("gfx/conback");
 
 	y = (vid.height_2d * 3) >> 2;
 
@@ -646,12 +638,17 @@ Draw_ConsoleBackground (int lines)
 	else
 		ofs = (float) ((vid.height_2d - lines) / vid.height_2d);
 
-	if (alpha != 1.0f) {
+	if (conback_texture)
 		qglColor4f (1.0f, 1.0f, 1.0f, alpha);
-		qglEnable (GL_BLEND);
-	}
+	else
+		qglColor4f (0.0f, 0.0f, 0.0f, alpha);
+	qglEnable (GL_BLEND);
 
-	qglBindTexture (GL_TEXTURE_2D, conback->texnum);
+	if (conback_texture)
+		qglBindTexture (GL_TEXTURE_2D, conback_texture);
+	else
+		qglBindTexture (GL_TEXTURE_2D, 0);
+
 	VectorSet2 (tc_array_v(0), 0, 0 + ofs);
 	VectorSet2 (v_array_v(0), 0, 0);
 	VectorSet2 (tc_array_v(1), 1, 0 + ofs);
@@ -664,6 +661,12 @@ Draw_ConsoleBackground (int lines)
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
 
+	if (!conback_texture) {
+		vec4_t	color0 = {0.0, 1.0, 1.0, alpha}, color1;
+		VectorScale (color0, 0.5, color1);
+		Draw_Box (0, 0, vid.width_2d, lines, 1, color0, color1);
+	}
+
 	/* hack the version number directly into the pic */
 	{
 		int     ver_len = strlen (cl_verstring->svalue);
@@ -671,8 +674,7 @@ Draw_ConsoleBackground (int lines)
 		Draw_Alt_String_Len (vid.width_2d - (ver_len * con->tsize) - 16,
 				lines - 14, cl_verstring->svalue, ver_len, con->tsize);
 	}
-	if (alpha != 1.0f)
-		qglDisable (GL_BLEND);
+	qglDisable (GL_BLEND);
 
 	qglColor4fv (whitev);
 }

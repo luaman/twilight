@@ -202,7 +202,7 @@ R_SetupGL (void)
 	qglEnable (GL_DEPTH_TEST);
 }
 
-static void
+void
 R_Clear (void)
 {
 	if (gl_clear->ivalue)

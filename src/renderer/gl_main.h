@@ -56,6 +56,7 @@ extern cvar_t *gl_oldlights;
 extern cvar_t *gl_colorlights;
 extern qboolean colorlights;
 
+void R_Clear (void);
 void R_RenderView(void);
 void R_Init_Cvars(void);
 void R_Init(void);

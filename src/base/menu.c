@@ -309,9 +309,10 @@ Menu_Parse_Item (const char *type, codetree_t *tree_base)
 					break;
 				case m_img:
 					if ((!strcmp(word->string, "qpic") || !strcmp(word->string, "img")) && !code->child) {
-						if (word2 && (word2->flags & WORDFLAG_STRING))
-							item->u.img.img = Image_Load(va("gfx/%s", word2->string), TEX_UPLOAD | TEX_ALPHA | TEX_KEEPRAW);
-						else MENU_ERROR ();
+						if (word2 && (word2->flags & WORDFLAG_STRING)) {
+							if (!(item->u.img.img = Image_Load(va("gfx/%s", word2->string), TEX_UPLOAD | TEX_ALPHA | TEX_KEEPRAW)))
+								MENU_ERROR ();
+						} else MENU_ERROR ();
 					} else if (!strcmp(word->string, "x") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_INTEGER))
 							item->u.img.x = word2->intvalue;

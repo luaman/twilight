@@ -150,11 +150,11 @@ RWprintf (SDL_RWops *rw, const char *format, ...)
 	size_t length;
 	va_list argptr;
 	char *p;
-	char text[4096];
+	char text[4096] = {0};
 	int n;
 
 	va_start (argptr, format);
-	length = vsnprintf (text, sizeof (text), format, argptr);
+	length = vsnprintf (text, sizeof (text) - 1, format, argptr);
 	// note: assumes Zone_Alloc clears memory to zero
 	if (length > sizeof(text)) {
 		p = Zone_Alloc (tempzone, length + 1);

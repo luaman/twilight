@@ -6,3 +6,5 @@ missing
 config.guess
 config.sub
 depcomp
+lhbin2c
+.deps

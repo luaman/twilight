@@ -1,0 +1,3 @@
+loadmenu menu.mnu
+
+exec quake.rc

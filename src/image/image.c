@@ -94,8 +94,16 @@ image_t *
 Image_Load (char *name, int flags)
 {
 	const char	*names[2] = {name, NULL};
+	image_t		*ret;
 
-	return Image_Load_Multi (names, flags);
+	ret = Image_Load_Multi (names, flags);
+	if (!ret) {
+		if (flags & TEX_NEED)
+			Sys_Error ("Image_Load: Unable to load %s\n", name);
+		else
+			Com_DPrintf ("Image_Load: Unable to load %s\n", name);
+	}
+	return ret;
 }
 
 image_t *
