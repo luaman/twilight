@@ -99,8 +99,8 @@ AC_CHECK_HEADERS(
 )
 
 dnl Let 'em figure this one out...
-AC_MSG_CHECKING(if -l33t works)
-AC_MSG_RESULT(no)
+AC_MSG_CHECKING(for breakfast options)
+AC_MSG_RESULT($CC -froot-loops -milk)
 
 dnl userpath/sharepath config
 AC_ARG_WITH(sharepath,
