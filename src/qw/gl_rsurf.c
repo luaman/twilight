@@ -784,7 +784,7 @@ DrawTextureChainsMTexCombine (void)
 			if (s->flags & SURF_DRAWSKY) {
 				for (; s; s = s->texturechain)
 					EmitBothSkyLayers (s);
-				continue;
+				break;
 			}
 		}
 	}
@@ -817,7 +817,7 @@ DrawTextureChainsMTexCombine (void)
 				continue;				/* draw translucent water later */
 
 			if (s->flags & SURF_DRAWSKY)
-				continue;
+				return;
 
 			qglActiveTextureARB (GL_TEXTURE0_ARB);
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
