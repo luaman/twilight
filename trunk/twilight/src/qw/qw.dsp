@@ -153,6 +153,10 @@ SOURCE=.\gl_ngraph.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\gl_poly.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\gl_refrag.c
 # End Source File
 # Begin Source File
@@ -237,6 +241,10 @@ SOURCE=.\tga.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\transform.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\vid_sdl.c
 # End Source File
 # Begin Source File
@@ -306,6 +314,10 @@ SOURCE=..\include\cvar.h
 # Begin Source File
 
 SOURCE=..\include\draw.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\gl_poly.h
 # End Source File
 # Begin Source File
 
@@ -418,6 +430,10 @@ SOURCE=..\include\TGL_funcs_list.h
 # Begin Source File
 
 SOURCE=..\include\TGL_types.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\transform.h
 # End Source File
 # Begin Source File
 
