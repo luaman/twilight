@@ -11,3 +11,4 @@ Release
 *.s
 .DS_Store
 .sconsign
+*.obj
