@@ -283,13 +283,14 @@ SV_PreSpawn_f (void)
 		// should be three numbers following containing checksums
 		check = Q_atoi (Cmd_Argv (3));
 
-		if (sv_mapcheck->ivalue && check != sv.worldmodel->checksum &&
-			check != sv.worldmodel->checksum2) {
+		if (sv_mapcheck->ivalue && check != sv.worldmodel->brush->checksum &&
+			check != sv.worldmodel->brush->checksum2) {
 			SV_ClientPrintf (host_client, PRINT_HIGH,
 							 "Map model file does not match (%s), %i != %i/%i.\n"
 							 "You may need a new version of the map, or the proper install files.\n",
-							 sv.modelname, check, sv.worldmodel->checksum,
-							 sv.worldmodel->checksum2);
+							 sv.modelname, check,
+							 sv.worldmodel->brush->checksum,
+							 sv.worldmodel->brush->checksum2);
 			SV_DropClient (host_client);
 			return;
 		}

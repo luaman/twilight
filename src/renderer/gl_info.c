@@ -36,6 +36,9 @@ static const char rcsid[] =
 #include "dyngl.h"
 #include "cmd.h"
 
+double r_time, r_frametime; // Current time, and time since last frame.
+Uint r_framecount;          // Current frame.
+
 GLfloat whitev[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 int fb_size[4];
@@ -54,6 +57,7 @@ qboolean gl_mtex = false;
 qboolean gl_mtexcombine = false;
 qboolean gl_secondary_color = false;
 qboolean gl_nv_register_combiners = false;
+qboolean gl_sgis_mipmap = false;
 int gl_tmus = 1;
 
 /*
@@ -124,9 +128,17 @@ GLInfo_CheckExtensions (void)
 	Com_Printf ("Checking for GL_EXT_secondary_color: %s.\n",
 			gl_secondary_color ? "Yes" : "No");
 
-	gl_nv_register_combiners = DynGL_HasExtension ("GL_NV_register_combiners");
+	if (!COM_CheckParm ("-nocombiners"))
+		gl_nv_register_combiners=DynGL_HasExtension("GL_NV_register_combiners");
 	Com_Printf ("Checking for GL_NV_register_combiners: %s.\n",
 			gl_nv_register_combiners ? "Yes" : "No");
+
+	if (!COM_CheckParm ("-noautomip"))
+		gl_sgis_mipmap = DynGL_HasExtension ("GL_SGIS_generate_mipmap");
+
+	Com_Printf ("Checking for accelerated mipmap generation: %s.\n",
+			gl_sgis_mipmap ? "GL_SGIS_generate_mipmap" : "no");
+
 }
 
 void

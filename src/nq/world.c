@@ -231,7 +231,7 @@ SV_FindTouchedLeafs (edict_t *ent, mnode_t *node)
 			return;
 
 		leaf = (mleaf_t *) node;
-		leafnum = leaf - sv.worldmodel->leafs - 1;
+		leafnum = leaf - sv.worldmodel->brush->leafs - 1;
 
 		ent->leafnums[ent->num_leafs] = leafnum;
 		ent->num_leafs++;
@@ -342,7 +342,7 @@ SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 	// link to PVS leafs
 	ent->num_leafs = 0;
 	if (ent->v.modelindex)
-		SV_FindTouchedLeafs (ent, sv.worldmodel->nodes);
+		SV_FindTouchedLeafs (ent, sv.worldmodel->brush->nodes);
 
 	if (ent->v.solid == SOLID_NOT)
 		return;

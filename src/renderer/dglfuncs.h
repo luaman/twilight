@@ -61,6 +61,7 @@ DYNGL_NEED (void, glColor4f, (GLfloat red, GLfloat green, GLfloat blue, GLfloat 
 DYNGL_NEED (void, glColor4fv, (const GLfloat * v))
 DYNGL_NEED (void, glColorPointer, (GLint size, GLenum type, GLsizei stride, const GLvoid * ptr))
 DYNGL_NEED (void, glCullFace, (GLenum mode))
+DYNGL_NEED (void, glDeleteTextures, (GLsizei n, const GLuint * textures))
 DYNGL_NEED (void, glDepthFunc, (GLenum func))
 DYNGL_NEED (void, glDepthMask, (GLboolean flag))
 DYNGL_NEED (void, glDepthRange, (GLclampd near_val, GLclampd far_val))

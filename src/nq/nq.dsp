@@ -156,10 +156,6 @@ SOURCE=.\gl_screen.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_warp.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\host.c
 # End Source File
 # Begin Source File
@@ -313,14 +309,6 @@ SOURCE=..\include\cvar.h
 # Begin Source File
 
 SOURCE=..\include\draw.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_poly.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\gl_warp_sin.h
 # End Source File
 # Begin Source File
 

@@ -165,10 +165,6 @@ SOURCE=.\gl_screen.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_warp.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\info.c
 # End Source File
 # Begin Source File

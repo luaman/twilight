@@ -57,6 +57,7 @@ static const char rcsid[] =
 #include "gl_textures.h"
 #include "keys.h"
 #include "teamplay.h"
+#include "surface.h"
 
 void        Cmd_ForwardToServer (void);
 
@@ -390,6 +391,8 @@ CL_ClearState (void)
 	memset (cl_dlights, 0, sizeof (cl_dlights));
 	memset (cl_lightstyle, 0, sizeof (cl_lightstyle));
 	memset (cl_baselines, 0, sizeof(cl_baselines));
+
+	SetupLightmapSettings ();
 }
 
 /*

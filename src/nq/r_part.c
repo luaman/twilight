@@ -785,7 +785,7 @@ R_Move_Base_Particles (void)
 			if ((mleaf->contents == CONTENTS_SOLID) ||
 					(mleaf->contents == CONTENTS_SKY))
 				p->die = -1;
-			if (mleaf->visframe != r_framecount)
+			if (mleaf->visframe != vis_framecount)
 				p->draw = false;
 #endif
 

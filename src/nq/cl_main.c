@@ -45,6 +45,7 @@ static const char rcsid[] =
 #include "world.h"
 #include "gl_textures.h"
 #include "teamplay.h"
+#include "surface.h"
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.
@@ -100,6 +101,8 @@ CL_ClearState (void)
 	memset (cl_lightstyle, 0, sizeof (cl_lightstyle));
 	memset (cl_temp_entities, 0, sizeof (cl_temp_entities));
 	memset (cl_beams, 0, sizeof (cl_beams));
+
+	SetupLightmapSettings ();
 }
 
 /*
@@ -524,9 +527,9 @@ CL_RelinkEntities (void)
 
 					dl->radius = 200 + (rand () & 31);
 					dl->minlight = 32;
-					dl->color[0] = 1.0f;
-					dl->color[1] = 1.0f;
-					dl->color[2] = 0.8f;
+					dl->color[0] = 0.5f;
+					dl->color[1] = 0.5f;
+					dl->color[2] = 0.4f;
 					dl->die = cl.time + 0.1;
 				}
 			}
@@ -569,7 +572,7 @@ CL_RelinkEntities (void)
 	}
 
 	for (i = 0; i < cl.num_statics; i++) {
-		cl_static_entities[i].visframe = r_framecount;
+		cl_static_entities[i].visframe = vis_framecount;
 
 		V_AddEntity ( &cl_static_entities[i] );
 	}

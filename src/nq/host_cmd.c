@@ -1388,7 +1388,7 @@ PrintFrameName (model_t *m, int frame)
 	aliashdr_t *hdr;
 	maliasframedesc_t *pframedesc;
 
-	hdr = (aliashdr_t *) Mod_Extradata (m);
+	hdr = m->alias;
 	if (!hdr)
 		return;
 	pframedesc = &hdr->frames[frame];

@@ -105,7 +105,15 @@ SOURCE=.\liquid.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\mod_alias.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\mod_brush.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\mod_sprite.c
 # End Source File
 # Begin Source File
 
@@ -130,6 +138,10 @@ SOURCE=.\surface.c
 # Begin Source File
 
 SOURCE=.\transform.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\vis.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -169,6 +181,18 @@ SOURCE=.\liquid.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\mod_alias.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mod_brush.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mod_sprite.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\pointers.h
 # End Source File
 # Begin Source File
@@ -182,6 +206,10 @@ SOURCE=.\surface.h
 # Begin Source File
 
 SOURCE=.\transform.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\vis.h
 # End Source File
 # End Group
 # End Target

@@ -24,20 +24,22 @@
 	$Id$
 */
 
-#ifndef __R_SKY_H
-#define __R_SKY_H
+#ifndef __VIS_H
+#define __VIS_H
 
 #include "qtypes.h"
 #include "model.h"
 
-extern void R_Draw_Old_Sky_Chain (chain_head_t *chain, vec3_t origin);
-extern void R_Draw_Fast_Sky_Chain (chain_head_t *chain, vec3_t origin);
-extern void R_Draw_Depth_Sky_Chain (chain_head_t *chain, vec3_t origin);
-extern void R_DrawSkyBox (void);
-extern void R_Init_Sky (void);
-extern void R_Init_Sky_Cvars (void);
-extern void R_InitSky (texture_t *unused, Uint8 *pixels);
+extern Uint		 vis_framecount;
+extern mleaf_t	*vis_viewleaf, *vis_oldviewleaf;
+extern model_t	*vis_model;
 
-extern qboolean draw_skybox;
+extern void Vis_Init (void);
+extern void Vis_Init_Cvars (void);
+extern void Vis_NewVisParams (model_t *mod, vec3_t org, vec3_t up, vec3_t right, vec3_t point, float fov_x, float fov_y);
+extern qboolean Vis_CullBox (vec3_t mins, vec3_t maxs);
+extern void Vis_RecursiveWorldNode (mnode_t *node, model_t *mod, vec3_t org);
+extern void Vis_MarkLeaves (model_t *mod);
 
-#endif // __R_SKY_H
+#endif // __VIS_H
+

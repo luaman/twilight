@@ -30,6 +30,17 @@
 #include "mathlib.h"
 #include "dyngl.h"
 
+extern double	r_time;			// Current time.
+extern double	r_frametime;	// Time since last frame.
+extern Uint		r_framecount;	// Current frame.
+extern vec3_t	r_origin;
+extern float	d_8tofloattable[256][4];
+extern Uint32	d_8to32table[256];
+extern int		gl_solid_format;
+extern int		gl_alpha_format;
+extern int		gl_filter_mag;
+
+
 // for glColor4fv
 extern GLfloat whitev[4];
 
@@ -42,6 +53,7 @@ extern qboolean gl_mtex;
 extern qboolean gl_mtexcombine;
 extern qboolean gl_secondary_color;
 extern qboolean gl_nv_register_combiners;
+extern qboolean gl_sgis_mipmap;
 extern int gl_tmus;
 
 extern int fb_size[4];

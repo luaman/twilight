@@ -554,7 +554,7 @@ CL_Update_Frame (entity_t *e, int frame, float frame_time)
 	}
 
 	if (e->model->type == mod_alias) {
-		paliashdr = (aliashdr_t *) Mod_Extradata (e->model);
+		paliashdr = e->model->alias;
 
 		if (paliashdr->frames[e->from.frame].numposes > 1)
 			e->from.frame_interval = paliashdr->frames[e->from.frame].interval;

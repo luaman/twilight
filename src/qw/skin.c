@@ -193,7 +193,7 @@ Skin_Load (char *skin_name)
 
 	skin = Zone_Alloc(skin_zone, sizeof(skin_t));
 
-	GLT_Skin_Parse(final, skin, Mod_Extradata(player_model), name, 295, 193, 1, 1);
+	GLT_Skin_Parse(final, skin, player_model->alias, name, 295, 193, 1,1);
 	Zone_Free (tmp);
 	Zone_Free (final);
 

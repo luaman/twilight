@@ -236,7 +236,7 @@ SV_Multicast (vec3_t origin, int to)
 	if (!leaf)
 		leafnum = 0;
 	else
-		leafnum = leaf - sv.worldmodel->leafs;
+		leafnum = leaf - sv.worldmodel->brush->leafs;
 
 	reliable = false;
 
@@ -250,13 +250,13 @@ SV_Multicast (vec3_t origin, int to)
 		case MULTICAST_PHS_R:
 			reliable = true;			// intentional fallthrough
 		case MULTICAST_PHS:
-			mask = sv.phs + leafnum * 4 * ((sv.worldmodel->numleafs + 31) >> 5);
+			mask = sv.phs + leafnum * 4 * ((sv.worldmodel->brush->numleafs + 31) >> 5);
 			break;
 
 		case MULTICAST_PVS_R:
 			reliable = true;			// intentional fallthrough
 		case MULTICAST_PVS:
-			mask = sv.pvs + leafnum * 4 * ((sv.worldmodel->numleafs + 31) >> 5);
+			mask = sv.pvs + leafnum * 4 * ((sv.worldmodel->brush->numleafs + 31) >> 5);
 			break;
 
 		default:
@@ -280,7 +280,7 @@ SV_Multicast (vec3_t origin, int to)
 		leaf = Mod_PointInLeaf (client->edict->v.origin, sv.worldmodel);
 		if (leaf) {
 			// -1 is because pvs rows are 1 based, not 0 based like leafs
-			leafnum = leaf - sv.worldmodel->leafs - 1;
+			leafnum = leaf - sv.worldmodel->brush->leafs - 1;
 			if (!(mask[leafnum >> 3] & (1 << (leafnum & 7)))) {
 				continue;
 			}

@@ -321,7 +321,7 @@ VID_Init (unsigned char *palette)
 		sdl_flags |= SDL_FULLSCREEN;
 
 	vid.width = 640;
-	vid.height = 480;
+	vid.height = 0;
 
 	i = COM_CheckParm ("-width");
 	if (i && i < com_argc - 1)
@@ -337,6 +337,9 @@ VID_Init (unsigned char *palette)
 		vid.width = Q_atoi (com_argv[i + 1]);
 		vid.height = Q_atoi (com_argv[i + 2]);
 	}
+
+	if (!vid.height)
+		vid.height = (vid.width * 3) / 4;
 
 	vid.width = max (320, vid.width);
 	vid.height = max (240, vid.height);
