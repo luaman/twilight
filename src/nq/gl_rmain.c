@@ -1050,10 +1050,17 @@ R_DrawAliasModel (entity_t *e)
 		qglRotatef (e->angles[2], 1, 0, 0);
 	}
 
-	qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
-		paliashdr->scale_origin[2]);
-	qglScalef (paliashdr->scale[0], paliashdr->scale[1],
-		paliashdr->scale[2]);
+	if ( clmodel->flags & FLAG_EYES ) {
+		qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
+	} else {
+		qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+	}
+
+	if ( clmodel->flags & FLAG_DOUBLESIZE ) {
+		qglScalef (paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
+	} else {
+		qglScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+	}
 
 	anim = (int) (cl.time * 10) & 3;
 	skinnum = e->skinnum;
