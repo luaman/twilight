@@ -1048,6 +1048,15 @@ CL_SbarCallback (cvar_t *cvar)
 	vid.recalc_refdef = true;
 }
 
+void CL_WriteConfig_f (void)
+{
+	if (Cmd_Argc () != 2) {
+		Con_Printf ("writeconfig <filename> : dump configuration to file\n");
+		return;
+	}
+
+	Host_WriteConfiguration (Cmd_Argv(1));
+}
 
 /*
 =================
@@ -1168,6 +1177,8 @@ CL_Init (void)
 	Cmd_AddCommand ("nextul", CL_NextUpload);
 	Cmd_AddCommand ("stopul", CL_StopUpload);
 
+	Cmd_AddCommand ("writeconfig", CL_WriteConfig_f);
+
 	//
 	// forward to server commands
 	//
@@ -1241,20 +1252,29 @@ Host_Error (char *error, ...)
 ===============
 Host_WriteConfiguration
 
-Writes key bindings and archived cvars to config.cfg
+Writes key bindings and archived cvars to file
 ===============
 */
 void
-Host_WriteConfiguration (void)
+Host_WriteConfiguration (char *name)
 {
 	FILE       *f;
 
+// dedicated servers initialize the host but don't parse and set the
+// config.cfg cvars
 	if (host_initialized) {
-		f = fopen (va ("%s/config.cfg", com_gamedir), "w");
+		char fname[MAX_QPATH] = { 0 };
+
+		snprintf (fname, sizeof (fname), "%s/%s", com_gamedir, name);
+		COM_DefaultExtension (fname, ".cfg");
+
+		f = fopen (fname, "wt");
 		if (!f) {
-			Con_Printf ("Couldn't write config.cfg.\n");
+			Con_Printf ("Couldn't write %s.\n", fname);
 			return;
 		}
+
+		Con_Printf ("Writing %s\n", fname);
 
 		Key_WriteBindings (f);
 		Cvar_WriteVars (f);
@@ -1262,6 +1282,7 @@ Host_WriteConfiguration (void)
 		fclose (f);
 	}
 }
+
 
 
 //============================================================================
@@ -1536,7 +1557,7 @@ Host_Shutdown (void)
 	}
 	isdown = true;
 
-	Host_WriteConfiguration ();
+	Host_WriteConfiguration ("config");
 
 	CDAudio_Shutdown ();
 	NET_Shutdown ();

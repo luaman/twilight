@@ -284,7 +284,7 @@ Host_InitLocal (void)
 ===============
 Host_WriteConfiguration
 
-Writes key bindings and archived cvars to config.cfg
+Writes key bindings and archived cvars to file
 ===============
 */
 void
