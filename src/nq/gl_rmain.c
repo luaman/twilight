@@ -1167,7 +1167,7 @@ R_PolyBlend (void)
 
 	GL_DisableMultitexture ();
 
-	qglDisable (GL_ALPHA_TEST);
+//	qglDisable (GL_ALPHA_TEST);
 	qglEnable (GL_BLEND);
 	qglDisable (GL_DEPTH_TEST);
 	qglDisable (GL_TEXTURE_2D);
@@ -1189,7 +1189,7 @@ R_PolyBlend (void)
 
 	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
-	qglEnable (GL_ALPHA_TEST);
+//	qglEnable (GL_ALPHA_TEST);
 }
 
 
@@ -1374,7 +1374,7 @@ R_SetupGL (void)
 		qglDisable (GL_CULL_FACE);
 
 	qglDisable (GL_BLEND);
-	qglDisable (GL_ALPHA_TEST);
+//	qglDisable (GL_ALPHA_TEST);
 	qglEnable (GL_DEPTH_TEST);
 }
 
