@@ -590,19 +590,6 @@ CL_ParseServerData (void)
 	// game directory
 	str = MSG_ReadString ();
 
-	cl.teamfortress = !strcasecmp(str, "fortress");
-	if (cl.teamfortress) {
-		extern cvar_t	v_iyaw_cycle, v_iroll_cycle, v_ipitch_cycle,
-			v_iyaw_level, v_iroll_level, v_ipitch_level, v_idlescale;
-		Cvar_Set (&v_iyaw_cycle, "2");
-		Cvar_Set (&v_iroll_cycle, "0.5");
-		Cvar_Set (&v_ipitch_cycle, "1");
-		Cvar_Set (&v_iyaw_level, "0.3");
-		Cvar_Set (&v_iroll_level, "0.1");
-		Cvar_Set (&v_ipitch_level, "0.3");
-		Cvar_Set (&v_idlescale, "0");
-	}
-
 	if (strcasecmp (gamedirfile, str)) {
 		// save current config
 		Host_WriteConfiguration ();

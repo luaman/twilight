@@ -270,26 +270,6 @@ CL_ParseServerInfo (void)
 // parse gametype
 	cl.gametype = MSG_ReadByte ();
 
-	if (strlen(com_gamedir) > 8)
-		cl.teamfortress = !strcmp(&(com_gamedir[strlen(com_gamedir)-8]), "fortress");
-	else
-		cl.teamfortress = false;
-
-	// Vic: FIXME
-/*
-	if (cl.teamfortress) {
-		extern cvar_t	v_iyaw_cycle, v_iroll_cycle, v_ipitch_cycle,
-			v_iyaw_level, v_iroll_level, v_ipitch_level, v_idlescale;
-		Cvar_Set (&v_iyaw_cycle, "2");
-		Cvar_Set (&v_iroll_cycle, "0.5");
-		Cvar_Set (&v_ipitch_cycle, "1");
-		Cvar_Set (&v_iyaw_level, "0.3");
-		Cvar_Set (&v_iroll_level, "0.1");
-		Cvar_Set (&v_ipitch_level, "0.3");
-		Cvar_Set (&v_idlescale, "0");
-	}
-*/
-
 // parse signon message
 	str = MSG_ReadString ();
 	strlcpy (cl.levelname, str, sizeof (cl.levelname));
