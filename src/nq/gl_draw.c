@@ -502,11 +502,9 @@ Draw_Crosshair (void)
 	int         x, y;
 	double		dx, dy;
 	extern vrect_t scr_vrect;
-	unsigned char *pColor;
 
 	x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
 	y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
-	pColor = (Uint8 *) &d_8to32table[(Uint8) crosshaircolor->value];
 	if ((vid.conheight != vid.height) || (vid.conwidth != vid.width))
 	{
 		dx = (double) x / (double) vid.width;
@@ -522,7 +520,7 @@ Draw_Crosshair (void)
 			break;
 
 		case 2:
-			qglColor4ubv (pColor);
+			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->value]);
 			qglBindTexture (GL_TEXTURE_2D, cs_texture);
 
 			qglEnable (GL_BLEND);
@@ -540,7 +538,7 @@ Draw_Crosshair (void)
 			break;
 
 		case 3:
-			qglColor4ubv (pColor);
+			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->value]);
 			qglBindTexture (GL_TEXTURE_2D, cs_square);
 
 			qglEnable (GL_BLEND);
@@ -765,7 +763,7 @@ Draw_Fill (int x, int y, int w, int h, int c)
 {
 	qglDisable (GL_TEXTURE_2D);
 
-	qglColor4ubv((Uint8 *)&d_8to32table[c]);
+	qglColor4fv(d_8tofloattable[c]);
 
 	VectorSet2 (v_array[0], x, y);
 	VectorSet2 (v_array[1], x + w, y);
