@@ -137,7 +137,7 @@ GLT_Init_Cvars (void)
 	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
 	r_colormiplevels = Cvar_Get ("r_colormiplevels", "0", CVAR_NONE, NULL);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
-	gl_texture_anisotropy = Cvar_Get("gl_texture_anisotropy", "0", CVAR_ARCHIVE, Set_Anisotropy_f);
+	gl_texture_anisotropy = Cvar_Get("gl_texture_anisotropy", "1", CVAR_ARCHIVE, Set_Anisotropy_f);
 }
 
 void
