@@ -1059,7 +1059,7 @@ CL_MuzzleFlash
 void
 CL_MuzzleFlash (void)
 {
-	vec3_t      fv, rv, uv;
+	vec3_t      fv;
 	dlight_t   *dl;
 	int         i;
 	player_state_t *pl;
