@@ -43,7 +43,7 @@ static const char rcsid[] =
 static int lightmap_bytes;				// 1, 3, or 4
 static int lightmap_shift;
 
-static int lightmap_textures;
+static int lightmap_textures[MAX_LIGHTMAPS];
 
 static Uint32 blocklights[BLOCK_WIDTH * BLOCK_HEIGHT * 3];
 static Uint8 templight[BLOCK_WIDTH * BLOCK_HEIGHT * 4];
@@ -418,8 +418,7 @@ GL_BuildLightmap (msurface_t *surf)
 	Uint32		scale, *bl;
 
 	// Bind your textures early and often - or at least early
-	qglBindTexture (GL_TEXTURE_2D, lightmap_textures
-			+ surf->lightmaptexturenum);
+	qglBindTexture (GL_TEXTURE_2D, lightmap_textures[surf->lightmaptexturenum]);
 
 	// Reset stuff here
 	surf->cached_light[0] = d_lightstylevalue[surf->styles[0]];
@@ -625,7 +624,7 @@ R_BlendLightmaps (void)
 		p = lightmap_polys[i];
 		if (!p)
 			continue;
-		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + i);
+		qglBindTexture (GL_TEXTURE_2D, lightmap_textures[i]);
 		for (; p; p = p->lchain) {
 			memcpy (v_array_p, p->v, sizeof(vertex_t) * p->numverts);
 			memcpy (tc0_array_p, p->ltc, sizeof(texcoord_t) * p->numverts);
@@ -653,7 +652,7 @@ R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 {
 	c_brush_polys++;
 
-	qglBindTexture(GL_TEXTURE_2D, lightmap_textures + fa->lightmaptexturenum);
+	qglBindTexture(GL_TEXTURE_2D, lightmap_textures[fa->lightmaptexturenum]);
 
 	memcpy (v_array_p, fa->polys->v, sizeof(vertex_t) * fa->polys->numverts);
 	memcpy (tc0_array_p, fa->polys->tc,
@@ -1359,7 +1358,7 @@ AllocBlock (int w, int h, int *x, int *y)
 		if (!allocated[texnum][0])
 		{
 			memset(templight, 0, sizeof(templight));
-			qglBindTexture(GL_TEXTURE_2D, lightmap_textures + texnum);
+			qglBindTexture(GL_TEXTURE_2D, lightmap_textures[texnum]);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			qglTexImage2D (GL_TEXTURE_2D, 0, colorlights ? 3 : 1, BLOCK_WIDTH,
@@ -1500,9 +1499,8 @@ GL_BuildLightmaps (void)
 
 	r_framecount = 1;					// no dlightcache
 
-	if (!lightmap_textures) {
-		lightmap_textures = texture_extension_number;
-		texture_extension_number += MAX_LIGHTMAPS;
+	if (!lightmap_textures[0]) {
+		qglGenTextures (MAX_LIGHTMAPS, lightmap_textures);
 	}
 
 	if (gl_mtexcombine)

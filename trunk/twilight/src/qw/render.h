@@ -167,8 +167,6 @@ extern GLfloat whitev[4];
 qboolean GLF_Init (void);
 void GL_EndRendering (void);
 
-extern int texture_extension_number;
-
 int GL_MangleImage8 (Uint8 *in, Uint8 *out, int width, int height, short mask,
 		        Uint8 to, qboolean bleach);
 void GL_Upload32 (Uint32 *data, int width, int height, int flags);
@@ -216,7 +214,7 @@ extern int d_lightstylevalue[256];		// 8.8 fraction of base light value
 extern int netgraphtexture;				// netgraph texture
 extern int playertextures;
 
-extern int skyboxtexnum;
+extern int skyboxtexnums[6];
 
 extern int skytexturenum;				// in cl.loadmodel, not GL texture
 

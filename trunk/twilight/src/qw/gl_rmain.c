@@ -737,10 +737,9 @@ R_Init (void)
 	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
 	Cmd_AddCommand ("loadsky", &R_LoadSky_f);
 
-	netgraphtexture = texture_extension_number++;
+	qglGenTextures(1, &netgraphtexture);
 
-	skyboxtexnum = texture_extension_number;
-	texture_extension_number += 6;
+	qglGenTextures(6, skyboxtexnums);
 
 	R_InitTextures ();
 	R_InitBubble ();
