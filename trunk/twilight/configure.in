@@ -145,7 +145,7 @@ if test "x$with_clients" != "xno"; then
 fi
 
 dnl Check for SDL
-AM_PATH_SDL(1.2.5,
+AM_PATH_SDL(1.2.4,
 	AC_DEFINE(HAVE_SDL_H, 1,
 			  [Define if you have SDL available (required for clients)])
 	SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"
@@ -155,6 +155,15 @@ AM_PATH_SDL(1.2.5,
 	fi
 	SDLVER="None (cannot build clients)"
 )
+
+
+AC_ARG_WITH(sdl_loadobj,
+	[  --without-mmx       Disables use of SDL_LoadObject],,
+	with_loadobj="yes")
+AC_MSG_CHECKING(if SDL has SDL_LoadObject)
+if test "x$with_loadobj" = "xyes"; then
+	AC_COMPILE_IFELSE([int main (int argc, char **argv) { argc=argc; argv=argv; SDL_LoadObject(""); return 0; }], [AC_MSG_RESULT(yes); AC_DEFINE(HAVE_SDL_LOADOBJ, 1, [Defined if we have SDL_LoadObject])], [AC_MSG_RESULT(no)])
+fi
 
 
 dnl Some systems need a keyword in declarations for dynamic libs

@@ -39,6 +39,9 @@
 /* Define if you have SDL available (required for clients) */
 #undef HAVE_SDL_H
 
+/* Defined if we have SDL_LoadObject */
+#undef HAVE_SDL_LOADOBJ
+
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
 
