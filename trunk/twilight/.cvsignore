@@ -9,3 +9,5 @@ mkinstalldirs
 stamp-h
 stamp-h.in
 ChangeLog
+twilight-*.zip
+twilight-*.tar.gz

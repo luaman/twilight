@@ -1,0 +1,9 @@
+# $Id$
+#
+# This file is intended to be processed by automake
+
+AUTOMAKE_OPTIONS=gnu dist-zip
+
+EXTRA_DIST= \
+	cvs2cl.pl
+

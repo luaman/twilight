@@ -15,12 +15,13 @@ These things need to be done before first public release:
     - CVS walktrhoughs
     - Anything else we can get done by release date
   - Packaging scripts
-  - cvs2cl target in autoconf to keep the ChangeLog current
+    - Debian
+    - RPM
+    ? Something for win32?
 
 Would be nice but is not strictly needed, in importance order:
 
   - MySQL-based news
-  - Fix targa loader
   - Mac port
   - Produce a dedicated server for NQ
   - Convert Cvars from list to hash

@@ -10,7 +10,7 @@ if [ ! -e ChangeLog ]; then
 fi
 aclocal
 autoheader
-automake --add-missing --gnu
+automake --add-missing
 autoconf
 echo "Okay, you should be able to run ./configure now."
 

@@ -2,6 +2,8 @@
 #
 # This file is intended to be processed by automake
 
+AUTOMAKE_OPTIONS=gnu dist-zip
+
 INCLUDES= -I$(top_srcdir)/include
 
 bin_PROGRAMS=twilight-qw
@@ -18,12 +20,12 @@ twilight_qw_SOURCES= \
 	cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c cl_parse.c \
 	cl_pred.c cl_tent.c client.h \
 	cmd.c cmd.h common.c common.h console.c console.h crc.c crc.h \
-	cvar.c cvar.h gl_funcs.c \
+	cvar.c gl_funcs.c \
 	gl_draw.c gl_mesh.c gl_model.c gl_model.h modelgen.h spritegn.h \
 	gl_ngraph.c gl_refrag.c gl_rlight.c gl_rmain.c anorms.h anorm_dots.h \
 	gl_rmisc.c gl_rsurf.c gl_screen.c screen.h gl_warp.c gl_warp_sin.h \
 	glquake.h hash.c hash.h \
-	keys.c mathlib.c mathlib.h mdfour.c menu.c menu.h \
+	keys.c mathlib.c mathlib.h mdfour.c mdfour.h menu.c menu.h \
 	net.h net_chan.c net_udp.c strlib.c strlib.h \
 	pmove.c pmove.h pmovetst.c r_part.c sbar.c sbar.h skin.c \
 	snd_dma.c snd_mem.c \
@@ -33,6 +35,14 @@ twilight_qw_SOURCES= \
 	buildnum.c \
 	quakedef.h bothdefs.h bspfile.h draw.h input.h keys.h protocol.h \
 	render.h $(twilight_nq_sys)
+
+EXTRA_twilight_qw_SOURCES= \
+	sys_win.c snd_win.c winquake.h \
+	sys_linux.c snd_linux.c \
+	sys_null.c
+
+EXTRA_DIST= \
+	qw.dsp
 
 LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_nq_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@
