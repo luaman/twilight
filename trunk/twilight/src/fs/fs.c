@@ -179,7 +179,7 @@ FS_Add_File (fs_group_t *group, const char *name, size_t len,
 }
 
 void
-FS_AddPath (const char *path, const char *id)
+FS_AddPath (const char *path, const char *id, const Uint32 flags)
 {
 	if (!id) {
 		if ((id = strrchr(path, '/')))
@@ -188,7 +188,7 @@ FS_AddPath (const char *path, const char *id)
 			id = path;
 	}
 		
-	FS_AddGroup (FSD_New_Group (path, NULL, id));
+	FS_AddGroup (FSD_New_Group (path, NULL, id, flags));
 }
 
 fs_group_t *

@@ -58,7 +58,7 @@ FSD_Free_File (fs_file_t *file)
 }
 
 static SDL_RWops *
-FSD_Open_File (fs_file_t *file, qboolean write)
+FSD_Open_File (fs_file_t *file, Uint32 flags)
 {
 	fsd_group_t	*dir;
 	char		*name;
@@ -70,9 +70,13 @@ FSD_Open_File (fs_file_t *file, qboolean write)
 	else
 		name = zasprintf (tempzone, "%s/%s", dir->path, file->name_base);
 
-	if (write)
-		rw = SDL_RWFromFile (name, "w");
-	else
+	if (flags & FSF_WRITE) {
+		if (file->group->flags & FS_READ_ONLY) {
+			Com_Printf ("Refusing to open '%s' in write mode.\n", name);
+			rw = NULL;
+		} else
+			rw = SDL_RWFromFile (name, "w");
+	} else
 		rw = SDL_RWFromFile (name, "r");
 
 	Zone_Free (name);
@@ -149,7 +153,8 @@ FSD_Close_New (fs_group_t *group, fs_new_t *new)
 }
 
 fs_group_t *
-FSD_New_Group (const char *path, fs_group_t *parent, const char *id)
+FSD_New_Group (const char *path, fs_group_t *parent, const char *id,
+		Uint32 flags)
 {
 	fs_group_t	*group;
 	fsd_group_t	*dir;
@@ -159,8 +164,13 @@ FSD_New_Group (const char *path, fs_group_t *parent, const char *id)
 	group->fs_data = dir;
 	group->free = FSD_Free;
 	group->free_file = FSD_Free_File;
-	group->open_new = FSD_Open_New;
-	group->close_new = FSD_Close_New;
+	group->flags |= flags;
+	if (parent)
+		group->flags |= parent->flags;
+	if (!(group->flags & FS_READ_ONLY)) {
+		group->open_new = FSD_Open_New;
+		group->close_new = FSD_Close_New;
+	}
 
 	dir->path = Zstrdup (fs_zone, path);
 

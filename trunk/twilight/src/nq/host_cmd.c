@@ -441,7 +441,7 @@ Host_Savegame_f (void)
 	COM_DefaultExtension (name, ".sav", sizeof (name));
 
 	if ((file = FS_FindFile (name)))
-		rw = file->open(file, true);
+		rw = file->open(file, FSF_WRITE);
 
 	if (!rw)
 		rw = FS_Open_New (name);

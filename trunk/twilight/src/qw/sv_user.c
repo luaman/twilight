@@ -643,10 +643,12 @@ SV_BeginDownload_f (void)
 	file = FS_FindFile (name);
 	if (!file)
 		goto error;
+	if (file->group->flags & FS_NO_UPLOAD)
+		goto error;
 
 	host_client->downloadsize = file->len;
 	host_client->downloadcount = 0;
-	host_client->download = file->open(file, false);
+	host_client->download = file->open(file, 0);
 
 	if (!file || !host_client->download) {
 error:

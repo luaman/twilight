@@ -1036,7 +1036,7 @@ COM_LoadFile (const char *path, qboolean complain, int type, memzone_t *zone)
 			Sys_Printf ("LoadFile: can't find %s\n", path);
 		return NULL;
 	}
-	rw = file->open(file, false);
+	rw = file->open(file, 0);
 	if (!rw) {
 		if (complain)
 			Sys_Printf ("LoadFile: can't open %s\n", path);
@@ -1096,12 +1096,12 @@ Sets com_gamedir, and adds the directory to the head of the path.
 ================
 */
 static void
-COM_AddDirectory (const char *dir)
+COM_AddDirectory (const char *dir, Uint32 flags)
 {
 	strlcpy_s (com_gamedir, dir);
 	Sys_mkdir (com_gamedir);
 
-	FS_AddPath (dir, NULL);
+	FS_AddPath (dir, NULL, flags);
 }
 
 /*
@@ -1115,15 +1115,16 @@ COM_AddGameDirectory (const char *dir)
 	char		buf[1024];
 
 	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->svalue, dir);
-	COM_AddDirectory (buf);
 
-	if (strcmp (fs_userpath->svalue, fs_sharepath->svalue) != 0)
+	if (strcmp (fs_userpath->svalue, fs_sharepath->svalue))
 	{
 		// only do this if the share path is not the same as the base path
+		COM_AddDirectory (buf, FS_READ_ONLY);
 		snprintf (buf, sizeof (buf), "%s/%s", fs_userpath->svalue, dir);
 		Sys_mkdir (buf);
-		COM_AddDirectory (buf);
 	}
+
+	COM_AddDirectory (buf, 0);
 }
 
 

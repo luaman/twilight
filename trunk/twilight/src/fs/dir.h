@@ -28,7 +28,7 @@
 
 #include "fs.h"
 
-fs_group_t *FSD_New_Group(const char *path, fs_group_t *parent, const char *id);
+fs_group_t *FSD_New_Group(const char *path, fs_group_t *parent, const char *id, Uint32 flags);
 
 #endif // __FS_DIR_H
 

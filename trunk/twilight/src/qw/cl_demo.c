@@ -683,7 +683,7 @@ CL_PlayDemo_f (void)
 		return;
 	}
 
-	ccls.demofile = file->open(file, false);
+	ccls.demofile = file->open(file, 0);
 	if (!ccls.demofile) {
 		Com_Printf ("ERROR: couldn't open %s.\n", name);
 		ccls.demonum = -1;				// stop demo loop
