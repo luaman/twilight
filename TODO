@@ -10,19 +10,23 @@ Bugs we know about:
   - Some OpenGL state changes lost in QW, particularly things like alpha
     in the console and in crosshairs is missing.
   - MacOS X sound is "choppy", not sure if this is SDL's problem or ours.
+    Seems that tweaking snd_mixahead fixes it, but that's annoying.
   - share/userpath mkdir handling is still kinda borked.
+  - QF asks for models as eg, /progs/backpack.mdl - totally incompatible
+    with 2.40.  No idea if it works with Id's stuff, but there are just
+    enough QF servers out there that we have to make it work.
 
 New stuff slated for 0.2.0:
 
   - QW/NQ renderers - port changes between them
   - "lighthalf" gamma table doubling trick
   - faster dlights if we can make them faster
+  - model.c, cl_model.c, sv_model.c [Vic]
 
 Would be nice but is not strictly needed:
 
   - Merge QW server into QW client ala NQ
   - Server browser
-  - sv_model.c for NQ [LordHavoc]
   - Build a seperate dedicated server in NQ [LordHavoc]
   - Prettiness features all around
   - Console font [Knghtbrd]
@@ -34,7 +38,6 @@ Would be nice but is not strictly needed:
   - SDL improvements
     - Remove Quake-specific simple datatypes which SDL gives us
     - switch to using specific-sized SDL variables for file accesses
-    - Replace Quake library functions with SDL functions
   - Cvar improvements
     - Convert from an unsorted list to a hash
     - Implement flag manipulation functions for internal use

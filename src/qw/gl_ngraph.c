@@ -39,9 +39,6 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "menu.h"
 #include "sbar.h"
-#include "TGL_defines.h"
-#include "TGL_types.h"
-#include "TGL_funcs.h"
 
 extern Uint8 *draw_chars;				// 8*8 graphic characters
 

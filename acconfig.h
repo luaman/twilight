@@ -21,7 +21,7 @@
 #undef USERCONF
 
 /* Define to whatever your OS requires */
-#undef APIENTRY
+#undef OGLDECL
 
 /* Define to your default OpenGL library */
 #undef GL_LIBRARY

@@ -40,9 +40,8 @@
 #include <windows.h>
 #endif
 
-#include "TGL_defines.h"
-#include "TGL_types.h"
-#include "TGL_funcs.h"
+#include "opengl.h"
+#include "dynogl.h"
 
 #include "client.h"
 #include "mathlib.h"
@@ -50,15 +49,6 @@
 
 void        GL_BeginRendering (int *x, int *y, int *width, int *height);
 void        GL_EndRendering (void);
-
-GLint APIENTRY gluScaleImage( GLenum format,
-                              GLsizei widthin, GLsizei heightin,
-                              GLenum typein, const void *datain,
-                              GLsizei widthout, GLsizei heightout,
-                              GLenum typeout, void *dataout );
-int gluBuild2DMipmaps (GLenum target, GLint components, 
-						GLint width, GLint height, 
-						GLenum format, GLenum type, const void *data);
 
 extern int  texture_extension_number;
 
@@ -236,8 +226,8 @@ void        R_TranslatePlayerSkin (int playernum);
 // note: ARB supports up to 32 units, but only 2 are currently used in this engine
 #endif
 
-typedef void (APIENTRY * lpMTexFUNC) (GLenum, GLfloat, GLfloat);
-typedef void (APIENTRY * lpSelTexFUNC) (GLenum);
+typedef void (OGLDECL * lpMTexFUNC) (GLenum, GLfloat, GLfloat);
+typedef void (OGLDECL * lpSelTexFUNC) (GLenum);
 extern lpMTexFUNC qglMTexCoord2f;
 extern lpSelTexFUNC qglSelectTexture;
 
