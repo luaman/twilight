@@ -680,7 +680,7 @@ M_Gfx_Draw (void)
 
 	y = 32;
 	M_Print (16, y, "         Affine models"); M_DrawCheckbox (220, y, gl_affinemodels->value); y += 8;
-	M_Print (16, y, "      Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->value); y += 8;
+	M_Print (16, y, "     Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->value); y += 8;
 	M_Print (16, y, "   Fast dynamic lights"); M_DrawCheckbox (220, y, gl_flashblend->value); y += 8;
 	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off"); y += 8;
 	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->value);
