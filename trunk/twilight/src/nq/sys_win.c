@@ -289,7 +289,7 @@ Sys_Init (void)
 
 	Sys_InitFloatTime ();
 
-	Init_Mathlib();
+	Math_Init();
 }
 
 
