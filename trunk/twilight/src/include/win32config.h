@@ -46,9 +46,9 @@
 
 #define HAVE_LIMITS_H 1
 
+#define HAVE__MKDIR 1
+
 #define DYNGLENTRY APIENTRY
 
 #define inline __inline
-
-#define mkdir(path, permission) _mkdir (path)
 
