@@ -133,12 +133,17 @@ AC_ARG_WITH(clients,
 	with_clients="yes")
 AM_CONDITIONAL(CLIENTS, test "x$with_clients" != "xno")
 
-dnl Check for SDL, fatal if not found
-AM_PATH_SDL(1.2.0,
+dnl Check for SDL
+AM_PATH_SDL(1.2.4,
+	AC_DEFINE(HAVE_SDL_H, 1,
+			  [Define if you have SDL available (required for clients)])
+	SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"
 	,
-	AC_MSG_ERROR([SDL 1.2 or above is required to build $PACKAGE])
+	if test "x$with_clients" != "xno"; then
+		AC_MSG_ERROR([Cannot build --with-clients!])
+	fi
+	SDLVER="None (cannot build clients)"
 )
-SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"
 
 
 dnl Some systems need a keyword in declarations for dynamic libs
