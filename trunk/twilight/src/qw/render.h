@@ -131,6 +131,7 @@ void        R_PushDlights (void);
 
 void        R_InitParticles (void);
 void        R_ClearParticles (void);
+void        R_MoveParticles (void);
 void        R_DrawParticles (void);
 void        R_DrawWaterSurfaces (void);
 

@@ -1456,6 +1456,39 @@ R_Clear (void)
 
 /*
 ================
+R_Render3DView
+
+Called by R_RenderView, possibily repeatedly.
+================
+*/
+void
+R_Render3DView (void)
+{
+	// adds static entities to the list
+	R_DrawWorld ();
+
+	R_DrawEntitiesOnList ();
+
+	R_DrawViewModel ();
+
+	qglEnable (GL_BLEND);
+	qglDepthMask (GL_FALSE);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
+
+	R_DrawExplosions ();
+	R_DrawParticles ();
+	R_RenderDlights ();
+	R_DrawWaterTextureChains ();
+
+	transpolyrender ();
+
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDepthMask (GL_TRUE);
+	qglDisable (GL_BLEND);
+}
+
+/*
+================
 R_RenderView
 
 r_refdef must be set before the first call
@@ -1494,43 +1527,35 @@ R_RenderView (void)
 
 	transpolyclear();
 
-	if (gl_wireframe) {
-		qglDepthMask (GL_FALSE);
-		qglPolygonMode(GL_BACK, GL_LINE);
-		qglDisable (GL_TEXTURE_2D);
-	}
-			
-	// adds static entities to the list
-	R_DrawWorld ();
+	R_MoveExplosions ();
+	R_MoveParticles ();
+
+	if (gl_wireframe != 1)
+		R_Render3DView ();
 
 	// don't let sound get messed up if going slow
 	S_ExtraUpdate ();
 
-	R_DrawEntitiesOnList ();
-
-	R_DrawViewModel ();
-
-	qglEnable (GL_BLEND);
-	qglDepthMask (GL_FALSE);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
-
-	R_MoveExplosions ();
-	R_DrawExplosions ();
-	R_DrawParticles ();
-	R_RenderDlights ();
-	R_DrawWaterTextureChains ();
-
-	transpolyrender ();
-
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDepthMask (GL_TRUE);
-	qglDisable (GL_BLEND);
-
 	if (gl_wireframe) {
-		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		qglEnable (GL_TEXTURE_2D);
-	}
+		if (gl_wireframe == 3)
+			qglDisable (GL_DEPTH_TEST);
+		else if (gl_wireframe == 2)
+			qglEnable (GL_POLYGON_OFFSET_LINE);
+		qglDepthMask (GL_FALSE);
+		qglPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		qglDisable (GL_TEXTURE_2D);
 
+		R_Render3DView ();
+
+		qglEnable (GL_TEXTURE_2D);
+		qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		qglDepthMask (GL_TRUE);
+		if (gl_wireframe == 3)
+			qglEnable (GL_DEPTH_TEST);
+		else if (gl_wireframe == 2)
+			qglDisable (GL_POLYGON_OFFSET_LINE);
+	}
+			
 	R_PolyBlend ();
 
 	if (r_speeds->value)

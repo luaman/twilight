@@ -110,7 +110,7 @@ R_WireframeChanged (cvar_t *cvar)
 		return;
 	}
 
-	gl_wireframe = !!cvar->value;
+	gl_wireframe = cvar->value;
 }
 
 /*
