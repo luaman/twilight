@@ -20,6 +20,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name twilight_sound
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name twilight_image
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -41,6 +44,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name twilight_sound
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name twilight_image
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -61,6 +67,18 @@ Package=<4>
 ###############################################################################
 
 Project: "twilight_base"=.\src\base\twilight_base.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "twilight_image"=.\src\image\twilight_image.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

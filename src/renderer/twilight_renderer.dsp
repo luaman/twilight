@@ -89,10 +89,6 @@ SOURCE=.\dynogl.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\image.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\noise.c
 # End Source File
 # Begin Source File
@@ -101,23 +97,7 @@ SOURCE=.\noise_textures.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\pcx.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\qlmp.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\tga.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\transform.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\wad.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -133,27 +113,11 @@ SOURCE=.\glquake.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\image.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\oglfuncs.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\opengl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\pcx.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\qlmp.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\tga.h
 # End Source File
 # Begin Source File
 
