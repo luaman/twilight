@@ -7,25 +7,17 @@ Portability:
   systems, including Linux. (Requires OpenGL.)
 
 Skies:
-  Full support for both skyboxes, old style sky sphere, and simple
-  colored sky polygons. (The latter has one use, it is /fast/.)
-
-Overbright support:
-  We support 2x overbright for single texture, 4x overbright for
-  multi-texture with GL_ARB_texture_env_combine, and unfortunately no
-  overbright for multitexture without combine support.
-
-Particles:
-  The particle engine has changed quite a bit, with effects that we
-  believe to look quite a bit better.
+  Features Skybox and software-quake style sky, or turn the sky off for
+  extra speed.
 
 Lighting:
-  Twilight has full support for colored lighting, both static from .lit
-  files, and from colored dynamic lights.
+  Lighting is now just as bright as software Quake on most 3d cards.
+  It is also now in color, with support for .lit files and colored
+  dynamic lights.
 
 Fullbright colors:
   Twilight has full support for fullbright colors on both alias models
-  are brush models, this can be turned off with the gl_fb Cvar.
+  and brush models, this can be turned off with the gl_fb Cvar.
 
 Image formats:
   Twilight has support for loading a number of image formats.
@@ -44,13 +36,11 @@ Alias model team colors:
   If a teamcolor is assigned to an alias model, it will be rendered
   correctly with the teamcolor.
 
-Explosions:
-  The Twilight explosion effect is quite different then the stock quake
-  explosion effect. [1]
-  Twilight has /greatly/ enhanced explosion effects.
-
-Lightning:
-  Twilight has some /very/ cool looking lightning effects.
+Effects:
+  - The Twilight explosion effect is quite different (and much cooler)
+    than the stock quake explosion effect. [1]
+  - Twilight has some /very/ cool looking lightning effects.
+  - Improved and much faster particles while maintaining the quake style.
 
 Interpolation:
   Twilight has full alias model interpolation support.
@@ -109,6 +99,18 @@ Probably a lot more:
   appreciate reminders of Twilight features that I am not mentioning.
   Please send corrections and additions to twilight-devel@icculus.org.
 
+Stains:
+  Have you ever been running around in a death-match, and thought that
+  the walls, floors, ceilings, etc, should have some marks to show that
+  many people have been blown straight to hell?
+
+  Well, now you can, explosions, shotguns, blood trails, they all leave
+  their mark on the world.
+  (r_stainmaps 0 to disable.)
+
+Console Cvar substitution:
+  In the console using $cvar will replace the '$cvar' with the value of
+  the cvar in question.
 
 0: The search path is:
     maps/<map>/<texture>,
