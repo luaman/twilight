@@ -130,7 +130,6 @@ typedef struct {
 	skin_t		*skins;
 } aliashdr_t;
 
-#define	MAXALIASVERTS	1024
 extern struct model_s *player_model;
 extern float bboxradius;
 extern float bboxyawradius;
