@@ -263,7 +263,6 @@ qboolean    R_CullBox (vec3_t mins, vec3_t maxs);
 void        R_DrawSkyChain (msurface_t *s);
 void        EmitBothSkyLayers (msurface_t *fa);
 void        EmitWaterPolys (msurface_t *fa);
-void        EmitSkyPolys (msurface_t *fa);
 
 #endif // __GLQUAKE_H
 
