@@ -19,7 +19,11 @@ test "x$exec_prefix" = "xNONE" && exec_prefix="$prefix"
 eval PDIR="$prefix"
 eval DDIR="$datadir"
 eval BDIR="$bindir"
-eval EDIR="$sysconfdir"
+if test "x$sysconfdir" = 'x${prefix}/etc' -a "$PDIR" = "/usr"; then
+	EDIR="/etc"
+else
+	eval EDIR="$sysconfdir"
+fi
 
 dnl Checkfs for system type
 AC_CANONICAL_HOST
