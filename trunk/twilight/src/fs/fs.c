@@ -173,7 +173,7 @@ FS_AddGroup (fs_group_t *group)
 {
 	static int	num = 0;
 
-	Com_DFPrintf (DEBUG_FS, "AddGroup: %p\n");
+	Com_DFPrintf (DEBUG_FS, "AddGroup: %p\n", group);
 	if (!group)
 		return;
 
