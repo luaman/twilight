@@ -1461,7 +1461,7 @@ Host_Init (void)
 	Memory_Init ();
 	Cvar_Init (&Host_CvarUserinfo);		// Cvar system
 	Cbuf_Init ();						// Command buffer
-	Cmd_Init ();						// Command system
+	Cmd_Init (&Cmd_ForwardToServer_f);	// Command system
 	Sys_Init ();						// System system =)
 
 	// These have to be here.

@@ -691,7 +691,6 @@ CL_SbarCallback (cvar_t *cvar)
 	vid.recalc_refdef = true;
 }
 
-
 /*
 ===================
 Cmd_ForwardToServer
@@ -719,12 +718,6 @@ Cmd_ForwardToServer (void)
 		SZ_Print (&cls.message, Cmd_Args ());
 	else
 		SZ_Print (&cls.message, "\n");
-}
-
-void
-Cmd_ForwardToServer_f (void)
-{
-	Cmd_ForwardToServer ();
 }
 
 /*
