@@ -498,6 +498,9 @@ CL_LinkPacketEntities (void)
 			ent->times++;
 		}
 
+		if (!s1->modelindex)
+			return;
+
 		if ((cl_num_vis_entities + 1) >= MAX_ENTITIES)
 			Sys_Error ("ERROR! Out of entitys!\n");
 		cl_vis_entities[cl_num_vis_entities++] = ent;
