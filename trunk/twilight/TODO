@@ -6,9 +6,14 @@ Bugs we know about:
   - Damm can demonstrate lightmap corruption consistantly with certain
     maps at certain times.  He can't reproduce it at will, but it does
     happen.
-  - QF asks for models as eg, /progs/backpack.mdl - totally incompatible
-    with 2.40.  No idea if it works with Id's stuff, but there are just
-    enough QF servers out there that we have to make it work.
+  - lights do not react to moving bmodels, untransforming into the
+    bmodel's coordinates would fix this.  This is a stock Quake bug.
+  - Quake never checked BSPs very well, a bad one can crash the engine.
+  - Cosmetic bug: The new particles look cool, but some people would
+    prefer the original GLQuake particles just for nostalgia value.  We
+    should support that.
+  - Twilight uses far too much memory.  Textures should be freed when they
+    are uploaded for one, and we should use fewer big static buffers.
 
 New stuff slated for 0.2.0:
 
@@ -25,4 +30,15 @@ Would be nice but is not strictly needed:
     directory (zone, mathlib, qtypes, compat, part of console, etc)
   - switch to using specific-sized SDL variables for file accesses
   - Convert Cvars from an unsorted list to a hash
+  - Use traceline to determine visibility (trace from eye to random places
+    in entity bbox), with 1 second visibility timeout (if traceline
+    succeeds, reset timeout to realtime + 1), this is as fast as pvs
+    checking, and much more effective, use this in server and optionally
+    client
+  - Add back mirrors at some point
+  - DarkPlaces has better lighting which we should port over to Twilight
+    (R_BuildLightList and R_AddDynamicLights, rdlight_t stuff)
+  - Implement stainmaps (ie, blood staining the lightmaps)a
+  - Rewrite the sound code so that it is possible to spit out a timed
+    sound file which matches frame outputs (for recording videos)
 
