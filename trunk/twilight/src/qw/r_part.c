@@ -786,5 +786,6 @@ R_DrawParticles (void)
 
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglColor3f (1.0f, 1.0f, 1.0f);
 }
 
