@@ -422,6 +422,19 @@ CL_ParsePacketEntities (qboolean delta)
 	newp->num_entities = newindex;
 }
 
+void
+CL_Update_Matrices (entity_t *ent)
+{
+	Matrix4x4_CreateFromQuakeEntity(&ent->matrix, ent->origin, ent->angles, 1);
+	if (ent->model && ent->model->alias)
+	{
+		aliashdr_t  *alias = ent->model->alias;
+		Matrix4x4_ConcatTranslate(&ent->matrix, alias->scale_origin);
+		Matrix4x4_ConcatScale3(&ent->matrix, alias->scale);
+	}
+	Matrix4x4_Invert_Simple(&ent->invmatrix, &ent->matrix);
+}
+
 qboolean
 CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time)
 {
@@ -466,16 +479,7 @@ CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time)
 			ent->angles[PITCH] = -ent->angles[PITCH];
 
 		if (!ent->lerping)
-		{
-			Matrix4x4_CreateFromQuakeEntity(&ent->matrix, ent->origin, ent->angles, 1);
-			if (ent->model && ent->model->alias)
-			{
-				aliashdr_t  *alias = ent->model->alias;
-				Matrix4x4_ConcatTranslate(&ent->matrix, alias->scale_origin);
-				Matrix4x4_ConcatScale3(&ent->matrix, alias->scale);
-			}
-			Matrix4x4_Invert_Simple(&ent->invmatrix, &ent->matrix);
-		}
+			CL_Update_Matrices (ent);
 	}
 
 	return changed;
@@ -508,14 +512,7 @@ CL_Lerp_OriginAngles (entity_t *ent)
 		if (ent->model && ent->model->alias)
 			ent->angles[PITCH] = -ent->angles[PITCH];
 
-		Matrix4x4_CreateFromQuakeEntity(&ent->matrix, ent->origin, ent->angles, 1);
-		if (ent->model && ent->model->alias)
-		{
-			aliashdr_t  *alias = ent->model->alias;
-			Matrix4x4_ConcatTranslate(&ent->matrix, alias->scale_origin);
-			Matrix4x4_ConcatScale3(&ent->matrix, alias->scale);
-		}
-		Matrix4x4_Invert_Simple(&ent->invmatrix, &ent->matrix);
+		CL_Update_Matrices (ent);
 	}
 }
 
@@ -639,12 +636,13 @@ CL_LinkPacketEntities (void)
 
 		flags = model->flags;
 
+		VectorCopy(state->angles, angles);
+
 		// rotate binary objects locally
 		if (flags & EF_ROTATE) {
 			flags &= ~EF_ROTATE;
-			VectorSet (angles, 0, autorotate, 0);
-		} else
-			VectorCopy(state->angles, angles);
+			angles[YAW] = autorotate;
+		}
 
 		moved = CL_Update_OriginAngles (ent, state->origin, angles, cl.time);
 		CL_Lerp_OriginAngles (ent);

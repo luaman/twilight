@@ -514,7 +514,8 @@ CL_RelinkEntities (void)
 
 			if (flags & EF_ROTATE) {
 				flags &= ~EF_ROTATE;
-				ent->angles[1] = ANGLEMOD (100 * (cl.time + ent->syncbase));
+				ent->angles[YAW] = ANGLEMOD (100 * (cl.time + ent->syncbase));
+				CL_Update_Matrices (ent);
 			}
 
 			if (flags & EF_ROCKET) {
