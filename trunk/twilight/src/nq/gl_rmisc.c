@@ -123,31 +123,31 @@ R_Init_Cvars (void)
 	r_drawentities = Cvar_Get ("r_drawentities", "1", CVAR_NONE, NULL);
 	r_drawviewmodel = Cvar_Get ("r_drawviewmodel", "1", CVAR_NONE, NULL);
 	r_speeds = Cvar_Get ("r_speeds", "0", CVAR_NONE, NULL);
-	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_NONE, NULL);
+	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_ARCHIVE, NULL);
 	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
 	r_waterripple = Cvar_Get ("r_waterripple", "0", CVAR_NONE, NULL);
 	r_wireframe = Cvar_Get ("r_wireframe", "0", CVAR_NONE, &R_WireframeChanged);
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
 	r_novis = Cvar_Get ("r_novis", "0", CVAR_NONE, NULL);
-	r_lightlerp = Cvar_Get ("r_lightlerp", "1", CVAR_NONE, NULL);
+	r_lightlerp = Cvar_Get ("r_lightlerp", "1", CVAR_ARCHIVE, NULL);
 
 	r_skyname = Cvar_Get ("r_skyname", "", CVAR_NONE, &R_SkyBoxChanged);
 	r_fastsky = Cvar_Get ("r_fastsky", "0", CVAR_NONE, NULL);
 
 	gl_clear = Cvar_Get ("gl_clear", "1", CVAR_NONE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
-	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_NONE, NULL);
+	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_ARCHIVE, NULL);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", CVAR_NONE, NULL);
 	gl_flashblend = Cvar_Get ("gl_flashblend", "1", CVAR_ARCHIVE, NULL);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", CVAR_NONE, NULL);
 	gl_nocolors = Cvar_Get ("gl_nocolors", "0", CVAR_NONE, NULL);
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
 
-	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_NONE, NULL);
-	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_NONE, NULL);
+	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_ARCHIVE, NULL);
+	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_ARCHIVE, NULL);
 
-	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_NONE, NULL);
-	gl_fb_bmodels = Cvar_Get ("gl_fb_bmodels", "1", CVAR_NONE, NULL);
+	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_ARCHIVE, NULL);
+	gl_fb_bmodels = Cvar_Get ("gl_fb_bmodels", "1", CVAR_ARCHIVE, NULL);
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
 
