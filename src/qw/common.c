@@ -1489,7 +1489,7 @@ COM_FOpenFile (char *filename, FILE ** file)
 			pak = search->pack;
 			for (i = 0; i < pak->numfiles; i++)
 				if (!Q_strcmp (pak->files[i].name, filename)) {	// found it!
-					Sys_Printf ("PackFile: %s : %s\n", pak->filename, filename);
+					Con_DPrintf("PackFile: %s : %s\n", pak->filename, filename);
 					// open a new file on the pakfile
 					*file = fopen (pak->filename, "rb");
 					if (!*file)
@@ -1516,7 +1516,7 @@ COM_FOpenFile (char *filename, FILE ** file)
 			if (findtime == -1)
 				continue;
 
-			Sys_Printf ("FindFile: %s\n", netpath);
+			Con_DPrintf ("FindFile: %s\n", netpath);
 
 			*file = fopen (netpath, "rb");
 			return COM_filelength (*file);
