@@ -831,9 +831,9 @@ main (int argc, char *argv[])
 	char *tmp = NULL;
 	char lastmap[1024] = "";
 	char wintitle[1024] = "";
-	int lastmaxclients = 0;
-	int lastclients = 0;
-	int updatetitle = 0;
+	Uint lastmaxclients = 0;
+	Uint lastclients = 0;
+	qboolean updatetitle = 0;
 	Uint i;
 #endif
 
