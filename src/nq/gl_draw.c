@@ -1144,10 +1144,10 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
 			GL_MipMap ((Uint8 *) scaled, scaled_width, scaled_height);
 			scaled_width >>= 1;
 			scaled_height >>= 1;
-			if (scaled_width < 1)
-				scaled_width = 1;
-			if (scaled_height <1)
-				scaled_height = 1;
+
+			scaled_width = max (scaled_width, 1);
+			scaled_height = max (scaled_height, 1);
+
 			miplevel++;
 			qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
 						  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
