@@ -600,6 +600,9 @@ R_DrawParticles (void)
 	Uint8		theAlpha, *at;
 	extern	double host_frametime;
 
+	if (!active_particles)
+		return;
+
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
 
 	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
