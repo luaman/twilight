@@ -38,6 +38,16 @@
 #include "quakedef.h"
 #endif
 
+// FIXME: now in src/base/parm.c - remove this at some point
+
+extern int  com_argc;
+extern char **com_argv;
+
+void        COM_InitArgv (int argc, char **argv);
+int         COM_CheckParm (char *parm);
+
+
+
 #define	MAX_INFO_STRING	196
 #define	MAX_SERVERINFO_STRING	512
 #define	MAX_LOCALINFO_STRING	32768
@@ -180,15 +190,8 @@ extern qboolean com_eof;
 char       *COM_Parse (char *data);
 
 
-extern int  com_argc;
-extern char **com_argv;
-
-int         COM_CheckParm (char *parm);
-void        COM_AddParm (char *parm);
-
 void        COM_Init_Cvars (void);
 void        COM_Init (void);
-void        COM_InitArgv (int argc, char **argv);
 
 char       *COM_SkipPath (char *pathname);
 void        COM_StripExtension (char *in, char *out);

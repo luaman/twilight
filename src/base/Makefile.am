@@ -8,5 +8,6 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 
 lib_LIBRARIES=libtwilight_base.a
 
-libtwilight_base_a_SOURCES=strlib.c crc.c mathlib.c
+libtwilight_base_a_SOURCES= \
+	crc.c mathlib.c parm.c strlib.c
 
