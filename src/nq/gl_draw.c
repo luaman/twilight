@@ -41,6 +41,7 @@ static const char rcsid[] =
 #define GL_COLOR_INDEX8_EXT     0x80E5
 
 extern unsigned char d_15to8table[65536];
+extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
 cvar_t		*gl_max_size;
 cvar_t		*gl_picmip;
@@ -52,6 +53,18 @@ qpic_t		*draw_backtile;
 
 int         translate_texture;
 int         char_texture;
+int         cs_texture;						// crosshair texture
+
+static Uint8 cs_data[64] = {
+	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
+	0xfe, 0xff, 0xfe, 0xff, 0xfe, 0xff, 0xfe, 0xff,
+	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+};
 
 typedef struct {
 	int         texnum;
@@ -292,6 +305,9 @@ Draw_Init (void)
 	char_texture =
 		GL_LoadTexture ("charset", 128, 128, draw_chars, false, true);
 
+	//  Draw_CrosshairAdjust();
+	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
+
 	start = Hunk_LowMark ();
 
 	cb = (qpic_t *) COM_LoadTempFile ("gfx/conback.lmp");
@@ -468,6 +484,39 @@ Draw_Alt_String (int x, int y, char *str)
 	}
 
 	qglEnd ();
+}
+
+void
+Draw_Crosshair (void)
+{
+	int         x, y;
+	extern vrect_t scr_vrect;
+	unsigned char *pColor;
+
+	if (crosshair->value == 2) {
+		x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
+		y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
+
+		pColor = (Uint8 *) &d_8to24table[(Uint8) crosshaircolor->value];
+		qglColor4ubv (pColor);
+		qglBindTexture (GL_TEXTURE_2D, cs_texture);
+
+		qglBegin (GL_QUADS);
+		qglTexCoord2f (0, 0);
+		qglVertex2f (x - 4, y - 4);
+		qglTexCoord2f (1, 0);
+		qglVertex2f (x + 12, y - 4);
+		qglTexCoord2f (1, 1);
+		qglVertex2f (x + 12, y + 12);
+		qglTexCoord2f (0, 1);
+		qglVertex2f (x - 4, y + 12);
+		qglEnd ();
+		qglColor4f (1, 1, 1, 1);
+	} else if (crosshair->value)
+		Draw_Character (
+				scr_vrect.x + scr_vrect.width / 2 - 4 +	cl_crossx->value,
+				scr_vrect.y + scr_vrect.height / 2 - 4 + cl_crossy->value,
+				'+');
 }
 
 /*
@@ -997,92 +1046,6 @@ GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 	}
   done:;
 #endif
-
-
-	if (mipmap) {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
-	} else {
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
-	}
-}
-
-void
-GL_Upload8_EXT (Uint8 *data, int width, int height, qboolean mipmap,
-				qboolean alpha)
-{
-	int         i, s;
-	qboolean    noalpha;
-	int         samples;
-	static unsigned char scaled[1024 * 512];	// [512*256];
-	int         scaled_width, scaled_height;
-
-	s = width * height;
-	// if there are no transparent pixels, make it a 3 component
-	// texture even if it was specified as otherwise
-	if (alpha) {
-		noalpha = true;
-		for (i = 0; i < s; i++) {
-			if (data[i] == 255)
-				noalpha = false;
-		}
-
-		if (alpha && noalpha)
-			alpha = false;
-	}
-	for (scaled_width = 1; scaled_width < width; scaled_width <<= 1);
-	for (scaled_height = 1; scaled_height < height; scaled_height <<= 1);
-
-	scaled_width >>= (int) gl_picmip->value;
-	scaled_height >>= (int) gl_picmip->value;
-
-	if (scaled_width > gl_max_size->value)
-		scaled_width = gl_max_size->value;
-	if (scaled_height > gl_max_size->value)
-		scaled_height = gl_max_size->value;
-
-	if (scaled_width * scaled_height > sizeof (scaled))
-		Sys_Error ("GL_LoadTexture: too big");
-
-	samples = 1;						// alpha ? gl_alpha_format :
-	// gl_solid_format;
-
-	texels += scaled_width * scaled_height;
-
-	if (scaled_width == width && scaled_height == height) {
-		if (!mipmap) {
-			qglTexImage2D (GL_TEXTURE_2D, 0, GL_COLOR_INDEX8_EXT, scaled_width,
-						  scaled_height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE,
-						  data);
-			goto done;
-		}
-		memcpy (scaled, data, width * height);
-	} else
-		GL_Resample8BitTexture (data, width, height, scaled, scaled_width,
-								scaled_height);
-
-	qglTexImage2D (GL_TEXTURE_2D, 0, GL_COLOR_INDEX8_EXT, scaled_width,
-				  scaled_height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, scaled);
-	if (mipmap) {
-		int         miplevel;
-
-		miplevel = 0;
-		while (scaled_width > 1 || scaled_height > 1) {
-			GL_MipMap8Bit ((Uint8 *) scaled, scaled_width, scaled_height);
-			scaled_width >>= 1;
-			scaled_height >>= 1;
-			if (scaled_width < 1)
-				scaled_width = 1;
-			if (scaled_height < 1)
-				scaled_height = 1;
-			miplevel++;
-			qglTexImage2D (GL_TEXTURE_2D, miplevel, GL_COLOR_INDEX8_EXT,
-						  scaled_width, scaled_height, 0, GL_COLOR_INDEX,
-						  GL_UNSIGNED_BYTE, scaled);
-		}
-	}
-  done:;
 
 
 	if (mipmap) {

@@ -44,6 +44,8 @@ static const char rcsid[] =
 #include <fcntl.h>
 #endif
 
+#include <SDL.h>
+
 #define MINIMUM_WIN_MEMORY		0x0880000
 #define MAXIMUM_WIN_MEMORY		0x1000000
 
@@ -308,11 +310,11 @@ Sys_Error (char *error, ...)
 		WriteFile (houtput, text4, strlen (text4), &dummy, NULL);
 
 
-		starttime = Sys_FloatTime ();
+		starttime = Sys_DoubleTime ();
 		sc_return_on_enter = true;		// so Enter will get us out of here
 
 		while (!Sys_ConsoleInput () &&
-			   ((Sys_FloatTime () - starttime) < CONSOLE_ERROR_TIMEOUT)) {
+			   ((Sys_DoubleTime () - starttime) < CONSOLE_ERROR_TIMEOUT)) {
 		}
 	} else {
 		// switch to windowed so the message box is visible, unless we already
@@ -385,11 +387,11 @@ Sys_Quit (void)
 
 /*
 ================
-Sys_FloatTime
+Sys_DoubleTime
 ================
 */
 double
-Sys_FloatTime (void)
+Sys_DoubleTime (void)
 {
 	static int  sametimecount;
 	static unsigned int oldtime;
@@ -452,7 +454,7 @@ Sys_InitFloatTime (void)
 {
 	int         j;
 
-	Sys_FloatTime ();
+	Sys_DoubleTime ();
 
 	j = COM_CheckParm ("-starttime");
 
@@ -625,6 +627,8 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	if (hPrevInstance)
 		return 0;
 
+    SDL_RegisterApp("Twilight NetQuake", 0, GetModuleHandle(NULL));
+
 	global_hInstance = hInstance;
 	global_nCmdShow = nCmdShow;
 
@@ -725,18 +729,18 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	Sys_Printf ("Host_Init\n");
 	Host_Init ();
 
-	oldtime = Sys_FloatTime ();
+	oldtime = Sys_DoubleTime ();
 
 	/* main window message loop */
 	while (1) {
 		scr_skipupdate = 0;
 		if (isDedicated) {
-			newtime = Sys_FloatTime ();
+			newtime = Sys_DoubleTime ();
 			time = newtime - oldtime;
 
 			while (time < sys_ticrate->value) {
 				Sys_Sleep ();
-				newtime = Sys_FloatTime ();
+				newtime = Sys_DoubleTime ();
 				time = newtime - oldtime;
 			}
 		} else {
@@ -749,7 +753,7 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 				SleepUntilInput (NOT_FOCUS_SLEEP);
 			}
 
-			newtime = Sys_FloatTime ();
+			newtime = Sys_DoubleTime ();
 			time = newtime - oldtime;
 		}
 

@@ -199,7 +199,7 @@ Sys_Quit (void)
 }
 
 double
-Sys_FloatTime (void)
+Sys_DoubleTime (void)
 {
 	static double t;
 

@@ -70,6 +70,8 @@ cvar_t     *v_ipitch_level;
 cvar_t     *v_idlescale;
 
 cvar_t     *crosshair;
+cvar_t     *crosshaircolor;
+
 cvar_t     *cl_crossx;
 cvar_t     *cl_crossy;
 
@@ -944,6 +946,8 @@ V_Init_Cvars (void)
 	v_idlescale = Cvar_Get ("v_idlescale", "0", CVAR_NONE, NULL);
 
 	crosshair = Cvar_Get ("crosshair", "0", CVAR_ARCHIVE, NULL);
+	crosshaircolor = Cvar_Get ("crosshaircolor", "79", CVAR_ARCHIVE, NULL);
+
 	cl_crossx = Cvar_Get ("cl_crossx", "0", CVAR_NONE, NULL);
 	cl_crossy = Cvar_Get ("cl_crossy", "0", CVAR_NONE, NULL);
 

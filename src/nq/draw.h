@@ -49,6 +49,7 @@ void        Draw_String (int x, int y, char *str);
 void        Draw_Alt_String (int x, int y, char *str);
 qpic_t     *Draw_PicFromWad (char *name);
 qpic_t     *Draw_CachePic (char *path);
+void        Draw_Crosshair (void);
 
 int         GL_LoadPicTexture (qpic_t *pic);
 void        GL_Set2D (void);

@@ -1046,6 +1046,7 @@ R_DrawAliasModel (entity_t *e)
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
+	qglColor3f (1, 1, 1);
 	qglPopMatrix ();
 
 	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {
@@ -1560,7 +1561,7 @@ R_RenderView (void)
 
 	if (r_speeds->value) {
 		qglFinish ();
-		time1 = Sys_FloatTime ();
+		time1 = Sys_DoubleTime ();
 		c_brush_polys = 0;
 		c_alias_polys = 0;
 	}
@@ -1598,7 +1599,7 @@ R_RenderView (void)
 
 	if (r_speeds->value) {
 //      qglFinish ();
-		time2 = Sys_FloatTime ();
+		time2 = Sys_DoubleTime ();
 		Con_Printf ("%3i ms  %4i wpoly %4i epoly\n",
 					(int) ((time2 - time1) * 1000), c_brush_polys,
 					c_alias_polys);
