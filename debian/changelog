@@ -1,4 +1,10 @@
-twilight-classic (0.0.9-2) unstable; urgency=low
+twilight (0.1.99-1) unstable; urgency=low
+
+  * New upstream pre-release
+
+ -- Joseph Carter <knghtbrd@debian.org>  Sat, 24 Nov 2001 03:32:18 -0800
+
+twilight (0.0.9-2) unstable; urgency=low
 
   * Changed package name preemptively - upstream will eventually rename
     its archive to match and it's better to take care of that while we're
