@@ -151,8 +151,9 @@ extern qboolean gl_mtexcombine;
 
 // Vertex array stuff.
 
-#define MAX_VERTEX_ARRAYS	2048
-#define MAX_VERTEX_INDICES	(MAX_VERTEX_ARRAYS * 4)
+// LordHavoc: MAX_VERTEX_INDICES beyond 1024 crashs 3DFX drivers on windows!
+#define MAX_VERTEX_ARRAYS	1024
+#define MAX_VERTEX_INDICES	1024
 
 extern texcoord_t	*tc0_array_p;
 extern texcoord_t	*tc1_array_p;
