@@ -9,9 +9,9 @@ if [ ! -f doc/ChangeLog ]; then
 	touch doc/ChangeLog
 fi
 
-# Debian's automake 1.6 does not provide /usr/bin/automake.  *sigh*
-if command -v automake-1.6 > /dev/null 2>&1; then
-	DEBFUCKUP="-1.6"
+# Debian's automake 1.7 does not provide /usr/bin/automake.  *sigh*
+if command -v automake-1.7 > /dev/null 2>&1; then
+	DEBFUCKUP="-1.7"
 else
 	DEBFUCKUP=""
 fi
