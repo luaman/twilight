@@ -407,8 +407,8 @@ main (int c, char **v)
 	int     	    j;
 #ifndef _WIN32
 	fd_set			fdset;
-	extern int		net_socket;
 	struct timeval	timeout;
+	extern int		ip_sockets[2];
 #endif
 
 	SDL_Init (SDL_INIT_TIMER);
@@ -444,10 +444,10 @@ main (int c, char **v)
 		FD_ZERO (&fdset);
 		if (do_stdin)
 			FD_SET (0, &fdset);
-		FD_SET (net_socket, &fdset);
+		FD_SET (ip_sockets[NS_SERVER], &fdset);
 		timeout.tv_sec = 1;
 		timeout.tv_usec = 0;
-		if (select (net_socket + 1, &fdset, NULL, NULL, &timeout) == -1)
+		if (select (ip_sockets[NS_SERVER] + 1, &fdset, NULL, NULL, &timeout) == -1)
 		{
 			printf("select returned error: %s\n", strerror (errno));
 			continue;

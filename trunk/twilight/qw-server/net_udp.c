@@ -80,7 +80,7 @@ netadr_t    net_local_adr;
 netadr_t    net_from;
 sizebuf_t   net_message;
 
-static int  ip_sockets[2];	// non blocking, for receives
+int  ip_sockets[2];	// non blocking, for receives
 
 #define	MAX_UDP_PACKET	8192
 Uint8       net_message_buffer[MAX_UDP_PACKET];
