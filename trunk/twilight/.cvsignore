@@ -14,4 +14,8 @@ twilight-nq
 *.ncb
 *.opt
 *.plg
+*.exe
+*.ilk
+*.map
+*.pdb
 .DS_Store
