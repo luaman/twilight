@@ -417,10 +417,14 @@ R_LoadSkys (void)
 	Uint8  *image_buf = NULL;
 
 	for (i = 0; i < 6; i++) {
-		snprintf (name, sizeof (name), "gfx/env/%s%s",
+		snprintf (name, sizeof (name), "env/%s%s",
 				r_skyname->string, suf[i]);
-
-		IMG_Load (name, &image_buf, &w, &h);
+		if (!IMG_Load (name, &image_buf, &w, &h))
+		{
+			snprintf (name, sizeof (name), "gfx/env/%s%s",
+					r_skyname->string, suf[i]);
+			IMG_Load (name, &image_buf, &w, &h);
+		}
 
 		if (!image_buf)
 			return false;
