@@ -152,10 +152,6 @@ SOURCE=.\gl_draw.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_mesh.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_refrag.c
 # End Source File
 # Begin Source File

@@ -336,10 +336,6 @@ SOURCE=..\include\draw.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\gl_model.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\gl_warp_sin.h
 # End Source File
 # Begin Source File

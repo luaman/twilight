@@ -220,13 +220,15 @@ Sys_Printf (char *fmt, ...)
 	if (nostdout)
 		return;
 
+#ifdef _WIN32
 	if (isDedicated)
 	{
 		DWORD		dummy;
 
-		WriteFile(houtput, text, strlen (text), &dummy, NULL);	
+		WriteFile(houtput, text, strlen (text), &dummy, NULL);
 		return;
 	}
+#endif
 
 	for (p = (unsigned char *) text; *p; p++)
 		if ((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
