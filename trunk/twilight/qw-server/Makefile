@@ -14,7 +14,7 @@ LDFLAGS=
 
 all: twilight-qwsv
 
-frost-qwsv: $(OBJECTS)
+twilight-qwsv: $(OBJECTS)
 	gcc $(LDFLAGS) -o $@ $^
 
 .SUFFIXES: .c .o
