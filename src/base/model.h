@@ -117,8 +117,6 @@ typedef struct model_s {
 	vec3_t		yawmins;
 	vec3_t		yawmaxs;
 
-	hull_t		hulls[MAX_MAP_HULLS];
-
 //
 // additional model data
 //

@@ -237,7 +237,7 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 	icolor[7] = ca2;
 
 	model = r.worldmodel;
-	R_StainNode(model->brush->nodes + model->hulls[0].firstclipnode,
+	R_StainNode(model->brush->nodes + model->brush->hulls[0].firstclipnode,
 			model, origin, radius, icolor);
 
 	// look for embedded bmodels
@@ -250,7 +250,7 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 			if (model->type == mod_brush)
 			{
 				Matrix4x4_Transform(&ent->invmatrix, origin, org);
-				R_StainNode(model->brush->nodes + model->hulls[0].firstclipnode, model, org, radius, icolor);
+				R_StainNode(model->brush->nodes + model->brush->hulls[0].firstclipnode, model, org, radius, icolor);
 			}
 		}
 	}
@@ -622,7 +622,7 @@ R_DrawOpaqueBrushModel (entity_common_t *e)
 		for (k = 0; k < r.numdlights; k++) {
 			Matrix4x4_Transform(&e->invmatrix, r.dlight[k].origin, lightorigin);
 			R_MarkLightsNoVis (lightorigin, &r.dlight[k], 1 << k, mod,
-					mod->brush->nodes + mod->hulls[0].firstclipnode);
+					mod->brush->nodes + mod->brush->hulls[0].firstclipnode);
 		}
 	}
 

@@ -406,7 +406,7 @@ Mod_LoadClipnodes (lump_t *l, model_t *mod)
 	mod->brush->clipnodes = out;
 	mod->brush->numclipnodes = count;
 
-	hull = &mod->hulls[1];
+	hull = &mod->brush->hulls[1];
 	hull->clipnodes = out;
 	hull->firstclipnode = 0;
 	hull->lastclipnode = count - 1;
@@ -419,7 +419,7 @@ Mod_LoadClipnodes (lump_t *l, model_t *mod)
 	hull->clip_maxs[2] = 32;
 	VectorSubtract (hull->clip_maxs, hull->clip_mins, hull->clip_size);
 
-	hull = &mod->hulls[2];
+	hull = &mod->brush->hulls[2];
 	hull->clipnodes = out;
 	hull->firstclipnode = 0;
 	hull->lastclipnode = count - 1;
@@ -452,7 +452,7 @@ Mod_MakeHull0 (model_t *mod)
 	int         i, j, count;
 	hull_t     *hull;
 
-	hull = &mod->hulls[0];
+	hull = &mod->brush->hulls[0];
 
 	in = mod->brush->nodes;
 	count = mod->brush->numnodes;
@@ -635,10 +635,10 @@ Mod_LoadBrushModel (model_t *mod, void *buffer, int flags)
 
 		bm = &bheader->submodels[i];
 
-		mod->hulls[0].firstclipnode = bm->headnode[0];
+		mod->brush->hulls[0].firstclipnode = bm->headnode[0];
 		for (j = 1; j < MAX_MAP_HULLS; j++) {
-			mod->hulls[j].firstclipnode = bm->headnode[j];
-			mod->hulls[j].lastclipnode = bheader->numclipnodes - 1;
+			mod->brush->hulls[j].firstclipnode = bm->headnode[j];
+			mod->brush->hulls[j].lastclipnode = bheader->numclipnodes - 1;
 		}
 
 		bheader->firstmodelsurface = bm->firstface;

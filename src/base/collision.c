@@ -311,11 +311,11 @@ HullForBrushModel (const model_t *cmodel, const vec3_t corigin,
 
 	// FIXME: Hulls are evil.
 	if (size[0] < 3)
-		hull = &cmodel->hulls[0]; // 0x0x0
+		hull = &cmodel->brush->hulls[0]; // 0x0x0
 	else if (size[0] <= 32)
-		hull = &cmodel->hulls[1]; // 32x32x56
+		hull = &cmodel->brush->hulls[1]; // 32x32x56
 	else
-		hull = &cmodel->hulls[2]; // 64x64x88
+		hull = &cmodel->brush->hulls[2]; // 64x64x88
 
 	// calculate an offset value to center the origin
 	VectorSubtract (hull->clip_mins, mins, offset);
@@ -467,7 +467,7 @@ TraceLine (model_t *mdl, vec3_t start, vec3_t end, vec3_t impact,
 {
 	trace_t		trace;
 
-	TraceLine_Raw (mdl->hulls, start, end, &trace);
+	TraceLine_Raw (mdl->brush->hulls, start, end, &trace);
 
 	if (impact)
 		VectorCopy (trace.endpos, impact);

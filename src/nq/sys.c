@@ -268,10 +268,9 @@ static void
 Sys_BackTrace (int fd)
 {
 #if HAVE_EXECINFO_H
-	void		*array[128];
+	void		*array[128] = { 0 };
 	int			size;
 
-	memset (array, 0, sizeof(array));
 	size = backtrace (array, sizeof(array) / sizeof(array[0]));
 	backtrace_symbols_fd (array, size, fd);
 #else
