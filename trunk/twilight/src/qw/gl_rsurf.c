@@ -60,6 +60,8 @@ static int r_pvsframecount = 1;
 
 static int dlightdivtable[32768];
 
+vec3_t modelorg;
+
 void
 R_InitSurf (void)
 {
@@ -914,7 +916,6 @@ R_DrawBrushModel (entity_t *e)
 	float			dot, wateralpha = r_wateralpha->fvalue;
 	model_t			*clmodel = e->model;
 	texture_t		*t, *st;
-	vec3_t			modelorg;
 
 	Mod_MinsMaxs (clmodel, e->cur.origin, e->cur.angles, mins, maxs);
 
@@ -1132,7 +1133,7 @@ R_RecursiveWorldNode (mnode_t *node)
 
 	// find which side of the node we are on
 	plane = node->plane;
-	dot = PlaneDiff (r_origin, plane);
+	dot = PlaneDiff (modelorg, plane);
 	side = dot < 0;
 
 	// recurse down the children, front side first
@@ -1226,6 +1227,7 @@ R_DrawWorld (void)
 	memset (&ent, 0, sizeof (ent));
 	ent.model = cl.worldmodel;
 
+	VectorCopy (r_origin, modelorg);
 	currententity = &ent;
 
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));

@@ -88,7 +88,9 @@ extern vec3_t r_origin;
  */
 extern refdef_t r_refdef;
 extern mleaf_t *r_viewleaf, *r_oldviewleaf;
-extern texture_t *r_notexture_mip;
+
+extern vec3_t modelorg;
+
 extern int d_lightstylevalue[256];		// 8.8 fraction of base light value
 
 extern int netgraphtexture;				// netgraph texture
