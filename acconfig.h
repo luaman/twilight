@@ -3,9 +3,6 @@
 
 	System configuration
 */
-#ifndef __CONFIG_H
-#define __CONFIG_H
-@TOP@
 
 /* Location of read-only (shared) gamedata */
 #undef SHAREPATH
@@ -24,7 +21,4 @@
 
 /* Define to your default OpenGL library */
 #undef GL_LIBRARY
-
-@BOTTOM@
-#endif // __CONFIG_H
 
