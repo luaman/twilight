@@ -671,31 +671,22 @@ M_Menu_Gfx_f (void)
 void
 M_Gfx_Draw (void)
 {
-	static qpic_t *p = NULL;
+	int				y;
+	static qpic_t	*p = NULL;
 
 	if (!p) p = Draw_CachePic ("gfx/p_option.lmp");
 
 	M_DrawPic ((320 - p->width) / 2, 4, p);
 
-	M_Print (16, 32, "         Affine models");
-	M_DrawCheckbox (220, 32, gl_affinemodels->value);
+	y = 32;
+	M_Print (16, y, "         Affine models"); M_DrawCheckbox (220, y, gl_affinemodels->value); y += 8;
+	M_Print (16, y, "      Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->value); y += 8;
+	M_Print (16, y, "   Fast dynamic lights"); M_DrawCheckbox (220, y, gl_flashblend->value); y += 8;
+	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off"); y += 8;
+	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->value);
 
-/*	M_Print (16, 40, "      Fullbright models");
-	M_DrawCheckbox (220, 40, gl_fb_models->value); */
-
-	M_Print (16, 48, "   Fast dynamic lights");
-	M_DrawCheckbox (220, 48, gl_flashblend->value);
-
-	M_Print (16, 56, "               Shadows");
-	M_Print (220, 56, 
-		(r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off");
-
-/*	M_Print (16, 64, "   Frame interpolation");
-	M_DrawCheckbox (220, 64, gl_im_animation->value); */
-
-// cursor
-	M_DrawCharacter (200, 32 + gfx_cursor * 8,
-					 12 + ((int) (realtime * 4) & 1));
+	// cursor
+	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (realtime * 4) & 1));
 }
 
 void
@@ -710,10 +701,12 @@ M_Gfx_Set (void)
 			Cvar_Set (gl_affinemodels, va("%i", v));
 			break;
 
-/*		case 1:
+		case 1:
 			v = !(int)gl_fb_models->value;
 			Cvar_Set (gl_fb_models, va("%i", v));
-			break; */
+			v = !(int)gl_fb_bmodels->value;
+			Cvar_Set (gl_fb_bmodels, va("%i", v));
+			break;
 
 		case 2:
 			v = !(int)gl_flashblend->value;
@@ -726,11 +719,11 @@ M_Gfx_Set (void)
 			Cvar_Set (r_shadows, va("%i", v));
 			break;
 
-/*		case 4:
+		case 4:
 			v = !(int)gl_im_animation->value;
 			Cvar_Set (gl_im_animation, va("%i", v));
 			break;
-			*/
+
 		default:
 			break;
 	}
