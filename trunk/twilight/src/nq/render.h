@@ -215,12 +215,10 @@ extern vec3_t modelorg;
 
 extern int d_lightstylevalue[256];		// 8.8 fraction of base light value
 
-extern int netgraphtexture;				// netgraph texture
-extern int playertextures;
+extern GLuint netgraphtexture;				// netgraph texture
+extern GLuint playertextures;
 
-extern int skyboxtexnums[6];
-
-extern int skytexturenum;				// in cl.loadmodel, not GL texture
+extern GLuint skyboxtexnums[6];
 
 extern struct cvar_s *r_norefresh;
 extern struct cvar_s *r_drawentities;

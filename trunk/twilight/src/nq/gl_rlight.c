@@ -429,7 +429,7 @@ R_MarkLights (rdlight_t *light, int bit, model_t *model)
 						|| leaf->mins[2] > high[2]
 						|| leaf->maxs[2] < low[2])
 						continue;
-					if ((m = leaf->nummarksurfaces) != 0)
+					if ((m = leaf->nummarksurfaces))
 					{
 						mark = leaf->firstmarksurface;
 						do {

@@ -450,7 +450,7 @@ Host_ShutdownServer (qboolean crash)
 {
 	Uint32		i, count;
 	sizebuf_t	buf;
-	char		message[4];
+	Uint8		message[4];
 	double		start;
 
 	if (!sv.active)
@@ -484,8 +484,8 @@ Host_ShutdownServer (qboolean crash)
 	}
 	while (count);
 
-	// make sure all the clients know we're disconnecting
-	SZ_Init (&buf, (Uint8 *)message, sizeof(message));
+// make sure all the clients know we're disconnecting
+	SZ_Init (&buf, message, sizeof(message));
 	SZ_Clear (&buf);
 
 	MSG_WriteByte (&buf, svc_disconnect);

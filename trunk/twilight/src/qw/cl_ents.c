@@ -790,6 +790,8 @@ CL_ParseStatic (void)
 	entity_state_t es;
 
 	CL_ParseBaseline (&es);
+	if (!es.modelindex)
+		return;
 
 	if ((cl_num_static_entities + 1) >= MAX_STATIC_ENTITIES)
 		Host_EndGame ("Too many static entities");

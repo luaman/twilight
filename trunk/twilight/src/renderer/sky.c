@@ -45,12 +45,11 @@ static const char rcsid[] =
 
 extern model_t *loadmodel;
 
-int         skytexturenum;
-int			skyboxtexnums[6];
+GLuint	skyboxtexnums[6];
 
-int         solidskytexture;
-int         alphaskytexture;
-float		speedscale, speedscale2;	// for top sky and bottom sky
+GLuint	solidskytexture;
+GLuint	alphaskytexture;
+float	speedscale, speedscale2;	// for top sky and bottom sky
 
 cvar_t *r_skyname;
 cvar_t *r_fastsky;
@@ -293,7 +292,7 @@ R_DrawSkyBox
 void
 R_DrawSkyBox (void)
 {
-	if (!draw_skybox || (skytexturenum == -1))
+	if (!draw_skybox)
 		return;
 
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);

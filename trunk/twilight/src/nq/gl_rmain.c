@@ -770,7 +770,7 @@ R_Init (void)
 	Cmd_AddCommand ("timerefresh", &R_TimeRefresh_f);
 	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
 
-	qglGenTextures(6, (GLuint *)skyboxtexnums);
+	qglGenTextures(6, skyboxtexnums);
 
 	R_InitTextures ();
 	R_InitBubble ();

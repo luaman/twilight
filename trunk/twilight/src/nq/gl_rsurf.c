@@ -133,9 +133,9 @@ R_AddDynamicLights (msurface_t *surf)
 		maxdist3 = maxdist - dist2;
 
 		// convert to 8.8 blocklights format
-		red = rd->light[0];
-		green = rd->light[1];
-		blue = rd->light[2];
+		red = (rd->light[0] * (1.0/256.0));
+		green = (rd->light[1] * (1.0/256.0));
+		blue = (rd->light[2] * (1.0/256.0));
 		subtract = (int) (rd->lightsubtract * 4194304.0f);
 		bl = blocklights;
 
@@ -152,7 +152,6 @@ R_AddDynamicLights (msurface_t *surf)
 					if (sdtable[s] < maxdist2)
 					{
 						k = dlightdivtable[(sdtable[s] + td) >> 7] - subtract;
-						k >>= 8;
 						if (k > 0)
 						{
 							bl[0] += (red   * k);
