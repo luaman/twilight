@@ -55,7 +55,7 @@ void	Mod_UnloadSpriteModel (model_t *mod);
 void
 Mod_UnloadModel (model_t *mod)
 {
-	if (mod->needload)
+	if (!mod->needload)
 		return;
 
 	switch (mod->type) {

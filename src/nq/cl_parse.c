@@ -241,7 +241,6 @@ CL_ParseServerInfo (void)
 // wipe the client_state_t struct
 //
 	CL_ClearState ();
-	cl.zone = Zone_AllocZone ("client");
 
 // parse protocol version number
 	i = MSG_ReadLong ();
@@ -255,7 +254,7 @@ CL_ParseServerInfo (void)
 	if (cl.maxclients < 1 || cl.maxclients > MAX_SCOREBOARD)
 		Host_Error ("Bad maxclients (%u) from server\n", cl.maxclients);
 
-	cl.scores = Zone_Alloc (cl.zone, cl.maxclients * sizeof (*cl.scores));
+	cl.scores = Zone_Alloc (cl_zone, cl.maxclients * sizeof (*cl.scores));
 
 // parse gametype
 	cl.gametype = MSG_ReadByte ();
@@ -304,10 +303,7 @@ CL_ParseServerInfo (void)
 
 	for (i = 1; i < nummodels; i++) {
 		isnotmap = (i != 1);
-		cl.model_precache[i] = Mod_ForName (model_precache[i], false);
-
-		if (cl.model_precache[i] == NULL)
-			Host_Error ("Model %s not found\n", model_precache[i]);
+		cl.model_precache[i] = Mod_ForName (model_precache[i], true);
 
 		if (!isnotmap)
 		{

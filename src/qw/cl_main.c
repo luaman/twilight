@@ -378,7 +378,6 @@ CL_ClearState (void)
 	CL_ClearTEnts ();
 
 	// wipe the entire cl structure
-	Zone_FreeZone (&cl.zone);
 	memset (&cl, 0, sizeof (cl));
 
 	// We don't get this from the server, that'd take a new protocol

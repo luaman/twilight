@@ -1162,7 +1162,7 @@ COM_LoadFile (char *path, qboolean complain, int type, memzone_t *zone)
 			buf = Zone_Alloc (zone, len + 1);
 			break;
 		case 1:			// Temp zone.
-			buf = Zone_AllocName (va("tempzone/%s", path), len + 1);
+			buf = Zone_Alloc (tempzone, len + 1);
 			break;
 		case 2:			// Named alloc.
 			buf = Zone_AllocName (path, len + 1);

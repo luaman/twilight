@@ -875,7 +875,7 @@ S_SoundList (void)
 	for (sfx = known_sfx, i = 0; i < num_sfx; i++, sfx++) {
 		if (!sfx->loaded)
 			continue;
-		size = sfx->length * sfx->width * (sfx->stereo + 1);
+		size = sfx->length * sfx->width * sfx->channels;
 		total += size;
 		if (sfx->loopstart >= 0)
 			Com_Printf ("L");

@@ -45,7 +45,7 @@ typedef struct sfx_s {
 	int			 loopstart;
 	int			 speed;
 	int			 width;
-	int			 stereo;
+	int			 channels;
 	Uint8		*data;
 } sfx_t;
 

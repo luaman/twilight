@@ -42,8 +42,9 @@ static const char rcsid[] =
 #include "world.h"
 #include "surface.h"
 
-server_t    sv;
-server_static_t svs;
+server_t		 sv;
+server_static_t	 svs;
+memzone_t		*sv_zone;
 
 cvar_t *sv_aim;
 
@@ -51,15 +52,9 @@ char        localmodels[MAX_MODELS][5];	// inline model names for precache
 
 //============================================================================
 
-/*
-===============
-SV_Init
-===============
-*/
 void
-SV_Init (void)
+SV_Init_Cvars (void)
 {
-	int         i;
 	extern cvar_t *sv_maxvelocity;
 	extern cvar_t *sv_gravity;
 	extern cvar_t *sv_nostep;
@@ -86,6 +81,19 @@ SV_Init (void)
 	sv_nostep = Cvar_Get ("sv_nostep", "0", CVAR_SERVERINFO, NULL);
 	sv_jumpstep = Cvar_Get ("sv_jumpstep", "0", CVAR_SERVERINFO, NULL);
 	sv_stepheight = Cvar_Get ("sv_stepheight", "18", CVAR_SERVERINFO, NULL);
+}
+
+/*
+===============
+SV_Init
+===============
+*/
+void
+SV_Init (void)
+{
+	int         i;
+
+	sv_zone = Zone_AllocZone ("server");
 
 	for (i = 0; i < MAX_MODELS; i++)
 		snprintf (localmodels[i], sizeof (localmodels[i]), "*%i", i);
@@ -1069,8 +1077,6 @@ SV_SpawnServer (char *server)
 	// set up the new server
 	Host_ClearMemory ();
 
-	sv.zone = Zone_AllocZone ("server");
-
 	strcpy (sv.name, server);
 
 	// load progs to get entity field count
@@ -1079,7 +1085,7 @@ SV_SpawnServer (char *server)
 	// allocate server memory
 	sv.max_edicts = MAX_EDICTS;
 
-	sv.edicts = Zone_Alloc (sv.zone, sv.max_edicts * pr_edict_size);
+	sv.edicts = Zone_Alloc (sv_zone, sv.max_edicts * pr_edict_size);
 
 	sv.datagram.maxsize = sizeof (sv.datagram_buf);
 	sv.datagram.cursize = 0;

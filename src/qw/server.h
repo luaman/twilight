@@ -103,8 +103,6 @@ typedef struct {
 	int         num_signon_buffers;
 	int         signon_buffer_size[MAX_SIGNON_BUFFERS];
 	Uint8       signon_buffers[MAX_SIGNON_BUFFERS][MAX_DATAGRAM];
-
-	memzone_t	*zone;
 } server_t;
 
 
@@ -355,6 +353,7 @@ extern struct cvar_s *timelimit;
 
 extern server_static_t svs;				// persistant server info
 extern server_t sv;						// local server
+extern memzone_t *sv_zone;
 
 extern client_t *host_client;
 

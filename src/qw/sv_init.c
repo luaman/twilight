@@ -41,8 +41,9 @@ static const char rcsid[] =
 #include "zone.h"
 #include "cvar.h"
 
-server_static_t svs;					// persistant server info
-server_t    sv;							// local server
+server_static_t	 svs;					// persistant server info
+server_t		 sv;					// local server
+memzone_t		*sv_zone;
 
 char        localmodels[MAX_MODELS][5];	// inline model names for precache
 
@@ -221,7 +222,7 @@ SV_CalcPHS (void)
 	rowwords = (num + 31) >> 5;
 	rowbytes = rowwords * 4;
 
-	sv.pvs = Zone_Alloc (sv.zone, rowbytes * num);
+	sv.pvs = Zone_Alloc (sv_zone, rowbytes * num);
 	scan = sv.pvs;
 	vcount = 0;
 	for (i = 0; i < num; i++, scan += rowbytes) {
@@ -237,7 +238,7 @@ SV_CalcPHS (void)
 	}
 
 
-	sv.phs = Zone_Alloc (sv.zone, rowbytes * num);
+	sv.phs = Zone_Alloc (sv_zone, rowbytes * num);
 	count = 0;
 	scan = sv.pvs;
 	dest = (unsigned *) sv.phs;
@@ -324,11 +325,9 @@ SV_SpawnServer (char *server)
 	Cvar_Set (skill, va("%i", current_skill));
 
 	// wipe the entire per-level structure
-	if (sv.zone)
-		Zone_EmptyZone (sv.zone);
+	if (sv_zone)
+		Zone_EmptyZone (sv_zone);
 	memset (&sv, 0, sizeof (sv));
-	if (!sv.zone)
-		sv.zone = Zone_AllocZone ("server");
 
 	SZ_Init (&sv.datagram, sv.datagram_buf, 
 		sizeof (sv.datagram_buf));
@@ -355,7 +354,7 @@ SV_SpawnServer (char *server)
 	PR_LoadProgs ();
 
 	// allocate edicts
-	sv.edicts = Zone_Alloc (sv.zone, MAX_EDICTS * pr_edict_size);
+	sv.edicts = Zone_Alloc (sv_zone, MAX_EDICTS * pr_edict_size);
 
 	// leave slots at start for clients only
 	sv.num_edicts = MAX_CLIENTS + 1;
