@@ -14,17 +14,23 @@ Bugs we know about:
     (Non-trivial)
   - RC: We need to split the model loading into server and client versions.
     (Need to load much less for the server.)
-  - RC: userpath is not properly created if it doesn't exist.  Needs to be.
   - RC: Interpolation is broken in both NQ/QW.
     (Can LH do this /please/?)
   - RC: Need to print out Id's Copyright message on engine startup.
-  - RC: Need a 3dfx quirk for limiting vertex array size.  We need the
-    output of the OpenGL strings in Win32 for this.
+    (Knghtbrd? What exactly needs to be printed?)
   - RC: textures with fullbrights need their base color black, see below for
     how this could be done simply...
+  - RC: userpath is not properly created if it doesn't exist.  Needs to be.
+  - RC: twilight should create ~/.twilight and ~/.twilight/id1 on demand (and
+    any other mod directories as needed)
+    (Reported by Peter Jay Salzman)
   - lights do not react to moving bmodels, untransforming into the
     bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.
+
+  Driver related quirks:
+  - RC: Need a 3dfx quirk for limiting vertex array size.  We need the
+    output of the OpenGL strings in Win32 for this.
   - 3dfxvgl.dll does not work with Twilight even though it should.  Forest
     can try a minimal example SDL app which binds OpenGL dynamically if we
     get him one.  Workaround: copy 3dfxvgl.dll to opengl32.dll in your Quake
@@ -37,9 +43,6 @@ Bugs we know about:
     (Darkplaces does not have this problem, may be SDL related, very likely
      ATI related as well)
     (Reported by Dry-ice)
-  - RC: twilight should create ~/.twilight and ~/.twilight/id1 on demand (and
-    any other mod directories as needed)
-    (Reported by Peter Jay Salzman)
 
 
 Stuff that isn't needed for 0.2, but would be nice:
