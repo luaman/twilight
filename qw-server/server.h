@@ -377,6 +377,8 @@ void SV_ExtractFromUserinfo (client_t *cl);
 void Master_Heartbeat (void);
 void Master_Packet (void);
 
+void SV_FullClientUpdateToClient (client_t *client, client_t *cl);
+
 //
 // sv_init.c
 //
