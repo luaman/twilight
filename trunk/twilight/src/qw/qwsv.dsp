@@ -50,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib sdl.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"libc" /out:"tw-qwsv.exe" /libpath:"../SDL/lib"
+# ADD LINK32 wsock32.lib user32.lib sdl.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"libc" /out:"tw-qwsv.exe" /libpath:"../SDL/lib"
 
 !ELSEIF  "$(CFG)" == "qwsv - Win32 Debug"
 
@@ -74,7 +74,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib sdl.lib /nologo /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd" /out:"tw-qwsv-debug.exe" /pdbtype:sept /libpath:"../SDL/lib"
+# ADD LINK32 wsock32.lib user32.lib sdl.lib /nologo /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd" /out:"tw-qwsv-debug.exe" /pdbtype:sept /libpath:"../SDL/lib"
 
 !ENDIF 
 
@@ -96,10 +96,6 @@ SOURCE=.\common.c
 # Begin Source File
 
 SOURCE=.\info.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\mdfour.c
 # End Source File
 # Begin Source File
 
