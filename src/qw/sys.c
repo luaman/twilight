@@ -341,6 +341,9 @@ Sys_ExpandPath (char *str)
 	return buf;
 }
 
+extern int key_linepos;
+extern char key_lines[32][MAX_INPUTLINE];
+extern int edit_line;
 int Sys_CheckClipboardPaste(int key)
 {
 	int		i;
