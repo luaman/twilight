@@ -125,6 +125,7 @@ PCX_LoadBuffer (Uint8 *buf)
 		}
 	}
 
+	img->type = IMG_RGBA;
 	return img;
 }
 

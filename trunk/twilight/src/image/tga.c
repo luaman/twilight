@@ -265,6 +265,7 @@ TGA_LoadBuffer (Uint8 *buffer)
 		}
 	}
 
+	img->type = IMG_RGBA;
 	return img;
 }
 
