@@ -53,7 +53,12 @@ void *_Zone_Alloc(memzone_t *zone, const size_t size, const char *filename, cons
 		Sys_Error("Zone_Alloc: zone == NULL (alloc at %s:%i)", filename, fileline);
 	if (size <= 0)
 		Sys_Error("Zone_Alloc: size <= 0 (alloc at %s:%i, zone %s, size %i)", filename, fileline, zone->name, size);
+	/*
+	 * FIXME: This line causes an infinite loop, due to the console system
+	 * calling Zone_Alloc which prints which calls the console system which
+	 * calls Zone_Alloc...
 	Com_DFPrintf(DEBUG_ZONE, "Zone_Alloc: zone %s, file %s:%i, size %i bytes\n", zone->name, filename, fileline, size);
+	*/
 	zone->totalsize += size;
 	zone->realsize += sizeof(memheader_t) + size + sizeof(Uint32);
 	mem = malloc(sizeof(memheader_t) + size + sizeof(Uint32));
@@ -94,7 +99,12 @@ void _Zone_Free(void *data, const char *filename, const int fileline)
 		return;
 	}
 
-	Com_DFPrintf(DEBUG_ZONE, "Zone_Free: zone %s, alloc %s:%i, free %s:%i, size %i bytes\n", zone->name, mem->filename, mem->fileline, filename, fileline, mem->size);
+	/*
+	 * FIXME: This line causes an infinite loop, due to the console system
+	 * which can call Zone_Free which prints which calls the console system
+	 * which can call Zone_Free...
+	 Com_DFPrintf(DEBUG_ZONE, "Zone_Free: zone %s, alloc %s:%i, free %s:%i, size %i bytes\n", zone->name, mem->filename, mem->fileline, filename, fileline, mem->size);
+	*/
 	for (memchainpointer = &zone->chain;*memchainpointer;memchainpointer = &(*memchainpointer)->chain)
 	{
 		if (*memchainpointer == mem)

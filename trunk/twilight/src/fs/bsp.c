@@ -87,7 +87,7 @@ FSB_Close_File (SDL_RWops *rw, void *data)
 }
 
 static SDL_RWops *
-FSB_Open_File (fs_file_t *file, Uint32 flags)
+FSB_Open_LMP_File (fs_file_t *file, Uint32 flags)
 {
 	fsb_file_t	*b_file = file->fs_data;
 	fsb_group_t	*bsp = file->group->fs_data;
@@ -107,6 +107,22 @@ FSB_Open_File (fs_file_t *file, Uint32 flags)
 
 	rw = SDL_RWFromMem (buf, file->len);
 	return WrapRW (rw, NULL, FSB_Close_File);
+}
+
+static SDL_RWops *
+FSB_Open_ENT_File (fs_file_t *file, Uint32 flags)
+{
+	fsb_file_t	*b_file = file->fs_data;
+	fsb_group_t	*bsp = file->group->fs_data;
+	SDL_RWops	*rw;
+
+	if (flags & FSF_WRITE)
+		return NULL;
+
+	rw = bsp->bsp->open (bsp->bsp, 0);
+	SDL_RWseek (rw, b_file->ofs, SEEK_SET);
+	rw = LimitFromRW (rw, b_file->ofs, b_file->ofs + file->len);
+	return rw;
 }
 
 static qboolean
@@ -162,9 +178,18 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 		fsb_file->height = LittleLong (miptex.height);
 
 		size = (fsb_file->width * fsb_file->height) + (sizeof (Uint32) * 2);
-		FS_Add_File (group, va("%s/%s.lmp", base_name, miptex.name), size, FSB_Open_File, fsb_file);
+		FS_Add_File (group, va("%s/%s.lmp", base_name, miptex.name), size, FSB_Open_LMP_File, fsb_file);
 	}
 	Zone_Free (offsets);
+
+	if (header.lumps[LUMP_ENTITIES].fileofs &&
+			header.lumps[LUMP_ENTITIES].filelen) {
+		fsb_file = Zone_Alloc (fs_zone, sizeof(fsb_file_t));
+		fsb_file->ofs = header.lumps[LUMP_ENTITIES].fileofs;
+
+		size = header.lumps[LUMP_ENTITIES].filelen;
+		FS_Add_File (group, va("%s.ent", base_name), size, FSB_Open_ENT_File, fsb_file);
+	}
 	SDL_RWclose(rw);
 	return true;
 }

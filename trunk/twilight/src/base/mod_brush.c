@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include "mdfour.h"
 #include "model.h"
 #include "mod_brush.h"
+#include "fs.h"
 
 Uint8	*mod_base;
 
@@ -135,12 +136,26 @@ Mod_LoadVisibility (lump_t *l, model_t *mod)
 static void
 Mod_LoadEntities (lump_t *l, model_t *mod)
 {
+	fs_file_t	*file;
+	SDL_RWops	*rw;
+	char		*base_name, *tmp;
+
 	if (!l->filelen) {
 		mod->brush->entities = NULL;
 		return;
 	}
-	mod->brush->entities = Zone_Alloc (mod->zone, l->filelen);
-	memcpy(mod->brush->entities, mod_base + l->fileofs, l->filelen);
+
+	base_name = Zstrdup (tempzone, mod->name);
+	if ((tmp = strrchr (base_name, '.')))
+		*tmp = '\0';
+
+	file = FS_FindFile (va("%s.ent", base_name));
+	rw = file->open (file, 0);
+
+	mod->brush->entities = Zone_Alloc (mod->zone, file->len);
+	SDL_RWread (rw, mod->brush->entities, file->len, 1);
+	SDL_RWclose (rw);
+	Zone_Free (base_name);
 }
 
 
