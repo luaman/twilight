@@ -122,22 +122,14 @@ R_DrawCoronas (void)
 				VectorCopy4 (c_array_v(0), c_array_v(3));
 
 				scale = rd->cullradius * 0.25f;
-				VectorSet3 (v_array_v(0), 
-						rd->origin[0] - vright[0] * scale - vup[0] * scale,
-						rd->origin[1] - vright[1] * scale - vup[1] * scale,
-						rd->origin[2] - vright[2] * scale - vup[2] * scale);
-				VectorSet3 (v_array_v(1),
-						rd->origin[0] - vright[0] * scale + vup[0] * scale,
-						rd->origin[1] - vright[1] * scale + vup[1] * scale,
-						rd->origin[2] - vright[2] * scale + vup[2] * scale);
-				VectorSet3 (v_array_v(2),
-						rd->origin[0] + vright[0] * scale + vup[0] * scale,
-						rd->origin[1] + vright[1] * scale + vup[1] * scale,
-						rd->origin[2] + vright[2] * scale + vup[2] * scale);
-				VectorSet3 (v_array_v(3),
-						rd->origin[0] + vright[0] * scale - vup[0] * scale,
-						rd->origin[1] + vright[1] * scale - vup[1] * scale,
-						rd->origin[2] + vright[2] * scale - vup[2] * scale);
+				VectorTwiddle (rd->origin, vright, -1, vup, -1, scale,
+						v_array_v(0));
+				VectorTwiddle (rd->origin, vright, -1, vup, 1, scale,
+						v_array_v(1));
+				VectorTwiddle (rd->origin, vright, 1, vup, 1, scale,
+						v_array_v(2));
+				VectorTwiddle (rd->origin, vright, 1, vup, -1, scale,
+						v_array_v(3));
 				TWI_PreVDraw (0, 4);
 				qglDrawArrays (GL_QUADS, 0, 4);
 				TWI_PostVDraw ();			
