@@ -10,7 +10,7 @@ OBJECTS=cd_linux.o chase.o cl_demo.o cl_input.o cl_main.o cl_parse.o \
 	sv_phys.o sv_user.o sys_linux.o vid_sdl.o view.o wad.o world.o zone.o
 #ASM_OBJECTS=math.o snd_mixa.o sys_dosa.o worlda.o
 
-CFLAGS= -DGLQUAKE -ggdb -Wall `sdl-config --cflags`
+CFLAGS=-ggdb -Wall -Werror `sdl-config --cflags`
 OPTIMIZATIONS= -O6 -ffast-math -funroll-loops -fomit-frame-pointer \
 	-fexpensive-optimizations
 

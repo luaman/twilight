@@ -54,7 +54,6 @@ in_sun.c
 in_win.c
 makezip.bat
 math.s
-menu.h
 model.c
 model.h
 mpdosock.h
