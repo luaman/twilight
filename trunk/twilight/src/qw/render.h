@@ -71,6 +71,8 @@ typedef struct entity_s {
 	struct player_info_s *scoreboard;	// identify player
 } entity_t;
 
+#define MAX_ENTITIES	1024
+
 typedef struct {
 	vrect_t     vrect;					// subwindow in video for refresh
 
@@ -78,6 +80,9 @@ typedef struct {
 	vec3_t      viewangles;
 
 	float       fov_x, fov_y;
+
+	int			num_entities;
+	entity_t	*entities[MAX_ENTITIES];
 } refdef_t;
 
 

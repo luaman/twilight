@@ -1279,39 +1279,40 @@ Sbar_IntermissionOverlay
 void
 Sbar_IntermissionOverlay (void)
 {
-	if ( cl.gametype != GAME_DEATHMATCH )
-	{
-		qpic_t     *pic;
-		int         dig;
-		int         num;
-
-		pic = Draw_CachePic ("gfx/complete.lmp");
-		Draw_Pic (64, 24, pic);
-
-		pic = Draw_CachePic ("gfx/inter.lmp");
-		Draw_Pic (0, 56, pic);
-
-	// time
-		dig = cl.completed_time / 60;
-		Sbar_IntermissionNumber (160, 64, dig, 3, 0);
-		num = cl.completed_time - dig * 60;
-		Draw_Pic (234, 64, sb_colon);
-		Draw_Pic (246, 64, sb_nums[0][num / 10]);
-		Draw_Pic (266, 64, sb_nums[0][num % 10]);
-
-		Sbar_IntermissionNumber (160, 104, cl.stats[STAT_SECRETS], 3, 0);
-		Draw_Pic (232, 104, sb_slash);
-		Sbar_IntermissionNumber (240, 104, cl.stats[STAT_TOTALSECRETS], 3, 0);
-
-		Sbar_IntermissionNumber (160, 144, cl.stats[STAT_MONSTERS], 3, 0);
-		Draw_Pic (232, 144, sb_slash);
-		Sbar_IntermissionNumber (240, 144, cl.stats[STAT_TOTALMONSTERS], 3, 0);
-	} else {
-		if (Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0
-			&& !sb_showscores)
+	if (Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0
+		&& !sb_showscores)
 			Sbar_TeamOverlay ();
-		else
+	else {
+		if ( cl.gametype != GAME_DEATHMATCH )
+		{
+			qpic_t     *pic;
+			int         dig;
+			int         num;
+
+			pic = Draw_CachePic ("gfx/complete.lmp");
+			Draw_Pic (64, 24, pic);
+
+			pic = Draw_CachePic ("gfx/inter.lmp");
+			Draw_Pic (0, 56, pic);
+
+		// time
+			dig = cl.completed_time / 60;
+			Sbar_IntermissionNumber (160, 64, dig, 3, 0);
+			num = cl.completed_time - dig * 60;
+			Draw_Pic (234, 64, sb_colon);
+			Draw_Pic (246, 64, sb_nums[0][num / 10]);
+			Draw_Pic (266, 64, sb_nums[0][num % 10]);
+
+			Sbar_IntermissionNumber (160, 104, cl.stats[STAT_SECRETS], 3, 0);
+			Draw_Pic (232, 104, sb_slash);
+			Sbar_IntermissionNumber (240, 104, cl.stats[STAT_TOTALSECRETS], 3, 0);
+
+			Sbar_IntermissionNumber (160, 144, cl.stats[STAT_MONSTERS], 3, 0);
+			Draw_Pic (232, 144, sb_slash);
+			Sbar_IntermissionNumber (240, 144, cl.stats[STAT_TOTALMONSTERS], 3, 0);
+		} else {
 			Sbar_DeathmatchOverlay (0);
+		}
 	}
 }
 

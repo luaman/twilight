@@ -77,9 +77,6 @@ entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
 lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
 dlight_t	cl_dlights[MAX_DLIGHTS];
 
-int			cl_numvisedicts;
-entity_t	*cl_visedicts[MAX_VISEDICTS];
-
 extern int	r_framecount;
 
 /*
@@ -457,7 +454,7 @@ CL_RelinkEntities (void)
 // determine partial update time    
 	frac = CL_LerpPoint ();
 
-	cl_numvisedicts = 0;
+	V_ClearEntities ();
 
 //
 // interpolate player info
@@ -596,16 +593,13 @@ CL_RelinkEntities (void)
 		if (i == cl.viewentity && !chase_active->value)
 			continue;
 
-		if (cl_numvisedicts < MAX_VISEDICTS) {
-			cl_visedicts[cl_numvisedicts++] = ent;
-		}
+		V_AddEntity ( ent );
 	}
 
 	for (i = 0; i < cl.num_statics; i++) {
 		cl_static_entities[i].visframe = r_framecount;
-		if (cl_numvisedicts >= MAX_VISEDICTS)
-			continue;
-		cl_visedicts[cl_numvisedicts++] = &cl_static_entities[i];
+
+		V_AddEntity ( &cl_static_entities[i] );
 	}
 }
 

@@ -302,8 +302,8 @@ R_DrawSpriteModels ()
 
 	qglEnable (GL_ALPHA_TEST);
 
-	for (i = 0; i < cl_num_vis_entities; i++) {
-		e = cl_vis_entities[i];
+	for (i = 0; i < r_refdef.num_entities; i++) {
+		e = r_refdef.entities[i];
 
 		if (e->model->type != mod_sprite)
 			continue;
@@ -1169,8 +1169,8 @@ R_DrawEntitiesOnList (void)
 	if (!r_drawentities->value)
 		return;
 
-	for (i = 0; i < cl_num_vis_entities; i++) {
-		currententity = cl_vis_entities[i];
+	for (i = 0; i < r_refdef.num_entities; i++) {
+		currententity = r_refdef.entities[i];
 
 		if (currententity->model->type == mod_brush)
 			R_DrawBrushModel (currententity);
@@ -1178,8 +1178,8 @@ R_DrawEntitiesOnList (void)
 
 	R_DrawSpriteModels ();
 
-	for (i = 0; i < cl_num_vis_entities; i++) {
-		currententity = cl_vis_entities[i];
+	for (i = 0; i < r_refdef.num_entities; i++) {
+		currententity = r_refdef.entities[i];
 
 		if (currententity->model->type == mod_alias)
 			R_DrawAliasModel (currententity);
