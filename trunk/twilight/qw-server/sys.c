@@ -61,7 +61,7 @@ static const char rcsid[] =
 #include <errno.h>
 #ifdef _WIN32
 // Don't need windows.h till we have win32 GUI console
-//#include <windows.h>
+#include <windows.h>
 #include <io.h>
 #include <conio.h>
 #endif
@@ -192,7 +192,11 @@ Sys_DoubleTime (void)
 	return epoch + now / 1000.0;
 }
 
+#ifdef _WIN32
+	static qboolean		do_stdin = false;
+#else
 	static qboolean		do_stdin = true;
+#endif
 	static qboolean		stdin_ready;
 
 char *
@@ -337,9 +341,11 @@ main (int c, char **v)
 {
 	double  	    time, oldtime, newtime;
 	int     	    j;
+//#ifndef _WIN32
 	fd_set			fdset;
 	extern int		net_socket;
 	struct timeval	timeout;
+//#endif
 
 	SDL_Init (SDL_INIT_TIMER);
 	atexit (SDL_Quit);
@@ -377,7 +383,10 @@ main (int c, char **v)
 		timeout.tv_sec = 1;
 		timeout.tv_usec = 0;
 		if (select (net_socket + 1, &fdset, NULL, NULL, &timeout) == -1)
+		{
+			printf("select returned error: %s\n", strerror (errno));
 			continue;
+		}
 		stdin_ready = FD_ISSET (0, &fdset);
 
 		// find time spent rendering last frame
@@ -388,7 +397,11 @@ main (int c, char **v)
 		oldtime = newtime;
 
 		if (sys_extrasleep->value)
+#ifdef _WIN32
+			Sleep ((DWORD) (bound(0.0f, sys_extrasleep->value, 1000000.0f) * (1.0f / 1000.0f)));
+#else
 			usleep (sys_extrasleep->value);
+#endif
 	}
 
 	return 0;
