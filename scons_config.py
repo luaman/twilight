@@ -116,12 +116,15 @@ def check_cflag (context, cflag, add = 1):
 def conf_base ():
 	global opts
 	opts.create('bitchiness', 1, 'Enable (many) extra compiler warnings')
+	opts.create('warnings', 1, 'Enable most warnings')
 	opts.create('werror', 1, 'Enable error on compiler warnings')
 	opts.create('profile', 0, 'Enable profiling with gprof')
 	opts.create('servers', 1, 'Enable dedicated servers')
 	opts.create('clients', 1, 'Enable clients')
+	opts.create('debug', 1, 'Enable debugging')
+	opts.create('optimize', 1, 'Enable optimizations')
 	opts.create('CC', env['CC'], 'C compiler command')
-	opts.create('CFLAGS', '-O2 -g -Wall', 'Base C compiler flags')
+	opts.create('CFLAGS', '', 'Base C compiler flags')
 	opts.create('save-temps', 0, 'Save temporary compilation files')
 	opts.create('sdl_include', '', 'Path to your SDL headers')
 
@@ -163,24 +166,39 @@ def check_cheaders (conf, defs, headers):
 
 def handle_opts (conf, opts, config_defs, destructive):
 	if destructive:
-		if int(opts['werror']):
-			conf.cflag ('-Werror')
+		if ('gcc' in env['TOOLS']):
+			if int(opts['werror']):
+				conf.cflag ('-Werror')
 	else:
 		conf.env.Replace (CC = opts['CC'])
-		if (env['PLATFORM'] != 'win32'):
-		    conf.env.Replace (CCFLAGS = Split (opts['CFLAGS']))
+		conf.env.Replace (CCFLAGS = Split (opts['CFLAGS']))
+		if ('gcc' in env['TOOLS']):
+		    if int(opts['optimize']):
+				conf.cflag ('-O2')
+		    if int(opts['debug']):
+				conf.cflag ('-g')
+				env.Append (LINKFLAGS = ['-g'])
+		    if int(opts['warnings']):
+				conf.cflag ('-Wall')
 		    if int(opts['bitchiness']):
 			    conf.cflag ('-Wcast-qual')
 			    conf.cflag ('-Wsign-compare')
 			    conf.cflag ('-W')
 		    if int(opts['profile']):
-			    conf.cflag ('-pg -g')
+				env.Append (LINKFLAGS = ['-g', '-pg'])
+				conf.cflag ('-g')
+				conf.cflag ('-pg')
 		    if int(opts['save-temps']):
 			    conf.cflag ('-save-temps', 1)
 		    else:
 			    conf.cflag ('-pipe', 1)
 		    conf.cflag ('-fno-strict-aliasing', 1)
 		    conf.cflag ('-finline', 1)
+		if ('msvc' in env['TOOLS']):
+		    env.Append (LINKFLAGS = ['/subsystem:windows'])
+		    if int(opts['optimize']):
+			env.Append (CCFLAGS = ['/G5', '/MD'])
+
 		config_defs.set('SDL_IMAGE_LIBRARY', '"' + opts['sdl_image'] + '"')
 		config_defs.set('USERPATH', '"' + opts['userpath'] + '"')
 		config_defs.set('SHAREPATH', '"' + opts['sharepath'] + '"')
@@ -259,7 +277,6 @@ def do_configure (env):
 	if env['PLATFORM'] == 'win32':
 		env.Append (LIBS = ['user32', 'gdi32', 'shell32', 'wsock32', 'msvcrt', 'kernel32'])
 		env.Append (LINKFLAGS = ['/subsystem:windows'])
-		env.Append (CCFLAGS = ['/G5', '/MD'])
 
 	conf.Finish ()
 
