@@ -152,10 +152,10 @@ Sends an out-of-band datagram
 ================
 */
 void
-Netchan_OutOfBand (netadr_t adr, int length, byte * data)
+Netchan_OutOfBand (netadr_t adr, int length, Uint8 *data)
 {
 	sizebuf_t	send;
-	byte		send_buf[MAX_MSGLEN + PACKET_HEADER];
+	Uint8		send_buf[MAX_MSGLEN + PACKET_HEADER];
 
 	// write the packet header
 	send.data = send_buf;
@@ -189,7 +189,7 @@ Netchan_OutOfBandPrint (netadr_t adr, char *format, ...)
 	va_end (argptr);
 
 
-	Netchan_OutOfBand (adr, strlen (string), (byte *) string);
+	Netchan_OutOfBand (adr, strlen (string), (Uint8 *) string);
 }
 
 
@@ -262,10 +262,10 @@ A 0 length will still generate a packet and deal with the reliable messages.
 ================
 */
 void
-Netchan_Transmit (netchan_t *chan, int length, byte * data)
+Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 {
 	sizebuf_t   send;
-	byte        send_buf[MAX_MSGLEN + PACKET_HEADER];
+	Uint8       send_buf[MAX_MSGLEN + PACKET_HEADER];
 	qboolean    send_reliable;
 	unsigned    w1, w2;
 	int         i;

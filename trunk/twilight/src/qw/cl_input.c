@@ -597,7 +597,7 @@ void
 CL_SendCmd (void)
 {
 	sizebuf_t   buf;
-	byte        data[128];
+	Uint8       data[128];
 	int         i;
 	usercmd_t  *cmd, *oldcmd;
 	int         checksumIndex;
@@ -644,7 +644,7 @@ CL_SendCmd (void)
 
 	// write our lossage percentage
 	lost = CL_CalcNet ();
-	MSG_WriteByte (&buf, (byte) lost);
+	MSG_WriteByte (&buf, (Uint8) lost);
 
 	i = (cls.netchan.outgoing_sequence - 2) & UPDATE_MASK;
 	cmd = &cl.frames[i].cmd;

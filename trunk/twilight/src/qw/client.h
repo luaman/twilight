@@ -80,7 +80,7 @@ typedef struct player_info_s {
 	float       entertime;
 	int         frags;
 	int         ping;
-	byte        pl;
+	Uint8       pl;
 
 	// skin information
 	int         topcolor;
@@ -90,7 +90,7 @@ typedef struct player_info_s {
 	int         _bottomcolor;
 
 	int         spectator;
-	byte        translations[VID_GRADES * 256];
+	Uint8       translations[VID_GRADES * 256];
 	skin_t     *skin;
 } player_info_t;
 
@@ -450,7 +450,7 @@ void		CL_NewTranslation (int slot);
 qboolean	CL_CheckOrDownloadFile (char *filename);
 qboolean	CL_IsUploading (void);
 void		CL_NextUpload (void);
-void		CL_StartUpload (byte * data, int size);
+void		CL_StartUpload (Uint8 *data, int size);
 void		CL_StopUpload (void);
 
 //
@@ -530,7 +530,7 @@ typedef struct {
 
 
 void		Skin_Find (player_info_t *sc);
-byte		*Skin_Cache (skin_t *skin);
+Uint8	   *Skin_Cache (skin_t *skin);
 void		Skin_Skins_f (void);
 void		Skin_AllSkins_f (void);
 void		Skin_NextDownload (void);

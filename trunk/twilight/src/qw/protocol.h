@@ -288,11 +288,11 @@ typedef struct {
 } packet_entities_t;
 
 typedef struct usercmd_s {
-	byte        msec;
+	Uint8       msec;
 	vec3_t      angles;
 	short       forwardmove, sidemove, upmove;
-	byte        buttons;
-	byte        impulse;
+	Uint8       buttons;
+	Uint8       impulse;
 } usercmd_t;
 
 #endif // __PROTOCOL_H

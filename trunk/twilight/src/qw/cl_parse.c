@@ -363,7 +363,7 @@ void
 CL_ParseDownload (void)
 {
 	int         size, percent;
-	byte        name[MAX_OSPATH];
+	Uint8       name[MAX_OSPATH];
 	int         r;
 
 
@@ -458,14 +458,14 @@ CL_ParseDownload (void)
 	}
 }
 
-static byte *upload_data;
-static int  upload_pos;
-static int  upload_size;
+static Uint8 *upload_data;
+static int    upload_pos;
+static int    upload_size;
 
 void
 CL_NextUpload (void)
 {
-	byte        buffer[1024];
+	Uint8       buffer[1024];
 	int         r;
 	int         percent;
 	int         size;
@@ -501,7 +501,7 @@ CL_NextUpload (void)
 }
 
 void
-CL_StartUpload (byte * data, int size)
+CL_StartUpload (Uint8 *data, int size)
 {
 	if (cls.state < ca_onserver)
 		return;							// gotta be connected
@@ -1279,7 +1279,7 @@ CL_ParseServerMessage (void)
 
 			case svc_cdtrack:
 				cl.cdtrack = MSG_ReadByte ();
-				CDAudio_Play ((byte) cl.cdtrack, true);
+				CDAudio_Play ((Uint8) cl.cdtrack, true);
 				break;
 
 			case svc_intermission:

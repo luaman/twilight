@@ -994,7 +994,7 @@ PR_LoadProgs (void)
 
 // add prog crc to the serverinfo
 	snprintf (num, sizeof (num), "%i",
-			  CRC_Block ((byte *) progs, com_filesize));
+			  CRC_Block ((Uint8 *) progs, com_filesize));
 	Info_SetValueForStarKey (svs.info, "*progs", num, MAX_SERVERINFO_STRING);
 
 // byte swap the header
@@ -1005,17 +1005,17 @@ PR_LoadProgs (void)
 		SV_Error ("progs.dat has wrong version number (%i should be %i)",
 				  progs->version, PROG_VERSION);
 	if (progs->crc != PROGHEADER_CRC)
-		SV_Error ("You must have the progs.dat from QuakeWorld installed");
+		SV_Error ("You must have the qwprogs.dat from QuakeWorld installed");
 
-	pr_functions = (dfunction_t *) ((byte *) progs + progs->ofs_functions);
+	pr_functions = (dfunction_t *) ((Uint8 *) progs + progs->ofs_functions);
 	pr_strings = (char *) progs + progs->ofs_strings;
-	pr_globaldefs = (ddef_t *) ((byte *) progs + progs->ofs_globaldefs);
-	pr_fielddefs = (ddef_t *) ((byte *) progs + progs->ofs_fielddefs);
-	pr_statements = (dstatement_t *) ((byte *) progs + progs->ofs_statements);
+	pr_globaldefs = (ddef_t *) ((Uint8 *) progs + progs->ofs_globaldefs);
+	pr_fielddefs = (ddef_t *) ((Uint8 *) progs + progs->ofs_fielddefs);
+	pr_statements = (dstatement_t *) ((Uint8 *) progs + progs->ofs_statements);
 
 	num_prstr = 0;
 
-	pr_global_struct = (globalvars_t *) ((byte *) progs + progs->ofs_globals);
+	pr_global_struct = (globalvars_t *) ((Uint8 *) progs + progs->ofs_globals);
 	pr_globals = (float *) pr_global_struct;
 
 	pr_edict_size =
@@ -1089,7 +1089,7 @@ EDICT_NUM (int n)
 {
 	if (n < 0 || n >= MAX_EDICTS)
 		SV_Error ("EDICT_NUM: bad number %i", n);
-	return (edict_t *) ((byte *) sv.edicts + (n) * pr_edict_size);
+	return (edict_t *) ((Uint8 *) sv.edicts + (n) * pr_edict_size);
 }
 
 int
@@ -1097,7 +1097,7 @@ NUM_FOR_EDICT (edict_t *e)
 {
 	int         b;
 
-	b = (byte *) e - (byte *) sv.edicts;
+	b = (Uint8 *) e - (Uint8 *) sv.edicts;
 	b = b / pr_edict_size;
 
 	if (b < 0 || b >= sv.num_edicts)

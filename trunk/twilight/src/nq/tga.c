@@ -35,8 +35,12 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <sdl.h>
+#include <stdlib.h>
+#include <SDL.h>
+
 #include "quakedef.h"
+#include "common.h"
+#include "sys.h"
 #include "tga.h"
 
 typedef struct _TargaHeader {

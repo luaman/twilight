@@ -110,16 +110,6 @@ qboolean    isPermedia = false;
 qboolean    gl_mtexable = false;
 
 /*-----------------------------------------------------------------------*/
-void
-D_BeginDirectRect (int x, int y, byte * pbitmap, int width, int height)
-{
-}
-
-void
-D_EndDirectRect (int x, int y, int width, int height)
-{
-}
-
 
 void
 VID_Shutdown (void)
@@ -158,7 +148,7 @@ InitSig (void)
 void
 VID_SetPalette (unsigned char *palette)
 {
-	byte       *pal;
+	Uint8      *pal;
 	unsigned    r, g, b;
 	unsigned    v;
 	int         r1, g1, b1;
@@ -321,7 +311,7 @@ Check_Gamma (unsigned char *pal)
 	for (i = 0; i < 768; i++) {
 		inf = (int)(Q_pow ((pal[i] + 1) / 256.0, vid_gamma) * 255 + 0.5);
 		inf = bound (0, inf, 255);
-		palette[i] = (byte)inf;
+		palette[i] = (Uint8)inf;
 	}
 
 	memcpy (pal, palette, sizeof (palette));

@@ -299,7 +299,7 @@ CL_ParsePacketEntities (qboolean delta)
 	int         oldindex, newindex;
 	int         word, newnum, oldnum;
 	qboolean    full;
-	byte        from;
+	Uint8       from;
 
 	newpacket = cls.netchan.incoming_sequence & UPDATE_MASK;
 	newp = &cl.frames[newpacket].packet_entities;
@@ -617,7 +617,7 @@ void
 CL_ParseProjectiles (void)
 {
 	int         i, c, j;
-	byte        bits[6];
+	Uint8       bits[6];
 	projectile_t *pr;
 
 	c = MSG_ReadByte ();

@@ -75,10 +75,10 @@ typedef struct {
 typedef struct mplane_s {
 	vec3_t      normal;
 	float       dist;
-	byte        type;					// for texture axis selection and fast
+	Uint8       type;					// for texture axis selection and fast
 	// side tests
-	byte        signbits;				// signx + signy<<1 + signz<<1
-	byte        pad[2];
+	Uint8       signbits;				// signx + signy<<1 + signz<<1
+	Uint8       pad[2];
 } mplane_t;
 
 typedef struct texture_s {
@@ -133,8 +133,8 @@ typedef struct msurface_s {
 	mtexinfo_t *texinfo;
 
 // lighting info
-	byte        styles[MAXLIGHTMAPS];
-	byte       *samples;				// [numstyles*surfsize]
+	Uint8       styles[MAXLIGHTMAPS];
+	Uint8      *samples;				// [numstyles*surfsize]
 } msurface_t;
 
 typedef struct mnode_s {
@@ -168,14 +168,14 @@ typedef struct mleaf_s {
 	struct mnode_s *parent;
 
 // leaf specific
-	byte       *compressed_vis;
+	Uint8      *compressed_vis;
 	struct efrag_s *efrags;
 
 	msurface_t **firstmarksurface;
 	int         nummarksurfaces;
 	int         key;					// BSP sequence number for leaf's
 	// contents
-	byte        ambient_sound_level[NUM_AMBIENTS];
+	Uint8       ambient_sound_level[NUM_AMBIENTS];
 } mleaf_t;
 
 typedef struct hull_s {
@@ -202,7 +202,7 @@ typedef struct mspriteframe_s {
 	int         height;
 	void       *pcachespot;				// remove?
 	float       up, down, left, right;
-	byte        pixels[4];
+	Uint8       pixels[4];
 } mspriteframe_t;
 
 typedef struct {
@@ -365,8 +365,8 @@ typedef struct model_s {
 	int         numtextures;
 	texture_t **textures;
 
-	byte       *visdata;
-	byte       *lightdata;
+	Uint8      *visdata;
+	Uint8      *lightdata;
 	char       *entities;
 
 	unsigned    checksum;				// for world models only
@@ -388,7 +388,7 @@ void       *Mod_Extradata (model_t *mod);	// handles caching
 void        Mod_TouchModel (char *name);
 
 mleaf_t    *Mod_PointInLeaf (float *p, model_t *model);
-byte       *Mod_LeafPVS (mleaf_t *leaf, model_t *model);
+Uint8      *Mod_LeafPVS (mleaf_t *leaf, model_t *model);
 
 #endif // __MODEL__
 

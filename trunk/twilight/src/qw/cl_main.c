@@ -152,8 +152,8 @@ int         host_framecount;
 
 int         host_hunklevel;
 
-byte       *host_basepal;
-byte       *host_colormap;
+Uint8      *host_basepal;
+Uint8      *host_colormap;
 
 netadr_t    master_adr;					// address of the master server
 
@@ -451,7 +451,7 @@ This is also called on Host_Error, so it shouldn't cause any errors
 void
 CL_Disconnect (void)
 {
-	byte        final[10];
+	Uint8       final[10];
 
 	connect_time = -1;
 
@@ -1460,10 +1460,10 @@ Host_Init (void)
 //  Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
 	Con_Printf ("%4.1f megs RAM used.\n", sys_memsize / (1024 * 1024.0));
 
-	host_basepal = (byte *) COM_LoadHunkFile ("gfx/palette.lmp");
+	host_basepal = (Uint8 *) COM_LoadHunkFile ("gfx/palette.lmp");
 	if (!host_basepal)
 		Sys_Error ("Couldn't load gfx/palette.lmp");
-	host_colormap = (byte *) COM_LoadHunkFile ("gfx/colormap.lmp");
+	host_colormap = (Uint8 *) COM_LoadHunkFile ("gfx/colormap.lmp");
 	if (!host_colormap)
 		Sys_Error ("Couldn't load gfx/colormap.lmp");
 

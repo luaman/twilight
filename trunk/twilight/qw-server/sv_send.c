@@ -286,7 +286,7 @@ void
 SV_Multicast (vec3_t origin, int to)
 {
 	client_t   *client;
-	byte       *mask;
+	Uint8      *mask;
 	mleaf_t    *leaf;
 	int         leafnum;
 	int         j;
@@ -594,7 +594,7 @@ SV_SendClientDatagram
 qboolean
 SV_SendClientDatagram (client_t *client)
 {
-	byte        buf[MAX_DATAGRAM];
+	Uint8       buf[MAX_DATAGRAM];
 	sizebuf_t   msg;
 
 	msg.data = buf;

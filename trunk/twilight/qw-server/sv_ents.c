@@ -58,13 +58,13 @@ crosses a waterline.
 */
 
 int         fatbytes;
-byte        fatpvs[MAX_MAP_LEAFS / 8];
+Uint8       fatpvs[MAX_MAP_LEAFS / 8];
 
 void
 SV_AddToFatPVS (vec3_t org, mnode_t *node)
 {
 	int         i;
-	byte       *pvs;
+	Uint8      *pvs;
 	mplane_t   *plane;
 	float       d;
 
@@ -101,7 +101,7 @@ Calculates a PVS that is the inclusive or of all leafs within 8 pixels of the
 given point.
 =============
 */
-byte       *
+Uint8 *
 SV_FatPVS (vec3_t org)
 {
 	fatbytes = (sv.worldmodel->numleafs + 31) >> 3;
@@ -136,7 +136,7 @@ SV_AddNailUpdate (edict_t *ent)
 void
 SV_EmitNailUpdate (sizebuf_t *msg)
 {
-	byte        bits[6];				// [48 bits] xyzpy 12 12 12 4 8 
+	Uint8       bits[6];				// [48 bits] xyzpy 12 12 12 4 8 
 	int         n, i;
 	edict_t    *ent;
 	int         x, y, z, p, yaw;
@@ -345,7 +345,7 @@ SV_WritePlayersToClient
 =============
 */
 void
-SV_WritePlayersToClient (client_t *client, edict_t *clent, byte * pvs,
+SV_WritePlayersToClient (client_t *client, edict_t *clent, Uint8 *pvs,
 						 sizebuf_t *msg)
 {
 	int         i, j;
@@ -471,7 +471,7 @@ void
 SV_WriteEntitiesToClient (client_t *client, sizebuf_t *msg)
 {
 	int         e, i;
-	byte       *pvs;
+	Uint8      *pvs;
 	vec3_t      org;
 	edict_t    *ent;
 	packet_entities_t *pack;

@@ -43,7 +43,7 @@ typedef struct sizebuf_s {
 	qboolean    allowoverflow;			// if false, do a Sys_Error
 	qboolean    overflowed;				// set to true if the buffer size
 	// failed
-	byte       *data;
+	Uint8      *data;
 	int         maxsize;
 	int         cursize;
 } sizebuf_t;
@@ -68,7 +68,7 @@ void        InsertLinkAfter (link_t *l, link_t *after);
 // (type *)STRUCT_FROM_LINK(link_t *link, type, member)
 // ent = STRUCT_FROM_LINK(link,entity_t,order)
 // FIXME: remove this mess!
-#define	STRUCT_FROM_LINK(l,t,m) ((t *)((byte *)l - (int)&(((t *)0)->m)))
+#define	STRUCT_FROM_LINK(l,t,m) ((t *)((Uint8 *)l - (int)&(((t *)0)->m)))
 
 //============================================================================
 
@@ -184,9 +184,9 @@ void        COM_WriteFile (char *filename, void *data, int len);
 int         COM_FOpenFile (char *filename, FILE ** file);
 void        COM_CloseFile (FILE * h);
 
-byte       *COM_LoadStackFile (char *path, void *buffer, int bufsize);
-byte       *COM_LoadTempFile (char *path);
-byte       *COM_LoadHunkFile (char *path);
+Uint8      *COM_LoadStackFile (char *path, void *buffer, int bufsize);
+Uint8      *COM_LoadTempFile (char *path);
+Uint8      *COM_LoadHunkFile (char *path);
 void        COM_LoadCacheFile (char *path, struct cache_user_s *cu);
 void        COM_CreatePath (char *path);
 void        COM_Gamedir (char *dir);
@@ -202,9 +202,9 @@ void        Info_SetValueForStarKey (char *s, char *key, char *value,
 									 int maxsize);
 void        Info_Print (char *s);
 
-byte        COM_BlockSequenceCheckByte (byte * base, int length, int sequence,
+Uint8       COM_BlockSequenceCheckByte (Uint8 *base, int length, int sequence,
 										unsigned mapchecksum);
-byte        COM_BlockSequenceCRCByte (byte * base, int length, int sequence);
+Uint8       COM_BlockSequenceCRCByte (Uint8 *base, int length, int sequence);
 
 int         build_number (void);
 

@@ -183,7 +183,7 @@ typedef struct {
 	short       texinfo;
 
 // lighting info
-	byte        styles[MAXLIGHTMAPS];
+	Uint8       styles[MAXLIGHTMAPS];
 	int         lightofs;				// start of [numstyles*surfsize]
 	// samples
 } dface_t;
@@ -209,7 +209,7 @@ typedef struct {
 	unsigned short firstmarksurface;
 	unsigned short nummarksurfaces;
 
-	byte        ambient_level[NUM_AMBIENTS];
+	Uint8       ambient_level[NUM_AMBIENTS];
 } dleaf_t;
 
 //============================================================================
@@ -221,14 +221,14 @@ typedef struct {
 extern int  nummodels;
 extern dmodel_t dmodels[MAX_MAP_MODELS];
 
-extern int  visdatasize;
-extern byte dvisdata[MAX_MAP_VISIBILITY];
+extern int   visdatasize;
+extern Uint8 dvisdata[MAX_MAP_VISIBILITY];
 
-extern int  lightdatasize;
-extern byte dlightdata[MAX_MAP_LIGHTING];
+extern int   lightdatasize;
+extern Uint8 dlightdata[MAX_MAP_LIGHTING];
 
-extern int  texdatasize;
-extern byte dtexdata[MAX_MAP_MIPTEX];	// (dmiptexlump_t)
+extern int   texdatasize;
+extern Uint8 dtexdata[MAX_MAP_MIPTEX];	// (dmiptexlump_t)
 
 extern int  entdatasize;
 extern char dentdata[MAX_MAP_ENTSTRING];

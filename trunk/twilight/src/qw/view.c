@@ -281,10 +281,10 @@ cshift_t    cshift_slime = { {0, 25, 5}, 150 };
 cshift_t    cshift_lava = { {255, 80, 0}, 150 };
 
 
-byte        gammatable[256];			// palette is sent through this
+Uint8       gammatable[256];			// palette is sent through this
 
 
-byte        ramps[3][256];
+Uint8       ramps[3][256];
 float       v_blend[4];					// rgba 0.0 - 1.0
 
 void
@@ -301,7 +301,7 @@ BuildGammaTable (float g)
 	for (i = 0; i < 256; i++) {
 		inf = (int)(255 * Q_pow ((i + 0.5) / 255.5, g) + 0.5);
 		inf = bound(0, inf, 255);
-		gammatable[i] = (byte)inf;
+		gammatable[i] = (Uint8)inf;
 	}
 }
 

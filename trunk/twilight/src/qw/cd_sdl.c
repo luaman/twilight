@@ -55,8 +55,8 @@ static qboolean wasPlaying = false;
 static qboolean enabled = true;
 static qboolean playLooping = false;
 static float cdvolume;
-static byte remap[100];
-static byte playTrack;
+static Uint8 remap[100];
+static Uint8 playTrack;
 static double endOfTrack = -1.0, pausetime = -1.0;
 
 SDL_CD     *cd_handle;
@@ -103,7 +103,7 @@ CDAudio_GetAudioDiskInfo (void)
 
 
 void
-CDAudio_Play (byte track, qboolean looping)
+CDAudio_Play (Uint8 track, qboolean looping)
 {
 	int len_m, len_s, len_f;
 	
@@ -282,12 +282,12 @@ CD_f (void)
 	}
 
 	if (strcasecmp (command, "play") == 0) {
-		CDAudio_Play ((byte) Q_atoi (Cmd_Argv (2)), false);
+		CDAudio_Play ((Uint8) Q_atoi (Cmd_Argv (2)), false);
 		return;
 	}
 
 	if (strcasecmp (command, "loop") == 0) {
-		CDAudio_Play ((byte) Q_atoi (Cmd_Argv (2)), true);
+		CDAudio_Play ((Uint8) Q_atoi (Cmd_Argv (2)), true);
 		return;
 	}
 

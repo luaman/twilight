@@ -46,7 +46,7 @@
 #define	TYP_MIPTEX		68
 
 typedef struct {
-	int         width, height;
+	Uint32      width, height;
 	Uint8       data[4];				// variably sized
 } qpic_t;
 

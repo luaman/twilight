@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) 1996-1997  Id Software, Inc.
+	Copyright (C) 1999-2000  Brian Paul
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -34,12 +34,13 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <malloc.h>
+#include "TGL_funcs.h"
+
+#include <stdlib.h>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
-#include <GL/gl.h>
 
 // GLU- Replacement-functions : taken from MESA 
 
@@ -172,14 +173,14 @@ GLint APIENTRY gluScaleImage( GLenum format,
 	}
 	
 	/* Get glPixelStore state */
-	glGetIntegerv( GL_UNPACK_ROW_LENGTH, &unpackrowlength );
-	glGetIntegerv( GL_UNPACK_ALIGNMENT, &unpackalignment );
-	glGetIntegerv( GL_UNPACK_SKIP_ROWS, &unpackskiprows );
-	glGetIntegerv( GL_UNPACK_SKIP_PIXELS, &unpackskippixels );
-	glGetIntegerv( GL_PACK_ROW_LENGTH, &packrowlength );
-	glGetIntegerv( GL_PACK_ALIGNMENT, &packalignment );
-	glGetIntegerv( GL_PACK_SKIP_ROWS, &packskiprows );
-	glGetIntegerv( GL_PACK_SKIP_PIXELS, &packskippixels );
+	qglGetIntegerv( GL_UNPACK_ROW_LENGTH, &unpackrowlength );
+	qglGetIntegerv( GL_UNPACK_ALIGNMENT, &unpackalignment );
+	qglGetIntegerv( GL_UNPACK_SKIP_ROWS, &unpackskiprows );
+	qglGetIntegerv( GL_UNPACK_SKIP_PIXELS, &unpackskippixels );
+	qglGetIntegerv( GL_PACK_ROW_LENGTH, &packrowlength );
+	qglGetIntegerv( GL_PACK_ALIGNMENT, &packalignment );
+	qglGetIntegerv( GL_PACK_SKIP_ROWS, &packskiprows );
+	qglGetIntegerv( GL_PACK_SKIP_PIXELS, &packskippixels );
 	
 	/* Allocate storage for intermediate images */
 	tempin = (GLfloat *) malloc( widthin * heightin
@@ -563,7 +564,7 @@ GLint APIENTRY GL_Build2DMipmaps( GLenum target, GLint components,
 		return GL_INVALID_VALUE;
 	
 	if (!maxsize)
-		glGetIntegerv( GL_MAX_TEXTURE_SIZE, &maxsize );
+		qglGetIntegerv( GL_MAX_TEXTURE_SIZE, &maxsize );
 	
 	if (!maxsize)
 		return GL_INVALID_VALUE;
@@ -584,20 +585,20 @@ GLint APIENTRY GL_Build2DMipmaps( GLenum target, GLint components,
 	}
 	
 	/* Get current glPixelStore values */
-	glGetIntegerv( GL_UNPACK_ROW_LENGTH, &unpackrowlength );
-	glGetIntegerv( GL_UNPACK_ALIGNMENT, &unpackalignment );
-	glGetIntegerv( GL_UNPACK_SKIP_ROWS, &unpackskiprows );
-	glGetIntegerv( GL_UNPACK_SKIP_PIXELS, &unpackskippixels );
-	glGetIntegerv( GL_PACK_ROW_LENGTH, &packrowlength );
-	glGetIntegerv( GL_PACK_ALIGNMENT, &packalignment );
-	glGetIntegerv( GL_PACK_SKIP_ROWS, &packskiprows );
-	glGetIntegerv( GL_PACK_SKIP_PIXELS, &packskippixels );
+	qglGetIntegerv( GL_UNPACK_ROW_LENGTH, &unpackrowlength );
+	qglGetIntegerv( GL_UNPACK_ALIGNMENT, &unpackalignment );
+	qglGetIntegerv( GL_UNPACK_SKIP_ROWS, &unpackskiprows );
+	qglGetIntegerv( GL_UNPACK_SKIP_PIXELS, &unpackskippixels );
+	qglGetIntegerv( GL_PACK_ROW_LENGTH, &packrowlength );
+	qglGetIntegerv( GL_PACK_ALIGNMENT, &packalignment );
+	qglGetIntegerv( GL_PACK_SKIP_ROWS, &packskiprows );
+	qglGetIntegerv( GL_PACK_SKIP_PIXELS, &packskippixels );
 	
 	/* set pixel packing */
-	glPixelStorei( GL_PACK_ROW_LENGTH, 0 );
-	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
-	glPixelStorei( GL_PACK_SKIP_ROWS, 0 );
-	glPixelStorei( GL_PACK_SKIP_PIXELS, 0 );
+	qglPixelStorei( GL_PACK_ROW_LENGTH, 0 );
+	qglPixelStorei( GL_PACK_ALIGNMENT, 1 );
+	qglPixelStorei( GL_PACK_SKIP_ROWS, 0 );
+	qglPixelStorei( GL_PACK_SKIP_PIXELS, 0 );
 	
 	done = GL_FALSE;
 	
@@ -622,13 +623,14 @@ GLint APIENTRY GL_Build2DMipmaps( GLenum target, GLint components,
 	while (!done) {
 		if (image != data) {
 			/* set pixel unpacking */
-			glPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
-			glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-			glPixelStorei( GL_UNPACK_SKIP_ROWS, 0 );
-			glPixelStorei( GL_UNPACK_SKIP_PIXELS, 0 );
+			qglPixelStorei( GL_UNPACK_ROW_LENGTH, 0 );
+			qglPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+			qglPixelStorei( GL_UNPACK_SKIP_ROWS, 0 );
+			qglPixelStorei( GL_UNPACK_SKIP_PIXELS, 0 );
 		}
 		
-		glTexImage2D( target, level, components, w, h, 0, format, type, image );
+		qglTexImage2D (target, level, components, w, h, 0, format, type,
+				image);
 		
 		if (w==1 && h==1)  break;
 		
@@ -661,14 +663,14 @@ GLint APIENTRY GL_Build2DMipmaps( GLenum target, GLint components,
 	}
 	
 	/* Restore original glPixelStore state */
-	glPixelStorei( GL_UNPACK_ROW_LENGTH, unpackrowlength );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, unpackalignment );
-	glPixelStorei( GL_UNPACK_SKIP_ROWS, unpackskiprows );
-	glPixelStorei( GL_UNPACK_SKIP_PIXELS, unpackskippixels );
-	glPixelStorei( GL_PACK_ROW_LENGTH, packrowlength );
-	glPixelStorei( GL_PACK_ALIGNMENT, packalignment );
-	glPixelStorei( GL_PACK_SKIP_ROWS, packskiprows );
-	glPixelStorei( GL_PACK_SKIP_PIXELS, packskippixels );
+	qglPixelStorei( GL_UNPACK_ROW_LENGTH, unpackrowlength );
+	qglPixelStorei( GL_UNPACK_ALIGNMENT, unpackalignment );
+	qglPixelStorei( GL_UNPACK_SKIP_ROWS, unpackskiprows );
+	qglPixelStorei( GL_UNPACK_SKIP_PIXELS, unpackskippixels );
+	qglPixelStorei( GL_PACK_ROW_LENGTH, packrowlength );
+	qglPixelStorei( GL_PACK_ALIGNMENT, packalignment );
+	qglPixelStorei( GL_PACK_SKIP_ROWS, packskiprows );
+	qglPixelStorei( GL_PACK_SKIP_PIXELS, packskippixels );
 	
 	return retval;
 }

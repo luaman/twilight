@@ -76,23 +76,23 @@ typedef struct {
 	// edict_t is variable sized, but can
 	// be used to reference the world ent
 
-	byte       *pvs, *phs;				// fully expanded and decompressed
+	Uint8      *pvs, *phs;				// fully expanded and decompressed
 
 	// added to every client's unreliable buffer each frame, then cleared
 	sizebuf_t   datagram;
-	byte        datagram_buf[MAX_DATAGRAM];
+	Uint8       datagram_buf[MAX_DATAGRAM];
 
 	// added to every client's reliable buffer each frame, then cleared
 	sizebuf_t   reliable_datagram;
-	byte        reliable_datagram_buf[MAX_MSGLEN];
+	Uint8       reliable_datagram_buf[MAX_MSGLEN];
 
 	// the multicast buffer is used to send a message to a set of clients
 	sizebuf_t   multicast;
-	byte        multicast_buf[MAX_MSGLEN];
+	Uint8       multicast_buf[MAX_MSGLEN];
 
 	// the master buffer is used for building log packets
 	sizebuf_t   master;
-	byte        master_buf[MAX_DATAGRAM];
+	Uint8       master_buf[MAX_DATAGRAM];
 
 	// the signon buffer will be sent to each client as they connect
 	// includes the entity baselines, the static entities, etc
@@ -101,7 +101,7 @@ typedef struct {
 	sizebuf_t   signon;
 	int         num_signon_buffers;
 	int         signon_buffer_size[MAX_SIGNON_BUFFERS];
-	byte        signon_buffers[MAX_SIGNON_BUFFERS][MAX_DATAGRAM];
+	Uint8       signon_buffers[MAX_SIGNON_BUFFERS][MAX_DATAGRAM];
 } server_t;
 
 
@@ -162,13 +162,13 @@ typedef struct client_s {
 	// the datagram is written to after every frame, but only cleared
 	// when it is sent out to the client.  overflow is tolerated.
 	sizebuf_t   datagram;
-	byte        datagram_buf[MAX_DATAGRAM];
+	Uint8       datagram_buf[MAX_DATAGRAM];
 
 	// back buffers for client reliable data
 	sizebuf_t   backbuf;
 	int         num_backbuf;
 	int         backbuf_size[MAX_BACK_BUFFERS];
-	byte        backbuf_data[MAX_BACK_BUFFERS][MAX_MSGLEN];
+	Uint8       backbuf_data[MAX_BACK_BUFFERS][MAX_MSGLEN];
 
 	double      connection_started;		// or time of disconnect for zombies
 	qboolean    send_message;			// set on frames a datagram arived on
@@ -260,7 +260,7 @@ typedef struct {
 	int         logsequence;			// the message currently being filled
 	double      logtime;				// time of last swap
 	sizebuf_t   log[2];
-	byte        log_buf[2][MAX_DATAGRAM];
+	Uint8       log_buf[2][MAX_DATAGRAM];
 
 	challenge_t challenges[MAX_CHALLENGES];	// to prevent invalid IPs from
 	// connecting

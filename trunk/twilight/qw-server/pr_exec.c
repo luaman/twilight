@@ -567,11 +567,11 @@ PR_ExecuteProgram (func_t fnum)
 			case OP_STOREP_FLD:		// integers
 			case OP_STOREP_S:
 			case OP_STOREP_FNC:		// pointers
-				ptr = (eval_t *) ((byte *) sv.edicts + b->_int);
+				ptr = (eval_t *) ((Uint8 *) sv.edicts + b->_int);
 				ptr->_int = a->_int;
 				break;
 			case OP_STOREP_V:
-				ptr = (eval_t *) ((byte *) sv.edicts + b->_int);
+				ptr = (eval_t *) ((Uint8 *) sv.edicts + b->_int);
 				ptr->vector[0] = a->vector[0];
 				ptr->vector[1] = a->vector[1];
 				ptr->vector[2] = a->vector[2];
@@ -585,7 +585,7 @@ PR_ExecuteProgram (func_t fnum)
 				if (ed == (edict_t *) sv.edicts && sv.state == ss_active)
 					PR_RunError ("assignment to world entity");
 				c->_int =
-					(byte *) ((int *) &ed->v + b->_int) - (byte *) sv.edicts;
+					(Uint8 *) ((int *) &ed->v + b->_int) - (Uint8 *) sv.edicts;
 				break;
 
 			case OP_LOAD_F:

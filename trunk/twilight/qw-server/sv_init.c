@@ -213,7 +213,7 @@ SV_CalcPHS (void)
 	int         i, j, k, l, index, num;
 	int         bitbyte;
 	unsigned   *dest, *src;
-	byte       *scan;
+	Uint8      *scan;
 	int         count, vcount;
 
 	Con_Printf ("Building PHS...\n");
@@ -265,7 +265,7 @@ SV_CalcPHS (void)
 		if (i == 0)
 			continue;
 		for (j = 0; j < num; j++)
-			if (((byte *) dest)[j >> 3] & (1 << (j & 7)))
+			if (((Uint8 *) dest)[j >> 3] & (1 << (j & 7)))
 				count++;
 	}
 
@@ -276,13 +276,13 @@ SV_CalcPHS (void)
 unsigned
 SV_CheckModel (char *mdl)
 {
-	byte        stackbuf[1024];			// avoid dirtying the cache heap
-	byte       *buf;
+	Uint8       stackbuf[1024];			// avoid dirtying the cache heap
+	Uint8      *buf;
 	unsigned short crc;
 
 //  int len;
 
-	buf = (byte *) COM_LoadStackFile (mdl, stackbuf, sizeof (stackbuf));
+	buf = (Uint8 *) COM_LoadStackFile (mdl, stackbuf, sizeof (stackbuf));
 	crc = CRC_Block (buf, com_filesize);
 //  for (len = com_filesize; len; len--, buf++)
 //      CRC_ProcessByte(&crc, *buf);

@@ -85,7 +85,7 @@ Cmd_Wait_f (void)
 */
 
 sizebuf_t   cmd_text;
-byte        cmd_text_buf[8192];
+Uint8       cmd_text_buf[8192];
 
 /*
 ============

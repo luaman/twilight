@@ -611,10 +611,10 @@ SVC_DirectConnect (void)
 
 	// works properly
 	if (!sv_highchars->value) {
-		byte       *p, *q;
+		Uint8      *p, *q;
 
-		for (p = (byte *) newcl->userinfo, q = (byte *) userinfo;
-			 *q && p < (byte *) newcl->userinfo + sizeof (newcl->userinfo) - 1;
+		for (p = (Uint8 *) newcl->userinfo, q = (Uint8 *) userinfo;
+			 *q && p < (Uint8 *) newcl->userinfo + sizeof (newcl->userinfo) - 1;
 			 q++)
 			if (*q > 31 && *q <= 127)
 				*p++ = *q;
@@ -886,8 +886,8 @@ StringToFilter (char *s, ipfilter_t * f)
 {
 	char        num[128];
 	int         i, j;
-	byte        b[4];
-	byte        m[4];
+	Uint8       b[4];
+	Uint8       m[4];
 
 	for (i = 0; i < 4; i++) {
 		b[i] = 0;
@@ -978,7 +978,7 @@ void
 SV_ListIP_f (void)
 {
 	int         i;
-	byte        b[4];
+	Uint8       b[4];
 
 	Con_Printf ("Filter list:\n");
 	for (i = 0; i < numipfilters; i++) {
@@ -997,7 +997,7 @@ SV_WriteIP_f (void)
 {
 	FILE       *f;
 	char        name[MAX_OSPATH];
-	byte        b[4];
+	Uint8       b[4];
 	int         i;
 
 	snprintf (name, sizeof (name), "%s/listip.cfg", com_gamedir);
