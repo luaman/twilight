@@ -245,14 +245,16 @@ loc0:
 			impact[j] = light->origin[j] - surf->plane->normal[j]*dist;
 
 		// clamp center of light to corner and check brightness
-		l = DotProduct (impact, surf->texinfo->vecs[0]) + surf->texinfo->vecs[0][3] - surf->texturemins[0];
+		l = DotProduct (impact, surf->texinfo->vecs[0])
+			+ surf->texinfo->vecs[0][3] - surf->texturemins[0];
 		s = l+0.5;
 		if (s < 0) 
 			s = 0;
 		else if (s > surf->extents[0]) 
 			s = surf->extents[0];
 		s = l - s;
-		l = DotProduct (impact, surf->texinfo->vecs[1]) + surf->texinfo->vecs[1][3] - surf->texturemins[1];
+		l = DotProduct (impact, surf->texinfo->vecs[1])
+			+ surf->texinfo->vecs[1][3] - surf->texturemins[1];
 		t = l+0.5;
 		if (t < 0) 
 			t = 0;
@@ -297,141 +299,144 @@ void
 R_MarkLights (dlight_t *light, int bit, model_t *model)
 {
 	mleaf_t *pvsleaf = Mod_PointInLeaf (light->origin, model);
+	int		i, k, l, m, c;
+	msurface_t *surf, **mark;
+	mleaf_t *leaf;
+	Uint8	*in = pvsleaf->compressed_vis;
+	int		row = (model->numleafs+7)>>3;
+	float	low[3], high[3], radius, dist, maxdist;
 	
 	if (!pvsleaf->compressed_vis || gl_oldlights->value)
 	{
 		// no vis info, so make all visible
-		R_MarkLightsNoVis(light, bit, model->nodes + model->hulls[0].firstclipnode);
+		R_MarkLightsNoVis(light, bit, model->nodes
+				+ model->hulls[0].firstclipnode);
 		return;
 	}
-	else
+
+	r_dlightframecount++;
+
+	radius = light->radius * 2;
+
+	low[0] = light->origin[0] - radius;
+	low[1] = light->origin[1] - radius;
+	low[2] = light->origin[2] - radius;
+	high[0] = light->origin[0] + radius;
+	high[1] = light->origin[1] + radius;
+	high[2] = light->origin[2] + radius;
+
+	// for comparisons to minimum acceptable light
+	maxdist = radius*radius;
+
+	k = 0;
+	while (k < row)
 	{
-		int		i, k, l, m, c;
-		msurface_t *surf, **mark;
-		mleaf_t *leaf;
-		Uint8	*in = pvsleaf->compressed_vis;
-		int		row = (model->numleafs+7)>>3;
-		float	low[3], high[3], radius, dist, maxdist;
-
-		r_dlightframecount++;
-
-		radius = light->radius * 2;
-
-		low[0] = light->origin[0] - radius;
-		low[1] = light->origin[1] - radius;
-		low[2] = light->origin[2] - radius;
-		high[0] = light->origin[0] + radius;
-		high[1] = light->origin[1] + radius;
-		high[2] = light->origin[2] + radius;
-
-		// for comparisons to minimum acceptable light
-		maxdist = radius*radius;
-
-		k = 0;
-		while (k < row)
+		c = *in++;
+		if (c)
 		{
-			c = *in++;
-			if (c)
+			l = model->numleafs - (k << 3);
+			l = min (l, 8);
+			for (i=0 ; i<l ; i++)
 			{
-				l = model->numleafs - (k << 3);
-				if (l > 8)
-					l = 8;
-				for (i=0 ; i<l ; i++)
+				if (c & (1<<i))
 				{
-					if (c & (1<<i))
+					leaf = &model->leafs[(k << 3)+i+1];
+					if (leaf->visframe != r_visframecount)
+						continue;
+					if (leaf->contents == CONTENTS_SOLID)
+						continue;
+					// if out of the light radius, skip
+					if (leaf->minmaxs[0] > high[0]
+							|| leaf->minmaxs[3+0] < low[0]
+							|| leaf->minmaxs[1] > high[1]
+							|| leaf->minmaxs[3+1] < low[1]
+							|| leaf->minmaxs[2] > high[2]
+							|| leaf->minmaxs[3+2] < low[2])
+						continue; 
+					if ((m = leaf->nummarksurfaces))
 					{
-						leaf = &model->leafs[(k << 3)+i+1];
-						if (leaf->visframe != r_visframecount)
-							continue;
-						if (leaf->contents == CONTENTS_SOLID)
-							continue;
-						// if out of the light radius, skip
-						if (leaf->minmaxs[0] > high[0] || leaf->minmaxs[3+0] < low[0]
-						 || leaf->minmaxs[1] > high[1] || leaf->minmaxs[3+1] < low[1]
-						 || leaf->minmaxs[2] > high[2] || leaf->minmaxs[3+2] < low[2])
-							continue; 
-						if ((m = leaf->nummarksurfaces))
-						{
-							mark = leaf->firstmarksurface;
-							do
+						mark = leaf->firstmarksurface;
+						do {
+							surf = *mark++;
+
+							if (surf->lightframe == r_dlightframecount)
+								continue;
+
+							surf->lightframe = r_dlightframecount;
+							dist = PlaneDiff(light->origin, surf->plane);
+							if (surf->flags & SURF_PLANEBACK)
+								dist = -dist;
+							// LordHavoc: make sure it is infront of the
+							// surface and not too far away
+							if (dist >= -0.25f && (dist < radius))
 							{
-								surf = *mark++;
+								int d;
+								float dist2, impact[3];
 
-								if (surf->lightframe == r_dlightframecount)
-									continue;
+								dist2 = dist * dist;
 
-								surf->lightframe = r_dlightframecount;
-								dist = PlaneDiff(light->origin, surf->plane);
-								if (surf->flags & SURF_PLANEBACK)
-									dist = -dist;
-								// LordHavoc: make sure it is infront of the surface and not too far away
-								if (dist >= -0.25f && (dist < radius))
+								impact[0] = light->origin[0]
+									- surf->plane->normal[0] * dist;
+								impact[1] = light->origin[1]
+									- surf->plane->normal[1] * dist;
+								impact[2] = light->origin[2]
+									- surf->plane->normal[2] * dist;
+
+								d = DotProduct (impact, surf->texinfo->vecs[0])
+									+ surf->texinfo->vecs[0][3]
+									- surf->texturemins[0];
+
+								if (d < 0)
 								{
-									int d;
-									float dist2, impact[3];
-
-									dist2 = dist * dist;
-
-									impact[0] = light->origin[0] - surf->plane->normal[0] * dist;
-									impact[1] = light->origin[1] - surf->plane->normal[1] * dist;
-									impact[2] = light->origin[2] - surf->plane->normal[2] * dist;
-
-									d = DotProduct (impact, surf->texinfo->vecs[0]) + surf->texinfo->vecs[0][3] - surf->texturemins[0];
-
-									if (d < 0)
+									dist2 += d * d;
+									if (dist2 >= maxdist)
+										continue;
+								} else {
+									d -= surf->extents[0] + 16;
+									if (d > 0)
 									{
 										dist2 += d * d;
 										if (dist2 >= maxdist)
 											continue;
 									}
-									else
-									{
-										d -= surf->extents[0] + 16;
-										if (d > 0)
-										{
-											dist2 += d * d;
-											if (dist2 >= maxdist)
-												continue;
-										}
-									}
-
-									d = DotProduct (impact, surf->texinfo->vecs[1]) + surf->texinfo->vecs[1][3] - surf->texturemins[1];
-
-									if (d < 0)
-									{
-										dist2 += d * d;
-										if (dist2 >= maxdist)
-											continue;
-									}
-									else
-									{
-										d -= surf->extents[1] + 16;
-										if (d > 0)
-										{
-											dist2 += d * d;
-											if (dist2 >= maxdist)
-												continue;
-										}
-									}
-
-									if (surf->dlightframe != r_framecount) // not dynamic until now
-									{
-										surf->dlightbits = 0;
-										surf->dlightframe = r_framecount;
-									}
-									surf->dlightbits |= bit;
 								}
+
+								d = DotProduct (impact, surf->texinfo->vecs[1])
+									+ surf->texinfo->vecs[1][3]
+									- surf->texturemins[1];
+
+								if (d < 0)
+								{
+									dist2 += d * d;
+									if (dist2 >= maxdist)
+										continue;
+								} else {
+									d -= surf->extents[1] + 16;
+									if (d > 0)
+									{
+										dist2 += d * d;
+										if (dist2 >= maxdist)
+											continue;
+									}
+								}
+
+								if (surf->dlightframe != r_framecount)
+								{
+									// not dynamic until now
+									surf->dlightbits = 0;
+									surf->dlightframe = r_framecount;
+								}
+								surf->dlightbits |= bit;
 							}
-							while (--m);
-						}
+						} while (--m);
 					}
 				}
-				k++;
-				continue;
 			}
-		
-			k += *in++;
+			k++;
+			continue;
 		}
+
+		k += *in++;
 	}
 }
 
@@ -566,10 +571,12 @@ RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	return RecursiveLightPoint (node->children[!side], mid, end);
 }
 
-int RecursiveColorLightPoint (vec3_t color, mnode_t *node, vec3_t start, vec3_t end)
+int
+RecursiveColorLightPoint (vec3_t color, mnode_t *node, vec3_t start,
+		vec3_t end)
 {
-	float front, back, frac;
-	vec3_t mid;
+	float		front, back, frac;
+	vec3_t		mid;
 
 loc0:
 	if (node->contents < 0)
@@ -608,8 +615,10 @@ loc0:
 			if (surf->flags & SURF_DRAWTILED)
 				continue;// no lightmaps
 
-			ds = (int) ((float) DotProduct (mid, surf->texinfo->vecs[0]) + surf->texinfo->vecs[0][3]);
-			dt = (int) ((float) DotProduct (mid, surf->texinfo->vecs[1]) + surf->texinfo->vecs[1][3]);
+			ds = (int) ((float) DotProduct (mid, surf->texinfo->vecs[0])
+					+ surf->texinfo->vecs[0][3]);
+			dt = (int) ((float) DotProduct (mid, surf->texinfo->vecs[1])
+					+ surf->texinfo->vecs[1][3]);
 			if (ds < surf->texturemins[0] || dt < surf->texturemins[1])
 				continue;
 			
@@ -630,10 +639,16 @@ loc0:
 				float scale;
 
 				line3 = ((surf->extents[0]>>4)+1)*3;
-				lightmap = surf->samples + ((dt>>4) * ((surf->extents[0]>>4)+1) + (ds>>4))*3; // LordHavoc: *3 for color
-				for (maps = 0;maps < MAXLIGHTMAPS && surf->styles[maps] != 255;maps++)
+
+				// LordHavoc: *3 for color
+				lightmap = surf->samples + ((dt>>4)
+						* ((surf->extents[0]>>4)+1) + (ds>>4))*3;
+				for (maps = 0;
+						maps < MAXLIGHTMAPS && surf->styles[maps] != 255;
+						maps++)
 				{
-					scale = (float)d_lightstylevalue[surf->styles[maps]] * 1.0 / 256.0;
+					scale = (float)d_lightstylevalue[surf->styles[maps]]
+						* 1.0 / 256.0;
 					r00 += (float)lightmap[0] * scale;
 					g00 += (float)lightmap[1] * scale;
 					b00 += (float)lightmap[2] * scale;
@@ -649,18 +664,25 @@ loc0:
 					lightmap += surf->smax * surf->tmax *3;
 				}
 
-				color[0] += (float)((int)((((((((r11-r10) * dsfrac) >> 4) + r10)-((((r01-r00) * dsfrac) >> 4) + r00)) * dtfrac) >> 4)
-					+ ((((r01-r00) * dsfrac) >> 4) + r00)));
-				color[1] += (float)((int)((((((((g11-g10) * dsfrac) >> 4) + g10)-((((g01-g00) * dsfrac) >> 4) + g00)) * dtfrac) >> 4)
-					+ ((((g01-g00) * dsfrac) >> 4) + g00)));
-				color[2] += (float)((int)((((((((b11-b10) * dsfrac) >> 4) + b10)-((((b01-b00) * dsfrac) >> 4) + b00)) * dtfrac) >> 4)
-					+ ((((b01-b00) * dsfrac) >> 4) + b00)));
+				color[0] += (float)((int)((((((((r11-r10) * dsfrac) >> 4)
+											+ r10)-((((r01-r00) * dsfrac) >> 4)
+												+ r00)) * dtfrac) >> 4)
+							+ ((((r01-r00) * dsfrac) >> 4) + r00)));
+				color[1] += (float)((int)((((((((g11-g10) * dsfrac) >> 4)
+											+ g10)-((((g01-g00) * dsfrac) >> 4)
+												+ g00)) * dtfrac) >> 4)
+							+ ((((g01-g00) * dsfrac) >> 4) + g00)));
+				color[2] += (float)((int)((((((((b11-b10) * dsfrac) >> 4)
+											+ b10)-((((b01-b00) * dsfrac) >> 4)
+												+ b00)) * dtfrac) >> 4)
+							+ ((((b01-b00) * dsfrac) >> 4) + b00)));
 			}
 			return true; // success
 		}
 
 		// go down back side
-		return RecursiveColorLightPoint (color, node->children[front >= 0], mid, end);
+		return RecursiveColorLightPoint (color, node->children[front >= 0],
+				mid, end);
 	}
 }
 
@@ -702,6 +724,8 @@ int R_LightPoint (vec3_t p)
 
 		RecursiveColorLightPoint (lightcolor, cl.worldmodel->nodes, p, end);
 
-		return ((lightcolor[0] + lightcolor[1] + lightcolor[2]) * (1.0f / 3.0f));
+		return ((lightcolor[0] + lightcolor[1] + lightcolor[2])
+				* (1.0f / 3.0f));
 	}
 }
+

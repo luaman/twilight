@@ -59,7 +59,7 @@ void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
 
 enum { m_none, m_main, m_singleplayer, m_load, m_save, m_multiplayer, m_setup,
-	m_net, m_options, m_video, m_keys, m_help, m_quit, m_serialconfig,
+	m_options, m_video, m_keys, m_help, m_quit, m_serialconfig,
 	m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist, m_gfx
 } m_state;
 
@@ -69,7 +69,6 @@ void        M_Menu_Load_f (void);
 void        M_Menu_Save_f (void);
 void        M_Menu_MultiPlayer_f (void);
 void        M_Menu_Setup_f (void);
-void        M_Menu_Net_f (void);
 void        M_Menu_Options_f (void);
 void        M_Menu_Keys_f (void);
 void        M_Menu_Video_f (void);
@@ -89,7 +88,6 @@ void        M_Load_Draw (void);
 void        M_Save_Draw (void);
 void        M_MultiPlayer_Draw (void);
 void        M_Setup_Draw (void);
-void        M_Net_Draw (void);
 void        M_Options_Draw (void);
 void        M_Keys_Draw (void);
 void        M_Video_Draw (void);
@@ -108,7 +106,6 @@ void        M_Load_Key (int key);
 void        M_Save_Key (int key);
 void        M_MultiPlayer_Key (int key);
 void        M_Setup_Key (int key);
-void        M_Net_Key (int key);
 void        M_Options_Key (int key);
 void        M_Keys_Key (int key);
 void        M_Video_Key (int key);
@@ -133,10 +130,6 @@ char        m_return_reason[32];
 
 #define StartingGame	(m_multiplayer_cursor == 1)
 #define JoiningGame		(m_multiplayer_cursor == 0)
-#define SerialConfig	(m_net_cursor == 0)
-#define DirectConfig	(m_net_cursor == 1)
-#define	IPXConfig		(m_net_cursor == 2)
-#define	TCPIPConfig		(m_net_cursor == 3)
 
 void        M_ConfigureNetSubsystem (void);
 
@@ -1328,10 +1321,6 @@ M_Draw (void)
 //      M_Setup_Draw ();
 			break;
 
-		case m_net:
-//      M_Net_Draw ();
-			break;
-
 		case m_options:
 			M_Options_Draw ();
 			break;
@@ -1419,10 +1408,6 @@ M_Keydown (int key)
 
 		case m_setup:
 //      M_Setup_Key (key);
-			return;
-
-		case m_net:
-//      M_Net_Key (key);
 			return;
 
 		case m_options:

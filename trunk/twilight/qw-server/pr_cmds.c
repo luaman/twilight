@@ -947,8 +947,8 @@ PR_CheckEmptyString (char *s)
 
 void
 PF_precache_file (void)
-{										// precache_file is only used to copy
-	// files with qcc, it does nothing
+{
+	// precache_file is only used to copy files with qcc, it does nothing
 	G_INT (OFS_RETURN) = G_INT (OFS_PARM0);
 }
 
@@ -1598,7 +1598,8 @@ PF_logfrag (void)
 	if (e1 < 1 || e1 > MAX_CLIENTS || e2 < 1 || e2 > MAX_CLIENTS)
 		return;
 
-	s = va ("\\%s\\%s\\\n", svs.clients[e1 - 1].name, svs.clients[e2 - 1].name);
+	s = va ("\\%s\\%s\\\n", svs.clients[e1 - 1].name,
+			svs.clients[e2 - 1].name);
 
 	SZ_Print (&svs.log[svs.logsequence & 1], s);
 	if (sv_fraglogfile) {
@@ -1700,7 +1701,6 @@ builtin_t   pr_builtin[] = {
 	PF_Fixme,
 	PF_makevectors,						// void(entity e) makevectors = #1;
 	PF_setorigin,						// void(entity e, vector o) setorigin = 
-										// 
 	// #2;
 	PF_setmodel,						// void(entity e, string m) setmodel =
 	// #3;
@@ -1811,3 +1811,4 @@ builtin_t   pr_builtin[] = {
 
 builtin_t  *pr_builtins = pr_builtin;
 int         pr_numbuiltins = sizeof (pr_builtin) / sizeof (pr_builtin[0]);
+

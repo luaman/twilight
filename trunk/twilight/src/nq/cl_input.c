@@ -112,8 +112,8 @@ KeyUp (kbutton_t *b)
 	c = Cmd_Argv (1);
 	if (c[0])
 		k = Q_atoi (c);
-	else {								// typed manually at the console,
-		// assume for unsticking, so clear all
+	else {
+		// typed manually at the console, assume for unsticking, so clear all
 		b->down[0] = b->down[1] = 0;
 		b->state = 4;					// impulse up
 		return;
@@ -124,11 +124,11 @@ KeyUp (kbutton_t *b)
 	else if (b->down[1] == k)
 		b->down[1] = 0;
 	else
-		return;							// key up without coresponding down
-	// (menu pass through)
+		// key up without coresponding down (menu pass through)
+		return;
 	if (b->down[0] || b->down[1])
-		return;							// some other key is still holding it
-	// down
+		// some other key is still holding it dowm
+		return;
 
 	if (!(b->state & 1))
 		return;							// still up (this should not happen)
@@ -635,7 +635,8 @@ CL_InitInput (void)
 	Cmd_AddCommand ("-klook", IN_KLookUp);
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
-	SDL_EnableKeyRepeat(in_key_repeat_delay->value, in_key_repeat_interval->value);
+	SDL_EnableKeyRepeat(in_key_repeat_delay->value,
+			in_key_repeat_interval->value);
 }
 
 /*
@@ -655,8 +656,12 @@ CL_InitInputCvars (void)
 	cl_pitchspeed = Cvar_Get ("cl_pitchspeed", "150", CVAR_NONE, NULL);
 	cl_anglespeedkey = Cvar_Get ("cl_anglespeedkey", "1.5", CVAR_NONE, NULL);
 
-	in_key_repeat_delay = Cvar_Get ("in_key_repeat_delay", va ("%i", SDL_DEFAULT_REPEAT_DELAY), CVAR_NONE, CL_InputSetRepeatDelay);
-	in_key_repeat_interval = Cvar_Get ("in_key_repeat_interval", va ("%i", SDL_DEFAULT_REPEAT_INTERVAL), CVAR_NONE, CL_InputSetRepeatInterval);
+	in_key_repeat_delay = Cvar_Get ("in_key_repeat_delay",
+			va ("%i", SDL_DEFAULT_REPEAT_DELAY), CVAR_NONE,
+			CL_InputSetRepeatDelay);
+	in_key_repeat_interval = Cvar_Get ("in_key_repeat_interval",
+			va ("%i", SDL_DEFAULT_REPEAT_INTERVAL), CVAR_NONE,
+			CL_InputSetRepeatInterval);
 }
 
 /*
@@ -665,7 +670,8 @@ CL_InitInputCvars (void)
 void
 CL_InputSetRepeatDelay (struct cvar_s *var)
 {
-	SDL_EnableKeyRepeat(var->value, (in_key_repeat_interval) ? in_key_repeat_interval->value : SDL_DEFAULT_REPEAT_INTERVAL);
+	SDL_EnableKeyRepeat(var->value, (in_key_repeat_interval) ?
+			in_key_repeat_interval->value : SDL_DEFAULT_REPEAT_INTERVAL);
 }
 
 /*
@@ -674,6 +680,7 @@ CL_InputSetRepeatDelay (struct cvar_s *var)
 void
 CL_InputSetRepeatInterval (struct cvar_s *var)
 {
-	SDL_EnableKeyRepeat((in_key_repeat_delay) ? in_key_repeat_delay->value : SDL_DEFAULT_REPEAT_DELAY, var->value);
+	SDL_EnableKeyRepeat((in_key_repeat_delay) ? in_key_repeat_delay->value
+			: SDL_DEFAULT_REPEAT_DELAY, var->value);
 }
 

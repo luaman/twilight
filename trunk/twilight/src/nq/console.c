@@ -210,7 +210,7 @@ Con_CheckResize (void)
 			for (j = 0; j < numchars; j++) {
 				con_text[(con_totallines - 1 - i) * con_linewidth + j] =
 					tbuf[((con_current - i + oldtotallines) %
-						  oldtotallines) * oldwidth + j];
+							oldtotallines) * oldwidth + j];
 			}
 		}
 
@@ -283,7 +283,8 @@ Con_Linefeed (void)
 {
 	con_x = 0;
 	con_current++;
-	memset (&con_text[(con_current % con_totallines) * con_linewidth], ' ', con_linewidth);
+	memset (&con_text[(con_current % con_totallines) * con_linewidth], ' ',
+			con_linewidth);
 }
 
 /*
@@ -352,7 +353,8 @@ Con_Print (char *txt)
 				cr = 1;
 				break;
 
-			default:					// display character and advance
+			default:
+				// display character and advance
 				y = con_current % con_totallines;
 				con_text[y * con_linewidth + con_x] = c | mask;
 				con_x++;
@@ -405,7 +407,7 @@ Con_Printf (char *fmt, ...)
 	va_end (argptr);
 
 // also echo to debugging console
-	Sys_Printf ("%s", msg);				// also echo to debugging console
+	Sys_Printf ("%s", msg);
 
 // log all messages to file
 	if (con_debuglog) {
@@ -421,7 +423,8 @@ Con_Printf (char *fmt, ...)
 		return;
 
 	if (cls.state == ca_dedicated)
-		return;							// no graphics mode
+		// no graphics mode
+		return;
 
 // write it to the scrollable buffer
 	Con_Print (msg);
@@ -441,8 +444,7 @@ Con_DPrintf (char *fmt, ...)
 	char        msg[MAXPRINTMSG];
 
 	if (!developer->value)
-		return;							// don't confuse non-developers with
-	// techie stuff...
+		return;
 
 	va_start (argptr, fmt);
 	vsnprintf (msg, sizeof (msg), fmt, argptr);
@@ -640,42 +642,6 @@ Con_DrawConsole (int lines, qboolean drawinput)
 
 
 /*
-==================
-Con_NotifyBox
-==================
-*/
-void
-Con_NotifyBox (char *text)
-{
-	double      t1, t2;
-
-// during startup for sound / cd warnings
-	Con_Printf
-		("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n");
-
-	Con_Printf (text);
-
-	Con_Printf ("Press a key.\n");
-	Con_Printf
-		("\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n");
-
-	key_count = -2;						// wait for a key down and up
-	key_dest = key_console;
-
-	do {
-		t1 = Sys_DoubleTime ();
-		SCR_UpdateScreen ();
-		Sys_SendKeyEvents ();
-		t2 = Sys_DoubleTime ();
-		realtime += t2 - t1;			// make the cursor blink
-	} while (key_count < 0);
-
-	Con_Printf ("\n");
-	key_dest = key_game;
-	realtime = 0;						// put the cursor back to invisible
-}
-
-/*
 	Con_DisplayList
 
 	New function for tab-completion system
@@ -744,9 +710,11 @@ Con_CompleteCommandLine (void)
 	v = Cvar_CompleteCountPossible(s);
 	a = Cmd_CompleteAliasCountPossible(s);
 	
-	if (!(c + v + a)) {	// No possible matches, let the user know they're insane
+	if (!(c + v + a))
+	{
+		// No possible matches, let the user know they're insane
 		S_LocalSound ("misc/talk.wav");
-		Con_Printf("\n\nNo matching aliases, commands, or cvars were found.\n\n");
+		Con_Printf("\n\nNo matches found\n\n");
 		return;
 	}
 

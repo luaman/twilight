@@ -84,17 +84,26 @@ char        gamedirfile[MAX_OSPATH];
 /*
 
 
-All of Quake's data access is through a hierchal file system, but the contents of the file system can be transparently merged from several sources.
+All of Quake's data access is through a hierchal file system, but the contents
+of the file system can be transparently merged from several sources.
 
-The "base directory" is the path to the directory holding the quake.exe and all game directories.  The sys_* files pass this to host_init in quakeparms_t->basedir.  This can be overridden with the "-basedir" command line parm to allow code debugging in a different directory.  The base directory is
-only used during filesystem initialization.
+The "base directory" is the path to the directory holding the quake.exe and
+all game directories.  The sys_* files pass this to host_init in
+quakeparms_t->basedir.  This can be overridden with the "-basedir" command
+line parm to allow code debugging in a different directory.  The base
+directory is only used during filesystem initialization.
 
-The "game directory" is the first tree on the search path and directory that all generated files (savegames, screenshots, demos, config files) will be saved to.  This can be overridden with the "-game" command line parameter.  The game directory can never be changed while quake is executing.  This is a precacution against having a malicious server instruct clients to write files over areas they shouldn't.
+The "game directory" is the first tree on the search path and directory that
+all generated files (savegames, screenshots, demos, config files) will be
+saved to.  This can be overridden with the "-game" command line parameter.
+The game directory can never be changed while quake is executing.  This is a
+precacution against having a malicious server instruct clients to write files
+over areas they shouldn't.
 
-The "cache directory" is only used during development to save network bandwidth, especially over ISDN / T1 lines.  If there is a cache directory
+The "cache directory" is only used during development to save network
+bandwidth, especially over ISDN / T1 lines.  If there is a cache directory
 specified, when a file is found by the normal search path, it will be mirrored
-into the cache directory, then opened there.
-	
+into the cache directory, then opened there.  
 */
 
 //============================================================================
@@ -721,8 +730,8 @@ SZ_GetSpace (sizebuf_t *buf, int length)
 		if (length > buf->maxsize)
 			Sys_Error ("SZ_GetSpace: %i is > full buffer size", length);
 
-		Sys_Printf ("SZ_GetSpace: overflow\n");	// because Con_Printf may be
-		// redirected
+		// because Con_Printf may be redirected
+		Sys_Printf ("SZ_GetSpace: overflow\n");
 		SZ_Clear (buf);
 		buf->overflowed = true;
 	}
@@ -945,8 +954,8 @@ COM_CheckParm (char *parm)
 
 	for (i = 1; i < com_argc; i++) {
 		if (!com_argv[i])
-			continue;					// NEXTSTEP sometimes clears appkit
-		// vars.
+			// NEXTSTEP sometimes clears appkit vars.
+			continue;
 		if (!strcmp (parm, com_argv[i]))
 			return i;
 	}
@@ -1005,8 +1014,7 @@ COM_InitArgv (int argc, char **argv)
 
 	if (safe) {
 		// force all the safe-mode switches. Note that we reserved extra space
-		// in
-		// case we need to add these, so we don't need an overflow check
+		// in case we need to add these, so we don't need an overflow check
 		for (i = 0; i < NUM_SAFE_ARGVS; i++) {
 			largv[com_argc] = safeargvs[i];
 			com_argc++;
@@ -1161,8 +1169,7 @@ char        com_gamedir[MAX_OSPATH];
 
 typedef struct searchpath_s {
 	char        filename[MAX_OSPATH];
-	pack_t     *pack;					// only one of filename / pack will be
-	// used
+	pack_t     *pack;		// only one of filename / pack will be used
 	struct searchpath_s *next;
 } searchpath_t;
 
@@ -1293,8 +1300,8 @@ COM_CopyFile (char *netpath, char *cachepath)
 	char        buf[4096];
 
 	remaining = COM_FileOpenRead (netpath, &in);
-	COM_CreatePath (cachepath);			// create directories up to the cache
-	// file
+	// create directories up to the cache file
+	COM_CreatePath (cachepath);
 	out = fopen (cachepath, "wb");
 	if (!out)
 		Sys_Error ("Error opening %s", cachepath);
@@ -1322,7 +1329,6 @@ Sets com_filesize and one of handle or file
 ===========
 */
 int         file_from_pak;				// global indicating file came from
-
 										// pack file ZOID
 
 int
@@ -1345,8 +1351,10 @@ COM_FOpenFile (char *filename, FILE ** file)
 			// look through all the pak file elements
 			pak = search->pack;
 			for (i = 0; i < pak->numfiles; i++)
-				if (!strcmp (pak->files[i].name, filename)) {	// found it!
-					Sys_Printf ("PackFile: %s : %s\n", pak->filename, filename);
+				if (!strcmp (pak->files[i].name, filename)) {
+					// found it!
+					Sys_Printf ("PackFile: %s : %s\n", pak->filename,
+							filename);
 					// open a new file on the pakfile
 					*file = fopen (pak->filename, "rb");
 					if (!*file)
@@ -1358,8 +1366,8 @@ COM_FOpenFile (char *filename, FILE ** file)
 				}
 		} else {
 			// check a file in the directory tree
-			/* 
-			   if (strchr (filename, '/') || strchr (filename, '\\')) continue; */
+//			if (strchr (filename, '/') || strchr (filename, '\\'))
+//				continue;
 
 			snprintf (netpath, sizeof (netpath), "%s/%s", search->filename,
 					  filename);
@@ -1868,7 +1876,6 @@ Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
 	// this next line is kinda trippy
 	if (*(v = Info_ValueForKey (s, key))) {
 		// key exists, make sure we have enough room for new value, if we
-		// don't,
 		// don't change it!
 		if (strlen (value) - strlen (v) + strlen (s) > maxsize) {
 			Con_Printf ("Info string length exceeded\n");

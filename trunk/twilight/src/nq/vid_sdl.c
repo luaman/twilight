@@ -115,7 +115,7 @@ VID_Shutdown (void)
 	SDL_Quit ();
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 void
 signal_handler (int sig)
 {
@@ -128,7 +128,7 @@ signal_handler (int sig)
 void
 InitSig (void)
 {
-#ifndef WIN32
+#ifndef _WIN32
 	signal (SIGHUP, signal_handler);
 	signal (SIGINT, signal_handler);
 	signal (SIGQUIT, signal_handler);
@@ -439,7 +439,7 @@ VID_Init (unsigned char *palette)
 	if (use_mouse)
 		SDL_ShowCursor (0);
 
-#ifdef WIN32
+#ifdef _WIN32
 	// LordHavoc: a dark incantation necessary for DirectSound with SDL
 	// (an evil which Loki clearly did not intend)
 	mainwindow = GetActiveWindow ();

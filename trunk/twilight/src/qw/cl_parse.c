@@ -261,9 +261,8 @@ Model_NextDownload (void)
 		cl.model_precache[i] = Mod_ForName (cl.model_name[i], false);
 
 		if (!cl.model_precache[i]) {
-			Con_Printf
-				("\nThe required model file '%s' could not be found or downloaded.\n\n",
-				 cl.model_name[i]);
+			Con_Printf ("\nThe required model file '%s' could not be found "
+					"or downloaded.\n\n", cl.model_name[i]);
 			Con_Printf ("You may need to download or purchase a %s client "
 						"pack in order to play on this server.\n\n",
 						gamedirfile);
@@ -279,10 +278,8 @@ Model_NextDownload (void)
 
 	// done with modellist, request first of static signon messages
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-//  MSG_WriteString (&cls.netchan.message, va("prespawn %i 0 %i", cl.servercount, cl.worldmodel->checksum2));
 	MSG_WriteString (&cls.netchan.message,
-					 va (prespawn_name, cl.servercount,
-						 cl.worldmodel->checksum2));
+			va (prespawn_name, cl.servercount, cl.worldmodel->checksum2));
 }
 
 /*
@@ -320,9 +317,8 @@ Sound_NextDownload (void)
 	cl_spikeindex = -1;
 	cl_flagindex = -1;
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-//  MSG_WriteString (&cls.netchan.message, va("modellist %i 0", cl.servercount));
 	MSG_WriteString (&cls.netchan.message,
-					 va (modellist_name, cl.servercount, 0));
+			va (modellist_name, cl.servercount, 0));
 }
 
 
@@ -560,9 +556,10 @@ CL_ParseServerData (void)
 	if (protover != PROTOCOL_VERSION &&
 		!(cls.demoplayback
 		  && (protover == 26 || protover == 27 || protover == 28)))
-		Host_EndGame
-			("Server returned version %i, not %i\nYou probably need to upgrade.\nCheck http://www.quakeworld.net/",
-			 protover, PROTOCOL_VERSION);
+		Host_EndGame ("Server returned version %i, not %i\n"
+				"You probably need to upgrade.\n"
+				"Check http://www.quakeworld.net/",
+				protover, PROTOCOL_VERSION);
 
 	cl.servercount = MSG_ReadLong ();
 
@@ -613,15 +610,15 @@ CL_ParseServerData (void)
 
 	// seperate the printfs so the server message can have a color
 	Con_Printf
-		("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
+		("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36"
+		 "\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
 	Con_Printf ("%c%s\n", 2, str);
 
 	// ask for the sound list next
 	memset (cl.sound_name, 0, sizeof (cl.sound_name));
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-//  MSG_WriteString (&cls.netchan.message, va("soundlist %i 0", cl.servercount));
 	MSG_WriteString (&cls.netchan.message,
-					 va (soundlist_name, cl.servercount, 0));
+			va (soundlist_name, cl.servercount, 0));
 
 	// now waiting for downloads, etc
 	cls.state = ca_onserver;
@@ -658,9 +655,8 @@ CL_ParseSoundlist (void)
 
 	if (n) {
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-//      MSG_WriteString (&cls.netchan.message, va("soundlist %i %i", cl.servercount, n));
 		MSG_WriteString (&cls.netchan.message,
-						 va (soundlist_name, cl.servercount, n));
+				va (soundlist_name, cl.servercount, n));
 		return;
 	}
 
@@ -705,7 +701,6 @@ CL_ParseModellist (void)
 
 	if (n) {
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-//      MSG_WriteString (&cls.netchan.message, va("modellist %i %i", cl.servercount, n));
 		MSG_WriteString (&cls.netchan.message,
 						 va (modellist_name, cl.servercount, n));
 		return;
@@ -1173,8 +1168,8 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_serverdata:
-				Cbuf_Execute ();		// make sure any stuffed commands are
-				// done
+				// make sure any stuffed commands are done
+				Cbuf_Execute ();
 				CL_ParseServerData ();
 				vid.recalc_refdef = true;	// leave full screen intermission
 				break;
@@ -1205,24 +1200,24 @@ CL_ParseServerMessage (void)
 			case svc_updatefrags:
 				i = MSG_ReadByte ();
 				if (i >= MAX_CLIENTS)
-					Host_EndGame
-						("CL_ParseServerMessage: svc_updatefrags > MAX_SCOREBOARD");
+					Host_EndGame ("CL_ParseServerMessage: svc_updatefrags >"
+							" MAX_SCOREBOARD");
 				cl.players[i].frags = MSG_ReadShort ();
 				break;
 
 			case svc_updateping:
 				i = MSG_ReadByte ();
 				if (i >= MAX_CLIENTS)
-					Host_EndGame
-						("CL_ParseServerMessage: svc_updateping > MAX_SCOREBOARD");
+					Host_EndGame ("CL_ParseServerMessage: svc_updateping >"
+							" MAX_SCOREBOARD");
 				cl.players[i].ping = MSG_ReadShort ();
 				break;
 
 			case svc_updatepl:
 				i = MSG_ReadByte ();
 				if (i >= MAX_CLIENTS)
-					Host_EndGame
-						("CL_ParseServerMessage: svc_updatepl > MAX_SCOREBOARD");
+					Host_EndGame ("CL_ParseServerMessage: svc_updatepl >"
+							" MAX_SCOREBOARD");
 				cl.players[i].pl = MSG_ReadByte ();
 				break;
 
@@ -1230,8 +1225,8 @@ CL_ParseServerMessage (void)
 				// time is sent over as seconds ago
 				i = MSG_ReadByte ();
 				if (i >= MAX_CLIENTS)
-					Host_EndGame
-						("CL_ParseServerMessage: svc_updateentertime > MAX_SCOREBOARD");
+					Host_EndGame ("CL_ParseServerMessage: svc_updateentertime"
+							" > MAX_SCOREBOARD");
 				cl.players[i].entertime = realtime - MSG_ReadFloat ();
 				break;
 
@@ -1331,7 +1326,8 @@ CL_ParseServerMessage (void)
 				CL_ParseProjectiles ();
 				break;
 
-			case svc_chokecount:		// some preceding packets were choked
+			case svc_chokecount:
+				// some preceding packets were choked
 				i = MSG_ReadByte ();
 				for (j = 0; j < i; j++)
 					cl.frames[(cls.netchan.incoming_acknowledged - 1 -
@@ -1375,3 +1371,4 @@ CL_ParseServerMessage (void)
 
 	CL_SetSolidEntities ();
 }
+
