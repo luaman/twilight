@@ -1638,6 +1638,10 @@ SV_Init (quakeparms_t *parms)
 	Cvar_Init ();
 	Sys_Init ();
 
+	// process command line arguments
+	Cmd_StuffCmds_f ();
+	Cbuf_Execute_Sets ();
+
 	COM_Init ();
 
 	PR_Init ();
@@ -1663,11 +1667,11 @@ SV_Init (quakeparms_t *parms)
 
 	Con_Printf ("======== QuakeWorld Initialized ========\n");
 
-// process command line arguments
+	// process command line arguments
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute ();
 
-// if a map wasn't specified on the command line, spawn start.map
+	// if a map wasn't specified on the command line, spawn start.map
 	if (sv.state == ss_dead)
 		Cmd_ExecuteString ("map start");
 	if (sv.state == ss_dead)

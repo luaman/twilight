@@ -58,6 +58,7 @@ void        Cbuf_InsertText (char *text);
 // inserted at the beginning of the buffer, before any remaining unexecuted
 // commands.
 
+void        Cbuf_Execute_Sets (void);
 void        Cbuf_Execute (void);
 
 // Pulls off \n terminated lines of text from the command buffer and sends

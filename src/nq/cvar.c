@@ -52,7 +52,7 @@ Cvar_Init (void)
 
 	developer = Cvar_Get ("developer", "0", CVAR_NONE, NULL);
 
-	Cmd_AddCommand ("set", &Cvar_Set_f);
+	Cmd_AddCommand ("set", Cvar_Set_f);
 }
 
 
