@@ -102,30 +102,30 @@ void        InsertLinkAfter (link_t *l, link_t *after);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 # define swap_short LittleShort
-# define BigShort(x) ((Sint16)(x))
+# define BigShort(x) ((Uint16)(x))
 
 # define swap_long LittleLong
-# define BigLong(x) ((Sint32)(x))
+# define BigLong(x) ((Uint32)(x))
 
 # define swap_float LittleFloat
 # define BigFloat(x) (x)
 #else
 # define swap_short BigShort
-# define LittleShort(x) ((Sint16)(x))
+# define LittleShort(x) ((Uint16)(x))
 
 # define swap_long BigLong
-# define LittleLong(x) ((Sint32)(x))
+# define LittleLong(x) ((Uint32)(x))
 
 # define swap_float BigFloat
 # define LittleFloat(x) (x)
 #endif
 
-static inline Sint16 swap_short(Sint16 x)
+static inline Uint16 swap_short(Uint16 x)
 {
 	return (x >> 8) | (x << 8);
 }
 
-static inline Sint32 swap_long(Sint32 x)
+static inline Uint32 swap_long(Uint32 x)
 {
 	return	(x >> 24) |
 		((x & 0x00ff0000) >> 8) |
