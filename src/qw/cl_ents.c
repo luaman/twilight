@@ -184,6 +184,25 @@ CL_DecayLights (void)
 
 
 /*
+==============
+CL_BoundDlight
+==============
+*/
+void
+CL_BoundDlight (dlight_t *dl, vec3_t org)
+{
+	pmtrace_t tr;
+
+	if (gl_flashblend->value || gl_oldlights->value)
+		return;
+
+	memset (&tr, 0, sizeof(tr));
+	VectorCopy (dl->origin, tr.endpos);
+	PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, org, dl->origin, &tr);
+	VectorCopy (tr.endpos, dl->origin);
+}
+
+/*
 =========================================================================
 
 PACKET ENTITY PARSING / LINKING

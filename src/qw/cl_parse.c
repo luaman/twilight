@@ -1043,26 +1043,6 @@ CL_SetStat (int stat, int value)
 
 /*
 ==============
-CL_BoundDlight
-==============
-*/
-void
-CL_BoundDlight (dlight_t *dl, vec3_t ownerorg)
-{
-	pmtrace_t tr;
-
-	if (gl_flashblend->value || gl_oldlights->value)
-		return;
-
-	memset (&tr, 0, sizeof(tr));
-	VectorCopy (dl->origin, tr.endpos);
-	PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ownerorg, dl->origin, &tr);
-	VectorCopy (tr.endpos, dl->origin);
-}
-
-
-/*
-==============
 CL_MuzzleFlash
 ==============
 */

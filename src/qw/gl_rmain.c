@@ -846,7 +846,11 @@ R_DrawAliasModel (entity_t *e)
 			e->pose1 = e->pose2 = 0;
 			return;
 		}
+	} else {
+		// Vic: fix gun model not being interpolated
+		e->times = r_framecount;
 	}
+
 
 	/*
 	 * get lighting information

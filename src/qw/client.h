@@ -380,6 +380,7 @@ extern float server_version;			// version of server we connected to
  */
 dlight_t *CL_AllocDlight (int key);
 void CL_DecayLights (void);
+void CL_BoundDlight (dlight_t *dl, vec3_t org);
 
 void CL_Init_Cvars (void);
 void CL_Init (void);
