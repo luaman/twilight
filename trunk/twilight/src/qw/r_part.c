@@ -1280,11 +1280,11 @@ DrawBeam (vec3_t p1, vec3_t p2, vec3_t normal, vec4_t color, float scale,
 	VectorCopy4 (color, c_array_v(v_index + 3));
 
 	dp = DotProduct(p1, normal) / 64;
-	dp += ramp;
+	dp -= ramp;
 	VectorSet2 (tc_array_v(v_index + 0), 1, dp);
 	VectorSet2 (tc_array_v(v_index + 1), 0, dp);
 	dp = DotProduct(p2, normal) / 64;
-	dp += ramp;
+	dp -= ramp;
 	VectorSet2 (tc_array_v(v_index + 2), 0, dp);
 	VectorSet2 (tc_array_v(v_index + 3), 1, dp);
 }
