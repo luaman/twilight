@@ -270,7 +270,7 @@ EmitSkyPolys (msurface_t *fa)
 			VectorSubtract (v, r_origin, dir);
 			dir[2] *= 3;				// flatten the sphere
 
-			length = 6 * 63 / VectorLength (dir);
+			length = 6 * 63 * Q_RSqrt (DotProduct(dir,dir));
 
 			dir[0] *= length;
 			dir[1] *= length;
@@ -423,7 +423,7 @@ void R_SkyBoxChanged (cvar_t *cvar)
 static int c_sky;
 static float skymins[2][6], skymaxs[2][6];
 
-static vec3_t skyclip[6] = {
+static const vec3_t skyclip[6] = {
 	{  1,  1, 0 },
 	{  1, -1, 0 },
 	{  0, -1, 1 },
@@ -432,7 +432,7 @@ static vec3_t skyclip[6] = {
 	{ -1,  0, 1 } 
 };
 
-static int st_to_vec[6][3] =
+static const int st_to_vec[6][3] =
 {
 	{  3, -1, 2 },
 	{ -3,  1, 2 },
@@ -444,7 +444,7 @@ static int st_to_vec[6][3] =
 	{  2, -1, -3 }		// look straight down
 };
 
-static int vec_to_st[6][3] =
+static const int vec_to_st[6][3] =
 {
 	{ -2, 3,  1 },
 	{  2, 3, -1 },
@@ -506,7 +506,6 @@ void DrawSkyPolygon (int nump, vec3_t vecs)
 
 void ClipSkyPolygon (int nump, vec3_t vecs, int stage)
 {
-	float	*norm;
 	float	*v;
 	qboolean	front, back;
 	float	d, e;
@@ -527,11 +526,10 @@ void ClipSkyPolygon (int nump, vec3_t vecs, int stage)
 	}
 
 	front = back = false;
-	norm = skyclip[stage];
 
 	for (i = 0, v = vecs; i < nump; i++, v += 3)
 	{
-		d = DotProduct (v, norm);
+		d = DotProduct (v, skyclip[stage]);
 
 		if (d > ON_EPSILON)
 		{
