@@ -422,6 +422,9 @@ Sys_ExpandPath (char *str)
 
 int Sys_CheckClipboardPaste(int key)
 {
+	int		i;
+	HANDLE	th;
+	char	*clipText, *textCopied;
 	if ((key == 'V' || key == 'v') && GetKeyState(VK_CONTROL) < 0)
 	{
 		if (OpenClipboard(NULL))
