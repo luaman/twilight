@@ -140,8 +140,6 @@ extern int gl_wireframe;
 extern struct cvar_s *gl_max_size;
 extern struct cvar_s *gl_playermip;
 
-extern float r_world_matrix[16];
-
 extern const char *gl_vendor;
 extern const char *gl_renderer;
 extern const char *gl_version;
