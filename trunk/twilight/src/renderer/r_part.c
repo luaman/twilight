@@ -987,12 +987,6 @@ R_Draw_Base_Particles (void)
 		VectorTwiddle(p->org, vright,-1, vup,-1, scale, v_array_v(v_index+1));
 		VectorTwiddle(p->org, vright,-1, vup, 1, scale, v_array_v(v_index+2));
 		VectorTwiddle(p->org, vright, 1, vup, 1, scale, v_array_v(v_index+3));
-		/*
-		VectorTwiddleS (p->org, vup, vright, scale * -0.5, v_array_v(v_index));
-		VectorTwiddle(corner, vup, 1, vright, 0, scale, v_array_v(v_index+1));
-		VectorTwiddle(corner, vup, 1, vright, 1, scale, v_array_v(v_index+2));
-		VectorTwiddle(corner, vup, 0, vright, 1, scale, v_array_v(v_index+3));
-		*/
 
 		v_index += 4;
 
