@@ -13,7 +13,7 @@
 #ifndef __gl_types_h
 #define __gl_types_h
 
-#include "SDL/SDL_types.h"
+#include <SDL_types.h>
 
 typedef void			GLvoid;
 typedef	Uint8			GLboolean;
