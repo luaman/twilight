@@ -42,7 +42,6 @@ void Draw_TransPicTranslate (int x, int y, struct qpic_s *pic,
 		Uint8 *translation);
 void Draw_ConsoleBackground (int lines);
 void Draw_Disc (void);
-void Draw_TileClear (int x, int y, int w, int h);
 void Draw_Fill (int x, int y, int w, int h, vec4_t color);
 void Draw_FadeScreen (void);
 void Draw_String (float x, float y, char *str, float text_size);
