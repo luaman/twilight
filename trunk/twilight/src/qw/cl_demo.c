@@ -71,8 +71,7 @@ Writes the current user cmd
 void
 CL_WriteDemoCmd (usercmd_t *pcmd)
 {
-	int         i;
-	float       fl;
+	float       fl, ang[3];
 	byte        c;
 	usercmd_t   cmd;
 
@@ -87,18 +86,20 @@ CL_WriteDemoCmd (usercmd_t *pcmd)
 	// correct for byte order, bytes don't matter
 	cmd = *pcmd;
 
-	for (i = 0; i < 3; i++)
-		cmd.angles[i] = LittleFloat (cmd.angles[i]);
+	cmd.angles[0] = LittleFloat (cmd.angles[0]);
+	cmd.angles[1] = LittleFloat (cmd.angles[1]);
+	cmd.angles[2] = LittleFloat (cmd.angles[2]);
 	cmd.forwardmove = LittleShort (cmd.forwardmove);
 	cmd.sidemove = LittleShort (cmd.sidemove);
 	cmd.upmove = LittleShort (cmd.upmove);
 
 	fwrite (&cmd, sizeof (cmd), 1, cls.demofile);
 
-	for (i = 0; i < 3; i++) {
-		fl = LittleFloat (cl.viewangles[i]);
-		fwrite (&fl, 4, 1, cls.demofile);
-	}
+	ang[0] = LittleFloat (cl.viewangles[0]);
+	ang[1] = LittleFloat (cl.viewangles[1]);
+	ang[2] = LittleFloat (cl.viewangles[2]);
+
+	fwrite (ang, 12, 1, cls.demofile);
 
 	fflush (cls.demofile);
 }
