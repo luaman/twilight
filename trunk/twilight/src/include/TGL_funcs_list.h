@@ -48,7 +48,7 @@ TWIGL_DONT_NEED (void, glColor3bv, (const GLbyte * v));
 TWIGL_DONT_NEED (void, glColor3d, (GLdouble red, GLdouble green, GLdouble blue));
 TWIGL_DONT_NEED (void, glColor3dv, (const GLdouble * v));
 TWIGL_NEED (void, glColor3f, (GLfloat red, GLfloat green, GLfloat blue));
-TWIGL_DONT_NEED (void, glColor3fv, (const GLfloat * v));
+TWIGL_NEED (void, glColor3fv, (const GLfloat * v));
 TWIGL_DONT_NEED (void, glColor3i, (GLint red, GLint green, GLint blue));
 TWIGL_DONT_NEED (void, glColor3iv, (const GLint * v));
 TWIGL_DONT_NEED (void, glColor3s, (GLshort red, GLshort green, GLshort blue));
