@@ -89,8 +89,8 @@ W_LoadWadFile (char *filename)
 {
 	lumpinfo_t *lump_p;
 	wadinfo_t  *header;
-	unsigned    i;
-	int         infotableofs;
+	int			i;
+	int			infotableofs;
 
 	wad_base = COM_LoadHunkFile (filename);
 	if (!wad_base)
