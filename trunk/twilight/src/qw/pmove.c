@@ -776,11 +776,12 @@ SpectatorMove (void)
 	float       wishspeed;
 
 	// friction
+	speed = DotProduct (pmove.velocity, pmove.velocity);
 
-	speed = VectorLength (pmove.velocity);
 	if (speed < 1) {
 		VectorClear (pmove.velocity);
 	} else {
+		speed = VectorLength (speed);
 		drop = 0;
 
 		friction = movevars.friction * 1.5;	// extra friction

@@ -125,73 +125,6 @@ R_InitParticleTexture (void)
 
 /*
 ===============
-R_Envmap_f
-
-Grab six views for environment mapping tests
-===============
-*/
-void
-R_Envmap_f (void)
-{
-	byte        buffer[256 * 256 * 4];
-
-	qglDrawBuffer (GL_FRONT);
-	qglReadBuffer (GL_FRONT);
-	envmap = true;
-
-	r_refdef.vrect.x = 0;
-	r_refdef.vrect.y = 0;
-	r_refdef.vrect.width = 256;
-	r_refdef.vrect.height = 256;
-
-	r_refdef.viewangles[0] = 0;
-	r_refdef.viewangles[1] = 0;
-	r_refdef.viewangles[2] = 0;
-	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
-	R_RenderView ();
-	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-	COM_WriteFile ("env0.rgb", buffer, sizeof (buffer));
-
-	r_refdef.viewangles[1] = 90;
-	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
-	R_RenderView ();
-	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-	COM_WriteFile ("env1.rgb", buffer, sizeof (buffer));
-
-	r_refdef.viewangles[1] = 180;
-	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
-	R_RenderView ();
-	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-	COM_WriteFile ("env2.rgb", buffer, sizeof (buffer));
-
-	r_refdef.viewangles[1] = 270;
-	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
-	R_RenderView ();
-	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-	COM_WriteFile ("env3.rgb", buffer, sizeof (buffer));
-
-	r_refdef.viewangles[0] = -90;
-	r_refdef.viewangles[1] = 0;
-	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
-	R_RenderView ();
-	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-	COM_WriteFile ("env4.rgb", buffer, sizeof (buffer));
-
-	r_refdef.viewangles[0] = 90;
-	r_refdef.viewangles[1] = 0;
-	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
-	R_RenderView ();
-	qglReadPixels (0, 0, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-	COM_WriteFile ("env5.rgb", buffer, sizeof (buffer));
-
-	envmap = false;
-	qglDrawBuffer (GL_BACK);
-	qglReadBuffer (GL_BACK);
-	GL_EndRendering ();
-}
-
-/*
-===============
 R_Init_Cvars
 ===============
 */
@@ -241,7 +174,6 @@ void
 R_Init (void)
 {
 	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);
-	Cmd_AddCommand ("envmap", R_Envmap_f);
 	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);
 
 	R_InitBubble ();

@@ -51,8 +51,6 @@ mplane_t    frustum[4];
 
 int         c_brush_polys, c_alias_polys;
 
-qboolean    envmap;						// true during envmap command capture 
-
 int         currenttexture = -1;		// to avoid unnecessary texture sets
 
 int         cnttextures[2] = { -1, -1 };	// cached
@@ -1102,7 +1100,6 @@ R_DrawViewModel (void)
 
 	if (!r_drawviewmodel->value ||
 		chase_active->value ||
-		envmap ||
 		!r_drawentities->value ||
 		cl.items & IT_INVISIBILITY ||
 		(cl.stats[STAT_HEALTH] <= 0) ||
@@ -1294,11 +1291,6 @@ R_SetupGL (void)
 
 	w = x2 - x;
 	h = y - y2;
-
-	if (envmap) {
-		x = y2 = 0;
-		w = h = 256;
-	}
 
 	qglViewport (glx + x, gly + y2, w, h);
 	screenaspect = (float) r_refdef.vrect.width / r_refdef.vrect.height;
