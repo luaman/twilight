@@ -32,7 +32,7 @@
 #ifdef HAVE_SDL_H
 # include "SDL_endian.h"
 #else
-# include "sv_sdlstub.h"
+# include "sdlstub.h"
 #endif
 #include "qtypes.h"
 #include "zone.h"

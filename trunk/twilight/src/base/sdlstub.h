@@ -1,40 +1,45 @@
-
-#ifndef SV_SDLSTUB_H
-#define SV_SDLSTUB_H
-
-// this is just SDL_types.h included right here
-
 /*
-    SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001  Sam Lantinga
+	$RCSfile$
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
+	Copyright (C) 1997-2001  Sam Lantinga
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
 
-    You should have received a copy of the GNU Library General Public
-    License along with this library; if not, write to the Free
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
-    Sam Lantinga
-    slouken@devolution.com
+	See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to:
+	
+		Free Software Foundation, Inc.
+		59 Temple Place - Suite 330
+		Boston, MA  02111-1307, USA
+
+	$Id$
 */
 
-#ifdef SAVE_RCSID
-static char rcsid =
- "@(#) $Id$";
-#endif
+#ifndef _SDLSTUB_H
+#define _SDLSTUB_H
 
-/* General data types used by the SDL library */
+/*
+ * In order to build servers without SDL under UNIX, we're basically putting
+ * the smallest bits of SDL right in to the engine source.  Everything in
+ * this file comes from SDL and is Sam Lantinga's work.
+ *
+ * FIXME: Most of this crap should go away after we know it's not needed
+ */
 
-#ifndef _SDL_types_h
-#define _SDL_types_h
+
+/*
+ * SDL_types.h
+ */
+
 
 /* The number of elements in a table */
 #define SDL_TABLESIZE(table)	(sizeof(table)/sizeof(table[0]))
@@ -90,41 +95,10 @@ SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
 /* General keyboard/mouse state definitions */
 enum { SDL_PRESSED = 0x01, SDL_RELEASED = 0x00 };
 
-#endif
-
-// this is just SDL_endian.h included right here
 
 /*
-    SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001  Sam Lantinga
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
-
-    You should have received a copy of the GNU Library General Public
-    License along with this library; if not, write to the Free
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-    Sam Lantinga
-    slouken@devolution.com
-*/
-
-#ifdef SAVE_RCSID
-static char rcsid =
- "@(#) $Id$";
-#endif
-
-/* Functions for reading and writing endian-specific values */
-
-#ifndef _SDL_endian_h
-#define _SDL_endian_h
+ * SDL_endian.h
+ */
 
 /* These functions read and write data of the specified endianness,
    dynamically translating to the host machine endianness.
@@ -140,15 +114,9 @@ static char rcsid =
 
 #include <stdio.h>
 
-#include "SDL_types.h"
-#include "SDL_rwops.h"
-#include "SDL_byteorder.h"
-
-#include "begin_code.h"
-/* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
-extern "C" {
-#endif
+//include "SDL_types.h"
+//include "SDL_rwops.h"
+//include "SDL_byteorder.h"
 
 /* The macros used to swap values */
 /* Try to use superfast macros on systems that support them */
@@ -219,30 +187,6 @@ static __inline__ Uint64 SDL_Swap64(Uint64 val) {
 #define SDL_SwapBE64(X)	(X)
 #endif
 
-/* Read an item of the specified endianness and return in native format */
-extern DECLSPEC Uint16 SDL_ReadLE16(SDL_RWops *src);
-extern DECLSPEC Uint16 SDL_ReadBE16(SDL_RWops *src);
-extern DECLSPEC Uint32 SDL_ReadLE32(SDL_RWops *src);
-extern DECLSPEC Uint32 SDL_ReadBE32(SDL_RWops *src);
-extern DECLSPEC Uint64 SDL_ReadLE64(SDL_RWops *src);
-extern DECLSPEC Uint64 SDL_ReadBE64(SDL_RWops *src);
-
-/* Write an item of native format to the specified endianness */
-extern DECLSPEC int SDL_WriteLE16(SDL_RWops *dst, Uint16 value);
-extern DECLSPEC int SDL_WriteBE16(SDL_RWops *dst, Uint16 value);
-extern DECLSPEC int SDL_WriteLE32(SDL_RWops *dst, Uint32 value);
-extern DECLSPEC int SDL_WriteBE32(SDL_RWops *dst, Uint32 value);
-extern DECLSPEC int SDL_WriteLE64(SDL_RWops *dst, Uint64 value);
-extern DECLSPEC int SDL_WriteBE64(SDL_RWops *dst, Uint64 value);
-
-
-/* Ends C function definitions when using C++ */
-#ifdef __cplusplus
-}
-#endif
-#include "close_code.h"
-
-#endif /* _SDL_endian_h */
 
 // the only functions provided by sv_sdlstub.c
 void SDL_Delay(Uint32 ms);
@@ -252,4 +196,5 @@ void SDL_Quit(void);
 // various #defines
 #define   SDL_INIT_TIMER          0x00000001
 
-#endif
+#endif // _SDLSTUB_H
+

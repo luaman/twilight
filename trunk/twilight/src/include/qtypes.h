@@ -31,7 +31,7 @@
 #ifdef HAVE_SDL_H
 # include "SDL_types.h"
 #else
-# include "sv_sdlstub.h"
+# include "sdlstub.h"
 #endif
 #include <stdio.h>
 

@@ -33,7 +33,9 @@
 #include "light.h"
 #include "net.h"
 #include "protocol.h"
-#include "render.h"
+#ifdef WANT_CLIENTS
+# include "render.h"
+#endif
 #include "zone.h"
 #include "pmove.h"
 
