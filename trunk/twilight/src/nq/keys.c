@@ -153,7 +153,6 @@ keyname_t   keynames[] = {
 ==============================================================================
 */
 
-
 /*
 ====================
 Key_Console
@@ -165,6 +164,7 @@ void
 Key_Console (int key)
 {
 	char       *cmd;
+	int			i;
 
 	if (key == K_ENTER) {
 		Cbuf_AddText (key_lines[edit_line] + 1);	// skip the >
@@ -173,6 +173,7 @@ Key_Console (int key)
 		edit_line = (edit_line + 1) & 31;
 		history_line = edit_line;
 		key_lines[edit_line][0] = ']';
+		key_lines[edit_line][1] = 0;    // null terminate
 		key_linepos = 1;
 		if (cls.state == ca_disconnected)
 			SCR_UpdateScreen ();		// force an update, because the command
@@ -180,6 +181,52 @@ Key_Console (int key)
 		return;
 	}
 
+	// left arrow will just move left one w/o earsing, backspace will
+	// actually erase charcter
+	if (key == K_LEFTARROW)
+	{
+		if (key_linepos > 1)
+			key_linepos--;
+
+		return;
+	}
+	if (key == K_BACKSPACE)// delete char before cursor
+	{
+		if (key_linepos > 1)
+		{
+			strcpy(key_lines[edit_line] + key_linepos - 1, key_lines[edit_line] + key_linepos);
+			key_linepos--;
+		}
+
+		return;
+	}
+	if (key == K_DEL)// delete char on cursor
+	{
+		if (key_linepos < strlen(key_lines[edit_line]))
+			strcpy(key_lines[edit_line] + key_linepos, key_lines[edit_line] + key_linepos + 1);
+
+		return;
+	}
+
+	// if we're at the end, get one character from previous line,
+	// otherwise just go right one
+	if (key == K_RIGHTARROW)
+	{
+		if (strlen(key_lines[edit_line]) == key_linepos)
+		{
+			if (strlen(key_lines[(edit_line + 31) & 31]) <= key_linepos)
+				return;// no character to get
+			key_lines[edit_line][key_linepos] = key_lines[(edit_line + 31) & 31][key_linepos];
+			key_linepos++;
+			key_lines[edit_line][key_linepos] = 0;
+		}
+		else {
+			key_linepos++;
+		}
+
+		return;
+	}
+	
 	if (key == K_TAB) {					// command completion
 		cmd = Cmd_CompleteCommand (key_lines[edit_line] + 1);
 		if (!cmd)
@@ -220,6 +267,7 @@ Key_Console (int key)
 		while (history_line != edit_line && !key_lines[history_line][1]);
 		if (history_line == edit_line) {
 			key_lines[edit_line][0] = ']';
+			key_lines[edit_line][1] = 0;
 			key_linepos = 1;
 		} else {
 			Q_strcpy (key_lines[edit_line], key_lines[history_line]);
@@ -255,12 +303,14 @@ Key_Console (int key)
 	if (key < 32 || key > 127)
 		return;							// non printable
 
-	if (key_linepos < MAXCMDLINE - 1) {
-		key_lines[edit_line][key_linepos] = key;
-		key_linepos++;
-		key_lines[edit_line][key_linepos] = 0;
-	}
+	i = strlen(key_lines[edit_line]);
 
+	if (i >= MAXCMDLINE - 1)
+		return;
+
+	memmove (key_lines[edit_line]+key_linepos+1, key_lines[edit_line]+key_linepos, i-key_linepos+1);
+	key_lines[edit_line][key_linepos] = key;
+	key_linepos++;
 }
 
 //============================================================================
@@ -530,6 +580,7 @@ Key_Init (void)
 	consolekeys[K_MWHEELDOWN] = true;
 	consolekeys['`'] = false;
 	consolekeys['~'] = false;
+	consolekeys[K_DEL] = true;
 
 	for (i = 0; i < 256; i++)
 		keyshift[i] = i;

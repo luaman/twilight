@@ -489,31 +489,31 @@ Con_DrawInput (void)
 	int         y;
 	int         i;
 	char       *text;
+	char		temp[256];
 
 	if (key_dest != key_console && !con_forcedup)
 		return;							// don't draw anything
+	
+	text = strcpy(temp, key_lines[edit_line]);
+	y = strlen(text);
 
-	text = key_lines[edit_line];
-
-// add the cursor frame
-	text[key_linepos] = 10 + ((int) (realtime * con_cursorspeed) & 1);
-
-// fill out remainder with spaces
-	for (i = key_linepos + 1; i < con_linewidth; i++)
+	// fill out remainder with spaces
+	for (i = y; i < 256; i++)
 		text[i] = ' ';
+	
+	// add the cursor frame
+	if ((int)(realtime * con_cursorspeed) & 1)// cursor is visible
+		text[key_linepos] = ((int)(realtime * con_cursorspeed) & 1)*11;
 
-//  prestep if horizontally scrolling
+	//  prestep if horizontally scrolling
 	if (key_linepos >= con_linewidth)
 		text += 1 + key_linepos - con_linewidth;
 
-// draw it
+	// draw it
 	y = con_vislines - 16;
 
 	for (i = 0; i < con_linewidth; i++)
 		Draw_Character ((i + 1) << 3, con_vislines - 16, text[i]);
-
-// remove cursor
-	key_lines[edit_line][key_linepos] = 0;
 }
 
 
