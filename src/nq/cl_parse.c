@@ -536,26 +536,19 @@ CL_ParseClientdata (int bits)
 {
 	int         i, j;
 
-	if (bits & SU_VIEWHEIGHT)
-		cl.viewheight = MSG_ReadChar ();
-	else
-		cl.viewheight = DEFAULT_VIEWHEIGHT;
+	cl.viewheight = (bits & SU_VIEWHEIGHT) ? 
+		MSG_ReadChar() : DEFAULT_VIEWHEIGHT;
 
-	if (bits & SU_IDEALPITCH)
-		cl.idealpitch = MSG_ReadChar ();
-	else
-		cl.idealpitch = 0;
+	cl.idealpitch = (bits & SU_IDEALPITCH) ?
+		MSG_ReadChar() : cl.idealpitch = 0;
 
 	VectorCopy (cl.mvelocity[0], cl.mvelocity[1]);
+
 	for (i = 0; i < 3; i++) {
-		if (bits & (SU_PUNCH1 << i))
-			cl.punchangle[i] = MSG_ReadChar ();
-		else
-			cl.punchangle[i] = 0;
-		if (bits & (SU_VELOCITY1 << i))
-			cl.mvelocity[0][i] = MSG_ReadChar () * 16;
-		else
-			cl.mvelocity[0][i] = 0;
+		cl.punchangle[i] = (bits & (SU_PUNCH1 << i)) ?
+			MSG_ReadChar() : cl.punchangle[i] = 0;
+		cl.mvelocity[0][i] = (bits & (SU_VELOCITY1 << i)) ?
+			MSG_ReadChar() * 16 : cl.mvelocity[0][i] = 0;
 	}
 
 // [always sent]    if (bits & SU_ITEMS)
@@ -571,23 +564,17 @@ CL_ParseClientdata (int bits)
 	cl.onground = (bits & SU_ONGROUND) != 0;
 	cl.inwater = (bits & SU_INWATER) != 0;
 
-	if (bits & SU_WEAPONFRAME)
-		cl.stats[STAT_WEAPONFRAME] = MSG_ReadByte ();
-	else
-		cl.stats[STAT_WEAPONFRAME] = 0;
+	cl.stats[STAT_WEAPONFRAME] = (bits & SU_WEAPONFRAME) ?
+		MSG_ReadByte() : 0;
 
-	if (bits & SU_ARMOR)
-		i = MSG_ReadByte ();
-	else
-		i = 0;
+	i = (bits & SU_ARMOR) ? MSG_ReadByte() : 0;
+
 	if (cl.stats[STAT_ARMOR] != i) {
 		cl.stats[STAT_ARMOR] = i;
 	}
 
-	if (bits & SU_WEAPON)
-		i = MSG_ReadByte ();
-	else
-		i = 0;
+	i = (bits & SU_WEAPON) ? MSG_ReadByte() : 0;
+
 	if (cl.stats[STAT_WEAPON] != i) {
 		cl.stats[STAT_WEAPON] = i;
 	}
