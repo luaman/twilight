@@ -499,6 +499,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\winconsole.c">
+			</File>
+			<File
 				RelativePath="zone.c">
 				<FileConfiguration
 					Name="Release|Win32">

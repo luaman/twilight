@@ -46,7 +46,11 @@ static const char rcsid[] =
 #include "fs/fs.h"
 #include "fs/rw_ops.h"
 #include "host.h"
-	
+
+#ifdef WIN32
+# include "winconsole.h"
+#endif
+
 host_t		host;
 
 netadr_t    master_adr[MAX_MASTERS];	// address of group servers
@@ -1072,6 +1076,24 @@ SV_CheckTimeouts (void)
 		// nobody left, unpause the server
 		SV_TogglePause ("Pause released since no players are left.\n");
 	}
+
+#ifdef WIN32
+	{
+		// check these and update the console if neccessary
+		static int lastclients = 0;
+		static int lastmaxclients = 0;
+		if(lastclients != nclients)
+		{
+			WinCon_SetConnectedClients(nclients);
+			lastclients = nclients;
+		}
+		if(lastmaxclients != maxclients->ivalue)
+		{
+			lastmaxclients = maxclients->ivalue;
+			WinCon_SetMaxClients(lastmaxclients);
+		}
+	}
+#endif
 }
 
 /*
