@@ -143,6 +143,7 @@ R_Init_Cvars (void)
 	r_netgraph = Cvar_Get ("r_netgraph", "0", CVAR_NONE, NULL);
 
 	r_skybox = Cvar_Get ("skybox", "", CVAR_NONE, &R_SkyBoxChanged);
+	r_fastsky = Cvar_Get ("r_fastsky", "0", CVAR_NONE, NULL);
 
 	gl_clear = Cvar_Get ("gl_clear", "1", CVAR_NONE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
