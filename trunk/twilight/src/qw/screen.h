@@ -51,7 +51,6 @@ extern qboolean scr_disabled_for_loading;
 extern struct cvar_s *scr_viewsize;
 extern cvar_t *r_brightness;
 extern cvar_t *r_contrast;
-extern cvar_t *r_waterwarp;
 
 // only the refresh window will be updated unless these variables are flagged 
 extern int scr_copytop;
