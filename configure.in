@@ -138,15 +138,15 @@ SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"
 dnl Some systems need a keyword in declarations for dynamic libs
 AC_MSG_CHECKING(for OpenGL import declaration)
 case "${SYS}" in
-	Win32) OGLDECL="APIENTRY" ;;
-	*) OGLDECL="" ;;
+	Win32) DYNGLENTRY="APIENTRY" ;;
+	*) DYNGLENTRY="" ;;
 esac
-if test "x$OGLDECL" = "x"; then
+if test "x$DYNGLENTRY" = "x"; then
 	AC_MSG_RESULT(None needed)
 else
-	AC_MSG_RESULT($OGLDECL)
+	AC_MSG_RESULT($DYNGLENTRY)
 fi
-AC_DEFINE_UNQUOTED(OGLDECL, $OGLDECL,
+AC_DEFINE_UNQUOTED(DYNGLENTRY, $DYNGLENTRY,
 	[Define to whatever your OS requires])
 
 dnl let the user choose the default OpenGL library
