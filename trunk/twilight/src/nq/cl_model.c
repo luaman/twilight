@@ -1054,6 +1054,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	daliasframetype_t	*pframetype;
 	daliasskintype_t	*pskintype;
 	int					start, end, total;
+	qboolean			typeSingle = false;
 
 	start = Hunk_LowMark ();
 
@@ -1163,6 +1164,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		frametype = LittleLong (pframetype->type);
 
 		if (frametype == ALIAS_SINGLE) {
+			typeSingle = true;
 			pframetype = (daliasframetype_t *)
 				Mod_LoadAliasFrame (pframetype + 1, &pheader->frames[i]);
 		} else {
@@ -1183,9 +1185,10 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 	// Vic: automatically detect models 
 	// that should not be interpolated
-	if (mod->numframes == 1)
-		if (!mod->modflags & FLAG_NO_IM_ANIM)
-			mod->modflags |= FLAG_NO_IM_ANIM;
+	if (numframes == 1)
+		if (typeSingle)
+			if (!(mod->modflags & FLAG_NO_IM_ANIM))
+				mod->modflags |= FLAG_NO_IM_ANIM;
 
 	// double size of eyes, since they are really hard to see in gl
 	if (mod->modflags & FLAG_EYES)
