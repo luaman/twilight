@@ -13,7 +13,6 @@ Bugs we know about:
 New stuff slated for 0.2.0:
 
   - QW/NQ renderers - port changes between them
-  - "lighthalf" gamma table doubling trick
   - faster dlights if we can make them faster
   - particle torches
 

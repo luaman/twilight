@@ -1078,3 +1078,4 @@ SCR_UpdateScreen (void)
 
 	GL_EndRendering ();
 }
+
