@@ -26,11 +26,11 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
-#include "qtypes.h"
-#include "zone.h"
 #include "cvar.h"
 #include "dyngl.h"
 #include "gl_arrays.h"
+#include "qtypes.h"
+#include "zone.h"
 
 static memzone_t	*vzone;
 

@@ -27,9 +27,9 @@
 #ifndef __R_SKY_H
 #define __R_SKY_H
 
-#include "qtypes.h"
-#include "model.h"
 #include "image/image.h"
+#include "model.h"
+#include "qtypes.h"
 
 typedef enum {
 	SKY_SPHERE, SKY_BOX, SKY_FAST,

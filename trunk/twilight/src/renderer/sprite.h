@@ -27,8 +27,8 @@
 #ifndef __GL_SPRITE_H
 #define __GL_SPRITE_H
 
-#include "qtypes.h"
 #include "gl_info.h"
+#include "qtypes.h"
 
 void R_DrawOpaqueSpriteModels(void);
 

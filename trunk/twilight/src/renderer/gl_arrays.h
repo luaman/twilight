@@ -30,9 +30,9 @@
 
 #include <string.h>
 
-#include "mathlib.h"
 #include "dyngl.h"
 #include "gl_info.h"
+#include "mathlib.h"
 #include "sys.h"
 
 // Vertex array stuff.

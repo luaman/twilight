@@ -31,12 +31,12 @@ static const char rcsid[] =
 
 #include <string.h>
 
-#include "common.h"
-#include "qtypes.h"
-#include "dyngl.h"
 #include "cmd.h"
-#include "sys.h"
+#include "common.h"
+#include "dyngl.h"
 #include "model.h"
+#include "qtypes.h"
+#include "sys.h"
 
 GLfloat whitev[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 

@@ -32,15 +32,15 @@ static const char rcsid[] =
 #include "cpu.h"
 #include "crc.h"
 #include "dyngl.h"
+#include "fs/wad.h"
 #include "gl_info.h"
-#include "textures.h"
 #include "image/image.h"
 #include "mathlib.h"
 #include "model.h"
 #include "qtypes.h"
 #include "strlib.h"
 #include "sys.h"
-#include "fs/wad.h"
+#include "textures.h"
 
 static Uint32 * GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette, qboolean check_empty);
 static void GLT_FloodFill8 (Uint8 * skin, int skinwidth, int skinheight);

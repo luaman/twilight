@@ -31,15 +31,15 @@ static const char rcsid[] =
 #include <stdlib.h>	/* for malloc() */
 #include <string.h>
 
-#include "qtypes.h"
 #include "model.h"
+#include "qtypes.h"
 
+#include "cclient.h"
 #include "dyngl.h"
 #include "gl_arrays.h"
 #include "liquid.h"
 #include "textures.h"
 #include "vis.h"
-#include "cclient.h"
 
 #include "cvar.h"
 

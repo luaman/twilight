@@ -33,12 +33,12 @@ static const char rcsid[] =
 #include "SDL_types.h"
 
 #include "dyngl.h"
-#include "qtypes.h"
-#include "mathlib.h"
-#include "zone.h"
 #include "gen_textures.h"
-#include "textures.h"
+#include "mathlib.h"
 #include "noise.h"
+#include "qtypes.h"
+#include "textures.h"
+#include "zone.h"
 
 static void GTF_Init (void);
 

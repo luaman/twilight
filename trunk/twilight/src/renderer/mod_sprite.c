@@ -28,16 +28,16 @@ static const char rcsid[] =
 #include "twiconfig.h"
 #include <math.h>
 
-#include "quakedef.h"
 #include "crc.h"
 #include "cvar.h"
+#include "gl_info.h"
 #include "host.h"
 #include "mathlib.h"
+#include "mod_sprite.h"
+#include "quakedef.h"
 #include "strlib.h"
 #include "sys.h"
 #include "textures.h"
-#include "gl_info.h"
-#include "mod_sprite.h"
 
 extern vec3_t	 bboxmin, bboxmax;
 extern float	 bboxradius, bboxyawradius;

@@ -31,21 +31,21 @@ static const char rcsid[] =
 #include <stdlib.h>	/* for malloc() */
 #include <string.h>
 
-#include "qtypes.h"
 #include "model.h"
+#include "qtypes.h"
 
 #include "dyngl.h"
 #include "gl_arrays.h"
 #include "gl_main.h"
-#include "textures.h"
-#include "sky.h"
 #include "image/image.h"
+#include "sky.h"
+#include "textures.h"
 #include "vis.h"
 
-#include "cvar.h"
-#include "cmd.h"
-#include "strlib.h"
 #include "cclient.h"
+#include "cmd.h"
+#include "cvar.h"
+#include "strlib.h"
 
 static GLuint	skyboxtexnums[6];
 

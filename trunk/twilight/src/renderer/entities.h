@@ -27,13 +27,13 @@
 #ifndef __ENTITIES_H
 #define __ENTITIES_H
 
-#include "mathlib.h"
 #include "dyngl.h"
-#include "qtypes.h"
-#include "matrixlib.h"
 #include "gl_info.h"
+#include "mathlib.h"
+#include "matrixlib.h"
 #include "model.h"
 #include "palette.h"
+#include "qtypes.h"
 
 #define MAX_ENTITIES	1024
 

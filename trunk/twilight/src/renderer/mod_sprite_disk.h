@@ -51,21 +51,6 @@
 // <endrepeat>
 //-------------------------------------------------------
 
-#ifdef INCLUDELIBS
-
-#include <stdlib.h>
-#include <stdio.h>
-
-#include "cmdlib.h"
-#include "scriplib.h"
-#include "dictlib.h"
-#include "trilib.h"
-#include "lbmlib.h"
-#include "mathlib.h"
-#include "strlib.h"
-
-#endif
-
 #define SPRITE_VERSION	1
 
 // must match definition in modelgen.h

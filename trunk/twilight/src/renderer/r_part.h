@@ -27,9 +27,9 @@
 #ifndef __R_PART_H
 #define __R_PART_H
 
-#include "qtypes.h"
-#include "gl_info.h"
 #include "entities.h"
+#include "gl_info.h"
+#include "qtypes.h"
 
 void R_Particles_Init_Cvars (void);
 void R_Particles_Init (void);

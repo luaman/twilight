@@ -30,23 +30,21 @@ static const char rcsid[] =
 
 #include <string.h>
 
-#include "SDL.h"
-
-#include "quakedef.h"
+#include "cclient.h"
 #include "cmd.h"
 #include "console.h"
 #include "cvar.h"
+#include "gl_arrays.h"
+#include "gl_info.h"
 #include "host.h"
+#include "hud.h"
 #include "keys.h"
 #include "mathlib.h"
-#include "sys.h"
-#include "gl_info.h"
-#include "gl_arrays.h"
 #include "palette.h"
-#include "video.h"
-#include "cclient.h"
-#include "hud.h"
+#include "quakedef.h"
 #include "strlib.h"
+#include "sys.h"
+#include "video.h"
 
 extern cvar_t *cl_verstring;
 

@@ -28,11 +28,11 @@ static const char rcsid[] =
 #include "twiconfig.h"
 #include <math.h>
 
-#include "vis.h"
-#include "qtypes.h"
+#include "cvar.h"
 #include "mathlib.h"
 #include "model.h"
-#include "cvar.h"
+#include "qtypes.h"
+#include "vis.h"
 
 static cvar_t *r_novis;
 

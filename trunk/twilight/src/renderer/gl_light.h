@@ -27,11 +27,11 @@
 #ifndef __GL_RLIGHT_H
 #define __GL_RLIGHT_H
 
-#include "qtypes.h"
 #include "cclient.h"
 #include "gl_info.h"
-#include "model.h"
 #include "matrixlib.h"
+#include "model.h"
+#include "qtypes.h"
 
 // Light sources are points, use this to pretend they are not
 #define LIGHTOFFSET (32 * 32)

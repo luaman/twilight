@@ -27,8 +27,8 @@ static const char rcsid[] =
 #include "twiconfig.h"
 
 #include "SDL_types.h"
-#include "qtypes.h"
 #include "mathlib.h"
+#include "qtypes.h"
 #include "strlib.h"
 #include "sys.h"
 #include "zone.h"

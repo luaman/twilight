@@ -27,10 +27,10 @@
 #ifndef __GL_DRAW_H
 #define __GL_DRAW_H
 
-#include "qtypes.h"
 #include "fs/wad.h"
-#include "mod_brush.h"
 #include "image/image.h"
+#include "mod_brush.h"
+#include "qtypes.h"
 
 extern image_t *draw_disc;
 

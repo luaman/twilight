@@ -27,8 +27,8 @@
 #ifndef __GL_INFO_H
 #define __GL_INFO_H
 
-#include "mathlib.h"
 #include "dyngl.h"
+#include "mathlib.h"
 #include "matrixlib.h"
 #include "mod_alias.h"
 #include "model.h"

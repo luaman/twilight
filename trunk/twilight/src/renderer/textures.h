@@ -28,10 +28,10 @@
 #ifndef __gl_textures_h
 #define __gl_textures_h
 
-#include "qtypes.h"
-#include "model.h"
 #include "image/image.h"
 #include "mathlib.h"
+#include "model.h"
+#include "qtypes.h"
 
 void GLT_Init_Cvars(void);
 void GLT_Init(void);

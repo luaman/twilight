@@ -31,14 +31,14 @@ static const char rcsid[] =
 
 #include <string.h>
 
-#include "entities.h"
-#include "host.h"
-#include "sky.h"
-#include "gl_info.h"
 #include "alias.h"
 #include "brush.h"
-#include "sprite.h"
+#include "entities.h"
+#include "gl_info.h"
 #include "gl_main.h"
+#include "host.h"
+#include "sky.h"
+#include "sprite.h"
 #include "vis.h"
 
 static qboolean need_sky;

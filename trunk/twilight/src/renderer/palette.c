@@ -30,15 +30,13 @@ static const char rcsid[] =
 
 #include <string.h>
 
-#include "SDL.h"
-
-#include "mathlib.h"
-#include "cvar.h"
-#include "host.h"
-#include "gl_info.h"
-#include "video.h"
 #include "common.h"
+#include "cvar.h"
+#include "gl_info.h"
+#include "host.h"
+#include "mathlib.h"
 #include "sys.h"
+#include "video.h"
 
 
 Uint8	*host_basepal;
