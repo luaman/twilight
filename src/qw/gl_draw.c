@@ -523,29 +523,84 @@ Draw_Character (int x, int y, int num)
 Draw_String
 ================
 */
-void
+void 
 Draw_String (int x, int y, char *str)
 {
-	while (*str) {
-		Draw_Character (x, y, *str);
-		str++;
+	float			frow, fcol;
+	int num;
+
+	if (y <= -8)
+		return;			// totally off screen
+	if (!str || !str[0])
+		return;
+
+	GL_Bind (char_texture);
+
+	glBegin (GL_QUADS);
+
+	while (*str) // stop rendering when out of characters
+	{
+		if ((num = *str++) != 32) // skip spaces
+		{
+			frow = (float) (num >> 4)*0.0625;
+			fcol = (float) (num & 15)*0.0625;
+			glTexCoord2f (fcol, frow);
+			glVertex2f (x, y);
+			glTexCoord2f (fcol + 0.0625, frow);
+			glVertex2f (x+8, y);
+			glTexCoord2f (fcol + 0.0625, frow + 0.0625);
+			glVertex2f (x+8, y+8);
+			glTexCoord2f (fcol, frow + 0.0625);
+			glVertex2f (x, y+8);
+		}
+
 		x += 8;
 	}
+
+	glEnd ();
 }
+
 
 /*
 ================
 Draw_Alt_String
 ================
 */
-void
+void 
 Draw_Alt_String (int x, int y, char *str)
 {
-	while (*str) {
-		Draw_Character (x, y, (*str) | 0x80);
-		str++;
+	float			frow, fcol;
+	int num;
+
+	if (y <= -8)
+		return;			// totally off screen
+	if (!str || !str[0])
+		return;
+
+	GL_Bind (char_texture);
+
+	glBegin (GL_QUADS);
+
+	while (*str) // stop rendering when out of characters
+	{
+		if ((num = *str++|0x80) != (32|0x80))
+		{
+			frow = (float) (num >> 4)*0.0625;
+			fcol = (float) (num & 15)*0.0625;
+			glTexCoord2f (fcol, frow);
+			glVertex2f (x, y);
+			glTexCoord2f (fcol + 0.0625, frow);
+			glVertex2f (x+8, y);
+			glTexCoord2f (fcol + 0.0625, frow + 0.0625);
+			glVertex2f (x+8, y+8);
+			glTexCoord2f (fcol, frow + 0.0625);
+			glVertex2f (x, y+8);
+		}
+
 		x += 8;
 	}
+
+	glEnd ();
 }
 
 void
