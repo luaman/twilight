@@ -1,0 +1,37 @@
+This is the embedded gamedata which will be included in a compiled
+binary, this is desirable because this gives us basic minimal
+functionality in the event of being able to locate NOTHING.
+
+This is also desirable because it allows us to move things (such as the
+menu) to gamedata, while still giving people who just have the ID
+gamedata the basic functionality.
+
+Everything here is at the END of the search path, and thus will only be
+used if nothing else of the given name can be found.
+
+To add files to this, edit Makefile.am and add deps to the
+embedded_data.fs rule.
+
+
+Copyrights:
+
+  menu.mnu was written by Zephaniah E. Hull. [0]
+  twilight.rc was written by Zephaniah E. Hull. [0]
+
+  src/conchars.xcf was written by Joseph Carter, and modified by
+  Zephaniah E. Hull, src/conchars.tga is generated from that. [1]
+
+  src/palette.lmp originates from ID software. [2]
+
+
+0:  Zephaniah E. Hull disclaims all copyright to these files and
+    releases them into the Public Domain WITHOUT ANY WARRANTY
+    whatsoever, express or implied.
+
+1:  Both Joseph Carter and Zephaniah E. Hull disclaim all copyright
+    to these files and releases them into the Public Domain WITHOUT ANY
+    WARRANTY whatsoever, express or implied.
+
+2:  It is our understanding that ID software does not believe the
+    file to be copyright-able, and thus releases it into the Public
+    Domain WITHOUT ANY WARRANTY whatsoever, express or implied.

@@ -122,9 +122,6 @@ int			host_framecount;
 
 int			host_hunklevel;
 
-Uint8		*host_basepal;
-Uint8		*host_colormap;
-
 int			fps_count = 0;
 
 static jmp_buf host_abort;
@@ -1431,14 +1428,6 @@ Host_Init (void)
 
 	Image_Init ();
 
-	host_basepal = COM_LoadNamedFile ("gfx/palette.lmp", true);
-	if (!host_basepal)
-		Sys_Error ("Couldn't load gfx/palette.lmp");
-	host_colormap = COM_LoadNamedFile ("gfx/colormap.lmp", true);
-	if (!host_colormap)
-		Sys_Error ("Couldn't load gfx/colormap.lmp");
-
-	VID_Init (host_basepal);
 	Draw_Init_Cvars ();				// initialize all draw system related cvars
 	Draw_Init ();					// setup draw system, add related commands
 
