@@ -5,9 +5,6 @@ Bugs we know about:
 
   - Sometimes a client will not die on crash properly because somehow the
     SDL sound thread doesn't get told to die.  We need to fix this.
-  - Id bug: if you look up, models disappear when they get to about the
-    status bar level.  Another bug used to hide this from people using a
-    fov of 90, but we fixed that one, exposing this.
   - Damm could demonstrate lightmap corruption consistantly with certain
     maps, if he still can we need to fix it.
   - Some OpenGL state changes lost in QW, particularly things like alpha
