@@ -117,7 +117,7 @@ R_Init_Cvars (void)
 	r_lightlerp = Cvar_Get ("r_lightlerp", "1", CVAR_NONE, NULL);
 	r_showtris = Cvar_Get ("r_showtris", "0", CVAR_NONE, NULL);
 
-	r_skybox = Cvar_Get ("skybox", "", CVAR_NONE, &R_SkyBoxChanged);
+	r_skyname = Cvar_Get ("r_skyname", "", CVAR_NONE, &R_SkyBoxChanged);
 	r_fastsky = Cvar_Get ("r_fastsky", "0", CVAR_NONE, NULL);
 
 	gl_clear = Cvar_Get ("gl_clear", "1", CVAR_NONE, NULL);
@@ -146,6 +146,21 @@ R_Init_Cvars (void)
 }
 
 /*
+ * compatibility function to set r_skyname
+ */
+static void
+R_LoadSky_f (void)
+{
+	if (Cmd_Argc() != 2)
+	{
+		Con_Printf ("loadsky <name> : load a skybox\n");
+		return;
+	}
+
+	Cvar_Set (r_skyname, Cmd_Argv(1));
+}
+
+/*
 ===============
 R_Init
 ===============
@@ -153,8 +168,9 @@ R_Init
 void
 R_Init (void)
 {
-	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);
-	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);
+	Cmd_AddCommand ("timerefresh", &R_TimeRefresh_f);
+	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
+	Cmd_AddCommand ("loadsky", &R_LoadSky_f);
 
 	R_InitBubble ();
 	R_InitParticles ();
@@ -277,6 +293,13 @@ R_NewMap (void)
 			skytexturenum = i;
 		cl.worldmodel->textures[i]->texturechain = NULL;
 	}
+
+	// some Cvars need resetting on map change
+	Cvar_Set (r_skyname, "");
+
+	// Parse map entities
+	CL_ParseEntityLump (cl.worldmodel->entities);
+
 	r_explosion_newmap ();
 }
 

@@ -1370,3 +1370,45 @@ CL_ParseServerMessage (void)
 	CL_SetSolidEntities ();
 }
 
+void
+CL_ParseEntityLump (char *entdata)
+{
+	char *data;
+	char key[128], value[4096];
+
+	data = entdata;
+
+	if (!data)
+		return;
+	data = COM_Parse (data);
+	if (!data || com_token[0] != '{')
+		return;							// error
+
+	while (1)
+	{
+		data = COM_Parse (data);
+		if (!data)
+			return;						// error
+		if (com_token[0] == '}')
+			break;						// end of worldspawn
+		if (com_token[0] == '_')
+			strlcpy(key, com_token + 1, 128);
+		else
+			strlcpy(key, com_token, 128);
+
+		while (key[strlen(key)-1] == ' ')
+			key[strlen(key)-1] = 0;		// remove trailing spaces
+
+		data = COM_Parse (data);
+		if (!data)
+			return;						// error
+		strlcpy (value, com_token, 4096);
+
+		if (strcmp (key, "sky") == 0 || strcmp (key, "skyname") == 0 ||
+				strcmp (key, "qlsky") == 0)
+			Cvar_Set (r_skyname, value);
+
+		// more checks here..
+	}
+}
+
