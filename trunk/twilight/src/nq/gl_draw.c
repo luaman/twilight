@@ -691,9 +691,12 @@ void
 Draw_Fill (int x, int y, int w, int h, int c)
 {
 	qglDisable (GL_TEXTURE_2D);
-	qglColor3f (d_8to32table[c * 3] / 255.0,
-			   d_8to32table[c * 3 + 1] / 255.0,
-			   d_8to32table[c * 3 + 2] / 255.0);
+
+	// Save this for lighthalf later
+//	qglColor3f (((Uint8 *)&d_8to32table[c])[0] / 255.0,
+//			((Uint8 *)&d_8to32table[c])[1] / 255.0,
+//			((Uint8 *)&d_8to32table[c])[2] / 255.0);
+	qglColor4ubv((Uint8 *)&d_8to32table[c]);
 
 	qglBegin (GL_QUADS);
 
