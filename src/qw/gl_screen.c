@@ -365,7 +365,7 @@ SCR_CalcRefdef (void)
 	else
 		sb_lines = 24 + 16 + 8;
 
-	r_refdef.fov_x = scr_fov->fvalue  * cl.viewzoom;
+	r_refdef.fov_x = bound (10, scr_fov->fvalue * cl.viewzoom, 170);
 	r_refdef.fov_y = CalcFov (r_refdef.fov_x, vid.width, vid.height);
 
 	if (cl.worldmodel)
