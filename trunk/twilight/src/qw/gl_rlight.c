@@ -67,7 +67,7 @@ AddLightBlend (float r, float g, float b, float a2)
 
 	a2 = a2 / a;
 
-	v_blend[0] = v_blend[1] * (1 - a2) + r * a2;
+	v_blend[0] = v_blend[0] * (1 - a2) + r * a2;
 	v_blend[1] = v_blend[1] * (1 - a2) + g * a2;
 	v_blend[2] = v_blend[2] * (1 - a2) + b * a2;
 //Con_Printf("AddLightBlend(): %4.2f %4.2f %4.2f %4.6f\n", v_blend[0], v_blend[1], v_blend[2], v_blend[3]);
