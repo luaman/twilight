@@ -27,10 +27,6 @@
 #ifndef __GLQUAKE_H
 #define __GLQUAKE_H
 
-#ifdef _WIN32
-# include <windows.h>
-#endif
-
 #define	MAX_GLTEXTURES	1024
 
 #include "opengl.h"
