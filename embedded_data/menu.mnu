@@ -81,7 +81,7 @@ menu:
 	item qpic:
 		control kill_load "game_name" "nq"
 		flags ~selectable
-		qpic "gfx/menuplyr.lmp"
+		qpic "menuplyr"
 		height 0
 		x 16
 		y 0
@@ -123,7 +123,7 @@ menu:
 	item qpic:
 		control kill_load "game_name" "qw"
 		flags ~selectable
-		qpic "gfx/menuplyr.lmp"
+		qpic "menuplyr"
 		height 0
 		x 16
 		y 0
