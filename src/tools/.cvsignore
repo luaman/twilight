@@ -1,2 +1,8 @@
 Makefile
 Makefile.in
+install-sh
+mkinstalldirs
+missing
+config.guess
+config.sub
+depcomp
