@@ -1,8 +1,8 @@
 /*
-	$RCSFile$
 	Dynamic texture generation.
 
 	Copyright (C) 2000-2001   Zephaniah E. Hull.
+	Copyright (C) 2000-2001   Ragnvald "Despair" Maartmann-Moe IV
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -102,25 +102,21 @@ TNT_InitSmokeParticleTexture (void)
 {
 	Uint8	d;
 	Uint8	data[32][32][4], noise1[32][32], noise2[32][32];
-	int		dx, dy2, x, y, c;
+	int		dx, x, y;
 
 	FractalNoise (&noise1[0][0], 32, 4);
 	FractalNoise (&noise2[0][0], 32, 8);
 	for (y = 0; y < 32; y++)
 	{
-		dy2 = y - 16;
-		dy2 *= dy2;
 		for (x = 0; x < 32; x++) {
 			dx = x - 16;
-			c = 255 - (dx * dx + dy2);
-			if (c < 1)
-				c = 0;
-			d = (noise1[y][x] + noise2[y][x]) / 2;
+//			d = (noise1[y][x] + noise2[y][x]) / 2;
+			d = noise2[y][x];
 			if (d > 0) {
 				data[y][x][0] = 255;
 				data[y][x][1] = 255;
 				data[y][x][2] = 255;
-				data[y][x][3] = (d * c)/255;
+				data[y][x][3] = d;
 			} else {
 				data[y][x][0] = 255;
 				data[y][x][1] = 255;

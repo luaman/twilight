@@ -790,7 +790,7 @@ R_DrawAliasModel (entity_t *e)
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
 			if (realtime >= e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
-				e->time_left = realtime + 0.05;
+				e->time_left = realtime + 0.10;
 			}
 			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_fire)
 				clmodel = mdl_fire;
