@@ -138,3 +138,17 @@ end:
 
 	return NULL;
 }
+
+void
+Image_Free (image_t *img, qboolean gl)
+{
+	if (!img)
+		return;
+
+	if (img->pixels)
+		Zone_Free (img->pixels);
+	if (gl && img->texnum)
+		GLT_Delete (img->texnum);
+
+	Zone_Free (img);
+}
