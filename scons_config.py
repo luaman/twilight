@@ -65,7 +65,7 @@ def check_SDL_config (context):
 def check_SDL_headers (context):
 	context.Message ('Checking for SDL headers ... ')
 	ret = context.TryRun ("""
-#include <SDL/SDL_version.h>
+#include "SDL_version.h"
 #include <stdio.h>
 
 int main (int argc, char *argv[])
@@ -116,6 +116,7 @@ def conf_base ():
 	opts.create('CC', env['CC'], 'C compiler command')
 	opts.create('CFLAGS', '-O2 -g -Wall', 'Base C compiler flags')
 	opts.create('save-temps', 0, 'Save temporary compilation files')
+	opts.create('sdl_include', '', 'Path to your SDL headers')
 
 	if env['PLATFORM'] == "cygwin" or env['PLATFORM'] == "mingw" or env['PLATFORM'] == "win32":
 		opts.create('dir_mode', 'dir_win32', 'Directory access mode')
@@ -158,21 +159,23 @@ def handle_opts (conf, opts, config_defs, destructive):
 		if int(opts['werror']):
 			conf.cflag ('-Werror')
 	else:
-		ccflags = opts['CFLAGS']
-		conf.env.Replace (CCFLAGS = Split (ccflags))
 		conf.env.Replace (CC = opts['CC'])
-		if int(opts['bitchiness']):
-			conf.cflag ('-Wcast-qual')
-			conf.cflag ('-Wsign-compare')
-			conf.cflag ('-W')
-		if int(opts['profile']):
-			conf.cflag ('-pg -g')
-		if int(opts['save-temps']):
-			conf.cflag ('-save-temps', 1)
+		if (env['PLATFORM'] == 'win32'):
+		    print 'Things may not work too well, trying anyways.'
 		else:
-			conf.cflag ('-pipe', 1)
-		conf.cflag ('-fno-strict-aliasing', 1)
-		conf.cflag ('-finline', 1)
+		    conf.env.Replace (CCFLAGS = Split (opts['CFLAGS']))
+		    if int(opts['bitchiness']):
+			    conf.cflag ('-Wcast-qual')
+			    conf.cflag ('-Wsign-compare')
+			    conf.cflag ('-W')
+		    if int(opts['profile']):
+			    conf.cflag ('-pg -g')
+		    if int(opts['save-temps']):
+			    conf.cflag ('-save-temps', 1)
+		    else:
+			    conf.cflag ('-pipe', 1)
+		    conf.cflag ('-fno-strict-aliasing', 1)
+		    conf.cflag ('-finline', 1)
 		config_defs.set('SDL_IMAGE_LIBRARY', '"' + opts['sdl_image'] + '"')
 		config_defs.set('USERPATH', '"' + opts['userpath'] + '"')
 		config_defs.set('SHAREPATH', '"' + opts['sharepath'] + '"')
@@ -210,6 +213,8 @@ def do_configure (env):
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		sdl_ver = ret[1]
 	else:
+		if (opts['sdl_include']):
+		    env.Append (CPPPATH = [opts['sdl_include']])
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		if not config_defs.has_key ('HAVE_SDL_H'):
 			print "Twilight requires SDL 1.2.5. (None found.)"
@@ -258,10 +263,16 @@ def do_configure (env):
     Build platform              : """ + env['PLATFORM'] + """
     SDL version                 : """ + repr(sdl_ver) + """
     Compiler                    : """ + env['CC'] + """
-    Compiler flags              : """ + string.join(env['CCFLAGS'], " ") + """
-    Link flags                  : """ + string.join(env['LINKFLAGS'], " ") + """
-    Libraries                   : """ + string.join(env['LIBS'], " ") + """
-    Lib path                    : """ + string.join(env['LIBPATH'], " ") + """
+    Compiler flags              : """ + string.join(env['CCFLAGS'], " ")
+	if (env.has_key ('LINKFLAGS') and env['LINKFLAGS']):
+	    print """\
+    Link flags                  : """ + string.join(env['LINKFLAGS'], " ")
+	print """\
+    Libraries                   : """ + string.join(env['LIBS'], " ")
+	if (env.has_key ('LIBPATH') and env['LIBPATH']):
+	    print """\
+    Lib path                    : """ + string.join(env['LIBPATH'], " ")
+	print """\
     Default OpenGL library      : """ + opts['libgl'] + """
 
   Path information
