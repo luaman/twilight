@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <SDL.h>
 #include "quakedef.h"
+#include "keys.h"
 
 
 #define WARP_WIDTH              640
@@ -465,14 +466,14 @@ VID_Init (unsigned char *palette)
 		vid.conwidth = scr_width;
 
 	if (SDL_Init (SDL_INIT_VIDEO) != 0) {
-		fprintf (stderr, "Error: %s\n", SDL_GetError ());
+		fprintf (stderr, "Error 1: %s\n", SDL_GetError ());
 		exit (1);
 	}
 	// We want at least 4444 (16 bit RGBA)
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 4);
-	SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 4);
+//	SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 4);
 
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
@@ -482,6 +483,9 @@ VID_Init (unsigned char *palette)
 		exit (1);
 	}
 	SDL_WM_SetCaption ("Twilight QWCL", "twilight");
+
+	/* Enable UNICODE translation for keyboard input */
+	SDL_EnableUNICODE(1);
 
 	vid.height = scr_height;
 	vid.width = scr_width;
@@ -518,7 +522,7 @@ Sys_SendKeyEvents (void)
 {
 	SDL_Event   event;
 	int         sym, state, but;
-	int         modstate;
+	short		unicode;
 
 	while (SDL_PollEvent (&event)) {
 		switch (event.type) {
@@ -526,180 +530,10 @@ Sys_SendKeyEvents (void)
 			case SDL_KEYUP:
 				sym = event.key.keysym.sym;
 				state = event.key.state;
-				modstate = SDL_GetModState ();
-				switch (sym) {
-					case SDLK_DELETE:
-						sym = K_DEL;
-						break;
-					case SDLK_BACKSPACE:
-						sym = K_BACKSPACE;
-						break;
-					case SDLK_F1:
-						sym = K_F1;
-						break;
-					case SDLK_F2:
-						sym = K_F2;
-						break;
-					case SDLK_F3:
-						sym = K_F3;
-						break;
-					case SDLK_F4:
-						sym = K_F4;
-						break;
-					case SDLK_F5:
-						sym = K_F5;
-						break;
-					case SDLK_F6:
-						sym = K_F6;
-						break;
-					case SDLK_F7:
-						sym = K_F7;
-						break;
-					case SDLK_F8:
-						sym = K_F8;
-						break;
-					case SDLK_F9:
-						sym = K_F9;
-						break;
-					case SDLK_F10:
-						sym = K_F10;
-						break;
-					case SDLK_F11:
-						sym = K_F11;
-						break;
-					case SDLK_F12:
-						sym = K_F12;
-						break;
-					case SDLK_BREAK:
-					case SDLK_PAUSE:
-						sym = K_PAUSE;
-						break;
-					case SDLK_UP:
-						sym = K_UPARROW;
-						break;
-					case SDLK_DOWN:
-						sym = K_DOWNARROW;
-						break;
-					case SDLK_RIGHT:
-						sym = K_RIGHTARROW;
-						break;
-					case SDLK_LEFT:
-						sym = K_LEFTARROW;
-						break;
-					case SDLK_INSERT:
-						sym = K_INS;
-						break;
-					case SDLK_HOME:
-						sym = K_HOME;
-						break;
-					case SDLK_END:
-						sym = K_END;
-						break;
-					case SDLK_PAGEUP:
-						sym = K_PGUP;
-						break;
-					case SDLK_PAGEDOWN:
-						sym = K_PGDN;
-						break;
-					case SDLK_RSHIFT:
-					case SDLK_LSHIFT:
-						sym = K_SHIFT;
-						break;
-					case SDLK_RCTRL:
-					case SDLK_LCTRL:
-						sym = K_CTRL;
-						break;
-					case SDLK_RALT:
-					case SDLK_LALT:
-						sym = K_ALT;
-						break;
-					case SDLK_KP0:
-						if (modstate & KMOD_NUM)
-							sym = K_INS;
-						else
-							sym = SDLK_0;
-						break;
-					case SDLK_KP1:
-						if (modstate & KMOD_NUM)
-							sym = K_END;
-						else
-							sym = SDLK_1;
-						break;
-					case SDLK_KP2:
-						if (modstate & KMOD_NUM)
-							sym = K_DOWNARROW;
-						else
-							sym = SDLK_2;
-						break;
-					case SDLK_KP3:
-						if (modstate & KMOD_NUM)
-							sym = K_PGDN;
-						else
-							sym = SDLK_3;
-						break;
-					case SDLK_KP4:
-						if (modstate & KMOD_NUM)
-							sym = K_LEFTARROW;
-						else
-							sym = SDLK_4;
-						break;
-					case SDLK_KP5:
-						sym = SDLK_5;
-						break;
-					case SDLK_KP6:
-						if (modstate & KMOD_NUM)
-							sym = K_RIGHTARROW;
-						else
-							sym = SDLK_6;
-						break;
-					case SDLK_KP7:
-						if (modstate & KMOD_NUM)
-							sym = K_HOME;
-						else
-							sym = SDLK_7;
-						break;
-					case SDLK_KP8:
-						if (modstate & KMOD_NUM)
-							sym = K_UPARROW;
-						else
-							sym = SDLK_8;
-						break;
-					case SDLK_KP9:
-						if (modstate & KMOD_NUM)
-							sym = K_PGUP;
-						else
-							sym = SDLK_9;
-						break;
-					case SDLK_KP_PERIOD:
-						if (modstate & KMOD_NUM)
-							sym = K_DEL;
-						else
-							sym = SDLK_PERIOD;
-						break;
-					case SDLK_KP_DIVIDE:
-						sym = SDLK_SLASH;
-						break;
-					case SDLK_KP_MULTIPLY:
-						sym = SDLK_ASTERISK;
-						break;
-					case SDLK_KP_MINUS:
-						sym = SDLK_MINUS;
-						break;
-					case SDLK_KP_PLUS:
-						sym = SDLK_PLUS;
-						break;
-					case SDLK_KP_ENTER:
-						sym = SDLK_RETURN;
-						break;
-					case SDLK_KP_EQUALS:
-						sym = SDLK_EQUALS;
-						break;
-				}
-				// If we're not directly handled and still above 255
-				// just force it to 0
-				if (sym > 255)
-					sym = 0;
-				Key_Event (sym, state);
+				unicode = event.key.keysym.unicode;
+				if (unicode > 255)
+					unicode = 0;
+				Key_Event (sym, unicode, state);
 				break;
 
 			case SDL_MOUSEBUTTONDOWN:
@@ -713,7 +547,7 @@ Sys_SendKeyEvents (void)
 					case 1:
 					case 2:
 					case 3:
-						Key_Event (K_MOUSE1 + but - 1, event.type
+						Key_Event (KM_BUTTON1 + but - 1, 0, event.type
 								   == SDL_MOUSEBUTTONDOWN);
 						break;
 				}

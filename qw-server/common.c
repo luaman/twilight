@@ -1501,8 +1501,10 @@ COM_FOpenFile (char *filename, FILE ** file)
 				}
 		} else {
 			// check a file in the directory tree
+			/*
 			if (strchr (filename, '/') || strchr (filename, '\\'))
 				continue;
+				*/
 
 			snprintf (netpath, sizeof(netpath), "%s/%s", search->filename, filename);
 

@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // console.c
 
 #include "quakedef.h"
+#include "keys.h"
 
 int         con_ormask;
 console_t   con_main;
@@ -71,8 +72,10 @@ Con_ToggleConsole_f (void)
 	Key_ClearTyping ();
 
 	if (key_dest == key_console) {
-		if (cls.state == ca_active)
+		if (cls.state == ca_active) {
 			key_dest = key_game;
+			game_target = KGT_DEFAULT;
+		}
 	} else
 		key_dest = key_console;
 
@@ -90,8 +93,10 @@ Con_ToggleChat_f (void)
 	Key_ClearTyping ();
 
 	if (key_dest == key_console) {
-		if (cls.state == ca_active)
+		if (cls.state == ca_active) {
 			key_dest = key_game;
+			game_target = KGT_DEFAULT;
+		}
 	} else
 		key_dest = key_console;
 
@@ -632,44 +637,6 @@ Con_DrawConsole (int lines)
 // draw the input prompt, user text, and cursor if desired
 	Con_DrawInput ();
 }
-
-
-/*
-==================
-Con_NotifyBox
-==================
-*/
-void
-Con_NotifyBox (char *text)
-{
-	double      t1, t2;
-
-// during startup for sound / cd warnings
-	Con_Printf
-		("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n");
-
-	Con_Printf (text);
-
-	Con_Printf ("Press a key.\n");
-	Con_Printf
-		("\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n");
-
-	key_count = -2;						// wait for a key down and up
-	key_dest = key_console;
-
-	do {
-		t1 = Sys_DoubleTime ();
-		SCR_UpdateScreen ();
-		Sys_SendKeyEvents ();
-		t2 = Sys_DoubleTime ();
-		realtime += t2 - t1;			// make the cursor blink
-	} while (key_count < 0);
-
-	Con_Printf ("\n");
-	key_dest = key_game;
-	realtime = 0;						// put the cursor back to invisible
-}
-
 
 /*
 ==================
