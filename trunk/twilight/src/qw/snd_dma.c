@@ -34,10 +34,16 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "client.h"
+#include "cmd.h"
+#include "console.h"
 #include "cvar.h"
 #include "gl_model.h"
+#include "mathlib.h"
 #include "sound.h"
+#include "strlib.h"
+#include "sys.h"
+
 
 #ifdef _WIN32
 #include "winquake.h"

@@ -34,14 +34,24 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "bothdefs.h"
 #include "cdaudio.h"
+#include "client.h"
+#include "cmd.h"
+#include "console.h"
 #include "cvar.h"
+#include "host.h"
 #include "keys.h"
 #include "glquake.h"
+#include "mathlib.h"
 #include "pmove.h"
 #include "screen.h"
 #include "sound.h"
+#include "strlib.h"
+#include "sys.h"
 
 char       *svc_strings[] = {
 	"svc_bad",
@@ -915,9 +925,10 @@ CL_ProcessUserInfo (int slot, player_info_t *player)
 {
 	Q_strncpy (player->name, Info_ValueForKey (player->userinfo, "name"),
 			   sizeof (player->name) - 1);
-	player->topcolor = atoi (Info_ValueForKey (player->userinfo, "topcolor"));
+	player->topcolor =
+		Q_atoi (Info_ValueForKey (player->userinfo, "topcolor"));
 	player->bottomcolor =
-		atoi (Info_ValueForKey (player->userinfo, "bottomcolor"));
+		Q_atoi (Info_ValueForKey (player->userinfo, "bottomcolor"));
 	if (Info_ValueForKey (player->userinfo, "*spectator")[0])
 		player->spectator = true;
 	else

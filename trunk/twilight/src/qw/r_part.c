@@ -33,8 +33,10 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "client.h"
+#include "console.h"
 #include "glquake.h"
+#include "mathlib.h"
 
 #define MAX_PARTICLES			2048	// default max # of particles at one
 										// time

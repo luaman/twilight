@@ -28,6 +28,8 @@
 #ifndef __SOUND_H
 #define __SOUND_H
 
+#include "zone.h"
+
 typedef struct {
 	int         left;
 	int         right;

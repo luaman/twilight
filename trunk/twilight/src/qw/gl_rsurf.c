@@ -34,9 +34,12 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "client.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "mathlib.h"
+#include "sys.h"
+
 
 int         skytexturenum;
 

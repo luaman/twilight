@@ -34,11 +34,16 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "bothdefs.h"
+#include "client.h"
+#include "console.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "host.h"
+#include "mathlib.h"
 #include "pmove.h"
 #include "view.h"
+#include "sys.h"
 
 extern cvar_t cl_predict_players;
 extern cvar_t cl_predict_players2;

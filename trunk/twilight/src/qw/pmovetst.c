@@ -33,8 +33,14 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "bothdefs.h"
+#include "bspfile.h"
+#include "console.h"
+#include "mathlib.h"
+#include "gl_model.h"
 #include "pmove.h"
+#include "sys.h"
+#include "strlib.h"
 
 static hull_t box_hull;
 static dclipnode_t box_clipnodes[6];
@@ -122,7 +128,6 @@ PM_HullPointContents (hull_t *hull, int num, vec3_t p)
 		node = hull->clipnodes + num;
 		plane = hull->planes + node->planenum;
 		d = PlaneDiff(p, plane);
-
 		if (d < 0)
 			num = node->children[1];
 		else
@@ -158,7 +163,6 @@ PM_PointContents (vec3_t p)
 		node = hull->clipnodes + num;
 		plane = hull->planes + node->planenum;
 		d = PlaneDiff(p, plane);
-
 		if (d < 0)
 			num = node->children[1];
 		else
@@ -219,8 +223,8 @@ PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
 //
 	node = hull->clipnodes + num;
 	plane = hull->planes + node->planenum;
-	t1 = PlaneDiff (p1, plane);
-	t2 = PlaneDiff (p2, plane);
+	t1 = PlaneDiff(p1, plane);
+	t2 = PlaneDiff(p2, plane);
 
 #if 1
 	if (t1 >= 0 && t2 >= 0)
@@ -362,7 +366,7 @@ PM_PlayerMove (vec3_t start, vec3_t end)
 	vec3_t      mins, maxs;
 
 // fill in a default trace
-	memset (&total, 0, sizeof (pmtrace_t));
+	Q_memset (&total, 0, sizeof (pmtrace_t));
 	total.fraction = 1;
 	total.ent = -1;
 	VectorCopy (end, total.endpos);
@@ -385,7 +389,7 @@ PM_PlayerMove (vec3_t start, vec3_t end)
 		VectorSubtract (end, offset, end_l);
 
 		// fill in a default trace
-		memset (&trace, 0, sizeof (pmtrace_t));
+		Q_memset (&trace, 0, sizeof (pmtrace_t));
 		trace.fraction = 1;
 		trace.allsolid = true;
 //      trace.startsolid = true;

@@ -23,60 +23,16 @@
 
 	$Id$
 */
-// quakedef.h -- primary header for client
+// host.h
 
-#ifndef __QUAKEDEF_H
-#define __QUAKEDEF_H
-
-#define	QUAKE_GAME						// as opposed to utilities
-
-//define    PARANOID            // speed sapping error checking
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <setjmp.h>
-#include <time.h>
-
-#include "bothdefs.h"
-
-#include "common.h"
-#include "bspfile.h"
-#include "vid.h"
-#include "sys.h"
-#include "zone.h"
-#include "mathlib.h"
-#include "strlib.h"
-#include "wad.h"
-#include "draw.h"
-#include "net.h"
-#include "protocol.h"
-#include "cmd.h"
-#include "render.h"
-#include "client.h"
-
-#include "console.h"
-
-//=============================================================================
-
-
-#define MAX_NUM_ARGVS	50
-
-
-extern qboolean noclip_anglehack;
-
-
-//
-// host
-//
+#ifndef __HOST_H
+#define __HOST_H
 
 extern struct cvar_s *sys_ticrate;
 extern struct cvar_s *sys_nostdout;
-extern struct cvar_s *developer;
 
 extern struct cvar_s *password;
 
-extern qboolean host_initialized;		// true if into command execution
 extern double host_frametime;
 extern byte *host_basepal;
 extern byte *host_colormap;
@@ -91,17 +47,14 @@ void        Host_Init (void);
 void        Host_Shutdown (void);
 void        Host_Error (char *error, ...);
 void        Host_EndGame (char *message, ...);
-qboolean    Host_SimulationTime (float time);
 void        Host_Frame (float time);
 void        Host_Quit_f (void);
 void        Host_ClientCommands (char *fmt, ...);
 void        Host_ShutdownServer (qboolean crash);
 
-extern qboolean msg_suppress_1;			// suppresses resolution and cache size 
-										// 
-										// 
+//extern qboolean msg_suppress_1;			// suppresses resolution and cache size 
 										// console output
 										// an fullscreen DIB focus gain/loss
 
-#endif // __QUAKEDEF_H
+#endif // __HOST_H
 

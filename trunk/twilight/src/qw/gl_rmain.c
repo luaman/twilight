@@ -33,12 +33,16 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "client.h"
+#include "console.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "mathlib.h"
 #include "pmove.h"
 #include "sound.h"
 #include "view.h"
+#include "sys.h"
+
 
 entity_t    r_worldentity;
 
@@ -1071,7 +1075,7 @@ R_SetupFrame (void)
 		Cvar_Set (r_fullbright, "0");
 		Cvar_Set (r_lightmap, "0");
 	}
-	if (!atoi (Info_ValueForKey (cl.serverinfo, "watervis")))
+	if (!Q_atoi (Info_ValueForKey (cl.serverinfo, "watervis")))
 		if (r_wateralpha->value != 1)
 			Cvar_Set (r_wateralpha, "1");
 

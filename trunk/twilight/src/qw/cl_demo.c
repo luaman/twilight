@@ -33,8 +33,15 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+
+#include "bothdefs.h"
+#include "client.h"
+#include "cmd.h"
+#include "console.h"
+#include "host.h"
 #include "pmove.h"
+#include "sys.h"
+
 
 void        CL_FinishTimeDemo (void);
 

@@ -34,7 +34,15 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include <stdio.h>
+
+#include "bothdefs.h"
+#include "cmd.h"
+#include "common.h"
+#include "console.h"
+#include "strlib.h"
+#include "sys.h"
+#include "zone.h"
 
 #define	DYNAMIC_SIZE	0x20000
 
@@ -394,7 +402,7 @@ Hunk_Print (qboolean all)
 		// print the total
 		// 
 		if (next == endlow || next == endhigh ||
-			Q_strncmp (h->name, next->name, 8)) {
+			strncmp (h->name, next->name, 8)) {
 			if (!all)
 				Con_Printf ("          :%8i %8s (TOTAL)\n", sum, name);
 			count = 0;

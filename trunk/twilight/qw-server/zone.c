@@ -944,7 +944,7 @@ Memory_Init
 ========================
 */
 void
-Memory_Init (void *buf, int size)
+Memory_Init (void)
 {
 	int         p;
 	int         zonesize = DYNAMIC_SIZE;

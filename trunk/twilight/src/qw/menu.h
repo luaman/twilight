@@ -27,6 +27,8 @@
 #ifndef __MENU_H
 #define __MENU_H
 
+#include "wad.h"
+
 //
 // the net drivers should just set the apropriate bits in m_activenet,
 // instead of having the menu code look through their internal tables

@@ -33,9 +33,14 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "client.h"
+#include "cmd.h"
+#include "console.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "strlib.h"
+#include "sys.h"
+
 
 extern void R_InitBubble ();
 

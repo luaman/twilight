@@ -34,20 +34,32 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <stdio.h>
+#include <stdarg.h>
 #include <ctype.h>
+#include <setjmp.h>  // FIXME: REMOVE THIS EVIL SHIT!
 #include <SDL.h>
 
-#include "quakedef.h"
+#include "bothdefs.h"
 #include "cdaudio.h"
+#include "client.h"
+#include "cmd.h"
+#include "console.h"
 #include "cvar.h"
+#include "draw.h"
+#include "gl_model.h"
+#include "host.h"
 #include "input.h"
 #include "keys.h"
+#include "mathlib.h"
 #include "menu.h"
 #include "pmove.h"
 #include "sbar.h"
 #include "screen.h"
 #include "sound.h"
+#include "strlib.h"
 #include "view.h"
+#include "sys.h"
 
 #ifdef _WIN32
 #include "winquake.h"
@@ -60,8 +72,6 @@ static const char rcsid[] =
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.
-
-qboolean    noclip_anglehack;			// remnant from old quake
 
 
 cvar_t     *rcon_password;
@@ -505,7 +515,7 @@ CL_User_f (void)
 		return;
 	}
 
-	uid = atoi (Cmd_Argv (1));
+	uid = Q_atoi (Cmd_Argv (1));
 
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		if (!cl.players[i].name[0])
@@ -562,10 +572,10 @@ CL_Color_f (void)
 	}
 
 	if (Cmd_Argc () == 2)
-		top = bottom = atoi (Cmd_Argv (1));
+		top = bottom = Q_atoi (Cmd_Argv (1));
 	else {
-		top = atoi (Cmd_Argv (1));
-		bottom = atoi (Cmd_Argv (2));
+		top = Q_atoi (Cmd_Argv (1));
+		bottom = Q_atoi (Cmd_Argv (2));
 	}
 
 	top &= 15;
@@ -931,7 +941,7 @@ CL_ConnectionlessPacket (void)
 		Con_Printf ("challenge\n");
 
 		s = MSG_ReadString ();
-		cls.challenge = atoi (s);
+		cls.challenge = Q_atoi (s);
 		CL_SendConnectPacket ();
 		return;
 	}

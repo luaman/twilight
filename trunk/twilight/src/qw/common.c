@@ -34,11 +34,23 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 #include <ctype.h>
 
-#include "quakedef.h"
+#include "bothdefs.h"
+#include "cmd.h"
+#include "common.h"
+#include "console.h"
 #include "crc.h"
 #include "cvar.h"
+#include "draw.h"
+#include "net.h"
+#include "protocol.h"
+#include "strlib.h"
+#include "sys.h"
+#include "zone.h"
 
 #define MAX_NUM_ARGVS	50
 #define NUM_SAFE_ARGVS	6

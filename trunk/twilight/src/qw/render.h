@@ -28,6 +28,8 @@
 #ifndef __RENDER_H
 #define __RENDER_H
 
+#include "vid.h"
+
 #define	TOP_RANGE		16				// soldier uniform colors
 #define	BOTTOM_RANGE	96
 

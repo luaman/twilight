@@ -34,10 +34,14 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
 #include "SDL.h"
+
+#include "client.h"
+#include "cmd.h"
+#include "console.h"
 #include "cvar.h"
 #include "input.h"
+#include "mathlib.h"
 
 cvar_t     *cl_nodelta;
 
@@ -84,7 +88,7 @@ KeyDown (kbutton_t *b)
 
 	c = Cmd_Argv (1);
 	if (c[0])
-		k = atoi (c);
+		k = Q_atoi (c);
 	else
 		k = -1;							// typed manually at the console for
 	// continuous down
@@ -114,7 +118,7 @@ KeyUp (kbutton_t *b)
 
 	c = Cmd_Argv (1);
 	if (c[0])
-		k = atoi (c);
+		k = Q_atoi (c);
 	else {								// typed manually at the console,
 		// assume for unsticking, so clear all
 		b->down[0] = b->down[1] = 0;

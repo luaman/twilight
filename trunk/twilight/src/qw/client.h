@@ -28,6 +28,12 @@
 #ifndef __CLIENT_H
 #define __CLIENT_H
 
+#include "common.h"
+#include "net.h"
+#include "protocol.h"
+#include "render.h"
+#include "zone.h"
+
 typedef struct {
 	char        name[16];
 	qboolean    failedload;				// the name isn't a valid skin
