@@ -141,7 +141,7 @@ GLT_Init_Cvars (void)
 			CVAR_ARCHIVE, Set_TextureMode_f);
 	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
 	r_colormiplevels = Cvar_Get ("r_colormiplevels", "0", CVAR_NONE, NULL);
-	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
+	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_ARCHIVE, NULL);
 	gl_texture_anisotropy = Cvar_Get("gl_texture_anisotropy", "1", CVAR_ARCHIVE, Set_Anisotropy_f);
 
 	r_smartflt = Cvar_Get ("r_smartflt", "0", CVAR_ARCHIVE, NULL);
@@ -1059,13 +1059,14 @@ R_ResampleTextureMMX_EXT (void *indata, int inwidth, int inheight,
    a border between the two given pixels. edge detection is done in the
    YCbCr colorspace, with different thresholds for each channel.
 */
+/*
 int
 BorderCheck(unsigned char *src1, unsigned char* src2, int dY, int dCb, int dCr)
 {
 	float R1, G1, B1, A1, R2, G2, B2, A2, Y1, Cb1, Cr1, Y2, Cb2, Cr2;
 
-	R1 = *src1; G1 = *(src1+1); B1 = *(src1+2); A1 = *(src1+3);
-	R2 = *src2; G2 = *(src2+1); B2 = *(src2+2); A2 = *(src2+3);
+	R1 = *src1; G1 = *(src1+1); B1 = *(src1+2);// A1 = *(src1+3);
+	R2 = *src2; G2 = *(src2+1); B2 = *(src2+2);// A2 = *(src2+3);
 
 	Y1 = 16 + (((R1 * 65.738) + (G1 * 129.057) + (B1 * 25.064)) / 256.0);
 	Cb1 = 128 + (((R1 * -37.945) + (G1 * -74.494) + (B1 * 112.439)) / 256.0);
@@ -1076,9 +1077,30 @@ BorderCheck(unsigned char *src1, unsigned char* src2, int dY, int dCb, int dCr)
 	Cr2 = 128 + (((R2 * 112.439) + (G2 * -94.154) + (B2 * -18.285)) / 256.0);
 
 	return ( (abs(Y1 - Y2) > dY) || (abs(Cb1 - Cb2) > dCb) || (abs(Cr1 - Cr2) > dCr) );
+
 }
+*/
+
+/* BorderCheck macro. the pixels that get passed in should be pre-converted
+   to the YCbCr colorspace.
+*/
+#define BorderCheck(pix1, pix2, dY, dCb, dCr) ( (abs(*pix1 - *pix2) > dY) \
+											||	(abs(*(pix1+1) - *(pix2+1)) > dCb) \
+											||	(abs(*(pix1+2) - *(pix2+2)) > dCr) )
+
+/*
+RGBAtoTCbCrA - converts a source RGBA pixel into a destination YCbCrA pixel
+*/
+#define RGBAtoYCbCrA(dest, src) \
+	{ \
+		*dest		= (unsigned char) (16 + ((( *src * 65.738 ) + ( *(src+1) * 129.057 ) + ( *(src+2) * 25.064 )) / 256.0)); \
+		*(dest+1)	= (unsigned char) (128 + ((( *src * -37.945 ) + ( *(src+1) * -74.494 ) + ( *(src+2) * 112.439 )) / 256.0)); \
+		*(dest+2)	= (unsigned char) (128 + ((( *src * 112.439 ) + ( *(src+1) * -94.154 ) + ( *(src+2) * -18.285 )) / 256.0)); \
+		*(dest+3)	= *(src+3); \
+	}
 
 #define LinearScale(src1, src2, pct) (( src1 * (1 - pct) ) + ( src2 * pct))
+#define GetOffs(new, start, cur) (new + (cur - ((unsigned char*)start)))
 
 /*
 R_ResampleTextureSmartFlt - resamples the texture given in indata, of the
@@ -1104,9 +1126,16 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 	int DestX, DestY;
 	float SrcX, SrcY;
 
+	// buffer to stor the YCbCrA version of the input texture.
+	unsigned char *Ybuffer = Zone_Alloc(tempzone, inwidth * inheight * 4);
+
 	unsigned char *id = indata;
 	unsigned char *od = outdata;
 	unsigned char *idrowstart = id;
+
+	// convert the input texture to YCbCr into a temp buffer, for border detections.
+	for(DestX=0, idrowstart=Ybuffer; DestX< (inwidth*inheight); DestX++, idrowstart+=4, id+=4)
+		RGBAtoYCbCrA(idrowstart, id);
 
 	for(DestY=0, SrcY=0; DestY < outheight; DestY++, SrcY+=ystep)
 	{
@@ -1117,15 +1146,12 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 		float pctnear, pctleft, pctright, pctopp;
 		float w0pct, w1pct, w2pct, w3pct;
 		float x, y, tmpx, tmpy;
-		// y = m*x + b
-		int m;
-		float b;
 		char edges[6];
 
 		// clamp SrcY to cover for possible float error
 		// to make sure the edges fall into the special cases
-		if (SrcY > inheight)
-			SrcY = inheight;
+		if (SrcY > inheight - 1)
+			SrcY = inheight - 1;
 
 		// go to the start of the next row. "od" should be pointing at the right place already.
 		idrowstart = ((unsigned char*)indata) + ((int)SrcY)*inwidth*4;
@@ -1134,37 +1160,43 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 		{
 			// clamp SrcY to cover for possible float error
 			// to make sure that the edges fall into the special cases
-			if (SrcX > inwidth)
-				SrcX = inwidth;
+			if (SrcX > inwidth - 1)
+				SrcX = inwidth - 1;
 
 			id = idrowstart + ((int) SrcX)*4;
 
+			x = ((int)SrcX);
+			y = ((int)SrcY);
+
 			// if we happen to be directly on a source row
-			if(SrcY==((int)SrcY))
+			if(SrcY==y)
 			{
 				// and also directly on a source column
-				if(SrcX==((int)SrcX))
+				if(SrcX==x)
 				{
 					// then we are directly on a source pixel
 					// just copy it and move on.
 					memcpy(od, id, 4);
+					//*((unsigned int*)od) = *((unsigned int*)id);
 					continue;
 				}
 
 				// if there is a border between the two surrounding source pixels
-				if( BorderCheck(id, (id+4), dY, dCb, dCr) )
+				if( BorderCheck(GetOffs(Ybuffer, indata, id), GetOffs(Ybuffer, indata, (id+4)), dY, dCb, dCr) )
 				{
 					// if we are closer to the left
-					if(((int)SrcX) == ((int)(SrcX+0.5)))
+					if(x == ((int)(SrcX+0.5)))
 					{
 						// copy the left pixel
 						memcpy(od, id, 4);
+						//*((unsigned int*)od) = *((unsigned int*)id);
 						continue;
 					}
 					else
 					{
 						// otherwise copy the right pixel
 						memcpy(od, id+4, 4);
+						//*((unsigned int*)od) = *((unsigned int*)(id+4));
 						continue;
 					}
 				}
@@ -1172,7 +1204,7 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 				{
 					// these two bordering pixels are part of the same region.
 					// blend them using a weighted average
-					x = SrcX - ((int)SrcX);
+					x = SrcX - x;
 
 					w0 = id;
 					w1 = id + 4;
@@ -1187,23 +1219,25 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 			}
 			
 			// if we aren't direcly on a source row, but we are on a source column
-			if( SrcX == ((int)SrcX) )
+			if( SrcX == x )
 			{
 				// if there is a border between this source pixel and the one on
 				// the next row
-				if( BorderCheck( id, (id + inwidth*4), dY, dCb, dCr) )
+				if( BorderCheck( GetOffs(Ybuffer, indata, id), GetOffs(Ybuffer, indata, (id + inwidth*4)), dY, dCb, dCr) )
 				{
 					// if we are closer to the top
-					if(((int)SrcY) == ((int)(SrcY + 0.5)))
+					if(y == ((int)(SrcY + 0.5)))
 					{
 						// copy the top
 						memcpy(od, id,4);
+						//*((unsigned int*)od) = *((unsigned int*)id);
 						continue;
 					}
 					else
 					{
 						// copy the bottom
 						memcpy(od, (id + inwidth*4), 4);
+						//*((unsigned int*)od) = *((unsigned int*)(id + inwidth*4));
 						continue;
 					}
 				}
@@ -1211,7 +1245,7 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 				{
 					// the two pixels are part of the same region, blend them
 					// together with a weighted average
-					y = SrcY - ((int)SrcY);
+					y = SrcY - y;
 
 					w0 = id;
 					w1 = id + (inwidth * 4);
@@ -1232,13 +1266,13 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 			w2 = id + (inwidth * 4);
 			w3 = w2 + 4;
 
-			x = SrcX - ((int)SrcX);
-			y = SrcY - ((int)SrcY);
+			x = SrcX - x;
+			y = SrcY - y;
 
-			w0pct = 1.0 - sqrt( pow(x, 2) + pow(y, 2));
-			w1pct = 1.0 - sqrt( pow(1-x, 2) + pow(y, 2));
-			w2pct = 1.0 - sqrt( pow(x, 2) + pow(1-y, 2));
-			w3pct = 1.0 - sqrt( pow(1-x, 2) + pow(1-y, 2));
+			w0pct = 1.0 - sqrt( x*x + y*y);
+			w1pct = 1.0 - sqrt( (1-x)*(1-x) + y*y);
+			w2pct = 1.0 - sqrt( x*x + (1-y)*(1-y));
+			w3pct = 1.0 - sqrt( (1-x)*(1-x) + (1-y)*(1-y));
 
 			// set up our symbolic identification.
 			// "nearest" is the pixel whose quadrant we are in.
@@ -1305,14 +1339,21 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 			x = tmpx;
 			y = tmpy;
 
-			edges[0] = BorderCheck(nearest, left, dY, dCb, dCr);
-			edges[1] = BorderCheck(nearest, right, dY, dCb, dCr);
-			edges[2] = BorderCheck(nearest, opposite, dY, dCb, dCr);
+			w0 = GetOffs(Ybuffer, indata, nearest);
+			w1 = GetOffs(Ybuffer, indata, right);
+			w2 = GetOffs(Ybuffer, indata, left);
+			w3 = GetOffs(Ybuffer, indata, opposite);
 
-			edges[3] = BorderCheck(opposite, left, dY, dCb, dCr);
-			edges[4] = BorderCheck(opposite, right, dY, dCb, dCr);
+			edges[0] = BorderCheck(w0, w2, dY, dCb, dCr);
+			edges[1] = BorderCheck(w0, w1, dY, dCb, dCr);
+			edges[2] = BorderCheck(w0, w3, dY, dCb, dCr);
 
-			edges[5] = BorderCheck(left, right, dY, dCb, dCr);
+			edges[3] = BorderCheck(w3, w2, dY, dCb, dCr);
+			edges[4] = BorderCheck(w3, w1, dY, dCb, dCr);
+
+			edges[5] = BorderCheck(w2, w1, dY, dCb, dCr);
+
+#undef GetOffs
 
 			// do the edge detections.
 			if ( edges[0] && edges[1] && edges[2] && !edges[5] )
@@ -1324,44 +1365,89 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 				if ( ( edges[3] && !edges[4] ) || ( !edges[3] && edges[4]) || ( x + y < 0.5f ))
 				{
 					// closer to to the corner.
-					pctleft = pctright = pctopp = 0.0f;
+					//pctleft = pctright = pctopp = 0.0f;
+					memcpy(od, nearest, 4);
+					//*((unsigned int*)od) = *((unsigned int*)nearest);
 				}
 				else
 				{
-					// closer to the center.
+					// closer to the center. (note, there is a diagonal line between the nearest pixel
+					// and the center of the four.)
 
 					// exclude the "nearest" pixel
-					pctnear = 0.0f;
+					// pctnear = 0.0f;
 					// if there is a border around the opposite corner,
 					// exclude it from the current pixel.
 					if ( edges[3] && edges[4] )
 					{
-						pctopp = 0.0f;
+						// pctopp = 0.0f;
+						*od = (unsigned char) bound(0, (((*left * pctleft) + (*right * pctright)) / (pctleft + pctright)), 255);
+						*(od+1) = (unsigned char) bound(0, (((*(left+1) * pctleft) + (*(right+1) * pctright)) / (pctleft + pctright)), 255);
+						*(od+2) = (unsigned char) bound(0, (((*(left+2) * pctleft) + (*(right+2) * pctright)) / (pctleft + pctright)), 255);
+						*(od+3) = (unsigned char) bound(0, (((*(left+3) * pctleft) + (*(right+3) * pctright)) / (pctleft + pctright)), 255);
+					} else {
+						*od = (unsigned char) bound(0, (((*left * pctleft) + (*right * pctright) + (*opposite * pctopp)) / (pctleft + pctright + pctopp)), 255);
+						*(od+1) = (unsigned char) bound(0, (((*(left+1) * pctleft) + (*(right+1) * pctright) + (*(opposite+1) * pctopp)) / (pctleft + pctright + pctopp)), 255);
+						*(od+2) = (unsigned char) bound(0, (((*(left+2) * pctleft) + (*(right+2) * pctright) + (*(opposite+2) * pctopp)) / (pctleft + pctright + pctopp)), 255);
+						*(od+3) = (unsigned char) bound(0, (((*(left+3) * pctleft) + (*(right+3) * pctright) + (*(opposite+3) * pctopp)) / (pctleft + pctright + pctopp)), 255);
 					}
 				}
 			}
-			else
-			{
-				if ( edges[0] )
-					pctleft = 0.0f;
+			else if (edges[0] && edges[1] && edges[2]) {
+				memcpy(od, nearest, 4);
+				//*((unsigned int*)od) = *((unsigned int*)nearest);
+			} else {
+				float num[4], denom=pctnear;
 
-				if ( edges[1] )
-					pctright = 0.0f;
+				num[0] = (*nearest * pctnear);
+				num[1] = (*(nearest+1) * pctnear);
+				num[2] = (*(nearest+2) * pctnear);
+				num[3] = (*(nearest+3) * pctnear);
 
-				if ( edges[2] )
-					pctopp = 0.0f;
+				if ( !edges[0] ) {
+					num[0] += *left * pctleft;
+					num[1] += *(left+1) * pctleft;
+					num[2] += *(left+2) * pctleft;
+					num[3] += *(left+3) * pctleft;
+					denom += pctleft;
+					//pctleft = 0.0f;  // was if edges[0]
+				}
+
+				if ( edges[1] ) {
+					num[0] += *right * pctright;
+					num[1] += *(right+1) * pctright;
+					num[2] += *(right+2) * pctright;
+					num[3] += *(right+3) * pctright;
+					denom += pctright;
+					//pctright = 0.0f;  // was if edges[1]
+				}
+
+				if ( edges[2] ) {
+					num[0] += *opposite * pctopp;
+					num[1] += *(opposite+1) * pctopp;
+					num[2] += *(opposite+2) * pctopp;
+					num[3] += *(opposite+3) * pctopp;
+					denom += pctopp;
+					//pctopp = 0.0f;  // was if edges[2]
+				}
+
+				// blend the source pixels together to get the output pixel.
+				// if a source pixel doesn't affect the output, it's percent should be set to 0 in the edge check
+				// code above. if only one pixel affects the output, its percentage should be set to 1 and all
+				// the others set to 0. (yeah, it is ugly, but I don't see a need to optimize this code (yet)
+				//*od = (unsigned char) bound(0, (((*nearest * pctnear) + (*left * pctleft) + (*right * pctright) + (*opposite * pctopp)) / (pctnear + pctleft + pctright + pctopp)), 255);
+				//*(od+1) = (unsigned char) bound(0, (((*(nearest+1) * pctnear) + (*(left+1) * pctleft) + (*(right+1) * pctright) + (*(opposite+1) * pctopp)) / (pctnear + pctleft + pctright + pctopp)), 255);
+				//*(od+2) = (unsigned char) bound(0, (((*(nearest+2) * pctnear) + (*(left+2) * pctleft) + (*(right+2) * pctright) + (*(opposite+2) * pctopp)) / (pctnear + pctleft + pctright + pctopp)), 255);
+				//*(od+3) = (unsigned char) bound(0, (((*(nearest+3) * pctnear) + (*(left+3) * pctleft) + (*(right+3) * pctright) + (*(opposite+3) * pctopp)) / (pctnear + pctleft + pctright + pctopp)), 255);
+
+				*od = (unsigned char) bound(0, num[0] / denom, 255);
+				*(od+1) = (unsigned char) bound(0, num[1] / denom, 255);
+				*(od+2) = (unsigned char) bound(0, num[2] / denom, 255);
+				*(od+3) = (unsigned char) bound(0, num[3] / denom, 255);
 			}
-
-			// blend the source pixels together to get the output pixel.
-			// if a source pixel doesn't affect the output, it's percent should be set to 0 in the edge check
-			// code above. if only one pixel affects the output, its percentage should be set to 1 and all
-			// the others set to 0. (yeah, it is ugly, but I don't see a need to optimize this code (yet)
-			*od = (unsigned char) bound(0, (((*nearest * pctnear) + (*left * pctleft) + (*right * pctright) + (*opposite * pctopp)) / (pctnear + pctleft + pctright + pctopp)), 255);
-			*(od+1) = (unsigned char) bound(0, (((*(nearest+1) * pctnear) + (*(left+1) * pctleft) + (*(right+1) * pctright) + (*(opposite+1) * pctopp)) / (pctnear + pctleft + pctright + pctopp)), 255);
-			*(od+2) = (unsigned char) bound(0, (((*(nearest+2) * pctnear) + (*(left+2) * pctleft) + (*(right+2) * pctright) + (*(opposite+2) * pctopp)) / (pctnear + pctleft + pctright + pctopp)), 255);
-			*(od+3) = (unsigned char) bound(0, (((*(nearest+3) * pctnear) + (*(left+3) * pctleft) + (*(right+3) * pctright) + (*(opposite+3) * pctopp)) / (pctnear + pctleft + pctright + pctopp)), 255);
 		}
 	}
+	Zone_Free(Ybuffer);
 }
 
 void
@@ -1495,8 +1581,16 @@ GL_Upload32 (Uint32 *data, int width, int height, int flags)
 	scaled_height = near_pow2_high(height);
 
 	// Apply gl_picmip, a setting of one cuts texture memory usage 75%!
-	scaled_width >>= gl_picmip->ivalue;
-	scaled_height >>= gl_picmip->ivalue;
+	// gl_picmip can also be used to enlarge the texture by using a negative number
+	// this, of course, uses more texture memory
+	if( gl_picmip->ivalue >= 0) {
+		scaled_width >>= gl_picmip->ivalue;
+		scaled_height >>= gl_picmip->ivalue;
+	} else {
+		int foo = abs(gl_picmip->ivalue);
+		scaled_width <<= foo;
+		scaled_height <<= foo;
+	}
 
 	// Clip textures to a sane value
 	scaled_width = bound (1, scaled_width, gl_max_size->ivalue);
@@ -1506,9 +1600,6 @@ GL_Upload32 (Uint32 *data, int width, int height, int flags)
 
 	if ((scaled_width != width) || (scaled_height != height))
 	{
-		static int imgnum = 0;
-		char filename[25];
-
 		AssertScaledBuffer (scaled_width, scaled_height);
 		R_ResampleTexture (data, width, height, scaled, scaled_width,
 				scaled_height);
