@@ -450,7 +450,6 @@ SV_SpawnSpectator (void)
 			return;
 		}
 	}
-
 }
 
 /*
@@ -573,24 +572,6 @@ SV_NextDownload_f (void)
 
 }
 
-void
-OutofBandPrintf (netadr_t where, char *fmt, ...)
-{
-	va_list     argptr;
-	char        send[1024];
-
-	send[0] = 0xff;
-	send[1] = 0xff;
-	send[2] = 0xff;
-	send[3] = 0xff;
-	send[4] = A2C_PRINT;
-	va_start (argptr, fmt);
-	vsnprintf (send + 5, sizeof (send) - 5, fmt, argptr);
-	va_end (argptr);
-
-	NET_SendPacket (NS_SERVER, strlen (send) + 1, send, where);
-}
-
 /*
 ==================
 SV_NextUpload
@@ -632,8 +613,8 @@ SV_NextUpload (void)
 		Sys_Printf ("Receiving %s from %d...\n", host_client->uploadfn,
 					host_client->userid);
 		if (host_client->remote_snap)
-			OutofBandPrintf (host_client->snap_from,
-							 "Server receiving %s from %d...\n",
+			Netchan_OutOfBandPrint (NS_SERVER, host_client->snap_from,
+							 "%cServer receiving %s from %d...\n", A2C_PRINT,
 							 host_client->uploadfn, host_client->userid);
 	}
 
@@ -662,9 +643,9 @@ SV_NextUpload (void)
 				p++;
 			else
 				p = host_client->uploadfn;
-			OutofBandPrintf (host_client->snap_from,
-							 "%s upload completed.\nTo download, enter:\ndownload %s\n",
-							 host_client->uploadfn, p);
+			Netchan_OutOfBandPrint (NS_SERVER, host_client->snap_from,
+							 "%c%s upload completed.\nTo download, enter:\ndownload %s\n",
+							 A2C_PRINT, host_client->uploadfn, p);
 		}
 	}
 }
@@ -1526,12 +1507,12 @@ SV_RunCmd__clear:
 
 	host_client->oldbuttons = pmove.oldbuttons;
 	sv_player->v.teleport_time = pmove.waterjumptime;
-	sv_player->v.waterlevel = waterlevel;
-	sv_player->v.watertype = watertype;
-	if (onground != -1) {
+	sv_player->v.waterlevel = pmove.waterlevel;
+	sv_player->v.watertype = pmove.watertype;
+	if (pmove.groundent != -1) {
 		sv_player->v.flags = (int) sv_player->v.flags | FL_ONGROUND;
 		sv_player->v.groundentity =
-			EDICT_TO_PROG (EDICT_NUM (pmove.physents[onground].info));
+			EDICT_TO_PROG (EDICT_NUM (pmove.physents[pmove.groundent].info));
 	} else
 		sv_player->v.flags = (int) sv_player->v.flags & ~FL_ONGROUND;
 	for (i = 0; i < 3; i++)

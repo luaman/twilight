@@ -45,26 +45,12 @@ movevars_t  movevars;
 
 playermove_t pmove;
 
-int         onground;
-int         waterlevel;
-int         watertype;
-
 float       frametime;
 
 vec3_t      forward, right, up;
 
 vec3_t      player_mins = { -16, -16, -24 };
 vec3_t      player_maxs = { 16, 16, 32 };
-
-// #define  PM_GRAVITY          800
-// #define  PM_STOPSPEED        100
-// #define  PM_MAXSPEED         320
-// #define  PM_SPECTATORMAXSPEED    500
-// #define  PM_ACCELERATE       10
-// #define  PM_AIRACCELERATE    0.7
-// #define  PM_WATERACCELERATE  10
-// #define  PM_FRICTION         6
-// #define  PM_WATERFRICTION    1
 
 void        PM_InitBoxHull (void);
 
@@ -350,7 +336,7 @@ PM_Friction (void)
 	friction = movevars.friction;
 
 // if the leading edge is over a dropoff, increase friction
-	if (onground != -1) {
+	if (pmove.groundent != -1) {
 		start[0] = stop[0] = pmove.origin[0] + vel[0] / speed * 16;
 		start[1] = stop[1] = pmove.origin[1] + vel[1] / speed * 16;
 		start[2] = pmove.origin[2] + player_mins[2];
@@ -365,9 +351,9 @@ PM_Friction (void)
 
 	drop = 0;
 
-	if (waterlevel >= 2)				// apply water friction
-		drop += speed * movevars.waterfriction * waterlevel * frametime;
-	else if (onground != -1)			// apply ground friction
+	if (pmove.waterlevel >= 2)				// apply water friction
+		drop += speed * movevars.waterfriction * pmove.waterlevel * frametime;
+	else if (pmove.groundent != -1)			// apply ground friction
 	{
 		control = speed < movevars.stopspeed ? movevars.stopspeed : speed;
 		drop += control * friction * frametime;
@@ -539,7 +525,7 @@ PM_AirMove (void)
 		wishspeed = movevars.maxspeed;
 	}
 
-	if (onground != -1) {
+	if (pmove.groundent != -1) {
 		pmove.velocity[2] = 0;
 		PM_Accelerate (wishdir, wishspeed, movevars.accelerate);
 		pmove.velocity[2] -= movevars.entgravity * movevars.gravity * frametime;
@@ -578,14 +564,14 @@ PM_CatagorizePosition (void)
 	point[1] = pmove.origin[1];
 	point[2] = pmove.origin[2] - 1;
 	if (pmove.velocity[2] > 180) {
-		onground = -1;
+		pmove.groundent = -1;
 	} else {
 		tr = PM_PlayerMove (pmove.origin, point);
 		if (tr.plane.normal[2] < 0.7)
-			onground = -1;				// too steep
+			pmove.groundent = -1;				// too steep
 		else
-			onground = tr.ent;
-		if (onground != -1) {
+			pmove.groundent = tr.ent;
+		if (pmove.groundent != -1) {
 			pmove.waterjumptime = 0;
 			if (!tr.startsolid && !tr.allsolid)
 				VectorCopy (tr.endpos, pmove.origin);
@@ -600,23 +586,23 @@ PM_CatagorizePosition (void)
 //
 // get waterlevel
 //
-	waterlevel = 0;
-	watertype = CONTENTS_EMPTY;
+	pmove.waterlevel = 0;
+	pmove.watertype = CONTENTS_EMPTY;
 
 	point[2] = pmove.origin[2] + player_mins[2] + 1;
 	cont = PM_PointContents (point);
 
 	if (cont <= CONTENTS_WATER) {
-		watertype = cont;
-		waterlevel = 1;
+		pmove.watertype = cont;
+		pmove.waterlevel = 1;
 		point[2] = pmove.origin[2] + (player_mins[2] + player_maxs[2]) * 0.5;
 		cont = PM_PointContents (point);
 		if (cont <= CONTENTS_WATER) {
-			waterlevel = 2;
+			pmove.waterlevel = 2;
 			point[2] = pmove.origin[2] + 22;
 			cont = PM_PointContents (point);
 			if (cont <= CONTENTS_WATER)
-				waterlevel = 3;
+				pmove.waterlevel = 3;
 		}
 	}
 }
@@ -642,25 +628,25 @@ JumpButton (void)
 		return;
 	}
 
-	if (waterlevel >= 2) {				// swimming, not jumping
-		onground = -1;
+	if (pmove.waterlevel >= 2) {		// swimming, not jumping
+		pmove.groundent = -1;
 
-		if (watertype == CONTENTS_WATER)
+		if (pmove.watertype == CONTENTS_WATER)
 			pmove.velocity[2] = 100;
-		else if (watertype == CONTENTS_SLIME)
+		else if (pmove.watertype == CONTENTS_SLIME)
 			pmove.velocity[2] = 80;
 		else
 			pmove.velocity[2] = 50;
 		return;
 	}
 
-	if (onground == -1)
+	if (pmove.groundent == -1)
 		return;							// in air, so no effect
 
 	if (pmove.oldbuttons & BUTTON_JUMP)
 		return;							// don't pogo stick
 
-	onground = -1;
+	pmove.groundent = -1;
 	pmove.velocity[2] += 270;
 
 	pmove.oldbuttons |= BUTTON_JUMP;	// don't jump again until released
@@ -728,12 +714,6 @@ NudgePosition (void)
 
 	for (i = 0; i < 3; i++)
 		pmove.origin[i] = ((int) (pmove.origin[i] * 8)) * 0.125;
-//  pmove.origin[2] += 0.124;
-
-//  if (pmove.dead)
-//      return;     // might be a squished point, so don'y bother
-//  if (PM_TestPlayerPosition (pmove.origin) )
-//      return;
 
 	for (z = 0; z <= 2; z++) {
 		for (x = 0; x <= 2; x++) {
@@ -746,8 +726,8 @@ NudgePosition (void)
 			}
 		}
 	}
+
 	VectorCopy (base, pmove.origin);
-//  Con_DPrintf ("NudgePosition: stuck\n");
 }
 
 /*
@@ -856,10 +836,10 @@ PlayerMove (void)
 	// take angles directly from command
 	VectorCopy (pmove.cmd.angles, pmove.angles);
 
-	// set onground, watertype, and waterlevel
+	// set groundent, watertype, and waterlevel
 	PM_CatagorizePosition ();
 
-	if (waterlevel == 2)
+	if (pmove.waterlevel == 2)
 		CheckWaterJump ();
 
 	if (pmove.velocity[2] < 0)
@@ -872,11 +852,11 @@ PlayerMove (void)
 
 	PM_Friction ();
 
-	if (waterlevel >= 2)
+	if (pmove.waterlevel >= 2)
 		PM_WaterMove ();
 	else
 		PM_AirMove ();
 
-	// set onground, watertype, and waterlevel for final spot
+	// set groundent, watertype, and waterlevel for final spot
 	PM_CatagorizePosition ();
 }

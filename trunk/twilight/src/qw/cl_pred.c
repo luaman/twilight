@@ -119,7 +119,7 @@ CL_PredictUsercmd (player_state_t * from, player_state_t * to, usercmd_t *u,
 	VectorCopy (pmove.origin, to->origin);
 	VectorCopy (pmove.angles, to->viewangles);
 	VectorCopy (pmove.velocity, to->velocity);
-	to->onground = onground;
+	to->groundent = pmove.groundent;
 
 	to->weaponframe = from->weaponframe;
 }

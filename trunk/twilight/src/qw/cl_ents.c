@@ -217,7 +217,6 @@ CL_ParseDelta
 Can go from either a baseline or a previous packet_entity
 ==================
 */
-int         bitcounts[32];				// / just for protocol profiling
 void
 CL_ParseDelta (entity_state_t *from, entity_state_t *to, int bits)
 {
@@ -233,11 +232,6 @@ CL_ParseDelta (entity_state_t *from, entity_state_t *to, int bits)
 		i = MSG_ReadByte ();
 		bits |= i;
 	}
-
-	// count the bits for net profiling
-	for (i = 0; i < 16; i++)
-		if (bits & (1 << i))
-			bitcounts[i]++;
 
 	to->flags = bits;
 
@@ -624,7 +618,7 @@ CL_LinkPacketEntities (void)
 {
 	entity_t			*ent;
 	packet_entities_t	*pack;
-	entity_state_t		*s1;
+	entity_state_t		*state;
 	model_t				*model;
 	float				autorotate;
 	int					pnum;
@@ -636,54 +630,51 @@ CL_LinkPacketEntities (void)
 	autorotate = anglemod (100 * cl.time);
 
 	for (pnum = 0; pnum < pack->num_entities; pnum++) {
-		s1 = &pack->entities[pnum];
+		state = &pack->entities[pnum];
 
-		if (s1->effects & EF_LIGHTMASK) {
+		if (state->effects & EF_LIGHTMASK) {
 			// spawn light flashes, even ones coming from invisible objects
-			CL_NewDlight (s1->number, s1->origin, s1->effects);
+			CL_NewDlight (state->number, state->origin, state->effects);
 		}
 
-		if (s1->number >= MAX_EDICTS) {
+		if (state->number >= MAX_EDICTS) {
 			Host_EndGame ("ERROR! Entity number >= MAX_EDICTS!!\n");
 		}
 
-		ent = &cl_network_entities[s1->number];
+		ent = &cl_network_entities[state->number];
 
 		if ((ent->entity_frame != (entity_frame - 1)) ||
-				(ent->modelindex != s1->modelindex)) {
+				(ent->modelindex != state->modelindex)) {
 			memset (ent, 0, sizeof (*ent));
 		} else {
 			ent->times++;
 		}
 
-		if (!s1->modelindex)
+		if (!state->modelindex)
 			continue;		// Yes, it IS correct, go away.
 
-		ent->modelindex = s1->modelindex;
-		ent->model = model = cl.model_precache[s1->modelindex];	// Model.
+		ent->modelindex = state->modelindex;
+		ent->model = model = cl.model_precache[state->modelindex];	// Model.
 
-		moved = CL_UpdateAndLerp_Origin (ent, s1->origin, cls.realtime);
-		CL_UpdateAndLerp_Angles (ent, s1->angles, cls.realtime);
-		CL_UpdateAndLerp_Frame (ent, s1->frame, cls.realtime);
+		moved = CL_UpdateAndLerp_Origin (ent, state->origin, cls.realtime);
+		CL_UpdateAndLerp_Angles (ent, state->angles, cls.realtime);
+		CL_UpdateAndLerp_Frame (ent, state->frame, cls.realtime);
 
-		ent->skinnum = s1->skinnum;
-		ent->effects = s1->effects;
+		ent->skinnum = state->skinnum;
+		ent->effects = state->effects;
 		ent->entity_frame = entity_frame;
 
 		// set colormap
-		if (s1->colormap && (s1->colormap < MAX_CLIENTS)
-			&& s1->modelindex == cl_playerindex) {
-			ent->scoreboard = &cl.players[s1->colormap - 1];
+		if (state->colormap && (state->colormap < MAX_CLIENTS)
+			&& state->modelindex == cl_playerindex) {
+			ent->scoreboard = &cl.players[state->colormap - 1];
 		} else {
 			ent->scoreboard = NULL;
 		}
 
 		// rotate binary objects locally
-		if (model->flags & EF_ROTATE) {
-			ent->cur.angles[0] = 0;
-			ent->cur.angles[1] = autorotate;
-			ent->cur.angles[2] = 0;
-		}
+		if (model->flags & EF_ROTATE)
+			VectorSet (ent->cur.angles, 0, autorotate, 0);
 
 		V_AddEntity ( ent );
 
@@ -693,7 +684,7 @@ CL_LinkPacketEntities (void)
 
 		if (model->flags & EF_ROCKET) {
 			R_RocketTrail (ent->from.origin, ent->to.origin, 0);
-			dl = CL_AllocDlight (s1->number);
+			dl = CL_AllocDlight (state->number);
 			VectorCopy (ent->cur.origin, dl->origin);
 			dl->radius = 200;
 			dl->die = cl.time + 0.1;

@@ -737,6 +737,8 @@ CL_Init_Cvars (void)
 	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);
 	cl_nolerp = Cvar_Get ("cl_nolerp", "0", CVAR_NONE, NULL);
 
+	cl_warncmd = Cvar_Get ("cl_warncmd", "0", CVAR_NONE, NULL);
+
 	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, &CL_SbarCallback);
 	cl_hudswap = Cvar_Get ("cl_hudswap", "0", CVAR_ARCHIVE, NULL);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);

@@ -222,6 +222,8 @@ typedef struct {
 extern struct cvar_s *_cl_name;
 extern struct cvar_s *_cl_color;
 
+extern struct cvar_s *cl_warncmd;
+
 extern struct cvar_s *cl_upspeed;
 extern struct cvar_s *cl_forwardspeed;
 extern struct cvar_s *cl_backspeed;

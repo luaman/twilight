@@ -299,8 +299,6 @@ SV_FullClientUpdate (client_t *client, sizebuf_t *buf)
 
 	i = client - svs.clients;
 
-//Sys_Printf("SV_FullClientUpdate:  Updated frags for client %d\n", i);
-
 	MSG_WriteByte (buf, svc_updatefrags);
 	MSG_WriteByte (buf, i);
 	MSG_WriteShort (buf, client->old_frags);
@@ -755,7 +753,6 @@ SVC_RemoteCommand (void)
 	int         i;
 	char        remaining[1024];
 
-
 	if (!Rcon_Validate ()) {
 		Com_Printf ("Bad rcon from %s:\n%s\n", NET_AdrToString (net_from),
 					net_message.data + 4);
@@ -788,11 +785,6 @@ SVC_RemoteCommand (void)
 
 void
 Cmd_ForwardToServer (void)
-{
-}
-
-void
-Cmd_ForwardToServer_f (void)
 {
 }
 
@@ -1041,14 +1033,7 @@ SV_SendBan
 void
 SV_SendBan (void)
 {
-	char        data[128];
-
-	data[0] = data[1] = data[2] = data[3] = 0xff;
-	data[4] = A2C_PRINT;
-	data[5] = 0;
-	strcat (data, "\nbanned.\n");
-
-	NET_SendPacket (NS_SERVER, strlen (data), data, net_from);
+	Netchan_OutOfBandPrint (NS_SERVER, net_from, "%c\nbanned.\n", A2C_PRINT);
 }
 
 /*
@@ -1130,10 +1115,6 @@ SV_ReadPackets (void)
 
 		if (i != MAX_CLIENTS)
 			continue;
-
-		// packet is not from a known client
-		// Com_Printf ("%s:sequenced packet without connection\n"
-		// ,NET_AdrToString(net_from));
 	}
 }
 
@@ -1635,7 +1616,6 @@ SV_InitNet (void)
 
 	// heartbeats will always be sent to the id master
 	svs.last_heartbeat = -99999;		// send immediately
-//  NET_StringToAdr ("192.246.40.70:27000", &idmaster_adr);
 }
 
 static void

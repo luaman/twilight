@@ -60,6 +60,8 @@ int        *trashspot;
 
 qboolean    cmd_wait;
 
+cvar_t     *cl_warncmd;
+
 //=============================================================================
 
 /*
@@ -383,7 +385,9 @@ Cmd_Exec_f (void)
 		Com_Printf ("couldn't exec %s\n", Cmd_Argv (1));
 		return;
 	}
-	Com_Printf ("execing %s\n", Cmd_Argv (1));
+
+	if (cl_warncmd->value || developer->value)
+		Com_Printf ("execing %s\n", Cmd_Argv (1));
 
 	Cbuf_InsertText (f);
 	Hunk_FreeToLowMark (mark);
@@ -830,9 +834,8 @@ Cmd_ExecuteString (char *text, cmd_source_t src)
 	}
 
 	// check cvars
-	if (!Cvar_LegacyCmd ())
+	if (!Cvar_LegacyCmd () && (cl_warncmd->value || developer->value))
 		Com_Printf ("Unknown command \"%s\"\n", Cmd_Argv (0));
-
 }
 
 /*

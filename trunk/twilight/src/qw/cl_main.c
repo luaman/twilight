@@ -809,9 +809,10 @@ CL_ConnectionlessPacket (void)
 	MSG_ReadLong ();					// skip the -1
 
 	c = MSG_ReadByte ();
+
 	if (!cls.demoplayback)
 		Com_Printf ("%s: ", NET_AdrToString (net_from));
-//  Com_DPrintf ("%s", net_message.data + 5);
+
 	if (c == S2C_CONNECTION) {
 		Com_Printf ("connection\n");
 		if (cls.state >= ca_connected) {
@@ -827,6 +828,7 @@ CL_ConnectionlessPacket (void)
 		allowremotecmd = false;			// localid required now for remote cmds
 		return;
 	}
+
 	// remote command from gui front end
 	if (c == A2C_CLIENT_COMMAND) {
 		char        cmdtext[2048];
@@ -834,7 +836,7 @@ CL_ConnectionlessPacket (void)
 		Com_Printf ("client command\n");
 
 		if (!NET_IsLocalAddress (net_from)) {
-			Com_Printf ("Command packet from remote host.  Ignored.\n");
+			Com_Printf ("Command packet from remote host. Ignored.\n");
 			return;
 		}
 		s = MSG_ReadString ();
@@ -874,6 +876,7 @@ CL_ConnectionlessPacket (void)
 		allowremotecmd = false;
 		return;
 	}
+
 	// print command from somewhere
 	if (c == A2C_PRINT) {
 		Com_Printf ("print\n");
@@ -882,6 +885,7 @@ CL_ConnectionlessPacket (void)
 		Con_Print (s);
 		return;
 	}
+
 	// ping from somewhere
 	if (c == A2A_PING) {
 		char        data[6];
