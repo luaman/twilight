@@ -1,0 +1,58 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(nq/sv_main.c)
+AM_INIT_AUTOMAKE(twilight,0.0.0)
+AM_CONFIG_HEADER(config.h)
+
+dnl Checks for programs
+AC_PROG_CC
+AC_PROG_INSTALL
+
+dnl Checks for libraries
+AM_PATH_SDL(1.2.0,,AC_MSG_ERROR([*** SDL >= 1.2.0 not installed - please install first ***]))
+
+AC_CHECK_LIB(GL,glBegin,[
+	AC_DEFINE(HAVE_GL,1,define if libGL is present)
+	GL_LIBS="-lGL"
+	],AC_MSG_WARN(GL not found),$SDL_CFLAGS $SDL_LIBS)
+AC_SUBST(GL_LIBS)
+
+dnl Checks for header files.
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_INLINE
+
+dnl If we're compiling for x86, then include assembler code
+AC_ARG_ENABLE(asm,
+	[  --disable-asm           disable x86 assembler code],,enable_asm=yes)
+
+USE_X86_ASM=no
+if test x$enable_asm = xyes; then
+	AC_CANONICAL_HOST
+	case "$build_cpu" in
+		i*86*)	USE_X86_ASM=yes ;;
+	esac
+else
+	AM_CONDITIONAL(USE_X86_ASM,false)
+fi
+AM_CONDITIONAL(USE_X86_ASM,test x$USE_X86_ASM = xyes)
+
+dnl userpath/sharepath config
+AC_ARG_WITH(share-path,
+	[  --with-share-path       set default shared data path [DATADIR/twilight]],,
+	with_share_path=\${datadir}/twilight)
+SHAREPATH="$with_share_path"
+AC_SUBST(SHAREPATH)
+
+dnl XXX FIXME: make this a little more sane..
+AC_ARG_WITH(user-path,
+	[  --with-user-path        set default user data path [\$HOME/twilight]],,
+	with_user_path="$HOME/.twilight")
+USERPATH="$with_user_path"
+AC_SUBST(USERPATH)
+
+AC_OUTPUT(
+	Makefile
+	nq/Makefile
+	qw/Makefile
+	qw-server/Makefile
+)
