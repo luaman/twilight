@@ -392,13 +392,15 @@ float      *shadedots = r_avertexnormal_dots[0];
 int         lastposenum =  0;
 int			lastposenum0 = 0;
 
+extern GLenum gl_mtex_enum;
+
 /*
 =============
 GL_DrawAliasFrame
 =============
 */
 void
-GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
+GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 {
 	float       l;
 	trivertx_t *verts;
@@ -422,7 +424,15 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 
 		do {
 			// texture coordinates come from the draw list
-			qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
+
+			if (mtex) {
+				qglMTexCoord2f (gl_mtex_enum + 0, ((float *) order)[0], ((float *) order)[1]);
+				qglMTexCoord2f (gl_mtex_enum + 1, ((float *) order)[0], ((float *) order)[1]);
+			}
+			else {
+				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
+			}
+
 			order += 2;
 
 			// normals and vertexes come from the frame list
@@ -434,6 +444,9 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum)
 
 		qglEnd ();
 	}
+
+	if (mtex)
+		GL_DisableMultitexture();
 }
 
 /*
@@ -444,7 +457,7 @@ fenix@io.com: model animation interpolation
 =============
 */
 void 
-GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float blend)
+GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float blend, qboolean mtex)
 {
 	float       l;
 	trivertx_t	*verts1;
@@ -477,7 +490,14 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 		do
 		{
 			// texture coordinates come from the draw list
-			qglTexCoord2f (((float *)order)[0], ((float *)order)[1]);
+			if (mtex) {
+				qglMTexCoord2f (gl_mtex_enum + 0, ((float *) order)[0], ((float *) order)[1]);
+				qglMTexCoord2f (gl_mtex_enum + 1, ((float *) order)[0], ((float *) order)[1]);
+			}
+			else {
+				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
+			}
+
 			order += 2;
 
 			// normals and vertexes come from the frame list
@@ -502,6 +522,9 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 
 		qglEnd ();
 	}
+
+	if (mtex)
+		GL_DisableMultitexture();
 }
 
 /*
@@ -724,7 +747,7 @@ R_SetupAliasFrame
 =================
 */
 void
-R_SetupAliasFrame (int frame, aliashdr_t *paliashdr)
+R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, qboolean mtex)
 {
 	int         pose, numposes;
 	float       interval;
@@ -742,7 +765,7 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr)
 		pose += (int) (cl.time / interval) % numposes;
 	}
 
-	GL_DrawAliasFrame (paliashdr, pose);
+	GL_DrawAliasFrame (paliashdr, pose, mtex);
 }
 
 
@@ -754,7 +777,7 @@ fenix@io.com: model animation interpolation
 =================
 */
 void 
-R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t* e)
+R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolean mtex)
 {
 	int   pose;
 	int   numposes;
@@ -793,8 +816,10 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t* e)
 	if (cl.paused || blend > 1) 
 		blend = 1;
 	
-	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend);
+	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend, mtex);
 }
+
+void        GL_SelectTexture (GLenum target);
 
 /*
 =================
@@ -813,6 +838,7 @@ R_DrawAliasModel (entity_t *e)
 	vec3_t      mins, maxs;
 	aliashdr_t *paliashdr;
 	int         anim;
+	int			texture, fb_texture = 0;
 
 	clmodel = currententity->model;
 
@@ -887,7 +913,14 @@ R_DrawAliasModel (entity_t *e)
 	// draw all the triangles
 	// 
 
-	GL_DisableMultitexture ();
+	anim = (int) (cl.time * 10) & 3;
+
+	if (!(clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value) {
+		fb_texture = paliashdr->fb_texturenum[currententity->skinnum][anim];
+	}
+
+	if (!fb_texture || !gl_mtexable)
+		GL_DisableMultitexture ();
 
 	qglPushMatrix ();
 
@@ -910,44 +943,51 @@ R_DrawAliasModel (entity_t *e)
 				  paliashdr->scale[2]);
 	}
 
-	anim = (int) (cl.time * 10) & 3;
-	qglBindTexture (GL_TEXTURE_2D, paliashdr->gl_texturenum[currententity->skinnum][anim]);
+	texture = paliashdr->gl_texturenum[currententity->skinnum][anim];
 
 	// we can't dynamically colormap textures, so they are cached
 	// seperately for the players.  Heads are just uncolored.
 	if (currententity->colormap != vid.colormap && !gl_nocolors->value) {
 		i = currententity - cl_entities;
 		if (i >= 1 && i <= cl.maxclients	/* && !Q_strcmp
-											   (currententity->model->name,
-											   "progs/player.mdl") */ )
-			qglBindTexture (GL_TEXTURE_2D, playertextures - 1 + i);
+			   (currententity->model->name,
+			   "progs/player.mdl") */ )
+			texture = playertextures - 1 + i;
 	}
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	if (fb_texture) {
+		if (gl_mtexable) {
+			GL_SelectTexture (0);
+			qglBindTexture (GL_TEXTURE_2D, texture);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			GL_EnableMultitexture();
+			qglBindTexture (GL_TEXTURE_2D, fb_texture);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+		}
+	}
+	else {
+		qglBindTexture (GL_TEXTURE_2D, texture);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	}
 
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
+		R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity, (fb_texture && gl_mtexable));
 	else
-		R_SetupAliasFrame (currententity->frame, paliashdr);
+		R_SetupAliasFrame (currententity->frame, paliashdr, (fb_texture && gl_mtexable));
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-	if (!(clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value) {
-		int	fb_texture = paliashdr->fb_texturenum[currententity->skinnum][anim];
-		if (fb_texture) {
-			qglEnable (GL_BLEND);
-			qglBindTexture (GL_TEXTURE_2D, fb_texture);
-
-			if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-				R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity);
-			else
-				R_SetupAliasFrame (currententity->frame, paliashdr);
-
-			qglDisable (GL_BLEND);
-		}
+	if (fb_texture && !gl_mtexable) {
+		qglEnable (GL_BLEND);
+		qglBindTexture (GL_TEXTURE_2D, fb_texture);
+		
+		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+			R_SetupAliasBlendedFrame (currententity->frame, paliashdr, currententity, false);
+		else
+			R_SetupAliasFrame (currententity->frame, paliashdr, false);
+		
+		qglDisable (GL_BLEND);
 	}
 
 	if (gl_affinemodels->value)
@@ -957,10 +997,6 @@ R_DrawAliasModel (entity_t *e)
 
 	if (r_shadows->value && !(clmodel->modflags & FLAG_NOSHADOW)) {
 		float an;
-
-		// no shadows if underwater - crashes
-//		if (SV_PointContents(e->origin) <= CONTENTS_WATER)
-//			return;
 
 		if (!shadescale)
 			shadescale = Q_RSqrt(2);
