@@ -1248,11 +1248,11 @@ R_SetupGL (void)
 	// 
 	qglMatrixMode (GL_PROJECTION);
 	qglLoadIdentity ();
-	x = r_refdef.vrect.x * vid.width / vid.width;
-	x2 = (r_refdef.vrect.x + r_refdef.vrect.width) * vid.width / vid.width;
-	y = (vid.height - r_refdef.vrect.y) * vid.height / vid.height;
+	x = r_refdef.vrect.x;
+	x2 = (r_refdef.vrect.x + r_refdef.vrect.width);
+	y = (vid.height - r_refdef.vrect.y);
 	y2 = (vid.height -
-		  (r_refdef.vrect.y + r_refdef.vrect.height)) * vid.height / vid.height;
+		  (r_refdef.vrect.y + r_refdef.vrect.height));
 
 	// fudge around because of frac screen scale
 	if (x > 0)

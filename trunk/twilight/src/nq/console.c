@@ -154,13 +154,13 @@ Con_ClearNotify (void)
 Con_MessageMode_f
 ================
 */
-extern qboolean team_message;
+extern qboolean chat_team;
 
 void
 Con_MessageMode_f (void)
 {
 	key_dest = key_message;
-	team_message = false;
+	chat_team = false;
 }
 
 
@@ -173,7 +173,7 @@ void
 Con_MessageMode2_f (void)
 {
 	key_dest = key_message;
-	team_message = true;
+	chat_team = true;
 }
 
 
@@ -586,7 +586,7 @@ Con_DrawNotify (void)
 		clearnotify = 0;
 		scr_copytop = 1;
 
-		if (team_message) {
+		if (chat_team) {
 			Draw_String (8, v, "say_team:");
 			skip = 11;
 		} else {

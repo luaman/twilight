@@ -100,7 +100,7 @@ console is:
 
 qboolean    scr_skipupdate = 0;
 
-int         glx, gly, glwidth, glheight;
+int         glx, gly;
 
 // only the refresh window will be updated unless these variables are flagged 
 int         scr_copytop;
@@ -448,9 +448,9 @@ SCR_Init
 void
 SCR_Init (void)
 {
-	//
-	// register our commands
-	//
+//
+// register our commands
+//
 	Cmd_AddCommand ("screenshot", SCR_ScreenShot_f);
 	Cmd_AddCommand ("sizeup", SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown", SCR_SizeDown_f);
@@ -539,8 +539,8 @@ SCR_DrawPause (void)
 		return;
 
 	pic = Draw_CachePic ("gfx/pause.lmp");
-	Draw_Pic ((vid.width - pic->width) / 2,
-			  (vid.height - 48 - pic->height) / 2, pic);
+	Draw_Pic ((vid.conwidth - pic->width) / 2,
+			  (vid.conheight - 48 - pic->height) / 2, pic);
 }
 
 
@@ -559,8 +559,8 @@ SCR_DrawLoading (void)
 		return;
 
 	pic = Draw_CachePic ("gfx/loading.lmp");
-	Draw_Pic ((vid.width - pic->width) / 2,
-			  (vid.height - 48 - pic->height) / 2, pic);
+	Draw_Pic ((vid.conwidth - pic->width) / 2,
+			  (vid.conheight - 48 - pic->height) / 2, pic);
 }
 
 
@@ -585,10 +585,10 @@ SCR_SetUpToDrawConsole (void)
 	con_forcedup = !cl.worldmodel || cls.signon != SIGNONS;
 
 	if (con_forcedup) {
-		scr_conlines = vid.height;		// full screen
+		scr_conlines = vid.conheight;		// full screen
 		scr_con_current = scr_conlines;
 	} else if (key_dest == key_console)
-		scr_conlines = vid.height / 2;	// half screen
+		scr_conlines = vid.conheight / 2;	// half screen
 	else
 		scr_conlines = 0;				// none visible
 
@@ -685,23 +685,23 @@ SCR_ScreenShot_f (void)
 	}
 
 	if (i == 100) {
-		Con_Printf ("SCR_ScreenShot_f: Couldn't create a PCX file\n");
+		Con_Printf ("SCR_ScreenShot_f: Couldn't create a TGA file\n");
 		return;
 	}
 
-	buffer = malloc (glwidth * glheight * 3);
-	qglReadPixels (glx, gly, glwidth, glheight, GL_RGB, GL_UNSIGNED_BYTE,
+	buffer = malloc (vid.width * vid.height * 3);
+	qglReadPixels (glx, gly, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE,
 				  buffer);
 
 	// swap rgb to bgr
-	c = glwidth * glheight * 3;
+	c = vid.width * vid.height * 3;
 	for (i = 0; i < c; i += 3) {
 		temp = buffer[i];
 		buffer[i] = buffer[i + 2];
 		buffer[i + 2] = temp;
 	}
 
-	if (TGA_Write (pcxname, glwidth, glheight, 3, buffer))
+	if (TGA_Write (pcxname, vid.width, vid.height, 3, buffer))
 		Con_Printf ("Wrote %s\n", pcxname);
 
 	free (buffer);
@@ -890,7 +890,7 @@ SCR_UpdateScreen (void)
 		return;							// not initialized yet
 
 
-	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
+	qglEnable (GL_DEPTH_TEST);
 
 	if (vid.recalc_refdef)
 		SCR_CalcRefdef ();
@@ -942,3 +942,4 @@ SCR_UpdateScreen (void)
 
 	GL_EndRendering ();
 }
+

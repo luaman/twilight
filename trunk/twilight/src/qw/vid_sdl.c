@@ -147,7 +147,6 @@ VID_InitTexGamma (void)
 		b = tex_gamma_ramps[2][pal[2]];
 		pal += 3;
 
-
 		d_8tofloattable[i][0] = (float) r / 255;
 		d_8tofloattable[i][1] = (float) g / 255;
 		d_8tofloattable[i][2] = (float) b / 255;
@@ -266,7 +265,8 @@ GL_Init (void)
 
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+			GL_LINEAR_MIPMAP_NEAREST);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -286,10 +286,11 @@ GL_EndRendering (void)
 void
 VID_Init_Cvars (void)
 {
-	i_keypadmode = Cvar_Get ("i_keypadmode", "0", CVAR_NONE, I_KeypadMode);
+	i_keypadmode = Cvar_Get ("i_keypadmode", "0", CVAR_NONE, &I_KeypadMode);
 	vid_mode = Cvar_Get ("vid_mode", "0", CVAR_NONE, NULL);
 	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
-	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE, IN_WindowedMouse);
+	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE,
+			&IN_WindowedMouse);
 	gl_ztrick = Cvar_Get ("gl_ztrick", "0", CVAR_NONE, NULL);
 	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
 	v_hwgamma = Cvar_Get ("v_hwgamma", "1", CVAR_NONE, &GammaChanged);
@@ -320,7 +321,8 @@ VID_Init (unsigned char *palette)
 	if ((i = COM_CheckParm ("-window")) == 0)
 		sdl_flags |= SDL_FULLSCREEN;
 
-	if ((i = COM_CheckParm ("-width")))
+	i = COM_CheckParm ("-width");
+	if (i && i < com_argc - 1)
 		vid.width = Q_atoi (com_argv[i + 1]);
 	else
 		vid.width = 640;
@@ -328,7 +330,8 @@ VID_Init (unsigned char *palette)
 	if (vid.width < 320)
 		vid.width = 320;
 
-	if ((i = COM_CheckParm ("-height")))
+	i = COM_CheckParm ("-height");
+	if (i && i < com_argc - 1)
 		vid.height = Q_atoi (com_argv[i + 1]);
 	else
 		vid.height = 480;
@@ -336,7 +339,8 @@ VID_Init (unsigned char *palette)
 	if (vid.height < 200)
 		vid.height = 200;
 
-	if ((i = COM_CheckParm ("-conwidth")) != 0)
+	i = COM_CheckParm ("-conwidth");
+	if (i && i < com_argc - 1)
 		vid.conwidth = Q_atoi (com_argv[i + 1]);
 	else
 		vid.conwidth = vid.width;
@@ -349,7 +353,8 @@ VID_Init (unsigned char *palette)
 	// pick a conheight that matches with correct aspect
 	vid.conheight = vid.conwidth * 3 / 4;
 
-	if ((i = COM_CheckParm ("-conheight")) != 0)
+	i = COM_CheckParm ("-conheight");
+	if (i && i < com_argc - 1)
 		vid.conheight = Q_atoi (com_argv[i + 1]);
 	if (vid.conheight < 200)
 		vid.conheight = 200;
@@ -373,7 +378,8 @@ VID_Init (unsigned char *palette)
 	if (!DGL_LoadLibrary(gl_driver->string))
 		Sys_Error("%s\n", DGL_GetError());
 
-	if ((i = COM_CheckParm ("-bpp")) != 0)
+	i = COM_CheckParm ("-bpp");
+	if (i && i < com_argc - 1)
 		vid.bpp = Q_atoi (com_argv[i + 1]);
 	else
 		vid.bpp = info->vfmt->BitsPerPixel;
@@ -395,9 +401,6 @@ VID_Init (unsigned char *palette)
 		Sys_Error("%s\n", DGL_GetError());
 
 	SDL_WM_SetCaption ("Twilight QWCL", "twilight");
-
-	vid.aspect = ((float) vid.height / (float) vid.width) * (4.0 / 3.0);
-//	vid.conaspect = ((float) vid.conheight / (float) vid.conwidth) * (4.0 / 3.0);
 
 	VID_Inited = true;
 	GammaChanged(v_gamma);
