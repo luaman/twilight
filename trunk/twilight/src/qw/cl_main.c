@@ -1422,13 +1422,14 @@ Host_Init (void)
 
 	Netchan_Init ();				// setup netchan
 
-	W_LoadWadFile ("gfx.wad");
 	Key_Init ();					// setup keysym structures, add related commands
 	Con_Init ();					// setup and initialize console, add related commands
 	CPU_Init ();
 	M_Init ();						// setup menu, add related commands
 
 	Com_Printf ("Exe: "__TIME__" "__DATE__"\n");
+
+	Image_Init ();
 
 	host_basepal = COM_LoadNamedFile ("gfx/palette.lmp", true);
 	if (!host_basepal)

@@ -75,7 +75,7 @@ PCX_LoadBuffer (Uint8 *buf)
 		return NULL;
 	}
 
-	img = malloc (sizeof(image_t));
+	img = Zone_Alloc (img_zone, sizeof(image_t));
 
 	memcpy (palette, buf + com_filesize - 768, 768);
 
@@ -84,7 +84,7 @@ PCX_LoadBuffer (Uint8 *buf)
 	img->width = pcx->xmax+1;
 	img->height = pcx->ymax+1;
 
-	pcx_rgb = malloc (count * 4);
+	pcx_rgb = Zone_Alloc (img_zone, count * 4);
 	img->pixels = pcx_rgb;
 	pix = pcx_rgb;
 
@@ -120,16 +120,17 @@ PCX_LoadBuffer (Uint8 *buf)
 
 
 image_t *
-PCX_Load (char *name)
+PCX_Load (fs_file_t *file, SDL_RWops *rw)
 {
 	image_t	*image;
-	Uint8	*buf = COM_LoadTempFile (name, false);
+	Uint8	*buf;
 
-	if (buf) {
-		image = PCX_LoadBuffer (buf);
-		Zone_Free (buf);
-		return image;
-	}
+	buf = Zone_Alloc (tempzone, file->len);
+	SDL_RWread (rw, buf, file->len, 1);
+	SDL_RWclose (rw);
+	image = PCX_LoadBuffer (buf);
+	Zone_Free (buf);
+	return image;
 
 	return NULL;
 }

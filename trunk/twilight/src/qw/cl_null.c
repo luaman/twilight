@@ -29,6 +29,7 @@ static const char rcsid[] =
 #include <string.h>
 
 #include "client.h"
+#include "image.h"
 
 /*
  * Null client
@@ -75,8 +76,8 @@ M_SetKeyDest(void)
 {
 }
 
-qpic_t *
-Draw_CachePic(char *path)
+image_t *
+Draw_CacheImg(char *path)
 {
 	path = path;
 	

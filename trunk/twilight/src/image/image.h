@@ -27,6 +27,16 @@
 #define __IMAGE_H
 
 #include "qtypes.h"
+#include "fs.h"
+
+#define TEX_NONE		0
+#define TEX_ALPHA		BIT(0)
+#define TEX_MIPMAP		BIT(1)
+#define TEX_FORCE		BIT(2)
+#define TEX_REPLACE		BIT(3)
+#define TEX_UPLOAD		BIT(4)
+#define TEX_KEEPRAW		BIT(5)
+
 
 #define IMG_QPAL	0
 //define IMG_PAL		1
@@ -35,13 +45,28 @@
 
 typedef struct image_s
 {
+	fs_file_t	*file;
 	Uint32		width;
 	Uint32		height;
 	Uint32		type;
 	Uint8		*pixels;
+	GLuint		texnum;
 } image_t;
 
-image_t *Image_Load (char *name);
+typedef image_t * (IMG_Load) (fs_file_t *file, SDL_RWops *rw);
+
+typedef struct img_search_s {
+	char				*ext;
+	IMG_Load			*load;
+	struct img_search_s	*next;
+} img_search_t;
+
+extern memzone_t		*img_zone;
+extern img_search_t		*img_search;
+
+void Image_Init (void);
+image_t *Image_Load (char *name, int flags);
+image_t *Image_Load_Multi (const char **names, int flags);
 
 #endif // __IMAGE_H
 

@@ -33,25 +33,26 @@
 #include "wad.h"
 #include "mathlib.h"
 #include "strlib.h"
+#include "image.h"
 
 typedef enum {
 	m_command, m_slider, m_toggle, m_multi_select, m_text_entry, m_text,
-	m_step_float, m_loop_int, m_qpic,
+	m_step_float, m_loop_int, m_img,
 } item_type_t;
 
-typedef struct menu_qpic_trans_s {
+typedef struct menu_img_trans_s {
 	cvar_t		*from_cvar;
 	int			 from_shift, from_bits, from;
 	cvar_t		*to_cvar;
 	int			 to_shift, to_bits, to;
-} menu_qpic_trans_t;
+} menu_img_trans_t;
 
-typedef struct menu_item_qpic_s {
-	qpic_t				*qpic;
+typedef struct menu_item_img_s {
+	image_t				*img;
 	int					x, y;		// FIXME: HACK HACK HACK!
-	menu_qpic_trans_t	*trans;
+	menu_img_trans_t	*trans;
 	int					n_trans;
-} menu_item_qpic_t;
+} menu_item_img_t;
 
 typedef struct menu_item_loop_int_s {
 	cvar_t		*cvar;
@@ -119,7 +120,7 @@ typedef struct menu_item_s {
 		menu_item_text_entry_t	 text_entry;
 		menu_item_step_float_t	 step_float;
 		menu_item_loop_int_t	 loop_int;
-		menu_item_qpic_t		 qpic;
+		menu_item_img_t		 img;
 	} u;
 } menu_item_t;
 
@@ -137,7 +138,7 @@ extern memzone_t	*m_zone;
 extern qboolean		m_entersound;
 
 
-void M_DrawPic(int x, int y, qpic_t *pic);
+void M_DrawImg(int x, int y, image_t *img);
 void M_DrawTextBox(int x, int y, int width, int lines);
 void M_SetKeyDest(void);
 void M_ToggleMenu_f(void);
@@ -245,8 +246,8 @@ MItem_Draw_Value (menu_item_t *item)
 			good = !!item->u.toggle;
 		case m_text:
 			good = !!item->u.text;
-		case m_qpic:
-			good = !!item->u.qpic.qpic;
+		case m_img:
+			good = !!item->u.img.img;
 		case m_loop_int:
 			good = !!item->u.loop_int.cvar;
 		case m_step_float:

@@ -58,6 +58,7 @@ static const char rcsid[] =
 #include "cpu.h"
 #include "surface.h"
 #include "fs.h"
+#include "image.h"
 
 /*
 
@@ -788,7 +789,6 @@ Host_Init ()
 	COM_Init ();					// setup filesystem, add related commands
 
 	Host_InitLocal ();				// initialize local host
-	W_LoadWadFile ("gfx.wad");
 	Key_Init ();					// setup keysyms
 	Con_Init ();					// setup console, add related commands
 	CPU_Init ();
@@ -803,6 +803,8 @@ Host_Init ()
 //	Com_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
 
 	if (ccls.state != ca_dedicated) {
+		Image_Init ();
+
 		host_basepal = COM_LoadNamedFile ("gfx/palette.lmp", true);
 		if (!host_basepal)
 			Sys_Error ("Couldn't load gfx/palette.lmp");

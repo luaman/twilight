@@ -46,8 +46,8 @@ static const char rcsid[] =
 #include "cclient.h"
 #include "console.h"
 
-qpic_t *draw_disc;
-static qpic_t *draw_backtile;
+image_t *draw_disc;
+static image_t *draw_backtile;
 
 static GLuint	translate_texture;
 static GLuint	char_texture;
@@ -55,17 +55,9 @@ static GLuint	char_texture;
 /* ========================================================================= */
 /* Support Routines */
 
-typedef struct cachepic_s {
-	char	name[MAX_QPATH];
-	qpic_t	pic;
-	Uint8	padding[32];	/* for appended glpic */
-} cachepic_t;
-
-#define		MAX_CACHED_PICS		128
-static cachepic_t	GLT_cachepics[MAX_CACHED_PICS];
-static int			GLT_numcachepics;
-
-static Uint8		menuplyr_pixels[4096];
+#define		MAX_CACHED_IMGS		128
+static image_t	*GLT_cacheimgs[MAX_CACHED_IMGS];
+static int		GLT_numcacheimgs;
 
 static cvar_t *gl_constretch;
 extern cvar_t *cl_verstring;
@@ -81,70 +73,36 @@ static cvar_t *crosshaircolor;
 static GLuint   ch_textures[NUM_CROSSHAIRS];            // crosshair texture
 
 
-qpic_t     *
-Draw_PicFromWad (const char *name)
+image_t     *
+Draw_CacheImg (char *path)
 {
-	qpic_t     *p;
-	glpic_t    *gl;
-
-	p = W_GetLumpName (name);
-	if (!p)
-		Sys_Error ("Draw_PicFromWad: cannot find a lump named %s\n", name);
-
-	SwapPic (p);
-	gl = (glpic_t *) p->data;
-
-	gl->texnum = GLT_Load_qpic (p);
-	gl->sl = 0;
-	gl->sh = 1;
-	gl->tl = 0;
-	gl->th = 1;
-	return p;
-}
-
-
-qpic_t     *
-Draw_CachePic (const char *path)
-{
-	cachepic_t *pic;
+	image_t		*img;
 	int         i;
-	qpic_t     *dat;
-	glpic_t    *gl;
 
-	for (pic = GLT_cachepics, i = 0; i < GLT_numcachepics; pic++, i++)
-		if (!strcmp (path, pic->name))
-			return &pic->pic;
+	for (i = 0; i < GLT_numcacheimgs; i++) {
+		img = GLT_cacheimgs[i];
+		if (!strcasecmp (path, img->file->name_base))
+			return img;
+	}
 
-	if (GLT_numcachepics == MAX_CACHED_PICS)
-		Sys_Error ("GLT_numcachepics == MAX_CACHED_PICS");
-	GLT_numcachepics++;
-	strlcpy (pic->name, path, sizeof (pic->name));
+	if (GLT_numcacheimgs == MAX_CACHED_IMGS)
+		Sys_Error ("GLT_numcacheimgs == MAX_CACHED_IMGS");
+	GLT_numcacheimgs++;
 
-	/* load the pic from disk */
-	dat = (qpic_t *) COM_LoadTempFile (path, true);
-	if (!dat)
-		Sys_Error ("Draw_CachePic: failed to load %s", path);
-	SwapPic (dat);
+	/* load the img from disk */
 
 	/*	HACK HACK HACK --- we need to keep the bytes for
 		the translatable player picture just for the menu
 		configuration dialog */
-	if (!strcmp (path, "gfx/menuplyr.lmp"))
-		memcpy (menuplyr_pixels, dat->data, dat->width * dat->height);
+	if (!strcmp (path, "gfx/menuplyr"))
+		img = Image_Load (path, TEX_ALPHA | TEX_UPLOAD | TEX_KEEPRAW);
+	else
+		img = Image_Load (path, TEX_ALPHA | TEX_UPLOAD);
+	if (!img)
+		Sys_Error ("Draw_CacheImg: failed to load %s", path);
+	GLT_cacheimgs[i] = img;
 
-	pic->pic.width = dat->width;
-	pic->pic.height = dat->height;
-
-	gl = (glpic_t *) pic->pic.data;
-	gl->texnum = GLT_Load_qpic (dat);
-	gl->sl = 0;
-	gl->sh = 1;
-	gl->tl = 0;
-	gl->th = 1;
-
-	Zone_Free (dat);
-
-	return &pic->pic;
+	return img;
 }
 
 void
@@ -171,18 +129,18 @@ Draw_Init (void)
 
 	GLT_Init ();
 
-	img = Image_Load ("conchars");
+	img = Image_Load ("gfx/conchars", TEX_UPLOAD | TEX_ALPHA);
 	if (!img)
 		Sys_Error ("Draw_Init: Unable to load conchars\n");
 
-	char_texture = GLT_Load_image ("charset", img, NULL, TEX_ALPHA);
+	char_texture = img->texnum;
 
 	/* save a texture slot for translated picture */
 	qglGenTextures(1, &translate_texture);
 
 	/* get the other pics we need */
-	draw_disc = Draw_PicFromWad ("disc");
-	draw_backtile = Draw_PicFromWad ("backtile");
+	draw_disc = Image_Load ("gfx/disc", TEX_UPLOAD | TEX_ALPHA);
+	draw_backtile = Image_Load ("gfx/backtile", TEX_UPLOAD | TEX_ALPHA);
 
 	/* Keep track of the first crosshair texture */
 	for (i = 0; i < NUM_CROSSHAIRS; i++)
@@ -412,22 +370,19 @@ Draw_Conv_String (float x, float y, const char *str, float text_size)
 
 
 void
-Draw_Pic (int x, int y, const qpic_t *pic)
+Draw_Img (int x, int y, const image_t *img)
 {
-	const glpic_t	   *gl;
-
-	gl = (const glpic_t *) pic->data;
-	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
+	qglBindTexture (GL_TEXTURE_2D, img->texnum);
 	qglEnable (GL_BLEND);
 
-	VectorSet2 (tc_array_v(0), gl->sl, gl->tl);
+	VectorSet2 (tc_array_v(0), 0, 0);
 	VectorSet2 (v_array_v(0), x, y);
-	VectorSet2 (tc_array_v(1), gl->sh, gl->tl);
-	VectorSet2 (v_array_v(1), x + pic->width, y);
-	VectorSet2 (tc_array_v(2), gl->sh, gl->th);
-	VectorSet2 (v_array_v(2), x + pic->width, y + pic->height);
-	VectorSet2 (tc_array_v(3), gl->sl, gl->th);
-	VectorSet2 (v_array_v(3), x, y + pic->height);
+	VectorSet2 (tc_array_v(1), 1, 0);
+	VectorSet2 (v_array_v(1), x + img->width, y);
+	VectorSet2 (tc_array_v(2), 1, 1);
+	VectorSet2 (v_array_v(2), x + img->width, y + img->height);
+	VectorSet2 (tc_array_v(3), 0, 1);
+	VectorSet2 (v_array_v(3), x, y + img->height);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -437,25 +392,18 @@ Draw_Pic (int x, int y, const qpic_t *pic)
 
 
 void
-Draw_SubPic (int x, int y, const qpic_t *pic, int srcx, int srcy, int width,
+Draw_SubImg (int x, int y, const image_t *img, int srcx, int srcy, int width,
 		int height)
 {
-	const glpic_t	*gl;
 	float			newsl, newtl, newsh, newth;
-	float			oldglwidth, oldglheight;
 
-	gl = (const glpic_t *) pic->data;
+	newsl = srcx / img->width;
+	newsh = newsl + width / img->width;
 
-	oldglwidth = gl->sh - gl->sl;
-	oldglheight = gl->th - gl->tl;
+	newtl = srcy / img->height;
+	newth = newtl + height / img->height;
 
-	newsl = gl->sl + (srcx * oldglwidth) / pic->width;
-	newsh = newsl + (width * oldglwidth) / pic->width;
-
-	newtl = gl->tl + (srcy * oldglheight) / pic->height;
-	newth = newtl + (height * oldglheight) / pic->height;
-
-	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
+	qglBindTexture (GL_TEXTURE_2D, img->texnum);
 	VectorSet2 (tc_array_v(0), newsl, newtl);
 	VectorSet2 (v_array_v(0), x, y);
 	VectorSet2 (tc_array_v(1), newsh, newtl);
@@ -476,40 +424,33 @@ Only used for the player color selection menu
 =============
 */
 void
-Draw_TransPicTranslate (int x, int y, const qpic_t *pic, const Uint8 *translation)
+Draw_TransImgTranslate (int x, int y, const image_t *img, const Uint8 *translation)
 {
-	int         v, u, c;
-	unsigned    trans[64 * 64], *dest;
-	Uint8      *src;
-	int         p;
+	Uint	i;
+	Uint32	*trans;
+
+	if (!img->pixels)
+		return;
 
 	qglEnable (GL_BLEND);
 	qglBindTexture (GL_TEXTURE_2D, translate_texture);
 
-	c = pic->width * pic->height;
+	trans = Zone_Alloc (tempzone, sizeof (Uint32) * img->width * img->height);
 
-	dest = trans;
-	for (v = 0; v < 64; v++, dest += 64) {
-		src = &menuplyr_pixels[((v * pic->height) >> 6) * pic->width];
-		for (u = 0; u < 64; u++) {
-			p = src[(u * pic->width) >> 6];
-			if (p == 255)
-				dest[u] = p;
-			else
-				dest[u] = d_palette_raw[translation[p]];
-		}
-	}
+	for (i = 0; i < (img->width * img->height); i++)
+		trans[i] = d_palette_raw[translation[img->pixels[i]]];
 
-	GL_Upload32 (trans, 64, 64, TEX_ALPHA);
+	GL_Upload32 (trans, img->width, img->height, TEX_ALPHA);
+	Zone_Free (trans);
 
 	VectorSet2 (tc_array_v(0), 0, 0);
 	VectorSet2 (v_array_v(0), x, y);
 	VectorSet2 (tc_array_v(1), 1, 0);
-	VectorSet2 (v_array_v(1), x + pic->width, y);
+	VectorSet2 (v_array_v(1), x + img->width, y);
 	VectorSet2 (tc_array_v(2), 1, 1);
-	VectorSet2 (v_array_v(2), x + pic->width, y + pic->height);
+	VectorSet2 (v_array_v(2), x + img->width, y + img->height);
 	VectorSet2 (tc_array_v(3), 0, 1);
-	VectorSet2 (v_array_v(3), x, y + pic->height);
+	VectorSet2 (v_array_v(3), x, y + img->height);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -621,7 +562,7 @@ Draw_Disc (void)
 	if (!draw_disc)
 		return;
 	qglDrawBuffer (GL_FRONT);
-	Draw_Pic (vid.width_2d - 24, 0, draw_disc);
+	Draw_Img (vid.width_2d - 24, 0, draw_disc);
 	qglDrawBuffer (GL_BACK);
 }
 
@@ -687,13 +628,11 @@ void
 Draw_ConsoleBackground (int lines)
 {
 	int		y;
-	qpic_t	*conback;
-	glpic_t	*gl;
+	image_t	*conback;
 	float	alpha;
 	float	ofs;
 
-	conback = Draw_CachePic ("gfx/conback.lmp");
-	gl = (glpic_t *) conback->data;
+	conback = Draw_CacheImg ("gfx/conback");
 
 	y = (vid.height_2d * 3) >> 2;
 
@@ -712,14 +651,14 @@ Draw_ConsoleBackground (int lines)
 		qglEnable (GL_BLEND);
 	}
 
-	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
-	VectorSet2 (tc_array_v(0), gl->sl, gl->tl + ofs);
+	qglBindTexture (GL_TEXTURE_2D, conback->texnum);
+	VectorSet2 (tc_array_v(0), 0, 0 + ofs);
 	VectorSet2 (v_array_v(0), 0, 0);
-	VectorSet2 (tc_array_v(1), gl->sh, gl->tl + ofs);
+	VectorSet2 (tc_array_v(1), 1, 0 + ofs);
 	VectorSet2 (v_array_v(1), vid.width_2d, 0);
-	VectorSet2 (tc_array_v(2), gl->sh, gl->th);
+	VectorSet2 (tc_array_v(2), 1, 1);
 	VectorSet2 (v_array_v(2), vid.width_2d, lines);
-	VectorSet2 (tc_array_v(3), gl->sl, gl->th);
+	VectorSet2 (tc_array_v(3), 0, 1);
 	VectorSet2 (v_array_v(3), 0, lines);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);

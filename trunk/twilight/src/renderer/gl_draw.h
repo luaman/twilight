@@ -29,16 +29,12 @@
 
 #include "qtypes.h"
 #include "wad.h"
+#include "mod_brush.h"
+#include "image.h"
 
-typedef struct {
-	int		texnum;
-	float	sl, tl, sh, th;
-} glpic_t;
+extern image_t *draw_disc;
 
-extern qpic_t *draw_disc;
-
-qpic_t *Draw_PicFromWad(const char *name);
-qpic_t *Draw_CachePic(const char *path);
+image_t *Draw_CacheImg(char *path);
 void Draw_Init_Cvars(void);
 void Draw_Init(void);
 void Draw_Character(float x, float y, int num, float text_size);
@@ -48,9 +44,9 @@ void Draw_Alt_String_Len(float x, float y, const char *str, int len, float text_
 void Draw_Alt_String(float x, float y, const char *str, float text_size);
 void Draw_Conv_String_Len(float x, float y, const char *str, int len, float text_size);
 void Draw_Conv_String(float x, float y, const char *str, float text_size);
-void Draw_Pic(int x, int y, const qpic_t *pic);
-void Draw_SubPic(int x, int y, const qpic_t *pic, int srcx, int srcy, int width, int height);
-void Draw_TransPicTranslate(int x, int y, const qpic_t *pic, const Uint8 *translation);
+void Draw_Img(int x, int y, const image_t *img);
+void Draw_SubImg(int x, int y, const image_t *img, int srcx, int srcy, int width, int height);
+void Draw_TransImgTranslate(int x, int y, const image_t *img, const Uint8 *translation);
 void Draw_Fill(int x, int y, int w, int h, vec4_t color);
 void Draw_Box(int x, int y, int w, int h, int t, vec4_t color1, vec4_t color2);
 void Draw_FadeScreen(void);

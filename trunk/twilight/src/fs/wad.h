@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) 2002  Joseph Carter
+	Copyright (C) 1996-1997  Id Software, Inc.
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -23,11 +23,14 @@
 
 	$Id$
 */
+// wad.h
 
-#ifndef __QLMP_H
-#define __QLMP_H
+#ifndef __FS_WAD_H
+#define __FS_WAD_H
 
-image_t *QLMP_Load (fs_file_t *file, SDL_RWops *rw);
+#include "fs.h"
 
-#endif // __QLMP_H
+fs_group_t *FSW_New_Group (fs_file_t *in, fs_group_t *parent, const char *id);
+
+#endif // __FS_WAD_H
 

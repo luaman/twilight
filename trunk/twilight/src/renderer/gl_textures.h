@@ -32,6 +32,7 @@
 #include "model.h"
 #include "image.h"
 #include "wad.h"
+#include "mathlib.h"
 
 void GLT_Init_Cvars(void);
 void GLT_Init(void);
@@ -41,9 +42,8 @@ void R_ResampleTexture(void *id, int iw, int ih, void *od, int ow, int oh);
 qboolean GL_Upload32(Uint32 *data, int width, int height, int flags);
 qboolean GL_Upload8(Uint8 *data, int width, int height, Uint32 *palette, int flags);
 int GLT_Load_Raw(const char *identifier, Uint width, Uint height, Uint8 *data, Uint32 *palette, int flags, int bpp);
-int GLT_Load_image(const char *identifier, image_t *img, Uint32 *palette, int flags);
+int GLT_Load_image(const char *identifier, image_t *img, int flags);
 int GLT_Load_Pixmap(const char *name, const char *data);
-int GLT_Load_qpic(qpic_t *pic);
 qboolean GLT_Delete(GLuint texnum);
 
 extern int		glt_solid_format;
@@ -51,12 +51,6 @@ extern int		glt_alpha_format;
 extern int		glt_filter_min;
 extern int		glt_filter_mag;
 extern memzone_t *glt_zone;
-
-#define TEX_NONE		0
-#define TEX_ALPHA		1
-#define TEX_MIPMAP		2
-#define TEX_FORCE		4
-#define TEX_REPLACE		8
 
 #endif // __gl_textures_h
 

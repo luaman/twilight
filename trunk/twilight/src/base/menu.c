@@ -79,9 +79,9 @@ Menu_Delete_Item (menu_item_t *item)
 				Zone_Free(item->u.multi.values);
 			}
 			break;
-		case m_qpic:
-			if (item->u.qpic.trans)
-				Zone_Free(item->u.qpic.trans);
+		case m_img:
+			if (item->u.img.trans)
+				Zone_Free(item->u.img.trans);
 			break;
 		default:
 			break;
@@ -108,13 +108,13 @@ Menu_Delete_Menu (menu_t *menu)
 }
 
 static qboolean
-Menu_Parse_QPic_Trans (codetree_t *tree_base, menu_qpic_trans_t *trans)
+Menu_Parse_Img_Trans (codetree_t *tree_base, menu_img_trans_t *trans)
 {
 	codetree_t			*code;
 	codeword_t			*word, *word2;
 
 #define MENU_ERROR()		do {												\
-	Com_Printf("ERROR: Parse error when building qpic trans. (%d %d)\n", __LINE__, code->linenumber);	\
+	Com_Printf("ERROR: Parse error when building img trans. (%d %d)\n", __LINE__, code->linenumber);	\
 	return false;														\
 } while (0)
 
@@ -196,8 +196,8 @@ Menu_Parse_Item (const char *type, codetree_t *tree_base)
 		item->type = m_loop_int;
 	} else if (!strcmp(type, "multi_select")) {
 		item->type = m_multi_select;
-	} else if (!strcmp(type, "qpic")) {
-		item->type = m_qpic;
+	} else if (!strcmp(type, "qpic") || !strcmp(type, "img")) {
+		item->type = m_img;
 	} else
 		MENU_ERROR();
 
@@ -307,21 +307,21 @@ Menu_Parse_Item (const char *type, codetree_t *tree_base)
 						else MENU_ERROR ();
 					} else MENU_ERROR ();
 					break;
-				case m_qpic:
-					if (!strcmp(word->string, "qpic") && !code->child) {
+				case m_img:
+					if ((!strcmp(word->string, "qpic") || !strcmp(word->string, "img")) && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
-							item->u.qpic.qpic = Draw_CachePic(word2->string);
+							item->u.img.img = Image_Load(va("gfx/%s", word2->string), TEX_UPLOAD | TEX_ALPHA | TEX_KEEPRAW);
 						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "x") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_INTEGER))
-							item->u.qpic.x = word2->intvalue;
+							item->u.img.x = word2->intvalue;
 						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "y") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_INTEGER))
-							item->u.qpic.y = word2->intvalue;
+							item->u.img.y = word2->intvalue;
 						else MENU_ERROR ();
 					} else if (!strcmp(word->string,"trans") && code->child)
-						item->u.qpic.n_trans++;
+						item->u.img.n_trans++;
 					else MENU_ERROR ();
 					break;
 				case m_text:
@@ -443,17 +443,17 @@ Menu_Parse_Item (const char *type, codetree_t *tree_base)
 				}
 			}
 			break;
-		case m_qpic:
-			if (!item->u.qpic.n_trans)
+		case m_img:
+			if (!item->u.img.n_trans)
 				break;
 
-			item->u.qpic.trans = Zone_Alloc(m_zone,
-					sizeof(menu_qpic_trans_t) * item->u.qpic.n_trans);
+			item->u.img.trans = Zone_Alloc(m_zone,
+					sizeof(menu_img_trans_t) * item->u.img.n_trans);
 
 			for (code = tree_base, i = 0; code; code = code->next) {
 				if (!(word = code->words)) MENU_ERROR ();
 				if (!strcmp(word->string, "trans") && code->child) {
-					if (!Menu_Parse_QPic_Trans (code->child, &item->u.qpic.trans[i++]))
+					if (!Menu_Parse_Img_Trans (code->child, &item->u.img.trans[i++]))
 						MENU_ERROR ();
 				}
 			}

@@ -1226,15 +1226,15 @@ FIXME: HACK HACK HACK - this is just a GL_LoadTexture for image_t's for now
 ================
 */
 int
-GLT_Load_image(const char *identifier, image_t *img, Uint32 *palette, int flags)
+GLT_Load_image(const char *identifier, image_t *img, int flags)
 {
 	switch (img->type) {
 		case IMG_QPAL:
-			return GLT_Load_Raw (identifier, img->width, img->height,
-					img->pixels, palette, flags, 8);
+			return img->texnum = GLT_Load_Raw (identifier, img->width,
+					img->height, img->pixels, NULL, flags, 8);
 		case IMG_RGBA:
-			return GLT_Load_Raw (identifier, img->width, img->height,
-					img->pixels, palette, flags, 32);
+			return img->texnum = GLT_Load_Raw (identifier, img->width,
+					img->height, img->pixels, NULL, flags, 32);
 		default:
 			Sys_Error ("Bad bpp!");
 	}
@@ -1278,12 +1278,6 @@ GLT_Load_Pixmap (const char *name, const char *data)
 	}
 
 	return GLT_Load_Raw (name, 32, 32, (Uint8 *) pixels, NULL, TEX_ALPHA, 32);
-}
-
-int
-GLT_Load_qpic (qpic_t *pic)
-{
-	return GLT_Load_Raw ("", pic->width, pic->height, pic->data, NULL, TEX_ALPHA, 8);
 }
 
 

@@ -113,9 +113,9 @@ int				fps_count;
 
 static qboolean	scr_initialized;			/* ready to draw */
 
-static qpic_t   *scr_ram;
-static qpic_t   *scr_net;
-static qpic_t   *scr_turtle;
+static image_t   *scr_ram;
+static image_t   *scr_net;
+static image_t   *scr_turtle;
 
 static int		clearconsole;
 
@@ -440,9 +440,9 @@ SCR_Init (void)
 	Cmd_AddCommand ("sizeup", SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown", SCR_SizeDown_f);
 
-	scr_ram = Draw_PicFromWad ("ram");
-	scr_net = Draw_PicFromWad ("net");
-	scr_turtle = Draw_PicFromWad ("turtle");
+	scr_ram = Image_Load ("gfx/ram", TEX_UPLOAD | TEX_ALPHA);
+	scr_net = Image_Load ("gfx/net", TEX_UPLOAD | TEX_ALPHA);
+	scr_turtle = Image_Load ("gfx/turtle", TEX_UPLOAD | TEX_ALPHA);
 
 	scr_initialized = true;
 }
@@ -466,7 +466,7 @@ SCR_DrawTurtle (void)
 	if (count < 3)
 		return;
 
-	Draw_Pic (0, 0, scr_turtle);
+	Draw_Img (0, 0, scr_turtle);
 }
 
 static void
@@ -477,7 +477,7 @@ SCR_DrawNet (void)
 	if (ccls.demoplayback)
 		return;
 
-	Draw_Pic (64, 0, scr_net);
+	Draw_Img (64, 0, scr_net);
 }
 
 static void
@@ -511,7 +511,7 @@ SCR_DrawFPS (void)
 static void
 SCR_DrawPause (void)
 {
-	qpic_t	   *pic;
+	image_t	   *pic;
 
 	if (!scr_showpause->ivalue)			/* turn off for screenshots */
 		return;
@@ -519,8 +519,8 @@ SCR_DrawPause (void)
 	if (!cl.paused)
 		return;
 
-	pic = Draw_CachePic ("gfx/pause.lmp");
-	Draw_Pic ((vid.width_2d - pic->width) / 2,
+	pic = Draw_CacheImg ("gfx/pause");
+	Draw_Img ((vid.width_2d - pic->width) / 2,
 			  (vid.height_2d - 48 - pic->height) / 2, pic);
 }
 
@@ -528,13 +528,13 @@ SCR_DrawPause (void)
 static void
 SCR_DrawLoading (void)
 {
-	qpic_t	   *pic;
+	image_t	   *pic;
 
 	if (!scr_drawloading)
 		return;
 
-	pic = Draw_CachePic ("gfx/loading.lmp");
-	Draw_Pic ((vid.width_2d - pic->width) / 2,
+	pic = Draw_CacheImg ("gfx/loading");
+	Draw_Img ((vid.width_2d - pic->width) / 2,
 			  (vid.height_2d - 48 - pic->height) / 2, pic);
 }
 

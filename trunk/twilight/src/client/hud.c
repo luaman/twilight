@@ -44,26 +44,26 @@ static const char rcsid[] =
 
 extern void CL_UpdatePings (void);
 
-static qpic_t     *sb_nums[2][11];
-static qpic_t     *sb_colon, *sb_slash;
-static qpic_t     *sb_ibar;
-static qpic_t     *sb_sbar;
-static qpic_t     *sb_scorebar;
+static image_t     *sb_nums[2][11];
+static image_t     *sb_colon, *sb_slash;
+static image_t     *sb_ibar;
+static image_t     *sb_sbar;
+static image_t     *sb_scorebar;
 
-static qpic_t     *sb_weapons[7][8];	// 0 is active, 1 is owned, 2-5 are
+static image_t     *sb_weapons[7][8];	// 0 is active, 1 is owned, 2-5 are
 										// flashes
-static qpic_t     *sb_ammo[4];
-static qpic_t     *sb_sigil[4];
-static qpic_t     *sb_armor[3];
-static qpic_t     *sb_items[32];
+static image_t     *sb_ammo[4];
+static image_t     *sb_sigil[4];
+static image_t     *sb_armor[3];
+static image_t     *sb_items[32];
 
-static qpic_t     *sb_faces[7][2];		// 0 is gibbed, 1 is dead, 2-6 are
+static image_t     *sb_faces[7][2];		// 0 is gibbed, 1 is dead, 2-6 are
 										// alive 0 is static,
 										// 1 is temporary animation
-static qpic_t     *sb_face_invis;
-static qpic_t     *sb_face_quad;
-static qpic_t     *sb_face_invuln;
-static qpic_t     *sb_face_invis_invuln;
+static image_t     *sb_face_invis;
+static image_t     *sb_face_quad;
+static image_t     *sb_face_invuln;
+static image_t     *sb_face_invis_invuln;
 
 // Needed because SB_NONE is already defined in WinGDI.h
 #ifdef SB_NONE
@@ -77,14 +77,14 @@ static int			hud_scoreboard;
 
 int         sb_lines;					// scan lines to draw
 
-static qpic_t     *rsb_invbar[2];
-static qpic_t     *rsb_weapons[5];
-static qpic_t     *rsb_items[2];
-static qpic_t     *rsb_ammo[3];
-static qpic_t     *rsb_teambord;		// PGM 01/19/97 - team color border
+static image_t     *rsb_invbar[2];
+static image_t     *rsb_weapons[5];
+static image_t     *rsb_items[2];
+static image_t     *rsb_ammo[3];
+static image_t     *rsb_teambord;		// PGM 01/19/97 - team color border
 
 //MED 01/04/97 added two more weapons + 3 alternates for grenade launcher
-static qpic_t     *hsb_weapons[7][5];	// 0 is active, 1 is owned, 2-5 are
+static image_t     *hsb_weapons[7][5];	// 0 is active, 1 is owned, 2-5 are
 										// flashes
 //MED 01/04/97 added array to simplify weapon parsing
 #if 0
@@ -92,11 +92,11 @@ static int         hipweapons[4] =
 	{ HIT_LASER_CANNON_BIT, HIT_MJOLNIR_BIT, 4, HIT_PROXIMITY_GUN_BIT };
 #endif
 //MED 01/04/97 added hipnotic items array
-static qpic_t     *hsb_items[2];
+static image_t     *hsb_items[2];
 
 static memzone_t	*hud_zone;
 
-void        M_DrawPic (int x, int y, qpic_t *pic);
+void        M_DrawImg (int x, int y, image_t *pic);
 
 cvar_t		*cl_sbar;
 cvar_t		*cl_hudswap;
@@ -217,140 +217,140 @@ HUD_Init (void)
 
 	for (i = 0; i < 10; i++)
 	{
-		sb_nums[0][i] = Draw_PicFromWad (va ("num_%i", i));
-		sb_nums[1][i] = Draw_PicFromWad (va ("anum_%i", i));
+		sb_nums[0][i] = Image_Load (va ("gfx/num_%i", i), TEX_UPLOAD | TEX_ALPHA);
+		sb_nums[1][i] = Image_Load (va ("gfx/anum_%i", i), TEX_UPLOAD | TEX_ALPHA);
 	}
 
-	sb_nums[0][10] = Draw_PicFromWad ("num_minus");
-	sb_nums[1][10] = Draw_PicFromWad ("anum_minus");
+	sb_nums[0][10] = Image_Load ("gfx/num_minus", TEX_UPLOAD | TEX_ALPHA);
+	sb_nums[1][10] = Image_Load ("gfx/anum_minus", TEX_UPLOAD | TEX_ALPHA);
 
-	sb_colon = Draw_PicFromWad ("num_colon");
-	sb_slash = Draw_PicFromWad ("num_slash");
+	sb_colon = Image_Load ("gfx/num_colon", TEX_UPLOAD | TEX_ALPHA);
+	sb_slash = Image_Load ("gfx/num_slash", TEX_UPLOAD | TEX_ALPHA);
 
-	sb_weapons[0][0] = Draw_PicFromWad ("inv_shotgun");
-	sb_weapons[0][1] = Draw_PicFromWad ("inv_sshotgun");
-	sb_weapons[0][2] = Draw_PicFromWad ("inv_nailgun");
-	sb_weapons[0][3] = Draw_PicFromWad ("inv_snailgun");
-	sb_weapons[0][4] = Draw_PicFromWad ("inv_rlaunch");
-	sb_weapons[0][5] = Draw_PicFromWad ("inv_srlaunch");
-	sb_weapons[0][6] = Draw_PicFromWad ("inv_lightng");
+	sb_weapons[0][0] = Image_Load ("gfx/inv_shotgun", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[0][1] = Image_Load ("gfx/inv_sshotgun", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[0][2] = Image_Load ("gfx/inv_nailgun", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[0][3] = Image_Load ("gfx/inv_snailgun", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[0][4] = Image_Load ("gfx/inv_rlaunch", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[0][5] = Image_Load ("gfx/inv_srlaunch", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[0][6] = Image_Load ("gfx/inv_lightng", TEX_UPLOAD | TEX_ALPHA);
 
-	sb_weapons[1][0] = Draw_PicFromWad ("inv2_shotgun");
-	sb_weapons[1][1] = Draw_PicFromWad ("inv2_sshotgun");
-	sb_weapons[1][2] = Draw_PicFromWad ("inv2_nailgun");
-	sb_weapons[1][3] = Draw_PicFromWad ("inv2_snailgun");
-	sb_weapons[1][4] = Draw_PicFromWad ("inv2_rlaunch");
-	sb_weapons[1][5] = Draw_PicFromWad ("inv2_srlaunch");
-	sb_weapons[1][6] = Draw_PicFromWad ("inv2_lightng");
+	sb_weapons[1][0] = Image_Load ("gfx/inv2_shotgun", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[1][1] = Image_Load ("gfx/inv2_sshotgun", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[1][2] = Image_Load ("gfx/inv2_nailgun", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[1][3] = Image_Load ("gfx/inv2_snailgun", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[1][4] = Image_Load ("gfx/inv2_rlaunch", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[1][5] = Image_Load ("gfx/inv2_srlaunch", TEX_UPLOAD | TEX_ALPHA);
+	sb_weapons[1][6] = Image_Load ("gfx/inv2_lightng", TEX_UPLOAD | TEX_ALPHA);
 
 	for (i = 0; i < 5; i++)
 	{
-		sb_weapons[2 + i][0] = Draw_PicFromWad (va ("inva%i_shotgun", i + 1));
-		sb_weapons[2 + i][1] = Draw_PicFromWad (va ("inva%i_sshotgun", i + 1));
-		sb_weapons[2 + i][2] = Draw_PicFromWad (va ("inva%i_nailgun", i + 1));
-		sb_weapons[2 + i][3] = Draw_PicFromWad (va ("inva%i_snailgun", i + 1));
-		sb_weapons[2 + i][4] = Draw_PicFromWad (va ("inva%i_rlaunch", i + 1));
-		sb_weapons[2 + i][5] = Draw_PicFromWad (va ("inva%i_srlaunch", i + 1));
-		sb_weapons[2 + i][6] = Draw_PicFromWad (va ("inva%i_lightng", i + 1));
+		sb_weapons[2 + i][0] = Image_Load (va ("gfx/inva%i_shotgun", i + 1), TEX_UPLOAD | TEX_ALPHA);
+		sb_weapons[2 + i][1] = Image_Load (va ("gfx/inva%i_sshotgun", i + 1), TEX_UPLOAD | TEX_ALPHA);
+		sb_weapons[2 + i][2] = Image_Load (va ("gfx/inva%i_nailgun", i + 1), TEX_UPLOAD | TEX_ALPHA);
+		sb_weapons[2 + i][3] = Image_Load (va ("gfx/inva%i_snailgun", i + 1), TEX_UPLOAD | TEX_ALPHA);
+		sb_weapons[2 + i][4] = Image_Load (va ("gfx/inva%i_rlaunch", i + 1), TEX_UPLOAD | TEX_ALPHA);
+		sb_weapons[2 + i][5] = Image_Load (va ("gfx/inva%i_srlaunch", i + 1), TEX_UPLOAD | TEX_ALPHA);
+		sb_weapons[2 + i][6] = Image_Load (va ("gfx/inva%i_lightng", i + 1), TEX_UPLOAD | TEX_ALPHA);
 	}
 
-	sb_ammo[0] = Draw_PicFromWad ("sb_shells");
-	sb_ammo[1] = Draw_PicFromWad ("sb_nails");
-	sb_ammo[2] = Draw_PicFromWad ("sb_rocket");
-	sb_ammo[3] = Draw_PicFromWad ("sb_cells");
+	sb_ammo[0] = Image_Load ("gfx/sb_shells", TEX_UPLOAD | TEX_ALPHA);
+	sb_ammo[1] = Image_Load ("gfx/sb_nails", TEX_UPLOAD | TEX_ALPHA);
+	sb_ammo[2] = Image_Load ("gfx/sb_rocket", TEX_UPLOAD | TEX_ALPHA);
+	sb_ammo[3] = Image_Load ("gfx/sb_cells", TEX_UPLOAD | TEX_ALPHA);
 
-	sb_armor[0] = Draw_PicFromWad ("sb_armor1");
-	sb_armor[1] = Draw_PicFromWad ("sb_armor2");
-	sb_armor[2] = Draw_PicFromWad ("sb_armor3");
+	sb_armor[0] = Image_Load ("gfx/sb_armor1", TEX_UPLOAD | TEX_ALPHA);
+	sb_armor[1] = Image_Load ("gfx/sb_armor2", TEX_UPLOAD | TEX_ALPHA);
+	sb_armor[2] = Image_Load ("gfx/sb_armor3", TEX_UPLOAD | TEX_ALPHA);
 
-	sb_items[0] = Draw_PicFromWad ("sb_key1");
-	sb_items[1] = Draw_PicFromWad ("sb_key2");
-	sb_items[2] = Draw_PicFromWad ("sb_invis");
-	sb_items[3] = Draw_PicFromWad ("sb_invuln");
-	sb_items[4] = Draw_PicFromWad ("sb_suit");
-	sb_items[5] = Draw_PicFromWad ("sb_quad");
+	sb_items[0] = Image_Load ("gfx/sb_key1", TEX_UPLOAD | TEX_ALPHA);
+	sb_items[1] = Image_Load ("gfx/sb_key2", TEX_UPLOAD | TEX_ALPHA);
+	sb_items[2] = Image_Load ("gfx/sb_invis", TEX_UPLOAD | TEX_ALPHA);
+	sb_items[3] = Image_Load ("gfx/sb_invuln", TEX_UPLOAD | TEX_ALPHA);
+	sb_items[4] = Image_Load ("gfx/sb_suit", TEX_UPLOAD | TEX_ALPHA);
+	sb_items[5] = Image_Load ("gfx/sb_quad", TEX_UPLOAD | TEX_ALPHA);
 
-	sb_sigil[0] = Draw_PicFromWad ("sb_sigil1");
-	sb_sigil[1] = Draw_PicFromWad ("sb_sigil2");
-	sb_sigil[2] = Draw_PicFromWad ("sb_sigil3");
-	sb_sigil[3] = Draw_PicFromWad ("sb_sigil4");
+	sb_sigil[0] = Image_Load ("gfx/sb_sigil1", TEX_UPLOAD | TEX_ALPHA);
+	sb_sigil[1] = Image_Load ("gfx/sb_sigil2", TEX_UPLOAD | TEX_ALPHA);
+	sb_sigil[2] = Image_Load ("gfx/sb_sigil3", TEX_UPLOAD | TEX_ALPHA);
+	sb_sigil[3] = Image_Load ("gfx/sb_sigil4", TEX_UPLOAD | TEX_ALPHA);
 
-	sb_faces[4][0] = Draw_PicFromWad ("face1");
-	sb_faces[4][1] = Draw_PicFromWad ("face_p1");
-	sb_faces[3][0] = Draw_PicFromWad ("face2");
-	sb_faces[3][1] = Draw_PicFromWad ("face_p2");
-	sb_faces[2][0] = Draw_PicFromWad ("face3");
-	sb_faces[2][1] = Draw_PicFromWad ("face_p3");
-	sb_faces[1][0] = Draw_PicFromWad ("face4");
-	sb_faces[1][1] = Draw_PicFromWad ("face_p4");
-	sb_faces[0][0] = Draw_PicFromWad ("face5");
-	sb_faces[0][1] = Draw_PicFromWad ("face_p5");
+	sb_faces[4][0] = Image_Load ("gfx/face1", TEX_UPLOAD | TEX_ALPHA);
+	sb_faces[4][1] = Image_Load ("gfx/face_p1", TEX_UPLOAD | TEX_ALPHA);
+	sb_faces[3][0] = Image_Load ("gfx/face2", TEX_UPLOAD | TEX_ALPHA);
+	sb_faces[3][1] = Image_Load ("gfx/face_p2", TEX_UPLOAD | TEX_ALPHA);
+	sb_faces[2][0] = Image_Load ("gfx/face3", TEX_UPLOAD | TEX_ALPHA);
+	sb_faces[2][1] = Image_Load ("gfx/face_p3", TEX_UPLOAD | TEX_ALPHA);
+	sb_faces[1][0] = Image_Load ("gfx/face4", TEX_UPLOAD | TEX_ALPHA);
+	sb_faces[1][1] = Image_Load ("gfx/face_p4", TEX_UPLOAD | TEX_ALPHA);
+	sb_faces[0][0] = Image_Load ("gfx/face5", TEX_UPLOAD | TEX_ALPHA);
+	sb_faces[0][1] = Image_Load ("gfx/face_p5", TEX_UPLOAD | TEX_ALPHA);
 
-	sb_face_invis = Draw_PicFromWad ("face_invis");
-	sb_face_invuln = Draw_PicFromWad ("face_invul2");
-	sb_face_invis_invuln = Draw_PicFromWad ("face_inv2");
-	sb_face_quad = Draw_PicFromWad ("face_quad");
+	sb_face_invis = Image_Load ("gfx/face_invis", TEX_UPLOAD | TEX_ALPHA);
+	sb_face_invuln = Image_Load ("gfx/face_invul2", TEX_UPLOAD | TEX_ALPHA);
+	sb_face_invis_invuln = Image_Load ("gfx/face_inv2", TEX_UPLOAD | TEX_ALPHA);
+	sb_face_quad = Image_Load ("gfx/face_quad", TEX_UPLOAD | TEX_ALPHA);
 
 	Cmd_AddCommand ("+showscores", HUD_ShowScores);
 	Cmd_AddCommand ("-showscores", HUD_DontShowScores);
 	Cmd_AddCommand ("+showteamscores", HUD_ShowTeamScores);
 	Cmd_AddCommand ("-showteamscores", HUD_DontShowScores);
 
-	sb_sbar = Draw_PicFromWad ("sbar");
-	sb_ibar = Draw_PicFromWad ("ibar");
-	sb_scorebar = Draw_PicFromWad ("scorebar");
+	sb_sbar = Image_Load ("gfx/sbar", TEX_UPLOAD | TEX_ALPHA);
+	sb_ibar = Image_Load ("gfx/ibar", TEX_UPLOAD | TEX_ALPHA);
+	sb_scorebar = Image_Load ("gfx/scorebar", TEX_UPLOAD | TEX_ALPHA);
 
 	//MED 01/04/97 added new hipnotic weapons
 	switch (ccl.game_type) {
 		case GAME_HIPNOTIC:
-			hsb_weapons[0][0] = Draw_PicFromWad ("inv_laser");
-			hsb_weapons[0][1] = Draw_PicFromWad ("inv_mjolnir");
-			hsb_weapons[0][2] = Draw_PicFromWad ("inv_gren_prox");
-			hsb_weapons[0][3] = Draw_PicFromWad ("inv_prox_gren");
-			hsb_weapons[0][4] = Draw_PicFromWad ("inv_prox");
+			hsb_weapons[0][0] = Image_Load ("gfx/inv_laser", TEX_UPLOAD | TEX_ALPHA);
+			hsb_weapons[0][1] = Image_Load ("gfx/inv_mjolnir", TEX_UPLOAD | TEX_ALPHA);
+			hsb_weapons[0][2] = Image_Load ("gfx/inv_gren_prox", TEX_UPLOAD | TEX_ALPHA);
+			hsb_weapons[0][3] = Image_Load ("gfx/inv_prox_gren", TEX_UPLOAD | TEX_ALPHA);
+			hsb_weapons[0][4] = Image_Load ("gfx/inv_prox", TEX_UPLOAD | TEX_ALPHA);
 
-			hsb_weapons[1][0] = Draw_PicFromWad ("inv2_laser");
-			hsb_weapons[1][1] = Draw_PicFromWad ("inv2_mjolnir");
-			hsb_weapons[1][2] = Draw_PicFromWad ("inv2_gren_prox");
-			hsb_weapons[1][3] = Draw_PicFromWad ("inv2_prox_gren");
-			hsb_weapons[1][4] = Draw_PicFromWad ("inv2_prox");
+			hsb_weapons[1][0] = Image_Load ("gfx/inv2_laser", TEX_UPLOAD | TEX_ALPHA);
+			hsb_weapons[1][1] = Image_Load ("gfx/inv2_mjolnir", TEX_UPLOAD | TEX_ALPHA);
+			hsb_weapons[1][2] = Image_Load ("gfx/inv2_gren_prox", TEX_UPLOAD | TEX_ALPHA);
+			hsb_weapons[1][3] = Image_Load ("gfx/inv2_prox_gren", TEX_UPLOAD | TEX_ALPHA);
+			hsb_weapons[1][4] = Image_Load ("gfx/inv2_prox", TEX_UPLOAD | TEX_ALPHA);
 
 			for (i = 0; i < 5; i++)
 			{
 				hsb_weapons[2 + i][0] =
-					Draw_PicFromWad (va ("inva%i_laser", i + 1));
+					Image_Load (va ("gfx/inva%i_laser", i + 1), TEX_UPLOAD | TEX_ALPHA);
 				hsb_weapons[2 + i][1] =
-					Draw_PicFromWad (va ("inva%i_mjolnir", i + 1));
+					Image_Load (va ("gfx/inva%i_mjolnir", i + 1), TEX_UPLOAD | TEX_ALPHA);
 				hsb_weapons[2 + i][2] =
-					Draw_PicFromWad (va ("inva%i_gren_prox", i + 1));
+					Image_Load (va ("gfx/inva%i_gren_prox", i + 1), TEX_UPLOAD | TEX_ALPHA);
 				hsb_weapons[2 + i][3] =
-					Draw_PicFromWad (va ("inva%i_prox_gren", i + 1));
-				hsb_weapons[2 + i][4] = Draw_PicFromWad (va ("inva%i_prox", i + 1));
+					Image_Load (va ("gfx/inva%i_prox_gren", i + 1), TEX_UPLOAD | TEX_ALPHA);
+				hsb_weapons[2 + i][4] = Image_Load (va ("gfx/inva%i_prox", i + 1), TEX_UPLOAD | TEX_ALPHA);
 			}
 
-			hsb_items[0] = Draw_PicFromWad ("sb_wsuit");
-			hsb_items[1] = Draw_PicFromWad ("sb_eshld");
+			hsb_items[0] = Image_Load ("gfx/sb_wsuit", TEX_UPLOAD | TEX_ALPHA);
+			hsb_items[1] = Image_Load ("gfx/sb_eshld", TEX_UPLOAD | TEX_ALPHA);
 			break;
 		case GAME_ROGUE:
-			rsb_invbar[0] = Draw_PicFromWad ("r_invbar1");
-			rsb_invbar[1] = Draw_PicFromWad ("r_invbar2");
+			rsb_invbar[0] = Image_Load ("gfx/r_invbar1", TEX_UPLOAD | TEX_ALPHA);
+			rsb_invbar[1] = Image_Load ("gfx/r_invbar2", TEX_UPLOAD | TEX_ALPHA);
 
-			rsb_weapons[0] = Draw_PicFromWad ("r_lava");
-			rsb_weapons[1] = Draw_PicFromWad ("r_superlava");
-			rsb_weapons[2] = Draw_PicFromWad ("r_gren");
-			rsb_weapons[3] = Draw_PicFromWad ("r_multirock");
-			rsb_weapons[4] = Draw_PicFromWad ("r_plasma");
+			rsb_weapons[0] = Image_Load ("gfx/r_lava", TEX_UPLOAD | TEX_ALPHA);
+			rsb_weapons[1] = Image_Load ("gfx/r_superlava", TEX_UPLOAD | TEX_ALPHA);
+			rsb_weapons[2] = Image_Load ("gfx/r_gren", TEX_UPLOAD | TEX_ALPHA);
+			rsb_weapons[3] = Image_Load ("gfx/r_multirock", TEX_UPLOAD | TEX_ALPHA);
+			rsb_weapons[4] = Image_Load ("gfx/r_plasma", TEX_UPLOAD | TEX_ALPHA);
 
-			rsb_items[0] = Draw_PicFromWad ("r_shield1");
-			rsb_items[1] = Draw_PicFromWad ("r_agrav1");
+			rsb_items[0] = Image_Load ("gfx/r_shield1", TEX_UPLOAD | TEX_ALPHA);
+			rsb_items[1] = Image_Load ("gfx/r_agrav1", TEX_UPLOAD | TEX_ALPHA);
 
 			// PGM 01/19/97 - team color border
-			rsb_teambord = Draw_PicFromWad ("r_teambord");
+			rsb_teambord = Image_Load ("gfx/r_teambord", TEX_UPLOAD | TEX_ALPHA);
 			// PGM 01/19/97 - team color border
 
-			rsb_ammo[0] = Draw_PicFromWad ("r_ammolava");
-			rsb_ammo[1] = Draw_PicFromWad ("r_ammomulti");
-			rsb_ammo[2] = Draw_PicFromWad ("r_ammoplasma");
+			rsb_ammo[0] = Image_Load ("gfx/r_ammolava", TEX_UPLOAD | TEX_ALPHA);
+			rsb_ammo[1] = Image_Load ("gfx/r_ammomulti", TEX_UPLOAD | TEX_ALPHA);
+			rsb_ammo[2] = Image_Load ("gfx/r_ammoplasma", TEX_UPLOAD | TEX_ALPHA);
 			break;
 		default:
 			break;
@@ -378,7 +378,7 @@ HUD_DrawNum (int x, int y, int num, int digits, int color)
 		else
 			frame = *ptr - '0';
 
-		Draw_Pic (x, y, sb_nums[color][frame]);
+		Draw_Img (x, y, sb_nums[color][frame]);
 		x += 24;
 		ptr++;
 	}
@@ -778,7 +778,7 @@ HUD_Draw_Standard_HUD_Inventory (void)
 			} else
 				flashon = (flashon % 5) + 2;
 
-			Draw_SubPic (x1, y1 + (i * 16), sb_weapons[flashon][i], 0, 0, 24, 16);
+			Draw_SubImg (x1, y1 + (i * 16), sb_weapons[flashon][i], 0, 0, 24, 16);
 		}
 	}
 
@@ -789,19 +789,19 @@ HUD_Draw_Standard_HUD_Inventory (void)
 			if (num[j] != ' ')
 				num[j] = 18 + num[j] - '0';
 		tmp_y = y2 + (i * 11);
-		Draw_SubPic (x2, tmp_y, sb_ibar, 3 + (i * 48), 0, 42, 11);
+		Draw_SubImg (x2, tmp_y, sb_ibar, 3 + (i * 48), 0, 42, 11);
 		Draw_String (x2 + 3, tmp_y, num, 8);
 	}
 
 	// Normal items.
 	for (i = 0; i < 6; i++)
 		if (ccl.stats[STAT_ITEMS] & (IT_KEY1 << i))
-			Draw_Pic (sbar_x + (192 + i * 16), sbar_y2, sb_items[i]);
+			Draw_Img (sbar_x + (192 + i * 16), sbar_y2, sb_items[i]);
 
 	// Sigils.
 	for (i = 0; i < 4; i++)
 		if (ccl.stats[STAT_ITEMS] & (IT_SIGIL1 << i))
-			Draw_Pic (sbar_x + (SBAR_WIDTH - 32 + i * 8), sbar_y2, sb_sigil[i]);
+			Draw_Img (sbar_x + (SBAR_WIDTH - 32 + i * 8), sbar_y2, sb_sigil[i]);
 }
 
 static void
@@ -813,7 +813,7 @@ HUD_Draw_Standard_Sbar_Inventory (void)
 	int		flashon;
 	
 	// The backdrop.
-	Draw_Pic (x, y2, sb_ibar);
+	Draw_Img (x, y2, sb_ibar);
 
 	// The ammo counts.
 	for (i = 0; i < 4; i++) {
@@ -835,19 +835,19 @@ HUD_Draw_Standard_Sbar_Inventory (void)
 			} else
 				flashon = (flashon % 5) + 2;
 
-			Draw_Pic (x + (i * 24), y1, sb_weapons[flashon][i]);
+			Draw_Img (x + (i * 24), y1, sb_weapons[flashon][i]);
 		}
 	}
 
 	// Normal items.
 	for (i = 0; i < 6; i++)
 		if (ccl.stats[STAT_ITEMS] & (IT_KEY1 << i))
-			Draw_Pic (x + (192 + i * 16), y2, sb_items[i]);
+			Draw_Img (x + (192 + i * 16), y2, sb_items[i]);
 
 	// Sigils.
 	for (i = 0; i < 4; i++)
 		if (ccl.stats[STAT_ITEMS] & (IT_SIGIL1 << i))
-			Draw_Pic (x + (SBAR_WIDTH - 32 + i * 8), y2, sb_sigil[i]);
+			Draw_Img (x + (SBAR_WIDTH - 32 + i * 8), y2, sb_sigil[i]);
 }
 
 static void
@@ -856,31 +856,31 @@ HUD_Draw_Standard_Sbar (void)
 	int		x = hud.sbar_x, y = hud.sbar_y1;
 
 	if (!hud.headsup)
-		Draw_Pic (x, y, sb_sbar);
+		Draw_Img (x, y, sb_sbar);
 
 	if (ccl.stats[STAT_ITEMS] & IT_INVULNERABILITY) {
 		HUD_DrawNum (x + 24, y, 666, 3, 1);
-		Draw_Pic (x, y, draw_disc);
+		Draw_Img (x, y, draw_disc);
 	} else {
 		HUD_DrawNum (x + 24, y, ccl.stats[STAT_ARMOR], 3,
 				ccl.stats[STAT_ARMOR] <= 25);
 		if (ccl.stats[STAT_ITEMS] & IT_ARMOR3)
-			Draw_Pic (x, y, sb_armor[2]);
+			Draw_Img (x, y, sb_armor[2]);
 		else if (ccl.stats[STAT_ITEMS] & IT_ARMOR2)
-			Draw_Pic (x, y, sb_armor[1]);
+			Draw_Img (x, y, sb_armor[1]);
 		else if (ccl.stats[STAT_ITEMS] & IT_ARMOR1)
-			Draw_Pic (x, y, sb_armor[0]);
+			Draw_Img (x, y, sb_armor[0]);
 	}
 
 	if ((ccl.stats[STAT_ITEMS] & (IT_INVISIBILITY | IT_INVULNERABILITY)) ==
 			(IT_INVISIBILITY | IT_INVULNERABILITY))
-		Draw_Pic (x + 112, y, sb_face_invis_invuln);
+		Draw_Img (x + 112, y, sb_face_invis_invuln);
 	else if (ccl.stats[STAT_ITEMS] & IT_QUAD)
-		Draw_Pic (x + 112, y, sb_face_quad);
+		Draw_Img (x + 112, y, sb_face_quad);
 	else if (ccl.stats[STAT_ITEMS] & IT_INVISIBILITY)
-		Draw_Pic (x + 112, y, sb_face_invis);
+		Draw_Img (x + 112, y, sb_face_invis);
 	else if (ccl.stats[STAT_ITEMS] & IT_INVULNERABILITY)
-		Draw_Pic (x + 112, y, sb_face_invuln);
+		Draw_Img (x + 112, y, sb_face_invuln);
 	else {
 		int f = ccl.stats[STAT_HEALTH] / 20;
 		
@@ -889,22 +889,22 @@ HUD_Draw_Standard_Sbar (void)
 		if (f < 0)
 			f = 0;
 		if (ccl.time <= ccl.faceanimtime)
-			Draw_Pic (x + 112, y, sb_faces[f][1]);
+			Draw_Img (x + 112, y, sb_faces[f][1]);
 		else
-			Draw_Pic (x + 112, y, sb_faces[f][0]);
+			Draw_Img (x + 112, y, sb_faces[f][0]);
 	}
 
 	HUD_DrawNum (x + 136, y, ccl.stats[STAT_HEALTH], 3,
 			ccl.stats[STAT_HEALTH] <= 25);
 
 	if (ccl.stats[STAT_ITEMS] & IT_SHELLS)
-		Draw_Pic (x + 224, y, sb_ammo[0]);
+		Draw_Img (x + 224, y, sb_ammo[0]);
 	else if (ccl.stats[STAT_ITEMS] & IT_NAILS)
-		Draw_Pic (x + 224, y, sb_ammo[1]);
+		Draw_Img (x + 224, y, sb_ammo[1]);
 	else if (ccl.stats[STAT_ITEMS] & IT_ROCKETS)
-		Draw_Pic (x + 224, y, sb_ammo[2]);
+		Draw_Img (x + 224, y, sb_ammo[2]);
 	else if (ccl.stats[STAT_ITEMS] & IT_CELLS)
-		Draw_Pic (x + 224, y, sb_ammo[3]);
+		Draw_Img (x + 224, y, sb_ammo[3]);
 
 	HUD_DrawNum (x + 248, y, ccl.stats[STAT_AMMO], 3,
 			ccl.stats[STAT_AMMO] <= 10);
@@ -948,7 +948,7 @@ HUD_Draw (void)
 void
 HUD_IntermissionOverlay (void)
 {
-	qpic_t	*pic;
+	image_t	*pic;
 	int		dig, num;
 
 	if (ccls.state != ca_active)
@@ -963,26 +963,26 @@ HUD_IntermissionOverlay (void)
 			break;
 		case GAME_COOP:
 		case GAME_SINGLE:
-			pic = Draw_CachePic ("gfx/complete.lmp");
-			Draw_Pic (64, 24, pic);
+			pic = Draw_CacheImg ("gfx/complete");
+			Draw_Img (64, 24, pic);
 
-			pic = Draw_CachePic ("gfx/inter.lmp");
-			Draw_Pic (0, 56, pic);
+			pic = Draw_CacheImg ("gfx/inter");
+			Draw_Img (0, 56, pic);
 
 			// time
 			dig = ccl.completed_time / 60;
 			HUD_DrawNum (160, 64, dig, 3, 0);
 			num = ccl.completed_time - dig * 60;
-			Draw_Pic (234, 64, sb_colon);
-			Draw_Pic (246, 64, sb_nums[0][num / 10]);
-			Draw_Pic (266, 64, sb_nums[0][num % 10]);
+			Draw_Img (234, 64, sb_colon);
+			Draw_Img (246, 64, sb_nums[0][num / 10]);
+			Draw_Img (266, 64, sb_nums[0][num % 10]);
 
 			HUD_DrawNum (160, 104, ccl.stats[STAT_SECRETS], 3, 0);
-			Draw_Pic (232, 104, sb_slash);
+			Draw_Img (232, 104, sb_slash);
 			HUD_DrawNum (240,104, ccl.stats[STAT_TOTALSECRETS], 3, 0);
 
 			HUD_DrawNum (160, 144, ccl.stats[STAT_MONSTERS], 3, 0);
-			Draw_Pic (232, 144, sb_slash);
+			Draw_Img (232, 144, sb_slash);
 			HUD_DrawNum (240, 144, ccl.stats[STAT_TOTALMONSTERS], 3, 0);
 			break;
 	}
@@ -991,11 +991,11 @@ HUD_IntermissionOverlay (void)
 void
 HUD_FinaleOverlay (void)
 {
-	qpic_t     *pic;
+	image_t     *pic;
 
 	if (ccls.state != ca_active)
 		return;
 
-	pic = Draw_CachePic ("gfx/finale.lmp");
-	Draw_Pic ((hud.width - pic->width) / 2, 16, pic);
+	pic = Draw_CacheImg ("gfx/finale");
+	Draw_Img ((hud.width - pic->width) / 2, 16, pic);
 }
