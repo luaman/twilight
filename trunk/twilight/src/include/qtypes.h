@@ -44,6 +44,54 @@ typedef int fixed4_t;
 typedef int fixed8_t;
 typedef int fixed16_t;
 
+/*
+ * Types
+ *
+ * OpenGL uses a set of standard types which are usually going to be the
+ * same as the standard types of int, float, etc.  However, just to make
+ * things interesting, there is no promise this will be the case!  Lovely.
+ * The types do not change across a given platform, however, and we can be
+ * sure that if it works with one compiler it will work with all of them by
+ * using the SDL types.
+ */
+
+#ifndef OGL_TYPES
+#define OGL_TYPES
+
+/*
+ * A ./configure test should do these and #define OGL_TYPES !
+ */
+
+typedef void			GLvoid;
+typedef	Uint8			GLboolean;
+typedef Sint8			GLbyte;			/* 1-byte signed */
+typedef Uint8			GLubyte;		/* 1-byte unsigned */
+typedef Sint16			GLshort;		/* 2-byte signed */
+typedef Uint16			GLushort;		/* 2-byte unsigned */
+typedef Sint32			GLint;			/* 4-byte signed */
+typedef Uint32			GLuint;			/* 4-byte unsigned */
+typedef Uint32			GLsizei;		/* 4-byte signed */
+typedef Uint32			GLenum;
+typedef Uint32			GLbitfield;
+typedef float			GLfloat;		/* single precision float */
+typedef float			GLclampf;		/* single precision float in [0,1] */
+typedef double			GLdouble;		/* double precision float */
+typedef double			GLclampd;		/* double precision float in [0,1] */
+
+#endif // OGL_TYPES
+
+typedef struct {
+    GLfloat v[2];
+} texcoord_t;
+
+typedef struct {
+    GLfloat v[3];
+} vertex_t;
+
+typedef struct {
+    GLfloat v[4];
+} color_t;
+
 // plane_t structure
 typedef struct mplane_s {
 	vec3_t      normal;

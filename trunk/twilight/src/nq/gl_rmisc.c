@@ -36,11 +36,15 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "gl_textures.h"
+#include "opengl_ext.h"
 
 // FIXME
 extern void TNT_Init (void);
 
-texcoord_t	*tc_array_p;
+memzone_t	*vzone;
+
+texcoord_t	*tc0_array_p;
+texcoord_t	*tc1_array_p;
 vertex_t	*v_array_p;
 color_t		*c_array_p;
 GLuint		*vindices;
@@ -173,6 +177,8 @@ R_Init
 void
 R_Init (void)
 {
+	vzone = Zone_AllocZone ("Vertex Arrays");
+
 	Cmd_AddCommand ("timerefresh", &R_TimeRefresh_f);
 	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
 	Cmd_AddCommand ("loadsky", &R_LoadSky_f);
@@ -186,18 +192,26 @@ R_Init (void)
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
 
-	tc_array_p = Zone_Alloc(tempzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
-	v_array_p = Zone_Alloc(tempzone, MAX_VERTEX_ARRAYS * sizeof(vertex_t));
-	c_array_p = Zone_Alloc(tempzone, MAX_VERTEX_ARRAYS * sizeof(color_t));
-	vindices = Zone_Alloc(tempzone, MAX_VERTEX_INDICES * sizeof(GLuint));
+	tc0_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
+	tc1_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(texcoord_t));
+	v_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(vertex_t));
+	c_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(color_t));
+	vindices = Zone_Alloc(vzone, MAX_VERTEX_INDICES * sizeof(GLuint));
 
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array_v(0)), tc_array_p);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc0_array_v(0)), tc0_array_p);
 	qglColorPointer (4, GL_FLOAT, sizeof(c_array_v(0)), c_array_p);
 	qglVertexPointer (3, GL_FLOAT, sizeof(v_array_v(0)), v_array_p);
 
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+
+	if (gl_mtex) {
+		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(tc1_array_v(0)), tc1_array_p);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
+	}
 }
 
 /*

@@ -156,24 +156,17 @@ extern qboolean gl_mtexcombine;
 #define MAX_VERTEX_ARRAYS	2048
 #define MAX_VERTEX_INDICES	(MAX_VERTEX_ARRAYS * 4)
 
-typedef struct {
-	GLfloat	v[2];
-} texcoord_t;
-
-typedef struct {
-	GLfloat	v[3];
-} vertex_t;
-
-typedef struct {
-	GLfloat	v[4];
-} color_t;
-
-extern texcoord_t	*tc_array_p;
+extern texcoord_t	*tc0_array_p;
+extern texcoord_t	*tc1_array_p;
 extern vertex_t		*v_array_p;
 extern color_t		*c_array_p;
 
-#define tc_array_v(x) tc_array_p[x].v
-#define tc_array(x,y) tc_array_p[x].v[y]
+#define tc_array_v(x) tc0_array_p[x].v
+#define tc_array(x,y) tc0_array_p[x].v[y]
+#define tc0_array_v(x) tc0_array_p[x].v
+#define tc0_array(x,y) tc0_array_p[x].v[y]
+#define tc1_array_v(x) tc1_array_p[x].v
+#define tc1_array(x,y) tc1_array_p[x].v[y]
 #define v_array_v(x) v_array_p[x].v
 #define v_array(x,y) v_array_p[x].v[y]
 #define c_array_v(x) c_array_p[x].v
