@@ -1,6 +1,13 @@
 Project Twilight todo list
 --------------------------
 
+Missing stuff needed for 0.2:
+
+  - Loadtimes are too long.  This is caused by model triangulation.  Cache
+    this out to disk so we don't have to regenerate it all the time.  Also
+    be sure to avoid the glquake corrupt model mesh problem - regenerate the
+    file if it doesn't match the model..  (This one's yours, Zeph)
+
 We're almost there for 0.2, there are a number of bugs left which need to be
 fixed before release, they're marked RC below.
 
