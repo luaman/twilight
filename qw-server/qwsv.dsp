@@ -180,14 +180,6 @@ SOURCE=.\world.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\include\anorm_dots.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\anorms.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\bspfile.h
 # End Source File
 # Begin Source File
@@ -197,14 +189,6 @@ SOURCE=.\cmd.h
 # Begin Source File
 
 SOURCE=..\include\common.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\console.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\draw.h
 # End Source File
 # Begin Source File
 
@@ -221,10 +205,6 @@ SOURCE=..\include\menu.h
 # Begin Source File
 
 SOURCE=.\net.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\pcx.h
 # End Source File
 # Begin Source File
 

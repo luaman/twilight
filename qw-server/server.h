@@ -339,6 +339,7 @@ typedef struct {
 
 extern struct cvar_s *sv_mintic, *sv_maxtic;
 extern struct cvar_s *sv_maxspeed;
+extern struct cvar_s *sv_nailhack;
 
 extern netadr_t master_adr[MAX_MASTERS];	// address of the master server
 
