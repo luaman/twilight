@@ -553,8 +553,8 @@ Sbar_DrawInventory (void)
 	qboolean    headsup;
 	qboolean    hudswap;
 
-	headsup = !cl_sbar->value;
-	hudswap = cl_hudswap->value;
+	headsup = !cl_sbar->ivalue;
+	hudswap = cl_hudswap->ivalue;
 
 	if (!headsup)
 		Sbar_DrawPic (0, -24, sb_ibar);
@@ -735,7 +735,7 @@ Sbar_DrawNormal
 void
 Sbar_DrawNormal (void)
 {
-	if (cl_sbar->value)
+	if (cl_sbar->ivalue)
 		Sbar_DrawPic (0, 0, sb_sbar);
 
 	// armor
@@ -784,7 +784,7 @@ Sbar_Draw (void)
 	qboolean    headsup;
 	char        st[512];
 
-	headsup = !cl_sbar->value;
+	headsup = !cl_sbar->ivalue;
 
 	if (scr_con_current == vid.conheight)
 		return;							// console is full screen

@@ -138,7 +138,7 @@ SV_SetIdealPitch (void)
 
 	if (steps < 2)
 		return;
-	sv_player->v.idealpitch = -dir * sv_idealpitchscale->value;
+	sv_player->v.idealpitch = -dir * sv_idealpitchscale->fvalue;
 }
 
 
@@ -172,12 +172,12 @@ SV_UserFriction (void)
 	trace = SV_Move (start, vec3_origin, vec3_origin, stop, true, sv_player);
 
 	if (trace.fraction == 1.0)
-		friction = sv_friction->value * sv_edgefriction->value;
+		friction = sv_friction->fvalue * sv_edgefriction->fvalue;
 	else
-		friction = sv_friction->value;
+		friction = sv_friction->fvalue;
 
 // apply friction   
-	control = speed < sv_stopspeed->value ? sv_stopspeed->value : speed;
+	control = speed < sv_stopspeed->fvalue ? sv_stopspeed->fvalue : speed;
 	newspeed = speed - host_frametime * control * friction;
 
 	if (newspeed < 0) {
@@ -205,7 +205,7 @@ SV_Accelerate (void)
 	addspeed = wishspeed - currentspeed;
 	if (addspeed <= 0)
 		return;
-	accelspeed = sv_accelerate->value * host_frametime * wishspeed;
+	accelspeed = sv_accelerate->fvalue * host_frametime * wishspeed;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 
@@ -226,8 +226,7 @@ SV_AirAccelerate (vec3_t wishveloc)
 	addspeed = wishspd - currentspeed;
 	if (addspeed <= 0)
 		return;
-//  accelspeed = sv_accelerate.value * host_frametime;
-	accelspeed = sv_accelerate->value * wishspeed * host_frametime;
+	accelspeed = sv_accelerate->fvalue * wishspeed * host_frametime;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 
@@ -287,9 +286,9 @@ SV_WaterMove (void)
 		wishvel[2] += cmd.upmove;
 
 	wishspeed = VectorLength (wishvel);
-	if (wishspeed > sv_maxspeed->value) {
-		VectorScale (wishvel, sv_maxspeed->value / wishspeed, wishvel);
-		wishspeed = sv_maxspeed->value;
+	if (wishspeed > sv_maxspeed->fvalue) {
+		VectorScale (wishvel, sv_maxspeed->fvalue / wishspeed, wishvel);
+		wishspeed = sv_maxspeed->fvalue;
 	}
 	wishspeed *= 0.7;
 
@@ -298,7 +297,7 @@ SV_WaterMove (void)
 //
 	speed = VectorLength (velocity);
 	if (speed) {
-		newspeed = speed - host_frametime * speed * sv_friction->value;
+		newspeed = speed - host_frametime * speed * sv_friction->fvalue;
 		if (newspeed < 0)
 			newspeed = 0;
 		VectorScale (velocity, newspeed / speed, velocity);
@@ -316,7 +315,7 @@ SV_WaterMove (void)
 		return;
 
 	VectorNormalizeFast (wishvel);
-	accelspeed = sv_accelerate->value * wishspeed * host_frametime;
+	accelspeed = sv_accelerate->fvalue * wishspeed * host_frametime;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
 
@@ -368,10 +367,10 @@ SV_AirMove (void)
 
 	VectorCopy (wishvel, wishdir);
 	wishspeed = VectorNormalize (wishdir);
-	if (wishspeed > sv_maxspeed->value) {
-		wishspeed = sv_maxspeed->value / wishspeed;
+	if (wishspeed > sv_maxspeed->fvalue) {
+		wishspeed = sv_maxspeed->fvalue / wishspeed;
 		VectorScale (wishvel, wishspeed, wishvel);
-		wishspeed = sv_maxspeed->value;
+		wishspeed = sv_maxspeed->fvalue;
 	}
 
 	if (sv_player->v.movetype == MOVETYPE_NOCLIP) {	// noclip
@@ -470,7 +469,7 @@ SV_ReadClientMove (usercmd_t *move)
 
 	// if paused or a local game, don't predict
 // FIXME
-//	if (sv_predict->value && (svs.maxclients > 1) && (!sv.paused)) 
+//	if (sv_predict->fvalue && (svs.maxclients > 1) && (!sv.paused)) 
 //		host_client->latency = host_client->ping;
 
 	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_ping)))

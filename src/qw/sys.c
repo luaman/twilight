@@ -147,7 +147,7 @@ Sys_Printf (char *fmt, ...)
 	if (nostdout)
 		return;
 
-	if (sys_asciionly && sys_asciionly->value)
+	if (sys_asciionly && sys_asciionly->ivalue)
 		for (p = (unsigned char *) text; *p; p++)
 			putc (sys_charmap[*p], stdout);
 	else

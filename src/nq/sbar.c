@@ -523,8 +523,8 @@ Sbar_DrawInventory (void)
 	qboolean    headsup;
 	qboolean    hudswap;
 
-	headsup = !cl_sbar->value;
-	hudswap = cl_hudswap->value;
+	headsup = !cl_sbar->ivalue;
+	hudswap = cl_hudswap->ivalue;
 
 	if (!headsup)
 	{
@@ -753,8 +753,8 @@ Sbar_DrawFace (void)
 // PGM 01/19/97 - team color drawing
 // PGM 03/02/97 - fixed so color swatch only appears in CTF modes
 	if (rogue &&
-		(cl.maxclients != 1) && (teamplay->value > 3)
-		&& (teamplay->value < 7)) {
+		(cl.maxclients != 1) && (teamplay->ivalue > 3)
+		&& (teamplay->ivalue < 7)) {
 		int         xofs;
 		char        num[12];
 		scoreboard_t *s;
@@ -828,7 +828,7 @@ Sbar_Draw (void)
 	if (scr_con_current == vid.conheight)
 		return;							// console is full screen
 
-	headsup = !cl_sbar->value;
+	headsup = !cl_sbar->ivalue;
 
 	if (sb_lines > 24) {
 		Sbar_DrawInventory ();

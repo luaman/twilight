@@ -569,16 +569,18 @@ SVC_DirectConnect (void)
 		}
 	}
 	if (i == MAX_CHALLENGES) {
-		Netchan_OutOfBandPrint (NS_SERVER, net_from, "%c\nNo challenge for address.\n",
-								A2C_PRINT);
+		Netchan_OutOfBandPrint (NS_SERVER, net_from,
+				"%c\nNo challenge for address.\n", A2C_PRINT);
 		return;
 	}
 	// check for password or spectator_password
 	s = Info_ValueForKey (userinfo, "spectator");
 	if (s[0] && strcmp (s, "0")) {
-		if (spectator_password->string[0]
-				&& strcasecmp (spectator_password->string, "none")
-				&& strcmp (spectator_password->string, s)) {	// failed
+		if (spectator_password->svalue[0]
+				&& strcasecmp (spectator_password->svalue, "none")
+				&& strcmp (spectator_password->svalue, s))
+		{
+			// failed
 			Com_Printf ("%s:spectator password failed\n",
 						NET_AdrToString (net_from));
 			Netchan_OutOfBandPrint (NS_SERVER, net_from,
@@ -591,9 +593,9 @@ SVC_DirectConnect (void)
 		spectator = true;
 	} else {
 		s = Info_ValueForKey (userinfo, "password");
-		if (password->string[0] &&
-			strcasecmp (password->string, "none") &&
-			strcmp (password->string, s)) {
+		if (password->svalue[0] &&
+			strcasecmp (password->svalue, "none") &&
+			strcmp (password->svalue, s)) {
 			Com_Printf ("%s:password failed\n", NET_AdrToString (net_from));
 			Netchan_OutOfBandPrint (NS_SERVER, net_from,
 									"%c\nserver requires a password\n\n",
@@ -613,7 +615,7 @@ SVC_DirectConnect (void)
 	newcl->userid = userid;
 
 	// works properly
-	if (!sv_highchars->value) {
+	if (!sv_highchars->ivalue) {
 		Uint8      *p, *q;
 
 		for (p = (Uint8 *) newcl->userinfo, q = (Uint8 *) userinfo;
@@ -656,16 +658,16 @@ SVC_DirectConnect (void)
 	}
 
 	// if at server limits, refuse connection
-	if (maxclients->value > MAX_CLIENTS)
+	if (maxclients->ivalue > MAX_CLIENTS)
 		Cvar_Set (maxclients, va ("%i", MAX_CLIENTS));
-	if (maxspectators->value > MAX_CLIENTS)
+	if (maxspectators->ivalue > MAX_CLIENTS)
 		Cvar_Set (maxspectators, va ("%i", MAX_CLIENTS));
-	if (maxspectators->value + maxclients->value > MAX_CLIENTS)
+	if (maxspectators->ivalue + maxclients->ivalue > MAX_CLIENTS)
 		Cvar_Set (maxspectators, va ("%i",
-					   MAX_CLIENTS - maxspectators->value
-					   + maxclients->value));
-	if ((spectator && spectators >= (int) maxspectators->value)
-		|| (!spectator && clients >= (int) maxclients->value)) {
+					   MAX_CLIENTS - maxspectators->ivalue
+					   + maxclients->ivalue));
+	if ((spectator && spectators >= maxspectators->ivalue)
+		|| (!spectator && clients >= maxclients->ivalue)) {
 		Com_Printf ("%s:full connect\n", NET_AdrToString (adr));
 		Netchan_OutOfBandPrint (NS_SERVER, adr, "%c\nserver is full\n\n", A2C_PRINT);
 		return;
@@ -729,10 +731,10 @@ SVC_DirectConnect (void)
 int
 Rcon_Validate (void)
 {
-	if (!strlen (rcon_password->string))
+	if (!strlen (rcon_password->svalue))
 		return 0;
 
-	if (strcmp (Cmd_Argv (1), rcon_password->string))
+	if (strcmp (Cmd_Argv (1), rcon_password->svalue))
 		return 0;
 
 	return 1;
@@ -1051,9 +1053,9 @@ SV_FilterPacket (void)
 
 	for (i = 0; i < numipfilters; i++)
 		if ((in & ipfilters[i].mask) == ipfilters[i].compare)
-			return filterban->value;
+			return filterban->ivalue;
 
-	return !filterban->value;
+	return !filterban->ivalue;
 }
 
 //============================================================================
@@ -1138,7 +1140,7 @@ SV_CheckTimeouts (void)
 	float       droptime;
 	int         nclients;
 
-	droptime = svs.realtime - timeout->value;
+	droptime = svs.realtime - timeout->fvalue;
 	nclients = 0;
 
 	for (i = 0, cl = svs.clients; i < MAX_CLIENTS; i++, cl++) {
@@ -1152,7 +1154,7 @@ SV_CheckTimeouts (void)
 			}
 		}
 		if (cl->state == cs_zombie &&
-				svs.realtime - cl->connection_started > zombietime->value) {
+				svs.realtime - cl->connection_started > zombietime->fvalue) {
 			cl->state = cs_free;		// can now be reused
 		}
 	}
@@ -1194,10 +1196,10 @@ SV_CheckVars (void)
 	static char *pw, *spw;
 	int         v;
 
-	if (password->string == pw && spectator_password->string == spw)
+	if (password->svalue == pw && spectator_password->svalue == spw)
 		return;
-	pw = password->string;
-	spw = spectator_password->string;
+	pw = password->svalue;
+	spw = spectator_password->svalue;
 
 	v = 0;
 	if (pw && pw[0] && strcmp (pw, "none"))
@@ -1623,9 +1625,9 @@ SV_CvarServerinfo (cvar_t *var)
 {
 	if (var->flags & CVAR_SERVERINFO)
 	{
-		Info_SetValueForKey (svs.info, var->name, var->string,
+		Info_SetValueForKey (svs.info, var->name, var->svalue,
 				MAX_SERVERINFO_STRING);
-		SV_SendServerInfoChange (var->name, var->string);
+		SV_SendServerInfoChange (var->name, var->svalue);
 	}
 }
 
@@ -1652,11 +1654,11 @@ SV_Init (void)
 	// Yes, the repeated Cmd_StuffCmds_f/Cbuf_Execute_Sets are necessary!
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
-	Cbuf_InsertFile (fs_shareconf->string);
+	Cbuf_InsertFile (fs_shareconf->svalue);
 	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
-	Cbuf_InsertFile (fs_userconf->string);
+	Cbuf_InsertFile (fs_userconf->svalue);
 	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();

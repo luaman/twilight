@@ -201,7 +201,7 @@ R_RenderDlights (void)
 	int         i;
 	dlight_t   *l;
 
-	if (!gl_flashblend->value)
+	if (!gl_flashblend->ivalue)
 		return;
 
 	qglDisable (GL_TEXTURE_2D);
@@ -345,7 +345,7 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 	int				row = (model->numleafs+7)>>3;
 	float			low[3], high[3], radius, dist, maxdist;
 
-	if (!pvsleaf->compressed_vis || gl_oldlights->value)
+	if (!pvsleaf->compressed_vis || gl_oldlights->ivalue)
 	{
 		// no vis info, so make all visible
 		R_MarkLightsNoVis(light, bit, model->nodes
@@ -493,7 +493,7 @@ R_PushDlights (void)
 	int         i;
 	dlight_t   *l;
 
-	if (gl_flashblend->value)
+	if (gl_flashblend->ivalue)
 		return;
 
 	l = cl_dlights;

@@ -127,9 +127,9 @@ VID_InitTexGamma (void)
 	Uint8	r, g, b;
 	vec3_t	tex;
 
-	tex[0] = v_tgamma->value + v_tgammabias_r->value;
-	tex[1] = v_tgamma->value + v_tgammabias_g->value;
-	tex[2] = v_tgamma->value + v_tgammabias_b->value;
+	tex[0] = v_tgamma->fvalue + v_tgammabias_r->fvalue;
+	tex[1] = v_tgamma->fvalue + v_tgammabias_g->fvalue;
+	tex[2] = v_tgamma->fvalue + v_tgammabias_b->fvalue;
 
 	BUILD_GAMMA_RAMP(tex_gamma_ramps[0], tex[0], Uint8, 256);
 	BUILD_GAMMA_RAMP(tex_gamma_ramps[1], tex[1], Uint8, 256);
@@ -172,11 +172,11 @@ GammaChanged (cvar_t *cvar)
 		return;
 
 	/* Do we have and want to use hardware gamma? */
-	hw[0] = v_gamma->value + v_gammabias_r->value;
-	hw[1] = v_gamma->value + v_gammabias_g->value;
-	hw[2] = v_gamma->value + v_gammabias_b->value;
+	hw[0] = v_gamma->fvalue + v_gammabias_r->fvalue;
+	hw[1] = v_gamma->fvalue + v_gammabias_g->fvalue;
+	hw[2] = v_gamma->fvalue + v_gammabias_b->fvalue;
 
-	if (v_hwgamma->value == 1) {
+	if (v_hwgamma->ivalue == 1) {
 		BUILD_GAMMA_RAMP(hw_gamma_ramps[0], hw[0], Uint16, 256);
 		BUILD_GAMMA_RAMP(hw_gamma_ramps[1], hw[1], Uint16, 256);
 		BUILD_GAMMA_RAMP(hw_gamma_ramps[2], hw[2], Uint16, 256);
@@ -189,7 +189,7 @@ GammaChanged (cvar_t *cvar)
 			Cvar_Set(v_hwgamma, "0");
 			v_hwgamma->flags |= CVAR_ROM;
 		}
-	} else if (v_hwgamma->value == 2) {
+	} else if (v_hwgamma->ivalue == 2) {
 		SDL_SetGamma(hw[0], hw[1], hw[2]);
 	}
 }
@@ -390,8 +390,8 @@ VID_Init (unsigned char *palette)
 		Sys_Error ("Could not get video information!\n");
     }
 
-	Sys_Printf ("Using OpenGL driver '%s'\n", gl_driver->string);
-	if (!DGL_LoadLibrary(gl_driver->string))
+	Sys_Printf ("Using OpenGL driver '%s'\n", gl_driver->svalue);
+	if (!DGL_LoadLibrary(gl_driver->svalue))
 		Sys_Error("%s\n", DGL_GetError());
 
 	i = COM_CheckParm ("-bpp");
@@ -591,7 +591,7 @@ Sys_SendKeyEvents (void)
 				if (!use_mouse)
 					break;
 
-				if (_windowed_mouse->value && (cls.state >= ca_connected)) {
+				if (_windowed_mouse->ivalue && (cls.state >= ca_connected)) {
 					mouse_x += event.motion.xrel;
 					mouse_y += event.motion.yrel;
 				}
@@ -638,11 +638,11 @@ IN_WindowedMouse (cvar_t *cvar)
 	if (sdl_flags & SDL_FULLSCREEN)
 	{
 		_windowed_mouse->flags |= CVAR_ROM;
-		_windowed_mouse->value = 1;
+		Cvar_Set (_windowed_mouse, "1");
 		return;
 	}
 
-	if (!_windowed_mouse->value)
+	if (!_windowed_mouse->ivalue)
 		SDL_WM_GrabInput (SDL_GRAB_OFF);
 	else
 		SDL_WM_GrabInput (SDL_GRAB_ON);
@@ -651,7 +651,7 @@ IN_WindowedMouse (cvar_t *cvar)
 void
 I_KeypadMode (cvar_t *cvar)
 {
-	keypadmode = !!cvar->value;
+	keypadmode = !!cvar->ivalue;
 }
 
 /*
@@ -672,7 +672,7 @@ IN_Move
 void
 IN_Move (usercmd_t *cmd)
 {
-	if (m_filter->value &&
+	if (m_filter->fvalue &&
 		((mouse_x != old_mouse_x) ||
 		(mouse_y != old_mouse_y))) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
@@ -682,25 +682,25 @@ IN_Move (usercmd_t *cmd)
 	old_mouse_x = mouse_x;
 	old_mouse_y = mouse_y;
 
-	mouse_x *= sensitivity->value;
-	mouse_y *= sensitivity->value;
+	mouse_x *= sensitivity->fvalue;
+	mouse_y *= sensitivity->fvalue;
 
-	if ((in_strafe.state & 1) || (lookstrafe->value && freelook))
-		cmd->sidemove += m_side->value * mouse_x;
+	if ((in_strafe.state & 1) || (lookstrafe->ivalue && freelook))
+		cmd->sidemove += m_side->fvalue * mouse_x;
 	else
-		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
+		cl.viewangles[YAW] -= m_yaw->fvalue * mouse_x;
 
 	if (freelook)
 		V_StopPitchDrift ();
 
 	if (freelook && !(in_strafe.state & 1)) {
-		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
+		cl.viewangles[PITCH] += m_pitch->fvalue * mouse_y;
 		cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
 	} else {
 		if ((in_strafe.state & 1) && noclip_anglehack)
-			cmd->upmove -= m_forward->value * mouse_y;
+			cmd->upmove -= m_forward->fvalue * mouse_y;
 		else
-			cmd->forwardmove -= m_forward->value * mouse_y;
+			cmd->forwardmove -= m_forward->fvalue * mouse_y;
 	}
 
 	mouse_x = mouse_y = 0.0;

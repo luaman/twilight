@@ -406,7 +406,7 @@ PR_ExecuteProgram (func_t fnum, char *errormessage)
 
 chooseexecprogram:
 	cachedpr_trace = pr_trace;
-	if (pr_boundscheck->value)
+	if (pr_boundscheck->ivalue)
 	{
 #define PRBOUNDSCHECK 1
 		if (pr_trace)

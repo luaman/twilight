@@ -70,7 +70,7 @@ R_RenderFullbrights (void)
 	glpoly_t	   *p;
 	float		   *v;
 
-	if (!drawfullbrights || !gl_fb_bmodels->value)
+	if (!drawfullbrights || !gl_fb_bmodels->ivalue)
 		return;
 
 	qglDepthMask (GL_FALSE);	// don't bother writing Z
@@ -332,7 +332,7 @@ GL_UpdateLightmap (msurface_t *fa)
 		lightmap_polys[fa->lightmaptexturenum] = fa->polys;
 	}
 
-	if (!r_dynamic->value)
+	if (!r_dynamic->ivalue)
 		return;
 
 	if (fa->dlightframe == r_framecount // dynamic lighting
@@ -402,7 +402,7 @@ R_BlendLightmaps (void)
 	glpoly_t   *p;
 	vec3_t		nv;
 	float	   *v;
-	float		intensity = max (0, r_waterwarp->value);
+	float		intensity = max (0, r_waterwarp->fvalue);
 
 	// don't bother writing Z
 	qglDepthMask (GL_FALSE);
@@ -417,7 +417,7 @@ R_BlendLightmaps (void)
 			continue;
 		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + i);
 		for (; p; p = p->chain) {
-			if (p->flags & SURF_UNDERWATER && r_waterwarp->value) {
+			if (p->flags & SURF_UNDERWATER && r_waterwarp->fvalue) {
 				qglBegin (GL_TRIANGLE_FAN);
 				v = p->verts[0];
 				for (j = 0; j < p->numverts; j++, v += VERTEXSIZE) {
@@ -460,13 +460,13 @@ R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 	int			i;
 	float		*v;
 	vec3_t		nv;
-	float		intensity = max (0, r_waterwarp->value);
+	float		intensity = max (0, r_waterwarp->fvalue);
 
 	c_brush_polys++;
 
 	qglBindTexture(GL_TEXTURE_2D, lightmap_textures + fa->lightmaptexturenum);
 
-	if (fa->flags & SURF_UNDERWATER && r_waterwarp->value) {
+	if (fa->flags & SURF_UNDERWATER && r_waterwarp->fvalue) {
 		qglBegin (GL_TRIANGLE_FAN);
 		v = fa->polys->verts[0];
 		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
@@ -511,11 +511,11 @@ R_RenderBrushPoly (msurface_t *fa, texture_t *t)
 	int		i;
 	vec3_t	nv;
 	float	*v;
-	float	intensity = max (0, r_waterwarp->value);
+	float	intensity = max (0, r_waterwarp->fvalue);
 
 	c_brush_polys++;
 
-	if (fa->flags & SURF_UNDERWATER && r_waterwarp->value) {
+	if (fa->flags & SURF_UNDERWATER && r_waterwarp->fvalue) {
 		qglBegin (GL_TRIANGLE_FAN);
 		v = fa->polys->verts[0];
 		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
@@ -673,7 +673,7 @@ DrawTextureChains ()
 	}
 
 	// If the water is solid, draw here, if not, then later.
-	if (r_wateralpha->value == 1)
+	if (r_wateralpha->fvalue == 1)
 		R_DrawWaterTextureChains ();
 }
 
@@ -688,7 +688,7 @@ R_DrawWaterTextureChains ()
 	unsigned int	i;
 	msurface_t		*s;
 	texture_t		*t, *st;
-	float			wateralpha = r_wateralpha->value;
+	float			wateralpha = r_wateralpha->fvalue;
 
 	for (i = 0; i < cl.worldmodel->numtextures; i++)
 	{
@@ -722,7 +722,7 @@ R_DrawBrushModel (entity_t *e)
 	int				i, k, texnum, rotated;
 	vec3_t			mins, maxs;
 	msurface_t	   *psurf;
-	float			dot, wateralpha = r_wateralpha->value;
+	float			dot, wateralpha = r_wateralpha->fvalue;
 	model_t		   *clmodel = e->model;
 	texture_t	   *t, *st;
 	vec3_t			modelorg;
@@ -778,7 +778,7 @@ R_DrawBrushModel (entity_t *e)
 	}
 
 	// calculate dynamic lighting for bmodel if it's not an instanced model
-	if (clmodel->firstmodelsurface != 0 && !gl_flashblend->value) {
+	if (clmodel->firstmodelsurface != 0 && !gl_flashblend->ivalue) {
 		for (k = 0; k < MAX_DLIGHTS; k++) {
 			if ((cl_dlights[k].die < cl.time) || (!cl_dlights[k].radius))
 				continue;
@@ -975,7 +975,7 @@ R_RecursiveWorldNode (mnode_t *node)
 				continue;
 
 			// don't backface underwater surfaces, because they warp
-			if (r_waterwarp->value &&
+			if (r_waterwarp->fvalue &&
 					!(((r_viewleaf->contents == CONTENTS_EMPTY
 								&& (surf->flags & SURF_UNDERWATER))
 							|| (r_viewleaf->contents != CONTENTS_EMPTY
@@ -1015,13 +1015,13 @@ R_MarkLeaves (void)
 	mnode_t		   *node;
 	unsigned int	i;
 
-	if (r_oldviewleaf == r_viewleaf && !r_novis->value)
+	if (r_oldviewleaf == r_viewleaf && !r_novis->ivalue)
 		return;
 
 	r_pvsframecount++;
 	r_oldviewleaf = r_viewleaf;
 
-	if (r_novis->value)
+	if (r_novis->ivalue)
 	{
 		for (i = 0; i < cl.worldmodel->numleafs; i++)
 		{
@@ -1069,7 +1069,7 @@ R_DrawWorld (void)
 
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
-	if (gl_fb_bmodels->value)
+	if (gl_fb_bmodels->ivalue)
 		memset (fullbright_polys, 0, sizeof(fullbright_polys));
 
 	R_ClearSkyBox ();
@@ -1278,7 +1278,7 @@ GL_BuildLightmaps (void)
 		texture_extension_number += MAX_LIGHTMAPS;
 	}
 
-	switch ((int) gl_colorlights->value) {
+	switch ((int) gl_colorlights->ivalue) {
 		case 0:
 			gl_lightmap_format = GL_LUMINANCE;
 			lightmap_bytes = 1;

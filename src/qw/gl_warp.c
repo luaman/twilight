@@ -110,8 +110,8 @@ SubdividePolygon (int numverts, float *verts)
 
 	for (i = 0; i < 3; i++) {
 		m = (mins[i] + maxs[i]) * 0.5;
-		m = gl_subdivide_size->value
-			* Q_floor (m / gl_subdivide_size->value + 0.5);
+		m = gl_subdivide_size->fvalue
+			* Q_floor (m / gl_subdivide_size->fvalue + 0.5);
 		if (maxs[i] - m < 8)
 			continue;
 		if (m - mins[i] < 8)
@@ -236,7 +236,7 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 	int			i;
 	float		s, t, ripple;
 
-	ripple = r_waterripple->value;
+	ripple = r_waterripple->fvalue;
 
 	qglColor4f(1, 1, 1, alpha);
 
@@ -342,13 +342,13 @@ R_DrawSkyChain (msurface_t *s)
 {
 	msurface_t *fa;
 
-	if (r_fastsky->value) {
+	if (r_fastsky->ivalue) {
 		glpoly_t	*p;
 		float		*v;
 		int			i;
 
 		qglDisable (GL_TEXTURE_2D);
-		qglColor4fv (d_8tofloattable[(Uint8) r_fastsky->value - 1]);
+		qglColor4fv (d_8tofloattable[(Uint8) r_fastsky->ivalue - 1]);
 
 		for (fa=s ; fa ; fa=fa->texturechain){
 			for (p=fa->polys ; p ; p=p->next) {
@@ -397,12 +397,12 @@ R_LoadSkys (void)
 
 	for (i = 0; i < 6; i++) {
 		snprintf (name, sizeof (name), "env/%s%s",
-				r_skyname->string, suf[i]);
+				r_skyname->svalue, suf[i]);
 		img = Image_Load (name);
 		if (!img)
 		{
 			snprintf (name, sizeof (name), "gfx/env/%s%s",
-					r_skyname->string, suf[i]);
+					r_skyname->svalue, suf[i]);
 			img = Image_Load (name);
 		}
 
@@ -436,7 +436,7 @@ R_SkyBoxChanged
 */
 void R_SkyBoxChanged (cvar_t *cvar)
 {
-	if (cvar->string[0])
+	if (cvar->svalue[0])
 		draw_skybox = R_LoadSkys();
 	else
 		draw_skybox = false;

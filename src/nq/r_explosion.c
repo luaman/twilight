@@ -219,10 +219,10 @@ void R_DrawExplosion(explosion_t *e)
 		vindices[i_index + i] = explosiontris[0][i] + v_index;
 	}
 
-	r = r_explosioncolor_r->value;
-	g = r_explosioncolor_g->value;
-	b = r_explosioncolor_b->value;
-	a = r_explosioncolor_a->value * e->alpha;
+	r = r_explosioncolor_r->fvalue;
+	g = r_explosioncolor_g->fvalue;
+	b = r_explosioncolor_b->fvalue;
+	a = r_explosioncolor_a->fvalue * e->alpha;
 
 	for (i = 0; i < EXPLOSIONVERTS; i++)
 		VectorSet4(c_array_v(v_index + i), r, g, b, a);
@@ -252,7 +252,7 @@ void R_MoveExplosion(explosion_t *e, float frametime)
 			end[0] = e->vert[i][0] + frametime * e->vertvel[i][0];
 			end[1] = e->vert[i][1] + frametime * e->vertvel[i][1];
 			end[2] = e->vert[i][2] + frametime * e->vertvel[i][2];
-			if (r_explosionclip->value)
+			if (r_explosionclip->ivalue)
 			{
 				float f, dot;
 				vec3_t impact, normal;
@@ -296,11 +296,11 @@ void R_MoveExplosions(void)
 void R_DrawExplosions(void)
 {
 	int i;
-	if (!r_drawexplosions->value)
+	if (!r_drawexplosions->ivalue)
 		return;
 	qglEnableClientState (GL_COLOR_ARRAY);
 	qglBindTexture(GL_TEXTURE_2D, explosiontexture);
-	if (gl_cull->value)
+	if (gl_cull->ivalue)
 		qglDisable (GL_CULL_FACE);
 	for (i = 0;i < MAX_EXPLOSIONS;i++)
 	{
@@ -317,6 +317,6 @@ void R_DrawExplosions(void)
 		i_index = 0;
 	}
 	qglDisableClientState (GL_COLOR_ARRAY);
-	if (gl_cull->value)
+	if (gl_cull->ivalue)
 		qglEnable (GL_CULL_FACE);
 }

@@ -176,7 +176,7 @@ void
 IN_MLookUp (void)
 {
 	KeyUp (&in_mlook);
-	if (!freelook && lookspring->value)
+	if (!freelook && lookspring->ivalue)
 		V_StartPitchDrift ();
 }
 
@@ -449,30 +449,30 @@ CL_AdjustAngles (void)
 	float       up, down;
 
 	if (in_speed.state & 1)
-		speed = host_frametime * cl_anglespeedkey->value;
+		speed = host_frametime * cl_anglespeedkey->fvalue;
 	else
 		speed = host_frametime;
 
 	if (!(in_strafe.state & 1)) {
 		cl.viewangles[YAW] -=
-			speed * cl_yawspeed->value * CL_KeyState (&in_right);
+			speed * cl_yawspeed->fvalue * CL_KeyState (&in_right);
 		cl.viewangles[YAW] +=
-			speed * cl_yawspeed->value * CL_KeyState (&in_left);
+			speed * cl_yawspeed->fvalue * CL_KeyState (&in_left);
 		cl.viewangles[YAW] = ANGLEMOD (cl.viewangles[YAW]);
 	}
 	if (in_klook.state & 1) {
 		V_StopPitchDrift ();
 		cl.viewangles[PITCH] -=
-			speed * cl_pitchspeed->value * CL_KeyState (&in_forward);
+			speed * cl_pitchspeed->fvalue * CL_KeyState (&in_forward);
 		cl.viewangles[PITCH] +=
-			speed * cl_pitchspeed->value * CL_KeyState (&in_back);
+			speed * cl_pitchspeed->fvalue * CL_KeyState (&in_back);
 	}
 
 	up = CL_KeyState (&in_lookup);
 	down = CL_KeyState (&in_lookdown);
 
-	cl.viewangles[PITCH] -= speed * cl_pitchspeed->value * up;
-	cl.viewangles[PITCH] += speed * cl_pitchspeed->value * down;
+	cl.viewangles[PITCH] -= speed * cl_pitchspeed->fvalue * up;
+	cl.viewangles[PITCH] += speed * cl_pitchspeed->fvalue * down;
 
 	if (up || down)
 		V_StopPitchDrift ();
@@ -497,28 +497,28 @@ CL_BaseMove (usercmd_t *cmd)
 
 	VectorCopy (cl.viewangles, cmd->angles);
 	if (in_strafe.state & 1) {
-		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
-		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
+		cmd->sidemove += cl_sidespeed->fvalue * CL_KeyState (&in_right);
+		cmd->sidemove -= cl_sidespeed->fvalue * CL_KeyState (&in_left);
 	}
 
-	cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
-	cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
+	cmd->sidemove += cl_sidespeed->fvalue * CL_KeyState (&in_moveright);
+	cmd->sidemove -= cl_sidespeed->fvalue * CL_KeyState (&in_moveleft);
 
-	cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up);
-	cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
+	cmd->upmove += cl_upspeed->fvalue * CL_KeyState (&in_up);
+	cmd->upmove -= cl_upspeed->fvalue * CL_KeyState (&in_down);
 
 	if (!(in_klook.state & 1)) {
 		cmd->forwardmove +=
-			cl_forwardspeed->value * CL_KeyState (&in_forward);
-		cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
+			cl_forwardspeed->fvalue * CL_KeyState (&in_forward);
+		cmd->forwardmove -= cl_backspeed->fvalue * CL_KeyState (&in_back);
 	}
 	//
 	// adjust for speed key
 	//
 	if (in_speed.state & 1) {
-		cmd->forwardmove *= cl_movespeedkey->value;
-		cmd->sidemove *= cl_movespeedkey->value;
-		cmd->upmove *= cl_movespeedkey->value;
+		cmd->forwardmove *= cl_movespeedkey->fvalue;
+		cmd->sidemove *= cl_movespeedkey->fvalue;
+		cmd->upmove *= cl_movespeedkey->fvalue;
 	}
 }
 
@@ -666,7 +666,7 @@ CL_SendCmd (void)
 	if (cls.netchan.outgoing_sequence - cl.validsequence >= UPDATE_BACKUP - 1)
 		cl.validsequence = 0;
 
-	if (cl.validsequence && !cl_nodelta->value &&
+	if (cl.validsequence && !cl_nodelta->ivalue &&
 			cls.state == ca_active && !cls.demorecording) {
 		cl.frames[cls.netchan.outgoing_sequence & UPDATE_MASK].delta_sequence =
 			cl.validsequence;
@@ -730,8 +730,8 @@ CL_Input_Init (void)
 	Cmd_AddCommand ("-klook", IN_KLookUp);
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
-	SDL_EnableKeyRepeat(in_key_repeat_delay->value,
-			in_key_repeat_interval->value);
+	SDL_EnableKeyRepeat(in_key_repeat_delay->ivalue,
+			in_key_repeat_interval->ivalue);
 }
 
 void
@@ -771,8 +771,8 @@ CL_Input_Init_Cvars (void)
 void
 CL_InputSetRepeatDelay (struct cvar_s *var)
 {
-	SDL_EnableKeyRepeat(var->value, (in_key_repeat_interval) ?
-			in_key_repeat_interval->value : SDL_DEFAULT_REPEAT_INTERVAL);
+	SDL_EnableKeyRepeat(var->ivalue, (in_key_repeat_interval) ?
+			in_key_repeat_interval->ivalue : SDL_DEFAULT_REPEAT_INTERVAL);
 }
 
 /*
@@ -781,8 +781,8 @@ CL_InputSetRepeatDelay (struct cvar_s *var)
 void
 CL_InputSetRepeatInterval (struct cvar_s *var)
 {
-	SDL_EnableKeyRepeat((in_key_repeat_delay) ? in_key_repeat_delay->value
-			: SDL_DEFAULT_REPEAT_DELAY, var->value);
+	SDL_EnableKeyRepeat((in_key_repeat_delay) ? in_key_repeat_delay->ivalue
+			: SDL_DEFAULT_REPEAT_DELAY, var->ivalue);
 }
 
 /*

@@ -234,7 +234,7 @@ CL_SendConnectPacket (void)
 
 	connect_time = cls.realtime + t2 - t1;	// for retransmit requests
 
-	cls.qport = qport->value;
+	cls.qport = qport->ivalue;
 
 	Info_SetValueForStarKey (cls.userinfo, "*ip", NET_AdrToString (adr),
 							 MAX_INFO_STRING);
@@ -334,7 +334,7 @@ CL_Rcon_f (void)
 	int         i;
 	netadr_t    to;
 
-	if (!rcon_password->string) {
+	if (!rcon_password->svalue) {
 		Com_Printf ("You must set 'rcon_password' before\n"
 					"issuing an rcon command.\n");
 		return;
@@ -348,7 +348,7 @@ CL_Rcon_f (void)
 
 	strcat (message, "rcon ");
 
-	strcat (message, rcon_password->string);
+	strcat (message, rcon_password->svalue);
 	strcat (message, " ");
 
 	for (i = 1; i < Cmd_Argc (); i++) {
@@ -359,14 +359,14 @@ CL_Rcon_f (void)
 	if (cls.state >= ca_connected)
 		to = cls.netchan.remote_address;
 	else {
-		if (!strlen (rcon_address->string)) {
+		if (!strlen (rcon_address->svalue)) {
 			Com_Printf ("You must either be connected,\n"
 						"or set the 'rcon_address' cvar\n"
 						"to issue rcon commands\n");
 
 			return;
 		}
-		NET_StringToAdr (rcon_address->string, &to);
+		NET_StringToAdr (rcon_address->svalue, &to);
 	}
 
 	NET_SendPacket (NS_CLIENT, strlen (message) + 1, message, to);
@@ -852,8 +852,8 @@ CL_ConnectionlessPacket (void)
 			s[strlen (s) - 1] = 0;
 
 		if (!allowremotecmd
-			&& (!*localid->string || strcmp (localid->string, s))) {
-			if (!*localid->string) {
+			&& (!*localid->svalue || strcmp (localid->svalue, s))) {
+			if (!*localid->svalue) {
 				Com_Printf ("===========================\n");
 				Com_Printf ("Command packet received from local host, but no "
 							"localid has been set.  You may need to upgrade your server "
@@ -866,7 +866,7 @@ CL_ConnectionlessPacket (void)
 				("Invalid localid on command packet received from local host. "
 				 "\n|%s| != |%s|\n"
 				 "You may need to reload your server browser and QuakeWorld.\n",
-				 s, localid->string);
+				 s, localid->svalue);
 			Com_Printf ("===========================\n");
 			Cvar_Set (localid, "");
 			return;
@@ -962,9 +962,9 @@ CL_ReadPackets (void)
 	// check timeout
 	// 
 	if (cls.state >= ca_connected
-		&& cls.realtime - cls.netchan.last_received > cl_timeout->value) {
+		&& cls.realtime - cls.netchan.last_received > cl_timeout->fvalue) {
 		Com_Printf ("\nServer connection timed out. (%f %f %f)\n", cls.realtime,
-				cls.netchan.last_received, cl_timeout->value);
+				cls.netchan.last_received, cl_timeout->fvalue);
 		CL_Disconnect ();
 	}
 }
@@ -1327,10 +1327,10 @@ Host_Frame (double time)
 	if (oldrealtime > cls.realtime)
 		oldrealtime = 0;
 
-	if (cl_maxfps->value)
-		fps = cl_maxfps->value;
+	if (cl_maxfps->fvalue)
+		fps = cl_maxfps->fvalue;
 	else
-		fps = rate->value / 80.0f;
+		fps = rate->fvalue / 80.0f;
 
 	fps = bound (30.0f, fps, 72.0f);
 
@@ -1377,12 +1377,12 @@ Host_Frame (double time)
 	}
 
 	// update video
-	if (host_speeds->value)
+	if (host_speeds->ivalue)
 		time1 = Sys_DoubleTime ();
 
 	SCR_UpdateScreen ();
 
-	if (host_speeds->value)
+	if (host_speeds->ivalue)
 		time2 = Sys_DoubleTime ();
 
 	// update audio
@@ -1394,7 +1394,7 @@ Host_Frame (double time)
 
 	CDAudio_Update ();
 
-	if (host_speeds->value) {
+	if (host_speeds->ivalue) {
 		pass1 = (time1 - time3) * 1000;
 		time3 = Sys_DoubleTime ();
 		pass2 = (time2 - time1) * 1000;
@@ -1431,13 +1431,13 @@ Host_CvarUserinfo (cvar_t *var)
 {
 	if (var->flags & CVAR_USERINFO)
 	{
-		Info_SetValueForKey (cls.userinfo, var->name, var->string,
+		Info_SetValueForKey (cls.userinfo, var->name, var->svalue,
 				MAX_INFO_STRING);
 		if (cls.state >= ca_connected)
 		{
 			MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 			SZ_Print (&cls.netchan.message,
-					va ("setinfo \"%s\" \"%s\"\n", var->name, var->string));
+					va ("setinfo \"%s\" \"%s\"\n", var->name, var->svalue));
 		}
 	}
 }
@@ -1465,11 +1465,11 @@ Host_Init (void)
 	// Yes, the repeated Cmd_StuffCmds_f/Cbuf_Execute_Sets are necessary!
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
-	Cbuf_InsertFile (fs_shareconf->string);
+	Cbuf_InsertFile (fs_shareconf->svalue);
 	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
-	Cbuf_InsertFile (fs_userconf->string);
+	Cbuf_InsertFile (fs_userconf->svalue);
 	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();

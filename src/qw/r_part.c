@@ -328,7 +328,7 @@ R_ReadPointFile_f (void)
 	int				r, c;
 	char			name[MAX_OSPATH];
 
-	snprintf (name, sizeof (name), "maps/%s.pts", cl_mapname->string);
+	snprintf (name, sizeof (name), "maps/%s.pts", cl_mapname->svalue);
 
 	COM_FOpenFile (name, &f, true);
 	if (!f) {
@@ -559,7 +559,7 @@ R_Torch (entity_t *ent, qboolean torch2)
 	vec3_t	porg, pvel;
 	vec4_t	color;
 
-	if (!r_particles->value)
+	if (!r_particles->ivalue)
 		return;
 
 //	VectorSet4 (color, 227.0 / 255.0, 151.0 / 255.0, 79.0 / 255.0, .5);
@@ -767,7 +767,7 @@ R_Move_Base_Particles (void)
 			continue;
 		}
 
-		if (r_particle_physics->value)
+		if (r_particle_physics->ivalue)
 			VectorCopy(p->org, p->oldorg);
 
 		maxparticle = k;
@@ -856,7 +856,7 @@ R_Draw_Base_Particles__physics:
 
 			case pt_grav:
 			case pt_slowgrav:
-				if (r_particle_physics->value) {
+				if (r_particle_physics->ivalue) {
 					p->die = 9999;
 					p->bounce = 1.5;
 					p->color[3] -= (frametime * 1.5);
@@ -929,7 +929,7 @@ R_Draw_Base_Particles (void)
 			continue;
 		}
 
-		if (r_particle_physics->value)
+		if (r_particle_physics->ivalue)
 			VectorCopy(p->org, p->oldorg);
 
 		maxparticle = i;
@@ -1065,7 +1065,7 @@ R_Draw_Tube_Particles (void)
 	vec3_t			v_up, v_right;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke);
-	if (gl_cull->value)
+	if (gl_cull->ivalue)
 		qglDisable (GL_CULL_FACE);
 
 	activeparticles = 0;
@@ -1147,7 +1147,7 @@ R_Draw_Tube_Particles (void)
 	}
 	num_tube_particles = activeparticles;
 
-	if (gl_cull->value)
+	if (gl_cull->ivalue)
 		qglEnable (GL_CULL_FACE);
 }
 
@@ -1259,7 +1259,7 @@ R_Draw_Cone_Particles (void)
 	float			*bub_sin, *bub_cos;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_ring);
-	if (gl_cull->value)
+	if (gl_cull->ivalue)
 		qglDisable (GL_CULL_FACE);
 
 	activeparticles = 0;
@@ -1339,7 +1339,7 @@ R_Draw_Cone_Particles (void)
 	}
 	num_cone_particles = activeparticles;
 
-	if (gl_cull->value)
+	if (gl_cull->ivalue)
 		qglEnable (GL_CULL_FACE);
 }
 

@@ -119,7 +119,7 @@ UDP_Init (void)
 	myAddr = *(int *) local->h_addr_list[0];
 
 	// if the quake hostname isn't set, set it to the machine name
-	if (strcmp (hostname->string, "UNNAMED") == 0) {
+	if (strcmp (hostname->svalue, "UNNAMED") == 0) {
 		buf[15] = 0;
 		Cvar_Set (hostname, buf);
 	}

@@ -76,10 +76,10 @@ Loop_SearchForHosts (qboolean xmit)
 		return;
 
 	hostCacheCount = 1;
-	if (strcmp (hostname->string, "UNNAMED") == 0)
+	if (strcmp (hostname->svalue, "UNNAMED") == 0)
 		strcpy (hostcache[0].name, "local");
 	else
-		strcpy (hostcache[0].name, hostname->string);
+		strcpy (hostcache[0].name, hostname->svalue);
 	strcpy (hostcache[0].map, sv.name);
 	hostcache[0].users = net_activeconnections;
 	hostcache[0].maxusers = svs.maxclients;

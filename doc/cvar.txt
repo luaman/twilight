@@ -5,29 +5,34 @@ Configuration Variables
 
   The Configuration Variable system used in Project Twilight is a more
   dynamic version of the Console Variable system used by NQ/QW.  It's fair
-  to say that it more resembles the Cvar code used by Q3A, but is actually
-  even more flexible than that, although the structure has not changed
-  significantly:
+  to say that it more resembles the Cvar code used by Q3A, though it is a
+  bit more flexible than that.  Here's the structure declaration:
 
-    typedef struct cvar_s {
-        char               *name;
-        char               *string;
-        float               value;
-        int                 flags;
 
-        void              (*callback) (struct cvar_s *var);
+    typedef struct cvar_s
+    {
+        char            *name;
+        char            *initval;
+        char            *svalue;
+        float           fvalue;
+        int             ivalue;
+        int             flags;
+
+	void            (*callback) (struct cvar_s *var);
     } cvar_t;
 
+  This Cvar declaration seems to have almost nothing in common with the
+  Cvar system found in QW or in WinQuake.  The individual qbooleans are
+  gone now, replaced by a single flags field.  The first value given to
+  the Cvar is stored in initval.  There's also an optional function called
+  whenever the Cvar changes. The big changes to your code are that the
+  string and value fields have been replaced with svalue, fvalue, and
+  ivalue, and that the new Cvar API means you'll be declaring pointers
+  rather than structures.
 
-  Comparing this with the QW Cvar system illustrates a few differences
-  right from the start.  First, the boolean values for archive and info
-  are gone, replaced by a flags bitfield.  There is now a function which 
-  will be called when the Cvar changes, if defined.  The real change,
-  however, is in the API used to manipulate Cvars.
+  To create a Cvar, just do this:
 
-  To create a Cvar, declare a pointer for it
-
-    cvar_t     *_windowed mouse;
+    cvar_t *_windowed mouse;
 
   and find a good place to initialize it.  Initializing a Cvar is done
   with the Cvar_Get function.
@@ -35,70 +40,82 @@ Configuration Variables
     _windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE,
     	                NULL);
 
-  Now Q3A does not have a _windowed_mouse Cvar, but I can tell you that if
-  it did, its declaration would look almost exactly like the above, with
-  the notable exception of the NULL passed as the last parameter.  Here's
-  the formal declaration of Cvar_Get:
+  Here is the declaration of Cvar_Get:
 
     cvar_t *
     Cvar_Get (
-        const char *name,             // name as it appears to users
-        const char *value,            // default value of the Cvar
-        const int flags,              // bitfield for special flags
-        const cvar_callback callback  // function called on change
+        const char *name,               // name as it appears to users
+        const char *svalue,             // default value of the Cvar
+        const int flags,                // bitfield for special flags
+        const cvar_callback callback    // function called on change
     );
 
-  A Cvar's default value is a string, which will often represent at least
-  one number.  It is possible for a Cvar to contain up to five numbers,
-  just seperate them in the string with spaces or commas.
+  Both Cvar_Get and Cvar_Set (used for changing a Cvar you already have a
+  pointer for) take a string value, which often contains a number.  It is
+  a Quake practice, especially with NetQuake, to follow numeric Cvar
+  settings with a ; and a short description.  This is still supported, but
+  not used anywhere within the engine at this time.
 
-  The flags bitfield recognizes several flags.  All of the ones which
-  really matter are implemented, but a couple of them do not yet perform
-  their assigned tasks.  Here's the list:
+  The flags field recognizes several options which may be combined with a
+  logical or (|) if needed.  Here's the list:
 
     CVAR_NONE           Cvar has no flags
-    CVAR_ARCHIVE        Cvar should be saved on exit
+    CVAR_ARCHIVE        Cvar should be written to user's config.cfg
     CVAR_USER           Cvar was created by the user
-    CVAR_TEMP           Cvar was created by gamecode
-    CVAR_USERINFO       Cvar is sent to the server
-    CVAR_SERVERINFO     FIXME: QWism, not yet implemented
+    CVAR_TEMP           Cvar was created by progs (gamecode)
+    CVAR_USERINFO       Cvar is sent to server
+    CVAR_SERVERINFO     Cvar is sent to client
     CVAR_ROM            Cvar cannot be changed by user
 
-  CVAR_TEMP variables are not implemented yet, but will allow the gamecode
-  to create variables on the client which will be deleted upon disconnect
-  from the server.  If combined with code to allow saving settings in a
-  file on the client's machine, this could allow games the opportunity to
-  store persistant information about preferred settings and other things.
+  CVAR_USER variables may be created, but currently there is no practical
+  use for them yet besides initializing a CVAR_ROM variable before it is
+  declared as such and rendered unchangable.  A good example of this is
+  the filesystem variables.  Once the game starts, you really can't change
+  these, though you should be able to set them on the command line without
+  much trouble.  This is done with +set, just as it is in Q2/Q3A.
 
-  Note that Cvar_Get does not necessarily create a Cvar.  It is possible
-  to create a Cvar on the command line, in which Cvar_Get will simply
-  update the flags and callback of the Cvar, but not otherwise modify it.
-  This is useful for Cvars which normally have the flag CVAR_ROM, such as
-  those relating to filesystem locations of necessary files.  The user may
-  specify these locations on the command line, but as soon as one of them
-  is returned via Cvar_Get, its flags will contain CVAR_ROM instead of
-  CVAR_USER, and it may not be changed from that point onward by the user.
+  CVAR_TEMP variables may be created by the compiled QuakeC.  This allows
+  mod developers to make new Cvars.  No more should a mod need to make you
+  add 1 + 4 + 64 to set a combination of options.  If the mod needs more
+  Cvars, it can just make them.
 
-  The callback function, if set, is called upon Cvar_Get, and then again
-  on Cvar_Sets which modify its value.  Outside of one of these callback
-  functions, the contents of the Cvar structure should never be altered by
-  any portion of the engine.  A callback function, on the other hand, may
-  freely modify its data members at will, enforcing range limits or
-  whatever else is desired.  If a modification made to a Cvar is to change
-  its numerical value(s), the string should be updated to reflect this as
-  it is the string which is reported when a user queries a Cvar's content.
+  QuakeWorld provides an info key system which is expected to tie into the
+  Cvar system.  Since the system behaves a bit differently depending on
+  whether Cvar exists on a server (serverinfo) or a client (userinfo), we
+  have a flag for each.  This is done to eventually allow for a QuakeWorld
+  client to start its own server.  In NetQuake, the equivalent of the info
+  key system was simply for the server to propagate values to all clients.
+  We use the CVAR_USERINFO flag for this.
 
-  Cvar_Init also takes the same format of a callback which, if set, is
-  called for every Cvar which is set after the var-specific Cvar.  The
-  traditional use of the global callback is related to CVAR_USERINFO and
-  CVAR_SERVERINFO variables.  If you don't need these features, just set
-  the callback to NULL and all will work as you'd expect.
+  As suggested above, Cvar_Get does not necessarily create the Cvar.  The
+  Cvar may already exist.  In that case, Cvar_Get only changes the flags
+  to match your specification.  Note that flags are replaced, not
+  appended or toggled.
+
+  You may provide a callback function, called when the Cvar is changed
+  using the Cvar API.  For this and other reasons, you should never change
+  the value of a Cvar manually.  Always use Cvar_Set.
+
+    void
+    Cvar_Set (
+        cvar_t *var,                    // The variable to set
+        const char *svalue              // What to set it to
+    );
+
+  Traditionally, you were able to set a Cvar knowing only its console
+  name.  You cannot do this anymore, but you can use Cvar_Find
+
+    cvar_t *
+    Cvar_Find (
+        const char *name                // Cvar name, eg "_windowed_mouse"
+    );
 
   Using a Cvar once you have created it is fairly straightforward.  If the
   Cvar contains a string, where you would have referred to var.string
-  before, use var->string now.  If you would have referred to var.value,
-  you'd use var->value instead.  If the Cvar does not contain numeric data
-  the value will be 0.0.
+  before, use var->svalue now.  If you would have referred to var.value,
+  you'd use var->fvalue or var->ivalue instead, depending on whether the
+  Cvar contains an int or float value.  If the Cvar does not contain any
+  numeric data the int and float values will be 0.
 
 
   It is sometimes necessary to iterate through every Cvar, even though
@@ -111,12 +128,12 @@ Configuration Variables
 
     cvar_t *
     Cvar_ForeachNext (
-        struct cvar_foreach_s *id     // Search ID
+        struct cvar_foreach_s *id       // Search ID
     );
 
     void
     Cvar_ForeachEnd (
-        struct cvar_foreach_s *id     // Search ID
+        struct cvar_foreach_s *id       // Search ID
     );
 
   Create a pointer to a struct cvar_foreach_s and assign the result of
@@ -129,15 +146,9 @@ Configuration Variables
   subject to change.
 
 
-  There is another way to find a single Cvar if you need to do so, based
-  on its name:
-
-  cvar_t *
-  Cvar_Find (
-        const char *name              // user-visible name of the Cvar
-  );
-
-
-  That's really all there is to the Cvar system.  It's really quite simple
-  once you get the hang of it.
+  There are a few other functions in cvar.h which perform not covered by
+  this overview.  Most of these are support functions used by the console
+  or the init/shutdown functions.  There are a couple of functions which
+  exist primarily for developer convenience, and bight be useful to some
+  places.
 

@@ -203,13 +203,13 @@ CL_SignonReply (void)
 		case 2:
 			MSG_WriteByte (&cls.message, clc_stringcmd);
 			MSG_WriteString (&cls.message,
-							 va ("name \"%s\"\n", _cl_name->string));
+							 va ("name \"%s\"\n", _cl_name->svalue));
 
 			MSG_WriteByte (&cls.message, clc_stringcmd);
 			MSG_WriteString (&cls.message,
 							 va ("color %i %i\n", 
-								 ((int) _cl_color->value) >> 4,
-								 ((int) _cl_color->value) & 15));
+								 ((int) _cl_color->ivalue) >> 4,
+								 ((int) _cl_color->ivalue) & 15));
 
 			MSG_WriteByte (&cls.message, clc_stringcmd);
 			snprintf (str, sizeof (str), "spawn %s", cls.spawnparms);
@@ -406,7 +406,7 @@ CL_LerpPoint (void)
 
 	f = cl.mtime[0] - cl.mtime[1];
 
-	if (!f || cl_nolerp->value || cls.timedemo || sv.active) {
+	if (!f || cl_nolerp->ivalue || cls.timedemo || sv.active) {
 		cl.time = cl.mtime[0];
 		return 1;
 	}
@@ -519,7 +519,8 @@ CL_RelinkEntities (void)
 
 			if (ent->effects & EF_MUZZLEFLASH) {
 				// don't draw our own muzzle flash if flashblending
-				if (i != cl.viewentity || chase_active->value || !gl_flashblend->value) {
+				if (i != cl.viewentity || chase_active->ivalue
+						|| !gl_flashblend->ivalue) {
 					vec3_t fv, impact, impactnormal;
 
 					dl = CL_AllocDlight (i);
@@ -527,7 +528,7 @@ CL_RelinkEntities (void)
 					AngleVectors (ent->angles, fv, NULL, NULL);
 					VectorMA (dl->origin, 18, fv, dl->origin);
 
-					if (!gl_flashblend->value && !gl_oldlights->value)
+					if (!gl_flashblend->ivalue && !gl_oldlights->ivalue)
 					{
 						TraceLine(ent->origin, dl->origin, impact, impactnormal);
 						VectorCopy(impact, dl->origin);
@@ -573,7 +574,7 @@ CL_RelinkEntities (void)
 
 		ent->forcelink = false;
 
-		if (i == cl.viewentity && !chase_active->value)
+		if (i == cl.viewentity && !chase_active->ivalue)
 			continue;
 
 		V_AddEntity ( ent );
@@ -613,7 +614,7 @@ CL_ReadFromServer (void)
 		CL_ParseServerMessage ();
 	} while (ret && cls.state == ca_connected);
 
-	if (cl_shownet->value)
+	if (cl_shownet->ivalue)
 		Com_Printf ("\n");
 
 	CL_RelinkEntities ();

@@ -509,7 +509,7 @@ SV_WriteEntitiesToClient (client_t *client, sizebuf_t *msg)
 		if (i == ent->num_leafs)
 			continue;					// not visible
 
-		if (!sv_nailhack->value)
+		if (!sv_nailhack->ivalue)
 			if (SV_AddNailUpdate (ent))
 				continue;					// added to the special update list
 

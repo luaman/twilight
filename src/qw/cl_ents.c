@@ -193,7 +193,7 @@ CL_BoundDlight (dlight_t *dl, vec3_t org)
 {
 	pmtrace_t tr;
 
-	if (gl_flashblend->value || gl_oldlights->value)
+	if (gl_flashblend->ivalue || gl_oldlights->ivalue)
 		return;
 
 	memset (&tr, 0, sizeof(tr));
@@ -1020,7 +1020,7 @@ CL_LinkPlayers (void)
 
 		// spawn light flashes
 		if ((state->effects & EF_LIGHTMASK) &&
-				(!gl_flashblend->value || j != cl.playernum))
+				(!gl_flashblend->ivalue || j != cl.playernum))
 		{
 			if (j == cl.playernum)
 				VectorCopy (cl.simorg, org);
@@ -1063,7 +1063,7 @@ CL_LinkPlayers (void)
 
 		// only predict half the move to minimize overruns
 		msec = 500 * (playertime - state->state_time);
-		if (msec <= 0 || (!cl_predict_players->value))
+		if (msec <= 0 || (!cl_predict_players->ivalue))
 		{
 			CL_UpdateAndLerp_Origin (ent, state->origin, cls.realtime);
 		} else {
@@ -1180,7 +1180,7 @@ CL_SetUpPlayerPrediction (qboolean dopred)
 			// only predict half the move to minimize overruns
 			msec = 500 * (playertime - state->state_time);
 			if (msec <= 0 ||
-				(!cl_predict_players->value) || !dopred)
+				(!cl_predict_players->ivalue) || !dopred)
 			{
 				VectorCopy (state->origin, pplayer->origin);
 			} else {
@@ -1213,7 +1213,7 @@ CL_SetSolidPlayers (int playernum)
 	struct predicted_player *pplayer;
 	physent_t  *pent;
 
-	if (!cl_solid_players->value)
+	if (!cl_solid_players->ivalue)
 		return;
 
 	pent = pmove.physents + pmove.numphysent;

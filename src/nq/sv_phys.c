@@ -127,10 +127,10 @@ SV_CheckVelocity (edict_t *ent)
 	}
 
 	if (DotProduct(ent->v.velocity,ent->v.velocity) >
-		sv_maxvelocity->value*sv_maxvelocity->value)
+		sv_maxvelocity->fvalue * sv_maxvelocity->fvalue)
 	{
 		VectorNormalizeFast (ent->v.velocity);
-		VectorScale (ent->v.velocity, sv_maxvelocity->value, ent->v.velocity);
+		VectorScale (ent->v.velocity, sv_maxvelocity->fvalue, ent->v.velocity);
 	}
 }
 
@@ -384,7 +384,7 @@ SV_AddGravity (edict_t *ent)
 	else
 		ent_gravity = 1.0;
 
-	ent->v.velocity[2] -= ent_gravity * sv_gravity->value * host_frametime;
+	ent->v.velocity[2] -= ent_gravity * sv_gravity->ivalue * host_frametime;
 }
 
 /*
@@ -1009,7 +1009,7 @@ SV_WalkMove (edict_t *ent)
 	if (ent->v.movetype != MOVETYPE_WALK)
 		return;	// gibbed by a trigger
 
-	if (sv_nostep->value)
+	if (sv_nostep->ivalue)
 		return;
 
 	if ((int) sv_player->v.flags & FL_WATERJUMP)
@@ -1350,7 +1350,7 @@ SV_Physics_Step (edict_t *ent)
 
 	// freefall if not onground
 	if (!((int) ent->v.flags & (FL_ONGROUND | FL_FLY | FL_SWIM))) {
-		if (ent->v.velocity[2] < sv_gravity->value * -0.1)
+		if (ent->v.velocity[2] < sv_gravity->ivalue * -0.1)
 			hitsound = true;
 		else
 			hitsound = false;
@@ -1473,7 +1473,7 @@ trace_t SV_Trace_Toss (edict_t *tossent, edict_t *ignore)
 		gravity = val->_float;
 	else
 		gravity = 1.0;
-	gravity *= sv_gravity->value * 0.05;
+	gravity *= sv_gravity->ivalue * 0.05;
 
 	// LordHavoc: sanity check; never trace more than 10 seconds
 	for (i = 0; i < 200; i++)  {

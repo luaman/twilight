@@ -244,7 +244,7 @@ Set_TextureMode_f (struct cvar_s *var)
 	gltexture_t *glt;
 
 	for (i = 0; i < 6; i++) {
-		if (!strcasecmp (modes[i].name, var->string))
+		if (!strcasecmp (modes[i].name, var->svalue))
 			break;
 	}
 	if (i == 6) {
@@ -511,8 +511,8 @@ Draw_Crosshair (void)
 	double		dx, dy;
 	extern vrect_t scr_vrect;
 
-	x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->value;
-	y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->value;
+	x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->ivalue;
+	y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->ivalue;
 	if ((vid.conheight != vid.height) || (vid.conwidth != vid.width))
 	{
 		dx = (double) x / (double) vid.width;
@@ -521,14 +521,14 @@ Draw_Crosshair (void)
 		y = dy * vid.conheight;
 	}
 
-	switch ((int) crosshair->value)
+	switch (crosshair->ivalue)
 	{
 		case 1:
 			Draw_Character (x, y, '+');
 			break;
 
 		case 2:
-			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->value]);
+			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->ivalue]);
 			qglBindTexture (GL_TEXTURE_2D, cs_texture);
 
 			qglEnable (GL_BLEND);
@@ -548,7 +548,7 @@ Draw_Crosshair (void)
 			break;
 
 		case 3:
-			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->value]);
+			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->ivalue]);
 			qglBindTexture (GL_TEXTURE_2D, cs_square);
 
 			qglEnable (GL_BLEND);
@@ -711,7 +711,7 @@ Draw_ConsoleBackground (int lines)
 	else
 		alpha = (float) (0.6 * lines / y);
 
-	if (gl_constretch->value)
+	if (gl_constretch->ivalue)
 		ofs = 0.0f;
 	else
 		ofs = (float) ((vid.conheight - lines) / vid.conheight);
@@ -737,8 +737,8 @@ Draw_ConsoleBackground (int lines)
 	TWI_PostVDraw ();
 
 	/* hack the version number directly into the pic */
-	Draw_Alt_String (vid.conwidth - strlen (cl_verstring->string) * 8 - 14,
-			lines - 14, cl_verstring->string);
+	Draw_Alt_String (vid.conwidth - strlen (cl_verstring->svalue) * 8 - 14,
+			lines - 14, cl_verstring->svalue);
 
 	if (alpha != 1.0f)
 		qglDisable (GL_BLEND);
@@ -919,7 +919,7 @@ void
 R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
 		int outwidth, int outheight)
 {
-	if (r_lerpimages->value)
+	if (r_lerpimages->ivalue)
 	{
 		int		i, j, yi, oldy, f, fstep, endy = (inheight-1);
 		Uint8	*inrow, *out, *row1, *row2;
@@ -1134,12 +1134,12 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags)
 		scaled_height <<= 1;
 
 	// Apply gl_picmip, a setting of one cuts texture memory usage 75%!
-	scaled_width >>= (int) gl_picmip->value;
-	scaled_height >>= (int) gl_picmip->value;
+	scaled_width >>= gl_picmip->ivalue;
+	scaled_height >>= gl_picmip->ivalue;
 
 	// Clip textures to a sane value
-	scaled_width = bound (1, scaled_width, gl_max_size->value);
-	scaled_height = bound (1, scaled_height, gl_max_size->value);
+	scaled_width = bound (1, scaled_width, (unsigned)gl_max_size->ivalue);
+	scaled_height = bound (1, scaled_height, (unsigned)gl_max_size->ivalue);
 
 	if (scaled_width * scaled_height > sizeof (scaled) / 4)
 		Sys_Error ("GL_Upload32: cannot upload, %ix%i is too big",

@@ -343,7 +343,7 @@ CDAudio_Bgmcallback (cvar_t *cvar)
 		Cvar_Set (cvar, "1.0");
 		CDAudio_Resume ();
 	}
-	cdvolume = cvar->value;
+	cdvolume = cvar->fvalue;
 }
 
 void

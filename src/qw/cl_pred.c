@@ -139,14 +139,14 @@ CL_PredictMove (void)
 	frame_t    *from, *to = NULL;
 	int         oldphysent;
 
-	if (cl_pushlatency->value > 0)
+	if (cl_pushlatency->fvalue > 0)
 		Cvar_Set (cl_pushlatency, "0");
 
 	if (cl.paused)
 		return;
 
 	cl.oldtime = cl.time;
-	cl.time = cls.realtime - cls.latency - cl_pushlatency->value * 0.001;
+	cl.time = cls.realtime - cls.latency - cl_pushlatency->fvalue * 0.001;
 	if (cl.time > cls.realtime)
 		cl.time = cls.realtime;
 
@@ -175,7 +175,7 @@ CL_PredictMove (void)
 		SDL_WM_SetCaption (text, "Twilight QWCL");
 	}
 
-	if (cl_nopred->value) {
+	if (cl_nopred->ivalue) {
 		VectorCopy (from->playerstate[cl.playernum].velocity, cl.simvel);
 		VectorCopy (from->playerstate[cl.playernum].origin, cl.simorg);
 		return;
