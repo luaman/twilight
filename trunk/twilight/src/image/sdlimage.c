@@ -97,7 +97,7 @@ Image_InitSDL ()
 	if (loaded)
 		return 0;
 
-	sdl_handle = SDL_LoadObject("libSDL_image.so");
+	sdl_handle = SDL_LoadObject(SDL_IMAGE_LIBRARY);
 	if (!sdl_handle) {
 		Com_Printf("Error! %s\n", SDL_GetError ());
 		return 0;

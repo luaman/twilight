@@ -132,6 +132,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Define to your default SDL_image library */
+#undef SDL_IMAGE_LIBRARY
+
 /* Location of read-only (shared) configuration file */
 #undef SHARECONF
 

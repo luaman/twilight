@@ -157,13 +157,31 @@ AM_PATH_SDL(1.2.4,
 )
 
 
-AC_ARG_WITH(sdl_loadobj,
-	[  --without-mmx       Disables use of SDL_LoadObject],,
+AC_ARG_WITH(loadobj,
+	[  --without-loadobj       Disables use of SDL_LoadObject],,
 	with_loadobj="yes")
 AC_MSG_CHECKING(if SDL has SDL_LoadObject)
 if test "x$with_loadobj" = "xyes"; then
-	AC_COMPILE_IFELSE([int main (int argc, char **argv) { argc=argc; argv=argv; SDL_LoadObject(""); return 0; }], [AC_MSG_RESULT(yes); AC_DEFINE(HAVE_SDL_LOADOBJ, 1, [Defined if we have SDL_LoadObject])], [AC_MSG_RESULT(no)])
+	SAVE_LIBS=$LIBS
+	LIBS=$SDL_LIBS
+	AC_LINK_IFELSE([int main (int argc, char **argv) { argc=argc; argv=argv; SDL_LoadObject(""); return 0; }], [AC_MSG_RESULT(yes); AC_DEFINE(HAVE_SDL_LOADOBJ, 1, [Defined if we have SDL_LoadObject])], [AC_MSG_RESULT(no)])
+	LIBS=$SAVE_LIBS
 fi
+
+dnl let the user choose the default SDL_Image library
+AC_ARG_WITH(sdl_image,
+	[  --with-sdl_image       Name of your SDL_image library],,
+	[with_sdl_image=yes])
+if test "x$with_sdl_image" = "xyes" -o "x$with_sdl_image" = "xno"; then
+	if test "$SYS" = "Win32"; then
+		with_sdl_image="SDL_image.dll"
+	else
+		with_sdl_image="libSDL_image-1.2.so.0"
+	fi
+fi
+
+AC_DEFINE_UNQUOTED(SDL_IMAGE_LIBRARY, "$with_sdl_image",
+	[Define to your default SDL_image library])
 
 
 dnl Some systems need a keyword in declarations for dynamic libs
@@ -236,7 +254,6 @@ LDFLAGS=-Wl,-E
 AC_OUTPUT(
 	Makefile
 	twilight.spec
-	embedded_data/Makefile
 	src/include/Makefile
 	src/Makefile
 	src/base/Makefile

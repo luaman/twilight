@@ -59,13 +59,13 @@ M_DrawCharacter (int cx, int line, int num)
 }
 
 static void
-M_Print (int cx, int cy, char *str)
+M_Print (float cx, float cy, char *str)
 {
 	Draw_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
 }
 
 static void
-M_PrintAlt (int cx, int cy, char *str)
+M_PrintAlt (float cx, float cy, char *str)
 {
 	Draw_Alt_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
 }
@@ -235,8 +235,8 @@ M_ToggleMenu_f (void)
 static void
 M_Do_Draw (menu_t *menu, int current)
 {
-	int			 i;
-	double		 x, y, y_add, div_x, len;
+	int			 i, x, div_x, len;
+	float		 y, y_add;
 	menu_item_t	*item;
 
 	x = 8;
