@@ -1088,7 +1088,7 @@ M_AdjustSliders (int dir)
 			break;
 		case 4:						// gamma
 			t = v_gamma->value - (dir * 0.05f);
-			t = bound (0.5, t, 1.0);
+			t = bound (1.0, t, 2.0);
 			Cvar_Set (v_gamma, va("%f", t));
 			break;
 		case 5:						// software brightness
@@ -1097,8 +1097,8 @@ M_AdjustSliders (int dir)
 			Cvar_Set (r_brightness, va("%f", t));
 			break;
 		case 6:						// software contrast (base brightness)
-			t = r_contrast->value + dir * 0.08;
-			t = bound (.2, t, 1);
+			t = r_contrast->value + dir * 0.025;
+			t = bound (.75, t, 1);
 			Cvar_Set (r_contrast, va("%f", t));
 			break;
 		case 7:						// mouse speed
@@ -1182,9 +1182,9 @@ M_Options_Draw (void)
 	M_Print (16, y, "     Reset to defaults"); y += 8;
 
 	M_Print (16, y, "           Screen size"); M_DrawSlider (220, y, (scr_viewsize->value - 30) / (120 - 30)); y += 8;
-	M_Print (16, y, "   Hardware Brightness"); M_DrawSlider (220, y, (1.0 - v_gamma->value) / 0.5); y += 8;
+	M_Print (16, y, "   Hardware Brightness"); M_DrawSlider (220, y, v_gamma->value - 1.0); y += 8;
 	M_Print (16, y, "   Software Brightness"); M_DrawSlider(220, y, (r_brightness->value - 1) / 4);y += 8;
-	M_Print (16, y, "     Software Contrast"); M_DrawSlider(220, y, (r_contrast->value - 0.2) / 0.8);y += 8;
+	M_Print (16, y, "     Software Contrast"); M_DrawSlider(220, y, (r_contrast->value - 0.75) * 4);y += 8;
 	M_Print (16, y, "           Mouse Speed"); M_DrawSlider (220, y, (sensitivity->value - 1) / 10); y += 8;
 	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->value); y += 8;
 	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->value); y += 8;
