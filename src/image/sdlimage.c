@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "fs.h"
 
+#ifdef HAVE_SDL_LOADOBJ
 /* SDL interprets each pixel as a 32-bit number, so our masks must depend
 *        on the endianness (byte order) of the machine */
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -169,3 +170,11 @@ Image_FromSDL (fs_file_t *file, SDL_RWops *rw)
 
 	return NULL;
 }
+#else
+int
+Image_InitSDL ()
+{
+	Com_Printf ("Unable to load SDL_Image due to lack of SDL_LoadObject\n");
+	return 0;
+}
+#endif
