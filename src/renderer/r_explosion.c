@@ -55,11 +55,11 @@ extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 #define EXPLOSIONFADERATE (3.0f)
 
 
-vec3_t explosionspherevertvel[EXPLOSIONVERTS];
-float explosiontexcoords[EXPLOSIONVERTS][2];
-int explosiontris[EXPLOSIONTRIS][3];
-int explosionnoiseindex[EXPLOSIONVERTS];
-vec3_t explosionpoint[EXPLOSIONVERTS];
+static vec3_t explosionspherevertvel[EXPLOSIONVERTS];
+static float explosiontexcoords[EXPLOSIONVERTS][2];
+static int explosiontris[EXPLOSIONTRIS][3];
+static int explosionnoiseindex[EXPLOSIONVERTS];
+static vec3_t explosionpoint[EXPLOSIONVERTS];
 
 typedef struct explosion_s
 {
@@ -73,10 +73,10 @@ typedef struct explosion_s
 explosion_t;
 
 
-explosion_t explosion[MAX_EXPLOSIONS];
+static explosion_t explosion[MAX_EXPLOSIONS];
 
-int	explosiontexture;
-int	explosiontexturefog;
+static int	explosiontexture;
+static int	explosiontexturefog;
 
 static cvar_t *r_explosionclip, *r_drawexplosions;
 static cvar_t *r_explosioncolor_r, *r_explosioncolor_g, *r_explosioncolor_b, *r_explosioncolor_a;
@@ -112,7 +112,7 @@ R_ExplosionVert (int column, int row)
 }
 
 
-void
+static void
 r_explosion_start (void)
 {
 	int			x, y;

@@ -139,12 +139,10 @@ extern qboolean		m_entersound;
 
 extern void M_Keydown (int key);
 extern void M_Draw (void);
-extern void Menu_Parse_Menus (codetree_t *tree_base);
 extern void M_ToggleMenu_f (void);
 extern void M_DrawPic (int x, int y, qpic_t *pic);
 extern void M_DrawTextBox (int x, int y, int width, int lines);
 extern void M_Exit (qboolean new_menu);
-extern void M_Enter (menu_t *menu);
 
 
 extern void M_Init (void);

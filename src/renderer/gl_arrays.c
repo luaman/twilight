@@ -37,10 +37,14 @@ static memzone_t	*vzone;
 texcoord_t	*tc0_array_p;
 texcoord_t	*tc1_array_p;
 vertex_t	*v_array_p;
-colorf_t	*cf_array_p, *scf_array_p;
-colorub_t	*cub_array_p, *scub_array_p;
+colorf_t	*cf_array_p;
+colorub_t	*cub_array_p;
 GLuint		*vindices;
 float_int_t	*FtoUB_tmp;
+/*
+colorf_t	*scf_array_p;
+colorub_t	*scub_array_p;
+*/
 
 GLint		v_index, i_index;
 qboolean	va_locked;
@@ -82,10 +86,12 @@ GLArrays_Init (void)
 	cf_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(colorf_t));
 	cub_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(colorub_t));
 	FtoUB_tmp = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(float_int_t) * 4);
+	/*
 	if (gl_secondary_color) {
 	  scf_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(colorf_t));
 	  scub_array_p = Zone_Alloc(vzone, MAX_VERTEX_ARRAYS * sizeof(colorub_t));
 	}
+	*/
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), tc0_array_p);
 	qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(colorub_t), cub_array_p);
@@ -97,8 +103,10 @@ GLArrays_Init (void)
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
 	}
+	/*
 	if (gl_secondary_color)
 		qglSecondaryColorPointerEXT (4, GL_UNSIGNED_BYTE, sizeof(colorub_t), scub_array_p);
+		*/
 
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglEnableClientState (GL_VERTEX_ARRAY);

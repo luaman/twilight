@@ -70,12 +70,11 @@ texture_t *r_notexture_water;
 int d_lightstylevalue[256];				// 8.8 fraction of base light value
 
 
-cvar_t *r_norefresh;
+static cvar_t *r_norefresh;
 cvar_t *r_drawentities;
 cvar_t *r_drawviewmodel;
-cvar_t *r_speeds;
-cvar_t *r_shadows;
-cvar_t *r_wireframe;
+static cvar_t *r_speeds;
+static cvar_t *r_wireframe;
 cvar_t *r_dynamic;
 cvar_t *r_stainmaps;
 
@@ -682,7 +681,6 @@ R_Init_Cvars (void)
 	r_drawentities = Cvar_Get ("r_drawentities", "1", CVAR_NONE, NULL);
 	r_drawviewmodel = Cvar_Get ("r_drawviewmodel", "1", CVAR_NONE, NULL);
 	r_speeds = Cvar_Get ("r_speeds", "0", CVAR_NONE, NULL);
-	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_ARCHIVE, NULL);
 	r_wireframe = Cvar_Get ("r_wireframe", "0", CVAR_NONE, &R_WireframeChanged);
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
 	r_stainmaps = Cvar_Get ("r_stainmaps", "1", CVAR_ARCHIVE, NULL);

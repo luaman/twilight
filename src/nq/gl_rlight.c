@@ -216,7 +216,7 @@ DYNAMIC LIGHTS BLEND RENDERING
 =============================================================================
 */
 
-float       bubble_sintable[17], bubble_costable[17];
+static float       bubble_sintable[17], bubble_costable[17];
 
 void
 R_InitBubble (void)

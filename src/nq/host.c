@@ -76,29 +76,25 @@ double      host_realtime;				// without any filtering or bounding
 double      oldrealtime;				// last frame run
 int         host_framecount;
 
-int         host_hunklevel;
-
-int         minimum_memory;
-
 client_t   *host_client;				// current client
 
-jmp_buf     host_abortserver;
+static jmp_buf     host_abortserver;
 
 Uint8      *host_basepal;
 Uint8      *host_colormap;
 
-cvar_t     *host_framerate;
-cvar_t     *host_speeds;
+static cvar_t     *host_framerate;
+static cvar_t     *host_speeds;
 
-cvar_t     *sys_ticrate;
-cvar_t     *serverprofile;
+static cvar_t     *sys_ticrate;
+static cvar_t     *serverprofile;
 
-cvar_t     *fraglimit;
-cvar_t     *timelimit;
+static cvar_t     *fraglimit;
+static cvar_t     *timelimit;
 cvar_t     *teamplay;
 
-cvar_t     *samelevel;
-cvar_t     *noexit;
+static cvar_t     *samelevel;
+static cvar_t     *noexit;
 
 cvar_t     *skill;
 cvar_t     *deathmatch;
@@ -106,7 +102,7 @@ cvar_t     *coop;
 
 cvar_t     *pausable;
 
-cvar_t     *temp1;
+static cvar_t     *temp1;
 
 /*
 ================

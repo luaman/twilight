@@ -79,7 +79,6 @@ cvar_t *r_drawviewmodel;
 cvar_t *r_speeds;
 cvar_t *r_shadows;
 cvar_t *r_dynamic;
-cvar_t *r_novis;
 cvar_t *r_stainmaps;
 cvar_t *r_netgraph;
 

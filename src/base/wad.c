@@ -33,10 +33,10 @@ static const char rcsid[] =
 #include "sys.h"
 #include "wad.h"
 
-int			 wad_numlumps;
-lumpinfo_t	*wad_lumps;
-Uint8		*wad_base;
-memzone_t	*wad_zone;
+static int			 wad_numlumps;
+static lumpinfo_t	*wad_lumps;
+static Uint8		*wad_base;
+static memzone_t	*wad_zone;
 
 void        SwapPic (qpic_t *pic);
 

@@ -96,41 +96,40 @@ console is:
 */
 
 float		scr_con_current;
-float		scr_conlines;				/* lines of console to display */
+static float		scr_conlines;				/* lines of console to display */
 
-float		oldscreensize, oldfov;
-cvar_t	   *scr_viewsize;
-cvar_t	   *scr_fov;
-cvar_t	   *scr_conspeed;
-cvar_t	   *scr_centertime;
-cvar_t	   *scr_showram;
-cvar_t	   *scr_showturtle;
-cvar_t	   *scr_showpause;
-cvar_t	   *scr_printspeed;
-cvar_t	   *scr_logcprint;
-cvar_t	   *r_brightness;
-cvar_t	   *r_contrast;
-cvar_t	   *cl_avidemo;
+static cvar_t	   *scr_viewsize;
+static cvar_t	   *scr_fov;
+static cvar_t	   *scr_conspeed;
+static cvar_t	   *scr_centertime;
+static cvar_t	   *scr_showram;
+static cvar_t	   *scr_showturtle;
+static cvar_t	   *scr_showpause;
+static cvar_t	   *scr_printspeed;
+static cvar_t	   *scr_logcprint;
+static cvar_t	   *r_brightness;
+static cvar_t	   *r_contrast;
+static cvar_t	   *cl_avidemo;
 
 extern cvar_t *crosshair;
 
-qboolean	scr_initialized;			/* ready to draw */
+static qboolean	scr_initialized;			/* ready to draw */
 
-qpic_t	   *scr_ram;
-qpic_t	   *scr_net;
-qpic_t	   *scr_turtle;
+static qpic_t	   *scr_ram;
+static qpic_t	   *scr_net;
+static qpic_t	   *scr_turtle;
 
-int			clearconsole;
-int			clearnotify;
+static int			clearconsole;
+int					clearnotify;
 
 viddef_t	vid;						/* global video state */
 
 qboolean	scr_disabled_for_loading;
-qboolean	scr_drawloading;
-float		scr_disabled_time;
+static qboolean	scr_drawloading;
+static float		scr_disabled_time;
 
-Uint8	   *avibuffer;
-Uint32		aviframeno;
+static Uint8	   *avibuffer;
+static Uint32		aviframeno;
 
 static void SCR_ScreenShot_f (void);
 
@@ -197,12 +196,12 @@ CENTER PRINTING
 ===============================================================================
 */
 
-char		scr_centerstring[1024];
-float		scr_centertime_start;		/* for slow victory printing */
+static char		scr_centerstring[1024];
+static float		scr_centertime_start;		/* for slow victory printing */
 float		scr_centertime_off;
-int			scr_center_lines;
-int			scr_erase_lines;
-int			scr_erase_center;
+static int			scr_center_lines;
+static int			scr_erase_lines;
+static int			scr_erase_center;
 
 /*
 ==============
@@ -703,8 +702,8 @@ SCR_EndLoadingPlaque (void)
 
 /* ========================================================================= */
 
-char       *scr_notifystring;
-qboolean    scr_drawdialog;
+static char       *scr_notifystring;
+static qboolean    scr_drawdialog;
 
 static void
 SCR_DrawNotifyString (void)

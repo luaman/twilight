@@ -45,9 +45,9 @@ Uint r_framecount;          // Current frame.
 
 GLfloat whitev[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-int fb_size[4];
-int accum_size[4];
-int doublebuffer, buffer_size, depth_size, stencil_size;
+static int fb_size[4];
+static int accum_size[4];
+static int doublebuffer, buffer_size, depth_size, stencil_size;
 
 cvar_t *gl_affinemodels;
 cvar_t *gl_nocolors;
@@ -57,10 +57,10 @@ cvar_t *gl_cull;
 
 /*-----------------------------------------------------------------------*/
 
-const char *gl_vendor;
-const char *gl_renderer;
-const char *gl_version;
-const char *gl_extensions;
+static const char *gl_vendor;
+static const char *gl_renderer;
+static const char *gl_version;
+static const char *gl_extensions;
 
 qboolean gl_cva = false;
 qboolean gl_mtex = false;

@@ -47,9 +47,9 @@ extern cvar_t *sv_aim;
 Uint8 checkpvs[MAX_MAP_LEAFS / 8];
 
 #define	MAX_CHECK 16
-int c_invis, c_notvis;
+static int c_invis, c_notvis;
 
-char pr_string_temp[128];
+static char pr_string_temp[128];
 
 #define	MSG_BROADCAST	0				// unreliable to all
 #define	MSG_ONE			1				// reliable to one (msg_entity)
@@ -1953,7 +1953,7 @@ PF_fixme (void)
 					PF_FIXME10, PF_FIXME10, PF_FIXME10, \
 					PF_FIXME10
 
-builtin_t pr_builtin[] =
+static builtin_t pr_builtin[] =
 {
 	PF_fixme,				// #000 runtime error
 	PF_makevectors,			// #001

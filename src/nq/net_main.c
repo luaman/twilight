@@ -38,7 +38,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 
-memzone_t	*qsock_zone;
+static memzone_t	*qsock_zone;
 qsocket_t  *net_activeSockets = NULL;
 qsocket_t  *net_freeSockets = NULL;
 Uint        net_numsockets = 0;
@@ -50,16 +50,16 @@ static int  DEFAULTnet_hostport = 26000;
 
 static qboolean listening = false;
 
-qboolean    slistInProgress = false;
-qboolean    slistSilent = false;
-qboolean    slistLocal = true;
+static qboolean    slistInProgress = false;
+static qboolean    slistSilent = false;
+static qboolean    slistLocal = true;
 static double slistStartTime;
 static int  slistLastShown;
 
 static void Slist_Send (void);
 static void Slist_Poll (void);
-PollProcedure slistSendProcedure = { NULL, 0.0, Slist_Send, NULL };
-PollProcedure slistPollProcedure = { NULL, 0.0, Slist_Poll, NULL };
+static PollProcedure slistSendProcedure = { NULL, 0.0, Slist_Send, NULL };
+static PollProcedure slistPollProcedure = { NULL, 0.0, Slist_Poll, NULL };
 
 
 sizebuf_t	net_message;
@@ -77,14 +77,6 @@ cvar_t     *_net_hostport;
 cvar_t     *hostname;
 
 qboolean    configRestored = false;
-cvar_t     *config_com_port;
-cvar_t     *config_com_irq;
-cvar_t     *config_com_baud;
-cvar_t     *config_com_modem;
-cvar_t     *config_modem_dialtype;
-cvar_t     *config_modem_clear;
-cvar_t     *config_modem_init;
-cvar_t     *config_modem_hangup;
 
 
 // these two macros are to make the code more readable

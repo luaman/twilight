@@ -50,12 +50,8 @@ typedef struct sfx_s {
 } sfx_t;
 
 typedef struct {
-	qboolean    gamealive;
-	qboolean    soundalive;
-	qboolean    splitbuffer;
 	int         channels;
 	int         samples;				// mono samples in buffer
-	int         submission_chunk;		// don't mix less than this #
 	int         samplepos;				// in mono samples
 	int         samplebits;
 	int         speed;
@@ -144,9 +140,8 @@ extern vec3_t listener_origin;
 extern vec3_t listener_forward;
 extern vec3_t listener_right;
 extern vec3_t listener_up;
-extern volatile dma_t *shm;
-extern volatile dma_t sn;
 extern vec_t sound_nominal_clip_dist;
+extern dma_t *shm;
 
 extern struct cvar_s *loadas8bit;
 extern struct cvar_s *volume;

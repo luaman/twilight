@@ -45,10 +45,10 @@ static const char rcsid[] =
 #include "gl_draw.h"
 
 qpic_t *draw_disc;
-qpic_t *draw_backtile;
+static qpic_t *draw_backtile;
 
-GLuint	translate_texture;
-GLuint	char_texture;
+static GLuint	translate_texture;
+static GLuint	char_texture;
 
 /* ========================================================================= */
 /* Support Routines */

@@ -58,41 +58,40 @@ memzone_t	*snd_zone;
 channel_t   channels[MAX_CHANNELS];
 int         total_channels;
 
-int         snd_blocked = 0;
-qboolean    snd_initialized = false;
+static int         snd_blocked = 0;
+static qboolean    snd_initialized = false;
 
 // pointer should go away
-volatile dma_t *shm = 0;
-volatile dma_t sn;
+dma_t *shm = 0;
 
-vec3_t      listener_origin;
-vec3_t      listener_forward;
-vec3_t      listener_right;
-vec3_t      listener_up;
-vec_t       sound_nominal_clip_dist = 1000.0;
+static vec3_t      listener_origin;
+static vec3_t      listener_forward;
+static vec3_t      listener_right;
+static vec3_t      listener_up;
+static vec_t       sound_nominal_clip_dist = 1000.0;
 
 int         soundtime;					// sample PAIRS
 int         paintedtime;				// sample PAIRS
 
 
 #define	MAX_SFX		512
-sfx_t      *known_sfx;					// hunk allocated [MAX_SFX]
-int         num_sfx;
+static sfx_t      *known_sfx;					// hunk allocated [MAX_SFX]
+static int         num_sfx;
 
-sfx_t      *ambient_sfx[NUM_AMBIENTS];
+static sfx_t      *ambient_sfx[NUM_AMBIENTS];
 
-int         sound_started = 0;
+static int         sound_started = 0;
 
 cvar_t     *volume;
 
-cvar_t     *nosound;
-cvar_t     *precache;
+static cvar_t     *nosound;
+static cvar_t     *precache;
 cvar_t     *loadas8bit;
-cvar_t     *ambient_level;
-cvar_t     *ambient_fade;
-cvar_t     *snd_noextraupdate;
-cvar_t     *snd_show;
-cvar_t     *_snd_mixahead;
+static cvar_t     *ambient_level;
+static cvar_t     *ambient_fade;
+static cvar_t     *snd_noextraupdate;
+static cvar_t     *snd_show;
+static cvar_t     *_snd_mixahead;
 
 
 // ====================================================================
@@ -105,7 +104,7 @@ cvar_t     *_snd_mixahead;
 // isolating performance in the renderer.
 //
 
-qboolean    fakedma = false;
+static qboolean    fakedma = false;
 
 
 static void
@@ -120,7 +119,6 @@ S_SoundInfo_f (void)
 	Com_Printf ("%5d samples\n", shm->samples);
 	Com_Printf ("%5d samplepos\n", shm->samplepos);
 	Com_Printf ("%5d samplebits\n", shm->samplebits);
-	Com_Printf ("%5d submission_chunk\n", shm->submission_chunk);
 	Com_Printf ("%5d speed\n", shm->speed);
 	Com_Printf ("0x%x dma buffer\n", shm->buffer);
 	Com_Printf ("%5d total_channels\n", total_channels);
@@ -211,15 +209,11 @@ S_Init (void)
 
 	if (fakedma) {
 		shm = Zone_Alloc (snd_zone, sizeof (*shm));
-		shm->splitbuffer = 0;
 		shm->samplebits = 16;
 		shm->speed = 22050;
 		shm->channels = 2;
 		shm->samples = 32768;
 		shm->samplepos = 0;
-		shm->soundalive = true;
-		shm->gamealive = true;
-		shm->submission_chunk = 1;
 		shm->buffer = Zone_Alloc (snd_zone, 1 << 16);
 	}
 //  Com_Printf ("Sound sampling rate: %i\n", shm->speed);
@@ -246,9 +240,6 @@ S_Shutdown (void)
 
 	if (!sound_started)
 		return;
-
-	if (shm)
-		shm->gamealive = 0;
 
 	shm = 0;
 	sound_started = 0;

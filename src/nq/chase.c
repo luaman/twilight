@@ -34,16 +34,12 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "world.h"
 
-cvar_t	*chase_back;
-cvar_t	*chase_up;
-cvar_t	*chase_right;
 cvar_t	*chase_active;
+static cvar_t	*chase_back;
+static cvar_t	*chase_up;
+static cvar_t	*chase_right;
 
-vec3_t	chase_pos;
-vec3_t	chase_angles;
-
-vec3_t	chase_dest;
-vec3_t	chase_dest_angles;
+static vec3_t	chase_dest;
 
 
 void
