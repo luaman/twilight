@@ -46,7 +46,7 @@ static const char rcsid[] =
 #include <windows.h>	/* for timeGetTime() */
 #endif
 
-#include "bothdefs.h"
+#include "quakedef.h"
 #include "client.h"
 #include "common.h"
 #include "console.h"

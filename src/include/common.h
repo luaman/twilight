@@ -32,11 +32,7 @@
 
 #include "SDL_endian.h"
 
-#ifndef TWILIGHT_NQ
-#include "bothdefs.h"
-#else
 #include "quakedef.h"
-#endif
 
 // FIXME: now in src/base/parm.c - remove this at some point
 

@@ -10,7 +10,8 @@ Bugs we know about:
   - Some OpenGL state changes lost in QW, particularly things like alpha
     in the console and in crosshairs is missing.
   - MacOS X sound is "choppy", not sure if this is SDL's problem or ours.
-    Seems that tweaking snd_mixahead fixes it, but that's annoying.
+    Seems that tweaking snd_mixahead fixes it, but that's not a good fix,
+    need someone who understands SDL sound on MacOS X to look at it..
   - share/userpath mkdir handling is still kinda borked.
   - QF asks for models as eg, /progs/backpack.mdl - totally incompatible
     with 2.40.  No idea if it works with Id's stuff, but there are just
@@ -21,35 +22,18 @@ New stuff slated for 0.2.0:
   - QW/NQ renderers - port changes between them
   - "lighthalf" gamma table doubling trick
   - faster dlights if we can make them faster
-  - model.c, cl_model.c, sv_model.c [Vic]
+  - particle torches
 
 Would be nice but is not strictly needed:
 
+  - LordHavoc's software brightness/contrast support - looks different
+    than our texture gamma, but it can be done at runtime which is a big
+    problem with our stuff.
   - Merge QW server into QW client ala NQ
-  - Server browser
   - Build a seperate dedicated server in NQ [LordHavoc]
   - Prettiness features all around
-  - Console font [Knghtbrd]
-  - Menu overhaul
-  - Knghtbrd's server console
-  - Add PNG loader
   - Move Quake library functions used by all targets and tools to a common
     directory (zone, mathlib, qtypes, compat, part of console, etc)
-  - SDL improvements
-    - Remove Quake-specific simple datatypes which SDL gives us
-    - switch to using specific-sized SDL variables for file accesses
-  - Cvar improvements
-    - Convert from an unsorted list to a hash
-    - Implement flag manipulation functions for internal use
-    - Use Cvar callbacks for Cvar bounds checking and internal updates
-  - Command-specific tab completion (set, map, etc)
-
-
-Stuff that definitely should wait:
-
-  - The New Protocol(TM)
-  - Zip archive support
-  - Design a new HUD system
-  - Change resolutions in-game
-  - New key system.
+  - switch to using specific-sized SDL variables for file accesses
+  - Convert Cvars from an unsorted list to a hash
 

@@ -37,7 +37,7 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "bothdefs.h"
+#include "quakedef.h"
 #include "cdaudio.h"
 #include "client.h"
 #include "cmd.h"

@@ -4,7 +4,10 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-INCLUDES= -I$(top_srcdir)/include -I$(top_srcdir)/src/renderer
+INCLUDES= \
+	-I$(top_srcdir)/include \
+	-I$(top_srcdir)/src/renderer
+
 LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_qw_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_QW
 
@@ -20,6 +23,7 @@ twilight_qw_sys_libs=
 endif
 
 twilight_qw_SOURCES= \
+	quakedef.h \
 	cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c cl_parse.c \
 	cl_pred.c cl_tent.c client.h \
 	cmd.c cmd.h common.c console.c console.h \

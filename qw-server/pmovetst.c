@@ -33,7 +33,7 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "bothdefs.h"
+#include "quakedef.h"
 #include "bspfile.h"
 #include "console.h"
 #include "mathlib.h"
