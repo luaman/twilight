@@ -4,5 +4,5 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-SUBDIRS=base renderer sound
+SUBDIRS=base image renderer sound
 
