@@ -501,18 +501,12 @@ R_Torch (entity_t *ent, qboolean torch2)
 			VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
 
 			p = new_base_particle (pt_torch2, porg, pvel, color,
-					Q_rand () & 3, 15, 5);
-
-			if (ent->frame)
-				p->scale = 30;
-			else
-				p->scale = 10;
+					Q_rand () & 3, ent->frame? 30: 10, 5);
 
 		} else { 
 			/* wall torches */
 			p = new_base_particle (pt_torch, porg, pvel, color,
-					Q_rand () & 3, 5, 5);
-			p->scale = 10;
+					Q_rand () & 3, 10, 5);
 		}
 
 		ent->time_left = realtime + 0.05;
@@ -540,7 +534,7 @@ R_RocketConeTrail (vec3_t start, vec3_t end, int type)
 		VectorMA (cur, -7, vec, point1);
 		VectorMA (cur, lsub + 6, vec, point2);
 		new_cone_particle (pt_rtrail, point1, point2, vec3_origin, color1,
-				color2, 0, 2, 1);
+				color2, 0, 2, 10);
 		VectorMA (cur, lsub, vec, cur);
 		len -= lsub;
 	}

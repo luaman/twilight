@@ -1249,3 +1249,4 @@ GL_BuildLightmaps (void)
 		}
 	}
 }
+
