@@ -73,6 +73,7 @@ typedef struct {
 	char        identifier[64];
 	int         width, height;
 	qboolean    mipmap;
+	unsigned short crc;
 } gltexture_t;
 
 #define	MAX_GLTEXTURES	1024
@@ -1249,33 +1250,40 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 {
 	int         i;
 	gltexture_t *glt;
+	unsigned short crc;
 
 	// see if the texture is already present
 	if (identifier[0]) {
+		crc = CRC_Block (data, width*height);
+
 		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
 			if (!Q_strcmp (identifier, glt->identifier)) {
-				if (width != glt->width || height != glt->height)
-					Sys_Error ("GL_LoadTexture: cache mismatch");
-				return gltextures[i].texnum;
+
+				if (width == glt->width && height == glt->height && crc == glt->crc)
+					return gltextures[i].texnum;
+				else
+					goto setuptexture;	// reload the texture into the same slot		
 			}
 		}
-	} else
+	} else {
 		glt = &gltextures[numgltextures];
-	numgltextures++;
+	}
 
+	numgltextures++;
 	Q_strcpy (glt->identifier, identifier);
-	glt->texnum = texture_extension_number;
+	glt->texnum = texture_extension_number++;
+
+setuptexture:
 	glt->width = width;
 	glt->height = height;
 	glt->mipmap = mipmap;
+	glt->crc = crc;
 
-	glBindTexture (GL_TEXTURE_2D, texture_extension_number);
+	glBindTexture (GL_TEXTURE_2D, glt->texnum);
 
 	GL_Upload8 (data, width, height, mipmap, alpha);
 
-	texture_extension_number++;
-
-	return texture_extension_number - 1;
+	return glt->texnum;
 }
 
 /*
