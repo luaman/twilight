@@ -346,7 +346,7 @@ Collision_ClipTrace (trace_t *trace, void *cent, const model_t *cmodel,
 	rhc.trace = trace;
 
 	rhc.trace->fraction = 1;
-//	rhc.trace->allsolid = true;
+	rhc.trace->allsolid = true;
 
 	if (cmodel && cmodel->type == mod_brush) {
 		// brush model
