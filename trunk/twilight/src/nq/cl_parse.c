@@ -363,6 +363,7 @@ CL_ParseUpdate (int bits)
 	entity_t   *ent;
 	int         num;
 	int         skin;
+	vec3_t		origin, angles;
 
 	if (cls.signon == SIGNONS - 1) {
 		// first update is the final signon stage
@@ -412,8 +413,10 @@ CL_ParseUpdate (int bits)
 			forcelink = true;			// hack to make null model players work
 	}
 
-	ent->frame = (bits & U_FRAME) ? 
-		MSG_ReadByte() : ent->baseline.frame;
+	if (bits & U_FRAME)
+		CL_Update_Frame(ent, MSG_ReadByte(), cl.time);
+	else
+		CL_Update_Frame(ent, ent->baseline.frame, cl.time);
 
 	i = (bits & U_COLORMAP) ? 
 		MSG_ReadByte() : ent->baseline.colormap;
@@ -437,24 +440,23 @@ CL_ParseUpdate (int bits)
 		MSG_ReadByte() : ent->baseline.effects;
 
 	// shift the known values for interpolation
-	VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
-	VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
-
-	ent->msg_origins[0][0] = (bits & U_ORIGIN1) ? 
+	origin[0] = (bits & U_ORIGIN1) ? 
 		MSG_ReadCoord() : ent->baseline.origin[0];
-	ent->msg_angles[0][0] = (bits & U_ANGLE1) ? 
+	angles[0] = (bits & U_ANGLE1) ? 
 		MSG_ReadAngle() : ent->baseline.angles[0];
-	ent->msg_origins[0][1] = (bits & U_ORIGIN2) ? 
+	origin[1] = (bits & U_ORIGIN2) ? 
 		MSG_ReadCoord() : ent->baseline.origin[1];
-	ent->msg_angles[0][1] = (bits & U_ANGLE2) ? 
+	angles[1] = (bits & U_ANGLE2) ? 
 		MSG_ReadAngle() : ent->baseline.angles[1];
-	ent->msg_origins[0][2] = (bits & U_ORIGIN3) ? 
+	origin[2] = (bits & U_ORIGIN3) ? 
 		MSG_ReadCoord() : ent->baseline.origin[2];
-	ent->msg_angles[0][2] = (bits & U_ANGLE3) ? 
+	angles[2] = (bits & U_ANGLE3) ? 
 		MSG_ReadAngle() : ent->baseline.angles[2];
 
 	if (bits & U_NOLERP)
 		ent->forcelink = true;
+
+	CL_Update_OriginAngles(ent, origin, angles, cl.mtime[1]);
 
 	if (forcelink) {
 		// didn't have an update last message
@@ -614,15 +616,14 @@ CL_ParseStatic (void)
 
 // copy it to the current state
 	ent->model = cl.model_precache[ent->baseline.modelindex];
-	ent->frame = ent->baseline.frame;
+	CL_Update_Frame(ent, ent->baseline.frame, cl.mtime[1]);
 	ent->colormap = NULL;
 	ent->skinnum = ent->baseline.skin;
 	ent->effects = ent->baseline.effects;
 	ent->time_left = 0;
 	VectorClear (ent->last_light);
 
-	VectorCopy (ent->baseline.origin, ent->origin);
-	VectorCopy (ent->baseline.angles, ent->angles);
+	CL_Update_OriginAngles(ent, ent->baseline.origin, ent->baseline.angles, cl.mtime[1]);
 }
 
 /*

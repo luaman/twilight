@@ -528,12 +528,12 @@ CL_Record_f (void)
 		else
 			MSG_WriteByte (&buf, j);
 
-		MSG_WriteByte (&buf, ent->cur.frame);
+		MSG_WriteByte (&buf, ent->frame[0]);
 		MSG_WriteByte (&buf, 0);
 		MSG_WriteByte (&buf, ent->skinnum);
 		for (j = 0; j < 3; j++) {
-			MSG_WriteCoord (&buf, ent->cur.origin[j]);
-			MSG_WriteAngle (&buf, ent->cur.angles[j]);
+			MSG_WriteCoord (&buf, ent->msg_origins[0][j]);
+			MSG_WriteAngle (&buf, ent->msg_angles[0][j]);
 		}
 
 		if (buf.cursize > MAX_MSGLEN / 2) {

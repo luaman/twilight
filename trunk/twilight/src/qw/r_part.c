@@ -337,11 +337,11 @@ R_EntityParticles (entity_t *ent)
 		forward[0] = cp * cy;
 		forward[1] = cp * sy;
 		forward[2] = -sp;
-		org[0] = ent->cur.origin[0] + r_avertexnormals[i][0] * dist
+		org[0] = ent->origin[0] + r_avertexnormals[i][0] * dist
 			+ forward[0] * beamlength;
-		org[1] = ent->cur.origin[1] + r_avertexnormals[i][1] * dist
+		org[1] = ent->origin[1] + r_avertexnormals[i][1] * dist
 			+ forward[1] * beamlength;
-		org[2] = ent->cur.origin[2] + r_avertexnormals[i][2] * dist
+		org[2] = ent->origin[2] + r_avertexnormals[i][2] * dist
 			+ forward[2] * beamlength;
 		new_base_particle_oc (pt_explode, org, r_origin, 0x6f, 0, -1, 0.01, 0);
 	}
@@ -569,16 +569,16 @@ R_Torch (entity_t *ent, qboolean torch2)
 
 	VectorSet4 (color, 0.89, 0.59, 0.31, 0.5);
 	VectorSet (pvel, (rand() & 3) - 2, (rand() & 3) - 2, 0);
-	VectorSet (porg, ent->cur.origin[0], ent->cur.origin[1],
-			ent->cur.origin[2] + 4);
+	VectorSet (porg, ent->origin[0], ent->origin[1],
+			ent->origin[2] + 4);
 
 	if (torch2)
 	{
 		// used for large torches (eg, start map near spawn)
-		porg[2] = ent->cur.origin[2] - 2;
+		porg[2] = ent->origin[2] - 2;
 		VectorSet (pvel, (rand() & 7) - 4, (rand() & 7) - 4, 0);
 		new_base_particle (pt_torch2, porg, pvel, color, rand () & 3,
-			ent->cur.frame ? 30 : 10, 5, 0);
+			ent->frame[0] ? 30 : 10, 5, 0);
 	}
 	else
 		// wall torches
@@ -971,9 +971,9 @@ R_Draw_Base_Particles (void)
 
 		corner = v_array_v(v_index);
 		VectorTwiddleS (p->org, vup, vright, scale * -0.5, v_array_v(v_index));
-		VectorTwiddle(corner, vup, scale, vright, 0    ,1,v_array_v(v_index+1));
-		VectorTwiddle(corner, vup, scale, vright, scale,1,v_array_v(v_index+2));
-		VectorTwiddle(corner, vup, 0    , vright, scale,1,v_array_v(v_index+3));
+		VectorTwiddle(corner, vup, 1, vright, 0, scale, v_array_v(v_index+1));
+		VectorTwiddle(corner, vup, 1, vright, 1, scale, v_array_v(v_index+2));
+		VectorTwiddle(corner, vup, 0, vright, 1, scale, v_array_v(v_index+3));
 
 		v_index += 4;
 
@@ -985,7 +985,6 @@ R_Draw_Base_Particles (void)
 			TWI_PostVDrawCVA ();
 			v_index = 0;
 		}
-
 	}
 
 	if (v_index)

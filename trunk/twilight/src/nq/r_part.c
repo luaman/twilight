@@ -578,7 +578,7 @@ R_Torch (entity_t *ent, qboolean torch2)
 		porg[2] = ent->origin[2] - 2;
 		VectorSet (pvel, (rand() & 7) - 4, (rand() & 7) - 4, 0);
 		new_base_particle (pt_torch2, porg, pvel, color, rand () & 3,
-			ent->frame ? 30 : 10, 5, 0);
+			ent->frame[0] ? 30 : 10, 5, 0);
 	}
 	else
 		// wall torches

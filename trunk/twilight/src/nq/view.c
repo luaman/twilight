@@ -637,7 +637,7 @@ V_CalcRefdef (void)
 	entity_t		*ent, *view;
 	int				i;
 	vec3_t			forward, right, up;
-	vec3_t			angles;
+	vec3_t			angles, origin;
 	float			bob;
 	static float	oldz = 0;
 
@@ -692,22 +692,21 @@ V_CalcRefdef (void)
 	V_BoundOffsets();
 
 	/* set up gun position */
-	VectorCopy (cl.viewangles, view->angles);
+	VectorCopy (cl.viewangles, angles);
 
 	/* set up gun angles */
-	view->angles[YAW] = r_refdef.viewangles[YAW];
-	view->angles[PITCH] = -r_refdef.viewangles[PITCH];
+	angles[YAW] = r_refdef.viewangles[YAW];
+	angles[PITCH] = -r_refdef.viewangles[PITCH];
 
-	VectorCopy (ent->origin, view->origin);
-	view->origin[2] += cl.viewheight;
+	VectorCopy (ent->origin, origin);
+	origin[2] += cl.viewheight;
 
 	for (i = 0; i < 3; i++) {
-		view->origin[i] += forward[i] * bob * 0.4;
+		origin[i] += forward[i] * bob * 0.4;
 	}
 
-	view->origin[2] += bob;
+	origin[2] += bob;
 	view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
-	view->frame = cl.stats[STAT_WEAPONFRAME];
 
 	/* set up the refresh position */
 	VectorAdd (r_refdef.viewangles, cl.punchangle, r_refdef.viewangles);
@@ -724,9 +723,12 @@ V_CalcRefdef (void)
 		if (ent->origin[2] - oldz > 12)
 			oldz = ent->origin[2] - 12;
 		r_refdef.vieworg[2] += oldz - ent->origin[2];
-		view->origin[2] += oldz - ent->origin[2];
+		origin[2] += oldz - ent->origin[2];
 	} else
 		oldz = ent->origin[2];
+
+	CL_Update_OriginAngles(view, origin, angles, cl.mtime[1]);
+	CL_Update_Frame(view, cl.stats[STAT_WEAPONFRAME], cl.mtime[1]);
 
 	if (chase_active->ivalue)
 		Chase_Update();

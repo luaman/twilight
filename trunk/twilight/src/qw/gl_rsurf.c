@@ -382,7 +382,7 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 		{
 			if (model->type == mod_brush)
 			{
-				softwaretransformforentity (ent->cur.origin, ent->cur.angles);
+				softwaretransformforentity (ent->origin, ent->angles);
 				softwareuntransform (origin, org);
 				R_StainNode(model->brush->nodes + model->hulls[0].firstclipnode, model, org, radius, icolor);
 			}
@@ -598,18 +598,18 @@ R_DrawBrushDepthSkies (void)
 
 		if (e->model->type == mod_brush)
 		{
-			Mod_MinsMaxs (e->model, e->cur.origin, e->cur.angles, mins, maxs);
+			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
 			if (Vis_CullBox (mins, maxs))
 				continue;
 
-			softwaretransformforbrushentity (e->cur.origin, e->cur.angles);
+			softwaretransformforbrushentity (e->origin, e->angles);
 			softwareuntransform(r_origin, org);
 
 			qglPushMatrix ();
-			qglTranslatef(e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
-			qglRotatef (e->cur.angles[1], 0, 0, 1);
-			qglRotatef (e->cur.angles[0], 0, 1, 0);
-			qglRotatef (e->cur.angles[2], 1, 0, 0);
+			qglTranslatef(e->origin[0], e->origin[1], e->origin[2]);
+			qglRotatef (e->angles[1], 0, 0, 1);
+			qglRotatef (e->angles[0], 0, 1, 0);
+			qglRotatef (e->angles[2], 1, 0, 0);
 
 			R_Draw_Depth_Sky_Chain (&brush->sky_chain, org);
 
@@ -863,7 +863,7 @@ R_VisBrushModel (entity_t *e)
 	brushhdr_t		*brush = mod->brush;
 	vec3_t			 org;
 
-	softwaretransformforbrushentity (e->cur.origin, e->cur.angles);
+	softwaretransformforbrushentity (e->origin, e->angles);
 	softwareuntransform(r_origin, org);
 		
 	/*
@@ -918,13 +918,13 @@ R_DrawOpaqueBrushModel (entity_t *e)
 
 	qglPushMatrix ();
 
-	qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
+	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
 
-	qglRotatef (e->cur.angles[1], 0, 0, 1);
-	qglRotatef (e->cur.angles[0], 0, 1, 0);
-	qglRotatef (e->cur.angles[2], 1, 0, 0);
+	qglRotatef (e->angles[1], 0, 0, 1);
+	qglRotatef (e->angles[0], 0, 1, 0);
+	qglRotatef (e->angles[2], 1, 0, 0);
 
-	R_DrawTextureChains (mod, e->cur.origin, e->cur.frame);
+	R_DrawTextureChains (mod, e->origin, e->frame[0]);
 
 	qglPopMatrix ();
 }
@@ -941,11 +941,11 @@ R_DrawAddBrushModel (entity_t *e)
 
 	qglPushMatrix ();
 
-	qglTranslatef (e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
+	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
 
-	qglRotatef (e->cur.angles[1], 0, 0, 1);
-	qglRotatef (e->cur.angles[0], 0, 1, 0);
-	qglRotatef (e->cur.angles[2], 1, 0, 0);
+	qglRotatef (e->angles[1], 0, 0, 1);
+	qglRotatef (e->angles[0], 0, 1, 0);
+	qglRotatef (e->angles[2], 1, 0, 0);
 
 	R_DrawLiquidTextureChains (mod);
 

@@ -123,7 +123,7 @@ R_GetSpriteFrame (entity_t *e)
 	float			   *pintervals, fullinterval, targettime, time;
 
 	psprite = e->model->sprite;
-	frame = e->cur.frame;
+	frame = e->frame[0];
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
 		Com_Printf ("R_DrawSprite: no such frame %d\n", frame);
@@ -205,7 +205,7 @@ R_DrawOpaqueSpriteModels ()
 
 		if (psprite->type == SPR_ORIENTED) {
 			// bullet marks on walls
-			AngleVectors (e->cur.angles, v_forward, v_right, v_up);
+			AngleVectors (e->angles, v_forward, v_right, v_up);
 			up = v_up;
 			right = v_right;
 		} else {
@@ -219,13 +219,13 @@ R_DrawOpaqueSpriteModels ()
 		VectorSet2(tc_array_v(v_index + 2), 1, 0);
 		VectorSet2(tc_array_v(v_index + 3), 1, 1);
 
-		VectorTwiddle (e->cur.origin, up, f->down,	right, f->left, 1,
+		VectorTwiddle (e->origin, up, f->down,	right, f->left, 1,
 				v_array_v(v_index + 0));
-		VectorTwiddle (e->cur.origin, up, f->up,	right, f->left, 1,
+		VectorTwiddle (e->origin, up, f->up,	right, f->left, 1,
 				v_array_v(v_index + 1));
-		VectorTwiddle (e->cur.origin, up, f->up,	right, f->right, 1,
+		VectorTwiddle (e->origin, up, f->up,	right, f->right, 1,
 				v_array_v(v_index + 2));
-		VectorTwiddle (e->cur.origin, up, f->down,	right, f->right, 1,
+		VectorTwiddle (e->origin, up, f->down,	right, f->right, 1,
 				v_array_v(v_index + 3));
 
 		v_index += 4;
@@ -274,7 +274,7 @@ R_VisBrushModels (void)
 		e = r_refdef.entities[i];
 
 		if (e->model->type == mod_brush) {
-			Mod_MinsMaxs (e->model, e->cur.origin, e->cur.angles, mins, maxs);
+			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
 			if (Vis_CullBox (mins, maxs))
 				continue;
 			R_VisBrushModel (e);
@@ -298,7 +298,7 @@ R_DrawOpaqueBrushModels ()
 		e = r_refdef.entities[i];
 
 		if (e->model->type == mod_brush) {
-			Mod_MinsMaxs (e->model, e->cur.origin, e->cur.angles, mins, maxs);
+			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
 			if (Vis_CullBox (mins, maxs))
 				continue;
 
@@ -330,7 +330,7 @@ R_DrawAddBrushModels ()
 		e = r_refdef.entities[i];
 
 		if (e->model->type == mod_brush) {
-			Mod_MinsMaxs (e->model, e->cur.origin, e->cur.angles, mins, maxs);
+			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
 			if (Vis_CullBox (mins, maxs))
 				continue;
 
