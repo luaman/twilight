@@ -459,7 +459,7 @@ R_TeleportSplash (vec3_t org)
 	porg_bottom[1] = org[1];
 	porg_bottom[2] = org[2] - 40;
 
-	VectorSet4 (color1, 0.1, 0.1, 0.8, 1);
+	VectorSet4 (color1, 0.4, 0.4, 1.0, 1);
 	VectorSet4 (color2, 0, 0, 0, 0.5);
 
 	new_cone_particle (pt_teleport1, porg_top, porg_bottom, org, color1,
