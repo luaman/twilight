@@ -443,8 +443,7 @@ CL_RelinkEntities (void)
 {
 	entity_t   *ent;
 	int         i, j;
-	float       frac, f, d;
-	vec3_t      delta;
+	float       frac, f, delta;
 	vec3_t      oldorg;
 	dlight_t   *dl;
 	trace_t		tr;
@@ -461,17 +460,9 @@ CL_RelinkEntities (void)
 	Lerp_Vectors (cl.mvelocity[1], frac, cl.mvelocity[0], cl.velocity);
 
 	if (cls.demoplayback) {
-		// interpolate the angles 
-		for (j = 0; j < 3; j++) {
-			d = cl.mviewangles[0][j] - cl.mviewangles[1][j];
-			if (d > 180)
-				d -= 360;
-			else if (d < -180)
-				d += 360;
-			cl.viewangles[j] = cl.mviewangles[1][j] + frac * d;
-		}
+		// interpolate the angles
+		Lerp_Angles (cl.mviewangles[1], frac, cl.mviewangles[0], cl.viewangles);
 	}
-
 
 // start on the entity after the world
 	for (i = 1, ent = cl_entities + 1; i < cl.num_entities; i++, ent++) {
@@ -497,9 +488,11 @@ CL_RelinkEntities (void)
 			// teleport and don't lerp
 			f = frac;
 			for (j = 0; j < 3; j++) {
-				delta[j] = ent->msg_origins[0][j] - ent->msg_origins[1][j];
-				if (delta[j] > 100 || delta[j] < -100)
+				delta = ent->msg_origins[0][j] - ent->msg_origins[1][j];
+				if (delta > 100 || delta < -100) {
 					f = 1;				// assume a teleportation, not a motion
+					break;
+				}
 			}
 
 			if (f >= 1)
@@ -507,20 +500,17 @@ CL_RelinkEntities (void)
 				ent->translate_start_time = 0;
 				ent->rotate_start_time    = 0;
 				VectorClear (ent->last_light);
+				VectorCopy  (ent->msg_origins[0], ent->origin);
+				VectorCopy  (ent->msg_angles[0], ent->angles);
+			} 
+			else 
+			{
+				// interpolate the origin and angles
+				Lerp_Vectors (ent->msg_origins[1], f, ent->msg_origins[0], 
+					ent->origin);
+				Lerp_Angles (ent->msg_angles[1], f, ent->msg_angles[0], 
+					ent->angles);
 			}
-
-			// interpolate the origin and angles
-			for (j = 0; j < 3; j++) {
-				ent->origin[j] = ent->msg_origins[1][j] + f * delta[j];
-
-				d = ent->msg_angles[0][j] - ent->msg_angles[1][j];
-				if (d > 180)
-					d -= 360;
-				else if (d < -180)
-					d += 360;
-				ent->angles[j] = ent->msg_angles[1][j] + f * d;
-			}
-
 		}
 
 		if (ent->effects)
