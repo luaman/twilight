@@ -49,10 +49,10 @@ void *_Zone_Alloc(memzone_t *zone, int size, char *filename, int fileline)
 	int i, j, k, needed, endbit, largest;
 	memclump_t *clump, **clumpchainpointer;
 	memheader_t *mem;
-	if (size <= 0)
-		return NULL;
 	if (zone == NULL)
 		Sys_Error("Zone_Alloc: zone == NULL (alloc at %s:%i)", filename, fileline);
+	if (size <= 0)
+		Sys_Error("Zone_Alloc: size == 0 (alloc at %s:%i, zone == \"%s\")", filename, fileline, zone->name);
 	Com_DPrintf("Zone_Alloc: zone %s, file %s:%i, size %i bytes\n", zone->name, filename, fileline, size);
 	zone->totalsize += size;
 	if (size < 4096)
