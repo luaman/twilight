@@ -22,6 +22,8 @@ These things should be done before first public release:
 
 Would be nice but is not strictly needed, in importance order:
 
+  - Working gamma/brightness support
+  - Working mousewheel support
   - Rid ourselves of the monolithic header
   - Merge QW server into QW client ala NQ
   - Produce a dedicated server for NQ
@@ -30,7 +32,9 @@ Would be nice but is not strictly needed, in importance order:
   - Console font
   - Menu overhaul
   - Knghtbrd's server console
-
+  - Make water warping optional, and the intensity of it
+    controllable via cvars, and menu, most likely off
+    by default for QW, and on by default for NQ
 
 Stuff that can wait:
 

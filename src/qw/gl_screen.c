@@ -91,33 +91,36 @@ console is:
 
 */
 
-int         glx, gly, glwidth, glheight;
+int			glx, gly, glwidth, glheight;
 
 // only the refresh window will be updated unless these variables are flagged 
-int         scr_copytop;
-int         scr_copyeverything;
+int			scr_copytop;
+int			scr_copyeverything;
 
-float       scr_con_current;
-float       scr_conlines;				// lines of console to display
+float		scr_con_current;
+float		scr_conlines;				// lines of console to display
 
 float       oldscreensize, oldfov;
-cvar_t     *scr_viewsize;
-cvar_t     *scr_fov;
-cvar_t     *scr_conspeed;
-cvar_t     *scr_centertime;
-cvar_t     *scr_showram;
-cvar_t     *scr_showturtle;
-cvar_t     *scr_showpause;
-cvar_t     *scr_printspeed;
-cvar_t     *scr_allowsnap;
-cvar_t     *gl_triplebuffer;
+cvar_t		*scr_viewsize;
+cvar_t		*scr_fov;
+cvar_t		*scr_conspeed;
+cvar_t		*scr_centertime;
+cvar_t		*scr_showram;
+cvar_t		*scr_showturtle;
+cvar_t		*scr_showpause;
+cvar_t		*scr_printspeed;
+cvar_t		*scr_allowsnap;
+cvar_t		*gl_triplebuffer;
+cvar_t		*r_brightness;
+cvar_t		*r_contrast;
+
 extern cvar_t *crosshair;
 
 qboolean    scr_initialized;			// ready to draw
 
-qpic_t     *scr_ram;
-qpic_t     *scr_net;
-qpic_t     *scr_turtle;
+qpic_t		*scr_ram;
+qpic_t		*scr_net;
+qpic_t		*scr_turtle;
 
 int         scr_fullupdate;
 
@@ -136,6 +139,62 @@ float       scr_disabled_time;
 
 void        SCR_ScreenShot_f (void);
 void        SCR_RSShot_f (void);
+
+void
+GL_BrightenScreen(void)
+{
+	float f;
+
+	if (r_brightness->value < 0.1f)
+		Cvar_Set (r_brightness, va("%f",0.1f));
+	if (r_brightness->value > 5.0f)
+		Cvar_Set (r_brightness, va("%f",5.0f));
+
+	if (r_contrast->value < 0.2f)
+		Cvar_Set (r_contrast, va("%f",0.2f));
+	if (r_contrast->value > 1.0f)
+		Cvar_Set (r_contrast, va("%f",1.0f));
+
+	if (r_brightness->value < 1.01f && r_contrast->value > 0.99f)
+		return;
+
+	qglDisable (GL_TEXTURE_2D);
+	qglEnable (GL_BLEND);
+	f = r_brightness->value;
+	if (f >= 1.01f)
+	{
+		qglBlendFunc (GL_DST_COLOR, GL_ONE);
+		qglBegin (GL_TRIANGLES);
+		while (f >= 1.01f)
+		{
+			if (f >= 2)
+				qglColor3f (1, 1, 1);
+			else
+				qglColor3f (f-1, f-1, f-1);
+			qglVertex2f (-5000, -5000);
+			qglVertex2f (10000, -5000);
+			qglVertex2f (-5000, 10000);
+			f *= 0.5;
+		}
+		qglEnd ();
+	}
+	if (r_contrast->value <= 0.99f)
+	{
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			qglColor4f (1, 1, 1, 1 - r_contrast->value);
+		qglBegin (GL_TRIANGLES);
+		qglVertex2f (-5000, -5000);
+		qglVertex2f (10000, -5000);
+		qglVertex2f (-5000, 10000);
+		qglEnd ();
+	}
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	qglEnable (GL_CULL_FACE);
+	qglEnable (GL_DEPTH_TEST);
+	qglDisable (GL_BLEND);
+	qglEnable (GL_TEXTURE_2D);
+}
 
 /*
 ===============================================================================
@@ -398,6 +457,8 @@ SCR_Init_Cvars (void)
 	scr_printspeed = Cvar_Get ("scr_printspeed", "8", CVAR_NONE, NULL);
 	scr_allowsnap = Cvar_Get ("scr_allowsnap", "1", CVAR_NONE, NULL);
 	gl_triplebuffer = Cvar_Get ("gl_triplebuffer", "1", CVAR_ARCHIVE, NULL);
+	r_brightness = Cvar_Get ("r_brightness", "1", CVAR_ARCHIVE, NULL);
+	r_contrast = Cvar_Get ("r_contrast", "1", CVAR_ARCHIVE, NULL);
 }
 
 
@@ -1132,6 +1193,7 @@ SCR_UpdateScreen (void)
 	}
 
 	V_UpdatePalette ();
+	GL_BrightenScreen ();
 
 	GL_EndRendering ();
 }
