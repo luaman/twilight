@@ -150,6 +150,15 @@ Skin_Cache (skin_t *skin)
 	pcx = (pcx_t *) raw;
 	raw = &pcx->data;
 
+	pcx->xmax = LittleShort (pcx->xmax);
+	pcx->xmin = LittleShort (pcx->xmin);
+	pcx->ymax = LittleShort (pcx->ymax);
+	pcx->ymin = LittleShort (pcx->ymin);
+	pcx->hres = LittleShort (pcx->hres);
+	pcx->vres = LittleShort (pcx->vres);
+	pcx->bytes_per_line = LittleShort (pcx->bytes_per_line);
+	pcx->palette_type = LittleShort (pcx->palette_type);
+
 	if (pcx->manufacturer != 0x0a
 		|| pcx->version != 5
 		|| pcx->encoding != 1
