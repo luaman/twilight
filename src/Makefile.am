@@ -10,7 +10,7 @@ endif
 if SERVERS
 servers = server
 endif
-SUBDIRS=tools ../embedded_data include base fs $(clients) $(servers) nq qw
+SUBDIRS=tools include base fs $(clients) $(servers) nq qw
 
 
 noinst_HEADERS= \
