@@ -13,13 +13,13 @@ nq_sources = Split("""chase.c cl_demo.c cl_ents.c cl_input.c cl_main.c
 	pr_edict.c pr_exec.c snd_dma.c sv_main.c sv_move.c sv_phys.c
 	sv_user.c sys.c view.c world.c""")
 
+nq_headers = ['#/src/nq/'+e for e in nq_headers]
+nq_sources = ['#/src/nq/'+e for e in nq_sources]
 nq_sources.extend (base_sources)
 nq_sources.extend (client_sources)
 nq_sources.extend (fs_sources)
 nq_sources.extend (image_sources)
 nq_sources.extend (renderer_sources)
 nq_sources.extend (sound_sources)
-
-env.Program (target = "twilight-nq", source = nq_sources)
 
 Export ("nq_headers", "nq_sources")
