@@ -613,7 +613,7 @@ COM_StripExtension (char *in, char *out)
 
 	while (*in) {
 		if (*in == '.')
-			last = in;
+			last = out;
 		if ((*in == '/') || (*in == '\\') || (*in == ':'))
 			last = NULL;
 		*out++ = *in++;
