@@ -221,6 +221,8 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 	int			i;
 	float		s, t, ripple;
 
+	tex = tex;
+
 	ripple = r_waterripple->fvalue;
 
 	qglColor4f (1.0f, 1.0f, 1.0f, alpha);
@@ -631,6 +633,8 @@ R_InitSky (texture_t *mt, Uint8 *pixels)
 	unsigned	trans[128 * 128];
 	int			r, g, b;
 	Uint8		rgba[4], transpix[4];
+
+	mt = mt;
 
 	src = pixels;
 

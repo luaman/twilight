@@ -1299,7 +1299,6 @@ FIXME: HACK HACK HACK - this is just a GL_LoadTexture for image_t's for now
 int
 R_LoadTexture (const char *identifier, image_t *img, int flags)
 {
-	int         i;
 	gltexture_t *glt = NULL;
 	unsigned short crc = 0;
 
@@ -1363,7 +1362,6 @@ int
 GL_LoadTexture (const char *identifier, Uint width, Uint height, Uint8 *data,
 		int flags, int bpp)
 {
-	int         i;
 	gltexture_t *glt = NULL;
 	unsigned short crc = 0;
 
