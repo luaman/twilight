@@ -908,6 +908,7 @@ CL_SetSolidEntities (void)
 	packet_entities_t	*pak;
 	entity_state_t		*state;
 	physent_t			*pent;
+	model_t				*model;
 
 	pmove.physents[0].model = ccl.worldmodel;
 	VectorClear (pmove.physents[0].origin);
@@ -923,17 +924,20 @@ CL_SetSolidEntities (void)
 
 		if (!state->modelindex)
 			continue;
-		if (!ccl.model_precache[state->modelindex])
+		if (!(model = ccl.model_precache[state->modelindex]))
 			continue;
-		if (ccl.model_precache[state->modelindex]->hulls[1].firstclipnode) {
-			if (pmove.numphysent >= MAX_PHYSENTS)
-				return;
-			pent = &pmove.physents[pmove.numphysent++];
-			pent->model = ccl.model_precache[state->modelindex];
-			VectorCopy (state->origin, pent->origin);
-			pent->id = -1;
-			pent->info = __LINE__;
-		}
+		if (!model->brush)
+			continue;
+		if (!model->brush->hulls[1].firstclipnode)
+			continue;
+		if (pmove.numphysent >= MAX_PHYSENTS)
+			return;
+
+		pent = &pmove.physents[pmove.numphysent++];
+		pent->model = model;
+		VectorCopy (state->origin, pent->origin);
+		pent->id = -1;
+		pent->info = __LINE__;
 	}
 }
 

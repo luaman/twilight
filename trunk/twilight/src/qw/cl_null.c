@@ -84,3 +84,10 @@ Draw_CacheImg(char *path)
 	return NULL;
 }
 
+image_t *
+Image_Load (char *name, int flags)
+{
+	name = name;
+	flags = flags;
+	return NULL;
+}

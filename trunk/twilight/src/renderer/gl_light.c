@@ -310,7 +310,7 @@ R_MarkLights (rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix)
 	in = pvsleaf->compressed_vis;
 	if (!in || gl_oldlights->ivalue)
 	{ /* told not to use pvs, or there's no pvs to use */
-		R_MarkLightsNoVis(lightorigin, rd, bit, model, model->brush->nodes + model->hulls[0].firstclipnode);
+		R_MarkLightsNoVis(lightorigin, rd, bit, model, model->brush->nodes + model->brush->hulls[0].firstclipnode);
 		return;
 	}
 

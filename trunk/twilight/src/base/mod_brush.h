@@ -243,6 +243,8 @@ typedef struct brushhdr_s {
 
 	lightblock_t	lightblock;
 
+	hull_t			hulls[MAX_MAP_HULLS];
+
 	Uint32			numsubmodels;
 	dmodel_t		*submodels;
 

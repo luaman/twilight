@@ -157,11 +157,11 @@ SV_HullForEntity (edict_t *ent, vec3_t mins, vec3_t maxs, vec3_t offset)
 
 		VectorSubtract (maxs, mins, size);
 		if (size[0] < 3)
-			hull = &model->hulls[0];
+			hull = &model->brush->hulls[0];
 		else if (size[0] <= 32)
-			hull = &model->hulls[1];
+			hull = &model->brush->hulls[1];
 		else
-			hull = &model->hulls[2];
+			hull = &model->brush->hulls[2];
 
 // calculate an offset value to center the origin
 		VectorSubtract (hull->clip_mins, mins, offset);
