@@ -457,7 +457,7 @@ R_Torch (entity_t *ent, qboolean torch2)
 				return;
 			else {
 				if (ent->frame)
-					p->scale = 20;
+					p->scale = 30;
 				else
 					p->scale = 10;
 			}
@@ -712,6 +712,8 @@ R_DrawParticles (void)
 
 	if (therearetorches)
 	{
+		float scale2;
+
 		qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 		for (k = 0, p = particles; k < numparticles; k++, p++) {
@@ -720,16 +722,8 @@ R_DrawParticles (void)
 			maxparticle = k;
 			activeparticles++;
 
-			// hack a scale up to keep particles from disapearing
-			scale =
-				(p->org[0] - r_origin[0]) * vpn[0] + (p->org[1] -
-													  r_origin[1]) * vpn[1]
-				+ (p->org[2] - r_origin[2]) * vpn[2];
-
-			if (scale < 20)
-				scale = p->scale;
-			else
-				scale = p->scale + scale * 0.004;
+			scale = p->scale * -0.25;
+			scale2 = p->scale * 0.75;
 
 			VectorSet4(c_array[vnum + 0], p->color[0], p->color[1], p->color[2], p->alpha);
 			VectorSet4(c_array[vnum + 1], p->color[0], p->color[1], p->color[2], p->alpha);
@@ -737,9 +731,11 @@ R_DrawParticles (void)
 			VectorSet2(tc_array[vnum + 0], 0, 0);
 			VectorSet2(tc_array[vnum + 1], 1, 0);
 			VectorSet2(tc_array[vnum + 2], 0, 1);
-			VectorSet3(v_array[vnum + 0], p->org[0], p->org[1], p->org[2]);
-			VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale, p->org[1] + up[1] * scale, p->org[2] + up[2] * scale);
-			VectorSet3(v_array[vnum + 2], p->org[0] + right[0] * scale, p->org[1] + right[1] * scale, p->org[2] + right[2] * scale);
+			VectorSet3(v_array[vnum + 0], p->org[0] + (up[0]+right[0])*scale, p->org[1] + (up[1]+right[1])*scale, p->org[2] + (up[2]+right[2])*scale);
+			VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale2 + right[0]*scale, p->org[1] + up[1] * scale2 + right[1]*scale, 
+				p->org[2] + up[2] * scale2 + right[2]*scale);
+			VectorSet3(v_array[vnum + 2], p->org[0] + up[0] * scale + right[0]*scale2, p->org[1] + up[1] * scale + right[1]*scale2, 
+				p->org[2] + up[2] * scale + right[2]*scale2);
 			vnum += 3;
 
 			if ((vnum + 3) >= MAX_VERTEX_ARRAYS) {

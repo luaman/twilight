@@ -228,6 +228,8 @@ CL_KeepaliveMessage (void)
 	SZ_Clear (&cls.message);
 }
 
+model_t		*mdl_fire = NULL;
+
 /*
 ==================
 CL_ParseServerInfo
@@ -333,6 +335,10 @@ CL_ParseServerInfo (void)
 			COM_StripExtension (mapname, mapname);
 			Cvar_Set (cl_mapname, mapname);
 		}
+
+		if (!strcasecmp (model_precache[i], "progs/flame.mdl"))
+			if (!mdl_fire)
+				mdl_fire = Mod_ForName ("progs/fire.mdl", false);
 
 		CL_KeepaliveMessage ();
 	}

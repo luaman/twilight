@@ -49,7 +49,6 @@ entity_t    r_worldentity;
 
 qboolean    r_cache_thrash;				// compatability
 
-vec3_t      modelorg, r_entorigin;
 entity_t   *currententity;
 
 int         r_visframecount;			// bumped when going to a new PVS
@@ -132,6 +131,7 @@ qboolean colorlights = true;
 
 static float shadescale = 0.0;
 
+extern model_t		*mdl_fire;
 
 /*
 =================
@@ -255,7 +255,7 @@ R_GetSpriteFrame
 ================
 */
 mspriteframe_t *
-R_GetSpriteFrame (entity_t *currententity)
+R_GetSpriteFrame (entity_t *e)
 {
 	msprite_t  *psprite;
 	mspritegroup_t *pspritegroup;
@@ -263,8 +263,8 @@ R_GetSpriteFrame (entity_t *currententity)
 	int         i, numframes, frame;
 	float      *pintervals, fullinterval, targettime, time;
 
-	psprite = currententity->model->cache.data;
-	frame = currententity->frame;
+	psprite = e->model->cache.data;
+	frame = e->frame;
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
 		Con_Printf ("R_DrawSprite: no such frame %d\n", frame);
@@ -316,10 +316,10 @@ R_DrawSpriteModel (entity_t *e)
 	// don't even bother culling, because it's just a single
 	// polygon without a surface cache
 	frame = R_GetSpriteFrame (e);
-	psprite = currententity->model->cache.data;
+	psprite = e->model->cache.data;
 
 	if (psprite->type == SPR_ORIENTED) {	// bullet marks on walls
-		AngleVectors (currententity->angles, v_forward, v_right, v_up);
+		AngleVectors (e->angles, v_forward, v_right, v_up);
 		up = v_up;
 		right = v_right;
 	} else {							// normal sprite
@@ -508,8 +508,8 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 		{
 			// texture coordinates come from the draw list
 			if (mtex) {
-				qglMultiTexCoord2fARB (GL_TEXTURE0_ARB + 0, ((float *) order)[0], ((float *) order)[1]);
-				qglMultiTexCoord2fARB (GL_TEXTURE0_ARB + 1, ((float *) order)[0], ((float *) order)[1]);
+				qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, ((float *) order)[0], ((float *) order)[1]);
+				qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, ((float *) order)[0], ((float *) order)[1]);
 			}
 			else
 				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
@@ -884,13 +884,11 @@ R_DrawAliasModel (entity_t *e)
 	int			texture, fb_texture = 0;
 	dlight_t	*l;
 
-	VectorCopy (e->origin, r_entorigin);
-
 	if (e != &cl.viewent) {
 		vec3_t      mins, maxs;
 
-		VectorAdd (r_entorigin, clmodel->mins, mins);
-		VectorAdd (r_entorigin, clmodel->maxs, maxs);
+		VectorAdd (e->origin, clmodel->mins, mins);
+		VectorAdd (e->origin, clmodel->maxs, maxs);
 
 		if (R_CullBox (mins, maxs))
 			return;
@@ -900,11 +898,12 @@ R_DrawAliasModel (entity_t *e)
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2))
 		{
 			R_Torch(e, clmodel->modflags & FLAG_TORCH2);
-			return;
+			if (mdl_fire && !(clmodel->modflags & FLAG_TORCH2))
+				clmodel = mdl_fire;
+			else
+				return;
 		}
 	}
-
-	VectorSubtract (r_origin, r_entorigin, modelorg);
 
 	// 
 	// get lighting information
