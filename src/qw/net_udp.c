@@ -22,6 +22,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 
 #include <sys/types.h>
+#ifdef WIN32
+#include <windows.h>
+#include <winsock.h>
+#define EWOULDBLOCK WSAEWOULDBLOCK
+#define ECONNREFUSED WSAECONNREFUSED
+
+#define MAXHOSTNAMELEN		256
+#else
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -29,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/ioctl.h>
 #include <sys/uio.h>
 #include <arpa/inet.h>
+#endif
 #include <errno.h>
 
 #if defined(sun)
@@ -53,7 +62,7 @@ int         net_send_socket;			// blocking, for sends
 #define	MAX_UDP_PACKET	8192
 byte        net_message_buffer[MAX_UDP_PACKET];
 
-int         gethostname (char *, int);
+//int         gethostname (char *, int);
 int         close (int);
 
 //=============================================================================
@@ -139,12 +148,12 @@ NET_StringToAdr (char *s, netadr_t *a)
 
 	sadr.sin_port = 0;
 
-	strcpy (copy, s);
+	Q_strcpy (copy, s);
 	// strip off a trailing :port if present
 	for (colon = copy; *colon; colon++)
 		if (*colon == ':') {
 			*colon = 0;
-			sadr.sin_port = htons (atoi (colon + 1));
+			sadr.sin_port = htons ((unsigned short) atoi (colon + 1));
 		}
 
 	if (copy[0] >= '0' && copy[0] <= '9') {
@@ -249,12 +258,19 @@ UDP_OpenSocket (int port)
 {
 	int         newsocket;
 	struct sockaddr_in address;
-	qboolean    _true = true;
 	int         i;
+#ifdef _WIN32
+#define ioctl ioctlsocket
+	unsigned long _true = true;
+#else
+	int         _true = 1;
+#endif
+
+	memset (&address, 0, sizeof(address));
 
 	if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
-		Sys_Error ("UDP_OpenSocket: socket:", strerror (errno));
-	if (ioctl (newsocket, FIONBIO, (char *) &_true) == -1)
+		Sys_Error ("UDP_OpenSocket: socket:%s", strerror (errno));
+	if (ioctl (newsocket, FIONBIO, &_true) == -1)
 		Sys_Error ("UDP_OpenSocket: ioctl FIONBIO:", strerror (errno));
 	address.sin_family = AF_INET;
 //ZOID -- check for interface binding option
@@ -302,6 +318,18 @@ NET_Init
 void
 NET_Init (int port)
 {
+#ifdef _WIN32
+	WSADATA     winsockdata;
+	WORD        wVersionRequested;
+	int         r;
+
+	wVersionRequested = MAKEWORD (1, 1);
+
+	r = WSAStartup (MAKEWORD (1, 1), &winsockdata);
+	if (r)
+		Sys_Error ("Winsock initialization failed.");
+#endif /* _WIN32 */
+
 	// 
 	// open the single socket to be used for all communications
 	// 

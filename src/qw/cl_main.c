@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
+#include <sdl.h>
+
 #ifdef _WIN32
 #include "winquake.h"
 #include "winsock.h"
@@ -233,7 +235,7 @@ CL_SendConnectPacket (void)
 	sprintf (data, "%c%c%c%cconnect %i %i %i \"%s\"\n",
 			 255, 255, 255, 255, PROTOCOL_VERSION, cls.qport, cls.challenge,
 			 cls.userinfo);
-	NET_SendPacket (strlen (data), data, adr);
+	NET_SendPacket (Q_strlen (data), data, adr);
 }
 
 /*
@@ -278,7 +280,7 @@ CL_CheckForResend (void)
 
 	Con_Printf ("Connecting to %s...\n", cls.servername);
 	sprintf (data, "%c%c%c%cgetchallenge\n", 255, 255, 255, 255);
-	NET_SendPacket (strlen (data), data, adr);
+	NET_SendPacket (Q_strlen (data), data, adr);
 }
 
 void
@@ -308,7 +310,7 @@ CL_Connect_f (void)
 
 	CL_Disconnect ();
 
-	strncpy (cls.servername, server, sizeof (cls.servername) - 1);
+	Q_strncpy (cls.servername, server, sizeof (cls.servername) - 1);
 	CL_BeginServerConnect ();
 }
 
@@ -340,20 +342,20 @@ CL_Rcon_f (void)
 	message[3] = 255;
 	message[4] = 0;
 
-	strcat (message, "rcon ");
+	Q_strcat (message, "rcon ");
 
-	strcat (message, rcon_password.string);
-	strcat (message, " ");
+	Q_strcat (message, rcon_password.string);
+	Q_strcat (message, " ");
 
 	for (i = 1; i < Cmd_Argc (); i++) {
-		strcat (message, Cmd_Argv (i));
-		strcat (message, " ");
+		Q_strcat (message, Cmd_Argv (i));
+		Q_strcat (message, " ");
 	}
 
 	if (cls.state >= ca_connected)
 		to = cls.netchan.remote_address;
 	else {
-		if (!strlen (rcon_address.string)) {
+		if (!Q_strlen (rcon_address.string)) {
 			Con_Printf ("You must either be connected,\n"
 						"or set the 'rcon_address' cvar\n"
 						"to issue rcon commands\n");
@@ -363,7 +365,7 @@ CL_Rcon_f (void)
 		NET_StringToAdr (rcon_address.string, &to);
 	}
 
-	NET_SendPacket (strlen (message) + 1, message, to);
+	NET_SendPacket (Q_strlen (message) + 1, message, to);
 }
 
 
@@ -422,9 +424,7 @@ CL_Disconnect (void)
 
 	connect_time = -1;
 
-#ifdef _WIN32
-	SetWindowText (mainwindow, "QuakeWorld: disconnected");
-#endif
+	SDL_WM_SetCaption("Twilight QWCL: disconnected", "Twilight");
 
 // stop sounds (especially looping!)
 	S_StopAllSounds (true);
@@ -437,7 +437,7 @@ CL_Disconnect (void)
 			CL_Stop_f ();
 
 		final[0] = clc_stringcmd;
-		strcpy (final + 1, "drop");
+		Q_strcpy (final + 1, "drop");
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
@@ -489,7 +489,7 @@ CL_User_f (void)
 		if (!cl.players[i].name[0])
 			continue;
 		if (cl.players[i].userid == uid
-			|| !strcmp (cl.players[i].name, Cmd_Argv (1))) {
+			|| !Q_strcmp (cl.players[i].name, Cmd_Argv (1))) {
 			Info_Print (cl.players[i].userinfo);
 			return;
 		}
@@ -577,7 +577,7 @@ CL_FullServerinfo_f (void)
 		return;
 	}
 
-	strcpy (cl.serverinfo, Cmd_Argv (1));
+	Q_strcpy (cl.serverinfo, Cmd_Argv (1));
 
 	if ((p = Info_ValueForKey (cl.serverinfo, "*vesion")) && *p) {
 		v = Q_atof (p);
@@ -633,7 +633,7 @@ CL_FullInfo_f (void)
 		if (*s)
 			s++;
 
-		if (!strcasecmp (key, pmodel_name) || !strcasecmp (key, emodel_name))
+		if (!Q_strcasecmp (key, pmodel_name) || !Q_strcasecmp (key, emodel_name))
 			continue;
 
 		Info_SetValueForKey (cls.userinfo, key, value, MAX_INFO_STRING);
@@ -658,8 +658,8 @@ CL_SetInfo_f (void)
 		Con_Printf ("usage: setinfo [ <key> <value> ]\n");
 		return;
 	}
-	if (!strcasecmp (Cmd_Argv (1), pmodel_name) ||
-		!strcmp (Cmd_Argv (1), emodel_name))
+	if (!Q_strcasecmp (Cmd_Argv (1), pmodel_name) ||
+		!Q_strcmp (Cmd_Argv (1), emodel_name))
 		return;
 
 	Info_SetValueForKey (cls.userinfo, Cmd_Argv (1), Cmd_Argv (2),
@@ -699,7 +699,7 @@ CL_Packet_f (void)
 	out = send + 4;
 	send[0] = send[1] = send[2] = send[3] = 0xff;
 
-	l = strlen (in);
+	l = Q_strlen (in);
 	for (i = 0; i < l; i++) {
 		if (in[i] == '\\' && in[i + 1] == 'n') {
 			*out++ = '\n';
@@ -842,23 +842,19 @@ CL_ConnectionlessPacket (void)
 			Con_Printf ("Command packet from remote host.  Ignored.\n");
 			return;
 		}
-#ifdef _WIN32
-		ShowWindow (mainwindow, SW_RESTORE);
-		SetForegroundWindow (mainwindow);
-#endif
 		s = MSG_ReadString ();
 
-		strncpy (cmdtext, s, sizeof (cmdtext) - 1);
+		Q_strncpy (cmdtext, s, sizeof (cmdtext) - 1);
 		cmdtext[sizeof (cmdtext) - 1] = 0;
 
 		s = MSG_ReadString ();
 
 		while (*s && isspace (*s))
 			s++;
-		while (*s && isspace (s[strlen (s) - 1]))
-			s[strlen (s) - 1] = 0;
+		while (*s && isspace (s[Q_strlen (s) - 1]))
+			s[Q_strlen (s) - 1] = 0;
 
-		if (!allowremotecmd && (!*localid.string || strcmp (localid.string, s))) {
+		if (!allowremotecmd && (!*localid.string || Q_strcmp (localid.string, s))) {
 			if (!*localid.string) {
 				Con_Printf ("===========================\n");
 				Con_Printf ("Command packet received from local host, but no "
@@ -1014,30 +1010,13 @@ CL_Download_f (void)
 			break;
 	}
 
-	strcpy (cls.downloadtempname, cls.downloadname);
+	Q_strcpy (cls.downloadtempname, cls.downloadname);
 	cls.download = fopen (cls.downloadname, "wb");
 	cls.downloadtype = dl_single;
 
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	SZ_Print (&cls.netchan.message, va ("download %s\n", Cmd_Argv (1)));
 }
-
-#ifdef _WINDOWS
-#include <windows.h>
-/*
-=================
-CL_Minimize_f
-=================
-*/
-void
-CL_Windows_f (void)
-{
-//  if (modestate == MS_WINDOWED)
-//      ShowWindow(mainwindow, SW_MINIMIZE);
-//  else
-	SendMessage (mainwindow, WM_SYSKEYUP, VK_TAB, 1 | (0x0F << 16) | (1 << 29));
-}
-#endif
 
 /*
 =================
@@ -1166,13 +1145,6 @@ CL_Init (void)
 	Cmd_AddCommand ("say", NULL);
 	Cmd_AddCommand ("say_team", NULL);
 	Cmd_AddCommand ("serverinfo", NULL);
-
-//
-//  Windows commands
-//
-#ifdef _WINDOWS
-	Cmd_AddCommand ("windows", CL_Windows_f);
-#endif
 }
 
 

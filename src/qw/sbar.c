@@ -437,18 +437,18 @@ Sbar_SortTeams (void)
 
 		// find his team in the list
 		t[16] = 0;
-		strncpy (t, Info_ValueForKey (s->userinfo, "team"), 16);
+		Q_strncpy (t, Info_ValueForKey (s->userinfo, "team"), 16);
 		if (!t || !t[0])
 			continue;					// not on team
 		for (j = 0; j < scoreboardteams; j++)
-			if (!strcmp (teams[j].team, t)) {
+			if (!Q_strcmp (teams[j].team, t)) {
 				teams[j].frags += s->frags;
 				teams[j].players++;
 				goto addpinginfo;
 			}
 		if (j == scoreboardteams) {		// must add him
 			j = scoreboardteams++;
-			strcpy (teams[j].team, t);
+			Q_strcpy (teams[j].team, t);
 			teams[j].frags = s->frags;
 			teams[j].players = 1;
 		  addpinginfo:
@@ -961,7 +961,7 @@ Sbar_TeamOverlay (void)
 
 		// draw team
 		team[4] = 0;
-		strncpy (team, tm->team, 4);
+		Q_strncpy (team, tm->team, 4);
 		Draw_String (x + 104, y, team);
 
 		// draw total
@@ -972,7 +972,7 @@ Sbar_TeamOverlay (void)
 		sprintf (num, "%5i", tm->players);
 		Draw_String (x + 104 + 88, y, num);
 
-		if (!strncmp (Info_ValueForKey (cl.players[cl.playernum].userinfo,
+		if (!Q_strncmp (Info_ValueForKey (cl.players[cl.playernum].userinfo,
 										"team"), tm->team, 16)) {
 			Draw_Character (x + 104 - 8, y, 16);
 			Draw_Character (x + 104 + 32, y, 17);
@@ -1124,7 +1124,7 @@ Sbar_DeathmatchOverlay (int start)
 		// team
 		if (teamplay) {
 			team[4] = 0;
-			strncpy (team, Info_ValueForKey (s->userinfo, "team"), 4);
+			Q_strncpy (team, Info_ValueForKey (s->userinfo, "team"), 4);
 			Draw_String (x + 152, y, team);
 		}
 		// draw name
@@ -1233,12 +1233,12 @@ Sbar_MiniDeathmatchOverlay (void)
 		// team
 		if (teamplay) {
 			team[4] = 0;
-			strncpy (team, Info_ValueForKey (s->userinfo, "team"), 4);
+			Q_strncpy (team, Info_ValueForKey (s->userinfo, "team"), 4);
 			Draw_String (x + 48, y, team);
 		}
 		// draw name
 		name[16] = 0;
-		strncpy (name, s->name, 16);
+		Q_strncpy (name, s->name, 16);
 		if (teamplay)
 			Draw_String (x + 48 + 40, y, name);
 		else
@@ -1264,14 +1264,14 @@ Sbar_MiniDeathmatchOverlay (void)
 
 		// draw pings
 		team[4] = 0;
-		strncpy (team, tm->team, 4);
+		Q_strncpy (team, tm->team, 4);
 		Draw_String (x, y, team);
 
 		// draw total
 		sprintf (num, "%5i", tm->frags);
 		Draw_String (x + 40, y, num);
 
-		if (!strncmp (Info_ValueForKey (cl.players[cl.playernum].userinfo,
+		if (!Q_strncmp (Info_ValueForKey (cl.players[cl.playernum].userinfo,
 										"team"), tm->team, 16)) {
 			Draw_Character (x - 8, y, 16);
 			Draw_Character (x + 32, y, 17);

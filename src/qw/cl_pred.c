@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "quakedef.h"
 
+#include <sdl.h>
 #ifdef _WIN32
 #include "winquake.h"
 #endif
@@ -154,10 +155,8 @@ CL_PredictMove (void)
 		char        text[1024];
 
 		cls.state = ca_active;
-		sprintf (text, "QuakeWorld: %s", cls.servername);
-#ifdef _WIN32
-		SetWindowText (mainwindow, text);
-#endif
+		sprintf (text, "Twilight QWCL: %s", cls.servername);
+		SDL_WM_SetCaption(text, "Twilight QWCL");
 	}
 
 	if (cl_nopred.value) {

@@ -20,12 +20,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <string.h>
 
-#include <quakedef.h>
+#include "quakedef.h"
 
-// char *date = "Oct 24 1996";
-// char *time = "13:22:52";
-char *date = __DATE__ ;
-char *time = __TIME__ ;
+// char *qdate = "Oct 24 1996";
+// char *qtime = "13:22:52";
+char *qdate = __DATE__ ;
+char *qtime = __TIME__ ;
 
 char *mon[12] = 
 { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
@@ -46,14 +46,14 @@ int build_number( void )
 
 	for (m = 0; m < 11; m++)
 	{
-		if (_strnicmp( &date[0], mon[m], 3 ) == 0)
+		if (_strnicmp( &qdate[0], mon[m], 3 ) == 0)
 			break;
 		d += mond[m];
 	}
 
-	d += atoi( &date[4] ) - 1;
+	d += atoi( &qdate[4] ) - 1;
 
-	y = atoi( &date[7] ) - 1900;
+	y = atoi( &qdate[7] ) - 1900;
 
 	b = d + (int)((y - 1) * 365.25);
 
@@ -64,9 +64,9 @@ int build_number( void )
 
 	b -= 34995; // Oct 24 1996
 
-	hr = (time[0] - '0') * 10 + (time[1] - '0');
-	min = (time[3] - '0') * 10 + (time[4] - '0');
-//	sec = (time[6] - '0') * 10 + (time[7] - '0');
+	hr = (qtime[0] - '0') * 10 + (qtime[1] - '0');
+	min = (qtime[3] - '0') * 10 + (qtime[4] - '0');
+//	sec = (qtime[6] - '0') * 10 + (qtime[7] - '0');
 
 	b *= 60*24;
 	b += hr * 60 + min;

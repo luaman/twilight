@@ -169,9 +169,9 @@ CheckForCommand (void)
 	command[i] = 0;
 
 	cmd = Cmd_CompleteCommand (command);
-	if (!cmd || strcmp (cmd, command))
+	if (!cmd || Q_strcmp (cmd, command))
 		cmd = Cvar_CompleteVariable (command);
-	if (!cmd || strcmp (cmd, command))
+	if (!cmd || Q_strcmp (cmd, command))
 		return false;					// just a chat message
 	return true;
 }
@@ -209,8 +209,8 @@ Interactive line editing and console scrollback
 void
 Key_Console (int key)
 {
-#ifdef _WIN32
-	char       *cmd, *s;
+//#ifdef _WIN32
+#if 0
 	int         i;
 	HANDLE      th;
 	char       *clipText, *textCopied;
@@ -300,7 +300,9 @@ Key_Console (int key)
 		con->display = con->current;
 		return;
 	}
-#ifdef _WIN32
+// LordHavoc: clipboard stuff in an SDL app?  no thanks
+//#ifdef _WIN32
+#if 0
 	if ((key == 'V' || key == 'v') && GetKeyState (VK_CONTROL) < 0) {
 		if (OpenClipboard (NULL)) {
 			th = GetClipboardData (CF_TEXT);
@@ -308,15 +310,15 @@ Key_Console (int key)
 				clipText = GlobalLock (th);
 				if (clipText) {
 					textCopied = malloc (GlobalSize (th) + 1);
-					strcpy (textCopied, clipText);
-					/* Substitutes a NULL for every token */ strtok (textCopied,
+					Q_strcpy (textCopied, clipText);
+					/* Substitutes a NULL for every token */Q_strtok (textCopied,
 																	 "\n\r\b");
-					i = strlen (textCopied);
+					i = Q_strlen (textCopied);
 					if (i + key_linepos >= MAXCMDLINE)
 						i = MAXCMDLINE - key_linepos;
 					if (i > 0) {
 						textCopied[i] = 0;
-						strcat (key_lines[edit_line], textCopied);
+						Q_strcat (key_lines[edit_line], textCopied);
 						key_linepos += i;;
 					}
 					free (textCopied);
@@ -544,9 +546,9 @@ Key_Bind_f (void)
 // copy the rest of the command line
 	cmd[0] = 0;							// start out with a null string
 	for (i = 2; i < c; i++) {
-		strcat (cmd, Cmd_Argv (i));
+		Q_strcat (cmd, Cmd_Argv (i));
 		if (i != (c - 1))
-			strcat (cmd, " ");
+			Q_strcat (cmd, " ");
 	}
 
 	Key_SetBinding (b, cmd);

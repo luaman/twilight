@@ -261,9 +261,9 @@ R_TranslatePlayerSkin (int playernum)
 	if (!player->name[0])
 		return;
 
-	strcpy (s, Info_ValueForKey (player->userinfo, "skin"));
+	Q_strcpy (s, Info_ValueForKey (player->userinfo, "skin"));
 	COM_StripExtension (s, s);
-	if (player->skin && !strcasecmp (s, player->skin->name))
+	if (player->skin && !Q_strcasecmp (s, player->skin->name))
 		player->skin = NULL;
 
 	if (player->_topcolor != player->topcolor ||

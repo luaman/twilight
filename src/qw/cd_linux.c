@@ -363,7 +363,7 @@ CDAudio_Init (void)
 		return -1;
 
 	if ((i = COM_CheckParm ("-cddev")) != 0 && i < com_argc - 1) {
-		strncpy (cd_dev, com_argv[i + 1], sizeof (cd_dev));
+		Q_strncpy (cd_dev, com_argv[i + 1], sizeof (cd_dev));
 		cd_dev[sizeof (cd_dev) - 1] = 0;
 	}
 

@@ -486,12 +486,12 @@ R_DrawAliasModel (entity_t *e)
 		shadelight = 192 - ambientlight;
 
 	// ZOID: never allow players to go totally black
-	if (!strcmp (clmodel->name, "progs/player.mdl")) {
+	if (!Q_strcmp (clmodel->name, "progs/player.mdl")) {
 		if (ambientlight < 8)
 			ambientlight = shadelight = 8;
 
-	} else if (!strcmp (clmodel->name, "progs/flame2.mdl")
-			   || !strcmp (clmodel->name, "progs/flame.mdl"))
+	} else if (!Q_strcmp (clmodel->name, "progs/flame2.mdl")
+			   || !Q_strcmp (clmodel->name, "progs/flame.mdl"))
 		// HACK HACK HACK -- no fullbright colors, so make torches full light
 		ambientlight = shadelight = 256;
 
@@ -522,7 +522,7 @@ R_DrawAliasModel (entity_t *e)
 	glPushMatrix ();
 	R_RotateForEntity (e);
 
-	if (!strcmp (clmodel->name, "progs/eyes.mdl")) {
+	if (!Q_strcmp (clmodel->name, "progs/eyes.mdl")) {
 		glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
 					  paliashdr->scale_origin[2] - (22 + 8));
 		// double size of eyes, since they are really hard to see in gl

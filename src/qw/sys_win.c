@@ -21,10 +21,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 #include "winquake.h"
-#include "resource.h"
 #include "errno.h"
 #include "fcntl.h"
 #include <limits.h>
+#ifdef WIN32
+#include <io.h>
+#include <direct.h>
+#endif
 
 #define MINIMUM_WIN_MEMORY	0x0c00000
 #define MAXIMUM_WIN_MEMORY	0x1000000
@@ -33,10 +36,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define NOT_FOCUS_SLEEP	20				// sleep time when not focus
 
 int		starttime;
-qboolean ActiveApp, Minimized;
-qboolean	WinNT;
+qboolean	ActiveApp = 1, Minimized = 0; // LordHavoc: FIXME: set these based on the real situation
 
-HWND	hwnd_dialog;		// startup dialog box
+//HWND	hwnd_dialog;		// startup dialog box
 
 static double		pfreq;
 static double		curtime = 0.0;
@@ -64,7 +66,7 @@ void Sys_DebugLog(char *file, char *fmt, ...)
     vsprintf(data, fmt, argptr);
     va_end(argptr);
     fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0666);
-    write(fd, data, strlen(data));
+    write(fd, data, Q_strlen(data));
     close(fd);
 };
 
@@ -78,10 +80,10 @@ FILE IO
 
 /*
 ================
-filelength
+qfilelength
 ================
 */
-int filelength (FILE *f)
+int qfilelength (FILE *f)
 {
 	int		pos;
 	int		end;
@@ -98,10 +100,8 @@ int filelength (FILE *f)
 int	Sys_FileTime (char *path)
 {
 	FILE	*f;
-	int		t, retval;
+	int		retval;
 
-	t = VID_ForceUnlockedAndReturnState ();
-	
 	f = fopen(path, "rb");
 
 	if (f)
@@ -114,7 +114,6 @@ int	Sys_FileTime (char *path)
 		retval = -1;
 	}
 	
-	VID_ForceLockState (t);
 	return retval;
 }
 
@@ -154,9 +153,10 @@ Sys_Init
 */
 void Sys_Init (void)
 {
+#if 0
 	LARGE_INTEGER	PerformanceFreq;
 	unsigned int	lowpart, highpart;
-	OSVERSIONINFO	vinfo;
+#endif
 
 #ifndef SERVERONLY
 	// allocate a named semaphore on the client so the
@@ -178,8 +178,10 @@ void Sys_Init (void)
         "qwcl"); /* Semaphore name      */
 #endif
 
+#if id386
 	MaskExceptions ();
 	Sys_SetFPCW ();
+#endif
 
 #if 0
 	if (!QueryPerformanceFrequency (&PerformanceFreq))
@@ -207,30 +209,13 @@ void Sys_Init (void)
 	// make sure the timer is high precision, otherwise
 	// NT gets 18ms resolution
 	timeBeginPeriod( 1 );
-
-	vinfo.dwOSVersionInfoSize = sizeof(vinfo);
-
-	if (!GetVersionEx (&vinfo))
-		Sys_Error ("Couldn't get OS info");
-
-	if ((vinfo.dwMajorVersion < 4) ||
-		(vinfo.dwPlatformId == VER_PLATFORM_WIN32s))
-	{
-		Sys_Error ("QuakeWorld requires at least Win95 or NT 4.0");
-	}
-	
-	if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_NT)
-		WinNT = true;
-	else
-		WinNT = false;
 }
 
 
 void Sys_Error (char *error, ...)
 {
 	va_list		argptr;
-	char		text[1024], text2[1024];
-	DWORD		dummy;
+	char		text[1024];
 
 	Host_Shutdown ();
 
@@ -250,8 +235,6 @@ void Sys_Error (char *error, ...)
 void Sys_Printf (char *fmt, ...)
 {
 	va_list		argptr;
-	char		text[1024];
-	DWORD		dummy;
 	
 	va_start (argptr,fmt);
 	vprintf (fmt, argptr);
@@ -260,8 +243,6 @@ void Sys_Printf (char *fmt, ...)
 
 void Sys_Quit (void)
 {
-	VID_ForceUnlockedAndReturnState ();
-
 	Host_Shutdown();
 #ifndef SERVERONLY
 	if (tevent)
@@ -374,7 +355,6 @@ double Sys_DoubleTime (void)
 	static DWORD starttime;
 	static qboolean first = true;
 	DWORD now;
-	double t;
 
 	now = timeGetTime();
 
@@ -398,11 +378,13 @@ char *Sys_ConsoleInput (void)
 	static char	text[256];
 	static int		len;
 	INPUT_RECORD	recs[1024];
-	int		count;
-	int		i, dummy;
+	int		dummy;
 	int		ch, numread, numevents;
+#if 0
+	int		i;
 	HANDLE	th;
 	char	*clipText, *textCopied;
+#endif
 
 	for ( ;; )
 	{
@@ -442,12 +424,14 @@ char *Sys_ConsoleInput (void)
 						if (len)
 						{
 							len--;
-							putch('\b');
+							putchar('\b');
 						}
 						break;
 
 					default:
 						Con_Printf("Stupid: %d\n", recs[0].Event.KeyEvent.dwControlKeyState);
+// LordHavoc: clipboard stuff in an SDL app?  no thanks
+#if 0
 						if (((ch=='V' || ch=='v') && (recs[0].Event.KeyEvent.dwControlKeyState & 
 							(LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))) || ((recs[0].Event.KeyEvent.dwControlKeyState 
 							& SHIFT_PRESSED) && (recs[0].Event.KeyEvent.wVirtualKeyCode
@@ -458,15 +442,15 @@ char *Sys_ConsoleInput (void)
 									clipText = GlobalLock(th);
 									if (clipText) {
 										textCopied = malloc(GlobalSize(th)+1);
-										strcpy(textCopied, clipText);
-/* Substitutes a NULL for every token */strtok(textCopied, "\n\r\b");
-										i = strlen(textCopied);
+										Q_strcpy(textCopied, clipText);
+/* Substitutes a NULL for every token */Q_strtok(textCopied, "\n\r\b");
+										i = Q_strlen(textCopied);
 										if (i+len>=256)
 											i=256-len;
 										if (i>0) {
 											textCopied[i]=0;
 											text[len]=0;
-											strcat(text, textCopied);
+											Q_strcat(text, textCopied);
 											len+=dummy;
 											WriteFile(houtput, textCopied, i, &dummy, NULL);
 										}
@@ -476,7 +460,10 @@ char *Sys_ConsoleInput (void)
 								}
 								CloseClipboard();
 							}
-						} else if (ch >= ' ')
+						}
+						else
+#endif
+						if (ch >= ' ')
 						{
 							WriteFile(houtput, &ch, 1, &dummy, NULL);	
 							text[len] = ch;
@@ -497,22 +484,6 @@ void Sys_Sleep (void)
 {
 }
 
-
-void Sys_SendKeyEvents (void)
-{
-    MSG        msg;
-
-	while (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
-	{
-	// we always update if there are any event, even if we're paused
-		scr_skipupdate = 0;
-
-		if (!GetMessage (&msg, NULL, 0, 0))
-			Sys_Quit ();
-      	TranslateMessage (&msg);
-      	DispatchMessage (&msg);
-	}
-}
 
 
 
@@ -546,18 +517,16 @@ HINSTANCE	global_hInstance;
 int			global_nCmdShow;
 char		*argv[MAX_NUM_ARGVS];
 static char	*empty_string = "";
-HWND		hwnd_dialog;
+//HWND		hwnd_dialog;
 
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    MSG				msg;
 	quakeparms_t	parms;
 	double			time, oldtime, newtime;
 	MEMORYSTATUS	lpBuffer;
 	static	char	cwd[1024];
 	int				t;
-	RECT			rect;
 
     /* previous instances do not exist in Win32 */
     if (hPrevInstance)
@@ -610,6 +579,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	parms.argc = com_argc;
 	parms.argv = com_argv;
 
+	/*
 	hwnd_dialog = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, NULL);
 
 	if (hwnd_dialog)
@@ -629,6 +599,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 		UpdateWindow (hwnd_dialog);
 		SetForegroundWindow (hwnd_dialog);
 	}
+	*/
 
 // take the greater of all the available memory or half the total memory,
 // but at least 8 Mb and no more than 16 Mb, unless they explicitly
@@ -676,12 +647,12 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	while (1)
 	{
 	// yield the CPU for a little while when paused, minimized, or not the focus
-		if ((cl.paused && (!ActiveApp && !DDActive)) || Minimized || block_drawing)
+		if ((cl.paused && !ActiveApp) || Minimized || block_drawing)
 		{
 			SleepUntilInput (PAUSE_SLEEP);
 			scr_skipupdate = 1;		// no point in bothering to draw
 		}
-		else if (!ActiveApp && !DDActive)
+		else if (!ActiveApp)
 		{
 			SleepUntilInput (NOT_FOCUS_SLEEP);
 		}
