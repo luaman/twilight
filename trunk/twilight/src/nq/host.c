@@ -519,15 +519,18 @@ not reinitialize anything.
 void
 Host_ClearMemory (void)
 {
-	if (!cl.zone && !sv.zone)		// Nothing to clear.
+	if (!cl.worldmodel && !sv.worldmodel)		// Nothing to clear.
 		return;
 
-	Com_DPrintf ("Clearing memory %p %p\n", sv.zone, cl.zone);
 	Mod_ClearAll ();
 
 	cls.signon = 0;
-	Zone_FreeZone (&sv.zone);
-	Zone_FreeZone (&cl.zone);
+	if (cl.worldmodel)
+		Mod_UnloadModel (cl.worldmodel);
+	if (sv.worldmodel)
+		Mod_UnloadModel (sv.worldmodel);
+	Zone_EmptyZone (sv_zone);
+	Zone_EmptyZone (cl_zone);
 	memset (&sv, 0, sizeof (sv));
 	memset (&cl, 0, sizeof (cl));
 }
@@ -837,6 +840,7 @@ Host_Init ()
 	NET_Init_Cvars ();				// net related cvars
 	Host_InitLocal_Cvars ();		// local host related cvars
 	PR_Init_Cvars();				// pr_* related cvars
+	SV_Init_Cvars ();				// setup related cvars
 
 	Chase_Init ();					// setup chase camera
 	COM_Init ();					// setup filesystem, add related commands

@@ -219,8 +219,6 @@ typedef struct {
 
 	// frag scoreboard
 	scoreboard_t	*scores;				// [cl.maxclients]
-
-	memzone_t		*zone;
 } client_state_t;
 
 
@@ -265,7 +263,8 @@ extern struct cvar_s *m_filter;
 #define	MAX_TEMP_ENTITIES	64			// lightning bolts, etc
 #define	MAX_STATIC_ENTITIES	128			// torches, etc
 
-extern client_state_t cl;
+extern memzone_t		*cl_zone;
+extern client_state_t	 cl;
 
 // FIXME, allocate dynamically
 extern entity_t cl_entities[MAX_EDICTS];

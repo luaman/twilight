@@ -149,7 +149,7 @@ Draw_CachePic (char *path)
 	if (menu_numcachepics == MAX_CACHED_PICS)
 		Sys_Error ("menu_numcachepics == MAX_CACHED_PICS");
 	menu_numcachepics++;
-	strcpy (pic->name, path);
+	strlcpy (pic->name, path, sizeof(pic->name));
 
 	/* load the pic from disk */
 	dat = (qpic_t *) COM_LoadTempFile (path, true);
@@ -1323,7 +1323,7 @@ R_LoadTexture (const char *identifier, image_t *img, int flags)
 	glt->next = gltextures;
 	gltextures = glt;
 
-	strcpy (glt->identifier, identifier);
+	strlcpy (glt->identifier, identifier, sizeof(glt->identifier));
 	qglGenTextures (1, &glt->texnum);
 
 setuptexture:
@@ -1344,7 +1344,7 @@ setuptexture:
 					flags);
 			break;
 		default:
-			return 0;
+			Sys_Error ("Bad bpp!");
 	}
 
 	return glt->texnum;
@@ -1389,7 +1389,7 @@ GL_LoadTexture (const char *identifier, Uint width, Uint height, Uint8 *data,
 	glt->next = gltextures;
 	gltextures = glt;
 
-	strcpy (glt->identifier, identifier);
+	strlcpy (glt->identifier, identifier, sizeof(glt->identifier));
 	qglGenTextures (1, &glt->texnum);
 
 setuptexture:
@@ -1408,7 +1408,7 @@ setuptexture:
 			GL_Upload32 ((Uint32 *) data, width, height, flags);
 			break;
 		default:
-			return 0;
+			Sys_Error ("Bad bpp!");
 	}
 
 	return glt->texnum;

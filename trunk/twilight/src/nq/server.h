@@ -79,9 +79,6 @@ typedef struct {
 
 	sizebuf_t		signon;
 	Uint8			signon_buf[8192];
-
-	memzone_t		*zone;
-	/* Everything in the struct should be allocated in this. */
 } server_t;
 
 
@@ -197,6 +194,7 @@ extern struct cvar_s *timelimit;
 
 extern server_static_t svs;				// persistant server info
 extern server_t sv;						// local server
+extern memzone_t *sv_zone;
 
 extern client_t *host_client;
 
@@ -208,6 +206,7 @@ extern edict_t *sv_player;
 
 //===========================================================
 
+void SV_Init_Cvars (void);
 void SV_Init (void);
 
 void SV_StartParticle (vec3_t org, vec3_t dir, int color, int count);

@@ -599,7 +599,7 @@ Host_Loadgame_f (void)
 	for (i = 0; i < MAX_LIGHTSTYLES; i++)
 	{
 		fscanf (f, "%s\n", str);
-		sv.lightstyles[i] = Zone_Alloc (sv.zone, strlen (str) + 1);
+		sv.lightstyles[i] = Zone_Alloc (sv_zone, strlen (str) + 1);
 		strcpy (sv.lightstyles[i], str);
 	}
 

@@ -67,7 +67,7 @@ ResampleSfx (sfx_t *sfx, int inrate, int inwidth, Uint8 *data)
 		sfx->width = 1;
 	else
 		sfx->width = inwidth;
-	sfx->stereo = 0;
+	sfx->channels = 1;
 
 // resample / decimate to the current source rate
 
@@ -127,6 +127,7 @@ S_LoadSound (sfx_t *s)
 	}
 
 	info = GetWavinfo (s->name, data, com_filesize);
+
 	if (info.channels != 1) {
 		Com_Printf ("%s is a stereo sample\n", s->name);
 		Zone_Free (data);
@@ -149,7 +150,7 @@ S_LoadSound (sfx_t *s)
 	s->loopstart = info.loopstart;
 	s->speed = info.rate;
 	s->width = info.width;
-	s->stereo = info.channels;
+	s->channels = info.channels;
 
 	ResampleSfx (s, s->speed, s->width, data + info.dataofs);
 

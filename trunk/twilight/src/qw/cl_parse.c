@@ -580,8 +580,6 @@ CL_ParseServerData (void)
 //
 	CL_ClearState ();
 
-	cl.zone = Zone_AllocZone ("client");
-
 // parse protocol version number
 // allow 2.2 and 2.29 demos to play
 	protover = MSG_ReadLong ();

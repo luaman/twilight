@@ -3,12 +3,6 @@ Project Twilight todo list
 
 Missing stuff needed for 0.2:
 
-  - Loadtimes are too long.  This is caused by model triangulation.  Cache
-    this out to disk so we don't have to regenerate it all the time.  Also
-    be sure to avoid the glquake corrupt model mesh problem - regenerate the
-    file if it doesn't match the model..  (This one's yours, Zeph)
-    (Actually, the triangulation is under half of the load time. :/)
-
 We're almost there for 0.2, there are a number of bugs left which need to be
 fixed before release, they're marked RC below.
 
@@ -17,10 +11,12 @@ Bugs we know about:
   - RC: When you touch the bottom of a pool, you make a splash sound.  DP
     broke this and DP has fixed it.
   - RC: Fix net_udp (line 112) so we don't resolve non-network connections.
-  - RC: NQ dedicated server needs to not try to load certain parts of models
-    or else it will crash because of no vertex arrays.
+    (Non-trivial)
+  - RC: We need to split the model loading into server and client versions.
+    (Need to load much less for the server.)
   - RC: userpath is not properly created if it doesn't exist.  Needs to be.
   - RC: Interpolation is broken in both NQ/QW.
+    (Can LH do this /please/?)
   - RC: Need to print out Id's Copyright message on engine startup.
   - RC: Need a 3dfx quirk for limiting vertex array size.  We need the
     output of the OpenGL strings in Win32 for this.
@@ -29,8 +25,6 @@ Bugs we know about:
   - lights do not react to moving bmodels, untransforming into the
     bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.
-  - Twilight uses far too much memory.  Textures should be freed when they
-    are uploaded for one, and we should use fewer big static buffers.
   - 3dfxvgl.dll does not work with Twilight even though it should.  Forest
     can try a minimal example SDL app which binds OpenGL dynamically if we
     get him one.  Workaround: copy 3dfxvgl.dll to opengl32.dll in your Quake
@@ -91,7 +85,7 @@ Stuff that isn't needed for 0.2, but would be nice:
       movie has a custom trail for the General's cigar.  I shit you not.
     + Anything else?  List it here..
   - gl_colorlights can/should be made to work without +set
-  - Transfusion support
+  - Transfusion support (FIXME: Is this AKA bloodbath?)
     + Custom sbar
     + Custom keybindings
     + builtin to register Cvars

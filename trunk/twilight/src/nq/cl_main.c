@@ -64,8 +64,9 @@ cvar_t		*cl_mapname;
 
 cvar_t		*show_fps;
 
-client_static_t cls;
-client_state_t cl;
+client_static_t	 cls;
+client_state_t	 cl;
+memzone_t		*cl_zone;
 
 // FIXME: put these on hunk?
 entity_t	cl_entities[MAX_EDICTS];
@@ -88,7 +89,9 @@ CL_ClearState (void)
 		Host_ClearMemory ();
 
 // wipe the entire cl structure
-	Zone_FreeZone (&cl.zone);
+	if (cl.worldmodel)
+		Mod_UnloadModel (cl.worldmodel);
+	Zone_EmptyZone (cl_zone);
 	memset (&cl, 0, sizeof (cl));
 
 	// we don't get this from the server, that'd take a new protocol
@@ -737,6 +740,8 @@ CL_Init
 void
 CL_Init (void)
 {
+	cl_zone = Zone_AllocZone ("client");
+
 	SZ_Init (&cls.message, cls.msg_buf, sizeof(cls.msg_buf));
 
 	CL_Input_Init_Cvars ();

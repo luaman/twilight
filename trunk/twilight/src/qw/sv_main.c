@@ -1640,6 +1640,8 @@ SV_Init (void)
 	Sys_Init ();
 	Zone_Init_Commands ();
 
+	sv_zone = Zone_AllocZone ("server");
+
 	// These have to be here.
 	fs_shareconf = Cvar_Get ("fs_shareconf", SHARECONF, CVAR_ROM, NULL);
 	fs_userconf = Cvar_Get ("fs_userconf", USERCONF, CVAR_ROM, NULL);
