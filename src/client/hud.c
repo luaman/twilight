@@ -926,18 +926,26 @@ HUD_Draw_Standard_Sbar (void)
 }
 
 void
-HUD_Draw_Single_Stats (void)
+HUD_Draw_Single_Stats (qboolean completed)
 {
 	image_t	*pic;
 	double	time;
-	int		dig, num, x;
+	int		dig, num, x, y;
 
-	x = (vid.width_2d / 2) - 137;
+	x = (vid.width_2d / 2) - 160;
 	if (x < 0)
 		x = 0;
+	y = (vid.height_2d / 2) - 120;
+	if (y < 0)
+		y = 0;
+
+	if (completed) {
+		pic = Draw_CacheImg ("gfx/complete");
+		Draw_Img (x + 64, y + 24, pic);
+	}
 
 	pic = Draw_CacheImg ("gfx/inter");
-	Draw_Img (x + 0, 56, pic);
+	Draw_Img (x + 0, y + 56, pic);
 
 	// time
 	if (ccl.completed_time)
@@ -946,19 +954,19 @@ HUD_Draw_Single_Stats (void)
 		time = ccl.time;
 
 	dig = time / 60;
-	HUD_DrawNum (x + 160, 64, dig, 3, 0);
+	HUD_DrawNum (x + 160, y + 64, dig, 3, 0);
 	num = time - dig * 60;
-	Draw_Img (x + 234, 64, sb_colon);
-	Draw_Img (x + 246, 64, sb_nums[0][num / 10]);
-	Draw_Img (x + 266, 64, sb_nums[0][num % 10]);
+	Draw_Img (x + 234, y + 64, sb_colon);
+	Draw_Img (x + 246, y + 64, sb_nums[0][num / 10]);
+	Draw_Img (x + 266, y + 64, sb_nums[0][num % 10]);
 
-	HUD_DrawNum (x + 160, 104, ccl.stats[STAT_SECRETS], 3, 0);
-	Draw_Img (x + 232, 104, sb_slash);
-	HUD_DrawNum (x + 240, 104, ccl.stats[STAT_TOTALSECRETS], 3, 0);
+	HUD_DrawNum (x + 160, y + 104, ccl.stats[STAT_SECRETS], 3, 0);
+	Draw_Img (x + 232, y + 104, sb_slash);
+	HUD_DrawNum (x + 240, y + 104, ccl.stats[STAT_TOTALSECRETS], 3, 0);
 
-	HUD_DrawNum (x + 160, 144, ccl.stats[STAT_MONSTERS], 3, 0);
-	Draw_Img (x + 232, 144, sb_slash);
-	HUD_DrawNum (x + 240, 144, ccl.stats[STAT_TOTALMONSTERS], 3, 0);
+	HUD_DrawNum (x + 160, y + 144, ccl.stats[STAT_MONSTERS], 3, 0);
+	Draw_Img (x + 232, y + 144, sb_slash);
+	HUD_DrawNum (x + 240, y + 144, ccl.stats[STAT_TOTALMONSTERS], 3, 0);
 }
 
 void
@@ -985,7 +993,7 @@ HUD_Draw (void)
 
 	if (show) {
 		if (ccl.game_teams == GAME_COOP || ccl.game_teams == GAME_SINGLE) {
-			HUD_Draw_Single_Stats ();
+			HUD_Draw_Single_Stats (false);
 			return;
 		}
 
@@ -1003,8 +1011,6 @@ HUD_Draw (void)
 void
 HUD_IntermissionOverlay (void)
 {
-	image_t	*pic;
-
 	if (ccls.state != ca_active)
 		return;
 
@@ -1017,9 +1023,7 @@ HUD_IntermissionOverlay (void)
 			break;
 		case GAME_COOP:
 		case GAME_SINGLE:
-			pic = Draw_CacheImg ("gfx/complete");
-			Draw_Img (64, 24, pic);
-			HUD_Draw_Single_Stats ();
+			HUD_Draw_Single_Stats (true);
 			break;
 	}
 }
