@@ -508,7 +508,6 @@ CL_LinkPacketEntities (void)
 
 		if (!s1->modelindex)
 			continue;		// Vic: is it correct?
-//			return;
 
 		V_AddEntity ( ent );
 
@@ -531,6 +530,17 @@ CL_LinkPacketEntities (void)
 		}
 
 		ent->model = model = cl.model_precache[s1->modelindex];	// Model.
+
+		/*
+		 * Vic: prevent interpolating frames
+		 * of different models. Damn, I hate this
+		 * style of commenting :)
+		 */
+		if (ent->model != model)
+		{
+			ent->model = model;
+			ent->times = 0;
+		}
 
 		// rotate binary objects locally
 		if (model->flags & EF_ROTATE) {

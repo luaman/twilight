@@ -684,7 +684,6 @@ V_CalcRefdef (void)
 	if (view_message->flags & PF_DEAD)	/* PF_GIB will also set PF_DEAD */
 		r_refdef.viewangles[ROLL] = 80;	/*   dead view angle */
 
-
 	/* offsets */
 	AngleVectors (cl.simangles, forward, right, up);
 
@@ -710,8 +709,16 @@ V_CalcRefdef (void)
 
 	if (view_message->flags & (PF_GIB | PF_DEAD))
 		view->model = NULL;
-	else
-		view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
+	else {
+		model_t *model = cl.model_precache[cl.stats[STAT_WEAPON]];
+
+		if (view->model != model)
+		{
+			view->model = model;
+			view->times = 0;
+		}
+	}
+
 	view->cur.frame = view_message->weaponframe;
 
 	/* set up the refresh position */
