@@ -33,6 +33,8 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <stdio.h>
+
 #include "quakedef.h"
 #include "cmd.h"
 #include "console.h"
@@ -844,7 +846,7 @@ Host_Color_f (void)
 	}
 
 	if (Cmd_Argc () == 2)
-		top = bottom = atoi (Cmd_Argv (1));
+		top = bottom = Q_atoi (Cmd_Argv (1));
 	else {
 		top = Q_atoi (Cmd_Argv (1));
 		bottom = Q_atoi (Cmd_Argv (2));

@@ -69,6 +69,8 @@ unsigned long inet_addr (const char *cp);
 #endif
 #endif // BAN_TEST
 
+#include <stdio.h>
+
 #include "quakedef.h"
 #include "cmd.h"
 #include "console.h"

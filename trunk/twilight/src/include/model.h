@@ -28,6 +28,7 @@
 #define __MODEL__
 
 #include "bspfile.h"
+#include "common.h"
 #include "modelgen.h"
 #include "spritegn.h"
 #include "zone.h"

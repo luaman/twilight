@@ -58,6 +58,8 @@ static const char rcsid[] =
 #include <sys/filio.h>
 #endif
 
+#include <stdio.h>
+
 #include "quakedef.h"
 #include "console.h"
 #include "cvar.h"
