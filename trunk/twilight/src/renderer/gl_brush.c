@@ -28,6 +28,7 @@ static const char rcsid[] =
 #include "twiconfig.h"
 
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "quakedef.h"
 #include "cvar.h"
@@ -364,16 +365,13 @@ R_DrawTextureChains (model_t *mod, int frame,
 	chain_item_t	*c;
 	brushhdr_t		*brush = mod->brush;
 
-	if (gl_vbo) {
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_VERTS]);
-		qglVertexPointer (3, GL_FLOAT, sizeof(vertex_t), 0);
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC0]);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), 0);
-	} else {
-		qglVertexPointer (3, GL_FLOAT, sizeof(vertex_t), brush->verts);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), brush->tcoords[0]);
-		TWI_PreVDrawCVA(0, brush->numsets);
-	}
+	if (gl_vbo)
+		TWI_ChangeVDrawArraysVBO (brush->numsets, 0,
+				brush->vbo_objects[VBO_VERTS], brush->vbo_objects[VBO_TC0],
+				brush->vbo_objects[VBO_TC1], 0, 0);
+	else
+		TWI_ChangeVDrawArrays (brush->numsets, 1, brush->verts,
+				brush->tcoords[0], brush->tcoords[1], NULL, NULL);
 	
 	if (matrix) {
 		qglPushMatrix ();
@@ -425,17 +423,6 @@ R_DrawTextureChains (model_t *mod, int frame,
 			qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		}
 		qglEnable (GL_TEXTURE_2D);
-
-		if (gl_vbo) {
-			qglClientActiveTextureARB(GL_TEXTURE1_ARB);
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC1]);
-			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), 0);
-			qglClientActiveTextureARB(GL_TEXTURE0_ARB);
-		} else {
-			qglClientActiveTextureARB(GL_TEXTURE1_ARB);
-			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), brush->tcoords[1]);
-			qglClientActiveTextureARB(GL_TEXTURE0_ARB);
-		}
 
 		for (i = 0; i < brush->numtextures; i++)
 		{
@@ -498,11 +485,13 @@ R_DrawTextureChains (model_t *mod, int frame,
 		qglBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
 
 
-		if (gl_vbo) {
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC1]);
-			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), 0);
-		} else
-			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), brush->tcoords[1]);
+		if (gl_vbo)
+			TWI_ChangeVDrawArraysVBO (brush->numsets, 0,
+					brush->vbo_objects[VBO_VERTS], brush->vbo_objects[VBO_TC1],
+					0, 0, 0);
+		else
+			TWI_ChangeVDrawArrays (brush->numsets, 1, brush->verts,
+					brush->tcoords[1], NULL, NULL, NULL);
 
 		qglEnable (GL_BLEND);
 		for (i = 0; i < brush->lightblock.num; i++)
@@ -520,11 +509,13 @@ R_DrawTextureChains (model_t *mod, int frame,
 			}
 		}
 
-		if (gl_vbo) {
-			qglBindBufferARB(GL_ARRAY_BUFFER_ARB, brush->vbo_objects[VBO_TC0]);
-			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), 0);
-		} else
-			qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), brush->tcoords[0]);
+		if (gl_vbo)
+			TWI_ChangeVDrawArraysVBO (brush->numsets, 0,
+					brush->vbo_objects[VBO_VERTS], brush->vbo_objects[VBO_TC0],
+					0, 0, 0);
+		else
+			TWI_ChangeVDrawArrays (brush->numsets, 1, brush->verts,
+					brush->tcoords[0], NULL, NULL, NULL);
 
 		qglDisable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -570,12 +561,9 @@ R_DrawTextureChains (model_t *mod, int frame,
 		R_DrawLiquidTextureChains (mod, true);
 
 	if (gl_vbo)
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		TWI_ChangeVDrawArraysVBO (brush->numsets, 0, 0, 0, 0, 0, 0);
 	else
-		TWI_PostVDrawCVA ();
-
-	GLArrays_Reset_Vertex ();
-	GLArrays_Reset_TC (true);
+		TWI_ChangeVDrawArrays (brush->numsets, 0, NULL, NULL, NULL, NULL, NULL);
 
 	if (matrix)
 		qglPopMatrix ();

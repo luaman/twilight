@@ -35,7 +35,6 @@
 #include "video.h"
 #include "vis.h"
 #include "gl_info.h"
-#include "gl_arrays.h"
 #include "entities.h"
 #include "gl_light.h"
 #include "gl_brush.h"

@@ -46,19 +46,23 @@ colorf_t	*scf_array_p;
 colorub_t	*scub_array_p;
 */
 
-GLint		v_index, i_index;
+GLuint		v_index, i_index;
 qboolean	va_locked;
 
-GLint		MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
+void		*_varray, *_tc0array, *_tc1array, *_carray;
+
+GLuint		MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
 
 cvar_t *gl_varray_size;
 cvar_t *gl_iarray_size;
+cvar_t *gl_copy_arrays;
 
 void
 GLArrays_Init_Cvars (void)
 {
 	gl_varray_size = Cvar_Get ("gl_varray_size", "2048", CVAR_ARCHIVE | CVAR_ROM, NULL);
 	gl_iarray_size = Cvar_Get ("gl_iarray_size", "2048", CVAR_ARCHIVE | CVAR_ROM, NULL);
+	gl_copy_arrays = Cvar_Get ("gl_copy_arrays", "0", CVAR_ARCHIVE, NULL);
 }
 
 void

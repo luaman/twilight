@@ -27,6 +27,8 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
+#include <unistd.h>
+
 #include "cvar.h"
 #include "sys.h"
 #include "gl_info.h"
@@ -80,14 +82,14 @@ static void
 R_SetupAliasFrame (aliashdr_t *paliashdr, entity_common_t *e)
 {
 	float				l;
-	int					pose_num, i;
+	GLuint				pose_num, i;
 	maliasframedesc_t	*frame;
 	maliaspose_t		*pose;
 
 	frame = &paliashdr->frames[e->frame[0]];
 
 	if (frame->numposes > 1)
-		pose_num = (int) (r_time / frame->interval) % frame->numposes;
+		pose_num = (GLuint) (r_time / frame->interval) % frame->numposes;
 	else
 		pose_num = 0;
 
@@ -113,10 +115,10 @@ static void
 R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_common_t *e)
 {
 	float				d, frac;
-	int					i1, i2, i, j;
+	GLuint				i1, i2, i, j;
 	maliaspose_t		*poses[4];
 	float				fracs[4];
-	int					num_frames = 0;
+	GLuint				num_frames = 0;
 	maliasframedesc_t	*frame;
 
 	for (i = 0; i < 2; i++) {
@@ -351,23 +353,22 @@ R_DrawAliasModel ()
 {
 	qglPushMatrix ();
 
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), paliashdr->tcarray);
+	TWI_ChangeVDrawArrays (paliashdr->numverts, 1, NULL, paliashdr->tcarray,
+			NULL, NULL, NULL);
 
 	qglMultTransposeMatrixf ((GLfloat *) matrix);
-
-	TWI_PreVDrawCVA (0, paliashdr->numverts);
 
 	if (!has_top && !has_bottom)
 		R_DrawSubSkin (paliashdr, &skin->base[anim], NULL);
 	else
 		R_DrawSubSkin (paliashdr, &skin->base_team[anim], NULL);
 
-	TWI_PostVDrawCVA ();
-
 	if (has_top || has_bottom || has_fb) {
 		qglEnable (GL_BLEND);
 		qglDepthMask (GL_FALSE);
-		TWI_PreVDraw (0, paliashdr->numverts);
+
+		TWI_ChangeVDrawArrays (paliashdr->numverts, 0, NULL, paliashdr->tcarray,
+				NULL, NULL, NULL);
 	}
 
 	if (has_top)
@@ -386,12 +387,11 @@ R_DrawAliasModel ()
 	}
 
 	if (has_top || has_bottom || has_fb) {
-		TWI_PostVDraw ();
 		qglDepthMask (GL_TRUE);
 		qglDisable (GL_BLEND);
 	}
 
-	GLArrays_Reset_TC (false);
+	TWI_ChangeVDrawArrays(paliashdr->numverts, 0, NULL, NULL, NULL, NULL, NULL);
 
 	qglPopMatrix ();
 }
@@ -419,14 +419,9 @@ R_DrawAliasModelNV ()
 {
 	qglPushMatrix ();
 
-	qglClientActiveTextureARB(GL_TEXTURE1_ARB);
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), paliashdr->tcarray);
-	qglClientActiveTextureARB(GL_TEXTURE0_ARB);
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), paliashdr->tcarray);
+	TWI_ChangeVDrawArrays(paliashdr->numverts, 1, NULL, paliashdr->tcarray, paliashdr->tcarray, NULL, NULL);
 
 	qglMultTransposeMatrixf ((GLfloat *) matrix);
-
-	TWI_PreVDrawCVA (0, paliashdr->numverts);
 
 	if (has_fb) {
 		qglCombinerOutputNV (GL_COMBINER0_NV, GL_RGB, GL_SPARE0_NV, GL_SPARE1_NV, GL_DISCARD_NV, GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -466,9 +461,7 @@ R_DrawAliasModelNV ()
 		qglDisable (GL_BLEND);
 	}
 
-	TWI_PostVDrawCVA ();
-
-	GLArrays_Reset_TC (true);
+	TWI_ChangeVDrawArrays(paliashdr->numverts, 0, NULL, NULL, NULL, NULL, NULL);
 
 	qglPopMatrix ();
 }

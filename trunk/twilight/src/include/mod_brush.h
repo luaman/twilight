@@ -53,6 +53,9 @@ BRUSH MODELS
 #define B_TC_v(b,tc,n)		((b->tcoords[tc])[n].v)
 #define B_TC(b,tc,n,e)		((b->tcoords[tc])[n].v[e])
 
+#define B_Vert_r(b,n)		&(b->verts[n])
+#define B_TC_r(b,tc,n)		&((b->tcoords[tc])[n])
+
 //
 // in memory representation
 //

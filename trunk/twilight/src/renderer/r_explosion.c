@@ -33,7 +33,6 @@ static const char rcsid[] =
 #include "collision.h"
 #include "common.h"
 #include "cvar.h"
-#include "draw.h"
 #include "gl_textures.h"
 #include "mathlib.h"
 #include "strlib.h"

@@ -33,8 +33,7 @@ static const char rcsid[] =
 #include <stdio.h>
 
 #include "mathlib.h"
-
-void        Sys_Error (char *error, ...);
+#include "sys.h"
 
 vec3_t      vec3_origin = { 0, 0, 0 };
 

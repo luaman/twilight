@@ -52,20 +52,12 @@ Can safely be performed in place.
 ==================
 */
 static void
-W_CleanupName (char *in, char *out)
+W_CleanupName (const char *in, char *out)
 {
 	int         i;
-	int         c;
 
-	for (i = 0; i < 16; i++) {
-		c = in[i];
-		if (!c)
-			break;
-
-		if (c >= 'A' && c <= 'Z')
-			c += ('a' - 'A');
-		out[i] = c;
-	}
+	for (i = 0; (i < 16) && in[i]; i++)
+		out[i] = tolower(in[i]);
 
 	for (; i < 16; i++)
 		out[i] = 0;
@@ -79,7 +71,7 @@ W_LoadWadFile
 ====================
 */
 void
-W_LoadWadFile (char *filename)
+W_LoadWadFile (const char *filename)
 {
 	lumpinfo_t *lump_p;
 	wadinfo_t  *header;
@@ -119,7 +111,7 @@ W_GetLumpinfo
 =============
 */
 static lumpinfo_t *
-W_GetLumpinfo (char *name)
+W_GetLumpinfo (const char *name)
 {
 	int         i;
 	lumpinfo_t *lump_p;
@@ -136,7 +128,7 @@ W_GetLumpinfo (char *name)
 }
 
 void       *
-W_GetLumpName (char *name)
+W_GetLumpName (const char *name)
 {
 	lumpinfo_t *lump;
 

@@ -80,10 +80,10 @@ CRC_Init (unsigned short *crcvalue)
 	*crcvalue = CRC_INIT_VALUE;
 }
 
-unsigned short
-CRC_Block (Uint8 *start, size_t count)
+Uint16
+CRC_Block (const Uint8 *start, size_t count)
 {
-	unsigned short crc;
+	Uint16 crc;
 
 	CRC_Init (&crc);
 	while (count--)
@@ -171,7 +171,7 @@ For proxy protecting
 ====================
 */
 Uint8
-COM_BlockSequenceCRCByte (Uint8 *base, size_t length, int sequence)
+COM_BlockSequenceCRCByte (const Uint8 *base, size_t length, int sequence)
 {
 	unsigned short crc;
 	Uint8      *p;

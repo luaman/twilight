@@ -94,7 +94,7 @@ where the given parameter apears, or 0 if not present
 ================
 */
 int
-COM_CheckParm (char *parm)
+COM_CheckParm (const char *parm)
 {
     int			i;
 

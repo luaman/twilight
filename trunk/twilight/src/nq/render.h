@@ -35,7 +35,6 @@
 #include "video.h"
 #include "vis.h"
 #include "gl_info.h"
-#include "gl_arrays.h"
 #include "quakedef.h"
 #include "matrixlib.h"
 #include "r_part.h"

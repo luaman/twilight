@@ -72,13 +72,10 @@ EmitWaterPolys (model_t *mod, glpoly_t *p, qboolean arranged)
 	for (; p; p = p->next)
 	{
 		if (!arranged) {
-			memcpy(v_array_v(0), B_Vert_v(brush, p->start),
-					sizeof(vertex_t) * p->numverts);
-			memcpy(tc0_array_v(0), B_TC_v(brush, 0, p->start),
-					sizeof(texcoord_t) * p->numverts);
-			TWI_PreVDraw (0, p->numverts);
+			TWI_ChangeVDrawArrays (p->numverts, 0, B_Vert_r(brush, p->start),
+					B_TC_r(brush, 0, p->start), NULL, NULL, NULL);
 			qglDrawArrays (GL_TRIANGLE_FAN, 0, p->numverts);
-			TWI_PostVDraw ();
+			TWI_ChangeVDrawArrays (p->numverts,0, NULL, NULL, NULL, NULL, NULL);
 		} else {
 			qglDrawArrays (GL_TRIANGLE_FAN, p->start, p->numverts);
 		}
@@ -91,18 +88,16 @@ void
 R_Draw_Liquid_Chain (model_t *mod, chain_head_t *chain, qboolean arranged)
 {
 	Uint			 i;
-	chain_item_t	*c;
 	qboolean		 bound;
 
-	c = chain->items;
 	bound = false;
 	for (i = 0; i < chain->n_items; i++) {
-		if (c[i].visframe == vis_framecount) {
+		if (chain->items[i].visframe == vis_framecount) {
 			if (!bound) {
 				bound = true;
 				qglBindTexture (GL_TEXTURE_2D, chain->texture->gl_texturenum);
 			}
-			EmitWaterPolys (mod, c[i].surf->polys, arranged);
+			EmitWaterPolys (mod, chain->items[i].surf->polys, arranged);
 		}
 	}
 }

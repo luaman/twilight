@@ -70,12 +70,8 @@ typedef struct {
 	char        name[16];				// must be null terminated
 } lumpinfo_t;
 
-extern int  wad_numlumps;
-extern lumpinfo_t *wad_lumps;
-extern Uint8 *wad_base;
-
-void        W_LoadWadFile (char *filename);
-void       *W_GetLumpName (char *name);
+void        W_LoadWadFile (const char *filename);
+void       *W_GetLumpName (const char *name);
 
 void        SwapPic (qpic_t *pic);
 

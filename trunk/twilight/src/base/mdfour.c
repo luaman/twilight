@@ -142,7 +142,7 @@ mdfour64 (Uint32 * M)
 }
 
 static void
-copy64 (Uint32 * M, unsigned char *in)
+copy64 (Uint32 * M, const Uint8 *in)
 {
 	int         i;
 
@@ -153,7 +153,7 @@ copy64 (Uint32 * M, unsigned char *in)
 
 
 static void
-copy4 (unsigned char *out, Uint32 x)
+copy4 (Uint8 *out, Uint32 x)
 {
 	out[0] = x & 0xFF;
 	out[1] = (x >> 8) & 0xFF;
@@ -174,11 +174,11 @@ mdfour_begin (struct mdfour *md)
 
 
 static void
-mdfour_tail (unsigned char *in, int n)
+mdfour_tail (const Uint8 *in, int n)
 {
-	unsigned char buf[128];
-	Uint32      M[16];
-	Uint32      b;
+	Uint8	buf[128];
+	Uint32	M[16];
+	Uint32	b;
 
 	m->totalN += n;
 
@@ -204,7 +204,7 @@ mdfour_tail (unsigned char *in, int n)
 
 
 static void
-mdfour_update (struct mdfour *md, unsigned char *in, int n)
+mdfour_update (struct mdfour *md, const Uint8 *in, int n)
 {
 	Uint32      M[16];
 
@@ -226,7 +226,7 @@ mdfour_update (struct mdfour *md, unsigned char *in, int n)
 
 
 static void
-mdfour_result (struct mdfour *md, unsigned char *out)
+mdfour_result (struct mdfour *md, Uint8 *out)
 {
 	m = md;
 
@@ -238,7 +238,7 @@ mdfour_result (struct mdfour *md, unsigned char *out)
 
 
 static void
-mdfour (unsigned char *out, unsigned char *in, int n)
+mdfour (Uint8 *out, const Uint8 *in, int n)
 {
 	struct mdfour md;
 
@@ -249,11 +249,11 @@ mdfour (unsigned char *out, unsigned char *in, int n)
 
 
 Uint32
-Com_BlockChecksum (void *buffer, int length)
+Com_BlockChecksum (const void *buffer, int length)
 {
 	Uint8		digest[16];
 
-	mdfour ((unsigned char *) digest, (unsigned char *) buffer, length);
+	mdfour ((Uint8 *) digest, (const Uint8 *) buffer, length);
 
 	/*
 	 * This is intentional.  digest can't be 4 Uint32s because of

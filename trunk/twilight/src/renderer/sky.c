@@ -70,12 +70,12 @@ Sky_Emit_Chain (model_t *mod, chain_head_t *chain, qboolean arranged)
 			for (p = s->polys; p; p = p->next) 
 			{
 				if (!arranged) {
-					memcpy(v_array_v(0), B_Vert_v(brush, p->start),
-							sizeof(vertex_t) * p->numverts);
+					TWI_ChangeVDrawArrays (p->numverts, 0,
+							B_Vert_r(brush, p->start), NULL, NULL, NULL, NULL);
 
-					TWI_PreVDrawCVA (0, p->numverts);
 					qglDrawArrays (GL_POLYGON, 0, p->numverts);
-					TWI_PostVDrawCVA ();
+					TWI_ChangeVDrawArrays (p->numverts, 0,
+							NULL, NULL, NULL, NULL, NULL);
 				} else {
 					qglDrawArrays (GL_POLYGON, p->start, p->numverts);
 				}
@@ -194,11 +194,14 @@ Sky_Sphere_Draw (void)
 	speedscale -= floor(speedscale);
 
 	qglDepthMask (GL_FALSE);
+	qglDepthFunc (GL_GREATER);
+	qglDepthRange (1, 1);
+
 	qglPushMatrix ();
 	qglTranslatef(r_origin[0], r_origin[1], r_origin[2]);
 
-	qglVertexPointer (3, GL_FLOAT, sizeof(vertex_t), Sky_Sphere_Verts);
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), Sky_Sphere_Texcoords);
+	TWI_ChangeVDrawArrays (Sky_Sphere_Numverts, 1, Sky_Sphere_Verts,
+			Sky_Sphere_Texcoords, Sky_Sphere_Texcoords, NULL, NULL);
 
 	qglMatrixMode (GL_TEXTURE);
 	qglPushMatrix ();
@@ -220,10 +223,6 @@ Sky_Sphere_Draw (void)
 
 		qglDisable (GL_BLEND);
 	} else {
-		qglClientActiveTextureARB (GL_TEXTURE1_ARB);
-		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), Sky_Sphere_Texcoords);
-		qglClientActiveTextureARB (GL_TEXTURE0_ARB);
-
 		qglActiveTextureARB (GL_TEXTURE1_ARB);
 		qglPushMatrix ();
 
@@ -247,10 +246,11 @@ Sky_Sphere_Draw (void)
 	qglPopMatrix ();
 	qglMatrixMode (GL_MODELVIEW);
 
-	GLArrays_Reset_Vertex ();
-	GLArrays_Reset_TC (true);
+	TWI_ChangeVDrawArrays(Sky_Sphere_Numverts, 0, NULL, NULL, NULL, NULL, NULL);
 
 	qglPopMatrix ();
+	qglDepthRange (0, 1);
+	qglDepthFunc (GL_LEQUAL);
 	qglDepthMask (GL_TRUE);
 }
 
@@ -303,80 +303,102 @@ Sky_Changed (cvar_t *unused)
 		sky_type = SKY_SPHERE;
 }
 
-#define SKYBOXVERT(i, x, y, z, s, t)							\
-	((v_array(i, 0) = (x) * 1024.0f + r_origin[0]),				\
-	(v_array(i, 1) = (y) * 1024.0f + r_origin[1]),				\
-	(v_array(i, 2) = (z) * 1024.0f + r_origin[2]),				\
-	(tc_array(i, 0) = (s) * (254.0f/256.0f) + (1.0f/256.0f)),	\
-	(tc_array(i, 1) = (t) * (254.0f/256.0f) + (1.0f/256.0f)))
+#define SKYBOXVERT(i, x, y, z, s, t)						(	\
+	(Sky_Box_Verts[i].v[0] = (x) * 1024.0f),				\
+	(Sky_Box_Verts[i].v[1] = (y) * 1024.0f),				\
+	(Sky_Box_Verts[i].v[2] = (z) * 1024.0f),				\
+	(Sky_Box_Texcoords[i].v[0] = (s) * (254.0f/256.0f) + (1.0f/256.0f)),	\
+	(Sky_Box_Texcoords[i].v[1] = (t) * (254.0f/256.0f) + (1.0f/256.0f)))
+
+#define Sky_Box_Numverts	(4 * 6)
+
+static vertex_t Sky_Box_Verts[Sky_Box_Numverts];
+static texcoord_t Sky_Box_Texcoords[Sky_Box_Numverts];
 
 void
-Sky_Box_Draw (void)
+Sky_Box_Calc (void)
 {
-	qglDepthMask (GL_FALSE);
-	// Brute force method
-
 	// right
-	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[0]);
 	SKYBOXVERT (0,  1,  1,  1, 1, 0);
 	SKYBOXVERT (1,  1,  1, -1, 1, 1);
 	SKYBOXVERT (2, -1,  1, -1, 0, 1);
 	SKYBOXVERT (3, -1,  1,  1, 0, 0);
-	TWI_PreVDraw (0, 4);
-	qglDrawArrays (GL_QUADS, 0, 4);
-	TWI_PostVDraw ();
 
 	// back
-	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[1]);
-	SKYBOXVERT (0, -1,  1,  1, 1, 0);
-	SKYBOXVERT (1, -1,  1, -1, 1, 1);
-	SKYBOXVERT (2, -1, -1, -1, 0, 1);
-	SKYBOXVERT (3, -1, -1,  1, 0, 0);
-	TWI_PreVDraw (0, 4);
-	qglDrawArrays (GL_QUADS, 0, 4);
-	TWI_PostVDraw ();
+	SKYBOXVERT (4, -1,  1,  1, 1, 0);
+	SKYBOXVERT (5, -1,  1, -1, 1, 1);
+	SKYBOXVERT (6, -1, -1, -1, 0, 1);
+	SKYBOXVERT (7, -1, -1,  1, 0, 0);
 
 	// left
-	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[2]);
-	SKYBOXVERT (0, -1, -1,  1, 1, 0);
-	SKYBOXVERT (1, -1, -1, -1, 1, 1);
-	SKYBOXVERT (2,  1, -1, -1, 0, 1);
-	SKYBOXVERT (3,  1, -1,  1, 0, 0);
-	TWI_PreVDraw (0, 4);
-	qglDrawArrays (GL_QUADS, 0, 4);
-	TWI_PostVDraw ();
+	SKYBOXVERT (8, -1, -1,  1, 1, 0);
+	SKYBOXVERT (9, -1, -1, -1, 1, 1);
+	SKYBOXVERT (10,  1, -1, -1, 0, 1);
+	SKYBOXVERT (11,  1, -1,  1, 0, 0);
 
 	// front
 	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[3]);
-	SKYBOXVERT (0,  1, -1,  1, 1, 0);
-	SKYBOXVERT (1,  1, -1, -1, 1, 1);
-	SKYBOXVERT (2,  1,  1, -1, 0, 1);
-	SKYBOXVERT (3,  1,  1,  1, 0, 0);
-	TWI_PreVDraw (0, 4);
-	qglDrawArrays (GL_QUADS, 0, 4);
-	TWI_PostVDraw ();
+	SKYBOXVERT (12,  1, -1,  1, 1, 0);
+	SKYBOXVERT (13,  1, -1, -1, 1, 1);
+	SKYBOXVERT (14,  1,  1, -1, 0, 1);
+	SKYBOXVERT (15,  1,  1,  1, 0, 0);
+
+	// up
+	SKYBOXVERT (16,  1, -1,  1, 1, 0);
+	SKYBOXVERT (17,  1,  1,  1, 1, 1);
+	SKYBOXVERT (18, -1,  1,  1, 0, 1);
+	SKYBOXVERT (19, -1, -1,  1, 0, 0);
+
+	// down
+	SKYBOXVERT (20,  1,  1, -1, 1, 0);
+	SKYBOXVERT (21,  1, -1, -1, 1, 1);
+	SKYBOXVERT (22, -1, -1, -1, 0, 1);
+	SKYBOXVERT (23, -1,  1, -1, 0, 0);
+}
+
+void
+Sky_Box_Draw (void)
+{
+	TWI_ChangeVDrawArrays (Sky_Box_Numverts, 1, Sky_Box_Verts,
+			Sky_Box_Texcoords, NULL, NULL, NULL);
+
+	// Brute force method
+	qglDepthMask (GL_FALSE);
+	qglDepthFunc (GL_GREATER);
+	qglDepthRange (1, 1);
+	qglPushMatrix ();
+	qglTranslatef(r_origin[0], r_origin[1], r_origin[2]);
+
+	// right
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[0]);
+	qglDrawArrays (GL_QUADS, 0 * 4, 4);
+
+	// back
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[1]);
+	qglDrawArrays (GL_QUADS, 1 * 4, 4);
+
+	// left
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[2]);
+	qglDrawArrays (GL_QUADS, 2 * 4, 4);
+
+	// front
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[3]);
+	qglDrawArrays (GL_QUADS, 3 * 4, 4);
 
 	// up
 	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[4]);
-	SKYBOXVERT (0,  1, -1,  1, 1, 0);
-	SKYBOXVERT (1,  1,  1,  1, 1, 1);
-	SKYBOXVERT (2, -1,  1,  1, 0, 1);
-	SKYBOXVERT (3, -1, -1,  1, 0, 0);
-	TWI_PreVDraw (0, 4);
-	qglDrawArrays (GL_QUADS, 0, 4);
-	TWI_PostVDraw ();
+	qglDrawArrays (GL_QUADS, 4 * 4, 4);
 
 	// down
 	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[5]);
-	SKYBOXVERT (0,  1,  1, -1, 1, 0);
-	SKYBOXVERT (1,  1, -1, -1, 1, 1);
-	SKYBOXVERT (2, -1, -1, -1, 0, 1);
-	SKYBOXVERT (3, -1,  1, -1, 0, 0);
-	TWI_PreVDraw (0, 4);
-	qglDrawArrays (GL_QUADS, 0, 4);
-	TWI_PostVDraw ();
+	qglDrawArrays (GL_QUADS, 5 * 4, 4);
 
+	qglPopMatrix ();
+	qglDepthRange (0, 1);
+	qglDepthFunc (GL_LEQUAL);
 	qglDepthMask (GL_TRUE);
+
+	TWI_ChangeVDrawArrays (Sky_Box_Numverts, 0, NULL, NULL, NULL, NULL, NULL);
 }
 
 
@@ -456,6 +478,7 @@ Sky_Init (void)
 {
 	Cmd_AddCommand ("loadsky", &Sky_LoadSky_f);
 	Sky_Sphere_Calc ();
+	Sky_Box_Calc ();
 }
 
 void
