@@ -54,23 +54,13 @@ def check_SDL_config (context):
 
 	# Version.
 	try:
-		sdl_ver_str = os.popen("sdl-config --version").read().strip()
-		sdl_ver = map(int, sdl_ver_str.split("."))
+		sdl_ver_str = string.strip(os.popen("sdl-config --version").read())
+		sdl_ver = map(int, string.split(sdl_ver_str, "."))
 		context.Result (repr(sdl_ver))
 		return (1, sdl_ver)
 	except: # Ok, we don't have sdl-config, let's get desperate.
 		context.Result (0)
 		return (0, [])
-
-#	if ver > sdl_ver:
-#		context.Result (repr(sdl_ver) + " (failed)")
-#		return 0
-
-	# Ok, sdl-config exists, and reports a usable version.
-#	ParseConfig (context.env, "sdl-config --cflags")
-#	ParseConfig (context.env, "sdl-config --libs")
-#	context.Result (1)
-#	return 1
 
 def check_SDL_headers (context):
 	context.Message ('Checking for SDL headers ... ')
@@ -158,9 +148,9 @@ def check_funcs (conf, defs, funcs):
 def check_cheaders (conf, defs, headers):
 	for header in headers:
 		if conf.CheckCHeader (header):
-			str = header.upper()
-			str = str.replace('.', '_')
-			str = str.replace('/', '_')
+			str = string.upper(header)
+			str = string.replace(str, '.', '_')
+			str = string.replace(str, '/', '_')
 			defs.set('HAVE_' + str, 1)
 
 def handle_opts (conf, opts, config_defs, destructive):
@@ -195,7 +185,7 @@ def handle_opts (conf, opts, config_defs, destructive):
 
 def write_c_defines (filename, defs):
 	env.Append (CPPDEFINES = "HAVE_CONFIG_H")
-	fh = file(str(File ("#/src/config.h")), "w")
+	fh = open(str(File ("#/src/config.h")), "w")
 	for key in defs.keys():
 		try:
 			fh.write("#define " + key + "\t\t" + defs[key] + "\n")
