@@ -378,6 +378,14 @@ Mod_LoadTextures (lump_t *l)
 		// the pixels immediately follow the structures
 		memcpy (tx + 1, mt + 1, pixels);
 
+		// HACK HACK HACK
+		if (!strcmp(mt->name, "shot1sid") && mt->width==32 && mt->height==32
+			&& CRC_Block((byte*)(mt+1), mt->width*mt->height) == 65393)
+		{	// This texture in b_shell1.bsp has some of the first 32 pixels painted white.
+			// They are invisible in software, but look really ugly in GL. So we just copy
+			// 32 pixels from the bottom to make it look nice.
+			memcpy (tx+1, (byte *)(tx+1) + 32*31, 32);
+		}
 
 		if (!Q_strncmp (mt->name, "sky", 3))
 			R_InitSky (tx);
@@ -1484,6 +1492,42 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	if (version != ALIAS_VERSION)
 		Sys_Error ("%s has wrong version number (%i should be %i)",
 				   mod->name, version, ALIAS_VERSION);
+
+	mod->modflags = 0;
+
+	if (!Q_strncmp(mod->name, "progs/flame.mdl", 11) ||
+		!Q_strncmp(mod->name, "progs/bolt.mdl", 10) ||
+		!Q_strcmp (mod->name, "progs/lavaball.mdl")) {
+		mod->modflags |= FLAG_FULLBRIGHT;
+		mod->modflags |= FLAG_NOSHADOW;
+	}
+	else if ((!Q_strcmp(mod->name, "progs/missile.mdl")) ||
+		(!Q_strcmp(mod->name, "progs/grenade.mdl")) ||
+		(!Q_strcmp(mod->name, "progs/laser.mdl")) ||
+		(!Q_strcmp(mod->name, "progs/spike.mdl")) ||
+		(!Q_strcmp(mod->name, "progs/s_spike.mdl")) ||
+		(!Q_strcmp(mod->name, "progs/zom_gib")) ||
+		(!Q_strncmp(mod->name, "progs/gib", 9)) ||
+		(!Q_strncmp(mod->name, "progs/h_", 8)) ||
+		(!Q_strncmp(mod->name, "progs/v_", 8))
+		) {
+		mod->modflags |= FLAG_NOSHADOW;
+	}
+	else if (!Q_strcmp(mod->name, "progs/eyes.mdl")) {
+		mod->modflags |= FLAG_DOUBLESIZE;
+	}
+	// keys and runes are fullbright and do not cast shadows
+	else if (
+		!Q_strcmp(mod->name, "progs/w_s_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/m_s_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/b_s_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/w_g_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/m_g_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/b_g_key.mdl") ||
+		!Q_strncmp(mod->name, "progs/end", 9)) {
+		mod->modflags |= FLAG_FULLBRIGHT;
+		mod->modflags |= FLAG_NOSHADOW;
+	}
 
 //
 // allocate space for a working header, plus all the data except the frames,
