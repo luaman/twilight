@@ -63,9 +63,11 @@ static const char rcsid[] =
 #include <errno.h>
 
 #ifdef _WIN32
-// Don't need windows.h till we have win32 GUI console
 # include <io.h>
-# include <conio.h>
+# include <windows.h>
+// the win32 console needs cmd.h so it can directly stuff commands into the command
+// buffer from the message handlers.
+# include "cmd.h"
 #endif
 #ifdef HAVE_EXECINFO_H
 # include <execinfo.h>
@@ -109,6 +111,15 @@ double curtime;
 
 qboolean do_stdin = true;
 qboolean stdin_ready;
+
+#ifdef _WIN32
+HWND hMainWnd = NULL;
+HWND hLogWnd = NULL;
+HWND hEntryWnd = NULL;
+HINSTANCE hOurInstance = NULL;
+HFONT console_font = NULL;
+WNDPROC prev_EntryProc = NULL;
+#endif
 
 // =======================================================================
 // General routines
@@ -162,6 +173,7 @@ Sys_Printf (const char *fmt, ...)
 	vsnprintf (text, sizeof (text), fmt, argptr);
 	va_end (argptr);
 
+#ifndef _WIN32
 	if (sys_asciionly && sys_asciionly->ivalue)
 		for (p = (unsigned char *) text; *p; p++)
 			putc (sys_charmap[*p], stdout);
@@ -172,6 +184,71 @@ Sys_Printf (const char *fmt, ...)
 			else
 				putc (*p, stdout);
 	fflush (stdout);
+#else
+	if (hMainWnd)
+	{
+		char buf[4096];
+		Uint8 *pbuf = buf;
+
+		if (sys_asciionly && sys_asciionly->ivalue)
+		{
+			for(p = (Uint8*)text; *p; p++)
+			{
+				if (*p == '\n')
+				{
+					*pbuf = '\r';
+					pbuf++;
+				}
+
+				*pbuf = sys_charmap[*p];
+				pbuf++;
+			}
+			*pbuf = 0;
+		}
+		else
+		{
+			for (p = (Uint8*) text; *p; p++)
+			{
+				if((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
+				{
+					snprintf(pbuf, sizeof(buf) - (pbuf - buf) + 1, "[%02x]", *p);
+					pbuf += strlen(pbuf);
+				}
+				else
+				{
+					if(*p == '\n')
+					{
+						*pbuf = '\r';
+						pbuf++;
+					}
+					*pbuf = *p;
+					pbuf++;
+				}
+			}
+			*pbuf = 0;
+		}
+
+		{
+			static int	bufsize;
+			int			len;
+
+			len = strlen( buf );
+			bufsize += len;
+			if( bufsize > 0x7FFF ) {
+				SendMessage( hLogWnd, EM_SETSEL, 0, 0xFFFFFFFF );
+				bufsize = len;
+			}
+			else
+				SendMessage (hLogWnd, EM_SETSEL, 0xFFFF, 0xFFFF);
+
+
+			SendMessage( hLogWnd, EM_LINESCROLL, 0, 0xFFFF );
+			SendMessage( hLogWnd, EM_SCROLLCARET, 0, 0 );
+			SendMessage( hLogWnd, EM_REPLACESEL, FALSE, (LPARAM)buf );
+
+		}
+	}
+#endif
 }
 
 void
@@ -291,7 +368,6 @@ Sys_Error (const char *error, ...)
 	fprintf (stderr, "Error: %s\n", text);
 
 	Sys_BackTrace (2);
-	SDL_Quit ();
 	exit (1);
 }
 
@@ -417,36 +493,7 @@ Sys_ConsoleInput (void)
 }
 #else
 {
-	static char text[256];
-	static int  len;
-	int         c;
-
-	// read a line out
-	while (_kbhit ()) {
-		c = _getch ();
-		putch (c);
-		if (c == '\r') {
-			text[len] = 0;
-			putch ('\n');
-			len = 0;
-			return text;
-		}
-		if (c == 8) {
-			if (len) {
-				putch (' ');
-				putch (c);
-				len--;
-				text[len] = 0;
-			}
-			continue;
-		}
-		text[len] = c;
-		len++;
-		text[len] = 0;
-		if (len == sizeof (text))
-			len = 0;
-	}
-
+	// input handling on win32 is handled in the message loop.
 	return NULL;
 }
 #endif
@@ -503,6 +550,176 @@ Sys_ExpandPath (char *str)
 	return buf;
 }
 
+#ifdef _WIN32
+
+LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	static HBRUSH	logBG_brush;
+	NOTIFYICONDATA nd;
+	HRESULT res;
+
+	switch( uMsg ) {
+		case WM_CREATE:
+			logBG_brush = CreateSolidBrush( 0x000000 );
+			break;
+		case WM_ACTIVATE:
+			if( LOWORD( wParam ) != WA_INACTIVE ) {
+				SetFocus( hEntryWnd );
+			}
+			return(0);
+			break;
+		case WM_CLOSE:
+			Cbuf_AddText("quit");
+			return(0);
+			break;
+		case WM_SYSCOMMAND:
+			switch( wParam) {
+				case SC_MINIMIZE:
+					// do minimize to tray here
+					nd.cbSize = sizeof(NOTIFYICONDATA);
+					nd.hWnd = hMainWnd;
+					nd.hIcon = LoadIcon ((HINSTANCE) NULL, IDI_APPLICATION);
+					nd.uID = 1;
+					nd.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
+					nd.uCallbackMessage = WM_USER;
+					GetWindowText(hMainWnd, nd.szTip, sizeof(nd.szTip));
+					res = Shell_NotifyIcon(NIM_ADD, &nd);
+					DestroyIcon(nd.hIcon);
+
+					// only hide the window if the tray icon was added sucessfully.
+					if(res)
+					{
+						ShowWindow(hMainWnd, SW_HIDE);
+						return(0);
+					}
+					break;
+			}
+			break;
+		case WM_USER:
+			switch(lParam) {
+				case WM_LBUTTONDOWN:
+				case WM_RBUTTONDOWN:
+					ShowWindow(hMainWnd, SW_SHOW);
+					nd.hWnd = hMainWnd;
+					nd.uID = 1;
+					Shell_NotifyIcon(NIM_DELETE, &nd);
+					break;
+			}
+			break;
+		case WM_CTLCOLORSTATIC:
+			if( (HWND)lParam == hLogWnd ) {
+				SetBkColor( (HDC)wParam, 0x000000 );
+				SetTextColor( (HDC)wParam, 0xFFFFFF );
+				return( (long)logBG_brush );
+			}
+			break;
+	}
+
+	return( DefWindowProc( hwnd, uMsg, wParam, lParam ) );
+}
+
+LRESULT CALLBACK EntryWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	char buf[1024];
+
+	switch( uMsg ) {
+		case WM_CHAR:
+			if( wParam == '\r' ) {
+				GetWindowText( hEntryWnd, buf, sizeof(buf) );
+				
+				/* clear commandline */
+				SetWindowText( hEntryWnd, "" );
+
+				if(strlen(buf) > 0)
+				{
+					/* add to command buffer */
+					Cbuf_AddText(buf);
+
+					/* print command */
+					Sys_Printf( "]%s\n", buf );
+				}
+				return( 0 );
+			}
+			break;
+	}
+
+	return( CallWindowProc( prev_EntryProc, hwnd, uMsg, wParam, lParam ) );
+}
+
+void
+WinConsole_Init()
+{
+	WNDCLASS wc;
+	RECT rect;
+	HDC hDC;
+	int w, h, width, height;
+	
+	hOurInstance = GetModuleHandle(NULL);
+
+	wc.style = 0;
+	wc.lpfnWndProc = MainWinProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = hOurInstance;
+	wc.hIcon = LoadIcon ((HINSTANCE) NULL, IDI_APPLICATION);
+	wc.hCursor = NULL;
+	wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	wc.lpszMenuName =  NULL;
+	wc.lpszClassName = "TwiConsole";
+
+	if (!RegisterClass (&wc)) 
+		Sys_Error ("Unable to register Console window class.");
+
+	rect.left = rect.top = 0;
+	rect.right = 540;
+	rect.bottom = 450;
+
+	AdjustWindowRect( &rect, WS_POPUP|WS_CAPTION|WS_SYSMENU|WS_GROUP, FALSE);
+
+	hDC = GetDC(GetDesktopWindow());
+	w = GetDeviceCaps(hDC, HORZRES);
+	h = GetDeviceCaps(hDC, VERTRES);
+	ReleaseDC(GetDesktopWindow(), hDC);
+
+	width = rect.right - rect.left + 1;
+	height = rect.bottom - rect.top + 1;
+
+	hMainWnd = CreateWindow (	"TwiConsole",
+								"Twilight Console",
+								WS_POPUP|WS_CAPTION|WS_SYSMENU|WS_GROUP,
+								(w - width) / 2,
+								(h - height) / 2,
+								width,
+								height,
+								(HWND) NULL,
+								(HMENU) NULL,
+								hOurInstance,
+								(LPVOID) NULL); 	
+
+	if (!hMainWnd) 
+		Sys_Error("Unable to create Console window."); 
+
+	hDC = GetDC( hMainWnd);
+	console_font = CreateFont( -MulDiv(8, GetDeviceCaps(hDC, LOGPIXELSY), 72), 0, 0, 0,
+					FW_LIGHT, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+					CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FIXED_PITCH|FF_MODERN, "Fixedsys");
+	ReleaseDC(hMainWnd, hDC);
+
+	hEntryWnd = CreateWindowEx(0,"edit", NULL, WS_CHILD|WS_VISIBLE|WS_BORDER|ES_AUTOHSCROLL, 6,
+					400, 528, 20, hMainWnd, NULL, hOurInstance, NULL);
+	hLogWnd = CreateWindowEx(0, "edit", NULL, WS_CHILD|WS_VISIBLE|WS_BORDER|WS_VSCROLL|ES_READONLY|
+					ES_AUTOVSCROLL|ES_MULTILINE, 6, 40, 526, 354, hMainWnd, NULL, hOurInstance, NULL);
+	SendMessage(hLogWnd, WM_SETFONT, (WPARAM)console_font, FALSE);
+	SendMessage(hEntryWnd, WM_SETFONT, (WPARAM)console_font, FALSE);
+	prev_EntryProc = (WNDPROC)SetWindowLong(hEntryWnd, GWL_WNDPROC, (long)EntryWinProc);
+
+	ShowWindow(hMainWnd, SW_SHOWDEFAULT);
+	UpdateWindow(hMainWnd);
+	SetForegroundWindow(hMainWnd);
+	SetFocus(hEntryWnd);
+}
+#endif
+
 int
 main (int argc, char *argv[])
 {
@@ -512,6 +729,10 @@ main (int argc, char *argv[])
 	atexit (SDL_Quit);
 
 	sys_gametypes = GAME_QW_SERVER;
+
+#ifdef _WIN32
+	WinConsole_Init ();					// inits the console window for Sys_Printf on Win32
+#endif
 
 	Cmdline_Init (argc, argv);
 
@@ -523,14 +744,19 @@ main (int argc, char *argv[])
 	base = oldtime = Sys_DoubleTime () - 0.1;
 	while (1)
 	{
+#ifdef _WIN32
+		MSG msg;
+		while(PeekMessage(&msg, NULL, 0, 0, 0))
+		{
+			GetMessage( &msg, NULL, 0, 0 );
+            TranslateMessage(&msg); 
+            DispatchMessage(&msg); 
+		}
+#endif
 		// the only reason we have a timeout at all is so that if the last
 		// connected client times out, the message would not otherwise
 		// be printed until the next event.
-#ifndef _WIN32
 		NET_Sleep (10);
-#else
-		NET_Sleep (1);
-#endif
 
 		// find time spent rendering last frame
 		newtime = Sys_DoubleTime ();
