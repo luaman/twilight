@@ -58,7 +58,8 @@ unsigned    blocklights[18 * 18 * 3];
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128
 
-#define	MAX_LIGHTMAPS	64
+#define	MAX_LIGHTMAPS	256
+
 int         active_lightmaps;
 
 typedef struct glRect_s {
@@ -201,7 +202,10 @@ R_AddDynamicLights (msurface_t *surf)
 					}
 				}
 
-				dest += lightmap_bytes;
+				if (lightmap_bytes == 1)
+					dest ++;
+				else
+					dest += 3;
 			}
 		} 
 	}
@@ -286,6 +290,27 @@ store:
 					dest[2] = 255-t;
 					bl+=3;
 					dest+=3;
+				}
+			}
+
+			break;
+
+		case GL_RGBA:
+
+			stride -= (surf->smax * 4);
+			bl = blocklights;
+
+			for (i = 0; i < surf->tmax; i++, dest += stride) {
+				for (j=surf->smax; j; j--) {
+					t = bl[0]; t = t >> 7; if (t > 255) t = 255;
+					dest[0] = 255-t;
+					t = bl[1]; t = t >> 7; if (t > 255) t = 255;
+					dest[1] = 255-t;
+					t = bl[2]; t = t >> 7; if (t > 255) t = 255;
+					dest[2] = 255-t;
+					dest[3] = 255;
+					bl+=3;
+					dest+=4;
 				}
 			}
 
@@ -1563,6 +1588,13 @@ GL_BuildLightmaps (void)
 		gl_lightmap_format = GL_RGB;
 		lightmap_bytes = 3;
 		colorlights = true;
+
+		if ((i = COM_CheckParm ("-bpp")) != 0) {
+			if (Q_atoi (com_argv[i + 1]) == 32) {
+				gl_lightmap_format = GL_RGBA;
+				lightmap_bytes = 4;
+			}
+		}
 	}
 	else {
 		gl_lightmap_format = GL_LUMINANCE;
