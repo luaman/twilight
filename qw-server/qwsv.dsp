@@ -144,10 +144,6 @@ SOURCE=.\pr_exec.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\strlib.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\sv_ccmds.c
 # End Source File
 # Begin Source File

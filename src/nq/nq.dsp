@@ -272,10 +272,6 @@ SOURCE=.\snd_sdl.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\strlib.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\sv_main.c
 # End Source File
 # Begin Source File

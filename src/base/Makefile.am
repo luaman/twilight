@@ -4,5 +4,7 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-#libs_LIBRARIES=twilight.a
+lib_LIBRARIES=libtwilight_base.a
+
+libtwilight_base_a_SOURCES=strlib.c
 

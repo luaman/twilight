@@ -5,20 +5,21 @@
 AUTOMAKE_OPTIONS=gnu dist-zip
 
 INCLUDES= -I$(top_srcdir)/include
-LIBS=@LIBS@ -lm @SDL_LIBS@ $(twilight_nq_sys_libs)
+LIBS=@LIBS@ -lm @SDL_LIBS@ $(twilight_qwsv_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -Umain -DTWILIGHT_QWSV
 
 bin_PROGRAMS=twilight-qwsv
+twilight_qwsv_LDADD=$(top_srcdir)/src/base/libtwilight_base.a
 
 if SYS_WIN32
-twilight_nq_sys_libs=-lwsock32 -lwinmm
+twilight_qwsv_sys_libs=-lwsock32 -lwinmm
 else
-twilight_nq_sys_libs=
+twilight_qwsv_sys_libs=
 endif
 
 twilight_qwsv_SOURCES= \
 	common.c cmd.c cmd.h crc.c cvar.c mathlib.c \
-	mdfour.c strlib.c console.h \
+	mdfour.c console.h \
 	model.c model.h \
 	net.h net_chan.c net_udp.c \
 	pmove.c pmovetst.c pr_cmds.c pr_edict.c pr_exec.c \
