@@ -36,9 +36,6 @@ Would be nice but is not strictly needed:
     checking, and much more effective, use this in server and optionally
     client
   - Add back mirrors at some point
-  - DarkPlaces has better lighting which we should port over to Twilight
-    (R_BuildLightList and R_AddDynamicLights, rdlight_t stuff)
-  - Implement stainmaps (ie, blood staining the lightmaps)a
   - Rewrite the sound code so that it is possible to spit out a timed
     sound file which matches frame outputs (for recording videos)
   - Add {gl,cl}_weirdshit.c to support Nehahra.  ;)

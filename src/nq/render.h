@@ -51,22 +51,33 @@ typedef struct entity_s {
 
 	// time of last update
 	double			msgtime;
+
 	// last two updates (0 is newest) 
 	vec3_t			msg_origins[2];
 	vec3_t			origin;
+
 	// last two updates (0 is newest)
 	vec3_t			msg_angles[2];
 	vec3_t			angles;
+
+	// Bounding box
+	vec3_t			mins;
+	vec3_t			maxs;
+
 	// NULL = no model
 	struct model_s	*model;
 	int				frame;
+
 	// for client-side animations
 	float			syncbase;
 	colormap_t		*colormap;
+
 	// light, particals, etc
 	int				effects;
+
 	// for Alias models
 	int				skinnum;
+
 	// last frame this entity was found in an active leaf
 	int				visframe;
 
@@ -96,7 +107,6 @@ extern vec3_t r_origin, vpn, vright, vup;
 
 extern struct texture_s *r_notexture_mip;
 
-
 void R_Init_Cvars (void);
 void R_Init (void);
 void R_InitTextures (void);
@@ -109,6 +119,8 @@ void R_ViewChanged (vrect_t *pvrect, int lineadj, float aspect);
 
 // called at level load
 void R_InitSky (struct texture_s *mt);
+
+void R_InitSurf (void);
 
 void R_NewMap (void);
 
@@ -129,8 +141,6 @@ void R_RailTrail (vec3_t start, vec3_t end);
 //
 // gl_rlight.c
 //
-#define	MAX_DLIGHTS		32
-
 typedef struct {
 	int			key;					// so entities can reuse same entry
 	vec3_t		origin;
@@ -141,18 +151,14 @@ typedef struct {
 	float		color[3];
 } dlight_t;
 
-void R_MarkLights (dlight_t *light, int bit, model_t *model);
-void R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node);
-void R_AnimateLight (void);
-int R_LightPoint (vec3_t p);
-void R_RenderDlights (void);
-void R_PushDlights (void);
-
 void R_InitParticles (void);
 void R_ClearParticles (void);
 void R_MoveParticles (void);
 void R_DrawParticles (void);
-void R_DrawWaterSurfaces (void);
+
+// It's a particle effect or something.  =)
+void R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
+		int cr2, int cg2, int cb2, int ca2);
 
 #endif // __RENDER_H
 

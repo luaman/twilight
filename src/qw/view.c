@@ -32,6 +32,7 @@ static const char rcsid[] =
 #include "client.h"
 #include "cmd.h"
 #include "cvar.h"
+#include "light.h"
 #include "mathlib.h"
 #include "screen.h"
 #include "strlib.h"
@@ -761,14 +762,15 @@ V_RenderView (void)
 	view_frame = &cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK];
 	view_message = &view_frame->playerstate[cl.playernum];
 
-	DropPunchAngle();
-	if (cl.intermission) {				// intermission / finale rendering
-		V_CalcIntermissionRefdef();
-	} else {
-		V_CalcRefdef();
-	}
+	DropPunchAngle ();
+	if (cl.intermission)
+		/* intermission / finale rendering */
+		V_CalcIntermissionRefdef ();
+	else
+		V_CalcRefdef ();
 
-	R_RenderView();
+	R_BuildLightList ();
+	R_RenderView ();
 }
 
 /* ============================================================================ */

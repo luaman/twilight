@@ -140,6 +140,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 20, 30);
+			R_Stain (pos, 32, 40, 96, 40, 32, 96, 128, 96, 32);
 			S_StartSound (-1, 0, cl_sfx_wizhit, pos, 1, 1);
 			break;
 
@@ -148,6 +149,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 226, 20);
+			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
 			S_StartSound (-1, 0, cl_sfx_knighthit, pos, 1, 1);
 			break;
 
@@ -156,6 +158,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 10);
+			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
 			if (Q_rand () % 5)
 				S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
 			else {
@@ -172,6 +175,7 @@ CL_ParseTEnt (void)
 			pos[0] = MSG_ReadCoord ();
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
+			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
 			R_RunParticleEffect (pos, vec3_origin, 0, 20);
 
 			if (Q_rand () % 5)
@@ -192,6 +196,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 20);
+			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
 			break;
 
 		case TE_EXPLOSION:				// rocket explosion
@@ -205,9 +210,10 @@ CL_ParseTEnt (void)
 			dl->radius = 350;
 			dl->die = cl.time + 0.5;
 			dl->decay = 300;
-			dl->color[0] = 0.20;
-			dl->color[1] = 0.10;
-			dl->color[2] = 0.05;
+			dl->color[0] = 1.25f;
+			dl->color[1] = 1.0f;
+			dl->color[2] = 0.5f;
+			R_Stain (pos, 96, 60, 60, 60, 128, 128, 128, 128, 128);
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 			break;
 
@@ -216,6 +222,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_BlobExplosion (pos);
+			R_Stain (pos, 96, 60, 60, 60, 128, 128, 128, 128, 128);
 
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 			break;
@@ -266,12 +273,16 @@ CL_ParseTEnt (void)
 			pos[2] = MSG_ReadCoord ();
 			colorStart = MSG_ReadByte ();
 			colorLength = MSG_ReadByte ();
+			R_Stain (pos, 64, 60, 60, 60, 128, 128, 128, 128, 128);
 			R_ParticleExplosion2 (pos, colorStart, colorLength);
 			dl = CL_AllocDlight (0);
 			VectorCopy (pos, dl->origin);
 			dl->radius = 350;
 			dl->die = cl.time + 0.5;
 			dl->decay = 300;
+			dl->color[0] = 1.25f;
+			dl->color[1] = 1.0f;
+			dl->color[2] = 0.5f;
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 			break;
 
@@ -283,6 +294,7 @@ CL_ParseTEnt (void)
 			pos2[1] = MSG_ReadCoord();
 			pos2[2] = MSG_ReadCoord();
 			R_RailTrail (pos, pos2);
+			R_Stain (pos2, 32, 60, 60, 60, 32, 96, 96, 96, 32);
 			break;
 
 		default:

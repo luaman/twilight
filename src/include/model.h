@@ -169,6 +169,9 @@ typedef struct msurface_s {
 	// RGB lighting data [numstyles][height][width][3] or white lighting
 	// data [numstyles][height][width] - FIXME: This is ugly as hell
 	Uint8				*samples;
+
+	// stain to apply on lightmap (soot/dirt/blood/whatever)
+	Uint8				*stainsamples;
 } msurface_t;
 
 typedef struct mnode_s {

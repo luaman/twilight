@@ -191,7 +191,6 @@ CL_ParseTEnt (void)
 	vec3_t      pos;
 	dlight_t   *dl;
 	int         rnd;
-//	explosion_t *ex;
 	int         cnt;
 
 	type = MSG_ReadByte ();
@@ -201,6 +200,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 20, 30);
+			R_Stain (pos, 32, 40, 96, 40, 32, 96, 128, 96, 32);
 			S_StartSound (-1, 0, cl_sfx_wizhit, pos, 1, 1);
 			break;
 
@@ -209,6 +209,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 226, 20);
+			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
 			S_StartSound (-1, 0, cl_sfx_knighthit, pos, 1, 1);
 			break;
 
@@ -217,6 +218,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 10);
+			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
 
 			if (Q_rand () % 5)
 				S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
@@ -236,6 +238,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 20);
+			R_Stain (pos, 32, 60, 60, 60, 32, 96, 96, 96, 32);
 
 			if (Q_rand () % 5)
 				S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
@@ -256,7 +259,6 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_NewExplosion (pos);
-//			R_ParticleExplosion (pos);
 
 			// light
 			dl = CL_AllocDlight (0);
@@ -264,24 +266,14 @@ CL_ParseTEnt (void)
 			dl->radius = 350;
 			dl->die = cl.time + 0.5;
 			dl->decay = 300;
-			dl->color[0] = 0.20;
-			dl->color[1] = 0.10;
-			dl->color[2] = 0.05;
+			dl->color[0] = 1.25f;
+			dl->color[1] = 1.0f;
+			dl->color[2] = 0.5f;
+			R_Stain (pos, 96, 60, 60, 60, 128, 128, 128, 128, 128);
 
 			// sound
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 
-			// sprite
-#if 0
-			ex = CL_AllocExplosion ();
-			VectorCopy (pos, ex->origin);
-			ex->start = cl.time;
-
-			if (!cl_expl_mod)
-				cl_expl_mod = Mod_ForName ("progs/s_explod.spr", true);
-
-			ex->model = cl_expl_mod;
-#endif
 			break;
 
 		case TE_TAREXPLOSION:			// tarbaby explosion
@@ -289,6 +281,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_BlobExplosion (pos);
+			R_Stain (pos, 96, 60, 60, 60, 128, 128, 128, 128, 128);
 
 			S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 			break;
@@ -331,6 +324,7 @@ CL_ParseTEnt (void)
 			pos[1] = MSG_ReadCoord ();
 			pos[2] = MSG_ReadCoord ();
 			R_RunParticleEffect (pos, vec3_origin, 0, 20 * cnt);
+			R_Stain (pos, 6 * cnt, 60, 60, 60, 32, 96, 96, 96, 32);
 			break;
 
 		case TE_BLOOD:					// bullets hitting body

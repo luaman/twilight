@@ -484,17 +484,20 @@ Mod_LoadFaces (lump_t *l)
 	msurface_t	*out;
 	int			i, count, surfnum;
 	int			planenum, side;
+	int			ssize, tsize;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
-		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
+		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s",
+				loadmodel->name);
 	count = l->filelen / sizeof (*in);
 	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	loadmodel->surfaces = out;
 	loadmodel->numsurfaces = count;
 
-	for (surfnum = 0; surfnum < count; surfnum++, in++, out++) {
+	for (surfnum = 0; surfnum < count; surfnum++, in++, out++)
+	{
 		out->firstedge = LittleLong (in->firstedge);
 		out->numedges = LittleShort (in->numedges);
 		out->flags = 0;
@@ -523,24 +526,34 @@ Mod_LoadFaces (lump_t *l)
 
 		// set the drawing flags flag
 
-		if (!strncmp (out->texinfo->texture->name, "sky", 3))	// sky
+		// is it sky?
+		if (!strncmp (out->texinfo->texture->name, "sky", 3))
 		{
 			out->flags |= (SURF_DRAWSKY | SURF_DRAWTILED);
-			GL_SubdivideSurface (out);	// cut up polygon for warps
+			// cut up polygon for warps
+			GL_SubdivideSurface (out);
 			continue;
 		}
 
-		if (out->texinfo->texture->name[0] == '*')	// turbulent
+		// is it water?
+		if (out->texinfo->texture->name[0] == '*')
 		{
 			out->flags |= (SURF_DRAWTURB | SURF_DRAWTILED);
-			for (i = 0; i < 2; i++) {
+			for (i = 0; i < 2; i++)
+			{
 				out->extents[i] = 16384;
 				out->texturemins[i] = -8192;
 			}
-			GL_SubdivideSurface (out);	// cut up polygon for warps
+			// cut up polygon for warps
+			GL_SubdivideSurface (out);
 			continue;
 		}
 
+		// It's a wall - allocate a stainmap for it
+		ssize = (out->extents[0] >> 4) + 1;
+		tsize = (out->extents[1] >> 4) + 1;
+		out->stainsamples = Hunk_Alloc (ssize * tsize * 3);
+		memset(out->stainsamples, 255, ssize * tsize * 3);
 	}
 }
 

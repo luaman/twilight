@@ -180,6 +180,7 @@ R_Init (void)
 	R_InitParticles ();
 	TNT_Init ();
 	R_Explosion_Init ();
+	R_InitSurf ();
 
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
