@@ -121,11 +121,8 @@ PM_HullPointContents (hull_t *hull, int num, vec3_t p)
 
 		node = hull->clipnodes + num;
 		plane = hull->planes + node->planenum;
+		d = PlaneDiff(p, plane);
 
-		if (plane->type < 3)
-			d = p[plane->type] - plane->dist;
-		else
-			d = DotProduct (plane->normal, p) - plane->dist;
 		if (d < 0)
 			num = node->children[1];
 		else
@@ -160,11 +157,8 @@ PM_PointContents (vec3_t p)
 
 		node = hull->clipnodes + num;
 		plane = hull->planes + node->planenum;
+		d = PlaneDiff(p, plane);
 
-		if (plane->type < 3)
-			d = p[plane->type] - plane->dist;
-		else
-			d = DotProduct (plane->normal, p) - plane->dist;
 		if (d < 0)
 			num = node->children[1];
 		else
@@ -225,14 +219,8 @@ PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
 //
 	node = hull->clipnodes + num;
 	plane = hull->planes + node->planenum;
-
-	if (plane->type < 3) {
-		t1 = p1[plane->type] - plane->dist;
-		t2 = p2[plane->type] - plane->dist;
-	} else {
-		t1 = DotProduct (plane->normal, p1) - plane->dist;
-		t2 = DotProduct (plane->normal, p2) - plane->dist;
-	}
+	t1 = PlaneDiff (p1, plane);
+	t2 = PlaneDiff (p2, plane);
 
 #if 1
 	if (t1 >= 0 && t2 >= 0)

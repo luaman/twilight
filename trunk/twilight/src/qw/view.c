@@ -155,9 +155,7 @@ V_CalcBob (void)
 // bob is proportional to simulated velocity in the xy plane
 // (don't count Z, or jumping messes it up)
 
-	bob =
-		Q_sqrt (cl.simvel[0] * cl.simvel[0] +
-			  cl.simvel[1] * cl.simvel[1]) * cl_bob->value;
+	bob = VectorLength2(cl.simvel) * cl_bob->value;
 	bob = bob * 0.3 + bob * 0.7 * Q_sin (cycle);
 	if (bob > 4)
 		bob = 4;

@@ -87,7 +87,7 @@ vectoangles (vec3_t vec, vec3_t ang)
 		if (yaw < 0)
 			yaw += 360;
 
-		forward = Q_sqrt (vec[0] * vec[0] + vec[1] * vec[1]);
+		forward = VectorLength2 (vec);
 		pitch = Q_atan2 (vec[2], forward) * 180 / M_PI;
 		if (pitch < 0)
 			pitch += 360;

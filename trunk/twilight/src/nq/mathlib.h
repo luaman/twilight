@@ -39,12 +39,38 @@ typedef int fixed16_t;
 struct mplane_s;
 
 extern vec3_t vec3_origin;
+extern vec_t  vectortemp;
+
+void Math_Init (void);
+
+double Q_sin(double x);
+double Q_cos(double x);
+double Q_asin(double x);
+double Q_atan(double x);
+double Q_atan2(double y, double x);
+double Q_tan(double x);
+double Q_floor(double x);
+double Q_ceil(double x);
+float Q_fabs(float f);
+int Q_abs(int x);
+float Q_sqrt(float n);
+void Q_srand(unsigned seed);
+int	Q_rand(void);
+float Q_RSqrt(float number);
+double Q_pow(double x, double y);
 
 #define NANMASK		255 << 23
 #define	IS_NAN(x) (((*(int *)&x)&NANMASK)==NANMASK)
 
+#define PlaneDiff(point,plane) (((plane)->type < 3 ? (point)[(plane)->type] : DotProduct((point), (plane)->normal)) - (plane)->dist)
+
 #define CrossProduct(v1,v2,cross) (cross[0]=v1[1]*v2[2]-v1[2]*v2[1],cross[1]=v1[2]*v2[0]-v1[0]*v2[2],cross[2]=v1[0]*v2[1]-v1[1]*v2[0])
-#define DotProduct(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
+
+#define DotProduct_i(x,y,i) (((x)[i]&&(y)[i])?((x)[i]*(y)[i]):(0))
+#define DotProduct(x,y) (DotProduct_i(x,y,0)+DotProduct_i(x,y,1)+DotProduct_i(x,y,2))
+
+// this is for 2-dimensional vectors
+#define DotProduct2(x,y) (DotProduct_i(x,y,0)+DotProduct_i(x,y,1))
 
 #define VectorSubtract(a,b,c) (c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2])
 #define VectorAdd(a,b,c) (c[0]=a[0]+b[0],c[1]=a[1]+b[1],c[2]=a[2]+b[2])
@@ -54,9 +80,11 @@ extern vec3_t vec3_origin;
 #define VectorMA(a,b,c,d) (d[0]=a[0]+b*c[0],d[1]=a[1]+b*c[1],d[2]=a[2]+b*c[2])
 #define VectorCompare(a,b) ((a[0]==b[0])&&(a[1]==b[1])&&(a[2]==b[2]))
 #define VectorClear(a)		(a[0]=a[1]=a[2]=0)
+#define VectorLength(v)		((vectortemp=DotProduct(v,v))?(Q_sqrt(vectortemp)):(0))
+#define VectorLength2(v)		((vectortemp=DotProduct2(v,v))?(Q_sqrt(vectortemp)):(0))
 
-#define PlaneDiff(point,plane) (((plane)->type < 3 ? (point)[(plane)->type] : DotProduct((point), (plane)->normal)) - (plane)->dist)
-
+vec_t       _VectorLength (vec3_t v);
+vec_t       _VectorLength2 (vec3_t v);
 vec_t       _DotProduct (vec3_t v1, vec3_t v2);
 void        _CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross);
 void        _VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
@@ -67,7 +95,6 @@ int         _VectorCompare (vec3_t v1, vec3_t v2);
 void        _VectorInverse (vec3_t v);
 void        _VectorScale (vec3_t in, vec_t scale, vec3_t out);
 
-vec_t       VectorLength (vec3_t v);
 vec_t       VectorNormalize (vec3_t v);	// returns vector length
 void		VectorNormalizeFast (vec3_t v);
 int         Q_log2 (int val);
@@ -103,25 +130,6 @@ float       anglemod (float a);
 	)										\
 	:										\
 		BoxOnPlaneSide( (emins), (emaxs), (p)))
-
-
-void Math_Init (void);
-
-double Q_sin(double x);
-double Q_cos(double x);
-double Q_asin(double x);
-double Q_atan(double x);
-double Q_atan2(double y, double x);
-double Q_tan(double x);
-double Q_floor(double x);
-double Q_ceil(double x);
-float Q_fabs(float f);
-int Q_abs(int x);
-float Q_sqrt(float n);
-void Q_srand(unsigned seed);
-int	Q_rand(void);
-float Q_RSqrt(float number);
-double Q_pow(double x, double y);
 
 #endif // __MATHLIB_H
 

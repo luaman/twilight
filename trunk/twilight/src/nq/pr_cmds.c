@@ -378,7 +378,7 @@ PF_normalize (void)
 
 	value1 = G_VECTOR (OFS_PARM0);
 
-	new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2] * value1[2];
+	new = DotProduct(value1,value1);
 
 	if (new == 0)
 		newvalue[0] = newvalue[1] = newvalue[2] = 0;
@@ -408,7 +408,7 @@ PF_vlen (void)
 
 	value1 = G_VECTOR (OFS_PARM0);
 
-	new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2] * value1[2];
+	new = DotProduct(value1,value1);
 
 	G_FLOAT (OFS_RETURN) = (new) ? Q_sqrt (new) : 0;
 }
@@ -467,7 +467,7 @@ PF_vectoangles (void)
 		if (yaw < 0)
 			yaw += 360;
 
-		forward = Q_sqrt (value1[0] * value1[0] + value1[1] * value1[1]);
+		forward = VectorLength2 (value1);
 		pitch = Q_atan2 (value1[2], forward) * 180 / M_PI;
 		if (pitch < 0)
 			pitch += 360;

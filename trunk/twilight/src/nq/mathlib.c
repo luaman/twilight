@@ -43,6 +43,8 @@ void        Sys_Error (char *error, ...);
 
 vec3_t      vec3_origin = { 0, 0, 0 };
 
+vec_t  vectortemp = 0;
+
 /*-----------------------------------------------------------------*/
 
 // some q3 stuff here
@@ -678,9 +680,17 @@ _CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
 }
 
 vec_t 
-VectorLength (vec3_t v)
+_VectorLength (vec3_t v)
 {
-	float length = v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
+	float length = DotProduct(v,v);
+
+	return length ? Q_sqrt(length) : 0;
+}
+
+vec_t 
+_VectorLength2 (vec3_t v)
+{
+	float length = DotProduct2(v,v);
 
 	return length ? Q_sqrt(length) : 0;
 }
@@ -688,13 +698,14 @@ VectorLength (vec3_t v)
 vec_t 
 VectorNormalize (vec3_t v)
 {
-	float length, ilength;
-
-	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+	float length = DotProduct(v,v);
 
 	if (length) {
+		float ilength;
+
 		length = Q_sqrt(length);
 		ilength = 1 / length;
+
 		v[0] *= ilength;
 		v[1] *= ilength;
 		v[2] *= ilength;
@@ -706,7 +717,7 @@ VectorNormalize (vec3_t v)
 void 
 VectorNormalizeFast (vec3_t v)
 {
-	float length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+	float length = DotProduct(v,v);
 
 	if (length) {
 		length = Q_RSqrt(length);

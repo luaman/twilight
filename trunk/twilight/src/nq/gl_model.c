@@ -121,7 +121,7 @@ Mod_PointInLeaf (vec3_t p, model_t *model)
 		if (node->contents < 0)
 			return (mleaf_t *) node;
 		plane = node->plane;
-		d = DotProduct (p, plane->normal) - plane->dist;
+		d = PlaneDiff (p, plane);
 		if (d > 0)
 			node = node->children[0];
 		else
@@ -1543,7 +1543,6 @@ mflags_t modelflags[] =
 	{ "progs/flame.mdl", 11, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
 	{ "progs/bolt.mdl", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/laser.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
-	{ "progs/gib", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/missile.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/grenade.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
@@ -1592,9 +1591,11 @@ mflags_t modelflags[] =
 
 	// Common
 	{ "progs/v_", 8, FLAG_NOSHADOW|FLAG_NO_IM_FORM },
+	{ "progs/g_", 8, FLAG_NO_IM_ANIM },
+	{ "progs/h_", 8, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/gib", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/eyes.mdl", 0, FLAG_DOUBLESIZE|FLAG_NO_IM_ANIM },
 	{ "progs/armor.mdl", 0, FLAG_NO_IM_ANIM },
-	{ "progs/g_", 8, FLAG_NO_IM_ANIM },
 
 	// end of list
 	{ NULL }

@@ -98,7 +98,7 @@ Mod_PointInLeaf (vec3_t p, model_t *model)
 		if (node->contents < 0)
 			return (mleaf_t *) node;
 		plane = node->plane;
-		d = DotProduct (p, plane->normal) - plane->dist;
+		d = PlaneDiff(p, plane);
 		if (d > 0)
 			node = node->children[0];
 		else
