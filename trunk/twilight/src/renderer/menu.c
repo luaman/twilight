@@ -72,18 +72,6 @@ M_PrintAlt (int cx, int cy, char *str)
 	Draw_Alt_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
 }
 
-static void
-M_Print_Size (int cx, int cy, char *str, double size)
-{
-	Draw_String (cx + ((vid.width_2d - 320) >> 1), cy, str, size);
-}
-
-static void
-M_PrintAlt_Size (int cx, int cy, char *str, double size)
-{
-	Draw_Alt_String (cx + ((vid.width_2d - 320) >> 1), cy, str, size);
-}
-
 void
 M_DrawPic (int x, int y, qpic_t *pic)
 {
@@ -253,7 +241,7 @@ static void
 M_Do_Draw (menu_t *menu, int current)
 {
 	int			 i;
-	double		 size, x, y, y_add, div_x, center, len;
+	double		 x, y, y_add, div_x, len;
 	menu_item_t	*item;
 
 	x = 8;
@@ -273,22 +261,22 @@ M_Do_Draw (menu_t *menu, int current)
 			y_add = item->height;
 		}
 
-#define PULSE		(sin(r_realtime * 5) * 0.3)
+#define PULSE		(sin(r_realtime * 5) * 0.2)
 
 		if (MItem_Draw_Label(item)) {
 			len = strlen(item->label);
+			x = div_x - ((len + 1) * 8);
+			M_PrintAlt(x, y, item->label);
 			if (i == current) {
-				M_PrintAlt_Size(div_x - 8, y, "<=>", 8);
 
-				size = 8 + PULSE;
-				center = div_x - (((len / 2) + 1) * 8.3);
-				x = center - ((len / 2) * size);
-				M_Print_Size(x, y, item->label, size);
+				M_PrintAlt(div_x - 8, y, "<=>");
+				qglBlendFunc (GL_ONE, GL_SRC_ALPHA);
+				qglColor4f(1, 1, 1, 0.8 + PULSE);
+				M_PrintAlt(x, y, item->label);
+				qglColor4f(1, 1, 1, 1);
+				qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			} else {
 				M_PrintAlt(div_x, y, "|");
-
-				x = div_x - ((len + 1) * 8);
-				M_PrintAlt(x, y, item->label);
 			}
 		}
 
