@@ -1260,7 +1260,7 @@ Host_Frame (double time)
 	CL_ReadPackets ();
 
 	// get new key events
-	Sys_SendKeyEvents ();
+	IN_SendKeyEvents ();
 
 	// process console commands
 	Cbuf_Execute ();
@@ -1381,6 +1381,7 @@ Host_Init (void)
 	COM_Init_Cvars ();				// basic cvars
 	Con_Init_Cvars ();				// all console related cvars
 	Key_Init_Cvars ();				// all key related cvars
+	IN_Init_Cvars ();
 	Netchan_Init_Cvars ();			// all netchan related cvars
 	V_Init_Cvars();					// all view related cvars
 	M_Init_Cvars ();				// all menu related cvars

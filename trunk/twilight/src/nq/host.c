@@ -605,7 +605,7 @@ time_done:
 	}
 
 	// get new key events
-	Sys_SendKeyEvents ();
+	IN_SendKeyEvents ();
 
 	// process console commands
 	Cbuf_Execute ();
@@ -741,6 +741,7 @@ Host_Init ()
 	COM_Init_Cvars ();				// filesystem related variables
 	Con_Init_Cvars ();				// console related cvars
 	Key_Init_Cvars ();				// key related cvars
+	IN_Init_Cvars ();
 	Chase_Init_Cvars ();			// chase camera related cvars
 	V_Init_Cvars();					// view related cvars
 	M_Init_Cvars ();				// menu related cvars

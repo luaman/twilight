@@ -174,8 +174,10 @@ def do_configure (env):
 	else:
 		if sys.platform == "darwin":
 			# Mac OS X, no sdl-config, evil.
-			env.Append (LIBS = ['SDL', 'SDLmain'])
+			env.Append (LIBS = ['SDLmain'])
 			env.Append (CPPPATH = ['/sw/include/SDL/'])
+			print env['_LIBFLAGS']
+			print env['LINKFLAGS']
 
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		if not config_defs.has_key ('HAVE_SDL_H'):

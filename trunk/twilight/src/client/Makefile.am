@@ -21,6 +21,7 @@ libtwilight_client_a_SOURCES= \
 	cclient.c cclient.h \
 	console.c console.h \
 	dlight.c dlight.h \
+	input.c \
 	keys.c keys.h \
 	hud.c hud.h \
 	teamplay.c teamplay.h

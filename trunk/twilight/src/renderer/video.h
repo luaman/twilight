@@ -50,14 +50,12 @@ extern viddef_t	vid;
 extern qboolean VID_Inited;
 extern float mouse_x;
 extern float mouse_y;
+extern int sdl_flags;
 
-void VID_Shutdown(void);
 void GL_EndRendering(void);
 void Size_Changed2D(cvar_t *cvar);
 void VID_Init_Cvars(void);
 void VID_Init (void);
-void Sys_SendKeyEvents(void);
-void IN_Init(void);
-void IN_Shutdown(void);
+void VID_Shutdown(void);
 
 #endif // __VID_H
