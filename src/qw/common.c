@@ -36,7 +36,7 @@ static char *argvdummy = " ";
 static char *safeargvs[NUM_SAFE_ARGVS] =
 	{ "-stdvid", "-nolan", "-nosound", "-nocdaudio", "-nojoy", "-nomouse" };
 
-cvar_t      registered = { "registered", "0" };
+cvar_t     *registered;
 
 qboolean    com_modified;				// set true if using non-id files
 
@@ -1142,7 +1142,7 @@ COM_CheckRegistered (void)
 
 	fclose (h);
 
-	Cvar_Set ("registered", "1");
+	Cvar_Set (registered, "1");
 	Con_Printf ("Playing registered version.\n");
 }
 
@@ -1225,7 +1225,7 @@ COM_Init (void)
 		LittleFloat = FloatSwap;
 	}
 
-	Cvar_RegisterVariable (&registered);
+	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
 	Cmd_AddCommand ("path", COM_Path_f);
 
 	COM_InitFilesystem ();
