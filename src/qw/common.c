@@ -1504,7 +1504,7 @@ COM_FOpenFile (char *filename, FILE ** file)
 			if (strchr (filename, '/') || strchr (filename, '\\'))
 				continue;
 
-			snprintf (netpath, sizeof(newpath), "%s/%s", search->filename, filename);
+			snprintf (netpath, sizeof(netpath), "%s/%s", search->filename, filename);
 
 			findtime = Sys_FileTime (netpath);
 			if (findtime == -1)
