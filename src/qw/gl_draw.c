@@ -54,6 +54,7 @@ cvar_t		*gl_picmip;
 cvar_t		*gl_constretch;
 cvar_t		*gl_texturemode;
 cvar_t		*cl_verstring;					// FIXME: Move this?
+cvar_t		*r_lerpimages;
 
 Uint8		*draw_chars;					// 8*8 graphic characters
 qpic_t		*draw_disc;
@@ -258,6 +259,7 @@ Draw_Init_Cvars (void)
 			CVAR_ARCHIVE, Set_TextureMode_f);
 	cl_verstring = Cvar_Get ("cl_verstring",
 			"Project Twilight v" VERSION " QW", CVAR_NONE, NULL);
+	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
 
 	// 3dfx can only handle 256 wide textures
 	if (!strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
@@ -856,11 +858,185 @@ GL_FindTexture (char *identifier)
 	return -1;
 }
 
+void R_ResampleTextureLerpLine (byte *in, byte *out, int inwidth, int outwidth)
+{
+	int		j, xi, oldx = 0, f, fstep, endx;
+	fstep = (int) (inwidth*65536.0f/outwidth);
+	endx = (inwidth-1);
+	for (j = 0,f = 0;j < outwidth;j++, f += fstep)
+	{
+		xi = (int) f >> 16;
+		if (xi != oldx)
+		{
+			in += (xi - oldx) * 4;
+			oldx = xi;
+		}
+		if (xi < endx)
+		{
+			int lerp = f & 0xFFFF;
+			*out++ = (byte) ((((in[4] - in[0]) * lerp) >> 16) + in[0]);
+			*out++ = (byte) ((((in[5] - in[1]) * lerp) >> 16) + in[1]);
+			*out++ = (byte) ((((in[6] - in[2]) * lerp) >> 16) + in[2]);
+			*out++ = (byte) ((((in[7] - in[3]) * lerp) >> 16) + in[3]);
+		}
+		else // last pixel of the line has no pixel to lerp to
+		{
+			*out++ = in[0];
+			*out++ = in[1];
+			*out++ = in[2];
+			*out++ = in[3];
+		}
+	}
+}
+
+/*
+================
+R_ResampleTexture
+================
+*/
+void R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,  int outwidth, int outheight)
+{
+	if (r_lerpimages->value)
+	{
+		int		i, j, yi, oldy, f, fstep, endy = (inheight-1);
+		byte	*inrow, *out, *row1, *row2;
+		out = outdata;
+		fstep = (int) (inheight*65536.0f/outheight);
+
+		row1 = malloc(outwidth*4);
+		row2 = malloc(outwidth*4);
+		inrow = indata;
+		oldy = 0;
+		R_ResampleTextureLerpLine (inrow, row1, inwidth, outwidth);
+		R_ResampleTextureLerpLine (inrow + inwidth*4, row2, inwidth, outwidth);
+		for (i = 0, f = 0;i < outheight;i++,f += fstep)
+		{
+			yi = f >> 16;
+			if (yi < endy)
+			{
+				int lerp = f & 0xFFFF;
+				if (yi != oldy)
+				{
+					inrow = (byte *)indata + inwidth*4*yi;
+					if (yi == oldy+1)
+						memcpy(row1, row2, outwidth*4);
+					else
+						R_ResampleTextureLerpLine (inrow, row1, inwidth, outwidth);
+					R_ResampleTextureLerpLine (inrow + inwidth*4, row2, inwidth, outwidth);
+					oldy = yi;
+				}
+				j = outwidth - 4;
+				while(j >= 0)
+				{
+					out[ 0] = (byte) ((((row2[ 0] - row1[ 0]) * lerp) >> 16) + row1[ 0]);
+					out[ 1] = (byte) ((((row2[ 1] - row1[ 1]) * lerp) >> 16) + row1[ 1]);
+					out[ 2] = (byte) ((((row2[ 2] - row1[ 2]) * lerp) >> 16) + row1[ 2]);
+					out[ 3] = (byte) ((((row2[ 3] - row1[ 3]) * lerp) >> 16) + row1[ 3]);
+					out[ 4] = (byte) ((((row2[ 4] - row1[ 4]) * lerp) >> 16) + row1[ 4]);
+					out[ 5] = (byte) ((((row2[ 5] - row1[ 5]) * lerp) >> 16) + row1[ 5]);
+					out[ 6] = (byte) ((((row2[ 6] - row1[ 6]) * lerp) >> 16) + row1[ 6]);
+					out[ 7] = (byte) ((((row2[ 7] - row1[ 7]) * lerp) >> 16) + row1[ 7]);
+					out[ 8] = (byte) ((((row2[ 8] - row1[ 8]) * lerp) >> 16) + row1[ 8]);
+					out[ 9] = (byte) ((((row2[ 9] - row1[ 9]) * lerp) >> 16) + row1[ 9]);
+					out[10] = (byte) ((((row2[10] - row1[10]) * lerp) >> 16) + row1[10]);
+					out[11] = (byte) ((((row2[11] - row1[11]) * lerp) >> 16) + row1[11]);
+					out[12] = (byte) ((((row2[12] - row1[12]) * lerp) >> 16) + row1[12]);
+					out[13] = (byte) ((((row2[13] - row1[13]) * lerp) >> 16) + row1[13]);
+					out[14] = (byte) ((((row2[14] - row1[14]) * lerp) >> 16) + row1[14]);
+					out[15] = (byte) ((((row2[15] - row1[15]) * lerp) >> 16) + row1[15]);
+					out += 16;
+					row1 += 16;
+					row2 += 16;
+					j -= 4;
+				}
+				if (j & 2)
+				{
+					out[ 0] = (byte) ((((row2[ 0] - row1[ 0]) * lerp) >> 16) + row1[ 0]);
+					out[ 1] = (byte) ((((row2[ 1] - row1[ 1]) * lerp) >> 16) + row1[ 1]);
+					out[ 2] = (byte) ((((row2[ 2] - row1[ 2]) * lerp) >> 16) + row1[ 2]);
+					out[ 3] = (byte) ((((row2[ 3] - row1[ 3]) * lerp) >> 16) + row1[ 3]);
+					out[ 4] = (byte) ((((row2[ 4] - row1[ 4]) * lerp) >> 16) + row1[ 4]);
+					out[ 5] = (byte) ((((row2[ 5] - row1[ 5]) * lerp) >> 16) + row1[ 5]);
+					out[ 6] = (byte) ((((row2[ 6] - row1[ 6]) * lerp) >> 16) + row1[ 6]);
+					out[ 7] = (byte) ((((row2[ 7] - row1[ 7]) * lerp) >> 16) + row1[ 7]);
+					out += 8;
+					row1 += 8;
+					row2 += 8;
+				}
+				if (j & 1)
+				{
+					out[ 0] = (byte) ((((row2[ 0] - row1[ 0]) * lerp) >> 16) + row1[ 0]);
+					out[ 1] = (byte) ((((row2[ 1] - row1[ 1]) * lerp) >> 16) + row1[ 1]);
+					out[ 2] = (byte) ((((row2[ 2] - row1[ 2]) * lerp) >> 16) + row1[ 2]);
+					out[ 3] = (byte) ((((row2[ 3] - row1[ 3]) * lerp) >> 16) + row1[ 3]);
+					out += 4;
+					row1 += 4;
+					row2 += 4;
+				}
+				row1 -= outwidth*4;
+				row2 -= outwidth*4;
+			}
+			else
+			{
+				if (yi != oldy)
+				{
+					inrow = (byte *)indata + inwidth*4*yi;
+					if (yi == oldy+1)
+						memcpy(row1, row2, outwidth*4);
+					else
+						R_ResampleTextureLerpLine (inrow, row1, inwidth, outwidth);
+					oldy = yi;
+				}
+				memcpy(out, row1, outwidth * 4);
+			}
+		}
+		free(row1);
+		free(row2);
+	}
+	else
+	{
+		int i, j;
+		unsigned frac, fracstep;
+		// relies on int being 4 bytes
+		int *inrow, *out;
+		out = outdata;
+
+		fracstep = inwidth*0x10000/outwidth;
+		for (i = 0;i < outheight;i++)
+		{
+			inrow = (int *)indata + inwidth*(i*inheight/outheight);
+			frac = fracstep >> 1;
+			j = outwidth - 4;
+			while (j >= 0)
+			{
+				out[0] = inrow[frac >> 16];frac += fracstep;
+				out[1] = inrow[frac >> 16];frac += fracstep;
+				out[2] = inrow[frac >> 16];frac += fracstep;
+				out[3] = inrow[frac >> 16];frac += fracstep;
+				out += 4;
+				j -= 4;
+			}
+			if (j & 2)
+			{
+				out[0] = inrow[frac >> 16];frac += fracstep;
+				out[1] = inrow[frac >> 16];frac += fracstep;
+				out += 2;
+			}
+			if (j & 1)
+			{
+				out[0] = inrow[frac >> 16];frac += fracstep;
+				out += 1;
+			}
+		}
+	}
+}
+
 /*
 ================
 GL_ResampleTexture
 ================
 */
+/*
 void
 GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 					int outwidth, int outheight)
@@ -885,12 +1061,14 @@ GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 		}
 	}
 }
+*/
 
 /*
 ================
 GL_Resample8BitTexture -- JACK
 ================
 */
+/*
 void
 GL_Resample8BitTexture (unsigned char *in, int inwidth, int inheight,
 						unsigned char *out, int outwidth, int outheight)
@@ -915,6 +1093,7 @@ GL_Resample8BitTexture (unsigned char *in, int inwidth, int inheight,
 		}
 	}
 }
+*/
 
 /*
 ================
@@ -971,6 +1150,8 @@ GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 
 	samples = alpha ? gl_alpha_format : gl_solid_format;
 
+#if 0
+	// LordHavoc: disabled this because my resampling is faster than glu
 	if (mipmap)
 		gluBuild2DMipmaps (GL_TEXTURE_2D, samples, width, height, GL_RGBA,
 						   GL_UNSIGNED_BYTE, data);
@@ -983,6 +1164,41 @@ GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 		qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
 					  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 	}
+#else
+	texels += scaled_width * scaled_height;
+
+	if (scaled_width == width && scaled_height == height) {
+		if (!mipmap) {
+			qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width,
+						  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			goto done;
+		}
+		memcpy (scaled, data, width * height * 4);
+	} else
+		R_ResampleTexture (data, width, height, scaled, scaled_width,
+							scaled_height);
+
+	qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
+				  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+	if (mipmap) {
+		int         miplevel;
+
+		miplevel = 0;
+		while (scaled_width > 1 || scaled_height > 1) {
+			GL_MipMap ((Uint8 *) scaled, scaled_width, scaled_height);
+			scaled_width >>= 1;
+			scaled_height >>= 1;
+			if (scaled_width < 1)
+				scaled_width = 1;
+			if (scaled_height < 1)
+				scaled_height = 1;
+			miplevel++;
+			qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
+						  scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+		}
+	}
+  done:;
+#endif
 
 	if (mipmap) {
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
