@@ -21,10 +21,6 @@ Bugs we know about:
   - RC #0: Bogus player names in death messages?
     (Test by doing impulse 9 and blowing self up with RL)
     (Happens for LordHavoc, anyone else?)
-  - RC #1: Things break in QW when looking down at a 90 degree angle.
-    (We need to bound it to look at exactly 89.9945068359375 down max.)
-    (This is the closest to 90 without being 90 the network code will
-    send.)
   - RC #2: We need to identify WTF is being used in frontlin for the
     start part, and z7 for the 'night sky' surface wise and get
     /something/ drawn there, because right now we are not drawing

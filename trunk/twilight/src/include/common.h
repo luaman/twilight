@@ -36,6 +36,8 @@
 #define MAX_QPATH       64              // max length of a quake game pathname
 #define MAX_OSPATH      128             // max length of a filesystem pathname
 
+#define ANG16_DELTA		0.0054931640625f
+
 // FIXME: now in src/base/parm.c - remove this at some point
 
 extern size_t com_argc;
