@@ -42,6 +42,9 @@ static const char rcsid[] =
 transvert_t transvert[MAX_TRANSVERTS];
 transpoly_t transpoly[MAX_TRANSPOLYS];
 int transpolyindex[MAX_TRANSPOLYS];
+int transvertindex[MAX_TRANSVERTS];
+
+transpoly_t *transpolylist[MAX_TRANSPOLYS];
 
 int currenttranspoly;
 int currenttransvert;
@@ -155,87 +158,108 @@ void transpolyend(void)
 
 void transpolyrender(void)
 {
-	int				i, j, k, tpolytype, texnum;
+	int				i, j, k, tpolytype, texnum, transpolylistindex, transvertindices;
 	transpoly_t		*p;
-	int				points = -1;
 	translistitem	*item;
-	transvert_t		*vert;
 
 	if (currenttranspoly < 1)
 		return;
 
 	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	tpolytype = TPOLYTYPE_ALPHA;
-	texnum = -1;
 
 	// set up the vertex array
 	qglInterleavedArrays(GL_T2F_C4UB_V3F, sizeof(transvert[0]), transvert);
 
+	transpolylistindex = 0;
+	transvertindices = 0;
 	for (i = 4095;i >= 0;i--)
 	{
 		item = translisthash[i];
-		while (item)
+		while(item)
 		{
 			p = item->poly;
 			item = item->next;
-			if (p->texnum != texnum || p->verts != points || p->transpolytype != tpolytype)
-			{
-				qglEnd();
-				if (p->texnum != texnum)
-				{
-					texnum = p->texnum;
-					qglBindTexture(GL_TEXTURE_2D, texnum);
-				}
-				if (p->transpolytype != tpolytype)
-				{
-					tpolytype = p->transpolytype;
-					if (tpolytype == TPOLYTYPE_ADD) // additive
-						qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
-					else // alpha
-						qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				}
-				points = p->verts;
-				switch (points)
-				{
-				case 3:
-					qglBegin(GL_TRIANGLES);
-					break;
-				case 4:
-					qglBegin(GL_QUADS);
-					break;
-				default:
-					qglBegin(GL_POLYGON);
-					points = -1; // to force a reinit on the next poly
-					break;
-				}
-			}
-
+			transpolylist[transpolylistindex++] = p;
 			for (j = 0, k = p->firstvert;j < p->verts;j++, k++)
-				qglArrayElement(k);
-
+				transvertindex[transvertindices++] = k;
 			if (p->glowtexnum)
 			{
-				qglEnd();
-				texnum = p->glowtexnum; // highly unlikely to match next poly, but...
-				qglBindTexture(GL_TEXTURE_2D, texnum);
-				if (tpolytype != TPOLYTYPE_ADD)
+				// making
+				if (currenttranspoly < MAX_TRANSPOLYS && currenttransvert + p->verts <= MAX_TRANSVERTS)
 				{
-					tpolytype = TPOLYTYPE_ADD; // might match next poly
-					qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+					transpoly[currenttranspoly].texnum = (unsigned short) p->glowtexnum;
+					transpoly[currenttranspoly].glowtexnum = 0;
+					transpoly[currenttranspoly].transpolytype = TPOLYTYPE_ADD;
+					transpoly[currenttranspoly].firstvert = currenttransvert;
+					transpoly[currenttranspoly].verts = 0;
+					transpolylist[transpolylistindex++] = &transpoly[currenttranspoly];
+					currenttranspoly++;
+					memcpy(&transvert[currenttransvert], &transvert[p->firstvert], sizeof(transvert_t) * p->verts);
+					for (j = 0, k = p->firstvert;j < p->verts;j++, k++)
+					{
+						transvert[currenttransvert].r = transvert[currenttransvert].g = transvert[currenttransvert].b = 255;
+						transvertindex[transvertindices++] = currenttransvert++;
+					}
 				}
-				points = -1;
-				qglBegin(GL_POLYGON);
-				for (j = 0,vert = &transvert[p->firstvert];j < p->verts;j++, vert++)
-				{
-					qglColor4ub(255,255,255,vert->a);
-					qglTexCoord2fv(&vert->s);
-					qglVertex3fv(vert->v);
-				}
+				p->glowtexnum = 0;
 			}
 		}
 	}
-	qglEnd();
+
+	if (gl_cva)
+		qglLockArraysEXT (0, currenttransvert);
+
+	tpolytype = TPOLYTYPE_ALPHA;
+	texnum = -1;
+	transvertindices = 0;
+	for (i = 0;i < transpolylistindex;)
+	{
+		p = transpolylist[i];
+		if (p->texnum != texnum)
+		{
+			texnum = p->texnum;
+			qglBindTexture(GL_TEXTURE_2D, texnum);
+		}
+		if (p->transpolytype != tpolytype)
+		{
+			tpolytype = p->transpolytype;
+			if (tpolytype == TPOLYTYPE_ADD) // additive
+				qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			else // alpha
+				qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
+		k = transvertindices;
+		switch (p->verts)
+		{
+		case 3:
+			do
+			{
+				transvertindices += p->verts;
+				p = transpolylist[++i];
+			}
+			while (i < transpolylistindex && p->verts == 3 && p->texnum == texnum && p->transpolytype == tpolytype);
+			qglDrawElements(GL_TRIANGLES, transvertindices - k, GL_UNSIGNED_INT, &transvertindex[k]);
+			break;
+		case 4:
+			do
+			{
+				transvertindices += p->verts;
+				p = transpolylist[++i];
+			}
+			while (i < transpolylistindex && p->verts == 4 && p->texnum == texnum && p->transpolytype == tpolytype);
+			qglDrawElements(GL_QUADS, transvertindices - k, GL_UNSIGNED_INT, &transvertindex[k]);
+			break;
+		default:
+			transvertindices += p->verts;
+			p = transpolylist[++i];
+			qglDrawElements(GL_POLYGON, transvertindices - k, GL_UNSIGNED_INT, &transvertindex[k]);
+			break;
+		}
+	}
+
+	if (gl_cva)
+		qglUnlockArraysEXT ();
 
 	qglDisable(GL_COLOR_ARRAY);
 
