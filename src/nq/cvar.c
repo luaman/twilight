@@ -398,7 +398,8 @@ Cvar_WriteVars (FILE *f)
 	{
 		// Can't use set in legacy NQ/QW
 //		fprintf (f, "set %s \"%s\"\n", v->var->name, v->var->string);
-		fprintf (f, "%s \"%s\"\n", v->var->name, v->var->string);
+		if (v->var->flags & CVAR_ARCHIVE)
+			fprintf (f, "%s \"%s\"\n", v->var->name, v->var->string);
 		v = v->next;
 	}
 }
