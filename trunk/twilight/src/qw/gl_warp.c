@@ -231,7 +231,7 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 
 	ripple = r_waterripple->fvalue;
 
-	qglColor4f(1, 1, 1, alpha);
+	qglColor4f (1.0f, 1.0f, 1.0f, alpha);
 
 	for (p = fa->polys; p; p = p->next)
 	{
@@ -354,7 +354,7 @@ R_DrawSkyChain (msurface_t *s)
 		}
 
 		qglEnable (GL_TEXTURE_2D);
-		qglColor3f (1, 1, 1);
+		qglColor4fv (whitev);
 		return;
 	}
 

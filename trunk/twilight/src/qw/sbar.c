@@ -623,7 +623,7 @@ Sbar_DrawFrags (void)
 	int         i, k, l;
 	int         x, y, f;
 	player_info_t *s;
-	vec3_t		color;
+	vec4_t		color;
 
 	if (cl.gametype < GAME_DEATHMATCH)
 		return;
@@ -636,6 +636,7 @@ Sbar_DrawFrags (void)
 	x = 23;
 	y = vid.height_2d - SBAR_HEIGHT - 23;
 
+	color[3] = 1.0f;
 	for (i = 0; i < l; i++) {
 		k = fragsort[i];
 		s = &cl.players[k];
@@ -645,9 +646,9 @@ Sbar_DrawFrags (void)
 			continue;
 
 		// draw background
-		VectorScale(s->colormap.top, 0.5, color);
+		VectorScale (s->colormap.top, 0.5, color);
 		Draw_Fill (x * 8 + 10, y, 28, 4, color);
-		VectorScale(s->colormap.bottom, 0.5, color);
+		VectorScale (s->colormap.bottom, 0.5, color);
 		Draw_Fill (x * 8 + 10, y + 4, 28, 3, color);
 
 		// draw number
@@ -955,7 +956,7 @@ Sbar_DeathmatchOverlay (int start)
 	Sint32			p;
 	char			team[5];
 	Sint32			skip = 10;
-	vec3_t			color;
+	vec4_t			color;
 
 	if (largegame)
 		skip = 8;
@@ -1001,6 +1002,7 @@ Sbar_DeathmatchOverlay (int start)
 		y += 8;
 	}
 
+	color[3] = 1.0f;
 	for (i = 0; i < l && y <= vid.height_2d - 10; i++) {
 		k = fragsort[i];
 		s = &cl.players[k];
@@ -1039,12 +1041,12 @@ Sbar_DeathmatchOverlay (int start)
 		Draw_String (x + 64, y, va("%4d", minutes), 8);
 
 		// draw background
-		VectorScale(s->colormap.top, 0.5, color);
+		VectorScale (s->colormap.top, 0.5, color);
 		if (largegame)
 			Draw_Fill (x + 104, y + 1, 40, 3, color);
 		else
 			Draw_Fill (x + 104, y, 40, 4, color);
-		VectorScale(s->colormap.bottom, 0.5, color);
+		VectorScale (s->colormap.bottom, 0.5, color);
 		Draw_Fill (x + 104, y + 4, 40, 4, color);
 
 		// draw number
@@ -1093,7 +1095,7 @@ Sbar_MiniDeathmatchOverlay (void)
 	Sint32			numlines;
 	char			name[16 + 1];
 	team_t			*tm;
-	vec3_t			color;
+	vec4_t			color;
 
 	if (vid.width_2d < 512 || !sb_lines)
 		return;							// not enuff room
@@ -1127,6 +1129,7 @@ Sbar_MiniDeathmatchOverlay (void)
 
 	x = 324;
 
+	color[3] = 1.0f;
 	for (; i < scoreboardlines && y < vid.height_2d - 8 + 1; i++) {
 		k = fragsort[i];
 		s = &cl.players[k];

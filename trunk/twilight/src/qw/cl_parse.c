@@ -899,13 +899,13 @@ CL_ProcessUserInfo (int slot, player_info_t *player)
 	color = bound(0, color, 13) * 16;
 	if (color < 128)
 		color += 15;
-	VectorCopy(d_8tofloattable[color], player->colormap.top);
+	VectorCopy4 (d_8tofloattable[color], player->colormap.top);
 
 	color = Q_atoi (Info_ValueForKey (player->userinfo, "bottomcolor"));
 	color = bound(0, color, 13) * 16;
 	if (color < 128)
 		color += 15;
-	VectorCopy(d_8tofloattable[color], player->colormap.bottom);
+	VectorCopy4 (d_8tofloattable[color], player->colormap.bottom);
 
 	if (Info_ValueForKey (player->userinfo, "*spectator")[0])
 		player->spectator = true;

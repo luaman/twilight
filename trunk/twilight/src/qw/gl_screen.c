@@ -172,9 +172,9 @@ GL_BrightenScreen(void)
 		while (f >= 1.01f)
 		{
 			if (f >= 2)
-				qglColor3f (1, 1, 1);
+				qglColor4fv (whitev);
 			else
-				qglColor3f (f-1, f-1, f-1);
+				qglColor4f (f - 1.0f, f - 1.0f, f - 1.0f, 1.0f);
 			qglVertex2f (-5000, -5000);
 			qglVertex2f (10000, -5000);
 			qglVertex2f (-5000, 10000);
@@ -185,7 +185,7 @@ GL_BrightenScreen(void)
 	}
 	if (r_contrast->fvalue <= 0.99f)
 	{
-		qglColor4f (1, 1, 1, 1 - r_contrast->fvalue);
+		qglColor4f (1.0f, 1.0f, 1.0f, 1.0f - r_contrast->fvalue);
 		qglBegin (GL_TRIANGLES);
 		qglVertex2f (-5000, -5000);
 		qglVertex2f (10000, -5000);
@@ -193,7 +193,7 @@ GL_BrightenScreen(void)
 		qglEnd ();
 	}
 
-	qglColor3f (1, 1, 1);
+	qglColor4fv (whitev);
 	qglEnable (GL_TEXTURE_2D);
 	qglEnable (GL_CULL_FACE);
 	qglDisable (GL_BLEND);
@@ -866,7 +866,7 @@ rshot_fill (int x, int y, int w, int h)
 	qglVertex2f (x, y + h);
 	qglEnd ();
 
-	qglColor3f (1.0f, 1.0f, 1.0f);
+	qglColor4fv (whitev);
 	qglEnable (GL_TEXTURE_2D);
 }
 

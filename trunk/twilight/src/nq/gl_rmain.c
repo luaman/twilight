@@ -347,7 +347,7 @@ R_DrawSubSkin
 =================
 */
 void
-R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec3_t *color)
+R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec4_t *color)
 {
 	int			i;
 
@@ -377,7 +377,8 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 	aliashdr_t		*paliashdr;
 	rdlight_t		*rd;
 	skin_t			*skin;
-	vec3_t			top, bottom, dist;
+	vec4_t			top, bottom;
+	vec3_t			dist;
 	float			f;
 	qboolean		has_top = false, has_bottom = false, has_fb = false;
 
@@ -482,9 +483,9 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 
 	if (e->colormap && !gl_nocolors->ivalue) {
 		if ((has_top = !!skin->top[anim].num_indices))
-			VectorCopy(e->colormap->top, top);
+			VectorCopy4 (e->colormap->top, top);
 		if ((has_bottom = !!skin->bottom[anim].num_indices))
-			VectorCopy(e->colormap->bottom, bottom);
+			VectorCopy4 (e->colormap->bottom, bottom);
 	}
 
 	if (gl_fb_models->ivalue)
@@ -519,7 +520,7 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 		R_DrawSubSkin (paliashdr, &skin->bottom[anim], &bottom);
 
 	qglDisableClientState (GL_COLOR_ARRAY);
-	qglColor3f (1, 1, 1);
+	qglColor4fv (whitev);
 
 	if (has_fb)
 		R_DrawSubSkin (paliashdr, &skin->fb[anim], NULL);
@@ -629,7 +630,7 @@ R_PolyBlend (void)
 	qglVertex2f (-5, 10);
 	qglEnd ();
 
-	qglColor3f (1, 1, 1);
+	qglColor4fv (whitev);
 	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
 }
