@@ -57,6 +57,8 @@ char       *Sys_ConsoleInput (void);
 
 void        Sys_Sleep (void);
 
+char	   *Sys_ExpandPath (char *str);
+
 // called to yield for a little bit so as
 // not to hog cpu when paused or debugging
 
