@@ -109,12 +109,9 @@ double Q_tan(double x);
 double Q_floor(double x);
 double Q_ceil(double x);
 float Q_fabs(float f);
+int Q_abs(int x);
 float Q_sqrt(float n);
 void Q_srand(unsigned seed);
 int	Q_rand(void);
 float Q_RSqrt(float number);
-
-#ifndef Q_abs
-#define Q_abs(x)	(x > 0) ? (x) : (-x)
-#endif
-
+double Q_pow(double x, double y);
