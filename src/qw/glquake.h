@@ -229,10 +229,12 @@ extern struct cvar_s *gl_im_animation;
 extern struct cvar_s *gl_fb_models;
 extern struct cvar_s *gl_fb_bmodels;
 extern struct cvar_s *gl_oldlights;
+extern struct cvar_s *gl_colorlights;
 
 extern int  gl_lightmap_format;
 extern int  gl_solid_format;
 extern int  gl_alpha_format;
+extern qboolean colorlights;
 
 extern struct cvar_s *gl_max_size;
 extern struct cvar_s *gl_playermip;

@@ -214,10 +214,12 @@ extern cvar_t *gl_im_transform;
 extern cvar_t *gl_fb_models;
 extern cvar_t *gl_fb_bmodels;
 extern cvar_t *gl_oldlights;
+extern cvar_t *gl_colorlights;
 
 extern int  gl_lightmap_format;
 extern int  gl_solid_format;
 extern int  gl_alpha_format;
+extern qboolean colorlights;
 
 extern cvar_t *gl_max_size;
 extern cvar_t *gl_playermip;

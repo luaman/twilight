@@ -168,6 +168,8 @@ R_Init_Cvars (void)
 	r_maxedges = Cvar_Get ("r_maxedges", "0", CVAR_NONE, NULL);	// Shrak
 	r_maxsurfs = Cvar_Get ("r_maxsurfs", "0", CVAR_NONE, NULL); // Shrak
 
+	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
+
 	if (gl_mtexable)
 		Cvar_Set (gl_texsort, "0");
 }

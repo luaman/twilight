@@ -117,8 +117,12 @@ cvar_t	   *r_maxedges, *r_maxsurfs;		// Shrak
 cvar_t	   *gl_fb_models;
 cvar_t	   *gl_fb_bmodels;
 cvar_t	   *gl_oldlights;
+cvar_t	   *gl_colorlights;
 
 extern cvar_t *gl_ztrick;
+
+extern vec3_t lightcolor;
+qboolean colorlights = true;
 
 static float shadescale = 0.0;
 
@@ -434,8 +438,15 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 			order += 2;
 
 			// normals and vertexes come from the frame list
-			l = shadedots[verts->lightnormalindex] * shadelight;
-			qglColor3f (l, l, l);
+			if (!colorlights) {
+				l = shadedots[verts->lightnormalindex] * shadelight;
+				qglColor3f (l, l, l);
+			}
+			else {
+				l = shadedots[verts->lightnormalindex];
+				qglColor3f (l*lightcolor[0], l*lightcolor[1], l*lightcolor[2]);
+			}
+
 			qglVertex3f (verts->v[0], verts->v[1], verts->v[2]);
 			verts++;
 		} while (--count);
@@ -497,8 +508,14 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 			d[0] = shadedots[verts2->lightnormalindex] -
 				shadedots[verts1->lightnormalindex];
 
-			l = shadelight * (shadedots[verts1->lightnormalindex] + (blend * d[0]));
-			qglColor3f (l, l, l);
+			if (!colorlights) {
+				l = shadelight * (shadedots[verts1->lightnormalindex] + (blend * d[0]));
+				qglColor3f (l, l, l);
+			}
+			else {
+				l = shadedots[verts1->lightnormalindex] + (blend * d[0]);
+				qglColor3f (l*lightcolor[0], l*lightcolor[1], l*lightcolor[2]);
+			}
 
 			VectorSubtract(verts2->v, verts1->v, d);
 
@@ -850,8 +867,21 @@ R_DrawAliasModel (entity_t *e)
 		ambientlight = shadelight = R_LightPoint (currententity->origin);
 
 		// always give the gun some light
-		if (e == &cl.viewent && ambientlight < 24)
-			ambientlight = shadelight = 24;
+		if (!colorlights) {
+			if (e == &cl.viewent && ambientlight < 24)
+				ambientlight = shadelight = 24;
+		}
+		else {
+			if (e == &cl.viewent)
+			{
+				if (lightcolor[0] < 24)
+					lightcolor[0] = 24;
+				if (lightcolor[1] < 24)
+					lightcolor[1] = 24;
+				if (lightcolor[2] < 24)
+					lightcolor[2] = 24;
+			}
+		}
 
 		for (lnum = 0; lnum < MAX_DLIGHTS; lnum++) {
 			if (cl_dlights[lnum].die >= cl.time) {
@@ -860,36 +890,65 @@ R_DrawAliasModel (entity_t *e)
 				add = cl_dlights[lnum].radius - VectorLength (dist);
 
 				if (add > 0) {
-					ambientlight += add;
-					// ZOID models should be affected by dlights as well
-					shadelight += add;
+					if (!colorlights)
+					{
+						ambientlight += add;
+						// ZOID models should be affected by dlights as well
+						shadelight += add;
+					}
+					else {
+						lightcolor[0] += add * cl_dlights[lnum].color[0];
+						lightcolor[1] += add * cl_dlights[lnum].color[1];
+						lightcolor[2] += add * cl_dlights[lnum].color[2];
+					}
 				}
 			}
 		}
 
-		// clamp lighting so it doesn't overbright as much
-		if (ambientlight > 128)
-			ambientlight = 128;
-		if (ambientlight + shadelight > 192)
-			shadelight = 192 - ambientlight;
+		if (!colorlights)
+		{
+			// clamp lighting so it doesn't overbright as much
+			if (ambientlight > 128)
+				ambientlight = 128;
+			if (ambientlight + shadelight > 192)
+				shadelight = 192 - ambientlight;
+		}
 	}
 
 	// ZOID: never allow players to go totally black
 	i = currententity - cl_entities;
-	if (i >= 1 && i <= cl.maxclients	/* && !strcmp
-										   (currententity->model->name,
-										   "progs/player.mdl") */ )
-		if (ambientlight < 8)
-			ambientlight = shadelight = 8;
+	if (i >= 1 && i <= cl.maxclients) {
+		if (!colorlights)
+		{
+			if (ambientlight < 8)
+				ambientlight = shadelight = 8;
+		}
+		else {
+			if (lightcolor[0] < 8)
+				lightcolor[0] = 8;
+			if (lightcolor[1] < 8)
+				lightcolor[1] = 8;
+			if (lightcolor[2] < 8)
+				lightcolor[2] = 8;
+		}
+	}
 
 	// HACK HACK HACK -- no fullbright colors, so make torches full light
-	if ((clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value)
-		ambientlight = shadelight = 256;
+	if ((clmodel->modflags & FLAG_FULLBRIGHT) && gl_fb_models->value) {
+		if (!colorlights)
+			ambientlight = shadelight = 256;
+		else
+			lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
+	}
 
 	shadedots =
 		r_avertexnormal_dots[((int) (e->angles[1] * (SHADEDOT_QUANT / 360.0))) &
 							 (SHADEDOT_QUANT - 1)];
-	shadelight = shadelight * (1.0 / 200.0);
+
+	if (!colorlights)
+		shadelight = shadelight * (1.0 / 200.0);
+	else
+		VectorScale(lightcolor, 1.0f / 200.0f, lightcolor);
 
 	// 
 	// locate the proper data

@@ -483,7 +483,7 @@ RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	int         s, t, ds, dt;
 	int         i;
 	mtexinfo_t *tex;
-	Uint8       *lightmap;
+	Uint8      *lightmap;
 	unsigned    scale;
 	int         maps;
 
@@ -566,23 +566,143 @@ RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	return RecursiveLightPoint (node->children[!side], mid, end);
 }
 
-int
-R_LightPoint (vec3_t p)
+int RecursiveColorLightPoint (vec3_t color, mnode_t *node, vec3_t start, vec3_t end)
 {
-	vec3_t      end;
-	int         r;
+	float front, back, frac;
+	vec3_t mid;
 
-	if (!cl.worldmodel->lightdata)
-		return 255;
+loc0:
+	if (node->contents < 0)
+		return false;// didn't hit anything
+	
+	// calculate mid point
+	front = PlaneDiff (start, node->plane);
+	back = PlaneDiff (end, node->plane);
 
-	end[0] = p[0];
-	end[1] = p[1];
-	end[2] = p[2] - 2048;
+	if ((back < 0) == (front < 0))
+	{
+		node = node->children[front < 0];
+		goto loc0;
+	}
+	
+	frac = front / (front-back);
+	mid[0] = start[0] + (end[0] - start[0])*frac;
+	mid[1] = start[1] + (end[1] - start[1])*frac;
+	mid[2] = start[2] + (end[2] - start[2])*frac;
+	
+	// go down front side
+	if (RecursiveColorLightPoint (color, node->children[front < 0], start, mid))
+		return true; // hit something
+	else
+	{
+		int i, ds, dt;
+		msurface_t *surf;
 
-	r = RecursiveLightPoint (cl.worldmodel->nodes, p, end);
+		// check for impact on this node
+		VectorCopy (mid, lightspot);
+		lightplane = node->plane;
+		surf = cl.worldmodel->surfaces + node->firstsurface;
 
-	if (r == -1)
-		r = 0;
+		for (i = 0; i < node->numsurfaces; i++, surf++)
+		{
+			if (surf->flags & SURF_DRAWTILED)
+				continue;// no lightmaps
 
-	return r;
+			ds = (int) ((float) DotProduct (mid, surf->texinfo->vecs[0]) + surf->texinfo->vecs[0][3]);
+			dt = (int) ((float) DotProduct (mid, surf->texinfo->vecs[1]) + surf->texinfo->vecs[1][3]);
+			if (ds < surf->texturemins[0] || dt < surf->texturemins[1])
+				continue;
+			
+			ds -= surf->texturemins[0];
+			dt -= surf->texturemins[1];
+			
+			if (ds > surf->extents[0] || dt > surf->extents[1])
+				continue;
+			if (surf->samples)
+			{
+				Uint8 *lightmap;
+				int maps, line3, dsfrac = ds & 15, 
+					dtfrac = dt & 15, 
+					r00 = 0, g00 = 0, b00 = 0, 
+					r01 = 0, g01 = 0, b01 = 0, 
+					r10 = 0, g10 = 0, b10 = 0, 
+					r11 = 0, g11 = 0, b11 = 0;
+				float scale;
+
+				line3 = ((surf->extents[0]>>4)+1)*3;
+				lightmap = surf->samples + ((dt>>4) * ((surf->extents[0]>>4)+1) + (ds>>4))*3; // LordHavoc: *3 for color
+				for (maps = 0;maps < MAXLIGHTMAPS && surf->styles[maps] != 255;maps++)
+				{
+					scale = (float)d_lightstylevalue[surf->styles[maps]] * 1.0 / 256.0;
+					r00 += (float)lightmap[0] * scale;
+					g00 += (float)lightmap[1] * scale;
+					b00 += (float)lightmap[2] * scale;
+					r01 += (float)lightmap[3] * scale;
+					g01 += (float)lightmap[4] * scale;
+					b01 += (float)lightmap[5] * scale;
+					r10 += (float)lightmap[line3  ] * scale;
+					g10 += (float)lightmap[line3+1] * scale;
+					b10 += (float)lightmap[line3+2] * scale;
+					r11 += (float)lightmap[line3+3] * scale;
+					g11 += (float)lightmap[line3+4] * scale;
+					b11 += (float)lightmap[line3+5] * scale;
+					lightmap += surf->smax * surf->tmax *3;
+				}
+
+				color[0] += (float)((int)((((((((r11-r10) * dsfrac) >> 4) + r10)-((((r01-r00) * dsfrac) >> 4) + r00)) * dtfrac) >> 4)
+					+ ((((r01-r00) * dsfrac) >> 4) + r00)));
+				color[1] += (float)((int)((((((((g11-g10) * dsfrac) >> 4) + g10)-((((g01-g00) * dsfrac) >> 4) + g00)) * dtfrac) >> 4)
+					+ ((((g01-g00) * dsfrac) >> 4) + g00)));
+				color[2] += (float)((int)((((((((b11-b10) * dsfrac) >> 4) + b10)-((((b01-b00) * dsfrac) >> 4) + b00)) * dtfrac) >> 4)
+					+ ((((b01-b00) * dsfrac) >> 4) + b00)));
+			}
+			return true; // success
+		}
+
+		// go down back side
+		return RecursiveColorLightPoint (color, node->children[front >= 0], mid, end);
+	}
 }
+
+vec3_t lightcolor;
+
+int R_LightPoint (vec3_t p)
+{
+	vec3_t end;
+
+	if (!colorlights)
+	{
+		int         r;
+
+		if (!cl.worldmodel->lightdata)
+			return 255;
+
+		end[0] = p[0];
+		end[1] = p[1];
+		end[2] = p[2] - 2048;
+
+		r = RecursiveLightPoint (cl.worldmodel->nodes, p, end);
+
+		if (r == -1)
+			r = 0;
+
+		return r;
+	}
+	else {
+		if (/* r_fullbright->value || */!cl.worldmodel->lightdata)
+		{
+			lightcolor[0] = lightcolor[1] = lightcolor[2] = 255;
+			return 255;
+		}
+		
+		end[0] = p[0];
+		end[1] = p[1];
+		end[2] = p[2] - 2048;
+		lightcolor[0] = lightcolor[1] = lightcolor[2] = 0;
+
+		RecursiveColorLightPoint (lightcolor, cl.worldmodel->nodes, p, end);
+
+		return ((lightcolor[0] + lightcolor[1] + lightcolor[2]) * (1.0f / 3.0f));
+	}
+}
+
