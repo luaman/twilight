@@ -136,7 +136,7 @@ PCX_Load
 image_t *
 PCX_Load (char *name)
 {
-	Uint8 *buf = COM_LoadTempFile (name, true);
+	Uint8 *buf = COM_LoadTempFile (name, false);
 
 	if (buf)
 		return PCX_LoadBuffer (buf);

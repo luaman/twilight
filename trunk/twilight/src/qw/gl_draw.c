@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "draw.h"
 #include "glquake.h"
 #include "host.h"
+#include "image.h"
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
@@ -55,7 +56,7 @@ cvar_t	*gl_texturemode;
 cvar_t	*cl_verstring;					/* FIXME: Move this? */
 cvar_t	*r_lerpimages;
 
-Uint8	*draw_chars;					/* 8*8 graphic characters */
+Uint8	*draw_chars;
 qpic_t	*draw_disc;
 qpic_t	*draw_backtile;
 
@@ -290,20 +291,21 @@ Draw_Init
 void
 Draw_Init (void)
 {
-	int         i;
+	image_t	   *img;
+	int			i;
 
-	/*	load the console background and the charset
-		by hand, because we need to write the version
-		string into the background before turning
-		it into a texture */
+	img = IMG_Load ("conchars");
+	if (!img)
+		Sys_Error ("Draw_Init: Unable to load conchars\n");
+	
+	// FIXME: *sigh* gl_screen and gl_ngraph still use draw_chars
 	draw_chars = W_GetLumpName ("conchars");
 	for (i = 0; i < 256 * 64; i++)
 		if (draw_chars[i] == 0)
-			draw_chars[i] = 255;		/* proper transparent color */
-
-	/* now turn them into textures */
-	char_texture = GL_LoadTexture ("charset", 128, 128, draw_chars, false,
-			true, 8);
+			draw_chars[i] = 255;            /* proper transparent color */
+	 
+	char_texture = GL_LoadTexture ("charset", img->width, img->height,
+			img->pixels, false, true, 32);
 
 	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true, 8);
 	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata,
