@@ -20,10 +20,10 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../include,../../../SDL/include"
+				AdditionalIncludeDirectories="../,../base,../fs,../include,../renderer"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;HAVE_SDL_H"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\Debug/twilight_image.pch"
 				AssemblerListingLocation=".\Debug/"
@@ -71,11 +71,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				OptimizeForProcessor="3"
-				AdditionalIncludeDirectories="../include,../../../SDL/include"
+				AdditionalIncludeDirectories="../,../base,../fs,../include,../renderer"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;HAVE_SDL_H"
 				StringPooling="TRUE"
-				RuntimeLibrary="4"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\Release/twilight_image.pch"
@@ -200,7 +199,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="tga.c">
+				RelativePath="sdlimage.c">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -219,24 +218,25 @@
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="image.h">
-			</File>
-			<File
-				RelativePath="jpeg.h">
-			</File>
-			<File
-				RelativePath="pcx.h">
-			</File>
-			<File
-				RelativePath="qlmp.h">
-			</File>
-			<File
-				RelativePath="tga.h">
+				RelativePath="tga.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>
