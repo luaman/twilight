@@ -366,13 +366,13 @@ R_NewMap (void)
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
 
-	// clear out efrags in case the level hasn't been reloaded
-	// FIXME: is this one short?
-	for (i = 0; i < cl.worldmodel->numleafs; i++)
-		cl.worldmodel->leafs[i].efrags = NULL;
-
 	r_viewleaf = NULL;
 	R_ClearParticles ();
+
+	memset (&cl_network_entities, 0, sizeof(cl_network_entities));
+	memset (&cl_player_entities, 0, sizeof(cl_player_entities));
+	memset (&cl_static_entities, 0, sizeof(cl_static_entities));
+	cl_num_static_entities = 0;
 
 	r_dlightframecount = 0;
 

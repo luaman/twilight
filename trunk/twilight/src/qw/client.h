@@ -289,10 +289,8 @@ typedef struct {
 
 // refresh related state
 	struct model_s *worldmodel;			// cl_entitites[0].model
-	struct efrag_s *free_efrags;
 	int         num_entities;			// stored bottom up in cl_entities
 	// array
-	int         num_statics;			// stored top down in cl_entitiers
 
 	int         cdtrack;				// cd audio
 
@@ -341,14 +339,11 @@ extern struct cvar_s *_windowed_mouse;
 extern struct cvar_s *name;
 
 
-#define	MAX_STATIC_ENTITIES	128			// torches, etc
 
 extern client_state_t cl;
 
 // FIXME, allocate dynamically
 extern entity_state_t cl_baselines[MAX_EDICTS];
-extern efrag_t cl_efrags[MAX_EFRAGS];
-extern entity_t cl_static_entities[MAX_STATIC_ENTITIES];
 extern lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
 extern dlight_t cl_dlights[MAX_DLIGHTS];
 
@@ -376,10 +371,19 @@ qboolean	CL_DemoBehind (void);
 
 void		CL_BeginServerConnect (void);
 
-#define		MAX_VISEDICTS	256
-extern int	cl_numvisedicts, cl_oldnumvisedicts;
-extern entity_t	*cl_visedicts, *cl_oldvisedicts;
-extern entity_t	cl_visedicts_list[2][MAX_VISEDICTS];
+#define MAX_STATIC_ENTITIES	128
+#define MAX_ENTITIES	1024
+extern int			cl_num_vis_entities;
+extern entity_t	*cl_vis_entities[MAX_ENTITIES];
+
+extern int			cl_num_static_entities;
+extern entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
+
+extern int			cl_num_tmp_entities;
+extern entity_t	cl_tmp_entities[MAX_ENTITIES];
+
+extern entity_t	cl_network_entities[MAX_EDICTS];
+extern entity_t	cl_player_entities[MAX_CLIENTS];
 
 extern char	emodel_name[], pmodel_name[], prespawn_name[], modellist_name[],
 			soundlist_name[];

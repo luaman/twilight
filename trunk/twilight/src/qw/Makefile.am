@@ -24,25 +24,17 @@ else
 twilight_qw_sys_libs=
 endif
 
-twilight_qw_SOURCES= \
-	quakedef.h \
-        cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c cl_model.c \
-        cl_parse.c cl_pred.c cl_tent.c client.h \
-	cmd.c cmd.h common.c console.c console.h \
-	cvar.c \
-        gl_draw.c \
-	gl_ngraph.c gl_refrag.c gl_rlight.c gl_rmain.c \
-	gl_rmisc.c gl_rsurf.c gl_screen.c screen.h gl_warp.c \
-	keys.c mdfour.c menu.c \
-	net.h net_chan.c net_udp.c \
-	pmove.c pmovetst.c r_part.c sbar.c skin.c \
-	snd_dma.c \
-        vid_sdl.c \
-        view.c zone.c \
-	bspfile.h keys.h protocol.h \
-	render.h sys.c \
-        gl_poly.c gl_poly.h
+noinst_HEADERS= client.h gl_poly.h cmd.h console.h keys.h protocol.h render.h
 
+twilight_qw_SOURCES= \
+		     cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c	\
+		     cl_model.c cl_parse.c cl_pred.c cl_tent.c cmd.c	\
+		     console.c cvar.c gl_draw.c gl_ngraph.c gl_poly.c	\
+		     gl_rlight.c gl_rmain.c gl_rmisc.c gl_rsurf.c	\
+		     gl_screen.c gl_warp.c keys.c mdfour.c menu.c	\
+		     net_chan.c net_udp.c pmove.c pmovetst.c r_part.c	\
+		     sbar.c sys.c skin.c snd_dma.c vid_sdl.c view.c	\
+		     zone.c
 
 EXTRA_DIST= \
 	qw.dsp
