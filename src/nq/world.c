@@ -260,41 +260,76 @@ void
 SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 {
 	areanode_t	*node;
-	model_t		*mod;
+	model_t		*model;
 
+	// unlink from old position
 	if (ent->area.prev)
-		SV_UnlinkEdict (ent);			// unlink from old position
+		SV_UnlinkEdict (ent);
 
+	// don't add the world
 	if (ent == sv.edicts)
-		return;							// don't add the world
+		return;
 
 	if (ent->free)
 		return;
 
-// set the abs box
-	mod = sv.models[(int) ent->v.modelindex];
-#if 1
-	if (mod && (ent->v.solid == SOLID_BSP))
-		Mod_MinsMaxs (mod, ent->v.origin, ent->v.angles, ent->v.absmin, ent->v.absmax);
+	// set the abs box
+	if (ent->v.solid == SOLID_BSP)
+	{
+		if (ent->v.modelindex < 0 || ent->v.modelindex > MAX_MODELS)
+			PR_RunError("SOLID_BSP with invalid modelindex!\n");
+		model = sv.models[(int) ent->v.modelindex];
+		if (model != NULL)
+		{
+			if (model->type != mod_brush)
+				PR_RunError("SOLID_BSP with non-BSP model\n");
+
+			// Can't use Mod_MinsMaxs here because of avelocity
+			if (ent->v.angles[0] || ent->v.angles[2] || ent->v.avelocity[0]
+					|| ent->v.avelocity[2])
+			{
+				VectorAdd (ent->v.origin, model->rotatedmins, ent->v.absmin);
+				VectorAdd (ent->v.origin, model->rotatedmaxs, ent->v.absmax);
+			}
+			else if (ent->v.angles[1] || ent->v.avelocity[1])
+			{
+				VectorAdd (ent->v.origin, model->yawmins, ent->v.absmin);
+				VectorAdd (ent->v.origin, model->yawmaxs, ent->v.absmax);
+			}
+			else
+			{
+				VectorAdd (ent->v.origin, model->normalmins, ent->v.absmin);
+				VectorAdd (ent->v.origin, model->normalmaxs, ent->v.absmax);
+			}
+		}
+		else
+		{
+			// SOLID_BSP with no model is valid, mainly because some QC
+			// setup code does so temporarily
+			VectorAdd (ent->v.origin, ent->v.mins, ent->v.absmin);
+			VectorAdd (ent->v.origin, ent->v.maxs, ent->v.absmax);
+		}
+	}
 	else
-#endif
 	{
 		VectorAdd (ent->v.origin, ent->v.mins, ent->v.absmin);
 		VectorAdd (ent->v.origin, ent->v.maxs, ent->v.absmax);
 	}
 
-
-//
-// to make items easier to pick up and allow them to be grabbed off
-// of shelves, the abs sizes are expanded
-//
-	if ((int) ent->v.flags & FL_ITEM) {
+	// to make items easier to pick up and allow them to be grabbed off
+	// of shelves, the abs sizes are expanded
+	if ((int) ent->v.flags & FL_ITEM)
+	{
 		ent->v.absmin[0] -= 15;
 		ent->v.absmin[1] -= 15;
+		ent->v.absmin[2] -= 1;
 		ent->v.absmax[0] += 15;
 		ent->v.absmax[1] += 15;
-	} else {							// because movement is clipped an
-										// epsilon away from an actual edge,
+		ent->v.absmax[2] += 1;
+	}
+	else
+	{
+		// because movement is clipped an epsilon away from an actual edge,
 		// we must fully check even when bounding boxes don't quite touch
 		ent->v.absmin[0] -= 1;
 		ent->v.absmin[1] -= 1;
@@ -304,7 +339,7 @@ SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 		ent->v.absmax[2] += 1;
 	}
 
-// link to PVS leafs
+	// link to PVS leafs
 	ent->num_leafs = 0;
 	if (ent->v.modelindex)
 		SV_FindTouchedLeafs (ent, sv.worldmodel->nodes);
@@ -312,9 +347,10 @@ SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 	if (ent->v.solid == SOLID_NOT)
 		return;
 
-// find the first node that the ent's box crosses
+	// find the first node that the ent's box crosses
 	node = sv_areanodes;
-	while (1) {
+	while (1)
+	{
 		if (node->axis == -1)
 			break;
 		if (ent->v.absmin[node->axis] > node->dist)
@@ -322,17 +358,17 @@ SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 		else if (ent->v.absmax[node->axis] < node->dist)
 			node = node->children[1];
 		else
-			break;						// crosses the node
+			// crosses the node
+			break;
 	}
 
-// link it in   
-
+	// link it in
 	if (ent->v.solid == SOLID_TRIGGER)
 		InsertLinkBefore (&ent->area, &node->trigger_edicts);
 	else
 		InsertLinkBefore (&ent->area, &node->solid_edicts);
 
-// if touch_triggers, touch all entities at this node and decend for more
+	// if touch_triggers, touch all entities at this node and decend for more
 	if (touch_triggers)
 		SV_TouchLinks (ent, sv_areanodes);
 }
