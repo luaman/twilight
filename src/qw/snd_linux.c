@@ -40,7 +40,8 @@ static const char rcsid[] =
 #include <linux/soundcard.h>
 #include <stdio.h>
 
-#include "quakedef.h"
+#include "common.h"
+#include "console.h"
 #include "sound.h"
 
 int         audio_fd;

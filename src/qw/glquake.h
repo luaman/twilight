@@ -28,6 +28,8 @@
 #ifndef __GLQUAKE_H
 #define __GLQUAKE_H
 
+#include "mathlib.h"
+
 #ifdef _WIN32
 #if _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma warning(disable : 4244)			// MIPS
@@ -40,10 +42,12 @@
 
 #define	MAX_GLTEXTURES	1024
 
-#include "gl_model.h"
 #include "TGL_defines.h"
 #include "TGL_types.h"
 #include "TGL_funcs.h"
+
+#include "gl_model.h"
+#include "wad.h"
 
 void        GL_BeginRendering (int *x, int *y, int *width, int *height);
 void        GL_EndRendering (void);

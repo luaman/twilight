@@ -27,8 +27,10 @@
 #ifndef __MODEL__
 #define __MODEL__
 
+#include "bspfile.h"
 #include "modelgen.h"
 #include "spritegn.h"
+#include "zone.h"
 
 /*
 
@@ -189,7 +191,7 @@ typedef struct mleaf_s {
 
 // leaf specific
 	byte       *compressed_vis;
-	efrag_t    *efrags;
+	struct efrag_s    *efrags;
 
 	msurface_t **firstmarksurface;
 	int         nummarksurfaces;
@@ -198,7 +200,7 @@ typedef struct mleaf_s {
 	byte        ambient_sound_level[NUM_AMBIENTS];
 } mleaf_t;
 
-typedef struct {
+typedef struct hull_s {
 	dclipnode_t *clipnodes;
 	mplane_t   *planes;
 	int         firstclipnode;

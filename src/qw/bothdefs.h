@@ -23,11 +23,15 @@
 
 	$Id$
 */
-// defs common to client and server
 
 #ifndef __BOTHDEFS_H
 #define __BOTHDEFS_H
 
+#include "qtypes.h"
+
+// defs common to client and server
+
+#define MAX_NUM_ARGVS   50
 
 #define CACHE_SIZE	32					// used to align key data structures
 
@@ -142,6 +146,16 @@
 #define	PRINT_MEDIUM		1			// death messages
 #define	PRINT_HIGH			2			// critical messages
 #define	PRINT_CHAT			3			// chat messages
+
+#define	QUAKE_GAME						// as opposed to utilities
+
+extern double host_frametime;
+extern double realtime;					// not bounded in any way, changed at
+
+										// start of every frame, never reset
+
+//void        SV_Error (char *error, ...);
+//void        SV_Init (void);
 
 #endif // __BOTHDEFS_H
 

@@ -34,10 +34,14 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "client.h"
+#include "cmd.h"
 #include "cvar.h"
+#include "draw.h"
 #include "sbar.h"
 #include "screen.h"
+#include "strlib.h"
+#include "wad.h"
 
 
 #define STAT_MINUS		10				// num frame for '-' stats digit
@@ -427,7 +431,7 @@ Sbar_SortTeams (void)
 // request new ping times every two second
 	scoreboardteams = 0;
 
-	teamplay = atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
+	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
 	if (!teamplay)
 		return;
 
@@ -812,7 +816,7 @@ Sbar_Draw (void)
 // main screen deathmatch rankings
 	// if we're dead show team scores in team games
 	if (cl.stats[STAT_HEALTH] <= 0 && !cl.spectator)
-		if (atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0 &&
+		if (Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0 &&
 			!sb_showscores)
 			Sbar_TeamOverlay ();
 		else
@@ -897,7 +901,7 @@ Sbar_TeamOverlay (void)
 	int         plow, phigh, pavg;
 
 // request new ping times every two second
-	teamplay = atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
+	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
 
 	if (!teamplay) {
 		Sbar_DeathmatchOverlay (0);
@@ -1004,7 +1008,7 @@ Sbar_DeathmatchOverlay (int start)
 		SZ_Print (&cls.netchan.message, "pings");
 	}
 
-	teamplay = atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
+	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
 
 	scr_copyeverything = 1;
 	scr_fullupdate = 0;
@@ -1152,7 +1156,7 @@ Sbar_MiniDeathmatchOverlay (void)
 	if (vid.width < 512 || !sb_lines)
 		return;							// not enuff room
 
-	teamplay = atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
+	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
 
 	scr_copyeverything = 1;
 	scr_fullupdate = 0;
@@ -1281,7 +1285,7 @@ Sbar_IntermissionOverlay (void)
 	scr_copyeverything = 1;
 	scr_fullupdate = 0;
 
-	if (atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0
+	if (Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0
 		&& !sb_showscores)
 		Sbar_TeamOverlay ();
 	else

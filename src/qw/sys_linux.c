@@ -48,8 +48,12 @@ static const char rcsid[] =
 #include <sys/mman.h>
 #include <errno.h>
 
-#include "quakedef.h"
+#include "common.h"
+#include "host.h"
+#include "mathlib.h"
 #include "strlib.h"
+#include "sys.h"
+
 
 int         noconinput = 0;
 int         nostdout = 0;

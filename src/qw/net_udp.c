@@ -34,8 +34,6 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
-
 #include <sys/types.h>
 #ifdef WIN32
 #include <windows.h>
@@ -60,9 +58,13 @@ static const char rcsid[] =
 #include <sys/filio.h>
 #endif
 
-#ifdef NeXT
-#include <libc.h>
-#endif
+#include "bothdefs.h"
+#include "common.h"
+#include "console.h"
+#include "net.h"
+#include "strlib.h"
+#include "sys.h"
+
 
 netadr_t    net_local_adr;
 
@@ -165,7 +167,7 @@ NET_StringToAdr (char *s, netadr_t *a)
 	for (colon = copy; *colon; colon++)
 		if (*colon == ':') {
 			*colon = 0;
-			sadr.sin_port = htons ((unsigned short) atoi (colon + 1));
+			sadr.sin_port = htons ((unsigned short) Q_atoi (colon + 1));
 		}
 
 	if (copy[0] >= '0' && copy[0] <= '9') {

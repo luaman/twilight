@@ -46,11 +46,18 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <signal.h>
 
-#include "quakedef.h"
+#include "TGL_funcs.h"
+
+#include "client.h"
+#include "console.h"
 #include "cvar.h"
 #include "keys.h"
 #include "glquake.h"
-#include "TGL_funcs.h"
+#include "host.h"
+#include "mathlib.h"
+#include "strlib.h"
+#include "sys.h"
+
 
 #ifdef WIN32
 // LordHavoc: evil thing - DirectSound with SDL
@@ -374,12 +381,12 @@ VID_Init (unsigned char *palette)
 		flags |= SDL_FULLSCREEN;
 
 	if ((i = COM_CheckParm ("-width")) != 0)
-		scr_width = atoi (com_argv[i + 1]);
+		scr_width = Q_atoi (com_argv[i + 1]);
 	if (scr_width < 320)
 		scr_width = 320;
 
 	if ((i = COM_CheckParm ("-height")) != 0)
-		scr_height = atoi (com_argv[i + 1]);
+		scr_height = Q_atoi (com_argv[i + 1]);
 	if (scr_height < 200)
 		scr_height = 200;
 
@@ -776,7 +783,7 @@ IN_Move (usercmd_t *cmd)
 		if (cl.viewangles[PITCH] < -70)
 			cl.viewangles[PITCH] = -70;
 	} else {
-		if ((in_strafe.state & 1) && noclip_anglehack)
+		if (in_strafe.state & 1)
 			cmd->upmove -= m_forward->value * mouse_y;
 		else
 			cmd->forwardmove -= m_forward->value * mouse_y;

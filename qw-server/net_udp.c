@@ -60,10 +60,6 @@ static const char rcsid[] =
 #include <sys/filio.h>
 #endif
 
-#ifdef NeXT
-#include <libc.h>
-#endif
-
 #include "bothdefs.h"
 #include "common.h"
 #include "console.h"

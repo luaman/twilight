@@ -18,11 +18,12 @@ These things should be done before first public release:
     - Debian
     - RPM
     ? Something for win32?
+  - Working gamma/brightness support
+  - Working mousewheel support
 
 
 Would be nice but is not strictly needed, in importance order:
 
-  - Working mousewheel support
   - Rid ourselves of the monolithic header
   - Merge QW server into QW client ala NQ
   - Produce a dedicated server for NQ

@@ -35,7 +35,6 @@ static const char rcsid[] =
 
 #include <stdlib.h>
 
-#include "quakedef.h"
 #include "strlib.h"
 
 char       *qdate = __DATE__;

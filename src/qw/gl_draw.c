@@ -35,10 +35,16 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include "client.h"
+#include "cmd.h"
+#include "console.h"
 #include "crc.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "host.h"
+#include "strlib.h"
+#include "sys.h"
+
 
 extern unsigned char d_15to8table[65536];
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;

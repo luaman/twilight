@@ -34,10 +34,20 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+#include "client.h"
+#include "cmd.h"
+#include "console.h"
 #include "cvar.h"
+#include "draw.h"
 #include "keys.h"
 #include "screen.h"
+#include "strlib.h"
+#include "sys.h"
+
 
 int         con_ormask;
 console_t   con_main;

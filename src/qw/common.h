@@ -28,10 +28,10 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
-#include "bothdefs.h"
-#include "qtypes.h"
 #include <stdio.h>
 
+#include "bothdefs.h"
+#include "qtypes.h"
 
 #define	MAX_INFO_STRING	196
 #define	MAX_SERVERINFO_STRING	512
