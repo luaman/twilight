@@ -511,9 +511,9 @@ R_Render3DView (void)
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
 
 	R_DrawExplosions ();
-	R_DrawCoronas ();
 	R_DrawParticles ();
 	R_DrawWaterTextureChains ();
+	R_DrawCoronas ();
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (GL_TRUE);

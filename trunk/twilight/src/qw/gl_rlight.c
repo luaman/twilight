@@ -90,6 +90,7 @@ R_DrawCoronas (void)
 	qglDisable (GL_DEPTH_TEST);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
 	qglBindTexture (GL_TEXTURE_2D, corona_texture);
+	qglEnableClientState (GL_COLOR_ARRAY);
 
 	VectorSet2 (tc_array_v(0), 0.0f, 0.0f);
 	VectorSet2 (tc_array_v(1), 0.0f, 1.0f);
@@ -113,12 +114,15 @@ R_DrawCoronas (void)
 			VectorSubtract(rd->origin, vpn, diff);
 			if (TraceLine (cl.worldmodel, r_origin, diff, NULL, NULL) == 1)
 			{
-				
-				dlightcolor[0] = r_dlight->light[0] * brightness;
-				dlightcolor[1] = r_dlight->light[1] * brightness;
-				dlightcolor[2] = r_dlight->light[2] * brightness;
+				dlightcolor[0] = rd->light[0] * brightness;
+				dlightcolor[1] = rd->light[1] * brightness;
+				dlightcolor[2] = rd->light[2] * brightness;
 				dlightcolor[3] = 1.0f;
-				qglColor4fv (dlightcolor);
+
+				TWI_FtoUB (dlightcolor, c_array_v(0), 4);
+				VectorCopy4 (c_array_v(0), c_array_v(1));
+				VectorCopy4 (c_array_v(0), c_array_v(2));
+				VectorCopy4 (c_array_v(0), c_array_v(3));
 
 				scale = rd->cullradius * 0.25f;
 				VectorSet3 (v_array_v(0), 
@@ -144,6 +148,7 @@ R_DrawCoronas (void)
 		}
 	}
 
+	qglDisableClientState (GL_COLOR_ARRAY);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglEnable (GL_DEPTH_TEST);
 }
