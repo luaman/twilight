@@ -30,12 +30,12 @@ static const char rcsid[] =
 #include "SDL.h"
 
 #include "quakedef.h"
-#include "strlib.h"
 #include "client.h"
 #include "cmd.h"
 #include "cvar.h"
 #include "host.h"
 #include "mathlib.h"
+#include "strlib.h"
 #include "net.h"
 
 // cvars
@@ -43,7 +43,6 @@ static cvar_t	*in_key_repeat_delay;
 static cvar_t	*in_key_repeat_interval;
 
 static cvar_t	*lookspring;
-
 static cvar_t	*lookstrafe;
 static cvar_t	*sensitivity;
 
@@ -76,14 +75,14 @@ state bit 2 is edge triggered on the down to up transition
 */
 
 
-static kbutton_t   in_klook;
-static kbutton_t   in_left, in_right, in_forward, in_back;
-static kbutton_t   in_lookup, in_lookdown, in_moveleft, in_moveright;
-static kbutton_t   in_speed, in_use, in_jump, in_attack;
-static kbutton_t   in_up, in_down;
-kbutton_t			in_strafe, in_mlook;
+static kbutton_t in_klook;
+static kbutton_t in_left, in_right, in_forward, in_back;
+static kbutton_t in_lookup, in_lookdown, in_moveleft, in_moveright;
+static kbutton_t in_speed, in_use, in_jump, in_attack;
+static kbutton_t in_up, in_down;
+kbutton_t in_strafe, in_mlook;
 
-static int         in_impulse;
+static int in_impulse;
 
 
 static void
@@ -96,11 +95,12 @@ KeyDown (kbutton_t *b)
 	if (c[0])
 		k = Q_atoi (c);
 	else
-		k = -1;							// typed manually at the console for
-	// continuous down
+		// typed manually at the console for continuous down
+		k = -1;
 
 	if (k == b->down[0] || k == b->down[1])
-		return;							// repeating key
+		// repeating key
+		return;
 
 	if (!b->down[0])
 		b->down[0] = k;
@@ -112,8 +112,11 @@ KeyDown (kbutton_t *b)
 	}
 
 	if (b->state & 1)
-		return;							// still down
-	b->state |= 1 + 2;					// down + impulse down
+		// still down
+		return;
+
+	// down + impulse down
+	b->state |= 1 + 2;
 }
 
 static void
@@ -126,9 +129,9 @@ KeyUp (kbutton_t *b)
 	if (c[0])
 		k = Q_atoi (c);
 	else {
-		// typed manually at the console, assume for unsticking, so clear all
+		// typed manually at the console, assume for unsticking, clear all
 		b->down[0] = b->down[1] = 0;
-		b->state = 4;					// impulse up
+		b->state = 4;
 		return;
 	}
 
@@ -140,7 +143,7 @@ KeyUp (kbutton_t *b)
 		// key up without coresponding down (menu pass through)
 		return;
 	if (b->down[0] || b->down[1])
-		// some other key is still holding it dowm
+		// some other key is still holding it down
 		return;
 
 	if (!(b->state & 1))
@@ -421,17 +424,17 @@ CL_KeyState (kbutton_t *key)
 
 //==========================================================================
 
-cvar_t      *cl_upspeed;
-cvar_t      *cl_forwardspeed;
-cvar_t      *cl_backspeed;
-cvar_t      *cl_sidespeed;
+cvar_t *cl_upspeed;
+cvar_t *cl_forwardspeed;
+cvar_t *cl_backspeed;
+cvar_t *cl_sidespeed;
 
-cvar_t      *cl_movespeedkey;
+cvar_t *cl_movespeedkey;
 
-cvar_t      *cl_yawspeed;
-cvar_t      *cl_pitchspeed;
+cvar_t *cl_yawspeed;
+cvar_t *cl_pitchspeed;
 
-cvar_t      *cl_anglespeedkey;
+cvar_t *cl_anglespeedkey;
 
 
 /*
@@ -446,9 +449,9 @@ CL_AdjustAngles (void)
 	float       up, down;
 
 	if (in_speed.state & 1)
-		speed = (ccl.time - ccl.oldtime) * cl_anglespeedkey->fvalue;
+		speed = host_frametime * cl_anglespeedkey->fvalue;
 	else
-		speed = (ccl.time - ccl.oldtime);
+		speed = host_frametime;
 
 	if (!(in_strafe.state & 1)) {
 		cl.viewangles[YAW] -=
@@ -475,7 +478,7 @@ CL_AdjustAngles (void)
 		V_StopPitchDrift ();
 
 	// KB: Allow looking straight up/down
-	cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90);
+	cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90 - ANG16_DELTA);
 	cl.viewangles[ROLL] = bound (-50, cl.viewangles[ROLL], 50);
 }
 
@@ -632,7 +635,6 @@ CL_Input_Init (void)
 			in_key_repeat_interval->ivalue);
 }
 
-
 static void
 InputSetRepeatDelay (struct cvar_s *var)
 {
@@ -707,7 +709,8 @@ IN_Move (usercmd_t *cmd)
 	{
 		cl.viewangles[PITCH] += m_pitch->fvalue * mouse_y;
 		// KB: Allow looking straight up/down
-		cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90);
+		cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH],
+				90 - ANG16_DELTA);
 	}
 	else
 	{
@@ -719,3 +722,4 @@ IN_Move (usercmd_t *cmd)
 
 	mouse_x = mouse_y = 0.0;
 }
+
