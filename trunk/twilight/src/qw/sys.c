@@ -320,6 +320,7 @@ Sys_ExpandPath (char *str)
 }
 #endif
 
+int
 main (int c, char **v)
 {
 	double      time, oldtime, newtime;
