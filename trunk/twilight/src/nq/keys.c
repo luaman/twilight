@@ -309,31 +309,28 @@ Key_Console (int key)
 
 	if (key == K_PGUP || key == K_MWHEELUP)
 	{
-		con->display -= 2;
+		con->display += 2;
 		return;
 	}
 
 	if (key == K_PGDN || key == K_MWHEELDOWN)
 	{
-		con->display += 2;
-		if (con->display > con->current)
-			con->display = con->current;
+		con->display -= 2;
+		if (con->display < 1)
+			con->display = 1;
 		return;
 	}
 
 	if (key == K_HOME)
 	{
-		if (key_linepos == 1 && key_lines[edit_line][1] == '\0')
-			con->display = con->current - con_totallines + 10;
-		else
-			key_linepos = 1;
+		key_linepos = 1;
 		return;
 	}
 
 	if (key == K_END)
 	{
 		if (key_linepos == 1 && key_lines[edit_line][1] == '\0')
-			con->display = con->current;
+			con->display = 1;
 		else
 			key_linepos = strlen (key_lines[edit_line]);
 		return;

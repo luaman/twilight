@@ -11,10 +11,6 @@ with MSVC 4. (If we don't, then Sys_mkdir needs fixing.)
 
 Bugs we know about:
 
-  - RC #4: Need to print out Id's Copyright message on engine startup.
-    (Knghtbrd? What exactly needs to be printed?)
-  - RC #7: We need to fix the console to not destroy the contents on
-    resize, this is /required/ for #4. (And is thus the hard part.)
   - lights do not react to moving bmodels, untransforming into the
     bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.

@@ -30,12 +30,19 @@
 #ifndef __CONSOLE_H
 #define __CONSOLE_H
 
-#define		CON_TEXTSIZE	16384
+#define		CON_LINES		200
 typedef struct {
-	char        text[CON_TEXTSIZE];
-	int         current;			// line where next message will be printed
-	int         x;					// offset in current line for next print
-	int         display;			// bottom of console displays this line
+	char	*text;
+	int		length;
+	double	time;
+} con_line_t;
+
+typedef struct {
+	con_line_t	raw_lines[CON_LINES];
+	int			current_raw;		// line where next message will be printed
+	char		tmp_line[2048];		// buffer for line being worked on.
+	Uint		x;					// offset in current line for next print
+	int			display;			// bottom of console displays this line
 	float		tsize;				// Scale of the font * 8
 } console_t;
 
