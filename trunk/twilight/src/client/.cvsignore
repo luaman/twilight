@@ -5,3 +5,5 @@ Makefile.in
 .*.swp
 *.i
 *.s
+Debug
+Release
