@@ -149,71 +149,93 @@ GLT_FloodFillSkin8 (Uint8 * skin, int skinwidth, int skinheight)
 
 
 typedef struct {
-	int	lines;
-	int	x0, x1;
+	int left, right;
 } span_t;
 
-static inline void
-GL_DoSpan(astvert_t *a, astvert_t *b, span_t *span)
+static void
+GL_DoSpan(double as, double at, double bs, double bt, span_t *span, int width, int height, int *y1, int *y2)
 {
-	int		y;
-	double	x, slope;
+	int ay, by, ix;
+	double x, slope;
 
-	if ((int) a->t != (int) b->t) {
-		slope = (a->s - b->s) / (a->t - b->t);
-		if (a->t < b->t) {
-			for (x = a->s, y = ceil(a->t); y < b->t; x += slope, y++)
-				if (!span[y].lines++)
-					span[y].x0 = x;
-				else
-					span[y].x1 = x;
-		} else {
-			for (x = b->s, y = ceil(b->t); y < a->t; x += slope, y++)
-				if (!span[y].lines++)
-					span[y].x0 = x;
-				else
-					span[y].x1 = x;
+	ay = ceil(at);
+	by = ceil(bt);
+	if (ay != by)
+	{
+		slope = (as - bs) / (at - bt);
+		if (ay < by)
+		{
+			if (*y1 > ay)
+				*y1 = ay;
+			if (*y2 < by)
+				*y2 = by;
+			x = as;
+			if (ay < 0)
+			{
+				x += slope * ay;
+				ay = 0;
+			}
+			if (by > height - 1)
+				by = height - 1;
+			if (ay < by)
+			{
+				for (;ay < by; x += slope, ay++)
+				{
+					ix = ceil(x);
+					span[ay].right = min(ix, width);
+				}
+			}
+		}
+		else
+		{
+			if (*y1 > by)
+				*y1 = by;
+			if (*y2 < ay)
+				*y2 = ay;
+			x = bs;
+			if (by < 0)
+			{
+				x += slope * by;
+				by = 0;
+			}
+			if (ay > height - 1)
+				ay = height - 1;
+			if (by < ay)
+			{
+				for (;by < ay; x += slope, by++)
+				{
+					ix = ceil(x);
+					span[by].left = min(ix, width);
+				}
+			}
 		}
 	}
 }
 
 qboolean
-GLT_TriangleCheck8 (Uint32 *tex, int width, int height,
+GLT_TriangleCheck8 (Uint32 *tex, span_t *span, int width, int height,
 		astvert_t texcoords[3], Uint32 color)
 {
-	astvert_t	v[3];
-	span_t		*span;
 	Uint32		*line;
-	int			x, y, start = 0, end = 0;
+	int			x, y, start = 0, end = 0, y1, y2;
 
-	span = Zone_Alloc(tempzone, sizeof(span_t) * height);
+	y1 = height;
+	y2 = 0;
+	GL_DoSpan(texcoords[0].s * width, texcoords[0].t * height, texcoords[1].s * width, texcoords[1].t * height, span, width, height, &y1, &y2);
+	GL_DoSpan(texcoords[1].s * width, texcoords[1].t * height, texcoords[2].s * width, texcoords[2].t * height, span, width, height, &y1, &y2);
+	GL_DoSpan(texcoords[2].s * width, texcoords[2].t * height, texcoords[0].s * width, texcoords[0].t * height, span, width, height, &y1, &y2);
 
-	v[0].s = texcoords[0].s * width;
-	v[0].t = (texcoords[0].t) * height;
-	v[1].s = texcoords[1].s * width;
-	v[1].t = (texcoords[1].t) * height;
-	v[2].s = texcoords[2].s * width;
-	v[2].t = (texcoords[2].t) * height;
-
-	GL_DoSpan(&v[0], &v[1], span);
-	GL_DoSpan(&v[1], &v[2], span);
-	GL_DoSpan(&v[2], &v[0], span);
-
-	line = tex;
-	for (y = 0; y < height; y++, line += width) {
-		if (span[y].lines) {
-			start = min(span[y].x0, span[y].x1);
-			end = max(span[y].x0, span[y].x1);
+	for (y = y1, line = tex + y * width; y < y2; y++, line += width) {
+		if (span[y].left != span[y].right) {
+			start = min(span[y].left, span[y].right);
+			end = max(span[y].left, span[y].right);
 
 			for (x = start; x < end; x++)
-				if (line[x] != color) {
-					Zone_Free (span);
+				if (line[x] != color)
 					return true;
-				}
 		}
 	}
 
-	Zone_Free (span);
 	return false;
 }
 
@@ -260,27 +282,34 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 	int				i, numtris;
 	int				*triangles;
 	astvert_t		texcoords[3];
+	span_t			*span;
 
 	memset(skin, 0, sizeof(*skin));
 
+	Zone_CheckSentinelsGlobal();
 	mskin = GLT_8to32_convert(in, width, height, palette, tri_check);
+	Zone_CheckSentinelsGlobal();
 	if (!mskin)
 		return;
 
 	triangles = Zone_Alloc(glt_zone, sizeof(int) * amodel->numtris);
+	Zone_CheckSentinelsGlobal();
 
-	if (tri_check) {
+	if (tri_check && (width > 1 || height > 1)) {
+		span = Zone_Alloc(tempzone, sizeof(span_t) * height);
 		for (i = 0, numtris = 0; i < amodel->numtris; i++) {
 			texcoords[0] = amodel->tcarray[amodel->triangles[i].vertindex[0]];
 			texcoords[1] = amodel->tcarray[amodel->triangles[i].vertindex[1]];
 			texcoords[2] = amodel->tcarray[amodel->triangles[i].vertindex[2]];
 
-			if (GLT_TriangleCheck8(mskin, width, height, texcoords,
+			if (GLT_TriangleCheck8(mskin, span, width, height, texcoords,
 						d_palette_empty)) {
 				triangles[numtris] = i;
 				numtris++;
 			}
 		}
+		Zone_CheckSentinelsGlobal();
+		Zone_Free (span);
 	} else {
 		numtris = amodel->numtris;
 		for (i = 0; i < amodel->numtris; i++)
@@ -290,14 +319,35 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 	if (numtris) {
 		skin->num_tris = numtris;
 		skin->tris = Zone_Alloc(glt_zone, sizeof(int) * numtris);
+	Zone_CheckSentinelsGlobal();
 		memcpy(skin->tris, triangles, sizeof(int) * numtris);
+	Zone_CheckSentinelsGlobal();
 		GLT_Skin_IndicesFromSkins (amodel, 1, &skin, &skin->indices);
+	Zone_CheckSentinelsGlobal();
 		if (upload)
+{
 			skin->texnum = GL_LoadTexture (name, width, height, (Uint8 *) mskin,
 					NULL, TEX_MIPMAP | TEX_ALPHA, 32);
+	Zone_CheckSentinelsGlobal();
+}
 	}
 
+	Zone_CheckSentinelsGlobal();
 	Zone_Free(triangles);
+	Zone_CheckSentinelsGlobal();
+}
+
+qboolean GLT_Skin_CheckForInvalidTexCoords(astvert_t *texcoords, int numverts, int width, int height)
+{
+	int i, s, t;
+	for (i = 0;i < numverts;i++, texcoords++)
+	{
+		s = ceil(texcoords->s * width);
+		t = ceil(texcoords->t * height);
+		if (s < 0 || s < 0 || s > width || t > height)
+			return true;
+	}
+	return false;
 }
 
 void
@@ -308,6 +358,9 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 	Uint8	*iskin;
 	int		i;
 	size_t	s;
+
+	if (GLT_Skin_CheckForInvalidTexCoords(amodel->tcarray, amodel->numverts, width, height))
+		Com_Printf("GLT_Skin_Parse: invalid texcoords detected in model %s\n", name);
 
 	s = width * height;
 
