@@ -105,7 +105,6 @@ cvar_t     *gl_finish;
 cvar_t     *gl_clear;
 cvar_t     *gl_cull;
 cvar_t     *gl_texsort;
-cvar_t     *gl_smoothmodels;
 cvar_t     *gl_affinemodels;
 cvar_t     *gl_polyblend;
 cvar_t     *gl_flashblend;
@@ -924,8 +923,6 @@ R_DrawAliasModel (entity_t *e)
 			qglBindTexture (GL_TEXTURE_2D, playertextures - 1 + i);
 	}
 
-	if (gl_smoothmodels->value)
-		qglShadeModel (GL_SMOOTH);
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	if (gl_affinemodels->value)
@@ -953,8 +950,6 @@ R_DrawAliasModel (entity_t *e)
 		}
 	}
 
-/* FIXME: Should this be completely removed with gl_smoothmodels cvar too? */
-	qglShadeModel (GL_FLAT);
 	if (gl_affinemodels->value)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 

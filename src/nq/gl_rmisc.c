@@ -215,7 +215,6 @@ R_Init_Cvars (void)
 	gl_clear = Cvar_Get ("gl_clear", "0", CVAR_NONE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
 	gl_texsort = Cvar_Get ("gl_texsort", "1", CVAR_NONE, NULL);
-	gl_smoothmodels = Cvar_Get ("gl_smoothmodels", "1", CVAR_NONE, NULL);
 	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_NONE, NULL);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", CVAR_NONE, NULL);
 	gl_flashblend = Cvar_Get ("gl_flashblend", "1", CVAR_NONE, NULL);
