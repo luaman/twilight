@@ -1091,13 +1091,19 @@ BorderCheck(unsigned char *src1, unsigned char* src2, int dY, int dCb, int dCr)
 /*
 RGBAtoTCbCrA - converts a source RGBA pixel into a destination YCbCrA pixel
 */
-#define RGBAtoYCbCrA(dest, src) \
-	{ \
-		*dest		= (unsigned char) (16 + ((( *src * 65.738 ) + ( *(src+1) * 129.057 ) + ( *(src+2) * 25.064 )) / 256.0)); \
-		*(dest+1)	= (unsigned char) (128 + ((( *src * -37.945 ) + ( *(src+1) * -74.494 ) + ( *(src+2) * 112.439 )) / 256.0)); \
-		*(dest+2)	= (unsigned char) (128 + ((( *src * 112.439 ) + ( *(src+1) * -94.154 ) + ( *(src+2) * -18.285 )) / 256.0)); \
-		*(dest+3)	= *(src+3); \
-	}
+static inline void
+RGBAtoYCbCrA (unsigned char *dest, unsigned char *src)
+{
+	unsigned char s0, s1, s2;
+	s0 = *(src);
+	s1 = *(src+1);
+	s2 = *(src+2);
+#define MIX(i,n,m0,m1,m2)	(*(dest+i) = (unsigned char) (n + (((s0 * m0) + (s1 * m0) + (s2 * m2))/256.0f)))
+	MIX(0, 16.0f, 65.738f, 129.057f, 25.064f);
+	MIX(1, 128.0f, -37.945f, -74.494f, 112.439f);
+	MIX(2, 128.0f, 112.439f, -94.154f, -18.285f);
+	*(dest+3) = *(src+3);
+}
 
 #define LinearScale(src1, src2, pct) (( src1 * (1 - pct) ) + ( src2 * pct))
 #define GetOffs(new, start, cur) (new + (cur - ((unsigned char*)start)))
@@ -1185,7 +1191,7 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 				if( BorderCheck(GetOffs(Ybuffer, indata, id), GetOffs(Ybuffer, indata, (id+4)), dY, dCb, dCr) )
 				{
 					// if we are closer to the left
-					if(x == ((int)(SrcX+0.5)))
+					if(x == ((int)(SrcX+0.5f)))
 					{
 						// copy the left pixel
 						memcpy(od, id, 4);
@@ -1226,7 +1232,7 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 				if( BorderCheck( GetOffs(Ybuffer, indata, id), GetOffs(Ybuffer, indata, (id + inwidth*4)), dY, dCb, dCr) )
 				{
 					// if we are closer to the top
-					if(y == ((int)(SrcY + 0.5)))
+					if(y == ((int)(SrcY + 0.5f)))
 					{
 						// copy the top
 						memcpy(od, id,4);
@@ -1269,10 +1275,10 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 			x = SrcX - x;
 			y = SrcY - y;
 
-			w0pct = 1.0 - sqrt( x*x + y*y);
-			w1pct = 1.0 - sqrt( (1-x)*(1-x) + y*y);
-			w2pct = 1.0 - sqrt( x*x + (1-y)*(1-y));
-			w3pct = 1.0 - sqrt( (1-x)*(1-x) + (1-y)*(1-y));
+			w0pct = 1.0f - sqrtf( x*x + y*y);
+			w1pct = 1.0f - sqrtf( (1-x)*(1-x) + y*y);
+			w2pct = 1.0f - sqrtf( x*x + (1-y)*(1-y));
+			w3pct = 1.0f - sqrtf( (1-x)*(1-x) + (1-y)*(1-y));
 
 			// set up our symbolic identification.
 			// "nearest" is the pixel whose quadrant we are in.
@@ -1583,13 +1589,14 @@ GL_Upload32 (Uint32 *data, int width, int height, int flags)
 	// Apply gl_picmip, a setting of one cuts texture memory usage 75%!
 	// gl_picmip can also be used to enlarge the texture by using a negative number
 	// this, of course, uses more texture memory
-	if( gl_picmip->ivalue >= 0) {
-		scaled_width >>= gl_picmip->ivalue;
-		scaled_height >>= gl_picmip->ivalue;
-	} else {
-		int foo = abs(gl_picmip->ivalue);
-		scaled_width <<= foo;
-		scaled_height <<= foo;
+	if( gl_picmip->ivalue) {
+		if (gl_picmip->ivalue > 0) {
+			scaled_width >>= gl_picmip->ivalue;
+			scaled_height >>= gl_picmip->ivalue;
+		} else {
+			scaled_width <<= -gl_picmip->ivalue;
+			scaled_height <<= -gl_picmip->ivalue;
+		}
 	}
 
 	// Clip textures to a sane value

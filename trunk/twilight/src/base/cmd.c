@@ -404,7 +404,16 @@ Cmd_StuffCmds_f (void)
 					switch (text[j]) {
 						case '+':
 						case '-':
-							done = true;
+							switch (text[j + 1]) {
+								case '0': case '1': case '2': case '3':
+								case '4': case '5': case '6': case '7':
+								case '8': case '9':
+									j++;
+									break;
+								default:
+									done = true;
+									break;
+							}
 							break;
 						default:
 							j++;

@@ -714,8 +714,6 @@ Setup for single-pixel units
 void
 GL_Set2D (void)
 {
-	qglViewport (0, 0, vid.width, vid.height);
-
 	qglMatrixMode (GL_PROJECTION);
 	qglLoadIdentity ();
 	qglOrtho (0, vid.width_2d, vid.height_2d, 0, -99999, 99999);
