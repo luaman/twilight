@@ -390,7 +390,7 @@ VID_Init (unsigned char *palette)
 		fprintf (stderr, "Error: %s\n", SDL_GetError ());
 		exit (1);
 	}
-	SDL_WM_SetCaption ("Frost NetQuake", "frost");
+	SDL_WM_SetCaption ("Twilight NetQuake", "twilight");
 
 	vid.height = scr_height;
 	vid.width = scr_width;
