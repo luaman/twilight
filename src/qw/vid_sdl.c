@@ -28,6 +28,8 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
+#include <string.h>
+
 #include "SDL.h"
 
 #include "quakedef.h"
@@ -212,6 +214,22 @@ GammaChanged (cvar_t *cvar)
 
 
 /*
+	CheckDriverQuirks
+
+	Check for buggy OpenGL drivers.
+*/
+
+void
+CheckDriverQuirks (void)
+{
+	if (strstr(gl_vendor, "NVIDIA")) {		// nVidia drivers.
+		DynGL_BadExtension("GL_EXT_compiled_vertex_array");
+		Com_Printf("Disabiling GL_EXT_compiled_vertex_array due to buggy drivers.");
+	}
+}
+
+
+/*
 	CheckExtensions
 
 	Check for the OpenGL extensions we use
@@ -292,6 +310,7 @@ GL_Init (void)
 	gl_version = qglGetString (GL_VERSION);
 	gl_extensions = qglGetString (GL_EXTENSIONS);
 
+	CheckDriverQuirks ();
 	CheckExtensions ();
 
 	qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
