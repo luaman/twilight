@@ -369,7 +369,6 @@ extern int cl_playerindex;
 extern int cl_flagindex;
 extern int packet_latency[256];
 extern int CL_CalcNet(void);
-extern model_t *mdl_fire;
 
 qboolean CL_CheckOrDownloadFile(char *filename);
 void CL_NextUpload(void);

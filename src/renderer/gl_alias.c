@@ -205,7 +205,7 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 	rdlight_t	*rd;
 	vec3_t		dist;
 	float		f;
-	extern model_t *mdl_fire;
+	extern model_t *mdl_torch;
 
 	draw = false;
 
@@ -221,8 +221,8 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
 				e->time_left = r_time + 0.10;
 			}
-			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_fire) {
-				clmodel = mdl_fire;
+			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_torch) {
+				clmodel = mdl_torch;
 				paliashdr = clmodel->alias;
 				Matrix4x4_CreateFromQuakeEntity(&matrix,e->origin,e->angles,1);
 				Matrix4x4_ConcatTranslate(&matrix, paliashdr->scale_origin);

@@ -256,6 +256,7 @@ static mflags_t modelflags[] =
 	{ "progs/flame.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_TORCH1 },
 	{ "progs/flame2.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_TORCH2 },
 	{ "progs/fire.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/torch.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/bolt.mdl", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
 	{ "progs/laser.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
 	{ "progs/gib", 9, FLAG_NOSHADOW },

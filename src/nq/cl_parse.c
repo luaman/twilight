@@ -211,7 +211,7 @@ CL_KeepaliveMessage (void)
 	SZ_Clear (&cls.message);
 }
 
-model_t		*mdl_fire = NULL;
+model_t		*mdl_torch = NULL;
 
 static void
 CL_ParseServerInfo (void)
@@ -312,8 +312,10 @@ CL_ParseServerInfo (void)
 
 
 		if (!strcasecmp (model_precache[i], "progs/flame.mdl"))
-			if (!mdl_fire)
-				mdl_fire = Mod_ForName ("progs/fire.mdl", FLAG_RENDER);
+			if (!mdl_torch)
+				mdl_torch = Mod_ForName ("progs/torch.mdl", FLAG_RENDER);
+			if (!mdl_torch)
+				mdl_torch = Mod_ForName ("progs/fire.mdl", FLAG_RENDER);
 
 		CL_KeepaliveMessage ();
 	}

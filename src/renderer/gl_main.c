@@ -96,8 +96,6 @@ cvar_t *gl_colorlights;
 
 qboolean colorlights = true;
 
-extern model_t *mdl_fire;
-
 //============================================================================
 
 static void
