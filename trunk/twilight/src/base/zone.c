@@ -283,7 +283,6 @@ void _Zone_CheckSentinelsZone(memzone_t *zone, char *filename, int fileline)
 void _Zone_CheckSentinelsGlobal(char *filename, int fileline)
 {
 	memzone_t *zone;
-	Com_Printf ("CheckSenttinelsGlobal: %s %i\n", filename, fileline);
 	for (zone = zonechain;zone;zone = zone->next)
 		_Zone_CheckSentinelsZone(zone, filename, fileline);
 }
@@ -1017,7 +1016,7 @@ void Zone_Init (void)
 	if (j)
 		hunk_size = (int) (Q_atof (com_argv[j + 1]) * 1024 * 1024);
 	else
-		hunk_size = 16 * 1024 * 1024;
+		hunk_size = 4 * 1024 * 1024;
 
 	hunk_base = Zone_Alloc (hunkzone, hunk_size);
 

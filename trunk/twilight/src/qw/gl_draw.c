@@ -70,15 +70,12 @@ typedef struct {
 	float	sl, tl, sh, th;
 } glpic_t;
 
-int		gl_lightmap_format = GL_RGB;
 int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
 
 int		gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
 int		gl_filter_mag = GL_LINEAR;
 
-
-int		texels;
 
 typedef struct gltexture_s
 {
@@ -110,9 +107,6 @@ cachepic_t	menu_cachepics[MAX_CACHED_PICS];
 int			menu_numcachepics;
 
 Uint8		menuplyr_pixels[4096];
-
-int			pic_texels;
-int			pic_count;
 
 qpic_t     *
 Draw_PicFromWad (char *name)
@@ -1082,14 +1076,12 @@ Operates in place, quartering the size of the texture
 ================
 */
 void
-GL_MipMap (Uint8 *in, int width, int height)
+GL_MipMap (Uint8 *in, Uint8 *out, int width, int height)
 {
-	int         i, j;
-	Uint8      *out;
+	int i, j;
 
 	width <<= 2;
 	height >>= 1;
-	out = in;
 	for (i = 0; i < height; i++, in += width)
 	{
 		for (j = 0; j < width; j += 8, out += 4, in += 8)
@@ -1107,6 +1099,65 @@ static Uint32 *scaled, *scaled2;
 static int transsize = 0;
 static Uint32 *trans;
 
+static void
+AssertScaledBuffer (int scaled_width, int scaled_height)
+{
+	if (scaledsize < scaled_width * scaled_height) {
+		scaledsize = scaled_width * scaled_height;
+		if (scaled)
+			Zone_Free(scaled);
+		if (scaled2)
+			Zone_Free(scaled2);
+		scaled = NULL;
+		scaled2 = NULL;
+	}
+
+	if (scaled == NULL)
+		scaled = Zone_Alloc(resamplezone, scaledsize * 4);
+	if (scaled2 == NULL)
+		scaled2 = Zone_Alloc(resamplezone, scaledsize * 4);
+}
+
+static void
+GL_MipMapTexture (Uint32 *data, int width, int height, int samples)
+{
+	int		 miplevel = 0;
+	int		 channel, i;
+	Uint8	*in = (Uint8 *) data;
+
+	AssertScaledBuffer (width, height);
+
+	while (width > 1 || height > 1)
+	{
+		GL_MipMap (in, (Uint8 *) scaled, width, height);
+		in = (Uint8 *) scaled;
+
+		width >>= 1;
+		height >>= 1;
+		width = max (width, 1);
+		height = max (height, 1);
+
+		miplevel++;
+
+		if (r_colormiplevels->ivalue)
+		{
+			channel = (miplevel - 1) % 3;
+			for (i = 0; i < (width * height); i++)
+			{
+				scaled2[i] = 0;
+				((Uint8 *)&scaled2[i])[channel] =((Uint8 *)&scaled[i])[channel];
+				((Uint8 *)&scaled2[i])[3] = ((Uint8 *)&scaled[i])[3];
+			}
+
+			qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, width,
+					height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled2);
+		}
+		else
+			qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, width,
+					height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+	}
+}
+
 /*
 ===============
 GL_Upload32
@@ -1115,7 +1166,8 @@ GL_Upload32
 void
 GL_Upload32 (Uint32 *data, int width, int height, int flags)
 {
-	int samples, scaled_width, scaled_height;
+	int		 samples, scaled_width, scaled_height;
+	Uint32	*final;
 
 	// OpenGL textures are power of two
 	scaled_width = 1;
@@ -1134,89 +1186,34 @@ GL_Upload32 (Uint32 *data, int width, int height, int flags)
 	scaled_width = bound (1, scaled_width, gl_max_size->ivalue);
 	scaled_height = bound (1, scaled_height, gl_max_size->ivalue);
 
-	if (scaledsize < scaled_width * scaled_height)
-	{
-		scaledsize = scaled_width * scaled_height;
-		if (scaled)
-			Zone_Free(scaled);
-		if (scaled2)
-			Zone_Free(scaled2);
-		scaled = NULL;
-		scaled2 = NULL;
-	}
-
 	samples = (flags & TEX_ALPHA) ? gl_alpha_format : gl_solid_format;
 
-	texels += scaled_width * scaled_height;
-
-	if (scaled == NULL)
-		scaled = Zone_Alloc(resamplezone, scaledsize * 4);
-
-	if (scaled_width == width && scaled_height == height)
+	if ((scaled_width != width) || (scaled_height != height))
 	{
-		if (flags ^ TEX_MIPMAP)
-		{
-			qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width,
-					scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-					gl_filter_mag);
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-					gl_filter_mag);
-		}
-		memcpy (scaled, data, width * height * 4);
-	} else
+		AssertScaledBuffer (scaled_width, scaled_height);
 		R_ResampleTexture (data, width, height, scaled, scaled_width,
 				scaled_height);
+		final = scaled;
+	} else
+		final = data;
 
-	qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
-				  GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-	if (flags & TEX_MIPMAP)
-	{
-		int miplevel = 0;
-		int channel, i;
-
-		while (scaled_width > 1 || scaled_height > 1)
-		{
-			GL_MipMap ((Uint8 *) scaled, scaled_width, scaled_height);
-
-			scaled_width >>= 1;
-			scaled_height >>= 1;
-			scaled_width = max (scaled_width, 1);
-			scaled_height = max (scaled_height, 1);
-
-			miplevel++;
-
-			if (r_colormiplevels->ivalue)
-			{
-				if (scaled2 == NULL)
-					scaled2 = Zone_Alloc(resamplezone, scaledsize * 4);
-
-				channel = (miplevel - 1) % 3;
-				for (i = 0; i < (scaled_width * scaled_height); i++)
-				{
-					scaled2[i] = 0;
-					((Uint8 *)&scaled2[i])[channel] = ((Uint8 *)&scaled[i])[channel];
-					((Uint8 *)&scaled2[i])[3] = ((Uint8 *)&scaled[i])[3];
-				}
-
-				qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
-						scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled2);
-			}
-			else
-				qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
-						scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-		}
-	}
-
-	if (flags & TEX_MIPMAP)
-	{
+	if (flags & TEX_MIPMAP) {
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
+		if (gl_sgis_mipmap)
+			qglTexParameterf (GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, true);
 	} else {
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_mag);
 		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_mag);
+		if (gl_sgis_mipmap)
+			qglTexParameterf (GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, false);
 	}
+
+	qglTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0,
+				  GL_RGBA, GL_UNSIGNED_BYTE, final);
+
+	if (!gl_sgis_mipmap && (flags & TEX_MIPMAP))
+		GL_MipMapTexture (final, scaled_width, scaled_height, samples);
 }
 
 
@@ -1411,6 +1408,25 @@ setuptexture:
 	}
 
 	return glt->texnum;
+}
+
+qboolean
+GL_DeleteTexture (GLuint texnum)
+{
+	gltexture_t *cur, **last;
+
+	last = &gltextures;
+	for (cur = gltextures; cur != NULL; cur = cur->next)
+	{
+		if (cur->texnum == texnum) {
+			*last = cur->next;
+			qglDeleteTextures (1, &cur->texnum);
+			Zone_Free (cur);
+			return true;
+		}
+		last = &cur->next;
+	}
+	return false;
 }
 
 

@@ -296,11 +296,11 @@ R_MarkLightsNoVis (rdlight_t *light, int bit, mnode_t *node)
 
 		// mark the polygons
 		maxdist = light->cullradius2;
-		surf = cl.worldmodel->surfaces + node->firstsurface;
+		surf = cl.worldmodel->brush->surfaces + node->firstsurface;
 
 		for (i = 0; i < node->numsurfaces; i++, surf++)
 		{
-			if (surf->visframe != r_framecount)
+			if (surf->visframe != vis_framecount)
 				continue;
 
 			if (surf->plane->type < 3)
@@ -384,13 +384,13 @@ R_MarkLights (rdlight_t *light, int bit, model_t *model)
 	msurface_t	   *surf, **mark;
 	mleaf_t		   *leaf;
 	Uint8		   *in = pvsleaf->compressed_vis;
-	int				row = (model->numleafs+7)>>3;
+	int				row = (model->brush->numleafs+7)>>3;
 	float			low[3], high[3], radius, dist, maxdist;
 
 	if (!pvsleaf->compressed_vis || gl_oldlights->ivalue)
 	{
 		// no vis info, so make all visible
-		R_MarkLightsNoVis(light, bit, model->nodes
+		R_MarkLightsNoVis(light, bit, model->brush->nodes
 				+ model->hulls[0].firstclipnode);
 		return;
 	}
@@ -415,14 +415,14 @@ R_MarkLights (rdlight_t *light, int bit, model_t *model)
 		c = *in++;
 		if (c)
 		{
-			l = model->numleafs + 1 - (k << 3);
+			l = model->brush->numleafs + 1 - (k << 3);
 			l = min (l, 8);
 			for (i=0 ; i<l ; i++)
 			{
 				if (c & (1<<i))
 				{
-					leaf = &model->leafs[(k << 3)+i+1];
-					if (leaf->visframe != r_framecount)
+					leaf = &model->brush->leafs[(k << 3)+i+1];
+					if (leaf->visframe != vis_framecount)
 						continue;
 					if (leaf->contents == CONTENTS_SOLID)
 						continue;
@@ -443,7 +443,7 @@ R_MarkLights (rdlight_t *light, int bit, model_t *model)
 							if (surf->lightframe == r_dlightframecount)
 								continue;
 							surf->lightframe = r_dlightframecount;
-							if (surf->visframe != r_framecount)
+							if (surf->visframe != vis_framecount)
 								continue;
 
 							dist = PlaneDiff(light->origin, surf->plane);
@@ -613,11 +613,11 @@ RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 		// check for impact on this node
 		VectorCopy (mid, lightspot);
 		lightplane = node->plane;
-		surf = cl.worldmodel->surfaces + node->firstsurface;
+		surf = cl.worldmodel->brush->surfaces + node->firstsurface;
 
 		for (i = 0; i < node->numsurfaces; i++, surf++)
 		{
-			if (surf->flags & SURF_DRAWTILED)
+			if (!(surf->flags & SURF_LIGHTMAP))
 				// no lightmaps
 				continue;
 
@@ -730,7 +730,7 @@ int R_LightPoint (vec3_t p)
 {
 	vec3_t end;
 
-	if (!cl.worldmodel->lightdata)
+	if (!cl.worldmodel->brush->lightdata)
 	{
 		lightcolor[0] = lightcolor[1] = lightcolor[2] = 255;
 		return 255;
@@ -741,7 +741,7 @@ int R_LightPoint (vec3_t p)
 	end[2] = p[2] - 2048;
 	lightcolor[0] = lightcolor[1] = lightcolor[2] = 0;
 
-	RecursiveLightPoint (lightcolor, cl.worldmodel->nodes, p, end);
+	RecursiveLightPoint (lightcolor, cl.worldmodel->brush->nodes, p, end);
 
 	return 255;
 }

@@ -41,17 +41,17 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "view.h"
+#include "sky.h"
+#include "liquid.h"
 
 // FIXME - These need to be in a header somewhere
 extern void TNT_Init (void);
 extern void R_InitBubble (void);
-extern void R_SkyBoxChanged (cvar_t *cvar);
 void R_DrawViewModel (void);
-void R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
+void R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 
-Uint r_framecount;						// used for dlight push checking
-static mplane_t frustum[4];
-int c_brush_polys, c_alias_polys;
+Uint r_framecount;
+Uint c_brush_polys, c_alias_polys;
 
 
 /*
@@ -67,8 +67,6 @@ vec3_t r_origin;
  */
 refdef_t r_refdef;
 
-mleaf_t *r_viewleaf, *r_oldviewleaf;
-
 texture_t *r_notexture;
 texture_t *r_notexture_water;
 
@@ -80,8 +78,6 @@ cvar_t *r_drawentities;
 cvar_t *r_drawviewmodel;
 cvar_t *r_speeds;
 cvar_t *r_shadows;
-cvar_t *r_wateralpha;
-cvar_t *r_waterripple;
 cvar_t *r_dynamic;
 cvar_t *r_novis;
 cvar_t *r_stainmaps;
@@ -106,28 +102,6 @@ cvar_t *gl_particletorches;
 qboolean colorlights = true;
 
 /*
-=================
-R_CullBox
-
-Returns true if the box is completely outside the frustom
-=================
-*/
-qboolean
-R_CullBox (vec3_t mins, vec3_t maxs)
-{
-	if (BoxOnPlaneSide (mins, maxs, &frustum[0]) == 2)
-		return true;
-	if (BoxOnPlaneSide (mins, maxs, &frustum[1]) == 2)
-		return true;
-	if (BoxOnPlaneSide (mins, maxs, &frustum[2]) == 2)
-		return true;
-	if (BoxOnPlaneSide (mins, maxs, &frustum[3]) == 2)
-		return true;
-
-	return false;
-}
-
-/*
 =============================================================
 
   SPRITE MODELS
@@ -149,7 +123,7 @@ R_GetSpriteFrame (entity_t *e)
 	int					i, numframes, frame;
 	float			   *pintervals, fullinterval, targettime, time;
 
-	psprite = Mod_Extradata(e->model);
+	psprite = e->model->sprite;
 	frame = e->cur.frame;
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
@@ -192,7 +166,7 @@ R_DrawSpriteModel
 =================
 */
 static void
-R_DrawSpriteModels ()
+R_DrawOpaqueSpriteModels ()
 {
 	mspriteframe_t	   *f;
 	float			   *up, *right;
@@ -217,7 +191,7 @@ R_DrawSpriteModels ()
 		 * a surface cache
 		 */
 		f = R_GetSpriteFrame (e);
-		psprite = Mod_Extradata(e->model);
+		psprite = e->model->sprite;
 
 		if (last_tex != f->gl_texturenum) {
 			if (v_index) {
@@ -275,16 +249,24 @@ R_DrawSpriteModels ()
 
 //============================================================================
 
-/*
+ /*
 =============
-R_DrawEntitiesOnList
+R_VisEntitiesOnList
 =============
-*/
+  */
 static void
-R_DrawEntitiesOnList (void)
+R_VisBrushModels (void)
 {
 	entity_t	*e;
-	int			i;
+	vec3_t		 mins, maxs;
+	int			 i;
+
+	// First off, the world.
+
+	Vis_MarkLeaves (cl.worldmodel);
+	Vis_RecursiveWorldNode (cl.worldmodel->brush->nodes,cl.worldmodel,r_origin);
+
+	// Now everything else.
 
 	if (!r_drawentities->ivalue)
 		return;
@@ -292,13 +274,72 @@ R_DrawEntitiesOnList (void)
 	for (i = 0; i < r_refdef.num_entities; i++) {
 		e = r_refdef.entities[i];
 
-		if (e->model->type == mod_brush)
-			R_DrawBrushModel (e);
+		if (e->model->type == mod_brush) {
+			Mod_MinsMaxs (e->model, e->cur.origin, e->cur.angles, mins, maxs);
+			if (Vis_CullBox (mins, maxs))
+				continue;
+			R_VisBrushModel (e);
+		}
+	}
+}
+
+static void
+R_DrawOpaqueBrushModels ()
+{
+	entity_t	*e;
+	vec3_t		 mins, maxs;
+	int			 i;
+
+	R_DrawTextureChains (cl.worldmodel, r_origin);
+
+	if (!r_drawentities->ivalue)
+		return;
+
+	for (i = 0; i < r_refdef.num_entities; i++) {
+		e = r_refdef.entities[i];
+
+		if (e->model->type == mod_brush) {
+			Mod_MinsMaxs (e->model, e->cur.origin, e->cur.angles, mins, maxs);
+			if (Vis_CullBox (mins, maxs))
+				continue;
+
+			R_DrawOpaqueBrushModel (e);
+		}
+	}
+}
+
+static void
+R_DrawAddBrushModels ()
+{
+	entity_t	*e;
+	vec3_t		 mins, maxs;
+	int			 i;
+
+	if (r_wateralpha->fvalue == 1)
+		return;
+
+	qglColor4f (1, 1, 1, r_wateralpha->fvalue);
+
+	R_DrawLiquidTextureChains (cl.worldmodel);
+
+	if (!r_drawentities->ivalue) {
+		qglColor4fv (whitev);
+		return;
 	}
 
-	R_DrawSpriteModels ();
+	for (i = 0; i < r_refdef.num_entities; i++) {
+		e = r_refdef.entities[i];
 
-	R_DrawAliasModels (r_refdef.entities, r_refdef.num_entities, false);
+		if (e->model->type == mod_brush) {
+			Mod_MinsMaxs (e->model, e->cur.origin, e->cur.angles, mins, maxs);
+			if (Vis_CullBox (mins, maxs))
+				continue;
+
+			R_DrawAddBrushModel (e);
+		}
+	}
+
+	qglColor4fv (whitev);
 }
 
 /*
@@ -341,49 +382,6 @@ R_PolyBlend (void)
 }
 
 
-static int
-SignbitsForPlane (mplane_t *out)
-{
-	int			bits, j;
-
-	// for fast box on planeside test
-
-	bits = 0;
-	for (j = 0; j < 3; j++) {
-		if (out->normal[j] < 0)
-			bits |= 1 << j;
-	}
-	return bits;
-}
-
-
-static void
-R_SetFrustum (void)
-{
-	int			i;
-
-	// rotate VPN right by FOV_X/2 degrees
-	RotatePointAroundVector (frustum[0].normal, vup, vpn,
-			-(90 - r_refdef.fov_x / 2));
-	// rotate VPN left by FOV_X/2 degrees
-	RotatePointAroundVector (frustum[1].normal, vup, vpn,
-			90 - r_refdef.fov_x / 2);
-	// rotate VPN up by FOV_X/2 degrees
-	RotatePointAroundVector (frustum[2].normal, vright, vpn,
-			90 - r_refdef.fov_y / 2);
-	// rotate VPN down by FOV_X/2 degrees
-	RotatePointAroundVector (frustum[3].normal, vright, vpn,
-			-(90 - r_refdef.fov_y / 2));
-
-	for (i = 0; i < 4; i++) {
-		frustum[i].type = PLANE_ANYZ;
-		frustum[i].dist = DotProduct (r_origin, frustum[i].normal);
-		frustum[i].signbits = SignbitsForPlane (&frustum[i]);
-	}
-}
-
-
-
 /*
 ===============
 R_SetupFrame
@@ -407,11 +405,10 @@ R_SetupFrame (void)
 
 	AngleVectors (r_refdef.viewangles, vpn, vright, vup);
 
-	// current viewleaf
-	r_oldviewleaf = r_viewleaf;
-	r_viewleaf = Mod_PointInLeaf (r_origin, cl.worldmodel);
+	Vis_NewVisParams (cl.worldmodel, r_origin, vup, vright, vpn,
+			r_refdef.fov_x, r_refdef.fov_y);
 
-	V_SetContentsColor (r_viewleaf->contents);
+	V_SetContentsColor (vis_viewleaf->contents);
 	V_CalcBlend ();
 
 	c_brush_polys = 0;
@@ -484,8 +481,6 @@ R_Clear (void)
 }
 
 
-// XXX
-extern void R_DrawSkyBox (void);
 /*
 ================
 R_Render3DView
@@ -496,14 +491,24 @@ Called by R_RenderView, possibily repeatedly.
 void
 R_Render3DView (void)
 {
-	R_DrawSkyBox ();
+	R_VisBrushModels ();
 
-	R_DrawBrushModelSkies ();
-	
+	if (draw_skybox)
+	{
+		R_DrawSkyBox ();
+		R_DrawBrushDepthSkies ();
+	}
+
+	R_PushDlights ();
+
 	// adds static entities to the list
-	R_DrawWorld ();
+	R_DrawOpaqueBrushModels ();
 
-	R_DrawEntitiesOnList ();
+	// FIXME: For GL_NV_occlusion_query support we should do the tests here.
+	// R_VisAliasModels ();
+	R_DrawOpaqueSpriteModels ();
+	// FIXME: Any way to avoid the arguments sanely?
+	R_DrawOpaqueAliasModels (r_refdef.entities, r_refdef.num_entities, false);
 
 	R_DrawViewModel ();
 
@@ -513,9 +518,12 @@ R_Render3DView (void)
 
 	R_DrawExplosions ();
 	R_DrawParticles ();
-	R_DrawWaterTextureChains ();
 	R_DrawCoronas ();
 
+	R_DrawAddBrushModels ();
+//	R_DrawAddAliasModels ();		// FIXME: None exist.
+//	R_DrawAddSpriteModels ();		// FIXME: None exist.
+	
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);
@@ -533,6 +541,9 @@ R_RenderView (void)
 {
 	double		time1 = 0.0;
 	double		time2;
+
+	r_time = cl.time;
+	r_frametime = host_frametime;
 
 	if (r_norefresh->ivalue)
 		return;
@@ -554,8 +565,6 @@ R_RenderView (void)
 
 	// render normal view
 	R_SetupFrame ();
-
-	R_SetFrustum ();
 
 	R_SetupGL ();
 
@@ -645,15 +654,9 @@ R_Init_Cvars (void)
 	r_drawviewmodel = Cvar_Get ("r_drawviewmodel", "1", CVAR_NONE, NULL);
 	r_speeds = Cvar_Get ("r_speeds", "0", CVAR_NONE, NULL);
 	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_ARCHIVE, NULL);
-	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
-	r_waterripple = Cvar_Get ("r_waterripple", "0", CVAR_NONE, NULL);
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
-	r_novis = Cvar_Get ("r_novis", "0", CVAR_NONE, NULL);
 	r_stainmaps = Cvar_Get ("r_stainmaps", "1", CVAR_ARCHIVE, NULL);
 	r_netgraph = Cvar_Get ("r_netgraph", "0", CVAR_NONE, NULL);
-
-	r_skyname = Cvar_Get ("r_skyname", "", CVAR_NONE, &R_SkyBoxChanged);
-	r_fastsky = Cvar_Get ("r_fastsky", "0", CVAR_NONE, NULL);
 
 	gl_clear = Cvar_Get ("gl_clear", "0", CVAR_ARCHIVE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
@@ -675,21 +678,10 @@ R_Init_Cvars (void)
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 
 	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
-}
 
-/*
- * compatibility function to set r_skyname
- */
-static void
-R_LoadSky_f (void)
-{
-	if (Cmd_Argc() != 2)
-	{
-		Com_Printf ("loadsky <name> : load a skybox\n");
-		return;
-	}
-
-	Cvar_Set (r_skyname, Cmd_Argv(1));
+	R_Init_Sky_Cvars ();
+	R_Init_Liquid_Cvars ();
+	Vis_Init_Cvars ();
 }
 
 /*
@@ -735,7 +727,6 @@ R_Init (void)
 {
 	Cmd_AddCommand ("timerefresh", &R_TimeRefresh_f);
 	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
-	Cmd_AddCommand ("loadsky", &R_LoadSky_f);
 
 	qglGenTextures(1, &netgraphtexture);
 
@@ -747,6 +738,10 @@ R_Init (void)
 	TNT_Init ();
 	R_Explosion_Init ();
 	R_InitSurf ();
+
+	R_Init_Sky ();
+	R_Init_Liquid ();
+	Vis_Init ();
 }
 
 /*
@@ -763,7 +758,6 @@ R_NewMap (void)
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
 
-	r_viewleaf = NULL;
 	R_ClearParticles ();
 
 	memset (&cl_network_entities, 0, sizeof(cl_network_entities));
@@ -773,23 +767,11 @@ R_NewMap (void)
 
 	r_dlightframecount = 0;
 
-	GL_BuildLightmaps ();
-
-	// identify sky texture
-	skytexturenum = -1;
-	for (i = 0; i < cl.worldmodel->numtextures; i++) {
-		if (!cl.worldmodel->textures[i])
-			continue;
-		if (!strncmp (cl.worldmodel->textures[i]->name, "sky", 3))
-			skytexturenum = i;
-		cl.worldmodel->textures[i]->texturechain = NULL;
-	}
-
 	// some Cvars need resetting on map change
 	Cvar_Set (r_skyname, "");
 
 	// Parse map entities
-	CL_ParseEntityLump (cl.worldmodel->entities);
+	CL_ParseEntityLump (cl.worldmodel->brush->entities);
 
 	r_explosion_newmap ();
 }

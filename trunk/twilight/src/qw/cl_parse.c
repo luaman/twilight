@@ -297,11 +297,13 @@ Model_NextDownload (void)
 	R_NewMap ();
 	Team_NewMap ();
 	Hunk_Check ();						// make sure nothing is hurt
+	Zone_CheckSentinelsGlobal ();		// Make sure /nothing/ is hurt.
 
 	// done with modellist, request first of static signon messages
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message,
-			va (prespawn_name, cl.servercount, cl.worldmodel->checksum2));
+			va (prespawn_name, cl.servercount,
+				cl.worldmodel->brush->checksum2));
 }
 
 /*
@@ -1100,9 +1102,9 @@ CL_MuzzleFlash (void)
 				dl->radius = 200 + (rand()&31);
 				dl->minlight = 32;
 				dl->die = cl.time + 0.1;
-				dl->color[0] = 0.2;
-				dl->color[1] = 0.1;
-				dl->color[2] = 0.05;
+				dl->color[0] = 0.5;
+				dl->color[1] = 0.5;
+				dl->color[2] = 0.4;
 				break;
 			}
 		}
@@ -1124,9 +1126,9 @@ CL_MuzzleFlash (void)
 	dl->radius = 200 + (rand () & 31);
 	dl->minlight = 32;
 	dl->die = cl.time + 0.1;
-	dl->color[0] = 0.2;
-	dl->color[1] = 0.1;
-	dl->color[2] = 0.05;
+	dl->color[0] = 0.5;
+	dl->color[1] = 0.5;
+	dl->color[2] = 0.4;
 }
 
 

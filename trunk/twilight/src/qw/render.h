@@ -33,6 +33,7 @@
 #include "transform.h"
 #include "wad.h"
 #include "vid.h"
+#include "vis.h"
 #include "gl_info.h"
 #include "gl_arrays.h"
 
@@ -175,12 +176,6 @@ void GL_Upload8 (Uint8 *data, int width, int height,unsigned *ttable,
 
 extern int glx, gly;
 
-/*
- * normalizing factor so player model works out to about 1 pixel per triangle
- */
-#define ALIAS_BASE_SIZE_RATIO		(1.0 / 11.0)
-#define MAX_LBM_HEIGHT				480
-
 #define BACKFACE_EPSILON			0.01
 
 
@@ -190,7 +185,7 @@ void R_ReadPointFile_f (void);
 
 
 extern Uint r_framecount;
-extern int c_brush_polys, c_alias_polys;
+extern Uint c_brush_polys, c_alias_polys;
 
 
 /*
@@ -283,17 +278,16 @@ extern int gl_filter_min;
 extern int gl_filter_mag;
 
 /*
- * gl_rmain.c
- */
-qboolean R_CullBox (vec3_t mins, vec3_t maxs);
-
-/*
  * gl_rsurf.c
  */
-void R_DrawBrushModel (entity_t *e);
-void R_DrawBrushModelSkies (void);
+void R_VisBrushModel (entity_t *e);
+void R_DrawOpaqueBrushModel (entity_t *e);
+void R_DrawAddBrushModel (entity_t *e);
+void R_DrawBrushDepthSkies (void);
+void R_VisWorld (void);
 void R_DrawWorld (void);
-void R_DrawWaterTextureChains (void);
+void R_DrawLiquidTextureChains (model_t *mod);
+void R_DrawTextureChains (model_t *mod, vec3_t origin);
 void GL_BuildLightmaps (void);
 
 /*

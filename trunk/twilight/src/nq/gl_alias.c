@@ -31,7 +31,7 @@ static const char rcsid[] =
 #include "client.h"
 #include "cvar.h"
 
-void R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
+void R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 extern vec3_t lightcolor;
 
 extern void R_Torch (entity_t *ent, qboolean torch2);
@@ -87,7 +87,7 @@ R_DrawViewModel (void)
 
 	// hack the depth range to prevent view model from poking into walls
 	qglDepthRange (0.0f, 0.3f);
-	R_DrawAliasModels(&ent_pointer, 1, true);
+	R_DrawOpaqueAliasModels(&ent_pointer, 1, true);
 	qglDepthRange (0.0f, 1.0f);
 }
 
@@ -161,7 +161,7 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 
 		Mod_MinsMaxs (clmodel, e->origin, e->angles, mins, maxs);
 
-		if (R_CullBox (mins, maxs)) {
+		if (Vis_CullBox (mins, maxs)) {
 			return;
 		}
 	} 
@@ -219,7 +219,7 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 	/*
 	 * locate the proper data
 	 */
-	paliashdr = (aliashdr_t *) Mod_Extradata (clmodel);
+	paliashdr = clmodel->alias;
 
 	c_alias_polys += paliashdr->numtris;
 
@@ -316,11 +316,8 @@ R_DrawAliasModel ()
 
 static void
 R_DrawSubSkinNV (aliashdr_t *paliashdr, skin_sub_t *tris, skin_sub_t *s0,
-		skin_sub_t *s1, vec4_t color)
+		skin_sub_t *s1)
 {
-	if (color)
-		TWI_FtoUBMod(cf_array_v(0),scub_array_v(0),color,paliashdr->numverts*4);
-
 	qglBindTexture (GL_TEXTURE_2D, s0->texnum);
 	if (s1) {
 		qglActiveTextureARB (GL_TEXTURE1_ARB);
@@ -354,34 +351,36 @@ R_DrawAliasModelNV ()
 
 	TWI_PreVDraw (0, paliashdr->numverts);
 
-
 	if (!has_top && !has_bottom)
 		base = &skin->base_team[anim];
 	else
 		base = &skin->base[anim];
 
-	qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);
-	qglFinalCombinerInputNV (GL_VARIABLE_B_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);
 	if (has_fb)
-		qglFinalCombinerInputNV (GL_VARIABLE_D_NV, GL_SPARE1_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
-	else
-		qglFinalCombinerInputNV (GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
+		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);
+
 	if (has_fb)
-		R_DrawSubSkinNV (paliashdr, base, base, &skin->fb[anim], NULL);
+		R_DrawSubSkinNV (paliashdr, base, base, &skin->fb[anim]);
 	else
-		R_DrawSubSkinNV (paliashdr, base, base, NULL, NULL);
+		R_DrawSubSkinNV (paliashdr, base, base, NULL);
+
+	if (has_fb)
+		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 
 	if (has_top || has_bottom) {
 		qglEnable (GL_BLEND);
 		qglDepthMask (GL_FALSE);
 
 		qglCombinerParameterfvNV (GL_CONSTANT_COLOR0_NV, top);
-		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_SECONDARY_COLOR_NV, GL_UNSIGNED_INVERT_NV, GL_RGB);
-		qglFinalCombinerInputNV (GL_VARIABLE_B_NV, GL_CONSTANT_COLOR0_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
-		qglFinalCombinerInputNV (GL_VARIABLE_D_NV, GL_SPARE1_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
+		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, GL_CONSTANT_COLOR0_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 
-		R_DrawSubSkinNV (paliashdr, &skin->top_bottom[anim], &skin->top[anim], &skin->bottom[anim], bottom);
+		qglCombinerParameterfvNV (GL_CONSTANT_COLOR1_NV, bottom);
+		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_CONSTANT_COLOR1_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 
+		R_DrawSubSkinNV (paliashdr, &skin->top_bottom[anim], &skin->top[anim], &skin->bottom[anim]);
+
+		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);
+		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglDepthMask (GL_TRUE);
 		qglDisable (GL_BLEND);
 	}
@@ -395,11 +394,11 @@ R_DrawAliasModelNV ()
 
 /*
 =============
-R_DrawAliasModels
+R_DrawOpaqueAliasModels
 =============
 */
 void
-R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
+R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
 {
 	int			i;
 	entity_t	*e;
@@ -407,22 +406,27 @@ R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
 	if (gl_affinemodels->ivalue)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
-	if (gl_secondary_color && gl_nv_register_combiners) {
+	if (gl_nv_register_combiners) {
 		qglEnableClientState (GL_COLOR_ARRAY);
 		qglEnable (GL_REGISTER_COMBINERS_NV);
 		qglBlendFunc (GL_ONE, GL_ONE);
 
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV, GL_TEXTURE0_ARB, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_ALPHA, GL_VARIABLE_A_NV, GL_TEXTURE0_ARB, GL_UNSIGNED_IDENTITY_NV, GL_ALPHA);
-		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, GL_PRIMARY_COLOR_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
+
+		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_ALPHA, GL_VARIABLE_B_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_ALPHA);
 
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_C_NV, GL_TEXTURE1_ARB, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_ALPHA, GL_VARIABLE_C_NV, GL_TEXTURE1_ARB, GL_UNSIGNED_IDENTITY_NV, GL_ALPHA);
+
+		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_ALPHA, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_ALPHA);
-		qglCombinerOutputNV (GL_COMBINER0_NV, GL_RGB, GL_SPARE0_NV, GL_SPARE1_NV, GL_DISCARD_NV, GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+		qglCombinerOutputNV (GL_COMBINER0_NV, GL_RGB, GL_DISCARD_NV, GL_DISCARD_NV, GL_SPARE0_NV, GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE);
 
 		qglFinalCombinerInputNV (GL_VARIABLE_A_NV, GL_SPARE0_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
+		qglFinalCombinerInputNV (GL_VARIABLE_B_NV, GL_PRIMARY_COLOR_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglFinalCombinerInputNV (GL_VARIABLE_C_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglFinalCombinerInputNV (GL_VARIABLE_G_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_ALPHA);
 		for (i = 0; i < num_ents; i++) {

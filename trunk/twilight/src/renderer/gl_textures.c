@@ -341,6 +341,32 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 }
 
 void
+GLT_Delete_Sub_Skin (skin_sub_t *sub)
+{
+	GL_DeleteTexture(sub->texnum);
+	if (sub->indices)
+		Zone_Free(sub->indices);
+	Zone_Free(sub);
+}
+
+void
+GLT_Delete_Skin (skin_t *skin)
+{
+	int i;
+
+	for (i = 0; i < skin->frames; i++) {
+		GLT_Delete_Sub_Skin(&skin->raw[i]);
+		GLT_Delete_Sub_Skin(&skin->base[i]);
+		GLT_Delete_Sub_Skin(&skin->base_team[i]);
+		GLT_Delete_Sub_Skin(&skin->top_bottom[i]);
+		GLT_Delete_Sub_Skin(&skin->fb[i]);
+		GLT_Delete_Sub_Skin(&skin->top[i]);
+		GLT_Delete_Sub_Skin(&skin->bottom[i]);
+	}
+}
+
+
+void
 GLT_Init ()
 {
 	glt_zone = Zone_AllocZone("GL textures");
