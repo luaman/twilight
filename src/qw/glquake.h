@@ -78,7 +78,6 @@ texture_t  *R_TextureAnimation (texture_t *base);
 //====================================================
 
 
-extern vec3_t modelorg, r_entorigin;
 extern entity_t *currententity;
 extern int  r_visframecount;			// ??? what difs?
 extern int  r_framecount;

@@ -66,7 +66,7 @@ particle_t *particles, **freeparticles;
 int         numparticles, r_maxparticles;
 
 inline particle_t *
-particle_new (ptype_t type, vec3_t org, vec3_t vel, float die, Uint8 color,
+particle_new (ptype_t type, vec3_t org, vec3_t vel, float die, int color,
 		float ramp)
 {
 	particle_t *part;
@@ -81,7 +81,7 @@ particle_new (ptype_t type, vec3_t org, vec3_t vel, float die, Uint8 color,
 	VectorCopy(org, part->org);
 	VectorCopy(vel, part->vel);
 	part->die = die;
-	part->color = color;
+	part->color = (Uint8 )color;
 	part->ramp = ramp;
 
 	return part;
