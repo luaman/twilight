@@ -200,7 +200,6 @@ R_Init (void)
 	qglVertexPointer (3, GL_FLOAT, sizeof(v_array[0]), v_array[0]);
 
 	qglDisableClientState (GL_COLOR_ARRAY);
-	qglEnableClientState (GL_COLOR_ARRAY);
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 }
@@ -215,13 +214,13 @@ Translates a skin texture by the per-player color lookup
 void
 R_TranslatePlayerSkin (int playernum)
 {
-	int         top, bottom;
-	Uint8       translate[256];
-	unsigned    translate32[256];
-	int         i, s;
-	model_t    *model;
-	aliashdr_t *paliashdr;
-	Uint8      *original;
+	Sint32		top, bottom;
+	Uint8		translate[256];
+	Uint32		translate32[256];
+	Sint32		i, s;
+	model_t		*model;
+	aliashdr_t	*paliashdr;
+	Uint8		*original;
 
 	top = cl.scores[playernum].colors & 0xf0;
 	bottom = (cl.scores[playernum].colors & 15) << 4;
