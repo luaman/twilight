@@ -208,10 +208,6 @@ SOURCE=.\keys.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mathlib.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\mdfour.c
 # End Source File
 # Begin Source File

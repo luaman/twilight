@@ -39,5 +39,15 @@ typedef float vec_t;
 typedef vec_t vec3_t[3];
 typedef vec_t vec5_t[5];
 
+// plane_t structure
+typedef struct mplane_s {
+	vec3_t      normal;
+	float       dist;
+	Uint8       type;					// for texture axis selection and fast
+	// side tests
+	Uint8       signbits;				// signx + signy<<1 + signz<<1
+	Uint8       pad[2];
+} mplane_t;
+
 #endif // __QTYPES_H
 
