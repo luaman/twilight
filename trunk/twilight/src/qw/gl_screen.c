@@ -122,6 +122,7 @@ cvar_t	   *gl_triplebuffer;
 cvar_t	   *r_brightness;
 cvar_t	   *r_contrast;
 cvar_t	   *r_waterwarp;
+cvar_t	   *cl_avidemo;
 
 extern cvar_t *crosshair;
 
@@ -146,6 +147,9 @@ float		scr_disabled_time;
 
 void		SCR_ScreenShot_f (void);
 void		SCR_RSShot_f (void);
+
+Uint8	   *avibuffer;
+Uint32		aviframeno;
 
 void
 GL_BrightenScreen(void)
@@ -474,6 +478,7 @@ SCR_Init_Cvars (void)
 	r_brightness = Cvar_Get ("r_brightness", "1", CVAR_ARCHIVE, NULL);
 	r_contrast = Cvar_Get ("r_contrast", "1", CVAR_ARCHIVE, NULL);
 	r_waterwarp = Cvar_Get ("r_waterwarp", "0", CVAR_ARCHIVE, NULL);
+	cl_avidemo = Cvar_Get ("cl_avidemo", "0", CVAR_NONE, &AvidemoChanged);
 }
 
 
@@ -719,6 +724,43 @@ SCR_ScreenShot_f (void)
 		Com_Printf ("Wrote %s\n", pcxname);
 
 	free (buffer);
+}
+
+void
+SCR_CaptureAviDemo (void)
+{
+	double t;
+	static double lastframetime;
+	
+	char		filename[MAX_OSPATH];
+
+	/* check frame time */
+	t = Sys_DoubleTime ();
+	if ((t - lastframetime) < 1.0 / (double)cl_avidemo->ivalue)
+		return;
+
+	lastframetime = t;
+	
+	snprintf (filename, sizeof (filename), "twavi%06d.tga", aviframeno);
+	aviframeno++;
+
+	qglReadPixels (glx, gly, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
+				  avibuffer);
+
+	if (!TGA_Write (filename, vid.width, vid.height, 3, avibuffer)) { 
+		Com_Printf ("Screenshot write failed, stopping AVI demo.\n");
+		Cvar_Set(cl_avidemo, "0");
+	}
+}
+
+void AvidemoChanged(cvar_t *cvar)
+{
+	if (cvar->ivalue) 
+		avibuffer = malloc(vid.width * vid.height * 3);
+	else {
+		free(avibuffer);
+		aviframeno = 0;
+	}
 }
 
 /* 
@@ -1089,5 +1131,7 @@ SCR_UpdateScreen (void)
 	GL_BrightenScreen ();
 
 	GL_EndRendering ();
-}
 
+	if (cl_avidemo->ivalue)
+		SCR_CaptureAviDemo ();
+}
