@@ -323,6 +323,7 @@ void
 VID_Init_Cvars (void)
 {
 	GLArrays_Init_Cvars ();
+	GLInfo_Init_Cvars ();
 
 	width_2d = Cvar_Get ("width_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
 	height_2d = Cvar_Get ("height_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);

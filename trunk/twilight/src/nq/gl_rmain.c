@@ -48,7 +48,6 @@ static const char rcsid[] =
 extern void TNT_Init (void);
 extern void R_InitBubble (void);
 void R_DrawViewModel (void);
-void R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 
 Uint r_framecount;						// used for dlight push checking
 Uint c_brush_polys, c_alias_polys;
@@ -72,8 +71,6 @@ texture_t *r_notexture_water;
 int d_lightstylevalue[256];				// 8.8 fraction of base light value
 
 
-void R_Torch (entity_t *ent, qboolean torch2);
-
 cvar_t *r_norefresh;
 cvar_t *r_drawentities;
 cvar_t *r_drawviewmodel;
@@ -84,19 +81,13 @@ cvar_t *r_dynamic;
 cvar_t *r_stainmaps;
 
 cvar_t *gl_clear;
-cvar_t *gl_cull;
-cvar_t *gl_affinemodels;
 cvar_t *gl_polyblend;
 cvar_t *gl_flashblend;
 cvar_t *gl_playermip;
-cvar_t *gl_nocolors;
 cvar_t *gl_finish;
-cvar_t *gl_im_animation;
 cvar_t *gl_im_transform;
-cvar_t *gl_fb;
 cvar_t *gl_oldlights;
 cvar_t *gl_colorlights;
-cvar_t *gl_particletorches;
 cvar_t *gl_varray_size;
 cvar_t *gl_iarray_size;
 
@@ -123,7 +114,7 @@ R_GetSpriteFrame
 ================
 */
 static mspriteframe_t *
-R_GetSpriteFrame (entity_t *e)
+R_GetSpriteFrame (entity_common_t *e)
 {
 	msprite_t		   *psprite;
 	mspritegroup_t	   *pspritegroup;
@@ -133,6 +124,9 @@ R_GetSpriteFrame (entity_t *e)
 
 	psprite = e->model->sprite;
 	frame = e->frame[0];
+
+	if (!e->real_ent)
+		Sys_Error("No real ent! EVIL!\n");
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
 		Com_Printf ("R_DrawSprite: no such frame %d\n", frame);
@@ -147,7 +141,7 @@ R_GetSpriteFrame (entity_t *e)
 		numframes = pspritegroup->numframes;
 		fullinterval = pintervals[numframes - 1];
 
-		time = cl.time + e->syncbase;
+		time = cl.time + e->real_ent->syncbase;
 
 		/*
 		 * when loading in Mod_LoadSpriteGroup, we guaranteed all interval
@@ -180,8 +174,8 @@ R_DrawOpaqueSpriteModels (void)
 	float			   *up, *right;
 	vec3_t				v_forward, v_right, v_up;
 	msprite_t		   *psprite;
-	entity_t		   *e;
 	int					i, last_tex;
+	entity_common_t		*ce;
 
 	last_tex = -1;
 	v_index = 0;
@@ -189,17 +183,17 @@ R_DrawOpaqueSpriteModels (void)
 	qglEnable (GL_ALPHA_TEST);
 
 	for (i = 0; i < r_refdef.num_entities; i++) {
-		e = r_refdef.entities[i];
+		ce = r_refdef.entities[i];
 
-		if (e->model->type != mod_sprite)
+		if (ce->model->type != mod_sprite)
 			continue;
 
 		/*
 		 * don't even bother culling, because it's just a single polygon without
 		 * a surface cache
 		 */
-		f = R_GetSpriteFrame (e);
-		psprite = e->model->sprite;
+		f = R_GetSpriteFrame (ce);
+		psprite = ce->model->sprite;
 
 		if (last_tex != f->gl_texturenum) {
 			if (v_index) {
@@ -214,7 +208,7 @@ R_DrawOpaqueSpriteModels (void)
 
 		if (psprite->type == SPR_ORIENTED) {
 			// bullet marks on walls
-			AngleVectors (e->angles, v_forward, v_right, v_up);
+			AngleVectors (ce->angles, v_forward, v_right, v_up);
 			up = v_up;
 			right = v_right;
 		} else {
@@ -228,13 +222,13 @@ R_DrawOpaqueSpriteModels (void)
 		VectorSet2(tc_array_v(v_index + 2), 1, 0);
 		VectorSet2(tc_array_v(v_index + 3), 1, 1);
 
-		VectorTwiddle (e->origin, up, f->down,	right, f->left, 1,
+		VectorTwiddle (ce->origin, up, f->down,	right, f->left, 1,
 				v_array_v(v_index + 0));
-		VectorTwiddle (e->origin, up, f->up,	right, f->left, 1,
+		VectorTwiddle (ce->origin, up, f->up,	right, f->left, 1,
 				v_array_v(v_index + 1));
-		VectorTwiddle (e->origin, up, f->up,	right, f->right, 1,
+		VectorTwiddle (ce->origin, up, f->up,	right, f->right, 1,
 				v_array_v(v_index + 2));
-		VectorTwiddle (e->origin, up, f->down,	right, f->right, 1,
+		VectorTwiddle (ce->origin, up, f->down,	right, f->right, 1,
 				v_array_v(v_index + 3));
 
 		v_index += 4;
@@ -265,7 +259,7 @@ R_VisBrushModels
 static void
 R_VisBrushModels (void)
 {
-	entity_t	*e;
+	entity_common_t *ce;
 	vec3_t		 mins, maxs;
 	int			 i;
 
@@ -280,13 +274,13 @@ R_VisBrushModels (void)
 		return;
 
 	for (i = 0; i < r_refdef.num_entities; i++) {
-		e = r_refdef.entities[i];
+		ce = r_refdef.entities[i];
 
-		if (e->model->type == mod_brush) {
-			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
+		if (ce->model->type == mod_brush) {
+			Mod_MinsMaxs (ce->model, ce->origin, ce->angles, mins, maxs);
 			if (Vis_CullBox (mins, maxs))
 				continue;
-			R_VisBrushModel (e);
+			R_VisBrushModel (ce);
 		}
 	}
 }
@@ -294,7 +288,7 @@ R_VisBrushModels (void)
 static void
 R_DrawOpaqueBrushModels ()
 {
-	entity_t	*e;
+	entity_common_t *ce;
 	vec3_t		 mins, maxs;
 	int			 i;
 
@@ -304,14 +298,14 @@ R_DrawOpaqueBrushModels ()
 		return;
 
 	for (i = 0; i < r_refdef.num_entities; i++) {
-		e = r_refdef.entities[i];
+		ce = r_refdef.entities[i];
 
-		if (e->model->type == mod_brush) {
-			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
+		if (ce->model->type == mod_brush) {
+			Mod_MinsMaxs (ce->model, ce->origin, ce->angles, mins, maxs);
 			if (Vis_CullBox (mins, maxs))
 				continue;
 
-			R_DrawOpaqueBrushModel (e);
+			R_DrawOpaqueBrushModel (ce);
 		}
 	}
 }
@@ -319,7 +313,7 @@ R_DrawOpaqueBrushModels ()
 static void
 R_DrawAddBrushModels ()
 {
-	entity_t	*e;
+	entity_common_t *ce;
 	vec3_t		 mins, maxs;
 	int			 i;
 
@@ -336,14 +330,14 @@ R_DrawAddBrushModels ()
 	}
 
 	for (i = 0; i < r_refdef.num_entities; i++) {
-		e = r_refdef.entities[i];
+		ce = r_refdef.entities[i];
 
-		if (e->model->type == mod_brush) {
-			Mod_MinsMaxs (e->model, e->origin, e->angles, mins, maxs);
+		if (ce->model->type == mod_brush) {
+			Mod_MinsMaxs (ce->model, ce->origin, ce->angles, mins, maxs);
 			if (Vis_CullBox (mins, maxs))
 				continue;
 
-			R_DrawAddBrushModel (e);
+			R_DrawAddBrushModel (ce);
 		}
 	}
 
@@ -519,13 +513,13 @@ R_Render3DView (void)
 	qglDepthMask (GL_FALSE);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
 
-	R_DrawExplosions ();
-	R_DrawParticles ();
-	R_DrawCoronas ();
-
 	R_DrawAddBrushModels ();
 //	R_DrawAddAliasModels ();		// FIXME: None exist.
 //	R_DrawAddSpriteModels ();		// FIXME: None exist.
+
+	R_DrawExplosions ();
+	R_DrawParticles ();
+	R_DrawCoronas ();
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (GL_TRUE);
@@ -544,9 +538,6 @@ R_RenderView (void)
 {
 	double		time1 = 0.0;
 	double		time2;
-
-	r_time = cl.time;
-	r_frametime = host_frametime;
 
 	if (r_norefresh->ivalue)
 		return;
@@ -699,24 +690,18 @@ R_Init_Cvars (void)
 	r_stainmaps = Cvar_Get ("r_stainmaps", "1", CVAR_ARCHIVE, NULL);
 
 	gl_clear = Cvar_Get ("gl_clear", "0", CVAR_ARCHIVE, NULL);
-	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
-	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_ARCHIVE, NULL);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", CVAR_NONE, NULL);
 	gl_flashblend = Cvar_Get ("gl_flashblend", "1", CVAR_ARCHIVE, NULL);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", CVAR_NONE, NULL);
-	gl_nocolors = Cvar_Get ("gl_nocolors", "0", CVAR_NONE, NULL);
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_NONE, NULL);
 
-	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_ARCHIVE, NULL);
 	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_ARCHIVE, NULL);
 
-	gl_fb = Cvar_Get ("gl_fb", "1", CVAR_ARCHIVE, NULL);
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
-
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 
-	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
+
 
 	R_Init_Sky_Cvars ();
 	R_Init_Liquid_Cvars ();

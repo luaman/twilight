@@ -1121,6 +1121,8 @@ CL_Init_Cvars (void)
 	rate = Cvar_Get ("rate", "2500", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
 	noaim = Cvar_Get ("noaim", "0", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
 	msg = Cvar_Get ("msg", "1", CVAR_ARCHIVE|CVAR_USERINFO, NULL);
+
+	CL_TEnts_Init_Cvars ();
 }
 
 /*
@@ -1146,7 +1148,7 @@ CL_Init (void)
 	CL_Input_Init_Cvars ();			// initialize all cl_input related cvars
 	CL_Input_Init ();				// setup input system, add related commands
 
-	CL_InitTEnts ();
+	CL_TEnts_Init ();
 	CL_InitPrediction ();
 	CL_InitCam ();
 	CL_InitSkins ();

@@ -75,37 +75,6 @@ static matrix4x4_t	*matrix;
  * START OF NON-COMMON CODE.
  */
 
-/*
-=============
-R_DrawViewModel
-=============
-*/
-void
-R_DrawViewModel (void)
-{
-	entity_t *ent_pointer;
-
-	ent_pointer = &cl.viewent;
-
-	cl.viewent.times++;
-
-	if (!r_drawviewmodel->ivalue ||
-		!Cam_DrawViewModel () ||
-		!r_drawentities->ivalue ||
-		(cl.stats[STAT_ITEMS] & IT_INVISIBILITY) ||
-		(cl.stats[STAT_HEALTH] <= 0) ||
-		!cl.viewent.model) {
-		return;
-	}
-
-	CL_Update_OriginAngles(&cl.viewent, cl.viewent_origin, cl.viewent_angles, cls.realtime);
-	CL_Update_Frame(&cl.viewent, cl.viewent_frame, cls.realtime);
-
-	// hack the depth range to prevent view model from poking into walls
-	qglDepthRange (0.0f, 0.3f);
-	R_DrawOpaqueAliasModels(&ent_pointer, 1, true);
-	qglDepthRange (0.0f, 1.0f);
-}
 
 /*
 =================

@@ -38,6 +38,8 @@
 #include "gl_arrays.h"
 #include "quakedef.h"
 #include "matrixlib.h"
+#include "r_part.h"
+#include "gl_alias.h"
 
 
 #define	MAXCLIPPLANES	11
@@ -45,11 +47,6 @@
 #define	BOTTOM_RANGE	96
 
 //=============================================================================
-
-typedef struct colormap_s {
-	vec4_t		top;
-	vec4_t		bottom;
-} colormap_t;
 
 typedef struct entity_s {
 	// model changed
@@ -65,43 +62,20 @@ typedef struct entity_s {
 
 	// last two updates (0 is newest) 
 	vec3_t			msg_origins[2];
-	vec3_t			origin;
 
 	// last two updates (0 is newest)
 	vec3_t			msg_angles[2];
-	vec3_t			angles;
-
-	qboolean		lerping;
-
-	matrix4x4_t		matrix;
-	matrix4x4_t		invmatrix;
-
-	// Bounding box
-	vec3_t			mins;
-	vec3_t			maxs;
-
-	// NULL = no model
-	struct model_s	*model;
-	int				frame[2];
-	float			frame_frac[2];
-	float			frame_time[2];
-	float			frame_interval[2];
 
 	// for client-side animations
 	float			syncbase;
-	colormap_t		*colormap;
 
 	// light, particals, etc
 	int				effects;
 
-	// for Alias models
-	int				skinnum;
-
 	// last frame this entity was found in an active leaf
 	int				visframe;
 
-	vec3_t			last_light;
-	float			time_left;
+	entity_common_t	common;
 } entity_t;
 
 typedef struct {
@@ -111,7 +85,7 @@ typedef struct {
 	float       fov_x, fov_y;
 
 	int			num_entities;
-	entity_t	*entities[MAX_EDICTS];
+	entity_common_t	*entities[MAX_EDICTS];
 } refdef_t;
 
 
@@ -141,19 +115,6 @@ void R_InitSurf (void);
 
 void R_NewMap (void);
 
-
-void R_ParseParticleEffect (void);
-void R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count);
-void R_RocketTrail (vec3_t start, vec3_t end);
-void R_ParticleTrail (vec3_t start, vec3_t end, int type);
-
-void R_EntityParticles (entity_t *ent);
-void R_BlobExplosion (vec3_t org);
-void R_ParticleExplosion (vec3_t org);
-void R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength);
-void R_LavaSplash (vec3_t org);
-void R_RailTrail (vec3_t start, vec3_t end);
-
 //
 // gl_rlight.c
 //
@@ -166,11 +127,6 @@ typedef struct {
 	float		minlight;				// don't add when contributing less
 	float		color[3];
 } dlight_t;
-
-void R_InitParticles (void);
-void R_ClearParticles (void);
-void R_MoveParticles (void);
-void R_DrawParticles (void);
 
 // It's a particle effect or something.  =)
 void R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
@@ -286,9 +242,9 @@ extern int gl_filter_mag;
 /*
  * gl_rsurf.c
  */
-void R_VisBrushModel (entity_t *e);
-void R_DrawOpaqueBrushModel (entity_t *e);
-void R_DrawAddBrushModel (entity_t *e);
+void R_VisBrushModel (entity_common_t *e);
+void R_DrawOpaqueBrushModel (entity_common_t *e);
+void R_DrawAddBrushModel (entity_common_t *e);
 void R_DrawBrushDepthSkies (void);
 void R_VisWorld (void);
 void R_DrawWorld (void);

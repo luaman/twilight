@@ -486,7 +486,8 @@ void V_ClearEntities ( void );
 /*
  * cl_tent
  */
-void CL_InitTEnts (void);
+void CL_TEnts_Init_Cvars (void);
+void CL_TEnts_Init (void);
 void CL_ClearTEnts (void);
 
 /*
@@ -500,9 +501,12 @@ void CL_ParseProjectiles (void);
 void CL_ParsePacketEntities (qboolean delta);
 void CL_SetSolidEntities (void);
 void CL_ParsePlayerinfo (void);
+void CL_Update_Matrices (entity_t *ent);
+void CL_Update_Matrices_C (entity_common_t *ent);
 qboolean CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time);
 void CL_Lerp_OriginAngles (entity_t *ent);
 qboolean CL_Update_Frame (entity_t *e, int frame, float frame_time);
+qboolean CL_Update_Frame_C (entity_common_t *e, int frame, float frame_time);
 
 /*
  * cl_pred.c

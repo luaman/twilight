@@ -333,7 +333,7 @@ CL_ParseServerInfo (void)
 
 
 // local state
-	cl_entities[0].model = cl.worldmodel = cl.model_precache[1];
+	cl_entities[0].common.model = cl.worldmodel = cl.model_precache[1];
 
 	R_NewMap ();
 	Team_NewMap ();
@@ -391,13 +391,14 @@ CL_ParseUpdate (int bits)
 		modnum = ent->baseline.modelindex;
 
 	model = cl.model_precache[modnum];
-	if (model != ent->model) {
+	if (model != ent->common.model) {
 		entity_state_t	baseline;
 
 		baseline = ent->baseline;
 		memset(ent, 0, sizeof(*ent));
+		ent->common.real_ent = ent;
 		ent->baseline = baseline;
-		ent->model = model;
+		ent->common.model = model;
 		// automatic animation (torches, etc) can be either all together
 		// or randomized
 		if (model) {
@@ -413,7 +414,7 @@ CL_ParseUpdate (int bits)
 	if (ent->msgtime != cl.mtime[1])
 	{
 		forcelink = true;
-		ent->time_left = 0;
+		ent->common.time_left = 0;
 	}
 
 	ent->msgtime = cl.mtime[0];
@@ -427,19 +428,18 @@ CL_ParseUpdate (int bits)
 		MSG_ReadByte() : ent->baseline.colormap;
 
 	if (!i)
-		ent->colormap = NULL;
+		ent->common.colormap = NULL;
 	else {
 		if (i > cl.maxclients)
 			Sys_Error ("i >= cl.maxclients");
-		ent->colormap = &cl.scores[i - 1].colormap;
+		ent->common.colormap = &cl.scores[i - 1].colormap;
 	}
 
 	skin = (bits & U_SKIN) ? 
 		MSG_ReadByte() : ent->baseline.skin;
 
-	if (skin != ent->skinnum) {
-		ent->skinnum = skin;
-	}
+	if (skin != ent->common.skinnum)
+		ent->common.skinnum = skin;
 
 	ent->effects = (bits & U_EFFECTS) ? 
 		MSG_ReadByte() : ent->baseline.effects;
@@ -466,9 +466,9 @@ CL_ParseUpdate (int bits)
 	if (forcelink) {
 		// didn't have an update last message
 		VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
-		VectorCopy (ent->msg_origins[0], ent->origin);
+		VectorCopy (ent->msg_origins[0], ent->common.origin);
 		VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
-		VectorCopy (ent->msg_angles[0], ent->angles);
+		VectorCopy (ent->msg_angles[0], ent->common.angles);
 		ent->forcelink = true;
 	}
 }
@@ -620,13 +620,13 @@ CL_ParseStatic (void)
 	}
 
 // copy it to the current state
-	ent->model = cl.model_precache[ent->baseline.modelindex];
+	ent->common.model = cl.model_precache[ent->baseline.modelindex];
 	CL_Update_Frame(ent, ent->baseline.frame, cl.mtime[1]);
-	ent->colormap = NULL;
-	ent->skinnum = ent->baseline.skin;
+	ent->common.colormap = NULL;
+	ent->common.skinnum = ent->baseline.skin;
 	ent->effects = ent->baseline.effects;
-	ent->time_left = 0;
-	VectorClear (ent->last_light);
+	ent->common.time_left = 0;
+	VectorClear (ent->common.last_light);
 
 	CL_Update_OriginAngles(ent, ent->baseline.origin, ent->baseline.angles, cl.mtime[1]);
 }

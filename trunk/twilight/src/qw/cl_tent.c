@@ -37,13 +37,15 @@ static const char rcsid[] =
 #include "sound.h"
 #include "r_explosion.h"
 #include "host.h"
+#include "r_part.h"
 
 #define	MAX_BEAMS	8
 typedef struct {
-	int         entity;
-	struct model_s *model;
-	float       endtime;
-	vec3_t      start, end;
+	int				entity;
+	qboolean		lightning;
+	struct model_s	*model;
+	float			endtime;
+	vec3_t			start, end, diff;
 } beam_t;
 
 beam_t      cl_beams[MAX_BEAMS];
@@ -56,6 +58,7 @@ typedef struct {
 } explosion_t;
 
 explosion_t cl_explosions[MAX_EXPLOSIONS];
+cvar_t		*cl_lightning_xbeam;
 
 
 sfx_t      *cl_sfx_wizhit;
@@ -72,13 +75,14 @@ model_t	   *cl_bolt2_mod = NULL;
 model_t	   *cl_bolt3_mod = NULL;
 
 
-/*
-=================
-CL_ParseTEnts
-=================
-*/
 void
-CL_InitTEnts (void)
+CL_TEnts_Init_Cvars (void)
+{
+	cl_lightning_xbeam = Cvar_Get ("cl_lightning_xbeam","1",CVAR_ARCHIVE, NULL);
+}
+
+void
+CL_TEnts_Init (void)
 {
 	cl_sfx_wizhit = S_PrecacheSound ("wizard/hit.wav");
 	cl_sfx_knighthit = S_PrecacheSound ("hknight/hit.wav");
@@ -138,7 +142,7 @@ CL_ParseBeam
 =================
 */
 void
-CL_ParseBeam (model_t *m)
+CL_ParseBeam (model_t *m, qboolean lightning)
 {
 	int         ent;
 	vec3_t      start, end;
@@ -159,9 +163,12 @@ CL_ParseBeam (model_t *m)
 	for (i = 0, b = cl_beams; i < MAX_BEAMS; i++, b++) {
 		if (b->entity == ent) {
 			b->model = m;
-			b->endtime = cl.time + 0.2;
+			b->endtime = cl.time + 0.3;
+			b->lightning = lightning;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
+			if (b->entity == cl.viewentity)
+				VectorSubtract(cl.simorg, start, b->diff);
 			return;
 		}
 	}
@@ -171,9 +178,12 @@ CL_ParseBeam (model_t *m)
 		if (!b->model || b->endtime < cl.time) {
 			b->entity = ent;
 			b->model = m;
-			b->endtime = cl.time + 0.2;
+			b->endtime = cl.time + 0.3;
+			b->lightning = lightning;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
+			if (b->entity == cl.viewentity)
+				VectorSubtract(cl.simorg, start, b->diff);
 			return;
 		}
 	}
@@ -291,19 +301,19 @@ CL_ParseTEnt (void)
 		case TE_LIGHTNING1:			// lightning bolts
 			if (!cl_bolt1_mod)
 				cl_bolt1_mod = Mod_ForName ("progs/bolt.mdl", FLAG_RENDER | FLAG_CRASH);
-			CL_ParseBeam (cl_bolt1_mod);
+			CL_ParseBeam (cl_bolt1_mod, 1);
 			break;
 
 		case TE_LIGHTNING2:			// lightning bolts
 			if (!cl_bolt2_mod)
 				cl_bolt2_mod = Mod_ForName ("progs/bolt2.mdl", FLAG_RENDER | FLAG_CRASH);
-			CL_ParseBeam (cl_bolt2_mod);
+			CL_ParseBeam (cl_bolt2_mod, 1);
 			break;
 
 		case TE_LIGHTNING3:			// lightning bolts
 			if (!cl_bolt3_mod)
 				cl_bolt3_mod = Mod_ForName ("progs/bolt3.mdl", FLAG_RENDER | FLAG_CRASH);
-			CL_ParseBeam (cl_bolt3_mod);
+			CL_ParseBeam (cl_bolt3_mod, 0);
 			break;
 
 		case TE_LAVASPLASH:
@@ -371,6 +381,7 @@ CL_NewTempEntity (void)
 		Host_EndGame ("Out of entities!");
 
 	ent = &cl_tmp_entities[cl_num_tmp_entities++];
+	ent->common.real_ent = ent;
 
 	V_AddEntity ( ent );
 
@@ -402,7 +413,12 @@ CL_UpdateBeams (void)
 
 		// if coming from the player, update the start position
 		if (b->entity == cl.viewentity) {
-			VectorCopy (cl.simorg, b->start);
+			VectorAdd (cl.simorg, b->diff, b->start);
+		}
+
+		if (b->lightning) {
+			R_Lightning (b->start, b->end, 0);
+			continue;
 		}
 
 		// calculate pitch and yaw
@@ -418,7 +434,7 @@ CL_UpdateBeams (void)
 			if (!ent)
 				return;
 			ang[2] = rand () % 360;
-			ent->model = b->model;
+			ent->common.model = b->model;
 			CL_Update_OriginAngles(ent, org, ang, cls.realtime);
 			CL_Update_Frame(ent, 0, cls.realtime);
 
@@ -455,7 +471,7 @@ CL_UpdateExplosions (void)
 		ent = CL_NewTempEntity ();
 		if (!ent)
 			return;
-		ent->model = ex->model;
+		ent->common.model = ex->model;
 		CL_Update_OriginAngles(ent, ex->origin, vec3_origin, cls.realtime);
 		CL_Update_Frame (ent, f, cls.realtime);
 	}

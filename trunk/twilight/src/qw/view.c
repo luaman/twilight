@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "screen.h"
 #include "strlib.h"
 #include "host.h"
+#include "gl_alias.h"
 
 /* QW specific */
 #include "pmove.h"
@@ -611,7 +612,7 @@ V_AddEntity ( entity_t *ent )
 		Host_EndGame ("ERROR! Out of entitys!");
 	}
 
-	r_refdef.entities[r_refdef.num_entities++] = ent;
+	r_refdef.entities[r_refdef.num_entities++] = &ent->common;
 }
 
 /*
@@ -705,9 +706,9 @@ V_CalcRefdef (void)
 	} else {
 		model_t *model = cl.model_precache[cl.stats[STAT_WEAPON]];
 
-		if (cl.viewent.model != model) {
+		if (cl.viewent.common.model != model) {
 			memset (&cl.viewent, 0, sizeof (entity_t));
-			cl.viewent.model = model;
+			cl.viewent.common.model = model;
 			cl.viewent.times = -1;		// FIXME: HACK! DO NOT COPY ELSEWHERE!
 		}
 	}
@@ -846,3 +847,34 @@ V_Init (void)
 	Cmd_AddCommand ("centerview", V_StartPitchDrift);
 }
 
+/*
+=============
+R_DrawViewModel
+=============
+*/
+void
+R_DrawViewModel (void)
+{
+	entity_common_t *ent_pointer;
+
+	ent_pointer = &cl.viewent.common;
+
+	cl.viewent.times++;
+
+	if (!r_drawviewmodel->ivalue ||
+		!Cam_DrawViewModel () ||
+		!r_drawentities->ivalue ||
+		(cl.stats[STAT_ITEMS] & IT_INVISIBILITY) ||
+		(cl.stats[STAT_HEALTH] <= 0) ||
+		!cl.viewent.common.model) {
+		return;
+	}
+
+	CL_Update_OriginAngles(&cl.viewent, cl.viewent_origin, cl.viewent_angles, cls.realtime);
+	CL_Update_Frame(&cl.viewent, cl.viewent_frame, cls.realtime);
+
+	// hack the depth range to prevent view model from poking into walls
+	qglDepthRange (0.0f, 0.3f);
+	R_DrawOpaqueAliasModels(&ent_pointer, 1, true);
+	qglDepthRange (0.0f, 1.0f);
+}

@@ -46,6 +46,13 @@ int fb_size[4];
 int accum_size[4];
 int doublebuffer, buffer_size, depth_size, stencil_size;
 
+cvar_t *gl_affinemodels;
+cvar_t *gl_nocolors;
+cvar_t *gl_im_animation;
+cvar_t *gl_fb;
+cvar_t *gl_particletorches;
+cvar_t *gl_cull;
+
 /*-----------------------------------------------------------------------*/
 
 const char *gl_vendor;
@@ -177,6 +184,22 @@ GL_Info_f (void)
 	Com_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
 }
 
+
+/*
+===============
+GL_Init_Cvars
+===============
+*/
+void
+GLInfo_Init_Cvars (void)
+{
+	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_ARCHIVE, NULL);
+	gl_nocolors = Cvar_Get ("gl_nocolors", "0", CVAR_NONE, NULL);
+	gl_im_animation = Cvar_Get ("gl_im_animation", "1", CVAR_ARCHIVE, NULL);
+	gl_fb = Cvar_Get ("gl_fb", "1", CVAR_ARCHIVE, NULL);
+	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
+	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
+}
 
 /*
 ===============

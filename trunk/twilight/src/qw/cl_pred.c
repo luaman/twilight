@@ -114,6 +114,9 @@ CL_PredictMove (void)
 	if (cl.time > cls.realtime)
 		cl.time = cls.realtime;
 
+	r_time = cl.time;
+	r_frametime = cl.time - cl.oldtime;
+
 	if (cl.intermission)
 		return;
 

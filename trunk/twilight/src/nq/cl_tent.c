@@ -41,6 +41,7 @@ static const char rcsid[] =
 int         num_temp_entities;
 entity_t    cl_temp_entities[MAX_TEMP_ENTITIES];
 beam_t      cl_beams[MAX_BEAMS];
+cvar_t		*cl_lightning_xbeam;
 
 sfx_t      *cl_sfx_wizhit;
 sfx_t      *cl_sfx_knighthit;
@@ -55,13 +56,14 @@ model_t	   *cl_bolt2_mod = NULL;
 model_t	   *cl_bolt3_mod = NULL;
 model_t	   *cl_beam_mod = NULL;
 
-/*
-=================
-CL_ParseTEnt
-=================
-*/
 void
-CL_InitTEnts (void)
+CL_TEnts_Init_Cvars (void)
+{
+	cl_lightning_xbeam = Cvar_Get ("cl_lightning_xbeam","1",CVAR_ARCHIVE, NULL);
+}
+
+void
+CL_TEnts_Init (void)
 {
 	cl_sfx_wizhit = S_PrecacheSound ("wizard/hit.wav");
 	cl_sfx_knighthit = S_PrecacheSound ("hknight/hit.wav");
@@ -78,12 +80,15 @@ CL_ParseBeam
 =================
 */
 void
-CL_ParseBeam (model_t *m)
+CL_ParseBeam (model_t *m, qboolean lightning)
 {
 	int         ent;
 	vec3_t      start, end;
 	beam_t     *b;
 	int         i;
+
+	if (!cl_lightning_xbeam->ivalue)
+		lightning = 0;
 
 	ent = MSG_ReadShort ();
 
@@ -100,8 +105,11 @@ CL_ParseBeam (model_t *m)
 		if (b->entity == ent) {
 			b->model = m;
 			b->endtime = cl.time + 0.2;
+			b->lightning = lightning;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
+			if (b->entity == cl.viewentity)
+				VectorSubtract(cl_entities[cl.viewentity].common.origin, start, b->diff);
 			return;
 		}
 	}
@@ -112,8 +120,11 @@ CL_ParseBeam (model_t *m)
 			b->entity = ent;
 			b->model = m;
 			b->endtime = cl.time + 0.2;
+			b->lightning = lightning;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
+			if (b->entity == cl.viewentity)
+				VectorSubtract(cl_entities[cl.viewentity].common.origin, start, b->diff);
 			return;
 		}
 	}
@@ -232,26 +243,26 @@ CL_ParseTEnt (void)
 		case TE_LIGHTNING1:			// lightning bolts
 			if (!cl_bolt1_mod)
 				cl_bolt1_mod = Mod_ForName ("progs/bolt.mdl", FLAG_CRASH | FLAG_RENDER);
-			CL_ParseBeam (cl_bolt1_mod);
+			CL_ParseBeam (cl_bolt1_mod, 1);
 			break;
 
 		case TE_LIGHTNING2:			// lightning bolts
 			if (!cl_bolt2_mod)
 				cl_bolt2_mod = Mod_ForName ("progs/bolt2.mdl", FLAG_CRASH | FLAG_RENDER);
-			CL_ParseBeam (cl_bolt2_mod);
+			CL_ParseBeam (cl_bolt2_mod, 1);
 			break;
 
 		case TE_LIGHTNING3:			// lightning bolts
 			if (!cl_bolt3_mod)
 				cl_bolt3_mod = Mod_ForName ("progs/bolt3.mdl", FLAG_CRASH | FLAG_RENDER);
-			CL_ParseBeam (cl_bolt3_mod);
+			CL_ParseBeam (cl_bolt3_mod, 0);
 			break;
 
 // PGM 01/21/97 
 		case TE_BEAM:					// grappling hook beam
 			if (!cl_beam_mod)
 				cl_beam_mod = Mod_ForName ("progs/beam.mdl", FLAG_CRASH | FLAG_RENDER);
-			CL_ParseBeam (cl_beam_mod);
+			CL_ParseBeam (cl_beam_mod, 0);
 			break;
 // PGM 01/21/97
 
@@ -327,6 +338,7 @@ CL_NewTempEntity (void)
 
 	ent = &cl_temp_entities[num_temp_entities];
 	memset (ent, 0, sizeof (*ent));
+	ent->common.real_ent = ent;
 	num_temp_entities++;
 
 	V_AddEntity ( ent );
@@ -358,7 +370,12 @@ CL_UpdateTEnts (void)
 
 		// if coming from the player, update the start position
 		if (b->entity == cl.viewentity) {
-			VectorCopy (cl_entities[cl.viewentity].origin, b->start);
+			VectorAdd (cl_entities[cl.viewentity].common.origin, b->diff, b->start);
+		}
+
+		if (b->lightning) {
+			R_Lightning (b->start, b->end, 0);
+			continue;
 		}
 
 		// calculate pitch and yaw
@@ -373,7 +390,7 @@ CL_UpdateTEnts (void)
 			ent = CL_NewTempEntity ();
 			if (!ent)
 				return;
-			ent->model = b->model;
+			ent->common.model = b->model;
 			ang[2] = rand () % 360;
 			CL_Update_OriginAngles(ent, org, ang, cl.mtime[1]);
 

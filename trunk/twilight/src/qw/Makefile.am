@@ -41,11 +41,11 @@ twilight_qw_SOURCES= \
 	cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c \
 	cl_model.c cl_parse.c cl_pred.c cl_tent.c client.h \
 	cmd.h common.c console.c \
-	gl_alias.c gl_draw.c gl_ngraph.c gl_rlight.c \
+	gl_draw.c gl_ngraph.c gl_rlight.c \
 	gl_rmain.c gl_rsurf.c gl_screen.c \
 	info.c keys.c \
 	menu.c net.h net_chan.c net_udp.c pmove.c pmovetst.c protocol.h \
-	r_explosion.c r_part.c render.h sbar.c screen.h skin.c \
+	r_explosion.c render.h sbar.c screen.h skin.c \
 	snd_dma.c sv_null.c teamplay.c sys.c vid_sdl.c view.c
 
 twilight_qwsv_SOURCES= \
