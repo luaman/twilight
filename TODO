@@ -1,7 +1,18 @@
 Project Twilight todo list
 --------------------------
 
-Stuff /required/ for 0.2.0: Test a /LOT/.
+Stuff /required/ for 0.2.0:
+  - Menu:
+    * Get the renderer side of the menu code to handle menus larger then
+      the screen.
+    * Find a clean way to include a text file in the binary so that we
+      still have a basic menu.
+    * Add a command to /delete/ a menu. (Mostly trivial.)
+    * Saved games support.
+    * Server browser support.
+    * Key binding menu support.
+    * Get the graphics options cleaned up. (Add grey tweaking support!)
+
 
 Bugs we know about:
   - In QW coop mode, the scoreboard does not seem to work.
