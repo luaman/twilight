@@ -752,7 +752,7 @@ R_Draw_Base_Particles (void)
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
 
-	frametime = host_frametime;
+	frametime = cl.time - cl.oldtime;
 	time1 = frametime * 5;
 	time2 = frametime * 10;
 	time3 = frametime * 15;
@@ -943,7 +943,7 @@ R_Draw_Tube_Particles (void)
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
 
-	frametime = host_frametime;
+	frametime = cl.time - cl.oldtime;
 
 	activeparticles = 0;
 	maxparticle = -1;
@@ -1077,7 +1077,7 @@ R_Draw_Cone_Particles (void)
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
 
-	frametime = host_frametime;
+	frametime = cl.time - cl.oldtime;
 	teletime = frametime * 120;
 
 	activeparticles = 0;
@@ -1223,11 +1223,9 @@ void
 R_DrawParticles (void)
 {
 	qglEnableClientState (GL_COLOR_ARRAY);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
 	R_Draw_Base_Particles();
 	R_Draw_Cone_Particles();
 	R_Draw_Tube_Particles();
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglColor3f(1, 1, 1);
 }

@@ -267,7 +267,7 @@ void R_MoveExplosions(void)
 				explosion[i].alpha = 0;
 				continue;
 			}
-			R_MoveExplosion(&explosion[i], host_frametime);
+			R_MoveExplosion(&explosion[i], cl.time - cl.oldtime);
 		}
 	}
 }
@@ -279,7 +279,6 @@ void R_DrawExplosions(void)
 		return;
 	qglEnableClientState (GL_COLOR_ARRAY);
 	qglBindTexture(GL_TEXTURE_2D, explosiontexture);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
 	for (i = 0;i < MAX_EXPLOSIONS;i++)
@@ -297,7 +296,6 @@ void R_DrawExplosions(void)
 		i_index = 0;
 	}
 	qglDisableClientState (GL_COLOR_ARRAY);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	if (gl_cull->value)
 		qglEnable (GL_CULL_FACE);
 }

@@ -667,6 +667,10 @@ DrawTextureChains ()
 
 		R_BlendLightmaps();
 	}
+
+	// If the water is solid, draw here, if not, then later.
+	if (r_wateralpha->value == 1)
+		R_DrawWaterTextureChains ();
 }
 
 /*
@@ -681,12 +685,6 @@ R_DrawWaterTextureChains ()
 	msurface_t	   *s;
 	texture_t	   *t, *st;
 	float			wateralpha = r_wateralpha->value;
-
-	if (wateralpha != 1) {
-		qglEnable (GL_BLEND);
-		qglDepthMask (GL_FALSE);
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
-	}
 
 	for (i = 0; i < cl.worldmodel->numtextures; i++)
 	{
@@ -703,13 +701,6 @@ R_DrawWaterTextureChains ()
 			EmitWaterPolys (s, st, false, wateralpha);
 
 		t->texturechain = NULL;
-	}
-
-	if (wateralpha != 1) {
-		qglDepthMask (GL_TRUE);
-		qglDisable (GL_BLEND);
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		qglColor3f(1, 1, 1);
 	}
 }
 
