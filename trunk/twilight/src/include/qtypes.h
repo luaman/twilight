@@ -37,12 +37,18 @@ typedef unsigned char byte;
 
 typedef enum { false, true } qboolean;
 
-#ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
+#ifndef _WIN32
+
+# ifndef max
+#  define max(a,b) ((a) > (b) ? (a) : (b))
+# endif
+
+# ifndef min
+#  define min(a,b) ((a) < (b) ? (a) : (b))
+# endif
+
 #endif
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
+
 #ifndef bound
 #define bound(a,b,c) (max(a, min(b, c)))
 #endif
