@@ -28,6 +28,11 @@
 #ifndef __MATHLIB_H
 #define __MATHLIB_H
 
+// LordHavoc: min and max are defined in stdlib in MSVC
+#ifndef max
+#include <stdlib.h>
+#endif
+
 typedef int fixed4_t;
 typedef int fixed8_t;
 typedef int fixed16_t;
