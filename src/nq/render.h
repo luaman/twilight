@@ -63,16 +63,6 @@ typedef struct entity_s {
 	int         visframe;				// last frame this entity was
 	// found in an active leaf
 
-	float       frame_start_time;
-	float       frame_interval;
-	int         pose1;
-	int         pose2;
-	float       translate_start_time;
-	vec3_t      origin1;
-	vec3_t      origin2;
-	float       rotate_start_time;
-	vec3_t      angles1;
-	vec3_t      angles2;
 	vec3_t		last_light;
 	float		time_left;
 	struct model_s *lastmodel;

@@ -328,7 +328,7 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 	frame = &paliashdr->frames[e->frame];
 
 	if (frame->numposes > 1)
-		pose_num = (int) (cl.time / e->frame_interval) % frame->numposes;
+		pose_num = (int) (cl.time / frame->interval) % frame->numposes;
 	else
 		pose_num = 0;
 

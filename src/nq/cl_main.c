@@ -470,8 +470,6 @@ CL_RelinkEntities (void)
 // if the object wasn't included in the last packet, remove it
 		if (ent->msgtime != cl.mtime[0]) {
 			ent->model = NULL;
-			ent->translate_start_time = 0;
-			ent->rotate_start_time    = 0;
 			VectorClear (ent->last_light);
 			continue;
 		}
@@ -496,8 +494,6 @@ CL_RelinkEntities (void)
 
 			if (f >= 1)
 			{
-				ent->translate_start_time = 0;
-				ent->rotate_start_time    = 0;
 				VectorClear (ent->last_light);
 				VectorCopy  (ent->msg_origins[0], ent->origin);
 				VectorCopy  (ent->msg_angles[0], ent->angles);
