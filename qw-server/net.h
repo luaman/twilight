@@ -28,6 +28,9 @@
 #ifndef __NET_H
 #define __NET_H
 
+#define	MAX_MSGLEN		1450
+#define	MAX_DATAGRAM	1450
+
 #define	PORT_ANY	-1
 
 typedef struct {
