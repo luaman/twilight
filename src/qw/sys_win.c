@@ -38,7 +38,9 @@ static const char rcsid[] =
 #include <direct.h>
 #include <limits.h>
 #include <errno.h>
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 
 #include "common.h"
 #include "console.h"
@@ -654,3 +656,4 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	/* return success of application */
 	return TRUE;
 }
+

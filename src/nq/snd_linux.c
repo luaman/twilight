@@ -29,8 +29,12 @@ static const char rcsid[] =
 # include <config.h>
 #endif
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -270,3 +274,4 @@ void
 SNDDMA_Submit (void)
 {
 }
+

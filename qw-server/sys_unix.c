@@ -49,7 +49,9 @@ static const char rcsid[] =
 
 #if defined(__linux__) || defined(sun)
 #include <sys/stat.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <sys/time.h>
 #include <errno.h>
 #else

@@ -40,7 +40,9 @@ static const char rcsid[] =
 #include "conproc.h"
 #include <io.h>
 #include <direct.h>
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 
 #define MINIMUM_WIN_MEMORY		0x0880000
 #define MAXIMUM_WIN_MEMORY		0x1000000

@@ -8,91 +8,52 @@ AC_REVISION($Revision$)
 
 AM_INIT_AUTOMAKE(twilight,0.0.0)
 AM_CONFIG_HEADER(include/config.h)
+
+
+dnl Checkfs for system type
 AC_CANONICAL_HOST
+
+AC_MSG_CHECKING(Checking host type)
+case "${host}" in
+	*-*-mingw32*)
+		SYS=Win32
+		;;
+	*)
+		# Default to POSIX compliant system
+		SYS=POSIX
+		;;
+esac
+AC_MSG_RESULT($SYS)
+
+AM_CONDITIONAL(SYS_POSIX, test "$SYS" = "POSIX")
+AM_CONDITIONAL(SYS_WIN32, test "$SYS" = "Win32")
+
 
 dnl Checks for programs
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
+AC_CHECK_PROG(CVS2CL, cvs2cl, cvs2cl)
+AM_CONDITIONAL(CVS2CL, test "x$CVS2CL" != "x")
 
-dnl Checks for extensions
-AC_EXEEXT
-AC_OBJEXT
-
-dnl Checks for typedefs, structures, and compiler characteristics.
+dnl Checks for build environment characteristics
 AC_C_INLINE
 AC_C_CONST
+AC_EXEEXT
+AC_OBJEXT
+CFLAGS="-Wall -Werror $CFLAGS"
 
-dnl Custom macros (move these to a seperate file?)
-AC_DEFUN(TL_CHECK_LIB,[
-	LDFLAGS_SAVE=$LDFLAGS
-	LDFLAGS="$3 -l$1 $LDFLAGS"
-	AC_TRY_LINK_FUNC($2, [$4], [$5])
-	LDFLAGS=$LDFLAGS_SAVE
-])
-AC_DEFUN(TL_CHECK_HEADER,[
-	CPPFLAGS_SAVE=$CPPFLAGS
-	CPPFLAGS="$2 $CPPFLAGS"
-	AC_TRY_CPP([
-#include <$1>
-], [$3], [$4])
-	CPPFLAGS=$CPPFLAGS_SAVE
-])
 
-AC_MSG_CHECKING(Checking to see if building on Win32)
-case "${host}" in
-	*-*-mingw32*)
-		SYS=WIN32
-		AC_MSG_RESULT(yes)
-		;;
-# FIXME: What is cygwin's host type?  Check it here.  This is just a guess.
-	*-*-*cygwin*)
-		SYS=WIN32
-		AC_MSG_RESULT(yes)
-		;;
-	*)
-		# Default to POSIX compliant system
-		SYS=POSIX
-		AC_MSG_RESULT(no)
-		;;
-esac
-
-AM_CONDITIONAL(SYS_POSIX, test "$SYS" = "POSIX")
-AM_CONDITIONAL(SYS_WIN32, test "$SYS" = "WIN32")
+dnl Checks for functions and headers
 
 AC_CHECK_FUNCS(strlcat strlcpy)
 
-dnl Check for SDL, fatal if not found
-AM_PATH_SDL(1.2.0,
-	,
-	AC_MSG_ERROR([SDL 1.2 or above is required to build $PACKAGE])
-)
-SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"
+AC_CHECK_HEADERS(unistd.h fcntl.h)
 
 
-dnl APIENTRY needs to be defined to nothing except on win32
-if test "${SYS}" != "WIN32"; then
-	AC_DEFINE_UNQUOTED(APIENTRY,)
-fi
-
-dnl let the user choose the default OpenGL library
-AC_ARG_WITH(opengl,
-	[  --with-opengl           Default name of your OpenGL library
-                          (only affects value of the gl_driver Cvar)],,
-[if test "$SYS" = "WIN32"; then
-	with_opengl="opengl32.dll"
-else
-	with_opengl="libGL.so.1"
-fi
-])
-AC_DEFINE_UNQUOTED(GL_LIBRARY, "$with_opengl")
-
-
-dnl sanitize our paths a bit
-
+dnl Checks for paths
 test "$prefix" = "NONE" && prefix="$ac_default_prefix"
 test "x$exec_prefix" = "xNONE" && exec_prefix="$prefix"
-
 eval PDIR="$prefix"
 eval DDIR="$datadir"
 eval BDIR="$bindir"
@@ -108,12 +69,32 @@ AC_ARG_WITH(userpath,
 	with_userpath="~/.twilight")
 AC_DEFINE_UNQUOTED(USERPATH, "$with_userpath")
 
-CFLAGS="-Wall -Werror $CFLAGS"
+
+dnl Check for SDL, fatal if not found
+AM_PATH_SDL(1.2.0,
+	,
+	AC_MSG_ERROR([SDL 1.2 or above is required to build $PACKAGE])
+)
+SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"
 
 
+dnl APIENTRY needs to be defined to nothing except on win32
+if test "${SYS}" != "Win32"; then
+	AC_DEFINE_UNQUOTED(APIENTRY,)
+fi
 
-AC_CHECK_PROG(CVS2CL, cvs2cl, cvs2cl)
-AM_CONDITIONAL(CVS2CL, test "x$CVS2CL" != "x")
+dnl let the user choose the default OpenGL library
+AC_ARG_WITH(opengl,
+	[  --with-opengl           Default name of your OpenGL library
+                          (only affects value of the gl_driver Cvar)],,
+[if test "$SYS" = "Win32"; then
+	with_opengl="opengl32.dll"
+else
+	with_opengl="libGL.so.1"
+fi
+])
+AC_DEFINE_UNQUOTED(GL_LIBRARY, "$with_opengl")
+
 
 AC_OUTPUT(
 	Makefile
@@ -130,6 +111,7 @@ AC_OUTPUT(
 
 AC_MSG_RESULT([
   Project Twilight v$VERSION configuration:
+    Build system                : $SYS
     Compiler used               : $CC
     Compiler flags              : $CFLAGS
     SDL version                 : $SDLVER

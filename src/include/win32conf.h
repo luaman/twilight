@@ -20,5 +20,7 @@
 
 #include "compat.h"
 
+#define HAVE_FCNTL_H
+
 #endif // __WIN32CONF_H
 

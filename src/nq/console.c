@@ -38,13 +38,12 @@ static const char rcsid[] =
 #include <io.h>
 #endif
 
-#ifdef NeXT
-#include <libc.h>
-#endif
-#ifndef _MSC_VER
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include "quakedef.h"
 
 int         con_linewidth;

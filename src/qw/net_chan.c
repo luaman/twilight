@@ -38,7 +38,7 @@ static const char rcsid[] =
 #include <sys/types.h>
 #include <time.h>
 
-#ifndef WIN32
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -450,3 +450,4 @@ Netchan_Process (netchan_t *chan)
 
 	return true;
 }
+

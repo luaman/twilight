@@ -50,7 +50,9 @@ static const char rcsid[] =
 #include <sys/ioctl.h>
 #include <sys/uio.h>
 #include <arpa/inet.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #endif
 #include <errno.h>
 
@@ -380,3 +382,4 @@ NET_Shutdown (void)
 {
 	close (net_socket);
 }
+
