@@ -63,7 +63,7 @@ KeyDown (kbutton_t *b)
 
 	c = Cmd_Argv (1);
 	if (c[0])
-		k = atoi (c);
+		k = Q_atoi (c);
 	else
 		k = -1;							// typed manually at the console for
 	// continuous down
@@ -93,7 +93,7 @@ KeyUp (kbutton_t *b)
 
 	c = Cmd_Argv (1);
 	if (c[0])
-		k = atoi (c);
+		k = Q_atoi (c);
 	else {								// typed manually at the console,
 		// assume for unsticking, so clear all
 		b->down[0] = b->down[1] = 0;

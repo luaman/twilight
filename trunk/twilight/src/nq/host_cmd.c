@@ -1060,8 +1060,8 @@ Host_Color_f (void)
 	if (Cmd_Argc () == 2)
 		top = bottom = atoi (Cmd_Argv (1));
 	else {
-		top = atoi (Cmd_Argv (1));
-		bottom = atoi (Cmd_Argv (2));
+		top = Q_atoi (Cmd_Argv (1));
+		bottom = Q_atoi (Cmd_Argv (2));
 	}
 
 	top &= 15;
@@ -1417,7 +1417,7 @@ Host_Give_f (void)
 		return;
 
 	t = Cmd_Argv (1);
-	v = atoi (Cmd_Argv (2));
+	v = Q_atoi (Cmd_Argv (2));
 
 	switch (t[0]) {
 		case '0':
@@ -1592,7 +1592,7 @@ Host_Viewframe_f (void)
 		return;
 	m = cl.model_precache[(int) e->v.modelindex];
 
-	f = atoi (Cmd_Argv (1));
+	f = Q_atoi (Cmd_Argv (1));
 	if (f >= m->numframes)
 		f = m->numframes - 1;
 

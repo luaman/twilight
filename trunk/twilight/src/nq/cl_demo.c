@@ -216,7 +216,7 @@ CL_Record_f (void)
 	}
 // write the forced cd track number, or -1
 	if (c == 4) {
-		track = atoi (Cmd_Argv (3));
+		track = Q_atoi (Cmd_Argv (3));
 		Con_Printf ("Forcing CD track to %i\n", cls.forcetrack);
 	} else
 		track = -1;

@@ -365,7 +365,7 @@ Mod_LoadTextures (lump_t *l)
 
 		if ((mt->width & 15) || (mt->height & 15))
 			Sys_Error ("Texture %s is not 16 aligned", mt->name);
-		pixels = mt->width * mt->height / 64 * 85;
+		pixels = mt->width * mt->height * (85 / 64);
 		tx = Hunk_AllocName (sizeof (texture_t) + pixels, loadname);
 		loadmodel->textures[i] = tx;
 
@@ -639,9 +639,9 @@ Mod_LoadTexinfo (lump_t *l)
 	for (i = 0; i < count; i++, in++, out++) {
 		for (j = 0; j < 8; j++)
 			out->vecs[0][j] = LittleFloat (in->vecs[0][j]);
-		len1 = Length (out->vecs[0]);
-		len2 = Length (out->vecs[1]);
-		len1 = (len1 + len2) / 2;
+		len1 = VectorLength (out->vecs[0]);
+		len2 = VectorLength (out->vecs[1]);
+		len1 = (len1 + len2) * 0.5f;
 		if (len1 < 0.32)
 			out->mipadjust = 4;
 		else if (len1 < 0.49)
@@ -1109,7 +1109,7 @@ RadiusFromBounds (vec3_t mins, vec3_t maxs)
 			fabs (mins[i]) > Q_fabs (maxs[i]) ? Q_fabs (mins[i]) : Q_fabs (maxs[i]);
 	}
 
-	return Length (corner);
+	return VectorLength (corner);
 }
 
 /*

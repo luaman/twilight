@@ -364,11 +364,11 @@ PF_normalize (void)
 	value1 = G_VECTOR (OFS_PARM0);
 
 	new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2] * value1[2];
-	new = Q_sqrt (new);
 
 	if (new == 0)
 		newvalue[0] = newvalue[1] = newvalue[2] = 0;
 	else {
+		new = Q_sqrt (new);
 		new = 1 / new;
 		newvalue[0] = value1[0] * new;
 		newvalue[1] = value1[1] * new;
@@ -394,9 +394,8 @@ PF_vlen (void)
 	value1 = G_VECTOR (OFS_PARM0);
 
 	new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2] * value1[2];
-	new = Q_sqrt (new);
 
-	G_FLOAT (OFS_RETURN) = new;
+	G_FLOAT (OFS_RETURN) = (new) ? Q_sqrt (new) : 0;
 }
 
 /*
@@ -916,7 +915,7 @@ PF_findradius (void)
 			eorg[j] =
 				org[j] - (ent->v.origin[j] +
 						  (ent->v.mins[j] + ent->v.maxs[j]) * 0.5);
-		if (Length (eorg) > rad)
+		if (VectorLength (eorg) > rad)
 			continue;
 
 		ent->v.chain = EDICT_TO_PROG (chain);
@@ -1413,7 +1412,7 @@ PF_aim (void)
 			end[j] = check->v.origin[j]
 				+ 0.5 * (check->v.mins[j] + check->v.maxs[j]);
 		VectorSubtract (end, start, dir);
-		VectorNormalize (dir);
+		VectorNormalizeFast (dir);
 		dist = DotProduct (dir, pr_global_struct->v_forward);
 		if (dist < bestdist)
 			continue;					// to far to turn
@@ -1429,7 +1428,7 @@ PF_aim (void)
 		dist = DotProduct (dir, pr_global_struct->v_forward);
 		VectorScale (pr_global_struct->v_forward, dist, end);
 		end[2] = dir[2];
-		VectorNormalize (end);
+		VectorNormalizeFast (end);
 		VectorCopy (end, G_VECTOR (OFS_RETURN));
 	} else {
 		VectorCopy (bestdir, G_VECTOR (OFS_RETURN));

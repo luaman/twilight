@@ -261,7 +261,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 			SV_Move (ent->v.origin, ent->v.mins, ent->v.maxs, end, false, ent);
 
 		if (trace.allsolid) {			// entity is trapped in another solid
-			VectorCopy (vec3_origin, ent->v.velocity);
+			VectorClear (ent->v.velocity);
 			return 3;
 		}
 
@@ -301,7 +301,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 
 		// cliped to another plane
 		if (numplanes >= MAX_CLIP_PLANES) {	// this shouldn't really happen
-			VectorCopy (vec3_origin, ent->v.velocity);
+			VectorClear (ent->v.velocity);
 			return 3;
 		}
 
@@ -327,7 +327,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 		} else {						// go along the crease
 			if (numplanes != 2) {
 //              Con_Printf ("clip velocity, numplanes == %i\n",numplanes);
-				VectorCopy (vec3_origin, ent->v.velocity);
+				VectorClear (ent->v.velocity);
 				return 7;
 			}
 			CrossProduct (planes[0], planes[1], dir);
@@ -340,7 +340,7 @@ SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 // to avoid tiny occilations in sloping corners
 //
 		if (DotProduct (ent->v.velocity, primal_velocity) <= 0) {
-			VectorCopy (vec3_origin, ent->v.velocity);
+			VectorClear (ent->v.velocity);
 			return blocked;
 		}
 	}
@@ -883,7 +883,7 @@ SV_TryUnstick (edict_t *ent, vec3_t oldvel)
 	trace_t     steptrace;
 
 	VectorCopy (ent->v.origin, oldorg);
-	VectorCopy (vec3_origin, dir);
+	VectorClear (dir);
 
 	for (i = 0; i < 8; i++) {
 // try pushing a little in an axial direction
@@ -939,7 +939,7 @@ SV_TryUnstick (edict_t *ent, vec3_t oldvel)
 		VectorCopy (oldorg, ent->v.origin);
 	}
 
-	VectorCopy (vec3_origin, ent->v.velocity);
+	VectorClear (ent->v.velocity);
 	return 7;							// still not moving
 }
 
@@ -995,8 +995,8 @@ SV_WalkMove (edict_t *ent)
 //
 	VectorCopy (oldorg, ent->v.origin);	// back to start pos
 
-	VectorCopy (vec3_origin, upmove);
-	VectorCopy (vec3_origin, downmove);
+	VectorClear (upmove);
+	VectorClear (downmove);
 	upmove[2] = STEPSIZE;
 	downmove[2] = -STEPSIZE + oldvel[2] * host_frametime;
 
@@ -1333,8 +1333,8 @@ SV_Physics_Toss (edict_t *ent)
 		{
 			ent->v.flags = (int) ent->v.flags | FL_ONGROUND;
 			ent->v.groundentity = EDICT_TO_PROG (trace.ent);
-			VectorCopy (vec3_origin, ent->v.velocity);
-			VectorCopy (vec3_origin, ent->v.avelocity);
+			VectorClear (ent->v.velocity);
+			VectorClear (ent->v.avelocity);
 		}
 	}
 // check for in water
@@ -1602,8 +1602,8 @@ SV_Trace_Toss (edict_t *ent, edict_t *ignore)
 //          p->die = 256;
 //          p->color = 15;
 //          p->type = pt_static;
-//          VectorCopy (vec3_origin, p->vel);
-//          VectorCopy (tent->v.origin, p->org);
+//          VectorClear (p->vel);
+//          VectorClear (p->org);
 //      }
 
 		if (trace.ent)
