@@ -80,10 +80,12 @@ int gl_tmus = 1;
 void
 GLInfo_CheckDriverQuirks (void)
 {
+	/*
 	if (strstr (gl_vendor, "NVIDIA")) {		// nVidia drivers.
 		DynGL_BadExtension ("GL_EXT_compiled_vertex_array");
 		Com_Printf ("Disabling GL_EXT_compiled_vertex_array due to buggy nVidia driver.\n");
 	}
+	*/
 
 	if (!strcmp (gl_vendor, "ATI Technologies Inc."))	// ATI drivers.
 	{

@@ -390,9 +390,12 @@ R_DrawAliasModel ()
 	else
 		R_DrawSubSkin (paliashdr, &skin->base_team[anim], NULL);
 
+	TWI_PostVDrawCVA ();
+
 	if (has_top || has_bottom || has_fb) {
 		qglEnable (GL_BLEND);
 		qglDepthMask (GL_FALSE);
+		TWI_PreVDraw (0, paliashdr->numverts);
 	}
 
 	if (has_top)
@@ -411,11 +414,10 @@ R_DrawAliasModel ()
 	}
 
 	if (has_top || has_bottom || has_fb) {
+		TWI_PostVDraw ();
 		qglDepthMask (GL_TRUE);
 		qglDisable (GL_BLEND);
 	}
-
-	TWI_PostVDrawCVA ();
 
 	qglPopMatrix ();
 }
@@ -445,7 +447,7 @@ R_DrawAliasModelNV ()
 
 	qglMultTransposeMatrixf ((GLfloat *) matrix);
 
-	TWI_PreVDraw (0, paliashdr->numverts);
+	TWI_PreVDrawCVA (0, paliashdr->numverts);
 
 	if (has_fb) {
 		qglCombinerOutputNV (GL_COMBINER0_NV, GL_RGB, GL_SPARE0_NV, GL_SPARE1_NV, GL_DISCARD_NV, GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -485,7 +487,7 @@ R_DrawAliasModelNV ()
 		qglDisable (GL_BLEND);
 	}
 
-	TWI_PostVDraw ();
+	TWI_PostVDrawCVA ();
 
 	qglPopMatrix ();
 }

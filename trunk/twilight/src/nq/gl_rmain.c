@@ -751,8 +751,6 @@ R_Init (void)
 	Cmd_AddCommand ("timerefresh", &R_TimeRefresh_f);
 	Cmd_AddCommand ("pointfile", &R_ReadPointFile_f);
 
-	qglGenTextures(6, skyboxtexnums);
-
 	R_InitTextures ();
 	R_InitBubble ();
 	R_InitParticles ();
@@ -778,9 +776,6 @@ R_NewMap (void)
 		d_lightstylevalue[i] = 264;		// normal light value
 
 	R_ClearParticles ();
-
-	// some Cvars need resetting on map change
-	Cvar_Set (r_skyname, "");
 
 	// Parse map entities
 	CL_ParseEntityLump (cl.worldmodel->brush->entities);

@@ -45,6 +45,7 @@ extern int GLT_Load_image(const char *identifier, image_t *img, Uint32 *palette,
 extern int GLT_Load_Pixmap (const char *name, const char *data);
 extern int GLT_Load_qpic (qpic_t *pic);
 extern qboolean GLT_Delete (GLuint texnum);
+extern qboolean GL_Upload32 (Uint32 *data, int width, int height, int flags);
 
 extern int		glt_solid_format;
 extern int		glt_alpha_format;
@@ -56,6 +57,7 @@ extern memzone_t *glt_zone;
 #define TEX_ALPHA		1
 #define TEX_MIPMAP		2
 #define TEX_FORCE		4
+#define TEX_REPLACE		8
 
 #endif // __gl_textures_h
 

@@ -716,8 +716,6 @@ R_Init (void)
 
 	qglGenTextures(1, &netgraphtexture);
 
-	qglGenTextures(6, skyboxtexnums);
-
 	R_InitTextures ();
 	R_InitBubble ();
 	R_InitParticles ();
@@ -749,9 +747,6 @@ R_NewMap (void)
 	memset (&cl_player_entities, 0, sizeof(cl_player_entities));
 	memset (&cl_static_entities, 0, sizeof(cl_static_entities));
 	cl_num_static_entities = 0;
-
-	// some Cvars need resetting on map change
-	Cvar_Set (r_skyname, "");
 
 	// Parse map entities
 	CL_ParseEntityLump (cl.worldmodel->brush->entities);

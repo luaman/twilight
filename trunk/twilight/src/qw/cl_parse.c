@@ -45,6 +45,7 @@ static const char rcsid[] =
 #include "sound.h"
 #include "strlib.h"
 #include "sys.h"
+#include "sky.h"
 #include "teamplay.h"
 
 char       *svc_strings[] = {
