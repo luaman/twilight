@@ -62,6 +62,7 @@ cvar_t		*cl_nolerp;
 
 cvar_t		*cl_sbar;
 cvar_t		*cl_hudswap;
+cvar_t		*cl_maxfps;
 
 cvar_t		*cl_mapname;
 
@@ -716,6 +717,7 @@ CL_Init_Cvars (void)
 
 	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, &CL_SbarCallback);
 	cl_hudswap = Cvar_Get ("cl_hudswap", "0", CVAR_ARCHIVE, NULL);
+	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
 
 	cl_mapname = Cvar_Get ("cl_mapname", "", CVAR_ROM, NULL);
 }
