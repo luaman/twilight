@@ -4,3 +4,4 @@ Makefile.in
 *.i
 *.s
 .DS_Store
+.sconsign
