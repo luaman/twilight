@@ -5,12 +5,8 @@ These things should be done before first public release:
 
   - Global config file support
   - Website updates
-    - MySQL-based news [CoderJoe]
-    - Important non-project files
     - Releases page
     - Credits page
-    ? A few links to important sites
-    - Overview update to reflect changing project dynamics
     - CVS walktrhoughs
     - Anything else we can get done by release date
   - Packaging scripts
@@ -19,7 +15,6 @@ These things should be done before first public release:
     ? Something for win32?
   - Hardware gamma/brightness support [EvilTypeGuy]
   - Working mousewheel support [EvilTypeGuy]
-  - Fix QW sky
 
 
 Would be nice but is not strictly needed, in importance order:

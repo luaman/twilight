@@ -243,7 +243,7 @@ EmitWaterPolys (msurface_t *fa)
 
 
 
-
+#include <math.h>
 /*
 =============
 EmitSkyPolys
@@ -265,7 +265,7 @@ EmitSkyPolys (msurface_t *fa)
 			VectorSubtract (v, r_origin, dir);
 			dir[2] *= 3;				// flatten the sphere
 
-			length = 6 * 63 * VectorLength(dir);
+			length = 6 * 63 / VectorLength(dir);
 
 			dir[0] *= length;
 			dir[1] *= length;
