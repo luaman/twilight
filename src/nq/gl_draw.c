@@ -514,6 +514,9 @@ Draw_Character (int x, int y, int num)
 	glEnd ();
 }
 
+// LordHavoc: FIXME: optimize!!  great framerate gains from printing them as a
+// series of QUADS (and updating all the Draw_Char calls used for printing the
+// console and such to use this instead)
 /*
 ================
 Draw_String
@@ -524,6 +527,22 @@ Draw_String (int x, int y, char *str)
 {
 	while (*str) {
 		Draw_Character (x, y, *str);
+		str++;
+		x += 8;
+	}
+}
+
+// LordHavoc: someone used this and it did not exist yet, therefore I wrote it
+/*
+================
+Draw_Alt_String
+================
+*/
+void
+Draw_Alt_String (int x, int y, char *str)
+{
+	while (*str) {
+		Draw_Character (x, y, *str | 0x80);
 		str++;
 		x += 8;
 	}
