@@ -362,8 +362,9 @@ DynGL_GetFunctions (void (*errfunc)(const char *fmt, ...))
 		if (!(q##name = SDL_GL_GetProcAddress (#name)))						\
 		{																	\
 			DynGL_BadExtension (extension);									\
-			errfunc ("DynGL_GetFunctions: Missing %s, needed for %s\n",		\
-					#name, extension);										\
+				if (errfunc != NULL)										\
+					errfunc ("DynGL_GetFunctions: Missing %s, "				\
+							"needed for %s\n", #name, extension);			\
 		}
 #define DYNGL_WANT(ret, name, args, alt)
 #include "dglfuncs.h"
