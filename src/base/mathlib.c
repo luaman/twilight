@@ -370,9 +370,6 @@ Math_Init (void)
 	Q_srand (time(NULL));
 }
 
-/*-----------------------------------------------------------------*/
-
-#define DEG2RAD( a ) ( a * M_PI ) / 180.0F
 
 void
 ProjectPointOnPlane (vec3_t dst, const vec3_t p, const vec3_t normal)
