@@ -32,6 +32,7 @@
 #include "SDL_endian.h"
 #include "qtypes.h"
 #include "zone.h"
+#include "cvar.h"
 
 #define MAX_QPATH       64              // max length of a quake game pathname
 #define MAX_OSPATH      128             // max length of a filesystem pathname
@@ -215,6 +216,8 @@ void Com_EndRedirect (void);
 extern struct cvar_s *registered;
 
 int	build_number (void);
+
+void ExpandPath(cvar_t *var);
 
 #endif // __COMMON_H
 
