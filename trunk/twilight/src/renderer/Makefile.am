@@ -8,10 +8,15 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 
 lib_LIBRARIES=libtwilight_renderer.a
 
+noinst_HEADERS= \
+	dynogl.h opengl.h opengl_ext.h oglfuncs.h \
+	glquake.h transform.h \
+	tga.h pcx.h
+
 libtwilight_renderer_a_SOURCES= \
-	dynogl.c dynogl.h opengl.h opengl_ext.h oglfuncs.h \
+	dynogl.c \
 	noise.c noise_textures.c \
-	glquake.h transform.c transform.h \
+	transform.c \
 	wad.c \
 	tga.c pcx.c
 

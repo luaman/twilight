@@ -45,22 +45,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-typedef struct {
-	char        manufacturer;
-	char        version;
-	char        encoding;
-	char        bits_per_pixel;
-	unsigned short xmin, ymin, xmax, ymax;
-	unsigned short hres, vres;
-	unsigned char palette[48];
-	char        reserved;
-	char        color_planes;
-	unsigned short bytes_per_line;
-	unsigned short palette_type;
-	char        filler[58];
-	unsigned char   data[0];					// unbounded
-} pcx_t;
-
 /*
 ============
 PCX_LoadBuffer
