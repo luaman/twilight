@@ -58,6 +58,8 @@ cvar_t *Cvar_Get (const char *name, const char *value, const int flags,
 void Cvar_Set (cvar_t *var, const char *value);
 void Cvar_Set_f (void);
 
+void Cvar_Slide (cvar_t *var, const float change);
+
 void Cvar_Show (cvar_t *var);
 qboolean Cvar_LegacyCmd (void);
 

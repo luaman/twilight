@@ -44,6 +44,8 @@ Cvar_Init (void)
 	cvars = NULL;
 
 	developer = Cvar_Get ("developer", "0", CVAR_NONE, NULL);
+
+	Cmd_AddCommand ("set", &Cvar_Set_f);
 }
 
 
@@ -163,6 +165,22 @@ Cvar_Set_f (void)
 		Cvar_Show (var);
 
 	return;
+}
+
+
+void
+Cvar_Slide (cvar_t *var, const float change)
+{
+	static char		buf[128];
+
+	var->value[0] += change;
+	Z_Free (var->string);
+	Q_snprintf (buf, 128, "%f", var->value[0]);
+	var->string = Z_Malloc (Q_strlen (buf) + 1);
+	Q_strcpy (var->string, buf);
+
+	if (var->callback)
+		var->callback (var);
 }
 
 
