@@ -58,9 +58,5 @@ extern struct cvar_s *scr_viewsize;
 extern int  scr_copytop;
 extern int  scr_copyeverything;
 
-extern qboolean scr_skipupdate;
-
-qboolean    block_drawing;
-
 #endif // __SCREEN_H
 

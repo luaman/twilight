@@ -83,6 +83,7 @@ typedef struct texture_s {
 	char        name[16];
 	unsigned    width, height;
 	int         gl_texturenum;
+	int			fb_texturenum;			// index of fullbright mask or 0
 	struct msurface_s *texturechain;	// for gl_texsort drawing
 	int         anim_total;				// total tenths in sequence ( 0 = no)
 	int         anim_min, anim_max;		// time for this frame min <=time< max
@@ -118,6 +119,7 @@ typedef struct {
 typedef struct glpoly_s {
 	struct glpoly_s *next;
 	struct glpoly_s *chain;
+	struct glpoly_s	*fb_chain;
 	int         numverts;
 	int         flags;					// for SURF_UNDERWATER
 	float       verts[4][VERTEXSIZE];	// variable sized (xyz s1t1 s2t2)
@@ -304,6 +306,7 @@ typedef struct {
 	int         posedata;				// numposes*poseverts trivert_t
 	int         commands;				// gl command list with embedded s/t
 	int         gl_texturenum[MAX_SKINS][4];
+	int			fb_texturenum[MAX_SKINS][4];// index of fullbright mask or 0
 	maliasframedesc_t frames[1];		// variable sized
 } aliashdr_t;
 
@@ -337,7 +340,7 @@ typedef enum { mod_brush, mod_sprite, mod_alias } modtype_t;
 #define FLAG_DOUBLESIZE 4				// double sized model
 #define FLAG_NO_IM_ANIM 8				// do not interpolate frames (1 frame only)
 #define FLAG_NO_IM_FORM 16				// do not interpolate angles or position (weapons)
-#define FLAG_ALWAYSLIT	32				// always has some light
+#define FLAG_PLAYER		32				// always has some light
 
 typedef struct model_s {
 	char        name[MAX_QPATH];
@@ -432,6 +435,8 @@ void        Mod_TouchModel (char *name);
 
 mleaf_t    *Mod_PointInLeaf (float *p, model_t *model);
 byte       *Mod_LeafPVS (mleaf_t *leaf, model_t *model);
+
+qboolean   Img_HasFullbrights (byte *pixels, int size);
 
 #endif // __MODEL__
 

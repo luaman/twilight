@@ -342,6 +342,18 @@ Mod_ForName (char *name, qboolean crash)
 	return Mod_LoadModel (mod, crash);
 }
 
+qboolean 
+Img_HasFullbrights (byte *pixels, int size)
+{
+    int i;
+
+    for (i = 0; i < size; i++)
+        if (pixels[i] >= 224)
+            return true;
+
+    return false;
+}
+
 
 /*
 ===============================================================================
@@ -419,9 +431,18 @@ Mod_LoadTextures (lump_t *l)
 			R_InitSky (tx);
 		else {
 			texture_mode = GL_LINEAR_MIPMAP_NEAREST;	// _LINEAR;
-			tx->gl_texturenum =
-				GL_LoadTexture (mt->name, tx->width, tx->height,
-								(byte *) (tx + 1), true, false);
+
+			if (mt->name[0] == '*')	// we don't brighten turb textures
+				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false);
+			else {
+				tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false);
+
+				if (Img_HasFullbrights((byte *)(tx+1), tx->width*tx->height)) {
+					tx->fb_texturenum = GL_LoadTexture (va("@fb_%s", mt->name), tx->width, tx->height,
+									(byte *) (tx + 1), true, 2);
+				}
+			}
+
 			texture_mode = GL_LINEAR;
 		}
 	}
@@ -1482,6 +1503,16 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 				GL_LoadTexture (name, pheader->skinwidth,
 								pheader->skinheight, (byte *) (pskintype + 1),
 								true, false);
+
+			if (Img_HasFullbrights((byte *)(pskintype + 1),	pheader->skinwidth*pheader->skinheight))
+				pheader->fb_texturenum[i][0] = pheader->fb_texturenum[i][1] =
+				pheader->fb_texturenum[i][2] = pheader->fb_texturenum[i][3] =
+					GL_LoadTexture (va("@fb_%s", name), pheader->skinwidth, 
+					pheader->skinheight, (byte *)(pskintype + 1), true, 2);
+			else
+				pheader->fb_texturenum[i][0] = pheader->fb_texturenum[i][1] =
+				pheader->fb_texturenum[i][2] = pheader->fb_texturenum[i][3] = 0;
+
 			pskintype = (daliasskintype_t *) ((byte *) (pskintype + 1) + s);
 		} else {
 			// animating skin group.  yuck.
@@ -1501,6 +1532,14 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 					GL_LoadTexture (name, pheader->skinwidth,
 									pheader->skinheight, (byte *) (pskintype),
 									true, false);
+
+				if (Img_HasFullbrights((byte *)(pskintype),	pheader->skinwidth*pheader->skinheight))
+					pheader->fb_texturenum[i][j&3] =
+					GL_LoadTexture (va("@fb_%s", name), pheader->skinwidth, 
+					pheader->skinheight, (byte *)(pskintype), true, 2);
+				else
+					pheader->fb_texturenum[i][j&3] = 0;
+
 				pskintype = (daliasskintype_t *) ((byte *) (pskintype) + s);
 			}
 			k = j;
@@ -1515,6 +1554,67 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 
 
 //=========================================================================
+typedef struct
+{
+	char	*name;
+	int		len;
+	int		flags;
+} mflags_t;
+
+mflags_t modelflags[] =
+{
+	// Regular Quake
+	{ "progs/flame.mdl", 11, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/bolt.mdl", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/laser.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/gib", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/missile.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/grenade.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/s_spike.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/zom_gib.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/player.mdl", 0, FLAG_PLAYER },
+
+	// keys and runes do not cast shadows
+	{ "progs/w_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/m_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/b_s_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/w_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/m_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/b_g_key.mdl", 0, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+	{ "progs/end.mdl", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
+
+	// Common
+	{ "progs/v_", 8, FLAG_NOSHADOW|FLAG_NO_IM_FORM },
+	{ "progs/eyes.mdl", 0, FLAG_DOUBLESIZE|FLAG_NO_IM_ANIM },
+	{ "progs/armor.mdl", 0, FLAG_NO_IM_ANIM },
+	{ "progs/g_", 8, FLAG_NO_IM_ANIM },
+
+	// end of list
+	{ NULL }
+};
+
+static int nummflags = sizeof(modelflags) / sizeof(modelflags[0]) - 1;
+
+int
+Mod_FindModelFlags(char *name)
+{
+	int i;
+
+	for (i = 0; i < nummflags; i++)
+	{
+		if (modelflags[i].len > 0) {
+			if (!Q_strncmp(name, modelflags[i].name, modelflags[i].len))
+				return modelflags[i].flags;
+		}
+		else {
+			if (!Q_strcmp(name, modelflags[i].name))
+				return modelflags[i].flags;
+		}
+	}
+	
+	return 0;
+}
 
 /*
 =================
@@ -1570,50 +1670,8 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		Sys_Error ("%s has wrong version number (%i should be %i)",
 				   mod->name, version, ALIAS_VERSION);
 
-	mod->modflags = 0;
+	mod->modflags = Mod_FindModelFlags(mod->name);
 
-	if (!Q_strcmp(mod->name, "progs/player.mdl")) {
-		mod->modflags |= FLAG_ALWAYSLIT;
-	}
-	else if (!Q_strncmp(mod->name, "progs/flame.mdl", 11)) {
-		mod->modflags |= FLAG_FULLBRIGHT;
-		mod->modflags |= FLAG_NOSHADOW;
-	}
-	else if (!Q_strncmp(mod->name, "progs/bolt.mdl", 10) ||
-		!Q_strcmp(mod->name, "progs/laser.mdl") ||
-		!Q_strcmp (mod->name, "progs/lavaball.mdl")) {
-		mod->modflags |= FLAG_FULLBRIGHT;
-		mod->modflags |= FLAG_NOSHADOW;
-	}
-	else if (!Q_strcmp(mod->name, "progs/missile.mdl") ||
-		!Q_strcmp(mod->name, "progs/grenade.mdl") ||
-		!Q_strcmp(mod->name, "progs/spike.mdl") ||
-		!Q_strcmp(mod->name, "progs/s_spike.mdl") ||
-		!Q_strcmp(mod->name, "progs/zom_gib") ||
-		!Q_strncmp(mod->name, "progs/gib", 9) ||
-		!Q_strncmp(mod->name, "progs/h_", 8))
-	{
-		mod->modflags |= FLAG_NOSHADOW;
-	}
-	else if (!Q_strncmp(mod->name, "progs/v_", 8)) 
-	{
-		mod->modflags |= FLAG_NOSHADOW;
-	}
-	else if (!Q_strcmp(mod->name, "progs/eyes.mdl")) {
-		mod->modflags |= FLAG_DOUBLESIZE;
-	}
-	// keys and runes are fullbright and do not cast shadows
-	else if (
-		!Q_strcmp(mod->name, "progs/w_s_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/m_s_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/b_s_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/w_g_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/m_g_key.mdl") ||
-		!Q_strcmp(mod->name, "progs/b_g_key.mdl") ||
-		!Q_strncmp(mod->name, "progs/end", 9)) {
-		mod->modflags |= FLAG_FULLBRIGHT;
-		mod->modflags |= FLAG_NOSHADOW;
-	}
 
 //
 // allocate space for a working header, plus all the data except the frames,

@@ -93,7 +93,6 @@ typedef struct {
 	unsigned short crc;
 } gltexture_t;
 
-#define	MAX_GLTEXTURES	1024
 gltexture_t gltextures[MAX_GLTEXTURES];
 int         numgltextures;
 
@@ -331,40 +330,12 @@ Draw_Init (void)
 	for (x = 0; x < Q_strlen (ver); x++)
 		Draw_CharToConback (ver[x], dest + (x << 3));
 
-#if 0
-	conback->width = vid.conwidth;
-	conback->height = vid.conheight;
-
-	// scale console to vid size
-	dest = ncdata = Hunk_AllocName (vid.conwidth * vid.conheight, "conback");
-
-	for (y = 0; y < vid.conheight; y++, dest += vid.conwidth) {
-		src = cb->data + cb->width * (y * cb->height / vid.conheight);
-		if (vid.conwidth == cb->width)
-			memcpy (dest, src, vid.conwidth);
-		else {
-			f = 0;
-			fstep = cb->width * 0x10000 / vid.conwidth;
-			for (x = 0; x < vid.conwidth; x += 4) {
-				dest[x] = src[f >> 16];
-				f += fstep;
-				dest[x + 1] = src[f >> 16];
-				f += fstep;
-				dest[x + 2] = src[f >> 16];
-				f += fstep;
-				dest[x + 3] = src[f >> 16];
-				f += fstep;
-			}
-		}
-	}
-#else
 	conback->width = cb->width;
 	conback->height = cb->height;
 	ncdata = cb->data;
-#endif
 
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	gl = (glpic_t *) conback->data;
 	gl->texnum =
@@ -741,7 +712,7 @@ void
 Draw_ConsoleBackground (int lines)
 {
 	char        ver[80];
-	int         x, i;
+	int         x;
 	int         y;
 
 	y = (vid.height * 3) >> 2;
@@ -752,14 +723,13 @@ Draw_ConsoleBackground (int lines)
 					   (float) (1.2 * lines) / y);
 
 	// hack the version number directly into the pic
-//  y = lines-186;
 	y = lines - 14;
 	if (!cls.download) {
 		snprintf (ver, sizeof (ver), "Twilight %s QuakeWorld", VERSION);
 		x = vid.conwidth - (Q_strlen (ver) * 8 + 11) -
 			(vid.conwidth * 8 / 320) * 7;
-		for (i = 0; i < Q_strlen (ver); i++)
-			Draw_Character (x + i * 8, y, ver[i] | 0x80);
+
+		Draw_Alt_String (x, y, ver);
 	}
 }
 
@@ -1148,17 +1118,30 @@ GL_Upload8 (byte * data, int width, int height, qboolean mipmap, qboolean alpha)
 	int         i, s;
 	qboolean    noalpha;
 	int         p;
+	unsigned	*table = d_8to24table;
 
 	s = width * height;
-	// if there are no transparent pixels, make it a 3 component
-	// texture even if it was specified as otherwise
-	if (alpha) {
+
+	if (alpha == 2)
+	{
+	// this is a fullbright mask, so make all non-fullbright
+	// colors transparent
+		for (i=0 ; i<s ; i++)
+		{
+			p = data[i];
+			if (p < 224)
+				trans[i] = table[p] & 0x00FFFFFF; // transparent 
+			else
+				trans[i] = table[p];	// fullbright
+		}
+	}
+	else if (alpha) {
 		noalpha = true;
 		for (i = 0; i < s; i++) {
 			p = data[i];
 			if (p == 255)
 				noalpha = false;
-			trans[i] = d_8to24table[p];
+			trans[i] = table[p];
 		}
 
 		if (alpha && noalpha)
@@ -1167,10 +1150,10 @@ GL_Upload8 (byte * data, int width, int height, qboolean mipmap, qboolean alpha)
 		if (s & 3)
 			Sys_Error ("GL_Upload8: s&3");
 		for (i = 0; i < s; i += 4) {
-			trans[i] = d_8to24table[data[i]];
-			trans[i + 1] = d_8to24table[data[i + 1]];
-			trans[i + 2] = d_8to24table[data[i + 2]];
-			trans[i + 3] = d_8to24table[data[i + 3]];
+			trans[i] = table[data[i]];
+			trans[i + 1] = table[data[i + 1]];
+			trans[i + 2] = table[data[i + 2]];
+			trans[i + 3] = table[data[i + 3]];
 		}
 	}
 
@@ -1184,7 +1167,7 @@ GL_LoadTexture
 */
 int
 GL_LoadTexture (char *identifier, int width, int height, byte * data,
-				qboolean mipmap, qboolean alpha)
+				qboolean mipmap, int alpha)
 {
 	int         i;
 	gltexture_t *glt;

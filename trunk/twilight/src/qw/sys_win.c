@@ -34,15 +34,25 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
-#include "winquake.h"
-#include "errno.h"
-#include "fcntl.h"
-#include <limits.h>
-#ifdef WIN32
 #include <io.h>
 #include <direct.h>
-#endif
+#include <limits.h>
+#include <errno.h>
+#include <fcntl.h>
+
+#include "quakedef.h"
+#include "winquake.h"
+
+// the host system specifies the base of the directory tree, the
+// command line parms passed to the program, and the amount of memory
+// available for the program to use
+
+typedef struct {
+	int			argc;
+	char		**argv;
+	void		*membase;
+	int			memsize;
+} quakeparms_t;
 
 #define MINIMUM_WIN_MEMORY	0x0c00000
 #define MAXIMUM_WIN_MEMORY	0x1000000
@@ -55,14 +65,6 @@ qboolean    ActiveApp = 1, Minimized = 0;	// LordHavoc: FIXME: set these
 
 											// based on the real situation
 
-//HWND  hwnd_dialog;        // startup dialog box
-
-#if 0	/* These apparently aren't used anymore? */
-static double pfreq;
-static double curtime = 0.0;
-static double lastcurtime = 0.0;
-static int  lowshift;
-#endif
 static HANDLE hinput, houtput;
 
 HANDLE      qwclsemaphore;
@@ -73,6 +75,9 @@ void        Sys_InitFloatTime (void);
 
 void        Sys_PopFPCW (void);
 void        Sys_PushFPCW_SetHigh (void);
+
+int			sys_memsize = 0;
+void	   *sys_membase = NULL;
 
 void
 Sys_DebugLog (char *file, char *fmt, ...)
@@ -597,48 +602,36 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	parms.argc = com_argc;
 	parms.argv = com_argv;
 
-	/* 
-	   hwnd_dialog = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1),
-	   NULL, NULL);
-
-	   if (hwnd_dialog) { if (GetWindowRect (hwnd_dialog, &rect)) { if
-	   (rect.left > (rect.top * 2)) { SetWindowPos (hwnd_dialog, 0, (rect.left
-	   / 2) - ((rect.right - rect.left) / 2), rect.top, 0, 0, SWP_NOZORDER |
-	   SWP_NOSIZE); } }
-
-	   ShowWindow (hwnd_dialog, SW_SHOWDEFAULT); UpdateWindow (hwnd_dialog);
-	   SetForegroundWindow (hwnd_dialog); } */
-
 // take the greater of all the available memory or half the total memory,
 // but at least 8 Mb and no more than 16 Mb, unless they explicitly
 // request otherwise
-	parms.memsize = lpBuffer.dwAvailPhys;
+	sys_memsize = lpBuffer.dwAvailPhys;
 
-	if (parms.memsize < MINIMUM_WIN_MEMORY)
-		parms.memsize = MINIMUM_WIN_MEMORY;
+	if (sys_memsize < MINIMUM_WIN_MEMORY)
+		sys_memsize = MINIMUM_WIN_MEMORY;
 
-	if (parms.memsize < (lpBuffer.dwTotalPhys >> 1))
-		parms.memsize = lpBuffer.dwTotalPhys >> 1;
+	if (sys_memsize < (lpBuffer.dwTotalPhys >> 1))
+		sys_memsize = lpBuffer.dwTotalPhys >> 1;
 
-	if (parms.memsize > MAXIMUM_WIN_MEMORY)
-		parms.memsize = MAXIMUM_WIN_MEMORY;
+	if (sys_memsize > MAXIMUM_WIN_MEMORY)
+		sys_memsize = MAXIMUM_WIN_MEMORY;
 
 	if (COM_CheckParm ("-heapsize")) {
 		t = COM_CheckParm ("-heapsize") + 1;
 
 		if (t < com_argc)
-			parms.memsize = Q_atoi (com_argv[t]) * 1024;
+			sys_memsize = Q_atoi (com_argv[t]) * 1024;
 	}
 
-	parms.membase = malloc (parms.memsize);
+	sys_membase = malloc (sys_memsize);
 
-	if (!parms.membase)
+	if (!sys_membase)
 		Sys_Error ("Not enough memory free; check disk space\n");
 
 	tevent = CreateEvent (NULL, FALSE, FALSE, NULL);
 
 	if (!tevent)
-		Sys_Error ("Couldn't create event");
+		Sys_Error ("Couldn't create event\n");
 
 	Sys_Init ();
 
@@ -646,18 +639,16 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	S_BlockSound ();
 
 	Sys_Printf ("Host_Init\n");
-	Host_Init (&parms);
+	Host_Init ();
 
 	oldtime = Sys_DoubleTime ();
 
 	/* main window message loop */
 	while (1) {
-		scr_skipupdate = 0;
 		// yield the CPU for a little while when paused, minimized, or not the
 		// focus
-		if ((cl.paused && !ActiveApp) || Minimized || block_drawing) {
+		if ((cl.paused && !ActiveApp) || Minimized) {
 			SleepUntilInput (PAUSE_SLEEP);
-			scr_skipupdate = 1;			// no point in bothering to draw
 		} else if (!ActiveApp)
 			SleepUntilInput (NOT_FOCUS_SLEEP);
 

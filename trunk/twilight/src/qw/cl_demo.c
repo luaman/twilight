@@ -163,7 +163,6 @@ qboolean
 CL_GetDemoMessage (void)
 {
 	int         r, i, j;
-	float       f;
 	float       demotime;
 	byte        c;
 	usercmd_t  *pcmd;
@@ -232,9 +231,11 @@ CL_GetDemoMessage (void)
 			cl.frames[i].senttime = demotime;
 			cl.frames[i].receivedtime = -1;	// we haven't gotten a reply yet
 			cls.netchan.outgoing_sequence++;
+
+			r = fread (cl.viewangles, 12, 1, cls.demofile);
+
 			for (i = 0; i < 3; i++) {
-				r = fread (&f, 4, 1, cls.demofile);
-				cl.viewangles[i] = LittleFloat (f);
+				cl.viewangles[i] = LittleFloat (cl.viewangles[i]);
 			}
 			break;
 
