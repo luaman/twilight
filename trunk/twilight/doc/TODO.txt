@@ -3,8 +3,6 @@ Project Twilight todo list
 
 Stuff /required/ for 0.2.0:
   - Menu: (Listed in order of priority.)
-    * Find a clean way to include a text file in the binary so that we
-      still have a basic menu.
     * Get the renderer side of the menu code to handle menus larger then
       the screen.
     * Get the graphics options cleaned up. (Add grey tweaking support!)
