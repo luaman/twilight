@@ -17,6 +17,7 @@ lib_LIBRARIES=libtwilight_renderer.a
 
 libtwilight_renderer_a_SOURCES= \
 	dyngl.c dyngl.h dglfuncs.h \
+	gl_arrays.c gl_arrays.h gl_info.c gl_info.h \
 	gl_textures.c gl_textures.h \
 	noise.c noise_textures.c \
 	transform.c transform.h light.h \

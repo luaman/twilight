@@ -34,6 +34,9 @@
 #include "transform.h"
 #include "wad.h"
 #include "vid.h"
+#include "gl_info.h"
+#include "gl_arrays.h"
+#include "quakedef.h"
 
 
 #define	MAX_GLTEXTURES	1024
@@ -268,114 +271,6 @@ extern int gl_wireframe;
 
 extern struct cvar_s *gl_max_size;
 extern struct cvar_s *gl_playermip;
-
-extern const char *gl_vendor;
-extern const char *gl_renderer;
-extern const char *gl_version;
-extern const char *gl_extensions;
-
-extern qboolean gl_cva;
-extern qboolean gl_mtex;
-extern qboolean gl_mtexcombine;
-
-// Vertex array stuff.
-
-extern texcoord_t	*tc0_array_p;
-extern texcoord_t	*tc1_array_p;
-extern vertex_t		*v_array_p;
-extern colorf_t		*cf_array_p;
-extern colorub_t	*cub_array_p;
-
-#define tc_array_v(x) tc0_array_p[x].v
-#define tc_array(x,y) tc0_array_p[x].v[y]
-#define tc0_array_v(x) tc0_array_p[x].v
-#define tc0_array(x,y) tc0_array_p[x].v[y]
-#define tc1_array_v(x) tc1_array_p[x].v
-#define tc1_array(x,y) tc1_array_p[x].v[y]
-#define v_array_v(x) v_array_p[x].v
-#define v_array(x,y) v_array_p[x].v[y]
-#define c_array_v(x) cub_array_p[x].v
-#define c_array(x,y) cub_array_p[x].v[y]
-#define cub_array_v(x) cub_array_p[x].v
-#define cub_array(x,y) cub_array_p[x].v[y]
-#define cf_array_v(x) cf_array_p[x].v
-#define cf_array(x,y) cf_array_p[x].v[y]
-
-extern GLuint *vindices;
-
-extern GLint	v_index, i_index;
-extern qboolean	va_locked;
-extern GLint	MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
-extern memzone_t *vzone;
-
-extern float_int_t *FtoUB_tmp;
-
-extern void inline
-TWI_FtoUBMod (GLfloat *in, GLubyte *out, vec4_t *mod, int num)
-{
-	int		i;
-
-	// shift float to have 8bit fraction at base of number
-	for (i = 0; i < num; i += 4) {
-		FtoUB_tmp[i    ].f = (in[i    ] * (*mod)[0]) + 32768.0f;
-		FtoUB_tmp[i + 1].f = (in[i + 1] * (*mod)[1]) + 32768.0f;
-		FtoUB_tmp[i + 2].f = (in[i + 2] * (*mod)[2]) + 32768.0f;
-		FtoUB_tmp[i + 3].f = (in[i + 3] * (*mod)[3]) + 32768.0f;
-	}
-
-	// then read as integer and kill float bits...
-	for (i = 0; i < num; i += 4) {
-		out[i    ] = (Uint8) min(FtoUB_tmp[i    ].i & 0x7FFFFF, 255);
-		out[i + 1] = (Uint8) min(FtoUB_tmp[i + 1].i & 0x7FFFFF, 255);
-		out[i + 2] = (Uint8) min(FtoUB_tmp[i + 2].i & 0x7FFFFF, 255);
-		out[i + 3] = (Uint8) min(FtoUB_tmp[i + 3].i & 0x7FFFFF, 255);
-	}
-}
-
-extern void inline
-TWI_FtoUB (GLfloat *in, GLubyte *out, int num)
-{
-	int		i;
-
-	// shift float to have 8bit fraction at base of number
-	for (i = 0; i < num; i += 4) {
-		FtoUB_tmp[i    ].f = in[i    ] + 32768.0f;
-		FtoUB_tmp[i + 1].f = in[i + 1] + 32768.0f;
-		FtoUB_tmp[i + 2].f = in[i + 2] + 32768.0f;
-		FtoUB_tmp[i + 3].f = in[i + 3] + 32768.0f;
-	}
-
-	// then read as integer and kill float bits...
-	for (i = 0; i < num; i += 4) {
-		out[i    ] = (Uint8) min(FtoUB_tmp[i    ].i & 0x7FFFFF, 255);
-		out[i + 1] = (Uint8) min(FtoUB_tmp[i + 1].i & 0x7FFFFF, 255);
-		out[i + 2] = (Uint8) min(FtoUB_tmp[i + 2].i & 0x7FFFFF, 255);
-		out[i + 3] = (Uint8) min(FtoUB_tmp[i + 3].i & 0x7FFFFF, 255);
-	}
-}
-
-extern void inline TWI_PreVDrawCVA (GLint min, GLint max)
-{
-	if (gl_cva) {
-		qglLockArraysEXT (min, max);
-		va_locked = 1;
-	}
-}
-
-extern void inline TWI_PostVDrawCVA ()
-{
-	if (va_locked)
-		qglUnlockArraysEXT ();
-}
-
-// These may be used for NV_VAR or something
-extern void inline TWI_PreVDraw (GLint min, GLint max)
-{
-}
-
-extern void inline TWI_PostVDraw ()
-{
-}
 
 /*
  * gl_warp.c

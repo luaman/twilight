@@ -309,7 +309,8 @@ typedef struct skin_s {
 	float		interval;
 	skin_sub_t	*raw;
 	skin_sub_t	*base;
-	skin_sub_t	*normal;
+	skin_sub_t	*base_team;
+	skin_sub_t	*top_bottom;
 	skin_sub_t	*fb;
 	skin_sub_t	*top;
 	skin_sub_t	*bottom;
