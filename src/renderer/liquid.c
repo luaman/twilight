@@ -51,49 +51,33 @@ R_Liquid_Init_Cvars ()
 	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
 }
 
-/*
-=============
-Does a water warp on the pre-fragmented glpoly_t chain
-=============
-*/
-static void
-EmitWaterPolys (model_t *mod, glpoly_t *p, qboolean arranged)
+void
+R_Draw_Liquid_Chain (model_t *mod, chain_head_t *chain, qboolean arranged)
 {
+	Uint		 i;
 	brushhdr_t	*brush = mod->brush;
+	glpoly_t	*p;
 
+	qglBindTexture (GL_TEXTURE_2D, chain->texture->gl_texturenum);
 	qglMatrixMode (GL_TEXTURE);
 	qglPushMatrix ();
 	qglTranslatef (Q_sin(ccl.time) * 0.4f, Q_cos(ccl.time) * 0.06f, 0);
 
-	for (; p; p = p->next)
-	{
-		if (!arranged) {
-			TWI_ChangeVDrawArrays (p->numverts, 0, B_Vert_r(brush, p->start),
-					B_TC_r(brush, 0, p->start), NULL, NULL, NULL);
-			qglDrawArrays (GL_TRIANGLE_FAN, 0, p->numverts);
-			TWI_ChangeVDrawArrays (p->numverts,0, NULL, NULL, NULL, NULL, NULL);
-		} else {
-			qglDrawArrays (GL_TRIANGLE_FAN, p->start, p->numverts);
-		}
-	}
-	qglPopMatrix ();
-	qglMatrixMode (GL_MODELVIEW);
-}
+	if (!arranged)
+		TWI_ChangeVDrawArraysALL (brush->numsets, 1, brush->verts, &brush->vbo[VBO_VERTS],
+				brush->tcoords[0], &brush->vbo[VBO_TC0],
+				brush->tcoords[1], &brush->vbo[VBO_TC1]);
 
-void
-R_Draw_Liquid_Chain (model_t *mod, chain_head_t *chain, qboolean arranged)
-{
-	Uint			 i;
-	qboolean		 bound;
-
-	bound = false;
 	for (i = 0; i < chain->n_items; i++) {
 		if (chain->items[i].visframe == vis_framecount) {
-			if (!bound) {
-				bound = true;
-				qglBindTexture (GL_TEXTURE_2D, chain->texture->gl_texturenum);
-			}
-			EmitWaterPolys (mod, chain->items[i].surf->polys, arranged);
+			for (p = chain->items[i].surf->polys; p; p = p->next)
+				qglDrawArrays (GL_TRIANGLE_FAN, p->start, p->numverts);
 		}
 	}
+
+	if (!arranged)
+		TWI_ChangeVDrawArraysALL (brush->numsets, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+
+	qglPopMatrix ();
+	qglMatrixMode (GL_MODELVIEW);
 }

@@ -65,25 +65,20 @@ Sky_Emit_Chain (model_t *mod, chain_head_t *chain, qboolean arranged)
 	brushhdr_t		*brush = mod->brush;
 	Uint			 j;
 
+	if (!arranged)
+		TWI_ChangeVDrawArraysALL (brush->numsets, 1, brush->verts, &brush->vbo[VBO_VERTS],
+				brush->tcoords[0], &brush->vbo[VBO_TC0],
+				brush->tcoords[1], &brush->vbo[VBO_TC1]);
 	c = chain->items;
 	for (j = 0; j < chain->n_items; j++) {
 		if (c[j].visframe == vis_framecount) {
 			s = c[j].surf;
 			for (p = s->polys; p; p = p->next) 
-			{
-				if (!arranged) {
-					TWI_ChangeVDrawArrays (p->numverts, 0,
-							B_Vert_r(brush, p->start), NULL, NULL, NULL, NULL);
-
-					qglDrawArrays (GL_POLYGON, 0, p->numverts);
-					TWI_ChangeVDrawArrays (p->numverts, 0,
-							NULL, NULL, NULL, NULL, NULL);
-				} else {
-					qglDrawArrays (GL_POLYGON, p->start, p->numverts);
-				}
-			}
+				qglDrawArrays (GL_POLYGON, p->start, p->numverts);
 		}
 	}
+	if (!arranged)
+		TWI_ChangeVDrawArraysALL (brush->numsets, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 }
 
 /*
@@ -202,8 +197,8 @@ Sky_Sphere_Draw (void)
 	qglPushMatrix ();
 	qglTranslatef(r.origin[0], r.origin[1], r.origin[2]);
 
-	TWI_ChangeVDrawArrays (Sky_Sphere_Numverts, 1, Sky_Sphere_Verts,
-			Sky_Sphere_Texcoords, Sky_Sphere_Texcoords, NULL, NULL);
+	TWI_ChangeVDrawArraysALL (Sky_Sphere_Numverts, 1, Sky_Sphere_Verts, NULL,
+			Sky_Sphere_Texcoords, NULL, Sky_Sphere_Texcoords, NULL);
 
 	qglMatrixMode (GL_TEXTURE);
 	qglPushMatrix ();
@@ -248,7 +243,7 @@ Sky_Sphere_Draw (void)
 	qglPopMatrix ();
 	qglMatrixMode (GL_MODELVIEW);
 
-	TWI_ChangeVDrawArrays(Sky_Sphere_Numverts, 0, NULL, NULL, NULL, NULL, NULL);
+	TWI_ChangeVDrawArraysALL (Sky_Sphere_Numverts, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
 	qglPopMatrix ();
 	qglDepthRange (0, 1);
@@ -355,7 +350,7 @@ Sky_Box_Calc (void)
 void
 Sky_Box_Draw (void)
 {
-	TWI_ChangeVDrawArrays (Sky_Box_Numverts, 1, Sky_Box_Verts,
+	TWI_ChangeVDrawArraysALL (Sky_Box_Numverts, 1, Sky_Box_Verts, NULL,
 			Sky_Box_Texcoords, NULL, NULL, NULL);
 
 	// Brute force method
@@ -394,7 +389,7 @@ Sky_Box_Draw (void)
 	qglDepthFunc (GL_LEQUAL);
 	qglDepthMask (GL_TRUE);
 
-	TWI_ChangeVDrawArrays (Sky_Box_Numverts, 0, NULL, NULL, NULL, NULL, NULL);
+	TWI_ChangeVDrawArraysALL (Sky_Box_Numverts, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 }
 
 

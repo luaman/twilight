@@ -235,6 +235,18 @@ typedef struct lightblock_s {
 	chain_head_t	*chains;
 } lightblock_t;
 
+#define VBO_VERTS		0
+#define VBO_TC0			1
+#define VBO_TC1			2
+typedef struct vbo_s {
+	GLuint	buffer;
+	GLint	elements;
+	GLint	size;
+	GLenum	type;
+	GLsizei	stride;
+	GLvoid	*ptr;
+} vbo_t;
+
 typedef struct brushhdr_s {
 	struct model_s	*main_model;		// Only set if we are a submodel.
 	Uint			firstmodelsurface, nummodelsurfaces;
@@ -258,10 +270,7 @@ typedef struct brushhdr_s {
 	Uint32			numsets;
 	vertex_t		*verts;
 	texcoord_t		*tcoords[2];
-#define VBO_VERTS		2
-#define VBO_TC0			0
-#define VBO_TC1			1
-	Uint			vbo_objects[3];
+	vbo_t			vbo[3];
 
 	Uint32			numedges;
 	medge_t			*edges;

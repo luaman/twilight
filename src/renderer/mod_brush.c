@@ -43,7 +43,6 @@ static const char rcsid[] =
 #include "dyngl.h"
 #include "gl_main.h"
 
-
 /*
 ===============================================================================
 
@@ -51,6 +50,7 @@ static const char rcsid[] =
 
 ===============================================================================
 */
+
 
 void
 Mod_LoadTextures (dlump_t *l, model_t *mod)
@@ -698,22 +698,49 @@ Mod_MakeChains (model_t *mod)
 
 	// Vertex Buffer Objects, VERY cool stuff!
 	if (gl_vbo) {
-		qglGenBuffersARB(3, bheader->vbo_objects);
+		GLuint		buf;
+		size_t		size;
+		Uint8		*cur = 0;
 
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, bheader->vbo_objects[VBO_VERTS]);
-		qglBufferDataARB(GL_ARRAY_BUFFER_ARB,
-				sizeof(vertex_t) * bheader->numsets, bheader->verts,
-				GL_STATIC_DRAW_ARB);
+		size = (sizeof(vertex_t) + sizeof(texcoord_t) + sizeof(texcoord_t)) * bheader->numsets;
 
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, bheader->vbo_objects[VBO_TC0]);
-		qglBufferDataARB(GL_ARRAY_BUFFER_ARB,
-				sizeof(texcoord_t) * bheader->numsets, bheader->tcoords[0],
-				GL_STATIC_DRAW_ARB);
+		qglGenBuffersARB(1, &buf);
 
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, bheader->vbo_objects[VBO_TC1]);
-		qglBufferDataARB(GL_ARRAY_BUFFER_ARB,
-				sizeof(texcoord_t) * bheader->numsets, bheader->tcoords[1],
-				GL_STATIC_DRAW_ARB);
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, buf);
+		qglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_STATIC_DRAW_ARB);
+
+		bheader->vbo[VBO_VERTS].buffer = buf;
+		bheader->vbo[VBO_VERTS].elements = 3;
+		bheader->vbo[VBO_VERTS].size = sizeof (vertex_t) * bheader->numsets;
+		bheader->vbo[VBO_VERTS].type = GL_FLOAT;
+		bheader->vbo[VBO_VERTS].stride = sizeof (vertex_t);
+		bheader->vbo[VBO_VERTS].ptr = cur;
+		cur += bheader->vbo[VBO_VERTS].size;
+		qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB,
+				(GLintptrARB) bheader->vbo[VBO_VERTS].ptr, 
+				bheader->vbo[VBO_VERTS].size, bheader->verts);
+
+		bheader->vbo[VBO_TC0].buffer = buf;
+		bheader->vbo[VBO_TC0].elements = 2;
+		bheader->vbo[VBO_TC0].size = sizeof (texcoord_t) * bheader->numsets;
+		bheader->vbo[VBO_TC0].type = GL_FLOAT;
+		bheader->vbo[VBO_TC0].stride = sizeof (texcoord_t);
+		bheader->vbo[VBO_TC0].ptr = cur;
+		cur += bheader->vbo[VBO_TC0].size;
+		qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB,
+				(GLintptrARB) bheader->vbo[VBO_TC0].ptr, 
+				bheader->vbo[VBO_TC0].size, bheader->tcoords[0]);
+
+		bheader->vbo[VBO_TC1].buffer = buf;
+		bheader->vbo[VBO_TC1].elements = 2;
+		bheader->vbo[VBO_TC1].size = sizeof (texcoord_t) * bheader->numsets;
+		bheader->vbo[VBO_TC1].type = GL_FLOAT;
+		bheader->vbo[VBO_TC1].stride = sizeof (texcoord_t);
+		bheader->vbo[VBO_TC1].ptr = cur;
+		cur += bheader->vbo[VBO_TC1].size;
+		qglBufferSubDataARB (GL_ARRAY_BUFFER_ARB,
+				(GLintptrARB) bheader->vbo[VBO_TC1].ptr, 
+				bheader->vbo[VBO_TC1].size, bheader->tcoords[1]);
 
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	}
