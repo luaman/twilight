@@ -39,6 +39,7 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "mathlib.h"
 #include "strlib.h"
+#include "texture.h"
 
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
@@ -126,12 +127,12 @@ void r_explosion_start(void)
 		}
 	}
 	explosiontexture = GL_LoadTexture ("explosiontexture", 128, 128,
-			&data[0][0][0], true, true, 32);
+			&data[0][0][0], TEX_MIPMAP|TEX_ALPHA, 32);
 	for (y = 0;y < 128;y++)
 		for (x = 0;x < 128;x++)
 			data[y][x][0] = data[y][x][1] = data[y][x][2] = 255;
 	explosiontexturefog = GL_LoadTexture ("explosiontexturefog", 128, 128,
-			&data[0][0][0], true, true, 32);
+			&data[0][0][0], TEX_MIPMAP|TEX_ALPHA, 32);
 }
 
 void r_explosion_shutdown(void)

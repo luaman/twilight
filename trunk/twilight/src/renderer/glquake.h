@@ -49,10 +49,9 @@ void GL_EndRendering (void);
 extern int texture_extension_number;
 extern float gldepthmin, gldepthmax;
 
-void GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, qboolean mipmap,
-		qboolean alpha);
-void GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, 
-						int alpha, unsigned *ttable);
+void GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags);
+void GL_Upload8 (Uint8 *data, int width, int height,unsigned *ttable,
+		int flags);
 
 extern int glx, gly;
 

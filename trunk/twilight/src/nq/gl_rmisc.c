@@ -39,9 +39,10 @@ static const char rcsid[] =
 #include "cmd.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "r_explosion.h"
 #include "strlib.h"
 #include "sys.h"
-#include "r_explosion.h"
+#include "texture.h"
 
 // FIXME
 extern void TNT_Init (void);
@@ -269,7 +270,8 @@ R_TranslatePlayerSkin (int playernum)
 		translate32[i] = d_8to32table[translate[i]];
 
 	qglBindTexture (GL_TEXTURE_2D, playertextures + playernum);
-	GL_Upload8 (original, paliashdr->skinwidth, paliashdr->skinheight, true, false, translate32);
+	GL_Upload8 (original, paliashdr->skinwidth, paliashdr->skinheight,
+			translate32, TEX_MIPMAP);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
