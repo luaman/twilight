@@ -781,7 +781,7 @@ SpectatorMove (void)
 	if (speed < 1) {
 		VectorClear (pmove.velocity);
 	} else {
-		speed = VectorLength (speed);
+		speed = VectorLength (pmove.velocity);
 		drop = 0;
 
 		friction = movevars.friction * 1.5;	// extra friction
