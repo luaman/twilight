@@ -160,14 +160,9 @@ InitSig (void)
 		}																	\
 	} while (0)
 
-#ifdef _WIN32
-	#define SetGamma(x)	SetDeviceGammaRamp(GetDC(NULL),x)
-#else
-	#define SetGamma(x) SDL_SetGammaRamp(x[0],x[1],x[2])
-#endif
-		
+
 static void
-VID_InitTexGamma ()
+VID_InitTexGamma (void)
 {
 	int i;
 	Uint8	*pal;
@@ -220,7 +215,8 @@ GammaChanged (cvar_t *cvar)
 		BUILD_GAMMA_RAMP(hw_gamma_ramps[1], hw[1], Uint16, 256);
 		BUILD_GAMMA_RAMP(hw_gamma_ramps[2], hw[2], Uint16, 256);
 
-		if (SetGamma(hw_gamma_ramps) < 0) {
+		if (SDL_SetGammaRamp(hw_gamma_ramps[0], hw_gamma_ramps[1],
+			hw_gamma_ramps[2]) < 0) {
 			// No hardware gamma support, turn off and set ROM.
 			Con_Printf("No hardware gamma support: Disabling. (%s)\n",
 						SDL_GetError());
