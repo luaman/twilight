@@ -314,7 +314,7 @@ GL_DrawAliasFrame
 =============
 */
 void
-GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
+GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean fb)
 {
 	float       l;
 	trivertx_t *verts;
@@ -337,24 +337,20 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 
 		do {
 			// texture coordinates come from the draw list
-			if (mtex) {
-				qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, ((float *) order)[0], ((float *) order)[1]);
-				qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, ((float *) order)[0], ((float *) order)[1]);
-			}
-			else {
-				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
-			}
+			qglTexCoord2fv ((float *) order);
 
 			order += 2;
 
 			// normals and vertexes come from the frame list
-			if (!colorlights) {
-				l = shadedots[verts->lightnormalindex] * shadelight;
-				qglColor3f (l, l, l);
-			}
-			else {
-				l = shadedots[verts->lightnormalindex];
-				qglColor3f (l*lightcolor[0], l*lightcolor[1], l*lightcolor[2]);
+			if (!fb) {
+				if (!colorlights) {
+					l = shadedots[verts->lightnormalindex] * shadelight;
+					qglColor3f (l, l, l);
+				}
+				else {
+					l = shadedots[verts->lightnormalindex];
+					qglColor3f (l*lightcolor[0], l*lightcolor[1], l*lightcolor[2]);
+				}
 			}
 
 			qglVertex3f (verts->v[0], verts->v[1], verts->v[2]);
@@ -373,7 +369,7 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 */
 void
 GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
-		float blend, qboolean mtex)
+		float blend, qboolean fb)
 {
 	float       l;
 	trivertx_t *verts1;
@@ -404,13 +400,7 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 
 		do {
 			// texture coordinates come from the draw list
-			if (mtex) {
-				qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, ((float *) order)[0], ((float *) order)[1]);
-				qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, ((float *) order)[0], ((float *) order)[1]);
-			}
-			else {
-				qglTexCoord2f (((float *) order)[0], ((float *) order)[1]);
-			}
+			qglTexCoord2fv ((float *) order);
 
 			order += 2;
 
@@ -419,14 +409,15 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 			d[0] = shadedots[verts2->lightnormalindex]
 				- shadedots[verts1->lightnormalindex];
 
-			if (!colorlights) {
-				l = shadelight * (shadedots[verts1->lightnormalindex]
-						+ (blend * d[0]));
-				qglColor3f (l, l, l);
-			}
-			else {
-				l = shadedots[verts1->lightnormalindex] + (blend * d[0]);
-				qglColor3f (l*lightcolor[0], l*lightcolor[1], l*lightcolor[2]);
+			if (!fb) {
+				if (!colorlights) {
+					l = shadelight * (shadedots[verts1->lightnormalindex]
+							+ (blend * d[0]));
+					qglColor3f (l, l, l);
+				} else {
+					l = shadedots[verts1->lightnormalindex] + (blend * d[0]);
+					qglColor3f (l*lightcolor[0], l*lightcolor[1], l*lightcolor[2]);
+				}
 			}
 
 			VectorSubtract (verts2->v, verts1->v, d);
@@ -666,7 +657,7 @@ R_SetupAliasFrame
 =================
 */
 void
-R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, qboolean mtex)
+R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, qboolean fb)
 {
 	int         pose, numposes;
 	float       interval;
@@ -684,7 +675,7 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, qboolean mtex)
 		pose += (int) (cl.time / interval) % numposes;
 	}
 
-	GL_DrawAliasFrame (paliashdr, pose, mtex);
+	GL_DrawAliasFrame (paliashdr, pose, fb);
 }
 
 
@@ -694,7 +685,7 @@ R_SetupAliasFrame (int frame, aliashdr_t *paliashdr, qboolean mtex)
 
 */
 void
-R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolean mtex)
+R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolean fb)
 {
 	int 	pose, numposes;
 	float	blend;
@@ -741,7 +732,7 @@ R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t *e, qboolea
 	if (cl.paused || blend > 1)
 		blend = 1;
 
-	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend, mtex);
+	GL_DrawAliasBlendedFrame (paliashdr, e->pose1, e->pose2, blend, fb);
 }
 
 /*
@@ -761,7 +752,6 @@ R_DrawAliasModel (entity_t *e)
 	aliashdr_t *paliashdr;
 	int         anim;
 	int			texture, fb_texture, skinnum;
-	qboolean	mtex;
 	dlight_t	*l;
 
 	clmodel = currententity->model;
@@ -932,44 +922,24 @@ R_DrawAliasModel (entity_t *e)
 	if (!gl_fb_models->value)
 		fb_texture = 0;
 
-	mtex = fb_texture && gl_mtexable;
-
-	if (mtex) {
-		qglBindTexture (GL_TEXTURE_2D, texture);
-		qglActiveTextureARB (GL_TEXTURE1_ARB);
-		qglEnable (GL_TEXTURE_2D);
-		qglBindTexture (GL_TEXTURE_2D, fb_texture);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-	} else {
-		qglBindTexture (GL_TEXTURE_2D, texture);
-	}
+	qglBindTexture (GL_TEXTURE_2D, texture);
 
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 		R_SetupAliasBlendedFrame (currententity->frame, paliashdr,
-				currententity, mtex);
+				currententity, false);
 	else
-		R_SetupAliasFrame (currententity->frame, paliashdr, mtex);
+		R_SetupAliasFrame (currententity->frame, paliashdr, false);
 
-	if (mtex) {
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		qglDisable (GL_TEXTURE_2D);
-		qglActiveTextureARB (GL_TEXTURE0_ARB);
-	}
-
-	if (fb_texture && !gl_mtexable) {
+	if (fb_texture) {
 		qglEnable (GL_BLEND);
-		qglBlendFunc(GL_ONE, GL_ONE);
-//		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
 		if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 			R_SetupAliasBlendedFrame (currententity->frame, paliashdr,
-					currententity, false);
+					currententity, true);
 		else
-			R_SetupAliasFrame (currententity->frame, paliashdr, false);
+			R_SetupAliasFrame (currententity->frame, paliashdr, true);
 
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglDisable (GL_BLEND);
 	}
 
