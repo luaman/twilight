@@ -34,12 +34,6 @@ typedef struct matrix4x4_s
 }
 matrix4x4_t;
 
-typedef struct matrix3x4_s
-{
-	float m[3][4];
-}
-matrix3x4_t;
-
 // functions for manipulating 4x4 matrices
 
 // copy a matrix4x4
@@ -48,8 +42,6 @@ void Matrix4x4_Copy (matrix4x4_t *out, const matrix4x4_t *in);
 void Matrix4x4_CopyRotateOnly (matrix4x4_t *out, const matrix4x4_t *in);
 // copy only the translate portion of a matrix4x4
 void Matrix4x4_CopyTranslateOnly (matrix4x4_t *out, const matrix4x4_t *in);
-// make a matrix4x4 from a matrix3x4
-void Matrix4x4_FromMatrix3x4 (matrix4x4_t *out, const matrix3x4_t *in);
 // multiply two matrix4x4 together, combining their transformations
 // (warning: order matters - Concat(a, b, c) != Concat(a, c, b))
 void Matrix4x4_Concat (matrix4x4_t *out, const matrix4x4_t *in1, const matrix4x4_t *in2);

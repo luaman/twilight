@@ -446,7 +446,7 @@ Mod_LoadRFaces (dlump_t *l, model_t *mod)
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
-		Host_Error ("MOD_LoadBmodel: funny lump size in %s", mod->name);
+		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s", mod->name);
 	count = l->filelen / sizeof (*in);
 	out = Zone_Alloc (mod->zone, count * sizeof (*out));
 

@@ -67,7 +67,7 @@ def check_cflag (context, cflag, add = 1):
 	int main (int argc, char *argv[]) {
 		return 0;
 	}
-	""", ".c")
+""", ".c")
 
 	context.env['CCFLAGS'] = old_flags
 
@@ -86,6 +86,7 @@ def conf_base ():
 	opts.create('clients', 1, 'Enable clients')
 	opts.create('CC', env['CC'], 'C compiler command')
 	opts.create('CFLAGS', '-O2 -g -Wall', 'Base C compiler flags')
+	opts.create('save-temps', 0, 'Save temporary compilation files')
 
 	if env['PLATFORM'] == "cygwin" or env['PLATFORM'] == "mingw" or env['PLATFORM'] == "win32":
 		opts.create('dir_mode', 'dir_win32', 'Directory access mode')
@@ -123,27 +124,35 @@ def check_cheaders (conf, defs, headers):
 			str = str.replace('/', '_')
 			defs.set('HAVE_' + str, 1)
 
-def handle_opts (conf, opts, config_defs):
-	ccflags = opts['CFLAGS']
-	if int(opts['bitchiness']):
-		ccflags += ' -Wcast-qual -Wsign-compare -W'
-	if int(opts['werror']):
-		ccflags += ' -Werror'
-	if int(opts['profile']):
-		ccflags += ' -pg -g'
-	conf.env.Replace (CCFLAGS = Split (ccflags))
-	conf.env.Replace (CC = opts['CC'])
-	conf.cflag ('-fno-strict-aliasing', 1)
-	conf.cflag ('-finline', 1)
-	config_defs.set('SDL_IMAGE_LIBRARY', '"' + opts['sdl_image'] + '"')
-	config_defs.set('USERPATH', '"' + opts['userpath'] + '"')
-	config_defs.set('SHAREPATH', '"' + opts['sharepath'] + '"')
-	config_defs.set('USERCONF', '"' + opts['userconf'] + '"')
-	config_defs.set('SHARECONF', '"' + opts['userconf'] + '"')
-	config_defs.set('GL_LIBRARY', '"' + opts['libgl'] + '"')
-	config_defs.set('WANT_CLIENTS', str(opts['clients']))
-	config_defs.set('WANT_SERVERS', str(opts['servers']))
-	config_defs.set('CFLAG_WERROR', str(opts['werror']))
+def handle_opts (conf, opts, config_defs, destructive):
+	if destructive:
+		if int(opts['werror']):
+			conf.cflag ('-Werror')
+	else:
+		ccflags = opts['CFLAGS']
+		conf.env.Replace (CCFLAGS = Split (ccflags))
+		conf.env.Replace (CC = opts['CC'])
+		if int(opts['bitchiness']):
+			conf.cflag ('-Wcast-qual')
+			conf.cflag ('-Wsign-compare')
+			conf.cflag ('-W')
+		if int(opts['profile']):
+			conf.cflag ('-pg -g')
+		if int(opts['save-temps']):
+			conf.cflag ('-save-temps', 1)
+		else:
+			conf.cflag ('-pipe', 1)
+		conf.cflag ('-fno-strict-aliasing', 1)
+		conf.cflag ('-finline', 1)
+		config_defs.set('SDL_IMAGE_LIBRARY', '"' + opts['sdl_image'] + '"')
+		config_defs.set('USERPATH', '"' + opts['userpath'] + '"')
+		config_defs.set('SHAREPATH', '"' + opts['sharepath'] + '"')
+		config_defs.set('USERCONF', '"' + opts['userconf'] + '"')
+		config_defs.set('SHARECONF', '"' + opts['userconf'] + '"')
+		config_defs.set('GL_LIBRARY', '"' + opts['libgl'] + '"')
+		config_defs.set('WANT_CLIENTS', str(opts['clients']))
+		config_defs.set('WANT_SERVERS', str(opts['servers']))
+		config_defs.set('CFLAG_WERROR', str(opts['werror']))
 
 def write_c_defines (filename, defs):
 	env.Append (CPPDEFINES = "HAVE_CONFIG_H")
@@ -163,12 +172,12 @@ def do_configure (env):
 	opts.save('config_opts.py')
 	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag}
 	conf = Configure(env, custom_tests = tests)
-	handle_opts (conf, opts, config_defs)
+	handle_opts (conf, opts, config_defs, 0)
 
 	ret = conf.SDL_config ()
 	sdl_ver = None
 	if ret[0]:
-		ParseConfig (env, "sdl-config --cflags --libs")
+		env.ParseConfig ("sdl-config --cflags --libs")
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		sdl_ver = ret[1]
 	else:
@@ -203,6 +212,7 @@ def do_configure (env):
 	if not config_defs.has_key('HAVE_DLOPEN'):
 		if conf.CheckLib ('dl', 'dlopen', 1):
 			config_defs.set('HAVE_DLOPEN', 1)
+	handle_opts (conf, opts, config_defs, 1)
 	conf.Finish ()
 
 	print "\nWriting src/config.h"
