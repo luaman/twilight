@@ -214,17 +214,13 @@ CheckMultiTextureExtensions (void)
 		return;
 	}
 	if (strstr (gl_extensions, "GL_ARB_multitexture")) {
+		if (!qglActiveTextureARB || !qglMultiTexCoord2fARB) {
+			Con_Printf("Fucked up video driver. (0x%p 0x%p)\n",
+					qglActiveTextureARB, qglMultiTexCoord2fARB);
+			return;
+		}
 		Con_Printf ("GL_ARB_multitexture\n");
 		gl_mtexable = true;
-		if (!qglActiveTextureARB || !qglMultiTexCoord2fARB) {
-			qglActiveTextureARB = SDL_GL_GetProcAddress("glActiveTextureARB");
-			qglMultiTexCoord2fARB = SDL_GL_GetProcAddress("glMultiTexCoord2fARB");
-
-			if (!qglActiveTextureARB || !qglMultiTexCoord2fARB) {
-				Con_Printf("ERROR! qglActiveTextureARB (%p), qglMultiTexCoord2fARB (%p)\n", qglActiveTextureARB, qglMultiTexCoord2fARB);
-				gl_mtexable = false;
-			}
-		}
 	} else
 		Con_Printf ("none found\n");
 }
@@ -375,10 +371,6 @@ VID_Init (unsigned char *palette)
 	else
 		scr_bpp = info->vfmt->BitsPerPixel;
 
-	if (!GLF_Init()) {
-		Sys_Error ("Could not init the libGL!\n");
-	}
-
 	// We want at least 444 (16 bit RGB)
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 4);
@@ -390,6 +382,10 @@ VID_Init (unsigned char *palette)
 
 	if (SDL_SetVideoMode (scr_width, scr_height, scr_bpp, sdl_flags) == NULL) {
 		Sys_Error ("Could not init video mode: %s", SDL_GetError ());
+	}
+
+	if (!GLF_Init()) {
+		Sys_Error ("Could not init the libGL!\n");
 	}
 
 	SDL_WM_SetCaption ("Twilight QWCL", "twilight");
