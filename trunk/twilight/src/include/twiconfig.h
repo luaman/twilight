@@ -32,6 +32,10 @@
 #else
 # ifdef _WIN32
 #  include "../win32config.h"
+# elif defined(__APPLE__) && defined(__MACH__)
+#  include "../OSXconfig.h"
+# else
+#  error "No compile config available"
 # endif
 #endif
 
