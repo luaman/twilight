@@ -582,19 +582,18 @@ M_Options_Key (int k)
 /* GFX */
 
 /*
-	Smooth models			on/off
 	Affine models			on/off
 	Fullbright models		on/off
+	Fullbright bmodels		on/off
 	Fast dynamic lights		on/off
 	Shadows					on/fast/nice
 	Frame interpolation	    on/off
 	Motion interpolation	on/off
 	Texture Mode			see glmode_t modes[]
-	Light lerping			on/off
 	Particle torches		on/off
 */
 
-#define GFX_ITEMS	10
+#define GFX_ITEMS	9
 
 int gfx_cursor = 0;
 
