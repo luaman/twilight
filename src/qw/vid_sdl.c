@@ -49,46 +49,46 @@ static const char rcsid[] =
 #include "console.h"
 
 
-Uint32	d_8to32table[256];
-float	d_8tofloattable[256][4];
+Uint32 d_8to32table[256];
+float d_8tofloattable[256][4];
 
-cvar_t	*width_2d;
-cvar_t	*height_2d;
-cvar_t	*text_scale;
-cvar_t	*i_keypadmode;
-cvar_t	*vid_mode;
-cvar_t	*m_filter;
-cvar_t	*_windowed_mouse;
-cvar_t	*gl_ztrick;
-cvar_t	*gl_driver;
+cvar_t *width_2d;
+cvar_t *height_2d;
+cvar_t *text_scale;
+cvar_t *i_keypadmode;
+cvar_t *vid_mode;
+cvar_t *m_filter;
+cvar_t *_windowed_mouse;
+cvar_t *gl_ztrick;
+cvar_t *gl_driver;
 
-cvar_t	*v_hwgamma;
-cvar_t	*v_gamma;
-cvar_t	*v_gammabias_r;
-cvar_t	*v_gammabias_b;
-cvar_t	*v_gammabias_g;
-cvar_t	*v_tgamma;
-cvar_t	*v_tgammabias_r;
-cvar_t	*v_tgammabias_b;
-cvar_t	*v_tgammabias_g;
+cvar_t *v_hwgamma;
+cvar_t *v_gamma;
+cvar_t *v_gammabias_r;
+cvar_t *v_gammabias_b;
+cvar_t *v_gammabias_g;
+cvar_t *v_tgamma;
+cvar_t *v_tgammabias_r;
+cvar_t *v_tgammabias_b;
+cvar_t *v_tgammabias_g;
 
-static Uint16	hw_gamma_ramps[3][256];
-static Uint8	tex_gamma_ramps[3][256];
-qboolean		VID_Inited;
-qboolean		keypadmode = false;
+static Uint16 hw_gamma_ramps[3][256];
+static Uint8 tex_gamma_ramps[3][256];
+qboolean VID_Inited;
+qboolean keypadmode = false;
 
 static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
 
 static qboolean use_mouse = false;
 
-static int  sdl_flags = SDL_OPENGL;
+static int sdl_flags = SDL_OPENGL;
 
 /*-----------------------------------------------------------------------*/
 
-int         texture_extension_number = 1;
+int texture_extension_number = 1;
 
-float       gldepthmin, gldepthmax;
+float gldepthmin, gldepthmax;
 
 
 const char *gl_vendor;
@@ -96,27 +96,26 @@ const char *gl_renderer;
 const char *gl_version;
 const char *gl_extensions;
 
-qboolean	gl_cva = false;
-qboolean	gl_mtex = false;
-qboolean	gl_mtexcombine = false;
-int			gl_tmus = 1;
+qboolean gl_cva = false;
+qboolean gl_mtex = false;
+qboolean gl_mtexcombine = false;
+int gl_tmus = 1;
 
-void		I_KeypadMode (cvar_t *cvar);
-void		IN_WindowedMouse (cvar_t *cvar);
+void I_KeypadMode (cvar_t *cvar);
+void IN_WindowedMouse (cvar_t *cvar);
 
 /*-----------------------------------------------------------------------*/
 void
 VID_Shutdown (void)
 {
 	DGL_CloseLibrary ();
-	//SDL_Quit (); // LordHavoc: don't quit yet, we might be called by Sys_Error
 }
 
 static void
 VID_Build_Gamma_Ramp8 (Uint8 *ramp, int n, double gam, double con, double bri)
 {
-	int	i;
-	double i_d, i_s, invgam;
+	int			i;
+	double		i_d, i_s, invgam;
 
 	i_s = 1.0 / n;
 	invgam = 1.0 / gam;
@@ -129,8 +128,8 @@ VID_Build_Gamma_Ramp8 (Uint8 *ramp, int n, double gam, double con, double bri)
 static void
 VID_Build_Gamma_Ramp16 (Uint16 *ramp, int n, double gam, double con, double bri)
 {
-	int	i;
-	double i_d, i_s, invgam;
+	int			i;
+	double		i_d, i_s, invgam;
 
 	i_s = 1.0 / n;
 	invgam = 1.0 / gam;
@@ -143,10 +142,10 @@ VID_Build_Gamma_Ramp16 (Uint16 *ramp, int n, double gam, double con, double bri)
 static void
 VID_InitTexGamma (void)
 {
-	int i;
-	Uint8	*pal;
-	Uint8	r, g, b;
-	vec3_t	tex;
+	int			i;
+	Uint8		*pal;
+	Uint8		r, g, b;
+	vec3_t		tex;
 
 	tex[0] = v_tgamma->fvalue + v_tgammabias_r->fvalue;
 	tex[1] = v_tgamma->fvalue + v_tgammabias_g->fvalue;
@@ -182,7 +181,7 @@ VID_InitTexGamma (void)
 static void
 GammaChanged (cvar_t *cvar)
 {
-	vec3_t	hw;
+	vec3_t		hw;
 
 	if (!VID_Inited)
 		return;
@@ -272,7 +271,7 @@ GL_Info_f (void)
 	Com_Printf ("GL_VERSION: %s\n", gl_version);
 	Com_Printf ("GL_EXTENSIONS: %s\n", gl_extensions);
 }
-		
+
 
 /*
 ===============
@@ -320,8 +319,8 @@ GL_EndRendering (void)
 void
 Size_Changed2D (cvar_t *cvar)
 {
-	int		width, height;
-	float	txt_scale;
+	int			width, height;
+	float		txt_scale;
 
 	if (con) {
 		txt_scale = bound (0.5, text_scale->fvalue, 3);
@@ -343,7 +342,7 @@ Size_Changed2D (cvar_t *cvar)
 
 	width = bound (320, width, (int) vid.width);
 
-	width &= 0xfff8;				/* make it a multiple of eight */
+	width &= 0xfff8;					/* make it a multiple of eight */
 
 	/* pick a conheight that matches with correct aspect */
 	if (height == -1)
@@ -384,7 +383,7 @@ VID_Init_Cvars (void)
 void
 VID_Init (unsigned char *palette)
 {
-	int         i;
+	int			i;
 	const		SDL_VideoInfo *info = NULL;
 	char		sdl_driver[256];
 
@@ -493,9 +492,9 @@ VID_Init (unsigned char *palette)
 void
 Sys_SendKeyEvents (void)
 {
-	SDL_Event   event;
-	int         sym, state, but;
-	SDLMod      modstate;
+	SDL_Event	event;
+	int			sym, state, but;
+	SDLMod		modstate;
 
 	while (SDL_PollEvent (&event)) {
 		switch (event.type) {
@@ -667,11 +666,6 @@ void
 Force_CenterView_f (void)
 {
 	cl.viewangles[PITCH] = 0;
-}
-
-void
-IN_Init_Cvars (void)
-{
 }
 
 void

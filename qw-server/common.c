@@ -714,11 +714,7 @@ Com_SafePrintf (char *fmt, ...)
 	vsnprintf (msg, sizeof (msg), fmt, argptr);
 	va_end (argptr);
 
-#ifndef TWILIGHT_QWSV
-	Con_SafePrint (msg);
-#else
-	Com_Printf (msg);
-#endif
+	Com_Printf ("%s", msg);
 }
 
 //===========================================================================

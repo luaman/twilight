@@ -141,7 +141,6 @@ viddef_t	vid;						/* global video state */
 
 vrect_t		scr_vrect;
 
-qboolean	scr_disabled_for_loading;
 qboolean	scr_drawloading;
 float		scr_disabled_time;
 
@@ -1051,14 +1050,6 @@ needs almost the entire 256k of stack space!
 void
 SCR_UpdateScreen (void)
 {
-	if (scr_disabled_for_loading) {
-		if (cls.realtime - scr_disabled_time > 60) {
-			scr_disabled_for_loading = false;
-			Com_Printf ("load failed.\n");
-		} else
-			return;
-	}
-
 	if (!scr_initialized || !con_initialized)
 		return;							/* not initialized yet */
 

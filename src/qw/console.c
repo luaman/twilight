@@ -369,24 +369,6 @@ Con_Print (char *txt)
 
 
 /*
-==================
-Con_SafePrintf
-
-Okay to call even when the screen can't be updated
-==================
-*/
-void
-Con_SafePrint (char *fmt)
-{
-	qboolean temp = scr_disabled_for_loading;
-	
-	scr_disabled_for_loading = true;
-	Com_Printf (fmt);		// Vic: I know, it's weird...
-	scr_disabled_for_loading = temp;
-}
-
-
-/*
 ==============================================================================
 
 DRAWING
