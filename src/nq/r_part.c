@@ -582,6 +582,9 @@ R_RailTrail (vec3_t start, vec3_t end)
 	VectorSubtract (end, start, vec);
 	Vector2Angles (vec, org);
 
+	org[0] *= (M_PI * 2 / 360);
+	org[1] *= (M_PI * 2 / 360);
+
 	sp = Q_sin (org[0]);
 	cp = Q_cos (org[0]);
 	sy = Q_sin (org[1]);
