@@ -30,8 +30,6 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <stdlib.h>	/* for malloc() */
 
-#include "opengl_ext.h"
-
 #include "quakedef.h"
 #include "client.h"
 #include "cvar.h"

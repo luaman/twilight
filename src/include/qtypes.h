@@ -44,26 +44,11 @@ typedef int fixed4_t;
 typedef int fixed8_t;
 typedef int fixed16_t;
 
-/*
- * Types
- *
- * OpenGL uses a set of standard types which are usually going to be the
- * same as the standard types of int, float, etc.  However, just to make
- * things interesting, there is no promise this will be the case!  Lovely.
- * The types do not change across a given platform, however, and we can be
- * sure that if it works with one compiler it will work with all of them by
- * using the SDL types.
- */
-
-#ifndef OGL_TYPES
-#define OGL_TYPES
-
-/*
- * A ./configure test should do these and #define OGL_TYPES !
- */
+#ifndef DYNGL_TYPES
+#define DYNGL_TYPES
 
 typedef void			GLvoid;
-typedef	Uint8			GLboolean;
+typedef Uint8			GLboolean;
 typedef Sint8			GLbyte;			/* 1-byte signed */
 typedef Uint8			GLubyte;		/* 1-byte unsigned */
 typedef Sint16			GLshort;		/* 2-byte signed */
@@ -78,7 +63,8 @@ typedef float			GLclampf;		/* single precision float in [0,1] */
 typedef double			GLdouble;		/* double precision float */
 typedef double			GLclampd;		/* double precision float in [0,1] */
 
-#endif // OGL_TYPES
+#endif /* DYNGL_TYPES */
+
 
 typedef struct {
     GLfloat v[2];
