@@ -521,6 +521,9 @@ CL_BaseMove (usercmd_t *cmd)
 		cmd->sidemove *= cl_movespeedkey->fvalue;
 		cmd->upmove *= cl_movespeedkey->fvalue;
 	}
+
+	if (cl.viewangles[PITCH] >= 90) // HACK! HACK! HACK!
+		cmd->forwardmove *= -1;
 }
 
 static int
