@@ -433,27 +433,27 @@ M_AdjustSliders (int dir)
 
 	switch (options_cursor) {
 		case 3:						// screen size
-			t = scr_viewsize->value + dir * 10;
+			t = scr_viewsize->value + (dir * 10);
 			t = bound (30, t, 120);
 			Cvar_Set (scr_viewsize,  va ("%f", t));
 			break;
 		case 4:						// gamma
-			t = v_gamma->value + dir * 0.05;
+			t = v_gamma->value + (dir * 0.05);
 			t = bound (1.0, t, 2.0);
 			Cvar_Set (v_gamma, va ("%f", t));
 			break;
 		case 5:						// software brightness
-			t = r_brightness->value + dir * 0.25;
+			t = r_brightness->value + (dir * 0.25);
 			t = bound (1, t, 5);
 			Cvar_Set (r_brightness, va("%f", t));
 			break;
 		case 6:						// software contrast (base brightness)
-			t = r_contrast->value + dir * 0.025;
+			t = r_contrast->value + (dir * 0.025);
 			t = bound (0.75, t, 1.0);
 			Cvar_Set (r_contrast, va("%f", t));
 			break;
 		case 7:						// mouse speed
-			t = sensitivity->value + dir * 0.5;
+			t = sensitivity->value + (dir * 0.5);
 			t = bound (1, t, 11);
 			Cvar_Set (sensitivity, va ("%f", t));
 			break;

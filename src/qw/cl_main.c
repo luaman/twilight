@@ -73,47 +73,47 @@ static const char rcsid[] =
 // references them even when on a unix system.
 
 
-cvar_t     *rcon_password;
-cvar_t     *rcon_address;
+cvar_t		*rcon_password;
+cvar_t		*rcon_address;
 
-cvar_t     *cl_timeout;
-cvar_t     *cl_shownet;
+cvar_t		*cl_timeout;
+cvar_t		*cl_shownet;
 
-cvar_t     *cl_sbar;
-cvar_t     *cl_hudswap;
-cvar_t     *cl_maxfps;
+cvar_t		*cl_sbar;
+cvar_t		*cl_hudswap;
+cvar_t		*cl_maxfps;
 
-cvar_t     *lookspring;
-cvar_t     *lookstrafe;
-cvar_t     *sensitivity;
+cvar_t		*lookspring;
+cvar_t		*lookstrafe;
+cvar_t		*sensitivity;
 
-cvar_t     *m_pitch;
-cvar_t     *m_yaw;
-cvar_t     *m_forward;
-cvar_t     *m_side;
+cvar_t		*m_pitch;
+cvar_t		*m_yaw;
+cvar_t		*m_forward;
+cvar_t		*m_side;
 
-cvar_t     *entlatency;
-cvar_t     *cl_predict_players;
-cvar_t     *cl_solid_players;
+cvar_t		*entlatency;
+cvar_t		*cl_predict_players;
+cvar_t		*cl_solid_players;
 
-cvar_t     *localid;
+cvar_t		*localid;
 
 //
 // info mirrors
 //
-cvar_t     *password;
-cvar_t     *spectator;
-cvar_t     *name;
-cvar_t     *team;
-cvar_t     *skin;
-cvar_t     *topcolor;
-cvar_t     *bottomcolor;
-cvar_t     *rate;
-cvar_t     *noaim;
-cvar_t     *msg;
+cvar_t		*password;
+cvar_t		*spectator;
+cvar_t		*name;
+cvar_t		*team;
+cvar_t		*skin;
+cvar_t		*topcolor;
+cvar_t		*bottomcolor;
+cvar_t		*rate;
+cvar_t		*noaim;
+cvar_t		*msg;
 
-cvar_t     *host_speeds;
-cvar_t     *show_fps;
+cvar_t		*host_speeds;
+cvar_t		*show_fps;
 
 
 extern cvar_t *cl_hightrack;
@@ -126,43 +126,43 @@ static qboolean allowremotecmd = true;
 client_static_t cls;
 client_state_t cl;
 
-entity_state_t cl_baselines[MAX_EDICTS];
-efrag_t     cl_efrags[MAX_EFRAGS];
-entity_t    cl_static_entities[MAX_STATIC_ENTITIES];
-lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
-dlight_t    cl_dlights[MAX_DLIGHTS];
+entity_state_t	cl_baselines[MAX_EDICTS];
+efrag_t			cl_efrags[MAX_EFRAGS];
+entity_t		cl_static_entities[MAX_STATIC_ENTITIES];
+lightstyle_t	cl_lightstyle[MAX_LIGHTSTYLES];
+dlight_t		cl_dlights[MAX_DLIGHTS];
 
 // refresh list
 // this is double buffered so the last frame
 // can be scanned for oldorigins of trailing objects
-int         cl_numvisedicts, cl_oldnumvisedicts;
-entity_t   *cl_visedicts, *cl_oldvisedicts;
-entity_t    cl_visedicts_list[2][MAX_VISEDICTS];
+int			cl_numvisedicts, cl_oldnumvisedicts;
+entity_t	*cl_visedicts, *cl_oldvisedicts;
+entity_t	cl_visedicts_list[2][MAX_VISEDICTS];
 
-double      connect_time = -1;			// for connection retransmits
+double		connect_time = -1;			// for connection retransmits
 
-qboolean    host_initialized;			// true if into command execution
-qboolean    nomaster;
+qboolean	host_initialized;			// true if into command execution
+qboolean	nomaster;
 
-double      host_frametime;
-double      realtime;					// without any filtering or bounding
-double      oldrealtime;				// last frame run
-int         host_framecount;
+double		host_frametime;
+double		realtime;					// without any filtering or bounding
+double		oldrealtime;				// last frame run
+int			host_framecount;
 
-int         host_hunklevel;
+int			host_hunklevel;
 
-Uint8      *host_basepal;
-Uint8      *host_colormap;
+Uint8		*host_basepal;
+Uint8		*host_colormap;
 
-netadr_t    master_adr;					// address of the master server
+netadr_t	master_adr;					// address of the master server
 
-int         fps_count = 0;
+int			fps_count = 0;
 
 jmp_buf     host_abort;
 
-void        Master_Connect_f (void);
+void		Master_Connect_f (void);
 
-float       server_version = 0;			// version of server we connected to
+float		server_version = 0;			// version of server we connected to
 
 char        emodel_name[] =
 	{ 'e' ^ 0xff, 'm' ^ 0xff, 'o' ^ 0xff, 'd' ^ 0xff, 'e' ^ 0xff, 'l' ^ 0xff,
