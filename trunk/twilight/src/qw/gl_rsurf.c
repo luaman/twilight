@@ -206,21 +206,22 @@ R_AddDynamicLights (msurface_t *surf)
 					idist = td + (sd>>1);
 
 				if (idist < iminlight) {
-					if (lightmap_bytes == 1) {
-						*dest += irad - idist;
-					}
-					else {
-						br = irad - idist;
-						dest[0] += (int)(br * cl_dlights[lnum].color[0]);
-						dest[1] += (int)(br * cl_dlights[lnum].color[1]);
-						dest[2] += (int)(br * cl_dlights[lnum].color[2]);
+					br = irad - idist;
+					switch (lightmap_bytes) {
+						case 1:
+							*dest += br * ((cl_dlights[lnum].color[0] +
+											cl_dlights[lnum].color[1] +
+											cl_dlights[lnum].color[2]) / 3);
+							break;
+						case 3:
+						case 4:
+							dest[0] += (int)(br * cl_dlights[lnum].color[0]);
+							dest[1] += (int)(br * cl_dlights[lnum].color[1]);
+							dest[2] += (int)(br * cl_dlights[lnum].color[2]);
+							break;
 					}
 				}
-
-				if (lightmap_bytes == 1)
-					dest ++;
-				else
-					dest += 3;
+				dest += lightmap_bytes;
 			}
 		} 
 	}
@@ -263,21 +264,23 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 			surf->cached_light[maps] = scale;	// 8.8 fraction
 			bl = blocklights;
 
-			if (lightmap_bytes == 1)
-			{
-				for (i = 0; i < size; i++)
-					bl[i] += lightmap[i] * scale;
+			switch (lightmap_bytes) {
+				case 1:
+					for (i = 0; i < size; i++)
+						bl[i] += lightmap[i] * scale;
 
-				lightmap += size;
-			}
-			else {
-				for (i = 0; i < size; i++) {
-					bl[0] += lightmap[0] * scale;
-					bl[1] += lightmap[1] * scale;
-					bl[2] += lightmap[2] * scale;
-					bl += 3;
-					lightmap += 3;
-				}
+					lightmap += size;
+					break;
+				case 3:
+				case 4:
+					for (i = 0; i < size; i++) {
+						bl[0] += lightmap[0] * scale;
+						bl[1] += lightmap[1] * scale;
+						bl[2] += lightmap[2] * scale;
+						bl += 3;
+						lightmap += 3;
+					}
+					break;
 			}
 		}
 	}

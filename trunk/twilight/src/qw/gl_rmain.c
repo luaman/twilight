@@ -232,29 +232,27 @@ R_DrawSpriteModel (entity_t *e)
 
 	qglBindTexture (GL_TEXTURE_2D, frame->gl_texturenum);
 
-	qglBegin (GL_QUADS);
-
-	qglTexCoord2f (0, 1);
+	VectorSet2 (varray[0].texcoord, 0, 1);
 	VectorMA (e->origin, frame->down, up, point);
 	VectorMA (point, frame->left, right, point);
-	qglVertex3fv (point);
+	VectorSet3 (varray[0].vertex, point[0], point[1], point[2]);
 
-	qglTexCoord2f (0, 0);
+	VectorSet2 (varray[1].texcoord, 0, 0);
 	VectorMA (e->origin, frame->up, up, point);
 	VectorMA (point, frame->left, right, point);
-	qglVertex3fv (point);
+	VectorSet3 (varray[1].vertex, point[0], point[1], point[2]);
 
-	qglTexCoord2f (1, 0);
+	VectorSet2 (varray[2].texcoord, 1, 0);
 	VectorMA (e->origin, frame->up, up, point);
 	VectorMA (point, frame->right, right, point);
-	qglVertex3fv (point);
+	VectorSet3 (varray[2].vertex, point[0], point[1], point[2]);
 
-	qglTexCoord2f (1, 1);
+	VectorSet2 (varray[3].texcoord, 1, 1);
 	VectorMA (e->origin, frame->down, up, point);
 	VectorMA (point, frame->right, right, point);
-	qglVertex3fv (point);
+	VectorSet3 (varray[3].vertex, point[0], point[1], point[2]);
 
-	qglEnd ();
+	qglDrawArrays (GL_QUADS, 0, 4);
 }
 
 /*
@@ -1116,13 +1114,11 @@ R_PolyBlend (void)
 
 	qglColor4fv (v_blend);
 
-	qglBegin (GL_QUADS);
-
-	qglVertex3f (10, 100, 100);
-	qglVertex3f (10, -100, 100);
-	qglVertex3f (10, -100, -100);
-	qglVertex3f (10, 100, -100);
-	qglEnd ();
+	VectorSet3 (varray[0].vertex, 10, 100, 100);
+	VectorSet3 (varray[1].vertex, 10, -100, 100);
+	VectorSet3 (varray[2].vertex, 10, -100, -100);
+	VectorSet3 (varray[3].vertex, 10, 100, -100);
+	qglDrawArrays(GL_QUADS, 0, 4);
 
 	qglColor3f(1, 1, 1);
 	qglDisable (GL_BLEND);
@@ -1209,7 +1205,7 @@ R_SetupFrame (void)
 }
 
 
-void
+static void
 MYgluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
 	GLdouble    xmin, xmax, ymin, ymax;

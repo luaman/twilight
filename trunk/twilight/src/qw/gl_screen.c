@@ -530,8 +530,8 @@ SCR_DrawFPS (void)
 	}
 
 	snprintf (st, sizeof (st), "%3d FPS", lastfps);
-	x = vid.width - strlen (st) * 8 - 8;
-	y = vid.height - sb_lines - 8;
+	x = vid.conwidth - strlen (st) * 8 - 8;
+	y = vid.conheight - sb_lines - 8;
 //  Draw_TileClear(x, y, strlen(st) * 8, 8);
 	Draw_String (x, y, st);
 }
@@ -554,8 +554,8 @@ SCR_DrawPause (void)
 		return;
 
 	pic = Draw_CachePic ("gfx/pause.lmp");
-	Draw_Pic ((vid.width - pic->width) / 2,
-			  (vid.height - 48 - pic->height) / 2, pic);
+	Draw_Pic ((vid.conwidth - pic->width) / 2,
+			  (vid.conheight - 48 - pic->height) / 2, pic);
 }
 
 
@@ -574,8 +574,8 @@ SCR_DrawLoading (void)
 		return;
 
 	pic = Draw_CachePic ("gfx/loading.lmp");
-	Draw_Pic ((vid.width - pic->width) / 2,
-			  (vid.height - 48 - pic->height) / 2, pic);
+	Draw_Pic ((vid.conwidth - pic->width) / 2,
+			  (vid.conheight - 48 - pic->height) / 2, pic);
 }
 
 
@@ -598,10 +598,10 @@ SCR_SetUpToDrawConsole (void)
 
 // decide on the height of the console
 	if (cls.state != ca_active) {
-		scr_conlines = vid.height;		// full screen
+		scr_conlines = vid.conheight;		// full screen
 		scr_con_current = scr_conlines;
 	} else if (key_dest == key_console)
-		scr_conlines = vid.height / 2;	// half screen
+		scr_conlines = vid.conheight / 2;	// half screen
 	else
 		scr_conlines = 0;				// none visible
 
@@ -973,14 +973,14 @@ SCR_DrawNotifyString (void)
 
 	start = scr_notifystring;
 
-	y = vid.height * 0.35;
+	y = vid.conheight * 0.35;
 
 	do {
 		// scan the width of the line
 		for (l = 0; l < 40; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
-		x = (vid.width - l * 8) / 2;
+		x = (vid.conwidth - l * 8) / 2;
 		for (j = 0; j < l; j++, x += 8)
 			Draw_Character (x, y, start[j]);
 

@@ -169,6 +169,17 @@ void        R_TranslatePlayerSkin (int playernum);
 
 extern qboolean gl_mtexable;
 
+// Vertex array stuff.
+
+#define MAX_VERTEX_ARRAYS	1024
+typedef struct varray_t2f_c4f_v3f_s {
+	GLfloat		texcoord[2];
+	GLfloat		color[4];
+	GLfloat		vertex[3];
+} varray_t2f_c4f_v3f_t;
+
+extern varray_t2f_c4f_v3f_t varray[MAX_VERTEX_ARRAYS];
+
 //
 // gl_warp.c
 //

@@ -41,6 +41,8 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
+varray_t2f_c4f_v3f_t varray[MAX_VERTEX_ARRAYS];
+
 void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
 void R_TimeRefresh_f (void);
@@ -194,6 +196,15 @@ R_Init (void)
 
 	skyboxtexnum = texture_extension_number;
 	texture_extension_number += 6;
+
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(varray[0]), varray[0].texcoord);
+	qglColorPointer (4, GL_FLOAT, sizeof(varray[0]), varray[0].color);
+	qglVertexPointer (3, GL_FLOAT, sizeof(varray[0]), varray[0].vertex);
+
+	qglDisableClientState (GL_COLOR_ARRAY);
+//	qglEnableClientState (GL_COLOR_ARRAY);
+	qglEnableClientState (GL_VERTEX_ARRAY);
+	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 }
 
 int fb_skins[MAX_CLIENTS];

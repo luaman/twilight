@@ -30,102 +30,88 @@
 //
 // these are the key numbers that should be passed to Key_Event
 //
-#define		K_TAB			9
-#define		K_TAB			9
-#define		K_ENTER			13
-#define		K_ESCAPE		27
-#define		K_SPACE			32
+enum {
+	K_TAB			= 9,
+	K_ENTER			= 13,
+	K_ESCAPE		= 27,
+	K_SPACE			= 32,
 
-// normal keys should be passed as lowercased ascii
+	// normal keys should be passed as lowercased ascii
 
-#define		K_BACKSPACE		127
-#define		K_UPARROW		128
-#define		K_DOWNARROW		129
-#define		K_LEFTARROW		130
-#define		K_RIGHTARROW	131
+	K_BACKSPACE		= 127,
+	K_UPARROW,
+	K_DOWNARROW,
+	K_LEFTARROW,
+	K_RIGHTARROW,
 
-#define		K_ALT			132
-#define		K_CTRL			133
-#define		K_SHIFT			134
-#define		K_F1			135
-#define		K_F2			136
-#define		K_F3			137
-#define		K_F4			138
-#define		K_F5			139
-#define		K_F6			140
-#define		K_F7			141
-#define		K_F8			142
-#define		K_F9			143
-#define		K_F10			144
-#define		K_F11			145
-#define		K_F12			146
-#define		K_INS			147
-#define		K_DEL			148
-#define		K_PGDN			149
-#define		K_PGUP			150
-#define		K_HOME			151
-#define		K_END			152
+	K_ALT,
+	K_CTRL,
+	K_SHIFT,
+	K_F1,
+	K_F2,
+	K_F3,
+	K_F4,
+	K_F5,
+	K_F6,
+	K_F7,
+	K_F8,
+	K_F9,
+	K_F10,
+	K_F11,
+	K_F12,
+	K_INS,
+	K_DEL,
+	K_PGDN,
+	K_PGUP,
+	K_HOME,
+	K_END,
 
-#define		K_PAUSE			255
+	K_PAUSE,
 
-//
-// mouse buttons generate virtual keys
-//
-#define		K_MOUSE1		200
-#define		K_MOUSE2		201
-#define		K_MOUSE3		202
+	K_NUMLOCK,
+	K_CAPSLOCK,
+	K_SCROLLOCK,
 
-//
-// joystick buttons
-//
-#define		K_JOY1			203
-#define		K_JOY2			204
-#define		K_JOY3			205
-#define		K_JOY4			206
+	K_KP_0,
+	K_KP_1,
+	K_KP_2,
+	K_KP_3,
+	K_KP_4,
+	K_KP_5,
+	K_KP_6,
+	K_KP_7,
+	K_KP_8,
+	K_KP_9,
+	K_KP_PERIOD,
+	K_KP_DIVIDE,
+	K_KP_MULTIPLY,
+	K_KP_MINUS,
+	K_KP_PLUS,
+	K_KP_ENTER,
+	K_KP_EQUALS,
 
-//
-// aux keys are for multi-buttoned joysticks to generate so they can use
-// the normal binding process
-//
-#define		K_AUX1			207
-#define		K_AUX2			208
-#define		K_AUX3			209
-#define		K_AUX4			210
-#define		K_AUX5			211
-#define		K_AUX6			212
-#define		K_AUX7			213
-#define		K_AUX8			214
-#define		K_AUX9			215
-#define		K_AUX10			216
-#define		K_AUX11			217
-#define		K_AUX12			218
-#define		K_AUX13			219
-#define		K_AUX14			220
-#define		K_AUX15			221
-#define		K_AUX16			222
-#define		K_AUX17			223
-#define		K_AUX18			224
-#define		K_AUX19			225
-#define		K_AUX20			226
-#define		K_AUX21			227
-#define		K_AUX22			228
-#define		K_AUX23			229
-#define		K_AUX24			230
-#define		K_AUX25			231
-#define		K_AUX26			232
-#define		K_AUX27			233
-#define		K_AUX28			234
-#define		K_AUX29			235
-#define		K_AUX30			236
-#define		K_AUX31			237
-#define		K_AUX32			238
+	// mouse buttons generate virtual keys
 
-// JACK: Intellimouse(c) Mouse Wheel Support
+	K_MOUSE1,
+	K_MOUSE2,
+	K_MOUSE3,
+	K_MOUSE4,
+	K_MOUSE5,
+	K_MOUSE6,
+	K_MOUSE7,
+	K_MOUSE8,
+	K_MOUSE9,
+	K_MOUSE10,
+	K_MOUSE11,
+	K_MOUSE12,
+	K_MOUSE13,
+	K_MOUSE14,
+	K_MOUSE15,
+	K_MOUSE16,
 
-#define		K_MWHEELUP		239
-#define		K_MWHEELDOWN	240
-
-
+	K_MWHEELUP		= K_MOUSE4,
+	K_MWHEELDOWN	= K_MOUSE5,
+} keynum_t;
 
 typedef enum { key_game, key_console, key_message, key_menu } keydest_t;
 
