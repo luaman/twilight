@@ -448,32 +448,49 @@ V_CalcPowerupCshift (void)
 V_CalcBlend
 =============
 */
+// LordHavoc: fixed V_CalcBlend
 void
 V_CalcBlend (void)
 {
-	float       r = 0, g = 0, b = 0, a = 0, a2;
-	int         j;
+	float	r, g, b, a, a2;
+	int		j;
 
-	for (j = 0; j < NUM_CSHIFTS; j++) {
-		if (!gl_cshiftpercent->value)
-			continue;
+	r = 0;
+	g = 0;
+	b = 0;
+	a = 0;
 
-		a2 = ((cl.cshifts[j].percent
-					* gl_cshiftpercent->value) / 100.0) / 255.0;
+	if (gl_cshiftpercent->value)
+	{
+		for (j=0 ; j<NUM_CSHIFTS ; j++)	
+		{
+			a2 = cl.cshifts[j].percent * gl_cshiftpercent->value * (1.0f / 25500.0f);
 
-		if (!a2)
-			continue;
-		a = a + a2 * (1 - a);
-		a2 = a2 / a;
-		r = r * (1 - a2) + cl.cshifts[j].destcolor[0] * a2;
-		g = g * (1 - a2) + cl.cshifts[j].destcolor[1] * a2;
-		b = b * (1 - a2) + cl.cshifts[j].destcolor[2] * a2;
+			if (!a2)
+				continue;
+			if (a2 > 1)
+				a2 = 1;
+			r += (cl.cshifts[j].destcolor[0]-r) * a2;
+			g += (cl.cshifts[j].destcolor[1]-g) * a2;
+			b += (cl.cshifts[j].destcolor[2]-b) * a2;
+			// LordHavoc:
+			// correct alpha multiply...  took a while to find it on the web
+			a = 1 - (1 - a) * (1 - a2);
+		}
+		// saturate color (to avoid blending in black)
+		if (a)
+		{
+			a2 = 1 / a;
+			r *= a2;
+			g *= a2;
+			b *= a2;
+		}
 	}
 
-	v_blend[0] = r / 255.0;
-	v_blend[1] = g / 255.0;
-	v_blend[2] = b / 255.0;
-	v_blend[3] = bound (0, a, 1);
+	v_blend[0] = bound(0, r * (1.0/255.0), 1);
+	v_blend[1] = bound(0, g * (1.0/255.0), 1);
+	v_blend[2] = bound(0, b * (1.0/255.0), 1);
+	v_blend[3] = bound(0, a              , 1);
 }
 
 /*
