@@ -317,6 +317,8 @@ Sys_mkdir (char *path)
 	mkdir (path, 0777);
 #elif defined(HAVE__MKDIR)
 	_mkdir (path);
+#else
+# error "Need either POSIX mkdir or Win32 _mkdir"
 #endif
 }
 
