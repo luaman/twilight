@@ -958,12 +958,12 @@ R_DrawAliasModel (entity_t *e)
 			if (l->die < cl.time || !l->radius)
 				continue;
 
-			add = l->radius - VectorDistance (e->origin,
-					cl_dlights[lnum].origin);
+			add = VectorDistance_fast (e->origin, l->origin);
 
-			if (add > 0.01) {
-				if (!colorlights)
-				{
+			if (add <= l->radius * l->radius) {
+				add = 8 * l->radius * l->radius / add; 
+
+				if (!colorlights) {
 					ambientlight += add;
 					// ZOID: models should be affected by dlights as well
 					shadelight += add;
