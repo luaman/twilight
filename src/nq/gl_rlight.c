@@ -72,14 +72,37 @@ AddLightBlend (float r, float g, float b, float a2)
 	v_blend[2] = v_blend[2] * (1 - a2) + b * a2;
 }
 
+float       bubble_sintable[17], bubble_costable[17];
+
+void
+R_InitBubble (void)
+{
+	float       a;
+	int         i;
+	float      *bub_sin, *bub_cos;
+
+	bub_sin = bubble_sintable;
+	bub_cos = bubble_costable;
+
+	for (i = 16; i >= 0; i--) {
+		a = i / 16.0 * M_PI * 2;
+		*bub_sin++ = sin (a);
+		*bub_cos++ = cos (a);
+	}
+}
+
 void
 R_RenderDlight (dlight_t *light)
 {
 	int         i, j;
-	float       a;
+
+//  float   a;
 	vec3_t      v;
 	float       rad;
+	float      *bub_sin, *bub_cos;
 
+	bub_sin = bubble_sintable;
+	bub_cos = bubble_costable;
 	rad = light->radius * 0.35;
 
 	VectorSubtract (light->origin, r_origin, v);
@@ -89,20 +112,22 @@ R_RenderDlight (dlight_t *light)
 	}
 
 	glBegin (GL_TRIANGLE_FAN);
-	glColor3f (0.2, 0.1, 0.0);
+	glColor3f (0.2,0.1,0.0);
 	for (i = 0; i < 3; i++)
 		v[i] = light->origin[i] - vpn[i] * rad;
 	glVertex3fv (v);
 	glColor3f (0, 0, 0);
 	for (i = 16; i >= 0; i--) {
-		a = i / 16.0 * M_PI * 2;
 		for (j = 0; j < 3; j++)
-			v[j] = light->origin[j] + vright[j] * Q_cos (a) * rad
-				+ vup[j] * Q_sin (a) * rad;
+			v[j] = light->origin[j] + (vright[j] * (*bub_cos) +
+									   +vup[j] * (*bub_sin)) * rad;
+		bub_sin++;
+		bub_cos++;
 		glVertex3fv (v);
 	}
 	glEnd ();
 }
+
 
 /*
 =============
