@@ -1089,8 +1089,6 @@ CL_Init_Cvars (void)
 	host_speeds = Cvar_Get ("host_speeds", "0", CVAR_NONE, NULL);
 	show_fps = Cvar_Get ("show_fps", "0", CVAR_NONE, NULL);
 
-	cl_warncmd = Cvar_Get ("cl_warncmd", "0", CVAR_NONE, NULL);
-
 	rcon_password = Cvar_Get ("rcon_password", "", CVAR_NONE, NULL);
 	rcon_address = Cvar_Get ("rcon_address", "", CVAR_NONE, NULL);
 

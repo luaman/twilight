@@ -844,6 +844,9 @@ Cmd_Init (xcommand_t CmdForwardToServer)
 	Cmd_AddCommand ("alias", Cmd_Alias_f);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
 
+	// and our cvars
+	cl_warncmd = Cvar_Get ("cl_warncmd", "0", CVAR_NONE, NULL);
+
 	if (CmdForwardToServer)
 		Cmd_AddCommand ("cmd", CmdForwardToServer);
 }
