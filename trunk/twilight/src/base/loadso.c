@@ -63,7 +63,7 @@ extern DECLSPEC void SDL_UnloadObject(void *handle);
 
 
 typedef enum {
-#ifdef HAVE_SDL_LOADOBJ
+#ifdef HAVE_SDL_LOADOBJECT
 	SO_SDL,
 #endif
 #ifdef HAVE_DLOPEN

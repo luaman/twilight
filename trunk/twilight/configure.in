@@ -164,7 +164,7 @@ AC_MSG_CHECKING(if SDL has SDL_LoadObject)
 if test "x$with_loadobj" = "xyes"; then
 	SAVE_LIBS=$LIBS
 	LIBS=$SDL_LIBS
-	AC_LINK_IFELSE([int main (int argc, char **argv) { argc=argc; argv=argv; SDL_LoadObject(""); return 0; }], [AC_MSG_RESULT(yes); AC_DEFINE(HAVE_SDL_LOADOBJ, 1, [Defined if we have SDL_LoadObject])], [AC_MSG_RESULT(no)])
+	AC_LINK_IFELSE([int main (int argc, char **argv) { argc=argc; argv=argv; SDL_LoadObject(""); return 0; }], [AC_MSG_RESULT(yes); AC_DEFINE(HAVE_SDL_LOADOBJECT, 1, [Defined if we have SDL_LoadObject])], [AC_MSG_RESULT(no)])
 	LIBS=$SAVE_LIBS
 fi
 
