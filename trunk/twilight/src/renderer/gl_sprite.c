@@ -32,7 +32,6 @@ static const char rcsid[] =
 #include "gl_info.h"
 #include "gl_arrays.h"
 #include "model.h"
-#include "light.h"
 #include "quakedef.h"
 #include "r_part.h"
 #include "vis.h"

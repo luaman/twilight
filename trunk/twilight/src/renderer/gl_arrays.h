@@ -156,7 +156,7 @@ TWI_ChangeVDrawArrays_p (vertex_t *v, texcoord_t *tc0,
 		qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(colorub_t), cub);
 		_carray = cub;
 	}
-	if (cub && cf != _carray) {
+	if (cf && cf != _carray) {
 		qglColorPointer (4, GL_FLOAT, sizeof(colorf_t), cf);
 		_carray = cf;
 	}

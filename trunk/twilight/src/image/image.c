@@ -34,6 +34,7 @@ static const char rcsid[] =
 #include "qlmp.h"
 #include "tga.h"
 #include "sys.h"
+#include "sdlimage.h"
 
 image_t *
 Image_Load (char *name)
@@ -46,6 +47,9 @@ Image_Load (char *name)
 	if (!name)
 		Sys_Error ("IMG_Load: Attempt to load NULL image");
 
+	// FIXME: HACK HACK HACK.
+	Image_InitSDL ();
+
 	strlcpy(woext, name, MAX_OSPATH);
 	COM_StripExtension (woext, woext);
 
@@ -53,6 +57,9 @@ Image_Load (char *name)
 	for (p = woext; *p; p++)
 		if (*p == '*')
 			*p = '#';
+
+	if ((img = Image_FromSDL(woext)))
+		return img;
 
 	snprintf (buf, MAX_OSPATH, "%s.tga", woext);
 	if ((img = TGA_Load (buf)))

@@ -59,14 +59,14 @@ static vec3_t	bboxmin, bboxmax;
 float	bboxradius, bboxyawradius;
 
 static inline void
-Mod_CheckMinMaxVerts8 (Uint8 t[3])
+Mod_CheckMinMaxVerts (avertex_t t)
 {
 	vec3_t	v;
 	float	dist;
 	int		i;
 
 	for (i = 0; i < 3; i++) {
-		v[i] = t[i] * pheader->scale[i] + pheader->scale_origin[i];
+		v[i] = t.v[i] * pheader->scale[i] + pheader->scale_origin[i];
 
 		if (bboxmin[i] > v[i])
 			bboxmin[i] = v[i];
@@ -116,7 +116,7 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame, model_t *mod)
 		j = vremap[i];
 		pose->normal_indices[j] = pinframe->lightnormalindex;
 		VectorCopy(pinframe->v, pose->vertices[j].v);
-		Mod_CheckMinMaxVerts8 (pose->vertices[j].v);
+		Mod_CheckMinMaxVerts (pose->vertices[j]);
 
 		if (vseams[i]) {
 			pose->normal_indices[j + 1] = pinframe->lightnormalindex;
@@ -175,7 +175,7 @@ Mod_LoadAliasGroup (Uint8 *datapointer, maliasframedesc_t *frame, model_t *mod)
 			k = vremap[j];
 			pose->normal_indices[k] = vertices[j].lightnormalindex;
 			VectorCopy(vertices[j].v, pose->vertices[k].v);
-			Mod_CheckMinMaxVerts8 (pose->vertices[k].v);
+			Mod_CheckMinMaxVerts (pose->vertices[k]);
 
 			if (vseams[j]) {
 				pose->normal_indices[k + 1] = vertices[j].lightnormalindex;

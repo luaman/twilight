@@ -30,8 +30,6 @@
 #include "quakedef.h"
 #include "qtypes.h"
 #include "common.h"
-#include "light.h"
-#include "zone.h"
 #include "gl_info.h"
 #include "zone.h"
 

@@ -145,7 +145,7 @@ if test "x$with_clients" != "xno"; then
 fi
 
 dnl Check for SDL
-AM_PATH_SDL(1.2.4,
+AM_PATH_SDL(1.2.5,
 	AC_DEFINE(HAVE_SDL_H, 1,
 			  [Define if you have SDL available (required for clients)])
 	SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"

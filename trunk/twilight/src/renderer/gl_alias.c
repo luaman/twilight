@@ -34,7 +34,6 @@ static const char rcsid[] =
 #include "gl_info.h"
 #include "gl_arrays.h"
 #include "model.h"
-#include "light.h"
 #include "quakedef.h"
 #include "r_part.h"
 #include "vis.h"
@@ -49,8 +48,6 @@ float r_avertexnormals[NUMVERTEXNORMALS][3] = {
 #include "anorms.h"
 };
 
-static float shadelight;
-
 // precalculated dot products for quantized angles
 #define SHADEDOT_QUANT 16
 static float       r_avertexnormal_dots[SHADEDOT_QUANT][256] =
@@ -58,6 +55,8 @@ static float       r_avertexnormal_dots[SHADEDOT_QUANT][256] =
            ;
 
 static float *shadedots = r_avertexnormal_dots[0];
+
+static vec3_t lightcolor;
 
 /*
 =============================================================
@@ -98,7 +97,7 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_common_t *e)
 	for (i = 0; i < paliashdr->numverts; i++) {
 		VectorCopy(pose->vertices[i].v, v_array_v(i));
 
-		l = shadedots[pose->normal_indices[i]] * shadelight;
+		l = shadedots[pose->normal_indices[i]];
 		VectorScale(lightcolor, l, cf_array_v(i));
 		cf_array(i, 3) = 1;
 	}
@@ -150,66 +149,47 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_common_t *e)
 			return; // Never reached.
 		case 1:
 			for (i = 0; i < paliashdr->numverts; i++) {
-				v_array(i, 0) = poses[0]->vertices[i].v[0];
-				v_array(i, 1) = poses[0]->vertices[i].v[1];
-				v_array(i, 2) = poses[0]->vertices[i].v[2];
+				VectorCopy(poses[0]->vertices[i].v, v_array_v(i));
 
 				d = shadedots[poses[0]->normal_indices[i]];
-				d *= shadelight;
 				VectorScale (lightcolor, d, cf_array_v(i));
 				cf_array(i, 3) = 1;
 			}
 			break;
 		case 2:
 			for (i = 0; i < paliashdr->numverts; i++) {
-				v_array(i, 0) = poses[0]->vertices[i].v[0] * fracs[0];
-				v_array(i, 0) += poses[1]->vertices[i].v[0] * fracs[1];
-				v_array(i, 1) = poses[0]->vertices[i].v[1] * fracs[0];
-				v_array(i, 1) += poses[1]->vertices[i].v[1] * fracs[1];
-				v_array(i, 2) = poses[0]->vertices[i].v[2] * fracs[0];
-				v_array(i, 2) += poses[1]->vertices[i].v[2] * fracs[1];
+				VectorScale(poses[0]->vertices[i].v, fracs[0], v_array_v(i));
+				VectorMI(poses[1]->vertices[i].v, fracs[1], v_array_v(i));
 
 				d = shadedots[poses[0]->normal_indices[i]] * fracs[0];
 				d += shadedots[poses[1]->normal_indices[i]] * fracs[1];
-				d *= shadelight;
 				VectorScale (lightcolor, d, cf_array_v(i));
 				cf_array(i, 3) = 1;
 			}
 			break;
 		case 3:
 			for (i = 0; i < paliashdr->numverts; i++) {
-				v_array(i, 0) = poses[0]->vertices[i].v[0] * fracs[0];
-				v_array(i, 0) += poses[1]->vertices[i].v[0] * fracs[1];
-				v_array(i, 0) += poses[2]->vertices[i].v[0] * fracs[2];
-				v_array(i, 1) = poses[0]->vertices[i].v[1] * fracs[0];
-				v_array(i, 1) += poses[1]->vertices[i].v[1] * fracs[1];
-				v_array(i, 1) += poses[2]->vertices[i].v[1] * fracs[2];
-				v_array(i, 2) = poses[0]->vertices[i].v[2] * fracs[0];
-				v_array(i, 2) += poses[1]->vertices[i].v[2] * fracs[1];
-				v_array(i, 2) += poses[2]->vertices[i].v[2] * fracs[2];
+				VectorScale(poses[0]->vertices[i].v, fracs[0], v_array_v(i));
+				VectorMI(poses[1]->vertices[i].v, fracs[1], v_array_v(i));
+				VectorMI(poses[2]->vertices[i].v, fracs[2], v_array_v(i));
 
 				d = shadedots[poses[0]->normal_indices[i]] * fracs[0];
 				d += shadedots[poses[1]->normal_indices[i]] * fracs[1];
 				d += shadedots[poses[2]->normal_indices[i]] * fracs[2];
-				d *= shadelight;
 				VectorScale (lightcolor, d, cf_array_v(i));
 				cf_array(i, 3) = 1;
 			}
 			break;
 		default:
 			for (i = 0; i < paliashdr->numverts; i++) {
-				v_array(i, 0) = 0;
-				v_array(i, 1) = 0;
-				v_array(i, 2) = 0;
-				d = 0;
-				for (j = 0; j < num_frames; j++) {
-					v_array(i, 0) += poses[j]->vertices[i].v[0] * fracs[j];
-					v_array(i, 1) += poses[j]->vertices[i].v[1] * fracs[j];
-					v_array(i, 2) += poses[j]->vertices[i].v[2] * fracs[j];
+				VectorScale(poses[0]->vertices[0].v, fracs[0], v_array_v(i));
+				d = shadedots[poses[0]->normal_indices[0]] * fracs[0];
+
+				for (j = 1; j < num_frames; j++) {
+					VectorMI(poses[j]->vertices[i].v, fracs[j], v_array_v(i));
 					d += shadedots[poses[j]->normal_indices[i]] * fracs[j];
 				}
 
-				d *= shadelight;
 				VectorScale (lightcolor, d, cf_array_v(i));
 				cf_array(i, 3) = 1;
 			}
@@ -258,14 +238,7 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 	 * get lighting information
 	 */
 	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb->ivalue) {
-		shadelight = R_LightPoint (e->origin);
-
-		// always give the gun some light
-		if (viewent) {
-			lightcolor[0] = max (lightcolor[0], 24);
-			lightcolor[1] = max (lightcolor[1], 24);
-			lightcolor[2] = max (lightcolor[2], 24);
-		}
+		R_LightPoint (e->origin, lightcolor);
 
 		for (lnum = 0; lnum < r_numdlights; lnum++)
 		{
@@ -279,15 +252,20 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 					VectorMA (lightcolor, f, rd->light, lightcolor);
 			}
 		}
-
-		// ZOID: never allow players to go totally black
-		if (clmodel->modflags & FLAG_PLAYER) {
-			lightcolor[0] = max (lightcolor[0], 8);
-			lightcolor[1] = max (lightcolor[1], 8);
-			lightcolor[2] = max (lightcolor[2], 8);
-		}
 	} else if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb->ivalue)
 		lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
+
+	// The gun itself should always have some light.
+	// Players should as well, but not as much.
+	if (viewent) {
+		lightcolor[0] = max (lightcolor[0], 24);
+		lightcolor[1] = max (lightcolor[1], 24);
+		lightcolor[2] = max (lightcolor[2], 24);
+	} else if (clmodel->modflags & FLAG_PLAYER) {
+		lightcolor[0] = max (lightcolor[0], 8);
+		lightcolor[1] = max (lightcolor[1], 8);
+		lightcolor[2] = max (lightcolor[2], 8);
+	}
 
 	shadedots = r_avertexnormal_dots[((int) (e->angles[1]
 				* (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
@@ -301,8 +279,6 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 		VectorScale (lightcolor, 0.5f, lightcolor);
 		VectorCopy (lightcolor, e->last_light);
 	}
-
-	shadelight = 1;
 
 	/*
 	 * locate the proper data
@@ -369,24 +345,22 @@ R_DrawAliasModel ()
 
 		TWI_ChangeVDrawArrays (paliashdr->numverts, 0, NULL, paliashdr->tcarray,
 				NULL, NULL, NULL);
-	}
 
-	if (has_top)
-		R_DrawSubSkin (paliashdr, &skin->top[anim], top);
+		if (has_top)
+			R_DrawSubSkin (paliashdr, &skin->top[anim], top);
 
-	if (has_bottom)
-		R_DrawSubSkin (paliashdr, &skin->bottom[anim], bottom);
+		if (has_bottom)
+			R_DrawSubSkin (paliashdr, &skin->bottom[anim], bottom);
 
-	if (has_fb) {
-		qglDisableClientState (GL_COLOR_ARRAY);
-		qglColor4fv (whitev);
+		if (has_fb) {
+			qglDisableClientState (GL_COLOR_ARRAY);
+			qglColor4fv (whitev);
 
-		R_DrawSubSkin (paliashdr, &skin->fb[anim], NULL);
+			R_DrawSubSkin (paliashdr, &skin->fb[anim], NULL);
 
-		qglEnableClientState (GL_COLOR_ARRAY);
-	}
+			qglEnableClientState (GL_COLOR_ARRAY);
+		}
 
-	if (has_top || has_bottom || has_fb) {
 		qglDepthMask (GL_TRUE);
 		qglDisable (GL_BLEND);
 	}
