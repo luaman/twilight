@@ -39,7 +39,7 @@
 #include <stdlib.h>
 #endif
 
-#ifdef __WIN32
+#ifdef _WIN32
 # include <windows.h>	// for min() and max()
 #else
 

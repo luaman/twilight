@@ -640,7 +640,7 @@ SV_UpdateToReliableMessages (void)
 	SZ_Clear (&sv.datagram);
 }
 
-#if defined(__WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
+#if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma optimize( "", off )
 #endif
 
@@ -729,7 +729,7 @@ SV_SendClientMessages (void)
 	}
 }
 
-#if defined(__WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
+#if defined(_WIN32) && _MSC_VER >= 800	/* MSVC 4.0 */
 #pragma optimize( "", on )
 #endif
 

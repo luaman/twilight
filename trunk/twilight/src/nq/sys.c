@@ -55,7 +55,7 @@ static const char rcsid[] =
 # include <pwd.h>
 #endif
 #include <errno.h>
-#ifdef __WIN32
+#ifdef _WIN32
 # include <windows.h>
 # include <io.h>
 # include "conproc.h"
@@ -398,7 +398,7 @@ extern int edit_line;
 int
 Sys_CheckClipboardPaste(int key)
 {
-#ifdef __WIN32
+#ifdef _WIN32
 	int		i;
 	HANDLE	th;
 	char	*clipText, *textCopied;
@@ -453,12 +453,12 @@ Sys_ExpandPath (char *str)
 			/* Current user's home directory */
 			if ((p = getenv("HOME")))
 				strncpy(buf, p, PATH_MAX);
-#ifdef __WIN32
+#ifdef _WIN32
 			else if ((p = getenv("USERPROFILE")))
 				strncpy(buf, p, PATH_MAX);
 			else if ((p = getenv("WINDIR")))
 				strncpy(buf, p, PATH_MAX);
-#endif /* __WIN32 */
+#endif /* _WIN32 */
 			else
 				/* This should never happen */
 				strncpy(buf, ".", PATH_MAX);

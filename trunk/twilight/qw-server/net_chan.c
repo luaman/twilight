@@ -29,7 +29,7 @@ static const char rcsid[] =
 
 #include <stdio.h>
 #include <stdarg.h>
-#ifdef __WIN32
+#ifdef _WIN32
 # include <windows.h>
 #endif
 #ifdef HAVE_UNISTD_H
@@ -117,7 +117,7 @@ Netchan_Init_Cvars (void)
 	int		port;
 
 	// pick a port value that should be nice and random
-#ifdef __WIN32
+#ifdef _WIN32
 	port = ((int) (timeGetTime () * 1000) * time (NULL)) & 0xffff;
 #else
 	port = ((int) (getpid () + getuid () * 1000) * time (NULL)) & 0xffff;

@@ -33,7 +33,7 @@ static const char rcsid[] =
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>		// struct timeval
 #endif
-#ifdef __WIN32
+#ifdef _WIN32
 # include <windows.h>
 # include <winsock.h>
 # define EWOULDBLOCK WSAEWOULDBLOCK
@@ -54,7 +54,7 @@ static const char rcsid[] =
 #endif
 #include <errno.h>
 // LordHavoc: winsock uses WSAGetLastError instead of errno, errno is never set by winsock functions
-#ifdef __WIN32
+#ifdef _WIN32
 # ifdef errno
 # undef errno
 #endif
@@ -285,7 +285,7 @@ NET_GetPacket (netsrc_t sock)
 			return false;
 		if (errno == ECONNREFUSED)
 			return false;
-#ifdef __WIN32
+#ifdef _WIN32
 		// LordHavoc: never could figure out why recvfrom was returning this
 		// (no such file or directory), but had to workaround it...
 		if (errno == ENOENT)
@@ -342,7 +342,7 @@ UDP_OpenSocket (int port)
 	struct sockaddr_in address;
 	int         i;
 
-#ifdef __WIN32
+#ifdef _WIN32
 #define ioctl ioctlsocket
 	unsigned long _true = true;
 #else
@@ -381,7 +381,7 @@ NET_OpenSocket
 void
 NET_OpenSocket (netsrc_t sock, int port)
 {
-#ifdef __WIN32
+#ifdef _WIN32
 	WSADATA     winsockdata;
 	WORD        wVersionRequested;
 	int         r;
@@ -391,7 +391,7 @@ NET_OpenSocket (netsrc_t sock, int port)
 	r = WSAStartup (MAKEWORD (1, 1), &winsockdata);
 	if (r)
 		Sys_Error ("Winsock initialization failed.");
-#endif /* __WIN32 */
+#endif /* _WIN32 */
 
 	// 
 	// open the single socket to be used for all communications
@@ -429,7 +429,7 @@ NET_Sleep (int msec)
 	fd_set			fdset;
 	struct timeval	timeout;
 
-#ifndef __WIN32
+#ifndef _WIN32
 	#ifdef TWILIGHT_QWSV
 		extern qboolean do_stdin, stdin_ready;
 	#endif
@@ -437,7 +437,7 @@ NET_Sleep (int msec)
 
 	FD_ZERO (&fdset);
 
-#ifndef __WIN32
+#ifndef _WIN32
 	#ifdef TWILIGHT_QWSV
 		if (do_stdin)
 			FD_SET (0, &fdset);
@@ -450,7 +450,7 @@ NET_Sleep (int msec)
 
 	select (ip_sockets[NS_SERVER] + 1, &fdset, NULL, NULL, &timeout);
 
-#ifndef __WIN32
+#ifndef _WIN32
 	#ifdef TWILIGHT_QWSV
 		stdin_ready = FD_ISSET (0, &fdset);
 	#endif
@@ -466,14 +466,14 @@ void
 NET_Shutdown (void)
 {
 	if (ip_sockets[NS_CLIENT] != -1)
-#ifdef __WIN32
+#ifdef _WIN32
 		closesocket (ip_sockets[NS_CLIENT]);
 #else
 		close (ip_sockets[NS_CLIENT]);
 #endif
 
 	if (ip_sockets[NS_SERVER] != -1)
-#ifdef __WIN32
+#ifdef _WIN32
 		closesocket (ip_sockets[NS_SERVER]);
 #else
 		close (ip_sockets[NS_SERVER]);

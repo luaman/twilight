@@ -36,7 +36,7 @@ static const char rcsid[] =
 #include <unistd.h>
 #endif
 
-#ifdef __WIN32
+#ifdef _WIN32
 # include <windows.h>	/* for timeGetTime() */
 #endif
 

@@ -33,7 +33,7 @@ static const char rcsid[] =
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>		// struct timeval
 #endif
-#ifdef __WIN32
+#ifdef _WIN32
 # include <windows.h>
 # include <winsock.h>
 # define EWOULDBLOCK WSAEWOULDBLOCK
@@ -54,7 +54,7 @@ static const char rcsid[] =
 #endif
 #include <errno.h>
 // LordHavoc: winsock uses WSAGetLastError instead of errno, errno is never set by winsock functions
-#ifdef __WIN32
+#ifdef _WIN32
 # ifdef errno
 #  undef errno
 # endif

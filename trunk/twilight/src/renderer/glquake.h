@@ -27,7 +27,7 @@
 #ifndef __GLQUAKE_H
 #define __GLQUAKE_H
 
-#ifdef __WIN32
+#ifdef _WIN32
 # include <windows.h>
 #endif
 
