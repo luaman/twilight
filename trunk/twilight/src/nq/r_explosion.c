@@ -106,9 +106,9 @@ void r_explosion_start(void)
 		{
 			int j, r, g, b, a;
 			j = noise1[y][x] * 3 - 128;
-			r = (j * 512) / 256;
-			g = (j * 256) / 256;
-			b = (j * 128) / 256;
+			r = (j * 256) / 256;
+			g = (j * 128) / 256;
+			b = (j *  64) / 256;
 			a = noise2[y][x];
 			data[y][x][0] = bound(0, r, 255);
 			data[y][x][1] = bound(0, g, 255);
