@@ -68,15 +68,17 @@ void
 CL_WriteDemoMessage (void)
 {
 	int         len;
-	int         i;
-	float       f;
-
+	float       ang[3];
+	
 	len = LittleLong (net_message.cursize);
 	fwrite (&len, 4, 1, cls.demofile);
-	for (i = 0; i < 3; i++) {
-		f = LittleFloat (cl.viewangles[i]);
-		fwrite (&f, 4, 1, cls.demofile);
-	}
+
+	ang[0] = LittleFloat (cl.viewangles[0]);
+	ang[1] = LittleFloat (cl.viewangles[1]);
+	ang[2] = LittleFloat (cl.viewangles[2]);
+
+	fwrite (ang, 12, 1, cls.demofile);
+
 	fwrite (net_message.data, net_message.cursize, 1, cls.demofile);
 	fflush (cls.demofile);
 }
