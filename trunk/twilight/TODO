@@ -15,6 +15,12 @@ New stuff slated for 0.2.0:
   - QW/NQ renderers - port changes between them
   - faster dlights if we can make them faster
 
+stuff slate for EvilTypeGuy for 0.2.0:
+  - clean up the menus, make sure all cvar graphics options
+    are listed on the graphics options menu in both nq/qw
+  - clean up the Cmd system, make sure that all the _init,
+    init_cvars routines are still clean and proper
+
 Would be nice but is not strictly needed:
 
   - Merge QW server into QW client ala NQ
@@ -23,4 +29,3 @@ Would be nice but is not strictly needed:
     directory (zone, mathlib, qtypes, compat, part of console, etc)
   - switch to using specific-sized SDL variables for file accesses
   - Convert Cvars from an unsorted list to a hash
-
