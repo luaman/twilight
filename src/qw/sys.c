@@ -487,8 +487,6 @@ Sys_ExpandPath (char *str)
 int
 main (int argc, char *argv[])
 {
-	double		time, oldtime, newtime, base;
-
 	sys_gametypes = GAME_QW_CLIENT;
 
 	Cmdline_Init (argc, argv);
@@ -503,16 +501,12 @@ main (int argc, char *argv[])
 
 	Host_Init ();
 
-	oldtime = base = Sys_DoubleTime ();
 	while (1)
 	{
 		// find time spent rendering last frame
-		newtime = Sys_DoubleTime ();
-		time = newtime - oldtime;
-		curtime = newtime - base;
+		curtime = Sys_DoubleTime ();
 
-		Host_Frame (time);
-		oldtime = newtime;
+		Host_Frame (curtime);
 	}
 
 	return 0;

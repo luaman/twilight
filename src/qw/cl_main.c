@@ -132,7 +132,7 @@ netadr_t	master_adr;					// address of the master server
 
 int			fps_count = 0;
 
-jmp_buf     host_abort;
+static jmp_buf host_abort;
 
 void		Master_Connect_f (void);
 
@@ -1308,21 +1308,18 @@ int         nopacketcount;
 void
 Host_Frame (double time)
 {
-	static double time1 = 0;
-	static double time2 = 0;
-	static double time3 = 0;
-	static int skipped = 0;
-	int         pass1, pass2, pass3;
-	float       fps;
+	static double	time1 = 0;
+	static double	time2 = 0;
+	static double	time3 = 0;
+	int				pass1, pass2, pass3;
+	double			fps;
 
 	if (setjmp (host_abort))
 		return;							// something bad happened, or the
 	// server disconnected
 
 	// decide the simulation time
-	cls.realtime += time;
-	if (oldrealtime > cls.realtime)
-		oldrealtime = 0;
+	cls.realtime = time;
 
 	if (cl_maxfps->fvalue)
 		fps = cl_maxfps->fvalue;
@@ -1332,12 +1329,9 @@ Host_Frame (double time)
 	fps = bound (30.0f, fps, 72.0f);
 
 	if (!cls.timedemo && ((cls.realtime - oldrealtime) < (1.0 / fps))) {
-		if (skipped < 1)
-			SDL_Delay(1);
-		skipped++;
+		SDL_Delay(1);
 		return;							// framerate is too high
 	}
-	skipped = 0;
 
 	host_frametime = cls.realtime - oldrealtime;
 	oldrealtime = cls.realtime;
