@@ -3,6 +3,7 @@ Project Twilight todo list
 
 These things are done:
   - Make +set happen as early as possible
+	(still needs to happen for qwsv)
 
 These things need to be done before first public release:
 
@@ -39,7 +40,14 @@ Would be nice but is not strictly needed, in importance order:
   - Menu overhaul
   - Knghtbrd's server console
   - Use SDL functions to simplify code
-
+  - Bash-style tab completion of aliases/commands/cvars
+    - Ability to define custom callback functions for
+      tab completion when Cmd_AddCommand is used
+      * This would allow for neato things like:
+	/map <tab> and getting a list of all maps,
+                   or completing the current mapname
+	/set <tab> getting a list of all cvars
+                   or completing the current cvar, etc.
 
 Stuff that can wait:
 
