@@ -615,7 +615,7 @@ void
 SCR_DrawConsole (void)
 {
 	if (scr_con_current) {
-		Con_DrawConsole (scr_con_current, true);
+		Con_DrawConsole (scr_con_current);
 		clearconsole = 0;
 	} else {
 		if (key_dest == key_game || key_dest == key_message)
