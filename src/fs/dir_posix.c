@@ -45,6 +45,10 @@ typedef struct fsd_group_s {
 	char *path;
 } fsd_group_t;
 
+typedef struct fsd_file_s {
+	char *path;
+} fsd_file_t;
+
 static void
 FSD_Free (fs_group_t *group)
 {
@@ -54,32 +58,28 @@ FSD_Free (fs_group_t *group)
 static void
 FSD_Free_File (fs_file_t *file)
 {
+	fsd_file_t	*f = file->fs_data;
+
+	Zone_Free (f->path);
+	Zone_Free (f);
 	Zone_Free (file->name_base);
 }
 
 static SDL_RWops *
 FSD_Open_File (fs_file_t *file, Uint32 flags)
 {
-	fsd_group_t	*dir;
-	char		*name;
+	fsd_file_t	*f = file->fs_data;
 	SDL_RWops	*rw;
-
-	dir = file->group->fs_data;
-	if (file->ext)
-		name = zasprintf (tempzone, "%s/%s.%s", dir->path, file->name_base, file->ext);
-	else
-		name = zasprintf (tempzone, "%s/%s", dir->path, file->name_base);
 
 	if (flags & FSF_WRITE) {
 		if (file->group->flags & FS_READ_ONLY) {
-			Com_Printf ("Refusing to open '%s' in write mode.\n", name);
+			Com_Printf ("Refusing to open '%s' in write mode.\n", f->path);
 			rw = NULL;
 		} else
-			rw = SDL_RWFromFile (name, "w");
+			rw = SDL_RWFromFile (f->path, "w");
 	} else
-		rw = SDL_RWFromFile (name, "r");
+		rw = SDL_RWFromFile (f->path, "r");
 
-	Zone_Free (name);
 	return rw;
 }
 
@@ -90,6 +90,7 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 	struct dirent	*dirent;
 	char			*file, *full_path, *tmp;
 	struct stat		f_stat;
+	fsd_file_t		*f;
 
 	if (depth > 32)
 		return;
@@ -104,16 +105,21 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 		if (!tmp)
 			tmp = dirent->d_name;
 
-		if (stat(va("%s/%s", full_path, tmp), &f_stat)) {
+		f = Zone_Alloc (fs_zone, sizeof (fsd_file_t));
+		f->path = zasprintf (fs_zone, "%s/%s", full_path, tmp);
+
+		if (stat(f->path, &f_stat)) {
 			Com_Printf("Can't stat %s: %s\n", va("%s/%s", full_path, tmp),
 					strerror(errno));
+			Zone_Free (f->path);
+			Zone_Free (f);
 			continue;
 		}
 		file = zasprintf(fs_zone, "%s/%s", path, tmp);
 		if (S_ISDIR(f_stat.st_mode))
 			FSD_Add_Dir (group, g_dir, file, depth + 1);
 		else
-			FS_Add_File (group, file, f_stat.st_size, FSD_Open_File, NULL);
+			FS_Add_File (group, file, f_stat.st_size, FSD_Open_File, f);
 		Zone_Free (file);
 	}
 	Zone_Free (full_path);
