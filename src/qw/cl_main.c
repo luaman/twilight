@@ -1487,8 +1487,8 @@ Host_Init (void)
 	NET_Init ();
 
 	// setup net sockets and identify host
-//	NET_OpenSocket (NS_CLIENT, PORT_CLIENT);
-	NET_OpenSocket (NS_CLIENT, PORT_ANY);
+	NET_OpenSocket (NS_CLIENT, PORT_CLIENT);
+//	NET_OpenSocket (NS_CLIENT, PORT_ANY);
 
 	Netchan_Init ();				// setup netchan
 
