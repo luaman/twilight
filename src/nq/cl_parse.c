@@ -653,13 +653,10 @@ void
 CL_ParseStatic (void)
 {
 	entity_t   *ent;
-	int         i;
 
-	i = cl.num_statics;
-	if (i >= MAX_STATIC_ENTITIES)
+	if (cl.num_statics >= MAX_STATIC_ENTITIES)
 		Host_Error ("Too many static entities");
-	ent = &cl_static_entities[i];
-	cl.num_statics++;
+	ent = &cl_static_entities[cl.num_statics++];
 	CL_ParseBaseline (ent);
 
 // copy it to the current state

@@ -840,13 +840,13 @@ R_DrawAliasModel (entity_t *e)
 {
 	int         i;
 	int         lnum;
-	vec3_t      dist;
 	float       add;
 	model_t    *clmodel;
 	vec3_t      mins, maxs;
 	aliashdr_t *paliashdr;
 	int         anim;
 	int			texture, fb_texture = 0;
+	dlight_t	*l;
 
 	clmodel = currententity->model;
 
@@ -881,25 +881,23 @@ R_DrawAliasModel (entity_t *e)
 			}
 		}
 
-		for (lnum = 0; lnum < MAX_DLIGHTS; lnum++) {
-			if (cl_dlights[lnum].die >= cl.time) {
-				VectorSubtract (currententity->origin,
-								cl_dlights[lnum].origin, dist);
-				add = (cl_dlights[lnum].radius * cl_dlights[lnum].radius * 8)
-					/ (DotProduct (dist, dist));	// FIXME Deek
+		for (lnum = 0, l = &cl_dlights[0]; lnum < MAX_DLIGHTS; lnum++, l++) {
+			if (l->die < cl.time || !l->radius)
+				continue;
 
-				if (add > 0) {
-					if (!colorlights)
-					{
-						ambientlight += add;
-						// ZOID models should be affected by dlights as well
-						shadelight += add;
-					}
-					else {
-						lightcolor[0] += add * cl_dlights[lnum].color[0];
-						lightcolor[1] += add * cl_dlights[lnum].color[1];
-						lightcolor[2] += add * cl_dlights[lnum].color[2];
-					}
+			add = l->radius - VectorDistance (currententity->origin, cl_dlights[lnum].origin);
+
+			if (add > 0.01) {
+				if (!colorlights)
+				{
+					ambientlight += add;
+					// ZOID models should be affected by dlights as well
+					shadelight += add;
+				}
+				else {
+					lightcolor[0] += add * l->color[0];
+					lightcolor[1] += add * l->color[1];
+					lightcolor[2] += add * l->color[2];
 				}
 			}
 		}
