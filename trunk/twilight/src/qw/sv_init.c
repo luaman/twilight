@@ -42,6 +42,10 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "host.h"
 
+#ifdef WIN32
+# include "winconsole.h"
+#endif
+
 server_static_t	 svs;					// persistant server info
 server_t		 sv;					// local server
 memzone_t		*sv_zone;
@@ -296,6 +300,12 @@ SV_SpawnServer (char *server)
 	sv.state = ss_dead;
 
 	Mod_ClearAll (false);
+
+
+#ifdef WIN32
+	// tell the win32 console the new map name.
+	WinCon_SetMapname (server);
+#endif
 
 	//
 	// make cvars consistent
