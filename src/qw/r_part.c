@@ -572,7 +572,7 @@ R_Torch (entity_t *ent, qboolean torch2)
 }
 
 void
-R_RocketConeTrail (vec3_t start, vec3_t end, int type)
+R_RocketTubeTrail (vec3_t start, vec3_t end, int type)
 {
 	vec3_t		vec;
 	vec4_t		color;
@@ -599,7 +599,7 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 	ptype_t		ptype;
 
 	if (type == 0) {
-		R_RocketConeTrail (start, end, type);
+		R_RocketTubeTrail (start, end, type);
 		return;
 	}
 
