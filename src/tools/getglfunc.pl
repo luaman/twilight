@@ -26,7 +26,7 @@ sub main {
 			foreach $arg (@{$pfunc->[2]}) {
 			push (@args, sprintf("%s %s", $arg->[0], $arg->[1]));
 		}
-	    printf("OGL_NEED (%s, %s, (%s))\n",
+	    printf("DYNGL_NEED (%s, %s, (%s))\n",
 			$pfunc->[0], $pfunc->[1], join(', ', @args));
 			exit();
 		}
