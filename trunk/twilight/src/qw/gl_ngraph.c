@@ -42,8 +42,6 @@ static const char rcsid[] =
 #include "menu.h"
 #include "sbar.h"
 
-extern Uint8 *draw_chars;				// 8*8 graphic characters
-
 int         netgraphtexture;			// netgraph texture
 
 #define NET_GRAPHHEIGHT 32
@@ -79,26 +77,6 @@ R_LineGraph (int x, int h)
 
 	for (; i < s; i++)
 		ngraph_texels[NET_GRAPHHEIGHT - i - 1][x] = (Uint8) 0xff;
-}
-
-void
-Draw_CharToNetGraph (int x, int y, int num)
-{
-	int         row, col;
-	Uint8      *source;
-	int         drawline;
-	int         nx;
-
-	row = num >> 4;
-	col = num & 15;
-	source = draw_chars + (row << 10) + (col << 3);
-
-	for (drawline = 8; drawline; drawline--, y++) {
-		for (nx = 0; nx < 8; nx++)
-			if (source[nx] != 255)
-				ngraph_texels[y][nx + x] = 0x60 + source[nx];
-		source += 128;
-	}
 }
 
 
