@@ -12,8 +12,6 @@ Bugs we know about:
     broke this and DP has fixed it.
   - RC: Fix net_udp (line 112) so we don't resolve non-network connections.
     (Non-trivial)
-  - RC: We need to split the model loading into server and client versions.
-    (Need to load much less for the server.)
   - RC: Interpolation is broken in both NQ/QW.
     (Can LH do this /please/?)
   - RC: Need to print out Id's Copyright message on engine startup.
@@ -27,6 +25,7 @@ Bugs we know about:
   - lights do not react to moving bmodels, untransforming into the
     bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.
+    (Need some example bad BSPs.)
 
   Driver related quirks:
   - RC: Need a 3dfx quirk for limiting vertex array size.  We need the
