@@ -856,7 +856,6 @@ R_DrawAliasModel (entity_t *e)
 	if (R_CullBox (mins, maxs))
 		return;
 
-
 	VectorCopy (currententity->origin, r_entorigin);
 	VectorSubtract (r_origin, r_entorigin, modelorg);
 
@@ -876,12 +875,9 @@ R_DrawAliasModel (entity_t *e)
 		else {
 			if (e == &cl.viewent)
 			{
-				if (lightcolor[0] < 24)
-					lightcolor[0] = 24;
-				if (lightcolor[1] < 24)
-					lightcolor[1] = 24;
-				if (lightcolor[2] < 24)
-					lightcolor[2] = 24;
+				lightcolor[0] = max (lightcolor[0], 24);
+				lightcolor[1] = max (lightcolor[1], 24);
+				lightcolor[2] = max (lightcolor[2], 24);
 			}
 		}
 
@@ -926,12 +922,9 @@ R_DrawAliasModel (entity_t *e)
 				ambientlight = shadelight = 8;
 		}
 		else {
-			if (lightcolor[0] < 8)
-				lightcolor[0] = 8;
-			if (lightcolor[1] < 8)
-				lightcolor[1] = 8;
-			if (lightcolor[2] < 8)
-				lightcolor[2] = 8;
+			lightcolor[0] = max (lightcolor[0], 8);
+			lightcolor[1] = max (lightcolor[1], 8);
+			lightcolor[2] = max (lightcolor[2], 8);
 		}
 	}
 
@@ -947,10 +940,27 @@ R_DrawAliasModel (entity_t *e)
 		r_avertexnormal_dots[((int) (e->angles[1] * (SHADEDOT_QUANT / 360.0))) &
 							 (SHADEDOT_QUANT - 1)];
 
-	if (!colorlights)
+	if (!colorlights) {
 		shadelight = shadelight * (1.0 / 200.0);
-	else
+
+		if (!currententity->last_light[0])
+			currententity->last_light[0] = shadelight;
+		else {
+			shadelight = (shadelight + currententity->last_light[0])*0.5f;
+			currententity->last_light[0] = shadelight;
+		}
+	}
+	else {
 		VectorScale(lightcolor, 1.0f / 200.0f, lightcolor);
+
+		if (!currententity->last_light[0] && !currententity->last_light[1] && !currententity->last_light[2])
+			VectorCopy (lightcolor, currententity->last_light);
+		else {
+			VectorAdd (lightcolor, currententity->last_light, lightcolor);
+			VectorScale (lightcolor, 0.5f, lightcolor);
+			VectorCopy (lightcolor, currententity->last_light);
+		}
+	}
 
 	// 
 	// locate the proper data
@@ -1055,13 +1065,13 @@ R_DrawAliasModel (entity_t *e)
 		float an;
 
 		if (!shadescale)
-			shadescale = Q_sqrt(2);
+			shadescale = 1 / Q_sqrt(2);
 
 		an = e->angles[1] * (M_PI / 180);
 
-		shadevector[0] = Q_cos (an) / shadescale;
-		shadevector[1] = -Q_sin (an) / shadescale;
-		shadevector[2] = 1 / shadescale;
+		shadevector[0] = Q_cos (an) * shadescale;
+		shadevector[1] = -Q_sin (an) * shadescale;
+		shadevector[2] = shadescale;
 
 		qglPushMatrix ();
 

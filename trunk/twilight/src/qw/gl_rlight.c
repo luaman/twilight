@@ -756,8 +756,7 @@ int R_LightPoint (vec3_t p)
 
 		RecursiveColorLightPoint (lightcolor, cl.worldmodel->nodes, p, end);
 
-		return ((lightcolor[0] + lightcolor[1] + lightcolor[2])
-				* (1.0f / 3.0f));
+		return 255;
 	}
 }
 

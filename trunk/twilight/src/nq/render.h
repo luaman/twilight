@@ -84,6 +84,7 @@ typedef struct entity_s {
 	float       rotate_start_time;
 	vec3_t      angles1;
 	vec3_t      angles2;
+	vec3_t		last_light;
 } entity_t;
 
 typedef struct {
