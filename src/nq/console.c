@@ -41,7 +41,6 @@ static const char rcsid[] =
 #include "screen.h"
 #include "strlib.h"
 #include "sys.h"
-#include "host.h"
 
 extern void Size_Changed2D (cvar_t *cvar);
 
@@ -58,7 +57,6 @@ qboolean	con_forcedup;				// because no entities to refresh
 
 
 cvar_t	   *con_notifytime;
-cvar_t	   *con_logname;
 
 #define	NUM_CON_TIMES 4
 float		con_times[NUM_CON_TIMES];	// realtime the line was generated
@@ -66,16 +64,12 @@ float		con_times[NUM_CON_TIMES];	// realtime the line was generated
 int			con_vislines;
 int			con_notifylines;			// scan lines to clear for notify lines
 
-qboolean	con_debuglog;
-
 extern char	key_lines[32][MAX_INPUTLINE];
 extern int	edit_line;
 extern int	key_linepos;
 
 
 qboolean	con_initialized;
-
-char	logname[MAX_OSPATH] = "";
 
 void
 Key_ClearTyping (void)
@@ -230,16 +224,6 @@ Con_CheckResize (void)
 		Con_Resize (con);
 }
 
-static void
-setlogname (cvar_t *con_logname)
-{
-	if (com_gamedir[0] && con_logname->svalue && con_logname->svalue[0])
-		snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
-				con_logname->svalue);
-	else
-		logname[0] = '\0';
-}
-
 /*
 ================
 Con_Init_Cvars
@@ -249,7 +233,6 @@ void
 Con_Init_Cvars (void)
 {
 	con_notifytime = Cvar_Get ("con_notifytime", "3", CVAR_NONE, NULL);
-	con_logname = Cvar_Get ("con_logname", "", CVAR_NONE, &setlogname);
 }
 
 /*
@@ -260,9 +243,6 @@ Con_Init
 void
 Con_Init (void)
 {
-	if (COM_CheckParm ("-condebug"))
-		Cvar_Set (con_logname, "qconsole");
-
 	con_zone = Zone_AllocZone ("console");
 
 	con = Zone_Alloc (con_zone, sizeof(console_t));
@@ -314,12 +294,14 @@ Con_Print (char *txt)
 	int			y, c, l, mask;
 	static int	cr;
 
+	if (!con_initialized)
+		return;
+
 	if (txt[0] == 1 || txt[0] == 2) {
 		mask = 128;						// go to colored text
 		txt++;
 	} else
 		mask = 0;
-
 
 	while ((c = *txt)) {
 		// count word length
@@ -343,7 +325,7 @@ Con_Print (char *txt)
 			Con_Linefeed ();
 			// mark time for transparent overlay
 			if (con->current >= 0)
-				con_times[con->current % NUM_CON_TIMES] = host_realtime;
+				con_times[con->current % NUM_CON_TIMES] = cls.realtime;
 		}
 
 		switch (c) {
@@ -404,7 +386,7 @@ Con_DrawInput (void)
 	Draw_String_Len(con->tsize, con_vislines - (con->tsize * 2.75), text,
 			con_linewidth, con->tsize);
 
-	if ((int) (host_realtime * con_cursorspeed) & 1)
+	if ((int) (cls.realtime * con_cursorspeed) & 1)
 		Draw_Character ((1 + key_linepos) * con->tsize,
 				con_vislines - (con->tsize * 2.65), 11, con->tsize);
 }
@@ -434,7 +416,7 @@ Con_DrawNotify (void)
 		time = con_times[i % NUM_CON_TIMES];
 		if (time == 0)
 			continue;
-		time = host_realtime - time;
+		time = cls.realtime - time;
 		if (time > con_notifytime->fvalue)
 			continue;
 		text = con->text + (i % con_totallines) * con_linewidth;
@@ -466,7 +448,7 @@ Con_DrawNotify (void)
 		Draw_String (skip * con->tsize, v, s, con->tsize);
 
 		Draw_Character ((strlen(s) + skip) * con->tsize, v,
-						10 + ((int) (host_realtime * con_cursorspeed) & 1),
+						10 + ((int) (cls.realtime * con_cursorspeed) & 1),
 						con->tsize);
 		v += con->tsize;
 	}

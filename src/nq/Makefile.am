@@ -25,7 +25,7 @@ endif
 
 if SYS_WIN32
 twilight_nq_sys_libs=-lwinmm -lwsock32
-twilight_nq_sys_sources=conproc.c conproc.h
+twilight_nq_sys_sources=
 else
 twilight_nq_sys_libs=
 twilight_nq_sys_sources=
@@ -49,9 +49,6 @@ twilight_nq_SOURCES= \
 	sys.c teamplay.c vid_sdl.c \
         view.c world.c world.h \
 	$(twilight_nq_sys_sources)
-
-EXTRA_twilight_nq_SOURCES= \
-	conproc.c conproc.h
 
 EXTRA_DIST= \
 	nq.dsp

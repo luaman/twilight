@@ -16,8 +16,6 @@ Bugs we know about:
   - Damm can demonstrate lightmap corruption consistantly with certain
     maps at certain times.  He can't reproduce it at will, but it does
     happen.
-  - RC: NQ -dedicated is borked for console input in Linux.  Port the QW
-    sys.c across to NQ and add in the sv_sys differences.
   - RC: Need to print out Id's Copyright message on engine startup.
   - RC: Need a 3dfx quirk for limiting vertex array size.  We need the
     output of the OpenGL strings in Win32 for this.

@@ -56,9 +56,9 @@ static const char rcsid[] =
 #endif
 #include <errno.h>
 #ifdef _WIN32
-# include <windows.h>
+// Don't need windows.h till we have win32 GUI console
 # include <io.h>
-# include "conproc.h"
+# include <conio.h>
 #endif
 #ifdef HAVE_EXECINFO_H
 # include <execinfo.h>
@@ -77,27 +77,33 @@ static const char rcsid[] =
 // LordHavoc: for win32 which does not have PATH_MAX defined without POSIX
 // (and that disables lots of other useful stuff)
 #ifndef PATH_MAX
-#define PATH_MAX 256
+# define PATH_MAX 256
 #endif
-
 
 int nostdout = 0;
 
-qboolean isDedicated;
-
-
-#ifdef _WIN32
-HANDLE hinput, houtput;
-static HANDLE hFile;
-static HANDLE heventParent;
-static HANDLE heventChild;
-#endif
+Uint32 sys_sleep;
 
 char *qdate = __DATE__;
 
 cvar_t *sys_asciionly;
+cvar_t *sys_extrasleep;
+cvar_t *sys_logname;
 
-double curtime;
+int sys_gametypes;
+
+char logname[MAX_OSPATH] = "";
+
+double curtime = 0;
+
+qboolean isDedicated;
+qboolean do_stdin = true;
+qboolean stdin_ready;
+
+#ifdef _WIN32
+HANDLE semaphore;
+#endif
+
 
 // =======================================================================
 // General routines
@@ -154,28 +160,16 @@ Sys_Printf (char *fmt, ...)
 	vsnprintf (text, sizeof (text), fmt, argptr);
 	va_end (argptr);
 
-#ifdef _WIN32
-	if (isDedicated)
-	{
-		DWORD		dummy;
-
-		WriteFile(houtput, text, strlen (text), &dummy, NULL);
-		FlushFileBuffers(houtput);
-		return;
-	}
-#endif
-
 	if (sys_asciionly && sys_asciionly->ivalue)
-		for (p = (unsigned char *) text; *p; p++)
+		for (p = text; *p; p++)
 			putc (sys_charmap[*p], stdout);
 	else
-		for (p = (unsigned char *) text; *p; p++)
+		for (p = text; *p; p++)
 			if ((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
 				printf ("[%02x]", *p);
 			else
 				putc (*p, stdout);
-
-	fflush(stdout);
+	fflush (stdout);
 }
 
 void
@@ -185,19 +179,30 @@ Sys_Quit (void)
 #ifdef HAVE_FCNTL
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 #endif
-
-#ifdef _WIN32
-	if (isDedicated)
-		FreeConsole ();
-#endif
-
-	SDL_Quit();
+	SDL_Quit ();
 	exit (0);
 }
 
-#ifdef _WIN32
-HANDLE qwclsemaphore;
-#endif
+static void
+setextrasleep (cvar_t *sys_extrasleep)
+{
+	if (sys_extrasleep->ivalue < 0)
+		Cvar_Set (sys_extrasleep, "0");
+	else if (sys_extrasleep->ivalue > 1000000)
+		Cvar_Set (sys_extrasleep, "1000000");
+
+	sys_sleep = (Uint32)((sys_extrasleep->ivalue) * (1.0f / 1000.0f));
+}
+
+static void
+setlogname (cvar_t *sys_logname)
+{
+	if (com_gamedir[0] && sys_logname->svalue && sys_logname->svalue[0])
+		snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
+				sys_logname->svalue);
+	else
+		logname[0] = '\0';
+}
 
 void
 Sys_Init (void)
@@ -208,22 +213,51 @@ Sys_Init (void)
 	// Win32 clients need to make front-end programs happy
 
 	// will fail if semaphore already exists
-	qwclsemaphore = CreateMutex (NULL, 0, "qwcl");
-	if (!qwclsemaphore)
-		Sys_Error ("Project: Twilight NQ is already running");
+	semaphore = CreateMutex (NULL, 0, "nq");
+	if (!semaphore)
+		Sys_Error ("Project: Twilight is already running");
 
-	qwclsemaphore = CreateSemaphore (NULL, 0, 1, "qwcl");
+	semaphore = CreateSemaphore (NULL, 0, 1, "nq");
 #endif
 
+	sys_extrasleep = Cvar_Get ("sys_extrasleep", "0", CVAR_NONE,
+			setextrasleep);
 	sys_asciionly = Cvar_Get ("sys_asciionly", "1", CVAR_ARCHIVE, NULL);
+	sys_logname = Cvar_Get ("sys_logname", "", CVAR_NONE, setlogname);
+
+	if (COM_CheckParm ("-condebug"))
+		Cvar_Set (sys_logname, "qconsole");
 
 	Math_Init ();
+
+#ifdef _WIN32
+	if (COM_CheckParm ("-nopriority"))
+	{
+		Cvar_Set (sys_extrasleep, "0");
+	}
+	else
+	{
+		OSVERSIONINFO	vinfo;
+
+		vinfo.dwOSVersionInfoSize = sizeof(vinfo);
+		if (!GetVersionEx (&vinfo))
+			Sys_Error ("Couldn't get OS info");
+
+		if (!SetPriorityClass (GetCurrentProcess(), HIGH_PRIORITY_CLASS))
+			Sys_Printf ("SetPriorityClass() failed\n");
+		else
+			Sys_Printf ("Process priority class set to HIGH\n");
+
+		if (vinfo.dwPlatformId == VER_PLATFORM_WIN32_NT)
+			Cvar_Set (sys_extrasleep, "0");
+	}
+#endif
 
 	sdlflags = SDL_INIT_TIMER;
 	if (COM_CheckParm ("-noparachute"))
 	{
 		sdlflags |= SDL_INIT_NOPARACHUTE;
-		Sys_Printf ("Sys_Init: Flying without a parachute!\n");
+		Sys_Printf ("Flying without a parachute!\n");
 	}
 
 	SDL_Init (sdlflags);
@@ -255,7 +289,7 @@ Sys_Error (char *error, ...)
 	Host_Shutdown ();
 
 #ifdef HAVE_FCNTL
-// change stdin to non blocking
+	// change stdin to non blocking
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 #endif
 
@@ -302,13 +336,11 @@ Sys_FileTime (char *path)
 	return buf.st_mtime;
 }
 
-
 void
 Sys_mkdir (char *path)
 {
 	mkdir (path, 0777);
 }
-
 
 void
 Sys_DebugLog (char *file, char *fmt, ...)
@@ -350,71 +382,65 @@ Sys_ConsoleInput (void)
 #ifdef _WIN32
 	static char		text[256];
 	static int		len;
-	INPUT_RECORD	recs[1024];
-	CHAR			ch;
-	DWORD			numevents, numread, dummy;
+	int				c;
 
-	if (!isDedicated)
+	// read a line out
+	while (_kbhit ())
+	{
+		c = _getch ();
+		putch (c);
+		if (c == '\r')
+		{
+			text[len] = 0;
+			putch ('\n');
+			len = 0;
+			return text;
+		}
+		if (c == 8)
+		{
+			if (len)
+			{
+				putch (' ');
+				putch (c);
+				len--;
+				text[len] = 0;
+			}
+			continue;
+		}
+		text[len] = c;
+		len++;
+		text[len] = 0;
+		if (len == sizeof (text))
+			len = 0;
+	}
+
+	return NULL;
+#else
+	static char		text[256];
+	int				len;
+
+	if (!do_stdin)
 		return NULL;
 
-	for ( ;; )
+	if (!stdin_ready)
+		// the select didn't say it was ready
+		return NULL;
+
+	len = read (0, text, sizeof (text));
+	if (len == 0)
 	{
-		if (!GetNumberOfConsoleInputEvents (hinput, &numevents))
-			Sys_Error ("Error getting # of console events");
-
-		if (numevents <= 0)
-			break;
-
-		if (!ReadConsoleInput(hinput, recs, 1, &numread))
-			Sys_Error ("Error reading console input");
-
-		if (numread != 1)
-			Sys_Error ("Couldn't read console input");
-
-		if (recs[0].EventType == KEY_EVENT)
-		{
-			if (!recs[0].Event.KeyEvent.bKeyDown)
-			{
-				ch = recs[0].Event.KeyEvent.uChar.AsciiChar;
-
-				switch (ch)
-				{
-					case '\r':
-						WriteFile(houtput, "\r\n", 2, &dummy, NULL);	
-
-						if (len)
-						{
-							text[len] = 0;
-							len = 0;
-							return text;
-						}
-
-						break;
-
-					case '\b':
-						WriteFile(houtput, "\b \b", 3, &dummy, NULL);	
-						if (len)
-						{
-							len--;
-						}
-						break;
-
-					default:
-						if (ch >= ' ')
-						{
-							WriteFile(houtput, &ch, 1, &dummy, NULL);	
-							text[len] = ch;
-							len = (len + 1) & 0xff;
-						}
-
-						break;
-
-				}
-			}
-		}
+		// end of file
+		do_stdin = 0;
+		return NULL;
 	}
+	if (len < 1)
+		return NULL;
+
+	// rip off the \n and terminate
+	text[len - 1] = '\0';
+
+	return text;
 #endif
-	return NULL;
 }
 
 
@@ -526,6 +552,8 @@ main (int argc, char *argv[])
 {
 	double		time, oldtime, newtime, base;
 
+	sys_gametypes = GAME_NQ_CLIENT|GAME_NQ_SERVER;
+
 	Cmdline_Init (argc, argv);
 
 #ifdef HAVE_FCNTL
@@ -533,48 +561,12 @@ main (int argc, char *argv[])
 		fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) | FNDELAY);
 #endif
 
-	if (COM_CheckParm ("-nostdout"))
-		nostdout = 1;
-
 	Host_Init ();
 
-#ifdef _WIN32
-	if (isDedicated)
-	{
-		int			t;
+	if (!isDedicated && COM_CheckParm ("-nostdout"))
+		nostdout = 1;
 
-		if (!AllocConsole ())
-		{
-			Sys_Error ("Couldn't create dedicated server console");
-		}
-
-		hinput = GetStdHandle (STD_INPUT_HANDLE);
-		houtput = GetStdHandle (STD_OUTPUT_HANDLE);
-
-		// give QHOST a chance to hook into the console
-		if ((t = COM_CheckParm ("-HFILE")) > 0)
-		{
-			if (t < com_argc)
-				hFile = (HANDLE)Q_atoi (com_argv[t+1]);
-		}
-			
-		if ((t = COM_CheckParm ("-HPARENT")) > 0)
-		{
-			if (t < com_argc)
-				heventParent = (HANDLE)Q_atoi (com_argv[t+1]);
-		}
-			
-		if ((t = COM_CheckParm ("-HCHILD")) > 0)
-		{
-			if (t < com_argc)
-				heventChild = (HANDLE)Q_atoi (com_argv[t+1]);
-		}
-
-		InitConProc (hFile, heventParent, heventChild);
-	}
-#endif
-
-	base = oldtime = Sys_DoubleTime ();
+	oldtime = base = Sys_DoubleTime ();
 	while (1)
 	{
 		// find time spent rendering last frame
@@ -584,6 +576,9 @@ main (int argc, char *argv[])
 
 		Host_Frame (time);
 		oldtime = newtime;
+
+		if (isDedicated && sys_extrasleep->ivalue)
+			SDL_Delay (sys_sleep);
 	}
 
 	return 0;
