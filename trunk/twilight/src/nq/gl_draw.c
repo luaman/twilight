@@ -341,34 +341,32 @@ smoothly scrolled off.
 void
 Draw_Character (int x, int y, int num)
 {
-	int         row, col;
-	float       frow, fcol, size;
+	float		sl, sh, tl, th;
 
 	if (num == 32)
 		return;							/* space */
 
-	num &= 255;
-
 	if (y <= -8)
 		return;							/* totally off screen */
 
-	row = num >> 4;
-	col = num & 15;
+	num &= 255;
 
-	frow = row * 0.0625;
-	fcol = col * 0.0625;
-	size = 0.0625;
+	sl = (num & 15) * 0.0625;
+	sh = sl + 0.0625;
+
+	tl = (num >> 4) * 0.0625;
+	th = tl + 0.0625;
 
 	qglEnable (GL_BLEND);
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
-	VectorSet2 (tc_array[0], fcol, frow);
+	VectorSet2 (tc_array[0], sl, tl);
 	VectorSet2 (v_array[0], x, y);
-	VectorSet2 (tc_array[1], fcol + size, frow);
+	VectorSet2 (tc_array[1], sh, tl);
 	VectorSet2 (v_array[1], x + 8, y);
-	VectorSet2 (tc_array[2], fcol + size, frow + size);
+	VectorSet2 (tc_array[2], sh, th);
 	VectorSet2 (v_array[2], x + 8, y + 8);
-	VectorSet2 (tc_array[3], fcol, frow + size);
+	VectorSet2 (tc_array[3], sl, th);
 	VectorSet2 (v_array[3], x, y + 8);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
