@@ -71,8 +71,8 @@ CL_StopPlayback (void)
 	if (cls.timedemo)
 		CL_FinishTimeDemo ();
 
-	memset (cl.cshifts, 0, sizeof(cl.cshifts));
-	cl.stats[STAT_ITEMS] = 0;
+	memset (ccl.cshifts, 0, sizeof(ccl.cshifts));
+	ccl.stats[STAT_ITEMS] = 0;
 }
 
 #define dem_cmd		0
@@ -389,6 +389,7 @@ CL_Record_f (void)
 	entity_t		*ent;
 	sizebuf_t		buf;
 	player_info_t	*player;
+	user_info_t		*user;
 	entity_state_t	*es, blankes;
 	extern char		gamedirfile[];
 
@@ -432,12 +433,12 @@ CL_Record_f (void)
 	MSG_WriteString (&buf, gamedirfile);
 
 	if (cl.spectator)
-		MSG_WriteByte (&buf, cl.playernum | 128);
+		MSG_WriteByte (&buf, ccl.player_num | 128);
 	else
-		MSG_WriteByte (&buf, cl.playernum);
+		MSG_WriteByte (&buf, ccl.player_num);
 
 	// send full levelname
-	MSG_WriteString (&buf, cl.levelname);
+	MSG_WriteString (&buf, ccl.levelname);
 
 	// send the movevars
 	MSG_WriteFloat (&buf, movevars.gravity);
@@ -581,22 +582,23 @@ CL_Record_f (void)
 	// send current status of all other players
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		player = cl.players + i;
+		user = ccl.users + i;
 
 		MSG_WriteByte (&buf, svc_updatefrags);
 		MSG_WriteByte (&buf, i);
-		MSG_WriteShort (&buf, player->frags);
+		MSG_WriteShort (&buf, user->frags);
 
 		MSG_WriteByte (&buf, svc_updateping);
 		MSG_WriteByte (&buf, i);
-		MSG_WriteShort (&buf, player->ping);
+		MSG_WriteShort (&buf, user->ping);
 
 		MSG_WriteByte (&buf, svc_updatepl);
 		MSG_WriteByte (&buf, i);
-		MSG_WriteByte (&buf, player->pl);
+		MSG_WriteByte (&buf, user->pl);
 
 		MSG_WriteByte (&buf, svc_updateentertime);
 		MSG_WriteByte (&buf, i);
-		MSG_WriteFloat (&buf, cls.realtime - player->entertime);
+		MSG_WriteFloat (&buf, cls.realtime - user->entertime);
 
 		MSG_WriteByte (&buf, svc_updateuserinfo);
 		MSG_WriteByte (&buf, i);
@@ -619,7 +621,7 @@ CL_Record_f (void)
 	for (i = 0; i < MAX_CL_STATS; i++) {
 		MSG_WriteByte (&buf, svc_updatestatlong);
 		MSG_WriteByte (&buf, i);
-		MSG_WriteLong (&buf, cl.stats[i]);
+		MSG_WriteLong (&buf, ccl.stats[i]);
 		if (buf.cursize > MAX_MSGLEN / 2) {
 			CL_WriteRecordDemoMessage (&buf, seq++);
 			SZ_Clear (&buf);

@@ -372,7 +372,7 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 	icolor[6] = cb2;
 	icolor[7] = ca2;
 
-	model = cl.worldmodel;
+	model = ccl.worldmodel;
 	R_StainNode(model->brush->nodes + model->hulls[0].firstclipnode,
 			model, origin, radius, icolor);
 
@@ -566,7 +566,7 @@ R_TextureAnimation (texture_t *base, int frame)
 	if (!base->anim_total)
 		return base;
 
-	relative = (int) (cl.time * 10) % base->anim_total;
+	relative = (int) (ccl.time * 10) % base->anim_total;
 
 	count = 0;
 	while (base->anim_min > relative || base->anim_max <= relative)
@@ -598,7 +598,7 @@ R_DrawBrushDepthSkies (void)
 	brushhdr_t	*brush;
 	entity_common_t	*e;
 
-	Sky_Depth_Draw_Chain (cl.worldmodel, &cl.worldmodel->brush->sky_chain);
+	Sky_Depth_Draw_Chain (ccl.worldmodel, &ccl.worldmodel->brush->sky_chain);
 
 	if (!r_drawentities->ivalue)
 		return;

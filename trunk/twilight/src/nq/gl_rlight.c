@@ -113,7 +113,7 @@ R_DrawCoronas (void)
 		{
 			// trace to a point just barely closer to the eye
 			VectorSubtract(rd->origin, vpn, diff);
-			if (TraceLine (cl.worldmodel, r_origin, diff, NULL, NULL) == 1)
+			if (TraceLine (ccl.worldmodel, r_origin, diff, NULL, NULL) == 1)
 			{
 				TWI_FtoUBMod (rd->light, c_array_v(0), brightness, 4);
 				VectorCopy4 (c_array_v(0), c_array_v(1));
@@ -155,7 +155,7 @@ R_AnimateLight (void)
 //
 // light animations
 // 'm' is normal light, 'a' is no light, 'z' is double bright
-	i = (int) (cl.time * 10);
+	i = (int) (ccl.time * 10);
 	for (j = 0; j < MAX_LIGHTSTYLES; j++) {
 		if (!cl_lightstyle[j].length) {
 			d_lightstylevalue[j] = 256;
@@ -189,7 +189,7 @@ R_BuildLightList (void)
 	for (i = 0; i < MAX_DLIGHTS; i++)
 	{
 		cd = cl_dlights + i;
-		if (cd->radius <= 0 || cd->die < cl.time)
+		if (cd->radius <= 0 || cd->die < ccl.time)
 			continue;
 
 		rd = &r_dlight[r_numdlights++];
@@ -493,7 +493,7 @@ R_PushDlights (void)
 	l = r_dlight;
 
 	for (i = 0; i < r_numdlights; i++, l++)
-		R_MarkLights (l, 1 << i, cl.worldmodel, NULL);
+		R_MarkLights (l, 1 << i, ccl.worldmodel, NULL);
 }
 
 
@@ -555,7 +555,7 @@ RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 		// check for impact on this node
 		VectorCopy (mid, lightspot);
 		lightplane = node->plane;
-		surf = cl.worldmodel->brush->surfaces + node->firstsurface;
+		surf = ccl.worldmodel->brush->surfaces + node->firstsurface;
 
 		for (i = 0; i < node->numsurfaces; i++, surf++)
 		{
@@ -672,7 +672,7 @@ int R_LightPoint (vec3_t p)
 {
 	vec3_t end;
 
-	if (!cl.worldmodel->brush->lightdata)
+	if (!ccl.worldmodel->brush->lightdata)
 	{
 		lightcolor[0] = lightcolor[1] = lightcolor[2] = 255;
 		return 255;
@@ -683,7 +683,7 @@ int R_LightPoint (vec3_t p)
 	end[2] = p[2] - 2048;
 	lightcolor[0] = lightcolor[1] = lightcolor[2] = 0;
 
-	RecursiveLightPoint (lightcolor, cl.worldmodel->brush->nodes, p, end);
+	RecursiveLightPoint (lightcolor, ccl.worldmodel->brush->nodes, p, end);
 
 	return 255;
 }

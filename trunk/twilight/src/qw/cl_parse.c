@@ -291,17 +291,16 @@ Model_NextDownload (void)
 	}
 
 	// all done
-	cl.worldmodel = r_worldmodel = cl.model_precache[1];
+	ccl.worldmodel = r_worldmodel = cl.model_precache[1];
 
 	R_NewMap ();
 	Team_NewMap ();
-	Zone_CheckSentinelsGlobal ();		// Make sure /nothing/ is hurt.
 
 	// done with modellist, request first of static signon messages
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message,
 			va (prespawn_name, cl.servercount,
-				cl.worldmodel->brush->checksum2));
+				ccl.worldmodel->brush->checksum2));
 }
 
 /*
@@ -617,17 +616,17 @@ CL_ParseServerData (void)
 	}
 
 	// parse player slot, high bit means spectator
-	cl.playernum = MSG_ReadByte ();
-	if (cl.playernum & 128) {
+	ccl.player_num = MSG_ReadByte ();
+	if (ccl.player_num & 128) {
 		cl.spectator = true;
-		cl.playernum &= ~128;
+		ccl.player_num &= ~128;
 	}
 
-	cl.viewentity = cl.playernum + 1;
+	cl.viewentity = ccl.player_num + 1;
 
 	// get the full level name
 	str = MSG_ReadString ();
-	strncpy (cl.levelname, str, sizeof (cl.levelname) - 1);
+	strncpy (ccl.levelname, str, sizeof (ccl.levelname) - 1);
 
 	// get the movevars
 	movevars.gravity = MSG_ReadFloat ();
@@ -885,40 +884,45 @@ CL_ProcessUserInfo
 ==============
 */
 static void
-CL_ProcessUserInfo (int slot, player_info_t *player)
+CL_ProcessUserInfo (int slot)
 {
-	Uint8	color;
+	Uint8			color;
+	player_info_t	*player = &cl.players[slot];
+	user_info_t		*user = &ccl.users[slot];
 
 	slot = slot;
 
-	strncpy (player->name, Info_ValueForKey (player->userinfo, "name"),
-			   sizeof (player->name) - 1);
+	ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
+	strncpy (user->name, Info_ValueForKey (player->userinfo, "name"),
+			   sizeof (user->name) - 1);
 
-	strncpy (player->team, Info_ValueForKey (player->userinfo, "team"),
-			   sizeof (player->team) - 1);
+	strncpy (user->team, Info_ValueForKey (player->userinfo, "team"),
+			   sizeof (user->team) - 1);
 
 	color = Q_atoi (Info_ValueForKey (player->userinfo, "topcolor"));
 	color = bound(0, color, 13) * 16;
 	if (color < 128)
 		color += 15;
-	VectorCopy4 (d_8tofloattable[color], player->colormap.top);
+	user->color_top = color;
+	VectorCopy4 (d_8tofloattable[color], user->color_map.top);
 
 	color = Q_atoi (Info_ValueForKey (player->userinfo, "bottomcolor"));
 	color = bound(0, color, 13) * 16;
 	if (color < 128)
 		color += 15;
-	VectorCopy4 (d_8tofloattable[color], player->colormap.bottom);
+	user->color_bottom = color;
+	VectorCopy4 (d_8tofloattable[color], user->color_map.bottom);
 
 	if (Info_ValueForKey (player->userinfo, "*spectator")[0])
-		player->spectator = true;
+		user->flags |= USER_SPECTATOR;
 	else
-		player->spectator = false;
+		user->flags &= ~USER_SPECTATOR;
 
-	strlcpy(player->skin_name, Info_ValueForKey (player->userinfo, "skin"),
-			sizeof(player->skin_name));
+	strlcpy(user->skin_name, Info_ValueForKey (player->userinfo, "skin"),
+			sizeof(user->skin_name));
 
 	if (cls.state == ca_active)
-		player->skin = Skin_Load(player->skin_name);
+		user->skin = Skin_Load(user->skin_name);
 }
 
 /*
@@ -942,7 +946,7 @@ CL_UpdateUserinfo (void)
 	strncpy (player->userinfo, MSG_ReadString (),
 			   sizeof (player->userinfo) - 1);
 
-	CL_ProcessUserInfo (slot, player);
+	CL_ProcessUserInfo (slot);
 }
 
 /*
@@ -969,11 +973,11 @@ CL_SetInfo (void)
 	strncpy (value, MSG_ReadString (), sizeof (value) - 1);
 	key[sizeof (value) - 1] = 0;
 
-	Com_DPrintf ("SETINFO %s: %s=%s\n", player->name, key, value);
+	Com_DPrintf ("SETINFO %s: %s=%s\n", ccl.users[slot].name, key, value);
 
 	Info_SetValueForKey (player->userinfo, key, value, MAX_INFO_STRING);
 
-	CL_ProcessUserInfo (slot, player);
+	CL_ProcessUserInfo (slot);
 }
 
 /*
@@ -993,7 +997,7 @@ CL_ProcessServerInfo (void)
 	// If it exists and is true then this is a coop game, period.
 	if ((s = Info_ValueForKey (cl.serverinfo, "coop")) && *s)
 		if (Q_atoi (s)) {
-			cl.gametype = GAME_COOP;
+			ccl.game_teams = GAME_COOP;
 			return;
 		}
 
@@ -1003,7 +1007,7 @@ CL_ProcessServerInfo (void)
 	// do some more tests.
 	if ((s = Info_ValueForKey (cl.serverinfo, "deathmatch")) && *s)
 		if (!Q_atoi (s)) {
-			cl.gametype = GAME_SINGLE;
+			ccl.game_teams = GAME_SINGLE;
 			return;
 		}
 
@@ -1011,12 +1015,12 @@ CL_ProcessServerInfo (void)
 	// If so then it is a teamplay game, and the status bar code cares.
 	if ((s = Info_ValueForKey (cl.serverinfo, "teamplay")) && *s)
 		if (Q_atoi(s)) {
-			cl.gametype = GAME_TEAMS;
+			ccl.game_teams = GAME_TEAMS;
 			return;
 		}
 
 	// If we are here, then it is a good old deathmatch game, simple, right?
-	cl.gametype = GAME_DEATHMATCH;
+	ccl.game_teams = GAME_DEATHMATCH;
 }
 
 /*
@@ -1057,11 +1061,11 @@ CL_SetStat (int stat, int value)
 
 	if (stat == STAT_ITEMS) {			// set flash times
 		for (j = 0; j < 32; j++)
-			if ((value & (1 << j)) && !(cl.stats[stat] & (1 << j)))
-				cl.item_gettime[j] = cl.time;
+			if ((value & (1 << j)) && !(ccl.stats[stat] & (1 << j)))
+				ccl.items_gettime[j] = ccl.time;
 	}
 
-	cl.stats[stat] = value;
+	ccl.stats[stat] = value;
 }
 
 /*
@@ -1094,12 +1098,12 @@ CL_MuzzleFlash (void)
 				dl = CL_AllocDlight (-i);
 				AngleVectors (ent->angles, fv, NULL, NULL);
 				VectorMA (ent->origin, 18, fv, dl->origin);
-				TraceLine (cl.worldmodel, ent->origin, dl->origin, dl->origin,
+				TraceLine (ccl.worldmodel, ent->origin, dl->origin, dl->origin,
 						NULL);
 
 				dl->radius = 200 + (rand()&31);
 				dl->minlight = 32;
-				dl->die = cl.time + 0.1;
+				dl->die = ccl.time + 0.1;
 				dl->color[0] = 0.5;
 				dl->color[1] = 0.5;
 				dl->color[2] = 0.4;
@@ -1110,7 +1114,7 @@ CL_MuzzleFlash (void)
 	}
 
 	// don't draw our own muzzle flash if flashblending
-	if (i - 1 == cl.playernum && gl_flashblend->ivalue)
+	if (i - 1 == ccl.player_num && gl_flashblend->ivalue)
 		return;
 
 	pl = &cl.frames[parsecountmod].playerstate[i - 1];
@@ -1118,12 +1122,11 @@ CL_MuzzleFlash (void)
 	dl = CL_AllocDlight (-i);
 	AngleVectors (pl->viewangles, fv, NULL, NULL);
 	VectorMA (pl->origin, 18, fv, dl->origin);
-	TraceLine (cl.worldmodel, pl->origin, dl->origin, dl->origin,
-			NULL);
+	TraceLine (ccl.worldmodel, pl->origin, dl->origin, dl->origin, NULL);
 
 	dl->radius = 200 + (rand () & 31);
 	dl->minlight = 32;
-	dl->die = cl.time + 0.1;
+	dl->die = ccl.time + 0.1;
 	dl->color[0] = 0.5;
 	dl->color[1] = 0.5;
 	dl->color[2] = 0.4;
@@ -1256,8 +1259,8 @@ CL_ParseServerMessage (void)
 				if (i >= MAX_CLIENTS)
 					Host_EndGame ("CL_ParseServerMessage: svc_updatefrags >"
 							" MAX_SCOREBOARD");
-				cl.players[i].frags = MSG_ReadShort ();
-				cl.frags_updated = 0;
+				ccl.users[i].frags = MSG_ReadShort ();
+				ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 				break;
 
 			case svc_updateping:
@@ -1265,7 +1268,8 @@ CL_ParseServerMessage (void)
 				if (i >= MAX_CLIENTS)
 					Host_EndGame ("CL_ParseServerMessage: svc_updateping >"
 							" MAX_SCOREBOARD");
-				cl.players[i].ping = MSG_ReadShort ();
+				ccl.users[i].ping = MSG_ReadShort ();
+				ccl.user_flags &= ~USER_FLAG_TEAM_SORTED;
 				break;
 
 			case svc_updatepl:
@@ -1273,7 +1277,7 @@ CL_ParseServerMessage (void)
 				if (i >= MAX_CLIENTS)
 					Host_EndGame ("CL_ParseServerMessage: svc_updatepl >"
 							" MAX_SCOREBOARD");
-				cl.players[i].pl = MSG_ReadByte ();
+				ccl.users[i].pl = MSG_ReadByte ();
 				break;
 
 			case svc_updateentertime:
@@ -1282,7 +1286,7 @@ CL_ParseServerMessage (void)
 				if (i >= MAX_CLIENTS)
 					Host_EndGame ("CL_ParseServerMessage: svc_updateentertime"
 							" > MAX_SCOREBOARD");
-				cl.players[i].entertime = cls.realtime - MSG_ReadFloat ();
+				ccl.users[i].entertime = ccl.time - MSG_ReadFloat ();
 				break;
 
 			case svc_spawnbaseline:
@@ -1299,11 +1303,11 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_killedmonster:
-				cl.stats[STAT_MONSTERS]++;
+				ccl.stats[STAT_MONSTERS]++;
 				break;
 
 			case svc_foundsecret:
-				cl.stats[STAT_SECRETS]++;
+				ccl.stats[STAT_SECRETS]++;
 				break;
 
 			case svc_updatestat:
@@ -1328,8 +1332,8 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_intermission:
-				cl.intermission = 1;
-				cl.completed_time = cls.realtime;
+				ccl.intermission = 1;
+				ccl.completed_time = cls.realtime;
 				for (i = 0; i < 3; i++)
 					cl.simorg[i] = MSG_ReadCoord ();
 				for (i = 0; i < 3; i++)
@@ -1338,8 +1342,8 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_finale:
-				cl.intermission = 2;
-				cl.completed_time = cls.realtime;
+				ccl.intermission = 2;
+				ccl.completed_time = cls.realtime;
 				SCR_CenterPrint (MSG_ReadString ());
 				break;
 

@@ -146,7 +146,7 @@ CL_Lerp_OriginAngles (entity_t *ent)
 	if (ent->lerp_delta_time)
 	{
 		ent->common.lerping = true;
-		lerp = (cl.time - ent->lerp_start_time) / ent->lerp_delta_time;
+		lerp = (ccl.time - ent->lerp_start_time) / ent->lerp_delta_time;
 		if (lerp < 1)
 		{
 			VectorMA (ent->msg_origins[1], lerp, odelta, ent->common.origin);
@@ -196,7 +196,7 @@ CL_Update_Frame_C (entity_common_t *ce, int frame, float frame_time)
 		goto CL_Update_Frame_frac;
 	} else {
 CL_Update_Frame_frac:
-		ce->frame_frac[0] = (cl.time - ce->frame_time[0]) * 10;
+		ce->frame_frac[0] = (ccl.time - ce->frame_time[0]) * 10;
 		ce->frame_frac[0] = bound(0, ce->frame_frac[0], 1);
 		ce->frame_frac[1] = 1 - ce->frame_frac[0];
 	}

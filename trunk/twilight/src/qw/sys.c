@@ -224,7 +224,7 @@ static void
 Sys_BackTrace (int fd)
 {
 #if HAVE_EXECINFO_H
-	void		*array[128];
+	void		*array[256];
 	int			size;
 
 	memset (array, 0, sizeof(array));

@@ -40,7 +40,7 @@ static const char rcsid[] =
 #include "keys.h"
 #include "mathlib.h"
 #include "menu.h"
-#include "sbar.h"
+#include "hud.h"
 #include "screen.h"
 #include "sound.h"
 #include "strlib.h"
@@ -218,7 +218,7 @@ SCR_CenterPrint (char *str)
 
 	strlcpy (scr_centerstring, str, sizeof (scr_centerstring) - 1);
 	scr_centertime_off = scr_centertime->fvalue;
-	scr_centertime_start = cl.time;
+	scr_centertime_start = ccl.time;
 
 	/* count the number of lines for centering */
 	scr_center_lines = 1;
@@ -272,8 +272,8 @@ SCR_DrawCenterString (void)
 	int			remaining;
 
 	/* the finale prints the characters one at a time */
-	if (cl.intermission)
-		remaining = scr_printspeed->ivalue * (cl.time - scr_centertime_start);
+	if (ccl.intermission)
+		remaining = scr_printspeed->ivalue * (ccl.time - scr_centertime_start);
 	else
 		remaining = 9999;
 
@@ -315,7 +315,7 @@ SCR_CheckDrawCenterString (void)
 
 	scr_centertime_off -= host_frametime;
 
-	if (scr_centertime_off <= 0 && !cl.intermission)
+	if (scr_centertime_off <= 0 && !ccl.intermission)
 		return;
 	if (key_dest != key_game)
 		return;
@@ -342,7 +342,7 @@ SCR_CalcRefdef (void)
 	int			contents;
 
 	/* intermission is always full screen */
-	if (scr_viewsize->ivalue >= 120 || cl.intermission)
+	if (scr_viewsize->ivalue >= 120 || ccl.intermission)
 		sb_lines = 0;
 	else if (scr_viewsize->ivalue >= 110)
 		sb_lines = 24;
@@ -352,13 +352,13 @@ SCR_CalcRefdef (void)
 	r_refdef.fov_x = bound (10, scr_fov->fvalue * cl.viewzoom, 170);
 	r_refdef.fov_y = CalcFov (r_refdef.fov_x, vid.width, vid.height);
 
-	if (cl.worldmodel)
+	if (ccl.worldmodel)
 	{
-		contents = Mod_PointInLeaf (r_refdef.vieworg, cl.worldmodel)->contents;
+		contents = Mod_PointInLeaf (r_refdef.vieworg, ccl.worldmodel)->contents;
 		if (contents != CONTENTS_EMPTY && contents != CONTENTS_SOLID)
 		{
-			r_refdef.fov_x *= (Q_sin(cl.time * 4.7) * 0.015 + 0.985);
-			r_refdef.fov_y *= (Q_sin(cl.time * 3.0) * 0.015 + 0.985);
+			r_refdef.fov_x *= (Q_sin(ccl.time * 4.7) * 0.015 + 0.985);
+			r_refdef.fov_y *= (Q_sin(ccl.time * 3.0) * 0.015 + 0.985);
 		}
 	}
 }
@@ -569,7 +569,7 @@ SCR_SetUpToDrawConsole (void)
 		return;
 
 	/* decide on the height of the console */
-	con_forcedup = !cl.worldmodel || cls.signon != SIGNONS;
+	con_forcedup = !ccl.worldmodel || cls.signon != SIGNONS;
 	if (con_forcedup) {
 		scr_conlines = vid.height_2d;		/* full screen */
 		scr_con_current = scr_conlines;
@@ -784,16 +784,16 @@ SCR_UpdateScreen (void)
 	 */
 
 	if (scr_drawdialog) {
-		Sbar_Draw ();
+		HUD_Draw ();
 		Draw_FadeScreen ();
 		SCR_DrawNotifyString ();
 	} else if (scr_drawloading) {
 		SCR_DrawLoading ();
-		Sbar_Draw ();
-	} else if (cl.intermission == 1 && key_dest == key_game) {
-		Sbar_IntermissionOverlay ();
-	} else if (cl.intermission == 2 && key_dest == key_game) {
-		Sbar_FinaleOverlay ();
+		HUD_Draw ();
+	} else if (ccl.intermission == 1 && key_dest == key_game) {
+		HUD_IntermissionOverlay ();
+	} else if (ccl.intermission == 2 && key_dest == key_game) {
+		HUD_FinaleOverlay ();
 		SCR_CheckDrawCenterString ();
 	} else {
 		if (crosshair->ivalue)
@@ -804,7 +804,7 @@ SCR_UpdateScreen (void)
 		SCR_DrawTurtle ();
 		SCR_DrawPause ();
 		SCR_CheckDrawCenterString ();
-		Sbar_Draw ();
+		HUD_Draw ();
 		SCR_DrawConsole ();
 		M_Draw ();
 	}

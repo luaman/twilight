@@ -71,7 +71,7 @@ CL_PredictUsercmd (int id, player_state_t * from, player_state_t * to,
 	pmove.player_id = id;
 	pmove.oldbuttons = from->oldbuttons;
 	pmove.waterjumptime = from->waterjumptime;
-	pmove.dead = cl.stats[STAT_HEALTH] <= 0;
+	pmove.dead = ccl.stats[STAT_HEALTH] <= 0;
 	pmove.spectator = spectator;
 
 	pmove.cmd = *u;
@@ -109,15 +109,15 @@ CL_PredictMove (void)
 	if (cl.paused)
 		return;
 
-	cl.oldtime = cl.time;
-	cl.time = cls.realtime - cls.latency - cl_pushlatency->fvalue * 0.001;
-	if (cl.time > cls.realtime)
-		cl.time = cls.realtime;
+	ccl.oldtime = ccl.time;
+	ccl.time = cls.realtime - cls.latency - cl_pushlatency->fvalue * 0.001;
+	if (ccl.time > cls.realtime)
+		ccl.time = cls.realtime;
 
-	r_time = cl.time;
-	r_frametime = cl.time - cl.oldtime;
+	r_time = ccl.time;
+	r_frametime = ccl.time - ccl.oldtime;
 
-	if (cl.intermission)
+	if (ccl.intermission)
 		return;
 
 	if (!cl.validsequence)
@@ -133,17 +133,17 @@ CL_PredictMove (void)
 	from = &cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK];
 
 	if (cl_nopred->ivalue) {
-		VectorCopy (from->playerstate[cl.playernum].velocity, cl.simvel);
-		VectorCopy (from->playerstate[cl.playernum].origin, cl.simorg);
+		VectorCopy (from->playerstate[ccl.player_num].velocity, cl.simvel);
+		VectorCopy (from->playerstate[ccl.player_num].origin, cl.simorg);
 		return;
 	}
 
 	for (i = 1; i < UPDATE_BACKUP - 1 && cls.netchan.incoming_sequence + i <
 		 cls.netchan.outgoing_sequence; i++) {
 		to = &cl.frames[(cls.netchan.incoming_sequence + i) & UPDATE_MASK];
-		CL_PredictUsercmd (cl.playernum, &from->playerstate[cl.playernum],
-			&to->playerstate[cl.playernum], &to->cmd, cl.spectator);
-		if (to->senttime >= cl.time)
+		CL_PredictUsercmd (ccl.player_num, &from->playerstate[ccl.player_num],
+			&to->playerstate[ccl.player_num], &to->cmd, cl.spectator);
+		if (to->senttime >= ccl.time)
 			break;
 		from = to;
 	}
@@ -155,22 +155,22 @@ CL_PredictMove (void)
 	if (to->senttime == from->senttime)
 		f = 0;
 	else {
-		f = (cl.time - from->senttime) / (to->senttime - from->senttime);
+		f = (ccl.time - from->senttime) / (to->senttime - from->senttime);
 		f = bound (0, f, 1);
 	}
 
-	if (VectorDistance_fast (from->playerstate[cl.playernum].origin,
-				to->playerstate[cl.playernum].origin) > (128 * 128)) {
+	if (VectorDistance_fast (from->playerstate[ccl.player_num].origin,
+				to->playerstate[ccl.player_num].origin) > (128 * 128)) {
 		// teleported, so don't lerp
-		VectorCopy (to->playerstate[cl.playernum].velocity, cl.simvel);
-		VectorCopy (to->playerstate[cl.playernum].origin, cl.simorg);
+		VectorCopy (to->playerstate[ccl.player_num].velocity, cl.simvel);
+		VectorCopy (to->playerstate[ccl.player_num].origin, cl.simorg);
 		return;
 	}
 
-	Lerp_Vectors (from->playerstate[cl.playernum].origin,
-		f, to->playerstate[cl.playernum].origin, cl.simorg);
-	Lerp_Vectors (from->playerstate[cl.playernum].velocity,
-		f, to->playerstate[cl.playernum].velocity, cl.simvel);
+	Lerp_Vectors (from->playerstate[ccl.player_num].origin,
+		f, to->playerstate[ccl.player_num].origin, cl.simorg);
+	Lerp_Vectors (from->playerstate[ccl.player_num].velocity,
+		f, to->playerstate[ccl.player_num].velocity, cl.simvel);
 }
 
 

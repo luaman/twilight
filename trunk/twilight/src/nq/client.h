@@ -27,6 +27,7 @@
 #ifndef __CLIENT_H
 #define __CLIENT_H
 
+#include "cclient.h"
 #include "qtypes.h"
 #include "common.h"
 #include "light.h"
@@ -41,30 +42,6 @@ typedef struct {
 	float	sidemove;
 	float	upmove;
 } usercmd_t;
-
-typedef struct {
-	int		length;
-	char	map[MAX_STYLESTRING];
-} lightstyle_t;
-
-typedef struct {
-	char		name[MAX_SCOREBOARDNAME];
-	float		entertime;
-	int			frags;
-	int			colors;						// two 4 bit fields
-	colormap_t	colormap;
-} scoreboard_t;
-
-typedef struct {
-	int		destcolor[3];
-	int		percent;	// 0-256
-} cshift_t;
-
-#define	CSHIFT_CONTENTS	0
-#define	CSHIFT_DAMAGE	1
-#define	CSHIFT_BONUS	2
-#define	CSHIFT_POWERUP	3
-#define	NUM_CSHIFTS		4
 
 #define	NAME_LENGTH	64
 
@@ -147,15 +124,6 @@ typedef struct {
 
 	usercmd_t		cmd;					// last command sent to the server
 
-	// information for local display
-	int				stats[MAX_CL_STATS];	// health, etc
-	float			item_gettime[32];		// cl.time of aquiring item, for blinking
-	float			faceanimtime;			// use anim frame if cl.time < this
-
-	colormap_t		*colormap;				// The colormap for the display.
-	cshift_t		cshifts[NUM_CSHIFTS];	// color shifts for damage, powerups
-	cshift_t		prev_cshifts[NUM_CSHIFTS];	// and content types
-
 	// the client maintains its own idea of view angles, which are
 	// sent to the server each frame.  The server sets punchangle when
 	// the view is temporarliy offset, and an angle reset commands at the start
@@ -184,17 +152,7 @@ typedef struct {
 	qboolean		onground;
 	qboolean		inwater;
 
-	int				intermission;			// don't change view angle, full screen, etc
-	int				completed_time;			// latched at intermission start
-
 	double			mtime[2];				// the timestamp of last two messages 
-	double			time;					// clients view of time, should be between
-											// servertime and oldservertime to generate
-											// a lerp point for other data
-	double			oldtime;				// previous cl.time, time-oldtime is used
-											// to decay light values and smooth step ups
-
-
 	float			last_received_message;	// (realtime) for net trouble icon
 
 	//
@@ -203,22 +161,15 @@ typedef struct {
 	model_t			*model_precache[MAX_MODELS];
 	struct sfx_s	*sound_precache[MAX_SOUNDS];
 
-	char			levelname[40];			// for display on solo scoreboard
 	int				viewentity;				// cl_entitites[cl.viewentity] = player
-	Uint8			maxclients;
-	int				gametype;
 
 	// refresh related state
-	model_t			*worldmodel;				// cl_entitites[0].model
 	int				num_entities;			// held in cl_entities array
 	int				num_statics;			// held in cl_staticentities array
 	entity_t		viewent;				// the gun model
 
 	int				cdtrack, looptrack;		// cd audio
 	float			viewzoom;				// scales fov and sensitivity
-
-	// frag scoreboard
-	scoreboard_t	*scores;				// [cl.maxclients]
 } client_state_t;
 
 

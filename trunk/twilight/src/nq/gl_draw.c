@@ -117,12 +117,12 @@ Draw_Crosshair (void)
 
 	// Color selection madness
 	color = crosshaircolor->ivalue % 256;
-	if (color == 255 && cl.colormap)
-		VectorScale (cl.colormap->bottom, 0.5, base);
+	if (color == 255 && ccl.colormap)
+		VectorScale (ccl.colormap->bottom, 0.5, base);
 	else
 		VectorCopy (d_8tofloattable[color], base);
 
-	ofs = Q_sin (cl.time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
+	ofs = Q_sin (ccl.time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
 	ofs = boundsign (ofs, hud_chflash->fvalue);
 	VectorSlide (base, ofs, base);
 	base[3] = hud_chalpha->fvalue;

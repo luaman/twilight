@@ -48,7 +48,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "menu.h"
 #include "net.h"
-#include "sbar.h"
+#include "hud.h"
 #include "screen.h"
 #include "server.h"
 #include "sound.h"
@@ -244,8 +244,6 @@ Host_InitLocal_Cvars (void)
 
 	samelevel = Cvar_Get ("samelevel", "0", CVAR_NONE, NULL);
 	noexit = Cvar_Get ("noexit", "0", CVAR_SERVERINFO, NULL);
-
-	developer = Cvar_Get ("developer", "0", CVAR_NONE, NULL);
 
 	// 0 - 3
 	skill = Cvar_Get ("skill", "1", CVAR_NONE, NULL);
@@ -515,7 +513,7 @@ not reinitialize anything.
 void
 Host_ClearMemory (void)
 {
-	if (!cl.worldmodel && !sv.worldmodel)		// Nothing to clear.
+	if (!ccl.worldmodel && !sv.worldmodel)		// Nothing to clear.
 		return;
 
 	Mod_ClearAll ();
@@ -555,7 +553,7 @@ Host_FilterTime (float time)
 		return false;
 
 	fps = cl_maxfps->fvalue;
-	if (cl.maxclients > 1) {
+	if (ccl.max_users > 1) {
 		fps = bound (30.0f, fps, 72.0f);
 	} else if (fps) {
 		fps = bound (30.0f, fps, 999.0f);
@@ -826,7 +824,7 @@ Host_Init ()
 	V_Init_Cvars();					// view related cvars
 	M_Init_Cvars ();				// menu related cvars
 	R_Init_Cvars ();				// rendering system related cvars
-	Sbar_Init_Cvars ();				// statusbar related cvars
+	HUD_Init_Cvars ();				// statusbar related cvars
 	CL_Init_Cvars ();				// cl_* related cvars
 	S_Init_Cvars ();				// sound system related cvars
 	NET_Init_Cvars ();				// net related cvars
@@ -868,7 +866,7 @@ Host_Init ()
 		S_Init ();
 		CDAudio_Init_Cvars ();
 		CDAudio_Init ();
-		Sbar_Init ();
+		HUD_Init ();
 		CL_Init ();
 		IN_Init ();
 	}

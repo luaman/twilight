@@ -259,18 +259,18 @@ static void
 Cam_CheckHighTarget (void)
 {
 	int         i, j, max;
-	player_info_t *s;
+	user_info_t *s;
 
 	j = -1;
-	for (i = 0, max = -9999; i < MAX_CLIENTS; i++) {
-		s = &cl.players[i];
-		if (s->name[0] && !s->spectator && s->frags > max) {
+	for (i = 0, max = -9999; i < ccl.max_users; i++) {
+		s = &ccl.users[i];
+		if (s->name[0] && !(s->flags & USER_SPECTATOR) && s->frags > max) {
 			max = s->frags;
 			j = i;
 		}
 	}
 	if (j >= 0) {
-		if (!locked || cl.players[j].frags > cl.players[spec_track].frags)
+		if (!locked || ccl.users[j].frags > ccl.users[spec_track].frags)
 			Cam_Lock (j);
 	} else
 		Cam_Unlock ();
@@ -297,8 +297,8 @@ Cam_Track (usercmd_t *cmd)
 	if (!autocam || cls.state != ca_active)
 		return;
 
-	if (locked && (!cl.players[spec_track].name[0]
-				   || cl.players[spec_track].spectator)) {
+	if (locked && (!ccl.users[spec_track].name[0]
+				   || (ccl.users[spec_track].flags & USER_SPECTATOR))) {
 		locked = false;
 		if (cl_hightrack->ivalue)
 			Cam_CheckHighTarget ();
@@ -309,7 +309,7 @@ Cam_Track (usercmd_t *cmd)
 
 	frame = &cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK];
 	player = frame->playerstate + spec_track;
-	self = frame->playerstate + cl.playernum;
+	self = frame->playerstate + ccl.player_num;
 
 	if (!locked || !Cam_IsVisible (player, desired_position)) {
 		if (!locked || cls.realtime - cam_lastviewtime > 0.1) {
@@ -366,7 +366,7 @@ void
 Cam_FinishMove (usercmd_t *cmd)
 {
 	int         i;
-	player_info_t *s;
+	user_info_t *s;
 	int         end;
 
 	if (cls.state != ca_active)
@@ -417,8 +417,8 @@ Cam_FinishMove (usercmd_t *cmd)
 		end = spec_track;
 	i = end;
 	do {
-		s = &cl.players[i];
-		if (s->name[0] && !s->spectator) {
+		s = &ccl.users[i];
+		if (s->name[0] && !(s->flags & USER_SPECTATOR)) {
 			Cam_Lock (i);
 			return;
 		}
@@ -426,8 +426,8 @@ Cam_FinishMove (usercmd_t *cmd)
 	} while (i != end);
 	// stay on same guy?
 	i = spec_track;
-	s = &cl.players[i];
-	if (s->name[0] && !s->spectator) {
+	s = &ccl.users[i];
+	if (s->name[0] && !(s->flags & USER_SPECTATOR)) {
 		Cam_Lock (i);
 		return;
 	}

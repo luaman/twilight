@@ -157,7 +157,7 @@ V_CalcBob (void)
 
 	/* bob is proportional to simulated velocity in the xy plane
        (don't count Z, or jumping messes it up) */
-	vel = cl.frames[(cls.netchan.incoming_sequence)&UPDATE_MASK].playerstate[cl.playernum].velocity;
+	vel = cl.frames[(cls.netchan.incoming_sequence)&UPDATE_MASK].playerstate[ccl.player_num].velocity;
 
 	bob = VectorLength2(vel) * cl_bob->fvalue;
 	bob = bob * (0.3 + 0.7 * Q_sin (cycle));
@@ -172,7 +172,7 @@ V_CalcBob (void)
 void
 V_StartPitchDrift (void)
 {
-	if (cl.laststop == cl.time)
+	if (cl.laststop == ccl.time)
 		return;		/* something else is keeping it from drifting */
 
 	if (cl.nodrift || !cl.pitchvel) {
@@ -185,7 +185,7 @@ V_StartPitchDrift (void)
 void
 V_StopPitchDrift (void)
 {
-	cl.laststop = cl.time;
+	cl.laststop = ccl.time;
 	cl.nodrift = true;
 	cl.pitchvel = 0;
 }
@@ -290,26 +290,26 @@ V_ParseDamage (void)
 	if (count < 10)
 		count = 10;
 
-	cl.faceanimtime = cl.time + 0.2;	/* butt sbar face into pain frame */
+	ccl.faceanimtime = ccl.time + 0.2;	/* butt sbar face into pain frame */
 
-	cl.cshifts[CSHIFT_DAMAGE].percent += 3 * count;
-	if (cl.cshifts[CSHIFT_DAMAGE].percent < 0)
-		cl.cshifts[CSHIFT_DAMAGE].percent = 0;
-	if (cl.cshifts[CSHIFT_DAMAGE].percent > 150)
-		cl.cshifts[CSHIFT_DAMAGE].percent = 150;
+	ccl.cshifts[CSHIFT_DAMAGE].percent += 3 * count;
+	if (ccl.cshifts[CSHIFT_DAMAGE].percent < 0)
+		ccl.cshifts[CSHIFT_DAMAGE].percent = 0;
+	if (ccl.cshifts[CSHIFT_DAMAGE].percent > 150)
+		ccl.cshifts[CSHIFT_DAMAGE].percent = 150;
 
 	if (armor > blood) {
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 200;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 100;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 100;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 200;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 100;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 100;
 	} else if (armor) {
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 220;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 50;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 50;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 220;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 50;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 50;
 	} else {
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 255;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 0;
-		cl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 0;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 255;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 0;
+		ccl.cshifts[CSHIFT_DAMAGE].destcolor[2] = 0;
 	}
 
 	/* calculate view angle kicks */
@@ -351,10 +351,10 @@ When you run over an item, the server sends this command
 static void
 V_BonusFlash_f (void)
 {
-	cl.cshifts[CSHIFT_BONUS].destcolor[0] = 215;
-	cl.cshifts[CSHIFT_BONUS].destcolor[1] = 186;
-	cl.cshifts[CSHIFT_BONUS].destcolor[2] = 69;
-	cl.cshifts[CSHIFT_BONUS].percent = 50;
+	ccl.cshifts[CSHIFT_BONUS].destcolor[0] = 215;
+	ccl.cshifts[CSHIFT_BONUS].destcolor[1] = 186;
+	ccl.cshifts[CSHIFT_BONUS].destcolor[2] = 69;
+	ccl.cshifts[CSHIFT_BONUS].percent = 50;
 }
 
 /*
@@ -368,23 +368,23 @@ void
 V_SetContentsColor (int contents)
 {
 	if (!v_contentblend->ivalue) {
-		cl.cshifts[CSHIFT_CONTENTS] = cshift_empty;
+		ccl.cshifts[CSHIFT_CONTENTS] = cshift_empty;
 		return;
 	}
 
 	switch (contents) {
 		case CONTENTS_EMPTY:
-			cl.cshifts[CSHIFT_CONTENTS] = cshift_empty;
+			ccl.cshifts[CSHIFT_CONTENTS] = cshift_empty;
 			break;
 		case CONTENTS_LAVA:
-			cl.cshifts[CSHIFT_CONTENTS] = cshift_lava;
+			ccl.cshifts[CSHIFT_CONTENTS] = cshift_lava;
 			break;
 		case CONTENTS_SOLID:
 		case CONTENTS_SLIME:
-			cl.cshifts[CSHIFT_CONTENTS] = cshift_slime;
+			ccl.cshifts[CSHIFT_CONTENTS] = cshift_slime;
 			break;
 		default:
-			cl.cshifts[CSHIFT_CONTENTS] = cshift_water;
+			ccl.cshifts[CSHIFT_CONTENTS] = cshift_water;
 	}
 }
 
@@ -396,28 +396,28 @@ V_CalcPowerupCshift
 static void
 V_CalcPowerupCshift (void)
 {
-	if (cl.stats[STAT_ITEMS] & IT_QUAD) {
-		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 0;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 0;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 255;
-		cl.cshifts[CSHIFT_POWERUP].percent = 30;
-	} else if (cl.stats[STAT_ITEMS] & IT_SUIT) {
-		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 0;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 255;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 0;
-		cl.cshifts[CSHIFT_POWERUP].percent = 20;
-	} else if (cl.stats[STAT_ITEMS] & IT_INVISIBILITY) {
-		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 100;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 100;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 100;
-		cl.cshifts[CSHIFT_POWERUP].percent = 100;
-	} else if (cl.stats[STAT_ITEMS] & IT_INVULNERABILITY) {
-		cl.cshifts[CSHIFT_POWERUP].destcolor[0] = 255;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[1] = 255;
-		cl.cshifts[CSHIFT_POWERUP].destcolor[2] = 0;
-		cl.cshifts[CSHIFT_POWERUP].percent = 30;
+	if (ccl.stats[STAT_ITEMS] & IT_QUAD) {
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[0] = 0;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[1] = 0;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[2] = 255;
+		ccl.cshifts[CSHIFT_POWERUP].percent = 30;
+	} else if (ccl.stats[STAT_ITEMS] & IT_SUIT) {
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[0] = 0;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[1] = 255;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[2] = 0;
+		ccl.cshifts[CSHIFT_POWERUP].percent = 20;
+	} else if (ccl.stats[STAT_ITEMS] & IT_INVISIBILITY) {
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[0] = 100;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[1] = 100;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[2] = 100;
+		ccl.cshifts[CSHIFT_POWERUP].percent = 100;
+	} else if (ccl.stats[STAT_ITEMS] & IT_INVULNERABILITY) {
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[0] = 255;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[1] = 255;
+		ccl.cshifts[CSHIFT_POWERUP].destcolor[2] = 0;
+		ccl.cshifts[CSHIFT_POWERUP].percent = 30;
 	} else
-		cl.cshifts[CSHIFT_POWERUP].percent = 0;
+		ccl.cshifts[CSHIFT_POWERUP].percent = 0;
 }
 
 /*
@@ -433,15 +433,15 @@ V_CalcBlend (void)
 
 	if (gl_cshiftpercent->fvalue) {
 		for (j = 0; j < NUM_CSHIFTS; j++)	 {
-			a2 = cl.cshifts[j].percent * gl_cshiftpercent->fvalue * (1.0f / 25500.0f);
+			a2 = ccl.cshifts[j].percent * gl_cshiftpercent->fvalue * (1.0f / 25500.0f);
 
 			if (!a2)
 				continue;
 			if (a2 > 1)
 				a2 = 1;
-			r += (cl.cshifts[j].destcolor[0]-r) * a2;
-			g += (cl.cshifts[j].destcolor[1]-g) * a2;
-			b += (cl.cshifts[j].destcolor[2]-b) * a2;
+			r += (ccl.cshifts[j].destcolor[0]-r) * a2;
+			g += (ccl.cshifts[j].destcolor[1]-g) * a2;
+			b += (ccl.cshifts[j].destcolor[2]-b) * a2;
 			a = 1 - (1 - a) * (1 - a2);
 		}
 
@@ -473,24 +473,24 @@ V_UpdatePalette (void)
 	V_CalcPowerupCshift();
 
 	for (i = 0; i < NUM_CSHIFTS; i++) {
-		if (cl.cshifts[i].percent != cl.prev_cshifts[i].percent) {
-			cl.prev_cshifts[i].percent = cl.cshifts[i].percent;
+		if (ccl.cshifts[i].percent != ccl.prev_cshifts[i].percent) {
+			ccl.prev_cshifts[i].percent = ccl.cshifts[i].percent;
 		}
 		for (j = 0; j < 3; j++)
-			if (cl.cshifts[i].destcolor[j] != cl.prev_cshifts[i].destcolor[j]) {
-				cl.prev_cshifts[i].destcolor[j] = cl.cshifts[i].destcolor[j];
+			if (ccl.cshifts[i].destcolor[j] != ccl.prev_cshifts[i].destcolor[j]) {
+				ccl.prev_cshifts[i].destcolor[j] = ccl.cshifts[i].destcolor[j];
 			}
 	}
 
 	/* drop the damage value */
-	cl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime * 150;
-	if (cl.cshifts[CSHIFT_DAMAGE].percent <= 0)
-		cl.cshifts[CSHIFT_DAMAGE].percent = 0;
+	ccl.cshifts[CSHIFT_DAMAGE].percent -= host_frametime * 150;
+	if (ccl.cshifts[CSHIFT_DAMAGE].percent <= 0)
+		ccl.cshifts[CSHIFT_DAMAGE].percent = 0;
 
 	/* drop the bonus value */
-	cl.cshifts[CSHIFT_BONUS].percent -= host_frametime * 100;
-	if (cl.cshifts[CSHIFT_BONUS].percent <= 0)
-		cl.cshifts[CSHIFT_BONUS].percent = 0;
+	ccl.cshifts[CSHIFT_BONUS].percent -= host_frametime * 100;
+	if (ccl.cshifts[CSHIFT_BONUS].percent <= 0)
+		ccl.cshifts[CSHIFT_BONUS].percent = 0;
 
 	V_CalcBlend();
 }
@@ -514,23 +514,23 @@ static void
 V_AddIdle (void)
 {
 	r_refdef.viewangles[ROLL] +=
-		v_idlescale->fvalue * Q_sin (cl.time * v_iroll_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_iroll_cycle->fvalue) *
 		v_iroll_level->fvalue;
 	r_refdef.viewangles[PITCH] +=
-		v_idlescale->fvalue * Q_sin (cl.time * v_ipitch_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_ipitch_cycle->fvalue) *
 		v_ipitch_level->fvalue;
 	r_refdef.viewangles[YAW] +=
-		v_idlescale->fvalue * Q_sin (cl.time * v_iyaw_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_iyaw_cycle->fvalue) *
 		v_iyaw_level->fvalue;
 
 	cl.viewent_angles[ROLL] -=
-		v_idlescale->fvalue * Q_sin (cl.time * v_iroll_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_iroll_cycle->fvalue) *
 		v_iroll_level->fvalue;
 	cl.viewent_angles[PITCH] -=
-		v_idlescale->fvalue * Q_sin (cl.time * v_ipitch_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_ipitch_cycle->fvalue) *
 		v_ipitch_level->fvalue;
 	cl.viewent_angles[YAW] -=
-		v_idlescale->fvalue * Q_sin (cl.time * v_iyaw_cycle->fvalue) *
+		v_idlescale->fvalue * Q_sin (ccl.time * v_iyaw_cycle->fvalue) *
 		v_iyaw_level->fvalue;
 }
 
@@ -573,11 +573,11 @@ V_CalcIntermissionRefdef (void)
 	VectorCopy(cl.simangles, r_refdef.viewangles);
 
 	/* always idle in intermission */
-	r_refdef.viewangles[ROLL] += Q_sin (cl.time * v_iroll_cycle->fvalue) *
+	r_refdef.viewangles[ROLL] += Q_sin (ccl.time * v_iroll_cycle->fvalue) *
 		v_iroll_level->fvalue;
-	r_refdef.viewangles[PITCH] += Q_sin (cl.time * v_ipitch_cycle->fvalue) *
+	r_refdef.viewangles[PITCH] += Q_sin (ccl.time * v_ipitch_cycle->fvalue) *
 		v_ipitch_level->fvalue;
-	r_refdef.viewangles[YAW] += Q_sin (cl.time * v_iyaw_cycle->fvalue) *
+	r_refdef.viewangles[YAW] += Q_sin (ccl.time * v_iyaw_cycle->fvalue) *
 		v_iyaw_level->fvalue;
 }
 
@@ -623,7 +623,7 @@ V_CalcRefdef (void)
 	static float	oldz = 0;
 
 	/* Make sure we have an uptodate colormap. */
-	cl.colormap = &cl.players[cl.playernum].colormap;
+	ccl.colormap = &ccl.users[ccl.player_num].color_map;
 
 	V_DriftPitch();
 
@@ -685,7 +685,7 @@ V_CalcRefdef (void)
 		memset (&cl.viewent, 0, sizeof (entity_t));
 		cl.viewent.times = -1;		// FIXME: HACK! DO NOT COPY ELSEWHERE!
 	} else {
-		model_t *model = cl.model_precache[cl.stats[STAT_WEAPON]];
+		model_t *model = cl.model_precache[ccl.stats[STAT_WEAPON]];
 
 		if (cl.viewent.common.model != model) {
 			memset (&cl.viewent, 0, sizeof (entity_t));
@@ -746,10 +746,10 @@ V_RenderView (void)
 		return;
 
 	view_frame = &cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK];
-	view_message = &view_frame->playerstate[cl.playernum];
+	view_message = &view_frame->playerstate[ccl.player_num];
 
 	DropPunchAngle ();
-	if (cl.intermission)
+	if (ccl.intermission)
 		/* intermission / finale rendering */
 		V_CalcIntermissionRefdef ();
 	else
@@ -845,8 +845,8 @@ R_DrawViewModel (void)
 	if (!r_drawviewmodel->ivalue ||
 		!Cam_DrawViewModel () ||
 		!r_drawentities->ivalue ||
-		(cl.stats[STAT_ITEMS] & IT_INVISIBILITY) ||
-		(cl.stats[STAT_HEALTH] <= 0) ||
+		(ccl.stats[STAT_ITEMS] & IT_INVISIBILITY) ||
+		(ccl.stats[STAT_HEALTH] <= 0) ||
 		!cl.viewent.common.model) {
 		return;
 	}

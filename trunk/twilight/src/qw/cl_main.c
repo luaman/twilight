@@ -48,7 +48,6 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "menu.h"
 #include "pmove.h"
-#include "sbar.h"
 #include "screen.h"
 #include "sound.h"
 #include "strlib.h"
@@ -60,6 +59,7 @@ static const char rcsid[] =
 #include "surface.h"
 #include "common.h"
 #include "cpu.h"
+#include "hud.h"
 
 void        Cmd_ForwardToServer (void);
 
@@ -73,7 +73,6 @@ static cvar_t		*rcon_address;
 static cvar_t		*cl_timeout;
 cvar_t		*cl_shownet;
 
-cvar_t		*cl_hudswap;
 cvar_t		*cl_maxfps;
 cvar_t		*cl_mapname;
 
@@ -380,6 +379,12 @@ CL_ClearState (void)
 
 	// wipe the entire cl structure
 	memset (&cl, 0, sizeof (cl));
+	if (ccl.users)
+		Zone_Free(ccl.users);
+	memset (&ccl, 0, sizeof (ccl));
+	ccl.user_flags = USER_FLAG_NO_TEAM_NAME | USER_FLAG_PL_PING;
+	ccl.max_users = MAX_CLIENTS;
+	ccl.users = Zone_Alloc(ccl_zone, sizeof(*ccl.users) * ccl.max_users);
 
 	// We don't get this from the server, that'd take a new protocol
 	cl.viewzoom = 1.0f;
@@ -471,11 +476,11 @@ CL_User_f (void)
 
 	uid = Q_atoi (Cmd_Argv (1));
 
-	for (i = 0; i < MAX_CLIENTS; i++) {
-		if (!cl.players[i].name[0])
+	for (i = 0; i < ccl.max_users; i++) {
+		if (!ccl.users[i].name[0])
 			continue;
 		if (cl.players[i].userid == uid
-			|| !strcmp (cl.players[i].name, Cmd_Argv (1))) {
+			|| !strcmp (ccl.users[i].name, Cmd_Argv (1))) {
 			Info_Print (cl.players[i].userinfo);
 			return;
 		}
@@ -499,10 +504,10 @@ CL_Users_f (void)
 	c = 0;
 	Com_Printf ("userid frags name\n");
 	Com_Printf ("------ ----- ----\n");
-	for (i = 0; i < MAX_CLIENTS; i++) {
-		if (cl.players[i].name[0]) {
+	for (i = 0; i < ccl.max_users; i++) {
+		if (ccl.users[i].name[0]) {
 			Com_Printf ("%6i %4i %s\n", cl.players[i].userid,
-						cl.players[i].frags, cl.players[i].name);
+						ccl.users[i].frags, ccl.users[i].name);
 			c++;
 		}
 	}
@@ -747,7 +752,7 @@ CL_Changing_f (void)
 		return;
 
 	S_StopAllSounds (true);
-	cl.intermission = 0;
+	ccl.intermission = 0;
 	cls.state = ca_connected;			// not active anymore, but not
 	// disconnected
 	Com_Printf ("\nChanging map...\n");
@@ -905,7 +910,6 @@ CL_ReadPackets
 static void
 CL_ReadPackets (void)
 {
-//  while (NET_GetPacket ())
 	while (CL_GetMessage ()) {
 		// 
 		// remote command packet
@@ -1084,6 +1088,8 @@ CL_Init_Cvars (void)
 {
 	extern cvar_t	*noskins;
 
+	CCL_Init_Cvars ();
+
 	// set for running times
 	host_speeds = Cvar_Get ("host_speeds", "0", CVAR_NONE, NULL);
 	show_fps = Cvar_Get ("show_fps", "0", CVAR_NONE, NULL);
@@ -1096,7 +1102,6 @@ CL_Init_Cvars (void)
 	// can be 0, 1, or 2
 	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);
 
-	cl_hudswap = Cvar_Get ("cl_hudswap", "0", CVAR_ARCHIVE, NULL);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
 
 	cl_mapname = Cvar_Get ("cl_mapname", "", CVAR_ROM, NULL);
@@ -1135,6 +1140,11 @@ static void
 CL_Init (void)
 {
 	char			st[80];
+
+	CCL_Init ();
+	ccl.user_flags = USER_FLAG_NO_TEAM_NAME | USER_FLAG_PL_PING;
+	ccl.max_users = MAX_CLIENTS;
+	ccl.users = Zone_Alloc(ccl_zone, sizeof(*ccl.users) * ccl.max_users);
 
 	cls.state = ca_disconnected;
 	r_worldmodel = NULL;
@@ -1343,6 +1353,7 @@ Host_Frame (double time)
 	if (host_frametime > 0.2)
 		host_frametime = 0.2;
 
+
 	// fetch results from server
 	CL_ReadPackets ();
 
@@ -1488,7 +1499,7 @@ Host_Init (void)
 	V_Init_Cvars();					// all view related cvars
 	M_Init_Cvars ();				// all menu related cvars
 	R_Init_Cvars ();				// all rendering system related cvars
-	Sbar_Init_Cvars ();				// all statusbar related cvars
+	HUD_Init_Cvars ();				// all statusbar related cvars
 	CL_Init_Cvars ();				// all cl_* related cvars
 	S_Init_Cvars ();				// all sound system related cvars
 
@@ -1536,7 +1547,7 @@ Host_Init (void)
 	CDAudio_Init_Cvars ();			// initialize all cdaudio related cvars
 	CDAudio_Init ();				// setup cdaudio system, add related commands
 
-	Sbar_Init ();					// setup statusbar, add related commands
+	HUD_Init ();					// setup statusbar, add related commands
 
 	CL_Init ();						// setup client, add related commands
 
@@ -1585,3 +1596,12 @@ Host_Shutdown (void)
 		VID_Shutdown ();
 }
 
+void
+CL_UpdatePings (void)
+{
+	if ((cls.state == ca_active) && ((cls.realtime - cl.last_ping_request) > 5)) {
+		cl.last_ping_request = cls.realtime;
+		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
+		SZ_Print (&cls.netchan.message, "pings");
+	}
+}

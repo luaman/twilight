@@ -67,7 +67,7 @@
 #endif
 
 #ifndef BIT
-#define BIT(bit)			(1l << bit)
+#define BIT(bit)			(1Ul << (bit))
 #endif
 
 #ifndef bound_bits

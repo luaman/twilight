@@ -134,7 +134,7 @@ R_GetSpriteFrame (entity_common_t *e)
 		numframes = pspritegroup->numframes;
 		fullinterval = pintervals[numframes - 1];
 
-		time = cl.time;
+		time = ccl.time;
 
 		/*
 		 * when loading in Mod_LoadSpriteGroup, we guaranteed all interval
@@ -258,8 +258,8 @@ R_VisBrushModels (void)
 
 	// First off, the world.
 
-	Vis_MarkLeaves (cl.worldmodel);
-	Vis_RecursiveWorldNode (cl.worldmodel->brush->nodes,cl.worldmodel,r_origin);
+	Vis_MarkLeaves (ccl.worldmodel);
+	Vis_RecursiveWorldNode (ccl.worldmodel->brush->nodes,ccl.worldmodel,r_origin);
 
 	// Now everything else.
 
@@ -285,7 +285,7 @@ R_DrawOpaqueBrushModels ()
 	vec3_t			 mins, maxs;
 	int				 i;
 
-	R_DrawTextureChains (cl.worldmodel, 0, NULL, NULL);
+	R_DrawTextureChains (ccl.worldmodel, 0, NULL, NULL);
 
 	if (!r_drawentities->ivalue)
 		return;
@@ -315,7 +315,7 @@ R_DrawAddBrushModels ()
 
 	qglColor4f (1, 1, 1, r_wateralpha->fvalue);
 
-	R_DrawLiquidTextureChains (cl.worldmodel, false);
+	R_DrawLiquidTextureChains (ccl.worldmodel, false);
 
 	if (!r_drawentities->ivalue) {
 		qglColor4fv (whitev);
@@ -400,7 +400,7 @@ R_SetupFrame (void)
 
 	AngleVectors (r_refdef.viewangles, vpn, vright, vup);
 
-	Vis_NewVisParams (cl.worldmodel, r_origin, vup, vright, vpn,
+	Vis_NewVisParams (ccl.worldmodel, r_origin, vup, vright, vpn,
 			r_refdef.fov_x, r_refdef.fov_y);
 
 	V_SetContentsColor (vis_viewleaf->contents);
@@ -542,7 +542,7 @@ R_RenderView (void)
 	if (r_norefresh->ivalue)
 		return;
 
-	if (!cl.worldmodel)
+	if (!ccl.worldmodel)
 		Host_EndGame ("R_RenderView: NULL worldmodel");
 
 	if (r_speeds->ivalue)
@@ -748,7 +748,7 @@ R_NewMap (void)
 	cl_num_static_entities = 0;
 
 	// Parse map entities
-	CL_ParseEntityLump (cl.worldmodel->brush->entities);
+	CL_ParseEntityLump (ccl.worldmodel->brush->entities);
 
 	r_explosion_newmap ();
 }

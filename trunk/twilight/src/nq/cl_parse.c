@@ -249,19 +249,22 @@ CL_ParseServerInfo (void)
 		Host_Error ("Server returned version %i, not %i", i, PROTOCOL_VERSION);
 
 // parse maxclients
-	cl.maxclients = MSG_ReadByte ();
+	ccl.max_users = MSG_ReadByte ();
 
-	if (cl.maxclients < 1 || cl.maxclients > MAX_SCOREBOARD)
-		Host_Error ("Bad maxclients (%u) from server\n", cl.maxclients);
+	if (ccl.max_users < 1 || ccl.max_users > MAX_SCOREBOARD)
+		Host_Error ("Bad maxclients (%u) from server\n", ccl.max_users);
 
-	cl.scores = Zone_Alloc (cl_zone, cl.maxclients * sizeof (*cl.scores));
+	if (ccl.users)
+		Zone_Free(ccl.users);
+	ccl.users = Zone_Alloc (cl_zone, ccl.max_users * sizeof (*ccl.users));
+	ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 
 // parse gametype
-	cl.gametype = MSG_ReadByte ();
+	ccl.game_teams = MSG_ReadByte ();
 
 // parse signon message
 	str = MSG_ReadString ();
-	strlcpy (cl.levelname, str, sizeof (cl.levelname));
+	strlcpy (ccl.levelname, str, sizeof (ccl.levelname));
 
 // seperate the printfs so the server message can have a color
 	Com_Printf ("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36"
@@ -331,7 +334,7 @@ CL_ParseServerInfo (void)
 
 
 // local state
-	cl_entities[0].common.model = cl.worldmodel = r_worldmodel = cl.model_precache[1];
+	cl_entities[0].common.model = ccl.worldmodel = r_worldmodel = cl.model_precache[1];
 
 	R_NewMap ();
 	Team_NewMap ();
@@ -418,9 +421,9 @@ CL_ParseUpdate (int bits)
 	ent->msgtime = cl.mtime[0];
 
 	if (bits & U_FRAME)
-		CL_Update_Frame(ent, MSG_ReadByte(), cl.time);
+		CL_Update_Frame(ent, MSG_ReadByte(), ccl.time);
 	else
-		CL_Update_Frame(ent, ent->baseline.frame, cl.time);
+		CL_Update_Frame(ent, ent->baseline.frame, ccl.time);
 
 	i = (bits & U_COLORMAP) ? 
 		MSG_ReadByte() : ent->baseline.colormap;
@@ -428,9 +431,9 @@ CL_ParseUpdate (int bits)
 	if (!i)
 		ent->common.colormap = NULL;
 	else {
-		if (i > cl.maxclients)
-			Sys_Error ("i >= cl.maxclients");
-		ent->common.colormap = &cl.scores[i - 1].colormap;
+		if (i > ccl.max_users)
+			Sys_Error ("i >= ccl.max_users");
+		ent->common.colormap = &ccl.users[i - 1].color_map;
 	}
 
 	skin = (bits & U_SKIN) ? 
@@ -502,7 +505,7 @@ Server information pertaining to this client only
 static void
 CL_ParseClientdata (int bits)
 {
-	int			i, j;
+	Sint32		i, j;
 
 	cl.viewheight = (bits & SU_VIEWHEIGHT) ? 
 		MSG_ReadChar() : DEFAULT_VIEWHEIGHT;
@@ -523,57 +526,57 @@ CL_ParseClientdata (int bits)
 // [always sent]    if (bits & SU_ITEMS)
 	i = MSG_ReadLong ();
 
-	if (cl.stats[STAT_ITEMS] != i)
+	if (ccl.stats[STAT_ITEMS] != i)
 	{
 		// set flash times
 		for (j = 0; j < 32; j++)
-			if ((i & (1 << j)) && !(cl.stats[STAT_ITEMS] & (1 << j)))
-				cl.item_gettime[j] = cl.time;
-		cl.stats[STAT_ITEMS] = i;
+			if ((i & (1 << j)) && !(ccl.stats[STAT_ITEMS] & (1 << j)))
+				ccl.items_gettime[j] = ccl.time;
+		ccl.stats[STAT_ITEMS] = i;
 	}
 
 	cl.onground = (bits & SU_ONGROUND) != 0;
 	cl.inwater = (bits & SU_INWATER) != 0;
 
-	cl.stats[STAT_WEAPONFRAME] = (bits & SU_WEAPONFRAME) ?
+	ccl.stats[STAT_WEAPONFRAME] = (bits & SU_WEAPONFRAME) ?
 		MSG_ReadByte() : 0;
 
 	i = (bits & SU_ARMOR) ? MSG_ReadByte() : 0;
 
-	if (cl.stats[STAT_ARMOR] != i)
-		cl.stats[STAT_ARMOR] = i;
+	if (ccl.stats[STAT_ARMOR] != i)
+		ccl.stats[STAT_ARMOR] = i;
 
 	i = (bits & SU_WEAPON) ? MSG_ReadByte() : 0;
 
-	if (cl.stats[STAT_WEAPON] != i)
-		cl.stats[STAT_WEAPON] = i;
+	if (ccl.stats[STAT_WEAPON] != i)
+		ccl.stats[STAT_WEAPON] = i;
 
 	i = MSG_ReadShort ();
-	if (cl.stats[STAT_HEALTH] != i)
-		cl.stats[STAT_HEALTH] = i;
+	if (ccl.stats[STAT_HEALTH] != i)
+		ccl.stats[STAT_HEALTH] = i;
 
 	i = MSG_ReadByte ();
-	if (cl.stats[STAT_AMMO] != i)
-		cl.stats[STAT_AMMO] = i;
+	if (ccl.stats[STAT_AMMO] != i)
+		ccl.stats[STAT_AMMO] = i;
 
 	for (i = 0; i < 4; i++)
 	{
 		j = MSG_ReadByte ();
-		if (cl.stats[STAT_SHELLS + i] != j)
-			cl.stats[STAT_SHELLS + i] = j;
+		if (ccl.stats[STAT_SHELLS + i] != j)
+			ccl.stats[STAT_SHELLS + i] = j;
 	}
 
 	i = MSG_ReadByte ();
 
 	if (game_mission->ivalue)
 	{
-		if (cl.stats[STAT_ACTIVEWEAPON] != (1 << i))
-			cl.stats[STAT_ACTIVEWEAPON] = (1 << i);
+		if (ccl.stats[STAT_ACTIVEWEAPON] != (1 << i))
+			ccl.stats[STAT_ACTIVEWEAPON] = (1 << i);
 	}
 	else
 	{
-		if (cl.stats[STAT_ACTIVEWEAPON] != i)
-			cl.stats[STAT_ACTIVEWEAPON] = i;
+		if (ccl.stats[STAT_ACTIVEWEAPON] != i)
+			ccl.stats[STAT_ACTIVEWEAPON] = i;
 	}
 }
 
@@ -583,19 +586,27 @@ CL_NewTranslation
 =====================
 */
 static void
-CL_NewTranslation (int slot)
+CL_NewTranslation (int slot, int colors)
 {
-	Uint8	color;
+	Uint8		color;
+	user_info_t	*user;
 
-	color = cl.scores[slot].colors & 0xF0;
+	user = &ccl.users[slot];
+
+	color = colors & 0xF0;
 	if (color < 128)
 		color += 15;
-	VectorCopy4 (d_8tofloattable[color], cl.scores[slot].colormap.top);
+	user->color_top = color;
+	VectorCopy4 (d_8tofloattable[color], user->color_map.top);
 
-	color = (cl.scores[slot].colors & 0x0F) << 4;
+	color = (colors & 0x0F) << 4;
 	if (color < 128)
 		color += 15;
-	VectorCopy4 (d_8tofloattable[color], cl.scores[slot].colormap.bottom);
+	user->color_bottom = color;
+	VectorCopy4 (d_8tofloattable[color], user->color_map.bottom);
+
+	snprintf(user->team, sizeof(user->team), "$%d$", colors & 0x0F);
+	ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 }
 
 /*
@@ -760,6 +771,7 @@ CL_ParseServerMessage (void)
 
 			case svc_setview:
 				cl.viewentity = MSG_ReadShort ();
+				ccl.player_num = cl.viewentity - 1;
 				break;
 
 			case svc_lightstyle:
@@ -781,27 +793,29 @@ CL_ParseServerMessage (void)
 
 			case svc_updatename:
 				i = MSG_ReadByte ();
-				if (i >= cl.maxclients)
+				if (i >= ccl.max_users)
 					Host_Error ("CL_ParseServerMessage: svc_updatename >"
 							" MAX_SCOREBOARD");
-				strcpy (cl.scores[i].name, MSG_ReadString ());
+				strcpy (ccl.users[i].name, MSG_ReadString ());
+				ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 				break;
 
 			case svc_updatefrags:
 				i = MSG_ReadByte ();
-				if (i >= cl.maxclients)
+				if (i >= ccl.max_users)
 					Host_Error ("CL_ParseServerMessage: svc_updatefrags >"
 							" MAX_SCOREBOARD");
-				cl.scores[i].frags = MSG_ReadShort ();
+				ccl.users[i].frags = MSG_ReadShort ();
+				ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 				break;
 
 			case svc_updatecolors:
 				i = MSG_ReadByte ();
-				if (i >= cl.maxclients)
+				if (i >= ccl.max_users)
 					Host_Error ("CL_ParseServerMessage: svc_updatecolors >"
 							" MAX_SCOREBOARD");
-				cl.scores[i].colors = MSG_ReadByte ();
-				CL_NewTranslation (i);
+				CL_NewTranslation (i, MSG_ReadByte ());
+				ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 				break;
 
 			case svc_particle:
@@ -841,18 +855,18 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_killedmonster:
-				cl.stats[STAT_MONSTERS]++;
+				ccl.stats[STAT_MONSTERS]++;
 				break;
 
 			case svc_foundsecret:
-				cl.stats[STAT_SECRETS]++;
+				ccl.stats[STAT_SECRETS]++;
 				break;
 
 			case svc_updatestat:
 				i = MSG_ReadByte ();
 				if (i < 0 || i >= MAX_CL_STATS)
 					Sys_Error ("svc_updatestat: %i is invalid", i);
-				cl.stats[i] = MSG_ReadLong ();
+				ccl.stats[i] = MSG_ReadLong ();
 				break;
 
 			case svc_spawnstaticsound:
@@ -870,19 +884,19 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_intermission:
-				cl.intermission = 1;
-				cl.completed_time = cl.time;
+				ccl.intermission = 1;
+				ccl.completed_time = ccl.time;
 				break;
 
 			case svc_finale:
-				cl.intermission = 2;
-				cl.completed_time = cl.time;
+				ccl.intermission = 2;
+				ccl.completed_time = ccl.time;
 				SCR_CenterPrint (MSG_ReadString ());
 				break;
 
 			case svc_cutscene:
-				cl.intermission = 3;
-				cl.completed_time = cl.time;
+				ccl.intermission = 3;
+				ccl.completed_time = ccl.time;
 				SCR_CenterPrint (MSG_ReadString ());
 				break;
 

@@ -448,9 +448,9 @@ CL_AdjustAngles (void)
 	float       up, down;
 
 	if (in_speed.state & 1)
-		speed = (cl.time - cl.oldtime) * cl_anglespeedkey->fvalue;
+		speed = (ccl.time - ccl.oldtime) * cl_anglespeedkey->fvalue;
 	else
-		speed = (cl.time - cl.oldtime);
+		speed = (ccl.time - ccl.oldtime);
 
 	if (!(in_strafe.state & 1)) {
 		cl.viewangles[YAW] -=
