@@ -12,3 +12,6 @@ lhbin2c
 .*.swp
 *.i
 *.s
+*.ilk
+Debug
+Release

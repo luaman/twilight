@@ -11,3 +11,5 @@ Release
 *.plg
 *.i
 *.s
+*.map
+*.pdb
