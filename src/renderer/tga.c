@@ -276,12 +276,10 @@ TGA_Load (char *name, Uint8 **image_rgba, int *width, int *height)
 {
 	Uint8 *buf = COM_LoadTempFile (name);
 
-	if (buf) {
+	if (buf)
 		TGA_LoadBuffer (buf, image_rgba, width, height);
-	}
-	else {
-		image_rgba = NULL;
-	}
+	else
+		return NULL;
 
 	return image_rgba;
 }
@@ -323,3 +321,4 @@ TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer)
 
 	return true;
 }
+
