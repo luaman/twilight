@@ -1067,27 +1067,15 @@ M_AdjustSliders (int dir)
 
 	switch (options_cursor) {
 		case 3:						// screen size
-			t = scr_viewsize->value[0] + (dir * 10.0f);
-			if (t < 30.0f)
-				t = 30.0f;
-			if (t > 120.0f)
-				t = 120.0f;
+			t = bound (30, scr_viewsize->value[0] + (dir * 10.0f), 120);
 			Cvar_Set (scr_viewsize, va("%i", t));
 			break;
 		case 4:						// gamma
-			t = v_gamma->value[0] - (dir * 0.05f);
-			if (t < 0.5f)
-				t = 0.5f;
-			if (t > 1.0f)
-				t = 1.0f;
+			t = bound (0.5, v_gamma->value[0] - (dir * 0.05f), 1.0);
 			Cvar_Set (v_gamma, va("%i", t));
 			break;
 		case 5:						// mouse speed
-			t = sensitivity->value[0] + (dir * 0.5f);
-			if (t < 1.0f)
-				t = 1.0f;
-			if (t > 11.0f)
-				t = 11.0f;
+			t = bound (1, sensitivity->value[0] + (dir * 0.5f), 11);
 			Cvar_Set (sensitivity, va("%i", t));
 			break;
 		case 6:						// music volume
@@ -1107,11 +1095,7 @@ M_AdjustSliders (int dir)
 #endif
 			break;
 		case 7:						// sfx volume
-			t = volume->value[0] = (dir * 0.1f);
-			if (t < 0.0f)
-				t = 0.0f;
-			if (t > 1.0f)
-				t = 1.0f;
+			t = bound (0, volume->value[0] = (dir * 0.1f), 1);
 			Cvar_Set (volume, va("%i", t));
 			break;
 
@@ -1126,7 +1110,8 @@ M_AdjustSliders (int dir)
 			break;
 
 		case 9:						// invert mouse
-			Cvar_Set (m_pitch, va("%i", -m_pitch->value[0]));
+			t = -m_pitch->value[0];
+			Cvar_Set (m_pitch, va("%i", t));
 			break;
 
 		case 10:						// lookspring
@@ -2200,6 +2185,7 @@ void
 M_NetStart_Change (int dir)
 {
 	int         count;
+	int			t;
 
 	switch (gameoptions_cursor) {
 		case 1:
@@ -2223,39 +2209,26 @@ M_NetStart_Change (int dir)
 			else
 				count = 2;
 
-			Cvar_Set (teamplay, va("%i", teamplay->value[0] + dir));
-			if (teamplay->value[0] > count)
-				Cvar_Set (teamplay, "0");
-			else if (teamplay->value[0] < 0)
-				Cvar_Set (teamplay, va("%i", count));
+			t = bound (0, teamplay->value[0] + dir, count);
+			Cvar_Set (teamplay, va("%i", t));
 			break;
 
 		case 4:
-			Cvar_Set (skill, va("%i", skill->value[0] + dir));
-			if (skill->value[0] > 3)
-				Cvar_Set (skill, "0");
-			if (skill->value[0] < 0)
-				Cvar_Set (skill, "3");
+			t = bound (0, skill->value[0] + dir, 3);
+			Cvar_Set (skill, va("%i", t));
 			break;
 
 		case 5:
-			Cvar_Set (fraglimit, va("%i", fraglimit->value[0] + dir * 10));
-			if (fraglimit->value[0] > 100)
-				Cvar_Set (fraglimit, "0");
-			if (fraglimit->value[0] < 0)
-				Cvar_Set (fraglimit, "100");
+			t = bound (0, fraglimit->value[0] + dir * 10, 100);
+			Cvar_Set (fraglimit, va("%i", t));
 			break;
 
 		case 6:
-			Cvar_Set (timelimit, va("%i", timelimit->value[0] + dir * 5));
-			if (timelimit->value[0] > 60)
-				Cvar_Set (timelimit, "0");
-			if (timelimit->value[0] < 0)
-				Cvar_Set (timelimit, "60");
+			t = bound (0, timelimit->value[0] + dir * 5, 60);
+			Cvar_Set (timelimit, va("%i", t));
 			break;
 
 		case 7:
-			startepisode += dir;
 			// MED 01/06/97 added hipnotic count
 			if (hipnotic)
 				count = 6;
@@ -2268,17 +2241,11 @@ M_NetStart_Change (int dir)
 			else
 				count = 2;
 
-			if (startepisode < 0)
-				startepisode = count - 1;
-
-			if (startepisode >= count)
-				startepisode = 0;
-
+			startepisode = bound (0, startepisode + dir, count - 1);
 			startlevel = 0;
 			break;
 
 		case 8:
-			startlevel += dir;
 			// MED 01/06/97 added hipnotic episodes
 			if (hipnotic)
 				count = hipnoticepisodes[startepisode].levels;
@@ -2288,11 +2255,7 @@ M_NetStart_Change (int dir)
 			else
 				count = episodes[startepisode].levels;
 
-			if (startlevel < 0)
-				startlevel = count - 1;
-
-			if (startlevel >= count)
-				startlevel = 0;
+			startlevel = bound (0, startlevel + dir, count - 1);
 			break;
 	}
 }
