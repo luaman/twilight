@@ -2,7 +2,7 @@
 #
 # This file is intended to be processed by automake
 
-AUTOMAKE_OPTIONS=gnu dist-zip
+AUTOMAKE_OPTIONS=foreign dist-zip
 
 if CLIENTS
 clients = image renderer sound
