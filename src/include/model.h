@@ -97,6 +97,8 @@ typedef enum { mod_brush, mod_sprite, mod_alias } modtype_t;
 typedef struct model_s {
 	char        name[MAX_QPATH];
 	qboolean    loaded;			// bmodels and sprites don't cache normally
+	qboolean	submodel;
+	qboolean	needload;
 
 	modtype_t   type;
 	int         numframes;
@@ -137,13 +139,14 @@ void Mod_MakeChains(model_t *mod);
 void Mod_RUnloadBrushModel(model_t *mod);
 
 void Mod_LoadAliasModel(model_t *mod, void *buffer, int flags);
-void Mod_UnloadAliasModel(model_t *mod);
+void Mod_UnloadAliasModel(model_t *mod, qboolean keep);
 
 void Mod_LoadSpriteModel(model_t *mod, void *buffer, int flags);
-void Mod_UnloadSpriteModel(model_t *mod);
+void Mod_UnloadSpriteModel(model_t *mod, qboolean keep);
 
 void Mod_Init(void);
-void Mod_ClearAll(void);
+void Mod_ClearAll(qboolean keep);
+void Mod_ReloadAll (int flags);
 model_t *Mod_FindName(const char *name);
 void Mod_TouchModel(const char *name);
 model_t *Mod_ForName(const char *name, int flags);
@@ -152,9 +155,9 @@ void Mod_Brush_Init(void);
 mleaf_t *Mod_PointInLeaf(vec3_t p, model_t *model);
 Uint8 *Mod_LeafPVS(mleaf_t *leaf, model_t *model);
 void Mod_LoadBrushModel(model_t *mod, void *buffer, int flags);
-void Mod_UnloadBrushModel(model_t *mod);
+void Mod_UnloadBrushModel(model_t *mod, qboolean keep);
 
-void Mod_UnloadModel(model_t *mod);
+void Mod_UnloadModel(model_t *mod, qboolean keep);
 model_t *Mod_LoadModel(model_t *mod, int flags);
 qboolean Mod_MinsMaxs(model_t *mod, vec3_t org, vec3_t ang, vec3_t mins, vec3_t maxs);
 

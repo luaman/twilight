@@ -57,23 +57,20 @@ typedef struct
 } rdlight_t;
 
 extern int dlightdivtable[32768];
-extern rdlight_t r_dlight[MAX_DLIGHTS];
-extern int r_numdlights;
 extern mplane_t *lightplane;
 extern vec3_t lightspot;
 extern vec3_t lightcolor;
 
-void R_InitSurf(void);
-void R_InitLightTextures(void);
+void GL_Light_Tables_Init (void);
 void R_DrawCoronas(void);
 void R_AnimateLight(void);
 void R_BuildLightList(void);
-void R_InitBubble(void);
 void R_MarkLightsNoVis(vec3_t lightorigin, rdlight_t *rd, int bit, model_t *mod, mnode_t *node);
 void R_MarkLights(rdlight_t *rd, int bit, model_t *model, matrix4x4_t *invmatrix);
 void R_PushDlights(void);
 void R_LightPoint (vec3_t p, vec3_t out);
 void GL_UpdateLightmap(model_t *mod, msurface_t *fa, matrix4x4_t *invmatrix);
+void R_BuildLightList (void);
 
 #endif // __GL_RLIGHT_H
 

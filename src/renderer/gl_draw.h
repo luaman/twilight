@@ -37,6 +37,7 @@ extern image_t *draw_disc;
 image_t *Draw_CacheImg(char *path);
 void Draw_Init_Cvars(void);
 void Draw_Init(void);
+void Draw_Shutdown (void);
 void Draw_Character(float x, float y, int num, float text_size);
 void Draw_String_Len(float x, float y, const char *str, int len, float text_size);
 void Draw_String(float x, float y, const char *str, float text_size);

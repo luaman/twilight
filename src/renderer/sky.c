@@ -36,6 +36,7 @@ static const char rcsid[] =
 
 #include "dyngl.h"
 #include "gl_arrays.h"
+#include "gl_main.h"
 #include "gl_textures.h"
 #include "sky.h"
 #include "image.h"
@@ -199,7 +200,7 @@ Sky_Sphere_Draw (void)
 	qglDepthRange (1, 1);
 
 	qglPushMatrix ();
-	qglTranslatef(r_origin[0], r_origin[1], r_origin[2]);
+	qglTranslatef(r.origin[0], r.origin[1], r.origin[2]);
 
 	TWI_ChangeVDrawArrays (Sky_Sphere_Numverts, 1, Sky_Sphere_Verts,
 			Sky_Sphere_Texcoords, Sky_Sphere_Texcoords, NULL, NULL);
@@ -362,7 +363,7 @@ Sky_Box_Draw (void)
 	qglDepthFunc (GL_GREATER);
 	qglDepthRange (1, 1);
 	qglPushMatrix ();
-	qglTranslatef(r_origin[0], r_origin[1], r_origin[2]);
+	qglTranslatef(r.origin[0], r.origin[1], r.origin[2]);
 
 	// right
 	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[0]);
@@ -475,6 +476,24 @@ Sky_Init (void)
 	Cmd_AddCommand ("loadsky", &Sky_LoadSky_f);
 	Sky_Sphere_Calc ();
 	Sky_Box_Calc ();
+	Sky_Changed (NULL);
+}
+
+void
+Sky_Shutdown (void)
+{
+	int	i;
+	/*
+	Cmd_RemoveCommand ("loadsky", &Sky_LoadSky_f);
+	*/
+	if (solidskytexture)
+		GLT_Delete (solidskytexture);
+	if (alphaskytexture)
+		GLT_Delete (alphaskytexture);
+	for (i = 0; i < 6; i++)
+		if (skyboxtexnums[i])
+			GLT_Delete (skyboxtexnums[i]);
+	sky_type = SKY_SPHERE;
 }
 
 void

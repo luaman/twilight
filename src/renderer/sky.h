@@ -44,6 +44,7 @@ void Sky_Sphere_Draw(void);
 void Sky_Box_Draw(void);
 void Sky_InitSky (image_t *img);
 void Sky_Init(void);
+void Sky_Shutdown (void);
 void Sky_Init_Cvars(void);
 
 #endif // __R_SKY_H

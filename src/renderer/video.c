@@ -46,6 +46,7 @@ static const char rcsid[] =
 #include "video.h"
 #include "cclient.h"
 #include "hud.h"
+#include "strlib.h"
 
 extern cvar_t *cl_verstring;
 
@@ -56,6 +57,11 @@ static cvar_t *i_keypadmode;
 static cvar_t *_windowed_mouse;
 static cvar_t *gl_driver;
 
+static cvar_t *vid_width;
+static cvar_t *vid_height;
+static cvar_t *vid_windowed;
+static cvar_t *vid_bpp;
+
 viddef_t	vid;
 
 qboolean VID_Inited;
@@ -63,10 +69,9 @@ static qboolean keypadmode = false;
 
 float mouse_x, mouse_y;
 
-static qboolean use_mouse = false;
+static enum { M_NONE, M_FREE, M_GRAB, M_FULL } mouse = M_NONE;
 
 static int sdl_flags = SDL_OPENGL;
-
 
 /*-----------------------------------------------------------------------*/
 
@@ -74,38 +79,6 @@ static void I_KeypadMode (cvar_t *cvar);
 static void IN_WindowedMouse (cvar_t *cvar);
 
 /*-----------------------------------------------------------------------*/
-void
-VID_Shutdown (void)
-{
-	DynGL_CloseLibrary ();
-}
-
-static void
-GL_Init (void)
-{
-	qglFinish ();
-	GLInfo_Init ();
-	GLArrays_Init ();
-
-	qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
-	qglCullFace (GL_FRONT);
-	qglEnable (GL_TEXTURE_2D);
-
-	qglAlphaFunc (GL_GREATER, 0.666);
-
-	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-
-	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-			GL_LINEAR_MIPMAP_NEAREST);
-	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-}
-
 void
 GL_EndRendering (void)
 {
@@ -161,9 +134,7 @@ Size_Changed2D (cvar_t *cvar)
 void
 VID_Init_Cvars (void)
 {
-	GLArrays_Init_Cvars ();
-	GLInfo_Init_Cvars ();
-	PAL_Init_Cvars ();
+	Uint	i;
 
 	width_2d = Cvar_Get ("width_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
 	height_2d = Cvar_Get ("height_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
@@ -171,56 +142,71 @@ VID_Init_Cvars (void)
 	i_keypadmode = Cvar_Get ("i_keypadmode", "0", CVAR_ARCHIVE, &I_KeypadMode);
 	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE,
 			&IN_WindowedMouse);
-	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
+	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ARCHIVE, NULL);
+
+
+	vid_bpp = Cvar_Get ("vid_bpp", "0", CVAR_ARCHIVE, NULL);
+	vid_width = Cvar_Get ("vid_width", "640", CVAR_ARCHIVE, NULL);
+	vid_height = Cvar_Get ("vid_height", "0", CVAR_ARCHIVE, NULL);
+	vid_windowed = Cvar_Get ("vid_windowed", "0", CVAR_ARCHIVE, NULL);
+
+	if ((i = COM_CheckParm ("-window")))
+		Cvar_Set (vid_windowed, "1");
+
+	i = COM_CheckParm ("-width");
+	if (i && i < com_argc - 1) {
+		Cvar_Set (vid_width, com_argv[i + 1]);
+		Cvar_Set (vid_height, va("%d", vid_width->ivalue * 3 / 4));
+	}
+
+	i = COM_CheckParm ("-height");
+	if (i && i < com_argc - 1)
+		Cvar_Set (vid_height, com_argv[i + 1]);
+
+	i = COM_CheckParm ("-winsize");
+	if (i && i < com_argc - 2)
+	{
+		Cvar_Set (vid_width, com_argv[i + 1]);
+		Cvar_Set (vid_height, com_argv[i + 2]);
+	}
+
+	i = COM_CheckParm ("-conwidth");
+	if (i && i < (com_argc - 1))
+		Cvar_Set (width_2d, com_argv[i + 1]);
+
+	i = COM_CheckParm ("-conheight");
+	if (i && i < (com_argc - 1))
+		Cvar_Set (height_2d, com_argv[i + 1]);
+
+	i = COM_CheckParm ("-bpp");
+	if (i && i < com_argc - 1)
+		Cvar_Set (vid_bpp, com_argv[i + 1]);
 }
 
 void
 VID_Init (void)
 {
-	Uint		i;
 	const		SDL_VideoInfo *info = NULL;
 	char		sdl_driver[256];
 
 	/* interpret command-line params */
 
-	/* set vid parameters */
-	if ((i = COM_CheckParm ("-nomouse")) == 0)
-		use_mouse = true;
+	sdl_flags = SDL_OPENGL;
 
-	if ((i = COM_CheckParm ("-window")) == 0)
+	if (vid_windowed->ivalue)
+		sdl_flags &= ~SDL_FULLSCREEN;
+	else
 		sdl_flags |= SDL_FULLSCREEN;
 
-	vid.width = 640;
-	vid.height = 0;
-
-	i = COM_CheckParm ("-width");
-	if (i && i < com_argc - 1)
-		vid.width = Q_atoi (com_argv[i + 1]);
-
-	i = COM_CheckParm ("-height");
-	if (i && i < com_argc - 1)
-		vid.height = Q_atoi (com_argv[i + 1]);
-
-	i = COM_CheckParm ("-winsize");
-	if (i && i < com_argc - 2)
-	{
-		vid.width = Q_atoi (com_argv[i + 1]);
-		vid.height = Q_atoi (com_argv[i + 2]);
-	}
-
+	vid.width = vid_width->ivalue;
+	vid.height = vid_height->ivalue;
 	if (!vid.height)
-		vid.height = (vid.width * 3) / 4;
+		vid.height = vid.width * 3 / 4;
 
-	vid.width = max (320, vid.width);
-	vid.height = max (240, vid.height);
+	vid.width = max (512, vid.width);
+	vid.height = max (384, vid.height);
 
-	i = COM_CheckParm ("-conwidth");
-	if (i && i < (com_argc - 1))
-		Cvar_Set(width_2d, com_argv[i + 1]);
-
-	i = COM_CheckParm ("-conheight");
-	if (i && i < (com_argc - 1))
-		Cvar_Set(height_2d, com_argv[i + 1]);
+	vid.bpp = vid_bpp->ivalue;
 
 	if (SDL_InitSubSystem (SDL_INIT_VIDEO) != 0)
 		Sys_Error ("Could not init SDL video: %s\n", SDL_GetError ());
@@ -234,12 +220,6 @@ VID_Init (void)
 	if (!DynGL_LoadLibrary (gl_driver->svalue))
 		Sys_Error ("%s\n", SDL_GetError ());
 	Com_DPrintf ("VID_Init: DynGL_LoadLibrary successful.\n");
-
-	i = COM_CheckParm ("-bpp");
-	if (i && i < com_argc - 1)
-		vid.bpp = Q_atoi (com_argv[i + 1]);
-	else
-		vid.bpp = 0;
 
 	if (vid.bpp >= 24) {
 		/* Insist on at least 8 bits per channel */
@@ -276,18 +256,29 @@ VID_Init (void)
 	VID_Inited = true;
 	PAL_Init ();
 	Size_Changed2D (NULL);
+	IN_WindowedMouse (_windowed_mouse);
 
 	Com_Printf ("Video mode %dx%d initialized: %s.\n", vid.width, vid.height,
 			SDL_VideoDriverName(sdl_driver, sizeof(sdl_driver)));
+}
 
-	GL_Init ();
-	Com_DPrintf ("VID_Init: GL_Init successful.\n");
-
-	if (use_mouse)
+void
+VID_Shutdown (void)
+{
+	if (mouse > M_NONE)
 	{
-		SDL_ShowCursor (0);
-		SDL_WM_GrabInput (SDL_GRAB_ON);
+		SDL_ShowCursor (1);
+		SDL_WM_GrabInput (SDL_GRAB_OFF);
 	}
+
+	DynGL_CloseLibrary ();
+//	SDL_QuitSubSystem (SDL_INIT_VIDEO);
+	SDL_SetVideoMode (vid.width, vid.height, vid.bpp, sdl_flags & ~SDL_OPENGL);
+	VID_Inited = false;
+
+	memset (&vid, 0, sizeof (viddef_t));
+
+	Com_DPrintf ("VID_Shutdown: Successful.\n");
 }
 
 void
@@ -436,7 +427,7 @@ Sys_SendKeyEvents (void)
 
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
-				if (!use_mouse)
+				if (mouse <= M_FREE)
 					break;
 
 				but = event.button.button;
@@ -454,14 +445,11 @@ Sys_SendKeyEvents (void)
 				break;
 
 			case SDL_MOUSEMOTION:
-				if (!use_mouse)
+				if ((mouse <= M_FREE) || !(ccls.state >= ca_connected))
 					break;
 
-				if (_windowed_mouse->ivalue && (ccls.state >= ca_connected))
-				{
-					mouse_x += event.motion.xrel;
-					mouse_y += event.motion.yrel;
-				}
+				mouse_x += event.motion.xrel;
+				mouse_y += event.motion.yrel;
 				break;
 
 			case SDL_QUIT:
@@ -494,20 +482,27 @@ static void
 IN_WindowedMouse (cvar_t *cvar)
 {
 	cvar = cvar;
-	if (!use_mouse)
+
+	if (!VID_Inited)
 		return;
 
-	if (sdl_flags & SDL_FULLSCREEN)
-	{
-		_windowed_mouse->flags |= CVAR_ROM;
-		Cvar_Set (_windowed_mouse, "1");
-		return;
-	}
-
-	if (!_windowed_mouse->ivalue)
-		SDL_WM_GrabInput (SDL_GRAB_OFF);
+	if (COM_CheckParm ("-nomouse"))
+		mouse = M_NONE;
+	else if ((sdl_flags & SDL_FULLSCREEN))
+		mouse = M_FULL;
+	else if (_windowed_mouse->ivalue)
+		mouse = M_GRAB;
 	else
+		mouse = M_FREE;
+
+	if (mouse >= M_GRAB)
+	{
+		SDL_ShowCursor (0);
 		SDL_WM_GrabInput (SDL_GRAB_ON);
+	} else {
+		SDL_ShowCursor (1);
+		SDL_WM_GrabInput (SDL_GRAB_OFF);
+	}
 }
 
 static void

@@ -177,7 +177,7 @@ Host_FindMaxClients (void)
 			svs.maxclients = 16;
 	} else {
 		ccls.state = ca_disconnected;
-		ccl.worldmodel = r_worldmodel = NULL;
+		ccl.worldmodel = r.worldmodel = NULL;
 	}
 
 	i = COM_CheckParm ("-listen");
@@ -479,7 +479,7 @@ Host_ClearMemory (void)
 	if (!ccl.worldmodel && !sv.worldmodel)		// Nothing to clear.
 		return;
 
-	Mod_ClearAll ();
+	Mod_ClearAll (false);
 
 	cls.signon = 0;
 	if (sv_zone)
@@ -654,7 +654,7 @@ time_done:
 
 	// update audio
 	if (ccls.state == ca_active) {
-		S_Update (r_origin, vpn, vright, vup);
+		S_Update (r.origin, r.vpn, r.vright, r.vup);
 		CCL_DecayLights ();
 	} else
 		S_Update (vec3_origin, vec3_origin, vec3_origin, vec3_origin);
@@ -741,13 +741,9 @@ Host_Init ()
 	COM_Init_Cvars ();				// filesystem related variables
 	Con_Init_Cvars ();				// console related cvars
 	Key_Init_Cvars ();				// key related cvars
-	Surf_Init_Cvars();				// model related cvars
 	Chase_Init_Cvars ();			// chase camera related cvars
-	SCR_Init_Cvars ();				// screen(?) related cvars
-	VID_Init_Cvars();				// video related cvars
 	V_Init_Cvars();					// view related cvars
 	M_Init_Cvars ();				// menu related cvars
-	R_Init_Cvars ();				// rendering system related cvars
 	HUD_Init_Cvars ();				// statusbar related cvars
 	CL_Init_Cvars ();				// cl_* related cvars
 	S_Init_Cvars ();				// sound system related cvars
@@ -755,6 +751,8 @@ Host_Init ()
 	Host_InitLocal_Cvars ();		// local host related cvars
 	PR_Init_Cvars();				// pr_* related cvars
 	SV_Init_Cvars ();				// setup related cvars
+
+	R_Init_Cvars ();
 
 	Chase_Init ();					// setup chase camera
 	COM_Init ();					// setup filesystem, add related commands
@@ -776,11 +774,8 @@ Host_Init ()
 	if (ccls.state != ca_dedicated) {
 		Image_Init ();
 
-		VID_Init ();
-		Draw_Init_Cvars ();
-		Draw_Init ();
-		SCR_Init ();
 		R_Init ();
+
 		S_Init ();
 		CDAudio_Init_Cvars ();
 		CDAudio_Init ();

@@ -326,6 +326,7 @@ TWI_PostVDraw ()
 
 extern void GLArrays_Init_Cvars (void);
 extern void GLArrays_Init (void);
+extern void GLArrays_Shutdown (void);
 
 extern inline void
 GLArrays_Reset_Vertex (void)

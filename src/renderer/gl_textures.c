@@ -67,7 +67,7 @@ static gltexture_t *gltextures;
  * Memory zones.
  */
 static memzone_t *glt_skin_zone;
-memzone_t *glt_zone;
+static memzone_t *glt_zone;
 
 /*
  * This stuff is entirely specific to the selection of gl filter and 
@@ -101,6 +101,13 @@ static cvar_t *gl_picmip;
 static cvar_t *gl_max_size;
 static cvar_t *gl_texture_anisotropy;
 
+static Uint32 *conv_trans;
+static int conv_trans_size;
+
+static int scaledsize = 0;
+static Uint32 *scaled, *scaled2;
+
+
 static void
 GLT_verify_pow2 (cvar_t *cvar)
 {
@@ -115,7 +122,7 @@ GLT_verify_pow2 (cvar_t *cvar)
  */
 
 void
-GLT_Init_Cvars ()
+GLT_Init_Cvars (void)
 {
 	int max_tex_size = 0;
 
@@ -134,10 +141,41 @@ GLT_Init_Cvars ()
 }
 
 void
-GLT_Init ()
+GLT_Init (void)
 {
 	glt_zone = Zone_AllocZone("GL textures");
 	glt_skin_zone = Zone_AllocZone("GL textures (skins)");
+}
+
+void
+GLT_Shutdown (void)
+{
+	gltexture_t *cur, *next;
+
+	cur = gltextures;
+	while (cur)
+	{
+		Com_DPrintf ("GLT_Shutdown: '%s', %d\n", cur->identifier, cur->count);
+		next = cur->next;
+		qglDeleteTextures (1, &cur->texnum);
+		Zone_Free (cur);
+		cur = next;
+	}
+	gltextures = NULL;
+
+	Zone_Free (conv_trans);
+	conv_trans = NULL;
+	conv_trans_size = 0;
+	scaledsize = 0;
+	Zone_Free (scaled);
+	scaled = NULL;
+	Zone_Free (scaled2);
+	scaled2 = NULL;
+
+	Zone_PrintZone (true, glt_zone);
+	Zone_PrintZone (true, glt_skin_zone);
+	Zone_FreeZone (&glt_zone);
+	Zone_FreeZone (&glt_skin_zone);
 }
 
 /*
@@ -472,7 +510,8 @@ GLT_Delete_Sub_Skin (skin_sub_t *sub)
 	GLT_Delete(sub->texnum);
 	if (sub->indices.i)
 		Zone_Free(sub->indices.i);
-	Zone_Free(sub);
+	if (sub->tris)
+		Zone_Free (sub->tris);
 }
 
 static void
@@ -480,7 +519,6 @@ GLT_Delete_Indices (skin_indices_t *i)
 {
 	if (i->i)
 		Zone_Free(i->i);
-	Zone_Free(i);
 }
 
 void
@@ -499,6 +537,15 @@ GLT_Delete_Skin (skin_t *skin)
 		GLT_Delete_Indices(&skin->base_team_fb_i[i]);
 		GLT_Delete_Indices(&skin->top_bottom_i[i]);
 	}
+
+	Zone_Free (skin->base);
+	Zone_Free (skin->base_team);
+	Zone_Free (skin->fb);
+	Zone_Free (skin->top);
+	Zone_Free (skin->bottom);
+	Zone_Free (skin->base_fb_i);
+	Zone_Free (skin->base_team_fb_i);
+	Zone_Free (skin->top_bottom_i);
 }
 /*
  * =========================================================================
@@ -511,13 +558,10 @@ GLT_Delete_Skin (skin_t *skin)
  *                    Start of the texture mangling code.
  * =========================================================================
  */
-
 static Uint32 *
 GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 		qboolean check_empty)
 {
-	static Uint32 *trans;
-	static int trans_size;
 	int i, size, count = 0;
 	Uint32	d, t;
 
@@ -525,34 +569,34 @@ GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 		palette = d_palette_raw;
 
 	size = width * height;
-	if (size > trans_size)
+	if (size > conv_trans_size)
 	{
-		if (trans)
-			Zone_Free(trans);
-		trans = Zone_Alloc(glt_zone, size * sizeof(Uint32));
-		trans_size = size;
+		if (conv_trans)
+			Zone_Free(conv_trans);
+		conv_trans = Zone_Alloc(glt_zone, size * sizeof(Uint32));
+		conv_trans_size = size;
 	}
 
 	for (i = 0; i < size;) {
 		d = LittleLong(((Uint32 *) data)[i >> 2]);
 
 		t = palette[d & 0xFF];
-		if ((trans[i++] = t) != d_palette_empty)
+		if ((conv_trans[i++] = t) != d_palette_empty)
 			count++;
 
 		switch (size - i) {
 			default:
 			case 3:
 				t = palette[(d & 0xFF00) >> 8];
-				if ((trans[i++] = t) != d_palette_empty)
+				if ((conv_trans[i++] = t) != d_palette_empty)
 					count++;
 			case 2:
 				t = palette[(d & 0xFF0000) >> 16];
-				if ((trans[i++] = t) != d_palette_empty)
+				if ((conv_trans[i++] = t) != d_palette_empty)
 					count++;
 			case 1:
 				t = palette[(d & 0xFF000000) >> 24];
-				if ((trans[i++] = t) != d_palette_empty)
+				if ((conv_trans[i++] = t) != d_palette_empty)
 					count++;
 			case 0:
 				break;
@@ -562,7 +606,7 @@ GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 	if (!count && check_empty)
 		return NULL;
 	else
-		return trans;
+		return conv_trans;
 }
 
 /*
@@ -1044,9 +1088,6 @@ GL_MipMap (Uint8 *in, Uint8 *out, int width, int height)
 	}
 }
 
-static int scaledsize = 0;
-static Uint32 *scaled, *scaled2;
-
 static void
 AssertScaledBuffer (int scaled_width, int scaled_height)
 {
@@ -1316,7 +1357,7 @@ GLT_Delete (GLuint texnum)
 	gltexture_t *cur, **last;
 
 	last = &gltextures;
-	for (cur = gltextures; cur != NULL; cur = cur->next)
+	for (cur = gltextures; cur; cur = cur->next)
 	{
 		if (cur->texnum == texnum) {
 			if (!--cur->count) {

@@ -68,29 +68,29 @@ Chase_Update (void)
 
 	// calc exact destination
 	for (i = 0; i < 3; i++)
-		chase_dest[i] = r_refdef.vieworg[i] - forward[i] * chase_back->fvalue - right[i] * chase_right->fvalue;
+		chase_dest[i] = r.origin[i] - forward[i] * chase_back->fvalue - right[i] * chase_right->fvalue;
 
-	chase_dest[2] = r_refdef.vieworg[2] + chase_up->fvalue;
+	chase_dest[2] = r.origin[2] + chase_up->fvalue;
 
 	// find the spot the player is looking at
-	VectorMA (r_refdef.vieworg, 4096, forward, dest);
-	TraceLine (ccl.worldmodel, r_refdef.vieworg, dest, stop, normal);
+	VectorMA (r.origin, 4096, forward, dest);
+	TraceLine (ccl.worldmodel, r.origin, dest, stop, normal);
 
 	// calculate pitch to look at the same spot from camera
-	VectorSubtract (stop, r_refdef.vieworg, stop);
+	VectorSubtract (stop, r.origin, stop);
 	dist = DotProduct (stop, forward);
 
 	if (dist < 1)
 		dist = 1;
 
-	r_refdef.viewangles[PITCH] = -Q_atan (stop[2] / dist) / M_PI * 180;
+	r.angles[PITCH] = -Q_atan (stop[2] / dist) / M_PI * 180;
 
 	// move towards destination
-	TraceLine (ccl.worldmodel, r_refdef.vieworg, chase_dest, stop, normal);
+	TraceLine (ccl.worldmodel, r.origin, chase_dest, stop, normal);
 
 	VectorCopy (stop, chase_dest);
 
 	// move towards destination
-	VectorCopy (chase_dest, r_refdef.vieworg);
+	VectorCopy (chase_dest, r.origin);
 }
 

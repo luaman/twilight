@@ -106,3 +106,28 @@ GLArrays_Init (void)
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 }
+
+void
+GLArrays_Shutdown (void)
+{
+	Zone_Free (tc0_array_p);
+	tc0_array_p = NULL;
+	Zone_Free (tc1_array_p);
+	tc1_array_p = NULL;
+	Zone_Free (v_array_p);
+	v_array_p = NULL;
+	Zone_Free (vindices);
+	vindices = NULL;
+	Zone_Free (cf_array_p);
+	cf_array_p = NULL;
+	Zone_Free (cub_array_p);
+	cub_array_p = NULL;
+	Zone_Free (FtoUB_tmp);
+	FtoUB_tmp = NULL;
+
+	Zone_PrintZone (true, vzone);
+	Zone_FreeZone (&vzone);
+
+	MAX_VERTEX_ARRAYS = 0;
+	MAX_VERTEX_INDICES = 0;
+}

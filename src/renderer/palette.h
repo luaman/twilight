@@ -46,5 +46,6 @@ extern cvar_t *gl_fb;
 
 void PAL_Init_Cvars(void);
 void PAL_Init(void);
+void PAL_Shutdown(void);
 
 #endif // __PALETTE_H

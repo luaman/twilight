@@ -29,7 +29,7 @@
 
 #include "qtypes.h"
 
-void r_explosion_shutdown(void);
+void R_Explosion_Shutdown (void);
 void r_explosion_newmap(void);
 void R_Explosion_Init(void);
 void R_NewExplosion(vec3_t org);

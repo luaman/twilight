@@ -46,14 +46,9 @@ static const char rcsid[] =
 cvar_t *r_wateralpha;
 
 void
-R_Init_Liquid_Cvars ()
+R_Liquid_Init_Cvars ()
 {
 	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
-}
-
-void
-R_Init_Liquid ()
-{
 }
 
 /*

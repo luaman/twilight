@@ -664,9 +664,10 @@ Mod_LoadBrushModel (model_t *mod, void *buffer, int flags)
 				mod = Mod_FindName (name);
 				// If it was an old model then unload it first.
 				if (mod->loaded)
-					Mod_UnloadModel (mod);
+					Mod_UnloadModel (mod, false);
 				// Copy over the basic information.
 				*mod = *first;
+				mod->submodel = true;
 				strlcpy_s (mod->name, name);
 				// Allocate a new brush struct.
 				mod->brush = Zone_Alloc(first->zone, sizeof(brushhdr_t));
@@ -689,7 +690,7 @@ an infinite loop!
 =================
 */
 void
-Mod_UnloadBrushModel (model_t *mod)
+Mod_UnloadBrushModel (model_t *mod, qboolean keep)
 {
 	model_t			*sub;
 	Uint			 i;
@@ -697,7 +698,7 @@ Mod_UnloadBrushModel (model_t *mod)
 
 	if (mod->brush->main_model && !unloading)
 	{
-		Mod_UnloadModel (mod->brush->main_model);
+		Mod_UnloadModel (mod->brush->main_model, keep);
 		return;
 	}
 
@@ -709,7 +710,7 @@ Mod_UnloadBrushModel (model_t *mod)
 		unloading = true;
 		for (i = 1; i <= mod->brush->numsubmodels; i++) {
 			sub = Mod_FindName(va("*%d", i));
-			Mod_UnloadModel(sub); // FIXME
+			Mod_UnloadModel(sub, keep); // FIXME
 		}
 		unloading = false;
 

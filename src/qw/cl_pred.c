@@ -101,7 +101,7 @@ CL_PredictMove (void)
 	if (cl_pushlatency->fvalue > 0)
 		Cvar_Set (cl_pushlatency, "0");
 
-	if (cl.paused)
+	if (ccl.paused)
 		return;
 
 	oldtime = ccl.time;

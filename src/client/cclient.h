@@ -33,6 +33,7 @@
 #include "dlight.h"
 #include "gl_info.h"
 #include "zone.h"
+#include "sound.h"
 
 typedef struct {
 	int		length;
@@ -136,6 +137,32 @@ typedef struct client_common_s {
 	char			levelname[40];
 
 	dlight_t	    dlights[MAX_DLIGHTS];
+	lightstyle_t	lightstyles[MAX_LIGHTSTYLES];
+
+	// Misc.
+	float			viewzoom;			// Scales FOV and sensitivity.
+
+	/*
+	 * The client maintains its own idea of view angles, which are sent to
+	 * the server each frame.
+	 * The server normally only resets the view angles when spawning or
+	 * teleporting.
+	 */
+	// Pitch drifting vars.
+	float			pitchvel;
+	qboolean		nodrift;
+	float			driftmove;
+	double			laststop;
+
+	float			crouch;				// Local amount for smoothing steps.
+
+	qboolean		paused;				// Sent by the server.
+
+	/*
+	 * information that is static for the entire time connected to a server
+	 */
+	model_t			*model_precache[MAX_MODELS];
+	sfx_t			*sound_precache[MAX_SOUNDS];
 } client_common_t;
 
 extern client_common_t	 ccl;

@@ -31,16 +31,40 @@
 #include "qtypes.h"
 #include "cvar.h"
 #include "entities.h"
+#include "gl_light.h"
 
-extern Uint c_brush_polys;
-extern Uint c_alias_polys;
-extern vec3_t vup;
-extern vec3_t vpn;
-extern vec3_t vright;
-extern vec3_t r_origin;
-extern refdef_t r_refdef;
-extern texture_t *r_notexture;
-extern texture_t *r_notexture_water;
+typedef struct renderer_s {
+	/*
+	 * View port stuff.
+	 */
+	vec3_t			origin;
+	vec3_t			angles;
+	vec3_t			vpn, vright, vup;
+	float			fov_x, fov_y;
+
+	/*
+	 * Counters.
+	 */
+	Uint			brush_polys;
+	Uint			alias_polys;
+	Uint			framecount;
+
+	/*
+	 * The world, and stuff in it.
+	 */
+	model_t			*worldmodel;
+	Uint			num_entities;
+	entity_common_t	*entities[MAX_ENTITIES];
+
+	/*
+	 * Lights.
+	 */
+	rdlight_t		dlight[MAX_DLIGHTS];
+	Uint			numdlights;
+} renderer_t;
+
+extern renderer_t	r;
+
 extern int d_lightstylevalue[256];
 extern cvar_t *r_drawentities;
 extern cvar_t *r_drawviewmodel;
@@ -60,6 +84,7 @@ void R_Clear (void);
 void R_RenderView(void);
 void R_Init_Cvars(void);
 void R_Init(void);
+void R_Shutdown(void);
 void R_NewMap(void);
 
 #endif // __gl_main_h

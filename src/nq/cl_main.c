@@ -72,7 +72,6 @@ memzone_t		*cl_zone;
 // FIXME: put these on hunk?
 entity_t	cl_entities[MAX_EDICTS];
 entity_t	cl_static_entities[MAX_STATIC_ENTITIES];
-lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
 
 void
 CL_ClearState (void)
@@ -87,13 +86,12 @@ CL_ClearState (void)
 	ccl.user_flags = USER_FLAG_NO_TEAM_NAME;
 
 	// we don't get this from the server, that'd take a new protocol
-	cl.viewzoom = 1.0f;
+	ccl.viewzoom = 1.0f;
 
 	SZ_Clear (&cls.message);
 
 // clear other arrays   
 	memset (cl_entities, 0, sizeof (cl_entities));
-	memset (cl_lightstyle, 0, sizeof (cl_lightstyle));
 	memset (cl_temp_entities, 0, sizeof (cl_temp_entities));
 	memset (cl_beams, 0, sizeof (cl_beams));
 
@@ -133,7 +131,7 @@ CL_Disconnect (void)
 
 	ccls.demoplayback = ccls.timedemo = false;
 	cls.signon = 0;
-	ccl.worldmodel = r_worldmodel = NULL;
+	ccl.worldmodel = r.worldmodel = NULL;
 }
 
 void

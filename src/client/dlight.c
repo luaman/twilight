@@ -106,36 +106,3 @@ CCL_NewDlight (int key, vec3_t org, int effects)
 			dl->color[2] += 180.0f;
 	}
 }
-
-
-void
-CCL_BuildLightList (void)
-{
-	int i;
-	dlight_t *cd;
-	rdlight_t *rd;
-
-	r_numdlights = 0;
-
-	if (!r_dynamic->ivalue)
-		return;
-
-	for (i = 0; i < MAX_DLIGHTS; i++)
-	{
-		cd = ccl.dlights + i;
-		if (cd->radius <= 0 || cd->die < ccl.time)
-			continue;
-
-		rd = &r_dlight[r_numdlights++];
-		VectorCopy (cd->origin, rd->origin);
-		VectorScale (cd->color, cd->radius * 128.0f, rd->light);
-		rd->light[3] = 1.0f;
-		rd->cullradius = (1.0f / 128.0f) * VectorLength(rd->light);
-		rd->cullradius = max(2048.0f, rd->cullradius);	// avoid overflow
-
-		rd->cullradius2 = rd->cullradius * rd->cullradius;
-		rd->lightsubtract = 1.0f / rd->cullradius2;           
-	}
-}
-
-

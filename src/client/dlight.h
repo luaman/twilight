@@ -50,7 +50,6 @@ extern dlight_t cl_dlights[MAX_DLIGHTS];
 extern dlight_t *CCL_AllocDlight (int key);
 extern void CCL_DecayLights (void);
 extern void CCL_NewDlight (int key, vec3_t org, int effects);
-extern void CCL_BuildLightList (void);
 
 #endif // __DLIGHT_H
 

@@ -29,22 +29,18 @@
 
 void SCR_Init_Cvars (void);
 void SCR_Init (void);
+void SCR_Shutdown (void);
+
+void SCR_BeginLoadingPlaque(void);
+void SCR_EndLoadingPlaque(void);
 
 void SCR_UpdateScreen (void);
 
-void SCR_SizeUp (void);
-void SCR_SizeDown (void);
 void SCR_CenterPrint (const char *str);
 
-extern float scr_con_current;
-extern float scr_conlines;		/* lines of console to display */
-
-extern qboolean scr_disabled_for_loading;
+extern float	scr_con_current;
+extern qboolean	scr_disabled_for_loading;
 extern int		fps_count, fps_capped0, fps_capped1;
-
-extern struct cvar_s *scr_viewsize;
-extern struct cvar_s *r_brightness;
-extern struct cvar_s *r_contrast;
 
 #endif // __SCREEN_H
 

@@ -47,6 +47,7 @@ static const char rcsid[] =
 #include "gl_info.h"
 #include "sound.h"
 #include "cclient.h"
+#include "gl_main.h"
 
 /*
 ================
@@ -205,7 +206,7 @@ M_SetKeyDest (void)
 {
 	if (m_menu)
 		key_dest = key_menu;
-	else if (r_worldmodel)
+	else if (r.worldmodel)
 		key_dest = key_game;
 	else
 		key_dest = key_console;
@@ -227,7 +228,7 @@ M_ToggleMenu_f (void)
 		M_Exit (false);
 		M_SetKeyDest ();
 		return;
-	} else if (key_dest == key_console && r_worldmodel)
+	} else if (key_dest == key_console && r.worldmodel)
 		Con_ToggleConsole_f ();
 	else
 		Cbuf_InsertText("menu Main\n");

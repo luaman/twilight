@@ -27,6 +27,7 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
+#include "gl_main.h"
 #include "cvar.h"
 #include "sys.h"
 #include "gl_info.h"
@@ -38,8 +39,6 @@ static const char rcsid[] =
 #include "matrixlib.h"
 #include "palette.h"
 #include "gl_light.h"
-
-void R_DrawOpaqueAliasModels (entity_common_t *ents[],int num_ents, qboolean viewent);
 
 #define NUMVERTEXNORMALS	162
 float r_avertexnormals[NUMVERTEXNORMALS][3] = {
@@ -200,7 +199,7 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_common_t *e)
 static void
 R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 {
-	int			lnum;
+	Uint		lnum;
 	model_t		*clmodel = e->model;
 	rdlight_t	*rd;
 	vec3_t		dist;
@@ -249,9 +248,9 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb->ivalue) {
 		R_LightPoint (e->origin, lightcolor);
 
-		for (lnum = 0; lnum < r_numdlights; lnum++)
+		for (lnum = 0; lnum < r.numdlights; lnum++)
 		{
-			rd = r_dlight + lnum;
+			rd = r.dlight + lnum;
 			VectorSubtract (e->origin, rd->origin, dist);
 			f = DotProduct (dist, dist) + LIGHTOFFSET;
 			if (f < rd->cullradius2)

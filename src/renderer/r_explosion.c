@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "gl_info.h"
 #include "noise.h"
 #include "cclient.h"
+#include "gl_main.h"
 
 #define MAX_EXPLOSIONS 128
 #define EXPLOSIONGRID 8
@@ -155,8 +156,10 @@ r_explosion_start (void)
 
 
 void
-r_explosion_shutdown (void)
+R_Explosion_Shutdown (void)
 {
+	GLT_Delete (explosiontexture);
+	GLT_Delete (explosiontexturefog);
 }
 
 void
@@ -262,7 +265,7 @@ R_MoveExplosion (explosion_t *e)
 			if (r_explosionclip->ivalue)
 			{
 				if (TraceLine
-						(r_worldmodel, e->vert[i], end, impact, normal) < 1)
+						(r.worldmodel, e->vert[i], end, impact, normal) < 1)
 				{
 					// clip velocity against the wall
 					dot = DotProduct(e->vertvel[i], normal) * -1.125f;
@@ -297,7 +300,7 @@ static void
 R_DrawExplosion (explosion_t *e)
 {
 	int			i;
-	float		r, g, b, a;
+	float		red, g, b, a;
 	float		dist;
 	vec3_t		centerdir, diff;
 
@@ -320,12 +323,12 @@ R_DrawExplosion (explosion_t *e)
 	for (i = 0; i < EXPLOSIONINDICES; i++)
 		vindices[i_index + i] = explosiontris[0][i] + v_index;
 
-	r = r_explosioncolor_r->fvalue;
+	red = r_explosioncolor_r->fvalue;
 	g = r_explosioncolor_g->fvalue;
 	b = r_explosioncolor_b->fvalue;
 	a = r_explosioncolor_a->fvalue * e->alpha;
 
-	VectorSubtract(r_origin, e->origin, centerdir);
+	VectorSubtract (r.origin, e->origin, centerdir);
 	VectorNormalizeFast(centerdir);
 	for (i = 0;i < EXPLOSIONVERTS;i++)
 	{
@@ -333,7 +336,7 @@ R_DrawExplosion (explosion_t *e)
 		VectorNormalizeFast(diff);
 		dist = (DotProduct(diff, centerdir) * 6.0f - 4.0f) * a;
 		dist = max (dist, 0);
-		VectorSet4 (cf_array_v(v_index + i), dist * r, dist * g, dist * b, 1);
+		VectorSet4 (cf_array_v(v_index + i), dist * red, dist * g, dist * b, 1);
 	}
 
 	v_index += EXPLOSIONVERTS;

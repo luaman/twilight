@@ -145,22 +145,22 @@ V_CalcBob (void)
 void
 V_StartPitchDrift (void)
 {
-	if (cl.laststop == ccl.time)
+	if (ccl.laststop == ccl.time)
 		return;		/* something else is keeping it from drifting */
 
-	if (cl.nodrift || !cl.pitchvel) {
-		cl.pitchvel = v_centerspeed->fvalue;
-		cl.nodrift = false;
-		cl.driftmove = 0;
+	if (ccl.nodrift || !ccl.pitchvel) {
+		ccl.pitchvel = v_centerspeed->fvalue;
+		ccl.nodrift = false;
+		ccl.driftmove = 0;
 	}
 }
 
 void
 V_StopPitchDrift (void)
 {
-	cl.laststop = ccl.time;
-	cl.nodrift = true;
-	cl.pitchvel = 0;
+	ccl.laststop = ccl.time;
+	ccl.nodrift = true;
+	ccl.pitchvel = 0;
 }
 
 /*
@@ -180,19 +180,19 @@ V_DriftPitch (void)
 	float	delta, move;
 
 	if (noclip_anglehack || !cl.onground || ccls.demoplayback) {
-		cl.driftmove = 0;
-		cl.pitchvel = 0;
+		ccl.driftmove = 0;
+		ccl.pitchvel = 0;
 		return;
 	}
 
 	/* don't count small mouse motion */
-	if (cl.nodrift) {
+	if (ccl.nodrift) {
 		if (fabs(cl.cmd.forwardmove) < cl_forwardspeed->fvalue)
-			cl.driftmove = 0;
+			ccl.driftmove = 0;
 		else
-			cl.driftmove += ccl.frametime;
+			ccl.driftmove += ccl.frametime;
 
-		if (cl.driftmove > v_centermove->fvalue)
+		if (ccl.driftmove > v_centermove->fvalue)
 			V_StartPitchDrift();
 
 		return;
@@ -201,22 +201,22 @@ V_DriftPitch (void)
 	delta = cl.idealpitch - cl.viewangles[PITCH];
 
 	if (!delta) {
-		cl.pitchvel = 0;
+		ccl.pitchvel = 0;
 		return;
 	}
 
-	move = ccl.frametime * cl.pitchvel;
-	cl.pitchvel += ccl.frametime * v_centerspeed->fvalue;
+	move = ccl.frametime * ccl.pitchvel;
+	ccl.pitchvel += ccl.frametime * v_centerspeed->fvalue;
 
 	if (delta > 0) {
 		if (move > delta) {
-			cl.pitchvel = 0;
+			ccl.pitchvel = 0;
 			move = delta;
 		}
 		cl.viewangles[PITCH] += move;
 	} else if (delta < 0) {
 		if (move > -delta) {
-			cl.pitchvel = 0;
+			ccl.pitchvel = 0;
 			move = -delta;
 		}
 		cl.viewangles[PITCH] -= move;
@@ -458,9 +458,9 @@ V_BoundOffsets (void)
 
 	/* absolutely bound refresh relative to entity clipping hull
 	   so the view can never be inside a solid wall */
-	r_refdef.vieworg[0] = bound(org[0] - 14, r_refdef.vieworg[0], org[0] + 14);
-	r_refdef.vieworg[1] = bound(org[1] - 14, r_refdef.vieworg[1], org[1] + 14);
-	r_refdef.vieworg[2] = bound(org[2] - 22, r_refdef.vieworg[2], org[2] + 30);
+	r.origin[0] = bound(org[0] - 14, r.origin[0], org[0] + 14);
+	r.origin[1] = bound(org[1] - 14, r.origin[1], org[1] + 14);
+	r.origin[2] = bound(org[2] - 22, r.origin[2], org[2] + 30);
 }
 
 /*
@@ -471,13 +471,13 @@ Idle swaying
 static void
 V_AddIdle (void)
 {
-	r_refdef.viewangles[ROLL] +=
+	r.angles[ROLL] +=
 		v_idlescale->fvalue * Q_sin (ccl.time * v_iroll_cycle->fvalue) *
 		v_iroll_level->fvalue;
-	r_refdef.viewangles[PITCH] +=
+	r.angles[PITCH] +=
 		v_idlescale->fvalue * Q_sin (ccl.time * v_ipitch_cycle->fvalue) *
 		v_ipitch_level->fvalue;
-	r_refdef.viewangles[YAW] +=
+	r.angles[YAW] +=
 		v_idlescale->fvalue * Q_sin (ccl.time * v_iyaw_cycle->fvalue) *
 		v_iyaw_level->fvalue;
 
@@ -505,16 +505,16 @@ V_CalcViewRoll (void)
 	float       side;
 
 	side = V_CalcRoll (cl_entities[cl.viewentity].common.angles, ccl.player_velocity);
-	r_refdef.viewangles[ROLL] += side;
+	r.angles[ROLL] += side;
 
 	if (v_dmg_time > 0) {
-		r_refdef.viewangles[ROLL] += v_dmg_time / v_kicktime->fvalue * v_dmg_roll;
-		r_refdef.viewangles[PITCH] += v_dmg_time / v_kicktime->fvalue * v_dmg_pitch;
+		r.angles[ROLL] += v_dmg_time / v_kicktime->fvalue * v_dmg_roll;
+		r.angles[PITCH] += v_dmg_time / v_kicktime->fvalue * v_dmg_pitch;
 		v_dmg_time -= ccl.frametime;
 	}
 
 	if (ccl.stats[STAT_HEALTH] <= 0)
-		r_refdef.viewangles[ROLL] = 80; // dead view angle
+		r.angles[ROLL] = 80; // dead view angle
 }
 
 static void
@@ -523,16 +523,16 @@ V_CalcIntermissionRefdef (void)
 	/* ent is the player model (visible when out of body) */
 	entity_t   *ent = &cl_entities[cl.viewentity];
 
-	VectorCopy(ent->common.origin, r_refdef.vieworg);
-	VectorCopy(ent->common.angles, r_refdef.viewangles);
+	VectorCopy(ent->common.origin, r.origin);
+	VectorCopy(ent->common.angles, r.angles);
 	cl.viewent.common.model = NULL;
 
 	/* always idle in intermission */
-	r_refdef.viewangles[ROLL] += Q_sin (ccl.time * v_iroll_cycle->fvalue) *
+	r.angles[ROLL] += Q_sin (ccl.time * v_iroll_cycle->fvalue) *
 		v_iroll_level->fvalue;
-	r_refdef.viewangles[PITCH] += Q_sin (ccl.time * v_ipitch_cycle->fvalue) *
+	r.angles[PITCH] += Q_sin (ccl.time * v_ipitch_cycle->fvalue) *
 		v_ipitch_level->fvalue;
-	r_refdef.viewangles[YAW] += Q_sin (ccl.time * v_iyaw_cycle->fvalue) *
+	r.angles[YAW] += Q_sin (ccl.time * v_iyaw_cycle->fvalue) *
 		v_iyaw_level->fvalue;
 }
 
@@ -566,22 +566,22 @@ V_CalcRefdef (void)
 	bob = V_CalcBob();
 
 	/* refresh position */
-	VectorCopy (ent->common.origin, r_refdef.vieworg);
-	r_refdef.vieworg[2] += cl.viewheight + bob;
+	VectorCopy (ent->common.origin, r.origin);
+	r.origin[2] += cl.viewheight + bob;
 
 	/* never let it sit exactly on a node line, because a water plane can
 	   dissapear when viewed with the eye exactly on it.
 	   the server protocol only specifies to 1/16 pixel, so add 1/32 in each axis */
-	r_refdef.vieworg[0] += 1.0 / 32;
-	r_refdef.vieworg[1] += 1.0 / 32;
-	r_refdef.vieworg[2] += 1.0 / 32;
+	r.origin[0] += 1.0 / 32;
+	r.origin[1] += 1.0 / 32;
+	r.origin[2] += 1.0 / 32;
 
-	VectorCopy(cl.viewangles, r_refdef.viewangles);
+	VectorCopy(cl.viewangles, r.angles);
 	V_CalcViewRoll();
 	V_AddIdle();
 
-	if (v_zoom->fvalue != cl.viewzoom)
-		cl.viewzoom = SLIDE (cl.viewzoom, v_zoom->fvalue, 4 * host.frametime);
+	if (v_zoom->fvalue != ccl.viewzoom)
+		ccl.viewzoom = SLIDE (ccl.viewzoom, v_zoom->fvalue, 4 * host.frametime);
 
 	/* offsets */
 	angles[PITCH] = -ent->common.angles[PITCH]; /* because entity pitches are actually backward */
@@ -590,7 +590,7 @@ V_CalcRefdef (void)
 
 	AngleVectors (angles, forward, right, up);
 	for (i = 0; i < 3; i++)
-		r_refdef.vieworg[i] +=
+		r.origin[i] +=
 			scr_ofsx->ivalue * forward[i] +
 			scr_ofsy->ivalue * right[i] +
 			scr_ofsz->ivalue * up[i];
@@ -601,8 +601,8 @@ V_CalcRefdef (void)
 	VectorCopy (cl.viewangles, angles);
 
 	/* set up gun angles */
-	angles[YAW] = r_refdef.viewangles[YAW];
-	angles[PITCH] = -r_refdef.viewangles[PITCH];
+	angles[YAW] = r.angles[YAW];
+	angles[PITCH] = -r.angles[PITCH];
 
 	VectorCopy (ent->common.origin, origin);
 	origin[2] += cl.viewheight;
@@ -612,14 +612,14 @@ V_CalcRefdef (void)
 	}
 
 	origin[2] += bob;
-	if (view->common.model != cl.model_precache[ccl.stats[STAT_WEAPON]])
+	if (view->common.model != ccl.model_precache[ccl.stats[STAT_WEAPON]])
 	{
 		memset(view, 0, sizeof(*view));
-		view->common.model = cl.model_precache[ccl.stats[STAT_WEAPON]];
+		view->common.model = ccl.model_precache[ccl.stats[STAT_WEAPON]];
 	}
 
 	/* set up the refresh position */
-	VectorAdd (r_refdef.viewangles, cl.punchangle, r_refdef.viewangles);
+	VectorAdd (r.angles, cl.punchangle, r.angles);
 
 	/* smooth out stair step ups */
 	if (cl.onground && (ent->common.origin[2] - oldz > 0)) {
@@ -632,7 +632,7 @@ V_CalcRefdef (void)
 			oldz = ent->common.origin[2];
 		if (ent->common.origin[2] - oldz > 12)
 			oldz = ent->common.origin[2] - 12;
-		r_refdef.vieworg[2] += oldz - ent->common.origin[2];
+		r.origin[2] += oldz - ent->common.origin[2];
 		origin[2] += oldz - ent->common.origin[2];
 	} else
 		oldz = ent->common.origin[2];
@@ -674,7 +674,7 @@ V_RenderView (void)
 	else
 		V_CalcRefdef ();
 
-	CCL_BuildLightList ();
+	R_BuildLightList ();
 	R_RenderView ();
 }
 

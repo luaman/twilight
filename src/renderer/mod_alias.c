@@ -547,14 +547,17 @@ Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 }
 
 void
-Mod_UnloadAliasModel (model_t *mod)
+Mod_UnloadAliasModel (model_t *mod, qboolean keep)
 {
 	int	i;
 
+	keep = keep;
+
 	pheader = mod->alias;
 
-	for (i = 0; i < pheader->numskins; i++)
+	for (i = 0; i < pheader->numskins; i++) {
 		GLT_Delete_Skin(&pheader->skins[i]);
+	}
 
 	if (player_model == mod)
 		player_model = NULL;

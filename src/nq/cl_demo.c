@@ -67,7 +67,7 @@ CL_StopPlayback (void)
 	ccls.demoplayback = false;
 	ccls.demofile = NULL;
 	ccls.state = ca_disconnected;
-	ccl.worldmodel = r_worldmodel = NULL;
+	ccl.worldmodel = r.worldmodel = NULL;
 
 	if (ccls.timedemo)
 		CL_FinishTimeDemo ();

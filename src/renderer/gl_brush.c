@@ -219,7 +219,7 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 		int cr2, int cg2, int cb2, int ca2)
 {
 	int			icolor[8];
-	int			n;
+	Uint		n;
 	entity_common_t	*ent;
 	vec3_t		org;
 	model_t		*model;
@@ -236,14 +236,14 @@ R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
 	icolor[6] = cb2;
 	icolor[7] = ca2;
 
-	model = r_worldmodel;
+	model = r.worldmodel;
 	R_StainNode(model->brush->nodes + model->hulls[0].firstclipnode,
 			model, origin, radius, icolor);
 
 	// look for embedded bmodels
-	for (n = 0; n < r_refdef.num_entities; n++)
+	for (n = 0; n < r.num_entities; n++)
 	{
-		ent = r_refdef.entities[n];
+		ent = r.entities[n];
 		model = ent->model;
 		if (model && model->name[0] == '*')
 		{
@@ -292,19 +292,19 @@ R_TextureAnimation (texture_t *base, int frame)
 void
 R_DrawBrushDepthSkies (void)
 {
-	int			 i;
+	Uint		 i;
 	vec3_t		 mins, maxs, org;
 	brushhdr_t	*brush;
 	entity_common_t	*e;
 
-	Sky_Depth_Draw_Chain (r_worldmodel, &r_worldmodel->brush->sky_chain);
+	Sky_Depth_Draw_Chain (r.worldmodel, &r.worldmodel->brush->sky_chain);
 
 	if (!r_drawentities->ivalue)
 		return;
 
-	for (i = 0; i < r_refdef.num_entities; i++)
+	for (i = 0; i < r.num_entities; i++)
 	{
-		e = r_refdef.entities[i];
+		e = r.entities[i];
 		brush = e->model->brush;
 
 		if (e->model->type == mod_brush)
@@ -313,7 +313,7 @@ R_DrawBrushDepthSkies (void)
 			if (Vis_CullBox (mins, maxs))
 				continue;
 
-			Matrix4x4_Transform(&e->invmatrix, r_origin, org);
+			Matrix4x4_Transform(&e->invmatrix, r.origin, org);
 
 			qglPushMatrix ();
 			qglMultTransposeMatrixf ((GLfloat *) &e->matrix);
@@ -330,7 +330,7 @@ R_RenderBrushPolys (glpoly_t *p)
 {
 	for (;p; p = p->next)
 	{
-		c_brush_polys++;
+		r.brush_polys++;
 		qglDrawArrays (GL_POLYGON, p->start, p->numverts);
 	}
 }
@@ -577,7 +577,7 @@ R_VisBrushModel (entity_common_t *e)
 	brushhdr_t		*brush = mod->brush;
 	vec3_t			 org;
 
-	Matrix4x4_Transform(&e->invmatrix, r_origin, org);
+	Matrix4x4_Transform(&e->invmatrix, r.origin, org);
 		
 	/*
 	 * LordHavoc: decide which surfs are visible and update lightmaps, then
@@ -612,16 +612,16 @@ R_VisBrushModel (entity_common_t *e)
 void
 R_DrawOpaqueBrushModel (entity_common_t *e)
 {
-	int				 k;
+	Uint			 k;
 	model_t			*mod = e->model;
 	vec3_t			lightorigin;
 
 	// calculate dynamic lighting for bmodel if it's not an instanced model
 	if (mod->brush->firstmodelsurface != 0 && !gl_flashblend->ivalue)
 	{
-		for (k = 0; k < r_numdlights; k++) {
-			Matrix4x4_Transform(&e->invmatrix, r_dlight[k].origin, lightorigin);
-			R_MarkLightsNoVis (lightorigin, &r_dlight[k], 1 << k, mod,
+		for (k = 0; k < r.numdlights; k++) {
+			Matrix4x4_Transform(&e->invmatrix, r.dlight[k].origin, lightorigin);
+			R_MarkLightsNoVis (lightorigin, &r.dlight[k], 1 << k, mod,
 					mod->brush->nodes + mod->hulls[0].firstclipnode);
 		}
 	}
@@ -649,14 +649,14 @@ R_VisBrushModels (void)
 {
 	entity_common_t	*ce;
 	vec3_t			mins, maxs;
-	int				i;
+	Uint			i;
 	qboolean		sky = false;
 
 	// First off, the world.
 
-	Vis_MarkLeaves (r_worldmodel);
-	Vis_RecursiveWorldNode (r_worldmodel->brush->nodes,r_worldmodel,r_origin);
-	if (r_worldmodel->brush->sky_chain.visframe == vis_framecount)
+	Vis_MarkLeaves (r.worldmodel);
+	Vis_RecursiveWorldNode (r.worldmodel->brush->nodes, r.worldmodel, r.origin);
+	if (r.worldmodel->brush->sky_chain.visframe == vis_framecount)
 		sky = true;
 
 	// Now everything else.
@@ -664,8 +664,8 @@ R_VisBrushModels (void)
 	if (!r_drawentities->ivalue)
 		return sky;
 
-	for (i = 0; i < r_refdef.num_entities; i++) {
-		ce = r_refdef.entities[i];
+	for (i = 0; i < r.num_entities; i++) {
+		ce = r.entities[i];
 
 		if (ce->model->type == mod_brush) {
 			Mod_MinsMaxs (ce->model, ce->origin, ce->angles, mins, maxs);
@@ -685,15 +685,15 @@ R_DrawOpaqueBrushModels ()
 {
 	entity_common_t	*ce;
 	vec3_t			mins, maxs;
-	int				i;
+	Uint			i;
 
-	R_DrawTextureChains (r_worldmodel, 0, NULL, NULL);
+	R_DrawTextureChains (r.worldmodel, 0, NULL, NULL);
 
 	if (!r_drawentities->ivalue)
 		return;
 
-	for (i = 0; i < r_refdef.num_entities; i++) {
-		ce = r_refdef.entities[i];
+	for (i = 0; i < r.num_entities; i++) {
+		ce = r.entities[i];
 
 		if (ce->model->type == mod_brush) {
 			Mod_MinsMaxs (ce->model, ce->origin, ce->angles, mins, maxs);
@@ -710,22 +710,22 @@ R_DrawAddBrushModels ()
 {
 	entity_common_t	*ce;
 	vec3_t			mins, maxs;
-	int				i;
+	Uint			i;
 
 	if (r_wateralpha->fvalue == 1 || !(gl_allow & GLA_WATERALPHA))
 		return;
 
 	qglColor4f (1, 1, 1, r_wateralpha->fvalue);
 
-	R_DrawLiquidTextureChains (r_worldmodel, false);
+	R_DrawLiquidTextureChains (r.worldmodel, false);
 
 	if (!r_drawentities->ivalue) {
 		qglColor4fv (whitev);
 		return;
 	}
 
-	for (i = 0; i < r_refdef.num_entities; i++) {
-		ce = r_refdef.entities[i];
+	for (i = 0; i < r.num_entities; i++) {
+		ce = r.entities[i];
 
 		if (ce->model->type == mod_brush) {
 			Mod_MinsMaxs (ce->model, ce->origin, ce->angles, mins, maxs);

@@ -47,14 +47,25 @@ Mod_Init (void)
 }
 
 void
-Mod_ClearAll (void)
+Mod_ClearAll (qboolean keep)
 {
 	int         i;
 	model_t    *mod;
 
 	for (i = 0, mod = mod_known; i < MAX_MOD_KNOWN; i++, mod++)
-		if (mod->loaded && mod->name[0] && (mod->type == mod_brush))
-			Mod_UnloadModel (mod);
+		if (mod->loaded && mod->name[0])
+			Mod_UnloadModel (mod, keep);
+}
+
+void
+Mod_ReloadAll (int flags)
+{
+	int         i;
+	model_t    *mod;
+
+	for (i = 0, mod = mod_known; i < MAX_MOD_KNOWN; i++, mod++)
+		if (mod->name[0] && !mod->loaded && !mod->submodel && mod->needload)
+			Mod_LoadModel (mod, flags | mod->modflags);
 }
 
 model_t *

@@ -177,28 +177,13 @@ typedef struct {
 	 * times
 	 */
 	vec3_t			viewangles;
-
-	// pitch drifting vars
-	float			pitchvel;
-	qboolean		nodrift;
-	float			driftmove;
-	double			laststop;
-
-
-	float			crouch;					// local amount for smoothing stepups
-
-	qboolean		paused;					// send over by server
-
-	float			punchangle;				// yview kick from weapon firing
+	float			punchangle;
 
 	/*
 	 * information that is static for the entire time connected to a server
 	 */
 	char			model_name[MAX_MODELS][MAX_QPATH];
 	char			sound_name[MAX_SOUNDS][MAX_QPATH];
-
-	model_t			*model_precache[MAX_MODELS];
-	struct sfx_s	*sound_precache[MAX_SOUNDS];
 
 	int				viewentity;
 
@@ -211,7 +196,6 @@ typedef struct {
 	vec3_t			viewent_origin;
 	vec3_t			viewent_angles;
 	int				viewent_frame;
-	float			viewzoom;			// scales fov and sensitivity
 
 	// all player information
 	player_info_t	players[MAX_CLIENTS];
@@ -261,7 +245,6 @@ extern client_state_t cl;
 
 // FIXME, allocate dynamically
 extern entity_state_t cl_baselines[MAX_EDICTS];
-extern lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
 
 extern qboolean nomaster;
 extern float server_version;	// version of server we connected to
@@ -289,7 +272,6 @@ extern cvar_t *show_fps;
 extern client_static_t cls;
 extern client_state_t cl;
 extern entity_state_t cl_baselines[768];
-extern lightstyle_t cl_lightstyle[64];
 extern double connect_time;
 extern qboolean nomaster;
 extern char emodel_name[];

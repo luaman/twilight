@@ -416,7 +416,6 @@ void SV_Init(void);
 extern Uint8 mod_novis[32767 / 8];
 extern unsigned *model_checksum;
 
-void Mod_UnloadModel(model_t *mod);
 model_t *Mod_LoadModel(model_t *mod, int flags);
 void Mod_RUnloadBrushModel(model_t *mod);
 void Mod_LoadTextures(lump_t *l, model_t *mod);

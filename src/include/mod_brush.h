@@ -287,6 +287,7 @@ typedef struct brushhdr_s {
 	Uint32			numtextures;
 	texture_t		**textures;
 	chain_head_t	*tex_chains;
+	texture_t		notexture, notexture_water;
 
 	chain_head_t	sky_chain;
 
