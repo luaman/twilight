@@ -774,13 +774,13 @@ R_SetFrustum (void)
 		// front side is visible
 
 		VectorAdd (vpn, vright, frustum[0].normal);
-		VectorNormalize (frustum[0].normal);
+		VectorNormalizeFast (frustum[0].normal);
 		VectorSubtract (vpn, vright, frustum[1].normal);
-		VectorNormalize (frustum[1].normal);
+		VectorNormalizeFast (frustum[1].normal);
 		VectorAdd (vpn, vup, frustum[2].normal);
-		VectorNormalize (frustum[2].normal);
+		VectorNormalizeFast (frustum[2].normal);
 		VectorSubtract (vpn, vup, frustum[3].normal);
-		VectorNormalize (frustum[3].normal);
+		VectorNormalizeFast (frustum[3].normal);
 	} else {
 		// rotate VPN right by FOV_X/2 degrees
 		RotatePointAroundVector (frustum[0].normal, vup, vpn,

@@ -449,7 +449,7 @@ void VectorVectors(const vec3_t forward, vec3_t right, vec3_t up)
 	right[0] -= d * forward[0];
 	right[1] -= d * forward[1];
 	right[2] -= d * forward[2];
-	VectorNormalize(right);
+	VectorNormalizeFast(right);
 	CrossProduct(right, forward, up);
 }
 
