@@ -1480,8 +1480,6 @@ R_Render3DView (void)
 	R_RenderDlights ();
 	R_DrawWaterTextureChains ();
 
-	transpolyrender ();
-
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);
