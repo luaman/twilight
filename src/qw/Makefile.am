@@ -45,7 +45,7 @@ twilight_qw_SOURCES= \
 	gl_rmain.c gl_rsurf.c gl_screen.c \
 	info.c keys.c \
 	menu.c net.h net_chan.c net_udp.c pmove.c pmovetst.c protocol.h \
-	r_explosion.c r_explosion.h r_part.c render.h sbar.c screen.h skin.c \
+	r_explosion.c r_part.c render.h sbar.c screen.h skin.c \
 	snd_dma.c sv_null.c teamplay.c sys.c vid_sdl.c view.c
 
 twilight_qwsv_SOURCES= \
