@@ -10,13 +10,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -30,7 +30,7 @@
 #include "common.h"
 
 #define	MAX_MSGLEN		8000
-#define	MAX_DATAGRAM	4096
+#define	MAX_DATAGRAM	1024
 
 struct qsockaddr {
 	short       sa_family;
