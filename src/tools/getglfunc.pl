@@ -1,5 +1,8 @@
 #!/bin/sh
-exec perl -w -x $0 ${1+"$@"} # -*- mode: perl; perl-indent-level: 2; -*-
+exec perl -w -x $0 ${1+"$@"}
+# -*- mode: perl; perl-indent-level: 4; -*-
+# vi: ts=8 sw=4
+# vim: ft=perl
 #!perl -w
 
 # USAGE: ./getglfunc.pl <path to gl.h> <path to glext.h> <function>

@@ -5,5 +5,5 @@
 AUTOMAKE_OPTIONS=gnu dist-zip
 
 EXTRA_DIST= \
-	cvs2cl.pl
+	cvs2cl.pl getglfunc.pl
 
