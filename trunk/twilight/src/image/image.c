@@ -36,7 +36,6 @@ static const char rcsid[] =
 #include "common.h"
 #include "image.h"
 #include "strlib.h"
-#include "jpeg.h"
 #include "pcx.h"
 #include "qlmp.h"
 #include "tga.h"
@@ -67,10 +66,6 @@ Image_Load (char *name)
 
 	snprintf (buf, MAX_OSPATH, "%s.pcx", woext);
 	if ((img = PCX_Load (buf)))
-		return img;
-
-	snprintf (buf, MAX_OSPATH, "%s.jpg", woext);
-	if ((img = JPEG_Load (buf)))
 		return img;
 
 	snprintf (buf, MAX_OSPATH, "%s.lmp", woext);

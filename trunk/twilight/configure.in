@@ -185,8 +185,6 @@ AC_OUTPUT(
 	src/Makefile
 	src/base/Makefile
 	src/image/Makefile
-	src/image/libjpeg/Makefile
-	src/image/libpng/Makefile
 	src/renderer/Makefile
 	src/sound/Makefile
 	nq/Makefile

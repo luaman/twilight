@@ -26,6 +26,6 @@
 #ifndef __JPEG_H
 #define __JPEG_H
 
-image_t *JPEG_Load (char *name);
+// Put a jpeg saver in here
 
 #endif // __JPEG_H
