@@ -1159,6 +1159,9 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 	gltexture_t *glt;
 	unsigned short crc = 0;
 
+	if (isDedicated)
+		return 0;
+
 	// see if the texture is already present
 	if (identifier[0]) {
 		crc = CRC_Block (data, width*height);

@@ -414,7 +414,7 @@ Mod_LoadTextures (lump_t *l)
 			memcpy (tx+1, (byte *)(tx+1) + 32*31, 32);
 		}
 
-		if (!Q_strncmp (mt->name, "sky", 3))
+		if (!Q_strncmp (mt->name, "sky", 3) && !isDedicated)
 			R_InitSky (tx);
 		else {
 			texture_mode = GL_LINEAR_MIPMAP_NEAREST;	// _LINEAR;
