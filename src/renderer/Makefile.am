@@ -15,6 +15,7 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 lib_LIBRARIES=libtwilight_renderer.a
 
 noinst_HEADERS= \
+	pointers.h
 	dynogl.h opengl.h opengl_ext.h oglfuncs.h \
 	glquake.h transform.h gl_textures.h
 

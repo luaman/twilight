@@ -45,6 +45,7 @@ static const char rcsid[] =
 #include "host.h"
 #include "image.h"
 #include "mathlib.h"
+#include "pointers.h"
 #include "strlib.h"
 #include "sys.h"
 #include "gl_textures.h"
@@ -58,44 +59,18 @@ cvar_t	*gl_texturemode;
 cvar_t	*cl_verstring;					/* FIXME: Move this? */
 cvar_t	*r_lerpimages;
 
+cvar_t *hud_chsize;
+cvar_t *hud_chflash;
+cvar_t *hud_chspeed;
+cvar_t *hud_chalpha;
+
 Uint8	*draw_chars;
 qpic_t	*draw_disc;
 qpic_t	*draw_backtile;
 
 int         translate_texture;
 int         char_texture;
-int         cs_texture, cs_square;		/* crosshair texture */
-
-static Uint8 cs_data[64] = {
-	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
-	0xfe, 0xff, 0xfe, 0xff, 0xfe, 0xff, 0xfe, 0xff,
-	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
-};
-
-static Uint8 cs_squaredata[8][8] = {
-	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
-	,
-	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
-	,
-	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
-	,
-	{0xff, 0xff, 0xff, 0xfe, 0xfe, 0xff, 0xff, 0xff}
-	,
-	{0xff, 0xff, 0xff, 0xfe, 0xfe, 0xff, 0xff, 0xff}
-	,
-	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
-	,
-	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
-	,
-	{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
-	,
-};
-
+int         ch_texture;					// crosshair texture
 
 typedef struct {
 	int		texnum;
@@ -267,6 +242,52 @@ Set_TextureMode_f (struct cvar_s *var)
 
 /*
 ===============
+R_LoadPointer
+
+Loads a string into a named 32x32 greyscale OpenGL texture, suitable for
+crosshairs or mouse pointers.  The data string is in a format similar to an
+X11 pixmap.  '0'-'7' are brightness levels, any other character is considered
+transparent.
+
+ FIXME: No error checking is performed on the input string.  Do not give users
+		a way to load anything using this function without fixing it.
+ FIXME: Maybe hex values (0-F) for brightness?  Used 0-7 so we could borrow
+		DarkPlaces' crosshairs, but we use 32x32 instead of 16x16.
+===============
+*/
+static int
+R_LoadPointer (const char *name, const char *data)
+{
+	int			i;
+	image_t		img;
+	Uint8		pixels[32*32][4];
+
+	for (i = 0; i < 32*32; i++)
+	{
+		if (data[i] >= '0' && data[i] < '8')
+		{
+			pixels[i][0] = 255;
+			pixels[i][1] = 255;
+			pixels[i][2] = 255;
+			pixels[i][3] = (data[i] - '0') * 32;
+		} else {
+			pixels[i][0] = 255;
+			pixels[i][1] = 255;
+			pixels[i][2] = 255;
+			pixels[i][3] = 0;
+		}
+	}
+
+	img.type = IMG_RGBA;
+	img.width = 32;
+	img.height = 32;
+	img.pixels = (Uint8 *)pixels;
+
+	return R_LoadTexture (name, &img, TEX_ALPHA);
+}
+
+/*
+===============
 Draw_Init_Cvars
 ===============
 */
@@ -279,7 +300,8 @@ Draw_Init_Cvars (void)
 	if (!max_tex_size)
 		max_tex_size = 1024;
 
-	gl_max_size = Cvar_Get ("gl_max_size", va("%d", max_tex_size), CVAR_NONE, NULL);
+	gl_max_size = Cvar_Get ("gl_max_size", va("%d", max_tex_size), CVAR_NONE,
+			NULL);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
 	gl_constretch = Cvar_Get ("gl_constretch", "1", CVAR_ARCHIVE, NULL);
 	gl_texturemode = Cvar_Get ("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST",
@@ -287,6 +309,11 @@ Draw_Init_Cvars (void)
 	cl_verstring = Cvar_Get ("cl_verstring",
 			"Project Twilight v" VERSION " QW", CVAR_NONE, NULL);
 	r_lerpimages = Cvar_Get ("r_lerpimages", "1", CVAR_ARCHIVE, NULL);
+
+	hud_chsize = Cvar_Get ("hud_chsize", "0.5", CVAR_ARCHIVE, NULL);
+	hud_chflash = Cvar_Get ("hud_chflash", "0.1", CVAR_ARCHIVE, NULL);
+	hud_chspeed = Cvar_Get ("hud_chspeed", "1.5", CVAR_ARCHIVE, NULL);
+	hud_chalpha = Cvar_Get ("hud_chalpha", "1.0", CVAR_ARCHIVE, NULL);
 }
 
 /*
@@ -297,7 +324,7 @@ Draw_Init
 void
 Draw_Init (void)
 {
-	image_t	   *img;
+	image_t		*img;
 	int			i;
 
 	img = Image_Load ("conchars");
@@ -315,9 +342,10 @@ Draw_Init (void)
 	 
 	char_texture = R_LoadTexture ("charset", img, TEX_ALPHA);
 
-	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, TEX_ALPHA, 8);
-	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata,
-			TEX_ALPHA, 8);
+	// Keep track of the first crosshair texture
+	ch_texture = texture_extension_number;
+	for (i = 0; i < NUM_CROSSHAIRS; i++)
+		R_LoadPointer (va ("crosshair%i", i), crosshairs[i]);
 
 	/* save a texture slot for translated picture */
 	translate_texture = texture_extension_number++;
@@ -507,66 +535,48 @@ Draw_Alt_String (int x, int y, char *str)
 void
 Draw_Crosshair (void)
 {
-	int         x, y;
-	double		dx, dy;
-	extern vrect_t scr_vrect;
+	float			x1, y1, x2, y2;
+	int				color;
+	float			base[4];
+	float			ofs;
+	int				ctexture;
 
-	x = scr_vrect.x + scr_vrect.width / 2 - 3 + cl_crossx->ivalue;
-	y = scr_vrect.y + scr_vrect.height / 2 - 3 + cl_crossy->ivalue;
-	if ((vid.conheight != vid.height) || (vid.conwidth != vid.width))
-	{
-		dx = (double) x / (double) vid.width;
-		dy = (double) y / (double) vid.height;
-		x = dx * vid.conwidth;
-		y = dy * vid.conheight;
-	}
+	if (crosshair->ivalue < 1)
+		return;
 
-	switch (crosshair->ivalue)
-	{
-		case 1:
-			Draw_Character (x, y, '+');
-			break;
+	// FIXME: when textures have structures, fix the hardcoded 32x32 size
+	
+	ctexture = ch_texture + ((crosshair->ivalue - 1) % NUM_CROSSHAIRS);
 
-		case 2:
-			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->ivalue]);
-			qglBindTexture (GL_TEXTURE_2D, cs_texture);
+	x1 = (vid.width - 32 * hud_chsize->fvalue) * 0.5;
+	y1 = (vid.height - 32 * hud_chsize->fvalue) * 0.5;
 
-			qglEnable (GL_BLEND);
-			VectorSet2 (tc_array_v(0), 0, 0);
-			VectorSet2 (v_array_v(0), x - 4, y - 4);
-			VectorSet2 (tc_array_v(1), 1, 0);
-			VectorSet2 (v_array_v(1), x + 12, y - 4);
-			VectorSet2 (tc_array_v(2), 1, 1);
-			VectorSet2 (v_array_v(2), x + 12, y + 12);
-			VectorSet2 (tc_array_v(3), 0, 1);
-			VectorSet2 (v_array_v(3), x - 4, y + 12);
-			TWI_PreVDraw (0, 4);
-			qglDrawArrays (GL_QUADS, 0, 4);
-			TWI_PostVDraw ();
-			qglColor3f (1, 1, 1);
-			qglDisable (GL_BLEND);
-			break;
+	x2 = (vid.width + 32 * hud_chsize->fvalue) * 0.5;
+	y2 = (vid.height + 32 * hud_chsize->fvalue) * 0.5;
 
-		case 3:
-			qglColor4fv (d_8tofloattable[(Uint8) crosshaircolor->ivalue]);
-			qglBindTexture (GL_TEXTURE_2D, cs_square);
+	// Color selection madness
+	color = bound (0, crosshaircolor->ivalue, 255);
+	ofs = Q_sin (cl.time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
+	VectorSlide (d_8tofloattable[color], ofs, base);
+	base[3] = hud_chalpha->fvalue;
+	qglColor4fv (base);
 
-			qglEnable (GL_BLEND);
-			VectorSet2 (tc_array_v(0), 0, 0);
-			VectorSet2 (v_array_v(0), x - 4, y - 4);
-			VectorSet2 (tc_array_v(1), 1, 0);
-			VectorSet2 (v_array_v(1), x + 12, y - 4);
-			VectorSet2 (tc_array_v(2), 1, 1);
-			VectorSet2 (v_array_v(2), x + 12, y + 12);
-			VectorSet2 (tc_array_v(3), 0, 1);
-			VectorSet2 (v_array_v(3), x - 4, y + 12);
-			TWI_PreVDraw (0, 4);
-			qglDrawArrays (GL_QUADS, 0, 4);
-			TWI_PostVDraw ();
-			qglColor3f (1, 1, 1);
-			qglDisable (GL_BLEND);
-			break;
-	}
+	qglBindTexture (GL_TEXTURE_2D, ctexture);
+
+	qglEnable (GL_BLEND);
+	VectorSet2 (tc_array_v(0), 0, 0);
+	VectorSet2 (v_array_v(0), x1, y1);
+	VectorSet2 (tc_array_v(1), 1, 0);
+	VectorSet2 (v_array_v(1), x2, y1);
+	VectorSet2 (tc_array_v(2), 1, 1);
+	VectorSet2 (v_array_v(2), x2, y2);
+	VectorSet2 (tc_array_v(3), 0, 1);
+	VectorSet2 (v_array_v(3), x1, y2);
+	TWI_PreVDraw (0, 4);
+	qglDrawArrays (GL_QUADS, 0, 4);
+	TWI_PostVDraw ();
+	qglColor3f (1, 1, 1);
+	qglDisable (GL_BLEND);
 }
 
 
@@ -1268,7 +1278,7 @@ FIXME: HACK HACK HACK - this is just a GL_LoadTexture for image_t's for now
 ================
 */
 int
-R_LoadTexture (char *identifier, image_t *img, int flags)
+R_LoadTexture (const char *identifier, image_t *img, int flags)
 {
 	int         i;
 	gltexture_t *glt;
@@ -1330,7 +1340,7 @@ GL_LoadTexture
 ================
 */
 int
-GL_LoadTexture (char *identifier, int width, int height, Uint8 *data,
+GL_LoadTexture (const char *identifier, int width, int height, Uint8 *data,
 		int flags, int bpp)
 {
 	int         i;
