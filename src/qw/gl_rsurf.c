@@ -539,9 +539,9 @@ DrawTextureChains
 static void
 DrawTextureChains ()
 {
-	int         i;
-	msurface_t *s;
-	texture_t  *t, *st;
+	unsigned int	i;
+	msurface_t		*s;
+	texture_t		*t, *st;
 
 	// LordHavoc: upload lightmaps early
 	for (i = 0; i < cl.worldmodel->numtextures; i++)
@@ -947,9 +947,9 @@ R_MarkLeaves
 static void
 R_MarkLeaves (void)
 {
-	Uint8      *vis;
-	mnode_t    *node;
-	int         i;
+	Uint8			*vis;
+	mnode_t			*node;
+	unsigned int	i;
 
 	if (r_oldviewleaf == r_viewleaf && !r_novis->value)
 		return;
