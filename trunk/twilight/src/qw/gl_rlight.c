@@ -31,7 +31,11 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "client.h"
+#include "collision.h"
 #include "cvar.h"
+#include "draw.h"
+#include "gl_textures.h"
+#include "image.h"
 #include "light.h"
 #include "mathlib.h"
 #include "strlib.h"
@@ -41,6 +45,108 @@ rdlight_t r_dlight[MAX_DLIGHTS];
 int r_numdlights = 0;
 int r_dlightframecount;
 
+
+static int corona_texture;
+
+void
+R_InitLightTextures (void)
+{
+	float		dx, dy;
+	int			x, y, a;
+	Uint8		pixels[32][32][4];
+	image_t		img;
+	
+	for (y = 0; y < 32; y++)
+	{
+		dy = (y - 15.5f) * (1.0f / 16.0f);
+		for (x = 0; x < 32; x++)
+		{
+			dx = (x - 15.5f) * (1.0f / 16.0f);
+			a = ((1.0f / (dx * dx + dy * dy + 0.2f)) - (1.0f / 1.2f))
+				* 64.0f / (1.0f / (1.0f + 0.2));
+			a = bound(0, a, 255);
+			pixels[y][x][0] = 255;
+			pixels[y][x][1] = 255;
+			pixels[y][x][2] = 255;
+			pixels[y][x][3] = a;
+		}
+	}
+	img.width = 32;
+	img.height = 32;
+	img.type = IMG_RGBA;
+	img.pixels = (Uint8 *)pixels;
+	corona_texture = R_LoadTexture ("dlcorona", &img, TEX_ALPHA);
+}
+
+void
+R_DrawCoronas (void)
+{
+	int i;
+	float scale, viewdist, dist, brightness;
+	vec3_t diff;
+	vec4_t dlightcolor;
+	rdlight_t *rd;
+
+	qglDisable (GL_DEPTH_TEST);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
+	qglBindTexture (GL_TEXTURE_2D, corona_texture);
+
+	VectorSet2 (tc_array_v(0), 0.0f, 0.0f);
+	VectorSet2 (tc_array_v(1), 0.0f, 1.0f);
+	VectorSet2 (tc_array_v(2), 1.0f, 1.0f);
+	VectorSet2 (tc_array_v(3), 1.0f, 0.0f);
+	viewdist = DotProduct (r_origin, vpn);
+
+	// Need brighter coronas if we don't have dynamic lightmaps
+	if (gl_flashblend->ivalue)
+		brightness = 1.0f / 131072.0f;
+	else
+		brightness = 1.0f / 262144.0f;
+
+	for (i = 0; i < r_numdlights; i++)
+	{
+		rd = r_dlight + i;
+		dist = (DotProduct (rd->origin, vpn) - viewdist);
+		if (dist >= 24.0f)
+		{
+			// trace to a point just barely closer to the eye
+			VectorSubtract(rd->origin, vpn, diff);
+			if (TraceLine (cl.worldmodel, r_origin, diff, NULL, NULL) == 1)
+			{
+				
+				dlightcolor[0] = r_dlight->light[0] * brightness;
+				dlightcolor[1] = r_dlight->light[1] * brightness;
+				dlightcolor[2] = r_dlight->light[2] * brightness;
+				dlightcolor[3] = 1.0f;
+				qglColor4fv (dlightcolor);
+
+				scale = rd->cullradius * 0.25f;
+				VectorSet3 (v_array_v(0), 
+						rd->origin[0] - vright[0] * scale - vup[0] * scale,
+						rd->origin[1] - vright[1] * scale - vup[1] * scale,
+						rd->origin[2] - vright[2] * scale - vup[2] * scale);
+				VectorSet3 (v_array_v(1),
+						rd->origin[0] - vright[0] * scale + vup[0] * scale,
+						rd->origin[1] - vright[1] * scale + vup[1] * scale,
+						rd->origin[2] - vright[2] * scale + vup[2] * scale);
+				VectorSet3 (v_array_v(2),
+						rd->origin[0] + vright[0] * scale + vup[0] * scale,
+						rd->origin[1] + vright[1] * scale + vup[1] * scale,
+						rd->origin[2] + vright[2] * scale + vup[2] * scale);
+				VectorSet3 (v_array_v(3),
+						rd->origin[0] + vright[0] * scale - vup[0] * scale,
+						rd->origin[1] + vright[1] * scale - vup[1] * scale,
+						rd->origin[2] + vright[2] * scale - vup[2] * scale);
+				TWI_PreVDraw (0, 4);
+				qglDrawArrays (GL_QUADS, 0, 4);
+				TWI_PostVDraw ();			
+			}
+		}
+	}
+
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglEnable (GL_DEPTH_TEST);
+}
 
 /*
 ==================
@@ -148,119 +254,6 @@ R_InitBubble (void)
 		*bub_sin++ = sin (a);
 		*bub_cos++ = cos (a);
 	}
-}
-
-
-void
-R_RenderDlight (rdlight_t *light)
-{
-	int     i, j, vcenter, vlast = -1;
-	vec3_t  v, v_right, v_up;
-	vec4_t	c;
-	float	*bub_sin = bubble_sintable,
-			*bub_cos = bubble_costable;
-	float   rad = light->cullradius * 0.35, length;
-
-	VectorSubtract (light->origin, r_origin, v);
-	length = VectorNormalize (v);
-
-	VectorCopy (light->light, c);
-	VectorNormalizeFast (c);
-	
-	if (length < rad)
-	{
-		// view is inside the dlight
-		AddLightBlend (c, light->cullradius * 0.0003);
-		return;
-	}
-
-	v_right[0] = v[1];
-	v_right[1] = -v[0];
-	v_right[2] = 0;
-	VectorNormalizeFast (v_right);
-	CrossProduct (v_right, v, v_up);
-
-	if (length - rad > 8)
-		VectorScale (v, rad, v);
-	else {
-		// make sure the light bubble will not be clipped by
-		// near z clip plane
-		VectorScale (v, length-8, v);
-	}
-	VectorSubtract (light->origin, v, v);
-
-	VectorSet3 (v_array_v(v_index), v[0], v[1], v[2]);
-	TWI_FtoUB(c, c_array_v(v_index), 4);
-	c_array(v_index, 3) = 255;
-	vcenter = v_index;
-	v_index++;
-
-	for (i = 16; i >= 0; i--, bub_sin++, bub_cos++) 
-	{
-		for (j = 0; j < 3; j++)
-			v[j] = light->origin[j] + (v_right[j] * (*bub_cos) +
-				+ v_up[j] * (*bub_sin)) * rad;
-
-		VectorSet4 (c_array_v(v_index), 0, 0, 0, 0);
-		VectorSet3 (v_array_v(v_index), v[0], v[1], v[2]);
-		if (vlast != -1) {
-			vindices[i_index + 0] = vcenter;
-			vindices[i_index + 1] = vlast;
-			vindices[i_index + 2] = v_index;
-			i_index += 3;
-		}
-		vlast = v_index;
-		v_index++;
-
-		if (((v_index + 3) >= MAX_VERTEX_ARRAYS) ||
-				((i_index + 3) >= MAX_VERTEX_INDICES)) {
-			TWI_PreVDrawCVA (0, v_index);
-			qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
-			TWI_PostVDrawCVA ();
-			v_index = 0;
-			i_index = 0;
-			memcpy(v_array_v(v_index), v_array_v(vcenter),sizeof(v_array_v(0)));
-			memcpy(c_array_v(v_index), c_array_v(vcenter),sizeof(c_array_v(0)));
-			vcenter = v_index++;
-			memcpy(v_array_v(v_index), v_array_v(vlast), sizeof(v_array_v(0)));
-			memcpy(c_array_v(v_index), c_array_v(vlast), sizeof(c_array_v(0)));
-			vlast = v_index++;
-		}
-	}
-}
-
-/*
-=============
-R_RenderDlights
-=============
-*/
-void
-R_RenderDlights (void)
-{
-	int			i;
-	rdlight_t	*l;
-
-	if (!gl_flashblend->ivalue)
-		return;
-
-	qglDisable (GL_TEXTURE_2D);
-	qglEnableClientState (GL_COLOR_ARRAY);
-
-	l = r_dlight;
-	for (i = 0; i < r_numdlights; i++, l++)
-		R_RenderDlight (l);
-
-	if (v_index || i_index) {
-		TWI_PreVDrawCVA (0, v_index);
-		qglDrawElements(GL_TRIANGLES, i_index, GL_UNSIGNED_INT, vindices);
-		TWI_PostVDrawCVA ();
-		v_index = 0;
-		i_index = 0;
-	}
-
-	qglColor4fv (whitev);
-	qglEnable (GL_TEXTURE_2D);
-	qglDisableClientState (GL_COLOR_ARRAY);
 }
 
 
