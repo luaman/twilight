@@ -47,6 +47,7 @@ typedef struct cvar_s
 	char		*name;
 	char		*initval;
 	char		*svalue;
+	size_t		s_len;
 	float		fvalue;
 	int			ivalue;
 	int			flags;

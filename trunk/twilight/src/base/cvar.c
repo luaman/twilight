@@ -135,7 +135,8 @@ Cvar_Set (cvar_t *var, const char *svalue)
 		Z_Free (var->svalue);
 	}
 
-	var->svalue = Z_Malloc (strlen(svalue) + 1);
+	var->s_len = strlen(svalue);
+	var->svalue = Z_Malloc (var->s_len + 1);
 	strcpy (var->svalue, svalue);
 	
 	var->fvalue = Q_atof (var->svalue);

@@ -213,13 +213,16 @@ Cbuf_Execute
 void
 Cbuf_Execute (void)
 {
-	size_t		i;
-	int			quotes;
-	char		*text, line[1024];
+	size_t		i, size;
+	int			quotes, start, last, j;
+	cvar_t		*cvar;
+	char		*text, line[1024], c_name[32];
 	sizebuf_t	*p;
 
 	while (1)
 	{
+		memset(line, 0, sizeof(line));
+
 		if (!cmd_text->cursize)
 		{
 			if (cmd_text->next)
@@ -236,22 +239,53 @@ Cbuf_Execute (void)
 
 		// find a \n or ; line break
 		text = (char *) cmd_text->data;
+		last = 0;
 
 		quotes = 0;
-		for (i = 0; i < cmd_text->cursize; i++)
+		start = -1;
+		for (i = 0, j = 0; i < cmd_text->cursize; i++)
 		{
+			if (!(quotes & 1)) {
+				if ((start != -1) && !(((text[i] >= 'A' && text[i] <= 'Z')) ||
+							((text[i] >= 'a' && text[i] <= 'z')) ||
+							(text[i] == '_')))
+				{
+					size = i - start;
+					if (size && (size < sizeof(c_name))) {
+						memcpy(c_name, &text[start], size);
+						c_name[size] = '\0';
+						if ((cvar = Cvar_Find(c_name))) {
+							if ((cvar->s_len + j + 1) >= sizeof(line))
+								Sys_Error("Line too long!");
+							memcpy(&line[j], cvar->svalue, cvar->s_len);
+							j += cvar->s_len;
+							last = i;
+						}
+					}
+					start = -1;
+				} else if (text[i] == '$') {
+					size = i - last;
+					memcpy (&line[j], &text[last], size);
+					last = i;
+					start = i + 1;
+					j += size;
+					line[j + 1] = '\0';
+				}
+				if (text[i] == ';') // don't break in a quoted string
+					break;
+			}
 			if (text[i] == '"')
 				quotes++;
-			if (!(quotes & 1) && text[i] == ';')
-				// don't break in a quoted string
-				break;
 			if (text[i] == '\n')
 				break;
 		}
 
 
-		memcpy (line, text, i);
-		line[i] = 0;
+		size = i - last;
+		memcpy (&line[j], &text[last], size);
+		last = i + 1;
+		j += size;
+		line[j + 1] = '\0';
 
 		// delete the text from the command buffer and move remaining commands
 		// down this is necessary because commands (exec, alias) can insert
