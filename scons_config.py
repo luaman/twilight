@@ -35,17 +35,19 @@ def check_SDL_config (context):
 def check_SDL_headers (context):
 	context.Message ('Checking for SDL headers ... ')
 	ret = context.TryRun ("""
-#include "SDL_version.h"
+#include <SDL/SDL_version.h>
 #include <stdio.h>
 
 int main (int argc, char *argv[])
 {
-	printf("%d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
-	exit (0);
+	argc = argc;
+	argv = argv;
+	printf("%d.%d.%d\\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
+	return 0;
 }
-""")
+""", ".c")
 	if ret[0]:
-		ver = map (int, ret[1].strip.split("."))
+		ver = map (int, ret[1].split("."))
 		context.Result (repr(ver))
 		return (1, ver)
 	else:
@@ -165,7 +167,7 @@ def do_configure (env):
 	handle_opts (conf, opts, config_defs)
 
 	ret = conf.SDL_config ()
-	sdl_ver = [0, 0, 0]
+	sdl_ver = None
 	if ret[0]:
 		ParseConfig (env, "sdl-config --cflags --libs")
 		check_cheaders (conf, config_defs, ['SDL.h'])
@@ -211,6 +213,7 @@ def do_configure (env):
 	print """
   Project Twilight v""" + config_defs.get('VERSION')[1:-1] + """ configuration:
     Build platform              : """ + env['PLATFORM'] + """
+    SDL version                 : """ + repr(sdl_ver) + """
     Compiler                    : """ + env['CC'] + """
     Compiler flags              : """ + string.join(env['CCFLAGS'], " ") + """
     Libraries                   : """ + string.join(env['LIBS'], " ") + """
