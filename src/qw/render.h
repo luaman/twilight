@@ -47,23 +47,7 @@ typedef struct colormap_s {
 	vec4_t		bottom;
 } colormap_t;
 
-typedef struct entity_save_s {
-	vec3_t		origin;
-	float		origin_time;
-	float		origin_interval;
-	vec3_t		angles;
-	float		angles_time;
-	float		angles_interval;
-	int			frame;
-	float		frame_time;
-	float		frame_interval;
-} entity_save_t;
-
 typedef struct entity_s {
-	entity_save_t	from;
-	entity_save_t	to;
-	entity_save_t	cur;
-
 	// NULL = no model
 	struct model_s	*model;
 	int				skinnum;
@@ -75,7 +59,21 @@ typedef struct entity_s {
 	float			time_left;
 	unsigned int	times;
 
-	float			frame_blend;
+	float			lerp_start_time, lerp_delta_time;
+
+	// Last two updates. (0 is the newest)
+	vec3_t			msg_origins[2];
+	vec3_t			origin;
+
+	// Last two updates. (0 is the newest)
+	vec3_t			msg_angles[2];
+	vec3_t			angles;
+
+	// Last two updates. (0 is the newest)
+	int				frame[2];
+	float			frame_frac[2];
+	float			frame_time[2];
+	float			frame_interval[2];
 
 	// Bounding box
 	vec3_t			mins;

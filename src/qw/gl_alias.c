@@ -30,6 +30,7 @@ static const char rcsid[] =
 #include "render.h"
 #include "client.h"
 #include "cvar.h"
+#include "sys.h"
 
 void R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 extern vec3_t lightcolor;
@@ -95,9 +96,8 @@ R_DrawViewModel (void)
 		return;
 	}
 
-	CL_Update_Origin(&cl.viewent, cl.viewent_origin, cls.realtime);
-	CL_Update_Angles(&cl.viewent, cl.viewent_angles, cls.realtime);
-	CL_UpdateAndLerp_Frame(&cl.viewent, cl.viewent_frame, cls.realtime);
+	CL_Update_OriginAngles(&cl.viewent, cl.viewent_origin, cl.viewent_angles, cls.realtime);
+	CL_Update_Frame(&cl.viewent, cl.viewent_frame, cls.realtime);
 
 	// hack the depth range to prevent view model from poking into walls
 	qglDepthRange (0.0f, 0.3f);
@@ -119,10 +119,10 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 	maliasframedesc_t	*frame;
 	maliaspose_t		*pose;
 
-	frame = &paliashdr->frames[e->to.frame];
+	frame = &paliashdr->frames[e->frame[0]];
 
 	if (frame->numposes > 1)
-		pose_num = (int) (cl.time / e->to.frame_interval) % frame->numposes;
+		pose_num = (int) (cl.time / frame->interval) % frame->numposes;
 	else
 		pose_num = 0;
 
@@ -143,88 +143,65 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 /*
 =================
 R_SetupAliasBlendedFrame
-
-fenix@io.com: model animation interpolation
 =================
 */
-extern void
-Lerp_Vectors4pt (vec3_t v1_1, vec_t v1_blend, vec3_t v1_2, vec_t blend,
-		        vec3_t v2_1, vec_t v2_blend, vec3_t v2_2, vec3_t out);
-
 static void
 R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 {
-	float				l, d;
-	int					i;
-	int					pose_to_1_num, pose_to_2_num;
-	float				pose_to_blend;
-	maliaspose_t		*pose_to_1, *pose_to_2;
-	int					pose_from_1_num, pose_from_2_num;
-	float				pose_from_blend;
-	maliaspose_t		*pose_from_1, *pose_from_2;
-	maliasframedesc_t	*frame_from, *frame_to;
-	vec3_t				v1_1, v1_2, v2_1, v2_2;
+	float				l, d, frac;
+	int					i1, i2, i, j, k;
+	maliaspose_t		*poses[4];
+	float				fracs[4];
+	int					num_frames = 0;
+	maliasframedesc_t	*frame;
 
-	frame_from = &paliashdr->frames[e->from.frame];
+	for (i = 0; i < 2; i++) {
+		if (e->frame_frac[i] < (1.0/65536.0))
+			continue;
+		frame = &paliashdr->frames[e->frame[i]];
+		if (frame->numposes > 1) {
+			i1 = (int) (cl.time / e->frame_interval[i]) % frame->numposes;
+			i2 = (i1 + 1) % frame->numposes;
+			frac = (cl.time / e->frame_interval[i]) - i1;
+			poses[num_frames] = &frame->poses[i1];
+			fracs[num_frames] = frac * e->frame_frac[i];
+			if (fracs[num_frames] > (1.0/65536.0))
+				num_frames++;
+			poses[num_frames] = &frame->poses[i2];
+			fracs[num_frames] = (1 - frac) * e->frame_frac[i];
+			if (fracs[num_frames] > (1.0/65536.0))
+				num_frames++;
+		} else {
+			poses[num_frames] = &frame->poses[0];
+			fracs[num_frames++] = e->frame_frac[i];
+		}
+	}
 
-	if (frame_from->numposes > 1) {
-		pose_from_1_num = (int) (cl.time / e->from.frame_interval) % frame_from->numposes;
-		pose_from_2_num = (pose_from_1_num + 1) % frame_from->numposes;
-		pose_from_blend = (cl.time / e->from.frame_interval) - pose_from_1_num;
-	} else
-		pose_from_1_num = pose_from_2_num = pose_from_blend = 0;
-
-	frame_to = &paliashdr->frames[e->to.frame];
-
-	if (frame_to->numposes > 1) {
-		pose_to_1_num = (int) (cl.time / e->to.frame_interval) % frame_to->numposes;
-		pose_to_2_num = (pose_to_1_num + 1) % frame_to->numposes;
-		pose_to_blend = (cl.time / e->to.frame_interval) - pose_to_1_num;
-	} else
-		pose_to_1_num = pose_to_2_num = pose_to_blend = 0;
-
-	pose_from_1 = &frame_from->poses[pose_from_1_num];
-	pose_from_2 = &frame_from->poses[pose_from_2_num];
-	pose_to_1 = &frame_to->poses[pose_to_1_num];
-	pose_to_2 = &frame_to->poses[pose_to_2_num];
+	if (!num_frames)
+		Sys_Error("Eik! %s\n", e->model->name);
 
 	for (i = 0; i < paliashdr->numverts; i++) {
-		if (e->frame_blend >= 0.99) {
-			VectorCopy (pose_to_1->vertices[i].v, v2_1);
-			VectorCopy (pose_to_2->vertices[i].v, v2_2);
-			Lerp_Vectors (
-					v2_1, pose_to_blend, v2_2,
-					v_array_v(i));
-		} else if (e->frame_blend <= 0.01) {
-			VectorCopy (pose_from_1->vertices[i].v, v1_1);
-			VectorCopy (pose_from_2->vertices[i].v, v1_2);
-			Lerp_Vectors (
-					v1_1, pose_from_blend, v1_2,
-					v_array_v(i));
-		} else {
-			VectorCopy (pose_from_1->vertices[i].v, v1_1);
-			VectorCopy (pose_from_2->vertices[i].v, v1_2);
-			VectorCopy (pose_to_1->vertices[i].v, v2_1);
-			VectorCopy (pose_to_2->vertices[i].v, v2_2);
-			Lerp_Vectors4pt (
-					v1_1, pose_from_blend, v1_2,
-					e->frame_blend,
-					v2_1, pose_to_blend, v2_2,
-					v_array_v(i));
+		for (j = 0; j < 3; j++) {
+			v_array(i, j) = 0;
+			for (k = 0; k < num_frames; k++)
+				if (fracs[k] > (1/65536))
+					v_array(i, j) += poses[k]->vertices[i].v[j] * fracs[k];
 		}
 
 		tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
 		tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
 
-		d = shadedots[pose_to_1->normal_indices[i]] -
-			shadedots[pose_from_1->normal_indices[i]];
-		l = shadelight * (shadedots[pose_from_1->normal_indices[i]]
-				+ (e->frame_blend * d));
+		d = 0;
+		for (k = 0; k < num_frames; k++)
+			if (fracs[k] > (1/65536))
+				d += shadedots[poses[k]->normal_indices[i]] * fracs[k];
+		l = shadelight * d;
 		VectorScale(lightcolor, l, cf_array_v(i));
 		cf_array(i, 3) = 1;
 	}
 	TWI_FtoUB (cf_array_v(0), c_array_v(0), paliashdr->numverts * 4);
 }
+
 
 /*
 =================
@@ -259,7 +236,7 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 	if (!viewent) {
 		vec3_t      mins, maxs;
 
-		Mod_MinsMaxs (clmodel, e->cur.origin, e->cur.angles, mins, maxs);
+		Mod_MinsMaxs (clmodel, e->origin, e->angles, mins, maxs);
 
 		if (Vis_CullBox (mins, maxs)) {
 			return;
@@ -270,7 +247,7 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 	 * get lighting information
 	 */
 	if (!(clmodel->modflags & FLAG_FULLBRIGHT) || gl_fb->ivalue) {
-		shadelight = R_LightPoint (e->cur.origin);
+		shadelight = R_LightPoint (e->origin);
 
 		// always give the gun some light
 		if (viewent) {
@@ -282,7 +259,7 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 		for (lnum = 0; lnum < r_numdlights; lnum++)
 		{
 			rd = r_dlight + lnum;
-			VectorSubtract (e->cur.origin, rd->origin, dist);
+			VectorSubtract (e->origin, rd->origin, dist);
 			f = DotProduct (dist, dist) + LIGHTOFFSET;
 			if (f < rd->cullradius2)
 			{
@@ -298,11 +275,10 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 			lightcolor[1] = max (lightcolor[1], 8);
 			lightcolor[2] = max (lightcolor[2], 8);
 		}
-	} else if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb->ivalue) {
+	} else if ((clmodel->modflags & FLAG_FULLBRIGHT) && !gl_fb->ivalue)
 		lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
-	}
 
-	shadedots = r_avertexnormal_dots[((int) (e->cur.angles[1]
+	shadedots = r_avertexnormal_dots[((int) (e->angles[1]
 				* (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
 
 	VectorScale(lightcolor, 1.0f / 200.0f, lightcolor);
@@ -347,11 +323,11 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 		R_SetupAliasFrame (paliashdr, e);
 
 	if (gl_im_transform->ivalue && !(clmodel->modflags & FLAG_NO_IM_FORM)) {
-		mod_origin = e->cur.origin;
-		mod_angles = e->cur.angles;
+		mod_origin = e->origin;
+		mod_angles = e->angles;
 	} else {
-		mod_origin = e->to.origin;
-		mod_angles = e->to.angles;
+		mod_origin = e->msg_origins[0];
+		mod_angles = e->msg_angles[0];
 	}
 	draw = true;
 }

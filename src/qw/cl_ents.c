@@ -422,106 +422,59 @@ CL_ParsePacketEntities (qboolean delta)
 	newp->num_entities = newindex;
 }
 
-float
-CL_CalcBlend (float from_time, float to_time, float interval)
-{
-	float f;
-
-	f = to_time - from_time;
-
-	return bound(0, f / interval, 1);
-}
-
 qboolean
-CL_Update_Origin (entity_t *ent, vec3_t origin, float origin_time)
+CL_Update_OriginAngles (entity_t *ent, vec3_t origin, vec3_t angles, float time)
 {
-	qboolean changed = false;
+	vec3_t		odelta, adelta;
+	qboolean	changed = false;
+	float		lerp;
 
-	if (!ent->times) {
-		VectorCopy(origin, ent->from.origin);
-		VectorCopy(origin, ent->to.origin);
-		ent->from.origin_time = origin_time;
-		ent->to.origin_time = origin_time;
+	if (!ent->times)
+	{
+		VectorCopy (origin, ent->msg_origins[1]);
+		VectorCopy (origin, ent->msg_origins[0]);
+		VectorCopy (origin, ent->origin);
+
+		VectorCopy (angles, ent->msg_angles[1]);
+		VectorCopy (angles, ent->msg_angles[0]);
+		VectorCopy (angles, ent->angles);
+
+		ent->lerp_start_time = time;
+		ent->lerp_delta_time = 0;
+		return true;
 	}
 
-	if (!VectorCompare(ent->to.origin, origin)) {
+	VectorSubtract (origin, ent->msg_origins[0], odelta);
+	VectorSubtract (angles, ent->msg_angles[0], adelta);
+
+	if (DotProduct(odelta, odelta) + DotProduct(adelta, adelta) > 0.01)
+	{
+		ent->lerp_delta_time = bound (0, time - ent->lerp_start_time, 1);
+		ent->lerp_start_time = time;
+
+		VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
+		VectorCopy (origin, ent->msg_origins[0]);
+		VectorCopy (ent->msg_angles[0], ent->msg_angles[1]);
+		VectorCopy (angles, ent->msg_angles[0]);
 		changed = true;
-
-		VectorCopy(ent->to.origin, ent->from.origin);
-		ent->from.origin_time = ent->to.origin_time;
-
-		VectorCopy(origin, ent->to.origin);
-	}
-	ent->to.origin_time = origin_time;
-
-	VectorCopy (ent->to.origin, ent->cur.origin);
-
-	return changed;
-}
-
-void
-CL_Lerp_Origin (entity_t *ent)
-{
-	int f;
-
-	f = CL_CalcBlend (ent->from.origin_time, ent->to.origin_time, .1);
-	Lerp_Vectors (ent->from.origin, f, ent->to.origin, ent->cur.origin);
-}
-
-qboolean
-CL_UpdateAndLerp_Origin (entity_t *ent, vec3_t origin, float origin_time)
-{
-	qboolean changed;
-
-	changed = CL_Update_Origin(ent, origin, origin_time);
-	CL_Lerp_Origin(ent);
-
-	return changed;
-}
-
-qboolean
-CL_Update_Angles (entity_t *ent, vec3_t angles, float angles_time)
-{
-	qboolean changed = false;
-
-	if (!ent->times) {
-		VectorCopy(angles, ent->from.angles);
-		VectorCopy(angles, ent->to.angles);
-		ent->from.angles_time = angles_time;
-		ent->to.angles_time = angles_time;
 	}
 
-	if (!VectorCompare(ent->to.angles, angles)) {
-		changed = true;
-
-		VectorCopy(ent->to.angles, ent->from.angles);
-		ent->from.angles_time = ent->to.angles_time;
-
-		VectorCopy(angles, ent->to.angles);
+	// Now lerp it.
+	if (ent->lerp_delta_time)
+	{
+		lerp = (cl.time - ent->lerp_start_time) / ent->lerp_delta_time;
+		if (lerp < 1)
+		{
+			VectorMA (ent->msg_origins[1], lerp, odelta, ent->origin);
+			if (adelta[0] < -180) adelta[0] += 360;else if (adelta[0] >= 180) adelta[0] -= 360;
+			if (adelta[1] < -180) adelta[1] += 360;else if (adelta[1] >= 180) adelta[1] -= 360;
+			if (adelta[2] < -180) adelta[2] += 360;else if (adelta[2] >= 180) adelta[2] -= 360;
+			VectorMA (ent->msg_angles[1], lerp, adelta, ent->angles);
+		} else {
+			VectorCopy (ent->msg_origins[0], ent->origin);
+			VectorCopy (ent->msg_angles[0], ent->angles);
+		}
 	}
-	ent->to.angles_time = angles_time;
-
-	VectorCopy (ent->to.angles, ent->cur.angles);
-
-	return changed;
-}
-
-void
-CL_Lerp_Angles (entity_t *ent)
-{
-	int f;
-
-	f = CL_CalcBlend (ent->from.angles_time, ent->to.angles_time, .1);
-	Lerp_Angles (ent->from.angles, f, ent->to.angles, ent->cur.angles);
-}
-
-qboolean
-CL_UpdateAndLerp_Angles (entity_t *ent, vec3_t angles, float angles_time)
-{
-	qboolean changed = false;
-
-	changed = CL_Update_Angles(ent, angles, angles_time);
-	CL_Lerp_Angles(ent);
 
 	return changed;
 }
@@ -529,64 +482,54 @@ CL_UpdateAndLerp_Angles (entity_t *ent, vec3_t angles, float angles_time)
 qboolean
 CL_Update_Frame (entity_t *e, int frame, float frame_time)
 {
-	qboolean changed = false;
-	aliashdr_t *paliashdr;
+	qboolean	changed = false;
+	aliashdr_t	*paliashdr;
+	int			i;
 
-	if (!e->times) {
-		e->cur.frame = e->from.frame = e->to.frame = frame;
-		e->cur.frame_time = e->from.frame_time = e->to.frame_time = frame_time;
-	}
-
-	if (e->to.frame != frame) {
+	if (!e->frame_time[0]) {
 		changed = true;
 
-		e->from.frame = e->to.frame;
-		e->from.frame_time = e->to.frame_time;
+		e->frame[0] = e->frame[1] = frame;
+		e->frame_time[0] = e->frame_time[1] = frame_time;
+		e->frame_frac[0] = 1;
+		e->frame_frac[1] = 0;
+	} else if (e->frame[0] != frame) {
+		changed = true;
 
-		e->cur.frame = e->to.frame = frame;
+		e->frame[1] = e->frame[0];
+		e->frame_time[1] = e->frame_time[0];
+
+		e->frame[0] = frame;
+		e->frame_time[0] = frame_time;
+		goto CL_Update_Frame_frac;
+	} else {
+CL_Update_Frame_frac:
+		e->frame_frac[0] = (cl.time - e->frame_time[0]) * 10;
+		e->frame_frac[0] = bound(0, e->frame_frac[0], 1);
+		e->frame_frac[1] = 1 - e->frame_frac[0];
 	}
-	e->cur.frame_time = e->to.frame_time = frame_time;
 
-	if ((unsigned int) e->to.frame >= (unsigned int) e->model->numframes) {
-		Com_DPrintf("INVALID FRAME %d FOR MODEL %s!\n", e->to.frame,
+	if (!e->model) {
+		e->frame[0] = e->frame[1] = 0;
+		return changed;
+	}
+
+	if ((Uint) e->frame[0] >= (Uint) e->model->numframes) {
+		Com_DPrintf("INVALID FRAME %d FOR MODEL %s!\n", e->frame[0],
 				e->model->name);
-		e->cur.frame = e->to.frame = e->from.frame = 0;
+		e->frame[0] = e->frame[1] = 0;
 	}
 
 	if (e->model->type == mod_alias) {
 		paliashdr = e->model->alias;
 
-		if (paliashdr->frames[e->from.frame].numposes > 1)
-			e->from.frame_interval = paliashdr->frames[e->from.frame].interval;
-		else
-			e->from.frame_interval = 0.1;
-
-		if (paliashdr->frames[e->to.frame].numposes > 1)
-			e->to.frame_interval = paliashdr->frames[e->to.frame].interval;
-		else
-			e->to.frame_interval = 0.1;
+		for (i = 0; i < 2; i++) {
+			if (paliashdr->frames[e->frame[i]].numposes > 1)
+				e->frame_interval[i] = paliashdr->frames[e->frame[i]].interval;
+			else
+				e->frame_interval[i] = 0.1;
+		}
 	}
-
-	e->frame_blend = 1;
-
-	return changed;
-}
-
-void
-CL_Lerp_Frame (entity_t *e)
-{
-	if (e->from.frame_interval || e->to.frame_interval)
-		e->frame_blend = CL_CalcBlend (e->from.frame_time, e->to.frame_time,
-				(e->from.frame_interval + e->to.frame_interval) / 2);
-}
-
-qboolean
-CL_UpdateAndLerp_Frame (entity_t *ent, int frame, float frame_time)
-{
-	qboolean changed = true;
-
-	changed = CL_Update_Frame(ent, frame, frame_time);
-	CL_Lerp_Frame(ent);
 
 	return changed;
 }
@@ -641,9 +584,8 @@ CL_LinkPacketEntities (void)
 		ent->modelindex = state->modelindex;
 		ent->model = model = cl.model_precache[state->modelindex];	// Model.
 
-		moved = CL_UpdateAndLerp_Origin (ent, state->origin, cls.realtime);
-		CL_UpdateAndLerp_Angles (ent, state->angles, cls.realtime);
-		CL_UpdateAndLerp_Frame (ent, state->frame, cls.realtime);
+		moved = CL_Update_OriginAngles (ent, state->origin, state->angles, cls.realtime);
+		CL_Update_Frame (ent, state->frame, cls.realtime);
 
 		ent->skinnum = state->skinnum;
 		ent->effects = state->effects;
@@ -662,7 +604,7 @@ CL_LinkPacketEntities (void)
 		// rotate binary objects locally
 		if (flags & EF_ROTATE) {
 			flags &= ~EF_ROTATE;
-			VectorSet (ent->cur.angles, 0, autorotate, 0);
+			VectorSet (ent->angles, 0, autorotate, 0);
 		}
 
 		V_AddEntity ( ent );
@@ -673,16 +615,16 @@ CL_LinkPacketEntities (void)
 
 		if (flags & EF_ROCKET) {
 			flags &= ~EF_ROCKET;
-			R_RocketTrail (ent->from.origin, ent->to.origin);
+			R_RocketTrail (ent->msg_origins[1], ent->msg_origins[0]);
 			dl = CL_AllocDlight (state->number);
-			VectorCopy (ent->cur.origin, dl->origin);
+			VectorCopy (ent->origin, dl->origin);
 			dl->radius = 200;
 			dl->die = cl.time + 0.1;
 			VectorSet (dl->color, 1.0f, 0.6f, 0.2f);
 		}
 
 		if (flags)
-			R_ParticleTrail (ent->from.origin, ent->to.origin, flags);
+			R_ParticleTrail (ent->msg_origins[1], ent->msg_origins[0], flags);
 	}
 }
 
@@ -760,17 +702,16 @@ CL_LinkProjectiles (void)
 	entity_t   *ent;
 
 	for (i = 0, pr = cl_projectiles; i < cl_num_projectiles; i++, pr++) {
+		if (pr->modelindex < 1)
+			continue;
 		// grab an entity to fill in
 		ent = CL_NewTempEntity ();
 		if (!ent)
 			break;						// object list is full
 
-		if (pr->modelindex < 1)
-			continue;
 		ent->model = cl.model_precache[pr->modelindex];
 
-		CL_Update_Origin (ent, pr->origin, cls.realtime);
-		CL_Update_Angles (ent, pr->angles, cls.realtime);
+		CL_Update_OriginAngles (ent, pr->origin, pr->angles, cls.realtime);
 		CL_Update_Frame (ent, 0, cls.realtime);
 	}
 }
@@ -801,15 +742,15 @@ CL_ParseStatic (void)
 	memset (ent, 0, sizeof(*ent));
 
 	ent->model = cl.model_precache[es.modelindex];
-	ent->to.frame = ent->from.frame = ent->cur.frame = es.frame;
+	ent->frame[0] = ent->frame[1] = es.frame;
 	ent->skinnum = es.skinnum;
 
-	VectorCopy (es.origin, ent->to.origin);
-	VectorCopy (es.angles, ent->to.angles);
-	VectorCopy (es.origin, ent->cur.origin);
-	VectorCopy (es.angles, ent->cur.angles);
-	VectorCopy (es.origin, ent->from.origin);
-	VectorCopy (es.angles, ent->from.angles);
+	VectorCopy (es.origin, ent->msg_origins[1]);
+	VectorCopy (es.angles, ent->msg_angles[1]);
+	VectorCopy (es.origin, ent->msg_origins[0]);
+	VectorCopy (es.angles, ent->msg_angles[0]);
+	VectorCopy (es.origin, ent->origin);
+	VectorCopy (es.angles, ent->angles);
 }
 
 
@@ -901,42 +842,42 @@ CL_AddFlagModels (entity_t *ent, int team)
 		return;
 
 	f = 14;
-	if (ent->cur.frame >= 29 && ent->cur.frame <= 40) {
-		if (ent->cur.frame >= 29 && ent->cur.frame <= 34) {	// axpain
-			if (ent->cur.frame == 29)
+	if (ent->frame[0] >= 29 && ent->frame[0] <= 40) {
+		if (ent->frame[0] >= 29 && ent->frame[0] <= 34) {	// axpain
+			if (ent->frame[0] == 29)
 				f = f + 2;
-			else if (ent->cur.frame == 30)
+			else if (ent->frame[0] == 30)
 				f = f + 8;
-			else if (ent->cur.frame == 31)
+			else if (ent->frame[0] == 31)
 				f = f + 12;
-			else if (ent->cur.frame == 32)
+			else if (ent->frame[0] == 32)
 				f = f + 11;
-			else if (ent->cur.frame == 33)
+			else if (ent->frame[0] == 33)
 				f = f + 10;
-			else if (ent->cur.frame == 34)
+			else if (ent->frame[0] == 34)
 				f = f + 4;
-		} else if (ent->cur.frame >= 35 && ent->cur.frame <= 40) {	// pain
-			if (ent->cur.frame == 35)
+		} else if (ent->frame[0] >= 35 && ent->frame[0] <= 40) {	// pain
+			if (ent->frame[0] == 35)
 				f = f + 2;
-			else if (ent->cur.frame == 36)
+			else if (ent->frame[0] == 36)
 				f = f + 10;
-			else if (ent->cur.frame == 37)
+			else if (ent->frame[0] == 37)
 				f = f + 10;
-			else if (ent->cur.frame == 38)
+			else if (ent->frame[0] == 38)
 				f = f + 8;
-			else if (ent->cur.frame == 39)
+			else if (ent->frame[0] == 39)
 				f = f + 4;
-			else if (ent->cur.frame == 40)
+			else if (ent->frame[0] == 40)
 				f = f + 2;
 		}
-	} else if (ent->cur.frame >= 103 && ent->cur.frame <= 118) {
-		if (ent->cur.frame >= 103 && ent->cur.frame <= 104)
+	} else if (ent->frame[0] >= 103 && ent->frame[0] <= 118) {
+		if (ent->frame[0] >= 103 && ent->frame[0] <= 104)
 			f = f + 6;					// nailattack
-		else if (ent->cur.frame >= 105 && ent->cur.frame <= 106)
+		else if (ent->frame[0] >= 105 && ent->frame[0] <= 106)
 			f = f + 6;					// light 
-		else if (ent->cur.frame >= 107 && ent->cur.frame <= 112)
+		else if (ent->frame[0] >= 107 && ent->frame[0] <= 112)
 			f = f + 7;					// rocketattack
-		else if (ent->cur.frame >= 112 && ent->cur.frame <= 118)
+		else if (ent->frame[0] >= 112 && ent->frame[0] <= 118)
 			f = f + 7;					// shotattack
 	}
 
@@ -944,18 +885,17 @@ CL_AddFlagModels (entity_t *ent, int team)
 	newent->model = cl.model_precache[cl_flagindex];
 	newent->skinnum = team;
 
-	AngleVectors (ent->cur.angles, v_forward, v_right, v_up);
+	AngleVectors (ent->angles, v_forward, v_right, v_up);
 	v_forward[2] = -v_forward[2];		// reverse z component
 	for (i = 0; i < 3; i++)
-		origin[i] = ent->cur.origin[i] - f * v_forward[i] + 22 * v_right[i];
+		origin[i] = ent->origin[i] - f * v_forward[i] + 22 * v_right[i];
 	origin[2] -= 16;
 
-	VectorCopy (ent->cur.angles, angles);
+	VectorCopy (ent->angles, angles);
 	angles[2] -= 45;
 
-	CL_UpdateAndLerp_Origin (newent, origin, cls.realtime);
-	CL_UpdateAndLerp_Angles (newent, angles, cls.realtime);
-	CL_UpdateAndLerp_Frame (newent, 0, cls.realtime);
+	CL_Update_OriginAngles (newent, origin, angles, cls.realtime);
+	CL_Update_Frame (newent, 0, cls.realtime);
 }
 
 /*
@@ -1037,23 +977,22 @@ CL_LinkPlayers (void)
 		// 
 		angles[PITCH] = -state->viewangles[PITCH] / 3;
 		angles[YAW] = state->viewangles[YAW];
-		angles[ROLL] = V_CalcRoll(ent->cur.angles,state->velocity) * 4;
+		angles[ROLL] = V_CalcRoll(ent->angles, state->velocity) * 4;
 
 		// only predict half the move to minimize overruns
 		msec = 500 * (playertime - state->state_time);
 		if (msec <= 0 || (!cl_predict_players->ivalue)) {
-			CL_UpdateAndLerp_Origin (ent, state->origin, cls.realtime);
+			CL_Update_OriginAngles (ent, state->origin, angles, cls.realtime);
 		} else {
 			// predict players movement
 			state->command.msec = min (state->command.msec, 255);
 
 			CL_PredictUsercmd (j, state, &exact, &state->command, false);
-			VectorCopy (exact.origin, ent->cur.origin);
-			CL_UpdateAndLerp_Origin (ent, exact.origin, cls.realtime);
+			VectorCopy (exact.origin, ent->origin);
+			CL_Update_OriginAngles (ent, exact.origin, angles, cls.realtime);
 		}
 
-		CL_UpdateAndLerp_Angles (ent, angles, cls.realtime);
-		CL_UpdateAndLerp_Frame (ent, state->frame, cls.realtime);
+		CL_Update_Frame (ent, state->frame, cls.realtime);
 
 		if (state->effects & EF_FLAG1)
 			CL_AddFlagModels (ent, 0);
@@ -1168,9 +1107,11 @@ CL_LinkStaticEntites (void)
 	for (i = 0; i < cl_num_static_entities; i++) {
 		cl_static_entities[i].times++;
 
-		CL_Update_Angles (&cl_static_entities[i], cl_static_entities[i].to.angles, cls.realtime);
-		CL_Update_Origin (&cl_static_entities[i], cl_static_entities[i].to.origin, cls.realtime);
-		CL_Update_Frame (&cl_static_entities[i], cl_static_entities[i].to.frame, cls.realtime);
+		CL_Update_OriginAngles (&cl_static_entities[i],
+				cl_static_entities[i].msg_origins[0],
+				cl_static_entities[i].msg_angles[0], cls.realtime);
+		CL_Update_Frame (&cl_static_entities[i],
+				cl_static_entities[i].frame[0], cls.realtime);
 		V_AddEntity ( &cl_static_entities[i] );
 	}
 }

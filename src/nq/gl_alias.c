@@ -30,6 +30,7 @@ static const char rcsid[] =
 #include "render.h"
 #include "client.h"
 #include "cvar.h"
+#include "sys.h"
 
 void R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent);
 extern vec3_t lightcolor;
@@ -79,6 +80,9 @@ R_DrawViewModel (void)
 {
 	entity_t *ent_pointer;
 
+	if (!VectorCompare(cl.viewent.origin, cl.viewent.msg_origins[0]))
+		Sys_Error("Ack!\n");
+
 	ent_pointer = &cl.viewent;
 	if (!r_drawviewmodel->ivalue || chase_active->ivalue ||
 			!r_drawentities->ivalue || cl.items & IT_INVISIBILITY ||
@@ -105,7 +109,7 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 	maliasframedesc_t	*frame;
 	maliaspose_t		*pose;
 
-	frame = &paliashdr->frames[e->frame];
+	frame = &paliashdr->frames[e->frame[0]];
 
 	if (frame->numposes > 1)
 		pose_num = (int) (cl.time / frame->interval) % frame->numposes;
@@ -125,6 +129,69 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 	}
 	TWI_FtoUB (cf_array_v(0), c_array_v(0), paliashdr->numverts * 4);
 }
+
+/*
+=================
+R_SetupAliasBlendedFrame
+=================
+*/
+static void
+R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
+{
+	float				l, d, frac;
+	int					i1, i2, i, j, k;
+	maliaspose_t		*poses[4];
+	float				fracs[4];
+	int					num_frames = 0;
+	maliasframedesc_t	*frame;
+
+	for (i = 0; i < 2; i++) {
+		if (e->frame_frac[i] < (1.0/65536.0))
+			continue;
+		frame = &paliashdr->frames[e->frame[i]];
+		if (frame->numposes > 1) {
+			i1 = (int) (cl.time / e->frame_interval[i]) % frame->numposes;
+			i2 = (i1 + 1) % frame->numposes;
+			frac = (cl.time / e->frame_interval[i]) - i1;
+			poses[num_frames] = &frame->poses[i1];
+			fracs[num_frames] = frac * e->frame_frac[i];
+			if (fracs[num_frames] > (1.0/65536.0))
+				num_frames++;
+			poses[num_frames] = &frame->poses[i2];
+			fracs[num_frames] = (1 - frac) * e->frame_frac[i];
+			if (fracs[num_frames] > (1.0/65536.0))
+				num_frames++;
+		} else {
+			poses[num_frames] = &frame->poses[0];
+			fracs[num_frames++] = e->frame_frac[i];
+		}
+	}
+
+	if (!num_frames)
+		Sys_Error("Eik! %s\n", e->model->name);
+
+	for (i = 0; i < paliashdr->numverts; i++) {
+		for (j = 0; j < 3; j++) {
+			v_array(i, j) = 0;
+			for (k = 0; k < num_frames; k++)
+				if (fracs[k] > (1/65536))
+					v_array(i, j) += poses[k]->vertices[i].v[j] * fracs[k];
+		}
+
+		tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
+		tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
+
+		d = 0;
+		for (k = 0; k < num_frames; k++)
+			if (fracs[k] > (1/65536))
+				d += shadedots[poses[k]->normal_indices[i]] * fracs[k];
+		l = shadelight * d;
+		VectorScale(lightcolor, l, cf_array_v(i));
+		cf_array(i, 3) = 1;
+	}
+	TWI_FtoUB (cf_array_v(0), c_array_v(0), paliashdr->numverts * 4);
+}
+
 
 /*
 =================
@@ -237,10 +304,18 @@ R_SetupAliasModel (entity_t *e, qboolean viewent)
 
 	has_fb = !!skin->fb[anim].indices.num;
 
-	R_SetupAliasFrame (paliashdr, e);
+	if (gl_im_animation->ivalue && !(clmodel->modflags & FLAG_NO_IM_ANIM))
+		R_SetupAliasBlendedFrame (paliashdr, e);
+	else
+		R_SetupAliasFrame (paliashdr, e);
 
-	mod_origin = e->origin;
-	mod_angles = e->angles;
+	if (gl_im_transform->ivalue && !(clmodel->modflags & FLAG_NO_IM_FORM)) {
+		mod_origin = e->origin;
+		mod_angles = e->angles;
+	} else {
+		mod_origin = e->msg_origins[0];
+		mod_angles = e->msg_angles[0];
+	}
 	draw = true;
 }
 /*

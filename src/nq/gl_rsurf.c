@@ -925,7 +925,7 @@ R_DrawOpaqueBrushModel (entity_t *e)
 	qglRotatef (e->angles[0], 0, 1, 0);
 	qglRotatef (e->angles[2], 1, 0, 0);
 
-	R_DrawTextureChains (mod, e->origin, e->frame);
+	R_DrawTextureChains (mod, e->origin, e->frame[0]);
 
 	qglPopMatrix ();
 }

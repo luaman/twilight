@@ -61,6 +61,8 @@ typedef struct entity_s {
 	// time of last update
 	double			msgtime;
 
+	float			lerp_start_time, lerp_delta_time;
+
 	// last two updates (0 is newest) 
 	vec3_t			msg_origins[2];
 	vec3_t			origin;
@@ -75,7 +77,10 @@ typedef struct entity_s {
 
 	// NULL = no model
 	struct model_s	*model;
-	int				frame;
+	int				frame[2];
+	float			frame_frac[2];
+	float			frame_time[2];
+	float			frame_interval[2];
 
 	// for client-side animations
 	float			syncbase;

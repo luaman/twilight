@@ -132,7 +132,7 @@ R_GetSpriteFrame (entity_t *e)
 	float			   *pintervals, fullinterval, targettime, time;
 
 	psprite = e->model->sprite;
-	frame = e->frame;
+	frame = e->frame[0];
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
 		Com_Printf ("R_DrawSprite: no such frame %d\n", frame);

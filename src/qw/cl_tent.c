@@ -419,8 +419,7 @@ CL_UpdateBeams (void)
 				return;
 			ang[2] = rand () % 360;
 			ent->model = b->model;
-			CL_Update_Origin(ent, org, cls.realtime);
-			CL_Update_Angles(ent, ang, cls.realtime);
+			CL_Update_OriginAngles(ent, org, ang, cls.realtime);
 			CL_Update_Frame(ent, 0, cls.realtime);
 
 			for (i = 0; i < 3; i++)
@@ -456,9 +455,9 @@ CL_UpdateExplosions (void)
 		ent = CL_NewTempEntity ();
 		if (!ent)
 			return;
-		VectorCopy (ex->origin, ent->cur.origin);
 		ent->model = ex->model;
-		ent->cur.frame = f;
+		CL_Update_OriginAngles(ent, ex->origin, vec3_origin, cls.realtime);
+		CL_Update_Frame (ent, f, cls.realtime);
 	}
 }
 

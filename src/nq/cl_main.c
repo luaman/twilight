@@ -438,9 +438,8 @@ void
 CL_RelinkEntities (void)
 {
 	entity_t   *ent;
-	int         i, j;
-	float       frac, f, delta;
-	vec3_t      oldorg;
+	int         i;
+	float       frac;
 	dlight_t   *dl;
 	extern		cvar_t *gl_flashblend, *gl_oldlights;
 
@@ -470,39 +469,7 @@ CL_RelinkEntities (void)
 			continue;
 		}
 
-		VectorCopy (ent->origin, oldorg);
-
-		if (ent->forcelink) {			// the entity was not updated in the
-			// last message
-			// so move to the final spot
-			VectorCopy (ent->msg_origins[0], ent->origin);
-			VectorCopy (ent->msg_angles[0], ent->angles);
-		} else {						// if the delta is large, assume a
-			// teleport and don't lerp
-			f = frac;
-			for (j = 0; j < 3; j++) {
-				delta = ent->msg_origins[0][j] - ent->msg_origins[1][j];
-				if (delta > 100 || delta < -100) {
-					f = 1;				// assume a teleportation, not a motion
-					break;
-				}
-			}
-
-			if (f >= 1)
-			{
-				VectorClear (ent->last_light);
-				VectorCopy  (ent->msg_origins[0], ent->origin);
-				VectorCopy  (ent->msg_angles[0], ent->angles);
-			} 
-			else 
-			{
-				// interpolate the origin and angles
-				Lerp_Vectors (ent->msg_origins[1], f, ent->msg_origins[0], 
-					ent->origin);
-				Lerp_Angles (ent->msg_angles[1], f, ent->msg_angles[0], 
-					ent->angles);
-			}
-		}
+		CL_Lerp_OriginAngles (ent);
 
 		if (ent->effects)
 		{
@@ -552,7 +519,7 @@ CL_RelinkEntities (void)
 
 			if (flags & EF_ROCKET) {
 				flags &= ~EF_ROCKET;
-				R_RocketTrail (oldorg, ent->origin);
+				R_RocketTrail (ent->msg_origins[1], ent->msg_origins[0]);
 				dl = CL_AllocDlight (i);
 				VectorCopy (ent->origin, dl->origin);
 				dl->radius = 200;
@@ -561,7 +528,7 @@ CL_RelinkEntities (void)
 			}
 
 			if (flags)
-				R_ParticleTrail (oldorg, ent->origin, flags);
+				R_ParticleTrail (ent->msg_origins[1], ent->msg_origins[0], flags);
 		}
 
 		ent->forcelink = false;
