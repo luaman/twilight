@@ -39,7 +39,9 @@ static const char rcsid[] =
 #include "sys.h"
 #include "rw_ops.h"
 #include "bspfile.h"
-
+#include "modelgen.h"
+#include "spritegn.h"
+	
 typedef struct fsb_group_s {
 	fs_file_t	*bsp;
 } fsb_group_t;
@@ -131,10 +133,15 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 	for (i = 0; i < sizeof (dheader_t) / 4; i++)
 		((int *) &header)[i] = LittleLong (((int *) &header)[i]);
 	if (header.version != BSPVERSION) {
-		Com_Printf("WARNING: %s", file->name_base);
-		if (file->ext)
-			Com_Printf(".%s", file->ext);
-		Com_Printf(" is NOT a bsp file.  Skipping.\n");
+		if ((LittleLong(header.version) == IDPOLYHEADER) ||
+				LittleLong(header.version) == IDSPRITEHEADER) {
+			Com_Printf ("Very funny Tomaz, very funny.\n");
+		} else {
+			Com_Printf("WARNING: %s", file->name_base);
+			if (file->ext)
+				Com_Printf(".%s", file->ext);
+			Com_Printf(" is NOT a bsp file.  Skipping.\n");
+		}
 		SDL_RWclose (rw);
 		return false;
 	}
