@@ -255,9 +255,9 @@ def do_configure (env):
 	handle_opts (conf, opts, config_defs, 1)
 
 	if env['PLATFORM'] == 'win32':
-		env.Append (LIBS = ['SDLmain', 'user32', 'ws2_32'])
-		env.Append (LINKFLAGS = ['/subsystem:windows', '/nodefaultlib:msvcrt.lib'])
-		env.Append (CCFLAGS = ['/G5'])
+		env.Append (LIBS = ['SDLmain', 'user32', 'gdi32', 'shell32', 'wsock32', 'msvcrt', 'kernel32'])
+		env.Append (LINKFLAGS = ['/subsystem:windows'])
+		env.Append (CCFLAGS = ['/G5', '/MD'])
 
 	conf.Finish ()
 
