@@ -18,7 +18,7 @@ twilight_qwsv_sys_libs=
 endif
 
 twilight_qwsv_SOURCES= \
-	common.c cmd.c cmd.h crc.c cvar.c mathlib.c \
+	common.c cmd.c cmd.h cvar.c \
 	mdfour.c console.h \
 	model.c model.h \
 	net.h net_chan.c net_udp.c \
