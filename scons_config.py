@@ -10,6 +10,45 @@ env_defs = My_Options ()
 config_defs = My_Options ()
 building = 0
 
+def parse_SDL_conf(env, output):
+	dict = {
+		'CPPPATH' : [],
+		'LIBPATH' : [],
+		'LIBS'    : [],
+		'CCFLAGS' : [],
+		'LINKFLAGS' : [],
+	}
+	static_libs = []
+
+	params = string.split(output)
+	framework = False
+	for arg in params:
+		switch = arg[0:1]
+		opt = arg[1:2]
+		if framework:
+			dict['LINKFLAGS'].append(arg)
+			framework = False
+			continue
+
+		if opt == '-framework':
+			dict['LINKFLAGS'].append(arg)
+			framework = True
+			continue
+
+		if switch == '-':
+			if opt == 'L':
+				dict['LIBPATH'].append(arg[2:])
+			elif opt == 'l':
+				dict['LIBS'].append(arg[2:])
+			elif opt == 'I':
+				dict['CPPPATH'].append(arg[2:])
+			else:
+				dict['CCFLAGS'].append(arg)
+		else:
+			static_libs.append(arg)
+	apply(env.Append, (), dict)
+	return static_libs
+
 def check_SDL_config (context):
 	context.Message ('Checking for sdl-config ... ')
 
@@ -177,17 +216,10 @@ def do_configure (env):
 	ret = conf.SDL_config ()
 	sdl_ver = None
 	if ret[0]:
-		env.ParseConfig ("sdl-config --cflags --libs")
+		env.ParseConfig ("sdl-config --cflags --libs", parse_SDL_conf)
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		sdl_ver = ret[1]
 	else:
-		if sys.platform == "darwin":
-			# Mac OS X, no sdl-config, evil.
-			env.Append (LIBS = ['SDLmain'])
-			env.Append (CPPPATH = ['/sw/include/SDL/'])
-			print env['_LIBFLAGS']
-			print env['LINKFLAGS']
-
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		if not config_defs.has_key ('HAVE_SDL_H'):
 			print "Twilight requires SDL 1.2.5. (None found.)"
