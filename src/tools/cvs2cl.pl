@@ -1,10 +1,10 @@
-#!/bin/sh
+#! /bin/sh
 exec perl -w -x $0 ${1+"$@"}
 
 # -*- mode: perl; perl-indent-level: 2; -*-
 # vi: ts=2 sw=2
 # vim: ft=perl
-#!perl -w
+#! perl -w
 
 ##############################################################
 ###                                                        ###
