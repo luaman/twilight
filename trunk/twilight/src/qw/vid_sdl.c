@@ -456,7 +456,7 @@ Sys_SendKeyEvents (void)
 				if (!use_mouse)
 					break;
 
-				if (_windowed_mouse->ivalue && (ccl.state >= ca_connected))
+				if (_windowed_mouse->ivalue && (ccls.state >= ca_connected))
 				{
 					mouse_x += event.motion.xrel;
 					mouse_y += event.motion.yrel;

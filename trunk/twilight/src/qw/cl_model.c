@@ -117,7 +117,7 @@ Mod_LoadModel (model_t *mod, int flags)
 							? pmodel_name : emodel_name, va("%d", crc),
 							MAX_INFO_STRING);
 
-					if (ccl.state >= ca_connected) {
+					if (ccls.state >= ca_connected) {
 						MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 						SZ_Print (&cls.netchan.message, va("setinfo %s %d",
 									!strcmp (mod->name, "progs/player.mdl") ?

@@ -682,7 +682,7 @@ R_TimeRefresh_f (void)
 	int         i;
 	float       start, stop, time;
 
-	if (ccl.state != ca_active)
+	if (ccls.state != ca_active)
 		return;
 
 	qglFinish ();

@@ -742,7 +742,7 @@ V_RenderView (void)
 {
 	cl.simangles[ROLL] = 0;				// FIXME @@@ 
 
-	if (ccl.state != ca_active)
+	if (ccls.state != ca_active)
 		return;
 
 	view_frame = &cl.frames[cls.netchan.incoming_sequence & UPDATE_MASK];

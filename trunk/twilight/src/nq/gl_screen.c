@@ -569,7 +569,7 @@ SCR_SetUpToDrawConsole (void)
 		return;
 
 	/* decide on the height of the console */
-	con_forcedup = !ccl.worldmodel || cls.signon != SIGNONS;
+	con_forcedup = (!ccl.worldmodel) || (ccls.state != ca_active);
 	if (con_forcedup) {
 		scr_conlines = vid.height_2d;		/* full screen */
 		scr_con_current = scr_conlines;
@@ -675,7 +675,7 @@ SCR_BeginLoadingPlaque (void)
 {
 	S_StopAllSounds (true);
 
-	if (ccl.state != ca_active)
+	if (ccls.state != ca_active)
 		return;
 
 	/* redraw with no console and the loading plaque */

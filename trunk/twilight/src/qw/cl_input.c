@@ -668,7 +668,7 @@ CL_SendCmd (void)
 		cl.validsequence = 0;
 
 	if (cl.validsequence && !cl_nodelta->ivalue &&
-			ccl.state == ca_active && !cls.demorecording) {
+			ccls.state == ca_active && !cls.demorecording) {
 		cl.frames[cls.netchan.outgoing_sequence & UPDATE_MASK].delta_sequence =
 			cl.validsequence;
 		MSG_WriteByte (&buf, clc_delta);

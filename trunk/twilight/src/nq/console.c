@@ -83,7 +83,7 @@ Con_ToggleConsole_f (void)
 
 	if (key_dest == key_console)
 	{
-		if (ccl.state == ca_active)
+		if (ccls.state == ca_active)
 			key_dest = key_game;
 	}
 	else
@@ -326,7 +326,7 @@ Con_DrawInput (void)
 {
 	char		*text;
 
-	if (key_dest != key_console && (ccl.state == ca_active || !con_forcedup))
+	if (key_dest != key_console && (ccls.state == ca_active || !con_forcedup))
 		// don't draw anything (always draw if not connected)
 		return;
 

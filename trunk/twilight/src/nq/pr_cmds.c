@@ -266,7 +266,7 @@ PF_setmodel (void)
 	{
 		model_t *mod;
 		
-		if (ccl.state == ca_dedicated)
+		if (ccls.state == ca_dedicated)
 			mod = Mod_ForName (m, FLAG_CRASH);
 		else
 			mod = Mod_ForName (m, FLAG_RENDER | FLAG_CRASH);
@@ -1076,7 +1076,7 @@ PF_precache_model (void)
 		if (!sv.model_precache[i])
 		{
 			sv.model_precache[i] = s;
-			if (ccl.state == ca_dedicated)
+			if (ccls.state == ca_dedicated)
 				sv.models[i] = Mod_ForName (s, FLAG_CRASH);
 			else
 				sv.models[i] = Mod_ForName (s, FLAG_RENDER | FLAG_CRASH);

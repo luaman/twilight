@@ -518,7 +518,7 @@ CL_NextUpload (void)
 void
 CL_StartUpload (Uint8 *data, int size)
 {
-	if (ccl.state < ca_onserver)
+	if (ccls.state < ca_onserver)
 		return;							// gotta be connected
 
 	// override
@@ -653,7 +653,7 @@ CL_ParseServerData (void)
 			va (soundlist_name, cl.servercount, 0));
 
 	// now waiting for downloads, etc
-	ccl.state = ca_onserver;
+	ccls.state = ca_onserver;
 }
 
 /*
@@ -921,7 +921,7 @@ CL_ProcessUserInfo (int slot)
 	strlcpy(user->skin_name, Info_ValueForKey (player->userinfo, "skin"),
 			sizeof(user->skin_name));
 
-	if (ccl.state == ca_active)
+	if (ccls.state == ca_active)
 		user->skin = Skin_Load(user->skin_name);
 }
 
@@ -1195,7 +1195,7 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_disconnect:
-				if (ccl.state == ca_connected)
+				if (ccls.state == ca_connected)
 					Host_EndGame ("Server disconnected\n"
 								  "Server version may not be compatible");
 				else

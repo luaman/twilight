@@ -610,7 +610,7 @@ SCR_SetUpToDrawConsole (void)
 		return;
 
 	/* decide on the height of the console */
-	if (ccl.state != ca_active) {
+	if (ccls.state != ca_active) {
 		scr_conlines = vid.height_2d;		/* full screen */
 		scr_con_current = scr_conlines;
 	} else if (key_dest == key_console)
@@ -868,7 +868,7 @@ SCR_RSShot_f (void)
 	if (CL_IsUploading ())
 		return;							/* already one pending */
 
-	if (ccl.state < ca_onserver)
+	if (ccls.state < ca_onserver)
 		return;							/* gotta be connected */
 
 	Com_Printf ("Remote screen shot requested.\n");

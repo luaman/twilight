@@ -124,10 +124,15 @@ typedef struct client_common_s {
 
 	model_t			*worldmodel;
 	char			levelname[40];
-	ca_state_t		state;
 } client_common_t;
 
 extern client_common_t	 ccl;
+
+typedef struct client_common_static_s {
+	ca_state_t		state;
+} client_common_static_t;
+
+extern client_common_static_t	 ccls;
 
 extern memzone_t *ccl_zone;
 extern void CCL_Init_Cvars (void);

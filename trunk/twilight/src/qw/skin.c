@@ -243,7 +243,7 @@ Skin_NextDownload (void)
 		sc->skin = Skin_Load (sc->skin_name);
 	}
 
-	if (ccl.state != ca_active) {		// get next signon phase
+	if (ccls.state != ca_active) {		// get next signon phase
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message, va ("begin %i", cl.servercount));
 	}
