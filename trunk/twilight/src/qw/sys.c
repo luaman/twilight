@@ -80,9 +80,9 @@ static const char rcsid[] =
 #endif
 
 
-int         nostdout = 0;
+int nostdout = 0;
 
-char       *qdate = __DATE__;
+char *qdate = __DATE__;
 
 cvar_t *sys_asciionly;
 cvar_t *sys_logname;
@@ -91,13 +91,14 @@ int sys_gametypes;
 
 char logname[MAX_OSPATH] = "";
 
-double		curtime = 0;
+double curtime = 0;
 
 // =======================================================================
 // General routines
 // =======================================================================
 
-static const char sys_charmap[256] = {
+static const char sys_charmap[256] =
+{
 	' ', '#', '#', '#', '#', '.', '#', '#',
 	'#', '\t', '\n', '#', ' ', '\n', '.', '.',
 	'[', ']', '0', '1', '2', '3', '4', '5',
@@ -170,7 +171,7 @@ Sys_Quit (void)
 }
 
 #ifdef _WIN32
-HANDLE		qwclsemaphore;
+HANDLE qwclsemaphore;
 #endif
 
 static void
@@ -247,7 +248,8 @@ Sys_Error (char *error, ...)
 
 #ifdef _WIN32
 	// Win32 gets a message box, but needs us to clear events first!
-	do {
+	do
+	{
 		MSG			msg;
 
 		while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
@@ -258,7 +260,8 @@ Sys_Error (char *error, ...)
 			TranslateMessage (&msg);
 			DispatchMessage (&msg);
 		}
-	} while (0);
+	}
+	while (0);
 	MessageBox (NULL, text, "Error", 0);
 #endif
 	fprintf (stderr, "Error: %s\n", text);
@@ -279,7 +282,7 @@ returns -1 if not present
 int
 Sys_FileTime (char *path)
 {
-	struct stat buf;
+	struct stat		buf;
 
 	if (stat (path, &buf) == -1)
 		return -1;
@@ -291,11 +294,7 @@ Sys_FileTime (char *path)
 void
 Sys_mkdir (char *path)
 {
-#ifdef _WIN32
-	_mkdir (path);
-#else
 	mkdir (path, 0777);
-#endif
 }
 
 
@@ -346,7 +345,9 @@ Sys_ConsoleInput (void)
 extern int key_linepos;
 extern char key_lines[32][MAX_INPUTLINE];
 extern int edit_line;
-int Sys_CheckClipboardPaste(int key)
+
+int
+Sys_CheckClipboardPaste(int key)
 {
 #ifdef _WIN32
 	int		i;
@@ -443,13 +444,13 @@ Sys_ExpandPath (char *str)
 }
 
 int
-main (int c, char **v)
+main (int argc, char *argv[])
 {
-	double      time, oldtime, newtime, base;
+	double		time, oldtime, newtime, base;
 
 	sys_gametypes = GAME_QW_CLIENT;
 
-	COM_InitArgv (c, v);
+	Cmdline_Init (argc, argv);
 
 #ifdef HAVE_FCNTL
 	if (!COM_CheckParm ("-noconinput"))
@@ -462,8 +463,9 @@ main (int c, char **v)
 	Host_Init ();
 
 	oldtime = base = Sys_DoubleTime ();
-	while (1) {
-// find time spent rendering last frame
+	while (1)
+	{
+		// find time spent rendering last frame
 		newtime = Sys_DoubleTime ();
 		time = newtime - oldtime;
 		curtime = newtime - base;

@@ -81,29 +81,30 @@ static const char rcsid[] =
 #endif
 
 
-int         nostdout = 0;
+int nostdout = 0;
 
-qboolean    isDedicated;
+qboolean isDedicated;
 
 
 #ifdef _WIN32
-HANDLE				hinput, houtput;
-static HANDLE	hFile;
-static HANDLE	heventParent;
-static HANDLE	heventChild;
+HANDLE hinput, houtput;
+static HANDLE hFile;
+static HANDLE heventParent;
+static HANDLE heventChild;
 #endif
 
-char	   *qdate = __DATE__;
+char *qdate = __DATE__;
 
 cvar_t *sys_asciionly;
 
-double		curtime;
+double curtime;
 
 // =======================================================================
 // General routines
 // =======================================================================
 
-static const char sys_charmap[256] = {
+static const char sys_charmap[256] =
+{
 	' ', '#', '#', '#', '#', '.', '#', '#',
 	'#', '\t', '\n', '#', ' ', '\n', '.', '.',
 	'[', ']', '0', '1', '2', '3', '4', '5',
@@ -195,7 +196,7 @@ Sys_Quit (void)
 }
 
 #ifdef _WIN32
-HANDLE		qwclsemaphore;
+HANDLE qwclsemaphore;
 #endif
 
 void
@@ -209,7 +210,7 @@ Sys_Init (void)
 	// will fail if semaphore already exists
 	qwclsemaphore = CreateMutex (NULL, 0, "qwcl");
 	if (!qwclsemaphore)
-		Sys_Error ("Project Twilight QW is already running");
+		Sys_Error ("Project: Twilight NQ is already running");
 
 	qwclsemaphore = CreateSemaphore (NULL, 0, 1, "qwcl");
 #endif
@@ -222,7 +223,7 @@ Sys_Init (void)
 	if (COM_CheckParm ("-noparachute"))
 	{
 		sdlflags |= SDL_INIT_NOPARACHUTE;
-		Sys_Printf ("Flying without a parachute!\n");
+		Sys_Printf ("Sys_Init: Flying without a parachute!\n");
 	}
 
 	SDL_Init (sdlflags);
@@ -260,7 +261,8 @@ Sys_Error (char *error, ...)
 
 #ifdef _WIN32
 	// Win32 gets a message box, but needs us to clear events first!
-	do {
+	do
+	{
 		MSG			msg;
 
 		while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
@@ -271,7 +273,8 @@ Sys_Error (char *error, ...)
 			TranslateMessage (&msg);
 			DispatchMessage (&msg);
 		}
-	} while (0);
+	}
+	while (0);
 	MessageBox (NULL, text, "Error", 0);
 #endif
 	fprintf (stderr, "Error: %s\n", text);
@@ -291,7 +294,7 @@ returns -1 if not present
 int
 Sys_FileTime (char *path)
 {
-	struct stat buf;
+	struct stat		buf;
 
 	if (stat (path, &buf) == -1)
 		return -1;
@@ -303,11 +306,7 @@ Sys_FileTime (char *path)
 void
 Sys_mkdir (char *path)
 {
-#ifdef _WIN32
-	_mkdir (path);
-#else
 	mkdir (path, 0777);
-#endif
 }
 
 
@@ -349,11 +348,11 @@ char *
 Sys_ConsoleInput (void)
 {
 #ifdef _WIN32
-	static char	text[256];
+	static char		text[256];
 	static int		len;
 	INPUT_RECORD	recs[1024];
-	CHAR		ch;
-	DWORD		numevents, numread, dummy;
+	CHAR			ch;
+	DWORD			numevents, numread, dummy;
 
 	if (!isDedicated)
 		return NULL;
@@ -523,11 +522,11 @@ Sys_ExpandPath (char *str)
 }
 
 int
-main (int c, char **v)
+main (int argc, char *argv[])
 {
-	double      time, oldtime, newtime, base;
+	double		time, oldtime, newtime, base;
 
-	COM_InitArgv (c, v);
+	Cmdline_Init (argc, argv);
 
 #ifdef HAVE_FCNTL
 	if (!COM_CheckParm ("-noconinput"))
@@ -542,7 +541,7 @@ main (int c, char **v)
 #ifdef _WIN32
 	if (isDedicated)
 	{
-		int t;
+		int			t;
 
 		if (!AllocConsole ())
 		{
@@ -552,7 +551,7 @@ main (int c, char **v)
 		hinput = GetStdHandle (STD_INPUT_HANDLE);
 		houtput = GetStdHandle (STD_OUTPUT_HANDLE);
 
-	// give QHOST a chance to hook into the console
+		// give QHOST a chance to hook into the console
 		if ((t = COM_CheckParm ("-HFILE")) > 0)
 		{
 			if (t < com_argc)
@@ -576,8 +575,9 @@ main (int c, char **v)
 #endif
 
 	base = oldtime = Sys_DoubleTime ();
-	while (1) {
-// find time spent rendering last frame
+	while (1)
+	{
+		// find time spent rendering last frame
 		newtime = Sys_DoubleTime ();
 		time = newtime - oldtime;
 		curtime = newtime - base;

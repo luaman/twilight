@@ -91,9 +91,9 @@ static const char rcsid[] =
 // FIXME: put this somewhere else
 void SV_Init (void);
 
-Uint32		sys_sleep;
+Uint32 sys_sleep;
 
-char       *qdate = __DATE__;
+char *qdate = __DATE__;
 
 cvar_t *sys_asciionly;
 cvar_t *sys_extrasleep;
@@ -103,13 +103,17 @@ int sys_gametypes;
 
 char logname[MAX_OSPATH] = "";
 
-double		curtime;
+double curtime;
+
+qboolean do_stdin = true;
+qboolean stdin_ready;
 
 // =======================================================================
 // General routines
 // =======================================================================
 
-static const char sys_charmap[256] = {
+static const char sys_charmap[256] =
+{
 	' ', '#', '#', '#', '#', '.', '#', '#',
 	'#', '\t', '\n', '#', ' ', '\n', '.', '.',
 	'[', ']', '0', '1', '2', '3', '4', '5',
@@ -148,9 +152,9 @@ static const char sys_charmap[256] = {
 void
 Sys_Printf (char *fmt, ...)
 {
-	va_list     argptr;
-	char        text[2048];
-	unsigned char *p;
+	va_list		argptr;
+	char		text[2048];
+	Uint8		*p;
 
 	va_start (argptr, fmt);
 	vsnprintf (text, sizeof (text), fmt, argptr);
@@ -227,11 +231,9 @@ Sys_Init (void)
 
 		if ((vinfo.dwMajorVersion < 4) ||
 			(vinfo.dwPlatformId == VER_PLATFORM_WIN32s))
-		{
 			Sys_Error ("QuakeWorld requires at least Win95 or NT 4.0");
-		}
 
-		if ( ! SetPriorityClass (GetCurrentProcess(), HIGH_PRIORITY_CLASS))
+		if (!SetPriorityClass (GetCurrentProcess(), HIGH_PRIORITY_CLASS))
 			Sys_Printf ("SetPriorityClass() failed\n");
 		else
 			Sys_Printf ("Process priority class set to HIGH\n");
@@ -268,7 +270,8 @@ Sys_Error (char *error, ...)
 
 #ifdef _WIN32
 	// Win32 gets a message box, but needs us to clear events first!
-	do {
+	do
+	{
 		MSG			msg;
 
 		while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
@@ -279,7 +282,8 @@ Sys_Error (char *error, ...)
 			TranslateMessage (&msg);
 			DispatchMessage (&msg);
 		}
-	} while (0);
+	}
+	while (0);
 	MessageBox (NULL, text, "Error", 0);
 #endif
 	fprintf (stderr, "Error: %s\n", text);
@@ -312,11 +316,7 @@ Sys_FileTime (char *path)
 void
 Sys_mkdir (char *path)
 {
-#ifdef _WIN32
-	_mkdir (path);
-#else
 	mkdir (path, 0777);
-#endif
 }
 
 
@@ -353,9 +353,6 @@ Sys_DoubleTime (void)
 	last = now;
 	return (double) (curtime / 1000.0);
 }
-
-qboolean		do_stdin = true;
-qboolean		stdin_ready;
 
 char *
 Sys_ConsoleInput (void)
@@ -425,8 +422,8 @@ Sys_ConsoleInput (void)
 char *
 Sys_ExpandPath (char *str)
 {
-	static char	buf[PATH_MAX] = "";
-    char		*s, *p;
+	static char		buf[PATH_MAX] = "";
+    char			*s, *p;
 
 	s = str;
 	if (*s == '~')
@@ -481,16 +478,16 @@ Sys_ExpandPath (char *str)
 #endif
 
 int
-main (int c, char **v)
+main (int argc, char *argv[])
 {
-	double  	    time, oldtime, newtime, base;
+	double		time, oldtime, newtime, base;
 
 	SDL_Init (SDL_INIT_TIMER);
 	atexit (SDL_Quit);
 
 	sys_gametypes = GAME_QW_SERVER;
 
-	COM_InitArgv (c, v);
+	Cmdline_Init (argc, argv);
 
 	CL_Init ();							// Inits cls for net_chan.c
 	SV_Init ();
@@ -498,7 +495,8 @@ main (int c, char **v)
 	SV_Frame (0.1);
 
 	base = oldtime = Sys_DoubleTime () - 0.1;
-	while (1) {
+	while (1)
+	{
 		// the only reason we have a timeout at all is so that if the last
 		// connected client times out, the message would not otherwise
 		// be printed until the next event.

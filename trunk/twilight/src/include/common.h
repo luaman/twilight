@@ -40,7 +40,7 @@
 extern size_t com_argc;
 extern char **com_argv;
 
-void COM_InitArgv (int argc, char **argv);
+void Cmdline_Init (int argc, char *argv[]);
 int COM_CheckParm (char *parm);
 
 

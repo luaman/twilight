@@ -185,7 +185,7 @@ S_Init_Cvars (void)
 	loadas8bit = Cvar_Get ("loadas8bit", "0", CVAR_NONE, NULL);
 	snd_noextraupdate = Cvar_Get ("snd_noextraupdate", "0", CVAR_NONE, NULL);
 	snd_show = Cvar_Get ("snd_show", "0", CVAR_NONE, NULL);
-	_snd_mixahead = Cvar_Get ("_snd_mixahead", "0.1", CVAR_ARCHIVE, NULL);
+	_snd_mixahead = Cvar_Get ("_snd_mixahead", "0.05", CVAR_ARCHIVE, NULL);
 
 	if (hunk_size < 0x800000) {
 		Cvar_Set (loadas8bit, "1");
