@@ -37,6 +37,11 @@ static const char rcsid[] =
 #include "host.h"
 #include "gl_info.h"
 #include "video.h"
+#include "common.h"
+#include "sys.h"
+
+
+Uint8	*host_basepal;
 
 Uint32 d_palette_raw[256];
 Uint32 d_palette_base[256];
@@ -46,6 +51,7 @@ Uint32 d_palette_top[256];
 Uint32 d_palette_bottom[256];
 float d_8tofloattable[256][4];
 
+Uint8	num_fb;
 cvar_t *gl_fb;
 static cvar_t *v_hwgamma;
 
@@ -117,14 +123,14 @@ PAL_Build_Gamma_Ramp16 (Uint16 *ramp, int n, double black, double grey,
 static void
 PAL_RebuildPalettes (void)
 {
-	int		i, num_fb;
+	int		i, n_fb;
 
 	if (gl_fb->ivalue)
-		num_fb = host_colormap[0x4000];
+		n_fb = num_fb;
 	else
-		num_fb = 0;
+		n_fb = 0;
 
-	for (i = 0; i < (256 - num_fb); i++)
+	for (i = 0; i < (256 - n_fb); i++)
 	{
 		d_palette_base_team[i] = d_palette_base[i] = d_palette_raw[i];
 		d_palette_fb[i] = d_palette_empty;
@@ -289,6 +295,20 @@ PAL_Init_Cvars (void)
 void
 PAL_Init (void)
 {
+	Uint8	*host_colormap;
+	host_basepal = COM_LoadNamedFile ("gfx/palette.lmp", true);
+	if (!host_basepal)
+		Sys_Error ("Couldn't load gfx/palette.lmp");
+
+	host_colormap = COM_LoadTempFile ("gfx/colormap.lmp", true);
+	if (!host_colormap) {
+		Com_DPrintf ("Couldn't load gfx/colormap.lmp");
+		num_fb = 32;
+	} else {
+		num_fb = host_colormap[0x4000];
+		Zone_Free (host_colormap);
+	}
+
 	GammaChanged (v_grey);
 	TGammaChanged (v_tgrey);
 }

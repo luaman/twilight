@@ -83,9 +83,6 @@ client_t   *host_client;				// current client
 
 static jmp_buf     host_abortserver;
 
-Uint8      *host_basepal;
-Uint8      *host_colormap;
-
 static cvar_t     *host_framerate;
 static cvar_t     *host_speeds;
 
@@ -805,14 +802,7 @@ Host_Init ()
 	if (ccls.state != ca_dedicated) {
 		Image_Init ();
 
-		host_basepal = COM_LoadNamedFile ("gfx/palette.lmp", true);
-		if (!host_basepal)
-			Sys_Error ("Couldn't load gfx/palette.lmp");
-		host_colormap = COM_LoadNamedFile ("gfx/colormap.lmp", true);
-		if (!host_colormap)
-			Sys_Error ("Couldn't load gfx/colormap.lmp");
-
-		VID_Init (host_basepal);
+		VID_Init ();
 		Draw_Init_Cvars ();
 		Draw_Init ();
 		SCR_Init ();

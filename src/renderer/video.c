@@ -172,13 +172,11 @@ VID_Init_Cvars (void)
 }
 
 void
-VID_Init (unsigned char *palette)
+VID_Init (void)
 {
 	Uint		i;
 	const		SDL_VideoInfo *info = NULL;
 	char		sdl_driver[256];
-
-	palette = palette;
 
 	/* interpret command-line params */
 

@@ -75,15 +75,15 @@ typedef struct img_sdl_search_s {
 } img_sdl_search_t;
 
 static img_sdl_search_t	search[] = {
-	{"bmp", "IMG_LoadBMP_RW", NULL},
-	{"jpg", "IMG_LoadJPG_RW", NULL},
-	{"lbm", "IMG_LoadLBM_RW", NULL},
-	{"pcx", "IMG_LoadPCX_RW", NULL},
 	{"png", "IMG_LoadPNG_RW", NULL},
-	{"pnm", "IMG_LoadPNM_RW", NULL},
 	{"tga", "IMG_LoadTGA_RW", NULL},
+	{"jpg", "IMG_LoadJPG_RW", NULL},
+	{"pnm", "IMG_LoadPNM_RW", NULL},
 	{"tif", "IMG_LoadTIF_RW", NULL},
 	{"xpm", "IMG_LoadXPM_RW", NULL},
+	{"bmp", "IMG_LoadBMP_RW", NULL},
+	{"pcx", "IMG_LoadPCX_RW", NULL},
+	{"lbm", "IMG_LoadLBM_RW", NULL},
 	{NULL, NULL, NULL},
 };
 
