@@ -37,7 +37,7 @@ static const char rcsid[] =
 
 static memzone_t *zonechain = NULL;
 
-void *_Zone_AllocName (char *name, size_t size, char *filename, int fileline)
+void *_Zone_AllocName (const char *name, const size_t size, const char *filename, const int fileline)
 {
 	memzone_t	*zone;
 	zone = _Zone_AllocZone (name, filename, fileline);
@@ -46,7 +46,7 @@ void *_Zone_AllocName (char *name, size_t size, char *filename, int fileline)
 	return _Zone_Alloc (zone, size, filename, fileline);
 }
 
-void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
+void *_Zone_Alloc(memzone_t *zone, const size_t size, const char *filename, const int fileline)
 {
 	memheader_t *mem;
 	if (zone == NULL)
@@ -73,7 +73,7 @@ void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
 	return (void *)((Uint8 *) mem + sizeof(memheader_t));
 }
 
-void _Zone_Free(void *data, char *filename, int fileline)
+void _Zone_Free(void *data, const char *filename, const int fileline)
 {
 	memheader_t *mem, **memchainpointer;
 	memzone_t *zone;
@@ -110,7 +110,7 @@ void _Zone_Free(void *data, char *filename, int fileline)
 	Sys_Error("Zone_Free: not allocated (free at %s:%i)", filename, fileline);
 }
 
-memzone_t *_Zone_AllocZone(char *name, char *filename, int fileline)
+memzone_t *_Zone_AllocZone(const char *name, const char *filename, const int fileline)
 {
 	memzone_t *zone;
 	zone = malloc(sizeof(memzone_t));
@@ -126,7 +126,7 @@ memzone_t *_Zone_AllocZone(char *name, char *filename, int fileline)
 	return zone;
 }
 
-void _Zone_FreeZone(memzone_t **zone, char *filename, int fileline)
+void _Zone_FreeZone(memzone_t **zone, const char *filename, const int fileline)
 {
 	memzone_t **chainaddress;
 	if (*zone)
@@ -148,7 +148,7 @@ void _Zone_FreeZone(memzone_t **zone, char *filename, int fileline)
 	}
 }
 
-void _Zone_EmptyZone(memzone_t *zone, char *filename, int fileline)
+void _Zone_EmptyZone(memzone_t *zone, const char *filename, const int fileline)
 {
 	if (zone == NULL)
 		Sys_Error("Zone_EmptyZone: zone == NULL (emptyzone at %s:%i)", filename, fileline);
@@ -158,7 +158,7 @@ void _Zone_EmptyZone(memzone_t *zone, char *filename, int fileline)
 		Zone_Free((void *)((Uint8 *) zone->chain + sizeof(memheader_t)));
 }
 
-void _Zone_CheckSentinels(void *data, char *filename, int fileline)
+void _Zone_CheckSentinels(void *data, const char *filename, const int fileline)
 {
 	memheader_t *mem;
 
@@ -173,14 +173,14 @@ void _Zone_CheckSentinels(void *data, char *filename, int fileline)
 		Sys_Error("Zone_CheckSentinels: trashed header sentinel 2 (block allocated at %s:%i, sentinel check at %s:%i, zone %s)", mem->filename, mem->fileline, filename, fileline, mem->zone->name);
 }
 
-void _Zone_CheckSentinelsZone(memzone_t *zone, char *filename, int fileline)
+void _Zone_CheckSentinelsZone(memzone_t *zone, const char *filename, const int fileline)
 {
 	memheader_t *mem;
 	for (mem = zone->chain;mem;mem = mem->chain)
 		_Zone_CheckSentinels((void *)((Uint8 *) mem + sizeof(memheader_t)), filename, fileline);
 }
 
-void _Zone_CheckSentinelsGlobal(char *filename, int fileline)
+void _Zone_CheckSentinelsGlobal(const char *filename, const int fileline)
 {
 	memzone_t *zone;
 	for (zone = zonechain;zone;zone = zone->next)
@@ -221,7 +221,7 @@ Zone_PrintStats(void)
 }
 
 static void
-Zone_PrintList(int listallocations)
+Zone_PrintList(const int listallocations)
 {
 	memzone_t *zone;
 	memheader_t *mem;
