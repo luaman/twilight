@@ -1413,10 +1413,10 @@ BuildSurfaceDisplayList (msurface_t *fa)
 	/*
 	 * draw texture
 	 */
-	poly = Hunk_Alloc (sizeof (glpoly_t));
-	poly->tc = Hunk_Alloc (lnumverts * sizeof (texcoord_t));
-	poly->ltc = Hunk_Alloc (lnumverts * sizeof (texcoord_t));
-	poly->v = Hunk_Alloc (lnumverts * sizeof (vertex_t));
+	poly = Hunk_AllocName (sizeof (glpoly_t), "surfacedisplaylist");
+	poly->tc = Hunk_AllocName (lnumverts * sizeof (texcoord_t), "surfacedisplaylist");
+	poly->ltc = Hunk_AllocName (lnumverts * sizeof (texcoord_t), "surfacedisplaylist");
+	poly->v = Hunk_AllocName (lnumverts * sizeof (vertex_t), "surfacedisplaylist");
 
 	poly->next = fa->polys;
 	poly->flags = fa->flags;

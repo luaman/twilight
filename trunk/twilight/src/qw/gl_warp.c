@@ -142,9 +142,9 @@ SubdividePolygon (int numverts, float *verts)
 		return;
 	}
 
-	poly = Hunk_Alloc (sizeof (glpoly_t)); 
-	poly->tc = Hunk_Alloc (numverts * sizeof (texcoord_t));
-	poly->v = Hunk_Alloc (numverts * sizeof (vertex_t));
+	poly = Hunk_AllocName (sizeof (glpoly_t), "surfacedisplaylist");
+	poly->tc = Hunk_AllocName (numverts * sizeof (texcoord_t), "surfacedisplaylist");
+	poly->v = Hunk_AllocName (numverts * sizeof (vertex_t), "surfacedisplaylist");
 
 	poly->next = warpface->polys;
 	warpface->polys = poly;
