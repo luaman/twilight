@@ -52,7 +52,9 @@ void Host_ClientCommands (char *fmt, ...);
 void Host_ShutdownServer (qboolean crash);
 void Host_WriteConfiguration (char *name);
 
-#ifdef TWILIGHT_NQ
+
+// HACK HACK HACK - the rest of this file is for NQ only
+
 extern qboolean noclip_anglehack;
 extern qboolean host_initialized;		// true if into command execution
 
@@ -78,6 +80,5 @@ void		Chase_Update (void);
 
 extern		double	host_realtime;
 
-#endif /* TWILIGHT_NQ */
 #endif // __HOST_H
 

@@ -12,7 +12,7 @@ INCLUDES= \
 
 
 LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_nq_sys_libs)
-CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_NQ
+CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 
 bin_PROGRAMS=twilight-nq
 twilight_nq_LDADD= \

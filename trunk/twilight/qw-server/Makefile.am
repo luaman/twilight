@@ -9,7 +9,7 @@ INCLUDES= \
 	-I$(top_srcdir)/qw
 
 LIBS=@LIBS@ -lm @SDL_LIBS@ $(twilight_qwsv_sys_libs)
-CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -Umain -DTWILIGHT_QWSV
+CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -Umain
 
 bin_PROGRAMS=twilight-qwsv
 twilight_qwsv_LDADD= \
@@ -24,7 +24,7 @@ endif
 
 twilight_qwsv_SOURCES= \
 	cmd.h common.c console.h \
-	mdfour.c net.h net_chan.c net_udp.c \
+	net.h net_chan.c net_udp.c \
 	pmove.c pmovetst.c \
 	pr_cmds.c pr_edict.c pr_exec.c progdefs.h progs.h \
 	protocol.h server.h sv_ccmds.c \

@@ -12,7 +12,7 @@ INCLUDES= \
 
 
 LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_qw_sys_libs)
-CFLAGS=@CFLAGS@ @SDL_CFLAGS@ -DTWILIGHT_QW
+CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 
 bin_PROGRAMS=twilight-qw
 
@@ -44,7 +44,7 @@ twilight_qw_SOURCES= \
 	snd_dma.c sv_null.c teamplay.c sys.c vid_sdl.c view.c
 
 libqwsv_a_SOURCES= \
-	cl_null.c info.c
+	cl_null.c info.c mdfour.c
 
 EXTRA_DIST= \
 	qw.dsp
