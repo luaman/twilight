@@ -139,14 +139,14 @@ CL_NewDlight (int key, vec3_t org, int effects)
 	dl->die = cl.time + 0.1;
 	VectorCopy (org, dl->origin);
 
-	dl->color[0] = 0.44;
-	dl->color[1] = 0.34;
-	dl->color[2] = 0.24;
+	dl->color[0] = 0.20;
+	dl->color[1] = 0.10;
+	dl->color[2] = 0.05;
 
 	if (effects & EF_RED)
-		dl->color[0] = 0.86;
+		dl->color[0] = 0.50;
 	if (effects & EF_BLUE)
-		dl->color[2] = 0.86;
+		dl->color[2] = 0.50;
 
 	if (!(effects & (EF_LIGHTMASK - EF_DIMLIGHT))) {
 		dl->color[0] += 0.20;
