@@ -341,11 +341,11 @@ main (int c, char **v)
 {
 	double  	    time, oldtime, newtime;
 	int     	    j;
-//#ifndef _WIN32
+#ifndef _WIN32
 	fd_set			fdset;
 	extern int		net_socket;
 	struct timeval	timeout;
-//#endif
+#endif
 
 	SDL_Init (SDL_INIT_TIMER);
 	atexit (SDL_Quit);
@@ -373,6 +373,7 @@ main (int c, char **v)
 
 	oldtime = Sys_DoubleTime ();
 	while (1) {
+#ifndef _WIN32
 		// the only reason we have a timeout at all is so that if the last
 		// connected client times out, the message would not otherwise
 		// be printed until the next event.
@@ -388,6 +389,7 @@ main (int c, char **v)
 			continue;
 		}
 		stdin_ready = FD_ISSET (0, &fdset);
+#endif
 
 		// find time spent rendering last frame
 		newtime = Sys_DoubleTime ();
