@@ -34,6 +34,8 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include "opengl_ext.h"
+
 #include "quakedef.h"
 #include "cvar.h"
 #include "glquake.h"
@@ -306,6 +308,13 @@ EmitBothSkyLayers (msurface_t *fa)
 	if (draw_skybox)
 		return;
 
+	if (gl_mtexable)
+	{
+		qglActiveTextureARB (GL_TEXTURE1_ARB);
+		qglDisable (GL_TEXTURE_2D);
+		qglActiveTextureARB (GL_TEXTURE0_ARB);
+	}
+
 	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
 	speedscale = realtime * 8;
 	speedscale -= (int) speedscale & ~127;
@@ -319,6 +328,12 @@ EmitBothSkyLayers (msurface_t *fa)
 
 	EmitSkyPolys (fa);
 
+	if (gl_mtexable)
+	{
+		qglActiveTextureARB (GL_TEXTURE1_ARB);
+		qglEnable (GL_TEXTURE_2D);
+		qglActiveTextureARB (GL_TEXTURE0_ARB);
+	}
 	qglDisable (GL_BLEND);
 }
 
@@ -361,23 +376,8 @@ R_DrawSkyChain (msurface_t *s)
 		return;
 	}
 
-	// used when gl_texsort is on
-	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
-	speedscale = realtime * 8;
-	speedscale -= (int) speedscale & ~127;
-
 	for (fa = s; fa; fa = fa->texturechain)
-		EmitSkyPolys (fa);
-
-	qglEnable (GL_BLEND);
-	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
-	speedscale = realtime * 16;
-	speedscale -= (int) speedscale & ~127;
-
-	for (fa = s; fa; fa = fa->texturechain)
-		EmitSkyPolys (fa);
-
-	qglDisable (GL_BLEND);
+		EmitBothSkyLayers (fa);
 }
 
 /*
