@@ -17,3 +17,5 @@ Debug
 Release
 .DS_Store
 .sconsign
+*.exe
+*.obj

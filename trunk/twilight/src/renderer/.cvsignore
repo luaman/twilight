@@ -12,3 +12,4 @@ Debug
 *.s
 .DS_Store
 .sconsign
+*.obj
