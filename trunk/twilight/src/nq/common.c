@@ -557,18 +557,6 @@ void Com_DPrintf (char *fmt, ...)
 	Com_Printf ("%s", msg);
 }
 
-void
-Com_SafePrintf (char *fmt, ...)
-{
-	va_list     argptr;
-	char        msg[1024];
-
-	va_start (argptr, fmt);
-	vsnprintf (msg, sizeof (msg), fmt, argptr);
-	va_end (argptr);
-
-	Con_SafePrint (msg);
-}
 
 //===========================================================================
 

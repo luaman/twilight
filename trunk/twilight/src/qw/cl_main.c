@@ -1485,7 +1485,6 @@ Host_Init (void)
 	Sbar_Init_Cvars ();				// all statusbar related cvars
 	CL_Init_Cvars ();				// all cl_* related cvars
 	S_Init_Cvars ();				// all sound system related cvars
-	IN_Init_Cvars ();				// all input related cvars
 
 	COM_Init ();					// setup and initialize filesystem, endianess, add related commands
 

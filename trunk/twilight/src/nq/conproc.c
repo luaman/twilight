@@ -75,14 +75,14 @@ InitConProc (HANDLE hFile, HANDLE heventParent, HANDLE heventChild)
 	heventDone = CreateEvent (NULL, FALSE, FALSE, NULL);
 
 	if (!heventDone) {
-		Com_SafePrintf ("Couldn't create heventDone\n");
+		Com_Printf ("Couldn't create heventDone\n");
 		return;
 	}
 
 	if (!CreateThread (NULL,
 					   0, (LPTHREAD_START_ROUTINE) RequestProc, 0, 0, &dwID)) {
 		CloseHandle (heventDone);
-		Com_SafePrintf ("Couldn't create QHOST thread\n");
+		Com_Printf ("Couldn't create QHOST thread\n");
 		return;
 	}
 // save off the input/output handles.
@@ -124,7 +124,7 @@ RequestProc (DWORD dwNichts)
 
 		// hfileBuffer is invalid.  Just leave.
 		if (!pBuffer) {
-			Com_SafePrintf ("Invalid hfileBuffer\n");
+			Com_Printf ("Invalid hfileBuffer\n");
 			break;
 		}
 

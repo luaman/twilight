@@ -197,8 +197,6 @@ V_StopPitchDrift (void)
 ===============
 V_DriftPitch
 
-
-
 If the user is adjusting pitch manually, either with lookup/lookdown,
 mlook and mouse, or klook and keyboard, pitch drifting is constantly stopped.
 
