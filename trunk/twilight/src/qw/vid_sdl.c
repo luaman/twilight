@@ -54,7 +54,6 @@ cvar_t *i_keypadmode;
 cvar_t *vid_mode;
 cvar_t *m_filter;
 cvar_t *_windowed_mouse;
-cvar_t *gl_ztrick;
 cvar_t *gl_driver;
 
 cvar_t *v_hwgamma;
@@ -82,8 +81,6 @@ static int sdl_flags = SDL_OPENGL;
 /*-----------------------------------------------------------------------*/
 
 int texture_extension_number = 1;
-
-float gldepthmin, gldepthmax;
 
 
 const char *gl_vendor;
@@ -369,7 +366,6 @@ VID_Init_Cvars (void)
 	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
 	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE,
 			&IN_WindowedMouse);
-	gl_ztrick = Cvar_Get ("gl_ztrick", "0", CVAR_NONE, NULL);
 	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
 	v_hwgamma = Cvar_Get ("v_hwgamma", "1", CVAR_NONE, &GammaChanged);
 	v_gamma = Cvar_Get ("v_gamma", "1", CVAR_ARCHIVE, &GammaChanged);
