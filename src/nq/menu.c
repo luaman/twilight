@@ -124,21 +124,27 @@ M_DrawCharacter (int cx, int line, int num)
 void
 M_Print (int cx, int cy, char *str)
 {
+/*
 	while (*str) {
 		M_DrawCharacter (cx, cy, (*str) + 128);
 		str++;
 		cx += 8;
 	}
+*/
+	Draw_Alt_String (cx + ((vid.width - 320) >> 1), cy, str); 
 }
 
 void
 M_PrintWhite (int cx, int cy, char *str)
 {
+/*
 	while (*str) {
 		M_DrawCharacter (cx, cy, *str);
 		str++;
 		cx += 8;
 	}
+*/
+	Draw_String (cx + ((vid.width - 320) >> 1), cy, str); 
 }
 
 void
