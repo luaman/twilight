@@ -183,8 +183,6 @@ AC_OUTPUT(
 	qw-server/Makefile
 	doc/Makefile
 	doc/olddoc/Makefile
-	gamecode/Makefile
-	gamecode/progs/Makefile
 	tools/Makefile
 )
 
