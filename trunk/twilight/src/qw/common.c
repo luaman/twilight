@@ -1403,9 +1403,6 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 			else
 				buf = loadbuf;
 			break;
-		case 5:
-			buf = malloc (len + 1);
-			break;
 		default:
 			Sys_Error ("COM_LoadFile: bad usehunk");
 			break;
