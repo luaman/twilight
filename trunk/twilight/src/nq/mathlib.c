@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <SDL_types.h>
 #include <math.h>
+#include <float.h>
 #include <time.h>
 #include "quakedef.h"
 
@@ -29,6 +30,8 @@ void        Sys_Error (char *error, ...);
 vec3_t      vec3_origin = { 0, 0, 0 };
 
 /*-----------------------------------------------------------------*/
+
+// some q3 stuff here
 
 static float sintable[1024];
 
@@ -219,10 +222,19 @@ Q_ceil(double x)
 }
 
 float 
-Q_fabs( float f ) {
-	int tmp = * ( int * ) &f;
-	tmp &= 0x7FFFFFFF;
-	return * ( float * ) &tmp;
+Q_fabs( float f ) 
+{
+	float tmp = f;
+
+	return (tmp < 0) ? -tmp : tmp;
+}
+
+int 
+Q_abs(int x) 
+{
+	int tmp = x;
+
+	return (tmp < 0) ? -tmp : tmp;
 }
 
 static int q_randSeed = 0;
@@ -311,6 +323,12 @@ Q_RSqrt(float number)
 	y  = y * (threehalfs - (x2 * y * y));   // 1st iteration
 
 	return y;
+}
+
+double
+Q_pow (double x, double y)
+{
+	return pow (x, y);
 }
 
 void 
@@ -427,8 +445,8 @@ RotatePointAroundVector (vec3_t dst, const vec3_t dir, const vec3_t point,
 
 	zrot[0][0] = Q_cos (DEG2RAD (degrees));
 	zrot[0][1] = Q_sin (DEG2RAD (degrees));
-	zrot[1][0] = -Q_sin (DEG2RAD (degrees));
-	zrot[1][1] = Q_cos (DEG2RAD (degrees));
+	zrot[1][0] = -zrot[0][1];
+	zrot[1][1] = zrot[0][0];
 
 	R_ConcatRotations (m, zrot, tmpmat);
 	R_ConcatRotations (tmpmat, im, rot);
