@@ -35,6 +35,13 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "client.h"
+#include "common.h"
+#include "cvar.h"
+#include "gl_model.h"
+#include "host.h"
+#include "mathlib.h"
+#include "world.h"
 
 cvar_t      *chase_back;
 cvar_t      *chase_up;

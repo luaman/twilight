@@ -34,7 +34,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
-
+#include "net.h"
 #include "net_loop.h"
 #include "net_dgrm.h"
 

@@ -34,7 +34,16 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cmd.h"
 #include "console.h"
+#include "cvar.h"
+#include "gl_model.h"
+#include "host.h"
+#include "mathlib.h"
+#include "server.h"
+#include "strlib.h"
+#include "sys.h"
+#include "world.h"
 
 #define	RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
 

@@ -35,7 +35,12 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "client.h"
 #include "console.h"
+#include "gl_model.h"
+#include "mathlib.h"
+#include "sound.h"
+#include "sys.h"
 
 int         num_temp_entities;
 entity_t    cl_temp_entities[MAX_TEMP_ENTITIES];

@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "console.h"
 #include "glquake.h"
+#include "sys.h"
 
 mnode_t    *r_pefragtopnode;
 

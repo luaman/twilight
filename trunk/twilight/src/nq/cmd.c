@@ -35,7 +35,14 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "client.h"
+#include "cmd.h"
 #include "console.h"
+#include "cvar.h"
+#include "host.h"
+#include "strlib.h"
+#include "sys.h"
+#include "zone.h"
 
 void        Cmd_ForwardToServer (void);
 

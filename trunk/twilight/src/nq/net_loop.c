@@ -36,7 +36,11 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "console.h"
+#include "cvar.h"
+#include "net.h"
 #include "net_loop.h"
+#include "server.h"
+#include "sys.h"
 
 qboolean    localconnectpending = false;
 qsocket_t  *loop_client = NULL;

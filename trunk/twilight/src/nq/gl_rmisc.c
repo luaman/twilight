@@ -35,8 +35,12 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cmd.h"
 #include "console.h"
+#include "cvar.h"
 #include "glquake.h"
+#include "strlib.h"
+#include "sys.h"
 
 void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);

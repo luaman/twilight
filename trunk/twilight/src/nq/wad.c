@@ -35,6 +35,9 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "common.h"
+#include "sys.h"
+#include "wad.h"
 
 int         wad_numlumps;
 lumpinfo_t *wad_lumps;

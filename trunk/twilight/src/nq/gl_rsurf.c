@@ -35,7 +35,10 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cvar.h"
 #include "glquake.h"
+#include "host.h"
+#include "sys.h"
 
 int		lightmap_textures;
 int		skytexturenum;

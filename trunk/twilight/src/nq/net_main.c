@@ -35,7 +35,14 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cmd.h"
 #include "console.h"
+#include "cvar.h"
+#include "net.h"
+#include "server.h"
+#include "strlib.h"
+#include "sys.h"
+#include "zone.h"
 
 qsocket_t  *net_activeSockets = NULL;
 qsocket_t  *net_freeSockets = NULL;

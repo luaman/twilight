@@ -28,6 +28,8 @@
 #ifndef __NET_H
 #define __NET_H
 
+#include "common.h"
+
 struct qsockaddr {
 	short       sa_family;
 	unsigned char sa_data[14];
@@ -215,7 +217,7 @@ extern int  DEFAULTnet_hostport;
 extern int  net_hostport;
 
 extern int  net_driverlevel;
-extern cvar_t *hostname;
+extern struct cvar_s *hostname;
 extern char playername[];
 extern int  playercolor;
 

@@ -36,8 +36,13 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "console.h"
+#include "cvar.h"
 #include "glquake.h"
+#include "host.h"
+#include "sound.h"
+#include "sys.h"
 #include "view.h"
+#include "world.h"
 
 entity_t    r_worldentity;
 

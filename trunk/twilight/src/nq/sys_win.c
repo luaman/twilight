@@ -34,18 +34,19 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include "SDL.h"
+#include "SDL_main.h"
+
 #include "quakedef.h"
 #include "winquake.h"
-#include "errno.h"
+#include "client.h"
 #include "conproc.h"
 #include <io.h>
+#include <errno.h>
 #include <direct.h>
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-
-#include "SDL.h"
-#include "SDL_main.h"
 
 #define MINIMUM_WIN_MEMORY		0x0880000
 #define MAXIMUM_WIN_MEMORY		0x1000000
