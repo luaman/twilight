@@ -10,6 +10,30 @@ env_defs = My_Options ()
 config_defs = My_Options ()
 building = 0
 
+def check_mmx_asm (context):
+	context.Message('Checking to see if computer understands MMX asm ... ')
+	ret = context.TryCompile ("""
+int main (int argc, char *argv[])
+{
+	asm ("movq %%mm0, %%mm1" ::: "mm0", "mm1");
+	return 0;
+}
+""", ".c")
+	context.Result (ret)
+	return ret;
+
+def check_sse_asm (context):
+	context.Message('Checking to see if computer understands SSE asm ... ')
+	ret = context.TryCompile ("""
+int main (int argc, char *argv[])
+{
+	asm ("movhlps %%xmm0, %%xmm1" ::: "xmm0", "xmm1");
+	return 0;
+}
+""", ".c")
+	context.Result (ret)
+	return ret;
+
 def check_func_flag (context, flag):
 	context.Message ('Checking for function flag "' + flag + '" ... ')
 	ret = context.TryCompile ("""
@@ -250,7 +274,7 @@ def do_configure (env):
 		opts.load('config_opts.py')
 	opts.args (ARGUMENTS)
 	opts.save('config_opts.py')
-	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag, 'lflag' : check_lflag, 'func_flag' : check_func_flag}
+	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag, 'lflag' : check_lflag, 'func_flag' : check_func_flag, 'mmx_asm' : check_mmx_asm, 'sse_asm' : check_sse_asm}
 	conf = Configure(env, custom_tests = tests)
 	handle_opts (conf, opts, config_defs, 0)
 
@@ -293,6 +317,10 @@ def do_configure (env):
 	elif conf.func_flag('__inline'):
 		config_defs.create('inline', '__inline')
 
+	if conf.mmx_asm():
+		config_defs.set('HAVE_MMX', 1)
+	if conf.sse_asm():
+		config_defs.set('HAVE_SSE', 1)
 
 	if not config_defs.has_key('HAVE_DLOPEN'):
 		if conf.CheckLib ('dl', 'dlopen', 1):
@@ -332,7 +360,7 @@ def do_configure (env):
     User's configuration        : """ + opts['userconf'] + """
   """
 
-env = Environment ()
+env = Environment (ENV = {'PATH' : os.environ['PATH']})
 conf_base ()
 
 do_configure (env)
