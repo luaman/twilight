@@ -54,12 +54,9 @@ typedef struct {
 
 skin_t *Skin_Load (char *skin_name);
 
-cvar_t *baseskin;
 cvar_t *noskins;
 
 extern model_t	*player_model;
-
-skin_t	*base_skin;
 
 memzone_t *skin_zone;
 
@@ -104,7 +101,7 @@ Skin_Load (char *skin_name)
 			if (skins[i].skin)
 				return skins[i].skin;
 			else
-				return base_skin;
+				return NULL;
 		}
 	}
 
@@ -141,10 +138,10 @@ Skin_Load (char *skin_name)
 		|| pcx->encoding != 1
 		|| pcx->bits_per_pixel != 8 || pcx->xmax < 296 || pcx->ymax < 194) {
 		Com_Printf ("Bad skin %s\n", name);
-		return base_skin;
+		return NULL;
 	}
 
-	tmp = Zone_Alloc (skin_zone, (pcx->xmax + 1) * (pcx->ymax + 1));
+	tmp = Zone_Alloc (tempzone, (pcx->xmax + 1) * (pcx->ymax + 1));
 	if (!tmp)
 		Sys_Error ("Skin_Load: couldn't allocate");
 
@@ -156,7 +153,7 @@ Skin_Load (char *skin_name)
 				Zone_Free (tmp);
 				Com_Printf ("Skin %s was malformed.  You should delete it.\n",
 							name);
-				return base_skin;
+				return NULL;
 			}
 			dataByte = *raw++;
 
@@ -167,7 +164,7 @@ Skin_Load (char *skin_name)
 					Com_Printf
 						("Skin %s was malformed.  You should delete it.\n",
 						 name);
-					return base_skin;
+					return NULL;
 				}
 				dataByte = *raw++;
 			} else
@@ -178,7 +175,7 @@ Skin_Load (char *skin_name)
 				Zone_Free (tmp);
 				Com_Printf ("Skin %s was malformed.  You should delete it.\n",
 							name);
-				return base_skin;
+				return NULL;
 			}
 			while (runLength-- > 0)
 				pix[x++] = dataByte;
@@ -189,7 +186,7 @@ Skin_Load (char *skin_name)
 	if (raw - (Uint8 *) pcx > com_filesize) {
 		Zone_Free (tmp);
 		Com_Printf ("Skin %s was malformed.  You should delete it.\n", name);
-		return base_skin;
+		return NULL;
 	}
 
 	final = Zone_Alloc (skin_zone, 296 * 194);
@@ -301,8 +298,6 @@ void
 CL_InitSkins (void)
 {
 	skin_zone = Zone_AllocZone("skins");
-
-	base_skin = Skin_Load(baseskin->svalue);
 
 	Cmd_AddCommand ("skins", Skin_Skins_f);
 	Cmd_AddCommand ("allskins", Skin_AllSkins_f);

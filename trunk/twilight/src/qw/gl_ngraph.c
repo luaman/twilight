@@ -112,7 +112,7 @@ R_NetGraph (void)
 	y += 8;
 
 	snprintf (st, sizeof (st), "%3i%% packet loss", lost);
-	Draw_String (8, y, st);
+	Draw_String (8, y, st, 8);
 	y += 8;
 
 	qglBindTexture (GL_TEXTURE_2D, netgraphtexture);

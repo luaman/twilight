@@ -140,39 +140,25 @@ Draws one solid graphics character
 void
 M_DrawCharacter (int cx, int line, int num)
 {
-	Draw_Character (cx + ((vid.conwidth - 320) >> 1), line, num);
+	Draw_Character (cx + ((vid.width_2d - 320) >> 1), line, num, 8);
 }
 
 void
 M_Print (int cx, int cy, char *str)
 {
-/*
-	while (*str) {
-		M_DrawCharacter (cx, cy, (*str) + 128);
-		str++;
-		cx += 8;
-	}
-*/
-	Draw_Alt_String (cx + ((vid.conwidth - 320) >> 1), cy, str);
+	Draw_Alt_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
 }
 
 void
 M_PrintWhite (int cx, int cy, char *str)
 {
-/*
-	while (*str) {
-		M_DrawCharacter (cx, cy, *str);
-		str++;
-		cx += 8;
-	}
-*/
-	Draw_String (cx + ((vid.conwidth - 320) >> 1), cy, str);
+	Draw_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
 }
 
 void
 M_DrawPic (int x, int y, qpic_t *pic)
 {
-	Draw_Pic (x + ((vid.conwidth - 320) >> 1), y, pic);
+	Draw_Pic (x + ((vid.width_2d - 320) >> 1), y, pic);
 }
 
 void
@@ -1216,7 +1202,7 @@ M_Draw (void)
 
 	if (!m_recursiveDraw) {
 		if (scr_con_current) {
-			Draw_ConsoleBackground (vid.height);
+			Draw_ConsoleBackground (vid.height_2d);
 			S_ExtraUpdate ();
 		} else
 			Draw_FadeScreen ();

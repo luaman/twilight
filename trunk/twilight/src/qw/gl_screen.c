@@ -288,9 +288,7 @@ void
 SCR_DrawCenterString (void)
 {
 	char	   *start;
-	int			l;
-	int			j;
-	int			x, y;
+	int			x, y, l;
 	int			remaining;
 
 	/* the finale prints the characters one at a time */
@@ -303,23 +301,22 @@ SCR_DrawCenterString (void)
 	start = scr_centerstring;
 
 	if (scr_center_lines <= 4)
-		y = vid.conheight * 0.35;
+		y = vid.height_2d * 0.35;
 	else
 		y = 48;
 
-	do {
+	while (1) {
 		/* scan the width of the line */
 		for (l = 0; l < 40; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
-		x = (vid.conwidth - l * 8) / 2;
-		for (j = 0; j < l; j++, x += 8) {
-			Draw_Character (x, y, start[j]);
-			if (!remaining--)
-				return;
-		}
+		x = (vid.width_2d - l * (con->tsize)) / 2;
+		Draw_String_Len (x, y, start, min(l, remaining), con->tsize);
+		remaining -= l;
+		if (remaining <= 0)
+			return;
 
-		y += 8;
+		y += con->tsize;
 
 		while (*start && *start != '\n')
 			start++;
@@ -327,7 +324,7 @@ SCR_DrawCenterString (void)
 		if (!*start)
 			break;
 		start++;						/* skip the \n */
-	} while (1);
+	}
 }
 
 void
@@ -558,7 +555,7 @@ SCR_DrawFPS (void)
 	double				t;
 	extern int			fps_count;
 	static int			lastfps;
-	int					x, y;
+	int					x, y, st_len;
 	char				st[80];
 
 	if (!show_fps->ivalue)
@@ -572,9 +569,11 @@ SCR_DrawFPS (void)
 	}
 
 	snprintf (st, sizeof (st), "%3d FPS", lastfps);
-	x = vid.conwidth - strlen (st) * 8 - 8;
-	y = vid.conheight - sb_lines - 8;
-	Draw_String (x, y, st);
+	st_len = strlen (st);
+
+	x = vid.width_2d - st_len * con->tsize - con->tsize;
+	y = vid.height_2d - sb_lines - con->tsize;
+	Draw_String_Len (x, y, va("%3d FPS", lastfps), st_len, con->tsize);
 }
 
 
@@ -595,8 +594,8 @@ SCR_DrawPause (void)
 		return;
 
 	pic = Draw_CachePic ("gfx/pause.lmp");
-	Draw_Pic ((vid.conwidth - pic->width) / 2,
-			  (vid.conheight - 48 - pic->height) / 2, pic);
+	Draw_Pic ((vid.width_2d - pic->width) / 2,
+			  (vid.height_2d - 48 - pic->height) / 2, pic);
 }
 
 
@@ -614,8 +613,8 @@ SCR_DrawLoading (void)
 		return;
 
 	pic = Draw_CachePic ("gfx/loading.lmp");
-	Draw_Pic ((vid.conwidth - pic->width) / 2,
-			  (vid.conheight - 48 - pic->height) / 2, pic);
+	Draw_Pic ((vid.width_2d - pic->width) / 2,
+			  (vid.height_2d - 48 - pic->height) / 2, pic);
 }
 
 
@@ -639,10 +638,10 @@ SCR_SetUpToDrawConsole (void)
 
 	/* decide on the height of the console */
 	if (cls.state != ca_active) {
-		scr_conlines = vid.conheight;		/* full screen */
+		scr_conlines = vid.height_2d;		/* full screen */
 		scr_con_current = scr_conlines;
 	} else if (key_dest == key_console)
-		scr_conlines = vid.conheight / 2;	/* half screen */
+		scr_conlines = vid.height_2d / 2;	/* half screen */
 	else
 		scr_conlines = 0;					/* none visible */
 
@@ -1026,24 +1025,21 @@ void
 SCR_DrawNotifyString (void)
 {
 	char	   *start;
-	int			l;
-	int			j;
-	int			x, y;
+	int			x, y, l;
 
 	start = scr_notifystring;
 
-	y = vid.conheight * 0.35;
+	y = vid.height_2d * 0.35;
 
 	do {
 		/* scan the width of the line */
 		for (l = 0; l < 40; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
-		x = (vid.conwidth - l * 8) / 2;
-		for (j = 0; j < l; j++, x += 8)
-			Draw_Character (x, y, start[j]);
+		x = (vid.width_2d - l * con->tsize) / 2;
+		Draw_String_Len (x, y, start, l, con->tsize);
 
-		y += 8;
+		y += con->tsize;
 
 		while (*start && *start != '\n')
 			start++;

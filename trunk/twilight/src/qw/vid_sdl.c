@@ -46,11 +46,15 @@ static const char rcsid[] =
 #include "host.h"
 #include "mathlib.h"
 #include "sys.h"
+#include "console.h"
 
 
 Uint32	d_8to32table[256];
 float	d_8tofloattable[256][4];
 
+cvar_t	*width_2d;
+cvar_t	*height_2d;
+cvar_t	*text_scale;
 cvar_t	*i_keypadmode;
 cvar_t	*vid_mode;
 cvar_t	*m_filter;
@@ -296,10 +300,49 @@ GL_EndRendering (void)
 	SDL_GL_SwapBuffers ();
 }
 
+void
+Size_Changed2D (cvar_t *cvar)
+{
+	int		width, height;
+
+	if (con)
+		con->tsize = 8 * text_scale->fvalue;
+
+	if (!VID_Inited) {
+		vid.width_2d = 320;
+		vid.height_2d = 200;
+		Con_CheckResize();
+		return;
+	}
+
+	width = width_2d->ivalue;
+	height = height_2d->ivalue;
+
+	if (width == -1)
+		width = vid.width;
+
+	width = bound (320, width, (int) vid.width);
+
+	width &= 0xfff8;				/* make it a multiple of eight */
+
+	/* pick a conheight that matches with correct aspect */
+	if (height == -1)
+		height = width * 3 / 4;
+
+	height = bound (320, height, (int) vid.height);
+
+	vid.width_2d = width;
+	vid.height_2d = height;
+
+	Con_CheckResize();
+}
 
 void
 VID_Init_Cvars (void)
 {
+	width_2d = Cvar_Get ("width_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
+	height_2d = Cvar_Get ("height_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
+	text_scale = Cvar_Get ("text_scale", "1", CVAR_ARCHIVE, &Size_Changed2D);
 	i_keypadmode = Cvar_Get ("i_keypadmode", "0", CVAR_NONE, &I_KeypadMode);
 	vid_mode = Cvar_Get ("vid_mode", "0", CVAR_NONE, NULL);
 	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
@@ -323,8 +366,6 @@ VID_Init (unsigned char *palette)
 {
 	int         i;
 	const		SDL_VideoInfo *info = NULL;
-
-	vid.colormap = host_colormap;
 
 	/* interpret command-line params */
 
@@ -354,29 +395,12 @@ VID_Init (unsigned char *palette)
 		vid.height = 200;
 
 	i = COM_CheckParm ("-conwidth");
-	if (i && i < com_argc - 1)
-		vid.conwidth = Q_atoi (com_argv[i + 1]);
-	else
-		vid.conwidth = vid.width;
-
-	vid.conwidth &= 0xfff8;				/* make it a multiple of eight */
-
-	if (vid.conwidth < 320)
-		vid.conwidth = 320;
-
-	/* pick a conheight that matches with correct aspect */
-	vid.conheight = vid.conwidth * 3 / 4;
+	if (i && i < (com_argc - 1))
+		Cvar_Set(width_2d, com_argv[i + 1]);
 
 	i = COM_CheckParm ("-conheight");
-	if (i && i < com_argc - 1)
-		vid.conheight = Q_atoi (com_argv[i + 1]);
-	if (vid.conheight < 200)
-		vid.conheight = 200;
-
-	if (vid.conheight > vid.height)
-		vid.conheight = vid.height;
-	if (vid.conwidth > vid.width)
-		vid.conwidth = vid.width;
+	if (i && i < (com_argc - 1))
+		Cvar_Set(height_2d, com_argv[i + 1]);
 
 	if (SDL_Init (SDL_INIT_VIDEO) != 0) {
 		Sys_Error ("Could not init SDL video: %s\n", SDL_GetError ());
@@ -422,6 +446,7 @@ VID_Init (unsigned char *palette)
 
 	VID_Inited = true;
 	GammaChanged(v_gamma);
+	Size_Changed2D(NULL);
 
 	GL_Init ();
 	Com_DPrintf ("VID_Init: GL_Init successful.\n");

@@ -49,6 +49,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "gl_textures.h"
+#include "console.h"
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
@@ -367,7 +368,7 @@ smoothly scrolled off.
 ================
 */
 void
-Draw_Character (int x, int y, int num)
+Draw_Character (float x, float y, int num, float text_size)
 {
 	float		sl, sh, tl, th;
 
@@ -391,11 +392,11 @@ Draw_Character (int x, int y, int num)
 	VectorSet2 (tc_array_v(0), sl, tl);
 	VectorSet2 (v_array_v(0), x, y);
 	VectorSet2 (tc_array_v(1), sh, tl);
-	VectorSet2 (v_array_v(1), x + 8, y);
+	VectorSet2 (v_array_v(1), x + text_size, y);
 	VectorSet2 (tc_array_v(2), sh, th);
-	VectorSet2 (v_array_v(2), x + 8, y + 8);
+	VectorSet2 (v_array_v(2), x + text_size, y + text_size);
 	VectorSet2 (tc_array_v(3), sl, th);
-	VectorSet2 (v_array_v(3), x, y + 8);
+	VectorSet2 (v_array_v(3), x, y + text_size);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -409,7 +410,7 @@ Draw_String_Len
 ================
 */
 void
-Draw_String_Len (int x, int y, char *str, int len)
+Draw_String_Len (float x, float y, char *str, int len, float text_size)
 {
 	float	frow, fcol, size = 0.0625;
 	int		num, i, vnum;
@@ -424,18 +425,18 @@ Draw_String_Len (int x, int y, char *str, int len)
 	qglEnable (GL_BLEND);
 	vnum = 0;
 
-	for (i = 0; *str && (i < len); i++, x += 8) {
+	for (i = 0; *str && (i < len); i++, x += text_size) {
 		if ((num = *str++) != 32) {		/* Skip drawing spaces */
 			frow = (float) (num >> 4) * size;
 			fcol = (float) (num & 15) * size;
 			VectorSet2 (tc_array_v(vnum + 0), fcol, frow);
 			VectorSet2 (v_array_v(vnum + 0), x, y);
 			VectorSet2 (tc_array_v(vnum + 1), fcol + size, frow);
-			VectorSet2 (v_array_v(vnum + 1), x + 8, y);
+			VectorSet2 (v_array_v(vnum + 1), x + text_size, y);
 			VectorSet2 (tc_array_v(vnum + 2), fcol + size, frow + size);
-			VectorSet2 (v_array_v(vnum + 2), x + 8, y + 8);
+			VectorSet2 (v_array_v(vnum + 2), x + text_size, y + text_size);
 			VectorSet2 (tc_array_v(vnum + 3), fcol, frow + size);
-			VectorSet2 (v_array_v(vnum + 3), x, y + 8);
+			VectorSet2 (v_array_v(vnum + 3), x, y + text_size);
 			vnum += 4;
 			if ((vnum + 4) >= MAX_VERTEX_ARRAYS) {
 				TWI_PreVDraw (0, vnum);
@@ -460,9 +461,9 @@ Draw_String
 ================
 */
 void
-Draw_String (int x, int y, char *str)
+Draw_String (float x, float y, char *str, float text_size)
 {
-	Draw_String_Len (x, y, str, strlen(str));
+	Draw_String_Len (x, y, str, strlen(str), text_size);
 }
 
 
@@ -472,7 +473,7 @@ Draw_Alt_String_Len
 ================
 */
 void
-Draw_Alt_String_Len (int x, int y, char *str, int len)
+Draw_Alt_String_Len (float x, float y, char *str, int len, float text_size)
 {
 	float	frow, fcol, size = 0.0625;
 	int		num, i, vnum;
@@ -487,7 +488,7 @@ Draw_Alt_String_Len (int x, int y, char *str, int len)
 	qglEnable (GL_BLEND);
 	vnum = 0;
 
-	for (i = 0; *str && (i < len); i++, x += 8)
+	for (i = 0; *str && (i < len); i++, x += text_size)
 	{
 		if ((num = *str++ | 0x80) != (32 | 0x80))
 		{
@@ -496,11 +497,11 @@ Draw_Alt_String_Len (int x, int y, char *str, int len)
 			VectorSet2 (tc_array_v(vnum + 0), fcol, frow);
 			VectorSet2 (v_array_v(vnum + 0), x, y);
 			VectorSet2 (tc_array_v(vnum + 1), fcol + size, frow);
-			VectorSet2 (v_array_v(vnum + 1), x + 8, y);
+			VectorSet2 (v_array_v(vnum + 1), x + text_size, y);
 			VectorSet2 (tc_array_v(vnum + 2), fcol + size, frow + size);
-			VectorSet2 (v_array_v(vnum + 2), x + 8, y + 8);
+			VectorSet2 (v_array_v(vnum + 2), x + text_size, y + text_size);
 			VectorSet2 (tc_array_v(vnum + 3), fcol, frow + size);
-			VectorSet2 (v_array_v(vnum + 3), x, y + 8);
+			VectorSet2 (v_array_v(vnum + 3), x, y + text_size);
 			vnum += 4;
 			if ((vnum + 4) >= MAX_VERTEX_ARRAYS)
 			{
@@ -527,9 +528,9 @@ Draw_Alt_String
 ================
 */
 void
-Draw_Alt_String (int x, int y, char *str)
+Draw_Alt_String (float x, float y, char *str, float text_size)
 {
-	Draw_Alt_String_Len (x, y, str, strlen(str));
+	Draw_Alt_String_Len (x, y, str, strlen(str), text_size);
 }
 
 void
@@ -550,24 +551,25 @@ Draw_Crosshair (void)
 	ctexture = ch_texture + ((crosshair->ivalue - 1) % NUM_CROSSHAIRS);
 
 	x1 = ((scr_vrect.width + scr_vrect.x - 32 * hud_chsize->fvalue) * 0.5
-		+ cl_crossx->ivalue) / (double) vid.width * vid.conwidth;
+		+ cl_crossx->ivalue) / (double) vid.width * vid.width_2d;
 	y1 = ((scr_vrect.height + scr_vrect.y - 32 * hud_chsize->fvalue) * 0.5
-		+ cl_crossy->ivalue) / (double) vid.width * vid.conwidth;
+		+ cl_crossy->ivalue) / (double) vid.width * vid.width_2d;
 
 	x2 = ((scr_vrect.width + scr_vrect.x + 32 * hud_chsize->fvalue) * 0.5
-		+ cl_crossx->ivalue) / (double) vid.width * vid.conwidth;
+		+ cl_crossx->ivalue) / (double) vid.width * vid.width_2d;
 	y2 = ((scr_vrect.height + scr_vrect.y + 32 * hud_chsize->fvalue) * 0.5
-		+ cl_crossy->ivalue) / (double) vid.width * vid.conwidth;
+		+ cl_crossy->ivalue) / (double) vid.width * vid.width_2d;
 
 	// Color selection madness
 	color = crosshaircolor->ivalue % 256;
-//	if (color == 255 && cl.colormap)
-//		VectorScale(cl.colormap->bottom, 0.5, base);
-//	else
+	if (color == 255 && cl.colormap)
+		VectorScale(cl.colormap->bottom, 0.5, base);
+	else
 		VectorCopy (d_8tofloattable[color], base);
+
 	ofs = Q_sin (cl.time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
 	ofs = boundsign (ofs, hud_chflash->fvalue);
-	VectorSlide (d_8tofloattable[color], ofs, base);
+	VectorSlide (base, ofs, base);
 	base[3] = hud_chalpha->fvalue;
 	qglColor4fv (base);
 
@@ -725,7 +727,7 @@ Draw_ConsoleBackground (int lines)
 	conback = Draw_CachePic ("gfx/conback.lmp");
 	gl = (glpic_t *) conback->data;
 
-	y = (vid.conheight * 3) >> 2;
+	y = (vid.height_2d * 3) >> 2;
 
 	if (cls.state != ca_active || lines > y)
 		alpha = 1.0;
@@ -735,7 +737,7 @@ Draw_ConsoleBackground (int lines)
 	if (gl_constretch->ivalue)
 		ofs = 0.0f;
 	else
-		ofs = (float) ((vid.conheight - lines) / vid.conheight);
+		ofs = (float) ((vid.height_2d - lines) / vid.height_2d);
 
 	if (alpha != 1.0f)
 	{
@@ -748,9 +750,9 @@ Draw_ConsoleBackground (int lines)
 	VectorSet2 (tc_array_v(0), gl->sl, gl->tl + ofs);
 	VectorSet2 (v_array_v(0), 0, 0);
 	VectorSet2 (tc_array_v(1), gl->sh, gl->tl + ofs);
-	VectorSet2 (v_array_v(1), vid.conwidth, 0);
+	VectorSet2 (v_array_v(1), vid.width_2d, 0);
 	VectorSet2 (tc_array_v(2), gl->sh, gl->th);
-	VectorSet2 (v_array_v(2), vid.conwidth, lines);
+	VectorSet2 (v_array_v(2), vid.width_2d, lines);
 	VectorSet2 (tc_array_v(3), gl->sl, gl->th);
 	VectorSet2 (v_array_v(3), 0, lines);
 	TWI_PreVDraw (0, 4);
@@ -759,8 +761,10 @@ Draw_ConsoleBackground (int lines)
 
 	/* hack the version number directly into the pic */
 	if (!cls.download) {
-		Draw_Alt_String (vid.conwidth - strlen (cl_verstring->svalue) * 8 - 11,
-				lines - 14, cl_verstring->svalue);
+		int		ver_len = strlen (cl_verstring->svalue);
+
+		Draw_Alt_String_Len (vid.width_2d - (ver_len * con->tsize) - 16,
+				lines - 14, cl_verstring->svalue, ver_len, con->tsize);
 	}
 	if (alpha != 1.0f)
 		qglDisable (GL_BLEND);
@@ -837,9 +841,9 @@ Draw_FadeScreen (void)
 	qglColor4f (0, 0, 0, 0.8);
 
 	VectorSet2 (v_array_v(0), 0, 0);
-	VectorSet2 (v_array_v(1), vid.conwidth, 0);
-	VectorSet2 (v_array_v(2), vid.conwidth, vid.conheight);
-	VectorSet2 (v_array_v(3), 0, vid.conheight);
+	VectorSet2 (v_array_v(1), vid.width_2d, 0);
+	VectorSet2 (v_array_v(2), vid.width_2d, vid.height_2d);
+	VectorSet2 (v_array_v(3), 0, vid.height_2d);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -865,7 +869,7 @@ Draw_Disc (void)
 	if (!draw_disc)
 		return;
 	qglDrawBuffer (GL_FRONT);
-	Draw_Pic (vid.conwidth - 24, 0, draw_disc);
+	Draw_Pic (vid.width_2d - 24, 0, draw_disc);
 	qglDrawBuffer (GL_BACK);
 }
 
@@ -884,7 +888,7 @@ GL_Set2D (void)
 
 	qglMatrixMode (GL_PROJECTION);
 	qglLoadIdentity ();
-	qglOrtho (0, vid.conwidth, vid.conheight, 0, -99999, 99999);
+	qglOrtho (0, vid.width_2d, vid.height_2d, 0, -99999, 99999);
 
 	qglMatrixMode (GL_MODELVIEW);
 	qglLoadIdentity ();

@@ -49,6 +49,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
+extern void Size_Changed2D (cvar_t *cvar);
 
 int			con_ormask;
 console_t  *con;
@@ -171,7 +172,7 @@ Con_Resize (console_t *con)
 	int         i, j, width, oldwidth, oldtotallines, numlines, numchars;
 	char        tbuf[CON_TEXTSIZE];
 
-	width = (vid.conwidth >> 3) - 2;
+	width = (vid.width_2d / con->tsize) - 2;
 
 	if (width == con_linewidth)
 		return;
@@ -226,7 +227,8 @@ If the line width has changed, reformat the buffer.
 void
 Con_CheckResize (void)
 {
-	Con_Resize (con);
+	if (con)
+		Con_Resize (con);
 }
 
 static void
@@ -268,7 +270,7 @@ Con_Init (void)
 	con->x = 0;			// be initialized
 	con->display = 0;	// here
 
-	Con_CheckResize ();
+	Size_Changed2D (NULL);
 
 	Com_Printf ("Console initialized.\n");
 
@@ -416,10 +418,12 @@ Con_DrawInput (void)
 		text += 1 + key_linepos - con_linewidth;
 
 	// draw it
-	Draw_String_Len(1 << 3, con_vislines - 22, text, con_linewidth);
+	Draw_String_Len(con->tsize, con_vislines - (con->tsize * 2.75), text,
+			con_linewidth, con->tsize);
 
 	if ((int) (cls.realtime * con_cursorspeed) & 1)
-		Draw_Character ((1 + key_linepos) << 3, con_vislines - 22, 11);
+		Draw_Character ((1 + key_linepos) * con->tsize,
+				con_vislines - (con->tsize * 2.65), 11, con->tsize);
 }
 
 
@@ -454,9 +458,9 @@ Con_DrawNotify (void)
 
 		clearnotify = 0;
 
-		Draw_String_Len(1 << 3, v, text, con_linewidth);
+		Draw_String_Len(con->tsize, v, text, con_linewidth, con->tsize);
 
-		v += 8;
+		v += con->tsize;
 	}
 
 
@@ -464,22 +468,24 @@ Con_DrawNotify (void)
 		clearnotify = 0;
 
 		if (chat_team) {
-			Draw_String (8, v, "say_team:");
+			Draw_String (con->tsize, v, "say_team:", con->tsize);
 			skip = 11;
 		} else {
-			Draw_String (8, v, "say:");
+			Draw_String (con->tsize, v, "say:", con->tsize);
 			skip = 5;
 		}
 
 		s = chat_buffer;
-		if (chat_bufferlen > (vid.conwidth >> 3) - (skip + 1))
-			s += chat_bufferlen - ((vid.conwidth >> 3) - (skip + 1));
+		if (chat_bufferlen > (vid.width_2d / con->tsize) - (skip + 1))
+			s += chat_bufferlen -
+				((int) (vid.width_2d / con->tsize) - (skip + 1));
 
-		Draw_String (skip << 3, v, s);
+		Draw_String (skip * con->tsize, v, s, con->tsize);
 
-		Draw_Character ((strlen(s) + skip) << 3, v,
-						10 + ((int) (cls.realtime * con_cursorspeed) & 1));
-		v += 8;
+		Draw_Character ((strlen(s) + skip) * con->tsize, v,
+						10 + ((int) (cls.realtime * con_cursorspeed) & 1),
+						con->tsize);
+		v += con->tsize;
 	}
 
 	if (v > con_notifylines)
@@ -513,22 +519,22 @@ Con_DrawConsole (int lines)
 	con_vislines = lines;
 
 // changed to line things up better
-	rows = (lines - 22) >> 3;			// rows of text to draw
+	rows = (lines - (con->tsize * 2.75)) / con->tsize;	// rows of text to draw
 
-	y = lines - 30;
+	y = lines - (con->tsize * 3.75);
 
 // draw from the bottom up
 	if (con->display != con->current) {
 		// draw arrows to show the buffer is backscrolled
 		for (x = 0; x < con_linewidth; x += 4)
-			Draw_Character ((x + 1) << 3, y, '^');
+			Draw_Character ((x + 1) * con->tsize, y, '^', con->tsize);
 
-		y -= 8;
+		y -= con->tsize;
 		rows--;
 	}
 
 	row = con->display;
-	for (i = 0; i < rows; i++, y -= 8, row--) {
+	for (i = 0; i < rows; i++, y -= con->tsize, row--) {
 		if (row < 0)
 			break;
 		if (con->current - row >= con_totallines)
@@ -536,7 +542,7 @@ Con_DrawConsole (int lines)
 
 		text = con->text + (row % con_totallines) * con_linewidth;
 
-		Draw_String_Len(1 << 3, y, text, con_linewidth);
+		Draw_String_Len(con->tsize, y, text, con_linewidth, con->tsize);
 	}
 
 	// draw the download bar
@@ -548,7 +554,7 @@ Con_DrawConsole (int lines)
 			text = cls.downloadname;
 
 		x = con_linewidth - ((con_linewidth * 7) / 40);
-		y = x - strlen (text) - 8;
+		y = x - strlen (text) - con->tsize;
 		i = con_linewidth / 3;
 		if (strlen (text) > i) {
 			y = x - i - 11;
@@ -578,8 +584,8 @@ Con_DrawConsole (int lines)
 				  " %02d%%", cls.downloadpercent);
 
 		// draw it
-		y = con_vislines - 22 + 8;
-		Draw_String(1 << 3, y, dlbar);
+		y = con_vislines - 22 + con->tsize;
+		Draw_String(con->tsize, y, dlbar, con->tsize);
 	}
 // draw the input prompt, user text, and cursor if desired
 	Con_DrawInput ();

@@ -141,19 +141,16 @@ static const char sys_charmap[256] = {
 void
 Sys_Printf (char *fmt, ...)
 {
-	va_list     argptr;
-	char        text[2048];
-	unsigned char *p;
+	va_list			argptr;
+	unsigned char	text[2048];
+	unsigned char	*p;
+
+	if (nostdout)
+		return;
 
 	va_start (argptr, fmt);
 	vsnprintf (text, sizeof (text), fmt, argptr);
 	va_end (argptr);
-
-	if (strlen (text) > sizeof (text))
-		Sys_Error ("memory overwrite in Sys_Printf");
-
-	if (nostdout)
-		return;
 
 #ifdef _WIN32
 	if (isDedicated)
