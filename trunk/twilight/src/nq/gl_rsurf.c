@@ -1287,10 +1287,6 @@ R_DrawWorld (void)
 	if (gl_fb_bmodels->value)
 		memset (fullbright_polys, 0, sizeof(fullbright_polys));
 
-#ifdef QUAKE2
-	R_ClearSkyBox ();
-#endif
-
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
@@ -1302,10 +1298,6 @@ R_DrawWorld (void)
 	R_BlendLightmaps ();
 
 	R_RenderFullbrights ();
-
-#ifdef QUAKE2
-	R_DrawSkyBox ();
-#endif
 }
 
 
@@ -1593,10 +1585,8 @@ GL_BuildLightmaps (void)
 			GL_CreateSurfaceLightmap (m->surfaces + i);
 			if (m->surfaces[i].flags & SURF_DRAWTURB)
 				continue;
-#ifndef QUAKE2
 			if (m->surfaces[i].flags & SURF_DRAWSKY)
 				continue;
-#endif
 			BuildSurfaceDisplayList (m->surfaces + i);
 		}
 	}
