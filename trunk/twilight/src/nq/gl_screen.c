@@ -95,8 +95,6 @@ console is:
 
 */
 
-int			glx, gly;
-
 float		scr_con_current;
 float		scr_conlines;				/* lines of console to display */
 
@@ -675,7 +673,7 @@ SCR_ScreenShot_f (void)
 
 	buffer = Zone_Alloc (tempzone, vid.width * vid.height * 3);
 
-	qglReadPixels (glx, gly, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
+	qglReadPixels (0, 0, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
 				  buffer);
 
 	if (TGA_Write (name, vid.width, vid.height, 3, buffer))
@@ -701,7 +699,7 @@ SCR_CaptureAviDemo (void)
 	snprintf (filename, sizeof (filename), "%s/twavi%06d.tga", com_gamedir, aviframeno);
 	aviframeno++;
 
-	qglReadPixels (glx, gly, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
+	qglReadPixels (0, 0, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
 				  avibuffer);
 
 	if (!TGA_Write (filename, vid.width, vid.height, 3, avibuffer)) {

@@ -30,7 +30,6 @@ static const char rcsid[] =
 #include <math.h>
 
 #include "quakedef.h"
-#include "client.h"
 #include "collision.h"
 #include "common.h"
 #include "cvar.h"
@@ -39,6 +38,9 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
+#include "dyngl.h"
+#include "gl_arrays.h"
+#include "gl_info.h"
 
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 
@@ -140,13 +142,13 @@ r_explosion_start (void)
 		}
 	}
 
-	explosiontexture = GL_LoadTexture ("explosiontexture", 128, 128,
+	explosiontexture = GLT_Load_Raw ("explosiontexture", 128, 128,
 			&data[0][0][0], NULL, TEX_MIPMAP|TEX_ALPHA, 32);
 	for (y = 0; y < 128; y++)
 		for (x = 0; x < 128; x++)
 			data[y][x][0] = data[y][x][1] = data[y][x][2] = 255;
 
-	explosiontexturefog = GL_LoadTexture ("explosiontexturefog", 128, 128,
+	explosiontexturefog = GLT_Load_Raw ("explosiontexturefog", 128, 128,
 			&data[0][0][0], NULL, TEX_MIPMAP|TEX_ALPHA, 32);
 
 	// note that explosions survive the restart
@@ -215,7 +217,7 @@ R_NewExplosion (vec3_t org)
 	{
 		if (explosion[i].alpha <= 0.01f)
 		{
-			explosion[i].starttime = cl.time;
+			explosion[i].starttime = r_time;
 			explosion[i].time = explosion[i].starttime - 0.1;
 			explosion[i].alpha = EXPLOSIONFADESTART;
 			VectorCopy(org, explosion[i].origin);
@@ -239,9 +241,9 @@ R_MoveExplosion (explosion_t *e)
 	int			i;
 	float		dot, frictionscale, end[3], impact[3], normal[3], frametime;
 
-	frametime = cl.time - e->time;
-	e->time = cl.time;
-	e->alpha = EXPLOSIONFADESTART - (cl.time - e->starttime)
+	frametime = r_time - e->time;
+	e->time = r_time;
+	e->alpha = EXPLOSIONFADESTART - (r_time - e->starttime)
 		* EXPLOSIONFADERATE;
 
 	if (e->alpha <= 0.01f)
@@ -261,7 +263,7 @@ R_MoveExplosion (explosion_t *e)
 			if (r_explosionclip->ivalue)
 			{
 				if (TraceLine
-						(cl.worldmodel, e->vert[i], end, impact, normal) < 1)
+						(r_worldmodel, e->vert[i], end, impact, normal) < 1)
 				{
 					// clip velocity against the wall
 					dot = DotProduct(e->vertvel[i], normal) * -1.125f;

@@ -17,9 +17,9 @@ CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 if CLIENTS
 bin_PROGRAMS=twilight-nq
 twilight_nq_LDADD= \
-	$(top_builddir)/src/image/libtwilight_image.a \
 	$(top_builddir)/src/base/libtwilight_base.a \
 	$(top_builddir)/src/renderer/libtwilight_renderer.a \
+	$(top_builddir)/src/image/libtwilight_image.a \
 	$(top_builddir)/src/sound/libtwilight_sound.a
 endif
 
@@ -36,14 +36,13 @@ twilight_nq_SOURCES= \
 	cl_demo.c cl_input.c cl_main.c cl_model.c cl_parse.c cl_ents.c \
 	cl_tent.c \
 	client.h cmd.h common.c console.c cl_console.h \
-	gl_draw.c \
-	gl_rlight.c gl_rmain.c gl_rsurf.c gl_screen.c \
+	gl_draw.c gl_rlight.c gl_rmain.c gl_rsurf.c gl_screen.c \
 	host.c host_cmd.c keys.c menu.c \
 	net.h net_bsd.c net_dgrm.c net_dgrm.h net_loop.c net_loop.h \
 	net_main.c net_udp.c net_udp.h \
 	pr_cmds.c pr_edict.c pr_exec.c progs.h progdefs.h \
 	progdefs.q1 protocol.h \
-	r_explosion.c render.h sbar.c screen.h server.h \
+	render.h sbar.c screen.h server.h \
 	snd_dma.c \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
 	sys.c teamplay.c vid_sdl.c \

@@ -26,6 +26,8 @@
 #ifndef __IMAGE_H
 #define __IMAGE_H
 
+#include "qtypes.h"
+
 #define IMG_QPAL	0
 //define IMG_PAL		1
 //define IMG_RGB		2

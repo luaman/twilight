@@ -145,8 +145,6 @@ qboolean GL_Upload32 (Uint32 *data, int width, int height, int flags);
 qboolean GL_Upload8 (Uint8 *data, int width, int height, Uint32 *palette,
 		int flags);
 
-extern int glx, gly;
-
 // r_local.h -- private refresh defs
 
 #define BACKFACE_EPSILON			0.01
@@ -217,8 +215,6 @@ extern struct cvar_s *gl_particletorches;
 extern struct cvar_s *r_particles;
 
 extern int gl_lightmap_format;
-extern int gl_solid_format;
-extern int gl_alpha_format;
 extern qboolean colorlights;
 extern int gl_wireframe;
 
@@ -232,12 +228,6 @@ void EmitBothSkyLayers (msurface_t *fa);
 void EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform,float alpha);
 void R_DrawSkyChain (msurface_t *s);
 extern void R_DrawSkyBoxChain (msurface_t *s);
-
-/*
- * gl_draw.c
- */
-extern int gl_filter_min;
-extern int gl_filter_mag;
 
 /*
  * gl_rsurf.c

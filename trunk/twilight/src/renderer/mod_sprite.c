@@ -87,7 +87,7 @@ Mod_LoadSpriteFrame (void *pin, model_t *mod, mspriteframe_t **ppframe,
 		bboxradius = i;
 
 	pspriteframe->gl_texturenum =
-		GL_LoadTexture (va("%s_%i", mod->name, framenum), width, height,
+		GLT_Load_Raw (va("%s_%i", mod->name, framenum), width, height,
 				(Uint8 *) (pinframe + 1), d_palette_raw,
 				TEX_MIPMAP|TEX_ALPHA, 8);
 
@@ -242,11 +242,11 @@ Mod_UnloadSpriteModel (model_t *mod)
 	psprite = mod->sprite;
 	for (i = 0; i < psprite->numframes; i++) {
 		if (psprite->frames[i].type == SPR_SINGLE) {
-			GL_DeleteTexture (psprite->frames[i].frameptr->gl_texturenum);
+			GLT_Delete (psprite->frames[i].frameptr->gl_texturenum);
 		} else {
 			pspritegroup = (mspritegroup_t *) psprite->frames[i].frameptr;
 			for (j = 0; j < pspritegroup->numframes; j++) {
-				GL_DeleteTexture (pspritegroup->frames[j]->gl_texturenum);
+				GLT_Delete (pspritegroup->frames[j]->gl_texturenum);
 			}
 		}
 	}

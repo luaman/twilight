@@ -52,14 +52,7 @@ struct qpic_s *Draw_PicFromWad (char *name);
 struct qpic_s *Draw_CachePic (char *path);
 void Draw_Crosshair (void);
 
-int GL_LoadTexture (const char *identifier, Uint width, Uint height,
-		Uint8 *data, Uint32 *palette, int flags, int bpp);
-qboolean GL_DeleteTexture (GLuint texnum);
-int GL_LoadPicTexture (struct qpic_s *pic);
 void GL_Set2D (void);
-
-int R_LoadTexture (const char *identifier, struct image_s *img,
-		Uint32 *palette, int flags);
 
 #endif // __DRAW_H
 
