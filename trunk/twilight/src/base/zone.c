@@ -44,9 +44,6 @@ static const char rcsid[] =
 
 memzone_t *zonechain = NULL;
 
-void foo (char *x,...) { (*(int *) 0x0)=0; }
-#define Sys_Error	foo
-
 void *_Zone_Alloc(memzone_t *zone, int size, char *filename, int fileline)
 {
 	int i, j, k, needed, endbit, largest;
