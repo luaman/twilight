@@ -147,7 +147,7 @@ R_AddDynamicLights (msurface_t *surf)
 			continue;					// not lit by this light
 
 		rad = cl_dlights[lnum].radius;
-		dist = DotProduct (cl_dlights[lnum].origin, surf->plane->normal) - surf->plane->dist;
+		dist = PlaneDiff(cl_dlights[lnum].origin, surf->plane);
 		rad -= Q_fabs (dist);
 		minlight = cl_dlights[lnum].minlight;
 		if (rad < minlight)

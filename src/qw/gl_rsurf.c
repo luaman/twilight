@@ -153,9 +153,6 @@ R_AddDynamicLights (msurface_t *surf)
 		rad = cl_dlights[lnum].radius;
 
 		dist = PlaneDiff (cl_dlights[lnum].origin, surf->plane);
-		// NQ uses the below statement, QW the above! Which one is right?
-		// dist = DotProduct (cl_dlights[lnum].origin, surf->plane->normal) - surf->plane->dist;
-
 		rad -= Q_fabs (dist);
 		minlight = cl_dlights[lnum].minlight;
 		if (rad < minlight)
