@@ -47,8 +47,8 @@ static const char rcsid[] =
 #include <SDL.h>
 #include "quakedef.h"
 #include "keys.h"
-#include "TGL_funcs.h"
 #include "glquake.h"
+#include "TGL_funcs.h"
 
 #define WARP_WIDTH              640
 #define WARP_HEIGHT             480
