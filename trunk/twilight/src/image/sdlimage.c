@@ -143,6 +143,7 @@ Image_FromSDL (fs_file_t *file, SDL_RWops *rw)
 				memcpy (image->pixels, rgb_surf->pixels, image->width * image->height * sizeof (Uint32));
 				SDL_FreeSurface (rgb_surf);
 				SDL_FreeSurface (surf);
+				SDL_RWclose (rw);
 				return image;
 			} else
 				Sys_Error ("Bad file!\n");

@@ -129,6 +129,7 @@ Image_Load_Multi (const char **names, int flags)
 				return img;
 			}
 
+	SDL_RWclose (rw);
 end:
 	if (flags & TEX_NEED)
 		Sys_Error ("Image_Load_Multi: Unable to load %s\n", names[0]);

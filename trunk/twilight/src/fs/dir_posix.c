@@ -136,6 +136,7 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 			FS_Add_File (group, file, f_stat.st_size, FSD_Open_File, f);
 		Zone_Free (file);
 	}
+	closedir (dir);
 	Zone_Free (full_path);
 }
 

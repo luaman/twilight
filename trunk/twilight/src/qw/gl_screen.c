@@ -115,6 +115,7 @@ static cvar_t   *r_contrast;
 static cvar_t   *cl_avidemo;
 
 static cvar_t	*show_fps;
+extern int		fps_capped0, fps_capped1;
 int				fps_count;
 
 static qboolean	scr_initialized;			/* ready to draw */
@@ -512,12 +513,15 @@ SCR_DrawFPS (void)
 		lastframetime = t;
 	}
 
-	snprintf (st, sizeof (st), "%3d FPS", lastfps);
+	if (show_fps->ivalue == 2)
+		snprintf (st, sizeof (st), "(%d %d) %3d FPS", fps_capped0, fps_capped1, lastfps);
+	else
+		snprintf (st, sizeof (st), "%3d FPS", lastfps);
 	st_len = strlen (st);
 
 	x = vid.width_2d - st_len * con->tsize - con->tsize;
 	y = vid.height_2d - sb_lines - con->tsize;
-	Draw_String_Len (x, y, va("%3d FPS", lastfps), st_len, con->tsize);
+	Draw_String_Len (x, y, st, st_len, con->tsize);
 }
 
 
