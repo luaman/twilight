@@ -407,7 +407,7 @@ extern kbutton_t in_mlook, in_klook;
 extern kbutton_t in_strafe;
 extern kbutton_t in_speed;
 
-#define freelook (m_freelook->value || (in_strafe.state & 1))
+#define freelook (m_freelook->value || (in_mlook.state & 1))
 
 void	CL_InputSetRepeatDelay (struct cvar_s *var);
 void	CL_InputSetRepeatInterval (struct cvar_s *var);
