@@ -36,7 +36,6 @@
 #pragma warning( disable : 4244 4127 4201 4214 4514 4305 4115 4018)
 #endif
 
-#include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,6 +49,7 @@
 #include "sys.h"
 #include "zone.h"
 #include "mathlib.h"
+#include "strlib.h"
 
 #include "net.h"
 #include "protocol.h"
