@@ -68,17 +68,11 @@ cvar_t *fs_userpath;
 cvar_t *fs_gamename;
 cvar_t *registered;
 
-qboolean    com_modified;				// set true if using non-id files
-
 qboolean    msg_suppress_1 = 0;
 
 void        COM_InitFilesystem (void);
 void        COM_Path_f (void);
 
-
-// if a packfile directory differs from this, it is assumed to be hacked
-#define	PAK0_COUNT		339
-#define	PAK0_CRC		52883
 
 qboolean    standard_quake = true, rogue, hipnotic;
 
@@ -1415,7 +1409,6 @@ COM_LoadPackFile (char *packfile)
 	pack_t     *pack;
 	FILE       *packhandle;
 	dpackfile_t info[MAX_FILES_IN_PACK];
-	unsigned short crc;
 
 	if (COM_FileOpenRead (packfile, &packhandle) == -1)
 		return NULL;
@@ -1432,22 +1425,10 @@ COM_LoadPackFile (char *packfile)
 	if (numpackfiles > MAX_FILES_IN_PACK)
 		Sys_Error ("%s has %i files", packfile, numpackfiles);
 
-	if (numpackfiles != PAK0_COUNT)
-		com_modified = true;			// not the original file
-
 	newfiles = Z_Malloc (numpackfiles * sizeof (packfile_t));
 
 	fseek (packhandle, header.dirofs, SEEK_SET);
 	fread (&info, 1, header.dirlen, packhandle);
-
-// crc the directory to check for modifications
-	crc = CRC_Block ((Uint8 *) info, header.dirlen);
-
-//  CRC_Init (&crc);
-//  for (i=0 ; i<header.dirlen ; i++)
-//      CRC_ProcessByte (&crc, ((Uint8 *)info)[i]);
-	if (crc != PAK0_CRC)
-		com_modified = true;
 
 // parse the directory
 	for (i = 0; i < numpackfiles; i++) {
