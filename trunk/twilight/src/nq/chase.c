@@ -1,5 +1,5 @@
 /*
-	$RCSfile$
+	$RCSfile$ -- chase camera code
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -22,7 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// chase.c -- chase camera code
 static const char rcsid[] =
     "$Id$";
 
@@ -37,10 +36,7 @@ static const char rcsid[] =
 #include "quakedef.h"
 #include "strlib.h"
 #include "client.h"
-#include "common.h"
 #include "cvar.h"
-#include "model.h"
-#include "host.h"
 #include "mathlib.h"
 #include "world.h"
 
@@ -73,14 +69,13 @@ Chase_Init (void)
 void
 Chase_Reset (void)
 {
-	// for respawning and teleporting
-//  start position 12 units behind head
+	/* FIXME: for respawning and teleporting start position 12 units behind head */
 }
 
 void
 TraceLine (vec3_t start, vec3_t end, vec3_t impact)
 {
-	trace_t     trace;
+	trace_t	trace;
 
 	memset (&trace, 0, sizeof (trace));
 	VectorCopy (end, trace.endpos);
@@ -92,10 +87,9 @@ TraceLine (vec3_t start, vec3_t end, vec3_t impact)
 void
 Chase_Update (void)
 {
-	int         i;
-	float       dist;
-	vec3_t      forward, up, right;
-	vec3_t      dest, stop;
+	int		i;
+	float	dist;
+	vec3_t	forward, up, right, dest, stop;
 
 
 	// if can't see player, reset
@@ -103,9 +97,8 @@ Chase_Update (void)
 
 	// calc exact destination
 	for (i = 0; i < 3; i++)
-		chase_dest[i] = r_refdef.vieworg[i]
-			- forward[i] * chase_back->value
-			- right[i] * chase_right->value;
+		chase_dest[i] = r_refdef.vieworg[i] - forward[i] * chase_back->value - right[i] * chase_right->value;
+
 	chase_dest[2] = r_refdef.vieworg[2] + chase_up->value;
 
 	// find the spot the player is looking at
@@ -115,8 +108,10 @@ Chase_Update (void)
 	// calculate pitch to look at the same spot from camera
 	VectorSubtract (stop, r_refdef.vieworg, stop);
 	dist = DotProduct (stop, forward);
+
 	if (dist < 1)
 		dist = 1;
+
 	r_refdef.viewangles[PITCH] = -Q_atan (stop[2] / dist) / M_PI * 180;
 
 	// move towards destination
@@ -127,3 +122,4 @@ Chase_Update (void)
 	// move towards destination
 	VectorCopy (chase_dest, r_refdef.vieworg);
 }
+
