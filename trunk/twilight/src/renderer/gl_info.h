@@ -37,7 +37,8 @@
 #define Check_GL_Error()		do {								\
 	int _err;														\
 	if ((_err = qglGetError())) {									\
-		printf("%s %d (%s): Error: %d\n",__FILE__,__LINE__,__FUNCTION__,_err);\
+		fprintf(stderr, "%s %d (%s): Error: %d\n",__FILE__,__LINE__,__FUNCTION__,_err);\
+		fflush(NULL);												\
 	}																\
 } while (0)
 
