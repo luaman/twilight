@@ -930,7 +930,7 @@ M_Menu_Options_f (void)
 void
 M_AdjustSliders (int dir)
 {
-	float		t;
+	float	t;
 
 	S_LocalSound ("misc/menu3.wav");
 
@@ -938,27 +938,27 @@ M_AdjustSliders (int dir)
 		case 3:						// screen size
 			t = scr_viewsize->ivalue + (dir * 10.0f);
 			t = bound (30, t, 120);
-			Cvar_Set (scr_viewsize, va("%f", t));
+			Cvar_Set (scr_viewsize, va ("%f", t));
 			break;
 		case 4:						// gamma
 			t = v_gamma->fvalue + (dir * 0.05f);
 			t = bound (1.0, t, 2.0);
-			Cvar_Set (v_gamma, va("%f", t));
+			Cvar_Set (v_gamma, va ("%f", t));
 			break;
 		case 5:						// software brightness
 			t = r_brightness->fvalue + (dir * 0.25);
 			t = bound (1, t, 5);
-			Cvar_Set (r_brightness, va("%f", t));
+			Cvar_Set (r_brightness, va ("%f", t));
 			break;
 		case 6:						// software contrast (base brightness)
 			t = r_contrast->fvalue + (dir * 0.025);
-			t = bound (.75, t, 1);
-			Cvar_Set (r_contrast, va("%f", t));
+			t = bound (0.75, t, 1);
+			Cvar_Set (r_contrast, va ("%f", t));
 			break;
 		case 7:						// mouse speed
 			t = sensitivity->fvalue + (dir * 0.5f);
 			t = bound (1, t, 11);
-			Cvar_Set (sensitivity, va("%f", t));
+			Cvar_Set (sensitivity, va ("%f", t));
 			break;
 		case 8:						// music volume
 			// Slider doesn't work with SDL
@@ -967,10 +967,10 @@ M_AdjustSliders (int dir)
 		case 9:						// sfx volume
 			t = volume->fvalue + (dir * 0.1f);
 			t = bound (0, t, 1);
-			Cvar_Set (volume, va("%f", t));
+			Cvar_Set (volume, va ("%f", t));
 			break;
 
-		case 10:						// always run
+		case 10:					// always run
 			if (cl_forwardspeed->fvalue > 200) {
 				Cvar_Set (cl_forwardspeed, "200");
 				Cvar_Set (cl_backspeed, "200");
@@ -982,19 +982,19 @@ M_AdjustSliders (int dir)
 
 		case 11:						// invert mouse
 			t = -m_pitch->fvalue;
-			Cvar_Set (m_pitch, va("%f", t));
+			Cvar_Set (m_pitch, va ("%f", t));
 			break;
 
 		case 12:						// lookspring
-			Cvar_Set (lookspring, va("%i", !lookspring->ivalue));
+			Cvar_Set (lookspring, va ("%i", !lookspring->ivalue));
 			break;
 
 		case 13:						// lookstrafe
-			Cvar_Set (lookstrafe, va("%i", !lookstrafe->ivalue));
+			Cvar_Set (lookstrafe, va ("%i", !lookstrafe->ivalue));
 			break;
 
 		case 14:
-			Cvar_Set (cl_sbar,  va ("%i", !cl_sbar->ivalue));
+			Cvar_Set (cl_sbar, va ("%i", !cl_sbar->ivalue));
 			break;
 
 		case 15:
@@ -1002,7 +1002,7 @@ M_AdjustSliders (int dir)
 			break;
 
 		case 16:						// _windowed_mouse
-			Cvar_Set (_windowed_mouse, va("%i", !_windowed_mouse->ivalue));
+			Cvar_Set (_windowed_mouse, va ("%i", !_windowed_mouse->ivalue));
 			break;
 	}
 }
@@ -1086,7 +1086,7 @@ M_Options_Key (int k)
 					Cbuf_AddText ("exec default.cfg\n");
 					break;
 				case 17:
-					M_Menu_Gfx_f();
+					M_Menu_Gfx_f ();
 					break;
 				default:
 					M_AdjustSliders (1);
