@@ -269,8 +269,8 @@ Sys_ConsoleInput (void)
 	static char	text[256];
 	static int		len;
 	INPUT_RECORD	recs[1024];
-	int		dummy;
-	int		ch, numread, numevents;
+	CHAR		ch;
+	DWORD		numevents, numread, dummy;
 
 	if (!isDedicated)
 		return NULL;
