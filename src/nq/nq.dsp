@@ -248,6 +248,10 @@ SOURCE=.\sys.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\teamplay.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\vid_sdl.c
 # End Source File
 # Begin Source File
