@@ -112,6 +112,7 @@ typedef struct mplane_s {
 typedef union {
 	float	f;
 	Uint32	i;
+	Uint8	b[4];
 } float_int_t;
 
 #endif // __QTYPES_H

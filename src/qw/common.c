@@ -520,10 +520,10 @@ MSG_ReadFloat (void)
 		return -1;
 	}
 
-	dat.i = net_message.data[msg_readcount] +
-		(net_message.data[msg_readcount + 1] << 8) +
-		(net_message.data[msg_readcount + 2] << 16) +
-		(net_message.data[msg_readcount + 3] << 24);
+	dat.b[0] = net_message.data[msg_readcount + 0];
+	dat.b[1] = net_message.data[msg_readcount + 1];
+	dat.b[2] = net_message.data[msg_readcount + 2];
+	dat.b[3] = net_message.data[msg_readcount + 3];
 	msg_readcount += 4;
 
 	dat.i = LittleLong (dat.i);
