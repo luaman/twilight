@@ -34,7 +34,7 @@ typedef struct image_s
 	Uint8	   *pixels;
 } image_t;
 
-image_t *IMG_Load (char *name);
+image_t *Image_Load (char *name);
 
 #endif // __IMAGE_H
 
