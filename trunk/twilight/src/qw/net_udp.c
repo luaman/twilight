@@ -79,7 +79,9 @@ netadr_t    net_local_adr;
 netadr_t    net_from;
 sizebuf_t   net_message;
 
-static int	ip_sockets[2];		// non blocking, for receives
+static qboolean net_initialized = false;
+
+static int	ip_sockets[2] = { -1, -1 };	// non blocking, for receives
 
 #define	MAX_UDP_PACKET	8192
 Uint8       net_message_buffer[MAX_UDP_PACKET];
@@ -407,13 +409,15 @@ NET_Init
 void
 NET_Init (void)
 {
-	ip_sockets[NS_CLIENT] = ip_sockets[NS_SERVER] = -1;
+	if (net_initialized)
+		return;
 
 	// 
 	// init the message buffer
 	// 
-	SZ_Init (&net_message, net_message_buffer, 
-		sizeof(net_message_buffer));
+	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
+
+	net_initialized = true;
 }
 
 /*

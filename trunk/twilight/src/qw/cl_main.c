@@ -952,9 +952,6 @@ CL_ReadPackets (void)
 		if (!Netchan_Process (&cls.netchan))
 			continue;					// wasn't accepted for some reason
 		CL_ParseServerMessage ();
-
-//      if (cls.demoplayback && cls.state >= ca_active && !CL_DemoBehind())
-//          return;
 	}
 
 	// 
@@ -1018,7 +1015,8 @@ CL_SbarCallback (cvar_t *cvar)
 	vid.recalc_refdef = true;
 }
 
-void CL_WriteConfig_f (void)
+void 
+CL_WriteConfig_f (void)
 {
 	if (Cmd_Argc () != 2) {
 		Com_Printf ("writeconfig <filename> : dump configuration to file\n");
