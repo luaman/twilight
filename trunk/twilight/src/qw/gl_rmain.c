@@ -92,6 +92,7 @@ cvar_t     *r_wateralpha;
 cvar_t     *r_dynamic;
 cvar_t     *r_novis;
 cvar_t     *r_netgraph;
+cvar_t	   *r_lightlerp;
 
 cvar_t     *gl_clear;
 cvar_t     *gl_cull;
@@ -140,22 +141,6 @@ R_CullBox (vec3_t mins, vec3_t maxs)
 		return true;
 
 	return false;
-}
-
-
-void
-R_RotateForEntity (entity_t *e, qboolean shadow)
-{
-	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
-
-	qglRotatef (e->angles[1], 0, 0, 1);
-
-	if (!shadow)
-	{
-		qglRotatef (-e->angles[0], 0, 1, 0);
-		// ZOID: fixed z angle
-		qglRotatef (e->angles[2], 1, 0, 0);
-	}
 }
 
 /*
@@ -297,6 +282,8 @@ float       r_avertexnormal_dots[SHADEDOT_QUANT][256] =
            ;
 
 float      *shadedots = r_avertexnormal_dots[0];
+float	   *shadedots2 = r_avertexnormal_dots[0];
+float       lightlerpoffset;
 
 int         lastposenum;
 
@@ -333,14 +320,39 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean fb)
 
 			order += 2;
 
+			if (!r_lightlerp->value)
+				l = shadedots[verts->lightnormalindex] * shadelight;
+			else
+			{
+				float l1, l2, diff;
+				l1 = shadedots[verts->lightnormalindex] * shadelight;
+				l2 = shadedots2[verts->lightnormalindex] * shadelight;
+
+				if (l1 != l2)
+				{
+					if (l1 > l2) {
+						diff = l1 - l2;
+						diff *= lightlerpoffset;
+						l = l1 - diff;
+					} else {
+						diff = l2 - l1;
+						diff *= lightlerpoffset;
+						l = l1 + diff;
+					}
+				}
+				else
+				{
+					l = l1;
+				}
+				
+			}
+
 			// normals and vertexes come from the frame list
 			if (!fb) {
 				if (!colorlights) {
-					l = shadedots[verts->lightnormalindex] * shadelight;
 					qglColor3f (l, l, l);
 				}
 				else {
-					l = shadedots[verts->lightnormalindex];
 					qglColor3f (l*lightcolor[0], l*lightcolor[1], l*lightcolor[2]);
 				}
 			}
@@ -398,18 +410,42 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2,
 
 			// normals and vertexes come from the frame list
 			// blend the light intensity from the two frames together
-			d[0] = shadedots[verts2->lightnormalindex]
-				- shadedots[verts1->lightnormalindex];
+			if (!r_lightlerp->value)
+			{
+				d[0] = shadedots[verts2->lightnormalindex] -
+					shadedots[verts1->lightnormalindex];
+				l = shadelight * (shadedots[verts1->lightnormalindex] + (blend * d[0]));
+			}
+			else
+			{
+				float d2, l1, l2, diff;
+				d[0] = shadedots[verts2->lightnormalindex] - shadedots[verts1->lightnormalindex];
+				d2 = shadedots2[verts2->lightnormalindex] - shadedots2[verts1->lightnormalindex];
+				l1 = shadelight * (shadedots[verts1->lightnormalindex] + (blend * d[0]));
+				l2 = shadelight * (shadedots2[verts1->lightnormalindex] + (blend * d2));
+				if (l1 != l2)
+				{
+					if (l1 > l2) {
+						diff = l1 - l2;
+						diff *= lightlerpoffset;
+						l = l1 - diff;
+					} else {
+						diff = l2 - l1;
+						diff *= lightlerpoffset;
+						l = l1 + diff;
+					}
+				}
+				else
+				{
+					l = l1;
+				}
+			}
 
 			if (!fb) {
-				if (!colorlights) {
-					l = shadelight * (shadedots[verts1->lightnormalindex]
-							+ (blend * d[0]));
+				if (!colorlights)
 					qglColor3f (l, l, l);
-				} else {
-					l = shadedots[verts1->lightnormalindex] + (blend * d[0]);
+				else
 					qglColor3f (l*lightcolor[0], l*lightcolor[1], l*lightcolor[2]);
-				}
 			}
 
 			VectorSubtract (verts2->v, verts1->v, d);
@@ -856,6 +892,8 @@ R_DrawAliasModel (entity_t *e)
 			VectorScale (lightcolor, 0.5f, lightcolor);
 			VectorCopy (lightcolor, e->last_light);
 		}
+
+		shadelight = 1;
 	}
 
 	// 
