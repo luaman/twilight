@@ -75,10 +75,6 @@ static vec_t		*mod_origin, *mod_angles;
 static aliashdr_t	*paliashdr;
 static matrix4x4_t	*matrix;
 
-/*
- * START OF NON-COMMON CODE.
- */
-
 #include "host.h"
 
 /*
@@ -366,9 +362,6 @@ R_SetupAliasModel (entity_common_t *e, qboolean viewent)
 	mod_angles = e->angles;
 	draw = true;
 }
-/*
- * END OF NON-COMMON CODE!
- */
 
 static void
 R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec4_t color)
