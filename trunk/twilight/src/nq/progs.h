@@ -53,10 +53,35 @@ typedef struct edict_s {
 
 	float		freetime;				// sv.time when the object was freed
 	entvars_t	v;						// C exported fields from progs
-// other fields from progs come immediately after
+										// other fields from progs come immediately after
 } edict_t;
 
-#define	EDICT_FROM_AREA(l) STRUCT_FROM_LINK(l,edict_t,area)
+extern int eval_gravity;
+extern int eval_button3;
+extern int eval_button4;
+extern int eval_button5;
+extern int eval_button6;
+extern int eval_button7;
+extern int eval_button8;
+extern int eval_items2;
+extern int eval_ammo_shells1;
+extern int eval_ammo_nails1;
+extern int eval_ammo_lava_nails;
+extern int eval_ammo_rockets1;
+extern int eval_ammo_multi_rockets;
+extern int eval_ammo_cells1;
+extern int eval_ammo_plasma;
+extern int eval_idealpitch;
+extern int eval_pitch_speed;
+extern int eval_ping;
+extern int eval_movement;
+extern int eval_punchvector;
+
+// eval_t *GetEdictFieldValue (edict_t *ed, char *field);
+// LordHavoc -- faster macro version
+#define GETEDICTFIELDVALUE(ed, fieldoffset) (fieldoffset ? (eval_t*)((char*)&ed->v + fieldoffset) : NULL)
+
+#define	EDICT_FROM_AREA(l) ((edict_t *)((Uint8 *)l - (int)&(((edict_t *)0)->area)))
 
 //============================================================================
 
@@ -70,38 +95,41 @@ extern globalvars_t	*pr_global_struct;
 extern float		*pr_globals;		// same as pr_global_struct
 
 extern int	pr_edict_size;				// in bytes
+extern int	pr_edictareasize;			// in bytes
 
 //============================================================================
 
-void		PR_Init_Cvars (void);
-void		PR_Init (void);
+void PR_Init_Cvars (void);
+void PR_Init (void);
 
-void		PR_ExecuteProgram (func_t fnum);
-void		PR_LoadProgs (void);
+void PR_ExecuteProgram (func_t fnum, char *errormessage);
+void PR_LoadProgs (void);
 
-void		PR_Profile_f (void);
+void PR_Profile_f (void);
 
-edict_t		*ED_Alloc (void);
-void		ED_Free (edict_t *ed);
+edict_t *ED_Alloc (void);
+void ED_Free (edict_t *ed);
 
-char		*ED_NewString (char *string);
+char *ED_NewString (char *string);
 
 // returns a copy of the string allocated from the server's string heap
 
-void		ED_Print (edict_t *ed);
-void		ED_Write (FILE * f, edict_t *ed);
-char		*ED_ParseEdict (char *data, edict_t *ent);
+void ED_Print (edict_t *ed);
+void ED_Write (FILE * f, edict_t *ed);
+char *ED_ParseEdict (char *data, edict_t *ent);
 
-void		ED_WriteGlobals (FILE * f);
-void		ED_ParseGlobals (char *data);
+void ED_WriteGlobals (FILE * f);
+void ED_ParseGlobals (char *data);
 
-void		ED_LoadFromFile (char *data);
+void ED_LoadFromFile (char *data);
 
+edict_t *EDICT_NUM_ERROR(int n);
+#define EDICT_NUM(n) (n >= 0 ? (n < sv.max_edicts ? (edict_t *)((Uint8 *)sv.edicts + (n) * pr_edict_size) : EDICT_NUM_ERROR(n)) : EDICT_NUM_ERROR(n))
 //define EDICT_NUM(n) ((edict_t *)(sv.edicts+ (n)*pr_edict_size))
 //define NUM_FOR_EDICT(e) (((Uint8 *)(e) - sv.edicts)/pr_edict_size)
 
-edict_t    *EDICT_NUM (int n);
-int         NUM_FOR_EDICT (edict_t *e);
+// edict_t *EDICT_NUM (int n); -- Macroized for speed LordHavoc
+int NUM_FOR_EDICT (edict_t *e, char *filename, int fileline);
 
 #define	NEXT_EDICT(e) ((edict_t *)( (Uint8 *)e + pr_edict_size))
 
@@ -113,7 +141,7 @@ int         NUM_FOR_EDICT (edict_t *e);
 #define	G_FLOAT(o) (pr_globals[o])
 #define	G_INT(o) (*(int *)&pr_globals[o])
 #define	G_EDICT(o) ((edict_t *)((Uint8 *)sv.edicts+ *(int *)&pr_globals[o]))
-#define G_EDICTNUM(o) NUM_FOR_EDICT(G_EDICT(o))
+#define G_EDICTNUM(o) NUM_FOR_EDICT(G_EDICT(o), __FILE__, __LINE__)
 #define	G_VECTOR(o) (&pr_globals[o])
 #define	G_STRING(o) (pr_strings + *(string_t *)&pr_globals[o])
 #define	G_FUNCTION(o) (*(func_t *)&pr_globals[o])
@@ -137,12 +165,10 @@ extern int  pr_xstatement;
 
 extern unsigned short pr_crc;
 
-void		PR_RunError (char *error, ...);
+void PR_RunError (char *error, ...);
 
-void		ED_PrintEdicts (void);
-void		ED_PrintNum (int ent);
-
-eval_t		*GetEdictFieldValue (edict_t *ed, char *field);
+void ED_PrintEdicts (void);
+void ED_PrintNum (int ent);
 
 #endif // __PROGS_H
 

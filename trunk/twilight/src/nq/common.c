@@ -1236,6 +1236,12 @@ COM_LoadFile (char *path, int usehunk, qboolean complain)
 }
 
 Uint8 *
+COM_LoadZoneFile (char *path, qboolean complain)
+{
+	return COM_LoadFile (path, 0, complain);
+}
+
+Uint8 *
 COM_LoadHunkFile (char *path, qboolean complain)
 {
 	return COM_LoadFile (path, 1, complain);

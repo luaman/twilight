@@ -555,7 +555,7 @@ CL_RelinkEntities (void)
 		if (ent->model->flags)
 		{
 			if (ent->model->flags & EF_ROTATE) {
-				ent->angles[1] = anglemod (100 * (cl.time + ent->syncbase));
+				ent->angles[1] = ANGLEMOD (100 * (cl.time + ent->syncbase));
 			}
 			if (ent->model->flags & EF_GIB)
 				R_RocketTrail (oldorg, ent->origin, 2);

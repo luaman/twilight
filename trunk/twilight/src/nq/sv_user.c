@@ -56,6 +56,7 @@ cvar_t			*sv_edgefriction;
 cvar_t			*sv_idealpitchscale;
 cvar_t			*sv_maxspeed;
 cvar_t			*sv_accelerate;
+cvar_t			*sv_predict;
 extern cvar_t	*sv_stopspeed;
 
 static vec3_t forward, right, up;
@@ -238,7 +239,8 @@ SV_AirAccelerate (vec3_t wishveloc)
 void
 DropPunchAngle (void)
 {
-	float       len;
+	float	len;
+	eval_t	*val;
 
 	len = VectorNormalize (sv_player->v.punchangle);
 
@@ -246,6 +248,16 @@ DropPunchAngle (void)
 	if (len < 0)
 		len = 0;
 	VectorScale (sv_player->v.punchangle, len, sv_player->v.punchangle);
+
+	if ((val = GETEDICTFIELDVALUE(sv_player, eval_punchvector)))
+	{
+		len = VectorNormalize (val->vector);
+		
+		len -= 20 * host_frametime;
+		if (len < 0)
+			len = 0;
+		VectorScale (val->vector, len, val->vector);
+	}
 }
 
 /*
@@ -440,31 +452,59 @@ SV_ReadClientMove
 void
 SV_ReadClientMove (usercmd_t *move)
 {
-	int         i;
-	vec3_t      angle;
-	int         bits;
+	int		i, bits;
+	float	total;
+	vec3_t	angle;
+	eval_t	*val;
 
-// read ping time
+	// read ping time
 	host_client->ping_times[host_client->num_pings % NUM_PING_TIMES]
 		= sv.time - MSG_ReadFloat ();
 	host_client->num_pings++;
 
-// read current angles  
+	for (i = 0, total = 0; i < NUM_PING_TIMES; i++)
+		total += host_client->ping_times[i];
+
+	host_client->ping = total / NUM_PING_TIMES; // can be used for prediction
+	host_client->latency = 0;
+
+	// if paused or a local game, don't predict
+// FIXME
+//	if (sv_predict->value && (svs.maxclients > 1) && (!sv.paused)) 
+//		host_client->latency = host_client->ping;
+
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_ping)))
+		val->_float = host_client->ping * 1000.0;
+
+	// read current angles  
 	for (i = 0; i < 3; i++)
 		angle[i] = MSG_ReadAngle ();
 
 	VectorCopy (angle, host_client->edict->v.v_angle);
 
-// read movement
+	// read movement
 	move->forwardmove = MSG_ReadShort ();
 	move->sidemove = MSG_ReadShort ();
 	move->upmove = MSG_ReadShort ();
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_movement)))
+	{
+		val->vector[0] = move->forwardmove;
+		val->vector[1] = move->sidemove;
+		val->vector[2] = move->upmove;
+	}
 
-// read buttons
+	// read buttons
 	bits = MSG_ReadByte ();
 	host_client->edict->v.button0 = bits & 1;
 	host_client->edict->v.button2 = (bits & 2) >> 1;
 	host_client->edict->v.button1 = (bits & 4) >> 2;
+	// LordHavoc: added 6 new buttons
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button3))) val->_float = ((bits >> 2) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button4))) val->_float = ((bits >> 3) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button5))) val->_float = ((bits >> 4) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button6))) val->_float = ((bits >> 5) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button7))) val->_float = ((bits >> 6) & 1);
+	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_button8))) val->_float = ((bits >> 7) & 1);
 
 	i = MSG_ReadByte ();
 	if (i)
@@ -481,9 +521,9 @@ Returns false if the client should be killed
 qboolean
 SV_ReadClientMessage (void)
 {
-	int         ret;
-	int         cmd;
-	char       *s;
+	int		ret;
+	int		cmd;
+	char	*s;
 
 	do {
 	  nextmsg:
@@ -526,50 +566,36 @@ SV_ReadClientMessage (void)
 						ret = 2;
 					else
 						ret = 0;
-					if (strncasecmp (s, "status", 6) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "god", 3) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "notarget", 8) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "fly", 3) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "name", 4) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "noclip", 6) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "say", 3) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "say_team", 8) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "tell", 4) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "color", 5) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "kill", 4) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "pause", 5) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "spawn", 5) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "begin", 5) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "prespawn", 8) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "kick", 4) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "ping", 4) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "give", 4) == 0)
-						ret = 1;
-					else if (strncasecmp (s, "ban", 3) == 0)
-						ret = 1;
-					if (ret == 2)
-						Cbuf_InsertText (s);
-					else if (ret == 1)
-						Cmd_ExecuteString (s, src_client);
+					if (strncasecmp (s, "status", 6) == 0 ||
+						strncasecmp (s, "god", 3) == 0 ||
+						strncasecmp (s, "notarget", 8) == 0 ||
+						strncasecmp (s, "fly", 3) == 0 ||
+						strncasecmp (s, "name", 4) == 0 ||
+						strncasecmp (s, "noclip", 6) == 0 ||
+						strncasecmp (s, "say", 3) == 0 ||
+						strncasecmp (s, "say_team", 8) == 0 ||
+						strncasecmp (s, "tell", 4) == 0 ||
+						strncasecmp (s, "color", 5) == 0 ||
+						strncasecmp (s, "kill", 4) == 0 ||
+						strncasecmp (s, "pause", 5) == 0 ||
+						strncasecmp (s, "spawn", 5) == 0 ||
+						strncasecmp (s, "begin", 5) == 0 ||
+						strncasecmp (s, "prespawn", 8) == 0 ||
+						strncasecmp (s, "kick", 4) == 0 ||
+						strncasecmp (s, "ping", 4) == 0 ||
+						strncasecmp (s, "give", 4) == 0 ||
+						strncasecmp (s, "ban", 3) == 0)
+					{
+							ret = 1;
+							Cmd_ExecuteString (s, src_client);
+					}
 					else
-						Com_DPrintf ("%s tried to %s\n", host_client->name, s);
+					{
+						if (ret == 2)
+							Cbuf_InsertText (s);
+						else
+							Com_DPrintf ("%s tried to %s\n", host_client->name, s);
+					}
 					break;
 
 				case clc_disconnect:

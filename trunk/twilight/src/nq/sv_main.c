@@ -176,7 +176,7 @@ SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 		return;
 	}
 
-	ent = NUM_FOR_EDICT (entity);
+	ent = NUM_FOR_EDICT (entity, __FILE__, __LINE__);
 
 	channel = (ent << 3) | channel;
 
@@ -256,7 +256,7 @@ SV_SendServerinfo (client_t *client)
 
 // set view 
 	MSG_WriteByte (&client->message, svc_setview);
-	MSG_WriteShort (&client->message, NUM_FOR_EDICT (client->edict));
+	MSG_WriteShort (&client->message, NUM_FOR_EDICT (client->edict, __FILE__, __LINE__));
 
 	MSG_WriteByte (&client->message, svc_signonnum);
 	MSG_WriteByte (&client->message, 1);
@@ -291,7 +291,7 @@ SV_ConnectClient (int clientnum)
 
 	ent = EDICT_NUM (edictnum);
 
-// set up the client_t
+	// set up the client_t
 	netconnection = client->netconnection;
 
 	if (sv.loadgame)
@@ -313,7 +313,7 @@ SV_ConnectClient (int clientnum)
 		memcpy (client->spawn_parms, spawn_parms, sizeof (spawn_parms));
 	else {
 		// call the progs to get default spawn parms for the new client
-		PR_ExecuteProgram (pr_global_struct->SetNewParms);
+		PR_ExecuteProgram (pr_global_struct->SetNewParms, "QC function SetNewParms is missing.");
 		for (i = 0; i < NUM_SPAWN_PARMS; i++)
 			client->spawn_parms[i] = (&pr_global_struct->parm1)[i];
 	}
@@ -618,12 +618,11 @@ SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 		ent->v.dmg_take = 0;
 		ent->v.dmg_save = 0;
 	}
-//
-// send the current viewpos offset from the view entity
-//
-	SV_SetIdealPitch ();				// how much to look up / down ideally
 
-// a fixangle might get lost in a dropped packet.  Oh well.
+	// send the current viewpos offset from the view entity
+	SV_SetIdealPitch ();	// how much to look up / down ideally
+
+	// a fixangle might get lost in a dropped packet.  Oh well.
 	if (ent->v.fixangle) {
 		MSG_WriteByte (msg, svc_setangle);
 		for (i = 0; i < 3; i++)
@@ -639,11 +638,9 @@ SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 	if (ent->v.idealpitch)
 		bits |= SU_IDEALPITCH;
 
-// stuff the sigil bits into the high bits of items for sbar, or else
-// mix in items2
-	val = GetEdictFieldValue (ent, "items2");
-
-	if (val)
+	// stuff the sigil bits into the high bits of items for sbar, or else
+	// mix in items2
+	if ((val = GETEDICTFIELDVALUE (ent, eval_items2)))
 		items = (int) ent->v.items | ((int) val->_float << 23);
 	else
 		items =
@@ -673,8 +670,7 @@ SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 //  if (ent->v.weapon)
 	bits |= SU_WEAPON;
 
-// send the data
-
+	// send the data
 	MSG_WriteByte (msg, svc_clientdata);
 	MSG_WriteShort (msg, bits);
 
@@ -691,7 +687,7 @@ SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 			MSG_WriteChar (msg, ent->v.velocity[i] / 16);
 	}
 
-// [always sent]    if (bits & SU_ITEMS)
+	// [always sent]    if (bits & SU_ITEMS)
 	MSG_WriteLong (msg, items);
 
 	if (bits & SU_WEAPONFRAME)
@@ -737,16 +733,16 @@ SV_SendClientDatagram (client_t *client)
 	MSG_WriteByte (&msg, svc_time);
 	MSG_WriteFloat (&msg, sv.time);
 
-// add the client specific data to the datagram
+	// add the client specific data to the datagram
 	SV_WriteClientdataToMessage (client->edict, &msg);
 
 	SV_WriteEntitiesToClient (client->edict, &msg);
 
-// copy the server datagram if there is space
+	// copy the server datagram if there is space
 	if (msg.cursize + sv.datagram.cursize < msg.maxsize)
 		SZ_Write (&msg, sv.datagram.data, sv.datagram.cursize);
 
-// send the datagram
+	// send the datagram
 	if (NET_SendUnreliableMessage (client->netconnection, &msg) == -1) {
 		SV_DropClient (true);			// if the message couldn't send, kick
 										// off
@@ -935,7 +931,7 @@ SV_CreateBaseline (void)
 
 	for (entnum = 0; entnum < sv.num_edicts; entnum++) {
 		// get the current server version
-		svent = EDICT_NUM (entnum);
+		svent = EDICT_NUM ((Sint32) entnum);
 		if (svent->free)
 			continue;
 		if (entnum > svs.maxclients && !svent->v.modelindex)
@@ -1022,7 +1018,7 @@ SV_SaveSpawnparms (void)
 
 		// call the progs to get default spawn parms for the new client
 		pr_global_struct->self = EDICT_TO_PROG (host_client->edict);
-		PR_ExecuteProgram (pr_global_struct->SetChangeParms);
+		PR_ExecuteProgram (pr_global_struct->SetChangeParms, "QC function SetNewParms is missing.");
 		for (j = 0; j < NUM_SPAWN_PARMS; j++)
 			host_client->spawn_parms[j] = (&pr_global_struct->parm1)[j];
 	}
@@ -1053,15 +1049,11 @@ SV_SpawnServer (char *server)
 	Com_DPrintf ("SpawnServer: %s\n", server);
 	svs.changelevel_issued = false;		// now safe to issue another
 
-	//
 	// tell all connected clients that we are going to a new level
-	//
-	if (sv.active) {
+	if (sv.active)
 		SV_SendReconnect ();
-	}
-	//
+
 	// make cvars consistent
-	//
 	if (coop->value)
 		Cvar_Set (deathmatch, "0");
 	if (deathmatch->value)
@@ -1071,9 +1063,7 @@ SV_SpawnServer (char *server)
 
 	Cvar_Set (skill, va("%i", current_skill));
 
-	//
 	// set up the new server
-	//
 	Host_ClearMemory ();
 
 	memset (&sv, 0, sizeof (sv));
@@ -1103,7 +1093,7 @@ SV_SpawnServer (char *server)
 	// leave slots at start for clients only
 	sv.num_edicts = svs.maxclients + 1;
 	for (i = 0; i < svs.maxclients; i++) {
-		ent = EDICT_NUM (i + 1);
+		ent = EDICT_NUM ((Sint32) i + 1);
 		svs.clients[i].edict = ent;
 	}
 
@@ -1124,9 +1114,7 @@ SV_SpawnServer (char *server)
 	}
 	sv.models[1] = sv.worldmodel;
 
-	//
 	// clear world interaction links
-	//
 	SV_ClearWorld ();
 
 	sv.sound_precache[0] = pr_strings;
@@ -1138,9 +1126,7 @@ SV_SpawnServer (char *server)
 		sv.models[i + 1] = Mod_ForName (localmodels[i], false);
 	}
 
-//
-// load the rest of the entities
-//  
+	// load the rest of the entities
 	ent = EDICT_NUM (0);
 	memset (&ent->v, 0, progs->entityfields * 4);
 	ent->free = false;
@@ -1156,7 +1142,7 @@ SV_SpawnServer (char *server)
 
 	pr_global_struct->mapname = sv.name - pr_strings;
 
-// serverflags are for cross level information (sigils)
+	// serverflags are for cross level information (sigils)
 	pr_global_struct->serverflags = svs.serverflags;
 
 	ED_LoadFromFile (sv.worldmodel->entities);
@@ -1165,18 +1151,18 @@ SV_SpawnServer (char *server)
 
 	sv.active = true;
 
-// all setup is completed, any further precache statements are errors
+	// all setup is completed, any further precache statements are errors
 	sv.state = ss_active;
 
-// run two frames to allow everything to settle
+	// run two frames to allow everything to settle
 	host_frametime = 0.1;
 	SV_Physics ();
 	SV_Physics ();
 
-// create a baseline for more efficient communications
+	// create a baseline for more efficient communications
 	SV_CreateBaseline ();
 
-// send serverinfo to all connected clients
+	// send serverinfo to all connected clients
 	for (i = 0, host_client = svs.clients; i < svs.maxclients;
 		 i++, host_client++)
 		if (host_client->active)

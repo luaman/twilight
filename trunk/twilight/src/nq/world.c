@@ -323,13 +323,13 @@ SV_TouchLinks (edict_t *ent, areanode_t *node)
 		pr_global_struct->self = EDICT_TO_PROG (touch);
 		pr_global_struct->other = EDICT_TO_PROG (ent);
 		pr_global_struct->time = sv.time;
-		PR_ExecuteProgram (touch->v.touch);
+		PR_ExecuteProgram (touch->v.touch, "");
 
 		pr_global_struct->self = old_self;
 		pr_global_struct->other = old_other;
 	}
 
-// recurse down both sides
+	// recurse down both sides
 	if (node->axis == -1)
 		return;
 

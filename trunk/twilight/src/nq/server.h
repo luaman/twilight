@@ -35,11 +35,11 @@
 #include "net.h"
 
 typedef struct {
-	Uint32		maxclients;
-	int         maxclientslimit;
-	struct client_s *clients;			// [maxclients]
-	int         serverflags;			// episode completion information
-	qboolean    changelevel_issued;		// cleared when at SV_SpawnServer
+	Uint32			maxclients;
+	int				maxclientslimit;
+	struct client_s	*clients;			// [maxclients]
+	int				serverflags;			// episode completion information
+	qboolean		changelevel_issued;		// cleared when at SV_SpawnServer
 } server_static_t;
 
 //=============================================================================
@@ -67,7 +67,7 @@ typedef struct {
 	char			*lightstyles[MAX_LIGHTSTYLES];
 	Uint32			num_edicts;
 	int				max_edicts;
-	edict_t    		*edicts;					// can NOT be array indexed, because
+	edict_t			*edicts;					// can NOT be array indexed, because
 												// edict_t is variable sized, but can
 												// be used to reference the world ent
 
@@ -84,15 +84,15 @@ typedef struct {
 } server_t;
 
 
-#define	NUM_PING_TIMES		16
-#define	NUM_SPAWN_PARMS		16
+#define	NUM_PING_TIMES	16
+#define	NUM_SPAWN_PARMS	16
 
 typedef struct client_s {
-	qboolean    active;					// false = client is free
-	qboolean    spawned;				// false = don't send datagrams
-	qboolean    dropasap;				// has been told to go to another level
-	qboolean    privileged;				// can execute any host command
-	qboolean    sendsignon;				// only valid before spawned
+	qboolean	active;					// false = client is free
+	qboolean	spawned;				// false = don't send datagrams
+	qboolean	dropasap;				// has been told to go to another level
+	qboolean	privileged;				// can execute any host command
+	qboolean	sendsignon;				// only valid before spawned
 
 	double      last_message;			// reliable messages must be sent
 	// periodically
@@ -105,18 +105,20 @@ typedef struct client_s {
 	sizebuf_t   message;				// can be added to at any time,
 	// copied and clear once per frame
 	Uint8       msgbuf[MAX_MSGLEN];
-	edict_t    *edict;					// EDICT_NUM(clientnum+1)
-	char        name[32];				// for printing to other people
-	int         colors;
+	edict_t		*edict;					// EDICT_NUM(clientnum+1)
+	char		name[32];				// for printing to other people
+	int			colors;
 
-	float       ping_times[NUM_PING_TIMES];
-	int         num_pings;				// ping_times[num_pings%NUM_PING_TIMES]
+	float		ping_times[NUM_PING_TIMES];
+	int			num_pings;				// ping_times[num_pings%NUM_PING_TIMES]
+	float		ping;				// LordHavoc: can be used for prediction or whatever...
+	float		latency;			// LordHavoc: specifically used for prediction, accounts for sys_ticrate too
 
-// spawn parms are carried from level to level
-	float       spawn_parms[NUM_SPAWN_PARMS];
+	// spawn parms are carried from level to level
+	float		spawn_parms[NUM_SPAWN_PARMS];
 
-// client known data for deltas 
-	int         old_frags;
+	// client known data for deltas 
+	int			old_frags;
 } client_t;
 
 
@@ -201,42 +203,42 @@ extern edict_t *sv_player;
 
 //===========================================================
 
-void        SV_Init (void);
+void SV_Init (void);
 
-void        SV_StartParticle (vec3_t org, vec3_t dir, int color, int count);
-void        SV_StartSound (edict_t *entity, int channel, char *sample,
+void SV_StartParticle (vec3_t org, vec3_t dir, int color, int count);
+void SV_StartSound (edict_t *entity, int channel, char *sample,
 						   int volume, float attenuation);
 
-void        SV_DropClient (qboolean crash);
+void SV_DropClient (qboolean crash);
 
-void        SV_SendClientMessages (void);
-void        SV_ClearDatagram (void);
+void SV_SendClientMessages (void);
+void SV_ClearDatagram (void);
 
-int         SV_ModelIndex (char *name);
+int SV_ModelIndex (char *name);
 
-void        SV_SetIdealPitch (void);
+void SV_SetIdealPitch (void);
 
-void        SV_AddUpdates (void);
+void SV_AddUpdates (void);
 
-void        SV_ClientThink (void);
-void        SV_AddClientToServer (struct qsocket_s *ret);
+void SV_ClientThink (void);
+void SV_AddClientToServer (struct qsocket_s *ret);
 
-void        SV_ClientPrintf (char *fmt, ...);
-void        SV_BroadcastPrintf (char *fmt, ...);
+void SV_ClientPrintf (char *fmt, ...);
+void SV_BroadcastPrintf (char *fmt, ...);
 
-void        SV_Physics (void);
+void SV_Physics (void);
 
-qboolean    SV_CheckBottom (edict_t *ent);
-qboolean    SV_movestep (edict_t *ent, vec3_t move, qboolean relink);
+qboolean SV_CheckBottom (edict_t *ent);
+qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink);
 
-void        SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg);
+void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg);
 
-void        SV_MoveToGoal (void);
+void SV_MoveToGoal (void);
 
-void        SV_CheckForNewClients (void);
-void        SV_RunClients (void);
-void        SV_SaveSpawnparms ();
-void        SV_SpawnServer (char *server);
+void SV_CheckForNewClients (void);
+void SV_RunClients (void);
+void SV_SaveSpawnparms ();
+void SV_SpawnServer (char *server);
 
 #endif // __SERVER_H
 
