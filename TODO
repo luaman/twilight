@@ -7,22 +7,37 @@ These things need to be done before first public release:
   - Make +set happen as early as possible
   - Add Cvars fs_sharepath and fs_userpath
   - Global config file support
-  - Documentation, we've changed enough that this is necessary
+  - Website updates
+    - Important non-project files
+    - Releases page
+    - IRC info
+    - Credits page
+    - A few links to important sites
+    - Overview update to reflect changing project dynamics
+    - CVS walktrhoughs
+    - Anything else we can get done by release date
+  - Packaging scripts
+  - cvs2cl target in autoconf to keep the ChangeLog current
 
+Would be nice but is not strictly needed, in importance order:
 
-Would be nice, in importance order:
-
+  - Rebuild Frosty's (irc bot's) source and put it in CVS
+  - MySQL-based news
   - Fix targa loader
+  - Mac port
   - Produce a dedicated server for NQ
   - Convert Cvars from list to hash
   - SDL audio, massive portability bonus to doing this now
   - Rid ourselves of the monolithic header
+  - Nightly CVS snapshots
+  - Use SDL datatypes where appropriate
   - Merge QW server into QW client ala NQ
   - Prettiness features all around
   - Console font
   - Use callbacks for Cvars where appropriate
   - Menu overhaul
   - Knghtbrd's server console
+  - Use SDL functions to simplify code
   - Change resolutions in-game
 
 
@@ -30,13 +45,14 @@ Stuff that can wait:
 
   - Add PNG loader
   - Zip archive support
+  - Cvar improvements
+    - Implement CVAR_TEMP for progs-created vars
+    - Implement Cvar_Clean to delete CVAR_TEMPs that aren't CVAR_USER
+    - Implement flag manipulation functions for internal use
 
 
 Stuff that definitely should wait:
 
   - The New Protocol(TM)
-  - Cvar improvements
-    - Implement CVAR_TEMP for progs-created vars
-    - Implement Cvar_Clean to delete CVAR_TEMPs that aren't CVAR_USER
-    - Implement flag manipulation functions for internal use
+  - Design a new HUD system
 
