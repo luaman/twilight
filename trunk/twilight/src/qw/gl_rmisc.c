@@ -159,7 +159,7 @@ R_Init_Cvars (void)
 
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 
-	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_NONE, NULL);
+	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
 }
 
 /*
