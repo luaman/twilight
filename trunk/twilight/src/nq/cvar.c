@@ -109,8 +109,6 @@ Cvar_Get (const char *name, const char *value, const int flags,
 void
 Cvar_Set (cvar_t *var, const char *value)
 {
-	int		i;
-
 	if (var->string)
 	{
 		if (Q_strcasecmp (value, var->string) == 0)
@@ -120,11 +118,8 @@ Cvar_Set (cvar_t *var, const char *value)
 
 	var->string = Z_Malloc (Q_strlen(value) + 1);
 	Q_strcpy (var->string, value);
-	for (i = 0; i < 5; i++)
-		var->value[i] = 0.0f;
-	sscanf (value, "%f%*[ ,]%f%*[ ,]%f%*[ ,]%f%*[ ,]%f",
-			&var->value[0], &var->value[1], &var->value[2],
-			&var->value[3], &var->value[4]);
+	
+	var->value = Q_atof (var->string);
 	if (var->callback)
 		var->callback (var);
 	
@@ -173,9 +168,9 @@ Cvar_Slide (cvar_t *var, const float change)
 {
 	static char		buf[128];
 
-	var->value[0] += change;
+	var->value += change;
 	Z_Free (var->string);
-	Q_snprintf (buf, 128, "%f", var->value[0]);
+	Q_snprintf (buf, 128, "%f", var->value);
 	var->string = Z_Malloc (Q_strlen (buf) + 1);
 	Q_strcpy (var->string, buf);
 

@@ -722,8 +722,8 @@ M_Menu_Setup_f (void)
 	m_entersound = true;
 	Q_strcpy (setup_myname, _cl_name->string);
 	Q_strcpy (setup_hostname, hostname->string);
-	setup_top = setup_oldtop = ((int) _cl_color->value[0]) >> 4;
-	setup_bottom = setup_oldbottom = ((int) _cl_color->value[0]) & 15;
+	setup_top = setup_oldtop = ((int) _cl_color->value) >> 4;
+	setup_bottom = setup_oldbottom = ((int) _cl_color->value) & 15;
 }
 
 
@@ -1064,17 +1064,17 @@ M_AdjustSliders (int dir)
 
 	switch (options_cursor) {
 		case 3:						// screen size
-			t = scr_viewsize->value[0] + (dir * 10.0f);
+			t = scr_viewsize->value + (dir * 10.0f);
 			t = bound (30, t, 120);
 			Cvar_Set (scr_viewsize, va("%f", t));
 			break;
 		case 4:						// gamma
-			t = v_gamma->value[0] - (dir * 0.05f);
+			t = v_gamma->value - (dir * 0.05f);
 			t = bound (0.5, t, 1.0);
 			Cvar_Set (v_gamma, va("%f", t));
 			break;
 		case 5:						// mouse speed
-			t = sensitivity->value[0] + (dir * 0.5f);
+			t = sensitivity->value + (dir * 0.5f);
 			t = bound (1, t, 11);
 			Cvar_Set (sensitivity, va("%f", t));
 			break;
@@ -1091,17 +1091,17 @@ M_AdjustSliders (int dir)
 				bgmvolume.value = 1;
 			Cvar_SetValue ("bgmvolume", bgmvolume.value);
 #else
-			Cvar_Set (bgmvolume, bgmvolume->value[0] ? "0" : "1");
+			Cvar_Set (bgmvolume, bgmvolume->value ? "0" : "1");
 #endif
 			break;
 		case 7:						// sfx volume
-			t = volume->value[0] + (dir * 0.1f);
+			t = volume->value + (dir * 0.1f);
 			t = bound (0, t, 1);
 			Cvar_Set (volume, va("%f", t));
 			break;
 
 		case 8:						// always run
-			if (cl_forwardspeed->value[0] > 200) {
+			if (cl_forwardspeed->value > 200) {
 				Cvar_Set (cl_forwardspeed, "200");
 				Cvar_Set (cl_backspeed, "200");
 			} else {
@@ -1111,20 +1111,20 @@ M_AdjustSliders (int dir)
 			break;
 
 		case 9:						// invert mouse
-			t = -m_pitch->value[0];
+			t = -m_pitch->value;
 			Cvar_Set (m_pitch, va("%f", t));
 			break;
 
 		case 10:						// lookspring
-			Cvar_Set (lookspring, va("%i", !lookspring->value[0]));
+			Cvar_Set (lookspring, va("%i", !lookspring->value));
 			break;
 
 		case 11:						// lookstrafe
-			Cvar_Set (lookstrafe, va("%i", !lookstrafe->value[0]));
+			Cvar_Set (lookstrafe, va("%i", !lookstrafe->value));
 			break;
 
 		case 13:						// _windowed_mouse
-			Cvar_Set (_windowed_mouse, va("%i", !_windowed_mouse->value[0]));
+			Cvar_Set (_windowed_mouse, va("%i", !_windowed_mouse->value));
 			break;
 
 		case 14:
@@ -1175,42 +1175,42 @@ M_Options_Draw (void)
 	M_Print (16, 48, "     Reset to defaults");
 
 	M_Print (16, 56, "           Screen size");
-	r = (scr_viewsize->value[0] - 30) / (120 - 30);
+	r = (scr_viewsize->value - 30) / (120 - 30);
 	M_DrawSlider (220, 56, r);
 
 	M_Print (16, 64, "            Brightness");
-	r = (1.0 - v_gamma->value[0]) / 0.5;
+	r = (1.0 - v_gamma->value) / 0.5;
 	M_DrawSlider (220, 64, r);
 
 	M_Print (16, 72, "           Mouse Speed");
-	r = (sensitivity->value[0] - 1) / 10;
+	r = (sensitivity->value - 1) / 10;
 	M_DrawSlider (220, 72, r);
 
 	M_Print (16, 80, "       CD Music Volume");
-	r = bgmvolume->value[0];
+	r = bgmvolume->value;
 	M_DrawSlider (220, 80, r);
 
 	M_Print (16, 88, "          Sound Volume");
-	r = volume->value[0];
+	r = volume->value;
 	M_DrawSlider (220, 88, r);
 
 	M_Print (16, 96, "            Always Run");
-	M_DrawCheckbox (220, 96, cl_forwardspeed->value[0] > 200);
+	M_DrawCheckbox (220, 96, cl_forwardspeed->value > 200);
 
 	M_Print (16, 104, "          Invert Mouse");
-	M_DrawCheckbox (220, 104, m_pitch->value[0] < 0);
+	M_DrawCheckbox (220, 104, m_pitch->value < 0);
 
 	M_Print (16, 112, "            Lookspring");
-	M_DrawCheckbox (220, 112, lookspring->value[0]);
+	M_DrawCheckbox (220, 112, lookspring->value);
 
 	M_Print (16, 120, "            Lookstrafe");
-	M_DrawCheckbox (220, 120, lookstrafe->value[0]);
+	M_DrawCheckbox (220, 120, lookstrafe->value);
 
 	if (vid_menudrawfn)
 		M_Print (16, 128, "         Video Options");
 
 	M_Print (16, 136, "             Use Mouse");
-	M_DrawCheckbox (220, 136, _windowed_mouse->value[0]);
+	M_DrawCheckbox (220, 136, _windowed_mouse->value);
 
 	M_Print (16, 144, "      Graphics Options");
 
@@ -1328,26 +1328,26 @@ M_Gfx_Draw (void)
 	M_Print (16, 32, "                      ");
 
 	M_Print (16, 32, "         Smooth models");
-	M_DrawCheckbox (220, 32, gl_smoothmodels->value[0]);
+	M_DrawCheckbox (220, 32, gl_smoothmodels->value);
 
 	M_Print (16, 40, "         Affine models");
-	M_DrawCheckbox (220, 40, gl_affinemodels->value[0]);
+	M_DrawCheckbox (220, 40, gl_affinemodels->value);
 
 	M_Print (16, 48, "      Fullbright models");
-	M_DrawCheckbox (220, 48, gl_fb_models->value[0]);
+	M_DrawCheckbox (220, 48, gl_fb_models->value);
 
 	M_Print (16, 56, "   Fast dynamic lights");
-	M_DrawCheckbox (220, 56, gl_flashblend->value[0]);
+	M_DrawCheckbox (220, 56, gl_flashblend->value);
 
 	M_Print (16, 64, "               Shadows");
 	M_Print (220, 64, 
-		(r_shadows->value[0]) ? (r_shadows->value[0] == 2 ? "nice" : "fast") : "off");
+		(r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off");
 
 	M_Print (16, 72, "   Frame interpolation");
-	M_DrawCheckbox (220, 72, gl_im_animation->value[0]);
+	M_DrawCheckbox (220, 72, gl_im_animation->value);
 
 	M_Print (16, 80, "  Motion interpolation");
-	M_DrawCheckbox (220, 80, gl_im_transform->value[0]);
+	M_DrawCheckbox (220, 80, gl_im_transform->value);
 
 // cursor
 	M_DrawCharacter (200, 32 + gfx_cursor * 8,
@@ -1362,38 +1362,38 @@ M_Gfx_Set (void)
 	switch (gfx_cursor)
 	{
 		case 0:
-			v = !(int)gl_smoothmodels->value[0];
+			v = !(int)gl_smoothmodels->value;
 			Cvar_Set (gl_smoothmodels, va("%i", v));
 			break;
 
 		case 1:
-			v = !(int)gl_affinemodels->value[0];
+			v = !(int)gl_affinemodels->value;
 			Cvar_Set (gl_affinemodels, va("%i", v));
 			break;
 
 		case 2:
-			v = !(int)gl_fb_models->value[0];
+			v = !(int)gl_fb_models->value;
 			Cvar_Set (gl_fb_models, va("%i", v));
 			break;
 
 		case 3:
-			v = !(int)gl_flashblend->value[0];
+			v = !(int)gl_flashblend->value;
 			Cvar_Set (gl_flashblend, va("%i", v));
 			break;
 
 		case 4:
-			v = (int)r_shadows->value[0] + 1;
+			v = (int)r_shadows->value + 1;
 			if (v > 2) v = 0;
 			Cvar_Set (r_shadows, va("%i", v));
 			break;
 
 		case 5:
-			v = !(int)gl_im_animation->value[0];
+			v = !(int)gl_im_animation->value;
 			Cvar_Set (gl_im_animation, va("%i", v));
 			break;
 
 		case 6:
-			v = !(int)gl_im_transform->value[0];
+			v = !(int)gl_im_transform->value;
 			Cvar_Set (gl_im_transform, va("%i", v));
 			break;
 			
@@ -2215,7 +2215,7 @@ M_GameOptions_Draw (void)
 	M_Print (160, 56, va ("%i", maxplayers));
 
 	M_Print (0, 64, "        Game Type");
-	if (coop->value[0])
+	if (coop->value)
 		M_Print (160, 64, "Cooperative");
 	else
 		M_Print (160, 64, "Deathmatch");
@@ -2224,7 +2224,7 @@ M_GameOptions_Draw (void)
 	if (rogue) {
 		char       *msg;
 
-		switch ((int) teamplay->value[0]) {
+		switch ((int) teamplay->value) {
 			case 1:
 				msg = "No Friendly Fire";
 				break;
@@ -2251,7 +2251,7 @@ M_GameOptions_Draw (void)
 	} else {
 		char       *msg;
 
-		switch ((int) teamplay->value[0]) {
+		switch ((int) teamplay->value) {
 			case 1:
 				msg = "No Friendly Fire";
 				break;
@@ -2266,26 +2266,26 @@ M_GameOptions_Draw (void)
 	}
 
 	M_Print (0, 80, "            Skill");
-	if (skill->value[0] == 0)
+	if (skill->value == 0)
 		M_Print (160, 80, "Easy difficulty");
-	else if (skill->value[0] == 1)
+	else if (skill->value == 1)
 		M_Print (160, 80, "Normal difficulty");
-	else if (skill->value[0] == 2)
+	else if (skill->value == 2)
 		M_Print (160, 80, "Hard difficulty");
 	else
 		M_Print (160, 80, "Nightmare difficulty");
 
 	M_Print (0, 88, "       Frag Limit");
-	if (fraglimit->value[0] == 0)
+	if (fraglimit->value == 0)
 		M_Print (160, 88, "none");
 	else
-		M_Print (160, 88, va ("%i frags", (int) fraglimit->value[0]));
+		M_Print (160, 88, va ("%i frags", (int) fraglimit->value));
 
 	M_Print (0, 96, "       Time Limit");
-	if (timelimit->value[0] == 0)
+	if (timelimit->value == 0)
 		M_Print (160, 96, "none");
 	else
-		M_Print (160, 96, va ("%i minutes", (int) timelimit->value[0]));
+		M_Print (160, 96, va ("%i minutes", (int) timelimit->value));
 
 	M_Print (0, 112, "         Episode");
 	// MED 01/06/97 added hipnotic episodes
@@ -2362,7 +2362,7 @@ M_NetStart_Change (int dir)
 			break;
 
 		case 2:
-			Cvar_Set (coop, coop->value[0] ? "0" : "1");
+			Cvar_Set (coop, coop->value ? "0" : "1");
 			break;
 
 		case 3:
@@ -2371,27 +2371,27 @@ M_NetStart_Change (int dir)
 			else
 				count = 2;
 
-			t = teamplay->value[0] + dir;
+			t = teamplay->value + dir;
 			t = bound (0, t, count);
 			Cvar_Set (teamplay, va("%i", t));
 			break;
 
 		case 4:
-			t = skill->value[0] + dir;
+			t = skill->value + dir;
 			t = bound (0, t, 3);
 			Cvar_Set (skill, va("%i", t));
 			break;
 
 		case 5:
-			t = fraglimit->value[0] + dir * 10;
+			t = fraglimit->value + dir * 10;
 			t = bound (0, t, 100);
 			Cvar_Set (fraglimit, va("%i", t));
 			break;
 
 		case 6:
-			t = timelimit->value[0] + dir * 5;
+			t = timelimit->value + dir * 5;
 			t = bound (0, t, 60);
-			Cvar_Set (timelimit, va("%f", t));
+			Cvar_Set (timelimit, va("%i", t));
 			break;
 
 		case 7:
@@ -2402,7 +2402,7 @@ M_NetStart_Change (int dir)
 			// PGM 03/02/97 added 1 for dmatch episode
 			else if (rogue)
 				count = 4;
-			else if (registered->value[0])
+			else if (registered->value)
 				count = 7;
 			else
 				count = 2;

@@ -715,7 +715,7 @@ Sys_SendKeyEvents (void)
 				if (!use_mouse)
 					break;
 				
-				if (_windowed_mouse->value[0]) {
+				if (_windowed_mouse->value) {
 					mouse_x += event.motion.xrel;
 					mouse_y += event.motion.yrel;
 				}
@@ -760,9 +760,9 @@ void
 IN_Commands (void)
 {
 	// FIXME: Move this to a Cvar callback when they're implemented
-	if (old_windowed_mouse != _windowed_mouse->value[0]) {
-		old_windowed_mouse = _windowed_mouse->value[0];
-		if (!_windowed_mouse->value[0])
+	if (old_windowed_mouse != _windowed_mouse->value) {
+		old_windowed_mouse = _windowed_mouse->value;
+		if (!_windowed_mouse->value)
 			SDL_WM_GrabInput (SDL_GRAB_OFF);
 		else
 			SDL_WM_GrabInput (SDL_GRAB_ON);
@@ -777,7 +777,7 @@ IN_Move
 void
 IN_Move (usercmd_t *cmd)
 {
-	if (m_filter->value[0]) {
+	if (m_filter->value) {
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
 		mouse_y = (mouse_y + old_mouse_y) * 0.5;
 	}
@@ -785,29 +785,29 @@ IN_Move (usercmd_t *cmd)
 	old_mouse_x = mouse_x;
 	old_mouse_y = mouse_y;
 
-	mouse_x *= sensitivity->value[0];
-	mouse_y *= sensitivity->value[0];
+	mouse_x *= sensitivity->value;
+	mouse_y *= sensitivity->value;
 
-	if ((in_strafe.state & 1) || (lookstrafe->value[0]
+	if ((in_strafe.state & 1) || (lookstrafe->value
 				&& (in_mlook.state & 1)))
-		cmd->sidemove += m_side->value[0] * mouse_x;
+		cmd->sidemove += m_side->value * mouse_x;
 	else
-		cl.viewangles[YAW] -= m_yaw->value[0] * mouse_x;
+		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
 
 	if (in_mlook.state & 1)
 		V_StopPitchDrift ();
 
 	if ((in_mlook.state & 1) && !(in_strafe.state & 1)) {
-		cl.viewangles[PITCH] += m_pitch->value[0] * mouse_y;
+		cl.viewangles[PITCH] += m_pitch->value * mouse_y;
 		if (cl.viewangles[PITCH] > 80)
 			cl.viewangles[PITCH] = 80;
 		if (cl.viewangles[PITCH] < -70)
 			cl.viewangles[PITCH] = -70;
 	} else {
 		if ((in_strafe.state & 1) && noclip_anglehack)
-			cmd->upmove -= m_forward->value[0] * mouse_y;
+			cmd->upmove -= m_forward->value * mouse_y;
 		else
-			cmd->forwardmove -= m_forward->value[0] * mouse_y;
+			cmd->forwardmove -= m_forward->value * mouse_y;
 	}
 
 	mouse_x = mouse_y = 0.0;

@@ -962,7 +962,7 @@ Host_Say (qboolean teamonly)
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
 		if (!client || !client->active || !client->spawned)
 			continue;
-		if (teamplay->value[0] && teamonly
+		if (teamplay->value && teamonly
 			&& client->edict->v.team != save->edict->v.team)
 			continue;
 		host_client = client;
@@ -1051,8 +1051,8 @@ Host_Color_f (void)
 
 	if (Cmd_Argc () == 1) {
 		Con_Printf ("\"color\" is \"%i %i\"\n",
-				((int) _cl_color->value[0]) >> 4,
-				((int) _cl_color->value[0]) & 0x0f);
+				((int) _cl_color->value) >> 4,
+				((int) _cl_color->value) & 0x0f);
 		Con_Printf ("color <0-13> [0-13]\n");
 		return;
 	}

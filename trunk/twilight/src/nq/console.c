@@ -430,7 +430,7 @@ Con_DPrintf (char *fmt, ...)
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
 
-	if (!developer->value[0])
+	if (!developer->value)
 		return;							// don't confuse non-developers with
 	// techie stuff...
 
@@ -541,7 +541,7 @@ Con_DrawNotify (void)
 		if (time == 0)
 			continue;
 		time = realtime - time;
-		if (time > con_notifytime->value[0])
+		if (time > con_notifytime->value)
 			continue;
 		text = con_text + (i % con_totallines) * con_linewidth;
 

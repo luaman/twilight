@@ -517,7 +517,7 @@ NET_GetMessage (qsocket_t * sock)
 	// see if this connection has timed out
 	if (ret == 0 && sock->driver) {
 		if (net_time - sock->lastMessageTime >
-				net_messagetimeout->value[0]) {
+				net_messagetimeout->value) {
 			NET_Close (sock);
 			return -1;
 		}

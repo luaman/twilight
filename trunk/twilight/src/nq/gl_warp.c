@@ -72,8 +72,8 @@ SubdividePolygon (int numverts, float *verts)
 
 	for (i = 0; i < 3; i++) {
 		m = (mins[i] + maxs[i]) * 0.5;
-		m = gl_subdivide_size->value[0]
-			* Q_floor (m / gl_subdivide_size->value[0] + 0.5);
+		m = gl_subdivide_size->value 
+			* Q_floor (m / gl_subdivide_size->value + 0.5);
 		if (maxs[i] - m < 8)
 			continue;
 		if (m - mins[i] < 8)

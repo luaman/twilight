@@ -40,7 +40,7 @@
 typedef struct cvar_s {
 	char			   *name;
 	char			   *string;
-	vec5_t			   	value;
+	float			   	value;
 	int					flags;
 
 	// EVIL!  cvar_callback	   *callback; won't work here
