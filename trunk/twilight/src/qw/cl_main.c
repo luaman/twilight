@@ -1232,8 +1232,8 @@ Host_Frame (double time)
 	double			fps, frametime, min_time;
 
 	if (setjmp (host_abort))
-		return;							// something bad happened, or the
-	// server disconnected
+		// something bad happened, or the server disconnected
+		return;
 
 	// decide the simulation time
 	frametime = time - old_realtime;
@@ -1255,7 +1255,8 @@ Host_Frame (double time)
 				fps_capped1++;
 			}
 
-			return;							// framerate is too high
+			// framerate is too high
+			return;
 		}
 	}
 

@@ -588,76 +588,80 @@ Host_ServerFrame (void)
 	SV_SendClientMessages ();
 }
 
-/*
-==================
-Runs all active servers
-==================
-*/
-static void
-_Host_Frame (double time)
+void
+Host_Frame (double time)
 {
 	static double time1 = 0;
 	static double time2 = 0;
 	static double time3 = 0;
-	int         pass1, pass2, pass3;
+	static double time4 = 0;
+	int pass1, pass2, pass3;
+	static double timetotal;
+	static int timecount;
+	int m;
+	Uint32 i, c;
+
+	if (serverprofile->ivalue)
+		time4 = Sys_DoubleTime ();
+		return;
 
 	if (setjmp (host_abortserver))
-		return;							// something bad happened, or the
-	// server disconnected
+		// something bad happened, or the server disconnected
+		return;
 
-// keep the random time dependent
+	// keep the random time dependent
 	rand ();
 
-// decide the simulation time
+	// decide the simulation time
 	if (!Host_FilterTime (time))
 	{
 		SDL_Delay (1);
-		return;							// don't run too fast, or packets will
-	// flood out
+		// don't run too fast, or packets will flood out
+		return;
 	}
 
-// get new key events
+	// get new key events
 	Sys_SendKeyEvents ();
 
-// process console commands
+	// process console commands
 	Cbuf_Execute ();
 
 	NET_Poll ();
 
-// if running the server locally, make intentions now
+	// if running the server locally, make intentions now
 	if (sv.active)
 		CL_SendCmd ();
 
-//-------------------
-//
-// server operations
-//
-//-------------------
+	//-------------------
+	//
+	// server operations
+	//
+	//-------------------
 
-// check for commands typed to the host
+	// check for commands typed to the host
 	Host_GetConsoleCommands ();
 
 	if (sv.active)
 		Host_ServerFrame ();
 
-//-------------------
-//
-// client operations
-//
-//-------------------
+	//-------------------
+	//
+	// client operations
+	//
+	//-------------------
 
-// if running the server remotely, send intentions now after
-// the incoming messages have been read
+	// if running the server remotely, send intentions now after
+	// the incoming messages have been read
 	if (!sv.active)
 		CL_SendCmd ();
 
 	host_time += host_frametime;
 
-// fetch results from server
+	// fetch results from server
 	if (ccls.state >= ca_connected)
 		CL_ReadFromServer ();
 
-// update video
+	// update video
 	if (host_speeds->ivalue)
 		time1 = Sys_DoubleTime ();
 
@@ -666,7 +670,7 @@ _Host_Frame (double time)
 	if (host_speeds->ivalue)
 		time2 = Sys_DoubleTime ();
 
-// update audio
+	// update audio
 	if (ccls.state == ca_active) {
 		S_Update (r_origin, vpn, vright, vup);
 		CCL_DecayLights ();
@@ -687,27 +691,13 @@ _Host_Frame (double time)
 
 	host_framecount++;
 	fps_count++;
-}
 
-void
-Host_Frame (double time)
-{
-	double			time1, time2;
-	static double	timetotal;
-	static int		timecount;
-	int				m;
-	Uint32			i, c;
-
-	if (!serverprofile->ivalue) {
-		_Host_Frame (time);
+	if (!serverprofile->ivalue)
 		return;
-	}
 
-	time1 = Sys_DoubleTime ();
-	_Host_Frame (time);
 	time2 = Sys_DoubleTime ();
 
-	timetotal += time2 - time1;
+	timetotal += time2 - time4;
 	timecount++;
 
 	if (timecount < 1000)

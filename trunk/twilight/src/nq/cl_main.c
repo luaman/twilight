@@ -435,7 +435,6 @@ CL_ReadFromServer (void)
 
 	ccl.oldtime = ccl.time;
 	ccl.time += host_frametime;
-	ccl.frametime = host_frametime;
 
 	do {
 		ret = CL_GetMessage ();
