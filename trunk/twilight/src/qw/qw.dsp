@@ -172,10 +172,6 @@ SOURCE=.\gl_ngraph.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_proc.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_refrag.c
 # End Source File
 # Begin Source File
