@@ -845,7 +845,7 @@ CL_LinkPlayers (void)
 	vec3_t      org;
 
 	playertime = realtime - cls.latency + 0.02;
-	playertime = max (playertime, realtime);
+	playertime = min (playertime, realtime);
 
 	frame = &cl.frames[cl.parsecount & UPDATE_MASK];
 
@@ -935,7 +935,7 @@ CL_LinkPlayers (void)
 			VectorCopy (state->origin, ent->origin);
 		} else {
 			// predict players movement
-			state->command.msec = max(state->command.msec, 255);
+			state->command.msec = min (state->command.msec, 255);
 
 			oldphysent = pmove.numphysent;
 			CL_SetSolidPlayers (j);
@@ -1049,7 +1049,7 @@ CL_SetUpPlayerPrediction (qboolean dopred)
 				VectorCopy (state->origin, pplayer->origin);
 			} else {
 				// predict players movement
-				state->command.msec = max (state->command.msec, 255);
+				state->command.msec = min (state->command.msec, 255);
 
 				CL_PredictUsercmd (state, &exact, &state->command, false);
 				VectorCopy (exact.origin, pplayer->origin);
