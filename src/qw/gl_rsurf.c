@@ -648,7 +648,7 @@ R_RenderBrushPolyMTex
 ================
 */
 static void
-R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
+R_RenderBrushPolyMTex (msurface_t *fa)
 {
 	c_brush_polys++;
 
@@ -671,7 +671,7 @@ R_RenderBrushPoly
 ================
 */
 static void
-R_RenderBrushPoly (msurface_t *fa, texture_t *t)
+R_RenderBrushPoly (msurface_t *fa)
 {
 	c_brush_polys++;
 
@@ -768,7 +768,7 @@ DrawTextureChains (void)
 			qglActiveTextureARB (GL_TEXTURE1_ARB);
 
 			for (; s; s = s->texturechain)
-				R_RenderBrushPolyMTex (s, st);
+				R_RenderBrushPolyMTex (s);
 		}
 
 		qglDisable (GL_TEXTURE_2D);
@@ -795,7 +795,7 @@ DrawTextureChains (void)
 
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 			for (; s; s = s->texturechain)
-				R_RenderBrushPoly (s, st);
+				R_RenderBrushPoly (s);
 		}
 
 		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -838,7 +838,7 @@ DrawTextureChains (void)
 		{
 			qglBindTexture (GL_TEXTURE_2D, st->fb_texturenum);
 			for (; s; s = s->texturechain)
-				R_RenderBrushPoly (s, st);
+				R_RenderBrushPoly (s);
 		}
 
 		t->texturechain = NULL;
@@ -1091,7 +1091,7 @@ R_DrawBrushModel (entity_t *e)
 					qglBindTexture (GL_TEXTURE_2D, texnum);
 					qglActiveTextureARB (GL_TEXTURE1_ARB);
 				}
-				R_RenderBrushPolyMTex (psurf, t);
+				R_RenderBrushPolyMTex (psurf);
 			}
 			else
 			{
@@ -1100,7 +1100,7 @@ R_DrawBrushModel (entity_t *e)
 					texnum = t->gl_texturenum;
 					qglBindTexture (GL_TEXTURE_2D, texnum);
 				}
-				R_RenderBrushPoly (psurf, t);
+				R_RenderBrushPoly (psurf);
 			}
 		}
 	}
@@ -1140,7 +1140,7 @@ R_DrawBrushModel (entity_t *e)
 						texnum = t->fb_texturenum;
 						qglBindTexture (GL_TEXTURE_2D, texnum);
 					}
-					R_RenderBrushPoly (psurf, t);
+					R_RenderBrushPoly (psurf);
 				}
 			}
 		}

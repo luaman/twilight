@@ -889,6 +889,8 @@ CL_ProcessUserInfo (int slot, player_info_t *player)
 {
 	Uint8	color;
 
+	slot = slot;
+
 	strncpy (player->name, Info_ValueForKey (player->userinfo, "name"),
 			   sizeof (player->name) - 1);
 

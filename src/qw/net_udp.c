@@ -249,6 +249,8 @@ NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
 	int		i;
 	loopback_t	*loop = &loopbacks[sock^1];
 
+	to = to;
+
 	i = loop->send & (MAX_LOOPBACK-1);
 	loop->send++;
 

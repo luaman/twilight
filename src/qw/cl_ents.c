@@ -460,7 +460,7 @@ CL_Update_Origin (entity_t *ent, vec3_t origin, float origin_time)
 }
 
 void
-CL_Lerp_Origin (entity_t *ent, vec3_t origin, float origin_time)
+CL_Lerp_Origin (entity_t *ent)
 {
 	int f;
 
@@ -474,7 +474,7 @@ CL_UpdateAndLerp_Origin (entity_t *ent, vec3_t origin, float origin_time)
 	qboolean changed;
 
 	changed = CL_Update_Origin(ent, origin, origin_time);
-	CL_Lerp_Origin(ent, origin, origin_time);
+	CL_Lerp_Origin(ent);
 
 	return changed;
 }
@@ -507,7 +507,7 @@ CL_Update_Angles (entity_t *ent, vec3_t angles, float angles_time)
 }
 
 void
-CL_Lerp_Angles (entity_t *ent, vec3_t angles, float angles_time)
+CL_Lerp_Angles (entity_t *ent)
 {
 	int f;
 
@@ -521,7 +521,7 @@ CL_UpdateAndLerp_Angles (entity_t *ent, vec3_t angles, float angles_time)
 	qboolean changed = false;
 
 	changed = CL_Update_Angles(ent, angles, angles_time);
-	CL_Lerp_Angles(ent, angles, angles_time);
+	CL_Lerp_Angles(ent);
 
 	return changed;
 }
@@ -573,7 +573,7 @@ CL_Update_Frame (entity_t *e, int frame, float frame_time)
 }
 
 void
-CL_Lerp_Frame (entity_t *e, int frame, float frame_time)
+CL_Lerp_Frame (entity_t *e)
 {
 	if (e->from.frame_interval || e->to.frame_interval)
 		e->frame_blend = CL_CalcBlend (e->from.frame_time, e->to.frame_time,
@@ -586,7 +586,7 @@ CL_UpdateAndLerp_Frame (entity_t *ent, int frame, float frame_time)
 	qboolean changed = true;
 
 	changed = CL_Update_Frame(ent, frame, frame_time);
-	CL_Lerp_Frame(ent, frame, frame_time);
+	CL_Lerp_Frame(ent);
 
 	return changed;
 }

@@ -338,7 +338,7 @@ R_DrawSubSkin (aliashdr_t *paliashdr, skin_sub_t *skin, vec4_t color)
 }
 
 static void
-R_DrawAliasModel (entity_t *e, qboolean viewent)
+R_DrawAliasModel ()
 {
 	qglPushMatrix ();
 
@@ -414,7 +414,7 @@ R_DrawSubSkinNV (aliashdr_t *paliashdr, skin_sub_t *tris, skin_sub_t *s0,
 }
 
 static void
-R_DrawAliasModelNV (entity_t *e, qboolean viewent)
+R_DrawAliasModelNV ()
 {
 	skin_sub_t	*base;
 
@@ -509,7 +509,7 @@ R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
 			if (e->model->type == mod_alias) {
 				R_SetupAliasModel (e, viewent);
 				if (draw)
-					R_DrawAliasModelNV (e, viewent);
+					R_DrawAliasModelNV ();
 			}
 		}
 
@@ -524,7 +524,7 @@ R_DrawAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
 			if (e->model->type == mod_alias) {
 				R_SetupAliasModel (e, viewent);
 				if (draw)
-					R_DrawAliasModel (e, viewent);
+					R_DrawAliasModel ();
 			}
 		}
 	}
