@@ -491,7 +491,7 @@ CL_BaseMove (usercmd_t *cmd)
 {
 	CL_AdjustAngles ();
 
-	Q_memset (cmd, 0, sizeof (*cmd));
+	memset (cmd, 0, sizeof (*cmd));
 
 	VectorCopy (cl.viewangles, cmd->angles);
 	if (in_strafe.state & 1) {

@@ -172,7 +172,7 @@ Z_Malloc (int size)
 	buf = Z_TagMalloc (size, 1);
 	if (!buf)
 		Sys_Error ("Z_Malloc: failed on allocation of %i bytes", size);
-	Q_memset (buf, 0, size);
+	memset (buf, 0, size);
 
 	return buf;
 }
@@ -402,7 +402,7 @@ Hunk_Print (qboolean all)
 		// print the total
 		// 
 		if (next == endlow || next == endhigh ||
-			Q_strncmp (h->name, next->name, 8)) {
+			strncmp (h->name, next->name, 8)) {
 			if (!all)
 				Con_Printf ("          :%8i %8s (TOTAL)\n", sum, name);
 			count = 0;
@@ -455,7 +455,7 @@ Hunk_AllocName (int size, char *name)
 
 	h->size = size;
 	h->sentinal = HUNK_SENTINAL;
-	Q_strlcpy (h->name, name, sizeof (h->name));
+	strlcpy (h->name, name, sizeof (h->name));
 
 	return (void *) (h + 1);
 }
@@ -547,7 +547,7 @@ Hunk_HighAllocName (int size, char *name)
 	memset (h, 0, size);
 	h->size = size;
 	h->sentinal = HUNK_SENTINAL;
-	Q_strlcpy (h->name, name, sizeof (h->name));
+	strlcpy (h->name, name, sizeof (h->name));
 
 	return (void *) (h + 1);
 }
@@ -616,9 +616,9 @@ Cache_Move (cache_system_t * c)
 	if (new) {
 //      Con_Printf ("cache_move ok\n");
 
-		Q_memcpy (new + 1, c + 1, c->size - sizeof (cache_system_t));
+		memcpy (new + 1, c + 1, c->size - sizeof (cache_system_t));
 		new->user = c->user;
-		Q_memcpy (new->name, c->name, sizeof (new->name));
+		memcpy (new->name, c->name, sizeof (new->name));
 		Cache_Free (c->user);
 		new->user->data = (void *) (new + 1);
 	} else {
@@ -920,7 +920,7 @@ Cache_Alloc (cache_user_t *c, int size, char *name)
 	while (1) {
 		cs = Cache_TryAlloc (size, false);
 		if (cs) {
-			Q_strlcpy (cs->name, name, sizeof (cs->name));
+			strlcpy (cs->name, name, sizeof (cs->name));
 			c->data = (void *) (cs + 1);
 			cs->user = c;
 			break;

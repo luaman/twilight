@@ -381,7 +381,7 @@ Cam_Track (usercmd_t *cmd)
 
 		VectorCopy (player->viewangles, cl.viewangles);
 		VectorCopy (player->origin, desired_position);
-		if (Q_memcmp (&desired_position, &self->origin, sizeof (desired_position))
+		if (memcmp (&desired_position, &self->origin, sizeof (desired_position))
 			!= 0) {
 			MSG_WriteByte (&cls.netchan.message, clc_tmove);
 			MSG_WriteCoord (&cls.netchan.message, desired_position[0]);

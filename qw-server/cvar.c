@@ -106,8 +106,8 @@ Cvar_Get (const char *name, const char *value, const int flags,
 	if (!var)	// Var does not exist, create it
 	{
 		var = Z_Malloc (sizeof(cvar_t));
-		var->name = Z_Malloc (Q_strlen (name) + 1);
-		Q_strcpy (var->name, name);
+		var->name = Z_Malloc (strlen (name) + 1);
+		strcpy (var->name, name);
 		var->string = NULL;		// force Cvar to change
 		var->callback = callback;
 		Cvar_InsertVar (var);
@@ -124,13 +124,13 @@ Cvar_Set (cvar_t *var, const char *value)
 {
 	if (var->string)
 	{
-		if (Q_strcasecmp (value, var->string) == 0)
+		if (strcasecmp (value, var->string) == 0)
 			return;
 		Z_Free (var->string);
 	}
 
-	var->string = Z_Malloc (Q_strlen(value) + 1);
-	Q_strcpy (var->string, value);
+	var->string = Z_Malloc (strlen(value) + 1);
+	strcpy (var->string, value);
 	var->value = Q_atof (var->string);
 	if (var->callback)
 		var->callback (var);
@@ -191,8 +191,8 @@ Cvar_CreateTemp (const char *name, const char *value)
 
 	// Var does not exist, create it
 	var = Z_Malloc (sizeof(cvar_t));
-	var->name = Z_Malloc (Q_strlen (name) + 1);
-	Q_strcpy (var->name, name);
+	var->name = Z_Malloc (strlen (name) + 1);
+	strcpy (var->name, name);
 	var->string = NULL;		// force Cvar to change
 	var->callback = NULL;
 	Cvar_InsertVar (var);
@@ -211,8 +211,8 @@ Cvar_Slide (cvar_t *var, const float change)
 	var->value += change;
 	Z_Free (var->string);
 	snprintf (buf, 128, "%f", var->value);
-	var->string = Z_Malloc (Q_strlen (buf) + 1);
-	Q_strcpy (var->string, buf);
+	var->string = Z_Malloc (strlen (buf) + 1);
+	strcpy (var->string, buf);
 
 	if (var->callback)
 		var->callback (var);
@@ -262,7 +262,7 @@ Cvar_Find (const char *name)
 
 	while (v)
 	{
-		if (Q_strcasecmp (name, v->var->name) == 0)
+		if (strcasecmp (name, v->var->name) == 0)
 			return v->var;
 		v = v->next;
 	}
@@ -278,14 +278,14 @@ Cvar_TabComplete (const char *partial)
 	cvar_list_t	   *v;
 	int				len;
 
-	len = Q_strlen (partial);
+	len = strlen (partial);
 	if (!len)
 		return NULL;	// nothing to complete
 
 	v = cvars;
 	while (v)	// if it's an exact match, leave it alone
 	{
-		if (Q_strcasecmp (partial, v->var->name) == 0)
+		if (strcasecmp (partial, v->var->name) == 0)
 			return v->var->name;
 		v = v->next;
 	}
@@ -293,7 +293,7 @@ Cvar_TabComplete (const char *partial)
 	v = cvars;
 	while (v)   // if it's a partial match, find the first match
 	{
-		if (Q_strncmp (partial, v->var->name, len) == 0)
+		if (strncmp (partial, v->var->name, len) == 0)
 			return v->var->name;
 		v = v->next;
 	}

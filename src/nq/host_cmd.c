@@ -275,13 +275,13 @@ Host_Map_f (void)
 
 	cls.mapstring[0] = 0;
 	for (i = 0; i < Cmd_Argc (); i++) {
-		Q_strcat (cls.mapstring, Cmd_Argv (i));
-		Q_strcat (cls.mapstring, " ");
+		strcat (cls.mapstring, Cmd_Argv (i));
+		strcat (cls.mapstring, " ");
 	}
-	Q_strcat (cls.mapstring, "\n");
+	strcat (cls.mapstring, "\n");
 
 	svs.serverflags = 0;				// haven't completed an episode yet
-	Q_strcpy (name, Cmd_Argv (1));
+	strcpy (name, Cmd_Argv (1));
 #ifdef QUAKE2
 	SV_SpawnServer (name, NULL);
 #else
@@ -291,11 +291,11 @@ Host_Map_f (void)
 		return;
 
 	if (cls.state != ca_dedicated) {
-		Q_strcpy (cls.spawnparms, "");
+		strcpy (cls.spawnparms, "");
 
 		for (i = 2; i < Cmd_Argc (); i++) {
-			Q_strcat (cls.spawnparms, Cmd_Argv (i));
-			Q_strcat (cls.spawnparms, " ");
+			strcat (cls.spawnparms, Cmd_Argv (i));
+			strcat (cls.spawnparms, " ");
 		}
 
 		Cmd_ExecuteString ("connect local", src_command);
@@ -326,11 +326,11 @@ Host_Changelevel_f (void)
 		return;
 	}
 
-	Q_strcpy (level, Cmd_Argv (1));
+	strcpy (level, Cmd_Argv (1));
 	if (Cmd_Argc () == 2)
 		startspot = NULL;
 	else {
-		Q_strcpy (_startspot, Cmd_Argv (2));
+		strcpy (_startspot, Cmd_Argv (2));
 		startspot = _startspot;
 	}
 
@@ -348,7 +348,7 @@ Host_Changelevel_f (void)
 		return;
 	}
 	SV_SaveSpawnparms ();
-	Q_strcpy (level, Cmd_Argv (1));
+	strcpy (level, Cmd_Argv (1));
 	SV_SpawnServer (level);
 #endif
 }
@@ -374,11 +374,11 @@ Host_Restart_f (void)
 
 	if (cmd_source != src_command)
 		return;
-	Q_strcpy (mapname, sv.name);		// must copy out, because it gets
+	strcpy (mapname, sv.name);		// must copy out, because it gets
 	// cleared
 	// in sv_spawnserver
 #ifdef QUAKE2
-	Q_strcpy (startspot, sv.startspot);
+	strcpy (startspot, sv.startspot);
 	SV_SpawnServer (mapname, startspot);
 #else
 	SV_SpawnServer (mapname);
@@ -417,7 +417,7 @@ Host_Connect_f (void)
 		CL_StopPlayback ();
 		CL_Disconnect ();
 	}
-	Q_strcpy (name, Cmd_Argv (1));
+	strcpy (name, Cmd_Argv (1));
 	CL_EstablishConnection (name);
 	Host_Reconnect_f ();
 }
@@ -448,10 +448,10 @@ Host_SavegameComment (char *text)
 
 	for (i = 0; i < SAVEGAME_COMMENT_LENGTH; i++)
 		text[i] = ' ';
-	memcpy (text, cl.levelname, Q_strlen (cl.levelname));
+	memcpy (text, cl.levelname, strlen (cl.levelname));
 	snprintf (kills, sizeof (kills), "kills:%3i/%3i", cl.stats[STAT_MONSTERS],
 			  cl.stats[STAT_TOTALMONSTERS]);
-	memcpy (text + 22, kills, Q_strlen (kills));
+	memcpy (text + 22, kills, strlen (kills));
 // convert space to _ to make stdio happy
 	for (i = 0; i < SAVEGAME_COMMENT_LENGTH; i++)
 		if (text[i] == ' ')
@@ -496,7 +496,7 @@ Host_Savegame_f (void)
 		return;
 	}
 
-	if (Q_strstr (Cmd_Argv (1), "..")) {
+	if (strstr (Cmd_Argv (1), "..")) {
 		Con_Printf ("Relative pathnames are not allowed.\n");
 		return;
 	}
@@ -632,8 +632,8 @@ Host_Loadgame_f (void)
 
 	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
 		fscanf (f, "%s\n", str);
-		sv.lightstyles[i] = Hunk_Alloc (Q_strlen (str) + 1);
-		Q_strcpy (sv.lightstyles[i], str);
+		sv.lightstyles[i] = Hunk_Alloc (strlen (str) + 1);
+		strcpy (sv.lightstyles[i], str);
 	}
 
 // load the edicts out of the savegame file
@@ -656,7 +656,7 @@ Host_Loadgame_f (void)
 		start = COM_Parse (str);
 		if (!com_token[0])
 			break;						// end of file
-		if (Q_strcmp (com_token, "{"))
+		if (strcmp (com_token, "{"))
 			Sys_Error ("First token isn't a brace");
 
 		if (entnum == -1) {				// parse the global vars
@@ -789,8 +789,8 @@ LoadGamestate (char *level, char *startspot)
 // load the light styles
 	for (i = 0; i < MAX_LIGHTSTYLES; i++) {
 		fscanf (f, "%s\n", str);
-		sv.lightstyles[i] = Hunk_Alloc (Q_strlen (str) + 1);
-		Q_strcpy (sv.lightstyles[i], str);
+		sv.lightstyles[i] = Hunk_Alloc (strlen (str) + 1);
+		strcpy (sv.lightstyles[i], str);
 	}
 
 // load the edicts out of the savegame file
@@ -813,7 +813,7 @@ LoadGamestate (char *level, char *startspot)
 		start = COM_Parse (str);
 		if (!com_token[0])
 			break;						// end of file
-		if (Q_strcmp (com_token, "{"))
+		if (strcmp (com_token, "{"))
 			Sys_Error ("First token isn't a brace");
 
 		// parse an edict
@@ -856,11 +856,11 @@ Host_Changelevel2_f (void)
 		return;
 	}
 
-	Q_strcpy (level, Cmd_Argv (1));
+	strcpy (level, Cmd_Argv (1));
 	if (Cmd_Argc () == 2)
 		startspot = NULL;
 	else {
-		Q_strcpy (_startspot, Cmd_Argv (2));
+		strcpy (_startspot, Cmd_Argv (2));
 		startspot = _startspot;
 	}
 
@@ -899,7 +899,7 @@ Host_Name_f (void)
 	newName[15] = 0;
 
 	if (cmd_source == src_command) {
-		if (Q_strcmp (_cl_name->string, newName) == 0)
+		if (strcmp (_cl_name->string, newName) == 0)
 			return;
 		Cvar_Set (_cl_name, newName);
 		if (cls.state == ca_connected)
@@ -907,10 +907,10 @@ Host_Name_f (void)
 		return;
 	}
 
-	if (host_client->name[0] && Q_strcmp (host_client->name, "unconnected"))
-		if (Q_strcmp (host_client->name, newName) != 0)
+	if (host_client->name[0] && strcmp (host_client->name, "unconnected"))
+		if (strcmp (host_client->name, newName) != 0)
 			Con_Printf ("%s renamed to %s\n", host_client->name, newName);
-	Q_strcpy (host_client->name, newName);
+	strcpy (host_client->name, newName);
 	host_client->edict->v.netname = host_client->name - pr_strings;
 
 // send notification to all clients
@@ -958,7 +958,7 @@ Host_Say (qboolean teamonly)
 // remove quotes if present
 	if (*p == '"') {
 		p++;
-		p[Q_strlen (p) - 1] = 0;
+		p[strlen (p) - 1] = 0;
 	}
 // turn on color set 1
 	if (!fromServer)
@@ -966,13 +966,13 @@ Host_Say (qboolean teamonly)
 	else
 		snprintf (text, sizeof (text), "%c<%s> ", 1, hostname->string);
 
-	j = sizeof (text) - 2 - Q_strlen (text);	// -2 for /n and null
+	j = sizeof (text) - 2 - strlen (text);	// -2 for /n and null
 	// terminator
-	if (Q_strlen (p) > j)
+	if (strlen (p) > j)
 		p[j] = 0;
 
-	Q_strcat (text, p);
-	Q_strcat (text, "\n");
+	strcat (text, p);
+	strcat (text, "\n");
 
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
 		if (!client || !client->active || !client->spawned)
@@ -1020,30 +1020,30 @@ Host_Tell_f (void)
 	if (Cmd_Argc () < 3)
 		return;
 
-	Q_strcpy (text, host_client->name);
-	Q_strcat (text, ": ");
+	strcpy (text, host_client->name);
+	strcat (text, ": ");
 
 	p = Cmd_Args ();
 
 // remove quotes if present
 	if (*p == '"') {
 		p++;
-		p[Q_strlen (p) - 1] = 0;
+		p[strlen (p) - 1] = 0;
 	}
 // check length & truncate if necessary
-	j = sizeof (text) - 2 - Q_strlen (text);	// -2 for /n and null
+	j = sizeof (text) - 2 - strlen (text);	// -2 for /n and null
 	// terminator
-	if (Q_strlen (p) > j)
+	if (strlen (p) > j)
 		p[j] = 0;
 
-	Q_strcat (text, p);
-	Q_strcat (text, "\n");
+	strcat (text, p);
+	strcat (text, "\n");
 
 	save = host_client;
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
 		if (!client->active || !client->spawned)
 			continue;
-		if (Q_strcasecmp (client->name, Cmd_Argv (1)))
+		if (strcasecmp (client->name, Cmd_Argv (1)))
 			continue;
 		host_client = client;
 		SV_ClientPrintf ("%s", text);
@@ -1351,7 +1351,7 @@ Host_Kick_f (void)
 
 	save = host_client;
 
-	if (Cmd_Argc () > 2 && Q_strcmp (Cmd_Argv (1), "#") == 0) {
+	if (Cmd_Argc () > 2 && strcmp (Cmd_Argv (1), "#") == 0) {
 		i = Q_atof (Cmd_Argv (2)) - 1;
 		if (i < 0 || i >= svs.maxclients)
 			return;
@@ -1364,7 +1364,7 @@ Host_Kick_f (void)
 			 i++, host_client++) {
 			if (!host_client->active)
 				continue;
-			if (Q_strcasecmp (host_client->name, Cmd_Argv (1)) == 0)
+			if (strcasecmp (host_client->name, Cmd_Argv (1)) == 0)
 				break;
 		}
 	}
@@ -1388,7 +1388,7 @@ Host_Kick_f (void)
 				message++;				// skip the #
 				while (*message == ' ')	// skip white space
 					message++;
-				message += Q_strlen (Cmd_Argv (2));	// skip the number
+				message += strlen (Cmd_Argv (2));	// skip the number
 			}
 			while (*message && *message == ' ')
 				message++;
@@ -1558,7 +1558,7 @@ FindViewthing (void)
 
 	for (i = 0; i < sv.num_edicts; i++) {
 		e = EDICT_NUM (i);
-		if (!Q_strcmp (pr_strings + e->v.classname, "viewthing"))
+		if (!strcmp (pr_strings + e->v.classname, "viewthing"))
 			return e;
 	}
 	Con_Printf ("No viewthing on map\n");
@@ -1709,7 +1709,7 @@ Host_Startdemos_f (void)
 	Con_Printf ("%i demo(s) in loop\n", c);
 
 	for (i = 1; i < c + 1; i++)
-		Q_strncpy (cls.demos[i - 1], Cmd_Argv (i), sizeof (cls.demos[0]) - 1);
+		strncpy (cls.demos[i - 1], Cmd_Argv (i), sizeof (cls.demos[0]) - 1);
 
 	if (!sv.active && cls.demonum != -1 && !cls.demoplayback) {
 		cls.demonum = 0;

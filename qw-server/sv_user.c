@@ -36,7 +36,6 @@ static const char rcsid[] =
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <ctype.h>
 
 #include "bothdefs.h"
 #include "cmd.h"
@@ -762,7 +761,7 @@ SV_Say (qboolean team)
 		return;
 
 	if (team) {
-		Q_strncpy (t1, Info_ValueForKey (host_client->userinfo, "team"), 31);
+		strncpy (t1, Info_ValueForKey (host_client->userinfo, "team"), 31);
 		t1[31] = 0;
 	}
 
@@ -806,11 +805,11 @@ SV_Say (qboolean team)
 
 	if (*p == '"') {
 		p++;
-		p[Q_strlen (p) - 1] = 0;
+		p[strlen (p) - 1] = 0;
 	}
 
-	Q_strcat (text, p);
-	Q_strcat (text, "\n");
+	strcat (text, p);
+	strcat (text, "\n");
 
 	Sys_Printf ("%s", text);
 
@@ -1105,13 +1104,13 @@ SV_SetInfo_f (void)
 	if (Cmd_Argv (1)[0] == '*')
 		return;							// don't set priveledged values
 
-	Q_strlcpy (oldval, Info_ValueForKey (host_client->userinfo, Cmd_Argv (1)),
+	strlcpy (oldval, Info_ValueForKey (host_client->userinfo, Cmd_Argv (1)),
 				sizeof (oldval));
 
 	Info_SetValueForKey (host_client->userinfo, Cmd_Argv (1), Cmd_Argv (2),
 						 MAX_INFO_STRING);
 // name is extracted below in ExtractFromUserInfo
-//  Q_strncpy (host_client->name, Info_ValueForKey (host_client->userinfo, "name")
+//  strncpy (host_client->name, Info_ValueForKey (host_client->userinfo, "name")
 //      , sizeof(host_client->name)-1); 
 //  SV_FullClientUpdate (host_client, &sv.reliable_datagram);
 //  host_client->sendinfo = true;

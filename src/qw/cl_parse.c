@@ -190,7 +190,7 @@ CL_CheckOrDownloadFile (char *filename)
 {
 	FILE       *f;
 
-	if (Q_strstr (filename, "..")) {
+	if (strstr (filename, "..")) {
 		Con_Printf ("Refusing to download a path with ..\n");
 		return true;
 	}
@@ -210,14 +210,14 @@ CL_CheckOrDownloadFile (char *filename)
 	if (cls.demoplayback)
 		return true;
 
-	Q_strcpy (cls.downloadname, filename);
+	strcpy (cls.downloadname, filename);
 	Con_Printf ("Downloading %s...\n", cls.downloadname);
 
 	// download to a temp name, and only rename
 	// to the real name when done, so if interrupted
 	// a runt file wont be left
 	COM_StripExtension (cls.downloadname, cls.downloadtempname);
-	Q_strcat (cls.downloadtempname, ".tmp");
+	strcat (cls.downloadtempname, ".tmp");
 
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message,
@@ -389,7 +389,7 @@ CL_ParseDownload (void)
 	}
 	// open the file if not opened yet
 	if (!cls.download) {
-		if (Q_strncmp (cls.downloadtempname, "skins/", 6))
+		if (strncmp (cls.downloadtempname, "skins/", 6))
 			snprintf (name, sizeof (name), "%s/%s", com_gamedir,
 					  cls.downloadtempname);
 		else
@@ -434,8 +434,8 @@ CL_ParseDownload (void)
 		fclose (cls.download);
 
 		// rename the temp file to it's final name
-		if (Q_strcmp (cls.downloadtempname, cls.downloadname)) {
-			if (Q_strncmp (cls.downloadtempname, "skins/", 6)) {
+		if (strcmp (cls.downloadtempname, cls.downloadname)) {
+			if (strncmp (cls.downloadtempname, "skins/", 6)) {
 				snprintf (oldn, sizeof (oldn), "%s/%s", com_gamedir,
 						  cls.downloadtempname);
 				snprintf (newn, sizeof (newn), "%s/%s", com_gamedir,
@@ -580,7 +580,7 @@ CL_ParseServerData (void)
 	// game directory
 	str = MSG_ReadString ();
 
-	if (Q_strcasecmp (gamedirfile, str)) {
+	if (strcasecmp (gamedirfile, str)) {
 		// save current config
 		Host_WriteConfiguration ();
 		cflag = true;
@@ -608,7 +608,7 @@ CL_ParseServerData (void)
 	}
 	// get the full level name
 	str = MSG_ReadString ();
-	Q_strncpy (cl.levelname, str, sizeof (cl.levelname) - 1);
+	strncpy (cl.levelname, str, sizeof (cl.levelname) - 1);
 
 	// get the movevars
 	movevars.gravity = MSG_ReadFloat ();
@@ -662,7 +662,7 @@ CL_ParseSoundlist (void)
 		numsounds++;
 		if (numsounds == MAX_SOUNDS)
 			Host_EndGame ("Server sent too many sound_precache");
-		Q_strcpy (cl.sound_name[numsounds], str);
+		strcpy (cl.sound_name[numsounds], str);
 	}
 
 	n = MSG_ReadByte ();
@@ -702,13 +702,13 @@ CL_ParseModellist (void)
 		nummodels++;
 		if (nummodels == MAX_MODELS)
 			Host_EndGame ("Server sent too many model_precache");
-		Q_strcpy (cl.model_name[nummodels], str);
+		strcpy (cl.model_name[nummodels], str);
 
-		if (!Q_strcmp (cl.model_name[nummodels], "progs/spike.mdl"))
+		if (!strcmp (cl.model_name[nummodels], "progs/spike.mdl"))
 			cl_spikeindex = nummodels;
-		if (!Q_strcmp (cl.model_name[nummodels], "progs/player.mdl"))
+		if (!strcmp (cl.model_name[nummodels], "progs/player.mdl"))
 			cl_playerindex = nummodels;
-		if (!Q_strcmp (cl.model_name[nummodels], "progs/flag.mdl"))
+		if (!strcmp (cl.model_name[nummodels], "progs/flag.mdl"))
 			cl_flagindex = nummodels;
 	}
 
@@ -923,7 +923,7 @@ CL_UpdateUserinfo
 void
 CL_ProcessUserInfo (int slot, player_info_t *player)
 {
-	Q_strncpy (player->name, Info_ValueForKey (player->userinfo, "name"),
+	strncpy (player->name, Info_ValueForKey (player->userinfo, "name"),
 			   sizeof (player->name) - 1);
 	player->topcolor =
 		Q_atoi (Info_ValueForKey (player->userinfo, "topcolor"));
@@ -958,7 +958,7 @@ CL_UpdateUserinfo (void)
 
 	player = &cl.players[slot];
 	player->userid = MSG_ReadLong ();
-	Q_strncpy (player->userinfo, MSG_ReadString (),
+	strncpy (player->userinfo, MSG_ReadString (),
 			   sizeof (player->userinfo) - 1);
 
 	CL_ProcessUserInfo (slot, player);
@@ -983,9 +983,9 @@ CL_SetInfo (void)
 
 	player = &cl.players[slot];
 
-	Q_strncpy (key, MSG_ReadString (), sizeof (key) - 1);
+	strncpy (key, MSG_ReadString (), sizeof (key) - 1);
 	key[sizeof (key) - 1] = 0;
-	Q_strncpy (value, MSG_ReadString (), sizeof (value) - 1);
+	strncpy (value, MSG_ReadString (), sizeof (value) - 1);
 	key[sizeof (value) - 1] = 0;
 
 	Con_DPrintf ("SETINFO %s: %s=%s\n", player->name, key, value);
@@ -1006,9 +1006,9 @@ CL_ServerInfo (void)
 	char        key[MAX_MSGLEN];
 	char        value[MAX_MSGLEN];
 
-	Q_strncpy (key, MSG_ReadString (), sizeof (key) - 1);
+	strncpy (key, MSG_ReadString (), sizeof (key) - 1);
 	key[sizeof (key) - 1] = 0;
-	Q_strncpy (value, MSG_ReadString (), sizeof (value) - 1);
+	strncpy (value, MSG_ReadString (), sizeof (value) - 1);
 	key[sizeof (value) - 1] = 0;
 
 	Con_DPrintf ("SERVERINFO: %s=%s\n", key, value);
@@ -1197,8 +1197,8 @@ CL_ParseServerMessage (void)
 				i = MSG_ReadByte ();
 				if (i >= MAX_LIGHTSTYLES)
 					Sys_Error ("svc_lightstyle > MAX_LIGHTSTYLES");
-				Q_strcpy (cl_lightstyle[i].map, MSG_ReadString ());
-				cl_lightstyle[i].length = Q_strlen (cl_lightstyle[i].map);
+				strcpy (cl_lightstyle[i].map, MSG_ReadString ());
+				cl_lightstyle[i].length = strlen (cl_lightstyle[i].map);
 				break;
 
 			case svc_sound:

@@ -186,9 +186,9 @@ mdfour_tail (unsigned char *in, int n)
 
 	b = m->totalN * 8;
 
-	Q_memset (buf, 0, 128);
+	memset (buf, 0, 128);
 	if (n)
-		Q_memcpy (buf, in, n);
+		memcpy (buf, in, n);
 	buf[n] = 0x80;
 
 	if (n <= 55) {

@@ -117,8 +117,8 @@ Con_Clear_f
 void
 Con_Clear_f (void)
 {
-	Q_memset (con_main.text, ' ', CON_TEXTSIZE);
-	Q_memset (con_chat.text, ' ', CON_TEXTSIZE);
+	memset (con_main.text, ' ', CON_TEXTSIZE);
+	memset (con_chat.text, ' ', CON_TEXTSIZE);
 }
 
 
@@ -183,7 +183,7 @@ Con_Resize (console_t *con)
 		width = 38;
 		con_linewidth = width;
 		con_totallines = CON_TEXTSIZE / con_linewidth;
-		Q_memset (con->text, ' ', CON_TEXTSIZE);
+		memset (con->text, ' ', CON_TEXTSIZE);
 	} else {
 		oldwidth = con_linewidth;
 		con_linewidth = width;
@@ -199,8 +199,8 @@ Con_Resize (console_t *con)
 		if (con_linewidth < numchars)
 			numchars = con_linewidth;
 
-		Q_memcpy (tbuf, con->text, CON_TEXTSIZE);
-		Q_memset (con->text, ' ', CON_TEXTSIZE);
+		memcpy (tbuf, con->text, CON_TEXTSIZE);
+		memset (con->text, ' ', CON_TEXTSIZE);
 
 		for (i = 0; i < numlines; i++) {
 			for (j = 0; j < numchars; j++) {
@@ -280,7 +280,7 @@ Con_Linefeed (void)
 	if (con->display == con->current)
 		con->display++;
 	con->current++;
-	Q_memset (&con->text[(con->current % con_totallines) * con_linewidth]
+	memset (&con->text[(con->current % con_totallines) * con_linewidth]
 			  , ' ', con_linewidth);
 }
 
@@ -539,7 +539,7 @@ Con_DrawNotify (void)
 
 		Draw_String (skip << 3, v, s);
 
-		Draw_Character ((Q_strlen(s) + skip) << 3, v,
+		Draw_Character ((strlen(s) + skip) << 3, v,
 						10 + ((int) (realtime * con_cursorspeed) & 1));
 		v += 8;
 	}
@@ -604,23 +604,23 @@ Con_DrawConsole (int lines)
 	// draw the download bar
 	// figure out width
 	if (cls.download) {
-		if ((text = Q_strrchr (cls.downloadname, '/')) != NULL)
+		if ((text = strrchr (cls.downloadname, '/')) != NULL)
 			text++;
 		else
 			text = cls.downloadname;
 
 		x = con_linewidth - ((con_linewidth * 7) / 40);
-		y = x - Q_strlen (text) - 8;
+		y = x - strlen (text) - 8;
 		i = con_linewidth / 3;
-		if (Q_strlen (text) > i) {
+		if (strlen (text) > i) {
 			y = x - i - 11;
-			Q_strncpy (dlbar, text, i);
+			strncpy (dlbar, text, i);
 			dlbar[i] = 0;
-			Q_strcat (dlbar, "...");
+			strcat (dlbar, "...");
 		} else
-			Q_strcpy (dlbar, text);
-		Q_strcat (dlbar, ": ");
-		i = Q_strlen (dlbar);
+			strcpy (dlbar, text);
+		strcat (dlbar, ": ");
+		i = strlen (dlbar);
 		dlbar[i++] = '\x80';
 		// where's the dot go?
 		if (cls.downloadpercent == 0)
@@ -636,12 +636,12 @@ Con_DrawConsole (int lines)
 		dlbar[i++] = '\x82';
 		dlbar[i] = 0;
 
-		snprintf (dlbar + Q_strlen (dlbar), sizeof (dlbar) - Q_strlen (dlbar),
+		snprintf (dlbar + strlen (dlbar), sizeof (dlbar) - strlen (dlbar),
 				  " %02d%%", cls.downloadpercent);
 
 		// draw it
 		y = con_vislines - 22 + 8;
-		for (i = 0; i < Q_strlen (dlbar); i++)
+		for (i = 0; i < strlen (dlbar); i++)
 			Draw_Character ((i + 1) << 3, y, dlbar[i]);
 	}
 // draw the input prompt, user text, and cursor if desired
@@ -763,7 +763,7 @@ Con_CompleteCommandLine (void)
 		if (a)
 			cmd = *(list[2] = Cmd_CompleteAliasBuildList(s));
 
-		cmd_len = Q_strlen (s);
+		cmd_len = strlen (s);
 		do {
 			for (i = 0; i < 3; i++) {
 				char ch = cmd[cmd_len];
@@ -803,7 +803,7 @@ Con_CompleteCommandLine (void)
 	}
 	
 	if (cmd) {
-		Q_strncpy(key_lines[edit_line] + 1, cmd, cmd_len);
+		strncpy(key_lines[edit_line] + 1, cmd, cmd_len);
 		key_linepos = cmd_len + 1;
 		if (c + v + a == 1) {
 			key_lines[edit_line][key_linepos] = ' ';

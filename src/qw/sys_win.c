@@ -87,7 +87,7 @@ Sys_DebugLog (char *file, char *fmt, ...)
 	vsnprintf (data, sizeof (data), fmt, argptr);
 	va_end (argptr);
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
-	write (fd, data, Q_strlen (data));
+	write (fd, data, strlen (data));
 	close (fd);
 };
 
@@ -439,16 +439,16 @@ Sys_ConsoleInput (void)
 									if (clipText) {
 										textCopied =
 											malloc (GlobalSize (th) + 1);
-										Q_strcpy (textCopied, clipText);
+										strcpy (textCopied, clipText);
 /* Substitutes a NULL for every token */
-										Q_strtok (textCopied, "\n\r\b");
-										i = Q_strlen (textCopied);
+										strtok (textCopied, "\n\r\b");
+										i = strlen (textCopied);
 										if (i + len >= 256)
 											i = 256 - len;
 										if (i > 0) {
 											textCopied[i] = 0;
 											text[len] = 0;
-											Q_strcat (text, textCopied);
+											strcat (text, textCopied);
 											len += dummy;
 											WriteFile (houtput, textCopied, i,
 													   &dummy, NULL);
@@ -496,21 +496,21 @@ Sys_ExpandPath (char *str)
 		{
 			/* Current user's home directory */
 			if ((p = getenv("TWILIGHT")))
-				Q_strncpy(buf, p, MAX_PATH);
+				strncpy(buf, p, MAX_PATH);
 			else if ((p = getenv("HOME")))
-				Q_strncpy(buf, p, MAX_PATH);
+				strncpy(buf, p, MAX_PATH);
 			else if ((p = getenv("WINDIR")))
-				Q_strncpy(buf, p, MAX_PATH);
+				strncpy(buf, p, MAX_PATH);
 			else
 				/* should never happen */
-				Q_strncpy(buf, ".", MAX_PATH);
-			Q_strncat (buf, s, MAX_PATH);
+				strncpy(buf, ".", MAX_PATH);
+			strncat (buf, s, MAX_PATH);
 		} else {
 			/* ~user expansion in win32 always fails */
-			Q_strcpy(buf, "");
+			strcpy(buf, "");
 		}
 	} else
-		Q_strncpy (buf, str, MAX_PATH);
+		strncpy (buf, str, MAX_PATH);
 
 	return buf;
 }

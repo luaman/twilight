@@ -257,8 +257,6 @@ void        R_DrawParticles (void);
 void        R_RenderDlights (void);
 void        V_CalcBlend (void);
 void        R_AnimateLight (void);
-void        RotatePointAroundVector (vec3_t dst, const vec3_t dir,
-									 const vec3_t point, float degrees);
 void        R_DrawBrushModel (entity_t *e);
 int         R_LightPoint (vec3_t p);
 void        GL_BuildLightmaps (void);

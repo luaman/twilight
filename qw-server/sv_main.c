@@ -312,7 +312,7 @@ SV_FullClientUpdate (client_t *client, sizebuf_t *buf)
 	MSG_WriteByte (buf, i);
 	MSG_WriteFloat (buf, realtime - client->connection_started);
 
-	Q_strlcpy (info, client->userinfo, sizeof (info));
+	strlcpy (info, client->userinfo, sizeof (info));
 	Info_RemovePrefixedKeys (info, '_');	// server passwords, etc
 
 	MSG_WriteByte (buf, svc_updateuserinfo);
@@ -449,7 +449,7 @@ SVC_Log (void)
 				 NET_AdrToString (net_from));
 
 	snprintf (data, sizeof (data), "stdlog %i\n", svs.logsequence - 1);
-	Q_strcat (data, (char *) svs.log_buf[((svs.logsequence - 1) & 1)]);
+	strcat (data, (char *) svs.log_buf[((svs.logsequence - 1) & 1)]);
 
 	NET_SendPacket (strlen (data) + 1, data, net_from);
 }
@@ -553,7 +553,7 @@ SVC_DirectConnect (void)
 	challenge = Q_atoi (Cmd_Argv (3));
 
 	// note an extra byte is needed to replace spectator key
-	Q_strlcpy (userinfo, Cmd_Argv (4), sizeof (userinfo) - 1);
+	strlcpy (userinfo, Cmd_Argv (4), sizeof (userinfo) - 1);
 
 	// see if the challenge is valid
 	for (i = 0; i < MAX_CHALLENGES; i++) {
@@ -574,7 +574,7 @@ SVC_DirectConnect (void)
 	s = Info_ValueForKey (userinfo, "spectator");
 	if (s[0] && strcmp (s, "0")) {
 		if (spectator_password->string[0]
-				&& Q_strcasecmp (spectator_password->string, "none")
+				&& strcasecmp (spectator_password->string, "none")
 				&& strcmp (spectator_password->string, s)) {	// failed
 			Con_Printf ("%s:spectator password failed\n",
 						NET_AdrToString (net_from));
@@ -589,7 +589,7 @@ SVC_DirectConnect (void)
 	} else {
 		s = Info_ValueForKey (userinfo, "password");
 		if (password->string[0] &&
-			Q_strcasecmp (password->string, "none") &&
+			strcasecmp (password->string, "none") &&
 			strcmp (password->string, s)) {
 			Con_Printf ("%s:password failed\n", NET_AdrToString (net_from));
 			Netchan_OutOfBandPrint (net_from,
@@ -619,7 +619,7 @@ SVC_DirectConnect (void)
 			if (*q > 31 && *q <= 127)
 				*p++ = *q;
 	} else
-		Q_strlcpy (newcl->userinfo, userinfo, sizeof (newcl->userinfo));
+		strlcpy (newcl->userinfo, userinfo, sizeof (newcl->userinfo));
 
 	// if there is already a slot for this ip, drop it
 	for (i = 0, cl = svs.clients; i < MAX_CLIENTS; i++, cl++) {
@@ -769,8 +769,8 @@ SVC_RemoteCommand (void)
 		remaining[0] = 0;
 
 		for (i = 2; i < Cmd_Argc (); i++) {
-			Q_strcat (remaining, Cmd_Argv (i));
-			Q_strcat (remaining, " ");
+			strcat (remaining, Cmd_Argv (i));
+			strcat (remaining, " ");
 		}
 
 		Cmd_ExecuteString (remaining);
@@ -1031,7 +1031,7 @@ SV_SendBan (void)
 	data[0] = data[1] = data[2] = data[3] = 0xff;
 	data[4] = A2C_PRINT;
 	data[5] = 0;
-	Q_strcat (data, "\nbanned.\n");
+	strcat (data, "\nbanned.\n");
 
 	NET_SendPacket (strlen (data), data, net_from);
 }
@@ -1490,13 +1490,13 @@ SV_ExtractFromUserinfo (client_t *cl)
 	val = Info_ValueForKey (cl->userinfo, "name");
 
 	// trim user name
-	Q_strlcpy (newname, val, sizeof (newname));
+	strlcpy (newname, val, sizeof (newname));
 
 	for (p = newname; (*p == ' ' || *p == '\r' || *p == '\n') && *p; p++);
 
 	if (p != newname && !*p) {
 		// white space only
-		Q_strcpy (newname, "unnamed");
+		strcpy (newname, "unnamed");
 		p = newname;
 	}
 
@@ -1513,7 +1513,7 @@ SV_ExtractFromUserinfo (client_t *cl)
 		val = Info_ValueForKey (cl->userinfo, "name");
 	}
 
-	if (!val[0] || !Q_strcasecmp (val, "console")) {
+	if (!val[0] || !strcasecmp (val, "console")) {
 		Info_SetValueForKey (cl->userinfo, "name", "unnamed", MAX_INFO_STRING);
 		val = Info_ValueForKey (cl->userinfo, "name");
 	}
@@ -1522,7 +1522,7 @@ SV_ExtractFromUserinfo (client_t *cl)
 		for (i = 0, client = svs.clients; i < MAX_CLIENTS; i++, client++) {
 			if (client->state != cs_spawned || client == cl)
 				continue;
-			if (!Q_strcasecmp (client->name, val))
+			if (!strcasecmp (client->name, val))
 				break;
 		}
 		if (i != MAX_CLIENTS) {			// dup name
@@ -1566,7 +1566,7 @@ SV_ExtractFromUserinfo (client_t *cl)
 	}
 
 
-	Q_strlcpy (cl->name, val, sizeof (cl->name));
+	strlcpy (cl->name, val, sizeof (cl->name));
 
 	// rate command
 	val = Info_ValueForKey (cl->userinfo, "rate");

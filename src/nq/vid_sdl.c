@@ -307,8 +307,8 @@ Check_Gamma (unsigned char *pal)
 	int         i, inf;
 
 	if ((i = COM_CheckParm ("-gamma")) == 0) {
-		if ((gl_renderer && Q_strstr (gl_renderer, "Voodoo")) ||
-			(gl_vendor && Q_strstr (gl_vendor, "3Dfx")))
+		if ((gl_renderer && strstr (gl_renderer, "Voodoo")) ||
+			(gl_vendor && strstr (gl_vendor, "3Dfx")))
 			vid_gamma = 1;
 		else
 			vid_gamma = 0.7;			// default to 0.7 on non-3dfx hardware

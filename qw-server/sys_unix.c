@@ -259,27 +259,27 @@ Sys_ExpandPath (char *str)
 		{
 			/* Current user's home directory */
 			if ((p = getenv("HOME")))
-				Q_strncpy(buf, p, PATH_MAX);
+				strncpy(buf, p, PATH_MAX);
 			else
-				Q_strncpy(buf, ".", PATH_MAX);
-			Q_strncat (buf, s, PATH_MAX);
+				strncpy(buf, ".", PATH_MAX);
+			strncat (buf, s, PATH_MAX);
 		} else {
 			/* Another user's home directory */
 			if ((p = strchr(s, '/')) != NULL)
 				*p = '\0';
 			if ((entry = getpwnam(s)) != NULL)
 			{
-				Q_strncpy (buf, entry->pw_dir, PATH_MAX);
+				strncpy (buf, entry->pw_dir, PATH_MAX);
 				if (p) {
 					*p = '/';
-					Q_strncat (buf, p, PATH_MAX);
+					strncat (buf, p, PATH_MAX);
 				}
 			} else
 				/* ~user expansion failed, no such user */
 				buf[0] = '\0';
 		}
 	} else
-		Q_strncpy (buf, str, PATH_MAX);
+		strncpy (buf, str, PATH_MAX);
 
 	return buf;
 }
