@@ -160,7 +160,7 @@ CL_GetDemoMessage (void)
 		else if (demotime > ccls.td_lastframe) {
 			ccls.td_lastframe = demotime;
 			// rewind back to time
-			SDL_RWseek (ccls.demofile, -sizeof (demotime), SEEK_CUR);
+			SDL_RWseek (ccls.demofile, -((int)sizeof (demotime)), SEEK_CUR);
 			return 0;					// already read this frame's message
 		}
 		if (!ccls.td_starttime && ccls.state == ca_active) {
@@ -174,11 +174,11 @@ CL_GetDemoMessage (void)
 			// too far back
 			ccls.realtime = demotime - 1.0;
 			// rewind back to time
-			SDL_RWseek (ccls.demofile, -sizeof (demotime), SEEK_CUR);
+			SDL_RWseek (ccls.demofile, -((int)sizeof (demotime)), SEEK_CUR);
 			return 0;
 		} else if (ccls.realtime < demotime) {
 			// rewind back to time
-			SDL_RWseek (ccls.demofile, -sizeof (demotime), SEEK_CUR);
+			SDL_RWseek (ccls.demofile, -((int)sizeof (demotime)), SEEK_CUR);
 			return 0;	// don't need another message yet
 		}
 	} else
