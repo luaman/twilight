@@ -211,6 +211,7 @@ typedef struct {
 	entity_t		viewent;				// the gun model
 
 	int				cdtrack, looptrack;		// cd audio
+	float			viewzoom;				// scales fov and sensitivity
 
 	// frag scoreboard
 	scoreboard_t	*scores;				// [cl.maxclients]

@@ -381,6 +381,9 @@ CL_ClearState (void)
 // wipe the entire cl structure
 	memset (&cl, 0, sizeof (cl));
 
+	// We don't get this from the server, that'd take a new protocol
+	cl.viewzoom = 1.0f;
+
 	SZ_Clear (&cls.netchan.message);
 
 // clear other arrays   

@@ -61,6 +61,10 @@
 #define boundsign(a, b) ((b) > 0 ? max(0, (a)) : min ((a), 0))
 #endif
 
+#ifndef SLIDE
+#define SLIDE(a, b, c) ((a) > (b)?(max((a) - (c), (b))):(min((a) + (c), (b))))
+#endif
+
 #ifndef BIT
 #define BIT(bit)			(1 << bit)
 #endif

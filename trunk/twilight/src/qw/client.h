@@ -313,6 +313,7 @@ typedef struct {
 	vec3_t			viewent_origin;
 	vec3_t			viewent_angles;
 	int				viewent_frame;
+	float			viewzoom;			// scales fov and sensitivity
 
 	// all player information
 	player_info_t	players[MAX_CLIENTS];
