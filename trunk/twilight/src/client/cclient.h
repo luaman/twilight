@@ -30,6 +30,7 @@
 #include "quakedef.h"
 #include "qtypes.h"
 #include "common.h"
+#include "dlight.h"
 #include "gl_info.h"
 #include "zone.h"
 
@@ -39,8 +40,7 @@ typedef struct {
 } lightstyle_t;
 
 
-typedef enum
-{
+typedef enum {
 	ca_dedicated,		// NQ - dedicated server
 	ca_disconnected,	// not connected at all
 	ca_demostart,		// QW - starting a demo
@@ -74,7 +74,6 @@ typedef struct {
 
 	char		skin_name[MAX_SKIN_NAME];
 	skin_t		*skin;
-	
 } user_info_t;
 
 #define	CSHIFT_CONTENTS	0
@@ -84,13 +83,23 @@ typedef struct {
 #define	NUM_CSHIFTS		4
 
 typedef struct {
-	Sint16	destcolor[3];
-	Sint16	percent;	// 0-256
+	Sint16		destcolor[3];
+	Sint16		percent;	// 0-256
 } cshift_t;
 
 // these determine which intermission screen plays
-typedef enum { GAME_SINGLE, GAME_COOP, GAME_DEATHMATCH, GAME_TEAMS } game_teams_t;
-typedef enum { GAME_STANDARD, GAME_HIPNOTIC, GAME_ROGUE } game_type_t;
+typedef enum {
+	GAME_SINGLE,
+	GAME_COOP,
+	GAME_DEATHMATCH,
+	GAME_TEAMS
+} game_teams_t;
+
+typedef enum {
+	GAME_STANDARD,
+	GAME_HIPNOTIC,
+	GAME_ROGUE
+} game_type_t;
 
 #define USER_FLAG_SORTED        BIT(0)
 #define USER_FLAG_TEAM_SORTED   BIT(1)
@@ -125,6 +134,8 @@ typedef struct client_common_s {
 
 	model_t			*worldmodel;
 	char			levelname[40];
+
+	dlight_t	    dlights[MAX_DLIGHTS];
 } client_common_t;
 
 extern client_common_t	 ccl;

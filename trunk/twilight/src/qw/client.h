@@ -262,7 +262,6 @@ extern client_state_t cl;
 // FIXME, allocate dynamically
 extern entity_state_t cl_baselines[MAX_EDICTS];
 extern lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
-extern dlight_t cl_dlights[MAX_DLIGHTS];
 
 extern qboolean nomaster;
 extern float server_version;	// version of server we connected to
@@ -291,7 +290,6 @@ extern client_static_t cls;
 extern client_state_t cl;
 extern entity_state_t cl_baselines[768];
 extern lightstyle_t cl_lightstyle[64];
-extern dlight_t cl_dlights[32];
 extern double connect_time;
 extern qboolean host_initialized;
 extern qboolean nomaster;
@@ -417,8 +415,6 @@ extern entity_t cl_tmp_entities[1024];
 extern entity_t cl_network_entities[768];
 extern entity_t cl_player_entities[32];
 
-dlight_t *CL_AllocDlight(int key);
-void CL_DecayLights(void);
 void CL_ParsePacketEntities(qboolean delta);
 void CL_Update_Matrices(entity_t *ent);
 void CL_Update_Matrices_C(entity_common_t *ent);

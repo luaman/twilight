@@ -30,9 +30,9 @@ static const char rcsid[] =
 #include <math.h>
 
 #include "quakedef.h"
-#include "cclient.h"
 #include "collision.h"
 #include "cvar.h"
+#include "dlight.h"
 #include "gl_textures.h"
 #include "image.h"
 #include "mathlib.h"
@@ -48,7 +48,6 @@ static const char rcsid[] =
 #include "gl_main.h"
 
 extern lightstyle_t cl_lightstyle[MAX_LIGHTSTYLES];
-extern dlight_t cl_dlights[MAX_DLIGHTS];
 
 static Uint32 blocklights[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 3];
 
@@ -182,40 +181,6 @@ R_AnimateLight (void)
 		k = cl_lightstyle[j].map[k] - 'a';
 		k = k * 22;
 		d_lightstylevalue[j] = k;
-	}
-}
-
-
-void
-R_BuildLightList (void)
-{
-	int			i;
-	dlight_t	*cd;
-	rdlight_t	*rd;
-
-	r_numdlights = 0;
-
-	if (!r_dynamic->ivalue)
-		return;
-
-	for (i = 0; i < MAX_DLIGHTS; i++)
-	{
-		cd = cl_dlights + i;
-		if (cd->radius <= 0 || cd->die < r_time)
-			continue;
-
-		rd = &r_dlight[r_numdlights++];
-		VectorCopy (cd->origin, rd->origin);
-		VectorScale (cd->color, cd->radius * 128.0f, rd->light);
-		rd->light[3] = 1.0f;
-		rd->cullradius = (1.0f / 128.0f) * VectorLength(rd->light);
-
-		// clamp radius to avoid overflowing division table in lightmap code
-		if (rd->cullradius > 2048.0f)
-			rd->cullradius = 2048.0f;
-
-		rd->cullradius2 = rd->cullradius * rd->cullradius;
-		rd->lightsubtract = 1.0f / rd->cullradius2;
 	}
 }
 

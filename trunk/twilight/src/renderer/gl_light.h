@@ -28,6 +28,7 @@
 #define __GL_RLIGHT_H
 
 #include "qtypes.h"
+#include "cclient.h"
 #include "gl_info.h"
 #include "model.h"
 #include "matrixlib.h"
@@ -54,17 +55,6 @@ typedef struct
 	// to avoid sudden brightness change at cullradius, subtract this
 	vec_t	lightsubtract;
 } rdlight_t;
-
-
-typedef struct {
-	int         key;                    // so entities can reuse same entry
-	vec3_t      origin;
-	float       radius;
-	float       die;                    // stop lighting after this time
-	float       decay;                  // drop this each second
-	float       minlight;               // don't add when contributing less
-	float       color[3];
-} dlight_t;
 
 extern int dlightdivtable[32768];
 extern rdlight_t r_dlight[MAX_DLIGHTS];
