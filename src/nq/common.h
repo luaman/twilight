@@ -30,6 +30,17 @@ typedef unsigned char byte;
 
 typedef enum { false, true } qboolean;
 
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef bound
+#define bound(a,b,c) (max(a, min(b, c)))
+#endif
+
+
 //============================================================================
 
 typedef struct sizebuf_s {
@@ -162,6 +173,13 @@ float Q_atof (char *str);
 #define Q_strcasecmp(s1, s2) strcasecmp((s1), (s2))
 #define Q_strncasecmp(s1, s2, n) strncasecmp((s1), (s2), (n))
 
+#endif
+
+// FIXME: do this with auto*
+#ifdef _WIN32
+#define Q_snprintf _snprintf
+#else
+#define Q_snprintf snprintf
 #endif
 
 int         Q_atoi (char *str);
