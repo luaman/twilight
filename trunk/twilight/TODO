@@ -1,42 +1,45 @@
 Project Twilight todo list
 --------------------------
 
-Stuff keeping 0.2.0 from being released: (Items may be repeated below.)
-  - Add 3dfx quirk to limit vertex array size.
-    (Do we need to limit indices too?)
-    (Need output of start and gl_info from a windows 3Dfx box for this.)
-  - Find and fix twibugs_qwsv_time_jump.
-  - Get /sane/ lerping for both NQ and QW. (Even QW is currently a mess.)
-    (If LH could please do this.)
-  - Add the rest of the items that need doing to the list.
-    (And then do them!)
-  - Need to fix twibugs_userpath.
-  
+We're almost there for 0.2, there are a number of bugs left which need to be
+fixed before release, they're marked RC below.
+
 Bugs we know about:
 
+  - RC: When you touch the bottom of a pool, you make a splash sound.  DP
+    broke this and DP has fixed it.
+  - RC: Fix net_udp (line 112) so we don't resolve non-network connections.
+  - RC: NQ dedicated server needs to not try to load certain parts of models
+    or else it will crash because of no vertex arrays.
+  - RC: userpath is not properly created if it doesn't exist.  Needs to be.
+  - RC: Interpolation is broken in both NQ/QW.
   - Damm can demonstrate lightmap corruption consistantly with certain
     maps at certain times.  He can't reproduce it at will, but it does
     happen.
+  - RC: NQ -dedicated is borked for console input in Linux.  Port the QW
+    sys.c across to NQ and add in the sv_sys differences.
+  - RC: Need to print out Id's Copyright message on engine startup.
+  - RC: Need a 3dfx quirk for limiting vertex array size.  We need the
+    output of the OpenGL strings in Win32 for this.
   - lights do not react to moving bmodels, untransforming into the
     bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.
   - Twilight uses far too much memory.  Textures should be freed when they
     are uploaded for one, and we should use fewer big static buffers.
+  - 3dfxvgl.dll does not work with Twilight even though it should.  Forest
+    can try a minimal example SDL app which binds OpenGL dynamically if we
+    get him one.  Workaround: copy 3dfxvgl.dll to opengl32.dll in your Quake
+    directory.  NOTE, if you don't have to do this and Twilight works, let
+    us know, we are having trouble identifying this problem.
+  
 
-New stuff slated for 0.2.0:
+Stuff that isn't needed for 0.2, but would be nice:
 
-stuff slate for EvilTypeGuy for 0.2.0:
   - clean up the menus, make sure all cvar graphics options
     are listed on the graphics options menu in both nq/qw
   - clean up the Cmd system
-
-Would be nice but is not strictly needed:
-
   - Merge QW server into QW client ala NQ
   - Build a seperate dedicated server in NQ [LordHavoc]
-  - Move Quake library functions used by all targets and tools to a common
-    directory (zone, mathlib, qtypes, compat, part of console, etc)
-    (Largely done.)
   - switch to using specific-sized SDL variables for file accesses
   - Convert Cvars from an unsorted list to a hash
   - Use traceline to determine visibility (trace from eye to random places
@@ -48,29 +51,28 @@ Would be nice but is not strictly needed:
   - Rewrite the sound code so that it is possible to spit out a timed
     sound file which matches frame outputs (for recording videos)
   - JPEG screenshots
-  - Add {gl,cl}_weirdshit.c to support Nehahra.  ;)
-  - Nehahra needs fog support.
-  - Nehahra needs alpha (alias/bmodel).
-    (Likely not going to happen, alpha effects are a nightmare!)
-  - Nehahra needs EF_FULLBRIGHT (512) (for alias/bmodel).
-  - Nehahra needs svc_showlmp (35), svc_hidelmp (36).
-  - Nehahra needs svc_skybox (37).
-  - Nehahra needs play2 command.
-  - Nehahra needs TE_EXPLOSION3 (16).
-  - Nehahra needs TE_LIGHTNING4NEH (17).
-  - Nehahra probably needs EF_NODRAW (16).
-    (CONFLICTS WITH QW!!!)
-  - Nehahra needs RestoreGame QC callback (called when savegame is loaded).
-  - Nehahra needs lots of other things...
+  - Nehahra support, total hackishness, *_weirdshit.c  =)
+    + fog (as Cvars - ugh)
+    + alpha brush/alias models (not trivial, speed hit)
+    + EF_FULLBRIGHT (512) for models, generated from .fullbright on server
+    + svc_showlmp (35) and svc_hidelmp (36)
+    + svc_skybox (37)
+    + TE_EXPLOSION3 (16)
+    + TE_LIGHTNING4NEH (17)
+    + EF_NODRAW (16, incompatible with QW)
+    + RestoreGame QC callback on savegame load
+    + Custom menus for mod/movie/both (GAH!)
+    + nehx00-nehx19, cutscene Cvars
+    + Old DP protocol for servers (hey, it's not even a hack!)
+    + Scary bloated QSG protocols for movie (proto 250 or nehahra_demo Cvar)
+    + Grenade trails for alpha -1 models should be different than normal, the
+      movie has a custom trail for the General's cigar.  I shit you not.
+    + Anything else?  List it here..
   - gl_colorlights can/should be made to work without +set
-  - BloodBath needs sv_stepheight cvar to control how much players step up
-  - BloodBath needs automatic step-up while airborn (Blood/Q2/Q3 style),
-    even though this does allow strafe jumping...  a physics glitch allowing
-    people to jump faster, farther, and higher, than normally possible, when
-    jumping up very steep stairs in the right conditions (double/triple jump).
-  - BloodBath needs different sbar.
-  - BloodBath needs different key bindings menu.
-  - Cosmetic bug: The new particles look cool, but some people would
-    prefer the original GLQuake particles just for nostalgia value.  We
-    should support that. (Likely won't happen.)
+  - BloodBath support
+    + Custom sbar
+    + Custom keybindings
+    + builtin to register Cvars
+  - Improve the particle code more.
+  - Option to use classic-looking particles?  (slow!)
 
