@@ -1,11 +1,30 @@
 Project Twilight todo list
 --------------------------
 
-Would be nice but is not strictly needed, in importance order:
+Bugs we know about:
+
+  - Sometimes a client will not die on crash properly because somehow the
+    SDL sound thread doesn't get told to die.  We need to fix this.
+  - Id bug: if you look up, models disappear when they get to about the
+    status bar level.  Another bug used to hide this from people using a
+    fov of 90, but we fixed that one, exposing this.
+  - Damm could demonstrate lightmap corruption consistantly with certain
+    maps, if he still can we need to fix it.
+  - Some OpenGL state changes lost in QW, particularly things like alpha
+    in the console and in crosshairs is missing.
+  - MacOS X sound is "choppy", not sure if this is SDL's problem or ours.
+  - share/userpath mkdir handling is still kinda borked.
+
+New stuff slated for 0.2.0:
+
+  - QW/NQ renderers - port changes between them
+  - "lighthalf" gamma table doubling trick
+  - faster dlights if we can make them faster
+
+Would be nice but is not strictly needed:
 
   - Merge QW server into QW client ala NQ
   - Server browser
-  - Test -dedicated to make sure there are no nasty surprises [LordHavoc]
   - sv_model.c for NQ [LordHavoc]
   - Build a seperate dedicated server in NQ [LordHavoc]
   - Prettiness features all around
@@ -16,7 +35,6 @@ Would be nice but is not strictly needed, in importance order:
   - Move Quake library functions used by all targets and tools to a common
     directory (zone, mathlib, qtypes, compat, part of console, etc)
   - SDL improvements
-    - MacOS/MacOS X ports
     - Remove Quake-specific simple datatypes which SDL gives us
     - switch to using specific-sized SDL variables for file accesses
     - Replace Quake library functions with SDL functions
