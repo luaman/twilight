@@ -41,7 +41,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "wad.h"
-#include "vid.h"
+#include "video.h"
 #include "lh_parser.h"
 #include "common.h"
 #include "gl_info.h"

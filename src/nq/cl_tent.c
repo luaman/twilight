@@ -338,7 +338,6 @@ CL_NewTempEntity (void)
 
 	ent = &cl_temp_entities[num_temp_entities];
 	memset (ent, 0, sizeof (*ent));
-	ent->common.real_ent = ent;
 	num_temp_entities++;
 
 	R_AddEntity ( &ent->common );

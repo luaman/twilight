@@ -30,7 +30,7 @@ static const char rcsid[] =
 #include <stdlib.h>
 #include <string.h>
 
-#include "vid.h"
+#include "video.h"
 #include "strlib.h"
 #include "pointers.h"
 #include "gl_textures.h"
@@ -537,6 +537,50 @@ Draw_Fill (int x, int y, int w, int h, vec4_t color)
 	qglEnable (GL_TEXTURE_2D);
 }
 
+
+void
+Draw_Box (int x, int y, int w, int h, int t, vec4_t color1, vec4_t color2)
+{
+	bvec4_t c1, c2;
+	Uint32  indices[] = {
+		0, 2, 3, 1,
+		2, 4, 5, 3,
+		4, 6, 7, 5,
+		6, 0, 1, 7,
+	};
+
+	TWI_FtoUB(color1, c1, 4);
+	TWI_FtoUB(color2, c2, 4);
+
+	qglDisable (GL_TEXTURE_2D);
+	qglEnableClientState (GL_COLOR_ARRAY);
+	qglEnable (GL_BLEND);
+
+	VectorSet2 (v_array_v(0), x  ,     y      ); // Top left out.
+	VectorCopy4 (c1, c_array_v(0));
+	VectorSet2 (v_array_v(1), x   + t, y   + t); // Top left in.
+	VectorCopy4 (c2, c_array_v(1));
+	VectorSet2 (v_array_v(2), x+w,     y      ); // Top right out.
+	VectorCopy4 (c1, c_array_v(2));
+	VectorSet2 (v_array_v(3), x+w - t, y   + t); // Top right in.
+	VectorCopy4 (c2, c_array_v(3));
+	VectorSet2 (v_array_v(4), x+w,     y+h    ); // Bottom right out.
+	VectorCopy4 (c1, c_array_v(4));
+	VectorSet2 (v_array_v(5), x+w - t, y+h - t); // Bottom right in.
+	VectorCopy4 (c2, c_array_v(5));
+	VectorSet2 (v_array_v(6), x  ,     y+h    ); // Bottom left out.
+	VectorCopy4 (c1, c_array_v(6));
+	VectorSet2 (v_array_v(7), x   + t, y+h - t); // Bottom left in.
+	VectorCopy4 (c2, c_array_v(7));
+	qglDrawElements(GL_QUADS, sizeof(indices) / sizeof(Uint32), GL_UNSIGNED_INT, indices);
+
+	qglDisable (GL_BLEND);
+	qglDisableClientState (GL_COLOR_ARRAY);
+	qglColor4fv (whitev);
+	qglEnable (GL_TEXTURE_2D);
+}
+
+
 /* ========================================================================= */
 
 void
@@ -610,7 +654,7 @@ Draw_Crosshair (void)
 	else
 		VectorCopy (d_8tofloattable[color], base);
 
-	ofs = Q_sin (ccl.time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
+	ofs = Q_sin (r_time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
 	ofs = boundsign (ofs, hud_chflash->fvalue);
 	VectorSlide (base, ofs, base);
 	base[3] = hud_chalpha->fvalue;

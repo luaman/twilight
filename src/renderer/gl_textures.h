@@ -33,6 +33,7 @@
 #include "image.h"
 #include "wad.h"
 
+extern void R_ResampleTexture (void *id, int iw, int ih, void *od, int ow, int oh);
 extern void GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name, int width, int height, int frames, float interval);
 extern void GLT_Delete_Skin (skin_t *skin);
 extern void GLT_Init_Cvars ();

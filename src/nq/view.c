@@ -751,7 +751,6 @@ R_DrawViewModel (void)
 	entity_common_t *ent_pointer;
 
 	ent_pointer = &cl.viewent.common;
-	cl.viewent.common.real_ent = &cl.viewent;
 
 	if (!r_drawviewmodel->ivalue || chase_active->ivalue ||
 			!r_drawentities->ivalue || ccl.stats[STAT_ITEMS] & IT_INVISIBILITY ||

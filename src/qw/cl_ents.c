@@ -626,7 +626,6 @@ CL_LinkPacketEntities (void)
 				(ent->modelindex != state->modelindex) ||
 				(VectorDistance_fast(ent->msg_origins[0], state->origin) > sq(512))) {
 			memset (ent, 0, sizeof (*ent));
-			ent->common.real_ent = ent;
 		} else
 			ent->times++;
 
@@ -793,7 +792,6 @@ CL_ParseStatic (void)
 
 	// copy it to the current state
 	memset (ent, 0, sizeof(*ent));
-	ent->common.real_ent = ent;
 
 	ent->common.model = cl.model_precache[es.modelindex];
 	ent->common.frame[0] = ent->common.frame[1] = es.frame;
@@ -987,7 +985,6 @@ CL_LinkPlayers (void)
 		// If not present this frame, skip it
 		if (state->messagenum != cl.parsecount) {
 			memset (ent, 0, sizeof(*ent));
-			ent->common.real_ent = ent;
 			continue;
 		}
 

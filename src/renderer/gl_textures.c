@@ -975,7 +975,7 @@ R_ResampleTextureMMX_EXT (void *indata, int inwidth, int inheight,
 }
 #endif
 
-static void
+void
 R_ResampleTexture (void *id, int iw, int ih, void *od, int ow, int oh)
 {
 	if (r_lerpimages->ivalue) {

@@ -349,7 +349,6 @@ CL_NewTempEntity (void)
 		Host_EndGame ("Out of entities!");
 
 	ent = &cl_tmp_entities[cl_num_tmp_entities++];
-	ent->common.real_ent = ent;
 
 	R_AddEntity ( &ent->common );
 

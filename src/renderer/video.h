@@ -46,10 +46,12 @@ typedef struct
 } viddef_t;
 
 extern viddef_t vid;					// global video state
+extern float mouse_x, mouse_y;
 
 void VID_Init_Cvars (void);
 void VID_Init (unsigned char *palette);
 void VID_Shutdown (void);
+void GL_EndRendering (void);
 
 #endif // __VID_H
 

@@ -30,6 +30,7 @@ libtwilight_renderer_a_SOURCES= \
 	gl_main.c gl_main.h \
 	gl_textures.c gl_textures.h \
 	liquid.c liquid.h \
+	video.c video.h \
 	menu.c \
 	mod_alias.c mod_alias.h \
 	mod_brush.c \

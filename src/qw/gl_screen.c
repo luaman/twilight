@@ -10,13 +10,13 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to:
-	
+
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
@@ -43,9 +43,11 @@ static const char rcsid[] =
 #include "pcx.h"
 #include "hud.h"
 #include "screen.h"
+#include "sound.h"
 #include "strlib.h"
 #include "sys.h"
 #include "tga.h"
+#include "gl_textures.h"
 
 /*
 
@@ -80,7 +82,7 @@ SlowPrint ()
 Screen_Update ();
 Com_Printf ();
 
-net 
+net
 turn off messages option
 
 the refresh is always rendered, unless the console is full screen
@@ -90,48 +92,48 @@ console is:
 	notify lines
 	half
 	full
-	
+
 
 */
 
-float		scr_con_current;
-static float		scr_conlines;				/* lines of console to display */
+float			scr_con_current;
+static float	scr_conlines;				/* lines of console to display */
 
-static cvar_t	   *scr_viewsize;
-static cvar_t	   *scr_fov;
-static cvar_t	   *scr_conspeed;
-static cvar_t	   *scr_centertime;
-static cvar_t	   *scr_showram;
-static cvar_t	   *scr_showturtle;
-static cvar_t	   *scr_showpause;
-static cvar_t	   *scr_printspeed;
-static cvar_t	   *scr_logcprint;
-static cvar_t	   *scr_allowsnap;
-static cvar_t	   *r_brightness;
-static cvar_t	   *r_contrast;
-static cvar_t	   *cl_avidemo;
+static cvar_t   *scr_viewsize;
+static cvar_t   *scr_fov;
+static cvar_t   *scr_conspeed;
+static cvar_t   *scr_centertime;
+static cvar_t   *scr_showram;
+static cvar_t   *scr_showturtle;
+static cvar_t   *scr_showpause;
+static cvar_t   *scr_printspeed;
+static cvar_t   *scr_logcprint;
+static cvar_t   *scr_allowsnap;
+static cvar_t   *r_brightness;
+static cvar_t   *r_contrast;
+static cvar_t   *cl_avidemo;
 
-extern cvar_t *crosshair;
+extern cvar_t	*crosshair;
 
 static qboolean	scr_initialized;			/* ready to draw */
 
-static qpic_t	   *scr_ram;
-static qpic_t	   *scr_net;
-static qpic_t	   *scr_turtle;
+static qpic_t   *scr_ram;
+static qpic_t   *scr_net;
+static qpic_t   *scr_turtle;
 
-int			clearconsole;
+int				clearconsole;
 
-int			sb_lines;
+viddef_t		vid;						/* global video state */
 
-viddef_t	vid;						/* global video state */
-
+qboolean		scr_disabled_for_loading;
 static qboolean	scr_drawloading;
+static float	scr_disabled_time;
 
 static void		SCR_ScreenShot_f (void);
 static void		SCR_RSShot_f (void);
 
-static Uint8	   *avibuffer;
-static Uint32		aviframeno;
+static Uint8	*avibuffer;
+static Uint32	 aviframeno;
 
 static void
 GL_BrightenScreen(void)
@@ -406,7 +408,7 @@ SCR_fov_CB (cvar_t *cvar)
 static void
 AvidemoChanged(cvar_t *cvar)
 {
-	if (cvar->ivalue) 
+	if (cvar->ivalue)
 		avibuffer = Zone_Alloc(tempzone, vid.width * vid.height * 3);
 	else {
 		if (avibuffer)
@@ -611,7 +613,7 @@ SCR_ScreenShot_f (void)
 	static int	i = 0;
 
 	/*
-	 * find a file name to save it to 
+	 * find a file name to save it to
 	 */
 	for (; i < 10000; i++)
 	{
@@ -649,18 +651,47 @@ SCR_CaptureAviDemo (void)
 		return;
 
 	lastframetime = t;
-	
+
 	snprintf (filename, sizeof (filename), "%s/twavi%06d.tga", com_gamedir, aviframeno);
 	aviframeno++;
 
 	qglReadPixels (0, 0, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
 				  avibuffer);
 
-	if (!TGA_Write (filename, vid.width, vid.height, 3, avibuffer)) { 
+	if (!TGA_Write (filename, vid.width, vid.height, 3, avibuffer)) {
 		Com_Printf ("Screenshot write failed, stopping AVI demo.\n");
 		Cvar_Set(cl_avidemo, "0");
 	}
 }
+
+void
+SCR_BeginLoadingPlaque (void)
+{
+	S_StopAllSounds (true);
+
+	if (ccls.state != ca_active)
+		return;
+
+	/* redraw with no console and the loading plaque */
+	Con_ClearNotify ();
+	scr_centertime_off = 0;
+	scr_con_current = 0;
+
+	scr_drawloading = true;
+	SCR_UpdateScreen ();
+	scr_drawloading = false;
+
+	scr_disabled_for_loading = true;
+	scr_disabled_time = ccls.realtime;
+}
+
+void
+SCR_EndLoadingPlaque (void)
+{
+	scr_disabled_for_loading = false;
+	Con_ClearNotify ();
+}
+
 
 static void
 WritePCXfile (char *filename, Uint8 *data, int width, int height,
@@ -673,7 +704,7 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 	rowbytes = rowbytes;
 
 	// Worst case is twice the size of the image.
-	pcx = Zone_Alloc(tempzone, sizeof(pcx_t) + ((width * height) * 2) + 769); 
+	pcx = Zone_Alloc(tempzone, sizeof(pcx_t) + ((width * height) * 2) + 769);
 	if (pcx == NULL) {
 		Com_Printf ("SCR_ScreenShot_f: not enough memory\n");
 		return;
@@ -761,37 +792,14 @@ MipColor (int r, int g, int b)
 }
 
 
-// HACK: Probably this can/should be done elsewhere/differently...
-static void
-rshot_fill (int x, int y, int w, int h)
-{
-	qglDisable (GL_TEXTURE_2D);
-	qglColor4fv (d_8tofloattable[98]);
-
-	qglBegin (GL_QUADS);
-	qglVertex2f (x, y);
-	qglVertex2f (x + w, y);
-	qglVertex2f (x + w, y + h);
-	qglVertex2f (x, y + h);
-	qglEnd ();
-
-	qglColor4fv (whitev);
-	qglEnable (GL_TEXTURE_2D);
-}
-
-
 static void
 SCR_RSShot_f (void)
 {
 	int			x, y;
 	Uint8	   *src, *dest;
 	char		pcxname[80];
-	Uint8	   *newbuf;
+	Uint8	   *buf, *tmpbuf;
 	int			w, h;
-	int			dx, dy, dex, dey, nx;
-	int			r, b, g;
-	int			count;
-	float		fracw, frach;
 	char		st[80];
 	time_t		now;
 	int			textsize;
@@ -808,81 +816,51 @@ SCR_RSShot_f (void)
 	textsize = 8 * vid.width_2d / 320;
 
 	time (&now);
-	strncpy (st, ctime (&now), sizeof (st));
-	st[sizeof (st) - 1] = '\0';
+	strlcpy (st, ctime (&now), sizeof (st));
 	len = strlen (st);
 	x = vid.width_2d - (len * textsize);
 	y = 0;
-	rshot_fill (x, y, vid.width_2d - x, textsize);
+	Draw_Fill(x, y, vid.width_2d - x, textsize, d_8tofloattable[98]);
 	Draw_String_Len (x, y, st, len, textsize);
 
-	strncpy (st, cls.servername, sizeof (st));
-	st[sizeof (st) - 1] = '\0';
+	strlcpy (st, cls.servername, sizeof (st));
 	x = vid.width_2d - (len * textsize);
 	y += textsize;
-	rshot_fill (x, y, vid.width_2d - x, textsize);
+	Draw_Fill(x, y, vid.width_2d - x, textsize, d_8tofloattable[98]);
 	Draw_String_Len (x, y, st, len, textsize);
 
-	strncpy (st, name->svalue, sizeof (st));
-	st[sizeof (st) - 1] = '\0';
+	strlcpy (st, name->svalue, sizeof (st));
 	x = vid.width_2d - (len * textsize);
 	y += textsize;
-	rshot_fill (x, y, vid.width_2d - x, textsize);
+	Draw_Fill(x, y, vid.width_2d - x, textsize, d_8tofloattable[98]);
 	Draw_String_Len (x, y, st, len, textsize);
 	qglFinish ();
 
 	/*
 	 * save the pcx file
 	 */
-	newbuf = malloc (vid.height * vid.width * 3);
+	buf = Zone_Alloc(tempzone, vid.height * vid.width * 3);
 
-	qglReadPixels (0, 0, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE,
-				  newbuf);
+	qglReadPixels (0, 0, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buf);
 
-	w = (vid.width < RSSHOT_WIDTH) ? vid.width : RSSHOT_WIDTH;
-	h = (vid.height < RSSHOT_HEIGHT) ? vid.height : RSSHOT_HEIGHT;
+	if ((vid.width > RSSHOT_WIDTH) || (vid.height > RSSHOT_HEIGHT)) {
+		w = RSSHOT_WIDTH;
+		h = RSSHOT_HEIGHT;
+		tmpbuf = Zone_Alloc(tempzone, w * h * 3);
 
-	fracw = (float) vid.width / (float) w;
-	frach = (float) vid.height / (float) h;
+		R_ResampleTexture(buf, vid.width, vid.height, tmpbuf, w, h);
 
-	for (y = 0; y < h; y++) {
-		dest = newbuf + (w * 3 * y);
-
-		for (x = 0; x < w; x++) {
-			r = g = b = 0;
-
-			dx = x * fracw;
-			dex = (x + 1) * fracw;
-			if (dex == dx)
-				dex++;					/* at least one */
-			dy = y * frach;
-			dey = (y + 1) * frach;
-			if (dey == dy)
-				dey++;					/* at least one */
-
-			count = 0;
-			for ( /* */ ; dy < dey; dy++) {
-				src = newbuf + (vid.width * 3 * dy) + dx * 3;
-				for (nx = dx; nx < dex; nx++) {
-					r += *src++;
-					g += *src++;
-					b += *src++;
-					count++;
-				}
-			}
-			r /= count;
-			g /= count;
-			b /= count;
-			*dest++ = r;
-			*dest++ = b;
-			*dest++ = g;
-		}
+		Zone_Free(buf);
+		buf = tmpbuf;
+	} else {
+		w = vid.width;
+		h = vid.height;
 	}
 
 	/* convert to eight bit */
 	for (y = 0; y < h; y++) {
-		src = newbuf + (w * 3 * y);
-		dest = newbuf + (w * y);
+		src = buf + (w * 3 * y);
+		dest = buf + (w * y);
 
 		for (x = 0; x < w; x++) {
 			*dest++ = MipColor (src[0], src[1], src[2]);
@@ -890,9 +868,9 @@ SCR_RSShot_f (void)
 		}
 	}
 
-	WritePCXfile (pcxname, newbuf, w, h, w, host_basepal, true);
+	WritePCXfile (pcxname, buf, w, h, w, host_basepal, true);
 
-	free (newbuf);
+	Zone_Free (buf);
 
 	Com_Printf ("Wrote %s\n", pcxname);
 }
@@ -943,6 +921,14 @@ text to the screen.
 void
 SCR_UpdateScreen (void)
 {
+	if (scr_disabled_for_loading) {
+		if (ccls.realtime - scr_disabled_time > 60) {
+			scr_disabled_for_loading = false;
+			Com_Printf ("load failed.\n");
+		} else
+			return;
+	}
+
 	if (!scr_initialized || !con_initialized)
 		return;							/* not initialized yet */
 
@@ -969,6 +955,7 @@ SCR_UpdateScreen (void)
 	/*
 	 * draw any areas not covered by the refresh
 	 */
+
 	if (scr_drawdialog) {
 		HUD_Draw ();
 		Draw_FadeScreen ();

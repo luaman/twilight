@@ -34,7 +34,6 @@ static const char rcsid[] =
 #include "image.h"
 #include "qlmp.h"
 #include "strlib.h"
-#include "vid.h"
 #include "wad.h"
 
 static image_t *

@@ -40,6 +40,7 @@ typedef struct {
 	float       color[3];
 } dlight_t;
 
+void GL_UpdateLightmap (model_t *mod, msurface_t *fa, matrix4x4_t *invmatrix);
 
 #endif // __GL_RLIGHT_H
 

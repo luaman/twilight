@@ -482,7 +482,7 @@ CL_RelinkEntities (void)
 
 			if (flags & EF_ROTATE) {
 				flags &= ~EF_ROTATE;
-				ent->common.angles[YAW] = ANGLEMOD (100 * (ccl.time + ent->syncbase));
+				ent->common.angles[YAW] = ANGLEMOD (100 * (ccl.time + ent->common.syncbase));
 				CL_Update_Matrices (ent);
 			}
 

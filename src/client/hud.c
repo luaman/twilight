@@ -36,10 +36,11 @@ static const char rcsid[] =
 #include "cmd.h"
 #include "cvar.h"
 #include "draw.h"
-#include "vid.h"
+#include "video.h"
 #include "wad.h"
 #include "mathlib.h"
 #include "gl_arrays.h"
+#include "gl_draw.h"
 
 extern void CL_UpdatePings (void);
 
@@ -716,48 +717,6 @@ HUD_Draw_Scoreboard_Team (int base_x, int base_y, int i)
 }
 
 static void
-HUD_Draw_Box (int x, int y, int w, int h, int t, vec4_t color1, vec4_t color2)
-{
-	bvec4_t c1, c2;
-	Uint32	indices[] = {
-		0, 2, 3, 1,
-		2, 4, 5, 3,
-		4, 6, 7, 5,
-		6, 0, 1, 7,
-	};
-
-	TWI_FtoUB(color1, c1, 4);
-	TWI_FtoUB(color2, c2, 4);
-
-	qglDisable (GL_TEXTURE_2D);
-	qglEnableClientState (GL_COLOR_ARRAY);
-	qglEnable (GL_BLEND);
-
-	VectorSet2 (v_array_v(0), x  ,     y      ); // Top left out.
-	VectorCopy4 (c1, c_array_v(0));
-	VectorSet2 (v_array_v(1), x   + t, y   + t); // Top left in.
-	VectorCopy4 (c2, c_array_v(1));
-	VectorSet2 (v_array_v(2), x+w,     y      ); // Top right out.
-	VectorCopy4 (c1, c_array_v(2));
-	VectorSet2 (v_array_v(3), x+w - t, y   + t); // Top right in.
-	VectorCopy4 (c2, c_array_v(3));
-	VectorSet2 (v_array_v(4), x+w,     y+h    ); // Bottom right out.
-	VectorCopy4 (c1, c_array_v(4));
-	VectorSet2 (v_array_v(5), x+w - t, y+h - t); // Bottom right in.
-	VectorCopy4 (c2, c_array_v(5));
-	VectorSet2 (v_array_v(6), x  ,     y+h    ); // Bottom left out.
-	VectorCopy4 (c1, c_array_v(6));
-	VectorSet2 (v_array_v(7), x   + t, y+h - t); // Bottom left in.
-	VectorCopy4 (c2, c_array_v(7));
-	qglDrawElements(GL_QUADS, sizeof(indices) / sizeof(Uint32), GL_UNSIGNED_INT, indices);
-
-	qglDisable (GL_BLEND);
-	qglDisableClientState (GL_COLOR_ARRAY);
-	qglColor4fv (whitev);
-	qglEnable (GL_TEXTURE_2D);
-}
-
-static void
 HUD_Draw_Scoreboard_Teams ()
 {
 	int		x[2], y[2], i;
@@ -780,7 +739,7 @@ HUD_Draw_Scoreboard_Teams ()
 		height = 8 + 16 + 16 + (teams[i].players * 10) + 16;
 		VectorCopy(teams[i].color, c1); c1[3] = 0.5;
 		VectorCopy(teams[i].color, c2); c2[3] = 0.0;
-		HUD_Draw_Box(x[i % 2] + 4, y[i % 2] + 4, width - 4, height - 4,4,c1,c2);
+		Draw_Box(x[i % 2] + 4, y[i % 2] + 4, width - 4, height - 4,4,c1,c2);
 		HUD_Draw_Scoreboard_Team(x[i % 2] + 8, y[i % 2] + 8, i);
 		y[i % 2] += height + (2 * 8);
 	}
@@ -789,7 +748,7 @@ HUD_Draw_Scoreboard_Teams ()
 		VectorSet4(c1, 0, 0.5, 0, 0.5);
 		VectorSet4(c2, 0, 0.5, 0, 0.0);
 		height = (n_spectators * 10) + 32;
-		HUD_Draw_Box(x[i % 2] + 4, y[i % 2] + 4, width - 4, height - 4,4,c1,c2);
+		Draw_Box(x[i % 2] + 4, y[i % 2] + 4, width - 4, height - 4,4,c1,c2);
 		HUD_Draw_Scoreboard(x[i % 2] + 8, y[i % 2] + 8, TEAM_SPECTATOR);
 	}
 }

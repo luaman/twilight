@@ -44,7 +44,7 @@ static const char rcsid[] =
 #include "sky.h"
 #include "liquid.h"
 #include "entities.h"
-#include "vid.h"
+#include "video.h"
 #include "vis.h"
 #include "r_part.h"
 #include "gl_brush.h"
@@ -105,11 +105,6 @@ extern model_t *mdl_fire;
 
 //============================================================================
 
-/*
-============
-R_PolyBlend
-============
-*/
 static void
 R_PolyBlend (void)
 {
@@ -145,11 +140,6 @@ R_PolyBlend (void)
 }
 
 
-/*
-===============
-R_SetupFrame
-===============
-*/
 static void
 R_SetupFrame (void)
 {
@@ -162,7 +152,7 @@ R_SetupFrame (void)
 
 	AngleVectors (r_refdef.viewangles, vpn, vright, vup);
 
-	Vis_NewVisParams (ccl.worldmodel, r_origin, vup, vright, vpn,
+	Vis_NewVisParams (r_worldmodel, r_origin, vup, vright, vpn,
 			r_refdef.fov_x, r_refdef.fov_y);
 
 	V_SetContentsColor (vis_viewleaf->contents);
@@ -173,11 +163,6 @@ R_SetupFrame (void)
 }
 
 
-/*
-=============
-R_SetupGL
-=============
-*/
 static void
 R_SetupGL (void)
 {
@@ -222,11 +207,6 @@ R_SetupGL (void)
 	qglEnable (GL_DEPTH_TEST);
 }
 
-/*
-=============
-R_Clear
-=============
-*/
 static void
 R_Clear (void)
 {
@@ -240,8 +220,6 @@ R_Clear (void)
 
 /*
 ================
-R_Render3DView
-
 Called by R_RenderView, possibily repeatedly.
 ================
 */
@@ -274,8 +252,6 @@ R_Render3DView (void)
 
 /*
 ================
-R_RenderView
-
 r_refdef must be set before the first call
 ================
 */
@@ -288,7 +264,7 @@ R_RenderView (void)
 	if (r_norefresh->ivalue)
 		return;
 
-	if (!ccl.worldmodel)
+	if (!r_worldmodel)
 		Host_EndGame ("R_RenderView: NULL worldmodel");
 
 	if (r_speeds->ivalue)
@@ -349,11 +325,6 @@ R_RenderView (void)
 }
 
 
-/*
-==================
-R_InitTextures
-==================
-*/
 static void
 R_InitTextures (void)
 {
@@ -401,11 +372,6 @@ R_InitTextures (void)
 	R_InitLightTextures ();
 }
 
-/*
-===============
-R_Init_Cvars
-===============
-*/
 void
 R_Init_Cvars (void)
 {
@@ -438,8 +404,6 @@ R_Init_Cvars (void)
 
 /*
 ====================
-R_TimeRefresh_f
-
 For program optimization
 ====================
 */
@@ -470,11 +434,6 @@ R_TimeRefresh_f (void)
 }
 
 
-/*
-===============
-R_Init
-===============
-*/
 void
 R_Init (void)
 {
@@ -492,11 +451,6 @@ R_Init (void)
 	Vis_Init ();
 }
 
-/*
-===============
-R_NewMap
-===============
-*/
 void
 R_NewMap (void)
 {
@@ -508,7 +462,7 @@ R_NewMap (void)
 	R_ClearParticles ();
 
 	// Parse map entities
-	CL_ParseEntityLump (ccl.worldmodel->brush->entities);
+	CL_ParseEntityLump (r_worldmodel->brush->entities);
 
 	r_explosion_newmap ();
 }

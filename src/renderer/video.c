@@ -33,28 +33,32 @@ static const char rcsid[] =
 #include "SDL.h"
 
 #include "quakedef.h"
-#include "client.h"
-#include "console.h"
 #include "cmd.h"
+#include "console.h"
 #include "cvar.h"
 #include "host.h"
 #include "keys.h"
 #include "mathlib.h"
 #include "sys.h"
+#include "gl_info.h"
+#include "gl_arrays.h"
+#include "palette.h"
+#include "video.h"
+#include "cclient.h"
+
+extern cvar_t *cl_verstring;
 
 static cvar_t *width_2d;
 static cvar_t *height_2d;
 static cvar_t *text_scale;
 static cvar_t *i_keypadmode;
-static cvar_t *m_filter;
 static cvar_t *_windowed_mouse;
 static cvar_t *gl_driver;
 
 qboolean VID_Inited;
-qboolean keypadmode = false;
+static qboolean keypadmode = false;
 
-static float mouse_x, mouse_y;
-static float old_mouse_x, old_mouse_y;
+float mouse_x, mouse_y;
 
 static qboolean use_mouse = false;
 
@@ -165,7 +169,6 @@ VID_Init_Cvars (void)
 	height_2d = Cvar_Get ("height_2d", "-1", CVAR_ARCHIVE, &Size_Changed2D);
 	text_scale = Cvar_Get ("text_scale", "1", CVAR_ARCHIVE, &Size_Changed2D);
 	i_keypadmode = Cvar_Get ("i_keypadmode", "0", CVAR_ARCHIVE, &I_KeypadMode);
-	m_filter = Cvar_Get ("m_filter", "0", CVAR_NONE, NULL);
 	_windowed_mouse = Cvar_Get ("_windowed_mouse", "1", CVAR_ARCHIVE,
 			&IN_WindowedMouse);
 	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
@@ -269,7 +272,7 @@ VID_Init (unsigned char *palette)
 		Sys_Error ("%s\n", SDL_GetError ());
 	Com_DPrintf ("VID_Init: DynGL_GetFuncs successful.\n");
 
-	SDL_WM_SetCaption ("Twilight QWCL", "twilight");
+	SDL_WM_SetCaption (cl_verstring->svalue, "twilight");
 	Com_DPrintf ("VID_Init: Window caption set.\n");
 
 	VID_Inited = true;
@@ -464,8 +467,8 @@ Sys_SendKeyEvents (void)
 				break;
 
 			case SDL_QUIT:
-				CL_Disconnect ();
-				/* Host_ShutdownServer (false); */
+//				CL_Disconnect ();
+//				Host_ShutdownServer (false);
 				Sys_Quit ();
 				break;
 
@@ -481,7 +484,7 @@ IN_Init (void)
 {
 	mouse_x = 0.0f;
 	mouse_y = 0.0f;
-	old_mouse_x = old_mouse_y = 0.0f;
+//	old_mouse_x = old_mouse_y = 0.0f;
 }
 
 void
@@ -514,51 +517,3 @@ I_KeypadMode (cvar_t *cvar)
 {
 	keypadmode = !!cvar->ivalue;
 }
-
-/*
-===========
-IN_Move
-===========
-*/
-void
-IN_Move (usercmd_t *cmd)
-{
-	if (m_filter->fvalue &&
-		((mouse_x != old_mouse_x)
-		 || (mouse_y != old_mouse_y)))
-	{
-		mouse_x = (mouse_x + old_mouse_x) * 0.5;
-		mouse_y = (mouse_y + old_mouse_y) * 0.5;
-	}
-
-	old_mouse_x = mouse_x;
-	old_mouse_y = mouse_y;
-
-	mouse_x *= sensitivity->fvalue * cl.viewzoom;
-	mouse_y *= sensitivity->fvalue * cl.viewzoom;
-
-	if ((in_strafe.state & 1) || (lookstrafe->ivalue && freelook))
-		cmd->sidemove += m_side->fvalue * mouse_x;
-	else
-		cl.viewangles[YAW] -= m_yaw->fvalue * mouse_x;
-
-	if (freelook)
-		V_StopPitchDrift ();
-
-	if (freelook && !(in_strafe.state & 1))
-	{
-		cl.viewangles[PITCH] += m_pitch->fvalue * mouse_y;
-		// KB: Allow looking (almost) straight up/down
-		cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90 - ANG16_DELTA);
-	}
-	else
-	{
-		if (in_strafe.state & 1)
-			cmd->upmove -= m_forward->fvalue * mouse_y;
-		else
-			cmd->forwardmove -= m_forward->fvalue * mouse_y;
-	}
-
-	mouse_x = mouse_y = 0.0;
-}
-
