@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "draw.h"
 #include "glquake.h"
 #include "host.h"
+#include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
 
@@ -99,9 +100,6 @@ typedef struct {
 	int		texnum;
 	float	sl, tl, sh, th;
 } glpic_t;
-
-Uint8	conback_buffer[sizeof (qpic_t) + sizeof (glpic_t)];
-qpic_t	*conback = (qpic_t *) &conback_buffer;
 
 int		gl_lightmap_format = GL_RGB;
 int		gl_solid_format = 3;

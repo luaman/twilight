@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include "keys.h"
 #include "glquake.h"
 #include "host.h"
+#include "mathlib.h"
 #include "sys.h"
 
 
@@ -195,7 +196,7 @@ GammaChanged (cvar_t *cvar)
 /*
 	CheckExtensions
 
-	Check for ARB multitexture support
+	Check for the OpenGL extensions we use
 */
 
 void
@@ -203,38 +204,36 @@ CheckExtensions (void)
 {
 	qboolean	gl_mtexable = 0, gl_mtexcombine_arb = 0, gl_mtexcombine_ext = 0;
 
-	Con_Printf ("Checking for multitexture: ");
 	if (!COM_CheckParm ("-nomtex")) {
 		gl_mtexable = DGL_HasExtension ("GL_ARB_multitexture");
-		return;
 	}
-	if (!COM_CheckParm ("-nomtexcombine")) {
+	Con_Printf ("Checking for multitexture... %s\n",
+			gl_mtexable ? "GL_ARB_multitexture." : "no.");
+
+	if (gl_mtexable && !COM_CheckParm ("-nomtexcombine")) {
 		gl_mtexcombine_arb = DGL_HasExtension ("GL_ARB_texture_env_combine");
 		gl_mtexcombine_ext = DGL_HasExtension ("GL_EXT_texture_env_combine");
-	}
-	if (gl_mtexable && gl_mtexcombine_arb) {
-		Con_Printf ("GL_ARB_multitexture + GL_ARB_texture_env_combine.\n");
-		gl_mtexcombine = true;
-	} else if (gl_mtexable && gl_mtexcombine_ext) {
-		Con_Printf ("GL_ARB_multitexture + GL_EXT_texture_env_combine.\n");
-		gl_mtexcombine = true;
-	} else if (gl_mtexable) {
-		Con_Printf ("GL_ARB_multitexture.\n");
-		gl_mtex = true;
-	} else {
-		Con_Printf ("no.\n");
+		Con_Printf ("Checking for texenv combine... ");
+		if (gl_mtexcombine_arb) {
+			Con_Printf ("GL_ARB_texture_env_combine.\n");
+			gl_mtexcombine = true;
+		} else if (gl_mtexcombine_ext) {
+			Con_Printf ("GL_EXT_texture_env_combine.\n");
+			gl_mtexcombine = true;
+		} else {
+			Con_Printf ("no.\n");
+		}
 	}
 
-	if (gl_mtexable) {
-		if (!qglActiveTextureARB || !qglMultiTexCoord2fARB) {
-			Sys_Error ("Extension list says we have GL_ARB_multitexture but missing functions. (%p %p)\n", qglActiveTextureARB, qglMultiTexCoord2fARB);
-		}
+	if (gl_mtexable && (!qglActiveTextureARB || !qglMultiTexCoord2fARB)) {
+		Sys_Error ("Missing GL_ARB_multitexture functions. (%p %p)\n",
+				qglActiveTextureARB, qglMultiTexCoord2fARB);
 	}
 
 	if (!COM_CheckParm ("-nocva"))
 		gl_cva = DGL_HasExtension ("GL_EXT_compiled_vertex_array");
 
-	Con_Printf ("Checking for CVA support: %s\n",
+	Con_Printf ("Checking for CVA support... %s\n",
 			gl_cva ? "GL_EXT_compiled_vertex_array" : "None");
 }
 
@@ -584,8 +583,7 @@ Sys_SendKeyEvents (void)
 
 			case SDL_QUIT:
 				CL_Disconnect ();
-				/* FIXME: Put this back when local server support is added
-				Host_ShutdownServer(false); */
+				/* Host_ShutdownServer (false); */
 				Sys_Quit ();
 				break;
 

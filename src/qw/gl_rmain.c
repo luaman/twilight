@@ -1376,7 +1376,8 @@ r_refdef must be set before the first call
 void
 R_RenderView (void)
 {
-	double      time1 = 0, time2;
+	double      time1 = 0;
+	double		time2;
 
 	if (r_norefresh->value)
 		return;
@@ -1420,9 +1421,8 @@ R_RenderView (void)
 
 	transpolyrender ();
 
-	R_RenderDlights ();
-
 	R_DrawParticles ();
+	R_RenderDlights ();
 
 	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);
@@ -1431,7 +1431,6 @@ R_RenderView (void)
 
 	if (r_speeds->value)
 	{
-		qglFinish ();
 		time2 = Sys_DoubleTime ();
 		Con_Printf ("%3i ms  %4i wpoly %4i epoly\n",
 					(int) ((time2 - time1) * 1000), c_brush_polys,

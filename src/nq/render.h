@@ -181,6 +181,11 @@ void        R_RenderDlights (void);
 void        R_AnimateLight (void);
 int         R_LightPoint (vec3_t p);
 
+void        R_InitParticles (void);
+void        R_ClearParticles (void);
+void        R_DrawParticles (void);
+void        R_DrawWaterSurfaces (void);
+
 //
 // surface cache related
 //

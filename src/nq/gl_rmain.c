@@ -35,17 +35,18 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
-#include "strlib.h"
+#include "client.h"
 #include "console.h"
 #include "cvar.h"
 #include "glquake.h"
 #include "host.h"
+#include "mathlib.h"
+#include "opengl_ext.h" // FIXME
 #include "sound.h"
+#include "strlib.h"
 #include "sys.h"
 #include "view.h"
 #include "world.h"
-
-entity_t    r_worldentity;
 
 qboolean    r_cache_thrash;				// compatability
 
@@ -95,8 +96,6 @@ cvar_t     *r_norefresh;
 cvar_t     *r_drawentities;
 cvar_t     *r_drawviewmodel;
 cvar_t     *r_speeds;
-cvar_t     *r_fullbright;
-cvar_t     *r_lightmap;
 cvar_t     *r_shadows;
 cvar_t     *r_wateralpha;
 cvar_t     *r_dynamic;
@@ -106,14 +105,11 @@ cvar_t	   *r_lightlerp;
 cvar_t     *gl_finish;
 cvar_t     *gl_clear;
 cvar_t     *gl_cull;
-cvar_t     *gl_texsort;
 cvar_t     *gl_affinemodels;
 cvar_t     *gl_polyblend;
 cvar_t     *gl_flashblend;
 cvar_t     *gl_playermip;
 cvar_t     *gl_nocolors;
-cvar_t     *gl_reporttjunctions;
-cvar_t     *gl_doubleeyes;
 cvar_t	   *gl_im_animation;
 cvar_t	   *gl_im_transform;
 cvar_t	   *r_maxedges, *r_maxsurfs;		// Shrak
@@ -1060,8 +1056,7 @@ R_DrawAliasModel (entity_t *e)
 		qglRotatef (e->angles[2], 1, 0, 0);
 	}
 
-	if ((clmodel->modflags & FLAG_DOUBLESIZE)
-			&& gl_doubleeyes->value) {
+	if (clmodel->modflags & FLAG_DOUBLESIZE) {
 		qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
 					  paliashdr->scale_origin[2] - (22 + 8));
 		// double size of eyes, since they are really hard to see in gl
@@ -1087,9 +1082,9 @@ R_DrawAliasModel (entity_t *e)
 	}
 
 	// LordHavoc: this was originally two nested if's, then an else (doing an
-	//            else on the fb_texture, nothing happened if gl_mtexable was
+	//            else on the fb_texture, nothing happened if gl_mtex was
 	//            off)...  don't ask how long it took to find that bug.
-	if (fb_texture && gl_mtexable) {
+	if (fb_texture && gl_mtex) {
 		qglActiveTextureARB (GL_TEXTURE0_ARB);
 		qglBindTexture (GL_TEXTURE_2D, texture);
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -1108,18 +1103,19 @@ R_DrawAliasModel (entity_t *e)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
 	if (gl_im_animation->value && !(clmodel->modflags & FLAG_NO_IM_ANIM))
-		R_SetupAliasBlendedFrame (e->frame, paliashdr, e, (fb_texture && gl_mtexable));
+		R_SetupAliasBlendedFrame (e->frame, paliashdr, e,
+				(fb_texture && gl_mtex));
 	else
-		R_SetupAliasFrame (e->frame, paliashdr, (fb_texture && gl_mtexable));
+		R_SetupAliasFrame (e->frame, paliashdr, (fb_texture && gl_mtex));
 
-	if (fb_texture && gl_mtexable) {
+	if (fb_texture && gl_mtex) {
 		qglDisable (GL_TEXTURE_2D);
 		qglActiveTextureARB (GL_TEXTURE0_ARB);
 	}
 
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-	if (fb_texture && !gl_mtexable) {
+	if (fb_texture && !gl_mtex) {
 		qglEnable (GL_BLEND);
 		qglBindTexture (GL_TEXTURE_2D, fb_texture);
 		
@@ -1365,10 +1361,6 @@ R_SetupFrame
 void
 R_SetupFrame (void)
 {
-// don't allow cheats in multiplayer
-	if (cl.maxclients > 1)
-		Cvar_Set (r_fullbright, "0");
-
 	R_AnimateLight ();
 
 	r_framecount++;
@@ -1445,7 +1437,6 @@ R_SetupGL (void)
 
 	qglViewport (glx + x, gly + y2, w, h);
 	screenaspect = (float) r_refdef.vrect.width / r_refdef.vrect.height;
-//  yfov = 2*atan((float)r_refdef.vrect.height/r_refdef.vrect.width)*180/M_PI;
 	MYgluPerspective (r_refdef.fov_y, screenaspect, 4, 8193);
 
 	qglCullFace (GL_FRONT);
@@ -1472,39 +1463,7 @@ R_SetupGL (void)
 		qglDisable (GL_CULL_FACE);
 
 	qglDisable (GL_BLEND);
-//	qglDisable (GL_ALPHA_TEST);
 	qglEnable (GL_DEPTH_TEST);
-}
-
-/*
-================
-R_RenderScene
-
-r_refdef must be set before the first call
-================
-*/
-void
-R_RenderScene (void)
-{
-	R_SetupFrame ();
-
-	R_SetFrustum ();
-
-	R_SetupGL ();
-
-	R_MarkLeaves ();					// done here so we know if we're in
-	// water
-
-	R_PushDlights ();
-
-	R_DrawWorld ();						// adds static entities to the list
-
-	S_ExtraUpdate ();					// don't let sound get messed up if
-	// going slow
-
-	R_DrawEntitiesOnList1 ();
-
-	R_DrawViewModel ();
 }
 
 
@@ -1561,7 +1520,7 @@ R_RenderView (void)
 	if (r_norefresh->value)
 		return;
 
-	if (!r_worldentity.model || !cl.worldmodel)
+	if (!cl.worldmodel)
 		Sys_Error ("R_RenderView: NULL worldmodel");
 
 	if (r_speeds->value) {
@@ -1577,16 +1536,26 @@ R_RenderView (void)
 	R_Clear ();
 
 	// render normal view
+	R_SetupFrame ();
 
-/***** Experimental silly looking fog ******
-****** Use r_fullbright if you enable ******
-	qglFogi(GL_FOG_MODE, GL_LINEAR);
-	qglFogfv(GL_FOG_COLOR, colors);
-	qglFogf(GL_FOG_END, 512.0);
-	qglEnable(GL_FOG);
-********************************************/
+	R_SetFrustum ();
 
-	R_RenderScene ();
+	R_SetupGL ();
+
+	// done here so we know if we're in water
+	R_MarkLeaves ();
+
+	R_PushDlights ();
+
+	// adds static entities to the list
+	R_DrawWorld ();
+
+	// don't let sound get messed up if going slow
+	S_ExtraUpdate ();
+
+	R_DrawEntitiesOnList1 ();
+
+	R_DrawViewModel ();
 	R_DrawWaterSurfaces ();
 
 	qglEnable (GL_BLEND);
@@ -1599,17 +1568,13 @@ R_RenderView (void)
 	qglDisable (GL_BLEND);
 	qglDepthMask (GL_TRUE);
 
-//  More fog right here :)
-//  qglDisable(GL_FOG);
-//  End of all fog code...
-
 	R_PolyBlend ();
 
 	if (r_speeds->value) {
-//      qglFinish ();
 		time2 = Sys_DoubleTime ();
 		Con_Printf ("%3i ms  %4i wpoly %4i epoly\n",
 					(int) ((time2 - time1) * 1000), c_brush_polys,
 					c_alias_polys);
 	}
 }
+

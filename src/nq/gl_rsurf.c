@@ -35,11 +35,13 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
-#include "strlib.h"
+#include "client.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "mathlib.h"
 #include "opengl_ext.h"
 #include "host.h"
+#include "strlib.h"
 #include "sys.h"
 
 
@@ -286,15 +288,12 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 
 	// bound, invert, and shift
 store:
-	if (gl_mtexable) {
-		if (gl_mtexcombine_arb || gl_mtexcombine_ext) {
-			shift = 9;
-		} else {
-			shift = 7;
-		}
-	} else {
+	if (gl_mtexcombine)
+		shift = 9;
+	else if (gl_mtex)
+		shift = 7;
+	else
 		shift = 8;
-	}
 
 	switch (gl_lightmap_format) {
 		case GL_RGB:
@@ -681,6 +680,136 @@ R_DrawWaterSurfaces (void)
 	}
 }
 
+
+/*
+================
+DrawTextureChains
+================
+*/
+/*void
+DrawTextureChains (void)
+{
+	unsigned int	i;
+	msurface_t	   *s;
+	texture_t	   *t, *st;
+
+	// LordHavoc: upload lightmaps early
+	for (i = 0; i < cl.worldmodel->numtextures; i++)
+	{   
+		t = cl.worldmodel->textures[i];
+		if (!t)
+			continue;
+		s = t->texturechain;
+		if (!s)
+			continue;
+		if (s->flags & (SURF_DRAWSKY | SURF_DRAWTURB))
+			continue;
+		for (; s; s = s->texturechain)
+			GL_UpdateLightmap(s);
+	}
+
+	for (i = 0; i < cl.worldmodel->numtextures; i++)
+	{
+		t = cl.worldmodel->textures[i];
+		if (!t)
+			continue;
+		s = t->texturechain;
+		if (!s)
+			continue;
+		st = R_TextureAnimation (s->texinfo->texture);
+		if (s->flags & SURF_DRAWSKY)
+		{
+			R_DrawSkyChain (s);
+			t->texturechain = NULL;
+		}
+		else if (s->flags & SURF_DRAWTURB)
+		{
+			// Lordhavoc: handle water here because it is just making
+			// transpolys, not really drawing
+			for (; s; s = s->texturechain)
+				EmitWaterPolys (s, st, false);
+			t->texturechain = NULL;
+		}
+	}
+
+	if (gl_mtex || gl_mtexcombine)
+	{
+		qglDisable (GL_BLEND);
+		if (gl_mtexcombine)
+		{
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+			qglActiveTextureARB (GL_TEXTURE1_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 4.0);
+		}
+		else
+		{
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			qglActiveTextureARB (GL_TEXTURE1_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		}
+		qglEnable (GL_TEXTURE_2D);
+
+		for (i = 0; i < cl.worldmodel->numtextures; i++)
+		{
+			t = cl.worldmodel->textures[i];
+			if (!t)
+				continue;
+			s = t->texturechain;
+			if (!s)
+				continue;
+			st = R_TextureAnimation (t);
+			qglActiveTextureARB (GL_TEXTURE0_ARB);
+			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
+			qglActiveTextureARB (GL_TEXTURE1_ARB);
+
+			for (; s; s = s->texturechain)
+				R_RenderBrushPolyMTex (s, st);
+
+			t->texturechain = NULL;
+		}
+
+		qglDisable (GL_TEXTURE_2D);
+		if (gl_mtexcombine)
+			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1.0);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		qglDisable (GL_TEXTURE_2D);
+		qglActiveTextureARB (GL_TEXTURE0_ARB);
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	}
+	else
+	{
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+		for (i = 0; i < cl.worldmodel->numtextures; i++)
+		{
+			t = cl.worldmodel->textures[i];
+			if (!t)
+				continue;
+			s = t->texturechain;
+			if (!s)
+				continue;
+			st = R_TextureAnimation (t);
+
+			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
+			for (; s; s = s->texturechain)
+				R_RenderBrushPoly (s, st);
+
+			t->texturechain = NULL;
+		}
+
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+		R_BlendLightmaps();
+	}
+}
+*/
+
 /*
 ================
 DrawTextureChainsMTex
@@ -964,7 +1093,7 @@ R_DrawBrushModel (entity_t *e)
 				EmitBothSkyLayers (psurf);
 			} else {
 				t = R_TextureAnimation(psurf->texinfo->texture);
-				if (gl_mtexable && (gl_mtexcombine_arb || gl_mtexcombine_ext))
+				if (gl_mtexcombine)
 				{
 					qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
 							GL_COMBINE_ARB);
@@ -993,7 +1122,7 @@ R_DrawBrushModel (entity_t *e)
 					qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
 							GL_MODULATE);			
 				}
-				else if (gl_mtexable)
+				else if (gl_mtex)
 				{
 					qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
 					qglActiveTextureARB (GL_TEXTURE1_ARB);
@@ -1135,11 +1264,11 @@ R_DrawWorld (void)
 
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
 
-	if (gl_mtexable && (gl_mtexcombine_arb || gl_mtexcombine_ext)) {
+	if (gl_mtexcombine)
 		DrawTextureChainsMTexCombine ();
-	} else if (gl_mtexable) {
+	else if (gl_mtex)
 		DrawTextureChainsMTex ();
-	} else {
+	else {
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		DrawTextureChains ();
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
