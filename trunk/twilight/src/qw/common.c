@@ -807,7 +807,7 @@ COM_StripExtension (char *in, char *out)
 	}
 
 	if (last)
-		last = '\0';
+		*last = '\0';
 }
 
 /*
