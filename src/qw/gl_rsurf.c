@@ -42,6 +42,7 @@ static const char rcsid[] =
 #define	MAX_LIGHTMAPS	256
 
 static int lightmap_bytes;				// 1, 3, or 4
+static int lightmap_shift;
 
 static int lightmap_textures;
 
@@ -429,7 +430,7 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 static void
 GL_BuildLightmap (msurface_t *surf)
 {
-	int			i, j, size, size3, shift, stride;
+	int			i, j, size, size3, stride;
 	Uint8	   *lightmap, *dest, *stain;
 	Uint32		scale, *bl;
 
@@ -493,13 +494,6 @@ GL_BuildLightmap (msurface_t *surf)
 	// bound, invert, and shift
 	stride = surf->alignedwidth * lightmap_bytes;
 
-	if (gl_mtexcombine)
-		shift = 9;
-	else if (gl_mtex)
-		shift = 7;
-	else
-		shift = 8;
-
 	switch (gl_lightmap_format)
 	{
 		case GL_RGB:
@@ -508,9 +502,9 @@ GL_BuildLightmap (msurface_t *surf)
 			{
 				for (j = 0; j < surf->smax; j++)
 				{
-					dest[0] = bound (0, bl[0] >> shift, 255);
-					dest[1] = bound (0, bl[1] >> shift, 255);
-					dest[2] = bound (0, bl[2] >> shift, 255);
+					dest[0] = bound (0, bl[0] >> lightmap_shift, 255);
+					dest[1] = bound (0, bl[1] >> lightmap_shift, 255);
+					dest[2] = bound (0, bl[2] >> lightmap_shift, 255);
 					bl += 3;
 					dest += 3;
 				}
@@ -524,9 +518,9 @@ GL_BuildLightmap (msurface_t *surf)
 			{
 				for (j = 0; j < surf->smax; j++)
 				{
-					dest[0] = bound (0, bl[0] >> shift, 255);
-					dest[1] = bound (0, bl[1] >> shift, 255);
-					dest[2] = bound (0, bl[2] >> shift, 255);
+					dest[0] = bound (0, bl[0] >> lightmap_shift, 255);
+					dest[1] = bound (0, bl[1] >> lightmap_shift, 255);
+					dest[2] = bound (0, bl[2] >> lightmap_shift, 255);
 					dest[3] = 255;
 					bl += 3;
 					dest += 4;
@@ -538,15 +532,12 @@ GL_BuildLightmap (msurface_t *surf)
 		case GL_LUMINANCE:
 			stride -= surf->smax;
 
-			// adjust shift for an extra divide by 256
-			shift += 8;
-
 			for (i = 0; i < surf->tmax; i++, dest += stride)
 			{
 				for (j = 0; j < surf->smax; j++)
 				{
 					// 85 / 256 == 0.33203125, close enough
-					scale = ((bl[0] + bl[1] + bl[2]) * 85) >> shift;
+					scale = ((bl[0] + bl[1] + bl[2]) * 85) >> lightmap_shift;
 					*dest++ = bound (0, scale, 255);
 					bl += 3;
 				}
@@ -1512,19 +1503,31 @@ GL_BuildLightmaps (void)
 		texture_extension_number += MAX_LIGHTMAPS;
 	}
 
+	if (gl_mtexcombine)
+		lightmap_shift = 9;
+	else if (gl_mtex)
+		lightmap_shift = 7;
+	else
+		lightmap_shift = 8;
+
 	switch (gl_colorlights->ivalue)
 	{
 		case 0:
 			gl_lightmap_format = GL_LUMINANCE;
 			lightmap_bytes = 1;
 			colorlights = false;
+
+			// adjust lightmap_shift for an extra divide by 256
+			lightmap_shift += 8;
 			break;
+		
 		default:
 		case 1:
 			gl_lightmap_format = GL_RGB;
 			lightmap_bytes = 3;
 			colorlights = true;
 			break;
+
 		case 2:
 			gl_lightmap_format = GL_RGBA;
 			lightmap_bytes = 4;
