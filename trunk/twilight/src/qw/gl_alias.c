@@ -353,8 +353,6 @@ R_DrawAliasModel ()
 
 	TWI_PreVDrawCVA (0, paliashdr->numverts);
 
-	qglEnableClientState (GL_COLOR_ARRAY);
-
 	if (!has_top || !has_bottom)
 		R_DrawSubSkin (paliashdr, &skin->base[anim], NULL);
 	else
@@ -363,7 +361,6 @@ R_DrawAliasModel ()
 	if (has_top || has_bottom || has_fb) {
 		qglEnable (GL_BLEND);
 		qglDepthMask (GL_FALSE);
-		qglBlendFunc (GL_ONE, GL_ONE);
 	}
 
 	if (has_top)
@@ -372,14 +369,16 @@ R_DrawAliasModel ()
 	if (has_bottom)
 		R_DrawSubSkin (paliashdr, &skin->bottom[anim], bottom);
 
-	qglDisableClientState (GL_COLOR_ARRAY);
-	qglColor4fv (whitev);
+	if (has_fb) {
+		qglDisableClientState (GL_COLOR_ARRAY);
+		qglColor4fv (whitev);
 
-	if (has_fb)
 		R_DrawSubSkin (paliashdr, &skin->fb[anim], NULL);
 
+		qglEnableClientState (GL_COLOR_ARRAY);
+	}
+
 	if (has_top || has_bottom || has_fb) {
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		qglDepthMask (GL_TRUE);
 		qglDisable (GL_BLEND);
 	}
@@ -424,17 +423,18 @@ R_DrawAliasModelNV ()
 
 	TWI_PreVDraw (0, paliashdr->numverts);
 
-	if (has_fb)
-		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);
-
 	if (has_fb) {
+		qglCombinerOutputNV (GL_COMBINER0_NV, GL_RGB, GL_SPARE0_NV, GL_SPARE1_NV, GL_DISCARD_NV, GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE);
+		qglFinalCombinerInputNV (GL_VARIABLE_D_NV, GL_SPARE1_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		if (!has_top && !has_bottom)
 			R_DrawSubSkinNV (paliashdr, &skin->base_fb_i[anim],
 					&skin->base[anim], &skin->fb[anim]);
 		else
 			R_DrawSubSkinNV (paliashdr, &skin->base_team_fb_i[anim],
 					&skin->base_team[anim], &skin->fb[anim]);
+		qglFinalCombinerInputNV (GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 	} else {
+		qglCombinerOutputNV (GL_COMBINER0_NV, GL_RGB, GL_SPARE0_NV, GL_DISCARD_NV, GL_DISCARD_NV, GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE);
 		if (!has_top && !has_bottom)
 			R_DrawSubSkinNV (paliashdr, &skin->base[anim].indices,
 					&skin->base[anim], NULL);
@@ -443,23 +443,20 @@ R_DrawAliasModelNV ()
 					&skin->base_team[anim], NULL);
 	}
 
-	if (has_fb)
-		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
-
 	if (has_top || has_bottom) {
 		qglEnable (GL_BLEND);
 		qglDepthMask (GL_FALSE);
 
-		qglCombinerParameterfvNV (GL_CONSTANT_COLOR0_NV, top);
-		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, GL_CONSTANT_COLOR0_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
+		qglCombinerOutputNV (GL_COMBINER0_NV, GL_RGB, GL_DISCARD_NV, GL_DISCARD_NV, GL_SPARE0_NV, GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE);
 
+		qglCombinerParameterfvNV (GL_CONSTANT_COLOR0_NV, top);
 		qglCombinerParameterfvNV (GL_CONSTANT_COLOR1_NV, bottom);
-		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_CONSTANT_COLOR1_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 
 		R_DrawSubSkinNV (paliashdr, &skin->top_bottom_i[anim], &skin->top[anim], &skin->bottom[anim]);
 
-		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);
-		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
+		qglCombinerParameterfvNV (GL_CONSTANT_COLOR0_NV, whitev);
+		qglCombinerParameterfvNV (GL_CONSTANT_COLOR1_NV, whitev);
+
 		qglDepthMask (GL_TRUE);
 		qglDisable (GL_BLEND);
 	}
@@ -484,29 +481,32 @@ R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
 
 	if (gl_affinemodels->ivalue)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+	qglEnableClientState (GL_COLOR_ARRAY);
+	qglBlendFunc (GL_ONE, GL_ONE);
 
 	if (gl_nv_register_combiners) {
-		qglEnableClientState (GL_COLOR_ARRAY);
 		qglEnable (GL_REGISTER_COMBINERS_NV);
-		qglBlendFunc (GL_ONE, GL_ONE);
 
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV, GL_TEXTURE0_ARB, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_ALPHA, GL_VARIABLE_A_NV, GL_TEXTURE0_ARB, GL_UNSIGNED_IDENTITY_NV, GL_ALPHA);
 
-		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_RGB);
+		qglCombinerParameterfvNV (GL_CONSTANT_COLOR0_NV, whitev);
+		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV, GL_CONSTANT_COLOR0_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_ALPHA, GL_VARIABLE_B_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_ALPHA);
 
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_C_NV, GL_TEXTURE1_ARB, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_ALPHA, GL_VARIABLE_C_NV, GL_TEXTURE1_ARB, GL_UNSIGNED_IDENTITY_NV, GL_ALPHA);
 
-		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
+		qglCombinerParameterfvNV (GL_CONSTANT_COLOR1_NV, whitev);
+		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV, GL_CONSTANT_COLOR1_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_ALPHA, GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_ALPHA);
 
-		qglCombinerOutputNV (GL_COMBINER0_NV, GL_RGB, GL_DISCARD_NV, GL_DISCARD_NV, GL_SPARE0_NV, GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE);
+//		qglCombinerOutputNV (GL_COMBINER0_NV, GL_RGB, GL_DISCARD_NV, GL_DISCARD_NV, GL_SPARE0_NV, GL_NONE, GL_NONE, GL_FALSE, GL_FALSE, GL_FALSE);
 
 		qglFinalCombinerInputNV (GL_VARIABLE_A_NV, GL_SPARE0_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglFinalCombinerInputNV (GL_VARIABLE_B_NV, GL_PRIMARY_COLOR_NV, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglFinalCombinerInputNV (GL_VARIABLE_C_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
+		qglFinalCombinerInputNV (GL_VARIABLE_D_NV, GL_ZERO, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
 		qglFinalCombinerInputNV (GL_VARIABLE_G_NV, GL_ZERO, GL_UNSIGNED_INVERT_NV, GL_ALPHA);
 		for (i = 0; i < num_ents; i++) {
 			e = ents[i];
@@ -518,10 +518,7 @@ R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
 			}
 		}
 
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		qglDisable (GL_REGISTER_COMBINERS_NV);
-		qglDisableClientState (GL_COLOR_ARRAY);
-		qglColor4fv (whitev);
 	} else {
 		for (i = 0; i < num_ents; i++) {
 			e = ents[i];
@@ -534,7 +531,9 @@ R_DrawOpaqueAliasModels (entity_t *ents[], int num_ents, qboolean viewent)
 		}
 	}
 		
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDisableClientState (GL_COLOR_ARRAY);
+	qglColor4fv (whitev);
 	if (gl_affinemodels->ivalue)
 		qglHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
-

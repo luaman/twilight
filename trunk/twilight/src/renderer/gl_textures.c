@@ -44,7 +44,8 @@ static Uint32 *trans;
 static int trans_size;
 
 Uint32 *
-GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette)
+GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
+		qboolean check_empty)
 {
 	int i, size, count = 0;
 
@@ -64,10 +65,10 @@ GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette)
 		if ((trans[i] = palette[data[i]]) != d_palette_empty)
 			count++;
 
-	if (count)
-		return trans;
-	else
+	if (!count && check_empty)
 		return NULL;
+	else
+		return trans;
 }
 
 /*
@@ -262,7 +263,7 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 
 	memset(skin, 0, sizeof(*skin));
 
-	mskin = GLT_8to32_convert(in, width, height, palette);
+	mskin = GLT_8to32_convert(in, width, height, palette, tri_check);
 	if (!mskin)
 		return;
 
