@@ -48,6 +48,7 @@ Credits for Project: Twilight
    Shawn Walker <eviltypeguy@icculus.org>
    Jason Wilkins <fenix@io.com>
    Ben Winslow <rain@bluecherry.net>
+   Thad Ward <coderjoe@grnet.com>
 
 
 Quake(R) and QuakeWorld(R) are registered trademarks of Id Software, Inc.
