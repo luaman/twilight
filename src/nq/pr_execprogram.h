@@ -192,7 +192,7 @@
 					PR_RunError("Progs attempted to address an out of bounds edict\n");
 					return;
 				}
-				if (OPB->_int < 0 || OPB->_int >= progs->entityfields)
+				if (OPB->_int < 0 || OPB->_int >= (Sint)progs->entityfields)
 				{
 					pr_xstatement = st - pr_statements;
 					PR_RunError("Progs attempted to address an invalid field in an edict\n");
@@ -222,7 +222,7 @@
 					PR_RunError("Progs attempted to read an out of bounds edict number\n");
 					return;
 				}
-				if (OPB->_int < 0 || OPB->_int >= progs->entityfields)
+				if (OPB->_int < 0 || OPB->_int >= (Sint)progs->entityfields)
 				{
 					pr_xstatement = st - pr_statements;
 					PR_RunError("Progs attempted to read an invalid field in an edict\n");
@@ -241,7 +241,7 @@
 					PR_RunError("Progs attempted to read an out of bounds edict number\n");
 					return;
 				}
-				if (OPB->_int < 0 || OPB->_int + 2 >= progs->entityfields)
+				if (OPB->_int < 0 || OPB->_int + 2 >= (Sint)progs->entityfields)
 				{
 					pr_xstatement = st - pr_statements;
 					PR_RunError("Progs attempted to read an invalid field in an edict\n");
@@ -291,7 +291,7 @@
 				if (newf->first_statement < 0)
 				{
 					// negative statements are built in functions
-					if ((-newf->first_statement) >= pr_numbuiltins)
+					if ((Uint)(-newf->first_statement) >= pr_numbuiltins)
 						PR_RunError ("Bad builtin call number");
 					pr_builtins[-newf->first_statement] ();
 				}

@@ -428,17 +428,19 @@ SV_SpawnSpectator
 void
 SV_SpawnSpectator (void)
 {
-	int         i;
-	edict_t    *e;
+	Uint		i;
+	edict_t		*e;
 
 	VectorClear (sv_player->v.origin);
 	VectorClear (sv_player->v.view_ofs);
 	sv_player->v.view_ofs[2] = 22;
 
 	// search for an info_playerstart to spawn the spectator at
-	for (i = MAX_CLIENTS - 1; i < sv.num_edicts; i++) {
+	for (i = MAX_CLIENTS - 1; i < sv.num_edicts; i++)
+	{
 		e = EDICT_NUM (i);
-		if (!strcmp (PR_GetString (e->v.classname), "info_player_start")) {
+		if (!strcmp (PR_GetString (e->v.classname), "info_player_start"))
+		{
 			VectorCopy (e->v.origin, sv_player->v.origin);
 			return;
 		}
@@ -1326,28 +1328,30 @@ For debugging
 void
 AddAllEntsToPmove (void)
 {
-	int         e;
-	edict_t    *check;
-	int         i;
-	physent_t  *pe;
-	int         pl;
+	Uint		e;
+	edict_t		*check;
+	Uint		i;
+	physent_t	*pe;
+	int			pl;
 
 	pl = EDICT_TO_PROG (sv_player);
 	check = NEXT_EDICT (sv.edicts);
-	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check)) {
+	for (e = 1; e < sv.num_edicts; e++, check = NEXT_EDICT (check))
+	{
 		if (check->free)
 			continue;
 		if (check->v.owner == pl)
 			continue;
 		if (check->v.solid == SOLID_BSP
-			|| check->v.solid == SOLID_BBOX
-			|| check->v.solid == SOLID_SLIDEBOX) {
+				|| check->v.solid == SOLID_BBOX
+				|| check->v.solid == SOLID_SLIDEBOX)
+		{
 			if (check == sv_player)
 				continue;
 
 			for (i = 0; i < 3; i++)
 				if (check->v.absmin[i] > pmove_maxs[i]
-					|| check->v.absmax[i] < pmove_mins[i])
+						|| check->v.absmax[i] < pmove_mins[i])
 					break;
 			if (i != 3)
 				continue;
@@ -1358,7 +1362,8 @@ AddAllEntsToPmove (void)
 			pe->id = -1;
 			if (check->v.solid == SOLID_BSP)
 				pe->model = sv.models[(int) (check->v.modelindex)];
-			else {
+			else
+			{
 				pe->model = NULL;
 				VectorCopy (check->v.mins, pe->mins);
 				VectorCopy (check->v.maxs, pe->maxs);

@@ -104,11 +104,12 @@ baseline will be transmitted
 void
 SV_CreateBaseline (void)
 {
-	int         i;
-	edict_t    *svent;
-	int         entnum;
+	int			i;
+	edict_t		*svent;
+	Uint		entnum;
 
-	for (entnum = 0; entnum < sv.num_edicts; entnum++) {
+	for (entnum = 0; entnum < sv.num_edicts; entnum++)
+	{
 		svent = EDICT_NUM (entnum);
 		if (svent->free)
 			continue;
@@ -124,10 +125,13 @@ SV_CreateBaseline (void)
 		VectorCopy (svent->v.angles, svent->baseline.angles);
 		svent->baseline.frame = svent->v.frame;
 		svent->baseline.skinnum = svent->v.skin;
-		if (entnum > 0 && entnum <= MAX_CLIENTS) {
+		if (entnum > 0 && entnum <= MAX_CLIENTS)
+		{
 			svent->baseline.colormap = entnum;
 			svent->baseline.modelindex = SV_ModelIndex ("progs/player.mdl");
-		} else {
+		}
+		else
+		{
 			svent->baseline.colormap = 0;
 			svent->baseline.modelindex =
 				SV_ModelIndex (PR_GetString (svent->v.model));
@@ -149,7 +153,8 @@ SV_CreateBaseline (void)
 		MSG_WriteByte (&sv.signon, svent->baseline.frame);
 		MSG_WriteByte (&sv.signon, svent->baseline.colormap);
 		MSG_WriteByte (&sv.signon, svent->baseline.skinnum);
-		for (i = 0; i < 3; i++) {
+		for (i = 0; i < 3; i++)
+		{
 			MSG_WriteCoord (&sv.signon, svent->baseline.origin[i]);
 			MSG_WriteAngle (&sv.signon, svent->baseline.angles[i]);
 		}

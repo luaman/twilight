@@ -338,16 +338,17 @@ SV_WritePlayersToClient
 */
 void
 SV_WritePlayersToClient (client_t *client, edict_t *clent, Uint8 *pvs,
-						 sizebuf_t *msg)
+		sizebuf_t *msg)
 {
-	int         i, j;
-	client_t   *cl;
-	edict_t    *ent;
-	int         msec;
-	usercmd_t   cmd;
-	int         pflags;
+	Uint		i, j;
+	client_t	*cl;
+	edict_t		*ent;
+	int			msec;
+	usercmd_t	cmd;
+	int			pflags;
 
-	for (j = 0, cl = svs.clients; j < MAX_CLIENTS; j++, cl++) {
+	for (j = 0, cl = svs.clients; j < MAX_CLIENTS; j++, cl++)
+	{
 		if (cl->state != cs_spawned)
 			continue;
 
@@ -355,7 +356,8 @@ SV_WritePlayersToClient (client_t *client, edict_t *clent, Uint8 *pvs,
 
 		// ZOID visibility tracking
 		if (ent != clent &&
-			!(client->spec_track && client->spec_track - 1 == j)) {
+			!((Uint)(client->spec_track && client->spec_track - 1) == j))
+		{
 			if (cl->spectator)
 				continue;
 
@@ -364,7 +366,8 @@ SV_WritePlayersToClient (client_t *client, edict_t *clent, Uint8 *pvs,
 				if (pvs[ent->leafnums[i] >> 3] & (1 << (ent->leafnums[i] & 7)))
 					break;
 			if (i == ent->num_leafs)
-				continue;				// not visible
+				// not visible
+				continue;
 		}
 
 		pflags = PF_MSEC | PF_COMMAND;
@@ -383,19 +386,21 @@ SV_WritePlayersToClient (client_t *client, edict_t *clent, Uint8 *pvs,
 		if (ent->v.mins[2] != -24)
 			pflags |= PF_GIB;
 
-		if (cl->spectator) {			// only sent origin and velocity to
-			// spectators
+		if (cl->spectator)
+		{
+			// only sent origin and velocity to spectators
 			pflags &= PF_VELOCITY1 | PF_VELOCITY2 | PF_VELOCITY3;
-		} else if (ent == clent) {		// don't send a lot of data on personal 
-										// 
-			// entity
+		}
+		else if (ent == clent)
+		{
+			// don't send a lot of data on personal entity
 			pflags &= ~(PF_MSEC | PF_COMMAND);
 			if (ent->v.weaponframe)
 				pflags |= PF_WEAPONFRAME;
 		}
 
-		if (client->spec_track && client->spec_track - 1 == j &&
-			ent->v.weaponframe)
+		if ((Uint)(client->spec_track && client->spec_track - 1) == j
+				&& ent->v.weaponframe)
 			pflags |= PF_WEAPONFRAME;
 
 		MSG_WriteByte (msg, svc_playerinfo);
@@ -407,18 +412,21 @@ SV_WritePlayersToClient (client_t *client, edict_t *clent, Uint8 *pvs,
 
 		MSG_WriteByte (msg, ent->v.frame);
 
-		if (pflags & PF_MSEC) {
+		if (pflags & PF_MSEC)
+		{
 			msec = 1000 * (sv.time - cl->localtime);
 			if (msec > 255)
 				msec = 255;
 			MSG_WriteByte (msg, msec);
 		}
 
-		if (pflags & PF_COMMAND) {
+		if (pflags & PF_COMMAND)
+		{
 			cmd = cl->lastcmd;
 
-			if (ent->v.health <= 0) {	// don't show the corpse looking
-				// around...
+			if (ent->v.health <= 0)
+			{
+				// don't show the corpse looking around...
 				cmd.angles[0] = 0;
 				cmd.angles[1] = ent->v.angles[1];
 				cmd.angles[0] = 0;
@@ -462,14 +470,14 @@ svc_playerinfo messages
 void
 SV_WriteEntitiesToClient (client_t *client, sizebuf_t *msg)
 {
-	int         e, i;
-	Uint8      *pvs;
-	vec3_t      org;
-	edict_t    *ent;
-	packet_entities_t *pack;
-	edict_t    *clent;
-	client_frame_t *frame;
-	entity_state_t *state;
+	Uint				e, i;
+	Uint8				*pvs;
+	vec3_t				org;
+	edict_t				*ent;
+	packet_entities_t	*pack;
+	edict_t				*clent;
+	client_frame_t		*frame;
+	entity_state_t		*state;
 
 	// this is the frame we are creating
 	frame = &client->frames[client->netchan.incoming_sequence & UPDATE_MASK];
@@ -490,7 +498,8 @@ SV_WriteEntitiesToClient (client_t *client, sizebuf_t *msg)
 	numnails = 0;
 
 	for (e = MAX_CLIENTS + 1, ent = EDICT_NUM (e); e < sv.num_edicts;
-		 e++, ent = NEXT_EDICT (ent)) {
+			e++, ent = NEXT_EDICT (ent))
+	{
 		// ignore ents without visible models
 		if (!ent->v.modelindex || !*PR_GetString (ent->v.model))
 			continue;
@@ -501,15 +510,18 @@ SV_WriteEntitiesToClient (client_t *client, sizebuf_t *msg)
 				break;
 
 		if (i == ent->num_leafs)
-			continue;					// not visible
+			// not visible
+			continue;
 
 		if (!sv_nailhack->ivalue)
 			if (SV_AddNailUpdate (ent))
-				continue;					// added to the special update list
+				// added to the special update list
+				continue;
 
 		// add to the packetentities
 		if (pack->num_entities == MAX_PACKET_ENTITIES)
-			continue;					// all full
+			// all full
+			continue;
 
 		state = &pack->entities[pack->num_entities];
 		pack->num_entities++;
@@ -533,3 +545,4 @@ SV_WriteEntitiesToClient (client_t *client, sizebuf_t *msg)
 	// now add the specialized nail update
 	SV_EmitNailUpdate (msg);
 }
+

@@ -37,28 +37,31 @@ static const char rcsid[] =
 #include "sys.h"
 #include "cvar.h"
 
-typedef struct {
-	int         s;
-	dfunction_t *f;
-} prstack_t;
+typedef struct
+{
+	Uint			s;
+	dfunction_t		*f;
+}
+prstack_t;
 
-#define	MAX_STACK_DEPTH		32
-prstack_t   pr_stack[MAX_STACK_DEPTH];
-int         pr_depth;
+#define MAX_STACK_DEPTH 32
+prstack_t pr_stack[MAX_STACK_DEPTH];
+int pr_depth;
 
-#define	LOCALSTACK_SIZE		2048
-int         localstack[LOCALSTACK_SIZE];
-int         localstack_used;
+#define LOCALSTACK_SIZE 2048
+int localstack[LOCALSTACK_SIZE];
+int localstack_used;
 
 
-qboolean    pr_trace;
+qboolean pr_trace;
 dfunction_t *pr_xfunction;
-int         pr_xstatement;
+int pr_xstatement;
 
 
-int         pr_argc;
+Uint pr_argc;
 
-char       *pr_opnames[] = {
+char *pr_opnames[] =
+{
 	"DONE",
 
 	"MUL_F",
@@ -146,8 +149,8 @@ char       *pr_opnames[] = {
 	"BITOR"
 };
 
-char       *PR_GlobalString (int ofs);
-char       *PR_GlobalStringNoContents (int ofs);
+char *PR_GlobalString (int ofs);
+char *PR_GlobalStringNoContents (int ofs);
 
 
 //=============================================================================
@@ -219,28 +222,33 @@ PR_Profile_f
 void
 PR_Profile_f (void)
 {
-	dfunction_t *f, *best;
-	int         max, num, i;
+	dfunction_t		*f, *best;
+	Uint			max, num, i;
 
 	num = 0;
-	do {
+	do
+	{
 		max = 0;
 		best = NULL;
-		for (i = 0; i < progs->numfunctions; i++) {
+		for (i = 0; i < progs->numfunctions; i++)
+		{
 			f = &pr_functions[i];
-			if (f->profile > max) {
+			if (f->profile > max)
+			{
 				max = f->profile;
 				best = f;
 			}
 		}
-		if (best) {
+		if (best)
+		{
 			if (num < 10)
 				Com_Printf ("%7i %s\n", best->profile,
 							pr_strings + best->s_name);
 			num++;
 			best->profile = 0;
 		}
-	} while (best);
+	}
+	while (best);
 }
 
 
@@ -296,7 +304,7 @@ Returns the new program statement counter
 int
 PR_EnterFunction (dfunction_t *f)
 {
-	int	i, j, c, o;
+	Uint		i, j, c, o;
 
 	if (!f)
 		PR_RunError ("PR_EnterFunction: NULL function\n");

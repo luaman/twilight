@@ -29,29 +29,40 @@
 
 // this file is shared by quake and qcc
 
-typedef int func_t;
+typedef Uint func_t;
 typedef int string_t;
 
-typedef enum { ev_void, ev_string, ev_float, ev_vector, ev_entity, ev_field,
-	ev_function, ev_pointer
-} etype_t;
+typedef enum
+{
+	ev_void,
+	ev_string,
+	ev_float,
+	ev_vector,
+	ev_entity,
+	ev_field,
+	ev_function,
+	ev_pointer
+}
+etype_t;
 
 
-#define	OFS_NULL		0
-#define	OFS_RETURN		1
-#define	OFS_PARM0		4				// leave 3 ofs for each parm to hold
-										// vectors
-#define	OFS_PARM1		7
-#define	OFS_PARM2		10
-#define	OFS_PARM3		13
-#define	OFS_PARM4		16
-#define	OFS_PARM5		19
-#define	OFS_PARM6		22
-#define	OFS_PARM7		25
-#define	RESERVED_OFS	28
+/*
+ * Note, each parm gets an offset of 3 to hold vectors
+ */
+#define OFS_NULL		0
+#define OFS_RETURN		1
+#define OFS_PARM0		4
+#define OFS_PARM1		7
+#define OFS_PARM2		10
+#define OFS_PARM3		13
+#define OFS_PARM4		16
+#define OFS_PARM5		19
+#define OFS_PARM6		22
+#define OFS_PARM7		25
+#define RESERVED_OFS	28
 
-
-enum {
+enum
+{
 	OP_DONE,
 	OP_MUL_F,
 	OP_MUL_V,
@@ -130,62 +141,70 @@ enum {
 };
 
 
-typedef struct statement_s {
-	unsigned short op;
-	short       a, b, c;
-} dstatement_t;
+typedef struct statement_s
+{
+	Uint16		op;
+	Sint16		a, b, c;
+}
+dstatement_t;
 
-typedef struct {
-	unsigned short type;				// if DEF_SAVEGLOBGAL bit is set
-	// the variable needs to be saved in savegames
-	unsigned short ofs;
-	int         s_name;
-} ddef_t;
+typedef struct
+{
+	// if DEF_SAVEGLOBGAL is set, save variable in savegames
+	Uint16		type;
+	Uint16		ofs;
+	Uint32		s_name;
+}
+ddef_t;
 
-#define	DEF_SAVEGLOBAL	(1<<15)
+#define DEF_SAVEGLOBAL (1<<15)
 
-#define	MAX_PARMS	8
+#define MAX_PARMS 8
 
-typedef struct {
-	int         first_statement;		// negative numbers are builtins
-	int         parm_start;
-	int         locals;					// total ints of parms + locals
+typedef struct
+{
+	Sint32		first_statement;		// negative numbers are builtins
+	Uint32		parm_start;
+	Uint32		locals;					// total ints of parms + locals
 
-	int         profile;				// runtime
+	Uint32		profile;				// runtime
 
-	int         s_name;
-	int         s_file;					// source file defined in
+	Uint32		s_name;
+	Uint32		s_file;					// source file defined in
 
-	int         numparms;
-	Uint8       parm_size[MAX_PARMS];
-} dfunction_t;
+	Uint32		numparms;
+	Uint8		parm_size[MAX_PARMS];
+}
+dfunction_t;
 
 
-#define	PROG_VERSION	6
-typedef struct {
-	int         version;
-	int         crc;					// check of header file
+#define PROG_VERSION 6
+typedef struct
+{
+	Uint32		version;
+	Uint32		crc;					// check of header file
 
-	int         ofs_statements;
-	int         numstatements;			// statement 0 is an error
+	Uint32		ofs_statements;
+	Uint32		numstatements;			// statement 0 is an error
 
-	int         ofs_globaldefs;
-	int         numglobaldefs;
+	Uint32		ofs_globaldefs;
+	Uint32		numglobaldefs;
 
-	int         ofs_fielddefs;
-	int         numfielddefs;
+	Uint32		ofs_fielddefs;
+	Uint32		numfielddefs;
 
-	int         ofs_functions;
-	int         numfunctions;			// function 0 is an empty
+	Uint32		ofs_functions;
+	Uint32		numfunctions;			// function 0 is an empty
 
-	int         ofs_strings;
-	int         numstrings;				// first string is a null string
+	Uint32		ofs_strings;
+	Uint32		numstrings;				// first string is a null string
 
-	int         ofs_globals;
-	int         numglobals;
+	Uint32		ofs_globals;
+	Uint32		numglobals;
 
-	int         entityfields;
-} dprograms_t;
+	Uint32		entityfields;
+}
+dprograms_t;
 
 #endif // __PR_COMP_H
 

@@ -42,28 +42,31 @@ static const char rcsid[] =
 
 */
 
-typedef struct {
-	int         s;
-	dfunction_t *f;
-} prstack_t;
+typedef struct
+{
+	int				s;
+	dfunction_t		*f;
+}
+prstack_t;
 
-#define	MAX_STACK_DEPTH		32
-prstack_t   pr_stack[MAX_STACK_DEPTH];
-int         pr_depth;
+#define MAX_STACK_DEPTH 32
+prstack_t pr_stack[MAX_STACK_DEPTH];
+int pr_depth;
 
-#define	LOCALSTACK_SIZE		2048
-int         localstack[LOCALSTACK_SIZE];
-int         localstack_used;
+#define LOCALSTACK_SIZE 2048
+int localstack[LOCALSTACK_SIZE];
+int localstack_used;
 
 
-qboolean    pr_trace;
+qboolean pr_trace;
 dfunction_t *pr_xfunction;
-int         pr_xstatement;
+int pr_xstatement;
 
 
-int         pr_argc;
+Uint pr_argc;
 
-char       *pr_opnames[] = {
+char *pr_opnames[] =
+{
 	"DONE",
 
 	"MUL_F",
@@ -151,8 +154,8 @@ char       *pr_opnames[] = {
 	"BITOR"
 };
 
-char       *PR_GlobalString (int ofs);
-char       *PR_GlobalStringNoContents (int ofs);
+extern char *PR_GlobalString (int ofs);
+extern char *PR_GlobalStringNoContents (int ofs);
 
 
 //=============================================================================
@@ -230,30 +233,35 @@ PR_Profile_f
 void
 PR_Profile_f (void)
 {
-	dfunction_t *f, *best;
-	int         max;
-	int         num;
-	int         i;
+	dfunction_t		*f, *best;
+	Uint			max;
+	Uint			num;
+	Uint			i;
 
 	num = 0;
-	do {
+	do
+	{
 		max = 0;
 		best = NULL;
-		for (i = 0; i < progs->numfunctions; i++) {
+		for (i = 0; i < progs->numfunctions; i++)
+		{
 			f = &pr_functions[i];
-			if (f->profile > max) {
+			if (f->profile > max)
+			{
 				max = f->profile;
 				best = f;
 			}
 		}
-		if (best) {
+		if (best)
+		{
 			if (num < 10)
 				Com_Printf ("%7i %s\n", best->profile,
-							PR_GetString (best->s_name));
+						PR_GetString (best->s_name));
 			num++;
 			best->profile = 0;
 		}
-	} while (best);
+	}
+	while (best);
 }
 
 
@@ -302,7 +310,7 @@ Returns the new program statement counter
 int
 PR_EnterFunction (dfunction_t *f)
 {
-	int         i, j, c, o;
+	Uint		i, j, c, o;
 
 	pr_stack[pr_depth].s = pr_xstatement;
 	pr_stack[pr_depth].f = pr_xfunction;
@@ -310,7 +318,7 @@ PR_EnterFunction (dfunction_t *f)
 	if (pr_depth >= MAX_STACK_DEPTH)
 		PR_RunError ("stack overflow");
 
-// save off any locals that the new function steps on
+	// save off any locals that the new function steps on
 	c = f->locals;
 	if (localstack_used + c > LOCALSTACK_SIZE)
 		PR_RunError ("PR_ExecuteProgram: locals stack overflow\n");
@@ -320,10 +328,12 @@ PR_EnterFunction (dfunction_t *f)
 			((int *) pr_globals)[f->parm_start + i];
 	localstack_used += c;
 
-// copy parameters
+	// copy parameters
 	o = f->parm_start;
-	for (i = 0; i < f->numparms; i++) {
-		for (j = 0; j < f->parm_size[i]; j++) {
+	for (i = 0; i < f->numparms; i++)
+	{
+		for (j = 0; j < f->parm_size[i]; j++)
+		{
 			((int *) pr_globals)[o] =
 				((int *) pr_globals)[OFS_PARM0 + i * 3 + j];
 			o++;
@@ -372,19 +382,20 @@ PR_ExecuteProgram
 void
 PR_ExecuteProgram (func_t fnum)
 {
-	eval_t  	   *a = NULL;
-	eval_t		   *b = NULL;
-	eval_t		   *c = NULL;
+	eval_t			*a = NULL;
+	eval_t			*b = NULL;
+	eval_t			*c = NULL;
 	int				s;
-	dstatement_t   *st = NULL;
-	dfunction_t	   *f, *newf;
+	dstatement_t	*st = NULL;
+	dfunction_t		*f, *newf;
 	int				runaway;
-	int				i;
-	edict_t		   *ed;
+	Uint			i;
+	edict_t			*ed;
 	int				exitdepth;
-	eval_t		   *ptr;
+	eval_t			*ptr;
 
-	if (!fnum || fnum >= progs->numfunctions) {
+	if (!fnum || fnum >= progs->numfunctions)
+	{
 		if (pr_global_struct->self)
 			ED_Print (PROG_TO_EDICT (pr_global_struct->self));
 		SV_Error ("PR_ExecuteProgram: NULL function");
@@ -395,12 +406,13 @@ PR_ExecuteProgram (func_t fnum)
 	runaway = 100000;
 	pr_trace = false;
 
-// make a stack frame
+	// make a stack frame
 	exitdepth = pr_depth;
 
 	s = PR_EnterFunction (f);
 
-	while (1) {
+	while (1)
+	{
 		s++;							// next statement
 
 		st = &pr_statements[s];
@@ -417,7 +429,8 @@ PR_ExecuteProgram (func_t fnum)
 		if (pr_trace)
 			PR_PrintStatement (st);
 
-		switch (st->op) {
+		switch (st->op)
+		{
 			case OP_ADD_F:
 				c->_float = a->_float + b->_float;
 				break;
@@ -514,7 +527,7 @@ PR_ExecuteProgram (func_t fnum)
 			case OP_EQ_S:
 				c->_float =
 					!strcmp (PR_GetString (a->string),
-							 PR_GetString (b->string));
+							PR_GetString (b->string));
 				break;
 			case OP_EQ_E:
 				c->_float = a->_int == b->_int;
@@ -528,9 +541,9 @@ PR_ExecuteProgram (func_t fnum)
 				c->_float = a->_float != b->_float;
 				break;
 			case OP_NE_V:
-				c->_float = (a->vector[0] != b->vector[0]) ||
-					(a->vector[1] != b->vector[1]) ||
-					(a->vector[2] != b->vector[2]);
+				c->_float = (a->vector[0] != b->vector[0])
+					|| (a->vector[1] != b->vector[1])
+					|| (a->vector[2] != b->vector[2]);
 				break;
 			case OP_NE_S:
 				c->_float =
@@ -638,8 +651,9 @@ PR_ExecuteProgram (func_t fnum)
 
 				newf = &pr_functions[a->function];
 
-				if (newf->first_statement < 0) {	// negative statements are
-					// built in functions
+				if (newf->first_statement < 0)
+				{
+					// negative statements are built in functions
 					i = -newf->first_statement;
 					if (i >= pr_numbuiltins)
 						PR_RunError ("Bad builtin call number");
@@ -658,15 +672,16 @@ PR_ExecuteProgram (func_t fnum)
 
 				s = PR_LeaveFunction ();
 				if (pr_depth == exitdepth)
-					return;				// all done
+					// all done
+					return;
 				break;
 
 			case OP_STATE:
 				ed = PROG_TO_EDICT (pr_global_struct->self);
 				ed->v.nextthink = pr_global_struct->time + 0.1;
-				if (a->_float != ed->v.frame) {
+				if (a->_float != ed->v.frame)
 					ed->v.frame = a->_float;
-				}
+
 				ed->v.think = b->function;
 				break;
 
@@ -674,41 +689,44 @@ PR_ExecuteProgram (func_t fnum)
 				PR_RunError ("Bad opcode %i", st->op);
 		}
 	}
-
 }
 
 /*----------------------*/
 
-char       *pr_strtbl[MAX_PRSTR];
-int         num_prstr;
+char *pr_strtbl[MAX_PRSTR];
+int num_prstr;
 
-char       *
+char *
 PR_GetString (int num)
 {
-	if (num < 0) {
-//Con_DPrintf("GET:%d == %s\n", num, pr_strtbl[-num]);
+	if (num < 0)
 		return pr_strtbl[-num];
-	}
+
 	return pr_strings + num;
 }
 
 int
 PR_SetString (char *s)
 {
-	int         i;
+	int			i;
 
-	if (s - pr_strings < 0) {
+	if (s - pr_strings < 0)
+	{
 		for (i = 0; i <= num_prstr; i++)
 			if (pr_strtbl[i] == s)
 				break;
+
 		if (i < num_prstr)
 			return -i;
+
 		if (num_prstr == MAX_PRSTR - 1)
 			Sys_Error ("MAX_PRSTR");
+
 		num_prstr++;
 		pr_strtbl[num_prstr] = s;
-//Con_DPrintf("SET:%d == %s\n", -num_prstr, s);
 		return -num_prstr;
 	}
+
 	return (int) (s - pr_strings);
 }
+

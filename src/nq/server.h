@@ -53,7 +53,7 @@ typedef struct {
 
 	double			time;
 
-	int				lastcheck;				// used by PF_checkclient
+	Uint			lastcheck;				// used by PF_checkclient
 	double			lastchecktime;
 
 	char			name[64];				// map name
@@ -64,8 +64,8 @@ typedef struct {
 	struct model_s	*models[MAX_MODELS];
 	char			*sound_precache[MAX_SOUNDS];	// NULL terminated
 	char			*lightstyles[MAX_LIGHTSTYLES];
-	Uint32			num_edicts;
-	int				max_edicts;
+	Uint			num_edicts;
+	Uint			max_edicts;
 	edict_t			*edicts;					// can NOT be array indexed, because
 												// edict_t is variable sized, but can
 												// be used to reference the world ent

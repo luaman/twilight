@@ -72,7 +72,7 @@ typedef struct {
 	char       *lightstyles[MAX_LIGHTSTYLES];
 	struct model_s *models[MAX_MODELS];
 
-	int         num_edicts;				// increases towards MAX_EDICTS
+	Uint         num_edicts;				// increases towards MAX_EDICTS
 	struct edict_s    *edicts;					// can NOT be array indexed, because
 	// edict_t is variable sized, but can
 	// be used to reference the world ent
