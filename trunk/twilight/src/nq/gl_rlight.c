@@ -218,80 +218,83 @@ R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node)
 	int			j, s, t;
 	vec3_t		impact;
 
-loc0:
-	if (node->contents < 0)
-		return;
-
-	splitplane = node->plane;
-	dist = PlaneDiff (light->origin, splitplane);
-
-	if (dist > light->radius)
+	while (node->contents >= 0)
 	{
-		node = node->children[0];
-		goto loc0;
-	}
-	if (dist < -light->radius)
-	{
-		node = node->children[1];
-		goto loc0;
-	}
-		
-// mark the polygons
-	maxdist = light->radius*light->radius;
-	surf = cl.worldmodel->surfaces + node->firstsurface;
-	for (i = 0; i < node->numsurfaces; i++, surf++)
-	{
-		for (j=0 ; j<3 ; j++)
-			impact[j] = light->origin[j] - surf->plane->normal[j]*dist;
+		splitplane = node->plane;
+		dist = PlaneDiff (light->origin, splitplane);
 
-		// clamp center of light to corner and check brightness
-		l = DotProduct (impact, surf->texinfo->vecs[0])
-			+ surf->texinfo->vecs[0][3] - surf->texturemins[0];
-		s = l+0.5;
-		if (s < 0) 
-			s = 0;
-		else if (s > surf->extents[0]) 
-			s = surf->extents[0];
-		s = l - s;
-		l = DotProduct (impact, surf->texinfo->vecs[1])
-			+ surf->texinfo->vecs[1][3] - surf->texturemins[1];
-		t = l+0.5;
-		if (t < 0) 
-			t = 0;
-		else if (t > surf->extents[1]) 
-			t = surf->extents[1];
-		t = l - t;
-		// compare to minimum light
-		if ((s*s+t*t+dist*dist) < maxdist)
-		{
-			if (surf->dlightframe != r_framecount) // not dynamic until now
-			{
-				surf->dlightbits = bit;
-				surf->dlightframe = r_framecount;
-			}
-			else // already dynamic
-				surf->dlightbits |= bit;
-		}
-	}
-
-	if (node->children[0]->contents >= 0)
-	{
-		if (node->children[1]->contents >= 0)
-		{
-			R_MarkLightsNoVis (light, bit, node->children[0]);
-			node = node->children[1];
-			goto loc0;
-		}
-		else
+		if (dist > light->radius)
 		{
 			node = node->children[0];
-			goto loc0;
+			continue;
 		}
-	}
-	else if (node->children[1]->contents >= 0)
-	{
-		node = node->children[1];
-		goto loc0;
+
+		if (dist < -light->radius)
+		{
+			node = node->children[1];
+			continue;
+		}
+			
+		// mark the polygons
+		maxdist = light->radius*light->radius;
+		surf = cl.worldmodel->surfaces + node->firstsurface;
+
+		for (i = 0; i < node->numsurfaces; i++, surf++)
+		{
+			for (j = 0; j < 3; j++)
+				impact[j] = light->origin[j] - surf->plane->normal[j]*dist;
+
+			// clamp center of light to corner and check brightness
+			l = DotProduct (impact, surf->texinfo->vecs[0])
+				+ surf->texinfo->vecs[0][3] - surf->texturemins[0];
+			s = l+0.5;
+			if (s < 0) 
+				s = 0;
+			else if (s > surf->extents[0]) 
+				s = surf->extents[0];
+			s = l - s;
+			l = DotProduct (impact, surf->texinfo->vecs[1])
+				+ surf->texinfo->vecs[1][3] - surf->texturemins[1];
+			t = l+0.5;
+			if (t < 0) 
+				t = 0;
+			else if (t > surf->extents[1]) 
+				t = surf->extents[1];
+			t = l - t;
+			// compare to minimum light
+			if ((s*s+t*t+dist*dist) < maxdist)
+			{
+				if (surf->dlightframe != r_framecount) // not dynamic until now
+				{
+					surf->dlightbits = bit;
+					surf->dlightframe = r_framecount;
+				}
+				else // already dynamic
+					surf->dlightbits |= bit;
+			}
+		}
+
+		if (node->children[0]->contents >= 0)
+		{
+			if (node->children[1]->contents >= 0)
+			{
+				R_MarkLightsNoVis (light, bit, node->children[0]);
+				node = node->children[1];
+				continue;
+			}
+			else
+			{
+				node = node->children[0];
+				continue;
+			}
+		}
+		else if (node->children[1]->contents >= 0)
+		{
+			node = node->children[1];
+			continue;
+		}
+
+		return;
 	}
 }
 
@@ -577,18 +580,25 @@ RecursiveColorLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 	float		front, back, frac;
 	vec3_t		mid;
 
-loc0:
 	if (node->contents < 0)
-		return false;// didn't hit anything
-	
-	// calculate mid point
-	front = PlaneDiff (start, node->plane);
-	back = PlaneDiff (end, node->plane);
+		return false;		// didn't hit anything
 
-	if ((back < 0) == (front < 0))
+	while (1)
 	{
-		node = node->children[front < 0];
-		goto loc0;
+		if (node->contents < 0)
+			return false;	// didn't hit anything
+
+		// calculate mid point
+		front = PlaneDiff (start, node->plane);
+		back = PlaneDiff (end, node->plane);
+
+		if ((back < 0) == (front < 0))
+		{
+			node = node->children[front < 0];
+			continue;
+		}
+
+		break;
 	}
 	
 	frac = front / (front-back);

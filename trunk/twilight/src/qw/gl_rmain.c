@@ -1323,7 +1323,6 @@ R_SetupGL (void)
 		qglDisable (GL_CULL_FACE);
 
 	qglDisable (GL_BLEND);
-//	qglDisable (GL_ALPHA_TEST);
 	qglEnable (GL_DEPTH_TEST);
 }
 
@@ -1344,8 +1343,6 @@ R_RenderScene (void)
 	R_SetFrustum ();
 
 	R_SetupGL ();
-
-	R_DrawSkyBox ();
 
 	R_MarkLeaves ();					// done here so we know if we're in
 	// water
