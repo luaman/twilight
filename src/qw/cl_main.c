@@ -1501,6 +1501,7 @@ Host_Init (void)
 				build_number ());
 
 	Con_Printf ("€ QuakeWorld Initialized ‚\n");
+	key_dest = key_console;
 }
 
 

@@ -14,7 +14,6 @@ These things should be done before first public release:
     - RPM
     ? Something for win32?
   - Hardware gamma/brightness support [EvilTypeGuy]
-  - Working mousewheel support [EvilTypeGuy]
 
 
 Would be nice but is not strictly needed, in importance order:
