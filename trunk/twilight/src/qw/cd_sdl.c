@@ -41,6 +41,7 @@ static qboolean playLooping = false;
 static float cdvolume;
 static byte remap[100];
 static byte playTrack;
+static double endOfTrack = -1.0, pausetime = -1.0;
 
 SDL_CD     *cd_handle;
 static int  cd_dev = 0;			/* Default to first CD-ROM drive */
@@ -88,6 +89,8 @@ CDAudio_GetAudioDiskInfo (void)
 void
 CDAudio_Play (byte track, qboolean looping)
 {
+	int len_m, len_s, len_f;
+	
 	if (!cd_handle || !enabled)
 		return;
 
@@ -124,7 +127,17 @@ CDAudio_Play (byte track, qboolean looping)
 	playLooping = looping;
 	playTrack = track;
 	playing = true;
-
+	FRAMES_TO_MSF(cd_handle->track[track - 1].length, &len_m, &len_s, &len_f);
+	endOfTrack = realtime + ((double)len_m * 60.0) + (double)len_s + (double)len_f / (double)CD_FPS;
+	/*
+	 * Add the pregap for the next track.  This means that disc-at-once CDs
+	 * won't loop smoothly, but they wouldn't anyway so it doesn't really
+	 * matter.  SDL doesn't give us pregap information anyway, so you'll
+	 * just have to live with it.
+	 */
+	endOfTrack += 2.0;
+	pausetime = -1.0;
+	
 	if (cdvolume == 0.0)
 		CDAudio_Pause ();
 }
@@ -145,6 +158,8 @@ CDAudio_Stop (void)
 
 	wasPlaying = false;
 	playing = false;
+	pausetime = -1.0;
+	endOfTrack = -1.0;
 }
 
 void
@@ -161,6 +176,7 @@ CDAudio_Pause (void)
 
 	wasPlaying = playing;
 	playing = false;
+	pausetime = realtime;
 }
 
 
@@ -179,6 +195,8 @@ CDAudio_Resume (void)
 	if (SDL_CDResume (cd_handle) < 0)
 		Con_Printf ("Unable to resume CD-ROM: %s\n", SDL_GetError ());
 	playing = true;
+	endOfTrack += realtime - pausetime;
+	pausetime = -1.0;
 }
 
 static void
@@ -306,7 +324,6 @@ void
 CDAudio_Update (void)
 {
 	CDstatus    curstat;
-	static time_t lastchk;
 
 	if (!enabled)
 		return;
@@ -323,13 +340,14 @@ CDAudio_Update (void)
 		}
 	}
 
-	if (playing && lastchk < time (NULL)) {
-		lastchk = time (NULL) + 2;
+	if (playing && realtime > endOfTrack) {
 		curstat = SDL_CDStatus (cd_handle);
 		if (curstat != CD_PLAYING && curstat != CD_PAUSED) {
 			playing = false;
 			if (playLooping)
 				CDAudio_Play (playTrack, true);
+			else
+				endOfTrack = -1.0;
 		}
 	}
 }
