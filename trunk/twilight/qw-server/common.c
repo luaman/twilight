@@ -65,6 +65,7 @@ cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;
 cvar_t *fs_userconf;
 cvar_t *fs_userpath;
+cvar_t *fs_gamename;
 cvar_t *registered;
 
 qboolean    com_modified;				// set true if using non-id files
@@ -1057,8 +1058,11 @@ void
 COM_Init_Cvars (void)
 {
 	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
+
 	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, NULL);
 	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
+
+	fs_gamename = Cvar_Get ("fs_gamename", "id1", CVAR_ROM, NULL);
 }
 
 /*
@@ -1678,7 +1682,7 @@ COM_Gamedir (char *dir)
 	// 
 	Cache_Flush ();
 
-	if (!strcmp (dir, "id1") || !strcmp (dir, "qw"))
+	if (!strcmp (dir, fs_gamename->string) || !strcmp (dir, "qw"))
 		return;
 
 	COM_AddGameDirectory (dir);
@@ -1706,10 +1710,7 @@ COM_InitFilesystem (void)
 	if (!strlen (fs_sharepath->string))
 		Cvar_Set (fs_sharepath, fs_userpath->string);
 
-//
-// start up with id1 by default
-//
-	COM_AddGameDirectory ("id1");
+	COM_AddGameDirectory (fs_gamename->string);
 	COM_AddGameDirectory ("qw");
 
 	// any set gamedirs will be freed up to here

@@ -52,6 +52,7 @@ cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;
 cvar_t *fs_userconf;
 cvar_t *fs_userpath;
+cvar_t *fs_gamename;
 
 qboolean    com_modified;				// set true if using non-id files
 
@@ -983,6 +984,8 @@ COM_Init_Cvars (void)
 	// fs_shareconf/userconf have to be done by Host_Init
 	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, NULL);
 	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
+
+	fs_gamename = Cvar_Get ("fs_gamename", GAMENAME, CVAR_ROM, NULL);
 }
 
 
@@ -1614,7 +1617,7 @@ COM_InitFilesystem (void)
 //
 // start up with GAMENAME by default (id1)
 //
-	COM_AddGameDirectory (GAMENAME);
+	COM_AddGameDirectory (fs_gamename->string);
 
 	if (COM_CheckParm ("-rogue"))
 		COM_AddGameDirectory ("rogue");
