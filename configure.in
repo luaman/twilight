@@ -131,11 +131,17 @@ AC_ARG_WITH(servers,
 	[  --without-servers       Disables dedicated servers],,
 	with_servers="yes")
 AM_CONDITIONAL(SERVERS, test "x$with_servers" != "xno")
+if test "x$with_servers" != "xno"; then
+	AC_DEFINE(WANT_SERVERS, 1, Define if servers should be compiled)
+fi
 
 AC_ARG_WITH(clients,
 	[  --without-clients       Disables clients],,
 	with_clients="yes")
 AM_CONDITIONAL(CLIENTS, test "x$with_clients" != "xno")
+if test "x$with_clients" != "xno"; then
+	AC_DEFINE(WANT_CLIENTS, 1, Define if clients should be compiled)
+fi
 
 dnl Check for SDL
 AM_PATH_SDL(1.2.4,
