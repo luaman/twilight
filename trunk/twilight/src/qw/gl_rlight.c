@@ -286,7 +286,7 @@ R_MarkLightsNoVis (rdlight_t *light, int bit, mnode_t *node)
 	msurface_t	*surf;
 	int			i;
 	float		l, maxdist;
-	int			j, s, t;
+	int			s, t;
 	vec3_t		impact;
 
 	while (node->contents >= 0)
@@ -314,8 +314,20 @@ R_MarkLightsNoVis (rdlight_t *light, int bit, mnode_t *node)
 		{
 			if (surf->visframe != r_framecount)
 				continue;
-			for (j = 0; j < 3; j++)
-				impact[j] = light->origin[j] - surf->plane->normal[j]*dist;
+
+			if (surf->plane->type < 3)
+			{
+				impact[0] = light->origin[0];
+				impact[1] = light->origin[1];
+				impact[2] = light->origin[2];
+				impact[surf->plane->type] -= dist;
+			}
+			else
+			{
+				impact[0] = light->origin[0] - surf->plane->normal[0] * dist;
+				impact[1] = light->origin[1] - surf->plane->normal[1] * dist;
+				impact[2] = light->origin[2] - surf->plane->normal[2] * dist;
+			}
 
 			// clamp center of light to corner and check brightness
 			l = DotProduct (impact, surf->texinfo->vecs[0])
@@ -458,12 +470,22 @@ R_MarkLights (rdlight_t *light, int bit, model_t *model)
 
 								dist2 = dist * dist;
 
-								impact[0] = light->origin[0]
-									- surf->plane->normal[0] * dist;
-								impact[1] = light->origin[1]
-									- surf->plane->normal[1] * dist;
-								impact[2] = light->origin[2]
-									- surf->plane->normal[2] * dist;
+								if (surf->plane->type < 3)
+								{
+									impact[0] = light->origin[0];
+									impact[1] = light->origin[1];
+									impact[2] = light->origin[2];
+									impact[surf->plane->type] -= dist;
+								}
+								else
+								{
+									impact[0] = light->origin[0]
+										- surf->plane->normal[0] * dist;
+									impact[1] = light->origin[1]
+										- surf->plane->normal[1] * dist;
+									impact[2] = light->origin[2]
+										- surf->plane->normal[2] * dist;
+								}
 
 								d = DotProduct (impact, surf->texinfo->vecs[0])
 									+ surf->texinfo->vecs[0][3]
@@ -638,11 +660,11 @@ RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 					r11 = 0, g11 = 0, b11 = 0;
 				float scale;
 
-				line3 = ((surf->extents[0]>>4)+1)*3;
+				line3 = surf->smax*3;
 
 				// LordHavoc: *3 for color
 				lightmap = surf->samples + ((dt>>4)
-						* ((surf->extents[0]>>4)+1) + (ds>>4))*3;
+						* surf->smax + (ds>>4))*3;
 				for (maps = 0;
 						maps < MAXLIGHTMAPS && surf->styles[maps] != 255;
 						maps++)
