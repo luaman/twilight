@@ -371,8 +371,7 @@ CL_NewTempEntity (void)
 
 	if (cl_numvisedicts == MAX_VISEDICTS)
 		return NULL;
-	ent = &cl_visedicts[cl_numvisedicts];
-	cl_numvisedicts++;
+	ent = &cl_visedicts[cl_numvisedicts++];
 	ent->keynum = 0;
 
 	memset (ent, 0, sizeof (*ent));

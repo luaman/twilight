@@ -92,34 +92,6 @@ R_InitTextures (void)
 	}
 }
 
-static void
-R_InitParticleTexture (void)
-{
-	int     x,y,d;
-	float   dx, dy;
-	Uint8    data[64][64][4];
-	
-	// 
-	// particle texture
-	// 
-	particletexture = texture_extension_number++;
-	qglBindTexture(GL_TEXTURE_2D, particletexture);
-	
-	for (x=0 ; x<64; x++) {
-		for (y=0 ; y<64 ; y++) {
-			data[y][x][0] = data[y][x][1] = data[y][x][2] = 255;
-			dx = x - 16; dy = y - 16;
-			d = (255 - (dx*dx+dy*dy));
-			if (d < 0) d = 0;
-			data[y][x][3] = (Uint8) d;
-		}
-	}
-
-	qglTexImage2D (GL_TEXTURE_2D, 0, 4, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-}
-
 /*
 ===============
 R_Init_Cvars
@@ -176,7 +148,6 @@ R_Init (void)
 
 	R_InitBubble ();
 	R_InitParticles ();
-	R_InitParticleTexture ();
 	TNT_Init ();
 
 	netgraphtexture = texture_extension_number;

@@ -484,8 +484,7 @@ CL_LinkPacketEntities (void)
 		if (cl_numvisedicts == MAX_VISEDICTS)
 			break;						// object list is full
 
-		ent = &cl_visedicts[cl_numvisedicts];
-		cl_numvisedicts++;
+		ent = &cl_visedicts[cl_numvisedicts++];
 
 		ent->keynum = s1->number;
 		ent->model = model = cl.model_precache[s1->modelindex];
@@ -508,6 +507,7 @@ CL_LinkPacketEntities (void)
 		if (ent->visframe != r_framecount - 1) {
 			ent->pose1 = -1;
 			ent->pose2 = -1;
+			ent->time_left = 0;
 		}
 		ent->visframe = r_framecount;
 
@@ -539,6 +539,7 @@ CL_LinkPacketEntities (void)
 			if (cl_oldvisedicts[i].keynum == ent->keynum) {
 				ent->frame_start_time = cl_oldvisedicts[i].frame_start_time;
 				ent->frame_interval = cl_oldvisedicts[i].frame_interval;
+				ent->time_left = cl_oldvisedicts[i].time_left;
 				ent->pose1 = cl_oldvisedicts[i].pose1;
 				ent->pose2 = cl_oldvisedicts[i].pose2;
 				VectorCopy (cl_oldvisedicts[i].origin, old_origin);
@@ -549,6 +550,7 @@ CL_LinkPacketEntities (void)
 
 		if (i == cl_oldnumvisedicts) {	// not in last message, don't lerp 
 			ent->pose1 = ent->pose2 = -1;
+			ent->time_left = 0;
 			continue;
 		}
 
@@ -664,8 +666,7 @@ CL_LinkProjectiles (void)
 		// grab an entity to fill in
 		if (cl_numvisedicts == MAX_VISEDICTS)
 			break;						// object list is full
-		ent = &cl_visedicts[cl_numvisedicts];
-		cl_numvisedicts++;
+		ent = &cl_visedicts[cl_numvisedicts++];
 		ent->keynum = 0;
 
 		if (pr->modelindex < 1)
@@ -902,6 +903,7 @@ CL_LinkPlayers (void)
 			if (cl_oldvisedicts[i].keynum == state->number) {
 				ent->frame_start_time = cl_oldvisedicts[i].frame_start_time;
 				ent->frame_interval = cl_oldvisedicts[i].frame_interval;
+				ent->time_left = cl_oldvisedicts[i].time_left;
 				ent->pose1 = cl_oldvisedicts[i].pose1;
 				ent->pose2 = cl_oldvisedicts[i].pose2;
 				VectorCopy (cl_oldvisedicts[i].last_light, ent->last_light);
