@@ -64,6 +64,9 @@ static const char rcsid[] =
 # include <io.h>
 # include <conio.h>
 #endif
+#ifdef HAVE_EXECINFO_H
+# include <execinfo.h>
+#endif
 
 #include "SDL.h"
 
@@ -217,6 +220,18 @@ Sys_Init (void)
 #endif
 }
 
+static void
+Sys_BackTrace (int fd)
+{
+#if HAVE_EXECINFO_H
+	void		*array[128];
+	int			size;
+
+	size = backtrace (array, sizeof(array)/sizeof(array[0]));
+	backtrace_symbols_fd (array, size, fd);
+#endif
+}
+
 void
 Sys_Error (char *error, ...)
 {
@@ -245,6 +260,7 @@ Sys_Error (char *error, ...)
 #endif
 	fprintf (stderr, "Error: %s\n", text);
 
+	Sys_BackTrace (2);
 	SDL_Quit ();
 	exit (1);
 }
