@@ -262,7 +262,7 @@ SCR_DrawCenterString (void)
 	start = scr_centerstring;
 
 	if (scr_center_lines <= 4)
-		y = vid.height * 0.35;
+		y = vid.conheight * 0.35;
 	else
 		y = 48;
 
@@ -271,7 +271,7 @@ SCR_DrawCenterString (void)
 		for (l = 0; l < 40; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
-		x = (vid.width - l * 8) / 2;
+		x = (vid.conwidth - l * 8) / 2;
 		for (j = 0; j < l; j++, x += 8) {
 			Draw_Character (x, y, start[j]);
 			if (!remaining--)

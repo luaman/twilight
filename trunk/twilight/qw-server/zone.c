@@ -443,7 +443,7 @@ Hunk_AllocName (int size, char *name)
 			("Not enough RAM allocated.  Try starting using \"-heapsize 16000\" on the QuakeWorld command line.");
 #else
 		Sys_Error
-			("Not enough RAM allocated.  Try starting using \"-mem 16\" on the QuakeWorld command line.");
+			("Not enough RAM allocated.  Try starting using \"-mem 16\" on the QuakeWorld command line."); 
 #endif
 
 	h = (hunk_t *) (hunk_base + hunk_low_used);
