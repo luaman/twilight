@@ -58,8 +58,6 @@ cvar_t *r_skyname;
 cvar_t *r_fastsky;
 static qboolean draw_skybox = false;
 
-void R_DrawSkyboxChain (msurface_t *s);
-
 void
 BoundPoly (int numverts, float *verts, vec3_t mins, vec3_t maxs)
 {
@@ -528,29 +526,6 @@ void R_SkyBoxChanged (cvar_t *cvar)
 		draw_skybox = R_LoadSkys();
 	else
 		draw_skybox = false;
-}
-
-/*
-=================
-R_DrawSkyChain
-=================
-*/
-void R_DrawSkyboxChain (msurface_t *s)
-{
-	msurface_t	*fa;
-	int			i;
-	vec3_t		verts[MAX_CLIP_VERTS];
-	glpoly_t	*p;
-
-	// calculate vertex values for sky box
-	for (fa = s; fa; fa = fa->texturechain)
-	{
-		for (p = fa->polys; p; p = p->next)
-		{
-			for (i = 0; i < p->numverts; i++)
-				VectorSubtract (p->v[i].v, r_origin, verts[i]);
-		}
-	}
 }
 
 
