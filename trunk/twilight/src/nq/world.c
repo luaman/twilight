@@ -269,7 +269,7 @@ SV_ClearWorld (void)
 
 	memset (sv_areanodes, 0, sizeof (sv_areanodes));
 	sv_numareanodes = 0;
-	SV_CreateAreaNode (0, sv.worldmodel->mins, sv.worldmodel->maxs);
+	SV_CreateAreaNode (0, sv.worldmodel->normalmins, sv.worldmodel->normalmaxs);
 }
 
 
@@ -392,7 +392,8 @@ SV_LinkEdict
 void
 SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 {
-	areanode_t *node;
+	areanode_t	*node;
+	model_t		*mod;
 
 	if (ent->area.prev)
 		SV_UnlinkEdict (ent);			// unlink from old position
@@ -404,22 +405,17 @@ SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 		return;
 
 // set the abs box
-	if (ent->v.solid == SOLID_BSP && (ent->v.angles[0] || ent->v.angles[1]
-		|| ent->v.angles[2]))
-	{
-		int i;
-
-		// expand for rotation
-		for (i = 0; i < 3; i++)
-		{
-			ent->v.absmin[i] = ent->v.origin[i] - sv.models[(int) ent->v.modelindex]->radius;
-			ent->v.absmax[i] = ent->v.origin[i] - sv.models[(int) ent->v.modelindex]->radius;
-		}
-	} else
+	mod = sv.models[(int) ent->v.modelindex];
+#if 1
+	if (mod && (ent->v.solid == SOLID_BSP))
+		Mod_MinsMaxs (mod, ent->v.origin, ent->v.angles, ent->v.absmin, ent->v.absmax);
+	else
+#endif
 	{
 		VectorAdd (ent->v.origin, ent->v.mins, ent->v.absmin);
 		VectorAdd (ent->v.origin, ent->v.maxs, ent->v.absmax);
 	}
+
 
 //
 // to make items easier to pick up and allow them to be grabbed off

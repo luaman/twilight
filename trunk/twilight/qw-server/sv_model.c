@@ -48,6 +48,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "zone.h"
 #include "server.h"
+#include <math.h>
 
 model_t    *loadmodel;
 char        loadname[32];				// for hunk tags
@@ -173,7 +174,7 @@ Mod_LoadBrushModel
 void
 Mod_LoadBrushModel (model_t *mod, void *buffer)
 {
-	Uint32		i, j;
+	Uint32		i;
 	dheader_t	*header;
 	dmodel_t	*bm;
 
@@ -232,6 +233,10 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 // set up the submodels (FIXME: this is confusing)
 //
 	for (i = 0; i < mod->numsubmodels; i++) {
+		int			k, l, j;
+		float		dist, modelyawradius, modelradius, *vec;
+		msurface_t	*surf;
+
 		bm = &mod->submodels[i];
 
 		mod->hulls[0].firstclipnode = bm->headnode[0];
@@ -243,8 +248,43 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		mod->firstmodelsurface = bm->firstface;
 		mod->nummodelsurfaces = bm->numfaces;
 
-		VectorCopy (bm->maxs, mod->maxs);
-		VectorCopy (bm->mins, mod->mins);
+		mod->normalmins[0] = mod->normalmins[1] = mod->normalmins[2] = 1000000000.0f;
+		mod->normalmaxs[0] = mod->normalmaxs[1] = mod->normalmaxs[2] = -1000000000.0f;
+		modelyawradius = 0;
+		modelradius = 0;
+
+		// Calculate the bounding boxes, don't trust what the model says.
+		surf = &mod->surfaces[mod->firstmodelsurface];
+		for (j = 0; j < mod->nummodelsurfaces; j++, surf++) {
+			for (k = 0; k < surf->numedges; k++) {
+				l = mod->surfedges[k + surf->firstedge];
+				if (l > 0)
+					vec = mod->vertexes[mod->edges[l].v[0]].position;
+				else
+					vec = mod->vertexes[mod->edges[-l].v[1]].position;
+				if (mod->normalmins[0] > vec[0]) mod->normalmins[0] = vec[0];
+				if (mod->normalmins[1] > vec[1]) mod->normalmins[1] = vec[1];
+				if (mod->normalmins[2] > vec[2]) mod->normalmins[2] = vec[2];
+				if (mod->normalmaxs[0] < vec[0]) mod->normalmaxs[0] = vec[0];
+				if (mod->normalmaxs[1] < vec[1]) mod->normalmaxs[1] = vec[1];
+				if (mod->normalmaxs[2] < vec[2]) mod->normalmaxs[2] = vec[2];
+				dist = vec[0]*vec[0]+vec[1]*vec[1];
+				if (modelyawradius < dist)
+					modelyawradius = dist;
+				dist += vec[2]*vec[2];
+				if (modelradius < dist)
+					modelradius = dist;
+			}
+		}
+
+		modelyawradius = sqrt(modelyawradius);
+		modelradius = sqrt(modelradius);
+		mod->yawmins[0] = mod->yawmins[1] = -modelyawradius;
+		mod->yawmaxs[0] = mod->yawmaxs[1] = modelyawradius;
+		mod->yawmins[2] = mod->normalmins[2];
+		mod->yawmaxs[2] = mod->normalmaxs[2];
+		VectorSet(mod->rotatedmins, -modelradius, -modelradius, -modelradius);
+		VectorSet(mod->rotatedmaxs, modelradius, modelradius, modelradius);
 
 		mod->numleafs = bm->visleafs;
 

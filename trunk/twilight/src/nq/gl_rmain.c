@@ -408,8 +408,7 @@ R_DrawAliasModel (entity_t *e, qboolean viewent)
 	if (!viewent) {
 		vec3_t      mins, maxs;
 
-		VectorAdd (e->origin, clmodel->mins, mins);
-		VectorAdd (e->origin, clmodel->maxs, maxs);
+		Mod_MinsMaxs (clmodel, e->origin, e->angles, mins, maxs);
 
 		if (R_CullBox (mins, maxs)) {
 			return;
