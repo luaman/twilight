@@ -92,6 +92,8 @@ static HANDLE	heventParent;
 static HANDLE	heventChild;
 #endif
 
+char		*qdate = __DATE__;
+
 /*
 ===============================================================================
 
