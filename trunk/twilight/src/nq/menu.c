@@ -886,7 +886,7 @@ M_Setup_Key (int k)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	17
+#define	OPTIONS_ITEMS	19
 
 #define	SLIDER_RANGE	10
 
@@ -967,7 +967,15 @@ M_AdjustSliders (int dir)
 			Cvar_Set (lookstrafe, va("%i", !lookstrafe->value));
 			break;
 
-		case 14:						// _windowed_mouse
+		case 14:
+			Cvar_Set (cl_sbar,  va ("%i", !(int)cl_sbar->value));
+			break;
+
+		case 15:
+			Cvar_Set (cl_hudswap, va ("%i", !(int)cl_hudswap->value));
+			break;
+
+		case 16:						// _windowed_mouse
 			Cvar_Set (_windowed_mouse, va("%i", !_windowed_mouse->value));
 			break;
 	}
@@ -1020,6 +1028,8 @@ M_Options_Draw (void)
 	M_Print (16, y, "          Invert Mouse"); M_DrawCheckbox (220, y, m_pitch->value < 0); y += 8;
 	M_Print (16, y, "            Lookspring"); M_DrawCheckbox (220, y, lookspring->value); y += 8;
 	M_Print (16, y, "            Lookstrafe"); M_DrawCheckbox (220, y, lookstrafe->value); y += 8;
+	M_Print (16, y, "    Use old status bar"); M_DrawCheckbox (220, y, cl_sbar->value); y += 8;
+	M_Print (16, y, "      HUD on left side"); M_DrawCheckbox (220, y, cl_hudswap->value); y += 8;
 	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->value); y += 8;
 	M_Print (16, y, "      Graphics Options"); y += 8;
 
@@ -1088,16 +1098,9 @@ M_Options_Key (int k)
 			break;
 	}
 
-	if (options_cursor == 16 && vid_menudrawfn == NULL) {
+	if (options_cursor == 18) {
 		if (k == K_UPARROW)
-			options_cursor = 15;
-		else
-			options_cursor = 0;
-	}
-
-	if (options_cursor == 17) {
-		if (k == K_UPARROW)
-			options_cursor = 16;
+			options_cursor = 17;
 		else
 			options_cursor = 0;
 	}

@@ -998,29 +998,6 @@ SCR_DrawNotifyString (void)
 //=============================================================================
 
 /*
-===============
-SCR_BringDownConsole
-
-Brings the console down and fades the palettes back to normal
-================
-*/
-void
-SCR_BringDownConsole (void)
-{
-	int         i;
-
-	scr_centertime_off = 0;
-
-	for (i = 0; i < 20 && scr_conlines != scr_con_current; i++)
-		SCR_UpdateScreen ();
-
-	cl.cshifts[0].percent = 0;			// no area contents palette on next
-	// frame
-}
-
-float       oldsbar = 0;
-
-/*
 ==================
 SCR_UpdateScreen
 
@@ -1047,12 +1024,6 @@ SCR_UpdateScreen (void)
 
 	if (!scr_initialized || !con_initialized)
 		return;							// not initialized yet
-
-
-	if (oldsbar != cl_sbar->value) {
-		oldsbar = cl_sbar->value;
-		vid.recalc_refdef = true;
-	}
 
 	qglEnable (GL_DEPTH_TEST);
 

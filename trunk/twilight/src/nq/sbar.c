@@ -295,6 +295,21 @@ Sbar_DrawPic (int x, int y, qpic_t *pic)
 
 /*
 =============
+Sbar_DrawSubPic
+=============
+JACK: Draws a portion of the picture in the status bar.
+*/
+
+void
+Sbar_DrawSubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
+				 int height)
+{
+	Draw_SubPic (x, y + (vid.height - SBAR_HEIGHT), pic, srcx, srcy, width,
+				 height);
+}
+
+/*
+=============
 Sbar_DrawTransPic
 =============
 */
@@ -496,13 +511,16 @@ Sbar_SoloScoreboard (void)
 	int         minutes, seconds, tens, units;
 	int         l;
 
-	snprintf (str, sizeof (str), "Monsters:%3i /%3i", cl.stats[STAT_MONSTERS],
-			  cl.stats[STAT_TOTALMONSTERS]);
-	Sbar_DrawString (8, 4, str);
+	if (cl.gametype != GAME_DEATHMATCH)
+	{
+		snprintf (str, sizeof (str), "Monsters:%3i /%3i", cl.stats[STAT_MONSTERS],
+				  cl.stats[STAT_TOTALMONSTERS]);
+		Sbar_DrawString (8, 4, str);
 
-	snprintf (str, sizeof (str), "Secrets :%3i /%3i", cl.stats[STAT_SECRETS],
-			  cl.stats[STAT_TOTALSECRETS]);
-	Sbar_DrawString (8, 12, str);
+		snprintf (str, sizeof (str), "Secrets :%3i /%3i", cl.stats[STAT_SECRETS],
+				  cl.stats[STAT_TOTALSECRETS]);
+		Sbar_DrawString (8, 12, str);
+	}
 
 // time
 	minutes = cl.time / 60;
@@ -513,8 +531,11 @@ Sbar_SoloScoreboard (void)
 	Sbar_DrawString (184, 4, str);
 
 // draw level name
-	l = strlen (cl.levelname);
-	Sbar_DrawString (232 - l * 4, 12, cl.levelname);
+	if (cl.gametype != GAME_DEATHMATCH)
+	{
+		l = strlen (cl.levelname);
+		Sbar_DrawString (232 - l * 4, 12, cl.levelname);
+	}
 }
 
 /*
@@ -526,6 +547,7 @@ void
 Sbar_DrawScoreboard (void)
 {
 	Sbar_SoloScoreboard ();
+
 	if (cl.gametype == GAME_DEATHMATCH)
 		Sbar_DeathmatchOverlay ();
 }
@@ -544,14 +566,22 @@ Sbar_DrawInventory (void)
 	char        num[6];
 	float       time;
 	int         flashon;
+	qboolean    headsup;
+	qboolean    hudswap;
 
-	if (rogue) {
-		if (cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN)
-			Sbar_DrawPic (0, -24, rsb_invbar[0]);
-		else
-			Sbar_DrawPic (0, -24, rsb_invbar[1]);
-	} else {
-		Sbar_DrawPic (0, -24, sb_ibar);
+	headsup = !cl_sbar->value;
+	hudswap = cl_hudswap->value;
+
+	if (!headsup)
+	{
+		if (rogue) {
+			if (cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN)
+				Sbar_DrawPic (0, -24, rsb_invbar[0]);
+			else
+				Sbar_DrawPic (0, -24, rsb_invbar[1]);
+		} else {
+			Sbar_DrawPic (0, -24, sb_ibar);
+		}
 	}
 
 // weapons
@@ -567,7 +597,14 @@ Sbar_DrawInventory (void)
 			} else
 				flashon = (flashon % 5) + 2;
 
-			Sbar_DrawPic (i * 24, -16, sb_weapons[flashon][i]);
+			if (headsup) {
+				if (i || vid.height > 200)
+					Sbar_DrawSubPic ((hudswap) ? 0 : (vid.width - 24),
+							-68 - (7 - i) * 16, sb_weapons[flashon][i],
+							0, 0, 24, 16);
+
+			} else
+				Sbar_DrawPic (i * 24, -16, sb_weapons[flashon][i]);
 		}
 	}
 
@@ -624,12 +661,29 @@ Sbar_DrawInventory (void)
 // ammo counts
 	for (i = 0; i < 4; i++) {
 		snprintf (num, sizeof (num), "%3i", cl.stats[STAT_SHELLS + i]);
-		if (num[0] != ' ')
-			Sbar_DrawCharacter ((6 * i + 1) * 8 - 2, -24, 18 + num[0] - '0');
-		if (num[1] != ' ')
-			Sbar_DrawCharacter ((6 * i + 2) * 8 - 2, -24, 18 + num[1] - '0');
-		if (num[2] != ' ')
-			Sbar_DrawCharacter ((6 * i + 3) * 8 - 2, -24, 18 + num[2] - '0');
+		if (headsup) {
+			Sbar_DrawSubPic ((hudswap) ? 0 : (vid.width - 42), 
+					-24 - (4 - i) * 11, sb_ibar, 3 + (i * 48), 0, 42, 11);
+			if (num[0] != ' ')
+				Draw_Character ((hudswap) ? 7 : (vid.width - 35),
+						vid.height-SBAR_HEIGHT-24 - (4 - i) * 11, 18 + num[0] - '0');
+			if (num[1] != ' ')
+				Draw_Character ((hudswap) ? 15 : (vid.width - 27),
+						vid.height-SBAR_HEIGHT-24 - (4 - i) * 11, 18 + num[1] - '0');
+			if (num[2] != ' ')
+				Draw_Character ((hudswap) ? 23 : (vid.width - 19),
+						vid.height-SBAR_HEIGHT-24 - (4 - i) * 11, 18 + num[2] - '0');
+		} else {
+			if (num[0] != ' ')
+				Sbar_DrawCharacter ((6 * i + 1) * 8 - 2, -24,
+						18 + num[0] - '0');
+			if (num[1] != ' ')
+				Sbar_DrawCharacter ((6 * i + 2) * 8 - 2, -24,
+						18 + num[1] - '0');
+			if (num[2] != ' ')
+				Sbar_DrawCharacter ((6 * i + 3) * 8 - 2, -24,
+						18 + num[2] - '0');
+		}
 	}
 
 	flashon = 0;
@@ -830,17 +884,18 @@ Sbar_Draw
 void
 Sbar_Draw (void)
 {
+	qboolean    headsup;
+
 	if (scr_con_current == vid.height)
 		return;							// console is full screen
 
-	scr_copyeverything = 1;
+	headsup = !cl_sbar->value;
 
-	if (sb_lines && vid.width > 320)
-		Draw_TileClear (0, vid.height - sb_lines, vid.width, sb_lines);
+	scr_copyeverything = 1;
 
 	if (sb_lines > 24) {
 		Sbar_DrawInventory ();
-		if (cl.maxclients != 1)
+		if (!headsup && cl.maxclients != 1)
 			Sbar_DrawFrags ();
 	}
 
@@ -848,7 +903,8 @@ Sbar_Draw (void)
 		Sbar_DrawPic (0, 0, sb_scorebar);
 		Sbar_DrawScoreboard ();
 	} else if (sb_lines) {
-		Sbar_DrawPic (0, 0, sb_sbar);
+		if (cl_sbar->value)
+			Sbar_DrawPic (0, 0, sb_sbar);
 
 		// keys (hipnotic only)
 		// MED 01/04/97 moved keys here so they would not be overwritten
@@ -921,6 +977,9 @@ Sbar_Draw (void)
 		Sbar_DrawNum (248, 0, cl.stats[STAT_AMMO], 3,
 					  cl.stats[STAT_AMMO] <= 10);
 	}
+
+	if (sb_lines && vid.width > 320 && !headsup)
+		Draw_TileClear (320, vid.height - sb_lines, vid.width-320, sb_lines);
 
 	if (vid.width > 320) {
 		if (cl.gametype == GAME_DEATHMATCH)
