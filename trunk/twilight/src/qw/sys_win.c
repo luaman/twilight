@@ -538,15 +538,6 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	lpBuffer.dwLength = sizeof(MEMORYSTATUS);
 	GlobalMemoryStatus (&lpBuffer);
 
-	if (!GetCurrentDirectory (sizeof(cwd), cwd))
-		Sys_Error ("Couldn't determine current directory");
-
-	if (cwd[Q_strlen(cwd)-1] == '/')
-		cwd[Q_strlen(cwd)-1] = 0;
-
-	parms.basedir = cwd;
-	parms.cachedir = NULL;
-
 	parms.argc = 1;
 	argv[0] = empty_string;
 
@@ -653,9 +644,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 			scr_skipupdate = 1;		// no point in bothering to draw
 		}
 		else if (!ActiveApp)
-		{
 			SleepUntilInput (NOT_FOCUS_SLEEP);
-		}
 
 		newtime = Sys_DoubleTime ();
 		time = newtime - oldtime;
