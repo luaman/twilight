@@ -185,7 +185,10 @@ R_BuildLightMap (msurface_t *surf, byte * dest, int stride)
 					t >>= 7;
 					if (t > 255)
 						t = 255;
-					dest[3] = 255 - t;
+					dest[0] = 255 - t;
+					dest[1] = 255 - t;
+					dest[2] = 255 - t;
+					dest[3] = 255;
 					dest += 4;
 				}
 			}
