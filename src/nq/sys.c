@@ -443,8 +443,8 @@ int Sys_CheckClipboardPaste(int key)
 					/* Substitutes a NULL for every token */
 					strtok(textCopied, "\n\r\b");
 					i = strlen(textCopied);
-					if (i + key_linepos >= MAXCMDLINE)
-						i = MAXCMDLINE - key_linepos;
+					if (i + key_linepos >= MAX_INPUTLINE - 1)
+						i = MAX_INPUTLINE - 1 - key_linepos;
 					if (i > 0)
 					{
 						textCopied[i]=0;
