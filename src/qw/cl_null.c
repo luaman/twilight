@@ -24,6 +24,8 @@
 static const char rcsid[] =
 	"$Id$";
 
+#include <string.h>
+
 #include "twiconfig.h"
 
 #include "client.h"
