@@ -34,13 +34,13 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "TGL_funcs.h"
-
 #include <stdlib.h>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
+
+#include "TGL_funcs.h"
 
 // GLU- Replacement-functions : taken from MESA 
 
