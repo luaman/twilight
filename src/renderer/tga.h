@@ -23,8 +23,12 @@
 
 */
 
-void
-TGA_Load (char *name, Uint8 **image_rgba, int *width, int *height);
+#ifndef __TGA_H
+#define __TGA_H
 
-qboolean
-TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer);
+Uint8 **TGA_Load (char *name, Uint8 **image_rgba, int *width, int *height);
+
+qboolean TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer);
+
+#endif // __TGA_H
+
