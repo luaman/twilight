@@ -1056,6 +1056,7 @@ SV_SpawnServer (char *server)
 {
 	edict_t    *ent;
 	int         i;
+	extern		qboolean isnotmap;
 
 	// let's not have any servers with no name
 	if (hostname->string[0] == 0)
@@ -1079,10 +1080,7 @@ SV_SpawnServer (char *server)
 	if (deathmatch->value)
 		Cvar_Set (coop, "0");
 	current_skill = (int) (skill->value + 0.5);
-	if (current_skill < 0)
-		current_skill = 0;
-	if (current_skill > 3)
-		current_skill = 3;
+	current_skill = bound (0, current_skill, 3);
 
 	Cvar_Set (skill, va("%i", current_skill));
 
@@ -1133,7 +1131,9 @@ SV_SpawnServer (char *server)
 
 	strcpy (sv.name, server);
 	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
+	isnotmap = false;
 	sv.worldmodel = Mod_ForName (sv.modelname, false);
+	isnotmap = true;
 	if (!sv.worldmodel) {
 		Con_Printf ("Couldn't spawn server %s\n", sv.modelname);
 		sv.active = false;
