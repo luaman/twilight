@@ -902,6 +902,73 @@ R_DrawWaterTextureChains (void)
 		qglColor4fv (whitev);
 }
 
+
+/*
+=================
+R_DrawBrushModelSkies
+=================
+*/
+void
+R_DrawBrushModelSkies (void)
+{
+	int				i, j;
+	vec3_t			mins, maxs;
+	msurface_t		*psurf;
+	float			dot;
+	model_t			*clmodel;
+	entity_t		*e;
+
+	for (i = 0; i < r_refdef.num_entities; i++)
+	{
+		e = r_refdef.entities[i];
+		clmodel = e->model;
+	
+		if (e->model->type == mod_brush)
+		{
+			Mod_MinsMaxs (clmodel, e->cur.origin, e->cur.angles, mins, maxs);
+
+			if (R_CullBox (mins, maxs))
+				return;
+
+			memset (lightmap_polys, 0, sizeof (lightmap_polys));
+
+			softwaretransformforbrushentity (e->cur.origin, e->cur.angles);
+			softwareuntransform(r_origin, modelorg);
+
+			qglPushMatrix ();
+			qglTranslatef (e->cur.origin[0], e->cur.origin[1],
+					e->cur.origin[2]);
+			qglRotatef (e->cur.angles[1], 0, 0, 1);
+			qglRotatef (e->cur.angles[0], 0, 1, 0);
+			qglRotatef (e->cur.angles[2], 1, 0, 0);
+
+			// If any sky surfs are visible, draw them now
+			psurf = &clmodel->surfaces[clmodel->firstmodelsurface];
+			for (j = 0; j < clmodel->nummodelsurfaces; j++)
+			{
+				// find which side of the node we are on
+				dot = PlaneDiff (modelorg, psurf->plane);
+
+				// draw the polygon
+				if ((psurf->flags & SURF_DRAWSKY)
+						&& (((psurf->flags & SURF_PLANEBACK)
+								&& (dot < -BACKFACE_EPSILON))
+							|| (!(psurf->flags & SURF_PLANEBACK)
+								&& (dot > BACKFACE_EPSILON))))
+				{
+					// FIXME: Do this better
+					EmitBothSkyLayers (psurf);
+					R_DrawSkyBoxChain (psurf);
+				}
+				psurf->visframe = -1;
+				psurf++;
+			}
+			qglPopMatrix ();
+		}
+	}
+}
+
+
 /*
 =================
 R_DrawBrushModel
@@ -982,7 +1049,7 @@ R_DrawBrushModel (entity_t *e)
 		{
 			if (psurf->flags & SURF_DRAWSKY)
 			{
-				EmitBothSkyLayers (psurf);
+//				EmitBothSkyLayers (psurf);
 				psurf->visframe = -1;
 			}
 		}

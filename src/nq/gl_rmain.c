@@ -800,6 +800,8 @@ R_Render3DView (void)
 {
 	R_DrawSkyBox ();
 
+	R_DrawBrushModelSkies ();
+	
 	// adds static entities to the list
 	R_DrawWorld ();
 
