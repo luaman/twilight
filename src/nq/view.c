@@ -509,18 +509,6 @@ angledelta (float a)
 }
 
 /*
-==================
-V_CalcGunAngle
-==================
-*/
-void
-V_CalcGunAngle (void)
-{
-	cl.viewent.angles[YAW] = r_refdef.viewangles[YAW];
-	cl.viewent.angles[PITCH] = -r_refdef.viewangles[PITCH];
-}
-
-/*
 ==============
 V_BoundOffsets
 ==============
@@ -604,24 +592,20 @@ V_CalcIntermissionRefdef
 void
 V_CalcIntermissionRefdef (void)
 {
-	entity_t   *ent, *view;
-	float       old;
-
 	/* ent is the player model (visible when out of body) */
-	ent = &cl_entities[cl.viewentity];
-
-	/* view is the weapon model (only visible from inside body) */
-	view = &cl.viewent;
+	entity_t   *ent = &cl_entities[cl.viewentity];
 
 	VectorCopy(ent->origin, r_refdef.vieworg);
 	VectorCopy(ent->angles, r_refdef.viewangles);
-	view->model = NULL;
+	cl.viewent.model = NULL;
 
 	/* always idle in intermission */
-	old = v_idlescale->value;
-	Cvar_Set(v_idlescale, "1");
-	V_AddIdle();
-	Cvar_Set(v_idlescale, va("%i", old));
+	r_refdef.viewangles[ROLL] += Q_sin (cl.time * v_iroll_cycle->value) *
+		v_iroll_level->value;
+	r_refdef.viewangles[PITCH] += Q_sin (cl.time * v_ipitch_cycle->value) *
+		v_ipitch_level->value;
+	r_refdef.viewangles[YAW] += Q_sin (cl.time * v_iyaw_cycle->value) *
+		v_iyaw_level->value;
 }
 
 /*
@@ -644,6 +628,7 @@ V_CalcRefdef (void)
 
 	/* ent is the player model (visible when out of body) */
 	ent = &cl_entities[cl.viewentity];
+
 	/* view is the weapon model (only visible from inside body) */
 	view = &cl.viewent;
 
@@ -686,7 +671,9 @@ V_CalcRefdef (void)
 	/* set up gun position */
 	VectorCopy (cl.viewangles, view->angles);
 
-	V_CalcGunAngle();
+	/* set up gun angles */
+	view->angles[YAW] = r_refdef.viewangles[YAW];
+	view->angles[PITCH] = -r_refdef.viewangles[PITCH];
 
 	VectorCopy (ent->origin, view->origin);
 	view->origin[2] += cl.viewheight;
