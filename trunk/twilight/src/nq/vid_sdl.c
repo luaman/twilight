@@ -146,8 +146,6 @@ VID_SetPalette (unsigned char *palette)
 	int         k;
 	unsigned short i;
 	unsigned   *table;
-	FILE       *f;
-	char        s[MAX_OSPATH];
 	float       dist, bestdist;
 	static qboolean palflag = false;
 
@@ -171,37 +169,24 @@ VID_SetPalette (unsigned char *palette)
 		return;
 	palflag = true;
 
-	COM_FOpenFile ("glquake/15to8.pal", &f);
-	if (f) {
-		fread (d_15to8table, 1 << 15, 1, f);
-		fclose (f);
-	} else {
-		for (i = 0; i < (1 << 15); i++) {
-			/* Maps 000000000000000 000000000011111 = Red = 0x1F
-			   000001111100000 = Blue = 0x03E0 111110000000000 = Grn = 0x7C00 */
-			r = ((i & 0x1F) << 3) + 4;
-			g = ((i & 0x03E0) >> 2) + 4;
-			b = ((i & 0x7C00) >> 7) + 4;
-			pal = (unsigned char *) d_8to24table;
-			for (v = 0, k = 0, bestdist = 10000.0; v < 256; v++, pal += 4) {
-				r1 = (int) r - (int) pal[0];
-				g1 = (int) g - (int) pal[1];
-				b1 = (int) b - (int) pal[2];
-				dist = Q_sqrt (((r1 * r1) + (g1 * g1) + (b1 * b1)));
-				if (dist < bestdist) {
-					k = v;
-					bestdist = dist;
-				}
+	for (i = 0; i < (1 << 15); i++) {
+		/* Maps 000000000000000 000000000011111 = Red = 0x1F
+		   000001111100000 = Blue = 0x03E0 111110000000000 = Grn = 0x7C00 */
+		r = ((i & 0x1F) << 3) + 4;
+		g = ((i & 0x03E0) >> 2) + 4;
+		b = ((i & 0x7C00) >> 7) + 4;
+		pal = (unsigned char *) d_8to24table;
+		for (v = 0, k = 0, bestdist = 10000.0; v < 256; v++, pal += 4) {
+			r1 = (int) r - (int) pal[0];
+			g1 = (int) g - (int) pal[1];
+			b1 = (int) b - (int) pal[2];
+			dist = Q_sqrt (((r1 * r1) + (g1 * g1) + (b1 * b1)));
+			if (dist < bestdist) {
+				k = v;
+				bestdist = dist;
 			}
-			d_15to8table[i] = k;
 		}
-		snprintf (s, sizeof (s), "%s/glquake", com_gamedir);
-		Sys_mkdir (s);
-		snprintf (s, sizeof (s), "%s/glquake/15to8.pal", com_gamedir);
-		if ((f = fopen (s, "wb")) != NULL) {
-			fwrite (d_15to8table, 1 << 15, 1, f);
-			fclose (f);
-		}
+		d_15to8table[i] = k;
 	}
 }
 
@@ -474,11 +459,12 @@ VID_Init (unsigned char *palette)
 		fprintf (stderr, "Error: %s\n", SDL_GetError ());
 		exit (1);
 	}
+
 	// We want at least 4444 (16 bit RGBA)
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 4);
-	SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 4);
+//	SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 4);
 
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
