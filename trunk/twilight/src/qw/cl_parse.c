@@ -1061,7 +1061,6 @@ CL_MuzzleFlash (void)
 	dl->color[0] = 0.2;
 	dl->color[1] = 0.1;
 	dl->color[2] = 0.05;
-	dl->color[3] = 0.7;
 }
 
 
