@@ -85,6 +85,18 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\alias.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\brush.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\draw.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\dyngl.c
 # End Source File
 # Begin Source File
@@ -93,23 +105,15 @@ SOURCE=.\entities.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\explosion.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\gen_textures.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_alias.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\gl_arrays.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_brush.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_draw.c
 # End Source File
 # Begin Source File
 
@@ -122,14 +126,6 @@ SOURCE=.\gl_light.c
 # Begin Source File
 
 SOURCE=.\gl_main.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_sprite.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_textures.c
 # End Source File
 # Begin Source File
 
@@ -165,10 +161,6 @@ SOURCE=.\pointers.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\r_explosion.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\r_part.c
 # End Source File
 # Begin Source File
@@ -177,7 +169,15 @@ SOURCE=.\sky.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\sprite.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\surface.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\textures.c
 # End Source File
 # Begin Source File
 
