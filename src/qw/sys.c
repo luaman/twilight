@@ -294,7 +294,11 @@ Sys_FileTime (char *path)
 void
 Sys_mkdir (char *path)
 {
+#if defined(HAVE_MKDIR)
 	mkdir (path, 0777);
+#elif defined(HAVE__MKDIR)
+	_mkdir (path);
+#endif
 }
 
 
