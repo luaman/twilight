@@ -784,6 +784,16 @@ SVC_RemoteCommand (void)
 }
 
 
+void
+Cmd_ForwardToServer (void)
+{
+}
+
+void
+Cmd_ForwardToServer_f (void)
+{
+}
+
 /*
 =================
 SV_ConnectionlessPacket

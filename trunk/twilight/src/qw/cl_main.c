@@ -69,6 +69,8 @@ static const char rcsid[] =
 
 #include "keys.h"
 
+void        Cmd_ForwardToServer (void);
+
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.
 
@@ -1024,6 +1026,57 @@ void CL_WriteConfig_f (void)
 	}
 
 	Host_WriteConfiguration (Cmd_Argv(1));
+}
+
+/*
+===================
+Cmd_ForwardToServer
+
+adds the current command line as a clc_stringcmd to the client message.
+things like godmode, noclip, etc, are commands directed to the server,
+so when they are typed in at the console, they will need to be forwarded.
+===================
+*/
+void
+Cmd_ForwardToServer (void)
+{
+	if (cls.state == ca_disconnected) {
+		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
+		return;
+	}
+
+	if (cls.demoplayback)
+		return;							// not really connected
+
+	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
+	SZ_Print (&cls.netchan.message, Cmd_Argv (0));
+	if (Cmd_Argc () > 1) {
+		SZ_Print (&cls.netchan.message, " ");
+		SZ_Print (&cls.netchan.message, Cmd_Args ());
+	}
+}
+
+// don't forward the first argument
+void
+Cmd_ForwardToServer_f (void)
+{
+	if (cls.state == ca_disconnected) {
+		Com_Printf ("Can't \"%s\", not connected\n", Cmd_Argv (0));
+		return;
+	}
+
+	if (strcasecmp (Cmd_Argv (1), "snap") == 0) {
+		Cbuf_InsertText ("snap\n");
+		return;
+	}
+
+	if (cls.demoplayback)
+		return;							// not really connected
+
+	if (Cmd_Argc () > 1) {
+		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
+		SZ_Print (&cls.netchan.message, Cmd_Args ());
+	}
 }
 
 /*
