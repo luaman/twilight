@@ -135,18 +135,18 @@ enum { SDL_PRESSED = 0x01, SDL_RELEASED = 0x00 };
    header should only be included in files that actually use them.
 */
 #ifndef SDL_Swap16
-static __inline__ Uint16 SDL_Swap16(Uint16 D) {
+static inline Uint16 SDL_Swap16(Uint16 D) {
 	return((D<<8)|(D>>8));
 }
 #endif
 #ifndef SDL_Swap32
-static __inline__ Uint32 SDL_Swap32(Uint32 D) {
+static inline Uint32 SDL_Swap32(Uint32 D) {
 	return((D<<24)|((D<<8)&0x00FF0000)|((D>>8)&0x0000FF00)|(D>>24));
 }
 #endif
 #ifdef SDL_HAS_64BIT_TYPE
 #ifndef SDL_Swap64
-static __inline__ Uint64 SDL_Swap64(Uint64 val) {
+static inline Uint64 SDL_Swap64(Uint64 val) {
 	Uint32 hi, lo;
 
 	/* Separate into high and low 32-bit values and swap them */
