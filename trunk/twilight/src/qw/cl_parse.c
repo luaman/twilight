@@ -290,7 +290,7 @@ Model_NextDownload (void)
 	}
 
 	// all done
-	cl.worldmodel = cl.model_precache[1];
+	cl.worldmodel = r_worldmodel = cl.model_precache[1];
 
 	R_NewMap ();
 	Team_NewMap ();

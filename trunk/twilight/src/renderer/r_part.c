@@ -40,6 +40,7 @@ static const char rcsid[] =
 #include "gl_arrays.h"
 #include "gl_info.h"
 #include "r_part.h"
+#include "vis.h"
 
 extern void R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1, int cr2, int cg2, int cb2, int ca2);
 
@@ -788,12 +789,11 @@ R_Move_Base_Particles
 static void
 R_Move_Base_Particles (void)
 {
-#ifdef MOD_POINTINLEAF
 	mleaf_t				*mleaf;
-#endif
 	base_particle_t		*p;
 	int					i, j, k, activeparticles, maxparticle;
 	float				grav, dvel;
+	vec3_t				oldorg, v;
 
 	if (!max_base_particles)
 		return;
@@ -818,29 +818,27 @@ R_Move_Base_Particles (void)
 
 		p->draw = true;
 
-#if 0
+#if 1
 		if (r_particle_physics->ivalue)
 		{
-#ifdef MOD_POINTINLEAF
-			mleaf = Mod_PointInLeaf(p->org, cl.worldmodel);
+			mleaf = Mod_PointInLeaf(p->org, r_worldmodel);
 			if ((mleaf->contents == CONTENTS_SOLID) ||
 					(mleaf->contents == CONTENTS_SKY))
 				p->die = -1;
 			if (mleaf->visframe != vis_framecount)
 				p->draw = false;
-#endif
 
 			VectorCopy(p->org, oldorg);
 		}
 #endif
 
 		VectorMA (p->org, r_frametime, p->vel, p->org);
-#if 0
+#if 1
 		if (p->bounce && r_particle_physics->ivalue)
 		{
 			vec3_t normal;
 			float dist;
-			if (TraceLine (cl.worldmodel, oldorg, p->org, v, normal) < 1) {
+			if (TraceLine (r_worldmodel, oldorg, p->org, v, normal) < 1) {
 				VectorCopy (v, p->org);
 				if (p->bounce < 0)
 				{

@@ -333,7 +333,7 @@ CL_ParseServerInfo (void)
 
 
 // local state
-	cl_entities[0].common.model = cl.worldmodel = cl.model_precache[1];
+	cl_entities[0].common.model = cl.worldmodel = r_worldmodel = cl.model_precache[1];
 
 	R_NewMap ();
 	Team_NewMap ();

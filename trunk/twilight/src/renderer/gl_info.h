@@ -31,6 +31,7 @@
 #include "dyngl.h"
 #include "matrixlib.h"
 #include "mod_alias.h"
+#include "model.h"
 
 typedef struct colormap_s {
 	vec4_t	top;
@@ -79,10 +80,11 @@ typedef struct entity_common_s {
 	struct entity_s *real_ent;
 } entity_common_t;
 
-extern vec3_t r_origin, vpn, vright, vup;
+extern vec3_t	r_origin, vpn, vright, vup;
 extern double	r_time;			// Current time.
 extern double	r_frametime;	// Time since last frame.
 extern Uint		r_framecount;	// Current frame.
+extern model_t	*r_worldmodel;	// World model.
 extern vec3_t	r_origin;
 extern float	d_8tofloattable[256][4];
 extern Uint32	d_palette_raw[256];
