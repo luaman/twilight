@@ -19,18 +19,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // winquake.h: Win32-specific Quake header file
 
-#ifdef _WIN32
-#pragma warning( disable : 4229 )		// mgraph gets this
-
 #include <windows.h>
+#ifndef WM_MOUSEWHEEL
 #define WM_MOUSEWHEEL                   0x020A
+#endif
 
 #ifndef SERVERONLY
 #include <ddraw.h>
 #include <dsound.h>
-#ifndef GLQUAKE
-#include <mgraph.h>
-#endif
 #endif
 
 extern HINSTANCE global_hInstance;
@@ -107,4 +103,4 @@ struct hostent FAR *(PASCAL FAR * pgethostbyaddr) (const char FAR * addr,
 												   int len, int type);
 int         (PASCAL FAR * pgetsockname) (SOCKET s, struct sockaddr FAR * name,
 										 int FAR * namelen);
-#endif
+										 

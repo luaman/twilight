@@ -10,8 +10,6 @@
 
 #define GL_LIBRARY		"opengl32.dll"
 
-#define snprintf		_snprintf
-#define vsnprintf		_vsnprintf
-#define strcasecmp		_strcmpi
+#include "compat.h"
 
 #endif // _CONFIG_H

@@ -66,7 +66,7 @@ static int  snd_sent, snd_completed;
  */
 
 HANDLE      hData;
-HPSTR       lpData, lpData2;
+LPVOID		lpData, lpData2;
 
 HGLOBAL     hWaveHdr;
 LPWAVEHDR   lpWaveHdr;
@@ -542,7 +542,7 @@ Returns false if nothing is found.
 ==================
 */
 
-int
+qboolean
 SNDDMA_Init (void)
 {
 	sndinitstat stat;
@@ -613,7 +613,7 @@ int
 SNDDMA_GetDMAPos (void)
 {
 	MMTIME      mmtime;
-	int         s;
+	int         s = 0;
 	DWORD       dwWrite;
 
 	if (dsound_init) {

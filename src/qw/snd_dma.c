@@ -594,7 +594,7 @@ S_ClearBuffer (void)
 #ifdef _WIN32
 	if (pDSBuf) {
 		DWORD       dwSize;
-		DWORD      *pData;
+		LPVOID	    pData;
 		int         reps;
 		HRESULT     hresult;
 

@@ -262,7 +262,6 @@ main (int argc, char **argv)
 {
 	quakeparms_t parms;
 	double      newtime, time, oldtime;
-	static char cwd[1024];
 	struct timeval timeout;
 	fd_set      fdset;
 	int         t;

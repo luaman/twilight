@@ -57,10 +57,12 @@ qboolean    ActiveApp = 1, Minimized = 0;	// LordHavoc: FIXME: set these
 
 //HWND  hwnd_dialog;        // startup dialog box
 
+#if 0	/* These apparently aren't used anymore? */
 static double pfreq;
 static double curtime = 0.0;
 static double lastcurtime = 0.0;
 static int  lowshift;
+#endif
 static HANDLE hinput, houtput;
 
 HANDLE      qwclsemaphore;
@@ -387,8 +389,7 @@ Sys_ConsoleInput (void)
 	static char text[256];
 	static int  len;
 	INPUT_RECORD recs[1024];
-	int         dummy;
-	int         ch, numread, numevents;
+	DWORD         dummy, ch, numread, numevents;
 
 #if 0
 	int         i;
@@ -572,7 +573,6 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	quakeparms_t parms;
 	double      time, oldtime, newtime;
 	MEMORYSTATUS lpBuffer;
-	static char cwd[1024];
 	int         t;
 
 	/* previous instances do not exist in Win32 */

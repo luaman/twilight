@@ -6,6 +6,14 @@ INCLUDES= -I$(top_srcdir)/include
 
 bin_PROGRAMS=twilight-qw
 
+if SYS_WIN32
+twilight_nq_sys=sys_win.c snd_win.c
+twilight_nq_sys_libs=-lwinmm -lwsock32
+else
+twilight_nq_sys=sys_linux.c snd_linux.c
+twilight_nq_sys_libs=
+endif
+
 twilight_qw_SOURCES= \
 	cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c cl_parse.c \
 	cl_pred.c cl_tent.c client.h \
@@ -19,13 +27,13 @@ twilight_qw_SOURCES= \
 	net.h net_chan.c net_udp.c \
 	pmove.c pmove.h pmovetst.c r_part.c sbar.c sbar.h skin.c \
 	snd_dma.c snd_mem.c \
-	snd_mix.c snd_linux.c sound.h cd_sdl.c cdaudio.h \
-	sys_linux.c sys.h vid_sdl.c vid.h \
+	snd_mix.c sound.h cd_sdl.c cdaudio.h \
+	sys.h vid_sdl.c vid.h \
 	view.c view.h wad.c wad.h zone.c zone.h \
 	buildnum.c \
 	quakedef.h bothdefs.h bspfile.h draw.h input.h keys.h protocol.h \
-	render.h
+	render.h $(twilight_nq_sys)
 
-LDFLAGS=@SDL_LIBS@ @LIBS@ -lm
+LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_nq_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 

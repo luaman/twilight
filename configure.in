@@ -8,11 +8,16 @@ AC_REVISION($Revision$)
 
 AM_INIT_AUTOMAKE(twilight,0.0.0)
 AM_CONFIG_HEADER(include/config.h)
+AC_CANONICAL_HOST
 
 dnl Checks for programs
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
+
+dnl Checks for extensions
+AC_EXEEXT
+AC_OBJEXT
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -34,6 +39,26 @@ AC_DEFUN(TL_CHECK_HEADER,[
 	CPPFLAGS=$CPPFLAGS_SAVE
 ])
 
+AC_MSG_CHECKING(Checking to see if building on Win32)
+case "${host}" in
+	*-*-mingw32*)
+		SYS=WIN32
+		AC_MSG_RESULT(yes)
+		;;
+# FIXME: What is cygwin's host type?  Check it here.  This is just a guess.
+	*-*-*cygwin*)
+		SYS=WIN32
+		AC_MSG_RESULT(yes)
+		;;
+	*)
+		# Default to POSIX compliant system
+		SYS=POSIX
+		AC_MSG_RESULT(no)
+		;;
+esac
+
+AM_CONDITIONAL(SYS_POSIX, test "$SYS" = "POSIX")
+AM_CONDITIONAL(SYS_WIN32, test "$SYS" = "WIN32")
 
 dnl Check for SDL, fatal if not found
 AM_PATH_SDL(1.2.0,
@@ -44,14 +69,20 @@ SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"
 
 
 dnl APIENTRY needs to be defined to nothing except on win32
-AC_DEFINE_UNQUOTED(APIENTRY,)
-
+if test "${SYS}" != "WIN32"; then
+	AC_DEFINE_UNQUOTED(APIENTRY,)
+fi
 
 dnl let the user choose the default OpenGL library
 AC_ARG_WITH(opengl,
 	[  --with-opengl           Default name of your OpenGL library
                           (only affects value of the gl_driver Cvar)],,
-	with_opengl="libGL.so.1")
+[if test "$SYS" = "WIN32"; then
+	with_opengl="opengl32.dll"
+else
+	with_opengl="libGL.so.1"
+fi
+])
 AC_DEFINE_UNQUOTED(GL_LIBRARY, "$with_opengl")
 
 

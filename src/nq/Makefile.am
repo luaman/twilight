@@ -6,6 +6,14 @@ INCLUDES= -I$(top_srcdir)/include
 
 bin_PROGRAMS=twilight-nq
 
+if SYS_WIN32
+twilight_nq_sys=sys_win.c snd_win.c conproc.c
+twilight_nq_sys_libs=-lwinmm -lwsock32
+else
+twilight_nq_sys=sys_linux.c snd_linux.c
+twilight_nq_sys_libs=
+endif
+
 twilight_nq_SOURCES= \
 	chase.c cl_demo.c cl_input.c cl_main.c cl_parse.c cl_tent.c \
 	cmd.c cmd.h common.c common.h console.c console.h crc.c crc.h \
@@ -19,13 +27,12 @@ twilight_nq_SOURCES= \
 	net_main.c net_udp.c net_udp.h \
 	pr_cmds.c pr_edict.c pr_exec.c progs.h progdefs.h pr_comp.h \
 	sv_main.c sv_move.c sv_phys.c sv_user.c \
-	sys_linux.c sys.h vid_sdl.c vid.h \
-	snd_dma.c snd_mem.c snd_mix.c snd_linux.c sound.h \
+	sys.h vid_sdl.c vid.h \
+	snd_dma.c snd_mem.c snd_mix.c sound.h \
 	cd_sdl.c cdaudio.h \
 	view.c view.h wad.c wad.h world.c world.h zone.c zone.h \
 	quakedef.h bspfile.h client.h draw.h input.h keys.h protocol.h \
-	render.h server.h
+	render.h server.h $(twilight_nq_sys)
 
-LDFLAGS=@SDL_LIBS@ @LIBS@ -lm
+LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_nq_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@
-
