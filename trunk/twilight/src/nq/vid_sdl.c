@@ -204,7 +204,7 @@ GammaChanged (cvar_t *cvar)
 		if (SDL_SetGammaRamp(hw_gamma_ramps[0], hw_gamma_ramps[1],
 							 hw_gamma_ramps[2]) == -1) {
 			// No hardware gamma support, turn off and set ROM.
-			Con_Printf("No hardware gamma support: Disabiling.\n");
+			Con_Printf("No hardware gamma support: Disabling.\n");
 			Cvar_Set(v_hwgamma, "0");
 			v_hwgamma->flags |= CVAR_ROM;
 		}
