@@ -50,3 +50,5 @@
 
 #define inline __inline
 
+#define mkdir(path, permission) _mkdir (path)
+

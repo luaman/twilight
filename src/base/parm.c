@@ -29,6 +29,7 @@ static const char rcsid[] =
 
 #include "qtypes.h"
 #include "strlib.h"
+#include "sys.h"
 
 #define MAX_NUM_ARGVS   50
 #define NUM_SAFE_ARGVS  5
@@ -38,8 +39,8 @@ static char *argvdummy = " ";
 static char *safeargvs[NUM_SAFE_ARGVS] =
 	{ "-nocdaudio", "-nolan", "-nomouse", "-nosound", "-window" };
 
-int         com_argc;
-char      **com_argv;
+int com_argc;
+char **com_argv;
 
 /*
 ================
@@ -47,31 +48,40 @@ COM_InitArgv
 ================
 */
 void
-COM_InitArgv (int argc, char **argv)
+Cmdline_Init (int argc, char *argv[])
 {
-    qboolean    safe;
-    int         i;
+    qboolean	safe = false;
+    int			i;
 
-    safe = false;
+	if (argc > MAX_NUM_ARGVS)
+	{
+		Sys_Printf ("Cmdline_Init: %i parameters, can only handle %i\n",
+				argc, MAX_NUM_ARGVS);
+		argc = MAX_NUM_ARGVS;
+	}
 
-    for (com_argc = 0; (com_argc < MAX_NUM_ARGVS) && (com_argc < argc);
-         com_argc++) {
-        largv[com_argc] = argv[com_argc];
-        if (!strcmp ("-safe", argv[com_argc]))
+    for (i = 0; i < argc; i++)
+	{
+        largv[i] = argv[i];
+        if (!strcmp ("-safe", argv[i]))
             safe = true;
     }
 
-    if (safe) {
+	com_argc = i;
+    com_argv = largv;
+
+    if (safe)
+	{
         // force all the safe-mode switches. Note that we reserved extra space
         // in case we need to add these, so we don't need an overflow check
-        for (i = 0; i < NUM_SAFE_ARGVS; i++) {
+        for (i = 0; i < NUM_SAFE_ARGVS; i++)
+		{
             largv[com_argc] = safeargvs[i];
             com_argc++;
         }
     }
 
     largv[com_argc] = argvdummy;
-    com_argv = largv;
 }
 
 
@@ -86,9 +96,10 @@ where the given parameter apears, or 0 if not present
 int
 COM_CheckParm (char *parm)
 {
-    int         i;
+    int			i;
 
-    for (i = 1; i < com_argc; i++) {
+    for (i = 1; i < com_argc; i++)
+	{
         if (!com_argv[i])
             // NEXTSTEP sometimes clears appkit vars.
             continue;
@@ -98,5 +109,4 @@ COM_CheckParm (char *parm)
 
     return 0;
 }
-
 
