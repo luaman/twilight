@@ -385,28 +385,28 @@ SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 
 // set the abs box
 
-#ifdef QUAKE2
+//#ifdef QUAKE2
 	if (ent->v.solid == SOLID_BSP && (ent->v.angles[0] || ent->v.angles[1] || ent->v.angles[2])) {	// expand 
 																									// for 
 																									// rotation
-		float       max, v;
-		int         i;
+		float max, v;
+		int	i;
 
-		max = 0;
-		for (i = 0; i < 3; i++) {
-			v = Q_fabs (ent->v.mins[i]);
-			if (v > max)
-				max = v;
-			v = Q_fabs (ent->v.maxs[i]);
-			if (v > max)
-				max = v;
-		}
-		for (i = 0; i < 3; i++) {
+		max = DotProduct(ent->v.mins, ent->v.mins);
+		v = DotProduct(ent->v.maxs, ent->v.maxs);
+
+		if (max < v)
+			max = v;
+
+		max = Q_sqrt(max);
+
+		for (i = 0; i < 3; i++)
+		{
 			ent->v.absmin[i] = ent->v.origin[i] - max;
 			ent->v.absmax[i] = ent->v.origin[i] + max;
 		}
 	} else
-#endif
+//#endif
 	{
 		VectorAdd (ent->v.origin, ent->v.mins, ent->v.absmin);
 		VectorAdd (ent->v.origin, ent->v.maxs, ent->v.absmax);
@@ -733,11 +733,10 @@ SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs,
 	VectorSubtract (start, offset, start_l);
 	VectorSubtract (end, offset, end_l);
 
-#ifdef QUAKE2
+//#ifdef QUAKE2
 	// rotate start and end into the models frame of reference
 	if (ent->v.solid == SOLID_BSP &&
 		(ent->v.angles[0] || ent->v.angles[1] || ent->v.angles[2])) {
-		vec3_t      a;
 		vec3_t      forward, right, up;
 		vec3_t      temp;
 
@@ -753,13 +752,13 @@ SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs,
 		end_l[1] = -DotProduct (temp, right);
 		end_l[2] = DotProduct (temp, up);
 	}
-#endif
+//#endif
 
 // trace a line through the apropriate clipping hull
 	SV_RecursiveHullCheck (hull, hull->firstclipnode, 0, 1, start_l, end_l,
 						   &trace);
 
-#ifdef QUAKE2
+//#ifdef QUAKE2
 	// rotate endpos back to world frame of reference
 	if (ent->v.solid == SOLID_BSP &&
 		(ent->v.angles[0] || ent->v.angles[1] || ent->v.angles[2])) {
@@ -782,7 +781,7 @@ SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs,
 			trace.plane.normal[2] = DotProduct (temp, up);
 		}
 	}
-#endif
+//#endif
 
 // fix trace up by the offset
 	if (trace.fraction != 1)
