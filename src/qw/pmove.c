@@ -228,7 +228,6 @@ PM_GroundMove (void)
 	float       downdist, updist;
 
 	pmove.velocity[2] = 0;
-
 	if (!pmove.velocity[0] && !pmove.velocity[1])
 		return;
 
@@ -320,14 +319,14 @@ PM_Friction (void)
 
 	vel = pmove.velocity;
 
-	speed = DotProduct (vel,vel);
+	speed = DotProduct (vel, vel);
 	if (speed < 1) {
 		vel[0] = 0;
 		vel[1] = 0;
 		return;
 	}
 
-	speed = Q_sqrt(speed);
+	speed = Q_sqrt (speed);
 	friction = movevars.friction;
 
 // if the leading edge is over a dropoff, increase friction
@@ -457,8 +456,7 @@ PM_WaterMove (void)
 	wishspeed = VectorNormalize (wishdir);
 
 	if (wishspeed > movevars.maxspeed) {
-		wishspeed = movevars.maxspeed / wishspeed;
-		VectorScale (wishvel, wishspeed, wishvel);
+		VectorScale (wishvel, movevars.maxspeed / wishspeed, wishvel);
 		wishspeed = movevars.maxspeed;
 	}
 	wishspeed *= 0.7;
@@ -517,8 +515,7 @@ PM_AirMove (void)
 // clamp to server defined max speed
 //
 	if (wishspeed > movevars.maxspeed) {
-		wishspeed = movevars.maxspeed / wishspeed;
-		VectorScale (wishvel, wishspeed, wishvel);
+		VectorScale (wishvel, movevars.maxspeed / wishspeed, wishvel);
 		wishspeed = movevars.maxspeed;
 	}
 
@@ -743,12 +740,10 @@ SpectatorMove (void)
 	float       wishspeed;
 
 	// friction
-	speed = DotProduct (pmove.velocity, pmove.velocity);
-
+	speed = VectorLength (pmove.velocity);
 	if (speed < 1) {
 		VectorClear (pmove.velocity);
 	} else {
-		speed = Q_sqrt (speed);
 		drop = 0;
 
 		friction = movevars.friction * 1.5;	// extra friction
@@ -764,7 +759,6 @@ SpectatorMove (void)
 		}
 		else {
 			newspeed /= speed;
-
 			VectorScale (pmove.velocity, newspeed, pmove.velocity);
 		}
 	}
@@ -787,8 +781,7 @@ SpectatorMove (void)
 	// clamp to server defined max speed
 	// 
 	if (wishspeed > movevars.spectatormaxspeed) {
-		wishspeed = movevars.spectatormaxspeed / wishspeed;
-		VectorScale (wishvel, wishspeed, wishvel);
+		VectorScale (wishvel, movevars.spectatormaxspeed / wishspeed, wishvel);
 		wishspeed = movevars.spectatormaxspeed;
 	}
 

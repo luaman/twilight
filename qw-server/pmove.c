@@ -532,7 +532,6 @@ PM_AirMove (void)
 		pmove.velocity[2] -= movevars.entgravity * movevars.gravity * frametime;
 
 		PM_FlyMove ();
-
 	}
 }
 
@@ -741,7 +740,6 @@ SpectatorMove (void)
 	float       wishspeed;
 
 	// friction
-
 	speed = VectorLength (pmove.velocity);
 	if (speed < 1) {
 		VectorClear (pmove.velocity);
