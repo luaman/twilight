@@ -268,7 +268,7 @@ EmitSkyPolys (msurface_t *fa)
 	for (p = fa->polys; p; p = p->next) {
 		memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
 		for (i = 0; i < p->numverts; i++) {
-			VectorSubtract (p->v[i].v, r_origin, dir);
+			VectorSubtract (p->v[i].v, modelorg, dir);
 			dir[2] *= 3;				// flatten the sphere
 
 			length = 6 * 63 * Q_RSqrt (DotProduct(dir,dir));
@@ -314,7 +314,7 @@ EmitSkyPolysMTEX (msurface_t *fa)
 		memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
 		for (i = 0; i < p->numverts; i++) 
 		{
-			VectorSubtract (p->v[i].v, r_origin, dir);
+			VectorSubtract (p->v[i].v, modelorg, dir);
 			dir[2] *= 3;				// flatten the sphere
 
 			length = 6 * 63 * Q_RSqrt (DotProduct(dir,dir));
@@ -529,9 +529,9 @@ void R_SkyBoxChanged (cvar_t *cvar)
 }
 
 #define SKYBOXVERT(i, x, y, z, s, t)							\
-	((v_array(i, 0) = (x) * 1024.0f + r_origin[0]),				\
-	(v_array(i, 1) = (y) * 1024.0f + r_origin[1]),				\
-	(v_array(i, 2) = (z) * 1024.0f + r_origin[2]),				\
+	((v_array(i, 0) = (x) * 1024.0f + modelorg[0]),				\
+	(v_array(i, 1) = (y) * 1024.0f + modelorg[1]),				\
+	(v_array(i, 2) = (z) * 1024.0f + modelorg[2]),				\
 	(tc_array(i, 0) = (s) * (254.0f/256.0f) + (1.0f/256.0f)),	\
 	(tc_array(i, 1) = (t) * (254.0f/256.0f) + (1.0f/256.0f)))
 
