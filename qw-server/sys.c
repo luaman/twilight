@@ -192,12 +192,10 @@ Sys_DoubleTime (void)
 	return epoch + now / 1000.0;
 }
 
-#ifdef _WIN32
-	static qboolean		do_stdin = false;
-#else
+#ifndef _WIN32
 	static qboolean		do_stdin = true;
-#endif
 	static qboolean		stdin_ready;
+#endif
 
 char *
 Sys_ConsoleInput (void)

@@ -608,7 +608,6 @@ WinMain
 */
 int         global_nCmdShow;
 char       *argv[MAX_NUM_ARGVS];
-static char *empty_string = "";
 
 //HWND      hwnd_dialog;
 
