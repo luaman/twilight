@@ -208,21 +208,29 @@ GammaChanged (cvar_t *cvar)
 void
 CheckMultiTextureExtensions (void)
 {
+	gl_mtexable = false;
 	Con_Printf ("Checking for multitexture... ");
-	if (COM_CheckParm ("-nomtex")) {
+	if (COM_CheckParm ("-nomtex"))
+	{
 		Con_Printf ("disabled\n");
 		return;
 	}
-	if (strstr (gl_extensions, "GL_ARB_multitexture")) {
-		if (!qglActiveTextureARB || !qglMultiTexCoord2fARB) {
-			Con_Printf("Fucked up video driver. (0x%p 0x%p)\n",
+	// FIXME: don't strstr for extensions!
+	if (strstr (gl_extensions, "GL_ARB_multitexture"))
+	{
+		if (qglActiveTextureARB && qglMultiTexCoord2fARB)
+		{
+			Con_Printf ("GL_ARB_multitexture\n");
+			gl_mtexable = true;
+		} else {
+			// Shouldn't happen - driver is fucked up or its author is!
+			Con_Printf ("no, but driver thinks otherwise\n");
+			Con_DPrintf ("qglActiveTextureARB is 0x%p, "
+					"qglMultiTexCoord2fARB is 0x%p\n",
 					qglActiveTextureARB, qglMultiTexCoord2fARB);
-			return;
 		}
-		Con_Printf ("GL_ARB_multitexture\n");
-		gl_mtexable = true;
 	} else
-		Con_Printf ("none found\n");
+		Con_Printf ("no\n");
 }
 
 
