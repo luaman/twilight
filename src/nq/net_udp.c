@@ -34,13 +34,6 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "quakedef.h"
-#include "console.h"
-#include "cvar.h"
-#include "net.h"
-#include "strlib.h"
-#include "sys.h"
-
 #ifdef WIN32
 #include <winsock.h>
 #include <io.h>
@@ -70,6 +63,13 @@ static const char rcsid[] =
 #ifdef __sun__
 #include <sys/filio.h>
 #endif
+
+#include "quakedef.h"
+#include "console.h"
+#include "cvar.h"
+#include "net.h"
+#include "strlib.h"
+#include "sys.h"
 
 //extern int  gethostname (char *, int);
 //extern int  close (int);

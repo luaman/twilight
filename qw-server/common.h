@@ -28,7 +28,7 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
-#include <SDL_byteorder.h>
+#include <SDL_endian.h>
 
 #define	MAX_INFO_STRING	196
 #define	MAX_SERVERINFO_STRING	512
@@ -93,57 +93,26 @@ void        InsertLinkAfter (link_t *l, link_t *after);
 //============================================================================
 // Byte order macros
 
-// These macros _MUST_ sign extend.
+union flint {
+	float	fp;
+	int		i;
+};
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-# define swap_short LittleShort
-# define BigShort(x) ((Sint16)(x))
-
-# define swap_long LittleLong
-# define BigLong(x) ((Sint32)(x))
-
-# define swap_float LittleFloat
-# define BigFloat(x) (x)
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+# define LittleShort(x) (x)
+# define LittleLong(x) (x)
+ # define LittleFloat(x) (x)
+# define BigShort(x) SDL_SwapBE16(x)
+# define BigLong(x) SDL_SwapBE32(x)
+# define BigFloat(x) (flint.fp)SDL_SwapBE32((flint.i)(x))
 #else
-# define swap_short BigShort
-# define LittleShort(x) ((Sint16)(x))
-
-# define swap_long BigLong
-# define LittleLong(x) ((Sint32)(x))
-
-# define swap_float BigFloat
-# define LittleFloat(x) (x)
-#endif
-
-static inline Sint16 swap_short(Sint16 x)
-{
-	return (x >> 8) | (x << 8);
-}
-
-static inline Sint32 swap_long(Sint32 x)
-{
-	return	(x >> 24) |
-		((x & 0x00ff0000) >> 8) |
-		((x & 0x0000ff00) << 8) |
-		(x << 24);
-}
-
-static inline float swap_float(float f)
-{
-	Uint32 x;
-	
-	x = *(Uint32*)&f;
-	x =	(x >> 24) |
-		((x & 0x00ff0000) >> 8) |
-		((x & 0x0000ff00) << 8) |
-		(x << 24);
-	f = *(float*)&x;
-	return f;
-}
-
-#undef swap_short
-#undef swap_long
-#undef swap_float
+# define LittleShort(x) SDL_SwapLE16(x)
+# define LittleLong(x) SDL_SwapLE32(x)
+# define BigFloat(x) (flint.fp)SDL_SwapLE32((flint.i)(x))
+# define BigShort(x) (x)
+# define BigLong(x) (x)
+# define BigFloat(x) (x)
+#endif	
 
 //============================================================================
 
