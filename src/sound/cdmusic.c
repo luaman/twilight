@@ -101,7 +101,7 @@ CDAudio_GetAudioDiskInfo (void)
 void
 CDAudio_Play (Uint8 track, qboolean looping)
 {
-	int len_m, len_s, len_f;
+	int	len_m, len_s, len_f;
 	
 	if (!cd_handle || !enabled)
 		return;
@@ -129,6 +129,7 @@ CDAudio_Play (Uint8 track, qboolean looping)
 			return;
 		CDAudio_Stop ();
 	}
+
 	if (SDL_CDPlay (cd_handle, cd_handle->track[track - 1].offset, cd_handle->track[track - 1].length) < 0) {
 
 		/* ok, check for status now */
@@ -217,8 +218,8 @@ CDAudio_Resume (void)
 static void
 CD_f (void)
 {
-	char       *command;
-	int         ret, n;
+	char	*command;
+	int		ret, n;
 
 	if (Cmd_Argc () < 2)
 		return;
@@ -430,7 +431,9 @@ CDAudio_Shutdown (void)
 {
 	if (!cd_handle)
 		return;
+
 	CDAudio_Stop ();
 	SDL_CDClose (cd_handle);
 	cd_handle = NULL;
 }
+
