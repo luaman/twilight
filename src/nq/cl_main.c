@@ -552,12 +552,11 @@ CL_RelinkEntities (void)
 			extern cvar_t *gl_flashblend;
 
 			// don't draw our own muzzle flash if flashblending
-			if (i != cl.viewentity || !gl_flashblend->value) {
+			if (i != cl.viewentity || chase_active->value || !gl_flashblend->value) {
 				vec3_t      fv, rv, uv;
 
 				dl = CL_AllocDlight (i);
 				VectorCopy (ent->origin, dl->origin);
-				dl->origin[2] += 16;
 				AngleVectors (ent->angles, fv, rv, uv);
 
 				VectorMA (dl->origin, 18, fv, dl->origin);
