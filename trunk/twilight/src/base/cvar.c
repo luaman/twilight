@@ -96,25 +96,31 @@ Cvar_InsertVar (cvar_t *var)
 
 cvar_t *
 Cvar_Get (const char *name, const char *svalue, const int flags,
-				const cvar_callback callback)
+		const cvar_callback callback)
 {
 	cvar_t	   *var;
 
 	var = Cvar_Find (name);
-	if (!var)	// Var does not exist, create it
+
+	if (var)
 	{
-		var = Z_Malloc (sizeof(cvar_t));
-		var->name = Z_Malloc (strlen (name) + 1);
-		strcpy (var->name, name);
-		var->svalue = NULL;		// force Cvar to change
-		var->callback = callback;
-		var->initval = Z_Malloc (strlen(svalue) + 1);
-		strcpy (var->initval, svalue);
-		Cvar_InsertVar (var);
-		Cvar_Set (var, svalue);
+		// var exists, update flags and leave it alone
+		var->flags = flags;
+		return var;
 	}
 
-	var->flags = flags;		// we always throw out flags
+	// Var does not exist, create it
+	var = Z_Malloc (sizeof(cvar_t));
+	var->name = Z_Malloc (strlen (name) + 1);
+	strcpy (var->name, name);
+	var->svalue = NULL;					// force Cvar to change
+	var->callback = callback;
+	var->initval = Z_Malloc (strlen(svalue) + 1);
+	strcpy (var->initval, svalue);
+	var->flags = flags;
+	Cvar_InsertVar (var);
+	Cvar_Set (var, svalue);
+
 	return var;
 }
 
