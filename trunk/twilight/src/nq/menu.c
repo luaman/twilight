@@ -1322,7 +1322,7 @@ M_Options_Key (int k)
 	Movement interpolation	on/off
 */
 
-#define GFX_ITEMS	8
+#define GFX_ITEMS	7
 
 int gfx_cursor = 0;
 
@@ -1343,30 +1343,27 @@ M_Gfx_Draw (void)
 
 	M_DrawPic ((320 - p->width) / 2, 4, p);
 
-	M_Print (16, 32, "         Smooth models");
-	M_DrawCheckbox (220, 32, gl_smoothmodels->value);
+	M_Print (16, 32, "         Affine models");
+	M_DrawCheckbox (220, 32, gl_affinemodels->value);
 
-	M_Print (16, 40, "         Affine models");
-	M_DrawCheckbox (220, 40, gl_affinemodels->value);
+	M_Print (16, 40, "      Fullbright models");
+	M_DrawCheckbox (220, 40, gl_fb_models->value);
 
-	M_Print (16, 48, "      Fullbright models");
-	M_DrawCheckbox (220, 48, gl_fb_models->value);
+	M_Print (16, 48, "      Fullbright bmodels");
+	M_DrawCheckbox (220, 48, gl_fb_bmodels->value);
 
-	M_Print (16, 56, "      Fullbright bmodels");
-	M_DrawCheckbox (220, 56, gl_fb_bmodels->value);
+	M_Print (16, 56, "   Fast dynamic lights");
+	M_DrawCheckbox (220, 56, gl_flashblend->value);
 
-	M_Print (16, 64, "   Fast dynamic lights");
-	M_DrawCheckbox (220, 64, gl_flashblend->value);
-
-	M_Print (16, 72, "               Shadows");
-	M_Print (220, 72, 
+	M_Print (16, 64, "               Shadows");
+	M_Print (220, 64, 
 		(r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off");
 
-	M_Print (16, 80, "   Frame interpolation");
-	M_DrawCheckbox (220, 80, gl_im_animation->value);
+	M_Print (16, 72, "   Frame interpolation");
+	M_DrawCheckbox (220, 72, gl_im_animation->value);
 
-	M_Print (16, 88, "  Motion interpolation");
-	M_DrawCheckbox (220, 88, gl_im_transform->value);
+	M_Print (16, 80, "  Motion interpolation");
+	M_DrawCheckbox (220, 80, gl_im_transform->value);
 
 // cursor
 	M_DrawCharacter (200, 32 + gfx_cursor * 8,
@@ -1381,42 +1378,37 @@ M_Gfx_Set (void)
 	switch (gfx_cursor)
 	{
 		case 0:
-			v = !(int)gl_smoothmodels->value;
-			Cvar_Set (gl_smoothmodels, va("%i", v));
-			break;
-
-		case 1:
 			v = !(int)gl_affinemodels->value;
 			Cvar_Set (gl_affinemodels, va("%i", v));
 			break;
 
-		case 2:
+		case 1:
 			v = !(int)gl_fb_models->value;
 			Cvar_Set (gl_fb_models, va("%i", v));
 			break;
 
-		case 3:
+		case 2:
 			v = !(int)gl_fb_bmodels->value;
 			Cvar_Set (gl_fb_bmodels, va("%i", v));
 			break;
 
-		case 4:
+		case 3:
 			v = !(int)gl_flashblend->value;
 			Cvar_Set (gl_flashblend, va("%i", v));
 			break;
 
-		case 5:
+		case 4:
 			v = (int)r_shadows->value + 1;
 			if (v > 2) v = 0;
 			Cvar_Set (r_shadows, va("%i", v));
 			break;
 
-		case 6:
+		case 5:
 			v = !(int)gl_im_animation->value;
 			Cvar_Set (gl_im_animation, va("%i", v));
 			break;
 
-		case 7:
+		case 6:
 			v = !(int)gl_im_transform->value;
 			Cvar_Set (gl_im_transform, va("%i", v));
 			break;
