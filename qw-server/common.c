@@ -17,7 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-// common.c -- misc functions used in client and server
+/* common.c -- misc functions used in client and server */
+
+static const char rcsid[] =
+	"$Id$";
 
 #include <ctype.h>
 
@@ -980,7 +983,7 @@ COM_FileBase (char *in, char *out)
 	while (s != in && *s != '.')
 		s--;
 
-	for (s2 = s; *s2 && *s2 != '/'; s2--);
+	for (s2 = s; *s2 && *s2 != '/' && s2 > in; s2--);
 
 	if (s - s2 < 2)
 		strcpy (out, "?model?");

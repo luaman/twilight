@@ -41,22 +41,20 @@ static const char rcsid[] =
 static qboolean cdValid = false;
 static qboolean playing = false;
 static qboolean wasPlaying = false;
-static qboolean initialized = false;
 static qboolean enabled = true;
 static qboolean playLooping = false;
 static float cdvolume;
 static byte remap[100];
 static byte playTrack;
-static byte maxTrack;
 
 SDL_CD     *cd_handle;
-static int  cd_dev = 0;					/* Default to first CD-ROM drive */
+static int  cd_dev = 0;			/* Default to first CD-ROM drive */
 
 static void
 CDAudio_Eject (void)
 {
 	if (!cd_handle || !enabled)
-		return;							// no cd init'd
+		return;
 
 	if (SDL_CDEject (cd_handle) < 0)
 		Con_Printf ("Unable to eject CD-ROM: %s\n", SDL_GetError ());
@@ -67,11 +65,10 @@ static void
 CDAudio_CloseDoor (void)
 {
 	if (!cd_handle || !enabled)
-		return;							// no cd init'd
+		return;
 
 	/* 
-	 * Will SDL attempt to do this for us if we close and reopen the
-	 * device?  There is no SDL_CDCloseDoor.
+         * This is currently a NOP as SDL doesn't allow us to do this.
 	 */
 }
 
@@ -88,7 +85,6 @@ CDAudio_GetAudioDiskInfo (void)
 	}
 
 	cdValid = true;
-	maxTrack = cd_handle->numtracks;
 
 	return 0;
 }
@@ -108,7 +104,7 @@ CDAudio_Play (byte track, qboolean looping)
 
 	track = remap[track];
 
-	if (track < 1 || track > maxTrack) {
+	if (track < 1 || track > cd_handle->numtracks) {
 		Con_Printf ("CDAudio_Play: Bad track number %d.\n", track);
 		return;
 	}
@@ -287,7 +283,7 @@ CD_f (void)
 		int         current_min, current_sec, current_frame;
 		int         length_min, length_sec, length_frame;
 
-		Con_Printf ("%u tracks\n", maxTrack);
+		Con_Printf ("%u tracks\n", cd_handle->numtracks);
 		if (playing)
 			Con_Printf ("Currently %s track %u\n",
 						playLooping ? "looping" : "playing", playTrack);
@@ -333,7 +329,7 @@ CDAudio_Update (void)
 	}
 
 	if (playing && lastchk < time (NULL)) {
-		lastchk = time (NULL) + 2;		// two seconds between chks
+		lastchk = time (NULL) + 2;
 		curstat = SDL_CDStatus (cd_handle);
 		if (curstat != CD_PLAYING && curstat != CD_PAUSED) {
 			playing = false;
@@ -346,7 +342,7 @@ CDAudio_Update (void)
 int
 CDAudio_Init (void)
 {
-	int         i, sdl_num_drives;
+	int         i, x, sdl_num_drives;
 
 #if 0
 	if (cls.state == ca_dedicated)
@@ -369,6 +365,12 @@ CDAudio_Init (void)
 
 	if ((i = COM_CheckParm ("-cddev")) != 0 && i < com_argc - 1) {
 		cd_dev = atoi (com_argv[i + 1]);
+		for (x = 0; x < sdl_num_drives; x++) {
+			if (!strcasecmp (SDL_CDName (x), com_argv[i + 1])) {
+				cd_dev = x;
+				break;
+			}
+		}
 		if (cd_dev < 0 || cd_dev > sdl_num_drives)
 			cd_dev = 0;
 		Con_Printf ("Using CD-ROM device '%s'\n", SDL_CDName (cd_dev));
@@ -382,7 +384,6 @@ CDAudio_Init (void)
 
 	for (i = 0; i < 100; i++)
 		remap[i] = i;
-	initialized = true;
 	enabled = true;
 
 	if (CDAudio_GetAudioDiskInfo ()) {
@@ -401,7 +402,7 @@ CDAudio_Init (void)
 void
 CDAudio_Shutdown (void)
 {
-	if (!initialized)
+	if (!cd_handle)
 		return;
 	CDAudio_Stop ();
 	SDL_CDClose (cd_handle);
