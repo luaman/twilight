@@ -897,11 +897,10 @@ main (int argc, char *argv[])
 			updatetitle = 0;
 		}
 
-		while(PeekMessage(&msg, NULL, 0, 0, 0))
+		while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
-			GetMessage( &msg, NULL, 0, 0 );
-            TranslateMessage(&msg); 
-            DispatchMessage(&msg); 
+			TranslateMessage(&msg); 
+			DispatchMessage(&msg); 
 		}
 #endif
 		// the only reason we have a timeout at all is so that if the last
