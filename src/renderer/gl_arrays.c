@@ -42,10 +42,10 @@ colorub_t	*cub_array_p, *scub_array_p;
 GLuint		*vindices;
 float_int_t	*FtoUB_tmp;
 
-GLuint		v_index, i_index;
+GLint		v_index, i_index;
 qboolean	va_locked;
 
-GLuint		MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
+GLint		MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
 
 cvar_t *gl_varray_size;
 cvar_t *gl_iarray_size;

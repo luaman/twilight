@@ -103,7 +103,7 @@ This error checks and tracks the total number of entities
 ===============
 */
 entity_t   *
-CL_EntityNum (Uint num)
+CL_EntityNum (int num)
 {
 	if (num >= cl.num_entities) {
 		if (num >= MAX_EDICTS)
@@ -276,21 +276,25 @@ CL_ParseServerInfo (void)
 
 // precache models
 	memset (cl.model_precache, 0, sizeof (cl.model_precache));
-	nummodels = 1;
-	while (*(str = MSG_ReadString ())) {
+	for (nummodels = 1;; nummodels++) {
+		str = MSG_ReadString ();
+		if (!str[0])
+			break;
 		if (nummodels == MAX_MODELS)
 			Host_Error ("Server sent too many model precaches\n");
-		strcpy (model_precache[nummodels++], str);
+		strcpy (model_precache[nummodels], str);
 		Mod_TouchModel (str);
 	}
 
 // precache sounds
 	memset (cl.sound_precache, 0, sizeof (cl.sound_precache));
-	numsounds = 1;
-	while (*(str = MSG_ReadString ())) {
+	for (numsounds = 1;; numsounds++) {
+		str = MSG_ReadString ();
+		if (!str[0])
+			break;
 		if (numsounds == MAX_SOUNDS)
 			Host_Error ("Server sent too many sound precaches\n");
-		strcpy (sound_precache[numsounds++], str);
+		strcpy (sound_precache[numsounds], str);
 	}
 
 //

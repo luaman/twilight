@@ -35,8 +35,6 @@
 #include "vid.h"
 #include "gl_info.h"
 #include "gl_arrays.h"
-#include "liquid.h"
-#include "sky.h"
 
 #define	MAX_GLTEXTURES	1024
 #define	TOP_RANGE		16				// soldier uniform colors
@@ -98,7 +96,7 @@ typedef struct {
 
 	float       fov_x, fov_y;
 
-	Uint		num_entities;
+	int			num_entities;
 	entity_t	*entities[MAX_ENTITIES];
 } refdef_t;
 
@@ -170,6 +168,8 @@ extern GLfloat whitev[4];
 qboolean GLF_Init (void);
 void GL_EndRendering (void);
 
+extern int texture_extension_number;
+
 int GL_MangleImage8 (Uint8 *in, Uint8 *out, int width, int height, short mask,
 		        Uint8 to, qboolean bleach);
 void GL_Upload32 (Uint32 *data, int width, int height, int flags);
@@ -192,7 +192,8 @@ void R_ReadPointFile_f (void);
 //============================================================================
 
 
-extern Uint c_brush_polys, c_alias_polys;
+extern int r_framecount;
+extern int c_brush_polys, c_alias_polys;
 
 
 /*
@@ -216,7 +217,7 @@ extern int d_lightstylevalue[256];		// 8.8 fraction of base light value
 extern int netgraphtexture;				// netgraph texture
 extern int playertextures;
 
-extern int skyboxtexnums[6];
+extern int skyboxtexnum;
 
 extern int skytexturenum;				// in cl.loadmodel, not GL texture
 
@@ -271,6 +272,14 @@ extern qboolean gl_mtex;
 extern qboolean gl_mtexcombine;
 
 /*
+ * gl_warp.c
+ */
+void EmitBothSkyLayers (msurface_t *fa);
+void EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform,float alpha);
+void R_DrawSkyChain (msurface_t *s);
+extern void R_DrawSkyBoxChain (msurface_t *s);
+
+/*
  * gl_draw.c
  */
 extern int gl_filter_min;
@@ -284,12 +293,10 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 /*
  * gl_rsurf.c
  */
-void R_VisBrushModel (entity_t *e);
 void R_DrawBrushModel (entity_t *e);
 void R_DrawBrushModelSkies (void);
-void R_VisWorld (void);
 void R_DrawWorld (void);
-void R_DrawWaterTextureChains (brushhdr_t *brush, qboolean transform);
+void R_DrawWaterTextureChains (void);
 void GL_BuildLightmaps (void);
 
 /*

@@ -34,19 +34,13 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 #include "stdlib.h"
-#ifdef DMALLOC
-#include "dmalloc.h"
-#endif
 
-void Hunk_Print (qboolean all);
 memzone_t *zonechain = NULL;
 
 void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
 {
-#if 0
 	int i, j, k, needed, endbit, largest;
 	memclump_t *clump, **clumpchainpointer;
-#endif
 	memheader_t *mem;
 	if (zone == NULL)
 		Sys_Error("Zone_Alloc: zone == NULL (alloc at %s:%i)", filename, fileline);
@@ -54,7 +48,6 @@ void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
 		Sys_Error("Zone_Alloc: size <= 0 (alloc at %s:%i, zone %s, size %i)", filename, fileline, zone->name, size);
 	Com_DPrintf("Zone_Alloc: zone %s, file %s:%i, size %i bytes\n", zone->name, filename, fileline, size);
 	zone->totalsize += size;
-#if 0
 	if (size < 4096)
 	{
 		// clumping
@@ -110,7 +103,6 @@ choseclump:
 			clump->bits[j >> 5] |= (1 << (j & 31));
 	}
 	else
-#endif
 	{
 		// big allocations are not clumped
 		zone->realsize += sizeof(memheader_t) + size + sizeof(Uint32);
@@ -354,14 +346,12 @@ void ZoneList_f(void)
 	case 1:
 		Zone_PrintList(false);
 		Zone_PrintStats();
-		Hunk_Print (false);
 		break;
 	case 2:
 		if (!strcmp(Cmd_Argv(1), "all"))
 		{
 			Zone_PrintList(true);
 			Zone_PrintStats();
-			Hunk_Print (true);
 			break;
 		}
 		// drop through
@@ -486,7 +476,7 @@ Hunk_Print (qboolean all)
 		// 
 		// print the single block
 		// 
-		memcpy (name, h->name, sizeof(name));
+		memcpy (name, h->name, 8);
 		if (all)
 			Com_Printf ("%8p :%8i %8s\n", h, h->size, name);
 
@@ -494,7 +484,7 @@ Hunk_Print (qboolean all)
 		// print the total
 		//
 		if (next == endlow || next == endhigh ||
-			strcmp (h->name, next->name)) {
+			strncmp (h->name, next->name, 8)) {
 			if (!all)
 				Com_Printf ("          :%8i %8s (TOTAL)\n", sum, name);
 			count = 0;
@@ -1037,7 +1027,7 @@ void Zone_Init (void)
 	if (j)
 		hunk_size = (int) (Q_atof (com_argv[j + 1]) * 1024 * 1024);
 	else
-		hunk_size = 4 * 1024 * 1024;
+		hunk_size = 16 * 1024 * 1024;
 
 	hunk_base = Zone_Alloc (hunkzone, hunk_size);
 

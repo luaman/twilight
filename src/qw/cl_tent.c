@@ -440,7 +440,7 @@ void
 CL_UpdateExplosions (void)
 {
 	int         i;
-	Uint        f;
+	int         f;
 	explosion_t *ex;
 	entity_t   *ent;
 

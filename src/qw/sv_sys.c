@@ -81,9 +81,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "server.h"
 #include "sys.h"
-#ifdef DMALLOC
-#include "dmalloc.h"
-#endif
 
 // LordHavoc: for win32 which does not have PATH_MAX defined without POSIX
 // (and that disables lots of other useful stuff)

@@ -27,18 +27,10 @@
 #ifndef __GL_INFO_H
 #define __GL_INFO_H
 
+#define	MAX_GLTEXTURES	1024
+
 #include "mathlib.h"
 #include "dyngl.h"
-
-extern double	r_time;			// Current time
-extern double	r_frametime;	// Time since last frame.
-extern Uint		r_framecount;	// Current frame.
-extern vec3_t	r_origin;
-extern float	d_8tofloattable[256][4];
-extern Uint32	d_8to32table[256];
-extern int		gl_solid_format;
-extern int		gl_alpha_format;
-extern int		gl_filter_mag;
 
 // for glColor4fv
 extern GLfloat whitev[4];

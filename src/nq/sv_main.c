@@ -40,7 +40,6 @@ static const char rcsid[] =
 #include "sound.h"
 #include "sys.h"
 #include "world.h"
-#include "surface.h"
 
 server_t    sv;
 server_static_t svs;
@@ -437,9 +436,9 @@ given point.
 Uint8 *
 SV_FatPVS (vec3_t org)
 {
-	fatbytes = (sv.worldmodel->extra.brush->numleafs + 31) >> 3;
+	fatbytes = (sv.worldmodel->numleafs + 31) >> 3;
 	memset (fatpvs, 0, fatbytes);
-	SV_AddToFatPVS (org, sv.worldmodel->extra.brush->nodes);
+	SV_AddToFatPVS (org, sv.worldmodel->nodes);
 	return fatpvs;
 }
 
@@ -1105,10 +1104,6 @@ SV_SpawnServer (char *server)
 
 	sv.time = 1.0;
 
-	/*
-	 * FIXME: The server /really/ should not have to know about the renderer!
-	 */
-	SetupLightmapSettings ();
 	strcpy (sv.name, server);
 	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
 	isnotmap = false;
@@ -1128,7 +1123,7 @@ SV_SpawnServer (char *server)
 
 	sv.model_precache[0] = pr_strings;
 	sv.model_precache[1] = sv.modelname;
-	for (i = 1; i < sv.worldmodel->extra.brush->numsubmodels; i++) {
+	for (i = 1; i < sv.worldmodel->numsubmodels; i++) {
 		sv.model_precache[1 + i] = localmodels[i];
 		sv.models[i + 1] = Mod_ForName (localmodels[i], false);
 	}
@@ -1152,7 +1147,7 @@ SV_SpawnServer (char *server)
 	// serverflags are for cross level information (sigils)
 	pr_global_struct->serverflags = svs.serverflags;
 
-	ED_LoadFromFile (sv.worldmodel->extra.brush->entities);
+	ED_LoadFromFile (sv.worldmodel->entities);
 	// LordHavoc: clear world angles (to fix e3m3.bsp)
 	VectorClear(sv.edicts->v.angles);
 

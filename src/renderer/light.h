@@ -53,7 +53,7 @@ typedef struct
 }
 rdlight_t;
 
-extern Uint r_numdlights;
+extern int r_numdlights;
 extern rdlight_t r_dlight[MAX_DLIGHTS];
 
 

@@ -37,13 +37,12 @@ model_t    *loadmodel;
 
 void        Mod_LoadBrushModel (model_t *mod, void *buffer);
 model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
-void		Mod_UnloadModel (model_t *mod);
-
 
 Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 
 #define	MAX_MOD_KNOWN 4096
 model_t     mod_known[MAX_MOD_KNOWN];
+int         mod_numknown;
 
 qboolean    isnotmap;
 
@@ -66,13 +65,13 @@ Mod_Init
 Caches the data if needed
 ===============
 */
-void *
+void       *
 Mod_Extradata (model_t *mod)
 {
-	if (!mod->extra.ptr)
-		Sys_Error ("Mod_Extradata: %s has no data!", mod->name);
+	if (!mod->extradata)
+		Sys_Error ("Mod_Extradata: No data!");
 
-	return mod->extra.ptr;
+	return mod->extradata;
 }
 
 /*
@@ -80,16 +79,29 @@ Mod_Extradata (model_t *mod)
 Mod_PointInLeaf
 ===============
 */
-mleaf_t *
+mleaf_t    *
 Mod_PointInLeaf (vec3_t p, model_t *model)
 {
-	mnode_t		*node;
+	mnode_t    *node;
+	float       d;
+	mplane_t   *plane;
 
-	node = model->extra.brush->nodes;
-	while (node->contents >= 0)
-		node = node->children[PlaneDiff (p, node->plane) <= 0];
+	if (!model || !model->nodes)
+		Sys_Error ("Mod_PointInLeaf: bad model");
 
-	return (mleaf_t *) node;
+	node = model->nodes;
+	while (1) {
+		if (node->contents < 0)
+			return (mleaf_t *) node;
+		plane = node->plane;
+		d = PlaneDiff (p, plane);
+		if (d > 0)
+			node = node->children[0];
+		else
+			node = node->children[1];
+	}
+
+	return NULL;						// never reached
 }
 
 
@@ -106,7 +118,7 @@ Mod_DecompressVis (Uint8 *in, model_t *model)
 	Uint8		   *out;
 	int				row;
 
-	row = (model->extra.brush->numleafs + 7) >> 3;
+	row = (model->numleafs + 7) >> 3;
 	out = decompressed;
 
 	if (!in) {							// no vis info, so make all visible
@@ -137,7 +149,7 @@ Mod_DecompressVis (Uint8 *in, model_t *model)
 Uint8 *
 Mod_LeafPVS (mleaf_t *leaf, model_t *model)
 {
-	if (leaf == model->extra.brush->leafs)
+	if (leaf == model->leafs)
 		return mod_novis;
 	return Mod_DecompressVis (leaf->compressed_vis, model);
 }
@@ -153,12 +165,9 @@ Mod_ClearAll (void)
 	int         i;
 	model_t    *mod;
 
-	Zone_CheckSentinelsGlobal();
-	for (i = 0, mod = mod_known; i < MAX_MOD_KNOWN; i++, mod++)
-		if (mod->name[0])
-//			if (mod->type != mod_alias)
-				Mod_UnloadModel(mod);
-//			mod->needload = true;
+	for (i = 0, mod = mod_known; i < mod_numknown; i++, mod++)
+		if (mod->type != mod_alias)
+			mod->needload = true;
 }
 
 /*
@@ -193,6 +202,7 @@ Mod_FindName (char *name)
 
 	if (freemod)
 	{
+		mod_numknown++;
 		mod = freemod;
 		strcpy (mod->name, name);
 		mod->needload = true;
@@ -254,11 +264,11 @@ void
 Mod_LoadVisibility (lump_t *l)
 {
 	if (!l->filelen) {
-		loadmodel->extra.brush->visdata = NULL;
+		loadmodel->visdata = NULL;
 		return;
 	}
-	loadmodel->extra.brush->visdata = Zone_Alloc (loadmodel->extrazone, l->filelen);
-	memcpy (loadmodel->extra.brush->visdata, mod_base + l->fileofs, l->filelen);
+	loadmodel->visdata = Hunk_AllocName (l->filelen, loadmodel->name);
+	memcpy (loadmodel->visdata, mod_base + l->fileofs, l->filelen);
 }
 
 
@@ -271,11 +281,11 @@ void
 Mod_LoadEntities (lump_t *l)
 {
 	if (!l->filelen) {
-		loadmodel->extra.brush->entities = NULL;
+		loadmodel->entities = NULL;
 		return;
 	}
-	loadmodel->extra.brush->entities = Zone_Alloc (loadmodel->extrazone, l->filelen);
-	memcpy (loadmodel->extra.brush->entities, mod_base + l->fileofs, l->filelen);
+	loadmodel->entities = Hunk_AllocName (l->filelen, loadmodel->name);
+	memcpy (loadmodel->entities, mod_base + l->fileofs, l->filelen);
 }
 
 
@@ -295,10 +305,10 @@ Mod_LoadVertexes (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->extrazone, count * sizeof (*out));
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
-	loadmodel->extra.brush->vertexes = out;
-	loadmodel->extra.brush->numvertexes = count;
+	loadmodel->vertexes = out;
+	loadmodel->numvertexes = count;
 
 	for (i = 0; i < count; i++, in++, out++) {
 		out->position[0] = LittleFloat (in->point[0]);
@@ -323,10 +333,10 @@ Mod_LoadSubmodels (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->extrazone, count * sizeof (*out));
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
-	loadmodel->extra.brush->submodels = out;
-	loadmodel->extra.brush->numsubmodels = count;
+	loadmodel->submodels = out;
+	loadmodel->numsubmodels = count;
 
 	for (i = 0; i < count; i++, in++, out++) {
 		for (j = 0; j < 3; j++) {		// spread the mins / maxs by a pixel
@@ -358,10 +368,10 @@ Mod_LoadEdges (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->extrazone, (count + 1) * sizeof (*out));
+	out = Hunk_AllocName ((count + 1) * sizeof (*out), loadmodel->name);
 
-	loadmodel->extra.brush->edges = out;
-	loadmodel->extra.brush->numedges = count;
+	loadmodel->edges = out;
+	loadmodel->numedges = count;
 
 	for (i = 0; i < count; i++, in++, out++) {
 		out->v[0] = (unsigned short) LittleShort (in->v[0]);
@@ -400,10 +410,10 @@ Mod_LoadNodes (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->extrazone, count * sizeof (*out));
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
-	loadmodel->extra.brush->nodes = out;
-	loadmodel->extra.brush->numnodes = count;
+	loadmodel->nodes = out;
+	loadmodel->numnodes = count;
 
 	for (i = 0; i < count; i++, in++, out++) {
 		for (j = 0; j < 3; j++) {
@@ -412,7 +422,7 @@ Mod_LoadNodes (lump_t *l)
 		}
 
 		p = LittleLong (in->planenum);
-		out->plane = loadmodel->extra.brush->planes + p;
+		out->plane = loadmodel->planes + p;
 
 		out->firstsurface = LittleShort (in->firstface);
 		out->numsurfaces = LittleShort (in->numfaces);
@@ -420,13 +430,13 @@ Mod_LoadNodes (lump_t *l)
 		for (j = 0; j < 2; j++) {
 			p = LittleShort (in->children[j]);
 			if (p >= 0)
-				out->children[j] = loadmodel->extra.brush->nodes + p;
+				out->children[j] = loadmodel->nodes + p;
 			else
-				out->children[j] = (mnode_t *) (loadmodel->extra.brush->leafs + (-1 - p));
+				out->children[j] = (mnode_t *) (loadmodel->leafs + (-1 - p));
 		}
 	}
 
-	Mod_SetParent (loadmodel->extra.brush->nodes, NULL);	// sets nodes and leafs
+	Mod_SetParent (loadmodel->nodes, NULL);	// sets nodes and leafs
 }
 
 /*
@@ -445,10 +455,10 @@ Mod_LoadLeafs (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->extrazone, count * sizeof (*out));
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
-	loadmodel->extra.brush->leafs = out;
-	loadmodel->extra.brush->numleafs = count;
+	loadmodel->leafs = out;
+	loadmodel->numleafs = count;
 
 	for (i = 0; i < count; i++, in++, out++) {
 		for (j = 0; j < 3; j++) {
@@ -459,15 +469,15 @@ Mod_LoadLeafs (lump_t *l)
 		p = LittleLong (in->contents);
 		out->contents = p;
 
-		out->firstmarksurface = loadmodel->extra.brush->marksurfaces +
+		out->firstmarksurface = loadmodel->marksurfaces +
 			LittleShort (in->firstmarksurface);
 		out->nummarksurfaces = LittleShort (in->nummarksurfaces);
 
 		p = LittleLong (in->visofs);
-		if (p == -1 || !loadmodel->extra.brush->visdata)
+		if (p == -1 || !loadmodel->visdata)
 			out->compressed_vis = NULL;
 		else
-			out->compressed_vis = loadmodel->extra.brush->visdata + p;
+			out->compressed_vis = loadmodel->visdata + p;
 
 		for (j = 0; j < 4; j++)
 			out->ambient_sound_level[j] = in->ambient_level[j];
@@ -476,6 +486,11 @@ Mod_LoadLeafs (lump_t *l)
 		if (out->contents != CONTENTS_EMPTY) {
 			for (j = 0; j < out->nummarksurfaces; j++)
 				out->firstmarksurface[j]->flags |= SURF_UNDERWATER;
+		}
+
+		if (isnotmap) {
+			for (j = 0; j < out->nummarksurfaces; j++)
+				out->firstmarksurface[j]->flags |= SURF_DONTWARP;
 		}
 	}
 }
@@ -496,16 +511,16 @@ Mod_LoadClipnodes (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->extrazone, count * sizeof (*out));
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
-	loadmodel->extra.brush->clipnodes = out;
-	loadmodel->extra.brush->numclipnodes = count;
+	loadmodel->clipnodes = out;
+	loadmodel->numclipnodes = count;
 
-	hull = &loadmodel->extra.brush->hulls[1];
+	hull = &loadmodel->hulls[1];
 	hull->clipnodes = out;
 	hull->firstclipnode = 0;
 	hull->lastclipnode = count - 1;
-	hull->planes = loadmodel->extra.brush->planes;
+	hull->planes = loadmodel->planes;
 	hull->clip_mins[0] = -16;
 	hull->clip_mins[1] = -16;
 	hull->clip_mins[2] = -24;
@@ -514,11 +529,11 @@ Mod_LoadClipnodes (lump_t *l)
 	hull->clip_maxs[2] = 32;
 	VectorSubtract (hull->clip_maxs, hull->clip_mins, hull->clip_size);
 
-	hull = &loadmodel->extra.brush->hulls[2];
+	hull = &loadmodel->hulls[2];
 	hull->clipnodes = out;
 	hull->firstclipnode = 0;
 	hull->lastclipnode = count - 1;
-	hull->planes = loadmodel->extra.brush->planes;
+	hull->planes = loadmodel->planes;
 	hull->clip_mins[0] = -32;
 	hull->clip_mins[1] = -32;
 	hull->clip_mins[2] = -24;
@@ -549,25 +564,25 @@ Mod_MakeHull0 (void)
 	int         i, j, count;
 	hull_t     *hull;
 
-	hull = &loadmodel->extra.brush->hulls[0];
+	hull = &loadmodel->hulls[0];
 
-	in = loadmodel->extra.brush->nodes;
-	count = loadmodel->extra.brush->numnodes;
-	out = Zone_Alloc (loadmodel->extrazone, count * sizeof (*out));
+	in = loadmodel->nodes;
+	count = loadmodel->numnodes;
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
 	hull->clipnodes = out;
 	hull->firstclipnode = 0;
 	hull->lastclipnode = count - 1;
-	hull->planes = loadmodel->extra.brush->planes;
+	hull->planes = loadmodel->planes;
 
 	for (i = 0; i < count; i++, out++, in++) {
-		out->planenum = in->plane - loadmodel->extra.brush->planes;
+		out->planenum = in->plane - loadmodel->planes;
 		for (j = 0; j < 2; j++) {
 			child = in->children[j];
 			if (child->contents < 0)
 				out->children[j] = child->contents;
 			else
-				out->children[j] = child - loadmodel->extra.brush->nodes;
+				out->children[j] = child - loadmodel->nodes;
 		}
 	}
 }
@@ -588,16 +603,16 @@ Mod_LoadMarksurfaces (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->extrazone, count * sizeof (*out));
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
-	loadmodel->extra.brush->marksurfaces = out;
-	loadmodel->extra.brush->nummarksurfaces = count;
+	loadmodel->marksurfaces = out;
+	loadmodel->nummarksurfaces = count;
 
 	for (i = 0; i < count; i++) {
 		j = LittleShort (in[i]);
-		if (j >= loadmodel->extra.brush->numsurfaces)
+		if (j >= loadmodel->numsurfaces)
 			Sys_Error ("Mod_ParseMarksurfaces: bad surface number");
-		out[i] = loadmodel->extra.brush->surfaces + j;
+		out[i] = loadmodel->surfaces + j;
 	}
 }
 
@@ -616,10 +631,10 @@ Mod_LoadSurfedges (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->extrazone, count * sizeof (*out));
+	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
-	loadmodel->extra.brush->surfedges = out;
-	loadmodel->extra.brush->numsurfedges = count;
+	loadmodel->surfedges = out;
+	loadmodel->numsurfedges = count;
 
 	for (i = 0; i < count; i++)
 		out[i] = LittleLong (in[i]);
@@ -644,10 +659,10 @@ Mod_LoadPlanes (lump_t *l)
 	if (l->filelen % sizeof (*in))
 		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
-	out = Zone_Alloc (loadmodel->extrazone, count * 2 * sizeof (*out));
+	out = Hunk_AllocName (count * 2 * sizeof (*out), loadmodel->name);
 
-	loadmodel->extra.brush->planes = out;
-	loadmodel->extra.brush->numplanes = count;
+	loadmodel->planes = out;
+	loadmodel->numplanes = count;
 
 	for (i = 0; i < count; i++, in++, out++) {
 		bits = 0;

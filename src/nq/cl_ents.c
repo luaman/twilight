@@ -53,10 +53,13 @@ CL_ScanForBModels (void)
 		ent = &cl_entities[i];
 		model = ent->model;
 		// look for embedded brush models only
-		if (model && model->name[0] == '*' && model->type == mod_brush)
+		if (model && model->name[0] == '*')
 		{
-			traceline_entity[traceline_entities++] = ent;
-			Mod_MinsMaxs(model, ent->origin, ent->angles, ent->mins, ent->maxs);
+			if (model->type == mod_brush)
+			{
+				traceline_entity[traceline_entities++] = ent;
+				Mod_MinsMaxs (model, ent->origin, ent->angles, ent->mins, ent->maxs);
+			}
 		}
 	}
 }

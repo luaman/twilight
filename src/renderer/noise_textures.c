@@ -35,6 +35,8 @@ static const char rcsid[] =
 #include "qtypes.h"
 #include "mathlib.h"
 
+extern int texture_extension_number;
+
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 
 static void TNT_InitDotParticleTexture (void);
@@ -85,7 +87,7 @@ TNT_InitDotParticleTexture (void)
 		}
 	}
 
-	qglGenTextures (1, &part_tex_dot);
+	part_tex_dot = texture_extension_number++;
 	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -121,7 +123,7 @@ TNT_InitSmokeParticleTexture (void)
 			}
 		}
 	}
-	qglGenTextures (1, &part_tex_smoke);
+	part_tex_smoke = texture_extension_number++;
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -155,7 +157,7 @@ TNT_InitSmokeBeamParticleTexture (void)
 			data[y][x][3] = bound(0, d * b, 255);
 		}
 	}
-	qglGenTextures (1, &part_tex_smoke_beam);
+	part_tex_smoke_beam = texture_extension_number++;
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_beam);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -198,7 +200,7 @@ TNT_InitSmokeRingParticleTexture (void)
 			}
 		}
 	}
-	qglGenTextures (1, &part_tex_smoke_ring);
+	part_tex_smoke_ring = texture_extension_number++;
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_ring);
 	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
