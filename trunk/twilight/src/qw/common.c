@@ -1508,7 +1508,6 @@ COM_AddDirectory (char *indir)
 	char		   *p;
 
 	dir = Sys_ExpandPath (indir);
-	Com_Printf ("COM_AddDirectory: Adding %s\n", dir);
 
 	if ((p = strrchr (dir, '/')) != NULL)
 		strcpy (gamedirfile, ++p);
@@ -1553,7 +1552,6 @@ COM_AddGameDirectory (char *dir)
 {
 	char		buf[1024];
 
-	Com_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
 	snprintf (buf, sizeof (buf), "%s/%s", fs_sharepath->string, dir);
 	COM_AddDirectory (buf);
 
