@@ -23,7 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "winquake.h"
 #include "errno.h"
 #include "conproc.h"
+#include <io.h>
 #include <direct.h>
+#include <fcntl.h>
 
 #define MINIMUM_WIN_MEMORY		0x0880000
 #define MAXIMUM_WIN_MEMORY		0x1000000
@@ -182,6 +184,20 @@ void Sys_mkdir (char *path)
 	_mkdir (path);
 }
 
+void Sys_DebugLog(char *file, char *fmt, ...)
+{
+    va_list argptr; 
+    static char data[1024];
+    int fd;
+    
+    va_start(argptr, fmt);
+    vsprintf(data, fmt, argptr);
+    va_end(argptr);
+//    fd = open(file, O_WRONLY | O_BINARY | O_CREAT | O_APPEND, 0666);
+    fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0666);
+    write(fd, data, Q_strlen(data));
+    close(fd);
+}
 
 /*
 ===============================================================================

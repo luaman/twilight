@@ -42,8 +42,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <setjmp.h>
 
+// LordHavoc: added the _MSC_VER and win32config.h fallback
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
+#elif _MSC_VER
+#include "win32config.h"
 #endif
 
 //#if defined __i386__ // && !defined __sun__
