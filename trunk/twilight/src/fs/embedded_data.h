@@ -549,18 +549,21 @@ unsigned char embeddedfile_data4[18852] =
 };
 
 /*file "sound/misc/menu1.wav"*/
-unsigned char embeddedfile_data5[0] =
+unsigned char embeddedfile_data5[1] =
 {
+0
 };
 
 /*file "sound/misc/menu2.wav"*/
-unsigned char embeddedfile_data6[0] =
+unsigned char embeddedfile_data6[1] =
 {
+0
 };
 
 /*file "sound/misc/menu3.wav"*/
-unsigned char embeddedfile_data7[0] =
+unsigned char embeddedfile_data7[1] =
 {
+0
 };
 
 embeddedfile_t embeddedfile[9] =
