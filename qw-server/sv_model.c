@@ -94,7 +94,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 		(unsigned *) COM_LoadStackFile (mod->name, stackbuf, sizeof (stackbuf));
 	if (!buf) {
 		if (crash)
-			SV_Error ("Mod_NumForName: %s not found", mod->name);
+			SV_Error ("Mod_LoadModel: %s not found", mod->name);
 		return NULL;
 	}
 //
