@@ -39,7 +39,6 @@ static const char rcsid[] =
 
 #include "SDL.h"
 
-#include "quakedef.h"
 #include "common.h"
 #include "sys.h"
 #include "tga.h"
@@ -295,7 +294,7 @@ qboolean
 TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer)
 {
 	static char header[18] = "\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
-	int         handle;
+	FILE		*handle;
 	char        tganame[MAX_OSPATH];
 
 	header[12] = width & 255;
@@ -308,17 +307,17 @@ TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer)
 	COM_StripExtension (tganame, tganame);
 	COM_DefaultExtension (tganame, ".tga");
 
-	handle = Sys_FileOpenWrite (tganame);
+	handle = fopen (tganame, "wb");
 
-	if (handle == -1) {
+	if (!handle) {
 		Sys_Printf ("COM_WriteFile: failed on %s\n", tganame);
 		return false;
 	}
 
 	Sys_Printf ("COM_WriteFile: %s\n", tganame);
-	Sys_FileWrite (handle, header, 18);
-	Sys_FileWrite (handle, buffer, width*height*bpp);
-	Sys_FileClose (handle);
+	fwrite (header, 1, 18, handle);
+	fwrite (buffer, 1, width*height*bpp, handle);
+	fclose (handle);
 
 	return true;
 }

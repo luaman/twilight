@@ -26,12 +26,8 @@ New stuff slated for 0.2.0:
 
 Would be nice but is not strictly needed:
 
-  - LordHavoc's software brightness/contrast support - looks different
-    than our texture gamma, but it can be done at runtime which is a big
-    problem with our stuff.
   - Merge QW server into QW client ala NQ
   - Build a seperate dedicated server in NQ [LordHavoc]
-  - Prettiness features all around
   - Move Quake library functions used by all targets and tools to a common
     directory (zone, mathlib, qtypes, compat, part of console, etc)
   - switch to using specific-sized SDL variables for file accesses
