@@ -63,7 +63,9 @@ static char *argvdummy = " ";
 static char *safeargvs[NUM_SAFE_ARGVS] =
 	{ "-stdvid", "-nolan", "-nosound", "-nocdaudio", "-nojoy", "-nomouse" };
 
-cvar_t     *registered;
+cvar_t *fs_sharepath;
+cvar_t *fs_userpath;
+cvar_t *registered;
 
 qboolean    com_modified;				// set true if using non-id files
 
@@ -80,25 +82,6 @@ void        COM_Path_f (void);
 qboolean    standard_quake = true, rogue, hipnotic;
 
 char        gamedirfile[MAX_OSPATH];
-
-// this graphic needs to be in the pak file to use registered features
-unsigned short pop[] = {
-	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-	0x0000, 0x6600, 0x0000, 0x0000, 0x0000, 0x6600, 0x0000, 0x0000, 0x0066,
-	0x0000, 0x0000, 0x0000, 0x0000, 0x0067, 0x0000, 0x0000, 0x6665, 0x0000,
-	0x0000, 0x0000, 0x0000, 0x0065, 0x6600, 0x0063, 0x6561, 0x0000, 0x0000,
-	0x0000, 0x0000, 0x0061, 0x6563, 0x0064, 0x6561, 0x0000, 0x0000, 0x0000,
-	0x0000, 0x0061, 0x6564, 0x0064, 0x6564, 0x0000, 0x6469, 0x6969, 0x6400,
-	0x0064, 0x6564, 0x0063, 0x6568, 0x6200, 0x0064, 0x6864, 0x0000, 0x6268,
-	0x6563, 0x0000, 0x6567, 0x6963, 0x0064, 0x6764, 0x0063, 0x6967, 0x6500,
-	0x0000, 0x6266, 0x6769, 0x6a68, 0x6768, 0x6a69, 0x6766, 0x6200, 0x0000,
-	0x0062, 0x6566, 0x6666, 0x6666, 0x6666, 0x6562, 0x0000, 0x0000, 0x0000,
-	0x0062, 0x6364, 0x6664, 0x6362, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-	0x0062, 0x6662, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0061,
-	0x6661, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x6500,
-	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x6400, 0x0000,
-	0x0000, 0x0000
-};
 
 /*
 
@@ -1072,7 +1055,8 @@ void
 COM_Init_Cvars (void)
 {
 	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
-	COM_CheckRegistered ();
+	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, NULL);
+	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
 }
 
 /*
@@ -1106,6 +1090,7 @@ COM_Init (void)
 
 	Cmd_AddCommand ("path", COM_Path_f);
 	COM_InitFilesystem ();
+	COM_CheckRegistered ();
 }
 
 
@@ -1188,8 +1173,6 @@ typedef struct {
 #define	MAX_FILES_IN_PACK	2048
 
 char        com_gamedir[MAX_OSPATH];
-char        com_basedir[MAX_OSPATH];
-char        com_sharedir[MAX_OSPATH];
 
 typedef struct searchpath_s {
 	char        filename[MAX_OSPATH];
@@ -1594,13 +1577,10 @@ COM_AddDirectory (char *indir)
 	searchpath_t *search;
 	pack_t     *pak;
 	char        pakfile[MAX_OSPATH];
-	char        dir[MAX_OSPATH];
+	char	   *dir;
 	char       *p;
 
-	// LordHavoc: this function is called using va() sometimes,
-	// and va only stores one result,
-	// thus it can conflict with console logging.
-	Q_strcpy (dir, indir);
+	dir = Sys_ExpandPath (indir);
 	Con_Printf ("COM_AddDirectory: Adding %s\n", dir);
 
 	if ((p = Q_strrchr (dir, '/')) != NULL)
@@ -1648,11 +1628,11 @@ COM_AddGameDirectory (char *dir)
 	char       *d = NULL;
 
 	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
-	COM_AddDirectory (va ("%s/%s", com_sharedir, dir));
+	COM_AddDirectory (va ("%s/%s", fs_sharepath->string, dir));
 
-	if (strcmp (com_basedir, com_sharedir)) {
+	if (Q_strcmp (fs_userpath->string, fs_sharepath->string) != 0) {
 		// only do this if the share path is not the same as the base path
-		d = va ("%s/%s", com_basedir, dir);
+		d = va ("%s/%s", fs_userpath->string, dir);
 		Sys_mkdir (d);
 		COM_AddDirectory (d);
 	}
@@ -1726,23 +1706,11 @@ COM_InitFilesystem (void)
 //
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
-		Q_strcpy (com_basedir, Sys_ExpandPath (com_argv[i + 1]));
-	else
-		Q_strcpy (com_basedir, Sys_ExpandPath (USERPATH));
+		Cvar_Set (fs_userpath, com_argv[i + 1]);
 
-//
-// -sharedir <path>
-// Overrides the system supplied share directory
-//
-	i = COM_CheckParm ("-sharedir");
-	if (i && i < com_argc - 1)
-		Q_strcpy (com_sharedir, Sys_ExpandPath (com_argv[i + 1]));
-	else
-		Q_strcpy (com_sharedir, Sys_ExpandPath (SHAREPATH));
-
-	// LordHavoc: fix for empty com_sharedir
-	if (!*com_sharedir)
-		Q_strcpy (com_sharedir, com_basedir);
+// Make sure fs_sharepath is set to something useful
+	if (!Q_strlen (fs_sharepath->string))
+		Cvar_Set (fs_sharepath, fs_userpath->string);
 
 //
 // start up with id1 by default

@@ -823,6 +823,7 @@ Host_Init (quakeparms_t *parms)
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
 
+	COM_Init_Cvars ();				// initialize all filesystem related variables
 	Con_Init_Cvars ();				// initialize all console related cvars
 	Key_Init_Cvars ();				// initialize all key related cvars
 	Mod_Init_Cvars();				// initialize all model related cvars
@@ -842,7 +843,6 @@ Host_Init (quakeparms_t *parms)
 
 	Chase_Init ();					// setup chase camera
 	COM_Init ();					// setup filesystem, add related commands
-	COM_Init_Cvars ();				// initialize all filesystem related variables
 
 	Host_InitLocal ();				// initialize local host
 	W_LoadWadFile ("gfx.wad");

@@ -46,13 +46,15 @@ static char *safeargvs[NUM_SAFE_ARGVS] =
 	"-dibonly"
 };
 
-cvar_t      *registered;
-cvar_t      *cmdline;
+cvar_t *registered;
+cvar_t *cmdline;
+cvar_t *fs_userpath;
+cvar_t *fs_sharepath;
 
 qboolean    com_modified;				// set true if using non-id files
 
-static char com_basedir[MAX_OSPATH];
-static char com_sharedir[MAX_OSPATH];
+//static char com_basedir[MAX_OSPATH];
+//static char com_sharedir[MAX_OSPATH];
 
 qboolean    proghack;
 
@@ -949,8 +951,6 @@ COM_InitArgv (int argc, char **argv)
 /*
 ================
 COM_Init_Cvars
-This MUST be called after
-COM_Init and NOT before
 ================
 */
 void
@@ -958,8 +958,11 @@ COM_Init_Cvars (void)
 {
 	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
 	cmdline = Cvar_Get ("cmdline", com_cmdline, CVAR_USERINFO, NULL);
-	COM_CheckRegistered ();
+
+	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, NULL);
+	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
 }
+
 
 /*
 ================
@@ -992,6 +995,8 @@ COM_Init (void)
 
 	Cmd_AddCommand ("path", COM_Path_f);
 	COM_InitFilesystem ();
+
+	COM_CheckRegistered ();
 }
 
 
@@ -1495,13 +1500,15 @@ then loads and adds pak1.pak pak2.pak ...
 ================
 */
 void
-COM_AddDirectory (char *dir)
+COM_AddDirectory (char *indir)
 {
 	int         i;
 	searchpath_t *search;
 	pack_t     *pak;
+	char	   *dir;
 	char        pakfile[MAX_OSPATH];
 
+	dir = Sys_ExpandPath (indir);
 	Sys_mkdir (dir);
 	Q_strcpy (com_gamedir, dir);
 
@@ -1546,10 +1553,10 @@ COM_AddGameDirectory (char *dir)
 {
 	char       *d = NULL;
 
-	COM_AddDirectory (va ("%s/%s", com_sharedir, dir));
+	COM_AddDirectory (va ("%s/%s", fs_sharepath->string, dir));
 
-	if (strcmp (com_basedir, com_sharedir)) {
-		d = va ("%s/%s", com_basedir, dir);
+	if (Q_strcmp (fs_userpath->string, fs_sharepath->string) != 0) {
+		d = va ("%s/%s", fs_userpath->string, dir);
 		Sys_mkdir (d);
 		COM_AddDirectory (d);
 	}
@@ -1564,7 +1571,7 @@ COM_InitFilesystem
 void
 COM_InitFilesystem (void)
 {
-	int         i, j;
+	int         i;
 	searchpath_t *search;
 
 //
@@ -1573,38 +1580,13 @@ COM_InitFilesystem (void)
 //
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
-		Q_strcpy (com_basedir, Sys_ExpandPath (com_argv[i + 1]));
-	else
-		Q_strcpy (com_basedir, Sys_ExpandPath (USERPATH));
+		Cvar_Set (fs_userpath, com_argv[i + 1]);
 
-	j = Q_strlen (com_basedir);
+	Sys_mkdir (fs_userpath->string);
 
-	if (j > 0) {
-		if ((com_basedir[j - 1] == '\\') || (com_basedir[j - 1] == '/'))
-			com_basedir[j - 1] = 0;
-	}
-
-	Sys_mkdir (com_basedir);
-
-//
-// -sharedir <path>
-// Overrides the system supplied share directory
-//
-	i = COM_CheckParm ("-sharedir");
-	if (i && i < com_argc - 1)
-		Q_strcpy (com_sharedir, Sys_ExpandPath (com_argv[i + 1]));
-	else
-		Q_strcpy (com_sharedir, Sys_ExpandPath (SHAREPATH));
-
-	j = Q_strlen (com_sharedir);
-
-	if (j > 0) {
-		if ((com_sharedir[j - 1] == '\\') || (com_sharedir[j - 1] == '/'))
-			com_sharedir[j - 1] = 0;
-	}
-	// LordHavoc: fix for empty com_sharedir
-	if (!*com_sharedir)
-		Q_strcpy (com_sharedir, com_basedir);
+// Make sure fs_sharepath is set to something useful
+	if (!Q_strlen(fs_sharepath->string))
+		Cvar_Set (fs_sharepath, fs_userpath->string);
 
 //
 // start up with GAMENAME by default (id1)

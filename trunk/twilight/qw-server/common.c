@@ -62,7 +62,9 @@ static char *argvdummy = " ";
 static char *safeargvs[NUM_SAFE_ARGVS] =
 	{ "-stdvid", "-nolan", "-nosound", "-nocdaudio", "-nojoy", "-nomouse" };
 
-cvar_t     *registered;
+cvar_t *fs_sharepath;
+cvar_t *fs_userpath;
+cvar_t *registered;
 
 qboolean    com_modified;				// set true if using non-id files
 
@@ -1032,6 +1034,18 @@ COM_AddParm (char *parm)
 	largv[com_argc++] = parm;
 }
 
+/*
+================
+COM_Init_Cvars
+================
+*/
+void
+COM_Init_Cvars (void)
+{
+	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
+	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, NULL);
+	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
+}
 
 /*
 ================
@@ -1061,8 +1075,6 @@ COM_Init (void)
 		BigFloat = FloatNoSwap;
 		LittleFloat = FloatSwap;
 	}
-
-	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
 
 	Cmd_AddCommand ("path", COM_Path_f);
 
@@ -1150,8 +1162,6 @@ typedef struct {
 #define	MAX_FILES_IN_PACK	2048
 
 char        com_gamedir[MAX_OSPATH];
-char        com_basedir[MAX_OSPATH];
-char        com_sharedir[MAX_OSPATH];
 
 typedef struct searchpath_s {
 	char        filename[MAX_OSPATH];
@@ -1551,13 +1561,10 @@ COM_AddDirectory (char *indir)
 	searchpath_t *search;
 	pack_t     *pak;
 	char        pakfile[MAX_OSPATH];
-	char        dir[MAX_OSPATH];
+	char	   *dir;
 	char       *p;
 
-	// LordHavoc: this function is called using va() sometimes,
-	// and va only stores one result,
-	// thus it can conflict with console logging.
-	Q_strcpy (dir, indir);
+	dir = Sys_ExpandPath (indir);
 	Con_Printf ("COM_AddDirectory: Adding %s\n", dir);
 
 	if ((p = strrchr (dir, '/')) != NULL)
@@ -1604,11 +1611,11 @@ COM_AddGameDirectory (char *dir)
 	char       *d = NULL;
 
 	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
-	COM_AddDirectory (va ("%s/%s", com_sharedir, dir));
+	COM_AddDirectory (va ("%s/%s", fs_sharepath->string, dir));
 
-	if (strcmp (com_basedir, com_sharedir)) {
+	if (Q_strcmp (fs_userpath->string, fs_sharepath->string) != 0) {
 		// only do this if the share path is not the same as the base path
-		d = va ("%s/%s", com_basedir, dir);
+		d = va ("%s/%s", fs_userpath->string, dir);
 		Sys_mkdir (d);
 		COM_AddDirectory (d);
 	}
@@ -1679,23 +1686,11 @@ COM_InitFilesystem (void)
 //
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
-		Q_strcpy (com_basedir, Sys_ExpandPath (com_argv[i + 1]));
-	else
-		Q_strcpy (com_basedir, Sys_ExpandPath (USERPATH));
+		Cvar_Set (fs_userpath, com_argv[i + 1]);
 
-//
-// -sharedir <path>
-// Overrides the system supplied share directory
-//
-	i = COM_CheckParm ("-sharedir");
-	if (i && i < com_argc - 1)
-		Q_strcpy (com_sharedir, Sys_ExpandPath (com_argv[i + 1]));
-	else
-		Q_strcpy (com_sharedir, Sys_ExpandPath (SHAREPATH));
-
-	// LordHavoc: fix for empty com_sharedir
-	if (!*com_sharedir)
-		Q_strcpy (com_sharedir, com_basedir);
+// Make sure fs_sharepath is set to something useful
+	if (!Q_strlen (fs_sharepath->string))
+		Cvar_Set (fs_sharepath, fs_userpath->string);
 
 //
 // start up with id1 by default

@@ -1636,6 +1636,8 @@ SV_Init (void)
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
 
+	COM_Init_Cvars ();
+
 	COM_Init ();
 
 	PR_Init ();
