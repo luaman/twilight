@@ -5,7 +5,8 @@ import string
 
 from scons_lib import *
 
-opts = My_Options ();
+opts = My_Options ()
+env_defs = My_Options ()
 config_defs = My_Options ()
 building = 0
 
@@ -155,11 +156,9 @@ def write_c_defines (filename, defs):
 	fh.close();
 
 def do_configure (env):
-	global opts
+	global opts, config_defs, env_defs
 
-	env_defs = My_Options ()
 	config_defs.set('VERSION', '"0.2.02.cvs"')
-	conf_base ()
 	opts.args (ARGUMENTS)
 	opts.save('config_opts.py')
 	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag}
@@ -173,6 +172,11 @@ def do_configure (env):
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		sdl_ver = ret[1]
 	else:
+		if sys.platform == "darwin":
+			# Mac OS X, no sdl-config, evil.
+			env.Append (LIBS = ['SDL', 'SDLmain'])
+			env.Append (CPPPATH = ['/sw/include/SDL/'])
+
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		if not config_defs.has_key ('HAVE_SDL_H'):
 			print "Twilight requires SDL 1.2.5. (None found.)"
@@ -198,6 +202,7 @@ def do_configure (env):
 		if conf.CheckLib ('dl', 'dlopen', 1):
 			config_defs.set('HAVE_DLOPEN', 1)
 	conf.Finish ()
+
 	print "\nWriting src/config.h"
 	write_c_defines ("#/src/config.h", config_defs)
 	env_defs.set ('CCFLAGS', env['CCFLAGS'])
@@ -227,10 +232,7 @@ def do_configure (env):
   """
 
 def load_configure (env):
-	global building, opts
-	env_defs = My_Options ()
-	config_defs = My_Options ()
-	conf_base ()
+	global building, opts, env_defs, config_defs
 	if not env_defs.load ("config_env.py"):
 		print "Unable to load config. (1)"
 		print "Please run 'scons configure=1'."
@@ -258,7 +260,10 @@ def load_configure (env):
 	building = 1
 
 env = Environment ()
+conf_base ()
 
+#env.Command('configure', None, write_configure)
+#AddPreAction('configure', do_configure)
 if (ARGUMENTS.has_key('configure')):
 	do_configure (env)
 else:
