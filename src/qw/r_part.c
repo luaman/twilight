@@ -1295,7 +1295,7 @@ R_Move_Beam_Particles (void)
 	num_beam_particles = activeparticles;
 }
 
-static inline void
+static void
 DrawBeam (beam_particle_t *p)
 {
 	float	dp;
