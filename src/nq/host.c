@@ -47,8 +47,6 @@ Memory is cleared / released when a server or client begins, not when they end.
 
 */
 
-quakeparms_t host_parms;
-
 qboolean    host_initialized;			// true if into command execution
 
 double      host_frametime;
