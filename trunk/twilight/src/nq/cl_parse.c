@@ -400,7 +400,13 @@ CL_ParseUpdate (int bits)
 			bitcounts[i]++;
 
 	// no previous frame to lerp from
-	forcelink = (ent->msgtime != cl.mtime[1]);
+	if (ent->msgtime != cl.mtime[1])
+	{
+		forcelink = true;
+		ent->time_left = 0;
+	}
+	else
+		forcelink = false;
 
 	ent->msgtime = cl.mtime[0];
 

@@ -90,6 +90,7 @@ int         d_lightstylevalue[256];		// 8.8 fraction of base light value
 
 
 void        R_MarkLeaves (void);
+void		R_Torch (entity_t *ent, qboolean torch2);
 
 cvar_t     *r_norefresh;
 cvar_t     *r_drawentities;
@@ -122,6 +123,7 @@ cvar_t	   *gl_fb_models;
 cvar_t	   *gl_fb_bmodels;
 cvar_t	   *gl_oldlights;
 cvar_t	   *gl_colorlights;
+cvar_t	   *gl_particletorches;
 
 extern cvar_t *gl_ztrick;
 
@@ -329,29 +331,27 @@ R_DrawSpriteModel (entity_t *e)
 
 	qglBindTexture (GL_TEXTURE_2D, frame->gl_texturenum);
 
-	qglBegin (GL_QUADS);
-
-	qglTexCoord2f (0, 1);
+	VectorSet2 (tc_array[0], 0, 1);
 	VectorMA (e->origin, frame->down, up, point);
 	VectorMA (point, frame->left, right, point);
-	qglVertex3fv (point);
+	VectorSet3 (v_array[0], point[0], point[1], point[2]);
 
-	qglTexCoord2f (0, 0);
+	VectorSet2 (tc_array[1], 0, 0);
 	VectorMA (e->origin, frame->up, up, point);
 	VectorMA (point, frame->left, right, point);
-	qglVertex3fv (point);
+	VectorSet3 (v_array[1], point[0], point[1], point[2]);
 
-	qglTexCoord2f (1, 0);
+	VectorSet2 (tc_array[2], 1, 0);
 	VectorMA (e->origin, frame->up, up, point);
 	VectorMA (point, frame->right, right, point);
-	qglVertex3fv (point);
+	VectorSet3 (v_array[2], point[0], point[1], point[2]);
 
-	qglTexCoord2f (1, 1);
+	VectorSet2 (tc_array[3], 1, 1);
 	VectorMA (e->origin, frame->down, up, point);
 	VectorMA (point, frame->right, right, point);
-	qglVertex3fv (point);
+	VectorSet3 (v_array[3], point[0], point[1], point[2]);
 
-	qglEnd ();
+	qglDrawArrays (GL_QUADS, 0, 4);
 }
 
 /*
@@ -894,6 +894,14 @@ R_DrawAliasModel (entity_t *e)
 
 		if (R_CullBox (mins, maxs))
 			return;
+	}
+
+	if (gl_particletorches->value) {
+		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2))
+		{
+			R_Torch(e, clmodel->modflags & FLAG_TORCH2);
+			return;
+		}
 	}
 
 	VectorSubtract (r_origin, r_entorigin, modelorg);

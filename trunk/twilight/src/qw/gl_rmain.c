@@ -82,6 +82,7 @@ int         d_lightstylevalue[256];		// 8.8 fraction of base light value
 
 
 void        R_MarkLeaves (void);
+void		R_Torch (entity_t *ent, qboolean torch2);
 
 cvar_t     *r_norefresh;
 cvar_t     *r_drawentities;
@@ -108,6 +109,7 @@ cvar_t	   *gl_fb_models;
 cvar_t	   *gl_fb_bmodels;
 cvar_t	   *gl_oldlights;
 cvar_t	   *gl_colorlights;
+cvar_t	   *gl_particletorches;
 
 extern cvar_t *gl_ztrick;
 
@@ -787,6 +789,14 @@ R_DrawAliasModel (entity_t *e)
 
 		if (R_CullBox (mins, maxs))
 			return;
+	}
+
+	if (gl_particletorches->value) {
+		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2))
+		{
+			R_Torch(e, clmodel->modflags & FLAG_TORCH2);
+			return;
+		}
 	}
 
 	// 

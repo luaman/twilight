@@ -89,6 +89,7 @@ typedef struct entity_s {
 	vec3_t      angles1;
 	vec3_t      angles2;
 	vec3_t		last_light;
+	float		time_left;
 } entity_t;
 
 typedef struct {
