@@ -118,11 +118,10 @@ double Q_pow(double x, double y);
 		((to)[1]=(base)[1]+(((a)[1]+(b)[1])*mod)),	\
 		((to)[2]=(base)[2]+(((a)[2]+(b)[2])*mod)))
 
-#define VectorTwiddle(base, a1, a2, b1, b2, to)				(\
-		((to)[0]=(base)[0]+((a1)[0]*(a2))+((b1)[0]*(b2))),	\
-		((to)[1]=(base)[1]+((a1)[1]*(a2))+((b1)[1]*(b2))),	\
-		((to)[2]=(base)[2]+((a1)[2]*(a2))+((b1)[2]*(b2))))
-
+#define VectorTwiddle(base, a1, a2, b1, b2, c, to)					(\
+		((to)[0]=(base)[0]+((((a1)[0]*(a2))+((b1)[0]*(b2)))*c)),	\
+		((to)[1]=(base)[1]+((((a1)[1]*(a2))+((b1)[1]*(b2)))*c)),	\
+		((to)[2]=(base)[2]+((((a1)[2]*(a2))+((b1)[2]*(b2)))*c)))
 
 /*
  * VectorDistance, the distance between two points.
