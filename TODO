@@ -1,22 +1,12 @@
 Project Twilight todo list
 --------------------------
 
-Missing stuff needed for 0.2:
-
-We're almost there for 0.2, there are a number of bugs left which need to be
-fixed before release, they're marked RC below.
-
-We need to verify that we actually still start under windows 95 compiled
-with MSVC 4. (If we don't, then Sys_mkdir needs fixing.)
+Stuff /required/ for 0.2.0: NOTHING!
 
 Bugs we know about:
 
   - Quake never checked BSPs very well, a bad one can crash the engine.
     (Need some example bad BSPs.)
-  - rocket trails (and presumably some other kinds of particle) keep
-    spawning while paused
-  - RC #3: We /REALLY/ need to build on win32 without requiring the
-    .net compiler.
 
   Driver related quirks:
   - Need a 3dfx quirk for limiting vertex array size.  We need the
@@ -84,6 +74,5 @@ Stuff that isn't needed for 0.2, but would be nice:
     + Transparency in brush models (windows)
     + Targa loading for lmps (main menu)
     + Sprite orientation fixes
-  - Improve the particle code more.
   - Option to use classic-looking particles?  (slow!)
 
