@@ -334,7 +334,7 @@ V_ParseDamage (void)
 // calculate view angle kicks
 //
 	VectorSubtract (from, cl.simorg, from);
-	VectorNormalize (from);
+	VectorNormalizeFast (from);
 
 	AngleVectors (cl.simangles, forward, right, up);
 

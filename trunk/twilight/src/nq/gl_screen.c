@@ -346,9 +346,12 @@ SCR_CalcRefdef (void)
 	qboolean    full = false;
 
 
-	vid.recalc_refdef = 0;
+	vid.recalc_refdef = false;
 
 //========================================
+
+// Vic
+// FIXME: make these two callbacks?
 
 // bound viewsize
 	if (scr_viewsize->value < 30)
@@ -425,8 +428,8 @@ Keybinding command
 void
 SCR_SizeUp_f (void)
 {
-	Cvar_Set (scr_viewsize, va("%i", (int)scr_viewsize->value + 10));
-	vid.recalc_refdef = 1;
+	Cvar_Slide (scr_viewsize, 10);
+	vid.recalc_refdef = true;
 }
 
 
@@ -440,8 +443,8 @@ Keybinding command
 void
 SCR_SizeDown_f (void)
 {
-	Cvar_Set (scr_viewsize, va("%i", (int)scr_viewsize->value - 10));
-	vid.recalc_refdef = 1;
+	Cvar_Slide (scr_viewsize, -10);
+	vid.recalc_refdef = true;
 }
 
 //============================================================================

@@ -698,15 +698,27 @@ VectorNormalize (vec3_t v)
 	float length = DotProduct(v,v);
 
 	if (length) {
+		float ilength;
 
 		length = Q_sqrt(length);
+		ilength = 1 / length;
 
-		v[0] /= length;
-		v[1] /= length;
-		v[2] /= length;
+		v[0] *= ilength;
+		v[1] *= ilength;
+		v[2] *= ilength;
 	}
 
 	return length;
+}
+
+void 
+VectorNormalizeFast (vec3_t v)
+{
+	float ilength = Q_RSqrt (DotProduct(v,v));
+
+	v[0] *= ilength;
+	v[1] *= ilength;
+	v[2] *= ilength;
 }
 
 void

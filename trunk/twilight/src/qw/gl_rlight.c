@@ -135,7 +135,7 @@ R_RenderDlight (dlight_t *light)
 	v_right[0] = v[1];
 	v_right[1] = -v[0];
 	v_right[2] = 0;
-	VectorNormalize (v_right);
+	VectorNormalizeFast (v_right);
 	CrossProduct (v_right, v, v_up);
 
 	if (length - rad > 8)

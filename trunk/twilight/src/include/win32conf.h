@@ -42,6 +42,8 @@
 
 #define HAVE_WINDEF_H 1
 
+#define HAVE___INLINE 1
+
 #include "compat.h"
 
 #endif // __WIN32CONF_H
