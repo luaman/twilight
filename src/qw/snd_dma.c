@@ -38,7 +38,7 @@ static const char rcsid[] =
 #include "cmd.h"
 #include "console.h"
 #include "cvar.h"
-#include "gl_model.h"
+#include "model.h"
 #include "mathlib.h"
 #include "sound.h"
 #include "strlib.h"

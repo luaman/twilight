@@ -116,6 +116,10 @@ SOURCE=.\cl_main.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\cl_model.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\cl_parse.c
 # End Source File
 # Begin Source File
@@ -149,10 +153,6 @@ SOURCE=.\gl_draw.c
 # Begin Source File
 
 SOURCE=.\gl_mesh.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_model.c
 # End Source File
 # Begin Source File
 
@@ -197,6 +197,10 @@ SOURCE=.\keys.c
 # Begin Source File
 
 SOURCE=.\menu.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\model.c
 # End Source File
 # Begin Source File
 
@@ -364,10 +368,6 @@ SOURCE=..\include\draw.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\gl_model.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\gl_warp_sin.h
 # End Source File
 # Begin Source File
@@ -397,6 +397,10 @@ SOURCE=..\include\mdfour.h
 # Begin Source File
 
 SOURCE=..\include\menu.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\model.h
 # End Source File
 # Begin Source File
 

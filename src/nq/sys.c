@@ -65,6 +65,7 @@ static const char rcsid[] =
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
+#include "conproc.h"
 #endif
 
 #include "SDL.h"
@@ -83,6 +84,13 @@ qboolean    isDedicated;
 int			sys_memsize = 0;
 void	   *sys_membase = NULL;
 
+
+#ifdef _WIN32
+HANDLE				hinput, houtput;
+static HANDLE	hFile;
+static HANDLE	heventParent;
+static HANDLE	heventChild;
+#endif
 
 /*
 ===============================================================================
@@ -212,6 +220,14 @@ Sys_Printf (char *fmt, ...)
 	if (nostdout)
 		return;
 
+	if (isDedicated)
+	{
+		DWORD		dummy;
+
+		WriteFile(houtput, text, strlen (text), &dummy, NULL);	
+		return;
+	}
+
 	for (p = (unsigned char *) text; *p; p++)
 		if ((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
 			printf ("[%02x]", *p);
@@ -226,6 +242,12 @@ Sys_Quit (void)
 #ifdef HAVE_FCNTL
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 #endif
+
+#ifdef _WIN32
+	if (isDedicated)
+		FreeConsole ();
+#endif
+
 	exit (0);
 }
 
@@ -341,14 +363,80 @@ Sys_DoubleTime (void)
 	return epoch + now / 1000.0;
 }
 
-// =======================================================================
-// Sleeps for microseconds
-// =======================================================================
-
 char *
 Sys_ConsoleInput (void)
 {
+#ifdef _WIN32
+	static char	text[256];
+	static int		len;
+	INPUT_RECORD	recs[1024];
+	int		dummy;
+	int		ch, numread, numevents;
+
+	if (!isDedicated)
+		return NULL;
+
+	for ( ;; )
+	{
+		if (!GetNumberOfConsoleInputEvents (hinput, &numevents))
+			Sys_Error ("Error getting # of console events");
+
+		if (numevents <= 0)
+			break;
+
+		if (!ReadConsoleInput(hinput, recs, 1, &numread))
+			Sys_Error ("Error reading console input");
+
+		if (numread != 1)
+			Sys_Error ("Couldn't read console input");
+
+		if (recs[0].EventType == KEY_EVENT)
+		{
+			if (!recs[0].Event.KeyEvent.bKeyDown)
+			{
+				ch = recs[0].Event.KeyEvent.uChar.AsciiChar;
+
+				switch (ch)
+				{
+					case '\r':
+						WriteFile(houtput, "\r\n", 2, &dummy, NULL);	
+
+						if (len)
+						{
+							text[len] = 0;
+							len = 0;
+							return text;
+						}
+
+						break;
+
+					case '\b':
+						WriteFile(houtput, "\b \b", 3, &dummy, NULL);	
+						if (len)
+						{
+							len--;
+						}
+						break;
+
+					default:
+						if (ch >= ' ')
+						{
+							WriteFile(houtput, &ch, 1, &dummy, NULL);	
+							text[len] = ch;
+							len = (len + 1) & 0xff;
+						}
+
+						break;
+
+				}
+			}
+		}
+	}
+
 	return NULL;
+#else
+	return NULL;
+#endif
 }
 
 #ifdef _WIN32
@@ -458,6 +546,42 @@ main (int c, char **v)
 	Sys_Init ();
 
 	Host_Init ();
+
+#ifdef _WIN32
+	if (isDedicated)
+	{
+		int t;
+
+		if (!AllocConsole ())
+		{
+			Sys_Error ("Couldn't create dedicated server console");
+		}
+
+		hinput = GetStdHandle (STD_INPUT_HANDLE);
+		houtput = GetStdHandle (STD_OUTPUT_HANDLE);
+
+	// give QHOST a chance to hook into the console
+		if ((t = COM_CheckParm ("-HFILE")) > 0)
+		{
+			if (t < com_argc)
+				hFile = (HANDLE)Q_atoi (com_argv[t+1]);
+		}
+			
+		if ((t = COM_CheckParm ("-HPARENT")) > 0)
+		{
+			if (t < com_argc)
+				heventParent = (HANDLE)Q_atoi (com_argv[t+1]);
+		}
+			
+		if ((t = COM_CheckParm ("-HCHILD")) > 0)
+		{
+			if (t < com_argc)
+				heventChild = (HANDLE)Q_atoi (com_argv[t+1]);
+		}
+
+		InitConProc (hFile, heventParent, heventChild);
+	}
+#endif
 
 	oldtime = Sys_DoubleTime ();
 	while (1) {

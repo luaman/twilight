@@ -894,3 +894,22 @@ Invert24To16 (fixed16_t val)
 		(((double) 0x10000 * (double) 0x1000000 / (double) val) + 0.5);
 }
 
+/*
+=================
+RadiusFromBounds
+=================
+*/
+float
+RadiusFromBounds (vec3_t mins, vec3_t maxs)
+{
+	int         i;
+	vec3_t      corner;
+
+	for (i = 0; i < 3; i++) {
+		corner[i] =
+			fabs (mins[i]) > fabs (maxs[i]) ? fabs (mins[i]) : fabs (maxs[i]);
+	}
+
+	return VectorLength (corner);
+}
+

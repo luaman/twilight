@@ -153,6 +153,7 @@ float       anglemod (float a);
 void        RotatePointAroundVector (vec3_t dst, const vec3_t dir,
 									const vec3_t point, float degrees);
 
+float		RadiusFromBounds (vec3_t mins, vec3_t maxs);
 
 #define BOX_ON_PLANE_SIDE(emins, emaxs, p)	\
 	(((p)->type < 3)?						\
