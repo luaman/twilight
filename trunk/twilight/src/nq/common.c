@@ -1721,9 +1721,9 @@ COM_InitFilesystem (void)
 //
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
-		Q_strcpy (com_basedir, com_argv[i + 1]);
+		Q_strcpy (com_basedir, Sys_ExpandPath (com_argv[i + 1]));
 	else
-		Q_strcpy (com_basedir, USERPATH);
+		Q_strcpy (com_basedir, Sys_ExpandPath (USERPATH));
 
 	j = Q_strlen (com_basedir);
 
@@ -1740,9 +1740,9 @@ COM_InitFilesystem (void)
 //
 	i = COM_CheckParm ("-sharedir");
 	if (i && i < com_argc - 1)
-		Q_strcpy (com_sharedir, com_argv[i + 1]);
+		Q_strcpy (com_sharedir, Sys_ExpandPath (com_argv[i + 1]));
 	else
-		Q_strcpy (com_sharedir, SHAREPATH);
+		Q_strcpy (com_sharedir, Sys_ExpandPath (SHAREPATH));
 
 	j = Q_strlen (com_sharedir);
 

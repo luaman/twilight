@@ -33,6 +33,7 @@ static const char rcsid[] =
 #include <signal.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <pwd.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -291,6 +292,60 @@ Sys_ConsoleInput (void)
 	return NULL;
 }
 
+char *
+Sys_ExpandPath (char *str)
+{
+	char		buf[PATH_MAX] = "";
+	char	   *s = str;
+	char	   *p;
+	char	   *home = NULL;
+
+	if (*s == '~')
+	{
+		struct passwd	   *entry;
+
+		s++;
+		if (*s == '/' || *s == '\0')
+		{
+			if ((entry = getpwuid(getuid())))
+			{
+				if (entry->pw_dir && *(entry->pw_dir))
+					home = Q_strdup (entry->pw_dir);
+			}
+			if ((p = getenv("HOME")))
+				if (home)
+					free (home);
+				home = Q_strdup (p);
+			else if (!home)
+				home = Q_strdup (".");
+			Q_strncpy (buf, home, PATH_MAX);
+			Q_strncat (buf, s, PATH_MAX);
+		} else {
+			char			   *rest;
+
+			if ((rest = strchr(s, '/')) != NULL)
+				*rest++ = '\0';
+			if ((entry = getpwnam(s)) != NULL)
+			{
+				Q_strncpy (buf, entry->pw_dir, PATH_MAX);
+				if (rest)
+				{
+					Q_strncat (buf, "/", PATH_MAX);
+					Q_strncat (buf, rest, PATH_MAX);
+				}
+			} else
+				return NULL;
+		}
+	} else
+		Q_strncpy (buf, str, PATH_MAX);
+
+	if (home)
+		free (home);
+
+	p = Z_Malloc (Q_strlen (buf));
+	Q_strcpy (p, buf);
+	return p;
+}
 
 int
 main (int c, char **v)

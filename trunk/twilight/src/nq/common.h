@@ -139,12 +139,15 @@ float Q_atof (char *str);
 #define Q_strcpy(d, s) strcpy((d), (s))
 #define Q_strncpy(d, s, n) strncpy((d), (s), (n))
 #define Q_strlen(s) ((int)strlen(s))
+#define Q_strchr(s, c) strchr((s), (c))
 #define Q_strrchr(s, c) strrchr((s), (c))
 #define Q_strcat(d, s) strcat((d), (s))
+#define Q_strncat(d, s, c) strncat((d), (s), (c))
 #define Q_strcmp(s1, s2) strcmp((s1), (s2))
 #define Q_strncmp(s1, s2, n) strncmp((s1), (s2), (n))
 #define Q_strstr(d, s) strstr((d), (s))
 #define Q_strtok(d, s) strtok((d), (s))
+#define Q_strdup(s) strdup ((s))
 
 #ifdef _WIN32
 
@@ -217,3 +220,4 @@ extern qboolean standard_quake, rogue, hipnotic;
 
 
 #endif // _COMMON_H
+
