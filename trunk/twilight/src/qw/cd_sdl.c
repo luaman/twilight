@@ -136,10 +136,16 @@ CDAudio_Play (byte track, qboolean looping)
 	if (SDL_CDPlay
 		(cd_handle, cd_handle->track[track - 1].offset,
 		 cd_handle->track[track - 1].length) < 0) {
-		Con_Printf ("CDAudio_Play: Unable to play %d: %s\n", track,
-					SDL_GetError ());
+
+		// ok, check for status now
+		int cd_status = SDL_CDStatus (cd_handle);
+
+		if (cd_status > 0)
+			Con_Printf ("CDAudio_Play: Unable to play %d: %s\n", track,
+						SDL_GetError ());	
 		return;
 	}
+
 	playLooping = looping;
 	playTrack = track;
 	playing = true;
@@ -357,7 +363,7 @@ CDAudio_Update (void)
 	}
 
 	if (playing && realtime > endOfTrack) {
-		curstat = SDL_CDStatus (cd_handle);
+		curstat = cd_handle->status;
 		if (curstat != CD_PLAYING && curstat != CD_PAUSED) {
 			playing = false;
 			if (playLooping)
