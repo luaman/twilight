@@ -87,6 +87,10 @@ LIB32=link.exe -lib
 
 SOURCE=.\dynogl.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\noise.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
