@@ -56,8 +56,6 @@ typedef struct {
 } moveclip_t;
 
 
-int         SV_HullPointContents (hull_t *hull, int num, vec3_t p);
-
 /*
 ===============================================================================
 
@@ -351,37 +349,6 @@ POINT TESTING IN HULLS
 
 /*
 ==================
-SV_HullPointContents
-
-==================
-*/
-int
-SV_HullPointContents (hull_t *hull, int num, vec3_t p)
-{
-	float       d;
-	dclipnode_t *node;
-	mplane_t   *plane;
-
-	while (num >= 0) {
-		if (num < hull->firstclipnode || num > hull->lastclipnode)
-			Sys_Error ("SV_HullPointContents: bad node number");
-
-		node = hull->clipnodes + num;
-		plane = hull->planes + node->planenum;
-		d = PlaneDiff (p, plane);
-
-		if (d < 0)
-			num = node->children[1];
-		else
-			num = node->children[0];
-	}
-
-	return num;
-}
-
-
-/*
-==================
 SV_PointContents
 
 ==================
@@ -389,18 +356,7 @@ SV_PointContents
 int
 SV_PointContents (vec3_t p)
 {
-	int         cont;
-
-	cont = SV_HullPointContents (&sv.worldmodel->hulls[0], 0, p);
-	if (cont <= CONTENTS_CURRENT_0 && cont >= CONTENTS_CURRENT_DOWN)
-		cont = CONTENTS_WATER;
-	return cont;
-}
-
-int
-SV_TruePointContents (vec3_t p)
-{
-	return SV_HullPointContents (&sv.worldmodel->hulls[0], 0, p);
+	return (Mod_PointInLeaf (p, sv.worldmodel))->contents;
 }
 
 //===========================================================================
