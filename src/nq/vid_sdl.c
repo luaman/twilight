@@ -496,7 +496,8 @@ VID_Init (unsigned char *palette)
 
 	vid.recalc_refdef = 1;				// force a surface cache flush
 
-	SDL_ShowCursor (0);
+	if (use_mouse)
+		SDL_ShowCursor (0);
 
 #ifdef WIN32
 	// LordHavoc: a dark incantation necessary for DirectSound with SDL
@@ -696,6 +697,9 @@ Sys_SendKeyEvents (void)
 
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_MOUSEBUTTONUP:
+				if (!use_mouse)
+					break;
+
 				but = event.button.button;
 				if (but == 2)
 					but = 3;
@@ -759,6 +763,9 @@ IN_Commands
 void
 IN_Commands (void)
 {
+	if (!use_mouse)
+		return;
+
 	// FIXME: Move this to a Cvar callback when they're implemented
 	if (old_windowed_mouse != _windowed_mouse->value) {
 		old_windowed_mouse = _windowed_mouse->value;
