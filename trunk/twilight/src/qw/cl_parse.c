@@ -1224,7 +1224,6 @@ CL_ParseServerMessage (void)
 				// make sure any stuffed commands are done
 				Cbuf_Execute ();
 				CL_ParseServerData ();
-				vid.recalc_refdef = true;	// leave full screen intermission
 				break;
 
 			case svc_setangle:
@@ -1328,7 +1327,6 @@ CL_ParseServerMessage (void)
 			case svc_intermission:
 				cl.intermission = 1;
 				cl.completed_time = cls.realtime;
-				vid.recalc_refdef = true;	// go to full screen
 				for (i = 0; i < 3; i++)
 					cl.simorg[i] = MSG_ReadCoord ();
 				for (i = 0; i < 3; i++)
@@ -1339,7 +1337,6 @@ CL_ParseServerMessage (void)
 			case svc_finale:
 				cl.intermission = 2;
 				cl.completed_time = cls.realtime;
-				vid.recalc_refdef = true;	// go to full screen
 				SCR_CenterPrint (MSG_ReadString ());
 				break;
 

@@ -633,10 +633,8 @@ R_BlendLightmaps
 static void
 R_BlendLightmaps (void)
 {
-	int			i, j;
+	int			i;
 	glpoly_t   *p;
-	float	   *v;
-	float		intensity = max (0, r_waterwarp->fvalue);
 
 	// don't bother writing Z
 	qglDepthMask (GL_FALSE);
@@ -651,29 +649,12 @@ R_BlendLightmaps (void)
 			continue;
 		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + i);
 		for (; p; p = p->lchain) {
-			if (p->flags & SURF_UNDERWATER && r_waterwarp->fvalue) {
-				memcpy(tc0_array_p, p->ltc, sizeof(texcoord_t) * p->numverts);
-				for (j = 0; j < p->numverts; j++) {
-					v = p->v[j].v;
-					v_array(j, 0) = v[0] + intensity
-						* Q_sin (v[1] * 0.05 + host_realtime)
-						* Q_sin (v[2] * 0.05 + host_realtime);
-					v_array(j, 1) = v[1] + intensity
-						* Q_sin (v[0] * 0.05 + host_realtime)
-						* Q_sin (v[2] * 0.05 + host_realtime);
-					v_array(j, 2) = v[2];
-				}
-				TWI_PreVDrawCVA (0, p->numverts);
-				qglDrawArrays (GL_TRIANGLE_FAN, 0, p->numverts);
-				TWI_PostVDrawCVA ();
-			} else {
-				memcpy(v_array_p, p->v, sizeof(vertex_t) * p->numverts);
-				memcpy(tc0_array_p, p->ltc, sizeof(texcoord_t) * p->numverts);
+			memcpy (v_array_p, p->v, sizeof(vertex_t) * p->numverts);
+			memcpy (tc0_array_p, p->ltc, sizeof(texcoord_t) * p->numverts);
 
-				TWI_PreVDrawCVA (0, p->numverts);
-				qglDrawArrays (GL_POLYGON, 0, p->numverts);
-				TWI_PostVDrawCVA ();
-			}
+			TWI_PreVDrawCVA (0, p->numverts);
+			qglDrawArrays (GL_POLYGON, 0, p->numverts);
+			TWI_PostVDrawCVA ();
 		}
 	}
 
@@ -692,43 +673,19 @@ R_RenderBrushPolyMTex
 static void
 R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 {
-	int			i;
-	float		*v;
-	float		intensity = max (0, r_waterwarp->fvalue);
-
 	c_brush_polys++;
 
 	qglBindTexture(GL_TEXTURE_2D, lightmap_textures + fa->lightmaptexturenum);
 
-	if (fa->flags & SURF_UNDERWATER && r_waterwarp->fvalue) {
-		memcpy(tc0_array_p, fa->polys->tc,
-				sizeof(texcoord_t) * fa->polys->numverts);
-		memcpy(tc1_array_p, fa->polys->ltc,
-				sizeof(texcoord_t) * fa->polys->numverts);
-		for (i = 0; i < fa->polys->numverts; i++) {
-			v = fa->polys->v[i].v;
-			v_array(i, 0) = v[0] + intensity
-				* Q_sin (v[1] * 0.05 + host_realtime)
-				* Q_sin (v[2] * 0.05 + host_realtime);
-			v_array(i, 1) = v[1] + intensity
-				* Q_sin (v[0] * 0.05 + host_realtime)
-				* Q_sin (v[2] * 0.05 + host_realtime);
-			v_array(i, 2) = v[2];
-		}
-		TWI_PreVDrawCVA (0, fa->polys->numverts);
-		qglDrawArrays (GL_TRIANGLE_FAN, 0, fa->polys->numverts);
-		TWI_PostVDrawCVA ();
-	} else {
-		memcpy(v_array_p, fa->polys->v, sizeof(vertex_t) * fa->polys->numverts);
-		memcpy(tc0_array_p, fa->polys->tc,
-				sizeof(texcoord_t) * fa->polys->numverts);
-		memcpy(tc1_array_p, fa->polys->ltc,
-				sizeof(texcoord_t) * fa->polys->numverts);
+	memcpy (v_array_p, fa->polys->v, sizeof(vertex_t) * fa->polys->numverts);
+	memcpy (tc0_array_p, fa->polys->tc,
+			sizeof(texcoord_t) * fa->polys->numverts);
+	memcpy (tc1_array_p, fa->polys->ltc,
+			sizeof(texcoord_t) * fa->polys->numverts);
 
-		TWI_PreVDrawCVA (0, fa->polys->numverts);
-		qglDrawArrays (GL_POLYGON, 0, fa->polys->numverts);
-		TWI_PostVDrawCVA ();
-	}
+	TWI_PreVDrawCVA (0, fa->polys->numverts);
+	qglDrawArrays (GL_POLYGON, 0, fa->polys->numverts);
+	TWI_PostVDrawCVA ();
 
 	// add the poly to the proper fullbright chain
 
@@ -747,37 +704,15 @@ R_RenderBrushPoly
 static void
 R_RenderBrushPoly (msurface_t *fa, texture_t *t)
 {
-	int		i;
-	float	*v;
-	float	intensity = max (0, r_waterwarp->fvalue);
-
 	c_brush_polys++;
 
-	if (fa->flags & SURF_UNDERWATER && r_waterwarp->fvalue) {
-		memcpy(tc0_array_p, fa->polys->tc,
-				sizeof(texcoord_t) * fa->polys->numverts);
-		for (i = 0; i < fa->polys->numverts; i++) {
-			v = fa->polys->v[i].v;
-			v_array(i, 0) = v[0] + intensity
-				* Q_sin (v[1] * 0.05 + host_realtime)
-				* Q_sin (v[2] * 0.05 + host_realtime);
-			v_array(i, 1) = v[1] + intensity
-				* Q_sin (v[0] * 0.05 + host_realtime)
-				* Q_sin (v[2] * 0.05 + host_realtime);
-			v_array(i, 2) = v[2];
-		}
-		TWI_PreVDrawCVA (0, fa->polys->numverts);
-		qglDrawArrays (GL_TRIANGLE_FAN, 0, fa->polys->numverts);
-		TWI_PostVDrawCVA ();
-	} else {
-		memcpy(v_array_p, fa->polys->v, sizeof(vertex_t) * fa->polys->numverts);
-		memcpy(tc0_array_p, fa->polys->tc,
-				sizeof(texcoord_t) * fa->polys->numverts);
+	memcpy (v_array_p, fa->polys->v, sizeof(vertex_t) * fa->polys->numverts);
+	memcpy (tc0_array_p, fa->polys->tc,
+			sizeof(texcoord_t) * fa->polys->numverts);
 
-		TWI_PreVDrawCVA (0, fa->polys->numverts);
-		qglDrawArrays (GL_POLYGON, 0, fa->polys->numverts);
-		TWI_PostVDrawCVA ();
-	}
+	TWI_PreVDrawCVA (0, fa->polys->numverts);
+	qglDrawArrays (GL_POLYGON, 0, fa->polys->numverts);
+	TWI_PostVDrawCVA ();
 
 	// add the poly to the proper lightmap chain
 
@@ -1199,20 +1134,6 @@ R_RecursiveWorldNode (mnode_t *node)
 		for (; c; c--, surf++) {
 			if (surf->visframe != r_framecount)
 				continue;
-
-			// don't backface underwater surfaces, because they warp
-			if (r_waterwarp->fvalue &&
-					!(((r_viewleaf->contents == CONTENTS_EMPTY
-								&& (surf->flags & SURF_UNDERWATER))
-							|| (r_viewleaf->contents != CONTENTS_EMPTY
-								&& !(surf->flags & SURF_UNDERWATER)))
-						&& !(surf->flags & SURF_DONTWARP))
-					&& ((dot < 0) ^ !!(surf->flags & SURF_PLANEBACK)))
-			{
-				// wrong side
-				surf->visframe = -1;
-				continue;
-			}
 
 			// if sorting by texture, just store it out
 			surf->texturechain = surf->texinfo->texture->texturechain;

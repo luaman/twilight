@@ -115,7 +115,6 @@ cvar_t	   *scr_allowsnap;
 cvar_t	   *gl_triplebuffer;
 cvar_t	   *r_brightness;
 cvar_t	   *r_contrast;
-cvar_t	   *r_waterwarp;
 cvar_t	   *cl_avidemo;
 
 extern cvar_t *crosshair;
@@ -132,8 +131,6 @@ int			clearnotify;
 int			sb_lines;
 
 viddef_t	vid;						/* global video state */
-
-vrect_t		scr_vrect;
 
 qboolean	scr_drawloading;
 float		scr_disabled_time;
@@ -343,54 +340,43 @@ SCR_CheckDrawCenterString (void)
 CalcFov
 ====================
 */
-float
+static float
 CalcFov (float fov_x, float width, float height)
 {
-	float		x;
-	float		a;
-
-	if (fov_x < 1 || fov_x > 179)
-		Host_EndGame ("Bad fov: %f", fov_x);
-
-	x = width / Q_tan (fov_x * (M_PI / 360));
-	a = Q_atan (height / x) * (360 / M_PI);
-
-	return a;
+	return Q_atan (height / (width / Q_tan (fov_x/360*M_PI))) * 360 / M_PI;
 }
 
 /*
 =================
 SCR_CalcRefdef
 
-Must be called whenever vid changes
-Internal use only
 =================
 */
 static void
 SCR_CalcRefdef (void)
 {
-	vid.recalc_refdef = false;
+	int			contents;
 
 	/* intermission is always full screen */
-	if (scr_viewsize->ivalue >= 120 || cl.intermission) {
+	if (scr_viewsize->ivalue >= 120 || cl.intermission)
 		sb_lines = 0;
-	} else if (scr_viewsize->ivalue >= 110) {
+	else if (scr_viewsize->ivalue >= 110)
 		sb_lines = 24;
-	} else {
+	else
 		sb_lines = 24 + 16 + 8;
-	}
-
-	r_refdef.vrect.height = vid.height;
-
-	r_refdef.vrect.width = vid.width;
-	r_refdef.vrect.x = 0;
-	r_refdef.vrect.y = 0;
 
 	r_refdef.fov_x = scr_fov->fvalue;
-	r_refdef.fov_y =
-		CalcFov (r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height);
+	r_refdef.fov_y = CalcFov (r_refdef.fov_x, vid.width, vid.height);
 
-	scr_vrect = r_refdef.vrect;
+	if (cl.worldmodel)
+	{
+		contents = Mod_PointInLeaf (r_refdef.vieworg, cl.worldmodel)->contents;
+		if (contents != CONTENTS_EMPTY && contents != CONTENTS_SOLID)
+		{
+			r_refdef.fov_x *= (Q_sin(cl.time * 4.7) * 0.015 + 0.985);
+			r_refdef.fov_y *= (Q_sin(cl.time * 3.0) * 0.015 + 0.985);
+		}
+	}
 }
 
 
@@ -426,26 +412,20 @@ static void
 SCR_viewsize_CB (cvar_t *cvar)
 {
 	/* bound viewsize */
-	if (cvar->ivalue < 30) {
+	if (cvar->ivalue < 30)
 		Cvar_Set (cvar, "30");
-	} else if (cvar->ivalue > 120) {
+	else if (cvar->ivalue > 120)
 		Cvar_Set (cvar, "120");
-	} else {
-		vid.recalc_refdef = true;
-	}
 }
 
 static void
 SCR_fov_CB (cvar_t *cvar)
 {
 	/* bound field of view */
-	if (cvar->fvalue < 1) {
+	if (cvar->fvalue < 1)
 		Cvar_Set (cvar, "1");
-	} else if (cvar->fvalue > 170) {
+	else if (cvar->fvalue > 170)
 		Cvar_Set (cvar, "170");
-	} else {
-		vid.recalc_refdef = true;
-	}
 }
 
 void
@@ -464,7 +444,6 @@ SCR_Init_Cvars (void)
 	gl_triplebuffer = Cvar_Get ("gl_triplebuffer", "1", CVAR_ARCHIVE, NULL);
 	r_brightness = Cvar_Get ("r_brightness", "1", CVAR_ARCHIVE, NULL);
 	r_contrast = Cvar_Get ("r_contrast", "1", CVAR_ARCHIVE, NULL);
-	r_waterwarp = Cvar_Get ("r_waterwarp", "0", CVAR_ARCHIVE, NULL);
 	cl_avidemo = Cvar_Get ("cl_avidemo", "0", CVAR_NONE, &AvidemoChanged);
 }
 
@@ -517,7 +496,7 @@ SCR_DrawTurtle (void)
 	if (count < 3)
 		return;
 
-	Draw_Pic (scr_vrect.x, scr_vrect.y, scr_turtle);
+	Draw_Pic (0, 0, scr_turtle);
 }
 
 /*
@@ -534,7 +513,7 @@ SCR_DrawNet (void)
 	if (cls.demoplayback)
 		return;
 
-	Draw_Pic (scr_vrect.x + 64, scr_vrect.y, scr_net);
+	Draw_Pic (64, 0, scr_net);
 }
 
 void
@@ -1053,8 +1032,7 @@ SCR_UpdateScreen (void)
 
 	qglEnable (GL_DEPTH_TEST);
 
-	if (vid.recalc_refdef)
-		SCR_CalcRefdef ();
+	SCR_CalcRefdef ();
 
 	/*
 	 * do 3D refresh drawing, and then update the screen

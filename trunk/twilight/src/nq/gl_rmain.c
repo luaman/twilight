@@ -651,31 +651,18 @@ R_SetFrustum (void)
 {
 	int			i;
 
-	if (r_refdef.fov_x == 90) {
-		// front side is visible
-
-		VectorAdd (vpn, vright, frustum[0].normal);
-		VectorNormalizeFast (frustum[0].normal);
-		VectorSubtract (vpn, vright, frustum[1].normal);
-		VectorNormalizeFast (frustum[1].normal);
-		VectorAdd (vpn, vup, frustum[2].normal);
-		VectorNormalizeFast (frustum[2].normal);
-		VectorSubtract (vpn, vup, frustum[3].normal);
-		VectorNormalizeFast (frustum[3].normal);
-	} else {
-		// rotate VPN right by FOV_X/2 degrees
-		RotatePointAroundVector (frustum[0].normal, vup, vpn,
-								 -(90 - r_refdef.fov_x / 2));
-		// rotate VPN left by FOV_X/2 degrees
-		RotatePointAroundVector (frustum[1].normal, vup, vpn,
-								 90 - r_refdef.fov_x / 2);
-		// rotate VPN up by FOV_X/2 degrees
-		RotatePointAroundVector (frustum[2].normal, vright, vpn,
-								 90 - r_refdef.fov_y / 2);
-		// rotate VPN down by FOV_X/2 degrees
-		RotatePointAroundVector (frustum[3].normal, vright, vpn,
-								 -(90 - r_refdef.fov_y / 2));
-	}
+	// rotate VPN right by FOV_X/2 degrees
+	RotatePointAroundVector (frustum[0].normal, vup, vpn,
+			-(90 - r_refdef.fov_x / 2));
+	// rotate VPN left by FOV_X/2 degrees
+	RotatePointAroundVector (frustum[1].normal, vup, vpn,
+			90 - r_refdef.fov_x / 2);
+	// rotate VPN up by FOV_X/2 degrees
+	RotatePointAroundVector (frustum[2].normal, vright, vpn,
+			90 - r_refdef.fov_y / 2);
+	// rotate VPN down by FOV_X/2 degrees
+	RotatePointAroundVector (frustum[3].normal, vright, vpn,
+			-(90 - r_refdef.fov_y / 2));
 
 	for (i = 0; i < 4; i++) {
 		frustum[i].type = PLANE_ANYZ;
@@ -715,22 +702,6 @@ R_SetupFrame (void)
 }
 
 
-static void
-MYgluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear,
-		GLdouble zFar)
-{
-	GLdouble    xmin, xmax, ymin, ymax;
-
-	ymax = zNear * Q_tan (fovy * M_PI / 360.0);
-	ymin = -ymax;
-
-	xmin = ymin * aspect;
-	xmax = ymax * aspect;
-
-	qglFrustum (xmin, xmax, ymin, ymax, zNear, zFar);
-}
-
-
 /*
 =============
 R_SetupGL
@@ -739,36 +710,20 @@ R_SetupGL
 static void
 R_SetupGL (void)
 {
-	float		screenaspect;
-	unsigned	x, x2, y2, y, w, h;
+	GLdouble    xmax, ymax;
 
 	/*
 	 * set up viewpoint
 	 */ 
 	qglMatrixMode (GL_PROJECTION);
 	qglLoadIdentity ();
-	x = r_refdef.vrect.x;
-	x2 = (r_refdef.vrect.x + r_refdef.vrect.width);
-	y = (vid.height - r_refdef.vrect.y);
-	y2 = (vid.height -
-		  (r_refdef.vrect.y + r_refdef.vrect.height));
 
-	// fudge around because of frac screen scale
-	if (x > 0)
-		x--;
-	if (x2 < vid.width)
-		x2++;
-	if (y2 < 0)
-		y2--;
-	if (y < vid.height)
-		y++;
+	qglViewport (0, 0, vid.width, vid.height);
 
-	w = x2 - x;
-	h = y - y2;
+	xmax = Q_tan (r_refdef.fov_x * M_PI / 360.0) * (vid.width / vid.height);
+	ymax = Q_tan (r_refdef.fov_y * M_PI / 360.0);
 
-	qglViewport (glx + x, gly + y2, w, h);
-	screenaspect = (float) r_refdef.vrect.width / r_refdef.vrect.height;
-	MYgluPerspective (r_refdef.fov_y, screenaspect, 4, 8193);
+	qglFrustum (-xmax, xmax, -ymax, ymax, 1.0f, 8192.0);
 
 	qglCullFace (GL_FRONT);
 

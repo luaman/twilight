@@ -84,8 +84,6 @@ typedef struct entity_s {
 #define MAX_ENTITIES	1024
 
 typedef struct {
-	vrect_t     vrect;					// subwindow in video for refresh
-
 	vec3_t      vieworg;
 	vec3_t      viewangles;
 
