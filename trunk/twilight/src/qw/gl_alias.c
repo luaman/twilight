@@ -147,44 +147,78 @@ R_SetupAliasBlendedFrame
 fenix@io.com: model animation interpolation
 =================
 */
+extern void
+Lerp_Vectors4pt (vec3_t v1_1, vec_t v1_blend, vec3_t v1_2, vec_t blend,
+		        vec3_t v2_1, vec_t v2_blend, vec3_t v2_2, vec3_t out);
+
 static void
 R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 {
 	float				l, d;
 	int					i;
-	int					pose_to_num, pose_from_num;
+	int					pose_to_1_num, pose_to_2_num;
+	float				pose_to_blend;
+	maliaspose_t		*pose_to_1, *pose_to_2;
+	int					pose_from_1_num, pose_from_2_num;
+	float				pose_from_blend;
+	maliaspose_t		*pose_from_1, *pose_from_2;
 	maliasframedesc_t	*frame_from, *frame_to;
-	maliaspose_t		*pose_from, *pose_to;
-	vec3_t				v1, v2;
-
+	vec3_t				v1_1, v1_2, v2_1, v2_2;
 
 	frame_from = &paliashdr->frames[e->from.frame];
 
-	if (frame_from->numposes > 1)
-		pose_from_num = (int) (cl.time / e->from.frame_interval) % frame_from->numposes;
-	else
-		pose_from_num = 0;
+	if (frame_from->numposes > 1) {
+		pose_from_1_num = (int) (cl.time / e->from.frame_interval) % frame_from->numposes;
+		pose_from_2_num = (pose_from_1_num + 1) % frame_from->numposes;
+		pose_from_blend = (cl.time / e->from.frame_interval) - pose_from_1_num;
+	} else
+		pose_from_1_num = pose_from_2_num = pose_from_blend = 0;
 
 	frame_to = &paliashdr->frames[e->to.frame];
 
-	if (frame_to->numposes > 1)
-		pose_to_num = (int) (cl.time / e->to.frame_interval) % frame_to->numposes;
-	else
-		pose_to_num = 0;
+	if (frame_to->numposes > 1) {
+		pose_to_1_num = (int) (cl.time / e->to.frame_interval) % frame_to->numposes;
+		pose_to_2_num = (pose_to_1_num + 1) % frame_to->numposes;
+		pose_to_blend = (cl.time / e->to.frame_interval) - pose_to_1_num;
+	} else
+		pose_to_1_num = pose_to_2_num = pose_to_blend = 0;
 
-	pose_from = &frame_from->poses[pose_from_num];
-	pose_to = &frame_to->poses[pose_to_num];
+	pose_from_1 = &frame_from->poses[pose_from_1_num];
+	pose_from_2 = &frame_from->poses[pose_from_2_num];
+	pose_to_1 = &frame_to->poses[pose_to_1_num];
+	pose_to_2 = &frame_to->poses[pose_to_2_num];
 
 	for (i = 0; i < paliashdr->numverts; i++) {
-		VectorCopy(pose_from->vertices[i].v, v1);
-		VectorCopy(pose_to->vertices[i].v, v2);
-		Lerp_Vectors (v1, e->frame_blend, v2, v_array_v(i));
+		if (e->frame_blend >= 0.99) {
+			VectorCopy (pose_to_1->vertices[i].v, v2_1);
+			VectorCopy (pose_to_2->vertices[i].v, v2_2);
+			Lerp_Vectors (
+					v2_1, pose_to_blend, v2_2,
+					v_array_v(i));
+		} else if (e->frame_blend <= 0.01) {
+			VectorCopy (pose_from_1->vertices[i].v, v1_1);
+			VectorCopy (pose_from_2->vertices[i].v, v1_2);
+			Lerp_Vectors (
+					v1_1, pose_from_blend, v1_2,
+					v_array_v(i));
+		} else {
+			VectorCopy (pose_from_1->vertices[i].v, v1_1);
+			VectorCopy (pose_from_2->vertices[i].v, v1_2);
+			VectorCopy (pose_to_1->vertices[i].v, v2_1);
+			VectorCopy (pose_to_2->vertices[i].v, v2_2);
+			Lerp_Vectors4pt (
+					v1_1, pose_from_blend, v1_2,
+					e->frame_blend,
+					v2_1, pose_to_blend, v2_2,
+					v_array_v(i));
+		}
+
 		tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
 		tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
 
-		d = shadedots[pose_to->normal_indices[i]] -
-			shadedots[pose_from->normal_indices[i]];
-		l = shadelight * (shadedots[pose_from->normal_indices[i]]
+		d = shadedots[pose_to_1->normal_indices[i]] -
+			shadedots[pose_from_1->normal_indices[i]];
+		l = shadelight * (shadedots[pose_from_1->normal_indices[i]]
 				+ (e->frame_blend * d));
 		VectorScale(lightcolor, l, cf_array_v(i));
 		cf_array(i, 3) = 1;

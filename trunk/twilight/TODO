@@ -12,8 +12,8 @@ Bugs we know about:
     sound.  DP broke this and DP has fixed it.
   - RC #2: Fix net_udp (line 112) so we don't resolve non-network
     connections.  (Non-trivial)
-  - RC #3: Interpolation is broken in both NQ/QW.
-    (Can LH do this /please/?)
+  - RC #3: Alias model interpolation is broken in NQ.
+    (Fixed QW, need to figure out a clean way to do it in NQ.)
   - RC #4: Need to print out Id's Copyright message on engine startup.
     (Knghtbrd? What exactly needs to be printed?)
   - RC #5: We should create directories as needed, such as the userpath

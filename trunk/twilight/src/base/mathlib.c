@@ -712,6 +712,20 @@ Lerp_Vectors (vec3_t v1, float frac, vec3_t v2, vec3_t v)
 }
 
 void 
+Lerp_Vectors4pt (vec3_t v1_1, vec_t v1_blend, vec3_t v1_2, vec_t blend,
+		vec3_t v2_1, vec_t v2_blend, vec3_t v2_2, vec3_t out)
+{
+	int		i;
+	vec_t	t1, t2;
+
+	for (i = 0; i < 3; i++) {
+		t1 = (v1_1[i] + (v1_blend * (v1_2[i] - v1_1[i])));
+		t2 = (v2_1[i] + (v2_blend * (v2_2[i] - v2_1[i])));
+		out[i] = (t1 + (blend * (t2 - t1)));
+	}
+}
+
+void 
 Lerp_Angles (vec3_t v1, vec_t frac, vec3_t v2, vec3_t v)
 {
 	vec3_t	d;
