@@ -30,14 +30,16 @@ static const char rcsid[] =
 #endif
 
 #include <math.h>
+
 #include "quakedef.h"
+#include "client.h"
 #include "common.h"
 #include "console.h"
+#include "cvar.h"
+#include "draw.h"
 #include "glquake.h"
 #include "mathlib.h"
-#include "cvar.h"
-#include "client.h"
-#include "draw.h"
+#include "strlib.h"
 
 extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
