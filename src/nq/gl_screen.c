@@ -120,7 +120,6 @@ static qpic_t	   *scr_net;
 static qpic_t	   *scr_turtle;
 
 static int			clearconsole;
-int					clearnotify;
 
 viddef_t	vid;						/* global video state */
 
@@ -569,8 +568,7 @@ SCR_SetUpToDrawConsole (void)
 		return;
 
 	/* decide on the height of the console */
-	con_forcedup = (!ccl.worldmodel) || (ccls.state != ca_active);
-	if (con_forcedup) {
+	if (ccls.state != ca_active) {
 		scr_conlines = vid.height_2d;		/* full screen */
 		scr_con_current = scr_conlines;
 	} else if (key_dest == key_console)

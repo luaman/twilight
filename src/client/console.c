@@ -33,14 +33,13 @@ static const char rcsid[] =
 #include <stdarg.h>
 
 #include "quakedef.h"
-#include "client.h"
+#include "cclient.h"
 #include "cmd.h"
 #include "console.h"
-#include "cl_console.h"
 #include "cvar.h"
 #include "draw.h"
 #include "keys.h"
-#include "screen.h"
+#include "vid.h"
 #include "strlib.h"
 #include "sys.h"
 
@@ -48,14 +47,12 @@ extern void Size_Changed2D (cvar_t *cvar);
 
 static memzone_t *con_zone;
 
-static int con_ormask;
+int con_ormask;
 console_t *con;
 
 static int con_linewidth;						// characters across screen
 
 static float con_cursorspeed = 4;
-qboolean con_forcedup;					// because no entities to refresh
-
 
 static cvar_t *con_notifytime;
 
@@ -326,7 +323,7 @@ Con_DrawInput (void)
 {
 	char		*text;
 
-	if (key_dest != key_console && (ccls.state == ca_active || !con_forcedup))
+	if (key_dest != key_console && (ccls.state >= ca_active))
 		// don't draw anything (always draw if not connected)
 		return;
 
@@ -400,8 +397,6 @@ Con_DrawNotify (void)
 
 	if (key_dest == key_message)
 	{
-		clearnotify = 0;
-
 		if (chat_team)
 		{
 			Draw_String (con->tsize, y, "say_team:", con->tsize);

@@ -120,7 +120,6 @@ static qpic_t	   *scr_net;
 static qpic_t	   *scr_turtle;
 
 int			clearconsole;
-int			clearnotify;
 
 int			sb_lines;
 
