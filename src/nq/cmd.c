@@ -179,7 +179,7 @@ extract_line (char *line)
 	if (i == cmd_text.cursize)
 		cmd_text.cursize = 0;
 	else {
-		i += 2;
+		i++;
 		cmd_text.cursize -= i;
 		memcpy (text, text + i, cmd_text.cursize);
 	}
@@ -286,10 +286,6 @@ Cmd_StuffCmds_f (void)
 	int         s;
 	char       *text, *build, c;
 
-	if (Cmd_Argc () != 1) {
-		Con_Printf ("stuffcmds : execute command line parameters\n");
-		return;
-	}
 // build the combined string to parse from
 	s = 0;
 	for (i = 1; i < com_argc; i++) {

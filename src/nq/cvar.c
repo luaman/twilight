@@ -151,21 +151,26 @@ Cvar_Set_f (void)
 	}
 
 	var = Cvar_Find (Cmd_Argv (1));
-	if (!var)
+
+	if (Cmd_Argc () == 2)
 	{
-		Con_Printf ("Cvar \"%s\" does not exist.\n", Cmd_Argv (1));
+		Cvar_Show (var);
 		return;
 	}
 
-	if (Cmd_Argc () == 3)
+	if (!var)
 	{
-		if (!(var->flags & CVAR_ROM))
-			Cvar_Set (var, Cmd_Argv (2));
-		else
-			Con_Printf ("Cvar \"%s\" is read-only.\n", var->name);
-	} else
-		Cvar_Show (var);
-
+		var = Cvar_Get (Cmd_Argv (1), Cmd_Argv (2), CVAR_USER, NULL);
+		return;
+	}
+	
+	if (var->flags & CVAR_ROM)
+	{
+		Con_Printf ("Cvar \"%s\" is read-only.\n", var->name);
+		return;
+	}
+	
+	Cvar_Set (var, Cmd_Argv (2));
 	return;
 }
 
