@@ -293,7 +293,7 @@ OGL_DONT_NEED (void, glGetDoublev, (GLenum pname, GLdouble * params));
 OGL_DONT_NEED (GLenum, glGetError, (void));
 OGL_EXT_DONT_WANT (void, glGetFinalCombinerInputParameterfvNV, (GLenum, GLenum, GLfloat *));
 OGL_EXT_DONT_WANT (void, glGetFinalCombinerInputParameterivNV, (GLenum, GLenum, GLint *));
-OGL_NEED (void, glGetFloatv, (GLenum pname, GLfloat * params));
+OGL_DONT_NEED (void, glGetFloatv, (GLenum pname, GLfloat * params));
 OGL_EXT_DONT_WANT (void, glGetFogFuncSGIS, (const GLfloat *));
 OGL_EXT_DONT_WANT (void, glGetFragmentLightfvSGIX, (GLenum, GLenum, GLfloat *));
 OGL_EXT_DONT_WANT (void, glGetFragmentLightivSGIX, (GLenum, GLenum, GLint *));

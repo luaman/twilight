@@ -53,9 +53,6 @@ vec3_t vpn;
 vec3_t vright;
 vec3_t r_origin;
 
-float r_world_matrix[16];
-float r_base_world_matrix[16];
-
 /*
  * screen size info
  */
@@ -864,8 +861,6 @@ R_SetupGL (void)
 	qglRotatef (-r_refdef.viewangles[1], 0, 0, 1);
 	qglTranslatef (-r_refdef.vieworg[0], -r_refdef.vieworg[1],
 				  -r_refdef.vieworg[2]);
-
-	qglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
 
 	/*
 	 * set drawing parms
