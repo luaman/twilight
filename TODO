@@ -19,11 +19,6 @@ Bugs we know about:
     bmodel's coordinates would fix this.  This is a stock Quake bug.
   - Quake never checked BSPs very well, a bad one can crash the engine.
     (Need some example bad BSPs.)
-  - running with an invalid hostname causes this error:
-    Error: Unable to resolve our own hostname: 'node1.nodex.com'
-    (twilight-nq on Linux/UNIX only)
-    (known to occur on most Linux distributions out of the box)
-    (is this related to RC #4?)
   - dlights brighten bmodels twice as much as world
   - rocket trails (and presumably some other kinds of particle) keep spawning while paused
   - RC #8: Lifts hurt.
@@ -33,8 +28,10 @@ Bugs we know about:
     (Happens for LordHavoc, anyone else?)
 
   Driver related quirks:
-  - RC #6: Need a 3dfx quirk for limiting vertex array size.  We need
-    the output of the OpenGL strings in Win32 for this.
+  - Non-RC #6: Need a 3dfx quirk for limiting vertex array size.  We
+    need the output of the OpenGL strings in Win32 for this.
+    (Downgraded from RC, if nobody can give us the bloody strings,
+     nobody will notice the crash, /if/ it still happens.)
   - 3dfxvgl.dll does not work with Twilight even though it should.
     Forest can try a minimal example SDL app which binds OpenGL
     dynamically if we get him one.  Workaround: copy 3dfxvgl.dll to
