@@ -35,6 +35,7 @@ typedef enum {
 } knum_t;
 
 typedef enum {
+	KGT_CONSOLE,
 	KGT_DEFAULT,
 	KGT_1,
 	KGT_2,

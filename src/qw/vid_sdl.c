@@ -563,8 +563,8 @@ Sys_SendKeyEvents (void)
 
 			case SDL_MOUSEMOTION:
 				if (_windowed_mouse.value) {
-					mouse_x = event.motion.xrel * 5;
-					mouse_y = event.motion.yrel * 5;
+					mouse_x = event.motion.xrel * 2;
+					mouse_y = event.motion.yrel * 2;
 				}
 				break;
 

@@ -38,7 +38,7 @@ int         edit_line = 0;
 int         history_line = 0;
 
 keydest_t   key_dest;
-kgt_t		game_target;
+kgt_t		game_target = KGT_DEFAULT;
 
 int         key_count;			// incremented every key event
 
@@ -51,6 +51,7 @@ typedef struct {
 } kgtname_t;
 
 kgtname_t   kgtnames[] = {
+	{ "KGT_CONSOLE", KGT_CONSOLE },
 	{ "KGT_DEFAULT", KGT_DEFAULT },
 	{ "KGT_0", KGT_DEFAULT },
 	{ "KGT_1", KGT_1 },
@@ -363,6 +364,47 @@ CompleteCommand (void)
 
 /*
 ====================
+Key_Game
+
+Game key handling.
+====================
+*/
+qboolean
+Key_Game (knum_t key, short unicode)
+{
+	char *kb;
+	char cmd[1024];
+
+	kb = keybindings[game_target][key];
+	if (!kb && game_target > KGT_DEFAULT)
+		kb = keybindings[KGT_DEFAULT][key];
+
+	/*
+	Con_Printf("kb %p, game_target %d, key_dest %d, key %d\n", kb, game_target,
+			   key_dest, key);
+			   */
+	if (!kb)
+		return false;
+
+	if (!keydown[key]) {
+		if (kb[0] == '+') {
+			snprintf (cmd, sizeof(cmd), "-%s %d\n", kb + 1, key);
+			Cbuf_AddText (cmd);
+		}
+	} else if (keydown[key] == 1) {
+		if (kb[0] == '+') {
+			snprintf (cmd, sizeof(cmd), "%s %d\n", kb, key);
+			Cbuf_AddText (cmd);
+		} else {
+			snprintf (cmd, sizeof(cmd), "%s\n", kb);
+			Cbuf_AddText (cmd);
+		}
+	}
+	return true;
+}
+
+/*
+====================
 Key_Console
 
 Interactive line editing and console scrollback
@@ -372,6 +414,9 @@ void
 Key_Console (knum_t key, short unicode)
 {
 	if (keydown[key] != 1)
+		return;
+
+	if (Key_Game (key, unicode))
 		return;
 
 	if (unicode == '
@@ -468,45 +513,6 @@ Key_Console (knum_t key, short unicode)
 		key_lines[edit_line][key_linepos] = 0;
 	}
 
-}
-
-/*
-====================
-Key_Game
-
-Game key handling.
-====================
-*/
-void
-Key_Game (knum_t key, short unicode)
-{
-	char *kb;
-	char cmd[1024];
-
-	if (cls.state != ca_active)
-		return Key_Console(key, unicode);
-
-	kb = keybindings[game_target][key];
-	if (!kb && game_target > KGT_DEFAULT)
-		kb = keybindings[KGT_DEFAULT][key];
-
-	if (!kb)
-		return;
-
-	if (!keydown[key]) {
-		if (kb[0] == '+') {
-			snprintf (cmd, sizeof(cmd), "-%s %d\n", kb + 1, key);
-			Cbuf_AddText (cmd);
-		}
-	} else if (keydown[key] == 1) {
-		if (kb[0] == '+') {
-			snprintf (cmd, sizeof(cmd), "%s %d\n", kb, key);
-			Cbuf_AddText (cmd);
-		} else {
-			snprintf (cmd, sizeof(cmd), "%s\n", kb);
-			Cbuf_AddText (cmd);
-		}
-	}
 }
 
 //============================================================================
@@ -903,6 +909,9 @@ Key_Event (knum_t key, short unicode, qboolean down)
 		M_ToggleMenu_f ();
 		return;
 	}
+
+	if (!down && Key_Game (key, unicode))
+		return;
 
 //
 // if not a consolekey, send to the interpreter no matter what mode is

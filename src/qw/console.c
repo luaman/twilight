@@ -76,29 +76,10 @@ Con_ToggleConsole_f (void)
 			key_dest = key_game;
 			game_target = KGT_DEFAULT;
 		}
-	} else
+	} else {
 		key_dest = key_console;
-
-	Con_ClearNotify ();
-}
-
-/*
-================
-Con_ToggleChat_f
-================
-*/
-void
-Con_ToggleChat_f (void)
-{
-	Key_ClearTyping ();
-
-	if (key_dest == key_console) {
-		if (cls.state == ca_active) {
-			key_dest = key_game;
-			game_target = KGT_DEFAULT;
-		}
-	} else
-		key_dest = key_console;
+		game_target = KGT_CONSOLE;
+	}
 
 	Con_ClearNotify ();
 }
@@ -249,7 +230,6 @@ Con_Init (void)
 	Cvar_RegisterVariable (&con_notifytime);
 
 	Cmd_AddCommand ("toggleconsole", Con_ToggleConsole_f);
-	Cmd_AddCommand ("togglechat", Con_ToggleChat_f);
 	Cmd_AddCommand ("messagemode", Con_MessageMode_f);
 	Cmd_AddCommand ("messagemode2", Con_MessageMode2_f);
 	Cmd_AddCommand ("clear", Con_Clear_f);

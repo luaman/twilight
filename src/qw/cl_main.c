@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <SDL.h>
 
 #include "quakedef.h"
+#include "keys.h"
 
 #ifdef _WIN32
 #include "winquake.h"
@@ -163,10 +164,6 @@ CL_Quit_f
 void
 CL_Quit_f (void)
 {
-	if (1 /* key_dest != key_console *//* && cls.state != ca_dedicated */ ) {
-		M_Menu_Quit_f ();
-		return;
-	}
 	CL_Disconnect ();
 	Sys_Quit ();
 }
@@ -442,6 +439,8 @@ CL_Disconnect (void)
 		Netchan_Transmit (&cls.netchan, 6, final);
 
 		cls.state = ca_disconnected;
+		key_dest = key_console;
+		game_target = KGT_CONSOLE;
 
 		cls.demoplayback = cls.demorecording = cls.timedemo = false;
 	}
@@ -760,6 +759,8 @@ CL_Changing_f (void)
 	cl.intermission = 0;
 	cls.state = ca_connected;			// not active anymore, but not
 										// disconnected
+	key_dest = key_console;
+	game_target = KGT_CONSOLE;
 	Con_Printf ("\nChanging map...\n");
 }
 
@@ -826,6 +827,8 @@ CL_ConnectionlessPacket (void)
 		MSG_WriteChar (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message, "new");
 		cls.state = ca_connected;
+		key_dest = key_console;
+		game_target = KGT_CONSOLE;
 		Con_Printf ("Connected.\n");
 		allowremotecmd = false;			// localid required now for remote cmds
 		return;
@@ -1030,6 +1033,8 @@ CL_Init (void)
 	char        st[80];
 
 	cls.state = ca_disconnected;
+	key_dest = key_console;
+	game_target = KGT_CONSOLE;
 
 	Info_SetValueForKey (cls.userinfo, "name", "unnamed", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "topcolor", "0", MAX_INFO_STRING);
@@ -1444,6 +1449,8 @@ Host_Init (quakeparms_t *parms)
 	S_Init ();
 
 	cls.state = ca_disconnected;
+	key_dest = key_console;
+	game_target = KGT_CONSOLE;
 	Sbar_Init ();
 	CL_Init ();
 #else
@@ -1454,6 +1461,8 @@ Host_Init (quakeparms_t *parms)
 	S_Init ();
 
 	cls.state = ca_disconnected;
+	key_dest = key_console;
+	game_target = KGT_CONSOLE;
 	CDAudio_Init ();
 	Sbar_Init ();
 	CL_Init ();
