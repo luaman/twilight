@@ -114,9 +114,6 @@ UDP_Init (void)
 		Sys_Error ("Winsock initialization failed.");
 #endif /* _WIN32 */
 
-	if (COM_CheckParm ("-noudp"))
-		return -1;
-
 	// determine my name & address
 	gethostname (buf, MAXHOSTNAMELEN);
 	local = gethostbyname (buf);

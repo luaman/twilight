@@ -482,7 +482,6 @@ typedef struct cmd_function_s {
 
 static int  cmd_argc;
 static char *cmd_argv[MAX_ARGS];
-static char *cmd_null_string = "";
 static char *cmd_args = NULL;
 
 cmd_source_t cmd_source;
@@ -529,7 +528,7 @@ char       *
 Cmd_Argv (int arg)
 {
 	if (arg >= cmd_argc)
-		return cmd_null_string;
+		return "";
 	return cmd_argv[arg];
 }
 
@@ -883,30 +882,5 @@ Cmd_ForwardToServer (void)
 		SZ_Print (&cls.message, Cmd_Args ());
 	else
 		SZ_Print (&cls.message, "\n");
-}
-
-
-/*
-================
-Cmd_CheckParm
-
-Returns the position (1 to argc-1) in the command's argument list
-where the given parameter apears, or 0 if not present
-================
-*/
-
-int
-Cmd_CheckParm (char *parm)
-{
-	int         i;
-
-	if (!parm)
-		Sys_Error ("Cmd_CheckParm: NULL");
-
-	for (i = 1; i < Cmd_Argc (); i++)
-		if (!strcasecmp (parm, Cmd_Argv (i)))
-			return i;
-
-	return 0;
 }
 
