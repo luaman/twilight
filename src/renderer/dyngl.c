@@ -412,3 +412,41 @@ DynGL_GetFunctions (void (*errfunc)(const char *fmt, ...))
 	return SDL_TRUE;
 }
 
+
+SDL_bool
+DynGL_BadFunction (const char *func, void (*errfunc)(char *fmt, ...))
+{
+	if (!dyngl_loaded)
+	{
+		SDL_SetError ("DynGL_BadFunction: no OpenGL library loaded");
+		return SDL_FALSE;
+	}
+
+	/* Assign all of the functions, except extensions */
+#define DYNGL_NEED(ret, name, args)											\
+	if (!strcmp (#name, func))												\
+	{																		\
+		if (errfunc != NULL)												\
+			errfunc ("DynGL_BadFunction: Bad required function %s\n", #name);\
+		return SDL_FALSE;													\
+	}
+#define DYNGL_EXT(ret, name, args, extension)								\
+	if (!strcmp (#name, func))												\
+	{																		\
+		DynGL_BadExtension (extension);										\
+		return SDL_TRUE;													\
+	}
+#define DYNGL_WANT(ret, name, args, alt)									\
+	if (!strcmp (#name, func))												\
+	{																		\
+		q##name = alt;														\
+		return SDL_TRUE;													\
+	}
+#include "dglfuncs.h"
+#undef DYNGL_NEED
+#undef DYNGL_EXT
+#undef DYNGL_WANT
+
+	return SDL_FALSE;
+}
+

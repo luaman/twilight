@@ -406,6 +406,7 @@ R_DrawAliasModel ()
 {
 	qglPushMatrix ();
 
+
 	qglMultTransposeMatrixf ((GLfloat *) matrix);
 
 	TWI_PreVDrawCVA (0, paliashdr->numverts);
