@@ -1058,21 +1058,22 @@ int         file_from_pak;				// global indicating file came from
 int
 COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 {
-	searchpath_t *search;
-	char        netpath[MAX_OSPATH];
-	pack_t     *pak;
-	int         i;
-	int         findtime;
+	searchpath_t	*search;
+	char        	netpath[MAX_OSPATH];
+	pack_t			*pak;
+	int         	i;
+	int         	findtime;
+	char			*s;
 
 	file_from_pak = 0;
 
- 	if ((i = strchr (filename, '\\') - filename))
+ 	if ((s = strchr (filename, '\\')))
  	{
  		Com_Printf ("COM_FOpenFile: %s should use / to seperate paths, fixing it\n",
  				filename);
  		do
- 			filename[i] = '/';
- 		while ((i = strchr (filename, '\\') - filename));
+ 			*s = '/';
+ 		while ((s = strchr (filename, '\\')));
  	}
  	if (filename[0] == '/')
  	{
