@@ -287,10 +287,15 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 
 	// bound, invert, and shift
 store:
-	if (gl_mtexable && !(gl_mtexcombine_arb || gl_mtexcombine_ext))
-		shift = 7;
-	else
+	if (gl_mtexable) {
+		if (gl_mtexcombine_arb || gl_mtexcombine_ext) { 
+			shift = 9;
+		} else {
+			shift = 7;
+		}
+	} else {
 		shift = 8;
+	}
 
 	switch (gl_lightmap_format) {
 		case GL_RGB:
@@ -391,6 +396,27 @@ R_TextureAnimation (texture_t *base)
 extern int  solidskytexture;
 extern int  alphaskytexture;
 extern float speedscale;							// for top sky and bottom sky
+
+/*
+================
+R_UploadModifiedLightmaps
+================
+*/
+void
+R_UploadModifiedLightmaps (void)
+{
+	int			i;
+	glpoly_t	*p;
+
+	for (i = 0; i < MAX_LIGHTMAPS; i++) {
+		p = lightmap_polys[i];
+		if (!p)
+			continue;
+		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + i);
+		if (lightmap_modified[i])
+			R_UploadModifiedLightmap (i);
+	}
+}
 
 /*
 ================
@@ -753,7 +779,7 @@ DrawTextureChainsMTexCombine (void)
 			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
 			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
 			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2.0);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 4.0);
 			qglEnable (GL_TEXTURE_2D);
 
 			for (; s; s = s->texturechain) {
