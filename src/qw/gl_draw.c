@@ -63,7 +63,7 @@ qpic_t *draw_backtile;
 
 int         translate_texture;
 int         char_texture;
-int         ch_texture;					// crosshair texture
+int         ch_textures[NUM_CROSSHAIRS];			// crosshair texture
 
 typedef struct {
 	int		texnum;
@@ -339,12 +339,11 @@ Draw_Init (void)
 	char_texture = R_LoadTexture ("charset", img, TEX_ALPHA);
 
 	// Keep track of the first crosshair texture
-	ch_texture = texture_extension_number;
 	for (i = 0; i < NUM_CROSSHAIRS; i++)
-		R_LoadPointer (va ("crosshair%i", i), crosshairs[i]);
+		ch_textures[i] = R_LoadPointer (va ("crosshair%i", i), crosshairs[i]);
 
 	/* save a texture slot for translated picture */
-	translate_texture = texture_extension_number++;
+	qglGenTextures(1, &translate_texture);
 
 	/* get the other pics we need */
 	draw_disc = Draw_PicFromWad ("disc");
@@ -542,7 +541,7 @@ Draw_Crosshair (void)
 
 	// FIXME: when textures have structures, fix the hardcoded 32x32 size
 	
-	ctexture = ch_texture + ((crosshair->ivalue - 1) % NUM_CROSSHAIRS);
+	ctexture = ch_textures[((crosshair->ivalue - 1) % NUM_CROSSHAIRS)];
 
 	x1 = (vid.width - 32 * hud_chsize->fvalue) * 0.5
 		* vid.width_2d / vid.width;
@@ -1328,7 +1327,7 @@ R_LoadTexture (const char *identifier, image_t *img, int flags)
 	gltextures = glt;
 
 	strcpy (glt->identifier, identifier);
-	glt->texnum = texture_extension_number++;
+	qglGenTextures(1, &glt->texnum);
 
 setuptexture:
 	glt->width = img->width;
@@ -1392,7 +1391,7 @@ GL_LoadTexture (const char *identifier, Uint width, Uint height, Uint8 *data,
 	gltextures = glt;
 
 	strcpy (glt->identifier, identifier);
-	glt->texnum = texture_extension_number++;
+	qglGenTextures(1, &glt->texnum);
 
 setuptexture:
 	glt->width = width;

@@ -41,7 +41,7 @@ static const char rcsid[] =
 extern model_t *loadmodel;
 
 int         skytexturenum;
-int			skyboxtexnum;
+int			skyboxtexnums[6];
 
 int         solidskytexture;
 int         alphaskytexture;
@@ -500,7 +500,7 @@ R_LoadSkys (void)
 			return false;
 		}
 
-		qglBindTexture (GL_TEXTURE_2D, skyboxtexnum+i);
+		qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[i]);
 		qglTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height,
 				0, GL_RGBA, GL_UNSIGNED_BYTE, img->pixels);
 
@@ -550,7 +550,7 @@ R_DrawSkyBox (void)
 	// Brute force method
 
 	// right
-	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 0);
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[0]);
 	SKYBOXVERT (0,  1,  1,  1, 1, 0);
 	SKYBOXVERT (1,  1,  1, -1, 1, 1);
 	SKYBOXVERT (2, -1,  1, -1, 0, 1);
@@ -560,7 +560,7 @@ R_DrawSkyBox (void)
 	TWI_PostVDraw ();
 
 	// back
-	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 1);
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[1]);
 	SKYBOXVERT (0, -1,  1,  1, 1, 0);
 	SKYBOXVERT (1, -1,  1, -1, 1, 1);
 	SKYBOXVERT (2, -1, -1, -1, 0, 1);
@@ -570,7 +570,7 @@ R_DrawSkyBox (void)
 	TWI_PostVDraw ();
 
 	// left
-	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 2);
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[2]);
 	SKYBOXVERT (0, -1, -1,  1, 1, 0);
 	SKYBOXVERT (1, -1, -1, -1, 1, 1);
 	SKYBOXVERT (2,  1, -1, -1, 0, 1);
@@ -580,7 +580,7 @@ R_DrawSkyBox (void)
 	TWI_PostVDraw ();
 
 	// front
-	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 3);
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[3]);
 	SKYBOXVERT (0,  1, -1,  1, 1, 0);
 	SKYBOXVERT (1,  1, -1, -1, 1, 1);
 	SKYBOXVERT (2,  1,  1, -1, 0, 1);
@@ -590,7 +590,7 @@ R_DrawSkyBox (void)
 	TWI_PostVDraw ();
 
 	// up
-	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 4);
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[4]);
 	SKYBOXVERT (0,  1, -1,  1, 1, 0);
 	SKYBOXVERT (1,  1,  1,  1, 1, 1);
 	SKYBOXVERT (2, -1,  1,  1, 0, 1);
@@ -600,7 +600,7 @@ R_DrawSkyBox (void)
 	TWI_PostVDraw ();
 
 	// down
-	qglBindTexture (GL_TEXTURE_2D, skyboxtexnum + 5);
+	qglBindTexture (GL_TEXTURE_2D, skyboxtexnums[5]);
 	SKYBOXVERT (0,  1,  1, -1, 1, 0);
 	SKYBOXVERT (1,  1, -1, -1, 1, 1);
 	SKYBOXVERT (2, -1, -1, -1, 0, 1);
@@ -656,7 +656,7 @@ R_InitSky (texture_t *mt, Uint8 *pixels)
 
 
 	if (!solidskytexture)
-		solidskytexture = texture_extension_number++;
+		qglGenTextures(1, &solidskytexture);
 	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_solid_format, 128, 128, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, trans);
@@ -675,7 +675,7 @@ R_InitSky (texture_t *mt, Uint8 *pixels)
 		}
 
 	if (!alphaskytexture)
-		alphaskytexture = texture_extension_number++;
+		qglGenTextures(1, &alphaskytexture);
 	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 128, 128, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, trans);
