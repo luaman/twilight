@@ -341,7 +341,7 @@ CL_NewTempEntity (void)
 	ent->common.real_ent = ent;
 	num_temp_entities++;
 
-	V_AddEntity ( ent );
+	R_AddEntity ( &ent->common );
 	return ent;
 }
 

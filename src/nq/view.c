@@ -543,23 +543,6 @@ V_CalcIntermissionRefdef (void)
 		v_iyaw_level->fvalue;
 }
 
-void
-V_AddEntity ( entity_t *ent )
-{
-	if ( r_refdef.num_entities >= MAX_VISEDICTS ) {
-		Sys_Error ("ERROR! Out of entitys!");
-		return;
-	}
-
-	r_refdef.entities[r_refdef.num_entities++] = &ent->common;
-}
-
-void
-V_ClearEntities ( void )
-{
-	r_refdef.num_entities = 0;
-}
-
 static void
 V_CalcRefdef (void)
 {

@@ -373,8 +373,6 @@ void V_UpdatePalette (void);
 void V_Register (void);
 void V_ParseDamage (void);
 void V_SetContentsColor (int contents);
-void V_AddEntity ( entity_t *ent );
-void V_ClearEntities ( void );
 
 /*
  * cl_tent

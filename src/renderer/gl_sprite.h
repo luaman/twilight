@@ -24,32 +24,14 @@
 	$Id$
 */
 
-#ifndef __R_PART_H
-#define __R_PART_H
+#ifndef __GL_SPRITE_H
+#define __GL_SPRITE_H
 
 #include "qtypes.h"
 #include "gl_info.h"
-#include "entities.h"
 
-void R_Torch (entity_common_t *ent, qboolean torch2);
+mspriteframe_t *R_GetSpriteFrame (entity_common_t *e);
+void R_DrawOpaqueSpriteModels (void);
 
-void R_ParseParticleEffect (void);
-void R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count);
-void R_RocketTrail (vec3_t start, vec3_t end);
-void R_Lightning (vec3_t start, vec3_t end, float die);
-void R_ParticleTrail (entity_common_t *ent);
-
-void R_EntityParticles (entity_common_t *ent);
-void R_BlobExplosion (vec3_t org);
-void R_ParticleExplosion (vec3_t org);
-void R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength);
-void R_LavaSplash (vec3_t org);
-void R_RailTrail (vec3_t start, vec3_t end);
-
-void R_InitParticles (void);
-void R_ClearParticles (void);
-void R_MoveParticles (void);
-void R_DrawParticles (void);
-
-#endif // __R_PART_H
+#endif // __GL_SPRITE_H
 

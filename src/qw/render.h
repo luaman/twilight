@@ -36,6 +36,7 @@
 #include "vis.h"
 #include "gl_info.h"
 #include "gl_arrays.h"
+#include "entities.h"
 
 #define	TOP_RANGE		16				// soldier uniform colors
 #define	BOTTOM_RANGE	96
@@ -60,23 +61,6 @@ typedef struct entity_s {
 	entity_common_t	common;
 } entity_t;
 
-#define MAX_ENTITIES	1024
-
-typedef struct {
-	vec3_t			vieworg;
-	vec3_t			viewangles;
-
-	float			fov_x, fov_y;
-
-	int				num_entities;
-	entity_common_t	*entities[MAX_ENTITIES];
-} refdef_t;
-
-
-//
-// refresh
-//
-extern refdef_t r_refdef;
 
 extern struct texture_s *r_notexture;
 extern struct texture_s *r_notexture_water;
@@ -86,8 +70,6 @@ extern entity_t r_worldentity;
 void R_Init_Cvars (void);
 void R_Init (void);
 
-// must set r_refdef first
-// called whenever r_refdef or vid change
 void R_RenderView (void);
 
 // called at level load
@@ -153,7 +135,6 @@ extern vec3_t r_origin;
 /*
  * screen size info
  */
-extern refdef_t r_refdef;
 extern mleaf_t *r_viewleaf, *r_oldviewleaf;
 
 extern vec3_t modelorg;

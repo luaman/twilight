@@ -47,7 +47,7 @@ twilight_qw_SOURCES= \
 	cl_model.c cl_parse.c cl_pred.c cl_tent.c client.h \
 	common.c \
 	gl_draw.c gl_ngraph.c gl_rlight.c \
-	gl_rmain.c gl_rsurf.c gl_screen.c \
+	gl_rmain.c gl_screen.c \
 	info.c \
 	menu.c net.h net_chan.c net_udp.c pmove.c pmovetst.c protocol.h \
 	render.h screen.h skin.c \
