@@ -37,7 +37,6 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <ctype.h>
 
 #include "bothdefs.h"
 #include "cmd.h"
@@ -426,7 +425,7 @@ MSG_WriteString (sizebuf_t *sb, char *s)
 	if (!s)
 		SZ_Write (sb, "", 1);
 	else
-		SZ_Write (sb, s, Q_strlen (s) + 1);
+		SZ_Write (sb, s, strlen (s) + 1);
 }
 
 void
@@ -739,7 +738,7 @@ SZ_GetSpace (sizebuf_t *buf, int length)
 void
 SZ_Write (sizebuf_t *buf, void *data, int length)
 {
-	Q_memcpy (SZ_GetSpace (buf, length), data, length);
+	memcpy (SZ_GetSpace (buf, length), data, length);
 }
 
 void
@@ -747,13 +746,13 @@ SZ_Print (sizebuf_t *buf, char *data)
 {
 	int         len;
 
-	len = Q_strlen (data) + 1;
+	len = strlen (data) + 1;
 
 	if (!buf->cursize || buf->data[buf->cursize - 1])
-		Q_memcpy ((byte *) SZ_GetSpace (buf, len), data, len);	// no trailing
+		memcpy ((byte *) SZ_GetSpace (buf, len), data, len);	// no trailing
 	// 0
 	else
-		Q_memcpy ((byte *) SZ_GetSpace (buf, len - 1) - 1, data, len);	// write 
+		memcpy ((byte *) SZ_GetSpace (buf, len - 1) - 1, data, len);	// write 
 																		// 
 	// 
 	// 
@@ -845,7 +844,7 @@ COM_FileBase (char *in, char *out)
 	if (dot == NULL)
 		dot = s;
 	if (dot - slash < 2)
-		Q_strcpy (out,"?model?");
+		strcpy (out,"?model?");
 	else
 	{
 		while (slash < dot)
@@ -869,7 +868,7 @@ COM_DefaultExtension (char *path, char *extension)
 // if path doesn't have a .EXT, append extension
 // (extension should include the .)
 //
-	src = path + Q_strlen (path) - 1;
+	src = path + strlen (path) - 1;
 
 	while (*src != '/' && src != path) {
 		if (*src == '.')
@@ -877,7 +876,7 @@ COM_DefaultExtension (char *path, char *extension)
 		src--;
 	}
 
-	Q_strcat (path, extension);
+	strcat (path, extension);
 }
 
 //============================================================================
@@ -963,7 +962,7 @@ COM_CheckParm (char *parm)
 		if (!com_argv[i])
 			continue;					// NEXTSTEP sometimes clears appkit
 		// vars.
-		if (!Q_strcmp (parm, com_argv[i]))
+		if (!strcmp (parm, com_argv[i]))
 			return i;
 	}
 
@@ -1015,7 +1014,7 @@ COM_InitArgv (int argc, char **argv)
 	for (com_argc = 0; (com_argc < MAX_NUM_ARGVS) && (com_argc < argc);
 		 com_argc++) {
 		largv[com_argc] = argv[com_argc];
-		if (!Q_strcmp ("-safe", argv[com_argc]))
+		if (!strcmp ("-safe", argv[com_argc]))
 			safe = true;
 	}
 
@@ -1360,7 +1359,7 @@ COM_FOpenFile (char *filename, FILE ** file)
 			// look through all the pak file elements
 			pak = search->pack;
 			for (i = 0; i < pak->numfiles; i++)
-				if (!Q_strcmp (pak->files[i].name, filename)) {	// found it!
+				if (!strcmp (pak->files[i].name, filename)) {	// found it!
 					Con_DPrintf ("PackFile: %s : %s\n", pak->filename,
 								 filename);
 					// open a new file on the pakfile
@@ -1546,13 +1545,13 @@ COM_LoadPackFile (char *packfile)
 
 // parse the directory
 	for (i = 0; i < numpackfiles; i++) {
-		Q_strcpy (newfiles[i].name, info[i].name);
+		strcpy (newfiles[i].name, info[i].name);
 		newfiles[i].filepos = LittleLong (info[i].filepos);
 		newfiles[i].filelen = LittleLong (info[i].filelen);
 	}
 
 	pack = Z_Malloc (sizeof (pack_t));
-	Q_strcpy (pack->filename, packfile);
+	strcpy (pack->filename, packfile);
 	pack->handle = packhandle;
 	pack->numfiles = numpackfiles;
 	pack->files = newfiles;
@@ -1583,11 +1582,11 @@ COM_AddDirectory (char *indir)
 	dir = Sys_ExpandPath (indir);
 	Con_Printf ("COM_AddDirectory: Adding %s\n", dir);
 
-	if ((p = Q_strrchr (dir, '/')) != NULL)
-		Q_strcpy (gamedirfile, ++p);
+	if ((p = strrchr (dir, '/')) != NULL)
+		strcpy (gamedirfile, ++p);
 	else
-		Q_strcpy (gamedirfile, p);
-	Q_strcpy (com_gamedir, dir);
+		strcpy (gamedirfile, p);
+	strcpy (com_gamedir, dir);
 	Sys_mkdir (com_gamedir);
 
 //
@@ -1595,7 +1594,7 @@ COM_AddDirectory (char *indir)
 //
 	search = malloc (sizeof (searchpath_t));
 	search->pack = NULL;
-	Q_strcpy (search->filename, dir);
+	strcpy (search->filename, dir);
 	search->next = com_searchpaths;
 	com_searchpaths = search;
 
@@ -1630,7 +1629,7 @@ COM_AddGameDirectory (char *dir)
 	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
 	COM_AddDirectory (va ("%s/%s", fs_sharepath->string, dir));
 
-	if (Q_strcmp (fs_userpath->string, fs_sharepath->string) != 0) {
+	if (strcmp (fs_userpath->string, fs_sharepath->string) != 0) {
 		// only do this if the share path is not the same as the base path
 		d = va ("%s/%s", fs_userpath->string, dir);
 		Sys_mkdir (d);
@@ -1651,16 +1650,16 @@ COM_Gamedir (char *dir)
 {
 	searchpath_t *next;
 
-	if (Q_strstr (dir, "..") || Q_strstr (dir, "/")
-		|| Q_strstr (dir, "\\") || Q_strstr (dir, ":")) {
+	if (strstr (dir, "..") || strstr (dir, "/")
+		|| strstr (dir, "\\") || strstr (dir, ":")) {
 		Con_Printf ("Gamedir should be a single filename, not a path\n");
 		return;
 	}
 
-	if (!Q_strcmp (gamedirfile, dir))
+	if (!strcmp (gamedirfile, dir))
 		return;							// still the same
 
-	Q_strcpy (gamedirfile, dir);
+	strcpy (gamedirfile, dir);
 
 	// 
 	// free up any current game dir info
@@ -1684,7 +1683,7 @@ COM_Gamedir (char *dir)
 	// 
 	Cache_Flush ();
 
-	if (!Q_strcmp (dir, "id1") || !Q_strcmp (dir, "qw"))
+	if (!strcmp (dir, "id1") || !strcmp (dir, "qw"))
 		return;
 
 	COM_AddGameDirectory (dir);
@@ -1709,7 +1708,7 @@ COM_InitFilesystem (void)
 		Cvar_Set (fs_userpath, com_argv[i + 1]);
 
 // Make sure fs_sharepath is set to something useful
-	if (!Q_strlen (fs_sharepath->string))
+	if (!strlen (fs_sharepath->string))
 		Cvar_Set (fs_sharepath, fs_userpath->string);
 
 //
@@ -1772,7 +1771,7 @@ Info_ValueForKey (char *s, char *key)
 		}
 		*o = 0;
 
-		if (!Q_strcmp (key, pkey))
+		if (!strcmp (key, pkey))
 			return value[valueindex];
 
 		if (!*s)
@@ -1789,7 +1788,7 @@ Info_RemoveKey (char *s, char *key)
 	char        value[512];
 	char       *o;
 
-	if (Q_strstr (key, "\\")) {
+	if (strstr (key, "\\")) {
 		Con_Printf ("Can't use a key with a \\\n");
 		return;
 	}
@@ -1815,8 +1814,8 @@ Info_RemoveKey (char *s, char *key)
 		}
 		*o = 0;
 
-		if (!Q_strcmp (key, pkey)) {
-			Q_strcpy (start, s);		// remove this part
+		if (!strcmp (key, pkey)) {
+			strcpy (start, s);		// remove this part
 			return;
 		}
 
@@ -1874,17 +1873,17 @@ Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
 	char        new[1024], *v;
 	int         c;
 
-	if (Q_strstr (key, "\\") || Q_strstr (value, "\\")) {
+	if (strstr (key, "\\") || strstr (value, "\\")) {
 		Con_Printf ("Can't use keys or values with a \\\n");
 		return;
 	}
 
-	if (Q_strstr (key, "\"") || Q_strstr (value, "\"")) {
+	if (strstr (key, "\"") || strstr (value, "\"")) {
 		Con_Printf ("Can't use keys or values with a \"\n");
 		return;
 	}
 
-	if (Q_strlen (key) > 63 || Q_strlen (value) > 63) {
+	if (strlen (key) > 63 || strlen (value) > 63) {
 		Con_Printf ("Keys and values must be < 64 characters.\n");
 		return;
 	}
@@ -1893,33 +1892,33 @@ Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
 		// key exists, make sure we have enough room for new value, if we
 		// don't,
 		// don't change it!
-		if (Q_strlen (value) - Q_strlen (v) + Q_strlen (s) > maxsize) {
+		if (strlen (value) - strlen (v) + strlen (s) > maxsize) {
 			Con_Printf ("Info string length exceeded\n");
 			return;
 		}
 	}
 	Info_RemoveKey (s, key);
-	if (!value || !Q_strlen (value))
+	if (!value || !strlen (value))
 		return;
 
 	snprintf (new, sizeof (new), "\\%s\\%s", key, value);
 
-	if ((int) (Q_strlen (new) + Q_strlen (s)) > maxsize) {
+	if ((int) (strlen (new) + strlen (s)) > maxsize) {
 		Con_Printf ("Info string length exceeded\n");
 		return;
 	}
 	// only copy ascii values
-	s += Q_strlen (s);
+	s += strlen (s);
 	v = new;
 	while (*v) {
 		c = (unsigned char) *v++;
 		// client only allows highbits on name
-		if (Q_strcasecmp (key, "name") != 0) {
+		if (strcasecmp (key, "name") != 0) {
 			c &= 127;
 			if (c < 32 || c > 127)
 				continue;
 			// auto lowercase team
-			if (Q_strcasecmp (key, "team") == 0)
+			if (strcasecmp (key, "team") == 0)
 				c = tolower (c);
 		}
 //      c &= 127;       // strip high bits

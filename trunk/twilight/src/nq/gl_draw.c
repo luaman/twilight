@@ -133,13 +133,13 @@ Draw_CachePic (char *path)
 	glpic_t    *gl;
 
 	for (pic = menu_cachepics, i = 0; i < menu_numcachepics; pic++, i++)
-		if (!Q_strcmp (path, pic->name))
+		if (!strcmp (path, pic->name))
 			return &pic->pic;
 
 	if (menu_numcachepics == MAX_CACHED_PICS)
 		Sys_Error ("menu_numcachepics == MAX_CACHED_PICS");
 	menu_numcachepics++;
-	Q_strcpy (pic->name, path);
+	strcpy (pic->name, path);
 
 //
 // load the pic from disk
@@ -152,7 +152,7 @@ Draw_CachePic (char *path)
 	// HACK HACK HACK --- we need to keep the bytes for
 	// the translatable player picture just for the menu
 	// configuration dialog
-	if (!Q_strcmp (path, "gfx/menuplyr.lmp"))
+	if (!strcmp (path, "gfx/menuplyr.lmp"))
 		memcpy (menuplyr_pixels, dat->data, dat->width * dat->height);
 
 	pic->pic.width = dat->width;
@@ -219,7 +219,7 @@ Set_TextureMode_f (struct cvar_s *var)
 	gltexture_t *glt;
 
 	for (i = 0; i < 6; i++) {
-		if (!Q_strcasecmp (modes[i].name, var->string))
+		if (!strcasecmp (modes[i].name, var->string))
 			break;
 	}
 	if (i == 6) {
@@ -257,8 +257,8 @@ Draw_Init_Cvars (void)
 	gl_texturemode = Cvar_Get ("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE, Set_TextureMode_f);
 
 	// 3dfx can only handle 256 wide textures
-	if (!Q_strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
-		Q_strstr ((char *) gl_renderer, "Glide"))
+	if (!strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
+		strstr ((char *) gl_renderer, "Glide"))
 		Cvar_Set (gl_max_size, "256");
 }
 
@@ -301,7 +301,7 @@ Draw_Init (void)
 
 	// hack the version number directly into the pic
 	snprintf (ver, sizeof (ver), "twilight %-7s", VERSION);
-	y = Q_strlen (ver);
+	y = strlen (ver);
 	dest = cb->data + 320 * 186 + 320 - 11 - 8 * y;
 
 	for (x = 0; x < y; x++)
@@ -790,7 +790,7 @@ GL_FindTexture (char *identifier)
 	gltexture_t *glt;
 
 	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
-		if (!Q_strcmp (identifier, glt->identifier))
+		if (!strcmp (identifier, glt->identifier))
 			return gltextures[i].texnum;
 	}
 
@@ -1171,7 +1171,7 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 		crc = CRC_Block (data, width*height);
 
 		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
-			if (!Q_strcmp (identifier, glt->identifier)) {
+			if (!strcmp (identifier, glt->identifier)) {
 
 				if (width == glt->width && height == glt->height && crc == glt->crc)
 					return gltextures[i].texnum;
@@ -1188,7 +1188,7 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 		Sys_Error ("GL_LoadTexture: numgltextures == MAX_GLTEXTURES");
 
 	numgltextures++;
-	Q_strcpy (glt->identifier, identifier);
+	strcpy (glt->identifier, identifier);
 	glt->texnum = texture_extension_number++;
 
 setuptexture:

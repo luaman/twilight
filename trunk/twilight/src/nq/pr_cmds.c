@@ -55,7 +55,7 @@ PF_VarString (int first)
 
 	out[0] = 0;
 	for (i = first; i < pr_argc; i++) {
-		Q_strcat (out, G_STRING ((OFS_PARM0 + i * 3)));
+		strcat (out, G_STRING ((OFS_PARM0 + i * 3)));
 	}
 	return out;
 }
@@ -264,7 +264,7 @@ PF_setmodel (void)
 
 // check to see if model was properly precached
 	for (i = 0, check = sv.model_precache; *check; i++, check++)
-		if (!Q_strcmp (*check, m))
+		if (!strcmp (*check, m))
 			break;
 
 	if (!*check)
@@ -541,7 +541,7 @@ PF_ambientsound (void)
 
 // check to see if samp was properly precached
 	for (soundnum = 0, check = sv.sound_precache; *check; check++, soundnum++)
-		if (!Q_strcmp (*check, samp))
+		if (!strcmp (*check, samp))
 			break;
 
 	if (!*check) {
@@ -1047,7 +1047,7 @@ PF_Find (void)
 		t = E_STRING (ed, f);
 		if (!t)
 			continue;
-		if (!Q_strcmp (t, s)) {
+		if (!strcmp (t, s)) {
 			if (first == (edict_t *) sv.edicts)
 				first = ed;
 			else if (second == (edict_t *) sv.edicts)
@@ -1088,7 +1088,7 @@ PF_Find (void)
 		t = E_STRING (ed, f);
 		if (!t)
 			continue;
-		if (!Q_strcmp (t, s)) {
+		if (!strcmp (t, s)) {
 			RETURN_EDICT (ed);
 			return;
 		}
@@ -1131,7 +1131,7 @@ PF_precache_sound (void)
 			sv.sound_precache[i] = s;
 			return;
 		}
-		if (!Q_strcmp (sv.sound_precache[i], s))
+		if (!strcmp (sv.sound_precache[i], s))
 			return;
 	}
 	PR_RunError ("PF_precache_sound: overflow");
@@ -1157,7 +1157,7 @@ PF_precache_model (void)
 			sv.models[i] = Mod_ForName (s, true);
 			return;
 		}
-		if (!Q_strcmp (sv.model_precache[i], s))
+		if (!strcmp (sv.model_precache[i], s))
 			return;
 	}
 	PR_RunError ("PF_precache_model: overflow");

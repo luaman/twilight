@@ -52,7 +52,7 @@ AC_CHECK_FUNCS(
 	strcasecmp _stricmp strncasecmp _strnicmp
 )
 
-AC_CHECK_HEADERS(unistd.h fcntl.h)
+AC_CHECK_HEADERS(unistd.h fcntl.h windef.h)
 
 
 dnl Checks for paths

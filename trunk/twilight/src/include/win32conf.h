@@ -1,7 +1,7 @@
 /*
 	$Id$
 
-	System configuration
+	System configuration for Win32 without autoconf
 */
 #ifndef __WIN32CONF_H
 #define __WIN32CONF_H
@@ -27,6 +27,7 @@
 #define HAVE__VSNPRINTF 1
 
 #define HAVE_FCNTL_H 1
+#define HAVE_WINDEF_H 1
 
 #include "compat.h"
 

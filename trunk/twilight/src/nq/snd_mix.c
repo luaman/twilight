@@ -282,7 +282,7 @@ S_PaintChannels (int endtime)
 			end = paintedtime + PAINTBUFFER_SIZE;
 
 		// clear the paint buffer
-		Q_memset (paintbuffer, 0,
+		memset (paintbuffer, 0,
 				  (end - paintedtime) * sizeof (portable_samplepair_t));
 
 		// paint in the channels.

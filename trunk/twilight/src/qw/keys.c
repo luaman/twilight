@@ -192,9 +192,9 @@ CheckForCommand (void)
 	command[i] = 0;
 
 	cmd = Cmd_CompleteCommand (command);
-	if (!cmd || Q_strcmp (cmd, command))
+	if (!cmd || strcmp (cmd, command))
 		cmd = Cvar_TabComplete (command);
-	if (!cmd || Q_strcmp (cmd, command))
+	if (!cmd || strcmp (cmd, command))
 		return false;					// just a chat message
 	return true;
 }
@@ -213,8 +213,8 @@ CompleteCommand (void)
 		cmd = Cvar_TabComplete (s);
 	if (cmd) {
 		key_lines[edit_line][1] = '/';
-		Q_strcpy (key_lines[edit_line] + 2, cmd);
-		key_linepos = Q_strlen (cmd) + 2;
+		strcpy (key_lines[edit_line] + 2, cmd);
+		key_linepos = strlen (cmd) + 2;
 		key_lines[edit_line][key_linepos] = ' ';
 		key_linepos++;
 		key_lines[edit_line][key_linepos] = 0;
@@ -280,8 +280,8 @@ Key_Console (int key)
 		} while (history_line != edit_line && !key_lines[history_line][1]);
 		if (history_line == edit_line)
 			history_line = (edit_line + 1) & 31;
-		Q_strcpy (key_lines[edit_line], key_lines[history_line]);
-		key_linepos = Q_strlen (key_lines[edit_line]);
+		strcpy (key_lines[edit_line], key_lines[history_line]);
+		key_linepos = strlen (key_lines[edit_line]);
 		return;
 	}
 
@@ -296,8 +296,8 @@ Key_Console (int key)
 			key_lines[edit_line][0] = ']';
 			key_linepos = 1;
 		} else {
-			Q_strcpy (key_lines[edit_line], key_lines[history_line]);
-			key_linepos = Q_strlen (key_lines[edit_line]);
+			strcpy (key_lines[edit_line], key_lines[history_line]);
+			key_linepos = strlen (key_lines[edit_line]);
 		}
 		return;
 	}
@@ -333,15 +333,15 @@ Key_Console (int key)
 				clipText = GlobalLock (th);
 				if (clipText) {
 					textCopied = malloc (GlobalSize (th) + 1);
-					Q_strcpy (textCopied, clipText);
-					/* Substitutes a NULL for every token */Q_strtok (textCopied,
+					strcpy (textCopied, clipText);
+					/* Substitutes a NULL for every token */strtok (textCopied,
 																	 "\n\r\b");
-					i = Q_strlen (textCopied);
+					i = strlen (textCopied);
 					if (i + key_linepos >= MAXCMDLINE)
 						i = MAXCMDLINE - key_linepos;
 					if (i > 0) {
 						textCopied[i] = 0;
-						Q_strcat (key_lines[edit_line], textCopied);
+						strcat (key_lines[edit_line], textCopied);
 						key_linepos += i;;
 					}
 					free (textCopied);
@@ -437,7 +437,7 @@ Key_StringToKeynum (char *str)
 		return str[0];
 
 	for (kn = keynames; kn->name; kn++) {
-		if (!Q_strcasecmp (str, kn->name))
+		if (!strcasecmp (str, kn->name))
 			return kn->keynum;
 	}
 	return -1;
@@ -494,9 +494,9 @@ Key_SetBinding (int keynum, char *binding)
 		keybindings[keynum] = NULL;
 	}
 // allocate memory for new binding
-	l = Q_strlen (binding);
+	l = strlen (binding);
 	new = Z_Malloc (l + 1);
-	Q_strcpy (new, binding);
+	strcpy (new, binding);
 	new[l] = 0;
 	keybindings[keynum] = new;
 }
@@ -569,9 +569,9 @@ Key_Bind_f (void)
 // copy the rest of the command line
 	cmd[0] = 0;							// start out with a null string
 	for (i = 2; i < c; i++) {
-		Q_strcat (cmd, Cmd_Argv (i));
+		strcat (cmd, Cmd_Argv (i));
 		if (i != (c - 1))
-			Q_strcat (cmd, " ");
+			strcat (cmd, " ");
 	}
 
 	Key_SetBinding (b, cmd);

@@ -154,13 +154,13 @@ Draw_CachePic (char *path)
 	glpic_t    *gl;
 
 	for (pic = menu_cachepics, i = 0; i < menu_numcachepics; pic++, i++)
-		if (!Q_strcmp (path, pic->name))
+		if (!strcmp (path, pic->name))
 			return &pic->pic;
 
 	if (menu_numcachepics == MAX_CACHED_PICS)
 		Sys_Error ("menu_numcachepics == MAX_CACHED_PICS");
 	menu_numcachepics++;
-	Q_strcpy (pic->name, path);
+	strcpy (pic->name, path);
 
 //
 // load the pic from disk
@@ -173,7 +173,7 @@ Draw_CachePic (char *path)
 	// HACK HACK HACK --- we need to keep the bytes for
 	// the translatable player picture just for the menu
 	// configuration dialog
-	if (!Q_strcmp (path, "gfx/menuplyr.lmp"))
+	if (!strcmp (path, "gfx/menuplyr.lmp"))
 		memcpy (menuplyr_pixels, dat->data, dat->width * dat->height);
 
 	pic->pic.width = dat->width;
@@ -240,7 +240,7 @@ Set_TextureMode_f (struct cvar_s *var)
 	gltexture_t *glt;
 
 	for (i = 0; i < 6; i++) {
-		if (!Q_strcasecmp (modes[i].name, var->string))
+		if (!strcasecmp (modes[i].name, var->string))
 			break;
 	}
 	if (i == 6) {
@@ -279,8 +279,8 @@ Draw_Init_Cvars (void)
 	gl_texturemode = Cvar_Get ("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE, Set_TextureMode_f);
 
 	// 3dfx can only handle 256 wide textures
-	if (!Q_strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
-		!Q_strncasecmp ((char *) gl_renderer, "Mesa", 4))
+	if (!strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
+		!strncasecmp ((char *) gl_renderer, "Mesa", 4))
 		Cvar_Set (gl_max_size, "256");
 }
 
@@ -324,8 +324,8 @@ Draw_Init (void)
 	SwapPic (cb);
 
 	snprintf (ver, sizeof (ver), "twilight %s", VERSION);
-	dest = cb->data + 320 + 320 * 186 - 11 - 8 * Q_strlen (ver);
-	for (x = 0; x < Q_strlen (ver); x++)
+	dest = cb->data + 320 + 320 * 186 - 11 - 8 * strlen (ver);
+	for (x = 0; x < strlen (ver); x++)
 		Draw_CharToConback (ver[x], dest + (x << 3));
 
 	conback->width = cb->width;
@@ -722,7 +722,7 @@ Draw_ConsoleBackground (int lines)
 	y = lines - 14;
 	if (!cls.download) {
 		snprintf (ver, sizeof (ver), "Twilight %s QuakeWorld", VERSION);
-		x = vid.conwidth - (Q_strlen (ver) * 8 + 11) -
+		x = vid.conwidth - (strlen (ver) * 8 + 11) -
 			(vid.conwidth * 8 / 320) * 7;
 
 		Draw_Alt_String (x, y, ver);
@@ -888,7 +888,7 @@ GL_FindTexture (char *identifier)
 	gltexture_t *glt;
 
 	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
-		if (!Q_strcmp (identifier, glt->identifier))
+		if (!strcmp (identifier, glt->identifier))
 			return gltextures[i].texnum;
 	}
 
@@ -1176,7 +1176,7 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 		crc = CRC_Block (data, width*height);
 
 		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
-			if (!Q_strcmp (identifier, glt->identifier)) {
+			if (!strcmp (identifier, glt->identifier)) {
 
 				if (width == glt->width && height == glt->height && crc == glt->crc)
 					return gltextures[i].texnum;
@@ -1189,7 +1189,7 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 	}
 
 	numgltextures++;
-	Q_strcpy (glt->identifier, identifier);
+	strcpy (glt->identifier, identifier);
 	glt->texnum = texture_extension_number++;
 
 setuptexture:

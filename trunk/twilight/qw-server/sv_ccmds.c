@@ -332,13 +332,13 @@ SV_Map_f (void)
 		Con_Printf ("map <levelname> : continue game on a new level\n");
 		return;
 	}
-	Q_strlcpy (level, Cmd_Argv (1), sizeof (level));
+	strlcpy (level, Cmd_Argv (1), sizeof (level));
 
 #if 0
 	if (!strcmp (level, "e1m8")) {		// QuakeWorld can't go to e1m8
 		SV_BroadcastPrintf (PRINT_HIGH,
 							"can't go to low grav level in QuakeWorld...\n");
-		Q_strcpy (level, "e1m5");
+		strcpy (level, "e1m5");
 	}
 #endif
 
@@ -514,15 +514,15 @@ SV_ConSay_f (void)
 	if (Cmd_Argc () < 2)
 		return;
 
-	Q_strcpy (text, "console: ");
+	strcpy (text, "console: ");
 	p = Cmd_Args ();
 
 	if (*p == '"') {
 		p++;
-		p[Q_strlen (p) - 1] = 0;
+		p[strlen (p) - 1] = 0;
 	}
 
-	Q_strcat (text, p);
+	strcat (text, p);
 
 	for (j = 0, client = svs.clients; j < MAX_CLIENTS; j++, client++) {
 		if (client->state != cs_spawned)
@@ -823,7 +823,7 @@ SV_Snap (int uid)
 		Con_Printf ("Snap: Couldn't create a file, clean some out.\n");
 		return;
 	}
-	Q_strlcpy (cl->uploadfn, checkname, sizeof (cl->uploadfn));
+	strlcpy (cl->uploadfn, checkname, sizeof (cl->uploadfn));
 
 	memcpy (&cl->snap_from, &net_from, sizeof (net_from));
 	if (sv_redirected != RD_NONE)

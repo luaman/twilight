@@ -174,7 +174,7 @@ Netchan_OutOfBandPrint (netadr_t adr, char *format, ...)
 	va_end (argptr);
 
 
-	Netchan_OutOfBand (adr, Q_strlen (string), (byte *) string);
+	Netchan_OutOfBand (adr, strlen (string), (byte *) string);
 }
 
 

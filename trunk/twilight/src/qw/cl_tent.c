@@ -107,8 +107,8 @@ CL_ClearTEnts
 void
 CL_ClearTEnts (void)
 {
-	Q_memset (&cl_beams, 0, sizeof (cl_beams));
-	Q_memset (&cl_explosions, 0, sizeof (cl_explosions));
+	memset (&cl_beams, 0, sizeof (cl_beams));
+	memset (&cl_explosions, 0, sizeof (cl_explosions));
 }
 
 /*
@@ -362,7 +362,7 @@ CL_NewTempEntity (void)
 	cl_numvisedicts++;
 	ent->keynum = 0;
 
-	Q_memset (ent, 0, sizeof (*ent));
+	memset (ent, 0, sizeof (*ent));
 
 	ent->colormap = vid.colormap;
 	return ent;

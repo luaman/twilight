@@ -156,7 +156,7 @@ SV_StartSound (edict_t *entity, int channel, char *sample, int volume,
 // find precache number for sound
 	for (sound_num = 1; sound_num < MAX_SOUNDS
 		 && sv.sound_precache[sound_num]; sound_num++)
-		if (!Q_strcmp (sample, sv.sound_precache[sound_num]))
+		if (!strcmp (sample, sv.sound_precache[sound_num]))
 			break;
 
 	if (sound_num == MAX_SOUNDS || !sv.sound_precache[sound_num]) {
@@ -287,7 +287,7 @@ SV_ConnectClient (int clientnum)
 	memset (client, 0, sizeof (*client));
 	client->netconnection = netconnection;
 
-	Q_strcpy (client->name, "unconnected");
+	strcpy (client->name, "unconnected");
 	client->active = true;
 	client->spawned = false;
 	client->edict = ent;
@@ -426,7 +426,7 @@ byte       *
 SV_FatPVS (vec3_t org)
 {
 	fatbytes = (sv.worldmodel->numleafs + 31) >> 3;
-	Q_memset (fatpvs, 0, fatbytes);
+	memset (fatpvs, 0, fatbytes);
 	SV_AddToFatPVS (org, sv.worldmodel->nodes);
 	return fatpvs;
 }
@@ -915,7 +915,7 @@ SV_ModelIndex (char *name)
 		return 0;
 
 	for (i = 0; i < MAX_MODELS && sv.model_precache[i]; i++)
-		if (!Q_strcmp (sv.model_precache[i], name))
+		if (!strcmp (sv.model_precache[i], name))
 			return i;
 	if (i == MAX_MODELS || !sv.model_precache[i])
 		Sys_Error ("SV_ModelIndex: model %s not precached", name);
@@ -1092,10 +1092,10 @@ SV_SpawnServer (char *server)
 
 	memset (&sv, 0, sizeof (sv));
 
-	Q_strcpy (sv.name, server);
+	strcpy (sv.name, server);
 #ifdef QUAKE2
 	if (startspot)
-		Q_strcpy (sv.startspot, startspot);
+		strcpy (sv.startspot, startspot);
 #endif
 
 // load progs to get entity field count
@@ -1130,7 +1130,7 @@ SV_SpawnServer (char *server)
 
 	sv.time = 1.0;
 
-	Q_strcpy (sv.name, server);
+	strcpy (sv.name, server);
 	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
 	sv.worldmodel = Mod_ForName (sv.modelname, false);
 	if (!sv.worldmodel) {

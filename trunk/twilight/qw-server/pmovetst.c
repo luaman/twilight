@@ -366,7 +366,7 @@ PM_PlayerMove (vec3_t start, vec3_t end)
 	vec3_t      mins, maxs;
 
 // fill in a default trace
-	Q_memset (&total, 0, sizeof (pmtrace_t));
+	memset (&total, 0, sizeof (pmtrace_t));
 	total.fraction = 1;
 	total.ent = -1;
 	VectorCopy (end, total.endpos);
@@ -389,7 +389,7 @@ PM_PlayerMove (vec3_t start, vec3_t end)
 		VectorSubtract (end, offset, end_l);
 
 		// fill in a default trace
-		Q_memset (&trace, 0, sizeof (pmtrace_t));
+		memset (&trace, 0, sizeof (pmtrace_t));
 		trace.fraction = 1;
 		trace.allsolid = true;
 //      trace.startsolid = true;

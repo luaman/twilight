@@ -220,13 +220,13 @@ Mod_FindName (char *name)
 // search the currently loaded models
 //
 	for (i = 0, mod = mod_known; i < mod_numknown; i++, mod++)
-		if (!Q_strcmp (mod->name, name))
+		if (!strcmp (mod->name, name))
 			break;
 
 	if (i == mod_numknown) {
 		if (mod_numknown == MAX_MOD_KNOWN)
 			Sys_Error ("mod_numknown == MAX_MOD_KNOWN");
-		Q_strcpy (mod->name, name);
+		strcpy (mod->name, name);
 		mod->needload = true;
 		mod_numknown++;
 	}
@@ -423,7 +423,7 @@ Mod_LoadTextures (lump_t *l)
 			memcpy (tx+1, (byte *)(tx+1) + 32*31, 32);
 		}
 
-		if (!Q_strncmp (mt->name, "sky", 3) && !isDedicated)
+		if (!strncmp (mt->name, "sky", 3) && !isDedicated)
 			R_InitSky (tx);
 		else {
 			texture_mode = GL_LINEAR_MIPMAP_NEAREST;	// _LINEAR;
@@ -478,7 +478,7 @@ Mod_LoadTextures (lump_t *l)
 			tx2 = loadmodel->textures[j];
 			if (!tx2 || tx2->name[0] != '+')
 				continue;
-			if (Q_strcmp (tx2->name + 2, tx->name + 2))
+			if (strcmp (tx2->name + 2, tx->name + 2))
 				continue;
 
 			num = tx2->name[1];
@@ -829,7 +829,7 @@ Mod_LoadFaces (lump_t *l)
 
 		// set the drawing flags flag
 
-		if (!Q_strncmp (out->texinfo->texture->name, "sky", 3))	// sky
+		if (!strncmp (out->texinfo->texture->name, "sky", 3))	// sky
 		{
 			out->flags |= (SURF_DRAWSKY | SURF_DRAWTILED);
 #ifndef QUAKE2
@@ -838,7 +838,7 @@ Mod_LoadFaces (lump_t *l)
 			continue;
 		}
 
-		if (!Q_strncmp (out->texinfo->texture->name, "*", 1))	// turbulent
+		if (!strncmp (out->texinfo->texture->name, "*", 1))	// turbulent
 		{
 			out->flags |= (SURF_DRAWTURB | SURF_DRAWTILED);
 			for (i = 0; i < 2; i++) {
@@ -1243,7 +1243,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 			snprintf (name, sizeof (name), "*%i", i + 1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
-			Q_strcpy (loadmodel->name, name);
+			strcpy (loadmodel->name, name);
 			mod = loadmodel;
 		}
 	}
@@ -1284,7 +1284,7 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame)
 
 	pdaliasframe = (daliasframe_t *) pin;
 
-	Q_strcpy (frame->name, pdaliasframe->name);
+	strcpy (frame->name, pdaliasframe->name);
 	frame->firstpose = posenum;
 	frame->numposes = 1;
 
@@ -1460,7 +1460,7 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			Mod_FloodFillSkin (skin, pheader->skinwidth, pheader->skinheight);
 
 			// save 8 bit texels for the player model to remap
-			// if (!Q_strcmp(loadmodel->name,"progs/player.mdl")) {
+			// if (!strcmp(loadmodel->name,"progs/player.mdl")) {
 			texels = Hunk_AllocName (s, loadname);
 			pheader->texels[i] = texels - (byte *) pheader;
 			memcpy (texels, (byte *) (pskintype + 1), s);
@@ -1611,11 +1611,11 @@ Mod_FindModelFlags(char *name)
 	for (i = 0; i < nummflags; i++)
 	{
 		if (modelflags[i].len > 0) {
-			if (!Q_strncmp(name, modelflags[i].name, modelflags[i].len))
+			if (!strncmp(name, modelflags[i].name, modelflags[i].len))
 				return modelflags[i].flags;
 		}
 		else {
-			if (!Q_strcmp(name, modelflags[i].name))
+			if (!strcmp(name, modelflags[i].name))
 				return modelflags[i].flags;
 		}
 	}
@@ -1804,7 +1804,7 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 
 	pspriteframe = Hunk_AllocName (sizeof (mspriteframe_t), loadname);
 
-	Q_memset (pspriteframe, 0, sizeof (mspriteframe_t));
+	memset (pspriteframe, 0, sizeof (mspriteframe_t));
 
 	*ppframe = pspriteframe;
 

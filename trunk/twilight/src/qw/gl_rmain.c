@@ -1290,7 +1290,7 @@ R_Mirror (void)
 	if (!mirror)
 		return;
 
-	Q_memcpy (r_base_world_matrix, r_world_matrix, sizeof (r_base_world_matrix));
+	memcpy (r_base_world_matrix, r_world_matrix, sizeof (r_base_world_matrix));
 
 	d = DotProduct (r_refdef.vieworg,
 					mirror_plane->normal) - mirror_plane->dist;

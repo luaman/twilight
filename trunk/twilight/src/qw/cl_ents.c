@@ -79,7 +79,7 @@ CL_AllocDlight (int key)
 		dl = cl_dlights;
 		for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
 			if (dl->key == key) {
-				Q_memset (dl, 0, sizeof (*dl));
+				memset (dl, 0, sizeof (*dl));
 				dl->key = key;
 				return dl;
 			}

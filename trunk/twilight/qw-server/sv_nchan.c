@@ -51,7 +51,7 @@ ClientReliableCheckBlock (client_t *cl, int maxsize)
 		cl->netchan.message.maxsize - maxsize - 1) {
 		// we would probably overflow the buffer, save it for next
 		if (!cl->num_backbuf) {
-			Q_memset (&cl->backbuf, 0, sizeof (cl->backbuf));
+			memset (&cl->backbuf, 0, sizeof (cl->backbuf));
 			cl->backbuf.allowoverflow = true;
 			cl->backbuf.data = cl->backbuf_data[0];
 			cl->backbuf.maxsize = sizeof (cl->backbuf_data[0]);
@@ -68,7 +68,7 @@ ClientReliableCheckBlock (client_t *cl, int maxsize)
 				// client
 				return;
 			}
-			Q_memset (&cl->backbuf, 0, sizeof (cl->backbuf));
+			memset (&cl->backbuf, 0, sizeof (cl->backbuf));
 			cl->backbuf.allowoverflow = true;
 			cl->backbuf.data = cl->backbuf_data[cl->num_backbuf];
 			cl->backbuf.maxsize = sizeof (cl->backbuf_data[cl->num_backbuf]);

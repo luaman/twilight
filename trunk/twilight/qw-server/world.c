@@ -265,7 +265,7 @@ SV_ClearWorld (void)
 {
 	SV_InitBoxHull ();
 
-	Q_memset (sv_areanodes, 0, sizeof (sv_areanodes));
+	memset (sv_areanodes, 0, sizeof (sv_areanodes));
 	sv_numareanodes = 0;
 	SV_CreateAreaNode (0, sv.worldmodel->mins, sv.worldmodel->maxs);
 }
@@ -695,7 +695,7 @@ SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs,
 	hull_t     *hull;
 
 // fill in a default trace
-	Q_memset (&trace, 0, sizeof (trace_t));
+	memset (&trace, 0, sizeof (trace_t));
 	trace.fraction = 1;
 	trace.allsolid = true;
 	VectorCopy (end, trace.endpos);

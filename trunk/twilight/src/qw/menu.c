@@ -743,7 +743,7 @@ M_Gfx_Set (void)
 
 		case 5:
 			for (v = 0; v < 6; v++) {
-				if (Q_strcasecmp (texmodes[v].name, gl_texturemode->string) == 0)
+				if (strcasecmp (texmodes[v].name, gl_texturemode->string) == 0)
 					break;
 			}
 			v++;
@@ -843,14 +843,14 @@ M_FindKeysForCommand (char *command, int *twokeys)
 	char	*b;
 
 	twokeys[0] = twokeys[1] = -1;
-	l = Q_strlen (command);
+	l = strlen (command);
 	count = 0;
 
 	for (j = 0; j < 256; j++) {
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!Q_strncmp (b, command, l)) {
+		if (!strncmp (b, command, l)) {
 			twokeys[count] = j;
 			count++;
 			if (count == 2)
@@ -866,13 +866,13 @@ M_UnbindCommand (char *command)
 	int		l;
 	char	*b;
 
-	l = Q_strlen (command);
+	l = strlen (command);
 
 	for (j = 0; j < 256; j++) {
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!Q_strncmp (b, command, l))
+		if (!strncmp (b, command, l))
 			Key_SetBinding (j, "");
 	}
 }
@@ -901,7 +901,7 @@ M_Keys_Draw (void)
 
 		M_Print (16, y, bindnames[i][1]);
 
-		l = Q_strlen (bindnames[i][0]);
+		l = strlen (bindnames[i][0]);
 
 		M_FindKeysForCommand (bindnames[i][0], keys);
 
@@ -910,7 +910,7 @@ M_Keys_Draw (void)
 		} else {
 			name = Key_KeynumToString (keys[0]);
 			M_Print (140, y, name);
-			x = Q_strlen (name) * 8;
+			x = strlen (name) * 8;
 			if (keys[1] != -1) {
 				M_Print (140 + x + 8, y, "or");
 				M_Print (140 + x + 32, y, Key_KeynumToString (keys[1]));

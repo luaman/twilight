@@ -232,7 +232,7 @@ for a few moments
 void
 SCR_CenterPrint (char *str)
 {
-	Q_strncpy (scr_centerstring, str, sizeof (scr_centerstring) - 1);
+	strncpy (scr_centerstring, str, sizeof (scr_centerstring) - 1);
 	scr_centertime_off = scr_centertime->value;
 	scr_centertime_start = cl.time;
 
@@ -580,9 +580,9 @@ SCR_DrawFPS (void)
 	}
 
 	snprintf (st, sizeof (st), "%3d FPS", lastfps);
-	x = vid.width - Q_strlen (st) * 8 - 8;
+	x = vid.width - strlen (st) * 8 - 8;
 	y = vid.height - sb_lines - 8;
-//  Draw_TileClear(x, y, Q_strlen(st) * 8, 8);
+//  Draw_TileClear(x, y, strlen(st) * 8, 8);
 	Draw_String (x, y, st);
 }
 
@@ -719,7 +719,7 @@ SCR_ScreenShot_f (void)
 // 
 // find a file name to save it to 
 // 
-	Q_strcpy (pcxname, "quake00.tga");
+	strcpy (pcxname, "quake00.tga");
 
 	for (i = 0; i <= 99; i++) {
 		pcxname[5] = i / 10 + '0';
@@ -788,11 +788,11 @@ WritePCXfile (char *filename, byte * data, int width, int height,
 	pcx->ymax = LittleShort ((short) (height - 1));
 	pcx->hres = LittleShort ((short) width);
 	pcx->vres = LittleShort ((short) height);
-	Q_memset (pcx->palette, 0, sizeof (pcx->palette));
+	memset (pcx->palette, 0, sizeof (pcx->palette));
 	pcx->color_planes = 1;				// chunky image
 	pcx->bytes_per_line = LittleShort ((short) width);
 	pcx->palette_type = LittleShort (2);	// not a grey scale
-	Q_memset (pcx->filler, 0, sizeof (pcx->filler));
+	memset (pcx->filler, 0, sizeof (pcx->filler));
 
 // pack the image
 	pack = &pcx->data;
@@ -998,17 +998,17 @@ SCR_RSShot_f (void)
 	}
 
 	time (&now);
-	Q_strcpy (st, ctime (&now));
-	st[Q_strlen (st) - 1] = 0;
-	SCR_DrawStringToSnap (st, newbuf, w - Q_strlen (st) * 8, h - 1, w);
+	strcpy (st, ctime (&now));
+	st[strlen (st) - 1] = 0;
+	SCR_DrawStringToSnap (st, newbuf, w - strlen (st) * 8, h - 1, w);
 
-	Q_strncpy (st, cls.servername, sizeof (st));
+	strncpy (st, cls.servername, sizeof (st));
 	st[sizeof (st) - 1] = 0;
-	SCR_DrawStringToSnap (st, newbuf, w - Q_strlen (st) * 8, h - 11, w);
+	SCR_DrawStringToSnap (st, newbuf, w - strlen (st) * 8, h - 11, w);
 
-	Q_strncpy (st, name->string, sizeof (st));
+	strncpy (st, name->string, sizeof (st));
 	st[sizeof (st) - 1] = 0;
-	SCR_DrawStringToSnap (st, newbuf, w - Q_strlen (st) * 8, h - 21, w);
+	SCR_DrawStringToSnap (st, newbuf, w - strlen (st) * 8, h - 21, w);
 
 	WritePCXfile (pcxname, newbuf, w, h, w, host_basepal, true);
 

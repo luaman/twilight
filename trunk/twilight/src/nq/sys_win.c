@@ -223,7 +223,7 @@ Sys_DebugLog (char *file, char *fmt, ...)
 	va_end (argptr);
 //    fd = open(file, O_WRONLY | O_BINARY | O_CREAT | O_APPEND, 0666);
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
-	write (fd, data, Q_strlen (data));
+	write (fd, data, strlen (data));
 	close (fd);
 }
 
@@ -301,11 +301,11 @@ Sys_Error (char *error, ...)
 		va_end (argptr);
 
 		snprintf (text2, sizeof (text2), "ERROR: %s\n", text);
-		WriteFile (houtput, text5, Q_strlen (text5), &dummy, NULL);
-		WriteFile (houtput, text4, Q_strlen (text4), &dummy, NULL);
-		WriteFile (houtput, text2, Q_strlen (text2), &dummy, NULL);
-		WriteFile (houtput, text3, Q_strlen (text3), &dummy, NULL);
-		WriteFile (houtput, text4, Q_strlen (text4), &dummy, NULL);
+		WriteFile (houtput, text5, strlen (text5), &dummy, NULL);
+		WriteFile (houtput, text4, strlen (text4), &dummy, NULL);
+		WriteFile (houtput, text2, strlen (text2), &dummy, NULL);
+		WriteFile (houtput, text3, strlen (text3), &dummy, NULL);
+		WriteFile (houtput, text4, strlen (text4), &dummy, NULL);
 
 
 		starttime = Sys_FloatTime ();
@@ -360,7 +360,7 @@ Sys_Printf (char *fmt, ...)
 		vsnprintf (text, sizeof (text), fmt, argptr);
 		va_end (argptr);
 
-		WriteFile (houtput, text, Q_strlen (text), &dummy, NULL);
+		WriteFile (houtput, text, strlen (text), &dummy, NULL);
 	}
 }
 
@@ -556,21 +556,21 @@ Sys_ExpandPath (char *str)
 		{
 			/* Current user's home directory */
 			if ((p = getenv("TWILIGHT")))
-				Q_strncpy(buf, p, MAX_PATH);
+				strncpy(buf, p, MAX_PATH);
 			else if ((p = getenv("HOME")))
-				Q_strncpy(buf, p, MAX_PATH);
+				strncpy(buf, p, MAX_PATH);
 			else if ((p = getenv("WINDIR")))
-				Q_strncpy(buf, p, MAX_PATH);
+				strncpy(buf, p, MAX_PATH);
 			else
 				/* should never happen */
-				Q_strncpy(buf, ".", MAX_PATH);
-			Q_strncat (buf, s, MAX_PATH);
+				strncpy(buf, ".", MAX_PATH);
+			strncat (buf, s, MAX_PATH);
 		} else {
 			/* ~user expansion in win32 always fails */
-			Q_strcpy(buf, "");
+			strcpy(buf, "");
 		}
 	} else
-		Q_strncpy (buf, str, MAX_PATH);
+		strncpy (buf, str, MAX_PATH);
 
 	return buf;
 }

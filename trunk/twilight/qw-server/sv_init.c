@@ -339,7 +339,7 @@ SV_SpawnServer (char *server)
 	sv.signon.data = sv.signon_buffers[0];
 	sv.num_signon_buffers = 1;
 
-	Q_strlcpy (sv.name, server, sizeof (sv.name));
+	strlcpy (sv.name, server, sizeof (sv.name));
 
 	// load progs to get entity field count
 	// which determines how big each edict is

@@ -60,7 +60,7 @@ build_number (void)
 		return b;
 
 	for (m = 0; m < 11; m++) {
-		if (Q_strncasecmp (&qdate[0], mon[m], 3) == 0)
+		if (strncasecmp (&qdate[0], mon[m], 3) == 0)
 			break;
 		d += mond[m];
 	}

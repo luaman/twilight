@@ -1062,7 +1062,7 @@ R_DrawBrushModel (entity_t *e)
 		return;
 
 	qglColor3f (1, 1, 1);
-	Q_memset (lightmap_polys, 0, sizeof (lightmap_polys));
+	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
 	VectorSubtract (r_refdef.vieworg, e->origin, modelorg);
 	if (rotated) {
@@ -1252,7 +1252,7 @@ R_DrawWorld (void)
 {
 	entity_t    ent;
 
-	Q_memset (&ent, 0, sizeof (ent));
+	memset (&ent, 0, sizeof (ent));
 	ent.model = cl.worldmodel;
 
 	VectorCopy (r_refdef.vieworg, modelorg);
@@ -1261,10 +1261,10 @@ R_DrawWorld (void)
 	currenttexture = -1;
 
 	qglColor3f (1, 1, 1);
-	Q_memset (lightmap_polys, 0, sizeof (lightmap_polys));
+	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
 	if (gl_fb_bmodels->value)
-		Q_memset (fullbright_polys, 0, sizeof(fullbright_polys));
+		memset (fullbright_polys, 0, sizeof(fullbright_polys));
 
 #ifdef QUAKE2
 	R_ClearSkyBox ();
@@ -1312,7 +1312,7 @@ R_MarkLeaves (void)
 
 	if (r_novis->value) {
 		vis = solid;
-		Q_memset (solid, 0xff, (cl.worldmodel->numleafs + 7) >> 3);
+		memset (solid, 0xff, (cl.worldmodel->numleafs + 7) >> 3);
 	} else
 		vis = Mod_LeafPVS (r_viewleaf, cl.worldmodel);
 
@@ -1536,7 +1536,7 @@ GL_BuildLightmaps (void)
 	int         i, j;
 	model_t    *m;
 
-	Q_memset (allocated, 0, sizeof (allocated));
+	memset (allocated, 0, sizeof (allocated));
 
 	r_framecount = 1;					// no dlightcache
 

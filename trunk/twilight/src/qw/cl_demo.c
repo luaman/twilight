@@ -79,7 +79,7 @@ CL_StopPlayback (void)
 	if (cls.timedemo)
 		CL_FinishTimeDemo ();
 
-	Q_memset (cl.cshifts, 0, sizeof(cl.cshifts));
+	memset (cl.cshifts, 0, sizeof(cl.cshifts));
 	cl.stats[STAT_ITEMS] = 0;
 }
 
@@ -584,7 +584,7 @@ CL_Record_f (void)
 	for (i = 0; i < MAX_EDICTS; i++) {
 		es = cl_baselines + i;
 
-		if (Q_memcmp (es, &blankes, sizeof (blankes))) {
+		if (memcmp (es, &blankes, sizeof (blankes))) {
 			MSG_WriteByte (&buf, svc_spawnbaseline);
 			MSG_WriteShort (&buf, i);
 
@@ -758,7 +758,7 @@ CL_PlayDemo_f (void)
 //
 // open the demo file
 //
-	Q_strcpy (name, Cmd_Argv (1));
+	strcpy (name, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".qwd");
 
 	Con_Printf ("Playing demo from %s.\n", name);

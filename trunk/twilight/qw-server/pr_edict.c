@@ -280,7 +280,7 @@ GetEdictFieldValue (edict_t *ed, char *field)
 
 	if (strlen (field) < MAX_FIELD_LEN) {
 		gefvCache[rep].pcache = def;
-		Q_strcpy (gefvCache[rep].field, field);
+		strcpy (gefvCache[rep].field, field);
 		rep ^= 1;
 	}
 
@@ -424,8 +424,8 @@ PR_GlobalString (int ofs)
 
 	i = strlen (line);
 	for (; i < 20; i++)
-		Q_strcat (line, " ");
-	Q_strcat (line, " ");
+		strcat (line, " ");
+	strcat (line, " ");
 
 	return line;
 }
@@ -446,8 +446,8 @@ PR_GlobalStringNoContents (int ofs)
 
 	i = strlen (line);
 	for (; i < 20; i++)
-		Q_strcat (line, " ");
-	Q_strcat (line, " ");
+		strcat (line, " ");
+	strcat (line, " ");
 
 	return line;
 }
@@ -685,7 +685,7 @@ ED_ParseGlobals (char *data)
 		if (!data)
 			SV_Error ("ED_ParseEntity: EOF without closing brace");
 
-		Q_strcpy (keyname, com_token);
+		strcpy (keyname, com_token);
 
 		// parse value 
 		data = COM_Parse (data);
@@ -769,7 +769,7 @@ ED_ParseEpair (void *base, ddef_t *key, char *s)
 			break;
 
 		case ev_vector:
-			Q_strcpy (string, s);
+			strcpy (string, s);
 			v = string;
 			w = string;
 			for (i = 0; i < 3; i++) {
@@ -844,16 +844,16 @@ ED_ParseEdict (char *data, edict_t *ent)
 // anglehack is to allow QuakeEd to write single scalar angles
 // and allow them to be turned into vectors. (FIXME...)
 		if (!strcmp (com_token, "angle")) {
-			Q_strcpy (com_token, "angles");
+			strcpy (com_token, "angles");
 			anglehack = true;
 		} else
 			anglehack = false;
 
 // FIXME: change light to _light to get rid of this hack
 		if (!strcmp (com_token, "light"))
-			Q_strcpy (com_token, "light_lev");	// hack for single light def
+			strcpy (com_token, "light_lev");	// hack for single light def
 
-		Q_strcpy (keyname, com_token);
+		strcpy (keyname, com_token);
 
 		// parse value 
 		data = COM_Parse (data);
@@ -879,7 +879,7 @@ ED_ParseEdict (char *data, edict_t *ent)
 		if (anglehack) {
 			char        temp[32];
 
-			Q_strcpy (temp, com_token);
+			strcpy (temp, com_token);
 			snprintf (com_token, sizeof (com_token), "0 %s 0", temp);
 		}
 

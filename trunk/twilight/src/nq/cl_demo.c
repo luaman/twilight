@@ -222,7 +222,7 @@ CL_Record_f (void)
 		return;
 	}
 
-	if (Q_strstr (Cmd_Argv (1), "..")) {
+	if (strstr (Cmd_Argv (1), "..")) {
 		Con_Printf ("Relative pathnames are not allowed.\n");
 		return;
 	}
@@ -295,7 +295,7 @@ CL_PlayDemo_f (void)
 //
 // open the demo file
 //
-	Q_strcpy (name, Cmd_Argv (1));
+	strcpy (name, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".dem");
 
 	Con_Printf ("Playing demo from %s.\n", name);

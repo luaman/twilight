@@ -117,7 +117,7 @@ void
 Con_Clear_f (void)
 {
 	if (con_text)
-		Q_memset (con_text, ' ', CON_TEXTSIZE);
+		memset (con_text, ' ', CON_TEXTSIZE);
 }
 
 
@@ -187,7 +187,7 @@ Con_CheckResize (void)
 		width = 38;
 		con_linewidth = width;
 		con_totallines = CON_TEXTSIZE / con_linewidth;
-		Q_memset (con_text, ' ', CON_TEXTSIZE);
+		memset (con_text, ' ', CON_TEXTSIZE);
 	} else {
 		oldwidth = con_linewidth;
 		con_linewidth = width;
@@ -203,8 +203,8 @@ Con_CheckResize (void)
 		if (con_linewidth < numchars)
 			numchars = con_linewidth;
 
-		Q_memcpy (tbuf, con_text, CON_TEXTSIZE);
-		Q_memset (con_text, ' ', CON_TEXTSIZE);
+		memcpy (tbuf, con_text, CON_TEXTSIZE);
+		memset (con_text, ' ', CON_TEXTSIZE);
 
 		for (i = 0; i < numlines; i++) {
 			for (j = 0; j < numchars; j++) {
@@ -249,14 +249,14 @@ Con_Init (void)
 	con_debuglog = COM_CheckParm ("-condebug");
 
 	if (con_debuglog) {
-		if (Q_strlen (com_gamedir) < (MAXGAMEDIRLEN - Q_strlen (t2))) {
+		if (strlen (com_gamedir) < (MAXGAMEDIRLEN - strlen (t2))) {
 			snprintf (temp, sizeof (temp), "%s%s", com_gamedir, t2);
 			unlink (temp);
 		}
 	}
 
 	con_text = Hunk_AllocName (CON_TEXTSIZE, "context");
-	Q_memset (con_text, ' ', CON_TEXTSIZE);
+	memset (con_text, ' ', CON_TEXTSIZE);
 	con_linewidth = -1;
 	Con_CheckResize ();
 
@@ -283,7 +283,7 @@ Con_Linefeed (void)
 {
 	con_x = 0;
 	con_current++;
-	Q_memset (&con_text[(con_current % con_totallines) * con_linewidth], ' ', con_linewidth);
+	memset (&con_text[(con_current % con_totallines) * con_linewidth], ' ', con_linewidth);
 }
 
 /*
@@ -381,7 +381,7 @@ Con_DebugLog (char *file, char *fmt, ...)
 	vsnprintf (data, sizeof (data), fmt, argptr);
 	va_end (argptr);
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
-	write (fd, data, Q_strlen (data));
+	write (fd, data, strlen (data));
 	close (fd);
 }
 
@@ -517,7 +517,7 @@ Con_DrawInput (void)
 	if (key_dest != key_console && !con_forcedup)
 		return;							// don't draw anything
 	
-	text = Q_strcpy(temp, key_lines[edit_line]);
+	text = strcpy(temp, key_lines[edit_line]);
 	y = strlen(text);
 
 	// fill out remainder with spaces
@@ -599,7 +599,7 @@ Con_DrawNotify (void)
 
 		Draw_String (skip << 3, v, s);
 
-		Draw_Character ((Q_strlen(s) + skip) << 3, v,
+		Draw_Character ((strlen(s) + skip) << 3, v,
 						10 + ((int) (realtime * con_cursorspeed) & 1));
 		v += 8;
 	}
@@ -780,7 +780,7 @@ Con_CompleteCommandLine (void)
 		if (a)
 			cmd = *(list[2] = Cmd_CompleteAliasBuildList(s));
 
-		cmd_len = Q_strlen (s);
+		cmd_len = strlen (s);
 		do {
 			for (i = 0; i < 3; i++) {
 				char ch = cmd[cmd_len];
@@ -820,7 +820,7 @@ Con_CompleteCommandLine (void)
 	}
 	
 	if (cmd) {
-		Q_strncpy(key_lines[edit_line] + 1, cmd, cmd_len);
+		strncpy(key_lines[edit_line] + 1, cmd, cmd_len);
 		key_linepos = cmd_len + 1;
 		if (c + v + a == 1) {
 			key_lines[edit_line][key_linepos] = ' ';

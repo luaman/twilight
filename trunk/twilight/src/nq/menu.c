@@ -483,7 +483,7 @@ M_ScanSaves (void)
 	int         version;
 
 	for (i = 0; i < MAX_SAVEGAMES; i++) {
-		Q_strcpy (m_filenames[i], "--- UNUSED SLOT ---");
+		strcpy (m_filenames[i], "--- UNUSED SLOT ---");
 		loadable[i] = false;
 		snprintf (name, sizeof (name), "%s/s%i.sav", com_gamedir, i);
 		f = fopen (name, "r");
@@ -491,7 +491,7 @@ M_ScanSaves (void)
 			continue;
 		fscanf (f, "%i\n", &version);
 		fscanf (f, "%79s\n", name);
-		Q_strncpy (m_filenames[i], name, sizeof (m_filenames[i]) - 1);
+		strncpy (m_filenames[i], name, sizeof (m_filenames[i]) - 1);
 
 		// change _ back to space
 		for (j = 0; j < SAVEGAME_COMMENT_LENGTH; j++)
@@ -738,8 +738,8 @@ M_Menu_Setup_f (void)
 	key_dest = key_menu;
 	m_state = m_setup;
 	m_entersound = true;
-	Q_strcpy (setup_myname, _cl_name->string);
-	Q_strcpy (setup_hostname, hostname->string);
+	strcpy (setup_myname, _cl_name->string);
+	strcpy (setup_hostname, hostname->string);
 	setup_top = setup_oldtop = ((int) _cl_color->value) >> 4;
 	setup_bottom = setup_oldbottom = ((int) _cl_color->value) & 15;
 }
@@ -778,12 +778,12 @@ M_Setup_Draw (void)
 					 12 + ((int) (realtime * 4) & 1));
 
 	if (setup_cursor == 0)
-		M_DrawCharacter (168 + 8 * Q_strlen (setup_hostname),
+		M_DrawCharacter (168 + 8 * strlen (setup_hostname),
 						 setup_cursor_table[setup_cursor],
 						 10 + ((int) (realtime * 4) & 1));
 
 	if (setup_cursor == 1)
-		M_DrawCharacter (168 + 8 * Q_strlen (setup_myname),
+		M_DrawCharacter (168 + 8 * strlen (setup_myname),
 						 setup_cursor_table[setup_cursor],
 						 10 + ((int) (realtime * 4) & 1));
 }
@@ -841,9 +841,9 @@ M_Setup_Key (int k)
 				goto forward;
 
 			// setup_cursor == 4 (OK)
-			if (Q_strcmp (_cl_name->string, setup_myname) != 0)
+			if (strcmp (_cl_name->string, setup_myname) != 0)
 				Cbuf_AddText (va ("name \"%s\"\n", setup_myname));
-			if (Q_strcmp (hostname->string, setup_hostname) != 0)
+			if (strcmp (hostname->string, setup_hostname) != 0)
 				Cvar_Set (hostname, setup_hostname);
 			if (setup_top != setup_oldtop || setup_bottom != setup_oldbottom)
 				Cbuf_AddText (va ("color %i %i\n", setup_top, setup_bottom));
@@ -853,13 +853,13 @@ M_Setup_Key (int k)
 
 		case K_BACKSPACE:
 			if (setup_cursor == 0) {
-				if (Q_strlen (setup_hostname))
-					setup_hostname[Q_strlen (setup_hostname) - 1] = 0;
+				if (strlen (setup_hostname))
+					setup_hostname[strlen (setup_hostname) - 1] = 0;
 			}
 
 			if (setup_cursor == 1) {
-				if (Q_strlen (setup_myname))
-					setup_myname[Q_strlen (setup_myname) - 1] = 0;
+				if (strlen (setup_myname))
+					setup_myname[strlen (setup_myname) - 1] = 0;
 			}
 			break;
 
@@ -867,14 +867,14 @@ M_Setup_Key (int k)
 			if (k < 32 || k > 127)
 				break;
 			if (setup_cursor == 0) {
-				l = Q_strlen (setup_hostname);
+				l = strlen (setup_hostname);
 				if (l < 15) {
 					setup_hostname[l + 1] = 0;
 					setup_hostname[l] = k;
 				}
 			}
 			if (setup_cursor == 1) {
-				l = Q_strlen (setup_myname);
+				l = strlen (setup_myname);
 				if (l < 15) {
 					setup_myname[l + 1] = 0;
 					setup_myname[l] = k;
@@ -1404,7 +1404,7 @@ M_Gfx_Set (void)
 
 		case 7:
 			for (v = 0; v < 6; v++) {
-				if (Q_strcasecmp (texmodes[v].name, gl_texturemode->string) == 0)
+				if (strcasecmp (texmodes[v].name, gl_texturemode->string) == 0)
 					break;
 			}
 			v++;
@@ -1504,14 +1504,14 @@ M_FindKeysForCommand (char *command, int *twokeys)
 	char       *b;
 
 	twokeys[0] = twokeys[1] = -1;
-	l = Q_strlen (command);
+	l = strlen (command);
 	count = 0;
 
 	for (j = 0; j < 256; j++) {
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!Q_strncmp (b, command, l)) {
+		if (!strncmp (b, command, l)) {
 			twokeys[count] = j;
 			count++;
 			if (count == 2)
@@ -1527,13 +1527,13 @@ M_UnbindCommand (char *command)
 	int         l;
 	char       *b;
 
-	l = Q_strlen (command);
+	l = strlen (command);
 
 	for (j = 0; j < 256; j++) {
 		b = keybindings[j];
 		if (!b)
 			continue;
-		if (!Q_strncmp (b, command, l))
+		if (!strncmp (b, command, l))
 			Key_SetBinding (j, "");
 	}
 }
@@ -1562,7 +1562,7 @@ M_Keys_Draw (void)
 
 		M_Print (16, y, bindnames[i][1]);
 
-		l = Q_strlen (bindnames[i][0]);
+		l = strlen (bindnames[i][0]);
 
 		M_FindKeysForCommand (bindnames[i][0], keys);
 
@@ -1571,7 +1571,7 @@ M_Keys_Draw (void)
 		} else {
 			name = Key_KeynumToString (keys[0]);
 			M_Print (140, y, name);
-			x = Q_strlen (name) * 8;
+			x = strlen (name) * 8;
 			if (keys[1] != -1) {
 				M_Print (140 + x + 8, y, "or");
 				M_Print (140 + x + 32, y, Key_KeynumToString (keys[1]));
@@ -1934,12 +1934,12 @@ M_LanConfig_Draw (void)
 					 12 + ((int) (realtime * 4) & 1));
 
 	if (lanConfig_cursor == 0)
-		M_DrawCharacter (basex + 9 * 8 + 8 * Q_strlen (lanConfig_portname),
+		M_DrawCharacter (basex + 9 * 8 + 8 * strlen (lanConfig_portname),
 						 lanConfig_cursor_table[0],
 						 10 + ((int) (realtime * 4) & 1));
 
 	if (lanConfig_cursor == 2)
-		M_DrawCharacter (basex + 16 + 8 * Q_strlen (lanConfig_joinname),
+		M_DrawCharacter (basex + 16 + 8 * strlen (lanConfig_joinname),
 						 lanConfig_cursor_table[2],
 						 10 + ((int) (realtime * 4) & 1));
 
@@ -2002,13 +2002,13 @@ M_LanConfig_Key (int key)
 
 		case K_BACKSPACE:
 			if (lanConfig_cursor == 0) {
-				if (Q_strlen (lanConfig_portname))
-					lanConfig_portname[Q_strlen (lanConfig_portname) - 1] = 0;
+				if (strlen (lanConfig_portname))
+					lanConfig_portname[strlen (lanConfig_portname) - 1] = 0;
 			}
 
 			if (lanConfig_cursor == 2) {
-				if (Q_strlen (lanConfig_joinname))
-					lanConfig_joinname[Q_strlen (lanConfig_joinname) - 1] = 0;
+				if (strlen (lanConfig_joinname))
+					lanConfig_joinname[strlen (lanConfig_joinname) - 1] = 0;
 			}
 			break;
 
@@ -2017,7 +2017,7 @@ M_LanConfig_Key (int key)
 				break;
 
 			if (lanConfig_cursor == 2) {
-				l = Q_strlen (lanConfig_joinname);
+				l = strlen (lanConfig_joinname);
 				if (l < 21) {
 					lanConfig_joinname[l + 1] = 0;
 					lanConfig_joinname[l] = key;
@@ -2027,7 +2027,7 @@ M_LanConfig_Key (int key)
 			if (key < '0' || key > '9')
 				break;
 			if (lanConfig_cursor == 0) {
-				l = Q_strlen (lanConfig_portname);
+				l = strlen (lanConfig_portname);
 				if (l < 5) {
 					lanConfig_portname[l + 1] = 0;
 					lanConfig_portname[l] = key;
@@ -2606,11 +2606,11 @@ M_ServerList_Draw (void)
 
 			for (i = 0; i < hostCacheCount; i++)
 				for (j = i + 1; j < hostCacheCount; j++)
-					if (Q_strcmp (hostcache[j].name, hostcache[i].name) < 0) {
-						Q_memcpy (&temp, &hostcache[j], sizeof (hostcache_t));
-						Q_memcpy (&hostcache[j], &hostcache[i],
+					if (strcmp (hostcache[j].name, hostcache[i].name) < 0) {
+						memcpy (&temp, &hostcache[j], sizeof (hostcache_t));
+						memcpy (&hostcache[j], &hostcache[i],
 								  sizeof (hostcache_t));
-						Q_memcpy (&hostcache[i], &temp, sizeof (hostcache_t));
+						memcpy (&hostcache[i], &temp, sizeof (hostcache_t));
 					}
 		}
 		slist_sorted = true;

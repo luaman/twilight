@@ -210,7 +210,7 @@ Key_Console (int key)
 	{
 		if (key_linepos > 1)
 		{
-			Q_strcpy(key_lines[edit_line] + key_linepos - 1, key_lines[edit_line] + key_linepos);
+			strcpy(key_lines[edit_line] + key_linepos - 1, key_lines[edit_line] + key_linepos);
 			key_linepos--;
 		}
 
@@ -219,7 +219,7 @@ Key_Console (int key)
 	if (key == K_DEL)// delete char on cursor
 	{
 		if (key_linepos < strlen(key_lines[edit_line]))
-			Q_strcpy(key_lines[edit_line] + key_linepos, key_lines[edit_line] + key_linepos + 1);
+			strcpy(key_lines[edit_line] + key_linepos, key_lines[edit_line] + key_linepos + 1);
 
 		return;
 	}
@@ -260,8 +260,8 @@ Key_Console (int key)
 		} while (history_line != edit_line && !key_lines[history_line][1]);
 		if (history_line == edit_line)
 			history_line = (edit_line + 1) & 31;
-		Q_strcpy (key_lines[edit_line], key_lines[history_line]);
-		key_linepos = Q_strlen (key_lines[edit_line]);
+		strcpy (key_lines[edit_line], key_lines[history_line]);
+		key_linepos = strlen (key_lines[edit_line]);
 		return;
 	}
 
@@ -277,8 +277,8 @@ Key_Console (int key)
 			key_lines[edit_line][1] = 0;
 			key_linepos = 1;
 		} else {
-			Q_strcpy (key_lines[edit_line], key_lines[history_line]);
-			key_linepos = Q_strlen (key_lines[edit_line]);
+			strcpy (key_lines[edit_line], key_lines[history_line]);
+			key_linepos = strlen (key_lines[edit_line]);
 		}
 		return;
 	}
@@ -391,7 +391,7 @@ Key_StringToKeynum (char *str)
 		return str[0];
 
 	for (kn = keynames; kn->name; kn++) {
-		if (!Q_strcasecmp (str, kn->name))
+		if (!strcasecmp (str, kn->name))
 			return kn->keynum;
 	}
 	return -1;
@@ -448,9 +448,9 @@ Key_SetBinding (int keynum, char *binding)
 		keybindings[keynum] = NULL;
 	}
 // allocate memory for new binding
-	l = Q_strlen (binding);
+	l = strlen (binding);
 	new = Z_Malloc (l + 1);
-	Q_strcpy (new, binding);
+	strcpy (new, binding);
 	new[l] = 0;
 	keybindings[keynum] = new;
 }
@@ -524,8 +524,8 @@ Key_Bind_f (void)
 	cmd[0] = 0;							// start out with a null string
 	for (i = 2; i < c; i++) {
 		if (i > 2)
-			Q_strcat (cmd, " ");
-		Q_strcat (cmd, Cmd_Argv (i));
+			strcat (cmd, " ");
+		strcat (cmd, Cmd_Argv (i));
 	}
 
 	Key_SetBinding (b, cmd);

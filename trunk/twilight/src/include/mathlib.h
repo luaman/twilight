@@ -36,7 +36,7 @@ typedef int fixed16_t;
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
 
-#ifndef _WIN32
+#ifndef HAVE_WINDEF_H
 
 # ifndef max
 #  define max(a,b) ((a) > (b) ? (a) : (b))
@@ -104,7 +104,7 @@ void        _VectorSubtract (vec3_t veca, vec3_t vecb, vec3_t out);
 void        _VectorAdd (vec3_t veca, vec3_t vecb, vec3_t out);
 void        _VectorCopy (vec3_t in, vec3_t out);
 int         _VectorCompare (vec3_t v1, vec3_t v2);
-void        _VectorInverse (vec3_t v);
+void        _VectorInverse (vec3_t v, vec3_t t);
 void        _VectorScale (vec3_t in, vec_t scale, vec3_t out);
 
 vec_t       VectorNormalize (vec3_t v);	// returns vector length
@@ -124,7 +124,8 @@ void        AngleVectors (vec3_t angles, vec3_t forward, vec3_t right,
 						  vec3_t up);
 int         BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
 float       anglemod (float a);
-
+void        RotatePointAroundVector (vec3_t dst, const vec3_t dir,
+									const vec3_t point, float degrees);
 
 
 #define BOX_ON_PLANE_SIDE(emins, emaxs, p)	\
