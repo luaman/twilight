@@ -363,7 +363,7 @@ typedef enum { mod_brush, mod_sprite, mod_alias } modtype_t;
 
 typedef struct model_s {
 	char        name[MAX_QPATH];
-	qboolean    needload;				// bmodels and sprites don't cache normally
+	qboolean    needload;			// bmodels and sprites don't cache normally
 
 	modtype_t   type;
 	int         numframes;
@@ -375,8 +375,19 @@ typedef struct model_s {
 //
 // volume occupied by the model graphics
 //      
-	vec3_t      mins, maxs;
-	float       radius;
+	Uint32		c1;
+	vec3_t		rotatedmins;
+	Uint32		c2;
+	vec3_t		rotatedmaxs;
+	Uint32		c3;
+	vec3_t		normalmins;
+	Uint32		c4;
+	vec3_t		normalmaxs;
+	Uint32		c5;
+	vec3_t		yawmins;
+	Uint32		c6;
+	vec3_t		yawmaxs;
+	Uint32		c7;
 
 //
 // brush model
@@ -461,6 +472,8 @@ void		Mod_LoadPlanes (lump_t *l);
 void		Mod_MakeHull0 (void);
 void		Mod_SetParent (mnode_t *node, mnode_t *parent);
 model_t    *Mod_FindName (char *name);
+qboolean	Mod_MinsMaxs (model_t *mod, vec3_t org, vec3_t ang, vec3_t mins, vec3_t maxs);
+
 
 #endif // __MODEL__
 

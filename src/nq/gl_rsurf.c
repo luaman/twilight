@@ -727,17 +727,7 @@ R_DrawBrushModel (entity_t *e)
 	texture_t	   *t, *st;
 	vec3_t			modelorg;
 
-	if (e->angles[0] || e->angles[1] || e->angles[2]) {
-		rotated = true;
-		for (i = 0; i < 3; i++) {
-			mins[i] = e->origin[i] - clmodel->radius;
-			maxs[i] = e->origin[i] + clmodel->radius;
-		}
-	} else {
-		rotated = false;
-		VectorAdd (e->origin, clmodel->mins, mins);
-		VectorAdd (e->origin, clmodel->maxs, maxs);
-	}
+	rotated = Mod_MinsMaxs (clmodel, e->origin, e->angles, mins, maxs);
 
 	if (R_CullBox (mins, maxs))
 		return;

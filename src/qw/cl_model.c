@@ -49,6 +49,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "gl_textures.h"
+#include <math.h>
 
 extern model_t	*loadmodel;
 extern char	loadname[32];				// for hunk tags
@@ -580,7 +581,7 @@ Mod_LoadBrushModel
 void
 Mod_LoadBrushModel (model_t *mod, void *buffer)
 {
-	Uint32		i, j;
+	Uint32		i;
 	dheader_t	*header;
 	dmodel_t	*bm;
 	char		name[10];
@@ -608,14 +609,13 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 	for (i = 0; i < HEADER_LUMPS; i++) {
 		if (i == LUMP_ENTITIES)
 			continue;
-		mod->checksum ^= Com_BlockChecksum (mod_base + header->lumps[i].fileofs,
-											header->lumps[i].filelen);
+		mod->checksum ^= Com_BlockChecksum (mod_base + header->lumps[i].fileofs, header->lumps[i].filelen);
 
 		if (i == LUMP_VISIBILITY || i == LUMP_LEAFS || i == LUMP_NODES)
 			continue;
 		mod->checksum2 ^=
 			Com_BlockChecksum (mod_base + header->lumps[i].fileofs,
-							   header->lumps[i].filelen);
+					header->lumps[i].filelen);
 	}
 
 	// load into heap
@@ -643,6 +643,10 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 	// set up the submodels (FIXME: this is confusing)
 	//
 	for (i = 0; i < mod->numsubmodels; i++) {
+		int			k, l, j;
+		float		dist, modelyawradius, modelradius, *vec;
+		msurface_t	*surf;
+
 		bm = &mod->submodels[i];
 
 		mod->hulls[0].firstclipnode = bm->headnode[0];
@@ -654,10 +658,43 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		mod->firstmodelsurface = bm->firstface;
 		mod->nummodelsurfaces = bm->numfaces;
 
-		VectorCopy (bm->maxs, mod->maxs);
-		VectorCopy (bm->mins, mod->mins);
+		mod->normalmins[0] = mod->normalmins[1] = mod->normalmins[2] = 1000000000.0f;
+		mod->normalmaxs[0] = mod->normalmaxs[1] = mod->normalmaxs[2] = -1000000000.0f;
+		modelyawradius = 0;
+		modelradius = 0;
 
-		mod->radius = RadiusFromBounds (mod->mins, mod->maxs);
+		// Calculate the bounding boxes, don't trust what the model says.
+		surf = &mod->surfaces[mod->firstmodelsurface];
+		for (j = 0; j < mod->nummodelsurfaces; j++, surf++) {
+			for (k = 0; k < surf->numedges; k++) {
+				l = mod->surfedges[k + surf->firstedge];
+				if (l > 0)
+					vec = mod->vertexes[mod->edges[l].v[0]].position;
+				else
+					vec = mod->vertexes[mod->edges[-l].v[1]].position;
+				if (mod->normalmins[0] > vec[0]) mod->normalmins[0] = vec[0];
+				if (mod->normalmins[1] > vec[1]) mod->normalmins[1] = vec[1];
+				if (mod->normalmins[2] > vec[2]) mod->normalmins[2] = vec[2];
+				if (mod->normalmaxs[0] < vec[0]) mod->normalmaxs[0] = vec[0];
+				if (mod->normalmaxs[1] < vec[1]) mod->normalmaxs[1] = vec[1];
+				if (mod->normalmaxs[2] < vec[2]) mod->normalmaxs[2] = vec[2];
+				dist = vec[0]*vec[0]+vec[1]*vec[1];
+				if (modelyawradius < dist)
+					modelyawradius = dist;
+				dist += vec[2]*vec[2];
+				if (modelradius < dist)
+					modelradius = dist;
+			}
+		}
+
+		modelyawradius = sqrt(modelyawradius);
+		modelradius = sqrt(modelradius);
+		mod->yawmins[0] = mod->yawmins[1] = -modelyawradius;
+		mod->yawmaxs[0] = mod->yawmaxs[1] = modelyawradius;
+		mod->yawmins[2] = mod->normalmins[2];
+		mod->yawmaxs[2] = mod->normalmaxs[2];
+		VectorSet(mod->rotatedmins, -modelradius, -modelradius, -modelradius);
+		VectorSet(mod->rotatedmaxs, modelradius, modelradius, modelradius);
 
 		mod->numleafs = bm->visleafs;
 
@@ -690,7 +727,32 @@ int			numinverts;
 
 model_t	*player_model;
 
-float	aliasbboxmin[3], aliasbboxmax[3];
+vec3_t	bboxmin, bboxmax;
+float	bboxradius, bboxyawradius;
+
+static inline void
+Mod_CheckMinMaxVerts8 (Uint8 t[3])
+{
+	vec3_t	v;
+	float	dist;
+	int		i;
+
+	for (i = 0; i < 3; i++) {
+		v[i] = t[i] * pheader->scale[i] + pheader->scale_origin[i];
+
+		if (bboxmin[i] > v[i])
+			bboxmin[i] = v[i];
+		if (bboxmax[i] < v[i])
+			bboxmax[i] = v[i];
+	}
+
+	dist = DotProduct2(v, v);
+	if (bboxyawradius < dist)
+		bboxyawradius = dist;
+	dist = DotProduct(v, v);
+	if (bboxradius < dist)
+		bboxradius = dist;
+}
 
 /*
 =================
@@ -714,11 +776,6 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame, model_t *mod)
 		// these are byte values, so we don't have to worry about endianness
 		frame->bboxmin.v[i] = pdaliasframe->bboxmin.v[i];
 		frame->bboxmax.v[i] = pdaliasframe->bboxmax.v[i];
-
-		if (frame->bboxmin.v[i] < aliasbboxmin[i])
-			aliasbboxmin[i] = (float)frame->bboxmin.v[i];
-		if (frame->bboxmax.v[i] > aliasbboxmax[i])
-			aliasbboxmax[i] = (float)frame->bboxmax.v[i];
 	}
 
 	pinframe = (trivertx_t *) (pdaliasframe + 1);
@@ -736,6 +793,7 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame, model_t *mod)
 		j = vremap[i];
 		pose->normal_indices[j] = pinframe->lightnormalindex;
 		VectorCopy(pinframe->v, pose->vertices[j].v);
+		Mod_CheckMinMaxVerts8 (pose->vertices[j].v);
 
 		if (vseams[i]) {
 			pose->normal_indices[j + 1] = pinframe->lightnormalindex;
@@ -775,11 +833,6 @@ Mod_LoadAliasGroup (Uint8 *datapointer, maliasframedesc_t *frame, model_t *mod)
 		// these are byte values, so we don't have to worry about endianness
 		frame->bboxmin.v[i] = pingroup->bboxmin.v[i];
 		frame->bboxmax.v[i] = pingroup->bboxmax.v[i];
-
-		if (frame->bboxmin.v[i] < aliasbboxmin[i])
-			aliasbboxmin[i] = (float)frame->bboxmin.v[i];
-		if (frame->bboxmax.v[i] > aliasbboxmax[i])
-			aliasbboxmax[i] = (float)frame->bboxmax.v[i];
 	}
 
 	pin_intervals = (daliasinterval_t *) datapointer;
@@ -804,6 +857,7 @@ Mod_LoadAliasGroup (Uint8 *datapointer, maliasframedesc_t *frame, model_t *mod)
 			k = vremap[j];
 			pose->normal_indices[k] = vertices[j].lightnormalindex;
 			VectorCopy(vertices[j].v, pose->vertices[k].v);
+			Mod_CheckMinMaxVerts8 (pose->vertices[k].v);
 
 			if (vseams[j]) {
 				pose->normal_indices[k + 1] = vertices[j].lightnormalindex;
@@ -911,6 +965,37 @@ mflags_t modelflags[] =
 	{ "progs/b_g_key.mdl", 0, FLAG_NOSHADOW },
 	{ "progs/end.mdl", 9, FLAG_NOSHADOW },
 
+	// Dissolution of Eternity
+	{ "progs/lavalball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/beam.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/fireball.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/lspike.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/plasma.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/sphere.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/statgib.mdl", 13, FLAG_NOSHADOW },
+	{ "progs/wrthgib.mdl", 13, FLAG_NOSHADOW },
+	{ "progs/eelgib.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/eelhead.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/timegib.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/merveup.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/rockup.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/rocket.mdl", 0, FLAG_NOSHADOW },
+
+	// Shrak
+	{ "progs/shelcase.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/flare.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/bone.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/spine.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/spidleg.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/gor1_gib.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/gor2_gib.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/xhairo", 12, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_DOUBLESIZE },
+	{ "progs/bluankey.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/bluplkey.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/gldankey.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/gldplkey.mdl", 0, FLAG_NOSHADOW },
+	{ "progs/chip", 10, FLAG_NOSHADOW },
+
 	// Common
 	{ "progs/v_nail.mdl", 0, FLAG_NO_IM_ANIM|FLAG_NO_IM_FORM|FLAG_NOSHADOW },
 	{ "progs/v_light.mdl", 0, FLAG_NO_IM_ANIM|FLAG_NO_IM_FORM|FLAG_NOSHADOW },
@@ -966,25 +1051,20 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	memset (vremap, 0, sizeof(vremap));
 
 	if (!strcmp (loadmodel->name, "progs/player.mdl") ||
-		!strcmp (loadmodel->name, "progs/eyes.mdl")) {
-		unsigned short crc;
-		char        st[40];
+			!strcmp (loadmodel->name, "progs/eyes.mdl")) {
+		int crc;
 
 		crc = CRC_Block (buffer, com_filesize);
 
-		snprintf (st, sizeof (st), "%d", (int) crc);
 		Info_SetValueForKey (cls.userinfo,
-							 !strcmp (loadmodel->name,
-										"progs/player.mdl") ? pmodel_name :
-							 emodel_name, st, MAX_INFO_STRING);
+				!strcmp (loadmodel->name, "progs/player.mdl") ? pmodel_name :
+				emodel_name, va("%d", crc), MAX_INFO_STRING);
 
 		if (cls.state >= ca_connected) {
 			MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-			snprintf (st, sizeof (st), "setinfo %s %d",
-					  !strcmp (loadmodel->name,
-								 "progs/player.mdl") ? pmodel_name :
-					  emodel_name, (int) crc);
-			SZ_Print (&cls.netchan.message, st);
+			SZ_Print (&cls.netchan.message, va("setinfo %s %d",
+						!strcmp (loadmodel->name, "progs/player.mdl") ?
+						pmodel_name : emodel_name, crc));
 		}
 	}
 
@@ -1115,8 +1195,8 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 /*
  * load the frames
  */
-	aliasbboxmin[0] = aliasbboxmin[1] = aliasbboxmin[2] = 255;
-	aliasbboxmax[0] = aliasbboxmax[1] = aliasbboxmax[2] = 0;
+	bboxmin[0] = bboxmin[1] = bboxmin[2] = 1073741824;
+	bboxmax[0] = bboxmax[1] = bboxmax[2] = -1073741824;
 
 	pheader->frames = Zone_Alloc(mod->extrazone, numframes* sizeof(maliasframedesc_t));
 
@@ -1140,11 +1220,24 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 	mod->type = mod_alias;
 
-	for (i = 0; i < 3; i++)
-	{
-		mod->mins[i] = aliasbboxmin[i] * pheader->scale[i] + pheader->scale_origin[i];
-		mod->maxs[i] = aliasbboxmax[i] * pheader->scale[i] + pheader->scale_origin[i];
+	bboxyawradius = sqrt(bboxyawradius);
+	bboxradius = sqrt(bboxradius);
+
+	for (i = 0; i < 3; i++) {
+		mod->normalmins[i] = bboxmin[i];
+		mod->normalmaxs[i] = bboxmax[i];
+		mod->rotatedmins[i] = -bboxradius;
+		mod->rotatedmaxs[i] = bboxradius;
 	}
+	VectorSet(mod->yawmins, -bboxyawradius, -bboxyawradius, mod->normalmins[2]);
+	VectorSet(mod->yawmaxs, bboxyawradius, bboxyawradius, mod->normalmaxs[2]);
+	mod->c1 = 0xFF000000;
+	mod->c2 = 0x00FF0000;
+	mod->c3 = 0x0000FF00;
+	mod->c4 = 0x000000FF;
+	mod->c5 = 0xFFFF0000;
+	mod->c6 = 0xFF00FF00;
+	mod->c7 = 0xFF0000FF;
 
 /*
  * Actually load the skins, now that we have the triangle and texcoord data.
@@ -1173,8 +1266,7 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 {
 	dspriteframe_t	*pinframe;
 	mspriteframe_t	*pspriteframe;
-	int				width, height, size, origin[2];
-	char			name[64];
+	int				width, height, size, origin[2], i;
 
 	pinframe = (dspriteframe_t *) pin;
 
@@ -1196,12 +1288,16 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 	pspriteframe->up = origin[1];
 	pspriteframe->down = origin[1] - height;
 	pspriteframe->left = origin[0];
-	pspriteframe->right = width + origin[0];
+	pspriteframe->right = origin[0] + width;
 
-	snprintf (name, sizeof (name), "%s_%i", loadmodel->name, framenum);
+	i = max(sq(pspriteframe->left), sq(pspriteframe->right));
+	i += max(sq(pspriteframe->up), sq(pspriteframe->down));
+	if (bboxradius < i)
+		bboxradius = i;
+
 	pspriteframe->gl_texturenum =
-		GL_LoadTexture (name, width, height, (Uint8 *) (pinframe + 1),
-				TEX_MIPMAP|TEX_ALPHA, 8);
+		GL_LoadTexture (va("%s_%i", loadmodel->name, framenum), width, height,
+				(Uint8 *) (pinframe + 1), TEX_MIPMAP|TEX_ALPHA, 8);
 
 	return (void *) ((Uint8 *) pinframe + sizeof (dspriteframe_t) + size);
 }
@@ -1300,10 +1396,7 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 	mod->synctype = LittleLong (pin->synctype);
 	psprite->numframes = numframes;
 
-	mod->mins[0] = mod->mins[1] = -psprite->maxwidth / 2;
-	mod->maxs[0] = mod->maxs[1] = psprite->maxwidth / 2;
-	mod->mins[2] = -psprite->maxheight / 2;
-	mod->maxs[2] = psprite->maxheight / 2;
+	bboxradius = 0;
 
 //
 // load the frames
@@ -1332,5 +1425,34 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 		}
 	}
 
+	VectorSet (mod->normalmins, -bboxradius, -bboxradius, -bboxradius);
+	VectorCopy (mod->normalmins, mod->rotatedmins);
+	VectorCopy (mod->normalmins, mod->yawmins);
+	VectorSet (mod->normalmaxs, bboxradius, bboxradius, bboxradius);
+	VectorCopy (mod->normalmins, mod->rotatedmaxs);
+	VectorCopy (mod->normalmins, mod->yawmaxs);
+
 	mod->type = mod_sprite;
+}
+
+
+qboolean
+Mod_MinsMaxs (model_t *mod, vec3_t org, vec3_t ang,
+		vec3_t mins, vec3_t maxs)
+{
+#define CheckAngle(x)   (!(!x || (x == 180.0)))
+		if (CheckAngle(ang[0]) || CheckAngle(ang[2])) {
+			VectorAdd (org, mod->rotatedmins, mins);
+			VectorAdd (org, mod->rotatedmaxs, maxs);
+			return true;
+		} else if (CheckAngle(ang[2])) {
+			VectorAdd (org, mod->yawmins, mins);
+			VectorAdd (org, mod->yawmaxs, maxs);
+			return true;
+		} else {
+			VectorAdd (org, mod->normalmins, mins);
+			VectorAdd (org, mod->normalmaxs, maxs);
+			return false;
+		}
+#undef CheckAngle
 }

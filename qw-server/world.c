@@ -266,7 +266,7 @@ SV_ClearWorld (void)
 
 	memset (sv_areanodes, 0, sizeof (sv_areanodes));
 	sv_numareanodes = 0;
-	SV_CreateAreaNode (0, sv.worldmodel->mins, sv.worldmodel->maxs);
+	SV_CreateAreaNode (0, sv.worldmodel->normalmins, sv.worldmodel->normalmaxs);
 }
 
 

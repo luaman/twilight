@@ -221,9 +221,9 @@ PF_setmodel (void)
 // if it is an inline model, get the size information for it
 	if (m[0] == '*') {
 		mod = Mod_ForName (m, true);
-		VectorCopy (mod->mins, e->v.mins);
-		VectorCopy (mod->maxs, e->v.maxs);
-		VectorSubtract (mod->maxs, mod->mins, e->v.size);
+		VectorCopy (mod->normalmins, e->v.mins);
+		VectorCopy (mod->normalmaxs, e->v.maxs);
+		VectorSubtract (mod->normalmaxs, mod->normalmins, e->v.size);
 		SV_LinkEdict (e, false);
 	}
 
