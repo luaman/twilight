@@ -327,8 +327,6 @@ R_DrawSpriteModel (entity_t *e)
 		right = vright;
 	}
 
-	qglColor4f (1, 1, 1, 1);
-
 	qglBindTexture (GL_TEXTURE_2D, frame->gl_texturenum);
 
 	VectorSet2 (tc_array[0], 0, 1);
@@ -466,6 +464,7 @@ GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, qboolean mtex)
 
 		qglEnd ();
 	}
+	qglColor3f (1, 1, 1);
 }
 
 /*
@@ -570,6 +569,7 @@ GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float ble
 
 		qglEnd ();
 	}
+	qglColor3f (1, 1, 1);
 }
 
 /*
@@ -1282,6 +1282,7 @@ R_PolyBlend (void)
 	qglVertex3f (10, 100, -100);
 	qglEnd ();
 
+	qglColor3f (1, 1, 1);
 	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
 //	qglEnable (GL_ALPHA_TEST);

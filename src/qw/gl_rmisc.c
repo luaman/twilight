@@ -427,13 +427,13 @@ R_TimeRefresh_f (void)
 	if (cls.state != ca_active)
 		return;
 
-	qglDrawBuffer (GL_FRONT);
 	qglFinish ();
 
 	start = Sys_DoubleTime ();
 	for (i = 0; i < 128; i++) {
 		r_refdef.viewangles[1] = i * (360.0 / 128.0);
 		R_RenderView ();
+		GL_EndRendering ();
 	}
 
 	qglFinish ();
@@ -441,6 +441,5 @@ R_TimeRefresh_f (void)
 	time = stop - start;
 	Con_Printf ("%f seconds (%f fps)\n", time, 128 / time);
 
-	qglDrawBuffer (GL_BACK);
 	GL_EndRendering ();
 }
