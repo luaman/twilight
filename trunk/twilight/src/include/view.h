@@ -23,14 +23,12 @@
 
 	$Id$
 */
-// view.h
 
 #ifndef __VIEW_H
 #define __VIEW_H
 
 extern struct cvar_s	*v_gamma;
-extern struct cvar_s	*lcd_x;
-extern float	v_blend[4];
+extern float			v_blend[4];
 
 void		V_Init_Cvars (void);
 void		V_Init (void);
