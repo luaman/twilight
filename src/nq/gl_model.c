@@ -1501,18 +1501,39 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	}
 	else if (!Q_strncmp(mod->name, "progs/bolt.mdl", 10) ||
 		!Q_strcmp(mod->name, "progs/laser.mdl") ||
-		!Q_strcmp (mod->name, "progs/lavaball.mdl")) {
+		!Q_strcmp (mod->name, "progs/lavaball.mdl") ||
+		!Q_strcmp (mod->name, "progs/beam.mdl") ||		// MP 2
+		!Q_strcmp (mod->name, "progs/fireball.mdl") ||	// MP 2
+		!Q_strcmp (mod->name, "progs/lspike.mdl") ||	// MP 2
+		!Q_strcmp (mod->name, "progs/plasma.mdl") ||	// MP 2
+		!Q_strcmp (mod->name, "progs/sphere.mdl")		// MP 2
+		) {
 		mod->modflags |= FLAG_FULLBRIGHT;
 		mod->modflags |= FLAG_NOSHADOW;
 		mod->modflags |= FLAG_NO_IM_ANIM;
 	}
-	else if (!Q_strcmp(mod->name, "progs/missile.mdl") ||
+	else if (
+		!Q_strcmp(mod->name, "progs/missile.mdl") ||
 		!Q_strcmp(mod->name, "progs/grenade.mdl") ||
 		!Q_strcmp(mod->name, "progs/spike.mdl") ||
 		!Q_strcmp(mod->name, "progs/s_spike.mdl") ||
 		!Q_strcmp(mod->name, "progs/zom_gib") ||
 		!Q_strncmp(mod->name, "progs/gib", 9) ||
-		!Q_strncmp(mod->name, "progs/h_", 8))
+		!Q_strcmp(mod->name, "progs/eelgib.mdl") ||		// MP 2
+		!Q_strcmp(mod->name, "progs/eelhead.mdl") ||	// MP 2
+		!Q_strcmp(mod->name, "progs/timegib.mdl") ||	// MP 2
+		!Q_strcmp(mod->name, "progs/merveup.mdl") ||	// MP 2
+		!Q_strcmp(mod->name, "progs/rockup.mdl") ||		// MP 2
+		!Q_strncmp(mod->name, "progs/statgib", 13) ||	// MP 2
+		!Q_strncmp(mod->name, "progs/wrthgib", 13) ||	// MP 2
+		!Q_strcmp(mod->name, "progs/rocket.mdl") ||		// Shrak
+		!Q_strcmp(mod->name, "progs/shelcase.mdl") ||	// Shrak
+		!Q_strcmp(mod->name, "progs/flare.mdl") ||		// Shrak
+		!Q_strcmp(mod->name, "progs/bone.mdl") ||		// Shrak
+		!Q_strcmp(mod->name, "progs/spine.mdl") ||		// Shrak
+		!Q_strcmp(mod->name, "progs/spidleg.mdl") ||	// Shrak
+		!Q_strcmp(mod->name, "progs/gor1_gib.mdl") ||	// Shrak
+		!Q_strcmp(mod->name, "progs/gor2_gib.mdl"))		// Shrak
 	{
 		mod->modflags |= FLAG_NO_IM_ANIM;
 		mod->modflags |= FLAG_NOSHADOW;
@@ -1526,7 +1547,8 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		mod->modflags |= FLAG_DOUBLESIZE;
 		mod->modflags |= FLAG_NO_IM_ANIM;
 	}
-	else if (!Q_strcmp(mod->name, "progs/armor.mdl")) {
+	else if (!Q_strcmp(mod->name, "progs/armor.mdl") ||
+		!Q_strncmp(mod->name, "progs/g_", 8)) {
 		mod->modflags |= FLAG_NO_IM_ANIM;
 	}
 	// keys and runes are fullbright and do not cast shadows
@@ -1537,10 +1559,24 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		!Q_strcmp(mod->name, "progs/w_g_key.mdl") ||
 		!Q_strcmp(mod->name, "progs/m_g_key.mdl") ||
 		!Q_strcmp(mod->name, "progs/b_g_key.mdl") ||
+		!Q_strcmp(mod->name, "progs/bluankey.mdl") ||	// Shrak
+		!Q_strcmp(mod->name, "progs/bluplkey.mdl") ||	// Shrak
+		!Q_strcmp(mod->name, "progs/gldankey.mdl") ||	// Shrak
+		!Q_strcmp(mod->name, "progs/gldplkey.mdl") ||	// Shrak
+		!Q_strncmp(mod->name, "progs/chip", 10)	||		// Shrak
 		!Q_strncmp(mod->name, "progs/end", 9)) {
 		mod->modflags |= FLAG_FULLBRIGHT;
 		mod->modflags |= FLAG_NOSHADOW;
 		mod->modflags |= FLAG_NO_IM_ANIM;
+	}
+	else if	(
+		!Q_strcmp(mod->name, "progs/xhairoff.mdl") ||		// Shrak
+		!Q_strcmp(mod->name, "progs/xhairon.mdl"))			// Shrak
+	{
+		mod->modflags |= FLAG_FULLBRIGHT;
+		mod->modflags |= FLAG_NOSHADOW;
+		mod->modflags |= FLAG_NO_IM_ANIM;
+		mod->modflags |= FLAG_DOUBLESIZE;
 	}
 
 //
