@@ -340,6 +340,42 @@ Sys_ExpandPath (char *str)
 
 	return buf;
 }
+
+int Sys_CheckClipboardPaste(int key)
+{
+	if ((key == 'V' || key == 'v') && GetKeyState(VK_CONTROL) < 0)
+	{
+		if (OpenClipboard(NULL))
+		{
+			th = GetClipboardData(CF_TEXT);
+			if (th)
+			{
+				clipText = GlobalLock(th);
+				if (clipText)
+				{
+					textCopied = malloc(GlobalSize(th) + 1);
+					strcpy(textCopied, clipText);
+					/* Substitutes a NULL for every token */
+					strtok(textCopied, "\n\r\b");
+					i = strlen(textCopied);
+					if (i + key_linepos >= MAXCMDLINE)
+						i = MAXCMDLINE - key_linepos;
+					if (i > 0)
+					{
+						textCopied[i]=0;
+						strcat(key_lines[edit_line], textCopied);
+						key_linepos+=i;;
+					}
+					free(textCopied);
+				}
+				GlobalUnlock(th);
+			}
+			CloseClipboard();
+			return true;
+		}
+	}
+	return false;
+}
 #else
 char *
 Sys_ExpandPath (char *str)
@@ -378,6 +414,11 @@ Sys_ExpandPath (char *str)
 		strlcpy (buf, str, PATH_MAX);
 
 	return buf;
+}
+
+int Sys_CheckClipboardPaste(int key)
+{
+	return false;
 }
 #endif
 
