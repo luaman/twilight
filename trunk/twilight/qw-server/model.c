@@ -509,24 +509,6 @@ Mod_LoadFaces (lump_t *l)
 		i = LittleLong (in->lightofs);
 
 		out->samples = NULL;
-
-		// set the drawing flags flag
-
-		if (!strncmp (out->texinfo->texture->name, "sky", 3))	// sky
-		{
-			out->flags |= (SURF_DRAWSKY | SURF_DRAWTILED);
-			continue;
-		}
-
-		if (out->texinfo->texture->name[0] == '*')	// turbulent
-		{
-			out->flags |= (SURF_DRAWTURB | SURF_DRAWTILED);
-			for (i = 0; i < 2; i++) {
-				out->extents[i] = 16384;
-				out->texturemins[i] = -8192;
-			}
-			continue;
-		}
 	}
 }
 
