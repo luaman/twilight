@@ -613,6 +613,8 @@ CL_ParseServerData (void)
 		cl.playernum &= ~128;
 	}
 
+	cl.viewentity = cl.playernum + 1;
+
 	// get the full level name
 	str = MSG_ReadString ();
 	strncpy (cl.levelname, str, sizeof (cl.levelname) - 1);

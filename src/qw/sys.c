@@ -68,7 +68,6 @@ static const char rcsid[] =
 #endif
 
 #include "SDL.h"
-#include "SDL_main.h"
 
 #include "common.h"
 #include "compat.h"
@@ -224,9 +223,7 @@ Sys_DoubleTime (void)
 {
 	static double	epoch = 0.0;
 	static Uint32	last;
-	Uint32			now;
-
-	now = SDL_GetTicks ();
+	Uint32			now = SDL_GetTicks ();
 
 	// happens every 47 days or so - hey it _could_ happen!
 	if (now < last)

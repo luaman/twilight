@@ -65,15 +65,14 @@ static const char rcsid[] =
 #include <pwd.h>
 #endif
 #include <errno.h>
+
 #ifdef _WIN32
 // Don't need windows.h till we have win32 GUI console
-#include <windows.h>
 #include <io.h>
 #include <conio.h>
 #endif
 
 #include "SDL.h"
-#include "SDL_main.h"
 
 #include "bothdefs.h"
 #include "common.h"
@@ -88,6 +87,7 @@ static const char rcsid[] =
 void SV_Init (void);
 
 cvar_t	   *sys_extrasleep;
+Uint32		sys_sleep;
 
 int			sys_memsize = 0;
 void	   *sys_membase = NULL;
@@ -126,9 +126,20 @@ Sys_Quit (void)
 }
 
 void
+Sys_ESCallback (cvar_t *cvar)
+{
+	if (cvar->value < 0)
+		Cvar_Set (cvar, "0");
+	else if (cvar->value > 1000000.0f)
+		Cvar_Set (cvar, "1000000");
+
+	sys_sleep = (Uint32)((cvar->value) * (1.0f / 1000.0f));
+}
+
+void
 Sys_Init (void)
 {
-	sys_extrasleep = Cvar_Get ("sys_extrasleep", "0", CVAR_NONE, NULL);
+	sys_extrasleep = Cvar_Get ("sys_extrasleep", "0", CVAR_NONE, &Sys_ESCallback);
 
 	Math_Init ();
 }
@@ -185,9 +196,7 @@ Sys_DoubleTime (void)
 {
 	static double	epoch = 0.0;
 	static Uint32	last;
-	Uint32			now;
-
-	now = SDL_GetTicks ();
+	Uint32			now = SDL_GetTicks ();
 
 	// happens every 47 days or so - hey it _could_ happen!
 	if (now < last)
@@ -340,6 +349,10 @@ Sys_ExpandPath (char *str)
 }
 #endif
 
+#ifdef _CONSOLE 
+#undef main
+#endif
+
 int
 main (int c, char **v)
 {
@@ -403,11 +416,7 @@ main (int c, char **v)
 		oldtime = newtime;
 
 		if (sys_extrasleep->value)
-#ifdef _WIN32
-			Sleep ((DWORD) (bound(0.0f, sys_extrasleep->value, 1000000.0f) * (1.0f / 1000.0f)));
-#else
-			usleep (sys_extrasleep->value);
-#endif
+			SDL_Delay (sys_sleep);
 	}
 
 	return 0;

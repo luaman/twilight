@@ -345,24 +345,26 @@ CD_f (void)
 }
 
 void
+CDAudio_Bgmcallback (cvar_t *cvar)
+{
+	if (cdvolume) {
+		Cvar_Set (cvar, "0.0");
+		CDAudio_Pause ();
+	} else {
+		Cvar_Set (cvar, "1.0");
+		CDAudio_Resume ();
+	}
+
+	cdvolume = cvar->value;
+}
+
+void
 CDAudio_Update (void)
 {
 	CDstatus    curstat;
 
 	if (!enabled)
 		return;
-
-	if (bgmvolume->value != cdvolume) {
-		if (cdvolume) {
-			Cvar_Set (bgmvolume, "0.0");
-			cdvolume = bgmvolume->value;
-			CDAudio_Pause ();
-		} else {
-			Cvar_Set (bgmvolume, "1.0");
-			cdvolume = bgmvolume->value;
-			CDAudio_Resume ();
-		}
-	}
 
 	if (playing && realtime > endOfTrack) {
 		curstat = cd_handle->status;
