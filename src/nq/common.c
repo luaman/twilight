@@ -505,11 +505,7 @@ void Com_Printf (char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
-#ifndef TWILIGHT_QWSV
 	extern char	logname[MAX_OSPATH];
-#else
-	extern FILE *sv_logfile;
-#endif
 
 	va_start (argptr, fmt);
 	vsnprintf (msg, sizeof (msg), fmt, argptr);

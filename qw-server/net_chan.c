@@ -40,10 +40,6 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 
-#ifndef TWILIGHT_QWSV
-# include "client.h"
-#endif
-
 #include "common.h"
 #include "strlib.h"
 #include "cvar.h"
@@ -160,10 +156,7 @@ Netchan_OutOfBand (netsrc_t sock, netadr_t adr, int length, Uint8 *data)
 
 	// send the datagram
 	// zoid, no input in demo playback mode
-#ifndef TWILIGHT_QWSV
-	if ( !cls.demoplayback )
-#endif
-		NET_SendPacket (sock, send.cursize, send.data, adr);
+	NET_SendPacket (sock, send.cursize, send.data, adr);
 }
 
 /*
@@ -242,9 +235,7 @@ Netchan_CanReliable (netchan_t *chan)
 	return Netchan_CanPacket (chan);
 }
 
-#ifdef TWILIGHT_QWSV
 qboolean    ServerPaused (void);
-#endif
 
 /*
 ===============
@@ -317,20 +308,15 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 	chan->outgoing_time[i] = curtime;
 
 	// zoid, no input in demo playback mode
-#ifndef TWILIGHT_QWSV
-	if ( !cls.demoplayback )
-#endif
-		NET_SendPacket (chan->sock, send.cursize, send.data, chan->remote_address);
+	NET_SendPacket (chan->sock, send.cursize, send.data, chan->remote_address);
 
 	if (chan->cleartime < curtime)
 		chan->cleartime = curtime + send.cursize * chan->rate;
 	else
 		chan->cleartime += send.cursize * chan->rate;
 
-#ifdef TWILIGHT_QWSV
 	if (ServerPaused ())
 		chan->cleartime = curtime;
-#endif
 
 	if (showpackets->ivalue)
 		Com_Printf ("--> s=%i(%i) a=%i(%i) %i\n", chan->outgoing_sequence,
@@ -352,11 +338,8 @@ Netchan_Process (netchan_t *chan)
 	unsigned    sequence, sequence_ack;
 	unsigned    reliable_ack, reliable_message;
 
-#ifndef TWILIGHT_QWSV
-	if (!cls.demoplayback)
-#endif
-		if (!NET_CompareAdr (net_from, chan->remote_address))
-			return false;
+	if (!NET_CompareAdr (net_from, chan->remote_address))
+		return false;
 
 // get sequence numbers     
 	MSG_BeginReading ();
