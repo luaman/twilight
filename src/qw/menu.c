@@ -140,7 +140,7 @@ Draws one solid graphics character
 void
 M_DrawCharacter (int cx, int line, int num)
 {
-	Draw_Character (cx + ((vid.width - 320) >> 1), line, num);
+	Draw_Character (cx + ((vid.conwidth - 320) >> 1), line, num);
 }
 
 void
@@ -153,7 +153,7 @@ M_Print (int cx, int cy, char *str)
 		cx += 8;
 	}
 */
-	Draw_Alt_String (cx + ((vid.width - 320) >> 1), cy, str);
+	Draw_Alt_String (cx + ((vid.conwidth - 320) >> 1), cy, str);
 }
 
 void
@@ -166,13 +166,13 @@ M_PrintWhite (int cx, int cy, char *str)
 		cx += 8;
 	}
 */
-	Draw_String (cx + ((vid.width - 320) >> 1), cy, str);
+	Draw_String (cx + ((vid.conwidth - 320) >> 1), cy, str);
 }
 
 void
 M_DrawPic (int x, int y, qpic_t *pic)
 {
-	Draw_Pic (x + ((vid.width - 320) >> 1), y, pic);
+	Draw_Pic (x + ((vid.conwidth - 320) >> 1), y, pic);
 }
 
 void
