@@ -187,6 +187,11 @@ def handle_opts (conf, opts, config_defs, destructive):
 		if ('gcc' in env['TOOLS']):
 			if int(opts['werror']):
 				conf.cflag ('-Werror')
+		if ('msvc' in env['TOOLS']):
+			conf.cflag ('/MD')
+			conf.lflag ('/subsystem:windows')
+			if int(opts['werror']):
+				conf.cflag ('/WX')
 	else:
 		conf.env.Replace (CC = opts['CC'])
 		conf.env.Replace (CCFLAGS = Split (opts['CFLAGS']))
@@ -211,9 +216,14 @@ def handle_opts (conf, opts, config_defs, destructive):
 			conf.cflag ('-fno-strict-aliasing', 1)
 			conf.cflag ('-finline', 1)
 		if ('msvc' in env['TOOLS']):
-			env.Append (LINKFLAGS = ['/subsystem:windows'])
+			if int(opts['debug']):
+				conf.cflag ('/Zi')
+				conf.cflag ('/GZ')
 			if int(opts['optimize']):
-				env.Append (CCFLAGS = ['/G5', '/MD'])
+				conf.cflag ('/O2', 1)
+				conf.cflag ('/Og', 1)
+				conf.cflag ('/Oi', 1)
+				conf.cflag ('/G5', 1)
 
 		config_defs.set('SDL_IMAGE_LIBRARY', '"' + opts['sdl_image'] + '"')
 		config_defs.set('USERPATH', '"' + opts['userpath'] + '"')
