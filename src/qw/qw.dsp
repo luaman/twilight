@@ -113,6 +113,10 @@ SOURCE=.\cl_main.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\cl_model.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\cl_parse.c
 # End Source File
 # Begin Source File
@@ -142,14 +146,6 @@ SOURCE=.\cvar.c
 # Begin Source File
 
 SOURCE=.\gl_draw.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_mesh.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gl_model.c
 # End Source File
 # Begin Source File
 

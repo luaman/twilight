@@ -26,11 +26,11 @@ endif
 
 twilight_qw_SOURCES= \
 	quakedef.h \
-	cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c cl_parse.c \
-	cl_pred.c cl_tent.c client.h \
+        cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c cl_model.c \
+        cl_parse.c cl_pred.c cl_tent.c client.h \
 	cmd.c cmd.h common.c console.c console.h \
 	cvar.c \
-	gl_draw.c gl_mesh.c gl_model.c \
+        gl_draw.c \
 	gl_ngraph.c gl_refrag.c gl_rlight.c gl_rmain.c \
 	gl_rmisc.c gl_rsurf.c gl_screen.c screen.h gl_warp.c \
 	glquake.h \

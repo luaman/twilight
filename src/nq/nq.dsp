@@ -188,10 +188,6 @@ SOURCE=.\menu.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\model.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\net_bsd.c
 # End Source File
 # Begin Source File

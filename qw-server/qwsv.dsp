@@ -104,10 +104,6 @@ SOURCE=.\mdfour.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\model.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\net_chan.c
 # End Source File
 # Begin Source File
@@ -149,6 +145,10 @@ SOURCE=.\sv_init.c
 # Begin Source File
 
 SOURCE=.\sv_main.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\sv_model.c
 # End Source File
 # Begin Source File
 
@@ -229,10 +229,6 @@ SOURCE=..\include\input.h
 # Begin Source File
 
 SOURCE=..\include\menu.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\model.h
 # End Source File
 # Begin Source File
 
