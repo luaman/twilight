@@ -398,7 +398,6 @@ SV_Status_f (void)
 	float       cpu, avg, pak;
 	char       *s;
 
-
 	cpu = (svs.stats.latched_active + svs.stats.latched_idle);
 	if (cpu)
 		cpu = 100 * svs.stats.latched_active / cpu;

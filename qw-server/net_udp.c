@@ -79,9 +79,8 @@ netadr_t    net_local_adr;
 
 netadr_t    net_from;
 sizebuf_t   net_message;
-int         net_socket;
 
-int         ip_sockets[2];					// non blocking, for receives
+static int  ip_sockets[2];	// non blocking, for receives
 
 #define	MAX_UDP_PACKET	8192
 Uint8       net_message_buffer[MAX_UDP_PACKET];
@@ -241,10 +240,9 @@ qboolean NET_GetLoopPacket (netsrc_t sock)
 
 	memcpy (net_message.data, loop->msgs[i].data, loop->msgs[i].datalen);
 	net_message.cursize = loop->msgs[i].datalen;
-	memset (&net_from, 0, sizeof(net_from));
+	net_from = net_local_adr;
 	net_from.type = NA_LOOPBACK;
 	return true;
-
 }
 
 
@@ -377,12 +375,6 @@ UDP_OpenSocket (int port)
 		Sys_Error ("UDP_OpenSocket: bind: %s", strerror (errno));
 
 	return newsocket;
-}
-
-qboolean 
-NET_IsLocalAddress (netadr_t adr)
-{
-	return NET_CompareAdr (adr, net_local_adr);
 }
 
 /*
