@@ -136,7 +136,9 @@ Cbuf_InsertText (char *text)
 	char		*buf;
 	size_t		len;
 
-	len = strlen (text);
+	if (!(len = strlen (text)))
+		return;
+
 	p = Zone_Alloc (stringzone, sizeof (sizebuf_t));
 	buf = Zone_Alloc (stringzone, len);
 	memcpy (buf, text, len);

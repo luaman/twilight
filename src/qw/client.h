@@ -252,6 +252,7 @@ typedef struct {
 	float			item_gettime[32];		// cl.time of aquiring, for blinking
 	float			faceanimtime;			// use anim frame if cl.time < this
 
+	colormap_t		*colormap;				// The colormap for local display.
 	cshift_t		cshifts[NUM_CSHIFTS];	// color shifts for damage, powerups
 	cshift_t		prev_cshifts[NUM_CSHIFTS];	// and content types
 
@@ -305,10 +306,10 @@ typedef struct {
 
 	int				cdtrack;				// cd audio
 
+	entity_t		viewent;
 	vec3_t			viewent_origin;
 	vec3_t			viewent_angles;
 	int				viewent_frame;
-	model_t			*viewent_model;
 
 	// all player information
 	player_info_t players[MAX_CLIENTS];

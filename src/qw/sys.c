@@ -133,25 +133,22 @@ static const char sys_charmap[256] = {
 void
 Sys_Printf (char *fmt, ...)
 {
-	va_list     argptr;
-	char        text[2048];
-	unsigned char *p;
+	va_list			argptr;
+	unsigned char	text[2048];
+	unsigned char	*p;
+
+	if (nostdout)
+		return;
 
 	va_start (argptr, fmt);
 	vsnprintf (text, sizeof (text), fmt, argptr);
 	va_end (argptr);
 
-	if (strlen (text) > sizeof (text))
-		Sys_Error ("memory overwrite in Sys_Printf");
-
-	if (nostdout)
-		return;
-
 	if (sys_asciionly && sys_asciionly->ivalue)
-		for (p = (unsigned char *) text; *p; p++)
+		for (p = text; *p; p++)
 			putc (sys_charmap[*p], stdout);
 	else
-		for (p = (unsigned char *) text; *p; p++)
+		for (p = text; *p; p++)
 			if ((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
 				printf ("[%02x]", *p);
 			else

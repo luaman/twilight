@@ -148,6 +148,7 @@ typedef struct {
 	float			item_gettime[32];		// cl.time of aquiring item, for blinking
 	float			faceanimtime;			// use anim frame if cl.time < this
 
+	colormap_t		*colormap;				// The colormap for the display.
 	cshift_t		cshifts[NUM_CSHIFTS];	// color shifts for damage, powerups
 	cshift_t		prev_cshifts[NUM_CSHIFTS];	// and content types
 

@@ -590,7 +590,8 @@ void
 V_CalcIntermissionRefdef (void)
 {
 	/* view is the weapon model (only visible from inside body) */
-	cl.viewent_model = NULL;
+	memset (&cl.viewent, 0, sizeof (entity_t));
+	cl.viewent.times = -1;		// FIXME: HACK! DO NOT COPY ELSEWHERE!
 
 	VectorCopy(cl.simorg, r_refdef.vieworg);
 	VectorCopy(cl.simangles, r_refdef.viewangles);
@@ -645,6 +646,9 @@ V_CalcRefdef (void)
 	float			bob;
 	static float	oldz = 0;
 
+	/* Make sure we have an uptodate colormap. */
+	cl.colormap = &cl.players[cl.playernum].colormap;
+
 	V_DriftPitch();
 
 	bob = V_CalcBob();
@@ -698,14 +702,16 @@ V_CalcRefdef (void)
 	   roughly equal with different FOV */
 	cl.viewent_origin[2] += 2;
 
-	if (view_message->flags & (PF_GIB | PF_DEAD))
-		cl.viewent_model = NULL;
-	else {
+	if (view_message->flags & (PF_GIB | PF_DEAD)) {
+		memset (&cl.viewent, 0, sizeof (entity_t));
+		cl.viewent.times = -1;		// FIXME: HACK! DO NOT COPY ELSEWHERE!
+	} else {
 		model_t *model = cl.model_precache[cl.stats[STAT_WEAPON]];
 
-		if (cl.viewent_model != model)
-		{
-			cl.viewent_model = model;
+		if (cl.viewent.model != model) {
+			memset (&cl.viewent, 0, sizeof (entity_t));
+			cl.viewent.model = model;
+			cl.viewent.times = -1;		// FIXME: HACK! DO NOT COPY ELSEWHERE!
 		}
 	}
 
@@ -752,8 +758,6 @@ The player's clipping box goes from (-16 -16 -24) to (16 16 32) from
 the entity origin, so any view position inside that will be valid
 ==================
 */
-extern vrect_t scr_vrect;
-
 void
 V_RenderView (void)
 {

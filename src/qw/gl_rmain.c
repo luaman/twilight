@@ -687,31 +687,22 @@ R_DrawViewModel
 static void
 R_DrawViewModel (void)
 {
-	static entity_t viewent;
-	static qboolean first = true;
+	cl.viewent.times++;
 
-	if ((cl.viewent_model != viewent.model) || first) {
-		memset (&viewent, 0, sizeof (entity_t));
-		first = false;
-	} else {
-		viewent.times++;
-	}
-
-	viewent.model = cl.viewent_model;
-	currententity = &viewent;
+	currententity = &cl.viewent;
 
 	if (!r_drawviewmodel->ivalue ||
 		!Cam_DrawViewModel () ||
 		!r_drawentities->ivalue ||
 		(cl.stats[STAT_ITEMS] & IT_INVISIBILITY) ||
 		(cl.stats[STAT_HEALTH] <= 0) ||
-		!currententity->model) {
+		!cl.viewent.model) {
 		return;
 	}
 
-	CL_Update_Origin(&viewent, cl.viewent_origin, cls.realtime);
-	CL_Update_Angles(&viewent, cl.viewent_angles, cls.realtime);
-	CL_UpdateAndLerp_Frame(&viewent, cl.viewent_frame, cls.realtime);
+	CL_Update_Origin(&cl.viewent, cl.viewent_origin, cls.realtime);
+	CL_Update_Angles(&cl.viewent, cl.viewent_angles, cls.realtime);
+	CL_UpdateAndLerp_Frame(&cl.viewent, cl.viewent_frame, cls.realtime);
 
 	// hack the depth range to prevent view model from poking into walls
 	qglDepthRange (gldepthmin, gldepthmin + 0.3 * (gldepthmax - gldepthmin));

@@ -652,6 +652,9 @@ V_CalcRefdef (void)
 	/* view is the weapon model (only visible from inside body) */
 	view = &cl.viewent;
 
+	/* Keep the colormap correct. */
+	cl.colormap = ent->colormap;
+
 	/* transform the view offset by the model's matrix to get the offset from
 	   model origin for the view */
 	ent->angles[YAW] = cl.viewangles[YAW];		/* the model should */
@@ -705,7 +708,6 @@ V_CalcRefdef (void)
 	view->origin[2] += bob;
 	view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
 	view->frame = cl.stats[STAT_WEAPONFRAME];
-	view->colormap = NULL;
 
 	/* set up the refresh position */
 	VectorAdd (r_refdef.viewangles, cl.punchangle, r_refdef.viewangles);

@@ -1083,7 +1083,6 @@ CL_Init_Cvars
 void
 CL_Init_Cvars (void)
 {
-	extern cvar_t	*baseskin;
 	extern cvar_t	*noskins;
 
 	// set for running times
@@ -1109,7 +1108,6 @@ CL_Init_Cvars (void)
 
 	localid = Cvar_Get ("localid", "", CVAR_NONE, NULL);
 
-	baseskin = Cvar_Get ("baseskin", "base", CVAR_NONE, NULL);
 	noskins = Cvar_Get ("noskins", "0", CVAR_NONE, NULL);
 
 	// 
