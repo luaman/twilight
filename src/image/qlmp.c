@@ -33,7 +33,7 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <malloc.h>
+#include <stdlib.h>
 #include "SDL.h"
 
 #include "common.h"
