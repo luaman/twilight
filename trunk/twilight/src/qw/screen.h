@@ -23,9 +23,8 @@
 
 	$Id$
 */
-// screen.h
 
-#ifndef __SVREEN_H
+#ifndef __SCREEN_H
 #define __SCREEN_H
 
 void		SCR_Init_Cvars (void);

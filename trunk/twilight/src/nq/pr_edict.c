@@ -1070,17 +1070,12 @@ PR_LoadProgs (void)
 
 /*
 ===============
-PR_Init
+PR_Init_Cvars
 ===============
 */
 void
-PR_Init (void)
+PR_Init_Cvars (void)
 {
-	Cmd_AddCommand ("edict", ED_PrintEdict_f);
-	Cmd_AddCommand ("edicts", ED_PrintEdicts);
-	Cmd_AddCommand ("edictcount", ED_Count);
-	Cmd_AddCommand ("profile", PR_Profile_f);
-
 	nomonsters = Cvar_Get ("nomonsters", "0", CVAR_NONE, NULL);
 	gamecfg = Cvar_Get ("gamecfg", "0", CVAR_NONE, NULL);
 	scratch1 = Cvar_Get ("scratch1", "0", CVAR_NONE, NULL);
@@ -1094,7 +1089,19 @@ PR_Init (void)
 	saved4 = Cvar_Get ("saved4", "0", CVAR_ARCHIVE, NULL);
 }
 
-
+/*
+===============
+PR_Init
+===============
+*/
+void
+PR_Init (void)
+{
+	Cmd_AddCommand ("edict", ED_PrintEdict_f);
+	Cmd_AddCommand ("edicts", ED_PrintEdicts);
+	Cmd_AddCommand ("edictcount", ED_Count);
+	Cmd_AddCommand ("profile", PR_Profile_f);
+}
 
 edict_t    *
 EDICT_NUM (int n)

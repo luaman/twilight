@@ -253,6 +253,23 @@ Draw_TextureMode_f (void)
 
 /*
 ===============
+Draw_Init_Cvars
+===============
+*/
+void
+Draw_Init_Cvars (void)
+{
+	gl_max_size = Cvar_Get ("gl_max_size", "1024", CVAR_NONE, NULL);
+	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
+
+	// 3dfx can only handle 256 wide textures
+	if (!Q_strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
+		Q_strstr ((char *) gl_renderer, "Glide"))
+		Cvar_Set (gl_max_size, "256");
+}
+
+/*
+===============
 Draw_Init
 ===============
 */
@@ -267,14 +284,6 @@ Draw_Init (void)
 	glpic_t    *gl;
 	int         start;
 	byte       *ncdata;
-
-	gl_max_size = Cvar_Get ("gl_max_size", "1024", CVAR_NONE, NULL);
-	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
-
-	// 3dfx can only handle 256 wide textures
-	if (!Q_strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
-		Q_strstr ((char *) gl_renderer, "Glide"))
-		Cvar_Set (gl_max_size, "256");
 
 	Cmd_AddCommand ("gl_texturemode", &Draw_TextureMode_f);
 

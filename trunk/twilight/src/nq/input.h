@@ -28,6 +28,7 @@
 #ifndef __INPUT_H
 #define __INPUT_H
 
+void        IN_Init_Cvars (void);
 void        IN_Init (void);
 
 void        IN_Shutdown (void);

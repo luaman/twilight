@@ -34,6 +34,7 @@
 
 extern int  sb_lines;					// scan lines to draw
 
+void        Sbar_Init_Cvars (void);
 void        Sbar_Init (void);
 
 void        Sbar_Changed (void);

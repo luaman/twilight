@@ -190,18 +190,14 @@ R_Envmap_f (void)
 
 /*
 ===============
-R_Init
+R_Init_Cvars
 ===============
 */
 void
-R_Init (void)
+R_Init_Cvars (void)
 {
 	extern cvar_t *gl_finish;
 	extern cvar_t *r_maxedges, *r_maxsurfs;		// Shrak
-
-	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);
-	Cmd_AddCommand ("envmap", R_Envmap_f);
-	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);
 
 	r_norefresh = Cvar_Get ("r_norefresh", "0", CVAR_NONE, NULL);
 	r_drawentities = Cvar_Get ("r_drawentities", "1", CVAR_NONE, NULL);
@@ -242,6 +238,19 @@ R_Init (void)
 
 	if (gl_mtexable)
 		Cvar_Set (gl_texsort, "0");
+}
+
+/*
+===============
+R_Init
+===============
+*/
+void
+R_Init (void)
+{
+	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);
+	Cmd_AddCommand ("envmap", R_Envmap_f);
+	Cmd_AddCommand ("pointfile", R_ReadPointFile_f);
 
 	R_InitBubble();
 	R_InitParticles ();

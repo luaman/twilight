@@ -2691,6 +2691,10 @@ M_ServerList_Key (int k)
 //=============================================================================
 /* Menu Subsystem */
 
+void
+M_Init_Cvars(void)
+{
+}
 
 void
 M_Init (void)

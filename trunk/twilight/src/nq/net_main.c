@@ -702,6 +702,27 @@ NET_SendToAll (sizebuf_t *data, int blocktime)
 
 /*
 ====================
+NET_Init_Cvars
+====================
+*/
+
+void
+NET_Init_Cvars (void)
+{
+	net_messagetimeout = Cvar_Get ("net_messagetimeout", "300", CVAR_NONE, NULL);
+	hostname = Cvar_Get ("hostname", "UNNAMED", CVAR_NONE, NULL);
+	config_com_port = Cvar_Get ("_config_com_port", "0x3f8", CVAR_ARCHIVE, NULL);
+	config_com_irq = Cvar_Get ("_config_com_irq", "4", CVAR_NONE, NULL);
+	config_com_baud = Cvar_Get ("_config_com_baud", "57600", CVAR_NONE, NULL);
+	config_com_modem = Cvar_Get ("_config_com_modem", "1", CVAR_NONE, NULL);
+	config_modem_dialtype = Cvar_Get ("_config_modem_dialtype", "T", CVAR_NONE, NULL);
+	config_modem_clear = Cvar_Get ("_config_modem_clear", "ATZ", CVAR_NONE, NULL);
+	config_modem_init = Cvar_Get ("_config_modem_init", "", CVAR_NONE, NULL);
+	config_modem_hangup = Cvar_Get ("_config_modem_hangup", "AT H", CVAR_NONE, NULL);
+}
+
+/*
+====================
 NET_Init
 ====================
 */
@@ -742,22 +763,6 @@ NET_Init (void)
 
 	// allocate space for network message buffer
 	SZ_Alloc (&net_message, NET_MAXMESSAGE);
-
-	net_messagetimeout = Cvar_Get ("net_messagetimeout", "300", CVAR_NONE,
-			NULL);
-	hostname = Cvar_Get ("hostname", "UNNAMED", CVAR_NONE, NULL);
-	config_com_port = Cvar_Get ("_config_com_port", "0x3f8", CVAR_ARCHIVE,
-			NULL);
-	config_com_irq = Cvar_Get ("_config_com_irq", "4", CVAR_NONE, NULL);
-	config_com_baud = Cvar_Get ("_config_com_baud", "57600", CVAR_NONE, NULL);
-	config_com_modem = Cvar_Get ("_config_com_modem", "1", CVAR_NONE, NULL);
-	config_modem_dialtype = Cvar_Get ("_config_modem_dialtype", "T",
-			CVAR_NONE, NULL);
-	config_modem_clear = Cvar_Get ("_config_modem_clear", "ATZ", CVAR_NONE,
-			NULL);
-	config_modem_init = Cvar_Get ("_config_modem_init", "", CVAR_NONE, NULL);
-	config_modem_hangup = Cvar_Get ("_config_modem_hangup", "AT H",
-			CVAR_NONE, NULL);
 
 	Cmd_AddCommand ("slist", NET_Slist_f);
 	Cmd_AddCommand ("listen", NET_Listen_f);

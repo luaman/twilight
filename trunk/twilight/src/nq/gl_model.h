@@ -419,17 +419,18 @@ typedef struct model_s {
 
 //============================================================================
 
-void        Mod_Init (void);
-void        Mod_ClearAll (void);
-model_t    *Mod_ForName (char *name, qboolean crash);
-void       *Mod_Extradata (model_t *mod);	// handles caching
-void        Mod_TouchModel (char *name);
+void		Mod_Init_Cvars (void);
+void		Mod_Init (void);
+void		Mod_ClearAll (void);
+model_t		*Mod_ForName (char *name, qboolean crash);
+void		*Mod_Extradata (model_t *mod);	// handles caching
+void		Mod_TouchModel (char *name);
 
-mleaf_t    *Mod_PointInLeaf (float *p, model_t *model);
-byte       *Mod_LeafPVS (mleaf_t *leaf, model_t *model);
+mleaf_t		*Mod_PointInLeaf (float *p, model_t *model);
+byte		*Mod_LeafPVS (mleaf_t *leaf, model_t *model);
 
-void        GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
-void        GL_SubdivideSurface (msurface_t *fa);
+void		GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
+void		GL_SubdivideSurface (msurface_t *fa);
 
 #endif // __MODEL__
 

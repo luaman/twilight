@@ -58,41 +58,42 @@ typedef struct edict_s {
 
 //============================================================================
 
-extern dprograms_t *progs;
-extern dfunction_t *pr_functions;
-extern char *pr_strings;
-extern ddef_t *pr_globaldefs;
-extern ddef_t *pr_fielddefs;
-extern dstatement_t *pr_statements;
-extern globalvars_t *pr_global_struct;
-extern float *pr_globals;				// same as pr_global_struct
+extern dprograms_t	*progs;
+extern dfunction_t	*pr_functions;
+extern char			*pr_strings;
+extern ddef_t		*pr_globaldefs;
+extern ddef_t		*pr_fielddefs;
+extern dstatement_t	*pr_statements;
+extern globalvars_t	*pr_global_struct;
+extern float		*pr_globals;		// same as pr_global_struct
 
-extern int  pr_edict_size;				// in bytes
+extern int	pr_edict_size;				// in bytes
 
 //============================================================================
 
-void        PR_Init (void);
+void		PR_Init_Cvars (void);
+void		PR_Init (void);
 
-void        PR_ExecuteProgram (func_t fnum);
-void        PR_LoadProgs (void);
+void		PR_ExecuteProgram (func_t fnum);
+void		PR_LoadProgs (void);
 
-void        PR_Profile_f (void);
+void		PR_Profile_f (void);
 
-edict_t    *ED_Alloc (void);
-void        ED_Free (edict_t *ed);
+edict_t		*ED_Alloc (void);
+void		ED_Free (edict_t *ed);
 
-char       *ED_NewString (char *string);
+char		*ED_NewString (char *string);
 
 // returns a copy of the string allocated from the server's string heap
 
-void        ED_Print (edict_t *ed);
-void        ED_Write (FILE * f, edict_t *ed);
-char       *ED_ParseEdict (char *data, edict_t *ent);
+void		ED_Print (edict_t *ed);
+void		ED_Write (FILE * f, edict_t *ed);
+char		*ED_ParseEdict (char *data, edict_t *ent);
 
-void        ED_WriteGlobals (FILE * f);
-void        ED_ParseGlobals (char *data);
+void		ED_WriteGlobals (FILE * f);
+void		ED_ParseGlobals (char *data);
 
-void        ED_LoadFromFile (char *data);
+void		ED_LoadFromFile (char *data);
 
 //define EDICT_NUM(n) ((edict_t *)(sv.edicts+ (n)*pr_edict_size))
 //define NUM_FOR_EDICT(e) (((byte *)(e) - sv.edicts)/pr_edict_size)
@@ -134,12 +135,12 @@ extern int  pr_xstatement;
 
 extern unsigned short pr_crc;
 
-void        PR_RunError (char *error, ...);
+void		PR_RunError (char *error, ...);
 
-void        ED_PrintEdicts (void);
-void        ED_PrintNum (int ent);
+void		ED_PrintEdicts (void);
+void		ED_PrintNum (int ent);
 
-eval_t     *GetEdictFieldValue (edict_t *ed, char *field);
+eval_t		*GetEdictFieldValue (edict_t *ed, char *field);
 
 #endif // __PROGS_H
 
