@@ -54,7 +54,7 @@ typedef enum {NS_CLIENT, NS_SERVER} netsrc_t;
 void        NET_Init (void);
 void        NET_Shutdown (void);
 qboolean    NET_GetPacket (netsrc_t sock);
-void        NET_SendPacket (netsrc_t sock, int length, void *data, netadr_t to);
+void        NET_SendPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to);
 void		NET_OpenSocket (netsrc_t sock, int port);
 
 qboolean    NET_CompareAdr (netadr_t a, netadr_t b);
