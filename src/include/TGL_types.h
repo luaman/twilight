@@ -27,7 +27,7 @@
 #ifndef __TGL_types_h
 #define __TGL_types_h
 
-#include <SDL_types.h>
+#include "SDL_types.h"
 
 typedef void			GLvoid;
 typedef	Uint8			GLboolean;

@@ -36,7 +36,7 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <SDL_types.h>
+#include "SDL_types.h"
 
 #include "strlib.h"						/* XoXus: needed for memset / memcpy */
 #include "mdfour.h"
