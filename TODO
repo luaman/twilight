@@ -12,7 +12,6 @@ These things should be done before first public release:
 
 Would be nice but is not strictly needed, in importance order:
 
-  - Rid ourselves of the monolithic header in NQ
   - Merge QW server into QW client ala NQ
   - Server browser
   - Test -dedicated to make sure there are no nasty surprises [LordHavoc]
@@ -49,4 +48,3 @@ Stuff that definitely should wait:
   - Change resolutions in-game
   - New key system.
 
-Just testing this	// Tomaz

@@ -51,6 +51,10 @@ static const char rcsid[] =
 #include <errno.h>
 
 #include "quakedef.h"
+#include "client.h"
+#include "cvar.h"
+#include "host.h"
+#include "mathlib.h"
 #include "strlib.h"
 
 qboolean    isDedicated;

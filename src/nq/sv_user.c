@@ -35,8 +35,18 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cmd.h"
 #include "console.h"
+#include "cvar.h"
+#include "host.h"
+#include "keys.h"
+#include "mathlib.h"
+#include "net.h"
+#include "server.h"
+#include "strlib.h"
+#include "sys.h"
 #include "view.h"
+#include "world.h"
 
 edict_t			*sv_player;
 

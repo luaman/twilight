@@ -28,6 +28,9 @@
 #ifndef __RENDER_H
 #define __RENDER_H
 
+#include "protocol.h"
+#include "vid.h"
+
 #define	MAXCLIPPLANES	11
 
 #define	TOP_RANGE		16				// soldier uniform colors

@@ -28,8 +28,6 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
-#include "qtypes.h"
-
 extern struct cvar_s *fs_userconf;
 extern struct cvar_s *fs_userpath;
 extern struct cvar_s *fs_shareconf;

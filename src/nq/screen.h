@@ -54,9 +54,9 @@ extern int  clearnotify;				// set to 0 whenever notify text is
 extern qboolean scr_disabled_for_loading;
 extern qboolean scr_skipupdate;
 
-extern cvar_t *scr_viewsize;
-extern cvar_t *r_brightness;
-extern cvar_t *r_contrast;
+extern struct cvar_s *scr_viewsize;
+extern struct cvar_s *r_brightness;
+extern struct cvar_s *r_contrast;
 
 // only the refresh window will be updated unless these variables are flagged 
 extern int  scr_copytop;

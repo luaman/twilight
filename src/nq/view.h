@@ -28,7 +28,7 @@
 #ifndef __VIEW_H
 #define __VIEW_H
 
-extern cvar_t *v_gamma;
+extern struct cvar_s *v_gamma;
 
 extern Uint8 gammatable[256];			// palette is sent through this
 extern Uint8 ramps[3][256];

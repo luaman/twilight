@@ -38,9 +38,15 @@ static const char rcsid[] =
 #include <stdlib.h>
 
 #include "quakedef.h"
+#include "client.h"
 #include "console.h"
 #include "crc.h"
+#include "cvar.h"
+#include "draw.h"
 #include "glquake.h"
+#include "host.h"
+#include "strlib.h"
+#include "sys.h"
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
@@ -777,8 +783,6 @@ Draw_FadeScreen (void)
 	qglColor4f (1, 1, 1, 1);
 	qglEnable (GL_TEXTURE_2D);
 //	qglDisable (GL_BLEND);
-
-	Sbar_Changed ();
 }
 
 //=============================================================================

@@ -35,7 +35,12 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cmd.h"
+#include "common.h"
 #include "console.h"
+#include "strlib.h"
+#include "sys.h"
+#include "zone.h"
 
 #define	DYNAMIC_SIZE	0x20000
 

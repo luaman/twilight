@@ -35,6 +35,12 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cmd.h"
+#include "cvar.h"
+#include "draw.h"
+#include "sbar.h"
+#include "screen.h"
+#include "server.h"
 
 
 #define STAT_MINUS		10				// num frame for '-' stats digit
@@ -108,16 +114,6 @@ void
 Sbar_DontShowScores (void)
 {
 	sb_showscores = false;
-}
-
-/*
-===============
-Sbar_Changed
-===============
-*/
-void
-Sbar_Changed (void)
-{
 }
 
 /*

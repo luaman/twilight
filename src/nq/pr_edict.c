@@ -35,8 +35,16 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cmd.h"
 #include "console.h"
 #include "crc.h"
+#include "cvar.h"
+#include "host.h"
+#include "mathlib.h"
+#include "server.h"
+#include "strlib.h"
+#include "sys.h"
+#include "world.h"
 
 dprograms_t *progs;
 dfunction_t *pr_functions;

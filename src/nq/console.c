@@ -46,7 +46,18 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cmd.h"
 #include "console.h"
+#include "client.h"
+#include "cvar.h"
+#include "draw.h"
+#include "host.h"
+#include "keys.h"
+#include "screen.h"
+#include "sound.h"
+#include "strlib.h"
+#include "sys.h"
+#include "zone.h"
 
 int         con_linewidth;
 

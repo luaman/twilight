@@ -28,6 +28,9 @@
 #ifndef __SERVER_H
 #define __SERVER_H
 
+#include "client.h"
+#include "progs.h"
+
 typedef struct {
 	int         maxclients;
 	int         maxclientslimit;
@@ -204,12 +207,12 @@ typedef struct client_s {
 
 //============================================================================
 
-extern cvar_t *teamplay;
-extern cvar_t *skill;
-extern cvar_t *deathmatch;
-extern cvar_t *coop;
-extern cvar_t *fraglimit;
-extern cvar_t *timelimit;
+extern struct cvar_s *teamplay;
+extern struct cvar_s *skill;
+extern struct cvar_s *deathmatch;
+extern struct cvar_s *coop;
+extern struct cvar_s *fraglimit;
+extern struct cvar_s *timelimit;
 
 extern server_static_t svs;				// persistant server info
 extern server_t sv;						// local server

@@ -37,7 +37,13 @@ static const char rcsid[] =
 #include "SDL.h"
 
 #include "quakedef.h"
+#include "client.h"
+#include "cmd.h"
 #include "console.h"
+#include "cvar.h"
+#include "host.h"
+#include "mathlib.h"
+#include "net.h"
 
 // cvars
 cvar_t     *in_key_repeat_delay;

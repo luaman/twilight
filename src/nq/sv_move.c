@@ -35,6 +35,9 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "mathlib.h"
+#include "server.h"
+#include "world.h"
 
 #define	STEPSIZE	18
 

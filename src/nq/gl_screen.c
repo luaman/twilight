@@ -35,9 +35,19 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "cmd.h"
 #include "console.h"
+#include "cvar.h"
+#include "draw.h"
 #include "glquake.h"
+#include "host.h"
+#include "keys.h"
 #include "menu.h"
+#include "sbar.h"
+#include "screen.h"
+#include "sound.h"
+#include "strlib.h"
+#include "sys.h"
 #include "tga.h"
 
 /*
@@ -343,9 +353,6 @@ SCR_CalcRefdef (void)
 
 	scr_fullupdate = 0;					// force a background redraw
 	vid.recalc_refdef = 0;
-
-// force the status bar to redraw
-	Sbar_Changed ();
 
 //========================================
 
@@ -756,7 +763,6 @@ SCR_BeginLoadingPlaque (void)
 
 	scr_drawloading = true;
 	scr_fullupdate = 0;
-	Sbar_Changed ();
 	SCR_UpdateScreen ();
 	scr_drawloading = false;
 

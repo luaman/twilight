@@ -28,6 +28,10 @@
 #ifndef __WORLD_H
 #define __WORLD_H
 
+#include "common.h"
+#include "gl_model.h"
+#include "progs.h"
+
 typedef struct {
 	vec3_t      normal;
 	float       dist;

@@ -35,7 +35,12 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "common.h"
 #include "console.h"
+#include "cvar.h"
+#include "sound.h"
+#include "strlib.h"
+#include "sys.h"
 
 int         cache_full_cycle;
 

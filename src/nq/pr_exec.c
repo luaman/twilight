@@ -35,6 +35,9 @@ static const char rcsid[] =
 
 #include "quakedef.h"
 #include "console.h"
+#include "host.h"
+#include "server.h"
+#include "sys.h"
 
 
 /*

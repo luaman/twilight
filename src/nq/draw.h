@@ -29,6 +29,8 @@
 #ifndef __DRAW_H
 #define __DRAW_H
 
+#include "wad.h"
+
 extern qpic_t *draw_disc;				// also used on sbar
 
 void        Draw_Init_Cvars (void);
