@@ -176,6 +176,10 @@ SOURCE=.\keys.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\base\locs.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\menu.c
 # End Source File
 # Begin Source File

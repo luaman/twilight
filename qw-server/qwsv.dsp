@@ -112,11 +112,11 @@ SOURCE=.\net_udp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\pmove.c
+SOURCE=..\qw\pmove.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\pmovetst.c
+SOURCE=..\qw\pmovetst.c
 # End Source File
 # Begin Source File
 
