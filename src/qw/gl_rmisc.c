@@ -213,18 +213,18 @@ void
 R_TranslatePlayerSkin (int playernum)
 {
 	int		top, bottom;
-	byte	translate[256];
+	Uint8		translate[256];
 	unsigned	translate32[256];
 	int		i, j;
-	byte	*original;
+	Uint8		*original;
 	unsigned	pixels[512*256], *out;
 	unsigned	scaled_width, scaled_height;
-	int			inwidth, inheight;
-	int			tinwidth, tinheight;
-	byte		*inrow;
+	int		inwidth, inheight;
+	int		tinwidth, tinheight;
+	Uint8		*inrow;
 	unsigned	frac, fracstep;
-	player_info_t *player;
-	extern	byte		player_8bit_texels[320*200];
+	player_info_t	*player;
+	extern Uint8	player_8bit_texels[320*200];
 	char s[512];
 
 	player = &cl.players[playernum];
@@ -233,7 +233,7 @@ R_TranslatePlayerSkin (int playernum)
 
 	strcpy(s, Info_ValueForKey(player->userinfo, "skin"));
 	COM_StripExtension(s, s);
-	if (player->skin && !stricmp(s, player->skin->name))
+	if (player->skin && !strcasecmp(s, player->skin->name))
 		player->skin = NULL;
 
 	if (player->_topcolor != player->topcolor ||
