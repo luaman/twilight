@@ -65,8 +65,8 @@ SV_SetIdealPitch (void)
 		return;
 
 	angleval = sv_player->v.angles[YAW] * M_PI * 2 / 360;
-	sinval = sin (angleval);
-	cosval = cos (angleval);
+	sinval = Q_sin (angleval);
+	cosval = Q_cos (angleval);
 
 	for (i = 0; i < MAX_FORWARD; i++) {
 		top[0] = sv_player->v.origin[0] + cosval * (i + 3) * 12;
@@ -130,7 +130,7 @@ SV_UserFriction (void)
 
 	vel = velocity;
 
-	speed = sqrt (vel[0] * vel[0] + vel[1] * vel[1]);
+	speed = Q_sqrt (vel[0] * vel[0] + vel[1] * vel[1]);
 	if (!speed)
 		return;
 

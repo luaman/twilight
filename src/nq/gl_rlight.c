@@ -97,8 +97,8 @@ R_RenderDlight (dlight_t *light)
 	for (i = 16; i >= 0; i--) {
 		a = i / 16.0 * M_PI * 2;
 		for (j = 0; j < 3; j++)
-			v[j] = light->origin[j] + vright[j] * cos (a) * rad
-				+ vup[j] * sin (a) * rad;
+			v[j] = light->origin[j] + vright[j] * Q_cos (a) * rad
+				+ vup[j] * Q_sin (a) * rad;
 		glVertex3fv (v);
 	}
 	glEnd ();

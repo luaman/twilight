@@ -89,3 +89,30 @@ float       anglemod (float a);
 	)										\
 	:										\
 		BoxOnPlaneSide( (emins), (emaxs), (p)))
+
+
+#ifndef Q_abs
+#define Q_abs(x)	(x > 0) ? (x) : (-x)
+#endif
+
+void Init_Mathlib (void);
+
+double Q_sin(double x);
+double Q_cos(double x);
+double Q_asin(double x);
+double Q_atan2(double y, double x);
+double Q_tan(double x);
+double Q_floor(double x);
+double Q_ceil(double x);
+float Q_fabs(float f);
+float Q_sqrt(float n);
+void Q_srand(unsigned seed);
+int	Q_rand(void);
+
+
+
+
+
+
+
+

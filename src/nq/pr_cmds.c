@@ -163,10 +163,10 @@ SetMinMaxSize (edict_t *e, float *min, float *max, qboolean rotate)
 
 		a = angles[1] / 180 * M_PI;
 
-		xvector[0] = cos (a);
-		xvector[1] = sin (a);
-		yvector[0] = -sin (a);
-		yvector[1] = cos (a);
+		xvector[0] = Q_cos (a);
+		xvector[1] = Q_sin (a);
+		yvector[0] = -Q_sin (a);
+		yvector[1] = Q_cos (a);
 
 		VectorCopy (min, bounds[0]);
 		VectorCopy (max, bounds[1]);
@@ -364,7 +364,7 @@ PF_normalize (void)
 	value1 = G_VECTOR (OFS_PARM0);
 
 	new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2] * value1[2];
-	new = sqrt (new);
+	new = Q_sqrt (new);
 
 	if (new == 0)
 		newvalue[0] = newvalue[1] = newvalue[2] = 0;
@@ -394,7 +394,7 @@ PF_vlen (void)
 	value1 = G_VECTOR (OFS_PARM0);
 
 	new = value1[0] * value1[0] + value1[1] * value1[1] + value1[2] * value1[2];
-	new = sqrt (new);
+	new = Q_sqrt (new);
 
 	G_FLOAT (OFS_RETURN) = new;
 }
@@ -417,7 +417,7 @@ PF_vectoyaw (void)
 	if (value1[1] == 0 && value1[0] == 0)
 		yaw = 0;
 	else {
-		yaw = (int) (atan2 (value1[1], value1[0]) * 180 / M_PI);
+		yaw = (int) (Q_atan2 (value1[1], value1[0]) * 180 / M_PI);
 		if (yaw < 0)
 			yaw += 360;
 	}
@@ -449,12 +449,12 @@ PF_vectoangles (void)
 		else
 			pitch = 270;
 	} else {
-		yaw = (int) (atan2 (value1[1], value1[0]) * 180 / M_PI);
+		yaw = (int) (Q_atan2 (value1[1], value1[0]) * 180 / M_PI);
 		if (yaw < 0)
 			yaw += 360;
 
-		forward = sqrt (value1[0] * value1[0] + value1[1] * value1[1]);
-		pitch = (int) (atan2 (value1[2], forward) * 180 / M_PI);
+		forward = Q_sqrt (value1[0] * value1[0] + value1[1] * value1[1]);
+		pitch = (int) (Q_atan2 (value1[2], forward) * 180 / M_PI);
 		if (pitch < 0)
 			pitch += 360;
 	}
@@ -478,7 +478,7 @@ PF_random (void)
 {
 	float       num;
 
-	num = (rand () & 0x7fff) / ((float) 0x7fff);
+	num = (Q_rand () & 0x7fff) / ((float) 0x7fff);
 
 	G_FLOAT (OFS_RETURN) = num;
 }
@@ -960,7 +960,7 @@ PF_fabs (void)
 	float       v;
 
 	v = G_FLOAT (OFS_PARM0);
-	G_FLOAT (OFS_RETURN) = fabs (v);
+	G_FLOAT (OFS_RETURN) = Q_fabs (v);
 }
 
 void
@@ -1196,8 +1196,8 @@ PF_walkmove (void)
 
 	yaw = yaw * M_PI * 2 / 360;
 
-	move[0] = cos (yaw) * dist;
-	move[1] = sin (yaw) * dist;
+	move[0] = Q_cos (yaw) * dist;
+	move[1] = Q_sin (yaw) * dist;
 	move[2] = 0;
 
 // save program state, because SV_movestep may call other progs
@@ -1292,13 +1292,13 @@ PF_rint (void)
 void
 PF_floor (void)
 {
-	G_FLOAT (OFS_RETURN) = floor (G_FLOAT (OFS_PARM0));
+	G_FLOAT (OFS_RETURN) = Q_floor (G_FLOAT (OFS_PARM0));
 }
 
 void
 PF_ceil (void)
 {
-	G_FLOAT (OFS_RETURN) = ceil (G_FLOAT (OFS_PARM0));
+	G_FLOAT (OFS_RETURN) = Q_ceil (G_FLOAT (OFS_PARM0));
 }
 
 
@@ -1835,19 +1835,19 @@ PF_WaterMove (void)
 void
 PF_sin (void)
 {
-	G_FLOAT (OFS_RETURN) = sin (G_FLOAT (OFS_PARM0));
+	G_FLOAT (OFS_RETURN) = Q_sin (G_FLOAT (OFS_PARM0));
 }
 
 void
 PF_cos (void)
 {
-	G_FLOAT (OFS_RETURN) = cos (G_FLOAT (OFS_PARM0));
+	G_FLOAT (OFS_RETURN) = Q_cos (G_FLOAT (OFS_PARM0));
 }
 
 void
 PF_sqrt (void)
 {
-	G_FLOAT (OFS_RETURN) = sqrt (G_FLOAT (OFS_PARM0));
+	G_FLOAT (OFS_RETURN) = Q_sqrt (G_FLOAT (OFS_PARM0));
 }
 #endif
 

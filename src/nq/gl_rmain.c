@@ -499,8 +499,8 @@ R_DrawAliasModel (entity_t *e)
 	shadelight = shadelight / 200.0;
 
 	an = e->angles[1] / 180 * M_PI;
-	shadevector[0] = cos (-an);
-	shadevector[1] = sin (-an);
+	shadevector[0] = Q_cos (-an);
+	shadevector[1] = Q_sin (-an);
 	shadevector[2] = 1;
 	VectorNormalize (shadevector);
 
@@ -832,7 +832,7 @@ MYgluPerspective (GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
 	GLdouble    xmin, xmax, ymin, ymax;
 
-	ymax = zNear * tan (fovy * M_PI / 360.0);
+	ymax = zNear * Q_tan (fovy * M_PI / 360.0);
 	ymin = -ymax;
 
 	xmin = ymin * aspect;
@@ -1032,7 +1032,7 @@ R_Mirror (void)
 	VectorMA (vpn, -2 * d, mirror_plane->normal, vpn);
 
 	r_refdef.viewangles[0] = -asin (vpn[2]) / M_PI * 180;
-	r_refdef.viewangles[1] = atan2 (vpn[1], vpn[0]) / M_PI * 180;
+	r_refdef.viewangles[1] = Q_atan2 (vpn[1], vpn[0]) / M_PI * 180;
 	r_refdef.viewangles[2] = -r_refdef.viewangles[2];
 
 	ent = &cl_entities[cl.viewentity];
