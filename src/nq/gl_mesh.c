@@ -218,8 +218,8 @@ BuildTris (void)
 	float       s, t;
 	int         len, bestlen;
 	int         besttype = 0;			// shut up gcc
-	int         bestverts[1024];
-	int         besttris[1024];
+	int         bestverts[MAXALIASVERTS];
+	int         besttris[MAXALIASVERTS];
 	int         type;
 
 	// 

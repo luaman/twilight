@@ -227,7 +227,7 @@ SOURCE=..\include\cvar.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mathlib.h
+SOURCE=..\include\mathlib.h
 # End Source File
 # Begin Source File
 
