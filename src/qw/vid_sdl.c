@@ -47,8 +47,6 @@ static const char rcsid[] =
 #include "keys.h"
 #include "glquake.h"
 #include "host.h"
-#include "mathlib.h"
-#include "strlib.h"
 #include "sys.h"
 
 
