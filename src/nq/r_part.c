@@ -132,7 +132,7 @@ inline qboolean
 new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 		float ramp, float scale, float die)
 {
-	base_particle_t	   *p;
+	base_particle_t		*p;
 
 	if (num_base_particles >= max_base_particles)
 		// Out of particles.
@@ -261,12 +261,12 @@ R_ClearParticles (void)
 void
 R_ReadPointFile_f (void)
 {
-	FILE			   *f;
+	FILE				*f;
 	vec3_t				org;
 	int					r;
 	int					c;
 	char				name[MAX_OSPATH];
-	extern cvar_t	   *cl_mapname;
+	extern cvar_t		*cl_mapname;
 
 	snprintf (name, sizeof (name), "maps/%s.pts", cl_mapname->string);
 
@@ -508,11 +508,11 @@ R_Torch (entity_t *ent, qboolean torch2)
 		porg[2] = ent->origin[2] - 2;
 		VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
 		new_base_particle (pt_torch2, porg, pvel, color,
-				Q_rand () & 3, ent->frame ? 30 : 10, 5);
+				Q_rand () & 3, 15, 5);
 	} else { 
 		// wall torches
 		new_base_particle (pt_torch, porg, pvel, color,
-				Q_rand () & 3, 10, 5);
+				Q_rand () & 3, 5, 5);
 	}
 }
 
@@ -645,7 +645,7 @@ R_Draw_Base_Particles (void)
 #ifdef MOD_POINTINLEAF
 	mleaf_t				*mleaf;
 #endif
-	base_particle_t	   *p;
+	base_particle_t		*p;
 	int					i, j, k, activeparticles, maxparticle;
 	float				time1, time2, time3;
 	float				grav, dvel;
@@ -823,12 +823,12 @@ R_Draw_Cone_Particles
 static void
 R_Draw_Cone_Particles (void)
 {
-	cone_particle_t	   *p;
+	cone_particle_t		*p;
 	int					i, i2, j, k, activeparticles, maxparticle;
 	int					v_center, v_first, v_last;
 	float				frametime, teletime;
 	vec3_t				v_up, v_right;
-	float			   *bub_sin, *bub_cos;
+	float				*bub_sin, *bub_cos;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_ring);
 	if (gl_cull->value)
