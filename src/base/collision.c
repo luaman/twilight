@@ -27,6 +27,7 @@ static const char rcsid[] =
 #include "twiconfig.h"
 
 #include "qtypes.h"
+#include "fs.h"  // --KB-- Not actually needed
 #include "collision.h"
 #include "model.h"
 #include "mathlib.h"

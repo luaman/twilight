@@ -664,7 +664,7 @@ Draw_ConsoleBackground (int lines)
 	if (!conback_texture) {
 		vec4_t	color0 = {0.0, 1.0, 1.0, alpha}, color1;
 		VectorScale (color0, 0.5, color1);
-		Draw_Box (0, 0, vid.width_2d, lines, 1, color0, color1);
+		Draw_Box (-1, -1, vid.width_2d + 2, lines, 1, color0, color1);
 	}
 
 	/* hack the version number directly into the pic */
