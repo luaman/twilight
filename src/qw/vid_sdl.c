@@ -391,6 +391,7 @@ VID_Init (unsigned char *palette)
 	Sys_Printf ("Using OpenGL driver '%s'\n", gl_driver->svalue);
 	if (!DGL_LoadLibrary(gl_driver->svalue))
 		Sys_Error("%s\n", DGL_GetError());
+	Com_DPrintf ("VID_Init: DGL_LoadLibrary successful.\n");
 
 	i = COM_CheckParm ("-bpp");
 	if (i && i < com_argc - 1)
@@ -410,20 +411,24 @@ VID_Init (unsigned char *palette)
 	if (SDL_SetVideoMode (vid.width, vid.height, vid.bpp, sdl_flags) == NULL) {
 		Sys_Error ("Could not init video mode: %s", SDL_GetError ());
 	}
+	Com_DPrintf ("VID_Init: SDL_SetVideoMode successful.\n");
 
 	if (!DGL_GetFuncs())
 		Sys_Error("%s\n", DGL_GetError());
+	Com_DPrintf ("VID_Init: DGL_GetFuncs successful.\n");
 
 	SDL_WM_SetCaption ("Twilight QWCL", "twilight");
+	Com_DPrintf ("VID_Init: Window caption set.\n");
 
 	VID_Inited = true;
 	GammaChanged(v_gamma);
 
 	GL_Init ();
+	Com_DPrintf ("VID_Init: GL_Init successful.\n");
 
 	VID_InitTexGamma ();
 
-	Com_SafePrintf ("Video mode %dx%d initialized.\n", vid.width, vid.height);
+	Com_Printf ("Video mode %dx%d initialized.\n", vid.width, vid.height);
 
 	vid.recalc_refdef = true;	/* force a surface cache flush */
 
