@@ -25,17 +25,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	MNET_IPX		1
 #define	MNET_TCP		2
 
-extern	int	m_activenet;
+extern int  m_activenet;
 
 //
 // menus
 //
-void M_Init (void);
-void M_Keydown (int key);
-void M_Draw (void);
-void M_ToggleMenu_f (void);
-qpic_t	*M_CachePic (char *path);
-void M_DrawTextBox (int x, int y, int width, int lines);
-void M_Menu_Quit_f (void);
-
-
+void        M_Init (void);
+void        M_Keydown (int key);
+void        M_Draw (void);
+void        M_ToggleMenu_f (void);
+qpic_t     *M_CachePic (char *path);
+void        M_DrawTextBox (int x, int y, int width, int lines);
+void        M_Menu_Quit_f (void);
