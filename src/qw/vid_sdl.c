@@ -216,6 +216,10 @@ CheckMultiTextureExtensions (void)
 	if (strstr (gl_extensions, "GL_ARB_multitexture")) {
 		Con_Printf ("GL_ARB_multitexture\n");
 		gl_mtexable = true;
+		if (!qglActiveTextureARB || !qglMultiTexCoord2fARB) {
+			Con_Printf("ERROR! qglActiveTextureARB (%p), qglMultiTexCoord2fARB (%p)\n", qglActiveTextureARB, qglMultiTexCoord2fARB);
+			gl_mtexable = false;
+		}
 	} else
 		Con_Printf ("none found\n");
 }
