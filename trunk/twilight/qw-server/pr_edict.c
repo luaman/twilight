@@ -991,26 +991,34 @@ void
 PR_LoadProgs (void)
 {
 	Sint32		i;
-	char		num[32];
+	char		num[32], pname[16];
 	dfunction_t	*f;
 
 	// flush the non-C variable lookup cache
 	for (i = 0; i < GEFV_CACHESIZE; i++)
 		gefvCache[i].field[0] = 0;
 
-	if (!deathmatch->value)
+	progs = NULL;
+
+	if (!deathmatch->value) {
 		progs = (dprograms_t *)COM_LoadHunkFile ("spprogs.dat");
-	if (!progs)
+		strcpy (pname, "spprogs.dat");
+	}
+
+	if (!progs) {
 		progs = (dprograms_t *)COM_LoadHunkFile ("qwprogs.dat");
+		strcpy (pname, "qwprogs.dat");
+	}
+
 	if (!progs)
-		progs = (dprograms_t *)COM_LoadHunkFile ("progs.dat");
-	if (!progs)
-		SV_Error ("PR_LoadProgs: couldn't load qwprogs.dat");
+		SV_Error ("PR_LoadProgs: couldn't load spprogs.dat or qwprogs.dat");
+
 	Con_DPrintf ("Programs occupy %iK.\n", com_filesize / 1024);
 
 	// add prog crc to the serverinfo
 	snprintf (num, sizeof (num), "%i",
 			  CRC_Block ((Uint8 *) progs, com_filesize));
+
 	Info_SetValueForStarKey (svs.info, "*progs", num, MAX_SERVERINFO_STRING);
 
 	// byte swap the header
@@ -1018,7 +1026,7 @@ PR_LoadProgs (void)
 		((int *) progs)[i] = LittleLong (((int *) progs)[i]);
 
 	if (progs->version != PROG_VERSION)
-		SV_Error ("progs.dat has wrong version number (%i should be %i)",
+		SV_Error ("%s has wrong version number (%i should be %i)", pname,
 				  progs->version, PROG_VERSION);
 	if (progs->crc != PROGHEADER_CRC)
 		SV_Error ("You must have the qwprogs.dat from QuakeWorld installed");

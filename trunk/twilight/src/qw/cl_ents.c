@@ -156,6 +156,10 @@ CL_NewDlight (int key, vec3_t org, int effects)
 		dl->color[0] += 0.20;
 		dl->color[1] += 0.10;
 	}
+
+	dl->color[0] = bound ( 0, dl->color[0], 1 );
+	dl->color[1] = bound ( 0, dl->color[1], 1 );
+	dl->color[2] = bound ( 0, dl->color[2], 1 );
 }
 
 

@@ -552,7 +552,7 @@ DrawTextureChains
 ================
 */
 static void
-DrawTextureChains ()
+DrawTextureChains (void)
 {
 	unsigned int	i;
 	msurface_t	   *s;
@@ -681,7 +681,7 @@ R_DrawWaterTextureChains
 ================
 */
 void
-R_DrawWaterTextureChains ()
+R_DrawWaterTextureChains (void)
 {
 	unsigned int	i;
 	msurface_t	   *s;
