@@ -57,6 +57,9 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 
+#include "SDL.h"
+#include "SDL_main.h"
+
 qboolean    isDedicated;
 
 int         nostdout = 0;
