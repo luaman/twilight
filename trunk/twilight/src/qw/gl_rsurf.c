@@ -919,32 +919,28 @@ R_RecursiveWorldNode (mnode_t *node)
 	if (c) {
 		surf = cl.worldmodel->surfaces + node->firstsurface;
 
-		if (dot < 0 - BACKFACE_EPSILON)
+		if (dot < 0)
 			side = SURF_PLANEBACK;
-		else if (dot > BACKFACE_EPSILON)
+		else
 			side = 0;
-		{
-			for (; c; c--, surf++) {
-				if (surf->visframe != r_framecount)
-					continue;
+		for (; c; c--, surf++) {
+			if (surf->visframe != r_framecount)
+				continue;
 
-				// don't backface underwater surfaces, because they warp
-				if (!
-					(((r_viewleaf->contents == CONTENTS_EMPTY
-					   && (surf->flags & SURF_UNDERWATER))
-					  || (r_viewleaf->contents != CONTENTS_EMPTY
-						  && !(surf->flags & SURF_UNDERWATER)))
-					 && !(surf->flags & SURF_DONTWARP))
+			// don't backface underwater surfaces, because they warp
+			if (r_waterwarp->value &&
+					!(((r_viewleaf->contents == CONTENTS_EMPTY
+								&& (surf->flags & SURF_UNDERWATER))
+							|| (r_viewleaf->contents != CONTENTS_EMPTY
+								&& !(surf->flags & SURF_UNDERWATER)))
+						&& !(surf->flags & SURF_DONTWARP))
 					&& ((dot < 0) ^ !!(surf->flags & SURF_PLANEBACK)))
-					continue;			// wrong side
+				continue;			// wrong side
 
-				// if sorting by texture, just store it out
-				surf->texturechain = surf->texinfo->texture->texturechain;
-				surf->texinfo->texture->texturechain = surf;
-
-			}
+			// if sorting by texture, just store it out
+			surf->texturechain = surf->texinfo->texture->texturechain;
+			surf->texinfo->texture->texturechain = surf;
 		}
-
 	}
 // recurse down the back side
 	R_RecursiveWorldNode (node->children[!side]);
