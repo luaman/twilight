@@ -1,49 +1,43 @@
 Project Twilight todo list
 --------------------------
 
-These things need to be done before public release:
+These things need to be done before first public release:
 
   - replacement md4.c, ours is a GPL violation
-
-  - consult guys at #SDL about SDL_CDStatus since it is very slow in
-    Windows and lags on all computers
-
+  - Make SDL_CDStatus calls less often for win32
   - Sys_ExpandPath, for twiddle expansion, / normalization, etc
-
   - Dynamic OpenGL binding
-
-  - New Cvar system
-    - port to QW
-    - convert from list to hash
-
+  - Port new Cvar system to QW
   - Documentation, we've changed enough that this is necessary
 
-  ? Other stuff, not required for release, rated 1-9 for importance
-    1 SDL audio, massive portability bonus to doing this now
-    1 Fix Targa loader
-    3 Make headers includable more than once
-    3 Rid ourselves of the monolithic header
-    4 Menu overhaul, perhaps following tQER model for now
-    4 Console font
-    7 Knghtbrd's server console
-    9 Use callbacks for Cvars to increase performance somewhat
+
+Would be nice, in importance order:
+
+  - Fix targa loader
+  - Produce a dedicated server for NQ
+  - Convert Cvars from list to hash
+  - SDL audio, massive portability bonus to doing this now
+  - Rid ourselves of the monolithic header
+  - Merge QW server into QW client ala NQ
+  - Prettiness features all around
+  - Console font
+  - Use callbacks for Cvars where appropriate
+  - Menu overhaul
+  - Knghtbrd's server console
+  - Change resolutions in-game
 
 
-Stuff that can probably wait:
+Stuff that can wait:
 
   - Add PNG loader
   - Zip archive support
+
+
+Stuff that definitely should wait:
+
   - The New Protocol(TM)
-  - Enhance the binds menu for new features?
-  - improve sin/cos lookup tables and stop using the math.h functions
   - Cvar improvements
     - Implement CVAR_TEMP for progs-created vars
     - Implement Cvar_Clean to delete CVAR_TEMPs that aren't CVAR_USER
     - Implement flag manipulation functions for internal use
-
-Wishlist stuff:
-
-  - Change resolutions in-game
-  - Produce a dedicated server for NQ
-  - Merge QW server into QW client ala NQ
 
