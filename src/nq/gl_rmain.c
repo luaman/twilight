@@ -1403,8 +1403,6 @@ R_SetupGL (void)
 	qglEnable (GL_DEPTH_TEST);
 }
 
-void R_DrawSkyBox (void);
-
 /*
 ================
 R_RenderScene
@@ -1420,8 +1418,6 @@ R_RenderScene (void)
 	R_SetFrustum ();
 
 	R_SetupGL ();
-
-	R_DrawSkyBox ();
 
 	R_MarkLeaves ();					// done here so we know if we're in
 	// water
@@ -1448,8 +1444,10 @@ void
 R_Clear (void)
 {
 	if (r_mirroralpha->value != 1.0f) {
-		if (gl_clear->value)
+		if (gl_clear->value) {
 			qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
+		}
 		else
 			qglClear (GL_DEPTH_BUFFER_BIT);
 		gldepthmin = 0.0f;
@@ -1458,8 +1456,10 @@ R_Clear (void)
 	} else if (gl_ztrick->value) {
 		static int  trickframe;
 
-		if (gl_clear->value)
+		if (gl_clear->value) {
 			qglClear (GL_COLOR_BUFFER_BIT);
+			qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
+		}
 
 		trickframe++;
 		if (trickframe & 1) {
@@ -1472,8 +1472,10 @@ R_Clear (void)
 			qglDepthFunc (GL_GEQUAL);
 		}
 	} else {
-		if (gl_clear->value)
+		if (gl_clear->value) {
 			qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
+		}
 		else
 			qglClear (GL_DEPTH_BUFFER_BIT);
 		gldepthmin = 0.0f;

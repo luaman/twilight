@@ -1268,6 +1268,10 @@ R_RecursiveWorldNode (mnode_t *node)
 	R_RecursiveWorldNode (node->children[!side]);
 }
 
+void R_ClearSkyBox (void);
+void R_DrawSkyBox (void);
+
+
 
 
 /*
@@ -1293,6 +1297,8 @@ R_DrawWorld (void)
 	if (gl_fb_bmodels->value)
 		memset (fullbright_polys, 0, sizeof(fullbright_polys));
 
+	R_ClearSkyBox ();
+
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
@@ -1304,6 +1310,10 @@ R_DrawWorld (void)
 	R_BlendLightmaps ();
 
 	R_RenderFullbrights ();
+
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	R_DrawSkyBox ();
 }
 
 
