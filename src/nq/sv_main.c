@@ -69,11 +69,11 @@ SV_Init (void)
 	extern cvar_t *sv_aim;
 
 	sv_maxvelocity = Cvar_Get ("sv_maxvelocity", "2000", CVAR_NONE, NULL);
-	sv_gravity = Cvar_Get ("sv_gravity", "800", CVAR_USERINFO, NULL);
-	sv_friction = Cvar_Get ("sv_friction", "4", CVAR_USERINFO, NULL);
+	sv_gravity = Cvar_Get ("sv_gravity", "800", CVAR_SERVERINFO, NULL);
+	sv_friction = Cvar_Get ("sv_friction", "4", CVAR_SERVERINFO, NULL);
 	sv_edgefriction = Cvar_Get ("edgefriction", "2", CVAR_NONE, NULL);
 	sv_stopspeed = Cvar_Get ("sv_stopspeed", "100", CVAR_NONE, NULL);
-	sv_maxspeed = Cvar_Get ("sv_maxspeed", "320", CVAR_USERINFO, NULL);
+	sv_maxspeed = Cvar_Get ("sv_maxspeed", "320", CVAR_SERVERINFO, NULL);
 	sv_accelerate = Cvar_Get ("sv_accelerate", "10", CVAR_NONE, NULL);
 	sv_idealpitchscale = Cvar_Get ("sv_idealpitchscale", "0.8", CVAR_NONE,
 			NULL);

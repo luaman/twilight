@@ -942,7 +942,7 @@ _Datagram_CheckNewConnections (void)
 
 		// search for the next server cvar
 		while (var) {
-			if (var->flags & CVAR_USERINFO)
+			if (var->flags & CVAR_SERVERINFO)
 				break;
 			var = Cvar_ForeachNext (id);
 		}
