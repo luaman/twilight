@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <netinet/in.h>
 #endif
 
+#include "keys.h"
 
 // we need to declare some mouse variables here, because the menu system
 // references them even when on a unix system.
@@ -176,7 +177,7 @@ CL_Version_f
 void
 CL_Version_f (void)
 {
-	Con_Printf ("Version %4.2f\n", VERSION);
+	Con_Printf ("Version %s\n", VERSION);
 	Con_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
 }
 
