@@ -1566,7 +1566,6 @@ int         msgNumber;
 int         m_quit_prevstate;
 qboolean    wasInMenus;
 
-#ifndef	_WIN32
 char       *quitMessage[] = {
 /* .........1.........2.... */
 	"  Are you gonna quit    ",
@@ -1609,7 +1608,6 @@ char       *quitMessage[] = {
 	"   for you next time!   ",
 	"                        "
 };
-#endif
 
 void
 M_Menu_Quit_f (void)
@@ -1663,36 +1661,11 @@ M_Quit_Draw (void)
 		M_Draw ();
 		m_state = m_quit;
 	}
-#ifdef _WIN32
-	M_DrawTextBox (0, 0, 38, 23);
-	M_PrintAlt (16, 12, "  Quake version 1.09 by id Software\n\n");
-	M_PrintAlt (16, 28, "Programming        Art \n");
-	M_Print (16, 36, " John Carmack       Adrian Carmack\n");
-	M_Print (16, 44, " Michael Abrash     Kevin Cloud\n");
-	M_Print (16, 52, " John Cash          Paul Steed\n");
-	M_Print (16, 60, " Dave 'Zoid' Kirsch\n");
-	M_PrintAlt (16, 68, "Design             Biz\n");
-	M_Print (16, 76, " John Romero        Jay Wilbur\n");
-	M_Print (16, 84, " Sandy Petersen     Mike Wilson\n");
-	M_Print (16, 92, " American McGee     Donna Jackson\n");
-	M_Print (16, 100, " Tim Willits        Todd Hollenshead\n");
-	M_PrintAlt (16, 108, "Support            Projects\n");
-	M_Print (16, 116, " Barrett Alexander  Shawn Green\n");
-	M_PrintAlt (16, 124, "Sound Effects\n");
-	M_Print (16, 132, " Trent Reznor and Nine Inch Nails\n\n");
-	M_PrintAlt (16, 140, "Quake is a trademark of Id Software,\n");
-	M_PrintAlt (16, 148, "inc., (c)1996 Id Software, inc. All\n");
-	M_PrintAlt (16, 156, "rights reserved. NIN logo is a\n");
-	M_PrintAlt (16, 164, "registered trademark licensed to\n");
-	M_PrintAlt (16, 172, "Nothing Interactive, Inc. All rights\n");
-	M_PrintAlt (16, 180, "reserved. Press y to exit\n");
-#else
 	M_DrawTextBox (56, 76, 24, 4);
 	M_Print (64, 84, quitMessage[msgNumber * 4 + 0]);
 	M_Print (64, 92, quitMessage[msgNumber * 4 + 1]);
 	M_Print (64, 100, quitMessage[msgNumber * 4 + 2]);
 	M_Print (64, 108, quitMessage[msgNumber * 4 + 3]);
-#endif
 }
 
 
