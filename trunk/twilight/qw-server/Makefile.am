@@ -18,7 +18,7 @@ endif
 
 twilight_qwsv_SOURCES= \
 	common.c common.h cmd.c cmd.h crc.c crc.h cvar.c mathlib.c \
-	mathlib.h mdfour.c mdfour.h strlib.c strlib.h console.h \
+	mdfour.c mdfour.h strlib.c console.h \
 	model.c model.h modelgen.h spritegn.h \
 	net.h net_chan.c net_udp.c \
 	pmove.c pmove.h pmovetst.c pr_cmds.c pr_edict.c pr_exec.c \
