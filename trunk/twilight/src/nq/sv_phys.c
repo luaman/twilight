@@ -468,6 +468,7 @@ void SV_PushMove (edict_t *pusher, float movetime)
 		case SOLID_NOT:
 		case SOLID_TRIGGER:
 			VectorMA (pusher->v.origin, movetime, pusher->v.velocity, pusher->v.origin);
+			VectorMA (pusher->v.angles, movetime, pusher->v.avelocity, pusher->v.angles);
 			pusher->v.ltime += movetime;
 			SV_LinkEdict (pusher, false);
 			return;
@@ -493,10 +494,10 @@ void SV_PushMove (edict_t *pusher, float movetime)
 	for (i = 0; i < 3; i++) {									\
 		if (move1[i] > 0) {										\
 			mins[i] = _mins[i] + origin[i] - 1;					\
-				maxs[i] = _maxs[i] + origin[i] + move[i] + 1;	\
+			maxs[i] = _maxs[i] + origin[i] + move[i] + 1;		\
 		} else {												\
 			mins[i] = _mins[i] + origin[i] + move[i] - 1;		\
-				maxs[i] = _maxs[i] + origin[i] + 1;				\
+			maxs[i] = _maxs[i] + origin[i] + 1;					\
 		}														\
 	}
 	if (moveangle[0] || moveangle[2]) {
