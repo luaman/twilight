@@ -335,7 +335,7 @@ M_Main_Key (int key)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	21
+#define	OPTIONS_ITEMS	22
 
 #define	SLIDER_RANGE	10
 
@@ -428,28 +428,32 @@ M_AdjustSliders (int dir)
 			}
 			break;
 
-		case 14:						// invert mouse
+		case 14:					// mouse look
+			Cvar_Set (m_freelook, va ("%i", !m_freelook->ivalue));
+			break;
+
+		case 15:						// invert mouse
 			t = -m_pitch->fvalue;
 			Cvar_Set (m_pitch, va ("%f", t));
 			break;
 
-		case 15:						// lookspring
+		case 16:						// lookspring
 			Cvar_Set (lookspring, va ("%i", !lookspring->ivalue));
 			break;
 
-		case 16:						// lookstrafe
+		case 17:						// lookstrafe
 			Cvar_Set (lookstrafe, va ("%i", !lookstrafe->ivalue));
 			break;
 
-		case 17:
+		case 18:
 			Cvar_Set (cl_sbar, va ("%i", !cl_sbar->ivalue));
 			break;
 
-		case 18:
+		case 19:
 			Cvar_Set (cl_hudswap, va ("%i", !cl_hudswap->ivalue));
 			break;
 
-		case 19:						// _windowed_mouse
+		case 20:						// _windowed_mouse
 			Cvar_Set (_windowed_mouse, va ("%i", !_windowed_mouse->ivalue));
 			break;
 	}
@@ -505,6 +509,7 @@ M_Options_Draw (void)
 	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->fvalue); y += 8;
 	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->fvalue); y += 8;
 	M_Print (16, y, "            Always Run"); M_DrawCheckbox (220, y, cl_forwardspeed->fvalue > 200); y += 8;
+	M_Print (16, y, "            Mouse Look"); M_DrawCheckbox (220, y, m_freelook->ivalue); y += 8;
 	M_Print (16, y, "          Invert Mouse"); M_DrawCheckbox (220, y, m_pitch->fvalue < 0); y += 8;
 	M_Print (16, y, "            Lookspring"); M_DrawCheckbox (220, y, lookspring->ivalue); y += 8;
 	M_Print (16, y, "            Lookstrafe"); M_DrawCheckbox (220, y, lookstrafe->ivalue); y += 8;
