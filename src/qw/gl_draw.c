@@ -244,6 +244,7 @@ Set_TextureMode_f (struct cvar_s *var)
 			break;
 	}
 	if (i == 6) {
+		Cvar_Set (gl_texturemode,"GL_LINEAR_MIPMAP_NEAREST");
 		Con_Printf ("Bad GL_TEXTUREMODE, valid modes are:\n");
 		Con_Printf ("GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST\n");
 		Con_Printf ("GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST (default), \n");
