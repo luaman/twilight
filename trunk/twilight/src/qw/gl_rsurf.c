@@ -770,7 +770,7 @@ R_DrawBrushModel (entity_t *e)
 	qglRotatef (e->angles[2], 1, 0, 0);
 
 	// for transpoly water
-	softwaretransformforbrushentity (e);
+	softwaretransformforbrushentity (e->origin, e->angles);
 
 	/*
 	 * draw texture

@@ -25,16 +25,19 @@
 static const char rcsid[] =
 	"$Id$";
 
-#include "quakedef.h"
 #include "mathlib.h"
-#include "common.h"
-#include "render.h"
 
 vec3_t softwaretransform_x;
 vec3_t softwaretransform_y;
 vec3_t softwaretransform_z;
 vec_t softwaretransform_scale;
 vec3_t softwaretransform_offset;
+
+static const vec3_t softwaretransform_offset_id = { 0.0f, 0.0f, 0.0f };
+static const vec3_t softwaretransform_x_id = { 1.0f, 0.0f, 0.0f };
+static const vec3_t softwaretransform_y_id = { 0.0f, 1.0f, 0.0f };
+static const vec3_t softwaretransform_z_id = { 0.0f, 0.0f, 1.0f };
+static const float softwaretransform_scale_id = 1.0f;
 
 // set to different transform code depending on complexity of transform
 void (*softwaretransform) (vec3_t in, vec3_t out);
@@ -162,63 +165,50 @@ softwareuntransform (vec3_t in, vec3_t out)
 void
 softwaretransform_classify (void)
 {
-	if (softwaretransform_offset[0] != 0
-			|| softwaretransform_offset[1] != 0
-			|| softwaretransform_offset[2] != 0)
+	if (!VectorCompare(softwaretransform_offset, 
+		softwaretransform_offset_id))
 	{
-		if (softwaretransform_scale != 1)
+		if (softwaretransform_scale != softwaretransform_scale_id)
 		{
-			if (softwaretransform_x[0] != 1
-					|| softwaretransform_x[1] != 0
-					|| softwaretransform_x[2] != 0
-					|| softwaretransform_y[0] != 0
-					|| softwaretransform_y[1] != 1
-					|| softwaretransform_y[2] != 0
-					|| softwaretransform_z[0] != 0
-					|| softwaretransform_z[1] != 0
-					|| softwaretransform_z[2] != 1)
+			if (!VectorCompare(softwaretransform_x,
+					softwaretransform_x_id) ||
+				!VectorCompare(softwaretransform_y,
+					softwaretransform_y_id) ||
+				!VectorCompare(softwaretransform_x,
+					softwaretransform_z_id))
 				softwaretransform = &softwaretransform_dorotatescaletranslate;
 			else
 				softwaretransform = &softwaretransform_doscaletranslate;
 		} else {
-			if (softwaretransform_x[0] != 1
-					|| softwaretransform_x[1] != 0
-					|| softwaretransform_x[2] != 0
-					|| softwaretransform_y[0] != 0
-					|| softwaretransform_y[1] != 1
-					|| softwaretransform_y[2] != 0
-					|| softwaretransform_z[0] != 0
-					|| softwaretransform_z[1] != 0
-					|| softwaretransform_z[2] != 1)
+			if (!VectorCompare(softwaretransform_x,
+					softwaretransform_x_id) ||
+				!VectorCompare(softwaretransform_y,
+					softwaretransform_y_id) ||
+				!VectorCompare(softwaretransform_x,
+					softwaretransform_z_id))
 				softwaretransform = &softwaretransform_dorotatetranslate;
 			else
 				softwaretransform = &softwaretransform_dotranslate;
 		}
 	} else {
-		if (softwaretransform_scale != 1)
+		if (softwaretransform_scale != softwaretransform_scale_id)
 		{
-			if (softwaretransform_x[0] != 1
-					|| softwaretransform_x[1] != 0
-					|| softwaretransform_x[2] != 0
-					|| softwaretransform_y[0] != 0
-					|| softwaretransform_y[1] != 1
-					|| softwaretransform_y[2] != 0
-					|| softwaretransform_z[0] != 0
-					|| softwaretransform_z[1] != 0
-					|| softwaretransform_z[2] != 1)
+			if (!VectorCompare(softwaretransform_x,
+					softwaretransform_x_id) ||
+				!VectorCompare(softwaretransform_y,
+					softwaretransform_y_id) ||
+				!VectorCompare(softwaretransform_x,
+					softwaretransform_z_id))
 				softwaretransform = &softwaretransform_dorotatescale;
 			else
 				softwaretransform = &softwaretransform_doscale;
 		} else {
-			if (softwaretransform_x[0] != 1
-					|| softwaretransform_x[1] != 0
-					|| softwaretransform_x[2] != 0
-					|| softwaretransform_y[0] != 0
-					|| softwaretransform_y[1] != 1
-					|| softwaretransform_y[2] != 0
-					|| softwaretransform_z[0] != 0
-					|| softwaretransform_z[1] != 0
-					|| softwaretransform_z[2] != 1)
+			if (!VectorCompare(softwaretransform_x,
+					softwaretransform_x_id) ||
+				!VectorCompare(softwaretransform_y,
+					softwaretransform_y_id) ||
+				!VectorCompare(softwaretransform_x,
+					softwaretransform_z_id))
 				softwaretransform = &softwaretransform_dorotate;
 			else
 				softwaretransform = &softwaretransform_docopy;
@@ -229,45 +219,48 @@ softwaretransform_classify (void)
 void
 softwaretransformidentity (void)
 {
-	softwaretransform_offset[0] = softwaretransform_offset[1] =
-		softwaretransform_offset[2] = softwaretransform_x[1] =
-		softwaretransform_x[2] = softwaretransform_y[0] =
-		softwaretransform_y[2] = softwaretransform_z[0] =
-		softwaretransform_z[1] = 0;
-	softwaretransform_x[0] = softwaretransform_y[1] =
-		softwaretransform_z[2] = 1;
-	softwaretransform_scale = 1;
+	VectorCopy (softwaretransform_offset_id, softwaretransform_offset);
+	VectorCopy (softwaretransform_x_id, softwaretransform_x);
+	VectorCopy (softwaretransform_y_id, softwaretransform_y);
+	VectorCopy (softwaretransform_z_id, softwaretransform_z);
+
+	softwaretransform_scale = softwaretransform_scale_id;
+
 	// we know what it is
 	softwaretransform = &softwaretransform_docopy;
 }
 
-void softwaretransformset (vec3_t origin, vec3_t angles, vec_t scale)
+static void 
+softwaretransformset (vec3_t origin, vec3_t angles, vec_t scale)
 {
 	VectorCopy(origin, softwaretransform_offset);
+
 	AngleVectors(angles, softwaretransform_x, softwaretransform_y,
 			softwaretransform_z);
-	softwaretransform_y[0] = -softwaretransform_y[0];
-	softwaretransform_y[1] = -softwaretransform_y[1];
-	softwaretransform_y[2] = -softwaretransform_y[2];
+
+	VectorInverse (softwaretransform_y, softwaretransform_y);
+
 	softwaretransform_scale = scale;
+
 	// choose best transform code
 	softwaretransform_classify();
 }
 
-void softwaretransformforentity (entity_t *e)
+void 
+softwaretransformforentity (vec3_t origin, vec3_t angles)
 {
-	vec3_t		angles;
+	vec3_t	eangles;
 
-	angles[0] = -e->angles[0];
-	angles[1] = e->angles[1];
-	angles[2] = e->angles[2];
-	softwaretransformset(e->origin, angles, 1);
+	eangles[0] = -angles[0];
+	eangles[1] = angles[1];
+	eangles[2] = angles[2];
+	softwaretransformset(origin, eangles, 1);
 }
 
 // brush entities are not backwards like models and sprites are
 void
-softwaretransformforbrushentity (entity_t *e)
+softwaretransformforbrushentity (vec3_t origin, vec3_t angles)
 {
-	softwaretransformset(e->origin, e->angles, 1);
+	softwaretransformset(origin, angles, 1);
 }
 

@@ -241,19 +241,11 @@ SOURCE=.\tga.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\transform.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\vid_sdl.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\view.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\wad.c
 # End Source File
 # Begin Source File
 
@@ -322,10 +314,6 @@ SOURCE=.\gl_poly.h
 # Begin Source File
 
 SOURCE=..\include\gl_warp_sin.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\glquake.h
 # End Source File
 # Begin Source File
 
@@ -430,10 +418,6 @@ SOURCE=..\include\TGL_funcs_list.h
 # Begin Source File
 
 SOURCE=..\include\TGL_types.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\transform.h
 # End Source File
 # Begin Source File
 

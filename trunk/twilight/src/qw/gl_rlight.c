@@ -128,7 +128,8 @@ R_RenderDlight (dlight_t *light)
 	length = VectorNormalize (v);
 
 	if (length < rad) {				// view is inside the dlight
-		AddLightBlend (1, 0.5, 0, light->radius * 0.0003);
+		AddLightBlend (light->color[0], 
+			light->color[1], light->color[2], light->radius * 0.0003);
 		return;
 	}
 
