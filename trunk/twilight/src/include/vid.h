@@ -23,47 +23,35 @@
 
 	$Id$
 */
-// vid.h -- video driver defs
 
 #ifndef __VID_H
 #define __VID_H
 
-#define VID_CBITS	6
-#define VID_GRADES	(1 << VID_CBITS)
-
-// a pixel can be one, two, or four bytes
-typedef Uint8 pixel_t;
-
-typedef struct vrect_s {
-	int         x, y, width, height;
+typedef struct vrect_s
+{
+	int			x, y;
+	int			width, height;
 } vrect_t;
 
-typedef struct {
+typedef struct
+{
 	Uint32		width;
 	Uint32		height;
 	Uint32		width_2d;
 	Uint32		height_2d;
-	qboolean	recalc_refdef;	// if true, recalc vid-based stuff
+	qboolean	recalc_refdef;
 
 	Uint32		bpp;
 } viddef_t;
 
 extern viddef_t vid;					// global video state
-extern Uint32	d_8to32table[256];
-extern float	d_8tofloattable[256][4];
+extern Uint32 d_8to32table[256];
+extern float d_8tofloattable[256][4];
 
-// called at startup and after any gamma correction
 
-void        VID_Init_Cvars (void);
-void        VID_Init (unsigned char *palette);
-
-// Called at startup to set up translation tables, takes 256 8 bit RGB values
-// the palette data will go away after the call, so it must be copied off if
-// the video driver will need it again
-
-void        VID_Shutdown (void);
-
-// Called at shutdown
+void VID_Init_Cvars (void);
+void VID_Init (unsigned char *palette);
+void VID_Shutdown (void);
 
 #endif // __VID_H
 
