@@ -90,9 +90,9 @@ const char *gl_renderer;
 const char *gl_version;
 const char *gl_extensions;
 
-qboolean	gl_mtexable = false;
-qboolean	gl_mtexcombine_arb = false;
-qboolean	gl_mtexcombine_ext = false;
+qboolean	gl_cva = false;
+qboolean	gl_mtex = false;
+qboolean	gl_mtexcombine = false;
 
 void		I_KeypadMode (cvar_t *cvar);
 void		IN_WindowedMouse (cvar_t *cvar);
@@ -201,29 +201,28 @@ GammaChanged (cvar_t *cvar)
 void
 CheckExtensions (void)
 {
+	qboolean	gl_mtexable = 0, gl_mtexcombine_arb = 0, gl_mtexcombine_ext = 0;
+
 	Con_Printf ("Checking for multitexture: ");
-	if (COM_CheckParm ("-nomtex")) {
-		Con_Printf ("disabled.\n");
+	if (!COM_CheckParm ("-nomtex")) {
+		gl_mtexable = DGL_HasExtension ("GL_ARB_multitexture");
 		return;
 	}
-	gl_mtexable = DGL_HasExtension ("GL_ARB_multitexture");
-	if (gl_mtexable && COM_CheckParm ("-nomtexcombine")) {
-		gl_mtexcombine_arb = false;
-		gl_mtexcombine_ext = false;
-	} else {
+	if (!COM_CheckParm ("-nomtexcombine")) {
 		gl_mtexcombine_arb = DGL_HasExtension ("GL_ARB_texture_env_combine");
 		gl_mtexcombine_ext = DGL_HasExtension ("GL_EXT_texture_env_combine");
 	}
-	if (gl_mtexable && gl_mtexcombine_arb)
+	if (gl_mtexable && gl_mtexcombine_arb) {
 		Con_Printf ("GL_ARB_multitexture + GL_ARB_texture_env_combine.\n");
-	else if (gl_mtexable && gl_mtexcombine_ext)
+		gl_mtexcombine = true;
+	} else if (gl_mtexable && gl_mtexcombine_ext) {
 		Con_Printf ("GL_ARB_multitexture + GL_EXT_texture_env_combine.\n");
-	else if (gl_mtexable)
+		gl_mtexcombine = true;
+	} else if (gl_mtexable) {
 		Con_Printf ("GL_ARB_multitexture.\n");
-	else {
+		gl_mtex = true;
+	} else {
 		Con_Printf ("no.\n");
-		gl_mtexcombine_arb = false;
-		gl_mtexcombine_ext = false;
 	}
 
 	if (gl_mtexable) {
@@ -231,6 +230,12 @@ CheckExtensions (void)
 			Sys_Error ("Extension list says we have GL_ARB_multitexture but missing functions. (%p %p)\n", qglActiveTextureARB, qglMultiTexCoord2fARB);
 		}
 	}
+
+	if (!COM_CheckParm ("-nocva"))
+		gl_cva = DGL_HasExtension ("GL_EXT_compiled_vertex_array");
+
+	Con_Printf ("Checking for CVA support: %s\n",
+			gl_cva ? "GL_EXT_compiled_vertex_array" : "None");
 }
 
 

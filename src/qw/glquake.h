@@ -157,14 +157,14 @@ extern const char *gl_extensions;
 
 void        R_TranslatePlayerSkin (int playernum);
 
-extern qboolean gl_mtexable;
-extern qboolean gl_mtexcombine_arb;
-extern qboolean gl_mtexcombine_ext;
+extern qboolean gl_cva;
+extern qboolean gl_mtex;
+extern qboolean gl_mtexcombine;
 
 // Vertex array stuff.
 
 #define MAX_VERTEX_ARRAYS	1024
-#define MAX_VERTEX_INDICES	(MAX_VERTEX_ARRAYS * 3)
+#define MAX_VERTEX_INDICES	(MAX_VERTEX_ARRAYS * 4)
 extern GLfloat	tc_array[MAX_VERTEX_ARRAYS][2];
 extern GLfloat	v_array[MAX_VERTEX_ARRAYS][3];
 extern GLfloat	c_array[MAX_VERTEX_ARRAYS][4];
