@@ -22,9 +22,9 @@
 		Boston, MA  02111-1307, USA
 
 */
+// r_surf.c: surface-related refresh code
 static const char rcsid[] =
     "$Id$";
-// r_surf.c: surface-related refresh code
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -147,8 +147,7 @@ R_AddDynamicLights (msurface_t *surf)
 			continue;					// not lit by this light
 
 		rad = cl_dlights[lnum].radius;
-		dist = DotProduct (cl_dlights[lnum].origin, surf->plane->normal) -
-			surf->plane->dist;
+		dist = DotProduct (cl_dlights[lnum].origin, surf->plane->normal) - surf->plane->dist;
 		rad -= Q_fabs (dist);
 		minlight = cl_dlights[lnum].minlight;
 		if (rad < minlight)
