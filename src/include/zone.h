@@ -32,19 +32,20 @@
 #define MEMUNIT 8
 #define MEMBITS (MEMCLUMPSIZE / MEMUNIT)
 #define MEMBITINTS (MEMBITS / 32)
-#define MEMHEADER_SENTINEL 0xABADCAFE
-#define MEMCLUMP_SENTINEL 0xDEADF00D
+#define MEMHEADER_SENTINEL1 0xDEADF00D
+#define MEMHEADER_SENTINEL2 0xDF
+#define MEMCLUMP_SENTINEL 0xABADCAFE
 
 typedef struct memheader_s
 {
-	struct memheader_s *chain;			// next memheader in this zone
-	struct memzone_s   *zone;			// the parent zone
-	struct memclump_s  *clump;			// parent clump, if any
+	struct memheader_s	*chain;			// next memheader in this zone
+	struct memzone_s	*zone;			// the parent zone
+	struct memclump_s	*clump;			// parent clump, if any
 	int					size;			// allocated size, excludes header
-	char			   *filename;		// source file of this alloc
+	char				*filename;		// source file of this alloc
 	int					fileline;		// line of alloc in source file
-	Uint32				sentinel1;		// MEMCLUMP_SENTINEL
-	// followed by data and another MEMCLUMP_SENTINEL
+	Uint32				sentinel1;	// MEMHEADER_SENTINEL1
+	// followed by data and a MEMHEADER_SENTINEL2 byte
 } memheader_t;
 
 typedef struct memclump_s
@@ -52,21 +53,21 @@ typedef struct memclump_s
 	Uint8				block[MEMCLUMPSIZE];	// contents of the clump
 	Uint32				sentinel1;				// MEMCLUMP_SENTINEL
 	int					bits[MEMBITINTS];		// used to mark allocations
-	Uint32				sentinel2; 				// MEMCLUMP_SENTINEL
+	Uint32				sentinel2;				// MEMCLUMP_SENTINEL
 	int					blocksinuse;			// zone usage refcount
 	int					largestavailable;		// updated on alloc/free
-	struct memclump_s  *chain;					// next clump in chain
+	struct memclump_s	*chain;					// next clump in chain
 } memclump_t;
 
 typedef struct memzone_s
 {
-	struct memheader_s *chain;				// chain of individual allocs
-	struct memclump_s  *clumpchain;			// clain of clumps, if any
+	struct memheader_s	*chain;				// chain of individual allocs
+	struct memclump_s	*clumpchain;			// clain of clumps, if any
 	int					totalsize;			// total size of allocs
 	int					realsize;			// actual malloc size of zone
 	int					lastchecksize;		// last listed size (for detecting leaks)
 	char				name[ZONENAMESIZE];	// name of this zone
-	struct memzone_s   *next;				// next zone in list
+	struct memzone_s	*next;				// next zone in list
 } memzone_t;
 
 #define Zone_Alloc(zone,size) _Zone_Alloc(zone, size, __FILE__, __LINE__)

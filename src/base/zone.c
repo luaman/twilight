@@ -115,8 +115,9 @@ choseclump:
 	mem->fileline = fileline;
 	mem->size = size;
 	mem->zone = zone;
-	mem->sentinel1 = MEMHEADER_SENTINEL;
-	*((Uint32 *)((Uint8 *) mem + sizeof(memheader_t) + mem->size)) = MEMHEADER_SENTINEL;
+	mem->sentinel1 = MEMHEADER_SENTINEL1;
+	// some platforms (Sparc for instance) can not do unaligned writes, so this must be done as a char
+	*((Uint8 *) mem + sizeof(memheader_t) + mem->size) = MEMHEADER_SENTINEL2;
 	// append to head of list
 	mem->chain = zone->chain;
 	zone->chain = mem;
@@ -135,10 +136,10 @@ void _Zone_Free(void *data, char *filename, int fileline)
 
 
 	mem = (memheader_t *)((Uint8 *) data - sizeof(memheader_t));
-	if (mem->sentinel1 != MEMHEADER_SENTINEL)
+	if (mem->sentinel1 != MEMHEADER_SENTINEL1)
 		//Sys_Error("Zone_Free: trashed header sentinel 1 (alloc at %s:%i, free at %s:%i, zone %s)", mem->filename, mem->fileline, filename, fileline, mem->zone->name);
 		Sys_Error("Zone_Free: trashed header sentinel 1 (free at %s:%i)", filename, fileline);
-	if (*((Uint32 *)((Uint8 *) mem + sizeof(memheader_t) + mem->size)) != MEMHEADER_SENTINEL)
+	if (*((Uint8 *) mem + sizeof(memheader_t) + mem->size) != MEMHEADER_SENTINEL2)
 		Sys_Error("Zone_Free: trashed header sentinel 2 (alloc at %s:%i, free at %s:%i, zone %s)", mem->filename, mem->fileline, filename, fileline, mem->zone->name);
 	zone = mem->zone;
 	Com_DPrintf("Zone_Free: zone %s, alloc %s:%i, free %s:%i, size %i bytes\n", zone->name, mem->filename, mem->fileline, filename, fileline, mem->size);
@@ -253,10 +254,10 @@ void _Zone_CheckSentinels(void *data, char *filename, int fileline)
 		Sys_Error("Zone_CheckSentinels: data == NULL (sentinel check at %s:%i)", filename, fileline);
 
 	mem = (memheader_t *)((Uint8 *) data - sizeof(memheader_t));
-	if (mem->sentinel1 != MEMHEADER_SENTINEL)
+	if (mem->sentinel1 != MEMHEADER_SENTINEL1)
 		//Sys_Error("Zone_CheckSentinels: trashed header sentinel 1 (block allocated at %s:%i, sentinel check at %s:%i, zone %s)", mem->filename, mem->fileline, filename, fileline, mem->zone->name);
 		Sys_Error("Zone_CheckSentinels: trashed header sentinel 1 (sentinel check at %s:%i)", filename, fileline);
-	if (*((Uint32 *)((Uint8 *) mem + sizeof(memheader_t) + mem->size)) != MEMHEADER_SENTINEL)
+	if (*((Uint8 *) mem + sizeof(memheader_t) + mem->size) != MEMHEADER_SENTINEL2)
 		Sys_Error("Zone_CheckSentinels: trashed header sentinel 2 (block allocated at %s:%i, sentinel check at %s:%i, zone %s)", mem->filename, mem->fileline, filename, fileline, mem->zone->name);
 }
 
