@@ -431,7 +431,7 @@ R_TeleportSplash (vec3_t org)
 
 /*
 ==========
-R_Fire
+R_Torch
 
 ==========
 */
@@ -779,5 +779,6 @@ R_DrawParticles (void)
 	numparticles = activeparticles;
 
 	qglDisableClientState (GL_COLOR_ARRAY);
-	qglColor3f (1, 1, 1);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
+
