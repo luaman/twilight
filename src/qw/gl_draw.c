@@ -540,6 +540,7 @@ Draw_Crosshair (void)
 	float			base[4];
 	float			ofs;
 	int				ctexture;
+	extern vrect_t	scr_vrect;
 
 	if (crosshair->ivalue < 1)
 		return;
@@ -548,14 +549,22 @@ Draw_Crosshair (void)
 	
 	ctexture = ch_texture + ((crosshair->ivalue - 1) % NUM_CROSSHAIRS);
 
-	x1 = (vid.width - 32 * hud_chsize->fvalue) * 0.5;
-	y1 = (vid.height - 32 * hud_chsize->fvalue) * 0.5;
+	x1 = ((scr_vrect.width + scr_vrect.x - 32 * hud_chsize->fvalue) * 0.5
+		+ cl_crossx->ivalue) / (double) vid.width * vid.conwidth;
+	y1 = ((scr_vrect.height + scr_vrect.y - 32 * hud_chsize->fvalue) * 0.5
+		+ cl_crossy->ivalue) / (double) vid.width * vid.conwidth;
 
-	x2 = (vid.width + 32 * hud_chsize->fvalue) * 0.5;
-	y2 = (vid.height + 32 * hud_chsize->fvalue) * 0.5;
+	x2 = ((scr_vrect.width + scr_vrect.x + 32 * hud_chsize->fvalue) * 0.5
+		+ cl_crossx->ivalue) / (double) vid.width * vid.conwidth;
+	y2 = ((scr_vrect.height + scr_vrect.y + 32 * hud_chsize->fvalue) * 0.5
+		+ cl_crossy->ivalue) / (double) vid.width * vid.conwidth;
 
 	// Color selection madness
-	color = bound (0, crosshaircolor->ivalue, 255);
+	color = crosshaircolor->ivalue % 256;
+//	if (color == 255 && cl.colormap)
+//		VectorScale(cl.colormap->bottom, 0.5, base);
+//	else
+		VectorCopy (d_8tofloattable[color], base);
 	ofs = Q_sin (cl.time * M_PI * hud_chspeed->fvalue) * hud_chflash->fvalue;
 	VectorSlide (d_8tofloattable[color], ofs, base);
 	base[3] = hud_chalpha->fvalue;
