@@ -228,6 +228,8 @@ def do_configure (env):
 		if ret[0]:
 			sdl_ver = ret[1]
 			env.Append (LIBS = ['SDL'])
+			if env['PLATFORM'] == 'win32':
+				env.Append (LIBS = ['SDLmain'])
 
 	if [1, 2, 5] > sdl_ver:
 		print "Twilight requires SDL 1.2.5. (" + repr (sdl_ver) + " found)"
@@ -255,7 +257,7 @@ def do_configure (env):
 	handle_opts (conf, opts, config_defs, 1)
 
 	if env['PLATFORM'] == 'win32':
-		env.Append (LIBS = ['SDLmain', 'user32', 'gdi32', 'shell32', 'wsock32', 'msvcrt', 'kernel32'])
+		env.Append (LIBS = ['user32', 'gdi32', 'shell32', 'wsock32', 'msvcrt', 'kernel32'])
 		env.Append (LINKFLAGS = ['/subsystem:windows'])
 		env.Append (CCFLAGS = ['/G5', '/MD'])
 
