@@ -62,7 +62,9 @@ static char *argvdummy = " ";
 static char *safeargvs[NUM_SAFE_ARGVS] =
 	{ "-stdvid", "-nolan", "-nosound", "-nocdaudio", "-nojoy", "-nomouse" };
 
+cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;
+cvar_t *fs_userconf;
 cvar_t *fs_userpath;
 cvar_t *registered;
 
@@ -1066,6 +1068,8 @@ void
 COM_Init_Cvars (void)
 {
 	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
+
+	// fs_shareconf/userconf have to be done in Host_Init
 	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, NULL);
 	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
 }

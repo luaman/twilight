@@ -260,6 +260,24 @@ Cbuf_Execute (void)
 	}
 }
 
+
+void
+Cbuf_InsertFile (char *path)
+{
+	char	str[2048];
+	FILE	*f;
+
+	f = fopen (Sys_ExpandPath (path), "r");
+	if (!f)
+		return;
+	
+	while (fgets (str, 2048, f) != NULL)
+		Cbuf_InsertText (str);
+
+	fclose (f);
+}
+
+
 /*
 ==============================================================================
 

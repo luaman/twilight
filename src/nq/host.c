@@ -803,7 +803,20 @@ Host_Init ()
 	Cbuf_Init ();		// initialize cmd_text buffer
 	Cmd_Init ();		// setup the basic commands we need for the system
 
+	// These have to be here.
+	fs_shareconf = Cvar_Get ("fs_shareconf", SHARECONF, CVAR_ROM, NULL);
+	fs_userconf = Cvar_Get ("fs_userconf", USERCONF, CVAR_ROM, NULL);
+
 	// execute +set as early as possible
+	// Yes, the repeated Cmd_StuffCmds_f/Cbuf_Execute_Sets are necessary!
+	Cmd_StuffCmds_f ();
+	Cbuf_Execute_Sets ();
+	Cbuf_InsertFile (fs_shareconf->string);
+	Cbuf_Execute_Sets ();
+	Cmd_StuffCmds_f ();
+	Cbuf_Execute_Sets ();
+	Cbuf_InsertFile (fs_userconf->string);
+	Cbuf_Execute_Sets ();
 	Cmd_StuffCmds_f ();
 	Cbuf_Execute_Sets ();
 

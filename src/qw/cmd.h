@@ -61,6 +61,8 @@ void        Cbuf_InsertText (char *text);
 void        Cbuf_Execute (void);
 void		Cbuf_Execute_Sets (void);
 
+void Cbuf_InsertFile (char *path);
+
 // Pulls off \n terminated lines of text from the command buffer and sends
 // them through Cmd_ExecuteString.  Stops when the buffer is empty.
 // Normally called once per frame, but may be explicitly invoked.

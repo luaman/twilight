@@ -3,12 +3,10 @@ Project Twilight todo list
 
 These things should be done before first public release:
 
-  - Global config file support
   - Website updates
     - Releases page
     - CVS walktrhoughs
   - Packaging scripts
-    - RPM
     ? Something for win32?
 
 
