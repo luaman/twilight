@@ -46,16 +46,6 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 
-#define NUM_SAFE_ARGVS  7
-
-static char *largv[MAX_NUM_ARGVS + NUM_SAFE_ARGVS + 1];
-static char *argvdummy = " ";
-
-static char *safeargvs[NUM_SAFE_ARGVS] =
-	{ "-stdvid", "-nolan", "-nosound", "-nocdaudio", "-nojoy", "-nomouse",
-	"-dibonly"
-};
-
 cvar_t *registered;
 cvar_t *cmdline;
 cvar_t *fs_shareconf;
@@ -64,9 +54,6 @@ cvar_t *fs_userconf;
 cvar_t *fs_userpath;
 cvar_t *fs_gamename;
 
-//static char com_basedir[MAX_OSPATH];
-//static char com_sharedir[MAX_OSPATH];
-
 qboolean    proghack;
 
 qboolean    msg_suppress_1 = 0;
@@ -74,8 +61,6 @@ qboolean    msg_suppress_1 = 0;
 void        COM_InitFilesystem (void);
 
 char        com_token[1024];
-int         com_argc;
-char      **com_argv;
 
 #define CMDLINE_LENGTH	256
 char        com_cmdline[CMDLINE_LENGTH];
@@ -784,30 +769,6 @@ COM_Parse (char *data)
 
 /*
 ================
-COM_CheckParm
-
-Returns the position (1 to argc-1) in the program's argument list
-where the given parameter apears, or 0 if not present
-================
-*/
-int
-COM_CheckParm (char *parm)
-{
-	int         i;
-
-	for (i = 1; i < com_argc; i++) {
-		if (!com_argv[i])
-			continue;					// NEXTSTEP sometimes clears appkit
-		// vars.
-		if (!strcmp (parm, com_argv[i]))
-			return i;
-	}
-
-	return 0;
-}
-
-/*
-================
 COM_CheckFile
 
 ================
@@ -847,69 +808,6 @@ COM_CheckRegistered (void)
 
 
 void        COM_Path_f (void);
-
-
-/*
-================
-COM_InitArgv
-================
-*/
-void
-COM_InitArgv (int argc, char **argv)
-{
-	qboolean    safe;
-	int         i, j, n;
-
-// reconstitute the command line for the cmdline externally visible cvar
-	n = 0;
-
-	for (j = 0; (j < MAX_NUM_ARGVS) && (j < argc); j++) {
-		i = 0;
-
-		while ((n < (CMDLINE_LENGTH - 1)) && argv[j][i]) {
-			com_cmdline[n++] = argv[j][i++];
-		}
-
-		if (n < (CMDLINE_LENGTH - 1))
-			com_cmdline[n++] = ' ';
-		else
-			break;
-	}
-
-	com_cmdline[n] = 0;
-
-	safe = false;
-
-	for (com_argc = 0; (com_argc < MAX_NUM_ARGVS) && (com_argc < argc);
-		 com_argc++) {
-		largv[com_argc] = argv[com_argc];
-		if (!strcmp ("-safe", argv[com_argc]))
-			safe = true;
-	}
-
-	if (safe) {
-		// force all the safe-mode switches. Note that we reserved extra space
-		// in
-		// case we need to add these, so we don't need an overflow check
-		for (i = 0; i < NUM_SAFE_ARGVS; i++) {
-			largv[com_argc] = safeargvs[i];
-			com_argc++;
-		}
-	}
-
-	largv[com_argc] = argvdummy;
-	com_argv = largv;
-
-	if (COM_CheckParm ("-rogue")) {
-		rogue = true;
-		standard_quake = false;
-	}
-
-	if (COM_CheckParm ("-hipnotic")) {
-		hipnotic = true;
-		standard_quake = false;
-	}
-}
 
 
 /*
@@ -1512,9 +1410,17 @@ COM_InitFilesystem (void)
 	COM_AddGameDirectory (fs_gamename->string);
 
 	if (COM_CheckParm ("-rogue"))
+	{
+		rogue = true;
+		standard_quake = false;
 		COM_AddGameDirectory ("rogue");
+	}
 	if (COM_CheckParm ("-hipnotic"))
+	{
+		hipnotic = true;
+		standard_quake = false;
 		COM_AddGameDirectory ("hipnotic");
+	}
 
 //
 // -game <gamedir>
