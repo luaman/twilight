@@ -270,7 +270,8 @@ void        GL_Upload8_EXT (byte * data, int width, int height, qboolean mipmap,
 							qboolean alpha);
 void        R_InitParticles (void);
 void        R_StoreEfrags (efrag_t **ppefrag);
-void        R_MarkLights (dlight_t *light, int bit, mnode_t *node);
+void		R_MarkLights (dlight_t *light, int bit, model_t *model);
+void		R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node);
 qboolean    R_CullBox (vec3_t mins, vec3_t maxs);
 void        R_DrawSkyChain (msurface_t *s);
 void        EmitBothSkyLayers (msurface_t *fa);

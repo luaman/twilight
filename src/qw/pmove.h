@@ -109,5 +109,8 @@ int         PM_PointContents (vec3_t point);
 qboolean    PM_TestPlayerPosition (vec3_t point);
 pmtrace_t   PM_PlayerMove (vec3_t start, vec3_t stop);
 
+qboolean	PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
+					   vec3_t p2, pmtrace_t *trace);
+
 #endif // __PMOVE_H
 

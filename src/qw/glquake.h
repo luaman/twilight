@@ -287,7 +287,8 @@ qboolean    R_CullBox (vec3_t mins, vec3_t maxs);
 //
 // gl_rlight.c
 //
-void        R_MarkLights (dlight_t *light, int bit, mnode_t *node);
+void        R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node);
+void		R_MarkLights (dlight_t *light, int bit, model_t *model);
 void        R_AnimateLight (void);
 void        R_RenderDlights (void);
 int         R_LightPoint (vec3_t p);

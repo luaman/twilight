@@ -1054,8 +1054,18 @@ CL_MuzzleFlash (void)
 	dl = CL_AllocDlight (-i);
 	VectorCopy (pl->origin, dl->origin);
 	AngleVectors (pl->viewangles, fv, rv, uv);
-
 	VectorMA (dl->origin, 18, fv, dl->origin);
+
+	if (!gl_flashblend->value)
+	{
+		pmtrace_t tr;
+		
+		PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, pl->origin, dl->origin, &tr);
+				
+		if (tr.endpos[0] && tr.endpos[1] && tr.endpos[2])
+			VectorCopy (tr.endpos, dl->origin);
+	}
+
 	dl->radius = 200 + (Q_rand () & 31);
 	dl->minlight = 32;
 	dl->die = cl.time + 0.1;

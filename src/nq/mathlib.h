@@ -55,6 +55,8 @@ extern vec3_t vec3_origin;
 #define VectorCompare(a,b) ((a[0]==b[0])&&(a[1]==b[1])&&(a[2]==b[2]))
 #define VectorClear(a)		(a[0]=a[1]=a[2]=0)
 
+#define PlaneDiff(point,plane) (((plane)->type < 3 ? (point)[(plane)->type] : DotProduct((point), (plane)->normal)) - (plane)->dist)
+
 vec_t       _DotProduct (vec3_t v1, vec3_t v2);
 void        _CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross);
 void        _VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);

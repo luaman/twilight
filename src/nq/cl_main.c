@@ -457,6 +457,8 @@ CL_RelinkEntities (void)
 	float       bobjrotate;
 	vec3_t      oldorg;
 	dlight_t   *dl;
+	trace_t		tr;
+	extern		cvar_t *gl_flashblend;
 
 // determine partial update time    
 	frac = CL_LerpPoint ();
@@ -549,8 +551,6 @@ CL_RelinkEntities (void)
 #endif
 
 		if (ent->effects & EF_MUZZLEFLASH) {
-			extern cvar_t *gl_flashblend;
-
 			// don't draw our own muzzle flash if flashblending
 			if (i != cl.viewentity || chase_active->value || !gl_flashblend->value) {
 				vec3_t      fv, rv, uv;
@@ -558,8 +558,17 @@ CL_RelinkEntities (void)
 				dl = CL_AllocDlight (i);
 				VectorCopy (ent->origin, dl->origin);
 				AngleVectors (ent->angles, fv, rv, uv);
-
 				VectorMA (dl->origin, 18, fv, dl->origin);
+
+				if (!gl_flashblend->value)
+				{			
+					memset (&tr, 0, sizeof(tr));
+					SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ent->origin, dl->origin, &tr);
+					
+					if (tr.endpos[0 && tr.endpos[1] && tr.endpos[2])
+						VectorCopy (tr.endpos, dl->origin);
+				}
+
 				dl->radius = 200 + (Q_rand () & 31);
 				dl->minlight = 32;
 				dl->die = cl.time + 0.1;
@@ -570,6 +579,18 @@ CL_RelinkEntities (void)
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin, dl->origin);
 			dl->origin[2] += 16;
+
+			if (!gl_flashblend->value)
+			{
+				trace_t tr;
+				
+				memset (&tr, 0, sizeof(tr));
+				SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, ent->origin, dl->origin, &tr);
+				
+				if ((tr.endpos[0] != 0) && (tr.endpos[1] != 0) && (tr.endpos[2] != 0))
+					VectorCopy (tr.endpos, dl->origin);
+			}
+
 			dl->radius = 400 + (Q_rand () & 31);
 			dl->die = cl.time + 0.001;
 		}
