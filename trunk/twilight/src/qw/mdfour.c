@@ -38,6 +38,7 @@ static const char rcsid[] =
 
 #include "SDL_types.h"
 
+#include "common.h"
 #include "strlib.h"						/* XoXus: needed for memset call */
 #include "mdfour.h"
 
@@ -254,20 +255,10 @@ Uint32
 Com_BlockChecksum (void *buffer, int length)
 {
 	Uint32		digest[4];
-	Uint32		val;
 
 	mdfour ((unsigned char *) digest, (unsigned char *) buffer, length);
 
-	val = digest[0] ^ digest[1] ^ digest[2] ^ digest[3];
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	val = (((val&0x000000FF)<<24) |
-	       ((val&0x0000FF00)<<8) |
-	       ((val&0x00FF0000)>>8) |
-	       ((val>>24)&0xFF));
-#endif
-
-	return val;
+	return LittleLong(digest[0] ^ digest[1] ^ digest[2] ^ digest[3]);
 }
 
 
