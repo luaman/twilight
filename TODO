@@ -3,6 +3,7 @@ Project Twilight todo list
 
 These things need to be done before first public release:
 
+  - Add the key repeat code from NQ to QW
   - Add Cvars fs_sharepath and fs_userpath
   - Global config file support
   - Website updates
