@@ -48,7 +48,7 @@ AC_C_INLINE
 AC_C_CONST
 AC_EXEEXT
 AC_OBJEXT
-CFLAGS="-Wall -Werror $CFLAGS"
+CFLAGS="-Wall -Werror -Winline $CFLAGS"
 
 
 dnl Checks for functions and headers
@@ -123,6 +123,10 @@ AC_OUTPUT(
 	Makefile
 	twilight.spec
 	include/Makefile
+	src/Makefile
+	src/base/Makefile
+	src/renderer/Makefile
+	src/sound/Makefile
 	nq/Makefile
 	qw/Makefile
 	qw-server/Makefile
