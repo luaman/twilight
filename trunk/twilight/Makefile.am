@@ -4,9 +4,10 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-SUBDIRS=include nq qw qw-server doc gamecode debian
+SUBDIRS=include nq qw qw-server doc gamecode debian tools
 
 EXTRA_DIST= \
+	COPYING.BSD \
 	acconfig.h autogen.sh \
 	twilight.dsw \
 	twilight.spec
