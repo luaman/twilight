@@ -71,16 +71,6 @@ typedef struct {
 #define	SIDE_ON		2
 
 
-// plane_t structure
-typedef struct mplane_s {
-	vec3_t      normal;
-	float       dist;
-	Uint8       type;					// for texture axis selection and fast
-	// side tests
-	Uint8       signbits;				// signx + signy<<1 + signz<<1
-	Uint8       pad[2];
-} mplane_t;
-
 typedef struct texture_s {
 	char        name[16];
 	unsigned    width, height;
