@@ -926,6 +926,42 @@ HUD_Draw_Standard_Sbar (void)
 }
 
 void
+HUD_Draw_Single_Stats (void)
+{
+	image_t	*pic;
+	double	time;
+	int		dig, num, x;
+
+	x = (vid.width_2d / 2) - 137;
+	if (x < 0)
+		x = 0;
+
+	pic = Draw_CacheImg ("gfx/inter");
+	Draw_Img (x + 0, 56, pic);
+
+	// time
+	if (ccl.completed_time)
+		time = ccl.completed_time;
+	else
+		time = ccl.time;
+
+	dig = time / 60;
+	HUD_DrawNum (x + 160, 64, dig, 3, 0);
+	num = time - dig * 60;
+	Draw_Img (x + 234, 64, sb_colon);
+	Draw_Img (x + 246, 64, sb_nums[0][num / 10]);
+	Draw_Img (x + 266, 64, sb_nums[0][num % 10]);
+
+	HUD_DrawNum (x + 160, 104, ccl.stats[STAT_SECRETS], 3, 0);
+	Draw_Img (x + 232, 104, sb_slash);
+	HUD_DrawNum (x + 240, 104, ccl.stats[STAT_TOTALSECRETS], 3, 0);
+
+	HUD_DrawNum (x + 160, 144, ccl.stats[STAT_MONSTERS], 3, 0);
+	Draw_Img (x + 232, 144, sb_slash);
+	HUD_DrawNum (x + 240, 144, ccl.stats[STAT_TOTALMONSTERS], 3, 0);
+}
+
+void
 HUD_Draw (void)
 {
 	int show = hud_scoreboard;
@@ -948,6 +984,11 @@ HUD_Draw (void)
 	}
 
 	if (show) {
+		if (ccl.game_teams == GAME_COOP || ccl.game_teams == GAME_SINGLE) {
+			HUD_Draw_Single_Stats ();
+			return;
+		}
+
 		CL_UpdatePings ();
 		if (ccl.game_teams != GAME_TEAMS)
 			show = SB_PLAYERS;
@@ -963,7 +1004,6 @@ void
 HUD_IntermissionOverlay (void)
 {
 	image_t	*pic;
-	int		dig, num;
 
 	if (ccls.state != ca_active)
 		return;
@@ -979,25 +1019,7 @@ HUD_IntermissionOverlay (void)
 		case GAME_SINGLE:
 			pic = Draw_CacheImg ("gfx/complete");
 			Draw_Img (64, 24, pic);
-
-			pic = Draw_CacheImg ("gfx/inter");
-			Draw_Img (0, 56, pic);
-
-			// time
-			dig = ccl.completed_time / 60;
-			HUD_DrawNum (160, 64, dig, 3, 0);
-			num = ccl.completed_time - dig * 60;
-			Draw_Img (234, 64, sb_colon);
-			Draw_Img (246, 64, sb_nums[0][num / 10]);
-			Draw_Img (266, 64, sb_nums[0][num % 10]);
-
-			HUD_DrawNum (160, 104, ccl.stats[STAT_SECRETS], 3, 0);
-			Draw_Img (232, 104, sb_slash);
-			HUD_DrawNum (240,104, ccl.stats[STAT_TOTALSECRETS], 3, 0);
-
-			HUD_DrawNum (160, 144, ccl.stats[STAT_MONSTERS], 3, 0);
-			Draw_Img (232, 144, sb_slash);
-			HUD_DrawNum (240, 144, ccl.stats[STAT_TOTALMONSTERS], 3, 0);
+			HUD_Draw_Single_Stats ();
 			break;
 	}
 }

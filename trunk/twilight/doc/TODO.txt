@@ -12,8 +12,6 @@ Stuff /required/ for 0.2.0:
 
 
 Bugs we know about:
-  - In QW coop mode, the scoreboard does not seem to work.
-    (Possibly a server issue though.)
   - Some of the particles need tweaking.
 
   - Quake never checked BSPs very well, a bad one can crash the engine.
