@@ -8,4 +8,8 @@
 
 #define SHAREPATH ""
 
+#define snprintf _snprintf
+#define vsnprintf _vsnprintf
+#define strcasecmp _strcmpi
+
 #endif // _CONFIG_H
