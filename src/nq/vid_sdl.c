@@ -27,17 +27,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <dlfcn.h>
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include "quakedef.h"
-
 
 
 #define WARP_WIDTH              640
 #define WARP_HEIGHT             480
-
-static qboolean mouse_avail;
-static float   mouse_x, mouse_y;
-static float   old_mouse_x, old_mouse_y;
 
 
 unsigned short	d_8to16table[256];
@@ -45,20 +40,16 @@ unsigned		d_8to24table[256];
 unsigned char	d_15to8table[65536];
 
 cvar_t	vid_mode = {"vid_mode","0",false};
- 
-static qboolean        mouse_avail;
+cvar_t	m_filter = {"m_filter", "0"};
+cvar_t	_windowed_mouse = {"_windowed_mouse", "1", true};
+cvar_t	gl_ztrick = {"gl_ztrick","1"};
 
-static cvar_t in_mouse = {"in_mouse", "1", false};
-static cvar_t in_dgamouse = {"in_dgamouse", "1", false};
-static cvar_t m_filter = {"m_filter", "0"};
-static cvar_t _windowed_mouse = {"_windowed_mouse", "1"};
+static float	mouse_x, mouse_y;
+static float	old_mouse_x, old_mouse_y;
 
+static int old_windowed_mouse;
 
-int old_windowed_mouse;
-qboolean dgamouse = false;
-qboolean vidmode_ext = false;
-
-static int scr_width, scr_height;
+static int scr_width = 640, scr_height = 480;
 
 /*-----------------------------------------------------------------------*/
 
@@ -73,7 +64,6 @@ int		texture_extension_number = 1;
 
 float		gldepthmin, gldepthmax;
 
-cvar_t	gl_ztrick = {"gl_ztrick","1"};
 
 const char *gl_vendor;
 const char *gl_renderer;
@@ -85,7 +75,6 @@ void (*qgl3DfxSetPaletteEXT) (GLuint *);
 
 static float vid_gamma = 1.0;
 
-qboolean is8bit = false;
 qboolean isPermedia = false;
 qboolean gl_mtexable = false;
 
@@ -138,14 +127,17 @@ void	VID_SetPalette (unsigned char *palette)
 	int		k;
 	unsigned short i;
 	unsigned	*table;
-	int dist, bestdist;
+	FILE *f;
+	char s[255];
+	float dist, bestdist;
+	static qboolean palflag = false;
 
 //
 // 8 8 8 encoding
 //
 	pal = palette;
 	table = d_8to24table;
-	for (i=0 ; i<256 ; i++)
+	for (i = 0; i < 256; i++)
 	{
 		r = pal[0];
 		g = pal[1];
@@ -157,39 +149,67 @@ void	VID_SetPalette (unsigned char *palette)
 	}
 	d_8to24table[255] &= 0xffffff;	// 255 is transparent
 
-	for (i=0; i < (1<<15); i++) {
-		/* Maps
-		000000000000000
-		000000000011111 = Red  = 0x1F
-		000001111100000 = Blue = 0x03E0
-		111110000000000 = Grn  = 0x7C00
-		*/
-		r = ((i & 0x1F) << 3)+4;
-		g = ((i & 0x03E0) >> 2)+4;
-		b = ((i & 0x7C00) >> 7)+4;
-		pal = (unsigned char *)d_8to24table;
-		for (v=0,k=0,bestdist=10000*10000; v<256; v++,pal+=4) {
-			r1 = (int)r - (int)pal[0];
-			g1 = (int)g - (int)pal[1];
-			b1 = (int)b - (int)pal[2];
-			dist = (r1*r1)+(g1*g1)+(b1*b1);
-			if (dist < bestdist) {
-				k=v;
-				bestdist = dist;
+	if (palflag)
+		return;
+	palflag = true;
+
+	COM_FOpenFile("glquake/15to8.pal", &f);
+	if (f)
+	{
+		fread (d_15to8table, 1<<15, 1, f);
+		fclose (f);
+	}
+	else
+	{
+		for (i = 0; i < (1<<15); i++)
+		{
+			/* Maps
+			000000000000000
+			000000000011111 = Red  = 0x1F
+			000001111100000 = Blue = 0x03E0
+			111110000000000 = Grn  = 0x7C00
+			*/
+			r = ((i & 0x1F) << 3)+4;
+			g = ((i & 0x03E0) >> 2)+4;
+			b = ((i & 0x7C00) >> 7)+4;
+			pal = (unsigned char *)d_8to24table;
+			for (v=0,k=0,bestdist=10000.0; v<256; v++,pal+=4)
+			{
+				r1 = (int)r - (int)pal[0];
+				g1 = (int)g - (int)pal[1];
+				b1 = (int)b - (int)pal[2];
+				dist = sqrt(((r1*r1)+(g1*g1)+(b1*b1)));
+				if (dist < bestdist)
+				{
+					k=v;
+					bestdist = dist;
+				}
 			}
+			d_15to8table[i]=k;
 		}
-		d_15to8table[i]=k;
+		sprintf (s, "%s/glquake", com_gamedir);
+		Sys_mkdir (s);
+		sprintf (s, "%s/glquake/15to8.pal", com_gamedir);
+		if ((f = fopen(s, "wb")) != NULL)
+		{
+			fwrite (d_15to8table, 1<<15, 1, f);
+			fclose (f);
+		}
 	}
 }
 
-void CheckMultiTextureExtensions(void) 
+void
+CheckMultiTextureExtensions (void)
 {
 	void *prjobj;
 
-	if (strstr(gl_extensions, "GL_SGIS_multitexture ") && !COM_CheckParm("-nomtex")) {
+	if (strstr(gl_extensions, "GL_SGIS_multitexture ")
+			&& !COM_CheckParm("-nomtex"))
+	{
 		Con_Printf("Found GL_SGIS_multitexture...\n");
 
-		if ((prjobj = dlopen(NULL, RTLD_LAZY)) == NULL) {
+		if ((prjobj = dlopen(NULL, RTLD_LAZY)) == NULL)
+		{
 			Con_Printf("Unable to open symbol list for main program.\n");
 			return;
 		}
@@ -197,15 +217,18 @@ void CheckMultiTextureExtensions(void)
 		qglMTexCoord2fSGIS = (void *) dlsym(prjobj, "glMTexCoord2fSGIS");
 		qglSelectTextureSGIS = (void *) dlsym(prjobj, "glSelectTextureSGIS");
 
-		if (qglMTexCoord2fSGIS && qglSelectTextureSGIS) {
+		if (qglMTexCoord2fSGIS && qglSelectTextureSGIS)
+		{
 			Con_Printf("Multitexture extensions found.\n");
 			gl_mtexable = true;
-		} else
+		}
+		else
 			Con_Printf("Symbol not found, disabled.\n");
 
 		dlclose(prjobj);
 	}
 }
+
 
 /*
 ===============
@@ -269,80 +292,28 @@ void GL_EndRendering (void)
 	SDL_GL_SwapBuffers ();
 }
 
-qboolean VID_Is8bit(void)
+
+static void
+Check_Gamma (unsigned char *pal)
 {
-	return is8bit;
-}
-
-void VID_Init8bitPalette(void) 
-{
-	// Check for 8bit Extensions and initialize them.
-	int i;
-	void *prjobj;
-
-	if ((prjobj = dlopen(NULL, RTLD_LAZY)) == NULL) {
-		Con_Printf("Unable to open symbol list for main program.\n");
-		return;
-	}
-
-	if (strstr(gl_extensions, "3DFX_set_global_palette") &&
-		(qgl3DfxSetPaletteEXT = dlsym(prjobj, "gl3DfxSetPaletteEXT")) != NULL) {
-		GLubyte table[256][4];
-		char *oldpal;
-
-		Con_SafePrintf("8-bit GL extensions enabled.\n");
-		glEnable( GL_SHARED_TEXTURE_PALETTE_EXT );
-		oldpal = (char *) d_8to24table; //d_8to24table3dfx;
-		for (i=0;i<256;i++) {
-			table[i][2] = *oldpal++;
-			table[i][1] = *oldpal++;
-			table[i][0] = *oldpal++;
-			table[i][3] = 255;
-			oldpal++;
-		}
-		qgl3DfxSetPaletteEXT((GLuint *)table);
-		is8bit = true;
-
-	} else if (strstr(gl_extensions, "GL_EXT_shared_texture_palette") &&
-		(qglColorTableEXT = dlsym(prjobj, "glColorTableEXT")) != NULL) {
-		char thePalette[256*3];
-		char *oldPalette, *newPalette;
-
-		Con_SafePrintf("8-bit GL extensions enabled.\n");
-		glEnable( GL_SHARED_TEXTURE_PALETTE_EXT );
-		oldPalette = (char *) d_8to24table; //d_8to24table3dfx;
-		newPalette = thePalette;
-		for (i=0;i<256;i++) {
-			*newPalette++ = *oldPalette++;
-			*newPalette++ = *oldPalette++;
-			*newPalette++ = *oldPalette++;
-			oldPalette++;
-		}
-		qglColorTableEXT(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB, 256, GL_RGB, GL_UNSIGNED_BYTE, (void *) thePalette);
-		is8bit = true;
-	}
-	
-	dlclose(prjobj);
-}
-
-static void Check_Gamma (unsigned char *pal)
-{
-	float	f, inf;
+	float			f, inf;
 	unsigned char	palette[768];
-	int		i;
+	int				i;
 
-	if ((i = COM_CheckParm("-gamma")) == 0) {
+	if ((i = COM_CheckParm("-gamma")) == 0)
+	{
 		if ((gl_renderer && strstr(gl_renderer, "Voodoo")) ||
-			(gl_vendor && strstr(gl_vendor, "3Dfx")))
+				(gl_vendor && strstr(gl_vendor, "3Dfx")))
 			vid_gamma = 1;
 		else
 			vid_gamma = 0.7; // default to 0.7 on non-3dfx hardware
-	} else
+	}
+	else
 		vid_gamma = Q_atof(com_argv[i+1]);
 
 	for (i=0 ; i<768 ; i++)
 	{
-		f = pow ( (pal[i]+1)/256.0 , vid_gamma );
+		f = pow ((pal[i]+1)/256.0, vid_gamma);
 		inf = f*255 + 0.5;
 		if (inf < 0)
 			inf = 0;
@@ -354,16 +325,14 @@ static void Check_Gamma (unsigned char *pal)
 	memcpy (pal, palette, sizeof(palette));
 }
 
+
 void VID_Init(unsigned char *palette)
 {
 	int i;
-	int flags = SDL_OPENGL;
 	char	gldir[MAX_OSPATH];
-	int width = 640, height = 480;
+	int flags = SDL_OPENGL;
 
 	Cvar_RegisterVariable (&vid_mode);
-	Cvar_RegisterVariable (&in_mouse);
-	Cvar_RegisterVariable (&in_dgamouse);
 	Cvar_RegisterVariable (&m_filter);
 	Cvar_RegisterVariable (&gl_ztrick);
 	Cvar_RegisterVariable (&_windowed_mouse);
@@ -380,10 +349,14 @@ void VID_Init(unsigned char *palette)
 		flags |= SDL_FULLSCREEN;
 
 	if ((i = COM_CheckParm("-width")) != 0)
-		width = atoi(com_argv[i+1]);
+		scr_width = atoi(com_argv[i+1]);
+	if (scr_width < 320)
+		scr_width = 320;
 
 	if ((i = COM_CheckParm("-height")) != 0)
-		height = atoi(com_argv[i+1]);
+		scr_height = atoi(com_argv[i+1]);
+	if (scr_height < 200)
+		scr_height = 200;
 
 	if ((i = COM_CheckParm("-conwidth")) != 0)
 		vid.conwidth = Q_atoi(com_argv[i+1]);
@@ -403,13 +376,10 @@ void VID_Init(unsigned char *palette)
 	if (vid.conheight < 200)
 		vid.conheight = 200;
 
-	scr_width = width;
-	scr_height = height;
-
-	if (vid.conheight > height)
-		vid.conheight = height;
-	if (vid.conwidth > width)
-		vid.conwidth = width;
+	if (vid.conheight > scr_height)
+		vid.conheight = scr_height;
+	if (vid.conwidth > scr_width)
+		vid.conwidth = scr_width;
 
 	if (SDL_Init (SDL_INIT_VIDEO) != 0)
 	{
@@ -450,10 +420,7 @@ void VID_Init(unsigned char *palette)
 
 	VID_SetPalette(palette);
 
-	// Check for 3DFX Extensions and initialize them.
-	VID_Init8bitPalette();
-
-	Con_SafePrintf ("Video mode %dx%d initialized.\n", width, height);
+	Con_SafePrintf ("Video mode %dx%d initialized.\n", scr_width, scr_height);
 
 	vid.recalc_refdef = 1;				// force a surface cache flush
 
@@ -621,16 +588,11 @@ void Force_CenterView_f (void)
 
 void IN_Init(void)
 {
-	if ( COM_CheckParm ("-nomouse") )
-		return;
-
 	mouse_x = mouse_y = 0.0;
-	mouse_avail = 1;
 }
 
 void IN_Shutdown(void)
 {
-	mouse_avail = 0;
 }
 
 /*
@@ -640,15 +602,14 @@ IN_Commands
 */
 void IN_Commands (void)
 {
+	// FIXME: Move this to a Cvar callback when they're implemented
 	if (old_windowed_mouse != _windowed_mouse.value)
 	{
 		old_windowed_mouse = _windowed_mouse.value;
 		if (!_windowed_mouse.value)
-		{
 			SDL_WM_GrabInput (SDL_GRAB_OFF);
-		} else {
+		else
 			SDL_WM_GrabInput (SDL_GRAB_ON);
-		}
 	}
 }
 
@@ -659,9 +620,6 @@ IN_Move
 */
 void IN_Move (usercmd_t *cmd)
 {
-	if (!mouse_avail)
-		return;
-
 	if (m_filter.value)
 	{
 		mouse_x = (mouse_x + old_mouse_x) * 0.5;
@@ -681,14 +639,17 @@ void IN_Move (usercmd_t *cmd)
 
 	if (in_mlook.state & 1)
 		V_StopPitchDrift ();
-	
-	if ( (in_mlook.state & 1) && !(in_strafe.state & 1)) {
+
+	if ( (in_mlook.state & 1) && !(in_strafe.state & 1))
+	{
 		cl.viewangles[PITCH] += m_pitch.value * mouse_y;
 		if (cl.viewangles[PITCH] > 80)
 			cl.viewangles[PITCH] = 80;
 		if (cl.viewangles[PITCH] < -70)
 			cl.viewangles[PITCH] = -70;
-	} else {
+	}
+	else
+	{
 		if ((in_strafe.state & 1) && noclip_anglehack)
 			cmd->upmove -= m_forward.value * mouse_y;
 		else
