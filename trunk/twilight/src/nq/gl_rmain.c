@@ -156,22 +156,6 @@ R_CullBox (vec3_t mins, vec3_t maxs)
 	return false;
 }
 
-
-void
-R_RotateForEntity (entity_t *e, qboolean shadow)
-{
-	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
-
-	qglRotatef (e->angles[1], 0, 0, 1);
-
-	if (!shadow)
-	{
-		qglRotatef (-e->angles[0], 0, 1, 0);
-		qglRotatef (e->angles[2], 1, 0, 0);
-	}
-}
-
-
 /*
 =============
 R_BlendedRotateForEntity
@@ -986,8 +970,13 @@ R_DrawAliasModel (entity_t *e)
 
 	if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 		R_BlendedRotateForEntity (e, false);
-	else
-		R_RotateForEntity (e, false);
+	else {
+		qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
+
+		qglRotatef (e->angles[1], 0, 0, 1);
+		qglRotatef (-e->angles[0], 0, 1, 0);
+		qglRotatef (e->angles[2], 1, 0, 0);
+	}
 
 	if ((clmodel->modflags & FLAG_DOUBLESIZE)
 			&& gl_doubleeyes->value) {
@@ -1081,8 +1070,10 @@ R_DrawAliasModel (entity_t *e)
 
 		if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
 			R_BlendedRotateForEntity (e, true);
-		else
-            R_RotateForEntity (e, true);
+		else {
+			qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
+			qglRotatef (e->angles[1], 0, 0, 1);
+		}
 
 		qglDisable (GL_TEXTURE_2D);
 		qglEnable (GL_BLEND);

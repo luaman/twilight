@@ -242,6 +242,7 @@ CL_ParseTEnt (void)
 					S_StartSound (-1, 0, cl_sfx_ric3, pos, 1, 1);
 			}
 			break;
+
 		case TE_SUPERSPIKE:			// super spike hitting wall
 			pos[0] = MSG_ReadCoord ();
 			pos[1] = MSG_ReadCoord ();

@@ -166,12 +166,12 @@ CL_CalcNet (void)
 				(frame->receivedtime - frame->senttime) * 20;
 	}
 
-	lost = 0;
-	for (a = 0; a < NET_TIMINGS; a++) {
+	for (lost = 0, a = 0; a < NET_TIMINGS; a++) {
 		i = (cls.netchan.outgoing_sequence - a) & NET_TIMINGSMASK;
 		if (packet_latency[i] == 9999)
 			lost++;
 	}
+
 	return lost * 100 / NET_TIMINGS;
 }
 
@@ -196,16 +196,19 @@ CL_CheckOrDownloadFile (char *filename)
 	}
 
 	COM_FOpenFile (filename, &f);
+
 	if (f) {							// it exists, no need to download
 		fclose (f);
 		return true;
 	}
+
 	// ZOID - can't download when recording
 	if (cls.demorecording) {
 		Con_Printf ("Unable to download %s in record mode.\n",
 					cls.downloadname);
 		return true;
 	}
+
 	// ZOID - can't download when playback
 	if (cls.demoplayback)
 		return true;
@@ -246,10 +249,13 @@ Model_NextDownload (void)
 	}
 
 	cls.downloadtype = dl_model;
+
 	for (; cl.model_name[cls.downloadnumber][0]; cls.downloadnumber++) {
 		s = cl.model_name[cls.downloadnumber];
+
 		if (s[0] == '*')
 			continue;					// inline brush model
+
 		if (!CL_CheckOrDownloadFile (s))
 			return;						// started a download
 	}
@@ -299,8 +305,10 @@ Sound_NextDownload (void)
 	}
 
 	cls.downloadtype = dl_sound;
+
 	for (; cl.sound_name[cls.downloadnumber][0]; cls.downloadnumber++) {
 		s = cl.sound_name[cls.downloadnumber];
+
 		if (!CL_CheckOrDownloadFile (va ("sound/%s", s)))
 			return;						// started a download
 	}
@@ -308,6 +316,7 @@ Sound_NextDownload (void)
 	for (i = 1; i < MAX_SOUNDS; i++) {
 		if (!cl.sound_name[i][0])
 			break;
+
 		cl.sound_precache[i] = S_PrecacheSound (cl.sound_name[i]);
 	}
 
@@ -333,18 +342,23 @@ CL_RequestNextDownload (void)
 	switch (cls.downloadtype) {
 		case dl_single:
 			break;
+
 		case dl_skin:
 			Skin_NextDownload ();
 			break;
+
 		case dl_model:
 			Model_NextDownload ();
 			break;
+
 		case dl_sound:
 			Sound_NextDownload ();
 			break;
+
 		case dl_none:
 		default:
 			Con_DPrintf ("Unknown download type.\n");
+			break;
 	}
 }
 
@@ -383,6 +397,7 @@ CL_ParseDownload (void)
 		CL_RequestNextDownload ();
 		return;
 	}
+
 	// open the file if not opened yet
 	if (!cls.download) {
 		if (strncmp (cls.downloadtempname, "skins/", 6))
@@ -508,9 +523,7 @@ CL_StartUpload (Uint8 *data, int size)
 qboolean
 CL_IsUploading (void)
 {
-	if (upload_data)
-		return true;
-	return false;
+	return (qboolean)(upload_data);
 }
 
 void
@@ -586,12 +599,14 @@ CL_ParseServerData (void)
 			Cbuf_AddText ("cl_warncmd 1\n");
 		}
 	}
+
 	// parse player slot, high bit means spectator
 	cl.playernum = MSG_ReadByte ();
 	if (cl.playernum & 128) {
 		cl.spectator = true;
 		cl.playernum &= ~128;
 	}
+
 	// get the full level name
 	str = MSG_ReadString ();
 	strncpy (cl.levelname, str, sizeof (cl.levelname) - 1);
@@ -1117,8 +1132,8 @@ CL_ParseServerMessage (void)
 		cmd = MSG_ReadByte ();
 
 		if (cmd == -1) {
-			msg_readcount++;			// so the EOM showner has the right
-			// value
+			msg_readcount++;
+			// so the EOM showner has the right value
 			SHOWNET ("END OF MESSAGE");
 			break;
 		}
@@ -1133,7 +1148,6 @@ CL_ParseServerMessage (void)
 				break;
 
 			case svc_nop:
-//          Con_Printf ("svc_nop\n");
 				break;
 
 			case svc_disconnect:
@@ -1178,7 +1192,6 @@ CL_ParseServerMessage (void)
 			case svc_setangle:
 				for (i = 0; i < 3; i++)
 					cl.viewangles[i] = MSG_ReadAngle ();
-//          cl.viewangles[PITCH] = cl.viewangles[ROLL] = 0;
 				break;
 
 			case svc_lightstyle:
@@ -1235,9 +1248,11 @@ CL_ParseServerMessage (void)
 				i = MSG_ReadShort ();
 				CL_ParseBaseline (&cl_baselines[i]);
 				break;
+
 			case svc_spawnstatic:
 				CL_ParseStatic ();
 				break;
+
 			case svc_temp_entity:
 				CL_ParseTEnt ();
 				break;
@@ -1255,6 +1270,7 @@ CL_ParseServerMessage (void)
 				j = MSG_ReadByte ();
 				CL_SetStat (i, j);
 				break;
+
 			case svc_updatestatlong:
 				i = MSG_ReadByte ();
 				j = MSG_ReadLong ();

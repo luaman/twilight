@@ -87,6 +87,7 @@ CL_AllocDlight (int key)
 			}
 		}
 	}
+
 // then look for anything else
 	dl = cl_dlights;
 	for (i = 0; i < MAX_DLIGHTS; i++, dl++) {
@@ -136,22 +137,26 @@ CL_NewDlight (int key, vec3_t org, float radius, float time,
 
 	dl->radius = radius;
 	dl->die = cl.time + time;
+
 	if (type == 0) // Normal
 	{
 		dl->color[0] = 0.86;
 		dl->color[1] = 0.31;
 		dl->color[2] = 0.24;
-	} else if (type == 1) // Blue
+	} 
+	else if (type == 1) // Blue
 	{
 		dl->color[0] = 0.24;
 		dl->color[1] = 0.24;
 		dl->color[2] = 0.86;
-	} else if (type == 2) // Red
+	} 
+	else if (type == 2) // Red
 	{
 		dl->color[0] = 0.86;
 		dl->color[1] = 0.24;
 		dl->color[2] = 0.24;
-	} else if (type == 3) // Purple
+	} 
+	else if (type == 3) // Purple
 	{
 		dl->color[0] = 0.86;
 		dl->color[1] = 0.24;
@@ -215,6 +220,7 @@ CL_ParseDelta (entity_state_t *from, entity_state_t *to, int bits)
 		i = MSG_ReadByte ();
 		bits |= i;
 	}
+
 	// count the bits for net profiling
 	for (i = 0; i < 16; i++)
 		if (bits & (1 << i))
@@ -741,25 +747,15 @@ CL_ParsePlayerinfo (void)
 		else
 			state->velocity[i] = 0;
 	}
-	if (flags & PF_MODEL)
-		state->modelindex = MSG_ReadByte ();
-	else
-		state->modelindex = cl_playerindex;
 
-	if (flags & PF_SKINNUM)
-		state->skinnum = MSG_ReadByte ();
-	else
-		state->skinnum = 0;
-
-	if (flags & PF_EFFECTS)
-		state->effects = MSG_ReadByte ();
-	else
-		state->effects = 0;
-
-	if (flags & PF_WEAPONFRAME)
-		state->weaponframe = MSG_ReadByte ();
-	else
-		state->weaponframe = 0;
+	state->modelindex = (flags & PF_MODEL) ? 
+		MSG_ReadByte() : cl_playerindex;
+	state->skinnum = (flags & PF_SKINNUM) ? 
+		MSG_ReadByte() : 0;
+	state->effects = (flags & PF_EFFECTS) ? 
+		MSG_ReadByte() : 0;
+	state->weaponframe = (flags & PF_WEAPONFRAME) ? 
+		MSG_ReadByte() : 0;
 
 	VectorCopy (state->command.angles, state->viewangles);
 }
