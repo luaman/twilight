@@ -197,6 +197,7 @@ void        COM_StripExtension (char *in, char *out);
 void        COM_FileBase (char *in, char *out);
 void        COM_DefaultExtension (char *path, char *extension);
 qboolean	COM_CheckFile (char *fname);
+char       *COM_FileExtension (char *in);
 
 //============================================================================
 

@@ -181,7 +181,6 @@ SetMinMaxSize (edict_t *e, float *min, float *max, qboolean rotate)
 
 	rotate = false;						// FIXME: implement rotation properly
 										// again
-
 	if (!rotate) {
 		VectorCopy (min, rmin);
 		VectorCopy (max, rmax);
@@ -282,11 +281,10 @@ PF_setmodel (void)
 	if (!*check)
 		PR_RunError ("no precache: %s\n", m);
 
-
 	e->v.model = m - pr_strings;
 	e->v.modelindex = i;				// SV_ModelIndex (m);
 
-	if (m[0] == '*')
+	if (m[0] == '*' || !strcmp(COM_FileExtension(m), "bsp"))
 	{
 		model_t *mod = Mod_ForName (m, true);
 		SetMinMaxSize (e, mod->mins, mod->maxs, true);

@@ -55,6 +55,20 @@ void        Mod_LoadBrushModel (model_t *mod, void *buffer);
 void		GL_SubdivideSurface (msurface_t *fa);
 void        GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
 
+cvar_t     *gl_subdivide_size;
+
+
+/*
+===============
+Mod_Init_Cvars
+===============
+*/
+void
+Mod_Init_Cvars (void)
+{
+	gl_subdivide_size = Cvar_Get ("gl_subdivide_size", "128", CVAR_ARCHIVE, NULL);
+}
+
 /*
 ==================
 Mod_LoadModel

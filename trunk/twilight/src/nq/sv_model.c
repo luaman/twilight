@@ -56,6 +56,16 @@ void        Mod_LoadBrushModel (model_t *mod, void *buffer);
 vec3_t		mod_mins, mod_maxs;
 
 /*
+===============
+Mod_Init_Cvars
+===============
+*/
+void
+Mod_Init_Cvars (void)
+{
+}
+
+/*
 ==================
 Mod_LoadModel
 
