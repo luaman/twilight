@@ -10,7 +10,7 @@
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 	See the GNU General Public License for more details.
 
@@ -65,6 +65,8 @@ int         ramp3[8] = { 0x6d, 0x6b, 6, 5, 4, 3 };
 
 particle_t *particles, **freeparticles;
 int         numparticles, r_maxparticles;
+
+cvar_t *r_particles;
 
 inline particle_t *
 particle_new (ptype_t type, vec3_t org, vec3_t vel, float die, int color,
@@ -137,6 +139,8 @@ R_EntityParticles (entity_t *ent)
 	float       sr, sp, sy, cr, cp, cy;
 	vec3_t      forward, org;
 	float       dist = 64;
+	if (!r_particles->value)
+		return;
 
 	if (!avelocities[0][0]) {
 		for (i = 0; i < NUMVERTEXNORMALS * 3; i++)
@@ -231,6 +235,8 @@ R_ParseParticleEffect (void)
 	color = MSG_ReadByte ();
 	count = (msgcount == 255) ? 1024 : msgcount;
 
+	if (!r_particles->value)
+		return;
 	R_RunParticleEffect (org, dir, color, count);
 }
 
@@ -245,6 +251,8 @@ R_ParticleExplosion (vec3_t org)
 {
 	int		i, j, type;
 	vec3_t	porg, vel;
+	if (!r_particles->value)
+		return;
 
 	for (i = 0; i < 1024; i++) {
 		if (i & 1) {
@@ -276,6 +284,8 @@ R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength)
 	int		i, j;
 	int		colorMod = 0, color;
 	vec3_t	porg, vel;
+	if (!r_particles->value)
+		return;
 
 	for (i = 0; i < 512; i++) {
 		color = colorStart + (colorMod % colorLength);
@@ -300,6 +310,8 @@ R_BlobExplosion (vec3_t org)
 	int		i, j;
 	float	pdie;
 	vec3_t	porg, pvel;
+	if (!r_particles->value)
+		return;
 
 	for (i = 0; i < 1024; i++) {
 		pdie = realtime + 1 + (Q_rand () & 8) * 0.05;
@@ -332,6 +344,8 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 	int		i, j, pcolor;
 	float	pdie;
 	vec3_t	porg, pvel;
+	if (!r_particles->value)
+		return;
 
 	for (i = 0; i < count; i++) {
 		if (count == 1024) {			// rocket explosion
@@ -373,6 +387,8 @@ R_LavaSplash (vec3_t org)
 	int         i, j, k, pcolor;
 	float       vel, pdie;
 	vec3_t      dir, porg, pvel;
+	if (!r_particles->value)
+		return;
 
 	for (i = -16; i < 16; i++)
 		for (j = -16; j < 16; j++)
@@ -407,6 +423,8 @@ R_TeleportSplash (vec3_t org)
 	int         i, j, k, pcolor;
 	float       vel, pdie;
 	vec3_t      dir, porg, pvel;
+	if (!r_particles->value)
+		return;
 
 	for (i = -16; i < 16; i += 4)
 		for (j = -16; j < 16; j += 4)
@@ -435,15 +453,17 @@ R_Torch
 
 ==========
 */
-void 
+void
 R_Torch (entity_t *ent, qboolean torch2)
 {
 	particle_t	*p;
 	vec3_t porg, pvel;
+	if (!r_particles->value)
+		return;
 
 	if (realtime + 2 < ent->time_left)
 		ent->time_left = 0;
-	
+
 	if (realtime > ent->time_left) {
 		VectorSet (pvel, (rand() & 3) - 2, (rand() & 3) - 2, 0);
 		VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
@@ -484,6 +504,8 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 	int         j, lsub, pcolor;
 	static int  tracercount;
 	ptype_t		ptype;
+	if (!r_particles->value)
+		return;
 
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
@@ -614,8 +636,7 @@ R_DrawParticles (void)
 			continue;
 		}
 		if (p->type == pt_torch || p->type == pt_torch2) {
-			if (!therearetorches)
-				therearetorches = true;
+			therearetorches = true;
 			continue;
 		}
 
@@ -731,9 +752,9 @@ R_DrawParticles (void)
 			VectorSet2(tc_array[vnum + 1], 1, 0);
 			VectorSet2(tc_array[vnum + 2], 0, 1);
 			VectorSet3(v_array[vnum + 0], p->org[0] + (up[0]+right[0])*scale, p->org[1] + (up[1]+right[1])*scale, p->org[2] + (up[2]+right[2])*scale);
-			VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale2 + right[0]*scale, p->org[1] + up[1] * scale2 + right[1]*scale, 
+			VectorSet3(v_array[vnum + 1], p->org[0] + up[0] * scale2 + right[0]*scale, p->org[1] + up[1] * scale2 + right[1]*scale,
 				p->org[2] + up[2] * scale2 + right[2]*scale);
-			VectorSet3(v_array[vnum + 2], p->org[0] + up[0] * scale + right[0]*scale2, p->org[1] + up[1] * scale + right[1]*scale2, 
+			VectorSet3(v_array[vnum + 2], p->org[0] + up[0] * scale + right[0]*scale2, p->org[1] + up[1] * scale + right[1]*scale2,
 				p->org[2] + up[2] * scale + right[2]*scale2);
 			vnum += 3;
 

@@ -228,20 +228,26 @@ Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
 void
-EmitWaterPolys (msurface_t *fa)
+EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform)
 {
-	glpoly_t   *p;
-	float      *v;
-	int         i;
-	float       s, t, os, ot;
-	texture_t  *tex;
+	glpoly_t	*p;
+	float		*v;
+	float		temp[3];
+	int			i, texnum;
+	Uint8		cr, cg, cb, ca;
+	float		s, t, os, ot;
 
-	tex = R_TextureAnimation (fa->texinfo->texture);
-	qglBindTexture (GL_TEXTURE_2D, tex->gl_texturenum);
+	cr = 255;
+	cg = 255;
+	cb = 255;
+	ca = (Uint8) (bound(0.0f, r_wateralpha->value * 255.0f, 255.0f));
+	texnum = tex->gl_texturenum;
 
-	for (p = fa->polys; p; p = p->next) {
-		qglBegin (GL_POLYGON);
-		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE) {
+	for (p = fa->polys; p; p = p->next)
+	{
+		transpolybegin(texnum, 0, TPOLYTYPE_ALPHA);
+		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
+		{
 			os = v[3];
 			ot = v[4];
 
@@ -251,10 +257,14 @@ EmitWaterPolys (msurface_t *fa)
 			t = ot + turbsin[(int) ((os * 0.125 + realtime) * TURBSCALE) & 255];
 			t *= (1.0 / 64);
 
-			qglTexCoord2f (s, t);
-			qglVertex3fv (v);
+			if (transform)
+				softwaretransform(v, temp);
+			else
+				VectorCopy(v, temp);
+
+			transpolyvertub(temp[0], temp[1], temp[2], s, t, cr, cg, cb, ca);
 		}
-		qglEnd ();
+		transpolyend();
 	}
 }
 
@@ -312,13 +322,6 @@ EmitBothSkyLayers (msurface_t *fa)
 	if (draw_skybox)
 		return;
 
-	if (gl_mtexable)
-	{
-		qglActiveTextureARB (GL_TEXTURE1_ARB);
-		qglDisable (GL_TEXTURE_2D);
-		qglActiveTextureARB (GL_TEXTURE0_ARB);
-	}
-
 	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
 	speedscale = realtime * 8;
 	speedscale -= (int) speedscale & ~127;
@@ -332,12 +335,6 @@ EmitBothSkyLayers (msurface_t *fa)
 
 	EmitSkyPolys (fa);
 
-	if (gl_mtexable)
-	{
-		qglActiveTextureARB (GL_TEXTURE1_ARB);
-		qglEnable (GL_TEXTURE_2D);
-		qglActiveTextureARB (GL_TEXTURE0_ARB);
-	}
 	qglDisable (GL_BLEND);
 }
 
@@ -351,15 +348,15 @@ R_DrawSkyChain (msurface_t *s)
 {
 	msurface_t *fa;
 
-	if (r_fastsky->value) 
+	if (r_fastsky->value)
 	{
 		glpoly_t	*p;
 		float		*v;
 		int			i;
-		
+
 		qglDisable (GL_TEXTURE_2D);
 		qglColor4fv (d_8tofloattable[(Uint8) r_fastsky->value - 1]);
-		
+
 		for (fa=s ; fa ; fa=fa->texturechain){
 			for (p=fa->polys ; p ; p=p->next) {
 				qglBegin (GL_POLYGON);
@@ -717,6 +714,7 @@ void R_DrawSkyBox (void)
 	if (!draw_skybox || (skytexturenum == -1))
 		return;
 
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	for (i = 0; i < 6; i++)
 	{
 		if (skymins[0][i] >= skymaxs[0][i]
@@ -732,6 +730,7 @@ void R_DrawSkyBox (void)
 		MakeSkyVec (skymaxs[0][i], skymins[1][i], i);
 		qglEnd ();
 	}
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
 

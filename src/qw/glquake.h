@@ -47,6 +47,10 @@
 #include "wad.h"
 #include "render.h"
 
+#include "gl_poly.h"
+
+#include "transform.h"
+
 qboolean GLF_Init (void);
 
 void        GL_EndRendering (void);
@@ -73,13 +77,11 @@ extern int  glx, gly;
 
 
 void        R_ReadPointFile_f (void);
-texture_t  *R_TextureAnimation (texture_t *base);
 
 //====================================================
 
 
 extern entity_t *currententity;
-extern int  r_visframecount;			// ??? what difs?
 extern int  r_framecount;
 extern int  c_brush_polys, c_alias_polys;
 
@@ -136,6 +138,7 @@ extern struct cvar_s *gl_fb_bmodels;
 extern struct cvar_s *gl_oldlights;
 extern struct cvar_s *gl_colorlights;
 extern struct cvar_s *gl_particletorches;
+extern struct cvar_s *r_particles;
 
 extern int  gl_lightmap_format;
 extern int  gl_solid_format;
@@ -183,7 +186,7 @@ typedef struct varray_t2f_c4f_v4f_s {
 // gl_warp.c
 //
 void        EmitBothSkyLayers (msurface_t *fa);
-void        EmitWaterPolys (msurface_t *fa);
+void        EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform);
 void        R_DrawSkyChain (msurface_t *s);
 
 //
