@@ -34,6 +34,7 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <math.h>
 #include "quakedef.h"
 #include "glquake.h"
 
@@ -62,7 +63,7 @@ R_AnimateLight (void)
 		k = i % cl_lightstyle[j].length;
 		k = cl_lightstyle[j].map[k] - 'a';
 		k = k * 22;
-		d_lightstylevalue[j] = k;
+		d_lightstylevalue[j] = k * 22;
 	}
 }
 
@@ -95,52 +96,64 @@ R_InitBubble (void)
 {
 	float       a;
 	int         i;
-	float      *bub_sin, *bub_cos;
+	float       *bub_sin = bubble_sintable,
+				*bub_cos = bubble_costable;
 
-	bub_sin = bubble_sintable;
-	bub_cos = bubble_costable;
-
+	// additional accuracy here
 	for (i = 16; i >= 0; i--) {
 		a = i / 16.0 * M_PI * 2;
-		*bub_sin++ = Q_sin (a);
-		*bub_cos++ = Q_cos (a);
+		*bub_sin++ = sin (a);
+		*bub_cos++ = cos (a);
 	}
 }
 
 void
 R_RenderDlight (dlight_t *light)
 {
-	int         i, j;
-
-//  float   a;
-	vec3_t      v;
-	float       rad;
-	float      *bub_sin, *bub_cos;
-
-	bub_sin = bubble_sintable;
-	bub_cos = bubble_costable;
-	rad = light->radius * 0.35;
+	int     i, j;
+	vec3_t  v, v_right, v_up;
+	float	*bub_sin = bubble_sintable, 
+			*bub_cos = bubble_costable;
+	float   rad = light->radius * 0.35, length;
 
 	VectorSubtract (light->origin, r_origin, v);
-	if (VectorLength (v) < rad) {				// view is inside the dlight
+	length = VectorNormalize (v);
+
+	if (length < rad) {				// view is inside the dlight
 		AddLightBlend (1, 0.5, 0, light->radius * 0.0003);
 		return;
 	}
 
 	qglBegin (GL_TRIANGLE_FAN);
-	qglColor3f (0.2,0.1,0.0);
-	for (i = 0; i < 3; i++)
-		v[i] = light->origin[i] - vpn[i] * rad;
+	qglColor3f (0.2, 0.1, 0.0);
+
+	v_right[0] = v[1];
+	v_right[1] = -v[0];
+	v_right[2] = 0;
+	VectorNormalizeFast (v_right);
+	CrossProduct (v_right, v, v_up);
+
+	if (length - rad > 8)
+		VectorScale (v, rad, v);
+	else {
+		// make sure the light bubble will not be clipped by
+		// near z clip plane
+		VectorScale (v, length-8, v);
+	}
+	VectorSubtract (light->origin, v, v);
+
 	qglVertex3fv (v);
 	qglColor3f (0, 0, 0);
-	for (i = 16; i >= 0; i--) {
+
+	for (i = 16; i >= 0; i--, bub_sin++, bub_cos++) 
+	{
 		for (j = 0; j < 3; j++)
-			v[j] = light->origin[j] + (vright[j] * (*bub_cos) +
-									   +vup[j] * (*bub_sin)) * rad;
-		bub_sin++;
-		bub_cos++;
+			v[j] = light->origin[j] + (v_right[j] * (*bub_cos) +
+				+ v_up[j] * (*bub_sin)) * rad;
+
 		qglVertex3fv (v);
 	}
+
 	qglEnd ();
 }
 
@@ -160,6 +173,7 @@ R_RenderDlights (void)
 		return;
 
 	r_dlightframecount = r_framecount + 1;	// because the count hasn't
+
 	// advanced yet for this frame
 	qglDepthMask (GL_FALSE);
 	qglDisable (GL_TEXTURE_2D);
