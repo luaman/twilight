@@ -90,7 +90,7 @@ TWI_LoadObject (const char *sofile)
 {
 	so_handle_t	*twi_handle;
 
-	twi_handle = Zone_Alloc (tempzone, sizeof (so_handle_t));
+	twi_handle = Zone_AllocName (sofile, sizeof (so_handle_t));
 
 #ifdef HAVE_SDL_LOADOBJ
 	if (!twi_handle->handle) {
@@ -293,4 +293,5 @@ TWI_UnloadObject (void *handle)
 			break;
 #endif
 	}
+	Zone_Free (twi_handle);
 }
