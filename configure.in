@@ -4,7 +4,7 @@ dnl Process this file with ./bootstrap to produce a configure script.
 
 AC_PREREQ(2.13)
 AC_INIT(src/nq/sv_main.c)
-AC_CONFIG_AUX_DIR(tools)
+AC_CONFIG_AUX_DIR(src/tools)
 AC_REVISION($Revision$)
 
 VERSION=0.2.00-RC2
@@ -233,9 +233,9 @@ AC_OUTPUT(
 	src/sound/Makefile
 	src/nq/Makefile
 	src/qw/Makefile
+	src/tools/Makefile
 	doc/Makefile
 	doc/olddoc/Makefile
-	tools/Makefile
 )
 
 AC_MSG_RESULT([
