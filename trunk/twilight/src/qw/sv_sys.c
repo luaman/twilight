@@ -628,11 +628,11 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if( LOWORD( wParam ) != WA_INACTIVE ) {
 				SetFocus( hEntryWnd );
 			}
-			return(0);
+			return 0;
 			break;
 		case WM_CLOSE:
 			Cbuf_AddText("quit");
-			return(0);
+			return 0;
 			break;
 		case WM_SYSCOMMAND:
 			switch( wParam) {
@@ -654,7 +654,7 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						ShowWindow(hMainWnd, SW_HIDE);
 						minimized = 1;
-						return(0);
+						return 0;
 					}
 					break;
 			}
@@ -673,7 +673,7 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						nd.hWnd = hMainWnd;
 						nd.uID = 1;
 						Shell_NotifyIcon(NIM_DELETE, &nd);
-						return(0);
+						return 0;
 					}
 					break;
 			}
@@ -682,17 +682,17 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			switch(LOWORD(wParam)) {
 			case IDC_CLEAR:
 				SetWindowText(hLogWnd, "");
-				return(0);
+				return 0;
 				break;
 			case IDC_QUIT:
 				Cbuf_AddText("quit");
-				return(0);
+				return 0;
 				break;
 			}
 			break;
 	}
 
-	return( DefWindowProc( hwnd, uMsg, wParam, lParam ) );
+	return DefWindowProc( hwnd, uMsg, wParam, lParam );
 }
 
 LRESULT CALLBACK EntryWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -714,13 +714,13 @@ LRESULT CALLBACK EntryWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 				/* print command */
 				Sys_Printf( "]%s\n", buf );
-				return( 0 );
+				return 0;
 				break;
 			}
 			break;
 	}
 
-	return( CallWindowProc( prev_EntryProc, hwnd, uMsg, wParam, lParam ) );
+	return CallWindowProc( prev_EntryProc, hwnd, uMsg, wParam, lParam );
 }
 
 void
