@@ -2772,7 +2772,7 @@ png_read_finish_row(png_structp png_ptr)
 
                png_reset_crc(png_ptr);
                png_crc_read(png_ptr, png_ptr->chunk_name, 4);
-               if (png_memcmp(png_ptr->chunk_name, (png_bytep)png_IDAT, 4))
+               if (png_memcmp(png_ptr->chunk_name, (png_bytep)(const png_byte FARDATA)png_IDAT, 4))
                   png_error(png_ptr, "Not enough image data");
 
             }
