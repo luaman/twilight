@@ -71,8 +71,7 @@ int			con_notifylines;			// scan lines to clear for notify lines
 
 qboolean	con_debuglog;
 
-#define		MAXCMDLINE	256
-extern char	key_lines[32][MAXCMDLINE];
+extern char	key_lines[32][MAX_INPUTLINE];
 extern int	edit_line;
 extern int	key_linepos;
 
@@ -749,7 +748,7 @@ Con_CompleteCommandLine (void)
 	}
 	
 	if (cmd) {
-		snprintf (key_lines[edit_line] + 1, MAXCMDLINE, "/%s", cmd);
+		snprintf (key_lines[edit_line] + 1, MAX_INPUTLINE, "/%s", cmd);
 		key_linepos = cmd_len + 2;
 		if (c + v + a == 1) {
 			key_lines[edit_line][key_linepos] = ' ';

@@ -38,6 +38,8 @@
 #define	MINIMUM_MEMORY	0x550000
 #define	MINIMUM_MEMORY_LEVELPAK	(MINIMUM_MEMORY + 0x100000)
 
+#define MAX_INPUTLINE 256
+
 // up / down
 #define	PITCH	0
 
