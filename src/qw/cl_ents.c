@@ -572,7 +572,7 @@ CL_Update_Frame (entity_t *e, int frame, float frame_time)
 	if (e->model->type == mod_alias) {
 		paliashdr = (aliashdr_t *) Mod_Extradata (e->model);
 		if (paliashdr->numframes <= e->to.frame) {
-			Com_DPrintf("INVALID FRAME %d FOR MODEL %s!\n", e->to.frame,
+			Com_Printf("INVALID FRAME %d FOR MODEL %s!\n", e->to.frame,
 					e->model->name);
 			e->cur.frame = e->to.frame = e->from.frame = 0;
 		}
