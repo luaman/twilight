@@ -81,3 +81,14 @@ CRC_Value (unsigned short crcvalue)
 {
 	return crcvalue ^ CRC_XOR_VALUE;
 }
+
+unsigned short CRC_Block (byte *start, int count)
+{
+	unsigned short	crc;
+
+	CRC_Init (&crc);
+	while (count--)
+		crc = (crc << 8) ^ crctable[(crc >> 8) ^ *start++];
+
+	return crc;
+}
