@@ -1035,8 +1035,9 @@ _Datagram_CheckNewConnections (void)
 			}
 			// it's somebody coming back in from a crash/disconnect
 			// so close the old qsocket and let their retry get them back in
-			NET_Close (s);
-			return NULL;
+
+//			NET_Close(s);	// this is A SECURITY-HOLE fix!
+//			return NULL;	// thanx to J.P. Grossman (a.k.a. Mephistopheles)
 		}
 	}
 
