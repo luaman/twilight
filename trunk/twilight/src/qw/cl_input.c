@@ -513,9 +513,9 @@ CL_BaseMove (usercmd_t *cmd)
 			cl_forwardspeed->value * CL_KeyState (&in_forward);
 		cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
 	}
-//
-// adjust for speed key
-//
+	//
+	// adjust for speed key
+	//
 	if (in_speed.state & 1) {
 		cmd->forwardmove *= cl_movespeedkey->value;
 		cmd->sidemove *= cl_movespeedkey->value;
@@ -543,15 +543,15 @@ CL_FinishMove (usercmd_t *cmd)
 	int         i;
 	int         ms;
 
-//
-// always dump the first two message, because it may contain leftover inputs
-// from the last level
-//
+	//
+	// always dump the first two message, because it may contain leftover inputs
+	// from the last level
+	//
 	if (++cl.movemessages <= 2)
 		return;
-//
-// figure button bits
-//  
+	//
+	// figure button bits
+	//  
 	if (in_attack.state & 3)
 		cmd->buttons |= 1;
 	in_attack.state &= ~2;
@@ -576,9 +576,9 @@ CL_FinishMove (usercmd_t *cmd)
 	in_impulse = 0;
 
 
-//
-// chop down so no extra bits are kept that the server wouldn't get
-//
+	//
+	// chop down so no extra bits are kept that the server wouldn't get
+	//
 	cmd->forwardmove = MakeChar (cmd->forwardmove);
 	cmd->sidemove = MakeChar (cmd->sidemove);
 	cmd->upmove = MakeChar (cmd->upmove);
@@ -630,8 +630,8 @@ CL_SendCmd (void)
 
 	Cam_FinishMove (cmd);
 
-// send this and the previous cmds in the message, so
-// if the last packet was dropped, it can be recovered
+	// send this and the previous cmds in the message, so
+	// if the last packet was dropped, it can be recovered
 	buf.maxsize = 128;
 	buf.cursize = 0;
 	buf.data = data;
@@ -682,9 +682,9 @@ CL_SendCmd (void)
 	if (cls.demorecording)
 		CL_WriteDemoCmd (cmd);
 
-//
-// deliver the message
-//
+	//
+	// deliver the message
+	//
 	Netchan_Transmit (&cls.netchan, buf.cursize, buf.data);
 }
 
@@ -692,7 +692,7 @@ CL_SendCmd (void)
 
 /*
 ============
-CL_InitInput
+CL_Input_Init
 ============
 */
 void

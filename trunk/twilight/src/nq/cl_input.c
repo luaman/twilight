@@ -601,11 +601,11 @@ CL_SendMove (usercmd_t *cmd)
 
 /*
 ============
-CL_InitInput
+CL_Input_Init
 ============
 */
 void
-CL_InitInput (void)
+CL_Input_Init (void)
 {
 	Cmd_AddCommand ("+moveup", IN_UpDown);
 	Cmd_AddCommand ("-moveup", IN_UpUp);
@@ -648,11 +648,11 @@ CL_InitInput (void)
 
 /*
 ============
-CL_InitInputCvars
+CL_Input_Init_Cvars
 ============
 */
 void
-CL_InitInputCvars (void)
+CL_Input_Init_Cvars (void)
 {
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", CVAR_NONE, NULL);
 	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", CVAR_ARCHIVE, NULL);

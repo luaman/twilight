@@ -306,8 +306,8 @@ extern kbutton_t in_speed;
 
 #define freelook (m_freelook->value || (in_mlook.state & 1))
 
-void	CL_InitInput (void);
-void	CL_InitInputCvars (void);
+void	CL_Input_Init (void);
+void	CL_Input_Init_Cvars (void);
 void	CL_InputSetRepeatDelay (struct cvar_s *var);
 void	CL_InputSetRepeatInterval (struct cvar_s *var);
 void	CL_SendCmd (void);
