@@ -727,8 +727,6 @@ R_Draw_Base_Particles (void)
 					p->die = -1;
 				else
 					p->color[3] -= frametime;
-				if (p->color[3] < 0)
-					p->die = -1;
 				p->vel[2] += grav;
 				break;
 
@@ -773,11 +771,8 @@ R_Draw_Base_Particles (void)
 			default:
 				break;
 		}
-	}
-
-	if (vnum) {
-		qglDrawArrays (GL_TRIANGLES, 0, vnum);
-		vnum = 0;
+		if (p->color[3] < 0 || p->scale < 0)
+			p->die = -1;
 	}
 
 	if (therearetorches)
@@ -821,20 +816,19 @@ R_Draw_Base_Particles (void)
 			if (p->type == pt_torch) {
 				p->scale -= frametime * 2;
 				p->vel[2] += grav * 0.4;
-				if (p->color[3] < 0 || p->scale < 0)
-					p->die = -1;
 			} else {
 				p->scale -= frametime * 4;
 				p->vel[2] += grav;
-				if (p->color[3] < 0 || p->scale < 0)
-					p->die = -1;
 			}
 		}
 
-		if (vnum) {
-			qglDrawArrays (GL_TRIANGLES, 0, vnum);
-			vnum = 0;
-		}
+		if (p->color[3] < 0 || p->scale < 0)
+			p->die = -1;
+	}
+
+	if (vnum) {
+		qglDrawArrays (GL_TRIANGLES, 0, vnum);
+		vnum = 0;
 	}
 
 	k = 0;
