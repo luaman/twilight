@@ -35,8 +35,6 @@
 #include "wad.h"
 #include "render.h"
 
-#include "gl_poly.h"
-
 #include "transform.h"
 
 qboolean GLF_Init (void);
