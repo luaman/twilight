@@ -26,3 +26,7 @@ twilight-nq
 *.s
 .DS_Store
 std*.txt
+*._xe
+*.pbi
+*.pbo
+*.pbt
