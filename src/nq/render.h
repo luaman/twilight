@@ -87,8 +87,6 @@ typedef struct entity_s {
 } entity_t;
 
 typedef struct {
-	vrect_t     vrect;					// subwindow in video for refresh
-
 	vec3_t      vieworg;
 	vec3_t      viewangles;
 

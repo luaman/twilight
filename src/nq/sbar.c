@@ -91,17 +91,6 @@ cvar_t		*cl_sbar;
 
 /*
 ===============
-Sbar_Callback
-===============
-*/
-void 
-Sbar_Callback (cvar_t *cvar)
-{
-	vid.recalc_refdef = true;
-}
-
-/*
-===============
 Sbar_ShowScores
 
 Tab key down
@@ -131,7 +120,7 @@ Sbar_DontShowScores (void)
 void
 Sbar_Init_Cvars (void)
 {
-	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, &Sbar_Callback);
+	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, NULL);
 }
 
 /*

@@ -481,8 +481,6 @@ VID_Init (unsigned char *palette)
 	Com_Printf ("Video mode %dx%d initialized: %s.\n", vid.width, vid.height,
 			SDL_VideoDriverName(sdl_driver, sizeof(sdl_driver)));
 
-	vid.recalc_refdef = true;	/* force a surface cache flush */
-
 	if (use_mouse) {
 		SDL_ShowCursor (0);
 		SDL_WM_GrabInput (SDL_GRAB_ON);

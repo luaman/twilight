@@ -39,7 +39,6 @@ typedef struct
 	Uint32		height;
 	Uint32		width_2d;
 	Uint32		height_2d;
-	qboolean	recalc_refdef;
 
 	Uint32		bpp;
 } viddef_t;
