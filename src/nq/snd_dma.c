@@ -34,6 +34,8 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include "SDL.h"
+
 #include "quakedef.h"
 #include "cmd.h"
 #include "client.h"
@@ -826,6 +828,7 @@ S_Update_ (void)
 	if (!sound_started || (snd_blocked > 0))
 		return;
 
+	SDL_LockAudio ();
 // Updates DMA time
 	GetSoundtime ();
 
@@ -841,8 +844,7 @@ S_Update_ (void)
 		endtime = soundtime + samps;
 
 	S_PaintChannels (endtime);
-
-	SNDDMA_Submit ();
+	SDL_UnlockAudio ();
 }
 
 /*

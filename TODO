@@ -3,16 +3,11 @@ Project Twilight todo list
 
 Bugs we know about:
 
-  - Sometimes a client will not die on crash properly because somehow the
-    SDL sound thread doesn't get told to die.  We need to fix this.
-  - Damm could demonstrate lightmap corruption consistantly with certain
-    maps, if he still can we need to fix it.
+  - Damm can demonstrate lightmap corruption consistantly with certain
+    maps at certain times.  He can't reproduce it at will, but it does
+    happen.
   - Some OpenGL state changes lost in QW, particularly things like alpha
     in the console and in crosshairs is missing.
-  - MacOS X sound is "choppy", not sure if this is SDL's problem or ours.
-    Seems that tweaking snd_mixahead fixes it, but that's not a good fix,
-    need someone who understands SDL sound on MacOS X to look at it..
-  - share/userpath mkdir handling is still kinda borked.
   - QF asks for models as eg, /progs/backpack.mdl - totally incompatible
     with 2.40.  No idea if it works with Id's stuff, but there are just
     enough QF servers out there that we have to make it work.
