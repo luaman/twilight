@@ -1322,6 +1322,7 @@ Host_Frame (double time)
 
 	// decide the simulation time
 	cls.realtime = time;
+	r_realtime = time;
 
 	if (cl_maxfps->fvalue)
 		fps = cl_maxfps->fvalue;

@@ -553,6 +553,7 @@ Host_FilterTime (float time)
 
 	host_realtime += time;
 	cls.realtime = host_realtime;
+	r_realtime = host_realtime;
 
 	/* if the frame time is below 0.001, don't even bother computing anything */
 	newframetime = host_realtime - oldrealtime;

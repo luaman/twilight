@@ -83,6 +83,7 @@ typedef struct entity_common_s {
 
 extern vec3_t	r_origin, vpn, vright, vup;
 extern double	r_time;			// Current time.
+extern double	r_realtime;		// Current real time, NOT affected by pausing.
 extern double	r_frametime;	// Time since last frame.
 extern Uint		r_framecount;	// Current frame.
 extern model_t	*r_worldmodel;	// World model.

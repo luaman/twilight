@@ -188,7 +188,7 @@ menu:
 		max 100
 		step 0.5
 	item slider:
-		label "Volume"
+		label "Sound Volume"
 		cvar "volume"
 		min 0
 		max 1
@@ -212,8 +212,23 @@ menu:
 		label "HUD on left side"
 		cvar "cl_hudswap"
 	item toggle:
-		label "Grab Mouse"
+		label "Use Mouse"
 		cvar "_windowed_mouse"
+	item toggle:
+		label "Affine models"
+		cvar "gl_affinemodels"
+	item toggle:
+		label "Fullbright Colors"
+		cvar "gl_fb"
+	item toggle:
+		label "Faster dynamic lights"
+		cvar "gl_flashblend"
+	item toggle:
+		label "Frame interpolation"
+		cvar "gl_im_animation"
+	item toggle:
+		label "Motion interpolation"
+		cvar "gl_im_transform"
 	item multi_select:
 		label "Texture mode"
 		cvar "gl_texturemode"
@@ -223,10 +238,13 @@ menu:
 		value "GL_LINEAR_MIPMAP_NEAREST"
 		value "GL_NEAREST_MIPMAP_LINEAR"
 		value "GL_LINEAR_MIPMAP_LINEAR" "Trilinear"
+	item toggle:
+		label "Particle torches"
+		cvar "gl_particletorches"
 	item text_entry:
+		label "Skybox"
 		cvar "r_skyname"
 		max_len 30
-		label "Skybox Name"
 
 menu:
 	id "Main"

@@ -72,6 +72,18 @@ M_PrintAlt (int cx, int cy, char *str)
 	Draw_Alt_String (cx + ((vid.width_2d - 320) >> 1), cy, str, 8);
 }
 
+static void
+M_Print_Size (int cx, int cy, char *str, double size)
+{
+	Draw_String (cx + ((vid.width_2d - 320) >> 1), cy, str, size);
+}
+
+static void
+M_PrintAlt_Size (int cx, int cy, char *str, double size)
+{
+	Draw_Alt_String (cx + ((vid.width_2d - 320) >> 1), cy, str, size);
+}
+
 void
 M_DrawPic (int x, int y, qpic_t *pic)
 {
@@ -240,7 +252,8 @@ M_ToggleMenu_f (void)
 static void
 M_Do_Draw (menu_t *menu, int current)
 {
-	int x, y, y_add, i, div_x;
+	int			 i;
+	double		 size, x, y, y_add, div_x, center, len;
 	menu_item_t	*item;
 
 	x = 8;
@@ -260,14 +273,22 @@ M_Do_Draw (menu_t *menu, int current)
 			y_add = item->height;
 		}
 
+#define PULSE		(sin(r_realtime * 5) * 0.3)
+
 		if (MItem_Draw_Label(item)) {
-			x = (div_x - (strlen(item->label) * 8)) - (8 * 1);
+			len = strlen(item->label);
 			if (i == current) {
-				M_PrintAlt(div_x - (8 * 1), y, "<=>");
-				M_Print(x, y, item->label);
+				M_PrintAlt_Size(div_x - 8, y, "<=>", 8);
+
+				size = 8 + PULSE;
+				center = div_x - (((len / 2) + 1) * 8.3);
+				x = center - ((len / 2) * size);
+				M_Print_Size(x, y, item->label, size);
 			} else {
-				M_PrintAlt(x, y, item->label);
 				M_PrintAlt(div_x, y, "|");
+
+				x = div_x - ((len + 1) * 8);
+				M_PrintAlt(x, y, item->label);
 			}
 		}
 
