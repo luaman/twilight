@@ -647,9 +647,7 @@ CL_ParseProjectiles (void)
 		if (cl_num_projectiles == MAX_PROJECTILES)
 			continue;
 
-		pr = &cl_projectiles[cl_num_projectiles];
-		cl_num_projectiles++;
-
+		pr = &cl_projectiles[cl_num_projectiles++];
 		pr->modelindex = cl_spikeindex;
 		pr->origin[0] = ((bits[0] + ((bits[1] & 15) << 8)) << 1) - 4096;
 		pr->origin[1] = (((bits[1] >> 4) + (bits[2] << 4)) << 1) - 4096;
@@ -1056,13 +1054,9 @@ CL_SetUpPlayerPrediction (qboolean dopred)
 				(!cl_predict_players->value) || !dopred)
 			{
 				VectorCopy (state->origin, pplayer->origin);
-				// Con_DPrintf ("nopredict\n");
 			} else {
 				// predict players movement
-				if (msec > 255)
-					msec = 255;
-				state->command.msec = msec;
-				// Con_DPrintf ("predict: %i\n", msec);
+				state->command.msec = min(msec, 255);
 
 				CL_PredictUsercmd (state, &exact, &state->command, false);
 				VectorCopy (exact.origin, pplayer->origin);
