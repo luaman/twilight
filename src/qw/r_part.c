@@ -46,12 +46,13 @@ static const char rcsid[] =
 
 typedef enum {
 	pt_static, pt_grav, pt_slowgrav, pt_fire, pt_explode, pt_explode2, pt_blob,
-		pt_blob2
+		pt_blob2, pt_torch, pt_torch2
 } ptype_t;
 
 typedef struct particle_s {
 	vec3_t      org;
-	Uint8       color;
+	float       color[3];
+	float		alpha, scale;
 	vec3_t      vel;
 	float       ramp;
 	float       die;
@@ -72,7 +73,7 @@ particle_new (ptype_t type, vec3_t org, vec3_t vel, float die, int color,
 	particle_t *part;
 
 	if (numparticles >= r_maxparticles) {
-//		Con_Printf("FAILED PARTICLE ALLOC! %d %d\n", numparticles, r_maxparticles);
+		Con_Printf("FAILED PARTICLE ALLOC! %d %d\n", numparticles, r_maxparticles);
 		return NULL;
 	}
 
@@ -80,9 +81,11 @@ particle_new (ptype_t type, vec3_t org, vec3_t vel, float die, int color,
 	part->type = type;
 	VectorCopy(org, part->org);
 	VectorCopy(vel, part->vel);
+	VectorCopy (d_8tofloattable[color], part->color);
 	part->die = die;
-	part->color = (Uint8 )color;
 	part->ramp = ramp;
+	part->alpha = 1.0f;
+	part->scale = 1.0f;
 
 	return part;
 }
@@ -430,6 +433,48 @@ R_TeleportSplash (vec3_t org)
 			}
 }
 
+/*
+==========
+R_Fire
+
+==========
+*/
+void 
+R_Torch (entity_t *ent, qboolean torch2)
+{
+	particle_t	*p;
+	vec3_t porg, pvel;
+
+	if (realtime + 2 < ent->time_left)
+		ent->time_left = 0;
+	
+	if (realtime > ent->time_left)
+	{
+		VectorSet (pvel, (rand() & 3) - 2, (rand() & 3) - 2, 0);
+		VectorSet (porg, ent->origin[0], ent->origin[1], ent->origin[2] + 4);
+
+		if (torch2) {
+			porg[2] = ent->origin[2] - 2;
+			VectorSet (pvel, (rand() & 7) - 4, (rand() & 7) - 4, 0);
+			p = particle_new(pt_torch2, porg, pvel, realtime + 5, 0, Q_rand () & 3);
+
+			if (ent->frame)
+				p->scale = 20;
+			else
+				p->scale = 10;
+		}
+		else {
+			p = particle_new(pt_torch, porg, pvel, realtime + 5, 0, Q_rand () & 3);
+			p->scale = 10;
+		}
+
+		p->alpha = 0.5;
+		VectorSet (p->color, 227.0 / 255.0, 151.0 / 255.0, 79.0 / 255.0);
+
+		ent->time_left = realtime + 0.1;
+	}
+}
+
 void
 R_RocketTrail (vec3_t start, vec3_t end, int type)
 {
@@ -540,7 +585,6 @@ R_DrawParticles (void)
 	float       frametime;
 	vec3_t      up, right;
 	float       scale;
-	float		theAlpha, *at;
 
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
 	qglEnableClientState (GL_COLOR_ARRAY);
@@ -577,20 +621,13 @@ R_DrawParticles (void)
 			+ (p->org[2] - r_origin[2]) * vpn[2];
 
 		if (scale < 20)
-			scale = 1;
+			scale = p->scale;
 		else
-			scale = 1 + scale * 0.004;
+			scale = p->scale + scale * 0.004;
 
-		at = d_8tofloattable[p->color];
-
-		if (p->type == pt_fire)
-			theAlpha = (255 - p->ramp * (1 / 6)) / 255;
-		else
-			theAlpha = 1;
-
-		VectorSet4(c_array[vnum + 0], at[0], at[1], at[2], theAlpha);
-		VectorSet4(c_array[vnum + 1], at[0], at[1], at[2], theAlpha);
-		VectorSet4(c_array[vnum + 2], at[0], at[1], at[2], theAlpha);
+		VectorSet4(c_array[vnum + 0], p->color[0], p->color[1], p->color[2], p->alpha);
+		VectorSet4(c_array[vnum + 1], p->color[0], p->color[1], p->color[2], p->alpha);
+		VectorSet4(c_array[vnum + 2], p->color[0], p->color[1], p->color[2], p->alpha);
 		VectorSet2(tc_array[vnum + 0], 0, 0);
 		VectorSet2(tc_array[vnum + 1], 1, 0);
 		VectorSet2(tc_array[vnum + 2], 0, 1);
@@ -617,7 +654,9 @@ R_DrawParticles (void)
 				if (p->ramp >= 6)
 					p->die = -1;
 				else
-					p->color = ramp3[(int) p->ramp];
+					p->alpha -= frametime;
+				if (p->alpha < 0)
+					p->die = -1;
 				p->vel[2] += grav;
 				break;
 
@@ -626,7 +665,7 @@ R_DrawParticles (void)
 				if (p->ramp >= 8)
 					p->die = -1;
 				else
-					p->color = ramp1[(int) p->ramp];
+					VectorCopy (d_8tofloattable[ramp1[(int) p->ramp]], p->color);
 				for (i = 0; i < 3; i++)
 					p->vel[i] += p->vel[i] * dvel;
 				p->vel[2] -= grav;
@@ -637,7 +676,7 @@ R_DrawParticles (void)
 				if (p->ramp >= 8)
 					p->die = -1;
 				else
-					p->color = ramp2[(int) p->ramp];
+					VectorCopy (d_8tofloattable[ramp2[(int) p->ramp]], p->color);
 				for (i = 0; i < 3; i++)
 					p->vel[i] -= p->vel[i] * frametime;
 				p->vel[2] -= grav;
@@ -659,6 +698,22 @@ R_DrawParticles (void)
 			case pt_slowgrav:
 				p->vel[2] -= grav;
 				break;
+
+			case pt_torch:
+				p->alpha -= frametime * 64.0 / 255.0;
+				p->scale -= frametime * 2;
+				p->vel[2] += grav * 0.4;
+				if (p->alpha < 0 || p->scale < 0)
+					p->die = -1;
+				break;
+
+			case pt_torch2:
+				p->alpha -= frametime * 64.0 / 255.0;
+				p->scale -= frametime * 4;
+				p->vel[2] += grav;
+				if (p->alpha < 0 || p->scale < 0)
+					p->die = -1;
+				break;
 		}
 	}
 
@@ -666,6 +721,9 @@ R_DrawParticles (void)
 		qglDrawArrays (GL_TRIANGLES, 0, vnum);
 		vnum = 0;
 	}
+
+	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	k = 0;
 	while (maxparticle >= activeparticles) {
 		*freeparticles[k++] = particles[maxparticle--];

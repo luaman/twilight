@@ -85,47 +85,30 @@ R_InitTextures (void)
 	}
 }
 
-Uint8       dottexture[8][8] = {
-	{0, 1, 1, 0, 0, 0, 0, 0}
-	,
-	{1, 1, 1, 1, 0, 0, 0, 0}
-	,
-	{1, 1, 1, 1, 0, 0, 0, 0}
-	,
-	{0, 1, 1, 0, 0, 0, 0, 0}
-	,
-	{0, 0, 0, 0, 0, 0, 0, 0}
-	,
-	{0, 0, 0, 0, 0, 0, 0, 0}
-	,
-	{0, 0, 0, 0, 0, 0, 0, 0}
-	,
-	{0, 0, 0, 0, 0, 0, 0, 0}
-	,
-};
 void
 R_InitParticleTexture (void)
 {
-	int         x, y;
-	Uint8       data[8][8][4];
-
+	int     x,y,d;
+	float   dx, dy;
+	Uint8    data[64][64][4];
+	
 	// 
 	// particle texture
 	// 
 	particletexture = texture_extension_number++;
-	qglBindTexture (GL_TEXTURE_2D, particletexture);
-
-	for (x = 0; x < 8; x++) {
-		for (y = 0; y < 8; y++) {
-			data[y][x][0] = 255;
-			data[y][x][1] = 255;
-			data[y][x][2] = 255;
-			data[y][x][3] = dottexture[x][y] * 255;
+	qglBindTexture(GL_TEXTURE_2D, particletexture);
+	
+	for (x=0 ; x<64; x++) {
+		for (y=0 ; y<64 ; y++) {
+			data[y][x][0] = data[y][x][1] = data[y][x][2] = 255;
+			dx = x - 16; dy = y - 16;
+			d = (255 - (dx*dx+dy*dy));
+			if (d < 0) d = 0;
+			data[y][x][3] = (Uint8) d;
 		}
 	}
-	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 8, 8, 0, GL_RGBA,
-				  GL_UNSIGNED_BYTE, data);
 
+	qglTexImage2D (GL_TEXTURE_2D, 0, 4, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
@@ -178,6 +161,8 @@ R_Init_Cvars (void)
 	gl_fb_bmodels = Cvar_Get ("gl_fb_bmodels", "1", CVAR_NONE, NULL);
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
+
+	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_NONE, NULL);
 
 	r_maxedges = Cvar_Get ("r_maxedges", "0", CVAR_NONE, NULL);	// Shrak
 	r_maxsurfs = Cvar_Get ("r_maxsurfs", "0", CVAR_NONE, NULL); // Shrak

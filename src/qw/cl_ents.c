@@ -543,6 +543,7 @@ CL_LinkPacketEntities (void)
 				ent->pose2 = cl_oldvisedicts[i].pose2;
 				VectorCopy (cl_oldvisedicts[i].origin, old_origin);
 				VectorCopy (cl_oldvisedicts[i].last_light, ent->last_light);
+				ent->time_left = 0;
 				break;
 			}
 		}
@@ -905,6 +906,7 @@ CL_LinkPlayers (void)
 				ent->pose1 = cl_oldvisedicts[i].pose1;
 				ent->pose2 = cl_oldvisedicts[i].pose2;
 				VectorCopy (cl_oldvisedicts[i].last_light, ent->last_light);
+				ent->time_left = 0;
 				break;
 			}
 		}

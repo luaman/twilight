@@ -1604,7 +1604,8 @@ typedef struct
 mflags_t modelflags[] =
 {
 	// Regular Quake
-	{ "progs/flame.mdl", 11, FLAG_FULLBRIGHT|FLAG_NOSHADOW },
+	{ "progs/flame.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_TORCH1 },
+	{ "progs/flame2.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_TORCH2 },
 	{ "progs/bolt.mdl", 10, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/laser.mdl", 0, FLAG_FULLBRIGHT|FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
 	{ "progs/gib", 9, FLAG_NOSHADOW|FLAG_NO_IM_ANIM },
