@@ -764,81 +764,73 @@ SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec3_t maxs,
 					 vec3_t end)
 {
 	trace_t     trace;
-	vec3_t      offset;
-	vec3_t      start_l, end_l;
-	double      startd[3], endd[3];
-	hull_t     *hull;
+	vec3_t      offset, forward, left, up;
+	double      startd[3], endd[3], tempd[3];
+	hull_t		*hull;
 
-// fill in a default trace
+	// fill in a default trace
 	memset (&trace, 0, sizeof (trace_t));
 	trace.fraction = 1;
 	trace.allsolid = true;
 	VectorCopy (end, trace.endpos);
 
-// get the clipping hull
+	// get the clipping hull
 	hull = SV_HullForEntity (ent, mins, maxs, offset);
 
-	VectorSubtract (start, offset, start_l);
-	VectorSubtract (end, offset, end_l);
+	VectorSubtract (start, offset, startd);
+	VectorSubtract (end, offset, endd);
 
 	// rotate start and end into the models frame of reference
 	if (ent->v.solid == SOLID_BSP &&
 		(ent->v.angles[0] || ent->v.angles[1] || ent->v.angles[2])) {
-		vec3_t      forward, right, up;
-		vec3_t      temp;
 
-		AngleVectors (ent->v.angles, forward, right, up);
+		AngleVectorsFLU (ent->v.angles, forward, left, up);
 
-		VectorCopy (start_l, temp);
-		start_l[0] = DotProduct (temp, forward);
-		start_l[1] = -DotProduct (temp, right);
-		start_l[2] = DotProduct (temp, up);
+		VectorCopy(startd, tempd);
+		startd[0] = DotProduct (tempd, forward);
+		startd[1] = DotProduct (tempd, left);
+		startd[2] = DotProduct (tempd, up);
 
-		VectorCopy (end_l, temp);
-		end_l[0] = DotProduct (temp, forward);
-		end_l[1] = -DotProduct (temp, right);
-		end_l[2] = DotProduct (temp, up);
+		VectorCopy(endd, tempd);
+		endd[0] = DotProduct (tempd, forward);
+		endd[1] = DotProduct (tempd, left);
+		endd[2] = DotProduct (tempd, up);
 	}
 
-	VectorCopy(start_l, startd);
-	VectorCopy(end_l, endd);
+	VectorCopy(end, trace.endpos);
+	
+	// trace a line through the apropriate clipping hull
 	VectorCopy(startd, RecursiveHullCheckInfo.start);
 	VectorSubtract(endd, startd, RecursiveHullCheckInfo.dist);
 	RecursiveHullCheckInfo.hull = hull;
 	RecursiveHullCheckInfo.trace = &trace;
-
-// trace a line through the apropriate clipping hull
 	SV_RecursiveHullCheck (hull->firstclipnode, 0, 1, startd, endd);
 
-	// rotate endpos back to world frame of reference
-	if (ent->v.solid == SOLID_BSP &&
-		(ent->v.angles[0] || ent->v.angles[1] || ent->v.angles[2])) {
-		vec3_t      a;
-		vec3_t      forward, right, up;
-		vec3_t      temp;
-
-		if (trace.fraction != 1) {
-			VectorInverse (ent->v.angles, a);
-			AngleVectors (a, forward, right, up);
-
-			VectorCopy (trace.endpos, temp);
-			trace.endpos[0] = DotProduct (temp, forward);
-			trace.endpos[1] = -DotProduct (temp, right);
-			trace.endpos[2] = DotProduct (temp, up);
-
-			VectorCopy (trace.plane.normal, temp);
-			trace.plane.normal[0] = DotProduct (temp, forward);
-			trace.plane.normal[1] = -DotProduct (temp, right);
-			trace.plane.normal[2] = DotProduct (temp, up);
-		}
-	}
-
-// fix trace up by the offset
+	// if we hit, unrotate endpos and normal, and store the entity we hit
 	if (trace.fraction != 1)
-		VectorAdd (trace.endpos, offset, trace.endpos);
+	{
+		if (ent->v.solid == SOLID_BSP
+				&& (ent->v.angles[0] || ent->v.angles[1] || ent->v.angles[2]))
+		{
+			VectorNegate (ent->v.angles, offset);
+			AngleVectorsFLU (offset, forward, left, up);
 
-// did we clip the move?
-	if (trace.fraction < 1 || trace.startsolid)
+			VectorCopy (trace.endpos, tempd);
+			trace.endpos[0] = DotProduct (tempd, forward);
+			trace.endpos[1] = DotProduct (tempd, left);
+			trace.endpos[2] = DotProduct (tempd, up);
+
+			VectorCopy (trace.plane.normal, tempd);
+			trace.plane.normal[0] = DotProduct (tempd, forward);
+			trace.plane.normal[1] = DotProduct (tempd, left);
+			trace.plane.normal[2] = DotProduct (tempd, up);
+		}
+
+		// fix offset
+		VectorAdd (trace.endpos, offset, trace.endpos);
+		trace.ent = ent;
+	}
+	else if (trace.allsolid || trace.startsolid)
 		trace.ent = ent;
 
 	return trace;
@@ -882,35 +874,59 @@ SV_ClipToLinks (areanode_t *node, moveclip_t * clip)
 			|| clip->boxmaxs[2] < touch->v.absmin[2])
 			continue;
 
-		if (clip->passedict && clip->passedict->v.size[0] && !touch->v.size[0])
-			continue;					// points never interact
+		if (clip->passedict)
+		{
+			if (clip->passedict->v.size[0] && !touch->v.size[0])
+				// points never interact
+				continue;
 
-		// might intersect, so do an exact clip
-		if (clip->trace.allsolid)
-			return;
-		if (clip->passedict) {
-			if (PROG_TO_EDICT (touch->v.owner) == clip->passedict)
-				continue;				// don't clip against own missiles
-			if (PROG_TO_EDICT (clip->passedict->v.owner) == touch)
-				continue;				// don't clip against owner
+			if (PROG_TO_EDICT(touch->v.owner) == clip->passedict)
+				// don't clip against own missiles
+				continue;
+
+			if (PROG_TO_EDICT(clip->passedict->v.owner) == touch)
+				// don't clip against owner
+				continue;
+
+			// LordHavoc: corpse code
+			if (clip->passedict->v.solid == SOLID_CORPSE
+					&& (touch->v.solid == SOLID_SLIDEBOX
+						|| touch->v.solid == SOLID_CORPSE))
+				continue;
+			if (clip->passedict->v.solid == SOLID_SLIDEBOX
+					&& touch->v.solid == SOLID_CORPSE)
+				continue;
 		}
-
+		
+		// might intersect, so do an exact clip
 		if ((int) touch->v.flags & FL_MONSTER)
 			trace = SV_ClipMoveToEntity (touch, clip->start, clip->mins2,
 					clip->maxs2, clip->end);
 		else
 			trace = SV_ClipMoveToEntity (touch, clip->start, clip->mins,
 					clip->maxs, clip->end);
-		if (trace.allsolid || trace.startsolid
-			|| trace.fraction < clip->trace.fraction) {
-			trace.ent = touch;
-			if (clip->trace.startsolid) {
-				clip->trace = trace;
-				clip->trace.startsolid = true;
-			} else
-				clip->trace = trace;
-		} else if (trace.startsolid)
+		// LordHavoc: take the 'best' answers from the new trace and combine
+		// with existing data
+		if (trace.allsolid)
+			clip->trace.allsolid = true;
+		if (trace.startsolid)
+		{
 			clip->trace.startsolid = true;
+			if (!clip->trace.ent)
+				clip->trace.ent = trace.ent;
+		}
+		if (trace.inopen)
+			clip->trace.inopen = true;
+		if (trace.inwater)
+			clip->trace.inwater = true;
+		if (trace.fraction < clip->trace.fraction)
+		{
+			clip->trace.fraction = trace.fraction;
+			VectorCopy(trace.endpos, clip->trace.endpos);
+			clip->trace.plane = trace.plane;
+			clip->trace.endcontents = trace.endcontents;
+			clip->trace.ent = trace.ent;
+		}
 	}
 
 // recurse down both sides
