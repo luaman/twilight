@@ -312,7 +312,7 @@ SV_WaterMove (void)
 	if (addspeed <= 0)
 		return;
 
-	VectorNormalizeFast (wishvel);
+	VectorNormalize (wishvel);
 	accelspeed = sv_accelerate->value * wishspeed * host_frametime;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;

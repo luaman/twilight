@@ -71,7 +71,6 @@ int Q_abs(int x);
 float Q_sqrt(float n);
 void Q_srand(unsigned seed);
 int	Q_rand(void);
-float Q_RSqrt(float number);
 double Q_pow(double x, double y);
 
 #define NANMASK		255 << 23
@@ -108,7 +107,6 @@ void        _VectorInverse (vec3_t v, vec3_t t);
 void        _VectorScale (vec3_t in, vec_t scale, vec3_t out);
 
 vec_t       VectorNormalize (vec3_t v);	// returns vector length
-void		VectorNormalizeFast (vec3_t v);
 int         Q_log2 (int val);
 
 void        R_ConcatRotations (float in1[3][3], float in2[3][3],
