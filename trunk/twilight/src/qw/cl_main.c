@@ -1463,19 +1463,7 @@ Host_Init (quakeparms_t *parms)
 	host_colormap = (byte *) COM_LoadHunkFile ("gfx/colormap.lmp");
 	if (!host_colormap)
 		Sys_Error ("Couldn't load gfx/colormap.lmp");
-#ifdef __linux__
-	IN_Init ();
-	CDAudio_Init ();
-	VID_Init (host_basepal);
-	Draw_Init ();
-	SCR_Init ();
-	R_Init ();
-	S_Init ();
 
-	cls.state = ca_disconnected;
-	Sbar_Init ();
-	CL_Init ();
-#else
 	VID_Init (host_basepal);
 	Draw_Init ();
 	SCR_Init ();
@@ -1487,7 +1475,6 @@ Host_Init (quakeparms_t *parms)
 	Sbar_Init ();
 	CL_Init ();
 	IN_Init ();
-#endif
 
 	Cbuf_InsertText ("exec quake.rc\n");
 	Cbuf_AddText
@@ -1534,3 +1521,4 @@ Host_Shutdown (void)
 	if (host_basepal)
 		VID_Shutdown ();
 }
+
