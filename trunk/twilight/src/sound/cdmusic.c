@@ -33,42 +33,37 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <errno.h>
 
 #include "SDL.h"
-
 #include "qtypes.h"
 #include "cdaudio.h"
 #include "common.h"
 #include "strlib.h"
 #include "cvar.h"
-#include "sound.h"
 
 /* FIXME: All of this is not yet common */
-void Con_Printf (char *fmt, ...);
-void Con_DPrintf (char *fmt, ...);
-typedef void (*xcommand_t) (void);
-void Cmd_AddCommand (char *cmd_name, xcommand_t function);
-int Cmd_Argc (void);
-char *Cmd_Argv (int arg);
-extern double realtime;
+void			Con_Printf (char *fmt, ...);
+void			Con_DPrintf (char *fmt, ...);
+typedef void	(*xcommand_t) (void);
+void			Cmd_AddCommand (char *cmd_name, xcommand_t function);
+int				Cmd_Argc (void);
+char			*Cmd_Argv (int arg);
+extern double	realtime;
 
 
-static qboolean cdValid = false;
-static qboolean playing = false;
-static qboolean wasPlaying = false;
-static qboolean enabled = true;
-static qboolean playLooping = false;
-static float cdvolume;
-static Uint8 remap[100];
-static Uint8 playTrack;
-static double endOfTrack = -1.0, pausetime = -1.0;
+static qboolean	cdValid = false;
+static qboolean	playing = false;
+static qboolean	wasPlaying = false;
+static qboolean	enabled = true;
+static qboolean	playLooping = false;
+static float	cdvolume;
+static Uint8	remap[100];
+static Uint8	playTrack;
+static double	endOfTrack = -1.0, pausetime = -1.0;
 
-SDL_CD     *cd_handle;
-static int  cd_dev = 0;			/* Default to first CD-ROM drive */
+SDL_CD			*cd_handle;
+static int		cd_dev = 0;			/* Default to first CD-ROM drive */
 
 static void
 CDAudio_Eject (void)
@@ -80,16 +75,12 @@ CDAudio_Eject (void)
 		Con_Printf ("Unable to eject CD-ROM: %s\n", SDL_GetError ());
 }
 
-
 static void
 CDAudio_CloseDoor (void)
 {
 	if (!cd_handle || !enabled)
 		return;
-
-	/* 
-         * This is currently a NOP as SDL doesn't allow us to do this.
-	 */
+	/* This is currently a NOP as SDL doesn't allow us to do this. */
 }
 
 static int
@@ -108,7 +99,6 @@ CDAudio_GetAudioDiskInfo (void)
 
 	return 0;
 }
-
 
 void
 CDAudio_Play (Uint8 track, qboolean looping)
@@ -141,16 +131,13 @@ CDAudio_Play (Uint8 track, qboolean looping)
 			return;
 		CDAudio_Stop ();
 	}
-	if (SDL_CDPlay
-		(cd_handle, cd_handle->track[track - 1].offset,
-		 cd_handle->track[track - 1].length) < 0) {
+	if (SDL_CDPlay (cd_handle, cd_handle->track[track - 1].offset, cd_handle->track[track - 1].length) < 0) {
 
 		/* ok, check for status now */
 		int cd_status = SDL_CDStatus (cd_handle);
 
 		if (cd_status > 0)
-			Con_Printf ("CDAudio_Play: Unable to play %d: %s\n", track,
-						SDL_GetError ());	
+			Con_Printf ("CDAudio_Play: Unable to play %d: %s\n", track, SDL_GetError ());	
 		return;
 	}
 
@@ -159,19 +146,20 @@ CDAudio_Play (Uint8 track, qboolean looping)
 	playing = true;
 	FRAMES_TO_MSF(cd_handle->track[track - 1].length, &len_m, &len_s, &len_f);
 	endOfTrack = realtime + ((double)len_m * 60.0) + (double)len_s + (double)len_f / (double)CD_FPS;
+
 	/*
 	 * Add the pregap for the next track.  This means that disc-at-once CDs
 	 * won't loop smoothly, but they wouldn't anyway so it doesn't really
 	 * matter.  SDL doesn't give us pregap information anyway, so you'll
 	 * just have to live with it.
 	 */
+
 	endOfTrack += 2.0;
 	pausetime = -1.0;
 	
 	if (cdvolume == 0.0)
 		CDAudio_Pause ();
 }
-
 
 void
 CDAudio_Stop (void)
@@ -209,7 +197,6 @@ CDAudio_Pause (void)
 	pausetime = realtime;
 }
 
-
 void
 CDAudio_Resume (void)
 {
@@ -233,8 +220,7 @@ static void
 CD_f (void)
 {
 	char       *command;
-	int         ret;
-	int         n;
+	int         ret, n;
 
 	if (Cmd_Argc () < 2)
 		return;
@@ -323,22 +309,20 @@ CD_f (void)
 	}
 
 	if (strcasecmp (command, "info") == 0) {
-		int         current_min, current_sec, current_frame;
-		int         length_min, length_sec, length_frame;
+		int	current_min, current_sec, current_frame;
+		int	length_min, length_sec, length_frame;
 
 		Con_Printf ("%u tracks\n", cd_handle->numtracks);
+
 		if (playing)
-			Con_Printf ("Currently %s track %u\n",
-						playLooping ? "looping" : "playing", playTrack);
+			Con_Printf ("Currently %s track %u\n", playLooping ? "looping" : "playing", playTrack);
 		else if (wasPlaying)
-			Con_Printf ("Paused %s track %u\n",
-						playLooping ? "looping" : "playing", playTrack);
+			Con_Printf ("Paused %s track %u\n", playLooping ? "looping" : "playing", playTrack);
+
 		if (playing || wasPlaying) {
 			SDL_CDStatus (cd_handle);
-			FRAMES_TO_MSF (cd_handle->cur_frame, &current_min, &current_sec,
-						   &current_frame);
-			FRAMES_TO_MSF (cd_handle->track[playTrack - 1].length, &length_min,
-						   &length_sec, &length_frame);
+			FRAMES_TO_MSF (cd_handle->cur_frame, &current_min, &current_sec, &current_frame);
+			FRAMES_TO_MSF (cd_handle->track[playTrack - 1].length, &length_min, &length_sec, &length_frame);
 
 			Con_Printf ("Current position: %d:%02d.%02d (of %d:%02d.%02d)\n",
 						current_min, current_sec, current_frame * 60 / CD_FPS,
@@ -350,7 +334,6 @@ CD_f (void)
 	}
 }
 
-
 void
 CDAudio_Bgmcallback (cvar_t *cvar)
 {
@@ -361,14 +344,13 @@ CDAudio_Bgmcallback (cvar_t *cvar)
 		Cvar_Set (cvar, "1.0");
 		CDAudio_Resume ();
 	}
-
 	cdvolume = cvar->value;
 }
 
 void
 CDAudio_Update (void)
 {
-	CDstatus    curstat;
+	CDstatus	curstat;
 
 	if (!enabled)
 		return;
@@ -430,6 +412,7 @@ CDAudio_Init (void)
 
 	for (i = 0; i < 100; i++)
 		remap[i] = i;
+
 	enabled = true;
 
 	if (CDAudio_GetAudioDiskInfo ()) {
@@ -443,7 +426,6 @@ CDAudio_Init (void)
 
 	return 0;
 }
-
 
 void
 CDAudio_Shutdown (void)
