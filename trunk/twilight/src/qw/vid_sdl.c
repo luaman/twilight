@@ -217,8 +217,13 @@ CheckMultiTextureExtensions (void)
 		Con_Printf ("GL_ARB_multitexture\n");
 		gl_mtexable = true;
 		if (!qglActiveTextureARB || !qglMultiTexCoord2fARB) {
-			Con_Printf("ERROR! qglActiveTextureARB (%p), qglMultiTexCoord2fARB (%p)\n", qglActiveTextureARB, qglMultiTexCoord2fARB);
-			gl_mtexable = false;
+			qglActiveTextureARB = SDL_GL_GetProcAddress("glActiveTextureARB");
+			qglMultiTexCoord2fARB = SDL_GL_GetProcAddress("glMultiTexCoord2fARB");
+
+			if (!qglActiveTextureARB || !qglMultiTexCoord2fARB) {
+				Con_Printf("ERROR! qglActiveTextureARB (%p), qglMultiTexCoord2fARB (%p)\n", qglActiveTextureARB, qglMultiTexCoord2fARB);
+				gl_mtexable = false;
+			}
 		}
 	} else
 		Con_Printf ("none found\n");
