@@ -27,6 +27,7 @@
 
 #define OGL_DONT_NEED(ret, func, params)
 #define OGL_EXT_DONT_WANT(ret, func, params)
+#define OGL_DONT_NEED_BUT(ret, func, params, alt)
 
 #ifndef OGL_NEED
 #error "oglfuncs.h included without OGL_NEED"
@@ -47,7 +48,7 @@ OGL_NEED (void, glAlphaFunc, (GLenum func, GLclampf ref));
 OGL_EXT_DONT_WANT (void, glApplyTextureEXT, (GLenum));
 OGL_DONT_NEED (GLboolean, glAreTexturesResident, (GLsizei n, const GLuint * textures, GLboolean * residences));
 OGL_EXT_DONT_WANT (GLboolean, glAreTexturesResidentEXT, (GLsizei, const GLuint *, GLboolean *));
-OGL_NEED (void, glArrayElement, (GLint i));
+OGL_DONT_NEED (void, glArrayElement, (GLint i));
 OGL_EXT_DONT_WANT (void, glArrayElementEXT, (GLint));
 OGL_EXT_DONT_WANT (void, glAsyncMarkerSGIX, (GLuint));
 OGL_NEED (void, glBegin, (GLenum mode));
@@ -94,7 +95,7 @@ OGL_DONT_NEED (void, glColor3iv, (const GLint * v));
 OGL_DONT_NEED (void, glColor3s, (GLshort red, GLshort green, GLshort blue));
 OGL_DONT_NEED (void, glColor3sv, (const GLshort * v));
 OGL_DONT_NEED (void, glColor3ub, (GLubyte red, GLubyte green, GLubyte blue));
-OGL_NEED (void, glColor3ubv, (const GLubyte * v));
+OGL_DONT_NEED (void, glColor3ubv, (const GLubyte * v));
 OGL_DONT_NEED (void, glColor3ui, (GLuint red, GLuint green, GLuint blue));
 OGL_DONT_NEED (void, glColor3uiv, (const GLuint * v));
 OGL_DONT_NEED (void, glColor3us, (GLushort red, GLushort green, GLushort blue));
@@ -111,12 +112,12 @@ OGL_DONT_NEED (void, glColor4i, (GLint red, GLint green, GLint blue, GLint alpha
 OGL_DONT_NEED (void, glColor4iv, (const GLint * v));
 OGL_DONT_NEED (void, glColor4s, (GLshort red, GLshort green, GLshort blue, GLshort alpha));
 OGL_DONT_NEED (void, glColor4sv, (const GLshort * v));
-OGL_NEED (void, glColor4ub, (GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha));
+OGL_DONT_NEED (void, glColor4ub, (GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha));
 OGL_EXT_DONT_WANT (void, glColor4ubVertex2fSUN, (GLubyte, GLubyte, GLubyte, GLubyte, GLfloat, GLfloat));
 OGL_EXT_DONT_WANT (void, glColor4ubVertex2fvSUN, (const GLubyte *, const GLfloat *));
 OGL_EXT_DONT_WANT (void, glColor4ubVertex3fSUN, (GLubyte, GLubyte, GLubyte, GLubyte, GLfloat, GLfloat, GLfloat));
 OGL_EXT_DONT_WANT (void, glColor4ubVertex3fvSUN, (const GLubyte *, const GLfloat *));
-OGL_NEED (void, glColor4ubv, (const GLubyte * v));
+OGL_DONT_NEED (void, glColor4ubv, (const GLubyte * v));
 OGL_DONT_NEED (void, glColor4ui, (GLuint red, GLuint green, GLuint blue, GLuint alpha));
 OGL_DONT_NEED (void, glColor4uiv, (const GLuint * v));
 OGL_DONT_NEED (void, glColor4us, (GLushort red, GLushort green, GLushort blue, GLushort alpha));
@@ -241,9 +242,9 @@ OGL_EXT_DONT_WANT (void, glFogCoorddvEXT, (const GLdouble *));
 OGL_EXT_DONT_WANT (void, glFogCoordfEXT, (GLfloat));
 OGL_EXT_DONT_WANT (void, glFogCoordfvEXT, (const GLfloat *));
 OGL_EXT_DONT_WANT (void, glFogFuncSGIS, (GLsizei, const GLfloat *));
-OGL_NEED (void, glFogf, (GLenum pname, GLfloat param));
-OGL_NEED (void, glFogfv, (GLenum pname, const GLfloat * params));
-OGL_NEED (void, glFogi, (GLenum pname, GLint param));
+OGL_DONT_NEED (void, glFogf, (GLenum pname, GLfloat param));
+OGL_DONT_NEED (void, glFogfv, (GLenum pname, const GLfloat * params));
+OGL_DONT_NEED (void, glFogi, (GLenum pname, GLint param));
 OGL_DONT_NEED (void, glFogiv, (GLenum pname, const GLint * params));
 OGL_EXT_DONT_WANT (void, glFragmentColorMaterialSGIX, (GLenum, GLenum));
 OGL_EXT_DONT_WANT (void, glFragmentLightModelfSGIX, (GLenum, GLfloat));
@@ -381,7 +382,7 @@ OGL_DONT_NEED (void, glIndexub, (GLubyte c));
 OGL_DONT_NEED (void, glIndexubv, (const GLubyte * c));
 OGL_DONT_NEED (void, glInitNames, (void));
 OGL_EXT_DONT_WANT (void, glInstrumentsBufferSGIX, (GLsizei, GLint *));
-OGL_NEED (void, glInterleavedArrays, (GLenum format, GLsizei stride, const GLvoid * pointer));
+OGL_DONT_NEED (void, glInterleavedArrays, (GLenum format, GLsizei stride, const GLvoid * pointer));
 OGL_EXT_DONT_WANT (GLboolean, glIsAsyncMarkerSGIX, (GLuint));
 OGL_DONT_NEED (GLboolean, glIsEnabled, (GLenum cap));
 OGL_DONT_NEED (GLboolean, glIsList, (GLuint list));
@@ -397,7 +398,7 @@ OGL_DONT_NEED (void, glLightfv, (GLenum light, GLenum pname, const GLfloat * par
 OGL_DONT_NEED (void, glLighti, (GLenum light, GLenum pname, GLint param));
 OGL_DONT_NEED (void, glLightiv, (GLenum light, GLenum pname, const GLint * params));
 OGL_DONT_NEED (void, glLineStipple, (GLint factor, GLushort pattern));
-OGL_NEED (void, glLineWidth, (GLfloat width));
+OGL_DONT_NEED (void, glLineWidth, (GLfloat width));
 OGL_DONT_NEED (void, glListBase, (GLuint base));
 OGL_EXT_DONT_WANT (void, glListParameterfSGIX, (GLuint, GLenum, GLfloat));
 OGL_EXT_DONT_WANT (void, glListParameterfvSGIX, (GLuint, GLenum, const GLfloat *));
@@ -406,7 +407,7 @@ OGL_EXT_DONT_WANT (void, glListParameterivSGIX, (GLuint, GLenum, const GLint *))
 OGL_NEED (void, glLoadIdentity, (void));
 OGL_EXT_DONT_WANT (void, glLoadIdentityDeformationMapSGIX, (GLbitfield));
 OGL_DONT_NEED (void, glLoadMatrixd, (const GLdouble * m));
-OGL_NEED (void, glLoadMatrixf, (const GLfloat * m));
+OGL_DONT_NEED (void, glLoadMatrixf, (const GLfloat * m));
 OGL_DONT_NEED (void, glLoadName, (GLuint name));
 OGL_EXT_DONT_WANT (void, glLoadTransposeMatrixdARB, (const GLdouble *));
 OGL_EXT_DONT_WANT (void, glLoadTransposeMatrixfARB, (const GLfloat *));
@@ -491,7 +492,7 @@ OGL_DONT_NEED (void, glPixelMapfv, (GLenum map, GLint mapsize, const GLfloat * v
 OGL_DONT_NEED (void, glPixelMapuiv, (GLenum map, GLint mapsize, const GLuint * values));
 OGL_DONT_NEED (void, glPixelMapusv, (GLenum map, GLint mapsize, const GLushort * values));
 OGL_DONT_NEED (void, glPixelStoref, (GLenum pname, GLfloat param));
-OGL_NEED (void, glPixelStorei, (GLenum pname, GLint param));
+OGL_DONT_NEED (void, glPixelStorei, (GLenum pname, GLint param));
 OGL_EXT_DONT_WANT (void, glPixelTexGenParameterfSGIS, (GLenum, GLfloat));
 OGL_EXT_DONT_WANT (void, glPixelTexGenParameterfvSGIS, (GLenum, const GLfloat *));
 OGL_EXT_DONT_WANT (void, glPixelTexGenParameteriSGIS, (GLenum, GLint));
@@ -512,7 +513,7 @@ OGL_DONT_NEED (void, glPointSize, (GLfloat size));
 OGL_EXT_DONT_WANT (GLint, glPollAsyncSGIX, (GLuint *));
 OGL_EXT_DONT_WANT (GLint, glPollInstrumentsSGIX, (GLint *));
 OGL_NEED (void, glPolygonMode, (GLenum face, GLenum mode));
-OGL_NEED (void, glPolygonOffset, (GLfloat factor, GLfloat units));
+OGL_DONT_NEED (void, glPolygonOffset, (GLfloat factor, GLfloat units));
 OGL_EXT_DONT_WANT (void, glPolygonOffsetEXT, (GLfloat, GLfloat));
 OGL_DONT_NEED (void, glPolygonStipple, (const GLubyte * mask));
 OGL_DONT_NEED (void, glPopAttrib, (void));
@@ -667,7 +668,7 @@ OGL_EXT_DONT_WANT (void, glTexCoord2fNormal3fVertex3fSUN, (GLfloat, GLfloat, GLf
 OGL_EXT_DONT_WANT (void, glTexCoord2fNormal3fVertex3fvSUN, (const GLfloat *, const GLfloat *, const GLfloat *));
 OGL_EXT_DONT_WANT (void, glTexCoord2fVertex3fSUN, (GLfloat, GLfloat, GLfloat, GLfloat, GLfloat));
 OGL_EXT_DONT_WANT (void, glTexCoord2fVertex3fvSUN, (const GLfloat *, const GLfloat *));
-OGL_NEED (void, glTexCoord2fv, (const GLfloat * v));
+OGL_DONT_NEED (void, glTexCoord2fv, (const GLfloat * v));
 OGL_DONT_NEED (void, glTexCoord2i, (GLint s, GLint t));
 OGL_DONT_NEED (void, glTexCoord2iv, (const GLint * v));
 OGL_DONT_NEED (void, glTexCoord2s, (GLshort s, GLshort t));
@@ -696,7 +697,7 @@ OGL_NEED (void, glTexCoordPointer, (GLint size, GLenum type, GLsizei stride, con
 OGL_EXT_DONT_WANT (void, glTexCoordPointerEXT, (GLint, GLenum, GLsizei, GLsizei, const GLvoid *));
 OGL_EXT_DONT_WANT (void, glTexCoordPointerListIBM, (GLint, GLenum, GLint, const GLvoid * *, GLint));
 OGL_EXT_DONT_WANT (void, glTexCoordPointervINTEL, (GLint, GLenum, const GLvoid * *));
-OGL_NEED (void, glTexEnvf, (GLenum target, GLenum pname, GLfloat param));
+OGL_DONT_NEED (void, glTexEnvf, (GLenum target, GLenum pname, GLfloat param));
 OGL_DONT_NEED (void, glTexEnvfv, (GLenum target, GLenum pname, const GLfloat * params));
 OGL_NEED (void, glTexEnvi, (GLenum target, GLenum pname, GLint param));
 OGL_DONT_NEED (void, glTexEnviv, (GLenum target, GLenum pname, const GLint * params));
@@ -746,7 +747,7 @@ OGL_DONT_NEED (void, glVertex2s, (GLshort x, GLshort y));
 OGL_DONT_NEED (void, glVertex2sv, (const GLshort * v));
 OGL_DONT_NEED (void, glVertex3d, (GLdouble x, GLdouble y, GLdouble z));
 OGL_DONT_NEED (void, glVertex3dv, (const GLdouble * v));
-OGL_NEED (void, glVertex3f, (GLfloat x, GLfloat y, GLfloat z));
+OGL_DONT_NEED (void, glVertex3f, (GLfloat x, GLfloat y, GLfloat z));
 OGL_NEED (void, glVertex3fv, (const GLfloat * v));
 OGL_DONT_NEED (void, glVertex3i, (GLint x, GLint y, GLint z));
 OGL_DONT_NEED (void, glVertex3iv, (const GLint * v));
