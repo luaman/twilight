@@ -385,6 +385,7 @@ typedef struct {
 	int		frags;
 	int		players;
 	int		phigh, plow, ptotal;
+	double	color[3];
 } team_t;
 
 static team_t	*teams;
@@ -488,6 +489,7 @@ HUD_SortTeamFrags (void)
 		team = &teams[n_teams++];
 		strncpy(team->name, user->team, MAX_SCOREBOARDNAME);
 found_team:
+		VectorAdd (user->color_map.bottom, team->color, team->color);
 		team->frags += user->frags;
 		team->players++;
 		if (ccl.user_flags & USER_FLAG_PL_PING) {
@@ -499,8 +501,11 @@ found_team:
 		}
 	}
 
-	for (i = 0; i < n_teams; i++)
+	for (i = 0; i < n_teams; i++) {
 		teamsort[i] = i;
+		for (j = 0; j < 3; j++)
+			teams[i].color[j] /= teams[i].players;
+	}
 
 	for (i = 0; i < n_teams; i++)
 		for (j = i + 1; j < n_teams; j++)
@@ -676,7 +681,7 @@ HUD_Draw_Scoreboard (int start_x, int start_y, int team)
 			}
 		}
 
-		Draw_String(x, y, user->name, 8);
+		Draw_String_Len(x, y, user->name, 16, 8);
 		y += 10;
 	}
 }
@@ -766,13 +771,13 @@ HUD_Draw_Scoreboard_Teams ()
 	HUD_SortFrags ();
 	HUD_SortTeamFrags ();
 
-	x[0] = 0;
-	x[1] = hud.width - width;
+	x[0] = 4;
+	x[1] = hud.width - width - 4;
 	y[0] = y[1] = 48;
-	VectorSet4(c1, 0.5, 0, 0, 0.5);
-	VectorSet4(c2, 0.5, 0, 0, 0.0);
 	for (i = 0; i < n_teams; i++) {
 		height = 8 + 16 + 16 + (teams[i].players * 10) + 16;
+		VectorCopy(teams[i].color, c1); c1[3] = 0.5;
+		VectorCopy(teams[i].color, c2); c2[3] = 0.0;
 		HUD_Draw_Box(x[i % 2] + 4, y[i % 2] + 4, width - 4, height - 4,4,c1,c2);
 		HUD_Draw_Scoreboard_Team(x[i % 2] + 8, y[i % 2] + 8, i);
 		y[i % 2] += height + (2 * 8);
