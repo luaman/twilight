@@ -128,10 +128,6 @@ SOURCE=.\common.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\conproc.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\console.c
 # End Source File
 # Begin Source File
@@ -301,10 +297,6 @@ SOURCE=..\include\common.h
 # Begin Source File
 
 SOURCE=..\include\compat.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\conproc.h
 # End Source File
 # Begin Source File
 
