@@ -808,32 +808,6 @@ Draw_ConsoleBackground (int lines)
 
 /*
 =============
-Draw_TileClear
-
-This repeats a 64*64 tile graphic to fill the screen around a sized down
-refresh window.
-=============
-*/
-void
-Draw_TileClear (int x, int y, int w, int h)
-{
-	qglBindTexture (GL_TEXTURE_2D, *(int *) draw_backtile->data);
-	VectorSet2 (tc_array_v(0), x / 64.0, y / 64.0);
-	VectorSet2 (v_array_v(0), x, y);
-	VectorSet2 (tc_array_v(1), (x + w) / 64.0, y / 64.0);
-	VectorSet2 (v_array_v(1), x + w, y);
-	VectorSet2 (tc_array_v(2), (x + w) / 64.0, (y + h) / 64.0);
-	VectorSet2 (v_array_v(2), x + w, y + h);
-	VectorSet2 (tc_array_v(3), x / 64.0, (y + h) / 64.0);
-	VectorSet2 (v_array_v(3), x, y + h);
-	TWI_PreVDraw (0, 4);
-	qglDrawArrays (GL_QUADS, 0, 4);
-	TWI_PostVDraw ();
-}
-
-
-/*
-=============
 Draw_Fill
 
 Fills a box of pixels with a single color

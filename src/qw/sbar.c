@@ -800,10 +800,6 @@ Sbar_Draw (void)
 	else if (sb_showteamscores)
 		Sbar_TeamOverlay ();
 
-	// clear unused areas in gl
-	if (vid.width_2d > 320 && !headsup)
-		Draw_TileClear (320, vid.height_2d - sb_lines, vid.width_2d - 320, sb_lines);
-
 	if (sb_lines > 0)
 		if (cl.gametype >= GAME_DEATHMATCH)
 			Sbar_MiniDeathmatchOverlay ();
