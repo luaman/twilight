@@ -317,6 +317,8 @@ Draw_Init_Cvars (void)
 	hud_chalpha = Cvar_Get ("hud_chalpha", "1.0", CVAR_ARCHIVE, NULL);
 }
 
+static memzone_t *resamplezone;
+
 /*
 ===============
 Draw_Init
@@ -327,6 +329,8 @@ Draw_Init (void)
 {
 	image_t		*img;
 	int			i;
+
+	resamplezone = Zone_AllocZone("Texture Processing Buffers");
 
 	img = Image_Load ("conchars");
 	if (!img)
@@ -1126,18 +1130,20 @@ GL_MipMap (Uint8 *in, int width, int height)
 }
 
 
+static int scaledsize = 0;
+static Uint32 *scaled, *scaled2;
+static int transsize = 0;
+static Uint32 *trans;
+
 /*
 ===============
 GL_Upload32
 ===============
 */
 void
-GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags)
+GL_Upload32 (Uint32 *data, int width, int height, int flags)
 {
-	int				samples;
-	static Uint32	scaled[1024 * 512];	/* [512*256]; */
-	static Uint32	scaled2[1024 * 512];
-	Uint32			scaled_width, scaled_height;
+	int samples, scaled_width, scaled_height;
 
 	// OpenGL textures are power of two
 	scaled_width = 1;
@@ -1153,16 +1159,26 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags)
 	scaled_height >>= gl_picmip->ivalue;
 
 	// Clip textures to a sane value
-	scaled_width = bound (1, scaled_width, (unsigned)gl_max_size->ivalue);
-	scaled_height = bound (1, scaled_height, (unsigned)gl_max_size->ivalue);
+	scaled_width = bound (1, scaled_width, gl_max_size->ivalue);
+	scaled_height = bound (1, scaled_height, gl_max_size->ivalue);
 
-	if (scaled_width * scaled_height > sizeof (scaled) / 4)
-		Sys_Error ("GL_Upload32: cannot upload, %ix%i is too big",
-				scaled_width, scaled_height);
+	if (scaledsize < scaled_width * scaled_height)
+	{
+		scaledsize = scaled_width * scaled_height;
+		if (scaled)
+			Zone_Free(scaled);
+		if (scaled2)
+			Zone_Free(scaled2);
+		scaled = NULL;
+		scaled2 = NULL;
+	}
 
 	samples = (flags & TEX_ALPHA) ? gl_alpha_format : gl_solid_format;
 
 	texels += scaled_width * scaled_height;
+
+	if (scaled == NULL)
+		scaled = Zone_Alloc(resamplezone, scaledsize * 4);
 
 	if (scaled_width == width && scaled_height == height)
 	{
@@ -1186,11 +1202,10 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags)
 	if (flags & TEX_MIPMAP)
 	{
 		int miplevel = 0;
-		unsigned	channel, i;
+		int channel, i;
 
 		while (scaled_width > 1 || scaled_height > 1)
 		{
-
 			GL_MipMap ((Uint8 *) scaled, scaled_width, scaled_height);
 
 			scaled_width >>= 1;
@@ -1202,17 +1217,23 @@ GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags)
 
 			if (r_colormiplevels->ivalue)
 			{
-				memcpy (scaled2, scaled, scaled_width * scaled_height * 4);
-				channel = (miplevel % 4) - 1;
+				if (scaled2 == NULL)
+					scaled2 = Zone_Alloc(resamplezone, scaledsize * 4);
+
+				channel = (miplevel - 1) % 3;
 				for (i = 0; i < (scaled_width * scaled_height); i++)
-					scaled2[i] &= (0xff << (channel * 8));
+				{
+					scaled2[i] = 0;
+					((Uint8 *)&scaled2[i])[channel] = ((Uint8 *)&scaled[i])[channel];
+					((Uint8 *)&scaled2[i])[3] = ((Uint8 *)&scaled[i])[3];
+				}
 
 				qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
 						scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled2);
-			} else {
+			}
+			else
 				qglTexImage2D (GL_TEXTURE_2D, miplevel, samples, scaled_width,
 						scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-			}
 		}
 	}
 
@@ -1235,11 +1256,19 @@ GL_Upload8
 void
 GL_Upload8 (Uint8 *data, int width, int height, unsigned *ttable, int flags)
 {
-	static unsigned trans[640 * 480];	/* FIXME, temporary */
-	int         i, s = width * height;
-	qboolean    noalpha;
-	int         p;
-	unsigned	*table = ttable ? ttable : d_8to32table;
+	int i, s = width * height, p, noalpha;
+	Uint32 *table = ttable ? ttable : d_8to32table;
+
+	if (transsize < s)
+	{
+		transsize = s;
+		if (trans)
+			Zone_Free(trans);
+		trans = NULL;
+	}
+
+	if (trans == NULL)
+		trans = Zone_Alloc(resamplezone, transsize * 4);
 
 	if (flags & TEX_FBMASK)
 	{
@@ -1272,7 +1301,7 @@ GL_Upload8 (Uint8 *data, int width, int height, unsigned *ttable, int flags)
 			flags &= ~TEX_ALPHA;
 	} else {
 		if (s & 3)
-			Sys_Error ("GL_Upload8: s&3");
+			Host_EndGame ("GL_Upload8: s&3");
 		for (i = 0; i < s; i += 4)
 		{
 			trans[i] = table[data[i]];

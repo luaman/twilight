@@ -51,7 +51,7 @@ extern float gldepthmin, gldepthmax;
 
 int GL_MangleImage8 (Uint8 *in, Uint8 *out, int width, int height, short mask,
 		        Uint8 to, qboolean bleach);
-void GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags);
+void GL_Upload32 (Uint32 *data, int width, int height, int flags);
 void GL_Upload8 (Uint8 *data, int width, int height,unsigned *ttable,
 		int flags);
 

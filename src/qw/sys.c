@@ -221,16 +221,16 @@ Sys_Error (char *error, ...)
 	va_list     argptr;
 	char        text[1024];
 
+	va_start (argptr, error);
+	vsnprintf (text, sizeof (text), error, argptr);
+	va_end (argptr);
+
 	Host_Shutdown ();
 
 #ifdef HAVE_FCNTL
 // change stdin to non blocking
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 #endif
-
-	va_start (argptr, error);
-	vsnprintf (text, sizeof (text), error, argptr);
-	va_end (argptr);
 
 #ifdef _WIN32
 	// Win32 gets a GUI message box
