@@ -46,7 +46,8 @@ static const char rcsid[] =
 GLfloat	tc_array[MAX_VERTEX_ARRAYS][2];
 GLfloat	v_array[MAX_VERTEX_ARRAYS][3];
 GLfloat	c_array[MAX_VERTEX_ARRAYS][4];
-unsigned int vindices[MAX_VERTEX_INDICES];
+GLuint vindices[MAX_VERTEX_INDICES];
+GLuint v_index, i_index;
 
 void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
