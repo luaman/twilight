@@ -30,7 +30,7 @@ def parse_SDL_conf(env, output):
 			framework = False
 			continue
 
-		if opt == '-framework':
+		if arg == '-framework':
 			dict['LINKFLAGS'].append(arg)
 			framework = True
 			continue
