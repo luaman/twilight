@@ -18,9 +18,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "hash.h"
-#include "common.h"
 #include <stdlib.h>
+#include "hash.h"
+//#include "common.h"
 
 #define HASH_LENGTH	8
 hash_t	hashs[HASH_LENGTH];
