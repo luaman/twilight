@@ -210,6 +210,7 @@ extern struct cvar_s *r_wateralpha;
 extern struct cvar_s *r_dynamic;
 extern struct cvar_s *r_novis;
 extern struct cvar_s *r_netgraph;
+extern struct cvar_s *r_skybox;
 
 extern struct cvar_s *gl_clear;
 extern struct cvar_s *gl_cull;

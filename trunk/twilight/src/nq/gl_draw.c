@@ -92,7 +92,7 @@ typedef struct {
 } gltexture_t;
 
 gltexture_t gltextures[MAX_GLTEXTURES];
-int         numgltextures;
+int         numgltextures = 0;
 
 
 //=============================================================================
