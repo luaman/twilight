@@ -136,7 +136,6 @@ W_GetLumpinfo (char *name)
 			return lump_p;
 	}
 
-	Sys_Error ("W_GetLumpinfo: %s not found", name);
 	return NULL;
 }
 
@@ -146,8 +145,11 @@ W_GetLumpName (char *name)
 	lumpinfo_t *lump;
 
 	lump = W_GetLumpinfo (name);
+	
+	if (lump)
+		return (void *) (wad_base + lump->filepos);
 
-	return (void *) (wad_base + lump->filepos);
+	return NULL;
 }
 
 void       *
