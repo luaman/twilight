@@ -870,7 +870,7 @@ Mod_LoadLeafs (lump_t *l)
 	dleaf_t    *in;
 	mleaf_t    *out;
 	int         i, j, count, p;
-	char        s[80];
+	char        s[MAX_OSPATH];
 	qboolean    isnotmap = true;
 
 	in = (void *) (mod_base + l->fileofs);
@@ -881,7 +881,7 @@ Mod_LoadLeafs (lump_t *l)
 
 	loadmodel->leafs = out;
 	loadmodel->numleafs = count;
-	sprintf (s, "maps/%s.bsp", Info_ValueForKey (cl.serverinfo, "map"));
+	snprintf (s, sizeof(s), "maps/%s.bsp", Info_ValueForKey (cl.serverinfo, "map"));
 	if (!Q_strcmp (s, loadmodel->name))
 		isnotmap = false;
 	for (i = 0; i < count; i++, in++, out++) {
@@ -1212,7 +1212,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		if (i < mod->numsubmodels - 1) {	// duplicate the basic information
 			char        name[10];
 
-			sprintf (name, "*%i", i + 1);
+			snprintf (name, sizeof(name), "*%i", i + 1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			Q_strcpy (loadmodel->name, name);
@@ -1436,7 +1436,7 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 					Sys_Error ("Player skin too large");
 				memcpy (player_8bit_texels, (byte *) (pskintype + 1), s);
 			}
-			sprintf (name, "%s_%i", loadmodel->name, i);
+			snprintf (name, sizeof(name), "%s_%i", loadmodel->name, i);
 			pheader->gl_texturenum[i][0] =
 				pheader->gl_texturenum[i][1] =
 				pheader->gl_texturenum[i][2] =
@@ -1457,7 +1457,7 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			for (j = 0; j < groupskins; j++) {
 				Mod_FloodFillSkin (skin, pheader->skinwidth,
 								   pheader->skinheight);
-				sprintf (name, "%s_%i_%i", loadmodel->name, i, j);
+				snprintf (name, sizeof(name), "%s_%i_%i", loadmodel->name, i, j);
 				pheader->gl_texturenum[i][j & 3] =
 					GL_LoadTexture (name, pheader->skinwidth,
 									pheader->skinheight, (byte *) (pskintype),
@@ -1506,7 +1506,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 		for (len = com_filesize, p = buffer; len; len--, p++)
 			CRC_ProcessByte (&crc, *p);
 
-		sprintf (st, "%d", (int) crc);
+		snprintf (st, sizeof(st), "%d", (int) crc);
 		Info_SetValueForKey (cls.userinfo,
 							 !Q_strcmp (loadmodel->name,
 									  "progs/player.mdl") ? pmodel_name :
@@ -1514,7 +1514,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 		if (cls.state >= ca_connected) {
 			MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-			sprintf (st, "setinfo %s %d",
+			snprintf (st, sizeof(st), "setinfo %s %d",
 					 !Q_strcmp (loadmodel->name,
 							  "progs/player.mdl") ? pmodel_name : emodel_name,
 					 (int) crc);
@@ -1697,7 +1697,7 @@ Mod_LoadSpriteFrame (void *pin, mspriteframe_t **ppframe, int framenum)
 	pspriteframe->left = origin[0];
 	pspriteframe->right = width + origin[0];
 
-	sprintf (name, "%s_%i", loadmodel->name, framenum);
+	snprintf (name, sizeof(name), "%s_%i", loadmodel->name, framenum);
 	pspriteframe->gl_texturenum =
 		GL_LoadTexture (name, width, height, (byte *) (pinframe + 1), true,
 						true);

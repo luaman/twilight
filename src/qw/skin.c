@@ -93,7 +93,7 @@ Returns a pointer to the skin bitmap, or NULL to use the default
 byte       *
 Skin_Cache (skin_t *skin)
 {
-	char        name[1024];
+	char        name[MAX_OSPATH];
 	byte       *raw;
 	byte       *out, *pix;
 	pcx_t      *pcx;
@@ -118,11 +118,11 @@ Skin_Cache (skin_t *skin)
 //
 // load the pic from disk
 //
-	sprintf (name, "skins/%s.pcx", skin->name);
+	snprintf (name, sizeof(name), "skins/%s.pcx", skin->name);
 	raw = COM_LoadTempFile (name);
 	if (!raw) {
 		Con_Printf ("Couldn't load skin %s\n", name);
-		sprintf (name, "skins/%s.pcx", baseskin.string);
+		snprintf (name, sizeof(name), "skins/%s.pcx", baseskin.string);
 		raw = COM_LoadTempFile (name);
 		if (!raw) {
 			skin->failedload = true;

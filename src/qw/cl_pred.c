@@ -155,7 +155,7 @@ CL_PredictMove (void)
 		char        text[1024];
 
 		cls.state = ca_active;
-		sprintf (text, "Twilight QWCL: %s", cls.servername);
+		snprintf (text, sizeof(text), "Twilight QWCL: %s", cls.servername);
 		SDL_WM_SetCaption(text, "Twilight QWCL");
 	}
 

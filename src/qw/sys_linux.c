@@ -59,8 +59,8 @@ void Sys_Printf (char *fmt, ...)
 	va_list		argptr;
 	char		text[1024];
 	
-	va_start (argptr,fmt);
-	vsprintf (text,fmt,argptr);
+	va_start (argptr, fmt);
+	vsnprintf (text, sizeof(text), fmt, argptr);
 	va_end (argptr);
 	fprintf(stderr, "%s", text);
 	
@@ -78,7 +78,7 @@ void Sys_Printf (char *fmt, ...)
         return;
 
     va_start (argptr,fmt);
-    vsprintf (text,fmt,argptr);
+    vsnprintf (text, sizeof(text), fmt, argptr);
     va_end (argptr);
 
     l = Q_strlen(text);
@@ -108,7 +108,7 @@ Sys_Printf (char *fmt, ...)
 	unsigned char *p;
 
 	va_start (argptr, fmt);
-	vsprintf (text, fmt, argptr);
+	vsnprintf (text, sizeof(text), fmt, argptr);
 	va_end (argptr);
 
 	if (Q_strlen (text) > sizeof (text))
@@ -150,7 +150,7 @@ Sys_Error (char *error, ...)
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 
 	va_start (argptr, error);
-	vsprintf (string, error, argptr);
+	vsnprintf (string, sizeof(string), error, argptr);
 	va_end (argptr);
 	fprintf (stderr, "Error: %s\n", string);
 
@@ -166,7 +166,7 @@ Sys_Warn (char *warning, ...)
 	char        string[1024];
 
 	va_start (argptr, warning);
-	vsprintf (string, warning, argptr);
+	vsnprintf (string, sizeof(string), warning, argptr);
 	va_end (argptr);
 	fprintf (stderr, "Warning: %s", string);
 }
@@ -261,7 +261,7 @@ Sys_DebugLog (char *file, char *fmt, ...)
 	int         fd;
 
 	va_start (argptr, fmt);
-	vsprintf (data, fmt, argptr);
+	vsnprintf (data, sizeof(data), fmt, argptr);
 	va_end (argptr);
 //    fd = open(file, O_WRONLY | O_BINARY | O_CREAT | O_APPEND, 0666);
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
@@ -286,7 +286,7 @@ Sys_EditFile (char *filename)
 			editor = getenv ("EDIT");
 		if (!editor)
 			editor = "vi";
-		sprintf (cmd, "xterm -e %s %s", editor, filename);
+		snprintf (cmd, sizeof(cmd), "xterm -e %s %s", editor, filename);
 		system (cmd);
 	}
 

@@ -1237,7 +1237,7 @@ va (char *format, ...)
 	static char string[1024];
 
 	va_start (argptr, format);
-	vsprintf (string, format, argptr);
+	vsnprintf (string, sizeof(string), format, argptr);
 	va_end (argptr);
 
 	return string;
@@ -1383,7 +1383,7 @@ COM_WriteFile (char *filename, void *data, int len)
 	FILE       *f;
 	char        name[MAX_OSPATH];
 
-	sprintf (name, "%s/%s", com_gamedir, filename);
+	snprintf (name, sizeof(name), "%s/%s", com_gamedir, filename);
 
 	f = fopen (name, "wb");
 	if (!f) {
@@ -1504,7 +1504,7 @@ COM_FOpenFile (char *filename, FILE ** file)
 			if (strchr (filename, '/') || strchr (filename, '\\'))
 				continue;
 
-			sprintf (netpath, "%s/%s", search->filename, filename);
+			snprintf (netpath, sizeof(newpath), "%s/%s", search->filename, filename);
 
 			findtime = Sys_FileTime (netpath);
 			if (findtime == -1)
@@ -1729,7 +1729,7 @@ COM_AddDirectory (char *indir)
 // add any pak files in the format pak0.pak pak1.pak, ...
 //
 	for (i = 0;; i++) {
-		sprintf (pakfile, "%s/pak%i.pak", dir, i);
+		snprintf (pakfile, sizeof(pakfile), "%s/pak%i.pak", dir, i);
 		pak = COM_LoadPackFile (pakfile);
 		if (!pak)
 			break;
@@ -2040,7 +2040,7 @@ Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
 	if (!value || !Q_strlen (value))
 		return;
 
-	sprintf (new, "\\%s\\%s", key, value);
+	snprintf (new, sizeof(new), "\\%s\\%s", key, value);
 
 	if ((int) (Q_strlen (new) + Q_strlen (s)) > maxsize) {
 		Con_Printf ("Info string length exceeded\n");
