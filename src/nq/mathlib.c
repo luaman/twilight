@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // mathlib.c -- math primitives
 
-//#include <math.h>
+#include <math.h>
 #include <time.h>
 #include "quakedef.h"
 
@@ -32,7 +32,8 @@ int         nanmask = 255 << 23;
 
 static float sintable[1024];
 
-static void Math_BuildSinTable(void) 
+static void 
+Math_BuildSinTable(void) 
 {
 	int i;
 
@@ -40,7 +41,8 @@ static void Math_BuildSinTable(void)
 		sintable[i] = (float)sin(i * M_PI / 2048.0f);
 }
 
-double Q_sin(double x)
+double 
+Q_sin(double x)
 {
 	int	index = (int)(1024 * x / (M_PI * 0.5));
 	int	quad = index >> 10;
@@ -63,7 +65,8 @@ double Q_sin(double x)
 	return 0;
 }
 
-double Q_cos(double x) 
+double 
+Q_cos(double x) 
 {
 	int	index = (int)(1024 * x / (M_PI * 0.5));
 	int	quad = index >> 10;
@@ -86,93 +89,100 @@ double Q_cos(double x)
 	return 0;
 }
 
-double Q_asin(double x)
+double 
+Q_asin(double x)
 {
 	return x * (M_PI / 2048);
 }
 
-double Q_atan2(double y, double x) 
+double 
+Q_atan2(double y, double x) 
 {
-	float	base;
+	float	base = 0;
 	float	temp;
-	float	dir;
+	float	dir = 1;
 	float	test;
 	int		i;
+	double  x1 = x, y1 = y;
 
-	if (x < 0) 
+	if (x1 < 0) 
 	{
-		if (y >= 0) 
+		if (y1 >= 0) 
 		{
 			// quad 1
-			base = M_PI / 2;
-			temp = x;
-			x = y;
-			y = -temp;
+			base = M_PI * 0.5;
+			temp = x1;
+			x1 = y1;
+			y1 = -temp;
 		} 
 		else 
 		{
 			// quad 2
 			base = M_PI;
-			x = -x;
-			y = -y;
+			x1 = -x1;
+			y1 = -y1;
 		}
 	} 
 	else 
 	{
-		if (y < 0) 
+		if (y1 < 0) 
 		{
 			// quad 3
-			base = 3 * M_PI / 2;
-			temp = x;
-			x = -y;
-			y = temp;
+			base = 3 * M_PI * 0.5;
+			temp = x1;
+			x1 = -y1;
+			y1 = temp;
 		}
 	}
 
-	if (y > x) 
+	if (y1 > x1) 
 	{
-		base += M_PI/2;
-		temp = x;
-		x = y;
-		y = temp;
+		base += M_PI*0.5;
+		temp = x1;
+		x1 = y1;
+		y1 = temp;
 		dir = -1;
 	} 
 	else 
 		dir = 1;
 
 	// calcualte angle in octant 0
-	if (x == 0) 
+	if (x1 == 0) {
 		return base;
+	}
 
-	y /= x;
-	i = 511;
+	y1 /= x1;
 
-	for ( ; i >= 0; i--)
+	for (i = 0; i < 512; i++)
 	{
 		test = sintable[i] / sintable[1023-i];
-		if (test > y)
+		if (test > y1)
 			break;
 	}
 
 	return base + dir * i * (M_PI / 2048.0f);
 }
 
-double Q_tan(double x)
+double 
+Q_tan(double x)
 {
 	return Q_sin(x) / Q_cos(x);
 }
 
-double Q_floor(double x)
+double 
+Q_floor(double x)
 {
-	return (int)(x + 0x40000000) - 0x40000000;
+	return floor(x);
 }
 
-double Q_ceil(double x)
+double 
+Q_ceil(double x)
 {
-	return (int)(x + 0x40000000 + 0.5f) - 0x40000000;
+	return ceil(x);
 }
 
-float Q_fabs( float f ) {
+float 
+Q_fabs( float f ) {
 	int tmp = * ( int * ) &f;
 	tmp &= 0x7FFFFFFF;
 	return * ( float * ) &tmp;
@@ -180,12 +190,14 @@ float Q_fabs( float f ) {
 
 static int q_randSeed = 0;
 
-void Q_srand(unsigned seed)
+void 
+Q_srand(unsigned seed)
 {
 	q_randSeed = seed;
 }
 
-int	Q_rand(void)
+int	
+Q_rand(void)
 {
 	q_randSeed = (69069 * q_randSeed + 1);
 	return q_randSeed & 0x7fff;
@@ -206,7 +218,8 @@ typedef union FastSqrtUnion
 static unsigned int iFastSqrtTable[0x10000];
 
 // Build the square root table
-static void Math_BuildSqrtTable(void)
+static void 
+Math_BuildSqrtTable(void)
 {
 	unsigned int i;
 	FastSqrtUnion s;
@@ -232,7 +245,8 @@ static void Math_BuildSqrtTable(void)
 	}
 }
 
-float Q_sqrt(float n)
+float 
+Q_sqrt(float n)
 {
 	// Check for square root of 0
 	if (FP_BITS(n) == 0)
@@ -245,8 +259,25 @@ float Q_sqrt(float n)
 	return n;
 }
 
+float 
+Q_RSqrt(float number)
+{
+	long i;
+	float x2, y;
+	const float threehalfs = 1.5f;
 
-void Init_Mathlib (void)
+	x2 = number * 0.5f;
+	y  = number;
+	i  = * (long *) &y;						// evil floating point bit level hacking
+	i  = 0x5f3759df - (i >> 1);             // what the fuck?
+	y  = * (float *) &i;
+	y  = y * (threehalfs - (x2 * y * y));   // 1st iteration
+
+	return y;
+}
+
+void 
+Init_Mathlib (void)
 {
 	Math_BuildSqrtTable();
 	Math_BuildSinTable();
@@ -306,7 +337,7 @@ PerpendicularVector (vec3_t dst, const vec3_t src)
 
 	/* 
 	   ** normalize the result */
-	VectorNormalize (dst);
+	VectorNormalizeFast (dst);
 }
 
 #ifdef _WIN32
@@ -574,7 +605,7 @@ AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 }
 
 int
-VectorCompare (vec3_t v1, vec3_t v2)
+_VectorCompare (vec3_t v1, vec3_t v2)
 {
 	int         i;
 
@@ -586,7 +617,7 @@ VectorCompare (vec3_t v1, vec3_t v2)
 }
 
 void
-VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc)
+_VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc)
 {
 	vecc[0] = veca[0] + scale * vecb[0];
 	vecc[1] = veca[1] + scale * vecb[1];
@@ -625,36 +656,30 @@ _VectorCopy (vec3_t in, vec3_t out)
 }
 
 void
-CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
+_CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
 {
 	cross[0] = v1[1] * v2[2] - v1[2] * v2[1];
 	cross[1] = v1[2] * v2[0] - v1[0] * v2[2];
 	cross[2] = v1[0] * v2[1] - v1[1] * v2[0];
 }
 
-vec_t
-Length (vec3_t v)
+vec_t 
+VectorLength (vec3_t v)
 {
-	int         i;
-	float       length;
+	float length = v[0]*v[0]+v[1]*v[1]+v[2]*v[2];
 
-	length = 0;
-	for (i = 0; i < 3; i++)
-		length += v[i] * v[i];
-	length = Q_sqrt (length);				// FIXME
-
-	return length;
+	return length ? Q_sqrt(length) : 0;
 }
 
-float
+float 
 VectorNormalize (vec3_t v)
 {
-	float       length, ilength;
+	float length, ilength;
 
-	length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-	length = Q_sqrt (length);				// FIXME
+	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
 
 	if (length) {
+		length = Q_sqrt(length);
 		ilength = 1 / length;
 		v[0] *= ilength;
 		v[1] *= ilength;
@@ -662,11 +687,23 @@ VectorNormalize (vec3_t v)
 	}
 
 	return length;
+}
 
+void 
+VectorNormalizeFast (vec3_t v)
+{
+	float length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+
+	if (length) {
+		length = Q_RSqrt(length);
+		v[0] *= length;
+		v[1] *= length;
+		v[2] *= length;
+	}
 }
 
 void
-VectorInverse (vec3_t v)
+_VectorInverse (vec3_t v)
 {
 	v[0] = -v[0];
 	v[1] = -v[1];
@@ -674,7 +711,7 @@ VectorInverse (vec3_t v)
 }
 
 void
-VectorScale (vec3_t in, vec_t scale, vec3_t out)
+_VectorScale (vec3_t in, vec_t scale, vec3_t out)
 {
 	out[0] = in[0] * scale;
 	out[1] = in[1] * scale;
