@@ -26,11 +26,16 @@
 #ifndef __IMAGE_H
 #define __IMAGE_H
 
+#define IMG_QPAL	0
+//define IMG_PAL		1
+//define IMG_RGB		2
+#define IMG_RGBA	4
+
 typedef struct image_s
 {
-	char	   *name;
 	Uint32		width;
 	Uint32		height;
+	Uint32		type;
 	Uint8	   *pixels;
 } image_t;
 

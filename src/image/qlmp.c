@@ -44,13 +44,10 @@ static const char rcsid[] =
 #include "wad.h"
 
 static image_t *
-QLMP_LoadQPic (Uint8 *p)
+QLMP_LoadQPic (Uint8 *buf)
 {
-	Uint8	   *buf = p;
-	Uint32		numpixels = 0;
-	Uint32		i = 0;
-	Uint32	   *qlmp_rgba;
 	image_t	   *img;
+	Uint32		numpixels;
 
 	img = malloc (sizeof(image_t));
 	
@@ -68,11 +65,10 @@ QLMP_LoadQPic (Uint8 *p)
 	}
 
 	numpixels = img->width * img->height;
-	qlmp_rgba = malloc (numpixels * sizeof (Uint32));
-	img->pixels = (Uint8 *)qlmp_rgba;
-	while (i < numpixels)
-		qlmp_rgba[i++] = d_8to32table[*buf++];
+	img->pixels = malloc (numpixels * sizeof (Uint8));
+	memcpy (img->pixels, buf, numpixels);
 
+	img->type = IMG_QPAL;
 	return img;
 }
 
@@ -85,26 +81,25 @@ static image_t *
 QLMP_LoadFont (Uint8 *buf)
 {
 	Uint32		i;
-	Uint32	   *qlmp_rgba;
 	image_t	   *img;
 
 	img = malloc (sizeof (image_t));
-	qlmp_rgba = malloc (CONCHARS_SIZE * sizeof (Uint32));
+	img->pixels = malloc (CONCHARS_SIZE * sizeof (Uint8));
 
 	img->width = CONCHARS_W;
 	img->height = CONCHARS_H;
-	img->pixels = (Uint8 *)qlmp_rgba;
 
 	for (i = 0; i < CONCHARS_SIZE; i++)
 	{
 		// color 0 should be transparent in font
 		if (*buf == 0)
-			qlmp_rgba[i] = d_8to32table[255];
+			img->pixels[i] = 255;
 		else
-			qlmp_rgba[i] = d_8to32table[*buf];
+			img->pixels[i] = *buf;
 		buf++;
 	}
 
+	img->type = IMG_QPAL;
 	return img;
 }
 

@@ -1307,17 +1307,19 @@ setuptexture:
 
 	qglBindTexture (GL_TEXTURE_2D, glt->texnum);
 
-//	switch (bpp) {
-//		case 8:
-//			GL_Upload8 (data, width, height, mipmap, alpha, NULL);
-//			break;a
-//		case 32:
+	switch (img->type)
+	{
+		case IMG_QPAL:
+			GL_Upload8 (img->pixels, img->width, img->height, mipmap, alpha,
+					NULL);
+			break;
+		case IMG_RGBA:
 			GL_Upload32 ((Uint32 *) img->pixels, img->width, img->height,
 					mipmap, alpha);
-//			break;
-//		default:
-//			return 0;
-//	}
+			break;
+		default:
+			return 0;
+	}
 
 	return glt->texnum;
 }
