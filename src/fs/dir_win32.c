@@ -73,13 +73,8 @@ FSD_Open_File (fs_file_t *file, Uint32 flags)
 		if (file->group->flags & FS_READ_ONLY) {
 			Com_Printf ("Refusing to open '%s' in write mode.\n", name);
 			rw = NULL;
-		} else {
-			FILE		*file;
-			if ((file = fopen (name, (flags & FSF_ASCII) ? "w" : "wb")))
-				rw = SDL_RWFromFP (file, 1);
-			else
-				rw = NULL;
-		}
+		} else
+			rw = SDL_RWFromFile (name, (flags & FSF_ASCII) ? "w" : "wb");
 	} else
 		rw = SDL_RWFromFile (name, (flags & FSF_ASCII) ? "r" : "rb");
 
@@ -123,20 +118,15 @@ qboolean
 FSD_Open_New (fs_group_t *group, fs_new_t *new)
 {
 	fsd_group_t	*dir = group->fs_data;
-	FILE		*file;
 
 	new->temp = zasprintf (fs_zone, "%s.tmp", new->wanted);
-	if (!(file = fopen(va("%s/%s", dir->path, new->temp),
-					(new->flags & FSF_ASCII) ? "w" : "wb"))) {
-		Com_Printf ("FSD_Open_New: Unable to fdopen. %s\n", strerror(errno));
+	new->rw = SDL_RWFromFile (va("%s/%s", dir->path, new->temp), 1);
+	if (!new->rw) {
 		Zone_Free (new->temp);
-		new->temp = NULL;
+		Com_Printf ("FSD_Open_New: Unable to open. %s\n", strerror(errno));
 		return false;
-	}
-	if ((new->rw = SDL_RWFromFP (file, 1)))
+	} else
 		return true;
-	else
-		return false;
 }
 
 void
