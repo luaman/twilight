@@ -28,6 +28,9 @@
 #ifndef __SYS_H
 #define __SYS_H
 
+extern int sys_memsize;
+extern void *sys_membase;
+
 //
 // file IO
 //

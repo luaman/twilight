@@ -124,8 +124,6 @@ entity_t    cl_visedicts_list[2][MAX_VISEDICTS];
 
 double      connect_time = -1;			// for connection retransmits
 
-quakeparms_t host_parms;
-
 qboolean    host_initialized;			// true if into command execution
 qboolean    nomaster;
 
@@ -1427,20 +1425,9 @@ Host_Init
 ====================
 */
 void
-Host_Init (quakeparms_t *parms)
+Host_Init (void)
 {
-	COM_InitArgv (parms->argc, parms->argv);
-
-	if (COM_CheckParm ("-minmemory"))
-		parms->memsize = MINIMUM_MEMORY;
-
-	host_parms = *parms;
-
-	if (parms->memsize < MINIMUM_MEMORY)
-		Sys_Error ("Only %4.1f megs of memory reported, can't execute game",
-				   parms->memsize / (float) 0x100000);
-
-	Memory_Init (parms->membase, parms->memsize);
+	Memory_Init ();
 	Cvar_Init ();		// add all cvar related manipulation commands and set developer cvar
 	Cbuf_Init ();		// initialize cmd_text buffer
 	Cmd_Init ();		// setup the basic commands we need for the system
@@ -1482,7 +1469,7 @@ Host_Init (quakeparms_t *parms)
 	R_InitTextures ();				// setup texture system defaults
 
 //  Con_Printf ("Exe: "__TIME__" "__DATE__"\n");
-	Con_Printf ("%4.1f megs RAM used.\n", parms->memsize / (1024 * 1024.0));
+	Con_Printf ("%4.1f megs RAM used.\n", sys_memsize / (1024 * 1024.0));
 
 	host_basepal = (byte *) COM_LoadHunkFile ("gfx/palette.lmp");
 	if (!host_basepal)
