@@ -241,8 +241,7 @@ EmitSkyPolys (msurface_t *fa)
 			dir[2] *= 3;				// flatten the sphere
 
 			length = dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2];
-			length = Q_sqrt (length);
-			length = 6 * 63 / length;
+			length = 6 * 63 * Q_RSqrt (length);
 
 			dir[0] *= length;
 			dir[1] *= length;
@@ -721,7 +720,7 @@ DrawSkyPolygon (int nump, vec3_t vecs)
 	return;
 #endif
 	// decide which face it maps to
-	VectorCopy (vec3_origin, v);
+	VectorClear (v);
 	for (i = 0, vp = vecs; i < nump; i++, vp += 3) {
 		VectorAdd (vp, v, v);
 	}

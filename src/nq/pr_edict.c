@@ -133,8 +133,8 @@ ED_Free (edict_t *ed)
 	ed->v.colormap = 0;
 	ed->v.skin = 0;
 	ed->v.frame = 0;
-	VectorCopy (vec3_origin, ed->v.origin);
-	VectorCopy (vec3_origin, ed->v.angles);
+	VectorClear (ed->v.origin);
+	VectorClear (ed->v.angles);
 	ed->v.nextthink = -1;
 	ed->v.solid = 0;
 
@@ -746,7 +746,7 @@ ED_ParseEpair (void *base, ddef_t *key, char *s)
 			break;
 
 		case ev_float:
-			*(float *) d = atof (s);
+			*(float *) d = Q_atof (s);
 			break;
 
 		case ev_vector:
@@ -757,7 +757,7 @@ ED_ParseEpair (void *base, ddef_t *key, char *s)
 				while (*v && *v != ' ')
 					v++;
 				*v = 0;
-				((float *) d)[i] = atof (w);
+				((float *) d)[i] = Q_atof (w);
 				w = v = v + 1;
 			}
 			break;

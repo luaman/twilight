@@ -359,7 +359,7 @@ CDAudio_Init (void)
 		return -1;
 
 	if ((i = COM_CheckParm ("-cddev")) != 0 && i < com_argc - 1) {
-		cd_dev = atoi (com_argv[i + 1]);
+		cd_dev = Q_atoi (com_argv[i + 1]);
 		for (x = 0; x < sdl_num_drives; x++) {
 			if (!strcasecmp (SDL_CDName (x), com_argv[i + 1])) {
 				cd_dev = x;

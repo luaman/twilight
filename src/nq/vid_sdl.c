@@ -434,12 +434,12 @@ VID_Init (unsigned char *palette)
 		flags |= SDL_FULLSCREEN;
 
 	if ((i = COM_CheckParm ("-width")) != 0)
-		scr_width = atoi (com_argv[i + 1]);
+		scr_width = Q_atoi (com_argv[i + 1]);
 	if (scr_width < 320)
 		scr_width = 320;
 
 	if ((i = COM_CheckParm ("-height")) != 0)
-		scr_height = atoi (com_argv[i + 1]);
+		scr_height = Q_atoi (com_argv[i + 1]);
 	if (scr_height < 200)
 		scr_height = 200;
 

@@ -136,7 +136,7 @@ V_CalcBob (void)
 	bob =
 		Q_sqrt (cl.velocity[0] * cl.velocity[0] +
 			  cl.velocity[1] * cl.velocity[1]) * cl_bob->value[0];
-//Con_Printf ("speed: %5.1f\n", Length(cl.velocity));
+//Con_Printf ("speed: %5.1f\n", VectorLength(cl.velocity));
 	bob = bob * 0.3 + bob * 0.7 * Q_sin (cycle);
 	if (bob > 4)
 		bob = 4;
@@ -356,7 +356,7 @@ V_ParseDamage (void)
 	ent = &cl_entities[cl.viewentity];
 
 	VectorSubtract (from, ent->origin, from);
-	VectorNormalize (from);
+	VectorNormalizeFast (from);
 
 	AngleVectors (ent->angles, forward, right, up);
 
@@ -378,10 +378,10 @@ V_cshift_f
 void
 V_cshift_f (void)
 {
-	cshift_empty.destcolor[0] = atoi (Cmd_Argv (1));
-	cshift_empty.destcolor[1] = atoi (Cmd_Argv (2));
-	cshift_empty.destcolor[2] = atoi (Cmd_Argv (3));
-	cshift_empty.percent = atoi (Cmd_Argv (4));
+	cshift_empty.destcolor[0] = Q_atoi (Cmd_Argv (1));
+	cshift_empty.destcolor[1] = Q_atoi (Cmd_Argv (2));
+	cshift_empty.destcolor[2] = Q_atoi (Cmd_Argv (3));
+	cshift_empty.percent = Q_atoi (Cmd_Argv (4));
 }
 
 

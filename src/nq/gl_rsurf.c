@@ -1488,9 +1488,9 @@ BuildSurfaceDisplayList (msurface_t *fa)
 			next = poly->verts[(i + 1) % lnumverts];
 
 			VectorSubtract (this, prev, v1);
-			VectorNormalize (v1);
+			VectorNormalizeFast (v1);
 			VectorSubtract (next, prev, v2);
-			VectorNormalize (v2);
+			VectorNormalizeFast (v2);
 
 			// skip co-linear points
 #define COLINEAR_EPSILON 0.001

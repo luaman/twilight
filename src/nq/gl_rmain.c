@@ -464,7 +464,7 @@ R_DrawAliasModel (entity_t *e)
 		if (cl_dlights[lnum].die >= cl.time) {
 			VectorSubtract (currententity->origin,
 							cl_dlights[lnum].origin, dist);
-			add = cl_dlights[lnum].radius - Length (dist);
+			add = cl_dlights[lnum].radius - VectorLength (dist);
 
 			if (add > 0) {
 				ambientlight += add;
@@ -502,7 +502,7 @@ R_DrawAliasModel (entity_t *e)
 	shadevector[0] = Q_cos (-an);
 	shadevector[1] = Q_sin (-an);
 	shadevector[2] = 1;
-	VectorNormalize (shadevector);
+	VectorNormalizeFast (shadevector);
 
 	// 
 	// locate the proper data
@@ -680,15 +680,15 @@ R_DrawViewModel (void)
 			continue;
 
 		VectorSubtract (currententity->origin, dl->origin, dist);
-		add = dl->radius - Length (dist);
+		add = dl->radius - VectorLength (dist);
 		if (add > 0)
 			ambientlight += add;
 	}
 
 	ambient[0] = ambient[1] = ambient[2] = ambient[3] =
-		(float) ambientlight / 128;
+		(float) ambientlight * (1 / 128);
 	diffuse[0] = diffuse[1] = diffuse[2] = diffuse[3] =
-		(float) shadelight / 128;
+		(float) shadelight * (1 / 128);
 
 	// hack the depth range to prevent view model from poking into walls
 	glDepthRange (gldepthmin, gldepthmin + 0.3 * (gldepthmax - gldepthmin));
