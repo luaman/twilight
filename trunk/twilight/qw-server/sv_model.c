@@ -22,9 +22,12 @@
 		Boston, MA  02111-1307, USA
 
 */
-// sv_model.c -- server model loading
+// models.c -- model loading and caching
 static const char rcsid[] =
     "$Id$";
+
+// models are the only shared resource between a client and server running
+// on the same machine.
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -34,31 +37,33 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "sys.h"
+#include <stdio.h>
+
 #include "quakedef.h"
-#include "cvar.h"
-#include "glquake.h"
+#include "bspfile.h"
+#include "common.h"
+#include "console.h"
+#include "mathlib.h"
+#include "mdfour.h"
+#include "model.h"
 #include "strlib.h"
+#include "zone.h"
 
-extern model_t    *loadmodel;
-extern char        loadname[32];				// for hunk tags
-extern Uint8      *mod_base;
+model_t    *loadmodel;
+char        loadname[32];				// for hunk tags
 
-model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
 void        Mod_LoadBrushModel (model_t *mod, void *buffer);
+model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
 
-cvar_t		*gl_subdivide_size;
+Uint8       mod_novis[MAX_MAP_LEAFS / 8];
 
-/*
-===============
-Mod_Init_Cvars
-===============
-*/
-void
-Mod_Init_Cvars (void)
-{
-	gl_subdivide_size = NULL;		// FIXME?
-}
+#define	MAX_MOD_KNOWN	256
+model_t     mod_known[MAX_MOD_KNOWN];
+int         mod_numknown;
+
+texture_t   r_notexture_mip;
+
+unsigned   *model_checksum;
 
 /*
 ==================
@@ -83,19 +88,13 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 			return mod;					// not cached at all
 	}
 //
-// because the world is so huge, load it one piece at a time
-//
-	if (!crash) {
-
-	}
-//
 // load the file
 //
 	buf =
 		(unsigned *) COM_LoadStackFile (mod->name, stackbuf, sizeof (stackbuf));
 	if (!buf) {
 		if (crash)
-			Sys_Error ("Mod_NumForName: %s not found", mod->name);
+			SV_Error ("Mod_NumForName: %s not found", mod->name);
 		return NULL;
 	}
 //
@@ -118,6 +117,16 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 }
 
 /*
+===============================================================================
+
+					BRUSHMODEL LOADING
+
+===============================================================================
+*/
+
+Uint8      *mod_base;
+
+/*
 =================
 Mod_LoadFaces
 =================
@@ -132,7 +141,7 @@ Mod_LoadFaces (lump_t *l)
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
-		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
+		SV_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
 	out = Hunk_AllocName (count * sizeof (*out), loadname);
 
@@ -150,10 +159,10 @@ Mod_LoadFaces (lump_t *l)
 			out->flags |= SURF_PLANEBACK;
 
 		out->plane = loadmodel->planes + planenum;
+
 		out->texinfo = NULL;
 
 		// lighting info
-
 		for (i = 0; i < MAXLIGHTMAPS; i++)
 			out->styles[i] = in->styles[i];
 		i = LittleLong (in->lightofs);
@@ -173,8 +182,6 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 	int         i, j;
 	dheader_t  *header;
 	dmodel_t   *bm;
-	char        name[10];
-	extern qboolean isnotmap;
 
 	loadmodel->type = mod_brush;
 
@@ -182,7 +189,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	i = LittleLong (header->version);
 	if (i != BSPVERSION)
-		Sys_Error
+		SV_Error
 			("Mod_LoadBrushModel: %s has wrong version number (%i should be %i)",
 			 mod->name, i, BSPVERSION);
 
@@ -193,6 +200,23 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		((int *) header)[i] = LittleLong (((int *) header)[i]);
 
 // load into heap
+
+	mod->checksum = 0;
+	mod->checksum2 = 0;
+
+	// checksum all of the map, except for entities
+	for (i = 0; i < HEADER_LUMPS; i++) {
+		if (i == LUMP_ENTITIES)
+			continue;
+		mod->checksum ^= Com_BlockChecksum (mod_base + 
+			header->lumps[i].fileofs,  header->lumps[i].filelen);
+
+		if (i == LUMP_VISIBILITY || i == LUMP_LEAFS || i == LUMP_NODES)
+			continue;
+
+		mod->checksum2 ^= Com_BlockChecksum (mod_base +
+			header->lumps[i].fileofs, header->lumps[i].filelen);
+	}
 
 	Mod_LoadVertexes (&header->lumps[LUMP_VERTEXES]);
 	Mod_LoadEdges (&header->lumps[LUMP_EDGES]);
@@ -229,14 +253,12 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		VectorCopy (bm->maxs, mod->maxs);
 		VectorCopy (bm->mins, mod->mins);
 
-		mod->radius = RadiusFromBounds (mod->mins, mod->maxs);
-
 		mod->numleafs = bm->visleafs;
 
-		if (!isnotmap && (i < mod->numsubmodels - 1)) 
-		{	
-			// duplicate the basic information
-			strlcpy (name, va("*%i", i + 1), sizeof(name));
+		if (i < mod->numsubmodels - 1) {	// duplicate the basic information
+			char        name[10];
+
+			snprintf (name, sizeof (name), "*%i", i + 1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);
@@ -244,4 +266,3 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		}
 	}
 }
-

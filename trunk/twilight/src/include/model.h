@@ -435,5 +435,20 @@ void        Mod_TouchModel (char *name);
 mleaf_t    *Mod_PointInLeaf (float *p, model_t *model);
 Uint8      *Mod_LeafPVS (mleaf_t *leaf, model_t *model);
 
+void		Mod_LoadVisibility (lump_t *l); 
+void		Mod_LoadEntities (lump_t *l);
+void		Mod_LoadVertexes (lump_t *l);
+void		Mod_LoadSubmodels (lump_t *l);
+void		Mod_LoadEdges (lump_t *l);
+void		Mod_LoadNodes (lump_t *l);
+void		Mod_LoadLeafs (lump_t *l);
+void		Mod_LoadClipnodes (lump_t *l);
+void		Mod_LoadMarksurfaces (lump_t *l);
+void		Mod_LoadSurfedges (lump_t *l);
+void		Mod_LoadPlanes (lump_t *l);
+void		Mod_MakeHull0 (void);
+void		Mod_SetParent (mnode_t *node, mnode_t *parent);
+model_t    *Mod_FindName (char *name);
+
 #endif // __MODEL__
 

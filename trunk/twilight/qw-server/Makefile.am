@@ -23,12 +23,12 @@ endif
 twilight_qwsv_SOURCES= \
 	common.c cmd.c cmd.h cvar.c \
 	mdfour.c console.h \
-	model.c model.h \
+        model.h \
 	net.h net_chan.c net_udp.c \
 	pmove.c pmovetst.c pr_cmds.c pr_edict.c pr_exec.c \
 	progs.h progdefs.h \
 	sv_ccmds.c sv_ents.c sv_init.c sv_main.c sv_move.c sv_nchan.c \
-	sv_phys.c sv_send.c sv_user.c \
+        sv_model.c sv_phys.c sv_send.c sv_user.c \
 	sys.h world.c world.h zone.c \
 	bspfile.h protocol.h server.h sys.c
 
