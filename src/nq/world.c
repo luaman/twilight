@@ -405,29 +405,18 @@ SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 		return;
 
 // set the abs box
-
 	if (ent->v.solid == SOLID_BSP && (ent->v.angles[0] || ent->v.angles[1]
-				|| ent->v.angles[2]))
+		|| ent->v.angles[2]))
 	{
+		int i;
+
 		// expand for rotation
-		float max, v;
-		int	i;
-
-		max = DotProduct(ent->v.mins, ent->v.mins);
-		v = DotProduct(ent->v.maxs, ent->v.maxs);
-
-		if (max < v)
-			max = v;
-
-		max = Q_sqrt(max);
-
 		for (i = 0; i < 3; i++)
 		{
-			ent->v.absmin[i] = ent->v.origin[i] - max;
-			ent->v.absmax[i] = ent->v.origin[i] + max;
+			ent->v.absmin[i] = ent->v.origin[i] - sv.models[(int) ent->v.modelindex]->radius;
+			ent->v.absmax[i] = ent->v.origin[i] - sv.models[(int) ent->v.modelindex]->radius;
 		}
 	} else
-//#endif
 	{
 		VectorAdd (ent->v.origin, ent->v.mins, ent->v.absmin);
 		VectorAdd (ent->v.origin, ent->v.maxs, ent->v.absmax);

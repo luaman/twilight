@@ -79,6 +79,8 @@ qboolean	drawfullbrights = false;
 void	R_RenderDynamicLightmaps (msurface_t *fa);
 void	DrawGLPoly (glpoly_t *p);
 
+void R_BlendedRotateForEntity (entity_t *e, qboolean shadow);
+
 void 
 R_RenderFullbrights (void)
 {
@@ -1052,13 +1054,11 @@ R_DrawBrushModel (entity_t *e)
 	msurface_t *psurf;
 	float       dot;
 	mplane_t   *pplane;
-	model_t    *clmodel;
+	model_t    *clmodel = e->model;
 	qboolean    rotated;
+	vec3_t		modelorg;
 
-	currententity = e;
 	currenttexture = -1;
-
-	clmodel = e->model;
 
 	if (e->angles[0] || e->angles[1] || e->angles[2]) {
 		rotated = true;
@@ -1190,7 +1190,7 @@ R_RecursiveWorldNode (mnode_t *node)
 
 // find which side of the node we are on
 	plane = node->plane;
-	dot = PlaneDiff (modelorg, plane);
+	dot = PlaneDiff (r_refdef.vieworg, plane);
 
 	if (dot >= 0)
 		side = 0;
@@ -1261,8 +1261,6 @@ R_DrawWorld (void)
 
 	memset (&ent, 0, sizeof (ent));
 	ent.model = cl.worldmodel;
-
-	VectorCopy (r_refdef.vieworg, modelorg);
 
 	currententity = &ent;
 	currenttexture = -1;
