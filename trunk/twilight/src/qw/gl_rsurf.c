@@ -849,7 +849,7 @@ R_DrawBrushModel (entity_t *e)
 
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
-	VectorSubtract (r_refdef.vieworg, e->origin, modelorg);
+	VectorSubtract (r_origin, e->origin, modelorg);
 	if (rotated) {
 		vec3_t      temp;
 		vec3_t      forward, right, up;
@@ -965,12 +965,8 @@ R_RecursiveWorldNode (mnode_t *node)
 
 // find which side of the node we are on
 	plane = node->plane;
-	dot = PlaneDiff (r_refdef.vieworg, plane);
-
-	if (dot >= 0)
-		side = 0;
-	else
-		side = 1;
+	dot = PlaneDiff (r_origin, plane);
+	side = dot < 0;
 
 // recurse down the children, front side first
 	R_RecursiveWorldNode (node->children[side]);
@@ -980,11 +976,8 @@ R_RecursiveWorldNode (mnode_t *node)
 
 	if (c) {
 		surf = cl.worldmodel->surfaces + node->firstsurface;
+		side = (dot < 0) ? SURF_PLANEBACK : 0;
 
-		if (dot < 0)
-			side = SURF_PLANEBACK;
-		else
-			side = 0;
 		for (; c; c--, surf++) {
 			if (surf->visframe != r_framecount)
 				continue;

@@ -38,68 +38,76 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "opengl_ext.h"
 #include "host.h"
 #include "sys.h"
 
-int		lightmap_textures;
-int		skytexturenum;
+int         skytexturenum;
 
-int		lightmap_bytes = 3;				// 1, 3, or 4
+int         lightmap_bytes = 3;				// 1, 3, or 4
+
+int         lightmap_textures;
 
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128
 
-unsigned int blocklights[BLOCK_WIDTH * BLOCK_HEIGHT * 3];
+//unsigned    blocklights[BLOCK_WIDTH * BLOCK_HEIGHT * 3];
+Uint32		*blocklights;
 
 #define	MAX_LIGHTMAPS	256
-
-int		active_lightmaps;
 
 typedef struct glRect_s {
 	unsigned char l, t, w, h;
 } glRect_t;
 
-glpoly_t	*lightmap_polys[MAX_LIGHTMAPS];
-qboolean	lightmap_modified[MAX_LIGHTMAPS];
-glRect_t	lightmap_rectchange[MAX_LIGHTMAPS];
+glpoly_t   *lightmap_polys[MAX_LIGHTMAPS];
+qboolean    lightmap_modified[MAX_LIGHTMAPS];
+glRect_t    lightmap_rectchange[MAX_LIGHTMAPS];
 
-int			allocated[MAX_LIGHTMAPS][BLOCK_WIDTH];
+int         allocated[MAX_LIGHTMAPS][BLOCK_WIDTH];
 
 // the lightmap texture data needs to be kept in
 // main memory so texsubimage can update properly
-Uint8		lightmaps[4 * MAX_LIGHTMAPS * BLOCK_WIDTH * BLOCK_HEIGHT];
-
-// For gl_texsort 0
-msurface_t *skychain = NULL;
-msurface_t *waterchain = NULL;
+Uint8       lightmaps[4 * MAX_LIGHTMAPS * BLOCK_WIDTH * BLOCK_HEIGHT];
 
 glpoly_t	*fullbright_polys[MAX_GLTEXTURES];
 qboolean	drawfullbrights = false;
 
-void	R_RenderDynamicLightmaps (msurface_t *fa);
-void	DrawGLPoly (glpoly_t *p);
+void        R_RenderDynamicLightmaps (msurface_t *fa);
+void		DrawGLPoly (glpoly_t *p);
 
-void R_BlendedRotateForEntity (entity_t *e, qboolean shadow);
+void inline
+R_UploadModifiedLightmap (int lightmapnum)
+{
+	glRect_t	*theRect;
+	
+	lightmap_modified[lightmapnum] = false;
+	theRect = &lightmap_rectchange[lightmapnum];
+	qglTexSubImage2D (GL_TEXTURE_2D, 0, 0, theRect->t,
+					 BLOCK_WIDTH, theRect->h, gl_lightmap_format,
+					 GL_UNSIGNED_BYTE,
+					 lightmaps + (lightmapnum * BLOCK_HEIGHT +
+								  theRect->t) * BLOCK_WIDTH *
+					 lightmap_bytes);
+	theRect->l = BLOCK_WIDTH;
+	theRect->t = BLOCK_HEIGHT;
+	theRect->h = 0;
+	theRect->w = 0;
+}
 
 void 
 R_RenderFullbrights (void)
 {
-	int         i;
+	int         i, j;
 	glpoly_t   *p;
-//	float			depthdelta;
+	float		*v;
 
 	if (!drawfullbrights || !gl_fb_bmodels->value)
 		return;
 
 	qglDepthMask (GL_FALSE);	// don't bother writing Z
 
-//	depthdelta = -1.0/8192;
-
-	// hack depth range to prevent flickering of fullbrights
-//	qglDepthRange (gldepthmin + depthdelta, gldepthmax + depthdelta);
-
 	qglEnable (GL_BLEND);
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	for (i = 1; i < MAX_GLTEXTURES; i++) {
 		if (!fullbright_polys[i])
@@ -108,7 +116,13 @@ R_RenderFullbrights (void)
 		qglBindTexture (GL_TEXTURE_2D, i);
 
 		for (p = fullbright_polys[i]; p; p = p->fb_chain) {
-			DrawGLPoly (p);
+			qglBegin (GL_POLYGON);
+			v = p->verts[0];
+			for (j = 0; j < p->numverts; j++, v += VERTEXSIZE) {
+				qglTexCoord2f (v[3], v[4]);
+				qglVertex3fv (v);
+			}
+			qglEnd ();
 		}
 
 		fullbright_polys[i] = NULL;
@@ -117,7 +131,6 @@ R_RenderFullbrights (void)
 	qglDisable (GL_BLEND);
 	
 	qglDepthMask (GL_TRUE);
-//	qglDepthRange (gldepthmin, gldepthmax);
 
 	drawfullbrights = false;
 }
@@ -187,21 +200,22 @@ R_AddDynamicLights (msurface_t *surf)
 					idist = td + (sd>>1);
 
 				if (idist < iminlight) {
-					if (lightmap_bytes == 1) {
-						*dest += irad - idist;
-					}
-					else {
-						br = irad - idist;
-						dest[0] += (int)(br * cl_dlights[lnum].color[0]);
-						dest[1] += (int)(br * cl_dlights[lnum].color[1]);
-						dest[2] += (int)(br * cl_dlights[lnum].color[2]);
+					br = irad - idist;
+					switch (lightmap_bytes) {
+						case 1:
+							*dest += br * ((cl_dlights[lnum].color[0] +
+											cl_dlights[lnum].color[1] +
+											cl_dlights[lnum].color[2]) / 3);
+							break;
+						case 3:
+						case 4:
+							dest[0] += (int)(br * cl_dlights[lnum].color[0]);
+							dest[1] += (int)(br * cl_dlights[lnum].color[1]);
+							dest[2] += (int)(br * cl_dlights[lnum].color[2]);
+							break;
 					}
 				}
-
-				if (lightmap_bytes == 1)
-					dest ++;
-				else
-					dest += 3;
+				dest += lightmap_bytes;
 			}
 		} 
 	}
@@ -221,7 +235,7 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 	int			i, j, size;
 	Uint8		*lightmap;
 	unsigned	scale;
-	int			maps;
+	int			maps, shift;
 	unsigned	*bl;
 
 	surf->cached_dlight = (surf->dlightframe == r_framecount);
@@ -229,13 +243,13 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 	lightmap = surf->samples;
 
 	// set to full bright if no light data
-	if (/* r_fullbright->value || */!cl.worldmodel->lightdata) {
-		memset (blocklights, 255, size * lightmap_bytes * sizeof(int));
+	if (!cl.worldmodel->lightdata) {
+		memset (blocklights, 255, size*lightmap_bytes*sizeof(Uint32));
 		goto store;
 	}
 
 	// clear to no light
-	memset (blocklights, 0, size * lightmap_bytes * sizeof(int));
+	memset (blocklights, 0, size*lightmap_bytes*sizeof(Uint32));
 
 	// add all the lightmaps
 	if (lightmap) {
@@ -244,22 +258,23 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 			surf->cached_light[maps] = scale;	// 8.8 fraction
 			bl = blocklights;
 
-			if (lightmap_bytes == 1)
-			{
-				for (i = 0; i < size; i++)
-					bl[i] += lightmap[i] * scale;
+			switch (lightmap_bytes) {
+				case 1:
+					for (i = 0; i < size; i++)
+						bl[i] += lightmap[i] * scale;
 
-				lightmap += size;
-			}
-			else 
-			{
-				for (i = 0; i < size; i++) {
-					bl[0] += lightmap[0] * scale;
-					bl[1] += lightmap[1] * scale;
-					bl[2] += lightmap[2] * scale;
-					bl += 3;
-					lightmap += 3;
-				}
+					lightmap += size;
+					break;
+				case 3:
+				case 4:
+					for (i = 0; i < size; i++) {
+						bl[0] += lightmap[0] * scale;
+						bl[1] += lightmap[1] * scale;
+						bl[2] += lightmap[2] * scale;
+						bl += lightmap_bytes;
+						lightmap += 3;
+					}
+					break;
 			}
 		}
 	}
@@ -270,6 +285,11 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 
 	// bound, invert, and shift
 store:
+	if (gl_mtexable && !(gl_mtexcombine_arb || gl_mtexcombine_ext))
+		shift = 7;
+	else
+		shift = 8;
+
 	switch (gl_lightmap_format) {
 		case GL_RGB:
 
@@ -278,11 +298,11 @@ store:
 
 			for (i = 0; i < surf->tmax; i++, dest += stride) {
 				for (j=surf->smax; j; j--) {
-					dest[0] = (Uint8) (min(bl[0], (128 * 255)) >> 7);
-					dest[1] = (Uint8) (min(bl[1], (128 * 255)) >> 7);
-					dest[2] = (Uint8) (min(bl[2], (128 * 255)) >> 7);
-					bl+=3;
-					dest+=3;
+					dest[0] = bound (0, bl[0] >> shift, 255);
+					dest[1] = bound (0, bl[1] >> shift, 255);
+					dest[2] = bound (0, bl[2] >> shift, 255);
+					bl += lightmap_bytes;
+					dest += 3;
 				}
 			}
 
@@ -295,12 +315,12 @@ store:
 
 			for (i = 0; i < surf->tmax; i++, dest += stride) {
 				for (j=surf->smax; j; j--) {
-					dest[0] = (Uint8) (min(bl[0], (128 * 255)) >> 7);
-					dest[1] = (Uint8) (min(bl[1], (128 * 255)) >> 7);
-					dest[2] = (Uint8) (min(bl[2], (128 * 255)) >> 7);
+					dest[0] = bound (0, bl[0] >> shift, 255);
+					dest[1] = bound (0, bl[1] >> shift, 255);
+					dest[2] = bound (0, bl[2] >> shift, 255);
 					dest[3] = 255;
-					bl+=3;
-					dest+=4;
+					bl += lightmap_bytes;
+					dest += 4;
 				}
 			}
 
@@ -311,7 +331,7 @@ store:
 
 			for (i = 0; i < surf->tmax; i++, dest += stride, bl += surf->smax)
 				for (j = 0; j < surf->smax; j++)
-					dest[j] = (Uint8) (min(bl[j], (128 * 255)) >> 7);
+					dest[j] = bound (0, bl[j] >> shift, 255);
 
 			break;
 
@@ -331,7 +351,7 @@ Returns the proper texture for a given time and base texture
 texture_t  *
 R_TextureAnimation (texture_t *base)
 {
-	int         relative;
+	int         reletive;
 	int         count;
 
 	if (currententity->frame) {
@@ -342,10 +362,10 @@ R_TextureAnimation (texture_t *base)
 	if (!base->anim_total)
 		return base;
 
-	relative = (int) (cl.time * 10) % base->anim_total;
+	reletive = (int) (cl.time * 10) % base->anim_total;
 
 	count = 0;
-	while (base->anim_min > relative || base->anim_max <= relative) {
+	while (base->anim_min > reletive || base->anim_max <= reletive) {
 		base = base->anim_next;
 		if (!base)
 			Sys_Error ("R_TextureAnimation: broken cycle");
@@ -368,354 +388,7 @@ R_TextureAnimation (texture_t *base)
 
 extern int  solidskytexture;
 extern int  alphaskytexture;
-extern float speedscale;				// for top sky and bottom sky
-
-void        DrawGLWaterPoly (glpoly_t *p);
-void        DrawGLWaterPolyLightmap (glpoly_t *p);
-void        DrawGLWaterPolyMTex (glpoly_t *p);
-
-lpMTexFUNC  qglMTexCoord2f = NULL;
-lpSelTexFUNC qglSelectTexture = NULL;
-
-qboolean    mtexenabled = false;
-
-void        GL_SelectTexture (GLenum target);
-
-/*
-================
-R_DrawSequentialPoly
-
-Systems that have fast state and texture changes can
-just do everything as it passes with no need to sort
-================
-*/
-void
-R_DrawSequentialPoly (msurface_t *s)
-{
-	glpoly_t   *p;
-	float      *v;
-	int         i;
-	texture_t  *t;
-	glRect_t   *theRect;
-
-	// 
-	// normal lightmapped poly
-	// 
-
-	if (!(s->flags & (SURF_DRAWSKY | SURF_DRAWTURB | SURF_UNDERWATER))) {
-		R_RenderDynamicLightmaps (s);
-		if (gl_mtexable) {
-			p = s->polys;
-
-			t = R_TextureAnimation (s->texinfo->texture);
-			// Binds world to texture env 0
-			GL_SelectTexture (0);
-			qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
-			// Binds lightmap to texenv 1
-			GL_SelectTexture (1);
-			qglEnable (GL_TEXTURE_2D);
-			qglBindTexture (GL_TEXTURE_2D, lightmap_textures + s->lightmaptexturenum);
-			i = s->lightmaptexturenum;
-			if (lightmap_modified[i]) {
-				lightmap_modified[i] = false;
-				theRect = &lightmap_rectchange[i];
-				qglTexSubImage2D (GL_TEXTURE_2D, 0, 0, theRect->t,
-								 BLOCK_WIDTH, theRect->h, gl_lightmap_format,
-								 GL_UNSIGNED_BYTE,
-								 lightmaps + (i * BLOCK_HEIGHT +
-											  theRect->t) * BLOCK_WIDTH *
-								 lightmap_bytes);
-				theRect->l = BLOCK_WIDTH;
-				theRect->t = BLOCK_HEIGHT;
-				theRect->h = 0;
-				theRect->w = 0;
-			}
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-			qglBegin (GL_POLYGON);
-			v = p->verts[0];
-			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-				qglMTexCoord2f (GL_TEXTURE0_ARB + 0, v[3], v[4]);
-				qglMTexCoord2f (GL_TEXTURE0_ARB + 1, v[5], v[6]);
-				qglVertex3fv (v);
-			}
-			qglEnd ();
-			qglDisable (GL_TEXTURE_2D);
-			GL_SelectTexture (0);
-		} else {
-			p = s->polys;
-
-			t = R_TextureAnimation (s->texinfo->texture);
-			qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
-			qglBegin (GL_POLYGON);
-			v = p->verts[0];
-			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-				qglTexCoord2f (v[3], v[4]);
-				qglVertex3fv (v);
-			}
-			qglEnd ();
-
-			qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
-			qglBindTexture (GL_TEXTURE_2D, lightmap_textures + s->lightmaptexturenum);
-			i = s->lightmaptexturenum;
-			if (lightmap_modified[i]) {
-				lightmap_modified[i] = false;
-				theRect = &lightmap_rectchange[i];
-				qglTexSubImage2D (GL_TEXTURE_2D, 0, 0, theRect->t,
-								 BLOCK_WIDTH, theRect->h, gl_lightmap_format,
-								 GL_UNSIGNED_BYTE,
-								 lightmaps + (i * BLOCK_HEIGHT +
-											  theRect->t) * BLOCK_WIDTH *
-								 lightmap_bytes);
-				theRect->l = BLOCK_WIDTH;
-				theRect->t = BLOCK_HEIGHT;
-				theRect->h = 0;
-				theRect->w = 0;
-			}
-			qglEnable (GL_BLEND);
-			qglBegin (GL_POLYGON);
-			v = p->verts[0];
-			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-				qglTexCoord2f (v[5], v[6]);
-				qglVertex3fv (v);
-			}
-			qglEnd ();
-
-			qglDisable (GL_BLEND);
-			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
-
-		if (t->fb_texturenum) {
-			s->polys->fb_chain = fullbright_polys[t->fb_texturenum];
-			fullbright_polys[t->fb_texturenum] = s->polys;
-			drawfullbrights = true;
-		}
-		
-		return;
-	}
-	// 
-	// subdivided water surface warp
-	// 
-
-	if (s->flags & SURF_DRAWTURB) {
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		qglBindTexture (GL_TEXTURE_2D, s->texinfo->texture->gl_texturenum);
-		EmitWaterPolys (s);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		return;
-	}
-	// 
-	// subdivided sky warp
-	// 
-	if (s->flags & SURF_DRAWSKY) {
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		qglBindTexture (GL_TEXTURE_2D, solidskytexture);
-		speedscale = realtime * 8;
-		speedscale -= (int) speedscale & ~127;
-
-		EmitSkyPolys (s);
-
-		qglEnable (GL_BLEND);
-		qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
-		speedscale = realtime * 16;
-		speedscale -= (int) speedscale & ~127;
-		EmitSkyPolys (s);
-
-		qglDisable (GL_BLEND);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		return;
-	}
-	// 
-	// underwater warped with lightmap
-	// 
-	R_RenderDynamicLightmaps (s);
-	if (gl_mtexable) {
-		p = s->polys;
-
-		t = R_TextureAnimation (s->texinfo->texture);
-		GL_SelectTexture (0);
-		qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
-		GL_SelectTexture (1);
-		qglEnable (GL_TEXTURE_2D);
-		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + s->lightmaptexturenum);
-		i = s->lightmaptexturenum;
-		if (lightmap_modified[i]) {
-			lightmap_modified[i] = false;
-			theRect = &lightmap_rectchange[i];
-			qglTexSubImage2D (GL_TEXTURE_2D, 0, 0, theRect->t,
-							 BLOCK_WIDTH, theRect->h, gl_lightmap_format,
-							 GL_UNSIGNED_BYTE,
-							 lightmaps + (i * BLOCK_HEIGHT +
-										  theRect->t) * BLOCK_WIDTH *
-							 lightmap_bytes);
-			theRect->l = BLOCK_WIDTH;
-			theRect->t = BLOCK_HEIGHT;
-			theRect->h = 0;
-			theRect->w = 0;
-		}
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		if (r_waterwarp->value > 0) {	// warping factor greater than 0
-			DrawGLWaterPolyMTex(p);
-		} else {						// no warping
-			qglBegin (GL_POLYGON);
-			v = p->verts[0];
-			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-					qglMTexCoord2f (GL_TEXTURE0_ARB + 0, v[3], v[4]);
-					qglMTexCoord2f (GL_TEXTURE0_ARB + 1, v[5], v[6]);
-					qglVertex3fv (v);
-			}
-			qglEnd ();
-		}
-		qglDisable (GL_TEXTURE_2D);
-		GL_SelectTexture (0);
-
-	} else {
-		p = s->polys;
-
-		t = R_TextureAnimation (s->texinfo->texture);
-		qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
-		if (r_waterwarp->value > 0) {	// warping factor greater than 0
-			DrawGLWaterPoly (p);
-		} else {
-			qglBegin (GL_POLYGON);
-			v = p->verts[0];
-			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-				qglTexCoord2f (v[3], v[4]);
-				qglVertex3fv (v);
-			}
-			qglEnd ();
-		}
-
-		qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
-		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + s->lightmaptexturenum);
-		i = s->lightmaptexturenum;
-		if (lightmap_modified[i]) {
-			lightmap_modified[i] = false;
-			theRect = &lightmap_rectchange[i];
-			qglTexSubImage2D (GL_TEXTURE_2D, 0, 0, theRect->t,
-							 BLOCK_WIDTH, theRect->h, gl_lightmap_format,
-							 GL_UNSIGNED_BYTE,
-							 lightmaps + (i * BLOCK_HEIGHT +
-										  theRect->t) * BLOCK_WIDTH *
-							 lightmap_bytes);
-			theRect->l = BLOCK_WIDTH;
-			theRect->t = BLOCK_HEIGHT;
-			theRect->h = 0;
-			theRect->w = 0;
-		}
-		qglEnable (GL_BLEND);
-		if (r_waterwarp->value > 0) {	// warping factor greater than 0
-			DrawGLWaterPolyLightmap (p);
-		} else {
-			qglBegin (GL_POLYGON);
-			v = p->verts[0];
-			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-				qglTexCoord2f (v[5], v[6]);
-				qglVertex3fv (v);
-			}
-			qglEnd ();
-		}
-		qglDisable (GL_BLEND);
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
-}
-
-/*
-================
-DrawGLWaterPolyMTex
-
-Warp the vertex coordinates
-for gl->mtexable mode, draws
-the lightmap as well
-================
-*/
-void
-DrawGLWaterPolyMTex (glpoly_t *p)
-{
-	int			i;
-	float		*v;
-	vec3_t		nv;
-	float		intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
-
-	qglBegin (GL_TRIANGLE_FAN);
-	v = p->verts[0];
-	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-			qglMTexCoord2f (GL_TEXTURE0_ARB + 0, v[3], v[4]);
-			qglMTexCoord2f (GL_TEXTURE0_ARB + 1, v[5], v[6]);
-			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
-			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
-			nv[2] = v[2];
-			qglVertex3fv (nv);
-	}
-	qglEnd ();
-}
-
-/*
-================
-DrawGLWaterPoly
-
-Warp the vertex coordinates
-================
-*/
-void
-DrawGLWaterPoly (glpoly_t *p)
-{
-	int         i;
-	float      *v;
-	vec3_t      nv;
-	float		intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
-
-	qglBegin (GL_TRIANGLE_FAN);
-	v = p->verts[0];
-	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-		qglTexCoord2f (v[3], v[4]);
-		nv[0] =	v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
-		nv[1] =	v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
-		nv[2] = v[2];
-		qglVertex3fv (nv);
-	}
-	qglEnd ();
-}
-
-void
-DrawGLWaterPolyLightmap (glpoly_t *p)
-{
-	int         i;
-	float      *v;
-	vec3_t      nv;
-	float		intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
-
-	qglBegin (GL_TRIANGLE_FAN);
-	v = p->verts[0];
-	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-		qglTexCoord2f (v[5], v[6]);
-		nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
-		nv[1] =	v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
-		nv[2] = v[2];
-		qglVertex3fv (nv);
-	}
-	qglEnd ();
-}
-
-/*
-================
-DrawGLPoly
-================
-*/
-void
-DrawGLPoly (glpoly_t *p)
-{
-	int         i;
-	float      *v;
-
-	qglBegin (GL_POLYGON);
-	v = p->verts[0];
-	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-		qglTexCoord2f (v[3], v[4]);
-		qglVertex3fv (v);
-	}
-	qglEnd ();
-}
-
+extern float speedscale;							// for top sky and bottom sky
 
 /*
 ================
@@ -726,19 +399,15 @@ void
 R_BlendLightmaps (void)
 {
 	int         i, j;
-	glpoly_t   *p;
-	float      *v;
-	glRect_t   *theRect;
+	glpoly_t	*p;
+	vec3_t		nv;
+	float		*v;
+	float		intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
 
-	if (r_fullbright->value)
-		return;
-	if (!gl_texsort->value)
-		return;
+	qglDepthMask (GL_FALSE);					// don't bother writing Z
 
-	qglDepthMask (0);					// don't bother writing Z
-	qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+	qglBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglEnable (GL_BLEND);
 
 	for (i = 0; i < MAX_LIGHTMAPS; i++) {
@@ -746,24 +415,21 @@ R_BlendLightmaps (void)
 		if (!p)
 			continue;
 		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + i);
-		if (lightmap_modified[i]) {
-			lightmap_modified[i] = false;
-			theRect = &lightmap_rectchange[i];
-			qglTexSubImage2D (GL_TEXTURE_2D, 0, 0, theRect->t,
-							 BLOCK_WIDTH, theRect->h, gl_lightmap_format,
-							 GL_UNSIGNED_BYTE,
-							 lightmaps + (i * BLOCK_HEIGHT +
-										  theRect->t) * BLOCK_WIDTH *
-							 lightmap_bytes);
-			theRect->l = BLOCK_WIDTH;
-			theRect->t = BLOCK_HEIGHT;
-			theRect->h = 0;
-			theRect->w = 0;
-		}
+		if (lightmap_modified[i])
+			R_UploadModifiedLightmap (i);
 		for (; p; p = p->chain) {
-			if (r_waterwarp->value > 0 && (p->flags & SURF_UNDERWATER))
-				DrawGLWaterPolyLightmap (p);
-			else {
+			if (p->flags & SURF_UNDERWATER && r_waterwarp->value) {
+				qglBegin (GL_TRIANGLE_FAN);
+				v = p->verts[0];
+				for (j = 0; j < p->numverts; j++, v += VERTEXSIZE) {
+					qglTexCoord2f (v[5], v[6]);
+					nv[0] =	v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+					nv[1] =	v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+					nv[2] = v[2];
+					qglVertex3fv (nv);
+				}
+				qglEnd ();
+			} else {
 				qglBegin (GL_POLYGON);
 				v = p->verts[0];
 				for (j = 0; j < p->numverts; j++, v += VERTEXSIZE) {
@@ -777,9 +443,61 @@ R_BlendLightmaps (void)
 
 	qglDisable (GL_BLEND);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglColor3f (1, 1, 1);
 
-	qglDepthMask (1);					// back to normal Z buffering
+	qglDepthMask (GL_TRUE);					// back to normal Z buffering
+}
+
+/*
+================
+R_RenderBrushPolyMTex
+================
+*/
+static void
+R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
+{
+	int		i;
+	float	*v;
+	vec3_t	nv;
+	float	intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
+
+	c_brush_polys++;
+
+	qglBindTexture (GL_TEXTURE_2D, lightmap_textures + fa->lightmaptexturenum);
+
+	R_RenderDynamicLightmaps (fa);
+	if (lightmap_modified[fa->lightmaptexturenum])
+		R_UploadModifiedLightmap (fa->lightmaptexturenum);
+	
+	if (fa->flags & SURF_UNDERWATER && r_waterwarp->value) {
+		qglBegin (GL_TRIANGLE_FAN);
+		v = fa->polys->verts[0];
+		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
+			qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, v[3], v[4]);
+			qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, v[5], v[6]);
+			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+			nv[2] = v[2];
+			qglVertex3fv (nv);
+		}
+		qglEnd ();
+	} else {
+		qglBegin (GL_POLYGON);
+		v = fa->polys->verts[0];
+		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
+			qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, v[3], v[4]);
+			qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, v[5], v[6]);
+			qglVertex3fv (v);
+		}
+		qglEnd ();
+	}
+
+	// add the poly to the proper fullbright chain
+
+	if (t->fb_texturenum) {
+		fa->polys->fb_chain = fullbright_polys[t->fb_texturenum];
+		fullbright_polys[t->fb_texturenum] = fa->polys;
+		drawfullbrights = true;
+	}
 }
 
 /*
@@ -787,38 +505,38 @@ R_BlendLightmaps (void)
 R_RenderBrushPoly
 ================
 */
-void
-R_RenderBrushPoly (msurface_t *fa)
+static void
+R_RenderBrushPoly (msurface_t *fa, texture_t *t)
 {
-	texture_t  *t;
-	Uint8      *base;
-	int         maps;
-	glRect_t   *theRect;
+	int		i;
+	vec3_t	nv;
+	float	*v;
+	float	intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
 
 	c_brush_polys++;
 
-	if (fa->flags & SURF_DRAWSKY) {		// warp texture, no lightmaps
-		EmitBothSkyLayers (fa);
-		return;
+	if (fa->flags & SURF_UNDERWATER && r_waterwarp->value) {
+		qglBegin (GL_TRIANGLE_FAN);
+		v = fa->polys->verts[0];
+		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
+			qglTexCoord2f (v[3], v[4]);
+			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+			nv[2] = v[2];
+			qglVertex3fv (nv);
+		}
+		qglEnd ();
+	} else {
+		qglBegin (GL_POLYGON);
+		v = fa->polys->verts[0];
+		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
+			qglTexCoord2f (v[3], v[4]);
+			qglVertex3fv (v);
+		}
+		qglEnd ();
 	}
-
-	t = R_TextureAnimation (fa->texinfo->texture);
-	qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
-
-	if (fa->flags & SURF_DRAWTURB) {	// warp texture, no lightmaps
-		EmitWaterPolys (fa);
-		return;
-	}
-
-	if (r_waterwarp->value > 0 && (fa->flags & SURF_UNDERWATER))
-		DrawGLWaterPoly (fa->polys);
-	else
-		DrawGLPoly (fa->polys);
 
 	// add the poly to the proper lightmap chain
-
-	fa->polys->chain = lightmap_polys[fa->lightmaptexturenum];
-	lightmap_polys[fa->lightmaptexturenum] = fa->polys;
 
 	if (t->fb_texturenum) {
 		fa->polys->fb_chain = fullbright_polys[t->fb_texturenum];
@@ -826,43 +544,7 @@ R_RenderBrushPoly (msurface_t *fa)
 		drawfullbrights = true;
 	}
 
-	// check for lightmap modification
-	for (maps = 0; maps < MAXLIGHTMAPS && fa->styles[maps] != 255; maps++)
-		if (d_lightstylevalue[fa->styles[maps]] != fa->cached_light[maps])
-			goto dynamic;
-
-	if (fa->dlightframe == r_framecount	// dynamic this frame
-		|| fa->cached_dlight)			// dynamic previously
-	{
-	  dynamic:
-		if (r_dynamic->value) {
-			lightmap_modified[fa->lightmaptexturenum] = true;
-			theRect = &lightmap_rectchange[fa->lightmaptexturenum];
-			if (fa->light_t < theRect->t) {
-				if (theRect->h)
-					theRect->h += theRect->t - fa->light_t;
-				theRect->t = fa->light_t;
-			}
-			if (fa->light_s < theRect->l) {
-				if (theRect->w)
-					theRect->w += theRect->l - fa->light_s;
-				theRect->l = fa->light_s;
-			}
-
-			if ((theRect->w + theRect->l) < (fa->light_s + fa->smax))
-				theRect->w = (fa->light_s - theRect->l) + fa->smax;
-			if ((theRect->h + theRect->t) < (fa->light_t + fa->tmax))
-				theRect->h = (fa->light_t - theRect->t) + fa->tmax;
-			base =
-				lightmaps +
-				fa->lightmaptexturenum * lightmap_bytes * BLOCK_WIDTH *
-				BLOCK_HEIGHT;
-			base +=
-				fa->light_t * BLOCK_WIDTH * lightmap_bytes +
-				fa->light_s * lightmap_bytes;
-			R_BuildLightMap (fa, base, BLOCK_WIDTH * lightmap_bytes);
-		}
-	}
+	R_RenderDynamicLightmaps(fa);
 }
 
 /*
@@ -877,8 +559,6 @@ R_RenderDynamicLightmaps (msurface_t *fa)
 	Uint8      *base;
 	int         maps;
 	glRect_t   *theRect;
-
-	c_brush_polys++;
 
 	if (fa->flags & (SURF_DRAWSKY | SURF_DRAWTURB))
 		return;
@@ -937,67 +617,157 @@ R_DrawWaterSurfaces (void)
 	msurface_t *s;
 	texture_t  *t;
 
-	if (r_wateralpha->value == 1.0 && gl_texsort->value)
-		return;
-
 	// 
 	// go back to the world matrix
 	// 
 
 	qglLoadMatrixf (r_world_matrix);
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	if (r_wateralpha->value < 1.0) {
 		qglEnable (GL_BLEND);
 		qglColor4f (1, 1, 1, r_wateralpha->value);
 	}
-	else
-	{
-		qglDisable (GL_BLEND);
-		qglColor3f (1, 1, 1);
-	}
 
-	if (!gl_texsort->value) {
-		if (!waterchain)
-			return;
+	for (i = 0; i < cl.worldmodel->numtextures; i++) {
+		t = cl.worldmodel->textures[i];
+		if (!t)
+			continue;
+		s = t->texturechain;
+		if (!s)
+			continue;
+		if (!(s->flags & SURF_DRAWTURB))
+			continue;
 
-		for (s = waterchain; s; s = s->texturechain) {
-			qglBindTexture (GL_TEXTURE_2D, s->texinfo->texture->gl_texturenum);
+		// set modulate mode explicitly
+
+		qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
+
+		for (; s; s = s->texturechain)
 			EmitWaterPolys (s);
-		}
 
-		waterchain = NULL;
-	} else {
-
-		for (i = 0; i < cl.worldmodel->numtextures; i++) {
-			t = cl.worldmodel->textures[i];
-			if (!t)
-				continue;
-			s = t->texturechain;
-			if (!s)
-				continue;
-			if (!(s->flags & SURF_DRAWTURB))
-				continue;
-
-			// set modulate mode explicitly
-
-			qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
-
-			for (; s; s = s->texturechain)
-				EmitWaterPolys (s);
-
-			t->texturechain = NULL;
-		}
-
+		t->texturechain = NULL;
 	}
 
-	qglColor3f (1, 1, 1);
-	qglDisable (GL_BLEND);
-
+	if (r_wateralpha->value < 1.0) {
+		qglColor3f (1, 1, 1);
+		qglDisable (GL_BLEND);
+	}
 }
 
+/*
+================
+DrawTextureChainsMTex
+================
+*/
+void
+DrawTextureChainsMTex (void)
+{
+	int         i;
+	msurface_t *s;
+	texture_t  *t, *st;
+
+	for (i = 0; i < cl.worldmodel->numtextures; i++) {
+		t = cl.worldmodel->textures[i];
+		if (!t)
+			continue;
+		s = t->texturechain;
+		if (!s)
+			continue;
+		st = R_TextureAnimation (s->texinfo->texture);
+		if (i == skytexturenum)
+			R_DrawSkyChain (s);
+		else {
+			if ((s->flags & SURF_DRAWTURB))
+				continue;				// draw translucent water later
+
+			if (s->flags & SURF_DRAWSKY) {
+				for (; s; s = s->texturechain) {
+					EmitBothSkyLayers (s);
+				}
+				return;
+			}
+
+			qglEnable (GL_BLEND);
+			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			qglActiveTextureARB (GL_TEXTURE1_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			qglEnable (GL_TEXTURE_2D);
+
+			for (; s; s = s->texturechain) {
+				R_RenderBrushPolyMTex (s, st);
+			}
+
+			qglDisable (GL_TEXTURE_2D);
+			qglActiveTextureARB (GL_TEXTURE0_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			qglDisable (GL_BLEND);
+		}
+
+		t->texturechain = NULL;
+	}
+}
+
+/*
+================
+DrawTextureChainsMTexCombine
+================
+*/
+void
+DrawTextureChainsMTexCombine (void)
+{
+	int         i;
+	msurface_t *s;
+	texture_t  *t, *st;
+
+	for (i = 0; i < cl.worldmodel->numtextures; i++) {
+		t = cl.worldmodel->textures[i];
+		if (!t)
+			continue;
+		s = t->texturechain;
+		if (!s)
+			continue;
+		st = R_TextureAnimation (s->texinfo->texture);
+		if (i == skytexturenum)
+			R_DrawSkyChain (s);
+		else {
+			if ((s->flags & SURF_DRAWTURB))
+				continue;				// draw translucent water later
+
+			if (s->flags & SURF_DRAWSKY) {
+				for (; s; s = s->texturechain) {
+					EmitBothSkyLayers (s);
+				}
+				return;
+			}
+
+			qglEnable (GL_BLEND);
+			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+			qglActiveTextureARB (GL_TEXTURE1_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2.0);
+			qglEnable (GL_TEXTURE_2D);
+
+			for (; s; s = s->texturechain) {
+				R_RenderBrushPolyMTex (s, st);
+			}
+
+			qglDisable (GL_TEXTURE_2D);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1.0);
+			qglActiveTextureARB (GL_TEXTURE0_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			qglDisable (GL_BLEND);
+		}
+
+		t->texturechain = NULL;
+	}
+}
 
 /*
 ================
@@ -1009,16 +779,7 @@ DrawTextureChains (void)
 {
 	int         i;
 	msurface_t *s;
-	texture_t  *t;
-
-	if (!gl_texsort->value) {
-		if (skychain) {
-			R_DrawSkyChain (skychain);
-			skychain = NULL;
-		}
-
-		return;
-	}
+	texture_t  *t, *st;
 
 	for (i = 0; i < cl.worldmodel->numtextures; i++) {
 		t = cl.worldmodel->textures[i];
@@ -1027,13 +788,23 @@ DrawTextureChains (void)
 		s = t->texturechain;
 		if (!s)
 			continue;
+		st = R_TextureAnimation (s->texinfo->texture);
 		if (i == skytexturenum)
 			R_DrawSkyChain (s);
 		else {
-			if ((s->flags & SURF_DRAWTURB) && r_wateralpha->value != 1.0)
+			if ((s->flags & SURF_DRAWTURB))
 				continue;				// draw translucent water later
+
+			if (s->flags & SURF_DRAWSKY) {
+				for (; s; s = s->texturechain) {
+					EmitBothSkyLayers (s);
+				}
+				return;
+			}
+
+			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 			for (; s; s = s->texturechain)
-				R_RenderBrushPoly (s);
+				R_RenderBrushPoly (s, st);
 		}
 
 		t->texturechain = NULL;
@@ -1048,18 +819,17 @@ R_DrawBrushModel
 void
 R_DrawBrushModel (entity_t *e)
 {
+	int         i;
 	int         k;
 	vec3_t      mins, maxs;
-	int         i;
 	msurface_t *psurf;
 	float       dot;
 	mplane_t   *pplane;
 	model_t    *clmodel = e->model;
 	qboolean    rotated;
+	texture_t	*t;
 	vec3_t		modelorg;
-
-	currenttexture = -1;
-
+	
 	if (e->angles[0] || e->angles[1] || e->angles[2]) {
 		rotated = true;
 		for (i = 0; i < 3; i++) {
@@ -1075,10 +845,9 @@ R_DrawBrushModel (entity_t *e)
 	if (R_CullBox (mins, maxs))
 		return;
 
-	qglColor3f (1, 1, 1);
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
-	VectorSubtract (r_refdef.vieworg, e->origin, modelorg);
+	VectorSubtract (r_origin, e->origin, modelorg);
 	if (rotated) {
 		vec3_t      temp;
 		vec3_t      forward, right, up;
@@ -1099,14 +868,15 @@ R_DrawBrushModel (entity_t *e)
 			if ((cl_dlights[k].die < cl.time) || (!cl_dlights[k].radius))
 				continue;
 
-			R_MarkLightsNoVis (&cl_dlights[k], 1 << k,
-						  clmodel->nodes + clmodel->hulls[0].firstclipnode);
+			R_MarkLightsNoVis (&cl_dlights[k], 1 << k, 
+				clmodel->nodes + clmodel->hulls[0].firstclipnode);
 		}
 	}
 
 	qglPushMatrix ();
 
 	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
+
 	qglRotatef (e->angles[1], 0, 0, 1);
 	qglRotatef (e->angles[0], 0, 1, 0);	// stupid quake bug
 	qglRotatef (e->angles[2], 1, 0, 0);
@@ -1123,10 +893,13 @@ R_DrawBrushModel (entity_t *e)
 		// draw the polygon
 		if (((psurf->flags & SURF_PLANEBACK) && (dot < -BACKFACE_EPSILON)) ||
 			(!(psurf->flags & SURF_PLANEBACK) && (dot > BACKFACE_EPSILON))) {
-			if (gl_texsort->value)
-				R_RenderBrushPoly (psurf);
-			else
-				R_DrawSequentialPoly (psurf);
+			if (psurf->flags & SURF_DRAWSKY) {
+				EmitBothSkyLayers (psurf);
+			} else {
+				t = R_TextureAnimation(psurf->texinfo->texture);
+				qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
+				R_RenderBrushPoly (psurf, t);
+			}
 		}
 	}
 
@@ -1190,12 +963,8 @@ R_RecursiveWorldNode (mnode_t *node)
 
 // find which side of the node we are on
 	plane = node->plane;
-	dot = PlaneDiff (r_refdef.vieworg, plane);
-
-	if (dot >= 0)
-		side = 0;
-	else
-		side = 1;
+	dot = PlaneDiff (r_origin, plane);
+	side = dot < 0;
 
 // recurse down the children, front side first
 	R_RecursiveWorldNode (node->children[side]);
@@ -1205,12 +974,8 @@ R_RecursiveWorldNode (mnode_t *node)
 
 	if (c) {
 		surf = cl.worldmodel->surfaces + node->firstsurface;
+		side = (dot < 0) ? SURF_PLANEBACK : 0;
 
-		if (dot < 0)
-			side = SURF_PLANEBACK;
-		else
-			side = 0;
-	
 		for (; c; c--, surf++) {
 			if (surf->visframe != r_framecount)
 				continue;
@@ -1226,19 +991,8 @@ R_RecursiveWorldNode (mnode_t *node)
 				continue;			// wrong side
 
 			// if sorting by texture, just store it out
-			if (gl_texsort->value) {
-				surf->texturechain =
-					surf->texinfo->texture->texturechain;
-				surf->texinfo->texture->texturechain = surf;
-			} else if (surf->flags & SURF_DRAWSKY) {
-				surf->texturechain = skychain;
-				skychain = surf;
-			} else if (surf->flags & SURF_DRAWTURB) {
-				surf->texturechain = waterchain;
-				waterchain = surf;
-			} else
-				R_DrawSequentialPoly (surf);
-
+			surf->texturechain = surf->texinfo->texture->texturechain;
+			surf->texinfo->texture->texturechain = surf;
 		}
 	}
 // recurse down the back side
@@ -1247,6 +1001,8 @@ R_RecursiveWorldNode (mnode_t *node)
 
 void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
+
+
 
 
 /*
@@ -1263,9 +1019,7 @@ R_DrawWorld (void)
 	ent.model = cl.worldmodel;
 
 	currententity = &ent;
-	currenttexture = -1;
 
-	qglColor3f (1, 1, 1);
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
 	if (gl_fb_bmodels->value)
@@ -1273,21 +1027,24 @@ R_DrawWorld (void)
 
 	R_ClearSkyBox ();
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
 
-	DrawTextureChains ();
-
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-	R_BlendLightmaps ();
+	if (gl_mtexable && (gl_mtexcombine_arb || gl_mtexcombine_ext)) {
+		DrawTextureChainsMTexCombine ();
+	} else if (gl_mtexable) {
+		DrawTextureChainsMTex ();
+	} else {
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		DrawTextureChains ();
+		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		R_BlendLightmaps ();
+	}
 
 	R_RenderFullbrights ();
 
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
 	R_DrawSkyBox ();
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
 
@@ -1375,13 +1132,14 @@ AllocBlock (int w, int h, int *x, int *y)
 	}
 
 	Sys_Error ("AllocBlock: full");
-	// NOT REACHED
 	return 0;
 }
 
 
 mvertex_t  *r_pcurrentvertbase;
 model_t    *currentmodel;
+
+//int         nColinElim;
 
 /*
 ================
@@ -1484,7 +1242,7 @@ BuildSurfaceDisplayList (msurface_t *fa)
 						poly->verts[j - 1][k] = poly->verts[j][k];
 				}
 				--lnumverts;
-
+//				++nColinElim;
 				// retry next vertex next time, which is now current vertex
 				--i;
 			}
@@ -1528,10 +1286,8 @@ with all the surfaces from all brush models
 void
 GL_BuildLightmaps (void)
 {
-	int			i, j;
-	model_t		*m;
-// not used yet
-//	extern qboolean isPermedia;
+	int         i, j;
+	model_t    *m;
 
 	memset (allocated, 0, sizeof (allocated));
 
@@ -1542,22 +1298,29 @@ GL_BuildLightmaps (void)
 		texture_extension_number += MAX_LIGHTMAPS;
 	}
 
-	if (gl_colorlights->value) {
-		gl_lightmap_format = GL_RGB;
-		lightmap_bytes = 3;
-		colorlights = true;
-
-		if ((i = COM_CheckParm ("-bpp")) != 0) {
-			if (Q_atoi (com_argv[i + 1]) == 32) {
-				gl_lightmap_format = GL_RGBA;
-				lightmap_bytes = 4;
-			}
-		}
-	} else {
-		gl_lightmap_format = GL_LUMINANCE;
-		lightmap_bytes = 1;
-		colorlights = false;
+	switch ((int) gl_colorlights->value) {
+		case 0:
+			gl_lightmap_format = GL_LUMINANCE;
+			lightmap_bytes = 1;
+			colorlights = false;
+			break;
+		default:
+		case 1:
+			gl_lightmap_format = GL_RGB;
+			lightmap_bytes = 3;
+			colorlights = true;
+			break;
+		case 2:
+			gl_lightmap_format = GL_RGBA;
+			lightmap_bytes = 4;
+			colorlights = true;
+			break;
 	}
+
+	if (blocklights)
+		free (blocklights);
+
+	blocklights = malloc (BLOCK_WIDTH * BLOCK_HEIGHT * lightmap_bytes);
 
 	for (j = 1; j < MAX_MODELS; j++) {
 		m = cl.model_precache[j];
@@ -1577,9 +1340,6 @@ GL_BuildLightmaps (void)
 		}
 	}
 
-	if (!gl_texsort->value)
-		GL_SelectTexture (1);
-
 	// 
 	// upload all lightmaps that were filled
 	// 
@@ -1592,15 +1352,12 @@ GL_BuildLightmaps (void)
 		lightmap_rectchange[i].w = 0;
 		lightmap_rectchange[i].h = 0;
 		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + i);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+		qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 		qglTexImage2D (GL_TEXTURE_2D, 0, lightmap_bytes, BLOCK_WIDTH,
 					  BLOCK_HEIGHT, 0, gl_lightmap_format, GL_UNSIGNED_BYTE,
 					  lightmaps +
 					  i * BLOCK_WIDTH * BLOCK_HEIGHT * lightmap_bytes);
 	}
-
-	if (!gl_texsort->value)
-		GL_SelectTexture (0);
-
 }
+
