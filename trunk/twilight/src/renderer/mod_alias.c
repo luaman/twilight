@@ -93,7 +93,7 @@ Mod_LoadAliasFrame (void *pin, maliasframedesc_t *frame, model_t *mod)
 
 	pdaliasframe = (daliasframe_t *) pin;
 
-	strcpy (frame->name, pdaliasframe->name);
+	strlcpy_s (frame->name, pdaliasframe->name);
 	frame->numposes = 1;
 
 	for (i = 0; i < 3; i++) {

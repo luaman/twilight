@@ -384,7 +384,7 @@ quake -nosound +cmd amlev1
 void
 Cmd_StuffCmds_f (void)
 {
-	size_t		s, i;
+	size_t		s, i, len;
 	int			j;
 	char		*text, *build, c;
 	qboolean	done;
@@ -401,21 +401,21 @@ Cmd_StuffCmds_f (void)
 	if (!s)
 		return;
 
-	text = Z_Malloc (s + 1);
-	text[0] = 0;
+	len = s + 1;
+
+	text = Z_Malloc (len);
 	for (i = 1; i < com_argc; i++)
 	{
 		if (!com_argv[i])
 			// NEXTSTEP nulls out -NXHost
 			continue;
-		strcat (text, com_argv[i]);
+		strlcat (text, com_argv[i], len);
 		if (i != com_argc - 1)
-			strcat (text, " ");
+			strlcat (text, " ", len);
 	}
 
 	// pull out the commands
-	build = Z_Malloc (s + 1);
-	build[0] = 0;
+	build = Z_Malloc (len);
 
 	for (i = 0; i < s - 1; i++)
 	{
@@ -442,8 +442,8 @@ Cmd_StuffCmds_f (void)
 			c = text[j];
 			text[j] = 0;
 
-			strcat (build, text + i);
-			strcat (build, "\n");
+			strlcat (build, text + i, len);
+			strlcat (build, "\n", len);
 			text[j] = c;
 			i = j - 1;
 		}
@@ -549,7 +549,7 @@ Cmd_Alias_f (void)
 		a->next = cmd_alias;
 		cmd_alias = a;
 	}
-	strcpy (a->name, s);
+	strlcpy_s (a->name, s);
 
 	// copy the rest of the command line
 	cmd[0] = 0;

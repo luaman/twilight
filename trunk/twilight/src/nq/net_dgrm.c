@@ -135,8 +135,8 @@ NET_Ban_f (void)
 	switch (Cmd_Argc ()) {
 		case 1:
 			if (((struct in_addr *) &banAddr)->s_addr) {
-				strcpy (addrStr, inet_ntoa (*(struct in_addr *) &banAddr));
-				strcpy (maskStr, inet_ntoa (*(struct in_addr *) &banMask));
+				strlcpy_s (addrStr, inet_ntoa (*(struct in_addr *) &banAddr));
+				strlcpy_s (maskStr, inet_ntoa (*(struct in_addr *) &banMask));
 				print ("Banning %s [%s]\n", addrStr, maskStr);
 			} else
 				print ("Banning not active\n");
@@ -543,11 +543,11 @@ Test_Poll (void)
 			Sys_Error ("Unexpected repsonse to Player Info request\n");
 
 		playerNumber = MSG_ReadByte ();
-		strcpy (name, MSG_ReadString ());
+		strlcpy_s (name, MSG_ReadString ());
 		colors = MSG_ReadLong ();
 		frags = MSG_ReadLong ();
 		connectTime = MSG_ReadLong ();
-		strcpy (address, MSG_ReadString ());
+		strlcpy_s (address, MSG_ReadString ());
 
 		Com_Printf ("%s\n  frags:%3i  colors:%u %u  time:%u\n  %s\n", name,
 					frags, colors >> 4, colors & 0x0f, connectTime / 60,
@@ -667,10 +667,10 @@ Test2_Poll (void)
 	if (MSG_ReadByte () != CCREP_RULE_INFO)
 		goto Error;
 
-	strcpy (name, MSG_ReadString ());
+	strlcpy_s (name, MSG_ReadString ());
 	if (name[0] == 0)
 		goto Done;
-	strcpy (value, MSG_ReadString ());
+	strlcpy_s (value, MSG_ReadString ());
 
 	Com_Printf ("%-16.16s  %-16.16s\n", name, value);
 
@@ -1067,7 +1067,7 @@ _Datagram_CheckNewConnections (void)
 	sock->socket = newsock;
 	sock->landriver = net_landriverlevel;
 	sock->addr = clientaddr;
-	strcpy (sock->address, dfunc.AddrToString (&clientaddr));
+	strlcpy_s (sock->address, dfunc.AddrToString (&clientaddr));
 
 	// send him back the info about the server connection he has been allocated
 	SZ_Clear (&net_message);
@@ -1163,20 +1163,20 @@ _Datagram_SearchForHosts (qboolean xmit)
 
 		// add it
 		hostCacheCount++;
-		strcpy (hostcache[n].name, MSG_ReadString ());
-		strcpy (hostcache[n].map, MSG_ReadString ());
+		strlcpy_s (hostcache[n].name, MSG_ReadString ());
+		strlcpy_s (hostcache[n].map, MSG_ReadString ());
 		hostcache[n].users = MSG_ReadByte ();
 		hostcache[n].maxusers = MSG_ReadByte ();
 		if (MSG_ReadByte () != NET_PROTOCOL_VERSION) {
-			strcpy (hostcache[n].cname, hostcache[n].name);
+			strlcpy_s (hostcache[n].cname, hostcache[n].name);
 			hostcache[n].cname[14] = 0;
-			strcpy (hostcache[n].name, "*");
-			strcat (hostcache[n].name, hostcache[n].cname);
+			strlcpy_s (hostcache[n].name, "*");
+			strlcat_s (hostcache[n].name, hostcache[n].cname);
 		}
 		memcpy (&hostcache[n].addr, &readaddr, sizeof (struct qsockaddr));
 		hostcache[n].driver = net_driverlevel;
 		hostcache[n].ldriver = net_landriverlevel;
-		strcpy (hostcache[n].cname, dfunc.AddrToString (&readaddr));
+		strlcpy_s (hostcache[n].cname, dfunc.AddrToString (&readaddr));
 
 		// check for a name conflict
 		for (i = 0; i < hostCacheCount; i++) {

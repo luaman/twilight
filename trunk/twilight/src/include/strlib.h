@@ -54,10 +54,12 @@
 #ifndef HAVE_STRLCAT
 size_t strlcat (char* dst, const char* src, size_t siz);
 #endif
+#define strlcat_s(dst,src)		strlcat(dst, src, sizeof(dst))
 
 #ifndef HAVE_STRLCPY
 size_t strlcpy (char* dst, const char* src, size_t siz);
 #endif
+#define strlcpy_s(dst,src)		strlcpy(dst, src, sizeof(dst))
 
 
 char *Zstrdup (memzone_t *zone, const char *string);

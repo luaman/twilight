@@ -249,7 +249,7 @@ Mod_LoadLighting (lump_t *l, model_t *mod)
 
 	bheader->lightdata = NULL;
 
-	strcpy(litfilename, mod->name);
+	strlcpy_s (litfilename, mod->name);
 	COM_StripExtension(litfilename, litfilename);
 	COM_DefaultExtension(litfilename, ".lit");
 	data = (Uint8 *) COM_LoadZoneFile (litfilename, false, mod->zone);

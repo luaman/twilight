@@ -88,7 +88,7 @@ PF_VarString (Uint first)
 
 	out[0] = 0;
 	for (i = first; i < pr_argc; i++)
-		strcat (out, G_STRING ((OFS_PARM0 + i * 3)));
+		strlcat_s (out, G_STRING ((OFS_PARM0 + i * 3)));
 
 	return out;
 }

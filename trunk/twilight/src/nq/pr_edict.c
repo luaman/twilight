@@ -478,8 +478,8 @@ PR_GlobalString (int ofs)
 
 	i = strlen (line);
 	for (; i < 20; i++)
-		strcat (line, " ");
-	strcat (line, " ");
+		strlcat_s (line, " ");
+	strlcat_s (line, " ");
 
 	return line;
 }
@@ -498,8 +498,8 @@ PR_GlobalStringNoContents (int ofs)
 		snprintf (line, sizeof (line), "%i(%s)", ofs, pr_strings + def->s_name);
 
 	for (i = strlen (line); i < 20; i++)
-		strcat (line, " ");
-	strcat (line, " ");
+		strlcat_s (line, " ");
+	strlcat_s (line, " ");
 
 	return line;
 }
@@ -729,7 +729,7 @@ ED_ParseGlobals (char *data)
 		if (!data)
 			Host_Error ("ED_ParseEntity: EOF without closing brace");
 
-		strcpy (keyname, com_token);
+		strlcpy_s (keyname, com_token);
 
 		// parse value 
 		data = COM_Parse (data);
@@ -810,7 +810,7 @@ ED_ParseEpair (void *base, ddef_t *key, char *s)
 			break;
 
 		case ev_vector:
-			strcpy (string, s);
+			strlcpy_s (string, s);
 			v = string;
 			w = string;
 			for (i = 0; i < 3; i++)
@@ -889,7 +889,7 @@ ED_ParseEdict (char *data, edict_t *ent)
 		// and allow them to be turned into vectors. (FIXME...)
 		if (!strcmp (com_token, "angle"))
 		{
-			strcpy (com_token, "angles");
+			strlcpy_s (com_token, "angles");
 			anglehack = true;
 		}
 		else
@@ -897,9 +897,9 @@ ED_ParseEdict (char *data, edict_t *ent)
 
 		// FIXME: change light to _light to get rid of this hack
 		if (!strcmp (com_token, "light"))
-			strcpy (com_token, "light_lev");	// hack for single light def
+			strlcpy_s (com_token, "light_lev");	// hack for single light def
 
-		strcpy (keyname, com_token);
+		strlcpy_s (keyname, com_token);
 
 		// another hack to fix heynames with trailing spaces
 		n = strlen (keyname);
@@ -933,7 +933,7 @@ ED_ParseEdict (char *data, edict_t *ent)
 
 		if (anglehack)
 		{
-			strcpy (temp, com_token);
+			strlcpy_s (temp, com_token);
 			snprintf (com_token, sizeof (com_token), "0 %s 0", temp);
 		}
 

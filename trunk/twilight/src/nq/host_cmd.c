@@ -272,24 +272,24 @@ Host_Map_f (void)
 
 	cls.mapstring[0] = 0;
 	for (i = 0; i < Cmd_Argc (); i++) {
-		strcat (cls.mapstring, Cmd_Argv (i));
-		strcat (cls.mapstring, " ");
+		strlcat_s (cls.mapstring, Cmd_Argv (i));
+		strlcat_s (cls.mapstring, " ");
 	}
-	strcat (cls.mapstring, "\n");
+	strlcat_s (cls.mapstring, "\n");
 
 	svs.serverflags = 0;				// haven't completed an episode yet
-	strcpy (name, Cmd_Argv (1));
+	strlcpy_s (name, Cmd_Argv (1));
 	SV_SpawnServer (name);
 
 	if (!sv.active)
 		return;
 
 	if (ccls.state != ca_dedicated) {
-		strcpy (cls.spawnparms, "");
+		cls.spawnparms[0] = '\0';
 
 		for (i = 2; i < Cmd_Argc (); i++) {
-			strcat (cls.spawnparms, Cmd_Argv (i));
-			strcat (cls.spawnparms, " ");
+			strlcat_s (cls.spawnparms, Cmd_Argv (i));
+			strlcat_s (cls.spawnparms, " ");
 		}
 
 		Cmd_ExecuteString ("connect local", src_command);
@@ -317,7 +317,7 @@ Host_Changelevel_f (void)
 		return;
 	}
 	SV_SaveSpawnparms ();
-	strcpy (level, Cmd_Argv (1));
+	strlcpy_s (level, Cmd_Argv (1));
 	SV_SpawnServer (level);
 }
 
@@ -338,10 +338,8 @@ Host_Restart_f (void)
 
 	if (cmd_source != src_command)
 		return;
-	strcpy (mapname, sv.name);		// must copy out, because it gets
-
-	// cleared
-	// in sv_spawnserver
+	// Must copy out, because it gets cleared in sv_spawnserver.
+	strlcpy_s (mapname, sv.name);
 	SV_SpawnServer (mapname);
 }
 
@@ -377,7 +375,7 @@ Host_Connect_f (void)
 		CL_StopPlayback ();
 		CL_Disconnect ();
 	}
-	strcpy (name, Cmd_Argv (1));
+	strlcpy_s (name, Cmd_Argv (1));
 	CL_EstablishConnection (name);
 	Host_Reconnect_f ();
 }
@@ -592,7 +590,7 @@ Host_Loadgame_f (void)
 	{
 		fscanf (f, "%s\n", str);
 		sv.lightstyles[i] = Zone_Alloc (sv_zone, strlen (str) + 1);
-		strcpy (sv.lightstyles[i], str);
+		strlcpy_s (sv.lightstyles[i], str);
 	}
 
 	// load the edicts out of the savegame file
@@ -675,9 +673,9 @@ Host_Name_f (void)
 		return;
 	}
 	if (Cmd_Argc () == 2)
-		strlcpy(newName, Cmd_Argv (1), 16);
+		strlcpy_s(newName, Cmd_Argv (1));
 	else
-		strlcpy(newName, Cmd_Args (), 16);
+		strlcpy_s(newName, Cmd_Args ());
 
 	if (cmd_source == src_command) {
 		if (strcmp (_cl_name->svalue, newName) == 0)
@@ -691,7 +689,7 @@ Host_Name_f (void)
 	if (host_client->name[0] && strcmp (host_client->name, "unconnected"))
 		if (strcmp (host_client->name, newName) != 0)
 			Com_Printf ("%s renamed to %s\n", host_client->name, newName);
-	strcpy (host_client->name, newName);
+	strlcpy_s (host_client->name, newName);
 	host_client->edict->v.netname = host_client->name - pr_strings;
 
 // send notification to all clients
@@ -751,8 +749,8 @@ Host_Say (qboolean teamonly)
 	if (strlen (p) > j)
 		p[j] = 0;
 
-	strcat (text, p);
-	strcat (text, "\n");
+	strlcat_s (text, p);
+	strlcat_s (text, "\n");
 
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
 		if (!client || !client->active || !client->spawned)
@@ -798,8 +796,8 @@ Host_Tell_f (void)
 	if (Cmd_Argc () < 3)
 		return;
 
-	strcpy (text, host_client->name);
-	strcat (text, ": ");
+	strlcpy_s (text, host_client->name);
+	strlcat_s (text, ": ");
 
 	p = Cmd_Args ();
 
@@ -814,8 +812,8 @@ Host_Tell_f (void)
 	if (strlen (p) > j)
 		p[j] = 0;
 
-	strcat (text, p);
-	strcat (text, "\n");
+	strlcat_s (text, p);
+	strlcat_s (text, "\n");
 
 	save = host_client;
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
@@ -1407,7 +1405,7 @@ Host_Startdemos_f (void)
 	Com_Printf ("%i demo(s) in loop\n", c);
 
 	for (i = 1; i < c + 1; i++)
-		strlcpy (ccls.demos[i - 1], Cmd_Argv (i), sizeof (ccls.demos[0]));
+		strlcpy_s (ccls.demos[i - 1], Cmd_Argv (i));
 
 	if (!sv.active && ccls.demonum != -1 && !ccls.demoplayback) {
 		ccls.demonum = 0;

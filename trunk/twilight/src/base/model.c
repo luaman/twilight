@@ -101,7 +101,7 @@ Mod_FindName (char *name)
 	{
 		mod_numknown++;
 		mod = freemod;
-		strcpy (mod->name, name);
+		strlcpy_s (mod->name, name);
 		return mod;
 	}
 

@@ -293,7 +293,7 @@ SV_ConnectClient (int clientnum)
 	memset (client, 0, sizeof (*client));
 	client->netconnection = netconnection;
 
-	strcpy (client->name, "unconnected");
+	strlcpy_s (client->name, "unconnected");
 	client->active = true;
 	client->spawned = false;
 	client->edict = ent;
@@ -1037,7 +1037,7 @@ SV_SpawnServer (char *server)
 	// set up the new server
 	Host_ClearMemory ();
 
-	strcpy (sv.name, server);
+	strlcpy_s (sv.name, server);
 
 	// load progs to get entity field count
 	PR_LoadProgs ();
@@ -1071,7 +1071,7 @@ SV_SpawnServer (char *server)
 
 	sv.time = 1.0;
 
-	strcpy (sv.name, server);
+	strlcpy_s (sv.name, server);
 	snprintf (sv.modelname, sizeof (sv.modelname), "maps/%s.bsp", server);
 
 	SetupLightmapSettings ();

@@ -492,7 +492,7 @@ SV_ConSay_f (void)
 	if (Cmd_Argc () < 2)
 		return;
 
-	strcpy (text, "console: ");
+	strlcpy_s (text, "console: ");
 	p = Cmd_Args ();
 
 	if (*p == '"') {
@@ -500,7 +500,7 @@ SV_ConSay_f (void)
 		p[strlen (p) - 1] = 0;
 	}
 
-	strcat (text, p);
+	strlcat_s (text, p);
 
 	for (j = 0, client = svs.clients; j < MAX_CLIENTS; j++, client++) {
 		if (client->state != cs_spawned)

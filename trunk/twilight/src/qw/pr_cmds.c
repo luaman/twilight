@@ -68,7 +68,7 @@ PF_VarString (int first)
 
 	out[0] = 0;
 	for (i = first; i < pr_argc; i++)
-		strcat (out, G_STRING ((OFS_PARM0 + i * 3)));
+		strlcat_s (out, G_STRING ((OFS_PARM0 + i * 3)));
 
 	return out;
 }
@@ -1660,16 +1660,13 @@ PF_infokey (void)
 		if ((value = Info_ValueForKey (svs.info, key)) == NULL || !*value)
 			value = Info_ValueForKey (localinfo, key);
 	} else if (e1 <= MAX_CLIENTS) {
-		if (!strcmp (key, "ip"))
-			value =
-				strcpy (ov,
-						NET_BaseAdrToString (svs.clients[e1 - 1].netchan.
-											 remote_address));
-		else if (!strcmp (key, "ping")) {
+		value = ov;
+		if (!strcmp (key, "ip")) {
+			strlcpy_s (ov, NET_BaseAdrToString (svs.clients[e1 - 1].netchan.remote_address));
+		} else if (!strcmp (key, "ping")) {
 			int         ping = SV_CalcPing (&svs.clients[e1 - 1]);
 
 			snprintf (ov, sizeof (ov), "%d", ping);
-			value = ov;
 		} else
 			value = Info_ValueForKey (svs.clients[e1 - 1].userinfo, key);
 	} else

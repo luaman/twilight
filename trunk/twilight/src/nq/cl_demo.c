@@ -290,7 +290,7 @@ CL_PlayDemo_f (void)
 	CL_Disconnect ();
 
 	// open the demo file
-	strcpy (name, Cmd_Argv (1));
+	strlcpy_s (name, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".dem");
 
 	Com_Printf ("Playing demo from %s.\n", name);

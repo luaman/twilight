@@ -263,7 +263,7 @@ Key_Console (int key)
 		} while (history_line != edit_line && !key_lines[history_line][1]);
 		if (history_line == edit_line)
 			history_line = (edit_line + 1) & 31;
-		strcpy (key_lines[edit_line], key_lines[history_line]);
+		strlcpy_s (key_lines[edit_line], key_lines[history_line]);
 		key_linepos = strlen (key_lines[edit_line]);
 		return;
 	}
@@ -280,7 +280,7 @@ Key_Console (int key)
 			key_lines[edit_line][0] = ']';
 			key_linepos = 1;
 		} else {
-			strcpy (key_lines[edit_line], key_lines[history_line]);
+			strlcpy_s (key_lines[edit_line], key_lines[history_line]);
 			key_linepos = strlen (key_lines[edit_line]);
 		}
 		return;
@@ -564,9 +564,9 @@ Key_In_Bind_f (void)
 // copy the rest of the command line
 	cmd[0] = 0;							// start out with a null string
 	for (i = 3; i < c; i++) {
-		strcat (cmd, Cmd_Argv (i));
+		strlcat_s (cmd, Cmd_Argv (i));
 		if (i != (c - 1))
-			strcat (cmd, " ");
+			strlcat_s (cmd, " ");
 	}
 
 	Key_SetBinding (b, m, cmd);
@@ -659,9 +659,9 @@ Key_Bind_f (void)
 // copy the rest of the command line
 	cmd[0] = 0;							// start out with a null string
 	for (i = 2; i < c; i++) {
-		strcat (cmd, Cmd_Argv (i));
+		strlcat_s (cmd, Cmd_Argv (i));
 		if (i != (c - 1))
-			strcat (cmd, " ");
+			strlcat_s (cmd, " ");
 	}
 
 	Key_SetBinding (b, 0, cmd);
