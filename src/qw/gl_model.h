@@ -138,7 +138,7 @@ typedef struct msurface_s {
 	int         numedges;				// are backwards edges
 
 	short       texturemins[2];
-	short       extents[2];
+	short       extents[2], smax, tmax;
 
 	int         light_s, light_t;		// gl lightmap coordinates
 
