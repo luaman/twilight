@@ -319,7 +319,7 @@ VID_Init_Cvars (void)
 	gl_ztrick = Cvar_Get ("gl_ztrick", "0", CVAR_NONE, NULL);
 	gl_driver = Cvar_Get ("gl_driver", GL_LIBRARY, CVAR_ROM, NULL);
 	v_hwgamma = Cvar_Get ("v_hwgamma", "1", CVAR_NONE, NULL);
-	v_gamma = Cvar_Get ("gamma", "1", CVAR_NONE, &GammaChanged);
+	v_gamma = Cvar_Get ("v_gamma", "1", CVAR_NONE, &GammaChanged);
 	v_gammabias_r = Cvar_Get ("v_gammabias_r", "0", CVAR_NONE, &GammaChanged);
 	v_gammabias_g = Cvar_Get ("v_gammabias_g", "0", CVAR_NONE, &GammaChanged);
 	v_gammabias_b = Cvar_Get ("v_gammabias_b", "0", CVAR_NONE, &GammaChanged);
