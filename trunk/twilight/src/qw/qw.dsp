@@ -188,10 +188,6 @@ SOURCE=.\gl_warp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\hash.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\keys.c
 # End Source File
 # Begin Source File
