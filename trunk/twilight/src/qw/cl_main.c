@@ -20,10 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // cl_main.c  -- client main loop
 
 #include <ctype.h>
+#include <SDL.h>
 
 #include "quakedef.h"
-
-#include <sdl.h>
 
 #ifdef _WIN32
 #include "winquake.h"
