@@ -46,12 +46,14 @@ static const char rcsid[] =
 #define MAX_PARTICLES			2048	// default max # of particles
 #define ABSOLUTE_MIN_PARTICLES	2		// no fewer than this no matter what
 
+extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
+
 extern int part_tex_dot;
 extern int part_tex_spark;
 extern int part_tex_smoke;
 extern int part_tex_smoke_ring;
 
-static cvar_t *r_particles;
+static cvar_t *r_particles, *r_particle_physics;
 static cvar_t *r_base_particles, *r_cone_particles, *r_tube_particles;
 
 static int ramp1[8] = { 0x6f, 0x6d, 0x6b, 0x69, 0x67, 0x65, 0x63, 0x61 };
@@ -166,21 +168,31 @@ new_cone_particle (ptype_t type, vec3_t org1, vec3_t org2, vec3_t org3,
 }
 	
 typedef struct {
-	vec3_t		org;
-	vec3_t		vel;
-	vec4_t		color;
-	float		scale;
-	float		ramp;
-	float		die;
 	ptype_t		type;
+	vec3_t		org;
+	vec3_t		oldorg;		// used to store last position to traceline can be used
+							// to allow particles to have bounce physics, etc.
+	vec3_t		vel;
+	vec3_t		vel2;		// used for snow fluttering (base velocity, wind for instance)
+	vec4_t		color;
+	float		bounce;		// how much bounce-back from a surface the particle hits
+							// (0 = no physics, 1 = stop and slide, 2 = keep bouncing forever,
+							// 1.5 is typical)
+	float		die;
+	float		friction;	// how much air friction affects this object (objects with a low
+							// mass/size ratio tend to get more air friction)
+	float		pressure;	// if non-zero, apply pressure to other particles
+	float		ramp;
+	float		scale;
 } base_particle_t;
 
 static base_particle_t *base_particles, **free_base_particles;
 static int num_base_particles, max_base_particles;
 
 inline qboolean
-new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
-		float ramp, float scale, float die)
+new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec3_t vel2,
+		vec4_t color, float ramp, float scale, float die, float bounce,
+		float friction, float pressure)
 {
 	base_particle_t	   *p;
 
@@ -196,18 +208,27 @@ new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 	p->ramp = ramp;
 	p->die = cl.time + die;
 	p->scale = scale;
+	if (r_particle_physics->value) {
+		p->bounce = bounce;
+		p->friction = friction;
+		p->pressure = pressure;
+		if (vel2)
+			VectorCopy (vel2, p->vel2);
+	}
 
 	return true;
 }
 	
 inline qboolean
-new_base_particle_oc (ptype_t type, vec3_t org, vec3_t vel, int color,
-		float ramp, float scale, float die)
+new_base_particle_oc (ptype_t type, vec3_t org, vec3_t vel, vec3_t vel2,
+		int color, float ramp, float scale, float die, float bounce,
+		float friction, float pressure)
 {
 	vec4_t		vcolor;
 
 	VectorCopy4 (d_8tofloattable[color], vcolor);	
-	return new_base_particle (type, org, vel, vcolor, ramp, scale, die);
+	return new_base_particle (type, org, vel, NULL, vcolor, ramp, scale, die,
+								bounce, friction, pressure);
 }
 	
 /*
@@ -224,6 +245,8 @@ R_InitParticles (void)
 	r_base_particles = Cvar_Get ("r_base_particles", "1", CVAR_NONE, NULL);
 	r_cone_particles = Cvar_Get ("r_cone_particles", "1", CVAR_NONE, NULL);
 	r_tube_particles = Cvar_Get ("r_tube_particles", "1", CVAR_NONE, NULL);
+
+	r_particle_physics = Cvar_Get ("r_particle_physics", "0", CVAR_NONE, NULL);
 
 	i = COM_CheckParm ("-particles");
 
@@ -296,7 +319,8 @@ R_EntityParticles (entity_t *ent)
 			* beamlength;
 		org[2] = ent->cur.origin[2] + r_avertexnormals[i][2] * dist + forward[2]
 			* beamlength;
-		new_base_particle_oc(pt_explode, org, r_origin, 0x6f, 0, -1, 0.01);
+		new_base_particle_oc(pt_explode, org, r_origin, NULL, 0x6f, 0, -1,
+			0.01, 0, 0, 0);
 	}
 }
 
@@ -341,7 +365,8 @@ R_ReadPointFile_f (void)
 			break;
 		c++;
 
-		new_base_particle_oc (pt_static, org, r_origin, (-c) & 15, 0, -1,99999);
+		new_base_particle_oc (pt_static, org, r_origin, NULL, (-c) & 15, 0, -1,
+			99999, 0, 0, 0);
 	}
 
 	fclose (f);
@@ -390,7 +415,8 @@ R_ParticleExplosion (vec3_t org)
 			porg[j] = org[j] + ((Q_rand () % 32) - 16);
 			vel[j] = (Q_rand () % 512) - 256;
 		}
-		new_base_particle_oc (type, porg, vel, ramp1[0], Q_rand () & 3, -1, 5);
+		new_base_particle_oc (type, porg, vel, NULL, ramp1[0], Q_rand () & 3, -1,
+			5, 0, 0, 0);
 	}
 }
 
@@ -414,7 +440,8 @@ R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength)
 			porg[j] = org[j] + ((Q_rand () % 32) - 16);
 			vel[j] = (Q_rand () % 512) - 256;
 		}
-		new_base_particle_oc (pt_blob, porg, vel, color, 0, -1, 0.3);
+		new_base_particle_oc (pt_blob, porg, vel, NULL, color, 0, -1,
+			0.3, 0, 0, 0);
 	}
 }
 
@@ -446,7 +473,8 @@ R_BlobExplosion (vec3_t org)
 			porg[j] = org[j] + ((Q_rand () % 32) - 16);
 			pvel[j] = (Q_rand () % 512) - 256;
 		}
-		new_base_particle_oc (ptype, porg, pvel, color, 0, -1, pdie);
+		new_base_particle_oc (ptype, porg, pvel, NULL, color, 0, -1,
+			pdie, 0, 0, 0);
 	}
 }
 
@@ -470,7 +498,8 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 			porg[j] = org[j] + ((Q_rand () & 15) - 8);
 			pvel[j] = dir[j] * 15;	// + (Q_rand()%300)-150;
 		}
-		new_base_particle_oc (pt_slowgrav, porg, pvel, pcolor, 0, -1, pdie);
+		new_base_particle_oc (pt_slowgrav, porg, pvel, NULL, pcolor, 0, -1,
+			pdie, 0, 0, 0);
 	}
 }
 
@@ -504,7 +533,8 @@ R_LavaSplash (vec3_t org)
 			VectorNormalizeFast (dir);
 			vel = 50 + (Q_rand () & 63);
 			VectorScale (dir, vel, pvel);
-			new_base_particle_oc (pt_slowgrav, porg, pvel, pcolor, 0, -1, pdie);
+			new_base_particle_oc (pt_slowgrav, porg, pvel, NULL, pcolor, 0, -1,
+				pdie, 0, 0, 0);
 		}
 }
 
@@ -564,12 +594,12 @@ R_Torch (entity_t *ent, qboolean torch2)
 		// used for large torches (eg, start map near spawn)
 		porg[2] = ent->cur.origin[2] - 2;
 		VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
-		new_base_particle (pt_torch2, porg, pvel, color,
-				Q_rand () & 3, ent->cur.frame ? 30 : 10, 5);
+		new_base_particle (pt_torch2, porg, pvel, NULL, color, Q_rand () & 3,
+			ent->cur.frame ? 30 : 10, 5, 0, 0, 0);
 	} else { 
 		// wall torches
-		new_base_particle (pt_torch, porg, pvel, color,
-				Q_rand () & 3, 10, 5);
+		new_base_particle (pt_torch, porg, pvel, NULL, color, Q_rand () & 3,
+			10, 5, 0, 0, 0);
 	}
 }
 
@@ -599,14 +629,14 @@ R_RailTrail (vec3_t start, vec3_t end)
 	while (len > 0)
 	{
 		VectorCopy (d_8tofloattable[(rand() & 3) + 225], color); color[3] = 0.5;
-		new_base_particle (pt_railtrail, start, vec3_origin, color,
-				0, 2.5, 1.0);
+		new_base_particle (pt_railtrail, start, vec3_origin, NULL, color,
+			0, 2.5, 1.0, 0, 0, 0);
 
 		VectorMA (start, 4, right, org);
 		VectorScale (right, 8, vel);
 		VectorCopy (d_8tofloattable[(rand() & 7) + 206], color); color[3] = 0.5;
-		new_base_particle (pt_railtrail, org, vel, color,
-				0, 5.0, 1.0);
+		new_base_particle (pt_railtrail, org, vel, NULL, color,
+				0, 5.0, 1.0, 0, 0, 0);
 
 		roll += 7.5 * (M_PI / 180.0);
 
@@ -724,7 +754,8 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 				break;
 		}
 
-		new_base_particle_oc (ptype, porg, pvel, pcolor, pramp, -1, pdie);
+		new_base_particle_oc (ptype, porg, pvel, NULL, pcolor, pramp, -1, pdie,
+			0, 0, 0);
 
 		VectorScale(vec, lsub, avec);
 		VectorAdd (start, avec, start);
@@ -732,7 +763,7 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 	}
 }
 
-//#define MOD_POINTINLEAF
+// #define MOD_POINTINLEAF
 /*
 ===============
 R_Draw_Base_Particles
@@ -745,12 +776,11 @@ R_Draw_Base_Particles (void)
 	mleaf_t				*mleaf;
 #endif
 	base_particle_t	   *p;
-	int					i, j, k, activeparticles, maxparticle;
+	int					i, j, k, activeparticles, maxparticle, pressureused = false;
 	float				time1, time2, time3;
 	float				grav, dvel;
-	float				frametime;
-	float				scale;
-	float				*corner;
+	float				frametime, scale, *corner;
+	vec3_t				v;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
 
@@ -771,6 +801,9 @@ R_Draw_Base_Particles (void)
 			free_base_particles[j++] = p;
 			continue;
 		}
+
+		if (r_particle_physics->value)
+			VectorCopy(p->org, p->oldorg);
 
 		maxparticle = k;
 		activeparticles++;
@@ -826,6 +859,28 @@ R_Draw_Base_Particles (void)
 R_Draw_Base_Particles__physics:
 #endif
 		VectorMA (p->org, frametime, p->vel, p->org);
+		if (p->bounce)
+		{
+			vec3_t normal;
+			float dist;
+			if (TraceLine (p->oldorg, p->org, v, normal) < 1)
+			{
+				VectorCopy (v, p->org);
+				if (p->bounce < 0)
+				{
+					p->die = -1;
+					free_base_particles[j++] = p;
+					continue;
+				}
+				else
+				{
+					dist = DotProduct (p->vel, normal) * -p->bounce;
+					VectorMA (p->vel, dist, normal, p->vel);
+					if (DotProduct (p->vel, p->vel) < 0.03)
+						VectorClear (p->vel);
+				}
+			}
+		}
 
 		switch (p->type) {
 			case pt_static:
@@ -877,7 +932,15 @@ R_Draw_Base_Particles__physics:
 
 			case pt_grav:
 			case pt_slowgrav:
+				if (r_particle_physics->value) {
+					p->die = 9999;
+					p->bounce = 1.5;
+					p->color[3] -= (frametime * 1.5);
+					p->friction = 2;
+					p->vel[2] -= grav * 9.8;
+				} else
 				p->vel[2] -= grav;
+
 				break;
 			case pt_torch:
 				p->color[3] -= (frametime * 64 / 255);
@@ -904,6 +967,8 @@ R_Draw_Base_Particles__physics:
 		}
 		if ((p->color[3] < 0))
 			p->die = -1;
+		if (p->pressure)
+			pressureused = true;
 	}
 
 	if (v_index) {
@@ -921,6 +986,35 @@ R_Draw_Base_Particles__physics:
 			maxparticle--;
 	}
 	num_base_particles = activeparticles;
+
+	if (pressureused)
+	{
+		activeparticles = 0;
+		for (i = 0, p = base_particles; i < num_base_particles; i++, p++)
+			if (p->pressure)
+				free_base_particles[activeparticles++] = p;
+
+		if (activeparticles)
+		{
+			for (i = 0, p = base_particles; i < num_base_particles; i++, p++)
+			{
+				for (j = 0; j < activeparticles; j++)
+				{
+					if (free_base_particles[j] != p)
+					{
+						float dist, diff[3];
+						VectorSubtract (p->org, free_base_particles[j]->org, diff);
+						dist = DotProduct (diff, diff);
+						if (dist < 4096 && dist >= 1)
+						{
+							dist = free_base_particles[j]->scale * 4.0f * frametime / Q_sqrt (dist);
+							VectorMA (p->vel, dist, diff, p->vel);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 extern float bubble_sintable[17], bubble_costable[17];
