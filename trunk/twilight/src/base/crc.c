@@ -34,6 +34,7 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include "strlib.h"
 #include "qtypes.h"
 #include "crc.h"
 
