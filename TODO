@@ -1,9 +1,11 @@
 Project Twilight todo list
 --------------------------
 
+These things are done:
+  - Make +set happen as early as possible
+
 These things need to be done before first public release:
 
-  - Make +set happen as early as possible
   - Add Cvars fs_sharepath and fs_userpath
   - Global config file support
   - Website updates
