@@ -42,7 +42,7 @@ static const char rcsid[] =
 #include "zone.h"
 #include "mathlib.h"
 
-cvar_t *registered;
+static cvar_t *registered;
 cvar_t *cmdline;
 cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;

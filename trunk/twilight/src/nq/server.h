@@ -191,7 +191,6 @@ extern struct cvar_s *skill;
 extern struct cvar_s *deathmatch;
 extern struct cvar_s *coop;
 extern struct cvar_s *fraglimit;
-extern struct cvar_s *timelimit;
 
 extern server_static_t svs;				// persistant server info
 extern server_t sv;						// local server

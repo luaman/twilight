@@ -52,7 +52,7 @@ VecRBetween (vec3_t c1, vec3_t c2, vec3_t out)
 	VectorMA(c1, f, out, out);
 }
 
-memzone_t *part_zone;
+static memzone_t *part_zone;
 
 static cvar_t *r_particles, *r_particle_physics;
 static cvar_t *r_base_particles, *r_xbeam_particles;
@@ -90,7 +90,7 @@ xbeam_particle_t;
 static xbeam_particle_t *xbeam_particles, **free_xbeam_particles;
 static int num_xbeam_particles, max_xbeam_particles;
 
-inline qboolean
+static inline qboolean
 new_xbeam_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
 		float thickness, float scroll, float repeat_scale, float die)
 {
@@ -144,7 +144,7 @@ base_particle_t;
 static base_particle_t *base_particles, **free_base_particles;
 static int num_base_particles, max_base_particles;
 
-inline base_particle_t *
+static inline base_particle_t *
 new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 		float ramp, float scale, float die, float bounce)
 {
@@ -171,7 +171,7 @@ new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 	return p;
 }
 	
-inline base_particle_t *
+static inline base_particle_t *
 new_base_particle_oc (ptype_t type, vec3_t org, vec3_t vel, int color,
 		float ramp, float scale, float die, float bounce)
 {
@@ -275,8 +275,8 @@ R_EntityParticles
 
 #define NUMVERTEXNORMALS 162
 extern float r_avertexnormals[NUMVERTEXNORMALS][3];
-vec3_t avelocities[NUMVERTEXNORMALS];
-float beamlength = 16;
+static vec3_t avelocities[NUMVERTEXNORMALS];
+#define beamlength 16.0f
 
 void
 R_EntityParticles (entity_common_t *ent)

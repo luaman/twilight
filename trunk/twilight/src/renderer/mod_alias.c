@@ -48,16 +48,15 @@ ALIAS MODELS
 ==============================================================================
 */
 
-aliashdr_t	*pheader;
+static aliashdr_t	*pheader;
 
-qboolean	vseams[MAXALIASVERTS];
-int			vremap[MAXALIASVERTS];
-mtriangle_t	triangles[MAXALIASTRIS];
-int			numinverts;
+static qboolean	vseams[MAXALIASVERTS];
+static int			vremap[MAXALIASVERTS];
+static int			numinverts;
 
 model_t	*player_model;
 
-vec3_t	bboxmin, bboxmax;
+static vec3_t	bboxmin, bboxmax;
 float	bboxradius, bboxyawradius;
 
 static inline void

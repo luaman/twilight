@@ -162,7 +162,7 @@ copy4 (unsigned char *out, Uint32 x)
 }
 
 
-void
+static void
 mdfour_begin (struct mdfour *md)
 {
 	md->A = 0x67452301;
@@ -203,7 +203,7 @@ mdfour_tail (unsigned char *in, int n)
 }
 
 
-void
+static void
 mdfour_update (struct mdfour *md, unsigned char *in, int n)
 {
 	Uint32      M[16];
@@ -225,7 +225,7 @@ mdfour_update (struct mdfour *md, unsigned char *in, int n)
 }
 
 
-void
+static void
 mdfour_result (struct mdfour *md, unsigned char *out)
 {
 	m = md;
@@ -237,7 +237,7 @@ mdfour_result (struct mdfour *md, unsigned char *out)
 }
 
 
-void
+static void
 mdfour (unsigned char *out, unsigned char *in, int n)
 {
 	struct mdfour md;

@@ -466,7 +466,7 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 	return item;
 }
 
-void
+static void
 Menu_Parse_Menu (codetree_t *tree_base)
 {
 	menu_t			*menu, *tmenu;
@@ -545,7 +545,7 @@ Menu_Parse_Menu (codetree_t *tree_base)
 		LHP_printcodetree_c(1, tree_base);
 }
 
-void
+static void
 Menu_Parse_Menus (codetree_t *tree_base)
 {
 	codetree_t		*code = tree_base;
@@ -569,7 +569,7 @@ Menu_Parse_Menus (codetree_t *tree_base)
 #undef MENU_ERROR
 }
 
-void
+static void
 M_Deletemenu_f (void)
 {
 	menu_t	*menu, **last;
@@ -592,7 +592,7 @@ M_Deletemenu_f (void)
 	Com_Printf("ERROR: Menu %s not found!\n", id);
 }
 
-void
+static void
 M_Loadmenu_f (void)
 {
 	char		*menu_buffer;
@@ -643,7 +643,7 @@ M_Exit (qboolean new_menu)
 	M_SetKeyDest ();
 }
 
-void
+static void
 M_Enter (menu_t *menu)
 {
 	if (!menu)

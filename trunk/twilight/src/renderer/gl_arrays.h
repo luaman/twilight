@@ -155,8 +155,10 @@ extern inline void
 GLArrays_Reset_Color (void)
 {
 	qglColorPointer (4, GL_UNSIGNED_BYTE, sizeof(colorub_t), cub_array_p);
+	/*
 	if (gl_secondary_color)
 		qglSecondaryColorPointerEXT (4, GL_UNSIGNED_BYTE, sizeof(colorub_t), scub_array_p);
+		*/
 }
 
 extern inline void

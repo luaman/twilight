@@ -49,22 +49,21 @@ cvar_t			*sv_edgefriction;
 cvar_t			*sv_idealpitchscale;
 cvar_t			*sv_maxspeed;
 cvar_t			*sv_accelerate;
-cvar_t			*sv_predict;
 extern cvar_t	*sv_stopspeed;
 
 static vec3_t forward, right, up;
 
-vec3_t		wishdir;
-float		wishspeed;
+static vec3_t		wishdir;
+static float		wishspeed;
 
 // world
-float		*angles;
-float		*origin;
-float		*velocity;
+static float		*angles;
+static float		*origin;
+static float		*velocity;
 
-qboolean	onground;
+static qboolean	onground;
 
-usercmd_t	cmd;
+static usercmd_t	cmd;
 
 
 #define	MAX_FORWARD	6
@@ -454,11 +453,6 @@ SV_ReadClientMove (usercmd_t *move)
 
 	host_client->ping = total / NUM_PING_TIMES; // can be used for prediction
 	host_client->latency = 0;
-
-	// if paused or a local game, don't predict
-// FIXME
-//	if (sv_predict->fvalue && (svs.maxclients > 1) && (!sv.paused)) 
-//		host_client->latency = host_client->ping;
 
 	if ((val = GETEDICTFIELDVALUE (host_client->edict, eval_ping)))
 		val->_float = host_client->ping * 1000.0;

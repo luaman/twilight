@@ -62,7 +62,7 @@ typedef struct gltexture_s
 }
 gltexture_t;
 
-gltexture_t *gltextures;
+static gltexture_t *gltextures;
 
 /*
  * Memory zones.
@@ -74,10 +74,10 @@ memzone_t *glt_zone;
  * This stuff is entirely specific to the selection of gl filter and 
  * texture modes.
  */
-int		glt_filter_min = GL_LINEAR_MIPMAP_NEAREST;
-int		glt_filter_mag = GL_LINEAR;
-int		glt_solid_format = 3;
-int		glt_alpha_format = 4;
+static int		glt_filter_min = GL_LINEAR_MIPMAP_NEAREST;
+static int		glt_filter_mag = GL_LINEAR;
+static int		glt_solid_format = 3;
+static int		glt_alpha_format = 4;
 
 typedef struct {
 	char	*name;
@@ -94,11 +94,11 @@ static glmode_t modes[] = {
 };
 
 static void Set_TextureMode_f (struct cvar_s *var);
-cvar_t *gl_texturemode;
-cvar_t *r_lerpimages;
-cvar_t *r_colormiplevels;
-cvar_t *gl_picmip;
-cvar_t *gl_max_size;
+static cvar_t *gl_texturemode;
+static cvar_t *r_lerpimages;
+static cvar_t *r_colormiplevels;
+static cvar_t *gl_picmip;
+static cvar_t *gl_max_size;
 
 static void
 GLT_verify_pow2 (cvar_t *cvar)

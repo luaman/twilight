@@ -53,7 +53,7 @@ static GLuint	solidskytexture;
 static GLuint	alphaskytexture;
 
 cvar_t *r_skyname;
-cvar_t *r_fastsky;
+static cvar_t *r_fastsky;
 sky_type_t	sky_type = SKY_SPHERE;
 
 static void
@@ -265,7 +265,7 @@ Sky_Sphere_Draw (void)
 R_LoadSkys
 ==================
 */
-char       *suf[6] = { "rt", "bk", "lf", "ft", "up", "dn" };
+static char       *suf[6] = { "rt", "bk", "lf", "ft", "up", "dn" };
 static qboolean
 Sky_LoadSkys (cvar_t *cvar)
 {

@@ -32,8 +32,8 @@ static const char rcsid[] =
 #include "model.h"
 #include "render.h"
 
-entity_t *traceline_entity[MAX_EDICTS];
-int traceline_entities;
+static entity_t *traceline_entity[MAX_EDICTS];
+static int traceline_entities;
 
 /*
 ================

@@ -41,15 +41,15 @@ static const char rcsid[] =
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
-cvar_t *gl_constretch;
-cvar_t *cl_verstring;					/* FIXME: Move this? */
+static cvar_t *gl_constretch;
+static cvar_t *cl_verstring;					/* FIXME: Move this? */
 
-cvar_t *hud_chsize;
-cvar_t *hud_chflash;
-cvar_t *hud_chspeed;
-cvar_t *hud_chalpha;
+static cvar_t *hud_chsize;
+static cvar_t *hud_chflash;
+static cvar_t *hud_chspeed;
+static cvar_t *hud_chalpha;
 
-GLuint	ch_textures[NUM_CROSSHAIRS];			// crosshair texture
+static GLuint	ch_textures[NUM_CROSSHAIRS];			// crosshair texture
 
 /*
 ===============

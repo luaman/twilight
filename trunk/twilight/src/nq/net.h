@@ -320,9 +320,5 @@ void        SchedulePollProcedure (PollProcedure * pp, double timeOffset);
 
 extern qboolean tcpipAvailable;
 
-extern qboolean slistInProgress;
-extern qboolean slistSilent;
-extern qboolean slistLocal;
-
 #endif // __NET_H
 

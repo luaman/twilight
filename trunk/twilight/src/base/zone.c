@@ -35,7 +35,7 @@ static const char rcsid[] =
 #include "zone.h"
 #include "stdlib.h"
 
-memzone_t *zonechain = NULL;
+static memzone_t *zonechain = NULL;
 
 void *_Zone_AllocName (char *name, size_t size, char *filename, int fileline)
 {

@@ -40,11 +40,6 @@ struct mdfour {
 	Uint32 totalN;
 };
 
-void mdfour_begin (struct mdfour *md); // old: MD4Init
-void mdfour_update (struct mdfour *md, unsigned char *in, int n); //old: MD4Update
-void mdfour_result (struct mdfour *md, unsigned char *out); // old: MD4Final
-void mdfour (unsigned char *out, unsigned char *in, int n);
-
 Uint32 Com_BlockChecksum (void *buffer, int length);
 
 #endif	// __MDFOUR_H

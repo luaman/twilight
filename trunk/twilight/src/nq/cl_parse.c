@@ -46,7 +46,7 @@ static const char rcsid[] =
 #include "sky.h"
 #include "teamplay.h"
 
-char       *svc_strings[] = {
+static char       *svc_strings[] = {
 	"svc_bad",
 	"svc_nop",
 	"svc_disconnect",

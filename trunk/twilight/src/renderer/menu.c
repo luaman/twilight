@@ -163,17 +163,17 @@ M_DrawCheckbox (int x, int y, int on)
 	M_Print (x, y, (on) ? "[*]" : "[ ]");
 }
 
-Uint8	trans_table_ident[256];
-Uint8	trans_table_cur[256];
+static Uint8	trans_table_ident[256];
+static Uint8	trans_table_cur[256];
 
-void
+static void
 M_DrawTransPicTranslate (int x, int y, qpic_t *pic)
 {
 	Draw_TransPicTranslate (x + ((vid.width_2d - 320) >> 1), y, pic,
 			trans_table_cur);
 }
 
-void
+static void
 M_Trans_Table_New (void)
 {
 	int i;
@@ -181,7 +181,7 @@ M_Trans_Table_New (void)
 		trans_table_cur[i] = trans_table_ident[i];
 }
 
-void
+static void
 M_Trans_Table_Trans (int from, int to)
 {
 	int		i;

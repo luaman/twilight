@@ -82,15 +82,15 @@ static const char rcsid[] =
 
 int nostdout = 0;
 
-Uint32 sys_sleep;
+static Uint32 sys_sleep;
 
 char *qdate = __DATE__;
 
-cvar_t *sys_asciionly;
-cvar_t *sys_extrasleep;
-cvar_t *sys_logname;
+static cvar_t *sys_asciionly;
+static cvar_t *sys_extrasleep;
+static cvar_t *sys_logname;
 
-int sys_gametypes;
+static int sys_gametypes;
 
 char logname[MAX_OSPATH] = "";
 
@@ -98,7 +98,6 @@ double curtime = 0;
 
 qboolean isDedicated;
 qboolean do_stdin = true;
-qboolean stdin_ready;
 
 #ifdef _WIN32
 HANDLE semaphore;
@@ -459,10 +458,6 @@ Sys_ConsoleInput (void)
 	int				len;
 
 	if (!do_stdin)
-		return NULL;
-
-	if (!stdin_ready)
-		// the select didn't say it was ready
 		return NULL;
 
 	len = read (0, text, sizeof (text));

@@ -43,8 +43,8 @@ static const char rcsid[] =
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
 char			*pr_strings;
-ddef_t			*pr_fielddefs;
-ddef_t			*pr_globaldefs;
+static ddef_t			*pr_fielddefs;
+static ddef_t			*pr_globaldefs;
 dstatement_t	*pr_statements;
 globalvars_t	*pr_global_struct;
 float			*pr_globals;		// same as pr_global_struct
@@ -56,7 +56,7 @@ unsigned short pr_crc;
 static memzone_t *progs_memzone;
 static memzone_t *edictstring_memzone;
 
-Uint type_size[8] =
+static Uint type_size[8] =
 {
 	1,
 	sizeof (string_t) / 4,
@@ -71,18 +71,18 @@ Uint type_size[8] =
 static ddef_t *ED_FieldAtOfs (int ofs);
 static qboolean ED_ParseEpair (void *base, ddef_t *key, char *s);
 
-cvar_t *nomonsters;
-cvar_t *gamecfg;
-cvar_t *scratch1;
-cvar_t *scratch2;
-cvar_t *scratch3;
-cvar_t *scratch4;
-cvar_t *savedgamecfg;
-cvar_t *saved1;
-cvar_t *saved2;
-cvar_t *saved3;
-cvar_t *saved4;
-cvar_t *pr_checkextension;
+static cvar_t *nomonsters;
+static cvar_t *gamecfg;
+static cvar_t *scratch1;
+static cvar_t *scratch2;
+static cvar_t *scratch3;
+static cvar_t *scratch4;
+static cvar_t *savedgamecfg;
+static cvar_t *saved1;
+static cvar_t *saved2;
+static cvar_t *saved3;
+static cvar_t *saved4;
+static cvar_t *pr_checkextension;
 
 // Used to flag whether or not to use LordHavoc's optional runtime bounds checking
 // optional since some mods won't run with it :) Should be off by default...

@@ -34,14 +34,14 @@ static const char rcsid[] =
 #include "model.h"
 #include "cvar.h"
 
-cvar_t *r_novis;
+static cvar_t *r_novis;
 
 static mplane_t frustum[4];
 
 static Uint	 vis_pvsframecount;
 Uint		 vis_framecount;
-mleaf_t		*vis_viewleaf, *vis_oldviewleaf;
-model_t		*vis_model;
+mleaf_t		*vis_viewleaf;
+static mleaf_t	*vis_oldviewleaf;
 
 void
 Vis_Init_Cvars (void)

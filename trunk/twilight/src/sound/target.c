@@ -37,10 +37,10 @@ static const char rcsid[] =
 #include "sound.h"
 #include "sys.h"
 
-cvar_t *snd_bits;
-cvar_t *snd_rate;
-cvar_t *snd_channels;
-cvar_t *snd_samples;
+static cvar_t *snd_bits;
+static cvar_t *snd_rate;
+static cvar_t *snd_channels;
+static cvar_t *snd_samples;
 
 static dma_t the_shm;
 static qboolean snd_inited;
@@ -165,13 +165,11 @@ SNDDMA_Init (void)
 	SDL_PauseAudio (0);
 
 	/* Fill the audio DMA information block */
-	the_shm.splitbuffer = 0;
 	the_shm.samplebits = (obtained.format & 0xFF);
 	the_shm.speed = obtained.freq;
 	the_shm.channels = obtained.channels;
 	the_shm.samples = obtained.samples << 4;
 	the_shm.samplepos = 0;
-	the_shm.submission_chunk = 1;
 	the_shm.buffer = Z_Malloc (the_shm.samples * (the_shm.samplebits >> 3));
 	if (!the_shm.buffer)
 	{

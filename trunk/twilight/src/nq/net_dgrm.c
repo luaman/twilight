@@ -79,12 +79,12 @@ unsigned long inet_addr (const char *cp);
 static int  net_landriverlevel;
 
 /* statistic counters */
-int         packetsSent = 0;
-int         packetsReSent = 0;
-int         packetsReceived = 0;
-int         receivedDuplicateCount = 0;
-int         shortPacketCount = 0;
-int         droppedDatagrams;
+static int         packetsSent = 0;
+static int         packetsReSent = 0;
+static int         packetsReceived = 0;
+static int         receivedDuplicateCount = 0;
+static int         shortPacketCount = 0;
+static int         droppedDatagrams;
 
 static int  myDriverLevel;
 
@@ -110,8 +110,8 @@ StrAddr (struct qsockaddr *addr)
 
 
 #ifdef BAN_TEST
-unsigned long banAddr = 0x00000000;
-unsigned long banMask = 0xffffffff;
+static unsigned long banAddr = 0x00000000;
+static unsigned long banMask = 0xffffffff;
 
 static void
 NET_Ban_f (void)
@@ -505,7 +505,7 @@ static int  testDriver;
 static int  testSocket;
 
 static void Test_Poll (void);
-PollProcedure testPollProcedure = { NULL, 0.0, Test_Poll, NULL };
+static PollProcedure testPollProcedure = { NULL, 0.0, Test_Poll, NULL };
 
 static void
 Test_Poll (void)
@@ -633,7 +633,7 @@ static int  test2Driver;
 static int  test2Socket;
 
 static void Test2_Poll (void);
-PollProcedure test2PollProcedure = { NULL, 0.0, Test2_Poll, NULL };
+static PollProcedure test2PollProcedure = { NULL, 0.0, Test2_Poll, NULL };
 
 static void
 Test2_Poll (void)

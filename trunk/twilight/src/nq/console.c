@@ -46,24 +46,23 @@ static const char rcsid[] =
 
 extern void Size_Changed2D (cvar_t *cvar);
 
-memzone_t *con_zone;
+static memzone_t *con_zone;
 
-int con_ormask;
+static int con_ormask;
 console_t *con;
 
-int con_linewidth;						// characters across screen
+static int con_linewidth;						// characters across screen
 
-float con_cursorspeed = 4;
+static float con_cursorspeed = 4;
 qboolean con_forcedup;					// because no entities to refresh
 
 
-cvar_t *con_notifytime;
+static cvar_t *con_notifytime;
 
 #define NUM_CON_TIMES 4
-double con_cleartime;
+static double con_cleartime;
 
-int con_vislines;
-int con_notifylines;					// scan lines to clear for notify lines
+static int con_vislines;
 
 extern char key_lines[32][MAX_INPUTLINE];
 extern int edit_line;

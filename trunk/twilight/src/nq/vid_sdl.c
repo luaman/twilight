@@ -45,16 +45,16 @@ static const char rcsid[] =
 #include "gl_arrays.h"
 #include "palette.h"
 
-cvar_t *width_2d;
-cvar_t *height_2d;
-cvar_t *text_scale;
-cvar_t *i_keypadmode;
-cvar_t *m_filter;
-cvar_t *_windowed_mouse;
-cvar_t *gl_driver;
+static cvar_t *width_2d;
+static cvar_t *height_2d;
+static cvar_t *text_scale;
+static cvar_t *i_keypadmode;
+static cvar_t *m_filter;
+static cvar_t *_windowed_mouse;
+static cvar_t *gl_driver;
 
 qboolean VID_Inited;
-qboolean keypadmode = false;
+static qboolean keypadmode = false;
 
 static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
