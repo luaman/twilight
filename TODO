@@ -36,5 +36,11 @@ Stuff that can probably wait:
 
   - Add PNG loader
   - Zip archive support
+  - The New Protocol(TM)
   - Enhance the binds menu for new features?
+  - improve sin/cos lookup tables and stop using the math.h functions
+  - Cvar improvements
+    - Implement CVAR_TEMP for progs-created vars
+    - Implement Cvar_Clean to delete CVAR_TEMPs that aren't CVAR_USER
+    - Implement flag manipulation functions for internal use
 

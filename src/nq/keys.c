@@ -183,7 +183,7 @@ Key_Console (int key)
 	if (key == K_TAB) {					// command completion
 		cmd = Cmd_CompleteCommand (key_lines[edit_line] + 1);
 		if (!cmd)
-			cmd = Cvar_CompleteVariable (key_lines[edit_line] + 1);
+			cmd = Cvar_TabComplete (key_lines[edit_line] + 1);
 		if (cmd) {
 			Q_strcpy (key_lines[edit_line] + 1, cmd);
 			key_linepos = Q_strlen (cmd) + 1;

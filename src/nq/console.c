@@ -48,7 +48,7 @@ int         con_x;						// offset in current line for next
 										// print
 char       *con_text = 0;
 
-cvar_t      con_notifytime = { "con_notifytime", "3" };	// seconds
+cvar_t     *con_notifytime;
 
 #define	NUM_CON_TIMES 4
 float       con_times[NUM_CON_TIMES];	// realtime time the line was generated
@@ -239,7 +239,8 @@ Con_Init (void)
 //
 // register our commands
 //
-	Cvar_RegisterVariable (&con_notifytime);
+	// time in seconds
+	con_notifytime = Cvar_Get ("con_notifytime", "3", CVAR_NONE, NULL);
 
 	Cmd_AddCommand ("toggleconsole", Con_ToggleConsole_f);
 	Cmd_AddCommand ("messagemode", Con_MessageMode_f);
@@ -429,7 +430,7 @@ Con_DPrintf (char *fmt, ...)
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
 
-	if (!developer.value)
+	if (!developer->value[0])
 		return;							// don't confuse non-developers with
 	// techie stuff...
 
@@ -540,7 +541,7 @@ Con_DrawNotify (void)
 		if (time == 0)
 			continue;
 		time = realtime - time;
-		if (time > con_notifytime.value)
+		if (time > con_notifytime->value[0])
 			continue;
 		text = con_text + (i % con_totallines) * con_linewidth;
 

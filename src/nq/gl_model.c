@@ -38,7 +38,7 @@ byte        mod_novis[MAX_MAP_LEAFS / 8];
 model_t     mod_known[MAX_MOD_KNOWN];
 int         mod_numknown;
 
-cvar_t      gl_subdivide_size = { "gl_subdivide_size", "128", true };
+cvar_t     *gl_subdivide_size;
 
 /*
 ===============
@@ -48,7 +48,8 @@ Mod_Init
 void
 Mod_Init (void)
 {
-	Cvar_RegisterVariable (&gl_subdivide_size);
+	gl_subdivide_size = Cvar_Get ("gl_subdivide_size", "128", CVAR_ARCHIVE,
+			NULL);
 	memset (mod_novis, 0xff, sizeof (mod_novis));
 }
 

@@ -34,8 +34,8 @@ static char *safeargvs[NUM_SAFE_ARGVS] =
 	"-dibonly"
 };
 
-cvar_t      registered = { "registered", "0" };
-cvar_t      cmdline = { "cmdline", "0", false, true };
+cvar_t      *registered;
+cvar_t      *cmdline;
 
 qboolean    com_modified;				// set true if using non-id files
 
@@ -1022,7 +1022,7 @@ COM_CheckRegistered (void)
 
 	COM_CloseFile (h);
 
-	Cvar_Set ("registered", "1");
+	Cvar_Set (registered, "1");
 	Con_Printf ("Playing registered version.\n");
 }
 
@@ -1122,11 +1122,9 @@ COM_Init (void)
 		LittleFloat = FloatSwap;
 	}
 
-	Cvar_RegisterVariable (&registered);
-	Cvar_RegisterVariable (&cmdline);
+	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
+	cmdline = Cvar_Get ("cmdline", com_cmdline, CVAR_USERINFO, NULL);
 	Cmd_AddCommand ("path", COM_Path_f);
-
-	Cvar_Set ("cmdline", com_cmdline);
 
 	COM_InitFilesystem ();
 	COM_CheckRegistered ();

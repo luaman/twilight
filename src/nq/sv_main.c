@@ -37,27 +37,28 @@ void
 SV_Init (void)
 {
 	int         i;
-	extern cvar_t sv_maxvelocity;
-	extern cvar_t sv_gravity;
-	extern cvar_t sv_nostep;
-	extern cvar_t sv_friction;
-	extern cvar_t sv_edgefriction;
-	extern cvar_t sv_stopspeed;
-	extern cvar_t sv_maxspeed;
-	extern cvar_t sv_accelerate;
-	extern cvar_t sv_idealpitchscale;
-	extern cvar_t sv_aim;
+	extern cvar_t *sv_maxvelocity;
+	extern cvar_t *sv_gravity;
+	extern cvar_t *sv_nostep;
+	extern cvar_t *sv_friction;
+	extern cvar_t *sv_edgefriction;
+	extern cvar_t *sv_stopspeed;
+	extern cvar_t *sv_maxspeed;
+	extern cvar_t *sv_accelerate;
+	extern cvar_t *sv_idealpitchscale;
+	extern cvar_t *sv_aim;
 
-	Cvar_RegisterVariable (&sv_maxvelocity);
-	Cvar_RegisterVariable (&sv_gravity);
-	Cvar_RegisterVariable (&sv_friction);
-	Cvar_RegisterVariable (&sv_edgefriction);
-	Cvar_RegisterVariable (&sv_stopspeed);
-	Cvar_RegisterVariable (&sv_maxspeed);
-	Cvar_RegisterVariable (&sv_accelerate);
-	Cvar_RegisterVariable (&sv_idealpitchscale);
-	Cvar_RegisterVariable (&sv_aim);
-	Cvar_RegisterVariable (&sv_nostep);
+	sv_maxvelocity = Cvar_Get ("sv_maxvelocity", "2000", CVAR_NONE, NULL);
+	sv_gravity = Cvar_Get ("sv_gravity", "800", CVAR_USERINFO, NULL);
+	sv_friction = Cvar_Get ("sv_friction", "4", CVAR_USERINFO, NULL);
+	sv_edgefriction = Cvar_Get ("edgefriction", "2", CVAR_NONE, NULL);
+	sv_stopspeed = Cvar_Get ("sv_stopspeed", "100", CVAR_NONE, NULL);
+	sv_maxspeed = Cvar_Get ("sv_maxspeed", "320", CVAR_USERINFO, NULL);
+	sv_accelerate = Cvar_Get ("sv_accelerate", "10", CVAR_NONE, NULL);
+	sv_idealpitchscale = Cvar_Get ("sv_idealpitchscale", "0.8", CVAR_NONE,
+			NULL);
+	sv_aim = Cvar_Get ("sv_aim", "0.93", CVAR_NONE, NULL);
+	sv_nostep = Cvar_Get ("sv_nostep", "0", CVAR_NONE, NULL);
 
 	for (i = 0; i < MAX_MODELS; i++)
 		snprintf (localmodels[i], sizeof (localmodels[i]), "*%i", i);
@@ -204,7 +205,7 @@ SV_SendServerinfo (client_t *client)
 	MSG_WriteLong (&client->message, PROTOCOL_VERSION);
 	MSG_WriteByte (&client->message, svs.maxclients);
 
-	if (!coop.value && deathmatch.value)
+	if (!coop->value[0] && deathmatch->value[0])
 		MSG_WriteByte (&client->message, GAME_DEATHMATCH);
 	else
 		MSG_WriteByte (&client->message, GAME_COOP);
@@ -1041,8 +1042,8 @@ SV_SpawnServer (char *server)
 	int         i;
 
 	// let's not have any servers with no name
-	if (hostname.string[0] == 0)
-		Cvar_Set ("hostname", "UNNAMED");
+	if (hostname->string[0] == 0)
+		Cvar_Set (hostname, "UNNAMED");
 	scr_centertime_off = 0;
 
 	Con_DPrintf ("SpawnServer: %s\n", server);
@@ -1057,15 +1058,17 @@ SV_SpawnServer (char *server)
 //
 // make cvars consistant
 //
-	if (coop.value)
-		Cvar_SetValue ("deathmatch", 0);
-	current_skill = (int) (skill.value + 0.5);
+	if (coop->value[0])
+		Cvar_Set (deathmatch, "0");
+	if (deathmatch->value[0])
+		Cvar_Set (coop, "0");
+	current_skill = (int) (skill->value[0] + 0.5);
 	if (current_skill < 0)
 		current_skill = 0;
 	if (current_skill > 3)
 		current_skill = 3;
 
-	Cvar_SetValue ("skill", (float) current_skill);
+	Cvar_Set (skill, va("%i", current_skill));
 
 //
 // set up the new server
@@ -1147,10 +1150,10 @@ SV_SpawnServer (char *server)
 	ent->v.solid = SOLID_BSP;
 	ent->v.movetype = MOVETYPE_PUSH;
 
-	if (coop.value)
-		pr_global_struct->coop = coop.value;
+	if (coop->value[0])
+		pr_global_struct->coop = coop->value[0];
 	else
-		pr_global_struct->deathmatch = deathmatch.value;
+		pr_global_struct->deathmatch = deathmatch->value[0];
 
 	pr_global_struct->mapname = sv.name - pr_strings;
 #ifdef QUAKE2

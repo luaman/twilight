@@ -72,7 +72,7 @@ Host_Status_f (void)
 	} else
 		print = SV_ClientPrintf;
 
-	print ("host:    %s\n", Cvar_VariableString ("hostname"));
+	print ("host:    %s\n", hostname->string);
 	print ("version: %s\n", VERSION);
 	if (tcpipAvailable)
 		print ("tcp/ip:  %s\n", my_tcpip_address);
@@ -590,7 +590,7 @@ Host_Loadgame_f (void)
 // this silliness is so we can load 1.06 save files, which have float skill values
 	fscanf (f, "%f\n", &tfloat);
 	current_skill = (int) (tfloat + 0.1);
-	Cvar_SetValue ("skill", (float) current_skill);
+	Cvar_Set (skill, va("%i", current_skill));
 
 #ifdef QUAKE2
 	Cvar_SetValue ("deathmatch", 0);
@@ -876,7 +876,7 @@ Host_Name_f (void)
 	char       *newName;
 
 	if (Cmd_Argc () == 1) {
-		Con_Printf ("\"name\" is \"%s\"\n", cl_name.string);
+		Con_Printf ("\"name\" is \"%s\"\n", _cl_name->string[0]);
 		return;
 	}
 	if (Cmd_Argc () == 2)
@@ -886,9 +886,9 @@ Host_Name_f (void)
 	newName[15] = 0;
 
 	if (cmd_source == src_command) {
-		if (Q_strcmp (cl_name.string, newName) == 0)
+		if (Q_strcmp (_cl_name->string, newName) == 0)
 			return;
-		Cvar_Set ("_cl_name", newName);
+		Cvar_Set (_cl_name, newName);
 		if (cls.state == ca_connected)
 			Cmd_ForwardToServer ();
 		return;
@@ -951,7 +951,7 @@ Host_Say (qboolean teamonly)
 	if (!fromServer)
 		snprintf (text, sizeof (text), "%c%s: ", 1, save->name);
 	else
-		snprintf (text, sizeof (text), "%c<%s> ", 1, hostname.string);
+		snprintf (text, sizeof (text), "%c<%s> ", 1, hostname->string);
 
 	j = sizeof (text) - 2 - Q_strlen (text);	// -2 for /n and null
 	// terminator
@@ -964,7 +964,7 @@ Host_Say (qboolean teamonly)
 	for (j = 0, client = svs.clients; j < svs.maxclients; j++, client++) {
 		if (!client || !client->active || !client->spawned)
 			continue;
-		if (teamplay.value && teamonly
+		if (teamplay->value[0] && teamonly
 			&& client->edict->v.team != save->edict->v.team)
 			continue;
 		host_client = client;
@@ -1052,8 +1052,9 @@ Host_Color_f (void)
 	int         playercolor;
 
 	if (Cmd_Argc () == 1) {
-		Con_Printf ("\"color\" is \"%i %i\"\n", ((int) cl_color.value) >> 4,
-					((int) cl_color.value) & 0x0f);
+		Con_Printf ("\"color\" is \"%i %i\"\n",
+				((int) _cl_color->value[0]) >> 4,
+				((int) _cl_color->value[0]) & 0x0f);
 		Con_Printf ("color <0-13> [0-13]\n");
 		return;
 	}
@@ -1075,7 +1076,7 @@ Host_Color_f (void)
 	playercolor = top * 16 + bottom;
 
 	if (cmd_source == src_command) {
-		Cvar_SetValue ("_cl_color", playercolor);
+		Cvar_Set (_cl_color, va("%i", playercolor));
 		if (cls.state == ca_connected)
 			Cmd_ForwardToServer ();
 		return;
@@ -1360,7 +1361,7 @@ Host_Kick_f (void)
 			if (cls.state == ca_dedicated)
 				who = "Console";
 			else
-				who = cl_name.string;
+				who = _cl_name->string;
 		else
 			who = save->name;
 

@@ -875,7 +875,7 @@ _Datagram_CheckNewConnections (void)
 		MSG_WriteByte (&net_message, CCREP_SERVER_INFO);
 		dfunc.GetSocketAddr (acceptsock, &newaddr);
 		MSG_WriteString (&net_message, dfunc.AddrToString (&newaddr));
-		MSG_WriteString (&net_message, hostname.string);
+		MSG_WriteString (&net_message, hostname->string);
 		MSG_WriteString (&net_message, sv.name);
 		MSG_WriteByte (&net_message, net_activeconnections);
 		MSG_WriteByte (&net_message, svs.maxclients);
@@ -928,24 +928,24 @@ _Datagram_CheckNewConnections (void)
 	}
 
 	if (command == CCREQ_RULE_INFO) {
-		char       *prevCvarName;
-		cvar_t     *var;
+		char					   *prevCvarName;
+		struct cvar_foreach_s	   *id = NULL;
+		cvar_t					   *var = NULL;
 
 		// find the search start location
 		prevCvarName = MSG_ReadString ();
 		if (*prevCvarName) {
-			var = Cvar_FindVar (prevCvarName);
 			if (!var)
 				return NULL;
-			var = var->next;
+			var = Cvar_ForeachNext (id);
 		} else
-			var = cvar_vars;
+			id = Cvar_ForeachStart ();
 
 		// search for the next server cvar
 		while (var) {
-			if (var->info)
+			if (var->flags & CVAR_USERINFO)
 				break;
-			var = var->next;
+			var = Cvar_ForeachNext (id);
 		}
 
 		// send the response
@@ -957,7 +957,8 @@ _Datagram_CheckNewConnections (void)
 		if (var) {
 			MSG_WriteString (&net_message, var->name);
 			MSG_WriteString (&net_message, var->string);
-		}
+		} else
+			Cvar_ForeachEnd (id);
 		*((int *) net_message.data) =
 			BigLong (NETFLAG_CTL | (net_message.cursize & NETFLAG_LENGTH_MASK));
 		dfunc.Write (acceptsock, net_message.data, net_message.cursize,

@@ -311,14 +311,14 @@ CDAudio_Update (void)
 	if (!enabled)
 		return;
 
-	if (bgmvolume.value != cdvolume) {
+	if (bgmvolume->value[0] != cdvolume) {
 		if (cdvolume) {
-			Cvar_SetValue ("bgmvolume", 0.0);
-			cdvolume = bgmvolume.value;
+			Cvar_Set (bgmvolume, "0.0");
+			cdvolume = bgmvolume->value[0];
 			CDAudio_Pause ();
 		} else {
-			Cvar_SetValue ("bgmvolume", 1.0);
-			cdvolume = bgmvolume.value;
+			Cvar_Set (bgmvolume, "1.0");
+			cdvolume = bgmvolume->value[0];
 			CDAudio_Resume ();
 		}
 	}
