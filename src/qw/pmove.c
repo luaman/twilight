@@ -471,7 +471,8 @@ PM_WaterMove (void)
 	wishspeed = VectorNormalize (wishdir);
 
 	if (wishspeed > movevars.maxspeed) {
-		VectorScale (wishvel, movevars.maxspeed / wishspeed, wishvel);
+		wishspeed = movevars.maxspeed / wishspeed;
+		VectorScale (wishvel, wishspeed, wishvel);
 		wishspeed = movevars.maxspeed;
 	}
 	wishspeed *= 0.7;
@@ -534,7 +535,8 @@ PM_AirMove (void)
 // clamp to server defined max speed
 //
 	if (wishspeed > movevars.maxspeed) {
-		VectorScale (wishvel, movevars.maxspeed / wishspeed, wishvel);
+		wishspeed = movevars.maxspeed / wishspeed;
+		VectorScale (wishvel, wishspeed, wishvel);
 		wishspeed = movevars.maxspeed;
 	}
 //  if (pmove.waterjumptime)
@@ -816,7 +818,8 @@ SpectatorMove (void)
 	// clamp to server defined max speed
 	// 
 	if (wishspeed > movevars.spectatormaxspeed) {
-		VectorScale (wishvel, movevars.spectatormaxspeed / wishspeed, wishvel);
+		wishspeed = movevars.spectatormaxspeed / wishspeed;
+		VectorScale (wishvel, wishspeed, wishvel);
 		wishspeed = movevars.spectatormaxspeed;
 	}
 
@@ -830,7 +833,6 @@ SpectatorMove (void)
 
 	for (i = 0; i < 3; i++)
 		pmove.velocity[i] += accelspeed * wishdir[i];
-
 
 	// move
 	VectorMA (pmove.origin, frametime, pmove.velocity, pmove.origin);

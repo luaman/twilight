@@ -85,10 +85,11 @@ AddLightBlend (float r, float g, float b, float a2)
 	v_blend[3] = a = v_blend[3] + a2 * (1 - v_blend[3]);
 
 	a2 = a2 / a;
+	a = 1 - a2;
 
-	v_blend[0] = v_blend[0] * (1 - a2) + r * a2;
-	v_blend[1] = v_blend[1] * (1 - a2) + g * a2;
-	v_blend[2] = v_blend[2] * (1 - a2) + b * a2;
+	v_blend[0] = v_blend[0] * a + r * a2;
+	v_blend[1] = v_blend[1] * a + g * a2;
+	v_blend[2] = v_blend[2] * a + b * a2;
 }
 
 float       bubble_sintable[17], bubble_costable[17];
@@ -103,7 +104,7 @@ R_InitBubble (void)
 
 	// additional accuracy here
 	for (i = 16; i >= 0; i--) {
-		a = i / 16.0 * M_PI * 2;
+		a = i * (M_PI / 8.0);
 		*bub_sin++ = Q_sin (a);
 		*bub_cos++ = Q_cos (a);
 	}
@@ -175,9 +176,7 @@ R_RenderDlights (void)
 	if (!gl_flashblend->value)
 		return;
 
-	qglDepthMask (GL_FALSE);
 	qglDisable (GL_TEXTURE_2D);
-	qglEnable (GL_BLEND);
 	qglBlendFunc (GL_ONE, GL_ONE);
 
 	l = cl_dlights;
@@ -188,10 +187,8 @@ R_RenderDlights (void)
 	}
 
 	qglColor3f (1, 1, 1);
-	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDepthMask (GL_TRUE);
 }
 
 

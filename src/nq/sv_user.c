@@ -346,7 +346,8 @@ SV_AirMove (void)
 	VectorCopy (wishvel, wishdir);
 	wishspeed = VectorNormalize (wishdir);
 	if (wishspeed > sv_maxspeed->value) {
-		VectorScale (wishvel, sv_maxspeed->value / wishspeed, wishvel);
+		wishspeed = sv_maxspeed->value / wishspeed;
+		VectorScale (wishvel, wishspeed, wishvel);
 		wishspeed = sv_maxspeed->value;
 	}
 
