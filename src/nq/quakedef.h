@@ -173,5 +173,8 @@
 
 #define	SOUND_CHANNELS		8
 
+extern double host_frametime;
+extern double realtime;					// not bounded in any way, changed at
+
 #endif // __QUAKEDEF_H
 

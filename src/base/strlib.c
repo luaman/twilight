@@ -158,13 +158,13 @@ varargs versions of all text functions.
 char *
 va (char *format, ...)
 {
-        va_list     argptr;
-        static char string[4096];
-
-        va_start (argptr, format);
-        vsnprintf (string, sizeof (string), format, argptr);
-        va_end (argptr);
-
-        return string;
+	va_list     argptr;
+	static char string[4096];
+	
+	va_start (argptr, format);
+	vsnprintf (string, sizeof (string), format, argptr);
+	va_end (argptr);
+	
+	return string;
 }
 

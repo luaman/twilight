@@ -120,8 +120,7 @@ StripLength (int starttri, int startv)
 				m1 = check->vertindex[(k + 2) % 3];
 
 			stripverts[stripcount + 2] = check->vertindex[(k + 2) % 3];
-			striptris[stripcount] = j;
-			stripcount++;
+			striptris[stripcount++] = j;
 
 			used[j] = 2;
 			goto nexttri;
@@ -187,8 +186,7 @@ FanLength (int starttri, int startv)
 			m2 = check->vertindex[(k + 2) % 3];
 
 			stripverts[stripcount + 2] = m2;
-			striptris[stripcount] = j;
-			stripcount++;
+			striptris[stripcount++] = j;
 
 			used[j] = 2;
 			goto nexttri;

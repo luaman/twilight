@@ -45,7 +45,6 @@
 #include "TGL_funcs.h"
 
 #include "client.h"
-#include "gl_model.h"
 #include "mathlib.h"
 #include "render.h"
 
@@ -131,24 +130,6 @@ typedef struct {
 	int         surfwidth;				// in mipmapped texels
 	int         surfheight;				// in mipmapped texels
 } drawsurf_t;
-
-
-typedef enum {
-	pt_static, pt_grav, pt_slowgrav, pt_fire, pt_explode, pt_explode2, pt_blob,
-		pt_blob2
-} ptype_t;
-
-typedef struct particle_s {
-// driver-usable fields
-	vec3_t      org;
-	float       color;
-// drivers never touch the following fields
-	struct particle_s *next;
-	vec3_t      vel;
-	float       ramp;
-	float       die;
-	ptype_t     type;
-} particle_t;
 
 
 //====================================================
@@ -267,17 +248,12 @@ void        R_DrawWorld (void);
 void        R_RenderBrushPoly (msurface_t *fa);
 void        R_DrawWaterSurfaces (void);
 void        R_DrawParticles (void);
-void        R_RenderDlights (void);
 void        V_CalcBlend (void);
-void        R_AnimateLight (void);
 void        R_DrawBrushModel (entity_t *e);
-int         R_LightPoint (vec3_t p);
 void        GL_BuildLightmaps (void);
 void        R_ClearParticles (void);
 void        R_InitParticles (void);
 void        R_StoreEfrags (efrag_t **ppefrag);
-void		R_MarkLights (dlight_t *light, int bit, model_t *model);
-void		R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node);
 qboolean    R_CullBox (vec3_t mins, vec3_t maxs);
 void        R_DrawSkyChain (msurface_t *s);
 void        EmitBothSkyLayers (msurface_t *fa);

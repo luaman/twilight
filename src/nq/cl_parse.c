@@ -310,7 +310,6 @@ CL_ParseServerInfo (void)
 			return;
 		}
 		strcpy (sound_precache[numsounds], str);
-		S_TouchSound (str);
 	}
 
 //

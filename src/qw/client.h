@@ -128,18 +128,6 @@ typedef struct {
 //
 // client_state_t should hold all pieces of the client state
 //
-#define	MAX_DLIGHTS		32
-
-typedef struct {
-	int         key;					// so entities can reuse same entry
-	vec3_t      origin;
-	float       radius;
-	float       die;					// stop lighting after this time
-	float       decay;					// drop this each second
-	float       minlight;				// don't add when contributing less
-	float       color[3];
-} dlight_t;
-
 typedef struct {
 	int         length;
 	char        map[MAX_STYLESTRING];

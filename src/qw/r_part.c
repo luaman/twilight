@@ -33,16 +33,32 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "client.h"
+#include "common.h"
 #include "console.h"
 #include "cvar.h"
 #include "glquake.h"
-#include "mathlib.h"
 
 #define MAX_PARTICLES			2048	// default max # of particles at one
 										// time
 #define ABSOLUTE_MIN_PARTICLES	512		// no fewer than this no matter what's
 										// on the command line
+
+typedef enum {
+	pt_static, pt_grav, pt_slowgrav, pt_fire, pt_explode, pt_explode2, pt_blob,
+		pt_blob2
+} ptype_t;
+
+typedef struct particle_s {
+// driver-usable fields
+	vec3_t      org;
+	float       color;
+// drivers never touch the following fields
+	struct particle_s *next;
+	vec3_t      vel;
+	float       ramp;
+	float       die;
+	ptype_t     type;
+} particle_t;
 
 int         ramp1[8] = { 0x6f, 0x6d, 0x6b, 0x69, 0x67, 0x65, 0x63, 0x61 };
 int         ramp2[8] = { 0x6f, 0x6e, 0x6d, 0x6c, 0x6b, 0x6a, 0x68, 0x66 };
@@ -176,6 +192,7 @@ R_ReadPointFile_f (void)
 	int         c;
 	particle_t *p;
 	char        name[MAX_OSPATH];
+	extern cvar_t *cl_mapname;
 
 	snprintf (name, sizeof (name), "maps/%s.pts", cl_mapname->string);
 
