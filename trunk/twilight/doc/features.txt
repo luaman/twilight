@@ -13,7 +13,7 @@ Skies:
 Overbright support:
   We support 2x overbright for single texture, 4x overbright for
   multi-texture with GL_ARB_texture_env_combine, and unfortunately no
-  overbright for mtex without combine support.
+  overbright for multitexture without combine support.
 
 Particles:
   The particle engine has changed quite a bit, with effects that we
@@ -25,14 +25,14 @@ Lighting:
 
 Fullbright colors:
   Twilight has full support for fullbright colors on both alias models
-  are brush models, this can be turned off with the gl_fb cvar.
+  are brush models, this can be turned off with the gl_fb Cvar.
 
 Image formats:
   Twilight has support for loading a number of image formats.
     - Without SDL_Image: tga (limited), pcx, and lmp.
     - With SDL_Image: tga, png, jpg, pnm, tiff, xpm, bmp, lbm, pcx, and
       lmp.
-  All images that we attempt to load from pak files and wads can be
+  All images that we attempt to load from PAK files and wads can be
   loaded in any of the supported image formats, this includes the font,
   the console background, and the HUD elements.
 
@@ -57,7 +57,7 @@ Interpolation:
 
 Crosshairs:
   Twilight has several new crosshairs, and the ability to color the
-  crosshair both by cvar, or by the player's pants color.
+  crosshair both by Cvar, or by the player's pants color.
 
 Water warping:
   While underwater Twilight uses a very different distortion effect,
@@ -65,15 +65,15 @@ Water warping:
 
 Team messages:
   Twilight has support for % expansion of a number of variables in a
-  manner similar to Qizmo (This defaults off, the cl_parsesay cvar
+  manner similar to Qizmo (This defaults off, the cl_parsesay Cvar
   controls this):
    %%: Used to give a single % in the message.
    %a: Current armor value.
    %A: Current armor type. (R, Y, G, or 'NONE!')
    %h: Current health value.
-   %[a]: Roughly equilivant to '%Aa:%a', with brackets around it if the
+   %[a]: Roughly equivalent to '%Aa:%a', with brackets around it if the
          armor is equal to or below 50.
-   %[h]: Roughly equilivant to 'h:%h', with brackets around it if the
+   %[h]: Roughly equivalent to 'h:%h', with brackets around it if the
          health is equal to or below 50.
 
    Location messages (see below)
@@ -100,7 +100,7 @@ Stability:
   hear about it, so please report all problems to
   twilight-devel@icculus.org.
 
-Fallback:
+Fall-back:
   In the event of being unable to locate any gamedata at all, Twilight
   will still start and give you a basic usable console.
 
@@ -123,13 +123,13 @@ Probably a lot more:
    texturing projects.)
 
 1: The effect is from LordHavoc's DarkPlaces, and is controlled by a
-   number of cvars:
+   number of Cvars:
      r_drawexplosions (Controls if the explosions are drawn.)
      r_explosionclip (Controls if the explosion vertices are bound by
                       the world geometry.)
      r_explosioncolor_[rgba] (Controls the explosion colors.)
 
-2: 'loc add <description>' adds a marker at your corrent location, with
+2: 'loc add <description>' adds a marker at your current location, with
    the given description.
    'loc rename <description>' changes the description of the nearest
    marker.
