@@ -50,10 +50,12 @@ extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
 extern int part_tex_dot;
 extern int part_tex_spark;
 extern int part_tex_smoke;
+extern int part_tex_smoke_beam;
 extern int part_tex_smoke_ring;
 
 static cvar_t *r_particles, *r_particle_physics;
-static cvar_t *r_base_particles, *r_cone_particles, *r_tube_particles;
+static cvar_t *r_base_particles, *r_cone_particles, *r_tube_particles,
+	*r_beam_particles;
 
 static int ramp1[8] = { 0x6f, 0x6d, 0x6b, 0x69, 0x67, 0x65, 0x63, 0x61 };
 static int ramp2[8] = { 0x6f, 0x6e, 0x6d, 0x6c, 0x6b, 0x6a, 0x68, 0x66 };
@@ -71,6 +73,49 @@ typedef enum {
 	pt_rtrail, pt_railtrail
 } ptype_t;
 
+typedef struct {
+	vec3_t	org1;
+	vec3_t	org2;
+
+	vec3_t	normal;
+	vec4_t	color;
+	float	scale;
+	float	ramp;
+	float	die;
+	float	rstep;
+	ptype_t	type;
+} beam_particle_t;
+
+static beam_particle_t *beam_particles, **free_beam_particles;
+static int num_beam_particles, max_beam_particles;
+
+inline qboolean
+new_beam_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
+		float ramp, float rstep, float scale, float die)
+{
+	beam_particle_t	*p;
+	vec3_t			normal;
+
+	if (num_beam_particles >= max_beam_particles)	// Out of particles.
+		return false;
+
+	p = &beam_particles[num_beam_particles++];
+	p->type = type;
+	VectorCopy (org1, p->org1);
+	VectorCopy (org2, p->org2);
+	VectorCopy4 (color, p->color);
+	p->ramp = ramp;
+	p->rstep = rstep;
+	p->die = cl.time + die;
+	p->scale = scale;
+
+	VectorSubtract (org1, org2, normal);
+	VectorNormalize (normal);
+	VectorCopy (normal, p->normal);
+
+	return true;
+}
+	
 typedef struct {
 	vec3_t	org1;
 	vec3_t	org2;
@@ -230,6 +275,7 @@ R_InitParticles (void)
 	r_base_particles = Cvar_Get ("r_base_particles", "1", CVAR_NONE, NULL);
 	r_cone_particles = Cvar_Get ("r_cone_particles", "1", CVAR_NONE, NULL);
 	r_tube_particles = Cvar_Get ("r_tube_particles", "1", CVAR_NONE, NULL);
+	r_beam_particles = Cvar_Get ("r_beam_particles", "1", CVAR_NONE, NULL);
 
 	r_particle_physics = Cvar_Get ("r_particle_physics", "0", CVAR_NONE, NULL);
 
@@ -243,6 +289,7 @@ R_InitParticles (void)
 	max_base_particles = max(max_base_particles, ABSOLUTE_MIN_PARTICLES);
 	max_cone_particles = max_base_particles;
 	max_tube_particles = max_base_particles;
+	max_beam_particles = max_base_particles;
 
 	base_particles = (base_particle_t *) calloc (max_base_particles,
 			sizeof (base_particle_t));
@@ -256,6 +303,10 @@ R_InitParticles (void)
 			sizeof (tube_particle_t));
 	free_tube_particles = (tube_particle_t **) calloc (max_tube_particles,
 			sizeof (tube_particle_t *));
+	beam_particles = (beam_particle_t *) calloc (max_beam_particles,
+			sizeof (beam_particle_t));
+	free_beam_particles = (beam_particle_t **) calloc (max_beam_particles,
+			sizeof (beam_particle_t *));
 }
 
 /*
@@ -317,6 +368,7 @@ R_ClearParticles (void)
 	num_base_particles = 0;
 	num_cone_particles = 0;
 	num_tube_particles = 0;
+	num_beam_particles = 0;
 }
 
 void
@@ -630,7 +682,7 @@ R_RailTrail (vec3_t start, vec3_t end)
 }
 
 void
-R_RocketTubeTrail (vec3_t start, vec3_t end, int type)
+R_RocketBeamTrail (vec3_t start, vec3_t end, int type)
 {
 	vec3_t	vec;
 	vec4_t	color;
@@ -640,10 +692,8 @@ R_RocketTubeTrail (vec3_t start, vec3_t end, int type)
 	len = VectorLength (vec);
 
 	if (len) {
-		VectorSet4 (color, 0.5, 0.1, 0.1, 0.2);
-		new_tube_particle (pt_rtrail, start, end, color, 0, 8, 5, 5, 15);
-		VectorSet4 (color, 0.5, 0.5, 0.1, 0.1);
-		new_tube_particle (pt_rtrail, start, end, color, 0, -8, 3, 3, 15);
+		VectorSet4 (color, 0.5, 0.2, 0.2, 0.5);
+		new_beam_particle (pt_rtrail, start, end, color, 0, 8, 10, 15);
 	}
 }
 
@@ -657,7 +707,7 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 	ptype_t		ptype;
 
 	if (type == 0) {
-		R_RocketTubeTrail (start, end, type);
+		R_RocketBeamTrail (start, end, type);
 		return;
 	}
 
@@ -991,6 +1041,7 @@ R_Draw_Base_Particles (void)
 
 extern float bubble_sintable[17], bubble_costable[17];
 
+#if 0
 /*
 ===============
 R_Move_Tube_Particles
@@ -1032,8 +1083,6 @@ R_Move_Tube_Particles (void)
 					p->color[2] += frametime * 0.40;
 					p->color[3] += frametime * 0.40;
 				}
-				p->scale1 += frametime * 1.5;
-				p->scale2 += frametime * 1.6;
 				break;
 			default:
 				break;
@@ -1065,8 +1114,6 @@ R_Draw_Tube_Particles (void)
 	vec3_t			v_up, v_right;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke);
-	if (gl_cull->ivalue)
-		qglDisable (GL_CULL_FACE);
 
 	activeparticles = 0;
 	maxparticle = -1;
@@ -1146,9 +1193,151 @@ R_Draw_Tube_Particles (void)
 			maxparticle--;
 	}
 	num_tube_particles = activeparticles;
+}
+#endif
 
-	if (gl_cull->ivalue)
-		qglEnable (GL_CULL_FACE);
+/*
+===============
+R_Move_Beam_Particles
+===============
+*/
+static void
+R_Move_Beam_Particles (void)
+{
+	beam_particle_t	*p;
+	int				i, j, activeparticles, maxparticle;
+	float			frametime;
+
+	frametime = cl.time - cl.oldtime;
+
+	activeparticles = 0;
+	maxparticle = -1;
+	j = 0;
+	v_index = 0;
+	i_index = 0;
+
+	for (i = 0, p = beam_particles; i < num_beam_particles; i++, p++) {
+		if (p->die <= cl.time) {
+			free_beam_particles[j++] = p;
+			continue;
+		}
+
+		maxparticle = i;
+		activeparticles++;
+
+		switch (p->type) {
+			case pt_rtrail:
+				p->ramp += frametime * p->rstep;
+
+				p->color[3] -= frametime * 0.4;
+				if (p->color[3] <= 0)
+					p->die = -1;
+				if (p->color[1] < p->color[0]) {
+					p->color[1] += frametime * 0.40;
+					p->color[2] += frametime * 0.40;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	i = 0;
+	while (maxparticle >= activeparticles) {
+		*free_beam_particles[i++] = beam_particles[maxparticle--];
+		while (maxparticle >= activeparticles &&
+				beam_particles[maxparticle].die <= cl.time)
+			maxparticle--;
+	}
+	num_beam_particles = activeparticles;
+}
+
+static inline void
+DrawBeam (vec3_t p1, vec3_t p2, vec3_t normal, vec4_t color, float scale)
+{
+	float	dp;
+	vec3_t	v_up, v_right1, v_right2, v_diff;
+
+	VectorSubtract (r_origin, p1, v_diff);
+	CrossProduct (normal, v_diff, v_right1);
+	VectorNormalizeFast (v_right1);
+
+	VectorSubtract (r_origin, p1, v_diff);
+	CrossProduct (normal, v_diff, v_right2);
+	VectorNormalizeFast (v_right2);
+
+	VectorCopy (normal, v_up);
+
+	VectorTwiddle(p1, v_up, -scale, v_right1,  scale, 1,v_array_v(v_index + 0));
+	VectorTwiddle(p1, v_up,  scale, v_right1, -scale, 1,v_array_v(v_index + 1));
+	VectorTwiddle(p2, v_up,  scale, v_right2, -scale, 1,v_array_v(v_index + 2));
+	VectorTwiddle(p2, v_up, -scale, v_right2,  scale, 1,v_array_v(v_index + 3));
+
+	VectorCopy4 (color, c_array_v(v_index + 0));
+	VectorCopy4 (color, c_array_v(v_index + 1));
+	VectorCopy4 (color, c_array_v(v_index + 2));
+	VectorCopy4 (color, c_array_v(v_index + 3));
+
+	dp = DotProduct(p1, normal) / 64;
+	VectorSet2 (tc_array_v(v_index + 0), 1, dp);
+	VectorSet2 (tc_array_v(v_index + 1), 0, dp);
+	dp = DotProduct(p2, normal) / 64;
+	VectorSet2 (tc_array_v(v_index + 2), 0, dp);
+	VectorSet2 (tc_array_v(v_index + 3), 1, dp);
+}
+
+/*
+===============
+R_Draw_Beam_Particles
+===============
+*/
+static void
+R_Draw_Beam_Particles (void)
+{
+	beam_particle_t	*p;
+	int				j, k, activeparticles, maxparticle;
+
+	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_beam);
+	activeparticles = 0;
+	maxparticle = -1;
+	j = 0;
+	v_index = 0;
+
+	for (k = 0, p = beam_particles; k < num_beam_particles; k++, p++) {
+		if (p->die <= cl.time) {
+			free_beam_particles[j++] = p;
+			continue;
+		}
+
+		maxparticle = k;
+		activeparticles++;
+
+		DrawBeam (p->org1, p->org2, p->normal, p->color, p->scale);
+
+		v_index += 4;
+		if ((v_index + 4) > MAX_VERTEX_ARRAYS) {
+			TWI_PreVDraw (0, v_index);
+			qglDrawArrays (GL_QUADS, 0, v_index);
+			TWI_PostVDraw ();
+			v_index = 0;
+		}
+	}
+
+	if (v_index) {
+		TWI_PreVDraw (0, v_index);
+		qglDrawArrays (GL_QUADS, 0, v_index);
+		TWI_PostVDraw ();
+		v_index = 0;
+	}
+
+	k = 0;
+	while (maxparticle >= activeparticles) {
+		*free_beam_particles[k++] = beam_particles[maxparticle--];
+		while (maxparticle >= activeparticles &&
+				beam_particles[maxparticle].die <= cl.time)
+			maxparticle--;
+	}
+	num_beam_particles = activeparticles;
 }
 
 /*
@@ -1259,8 +1448,6 @@ R_Draw_Cone_Particles (void)
 	float			*bub_sin, *bub_cos;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_ring);
-	if (gl_cull->ivalue)
-		qglDisable (GL_CULL_FACE);
 
 	activeparticles = 0;
 	maxparticle = -1;
@@ -1338,9 +1525,6 @@ R_Draw_Cone_Particles (void)
 			maxparticle--;
 	}
 	num_cone_particles = activeparticles;
-
-	if (gl_cull->ivalue)
-		qglEnable (GL_CULL_FACE);
 }
 
 /*
@@ -1353,7 +1537,8 @@ R_MoveParticles (void)
 {
 	R_Move_Base_Particles();
 	R_Move_Cone_Particles();
-	R_Move_Tube_Particles();
+//	R_Move_Tube_Particles();
+	R_Move_Beam_Particles();
 }
 
 /*
@@ -1366,8 +1551,17 @@ R_DrawParticles (void)
 {
 	qglEnableClientState (GL_COLOR_ARRAY);
 	R_Draw_Base_Particles();
+
+	if (gl_cull->ivalue)
+		qglDisable (GL_CULL_FACE);
+
 	R_Draw_Cone_Particles();
-	R_Draw_Tube_Particles();
+//	R_Draw_Tube_Particles();
+	R_Draw_Beam_Particles();
+
+	if (gl_cull->ivalue)
+		qglEnable (GL_CULL_FACE);
+
 	qglDisableClientState (GL_COLOR_ARRAY);
 	qglColor3f(1, 1, 1);
 }

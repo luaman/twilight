@@ -48,11 +48,13 @@ extern void FractalNoise (Uint8 *noise, int size, int startgrid);
 
 static void TNT_InitDotParticleTexture (void);
 static void TNT_InitSmokeParticleTexture (void);
+static void TNT_InitSmokeBeamParticleTexture (void);
 static void TNT_InitSmokeRingParticleTexture (void);
 
 int	part_tex_dot;
 int	part_tex_spark;
 int	part_tex_smoke;
+int	part_tex_smoke_beam;
 int	part_tex_smoke_ring;
 
 
@@ -62,6 +64,7 @@ TNT_Init (void)
 	TNT_InitDotParticleTexture ();
 	TNT_InitSmokeParticleTexture ();
 	TNT_InitSmokeRingParticleTexture ();
+	TNT_InitSmokeBeamParticleTexture ();
 }
 
 static void
@@ -129,6 +132,39 @@ TNT_InitSmokeParticleTexture (void)
 	}
 	part_tex_smoke = texture_extension_number++;
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexImage2D (GL_TEXTURE_2D, 0, 4, 32, 32, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+}
+
+static void
+TNT_InitSmokeBeamParticleTexture (void)
+{
+	Uint8	d;
+	Uint8	data[32][32][4], noise1[32][32], noise2[32][32];
+	int		x, y;
+	double	dx, b;
+
+	FractalNoise (&noise1[0][0], 32, 4);
+	FractalNoise (&noise2[0][0], 32, 8);
+	for (y = 0; y < 32; y++) {
+		for (x = 0; x < 32; x++) {
+			dx = x - 16;
+			if (dx < 0)
+				dx = -dx;
+			b = dx / (16);
+			b = 1 - b;
+			if (b < 0) b = 0;
+			d = (noise1[y][x] + noise2[y][x]) / 2;
+
+			data[y][x][0] = 255;
+			data[y][x][1] = 255;
+			data[y][x][2] = 255;
+			data[y][x][3] = bound(0, d * b, 255);
+		}
+	}
+	part_tex_smoke_ring = texture_extension_number++;
+	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_beam);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	qglTexImage2D (GL_TEXTURE_2D, 0, 4, 32, 32, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
