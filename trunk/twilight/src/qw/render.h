@@ -135,7 +135,6 @@ void R_ParticleTrail (vec3_t start, vec3_t end, int type);
 void R_BlobExplosion (vec3_t org);
 void R_ParticleExplosion (vec3_t org);
 void R_LavaSplash (vec3_t org);
-void R_TeleportSplash (vec3_t org);
 
 //
 // gl_rlight.c
