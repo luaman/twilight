@@ -36,7 +36,14 @@ Bugs we know about:
     get him one.  Workaround: copy 3dfxvgl.dll to opengl32.dll in your Quake
     directory.  NOTE, if you don't have to do this and Twilight works, let
     us know, we are having trouble identifying this problem.
-  
+  - Win32 ATI Radeon: Leaving the game via alt-tab when fullscreen leaves
+    sound looping.  Trying to return to the game has no effect.  This only
+    happens if playing the game, not if watching a demo; watching a demo and
+    doing this works.
+    (Darkplaces does not have this problem, may be SDL related, very likely
+     ATI related as well)
+    (Reported by Dry-ice)
+
 
 Stuff that isn't needed for 0.2, but would be nice:
 
