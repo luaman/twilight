@@ -46,6 +46,8 @@
 
 #define HAVE___INLINE 1
 
+#define OGLDECL APIENTRY
+
 #include "compat.h"
 
 #endif // __WIN32CONF_H

@@ -41,12 +41,13 @@
 
 #define	MAX_GLTEXTURES	1024
 
-#include "TGL_defines.h"
-#include "TGL_types.h"
-#include "TGL_funcs.h"
+#include "opengl.h"
+#include "dynogl.h"
 
 #include "wad.h"
 #include "render.h"
+
+qboolean GLF_Init (void);
 
 void        GL_EndRendering (void);
 

@@ -103,6 +103,7 @@ void		IN_WindowedMouse (cvar_t *cvar);
 void
 VID_Shutdown (void)
 {
+	DGL_CloseLibrary ();
 	SDL_Quit ();
 }
 
@@ -208,7 +209,7 @@ CheckMultiTextureExtensions (void)
 		return;
 	}
 	// FIXME: don't strstr for extensions!
-	if (strstr (gl_extensions, "GL_ARB_multitexture"))
+	if (DGL_HasExtension ("GL_ARB_multitexture"))
 	{
 		if (qglActiveTextureARB && qglMultiTexCoord2fARB)
 		{
@@ -345,16 +346,15 @@ VID_Init (unsigned char *palette)
 		Sys_Error ("Could not init SDL video: %s\n", SDL_GetError ());
 	}
 
-    info = SDL_GetVideoInfo();
+	info = SDL_GetVideoInfo();
 
 	if (!info) {
 		Sys_Error ("Could not get video information!\n");
     }
 
 	fprintf(stderr, "gl_driver->string: '%s'\n", gl_driver->string);
-	if (SDL_GL_LoadLibrary(gl_driver->string) == -1) {
-		Sys_Error("Can't load lib %s: %s\n", gl_driver->string, SDL_GetError());
-	}
+	if (!DGL_LoadLibrary(gl_driver->string))
+		Sys_Error("%s\n", DGL_GetError());
 
 	if ((i = COM_CheckParm ("-bpp")) != 0)
 		scr_bpp = Q_atoi (com_argv[i + 1]);
@@ -374,9 +374,8 @@ VID_Init (unsigned char *palette)
 		Sys_Error ("Could not init video mode: %s", SDL_GetError ());
 	}
 
-	if (!GLF_Init()) {
-		Sys_Error ("Could not init the libGL!\n");
-	}
+	if (!DGL_GetFuncs())
+		Sys_Error("%s\n", DGL_GetError());
 
 	SDL_WM_SetCaption ("Twilight QWCL", "twilight");
 

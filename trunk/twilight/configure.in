@@ -102,10 +102,18 @@ AM_PATH_SDL(1.2.0,
 SDLVER="$sdl_major_version.$sdl_minor_version.$sdl_micro_version"
 
 
-dnl APIENTRY needs to be defined to nothing except on win32
-if test "${SYS}" != "Win32"; then
-	AC_DEFINE_UNQUOTED(APIENTRY,)
+dnl Some systems need a keyword in declarations for dynamic libs
+AC_MSG_CHECKING(for OpenGL import declaration)
+case "${SYS}" in
+	Win32) OGLDECL="APIENTRY" ;;
+	*) OGLDECL="" ;;
+esac
+if test "x$OGLDECL" = "x"; then
+	AC_MSG_RESULT(None needed)
+else
+	AC_MSG_RESULT($OGLDECL)
 fi
+AC_DEFINE_UNQUOTED(OGLDECL, $OGLDECL)
 
 dnl let the user choose the default OpenGL library
 AC_ARG_WITH(opengl,

@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-    Copyright (C) 2001  Zephaniah E. Hull.
+	Copyright (C) 2001  Zephaniah E. Hull.
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -21,23 +21,18 @@
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
 
-	$Id$
+    "$Id$";
 */
 
-#ifndef __TGL_funcs_h
-#define __TGL_funcs_h
+#ifndef __dynogl_h
+#define __dynogl_h
 
-#include "qtypes.h"
-#include "TGL_types.h"
-#include "TGL_defines.h"
+void DGL_SetError (char *err);
+char *DGL_GetError (void);
+qboolean DGL_LoadLibrary (char *name);
+void DGL_CloseLibrary (void);
+qboolean DGL_GetFuncs (void);
+qboolean DGL_HasExtension (char *ext);
 
-#define TWIGL_NEED(ret, name, args)	extern ret (APIENTRY * q##name) args
-#define TWIGL_EXT_WANT(ret, name, args)	extern ret (APIENTRY * q##name) args
-#include "TGL_funcs_list.h"
-#undef TWIGL_EXT_WANT
-#undef TWIGL_NEED
-
-qboolean GLF_Init (void);
-
-#endif // __TGL_funcs_h
+#endif // __dynogl_h
 
