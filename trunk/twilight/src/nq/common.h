@@ -96,7 +96,7 @@ void        InsertLinkAfter (link_t *l, link_t *after);
 
 union flint {
 	float	fp;
-	int		i;
+	Uint32	i;
 };
 
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
@@ -105,11 +105,11 @@ union flint {
 # define LittleFloat(x) (x)
 # define BigShort(x) SDL_SwapBE16(x)
 # define BigLong(x) SDL_SwapBE32(x)
-# define BigFloat(x) (flint.fp)SDL_SwapBE32((flint.i)(x))
+# define BigFloat(x) ((union flint)SDL_SwapBE32(((union flint)(x)).i)).fp
 #else
 # define LittleShort(x) SDL_SwapLE16(x)
 # define LittleLong(x) SDL_SwapLE32(x)
-# define BigFloat(x) (flint.fp)SDL_SwapLE32((flint.i)(x))
+# define LittleFloat(x) ((union flint)SDL_SwapLE32(((union flint)(x)).i)).fp
 # define BigShort(x) (x)
 # define BigLong(x) (x)
 # define BigFloat(x) (x)
