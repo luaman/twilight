@@ -399,25 +399,25 @@ extern kbutton_t in_mlook, in_klook;
 extern kbutton_t in_strafe;
 extern kbutton_t in_speed;
 
-void		CL_Input_Init_Cvars(void);
-void		CL_Input_Init (void);
-void		CL_SendCmd (void);
-void		CL_SendMove (usercmd_t *cmd);
+void	CL_InputSetRepeatDelay (struct cvar_s *var);
+void	CL_InputSetRepeatInterval (struct cvar_s *var);
+void	CL_Input_Init_Cvars(void);
+void	CL_Input_Init (void);
+void	CL_SendCmd (void);
+void	CL_SendMove (usercmd_t *cmd);
 
-void		CL_ParseTEnt (void);
-void		CL_UpdateTEnts (void);
+void	CL_ParseTEnt (void);
+void	CL_UpdateTEnts (void);
 
-void		CL_ClearState (void);
+void	CL_ClearState (void);
+void	CL_ReadPackets (void);
 
-void		CL_ReadPackets (void);
+int		CL_ReadFromServer (void);
+void	CL_WriteToServer (usercmd_t *cmd);
+void	CL_BaseMove (usercmd_t *cmd);
 
-int			CL_ReadFromServer (void);
-void		CL_WriteToServer (usercmd_t *cmd);
-void		CL_BaseMove (usercmd_t *cmd);
-
-
-float		CL_KeyState (kbutton_t *key);
-char		*Key_KeynumToString (int keynum);
+float	CL_KeyState (kbutton_t *key);
+char	*Key_KeynumToString (int keynum);
 
 //
 // cl_demo.c
@@ -506,7 +506,6 @@ void		CL_InitCam (void);
 //
 // skin.c
 //
-
 typedef struct {
 	char			manufacturer;
 	char			version;
