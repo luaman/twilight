@@ -852,7 +852,7 @@ R_DrawTextureChains (model_t *mod, int frame,
 	}
 
 	// If the water is solid, draw here, if not, then later.
-	if (r_wateralpha->fvalue == 1)
+	if (r_wateralpha->fvalue == 1 || !(gl_allow & GLA_WATERALPHA))
 		R_DrawLiquidTextureChains (mod, true);
 
 	if (gl_vbo)
@@ -861,7 +861,7 @@ R_DrawTextureChains (model_t *mod, int frame,
 		TWI_PostVDrawCVA ();
 
 	GLArrays_Reset_Vertex ();
-	GLArrays_Reset_TC ();
+	GLArrays_Reset_TC (true);
 
 	if (matrix)
 		qglPopMatrix ();
@@ -944,22 +944,25 @@ R_DrawAddBrushModel (entity_common_t *e)
 }
 
 
-void
+qboolean
 R_VisBrushModels (void)
 {
 	entity_common_t	*ce;
 	vec3_t			mins, maxs;
 	int				i;
+	qboolean		sky = false;
 
 	// First off, the world.
 
 	Vis_MarkLeaves (ccl.worldmodel);
 	Vis_RecursiveWorldNode (ccl.worldmodel->brush->nodes,ccl.worldmodel,r_origin);
+	if (ccl.worldmodel->brush->sky_chain.visframe == vis_framecount)
+		sky = true;
 
 	// Now everything else.
 
 	if (!r_drawentities->ivalue)
-		return;
+		return sky;
 
 	for (i = 0; i < r_refdef.num_entities; i++) {
 		ce = r_refdef.entities[i];
@@ -969,8 +972,12 @@ R_VisBrushModels (void)
 			if (Vis_CullBox (mins, maxs))
 				continue;
 			R_VisBrushModel (ce);
+			if (ce->model->brush->sky_chain.visframe == vis_framecount)
+				sky = true;
 		}
 	}
+
+	return sky;
 }
 
 void
@@ -1005,7 +1012,7 @@ R_DrawAddBrushModels ()
 	vec3_t			mins, maxs;
 	int				i;
 
-	if (r_wateralpha->fvalue == 1)
+	if (r_wateralpha->fvalue == 1 || !(gl_allow & GLA_WATERALPHA))
 		return;
 
 	qglColor4f (1, 1, 1, r_wateralpha->fvalue);

@@ -39,7 +39,7 @@ extern void R_DrawTextureChains (model_t *mod, int frame, matrix4x4_t *matrix, m
 extern void R_VisBrushModel (entity_common_t *e);
 extern void R_DrawOpaqueBrushModel (entity_common_t *e);
 extern void R_DrawAddBrushModel (entity_common_t *e);
-extern void R_VisBrushModels (void);
+extern qboolean R_VisBrushModels (void);
 extern void R_DrawOpaqueBrushModels (void);
 extern void R_DrawAddBrushModels (void);
 

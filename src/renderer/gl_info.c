@@ -71,6 +71,8 @@ qboolean gl_sgis_mipmap = false;
 qboolean gl_vbo = false;
 int gl_tmus = 1;
 
+Uint32 gl_allow;
+
 /*
 	CheckDriverQuirks
 

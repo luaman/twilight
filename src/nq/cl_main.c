@@ -61,6 +61,7 @@ cvar_t		*cl_nolerp;
 cvar_t		*cl_maxfps;
 
 cvar_t		*cl_mapname;
+cvar_t		*cl_verstring;
 
 cvar_t		*show_fps;
 
@@ -76,12 +77,6 @@ dlight_t	cl_dlights[MAX_DLIGHTS];
 
 extern Uint	r_framecount;
 
-/*
-=====================
-CL_ClearState
-
-=====================
-*/
 void
 CL_ClearState (void)
 {
@@ -111,8 +106,6 @@ CL_ClearState (void)
 
 /*
 =====================
-CL_Disconnect
-
 Sends a disconnect message to the server
 This is also called on Host_Error, so it shouldn't cause any errors
 =====================
@@ -160,8 +153,6 @@ CL_Disconnect_f (void)
 
 /*
 =====================
-CL_EstablishConnection
-
 Host should be either "local" or a net address to be passed on
 =====================
 */
@@ -189,8 +180,6 @@ CL_EstablishConnection (char *host)
 
 /*
 =====================
-CL_SignonReply
-
 An svc_signonnum has been received, perform a client side setup
 =====================
 */
@@ -237,8 +226,6 @@ CL_SignonReply (void)
 
 /*
 =====================
-CL_NextDemo
-
 Called to play the next demo in the demo loop
 =====================
 */
@@ -266,11 +253,6 @@ CL_NextDemo (void)
 	ccls.demonum++;
 }
 
-/*
-==============
-CL_PrintEntities_f
-==============
-*/
 static void
 CL_PrintEntities_f (void)
 {
@@ -291,12 +273,6 @@ CL_PrintEntities_f (void)
 	}
 }
 
-/*
-===============
-CL_AllocDlight
-
-===============
-*/
 dlight_t   *
 CL_AllocDlight (int key)
 {
@@ -330,11 +306,6 @@ CL_AllocDlight (int key)
 	return dl;
 }
 
-/*
-===============
-CL_NewDlight
-===============
-*/
 static void
 CL_NewDlight (int key, vec3_t org, int effects)
 {
@@ -365,12 +336,6 @@ CL_NewDlight (int key, vec3_t org, int effects)
 		dl->color[2] += 200.0f;
 }
 
-/*
-===============
-CL_DecayLights
-
-===============
-*/
 void
 CL_DecayLights (void)
 {
@@ -394,8 +359,6 @@ CL_DecayLights (void)
 
 /*
 ===============
-CL_LerpPoint
-
 Determines the fraction between the last two messages that the objects
 should be put at.
 ===============
@@ -439,11 +402,6 @@ CL_LerpPoint (void)
 }
 
 
-/*
-===============
-CL_RelinkEntities
-===============
-*/
 static void
 CL_RelinkEntities (void)
 {
@@ -591,11 +549,6 @@ CL_ReadFromServer (void)
 	return 0;
 }
 
-/*
-=================
-CL_SendCmd
-=================
-*/
 void
 CL_SendCmd (void)
 {
@@ -637,8 +590,6 @@ CL_SendCmd (void)
 
 /*
 ===================
-Cmd_ForwardToServer
-
 Sends the entire command line over to the server
 ===================
 */
@@ -679,11 +630,6 @@ Cmd_ForwardToServer (void)
 		SZ_Print (&cls.message, "\n");
 }
 
-/*
-=================
-CL_Init_Cvars
-=================
-*/
 void
 CL_Init_Cvars (void)
 {
@@ -702,17 +648,14 @@ CL_Init_Cvars (void)
 	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
 
 	cl_mapname = Cvar_Get ("cl_mapname", "", CVAR_ROM, NULL);
+	cl_verstring = Cvar_Get ("cl_verstring",
+			"Project Twilight v" VERSION " NQ", CVAR_NONE, NULL);
 
 	CL_Input_Init_Cvars ();
 	CL_TEnts_Init_Cvars ();
 	Team_Init_Cvars ();
 }
 
-/*
-=================
-CL_Init
-=================
-*/
 void
 CL_Init (void)
 {

@@ -41,6 +41,8 @@
 #include "r_part.h"
 #include "gl_alias.h"
 #include "entities.h"
+#include "gl_light.h"
+#include "gl_brush.h"
 
 
 #define	MAXCLIPPLANES	11
@@ -99,23 +101,6 @@ void R_InitSky (struct texture_s *mt, Uint8 *pixels);
 void R_InitSurf (void);
 
 void R_NewMap (void);
-
-//
-// gl_rlight.c
-//
-typedef struct {
-	int			key;					// so entities can reuse same entry
-	vec3_t		origin;
-	float		radius;
-	float		die;					// stop lighting after this time
-	float		decay;					// drop this each second
-	float		minlight;				// don't add when contributing less
-	float		color[3];
-} dlight_t;
-
-// It's a particle effect or something.  =)
-void R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
-		int cr2, int cg2, int cb2, int ca2);
 
 // for glColor4fv
 extern GLfloat whitev[4];

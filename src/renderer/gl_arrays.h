@@ -162,11 +162,11 @@ GLArrays_Reset_Color (void)
 }
 
 extern inline void
-GLArrays_Reset_TC (void)
+GLArrays_Reset_TC (qboolean both)
 {
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), tc0_array_p);
 
-	if (gl_mtex) {
+	if (gl_mtex && both) {
 		qglClientActiveTextureARB(GL_TEXTURE1_ARB);
 		qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), tc1_array_p);
 		qglClientActiveTextureARB(GL_TEXTURE0_ARB);

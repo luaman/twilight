@@ -38,8 +38,10 @@ static const char rcsid[] =
 #include "gl_alias.h"
 #include "gl_brush.h"
 #include "gl_sprite.h"
+#include "vis.h"
 
 refdef_t	r_refdef;
+static qboolean need_sky;
 
 void
 R_AddEntity (entity_common_t *ent)
@@ -60,7 +62,7 @@ R_ClearEntities (void)
 void
 R_VisEntities (void)
 {
-	R_VisBrushModels ();
+	need_sky = R_VisBrushModels ();
 #if 0
 	R_VisAliasModels ();
 	R_VisSpriteModels ();
@@ -70,7 +72,7 @@ R_VisEntities (void)
 void
 R_DrawSkyEntities (void)
 {
-	if (sky_type != SKY_FAST) {
+	if (sky_type != SKY_FAST && need_sky) {
 		if (sky_type == SKY_BOX)
 			Sky_Box_Draw ();
 		else if (sky_type == SKY_SPHERE)

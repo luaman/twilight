@@ -259,6 +259,11 @@ CL_ParseServerInfo (void)
 	ccl.users = Zone_Alloc (cl_zone, ccl.max_users * sizeof (*ccl.users));
 	ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 
+	gl_allow |= GLA_WATERALPHA | GLA_WIREFRAME;
+
+	if (ccl.max_users >= 2)
+		gl_allow &= ~GLA_WIREFRAME;
+
 // parse gametype
 	ccl.game_teams = MSG_ReadByte ();
 

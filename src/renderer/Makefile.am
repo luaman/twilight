@@ -26,6 +26,8 @@ libtwilight_renderer_a_SOURCES= \
 	gl_draw.c gl_draw.h \
 	gl_sprite.c gl_sprite.h \
 	gl_info.c gl_info.h \
+	gl_light.c gl_light.h \
+	gl_main.c gl_main.h \
 	gl_textures.c gl_textures.h \
 	liquid.c liquid.h \
 	menu.c \

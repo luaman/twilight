@@ -142,24 +142,23 @@ extern void CL_ParseStatic (void);
 
 //=============================================================================
 
-int         packet_latency[NET_TIMINGS];
+int			packet_latency[NET_TIMINGS];
 
 int
 CL_CalcNet (void)
 {
-	int         a, i;
-	frame_t    *frame;
-	int         lost;
+	int			a, i, lost;
+	frame_t		*frame;
 
 	for (i = cls.netchan.outgoing_sequence - UPDATE_BACKUP + 1;
-		 i <= cls.netchan.outgoing_sequence; i++) {
+			i <= cls.netchan.outgoing_sequence; i++) {
 		frame = &cl.frames[i & UPDATE_MASK];
 		if (frame->receivedtime == -1)
-			packet_latency[i & NET_TIMINGSMASK] = 9999;	// dropped
+			packet_latency[i & NET_TIMINGSMASK] = 9999; // dropped
 		else if (frame->receivedtime == -2)
-			packet_latency[i & NET_TIMINGSMASK] = 10000;	// choked
+			packet_latency[i & NET_TIMINGSMASK] = 10000;    // choked
 		else if (frame->invalid)
-			packet_latency[i & NET_TIMINGSMASK] = 9998;	// invalid delta
+			packet_latency[i & NET_TIMINGSMASK] = 9998; // invalid delta
 		else
 			packet_latency[i & NET_TIMINGSMASK] =
 				(frame->receivedtime - frame->senttime) * 20;
@@ -292,6 +291,11 @@ Model_NextDownload (void)
 
 	// all done
 	ccl.worldmodel = r_worldmodel = cl.model_precache[1];
+
+	memset (&cl_network_entities, 0, sizeof(cl_network_entities));
+	memset (&cl_player_entities, 0, sizeof(cl_player_entities));
+	memset (&cl_static_entities, 0, sizeof(cl_static_entities));
+	cl_num_static_entities = 0;
 
 	R_NewMap ();
 	Team_NewMap ();
@@ -992,6 +996,11 @@ CL_ProcessServerInfo (void)
 {
 	char *s;
 
+	gl_allow &= ~(GLA_WIREFRAME | GLA_WATERALPHA);
+
+	if (Q_atoi (Info_ValueForKey (cl.serverinfo, "watervis")))
+		gl_allow |= GLA_WATERALPHA;
+
 	// Commented in this manner because the rules don't make sense.
 	// NOTE: ORDER MATTERS, DO NOT REORDER!
 
@@ -1036,10 +1045,8 @@ CL_ServerInfo (void)
 	char        key[MAX_MSGLEN];
 	char        value[MAX_MSGLEN];
 	
-	strncpy (key, MSG_ReadString (), sizeof (key) - 1);
-	key[sizeof (key) - 1] = 0;
-	strncpy (value, MSG_ReadString (), sizeof (value) - 1);
-	key[sizeof (value) - 1] = 0;
+	strlcpy (key, MSG_ReadString (), sizeof (key));
+	strlcpy (value, MSG_ReadString (), sizeof (value));
 
 	Com_DPrintf ("SERVERINFO: %s=%s\n", key, value);
 

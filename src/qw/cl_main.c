@@ -75,6 +75,7 @@ cvar_t		*cl_shownet;
 
 cvar_t		*cl_maxfps;
 cvar_t		*cl_mapname;
+cvar_t		*cl_verstring;
 
 cvar_t		*cl_predict_players;
 cvar_t		*cl_solid_players;
@@ -568,7 +569,7 @@ CL_FullServerinfo_f (void)
 		return;
 	}
 
-	strcpy (cl.serverinfo, Cmd_Argv (1));
+	strlcpy (cl.serverinfo, Cmd_Argv (1), sizeof(cl.serverinfo));
 
 	if ((p = Info_ValueForKey (cl.serverinfo, "*vesion")) && *p) {
 		v = Q_atof (p);
@@ -1105,6 +1106,8 @@ CL_Init_Cvars (void)
 	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
 
 	cl_mapname = Cvar_Get ("cl_mapname", "", CVAR_ROM, NULL);
+	cl_verstring = Cvar_Get ("cl_verstring",
+			"Project Twilight v" VERSION " QW", CVAR_NONE, NULL);
 
 	cl_predict_players = Cvar_Get ("cl_predict_players", "1", CVAR_NONE, NULL);
 	cl_solid_players = Cvar_Get ("cl_solid_players", "1", CVAR_NONE, NULL);
