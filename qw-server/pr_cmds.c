@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
 #define	RETURN_STRING(s) (((int *)pr_globals)[OFS_RETURN] = PR_SetString(s))
 
+extern cvar_t *sv_aim;
+
 /*
 ===============================================================================
 
@@ -737,10 +739,12 @@ void
 PF_cvar (void)
 {
 	char       *str;
+	cvar_t	   *var;
 
 	str = G_STRING (OFS_PARM0);
 
-	G_FLOAT (OFS_RETURN) = Cvar_VariableValue (str);
+	var = Cvar_Find (str);
+	G_FLOAT (OFS_RETURN) = var->value;
 }
 
 /*
@@ -753,11 +757,13 @@ float cvar (string)
 void
 PF_cvar_set (void)
 {
-	char       *var, *val;
+	char       *name, *val;
+	cvar_t	   *var;
 
-	var = G_STRING (OFS_PARM0);
+	name = G_STRING (OFS_PARM0);
 	val = G_STRING (OFS_PARM1);
 
+	var = Cvar_Find (name);
 	Cvar_Set (var, val);
 }
 
@@ -1189,8 +1195,6 @@ Pick a vector for the player to shoot along
 vector aim(entity, missilespeed)
 =============
 */
-//cvar_t    sv_aim = {"sv_aim", "0.93"};
-cvar_t      sv_aim = { "sv_aim", "2" };
 void
 PF_aim (void)
 {
@@ -1222,14 +1226,14 @@ PF_aim (void)
 	VectorMA (start, 2048, dir, end);
 	tr = SV_Move (start, vec3_origin, vec3_origin, end, false, ent);
 	if (tr.ent && tr.ent->v.takedamage == DAMAGE_AIM
-		&& (!teamplay.value || ent->v.team <= 0
+		&& (!teamplay->value || ent->v.team <= 0
 			|| ent->v.team != tr.ent->v.team)) {
 		VectorCopy (pr_global_struct->v_forward, G_VECTOR (OFS_RETURN));
 		return;
 	}
 // try all possible entities
 	VectorCopy (dir, bestdir);
-	bestdist = sv_aim.value;
+	bestdist = sv_aim->value;
 	bestent = NULL;
 
 	check = NEXT_EDICT (sv.edicts);
@@ -1238,7 +1242,7 @@ PF_aim (void)
 			continue;
 		if (check == ent)
 			continue;
-		if (teamplay.value && ent->v.team > 0 && ent->v.team == check->v.team)
+		if (teamplay->value && ent->v.team > 0 && ent->v.team == check->v.team)
 			continue;					// don't aim at teammate
 		for (j = 0; j < 3; j++)
 			end[j] = check->v.origin[j]
