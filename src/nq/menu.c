@@ -1277,16 +1277,16 @@ M_Options_Key (int k)
 			break;
 	}
 
-	if (options_cursor == 15 && vid_menudrawfn == NULL) {
+	if (options_cursor == 16 && vid_menudrawfn == NULL) {
 		if (k == K_UPARROW)
-			options_cursor = 14;
+			options_cursor = 15;
 		else
 			options_cursor = 0;
 	}
 
-	if (options_cursor == 16) {
+	if (options_cursor == 17) {
 		if (k == K_UPARROW)
-			options_cursor = 15;
+			options_cursor = 16;
 		else
 			options_cursor = 0;
 	}
