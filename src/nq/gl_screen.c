@@ -687,25 +687,23 @@ SCR_ScreenShot_f
 void
 SCR_ScreenShot_f (void)
 {
-	Uint8	   *buffer;
-	char		pcxname[80];
-	char		checkname[MAX_OSPATH];
+	Uint8		*buffer;
+	char		name[MAX_OSPATH];
 	int			i;
 
 	/*
 	 * find a file name to save it to
 	 */
-	strcpy (pcxname, "quake00.tga");
-
-	for (i = 0; i <= 99; i++) {
-		pcxname[5] = i / 10 + '0';
-		pcxname[6] = i % 10 + '0';
-		snprintf (checkname, sizeof (checkname), "%s/%s", com_gamedir, pcxname);
-		if (Sys_FileTime (checkname) == -1)
-			break;						/* file doesn't exist */
+	for (i = 0; i < 10000; i++)
+	{
+		snprintf (name, sizeof (name), "tw%04i.tga", i);
+		if (Sys_FileTime (name) == -1)
+			// Doesn't exist
+			break;						
 	}
-	if (i == 100) {
-		Com_Printf ("SCR_ScreenShot_f: Couldn't create a TGA file\n");
+	if (i == 10000)
+	{
+		Com_Printf ("SCR_ScreenShot_f: Unable to create file\n");
 		return;
 	}
 
@@ -715,8 +713,8 @@ SCR_ScreenShot_f (void)
 	qglReadPixels (glx, gly, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
 				  buffer);
 
-	if (TGA_Write (pcxname, vid.width, vid.height, 3, buffer))
-		Com_Printf ("Wrote %s\n", pcxname);
+	if (TGA_Write (name, vid.width, vid.height, 3, buffer))
+		Com_Printf ("Wrote %s\n", name);
 
 	free (buffer);
 }
