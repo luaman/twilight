@@ -21,18 +21,18 @@ def parse_SDL_conf(env, output):
 	static_libs = []
 
 	params = string.split(output)
-	framework = False
+	framework = 0
 	for arg in params:
 		switch = arg[0:1]
 		opt = arg[1:2]
 		if framework:
 			dict['LINKFLAGS'].append(arg)
-			framework = False
+			framework = 0
 			continue
 
 		if arg == '-framework':
 			dict['LINKFLAGS'].append(arg)
-			framework = True
+			framework = 1
 			continue
 
 		if switch == '-':
