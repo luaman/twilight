@@ -42,12 +42,13 @@ static const char rcsid[] =
 
 extern unsigned char d_15to8table[65536];
 
-cvar_t     *gl_max_size;
-cvar_t     *gl_picmip;
+cvar_t		*gl_max_size;
+cvar_t		*gl_picmip;
+cvar_t		*gl_texturemode;
 
-byte       *draw_chars;					// 8*8 graphic characters
-qpic_t     *draw_disc;
-qpic_t     *draw_backtile;
+byte		*draw_chars;					// 8*8 graphic characters
+qpic_t		*draw_disc;
+qpic_t		*draw_backtile;
 
 int         translate_texture;
 int         char_texture;
@@ -208,31 +209,24 @@ glmode_t    modes[] = {
 
 /*
 ===============
-Draw_TextureMode_f
+Set_TextureMode_f
 ===============
 */
 void
-Draw_TextureMode_f (void)
+Set_TextureMode_f (struct cvar_s *var)
 {
 	int         i;
 	gltexture_t *glt;
 
-	if (Cmd_Argc () == 1) {
-		for (i = 0; i < 6; i++)
-			if (gl_filter_min == modes[i].minimize) {
-				Con_Printf ("%s\n", modes[i].name);
-				return;
-			}
-		Con_Printf ("current filter is unknown???\n");
-		return;
-	}
-
 	for (i = 0; i < 6; i++) {
-		if (!Q_strcasecmp (modes[i].name, Cmd_Argv (1)))
+		if (!Q_strcasecmp (modes[i].name, var->string))
 			break;
 	}
 	if (i == 6) {
-		Con_Printf ("bad filter name\n");
+		Con_Printf ("Bad GL_TEXTURE_MODE, valid modes are:\n");
+		Con_Printf ("GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST\n");
+		Con_Printf ("GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_NEAREST (default), \n");
+		Con_Printf ("GL_LINEAR_MIPMAP_LINEAR\n\n");
 		return;
 	}
 
@@ -243,10 +237,8 @@ Draw_TextureMode_f (void)
 	for (i = 0, glt = gltextures; i < numgltextures; i++, glt++) {
 		if (glt->mipmap) {
 			qglBindTexture (GL_TEXTURE_2D, glt->texnum);
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-							 gl_filter_min);
-			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-							 gl_filter_max);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
+			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 		}
 	}
 }
@@ -261,6 +253,7 @@ Draw_Init_Cvars (void)
 {
 	gl_max_size = Cvar_Get ("gl_max_size", "1024", CVAR_NONE, NULL);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
+	gl_texturemode = Cvar_Get ("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE, Set_TextureMode_f);
 
 	// 3dfx can only handle 256 wide textures
 	if (!Q_strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
@@ -284,8 +277,6 @@ Draw_Init (void)
 	glpic_t    *gl;
 	int         start;
 	byte       *ncdata;
-
-	Cmd_AddCommand ("gl_texturemode", &Draw_TextureMode_f);
 
 	// load the console background and the charset
 	// by hand, because we need to write the version
