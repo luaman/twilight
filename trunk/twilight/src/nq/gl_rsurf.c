@@ -457,9 +457,10 @@ static void
 R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 {
 	int			i;
-	float	   *v;
+	float		*v;
 	vec3_t		nv;
 	float		intensity = max (0, r_waterwarp->value);
+	glpoly_t	*p;
 
 	c_brush_polys++;
 
@@ -488,6 +489,32 @@ R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 			qglVertex3fv (v);
 		}
 		qglEnd ();
+
+		if (!(cl.maxclients > 1) && r_showtris->value) {
+			qglDisable (GL_TEXTURE_2D);
+			qglActiveTextureARB (GL_TEXTURE0_ARB);
+			qglDisable (GL_TEXTURE_2D);
+
+			qglDisable (GL_DEPTH_TEST);
+			qglColor4f (1,1,1,1);
+
+			p = fa->polys;
+			for (i = 2 ; i < p->numverts; i++)
+			{
+				qglBegin (GL_LINE_STRIP);
+				qglVertex3fv (p->verts[0]);
+				qglVertex3fv (p->verts[i - 1]);
+				qglVertex3fv (p->verts[i]);
+				qglVertex3fv (p->verts[0]);
+				qglEnd ();
+			}
+
+			qglEnable (GL_DEPTH_TEST);
+
+			qglEnable (GL_TEXTURE_2D);
+			qglActiveTextureARB (GL_TEXTURE1_ARB);
+			qglEnable (GL_TEXTURE_2D);
+		}
 	}
 
 	// add the poly to the proper fullbright chain

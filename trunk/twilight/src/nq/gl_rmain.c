@@ -87,6 +87,7 @@ cvar_t *r_wateralpha;
 cvar_t *r_dynamic;
 cvar_t *r_novis;
 cvar_t *r_lightlerp;
+cvar_t *r_showtris;
 
 cvar_t *gl_clear;
 cvar_t *gl_cull;
@@ -1132,8 +1133,7 @@ R_DrawAliasModel (entity_t *e)
 		qglEnable (GL_BLEND);
 		qglColor4f (0, 0, 0, 0.5);
 		if (gl_im_animation->value) {
-			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0, lastposenum,
-					e);
+			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0, lastposenum, e);
 		} else {
 			GL_DrawAliasShadow (paliashdr, lastposenum);
 		}

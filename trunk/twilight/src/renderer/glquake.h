@@ -113,6 +113,7 @@ extern struct cvar_s *r_netgraph;
 extern struct cvar_s *r_skybox;
 extern struct cvar_s *r_fastsky;
 extern struct cvar_s *r_lightlerp;
+extern struct cvar_s *r_showtris;
 
 extern struct cvar_s *gl_clear;
 extern struct cvar_s *gl_cull;
