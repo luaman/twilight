@@ -35,6 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include "quakedef.h"
+#include "strlib.h"
 #include "console.h"
 #include "cvar.h"
 #include "glquake.h"
