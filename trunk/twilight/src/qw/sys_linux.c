@@ -58,11 +58,6 @@ int         nostdout = 0;
 // General routines
 // =======================================================================
 
-void
-Sys_DebugNumber (int y, int val)
-{
-}
-
 
 void
 Sys_Printf (char *fmt, ...)
@@ -121,17 +116,6 @@ Sys_Error (char *error, ...)
 
 }
 
-void
-Sys_Warn (char *warning, ...)
-{
-	va_list     argptr;
-	char        string[1024];
-
-	va_start (argptr, warning);
-	vsnprintf (string, sizeof (string), warning, argptr);
-	va_end (argptr);
-	fprintf (stderr, "Warning: %s", string);
-}
 
 /*
 ============
@@ -231,28 +215,6 @@ Sys_DebugLog (char *file, char *fmt, ...)
 	close (fd);
 }
 
-void
-Sys_EditFile (char *filename)
-{
-
-	char        cmd[256];
-	char       *term;
-	char       *editor;
-
-	term = getenv ("TERM");
-	if (term && !Q_strcmp (term, "xterm")) {
-		editor = getenv ("VISUAL");
-		if (!editor)
-			editor = getenv ("EDITOR");
-		if (!editor)
-			editor = getenv ("EDIT");
-		if (!editor)
-			editor = "vi";
-		snprintf (cmd, sizeof (cmd), "xterm -e %s %s", editor, filename);
-		system (cmd);
-	}
-
-}
 
 double
 Sys_DoubleTime (void)
@@ -274,26 +236,6 @@ Sys_DoubleTime (void)
 // =======================================================================
 // Sleeps for microseconds
 // =======================================================================
-
-static volatile int oktogo;
-
-void
-alarm_handler (int x)
-{
-	oktogo = 1;
-}
-
-void
-Sys_LineRefresh (void)
-{
-}
-
-void
-floating_point_exception_handler (int whatever)
-{
-//  Sys_Warn("floating point exception\n");
-	signal (SIGFPE, floating_point_exception_handler);
-}
 
 char       *
 Sys_ConsoleInput (void)
@@ -365,9 +307,6 @@ main (int c, char **v)
 	quakeparms_t parms;
 	int         j;
 
-//  static char cwd[1024];
-
-//  signal(SIGFPE, floating_point_exception_handler);
 	signal (SIGFPE, SIG_IGN);
 
 	memset (&parms, 0, sizeof (parms));
@@ -406,28 +345,3 @@ main (int c, char **v)
 
 }
 
-
-/*
-================
-Sys_MakeCodeWriteable
-================
-*/
-void
-Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
-{
-
-	int         r;
-	unsigned long addr;
-	int         psize = getpagesize ();
-
-	addr = (startaddr & ~(psize - 1)) - psize;
-
-//  fprintf(stderr, "writable code %lx(%lx)-%lx, length=%lx\n", startaddr,
-//          addr, startaddr+length, length);
-
-	r = mprotect ((char *) addr, length + startaddr - addr + psize, 7);
-
-	if (r < 0)
-		Sys_Error ("Protection change failed\n");
-
-}
