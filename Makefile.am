@@ -20,11 +20,7 @@ EXTRA_DIST= \
 	twilight.spec
 
 ChangeLog:
-if CVS2CL
-	@CVS2CL@
-else
 	$(top_srcdir)/tools/cvs2cl.pl
-endif
 	-rm -f ChangeLog.bak
 
 .PHONY: ChangeLog
