@@ -290,8 +290,6 @@ SV_PreSpawn_f (void)
 		// should be three numbers following containing checksums
 		check = Q_atoi (Cmd_Argv (3));
 
-//		Com_DPrintf("Client check = %d\n", check);
-
 		if (sv_mapcheck->value && check != sv.worldmodel->checksum &&
 			check != sv.worldmodel->checksum2) {
 			SV_ClientPrintf (host_client, PRINT_HIGH,
@@ -619,15 +617,18 @@ SV_NextUpload (void)
 	size = MSG_ReadShort ();
 	percent = MSG_ReadByte ();
 
-	if (!host_client->upload) {
+	if (!host_client->upload) 
+	{
 		host_client->upload = fopen (host_client->uploadfn, "wb");
-		if (!host_client->upload) {
+		if (!host_client->upload) 
+		{
 			Sys_Printf ("Can't create %s\n", host_client->uploadfn);
 			ClientReliableWrite_Begin (host_client, svc_stufftext, 8);
 			ClientReliableWrite_String (host_client, "stopul");
 			*host_client->uploadfn = 0;
 			return;
 		}
+
 		Sys_Printf ("Receiving %s from %d...\n", host_client->uploadfn,
 					host_client->userid);
 		if (host_client->remote_snap)
@@ -641,16 +642,20 @@ SV_NextUpload (void)
 
 	Com_DPrintf ("UPLOAD: %d received\n", size);
 
-	if (percent != 100) {
+	if (percent != 100) 
+	{
 		ClientReliableWrite_Begin (host_client, svc_stufftext, 8);
 		ClientReliableWrite_String (host_client, "nextul\n");
-	} else {
+	} 
+	else 
+	{
 		fclose (host_client->upload);
 		host_client->upload = NULL;
 
 		Sys_Printf ("%s upload completed.\n", host_client->uploadfn);
 
-		if (host_client->remote_snap) {
+		if (host_client->remote_snap) 
+		{
 			char       *p;
 
 			if ((p = strchr (host_client->uploadfn, '/')) != NULL)
@@ -662,7 +667,6 @@ SV_NextUpload (void)
 							 host_client->uploadfn, p);
 		}
 	}
-
 }
 
 /*
@@ -673,7 +677,7 @@ SV_BeginDownload_f
 void
 SV_BeginDownload_f (void)
 {
-	char       *name;
+	char       *name, *p;
 	extern cvar_t allow_download;
 	extern cvar_t allow_download_skins;
 	extern cvar_t allow_download_models;
@@ -709,14 +713,10 @@ SV_BeginDownload_f (void)
 		fclose (host_client->download);
 		host_client->download = NULL;
 	}
+
 	// lowercase name (needed for casesen file systems)
-	{
-		char       *p;
-
-		for (p = name; *p; p++)
-			*p = (char) tolower (*p);
-	}
-
+	for (p = name; *p; p++)
+		*p = (char) tolower (*p);
 
 	host_client->downloadsize = COM_FOpenFile (name, &host_client->download,
 			true);
@@ -761,7 +761,8 @@ SV_Say (qboolean team)
 	if (Cmd_Argc () < 2)
 		return;
 
-	if (team) {
+	if (team) 
+	{
 		strncpy (t1, Info_ValueForKey (host_client->userinfo, "team"), 31);
 		t1[31] = 0;
 	}
@@ -770,12 +771,13 @@ SV_Say (qboolean team)
 		snprintf (text, sizeof (text), "[SPEC] %s: ", host_client->name);
 	else if (team)
 		snprintf (text, sizeof (text), "(%s): ", host_client->name);
-	else {
+	else 
 		snprintf (text, sizeof (text), "%s: ", host_client->name);
-	}
 
-	if (fp_messages) {
-		if (!sv.paused && svs.realtime < host_client->lockedtill) {
+	if (fp_messages) 
+	{
+		if (!sv.paused && svs.realtime < host_client->lockedtill) 
+		{
 			SV_ClientPrintf (host_client, PRINT_CHAT,
 							 "You can't talk for %d more seconds\n",
 							 (int) (host_client->lockedtill - svs.realtime));
@@ -804,7 +806,8 @@ SV_Say (qboolean team)
 
 	p = Cmd_Args ();
 
-	if (*p == '"') {
+	if (*p == '"') 
+	{
 		p++;
 		p[strlen (p) - 1] = 0;
 	}
@@ -821,12 +824,16 @@ SV_Say (qboolean team)
 			if (!client->spectator)
 				continue;
 
-		if (team) {
+		if (team) 
+		{
 			// the spectator team
-			if (host_client->spectator) {
+			if (host_client->spectator) 
+			{
 				if (!client->spectator)
 					continue;
-			} else {
+			} 
+			else 
+			{
 				t2 = Info_ValueForKey (client->userinfo, "team");
 				if (strcmp (t1, t2) || client->spectator)
 					continue;			// on different teams
@@ -877,7 +884,8 @@ SV_Pings_f (void)
 	client_t   *client;
 	int         j;
 
-	for (j = 0, client = svs.clients; j < MAX_CLIENTS; j++, client++) {
+	for (j = 0, client = svs.clients; j < MAX_CLIENTS; j++, client++) 
+	{
 		if (client->state != cs_spawned)
 			continue;
 
@@ -900,7 +908,8 @@ SV_Kill_f
 void
 SV_Kill_f (void)
 {
-	if (sv_player->v.health <= 0) {
+	if (sv_player->v.health <= 0) 
+	{
 		SV_ClientPrintf (host_client, PRINT_HIGH,
 						 "Can't suicide -- already dead!\n");
 		return;
@@ -928,7 +937,8 @@ SV_TogglePause (const char *msg)
 		SV_BroadcastPrintf (PRINT_HIGH, "%s", msg);
 
 	// send notification to all clients
-	for (i = 0, cl = svs.clients; i < MAX_CLIENTS; i++, cl++) {
+	for (i = 0, cl = svs.clients; i < MAX_CLIENTS; i++, cl++) 
+	{
 		if (!cl->state)
 			continue;
 		ClientReliableWrite_Begin (cl, svc_setpause, 2);
@@ -947,12 +957,14 @@ SV_Pause_f (void)
 {
 	char        st[sizeof (host_client->name) + 32];
 
-	if (!pausable.value) {
+	if (!pausable.value) 
+	{
 		SV_ClientPrintf (host_client, PRINT_HIGH, "Pause not allowed.\n");
 		return;
 	}
 
-	if (host_client->spectator) {
+	if (host_client->spectator) 
+	{
 		SV_ClientPrintf (host_client, PRINT_HIGH,
 						 "Spectators can not pause.\n");
 		return;
@@ -999,7 +1011,8 @@ SV_PTrack_f (void)
 	if (!host_client->spectator)
 		return;
 
-	if (Cmd_Argc () != 2) {
+	if (Cmd_Argc () != 2) 
+	{
 		// turn off tracking
 		host_client->spec_track = 0;
 		ent = EDICT_NUM (host_client - svs.clients + 1);
@@ -1010,7 +1023,8 @@ SV_PTrack_f (void)
 
 	i = Q_atoi (Cmd_Argv (1));
 	if (i < 0 || i >= MAX_CLIENTS || svs.clients[i].state != cs_spawned ||
-		svs.clients[i].spectator) {
+		svs.clients[i].spectator) 
+	{
 		SV_ClientPrintf (host_client, PRINT_HIGH, "Invalid client to track\n");
 		host_client->spec_track = 0;
 		ent = EDICT_NUM (host_client - svs.clients + 1);
@@ -1038,17 +1052,15 @@ SV_Rate_f (void)
 {
 	int         rate;
 
-	if (Cmd_Argc () != 2) {
+	if (Cmd_Argc () != 2) 
+	{
 		SV_ClientPrintf (host_client, PRINT_HIGH, "Current rate is %i\n",
 						 (int) (1.0 / host_client->netchan.rate + 0.5));
 		return;
 	}
 
 	rate = Q_atoi (Cmd_Argv (1));
-	if (rate < 500)
-		rate = 500;
-	if (rate > 10000)
-		rate = 10000;
+	rate = bound (500, rate, 10000);
 
 	SV_ClientPrintf (host_client, PRINT_HIGH, "Net rate set to %i\n", rate);
 	host_client->netchan.rate = 1.0 / rate;
@@ -1065,7 +1077,8 @@ Change the message level for a client
 void
 SV_Msg_f (void)
 {
-	if (Cmd_Argc () != 2) {
+	if (Cmd_Argc () != 2) 
+	{
 		SV_ClientPrintf (host_client, PRINT_HIGH, "Current msg level is %i\n",
 						 host_client->messagelevel);
 		return;
@@ -1091,13 +1104,15 @@ SV_SetInfo_f (void)
 	char        oldval[MAX_INFO_STRING];
 
 
-	if (Cmd_Argc () == 1) {
+	if (Cmd_Argc () == 1) 
+	{
 		Com_Printf ("User info settings:\n");
 		Info_Print (host_client->userinfo);
 		return;
 	}
 
-	if (Cmd_Argc () != 3) {
+	if (Cmd_Argc () != 3) 
+	{
 		Com_Printf ("usage: setinfo [ <key> <value> ]\n");
 		return;
 	}
@@ -1110,11 +1125,7 @@ SV_SetInfo_f (void)
 
 	Info_SetValueForKey (host_client->userinfo, Cmd_Argv (1), Cmd_Argv (2),
 						 MAX_INFO_STRING);
-// name is extracted below in ExtractFromUserInfo
-//  strncpy (host_client->name, Info_ValueForKey (host_client->userinfo, "name")
-//      , sizeof(host_client->name)-1); 
-//  SV_FullClientUpdate (host_client, &sv.reliable_datagram);
-//  host_client->sendinfo = true;
+// name is extracted below in SV_ExtractFromUserinfo
 
 	if (!strcmp
 		(Info_ValueForKey (host_client->userinfo, Cmd_Argv (1)), oldval))
@@ -1147,7 +1158,8 @@ SV_ShowServerinfo_f (void)
 void
 SV_NoSnap_f (void)
 {
-	if (*host_client->uploadfn) {
+	if (*host_client->uploadfn) 
+	{
 		*host_client->uploadfn = 0;
 		SV_BroadcastPrintf (PRINT_HIGH, "%s refused remote screenshot\n",
 							host_client->name);
@@ -1209,10 +1221,13 @@ SV_ExecuteUserCommand (char *s)
 	SV_BeginRedirect (RD_CLIENT);
 
 	for (u = ucmds; u->name; u++)
-		if (!strcmp (Cmd_Argv (0), u->name)) {
+	{
+		if (!strcmp (Cmd_Argv (0), u->name)) 
+		{
 			u->func ();
 			break;
 		}
+	}
 
 	if (!u->name)
 		Com_Printf ("Bad user command: %s\n", Cmd_Argv (0));
@@ -1238,12 +1253,12 @@ Used by view and sv_user
 float
 V_CalcRoll (vec3_t angles, vec3_t velocity)
 {
-	vec3_t      forward, right, up;
+	vec3_t      forward, right;
 	float       sign;
 	float       side;
 	float       value;
 
-	AngleVectors (angles, forward, right, up);
+	AngleVectors (angles, forward, right, NULL);
 	side = DotProduct (velocity, right);
 	sign = side < 0 ? -1 : 1;
 	side = Q_fabs (side);
@@ -1256,7 +1271,6 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 		side = value;
 
 	return side * sign;
-
 }
 
 
@@ -1311,7 +1325,8 @@ AddLinksToPmove (areanode_t *node)
 			pe->info = NUM_FOR_EDICT (check);
 			if (check->v.solid == SOLID_BSP)
 				pe->model = sv.models[(int) (check->v.modelindex)];
-			else {
+			else 
+			{
 				pe->model = NULL;
 				VectorCopy (check->v.mins, pe->mins);
 				VectorCopy (check->v.maxs, pe->maxs);
