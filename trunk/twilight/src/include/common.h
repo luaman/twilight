@@ -205,8 +205,6 @@ Uint8 *COM_LoadStackFile (char *path, void *buffer, int bufsize,
 		qboolean complain);
 Uint8 *COM_LoadTempFile (char *path, qboolean complain);
 Uint8 *COM_LoadHunkFile (char *path, qboolean complain);
-void COM_LoadCacheFile (char *path, struct cache_user_s *cu,
-		qboolean complain);
 void COM_CreatePath (char *path);
 void COM_Gamedir (char *dir);
 

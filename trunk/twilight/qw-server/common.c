@@ -1421,13 +1421,6 @@ COM_LoadTempFile (char *path, qboolean complain)
 	return COM_LoadFile (path, 2, complain);
 }
 
-void
-COM_LoadCacheFile (char *path, struct cache_user_s *cu, qboolean complain)
-{
-	loadcache = cu;
-	COM_LoadFile (path, 3, complain);
-}
-
 // uses temp hunk if larger than bufsize
 Uint8 *
 COM_LoadStackFile (char *path, void *buffer, int bufsize, qboolean complain)
