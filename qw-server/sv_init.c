@@ -282,7 +282,7 @@ SV_CheckModel (char *mdl)
 
 //  int len;
 
-	buf = (Uint8 *) COM_LoadStackFile (mdl, stackbuf, sizeof (stackbuf));
+	buf = (Uint8 *) COM_LoadStackFile (mdl, stackbuf, sizeof (stackbuf), true);
 	crc = CRC_Block (buf, com_filesize);
 //  for (len = com_filesize; len; len--, buf++)
 //      CRC_ProcessByte(&crc, *buf);

@@ -905,10 +905,10 @@ Host_Init ()
 	R_InitTextures ();				// needed even for dedicated servers
 
 	if (cls.state != ca_dedicated) {
-		host_basepal = (Uint8 *) COM_LoadHunkFile ("gfx/palette.lmp");
+		host_basepal = (Uint8 *) COM_LoadHunkFile ("gfx/palette.lmp", true);
 		if (!host_basepal)
 			Sys_Error ("Couldn't load gfx/palette.lmp");
-		host_colormap = (Uint8 *) COM_LoadHunkFile ("gfx/colormap.lmp");
+		host_colormap = (Uint8 *) COM_LoadHunkFile ("gfx/colormap.lmp", true);
 		if (!host_colormap)
 			Sys_Error ("Couldn't load gfx/colormap.lmp");
 

@@ -106,8 +106,8 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 //
 // load the file
 //
-	buf =
-		(unsigned *) COM_LoadStackFile (mod->name, stackbuf, sizeof (stackbuf));
+	buf = (unsigned *) COM_LoadStackFile (mod->name, stackbuf,
+			sizeof (stackbuf), true);
 	if (!buf) {
 		if (crash)
 			Sys_Error ("Mod_LoadModel: %s not found", mod->name);
@@ -355,7 +355,7 @@ Mod_LoadLighting (lump_t *l)
 		strcpy(litfilename, loadmodel->name);
 		COM_StripExtension(litfilename, litfilename);
 		COM_DefaultExtension(litfilename, ".lit");
-		data = (Uint8 *) COM_LoadHunkFile (litfilename);
+		data = (Uint8 *) COM_LoadHunkFile (litfilename, false);
 
 		if (data)
 		{

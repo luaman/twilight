@@ -718,7 +718,8 @@ SV_BeginDownload_f (void)
 	}
 
 
-	host_client->downloadsize = COM_FOpenFile (name, &host_client->download);
+	host_client->downloadsize = COM_FOpenFile (name, &host_client->download,
+			true);
 	host_client->downloadcount = 0;
 
 	if (!host_client->download

@@ -197,7 +197,7 @@ CL_CheckOrDownloadFile (char *filename)
 		return true;
 	}
 
-	COM_FOpenFile (filename, &f);
+	COM_FOpenFile (filename, &f, true);
 
 	if (f) {							// it exists, no need to download
 		fclose (f);

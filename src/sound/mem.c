@@ -131,7 +131,7 @@ S_LoadSound (sfx_t *s)
 	strcpy (namebuffer, "sound/");
 	strcat (namebuffer, s->name);
 
-	data = COM_LoadStackFile (namebuffer, stackbuf, sizeof (stackbuf));
+	data = COM_LoadStackFile (namebuffer, stackbuf, sizeof (stackbuf), true);
 
 	if (!data) {
 		Com_Printf ("Couldn't load %s\n", namebuffer);

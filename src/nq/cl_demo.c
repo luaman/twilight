@@ -306,7 +306,7 @@ CL_PlayDemo_f (void)
 	COM_DefaultExtension (name, ".dem");
 
 	Com_Printf ("Playing demo from %s.\n", name);
-	COM_FOpenFile (name, &cls.demofile);
+	COM_FOpenFile (name, &cls.demofile, true);
 	if (!cls.demofile) {
 		Com_Printf ("ERROR: couldn't open.\n");
 		cls.demonum = -1;				// stop demo loop
