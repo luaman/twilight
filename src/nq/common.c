@@ -808,6 +808,27 @@ COM_CheckParm (char *parm)
 
 /*
 ================
+COM_CheckFile
+
+================
+*/
+qboolean 
+COM_CheckFile (char *fname)
+{
+	int h;
+
+	COM_OpenFile (fname, &h);
+
+	if (h == -1) {
+		return false;
+	}
+
+	COM_CloseFile (h);
+	return true;
+}
+
+/*
+================
 COM_CheckRegistered
 
 Looks for the pop.lmp file
@@ -817,15 +838,8 @@ Sets the "registered" cvar.
 void
 COM_CheckRegistered (void)
 {
-	int         h;
-
-	COM_OpenFile ("gfx/pop.lmp", &h);
-
-	if (h == -1) {
+	if (!COM_CheckFile ("gfx/pop.lmp"))
 		return;
-	}
-
-	COM_CloseFile (h);
 
 	Cvar_Set (registered, "1");
 	Con_Printf ("Playing registered version.\n");

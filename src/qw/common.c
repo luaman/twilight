@@ -905,6 +905,27 @@ COM_CheckParm (char *parm)
 
 /*
 ================
+COM_CheckFile
+
+================
+*/
+qboolean 
+COM_CheckFile (char *fname)
+{
+	FILE *h;
+
+	COM_FOpenFile (fname, &h);
+
+	if (!h) {
+		return false;
+	}
+
+	fclose (h);
+	return true;
+}
+
+/*
+================
 COM_CheckRegistered
 
 Looks for the pop.txt file and verifies it.
@@ -916,15 +937,8 @@ being registered.
 void
 COM_CheckRegistered (void)
 {
-	FILE       *h;
-
-	COM_FOpenFile ("gfx/pop.lmp", &h);
-
-	if (!h) {
+	if (!COM_CheckFile("gfx/pop.lmp"))
 		return;
-	}
-
-	fclose (h);
 
 	Cvar_Set (registered, "1");
 	Con_Printf ("Playing registered version.\n");
