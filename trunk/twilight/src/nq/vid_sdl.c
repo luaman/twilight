@@ -74,6 +74,7 @@ cvar_t  *v_tgammabias_g;
 
 static Uint16   hw_gamma_ramps[3][256];
 static Uint8    tex_gamma_ramps[3][256];
+qboolean		VID_Inited;
 
 static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
@@ -185,6 +186,9 @@ static void
 GammaChanged (cvar_t *cvar)
 {
 	vec3_t	hw;
+
+	if (!VID_Inited)
+		return;
 
 	// Might be init, we don't want to segfault.
 	if (!(v_hwgamma && v_gamma && v_gammabias_r && v_gammabias_g &&
@@ -417,6 +421,9 @@ VID_Init (unsigned char *palette)
 	vid.aspect = ((float) vid.height / (float) vid.width) * (4.0 / 3.0);
 
 	InitSig ();							// trap evil signals
+
+	VID_Inited = true;
+	GammaChanged(v_gamma);
 
 	GL_Init ();
 
