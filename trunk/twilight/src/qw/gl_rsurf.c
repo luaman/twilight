@@ -39,19 +39,13 @@ static const char rcsid[] =
 #include "sky.h"
 #include "liquid.h"
 
-#define	BLOCK_WIDTH		128
-#define	BLOCK_HEIGHT	128
-#define	MAX_LIGHTMAPS	256
-
 extern int lightmap_bytes;				// 1, 3, or 4
 extern int lightmap_shift;
 
-extern Uint8 templight[BLOCK_WIDTH * BLOCK_HEIGHT * 4];
-static Uint32 blocklights[BLOCK_WIDTH * BLOCK_HEIGHT * 3];
+extern Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
+static Uint32 blocklights[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 3];
 
 static int dlightdivtable[32768];
-
-vec3_t modelorg;
 
 void
 R_InitSurf (void)
@@ -77,10 +71,11 @@ R_AddDynamicLights (msurface_t *surf)
 	int				dist2, maxdist, maxdist2, maxdist3;
 	int				impacts, impactt, subtract;
 	int				sdtable[256];
-	unsigned int	*bl;
+	Uint			*bl;
+	rdlight_t		*rd;
 	float			dist;
 	vec3_t			impact, local;
-	Sint64			k;
+	Uint64			k;
 
 	lit = false;
 
@@ -93,12 +88,13 @@ R_AddDynamicLights (msurface_t *surf)
 		if (!(surf->dlightbits & (1 << (lnum & 31))))
 			continue;                   // not lit by this light
 
-		VectorCopy (r_dlight[lnum].origin, local);
+		rd = &r_dlight[lnum];
+		VectorCopy (rd->origin, local);
 		dist = PlaneDiff (local, surf->plane);
 		
 		// for comparisons to minimum acceptable light
 		// compensate for LIGHTOFFSET
-		maxdist = (int) r_dlight[lnum].cullradius2 + LIGHTOFFSET;
+		maxdist = (int) rd->cullradius2 + LIGHTOFFSET;
 		
 		dist2 = dist * dist;
 		dist2 += LIGHTOFFSET;
@@ -137,10 +133,10 @@ R_AddDynamicLights (msurface_t *surf)
 		maxdist3 = maxdist - dist2;
 
 		// convert to 8.8 blocklights format
-		red = r_dlight[lnum].light[0];
-		green = r_dlight[lnum].light[1];
-		blue = r_dlight[lnum].light[2];
-		subtract = (int) (r_dlight[lnum].lightsubtract * 4194304.0f);
+		red = rd->light[0];
+		green = rd->light[1];
+		blue = rd->light[2];
+		subtract = (int) (rd->lightsubtract * 4194304.0f);
 		bl = blocklights;
 
 		i = impactt;
@@ -438,7 +434,7 @@ GL_BuildLightmap (model_t *mod, msurface_t *surf)
 		memset (blocklights, 0, size3 * sizeof(Uint32));
 
 		// add all the dynamic lights
-		if (surf->dlightframe == vis_framecount)
+		if (surf->dlightframe == r_framecount)
 			if (R_AddDynamicLights (surf))
 				surf->cached_dlight = 1;
 
@@ -531,7 +527,7 @@ GL_UpdateLightmap (model_t *mod, msurface_t *fa)
 	if (!r_dynamic->ivalue)
 		return;
 
-	if (fa->dlightframe == vis_framecount // dynamic lighting
+	if (fa->dlightframe == r_framecount // dynamic lighting
 			|| fa->cached_dlight // previously lit
 			|| d_lightstylevalue[fa->styles[0]] != fa->cached_light[0]
 			|| d_lightstylevalue[fa->styles[1]] != fa->cached_light[1]
@@ -588,7 +584,7 @@ void
 R_DrawBrushDepthSkies (void)
 {
 	int			 i;
-	vec3_t		 mins, maxs;
+	vec3_t		 mins, maxs, org;
 	brushhdr_t	*brush;
 	entity_t	*e;
 
@@ -609,7 +605,7 @@ R_DrawBrushDepthSkies (void)
 				continue;
 
 			softwaretransformforbrushentity (e->cur.origin, e->cur.angles);
-			softwareuntransform(r_origin, modelorg);
+			softwareuntransform(r_origin, org);
 
 			qglPushMatrix ();
 			qglTranslatef(e->cur.origin[0], e->cur.origin[1], e->cur.origin[2]);
@@ -617,7 +613,7 @@ R_DrawBrushDepthSkies (void)
 			qglRotatef (e->cur.angles[0], 0, 1, 0);
 			qglRotatef (e->cur.angles[2], 1, 0, 0);
 
-			R_Draw_Depth_Sky_Chain (&brush->sky_chain, modelorg);
+			R_Draw_Depth_Sky_Chain (&brush->sky_chain, org);
 
 			qglPopMatrix ();
 		}
@@ -867,9 +863,10 @@ R_VisBrushModel (entity_t *e)
 	float			 dot;
 	model_t			*mod = e->model;
 	brushhdr_t		*brush = mod->brush;
+	vec3_t			 org;
 
 	softwaretransformforbrushentity (e->cur.origin, e->cur.angles);
-	softwareuntransform(r_origin, modelorg);
+	softwareuntransform(r_origin, org);
 		
 	/*
 	 * LordHavoc: decide which surfs are visible and update lightmaps, then
@@ -879,7 +876,7 @@ R_VisBrushModel (entity_t *e)
 			i < brush->nummodelsurfaces; i++, psurf++)
 	{
 		// find which side of the node we are on
-		dot = PlaneDiff (modelorg, psurf->plane);
+		dot = PlaneDiff (org, psurf->plane);
 
 		// draw the polygon
 		if (((psurf->flags & SURF_PLANEBACK) && (dot < -BACKFACE_EPSILON))
@@ -913,9 +910,6 @@ R_DrawOpaqueBrushModel (entity_t *e)
 	model_t			*mod = e->model;
 	brushhdr_t		*brush = mod->brush;
 
-	softwaretransformforbrushentity (e->cur.origin, e->cur.angles);
-	softwareuntransform(r_origin, modelorg);
-
 	// calculate dynamic lighting for bmodel if it's not an instanced model
 	if (brush->firstmodelsurface != 0 && !gl_flashblend->ivalue)
 	{
@@ -946,9 +940,6 @@ void
 R_DrawAddBrushModel (entity_t *e)
 {
 	model_t *mod = e->model;
-
-	softwaretransformforbrushentity (e->cur.origin, e->cur.angles);
-	softwareuntransform(r_origin, modelorg);
 
 	qglPushMatrix ();
 

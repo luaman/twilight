@@ -8,7 +8,6 @@ fixed before release, they're marked RC below.
 
 Bugs we know about:
 
-  - RC: Dlights are screwed after the first map. (WAAAAY too dark.)
   - RC: When you touch the bottom of a pool, you make a splash sound.  DP
     broke this and DP has fixed it.
   - RC: Fix net_udp (line 112) so we don't resolve non-network connections.

@@ -754,7 +754,6 @@ void
 R_NewMap (void)
 {
 	Uint32			i;
-	extern Sint32	r_dlightframecount;
 
 	for (i = 0; i < 256; i++)
 		d_lightstylevalue[i] = 264;		// normal light value
@@ -765,8 +764,6 @@ R_NewMap (void)
 	memset (&cl_player_entities, 0, sizeof(cl_player_entities));
 	memset (&cl_static_entities, 0, sizeof(cl_static_entities));
 	cl_num_static_entities = 0;
-
-	r_dlightframecount = 0;
 
 	// some Cvars need resetting on map change
 	Cvar_Set (r_skyname, "");

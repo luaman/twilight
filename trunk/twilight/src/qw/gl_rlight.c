@@ -43,8 +43,6 @@ static const char rcsid[] =
 
 rdlight_t r_dlight[MAX_DLIGHTS];
 int r_numdlights = 0;
-Uint r_dlightframecount;
-
 
 static int corona_texture;
 
@@ -205,7 +203,6 @@ R_BuildLightList (void)
 
 		rd->cullradius2 = rd->cullradius * rd->cullradius;
 		rd->lightsubtract = 1.0f / rd->cullradius2;
-		r_numdlights++;
 	}
 }
 
@@ -395,8 +392,6 @@ R_MarkLights (rdlight_t *light, int bit, model_t *model)
 		return;
 	}
 
-	r_dlightframecount++;
-
 	radius = light->cullradius;
 
 	//for comparisons to maximum light distance
@@ -440,9 +435,9 @@ R_MarkLights (rdlight_t *light, int bit, model_t *model)
 						do {
 							surf = *mark++;
 
-							if (surf->lightframe == r_dlightframecount)
+							if (surf->lightframe == r_framecount)
 								continue;
-							surf->lightframe = r_dlightframecount;
+							surf->lightframe = r_framecount;
 							if (surf->visframe != vis_framecount)
 								continue;
 
