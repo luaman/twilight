@@ -34,49 +34,52 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
 #include "SDL.h"
 
 #include "quakedef.h"
 #include "console.h"
 #include "cvar.h"
+#include "keys.h"
 #include "glquake.h"
 #include "host.h"
-#include "keys.h"
 #include "strlib.h"
 #include "sys.h"
 
 
-unsigned		d_8to32table[256];
+unsigned	d_8to32table[256];
 
-cvar_t     *vid_mode;
-cvar_t     *m_filter;
-cvar_t     *_windowed_mouse;
-cvar_t     *gl_ztrick;
-cvar_t     *gl_driver;
+cvar_t	*vid_mode;
+cvar_t	*m_filter;
+cvar_t	*_windowed_mouse;
+cvar_t	*gl_ztrick;
+cvar_t	*gl_driver;
 
-cvar_t  *v_hwgamma;
-cvar_t  *v_gamma;
-cvar_t  *v_gammabias_r;
-cvar_t  *v_gammabias_b;
-cvar_t  *v_gammabias_g;
-cvar_t  *v_tgamma;
-cvar_t  *v_tgammabias_r;
-cvar_t  *v_tgammabias_b;
-cvar_t  *v_tgammabias_g;
+cvar_t	*v_hwgamma;
+cvar_t	*v_gamma;
+cvar_t	*v_gammabias_r;
+cvar_t	*v_gammabias_b;
+cvar_t	*v_gammabias_g;
+cvar_t	*v_tgamma;
+cvar_t	*v_tgammabias_r;
+cvar_t	*v_tgammabias_b;
+cvar_t	*v_tgammabias_g;
 
-static Uint16   hw_gamma_ramps[3][256];
-static Uint8    tex_gamma_ramps[3][256];
+static Uint16	hw_gamma_ramps[3][256];
+static Uint8	tex_gamma_ramps[3][256];
 qboolean		VID_Inited;
 
 static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
 
-static qboolean  use_mouse = false;
+static qboolean use_mouse = false;
 
 static int  scr_width = 640, scr_height = 480, scr_bpp = 15;
+
+static int  sdl_flags = SDL_OPENGL;
 
 /*-----------------------------------------------------------------------*/
 
@@ -98,15 +101,12 @@ const char *gl_renderer;
 const char *gl_version;
 const char *gl_extensions;
 
-qboolean    isPermedia = false;
-qboolean    gl_mtexable = false;
-
-static int  sdl_flags = SDL_OPENGL;
+qboolean	isPermedia = false;
+qboolean	gl_mtexable = false;
 
 void		IN_WindowedMouse (cvar_t *cvar);
 
 /*-----------------------------------------------------------------------*/
-
 void
 VID_Shutdown (void)
 {
@@ -122,7 +122,8 @@ VID_Shutdown (void)
 			ramp[_i] = (type)bound_bits(GAMMA(_i, gamma, _bits, n), _bits);	\
 		}																	\
 	} while (0)
-	
+
+
 static void
 VID_InitTexGamma (void)
 {
@@ -374,10 +375,6 @@ VID_Init (unsigned char *palette)
 	else
 		scr_bpp = info->vfmt->BitsPerPixel;
 
-	if (!GLF_Init()) {
-		Sys_Error ("Could not init the libGL!\n");
-	}
-
 	// We want at least 444 (16 bit RGB)
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 4);
 	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 4);
@@ -386,9 +383,13 @@ VID_Init (unsigned char *palette)
 
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 1);
-	
+
 	if (SDL_SetVideoMode (scr_width, scr_height, scr_bpp, sdl_flags) == NULL) {
 		Sys_Error ("Could not init video mode: %s", SDL_GetError ());
+	}
+
+	if (!GLF_Init()) {
+		Sys_Error ("Could not init the libGL!\n");
 	}
 
 	SDL_WM_SetCaption ("Twilight NetQuake", "twilight");
@@ -633,7 +634,7 @@ Sys_SendKeyEvents (void)
 			case SDL_MOUSEMOTION:
 				if (!use_mouse)
 					break;
-				
+
 				if (_windowed_mouse->value && (cls.state >= ca_connected)) {
 					mouse_x += event.motion.xrel;
 					mouse_y += event.motion.yrel;
@@ -728,8 +729,7 @@ IN_Move (usercmd_t *cmd)
 	mouse_x *= sensitivity->value;
 	mouse_y *= sensitivity->value;
 
-	if ((in_strafe.state & 1) || (lookstrafe->value
-				&& freelook))
+	if ((in_strafe.state & 1) || (lookstrafe->value && freelook))
 		cmd->sidemove += m_side->value * mouse_x;
 	else
 		cl.viewangles[YAW] -= m_yaw->value * mouse_x;
