@@ -144,6 +144,10 @@ SOURCE=.\gl_draw.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\gl_poly.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\gl_refrag.c
 # End Source File
 # Begin Source File
@@ -268,10 +272,6 @@ SOURCE=.\view.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\wad.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\world.c
 # End Source File
 # Begin Source File
@@ -340,11 +340,11 @@ SOURCE=..\include\draw.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\gl_warp_sin.h
+SOURCE=.\gl_poly.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\glquake.h
+SOURCE=..\include\gl_warp_sin.h
 # End Source File
 # Begin Source File
 
@@ -421,10 +421,6 @@ SOURCE=.\protocol.h
 # Begin Source File
 
 SOURCE=..\include\qtypes.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\quakedef.h
 # End Source File
 # Begin Source File
 

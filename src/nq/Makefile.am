@@ -44,10 +44,10 @@ twilight_nq_SOURCES= \
 	vid_sdl.c \
 	snd_dma.c \
 	pcx.c tga.c \
-	view.c wad.c world.c world.h zone.c \
+        view.c world.c world.h zone.c \
         quakedef.h bspfile.h client.h keys.h protocol.h \
 	render.h server.h sys.c \
-	gl_poly.c gl_poly.h transform.c transform.h \
+        gl_poly.c gl_poly.h \
 	$(twilight_nq_sys_sources)
 
 EXTRA_twilight_nq_SOURCES= \

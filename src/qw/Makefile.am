@@ -39,10 +39,10 @@ twilight_qw_SOURCES= \
 	snd_dma.c \
 	pcx.c tga.c \
 	vid_sdl.c \
-	view.c wad.c zone.c \
+        view.c zone.c \
 	bspfile.h keys.h protocol.h \
 	render.h sys.c \
-	transform.c transform.h gl_poly.c gl_poly.h
+        gl_poly.c gl_poly.h
 
 
 EXTRA_DIST= \

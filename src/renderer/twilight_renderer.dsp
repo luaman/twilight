@@ -95,6 +95,14 @@ SOURCE=.\noise.c
 
 SOURCE=.\noise_textures.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\transform.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\wad.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -110,6 +118,10 @@ SOURCE=.\oglfuncs.h
 # Begin Source File
 
 SOURCE=.\opengl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\transform.h
 # End Source File
 # End Group
 # End Target
