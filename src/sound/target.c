@@ -174,19 +174,19 @@ SNDDMA_Init (void)
 	SDL_PauseAudio (0);
 
 	/* Fill the audio DMA information block */
-	shm = &the_shm;
-	shm->splitbuffer = 0;
-	shm->samplebits = (obtained.format & 0xFF);
-	shm->speed = obtained.freq;
-	shm->channels = obtained.channels;
-	shm->samples = obtained.samples << 4;
-	shm->samplepos = 0;
-	shm->submission_chunk = 1;
-	shm->buffer = Z_Malloc (shm->samples * (shm->samplebits >> 3));
-	if (!shm->buffer)
+	the_shm.splitbuffer = 0;
+	the_shm.samplebits = (obtained.format & 0xFF);
+	the_shm.speed = obtained.freq;
+	the_shm.channels = obtained.channels;
+	the_shm.samples = obtained.samples << 4;
+	the_shm.samplepos = 0;
+	the_shm.submission_chunk = 1;
+	the_shm.buffer = Z_Malloc (the_shm.samples * (the_shm.samplebits >> 3));
+	if (!the_shm.buffer)
 	{
 		Sys_Error ("Failed to allocate buffer for sound!\n");
 	}
+	shm = &the_shm;
 
 	snd_inited = true;
 	return true;
