@@ -162,7 +162,7 @@ R_Init_Cvars (void)
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
 
-	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_NONE, NULL);
+	gl_particletorches = Cvar_Get ("gl_particletorches", "0", CVAR_ARCHIVE, NULL);
 
 	r_maxedges = Cvar_Get ("r_maxedges", "0", CVAR_NONE, NULL);	// Shrak
 	r_maxsurfs = Cvar_Get ("r_maxsurfs", "0", CVAR_NONE, NULL); // Shrak
