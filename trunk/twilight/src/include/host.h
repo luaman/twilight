@@ -75,6 +75,9 @@ void		Chase_Init_Cvars (void);
 void		Chase_Init (void);
 void		Chase_Reset (void);
 void		Chase_Update (void);
+
+extern		double	host_realtime;
+
 #endif /* TWILIGHT_NQ */
 #endif // __HOST_H
 

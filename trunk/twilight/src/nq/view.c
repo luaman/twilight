@@ -46,9 +46,6 @@ static const char rcsid[] =
 #include "host.h"
 #include "console.h"
 
-/* QW specific */
-#include "pmove.h"
-
 /*
 
 The view is allowed to move slightly from it's true position for bobbing,

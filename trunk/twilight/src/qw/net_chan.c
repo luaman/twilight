@@ -152,23 +152,21 @@ Sends an out-of-band datagram
 ================
 */
 void
-Netchan_OutOfBand (netadr_t adr, int length, Uint8 *data)
+Netchan_OutOfBand (netsrc_t sock, netadr_t adr, int length, Uint8 *data)
 {
 	sizebuf_t	send;
 	Uint8		send_buf[MAX_MSGLEN + PACKET_HEADER];
 
 	// write the packet header
-	send.data = send_buf;
-	send.maxsize = sizeof (send_buf);
-	send.cursize = 0;
+	SZ_Init (&send, send_buf, sizeof(send_buf));
 
 	MSG_WriteLong (&send, -1);			// -1 sequence means out of band
 	SZ_Write (&send, data, length);
 
 	// send the datagram
 	// zoid, no input in demo playback mode
-	if (!cls.demoplayback)
-		NET_SendPacket (send.cursize, send.data, adr);
+	if ( !cls.demoplayback )
+		NET_SendPacket (sock, send.cursize, send.data, adr);
 }
 
 /*
@@ -179,7 +177,7 @@ Sends a text message in an out-of-band datagram
 ================
 */
 void
-Netchan_OutOfBandPrint (netadr_t adr, char *format, ...)
+Netchan_OutOfBandPrint (netsrc_t sock, netadr_t adr, char *format, ...)
 {
 	va_list     argptr;
 	static char string[8192];			// ??? why static?
@@ -189,7 +187,7 @@ Netchan_OutOfBandPrint (netadr_t adr, char *format, ...)
 	va_end (argptr);
 
 
-	Netchan_OutOfBand (adr, strlen (string), (Uint8 *) string);
+	Netchan_OutOfBand (sock, adr, strlen (string), (Uint8 *) string);
 }
 
 
@@ -201,16 +199,16 @@ called to open a channel to a remote system
 ==============
 */
 void
-Netchan_Setup (netchan_t *chan, netadr_t adr, int qport)
+Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 {
 	memset (chan, 0, sizeof (*chan));
 
+	chan->sock = sock;
 	chan->remote_address = adr;
-	chan->last_received = realtime;
+	chan->last_received = curtime;
 
-	chan->message.data = chan->message_buf;
+	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
 	chan->message.allowoverflow = true;
-	chan->message.maxsize = sizeof (chan->message_buf);
 
 	chan->qport = qport;
 
@@ -229,7 +227,7 @@ Returns true if the bandwidth choke isn't active
 qboolean
 Netchan_CanPacket (netchan_t *chan)
 {
-	if (chan->cleartime < realtime + MAX_BACKUP * chan->rate)
+	if (chan->cleartime < curtime + MAX_BACKUP * chan->rate)
 		return true;
 	return false;
 }
@@ -293,9 +291,7 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 		send_reliable = true;
 	}
 // write the packet header
-	send.data = send_buf;
-	send.maxsize = sizeof (send_buf);
-	send.cursize = 0;
+	SZ_Init (&send, send_buf, sizeof(send_buf));
 
 	w1 = chan->outgoing_sequence | (send_reliable << 31);
 	w2 = chan->incoming_sequence | (chan->incoming_reliable_sequence << 31);
@@ -320,14 +316,14 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 // send the datagram
 	i = chan->outgoing_sequence & (MAX_LATENT - 1);
 	chan->outgoing_size[i] = send.cursize;
-	chan->outgoing_time[i] = realtime;
+	chan->outgoing_time[i] = curtime;
 
 	// zoid, no input in demo playback mode
-	if (!cls.demoplayback)
-		NET_SendPacket (send.cursize, send.data, chan->remote_address);
+	if ( !cls.demoplayback )
+		NET_SendPacket (chan->sock, send.cursize, send.data, chan->remote_address);
 
-	if (chan->cleartime < realtime)
-		chan->cleartime = realtime + send.cursize * chan->rate;
+	if (chan->cleartime < curtime)
+		chan->cleartime = curtime + send.cursize * chan->rate;
 	else
 		chan->cleartime += send.cursize * chan->rate;
 
@@ -335,7 +331,6 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 		Con_Printf ("--> s=%i(%i) a=%i(%i) %i\n", chan->outgoing_sequence,
 					send_reliable, chan->incoming_sequence,
 					chan->incoming_reliable_sequence, send.cursize);
-
 }
 
 /*
@@ -416,10 +411,10 @@ Netchan_Process (netchan_t *chan)
 	chan->frame_latency = chan->frame_latency * OLD_AVG
 		+ (chan->outgoing_sequence - sequence_ack) * (1.0 - OLD_AVG);
 	chan->frame_rate = chan->frame_rate * OLD_AVG
-		+ (realtime - chan->last_received) * (1.0 - OLD_AVG);
+		+ (curtime - chan->last_received) * (1.0 - OLD_AVG);
 	chan->good_count += 1;
 
-	chan->last_received = realtime;
+	chan->last_received = curtime;
 
 	return true;
 }

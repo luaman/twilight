@@ -131,7 +131,7 @@ CL_GetMessage (void)
 				// if this is the second frame, grab the real td_starttime
 				// so the bogus time on the first frame doesn't count
 				if (host_framecount == cls.td_startframe + 1)
-					cls.td_starttime = realtime;
+					cls.td_starttime = host_realtime;
 			} else if ( /* cl.time > 0 && */ cl.time <= cl.mtime[0]) {
 				return 0;				// don't need another message yet
 			}
@@ -346,7 +346,7 @@ CL_FinishTimeDemo (void)
 
 // the first frame didn't count
 	frames = (host_framecount - cls.td_startframe) - 1;
-	time = realtime - cls.td_starttime;
+	time = host_realtime - cls.td_starttime;
 	if (!time)
 		time = 1;
 	Con_Printf ("%i frames %5.1f seconds %5.1f fps\n", frames, time,

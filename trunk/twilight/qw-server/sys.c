@@ -96,6 +96,8 @@ char       *qdate = __DATE__;
 cvar_t	   *sys_asciionly;
 cvar_t	   *sys_extrasleep;
 
+double		curtime;
+
 // =======================================================================
 // General routines
 // =======================================================================
@@ -401,7 +403,7 @@ Sys_ExpandPath (char *str)
 int
 main (int c, char **v)
 {
-	double  	    time, oldtime, newtime;
+	double  	    time, oldtime, newtime, base;
 	int     	    j;
 #ifndef _WIN32
 	fd_set			fdset;
@@ -433,7 +435,7 @@ main (int c, char **v)
 
 	SV_Frame (0.1);
 
-	oldtime = Sys_DoubleTime ();
+	base = oldtime = Sys_DoubleTime () - 0.1;
 	while (1) {
 #ifndef _WIN32
 		// the only reason we have a timeout at all is so that if the last
@@ -456,6 +458,7 @@ main (int c, char **v)
 		// find time spent rendering last frame
 		newtime = Sys_DoubleTime ();
 		time = newtime - oldtime;
+		curtime = newtime - base;
 
 		SV_Frame (time);
 		oldtime = newtime;

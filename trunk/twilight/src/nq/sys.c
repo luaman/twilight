@@ -98,6 +98,8 @@ char	   *qdate = __DATE__;
 
 cvar_t	   *sys_asciionly;
 
+double		curtime;
+
 // =======================================================================
 // General routines
 // =======================================================================
@@ -461,7 +463,7 @@ Sys_ExpandPath (char *str)
 int
 main (int c, char **v)
 {
-	double      time, oldtime, newtime;
+	double      time, oldtime, newtime, base;
 	int         j;
 
 	COM_InitArgv (c, v);
@@ -527,11 +529,12 @@ main (int c, char **v)
 	}
 #endif
 
-	oldtime = Sys_DoubleTime ();
+	base = oldtime = Sys_DoubleTime ();
 	while (1) {
 // find time spent rendering last frame
 		newtime = Sys_DoubleTime ();
 		time = newtime - oldtime;
+		curtime = newtime - base;
 
 		Host_Frame (time);
 		oldtime = newtime;

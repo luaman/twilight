@@ -265,10 +265,6 @@ SOURCE=.\bspfile.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\cdaudio.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\client.h
 # End Source File
 # Begin Source File
@@ -390,10 +386,6 @@ SOURCE=..\include\spritegn.h
 # Begin Source File
 
 SOURCE=..\include\strlib.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\sys.h
 # End Source File
 # Begin Source File
 

@@ -338,7 +338,7 @@ Con_Print (char *txt)
 			Con_Linefeed ();
 			// mark time for transparent overlay
 			if (con->current >= 0)
-				con_times[con->current % NUM_CON_TIMES] = realtime;
+				con_times[con->current % NUM_CON_TIMES] = cls.realtime;
 		}
 
 		switch (c) {
@@ -454,7 +454,7 @@ Con_DrawInput (void)
 	// draw it
 	Draw_String_Len(1 << 3, con_vislines - 22, text, con_linewidth);
 
-	if ((int) (realtime * con_cursorspeed) & 1)
+	if ((int) (cls.realtime * con_cursorspeed) & 1)
 		Draw_Character ((1 + key_linepos) << 3, con_vislines - 22, 11);
 }
 
@@ -483,7 +483,7 @@ Con_DrawNotify (void)
 		time = con_times[i % NUM_CON_TIMES];
 		if (time == 0)
 			continue;
-		time = realtime - time;
+		time = cls.realtime - time;
 		if (time > con_notifytime->value)
 			continue;
 		text = con->text + (i % con_totallines) * con_linewidth;
@@ -514,7 +514,7 @@ Con_DrawNotify (void)
 		Draw_String (skip << 3, v, s);
 
 		Draw_Character ((strlen(s) + skip) << 3, v,
-						10 + ((int) (realtime * con_cursorspeed) & 1));
+						10 + ((int) (cls.realtime * con_cursorspeed) & 1));
 		v += 8;
 	}
 

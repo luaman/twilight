@@ -216,6 +216,8 @@ typedef struct {
 	int			challenge;
 
 	float		latency;				// rolling average
+
+	double		realtime;
 } client_static_t;
 
 extern client_static_t cls;

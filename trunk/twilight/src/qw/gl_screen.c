@@ -1033,7 +1033,7 @@ void
 SCR_UpdateScreen (void)
 {
 	if (scr_disabled_for_loading) {
-		if (realtime - scr_disabled_time > 60) {
+		if (cls.realtime - scr_disabled_time > 60) {
 			scr_disabled_for_loading = false;
 			Con_Printf ("load failed.\n");
 		} else

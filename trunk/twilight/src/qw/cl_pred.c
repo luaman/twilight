@@ -147,9 +147,9 @@ CL_PredictMove (void)
 		return;
 
 	cl.oldtime = cl.time;
-	cl.time = realtime - cls.latency - cl_pushlatency->value * 0.001;
-	if (cl.time > realtime)
-		cl.time = realtime;
+	cl.time = cls.realtime - cls.latency - cl_pushlatency->value * 0.001;
+	if (cl.time > cls.realtime)
+		cl.time = cls.realtime;
 
 	if (cl.intermission)
 		return;

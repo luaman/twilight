@@ -458,7 +458,7 @@ CL_LinkPacketEntities (void)
 	if ( cls.timedemo )
 		frac = 1.0;
 	else {
-		frac = min ( realtime - cls.latency + 0.02, realtime ); 
+		frac = min ( cls.realtime - cls.latency + 0.02, cls.realtime ); 
 		frac = 1.0 - ( frac - cl.frames[cl.validsequence & UPDATE_MASK].senttime );
 		frac = bound ( 0, frac, 1 );
 	}
@@ -828,8 +828,8 @@ CL_LinkPlayers (void)
 	int         oldphysent;
 	vec3_t      org;
 
-	playertime = realtime - cls.latency + 0.02;
-	playertime = min (playertime, realtime);
+	playertime = cls.realtime - cls.latency + 0.02;
+	playertime = min (playertime, cls.realtime);
 
 	frame = &cl.frames[cl.parsecount & UPDATE_MASK];
 
@@ -977,9 +977,9 @@ CL_SetUpPlayerPrediction (qboolean dopred)
 	frame_t    *frame;
 	struct predicted_player *pplayer;
 
-	playertime = realtime - cls.latency + 0.02;
-	if (playertime > realtime)
-		playertime = realtime;
+	playertime = cls.realtime - cls.latency + 0.02;
+	if (playertime > cls.realtime)
+		playertime = cls.realtime;
 
 	frame = &cl.frames[cl.parsecount & UPDATE_MASK];
 

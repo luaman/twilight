@@ -853,9 +853,10 @@ SV_RunEntity
 void
 SV_RunEntity (edict_t *ent)
 {
-	if (ent->v.lastruntime == (float) realtime)
+	if (ent->lastruntime == sv.time)
 		return;
-	ent->v.lastruntime = (float) realtime;
+	ent->lastruntime = sv.time;
+	ent->v.lastruntime = (float) svs.realtime;
 
 	switch ((int) ent->v.movetype) {
 		case MOVETYPE_PUSH:
@@ -915,12 +916,12 @@ SV_Physics (void)
 	static double old_time;
 
 // don't bother running a frame if sys_ticrate seconds haven't passed
-	host_frametime = realtime - old_time;
+	host_frametime = svs.realtime - old_time;
 	if (host_frametime < sv_mintic->value)
 		return;
 	if (host_frametime > sv_maxtic->value)
 		host_frametime = sv_maxtic->value;
-	old_time = realtime;
+	old_time = svs.realtime;
 
 	pr_global_struct->frametime = host_frametime;
 

@@ -55,7 +55,6 @@ qboolean    host_initialized;			// true if into command execution
 										// (compatability)
 
 double      host_frametime;
-double      realtime;					// without any filtering or bounding
 
 int         host_hunklevel;
 
@@ -236,7 +235,7 @@ SV_DropClient (client_t *drop)
 	*drop->uploadfn = 0;
 
 	drop->state = cs_zombie;			// become free in a few seconds
-	drop->connection_started = realtime;	// for zombie timeout
+	drop->connection_started = svs.realtime;	// for zombie timeout
 
 	drop->old_frags = 0;
 	drop->edict->v.frags = 0;
@@ -310,7 +309,7 @@ SV_FullClientUpdate (client_t *client, sizebuf_t *buf)
 
 	MSG_WriteByte (buf, svc_updateentertime);
 	MSG_WriteByte (buf, i);
-	MSG_WriteFloat (buf, realtime - client->connection_started);
+	MSG_WriteFloat (buf, svs.realtime - client->connection_started);
 
 	strlcpy (info, client->userinfo, sizeof (info));
 	Info_RemovePrefixedKeys (info, '_');	// server passwords, etc
@@ -378,7 +377,7 @@ SVC_Status (void)
 			ping = SV_CalcPing (cl);
 			Con_Printf ("%i %i %i %i \"%s\" \"%s\" %i %i\n", cl->userid,
 						cl->old_frags,
-						(int) (realtime - cl->connection_started) / 60, ping,
+						(int) (svs.realtime - cl->connection_started) / 60, ping,
 						cl->name, Info_ValueForKey (cl->userinfo, "skin"), top,
 						bottom);
 		}
@@ -404,9 +403,9 @@ SV_CheckLog (void)
 	// bump sequence if allmost full, or ten minutes have passed and
 	// there is something still sitting there
 	if (sz->cursize > LOG_HIGHWATER
-		|| (realtime - svs.logtime > LOG_FLUSH && sz->cursize)) {
+		|| (svs.realtime - svs.logtime > LOG_FLUSH && sz->cursize)) {
 		// swap buffers and bump sequence
-		svs.logtime = realtime;
+		svs.logtime = svs.realtime;
 		svs.logsequence++;
 		sz = &svs.log[svs.logsequence & 1];
 		sz->cursize = 0;
@@ -441,7 +440,7 @@ SVC_Log (void)
 		// or we aren't
 		// logging frags
 		data[0] = A2A_NACK;
-		NET_SendPacket (1, data, net_from);
+		NET_SendPacket (NS_SERVER, 1, data, net_from);
 		return;
 	}
 
@@ -451,7 +450,7 @@ SVC_Log (void)
 	snprintf (data, sizeof (data), "stdlog %i\n", svs.logsequence - 1);
 	strcat (data, (char *) svs.log_buf[((svs.logsequence - 1) & 1)]);
 
-	NET_SendPacket (strlen (data) + 1, data, net_from);
+	NET_SendPacket (NS_SERVER, strlen (data) + 1, data, net_from);
 }
 
 /*
@@ -468,7 +467,7 @@ SVC_Ping (void)
 
 	data = A2A_ACK;
 
-	NET_SendPacket (1, &data, net_from);
+	NET_SendPacket (NS_SERVER, 1, &data, net_from);
 }
 
 /*
@@ -506,11 +505,11 @@ SVC_GetChallenge (void)
 		// overwrite the oldest
 		svs.challenges[oldest].challenge = (Q_rand () << 16) ^ Q_rand ();
 		svs.challenges[oldest].adr = net_from;
-		svs.challenges[oldest].time = realtime;
+		svs.challenges[oldest].time = svs.realtime;
 		i = oldest;
 	}
 	// send it back
-	Netchan_OutOfBandPrint (net_from, "%c%i", S2C_CHALLENGE,
+	Netchan_OutOfBandPrint (NS_SERVER, net_from, "%c%i", S2C_CHALLENGE,
 							svs.challenges[i].challenge);
 }
 
@@ -541,7 +540,7 @@ SVC_DirectConnect (void)
 
 	version = Q_atoi (Cmd_Argv (1));
 	if (version != PROTOCOL_VERSION) {
-		Netchan_OutOfBandPrint (net_from,
+		Netchan_OutOfBandPrint (NS_SERVER, net_from,
 								"%c\nServer is Twilight version %s.\n",
 								A2C_PRINT, VERSION);
 		Con_Printf ("* rejected connect from version %i\n", version);
@@ -560,13 +559,13 @@ SVC_DirectConnect (void)
 		if (NET_CompareBaseAdr (net_from, svs.challenges[i].adr)) {
 			if (challenge == svs.challenges[i].challenge)
 				break;					// good
-			Netchan_OutOfBandPrint (net_from, "%c\nBad challenge.\n",
+			Netchan_OutOfBandPrint (NS_SERVER, net_from, "%c\nBad challenge.\n",
 									A2C_PRINT);
 			return;
 		}
 	}
 	if (i == MAX_CHALLENGES) {
-		Netchan_OutOfBandPrint (net_from, "%c\nNo challenge for address.\n",
+		Netchan_OutOfBandPrint (NS_SERVER, net_from, "%c\nNo challenge for address.\n",
 								A2C_PRINT);
 		return;
 	}
@@ -578,7 +577,7 @@ SVC_DirectConnect (void)
 				&& strcmp (spectator_password->string, s)) {	// failed
 			Con_Printf ("%s:spectator password failed\n",
 						NET_AdrToString (net_from));
-			Netchan_OutOfBandPrint (net_from,
+			Netchan_OutOfBandPrint (NS_SERVER, net_from,
 									"%c\nrequires a spectator password\n\n",
 									A2C_PRINT);
 			return;
@@ -592,7 +591,7 @@ SVC_DirectConnect (void)
 			strcasecmp (password->string, "none") &&
 			strcmp (password->string, s)) {
 			Con_Printf ("%s:password failed\n", NET_AdrToString (net_from));
-			Netchan_OutOfBandPrint (net_from,
+			Netchan_OutOfBandPrint (NS_SERVER, net_from,
 									"%c\nserver requires a password\n\n",
 									A2C_PRINT);
 			return;
@@ -664,7 +663,7 @@ SVC_DirectConnect (void)
 	if ((spectator && spectators >= (int) maxspectators->value)
 		|| (!spectator && clients >= (int) maxclients->value)) {
 		Con_Printf ("%s:full connect\n", NET_AdrToString (adr));
-		Netchan_OutOfBandPrint (adr, "%c\nserver is full\n\n", A2C_PRINT);
+		Netchan_OutOfBandPrint (NS_SERVER, adr, "%c\nserver is full\n\n", A2C_PRINT);
 		return;
 	}
 	// find a client slot
@@ -684,11 +683,11 @@ SVC_DirectConnect (void)
 	// this is the only place a client_t is ever initialized
 	*newcl = temp;
 
-	Netchan_OutOfBandPrint (adr, "%c", S2C_CONNECTION);
+	Netchan_OutOfBandPrint (NS_SERVER, adr, "%c", S2C_CONNECTION);
 
 	edictnum = (newcl - svs.clients) + 1;
 
-	Netchan_Setup (&newcl->netchan, adr, qport);
+	Netchan_Setup (NS_SERVER, &newcl->netchan, adr, qport);
 
 	newcl->state = cs_connected;
 
@@ -1033,7 +1032,7 @@ SV_SendBan (void)
 	data[5] = 0;
 	strcat (data, "\nbanned.\n");
 
-	NET_SendPacket (strlen (data), data, net_from);
+	NET_SendPacket (NS_SERVER, strlen (data), data, net_from);
 }
 
 /*
@@ -1072,7 +1071,7 @@ SV_ReadPackets (void)
 	int         qport;
 
 	good = false;
-	while (NET_GetPacket ()) {
+	while (NET_GetPacket (NS_SERVER)) {
 		if (SV_FilterPacket ()) {
 			SV_SendBan ();				// tell them we aren't listening...
 			continue;
@@ -1142,7 +1141,7 @@ SV_CheckTimeouts (void)
 	float       droptime;
 	int         nclients;
 
-	droptime = realtime - timeout->value;
+	droptime = svs.realtime - timeout->value;
 	nclients = 0;
 
 	for (i = 0, cl = svs.clients; i < MAX_CLIENTS; i++, cl++) {
@@ -1156,7 +1155,7 @@ SV_CheckTimeouts (void)
 			}
 		}
 		if (cl->state == cs_zombie &&
-				realtime - cl->connection_started > zombietime->value) {
+				svs.realtime - cl->connection_started > zombietime->value) {
 			cl->state = cs_free;		// can now be reused
 		}
 	}
@@ -1236,7 +1235,7 @@ SV_Frame (float time)
 
 // decide the simulation time
 	if (!sv.paused) {
-		realtime += time;
+		svs.realtime += time;
 		sv.time += time;
 	}
 // check timeouts
@@ -1384,9 +1383,11 @@ SV_InitLocal (void)
 	Info_SetValueForStarKey (svs.info, "*version", va ("twilight %s", VERSION),
 							 MAX_SERVERINFO_STRING);
 
+	svs.realtime = 0;
+
 	// init fraglog stuff
 	svs.logsequence = 1;
-	svs.logtime = realtime;
+	svs.logtime = svs.realtime;
 	svs.log[0].data = svs.log_buf[0];
 	svs.log[0].maxsize = sizeof (svs.log_buf[0]);
 	svs.log[0].cursize = 0;
@@ -1416,10 +1417,10 @@ Master_Heartbeat (void)
 	int         active;
 	int         i;
 
-	if (realtime - svs.last_heartbeat < HEARTBEAT_SECONDS)
+	if (svs.realtime - svs.last_heartbeat < HEARTBEAT_SECONDS)
 		return;							// not time to send yet
 
-	svs.last_heartbeat = realtime;
+	svs.last_heartbeat = svs.realtime;
 
 	// 
 	// count active users
@@ -1440,7 +1441,7 @@ Master_Heartbeat (void)
 		if (master_adr[i].port) {
 			Con_Printf ("Sending heartbeat to %s\n",
 						NET_AdrToString (master_adr[i]));
-			NET_SendPacket (strlen (string), string, master_adr[i]);
+			NET_SendPacket (NS_SERVER, strlen (string), string, master_adr[i]);
 		}
 }
 
@@ -1464,7 +1465,7 @@ Master_Shutdown (void)
 		if (master_adr[i].port) {
 			Con_Printf ("Sending heartbeat to %s\n",
 						NET_AdrToString (master_adr[i]));
-			NET_SendPacket (strlen (string), string, master_adr[i]);
+			NET_SendPacket (NS_SERVER, strlen (string), string, master_adr[i]);
 		}
 }
 
@@ -1547,9 +1548,9 @@ SV_ExtractFromUserinfo (client_t *cl)
 
 	if (strncmp (val, cl->name, strlen (cl->name))) {
 		if (!sv.paused) {
-			if (!cl->lastnametime || realtime - cl->lastnametime > 5) {
+			if (!cl->lastnametime || svs.realtime - cl->lastnametime > 5) {
 				cl->lastnamecount = 0;
-				cl->lastnametime = realtime;
+				cl->lastnametime = svs.realtime;
 			} else if (cl->lastnamecount++ > 4) {
 				SV_BroadcastPrintf (PRINT_HIGH, "%s was kicked for name spam\n",
 									cl->name);
@@ -1606,7 +1607,9 @@ SV_InitNet (void)
 		port = Q_atoi (com_argv[p + 1]);
 		Con_Printf ("Port: %i\n", port);
 	}
-	NET_Init (port);
+
+	NET_Init ();
+	NET_OpenSocket (NS_SERVER, port);
 
 	Netchan_Init ();
 

@@ -74,7 +74,7 @@ qboolean    host_initialized;			// true if into command execution
 
 double      host_frametime;
 double      host_time;
-double      realtime;					// without any filtering or bounding
+double      host_realtime;				// without any filtering or bounding
 double      oldrealtime;				// last frame run
 int         host_framecount;
 
@@ -491,9 +491,9 @@ Host_ShutdownServer (qboolean crash)
 	while (count);
 
 // make sure all the clients know we're disconnecting
-	buf.data = message;
-	buf.maxsize = 4;
-	buf.cursize = 0;
+	SZ_Init (&buf, message, sizeof(message));
+	SZ_Clear (&buf);
+
 	MSG_WriteByte (&buf, svc_disconnect);
 	count = NET_SendToAll (&buf, 5);
 	if (count)
@@ -550,7 +550,7 @@ Host_FilterTime (float time)
 {
 	float		fps;
 
-	realtime += time;
+	host_realtime += time;
 
 	fps = cl_maxfps->value;
 	if (cl.maxclients > 1) {
@@ -561,11 +561,11 @@ Host_FilterTime (float time)
 
 	/* eviltypeguy - added && cl.maxclients > 1 to allow uncapped framerate
 	   when playing singleplayer quake, possible NetQuake breakage? */
-	if ((!cls.timedemo && fps) && ((realtime - oldrealtime) < (1.0 / fps)))
+	if ((!cls.timedemo && fps) && ((host_realtime - oldrealtime) < (1.0 / fps)))
 		return false;					/* framerate is too high */
 
-	host_frametime = realtime - oldrealtime;
-	oldrealtime = realtime;
+	host_frametime = host_realtime - oldrealtime;
+	oldrealtime = host_realtime;
 
 	if (host_framerate->value > 0)
 		host_frametime = host_framerate->value;

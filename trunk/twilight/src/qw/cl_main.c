@@ -128,7 +128,6 @@ qboolean	host_initialized;			// true if into command execution
 qboolean	nomaster;
 
 double		host_frametime;
-double		realtime;					// without any filtering or bounding
 double		oldrealtime;				// last frame run
 int			host_framecount;
 
@@ -227,17 +226,11 @@ CL_SendConnectPacket (void)
 		return;
 	}
 
-	if (!NET_IsClientLegal (&adr)) {
-		Con_Printf ("Illegal server address\n");
-		connect_time = -1;
-		return;
-	}
-
 	if (adr.port == 0)
 		adr.port = BigShort (27500);
 	t2 = Sys_DoubleTime ();
 
-	connect_time = realtime + t2 - t1;	// for retransmit requests
+	connect_time = cls.realtime + t2 - t1;	// for retransmit requests
 
 	cls.qport = qport->value;
 
@@ -248,7 +241,7 @@ CL_SendConnectPacket (void)
 	snprintf (data, sizeof (data), "%c%c%c%cconnect %i %i %i \"%s\"\n",
 			  255, 255, 255, 255, PROTOCOL_VERSION, cls.qport, cls.challenge,
 			  cls.userinfo);
-	NET_SendPacket (strlen (data), data, adr);
+	NET_SendPacket (NS_CLIENT, strlen (data), data, adr);
 }
 
 /*
@@ -270,7 +263,7 @@ CL_CheckForResend (void)
 		return;
 	if (cls.state != ca_disconnected)
 		return;
-	if (connect_time && realtime - connect_time < 5.0)
+	if (connect_time && cls.realtime - connect_time < 5.0)
 		return;
 
 	t1 = Sys_DoubleTime ();
@@ -279,22 +272,17 @@ CL_CheckForResend (void)
 		connect_time = -1;
 		return;
 	}
-	if (!NET_IsClientLegal (&adr)) {
-		Con_Printf ("Illegal server address\n");
-		connect_time = -1;
-		return;
-	}
 
 	if (adr.port == 0)
 		adr.port = BigShort (27500);
 	t2 = Sys_DoubleTime ();
 
-	connect_time = realtime + t2 - t1;	// for retransmit requests
+	connect_time = cls.realtime + t2 - t1;	// for retransmit requests
 
 	Con_Printf ("Connecting to %s...\n", cls.servername);
 	snprintf (data, sizeof (data), "%c%c%c%cgetchallenge\n", 255, 255, 255,
 			  255);
-	NET_SendPacket (strlen (data), data, adr);
+	NET_SendPacket (NS_CLIENT, strlen (data), data, adr);
 }
 
 void
@@ -379,7 +367,7 @@ CL_Rcon_f (void)
 		NET_StringToAdr (rcon_address->string, &to);
 	}
 
-	NET_SendPacket (strlen (message) + 1, message, to);
+	NET_SendPacket (NS_CLIENT, strlen (message) + 1, message, to);
 }
 
 
@@ -713,7 +701,7 @@ CL_Packet_f (void)
 	}
 	*out = 0;
 
-	NET_SendPacket (out - send, send, adr);
+	NET_SendPacket (NS_CLIENT, out - send, send, adr);
 }
 
 
@@ -827,7 +815,7 @@ CL_ConnectionlessPacket (void)
 				Con_Printf ("Dup connect received.  Ignored.\n");
 			return;
 		}
-		Netchan_Setup (&cls.netchan, net_from, cls.qport);
+		Netchan_Setup (NS_CLIENT, &cls.netchan, net_from, cls.qport);
 		MSG_WriteChar (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message, "new");
 		cls.state = ca_connected;
@@ -841,8 +829,7 @@ CL_ConnectionlessPacket (void)
 
 		Con_Printf ("client command\n");
 
-		if ((*(unsigned *) net_from.ip != *(unsigned *) net_local_adr.ip
-			 && *(unsigned *) net_from.ip != htonl (INADDR_LOOPBACK))) {
+		if (!NET_IsLocalAddress (net_from)) {
 			Con_Printf ("Command packet from remote host.  Ignored.\n");
 			return;
 		}
@@ -904,7 +891,7 @@ CL_ConnectionlessPacket (void)
 		data[4] = A2A_ACK;
 		data[5] = 0;
 
-		NET_SendPacket (6, &data, net_from);
+		NET_SendPacket (NS_CLIENT, 6, &data, net_from);
 		return;
 	}
 
@@ -970,8 +957,8 @@ CL_ReadPackets (void)
 	// check timeout
 	// 
 	if (cls.state >= ca_connected
-		&& realtime - cls.netchan.last_received > cl_timeout->value) {
-		Con_Printf ("\nServer connection timed out. (%d %d %f)\n", realtime,
+		&& cls.realtime - cls.netchan.last_received > cl_timeout->value) {
+		Con_Printf ("\nServer connection timed out. (%d %d %f)\n", cls.realtime,
 				cls.netchan.last_received, cl_timeout->value);
 		CL_Disconnect ();
 		return;
@@ -1291,8 +1278,8 @@ Host_Frame (double time)
 	// server disconnected
 
 	// decide the simulation time
-	realtime += time;
-	if (oldrealtime > realtime)
+	cls.realtime += time;
+	if (oldrealtime > cls.realtime)
 		oldrealtime = 0;
 
 	if (cl_maxfps->value)
@@ -1302,11 +1289,11 @@ Host_Frame (double time)
 
 	fps = bound (30.0f, fps, 72.0f);
 
-	if (!cls.timedemo && ((realtime - oldrealtime) < (1.0 / fps)))
+	if (!cls.timedemo && ((cls.realtime - oldrealtime) < (1.0 / fps)))
 		return;							// framerate is too high
 
-	host_frametime = realtime - oldrealtime;
-	oldrealtime = realtime;
+	host_frametime = cls.realtime - oldrealtime;
+	oldrealtime = cls.realtime;
 	if (host_frametime > 0.2)
 		host_frametime = 0.2;
 
@@ -1463,7 +1450,11 @@ Host_Init (void)
 
 	V_Init ();						// setup view, add related commands
 
-	NET_Init (PORT_CLIENT);			// setup net sockets and identify host
+	NET_Init ();
+
+	// setup net sockets and identify host
+	NET_OpenSocket (NS_CLIENT, PORT_CLIENT);
+
 	Netchan_Init ();				// setup netchan
 
 	W_LoadWadFile ("gfx.wad");

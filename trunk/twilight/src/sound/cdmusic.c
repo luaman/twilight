@@ -49,7 +49,8 @@ typedef void	(*xcommand_t) (void);
 void			Cmd_AddCommand (char *cmd_name, xcommand_t function);
 int				Cmd_Argc (void);
 char			*Cmd_Argv (int arg);
-extern double	realtime;
+
+extern double	curtime;
 
 
 static qboolean	cdValid = false;
@@ -145,7 +146,7 @@ CDAudio_Play (Uint8 track, qboolean looping)
 	playTrack = track;
 	playing = true;
 	FRAMES_TO_MSF(cd_handle->track[track - 1].length, &len_m, &len_s, &len_f);
-	endOfTrack = realtime + ((double)len_m * 60.0) + (double)len_s + (double)len_f / (double)CD_FPS;
+	endOfTrack = curtime + ((double)len_m * 60.0) + (double)len_s + (double)len_f / (double)CD_FPS;
 
 	/*
 	 * Add the pregap for the next track.  This means that disc-at-once CDs
@@ -194,7 +195,7 @@ CDAudio_Pause (void)
 
 	wasPlaying = playing;
 	playing = false;
-	pausetime = realtime;
+	pausetime = curtime;
 }
 
 void
@@ -212,7 +213,7 @@ CDAudio_Resume (void)
 	if (SDL_CDResume (cd_handle) < 0)
 		Con_Printf ("Unable to resume CD-ROM: %s\n", SDL_GetError ());
 	playing = true;
-	endOfTrack += realtime - pausetime;
+	endOfTrack += curtime - pausetime;
 	pausetime = -1.0;
 }
 
@@ -355,7 +356,7 @@ CDAudio_Update (void)
 	if (!enabled)
 		return;
 
-	if (playing && realtime > endOfTrack) {
+	if (playing && curtime > endOfTrack) {
 		curstat = cd_handle->status;
 		if (curstat != CD_PLAYING && curstat != CD_PAUSED) {
 			playing = false;

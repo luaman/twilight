@@ -632,7 +632,7 @@ CL_ReadFromServer (void)
 		if (!ret)
 			break;
 
-		cl.last_received_message = realtime;
+		cl.last_received_message = host_realtime;
 		CL_ParseServerMessage ();
 	} while (ret && cls.state == ca_connected);
 
@@ -730,7 +730,7 @@ CL_Init
 void
 CL_Init (void)
 {
-	SZ_Alloc (&cls.message, 1024);
+	SZ_Init (&cls.message, cls.msg_buf, sizeof(cls.msg_buf));
 
 	CL_Input_Init_Cvars ();
 	CL_Input_Init ();

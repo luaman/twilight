@@ -421,10 +421,10 @@ R_BlendLightmaps (void)
 				v = p->verts[0];
 				for (j = 0; j < p->numverts; j++, v += VERTEXSIZE) {
 					qglTexCoord2f (v[5], v[6]);
-					nv[0] =	v[0] + intensity * Q_sin (v[1] * 0.05 + realtime)
-						* Q_sin (v[2] * 0.05 + realtime);
-					nv[1] =	v[1] + intensity * Q_sin (v[0] * 0.05 + realtime)
-						* Q_sin (v[2] * 0.05 + realtime);
+					nv[0] =	v[0] + intensity * Q_sin (v[1] * 0.05 + cls.realtime)
+						* Q_sin (v[2] * 0.05 + cls.realtime);
+					nv[1] =	v[1] + intensity * Q_sin (v[0] * 0.05 + cls.realtime)
+						* Q_sin (v[2] * 0.05 + cls.realtime);
 					nv[2] = v[2];
 					qglVertex3fv (nv);
 				}
@@ -471,10 +471,10 @@ R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
 			qglMultiTexCoord2fARB (GL_TEXTURE0_ARB, v[3], v[4]);
 			qglMultiTexCoord2fARB (GL_TEXTURE1_ARB, v[5], v[6]);
-			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime)
-				* Q_sin (v[2] * 0.05 + realtime);
-			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + realtime)
-				* Q_sin (v[2] * 0.05 + realtime);
+			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + cls.realtime)
+				* Q_sin (v[2] * 0.05 + cls.realtime);
+			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + cls.realtime)
+				* Q_sin (v[2] * 0.05 + cls.realtime);
 			nv[2] = v[2];
 			qglVertex3fv (nv);
 		}
@@ -519,10 +519,10 @@ R_RenderBrushPoly (msurface_t *fa, texture_t *t)
 		v = fa->polys->verts[0];
 		for (i = 0; i < fa->polys->numverts; i++, v += VERTEXSIZE) {
 			qglTexCoord2f (v[3], v[4]);
-			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime)
-				* Q_sin (v[2] * 0.05 + realtime);
-			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + realtime)
-				* Q_sin (v[2] * 0.05 + realtime);
+			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + cls.realtime)
+				* Q_sin (v[2] * 0.05 + cls.realtime);
+			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + cls.realtime)
+				* Q_sin (v[2] * 0.05 + cls.realtime);
 			nv[2] = v[2];
 			qglVertex3fv (nv);
 		}

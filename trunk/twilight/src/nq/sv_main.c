@@ -732,9 +732,8 @@ SV_SendClientDatagram (client_t *client)
 	Uint8       buf[MAX_DATAGRAM];
 	sizebuf_t   msg;
 
-	msg.data = buf;
-	msg.maxsize = sizeof (buf);
-	msg.cursize = 0;
+	SZ_Init (&msg, buf, sizeof(buf));
+	SZ_Clear (&msg);
 
 	MSG_WriteByte (&msg, svc_time);
 	MSG_WriteFloat (&msg, sv.time);
@@ -810,16 +809,15 @@ SV_SendNop (client_t *client)
 	sizebuf_t   msg;
 	Uint8       buf[4];
 
-	msg.data = buf;
-	msg.maxsize = sizeof (buf);
-	msg.cursize = 0;
+	SZ_Init (&msg, buf, sizeof(buf));
+	SZ_Clear (&msg);
 
 	MSG_WriteChar (&msg, svc_nop);
 
 	if (NET_SendUnreliableMessage (client->netconnection, &msg) == -1)
 		SV_DropClient (true);			// if the message couldn't send, kick
 										// off
-	client->last_message = realtime;
+	client->last_message = host_realtime;
 }
 
 /*
@@ -852,7 +850,7 @@ SV_SendClientMessages (void)
 			// some other message data (name changes, etc) may accumulate 
 			// between signon stages
 			if (!host_client->sendsignon) {
-				if (realtime - host_client->last_message > 5)
+				if (host_realtime - host_client->last_message > 5)
 					SV_SendNop (host_client);
 				continue;				// don't send out non-signon messages
 			}
@@ -881,7 +879,7 @@ SV_SendClientMessages (void)
 					SV_DropClient (true);	// if the message couldn't send,
 											// kick off
 				SZ_Clear (&host_client->message);
-				host_client->last_message = realtime;
+				host_client->last_message = host_realtime;
 				host_client->sendsignon = false;
 			}
 		}
@@ -991,9 +989,8 @@ SV_SendReconnect (void)
 	char        data[128];
 	sizebuf_t   msg;
 
-	msg.data = data;
-	msg.cursize = 0;
-	msg.maxsize = sizeof (data);
+	SZ_Init (&msg, data, sizeof(data));
+	SZ_Clear (&msg);
 
 	MSG_WriteChar (&msg, svc_stufftext);
 	MSG_WriteString (&msg, "reconnect\n");

@@ -329,7 +329,7 @@ M_Main_Draw (void)
 	M_DrawPic ((320 - p->width) / 2, 4, p);
 	M_DrawPic (72, 32, Draw_CachePic ("gfx/mainmenu.lmp"));
 
-	f = (int) (realtime * 10) % 6;
+	f = (int) (cls.realtime * 10) % 6;
 
 	M_DrawPic (54, 32 + m_main_cursor * 20,
 					Draw_CachePic (va ("gfx/menudot%i.lmp", f + 1)));
@@ -544,7 +544,7 @@ M_Options_Draw (void)
 
 
 	// cursor
-	M_DrawCharacter (200, 32 + options_cursor * 8, 12 + ((int) (realtime * 4) & 1));
+	M_DrawCharacter (200, 32 + options_cursor * 8, 12 + ((int) (cls.realtime * 4) & 1));
 }
 
 
@@ -675,7 +675,7 @@ M_Gfx_Draw (void)
 	M_Print (16, y, "      Particle torches"); M_DrawCheckbox (220, y, gl_particletorches->value);
 
 	// cursor
-	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (realtime * 4) & 1));
+	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (cls.realtime * 4) & 1));
 }
 
 void
@@ -909,7 +909,7 @@ M_Keys_Draw (void)
 		M_DrawCharacter (130, 48 + keys_cursor * 8, '=');
 	else
 		M_DrawCharacter (130, 48 + keys_cursor * 8,
-						 12 + ((int) (realtime * 4) & 1));
+						 12 + ((int) (cls.realtime * 4) & 1));
 }
 
 

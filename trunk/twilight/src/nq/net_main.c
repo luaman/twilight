@@ -81,6 +81,8 @@ PollProcedure slistPollProcedure = { NULL, 0.0, Slist_Poll };
 
 
 sizebuf_t	net_message;
+Uint8		net_msgbuf[NET_MAXMESSAGE];
+
 Uint32		net_activeconnections = 0;
 
 int			messagesSent = 0;
@@ -763,8 +765,7 @@ NET_Init (void)
 		s->disconnected = true;
 	}
 
-	// allocate space for network message buffer
-	SZ_Alloc (&net_message, NET_MAXMESSAGE);
+	SZ_Init (&net_message, net_msgbuf, sizeof(net_msgbuf));
 
 	Cmd_AddCommand ("slist", NET_Slist_f);
 	Cmd_AddCommand ("listen", NET_Listen_f);

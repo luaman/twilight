@@ -67,10 +67,7 @@ typedef struct sizebuf_s {
 	int         cursize;
 } sizebuf_t;
 
-#ifdef TWILIGHT_NQ
-void        SZ_Alloc (sizebuf_t *buf, int startsize);
-void        SZ_Free (sizebuf_t *buf);
-#endif
+void		SZ_Init (sizebuf_t *buf, Uint8 *data, int length);
 void        SZ_Clear (sizebuf_t *buf);
 void       *SZ_GetSpace (sizebuf_t *buf, int length);
 void        SZ_Write (sizebuf_t *buf, void *data, int length);
