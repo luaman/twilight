@@ -57,12 +57,12 @@ int main(int argc, char **argv)
 					filenum++;
 					for(;;)
 					{
-						c = fread(readbuf, 1, sizeof(readbuf), infile);
-						if (c < 1)
-							break;
 						w = 0;
 						writebuf[w++] = '\n';
 						writebuf[w++] = '"';
+						c = fread(readbuf, 1, sizeof(readbuf), infile);
+						if (c < 1)
+							break;
 						for (j = 0;j < c;j++)
 						{
 							if (readbuf[j] == '?')
