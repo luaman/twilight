@@ -595,8 +595,25 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	NOTIFYICONDATA nd;
 	HRESULT res;
+	static int minimized = 0;
 
 	switch( uMsg ) {
+		// grabbing WM_SETTEXT so that we can change the tooltip
+		// on the tray icon if we are minimized (while still only
+		// calling SetWindowText() )
+		// note: DO NOT return from this message, since we want to
+		// call the default window proc.
+		case WM_SETTEXT:
+			if(minimized)
+			{
+				memset(&nd, 0, sizeof(nd));
+				nd.cbSize = sizeof(nd);
+				nd.hWnd = hMainWnd;
+				nd.uID = 1;
+				strncpy(nd.szTip, (char*)lParam, sizeof(nd.szTip));
+				Shell_NotifyIcon(NIM_MODIFY, &nd);
+			}
+			break;
 		case WM_ACTIVATE:
 			if( LOWORD( wParam ) != WA_INACTIVE ) {
 				SetFocus( hEntryWnd );
@@ -611,7 +628,8 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			switch( wParam) {
 				case SC_MINIMIZE:
 					// do minimize to tray here
-					nd.cbSize = sizeof(NOTIFYICONDATA);
+					memset(&nd, 0, sizeof(nd));
+					nd.cbSize = sizeof(nd);
 					nd.hWnd = hMainWnd;
 					nd.hIcon = LoadIcon (hOurInstance, MAKEINTRESOURCE( IDI_TWILIGHT ));
 					nd.uID = 1;
@@ -625,6 +643,7 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					if(res)
 					{
 						ShowWindow(hMainWnd, SW_HIDE);
+						minimized = 1;
 						return(0);
 					}
 					break;
@@ -635,11 +654,17 @@ LRESULT CALLBACK MainWinProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case WM_LBUTTONDOWN:
 				case WM_RBUTTONDOWN:
 				case WM_MBUTTONDOWN:
-					ShowWindow(hMainWnd, SW_SHOW);
-					nd.hWnd = hMainWnd;
-					nd.uID = 1;
-					Shell_NotifyIcon(NIM_DELETE, &nd);
-					return(0);
+					if(minimized)
+					{
+						ShowWindow(hMainWnd, SW_SHOW);
+						minimized = 0;
+						memset(&nd, 0, sizeof(nd));
+						nd.cbSize = sizeof(nd);
+						nd.hWnd = hMainWnd;
+						nd.uID = 1;
+						Shell_NotifyIcon(NIM_DELETE, &nd);
+						return(0);
+					}
 					break;
 			}
 			break;
@@ -789,6 +814,8 @@ int
 main (int argc, char *argv[])
 {
 	double		time, oldtime, newtime, base;
+	Uint	port;
+	Uint	p, i;
 
 	SDL_Init (SDL_INIT_TIMER);
 	atexit (SDL_Quit);
@@ -806,11 +833,59 @@ main (int argc, char *argv[])
 
 	SV_Frame (0.1);
 
+	port = PORT_SERVER;
+	p = COM_CheckParm ("-port");
+	if (p && p < com_argc) {
+		port = Q_atoi (com_argv[p + 1]);
+	}
+
 	base = oldtime = Sys_DoubleTime () - 0.1;
 	while (1)
 	{
 #ifdef _WIN32
 		MSG msg;
+		char *tmp = NULL;
+		char lastmap[1024];
+		char wintitle[1024];
+		int lastmaxclients;
+		int lastclients;
+		int updatetitle;
+		
+		tmp = Info_ValueForKey (svs.info, "map");
+		if (strncmp(tmp, lastmap, sizeof(lastmap)))
+		{
+			strncpy(lastmap, tmp, sizeof(lastmap));
+			updatetitle = 1;
+		}
+		tmp = Info_ValueForKey(svs.info, "maxclients");
+		p = Q_atoi(tmp);
+		if(lastmaxclients != p)
+		{
+			lastmaxclients = p;
+			updatetitle = 1;
+		}
+
+		p = 0;
+		for (i = 0; i < MAX_CLIENTS; i++) {
+			client_t   *cl;
+			cl = &svs.clients[i];
+			if (cl->state == cs_connected || cl->state == cs_spawned || cl->spectator) 
+				p++;
+		}
+		if(lastclients != p)
+		{
+			lastclients = p;
+			updatetitle = 1;
+		}
+
+		if(updatetitle)
+		{
+			snprintf(wintitle, sizeof(wintitle), "Twilight - port %d, clients %d/%d, map %s", port, lastclients, lastmaxclients, lastmap);
+			SetWindowText(hMainWnd, wintitle);
+			Sys_Printf("title length: %d\n", strlen(wintitle));
+			updatetitle = 0;
+		}
+
 		while(PeekMessage(&msg, NULL, 0, 0, 0))
 		{
 			GetMessage( &msg, NULL, 0, 0 );
