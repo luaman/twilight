@@ -1050,18 +1050,10 @@ R_DrawAliasModel (entity_t *e)
 		qglRotatef (e->angles[2], 1, 0, 0);
 	}
 
-	// double size of eyes, since they are really hard to see in gl
-	if (clmodel->modflags & FLAG_DOUBLESIZE) {
-		qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
-					  paliashdr->scale_origin[2] - (22 + 8));
-		qglScalef (paliashdr->scale[0] * 2, paliashdr->scale[1] * 2,
-				  paliashdr->scale[2] * 2);
-	} else {
-		qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
-					  paliashdr->scale_origin[2]);
-		qglScalef (paliashdr->scale[0], paliashdr->scale[1],
-				  paliashdr->scale[2]);
-	}
+	qglTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1],
+		paliashdr->scale_origin[2]);
+	qglScalef (paliashdr->scale[0], paliashdr->scale[1],
+		paliashdr->scale[2]);
 
 	anim = (int) (cl.time * 10) & 3;
 	skinnum = e->skinnum;
