@@ -156,8 +156,6 @@ CL_PredictMove (void)
 		char        text[1024];
 
 		cls.state = ca_active;
-		key_dest = key_game;
-		game_target = KGT_DEFAULT;
 		snprintf (text, sizeof (text), "Twilight QWCL: %s", cls.servername);
 		SDL_WM_SetCaption (text, "Twilight QWCL");
 	}

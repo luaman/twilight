@@ -272,7 +272,6 @@ M_ToggleMenu_f (void)
 			return;
 		}
 		key_dest = key_game;
-		game_target = KGT_DEFAULT;
 		m_state = m_none;
 		return;
 	} else if (key_dest == key_console) {
@@ -326,9 +325,8 @@ void
 M_Main_Key (int key)
 {
 	switch (key) {
-		case SDLK_ESCAPE:
+		case K_ESCAPE:
 			key_dest = key_game;
-			game_target = KGT_DEFAULT;
 			m_state = m_none;
 			cls.demonum = m_save_demonum;
 			if (cls.demonum != -1 && !cls.demoplayback
@@ -336,19 +334,19 @@ M_Main_Key (int key)
 				CL_NextDemo ();
 			break;
 
-		case SDLK_DOWN:
+		case K_DOWNARROW:
 			S_LocalSound ("misc/menu1.wav");
 			if (++m_main_cursor >= MAIN_ITEMS)
 				m_main_cursor = 0;
 			break;
 
-		case SDLK_UP:
+		case K_UPARROW:
 			S_LocalSound ("misc/menu1.wav");
 			if (--m_main_cursor < 0)
 				m_main_cursor = MAIN_ITEMS - 1;
 			break;
 
-		case SDLK_RETURN:
+		case K_ENTER:
 			m_entersound = true;
 
 			switch (m_main_cursor) {
@@ -580,11 +578,11 @@ void
 M_Options_Key (int k)
 {
 	switch (k) {
-		case SDLK_ESCAPE:
+		case K_ESCAPE:
 			M_Menu_Main_f ();
 			break;
 
-		case SDLK_RETURN:
+		case K_ENTER:
 			m_entersound = true;
 			switch (options_cursor) {
 				case 0:
@@ -595,7 +593,7 @@ M_Options_Key (int k)
 					Con_ToggleConsole_f ();
 					break;
 				case 2:
-					Cbuf_AddText ("exec default.tcf\n");
+					Cbuf_AddText ("exec default.cfg\n");
 					break;
 				case 14:
 					M_Menu_Video_f ();
@@ -606,31 +604,31 @@ M_Options_Key (int k)
 			}
 			return;
 
-		case SDLK_UP:
+		case K_UPARROW:
 			S_LocalSound ("misc/menu1.wav");
 			options_cursor--;
 			if (options_cursor < 0)
 				options_cursor = OPTIONS_ITEMS - 1;
 			break;
 
-		case SDLK_DOWN:
+		case K_DOWNARROW:
 			S_LocalSound ("misc/menu1.wav");
 			options_cursor++;
 			if (options_cursor >= OPTIONS_ITEMS)
 				options_cursor = 0;
 			break;
 
-		case SDLK_LEFT:
+		case K_LEFTARROW:
 			M_AdjustSliders (-1);
 			break;
 
-		case SDLK_RIGHT:
+		case K_RIGHTARROW:
 			M_AdjustSliders (1);
 			break;
 	}
 
 	if (options_cursor == 14 && vid_menudrawfn == NULL) {
-		if (k == SDLK_UP)
+		if (k == K_UPARROW)
 			options_cursor = 13;
 		else
 			options_cursor = 0;
@@ -688,8 +686,8 @@ M_FindKeysForCommand (char *command, int *twokeys)
 	l = Q_strlen (command);
 	count = 0;
 
-	for (j = 0; j < KSYM_LAST; j++) {
-		b = Key_Hash_GetBind(KGT_DEFAULT, j);
+	for (j = 0; j < 256; j++) {
+		b = keybindings[j];
 		if (!b)
 			continue;
 		if (!Q_strncmp (b, command, l)) {
@@ -710,12 +708,12 @@ M_UnbindCommand (char *command)
 
 	l = Q_strlen (command);
 
-	for (j = 0; j < KSYM_LAST; j++) {
-		b = Key_Hash_GetBind(KGT_DEFAULT, j);
+	for (j = 0; j < 256; j++) {
+		b = keybindings[j];
 		if (!b)
 			continue;
 		if (!Q_strncmp (b, command, l))
-			Key_SetBinding (KGT_DEFAULT, j, "");
+			Key_SetBinding (j, "");
 	}
 }
 
@@ -771,15 +769,17 @@ M_Keys_Draw (void)
 void
 M_Keys_Key (int k)
 {
-//	char        cmd[80];
+	char        cmd[80];
 	int         keys[2];
 
 	if (bind_grab) {					// defining a key
 		S_LocalSound ("misc/menu1.wav");
-		if (k == SDLK_ESCAPE) {
+		if (k == K_ESCAPE) {
 			bind_grab = false;
 		} else if (k != '`') {
-			Key_SetBinding(KGT_DEFAULT, k, bindnames[keys_cursor][0]);
+			snprintf (cmd, sizeof (cmd), "bind %s \"%s\"\n",
+					Key_KeynumToString (k), bindnames[keys_cursor][0]);
+			Cbuf_InsertText (cmd);
 		}
 
 		bind_grab = false;
@@ -787,27 +787,27 @@ M_Keys_Key (int k)
 	}
 
 	switch (k) {
-		case SDLK_ESCAPE:
+		case K_ESCAPE:
 			M_Menu_Options_f ();
 			break;
 
-		case SDLK_LEFT:
-		case SDLK_UP:
+		case K_LEFTARROW:
+		case K_UPARROW:
 			S_LocalSound ("misc/menu1.wav");
 			keys_cursor--;
 			if (keys_cursor < 0)
 				keys_cursor = NUMCOMMANDS - 1;
 			break;
 
-		case SDLK_DOWN:
-		case SDLK_RIGHT:
+		case K_DOWNARROW:
+		case K_RIGHTARROW:
 			S_LocalSound ("misc/menu1.wav");
 			keys_cursor++;
 			if (keys_cursor >= NUMCOMMANDS)
 				keys_cursor = 0;
 			break;
 
-		case SDLK_RETURN:				// go into bind mode
+		case K_ENTER:				// go into bind mode
 			M_FindKeysForCommand (bindnames[keys_cursor][0], keys);
 			S_LocalSound ("misc/menu2.wav");
 			if (keys[1] != -1)
@@ -815,8 +815,8 @@ M_Keys_Key (int k)
 			bind_grab = true;
 			break;
 
-		case SDLK_BACKSPACE:			// delete bindings
-		case SDLK_DELETE:				// delete bindings
+		case K_BACKSPACE:			// delete bindings
+		case K_DEL:					// delete bindings
 			S_LocalSound ("misc/menu2.wav");
 			M_UnbindCommand (bindnames[keys_cursor][0]);
 			break;
@@ -878,19 +878,19 @@ void
 M_Help_Key (int key)
 {
 	switch (key) {
-		case SDLK_ESCAPE:
+		case K_ESCAPE:
 			M_Menu_Main_f ();
 			break;
 
-		case SDLK_UP:
-		case SDLK_RIGHT:
+		case K_UPARROW:
+		case K_RIGHTARROW:
 			m_entersound = true;
 			if (++help_page >= NUM_HELP_PAGES)
 				help_page = 0;
 			break;
 
-		case SDLK_DOWN:
-		case SDLK_LEFT:
+		case K_DOWNARROW:
+		case K_LEFTARROW:
 			m_entersound = true;
 			if (--help_page < 0)
 				help_page = NUM_HELP_PAGES - 1;
@@ -967,7 +967,7 @@ void
 M_Quit_Key (int key)
 {
 	switch (key) {
-		case SDLK_ESCAPE:
+		case K_ESCAPE:
 		case 'n':
 		case 'N':
 			if (wasInMenus) {
@@ -975,7 +975,6 @@ M_Quit_Key (int key)
 				m_entersound = true;
 			} else {
 				key_dest = key_game;
-				game_target = KGT_DEFAULT;
 				m_state = m_none;
 			}
 			break;
@@ -1019,7 +1018,7 @@ M_SinglePlayer_Draw (void)
 void
 M_SinglePlayer_Key (key)
 {
-	if (key == SDLK_ESCAPE || key == SDLK_RETURN)
+	if (key == K_ESCAPE || key == K_ENTER)
 		m_state = m_main;
 }
 
@@ -1053,7 +1052,7 @@ M_MultiPlayer_Draw (void)
 void
 M_MultiPlayer_Key (key)
 {
-	if (key == SDLK_ESCAPE || key == SDLK_RETURN)
+	if (key == K_ESCAPE || key == K_ENTER)
 		m_state = m_main;
 }
 
@@ -1244,9 +1243,6 @@ M_Draw (void)
 void
 M_Keydown (int key)
 {
-	if (keydown[key] != 1)
-		return;
-
 	switch (m_state) {
 		case m_none:
 			return;
