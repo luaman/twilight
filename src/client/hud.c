@@ -124,7 +124,7 @@ static hud_t	hud;
 #define HUD_WIDTH2		42
 #define HUD_WIDTH		(HUD_WIDTH1 + HUD_WIDTH2)
 
-static void
+void
 HUD_Changed (cvar_t *unused)
 {
 	unused = unused;

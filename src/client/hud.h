@@ -32,6 +32,8 @@
 extern int sb_lines;            // scan lines to draw
 extern cvar_t *cl_sbar;
 
+void		HUD_Changed (cvar_t *unused);
+
 void		HUD_Init_Cvars (void);
 void		HUD_Init (void);
 

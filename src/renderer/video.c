@@ -45,6 +45,7 @@ static const char rcsid[] =
 #include "palette.h"
 #include "video.h"
 #include "cclient.h"
+#include "hud.h"
 
 extern cvar_t *cl_verstring;
 
@@ -130,6 +131,7 @@ Size_Changed2D (cvar_t *cvar)
 		vid.width_2d = 320;
 		vid.height_2d = 240;
 		Con_CheckResize ();
+		HUD_Changed (height_2d);
 		return;
 	}
 
@@ -153,6 +155,7 @@ Size_Changed2D (cvar_t *cvar)
 	vid.height_2d = height;
 
 	Con_CheckResize ();
+	HUD_Changed (height_2d);
 }
 
 void
