@@ -25,7 +25,6 @@ endif
 twilight_qwsv_SOURCES= \
 	cmd.h common.c console.h \
 	net.h net_chan.c net_udp.c \
-	pmove.c pmovetst.c \
 	pr_cmds.c pr_edict.c pr_exec.c progdefs.h progs.h \
 	protocol.h server.h sv_ccmds.c \
 	sv_ents.c sv_init.c sv_main.c sv_model.c sv_move.c sv_nchan.c sv_phys.c \

@@ -308,13 +308,13 @@ PM_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1,
 }
 
 float
-TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal)
+TraceLine (model_t *mdl, vec3_t start, vec3_t end, vec3_t impact, vec3_t normal)
 {
-	pmtrace_t trace;
+	pmtrace_t	trace;
 
 	memset (&trace, 0, sizeof (trace));
 	VectorCopy (end, trace.endpos);
-	PM_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, start, end, &trace);
+	PM_RecursiveHullCheck (mdl->hulls, 0, 0, 1, start, end, &trace);
 
 	VectorCopy (trace.endpos, impact);
 	VectorCopy (trace.plane.normal, normal);
