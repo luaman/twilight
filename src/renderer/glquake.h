@@ -214,7 +214,7 @@ void R_DrawSkyChain (msurface_t *s);
  * gl_draw.c
  */
 extern int gl_filter_min;
-extern int gl_filter_max;
+extern int gl_filter_mag;
 
 /*
  * gl_rmain.c
