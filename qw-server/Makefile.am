@@ -1,3 +1,6 @@
+# $Id$
+#
+# This file is intended to be processed by automake
 
 bin_PROGRAMS=twilight-qwsv
 

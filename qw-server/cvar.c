@@ -93,7 +93,7 @@ Cvar_CompleteVariable (char *partial)
 
 	// check exact match
 	for (cvar = cvar_vars; cvar; cvar = cvar->next)
-		if (!strcmp (partial, cvar->name))
+		if (!Q_strcmp (partial, cvar->name))
 			return cvar->name;
 
 	// check partial match
@@ -162,7 +162,7 @@ Adds a freestanding variable to the variable list.
 void
 Cvar_RegisterVariable (cvar_t *variable)
 {
-	char        value[512];
+	char		value[512];
 
 // first check to see if it has already been defined
 	if (Cvar_FindVar (variable->name)) {
@@ -175,12 +175,13 @@ Cvar_RegisterVariable (cvar_t *variable)
 		Con_Printf ("Cvar_RegisterVariable: %s is a command\n", variable->name);
 		return;
 	}
+
 // link the variable in
 	variable->next = cvar_vars;
 	cvar_vars = variable;
 
 // copy the value off, because future sets will Z_Free it
-	strcpy (value, variable->string);
+	Q_strcpy (value, variable->string);
 	variable->string = Z_Malloc (1);
 
 // set it through the function to be consistant
