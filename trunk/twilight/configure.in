@@ -55,14 +55,14 @@ eval BDIR="$bindir"
 
 dnl userpath/sharepath config
 AC_ARG_WITH(sharepath,
-	[  --with-share-path       set default shared data path [DATADIR/games/twilight]],,
+	[  --with-sharepath        Default shared data path [DATADIR/games/twilight]],,
 	with_sharepath="$DDIR/games/twilight")
 AC_DEFINE_UNQUOTED(SHAREPATH, "$with_sharepath")
 
 AC_ARG_WITH(userpath,
-	[  --with-userpath         set default user data path [\$HOME/.twilight]],,
+	[  --with-userpath         Default user data path [\$HOME/.twilight]],,
 	with_userpath="~/.twilight")
-AC_DEFINE_UNQUOTED(USERPATH,)
+AC_DEFINE_UNQUOTED(USERPATH, "$with_userpath")
 
 CFLAGS="-Wall -Werror $CFLAGS"
 
