@@ -50,10 +50,10 @@ int		findhandle (void)
 
 /*
 ================
-filelength
+qfilelength
 ================
 */
-int filelength (FILE *f)
+int qfilelength (FILE *f)
 {
 	int		pos;
 	int		end;
@@ -82,7 +82,7 @@ int Sys_FileOpenRead (char *path, int *hndl)
 	sys_handles[i] = f;
 	*hndl = i;
 	
-	return filelength(f);
+	return qfilelength(f);
 }
 
 int Sys_FileOpenWrite (char *path)
@@ -206,10 +206,6 @@ void Sys_Sleep (void)
 }
 
 
-void Sys_SendKeyEvents (void)
-{
-}
-
 void Sys_HighFPPrecision (void)
 {
 }
@@ -278,12 +274,6 @@ int main (int argc, char **argv)
 
 	parms.memsize = 16384*1024;
 	parms.membase = malloc (parms.memsize);
-
-	_getcwd (cwd, sizeof(cwd));
-	if (cwd[Q_strlen(cwd)-1] == '\\')
-		cwd[Q_strlen(cwd)-1] = 0;
-	parms.basedir = cwd; //"f:/quake";
-//	parms.basedir = "f:\\quake";
 
 	COM_InitArgv (argc, argv);
 

@@ -375,7 +375,7 @@ void Hunk_Print (qboolean all)
 	// print the total
 	//
 		if (next == endlow || next == endhigh || 
-		strncmp (h->name, next->name, 8) )
+			Q_strncmp (h->name, next->name, 8) )
 		{
 			if (!all)
 				Con_Printf ("          :%8i %8s (TOTAL)\n",sum, name);
@@ -886,7 +886,7 @@ void *Cache_Alloc (cache_user_t *c, int size, char *name)
 		cs = Cache_TryAlloc (size, false);
 		if (cs)
 		{
-			strncpy (cs->name, name, sizeof(cs->name)-1);
+			Q_strncpy (cs->name, name, sizeof(cs->name)-1);
 			c->data = (void *)(cs+1);
 			cs->user = c;
 			break;

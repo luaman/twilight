@@ -191,7 +191,7 @@ ddef_t *ED_FindField (char *name)
 	for (i=0 ; i<progs->numfielddefs ; i++)
 	{
 		def = &pr_fielddefs[i];
-		if (!strcmp(pr_strings + def->s_name,name) )
+		if (!Q_strcmp(pr_strings + def->s_name,name) )
 			return def;
 	}
 	return NULL;
@@ -211,7 +211,7 @@ ddef_t *ED_FindGlobal (char *name)
 	for (i=0 ; i<progs->numglobaldefs ; i++)
 	{
 		def = &pr_globaldefs[i];
-		if (!strcmp(pr_strings + def->s_name,name) )
+		if (!Q_strcmp(pr_strings + def->s_name,name) )
 			return def;
 	}
 	return NULL;
@@ -231,7 +231,7 @@ dfunction_t *ED_FindFunction (char *name)
 	for (i=0 ; i<progs->numfunctions ; i++)
 	{
 		func = &pr_functions[i];
-		if (!strcmp(pr_strings + func->s_name,name) )
+		if (!Q_strcmp(pr_strings + func->s_name,name) )
 			return func;
 	}
 	return NULL;
@@ -246,7 +246,7 @@ eval_t *GetEdictFieldValue(edict_t *ed, char *field)
 
 	for (i=0 ; i<GEFV_CACHESIZE ; i++)
 	{
-		if (!strcmp(field, gefvCache[i].field))
+		if (!Q_strcmp(field, gefvCache[i].field))
 		{
 			def = gefvCache[i].pcache;
 			goto Done;
@@ -255,10 +255,10 @@ eval_t *GetEdictFieldValue(edict_t *ed, char *field)
 
 	def = ED_FindField (field);
 
-	if (strlen(field) < MAX_FIELD_LEN)
+	if (Q_strlen(field) < MAX_FIELD_LEN)
 	{
 		gefvCache[rep].pcache = def;
-		strcpy (gefvCache[rep].field, field);
+		Q_strcpy (gefvCache[rep].field, field);
 		rep ^= 1;
 	}
 
@@ -396,10 +396,10 @@ char *PR_GlobalString (int ofs)
 		sprintf (line,"%i(%s)%s", ofs, pr_strings + def->s_name, s);
 	}
 	
-	i = strlen(line);
+	i = Q_strlen(line);
 	for ( ; i<20 ; i++)
-		strcat (line," ");
-	strcat (line," ");
+		Q_strcat (line," ");
+	Q_strcat (line," ");
 		
 	return line;
 }
@@ -416,10 +416,10 @@ char *PR_GlobalStringNoContents (int ofs)
 	else
 		sprintf (line,"%i(%s)", ofs, pr_strings + def->s_name);
 	
-	i = strlen(line);
+	i = Q_strlen(line);
 	for ( ; i<20 ; i++)
-		strcat (line," ");
-	strcat (line," ");
+		Q_strcat (line," ");
+	Q_strcat (line," ");
 		
 	return line;
 }
@@ -452,7 +452,7 @@ void ED_Print (edict_t *ed)
 	{
 		d = &pr_fielddefs[i];
 		name = pr_strings + d->s_name;
-		if (name[strlen(name)-2] == '_')
+		if (name[Q_strlen(name)-2] == '_')
 			continue;	// skip _x, _y, _z vars
 			
 		v = (int *)((char *)&ed->v + d->ofs*4);
@@ -467,7 +467,7 @@ void ED_Print (edict_t *ed)
 			continue;
 	
 		Con_Printf ("%s",name);
-		l = strlen (name);
+		l = Q_strlen (name);
 		while (l++ < 15)
 			Con_Printf (" ");
 
@@ -502,7 +502,7 @@ void ED_Write (FILE *f, edict_t *ed)
 	{
 		d = &pr_fielddefs[i];
 		name = pr_strings + d->s_name;
-		if (name[strlen(name)-2] == '_')
+		if (name[Q_strlen(name)-2] == '_')
 			continue;	// skip _x, _y, _z vars
 			
 		v = (int *)((char *)&ed->v + d->ofs*4);
@@ -660,7 +660,7 @@ void ED_ParseGlobals (char *data)
 		if (!data)
 			Sys_Error ("ED_ParseEntity: EOF without closing brace");
 
-		strcpy (keyname, com_token);
+		Q_strcpy (keyname, com_token);
 
 	// parse value	
 		data = COM_Parse (data);
@@ -695,7 +695,7 @@ char *ED_NewString (char *string)
 	char	*new, *new_p;
 	int		i,l;
 	
-	l = strlen(string) + 1;
+	l = Q_strlen(string) + 1;
 	new = Hunk_Alloc (l);
 	new_p = new;
 
@@ -747,7 +747,7 @@ qboolean	ED_ParseEpair (void *base, ddef_t *key, char *s)
 		break;
 		
 	case ev_vector:
-		strcpy (string, s);
+		Q_strcpy (string, s);
 		v = string;
 		w = string;
 		for (i=0 ; i<3 ; i++)
@@ -825,22 +825,22 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 		
 // anglehack is to allow QuakeEd to write single scalar angles
 // and allow them to be turned into vectors. (FIXME...)
-if (!strcmp(com_token, "angle"))
+if (!Q_strcmp(com_token, "angle"))
 {
-	strcpy (com_token, "angles");
+	Q_strcpy (com_token, "angles");
 	anglehack = true;
 }
 else
 	anglehack = false;
 
 // FIXME: change light to _light to get rid of this hack
-if (!strcmp(com_token, "light"))
-	strcpy (com_token, "light_lev");	// hack for single light def
+if (!Q_strcmp(com_token, "light"))
+	Q_strcpy (com_token, "light_lev");	// hack for single light def
 
-		strcpy (keyname, com_token);
+		Q_strcpy (keyname, com_token);
 
 		// another hack to fix heynames with trailing spaces
-		n = strlen(keyname);
+		n = Q_strlen(keyname);
 		while (n && keyname[n-1] == ' ')
 		{
 			keyname[n-1] = 0;
@@ -872,7 +872,7 @@ if (!strcmp(com_token, "light"))
 if (anglehack)
 {
 char	temp[32];
-strcpy (temp, com_token);
+Q_strcpy (temp, com_token);
 sprintf (com_token, "0 %s 0", temp);
 }
 
