@@ -455,7 +455,7 @@ Sys_SendKeyEvents (void)
 			case SDL_QUIT:
 //				CL_Disconnect ();
 //				Host_ShutdownServer (false);
-				Sys_Quit ();
+				Sys_Quit (0);
 				break;
 
 			default:

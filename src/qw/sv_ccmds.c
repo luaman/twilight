@@ -97,7 +97,7 @@ SV_Quit_f (void)
 	SV_FinalMessage ("server shutdown\n");
 	Com_Printf ("Shutting down.\n");
 	SV_Shutdown ();
-	Sys_Quit ();
+	Sys_Quit (0);
 }
 
 static void
