@@ -443,8 +443,6 @@ CL_Disconnect (void)
 		Netchan_Transmit (&cls.netchan, 6, final);
 
 		cls.state = ca_disconnected;
-		key_dest = key_console;
-		game_target = KGT_CONSOLE;
 
 		cls.demoplayback = cls.demorecording = cls.timedemo = false;
 	}
@@ -764,8 +762,6 @@ CL_Changing_f (void)
 	cl.intermission = 0;
 	cls.state = ca_connected;			// not active anymore, but not
 	// disconnected
-	key_dest = key_console;
-	game_target = KGT_CONSOLE;
 	Con_Printf ("\nChanging map...\n");
 }
 
@@ -832,8 +828,6 @@ CL_ConnectionlessPacket (void)
 		MSG_WriteChar (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message, "new");
 		cls.state = ca_connected;
-		key_dest = key_console;
-		game_target = KGT_CONSOLE;
 		Con_Printf ("Connected.\n");
 		allowremotecmd = false;			// localid required now for remote cmds
 		return;
@@ -1040,8 +1034,6 @@ CL_Init (void)
 	char        st[80];
 
 	cls.state = ca_disconnected;
-	key_dest = key_console;
-	game_target = KGT_CONSOLE;
 
 	Info_SetValueForKey (cls.userinfo, "name", "unnamed", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "topcolor", "0", MAX_INFO_STRING);
@@ -1221,7 +1213,7 @@ Host_Error (char *error, ...)
 ===============
 Host_WriteConfiguration
 
-Writes key bindings and archived cvars to config.tcf
+Writes key bindings and archived cvars to config.cfg
 ===============
 */
 void
@@ -1230,9 +1222,9 @@ Host_WriteConfiguration (void)
 	FILE       *f;
 
 	if (host_initialized) {
-		f = fopen (va ("%s/config.tcf", com_gamedir), "w");
+		f = fopen (va ("%s/config.cfg", com_gamedir), "w");
 		if (!f) {
-			Con_Printf ("Couldn't write config.tcf.\n");
+			Con_Printf ("Couldn't write config.cfg.\n");
 			return;
 		}
 
@@ -1456,8 +1448,6 @@ Host_Init (quakeparms_t *parms)
 	S_Init ();
 
 	cls.state = ca_disconnected;
-	key_dest = key_console;
-	game_target = KGT_CONSOLE;
 	Sbar_Init ();
 	CL_Init ();
 #else
@@ -1468,15 +1458,13 @@ Host_Init (quakeparms_t *parms)
 	S_Init ();
 
 	cls.state = ca_disconnected;
-	key_dest = key_console;
-	game_target = KGT_CONSOLE;
 	CDAudio_Init ();
 	Sbar_Init ();
 	CL_Init ();
 	IN_Init ();
 #endif
 
-	Cbuf_InsertText ("exec quake.trc\n");
+	Cbuf_InsertText ("exec quake.rc\n");
 	Cbuf_AddText
 		("echo Type connect <internet address> or use GameSpy to connect to a game.\n");
 	Cbuf_AddText ("cl_warncmd 1\n");

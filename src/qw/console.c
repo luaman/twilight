@@ -74,11 +74,9 @@ Con_ToggleConsole_f (void)
 	if (key_dest == key_console) {
 		if (cls.state == ca_active) {
 			key_dest = key_game;
-			game_target = KGT_DEFAULT;
 		}
 	} else {
 		key_dest = key_console;
-		game_target = KGT_CONSOLE;
 	}
 
 	Con_ClearNotify ();

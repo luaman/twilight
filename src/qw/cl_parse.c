@@ -557,15 +557,15 @@ CL_ParseServerData (void)
 
 	COM_Gamedir (str);
 
-	// ZOID--run the autoexec.tcf in the gamedir
+	// ZOID--run the autoexec.cfg in the gamedir
 	// if it exists
 	if (cflag) {
-		snprintf (fn, sizeof (fn), "%s/%s", com_gamedir, "config.tcf");
+		snprintf (fn, sizeof (fn), "%s/%s", com_gamedir, "config.cfg");
 		if ((f = fopen (fn, "r")) != NULL) {
 			fclose (f);
 			Cbuf_AddText ("cl_warncmd 0\n");
-			Cbuf_AddText ("exec config.tcf\n");
-			Cbuf_AddText ("exec frontend.tcf\n");
+			Cbuf_AddText ("exec config.cfg\n");
+			Cbuf_AddText ("exec frontend.cfg\n");
 			Cbuf_AddText ("cl_warncmd 1\n");
 		}
 	}
@@ -605,8 +605,6 @@ CL_ParseServerData (void)
 
 	// now waiting for downloads, etc
 	cls.state = ca_onserver;
-	key_dest = key_console;
-	game_target = KGT_CONSOLE;
 }
 
 /*
