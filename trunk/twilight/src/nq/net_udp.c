@@ -431,7 +431,7 @@ UDP_GetNameFromAddr (struct qsockaddr *addr, char *name)
 		gethostbyaddr ((char *) &((struct sockaddr_in *) addr)->sin_addr,
 					   sizeof (struct in_addr), AF_INET);
 	if (hostentry) {
-		strncpy (name, (char *) hostentry->h_name, NET_NAMELEN - 1);
+		strlcpy (name, (char *) hostentry->h_name, NET_NAMELEN);
 		return 0;
 	}
 

@@ -934,8 +934,7 @@ Sbar_TeamOverlay (void)
 		Draw_String (x, y, num);
 
 		// draw team
-		team[4] = 0;
-		strncpy (team, tm->team, 4);
+		strlcpy (team, tm->team, sizeof (team));
 		Draw_String (x + 104, y, team);
 
 		// draw total
@@ -1097,8 +1096,8 @@ Sbar_DeathmatchOverlay (int start)
 		}
 		// team
 		if (teamplay) {
-			team[4] = 0;
-			strncpy (team, Info_ValueForKey (s->userinfo, "team"), 4);
+			strlcpy (team, Info_ValueForKey (s->userinfo, "team"),
+					sizeof (team));
 			Draw_String (x + 152, y, team);
 		}
 		// draw name
