@@ -663,13 +663,16 @@ R_RocketTubeTrail (vec3_t start, vec3_t end, int type)
 }
 
 void
-R_RocketTrail (vec3_t start, vec3_t end, int type)
+R_RocketTrail (vec3_t in_start, vec3_t in_end, int type)
 {
-	vec3_t		vec, avec, porg, pvel;
+	vec3_t		vec, avec, porg, pvel, start, end;
 	float		len, pdie, pramp;
 	int			j, lsub, pcolor;
 	static int	tracercount;
 	ptype_t		ptype;
+
+	VectorCopy (in_start, start);
+	VectorCopy (in_end, end);
 
 	if (type == 0) {
 		R_RocketTubeTrail (start, end, type);
