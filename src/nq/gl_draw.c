@@ -308,8 +308,7 @@ Draw_Init (void)
 	if (!img)
 		Sys_Error ("Draw_Init: Unable to load conchars\n");
 	
-	char_texture = GL_LoadTexture ("charset", img->width, img->height,
-			img->pixels, false, true, 32);
+	char_texture = R_LoadTexture ("charset", img, false, true);
 
 	cs_texture = GL_LoadTexture ("crosshair", 16, 16, cs_data, false, true, 8);
 	cs_square = GL_LoadTexture ("cs_square", 8, 8, (Uint8 *)cs_squaredata,
@@ -1252,6 +1251,76 @@ GL_Upload8 (Uint8 *data, int width, int height, qboolean mipmap, int alpha,
 
 	GL_Upload32 (trans, width, height, mipmap, alpha);
 }
+
+/*
+================
+R_LoadTexture
+
+FIXME: HACK HACK HACK - this is just a GL_LoadTexture for image_t's for now
+		and is temporary.  It should be replaced by a function which takes
+		only the name and some flags, and which returns a (yet unwritten)
+		texture structure.
+================
+*/
+int
+R_LoadTexture (char *identifier, image_t *img, qboolean mipmap, int alpha)
+{
+	int         i;
+	gltexture_t *glt;
+	unsigned short crc = 0;
+
+	if (isDedicated)
+		return 0;
+
+	/* see if the texture is already present */
+	if (identifier[0])
+	{
+		crc = CRC_Block (img->pixels, img->width * img->height);
+
+		for (i = 0, glt = gltextures; i < numgltextures; i++, glt++)
+		{
+			if (!strcmp (identifier, glt->identifier))
+			{
+				if (img->width == (Uint32)glt->width
+						&& img->height == (Uint32)glt->height
+						&& crc == glt->crc)
+					return gltextures[i].texnum;
+				else
+					/* reload the texture into the same slot */
+					goto setuptexture;
+			}
+		}
+	} else
+		glt = &gltextures[numgltextures];
+
+	numgltextures++;
+	strcpy (glt->identifier, identifier);
+	glt->texnum = texture_extension_number++;
+
+setuptexture:
+	glt->width = img->width;
+	glt->height = img->height;
+	glt->mipmap = mipmap;
+	glt->crc = crc;
+
+	qglBindTexture (GL_TEXTURE_2D, glt->texnum);
+
+//	switch (bpp) {
+//		case 8:
+//			GL_Upload8 (data, width, height, mipmap, alpha, NULL);
+//			break;a
+//		case 32:
+			GL_Upload32 ((Uint32 *) img->pixels, img->width, img->height,
+					mipmap, alpha);
+//			break;
+//		default:
+//			return 0;
+//	}
+
+	return glt->texnum;
+}
+
+
 
 /*
 ================
