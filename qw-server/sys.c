@@ -86,7 +86,6 @@ static const char rcsid[] =
 // FIXME: put this somewhere else
 void SV_Init (void);
 
-cvar_t	   *sys_extrasleep;
 Uint32		sys_sleep;
 
 int			sys_memsize = 0;
@@ -94,10 +93,48 @@ void	   *sys_membase = NULL;
 
 char       *qdate = __DATE__;
 
+cvar_t	   *sys_asciionly;
+cvar_t	   *sys_extrasleep;
+
 // =======================================================================
 // General routines
 // =======================================================================
 
+static const char sys_charmap[256] = {
+	' ', '#', '#', '#', '#', '.', '#', '#',
+	'#', '\t', '\n', '#', ' ', '\n', '.', '.',
+	'[', ']', '0', '1', '2', '3', '4', '5',
+	'6', '7', '8', '9', '.', '<', '=', '>',
+	' ', '!', '"', '#', '$', '%', '&', '\'',
+	'(', ')', '*', '+', ',', '-', '.', '/',
+	'0', '1', '2', '3', '4', '5', '6', '7',
+	'8', '9', ':', ';', '<', '=', '>', '?',
+	'@', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+	'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+	'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+	'X', 'Y', 'Z', '[', '\\', ']', '^', '_',
+	'`', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+	'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+	'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
+	'x', 'y', 'z', '{', '|', '}', '~', '<',
+
+	'<', '=', '>', '#', '#', '.', '#', '#',
+	'#', '#', ' ', '#', ' ', '>', '.', '.',
+	'[', ']', '0', '1', '2', '3', '4', '5',
+	'6', '7', '8', '9', '.', '<', '=', '>',
+	' ', '!', '"', '#', '$', '%', '&', '\'',
+	'(', ')', '*', '+', ',', '-', '.', '/',
+	'0', '1', '2', '3', '4', '5', '6', '7',
+	'8', '9', ':', ';', '<', '=', '>', '?',
+	'@', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+	'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+	'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+	'X', 'Y', 'Z', '[', '\\', ']', '^', '_',
+	'`', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+	'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+	'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
+	'x', 'y', 'z', '{', '|', '}', '~', '<'
+};
 
 void
 Sys_Printf (char *fmt, ...)
@@ -113,11 +150,15 @@ Sys_Printf (char *fmt, ...)
 	if (strlen (text) > sizeof (text))
 		Sys_Error ("memory overwrite in Sys_Printf");
 
-	for (p = (unsigned char *) text; *p; p++)
-		if ((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
-			printf ("[%02x]", *p);
-		else
-			putc (*p, stdout);
+	if (sys_asciionly && sys_asciionly->value)
+		for (p = (unsigned char *) text; *p; p++)
+			putc (sys_charmap[*p], stdout);
+	else
+		for (p = (unsigned char *) text; *p; p++)
+			if ((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
+				printf ("[%02x]", *p);
+			else
+				putc (*p, stdout);
 	fflush (stdout);
 }
 
@@ -141,7 +182,9 @@ Sys_ESCallback (cvar_t *cvar)
 void
 Sys_Init (void)
 {
-	sys_extrasleep = Cvar_Get ("sys_extrasleep", "0", CVAR_NONE, &Sys_ESCallback);
+	sys_extrasleep = Cvar_Get ("sys_extrasleep", "0", CVAR_NONE,
+			&Sys_ESCallback);
+	sys_asciionly = Cvar_Get ("sys_asciionly", "0", CVAR_ARCHIVE, NULL);
 
 	Math_Init ();
 }
