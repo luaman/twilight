@@ -304,7 +304,7 @@ TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer)
 	header[15] = (height >> 8);
 	header[16] = bpp << 3;
 
-	snprintf (tganame, sizeof (tganame), "%s/%s", com_gamedir, name);
+	snprintf (tganame, sizeof (tganame), "%s", name);
 	COM_StripExtension (tganame, tganame);
 	COM_DefaultExtension (tganame, ".tga");
 
@@ -317,7 +317,7 @@ TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer)
 
 	Sys_Printf ("COM_WriteFile: %s\n", tganame);
 	fwrite (header, 1, 18, handle);
-	fwrite (buffer, 1, width*height*bpp, handle);
+	fwrite (buffer, 1, width * height * bpp, handle);
 	fclose (handle);
 
 	return true;

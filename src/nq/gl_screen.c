@@ -689,24 +689,22 @@ SCR_ScreenShot_f (void)
 {
 	Uint8		*buffer;
 	char		name[MAX_OSPATH];
-	int			i;
+	static int	i = 0;
 
 	/*
 	 * find a file name to save it to
 	 */
-	for (i = 0; i < 10000; i++)
+	for (; i < 10000; i++)
 	{
-		snprintf (name, sizeof (name), "tw%04i.tga", i);
+		snprintf (name, sizeof (name), "%s/tw%04i.tga", com_gamedir, i);
 		if (Sys_FileTime (name) == -1)
-			// Doesn't exist
-			break;						
+			break;	/* Doesn't exist */
 	}
 	if (i == 10000)
 	{
 		Com_Printf ("SCR_ScreenShot_f: Unable to create file\n");
 		return;
 	}
-
 
 	buffer = malloc (vid.width * vid.height * 3);
 
@@ -722,10 +720,9 @@ SCR_ScreenShot_f (void)
 void
 SCR_CaptureAviDemo (void)
 {
-	double t;
-	static double lastframetime;
-	
-	char		filename[MAX_OSPATH];
+	double			t;
+	static double	lastframetime;
+	char			filename[MAX_OSPATH];
 
 	/* check frame time */
 	t = Sys_DoubleTime ();
@@ -734,7 +731,7 @@ SCR_CaptureAviDemo (void)
 
 	lastframetime = t;
 	
-	snprintf (filename, sizeof (filename), "twavi%06d.tga", aviframeno);
+	snprintf (filename, sizeof (filename), "%s/twavi%06d.tga", com_gamedir, aviframeno);
 	aviframeno++;
 
 	qglReadPixels (glx, gly, vid.width, vid.height, GL_BGR, GL_UNSIGNED_BYTE,
