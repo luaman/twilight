@@ -123,36 +123,52 @@ typedef struct glpoly_s {
 } glpoly_t;
 
 typedef struct msurface_s {
-	int         visframe;				// should be drawn when node is crossed
+	// should be drawn if visframe == r_framecount (set by WorldNode
+	// functions)
+	int					visframe;
 
-	mplane_t   *plane;
-	int         flags;
+	// the node plane this is on, backwards if SURF_PLANEBACK flag set
+	mplane_t			*plane;
 
-	int         firstedge;				// look up in model->surfedges[],
-	// negative numbers
-	int         numedges;				// are backwards edges
+	// SURF_ flags
+	int					flags;
 
-	short       texturemins[2];
-	short       extents[2];
-	short       smax, tmax, alignedwidth, unusedpadding;
+	
+	// look up in model->surfedges[], negative numbers are backwards edges
+	int					firstedge;
+	int					numedges;
 
-	int         light_s, light_t;		// gl lightmap coordinates
+	// gl lightmap coordinates mess
+	short				texturemins[2];
+	short				extents[2];
+	short				smax, tmax, alignedwidth, unusedpadding;
+	int					light_s, light_t;
 
-	glpoly_t   *polys;					// multiple if warped
-	struct msurface_s *texturechain;
+	// raw polys for this surface
+	glpoly_t			*polys;
 
-	mtexinfo_t *texinfo;
+	// list of surfaces using this texture in this frame (yes, it's odd)
+	struct msurface_s	*texturechain;
 
-// lighting info
-	int         dlightframe, lightframe, lightmappedframe;
-	int         dlightbits;
+	// this is where the real texture information is
+	mtexinfo_t			*texinfo;
 
-	int         lightmaptexturenum;
-	Uint8       styles[MAXLIGHTMAPS];
-	int         cached_light[MAXLIGHTMAPS];	// values currently used in
-	// lightmap
-	qboolean    cached_dlight;			// true if dynamic light in cache
-	Uint8      *samples;				// [numstyles*surfsize]
+	// dynamic lighting info
+	int					dlightframe, lightframe, lightmappedframe;
+	int					dlightbits;
+
+	int					lightmaptexturenum;
+	Uint8				styles[MAXLIGHTMAPS];
+
+	// values currently used in lightmap
+	int					cached_light[MAXLIGHTMAPS];
+
+	// if lightmap was lit by dynamic lights, force update on next frame
+	qboolean			cached_dlight;
+
+	// RGB lighting data [numstyles][height][width][3] or white lighting
+	// data [numstyles][height][width] - FIXME: This is ugly as hell
+	Uint8				*samples;
 } msurface_t;
 
 typedef struct mnode_s {
