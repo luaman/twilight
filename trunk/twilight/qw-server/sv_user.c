@@ -29,6 +29,10 @@ cvar_t     *cl_rollspeed;
 cvar_t     *cl_rollangle;
 cvar_t     *sv_spectalk;
 
+cvar_t     *sv_timekick;
+cvar_t     *sv_timekick_allowed;
+cvar_t     *sv_timekick_interval;
+
 cvar_t     *sv_mapcheck;
 
 extern vec3_t player_mins;
@@ -790,7 +794,7 @@ SV_Say (qboolean team)
 	Sys_Printf ("%s", text);
 
 	for (j = 0, client = svs.clients; j < MAX_CLIENTS; j++, client++) {
-		if (client->state != cs_spawned)
+		if (client->state < cs_connected)	// Clients connecting can hear.
 			continue;
 		if (host_client->spectator && !sv_spectalk->value)
 			if (!client->spectator)
@@ -1377,22 +1381,53 @@ SV_RunCmd
 ===========
 */
 void
-SV_RunCmd (usercmd_t *ucmd)
+SV_RunCmd (usercmd_t *ucmd, qboolean inside)
 {
 	edict_t    *ent;
 	int         i, n;
 	int         oldmsec;
 
+	if (!inside && sv_timekick->value) {
+		double	time_since;
+		int		time_allowed;
+
+		if (host_client->msec_last_check == -1)
+			goto SV_RunCmd__clear;
+
+		host_client->msecs += ucmd->msec;
+		time_since = realtime - host_client->msec_last_check;
+		if (time_since >= sv_timekick_interval->value) {
+			time_allowed = time_since * (1000 + sv_timekick_allowed->value);
+			if (host_client->msecs > time_allowed) {
+				host_client->msec_over++;
+				SV_BroadcastPrintf(PRINT_HIGH, "Temporal anomaly:\n"
+						"%f in %f for %s (%d/%d)\n", host_client->msecs,
+						time_since, host_client->name, host_client->msec_over,
+						sv_timekick->value);
+				if (host_client->msec_over >= sv_timekick->value) {
+					SV_BroadcastPrintf(PRINT_HIGH,
+							"Kicked %s for time sync errors. (%d times)\n",
+							host_client->name, host_client->msec_over);
+					SV_DropClient (host_client);
+					return;
+				}
+			}
+		}
+SV_RunCmd__clear:
+		host_client->msecs = 0;
+		host_client->msec_last_check = realtime;
+	}
+		
 	cmd = *ucmd;
 
 	// chop up very long commands
 	if (cmd.msec > 50) {
 		oldmsec = ucmd->msec;
 		cmd.msec = oldmsec / 2;
-		SV_RunCmd (&cmd);
+		SV_RunCmd (&cmd, true);
 		cmd.msec = oldmsec / 2;
 		cmd.impulse = 0;
-		SV_RunCmd (&cmd);
+		SV_RunCmd (&cmd, true);
 		return;
 	}
 
@@ -1647,15 +1682,15 @@ SV_ExecuteClientMessage (client_t *cl)
 
 					if (net_drop < 20) {
 						while (net_drop > 2) {
-							SV_RunCmd (&cl->lastcmd);
+							SV_RunCmd (&cl->lastcmd, false);
 							net_drop--;
 						}
 						if (net_drop > 1)
-							SV_RunCmd (&oldest);
+							SV_RunCmd (&oldest, false);
 						if (net_drop > 0)
-							SV_RunCmd (&oldcmd);
+							SV_RunCmd (&oldcmd, false);
 					}
-					SV_RunCmd (&newcmd);
+					SV_RunCmd (&newcmd, false);
 
 					SV_PostRunCmd ();
 				}
@@ -1702,5 +1737,11 @@ SV_UserInit (void)
 	sv_spectalk = Cvar_Get ("sv_spectalk", "1", CVAR_NONE, NULL);
 
 	sv_mapcheck = Cvar_Get ("sv_mapcheck", "1", CVAR_NONE, NULL);
+
+	sv_timekick = Cvar_Get ("sv_timekick", "3", CVAR_NONE, NULL);
+	sv_timekick_allowed = Cvar_Get ("sv_timekick_allowed",
+									"3", CVAR_NONE, NULL);
+	sv_timekick_interval = Cvar_Get ("sv_timekick_interval",
+									 "30", CVAR_NONE, NULL);
 }
 

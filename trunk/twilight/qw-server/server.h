@@ -182,6 +182,10 @@ typedef struct client_s {
 	int         whensaidhead;			// Head value for floodprots
 	double      lockedtill;
 
+	int			msecs;
+	double		msec_last_check;
+	int			msec_over;
+
 	qboolean    upgradewarn;			// did we warn him?
 
 	FILE       *upload;
