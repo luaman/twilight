@@ -57,6 +57,18 @@ static qboolean drawfullbrights = false;
 
 static int r_pvsframecount = 1;
 
+static int dlightdivtable[32768];
+
+void
+R_InitSurf (void)
+{
+	int			i;
+
+	dlightdivtable[0] = 4194304;
+	for (i = 1;i < 32768;i++)
+		dlightdivtable[i] = 4194304 / (i << 7);
+}
+
 static void
 R_RenderFullbrights (void)
 {
@@ -77,10 +89,12 @@ R_RenderFullbrights (void)
 
 		qglBindTexture (GL_TEXTURE_2D, i);
 
-		for (p = fullbright_polys[i]; p; p = p->fb_chain) {
+		for (p = fullbright_polys[i]; p; p = p->fb_chain)
+		{
 			qglBegin (GL_POLYGON);
 			v = p->verts[0];
-			for (j = 0; j < p->numverts; j++, v += VERTEXSIZE) {
+			for (j = 0; j < p->numverts; j++, v += VERTEXSIZE)
+			{
 				qglTexCoord2f (v[3], v[4]);
 				qglVertex3fv (v);
 			}
@@ -105,83 +119,303 @@ R_AddDynamicLights
 static int
 R_AddDynamicLights (msurface_t *surf)
 {
-	int				lnum, br;
-	int				colorscale, colorscale0, colorscale1, colorscale2;
-	int				local[2], s, t, sd, td, _sd, _td;
-	int				irad, idist, iminlight, lit = false;
-	float			dist, impact[3];
-	mtexinfo_t	   *tex = surf->texinfo;
-	Uint32		   *dest;
+	int				i, lnum, lit;
+	int				s, t, td, smax, tmax, smax3;
+	int				red, green, blue;
+	int				dist2, maxdist, maxdist2, maxdist3;
+	int				impacts, impactt, subtract;
+	int				sdtable[256];
+	unsigned int	*bl;
+	float			dist;
+	vec3_t			impact, local;
+	Sint64			k;
 
-	for (lnum = 0; lnum < MAX_DLIGHTS; lnum++)
+	lit = false;
+
+	smax = (surf->extents[0] >> 4) + 1;
+	tmax = (surf->extents[1] >> 4) + 1;
+
+	for (lnum = 0; lnum < r_numdlights; lnum++)
 	{
-		if (!(surf->dlightbits & (1 << lnum)))
+		if (!(surf->dlightbits & (1 << (lnum & 31))))
+			continue;                   // not lit by this light
+
+		VectorCopy (r_dlight[lnum].origin, local);
+		dist = DotProduct (local, surf->plane->normal) - surf->plane->dist;
+		
+		// for comparisons to minimum acceptable light
+		// compensate for LIGHTOFFSET
+		maxdist = (int) r_dlight[lnum].cullradius2 + LIGHTOFFSET;
+		
+		dist2 = dist * dist;
+		dist2 += LIGHTOFFSET;
+		if (dist2 >= maxdist)
 			continue;
-		// not lit by this light
-		dist = PlaneDiff (cl_dlights[lnum].origin, surf->plane);
-		irad = cl_dlights[lnum].radius - Q_fabs(dist);
-		iminlight = cl_dlights[lnum].minlight;
 
-		if (irad < iminlight)
+		VectorMA (local, -dist, surf->plane->normal, impact);
+
+		impacts = DotProduct (impact, surf->texinfo->vecs[0])
+			+ surf->texinfo->vecs[0][3] - surf->texturemins[0];
+		impactt = DotProduct (impact, surf->texinfo->vecs[1])
+			+ surf->texinfo->vecs[1][3] - surf->texturemins[1];
+
+		s = bound(0, impacts, smax * 16) - impacts;
+		t = bound(0, impactt, tmax * 16) - impactt;
+		i = s * s + t * t + dist2;
+		if (i > maxdist)
 			continue;
 
-		colorscale0 = cl_dlights[lnum].color[0] * 256;
-		colorscale1 = cl_dlights[lnum].color[1] * 256;
-		colorscale2 = cl_dlights[lnum].color[2] * 256;
-		colorscale = ((colorscale0 + colorscale1 + colorscale2) * 85) >> 8;
+		// reduce calculations
+		for (s = 0, i = impacts; s < smax; s++, i -= 16)
+			sdtable[s] = i * i + dist2;
 
-		iminlight = (irad - iminlight) * 256;
-		irad *= 256;
+		maxdist3 = maxdist - dist2;
 
-		VectorMA (cl_dlights[lnum].origin, -dist, surf->plane->normal,
-				impact);
+		// convert to 8.8 blocklights format
+		red = r_dlight[lnum].light[0];
+		green = r_dlight[lnum].light[1];
+		blue = r_dlight[lnum].light[2];
+		subtract = (int) (r_dlight[lnum].lightsubtract * 4194304.0f);
+		bl = blocklights;
+		smax3 = smax * 3;
 
-		local[0] = (DotProduct (impact, tex->vecs[0]) + tex->vecs[0][3]
-				- surf->texturemins[0]) * 256;
-		local[1] = (DotProduct (impact, tex->vecs[1]) + tex->vecs[1][3]
-				- surf->texturemins[1]) * 256;
-
-		_td = local[1];
-		dest = blocklights;
-
-		for (t = 0; t < surf->tmax; t++)
+		i = impactt;
+		for (t = 0; t < tmax; t++, i -= 16)
 		{
-			td = _td;
-			_td -= 16 * 256;
-
-			if (td < 0)
-				td = -td;
-
-			_sd = local[0];
-
-			for (s = 0; s < surf->smax; s++)
+			td = i * i;
+			// make sure some part of it is visible on this line
+			if (td < maxdist3)
 			{
-				sd = _sd;
-				_sd -= 16 * 256;
-				if (sd < 0)
-					sd = -sd;
-
-				if (sd > td)
-					idist = sd + (td >> 1);
-				else
-					idist = td + (sd >> 1);
-
-				if (idist < iminlight)
+				maxdist2 = maxdist - td;
+				for (s = 0; s < smax; s++)
 				{
-					br = irad - idist;
-					if (br >= 4)
+					if (sdtable[s] < maxdist2)
 					{
-						lit = true;
-						dest[s*3+0] += (int)(br * colorscale0) >> 8;
-						dest[s*3+1] += (int)(br * colorscale1) >> 8;
-						dest[s*3+2] += (int)(br * colorscale2) >> 8;
+						k = dlightdivtable[(sdtable[s] + td) >> 7]
+							- subtract;
+						if (k > 0)
+						{
+							bl[0] += (red   * k) >> 8;
+							bl[1] += (green * k) >> 8;
+							bl[2] += (blue  * k) >> 8;
+							lit = true;
+						}
 					}
+					bl += 3;
 				}
 			}
-			dest += surf->smax * 3;
+			else // skip line
+				bl += smax3;
 		}
 	}
 	return lit;
+}
+
+inline qboolean
+R_StainBlendTexel (Sint64 k, int *icolor, Uint8 *bl)
+{
+	int			ratio, a;
+	int			cr, cg, cb, ca;
+
+	ratio = rand() & 255;
+	ca = (((icolor[7] - icolor[3]) * ratio) >> 8) + icolor[3];
+	a = (ca * k) >> 8;
+
+	if (a > 0)
+	{
+		a = bound(0, a, 256);
+		cr = (((icolor[4] - icolor[0]) * ratio) >> 8) + icolor[0];
+		cg = (((icolor[5] - icolor[1]) * ratio) >> 8) + icolor[1];
+		cb = (((icolor[6] - icolor[2]) * ratio) >> 8) + icolor[2];
+		bl[0] = (Uint8) ((((cr - (int) bl[0]) * a) >> 8) + (int) bl[0]);
+		bl[1] = (Uint8) ((((cg - (int) bl[1]) * a) >> 8) + (int) bl[1]);
+		bl[2] = (Uint8) ((((cb - (int) bl[2]) * a) >> 8) + (int) bl[2]);
+		return true;
+	}
+	else
+		return false;
+}
+
+/*
+===============
+R_StainNode
+===============
+*/
+void
+R_StainNode (mnode_t *node, model_t *model, vec3_t origin, float radius,
+		int icolor[8])
+{
+	float			ndist; 
+	msurface_t		*surf, *endsurf;
+	int				i, stained;
+	int				s, t, td, smax, tmax, smax3;
+	int				dist2, maxdist, maxdist2, maxdist3;
+	int				impacts, impactt, subtract;
+	int				sdtable[256];
+	Uint8			*bl; 
+	vec3_t			impact;
+	Sint64			k;
+
+	// for comparisons to minimum acceptable light
+	// compensate for 4096 offset
+	maxdist = radius * radius + 4096;
+
+	// clamp radius to avoid exceeding 32768 entry division table
+	maxdist = min (maxdist, 4194304);
+
+	subtract = (int) ((1.0f / maxdist) * 4194304.0f);
+
+loc0:
+	if (node->contents < 0)
+		return;
+	ndist = PlaneDiff(origin, node->plane);
+	if (ndist > radius)
+	{
+		node = node->children[0];
+		goto loc0;
+	}
+	if (ndist < -radius)
+	{
+		node = node->children[1];
+		goto loc0;
+	}
+
+	dist2 = ndist * ndist;
+	dist2 += 4096.0f;
+	if (dist2 < maxdist)
+	{
+		maxdist3 = maxdist - dist2;
+
+		VectorMA (origin, -ndist, node->plane->normal, impact);
+
+		surf = model->surfaces + node->firstsurface;
+		endsurf = surf + node->numsurfaces;
+		for (; surf < endsurf; surf++)
+		{
+			if (surf->stainsamples)
+			{
+				smax = (surf->extents[0] >> 4) + 1;
+				tmax = (surf->extents[1] >> 4) + 1;
+
+				impacts = DotProduct (impact, surf->texinfo->vecs[0])
+					+ surf->texinfo->vecs[0][3] - surf->texturemins[0];
+				impactt = DotProduct (impact, surf->texinfo->vecs[1])
+					+ surf->texinfo->vecs[1][3] - surf->texturemins[1];
+
+				s = bound(0, impacts, smax * 16) - impacts;
+				t = bound(0, impactt, tmax * 16) - impactt;
+				i = s * s + t * t + dist2;
+				if (i > maxdist)
+					continue;
+
+				// reduce calculations
+				for (s = 0, i = impacts; s < smax; s++, i -= 16)
+					sdtable[s] = i * i + dist2;
+
+				// convert to 8.8 blocklights format
+				bl = surf->stainsamples;
+				smax3 = smax * 3;
+				stained = false;
+
+				i = impactt;
+				for (t = 0;t < tmax;t++, i -= 16)
+				{
+					td = i * i;
+					// make sure some part of it is visible on this line
+					if (td < maxdist3)
+					{
+						maxdist2 = maxdist - td;
+						for (s = 0; s < smax; s++)
+						{
+							if (sdtable[s] < maxdist2)
+							{
+								k = dlightdivtable[(sdtable[s] + td) >> 7]
+									- subtract;
+								if (k > 0)
+									if (R_StainBlendTexel (k, icolor, bl))
+										stained = true;
+							}
+							bl += 3;
+						}
+					}
+					else // skip line
+						bl += smax3;
+				}
+
+				// force lightmap upload
+				if (stained)
+					surf->cached_dlight = true;
+			}
+		}
+	}
+
+	if (node->children[0]->contents >= 0)
+	{
+		if (node->children[1]->contents >= 0)
+		{
+			R_StainNode(node->children[0], model, origin, radius, icolor);
+			node = node->children[1];
+			goto loc0;
+		}
+		else
+		{
+			node = node->children[0];
+			goto loc0;
+		}
+	}
+	else if (node->children[1]->contents >= 0)
+	{
+		node = node->children[1];
+		goto loc0;
+	}
+}
+
+
+/*
+===============
+R_Stain
+===============
+*/
+void
+R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
+		int cr2, int cg2, int cb2, int ca2)
+{
+	int			icolor[8];
+	int			n;
+	entity_t	*ent;
+	vec3_t		org;
+	model_t		*model;
+
+	icolor[0] = cr1;
+	icolor[1] = cg1;
+	icolor[2] = cb1;
+	icolor[3] = ca1;
+	icolor[4] = cr2;
+	icolor[5] = cg2;
+	icolor[6] = cb2;
+	icolor[7] = ca2;
+
+	model = cl.worldmodel;
+	softwaretransformidentity();
+	R_StainNode(model->nodes + model->hulls[0].firstclipnode, model,
+			origin, radius, icolor);
+
+	// look for embedded bmodels
+	for (n = 1; n < MAX_EDICTS; n++)
+	{
+		ent = &cl_entities[n];
+		model = ent->model;
+		if (model && model->name[0] == '*')
+		{
+			if (model->type == mod_brush)
+			{
+				softwaretransformforentity (ent->origin, ent->angles);
+				softwareuntransform (origin, org);
+				R_StainNode(model->nodes + model->hulls[0].firstclipnode,
+						model, org, radius, icolor);
+			}
+		}
+	}
 }
 
 
@@ -195,61 +429,79 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 static void
 GL_BuildLightmap (msurface_t *surf)
 {
-	int			i, j, size, shift, stride;
-	Uint8	   *lightmap, *dest;
+	int			i, j, size, size2, shift, stride;
+	Uint8	   *lightmap, *dest, *stain;
 	Uint32		scale, *bl;
 
+	// Bind your textures early and often - or at least early
 	qglBindTexture (GL_TEXTURE_2D, lightmap_textures
 			+ surf->lightmaptexturenum);
 
-	size = surf->smax * surf->tmax;
-	lightmap = surf->samples;
-
-	// set to full bright if no light data
-	if (!cl.worldmodel->lightdata)
-	{
-		memset (blocklights, 255, size * 3 * sizeof(Uint32));
-		goto store;
-	}
-
-	// clear to no light
-	memset (blocklights, 0, size * 3 * sizeof(Uint32));
-
-	// add all the lightmaps
-	if (lightmap)
-	{
-		for (i = 0; i < MAXLIGHTMAPS && surf->styles[i] != 255; i++)
-		{
-			scale = d_lightstylevalue[surf->styles[i]];
-			bl = blocklights;
-
-			for (j = 0; j < size * 3; j++)
-				*bl++ += *lightmap++ * scale;
-		}
-	}
+	// Reset stuff here
 	surf->cached_light[0] = d_lightstylevalue[surf->styles[0]];
 	surf->cached_light[1] = d_lightstylevalue[surf->styles[1]];
 	surf->cached_light[2] = d_lightstylevalue[surf->styles[2]];
 	surf->cached_light[3] = d_lightstylevalue[surf->styles[3]];
 
-	// add all the dynamic lights
-	if (surf->dlightframe == r_framecount)
-		if (R_AddDynamicLights (surf))
-			surf->cached_dlight = 1;
+	size = surf->smax * surf->tmax;
+	if (colorlights)
+		size2 = size * 3;
+	else
+		size2 = size;
+
+	lightmap = surf->samples;
+
+	// set to full bright if no light data
+	if (!cl.worldmodel->lightdata)
+		memset (blocklights, 255, size2	* sizeof(Uint32));
+	else
+	{
+		// clear to no light
+		memset (blocklights, 0, size2 * sizeof(Uint32));
+
+		// add all the dynamic lights
+		if (surf->dlightframe == r_framecount)
+			if (R_AddDynamicLights (surf))
+				surf->cached_dlight = 1;
+
+		// add all the lightmaps
+		if (lightmap)
+		{
+			for (i = 0; i < MAXLIGHTMAPS && surf->styles[i] != 255; i++)
+			{
+				scale = d_lightstylevalue[surf->styles[i]];
+				bl = blocklights;
+
+				for (j = 0; j < size2; j++)
+					*bl++ += *lightmap++ * scale;
+			}
+		}
+	}
+
+	// apply the stainmap
+	// NB: This is only done for colored lighting.  While it is possible to do
+	// it in the non-colored case, but it would suck.  A lot. 
+	if (colorlights)
+	{
+		stain = surf->stainsamples;
+		if (stain)
+			for (bl = blocklights, i = 0; i < size2; i++)
+				if (stain[i] < 255)
+					bl[i] = (bl[i] * stain[i]) >> 8;
+	}
+
+	bl = blocklights;
+	dest = templight;
 
 	// bound, invert, and shift
-store:
+	stride = surf->alignedwidth * lightmap_bytes;
+
 	if (gl_mtexcombine)
 		shift = 9;
 	else if (gl_mtex)
 		shift = 7;
 	else
 		shift = 8;
-
-	bl = blocklights;
-	dest = templight;
-
-	stride = surf->alignedwidth * lightmap_bytes;
 
 	switch (gl_lightmap_format)
 	{
@@ -305,7 +557,7 @@ store:
 			break;
 
 		default:
-			Sys_Error ("Bad lightmap format");
+			Sys_Error ("Bad lightmap format - your compiler sucks!");
 	}
 
 	qglTexSubImage2D (GL_TEXTURE_2D, 0, surf->light_s, surf->light_t,
@@ -763,13 +1015,9 @@ R_DrawBrushModel (entity_t *e)
 
 	// calculate dynamic lighting for bmodel if it's not an instanced model
 	if (clmodel->firstmodelsurface != 0 && !gl_flashblend->ivalue) {
-		for (k = 0; k < MAX_DLIGHTS; k++) {
-			if ((cl_dlights[k].die < cl.time) || (!cl_dlights[k].radius))
-				continue;
-
-			R_MarkLightsNoVis (&cl_dlights[k], 1 << k,
-				clmodel->nodes + clmodel->hulls[0].firstclipnode);
-		}
+		for (k = 0; k < r_numdlights; k++)
+			R_MarkLightsNoVis (&r_dlight[k], 1 << k,
+					clmodel->nodes + clmodel->hulls[0].firstclipnode);
 	}
 
 	for (i = 0, psurf = &clmodel->surfaces[clmodel->firstmodelsurface];

@@ -23,13 +23,13 @@
 
 	$Id$
 */
-// client.h
 
 #ifndef __CLIENT_H
 #define __CLIENT_H
 
 #include "quakedef.h"
 #include "common.h"
+#include "light.h"
 #include "net.h"
 #include "protocol.h"
 #include "render.h"
@@ -491,6 +491,10 @@ void CL_ClearTEnts (void);
 /*
  * cl_ents.c
  */
+extern entity_t *traceline_entity[MAX_EDICTS];
+extern int traceline_entities;
+
+void CL_ScanForBModels (void);
 void CL_SetSolidPlayers (int playernum);
 void CL_SetUpPlayerPrediction (qboolean dopred);
 void CL_EmitEntities (void);

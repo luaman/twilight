@@ -69,8 +69,14 @@ typedef struct entity_s {
 	unsigned int	times;
 
 	float			frame_blend;
+
+	// Bounding box
+	vec3_t			mins;
+	vec3_t			maxs;
+
 	// Skin other then model.
 	skin_t			*skin;
+
 	// Colormap for the model, if any.
 	colormap_t		*colormap;
 } entity_t;
@@ -109,6 +115,8 @@ void R_RenderView (void);
 // called at level load
 void R_InitSky (struct texture_s *mt);
 
+void R_InitSurf (void);
+
 void R_NewMap (void);
 
 
@@ -124,7 +132,6 @@ void R_TeleportSplash (vec3_t org);
 //
 // gl_rlight.c
 //
-#define	MAX_DLIGHTS		32
 
 typedef struct {
 	int			key;					// so entities can reuse same entry
@@ -136,18 +143,15 @@ typedef struct {
 	float		color[3];
 } dlight_t;
 
-void R_MarkLights (dlight_t *light, int bit, model_t *model);
-void R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node);
-void R_AnimateLight (void);
-int R_LightPoint (vec3_t p);
-void R_RenderDlights (void);
-void R_PushDlights (void);
-
 void R_InitParticles (void);
 void R_ClearParticles (void);
 void R_MoveParticles (void);
 void R_DrawParticles (void);
 void R_DrawWaterSurfaces (void);
+
+// It's a particle effect or something.  =)
+void R_Stain (vec3_t origin, float radius, int cr1, int cg1, int cb1, int ca1,
+		int cr2, int cg2, int cb2, int ca2);
 
 #endif // __RENDER_H
 

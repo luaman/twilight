@@ -334,27 +334,29 @@ CL_NewDlight (int key, vec3_t org, int effects)
 {
 	dlight_t   *dl = CL_AllocDlight (key);
 
-	if (effects & EF_BRIGHTLIGHT)
-		dl->radius = 400 + (Q_rand () & 31);
-	else
-		dl->radius = 200 + (Q_rand () & 31);
-
-	dl->die = cl.time + 0.1;
+	dl->radius = 1.0f;
+	dl->die = cl.time + 0.1f;
 	VectorCopy (org, dl->origin);
 
-	dl->color[0] = 0.44;
-	dl->color[1] = 0.34;
-	dl->color[2] = 0.24;
+	VectorClear (dl->color);
+
+	if (effects & EF_BRIGHTLIGHT)
+	{
+		dl->color[0] += 400.0f;
+		dl->color[1] += 400.0f;
+		dl->color[2] += 400.0f;
+	}
+	if (effects & EF_DIMLIGHT)
+	{
+		dl->color[0] += 200.0f;
+		dl->color[1] += 200.0f;
+		dl->color[2] += 200.0f;
+	}
 
 	if (effects & EF_RED)
-		dl->color[0] = 0.86;
+		dl->color[0] += 200.0f;
 	if (effects & EF_BLUE)
-		dl->color[2] = 0.86;
-
-	if (!(effects & (EF_LIGHTMASK - EF_DIMLIGHT))) {
-		dl->color[0] += 0.20;
-		dl->color[1] += 0.10;
-	}
+		dl->color[2] += 200.0f;
 }
 
 /*
@@ -551,6 +553,7 @@ CL_RelinkEntities (void)
 				VectorCopy (ent->origin, dl->origin);
 				dl->radius = 200;
 				dl->die = cl.time + 0.01;
+				VectorSet (dl->color, 1.0f, 0.6f, 0.2f);
 			}
 
 			if (flags)
@@ -603,6 +606,7 @@ CL_ReadFromServer (void)
 		Com_Printf ("\n");
 
 	CL_RelinkEntities ();
+    CL_ScanForBModels ();
 	CL_UpdateTEnts ();
 
 //

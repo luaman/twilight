@@ -33,11 +33,14 @@ static const char rcsid[] =
 #include "client.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "light.h"
 #include "mathlib.h"
 #include "strlib.h"
 #include "view.h"
 
-int         r_dlightframecount;
+rdlight_t r_dlight[MAX_DLIGHTS];
+int r_numdlights = 0;
+int r_dlightframecount;
 
 /*
 ==================
@@ -65,6 +68,46 @@ R_AnimateLight (void)
 	}
 }
 
+
+/*
+==================
+R_BuildLightList
+==================
+*/
+void
+R_BuildLightList (void)
+{
+	int			i;
+	dlight_t	*cd;
+	rdlight_t	*rd;
+
+	r_numdlights = 0;
+
+	if (!r_dynamic->ivalue)
+		return;
+
+	for (i = 0; i < MAX_DLIGHTS; i++)
+	{
+		cd = cl_dlights + i;
+		if (cd->radius <= 0 || cd->die < cl.time)
+			continue;
+
+		rd = &r_dlight[r_numdlights++];
+		VectorCopy (cd->origin, rd->origin);
+		VectorScale (cd->color, cd->radius * 128.0f, rd->light);
+		rd->cullradius = (1.0f / 128.0f) * sqrt (DotProduct (rd->light, rd->light));
+
+		// clamp radius to avoid overflowing division table in lightmap code
+		if (rd->cullradius > 2048.0f)
+			rd->cullradius = 2048.0f;
+
+		rd->cullradius2 = rd->cullradius * rd->cullradius;
+		rd->lightsubtract = 1.0f / rd->cullradius2;
+		r_numdlights++;
+	}
+}
+
+
 /*
 =============================================================================
 
@@ -74,7 +117,7 @@ DYNAMIC LIGHTS BLEND RENDERING
 */
 
 void
-AddLightBlend (float r, float g, float b, float a2)
+AddLightBlend (vec3_t v, float a2)
 {
 	float       a;
 
@@ -83,9 +126,9 @@ AddLightBlend (float r, float g, float b, float a2)
 	a2 = a2 / a;
 	a = 1 - a2;
 
-	v_blend[0] = v_blend[0] * a + r * a2;
-	v_blend[1] = v_blend[1] * a + g * a2;
-	v_blend[2] = v_blend[2] * a + b * a2;
+	v_blend[0] = v_blend[0] * a + v[0] * a2;
+	v_blend[1] = v_blend[1] * a + v[1] * a2;
+	v_blend[2] = v_blend[2] * a + v[2] * a2;
 }
 
 float       bubble_sintable[17], bubble_costable[17];
@@ -109,20 +152,24 @@ R_InitBubble (void)
 
 
 void
-R_RenderDlight (dlight_t *light)
+R_RenderDlight (rdlight_t *light)
 {
 	int     i, j, vcenter, vlast = -1;
-	vec3_t  v, v_right, v_up;
+	vec3_t  v, v_right, v_up, c;
 	float	*bub_sin = bubble_sintable,
 			*bub_cos = bubble_costable;
-	float   rad = light->radius * 0.35, length;
+	float   rad = light->cullradius * 0.35, length;
 
 	VectorSubtract (light->origin, r_origin, v);
 	length = VectorNormalize (v);
 
-	if (length < rad) {				// view is inside the dlight
-		AddLightBlend (light->color[0], 
-			light->color[1], light->color[2], light->radius * 0.0003);
+	VectorCopy (light->light, c);
+	VectorNormalizeFast (c);
+
+	if (length < rad)
+	{
+		// view is inside the dlight
+		AddLightBlend (c, light->cullradius * 0.0003);
 		return;
 	}
 
@@ -142,9 +189,9 @@ R_RenderDlight (dlight_t *light)
 	VectorSubtract (light->origin, v, v);
 
 	VectorSet3 (v_array_v(v_index), v[0], v[1], v[2]);
-	c_array(v_index, 0) = light->color[0];
-	c_array(v_index, 1) = light->color[1];
-	c_array(v_index, 2) = light->color[2];
+	c_array(v_index, 0) = c[0];
+	c_array(v_index, 1) = c[1];
+	c_array(v_index, 2) = c[2];
 	c_array(v_index, 3) = 1.0;
 	vcenter = v_index;
 	v_index++;
@@ -191,8 +238,8 @@ R_RenderDlights
 void
 R_RenderDlights (void)
 {
-	int         i;
-	dlight_t   *l;
+	int				i;
+	rdlight_t		*l;
 
 	if (!gl_flashblend->ivalue)
 		return;
@@ -200,12 +247,9 @@ R_RenderDlights (void)
 	qglDisable (GL_TEXTURE_2D);
 	qglEnableClientState (GL_COLOR_ARRAY);
 
-	l = cl_dlights;
-	for (i = 0; i < MAX_DLIGHTS; i++, l++) {
-		if (l->die < cl.time || !l->radius)
-			continue;
+	l = r_dlight;
+	for (i = 0; i < r_numdlights; i++, l++)
 		R_RenderDlight (l);
-	}
 
 	if (v_index || i_index) {
 		TWI_PreVDrawCVA (0, v_index);
@@ -231,11 +275,11 @@ DYNAMIC LIGHTS
 
 /*
 =============
-R_MarkLights
+R_MarkLightsNoVis
 =============
 */
 void 
-R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node)
+R_MarkLightsNoVis (rdlight_t *light, int bit, mnode_t *node)
 {
 	mplane_t	*splitplane;
 	float		dist;
@@ -250,20 +294,20 @@ R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node)
 		splitplane = node->plane;
 		dist = PlaneDiff (light->origin, splitplane);
 
-		if (dist > light->radius)
+		if (dist > light->cullradius)
 		{
 			node = node->children[0];
 			continue;
 		}
 
-		if (dist < -light->radius)
+		if (dist < -light->cullradius)
 		{
 			node = node->children[1];
 			continue;
 		}
 
 		// mark the polygons
-		maxdist = light->radius*light->radius;
+		maxdist = light->cullradius2;
 		surf = cl.worldmodel->surfaces + node->firstsurface;
 
 		for (i = 0; i < node->numsurfaces; i++, surf++)
@@ -327,8 +371,13 @@ R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node)
 	}
 }
 
+/*
+=============
+R_MarkLights
+=============
+*/
 void
-R_MarkLights (dlight_t *light, int bit, model_t *model)
+R_MarkLights (rdlight_t *light, int bit, model_t *model)
 {
 	mleaf_t *pvsleaf = Mod_PointInLeaf (light->origin, model);
 	int				i, k, l, m, c;
@@ -348,7 +397,10 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 
 	r_dlightframecount++;
 
-	radius = light->radius * 2;
+	radius = light->cullradius;
+
+	// for comparisons to maximum light distance
+	maxdist = light->cullradius2;
 
 	low[0] = light->origin[0] - radius;
 	low[1] = light->origin[1] - radius;
@@ -356,9 +408,6 @@ R_MarkLights (dlight_t *light, int bit, model_t *model)
 	high[0] = light->origin[0] + radius;
 	high[1] = light->origin[1] + radius;
 	high[2] = light->origin[2] + radius;
-
-	// for comparisons to minimum acceptable light
-	maxdist = radius*radius;
 
 	k = 0;
 	while (k < row)
@@ -483,19 +532,16 @@ R_PushDlights
 void
 R_PushDlights (void)
 {
-	int         i;
-	dlight_t   *l;
+	int			i;
+	rdlight_t	*l;
 
 	if (gl_flashblend->ivalue)
 		return;
 
-	l = cl_dlights;
+	l = r_dlight;
 
-	for (i = 0; i < MAX_DLIGHTS; i++, l++) {
-		if (l->die < cl.time || !l->radius)
-			continue;
+	for (i = 0; i < r_numdlights; i++, l++)
 		R_MarkLights (l, 1 << i, cl.worldmodel);
-	}
 }
 
 
@@ -518,12 +564,14 @@ RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 	vec3_t		mid;
 
 	if (node->contents < 0)
-		return false;		// didn't hit anything
+		// didn't hit anything
+		return false;
 
 	while (1)
 	{
 		if (node->contents < 0)
-			return false;	// didn't hit anything
+			// didn't hit anything
+			return false;
 
 		// calculate mid point
 		front = PlaneDiff (start, node->plane);
@@ -545,7 +593,8 @@ RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 	
 	// go down front side
 	if (RecursiveLightPoint (color, node->children[front < 0], start, mid))
-		return true; // hit something
+		// hit something
+		return true;
 	else
 	{
 		int i, ds, dt;
@@ -559,7 +608,8 @@ RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 		for (i = 0; i < node->numsurfaces; i++, surf++)
 		{
 			if (surf->flags & SURF_DRAWTILED)
-				continue;// no lightmaps
+				// no lightmaps
+				continue;
 
 			ds = (int) ((float) DotProduct (mid, surf->texinfo->vecs[0])
 					+ surf->texinfo->vecs[0][3]);

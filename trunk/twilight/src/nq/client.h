@@ -29,6 +29,7 @@
 #define __CLIENT_H
 
 #include "common.h"
+#include "light.h"
 #include "render.h"
 
 typedef struct {
@@ -355,6 +356,13 @@ void	V_SetContentsColor (int contents);
 void	V_AddEntity ( entity_t *ent );
 void	V_ClearEntities ( void );
 
+//
+// cl_ents
+//
+extern entity_t *traceline_entity[MAX_EDICTS];
+extern int traceline_entities;
+
+void CL_ScanForBModels (void);
 
 //
 // cl_tent

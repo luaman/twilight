@@ -65,6 +65,40 @@ static struct predicted_player {
 
 //============================================================
 
+
+entity_t *traceline_entity[MAX_EDICTS];
+int traceline_entities;
+
+/*
+================
+CL_ScanForBModels
+================
+*/
+void
+CL_ScanForBModels (void)
+{
+	int			i;
+	entity_t	*ent;
+	model_t		*model;
+
+	traceline_entities = 0;
+	for (i = 1; i < MAX_EDICTS; i++)
+	{
+		ent = &cl_network_entities[i];
+		model = ent->model;
+		// look for embedded brush models only
+		if (model && model->name[0] == '*')
+		{
+			if (model->type == mod_brush)
+			{
+				traceline_entity[traceline_entities++] = ent;
+				Mod_MinsMaxs (model, ent->cur.origin, ent->cur.angles, ent->mins, ent->maxs);
+			}
+		}
+	}
+}
+
+
 /*
 ===============
 CL_AllocDlight
@@ -124,31 +158,34 @@ CL_NewDlight (int key, vec3_t org, int effects)
 {
 	dlight_t   *dl = CL_AllocDlight (key);
 
-	if (effects & EF_BRIGHTLIGHT)
-		dl->radius = 400 + (Q_rand () & 31);
-	else
-		dl->radius = 200 + (Q_rand () & 31);
-
-	dl->die = cl.time + 0.1;
+	dl->radius = 1.0f;
+	dl->die = cl.time + 0.1f;
 	VectorCopy (org, dl->origin);
 
-	dl->color[0] = 0.20;
-	dl->color[1] = 0.10;
-	dl->color[2] = 0.05;
+	VectorClear (dl->color);
 
-	if (effects & EF_RED)
-		dl->color[0] = 0.50;
-	if (effects & EF_BLUE)
-		dl->color[2] = 0.50;
-
-	if (!(effects & (EF_LIGHTMASK - EF_DIMLIGHT))) {
-		dl->color[0] += 0.20;
-		dl->color[1] += 0.10;
+	if (effects & EF_BRIGHTLIGHT)
+	{
+		dl->color[0] += 400.0f;
+		dl->color[1] += 400.0f;
+		dl->color[2] += 400.0f;
+	}
+	if (effects & EF_DIMLIGHT)
+	{
+		dl->color[0] += 200.0f;
+		dl->color[1] += 200.0f;
+		dl->color[2] += 200.0f;
 	}
 
-	dl->color[0] = bound ( 0, dl->color[0], 1 );
-	dl->color[1] = bound ( 0, dl->color[1], 1 );
-	dl->color[2] = bound ( 0, dl->color[2], 1 );
+	// QW uses DIMLIGHT _and_ RED/BLUE - looks bad. *sigh*
+	if (effects & (EF_RED|EF_BLUE))
+	{
+		VectorSet (dl->color, 20.0f, 20.0f, 20.0f);
+		if (effects & EF_RED)
+			dl->color[0] += 180.0f;
+		if (effects & EF_BLUE)
+			dl->color[2] += 180.0f;
+	}
 }
 
 
@@ -693,6 +730,7 @@ CL_LinkPacketEntities (void)
 			VectorCopy (ent->cur.origin, dl->origin);
 			dl->radius = 200;
 			dl->die = cl.time + 0.1;
+			VectorSet (dl->color, 1.0f, 0.6f, 0.2f);
 		}
 
 		if (flags)
@@ -1272,6 +1310,7 @@ CL_EmitEntities (void)
 	CL_LinkProjectiles ();
 	CL_LinkStaticEntites ();
 	CL_LinkPacketEntities ();
+	CL_ScanForBModels ();
 	CL_UpdateTEnts ();
 }
 

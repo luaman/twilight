@@ -32,6 +32,7 @@ static const char rcsid[] =
 #include "client.h"
 #include "cmd.h"
 #include "cvar.h"
+#include "light.h"
 #include "mathlib.h"
 #include "screen.h"
 #include "strlib.h"
@@ -743,20 +744,21 @@ V_RenderView (void)
 		return;
 
 	/* don't allow cheats in multiplayer */
-	if (cl.maxclients > 1) {
-		Cvar_Set(scr_ofsx, "0");
-		Cvar_Set(scr_ofsy, "0");
-		Cvar_Set(scr_ofsz, "0");
+	if (cl.maxclients > 1)
+	{
+		Cvar_Set (scr_ofsx, "0");
+		Cvar_Set (scr_ofsy, "0");
+		Cvar_Set (scr_ofsz, "0");
 	}
 
-	if (cl.intermission) {			/* intermission / finale rendering */
-		V_CalcIntermissionRefdef();
-	} else {
-		if (!cl.paused /* && (sv.maxclients > 1 || key_dest == key_game) */)
-			V_CalcRefdef();
-	}
+	if (cl.intermission)
+		/* intermission / finale rendering */
+		V_CalcIntermissionRefdef ();
+	else
+		V_CalcRefdef ();
 
-	R_RenderView();
+	R_BuildLightList ();
+	R_RenderView ();
 }
 
 /* ============================================================================ */
