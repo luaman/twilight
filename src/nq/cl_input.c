@@ -34,8 +34,9 @@ static const char rcsid[] =
 # endif
 #endif
 
+#include <SDL.h>
+
 #include "quakedef.h"
-#include "SDL.h"
 
 // cvars
 cvar_t     *in_key_repeat_delay;
@@ -458,16 +459,8 @@ CL_AdjustAngles (void)
 	if (up || down)
 		V_StopPitchDrift ();
 
-	if (cl.viewangles[PITCH] > 80)
-		cl.viewangles[PITCH] = 80;
-	if (cl.viewangles[PITCH] < -70)
-		cl.viewangles[PITCH] = -70;
-
-	if (cl.viewangles[ROLL] > 50)
-		cl.viewangles[ROLL] = 50;
-	if (cl.viewangles[ROLL] < -50)
-		cl.viewangles[ROLL] = -50;
-
+	cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
+	cl.viewangles[ROLL] = bound (-50, cl.viewangles[PITCH], 50);
 }
 
 /*
