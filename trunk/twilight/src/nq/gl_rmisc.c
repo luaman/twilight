@@ -57,6 +57,7 @@ GLuint v_index, i_index, va_index;
 qboolean va_locked;
 
 void R_InitBubble (void);
+void R_WireframeChanged (cvar_t *cvar);
 void R_SkyBoxChanged (cvar_t *cvar);
 static void R_TimeRefresh_f (void);
 
@@ -98,6 +99,22 @@ R_InitTextures (void)
 
 /*
 ===============
+R_WireframeChanged
+===============
+*/
+void
+R_WireframeChanged (cvar_t *cvar)
+{
+	if (cl.maxclients > 1) {
+		gl_wireframe = 0;
+		return;
+	}
+
+	gl_wireframe = !!cvar->value;
+}
+
+/*
+===============
 R_Init_Cvars
 ===============
 */
@@ -113,6 +130,7 @@ R_Init_Cvars (void)
 	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_NONE, NULL);
 	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
 	r_waterripple = Cvar_Get ("r_waterripple", "0", CVAR_NONE, NULL);
+	r_wireframe = Cvar_Get ("r_wireframe", "0", CVAR_NONE, &R_WireframeChanged);
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
 	r_novis = Cvar_Get ("r_novis", "0", CVAR_NONE, NULL);
 	r_lightlerp = Cvar_Get ("r_lightlerp", "1", CVAR_NONE, NULL);
@@ -301,6 +319,8 @@ R_NewMap (void)
 	CL_ParseEntityLump (cl.worldmodel->entities);
 
 	r_explosion_newmap ();
+
+	R_WireframeChanged (r_wireframe);
 }
 
 
