@@ -24,20 +24,7 @@ static const char rcsid[] =
 	"$Id$";
 
 #include <stdio.h>
-
-#ifndef _WIN32
-#include <unistd.h>
-#endif
-
 #include <stdlib.h>
-
-#ifndef _WIN32
-#include <sys/ioctl.h>
-#include <sys/file.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#endif
-
 #include <string.h>
 #include <time.h>
 #include <errno.h>
