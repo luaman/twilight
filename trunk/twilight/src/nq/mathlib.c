@@ -189,7 +189,7 @@ Q_atan(double x)
 	if (!x)
 		return 0;
 
-	for (i = 0; i < 512; i++)
+	for (i = 0; i < 1024; i++)
 	{
 		test = sintable[i] / sintable[1023-i];
 		if (test > y)
