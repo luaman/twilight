@@ -253,15 +253,16 @@ DynGL_BadExtension (char *ext)
 	if (!dyngl_loaded)
 		return;
 
-	p = LIST_HEAD (extensions);
+	p = LIST_HEAD (extensions)->next;
 	while (!LIST_NODE_IS_TAIL (p))
 	{
-		p = p->next;
 		if (strcmp (p->name, ext) == 0)
 		{
 			LIST_NODE_REMOVE (p);
 			LIST_ADD_TAIL (bad_extensions, p);
+			return;
 		}
+		p = p->next;
 	}
 
 	/* Didn't find it! */
@@ -284,12 +285,12 @@ DynGL_HasExtension (char *ext)
 	if (!dyngl_loaded)
 		return SDL_FALSE;
 
-	p = LIST_HEAD (extensions);
+	p = LIST_HEAD (extensions)->next;
 	while (!LIST_NODE_IS_TAIL (p))
 	{
-		p = p->next;
 		if (strcmp (p->name, ext) == 0)
 			return SDL_TRUE;
+		p = p->next;
 	}
 
 	/* Didn't find it, sorry! */
