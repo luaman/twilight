@@ -143,13 +143,16 @@ R_SetupAliasFrame (aliashdr_t *paliashdr, entity_t *e)
 /*
 =================
 R_SetupAliasBlendedFrame
+
+Please forgive me for the duplicated code here..
+ -- Zephaniah E. Hull.
 =================
 */
 static void
 R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 {
-	float				l, d, frac;
-	int					i1, i2, i, j, k;
+	float				d, frac;
+	int					i1, i2, i, j;
 	maliaspose_t		*poses[4];
 	float				fracs[4];
 	int					num_frames = 0;
@@ -160,9 +163,9 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 			continue;
 		frame = &paliashdr->frames[e->frame[i]];
 		if (frame->numposes > 1) {
-			i1 = (int) (cl.time / e->frame_interval[i]);
-			frac = (cl.time / e->frame_interval[i]) - i1;
-			i1 %= frame->numposes;
+			i1 = (int) (cl.time / e->frame_interval[i]) % frame->numposes;
+			frac = (cl.time / e->frame_interval[i]);
+			frac -= floor(frac);
 			i2 = (i1 + 1) % frame->numposes;
 			poses[num_frames] = &frame->poses[i1];
 			fracs[num_frames] = (1 - frac) * e->frame_frac[i];
@@ -178,27 +181,88 @@ R_SetupAliasBlendedFrame (aliashdr_t *paliashdr, entity_t *e)
 		}
 	}
 
-	if (!num_frames)
-		Sys_Error("Eik! %s\n", e->model->name);
+	switch (num_frames) {
+		case 0:
+			Sys_Error("Eik! %s\n", e->model->name);
+			return; // Never reached.
+		case 1:
+			for (i = 0; i < paliashdr->numverts; i++) {
+				v_array(i, 0) = poses[0]->vertices[i].v[0];
+				v_array(i, 1) = poses[0]->vertices[i].v[1];
+				v_array(i, 2) = poses[0]->vertices[i].v[2];
 
-	for (i = 0; i < paliashdr->numverts; i++) {
-		for (j = 0; j < 3; j++) {
-			v_array(i, j) = 0;
-			for (k = 0; k < num_frames; k++)
-				if (fracs[k] > (1/65536))
-					v_array(i, j) += poses[k]->vertices[i].v[j] * fracs[k];
-		}
+				d = shadedots[poses[0]->normal_indices[i]];
+				d *= shadelight;
+				VectorScale (lightcolor, d, cf_array_v(i));
+				cf_array(i, 3) = 1;
 
-		tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
-		tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
+				tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
+				tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
+			}
+			break;
+		case 2:
+			for (i = 0; i < paliashdr->numverts; i++) {
+				v_array(i, 0) = poses[0]->vertices[i].v[0] * fracs[0];
+				v_array(i, 0) += poses[1]->vertices[i].v[0] * fracs[1];
+				v_array(i, 1) = poses[0]->vertices[i].v[1] * fracs[0];
+				v_array(i, 1) += poses[1]->vertices[i].v[1] * fracs[1];
+				v_array(i, 2) = poses[0]->vertices[i].v[2] * fracs[0];
+				v_array(i, 2) += poses[1]->vertices[i].v[2] * fracs[1];
 
-		d = 0;
-		for (k = 0; k < num_frames; k++)
-			if (fracs[k] > (1/65536))
-				d += shadedots[poses[k]->normal_indices[i]] * fracs[k];
-		l = shadelight * d;
-		VectorScale(lightcolor, l, cf_array_v(i));
-		cf_array(i, 3) = 1;
+				d = shadedots[poses[0]->normal_indices[i]] * fracs[0];
+				d += shadedots[poses[1]->normal_indices[i]] * fracs[1];
+				d *= shadelight;
+				VectorScale (lightcolor, d, cf_array_v(i));
+				cf_array(i, 3) = 1;
+
+				tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
+				tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
+			}
+			break;
+		case 3:
+			for (i = 0; i < paliashdr->numverts; i++) {
+				v_array(i, 0) = poses[0]->vertices[i].v[0] * fracs[0];
+				v_array(i, 0) += poses[1]->vertices[i].v[0] * fracs[1];
+				v_array(i, 0) += poses[2]->vertices[i].v[0] * fracs[2];
+				v_array(i, 1) = poses[0]->vertices[i].v[1] * fracs[0];
+				v_array(i, 1) += poses[1]->vertices[i].v[1] * fracs[1];
+				v_array(i, 1) += poses[2]->vertices[i].v[1] * fracs[2];
+				v_array(i, 2) = poses[0]->vertices[i].v[2] * fracs[0];
+				v_array(i, 2) += poses[1]->vertices[i].v[2] * fracs[1];
+				v_array(i, 2) += poses[2]->vertices[i].v[2] * fracs[2];
+
+				d = shadedots[poses[0]->normal_indices[i]] * fracs[0];
+				d += shadedots[poses[1]->normal_indices[i]] * fracs[1];
+				d += shadedots[poses[2]->normal_indices[i]] * fracs[2];
+				d *= shadelight;
+				VectorScale (lightcolor, d, cf_array_v(i));
+				cf_array(i, 3) = 1;
+
+				tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
+				tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
+			}
+			break;
+		default:
+			for (i = 0; i < paliashdr->numverts; i++) {
+				v_array(i, 0) = 0;
+				v_array(i, 1) = 0;
+				v_array(i, 2) = 0;
+				d = 0;
+				for (j = 0; j < num_frames; j++) {
+					v_array(i, 0) += poses[j]->vertices[i].v[0] * fracs[j];
+					v_array(i, 1) += poses[j]->vertices[i].v[1] * fracs[j];
+					v_array(i, 2) += poses[j]->vertices[i].v[2] * fracs[j];
+					d += shadedots[poses[j]->normal_indices[i]] * fracs[j];
+				}
+
+				d *= shadelight;
+				VectorScale (lightcolor, d, cf_array_v(i));
+				cf_array(i, 3) = 1;
+
+				tc0_array(i, 0) = tc1_array(i, 0) = paliashdr->tcarray[i].s;
+				tc0_array(i, 1) = tc1_array(i, 1) = paliashdr->tcarray[i].t;
+			}
+			break;
 	}
 	TWI_FtoUB (cf_array_v(0), c_array_v(0), paliashdr->numverts * 4);
 }

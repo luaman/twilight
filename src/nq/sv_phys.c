@@ -143,7 +143,7 @@ Returns false if the entity removed itself.
 qboolean
 SV_RunThink (edict_t *ent)
 {
-	float	thinktime;
+	double	thinktime;
 
 	thinktime = ent->v.nextthink;
 	if (thinktime <= 0 || thinktime > sv.time + host_frametime)
@@ -204,10 +204,10 @@ returns the blocked flags (1 = floor, 2 = step / wall)
 #define	STOP_EPSILON	0.1
 
 int
-ClipVelocity (vec3_t in, dvec3_t normal, vec3_t out, float overbounce)
+ClipVelocity (vec3_t in, dvec3_t normal, vec3_t out, double overbounce)
 {
-	float	backoff;
-	float	change;
+	double	backoff;
+	double	change;
 	int		i, blocked;
 
 	blocked = 0;
@@ -245,14 +245,14 @@ If steptrace is not NULL, the trace of any vertical wall hit will be stored
 //  angled corners, which you could get stuck on, now they are just a one
 //  frame hiccup)
 #define	MAX_CLIP_PLANES	20
-int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
+int SV_FlyMove (edict_t *ent, double time, trace_t *steptrace)
 {
 	int		bumpcount, numbumps, numplanes, i, j, blocked;
 	dvec3_t	planes[MAX_CLIP_PLANES];
 	vec3_t	dir, end;
 	vec3_t	primal_velocity, original_velocity, new_velocity;
 	trace_t	trace;
-	float	d, time_left;
+	double	d, time_left;
 	
 	time_left = time;
 	numplanes = 0;
@@ -373,7 +373,7 @@ SV_AddGravity
 void
 SV_AddGravity (edict_t *ent)
 {
-	float		ent_gravity;
+	double		ent_gravity;
 	eval_t		*val;
 
 	// Don't let entities fall out of the map
@@ -386,7 +386,7 @@ SV_AddGravity (edict_t *ent)
 	else
 		ent_gravity = 1.0;
 
-	ent->v.velocity[2] -= ent_gravity * sv_gravity->ivalue * host_frametime;
+	ent->v.velocity[2] -= ent_gravity * sv_gravity->fvalue * host_frametime;
 }
 
 /*
@@ -451,12 +451,12 @@ SV_PushMove
 
 ============
 */
-void SV_PushMove (edict_t *pusher, float movetime)
+void SV_PushMove (edict_t *pusher, double movetime)
 {
 	unsigned int	e;
 	int				i, index, num_moved;
 	edict_t			*check;
-	float			savesolid, pushltime;
+	double			savesolid, pushltime;
 	vec3_t			mins, maxs, move, move1, moveangle, pushorig, pushang;
 	vec3_t			a, forward, left, up, org, org2;
 	edict_t			*moved_edict[MAX_EDICTS];
@@ -631,9 +631,9 @@ SV_Physics_Pusher
 */
 void SV_Physics_Pusher (edict_t *ent)
 {
-	float	thinktime;
-	float	oldltime;
-	float	movetime;
+	double	thinktime;
+	double	oldltime;
+	double	movetime;
 
 	oldltime = ent->v.ltime;
 
@@ -761,7 +761,7 @@ void
 SV_WallFriction (edict_t *ent, trace_t *trace)
 {
 	vec3_t      forward; //, right, up;
-	float       d, i;
+	double       d, i;
 	vec3_t      into, side;
 
 //	AngleVectors (ent->v.v_angle, forward, right, up);
@@ -1394,7 +1394,7 @@ trace_t SV_Trace_Toss (edict_t *tossent, edict_t *ignore)
 	edict_t	tempent, *tent;
 	trace_t	trace;
 	vec3_t	move, end;
-	float	gravity, savesolid;
+	double	gravity, savesolid;
 	eval_t	*val;
 
 	memcpy (&tempent, tossent, sizeof(edict_t));

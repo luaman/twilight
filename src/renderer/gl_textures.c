@@ -165,10 +165,8 @@ GL_DoSpan(double as, double at, double bs, double bt, span_t *span, int width, i
 		slope = (as - bs) / (at - bt);
 		if (ay < by)
 		{
-			if (*y1 > ay)
-				*y1 = ay;
-			if (*y2 < by)
-				*y2 = by;
+			if (*y1 > ay) *y1 = ay;
+			if (*y2 < by) *y2 = by;
 			x = as;
 			if (ay < 0)
 			{
