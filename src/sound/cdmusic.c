@@ -47,7 +47,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "sound.h"
 
-// FIXME: All of this is not yet common
+/* FIXME: All of this is not yet common */
 void Con_Printf (char *fmt, ...);
 void Con_DPrintf (char *fmt, ...);
 typedef void (*xcommand_t) (void);
@@ -145,7 +145,7 @@ CDAudio_Play (Uint8 track, qboolean looping)
 		(cd_handle, cd_handle->track[track - 1].offset,
 		 cd_handle->track[track - 1].length) < 0) {
 
-		// ok, check for status now
+		/* ok, check for status now */
 		int cd_status = SDL_CDStatus (cd_handle);
 
 		if (cd_status > 0)
@@ -393,7 +393,7 @@ CDAudio_Init_Cvars(void)
 int
 CDAudio_Init (void)
 {
-	int         i, x, sdl_num_drives;
+	int	i, x, sdl_num_drives;
 
 	if (COM_CheckParm ("-nocdaudio"))
 		return -1;
