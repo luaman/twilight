@@ -79,6 +79,7 @@ netadr_t    net_local_adr;
 
 netadr_t    net_from;
 sizebuf_t   net_message;
+int         net_socket;
 
 int         ip_sockets[2];					// non blocking, for receives
 
@@ -92,7 +93,7 @@ int         close (int);
 
 typedef struct
 {
-	byte	data[MAX_UDP_PACKET];
+	Uint8	data[MAX_UDP_PACKET];
 	int		datalen;
 } loopmsg_t;
 
@@ -247,7 +248,7 @@ qboolean NET_GetLoopPacket (netsrc_t sock)
 }
 
 
-void NET_SendLoopPacket (netsrc_t sock, int length, void *data, netadr_t to)
+void NET_SendLoopPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
 {
 	int		i;
 	loopback_t	*loop;
@@ -309,7 +310,7 @@ NET_GetPacket (netsrc_t sock)
 //=============================================================================
 
 void
-NET_SendPacket (netsrc_t sock, int length, void *data, netadr_t to)
+NET_SendPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to)
 {
 	int         ret;
 	struct sockaddr_in addr;
