@@ -1821,7 +1821,7 @@ COM_InitFilesystem (void)
 	if (i && i < com_argc - 1)
 		strcpy (com_basedir, com_argv[i + 1]);
 	else
-		strcpy (com_basedir, host_parms.basedir);
+		strcpy (com_basedir, BASEPATH);
 
 //
 // -sharedir <path>
@@ -1831,7 +1831,7 @@ COM_InitFilesystem (void)
 	if (i && i < com_argc - 1)
 		strcpy (com_sharedir, com_argv[i + 1]);
 	else
-		strcpy (com_sharedir, host_parms.sharedir);
+		strcpy (com_sharedir, SHAREPATH);
 
 //
 // start up with id1 by default
