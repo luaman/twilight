@@ -1676,3 +1676,4 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 
 	mod->type = mod_sprite;
 }
+

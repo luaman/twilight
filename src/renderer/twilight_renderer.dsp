@@ -91,6 +91,10 @@ SOURCE=.\dynogl.c
 
 SOURCE=.\noise.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\noise_textures.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

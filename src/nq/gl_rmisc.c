@@ -50,6 +50,7 @@ unsigned int vindices[MAX_VERTEX_INDICES];
 void R_InitBubble (void);
 void R_SkyBoxChanged (cvar_t *cvar);
 void R_TimeRefresh_f (void);
+extern void TNT_Init (void);
 
 /*
 ==================
@@ -187,6 +188,7 @@ R_Init (void)
 	R_InitBubble();
 	R_InitParticles ();
 	R_InitParticleTexture ();
+//	TNT_Init ();
 
 	playertextures = texture_extension_number;
 	texture_extension_number += 16;

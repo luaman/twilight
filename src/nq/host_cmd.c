@@ -51,8 +51,6 @@ extern cvar_t *pausable;
 
 int         current_skill;
 
-void        Mod_Print (void);
-
 /*
 ==================
 Host_Quit_f
@@ -1468,6 +1466,4 @@ Host_InitCommands (void)
 	Cmd_AddCommand ("startdemos", Host_Startdemos_f);
 	Cmd_AddCommand ("demos", Host_Demos_f);
 	Cmd_AddCommand ("stopdemo", Host_Stopdemo_f);
-
-	Cmd_AddCommand ("mcache", Mod_Print);
 }
