@@ -1,5 +1,5 @@
 /*
-	$RCSfile$
+	$RCSfile$ -- coordinates spawning and killing of local servers
 
 	Copyright (C) 1996-1997  Id Software, Inc.
 
@@ -22,7 +22,6 @@
 		Boston, MA  02111-1307, USA
 
 */
-// host.c -- coordinates spawning and killing of local servers
 static const char rcsid[] =
     "$Id$";
 
@@ -532,8 +531,7 @@ Host_ClearMemory (void)
 }
 
 
-//============================================================================
-
+/* ============================================================================ */
 
 /*
 ===================
@@ -547,16 +545,17 @@ Host_FilterTime (float time)
 {
 	realtime += time;
 
-	if (!cls.timedemo && realtime - oldrealtime < 1.0 / 72.0)
-		return false;					// framerate is too high
+	/* eviltypeguy - added && cl.maxclients > 1 to allow uncapped framerate
+	   when playing singleplayer quake, possible NetQuake breakage? */
+	if (!cls.timedemo && cl.maxclients > 1 && realtime - oldrealtime < 1.0 / 72.0)
+		return false;					/* framerate is too high */
 
 	host_frametime = realtime - oldrealtime;
 	oldrealtime = realtime;
 
 	if (host_framerate->value > 0)
 		host_frametime = host_framerate->value;
-	else {								// don't allow really long or short
-		// frames
+	else {								/* don't allow really long or short frames */
 		if (host_frametime > 0.1)
 			host_frametime = 0.1;
 		if (host_frametime < 0.001)
@@ -565,7 +564,6 @@ Host_FilterTime (float time)
 
 	return true;
 }
-
 
 /*
 ===================
