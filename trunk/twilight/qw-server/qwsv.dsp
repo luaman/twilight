@@ -168,11 +168,11 @@ SOURCE=.\sv_send.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\sv_user.c
+SOURCE=.\sv_sys.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\sys.c
+SOURCE=.\sv_user.c
 # End Source File
 # Begin Source File
 
