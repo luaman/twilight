@@ -1063,10 +1063,10 @@ M_Options_Key (int k)
 				case 2:
 					Cbuf_AddText ("exec default.cfg\n");
 					break;
-				case 15:
+				case 17:
 					M_Menu_Gfx_f();
 					break;
-				case 16:
+				case 18:
 					M_Menu_Video_f ();
 					break;
 				default:
