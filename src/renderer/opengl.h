@@ -88,7 +88,7 @@ typedef double			GLclampd;		/* double precision float in [0,1] */
 /*
  * Constants
  *
- * These defines should all be part of GL/gl.h or GL/glext.h, except as
+ * These defines should all be part of GL/gl.h, except as
  * noted with the definition.  The list of defines here was primarily
  * composed of the Mesa3D headers, which provide an API compatible enough
  * OpenGL 1.2 for our purposes.

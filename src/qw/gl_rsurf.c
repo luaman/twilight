@@ -38,6 +38,7 @@ static const char rcsid[] =
 #include "client.h"
 #include "cvar.h"
 #include "glquake.h"
+#include "opengl_ext.h"
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
@@ -57,11 +58,10 @@ int         lightmap_textures;
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128
 
-unsigned    blocklights[BLOCK_WIDTH * BLOCK_HEIGHT * 3];
+//unsigned    blocklights[BLOCK_WIDTH * BLOCK_HEIGHT * 3];
+Uint32		*blocklights;
 
 #define	MAX_LIGHTMAPS	256
-
-int         active_lightmaps;
 
 typedef struct glRect_s {
 	unsigned char l, t, w, h;
@@ -242,7 +242,7 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 	int			i, j, size;
 	Uint8		*lightmap;
 	unsigned	scale;
-	int			maps;
+	int			maps, shift;
 	unsigned	*bl;
 
 	surf->cached_dlight = (surf->dlightframe == r_framecount);
@@ -251,12 +251,12 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 
 	// set to full bright if no light data
 	if (!cl.worldmodel->lightdata) {
-		memset (blocklights, 255, size*lightmap_bytes*sizeof(int));
+		memset (blocklights, 255, size*lightmap_bytes*sizeof(Uint32));
 		goto store;
 	}
 
 	// clear to no light
-	memset (blocklights, 0, size*lightmap_bytes*sizeof(int));
+	memset (blocklights, 0, size*lightmap_bytes*sizeof(Uint32));
 
 	// add all the lightmaps
 	if (lightmap) {
@@ -278,7 +278,7 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 						bl[0] += lightmap[0] * scale;
 						bl[1] += lightmap[1] * scale;
 						bl[2] += lightmap[2] * scale;
-						bl += 3;
+						bl += lightmap_bytes;
 						lightmap += 3;
 					}
 					break;
@@ -292,6 +292,11 @@ R_BuildLightMap (msurface_t *surf, Uint8 *dest, int stride)
 
 	// bound, invert, and shift
 store:
+	if (gl_mtexable && !(gl_mtexcombine_arb || gl_mtexcombine_ext))
+		shift = 7;
+	else
+		shift = 8;
+
 	switch (gl_lightmap_format) {
 		case GL_RGB:
 
@@ -300,11 +305,11 @@ store:
 
 			for (i = 0; i < surf->tmax; i++, dest += stride) {
 				for (j=surf->smax; j; j--) {
-					dest[0] = (Uint8) (min(bl[0], (128 * 255)) >> 7);
-					dest[1] = (Uint8) (min(bl[1], (128 * 255)) >> 7);
-					dest[2] = (Uint8) (min(bl[2], (128 * 255)) >> 7);
-					bl+=3;
-					dest+=3;
+					dest[0] = bound (0, bl[0] >> shift, 255);
+					dest[1] = bound (0, bl[1] >> shift, 255);
+					dest[2] = bound (0, bl[2] >> shift, 255);
+					bl += lightmap_bytes;
+					dest += 3;
 				}
 			}
 
@@ -317,12 +322,12 @@ store:
 
 			for (i = 0; i < surf->tmax; i++, dest += stride) {
 				for (j=surf->smax; j; j--) {
-					dest[0] = (Uint8) (min(bl[0], (128 * 255)) >> 7);
-					dest[1] = (Uint8) (min(bl[1], (128 * 255)) >> 7);
-					dest[2] = (Uint8) (min(bl[2], (128 * 255)) >> 7);
+					dest[0] = bound (0, bl[0] >> shift, 255);
+					dest[1] = bound (0, bl[1] >> shift, 255);
+					dest[2] = bound (0, bl[2] >> shift, 255);
 					dest[3] = 255;
-					bl+=3;
-					dest+=4;
+					bl += lightmap_bytes;
+					dest += 4;
 				}
 			}
 
@@ -333,7 +338,7 @@ store:
 
 			for (i = 0; i < surf->tmax; i++, dest += stride, bl += surf->smax)
 				for (j = 0; j < surf->smax; j++)
-					dest[j] = (Uint8) (min(bl[j], (128 * 255)) >> 7);
+					dest[j] = bound (0, bl[j] >> shift, 255);
 
 			break;
 
@@ -408,7 +413,7 @@ R_BlendLightmaps (void)
 
 	qglDepthMask (GL_FALSE);					// don't bother writing Z
 
-	qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+	qglBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
 
 	qglEnable (GL_BLEND);
 
@@ -712,6 +717,67 @@ DrawTextureChainsMTex (void)
 
 /*
 ================
+DrawTextureChainsMTexCombine
+================
+*/
+void
+DrawTextureChainsMTexCombine (void)
+{
+	int         i;
+	msurface_t *s;
+	texture_t  *t, *st;
+
+	for (i = 0; i < cl.worldmodel->numtextures; i++) {
+		t = cl.worldmodel->textures[i];
+		if (!t)
+			continue;
+		s = t->texturechain;
+		if (!s)
+			continue;
+		st = R_TextureAnimation (s->texinfo->texture);
+		if (i == skytexturenum)
+			R_DrawSkyChain (s);
+		else {
+			if ((s->flags & SURF_DRAWTURB))
+				continue;				// draw translucent water later
+
+			if (s->flags & SURF_DRAWSKY) {
+				for (; s; s = s->texturechain) {
+					EmitBothSkyLayers (s);
+				}
+				return;
+			}
+
+			qglEnable (GL_BLEND);
+			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+			qglActiveTextureARB (GL_TEXTURE1_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2.0);
+			qglEnable (GL_TEXTURE_2D);
+
+			for (; s; s = s->texturechain) {
+				R_RenderBrushPolyMTex (s, st);
+			}
+
+			qglDisable (GL_TEXTURE_2D);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1.0);
+			qglActiveTextureARB (GL_TEXTURE0_ARB);
+			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			qglDisable (GL_BLEND);
+		}
+
+		t->texturechain = NULL;
+	}
+}
+
+/*
+================
 DrawTextureChains
 ================
 */
@@ -982,7 +1048,9 @@ R_DrawWorld (void)
 
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
 
-	if (gl_mtexable) {
+	if (gl_mtexable && (gl_mtexcombine_arb || gl_mtexcombine_ext)) {
+		DrawTextureChainsMTexCombine ();
+	} else if (gl_mtexable) {
 		DrawTextureChainsMTex ();
 	} else {
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -1249,23 +1317,29 @@ GL_BuildLightmaps (void)
 		texture_extension_number += MAX_LIGHTMAPS;
 	}
 
-	if (gl_colorlights->value) {
-		gl_lightmap_format = GL_RGB;
-		lightmap_bytes = 3;
-		colorlights = true;
+	switch ((int) gl_colorlights->value) {
+		case 0:
+			gl_lightmap_format = GL_LUMINANCE;
+			lightmap_bytes = 1;
+			colorlights = false;
+			break;
+		default:
+		case 1:
+			gl_lightmap_format = GL_RGB;
+			lightmap_bytes = 3;
+			colorlights = true;
+			break;
+		case 2:
+			gl_lightmap_format = GL_RGBA;
+			lightmap_bytes = 4;
+			colorlights = true;
+			break;
+	}
 
-		if ((i = COM_CheckParm ("-bpp")) != 0) {
-			if (Q_atoi (com_argv[i + 1]) == 32) {
-				gl_lightmap_format = GL_RGBA;
-				lightmap_bytes = 4;
-			}
-		}
-	}
-	else {
-		gl_lightmap_format = GL_LUMINANCE;
-		lightmap_bytes = 1;
-		colorlights = false;
-	}
+	if (blocklights)
+		free (blocklights);
+
+	blocklights = malloc (BLOCK_WIDTH * BLOCK_HEIGHT * lightmap_bytes);
 
 	for (j = 1; j < MAX_MODELS; j++) {
 		m = cl.model_precache[j];

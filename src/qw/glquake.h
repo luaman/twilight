@@ -155,19 +155,9 @@ extern const char *gl_extensions;
 
 void        R_TranslatePlayerSkin (int playernum);
 
-#ifndef GL_ACTIVE_TEXTURE_ARB
-// multitexture
-#define GL_ACTIVE_TEXTURE_ARB			0x84E0
-#define GL_CLIENT_ACTIVE_TEXTURE_ARB	0x84E1
-#define GL_MAX_TEXTURES_UNITS_ARB		0x84E2
-#define GL_TEXTURE0_ARB					0x84C0
-#define GL_TEXTURE1_ARB					0x84C1
-#define GL_TEXTURE2_ARB					0x84C2
-#define GL_TEXTURE3_ARB					0x84C3
-// note: ARB supports up to 32 units, but only 2 are currently used in this engine
-#endif
-
 extern qboolean gl_mtexable;
+extern qboolean gl_mtexcombine_arb;
+extern qboolean gl_mtexcombine_ext;
 
 // Vertex array stuff.
 
