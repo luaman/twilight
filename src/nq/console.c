@@ -236,7 +236,11 @@ Con_CheckResize (void)
 static void
 setlogname (cvar_t *con_logname)
 {
-	snprintf (logname, MAX_OSPATH, "%s/%s", com_gamedir, con_logname->string);
+	if (con_logname->string)
+		snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
+				con_logname->string);
+	else
+		logname[0] = '\0';
 }
 
 /*
@@ -260,7 +264,7 @@ void
 Con_Init (void)
 {
 	if (COM_CheckParm ("-condebug"))
-		Cvar_Set (con_logname, "qconsole.log");
+		Cvar_Set (con_logname, "qconsole");
 
 	con = malloc (sizeof (console_t));
 	con_linewidth = -1;
