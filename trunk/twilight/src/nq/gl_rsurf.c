@@ -723,7 +723,7 @@ R_DrawBrushModel (entity_t *e)
 	msurface_t	   *psurf;
 	float			dot, wateralpha = r_wateralpha->value;
 	model_t		   *clmodel = e->model;
-	texture_t	   *t;
+	texture_t	   *t, *st;
 	vec3_t			modelorg;
 
 	if (e->angles[0] || e->angles[1] || e->angles[2]) {
@@ -826,9 +826,9 @@ R_DrawBrushModel (entity_t *e)
 		{
 			if (psurf->flags & SURF_DRAWTURB)
 			{
-				EmitWaterPolys (psurf,
-						R_TextureAnimation(psurf->texinfo->texture), true,
-						wateralpha);
+				st = R_TextureAnimation (psurf->texinfo->texture);
+				qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
+				EmitWaterPolys (psurf, st, true, wateralpha);
 				psurf->visframe = -1;
 			}
 		}

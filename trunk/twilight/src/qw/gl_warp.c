@@ -35,7 +35,7 @@ static const char rcsid[] =
 #endif
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h>	/* for malloc() */
 
 #include "opengl_ext.h"
 
@@ -342,8 +342,7 @@ R_DrawSkyChain (msurface_t *s)
 {
 	msurface_t *fa;
 
-	if (r_fastsky->value)
-	{
+	if (r_fastsky->value) {
 		glpoly_t	*p;
 		float		*v;
 		int			i;

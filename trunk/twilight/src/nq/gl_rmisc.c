@@ -121,8 +121,6 @@ R_Init_Cvars
 void
 R_Init_Cvars (void)
 {
-	extern cvar_t *r_maxedges, *r_maxsurfs;		// Shrak
-
 	r_norefresh = Cvar_Get ("r_norefresh", "0", CVAR_NONE, NULL);
 	r_drawentities = Cvar_Get ("r_drawentities", "1", CVAR_NONE, NULL);
 	r_drawviewmodel = Cvar_Get ("r_drawviewmodel", "1", CVAR_NONE, NULL);
@@ -154,9 +152,6 @@ R_Init_Cvars (void)
 	gl_fb_bmodels = Cvar_Get ("gl_fb_bmodels", "1", CVAR_NONE, NULL);
 
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
-
-	r_maxedges = Cvar_Get ("r_maxedges", "0", CVAR_NONE, NULL);	// Shrak
-	r_maxsurfs = Cvar_Get ("r_maxsurfs", "0", CVAR_NONE, NULL); // Shrak
 
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 

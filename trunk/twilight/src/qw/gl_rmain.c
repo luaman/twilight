@@ -153,7 +153,7 @@ R_GetSpriteFrame
 ================
 */
 static mspriteframe_t *
-R_GetSpriteFrame (entity_t *currententity)
+R_GetSpriteFrame (entity_t *e)
 {
 	msprite_t		   *psprite;
 	mspritegroup_t	   *pspritegroup;
@@ -161,8 +161,8 @@ R_GetSpriteFrame (entity_t *currententity)
 	int					i, numframes, frame;
 	float			   *pintervals, fullinterval, targettime, time;
 
-	psprite = currententity->model->cache.data;
-	frame = currententity->cur.frame;
+	psprite = e->model->cache.data;
+	frame = e->cur.frame;
 
 	if ((frame >= psprite->numframes) || (frame < 0)) {
 		Con_Printf ("R_DrawSprite: no such frame %d\n", frame);
@@ -1047,8 +1047,7 @@ R_DrawAliasModel (entity_t *e)
 		qglEnable (GL_BLEND);
 		qglColor4f (0, 0, 0, 0.5);
 		if (gl_im_animation->value) {
-			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0, lastposenum,
-					e);
+			GL_DrawAliasBlendedShadow (paliashdr, lastposenum0, lastposenum, e);
 		} else {
 			GL_DrawAliasShadow (paliashdr, lastposenum);
 		}
@@ -1369,6 +1368,37 @@ R_Clear (void)
 
 /*
 ================
+R_Render3DView
+
+Called by R_RenderView, possibily repeatedly.
+================
+*/
+void
+R_Render3DView (void)
+{
+	// adds static entities to the list
+	R_DrawWorld ();
+
+	R_DrawEntitiesOnList ();
+
+	R_DrawViewModel ();
+
+	qglEnable (GL_BLEND);
+	qglDepthMask (GL_FALSE);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
+
+	R_DrawExplosions ();
+	R_DrawParticles ();
+	R_RenderDlights ();
+	R_DrawWaterTextureChains ();
+
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDepthMask (GL_TRUE);
+	qglDisable (GL_BLEND);
+}
+
+/*
+================
 R_RenderView
 
 r_refdef must be set before the first call
@@ -1405,29 +1435,13 @@ R_RenderView (void)
 
 	R_SetupGL ();
 
-	// adds static entities to the list
-	R_DrawWorld ();
+	R_MoveExplosions ();
+	R_MoveParticles ();
+
+	R_Render3DView ();
 
 	// don't let sound get messed up if going slow
 	S_ExtraUpdate ();
-
-	R_DrawEntitiesOnList ();
-
-	R_DrawViewModel ();
-	qglEnable (GL_BLEND);
-	qglDepthMask (GL_FALSE);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
-
-	R_MoveExplosions ();
-	R_DrawExplosions ();
-	R_MoveParticles ();
-	R_DrawParticles ();
-	R_RenderDlights ();
-	R_DrawWaterTextureChains ();
-
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDepthMask (GL_TRUE);
-	qglDisable (GL_BLEND);
 
 	R_PolyBlend ();
 
