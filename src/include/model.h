@@ -32,9 +32,9 @@
 #include "modelgen.h"
 #include "spritegn.h"
 #include "zone.h"
-#include "../src/renderer/mod_alias.h"		// FIXME: HACK HACK HACK!
+#include "../renderer/mod_alias.h"		// FIXME: HACK HACK HACK!
 #include "mod_brush.h"
-#include "../src/renderer/mod_sprite.h"		// FIXME: HACK HACK HACK!
+#include "../renderer/mod_sprite.h"		// FIXME: HACK HACK HACK!
 
 /*
 

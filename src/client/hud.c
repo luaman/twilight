@@ -65,6 +65,11 @@ static qpic_t     *sb_face_quad;
 static qpic_t     *sb_face_invuln;
 static qpic_t     *sb_face_invis_invuln;
 
+// Needed because SB_NONE is already defined in WinGDI.h
+#ifdef SB_NONE
+#undef SB_NONE
+#endif
+
 #define SB_NONE		0
 #define SB_PLAYERS	1
 #define SB_TEAMS	2

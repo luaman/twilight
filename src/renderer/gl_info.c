@@ -91,17 +91,12 @@ GLInfo_CheckDriverQuirks (void)
 
 	if (!strcmp (gl_vendor, "ATI Technologies Inc."))	// ATI drivers.
 	{
-		// LordHavoc: Damm asked for it to be disabled on all driver versions for now
-		DynGL_BadExtension ("GL_SGIS_generate_mipmap");
-		Com_Printf ("Disabling GL_SGIS_generate_mipmap due to buggy ATI drivers.");
 		// LordHavoc: kept for future use
-		/*
-		if (!strcmp (gl_version, "1.3.3224 Win2000 Release"))
+		if (strcmp (gl_version, "1.3.3717 WinXP Release"))
 		{
 			DynGL_BadExtension ("GL_SGIS_generate_mipmap");
 			Com_Printf ("Disabling GL_SGIS_generate_mipmap due to buggy ATI driver version.");
 		}
-		*/
 	}
 	if (!strcmp (gl_renderer, "Mesa DRI Voodoo3 20010501 x86/MMX")) {
 		Com_Printf ("Disabiling glLoadTransposeMatrixf and glLoadTransposeMatrixf due to buggy DRI drivers.\n");
