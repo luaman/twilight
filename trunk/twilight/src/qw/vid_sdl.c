@@ -34,11 +34,11 @@ static const char rcsid[] =
 # endif
 #endif
 
-#include "SDL.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+
+#include "SDL.h"
 
 #include "client.h"
 #include "console.h"
@@ -51,13 +51,13 @@ static const char rcsid[] =
 #include "sys.h"
 
 
-unsigned    d_8to32table[256];
+unsigned	d_8to32table[256];
 
-cvar_t     *vid_mode;
-cvar_t     *m_filter;
-cvar_t     *_windowed_mouse;
-cvar_t     *gl_ztrick;
-cvar_t     *gl_driver;
+cvar_t	*vid_mode;
+cvar_t	*m_filter;
+cvar_t	*_windowed_mouse;
+cvar_t	*gl_ztrick;
+cvar_t	*gl_driver;
 
 cvar_t	*v_hwgamma;
 cvar_t	*v_gamma;
@@ -76,7 +76,7 @@ qboolean		VID_Inited;
 static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
 
-static qboolean	use_mouse = false;
+static qboolean use_mouse = false;
 
 static int  scr_width = 640, scr_height = 480, scr_bpp = 15;
 
@@ -102,8 +102,8 @@ const char *gl_renderer;
 const char *gl_version;
 const char *gl_extensions;
 
-qboolean    isPermedia = false;
-qboolean    gl_mtexable = false;
+qboolean	isPermedia = false;
+qboolean	gl_mtexable = false;
 
 void		IN_WindowedMouse (cvar_t *cvar);
 
@@ -131,7 +131,7 @@ VID_InitTexGamma (void)
 	int i;
 	Uint8	*pal;
 	Uint8	r, g, b;
-	unsigned	*table;
+	Uint32	*table;
 	vec3_t	tex;
 
 	tex[0] = v_tgamma->value + v_tgammabias_r->value;
@@ -314,9 +314,9 @@ VID_Init (unsigned char *palette)
 
 	vid.colormap = host_colormap;
 
-// interpret command-line params
+	// interpret command-line params
 
-// set vid parameters
+	// set vid parameters
 	if ((i = COM_CheckParm ("-nomouse")) == 0)
 		use_mouse = true;
 
@@ -413,7 +413,6 @@ VID_Init (unsigned char *palette)
 
 	if (use_mouse)
 		SDL_ShowCursor (0);
-
 }
 
 void
@@ -673,7 +672,7 @@ IN_Init (void)
 {
 	mouse_x = 0.0f;
 	mouse_y = 0.0f;
-	old_mouse_x = old_mouse_y = 0.0;
+	old_mouse_x = old_mouse_y = 0.0f;
 }
 
 void
