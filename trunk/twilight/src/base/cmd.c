@@ -37,6 +37,9 @@ static const char rcsid[] =
 #include "sys.h"
 #include "zone.h"
 
+// this gets allocated as soon as Cmd_AddCommand needs it
+memzone_t *cmdzone = NULL;
+
 #define MAX_ALIAS_NAME 32
 
 typedef struct cmdalias_s
@@ -641,7 +644,9 @@ Cmd_AddCommand (char *cmd_name, xcommand_t function)
 		}
 	}
 
-	cmd = Hunk_Alloc (sizeof (cmd_function_t));
+	if (!cmdzone)
+		cmdzone = Zone_AllocZone("command");
+	cmd = Zone_Alloc(cmdzone, sizeof (cmd_function_t));
 	cmd->name = cmd_name;
 	cmd->function = function;
 	cmd->next = cmd_functions;
@@ -722,7 +727,7 @@ Cmd_CompleteCountPossible (char *partial)
 	len = strlen(partial);
 	if (!len)
 		return 0;
-	
+
 	h = 0;
 	// Loop through the command list and count all partial matches
 	for (cmd = cmd_functions; cmd; cmd = cmd->next)
