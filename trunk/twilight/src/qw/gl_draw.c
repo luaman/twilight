@@ -42,6 +42,7 @@ static const char rcsid[] =
 #include "pointers.h"
 #include "strlib.h"
 #include "sys.h"
+#include "cpu.h"
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
@@ -61,9 +62,9 @@ cvar_t *hud_chalpha;
 qpic_t *draw_disc;
 qpic_t *draw_backtile;
 
-int         translate_texture;
-int         char_texture;
-int         ch_textures[NUM_CROSSHAIRS];			// crosshair texture
+GLuint	translate_texture;
+GLuint	char_texture;
+GLuint	ch_textures[NUM_CROSSHAIRS];			// crosshair texture
 
 typedef struct {
 	int		texnum;
@@ -868,8 +869,8 @@ GL_Set2D (void)
 R_ResampleTextureLerpLine
 ================
 */
-void
-R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth, int outwidth)
+static void
+R_ResampleTextureLerpLineBase (Uint8 *in, Uint8 *out, int inwidth, int outwidth)
 {
 	int		j, xi, oldx = 0, f, fstep, endx;
 	fstep = (int) (inwidth*65536.0f/outwidth);
@@ -899,14 +900,13 @@ R_ResampleTextureLerpLine (Uint8 *in, Uint8 *out, int inwidth, int outwidth)
 	}
 }
 
-
 /*
 ================
 R_ResampleTexture
 ================
 */
-void
-R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
+static void
+R_ResampleTextureBase (void *indata, int inwidth, int inheight, void *outdata,
 		int outwidth, int outheight)
 {
 	if (r_lerpimages->ivalue)
@@ -920,8 +920,8 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
 		row2 = Zone_Alloc(tempzone, outwidth*4);
 		inrow = indata;
 		oldy = 0;
-		R_ResampleTextureLerpLine (inrow, row1, inwidth, outwidth);
-		R_ResampleTextureLerpLine (inrow + inwidth*4, row2, inwidth,
+		R_ResampleTextureLerpLineBase (inrow, row1, inwidth, outwidth);
+		R_ResampleTextureLerpLineBase (inrow + inwidth*4, row2, inwidth,
 				outwidth);
 		for (i = 0, f = 0;i < outheight;i++,f += fstep)
 		{
@@ -935,84 +935,25 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
 					if (yi == oldy+1)
 						memcpy(row1, row2, outwidth*4);
 					else
-						R_ResampleTextureLerpLine (inrow, row1, inwidth,
+						R_ResampleTextureLerpLineBase (inrow, row1, inwidth,
 								outwidth);
-					R_ResampleTextureLerpLine (inrow + inwidth*4, row2,
+					R_ResampleTextureLerpLineBase (inrow + inwidth*4, row2,
 							inwidth, outwidth);
 					oldy = yi;
 				}
-				j = outwidth - 4;
-				while(j >= 0)
+				for (j = 0; j < outwidth; j++)  
 				{
-					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16)
-							+ row1[ 0]);
-					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16)
-							+ row1[ 1]);
-					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16)
-							+ row1[ 2]);
-					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16)
-							+ row1[ 3]);
-					out[ 4] = (Uint8) ((((row2[ 4] - row1[ 4]) * lerp) >> 16)
-							+ row1[ 4]);
-					out[ 5] = (Uint8) ((((row2[ 5] - row1[ 5]) * lerp) >> 16)
-							+ row1[ 5]);
-					out[ 6] = (Uint8) ((((row2[ 6] - row1[ 6]) * lerp) >> 16)
-							+ row1[ 6]);
-					out[ 7] = (Uint8) ((((row2[ 7] - row1[ 7]) * lerp) >> 16)
-							+ row1[ 7]);
-					out[ 8] = (Uint8) ((((row2[ 8] - row1[ 8]) * lerp) >> 16)
-							+ row1[ 8]);
-					out[ 9] = (Uint8) ((((row2[ 9] - row1[ 9]) * lerp) >> 16)
-							+ row1[ 9]);
-					out[10] = (Uint8) ((((row2[10] - row1[10]) * lerp) >> 16)
-							+ row1[10]);
-					out[11] = (Uint8) ((((row2[11] - row1[11]) * lerp) >> 16)
-							+ row1[11]);
-					out[12] = (Uint8) ((((row2[12] - row1[12]) * lerp) >> 16)
-							+ row1[12]);
-					out[13] = (Uint8) ((((row2[13] - row1[13]) * lerp) >> 16)
-							+ row1[13]);
-					out[14] = (Uint8) ((((row2[14] - row1[14]) * lerp) >> 16)
-							+ row1[14]);
-					out[15] = (Uint8) ((((row2[15] - row1[15]) * lerp) >> 16)
-							+ row1[15]);
-					out += 16;
-					row1 += 16;
-					row2 += 16;
-					j -= 4;
-				}
-				if (j & 2)
-				{
-					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16)
-							+ row1[ 0]);
-					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16)
-							+ row1[ 1]);
-					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16)
-							+ row1[ 2]);
-					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16)
-							+ row1[ 3]);
-					out[ 4] = (Uint8) ((((row2[ 4] - row1[ 4]) * lerp) >> 16)
-							+ row1[ 4]);
-					out[ 5] = (Uint8) ((((row2[ 5] - row1[ 5]) * lerp) >> 16)
-							+ row1[ 5]);
-					out[ 6] = (Uint8) ((((row2[ 6] - row1[ 6]) * lerp) >> 16)
-							+ row1[ 6]);
-					out[ 7] = (Uint8) ((((row2[ 7] - row1[ 7]) * lerp) >> 16)
-							+ row1[ 7]);
-					out += 8;
-					row1 += 8;
-					row2 += 8;
-				}
-				if (j & 1)
-				{
-					out[ 0] = (Uint8) ((((row2[ 0] - row1[ 0]) * lerp) >> 16)
-							+ row1[ 0]);
-					out[ 1] = (Uint8) ((((row2[ 1] - row1[ 1]) * lerp) >> 16)
-							+ row1[ 1]);
-					out[ 2] = (Uint8) ((((row2[ 2] - row1[ 2]) * lerp) >> 16)
-							+ row1[ 2]);
-					out[ 3] = (Uint8) ((((row2[ 3] - row1[ 3]) * lerp) >> 16)
-							+ row1[ 3]);
+					Uint32	r1, r2, out_32;
+					r1 = *((Uint32 *) row1);
+					r2 = *((Uint32 *) row2);
+					out_32 = r1;
+
+					out_32  = (((((((r2 & 0xFF000000) - (r1 & 0xFF000000)) >> 16) * lerp)) + (r1 & 0xFF000000)) & 0xFF000000);
+					out_32 |= (((((((r2 & 0x00FF0000) - (r1 & 0x00FF0000)) >> 16) * lerp)) + (r1 & 0x00FF0000)) & 0x00FF0000);
+					out_32 |= (((((((r2 & 0x0000FF00) - (r1 & 0x0000FF00))) * lerp) >> 16) + (r1 & 0x0000FF00)) & 0x0000FF00);
+					out_32 |= (((((((r2 & 0x000000FF) - (r1 & 0x000000FF))) * lerp) >> 16) + (r1 & 0x000000FF)) & 0x000000FF);
+
+					*((Uint32 *) out) = out_32;
 					out += 4;
 					row1 += 4;
 					row2 += 4;
@@ -1026,7 +967,7 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
 					if (yi == oldy+1)
 						memcpy(row1, row2, outwidth * 4);
 					else
-						R_ResampleTextureLerpLine (inrow, row1, inwidth,
+						R_ResampleTextureLerpLineBase (inrow, row1, inwidth,
 								outwidth);
 					oldy = yi;
 				}
@@ -1070,6 +1011,315 @@ R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
 			}
 		}
 	}
+}
+
+
+#ifdef HAVE_MMX
+static void
+R_ResampleTextureLerpLineMMX (Uint8 *in, Uint8 *out, int inwidth, int outwidth,
+		int fstep_w)
+{
+	int		j, xi, oldx = 0, f, endx;
+	endx = (inwidth-1);
+	for (j = 0,f = 0;j < outwidth;j++, f += fstep_w)
+	{
+		xi = (int) f >> 16;
+		if (xi != oldx)
+		{
+			in += (xi - oldx) * 4;
+			oldx = xi;
+		}
+		if (xi < endx)
+		{
+			Uint16	lerp = (f & 0xFFFF) >> 8;
+			Uint16	lerp1_4[4] = {lerp, lerp, lerp, lerp};
+			Uint16	lerp2_4[4] = {256-lerp, 256-lerp, 256-lerp, 256-lerp};
+			Uint64	zero = 0;
+			asm ("\n"
+					"movd					%1, %%mm0\n"
+					"movd					%2, %%mm1\n"
+					"punpcklbw				%5, %%mm0\n"
+					"punpcklbw				%5, %%mm1\n"
+					"pmullw					%3, %%mm0\n"
+					"pmullw					%4, %%mm1\n"
+					"psrlw					$8, %%mm0\n"
+					"psrlw					$8, %%mm1\n"
+					"paddsw					%%mm1, %%mm0\n"
+					"packuswb				%5, %%mm0\n"
+					"movd					%%mm0, %0\n"
+					: "=m" (*(Uint32 *)out) :
+					"m" (*(Uint32 *)(&in[0])),
+					"m" (*(Uint32 *)(&in[4])),
+					"m" (*(Uint64 *)lerp2_4),
+					"m" (*(Uint64 *)lerp1_4),
+					"m" (zero) : "mm0", "mm1");
+		} else {
+			/* last pixel of the line has no pixel to lerp to */
+			*(Uint32 *) out = *(Uint32 *) in;
+		}
+		out += 4;
+	}
+}
+
+void
+R_ResampleTextureMMX (void *indata, int inwidth, int inheight, void *outdata,
+		int outwidth, int outheight)
+{
+	if (r_lerpimages->ivalue)
+	{
+		int		i, j, yi, oldy, f, fstep_h, fstep_w, endy = (inheight-1);
+		Uint8	*inrow, *out, *row1, *row2;
+		out = outdata;
+		fstep_h = (int) (inheight*65536.0f/outheight);
+		fstep_w = (int) (inwidth*65536.0f/outwidth);
+
+		row1 = Zone_Alloc(tempzone, outwidth*4);
+		row2 = Zone_Alloc(tempzone, outwidth*4);
+		inrow = indata;
+		oldy = 0;
+		R_ResampleTextureLerpLineMMX (inrow, row1, inwidth, outwidth, fstep_w);
+		R_ResampleTextureLerpLineMMX (inrow + inwidth*4, row2, inwidth,
+				outwidth, fstep_w);
+		for (i = 0, f = 0;i < outheight;i++,f += fstep_h)
+		{
+			yi = f >> 16;
+			if (yi < endy)
+			{
+				Uint16	lerp = (f & 0xFFFF) >> 8;
+				Uint16	lerp1_4[4] = {lerp, lerp, lerp, lerp};
+				Uint16	lerp2_4[4] = {256-lerp, 256-lerp, 256-lerp, 256-lerp};
+				if (yi != oldy)
+				{
+					inrow = (Uint8 *)indata + inwidth*4*yi;
+					if (yi == oldy+1)
+						memcpy(row1, row2, outwidth*4);
+					else
+						R_ResampleTextureLerpLineMMX (inrow, row1, inwidth,
+								outwidth, fstep_w);
+					R_ResampleTextureLerpLineMMX (inrow + inwidth*4, row2,
+							inwidth, outwidth, fstep_w);
+					oldy = yi;
+				}
+				for (j = 0; j < outwidth; j++)  
+				{
+					asm ("\n"
+							"movd					%1, %%mm0\n"
+							"movd					%2, %%mm1\n"
+							"pxor					%%mm2, %%mm2\n"
+							"punpcklbw				%%mm2, %%mm0\n"
+							"punpcklbw				%%mm2, %%mm1\n"
+							"pmullw					%3, %%mm0\n"
+							"pmullw					%4, %%mm1\n"
+							"psrlw					$8, %%mm0\n"
+							"psrlw					$8, %%mm1\n"
+							"paddsw					%%mm1, %%mm0\n"
+							"packuswb				%%mm2, %%mm0\n"
+							"movd					%%mm0, %0\n"
+							: "=m" (*(Uint32 *)out) :
+							"m" (*(Uint32 *)row1),
+							"m" (*(Uint32 *)row2),
+							"m" (*(Uint64 *)lerp2_4),
+							"m" (*(Uint64 *)lerp1_4)
+							: "mm0", "mm1");
+
+					out += 4;
+					row1 += 4;
+					row2 += 4;
+				}
+				row1 -= outwidth*4;
+				row2 -= outwidth*4;
+			} else {
+				if (yi != oldy)
+				{
+					inrow = (Uint8 *)indata + inwidth * 4 * yi;
+					if (yi == oldy+1)
+						memcpy(row1, row2, outwidth * 4);
+					else
+						R_ResampleTextureLerpLineMMX (inrow, row1, inwidth,
+								outwidth, fstep_w);
+					oldy = yi;
+				}
+				memcpy(out, row1, outwidth * 4);
+			}
+		}
+		asm volatile ("emms\n");
+		Zone_Free(row1);
+		Zone_Free(row2);
+	} else {
+		int i, j;
+		unsigned frac, fracstep;
+		/* relies on int32 being 4 bytes */
+		Uint32 *inrow, *out;
+		out = outdata;
+
+		fracstep = inwidth*0x10000/outwidth;
+		for (i = 0;i < outheight;i++)
+		{
+			inrow = (Uint32 *)indata + inwidth * (i * inheight / outheight);
+			frac = fracstep >> 1;
+			j = outwidth - 4;
+			while (j >= 0)
+			{
+				out[0] = inrow[frac >> 16];frac += fracstep;
+				out[1] = inrow[frac >> 16];frac += fracstep;
+				out[2] = inrow[frac >> 16];frac += fracstep;
+				out[3] = inrow[frac >> 16];frac += fracstep;
+				out += 4;
+				j -= 4;
+			}
+			if (j & 2)
+			{
+				out[0] = inrow[frac >> 16];frac += fracstep;
+				out[1] = inrow[frac >> 16];frac += fracstep;
+				out += 2;
+			}
+			if (j & 1)
+			{
+				out[0] = inrow[frac >> 16];frac += fracstep;
+				out += 1;
+			}
+		}
+	}
+}
+
+void
+R_ResampleTextureMMX_EXT (void *indata, int inwidth, int inheight, void *outdata,
+		int outwidth, int outheight)
+{
+	if (r_lerpimages->ivalue)
+	{
+		int		i, j, yi, oldy, f, fstep_h, fstep_w, endy = (inheight-1);
+		Uint8	*inrow, *out, *row1, *row2;
+		out = outdata;
+		fstep_h = (int) (inheight*65536.0f/outheight);
+		fstep_w = (int) (inwidth*65536.0f/outwidth);
+
+		row1 = Zone_Alloc(tempzone, outwidth*4);
+		row2 = Zone_Alloc(tempzone, outwidth*4);
+		inrow = indata;
+		oldy = 0;
+		R_ResampleTextureLerpLineMMX (inrow, row1, inwidth, outwidth, fstep_w);
+		R_ResampleTextureLerpLineMMX (inrow + inwidth*4, row2, inwidth,
+				outwidth, fstep_w);
+		for (i = 0, f = 0;i < outheight;i++,f += fstep_h)
+		{
+			yi = f >> 16;
+			if (yi < endy)
+			{
+				Uint16	lerp = (f & 0xFFFF) >> 8;
+				Uint16	lerp1_4[4] = {lerp, lerp, lerp, lerp};
+				Uint16	lerp2_4[4] = {256-lerp, 256-lerp, 256-lerp, 256-lerp};
+				if (yi != oldy)
+				{
+					inrow = (Uint8 *)indata + inwidth*4*yi;
+					if (yi == oldy+1)
+						memcpy(row1, row2, outwidth*4);
+					else
+						R_ResampleTextureLerpLineMMX (inrow, row1, inwidth,
+								outwidth, fstep_w);
+					R_ResampleTextureLerpLineMMX (inrow + inwidth*4, row2,
+							inwidth, outwidth, fstep_w);
+					oldy = yi;
+				}
+				for (j = 0; j < outwidth; j += 2)  
+				{
+					asm ("\n"
+							"pxor					%%mm0, %%mm0\n"
+							"pxor					%%mm1, %%mm1\n"
+							"pxor					%%mm2, %%mm2\n"
+							"pxor					%%mm3, %%mm3\n"
+							"punpcklbw				%1, %%mm0\n"
+							"punpcklbw				4%1, %%mm2\n"
+							"punpcklbw				%2, %%mm1\n"
+							"punpcklbw				4%2, %%mm3\n"
+							"pmulhuw				%3, %%mm0\n"
+							"pmulhuw				%3, %%mm2\n"
+							"pmulhuw				%4, %%mm1\n"
+							"pmulhuw				%4, %%mm3\n"
+							"packuswb				%%mm2, %%mm0\n"
+							"packuswb				%%mm3, %%mm1\n"
+							"paddusb				%%mm1, %%mm0\n"
+							"movq					%%mm0, %0\n"
+							: "=o" (*(Uint64 *)out) :
+							"o" (*(Uint64 *)row1),
+							"o" (*(Uint64 *)row2),
+							"m" (*(Uint64 *)lerp2_4),
+							"m" (*(Uint64 *)lerp1_4)
+							: "memory", "mm0", "mm1", "mm2", "mm3");
+
+					out += 8;
+					row1 += 8;
+					row2 += 8;
+				}
+				row1 -= outwidth*4;
+				row2 -= outwidth*4;
+			} else {
+				if (yi != oldy)
+				{
+					inrow = (Uint8 *)indata + inwidth * 4 * yi;
+					if (yi == oldy+1)
+						memcpy(row1, row2, outwidth * 4);
+					else
+						R_ResampleTextureLerpLineMMX (inrow, row1, inwidth,
+								outwidth, fstep_w);
+					oldy = yi;
+				}
+				memcpy(out, row1, outwidth * 4);
+			}
+		}
+		asm volatile ("emms\n");
+		Zone_Free(row1);
+		Zone_Free(row2);
+	} else {
+		int i, j;
+		unsigned frac, fracstep;
+		/* relies on int32 being 4 bytes */
+		Uint32 *inrow, *out;
+		out = outdata;
+
+		fracstep = inwidth*0x10000/outwidth;
+		for (i = 0;i < outheight;i++)
+		{
+			inrow = (int *)indata + inwidth * (i * inheight / outheight);
+			frac = fracstep >> 1;
+			j = outwidth - 4;
+			while (j >= 0)
+			{
+				out[0] = inrow[frac >> 16];frac += fracstep;
+				out[1] = inrow[frac >> 16];frac += fracstep;
+				out[2] = inrow[frac >> 16];frac += fracstep;
+				out[3] = inrow[frac >> 16];frac += fracstep;
+				out += 4;
+				j -= 4;
+			}
+			if (j & 2)
+			{
+				out[0] = inrow[frac >> 16];frac += fracstep;
+				out[1] = inrow[frac >> 16];frac += fracstep;
+				out += 2;
+			}
+			if (j & 1)
+			{
+				out[0] = inrow[frac >> 16];frac += fracstep;
+				out += 1;
+			}
+		}
+	}
+}
+#endif
+
+void
+R_ResampleTexture (void *indata, int inwidth, int inheight, void *outdata,
+		int outwidth, int outheight)
+{
+#ifdef HAVE_MMX
+	if (cpu_flags & CPU_MMX_EXT)
+		R_ResampleTextureMMX_EXT (indata, inwidth, inheight, outdata, outwidth, outheight);
+	else if (cpu_flags & CPU_MMX)
+		R_ResampleTextureMMX (indata, inwidth, inheight, outdata, outwidth, outheight);
+	else
+#endif
+		R_ResampleTextureBase (indata, inwidth, inheight, outdata, outwidth, outheight);
 }
 
 

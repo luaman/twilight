@@ -338,6 +338,7 @@ Cmd_StuffCmds_f (void)
 	size_t		s, i;
 	int			j;
 	char		*text, *build, c;
+	qboolean	done;
 
 	// build the combined string to parse from
 	s = 0;
@@ -373,8 +374,21 @@ Cmd_StuffCmds_f (void)
 		{
 			i++;
 
-			for (j = i; (text[j] != '+') && (text[j] != '-') && (text[j] != 0);
-				 j++);
+			j = i;
+			done = false;
+			while (text[j] && !done) {
+				if (text[j - 1] == ' ')
+					switch (text[j]) {
+						case '+':
+						case '-':
+							done = true;
+							break;
+						default:
+							j++;
+					}
+				else
+					j++;
+			}
 
 			c = text[j];
 			text[j] = 0;

@@ -59,6 +59,7 @@ static const char rcsid[] =
 #include "teamplay.h"
 #include "surface.h"
 #include "common.h"
+#include "cpu.h"
 
 void        Cmd_ForwardToServer (void);
 
@@ -1496,6 +1497,7 @@ Host_Init (void)
 	W_LoadWadFile ("gfx.wad");
 	Key_Init ();					// setup keysym structures, add related commands
 	Con_Init ();					// setup and initialize console, add related commands
+	CPU_Init ();
 	M_Init ();						// setup menu, add related commands
 
 	Com_Printf ("Exe: "__TIME__" "__DATE__"\n");

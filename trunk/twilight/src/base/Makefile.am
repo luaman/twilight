@@ -11,6 +11,6 @@ INCLUDES = -I$(top_srcdir)/include
 lib_LIBRARIES=libtwilight_base.a
 
 libtwilight_base_a_SOURCES= \
-	buildnum.c cmd.c collision.c crc.c cvar.c mathlib.c matrixlib.c \
+	buildnum.c cpu.c cmd.c collision.c crc.c cvar.c mathlib.c matrixlib.c \
 	mdfour.c model.c mod_brush.c parm.c strlib.c wad.c zone.c locs.c
 
