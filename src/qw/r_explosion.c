@@ -18,6 +18,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+static const char rcsid[] =
+    "$Id$";
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#else
+# ifdef _WIN32
+#  include <win32conf.h>
+# endif
+#endif
+
 #include <math.h>
 #include "quakedef.h"
 #include "common.h"
