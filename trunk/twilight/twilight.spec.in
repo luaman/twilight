@@ -11,15 +11,18 @@ URL:		http://twilight.sf.net/
 Source:		%{name}-%{version}.tar.gz
 Group:		Amusements/Games
 Copyright:	GPL
-BuildRoot:	/var/tmp/%{name}-%{version}-root
+BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 Requires:	SDL >= 1.2.0
 BuildPrereq:	SDL-devel >= 1.2.0
-Summary:	A 3D gaming engine based Quake using OpenGL and SDL.
+Summary:	First person 3D game - classic version
 
 %description
-Project Twilight is a 3D gaming engine based Quake using OpenGL and SDL.
-It's meant to be faster and overall simpler than other projects have been
-without sacrifing the features we've come to expect from 3D games.
+Project Twilight is a game project based on the Quake(R) engine source
+code using OpenGL.  It is greatly enhanced over Id Software's original,
+but is in no way supported by Id Software, Inc.
+This package contains the classic version Project Twilight, which is
+fully compatible with Id software's last official versions of Quake(R)
+and QuakeWorld(R).
 
 %prep
 %setup -q
@@ -37,11 +40,16 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-, root, root)
-%doc AUTHORS ChangeLog COPYING COPYING.BSD INSTALL NEWS README THANKS
+%doc AUTHORS COPYING COPYING.BSD NEWS README THANKS TODO
 %{_prefix}/bin/twilight-nq
 %{_prefix}/bin/twilight-qw
 %{_prefix}/bin/twilight-qwsv
 
 %changelog
+* Tue Oct  2 2001 Mathieu Olivier <molivier@users.sourceforge.net>
+- Changed summary and description to the ones used in the Debian package.
+- Doc: added TODO, removed ChangeLog and INSTALL
+- BuildRoot now uses "_tmppath"
+
 * Thu Sep 13 2001 Mathieu Olivier <molivier@users.sourceforge.net>
 - Creation
