@@ -5,3 +5,8 @@ Makefile.in
 twilight-qw
 twilight-qwsv
 .deps
+Debug
+Release
+*.ncb
+*.opt
+*.plg

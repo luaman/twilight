@@ -3,3 +3,8 @@ Makefile.in
 *.o
 .*.swp
 .deps
+Release
+Debug
+*.ncb
+*.opt
+*.plg

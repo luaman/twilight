@@ -2,3 +2,8 @@ Makefile
 Makefile.in
 .*.swp
 .deps
+Debug
+Release
+*.ncb
+*.opt
+*.plg
