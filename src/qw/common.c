@@ -856,7 +856,7 @@ COM_DefaultExtension
 ==================
 */
 void
-COM_DefaultExtension (char *path, char *extension)
+COM_DefaultExtension (char *path, char *extension, size_t len)
 {
 	char	   *src;
 
@@ -873,7 +873,7 @@ COM_DefaultExtension (char *path, char *extension)
 		src--;
 	}
 
-	strcat (path, extension);
+	strlcat (path, extension, len);
 }
 
 //============================================================================

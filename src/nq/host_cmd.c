@@ -473,7 +473,7 @@ Host_Savegame_f (void)
 	}
 
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
-	COM_DefaultExtension (name, ".sav");
+	COM_DefaultExtension (name, ".sav", sizeof (name));
 
 	Com_Printf ("Saving game to %s...\n", name);
 	f = fopen (name, "w");
@@ -539,7 +539,7 @@ Host_Loadgame_f (void)
 	ccls.demonum = -1;					// stop demo loop in case this fails
 
 	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
-	COM_DefaultExtension (name, ".sav");
+	COM_DefaultExtension (name, ".sav", sizeof (name));
 
 	// we can't call SCR_BeginLoadingPlaque, because too much stack space has
 	// been used.  The menu calls it before stuffing loadgame command

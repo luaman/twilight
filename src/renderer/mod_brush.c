@@ -251,7 +251,7 @@ Mod_LoadLighting (lump_t *l, model_t *mod)
 
 	strlcpy_s (litfilename, mod->name);
 	COM_StripExtension(litfilename, litfilename);
-	COM_DefaultExtension(litfilename, ".lit");
+	COM_DefaultExtension(litfilename, ".lit", sizeof(litfilename));
 	data = (Uint8 *) COM_LoadZoneFile (litfilename, false, mod->zone);
 
 	if (data)

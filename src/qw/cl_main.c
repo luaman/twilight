@@ -1283,7 +1283,7 @@ Host_WriteConfiguration (char *name)
 		char fname[MAX_QPATH] = { 0 };
 
 		snprintf (fname, sizeof (fname), "%s/%s", com_gamedir, name);
-		COM_DefaultExtension (fname, ".cfg");
+		COM_DefaultExtension (fname, ".cfg", sizeof (fname));
 
 		f = fopen (fname, "wt");
 		if (!f) {
