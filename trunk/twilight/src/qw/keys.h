@@ -122,7 +122,7 @@ extern int	key_count;				// incremented every key event
 extern int	key_lastpress;
 
 extern char chat_buffer[];
-extern int  chat_bufferlen;
+extern unsigned chat_bufferlen;
 extern qboolean chat_team;
 
 void        Key_Event (int key, qboolean down);

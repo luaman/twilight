@@ -409,9 +409,9 @@ Mod_LoadTexinfo (lump_t *l)
 {
 	texinfo_t  *in;
 	mtexinfo_t *out;
-	int         i, j, count;
-	int         miptex;
-	float       len1, len2;
+	int			i, j, count;
+	unsigned	miptex;
+	float		len1, len2;
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
@@ -886,13 +886,13 @@ Mod_LoadAllSkins
 void       *
 Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 {
-	int         i, j, k;
-	char        name[32];
-	int         s;
-	Uint8      *skin;
-	daliasskingroup_t *pinskingroup;
-	int         groupskins;
-	daliasskininterval_t *pinskinintervals;
+	int						i, j, k;
+	char					name[32];
+	unsigned				s;
+	Uint8				   *skin;
+	daliasskingroup_t	   *pinskingroup;
+	int						groupskins;
+	daliasskininterval_t   *pinskinintervals;
 
 	skin = (Uint8 *) (pskintype + 1);
 

@@ -479,12 +479,12 @@ Draws the last few lines of output transparently over the game top
 void
 Con_DrawNotify (void)
 {
-	int         v;
-	char       *text;
-	int         i;
-	float       time;
-	char       *s;
-	int         skip;
+	int			v;
+	char	   *text;
+	int			i;
+	float		time;
+	char	   *s;
+	unsigned	skip;
 
 	v = 0;
 	for (i = con->current - NUM_CON_TIMES + 1; i <= con->current; i++) {
@@ -544,11 +544,12 @@ Draws the console with the solid background
 void
 Con_DrawConsole (int lines)
 {
-	int         i, j, x, y, n;
-	int         rows;
-	char       *text;
-	int         row;
-	char        dlbar[1024];
+	unsigned	i;
+	int			j, x, y, n;
+	unsigned	rows;
+	char	   *text;
+	int			row;
+	char		dlbar[1024];
 
 	if (lines <= 0)
 		return;

@@ -48,7 +48,7 @@ typedef struct {
 	unsigned    conwidth;
 	unsigned    conheight;
 
-	int			bpp;
+	unsigned	bpp;
 } viddef_t;
 
 extern viddef_t vid;					// global video state

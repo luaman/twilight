@@ -1250,8 +1250,8 @@ R_SetupGL
 void
 R_SetupGL (void)
 {
-	float       screenaspect;
-	int         x, x2, y2, y, w, h;
+	float		screenaspect;
+	unsigned	x, x2, y2, y, w, h;
 
 	// 
 	// set up viewpoint

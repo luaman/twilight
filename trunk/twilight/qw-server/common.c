@@ -526,8 +526,9 @@ MSG_ReadFloat (void)
 char       *
 MSG_ReadString (void)
 {
-	static char string[2048];
-	int         l, c;
+	static char		string[2048];
+	int				c;
+	unsigned		l;
 
 	l = 0;
 	do {
@@ -546,8 +547,9 @@ MSG_ReadString (void)
 char       *
 MSG_ReadStringLine (void)
 {
-	static char string[2048];
-	int         l, c;
+	static char		string[2048];
+	int				c;
+	unsigned		l;
 
 	l = 0;
 	do {
@@ -1112,9 +1114,9 @@ needed.  This is for the convenience of developers using ISDN from home.
 void
 COM_CopyFile (char *netpath, char *cachepath)
 {
-	FILE       *in, *out;
-	int         remaining, count;
-	char        buf[4096];
+	FILE	   *in, *out;
+	unsigned	remaining, count;
+	char		buf[4096];
 
 	remaining = COM_FileOpenRead (netpath, &in);
 	// create directories up to the cache file
@@ -1655,7 +1657,7 @@ Info_RemovePrefixedKeys (char *start, char prefix)
 
 
 void
-Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
+Info_SetValueForStarKey (char *s, char *key, char *value, unsigned maxsize)
 {
 	char        new[1024], *v;
 	int         c;
@@ -1690,7 +1692,7 @@ Info_SetValueForStarKey (char *s, char *key, char *value, int maxsize)
 
 	snprintf (new, sizeof (new), "\\%s\\%s", key, value);
 
-	if ((int) (strlen (new) + strlen (s)) > maxsize) {
+	if ((strlen (new) + strlen (s)) > maxsize) {
 		Con_Printf ("Info string length exceeded\n");
 		return;
 	}
