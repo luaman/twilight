@@ -55,6 +55,7 @@ key up events are sent even if in console mode
 char        key_lines[32][MAX_INPUTLINE];
 int         key_linepos;
 int         shift_down = false;
+int			ctrl_down = false;
 int         key_lastpress;
 
 int         edit_line = 0;
@@ -197,6 +198,14 @@ CheckForCommand (void)
 	return true;
 }
 
+static void
+Key_ClearEditLine (int edit_line)
+{
+	memset (key_lines[edit_line], '\0', MAX_INPUTLINE);
+	key_lines[edit_line][0] = ']';
+	key_linepos = 1;
+}
+
 /*
 ====================
 Key_Console
@@ -227,9 +236,7 @@ Key_Console (int key)
 		Con_Printf ("%s\n", key_lines[edit_line]);
 		edit_line = (edit_line + 1) & 31;
 		history_line = edit_line;
-		key_lines[edit_line][0] = ']';
-		key_lines[edit_line][1] = '\0';
-		key_linepos = 1;
+		Key_ClearEditLine (edit_line);
 		if (cls.state == ca_disconnected)
 			// force an update, because the command may take some time
 			SCR_UpdateScreen ();
@@ -317,14 +324,41 @@ Key_Console (int key)
 
 	if (key == K_HOME)
 	{
-		con->display = con->current - con_totallines + 10;
+		if (key_linepos == 1 && key_lines[edit_line][1] == '\0')
+			con->display = con->current - con_totallines + 10;
+		else
+			key_linepos = 1;
 		return;
 	}
 
 	if (key == K_END)
 	{
-		con->display = con->current;
+		if (key_linepos == 1 && key_lines[edit_line][1] == '\0')
+			con->display = con->current;
+		else
+			key_linepos = strlen (key_lines[edit_line]);
 		return;
+	}
+
+	if (ctrl_down)
+	{
+		if (key == 'u' || key == 'U')
+		{
+			Key_ClearEditLine (edit_line);
+			return;
+		}
+
+		if (key == 'a' || key == 'A')
+		{
+			key_linepos = 1;
+			return;
+		}
+
+		if (key == 'e' || key == 'E')
+		{
+			key_linepos = strlen (key_lines[edit_line]);
+			return;
+		}
 	}
 
 	// There was some clipboard stuff here, but it was not portable
@@ -343,9 +377,6 @@ Key_Console (int key)
 		for (; i >= key_linepos; i--)
 			key_lines[edit_line][i + 1] = key_lines[edit_line][i];
 
-		// XXX
-//		if (!key_lines[edit_line][key_linepos])
-//			key_lines[edit_line][key_linepos + 1] = '\0';
 		key_lines[edit_line][key_linepos++] = key;
 	}
 
@@ -703,6 +734,9 @@ Key_Event (int key, qboolean down)
 
 	if (key == K_SHIFT)
 		shift_down = down;
+
+	if (key == K_CTRL)
+		ctrl_down = down;
 
 	//
 	// handle escape specially, so the user can never unbind it
