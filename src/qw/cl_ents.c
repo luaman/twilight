@@ -47,7 +47,6 @@ static const char rcsid[] =
 #include "sys.h"
 
 extern cvar_t cl_predict_players;
-extern cvar_t cl_predict_players2;
 extern cvar_t cl_solid_players;
 
 extern int  cl_spikeindex, cl_playerindex, cl_flagindex;
@@ -927,7 +926,7 @@ CL_LinkPlayers (void)
 		// only predict half the move to minimize overruns
 		msec = 500 * (playertime - state->state_time);
 		if (msec <= 0
-			|| (!cl_predict_players.value && !cl_predict_players2.value)) {
+			|| (!cl_predict_players.value)) {
 			VectorCopy (state->origin, ent->origin);
 //Con_DPrintf ("nopredict\n");
 		} else {
@@ -1045,7 +1044,7 @@ CL_SetUpPlayerPrediction (qboolean dopred)
 			// only predict half the move to minimize overruns
 			msec = 500 * (playertime - state->state_time);
 			if (msec <= 0 ||
-				(!cl_predict_players.value && !cl_predict_players2.value) ||
+				(!cl_predict_players.value) ||
 				!dopred) {
 				VectorCopy (state->origin, pplayer->origin);
 				// Con_DPrintf ("nopredict\n");
