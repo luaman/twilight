@@ -186,7 +186,7 @@ Sys_Init (void)
 {
 	sys_extrasleep = Cvar_Get ("sys_extrasleep", "0", CVAR_NONE,
 			&Sys_ESCallback);
-	sys_asciionly = Cvar_Get ("sys_asciionly", "0", CVAR_ARCHIVE, NULL);
+	sys_asciionly = Cvar_Get ("sys_asciionly", "1", CVAR_ARCHIVE, NULL);
 
 	Math_Init ();
 

@@ -189,7 +189,7 @@ Sys_Init (void)
 	qwclsemaphore = CreateSemaphore (NULL, 0, 1, "qwcl");
 #endif
 
-	sys_asciionly = Cvar_Get ("sys_asciionly", "0", CVAR_ARCHIVE, NULL);
+	sys_asciionly = Cvar_Get ("sys_asciionly", "1", CVAR_ARCHIVE, NULL);
 
 	Math_Init ();
 }
