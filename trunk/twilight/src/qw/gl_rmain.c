@@ -1197,8 +1197,6 @@ R_RenderScene (void)
 	GL_DisableMultitexture ();
 
 	R_RenderDlights ();
-
-	R_DrawParticles ();
 }
 
 
@@ -1355,6 +1353,7 @@ R_RenderView (void)
 	R_RenderScene ();
 	R_DrawViewModel ();
 	R_DrawWaterSurfaces ();
+	R_DrawParticles ();
 
 	// render mirror view
 //  R_Mirror ();

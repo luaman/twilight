@@ -649,13 +649,14 @@ R_DrawParticles (void)
 	float       time1;
 	float       dvel;
 	float       frametime;
-
 	vec3_t      up, right;
 	float       scale;
 
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
+
 	qglEnable (GL_BLEND);
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglDepthMask (GL_FALSE);
+	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglBegin (GL_TRIANGLES);
 
 	VectorScale (vup, 1.5, up);
@@ -770,6 +771,8 @@ R_DrawParticles (void)
 	}
 
 	qglEnd ();
+	qglDepthMask (GL_TRUE);
 	qglDisable (GL_BLEND);
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglColor3f (1, 1, 1);
 }

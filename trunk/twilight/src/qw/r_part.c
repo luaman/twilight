@@ -445,13 +445,9 @@ R_DrawParticles (void)
 	unsigned char theAlpha;
 	vec3_t      up, right;
 	float       scale;
-	qboolean    alphaTestEnabled;
 
 	qglBindTexture (GL_TEXTURE_2D, particletexture);
-	alphaTestEnabled = qglIsEnabled (GL_ALPHA_TEST);
 
-	if (alphaTestEnabled)
-		qglDisable (GL_ALPHA_TEST);
 	qglEnable (GL_BLEND);
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglBegin (GL_TRIANGLES);
@@ -575,9 +571,8 @@ R_DrawParticles (void)
 		}
 	}
 
+	qglColor3f (1, 1, 1);
 	qglEnd ();
 	qglDisable (GL_BLEND);
-	if (alphaTestEnabled)
-		qglEnable (GL_ALPHA_TEST);
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
