@@ -1,11 +1,12 @@
 Project Twilight todo list
 --------------------------
 
-Stuff /required/ for 0.2.0:
+Really important stuff:
   - Menu: (Listed in order of priority.)
     * Get the renderer side of the menu code to handle menus larger then
       the screen.
     * Get the graphics options cleaned up. (Add grey tweaking support!)
+    * Add the stuff related to the vid restarting.
     * Key binding menu support.
     * Saved games support.
     * Server browser support.
@@ -39,7 +40,6 @@ Bugs we know about:
 
 Stuff that isn't needed for 0.2, but would be nice:
 
-  - Being able to restart the renderer would be useful.
   - clean up the menus, make sure all cvar graphics options
     are listed on the graphics options menu in both nq/qw
   - clean up the Cmd system
