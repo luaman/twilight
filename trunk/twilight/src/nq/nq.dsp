@@ -380,10 +380,6 @@ SOURCE=.\gl_model.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\gl_warp_sin.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\glquake.h
 # End Source File
 # Begin Source File

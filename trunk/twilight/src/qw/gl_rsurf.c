@@ -91,14 +91,14 @@ R_RenderFullbrights (void)
 {
 	int         i;
 	glpoly_t   *p;
-	float			depthdelta;
+//	float			depthdelta;
 
 	if (!drawfullbrights || !gl_fb_bmodels->value)
 		return;
 
 	qglDepthMask (GL_FALSE);	// don't bother writing Z
 
-	depthdelta = -1.0/8192;
+//	depthdelta = -1.0/8192;
 
 	qglEnable (GL_BLEND);
 
@@ -1233,8 +1233,6 @@ R_RecursiveWorldNode (mnode_t *node)
 					continue;
 
 				// don't backface underwater surfaces, because they warp
-//              if ( !(surf->flags & SURF_UNDERWATER) && ( (dot < 0) ^ !!(surf->flags & SURF_PLANEBACK)) )
-//                  continue;       // wrong side
 				if (!
 					(((r_viewleaf->contents == CONTENTS_EMPTY
 					   && (surf->flags & SURF_UNDERWATER))

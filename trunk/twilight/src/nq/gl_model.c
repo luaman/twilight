@@ -61,6 +61,8 @@ cvar_t     *gl_subdivide_size;
 
 extern int	lightmap_bytes;
 
+qboolean    isnotmap;
+
 /*
 ===============
 Mod_Init_Cvars
@@ -1010,6 +1012,11 @@ Mod_LoadLeafs (lump_t *l)
 			for (j = 0; j < out->nummarksurfaces; j++)
 				out->firstmarksurface[j]->flags |= SURF_UNDERWATER;
 		}
+
+		if (isnotmap) {
+			for (j = 0; j < out->nummarksurfaces; j++)
+				out->firstmarksurface[j]->flags |= SURF_DONTWARP;
+		}
 	}
 }
 
@@ -1224,6 +1231,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 	int         i, j;
 	dheader_t  *header;
 	dmodel_t   *bm;
+	char        name[10];
 
 	loadmodel->type = mod_brush;
 
@@ -1285,10 +1293,10 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 		mod->numleafs = bm->visleafs;
 
-		if (i < mod->numsubmodels - 1) {	// duplicate the basic information
-			char        name[10];
-
-			snprintf (name, sizeof (name), "*%i", i + 1);
+		if (!isnotmap && (i < mod->numsubmodels - 1)) 
+		{	
+			// duplicate the basic information
+			strncpy (name, va("*%i", i + 1), sizeof(name));
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);

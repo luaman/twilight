@@ -97,6 +97,7 @@ typedef struct texture_s {
 #define SURF_DRAWTILED		0x20
 #define SURF_DRAWBACKGROUND	0x40
 #define SURF_UNDERWATER		0x80
+#define SURF_DONTWARP		0x100
 
 typedef struct {
 	unsigned short v[2];
