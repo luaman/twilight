@@ -31,7 +31,7 @@
 # include "config.h"
 #else
 # ifdef __WIN32
-#  include "win32conf.h"
+#  include "win32config.h"
 # endif
 #endif
 
