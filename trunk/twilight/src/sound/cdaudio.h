@@ -36,5 +36,5 @@ void		CDAudio_Resume (void);
 void		CDAudio_Shutdown (void);
 void		CDAudio_Update (void);
 
-#endif // __CDAUDIO_H
+#endif /* __CDAUDIO_H */
 
