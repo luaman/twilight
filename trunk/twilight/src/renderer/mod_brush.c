@@ -80,8 +80,6 @@ Mod_LoadTextures (lump_t *l, model_t *mod)
 	else
 		map_name = base_name;
 
-	Com_Printf ("Map: %s\n", map_name);
-
 	m = (dmiptexlump_t *) (mod_base + l->fileofs);
 
 	m->nummiptex = LittleLong (m->nummiptex);
