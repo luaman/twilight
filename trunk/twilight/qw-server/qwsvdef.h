@@ -35,8 +35,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <setjmp.h>
 #include <ctype.h>
 
+// LordHavoc: added the _MSC_VER and win32config.h fallback
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
+#elif _MSC_VER
+#include "win32config.h"
 #endif
 
 #include "bothdefs.h"
@@ -66,9 +69,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // available for the program to use
 
 typedef struct {
-	char       *basedir;
-	char	   *sharedir;
-	char       *cachedir;				// for development over ISDN lines
 	int         argc;
 	char      **argv;
 	void       *membase;
