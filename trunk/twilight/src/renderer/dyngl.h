@@ -96,12 +96,12 @@
  *                      with the alternate function. If the function is a
  *                      NEED then errfunc will be called.
  */
-SDL_bool DynGL_LoadLibrary (char *name);
+SDL_bool DynGL_LoadLibrary (const char *name);
 void DynGL_CloseLibrary (void);
 SDL_bool DynGL_GetFunctions (void (*errfunc)(const char *fmt, ...));
-SDL_bool DynGL_BadFunction (const char *func, void (*errfunc)(char *fmt, ...));
-SDL_bool DynGL_HasExtension (char *ext);
-void DynGL_BadExtension (char *ext);
+SDL_bool DynGL_BadFunction (const char *func, void (*errfunc)(const char *fmt, ...));
+SDL_bool DynGL_HasExtension (const char *ext);
+void DynGL_BadExtension (const char *ext);
 
 /*
  * Types

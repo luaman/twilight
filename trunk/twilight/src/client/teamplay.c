@@ -52,8 +52,9 @@ Team_ParseSay (const char *s)
 {
 	static char			buf[1024];
 	int					bracket;
-	char				chr, *t1, t2[128], t3[128];
-	location_t			*location;
+	char				chr, t2[128], t3[128];
+	const char			*t1;
+	const location_t	*location;
 
 	if (!cl_parsesay->ivalue || !strchr(s, '%'))
 		return s;
@@ -226,7 +227,7 @@ Team_NewMap (void)
 static void
 Team_loc (void)
 {
-	char		*desc = NULL;
+	const char	*desc = NULL;
 	location_t	*loc;
 
 	if (Cmd_Argc () == 1) {

@@ -498,9 +498,9 @@ Returns false if the client should be killed
 static qboolean
 SV_ReadClientMessage (void)
 {
-	int		ret;
-	int		cmd;
-	char	*s;
+	int			ret;
+	int			cmd;
+	const char	*s;
 
 	do {
 	  nextmsg:

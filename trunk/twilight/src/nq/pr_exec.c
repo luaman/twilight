@@ -348,7 +348,7 @@ PR_LeaveFunction (void)
 #define OPB ((eval_t *)&pr_globals[(unsigned short int) st->b])
 #define OPC ((eval_t *)&pr_globals[(unsigned short int) st->c])
 void
-PR_ExecuteProgram (func_t fnum, char *errormessage)
+PR_ExecuteProgram (func_t fnum, const char *errormessage)
 {
 	dstatement_t	*st;
 	dfunction_t		*f, *newf;

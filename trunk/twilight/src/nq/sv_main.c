@@ -880,7 +880,7 @@ SV_ModelIndex
 ================
 */
 int
-SV_ModelIndex (char *name)
+SV_ModelIndex (const char *name)
 {
 	int         i;
 
@@ -1008,7 +1008,7 @@ This is called at the start of each level
 ================
 */
 void
-SV_SpawnServer (char *server)
+SV_SpawnServer (const char *server)
 {
 	edict_t		*ent;
 	Uint32		i;

@@ -69,7 +69,7 @@ loc_new_block ()
 }
 
 void
-loc_new (vec3_t where, char *name)
+loc_new (vec3_t where, const char *name)
 {
 	location_t	*loc;
 
@@ -133,7 +133,7 @@ loc_delete (location_t *del)
 }
 
 static void
-loc_parse (char *line)
+loc_parse (const char *line)
 {
 	int		x, y, z, i, ret;
 	vec3_t	loc;
@@ -158,7 +158,7 @@ loc_parse (char *line)
 }
 
 void
-loc_load (char *file)
+loc_load (const char *file)
 {
 	char	*orig, *data, *p;
 
@@ -178,7 +178,7 @@ loc_load (char *file)
 }
 
 char *
-loc_locfile (char *worldname)
+loc_locfile (const char *worldname)
 {
 	char	*name, *t;
 
@@ -193,7 +193,7 @@ loc_locfile (char *worldname)
 }
 
 void
-loc_newmap (char *worldname)
+loc_newmap (const char *worldname)
 {
 	char	*name;
 
@@ -204,7 +204,7 @@ loc_newmap (char *worldname)
 }
 
 void
-loc_write (char *worldname)
+loc_write (const char *worldname)
 {
 	char	*name;
 	FILE	*f;

@@ -59,9 +59,9 @@ void NET_OpenSocket (netsrc_t sock, int port);
 
 qboolean NET_CompareAdr (netadr_t a, netadr_t b);
 qboolean NET_CompareBaseAdr (netadr_t a, netadr_t b);
-char *NET_AdrToString (netadr_t a);
-char *NET_BaseAdrToString (netadr_t a);
-qboolean NET_StringToAdr (char *s, netadr_t *a);
+const char *NET_AdrToString (netadr_t a);
+const char *NET_BaseAdrToString (netadr_t a);
+qboolean NET_StringToAdr (const char *s, netadr_t *a);
 
 #define NET_IsLocalAddress(adr)	(NET_CompareAdr(adr,net_local_adr))
 
@@ -124,7 +124,7 @@ extern cvar_t *qport;
 
 void Netchan_Init_Cvars(void);
 void Netchan_Init(void);
-void Netchan_OutOfBandPrint(netsrc_t sock, netadr_t adr, char *format, ...);
+void Netchan_OutOfBandPrint(netsrc_t sock, netadr_t adr, const char *format, ...);
 void Netchan_Setup(netsrc_t sock, netchan_t *chan, netadr_t adr, int qport);
 qboolean Netchan_CanPacket(netchan_t *chan);
 qboolean Netchan_CanReliable(netchan_t *chan);

@@ -111,7 +111,7 @@ Host_EndGame
 ================
 */
 void
-Host_EndGame (char *message, ...)
+Host_EndGame (const char *message, ...)
 {
 	va_list     argptr;
 	char        string[1024];
@@ -143,7 +143,7 @@ This shuts down both the client and server
 ================
 */
 void
-Host_Error (char *error, ...)
+Host_Error (const char *error, ...)
 {
 	va_list     argptr;
 	char        string[1024];
@@ -277,7 +277,7 @@ Writes key bindings and archived cvars to file
 ===============
 */
 void
-Host_WriteConfiguration (char *name)
+Host_WriteConfiguration (const char *name)
 {
 	FILE       *f;
 
@@ -334,7 +334,7 @@ Sends text to all active clients
 =================
 */
 void
-SV_BroadcastPrintf (char *fmt, ...)
+SV_BroadcastPrintf (const char *fmt, ...)
 {
 	va_list		argptr;
 	char		string[1024];
@@ -359,7 +359,7 @@ Send text over to the client to be executed
 =================
 */
 void
-Host_ClientCommands (char *fmt, ...)
+Host_ClientCommands (const char *fmt, ...)
 {
 	va_list     argptr;
 	char        string[1024];

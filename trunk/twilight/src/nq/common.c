@@ -130,7 +130,7 @@ InsertLinkAfter (link_t *l, link_t *after)
 
 
 int
-Q_atoi (char *str)
+Q_atoi (const char *str)
 {
 	int         val;
 	int         sign;
@@ -182,7 +182,7 @@ Q_atoi (char *str)
 
 
 float
-Q_atof (char *str)
+Q_atof (const char *str)
 {
 	double      val;
 	int         sign;
@@ -327,7 +327,7 @@ MSG_WriteFloat (sizebuf_t *sb, float f)
 }
 
 void
-MSG_WriteString (sizebuf_t *sb, char *s)
+MSG_WriteString (sizebuf_t *sb, const char *s)
 {
 	if (!s)
 		SZ_Write (sb, "", 1);
@@ -621,10 +621,10 @@ SZ_Print (sizebuf_t *buf, const char *data)
 COM_SkipPath
 ============
 */
-char       *
-COM_SkipPath (char *pathname)
+const char       *
+COM_SkipPath (const char *pathname)
 {
-	char       *last;
+	const char       *last;
 
 	last = pathname;
 	while (*pathname) {
@@ -641,7 +641,7 @@ COM_StripExtension
 ============
 */
 void
-COM_StripExtension (char *in, char *out)
+COM_StripExtension (const char *in, char *out)
 {
 	char *last = NULL;
 
@@ -662,8 +662,8 @@ COM_StripExtension (char *in, char *out)
 COM_FileExtension
 ============
 */
-char       *
-COM_FileExtension (char *in)
+const char       *
+COM_FileExtension (const char *in)
 {
 	static char exten[8];
 	int         i;
@@ -686,7 +686,7 @@ COM_DefaultExtension
 ==================
 */
 void
-COM_DefaultExtension (char *path, char *extension, size_t len)
+COM_DefaultExtension (char *path, const char *extension, size_t len)
 {
 	char       *src;
 
@@ -712,13 +712,11 @@ char        com_token[1024];
 
 /*
 ==============
-COM_Parse
-
 Parse a token out of a string
 ==============
 */
-char       *
-COM_Parse (char *data)
+const char       *
+COM_Parse (const char *data)
 {
 	int         c;
 	int         len;
@@ -776,7 +774,7 @@ COM_CheckFile
 ================
 */
 static qboolean
-COM_CheckFile (char *fname)
+COM_CheckFile (const char *fname)
 {
 	FILE *h;
 
@@ -938,7 +936,7 @@ COM_filelength (FILE * f)
 }
 
 static int
-COM_FileOpenRead (char *path, FILE ** hndl)
+COM_FileOpenRead (const char *path, FILE ** hndl)
 {
 	FILE	   *f;
 
@@ -980,7 +978,7 @@ int         file_from_pak;				// global indicating file came from
 										// pack file ZOID
 
 int
-COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
+COM_FOpenFile (const char *filename, FILE ** file, qboolean complain)
 {
 	searchpath_t	*search;
 	char        	netpath[MAX_OSPATH];
@@ -1069,7 +1067,7 @@ Always appends a 0 byte to the loaded data.
 ============
 */
 static Uint8 *
-COM_LoadFile (char *path, qboolean complain, int type, memzone_t *zone)
+COM_LoadFile (const char *path, qboolean complain, int type, memzone_t *zone)
 {
 	FILE		*h;
 	Uint8		*buf = NULL;
@@ -1109,19 +1107,19 @@ COM_LoadFile (char *path, qboolean complain, int type, memzone_t *zone)
 }
 
 Uint8 *
-COM_LoadZoneFile (char *path, qboolean complain, memzone_t *zone)
+COM_LoadZoneFile (const char *path, qboolean complain, memzone_t *zone)
 {
 	return COM_LoadFile (path, complain, 0, zone);
 }
 
 Uint8 *
-COM_LoadTempFile (char *path, qboolean complain)
+COM_LoadTempFile (const char *path, qboolean complain)
 {
 	return COM_LoadFile (path, complain, 1, NULL);
 }
 
 Uint8 *
-COM_LoadNamedFile (char *path, qboolean complain)
+COM_LoadNamedFile (const char *path, qboolean complain)
 {
 	return COM_LoadFile (path, complain, 2, NULL);
 }
@@ -1137,7 +1135,7 @@ of the list so they override previous pack files.
 =================
 */
 static pack_t     *
-COM_LoadPackFile (char *packfile)
+COM_LoadPackFile (const char *packfile)
 {
 	dpackheader_t header;
 	int         i;
@@ -1194,7 +1192,7 @@ then loads and adds pak1.pak pak2.pak ...
 ================
 */
 static void
-COM_AddDirectory (char *dir)
+COM_AddDirectory (const char *dir)
 {
 	int         i;
 	searchpath_t *search;
@@ -1236,7 +1234,7 @@ Wrapper for COM_AddDirectory
 ================
 */
 static void
-COM_AddGameDirectory (char *dir)
+COM_AddGameDirectory (const char *dir)
 {
 	char		buf[1024];
 

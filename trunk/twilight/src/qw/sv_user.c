@@ -648,9 +648,14 @@ SV_BeginDownload_f
 static void
 SV_BeginDownload_f (void)
 {
-	char			*name, *p;
+	char	*name, *p;
 
-	name = Cmd_Argv (1);
+	name = Zstrdup(tempzone, Cmd_Argv (1));
+
+	// lowercase name
+	for (p = name; *p; p++)
+		*p = tolower(*p);
+
 	// hacked by zoid to allow more conrol over download
 	// first off, no .. or global allow check
 	if (strstr (name, "..") || !allow_download->ivalue
@@ -671,6 +676,7 @@ SV_BeginDownload_f (void)
 		ClientReliableWrite_Begin (host_client, svc_download, 4);
 		ClientReliableWrite_Short (host_client, -1);
 		ClientReliableWrite_Byte (host_client, 0);
+		Z_Free (name);
 		return;
 	}
 
@@ -678,10 +684,6 @@ SV_BeginDownload_f (void)
 		fclose (host_client->download);
 		host_client->download = NULL;
 	}
-
-	// lowercase name (needed for casesen file systems)
-	for (p = name; *p; p++)
-		*p = (char) tolower (*p);
 
 	host_client->downloadsize = COM_FOpenFile (name, &host_client->download,
 			true);
@@ -700,11 +702,13 @@ SV_BeginDownload_f (void)
 		ClientReliableWrite_Begin (host_client, svc_download, 4);
 		ClientReliableWrite_Short (host_client, -1);
 		ClientReliableWrite_Byte (host_client, 0);
+		Z_Free (name);
 		return;
 	}
 
 	SV_NextDownload_f ();
 	Sys_Printf ("Downloading %s to %s\n", name, host_client->name);
+	Z_Free (name);
 }
 
 //=============================================================================
@@ -719,7 +723,7 @@ SV_Say (qboolean team)
 {
 	client_t   *client;
 	int         j, tmp;
-	char       *p;
+	const char	*p;
 	char        text[2048];
 	char        t1[32], *t2;
 
@@ -771,10 +775,11 @@ SV_Say (qboolean team)
 	if (*p == '"') 
 	{
 		p++;
-		p[strlen (p) - 1] = 0;
-	}
+		strlcat_s (text, p);
+		text[strlen (text) - 1] = 0;
+	} else
+		strlcat_s (text, p);
 
-	strlcat_s (text, p);
 	strlcat_s (text, "\n");
 
 	Sys_Printf ("%s", text);

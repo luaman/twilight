@@ -315,12 +315,6 @@ void CL_ClearState(void);
 void CL_Disconnect(void);
 void CL_NextDemo(void);
 void Cmd_ForwardToServer(void);
-void Host_EndGame(char *message, ...);
-void Host_Error(char *error, ...);
-void Host_WriteConfiguration(char *name);
-void Host_Frame(double time);
-void Host_Init(void);
-void Host_Shutdown(void);
 void CL_UpdatePings(void);
 void CL_Init (void);
 

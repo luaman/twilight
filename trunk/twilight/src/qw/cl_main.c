@@ -287,7 +287,7 @@ CL_Connect_f
 static void
 CL_Connect_f (void)
 {
-	char       *server;
+	const char *server;
 
 	if (Cmd_Argc () != 2) {
 		Com_Printf ("usage: connect <server>\n");
@@ -592,7 +592,7 @@ CL_FullInfo_f (void)
 	char        key[512];
 	char        value[512];
 	char       *o;
-	char       *s;
+	const char	*s;
 
 	if (Cmd_Argc () != 2) {
 		Com_Printf ("fullinfo <complete info string>\n");
@@ -672,7 +672,8 @@ CL_Packet_f (void)
 {
 	char        send[2048];
 	int         i, l;
-	char       *in, *out;
+	const char	*in;
+	char		*out;
 	netadr_t    adr;
 
 	if (Cmd_Argc () != 3) {
@@ -1217,7 +1218,7 @@ Call this to drop to a console without exiting the qwcl
 ================
 */
 void
-Host_EndGame (char *message, ...)
+Host_EndGame (const char *message, ...)
 {
 	va_list     argptr;
 	char        string[1024];
@@ -1240,7 +1241,7 @@ This shuts down the client and exits qwcl
 ================
 */
 void
-Host_Error (char *error, ...)
+Host_Error (const char *error, ...)
 {
 	va_list     argptr;
 	char        string[1024];
@@ -1273,7 +1274,7 @@ Writes key bindings and archived cvars to file
 ===============
 */
 void
-Host_WriteConfiguration (char *name)
+Host_WriteConfiguration (const char *name)
 {
 	FILE       *f;
 

@@ -348,7 +348,7 @@ extern int fp_persecond;
 extern int fp_secondsdead;
 extern char fp_msg[255];
 
-void SV_SendServerInfoChange(char *key, char *value);
+void SV_SendServerInfoChange(const char *key, const char *value);
 void SV_InitOperatorCommands(void);
 
 
@@ -506,19 +506,6 @@ extern char logname[128];
 extern double curtime;
 extern qboolean do_stdin;
 extern qboolean stdin_ready;
-
-void Sys_Printf(char *fmt, ...);
-void Sys_Quit(void);
-void Sys_ESCallback(cvar_t *cvar);
-void Sys_Init(void);
-void Sys_Error(char *error, ...);
-int Sys_FileTime(char *path);
-void Sys_mkdir(char *path);
-void Sys_DebugLog(char *file, char *fmt, ...);
-double Sys_DoubleTime(void);
-char *Sys_ConsoleInput(void);
-char *Sys_ExpandPath(char *str);
-
 
 /* sv_user.c */
 extern edict_t *sv_player;

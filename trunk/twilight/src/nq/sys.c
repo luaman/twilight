@@ -144,7 +144,7 @@ static const char sys_charmap[256] =
 };
 
 void
-Sys_Printf (char *fmt, ...)
+Sys_Printf (const char *fmt, ...)
 {
 	va_list		argptr;
 	char		text[2048];
@@ -279,7 +279,7 @@ Sys_BackTrace (int fd)
 }
 
 void
-Sys_Error (char *error, ...)
+Sys_Error (const char *error, ...)
 {
 	va_list     argptr;
 	char        text[1024];
@@ -328,7 +328,7 @@ returns -1 if not present
 ============
 */
 int
-Sys_FileTime (char *path)
+Sys_FileTime (const char *path)
 {
 	struct stat		buf;
 
@@ -339,7 +339,7 @@ Sys_FileTime (char *path)
 }
 
 void
-Sys_mkdir (char *path)
+Sys_mkdir (const char *path)
 {
 #if defined(HAVE__MKDIR)	/* FIXME: ordering hack to compile with mingw */
 #define do_mkdir(x)	_mkdir(x)
@@ -379,7 +379,7 @@ Sys_mkdir (char *path)
 }
 
 void
-Sys_DebugLog (char *file, char *fmt, ...)
+Sys_DebugLog (const char *file, const char *fmt, ...)
 {
 	va_list     argptr;
 	static char data[1024];

@@ -230,7 +230,7 @@ CL_ParseServerInfo
 static void
 CL_ParseServerInfo (void)
 {
-	char       *str;
+	const char	*str;
 	int         i;
 	int         nummodels, numsounds;
 	char        model_precache[MAX_MODELS][MAX_QPATH];
@@ -915,9 +915,9 @@ CL_ParseServerMessage (void)
 }
 
 void
-CL_ParseEntityLump (char *entdata)
+CL_ParseEntityLump (const char *entdata)
 {
-	char *data;
+	const char *data;
 	char key[128], value[4096];
 
 	data = entdata;

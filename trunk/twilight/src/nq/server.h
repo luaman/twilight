@@ -228,19 +228,9 @@ extern cvar_t *sv_accelerate;
 
 //===========================================================
 
-void Host_EndGame(char *message, ...);
-void Host_Error(char *error, ...);
-void Host_WriteConfiguration(char *name);
 void SV_ClientPrintf(const char *fmt, ...);
-void SV_BroadcastPrintf(char *fmt, ...);
-void Host_ClientCommands(char *fmt, ...);
+void SV_BroadcastPrintf(const char *fmt, ...);
 void SV_DropClient(qboolean crash);
-void Host_ShutdownServer(qboolean crash);
-void Host_ClearMemory(void);
-void Host_Frame(double time);
-void Host_Init(void);
-void Host_Shutdown(void);
-void Host_InitCommands(void);
 void SV_Init_Cvars(void);
 void SV_Init(void);
 void SV_StartParticle(vec3_t org, vec3_t dir, int color, int count);
@@ -249,9 +239,9 @@ void SV_CheckForNewClients(void);
 void SV_ClearDatagram(void);
 void SV_WriteClientdataToMessage(edict_t *ent, sizebuf_t *msg);
 void SV_SendClientMessages(void);
-int SV_ModelIndex(char *name);
+int SV_ModelIndex(const char *name);
 void SV_SaveSpawnparms(void);
-void SV_SpawnServer(char *server);
+void SV_SpawnServer(const char *server);
 qboolean SV_CheckBottom(edict_t *ent);
 qboolean SV_movestep(edict_t *ent, vec3_t move, qboolean relink);
 void SV_MoveToGoal(void);

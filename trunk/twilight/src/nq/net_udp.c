@@ -320,7 +320,7 @@ UDP_AddrToString (struct qsockaddr *addr)
 //=============================================================================
 
 int
-UDP_StringToAddr (char *string, struct qsockaddr *addr)
+UDP_StringToAddr (const char *string, struct qsockaddr *addr)
 {
 	int         ha1, ha2, ha3, ha4, hp;
 	int         ipaddr;
@@ -373,7 +373,7 @@ UDP_GetNameFromAddr (struct qsockaddr *addr, char *name)
 //=============================================================================
 
 int
-UDP_GetAddrFromName (char *name, struct qsockaddr *addr)
+UDP_GetAddrFromName (const char *name, struct qsockaddr *addr)
 {
 	struct hostent *hostentry;
 
