@@ -277,7 +277,7 @@ Host_WriteConfiguration (void)
 		}
 
 		Key_WriteBindings (f);
-		Cvar_Archive (f);
+		Cvar_WriteVars (f);
 
 		fclose (f);
 	}

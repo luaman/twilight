@@ -392,7 +392,6 @@ Con_Printf (char *fmt, ...)
 {
 	va_list     argptr;
 	char        msg[MAXPRINTMSG];
-	static qboolean inupdate;
 
 	va_start (argptr, fmt);
 	vsnprintf (msg, sizeof (msg), fmt, argptr);
