@@ -897,6 +897,9 @@ CL_ProcessUserInfo (int slot, player_info_t *player)
 	strncpy (player->name, Info_ValueForKey (player->userinfo, "name"),
 			   sizeof (player->name) - 1);
 
+	strncpy (player->team, Info_ValueForKey (player->userinfo, "team"),
+			   sizeof (player->team) - 1);
+
 	color = Q_atoi (Info_ValueForKey (player->userinfo, "topcolor"));
 	color = bound(0, color, 13) * 16;
 	if (color < 128)
@@ -985,15 +988,38 @@ void
 CL_ProcessServerInfo (void)
 {
 	char *s;
-	int  val;
 
-	s = Info_ValueForKey (cl.serverinfo, "*deathmatch");
-	if (!*s)
-		val = 0;
-	else
-		val = Q_atoi (s);
+	// Commented in this manner because the rules don't make sense.
+	// NOTE: ORDER MATTERS, DO NOT REORDER!
 
-	cl.gametype = val ? GAME_DEATHMATCH : GAME_COOP;
+	// First we check to see if there is a coop server var.
+	// If it exists and is true then this is a coop game, period.
+	if ((s = Info_ValueForKey (cl.serverinfo, "coop")) && *s)
+		if (Q_atoi (s)) {
+			cl.gametype = GAME_COOP;
+			return;
+		}
+
+	// Next we check to see if there is a deathmatch server var.
+	// If it exists and is 0 then it is a single player game, period.
+	// HOWEVER: If it does not exist it is true, if it is true then
+	// do some more tests.
+	if ((s = Info_ValueForKey (cl.serverinfo, "deathmatch")) && *s)
+		if (!Q_atoi (s)) {
+			cl.gametype = GAME_SINGLE;
+			return;
+		}
+
+	// Now we check to see if teamplay exists and if it is true.
+	// If so then it is a teamplay game, and the status bar code cares.
+	if ((s = Info_ValueForKey (cl.serverinfo, "teamplay")) && *s)
+		if (Q_atoi(s)) {
+			cl.gametype = GAME_TEAMS;
+			return;
+		}
+
+	// If we are here, then it is a good old deathmatch game, simple, right?
+	cl.gametype = GAME_DEATHMATCH;
 }
 
 /*
@@ -1234,6 +1260,7 @@ CL_ParseServerMessage (void)
 					Host_EndGame ("CL_ParseServerMessage: svc_updatefrags >"
 							" MAX_SCOREBOARD");
 				cl.players[i].frags = MSG_ReadShort ();
+				cl.frags_updated = 0;
 				break;
 
 			case svc_updateping:

@@ -395,22 +395,24 @@ int         scoreboardteams;
 Sbar_SortFrags
 ===============
 */
-int
-Sbar_SortFrags (qboolean includespec)
+void
+Sbar_SortFrags ()
 {
-	int         i, j, k, p = 0;
+	int         i, j, k;
+
+	if (cl.frags_updated & FRAGS_SORTED)
+		return;
 
 // sort by frags
 	scoreboardlines = 0;
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		if (cl.players[i].name[0]) {
-			p++;
 
-			if ((!cl.players[i].spectator
-				|| includespec)) {
-				fragsort[scoreboardlines] = i;
-				scoreboardlines++;
-			}
+			if (cl.players[i].spectator)
+				continue;
+
+			fragsort[scoreboardlines] = i;
+			scoreboardlines++;
 		}
 	}
 
@@ -423,7 +425,7 @@ Sbar_SortFrags (qboolean includespec)
 				fragsort[j + 1] = k;
 			}
 
-	return p;
+	cl.frags_updated |= FRAGS_SORTED;
 }
 
 void
@@ -431,14 +433,15 @@ Sbar_SortTeams (void)
 {
 	int         i, j, k;
 	player_info_t *s;
-	int         teamplay;
 	char        t[16 + 1];
+
+	if (cl.frags_updated & FRAGS_TEAM_SORTED)
+		return;
 
 // request new ping times every two second
 	scoreboardteams = 0;
 
-	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
-	if (!teamplay)
+	if (cl.gametype != GAME_TEAMS)
 		return;
 
 // sort the teams
@@ -455,7 +458,7 @@ Sbar_SortTeams (void)
 
 		// find his team in the list
 		t[16] = 0;
-		strncpy (t, Info_ValueForKey (s->userinfo, "team"), 16);
+		strncpy (t, s->team, 16);
 		if (!t || !t[0])
 			continue;					// not on team
 		for (j = 0; j < scoreboardteams; j++)
@@ -490,6 +493,8 @@ Sbar_SortTeams (void)
 				teamsort[i] = teamsort[j];
 				teamsort[j] = k;
 			}
+
+	cl.frags_updated |= FRAGS_TEAM_SORTED;
 }
 
 
@@ -501,36 +506,30 @@ Sbar_SoloScoreboard
 void
 Sbar_SoloScoreboard (void)
 {
-	char        str[80];
 	int         minutes, seconds, tens, units;
 	int         l;
 	double		time;
 
-	if (cl.gametype != GAME_DEATHMATCH)
-	{
-		snprintf (str, sizeof (str), "Monsters:%3i /%3i", cl.stats[STAT_MONSTERS],
-				  cl.stats[STAT_TOTALMONSTERS]);
-		Sbar_DrawString (8, 4, str);
+	if (cl.gametype < GAME_DEATHMATCH) {
+		Sbar_DrawString (8, 4, va("Monsters:%3i /%3i", cl.stats[STAT_MONSTERS],
+					cl.stats[STAT_TOTALMONSTERS]));
 
-		snprintf (str, sizeof (str), "Secrets :%3i /%3i", cl.stats[STAT_SECRETS],
-				  cl.stats[STAT_TOTALSECRETS]);
-		Sbar_DrawString (8, 12, str);
+		Sbar_DrawString (8, 12, va("Secrets :%3i /%3i", cl.stats[STAT_SECRETS],
+					cl.stats[STAT_TOTALSECRETS]));
 	}
 
 // time
 	time = cls.realtime;
-	if (cl.gametype != GAME_DEATHMATCH)
+	if (cl.gametype < GAME_DEATHMATCH)
 		time -= cl.players[cl.playernum].entertime;
 	minutes = time / 60;
 	seconds = time - 60 * minutes;
 	tens = seconds / 10;
 	units = seconds - 10 * tens;
-	snprintf (str, sizeof (str), "Time :%3i:%i%i", minutes, tens, units);
-	Sbar_DrawString (184, 4, str);
+	Sbar_DrawString (184, 4, va("Time :%3i:%i%i", minutes, tens, units));
 
 // draw level name
-	if (cl.gametype != GAME_DEATHMATCH)
-	{
+	if (cl.gametype < GAME_DEATHMATCH) {
 		l = strlen (cl.levelname);
 		Sbar_DrawString (232 - l * 4, 12, cl.levelname);
 	}
@@ -546,7 +545,7 @@ Sbar_DrawInventory
 void
 Sbar_DrawInventory (void)
 {
-	int         i;
+	int         i, j, y;
 	char        num[6];
 	float       time;
 	int         flashon;
@@ -587,29 +586,20 @@ Sbar_DrawInventory (void)
 // ammo counts
 	for (i = 0; i < 4; i++) {
 		snprintf (num, sizeof (num), "%3i", cl.stats[STAT_SHELLS + i]);
+		for (j = 0; j < 3; j++)
+			num[j] = 18 + num[j] - '0';
 		if (headsup) {
-			Sbar_DrawSubPic ((hudswap) ? 0 : (vid.width_2d - 42), 
-					-24 - (4 - i) * 11, sb_ibar, 3 + (i * 48), 0, 42, 11);
-			if (num[0] != ' ')
-				Sbar_DrawCharacter ((hudswap) ? 3 : (vid.width_2d - 39),
-						-24 - (4 - i) * 11, 18 + num[0] - '0');
-			if (num[1] != ' ')
-				Sbar_DrawCharacter ((hudswap) ? 11 : (vid.width_2d - 31),
-						-24 - (4 - i) * 11, 18 + num[1] - '0');
-			if (num[2] != ' ')
-				Sbar_DrawCharacter ((hudswap) ? 19 : (vid.width_2d - 23),
-						-24 - (4 - i) * 11, 18 + num[2] - '0');
-		} else {
-			if (num[0] != ' ')
-				Sbar_DrawCharacter ((6 * i + 1) * 8 - 2, -24,
-						18 + num[0] - '0');
-			if (num[1] != ' ')
-				Sbar_DrawCharacter ((6 * i + 2) * 8 - 2, -24,
-						18 + num[1] - '0');
-			if (num[2] != ' ')
-				Sbar_DrawCharacter ((6 * i + 3) * 8 - 2, -24,
-						18 + num[2] - '0');
-		}
+			y = -24 - (4 - i) * 11;
+			if (hudswap) {
+				Sbar_DrawSubPic (0, y, sb_ibar, 3 + (i * 48), 0, 42, 11);
+				Sbar_DrawString (3, y, num);
+			} else {
+				Sbar_DrawSubPic (vid.width_2d - 42, y, sb_ibar, 3 + (i * 48),
+						0, 42, 11);
+				Sbar_DrawString (vid.width_2d - 39, y, num);
+			}
+		} else
+			Sbar_DrawString ((6 * i + 1) * 8 - 2, -24, num);
 	}
 
 	flashon = 0;
@@ -639,14 +629,13 @@ Sbar_DrawFrags (void)
 {
 	int         i, k, l;
 	int         x, y, f;
-	char        num[12];
 	player_info_t *s;
 	vec3_t		color;
 
-	if (cl.gametype != GAME_DEATHMATCH)
+	if (cl.gametype < GAME_DEATHMATCH)
 		return;
 
-	Sbar_SortFrags (false);
+	Sbar_SortFrags ();
 
 // draw the text
 	l = scoreboardlines <= 4 ? scoreboardlines : 4;
@@ -670,11 +659,7 @@ Sbar_DrawFrags (void)
 
 		// draw number
 		f = s->frags;
-		snprintf (num, sizeof (num), "%3i", f);
-
-		Sbar_DrawCharacter ((x + 1) * 8, -24, num[0]);
-		Sbar_DrawCharacter ((x + 2) * 8, -24, num[1]);
-		Sbar_DrawCharacter ((x + 3) * 8, -24, num[2]);
+		Sbar_DrawString ((x + 1) * 8, -24, va ("%3i", f));
 
 		if (k == cl.playernum) {
 			Sbar_DrawCharacter (x * 8 + 2, -24, 16);
@@ -782,7 +767,6 @@ void
 Sbar_Draw (void)
 {
 	qboolean    headsup;
-	char        st[512];
 
 	headsup = !cl_sbar->ivalue;
 
@@ -812,26 +796,24 @@ Sbar_Draw (void)
 				else
 					Sbar_DrawNormal ();
 
-				snprintf (st, sizeof (st), "Tracking %-.13s, [JUMP] for next",
-						  cl.players[spec_track].name);
-				Sbar_DrawString (0, -8, st);
+				Sbar_DrawString (0, -8, va("Tracking %-.13s, [JUMP] for next",
+							cl.players[spec_track].name));
 			}
 		} else if (sb_showscores || cl.stats[STAT_HEALTH] <= 0) {
 			Sbar_DrawPic (0, 0, sb_scorebar);
 			Sbar_SoloScoreboard ();
-		}
-		else
+		} else
 			Sbar_DrawNormal ();
 	}
 // main screen deathmatch rankings
 	// if we're dead show team scores in team games
-	if (cl.stats[STAT_HEALTH] <= 0 && !cl.spectator)
-		if (Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0 &&
-			!sb_showscores)
+	if (cl.stats[STAT_HEALTH] <= 0 && !cl.spectator) {
+		if (cl.gametype == GAME_TEAMS && !sb_showscores) {
 			Sbar_TeamOverlay ();
-		else
+		} else {
 			Sbar_DeathmatchOverlay (0);
-	else if (sb_showscores)
+		}
+	} else if (sb_showscores)
 		Sbar_DeathmatchOverlay (0);
 	else if (sb_showteamscores)
 		Sbar_TeamOverlay ();
@@ -841,7 +823,7 @@ Sbar_Draw (void)
 		Draw_TileClear (320, vid.height_2d - sb_lines, vid.width_2d - 320, sb_lines);
 
 	if (sb_lines > 0)
-		if (cl.gametype == GAME_DEATHMATCH)
+		if (cl.gametype >= GAME_DEATHMATCH)
 			Sbar_MiniDeathmatchOverlay ();
 }
 
@@ -893,16 +875,11 @@ Sbar_TeamOverlay (void)
 	qpic_t		*pic;
 	Sint32		i, k, l;
 	Uint32		x, y;
-	char		num[12];
-	Sint32		teamplay;
-	char		team[5];
 	team_t		*tm;
 	Sint32		plow, phigh, pavg;
 
 	// request new ping times every two second
-	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
-
-	if (!teamplay) {
+	if (cl.gametype != GAME_TEAMS) {
 		Sbar_DeathmatchOverlay (0);
 		return;
 	}
@@ -944,23 +921,18 @@ Sbar_TeamOverlay (void)
 		if (pavg < 0 || pavg > 999)
 			pavg = 999;
 
-		snprintf (num, sizeof (num), "%3i/%3i/%3i", plow, pavg, phigh);
-		Draw_String (x, y, num, 8);
+		Draw_String (x, y, va("%3i/%3i/%3i", plow, pavg, phigh), 8);
 
 		// draw team
-		strlcpy (team, tm->team, sizeof (team));
-		Draw_String (x + 104, y, team, 8);
+		Draw_String (x + 104, y, tm->team, 8);
 
 		// draw total
-		snprintf (num, sizeof (num), "%5i", tm->frags);
-		Draw_String (x + 104 + 40, y, num, 8);
+		Draw_String (x + 104 + 40, y, va("%5i", tm->frags), 8);
 
 		// draw players
-		snprintf (num, sizeof (num), "%5i", tm->players);
-		Draw_String (x + 104 + 88, y, num, 8);
+		Draw_String (x + 104 + 88, y, va("%5i", tm->players), 8);
 
-		if (!strncmp (Info_ValueForKey (cl.players[cl.playernum].userinfo,
-										  "team"), tm->team, 16)) {
+		if (strncmp (cl.players[cl.playernum].team, tm->team, 16)) {
 			Draw_Character (x + 104 - 8, y, 16, 8);
 			Draw_Character (x + 104 + 32, y, 17, 8);
 		}
@@ -984,23 +956,13 @@ Sbar_DeathmatchOverlay (int start)
 	qpic_t			*pic;
 	Sint32			i, k, l;
 	Uint32			x, y, f;
-	char			num[12];
 	player_info_t	*s;
 	Sint32			total;
 	Sint32			minutes;
 	Sint32			p;
-	Sint32			teamplay;
 	char			team[5];
 	Sint32			skip = 10;
-	Sint32			coop;
 	vec3_t			color;
-
-	coop = Q_atoi (Info_ValueForKey (cl.serverinfo, "coop"));
-
-	// scores   
-	if ( !coop && (Sbar_SortFrags (true) == 1) ) {
-		return;
-	}
 
 	if (largegame)
 		skip = 8;
@@ -1011,8 +973,6 @@ Sbar_DeathmatchOverlay (int start)
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		SZ_Print (&cls.netchan.message, "pings");
 	}
-
-	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
 
 	if (!start) {
 		pic = Draw_CachePic ("gfx/ranking.lmp");
@@ -1026,7 +986,7 @@ Sbar_DeathmatchOverlay (int start)
 		y = start;
 	else
 		y = 24;
-	if (teamplay) {
+	if (cl.gametype == GAME_TEAMS) {
 		x = 4;
 //                            0    40 64   104   152  192 
 		Draw_String (x, y, "ping pl time frags team name", 8);
@@ -1058,21 +1018,19 @@ Sbar_DeathmatchOverlay (int start)
 		p = s->ping;
 		if (p < 0 || p > 999)
 			p = 999;
-		snprintf (num, sizeof (num), "%4i", p);
-		Draw_String (x, y, num, 8);
+		Draw_String (x, y, va("%4d", p), 8);
 
 		// draw pl
 		p = s->pl;
-		snprintf (num, sizeof (num), "%3i", p);
 		if (p > 25)
-			Draw_Alt_String (x + 32, y, num, 8);
+			Draw_Alt_String (x + 32, y, va("%3d", p), 8);
 		else
-			Draw_String (x + 32, y, num, 8);
+			Draw_String (x + 32, y, va("%3d", p), 8);
 
 		if (s->spectator) {
 			Draw_String (x + 40, y, "(spectator)", 8);
 			// draw name
-			if (teamplay)
+			if (cl.gametype == GAME_TEAMS)
 				Draw_String (x + 152 + 40, y, s->name, 8);
 			else
 				Draw_String (x + 152, y, s->name, 8);
@@ -1085,8 +1043,7 @@ Sbar_DeathmatchOverlay (int start)
 		else
 			total = curtime - s->entertime;
 		minutes = (int) total / 60;
-		snprintf (num, sizeof (num), "%4i", minutes);
-		Draw_String (x + 64, y, num, 8);
+		Draw_String (x + 64, y, va("%4d", minutes), 8);
 
 		// draw background
 		VectorScale(s->colormap.top, 0.5, color);
@@ -1099,22 +1056,20 @@ Sbar_DeathmatchOverlay (int start)
 
 		// draw number
 		f = s->frags;
-		snprintf (num, sizeof (num), "%3i", f);
 
-		Draw_String_Len (x + 112, y, num, 3, 8);
+		Draw_String_Len (x + 112, y, va("%3d", f), 3, 8);
 
 		if (k == cl.playernum) {
 			Draw_Character (x + 104, y, 16, 8);
 			Draw_Character (x + 136, y, 17, 8);
 		}
 		// team
-		if (teamplay) {
-			strlcpy (team, Info_ValueForKey (s->userinfo, "team"),
-					sizeof (team));
+		if (cl.gametype == GAME_TEAMS) {
+			strlcpy (team, s->team, sizeof (team));
 			Draw_String (x + 152, y, team, 8);
 		}
 		// draw name
-		if (teamplay)
+		if (cl.gametype == GAME_TEAMS)
 			Draw_String (x + 152 + 40, y, s->name, 8);
 		else
 			Draw_String (x + 152, y, s->name, 8);
@@ -1140,9 +1095,7 @@ Sbar_MiniDeathmatchOverlay (void)
 {
 	Sint32			i, k;
 	Uint32			x, y, f;
-	char        	num[12];
 	player_info_t	*s;
-	Sint32			teamplay;
 	char        	team[5];
 	Sint32			numlines;
 	char			name[16 + 1];
@@ -1152,10 +1105,8 @@ Sbar_MiniDeathmatchOverlay (void)
 	if (vid.width_2d < 512 || !sb_lines)
 		return;							// not enuff room
 
-	teamplay = Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay"));
-
 	// scores   
-	Sbar_SortFrags (false);
+	Sbar_SortFrags ();
 	if (vid.width_2d >= 640)
 		Sbar_SortTeams ();
 
@@ -1197,24 +1148,23 @@ Sbar_MiniDeathmatchOverlay (void)
 
 		// draw number
 		f = s->frags;
-		snprintf (num, sizeof (num), "%3i", f);
 
-		Draw_String_Len (x + 8, y, num, 3, 8);
+		Draw_String_Len (x + 8, y, va("%3d", f), 3, 8);
 
 		if (k == cl.playernum) {
 			Draw_Character (x, y, 16, 8);
 			Draw_Character (x + 32, y, 17, 8);
 		}
 		// team
-		if (teamplay) {
+		if (cl.gametype == GAME_TEAMS) {
 			team[4] = 0;
-			strncpy (team, Info_ValueForKey (s->userinfo, "team"), 4);
+			strncpy (team, s->team, 4);
 			Draw_String (x + 48, y, team, 8);
 		}
 		// draw name
 		name[16] = 0;
 		strncpy (name, s->name, 16);
-		if (teamplay)
+		if (cl.gametype == GAME_TEAMS)
 			Draw_String (x + 48 + 40, y, name, 8);
 		else
 			Draw_String (x + 48, y, name, 8);
@@ -1222,7 +1172,7 @@ Sbar_MiniDeathmatchOverlay (void)
 	}
 
 	// draw teams if room
-	if (vid.width_2d < 640 || !teamplay)
+	if (vid.width_2d < 640 || !(cl.gametype == GAME_TEAMS))
 		return;
 
 	// draw seperator
@@ -1243,11 +1193,9 @@ Sbar_MiniDeathmatchOverlay (void)
 		Draw_String (x, y, team, 8);
 
 		// draw total
-		snprintf (num, sizeof (num), "%5i", tm->frags);
-		Draw_String (x + 40, y, num, 8);
+		Draw_String (x + 40, y, va("%5d", tm->frags), 8);
 
-		if (!strncmp (Info_ValueForKey (cl.players[cl.playernum].userinfo,
-										  "team"), tm->team, 16)) {
+		if (!strncmp (cl.players[cl.playernum].team, tm->team, 16)) {
 			Draw_Character (x - 8, y, 16, 8);
 			Draw_Character (x + 32, y, 17, 8);
 		}
@@ -1267,23 +1215,26 @@ Sbar_IntermissionOverlay
 void
 Sbar_IntermissionOverlay (void)
 {
-	if (Q_atoi (Info_ValueForKey (cl.serverinfo, "teamplay")) > 0
-		&& !sb_showscores)
-			Sbar_TeamOverlay ();
-	else {
-		if ( cl.gametype != GAME_DEATHMATCH )
-		{
-			qpic_t     *pic;
-			int         dig;
-			int         num;
+	qpic_t     *pic;
+	int         dig;
+	int         num;
 
+	switch (cl.gametype) {
+		case GAME_TEAMS:
+			Sbar_TeamOverlay ();
+			break;
+		case GAME_DEATHMATCH:
+			Sbar_DeathmatchOverlay (0);
+			break;
+		case GAME_SINGLE:
+		case GAME_COOP:
 			pic = Draw_CachePic ("gfx/complete.lmp");
 			Draw_Pic (64, 24, pic);
 
 			pic = Draw_CachePic ("gfx/inter.lmp");
 			Draw_Pic (0, 56, pic);
 
-		// time
+			// time
 			dig = cl.completed_time / 60;
 			Sbar_IntermissionNumber (160, 64, dig, 3, 0);
 			num = cl.completed_time - dig * 60;
@@ -1298,9 +1249,7 @@ Sbar_IntermissionOverlay (void)
 			Sbar_IntermissionNumber (160, 144, cl.stats[STAT_MONSTERS], 3, 0);
 			Draw_Pic (232, 144, sb_slash);
 			Sbar_IntermissionNumber (240, 144, cl.stats[STAT_TOTALMONSTERS], 3, 0);
-		} else {
-			Sbar_DeathmatchOverlay (0);
-		}
+			break;
 	}
 }
 
