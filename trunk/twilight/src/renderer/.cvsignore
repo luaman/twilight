@@ -8,3 +8,5 @@ Debug
 *.ncb
 *.opt
 *.plg
+*.i
+*.s
