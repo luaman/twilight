@@ -26,5 +26,5 @@ EXTRA_DIST = \
 
 ed = $(top_srcdir)/embedded_data
 
-embedded_data.h: $(ed)/menu.mnu $(ed)/twilight.rc $(ed)/gfx/palette.lmp $(ed)/gfx/conchars.tga
-	$(top_srcdir)/src/tools/lhbin2c -strings -base=$(ed) menu.mnu twilight.rc gfx/palette.lmp gfx/conchars.tga > $@
+embedded_data.h: $(ed)/menu.mnu $(ed)/twilight.rc $(ed)/gfx/palette.lmp $(ed)/gfx/conchars.tga $(ed)/progs/torch.mdl
+	$(top_srcdir)/src/tools/lhbin2c -strings -base=$(ed) menu.mnu twilight.rc gfx/palette.lmp gfx/conchars.tga progs/torch.mdl > $@

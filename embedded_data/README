@@ -23,6 +23,8 @@ Copyrights:
 
   src/palette.lmp originates from ID software. [2]
 
+  progs/torch.mdl was created by Tomas Jakobsson. [3]
+
 
 0:  Zephaniah E. Hull disclaims all copyright to these files and
     releases them into the Public Domain WITHOUT ANY WARRANTY
@@ -35,3 +37,7 @@ Copyrights:
 2:  It is our understanding that ID software does not believe the
     file to be copyright-able, and thus releases it into the Public
     Domain WITHOUT ANY WARRANTY whatsoever, express or implied.
+
+3:  Tomas Jakobsson disclaims all copyright to this model and releases
+    it into the Public Domain WITHOUT ANY WARRANTY whatsoever, express
+    or implied.
