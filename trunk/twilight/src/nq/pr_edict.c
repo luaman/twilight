@@ -434,10 +434,7 @@ PR_UglyValueString (etype_t type, eval_t *val)
 			break;
 		case ev_entity:
 			n = NoCrash_NUM_FOR_EDICT (PROG_TO_EDICT (val->edict), __FILE__, __LINE__);
-			if (n >= MAX_EDICTS)
-				snprintf (line, sizeof (line), "entity %i (invalid!)", n);
-			else
-				snprintf (line, sizeof (line), "entity %i", n);
+			snprintf (line, sizeof (line), "%i", n);
 			break;
 		case ev_function:
 			f = pr_functions + val->function;
@@ -469,10 +466,10 @@ PR_UglyValueString (etype_t type, eval_t *val)
 			snprintf (line, sizeof (line), "void");
 			break;
 		case ev_float:
-			snprintf (line, sizeof (line), "%g", val->_float);
+			snprintf (line, sizeof (line), "%f", val->_float);
 			break;
 		case ev_vector:
-			snprintf (line, sizeof (line), "%g %g %g",
+			snprintf (line, sizeof (line), "%f %f %f",
 					  val->vector[0], val->vector[1], val->vector[2]);
 			break;
 		default:
