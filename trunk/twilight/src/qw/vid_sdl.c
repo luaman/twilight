@@ -127,6 +127,7 @@ VID_Shutdown (void)
 	SDL_Quit ();
 }
 
+#ifndef WIN32
 void
 signal_handler (int sig)
 {
@@ -134,6 +135,7 @@ signal_handler (int sig)
 	Sys_Quit ();
 	exit (0);
 }
+#endif
 
 void
 InitSig (void)
@@ -304,9 +306,8 @@ GL_EndRendering (void)
 static void
 Check_Gamma (unsigned char *pal)
 {
-	float       f, inf;
 	unsigned char palette[768];
-	int         i;
+	int         i, inf;
 
 	if ((i = COM_CheckParm ("-gamma")) == 0) {
 		if ((gl_renderer && Q_strstr (gl_renderer, "Voodoo")) ||
@@ -318,8 +319,7 @@ Check_Gamma (unsigned char *pal)
 		vid_gamma = Q_atof (com_argv[i + 1]);
 
 	for (i = 0; i < 768; i++) {
-		f = Q_pow ((pal[i] + 1) / 256.0, vid_gamma);
-		inf = f * 255 + 0.5;
+		inf = (int)(Q_pow ((pal[i] + 1) / 256.0, vid_gamma) * 255 + 0.5);
 		inf = bound (0, inf, 255);
 		palette[i] = (byte)inf;
 	}
@@ -709,6 +709,7 @@ void
 IN_Init (void)
 {
 	mouse_x = mouse_y = 0.0;
+	old_mouse_x = old_mouse_y = 0.0;
 }
 
 void

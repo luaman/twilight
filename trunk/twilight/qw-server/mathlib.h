@@ -36,6 +36,22 @@ typedef int fixed16_t;
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
 
+#ifndef _WIN32
+
+# ifndef max
+#  define max(a,b) ((a) > (b) ? (a) : (b))
+# endif
+
+# ifndef min
+#  define min(a,b) ((a) < (b) ? (a) : (b))
+# endif
+
+#endif
+
+#ifndef bound
+#define bound(a,b,c) (max(a, min(b, c)))
+#endif
+
 struct mplane_s;
 
 extern vec3_t vec3_origin;

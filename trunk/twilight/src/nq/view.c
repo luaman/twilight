@@ -150,12 +150,9 @@ V_CalcBob (void)
 			  cl.velocity[1] * cl.velocity[1]) * cl_bob->value;
 //Con_Printf ("speed: %5.1f\n", VectorLength(cl.velocity));
 	bob = bob * 0.3 + bob * 0.7 * Q_sin (cycle);
-	if (bob > 4)
-		bob = 4;
-	else if (bob < -7)
-		bob = -7;
-	return bob;
+	bob = bound (-7, bob, 4);
 
+	return bob;
 }
 
 
@@ -284,12 +281,9 @@ BuildGammaTable (float g)
 	}
 
 	for (i = 0; i < 256; i++) {
-		inf = 255 * Q_pow ((i + 0.5) / 255.5, g) + 0.5;
-		if (inf < 0)
-			inf = 0;
-		if (inf > 255)
-			inf = 255;
-		gammatable[i] = inf;
+		inf = (int)(255 * Q_pow ((i + 0.5) / 255.5, g) + 0.5);
+		inf = bound (0, inf, 255);
+		gammatable[i] = (byte)inf;
 	}
 }
 
@@ -336,7 +330,7 @@ V_ParseDamage (void)
 	for (i = 0; i < 3; i++)
 		from[i] = MSG_ReadCoord ();
 
-	count = blood * 0.5 + armor * 0.5;
+	count = (blood + armor) * 0.5;
 	if (count < 10)
 		count = 10;
 
@@ -479,13 +473,8 @@ V_CalcBlend
 void
 V_CalcBlend (void)
 {
-	float       r, g, b, a, a2;
+	float       r = 0, g = 0, b = 0, a = 0, a2;
 	int         j;
-
-	r = 0;
-	g = 0;
-	b = 0;
-	a = 0;
 
 	for (j = 0; j < NUM_CSHIFTS; j++) {
 		if (!gl_cshiftpercent->value)
@@ -494,11 +483,10 @@ V_CalcBlend (void)
 		a2 = ((cl.cshifts[j].percent * gl_cshiftpercent->value) / 100.0)
 			/ 255.0;
 
-//      a2 = cl.cshifts[j].percent/255.0;
 		if (!a2)
 			continue;
+
 		a = a + a2 * (1 - a);
-//Con_Printf ("j:%i a:%f\n", j, a);
 		a2 = a2 / a;
 		r = r * (1 - a2) + cl.cshifts[j].destcolor[0] * a2;
 		g = g * (1 - a2) + cl.cshifts[j].destcolor[1] * a2;
@@ -508,11 +496,7 @@ V_CalcBlend (void)
 	v_blend[0] = r / 255.0;
 	v_blend[1] = g / 255.0;
 	v_blend[2] = b / 255.0;
-	v_blend[3] = a;
-	if (v_blend[3] > 1)
-		v_blend[3] = 1;
-	if (v_blend[3] < 0)
-		v_blend[3] = 0;
+	v_blend[3] = bound (0, a, 1);
 }
 
 /*
@@ -570,16 +554,10 @@ V_UpdatePalette (void)
 
 	a = 1 - a;
 	for (i = 0; i < 256; i++) {
-		ir = i * a + r;
-		ig = i * a + g;
-		ib = i * a + b;
-		if (ir > 255)
-			ir = 255;
-		if (ig > 255)
-			ig = 255;
-		if (ib > 255)
-			ib = 255;
-
+		ir = i * a + r;	if (ir > 255) ir = 255;
+		ig = i * a + g; if (ig > 255) ig = 255;
+		ib = i * a + b; if (ib > 255) ib = 255;
+		
 		ramps[0][i] = gammatable[ir];
 		ramps[1][i] = gammatable[ig];
 		ramps[2][i] = gammatable[ib];
@@ -637,15 +615,11 @@ CalcGunAngle (void)
 	pitch = -r_refdef.viewangles[PITCH];
 
 	yaw = angledelta (yaw - r_refdef.viewangles[YAW]) * 0.4;
-	if (yaw > 10)
-		yaw = 10;
-	if (yaw < -10)
-		yaw = -10;
+	yaw = bound (-10, yaw, 10);
+
 	pitch = angledelta (-pitch - r_refdef.viewangles[PITCH]) * 0.4;
-	if (pitch > 10)
-		pitch = 10;
-	if (pitch < -10)
-		pitch = -10;
+	pitch = bound (-10, pitch, 10);
+
 	move = host_frametime * 20;
 	if (yaw > oldyaw) {
 		if (oldyaw + move < yaw)
@@ -688,25 +662,15 @@ V_BoundOffsets
 void
 V_BoundOffsets (void)
 {
-	entity_t   *ent;
-
-	ent = &cl_entities[cl.viewentity];
+	vec3_t org;
+	
+	VectorCopy (cl_entities[cl.viewentity].origin, org);
 
 // absolutely bound refresh reletive to entity clipping hull
 // so the view can never be inside a solid wall
-
-	if (r_refdef.vieworg[0] < ent->origin[0] - 14)
-		r_refdef.vieworg[0] = ent->origin[0] - 14;
-	else if (r_refdef.vieworg[0] > ent->origin[0] + 14)
-		r_refdef.vieworg[0] = ent->origin[0] + 14;
-	if (r_refdef.vieworg[1] < ent->origin[1] - 14)
-		r_refdef.vieworg[1] = ent->origin[1] - 14;
-	else if (r_refdef.vieworg[1] > ent->origin[1] + 14)
-		r_refdef.vieworg[1] = ent->origin[1] + 14;
-	if (r_refdef.vieworg[2] < ent->origin[2] - 22)
-		r_refdef.vieworg[2] = ent->origin[2] - 22;
-	else if (r_refdef.vieworg[2] > ent->origin[2] + 30)
-		r_refdef.vieworg[2] = ent->origin[2] + 30;
+	r_refdef.vieworg[0] = bound(org[0] - 14, r_refdef.vieworg[0], org[0] + 14);
+	r_refdef.vieworg[1] = bound(org[1] - 14, r_refdef.vieworg[1], org[1] + 14);
+	r_refdef.vieworg[2] = bound(org[2] - 22, r_refdef.vieworg[2], org[2] + 30);
 }
 
 /*
@@ -865,28 +829,22 @@ V_CalcRefdef (void)
 
 	for (i = 0; i < 3; i++) {
 		view->origin[i] += forward[i] * bob * 0.4;
-//      view->origin[i] += right[i]*bob*0.4;
-//      view->origin[i] += up[i]*bob*0.8;
 	}
+
 	view->origin[2] += bob;
 
 // fudge position around to keep amount of weapon visible
 // roughly equal with different FOV
 
-#if 0
-	if (cl.model_precache[cl.stats[STAT_WEAPON]]
-		&& Q_strcmp (cl.model_precache[cl.stats[STAT_WEAPON]]->name,
-					 "progs/v_shot2.mdl"))
-#endif
-		if (scr_viewsize->value == 110)
-			view->origin[2] += 1;
-		else if (scr_viewsize->value == 100)
-			view->origin[2] += 2;
-		else if (scr_viewsize->value == 90)
-			view->origin[2] += 1;
-		else if (scr_viewsize->value == 80)
-			view->origin[2] += 0.5;
-
+	if (scr_viewsize->value == 110)
+		view->origin[2] += 1;
+	else if (scr_viewsize->value == 100)
+		view->origin[2] += 2;
+	else if (scr_viewsize->value == 90)
+		view->origin[2] += 1;
+	else if (scr_viewsize->value == 80)
+		view->origin[2] += 0.5;
+	
 	view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
 	view->frame = cl.stats[STAT_WEAPONFRAME];
 	view->colormap = vid.colormap;

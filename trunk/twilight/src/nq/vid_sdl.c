@@ -72,7 +72,7 @@ static float mouse_x, mouse_y;
 static float old_mouse_x, old_mouse_y;
 
 static int  old_windowed_mouse;
-static int  use_mouse = false;
+static qboolean  use_mouse = false;
 
 static int  scr_width = 640, scr_height = 480, scr_bpp = 15;
 
@@ -303,9 +303,8 @@ GL_EndRendering (void)
 static void
 Check_Gamma (unsigned char *pal)
 {
-	float       f, inf;
 	unsigned char palette[768];
-	int         i;
+	int         i, inf;
 
 	if ((i = COM_CheckParm ("-gamma")) == 0) {
 		if ((gl_renderer && Q_strstr (gl_renderer, "Voodoo")) ||
@@ -317,8 +316,7 @@ Check_Gamma (unsigned char *pal)
 		vid_gamma = Q_atof (com_argv[i + 1]);
 
 	for (i = 0; i < 768; i++) {
-		f = Q_pow ((pal[i] + 1) / 256.0, vid_gamma);
-		inf = f * 255 + 0.5;
+		inf = (int)(Q_pow ((pal[i] + 1) / 256.0, vid_gamma) * 255 + 0.5);
 		inf = bound (0, inf, 255);
 		palette[i] = (byte)inf;
 	}
@@ -700,6 +698,7 @@ void
 IN_Init (void)
 {
 	mouse_x = mouse_y = 0.0;
+	old_mouse_x = old_mouse_y = 0.0;
 }
 
 void

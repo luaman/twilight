@@ -41,6 +41,10 @@ static const char rcsid[] =
 #include "pmove.h"
 #include "screen.h"
 
+#ifdef _WIN32
+#include "winquake.h"
+#endif
+
 /*
 
 The view is allowed to move slightly from it's true position for bobbing,
@@ -159,12 +163,9 @@ V_CalcBob (void)
 
 	bob = VectorLength2(cl.simvel) * cl_bob->value;
 	bob = bob * 0.3 + bob * 0.7 * Q_sin (cycle);
-	if (bob > 4)
-		bob = 4;
-	else if (bob < -7)
-		bob = -7;
-	return bob;
+	bob = bound(-7, bob, 4);
 
+	return bob;
 }
 
 
@@ -298,12 +299,9 @@ BuildGammaTable (float g)
 	}
 
 	for (i = 0; i < 256; i++) {
-		inf = 255 * Q_pow ((i + 0.5) / 255.5, g) + 0.5;
-		if (inf < 0)
-			inf = 0;
-		if (inf > 255)
-			inf = 255;
-		gammatable[i] = inf;
+		inf = (int)(255 * Q_pow ((i + 0.5) / 255.5, g) + 0.5);
+		inf = bound(0, inf, 255);
+		gammatable[i] = (byte)inf;
 	}
 }
 
@@ -346,10 +344,11 @@ V_ParseDamage (void)
 
 	armor = MSG_ReadByte ();
 	blood = MSG_ReadByte ();
+
 	for (i = 0; i < 3; i++)
 		from[i] = MSG_ReadCoord ();
 
-	count = blood * 0.5 + armor * 0.5;
+	count = (blood + armor) * 0.5;
 	if (count < 10)
 		count = 10;
 
@@ -496,13 +495,8 @@ V_CalcBlend
 void
 V_CalcBlend (void)
 {
-	float       r, g, b, a, a2;
+	float       r = 0, g = 0, b = 0, a = 0, a2;
 	int         j;
-
-	r = 0;
-	g = 0;
-	b = 0;
-	a = 0;
 
 	for (j = 0; j < NUM_CSHIFTS; j++) {
 		if (!gl_cshiftpercent->value)
@@ -511,11 +505,9 @@ V_CalcBlend (void)
 		a2 = ((cl.cshifts[j].percent
 					* gl_cshiftpercent->value) / 100.0) / 255.0;
 
-//      a2 = (cl.cshifts[j].percent/2)/255.0;
 		if (!a2)
 			continue;
 		a = a + a2 * (1 - a);
-//Con_Printf ("j:%i a:%f\n", j, a);
 		a2 = a2 / a;
 		r = r * (1 - a2) + cl.cshifts[j].destcolor[0] * a2;
 		g = g * (1 - a2) + cl.cshifts[j].destcolor[1] * a2;
@@ -525,11 +517,7 @@ V_CalcBlend (void)
 	v_blend[0] = r / 255.0;
 	v_blend[1] = g / 255.0;
 	v_blend[2] = b / 255.0;
-	v_blend[3] = a;
-	if (v_blend[3] > 1)
-		v_blend[3] = 1;
-	if (v_blend[3] < 0)
-		v_blend[3] = 0;
+	v_blend[3] = bound (0, a, 1);
 }
 
 /*
@@ -610,15 +598,11 @@ CalcGunAngle (void)
 	pitch = -r_refdef.viewangles[PITCH];
 
 	yaw = angledelta (yaw - r_refdef.viewangles[YAW]) * 0.4;
-	if (yaw > 10)
-		yaw = 10;
-	if (yaw < -10)
-		yaw = -10;
+	yaw = bound (-10, yaw, 10);
+
 	pitch = angledelta (-pitch - r_refdef.viewangles[PITCH]) * 0.4;
-	if (pitch > 10)
-		pitch = 10;
-	if (pitch < -10)
-		pitch = -10;
+	pitch = bound (-10, pitch, 10);
+
 	move = host_frametime * 20;
 	if (yaw > oldyaw) {
 		if (oldyaw + move < yaw)
@@ -651,21 +635,15 @@ V_BoundOffsets
 void
 V_BoundOffsets (void)
 {
+	vec3_t org;
+	
+	VectorCopy (cl.simorg, org);
+
 // absolutely bound refresh reletive to entity clipping hull
 // so the view can never be inside a solid wall
-
-	if (r_refdef.vieworg[0] < cl.simorg[0] - 14)
-		r_refdef.vieworg[0] = cl.simorg[0] - 14;
-	else if (r_refdef.vieworg[0] > cl.simorg[0] + 14)
-		r_refdef.vieworg[0] = cl.simorg[0] + 14;
-	if (r_refdef.vieworg[1] < cl.simorg[1] - 14)
-		r_refdef.vieworg[1] = cl.simorg[1] - 14;
-	else if (r_refdef.vieworg[1] > cl.simorg[1] + 14)
-		r_refdef.vieworg[1] = cl.simorg[1] + 14;
-	if (r_refdef.vieworg[2] < cl.simorg[2] - 22)
-		r_refdef.vieworg[2] = cl.simorg[2] - 22;
-	else if (r_refdef.vieworg[2] > cl.simorg[2] + 30)
-		r_refdef.vieworg[2] = cl.simorg[2] + 30;
+	r_refdef.vieworg[0] = bound(org[0] - 14, r_refdef.vieworg[0], org[0] + 14);
+	r_refdef.vieworg[1] = bound(org[1] - 14, r_refdef.vieworg[1], org[1] + 14);
+	r_refdef.vieworg[2] = bound(org[2] - 22, r_refdef.vieworg[2], org[2] + 30);
 }
 
 /*
@@ -814,9 +792,8 @@ V_CalcRefdef (void)
 
 	for (i = 0; i < 3; i++) {
 		view->origin[i] += forward[i] * bob * 0.4;
-//      view->origin[i] += right[i]*bob*0.4;
-//      view->origin[i] += up[i]*bob*0.8;
 	}
+
 	view->origin[2] += bob;
 
 // fudge position around to keep amount of weapon visible

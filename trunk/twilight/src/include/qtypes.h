@@ -37,22 +37,6 @@ typedef unsigned char byte;
 
 typedef enum { false, true } qboolean;
 
-#ifndef _WIN32
-
-# ifndef max
-#  define max(a,b) ((a) > (b) ? (a) : (b))
-# endif
-
-# ifndef min
-#  define min(a,b) ((a) < (b) ? (a) : (b))
-# endif
-
-#endif
-
-#ifndef bound
-#define bound(a,b,c) (max(a, min(b, c)))
-#endif
-
 typedef float vec_t;
 typedef vec_t vec3_t[3];
 typedef vec_t vec5_t[5];

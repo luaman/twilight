@@ -121,10 +121,13 @@ SV_CheckVelocity (edict_t *ent)
 						pr_strings + ent->v.classname);
 			ent->v.origin[i] = 0;
 		}
-		if (ent->v.velocity[i] > sv_maxvelocity->value)
-			ent->v.velocity[i] = sv_maxvelocity->value;
-		else if (ent->v.velocity[i] < -sv_maxvelocity->value)
-			ent->v.velocity[i] = -sv_maxvelocity->value;
+	}
+
+	if (DotProduct(ent->v.velocity,ent->v.velocity) >
+		sv_maxvelocity->value*sv_maxvelocity->value)
+	{
+		VectorNormalizeFast (ent->v.velocity);
+		VectorScale (ent->v.velocity, sv_maxvelocity->value, ent->v.velocity);
 	}
 }
 
