@@ -40,11 +40,6 @@ cvar_t     *cl_nopred;
 cvar_t     *cl_pushlatency;
 
 
-/*
-==============
-CL_PredictUsercmd
-==============
-*/
 void
 CL_PredictUsercmd (int id, player_state_t * from, player_state_t * to,
 		usercmd_t *u, qboolean spectator)
@@ -92,7 +87,6 @@ CL_PredictUsercmd (int id, player_state_t * from, player_state_t * to,
 
 /*
 ==============
-CL_PredictMove
 Predict our own movement.
 ==============
 */
@@ -174,11 +168,6 @@ CL_PredictMove (void)
 }
 
 
-/*
-==============
-CL_InitPrediction
-==============
-*/
 void
 CL_InitPrediction (void)
 {

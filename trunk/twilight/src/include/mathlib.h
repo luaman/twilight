@@ -40,6 +40,10 @@
 #include <stdlib.h>
 #endif
 
+#ifdef HAVE_SDL_H
+#include "SDL_endian.h"
+#endif
+
 #ifdef _WIN32
 # include <windows.h>	// for min() and max()
 #else

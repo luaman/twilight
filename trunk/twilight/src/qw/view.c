@@ -89,12 +89,7 @@ static float v_dmg_time, v_dmg_roll, v_dmg_pitch;
 static frame_t *view_frame;
 static player_state_t *view_message;
 
-/*
-===============
-V_CalcRoll
 
-===============
-*/
 float
 V_CalcRoll (vec3_t angles, vec3_t velocity)
 {
@@ -119,12 +114,7 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 }
 
 
-/*
-===============
-V_CalcBob
 
-===============
-*/
 static float
 V_CalcBob (void)
 {
@@ -189,8 +179,6 @@ V_StopPitchDrift (void)
 
 /*
 ===============
-V_DriftPitch
-
 If the user is adjusting pitch manually, either with lookup/lookdown,
 mlook and mouse, or klook and keyboard, pitch drifting is constantly stopped.
 
@@ -261,11 +249,7 @@ static cshift_t    cshift_lava = { {255, 80, 0}, 150 };
 
 float       v_blend[4];					// rgba 0.0 - 1.0
 
-/*
-===============
-V_ParseDamage
-===============
-*/
+
 void
 V_ParseDamage (void)
 {
@@ -324,11 +308,7 @@ V_ParseDamage (void)
 	v_dmg_time = v_kicktime->fvalue;
 }
 
-/*
-==================
-V_cshift_f
-==================
-*/
+
 static void
 V_cshift_f (void)
 {
@@ -340,8 +320,6 @@ V_cshift_f (void)
 
 /*
 ==================
-V_BonusFlash_f
-
 When you run over an item, the server sends this command
 ==================
 */
@@ -356,8 +334,6 @@ V_BonusFlash_f (void)
 
 /*
 =============
-V_SetContentsColor
-
 Underwater, lava, etc each has a color shift
 =============
 */
@@ -385,11 +361,7 @@ V_SetContentsColor (int contents)
 	}
 }
 
-/*
-=============
-V_CalcPowerupCshift
-=============
-*/
+
 static void
 V_CalcPowerupCshift (void)
 {
@@ -417,11 +389,7 @@ V_CalcPowerupCshift (void)
 		ccl.cshifts[CSHIFT_POWERUP].percent = 0;
 }
 
-/*
-=============
-V_CalcBlend
-=============
-*/
+
 void
 V_CalcBlend (void)
 {
@@ -457,11 +425,7 @@ V_CalcBlend (void)
 	v_blend[3] = bound(0, a				 , 1);
 }
 
-/*
-=============
-V_UpdatePalette
-=============
-*/
+
 void
 V_UpdatePalette (void)
 {
@@ -502,8 +466,6 @@ V_UpdatePalette (void)
 
 /*
 ==============
-V_AddIdle
-
 Idle swaying
 ==============
 */
@@ -533,8 +495,6 @@ V_AddIdle (void)
 
 /*
 ==============
-V_CalcViewRoll
-
 Roll is induced by movement and damage
 ==============
 */
@@ -553,12 +513,7 @@ V_CalcViewRoll (void)
 	}
 }
 
-/*
-==================
-V_CalcIntermissionRefdef
 
-==================
-*/
 static void
 V_CalcIntermissionRefdef (void)
 {
@@ -578,12 +533,7 @@ V_CalcIntermissionRefdef (void)
 		v_iyaw_level->fvalue;
 }
 
-/*
-==================
-V_CalcRefdef
 
-==================
-*/
 static void
 V_CalcRefdef (void)
 {
@@ -687,11 +637,7 @@ V_CalcRefdef (void)
 		oldz = ccl.player_origin[2];
 }
 
-/*
-=============
-DropPunchAngle
-=============
-*/
+
 static void
 DropPunchAngle (void)
 {
@@ -702,8 +648,6 @@ DropPunchAngle (void)
 
 /*
 ==================
-V_RenderView
-
 The player's clipping box goes from (-16 -16 -24) to (16 16 32) from
 the entity origin, so any view position inside that will be valid
 ==================
@@ -742,11 +686,7 @@ V_Zoom_CB (cvar_t *var)
 }
 
 
-/*
-=============
-V_Init_Cvars
-=============
-*/
+
 void
 V_Init_Cvars (void)
 {
@@ -786,11 +726,7 @@ V_Init_Cvars (void)
 	v_centerspeed = Cvar_Get ("v_centerspeed", "500", CVAR_NONE, NULL);
 }
 
-/*
-=============
-V_Init
-=============
-*/
+
 void
 V_Init (void)
 {
@@ -799,11 +735,7 @@ V_Init (void)
 	Cmd_AddCommand ("centerview", V_StartPitchDrift);
 }
 
-/*
-=============
-R_DrawViewModel
-=============
-*/
+
 void
 R_DrawViewModel (void)
 {

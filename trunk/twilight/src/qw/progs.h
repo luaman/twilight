@@ -98,9 +98,7 @@ void ED_Free (edict_t *ed);
 // returns a copy of the string allocated from the server's string heap
 
 void ED_Print (edict_t *ed);
-void ED_Write (FILE * f, edict_t *ed);
 
-void ED_WriteGlobals (FILE * f);
 void ED_ParseGlobals (const char *data);
 
 void ED_LoadFromFile (const char *data);

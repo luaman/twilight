@@ -74,11 +74,6 @@ CL_TEnts_Init (void)
 	cl_sfx_r_exp3 = S_PrecacheSound ("weapons/r_exp3.wav");
 }
 
-/*
-=================
-CL_ParseBeam
-=================
-*/
 static void
 CL_ParseBeam (model_t *m, qboolean lightning)
 {
@@ -132,11 +127,6 @@ CL_ParseBeam (model_t *m, qboolean lightning)
 	Com_Printf ("CL_ParseBeam: beam list overflow!\n");
 }
 
-/*
-=================
-CL_ParseTEnt
-=================
-*/
 void
 CL_ParseTEnt (void)
 {
@@ -323,11 +313,6 @@ CL_ParseTEnt (void)
 }
 
 
-/*
-=================
-CL_NewTempEntity
-=================
-*/
 static entity_t   *
 CL_NewTempEntity (void)
 {
@@ -345,11 +330,6 @@ CL_NewTempEntity (void)
 }
 
 
-/*
-=================
-CL_UpdateTEnts
-=================
-*/
 void
 CL_UpdateTEnts (void)
 {

@@ -43,11 +43,6 @@ Uint8	*mod_base;
 
 static Uint8 mod_novis[MAX_MAP_LEAFS / 8];
 
-/*
-===============
-Mod_Brush_Init
-===============
-*/
 void
 Mod_Brush_Init (void)
 {
@@ -55,11 +50,6 @@ Mod_Brush_Init (void)
 }
 
 
-/*
-===============
-Mod_PointInLeaf
-===============
-*/
 mleaf_t    *
 Mod_PointInLeaf (vec3_t p, model_t *model)
 {
@@ -86,11 +76,6 @@ Mod_PointInLeaf (vec3_t p, model_t *model)
 }
 
 
-/*
-===================
-Mod_DecompressVis
-===================
-*/
 static Uint8 *
 Mod_DecompressVis (Uint8 *in, model_t *model)
 {
@@ -135,11 +120,6 @@ Mod_LeafPVS (mleaf_t *leaf, model_t *model)
 	return Mod_DecompressVis (leaf->compressed_vis, model);
 }
 
-/*
-=================
-Mod_LoadVisibility
-=================
-*/
 static void
 Mod_LoadVisibility (lump_t *l, model_t *mod)
 {
@@ -152,11 +132,6 @@ Mod_LoadVisibility (lump_t *l, model_t *mod)
 }
 
 
-/*
-=================
-Mod_LoadEntities
-=================
-*/
 static void
 Mod_LoadEntities (lump_t *l, model_t *mod)
 {
@@ -169,11 +144,6 @@ Mod_LoadEntities (lump_t *l, model_t *mod)
 }
 
 
-/*
-=================
-Mod_LoadVertexes
-=================
-*/
 static void
 Mod_LoadVertexes (lump_t *l, model_t *mod)
 {
@@ -197,11 +167,6 @@ Mod_LoadVertexes (lump_t *l, model_t *mod)
 	}
 }
 
-/*
-=================
-Mod_LoadSubmodels
-=================
-*/
 static void
 Mod_LoadSubmodels (lump_t *l, model_t *mod)
 {
@@ -232,11 +197,6 @@ Mod_LoadSubmodels (lump_t *l, model_t *mod)
 	}
 }
 
-/*
-=================
-Mod_LoadEdges
-=================
-*/
 static void
 Mod_LoadEdges (lump_t *l, model_t *mod)
 {
@@ -292,12 +252,6 @@ Mod_LoadFaces (lump_t *l, model_t *mod)
 	}
 }
 
-
-/*
-=================
-Mod_SetParent
-=================
-*/
 static void
 Mod_SetParent (mnode_t *node, mnode_t *parent)
 {
@@ -308,11 +262,6 @@ Mod_SetParent (mnode_t *node, mnode_t *parent)
 	Mod_SetParent (node->children[1], node);
 }
 
-/*
-=================
-Mod_LoadNodes
-=================
-*/
 static void
 Mod_LoadNodes (lump_t *l, model_t *mod)
 {
@@ -353,11 +302,6 @@ Mod_LoadNodes (lump_t *l, model_t *mod)
 	Mod_SetParent (mod->brush->nodes, NULL);	// sets nodes and leafs
 }
 
-/*
-=================
-Mod_LoadLeafs
-=================
-*/
 static void
 Mod_LoadLeafs (lump_t *l, model_t *mod)
 {
@@ -398,11 +342,6 @@ Mod_LoadLeafs (lump_t *l, model_t *mod)
 	}
 }
 
-/*
-=================
-Mod_LoadClipnodes
-=================
-*/
 static void
 Mod_LoadClipnodes (lump_t *l, model_t *mod)
 {
@@ -454,8 +393,6 @@ Mod_LoadClipnodes (lump_t *l, model_t *mod)
 
 /*
 =================
-Mod_MakeHull0
-
 Deplicate the drawing hull structure as a clipping hull
 =================
 */
@@ -490,11 +427,6 @@ Mod_MakeHull0 (model_t *mod)
 	}
 }
 
-/*
-=================
-Mod_LoadMarksurfaces
-=================
-*/
 static void
 Mod_LoadMarksurfaces (lump_t *l, model_t *mod)
 {
@@ -519,11 +451,6 @@ Mod_LoadMarksurfaces (lump_t *l, model_t *mod)
 	}
 }
 
-/*
-=================
-Mod_LoadSurfedges
-=================
-*/
 static void
 Mod_LoadSurfedges (lump_t *l, model_t *mod)
 {
@@ -544,11 +471,6 @@ Mod_LoadSurfedges (lump_t *l, model_t *mod)
 }
 
 
-/*
-=================
-Mod_LoadPlanes
-=================
-*/
 static void
 Mod_LoadPlanes (lump_t *l, model_t *mod)
 {
@@ -581,11 +503,6 @@ Mod_LoadPlanes (lump_t *l, model_t *mod)
 	}
 }
 
-/*
-=================
-Mod_LoadBrushModel
-=================
-*/
 void
 Mod_LoadBrushModel (model_t *mod, void *buffer, int flags)
 {
@@ -752,8 +669,6 @@ Mod_LoadBrushModel (model_t *mod, void *buffer, int flags)
 
 /*
 =================
-Mod_UnloadBrushModel
-
 NOTE: Watch the 'unloading' variable, it is a simple lock to prevent
 an infinite loop!
 =================

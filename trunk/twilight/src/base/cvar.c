@@ -35,6 +35,7 @@ static const char rcsid[] =
 #include "cvar.h"
 #include "strlib.h"
 #include "zone.h"
+#include "rw_ops.h"
 
 static void Cvar_Show (cvar_t *var);
 static void Cvar_Set_f (void);
@@ -446,7 +447,7 @@ Cvar_Cleanup (void)
 
 
 void
-Cvar_WriteVars (FILE *f)
+Cvar_WriteVars (SDL_RWops *rw)
 {
 	cvar_list_t	   *v;
 
@@ -454,7 +455,7 @@ Cvar_WriteVars (FILE *f)
 	while (v)
 	{
 		if (v->var->flags & CVAR_ARCHIVE)
-			fprintf (f, "%s \"%s\"\n", v->var->name, v->var->svalue);
+			RWprintf (rw, "%s \"%s\"\n", v->var->name, v->var->svalue);
 		v = v->next;
 	}
 }

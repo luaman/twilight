@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "world.h"
 #include "crc.h"
+#include "fs.h"
 
 edict_t			*sv_player;
 
@@ -69,8 +70,6 @@ host_client and sv_player will be valid.
 
 /*
 ================
-SV_New_f
-
 Sends the first message from the server to a connected client.
 This will be sent on the initial connection and upon each server load.
 ================
@@ -140,11 +139,6 @@ SV_New_f (void)
 					 va ("fullserverinfo \"%s\"\n", svs.info));
 }
 
-/*
-==================
-SV_Soundlist_f
-==================
-*/
 static void
 SV_Soundlist_f (void)
 {
@@ -194,11 +188,6 @@ SV_Soundlist_f (void)
 		MSG_WriteByte (&host_client->netchan.message, 0);
 }
 
-/*
-==================
-SV_Modellist_f
-==================
-*/
 static void
 SV_Modellist_f (void)
 {
@@ -247,11 +236,6 @@ SV_Modellist_f (void)
 		MSG_WriteByte (&host_client->netchan.message, 0);
 }
 
-/*
-==================
-SV_PreSpawn_f
-==================
-*/
 static void
 SV_PreSpawn_f (void)
 {
@@ -314,11 +298,6 @@ SV_PreSpawn_f (void)
 	}
 }
 
-/*
-==================
-SV_Spawn_f
-==================
-*/
 static void
 SV_Spawn_f (void)
 {
@@ -415,11 +394,6 @@ SV_Spawn_f (void)
 
 }
 
-/*
-==================
-SV_SpawnSpectator
-==================
-*/
 static void
 SV_SpawnSpectator (void)
 {
@@ -442,11 +416,6 @@ SV_SpawnSpectator (void)
 	}
 }
 
-/*
-==================
-SV_Begin_f
-==================
-*/
 static void
 SV_Begin_f (void)
 {
@@ -523,11 +492,6 @@ SV_Begin_f (void)
 
 //=============================================================================
 
-/*
-==================
-SV_NextDownload_f
-==================
-*/
 static void
 SV_NextDownload_f (void)
 {
@@ -542,7 +506,7 @@ SV_NextDownload_f (void)
 	r = host_client->downloadsize - host_client->downloadcount;
 	if (r > 768)
 		r = 768;
-	r = fread (buffer, 1, r, host_client->download);
+	r = SDL_RWread (host_client->download, buffer, r, 1);
 	ClientReliableWrite_Begin (host_client, svc_download, 6 + r);
 	ClientReliableWrite_Short (host_client, r);
 
@@ -557,16 +521,11 @@ SV_NextDownload_f (void)
 	if (host_client->downloadcount != host_client->downloadsize)
 		return;
 
-	fclose (host_client->download);
+	SDL_RWclose (host_client->download);
 	host_client->download = NULL;
 
 }
 
-/*
-==================
-SV_NextUpload
-==================
-*/
 static void
 SV_NextUpload (void)
 {
@@ -590,7 +549,7 @@ SV_NextUpload (void)
 
 	if (!host_client->upload) 
 	{
-		host_client->upload = fopen (host_client->uploadfn, "wb");
+		host_client->upload = FS_Open_New (host_client->uploadfn);
 		if (!host_client->upload) 
 		{
 			Sys_Printf ("Can't create %s\n", host_client->uploadfn);
@@ -608,7 +567,7 @@ SV_NextUpload (void)
 							 host_client->uploadfn, host_client->userid);
 	}
 
-	fwrite (net_message.data + msg_readcount, 1, size, host_client->upload);
+	SDL_RWwrite(host_client->upload, net_message.data + msg_readcount, size, 1);
 	msg_readcount += size;
 
 	Com_DPrintf ("UPLOAD: %d received\n", size);
@@ -620,7 +579,7 @@ SV_NextUpload (void)
 	} 
 	else 
 	{
-		fclose (host_client->upload);
+		SDL_RWclose (host_client->upload);
 		host_client->upload = NULL;
 
 		Sys_Printf ("%s upload completed.\n", host_client->uploadfn);
@@ -640,15 +599,11 @@ SV_NextUpload (void)
 	}
 }
 
-/*
-==================
-SV_BeginDownload_f
-==================
-*/
 static void
 SV_BeginDownload_f (void)
 {
-	char	*name, *p;
+	char		*name, *p;
+	fs_file_t	*file;
 
 	name = Zstrdup(tempzone, Cmd_Argv (1));
 
@@ -681,23 +636,20 @@ SV_BeginDownload_f (void)
 	}
 
 	if (host_client->download) {
-		fclose (host_client->download);
+		SDL_RWclose (host_client->download);
 		host_client->download = NULL;
 	}
 
-	host_client->downloadsize = COM_FOpenFile (name, &host_client->download,
-			true);
+	file = FS_FindFile (name);
+	if (!file)
+		goto error;
+
+	host_client->downloadsize = file->len;
 	host_client->downloadcount = 0;
+	host_client->download = file->open(file, false);
 
-	if (!host_client->download
-		// special check for maps, if it came from a pak file, don't allow
-		// download ZOID
-		|| (strncmp (name, "maps/", 5) == 0 && file_from_pak)) {
-		if (host_client->download) {
-			fclose (host_client->download);
-			host_client->download = NULL;
-		}
-
+	if (!file || !host_client->download) {
+error:
 		Sys_Printf ("Couldn't download %s to %s\n", name, host_client->name);
 		ClientReliableWrite_Begin (host_client, svc_download, 4);
 		ClientReliableWrite_Short (host_client, -1);
@@ -713,11 +665,6 @@ SV_BeginDownload_f (void)
 
 //=============================================================================
 
-/*
-==================
-SV_Say
-==================
-*/
 static void
 SV_Say (qboolean team)
 {
@@ -811,22 +758,12 @@ SV_Say (qboolean team)
 }
 
 
-/*
-==================
-SV_Say_f
-==================
-*/
 static void
 SV_Say_f (void)
 {
 	SV_Say (false);
 }
 
-/*
-==================
-SV_Say_Team_f
-==================
-*/
 static void
 SV_Say_Team_f (void)
 {
@@ -839,8 +776,6 @@ SV_Say_Team_f (void)
 
 /*
 =================
-SV_Pings_f
-
 The client is showing the scoreboard, so send new ping times for all
 clients
 =================
@@ -867,11 +802,6 @@ SV_Pings_f (void)
 
 
 
-/*
-==================
-SV_Kill_f
-==================
-*/
 static void
 SV_Kill_f (void)
 {
@@ -887,11 +817,6 @@ SV_Kill_f (void)
 	PR_ExecuteProgram (pr_global_struct->ClientKill);
 }
 
-/*
-==================
-SV_TogglePause
-==================
-*/
 void
 SV_TogglePause (const char *msg)
 {
@@ -914,11 +839,6 @@ SV_TogglePause (const char *msg)
 }
 
 
-/*
-==================
-SV_Pause_f
-==================
-*/
 static void
 SV_Pause_f (void)
 {
@@ -948,8 +868,6 @@ SV_Pause_f (void)
 
 /*
 =================
-SV_Drop_f
-
 The client is going to disconnect, so remove the connection immediately
 =================
 */
@@ -964,8 +882,6 @@ SV_Drop_f (void)
 
 /*
 =================
-SV_PTrack_f
-
 Change the bandwidth estimate for a client
 =================
 */
@@ -1009,8 +925,6 @@ SV_PTrack_f (void)
 
 /*
 =================
-SV_Rate_f
-
 Change the bandwidth estimate for a client
 =================
 */
@@ -1036,8 +950,6 @@ SV_Rate_f (void)
 
 /*
 =================
-SV_Msg_f
-
 Change the message level for a client
 =================
 */
@@ -1059,8 +971,6 @@ SV_Msg_f (void)
 
 /*
 ==================
-SV_SetInfo_f
-
 Allow clients to change userinfo
 ==================
 */
@@ -1111,8 +1021,6 @@ SV_SetInfo_f (void)
 
 /*
 ==================
-SV_ShowServerinfo_f
-
 Dumps the serverinfo info string
 ==================
 */
@@ -1172,11 +1080,6 @@ static ucmd_t      ucmds[] = {
 	{NULL, NULL}
 };
 
-/*
-==================
-SV_ExecuteUserCommand
-==================
-*/
 static void
 SV_ExecuteUserCommand (char *s)
 {
@@ -1212,8 +1115,6 @@ USER CMD EXECUTION
 
 /*
 ===============
-V_CalcRoll
-
 Used by view and sv_user
 ===============
 */
@@ -1247,12 +1148,6 @@ V_CalcRoll (vec3_t angles, vec3_t velocity)
 
 static vec3_t      pmove_mins, pmove_maxs;
 
-/*
-====================
-AddLinksToPmove
-
-====================
-*/
 static void
 AddLinksToPmove (areanode_t *node)
 {
@@ -1313,7 +1208,6 @@ AddLinksToPmove (areanode_t *node)
 
 /*
 ===========
-SV_PreRunCmd
 ===========
 Done before running a player command.  Clears the touch array
 */
@@ -1325,11 +1219,6 @@ SV_PreRunCmd (void)
 	memset (playertouch, 0, sizeof (playertouch));
 }
 
-/*
-===========
-SV_RunCmd
-===========
-*/
 static void
 SV_RunCmd (usercmd_t *ucmd, qboolean inside)
 {
@@ -1480,7 +1369,6 @@ SV_RunCmd__clear:
 
 /*
 ===========
-SV_PostRunCmd
 ===========
 Done after running a player command.
 */
@@ -1504,8 +1392,6 @@ SV_PostRunCmd (void)
 
 /*
 ===================
-SV_ExecuteClientMessage
-
 The current net_message is parsed for the given client
 ===================
 */
@@ -1652,11 +1538,6 @@ SV_ExecuteClientMessage (client_t *cl)
 	}
 }
 
-/*
-==============
-SV_UserInit
-==============
-*/
 void
 SV_UserInit (void)
 {

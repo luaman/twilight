@@ -61,6 +61,7 @@ static const char rcsid[] =
 #include "cpu.h"
 #include "hud.h"
 #include "net.h"
+#include "fs.h"
 
 void        Cmd_ForwardToServer (void);
 
@@ -157,11 +158,6 @@ char        soundlist_name[] =
 	' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, ' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, 0
 };
 
-/*
-==================
-CL_Quit_f
-==================
-*/
 static void
 CL_Quit_f (void)
 {
@@ -169,11 +165,6 @@ CL_Quit_f (void)
 	Sys_Quit ();
 }
 
-/*
-=======================
-CL_Version_f
-======================
-*/
 static void
 CL_Version_f (void)
 {
@@ -185,8 +176,6 @@ CL_Version_f (void)
 
 /*
 =======================
-CL_SendConnectPacket
-
 called when we get a challenge from the server
 ======================
 */
@@ -232,8 +221,6 @@ CL_SendConnectPacket (int challenge)
 
 /*
 =================
-CL_CheckForResend
-
 Resend a connect message if the last one has timed out
 
 =================
@@ -278,12 +265,6 @@ CL_BeginServerConnect (void)
 	CL_CheckForResend ();
 }
 
-/*
-================
-CL_Connect_f
-
-================
-*/
 static void
 CL_Connect_f (void)
 {
@@ -305,8 +286,6 @@ CL_Connect_f (void)
 
 /*
 =====================
-CL_Rcon_f
-
   Send the rest of the command line over as
   an unconnected command.
 =====================
@@ -357,12 +336,6 @@ CL_Rcon_f (void)
 }
 
 
-/*
-=====================
-CL_ClearState
-
-=====================
-*/
 void
 CL_ClearState (void)
 {
@@ -397,8 +370,6 @@ CL_ClearState (void)
 
 /*
 =====================
-CL_Disconnect
-
 Sends a disconnect message to the server
 This is also called on Host_Error, so it shouldn't cause any errors
 =====================
@@ -435,7 +406,7 @@ CL_Disconnect (void)
 	Cam_Reset ();
 
 	if (cls.download) {
-		fclose (cls.download);
+		SDL_RWclose (cls.download);
 		cls.download = NULL;
 	}
 
@@ -452,8 +423,6 @@ CL_Disconnect_f (void)
 
 /*
 ====================
-CL_User_f
-
 user <name or userid>
 
 Dump userdata / masterdata for a user
@@ -486,8 +455,6 @@ CL_User_f (void)
 
 /*
 ====================
-CL_Users_f
-
 Dump userids for all current players
 ====================
 */
@@ -548,8 +515,6 @@ CL_Color_f (void)
 
 /*
 ==================
-CL_FullServerinfo_f
-
 Sent by server when serverinfo changes
 ==================
 */
@@ -580,8 +545,6 @@ CL_FullServerinfo_f (void)
 
 /*
 ==================
-CL_FullInfo_f
-
 Allow clients to change userinfo
 ==================
 Casey was here :)
@@ -632,8 +595,6 @@ CL_FullInfo_f (void)
 
 /*
 ==================
-CL_SetInfo_f
-
 Allow clients to change userinfo
 ==================
 */
@@ -660,8 +621,6 @@ CL_SetInfo_f (void)
 
 /*
 ====================
-CL_Packet_f
-
 packet <destination> <contents>
 
 Contents allows \n escape character
@@ -706,8 +665,6 @@ CL_Packet_f (void)
 
 /*
 =====================
-CL_NextDemo
-
 Called to play the next demo in the demo loop
 =====================
 */
@@ -736,8 +693,6 @@ CL_NextDemo (void)
 
 /*
 =================
-CL_Changing_f
-
 Just sent as a hint to the client that they should
 drop to full console
 =================
@@ -758,8 +713,6 @@ CL_Changing_f (void)
 
 /*
 =================
-CL_Reconnect_f
-
 The server is changing levels
 =================
 */
@@ -789,8 +742,6 @@ CL_Reconnect_f (void)
 
 /*
 =================
-CL_ConnectionlessPacket
-
 Responses to broadcasts, etc
 =================
 */
@@ -899,11 +850,6 @@ CL_ConnectionlessPacket (void)
 }
 
 
-/*
-=================
-CL_ReadPackets
-=================
-*/
 static void
 CL_ReadPackets (void)
 {
@@ -942,16 +888,9 @@ CL_ReadPackets (void)
 //=============================================================================
 
 
-/*
-=====================
-CL_Download_f
-=====================
-*/
 static void
 CL_Download_f (void)
 {
-	char       *p, *q;
-
 	if (ccls.state == ca_disconnected) {
 		Com_Printf ("Must be connected.\n");
 		return;
@@ -962,22 +901,9 @@ CL_Download_f (void)
 		return;
 	}
 
-	snprintf (cls.downloadname, sizeof (cls.downloadname), "%s/%s", com_gamedir,
-			  Cmd_Argv (1));
+	strlcpy_s (cls.downloadname, Cmd_Argv (1));
 
-	p = cls.downloadname;
-	for (;;) {
-		if ((q = strchr (p, '/')) != NULL) {
-			*q = 0;
-			Sys_mkdir (cls.downloadname);
-			*q = '/';
-			p = q + 1;
-		} else
-			break;
-	}
-
-	strlcpy_s (cls.downloadtempname, cls.downloadname);
-	cls.download = fopen (cls.downloadname, "wb");
+	cls.download = FS_Open_New (cls.downloadname);
 	cls.downloadtype = dl_single;
 
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
@@ -997,8 +923,6 @@ CL_WriteConfig_f (void)
 
 /*
 ===================
-Cmd_ForwardToServer
-
 adds the current command line as a clc_stringcmd to the client message.
 things like godmode, noclip, etc, are commands directed to the server,
 so when they are typed in at the console, they will need to be forwarded.
@@ -1075,11 +999,6 @@ Cmd_Say_f (void)
 	}
 }
 
-/*
-=================
-CL_Init_Cvars
-=================
-*/
 static void
 CL_Init_Cvars (void)
 {
@@ -1128,11 +1047,6 @@ CL_Init_Cvars (void)
 	Team_Init_Cvars ();
 }
 
-/*
-=================
-CL_Init
-=================
-*/
 void
 CL_Init (void)
 {
@@ -1212,8 +1126,6 @@ CL_Init (void)
 
 /*
 ================
-Host_EndGame
-
 Call this to drop to a console without exiting the qwcl
 ================
 */
@@ -1235,8 +1147,6 @@ Host_EndGame (const char *message, ...)
 
 /*
 ================
-Host_Error
-
 This shuts down the client and exits qwcl
 ================
 */
@@ -1268,36 +1178,40 @@ Host_Error (const char *error, ...)
 
 /*
 ===============
-Host_WriteConfiguration
-
 Writes key bindings and archived cvars to file
 ===============
 */
 void
 Host_WriteConfiguration (const char *name)
 {
-	FILE       *f;
+	fs_file_t	*file = NULL;
+	SDL_RWops	*rw = NULL;
 
 // dedicated servers initialize the host but don't parse and set the
 // config.cfg cvars
 	if (host_initialized) {
 		char fname[MAX_QPATH] = { 0 };
 
-		snprintf (fname, sizeof (fname), "%s/%s", com_gamedir, name);
+		strlcpy_s (fname, name);
 		COM_DefaultExtension (fname, ".cfg", sizeof (fname));
 
-		f = fopen (fname, "wt");
-		if (!f) {
+		if ((file = FS_FindFile (fname)))
+			rw = file->open(file, true);
+
+		if (!rw)
+			rw = FS_Open_New (fname);
+
+		if (!rw) {
 			Com_Printf ("Couldn't write %s.\n", fname);
 			return;
 		}
 
 		Com_Printf ("Writing %s\n", fname);
 
-		Key_WriteBindings (f);
-		Cvar_WriteVars (f);
+		Key_WriteBindings (rw);
+		Cvar_WriteVars (rw);
 
-		fclose (f);
+		SDL_RWclose (rw);
 	}
 }
 
@@ -1308,8 +1222,6 @@ Host_WriteConfiguration (const char *name)
 
 /*
 ==================
-Host_Frame
-
 Runs all active servers
 ==================
 */
@@ -1454,11 +1366,6 @@ Host_CvarUserinfo (cvar_t *var)
 	}
 }
 
-/*
-====================
-Host_Init
-====================
-*/
 void
 Host_Init (void)
 {
@@ -1566,8 +1473,6 @@ Host_Init (void)
 
 /*
 ===============
-Host_Shutdown
-
 FIXME: this is a callback from Sys_Quit and Sys_Error.  It would be better
 to run quit through here before the final handoff to the sys code.
 ===============

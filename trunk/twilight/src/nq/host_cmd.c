@@ -41,14 +41,10 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "world.h"
+#include "fs.h"
+#include "rw_ops.h"
 
 int         current_skill;
-
-/*
-==================
-Host_Quit_f
-==================
-*/
 
 static void
 Host_Quit_f (void)
@@ -60,11 +56,6 @@ Host_Quit_f (void)
 }
 
 
-/*
-==================
-Host_Status_f
-==================
-*/
 static void
 Host_Status_f (void)
 {
@@ -108,8 +99,6 @@ Host_Status_f (void)
 
 /*
 ==================
-Host_God_f
-
 Sets client to godmode
 ==================
 */
@@ -175,8 +164,6 @@ Host_Noclip_f (void)
 
 /*
 ==================
-Host_Fly_f
-
 Sets client to flymode
 ==================
 */
@@ -201,12 +188,6 @@ Host_Fly_f (void)
 }
 
 
-/*
-==================
-Host_Ping_f
-
-==================
-*/
 static void
 Host_Ping_f (void)
 {
@@ -242,8 +223,6 @@ SERVER TRANSITIONS
 
 /*
 ======================
-Host_Map_f
-
 handle a 
 map <servername>
 command from the console.  Active clients are kicked off.
@@ -298,8 +277,6 @@ Host_Map_f (void)
 
 /*
 ==================
-Host_Changelevel_f
-
 Goes to a new map, taking all clients along
 ==================
 */
@@ -323,8 +300,6 @@ Host_Changelevel_f (void)
 
 /*
 ==================
-Host_Restart_f
-
 Restarts the current server for a dead player
 ==================
 */
@@ -345,8 +320,6 @@ Host_Restart_f (void)
 
 /*
 ==================
-Host_Reconnect_f
-
 This command causes the client to wait for the signon messages again.
 This is sent just before a server changes levels
 ==================
@@ -360,8 +333,6 @@ Host_Reconnect_f (void)
 
 /*
 =====================
-Host_Connect_f
-
 User command to connect to server
 =====================
 */
@@ -393,8 +364,6 @@ LOAD / SAVE GAME
 
 /*
 ===============
-Host_SavegameComment
-
 Writes a SAVEGAME_COMMENT_LENGTH character comment describing the current 
 ===============
 */
@@ -418,15 +387,11 @@ Host_SavegameComment (char *text)
 }
 
 
-/*
-===============
-Host_Savegame_f
-===============
-*/
 static void
 Host_Savegame_f (void)
 {
-	FILE		*f;
+	fs_file_t	*file = NULL;
+	SDL_RWops	*rw = NULL;
 	Uint		i;
 	char		name[256], comment[SAVEGAME_COMMENT_LENGTH + 1];
 
@@ -472,61 +437,60 @@ Host_Savegame_f (void)
 		}
 	}
 
-	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
+	strlcpy_s (name, Cmd_Argv (1));
 	COM_DefaultExtension (name, ".sav", sizeof (name));
 
-	Com_Printf ("Saving game to %s...\n", name);
-	f = fopen (name, "w");
-	if (!f)
+	if ((file = FS_FindFile (name)))
+		rw = file->open(file, true);
+
+	if (!rw)
+		rw = FS_Open_New (name);
+
+	if (!rw)
 	{
 		Com_Printf ("ERROR: couldn't open.\n");
 		return;
 	}
 
-	fprintf (f, "%i\n", SAVEGAME_VERSION);
+	RWprintf (rw, "%i\n", SAVEGAME_VERSION);
 	Host_SavegameComment (comment);
-	fprintf (f, "%s\n", comment);
+	RWprintf (rw, "%s\n", comment);
 	for (i = 0; i < NUM_SPAWN_PARMS; i++)
-		fprintf (f, "%f\n", svs.clients->spawn_parms[i]);
-	fprintf (f, "%d\n", current_skill);
-	fprintf (f, "%s\n", sv.name);
-	fprintf (f, "%f\n", sv.time);
+		RWprintf (rw, "%f\n", svs.clients->spawn_parms[i]);
+	RWprintf (rw, "%d\n", current_skill);
+	RWprintf (rw, "%s\n", sv.name);
+	RWprintf (rw, "%f\n", sv.time);
 
 	// write the light styles
 	for (i = 0; i < MAX_LIGHTSTYLES; i++)
 	{
 		if (sv.lightstyles[i])
-			fprintf (f, "%s\n", sv.lightstyles[i]);
+			RWprintf (rw, "%s\n", sv.lightstyles[i]);
 		else
-			fprintf (f, "m\n");
+			RWprintf (rw, "m\n");
 	}
 
-	ED_WriteGlobals (f);
+	ED_WriteGlobals (rw);
 	for (i = 0; i < sv.num_edicts; i++)
 	{
-		ED_Write (f, EDICT_NUM (i));
-		fflush (f);
+		ED_Write (rw, EDICT_NUM (i));
 	}
-	fclose (f);
+	SDL_RWclose (rw);
 	Com_Printf ("done.\n");
 }
 
 
-/*
-===============
-Host_Loadgame_f
-===============
-*/
 static void
 Host_Loadgame_f (void)
 {
-	char        name[MAX_OSPATH], mapname[MAX_QPATH], str[32768];
+	char		name[MAX_OSPATH];
+	char		*mapname;
 	const char	*start;
+	char		*saved, *cur, *tmp, c;
 	float       time, tfloat, spawn_parms[NUM_SPAWN_PARMS];
-	Sint		entnum, version, r;
+	Sint		entnum, version;
 	Uint		i;
 	edict_t		*ent;
-	FILE		*f;
 
 	if (cmd_source != src_command)
 		return;
@@ -539,7 +503,7 @@ Host_Loadgame_f (void)
 
 	ccls.demonum = -1;					// stop demo loop in case this fails
 
-	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
+	strlcpy (name, Cmd_Argv (1), sizeof (name));
 	COM_DefaultExtension (name, ".sav", sizeof (name));
 
 	// we can't call SCR_BeginLoadingPlaque, because too much stack space has
@@ -547,31 +511,42 @@ Host_Loadgame_f (void)
 	// SCR_BeginLoadingPlaque ();
 
 	Com_Printf ("Loading game from %s...\n", name);
-	f = fopen (name, "r");
-	if (!f)
-	{
-		Com_Printf ("ERROR: couldn't open.\n");
+	cur = saved = COM_LoadTempFile (name, true);
+	if (!saved) {
+		Com_Printf ("ERROR: couldn't load.\n");
 		return;
 	}
 
-	fscanf (f, "%i\n", &version);
+	tmp = strchr (cur, '\n'); *tmp = '\0';
+	cur = tmp + 1;
+	sscanf (cur, "%d", &version);
 	if (version != SAVEGAME_VERSION)
 	{
-		fclose (f);
+		Zone_Free (saved);
 		Com_Printf ("Savegame is version %i, not %i\n", version,
 				SAVEGAME_VERSION);
 		return;
 	}
-	fscanf (f, "%s\n", str);
-	for (i = 0; i < NUM_SPAWN_PARMS; i++)
-		fscanf (f, "%f\n", &spawn_parms[i]);
+	cur = strchr (cur, '\n') + 1;
+	for (i = 0; i < NUM_SPAWN_PARMS; i++) {
+		tmp = strchr (cur, '\n'); *tmp = '\0';
+		sscanf (cur, "%f", &spawn_parms[i]);
+		cur = tmp + 1;
+	}
 	// Quake 1.06 used float skill...
-	fscanf (f, "%f\n", &tfloat);
+	tmp = strchr (cur, '\n'); *tmp = '\0';
+	sscanf (cur, "%f", &tfloat);
+	cur = tmp + 1;
 	current_skill = (int) (tfloat + 0.1);
 	Cvar_Set (skill, va("%i", current_skill));
 
-	fscanf (f, "%s\n", mapname);
-	fscanf (f, "%f\n", &time);
+	tmp = strchr (cur, '\n'); *tmp = '\0';
+	mapname = cur;
+	cur = tmp + 1;
+
+	tmp = strchr (cur, '\n'); *tmp = '\0';
+	sscanf (cur, "%f", &time);
+	cur = tmp + 1;
 
 	CL_Disconnect_f ();
 
@@ -589,31 +564,19 @@ Host_Loadgame_f (void)
 
 	for (i = 0; i < MAX_LIGHTSTYLES; i++)
 	{
-		fscanf (f, "%s\n", str);
-		sv.lightstyles[i] = Zone_Alloc (sv_zone, strlen (str) + 1);
-		strlcpy_s (sv.lightstyles[i], str);
+		tmp = strchr (cur, '\n'); *tmp = '\0';
+		sv.lightstyles[i] = Zone_Alloc (sv_zone, strlen (cur) + 1);
+		strlcpy_s (sv.lightstyles[i], cur);
+		cur = tmp + 1;
 	}
 
 	// load the edicts out of the savegame file
 	entnum = -1;						// -1 is the globals
-	while (!feof (f))
+	while ((cur - saved) < com_filesize)
 	{
-		for (i = 0; i < sizeof (str) - 1; i++)
-		{
-			r = fgetc (f);
-			if (r == EOF || !r)
-				break;
-			str[i] = r;
-			if (r == '}')
-			{
-				i++;
-				break;
-			}
-		}
-		if (i == sizeof (str) - 1)
-			Sys_Error ("Loadgame buffer overflow");
-		str[i] = 0;
-		start = COM_Parse (str);
+		tmp = strchr (cur, '}') + 1; c = *tmp; *tmp = '\0';
+		start = COM_Parse (cur);
+		*tmp = c; cur = tmp;
 		if (!com_token[0])
 			// end of file
 			break;
@@ -644,7 +607,7 @@ Host_Loadgame_f (void)
 	sv.num_edicts = entnum;
 	sv.time = time;
 
-	fclose (f);
+	Zone_Free (saved);
 
 	for (i = 0; i < NUM_SPAWN_PARMS; i++)
 		svs.clients->spawn_parms[i] = spawn_parms[i];
@@ -658,11 +621,6 @@ Host_Loadgame_f (void)
 
 //============================================================================
 
-/*
-======================
-Host_Name_f
-======================
-*/
 static void
 Host_Name_f (void)
 {
@@ -833,11 +791,6 @@ Host_Tell_f (void)
 }
 
 
-/*
-==================
-Host_Color_f
-==================
-*/
 static void
 Host_Color_f (void)
 {
@@ -884,11 +837,6 @@ Host_Color_f (void)
 	MSG_WriteByte (&sv.reliable_datagram, host_client->colors);
 }
 
-/*
-==================
-Host_Kill_f
-==================
-*/
 static void
 Host_Kill_f (void)
 {
@@ -918,11 +866,6 @@ Host_WriteConfig_f (void)
 	Host_WriteConfiguration (Cmd_Argv(1));
 }
 
-/*
-==================
-Host_Pause_f
-==================
-*/
 static void
 Host_Pause_f (void)
 {
@@ -953,11 +896,6 @@ Host_Pause_f (void)
 //===========================================================================
 
 
-/*
-==================
-Host_PreSpawn_f
-==================
-*/
 static void
 Host_PreSpawn_f (void)
 {
@@ -977,11 +915,6 @@ Host_PreSpawn_f (void)
 	host_client->sendsignon = true;
 }
 
-/*
-==================
-Host_Spawn_f
-==================
-*/
 static void
 Host_Spawn_f (void)
 {
@@ -1095,11 +1028,6 @@ Host_Spawn_f (void)
 	host_client->sendsignon = true;
 }
 
-/*
-==================
-Host_Begin_f
-==================
-*/
 static void
 Host_Begin_f (void)
 {
@@ -1116,8 +1044,6 @@ Host_Begin_f (void)
 
 /*
 ==================
-Host_Kick_f
-
 Kicks a user off of the server
 ==================
 */
@@ -1202,11 +1128,6 @@ DEBUGGING TOOLS
 ===============================================================================
 */
 
-/*
-==================
-Host_Give_f
-==================
-*/
 static void
 Host_Give_f (void)
 {
@@ -1387,11 +1308,6 @@ DEMO LOOP CONTROL
 */
 
 
-/*
-==================
-Host_Startdemos_f
-==================
-*/
 static void
 Host_Startdemos_f (void)
 {
@@ -1423,8 +1339,6 @@ Host_Startdemos_f (void)
 
 /*
 ==================
-Host_Demos_f
-
 Return to looping demos
 ==================
 */
@@ -1441,8 +1355,6 @@ Host_Demos_f (void)
 
 /*
 ==================
-Host_Stopdemo_f
-
 Return to looping demos
 ==================
 */
@@ -1459,11 +1371,6 @@ Host_Stopdemo_f (void)
 
 //=============================================================================
 
-/*
-==================
-Host_InitCommands
-==================
-*/
 void
 Host_InitCommands (void)
 {

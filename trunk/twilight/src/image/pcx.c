@@ -39,11 +39,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 
-/*
-============
-PCX_LoadBuffer
-============
-*/
+
 static image_t *
 PCX_LoadBuffer (Uint8 *buf)
 {
@@ -122,11 +118,7 @@ PCX_LoadBuffer (Uint8 *buf)
 	return img;
 }
 
-/*
-============
-PCX_Load
-============
-*/
+
 image_t *
 PCX_Load (char *name)
 {

@@ -35,6 +35,7 @@ static const char rcsid[] =
 #include "net.h"
 #include "strlib.h"
 #include "sys.h"
+#include "fs.h"
 
 static void CL_FinishTimeDemo (void);
 
@@ -53,8 +54,6 @@ read from the demo file.
 
 /*
 ==============
-CL_StopPlayback
-
 Called when a demo file runs out, or the user starts a game
 ==============
 */
@@ -64,7 +63,7 @@ CL_StopPlayback (void)
 	if (!ccls.demoplayback)
 		return;
 
-	fclose (ccls.demofile);
+	SDL_RWclose(ccls.demofile);
 	ccls.demoplayback = false;
 	ccls.demofile = NULL;
 	ccls.state = ca_disconnected;
@@ -78,8 +77,6 @@ CL_StopPlayback (void)
 
 /*
 ====================
-CL_WriteDemoMessage
-
 Dumps the current net message, prefixed by the length and view angles
 ====================
 */
@@ -90,22 +87,19 @@ CL_WriteDemoMessage (void)
 	float	ang[3];
 	
 	len = LittleLong (net_message.cursize);
-	fwrite (&len, 4, 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &len, sizeof (len), 1);
 
 	ang[0] = LittleFloat (cl.viewangles[0]);
 	ang[1] = LittleFloat (cl.viewangles[1]);
 	ang[2] = LittleFloat (cl.viewangles[2]);
 
-	fwrite (ang, 12, 1, ccls.demofile);
+	SDL_RWwrite (ccls.demofile, &ang, sizeof (ang), 1);
 
-	fwrite (net_message.data, net_message.cursize, 1, ccls.demofile);
-	fflush (ccls.demofile);
+	SDL_RWwrite (ccls.demofile, net_message.data, net_message.cursize, 1);
 }
 
 /*
 ====================
-CL_GetMessage
-
 Handles recording and playback of demos, on top of NET_ code
 ====================
 */
@@ -131,10 +125,10 @@ CL_GetMessage (void)
 			}
 		}
 		// get the next message
-		fread (&net_message.cursize, 4, 1, ccls.demofile);
+		SDL_RWread(ccls.demofile, &net_message.cursize, 4, 1);
 		VectorCopy (cl.mviewangles[0], cl.mviewangles[1]);
 
-		fread (cl.mviewangles[0], 12, 1, ccls.demofile);
+		SDL_RWread(ccls.demofile, cl.mviewangles[0], 12, 1);
 
 		for (i = 0; i < 3; i++) {
 			cl.mviewangles[0][i] = LittleFloat (cl.mviewangles[0][i]);
@@ -143,8 +137,9 @@ CL_GetMessage (void)
 		net_message.cursize = LittleLong (net_message.cursize);
 		if (net_message.cursize > MAX_MSGLEN)
 			Sys_Error ("Demo message > MAX_MSGLEN");
-		r = fread (net_message.data, net_message.cursize, 1, ccls.demofile);
+		r = SDL_RWread(ccls.demofile, net_message.data, net_message.cursize, 1);
 		if (r != 1) {
+			Com_Printf("Stopping: %d\n", r);
 			CL_StopPlayback ();
 			return 0;
 		}
@@ -174,8 +169,6 @@ CL_GetMessage (void)
 
 /*
 ====================
-CL_Stop_f
-
 stop recording a demo
 ====================
 */
@@ -195,7 +188,7 @@ CL_Stop_f (void)
 	CL_WriteDemoMessage ();
 
 	// finish up
-	fclose (ccls.demofile);
+	SDL_RWclose (ccls.demofile);
 	ccls.demofile = NULL;
 	ccls.demorecording = false;
 	Com_Printf ("Completed demo\n");
@@ -203,8 +196,6 @@ CL_Stop_f (void)
 
 /*
 ====================
-CL_Record_f
-
 record <demoname> <map> [cd track]
 ====================
 */
@@ -241,7 +232,7 @@ CL_Record_f (void)
 	} else
 		track = -1;
 
-	snprintf (name, sizeof (name), "%s/%s", com_gamedir, Cmd_Argv (1));
+	strncpy (name, Cmd_Argv (1), sizeof (name));
 
 	// start the map up
 	if (c > 2)
@@ -251,14 +242,15 @@ CL_Record_f (void)
 	COM_DefaultExtension (name, ".dem", sizeof(name));
 
 	Com_Printf ("recording to %s.\n", name);
-	ccls.demofile = fopen (name, "wb");
+	ccls.demofile = FS_Open_New (name);
 	if (!ccls.demofile) {
-		Com_Printf ("ERROR: couldn't open.\n");
+		Com_Printf ("ERROR: couldn't create %s.\n", name);
 		return;
 	}
 
 	cls.forcetrack = track;
-	fprintf (ccls.demofile, "%i\n", cls.forcetrack);
+	c = snprintf (name, sizeof (name), "%d\n", cls.forcetrack);
+	SDL_RWwrite (ccls.demofile, name, c, 1);
 
 	ccls.demorecording = true;
 }
@@ -266,8 +258,6 @@ CL_Record_f (void)
 
 /*
 ====================
-CL_PlayDemo_f
-
 play [demoname]
 ====================
 */
@@ -275,7 +265,8 @@ void
 CL_PlayDemo_f (void)
 {
 	char		name[256];
-	int			c;
+	fs_file_t	*file;
+	char		c = 0;
 	qboolean	neg = false;
 
 	if (cmd_source != src_command)
@@ -294,9 +285,15 @@ CL_PlayDemo_f (void)
 	COM_DefaultExtension (name, ".dem", sizeof(name));
 
 	Com_Printf ("Playing demo from %s.\n", name);
-	COM_FOpenFile (name, &ccls.demofile, true);
+	file = FS_FindFile (name);
+	if (!file) {
+		Com_Printf ("ERROR: couldn't find %s.\n", name);
+		ccls.demonum = -1;	// stop demo loop
+		return;
+	}
+	ccls.demofile = file->open(file, false);
 	if (!ccls.demofile) {
-		Com_Printf ("ERROR: couldn't open.\n");
+		Com_Printf ("ERROR: couldn't open %s.\n", name);
 		ccls.demonum = -1;	// stop demo loop
 		return;
 	}
@@ -305,7 +302,7 @@ CL_PlayDemo_f (void)
 	ccls.state = ca_connected;
 	cls.forcetrack = 0;
 
-	while ((c = getc (ccls.demofile)) != '\n')
+	while (SDL_RWread (ccls.demofile, &c, 1, 1) && (c != '\n'))
 		if (c == '-')
 			neg = true;
 		else
@@ -315,12 +312,6 @@ CL_PlayDemo_f (void)
 		cls.forcetrack = -cls.forcetrack;
 }
 
-/*
-====================
-CL_FinishTimeDemo
-
-====================
-*/
 static void
 CL_FinishTimeDemo (void)
 {
@@ -340,8 +331,6 @@ CL_FinishTimeDemo (void)
 
 /*
 ====================
-CL_TimeDemo_f
-
 timedemo [demoname]
 ====================
 */

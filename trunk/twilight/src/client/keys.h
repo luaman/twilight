@@ -27,6 +27,8 @@
 #ifndef __KEYS_H
 #define __KEYS_H
 
+#include "SDL.h"
+
 //
 // these are the key numbers that should be passed to Key_Event
 //
@@ -125,7 +127,7 @@ extern qboolean chat_team;
 extern char chat_buffer[256];
 extern Uint32 chat_bufferlen;
 
-void Key_WriteBindings(FILE *f);
+void Key_WriteBindings(SDL_RWops *rw);
 void Key_Init(void);
 void Key_Init_Cvars(void);
 void Key_Event(int key, qboolean down);

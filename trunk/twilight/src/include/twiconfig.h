@@ -46,5 +46,11 @@
 # define vsnprintf _vsnprintf
 #endif
 
+#ifdef HAVE_SDL_H
+# include "SDL.h"
+#else
+# include "sdlstub.h"
+#endif
+
 #endif // __TWICONFIG_H
 

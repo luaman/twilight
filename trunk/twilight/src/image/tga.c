@@ -44,11 +44,7 @@ typedef struct _TargaHeader {
 	unsigned char pixel_size, attributes;
 } TargaHeader;
 
-/*
-=============
-TGA_LoadBuffer
-=============
-*/
+
 static image_t *
 TGA_LoadBuffer (Uint8 *buffer)
 {
@@ -262,11 +258,7 @@ TGA_LoadBuffer (Uint8 *buffer)
 	return img;
 }
 
-/*
-=============
-TGA_Load
-=============
-*/
+
 image_t *
 TGA_Load (char *name)
 {
@@ -282,11 +274,7 @@ TGA_Load (char *name)
 	return NULL;
 }
 
-/*
-=============
-TGA_Write
-=============
-*/
+
 
 qboolean
 TGA_Write (char *name, int width, int height, int bpp, Uint8 *buffer)

@@ -369,8 +369,6 @@ IN_CenterView (void)
 
 /*
 ===============
-CL_KeyState
-
 Returns 0.25 if a key was pressed and released during the frame,
 0.5 if it was pressed and held
 0 if held then released, and
@@ -438,8 +436,6 @@ cvar_t      *cl_anglespeedkey;
 
 /*
 ================
-CL_AdjustAngles
-
 Moves the local angle positions
 ================
 */
@@ -485,8 +481,6 @@ CL_AdjustAngles (void)
 
 /*
 ================
-CL_BaseMove
-
 Send the intended movement message to the server
 ================
 */
@@ -527,12 +521,6 @@ CL_BaseMove (usercmd_t *cmd)
 }
 
 
-
-/*
-==============
-CL_SendMove
-==============
-*/
 void
 CL_SendMove (usercmd_t *cmd)
 {
@@ -601,11 +589,6 @@ CL_SendMove (usercmd_t *cmd)
 	}
 }
 
-/*
-============
-CL_Input_Init
-============
-*/
 void
 CL_Input_Init (void)
 {
@@ -664,11 +647,6 @@ InputSetRepeatInterval (struct cvar_s *var)
 			: SDL_DEFAULT_REPEAT_DELAY, var->ivalue);
 }
 
-/*
-============
-CL_Input_Init_Cvars
-============
-*/
 void
 CL_Input_Init_Cvars (void)
 {

@@ -92,8 +92,6 @@ func_t SpectatorDisconnect;
 
 /*
 =================
-ED_ClearEdict
-
 Sets everything to NULL
 =================
 */
@@ -106,8 +104,6 @@ ED_ClearEdict (edict_t *e)
 
 /*
 =================
-ED_Alloc
-
 Either finds a free edict, or allocates a new one.
 Try to avoid reusing an entity that was recently freed, because it
 can cause the client to think the entity morphed into something else
@@ -151,8 +147,6 @@ ED_Alloc (void)
 
 /*
 =================
-ED_Free
-
 Marks the edict as free
 FIXME: walk all entities and NULL out references to this entity
 =================
@@ -179,11 +173,6 @@ ED_Free (edict_t *ed)
 
 //===========================================================================
 
-/*
-============
-ED_GlobalAtOfs
-============
-*/
 static ddef_t *
 ED_GlobalAtOfs (int ofs)
 {
@@ -199,11 +188,6 @@ ED_GlobalAtOfs (int ofs)
 	return NULL;
 }
 
-/*
-============
-ED_FieldAtOfs
-============
-*/
 static ddef_t *
 ED_FieldAtOfs (int ofs)
 {
@@ -219,11 +203,6 @@ ED_FieldAtOfs (int ofs)
 	return NULL;
 }
 
-/*
-============
-ED_FindField
-============
-*/
 static ddef_t *
 ED_FindField (char *name)
 {
@@ -240,11 +219,6 @@ ED_FindField (char *name)
 }
 
 
-/*
-============
-ED_FindFunction
-============
-*/
 static dfunction_t *
 ED_FindFunction (char *name)
 {
@@ -294,8 +268,6 @@ done:
 
 /*
 ============
-PR_ValueString
-
 Returns a string describing *data in a type specific manner
 =============
 */
@@ -348,8 +320,6 @@ PR_ValueString (etype_t type, eval_t *val)
 
 /*
 ============
-PR_GlobalString
-
 Returns a string with a description and the contents of a global,
 padded to 20 field width
 ============
@@ -407,8 +377,6 @@ PR_GlobalStringNoContents (int ofs)
 
 /*
 =============
-ED_Print
-
 For debugging
 =============
 */
@@ -464,8 +432,6 @@ ED_PrintNum (int ent)
 
 /*
 =============
-ED_PrintEdicts
-
 For debugging, prints all the entities in the current server
 =============
 */
@@ -484,8 +450,6 @@ ED_PrintEdicts (void)
 
 /*
 =============
-ED_PrintEdict_f
-
 For debugging, prints a single edicy
 =============
 */
@@ -501,8 +465,6 @@ ED_PrintEdict_f (void)
 
 /*
 =============
-ED_Count
-
 For debugging
 =============
 */
@@ -535,11 +497,6 @@ ED_Count (void)
 	Com_Printf ("step      :%3i\n", step);
 }
 
-/*
-=============
-ED_NewString
-=============
-*/
 static char *
 ED_NewString (char *string)
 {
@@ -570,8 +527,6 @@ ED_NewString (char *string)
 
 /*
 =============
-ED_ParseEval
-
 Can parse either fields or globals
 returns false if error
 =============
@@ -644,8 +599,6 @@ ED_ParseEpair (void *base, ddef_t *key, char *s)
 
 /*
 ====================
-ED_ParseEdict
-
 Parses an edict out of the given string, returning the new position
 ed should be a properly initialized empty edict.
 Used for initial level load and for savegames.
@@ -734,8 +687,6 @@ ED_ParseEdict (const char *data, edict_t *ent)
 
 /*
 ================
-ED_LoadFromFile
-
 The entities are directly placed in the array, rather than allocated with
 ED_Alloc, because otherwise an error loading the map would have entity
 number references out of order.
@@ -827,11 +778,6 @@ ED_LoadFromFile (const char *data)
 }
 
 
-/*
-===============
-PR_LoadProgs
-===============
-*/
 void
 PR_LoadProgs (void)
 {
@@ -946,11 +892,6 @@ PR_LoadProgs (void)
 }
 
 
-/*
-===============
-PR_Init
-===============
-*/
 void
 PR_Init (void)
 {

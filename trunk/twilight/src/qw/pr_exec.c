@@ -157,11 +157,6 @@ static char *pr_opnames[] =
 
 //=============================================================================
 
-/*
-=================
-PR_PrintStatement
-=================
-*/
 static void
 PR_PrintStatement (dstatement_t *s)
 {
@@ -192,11 +187,6 @@ PR_PrintStatement (dstatement_t *s)
 	Com_Printf ("\n");
 }
 
-/*
-============
-PR_StackTrace
-============
-*/
 static void
 PR_StackTrace (void)
 {
@@ -221,12 +211,6 @@ PR_StackTrace (void)
 }
 
 
-/*
-============
-PR_Profile_f
-
-============
-*/
 void
 PR_Profile_f (void)
 {
@@ -264,8 +248,6 @@ PR_Profile_f (void)
 
 /*
 ============
-PR_RunError
-
 Aborts the currently executing function
 ============
 */
@@ -291,16 +273,12 @@ PR_RunError (char *error, ...)
 
 /*
 ============================================================================
-PR_ExecuteProgram
-
 The interpretation main loop
 ============================================================================
 */
 
 /*
 ====================
-PR_EnterFunction
-
 Returns the new program statement counter
 ====================
 */
@@ -341,11 +319,6 @@ PR_EnterFunction (dfunction_t *f)
 	return f->first_statement - 1;		// offset the s++
 }
 
-/*
-====================
-PR_LeaveFunction
-====================
-*/
 static int
 PR_LeaveFunction (void)
 {
@@ -371,11 +344,6 @@ PR_LeaveFunction (void)
 }
 
 
-/*
-====================
-PR_ExecuteProgram
-====================
-*/
 void
 PR_ExecuteProgram (func_t fnum)
 {

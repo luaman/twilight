@@ -37,6 +37,7 @@ static const char rcsid[] =
 #include "menu.h"
 #include "strlib.h"
 #include "sys.h"
+#include "rw_ops.h"
 
 #include <stdlib.h>
 
@@ -673,19 +674,19 @@ Writes lines containing "bind key value"
 ============
 */
 void
-Key_WriteBindings (FILE * f)
+Key_WriteBindings (SDL_RWops *rw)
 {
 	int         i, j;
 
 	for (i = 0; i < 256; i++)
 		if (keybindings[0][i])
-			fprintf (f, "bind %s \"%s\"\n", Key_KeynumToString (i),
-					 keybindings[0][i]);
+			RWprintf (rw, "bind %s \"%s\"\n",
+					Key_KeynumToString (i), keybindings[0][i]);
 	for (j = 1; j < 8; j++)
 		for (i = 0; i < 256; i++)
 			if (keybindings[j][i])
-				fprintf (f, "in_bind %d %s \"%s\"\n", j, Key_KeynumToString (i),
-						keybindings[j][i]);
+				RWprintf (rw, "in_bind %d %s \"%s\"\n",
+						j, Key_KeynumToString (i), keybindings[j][i]);
 }
 
 

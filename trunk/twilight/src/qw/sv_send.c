@@ -57,11 +57,6 @@ Com_Printf redirection
 static char        sv_outputbuf[MAX_MSGLEN - 1];
 redirect_t  sv_redirected;
 
-/*
-==================
-SV_FlushRedirect
-==================
-*/
 static void
 SV_FlushRedirect (void)
 {
@@ -91,8 +86,6 @@ SV_RedirectedPrint (char *msg)
 
 /*
 ==================
-SV_BeginRedirect
-
 Send Com_Printf data to the remote client
 instead of the console
 ==================
@@ -132,8 +125,6 @@ SV_PrintToClient (client_t *cl, int level, char *string)
 
 /*
 =================
-SV_ClientPrintf
-
 Sends text across to be displayed if the level passes
 =================
 */
@@ -155,8 +146,6 @@ SV_ClientPrintf (client_t *cl, int level, char *fmt, ...)
 
 /*
 =================
-SV_BroadcastPrintf
-
 Sends text to all active clients
 =================
 */
@@ -186,8 +175,6 @@ SV_BroadcastPrintf (int level, char *fmt, ...)
 
 /*
 =================
-SV_BroadcastCommand
-
 Sends text to all active clients
 =================
 */
@@ -210,8 +197,6 @@ SV_BroadcastCommand (char *fmt, ...)
 
 /*
 =================
-SV_Multicast
-
 Sends the contents of sv.multicast to a subset of the clients,
 then clears sv.multicast.
 
@@ -298,10 +283,8 @@ SV_Multicast (vec3_t origin, int to)
 }
 
 
-/*  
+/*
 ==================
-SV_StartSound
-
 Each entity can have eight independant sound sources, like voice,
 weapon, feet, etc.
 
@@ -310,7 +293,6 @@ already running on that entity/channel pair.
 
 An attenuation of 0 will play full volume everywhere in the level.
 Larger attenuations will drop off.  (max 4 attenuation)
-
 ==================
 */
 void
@@ -424,12 +406,6 @@ SV_FindModelNumbers (void)
 }
 
 
-/*
-==================
-SV_WriteClientdataToMessage
-
-==================
-*/
 static void
 SV_WriteClientdataToMessage (client_t *client, sizebuf_t *msg)
 {
@@ -470,8 +446,6 @@ SV_WriteClientdataToMessage (client_t *client, sizebuf_t *msg)
 
 /*
 =======================
-SV_UpdateClientStats
-
 Performs a delta update of the stats array.  This should only be performed
 when a reliable message can be delivered this frame.
 =======================
@@ -520,11 +494,6 @@ SV_UpdateClientStats (client_t *client)
 		}
 }
 
-/*
-=======================
-SV_SendClientDatagram
-=======================
-*/
 static qboolean
 SV_SendClientDatagram (client_t *client)
 {
@@ -566,11 +535,6 @@ SV_SendClientDatagram (client_t *client)
 	return true;
 }
 
-/*
-=======================
-SV_UpdateToReliableMessages
-=======================
-*/
 static void
 SV_UpdateToReliableMessages (void)
 {
@@ -644,11 +608,6 @@ SV_UpdateToReliableMessages (void)
 
 
 
-/*
-=======================
-SV_SendClientMessages
-=======================
-*/
 void
 SV_SendClientMessages (void)
 {
@@ -735,8 +694,6 @@ SV_SendClientMessages (void)
 
 /*
 =======================
-SV_SendMessagesToAll
-
 FIXME: does this sequence right?
 =======================
 */

@@ -62,8 +62,6 @@ Pmove_Init (void)
 
 /*
 ==================
-PM_ClipVelocity
-
 Slide off of the impacting object
 returns the blocked flags (1 = floor, 2 = step / wall)
 ==================
@@ -98,8 +96,6 @@ PM_ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
 
 /*
 ============
-PM_FlyMove
-
 The basic solid body movement clip that slides along multiple planes
 ============
 */
@@ -203,8 +199,6 @@ PM_FlyMove (void)
 
 /*
 =============
-PM_GroundMove
-
 Player is on ground, with no upwards velocity
 =============
 */
@@ -287,8 +281,6 @@ PM_GroundMove (void)
 
 /*
 ==================
-PM_Friction
-
 Handles both ground friction and water friction
 ==================
 */
@@ -357,11 +349,6 @@ PM_Friction (void)
 }
 
 
-/*
-==============
-PM_Accelerate
-==============
-*/
 static void
 PM_Accelerate (vec3_t wishdir, float wishspeed, float accel)
 {
@@ -412,12 +399,6 @@ PM_AirAccelerate (vec3_t wishdir, float wishspeed, float accel)
 
 
 
-/*
-===================
-PM_WaterMove
-
-===================
-*/
 static void
 PM_WaterMove (void)
 {
@@ -469,12 +450,6 @@ PM_WaterMove (void)
 }
 
 
-/*
-===================
-PM_AirMove
-
-===================
-*/
 static void
 PM_AirMove (void)
 {
@@ -525,11 +500,6 @@ PM_AirMove (void)
 
 
 
-/*
-=============
-PM_CatagorizePosition
-=============
-*/
 static void
 PM_CatagorizePosition (void)
 {
@@ -587,11 +557,6 @@ PM_CatagorizePosition (void)
 }
 
 
-/*
-=============
-JumpButton
-=============
-*/
 static void
 JumpButton (void)
 {
@@ -631,11 +596,6 @@ JumpButton (void)
 	pmove.oldbuttons |= BUTTON_JUMP;	// don't jump again until released
 }
 
-/*
-=============
-CheckWaterJump
-=============
-*/
 static void
 CheckWaterJump (void)
 {
@@ -674,8 +634,6 @@ CheckWaterJump (void)
 
 /*
 =================
-NudgePosition
-
 If pmove.origin is in a solid position,
 try nudging slightly on all axis to
 allow for the cut precision of the net coordinates
@@ -709,11 +667,6 @@ NudgePosition (void)
 	VectorCopy (base, pmove.origin);
 }
 
-/*
-===============
-SpectatorMove
-===============
-*/
 static void
 SpectatorMove (void)
 {
@@ -788,8 +741,6 @@ SpectatorMove (void)
 
 /*
 =============
-PlayerMove
-
 Returns with origin, angles, and velocity modified in place.
 
 Numtouch and touch[] will be set if any of the physents

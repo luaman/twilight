@@ -165,8 +165,6 @@ static Uint8 chktbl[1024 + 4] = {
 
 /*
 ====================
-COM_BlockSequenceCRCByte
-
 For proxy protecting
 ====================
 */

@@ -57,6 +57,7 @@ static const char rcsid[] =
 #include "wad.h"
 #include "cpu.h"
 #include "surface.h"
+#include "fs.h"
 
 /*
 
@@ -105,11 +106,6 @@ cvar_t     *pausable;
 
 static cvar_t     *temp1;
 
-/*
-================
-Host_EndGame
-================
-*/
 void
 Host_EndGame (const char *message, ...)
 {
@@ -137,8 +133,6 @@ Host_EndGame (const char *message, ...)
 
 /*
 ================
-Host_Error
-
 This shuts down both the client and server
 ================
 */
@@ -174,11 +168,6 @@ Host_Error (const char *error, ...)
 	longjmp (host_abortserver, 1);
 }
 
-/*
-================
-Host_FindMaxClients
-================
-*/
 static void
 Host_FindMaxClients (void)
 {
@@ -221,11 +210,6 @@ Host_FindMaxClients (void)
 		Cvar_Set (deathmatch, "0");
 }
 
-/*
-=======================
-Host_InitLocal_Cvars
-======================
-*/
 static void
 Host_InitLocal_Cvars (void)
 {
@@ -256,11 +240,6 @@ Host_InitLocal_Cvars (void)
 	temp1 = Cvar_Get ("temp1", "0", CVAR_NONE, NULL);
 }
 
-/*
-=======================
-Host_InitLocal
-======================
-*/
 static void
 Host_InitLocal (void)
 {
@@ -271,43 +250,45 @@ Host_InitLocal (void)
 
 /*
 ===============
-Host_WriteConfiguration
-
 Writes key bindings and archived cvars to file
 ===============
 */
 void
 Host_WriteConfiguration (const char *name)
 {
-	FILE       *f;
+	fs_file_t	*file = NULL;
+	SDL_RWops	*rw = NULL;
 
 // dedicated servers initialize the host but don't parse and set the
 // config.cfg cvars
 	if (host_initialized && ccls.state != ca_dedicated) {
 		char fname[MAX_QPATH] = { 0 };
 
-		snprintf (fname, sizeof (fname), "%s/%s", com_gamedir, name);
+		strlcpy_s (fname, name);
 		COM_DefaultExtension (fname, ".cfg", sizeof (fname));
 
-		f = fopen (fname, "wt");
-		if (!f) {
+		if ((file = FS_FindFile (fname)))
+			rw = file->open(file, true);
+
+		if (!rw)
+			rw = FS_Open_New (fname);
+
+		if (!rw) {
 			Com_Printf ("Couldn't write %s.\n", fname);
 			return;
 		}
 
 		Com_Printf ("Writing %s\n", fname);
 
-		Key_WriteBindings (f);
-		Cvar_WriteVars (f);
+		Key_WriteBindings (rw);
+		Cvar_WriteVars (rw);
 
-		fclose (f);
+		SDL_RWclose (rw);
 	}
 }
 
 /*
 =================
-SV_ClientPrintf
-
 Sends text across to be displayed 
 FIXME: make this just a stuffed echo?
 =================
@@ -328,8 +309,6 @@ SV_ClientPrintf (const char *fmt, ...)
 
 /*
 =================
-SV_BroadcastPrintf
-
 Sends text to all active clients
 =================
 */
@@ -353,8 +332,6 @@ SV_BroadcastPrintf (const char *fmt, ...)
 
 /*
 =================
-Host_ClientCommands
-
 Send text over to the client to be executed
 =================
 */
@@ -374,8 +351,6 @@ Host_ClientCommands (const char *fmt, ...)
 
 /*
 =====================
-SV_DropClient
-
 Called when the player is getting totally kicked off the host
 if (crash = true), don't bother sending signofs
 =====================
@@ -433,8 +408,6 @@ SV_DropClient (qboolean crash)
 
 /*
 ==================
-Host_ShutdownServer
-
 This only happens at the end of a game, not between levels
 ==================
 */
@@ -503,8 +476,6 @@ Host_ShutdownServer (qboolean crash)
 
 /*
 ================
-Host_ClearMemory
-
 This clears all the memory used by both the client and server, but does
 not reinitialize anything.
 ================
@@ -532,8 +503,6 @@ Host_ClearMemory (void)
 
 /*
 ===================
-Host_FilterTime
-
 Returns false if the time is too short to run a frame
 ===================
 */
@@ -579,8 +548,6 @@ Host_FilterTime (float time)
 
 /*
 ===================
-Host_GetConsoleCommands
-
 Add them exactly as if they had been typed at the console
 ===================
 */
@@ -598,12 +565,6 @@ Host_GetConsoleCommands (void)
 }
 
 
-/*
-==================
-Host_ServerFrame
-
-==================
-*/
 static void
 Host_ServerFrame (void)
 {
@@ -630,8 +591,6 @@ Host_ServerFrame (void)
 
 /*
 ==================
-Host_Frame
-
 Runs all active servers
 ==================
 */
@@ -780,11 +739,6 @@ Host_CvarUserinfo (cvar_t *var)
 	}
 }
 
-/*
-====================
-Host_Init
-====================
-*/
 void
 Host_Init ()
 {
@@ -879,8 +833,6 @@ Host_Init ()
 
 /*
 ===============
-Host_Shutdown
-
 FIXME: this is a callback from Sys_Quit and Sys_Error.  It would be better
 to run quit through here before the final handoff to the sys code.
 ===============

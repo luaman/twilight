@@ -42,11 +42,6 @@ static char *safeargvs[NUM_SAFE_ARGVS] =
 int com_argc;
 char **com_argv;
 
-/*
-================
-COM_InitArgv
-================
-*/
 void
 Cmdline_Init (int argc, char *argv[])
 {
@@ -87,8 +82,6 @@ Cmdline_Init (int argc, char *argv[])
 
 /*
 ================
-COM_CheckParm
-
 Returns the position (1 to argc-1) in the program's argument list
 where the given parameter apears, or 0 if not present
 ================

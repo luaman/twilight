@@ -29,11 +29,6 @@
 
 #include <stdio.h>
 
-#ifdef HAVE_SDL_H
-# include "SDL_endian.h"
-#else
-# include "sdlstub.h"
-#endif
 #include "qtypes.h"
 #include "zone.h"
 #include "cvar.h"
@@ -192,14 +187,8 @@ const char *COM_FileExtension (const char *in);
 //============================================================================
 
 extern int  com_filesize;
-struct cache_user_s;
-
 extern char com_gamedir[MAX_OSPATH];
 
-void COM_WriteFile (const char *filename, const void *data, int len);
-int COM_FOpenFile (const char *filename, FILE ** file, qboolean complain);
-
-int COM_filelength (FILE *f);
 Uint8 *COM_LoadZoneFile (const char *path, qboolean complain, memzone_t *zone);
 Uint8 *COM_LoadTempFile (const char *path, qboolean complain);
 Uint8 *COM_LoadNamedFile (const char *path, qboolean complain);

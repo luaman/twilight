@@ -40,11 +40,7 @@ int         cache_full_cycle;
 
 Uint8      *S_Alloc (int size);
 
-/*
-================
-ResampleSfx
-================
-*/
+
 static void
 ResampleSfx (sfx_t *sfx, int inrate, int inwidth, Uint8 *data)
 {
@@ -99,11 +95,7 @@ ResampleSfx (sfx_t *sfx, int inrate, int inwidth, Uint8 *data)
 
 //=============================================================================
 
-/*
-==============
-S_LoadSound
-==============
-*/
+
 sfx_t *
 S_LoadSound (sfx_t *s)
 {
@@ -241,11 +233,7 @@ FindChunk (char *name)
 }
 
 
-/*
-============
-GetWavinfo
-============
-*/
+
 static wavinfo_t
 GetWavinfo (char *name, Uint8 *wav, int wavlength)
 {

@@ -47,6 +47,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "sky.h"
 #include "teamplay.h"
+#include "fs.h"
 
 static char       *svc_strings[] = {
 	"svc_bad",
@@ -173,8 +174,6 @@ CL_CalcNet (void)
 
 /*
 ===============
-CL_CheckOrDownloadFile
-
 Returns true if the file exists, otherwise it attempts
 to start a download from the server.
 ===============
@@ -182,19 +181,13 @@ to start a download from the server.
 qboolean
 CL_CheckOrDownloadFile (char *filename)
 {
-	FILE       *f;
-
 	if (strstr (filename, "..")) {
 		Com_Printf ("Refusing to download a path with ..\n");
 		return true;
 	}
 
-	COM_FOpenFile (filename, &f, true);
-
-	if (f) {							// it exists, no need to download
-		fclose (f);
+	if (FS_FindFile (filename))	// it exists, no need to download
 		return true;
-	}
 
 	// ZOID - can't download when recording
 	if (ccls.demorecording) {
@@ -210,12 +203,6 @@ CL_CheckOrDownloadFile (char *filename)
 	strlcpy_s (cls.downloadname, filename);
 	Com_Printf ("Downloading %s...\n", cls.downloadname);
 
-	// download to a temp name, and only rename
-	// to the real name when done, so if interrupted
-	// a runt file wont be left
-	COM_StripExtension (cls.downloadname, cls.downloadtempname);
-	strlcat_s (cls.downloadtempname, ".tmp");
-
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message,
 					 va ("download %s", cls.downloadname));
@@ -227,11 +214,6 @@ CL_CheckOrDownloadFile (char *filename)
 
 model_t *mdl_fire = NULL;
 
-/*
-=================
-Model_NextDownload
-=================
-*/
 static void
 Model_NextDownload (void)
 {
@@ -302,11 +284,6 @@ Model_NextDownload (void)
 				ccl.worldmodel->brush->checksum2));
 }
 
-/*
-=================
-Sound_NextDownload
-=================
-*/
 static void
 Sound_NextDownload (void)
 {
@@ -345,11 +322,6 @@ Sound_NextDownload (void)
 }
 
 
-/*
-======================
-CL_RequestNextDownload
-======================
-*/
 static void
 CL_RequestNextDownload (void)
 {
@@ -378,8 +350,6 @@ CL_RequestNextDownload (void)
 
 /*
 =====================
-CL_ParseDownload
-
 A download message has been received from the server
 =====================
 */
@@ -388,7 +358,6 @@ CL_ParseDownload (void)
 {
 	int         size, percent;
 	Uint8       name[MAX_OSPATH];
-	int         r;
 
 
 	// read the data
@@ -405,7 +374,7 @@ CL_ParseDownload (void)
 		Com_Printf ("File not found.\n");
 		if (cls.download) {
 			Com_Printf ("cls.download shouldn't have been set\n");
-			fclose (cls.download);
+			SDL_RWclose (cls.download);
 			cls.download = NULL;
 		}
 		CL_RequestNextDownload ();
@@ -414,54 +383,29 @@ CL_ParseDownload (void)
 
 	// open the file if not opened yet
 	if (!cls.download) {
-		if (strncmp (cls.downloadtempname, "skins/", 6))
-			snprintf (name, sizeof (name), "%s/%s", com_gamedir,
-					  cls.downloadtempname);
-		else
-			snprintf (name, sizeof (name), "qw/%s", cls.downloadtempname);
-
 		COM_CreatePath (name);
 
-		cls.download = fopen (name, "wb");
+		cls.download = FS_Open_New (name);
+
 		if (!cls.download) {
 			msg_readcount += size;
-			Com_Printf ("Failed to open %s\n", cls.downloadtempname);
+			Com_Printf ("Failed to open %s\n", cls.downloadname);
 			CL_RequestNextDownload ();
 			return;
 		}
 	}
 
-	fwrite (net_message.data + msg_readcount, 1, size, cls.download);
+	SDL_RWwrite (cls.download, net_message.data + msg_readcount, size, 1);
 	msg_readcount += size;
 
 	if (percent != 100) {
-// change display routines by zoid
 		// request next block
 		cls.downloadpercent = percent;
 
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		SZ_Print (&cls.netchan.message, "nextdl");
 	} else {
-		char        oldn[MAX_OSPATH];
-		char        newn[MAX_OSPATH];
-
-		fclose (cls.download);
-
-		// rename the temp file to it's final name
-		if (strcmp (cls.downloadtempname, cls.downloadname)) {
-			if (strncmp (cls.downloadtempname, "skins/", 6)) {
-				snprintf (oldn, sizeof (oldn), "%s/%s", com_gamedir,
-						  cls.downloadtempname);
-				snprintf (newn, sizeof (newn), "%s/%s", com_gamedir,
-						  cls.downloadname);
-			} else {
-				snprintf (oldn, sizeof (oldn), "qw/%s", cls.downloadtempname);
-				snprintf (newn, sizeof (newn), "qw/%s", cls.downloadname);
-			}
-			r = rename (oldn, newn);
-			if (r)
-				Com_Printf ("failed to rename.\n");
-		}
+		SDL_RWclose (cls.download);
 
 		cls.download = NULL;
 		cls.downloadpercent = 0;
@@ -556,17 +500,10 @@ CL_StopUpload (void)
 =====================================================================
 */
 
-/*
-==================
-CL_ParseServerData
-==================
-*/
 static void
 CL_ParseServerData (void)
 {
 	char       *str;
-	FILE       *f;
-	char        fn[MAX_OSPATH];
 	qboolean    cflag = false;
 	int         protover;
 
@@ -603,14 +540,10 @@ CL_ParseServerData (void)
 	// ZOID--run the autoexec.cfg in the gamedir
 	// if it exists
 	if (cflag) {
-		snprintf (fn, sizeof (fn), "%s/%s", com_gamedir, "config.cfg");
-		if ((f = fopen (fn, "r")) != NULL) {
-			fclose (f);
-			Cbuf_AddText ("cl_warncmd 0\n");
-			Cbuf_AddText ("exec config.cfg\n");
-			Cbuf_AddText ("exec frontend.cfg\n");
-			Cbuf_AddText ("cl_warncmd 1\n");
-		}
+		Cbuf_AddText ("cl_warncmd 0\n");
+		Cbuf_AddText ("exec config.cfg\n");
+		Cbuf_AddText ("exec frontend.cfg\n");
+		Cbuf_AddText ("cl_warncmd 1\n");
 	}
 
 	// parse player slot, high bit means spectator
@@ -654,11 +587,6 @@ CL_ParseServerData (void)
 	ccls.state = ca_onserver;
 }
 
-/*
-==================
-CL_ParseSoundlist
-==================
-*/
 static void
 CL_ParseSoundlist (void)
 {
@@ -695,11 +623,6 @@ CL_ParseSoundlist (void)
 	Sound_NextDownload ();
 }
 
-/*
-==================
-CL_ParseModellist
-==================
-*/
 static void
 CL_ParseModellist (void)
 {
@@ -741,11 +664,6 @@ CL_ParseModellist (void)
 	Model_NextDownload ();
 }
 
-/*
-==================
-CL_ParseBaseline
-==================
-*/
 void
 CL_ParseBaseline (entity_state_t *es)
 {
@@ -762,11 +680,6 @@ CL_ParseBaseline (entity_state_t *es)
 }
 
 
-/*
-===================
-CL_ParseStaticSound
-===================
-*/
 static void
 CL_ParseStaticSound (void)
 {
@@ -793,11 +706,6 @@ ACTION MESSAGES
 =====================================================================
 */
 
-/*
-==================
-CL_ParseStartSoundPacket
-==================
-*/
 static void
 CL_ParseStartSoundPacket (void)
 {
@@ -838,8 +746,6 @@ CL_ParseStartSoundPacket (void)
 
 /*
 ==================
-CL_ParseClientdata
-
 Server information pertaining to this client only, sent every frame
 ==================
 */
@@ -876,11 +782,6 @@ CL_ParseClientdata (void)
 	}
 }
 
-/*
-==============
-CL_ProcessUserInfo
-==============
-*/
 static void
 CL_ProcessUserInfo (int slot)
 {
@@ -923,11 +824,6 @@ CL_ProcessUserInfo (int slot)
 		user->skin = Skin_Load(user->skin_name);
 }
 
-/*
-==============
-CL_UpdateUserinfo
-==============
-*/
 static void
 CL_UpdateUserinfo (void)
 {
@@ -948,11 +844,6 @@ CL_UpdateUserinfo (void)
 	CL_ProcessUserInfo (slot);
 }
 
-/*
-==============
-CL_SetInfo
-==============
-*/
 static void
 CL_SetInfo (void)
 {
@@ -977,11 +868,6 @@ CL_SetInfo (void)
 	CL_ProcessUserInfo (slot);
 }
 
-/*
-==============
-CL_ProcessServerInfo
-==============
-*/
 void
 CL_ProcessServerInfo (void)
 {
@@ -1025,11 +911,6 @@ CL_ProcessServerInfo (void)
 	ccl.game_teams = GAME_DEATHMATCH;
 }
 
-/*
-==============
-CL_ServerInfo
-==============
-*/
 static void
 CL_ServerInfo (void)
 {
@@ -1046,11 +927,6 @@ CL_ServerInfo (void)
 	CL_ProcessServerInfo ();
 }
 
-/*
-=====================
-CL_SetStat
-=====================
-*/
 static void
 CL_SetStat (int stat, int value)
 {
@@ -1071,11 +947,6 @@ CL_SetStat (int stat, int value)
 		Team_Dead ();
 }
 
-/*
-==============
-CL_MuzzleFlash
-==============
-*/
 static void
 CL_MuzzleFlash (void)
 {
@@ -1139,11 +1010,6 @@ CL_MuzzleFlash (void)
 #define SHOWNET(x) if(cl_shownet->ivalue==2) \
 	Com_Printf ("%3i:%s\n", msg_readcount-1, x);
 
-/*
-=====================
-CL_ParseServerMessage
-=====================
-*/
 static int         received_framecount;
 void
 CL_ParseServerMessage (void)

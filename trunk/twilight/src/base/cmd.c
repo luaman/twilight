@@ -316,7 +316,9 @@ Cbuf_InsertFile (const char *path)
 	f = fopen (path, "rb");
 	if (f)
 	{
-		size = COM_filelength (f);
+		fseek (f, 0, SEEK_END);
+		size = ftell (f);
+		fseek (f, 0, SEEK_SET);
 		if (size)
 		{
 			text = Zone_Alloc(tempzone, size);

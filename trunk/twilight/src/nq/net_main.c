@@ -98,8 +98,6 @@ SetNetTime (void)
 
 /*
 ===================
-NET_NewQSocket
-
 Called by drivers when a new communications endpoint is required
 The sequence and buffer fields will be filled in properly
 ===================
@@ -356,12 +354,6 @@ Slist_Poll (void)
 }
 
 
-/*
-===================
-NET_Connect
-===================
-*/
-
 int         hostCacheCount = 0;
 hostcache_t hostcache[HOSTCACHESIZE];
 
@@ -434,12 +426,6 @@ NET_Connect (char *host)
 }
 
 
-/*
-===================
-NET_CheckNewConnections
-===================
-*/
-
 qsocket_t  *
 NET_CheckNewConnections (void)
 {
@@ -462,11 +448,6 @@ NET_CheckNewConnections (void)
 	return NULL;
 }
 
-/*
-===================
-NET_Close
-===================
-*/
 void
 NET_Close (qsocket_t * sock)
 {
@@ -487,8 +468,6 @@ NET_Close (qsocket_t * sock)
 
 /*
 =================
-NET_GetMessage
-
 If there is a complete message, return it in net_message
 
 returns 0 if no data is waiting
@@ -540,8 +519,6 @@ NET_GetMessage (qsocket_t * sock)
 
 /*
 ==================
-NET_SendMessage
-
 Try to send a complete length+message unit over the reliable stream.
 returns 0 if the message cannot be delivered reliably, but the connection
 		is still considered valid
@@ -596,8 +573,6 @@ NET_SendUnreliableMessage (qsocket_t * sock, sizebuf_t *data)
 
 /*
 ==================
-NET_CanSendMessage
-
 Returns true or false if the given qsocket can currently accept a
 message to be transmitted.
 ==================
@@ -685,12 +660,6 @@ NET_SendToAll (sizebuf_t *data, int blocktime)
 
 //=============================================================================
 
-/*
-====================
-NET_Init_Cvars
-====================
-*/
-
 void
 NET_Init_Cvars (void)
 {
@@ -698,12 +667,6 @@ NET_Init_Cvars (void)
 	_net_hostport = Cvar_Get ("_net_hostport", "26000", CVAR_NONE, NULL);
 	hostname = Cvar_Get ("hostname", "UNNAMED", CVAR_NONE, NULL);
 }
-
-/*
-====================
-NET_Init
-====================
-*/
 
 void
 NET_Init (void)
@@ -760,12 +723,6 @@ NET_Init (void)
 			net_drivers[net_driverlevel].Listen (true);
 	}
 }
-
-/*
-====================
-NET_Shutdown
-====================
-*/
 
 void
 NET_Shutdown (void)

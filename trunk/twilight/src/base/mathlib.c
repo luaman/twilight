@@ -376,8 +376,6 @@ RotatePointAroundVector (vec3_t dst, const vec3_t dir, const vec3_t point,
 
 /*
 ==================
-BoxOnPlaneSide
-
 Returns 1, 2, or 1 + 2
 ==================
 */

@@ -53,12 +53,6 @@ static int	entity_frame = 0;
 
 //============================================================
 
-/*
-===============
-CL_AllocDlight
-
-===============
-*/
 dlight_t   *
 CL_AllocDlight (int key)
 {
@@ -102,11 +96,6 @@ CL_AllocDlight (int key)
 	return dl;
 }
 
-/*
-===============
-CL_NewDlight
-===============
-*/
 static void
 CL_NewDlight (int key, vec3_t org, int effects)
 {
@@ -143,12 +132,6 @@ CL_NewDlight (int key, vec3_t org, int effects)
 }
 
 
-/*
-===============
-CL_DecayLights
-
-===============
-*/
 void
 CL_DecayLights (void)
 {
@@ -177,8 +160,6 @@ PACKET ENTITY PARSING / LINKING
 
 /*
 ==================
-CL_ParseDelta
-
 Can go from either a baseline or a previous packet_entity
 ==================
 */
@@ -239,11 +220,6 @@ CL_ParseDelta (entity_state_t *from, entity_state_t *to, int bits)
 }
 
 
-/*
-=================
-FlushEntityPacket
-=================
-*/
 static void
 FlushEntityPacket (void)
 {
@@ -274,8 +250,6 @@ FlushEntityPacket (void)
 
 /*
 ==================
-CL_ParsePacketEntities
-
 An svc_packetentities has just been parsed, deal with the
 rest of the data stream.
 ==================
@@ -577,12 +551,6 @@ CL_Update_Frame_frac:
 }
 
 
-/*
-===============
-CL_LinkPacketEntities
-
-===============
-*/
 static void
 CL_LinkPacketEntities (void)
 {
@@ -700,8 +668,6 @@ CL_ClearProjectiles (void)
 
 /*
 =====================
-CL_ParseProjectiles
-
 Nails are passed as efficient temporary entities
 =====================
 */
@@ -730,12 +696,6 @@ CL_ParseProjectiles (void)
 	}
 }
 
-/*
-=============
-CL_LinkProjectiles
-
-=============
-*/
 static void
 CL_LinkProjectiles (void)
 {
@@ -760,8 +720,6 @@ CL_LinkProjectiles (void)
 
 /*
 =====================
-CL_ParseStatic
-
 Static entities are non-interactive world objects
 like torches
 =====================
@@ -798,11 +756,6 @@ CL_ParseStatic (void)
 
 //========================================
 
-/*
-===================
-CL_ParsePlayerinfo
-===================
-*/
 void
 CL_ParsePlayerinfo (void)
 {
@@ -865,8 +818,6 @@ CL_ParsePlayerinfo (void)
 
 /*
 ================
-CL_AddFlagModels
-
 Called when the CTF flags are set
 ================
 */
@@ -940,8 +891,6 @@ CL_AddFlagModels (entity_t *ent, int team)
 
 /*
 =============
-CL_LinkPlayers
-
 Create visible entities in the correct position
 for all current players
 =============
@@ -1046,8 +995,6 @@ CL_LinkPlayers (void)
 
 /*
 ===============
-CL_SetSolid
-
 Builds all the pmove physents for the current frame
 ===============
 */
@@ -1090,8 +1037,6 @@ CL_SetSolidEntities (void)
 
 /*
 ===============
-CL_SetSolid
-
 Builds all the pmove physents for the current frame
 pmove must be setup with world and solid entity hulls before calling
 (via CL_PredictMove)
@@ -1158,8 +1103,6 @@ CL_LinkStaticEntites (void)
 
 /*
 ===============
-CL_EmitEntities
-
 Builds the visedicts array for ccl.time
 
 Made up of: clients, packet_entities, nails, and tents
