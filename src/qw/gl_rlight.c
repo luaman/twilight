@@ -178,6 +178,7 @@ R_RenderDlights (void)
 	qglDepthMask (0);
 	qglDisable (GL_TEXTURE_2D);
 	qglEnable (GL_BLEND);
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	qglBlendFunc (GL_ONE, GL_ONE);
 
 	l = cl_dlights;
