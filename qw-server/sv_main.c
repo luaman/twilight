@@ -49,6 +49,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "zone.h"
+#include "net.h"
 
 qboolean    host_initialized;			// true if into command execution
 
@@ -1661,6 +1662,7 @@ SV_Init (void)
 	Cbuf_Execute_Sets ();
 
 	COM_Init_Cvars ();
+	Netchan_Init_Cvars ();
 
 	COM_Init ();
 
