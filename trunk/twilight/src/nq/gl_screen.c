@@ -917,6 +917,6 @@ SCR_UpdateScreen (void)
 
 	// LordHavoc: flush command queue to card (most drivers buffer commands for burst transfer)
 	// (note: this does not wait for anything to finish, it just empties the buffer)
-	glFlush();
+	qglFlush();
 }
 
