@@ -1368,13 +1368,6 @@ WriteDest (void)
 
 		case MSG_ONE:
 			SV_Error ("Shouldn't be at MSG_ONE");
-#if 0
-			ent = PROG_TO_EDICT (pr_global_struct->msg_entity);
-			entnum = NUM_FOR_EDICT (ent);
-			if (entnum < 1 || entnum > MAX_CLIENTS)
-				PR_RunError ("WriteDest: not a client");
-			return &svs.clients[entnum - 1].netchan.message;
-#endif
 
 		case MSG_ALL:
 			return &sv.reliable_datagram;

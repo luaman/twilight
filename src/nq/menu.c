@@ -1107,20 +1107,8 @@ M_AdjustSliders (int dir)
 			Cvar_Set (sensitivity, va("%f", t));
 			break;
 		case 8:						// music volume
-#if 0 // Not with SDL  --KB
-#ifdef _WIN32
-			bgmvolume.value += dir * 1.0;
-#else
-			bgmvolume.value += dir * 0.1;
-#endif
-			if (bgmvolume.value < 0)
-				bgmvolume.value = 0;
-			if (bgmvolume.value > 1)
-				bgmvolume.value = 1;
-			Cvar_SetValue ("bgmvolume", bgmvolume.value);
-#else
+			// Slider doesn't work with SDL
 			Cvar_Set (bgmvolume, bgmvolume->value ? "0" : "1");
-#endif
 			break;
 		case 9:						// sfx volume
 			t = volume->value + (dir * 0.1f);
@@ -1175,12 +1163,6 @@ M_DrawSlider (int x, int y, float range)
 void
 M_DrawCheckbox (int x, int y, int on)
 {
-#if 0
-	if (on)
-		M_DrawCharacter (x, y, 131);
-	else
-		M_DrawCharacter (x, y, 129);
-#endif
 	M_Print (x, y, (on) ? "on" : "off");
 }
 

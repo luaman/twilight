@@ -827,18 +827,6 @@ Sbar_Draw (void)
 		Sbar_TeamOverlay ();
 
 	// clear unused areas in gl
-#if 0
-	{
-		int         x = (vid.width - 320) >> 1;
-
-		// left
-		if (x > 0) {
-			Draw_TileClear (0, vid.height - sb_lines, x, sb_lines);
-			Draw_TileClear (x + 320, vid.height - sb_lines, vid.width - x + 320,
-							sb_lines);
-		}
-	}
-#endif
 	if (vid.width > 320 && !headsup)
 		Draw_TileClear (320, vid.height - sb_lines, vid.width - 320, sb_lines);
 

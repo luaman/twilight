@@ -380,11 +380,6 @@ CDAudio_Init (void)
 {
 	int         i, x, sdl_num_drives;
 
-#if 0
-	if (cls.state == ca_dedicated)
-		return -1;
-#endif
-
 	if (COM_CheckParm ("-nocdaudio"))
 		return -1;
 

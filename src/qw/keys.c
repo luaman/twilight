@@ -232,13 +232,6 @@ Interactive line editing and console scrollback
 void
 Key_Console (int key)
 {
-//#ifdef _WIN32
-#if 0
-	int         i;
-	HANDLE      th;
-	char       *clipText, *textCopied;
-#endif
-
 	if (key == K_ENTER) {				// backslash text are commands, else
 										// chat
 		if (key_lines[edit_line][1] == '\\' || key_lines[edit_line][1] == '/')
@@ -323,36 +316,7 @@ Key_Console (int key)
 		con->display = con->current;
 		return;
 	}
-// LordHavoc: clipboard stuff in an SDL app?  no thanks
-//#ifdef _WIN32
-#if 0
-	if ((key == 'V' || key == 'v') && GetKeyState (VK_CONTROL) < 0) {
-		if (OpenClipboard (NULL)) {
-			th = GetClipboardData (CF_TEXT);
-			if (th) {
-				clipText = GlobalLock (th);
-				if (clipText) {
-					textCopied = malloc (GlobalSize (th) + 1);
-					strcpy (textCopied, clipText);
-					/* Substitutes a NULL for every token */strtok (textCopied,
-																	 "\n\r\b");
-					i = strlen (textCopied);
-					if (i + key_linepos >= MAXCMDLINE)
-						i = MAXCMDLINE - key_linepos;
-					if (i > 0) {
-						textCopied[i] = 0;
-						strcat (key_lines[edit_line], textCopied);
-						key_linepos += i;;
-					}
-					free (textCopied);
-				}
-				GlobalUnlock (th);
-			}
-			CloseClipboard ();
-			return;
-		}
-	}
-#endif
+	// There was some clipboard stuff here, but it was not portable
 
 	if (key < 32 || key > 127)
 		return;							// non printable
