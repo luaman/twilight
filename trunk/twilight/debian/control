@@ -1,19 +1,16 @@
-Source: twilight-classic
+Source: twilight
 Section: contrib/games
 Priority: optional
 Maintainer: Joseph Carter <knghtbrd@debian.org>
 Build-Depends: debhelper (>> 3.0.0)
 Standards-Version: 3.5.6
 
-Package: twilight-classic
+Package: twilight
 Architecture: any
 Depends: ${shlibs:Depends}, libgl1
-Description: first person 3D game - classic version
+Description: first person 3D game
  Project Twilight is a game project based on the Quake(R) engine source
  code using OpenGL.  It is greatly enhanced over Id Software's original,
- but is in no way supported by Id Software, Inc.
- .
- This package contains the classic version Project Twilight, which is
- fully compatible with Id software's last official versions of Quake(R)
- and QuakeWorld(R).
+ but is in no way supported by Id Software, Inc.  It is fully compatible
+ with the original game.
 
