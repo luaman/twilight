@@ -41,6 +41,7 @@ static const char rcsid[] =
 #include <direct.h>
 
 #include "qwsvdef.h"
+#include "server.h"
 #include "cvar.h"
 
 cvar_t     *sys_nostdout;

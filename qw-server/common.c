@@ -1535,14 +1535,19 @@ then loads and adds pak1.pak pak2.pak ...
 ================
 */
 void
-COM_AddDirectory (char *dir)
+COM_AddDirectory (char *indir)
 {
 	int         i;
 	searchpath_t *search;
 	pack_t     *pak;
 	char        pakfile[MAX_OSPATH];
+	char        dir[MAX_OSPATH];
 	char       *p;
 
+	// LordHavoc: this function is called using va() sometimes,
+	// and va only stores one result,
+	// thus it can conflict with console logging.
+	strcpy (dir, indir);
 	Con_Printf ("COM_AddDirectory: Adding %s\n", dir);
 
 	if ((p = strrchr (dir, '/')) != NULL)
@@ -1591,9 +1596,12 @@ COM_AddGameDirectory (char *dir)
 	Con_Printf ("COM_AddGameDirectory: Adding %s\n", dir);
 	COM_AddDirectory (va ("%s/%s", com_sharedir, dir));
 
-	d = va ("%s/%s", com_basedir, dir);
-	Sys_mkdir (d);
-	COM_AddDirectory (d);
+	if (strcmp (com_basedir, com_sharedir)) {
+		// only do this if the share path is not the same as the base path
+		d = va ("%s/%s", com_basedir, dir);
+		Sys_mkdir (d);
+		COM_AddDirectory (d);
+	}
 }
 
 
@@ -1674,6 +1682,10 @@ COM_InitFilesystem (void)
 		strcpy (com_sharedir, Sys_ExpandPath (com_argv[i + 1]));
 	else
 		strcpy (com_sharedir, Sys_ExpandPath (SHAREPATH));
+
+	// LordHavoc: fix for empty com_sharedir
+	if (!*com_sharedir)
+		strcpy (com_sharedir, com_basedir);
 
 //
 // start up with id1 by default
