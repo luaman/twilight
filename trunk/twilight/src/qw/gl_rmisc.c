@@ -177,7 +177,7 @@ R_Init (void)
 	R_InitBubble ();
 	R_InitParticles ();
 	R_InitParticleTexture ();
-//	TNT_Init ();
+	TNT_Init ();
 
 	netgraphtexture = texture_extension_number;
 	texture_extension_number++;

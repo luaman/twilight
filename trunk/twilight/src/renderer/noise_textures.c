@@ -53,8 +53,8 @@ void
 TNT_Init (void)
 {
 	TNT_InitDotParticleTexture ();
-//	TNT_InitSmokeParticleTexture ();
-//	TNT_InitSmokeRingParticleTexture ();
+	TNT_InitSmokeParticleTexture ();
+	TNT_InitSmokeRingParticleTexture ();
 }
 
 static void
