@@ -51,7 +51,6 @@ extern void TNT_Init (void);
 extern void R_InitBubble (void);
 void R_DrawViewModel (void);
 
-Uint r_framecount;
 Uint c_brush_polys, c_alias_polys;
 
 

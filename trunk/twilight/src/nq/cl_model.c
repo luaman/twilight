@@ -120,9 +120,6 @@ Mod_LoadModel (model_t *mod, int flags)
 	return mod;
 }
 
-vec3_t	bboxmin, bboxmax;
-float	bboxradius, bboxyawradius;
-
 qboolean
 Mod_MinsMaxs (model_t *mod, vec3_t org, vec3_t ang,
 		vec3_t mins, vec3_t maxs)

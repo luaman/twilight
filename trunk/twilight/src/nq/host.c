@@ -100,8 +100,6 @@ cvar_t     *teamplay;
 cvar_t     *samelevel;
 cvar_t     *noexit;
 
-cvar_t     *developer;
-
 cvar_t     *skill;
 cvar_t     *deathmatch;
 cvar_t     *coop;

@@ -28,6 +28,7 @@ if SERVERS
 servers=twilight-qwsv
 twilight_qwsv_LDADD= \
 	$(top_builddir)/src/base/libtwilight_base.a
+twilight_qwsv_CFLAGS=-DSERVER_ONLY
 endif
 
 bin_PROGRAMS=$(clients) $(servers)

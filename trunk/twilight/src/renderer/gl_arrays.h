@@ -61,6 +61,7 @@ extern colorub_t	*scub_array_p;
 #define scf_array_v(x) scf_array_p[x].v
 #define scf_array(x,y) scf_array_p[x].v[y]
 
+#ifndef SERVER_ONLY
 extern GLuint *vindices;
 
 extern GLint	v_index, i_index;
@@ -172,4 +173,5 @@ GLArrays_Reset_TC (void)
 	}
 }
 
+#endif
 #endif // __GL_ARRAYS_H

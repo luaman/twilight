@@ -48,7 +48,6 @@
 #error "dglfuncs.h included without DYNGL_WANT"
 #endif
 
-
 DYNGL_EXT (void, glActiveTextureARB, (GLenum), "GL_ARB_multitexture")
 DYNGL_NEED (void, glAlphaFunc, (GLenum func, GLclampf ref))
 DYNGL_NEED (void, glBegin, (GLenum mode))

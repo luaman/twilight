@@ -44,7 +44,7 @@ typedef struct {
 	float	s1, t1, s2, t2;
 } GTF_texture_t;
 
-int GTF_texnum;
-GTF_texture_t GTF_texture[MAX_GT_FONT_TEXTURES];
+extern int GTF_texnum;
+extern GTF_texture_t GTF_texture[MAX_GT_FONT_TEXTURES];
 
 #endif // __GEN_TEXTURES_H

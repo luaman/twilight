@@ -49,7 +49,6 @@ extern void TNT_Init (void);
 extern void R_InitBubble (void);
 void R_DrawViewModel (void);
 
-Uint r_framecount;						// used for dlight push checking
 Uint c_brush_polys, c_alias_polys;
 
 /*
@@ -88,8 +87,6 @@ cvar_t *gl_finish;
 cvar_t *gl_im_transform;
 cvar_t *gl_oldlights;
 cvar_t *gl_colorlights;
-cvar_t *gl_varray_size;
-cvar_t *gl_iarray_size;
 
 extern vec3_t lightcolor;
 qboolean colorlights = true;
