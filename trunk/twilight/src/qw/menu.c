@@ -540,9 +540,9 @@ M_Options_Draw (void)
 	M_Print (16, y, "     Reset to defaults"); y += 8;
 
 	M_Print (16, y, "           Screen size"); M_DrawSlider (220, 56, (scr_viewsize->value - 30) / (120 - 30)); y += 8;
-	M_Print (16, y, "   Hardware Brightness"); M_DrawSlider (220, y, (v_gamma->value) - 1.0); y += 8;
-	M_Print (16, y, "   Software Brightness"); M_DrawSlider(220, y, (r_brightness->value - 1) / 4);y += 8;
-	M_Print (16, y, "     Software Contrast"); M_DrawSlider(220, y, (r_contrast->value - 0.75) * 4);y += 8;
+	M_Print (16, y, "        Hardware Gamma"); M_DrawSlider (220, y, v_gamma->value - 1.0); y += 8;
+	M_Print (16, y, "   Software Brightness"); M_DrawSlider(220, y, (r_brightness->value - 1) / 4); y += 8;
+	M_Print (16, y, "     Software Contrast"); M_DrawSlider(220, y, (r_contrast->value - 0.75) * 4); y += 8;
 	M_Print (16, y, "           Mouse Speed"); M_DrawSlider (220, y, (sensitivity->value - 1) / 10); y += 8;
 	M_Print (16, y, "       CD Music Volume"); M_DrawSlider (220, y, bgmvolume->value); y += 8;
 	M_Print (16, y, "          Sound Volume"); M_DrawSlider (220, y, volume->value); y += 8;
@@ -553,7 +553,7 @@ M_Options_Draw (void)
 	M_Print (16, y, "    Use old status bar"); M_DrawCheckbox (220, y, cl_sbar->value); y += 8;
 	M_Print (16, y, "      HUD on left side"); M_DrawCheckbox (220, y, cl_hudswap->value); y += 8;
 	M_Print (16, y, "             Use Mouse"); M_DrawCheckbox (220, y, _windowed_mouse->value); y += 8;
-	M_Print (16, y, "      Graphics Options");
+	M_Print (16, y, "      Graphics Options"); y += 8;
 
 	if (vid_menudrawfn)
 		M_Print (16, y, "         Video Options"); y += 8;
