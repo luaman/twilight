@@ -87,26 +87,38 @@ AC_CHECK_HEADERS(
 	limits.h signal.h sys/time.h time.h execinfo.h
 )
 
+dnl Let 'em figure this one out...
+AC_MSG_CHECKING(if -l33t works)
+if test "x`id -u`" = "x0"; then
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT([no (good!)])
+fi
+
 dnl userpath/sharepath config
 AC_ARG_WITH(sharepath,
 	[  --with-sharepath        Default shared data path [DATADIR/games/twilight]],,
 	with_sharepath="$DDIR/games/twilight")
-AC_DEFINE_UNQUOTED(SHAREPATH, "$with_sharepath")
+AC_DEFINE_UNQUOTED(SHAREPATH, "$with_sharepath",
+	[Location of read-only (shared) gamedata])
 
 AC_ARG_WITH(userpath,
 	[  --with-userpath         Default user data path [\$HOME/.twilight]],,
 	with_userpath="~/.twilight")
-AC_DEFINE_UNQUOTED(USERPATH, "$with_userpath")
+AC_DEFINE_UNQUOTED(USERPATH, "$with_userpath",
+	[Location of user-modifyable gamedata])
 
 AC_ARG_WITH(shareconf,
 	[  --with-shareconf        Default shared config [$SHARECONF]],,
 	with_shareconf="$SHARECONF")
-AC_DEFINE_UNQUOTED(SHARECONF, "$with_shareconf")
+AC_DEFINE_UNQUOTED(SHARECONF, "$with_shareconf",
+	[Location of read-only (shared) configuration file])
 
 AC_ARG_WITH(userconf,
 	[  --with-userconf         Default shared config [$USERCONF]],,
 	with_userconf="$USERCONF")
-AC_DEFINE_UNQUOTED(USERCONF, "$with_userconf")
+AC_DEFINE_UNQUOTED(USERCONF, "$with_userconf",
+	[Location of user-modifyable configuration file])
 
 dnl Allow partial builds
 AC_ARG_WITH(servers,
@@ -138,7 +150,8 @@ if test "x$OGLDECL" = "x"; then
 else
 	AC_MSG_RESULT($OGLDECL)
 fi
-AC_DEFINE_UNQUOTED(OGLDECL, $OGLDECL)
+AC_DEFINE_UNQUOTED(OGLDECL, $OGLDECL,
+	[Define to whatever your OS requires])
 
 dnl let the user choose the default OpenGL library
 AC_ARG_WITH(libgl,
@@ -153,7 +166,8 @@ if test "x$with_libgl" = "xyes" -o "x$with_libgl" = "xno"; then
 	fi
 fi
 
-AC_DEFINE_UNQUOTED(GL_LIBRARY, "$with_libgl")
+AC_DEFINE_UNQUOTED(GL_LIBRARY, "$with_libgl",
+	[Define to your default OpenGL library])
 
 
 dnl Make the compiler extra-bitchy if desired
