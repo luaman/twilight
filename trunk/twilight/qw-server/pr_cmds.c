@@ -62,7 +62,7 @@ PF_VarString (int first)
 
 	out[0] = 0;
 	for (i = first; i < pr_argc; i++) {
-		strcat (out, G_STRING ((OFS_PARM0 + i * 3)));
+		Q_strcat (out, G_STRING ((OFS_PARM0 + i * 3)));
 	}
 	return out;
 }
@@ -1630,7 +1630,7 @@ PF_infokey (void)
 	} else if (e1 <= MAX_CLIENTS) {
 		if (!strcmp (key, "ip"))
 			value =
-				strcpy (ov,
+				Q_strcpy (ov,
 						NET_BaseAdrToString (svs.clients[e1 - 1].netchan.
 											 remote_address));
 		else if (!strcmp (key, "ping")) {

@@ -850,7 +850,7 @@ COM_FileBase (char *in, char *out)
 	if (dot == NULL)
 		dot = s;
 	if (dot - slash < 2)
-		strcpy (out,"?model?");
+		Q_strcpy (out,"?model?");
 	else
 	{
 		while (slash < dot)
@@ -1730,7 +1730,7 @@ COM_InitFilesystem (void)
 
 	// LordHavoc: fix for empty com_sharedir
 	if (!*com_sharedir)
-		strcpy (com_sharedir, com_basedir);
+		Q_strcpy (com_sharedir, com_basedir);
 
 //
 // start up with id1 by default

@@ -1604,7 +1604,7 @@ COM_InitFilesystem (void)
 	}
 	// LordHavoc: fix for empty com_sharedir
 	if (!*com_sharedir)
-		strcpy (com_sharedir, com_basedir);
+		Q_strcpy (com_sharedir, com_basedir);
 
 //
 // start up with GAMENAME by default (id1)

@@ -913,7 +913,7 @@ Cache_Alloc (cache_user_t *c, int size, char *name)
 	while (1) {
 		cs = Cache_TryAlloc (size, false);
 		if (cs) {
-			strncpy (cs->name, name, sizeof (cs->name) - 1);
+			Q_strncpy (cs->name, name, sizeof (cs->name) - 1);
 			c->data = (void *) (cs + 1);
 			cs->user = c;
 			break;

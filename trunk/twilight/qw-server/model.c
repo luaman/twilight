@@ -195,7 +195,7 @@ Mod_FindName (char *name)
 	if (i == mod_numknown) {
 		if (mod_numknown == MAX_MOD_KNOWN)
 			SV_Error ("mod_numknown == MAX_MOD_KNOWN");
-		strcpy (mod->name, name);
+		Q_strcpy (mod->name, name);
 		mod->needload = true;
 		mod_numknown++;
 	}
@@ -1123,7 +1123,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 			snprintf (name, sizeof (name), "*%i", i + 1);
 			loadmodel = Mod_FindName (name);
 			*loadmodel = *mod;
-			strcpy (loadmodel->name, name);
+			Q_strcpy (loadmodel->name, name);
 			mod = loadmodel;
 		}
 	}

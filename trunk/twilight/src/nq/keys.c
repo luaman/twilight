@@ -210,7 +210,7 @@ Key_Console (int key)
 	{
 		if (key_linepos > 1)
 		{
-			strcpy(key_lines[edit_line] + key_linepos - 1, key_lines[edit_line] + key_linepos);
+			Q_strcpy(key_lines[edit_line] + key_linepos - 1, key_lines[edit_line] + key_linepos);
 			key_linepos--;
 		}
 
@@ -219,7 +219,7 @@ Key_Console (int key)
 	if (key == K_DEL)// delete char on cursor
 	{
 		if (key_linepos < strlen(key_lines[edit_line]))
-			strcpy(key_lines[edit_line] + key_linepos, key_lines[edit_line] + key_linepos + 1);
+			Q_strcpy(key_lines[edit_line] + key_linepos, key_lines[edit_line] + key_linepos + 1);
 
 		return;
 	}

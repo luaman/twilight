@@ -822,10 +822,10 @@ COM_FileBase (char *in, char *out)
 	for (s2 = s; *s2 && *s2 != '/' && s2 > in; s2--);
 
 	if (s - s2 < 2)
-		strcpy (out, "?model?");
+		Q_strcpy (out, "?model?");
 	else {
 		s--;
-		strncpy (out, s2 + 1, s - s2);
+		Q_strncpy (out, s2 + 1, s - s2);
 		out[s - s2] = 0;
 	}
 }
@@ -853,7 +853,7 @@ COM_DefaultExtension (char *path, char *extension)
 		src--;
 	}
 
-	strcat (path, extension);
+	Q_strcat (path, extension);
 }
 
 //============================================================================
@@ -1510,13 +1510,13 @@ COM_LoadPackFile (char *packfile)
 
 // parse the directory
 	for (i = 0; i < numpackfiles; i++) {
-		strcpy (newfiles[i].name, info[i].name);
+		Q_strcpy (newfiles[i].name, info[i].name);
 		newfiles[i].filepos = LittleLong (info[i].filepos);
 		newfiles[i].filelen = LittleLong (info[i].filelen);
 	}
 
 	pack = Z_Malloc (sizeof (pack_t));
-	strcpy (pack->filename, packfile);
+	Q_strcpy (pack->filename, packfile);
 	pack->handle = packhandle;
 	pack->numfiles = numpackfiles;
 	pack->files = newfiles;
@@ -1547,21 +1547,21 @@ COM_AddDirectory (char *indir)
 	// LordHavoc: this function is called using va() sometimes,
 	// and va only stores one result,
 	// thus it can conflict with console logging.
-	strcpy (dir, indir);
+	Q_strcpy (dir, indir);
 	Con_Printf ("COM_AddDirectory: Adding %s\n", dir);
 
 	if ((p = strrchr (dir, '/')) != NULL)
-		strcpy (gamedirfile, ++p);
+		Q_strcpy (gamedirfile, ++p);
 	else
-		strcpy (gamedirfile, p);
-	strcpy (com_gamedir, dir);
+		Q_strcpy (gamedirfile, p);
+	Q_strcpy (com_gamedir, dir);
 	Sys_mkdir (com_gamedir);
 
 //
 // add the directory to the search path
 //
 	search = Hunk_Alloc (sizeof (searchpath_t));
-	strcpy (search->filename, dir);
+	Q_strcpy (search->filename, dir);
 	search->next = com_searchpaths;
 	com_searchpaths = search;
 
@@ -1626,7 +1626,7 @@ COM_Gamedir (char *dir)
 	if (!strcmp (gamedirfile, dir))
 		return;							// still the same
 
-	strcpy (gamedirfile, dir);
+	Q_strcpy (gamedirfile, dir);
 
 	// 
 	// free up any current game dir info
@@ -1669,9 +1669,9 @@ COM_InitFilesystem (void)
 //
 	i = COM_CheckParm ("-basedir");
 	if (i && i < com_argc - 1)
-		strcpy (com_basedir, Sys_ExpandPath (com_argv[i + 1]));
+		Q_strcpy (com_basedir, Sys_ExpandPath (com_argv[i + 1]));
 	else
-		strcpy (com_basedir, Sys_ExpandPath (USERPATH));
+		Q_strcpy (com_basedir, Sys_ExpandPath (USERPATH));
 
 //
 // -sharedir <path>
@@ -1679,13 +1679,13 @@ COM_InitFilesystem (void)
 //
 	i = COM_CheckParm ("-sharedir");
 	if (i && i < com_argc - 1)
-		strcpy (com_sharedir, Sys_ExpandPath (com_argv[i + 1]));
+		Q_strcpy (com_sharedir, Sys_ExpandPath (com_argv[i + 1]));
 	else
-		strcpy (com_sharedir, Sys_ExpandPath (SHAREPATH));
+		Q_strcpy (com_sharedir, Sys_ExpandPath (SHAREPATH));
 
 	// LordHavoc: fix for empty com_sharedir
 	if (!*com_sharedir)
-		strcpy (com_sharedir, com_basedir);
+		Q_strcpy (com_sharedir, com_basedir);
 
 //
 // start up with id1 by default
@@ -1791,7 +1791,7 @@ Info_RemoveKey (char *s, char *key)
 		*o = 0;
 
 		if (!strcmp (key, pkey)) {
-			strcpy (start, s);			// remove this part
+			Q_strcpy (start, s);			// remove this part
 			return;
 		}
 

@@ -135,7 +135,7 @@ Con_Printf (char *fmt, ...)
 	if (sv_redirected) {
 		if (strlen (msg) + strlen (outputbuf) > sizeof (outputbuf) - 1)
 			SV_FlushRedirect ();
-		strcat (outputbuf, msg);
+		Q_strcat (outputbuf, msg);
 		return;
 	}
 
