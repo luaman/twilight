@@ -1193,7 +1193,7 @@ Host_WriteConfiguration (const char *name)
 		COM_DefaultExtension (fname, ".cfg", sizeof (fname));
 
 		if ((file = FS_FindFile (fname)))
-			rw = file->open(file, FSF_WRITE);
+			rw = file->open(file, FSF_WRITE | FSF_ASCII);
 
 		if (!rw)
 			rw = FS_Open_New (fname, FSF_ASCII);
