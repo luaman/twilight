@@ -324,6 +324,7 @@ extern float speedscale;				// for top sky and bottom sky
 
 void        DrawGLWaterPoly (glpoly_t *p);
 void        DrawGLWaterPolyLightmap (glpoly_t *p);
+void        DrawGLWaterPolyMTex (glpoly_t *p);
 
 lpMTexFUNC  qglMTexCoord2f = NULL;
 lpSelTexFUNC qglSelectTexture = NULL;
@@ -348,11 +349,10 @@ R_DrawSequentialPoly (msurface_t *s)
 	float      *v;
 	int         i;
 	texture_t  *t;
-	vec3_t      nv;
 	glRect_t   *theRect;
 
 	// 
-	// normal lightmaped poly
+	// normal lightmapped poly
 	// 
 
 	if (!(s->flags & (SURF_DRAWSKY | SURF_DRAWTURB | SURF_UNDERWATER))) {
@@ -490,23 +490,18 @@ R_DrawSequentialPoly (msurface_t *s)
 			theRect->w = 0;
 		}
 		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-		qglBegin (GL_TRIANGLE_FAN);
-		v = p->verts[0];
-		for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-			qglMTexCoord2f (gl_mtex_enum + 0, v[3], v[4]);
-			qglMTexCoord2f (gl_mtex_enum + 1, v[5], v[6]);
-
-			nv[0] =
-				v[0] + 8 * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-															   realtime);
-			nv[1] =
-				v[1] + 8 * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-															   realtime);
-			nv[2] = v[2];
-
-			qglVertex3fv (nv);
+		if (r_waterwarp->value > 0) {	// warping factor greater than 0
+			DrawGLWaterPolyMTex(p);
+		} else {						// no warping
+			qglBegin (GL_POLYGON);
+			v = p->verts[0];
+			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
+					qglMTexCoord2f (gl_mtex_enum + 0, v[3], v[4]);
+					qglMTexCoord2f (gl_mtex_enum + 1, v[5], v[6]);
+					qglVertex3fv (v);
+			}
+			qglEnd ();
 		}
-		qglEnd ();
 		qglDisable (GL_TEXTURE_2D);
 		GL_SelectTexture (0);
 
@@ -515,15 +510,64 @@ R_DrawSequentialPoly (msurface_t *s)
 
 		t = R_TextureAnimation (s->texinfo->texture);
 		qglBindTexture (GL_TEXTURE_2D, t->gl_texturenum);
-		DrawGLWaterPoly (p);
+		if (r_waterwarp->value > 0) {	// warping factor greater than 0
+			DrawGLWaterPoly (p);
+		} else {
+			qglBegin (GL_POLYGON);
+			v = p->verts[0];
+			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
+				qglTexCoord2f (v[3], v[4]);
+				qglVertex3fv (v);
+			}
+			qglEnd ();
+		}
 
 		qglBindTexture (GL_TEXTURE_2D, lightmap_textures + s->lightmaptexturenum);
 		qglEnable (GL_BLEND);
-		DrawGLWaterPolyLightmap (p);
+		if (r_waterwarp->value > 0) {	// warping factor greater than 0
+			DrawGLWaterPolyLightmap (p);
+		} else {
+			qglBegin (GL_POLYGON);
+			v = p->verts[0];
+			for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
+				qglTexCoord2f (v[5], v[6]);
+				qglVertex3fv (v);
+			}
+			qglEnd ();
+		}
 		qglDisable (GL_BLEND);
 	}
 }
 
+/*
+================
+DrawGLWaterPolyMTex
+
+Warp the vertex coordinates
+for gl->mtexable mode, draws
+the lightmap as well
+================
+*/
+void
+DrawGLWaterPolyMTex (glpoly_t *p)
+{
+	int			i;
+	float		*v;
+	vec3_t		nv;
+	float		intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
+
+	qglBegin (GL_TRIANGLE_FAN);
+	v = p->verts[0];
+	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
+			qglMTexCoord2f (gl_mtex_enum + 0, v[3], v[4]);
+			qglMTexCoord2f (gl_mtex_enum + 1, v[5], v[6]);
+			nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+			nv[1] = v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+			nv[2] = v[2];
+			qglVertex3fv (nv);
+	}
+	qglEnd ();
+}
 
 /*
 ================
@@ -538,20 +582,15 @@ DrawGLWaterPoly (glpoly_t *p)
 	int         i;
 	float      *v;
 	vec3_t      nv;
+	float		intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
 
 	qglBegin (GL_TRIANGLE_FAN);
 	v = p->verts[0];
 	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
 		qglTexCoord2f (v[3], v[4]);
-
-		nv[0] =
-			v[0] + 8 * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-														   realtime);
-		nv[1] =
-			v[1] + 8 * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-														   realtime);
+		nv[0] =	v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+		nv[1] =	v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
 		nv[2] = v[2];
-
 		qglVertex3fv (nv);
 	}
 	qglEnd ();
@@ -563,20 +602,15 @@ DrawGLWaterPolyLightmap (glpoly_t *p)
 	int         i;
 	float      *v;
 	vec3_t      nv;
+	float		intensity = (r_waterwarp->value > 0) ? r_waterwarp->value : 8;
 
 	qglBegin (GL_TRIANGLE_FAN);
 	v = p->verts[0];
 	for (i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
 		qglTexCoord2f (v[5], v[6]);
-
-		nv[0] =
-			v[0] + 8 * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-														   realtime);
-		nv[1] =
-			v[1] + 8 * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 +
-														   realtime);
+		nv[0] = v[0] + intensity * Q_sin (v[1] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
+		nv[1] =	v[1] + intensity * Q_sin (v[0] * 0.05 + realtime) * Q_sin (v[2] * 0.05 + realtime);
 		nv[2] = v[2];
-
 		qglVertex3fv (nv);
 	}
 	qglEnd ();
@@ -659,7 +693,7 @@ R_BlendLightmaps (void)
 			theRect->w = 0;
 		}
 		for (; p; p = p->chain) {
-			if (p->flags & SURF_UNDERWATER)
+			if (r_waterwarp->value > 0 && (p->flags & SURF_UNDERWATER))
 				DrawGLWaterPolyLightmap (p);
 			else {
 				qglBegin (GL_POLYGON);
@@ -709,7 +743,7 @@ R_RenderBrushPoly (msurface_t *fa)
 		return;
 	}
 
-	if (fa->flags & SURF_UNDERWATER)
+	if (r_waterwarp->value > 0 && (fa->flags & SURF_UNDERWATER))
 		DrawGLWaterPoly (fa->polys);
 	else
 		DrawGLPoly (fa->polys);

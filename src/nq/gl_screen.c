@@ -107,6 +107,7 @@ cvar_t		*scr_printspeed;
 cvar_t		*gl_triplebuffer;
 cvar_t		*r_brightness;
 cvar_t		*r_contrast;
+cvar_t		*r_waterwarp;
 
 extern cvar_t crosshair;
 
@@ -454,6 +455,7 @@ SCR_Init_Cvars (void)
 	gl_triplebuffer = Cvar_Get ("gl_triplebuffer", "1", CVAR_ARCHIVE, NULL);
 	r_brightness = Cvar_Get ("r_brightness", "1", CVAR_ARCHIVE, NULL);
 	r_contrast = Cvar_Get ("r_contrast", "1", CVAR_ARCHIVE, NULL);
+	r_waterwarp = Cvar_Get ("r_waterwarp", "0", CVAR_ARCHIVE, NULL);
 }
 
 /*
