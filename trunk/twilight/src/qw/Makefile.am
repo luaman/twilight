@@ -15,7 +15,7 @@ LIBS=@SDL_LIBS@ @LIBS@ -lm $(twilight_qw_sys_libs)
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 
 if CLIENTS
-bin_PROGRAMS=twilight-qw
+clients=twilight-qw
 twilight_qw_LDADD= \
 	$(top_builddir)/src/base/libtwilight_base.a \
 	$(top_builddir)/src/image/libtwilight_image.a \
@@ -24,10 +24,12 @@ twilight_qw_LDADD= \
 endif
 
 if SERVERS
-# FIXME: while -qwsv builds in a different directory, we need a way to export
-# the needed objects to it.  This library needs to go away.
-lib_LIBRARIES=libqwsv.a
+servers=twilight-qwsv
+twilight_qwsv_LDADD= \
+	$(top_builddir)/src/base/libtwilight_base.a
 endif
+
+bin_PROGRAMS=$(clients) $(servers)
 
 if SYS_WIN32
 twilight_qw_sys_libs=-lwinmm -lwsock32
@@ -46,8 +48,13 @@ twilight_qw_SOURCES= \
 	r_explosion.c r_explosion.h r_part.c render.h sbar.c screen.h skin.c \
 	snd_dma.c sv_null.c teamplay.c sys.c vid_sdl.c view.c
 
-libqwsv_a_SOURCES= \
-	cl_null.c info.c mdfour.c pmove.c pmovetst.c
+twilight_qwsv_SOURCES= \
+	cl_null.c common.c info.c mdfour.c net_chan.c net_udp.c pmove.c \
+	pmovetst.c pr_cmds.c pr_edict.c pr_exec.c progdefs.h progs.h \
+	server.h sv_ccmds.c sv_ents.c sv_init.c sv_main.c sv_model.c \
+	sv_move.c sv_nchan.c sv_phys.c sv_send.c sv_sys.c sv_user.c \
+	world.h world.c
+	
 
 EXTRA_DIST= \
 	qw.dsp

@@ -202,7 +202,6 @@ AC_OUTPUT(
 	src/sound/Makefile
 	nq/Makefile
 	qw/Makefile
-	qw-server/Makefile
 	doc/Makefile
 	doc/olddoc/Makefile
 	tools/Makefile

@@ -692,9 +692,6 @@ void Com_Printf (const char *fmt, ...)
 	if (logname[0])
 		Sys_DebugLog (logname, "%s", msg);
 
-	if (!con_initialized)
-		return;
-
 // write it to the scrollable buffer
 	Con_Print (msg);
 }

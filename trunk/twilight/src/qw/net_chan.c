@@ -33,12 +33,10 @@ static const char rcsid[] =
 #include <time.h>
 
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+# include <unistd.h>
 #endif
 
-#ifdef _WIN32
-# include <windows.h>	/* for timeGetTime() */
-#endif
+#include "SDL.h"
 
 #include "quakedef.h"
 
@@ -48,6 +46,8 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "cvar.h"
 #include "net.h"
+#include "server.h"
+#include "sys.h"
 
 #define	PACKET_HEADER	8
 
@@ -117,11 +117,7 @@ Netchan_Init_Cvars (void)
 	int		port;
 
 	// pick a port value that should be nice and random
-#ifdef _WIN32
-	port = ((int) (timeGetTime () * 1000) * time (NULL)) & 0xffff;
-#else
-	port = ((int) (getpid () + getuid () * 1000) * time (NULL)) & 0xffff;
-#endif
+	port = ((int) (SDL_GetTicks () * 1000) * time (NULL)) & 0xffff;
 
 	showpackets = Cvar_Get ("showpackets", "0", CVAR_NONE, NULL);
 	showdrop = Cvar_Get ("showdrop", "0", CVAR_NONE, NULL);
@@ -160,7 +156,7 @@ Netchan_OutOfBand (netsrc_t sock, netadr_t adr, int length, Uint8 *data)
 
 	// send the datagram
 	// zoid, no input in demo playback mode
-	if ( !cls.demoplayback )
+	if ((sys_gametypes & GAME_QW_SERVER) || !cls.demoplayback)
 		NET_SendPacket (sock, send.cursize, send.data, adr);
 }
 
@@ -199,10 +195,9 @@ Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 
 	chan->sock = sock;
 	chan->remote_address = adr;
-
 	chan->last_received = curtime;
 
-	if ( cls.demoplayback )
+	if ((sys_gametypes & GAME_QW_CLIENT) && cls.demoplayback)
 		chan->last_received = cls.realtime;
 
 	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
@@ -316,7 +311,7 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 	chan->outgoing_time[i] = curtime;
 
 	// zoid, no input in demo playback mode
-	if ( !cls.demoplayback )
+	if ((sys_gametypes & GAME_QW_SERVER) || !cls.demoplayback)
 		NET_SendPacket (chan->sock, send.cursize, send.data, chan->remote_address);
 
 	// LordHavoc: helpful info to anyone looking at this code in the future:
@@ -325,9 +320,16 @@ Netchan_Transmit (netchan_t *chan, int length, Uint8 *data)
 	// send) to the cleartime, and if cleartime is too far ahead of the
 	// current time, it will not send (the current time will advance until it
 	// is acceptable to send it)
-	if (chan->cleartime < curtime)
+
+	if (ServerPaused ())
 		chan->cleartime = curtime;
-	chan->cleartime += send.cursize * chan->rate;
+	else
+	{
+		if (chan->cleartime < curtime)
+			chan->cleartime = curtime;
+
+		chan->cleartime += send.cursize * chan->rate;
+	}
 
 	if (showpackets->ivalue)
 		Com_Printf ("--> s=%i(%i) a=%i(%i) %i\n", chan->outgoing_sequence,
@@ -349,7 +351,7 @@ Netchan_Process (netchan_t *chan)
 	unsigned    sequence, sequence_ack;
 	unsigned    reliable_ack, reliable_message;
 
-	if (!cls.demoplayback)
+	if ((sys_gametypes & GAME_QW_SERVER) || !cls.demoplayback)
 		if (!NET_CompareAdr (net_from, chan->remote_address))
 			return false;
 
@@ -423,7 +425,7 @@ Netchan_Process (netchan_t *chan)
 
 	chan->last_received = curtime;
 
-	if ( cls.demoplayback )
+	if ((sys_gametypes & GAME_QW_CLIENT) && cls.demoplayback)
 		chan->last_received = cls.realtime;
 
 	return true;

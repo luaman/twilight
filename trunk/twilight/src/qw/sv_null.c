@@ -28,6 +28,7 @@ static const char rcsid[] =
 
 #include <stdio.h>
 
+#include "qtypes.h"
 #include "cvar.h"
 
 /*
@@ -39,4 +40,16 @@ static const char rcsid[] =
 
 // Cvars which don't actually exist
 cvar_t *sv_highchars = NULL;
+
+// QW's stdio "console"
+qboolean do_stdin = true;
+qboolean stdin_ready;
+
+// Functions that don't actually exist
+
+qboolean
+ServerPaused (void)
+{
+	return true;
+}
 

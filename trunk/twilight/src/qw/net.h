@@ -23,7 +23,6 @@
 
 	$Id$
 */
-// net.h -- quake's interface to the networking layer
 
 #ifndef __NET_H
 #define __NET_H
@@ -51,19 +50,20 @@ extern struct cvar_s *hostname;
 
 typedef enum {NS_CLIENT, NS_SERVER} netsrc_t;
 
-void        NET_Init (void);
-void		NET_Sleep (int msec);
-void        NET_Shutdown (void);
-qboolean    NET_GetPacket (netsrc_t sock);
-void        NET_SendPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to);
-void		NET_OpenSocket (netsrc_t sock, int port);
+void NET_Init (void);
+void NET_Sleep (int msec);
+void NET_Shutdown (void);
+qboolean NET_GetPacket (netsrc_t sock);
+void NET_SendPacket (netsrc_t sock, unsigned int length, void *data, netadr_t to);
+void NET_OpenSocket (netsrc_t sock, int port);
 
-qboolean    NET_CompareAdr (netadr_t a, netadr_t b);
-qboolean    NET_CompareBaseAdr (netadr_t a, netadr_t b);
-char       *NET_AdrToString (netadr_t a);
-char       *NET_BaseAdrToString (netadr_t a);
-qboolean    NET_StringToAdr (char *s, netadr_t *a);
-qboolean	NET_IsLocalAddress (netadr_t a);
+qboolean NET_CompareAdr (netadr_t a, netadr_t b);
+qboolean NET_CompareBaseAdr (netadr_t a, netadr_t b);
+char *NET_AdrToString (netadr_t a);
+char *NET_BaseAdrToString (netadr_t a);
+qboolean NET_StringToAdr (char *s, netadr_t *a);
+
+#define NET_IsLocalAddress(adr)	(NET_CompareAdr(adr,net_local_adr))
 
 //============================================================================
 
@@ -90,8 +90,6 @@ typedef struct {
 
 // bandwidth estimator
 	double      cleartime;				// if realtime > nc->cleartime, free to 
-										// 
-	// 
 	// go
 	double      rate;					// seconds / byte
 
@@ -120,18 +118,18 @@ typedef struct {
 	netsrc_t	sock;
 } netchan_t;
 
-extern int  net_drop;					// packets dropped before this one
+extern int net_drop;					// packets dropped before this one
 
-void        Netchan_Init (void);
-void        Netchan_Init_Cvars (void);
-void        Netchan_Transmit (netchan_t *chan, int length, Uint8 *data);
-void		Netchan_OutOfBand (netsrc_t sock, netadr_t adr, int length, Uint8 *data);
-void        Netchan_OutOfBandPrint (netsrc_t sock, netadr_t adr, char *format, ...);
-qboolean    Netchan_Process (netchan_t *chan);
-void        Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport);
+void Netchan_Init (void);
+void Netchan_Init_Cvars (void);
+void Netchan_Transmit (netchan_t *chan, int length, Uint8 *data);
+void Netchan_OutOfBand (netsrc_t sock, netadr_t adr, int length, Uint8 *data);
+void Netchan_OutOfBandPrint (netsrc_t sock, netadr_t adr, char *format, ...);
+qboolean Netchan_Process (netchan_t *chan);
+void Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport);
 
-qboolean    Netchan_CanPacket (netchan_t *chan);
-qboolean    Netchan_CanReliable (netchan_t *chan);
+qboolean Netchan_CanPacket (netchan_t *chan);
+qboolean Netchan_CanReliable (netchan_t *chan);
 
 #endif // __NET_H
 

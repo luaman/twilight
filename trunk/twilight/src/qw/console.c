@@ -54,7 +54,6 @@ float		con_cursorspeed = 4;
 
 
 cvar_t	   *con_notifytime;
-cvar_t	   *con_logname;
 
 #define	NUM_CON_TIMES 4
 float		con_times[NUM_CON_TIMES];	// realtime the line was generated
@@ -68,8 +67,6 @@ extern int	key_linepos;
 
 
 qboolean	con_initialized;
-
-char	logname[MAX_OSPATH] = "";
 
 void
 Key_ClearTyping (void)
@@ -224,16 +221,6 @@ Con_CheckResize (void)
 		Con_Resize (con);
 }
 
-static void
-setlogname (cvar_t *con_logname)
-{
-	if (com_gamedir[0] && con_logname->svalue && con_logname->svalue[0])
-		snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
-				con_logname->svalue);
-	else
-		logname[0] = '\0';
-}
-
 /*
 ================
 Con_Init_Cvars
@@ -243,7 +230,6 @@ void
 Con_Init_Cvars (void)
 {
 	con_notifytime = Cvar_Get ("con_notifytime", "3", CVAR_NONE, NULL);
-	con_logname = Cvar_Get ("con_logname", "", CVAR_NONE, &setlogname);
 }
 
 /*
@@ -254,9 +240,6 @@ Con_Init
 void
 Con_Init (void)
 {
-	if (COM_CheckParm ("-condebug"))
-		Cvar_Set (con_logname, "qconsole");
-
 	con = malloc (sizeof (console_t));
 	con_linewidth = -1;
 	con->current = 0;	// these *MUST*
@@ -305,6 +288,9 @@ Con_Print (char *txt)
 {
 	int			y, c, l, mask;
 	static int	cr;
+
+	if (!con_initialized)
+		return;
 
 	if (txt[0] == 1 || txt[0] == 2) {
 		mask = 128;						// go to colored text

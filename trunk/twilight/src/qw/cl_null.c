@@ -26,18 +26,38 @@ static const char rcsid[] =
 
 #include "twiconfig.h"
 
+#include "client.h"
+
 /*
  * Null client
  *
  * Basically, anything required to make the server compile without a client
  * should go in here.  It's just a stub.
  */
-	
+
+// net_chan depends on cls (for now)
+client_static_t cls;
 
 // Funtions that don't actually exist
 
 void
 Draw_Disc (void)
 {
+}
+
+void
+CL_Disconnect (void)
+{
+}
+
+void
+Con_Print (char *txt)
+{
+}
+
+void
+CL_Init (void)
+{
+	memset (&cls, 0, sizeof(client_static_t));
 }
 

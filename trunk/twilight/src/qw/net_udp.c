@@ -61,7 +61,7 @@ static const char rcsid[] =
 # define errno WSAGetLastError()
 #endif
 
-#ifdef sun
+#ifdef __sun__
 # include <sys/filio.h>
 #endif
 
@@ -136,13 +136,6 @@ NET_CompareAdr (netadr_t a, netadr_t b)
 {
 	return ((a.type == NA_LOOPBACK && b.type == NA_LOOPBACK) ||
 		(*(unsigned *)a.ip == *(unsigned *)b.ip && a.port == b.port));
-}
-
-qboolean 
-NET_IsLocalAddress (netadr_t a)
-{
-	return (*(unsigned *)a.ip == *(unsigned *)net_local_adr.ip ||
-			*(unsigned *)a.ip == htonl(INADDR_LOOPBACK));
 }
 
 char       *
@@ -428,6 +421,9 @@ NET_Init (void)
 /*
 ====================
 NET_Sleep
+
+Only used by the server
+FIXME: Abstract the nonblocking stdin stuff
 ====================
 */
 void 
@@ -435,14 +431,24 @@ NET_Sleep (int msec)
 {
 	fd_set			fdset;
 	struct timeval	timeout;
+	extern qboolean do_stdin, stdin_ready;
 
 	FD_ZERO (&fdset);
+
+#ifndef _WIN32
+		if (do_stdin)
+			FD_SET (0, &fdset);
+#endif
 
 	FD_SET (ip_sockets[NS_SERVER], &fdset);
 	timeout.tv_sec = msec/1000;
 	timeout.tv_usec = (msec%1000)*1000;
 
 	select (ip_sockets[NS_SERVER] + 1, &fdset, NULL, NULL, &timeout);
+
+#ifndef _WIN32
+		stdin_ready = FD_ISSET (0, &fdset);
+#endif
 }
 
 /*

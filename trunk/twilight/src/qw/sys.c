@@ -76,7 +76,7 @@ static const char rcsid[] =
 // LordHavoc: for win32 which does not have PATH_MAX defined without POSIX
 // (and that disables lots of other useful stuff)
 #ifndef PATH_MAX
-#define PATH_MAX 256
+# define PATH_MAX 256
 #endif
 
 
@@ -85,6 +85,11 @@ int         nostdout = 0;
 char       *qdate = __DATE__;
 
 cvar_t *sys_asciionly;
+cvar_t *sys_logname;
+
+int sys_gametypes;
+
+char logname[MAX_OSPATH] = "";
 
 double		curtime = 0;
 
@@ -168,6 +173,16 @@ Sys_Quit (void)
 HANDLE		qwclsemaphore;
 #endif
 
+static void
+setlogname (cvar_t *sys_logname)
+{
+	if (com_gamedir[0] && sys_logname->svalue && sys_logname->svalue[0])
+		snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
+				sys_logname->svalue);
+	else
+		logname[0] = '\0';
+}
+
 void
 Sys_Init (void)
 {
@@ -185,6 +200,7 @@ Sys_Init (void)
 #endif
 
 	sys_asciionly = Cvar_Get ("sys_asciionly", "1", CVAR_ARCHIVE, NULL);
+	sys_logname = Cvar_Get ("sys_logname", "", CVAR_NONE, &setlogname);
 
 	sdlflags = SDL_INIT_TIMER;
 	if (COM_CheckParm ("-noparachute"))
@@ -427,6 +443,8 @@ main (int c, char **v)
 {
 	double      time, oldtime, newtime, base;
 
+	sys_gametypes = GAME_QW_CLIENT;
+
 	COM_InitArgv (c, v);
 
 #ifdef HAVE_FCNTL
@@ -436,6 +454,9 @@ main (int c, char **v)
 
 	if (COM_CheckParm ("-nostdout"))
 		nostdout = 1;
+
+	if (COM_CheckParm ("-condebug"))
+		Cvar_Set (sys_logname, "qconsole");
 
 	Host_Init ();
 
