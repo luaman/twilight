@@ -8,8 +8,6 @@ fixed before release, they're marked RC below.
 
 Bugs we know about:
 
-  - RC #1: When you touch the bottom of a pool, you make a splash
-    sound.  DP broke this and DP has fixed it.
   - RC #2: Fix net_udp (line 112) so we don't resolve non-network
     connections.  (Non-trivial)
   - RC #4: Need to print out Id's Copyright message on engine startup.
@@ -27,6 +25,14 @@ Bugs we know about:
     Error: Unable to resolve our own hostname: 'node1.nodex.com'
     (twilight-nq on Linux/UNIX only)
     (known to occur on most Linux distributions out of the box)
+    (is this related to RC #4?)
+  - dlights brighten bmodels twice as much as world
+  - rocket trails (and presumably some other kinds of particle) keep spawning while paused
+  - RC #8: Lifts hurt.
+    (Recommend testing on e4m1 water lift, it is especially painful)
+  - RC #9: Bogus player names in death messages?
+    (Test by doing impulse 9 and blowing self up with RL)
+    (Happens for LordHavoc, anyone else?)
 
   Driver related quirks:
   - RC #6: Need a 3dfx quirk for limiting vertex array size.  We need
