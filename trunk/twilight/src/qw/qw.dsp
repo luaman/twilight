@@ -209,6 +209,10 @@ SOURCE=.\pmovetst.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\r_explosion.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\r_part.c
 # End Source File
 # Begin Source File
@@ -358,6 +362,10 @@ SOURCE=.\protocol.h
 # Begin Source File
 
 SOURCE=..\include\qtypes.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\r_explosion.h
 # End Source File
 # Begin Source File
 
