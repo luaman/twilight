@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+#include <limits.h>
 #include <sys/types.h>
 #include <sys/timeb.h>
 #include "qwsvdef.h"
@@ -88,17 +89,25 @@ Sys_DoubleTime
 double
 Sys_DoubleTime (void)
 {
-	double      t;
-	struct _timeb tstruct;
-	static int  starttime;
+	static DWORD starttime;
+	static qboolean first = true;
+	DWORD now;
 
-	_ftime (&tstruct);
+	now = timeGetTime();
 
-	if (!starttime)
-		starttime = tstruct.time;
-	t = (tstruct.time - starttime) + tstruct.millitm * 0.001;
+	if (first) {
+		first = false;
+		starttime = now;
+		return 0.0;
+	}
+	
+	if (now < starttime) // wrapped?
+		return (now / 1000.0) + (LONG_MAX - starttime / 1000.0);
 
-	return t;
+	if (now - starttime == 0)
+		return 0.0;
+
+	return (now - starttime) / 1000.0;
 }
 
 
