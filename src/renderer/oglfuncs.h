@@ -392,7 +392,7 @@ OGL_DONT_NEED (void, glLightfv, (GLenum light, GLenum pname, const GLfloat * par
 OGL_DONT_NEED (void, glLighti, (GLenum light, GLenum pname, GLint param));
 OGL_DONT_NEED (void, glLightiv, (GLenum light, GLenum pname, const GLint * params));
 OGL_DONT_NEED (void, glLineStipple, (GLint factor, GLushort pattern));
-OGL_DONT_NEED (void, glLineWidth, (GLfloat width));
+OGL_NEED (void, glLineWidth, (GLfloat width));
 OGL_DONT_NEED (void, glListBase, (GLuint base));
 OGL_EXT_DONT_WANT (void, glListParameterfSGIX, (GLuint, GLenum, GLfloat));
 OGL_EXT_DONT_WANT (void, glListParameterfvSGIX, (GLuint, GLenum, const GLfloat *));
@@ -507,7 +507,7 @@ OGL_DONT_NEED (void, glPointSize, (GLfloat size));
 OGL_EXT_DONT_WANT (GLint, glPollAsyncSGIX, (GLuint *));
 OGL_EXT_DONT_WANT (GLint, glPollInstrumentsSGIX, (GLint *));
 OGL_NEED (void, glPolygonMode, (GLenum face, GLenum mode));
-OGL_DONT_NEED (void, glPolygonOffset, (GLfloat factor, GLfloat units));
+OGL_NEED (void, glPolygonOffset, (GLfloat factor, GLfloat units));
 OGL_EXT_DONT_WANT (void, glPolygonOffsetEXT, (GLfloat, GLfloat));
 OGL_DONT_NEED (void, glPolygonStipple, (const GLubyte * mask));
 OGL_DONT_NEED (void, glPopAttrib, (void));

@@ -180,6 +180,7 @@ int         R_LightPoint (vec3_t p);
 
 void        R_InitParticles (void);
 void        R_ClearParticles (void);
+void        R_MoveParticles (void);
 void        R_DrawParticles (void);
 void        R_DrawWaterSurfaces (void);
 

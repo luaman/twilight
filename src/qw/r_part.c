@@ -173,7 +173,6 @@ typedef struct {
 	vec3_t		oldorg;		// used to store last position to traceline can be used
 							// to allow particles to have bounce physics, etc.
 	vec3_t		vel;
-	vec3_t		vel2;		// used for snow fluttering (base velocity, wind for instance)
 	vec4_t		color;
 	float		bounce;		// how much bounce-back from a surface the particle hits
 							// (0 = no physics, 1 = stop and slide, 2 = keep bouncing forever,
@@ -181,7 +180,6 @@ typedef struct {
 	float		die;
 	float		friction;	// how much air friction affects this object (objects with a low
 							// mass/size ratio tend to get more air friction)
-	float		pressure;	// if non-zero, apply pressure to other particles
 	float		ramp;
 	float		scale;
 } base_particle_t;
@@ -190,9 +188,8 @@ static base_particle_t *base_particles, **free_base_particles;
 static int num_base_particles, max_base_particles;
 
 inline qboolean
-new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec3_t vel2,
-		vec4_t color, float ramp, float scale, float die, float bounce,
-		float friction, float pressure)
+new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
+		float ramp, float scale, float die, float bounce, float friction)
 {
 	base_particle_t	   *p;
 
@@ -208,27 +205,21 @@ new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec3_t vel2,
 	p->ramp = ramp;
 	p->die = cl.time + die;
 	p->scale = scale;
-	if (r_particle_physics->value) {
-		p->bounce = bounce;
-		p->friction = friction;
-		p->pressure = pressure;
-		if (vel2)
-			VectorCopy (vel2, p->vel2);
-	}
+	p->bounce = bounce;
+	p->friction = friction;
 
 	return true;
 }
 	
 inline qboolean
-new_base_particle_oc (ptype_t type, vec3_t org, vec3_t vel, vec3_t vel2,
-		int color, float ramp, float scale, float die, float bounce,
-		float friction, float pressure)
+new_base_particle_oc (ptype_t type, vec3_t org, vec3_t vel, int color,
+		float ramp, float scale, float die, float bounce, float friction)
 {
 	vec4_t		vcolor;
 
 	VectorCopy4 (d_8tofloattable[color], vcolor);	
-	return new_base_particle (type, org, vel, NULL, vcolor, ramp, scale, die,
-								bounce, friction, pressure);
+	return new_base_particle (type, org, vel, vcolor, ramp, scale, die,
+								bounce, friction);
 }
 	
 /*
@@ -319,8 +310,8 @@ R_EntityParticles (entity_t *ent)
 			* beamlength;
 		org[2] = ent->cur.origin[2] + r_avertexnormals[i][2] * dist + forward[2]
 			* beamlength;
-		new_base_particle_oc(pt_explode, org, r_origin, NULL, 0x6f, 0, -1,
-			0.01, 0, 0, 0);
+		new_base_particle_oc(pt_explode, org, r_origin, 0x6f, 0, -1, 0.01, 0,
+				0);
 	}
 }
 
@@ -365,8 +356,8 @@ R_ReadPointFile_f (void)
 			break;
 		c++;
 
-		new_base_particle_oc (pt_static, org, r_origin, NULL, (-c) & 15, 0, -1,
-			99999, 0, 0, 0);
+		new_base_particle_oc (pt_static, org, r_origin, (-c) & 15, 0, -1,
+			99999, 0, 0);
 	}
 
 	fclose (f);
@@ -415,8 +406,8 @@ R_ParticleExplosion (vec3_t org)
 			porg[j] = org[j] + ((Q_rand () % 32) - 16);
 			vel[j] = (Q_rand () % 512) - 256;
 		}
-		new_base_particle_oc (type, porg, vel, NULL, ramp1[0], Q_rand () & 3, -1,
-			5, 0, 0, 0);
+		new_base_particle_oc (type, porg, vel, ramp1[0], Q_rand () & 3, -1,
+			5, 0, 0);
 	}
 }
 
@@ -440,8 +431,8 @@ R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength)
 			porg[j] = org[j] + ((Q_rand () % 32) - 16);
 			vel[j] = (Q_rand () % 512) - 256;
 		}
-		new_base_particle_oc (pt_blob, porg, vel, NULL, color, 0, -1,
-			0.3, 0, 0, 0);
+		new_base_particle_oc (pt_blob, porg, vel, color, 0, -1,
+			0.3, 0, 0);
 	}
 }
 
@@ -473,8 +464,8 @@ R_BlobExplosion (vec3_t org)
 			porg[j] = org[j] + ((Q_rand () % 32) - 16);
 			pvel[j] = (Q_rand () % 512) - 256;
 		}
-		new_base_particle_oc (ptype, porg, pvel, NULL, color, 0, -1,
-			pdie, 0, 0, 0);
+		new_base_particle_oc (ptype, porg, pvel, color, 0, -1,
+			pdie, 0, 0);
 	}
 }
 
@@ -498,8 +489,8 @@ R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 			porg[j] = org[j] + ((Q_rand () & 15) - 8);
 			pvel[j] = dir[j] * 15;	// + (Q_rand()%300)-150;
 		}
-		new_base_particle_oc (pt_slowgrav, porg, pvel, NULL, pcolor, 0, -1,
-			pdie, 0, 0, 0);
+		new_base_particle_oc (pt_slowgrav, porg, pvel, pcolor, 0, -1,
+			pdie, 0, 0);
 	}
 }
 
@@ -533,8 +524,8 @@ R_LavaSplash (vec3_t org)
 			VectorNormalizeFast (dir);
 			vel = 50 + (Q_rand () & 63);
 			VectorScale (dir, vel, pvel);
-			new_base_particle_oc (pt_slowgrav, porg, pvel, NULL, pcolor, 0, -1,
-				pdie, 0, 0, 0);
+			new_base_particle_oc (pt_slowgrav, porg, pvel, pcolor, 0, -1,
+				pdie, 0, 0);
 		}
 }
 
@@ -594,12 +585,12 @@ R_Torch (entity_t *ent, qboolean torch2)
 		// used for large torches (eg, start map near spawn)
 		porg[2] = ent->cur.origin[2] - 2;
 		VectorSet (pvel, (Q_rand() & 7) - 4, (Q_rand() & 7) - 4, 0);
-		new_base_particle (pt_torch2, porg, pvel, NULL, color, Q_rand () & 3,
-			ent->cur.frame ? 30 : 10, 5, 0, 0, 0);
+		new_base_particle (pt_torch2, porg, pvel, color, Q_rand () & 3,
+			ent->cur.frame ? 30 : 10, 5, 0, 0);
 	} else { 
 		// wall torches
-		new_base_particle (pt_torch, porg, pvel, NULL, color, Q_rand () & 3,
-			10, 5, 0, 0, 0);
+		new_base_particle (pt_torch, porg, pvel, color, Q_rand () & 3,
+			10, 5, 0, 0);
 	}
 }
 
@@ -629,14 +620,14 @@ R_RailTrail (vec3_t start, vec3_t end)
 	while (len > 0)
 	{
 		VectorCopy (d_8tofloattable[(rand() & 3) + 225], color); color[3] = 0.5;
-		new_base_particle (pt_railtrail, start, vec3_origin, NULL, color,
-			0, 2.5, 1.0, 0, 0, 0);
+		new_base_particle (pt_railtrail, start, vec3_origin, color,
+			0, 2.5, 1.0, 0, 0);
 
 		VectorMA (start, 4, right, org);
 		VectorScale (right, 8, vel);
 		VectorCopy (d_8tofloattable[(rand() & 7) + 206], color); color[3] = 0.5;
-		new_base_particle (pt_railtrail, org, vel, NULL, color,
-				0, 5.0, 1.0, 0, 0, 0);
+		new_base_particle (pt_railtrail, org, vel, color,
+				0, 5.0, 1.0, 0, 0);
 
 		roll += 7.5 * (M_PI / 180.0);
 
@@ -748,8 +739,8 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 				break;
 		}
 
-		new_base_particle_oc (ptype, porg, pvel, NULL, pcolor, pramp, -1, pdie,
-			0, 0, 0);
+		new_base_particle_oc (ptype, porg, pvel, pcolor, pramp, -1, pdie,
+			0, 0);
 
 		VectorScale(vec, lsub, avec);
 		VectorAdd (start, avec, start);
@@ -757,23 +748,22 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 	}
 }
 
-// #define MOD_POINTINLEAF
 /*
 ===============
-R_Draw_Base_Particles
+R_Move_Base_Particles
 ===============
 */
 static void
-R_Draw_Base_Particles (void)
+R_Move_Base_Particles (void)
 {
 #ifdef MOD_POINTINLEAF
 	mleaf_t				*mleaf;
 #endif
 	base_particle_t	   *p;
-	int					i, j, k, activeparticles, maxparticle, pressureused = false;
+	int					i, j, k, activeparticles, maxparticle;
 	float				time1, time2, time3;
 	float				grav, dvel;
-	float				frametime, scale, *corner;
+	float				frametime;
 	vec3_t				v;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
@@ -787,7 +777,6 @@ R_Draw_Base_Particles (void)
 
 	activeparticles = 0;
 	maxparticle = -1;
-	v_index = 0;
 	j = 0;
 
 	for (k = 0, p = base_particles; k < num_base_particles; k++, p++) {
@@ -813,61 +802,20 @@ R_Draw_Base_Particles (void)
 			goto R_Draw_Base_Particles__physics;
 #endif
 
-		if (p->scale < 0) {
-			scale = ((p->org[0] - r_origin[0]) * vpn[0]) + 
-				((p->org[1] - r_origin[1]) * vpn[1]) +
-				((p->org[2] - r_origin[2]) * vpn[2]);
-			if (scale < 20)
-				scale = -p->scale;
-			else
-				scale = (-p->scale) + scale * 0.004;
-		} else {
-			scale = p->scale;
-		}
-
-		VectorCopy4 (p->color, c_array[v_index + 0]);
-		VectorCopy4 (p->color, c_array[v_index + 1]);
-		VectorCopy4 (p->color, c_array[v_index + 2]);
-		VectorCopy4 (p->color, c_array[v_index + 3]);
-		VectorSet2(tc_array[v_index + 0], 1, 1);
-		VectorSet2(tc_array[v_index + 1], 0, 1);
-		VectorSet2(tc_array[v_index + 2], 0, 0);
-		VectorSet2(tc_array[v_index + 3], 1, 0);
-
-		corner = v_array[v_index];
-		VectorTwiddleS (p->org, vup, vright, scale * -0.5, v_array[v_index]);
-		VectorTwiddle (corner, vup, scale, vright, 0    , 1,v_array[v_index+1]);
-		VectorTwiddle (corner, vup, scale, vright, scale, 1,v_array[v_index+2]);
-		VectorTwiddle (corner, vup, 0    , vright, scale, 1,v_array[v_index+3]);
-
-		v_index += 4;
-
-		if ((v_index + 4) >= MAX_VERTEX_ARRAYS) {
-			TWI_PreVDrawCVA (0, v_index);
-			qglDrawArrays (GL_QUADS, 0, v_index);
-			TWI_PostVDrawCVA ();
-			v_index = 0;
-		}
-
 #ifdef MOD_POINTINLEAF
 R_Draw_Base_Particles__physics:
 #endif
 		VectorMA (p->org, frametime, p->vel, p->org);
-		if (p->bounce)
-		{
+		if (p->bounce) {
 			vec3_t normal;
 			float dist;
-			if (TraceLine (p->oldorg, p->org, v, normal) < 1)
-			{
+			if (TraceLine (p->oldorg, p->org, v, normal) < 1) {
 				VectorCopy (v, p->org);
-				if (p->bounce < 0)
-				{
+				if (p->bounce < 0) {
 					p->die = -1;
 					free_base_particles[j++] = p;
 					continue;
-				}
-				else
-				{
+				} else {
 					dist = DotProduct (p->vel, normal) * -p->bounce;
 					VectorMA (p->vel, dist, normal, p->vel);
 					if (DotProduct (p->vel, p->vel) < 0.03)
@@ -961,15 +909,6 @@ R_Draw_Base_Particles__physics:
 		}
 		if ((p->color[3] < 0))
 			p->die = -1;
-		if (p->pressure)
-			pressureused = true;
-	}
-
-	if (v_index) {
-		TWI_PreVDrawCVA (0, v_index);
-		qglDrawArrays (GL_QUADS, 0, v_index);
-		TWI_PostVDrawCVA ();
-		v_index = 0;
 	}
 
 	k = 0;
@@ -980,38 +919,153 @@ R_Draw_Base_Particles__physics:
 			maxparticle--;
 	}
 	num_base_particles = activeparticles;
+}
 
-	if (pressureused)
-	{
-		activeparticles = 0;
-		for (i = 0, p = base_particles; i < num_base_particles; i++, p++)
-			if (p->pressure)
-				free_base_particles[activeparticles++] = p;
 
-		if (activeparticles)
-		{
-			for (i = 0, p = base_particles; i < num_base_particles; i++, p++)
-			{
-				for (j = 0; j < activeparticles; j++)
-				{
-					if (free_base_particles[j] != p)
-					{
-						float dist, diff[3];
-						VectorSubtract (p->org, free_base_particles[j]->org, diff);
-						dist = DotProduct (diff, diff);
-						if (dist < 4096 && dist >= 1)
-						{
-							dist = free_base_particles[j]->scale * 4.0f * frametime / Q_sqrt (dist);
-							VectorMA (p->vel, dist, diff, p->vel);
-						}
-					}
-				}
-			}
+/*
+===============
+R_Draw_Base_Particles
+===============
+*/
+static void
+R_Draw_Base_Particles (void)
+{
+	base_particle_t	   *p;
+	int					j, i, activeparticles, maxparticle;
+	float				scale, *corner;
+
+	qglBindTexture (GL_TEXTURE_2D, part_tex_dot);
+
+	activeparticles = 0;
+	maxparticle = -1;
+	v_index = 0;
+	j = 0;
+
+	for (i = 0, p = base_particles; i < num_base_particles; i++, p++) {
+		if (p->die <= cl.time) {
+			free_base_particles[j++] = p;
+			continue;
 		}
+
+		maxparticle = i;
+		activeparticles++;
+
+		if (p->scale < 0) {
+			scale = ((p->org[0] - r_origin[0]) * vpn[0]) + 
+				((p->org[1] - r_origin[1]) * vpn[1]) +
+				((p->org[2] - r_origin[2]) * vpn[2]);
+			if (scale < 20)
+				scale = -p->scale;
+			else
+				scale = (-p->scale) + scale * 0.004;
+		} else {
+			scale = p->scale;
+		}
+
+		VectorCopy4 (p->color, c_array[v_index + 0]);
+		VectorCopy4 (p->color, c_array[v_index + 1]);
+		VectorCopy4 (p->color, c_array[v_index + 2]);
+		VectorCopy4 (p->color, c_array[v_index + 3]);
+		VectorSet2(tc_array[v_index + 0], 1, 1);
+		VectorSet2(tc_array[v_index + 1], 0, 1);
+		VectorSet2(tc_array[v_index + 2], 0, 0);
+		VectorSet2(tc_array[v_index + 3], 1, 0);
+
+		corner = v_array[v_index];
+		VectorTwiddleS (p->org, vup, vright, scale * -0.5, v_array[v_index]);
+		VectorTwiddle (corner, vup, scale, vright, 0    , 1,v_array[v_index+1]);
+		VectorTwiddle (corner, vup, scale, vright, scale, 1,v_array[v_index+2]);
+		VectorTwiddle (corner, vup, 0    , vright, scale, 1,v_array[v_index+3]);
+
+		v_index += 4;
+
+		if ((v_index + 4) >= MAX_VERTEX_ARRAYS) {
+			TWI_PreVDrawCVA (0, v_index);
+			qglDrawArrays (GL_QUADS, 0, v_index);
+			TWI_PostVDrawCVA ();
+			v_index = 0;
+		}
+
 	}
+
+	if (v_index) {
+		TWI_PreVDrawCVA (0, v_index);
+		qglDrawArrays (GL_QUADS, 0, v_index);
+		TWI_PostVDrawCVA ();
+		v_index = 0;
+	}
+
+	i = 0;
+	while (maxparticle >= activeparticles) {
+		*free_base_particles[i++] = base_particles[maxparticle--];
+		while (maxparticle >= activeparticles &&
+				base_particles[maxparticle].die <= cl.time)
+			maxparticle--;
+	}
+	num_base_particles = activeparticles;
 }
 
 extern float bubble_sintable[17], bubble_costable[17];
+
+/*
+===============
+R_Move_Tube_Particles
+===============
+*/
+static void
+R_Move_Tube_Particles (void)
+{
+	tube_particle_t	   *p;
+	int					i, j, activeparticles, maxparticle;
+	float				frametime;
+
+	frametime = cl.time - cl.oldtime;
+
+	activeparticles = 0;
+	maxparticle = -1;
+	j = 0;
+	v_index = 0;
+	i_index = 0;
+
+	for (i = 0, p = tube_particles; i < num_tube_particles; i++, p++) {
+		if (p->die <= cl.time) {
+			free_tube_particles[j++] = p;
+			continue;
+		}
+
+		maxparticle = i;
+		activeparticles++;
+
+		switch (p->type) {
+			case pt_rtrail:
+				p->ramp += frametime * p->rstep;
+
+				p->color[3] -= frametime * 0.5;
+				if (p->color[3] <= 0)
+					p->die = -1;
+//				p->color[0] -= frametime * 0.5;
+				if (p->color[1] < p->color[0]) {
+					p->color[1] += frametime * 0.40;
+					p->color[2] += frametime * 0.40;
+					p->color[3] += frametime * 0.40;
+				}
+				p->scale1 += frametime * 1.5;
+				p->scale2 += frametime * 1.6;
+				break;
+			default:
+				break;
+		}
+	}
+
+	i = 0;
+	while (maxparticle >= activeparticles) {
+		*free_tube_particles[i++] = tube_particles[maxparticle--];
+		while (maxparticle >= activeparticles &&
+				tube_particles[maxparticle].die <= cl.time)
+			maxparticle--;
+	}
+	num_tube_particles = activeparticles;
+}
 
 /*
 ===============
@@ -1024,16 +1078,13 @@ R_Draw_Tube_Particles (void)
 	tube_particle_t	   *p;
 	int					i, j, k, activeparticles, maxparticle;
 	int					v0, v1, v2, v3, v_f0, v_f1;
-	float				frametime, f;
+	float				f;
 	vec3_t				v_up, v_right;
 	float			   *bub_sin, *bub_cos;
 
-//	qglDisable (GL_TEXTURE_2D);
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke);
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
-
-	frametime = cl.time - cl.oldtime;
 
 	activeparticles = 0;
 	maxparticle = -1;
@@ -1104,26 +1155,6 @@ R_Draw_Tube_Particles (void)
 			v_index = 0;
 			i_index = 0;
 		}
-
-		switch (p->type) {
-			case pt_rtrail:
-				p->ramp += frametime * p->rstep;
-
-				p->color[3] -= frametime * 0.5;
-				if (p->color[3] <= 0)
-					p->die = -1;
-//				p->color[0] -= frametime * 0.5;
-				if (p->color[1] < p->color[0]) {
-					p->color[1] += frametime * 0.40;
-					p->color[2] += frametime * 0.40;
-					p->color[3] += frametime * 0.40;
-				}
-				p->scale1 += frametime * 1.5;
-				p->scale2 += frametime * 1.6;
-				break;
-			default:
-				break;
-		}
 	}
 
 	if (v_index || i_index) {
@@ -1145,7 +1176,100 @@ R_Draw_Tube_Particles (void)
 
 	if (gl_cull->value)
 		qglEnable (GL_CULL_FACE);
-//	qglEnable (GL_TEXTURE_2D);
+}
+
+/*
+===============
+R_Move_Cone_Particles
+===============
+*/
+static void
+R_Move_Cone_Particles (void)
+{
+	cone_particle_t	   *p;
+	int					j, k, activeparticles, maxparticle;
+	float				frametime, teletime;
+
+	frametime = cl.time - cl.oldtime;
+	teletime = frametime * 120;
+
+	activeparticles = 0;
+	maxparticle = -1;
+	j = 0;
+	v_index = 0;
+	i_index = 0;
+
+	for (k = 0, p = cone_particles; k < num_cone_particles; k++, p++) {
+		if (p->die <= cl.time) {
+			free_cone_particles[j++] = p;
+			continue;
+		}
+
+		maxparticle = k;
+		activeparticles++;
+
+		switch (p->type) {
+			case pt_teleport2:
+				switch ((int) p->ramp & 1) {
+					case 0:
+						p->org1[2] += teletime;
+						p->org2[2] -= teletime;
+						if (p->org1[2] >= (p->org3[2] + 40))
+							p->ramp++;
+						break;
+					case 1:
+						p->org1[2] -= teletime;
+						p->org2[2] += teletime;
+						if (p->org1[2] <= (p->org3[2] - 40))
+							p->ramp++;
+						break;
+				}
+				if (p->ramp >= 1)
+					p->die = -1;
+				break;
+			case pt_teleport1:
+				switch ((int) p->ramp & 1) {
+					case 1:
+						p->org1[2] += teletime;
+						p->org2[2] -= teletime;
+						if (p->org1[2] >= (p->org3[2] + 40))
+							p->ramp++;
+						break;
+					case 0:
+						p->org1[2] -= teletime;
+						p->org2[2] += teletime;
+						if (p->org1[2] <= (p->org3[2] - 40))
+							p->ramp++;
+						break;
+				}
+				if (p->ramp >= 1)
+					p->die = -1;
+				break;
+			case pt_rtrail:
+				p->color1[3] -= frametime * 0.5;
+				if (p->color1[3] <= 0)
+					p->die = -1;
+//				p->color1[0] -= frametime * 0.5;
+				if (p->color1[1] < p->color1[0]) {
+					p->color1[1] += frametime * 0.50;
+					p->color1[2] += frametime * 0.50;
+					p->color1[3] += frametime * 0.50;
+				}
+				p->scale += frametime * 1.5;
+				break;
+			default:
+				break;
+		}
+	}
+
+	k = 0;
+	while (maxparticle >= activeparticles) {
+		*free_cone_particles[k++] = cone_particles[maxparticle--];
+		while (maxparticle >= activeparticles &&
+				cone_particles[maxparticle].die <= cl.time)
+			maxparticle--;
+	}
+	num_cone_particles = activeparticles;
 }
 
 /*
@@ -1159,16 +1283,12 @@ R_Draw_Cone_Particles (void)
 	cone_particle_t	   *p;
 	int					i, i2, j, k, activeparticles, maxparticle;
 	int					v_center, v_first, v_last;
-	float				frametime, teletime;
 	vec3_t				v_up, v_right;
 	float			   *bub_sin, *bub_cos;
 
 	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_ring);
 	if (gl_cull->value)
 		qglDisable (GL_CULL_FACE);
-
-	frametime = cl.time - cl.oldtime;
-	teletime = frametime * 120;
 
 	activeparticles = 0;
 	maxparticle = -1;
@@ -1228,59 +1348,6 @@ R_Draw_Cone_Particles (void)
 			v_index = 0;
 			i_index = 0;
 		}
-
-		switch (p->type) {
-			case pt_teleport2:
-				switch ((int) p->ramp & 1) {
-					case 0:
-						p->org1[2] += teletime;
-						p->org2[2] -= teletime;
-						if (p->org1[2] >= (p->org3[2] + 40))
-							p->ramp++;
-						break;
-					case 1:
-						p->org1[2] -= teletime;
-						p->org2[2] += teletime;
-						if (p->org1[2] <= (p->org3[2] - 40))
-							p->ramp++;
-						break;
-				}
-				if (p->ramp >= 1)
-					p->die = -1;
-				break;
-			case pt_teleport1:
-				switch ((int) p->ramp & 1) {
-					case 1:
-						p->org1[2] += teletime;
-						p->org2[2] -= teletime;
-						if (p->org1[2] >= (p->org3[2] + 40))
-							p->ramp++;
-						break;
-					case 0:
-						p->org1[2] -= teletime;
-						p->org2[2] += teletime;
-						if (p->org1[2] <= (p->org3[2] - 40))
-							p->ramp++;
-						break;
-				}
-				if (p->ramp >= 1)
-					p->die = -1;
-				break;
-			case pt_rtrail:
-				p->color1[3] -= frametime * 0.5;
-				if (p->color1[3] <= 0)
-					p->die = -1;
-//				p->color1[0] -= frametime * 0.5;
-				if (p->color1[1] < p->color1[0]) {
-					p->color1[1] += frametime * 0.50;
-					p->color1[2] += frametime * 0.50;
-					p->color1[3] += frametime * 0.50;
-				}
-				p->scale += frametime * 1.5;
-				break;
-			default:
-				break;
-		}
 	}
 
 	if (v_index || i_index) {
@@ -1302,6 +1369,19 @@ R_Draw_Cone_Particles (void)
 
 	if (gl_cull->value)
 		qglEnable (GL_CULL_FACE);
+}
+
+/*
+===============
+R_MoveParticles
+===============
+*/
+void
+R_MoveParticles (void)
+{
+	R_Move_Base_Particles();
+	R_Move_Cone_Particles();
+	R_Move_Tube_Particles();
 }
 
 /*

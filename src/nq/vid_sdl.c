@@ -272,13 +272,15 @@ GL_Init (void)
 
 	CheckExtensions ();
 
-	qglClearColor (0.3f, 0.3f, 0.3f, 0.5f);
+	qglClearColor (0.1f, 0.1f, 0.1f, 0.5f);
 	qglCullFace (GL_FRONT);
 	qglEnable (GL_TEXTURE_2D);
 
 	qglAlphaFunc (GL_GREATER, 0.666);
 
 	qglPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+
+	qglPolygonOffset (-0.5, -0.5);
 
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 			GL_LINEAR_MIPMAP_NEAREST);

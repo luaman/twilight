@@ -1420,6 +1420,7 @@ R_RenderView (void)
 
 	R_MoveExplosions ();
 	R_DrawExplosions ();
+	R_MoveParticles ();
 	R_DrawParticles ();
 	R_RenderDlights ();
 	R_DrawWaterTextureChains ();
