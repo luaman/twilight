@@ -712,7 +712,7 @@ DrawTextureChainsMTex (void)
 				for (; s; s = s->texturechain) {
 					EmitBothSkyLayers (s);
 				}
-				return;
+				break;
 			}
 		}
 	}
@@ -739,7 +739,7 @@ DrawTextureChainsMTex (void)
 				continue;				// draw translucent water later
 
 			if (s->flags & SURF_DRAWSKY)
-				continue;
+				break;
 
 			qglBindTexture (GL_TEXTURE_2D, st->gl_texturenum);
 			qglActiveTextureARB (GL_TEXTURE1_ARB);
