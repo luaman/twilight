@@ -263,7 +263,7 @@ Model_NextDownload (void)
 		if (i == 1)
 		{
 			cl.model_precache[i] = Mod_ForName (cl.model_name[i], FLAG_RENDER | FLAG_SUBMODELS);
-			strncpy (mapname, COM_SkipPath (cl.model_precache[1]->name), MAX_QPATH);
+			strlcpy (mapname, COM_SkipPath (cl.model_precache[1]->name), MAX_QPATH);
 			COM_StripExtension (mapname, mapname);
 			Cvar_Set (cl_mapname, mapname);
 		} else
@@ -624,7 +624,7 @@ CL_ParseServerData (void)
 
 	// get the full level name
 	str = MSG_ReadString ();
-	strncpy (ccl.levelname, str, sizeof (ccl.levelname) - 1);
+	strlcpy (ccl.levelname, str, sizeof (ccl.levelname));
 
 	// get the movevars
 	movevars.gravity = MSG_ReadFloat ();
@@ -891,11 +891,11 @@ CL_ProcessUserInfo (int slot)
 	slot = slot;
 
 	ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
-	strncpy (user->name, Info_ValueForKey (player->userinfo, "name"),
-			   sizeof (user->name) - 1);
+	strlcpy (user->name, Info_ValueForKey (player->userinfo, "name"),
+			   sizeof (user->name));
 
-	strncpy (user->team, Info_ValueForKey (player->userinfo, "team"),
-			   sizeof (user->team) - 1);
+	strlcpy (user->team, Info_ValueForKey (player->userinfo, "team"),
+			   sizeof (user->team));
 
 	color = Q_atoi (Info_ValueForKey (player->userinfo, "topcolor"));
 	color = bound(0, color, 13) * 16;
@@ -943,8 +943,7 @@ CL_UpdateUserinfo (void)
 	player = &cl.players[slot];
 	user = &ccl.users[slot];
 	user->user_id = MSG_ReadLong ();
-	strncpy (player->userinfo, MSG_ReadString (),
-			   sizeof (player->userinfo) - 1);
+	strlcpy (player->userinfo, MSG_ReadString (), sizeof (player->userinfo));
 
 	CL_ProcessUserInfo (slot);
 }
@@ -968,10 +967,8 @@ CL_SetInfo (void)
 
 	player = &cl.players[slot];
 
-	strncpy (key, MSG_ReadString (), sizeof (key) - 1);
-	key[sizeof (key) - 1] = 0;
-	strncpy (value, MSG_ReadString (), sizeof (value) - 1);
-	key[sizeof (value) - 1] = 0;
+	strlcpy (key, MSG_ReadString (), sizeof (key));
+	strlcpy (value, MSG_ReadString (), sizeof (value));
 
 	Com_DPrintf ("SETINFO %s: %s=%s\n", ccl.users[slot].name, key, value);
 

@@ -80,7 +80,6 @@ typedef struct texture_s {
 #define SURF_LIQUID			BIT(2)
 #define SURF_UNDERWATER		BIT(3)
 #define SURF_LIGHTMAP		BIT(4)
-#define SURF_SUBDIVIDE		BIT(5)
 
 typedef struct {
 	unsigned short v[2];

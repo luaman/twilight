@@ -187,7 +187,7 @@ location:
 				len = strlen (t1);
 				if (i + len >= sizeof (buf))
 					continue;			// No more space in buffer, icky
-				strncpy (buf + i, t1, len);
+				strlcpy (buf + i, t1, len);
 				i += len;
 			}
 

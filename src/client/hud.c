@@ -495,7 +495,7 @@ HUD_SortTeamFrags (void)
 		}
 		user->team_num = n_teams;
 		team = &teams[n_teams++];
-		strncpy(team->name, user->team, MAX_SCOREBOARDNAME);
+		strlcpy(team->name, user->team, MAX_SCOREBOARDNAME);
 found_team:
 		VectorAdd (user->color_map.bottom, team->color, team->color);
 		team->frags += user->frags;

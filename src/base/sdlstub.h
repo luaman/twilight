@@ -68,7 +68,7 @@ typedef signed int	Sint32;
 /* The 64-bit datatype isn't supported on all platforms */
 #ifdef SDL_HAS_64BIT_TYPE
 typedef unsigned SDL_HAS_64BIT_TYPE Uint64;
-typedef SDL_HAS_64BIT_TYPE Sint64;
+typedef signed SDL_HAS_64BIT_TYPE Sint64;
 #else
 /* This is really just a hack to prevent the compiler from complaining */
 typedef struct {

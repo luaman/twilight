@@ -415,23 +415,23 @@ Mod_LoadRFaces (lump_t *l, model_t *mod)
 		if (LittleShort (in->side))
 			out->flags |= SURF_PLANEBACK;
 
-		out->plane = bheader->planes + LittleShort (in->planenum);
+		out->plane = &bheader->planes[LittleShort (in->planenum)];
 
-		out->texinfo = bheader->texinfo + LittleShort (in->texinfo);
+		out->texinfo = &bheader->texinfo[LittleShort (in->texinfo)];
 
 		CalcSurfaceExtents (out, mod);
 
 		if (!strncmp (out->texinfo->texture->name, "sky", 3))
 		{
-			// Skies are sky, have no lightmap, and are subdivided.
-			out->flags |= SURF_SKY | SURF_SUBDIVIDE;
+			// Skies are sky, and have no lightmap.
+			out->flags |= SURF_SKY;
 			out->flags &= ~SURF_LIGHTMAP;
 		}
 		else if ((out->texinfo->texture->name[0] == '*')
 				|| (out->texinfo->flags & TEX_SPECIAL))
 		{
-			// Liquids are liquids, have no lightmap, and are subdivided.
-			out->flags |= SURF_LIQUID | SURF_SUBDIVIDE;
+			// Liquids are liquids, and have no lightmap.
+			out->flags |= SURF_LIQUID;
 			out->flags &= ~SURF_LIGHTMAP;
 			for (j = 0; j < 2; j++)
 			{
@@ -442,8 +442,7 @@ Mod_LoadRFaces (lump_t *l, model_t *mod)
 
 		if (out->flags & SURF_LIGHTMAP) {
 			// Ok, this has a lightmap.
-			for (j = 0; j < MAXLIGHTMAPS; j++)
-				out->styles[j] = in->styles[j];
+			memcpy(out->styles, in->styles, sizeof(Uint8) * MAXLIGHTMAPS);
 
 			j = LittleLong (in->lightofs);
 			if (j == -1)
@@ -581,12 +580,7 @@ Mod_MakeChains (model_t *mod)
 	count = 0;
 	for (i = first, surf = &bheader->surfaces[i]; i < last; i++, surf++)
 	{
-		/*
-		if (surf->flags & SURF_SUBDIVIDE)
-			BuildSubdividedGLPolyFromEdges (surf, mod);
-		else
-		*/
-			BuildGLPolyFromEdges (surf, mod, &count);
+		BuildGLPolyFromEdges (surf, mod, &count);
 
 		if (surf->flags & SURF_LIGHTMAP)
 			bheader->lightblock.chains[surf->lightmap_texnum].n_items++;
