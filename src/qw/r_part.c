@@ -502,7 +502,7 @@ R_RocketConeTrail (vec3_t start, vec3_t end, int type)
 		VectorMA (cur, -7, vec, point1);
 		VectorMA (cur, lsub + 6, vec, point2);
 		new_cone_particle (pt_rtrail, point1, point2, vec3_origin, color1,
-				color2, 0, 4, 5);
+				color2, 0, 2, 1);
 		VectorMA (cur, lsub, vec, cur);
 		len -= lsub;
 	}
