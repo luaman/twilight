@@ -61,6 +61,8 @@ size_t strlcpy (char* dst, const char* src, size_t siz);
 // Duplicate a string (memory allocated with Z_Malloc)
 char *CopyString (const char *string);
 
+// does a varargs printf into a temp buffer
+char *va (char *format, ...);
 
 #endif // __STRLIB_H
 

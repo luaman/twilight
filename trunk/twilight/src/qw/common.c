@@ -1022,30 +1022,6 @@ COM_Init (void)
 	COM_CheckRegistered ();
 }
 
-
-/*
-============
-va
-
-does a varargs printf into a temp buffer, so I don't need to have
-varargs versions of all text functions.
-FIXME: make this buffer size safe someday
-============
-*/
-char       *
-va (char *format, ...)
-{
-	va_list     argptr;
-	static char string[1024];
-
-	va_start (argptr, format);
-	vsnprintf (string, sizeof (string), format, argptr);
-	va_end (argptr);
-
-	return string;
-}
-
-
 /// just for debugging
 int
 memsearch (Uint8 *start, int count, int search)
