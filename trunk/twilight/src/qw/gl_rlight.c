@@ -175,7 +175,7 @@ R_RenderDlights (void)
 	if (!gl_flashblend->value)
 		return;
 
-	qglDepthMask (GL_TRUE);
+	qglDepthMask (GL_FALSE);
 	qglDisable (GL_TEXTURE_2D);
 	qglEnable (GL_BLEND);
 	qglBlendFunc (GL_ONE, GL_ONE);
@@ -191,7 +191,7 @@ R_RenderDlights (void)
 	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDepthMask (GL_FALSE);
+	qglDepthMask (GL_TRUE);
 }
 
 
