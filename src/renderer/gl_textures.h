@@ -42,6 +42,7 @@ extern void GLT_Init ();
 #define TEX_NONE		0
 #define TEX_ALPHA		1
 #define TEX_MIPMAP		2
+#define TEX_FORCE		4
 
 #endif // __gl_textures_h
 

@@ -274,7 +274,7 @@ GLT_Skin_IndicesFromSkins (aliashdr_t *amodel, int num_skins,
 static void
 GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 		int height, Uint32 *palette, qboolean tri_check, qboolean upload,
-		char *name)
+		int flags, char *name)
 {
 	Uint32			*mskin;
 	int				i, numtris;
@@ -317,22 +317,14 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 	if (numtris) {
 		skin->num_tris = numtris;
 		skin->tris = Zone_Alloc(glt_zone, sizeof(int) * numtris);
-	Zone_CheckSentinelsGlobal();
 		memcpy(skin->tris, triangles, sizeof(int) * numtris);
-	Zone_CheckSentinelsGlobal();
 		GLT_Skin_IndicesFromSkins (amodel, 1, &skin, &skin->indices);
-	Zone_CheckSentinelsGlobal();
 		if (upload)
-{
 			skin->texnum = GL_LoadTexture (name, width, height, (Uint8 *) mskin,
-					NULL, TEX_MIPMAP | TEX_ALPHA, 32);
-	Zone_CheckSentinelsGlobal();
-}
+					NULL, TEX_MIPMAP | TEX_ALPHA | flags, 32);
 	}
 
-	Zone_CheckSentinelsGlobal();
 	Zone_Free(triangles);
-	Zone_CheckSentinelsGlobal();
 }
 
 qboolean GLT_Skin_CheckForInvalidTexCoords(astvert_t *texcoords, int numverts, int width, int height)
@@ -383,19 +375,20 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 		GLT_FloodFillSkin8 (iskin, width, height);
 
 		GLT_Skin_SubParse (amodel, &skin->base[i], iskin, width, height,
-				d_palette_base, false, true, va("%s_base", name));
+				d_palette_base, false, true, TEX_FORCE, va("%s_base", name));
 
 		GLT_Skin_SubParse (amodel, &skin->base_team[i], iskin, width, height,
-				d_palette_base_team, false, true, va("%s_base_team", name));
+				d_palette_base_team, false, true, TEX_FORCE,
+				va("%s_base_team", name));
 
 		GLT_Skin_SubParse (amodel, &skin->fb[i], iskin, width, height,
-				d_palette_fb, true, true, va("%s_fb", name));
+				d_palette_fb, true, true, 0, va("%s_fb", name));
 
 		GLT_Skin_SubParse (amodel, &skin->top[i], iskin, width, height,
-				d_palette_top, true, true, va("%s_top", name));
+				d_palette_top, true, true, 0, va("%s_top", name));
 
 		GLT_Skin_SubParse (amodel, &skin->bottom[i], iskin, width, height,
-				d_palette_bottom, true, true, va("%s_bottom", name));
+				d_palette_bottom, true, true, 0, va("%s_bottom", name));
 
 		subs[0] = &skin->base[i]; subs[1] = &skin->fb[i];
 		GLT_Skin_IndicesFromSkins (amodel, 2, subs, &skin->base_fb_i[i]);
