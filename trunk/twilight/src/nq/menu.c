@@ -2022,8 +2022,8 @@ int         gameoptions_cursor;
 void
 M_GameOptions_Draw (void)
 {
-	qpic_t     *p;
-	int         x;
+	qpic_t		*p;
+	int			x;
 
 	M_DrawPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp"));
 	p = Draw_CachePic ("gfx/p_multi.lmp");
@@ -2042,10 +2042,12 @@ M_GameOptions_Draw (void)
 		M_Print (160, 64, "Deathmatch");
 
 	M_Print (0, 72, "        Teamplay");
-	if (rogue) {
+	if (game_rogue->ivalue)
+	{
 		char       *msg;
 
-		switch (teamplay->ivalue) {
+		switch (teamplay->ivalue)
+		{
 			case 1:
 				msg = "No Friendly Fire";
 				break;
@@ -2069,10 +2071,13 @@ M_GameOptions_Draw (void)
 				break;
 		}
 		M_Print (160, 72, msg);
-	} else {
+	}
+	else
+	{
 		char       *msg;
 
-		switch (teamplay->ivalue) {
+		switch (teamplay->ivalue)
+		{
 			case 1:
 				msg = "No Friendly Fire";
 				break;
@@ -2110,17 +2115,18 @@ M_GameOptions_Draw (void)
 
 	M_Print (0, 112, "         Episode");
 	// MED 01/06/97 added hipnotic episodes
-	if (hipnotic)
+	if (game_hipnotic->ivalue)
 		M_Print (160, 112, hipnoticepisodes[startepisode].description);
 	// PGM 01/07/97 added rogue episodes
-	else if (rogue)
+	else if (game_rogue->ivalue)
 		M_Print (160, 112, rogueepisodes[startepisode].description);
 	else
 		M_Print (160, 112, episodes[startepisode].description);
 
 	M_Print (0, 120, "           Level");
 	// MED 01/06/97 added hipnotic episodes
-	if (hipnotic) {
+	if (game_hipnotic->ivalue)
+	{
 		M_Print (160, 120,
 				 hipnoticlevels[hipnoticepisodes[startepisode].firstLevel +
 								startlevel].description);
@@ -2129,14 +2135,17 @@ M_GameOptions_Draw (void)
 								startlevel].name);
 	}
 	// PGM 01/07/97 added rogue episodes
-	else if (rogue) {
+	else if (game_rogue->ivalue)
+	{
 		M_Print (160, 120,
 				 roguelevels[rogueepisodes[startepisode].firstLevel +
 							 startlevel].description);
 		M_Print (160, 128,
 				 roguelevels[rogueepisodes[startepisode].firstLevel +
 							 startlevel].name);
-	} else {
+	}
+	else
+	{
 		M_Print (160, 120,
 				 levels[episodes[startepisode].firstLevel +
 						startlevel].description);
@@ -2144,11 +2153,12 @@ M_GameOptions_Draw (void)
 				 levels[episodes[startepisode].firstLevel + startlevel].name);
 	}
 
-// line cursor
+	// line cursor
 	M_DrawCharacter (144, gameoptions_cursor_table[gameoptions_cursor],
 					 12 + ((int) (host_realtime * 4) & 1));
 
-	if (m_serverInfoMessage) {
+	if (m_serverInfoMessage)
+	{
 		if ((host_realtime - m_serverInfoMessageTime) < 5.0) {
 			x = (320 - 26 * 8) / 2;
 			M_DrawTextBox (x, 138, 24, 4);
@@ -2157,9 +2167,9 @@ M_GameOptions_Draw (void)
 			M_Print (x, 154, " requires using command ");
 			M_Print (x, 162, "line parameters; please ");
 			M_Print (x, 170, "   see techinfo.txt.    ");
-		} else {
-			m_serverInfoMessage = false;
 		}
+		else
+			m_serverInfoMessage = false;
 	}
 }
 
@@ -2167,19 +2177,20 @@ M_GameOptions_Draw (void)
 void
 M_NetStart_Change (int dir)
 {
-	int         count;
+	int			count;
 	int			t;
 
-	switch (gameoptions_cursor) {
+	switch (gameoptions_cursor)
+	{
 		case 1:
 			maxplayers += dir;
-			if (maxplayers > svs.maxclientslimit) {
+			if (maxplayers > svs.maxclientslimit)
+			{
 				maxplayers = svs.maxclientslimit;
 				m_serverInfoMessage = true;
 				m_serverInfoMessageTime = host_realtime;
 			}
-			if (maxplayers < 2)
-				maxplayers = 2;
+			maxplayers = min (2, maxplayers);
 			break;
 
 		case 2:
@@ -2187,7 +2198,7 @@ M_NetStart_Change (int dir)
 			break;
 
 		case 3:
-			if (rogue)
+			if (game_rogue->ivalue)
 				count = 6;
 			else
 				count = 2;
@@ -2217,11 +2228,11 @@ M_NetStart_Change (int dir)
 
 		case 7:
 			// MED 01/06/97 added hipnotic count
-			if (hipnotic)
+			if (game_hipnotic->ivalue)
 				count = 6;
 			// PGM 01/07/97 added rogue count
 			// PGM 03/02/97 added 1 for dmatch episode
-			else if (rogue)
+			else if (game_rogue->ivalue)
 				count = 4;
 			else if (registered->ivalue)
 				count = 7;
@@ -2234,10 +2245,10 @@ M_NetStart_Change (int dir)
 
 		case 8:
 			// MED 01/06/97 added hipnotic episodes
-			if (hipnotic)
+			if (game_hipnotic->ivalue)
 				count = hipnoticepisodes[startepisode].levels;
 			// PGM 01/06/97 added hipnotic episodes
-			else if (rogue)
+			else if (game_rogue->ivalue)
 				count = rogueepisodes[startepisode].levels;
 			else
 				count = episodes[startepisode].levels;
@@ -2250,7 +2261,8 @@ M_NetStart_Change (int dir)
 void
 M_GameOptions_Key (int key)
 {
-	switch (key) {
+	switch (key)
+	{
 		case K_ESCAPE:
 			M_Menu_MultiPlayer_f ();
 			break;
@@ -2285,30 +2297,28 @@ M_GameOptions_Key (int key)
 
 		case K_ENTER:
 			S_LocalSound ("misc/menu2.wav");
-			if (gameoptions_cursor == 0) {
+			if (gameoptions_cursor == 0)
+			{
 				if (sv.active)
 					Cbuf_AddText ("disconnect\n");
-				Cbuf_AddText ("listen 0\n");	// so host_netport will be
-				// re-examined
+				// so host_netport will be re-examined
+				Cbuf_AddText ("listen 0\n");
 				Cbuf_AddText (va ("maxplayers %u\n", maxplayers));
 				SCR_BeginLoadingPlaque ();
 
-				if (hipnotic)
-					Cbuf_AddText (va
-								  ("map %s\n",
-								   hipnoticlevels[hipnoticepisodes
-												  [startepisode].firstLevel +
-												  startlevel].name));
-				else if (rogue)
-					Cbuf_AddText (va
-								  ("map %s\n",
+				if (game_hipnotic->ivalue)
+					Cbuf_AddText (va ("map %s\n",
+								hipnoticlevels[hipnoticepisodes
+								[startepisode].firstLevel
+								+ startlevel].name));
+				else if (game_rogue->ivalue)
+					Cbuf_AddText (va ("map %s\n",
 								   roguelevels[rogueepisodes[startepisode].
-											   firstLevel + startlevel].name));
+								   firstLevel + startlevel].name));
 				else
-					Cbuf_AddText (va
-								  ("map %s\n",
-								   levels[episodes[startepisode].firstLevel +
-										  startlevel].name));
+					Cbuf_AddText (va ("map %s\n",
+								   levels[episodes[startepisode].firstLevel
+								   + startlevel].name));
 
 				return;
 			}

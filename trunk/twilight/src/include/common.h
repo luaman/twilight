@@ -48,6 +48,10 @@ extern struct cvar_s *fs_userconf;
 extern struct cvar_s *fs_userpath;
 extern struct cvar_s *fs_shareconf;
 extern struct cvar_s *fs_sharepath;
+extern struct cvar_s *game_directory;
+extern struct cvar_s *game_rogue;
+extern struct cvar_s *game_hipnotic;
+extern struct cvar_s *game_mission;
 
 //============================================================================
 
@@ -203,7 +207,6 @@ void Com_BeginRedirect (void (*RedirectedPrint) (char *));
 void Com_EndRedirect (void);
 
 extern struct cvar_s *registered;
-extern qboolean standard_quake, rogue, hipnotic;
 
 int	build_number (void);
 
