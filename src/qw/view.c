@@ -41,7 +41,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "screen.h"
 #include "strlib.h"
-#include "sys.h"
+#include "host.h"
 
 /* QW specific */
 #include "pmove.h"
@@ -618,7 +618,7 @@ void
 V_AddEntity ( entity_t *ent )
 {
 	if ( r_refdef.num_entities >= MAX_ENTITIES ) {
-		Sys_Error ("ERROR! Out of entitys!");
+		Host_EndGame ("ERROR! Out of entitys!");
 	}
 
 	r_refdef.entities[r_refdef.num_entities++] = ent;

@@ -45,8 +45,8 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "mdfour.h"
 #include "strlib.h"
-#include "sys.h"
 #include "draw.h"
+#include "host.h"
 
 model_t	*loadmodel;
 char	loadname[32];				// for hunk tags
@@ -110,7 +110,7 @@ Mod_LoadModel (model_t *mod, qboolean crash)
 			sizeof (stackbuf), true);
 	if (!buf) {
 		if (crash)
-			Sys_Error ("Mod_LoadModel: %s not found", mod->name);
+			Host_EndGame ("Mod_LoadModel: %s not found", mod->name);
 		return NULL;
 	}
 //
@@ -206,7 +206,7 @@ Mod_LoadTextures (lump_t *l)
 			mt->offsets[j] = LittleLong (mt->offsets[j]);
 
 		if ((mt->width & 15) || (mt->height & 15))
-			Sys_Error ("Texture %s is not 16 aligned", mt->name);
+			Host_EndGame ("Texture %s is not 16 aligned", mt->name);
 		pixels = mt->width * mt->height * (85 / 64);
 		tx = Hunk_AllocName (sizeof (texture_t) + pixels, loadname);
 		loadmodel->textures[i] = tx;
@@ -274,7 +274,7 @@ Mod_LoadTextures (lump_t *l)
 			altanims[altmax] = tx;
 			altmax++;
 		} else
-			Sys_Error ("Bad animating texture %s", tx->name);
+			Host_EndGame ("Bad animating texture %s", tx->name);
 
 		for (j = i + 1; j < m->nummiptex; j++) {
 			tx2 = loadmodel->textures[j];
@@ -297,7 +297,7 @@ Mod_LoadTextures (lump_t *l)
 				if (num + 1 > altmax)
 					altmax = num + 1;
 			} else
-				Sys_Error ("Bad animating texture %s", tx->name);
+				Host_EndGame ("Bad animating texture %s", tx->name);
 		}
 
 #define	ANIM_CYCLE	2
@@ -305,7 +305,7 @@ Mod_LoadTextures (lump_t *l)
 		for (j = 0; j < max; j++) {
 			tx2 = anims[j];
 			if (!tx2)
-				Sys_Error ("Missing frame %i of %s", j, tx->name);
+				Host_EndGame ("Missing frame %i of %s", j, tx->name);
 			tx2->anim_total = max * ANIM_CYCLE;
 			tx2->anim_min = j * ANIM_CYCLE;
 			tx2->anim_max = (j + 1) * ANIM_CYCLE;
@@ -316,7 +316,7 @@ Mod_LoadTextures (lump_t *l)
 		for (j = 0; j < altmax; j++) {
 			tx2 = altanims[j];
 			if (!tx2)
-				Sys_Error ("Missing frame %i of %s", j, tx->name);
+				Host_EndGame ("Missing frame %i of %s", j, tx->name);
 			tx2->anim_total = altmax * ANIM_CYCLE;
 			tx2->anim_min = j * ANIM_CYCLE;
 			tx2->anim_max = (j + 1) * ANIM_CYCLE;
@@ -408,7 +408,7 @@ Mod_LoadTexinfo (lump_t *l)
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
-		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
+		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
 	out = Hunk_AllocName (count * sizeof (*out), loadname);
 
@@ -439,7 +439,7 @@ Mod_LoadTexinfo (lump_t *l)
 			out->flags = 0;
 		} else {
 			if (miptex >= loadmodel->numtextures)
-				Sys_Error ("miptex >= loadmodel->numtextures");
+				Host_EndGame ("miptex >= loadmodel->numtextures");
 			out->texture = loadmodel->textures[miptex];
 			if (!out->texture) {
 				out->texture = r_notexture_mip;	// texture not found
@@ -495,7 +495,7 @@ CalcSurfaceExtents (msurface_t *s)
 		s->texturemins[i] = bmins[i] * 16;
 		s->extents[i] = (bmaxs[i] - bmins[i]) * 16;
 		if (!(tex->flags & TEX_SPECIAL) && s->extents[i] > 512 /* 256 */ )
-			Sys_Error ("Bad surface extents");
+			Host_EndGame ("Bad surface extents");
 	}
 
 	s->smax = bmaxs[0] - bmins[0] + 1, 
@@ -518,7 +518,7 @@ Mod_LoadFaces (lump_t *l)
 
 	in = (void *) (mod_base + l->fileofs);
 	if (l->filelen % sizeof (*in))
-		Sys_Error ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
+		Host_EndGame ("MOD_LoadBmodel: funny lump size in %s", loadmodel->name);
 	count = l->filelen / sizeof (*in);
 	out = Hunk_AllocName (count * sizeof (*out), loadname);
 
@@ -596,7 +596,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	i = LittleLong (header->version);
 	if (i != BSPVERSION)
-		Sys_Error
+		Host_EndGame
 			("Mod_LoadBrushModel: %s has wrong version number (%i should be %i)",
 			 mod->name, i, BSPVERSION);
 
@@ -890,7 +890,7 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 	skin = (Uint8 *) (pskintype + 1);
 
 	if (numskins < 1 || numskins > MAX_SKINS)
-		Sys_Error ("Mod_LoadAliasModel: Invalid # of skins: %d\n", numskins);
+		Host_EndGame ("Mod_LoadAliasModel: Invalid # of skins: %d\n", numskins);
 
 	s = pheader->skinwidth * pheader->skinheight;
 
@@ -901,7 +901,7 @@ Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			// save 8 bit texels for the player model to remap
 			if (!strcmp (loadmodel->name, "progs/player.mdl")) {
 				if (s > sizeof (player_8bit_texels))
-					Sys_Error ("Player skin too large");
+					Host_EndGame ("Player skin too large");
 				memcpy (player_8bit_texels, (Uint8 *) (pskintype + 1), s);
 				player_8bit_width = pheader->skinwidth;
 				player_8bit_height = pheader->skinheight;
@@ -1079,7 +1079,7 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 	version = LittleLong (pinmodel->version);
 	if (version != ALIAS_VERSION)
-		Sys_Error ("%s has wrong version number (%i should be %i)",
+		Host_EndGame ("%s has wrong version number (%i should be %i)",
 				   mod->name, version, ALIAS_VERSION);
 
 	mod->modflags = Mod_FindModelFlags(mod->name);
@@ -1104,26 +1104,26 @@ Mod_LoadAliasModel (model_t *mod, void *buffer)
 	pheader->skinheight = LittleLong (pinmodel->skinheight);
 
 	if (pheader->skinheight > MAX_LBM_HEIGHT)
-		Sys_Error ("model %s has a skin taller than %d", mod->name,
+		Host_EndGame ("model %s has a skin taller than %d", mod->name,
 				   MAX_LBM_HEIGHT);
 
 	pheader->numverts = LittleLong (pinmodel->numverts);
 
 	if (pheader->numverts <= 0)
-		Sys_Error ("model %s has no vertices", mod->name);
+		Host_EndGame ("model %s has no vertices", mod->name);
 
 	if (pheader->numverts > MAXALIASVERTS)
-		Sys_Error ("model %s has too many vertices", mod->name);
+		Host_EndGame ("model %s has too many vertices", mod->name);
 
 	pheader->numtris = LittleLong (pinmodel->numtris);
 
 	if (pheader->numtris <= 0)
-		Sys_Error ("model %s has no triangles", mod->name);
+		Host_EndGame ("model %s has no triangles", mod->name);
 
 	pheader->numframes = LittleLong (pinmodel->numframes);
 	numframes = pheader->numframes;
 	if (numframes < 1)
-		Sys_Error ("Mod_LoadAliasModel: Invalid # of frames: %d\n", numframes);
+		Host_EndGame ("Mod_LoadAliasModel: Invalid # of frames: %d\n", numframes);
 
 	pheader->size = LittleFloat (pinmodel->size) * ALIAS_BASE_SIZE_RATIO;
 	mod->synctype = LittleLong (pinmodel->synctype);
@@ -1308,7 +1308,7 @@ Mod_LoadSpriteGroup (void *pin, mspriteframe_t **ppframe, int framenum)
 	for (i = 0; i < numframes; i++) {
 		*poutintervals = LittleFloat (pin_intervals->interval);
 		if (*poutintervals <= 0.0)
-			Sys_Error ("Mod_LoadSpriteGroup: interval<=0");
+			Host_EndGame ("Mod_LoadSpriteGroup: interval<=0");
 
 		poutintervals++;
 		pin_intervals++;
@@ -1346,7 +1346,7 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 
 	version = LittleLong (pin->version);
 	if (version != SPRITE_VERSION)
-		Sys_Error ("%s has wrong version number "
+		Host_EndGame ("%s has wrong version number "
 				   "(%i should be %i)", mod->name, version, SPRITE_VERSION);
 
 	numframes = LittleLong (pin->numframes);
@@ -1373,7 +1373,7 @@ Mod_LoadSpriteModel (model_t *mod, void *buffer)
 // load the frames
 //
 	if (numframes < 1)
-		Sys_Error ("Mod_LoadSpriteModel: Invalid # of frames: %d\n", numframes);
+		Host_EndGame ("Mod_LoadSpriteModel: Invalid # of frames: %d\n", numframes);
 
 	mod->numframes = numframes;
 

@@ -250,7 +250,7 @@ CL_GetDemoMessage (void)
 			net_message.cursize = LittleLong (net_message.cursize);
 			// Com_Printf("read: %ld bytes\n", net_message.cursize);
 			if (net_message.cursize > MAX_MSGLEN)
-				Sys_Error ("Demo message > MAX_MSGLEN");
+				Host_EndGame ("Demo message > MAX_MSGLEN");
 			r = fread (net_message.data, net_message.cursize, 1, cls.demofile);
 			if (r != 1) {
 				CL_StopPlayback ();

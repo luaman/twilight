@@ -46,7 +46,7 @@ static const char rcsid[] =
 #include "image.h"
 #include "mathlib.h"
 #include "strlib.h"
-#include "sys.h"
+#include "host.h"
 
 extern model_t *loadmodel;
 
@@ -102,9 +102,9 @@ SubdividePolygon (int numverts, float *verts)
 	float       s, t;
 
 	if (!numverts)
-		Sys_Error ("numverts = 0!");
+		Host_EndGame ("numverts = 0!");
 	if (numverts > 60)
-		Sys_Error ("numverts = %i", numverts);
+		Host_EndGame ("numverts = %i", numverts);
 
 	BoundPoly (numverts, verts, mins, maxs);
 
@@ -534,7 +534,7 @@ void ClipSkyPolygon (int nump, vec3_t vecs, int stage)
 	int		i, j;
 
 	if (nump > MAX_CLIP_VERTS-2)
-		Sys_Error ("ClipSkyPolygon: MAX_CLIP_VERTS");
+		Host_EndGame ("ClipSkyPolygon: MAX_CLIP_VERTS");
 
 	if (stage == 6)
 	{

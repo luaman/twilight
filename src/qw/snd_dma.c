@@ -304,10 +304,10 @@ S_FindName (char *name)
 	sfx_t      *sfx;
 
 	if (!name)
-		Sys_Error ("S_FindName: NULL\n");
+		Host_EndGame ("S_FindName: NULL\n");
 
 	if (strlen (name) >= MAX_QPATH)
-		Sys_Error ("Sound name too long: %s", name);
+		Host_EndGame ("Sound name too long: %s", name);
 
 // see if already loaded
 	for (i = 0; i < num_sfx; i++)
@@ -316,7 +316,7 @@ S_FindName (char *name)
 		}
 
 	if (num_sfx == MAX_SFX)
-		Sys_Error ("S_FindName: out of sfx_t");
+		Host_EndGame ("S_FindName: out of sfx_t");
 
 	sfx = &known_sfx[i];
 	strcpy (sfx->name, name);
