@@ -430,10 +430,11 @@ Easier to parse than PR_ValueString
 char       *
 PR_UglyValueString (etype_t type, eval_t *val)
 {
-	static char	line[1024]; // etg: made a bit larger, was 256
+	static char	line[4096];
 	ddef_t		*def;
 	dfunction_t	*f;
 	int			n;
+	char		*s;
 
 	type &= ~DEF_SAVEGLOBAL;
 
@@ -454,7 +455,24 @@ PR_UglyValueString (etype_t type, eval_t *val)
 			break;
 		case ev_field:
 			def = ED_FieldAtOfs (val->_int);
-			snprintf (line, sizeof (line), "%s", pr_strings + def->s_name);
+			s = pr_strings + def->s_name;
+			for (i = 0; i < (sizeof (line) - 1) && *s; )
+			{
+				if (*s == '\n')
+				{
+					line[i++] = '\\';
+					line[i++] = 'n';
+				}
+				else if (*s == '\r')
+				{
+					line[i++] = '\\';
+					line[i++] = 'r';
+				}
+				else
+					line[i] = *s;
+				s++;
+			}
+			line[i++] = 0;
 			break;
 		case ev_void:
 			snprintf (line, sizeof (line), "void");
