@@ -626,16 +626,20 @@ RecursiveColorLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 
 			ds = (int) ((float) DotProduct (mid, surf->texinfo->vecs[0])
 					+ surf->texinfo->vecs[0][3]);
+			if (ds < surf->texturemins[0])
+				continue;
 			dt = (int) ((float) DotProduct (mid, surf->texinfo->vecs[1])
 					+ surf->texinfo->vecs[1][3]);
-			if (ds < surf->texturemins[0] || dt < surf->texturemins[1])
+			if (dt < surf->texturemins[1])
 				continue;
-			
+
 			ds -= surf->texturemins[0];
-			dt -= surf->texturemins[1];
-			
-			if (ds > surf->extents[0] || dt > surf->extents[1])
+			if (ds > surf->extents[0])
 				continue;
+			dt -= surf->texturemins[1];
+			if (dt > surf->extents[1])
+				continue;
+
 			if (surf->samples)
 			{
 				Uint8 *lightmap;
