@@ -192,7 +192,7 @@ void transpolyrender(void)
 					transpoly[currenttranspoly].glowtexnum = 0;
 					transpoly[currenttranspoly].transpolytype = TPOLYTYPE_ADD;
 					transpoly[currenttranspoly].firstvert = currenttransvert;
-					transpoly[currenttranspoly].verts = 0;
+					transpoly[currenttranspoly].verts = p->verts;
 					transpolylist[transpolylistindex++] = &transpoly[currenttranspoly];
 					currenttranspoly++;
 					memcpy(&transvert[currenttransvert], &transvert[p->firstvert], sizeof(transvert_t) * p->verts);
@@ -261,7 +261,7 @@ void transpolyrender(void)
 	if (gl_cva)
 		qglUnlockArraysEXT ();
 
-	qglDisable(GL_COLOR_ARRAY);
+	qglDisableClientState(GL_COLOR_ARRAY);
 
 	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglColor3f(1,1,1);
