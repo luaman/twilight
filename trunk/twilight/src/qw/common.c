@@ -627,6 +627,12 @@ MSG_ReadDeltaUsercmd (usercmd_t *from, usercmd_t *move)
 	move->msec = MSG_ReadByte ();
 }
 
+void
+MSG_PrintPacket ()
+{
+	Com_PrintHex(net_message.data, net_message.cursize);
+}
+
 
 //===========================================================================
 
@@ -654,7 +660,7 @@ void Com_PrintHex (char *str, int len)
 		if ((c > 126) || (c < 32)) {
 			c = '.';
 		}
-		Com_Printf("%c  ", c, str[i] & 0xFF);
+		Com_Printf("%c  ", c);
 	}
 	Com_Printf("\n");
 
