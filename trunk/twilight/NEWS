@@ -48,8 +48,14 @@ NEWS for Project Twilight
 	Added FPS counter to twilight-nq, works just like it does in QW.
 
 2001-09-08 08:31  Colored dynamic lighting
-	Dynamic lightmaps may now contain color.
-		FIXME: Explain better, list Cvars involved
+	Dynamic lightmaps can now be generated using colored lighting.
+		gl_colorlights - 1 to use normal dynamic lighting
+			         0 to use dynamic lighting w/ color
+	This is a read only Cvar, for changes to take effect you'll have
+	to restart twilight-nq or twilight-qw, you can set this from
+	the command line by doing:
+		twilight-X +set gl_colorlights value
+		(Where X represents nq, qw)
 
 2001-09-01 15:27  New commandline parameter, -bpp
 	Specifies the color depth in bits per pixel.  Note, most OpenGL
@@ -92,7 +98,7 @@ NEWS for Project Twilight
 	isn't going to happen now, so it has been removed.
 
 2001-08-22 04:45  Support for +use has been added
-		FIXME: I don't know what this is for, still..
+	FIXME: +use doesn't do anything useful yet, as far as I can tell...
 
 2001-08-21 21:57  Improved tab completion
 	The tab completion feature has been improved a bit and will now give
