@@ -39,7 +39,6 @@ typedef int fixed16_t;
 struct mplane_s;
 
 extern vec3_t vec3_origin;
-extern vec_t  vectortemp;
 
 void Math_Init (void);
 
