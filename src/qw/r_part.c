@@ -74,11 +74,41 @@ typedef enum {
 } ptype_t;
 
 typedef struct {
+	vec3_t	org, up, right;
+	vec4_t	color;
+	float	scale;
+} smokering_t;
+
+static smokering_t *smokerings;
+static int num_smokerings, max_smokerings;
+
+inline qboolean
+new_smokering (vec3_t org, vec3_t up, vec3_t right, float scale, vec4_t color)
+{
+	smokering_t	*ring;
+
+	if (num_smokerings >= max_smokerings)
+		return false;
+
+	ring = &smokerings[num_smokerings++];
+
+	VectorCopy (org, ring->org);
+	VectorCopy (up, ring->up);
+	VectorCopy (right, ring->right);
+	VectorCopy4 (color, ring->color);
+	ring->scale = scale;
+
+	return true;
+}
+
+typedef struct {
 	vec3_t	org1;
 	vec3_t	org2;
+	vec3_t	org_center;
 
 	vec3_t	normal;
-	vec4_t	color;
+	vec4_t	color1;
+	vec4_t	color2;
 	float	scale;
 	float	ramp;
 	float	die;
@@ -90,11 +120,11 @@ static beam_particle_t *beam_particles, **free_beam_particles;
 static int num_beam_particles, max_beam_particles;
 
 inline qboolean
-new_beam_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
-		float ramp, float rstep, float scale, float die)
+new_beam_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color1,
+		vec4_t color2, float ramp, float rstep, float scale, float die)
 {
 	beam_particle_t	*p;
-	vec3_t			normal;
+	float			length;
 
 	if (num_beam_particles >= max_beam_particles)	// Out of particles.
 		return false;
@@ -103,15 +133,16 @@ new_beam_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
 	p->type = type;
 	VectorCopy (org1, p->org1);
 	VectorCopy (org2, p->org2);
-	VectorCopy4 (color, p->color);
+	VectorCopy4 (color1, p->color1);
+	VectorCopy4 (color2, p->color2);
 	p->ramp = ramp;
 	p->rstep = rstep;
 	p->die = cl.time + die;
 	p->scale = scale;
 
-	VectorSubtract (org1, org2, normal);
-	VectorNormalize (normal);
-	VectorCopy (normal, p->normal);
+	VectorSubtract (org1, org2, p->normal);
+	length = VectorNormalize (p->normal);
+	VectorMA (org1, length/2, p->normal, p->org_center);
 
 	return true;
 }
@@ -155,7 +186,7 @@ new_tube_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
 	p->scale2 = scale1;
 
 	VectorSubtract (org1, org2, normal);
-	VectorNormalize (normal);
+	VectorNormalizeFast (normal);
 	VectorCopy (normal, p->normal);
 
 	return true;
@@ -201,7 +232,7 @@ new_cone_particle (ptype_t type, vec3_t org1, vec3_t org2, vec3_t org3,
 	p->scale = scale;
 
 	VectorSubtract (org1, org2, normal);
-	VectorNormalize (normal);
+	VectorNormalizeFast (normal);
 	VectorCopy (normal, p->normal);
 
 	return true;
@@ -290,6 +321,7 @@ R_InitParticles (void)
 	max_cone_particles = max_base_particles;
 	max_tube_particles = max_base_particles;
 	max_beam_particles = max_base_particles;
+	max_smokerings = max_base_particles;
 
 	base_particles = (base_particle_t *) calloc (max_base_particles,
 			sizeof (base_particle_t));
@@ -307,6 +339,7 @@ R_InitParticles (void)
 			sizeof (beam_particle_t));
 	free_beam_particles = (beam_particle_t **) calloc (max_beam_particles,
 			sizeof (beam_particle_t *));
+	smokerings = (smokering_t *) calloc (max_smokerings, sizeof (smokering_t));
 }
 
 /*
@@ -693,7 +726,7 @@ R_RocketBeamTrail (vec3_t start, vec3_t end, int type)
 
 	if (len) {
 		VectorSet4 (color, 0.5, 0.2, 0.2, 0.5);
-		new_beam_particle (pt_rtrail, start, end, color, 0, 8, 10, 15);
+		new_beam_particle (pt_rtrail, start, end, color, color, 0, 8, 10, 15);
 	}
 }
 
@@ -1231,12 +1264,20 @@ R_Move_Beam_Particles (void)
 				if (p->rstep > 0.0)
 					p->rstep -= frametime;
 
-				p->color[3] -= frametime * 0.4;
-				if (p->color[3] <= 0)
+				p->color1[3] -= frametime * 0.4;
+				if (p->color1[3] <= 0)
 					p->die = -1;
-				if (p->color[1] < p->color[0]) {
-					p->color[1] += frametime * 0.40;
-					p->color[2] += frametime * 0.40;
+				if (p->color1[1] < p->color1[0]) {
+					p->color1[1] += frametime * 0.40;
+					p->color1[2] += frametime * 0.40;
+				}
+
+				p->color2[3] -= frametime * 0.4;
+				if (p->color2[3] <= 0)
+					p->die = -1;
+				if (p->color2[1] < p->color2[0]) {
+					p->color2[1] += frametime * 0.40;
+					p->color2[2] += frametime * 0.40;
 				}
 				break;
 			default:
@@ -1255,41 +1296,53 @@ R_Move_Beam_Particles (void)
 }
 
 static inline void
-DrawBeam (vec3_t p1, vec3_t p2, vec3_t normal, vec4_t color, float scale,
-		float ramp)
+DrawBeam (beam_particle_t *p)
 {
 	float	dp;
-	vec3_t	v_up, v_right1, v_right2, v_diff;
+	vec3_t	v_up, v_right1, v_right2, v_diff1, v_diff2, v_dist;
 
-	VectorSubtract (r_origin, p1, v_diff);
-	VectorNormalizeFast (v_diff);
-	CrossProduct (normal, v_diff, v_right1);
+	{
+		VectorSubtract (r_origin, p->org_center, v_diff1);
+		VectorVectors (p->normal, v_right1, v_up);
+		v_dist[0] = DotProduct(v_diff1, v_right1);
+		v_dist[1] = DotProduct(v_diff1, v_up);
+		v_dist[2] = 0;
+		if (DotProduct(v_dist, v_dist) < (p->scale * p->scale)) {
+			new_smokering(p->org_center, v_up, v_right1, p->scale/2, p->color2);
+			return;
+		}
+	}
 
-	VectorSubtract (r_origin, p2, v_diff);
-	VectorNormalizeFast (v_diff);
-	CrossProduct (normal, v_diff, v_right2);
+	VectorSubtract (r_origin, p->org1, v_diff1);
+	VectorNormalizeFast (v_diff1);
+	CrossProduct (p->normal, v_diff1, v_right1);
 
-	if (DotProduct(normal, v_diff) > 0.99f)
-		return;
+	VectorSubtract (r_origin, p->org2, v_diff2);
+	VectorNormalizeFast (v_diff2);
+	CrossProduct (p->normal, v_diff2, v_right2);
 
-	VectorCopy (normal, v_up);
+	VectorCopy (p->normal, v_up);
 
-	VectorTwiddle(p1, v_up, -scale, v_right1,  scale, 1,v_array_v(v_index + 0));
-	VectorTwiddle(p1, v_up,  scale, v_right1, -scale, 1,v_array_v(v_index + 1));
-	VectorTwiddle(p2, v_up,  scale, v_right2, -scale, 1,v_array_v(v_index + 2));
-	VectorTwiddle(p2, v_up, -scale, v_right2,  scale, 1,v_array_v(v_index + 3));
+	VectorTwiddle (p->org1, v_up, -p->scale, v_right1,  p->scale, 1,
+			v_array_v(v_index + 0));
+	VectorTwiddle (p->org1, v_up,  p->scale, v_right1, -p->scale, 1,
+			v_array_v(v_index + 1));
+	VectorTwiddle (p->org2, v_up,  p->scale, v_right2, -p->scale, 1,
+			v_array_v(v_index + 2));
+	VectorTwiddle (p->org2, v_up, -p->scale, v_right2,  p->scale, 1,
+			v_array_v(v_index + 3));
 
-	VectorCopy4 (color, c_array_v(v_index + 0));
-	VectorCopy4 (color, c_array_v(v_index + 1));
-	VectorCopy4 (color, c_array_v(v_index + 2));
-	VectorCopy4 (color, c_array_v(v_index + 3));
+	VectorCopy4 (p->color1, c_array_v(v_index + 0));
+	VectorCopy4 (p->color1, c_array_v(v_index + 1));
+	VectorCopy4 (p->color2, c_array_v(v_index + 2));
+	VectorCopy4 (p->color2, c_array_v(v_index + 3));
 
-	dp = DotProduct(p1, normal) / 64;
-	dp -= ramp;
+	dp = DotProduct(p->org1, p->normal) / 64;
+	dp -= p->ramp;
 	VectorSet2 (tc_array_v(v_index + 0), 1, dp);
 	VectorSet2 (tc_array_v(v_index + 1), 0, dp);
-	dp = DotProduct(p2, normal) / 64;
-	dp -= ramp;
+	dp = DotProduct(p->org2, p->normal) / 64;
+	dp -= p->ramp;
 	VectorSet2 (tc_array_v(v_index + 2), 0, dp);
 	VectorSet2 (tc_array_v(v_index + 3), 1, dp);
 
@@ -1330,7 +1383,7 @@ R_Draw_Beam_Particles (void)
 		maxparticle = k;
 		activeparticles++;
 
-		DrawBeam (p->org1, p->org2, p->normal, p->color, p->scale, p->ramp);
+		DrawBeam (p);
 
 		if (((i_index + 6) > MAX_VERTEX_INDICES) ||
 				((v_index + 4) > MAX_VERTEX_ARRAYS)) {
@@ -1358,6 +1411,61 @@ R_Draw_Beam_Particles (void)
 			maxparticle--;
 	}
 	num_beam_particles = activeparticles;
+}
+
+/*
+===============
+R_Draw_SmokeRings
+===============
+*/
+static void
+R_Draw_SmokeRings (void)
+{
+	smokering_t	*p;
+	int			k;
+	vec_t		*corner;
+
+	qglBindTexture (GL_TEXTURE_2D, part_tex_smoke_ring);
+	v_index = 0;
+
+	for (k = 0, p = smokerings; k < num_smokerings; k++, p++) {
+		VectorCopy4 (p->color, c_array_v(v_index + 0));
+		VectorCopy4 (p->color, c_array_v(v_index + 1));
+		VectorCopy4 (p->color, c_array_v(v_index + 2));
+		VectorCopy4 (p->color, c_array_v(v_index + 3));
+		VectorSet2(tc_array_v(v_index + 0), 1, 1);
+		VectorSet2(tc_array_v(v_index + 1), 0, 1);
+		VectorSet2(tc_array_v(v_index + 2), 0, 0);
+		VectorSet2(tc_array_v(v_index + 3), 1, 0);
+
+		corner = v_array_v(v_index);
+		VectorTwiddleS (p->org, p->up, p->right, p->scale * -0.5,
+				v_array_v(v_index));
+		VectorTwiddle (corner, p->up, p->scale, p->right, 0       , 1,
+				v_array_v(v_index+1));
+		VectorTwiddle (corner, p->up, p->scale, p->right, p->scale, 1,
+				v_array_v(v_index+2));
+		VectorTwiddle (corner, p->up, 0       , p->right, p->scale, 1,
+				v_array_v(v_index+3));
+
+		v_index += 4;
+
+		if ((v_index + 4) > MAX_VERTEX_ARRAYS) {
+			TWI_PreVDrawCVA (0, v_index);
+			qglDrawArrays (GL_QUADS, 0, v_index);
+			TWI_PostVDrawCVA ();
+			v_index = 0;
+		}
+	}
+
+	if (v_index) {
+		TWI_PreVDrawCVA (0, v_index);
+		qglDrawArrays (GL_QUADS, 0, v_index);
+		TWI_PostVDrawCVA ();
+		v_index = 0;
+	}
+
+	num_smokerings = 0;
 }
 
 /*
@@ -1578,6 +1686,7 @@ R_DrawParticles (void)
 	R_Draw_Cone_Particles();
 //	R_Draw_Tube_Particles();
 	R_Draw_Beam_Particles();
+	R_Draw_SmokeRings ();
 
 	if (gl_cull->ivalue)
 		qglEnable (GL_CULL_FACE);
