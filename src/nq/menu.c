@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "winquake.h"
 #endif
 
+// FIXME: do this right
+extern cvar_t _windowed_mouse;
+
 void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
 
@@ -1143,11 +1146,9 @@ M_AdjustSliders (int dir)
 			Cvar_SetValue ("lookstrafe", !lookstrafe.value);
 			break;
 
-#ifdef _WIN32
 		case 13:						// _windowed_mouse
 			Cvar_SetValue ("_windowed_mouse", !_windowed_mouse.value);
 			break;
-#endif
 	}
 }
 

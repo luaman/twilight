@@ -3,9 +3,6 @@ cd_win.c
 conproc.c
 conproc.h
 math.s
-net_win.c
-net_wins.c
-net_wins.h
 quakeasm.h
 snd_mixa.s
 snd_null.c
