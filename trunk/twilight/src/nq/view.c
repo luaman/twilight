@@ -138,15 +138,10 @@ V_CalcBob
 float
 V_CalcBob (void)
 {
-	static double	bobtime;
-	static float	bob;
-	float			cycle;
+	float       bob;
+	float       cycle;
 
-	if (onground == -1)
-		return bob;		/* just use old value */
-
-	bobtime += host_frametime;
-	cycle = bobtime - (int) (bobtime / cl_bobcycle->value) * cl_bobcycle->value;
+	cycle = cl.time - (int) (cl.time / cl_bobcycle->value) * cl_bobcycle->value;
 	cycle /= cl_bobcycle->value;
 	if (cycle < cl_bobup->value)
 		cycle = M_PI * cycle / cl_bobup->value;
@@ -155,10 +150,11 @@ V_CalcBob (void)
 			/ (1.0 - cl_bobup->value);
 
 	/* bob is proportional to velocity in the xy plane
-       (don't count Z, or jumping messes it up) */
+	   (don't count Z, or jumping messes it up) */
+
 	bob = Q_sqrt (cl.velocity[0] * cl.velocity[0] + cl.velocity[1] * cl.velocity[1]) * cl_bob->value;
 	bob = bob * 0.3 + bob * 0.7 * Q_sin (cycle);
-	bob = bound(-7, bob, 4);
+	bob = bound (-7, bob, 4);
 
 	return bob;
 }
