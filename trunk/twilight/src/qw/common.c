@@ -651,6 +651,26 @@ void Com_EndRedirect (void)
 	rd_print = NULL;
 }
 
+void Com_PrintHex (char *str, int len)
+{
+	char	c;
+	int		i;
+
+	for (i = 0; i < len; i++) {
+		c = str[i];
+		if ((c > 126) || (c < 32)) {
+			c = '.';
+		}
+		Com_Printf("%c  ", c, str[i] & 0xFF);
+	}
+	Com_Printf("\n");
+
+	for (i = 0; i < len; i++) {
+		Com_Printf("%02x ", str[i] & 0xFF);
+	}
+	Com_Printf("\n");
+}
+
 void Com_Printf (char *fmt, ...)
 {
 	va_list     argptr;
@@ -1279,7 +1299,6 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 	char			netpath[MAX_OSPATH];
 	pack_t		   *pak;
 	int				i;
-	int				findtime;
 
 	file_from_pak = 0;
 
@@ -1318,13 +1337,13 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 			snprintf (netpath, sizeof (netpath), "%s/%s", search->filename,
 					  filename);
 
-			findtime = Sys_FileTime (netpath);
-			if (findtime == -1)
+			*file = fopen (netpath, "rb");
+
+			if (!*file)
 				continue;
 
 			Com_DPrintf ("FindFile: %s\n", netpath);
 
-			*file = fopen (netpath, "rb");
 			return COM_filelength (*file);
 		}
 

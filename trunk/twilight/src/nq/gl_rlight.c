@@ -148,11 +148,11 @@ R_RenderDlight (dlight_t *light)
 	}
 	VectorSubtract (light->origin, v, v);
 
-	VectorSet3 (v_array[v_index], v[0], v[1], v[2]);
-	c_array[v_index][0] = light->color[0];
-	c_array[v_index][1] = light->color[1];
-	c_array[v_index][2] = light->color[2];
-	c_array[v_index][3] = 1.0;
+	VectorSet3 (v_array_v(v_index), v[0], v[1], v[2]);
+	c_array(v_index, 0) = light->color[0];
+	c_array(v_index, 1) = light->color[1];
+	c_array(v_index, 2) = light->color[2];
+	c_array(v_index, 3) = 1.0;
 	vcenter = v_index;
 	v_index++;
 
@@ -162,8 +162,8 @@ R_RenderDlight (dlight_t *light)
 			v[j] = light->origin[j] + (v_right[j] * (*bub_cos) +
 				+ v_up[j] * (*bub_sin)) * rad;
 
-		VectorSet4 (c_array[v_index], 0.0, 0.0, 0.0, 0.0);
-		VectorSet3 (v_array[v_index], v[0], v[1], v[2]);
+		VectorSet4 (c_array_v(v_index), 0.0, 0.0, 0.0, 0.0);
+		VectorSet3 (v_array_v(v_index), v[0], v[1], v[2]);
 		if (vlast != -1) {
 			vindices[i_index + 0] = vcenter;
 			vindices[i_index + 1] = vlast;
@@ -180,11 +180,11 @@ R_RenderDlight (dlight_t *light)
 			TWI_PostVDrawCVA ();
 			v_index = 0;
 			i_index = 0;
-			memcpy(v_array[v_index], v_array[vcenter], sizeof(*v_array));
-			memcpy(c_array[v_index], c_array[vcenter], sizeof(*c_array));
+			memcpy(v_array_v(v_index), v_array_v(vcenter),sizeof(v_array_v(0)));
+			memcpy(c_array_v(v_index), c_array_v(vcenter),sizeof(c_array_v(0)));
 			vcenter = v_index++;
-			memcpy(v_array[v_index], v_array[vlast], sizeof(*v_array));
-			memcpy(c_array[v_index], c_array[vlast], sizeof(*c_array));
+			memcpy(v_array_v(v_index), v_array_v(vlast), sizeof(v_array_v(0)));
+			memcpy(c_array_v(v_index), c_array_v(vlast), sizeof(c_array_v(0)));
 			vlast = v_index++;
 		}
 	}

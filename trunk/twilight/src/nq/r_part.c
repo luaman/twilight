@@ -946,20 +946,20 @@ R_Draw_Base_Particles (void)
 		} else
 			scale = p->scale;
 
-		VectorCopy4 (p->color, c_array[v_index + 0]);
-		VectorCopy4 (p->color, c_array[v_index + 1]);
-		VectorCopy4 (p->color, c_array[v_index + 2]);
-		VectorCopy4 (p->color, c_array[v_index + 3]);
-		VectorSet2(tc_array[v_index + 0], 1, 1);
-		VectorSet2(tc_array[v_index + 1], 0, 1);
-		VectorSet2(tc_array[v_index + 2], 0, 0);
-		VectorSet2(tc_array[v_index + 3], 1, 0);
+		VectorCopy4 (p->color, c_array_v(v_index + 0));
+		VectorCopy4 (p->color, c_array_v(v_index + 1));
+		VectorCopy4 (p->color, c_array_v(v_index + 2));
+		VectorCopy4 (p->color, c_array_v(v_index + 3));
+		VectorSet2(tc_array_v(v_index + 0), 1, 1);
+		VectorSet2(tc_array_v(v_index + 1), 0, 1);
+		VectorSet2(tc_array_v(v_index + 2), 0, 0);
+		VectorSet2(tc_array_v(v_index + 3), 1, 0);
 
-		corner = v_array[v_index];
-		VectorTwiddleS (p->org, vup, vright, scale * -0.5, v_array[v_index]);
-		VectorTwiddle (corner, vup, scale, vright, 0    , 1,v_array[v_index+1]);
-		VectorTwiddle (corner, vup, scale, vright, scale, 1,v_array[v_index+2]);
-		VectorTwiddle (corner, vup, 0    , vright, scale, 1,v_array[v_index+3]);
+		corner = v_array_v(v_index);
+		VectorTwiddleS (p->org, vup, vright, scale * -0.5, v_array_v(v_index));
+		VectorTwiddle (corner, vup, scale, vright, 0    , 1,v_array_v(v_index+1));
+		VectorTwiddle (corner, vup, scale, vright, scale, 1,v_array_v(v_index+2));
+		VectorTwiddle (corner, vup, 0    , vright, scale, 1,v_array_v(v_index+3));
 
 		v_index += 4;
 
@@ -1095,16 +1095,16 @@ R_Draw_Tube_Particles (void)
 		bub_cos = bubble_costable;
 		for (i = 0, f = p->ramp; i < 17; i++, f++) {
 			VectorTwiddle (p->org1, v_right, bub_cos[i%16], v_up, bub_sin[i%16],
-					p->scale2, v_array[v_index]);
-			VectorCopy4 (p->color, c_array[v_index]);
-			VectorSet2 (tc_array[v_index], f/16.0f, 
+					p->scale2, v_array_v(v_index));
+			VectorCopy4 (p->color, c_array_v(v_index));
+			VectorSet2 (tc_array_v(v_index), f/16.0f, 
 					DotProduct(p->org1, p->normal) / 64);
 			v2 = v_index++;
 
 			VectorTwiddle (p->org2, v_right, bub_cos[i%16], v_up, bub_sin[i%16],
-					p->scale2, v_array[v_index]);
-			VectorCopy4 (p->color, c_array[v_index]);
-			VectorSet2 (tc_array[v_index], f/16.0f, 
+					p->scale2, v_array_v(v_index));
+			VectorCopy4 (p->color, c_array_v(v_index));
+			VectorSet2 (tc_array_v(v_index), f/16.0f, 
 					DotProduct(p->org2, p->normal) / 64);
 			v3 = v_index++;
 
@@ -1279,9 +1279,9 @@ R_Draw_Cone_Particles (void)
 
 		VectorVectors (p->normal, v_right, v_up);
 
-		VectorCopy (p->org2, v_array[v_index]);
-		VectorCopy4 (p->color2, c_array[v_index]);
-		VectorSet2 (tc_array[v_index], 0.5, 0.5);
+		VectorCopy (p->org2, v_array_v(v_index));
+		VectorCopy4 (p->color2, c_array_v(v_index));
+		VectorSet2 (tc_array_v(v_index), 0.5, 0.5);
 		v_center = v_index++;
 		v_last = -1;
 		v_first = -1;
@@ -1289,13 +1289,13 @@ R_Draw_Cone_Particles (void)
 		bub_cos = bubble_costable;
 		for (i = 0; i < 16; i++, bub_sin++, bub_cos++) {
 			for (i2 = 0; i2 < 3; i2++)
-				v_array[v_index][i2] = p->org1[i2] +
+				v_array(v_index, i2) = p->org1[i2] +
 					((v_right[i2] * (*bub_cos)) +
 					(v_up[i2] * (*bub_sin))) * p->scale;
 
-			VectorSet2 (tc_array[v_index], *bub_cos * 0.5 + 0.5,
+			VectorSet2 (tc_array_v(v_index), *bub_cos * 0.5 + 0.5,
 					*bub_sin * 0.5 + 0.5);
-			VectorCopy4 (p->color1, c_array[v_index]);
+			VectorCopy4 (p->color1, c_array_v(v_index));
 			if (v_last != -1) {
 				vindices[i_index + 0] = v_center;
 				vindices[i_index + 1] = v_last;

@@ -49,6 +49,7 @@
 
 #define	MAX_SCOREBOARD		16
 #define	MAX_SCOREBOARDNAME	32
+#define	MAX_SKIN_NAME		16
 
 #define	SOUND_CHANNELS		8
 

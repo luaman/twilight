@@ -35,12 +35,6 @@
 #include "render.h"
 #include "zone.h"
 
-typedef struct {
-	char			name[16];
-	qboolean		failedload;			// the name isn't a valid skin
-	cache_user_t	cache;
-} player_skin_t;
-
 /*
  * player_state_t is the information needed by a player entity
  * to do move prediction and to generate a drawable entity
@@ -74,26 +68,21 @@ typedef struct {
 
 
 typedef struct player_info_s {
-	int				userid;
-	char			userinfo[MAX_INFO_STRING];
+	int			userid;
+	char		userinfo[MAX_INFO_STRING];
 
 	// scoreboard information
-	char			name[MAX_SCOREBOARDNAME];
-	float			entertime;
-	int				frags;
-	int				ping;
-	Uint8			pl;
+	char		name[MAX_SCOREBOARDNAME];
+	float		entertime;
+	int			frags;
+	int			ping;
+	Uint8		pl;
+	int			spectator;
 
 	// skin information
-	int				topcolor;
-	int				bottomcolor;
-
-	int				_topcolor;
-	int				_bottomcolor;
-
-	int				spectator;
-	Uint8			translations[VID_GRADES * 256];
-	player_skin_t	*skin;
+	colormap_t	colormap;
+	char		skin_name[MAX_SKIN_NAME];
+	skin_t		*skin;
 } player_info_t;
 
 
@@ -538,16 +527,17 @@ void Cam_FinishMove (usercmd_t *cmd);
 void Cam_Reset (void);
 void CL_InitCam (void);
 
-void Skin_Find (player_info_t *sc);
-Uint8 *Skin_Cache (player_skin_t *skin);
+/*
+ * skin.c
+ */
+void CL_InitSkins (void);
+skin_t *Skin_Load (char *skin_name);
 void Skin_Skins_f (void);
 void Skin_AllSkins_f (void);
 void Skin_NextDownload (void);
 
 #define RSSHOT_WIDTH 320
 #define RSSHOT_HEIGHT 200
-
-extern int fb_skins[MAX_CLIENTS];
 
 #endif // __CLIENT_H
 

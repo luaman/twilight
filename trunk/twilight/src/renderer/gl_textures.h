@@ -1,7 +1,8 @@
 /*
 	$RCSfile$
+	OpenGL Texture management.
 
-	Copyright (C) 2002  Joseph Carter
+	Copyright (C) 2002  Zephaniah E. Hull.
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -21,14 +22,24 @@
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
 
-	$Id$
+    "$Id$";
 */
 
-#ifndef __TEXTURE_H
-#define __TEXTURE_H
+#ifndef __gl_textures_h
+#define __gl_textures_h
+
+#include "qtypes.h"
+#include "model.h"
+
+extern void GLT_FloodFillSkin8 (Uint8 * skin, int skinwidth, int skinheight);
+extern qboolean GLT_TriangleCheck8 (Uint8 *tex, int width, int height, astvert_t texcoords[3], Uint8 color);
+extern int GLT_Mangle8 (Uint8 *in, Uint8 *out, int width, int height, short mask, Uint8 to, qboolean bleach);
+extern void GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name, int width, int height, int frames, float interval);
+extern void GLT_Init ();
 
 #define TEX_ALPHA		1
 #define TEX_MIPMAP		2
 #define TEX_FBMASK		4
 
-#endif // __TEXTURE_H
+#endif // __gl_textures_h
+

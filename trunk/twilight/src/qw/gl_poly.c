@@ -256,8 +256,8 @@ transpolyrender (void)
 	qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglColor3f(1,1,1);
 
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array[0]), tc_array[0]);
-	qglColorPointer (4, GL_FLOAT, sizeof(c_array[0]), c_array[0]);
-	qglVertexPointer (3, GL_FLOAT, sizeof(v_array[0]), v_array[0]);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tc_array_v(0)), tc_array_p);
+	qglColorPointer (4, GL_FLOAT, sizeof(c_array_v(0)), c_array_p);
+	qglVertexPointer (3, GL_FLOAT, sizeof(v_array_v(0)), v_array_p);
 }
 

@@ -46,7 +46,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 #include "sys.h"
-#include "texture.h"
+#include "gl_textures.h"
 
 extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 
@@ -356,14 +356,14 @@ Draw_Character (int x, int y, int num)
 	qglEnable (GL_BLEND);
 	qglBindTexture (GL_TEXTURE_2D, char_texture);
 
-	VectorSet2 (tc_array[0], sl, tl);
-	VectorSet2 (v_array[0], x, y);
-	VectorSet2 (tc_array[1], sh, tl);
-	VectorSet2 (v_array[1], x + 8, y);
-	VectorSet2 (tc_array[2], sh, th);
-	VectorSet2 (v_array[2], x + 8, y + 8);
-	VectorSet2 (tc_array[3], sl, th);
-	VectorSet2 (v_array[3], x, y + 8);
+	VectorSet2 (tc_array_v(0), sl, tl);
+	VectorSet2 (v_array_v(0), x, y);
+	VectorSet2 (tc_array_v(1), sh, tl);
+	VectorSet2 (v_array_v(1), x + 8, y);
+	VectorSet2 (tc_array_v(2), sh, th);
+	VectorSet2 (v_array_v(2), x + 8, y + 8);
+	VectorSet2 (tc_array_v(3), sl, th);
+	VectorSet2 (v_array_v(3), x, y + 8);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -398,14 +398,14 @@ Draw_String_Len (int x, int y, char *str, int len)
 		{
 			frow = (float) (num >> 4) * size;
 			fcol = (float) (num & 15) * size;
-			VectorSet2 (tc_array[vnum + 0], fcol, frow);
-			VectorSet2 (v_array[vnum + 0], x, y);
-			VectorSet2 (tc_array[vnum + 1], fcol + size, frow);
-			VectorSet2 (v_array[vnum + 1], x + 8, y);
-			VectorSet2 (tc_array[vnum + 2], fcol + size, frow + size);
-			VectorSet2 (v_array[vnum + 2], x + 8, y + 8);
-			VectorSet2 (tc_array[vnum + 3], fcol, frow + size);
-			VectorSet2 (v_array[vnum + 3], x, y + 8);
+			VectorSet2 (tc_array_v(vnum + 0), fcol, frow);
+			VectorSet2 (v_array_v(vnum + 0), x, y);
+			VectorSet2 (tc_array_v(vnum + 1), fcol + size, frow);
+			VectorSet2 (v_array_v(vnum + 1), x + 8, y);
+			VectorSet2 (tc_array_v(vnum + 2), fcol + size, frow + size);
+			VectorSet2 (v_array_v(vnum + 2), x + 8, y + 8);
+			VectorSet2 (tc_array_v(vnum + 3), fcol, frow + size);
+			VectorSet2 (v_array_v(vnum + 3), x, y + 8);
 			vnum += 4;
 			if ((vnum + 4) >= MAX_VERTEX_ARRAYS)
 			{
@@ -465,14 +465,14 @@ Draw_Alt_String_Len (int x, int y, char *str, int len)
 		{
 			frow = (float) (num >> 4) * size;
 			fcol = (float) (num & 15) * size;
-			VectorSet2 (tc_array[vnum + 0], fcol, frow);
-			VectorSet2 (v_array[vnum + 0], x, y);
-			VectorSet2 (tc_array[vnum + 1], fcol + size, frow);
-			VectorSet2 (v_array[vnum + 1], x + 8, y);
-			VectorSet2 (tc_array[vnum + 2], fcol + size, frow + size);
-			VectorSet2 (v_array[vnum + 2], x + 8, y + 8);
-			VectorSet2 (tc_array[vnum + 3], fcol, frow + size);
-			VectorSet2 (v_array[vnum + 3], x, y + 8);
+			VectorSet2 (tc_array_v(vnum + 0), fcol, frow);
+			VectorSet2 (v_array_v(vnum + 0), x, y);
+			VectorSet2 (tc_array_v(vnum + 1), fcol + size, frow);
+			VectorSet2 (v_array_v(vnum + 1), x + 8, y);
+			VectorSet2 (tc_array_v(vnum + 2), fcol + size, frow + size);
+			VectorSet2 (v_array_v(vnum + 2), x + 8, y + 8);
+			VectorSet2 (tc_array_v(vnum + 3), fcol, frow + size);
+			VectorSet2 (v_array_v(vnum + 3), x, y + 8);
 			vnum += 4;
 			if ((vnum + 4) >= MAX_VERTEX_ARRAYS)
 			{
@@ -532,14 +532,14 @@ Draw_Crosshair (void)
 			qglBindTexture (GL_TEXTURE_2D, cs_texture);
 
 			qglEnable (GL_BLEND);
-			VectorSet2 (tc_array[0], 0, 0);
-			VectorSet2 (v_array[0], x - 4, y - 4);
-			VectorSet2 (tc_array[1], 1, 0);
-			VectorSet2 (v_array[1], x + 12, y - 4);
-			VectorSet2 (tc_array[2], 1, 1);
-			VectorSet2 (v_array[2], x + 12, y + 12);
-			VectorSet2 (tc_array[3], 0, 1);
-			VectorSet2 (v_array[3], x - 4, y + 12);
+			VectorSet2 (tc_array_v(0), 0, 0);
+			VectorSet2 (v_array_v(0), x - 4, y - 4);
+			VectorSet2 (tc_array_v(1), 1, 0);
+			VectorSet2 (v_array_v(1), x + 12, y - 4);
+			VectorSet2 (tc_array_v(2), 1, 1);
+			VectorSet2 (v_array_v(2), x + 12, y + 12);
+			VectorSet2 (tc_array_v(3), 0, 1);
+			VectorSet2 (v_array_v(3), x - 4, y + 12);
 			TWI_PreVDraw (0, 4);
 			qglDrawArrays (GL_QUADS, 0, 4);
 			TWI_PostVDraw ();
@@ -552,14 +552,14 @@ Draw_Crosshair (void)
 			qglBindTexture (GL_TEXTURE_2D, cs_square);
 
 			qglEnable (GL_BLEND);
-			VectorSet2 (tc_array[0], 0, 0);
-			VectorSet2 (v_array[0], x - 4, y - 4);
-			VectorSet2 (tc_array[1], 1, 0);
-			VectorSet2 (v_array[1], x + 12, y - 4);
-			VectorSet2 (tc_array[2], 1, 1);
-			VectorSet2 (v_array[2], x + 12, y + 12);
-			VectorSet2 (tc_array[3], 0, 1);
-			VectorSet2 (v_array[3], x - 4, y + 12);
+			VectorSet2 (tc_array_v(0), 0, 0);
+			VectorSet2 (v_array_v(0), x - 4, y - 4);
+			VectorSet2 (tc_array_v(1), 1, 0);
+			VectorSet2 (v_array_v(1), x + 12, y - 4);
+			VectorSet2 (tc_array_v(2), 1, 1);
+			VectorSet2 (v_array_v(2), x + 12, y + 12);
+			VectorSet2 (tc_array_v(3), 0, 1);
+			VectorSet2 (v_array_v(3), x - 4, y + 12);
 			TWI_PreVDraw (0, 4);
 			qglDrawArrays (GL_QUADS, 0, 4);
 			TWI_PostVDraw ();
@@ -584,14 +584,14 @@ Draw_Pic (int x, int y, qpic_t *pic)
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
 	qglEnable (GL_BLEND);
 
-	VectorSet2 (tc_array[0], gl->sl, gl->tl);
-	VectorSet2 (v_array[0], x, y);
-	VectorSet2 (tc_array[1], gl->sh, gl->tl);
-	VectorSet2 (v_array[1], x + pic->width, y);
-	VectorSet2 (tc_array[2], gl->sh, gl->th);
-	VectorSet2 (v_array[2], x + pic->width, y + pic->height);
-	VectorSet2 (tc_array[3], gl->sl, gl->th);
-	VectorSet2 (v_array[3], x, y + pic->height);
+	VectorSet2 (tc_array_v(0), gl->sl, gl->tl);
+	VectorSet2 (v_array_v(0), x, y);
+	VectorSet2 (tc_array_v(1), gl->sh, gl->tl);
+	VectorSet2 (v_array_v(1), x + pic->width, y);
+	VectorSet2 (tc_array_v(2), gl->sh, gl->th);
+	VectorSet2 (v_array_v(2), x + pic->width, y + pic->height);
+	VectorSet2 (tc_array_v(3), gl->sl, gl->th);
+	VectorSet2 (v_array_v(3), x, y + pic->height);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -620,14 +620,14 @@ Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
 	newth = newtl + (height * oldglheight) / pic->height;
 
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
-	VectorSet2 (tc_array[0], newsl, newtl);
-	VectorSet2 (v_array[0], x, y);
-	VectorSet2 (tc_array[1], newsh, newtl);
-	VectorSet2 (v_array[1], x + width, y);
-	VectorSet2 (tc_array[2], newsh, newth);
-	VectorSet2 (v_array[2], x + width, y + height);
-	VectorSet2 (tc_array[3], newsl, newth);
-	VectorSet2 (v_array[3], x, y + height);
+	VectorSet2 (tc_array_v(0), newsl, newtl);
+	VectorSet2 (v_array_v(0), x, y);
+	VectorSet2 (tc_array_v(1), newsh, newtl);
+	VectorSet2 (v_array_v(1), x + width, y);
+	VectorSet2 (tc_array_v(2), newsh, newth);
+	VectorSet2 (v_array_v(2), x + width, y + height);
+	VectorSet2 (tc_array_v(3), newsl, newth);
+	VectorSet2 (v_array_v(3), x, y + height);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -671,14 +671,14 @@ Draw_TransPicTranslate (int x, int y, qpic_t *pic, Uint8 *translation)
 	qglTexImage2D (GL_TEXTURE_2D, 0, gl_alpha_format, 64, 64, 0, GL_RGBA,
 				  GL_UNSIGNED_BYTE, trans);
 
-	VectorSet2 (tc_array[0], 0, 0);
-	VectorSet2 (v_array[0], x, y);
-	VectorSet2 (tc_array[1], 1, 0);
-	VectorSet2 (v_array[1], x + pic->width, y);
-	VectorSet2 (tc_array[2], 1, 1);
-	VectorSet2 (v_array[2], x + pic->width, y + pic->height);
-	VectorSet2 (tc_array[3], 0, 1);
-	VectorSet2 (v_array[3], x, y + pic->height);
+	VectorSet2 (tc_array_v(0), 0, 0);
+	VectorSet2 (v_array_v(0), x, y);
+	VectorSet2 (tc_array_v(1), 1, 0);
+	VectorSet2 (v_array_v(1), x + pic->width, y);
+	VectorSet2 (tc_array_v(2), 1, 1);
+	VectorSet2 (v_array_v(2), x + pic->width, y + pic->height);
+	VectorSet2 (tc_array_v(3), 0, 1);
+	VectorSet2 (v_array_v(3), x, y + pic->height);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -724,14 +724,14 @@ Draw_ConsoleBackground (int lines)
 		qglColor3f (1.0f, 1.0f, 1.0f);
 
 	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
-	VectorSet2 (tc_array[0], gl->sl, gl->tl + ofs);
-	VectorSet2 (v_array[0], 0, 0);
-	VectorSet2 (tc_array[1], gl->sh, gl->tl + ofs);
-	VectorSet2 (v_array[1], vid.conwidth, 0);
-	VectorSet2 (tc_array[2], gl->sh, gl->th);
-	VectorSet2 (v_array[2], vid.conwidth, lines);
-	VectorSet2 (tc_array[3], gl->sl, gl->th);
-	VectorSet2 (v_array[3], 0, lines);
+	VectorSet2 (tc_array_v(0), gl->sl, gl->tl + ofs);
+	VectorSet2 (v_array_v(0), 0, 0);
+	VectorSet2 (tc_array_v(1), gl->sh, gl->tl + ofs);
+	VectorSet2 (v_array_v(1), vid.conwidth, 0);
+	VectorSet2 (tc_array_v(2), gl->sh, gl->th);
+	VectorSet2 (v_array_v(2), vid.conwidth, lines);
+	VectorSet2 (tc_array_v(3), gl->sl, gl->th);
+	VectorSet2 (v_array_v(3), 0, lines);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -759,14 +759,14 @@ void
 Draw_TileClear (int x, int y, int w, int h)
 {
 	qglBindTexture (GL_TEXTURE_2D, *(int *) draw_backtile->data);
-	VectorSet2 (tc_array[0], x / 64.0, y / 64.0);
-	VectorSet2 (v_array[0], x, y);
-	VectorSet2 (tc_array[1], (x + w) / 64.0, y / 64.0);
-	VectorSet2 (v_array[1], x + w, y);
-	VectorSet2 (tc_array[2], (x + w) / 64.0, (y + h) / 64.0);
-	VectorSet2 (v_array[2], x + w, y + h);
-	VectorSet2 (tc_array[3], x / 64.0, (y + h) / 64.0);
-	VectorSet2 (v_array[3], x, y + h);
+	VectorSet2 (tc_array_v(0), x / 64.0, y / 64.0);
+	VectorSet2 (v_array_v(0), x, y);
+	VectorSet2 (tc_array_v(1), (x + w) / 64.0, y / 64.0);
+	VectorSet2 (v_array_v(1), x + w, y);
+	VectorSet2 (tc_array_v(2), (x + w) / 64.0, (y + h) / 64.0);
+	VectorSet2 (v_array_v(2), x + w, y + h);
+	VectorSet2 (tc_array_v(3), x / 64.0, (y + h) / 64.0);
+	VectorSet2 (v_array_v(3), x, y + h);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -781,16 +781,16 @@ Fills a box of pixels with a single color
 =============
 */
 void
-Draw_Fill (int x, int y, int w, int h, int c)
+Draw_Fill (int x, int y, int w, int h, vec3_t color)
 {
 	qglDisable (GL_TEXTURE_2D);
 
-	qglColor4fv (d_8tofloattable[c]);
+	qglColor3fv (color);
 
-	VectorSet2 (v_array[0], x, y);
-	VectorSet2 (v_array[1], x + w, y);
-	VectorSet2 (v_array[2], x + w, y + h);
-	VectorSet2 (v_array[3], x, y + h);
+	VectorSet2 (v_array_v(0), x, y);
+	VectorSet2 (v_array_v(1), x + w, y);
+	VectorSet2 (v_array_v(2), x + w, y + h);
+	VectorSet2 (v_array_v(3), x, y + h);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();
@@ -814,10 +814,10 @@ Draw_FadeScreen (void)
 	qglDisable (GL_TEXTURE_2D);
 	qglColor4f (0, 0, 0, 0.8);
 
-	VectorSet2 (v_array[0], 0, 0);
-	VectorSet2 (v_array[1], vid.conwidth, 0);
-	VectorSet2 (v_array[2], vid.conwidth, vid.conheight);
-	VectorSet2 (v_array[3], 0, vid.conheight);
+	VectorSet2 (v_array_v(0), 0, 0);
+	VectorSet2 (v_array_v(1), vid.conwidth, 0);
+	VectorSet2 (v_array_v(2), vid.conwidth, vid.conheight);
+	VectorSet2 (v_array_v(3), 0, vid.conheight);
 	TWI_PreVDraw (0, 4);
 	qglDrawArrays (GL_QUADS, 0, 4);
 	TWI_PostVDraw ();

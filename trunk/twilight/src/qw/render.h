@@ -36,6 +36,11 @@
 
 //=============================================================================
 
+typedef struct colormap_s {
+	vec3_t	top;
+	vec3_t	bottom;
+} colormap_t;
+
 typedef struct entity_save_s {
 	vec3_t	origin;
 	float	origin_time;
@@ -49,7 +54,6 @@ typedef struct entity_save_s {
 } entity_save_t;
 
 typedef struct entity_s {
-	volatile int	a, b, c;
 	entity_save_t	from;
 	entity_save_t	to;
 	entity_save_t	cur;
@@ -65,7 +69,8 @@ typedef struct entity_s {
 	unsigned int	times;
 
 	float			frame_blend;
-	struct player_info_s *scoreboard;	// identify player
+	skin_t			*skin;				// Skin other then model.
+	colormap_t		*colormap;			// Colormap for the model, if any.
 } entity_t;
 
 #define MAX_ENTITIES	1024

@@ -49,6 +49,8 @@ void GL_EndRendering (void);
 extern int texture_extension_number;
 extern float gldepthmin, gldepthmax;
 
+int GL_MangleImage8 (Uint8 *in, Uint8 *out, int width, int height, short mask,
+		        Uint8 to, qboolean bleach);
 void GL_Upload32 (Uint32 *data, Uint32 width, Uint32 height, int flags);
 void GL_Upload8 (Uint8 *data, int width, int height,unsigned *ttable,
 		int flags);
@@ -147,8 +149,6 @@ extern const char *gl_renderer;
 extern const char *gl_version;
 extern const char *gl_extensions;
 
-void R_TranslatePlayerSkin (int playernum);
-
 extern qboolean gl_cva;
 extern qboolean gl_mtex;
 extern qboolean gl_mtexcombine;
@@ -157,20 +157,35 @@ extern qboolean gl_mtexcombine;
 
 #define MAX_VERTEX_ARRAYS	2048
 #define MAX_VERTEX_INDICES	(MAX_VERTEX_ARRAYS * 4)
-GLfloat v_arrays[2][MAX_VERTEX_ARRAYS][3];
 
-GLfloat tc_arrays[2][MAX_VERTEX_ARRAYS][2];
-GLfloat v_arrays[2][MAX_VERTEX_ARRAYS][3];
-GLfloat c_arrays[2][MAX_VERTEX_ARRAYS][4];
+typedef struct {
+	GLfloat	v[2];
+} texcoord_t;
 
-#define tc_array (tc_arrays[va_index])
-#define v_array (v_arrays[va_index])
-#define c_array (c_arrays[va_index])
+typedef struct {
+	GLfloat	v[3];
+} vertex_t;
 
-extern GLuint vindices[MAX_VERTEX_INDICES];
+typedef struct {
+	GLfloat	v[4];
+} color_t;
 
-extern GLuint v_index, i_index, va_index;
+extern texcoord_t	*tc_array_p;
+extern vertex_t		*v_array_p;
+extern color_t		*c_array_p;
+
+#define tc_array_v(x) tc_array_p[x].v
+#define tc_array(x,y) tc_array_p[x].v[y]
+#define v_array_v(x) v_array_p[x].v
+#define v_array(x,y) v_array_p[x].v[y]
+#define c_array_v(x) c_array_p[x].v
+#define c_array(x,y) c_array_p[x].v[y]
+
+extern GLuint *vindices;
+
+extern GLuint v_index, i_index;
 extern qboolean va_locked;
+extern memzone_t *vzone;
 
 extern void inline TWI_PreVDrawCVA (GLint min, GLint max)
 {

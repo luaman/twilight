@@ -46,11 +46,11 @@ typedef struct {
 } lightstyle_t;
 
 typedef struct {
-	char	name[MAX_SCOREBOARDNAME];
-	float	entertime;
-	int		frags;
-	int		colors;						// two 4 bit fields
-	Uint8	translations[VID_GRADES * 256];
+	char		name[MAX_SCOREBOARDNAME];
+	float		entertime;
+	int			frags;
+	int			colors;						// two 4 bit fields
+	colormap_t	colormap;
 } scoreboard_t;
 
 typedef struct {
