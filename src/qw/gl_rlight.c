@@ -62,7 +62,7 @@ R_InitLightTextures (void)
 		{
 			dx = (x - 15.5f) * (1.0f / 16.0f);
 			a = ((1.0f / (dx * dx + dy * dy + 0.2f)) - (1.0f / 1.2f))
-				* 64.0f / (1.0f / (1.0f + 0.2));
+				* 32.0f / (1.0f / (1.0f + 0.2));
 			a = bound(0, a, 255);
 			pixels[y][x][0] = 255;
 			pixels[y][x][1] = 255;
