@@ -254,6 +254,33 @@ DropPunchAngle (void)
 
 /*
 ===================
+SV_FreeMove
+
+===================
+*/
+void
+SV_FreeMove (void)
+{
+	int			i;
+	float		wishspeed;
+
+	AngleVectors (sv_player->v.v_angle, forward, right, up);
+
+	for (i = 0; i < 3; i++)
+		velocity[i] = forward[i] * cmd.forwardmove + right[i] * cmd.sidemove;
+
+	velocity[2] += cmd.upmove;
+
+	wishspeed = VectorLength (velocity);
+	if (wishspeed > sv_maxspeed->fvalue)
+	{
+		VectorScale (velocity, sv_maxspeed->fvalue / wishspeed, velocity);
+		wishspeed = sv_maxspeed->fvalue;
+	}
+}
+
+/*
+===================
 SV_WaterMove
 
 ===================
@@ -337,16 +364,16 @@ SV_AirMove
 void
 SV_AirMove (void)
 {
-	int         i;
-	vec3_t      wishvel;
-	float       fmove, smove;
+	int			i;
+	vec3_t		wishvel;
+	float		fmove, smove;
 
 	AngleVectors (sv_player->v.angles, forward, right, up);
 
 	fmove = cmd.forwardmove;
 	smove = cmd.sidemove;
 
-// hack to not let you back into teleporter
+	// hack to not let you back into teleporter
 	if (sv.time < sv_player->v.teleport_time && fmove < 0)
 		fmove = 0;
 
@@ -360,21 +387,23 @@ SV_AirMove (void)
 
 	VectorCopy (wishvel, wishdir);
 	wishspeed = VectorNormalize (wishdir);
-	if (wishspeed > sv_maxspeed->fvalue) {
+	if (wishspeed > sv_maxspeed->fvalue)
+	{
 		wishspeed = sv_maxspeed->fvalue / wishspeed;
 		VectorScale (wishvel, wishspeed, wishvel);
 		wishspeed = sv_maxspeed->fvalue;
 	}
 
-	if (sv_player->v.movetype == MOVETYPE_NOCLIP) {	// noclip
+	if (sv_player->v.movetype == MOVETYPE_NOCLIP)
 		VectorCopy (wishvel, velocity);
-	} else if (onground) {
+	else if (onground)
+	{
 		SV_UserFriction ();
 		SV_Accelerate ();
-	} else {							// not on ground, so little effect on
-										// velocity
-		SV_AirAccelerate (wishvel);
 	}
+	else
+		// not on ground, so little effect on velocity
+		SV_AirAccelerate (wishvel);
 }
 
 /*
@@ -388,7 +417,7 @@ the angle fields specify an exact angular motion in degrees
 void
 SV_ClientThink (void)
 {
-	vec3_t      v_angle;
+	vec3_t		v_angle;
 
 	if (sv_player->v.movetype == MOVETYPE_NONE)
 		return;
@@ -400,34 +429,42 @@ SV_ClientThink (void)
 
 	DropPunchAngle ();
 
-//
-// if dead, behave differently
-//
+	// if dead, behave differently
 	if (sv_player->v.health <= 0)
 		return;
 
-//
-// angles
-// show 1/3 the pitch angle and all the roll angle
+	// angles
+	// show 1/3 the pitch angle and all the roll angle
 	cmd = host_client->cmd;
 	angles = sv_player->v.angles;
 
 	VectorAdd (sv_player->v.v_angle, sv_player->v.punchangle, v_angle);
 	angles[ROLL] = V_CalcRoll (sv_player->v.angles, sv_player->v.velocity) * 4;
-	if (!sv_player->v.fixangle) {
+	if (!sv_player->v.fixangle)
+	{
 		angles[PITCH] = -v_angle[PITCH] / 3;
 		angles[YAW] = v_angle[YAW];
 	}
 
-	if ((int) sv_player->v.flags & FL_WATERJUMP) {
+	if ((int) sv_player->v.flags & FL_WATERJUMP)
+	{
 		SV_WaterJump ();
 		return;
 	}
-//
-// walk
-//
+
+	// Player is (somehow) outside of the map
+	if (SV_TestEntityPosition (sv_player)
+			|| sv_player->v.movetype == MOVETYPE_FLY
+			|| sv_player->v.movetype == MOVETYPE_NOCLIP)
+	{
+		SV_FreeMove ();
+		return;
+	}
+
+	// walk
 	if ((sv_player->v.waterlevel >= 2)
-		&& (sv_player->v.movetype != MOVETYPE_NOCLIP)) {
+		&& (sv_player->v.movetype != MOVETYPE_NOCLIP))
+	{
 		SV_WaterMove ();
 		return;
 	}
@@ -549,7 +586,6 @@ SV_ReadClientMessage (void)
 					return false;
 
 				case clc_nop:
-//              Sys_Printf ("clc_nop\n");
 					break;
 
 				case clc_stringcmd:
