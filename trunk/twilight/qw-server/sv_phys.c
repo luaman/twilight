@@ -451,7 +451,7 @@ SV_Push
 qboolean
 SV_Push (edict_t *pusher, vec3_t move)
 {
-	int         i, e;
+	int         i, e, savesolid;
 	edict_t    *check, *block;
 	vec3_t      mins, maxs;
 	vec3_t      pushorig;
@@ -482,9 +482,18 @@ SV_Push (edict_t *pusher, vec3_t move)
 			|| check->v.movetype == MOVETYPE_NOCLIP)
 			continue;
 
-		pusher->v.solid = SOLID_NOT;
-		block = SV_TestEntityPosition (check);
-		pusher->v.solid = SOLID_BSP;
+		savesolid = pusher->v.solid;
+
+		if (savesolid == SOLID_BSP || savesolid == SOLID_BBOX || savesolid == SOLID_SLIDEBOX)
+		{
+			pusher->v.solid = SOLID_NOT;
+			block = SV_TestEntityPosition (check);
+			pusher->v.solid = savesolid;
+		}
+		else {
+			block = NULL;
+		}
+
 		if (block)
 			continue;
 
