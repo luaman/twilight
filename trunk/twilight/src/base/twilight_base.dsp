@@ -89,6 +89,10 @@ SOURCE=.\buildnum.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmd.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\crc.c
 # End Source File
 # Begin Source File
