@@ -113,7 +113,7 @@ Chase_Update (void)
 	// move towards destination
 	TraceLine(r_refdef.vieworg, chase_dest, stop);
 
-	if (VectorLength(stop) != 0)
+	if ((stop[0] != 0) && (stop[1] != 0) && (stop[2] != 0))
 		VectorCopy(stop, chase_dest);
 
 	// move towards destination
