@@ -20,9 +20,8 @@ Bugs we know about:
   - Quake never checked BSPs very well, a bad one can crash the engine.
     (Need some example bad BSPs.)
   - dlights brighten bmodels twice as much as world
-  - rocket trails (and presumably some other kinds of particle) keep spawning while paused
-  - RC #8: Lifts hurt.
-    (Recommend testing on e4m1 water lift, it is especially painful)
+  - rocket trails (and presumably some other kinds of particle) keep
+    spawning while paused
   - RC #9: Bogus player names in death messages?
     (Test by doing impulse 9 and blowing self up with RL)
     (Happens for LordHavoc, anyone else?)
