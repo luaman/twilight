@@ -93,6 +93,10 @@ SOURCE=.\console.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\dlight.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\hud.c
 # End Source File
 # Begin Source File
