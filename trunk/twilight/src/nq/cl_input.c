@@ -460,7 +460,7 @@ CL_AdjustAngles (void)
 		V_StopPitchDrift ();
 
 	cl.viewangles[PITCH] = bound (-70, cl.viewangles[PITCH], 80);
-	cl.viewangles[ROLL] = bound (-50, cl.viewangles[PITCH], 50);
+	cl.viewangles[ROLL] = bound (-50, cl.viewangles[ROLL], 50);
 }
 
 /*
