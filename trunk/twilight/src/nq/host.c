@@ -549,8 +549,14 @@ qboolean
 Host_FilterTime (float time)
 {
 	float		fps;
+	float		newframetime;
 
 	host_realtime += time;
+
+	/* if the frame time is below 0.001, don't even bother computing anything */
+	newframetime = host_realtime - oldrealtime;
+	if (newframetime < 0.001)
+		return false;
 
 	fps = cl_maxfps->value;
 	if (cl.maxclients > 1) {
@@ -561,19 +567,17 @@ Host_FilterTime (float time)
 
 	/* eviltypeguy - added && cl.maxclients > 1 to allow uncapped framerate
 	   when playing singleplayer quake, possible NetQuake breakage? */
-	if ((!cls.timedemo && fps) && ((host_realtime - oldrealtime) < (1.0 / fps)))
+	if ((!cls.timedemo && fps) && (newframetime < (1.0 / fps)))
 		return false;					/* framerate is too high */
 
-	host_frametime = host_realtime - oldrealtime;
+	host_frametime = newframetime;
 	oldrealtime = host_realtime;
 
 	if (host_framerate->value > 0)
 		host_frametime = host_framerate->value;
-	else {								/* don't allow really long or short frames */
+	else {								/* don't allow really long frames */
 		if (host_frametime > 0.1)
 			host_frametime = 0.1;
-		if (host_frametime < 0.001)
-			host_frametime = 0.001;
 	}
 
 	return true;
