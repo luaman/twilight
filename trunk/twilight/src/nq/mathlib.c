@@ -729,11 +729,11 @@ VectorNormalizeFast (vec3_t v)
 }
 
 void
-_VectorInverse (vec3_t v)
+_VectorInverse (vec3_t v, vec3_t t)
 {
-	v[0] = -v[0];
-	v[1] = -v[1];
-	v[2] = -v[2];
+	t[0] = -v[0];
+	t[1] = -v[1];
+	t[2] = -v[2];
 }
 
 void
