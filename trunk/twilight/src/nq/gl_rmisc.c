@@ -135,7 +135,7 @@ R_Init_Cvars (void)
 	r_skyname = Cvar_Get ("r_skyname", "", CVAR_NONE, &R_SkyBoxChanged);
 	r_fastsky = Cvar_Get ("r_fastsky", "0", CVAR_NONE, NULL);
 
-	gl_clear = Cvar_Get ("gl_clear", "1", CVAR_ARCHIVE, NULL);
+	gl_clear = Cvar_Get ("gl_clear", "0", CVAR_ARCHIVE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
 	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_ARCHIVE, NULL);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", CVAR_NONE, NULL);
