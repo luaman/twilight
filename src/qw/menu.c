@@ -48,11 +48,6 @@ static const char rcsid[] =
 #include "view.h"
 #include "sys.h"
 
-
-#ifdef _WIN32
-#include "winquake.h"
-#endif
-
 extern cvar_t *gl_texturemode;
 
 void        (*vid_menudrawfn) (void);

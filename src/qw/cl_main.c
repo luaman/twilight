@@ -39,7 +39,6 @@ static const char rcsid[] =
 #include <setjmp.h>  // FIXME: REMOVE THIS EVIL SHIT!
 
 #ifdef _WIN32
-# include "winquake.h"
 # include "winsock.h"
 #else
 # include <netinet/in.h>

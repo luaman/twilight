@@ -42,6 +42,10 @@ static const char rcsid[] =
 #include <unistd.h>
 #endif
 
+#ifdef _WIN32
+#include <windows.h>	/* for timeGetTime() */
+#endif
+
 #include "bothdefs.h"
 #include "client.h"
 #include "common.h"
@@ -49,10 +53,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "cvar.h"
 #include "net.h"
-
-#ifdef _WIN32
-#include "winquake.h"
-#endif
 
 #define	PACKET_HEADER	8
 

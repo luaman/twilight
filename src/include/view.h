@@ -28,17 +28,15 @@
 #ifndef __VIEW_H
 #define __VIEW_H
 
-extern struct cvar_s *v_gamma;
+extern struct cvar_s	*v_gamma;
+extern struct cvar_s	*lcd_x;
+extern float	v_blend[4];
 
-extern Uint8 gammatable[256];			// palette is sent through this
-extern Uint8 ramps[3][256];
-extern float v_blend[4];
-
-void        V_Init_Cvars (void);
-void        V_Init (void);
-void        V_RenderView (void);
-float       V_CalcRoll (vec3_t angles, vec3_t velocity);
-void        V_UpdatePalette (void);
+void		V_Init_Cvars (void);
+void		V_Init (void);
+void		V_RenderView (void);
+float		V_CalcRoll (vec3_t angles, vec3_t velocity);
+void		V_UpdatePalette (void);
 
 #endif // __VIEW_H
 

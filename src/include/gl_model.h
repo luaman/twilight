@@ -30,7 +30,6 @@
 #include "bspfile.h"
 #include "modelgen.h"
 #include "spritegn.h"
-#include "render.h"
 #include "zone.h"
 
 /*
@@ -46,7 +45,10 @@ m*_t structures are in-memory
 #define	EF_MUZZLEFLASH 			2
 #define	EF_BRIGHTLIGHT 			4
 #define	EF_DIMLIGHT 			8
-
+#define	EF_FLAG1	 			16
+#define	EF_FLAG2	 			32
+#define EF_BLUE					64
+#define EF_RED					128
 
 /*
 ==============================================================================
@@ -74,7 +76,7 @@ typedef struct mplane_s {
 	vec3_t      normal;
 	float       dist;
 	Uint8       type;					// for texture axis selection and fast
-										// side tests
+	// side tests
 	Uint8       signbits;				// signx + signy<<1 + signz<<1
 	Uint8       pad[2];
 } mplane_t;
@@ -134,7 +136,7 @@ typedef struct msurface_s {
 	int         flags;
 
 	int         firstedge;				// look up in model->surfedges[],
-										// negative numbers
+	// negative numbers
 	int         numedges;				// are backwards edges
 
 	short       texturemins[2];
@@ -154,7 +156,7 @@ typedef struct msurface_s {
 	int         lightmaptexturenum;
 	Uint8       styles[MAXLIGHTMAPS];
 	int         cached_light[MAXLIGHTMAPS];	// values currently used in
-											// lightmap
+	// lightmap
 	qboolean    cached_dlight;			// true if dynamic light in cache
 	Uint8      *samples;				// [numstyles*surfsize]
 } msurface_t;
@@ -163,7 +165,8 @@ typedef struct mnode_s {
 // common with leaf
 	int         contents;				// 0, to differentiate from leafs
 	int         visframe;				// node needs to be traversed if
-										// current
+	// current
+
 	vec3_t      mins;					// for bounding box culling
 	vec3_t		maxs;					// for bounding box culling
 
@@ -183,7 +186,8 @@ typedef struct mleaf_s {
 // common with node
 	int         contents;				// wil be a negative contents number
 	int         visframe;				// node needs to be traversed if
-										// current
+	// current
+
 	vec3_t      mins;					// for bounding box culling
 	vec3_t		maxs;					// for bounding box culling
 
@@ -191,16 +195,16 @@ typedef struct mleaf_s {
 
 // leaf specific
 	Uint8      *compressed_vis;
-	efrag_t    *efrags;
+	struct efrag_s    *efrags;
 
 	msurface_t **firstmarksurface;
 	int         nummarksurfaces;
 	int         key;					// BSP sequence number for leaf's
-										// contents
+	// contents
 	Uint8       ambient_sound_level[NUM_AMBIENTS];
 } mleaf_t;
 
-typedef struct {
+typedef struct hull_s {
 	dclipnode_t *clipnodes;
 	mplane_t   *planes;
 	int         firstclipnode;
@@ -308,8 +312,10 @@ typedef struct {
 	int         posedata;				// numposes*poseverts trivert_t
 	int         commands;				// gl command list with embedded s/t
 	int         gl_texturenum[MAX_SKINS][4];
-	int			fb_texturenum[MAX_SKINS][4];
+	int			fb_texturenum[MAX_SKINS][4];// index of fullbright mask or 0
+#ifdef TWILIGHT_NQ
 	int         texels[MAX_SKINS];		// only for player skins
+#endif
 	maliasframedesc_t frames[1];		// variable sized
 } aliashdr_t;
 
@@ -348,7 +354,7 @@ typedef enum { mod_brush, mod_sprite, mod_alias } modtype_t;
 typedef struct model_s {
 	char        name[MAX_QPATH];
 	qboolean    needload;				// bmodels and sprites don't cache
-										// normally
+	// normally
 
 	modtype_t   type;
 	int         numframes;
@@ -381,7 +387,7 @@ typedef struct model_s {
 	mplane_t   *planes;
 
 	int         numleafs;				// number of visible leafs, not
-										// counting 0
+	// counting 0
 	mleaf_t    *leafs;
 
 	int         numvertexes;
@@ -417,6 +423,9 @@ typedef struct model_s {
 	Uint8      *lightdata;
 	char       *entities;
 
+	unsigned    checksum;
+	unsigned    checksum2;
+
 //
 // additional model data
 //
@@ -426,18 +435,19 @@ typedef struct model_s {
 
 //============================================================================
 
-void		Mod_Init_Cvars (void);
-void		Mod_Init (void);
-void		Mod_ClearAll (void);
-model_t		*Mod_ForName (char *name, qboolean crash);
-void		*Mod_Extradata (model_t *mod);	// handles caching
-void		Mod_TouchModel (char *name);
+void        Mod_Init_Cvars (void);
+void        Mod_Init (void);
+void        Mod_ClearAll (void);
+model_t    *Mod_ForName (char *name, qboolean crash);
+void       *Mod_Extradata (model_t *mod);	// handles caching
+void        Mod_TouchModel (char *name);
 
-mleaf_t		*Mod_PointInLeaf (float *p, model_t *model);
-Uint8		*Mod_LeafPVS (mleaf_t *leaf, model_t *model);
+mleaf_t    *Mod_PointInLeaf (float *p, model_t *model);
+Uint8      *Mod_LeafPVS (mleaf_t *leaf, model_t *model);
 
-void		GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
+qboolean   Img_HasFullbrights (Uint8 *pixels, int size);
 void		GL_SubdivideSurface (msurface_t *fa);
+void        GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr);
 
 #endif // __MODEL__
 

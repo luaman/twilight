@@ -42,10 +42,6 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "pmove.h"
 
-#ifdef _WIN32
-#include "winquake.h"
-#endif
-
 cvar_t     *cl_nopred;
 cvar_t     *cl_pushlatency;
 

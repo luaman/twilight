@@ -23,29 +23,32 @@
 
 	$Id$
 */
-// input.h -- external (non-keyboard) input devices
 
-#ifndef __INPUT_H
-#define __INPUT_H
+#ifndef __MENU_H
+#define __MENU_H
 
-#include "client.h"
+#include "wad.h"
 
-void        IN_Init_Cvars (void);
-void        IN_Init (void);
+//
+// the net drivers should just set the apropriate bits in m_activenet,
+// instead of having the menu code look through their internal tables
+//
+#define	MNET_IPX		1
+#define	MNET_TCP		2
 
-void        IN_Shutdown (void);
+extern int  m_activenet;
 
-void        IN_Commands (void);
+//
+// menus
+//
+void        M_Init_Cvars (void);
+void        M_Init (void);
+void        M_Keydown (int key);
+void        M_Draw (void);
+void        M_ToggleMenu_f (void);
+qpic_t     *M_CachePic (char *path);
+void        M_DrawTextBox (int x, int y, int width, int lines);
+void        M_Menu_Quit_f (void);
 
-// oportunity for devices to stick commands on the script buffer
-
-void        IN_Move (usercmd_t *cmd);
-
-// add additional movement on top of the keyboard move cmd
-
-void        IN_ClearStates (void);
-
-// restores all button and position states to defaults
-
-#endif // __INPUT_H
+#endif // __MENU_H
 

@@ -44,10 +44,6 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "strlib.h"
 
-#ifdef _WIN32
-#include "winquake.h"
-#endif
-
 cvar_t     *cl_nodelta;
 
 // cvars

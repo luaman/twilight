@@ -37,8 +37,9 @@ static const char rcsid[] =
 #include "SDL.h"
 #include "SDL_main.h"
 
+#include <windows.h>
+
 #include "quakedef.h"
-#include "winquake.h"
 #include "client.h"
 #include "conproc.h"
 #include <io.h>

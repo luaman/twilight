@@ -49,6 +49,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "tga.h"
+#include "wad.h"
 
 /*
 
@@ -124,9 +125,9 @@ cvar_t		*r_waterwarp;
 
 qboolean    scr_initialized;			// ready to draw
 
-qpic_t     *scr_ram;
-qpic_t     *scr_net;
-qpic_t     *scr_turtle;
+struct qpic_s     *scr_ram;
+struct qpic_s     *scr_net;
+struct qpic_s     *scr_turtle;
 
 int         clearconsole;
 int         clearnotify;
@@ -556,7 +557,7 @@ DrawPause
 void
 SCR_DrawPause (void)
 {
-	qpic_t     *pic;
+	struct qpic_s     *pic;
 
 	if (!scr_showpause->value)			// turn off for screenshots
 		return;
@@ -579,7 +580,7 @@ SCR_DrawLoading
 void
 SCR_DrawLoading (void)
 {
-	qpic_t     *pic;
+	struct qpic_s     *pic;
 
 	if (!scr_drawloading)
 		return;

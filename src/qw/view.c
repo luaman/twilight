@@ -41,10 +41,6 @@ static const char rcsid[] =
 #include "pmove.h"
 #include "screen.h"
 
-#ifdef _WIN32
-#include "winquake.h"
-#endif
-
 /*
 
 The view is allowed to move slightly from it's true position for bobbing,
