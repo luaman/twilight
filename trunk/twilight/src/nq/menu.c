@@ -42,6 +42,7 @@ static const char rcsid[] =
 
 // FIXME: do this right
 extern cvar_t *_windowed_mouse;
+extern cvar_t *gl_texturemode;
 
 void        (*vid_menudrawfn) (void);
 void        (*vid_menukeyfn) (int key);
@@ -1304,11 +1305,26 @@ M_Options_Key (int k)
 	Shadows					on/fast/nice
 	Frame interpolation	    on/off
 	Movement interpolation	on/off
+	Texture Mode			see glmode_t modes[]
 */
 
-#define GFX_ITEMS	7
+#define GFX_ITEMS	8
 
 int gfx_cursor = 0;
+
+typedef struct {
+	char       *name;
+	int         minimize, maximize;
+} glmode_t;
+
+glmode_t    texmodes[] = {
+	{"GL_NEAREST", GL_NEAREST, GL_NEAREST},
+	{"GL_LINEAR", GL_LINEAR, GL_LINEAR},
+	{"GL_NEAREST_MIPMAP_NEAREST", GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST},
+	{"GL_LINEAR_MIPMAP_NEAREST", GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR},
+	{"GL_NEAREST_MIPMAP_LINEAR", GL_NEAREST_MIPMAP_LINEAR, GL_NEAREST},
+	{"GL_LINEAR_MIPMAP_LINEAR", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR}
+};
 
 void
 M_Menu_Gfx_f (void)
@@ -1321,37 +1337,25 @@ M_Menu_Gfx_f (void)
 void
 M_Gfx_Draw (void)
 {
-	static qpic_t *p = NULL;
+	int				y;
+	static qpic_t	*p = NULL;
 
 	if (!p) p = Draw_CachePic ("gfx/p_option.lmp");
 
 	M_DrawPic ((320 - p->width) / 2, 4, p);
 
-	M_Print (16, 32, "         Affine models");
-	M_DrawCheckbox (220, 32, gl_affinemodels->value);
-
-	M_Print (16, 40, "      Fullbright models");
-	M_DrawCheckbox (220, 40, gl_fb_models->value);
-
-	M_Print (16, 48, "      Fullbright bmodels");
-	M_DrawCheckbox (220, 48, gl_fb_bmodels->value);
-
-	M_Print (16, 56, "   Fast dynamic lights");
-	M_DrawCheckbox (220, 56, gl_flashblend->value);
-
-	M_Print (16, 64, "               Shadows");
-	M_Print (220, 64, 
-		(r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off");
-
-	M_Print (16, 72, "   Frame interpolation");
-	M_DrawCheckbox (220, 72, gl_im_animation->value);
-
-	M_Print (16, 80, "  Motion interpolation");
-	M_DrawCheckbox (220, 80, gl_im_transform->value);
+	y = 32;
+	M_Print (16, y, "         Affine models"); M_DrawCheckbox (220, y, gl_affinemodels->value); y += 8;
+	M_Print (16, y, "     Fullbright models"); M_DrawCheckbox (220, y, gl_fb_models->value); y += 8;
+	M_Print (16, y, "    Fullbright bmodels"); M_DrawCheckbox (220, y, gl_fb_bmodels->value); y += 8;
+	M_Print (16, y, "   Fast dynamic lights"); M_DrawCheckbox (220, y, gl_flashblend->value); y += 8;
+	M_Print (16, y, "               Shadows"); M_Print (220, y, (r_shadows->value) ? (r_shadows->value == 2 ? "nice" : "fast") : "off"); y += 8;
+	M_Print (16, y, "   Frame interpolation"); M_DrawCheckbox (220, y, gl_im_animation->value); y += 8;
+	M_Print (16, y, "  Motion interpolation"); M_DrawCheckbox (220, y, gl_im_transform->value); y += 8;
+	M_Print (16, y, "          Texture Mode"); M_Print (220, y, gl_texturemode->string);
 
 	// cursor
-	M_DrawCharacter (200, 32 + gfx_cursor * 8,
-					 12 + ((int) (realtime * 4) & 1));
+	M_DrawCharacter (200, 32 + gfx_cursor * 8, 12 + ((int) (realtime * 4) & 1));
 }
 
 void
@@ -1383,7 +1387,8 @@ M_Gfx_Set (void)
 
 		case 4:
 			v = (int)r_shadows->value + 1;
-			if (v > 2) v = 0;
+			if (v > 2)
+				v = 0;
 			Cvar_Set (r_shadows, va("%i", v));
 			break;
 
@@ -1396,7 +1401,18 @@ M_Gfx_Set (void)
 			v = !(int)gl_im_transform->value;
 			Cvar_Set (gl_im_transform, va("%i", v));
 			break;
-			
+
+		case 7:
+			for (v = 0; v < 6; v++) {
+				if (Q_strcasecmp (texmodes[v].name, gl_texturemode->string) == 0)
+					break;
+			}
+			v++;
+			if (v > 5)
+				v = 0;
+			Cvar_Set (gl_texturemode, texmodes[v].name);
+			break;
+
 		default:
 			break;
 	}
