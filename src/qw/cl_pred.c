@@ -46,8 +46,6 @@ static const char rcsid[] =
 cvar_t     *cl_nopred;
 cvar_t     *cl_pushlatency;
 
-extern frame_t *view_frame;
-
 /*
 =================
 CL_NudgePosition
