@@ -135,6 +135,7 @@ V_CalcBob (void)
 	static double bobtime;
 	static float bob;
 	float       cycle;
+	float		*vel;
 
 	if (cl.spectator)
 		return 0;
@@ -154,8 +155,10 @@ V_CalcBob (void)
 
 // bob is proportional to simulated velocity in the xy plane
 // (don't count Z, or jumping messes it up)
+//	vel = cl.simvel;
+	vel = cl.frames[(cls.netchan.incoming_sequence)&UPDATE_MASK].playerstate[cl.playernum].velocity;
 
-	bob = VectorLength2(cl.simvel) * cl_bob->value;
+	bob = VectorLength2(vel) * cl_bob->value;
 	bob = bob * 0.3 + bob * 0.7 * Q_sin (cycle);
 	bob = bound(-7, bob, 4);
 
