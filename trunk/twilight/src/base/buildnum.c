@@ -38,20 +38,20 @@ static const char rcsid[] =
 
 extern char *qdate;
 
-char       *mon[12] =
+char *mon[12] =
 	{ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
 	"Nov", "Dec"
 };
-char        mond[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+char mond[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 // returns days since Sep 08 2001
 int
 build_number (void)
 {
-	int         m = 0;
-	int         d = 0;
-	int         y = 0;
-	static int  b = 0;
+	int			m = 0;
+	int			d = 0;
+	int			y = 0;
+	static int	b = 0;
 
 	if (b != 0)
 		return b;
@@ -72,7 +72,8 @@ build_number (void)
 		b += 1;
 	}
 
-	b -= 36775;				// Sep 08 2001
+	b -= 36775;	// Sep 08 2001
 
 	return b;
 }
+
