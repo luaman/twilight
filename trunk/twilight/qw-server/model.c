@@ -195,7 +195,7 @@ Mod_FindName (char *name)
 	if (i == mod_numknown) {
 		if (mod_numknown == MAX_MOD_KNOWN)
 			SV_Error ("mod_numknown == MAX_MOD_KNOWN");
-		Q_strcpy (mod->name, name);
+		Q_strlcpy (mod->name, name, sizeof (mod->name));
 		mod->needload = true;
 		mod_numknown++;
 	}

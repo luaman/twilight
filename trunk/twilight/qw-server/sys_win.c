@@ -242,7 +242,7 @@ Sys_ExpandPath (char *str)
 			Q_strncat (buf, s, MAX_PATH);
 		} else {
 			/* ~user expansion in win32 always fails */
-			Q_strcpy(buf, "");
+			buf[0] = '\0';
 		}
 	} else
 		Q_strncpy (buf, str, MAX_PATH);

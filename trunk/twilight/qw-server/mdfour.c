@@ -38,7 +38,7 @@ static const char rcsid[] =
 
 #include <SDL_types.h>
 
-#include <string.h>						/* XoXus: needed for memset call */
+#include "strlib.h"						/* XoXus: needed for memset / memcpy */
 #include "mdfour.h"
 
 /* NOTE: This code makes no attempt to be fast!
@@ -186,9 +186,9 @@ mdfour_tail (unsigned char *in, int n)
 
 	b = m->totalN * 8;
 
-	memset (buf, 0, 128);
+	Q_memset (buf, 0, 128);
 	if (n)
-		memcpy (buf, in, n);
+		Q_memcpy (buf, in, n);
 	buf[n] = 0x80;
 
 	if (n <= 55) {

@@ -262,7 +262,7 @@ Sys_ExpandPath (char *str)
 				}
 			} else
 				/* ~user expansion failed, no such user */
-				Q_strcpy(buf, "");
+				buf[0] = '\0';
 		}
 	} else
 		Q_strncpy (buf, str, PATH_MAX);

@@ -1096,7 +1096,8 @@ SV_SetInfo_f (void)
 	if (Cmd_Argv (1)[0] == '*')
 		return;							// don't set priveledged values
 
-	Q_strcpy (oldval, Info_ValueForKey (host_client->userinfo, Cmd_Argv (1)));
+	Q_strlcpy (oldval, Info_ValueForKey (host_client->userinfo, Cmd_Argv (1)),
+				sizeof (oldval));
 
 	Info_SetValueForKey (host_client->userinfo, Cmd_Argv (1), Cmd_Argv (2),
 						 MAX_INFO_STRING);
