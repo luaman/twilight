@@ -1315,46 +1315,6 @@ BuildSurfaceDisplayList (msurface_t *fa)
 		poly->verts[i][5] = s;
 		poly->verts[i][6] = t;
 	}
-
-	// 
-	// remove co-linear points - Ed
-	// 
-	if (!gl_keeptjunctions->value && !(fa->flags & SURF_UNDERWATER)) {
-		for (i = 0; i < lnumverts; ++i) {
-			vec3_t      v1, v2;
-			float      *prev, *this, *next;
-
-			prev = poly->verts[(i + lnumverts - 1) % lnumverts];
-			this = poly->verts[i];
-			next = poly->verts[(i + 1) % lnumverts];
-
-			VectorSubtract (this, prev, v1);
-			VectorNormalizeFast (v1);
-			VectorSubtract (next, prev, v2);
-			VectorNormalizeFast (v2);
-
-			// skip co-linear points
-#define COLINEAR_EPSILON 0.001
-			if ((Q_fabs (v1[0] - v2[0]) <= COLINEAR_EPSILON) &&
-				(Q_fabs (v1[1] - v2[1]) <= COLINEAR_EPSILON) &&
-				(Q_fabs (v1[2] - v2[2]) <= COLINEAR_EPSILON)) {
-				int         j;
-
-				for (j = i + 1; j < lnumverts; ++j) {
-					int         k;
-
-					for (k = 0; k < VERTEXSIZE; ++k)
-						poly->verts[j - 1][k] = poly->verts[j][k];
-				}
-				--lnumverts;
-//				++nColinElim;
-				// retry next vertex next time, which is now current vertex
-				--i;
-			}
-		}
-	}
-	poly->numverts = lnumverts;
-
 }
 
 /*
