@@ -131,8 +131,6 @@ typedef struct {
 } aliashdr_t;
 
 #define	MAXALIASVERTS	1024
-#define	MAXALIASFRAMES	256
-#define	MAXALIASTRIS	2048
 extern struct model_s *player_model;
 extern float bboxradius;
 extern float bboxyawradius;

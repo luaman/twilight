@@ -49,8 +49,8 @@ ALIAS MODELS
 
 static aliashdr_t	*pheader;
 
-static qboolean	vseams[MAXALIASVERTS];
-static int			vremap[MAXALIASVERTS];
+static qboolean		*vseams;
+static int			*vremap;
 static int			numinverts;
 
 model_t	*player_model;
@@ -356,9 +356,6 @@ Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 	qboolean			typeSingle = false;
 
 	flags = flags;
-	// Clear the arrays to NULL.
-	memset (vseams, 0, sizeof(vseams));
-	memset (vremap, 0, sizeof(vremap));
 
 	datapointer = buffer;
 
@@ -399,8 +396,8 @@ Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 	if (numinverts <= 0)
 		Host_Error ("model %s has no vertices", mod->name);
 
-	if (numinverts > MAXALIASVERTS)
-		Host_Error ("model %s has too many vertices", mod->name);
+	vseams = Zone_Alloc (tempzone, sizeof (qboolean) * numinverts);
+	vremap = Zone_Alloc (tempzone, sizeof (int) * numinverts);
 
 	pheader->numtris = LittleLong (pinmodel->numtris);
 
@@ -542,6 +539,11 @@ Mod_LoadAliasModel (model_t *mod, void *buffer, int flags)
 		player_model = mod;
 
 	mod->alias = pheader;
+
+	Zone_Free (vseams);
+	Zone_Free (vremap);
+	vseams = NULL;
+	vremap = NULL;
 }
 
 void
