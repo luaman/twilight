@@ -1245,13 +1245,13 @@ COM_FOpenFile (char *filename, FILE ** file, qboolean complain)
 
 	file_from_pak = 0;
 
-	if ((i = strchr (filename, '\\')))
+	if ((i = strchr (filename, '\\') - filename))
 	{
 		Com_Printf ("COM_FOpenFile: %s should use / to seperate paths, fixing it\n",
 				filename);
 		do
 			filename[i] = '/';
-		while ((i = strchr (filename, '\\')));
+		while ((i = strchr (filename, '\\') - filename));
 	}
 	if (filename[0] == '/')
 	{
