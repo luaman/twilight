@@ -571,6 +571,7 @@ Cmd_TokenizeString (char *text)
 			size_t length = Q_strlen (com_token) + 1;
 			cmd_argv[cmd_argc] = Z_Malloc (length);
 			Q_memcpy (cmd_argv[cmd_argc], com_token, length);
+			cmd_argc++; // VERY important :)
 		}
 	}
 
