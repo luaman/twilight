@@ -112,7 +112,6 @@ cvar_t     *pausable;
 
 cvar_t     *temp1;
 
-
 /*
 ================
 Host_EndGame
@@ -549,11 +548,20 @@ Returns false if the time is too short to run a frame
 qboolean
 Host_FilterTime (float time)
 {
+	float		fps;
+
 	realtime += time;
+
+	fps = cl_maxfps->value;
+	if (cl.maxclients > 1) {
+		fps = bound (30.0f, fps, 72.0f);
+	} else if (fps) {
+		fps = bound (30.0f, fps, 999.0f);
+	}
 
 	/* eviltypeguy - added && cl.maxclients > 1 to allow uncapped framerate
 	   when playing singleplayer quake, possible NetQuake breakage? */
-	if (!cls.timedemo && cl.maxclients > 1 && realtime - oldrealtime < 1.0 / 72.0)
+	if ((!cls.timedemo && fps) && ((realtime - oldrealtime) < (1.0 / fps)))
 		return false;					/* framerate is too high */
 
 	host_frametime = realtime - oldrealtime;
