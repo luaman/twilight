@@ -15,3 +15,5 @@ libtwilight_base_a_SOURCES= \
 	matrixlib.c menu.c mdfour.c model.c mod_brush.c parm.c strlib.c wad.c \
 	zone.c locs.c sdlstub.c sdlstub.h
 
+EXTRA_DIST = \
+	twilight_base.dsp twilight_base.vcproj
