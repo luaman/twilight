@@ -104,7 +104,7 @@ new_tube_particle (ptype_t type, vec3_t org1, vec3_t org2, vec4_t color,
 	VectorCopy4 (color, p->color);
 	p->ramp = ramp;
 	p->rstep = rstep;
-	p->die = realtime + die;
+	p->die = cl.time + die;
 	p->scale1 = scale1;
 	p->scale2 = scale1;
 
@@ -153,7 +153,7 @@ new_cone_particle (ptype_t type, vec3_t org1, vec3_t org2, vec3_t org3,
 	VectorCopy4 (color1, p->color1);
 	VectorCopy4 (color2, p->color2);
 	p->ramp = ramp;
-	p->die = realtime + die;
+	p->die = cl.time + die;
 	p->scale = scale;
 
 	VectorSubtract (org1, org2, normal);
@@ -192,7 +192,7 @@ new_base_particle (ptype_t type, vec3_t org, vec3_t vel, vec4_t color,
 	VectorCopy (vel, p->vel);
 	VectorCopy4 (color, p->color);
 	p->ramp = ramp;
-	p->die = realtime + die;
+	p->die = cl.time + die;
 	p->scale = scale;
 
 	return true;
@@ -275,13 +275,13 @@ R_EntityParticles (entity_t *ent)
 	}
 
 	for (i = 0; i < NUMVERTEXNORMALS; i++) {
-		angle = realtime * avelocities[i][0];
+		angle = cl.time * avelocities[i][0];
 		sy = Q_sin (angle);
 		cy = Q_cos (angle);
-		angle = realtime * avelocities[i][1];
+		angle = cl.time * avelocities[i][1];
 		sp = Q_sin (angle);
 		cp = Q_cos (angle);
-		angle = realtime * avelocities[i][2];
+		angle = cl.time * avelocities[i][2];
 		sr = Q_sin (angle);
 		cr = Q_cos (angle);
 
@@ -713,7 +713,7 @@ R_Draw_Base_Particles (void)
 	j = 0;
 
 	for (k = 0, p = base_particles; k < num_base_particles; k++, p++) {
-		if (p->die <= realtime) {
+		if (p->die <= cl.time) {
 			free_base_particles[j++] = p;
 			continue;
 		}
@@ -853,7 +853,7 @@ R_Draw_Base_Particles__physics:
 	while (maxparticle >= activeparticles) {
 		*free_base_particles[k++] = base_particles[maxparticle--];
 		while (maxparticle >= activeparticles &&
-				base_particles[maxparticle].die <= realtime)
+				base_particles[maxparticle].die <= cl.time)
 			maxparticle--;
 	}
 	num_base_particles = activeparticles;
@@ -890,7 +890,7 @@ R_Draw_Tube_Particles (void)
 	i_index = 0;
 
 	for (k = 0, p = tube_particles; k < num_tube_particles; k++, p++) {
-		if (p->die <= realtime) {
+		if (p->die <= cl.time) {
 			free_tube_particles[j++] = p;
 			continue;
 		}
@@ -990,7 +990,7 @@ R_Draw_Tube_Particles (void)
 	while (maxparticle >= activeparticles) {
 		*free_tube_particles[k++] = tube_particles[maxparticle--];
 		while (maxparticle >= activeparticles &&
-				tube_particles[maxparticle].die <= realtime)
+				tube_particles[maxparticle].die <= cl.time)
 			maxparticle--;
 	}
 	num_tube_particles = activeparticles;
@@ -1029,7 +1029,7 @@ R_Draw_Cone_Particles (void)
 	i_index = 0;
 
 	for (k = 0, p = cone_particles; k < num_cone_particles; k++, p++) {
-		if (p->die <= realtime) {
+		if (p->die <= cl.time) {
 			free_cone_particles[j++] = p;
 			continue;
 		}
@@ -1151,7 +1151,7 @@ R_Draw_Cone_Particles (void)
 	while (maxparticle >= activeparticles) {
 		*free_cone_particles[k++] = cone_particles[maxparticle--];
 		while (maxparticle >= activeparticles &&
-				cone_particles[maxparticle].die <= realtime)
+				cone_particles[maxparticle].die <= cl.time)
 			maxparticle--;
 	}
 	num_cone_particles = activeparticles;

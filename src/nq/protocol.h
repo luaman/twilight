@@ -175,6 +175,8 @@
 #define TE_BEAM				13
 // PGM 01/21/97 
 
+#define TE_RAILTRAIL		15
+
 #define	MAX_CLIENTS		32
 
 typedef struct {

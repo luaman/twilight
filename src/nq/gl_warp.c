@@ -47,6 +47,7 @@ static const char rcsid[] =
 #include "tga.h"
 #include "strlib.h"
 #include "sys.h"
+#include "client.h"
 
 extern model_t *loadmodel;
 
@@ -250,10 +251,10 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform)
 			os = v[3];
 			ot = v[4];
 
-			s = os + turbsin[(int) ((ot * 0.125 + realtime) * TURBSCALE) & 255];
+			s = os + turbsin[(int) ((ot * 0.125 + cl.time) * TURBSCALE) & 255];
 			s *= (1.0 / 64);
 
-			t = ot + turbsin[(int) ((os * 0.125 + realtime) * TURBSCALE) & 255];
+			t = ot + turbsin[(int) ((os * 0.125 + cl.time) * TURBSCALE) & 255];
 			t *= (1.0 / 64);
 
 			if (transform)
@@ -320,14 +321,14 @@ EmitBothSkyLayers (msurface_t *fa)
 		return;
 
 	qglBindTexture (GL_TEXTURE_2D, solidskytexture);
-	speedscale = realtime * 8;
+	speedscale = cl.time * 8;
 	speedscale -= (int) speedscale & ~127;
 
 	EmitSkyPolys (fa);
 
 	qglEnable (GL_BLEND);
 	qglBindTexture (GL_TEXTURE_2D, alphaskytexture);
-	speedscale = realtime * 16;
+	speedscale = cl.time * 16;
 	speedscale -= (int) speedscale & ~127;
 
 	EmitSkyPolys (fa);

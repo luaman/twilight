@@ -149,6 +149,8 @@ vec_t       VectorNormalize (vec3_t v);	// returns vector length
 void		VectorNormalizeFast (vec3_t v);
 void		VectorInterpolate (vec3_t v1, float frac, vec3_t v2, vec3_t v);
 
+void		Vector2Angles (vec3_t in, vec3_t out);
+
 int         Q_log2 (int val);
 
 void        R_ConcatRotations (float in1[3][3], float in2[3][3],

@@ -70,34 +70,6 @@ double      cam_lastviewtime;
 int         spec_track = 0;				// player# of who we are tracking
 int         autocam = CAM_NONE;
 
-static void
-vectoangles (vec3_t vec, vec3_t ang)
-{
-	float       forward;
-	float       yaw, pitch;
-
-	if (vec[1] == 0 && vec[0] == 0) {
-		yaw = 0;
-		if (vec[2] > 0)
-			pitch = 90;
-		else
-			pitch = 270;
-	} else {
-		yaw = Q_atan2 (vec[1], vec[0]) * 180 / M_PI;
-		if (yaw < 0)
-			yaw += 360;
-
-		forward = VectorLength2 (vec);
-		pitch = Q_atan2 (vec[2], forward) * 180 / M_PI;
-		if (pitch < 0)
-			pitch += 360;
-	}
-
-	ang[0] = pitch;
-	ang[1] = yaw;
-	ang[2] = 0;
-}
-
 // returns true if weapon model should be drawn in camera mode
 qboolean
 Cam_DrawViewModel (void)
@@ -158,7 +130,7 @@ Cam_TryFlyby (player_state_t * self, player_state_t * player, vec3_t vec,
 	pmtrace_t   trace;
 	float       len;
 
-	vectoangles (vec, v);
+	Vector2Angles (vec, v);
 	VectorCopy (v, pmove.angles);
 	VectorNormalizeFast (vec);
 	VectorMA (player->origin, 800, vec, v);
@@ -398,7 +370,7 @@ Cam_Track (usercmd_t *cmd)
 		VectorCopy (desired_position, self->origin);
 
 		VectorSubtract (player->origin, desired_position, vec);
-		vectoangles (vec, cl.viewangles);
+		Vector2Angles (vec, cl.viewangles);
 		cl.viewangles[0] = -cl.viewangles[0];
 	}
 }

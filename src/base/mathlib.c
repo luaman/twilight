@@ -838,3 +838,28 @@ void VectorInterpolate (vec3_t v1, float frac, vec3_t v2, vec3_t v)
 	v[1] = v1[1] + (vec_t)frac * (v2[1] - v1[1]);
 	v[2] = v1[2] + (vec_t)frac * (v2[2] - v1[2]);
 }
+
+void Vector2Angles (vec3_t in, vec3_t out)
+{
+	vec_t y, p;
+
+	if (!in[0] && !in[1])
+	{
+		y = 0;
+		p = (in[2] > 0) ? 90 : 270;
+	}
+	else
+	{
+		y = Q_atan2 (in[1], in[0]) * 180 / M_PI;
+		if (y < 0)
+			y += 360;
+
+		p = Q_atan2 (in[2], VectorLength2 (in)) * 180 / M_PI;
+		if (p < 0)
+			p += 360;
+	}
+
+	out[0] = p;
+	out[1] = y;
+	out[2] = 0;
+}

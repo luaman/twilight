@@ -657,12 +657,19 @@ CL_ParseStatic (void)
 // copy it to the current state
 	ent->model = cl.model_precache[ent->baseline.modelindex];
 	ent->frame = ent->baseline.frame;
+	ent->pose1 = 0;
+	ent->pose2 = 0;
 	ent->colormap = vid.colormap;
 	ent->skinnum = ent->baseline.skin;
 	ent->effects = ent->baseline.effects;
+	ent->frame_start_time = 0;
+	ent->translate_start_time = 0;
+	ent->rotate_start_time = 0;
+	VectorClear (ent->last_light);
 
 	VectorCopy (ent->baseline.origin, ent->origin);
 	VectorCopy (ent->baseline.angles, ent->angles);
+
 	R_AddEfrags (ent);
 }
 

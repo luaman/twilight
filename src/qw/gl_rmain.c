@@ -580,7 +580,7 @@ GL_DrawAliasBlendedShadow (aliashdr_t *paliashdr, int pose1, int pose2,
 	float			s1 = 0.0f;
 	float			c1 = 0.0f;
 
-	blend = (realtime - e->frame_start_time) / e->frame_interval;
+	blend = (cl.time - e->frame_start_time) / e->frame_interval;
 	blend = min (blend, 1);
 
 	lheight = e->cur.origin[2] - lightspot[2];
@@ -788,9 +788,9 @@ R_DrawAliasModel (entity_t *e)
 
 	if (gl_particletorches->value) {
 		if (clmodel->modflags & (FLAG_TORCH1|FLAG_TORCH2)) {
-			if (realtime >= e->time_left) {
+			if (cl.time >= e->time_left) {
 				R_Torch(e, clmodel->modflags & FLAG_TORCH2);
-				e->time_left = realtime + 0.10;
+				e->time_left = cl.time + 0.10;
 			}
 			if (!(clmodel->modflags & FLAG_TORCH2) && mdl_fire)
 				clmodel = mdl_fire;
