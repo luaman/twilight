@@ -4,7 +4,6 @@ AM_INIT_AUTOMAKE(twilight,0.0.0)
 AM_CONFIG_HEADER(config.h)
 
 dnl Checks for programs
-AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
@@ -24,17 +23,21 @@ AC_DEFUN(TL_CHECK_HEADER,[
 ], [$3], [$4])
 	CPPFLAGS=$CPPFLAGS_SAVE
 ])
-dnl Checks for libraries
-AM_PATH_SDL(1.2.0,,AC_MSG_ERROR([*** SDL >= 1.2.0 not installed - please install first ***]))
 
-dnl Check for libGL
-dnl Not having GL is fatal until we have a software renderer again
 
+dnl Check for SDL, fatal if not found
+AM_PATH_SDL(1.2.0,
+	,
+	AC_MSG_ERROR([SDL 1.2 or above is required to build $PACKAGE])
+)
+
+
+dnl Check for OpenGL - not having it is fatal (for now)
 GL_CHECK_LIB_PATHS=". /usr/X11R6/lib"
 GL_CHECK_INCLUDE_PATHS=". /usr/X11R6/include"
 
-AC_ARG_WITH(gl,
-[  --with-gl[=DIR]         libGL is located in DIR],
+AC_ARG_WITH(opengl,
+[  --with-opengl[=DIR]         libGL is located in DIR],
 [
 	if test $withval != no; then
 		if test $withval != yes; then
@@ -61,13 +64,13 @@ for check_path in $GL_CHECK_LIB_PATHS; do
 done
 if test x$HAVE_GL != x1; then
 	AC_MSG_RESULT(no)
-	AC_MSG_ERROR(GL 1.2 or above is currently required to build $PACKAGE)
+	AC_MSG_ERROR(OpenGL 1.2 or above is required to build $PACKAGE)
 fi
 AC_SUBST(GL_LIBS)
 
-dnl Check for GL headers
+dnl Check for OpenGL headers
 AC_ARG_WITH(gl,
-[  --with-gl-headers[=DIR] libGL headers are located in DIR],
+[  --with-gl-headers[=DIR] OpenGL headers are located in DIR],
 [
 	if test $withval != no; then
 		if test $withval != yes; then
@@ -78,7 +81,7 @@ AC_ARG_WITH(gl,
 	fi
 ], GL_LIBRARIES=yes)
 
-AC_MSG_CHECKING(for GL headers)
+AC_MSG_CHECKING(for OpenGL headers)
 for check_path in $GL_CHECK_INCLUDE_PATHS; do
 	TL_CHECK_HEADER(GL/gl.h,-I$check_path,[
 		if test $check_path != .; then
@@ -92,7 +95,7 @@ for check_path in $GL_CHECK_INCLUDE_PATHS; do
 done
 if test x$HAVE_GL_HEADERS != x1; then
 	AC_MSG_RESULT(no)
-	AC_MSG_ERROR(GL 1.2 or above is currently required to build $PACKAGE)
+	AC_MSG_ERROR(OpenGL 1.2 or above is required to build $PACKAGE)
 fi
 AC_SUBST(GL_CFLAGS)
 
@@ -116,7 +119,7 @@ AM_CONDITIONAL(USE_X86_ASM,test x$USE_X86_ASM = xyes)
 
 dnl userpath/sharepath config
 AC_ARG_WITH(share-path,
-	[  --with-share-path       set default shared data path [DATADIR/twilight]],,
+	[  --with-share-path       set default shared data path [DATADIR/games/twilight]],,
 	with_share_path=\${datadir}/games/twilight)
 SHAREPATH="$with_share_path"
 AC_SUBST(SHAREPATH)
@@ -128,9 +131,19 @@ AC_ARG_WITH(user-path,
 USERPATH="$with_user_path"
 AC_SUBST(USERPATH)
 
+CFLAGS="-Wall -Werror $CFLAGS"
+
 AC_OUTPUT(
 	Makefile
 	nq/Makefile
 	qw/Makefile
 	qw-server/Makefile
 )
+
+echo "*** Configuration details follow"
+echo "    VERSION   = $VERSION"
+echo "    CFLAGS    = $CFLAGS"
+echo "    SHAREPATH = $SHAREPATH"
+echo "    USERPATH  = $USERPATH"
+echo "*** You're ready to run make"
+

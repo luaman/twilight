@@ -2,7 +2,10 @@
 
 set -e
 
+echo "*** Setting up your build system"
 aclocal
 autoheader
-automake -a
+automake --add-missing --gnu
 autoconf
+echo "*** Done, you should be able to run ./configure now"
+
