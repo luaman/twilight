@@ -78,7 +78,6 @@ typedef struct {
 	unsigned short crc;
 } gltexture_t;
 
-#define	MAX_GLTEXTURES	1024
 gltexture_t gltextures[MAX_GLTEXTURES];
 int         numgltextures;
 
@@ -924,7 +923,7 @@ GL_Upload32
 */
 void
 GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
-			 qboolean alpha)
+			 int alpha)
 {
 	int         samples;
 	static unsigned scaled[1024 * 512];	// [512*256];
@@ -1007,7 +1006,7 @@ GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap,
 
 void
 GL_Upload8_EXT (byte * data, int width, int height, qboolean mipmap,
-				qboolean alpha)
+				int alpha)
 {
 	int         i, s;
 	qboolean    noalpha;
@@ -1097,23 +1096,38 @@ GL_Upload8
 ===============
 */
 void
-GL_Upload8 (byte * data, int width, int height, qboolean mipmap, qboolean alpha)
+GL_Upload8 (byte * data, int width, int height, qboolean mipmap, int alpha)
 {
 	static unsigned trans[640 * 480];	// FIXME, temporary
 	int         i, s;
 	qboolean    noalpha;
 	int         p;
+	unsigned	*table = d_8to24table;
 
 	s = width * height;
+
+	if (alpha == 2)
+	{
+	// this is a fullbright mask, so make all non-fullbright
+	// colors transparent
+		for (i=0 ; i<s ; i++)
+		{
+			p = data[i];
+			if (p < 224)
+				trans[i] = table[p] & 0x00FFFFFF; // transparent 
+			else
+				trans[i] = table[p];	// fullbright
+		}
+	}
+	else if (alpha) {
 	// if there are no transparent pixels, make it a 3 component
 	// texture even if it was specified as otherwise
-	if (alpha) {
 		noalpha = true;
 		for (i = 0; i < s; i++) {
 			p = data[i];
 			if (p == 255)
 				noalpha = false;
-			trans[i] = d_8to24table[p];
+			trans[i] = table[p];
 		}
 
 		if (alpha && noalpha)
@@ -1122,10 +1136,10 @@ GL_Upload8 (byte * data, int width, int height, qboolean mipmap, qboolean alpha)
 		if (s & 3)
 			Sys_Error ("GL_Upload8: s&3");
 		for (i = 0; i < s; i += 4) {
-			trans[i] = d_8to24table[data[i]];
-			trans[i + 1] = d_8to24table[data[i + 1]];
-			trans[i + 2] = d_8to24table[data[i + 2]];
-			trans[i + 3] = d_8to24table[data[i + 3]];
+			trans[i] = table[data[i]];
+			trans[i + 1] = table[data[i + 1]];
+			trans[i + 2] = table[data[i + 2]];
+			trans[i + 3] = table[data[i + 3]];
 		}
 	}
 
@@ -1139,7 +1153,7 @@ GL_LoadTexture
 */
 int
 GL_LoadTexture (char *identifier, int width, int height, byte * data,
-				qboolean mipmap, qboolean alpha)
+				qboolean mipmap, int alpha)
 {
 	int         i;
 	gltexture_t *glt;
@@ -1155,12 +1169,16 @@ GL_LoadTexture (char *identifier, int width, int height, byte * data,
 				if (width == glt->width && height == glt->height && crc == glt->crc)
 					return gltextures[i].texnum;
 				else
-					goto setuptexture;	// reload the texture into the same slot		
+					goto setuptexture;	// reload the texture into the same slot	
 			}
 		}
-	} else {
+	}
+	else {
 		glt = &gltextures[numgltextures];
 	}
+
+	if (numgltextures == MAX_GLTEXTURES)
+		Sys_Error ("GL_LoadTexture: numgltextures == MAX_GLTEXTURES");
 
 	numgltextures++;
 	Q_strcpy (glt->identifier, identifier);

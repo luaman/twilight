@@ -235,6 +235,7 @@ R_Init (void)
 	gl_im_transform = Cvar_Get ("gl_im_transform", "1", CVAR_NONE, NULL);
 
 	gl_fb_models = Cvar_Get ("gl_fb_models", "1", CVAR_NONE, NULL);
+	gl_fb_bmodels = Cvar_Get ("gl_fb_bmodels", "1", CVAR_NONE, NULL);
 
 	r_maxedges = Cvar_Get ("r_maxedges", "0", CVAR_NONE, NULL);	// Shrak
 	r_maxsurfs = Cvar_Get ("r_maxsurfs", "0", CVAR_NONE, NULL); // Shrak
