@@ -1922,27 +1922,18 @@ PF_checkextension (void)
 	G_FLOAT(OFS_RETURN) = false;
 }
 
-static void
-PF_fixme (void)
-{
-	PR_RunError ("unimplemented bulitin");
-}
-
-#define PF_FIXME10 PF_fixme, PF_fixme, PF_fixme, PF_fixme, PF_fixme, \
-					PF_fixme, PF_fixme, PF_fixme, PF_fixme, PF_fixme
-#define PF_FIXME100 PF_FIXME10, PF_FIXME10, PF_FIXME10, \
-					PF_FIXME10, PF_FIXME10, PF_FIXME10, \
-					PF_FIXME10, PF_FIXME10, PF_FIXME10, \
-					PF_FIXME10
+#define NULL10 NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+#define NULL100 NULL10, NULL10, NULL10, NULL10, NULL10, NULL10, NULL10, \
+		NULL10, NULL10, NULL10
 
 builtin_t pr_builtin[] =
 {
-	PF_fixme,				// #000 runtime error
+	NULL,					// #000 runtime error
 	PF_makevectors,			// #001
 	PF_setorigin,			// #002
 	PF_setmodel,			// #003
 	PF_setsize,				// #004
-	PF_fixme,				// #005 setabssize (never implemented)
+	NULL,					// #005 setabssize (never implemented)
 	PF_break,				// #006
 	PF_random,				// #007
 	PF_sound,				// #008
@@ -1973,26 +1964,26 @@ builtin_t pr_builtin[] =
 	PF_traceoff,			// #030
 	PF_eprint,				// #031
 	PF_walkmove,			// #032
-	PF_fixme,				// #033 ???
+	NULL,					// #033 ???
 	PF_droptofloor,			// #034
 	PF_lightstyle,			// #035
 	PF_rint,				// #036
 	PF_floor,				// #037
 	PF_ceil,				// #038
-	PF_fixme,				// #039
+	NULL,					// #039
 
 	PF_checkbottom,			// #040
 	PF_pointcontents,		// #041
-	PF_fixme,				// #042
+	NULL,					// #042
 	PF_fabs,				// #043
 	PF_aim,					// #044
 	PF_cvar,				// #045
 	PF_localcmd,			// #046
 	PF_nextent,				// #047
-	PF_fixme,				// #048 PF_particle in NQ
+	NULL,					// #048 PF_particle in NQ
 	PF_changeyaw,			// #049
 
-	PF_fixme,				// #050
+	NULL,					// #050
 	PF_vectoangles,			// #051
 	PF_WriteByte,			// #052
 	PF_WriteChar,			// #053
@@ -2006,16 +1997,16 @@ builtin_t pr_builtin[] =
 	PF_sin,					// #060 DP: DP_QC_SINCOSSQRTPOW
 	PF_cos,					// #061 DP: DP_QC_SINCOSSQRTPOW
 	PF_sqrt,				// #062 DP: DP_QC_SINCOSSQRTPOW
-	PF_fixme,				// #063 Q2: PF_changepitch
-	PF_fixme,				// #064 DP: PF_tracetoss
+	NULL,					// #063 Q2: PF_changepitch
+	NULL,					// #064 DP: PF_tracetoss
 	PF_etos,				// #065 DP: DP_QC_ETOS
-	PF_fixme,				// #066 Q2: PF_watermove (don't implement)
+	NULL,					// #066 Q2: PF_watermove (don't implement)
 	SV_MoveToGoal,			// #067
 	PF_precache_file,		// #068
 	PF_makestatic,			// #069
 
 	PF_changelevel,			// #070
-	PF_fixme,				// #071
+	NULL,					// #071
 	PF_cvar_set,			// #072
 	PF_centerprint,			// #073
 	PF_ambientsound,		// #074
@@ -2031,18 +2022,18 @@ builtin_t pr_builtin[] =
 	PF_multicast,			// #082
 
 	// Used by various QSG "tutorials"
-	PF_fixme,				// #083
-	PF_fixme,				// #084
-	PF_fixme,				// #085
-	PF_fixme,				// #086
-	PF_fixme,				// #087
-	PF_fixme,				// #088
-	PF_fixme,				// #089
+	NULL,					// #083
+	NULL,					// #084
+	NULL,					// #085
+	NULL,					// #086
+	NULL,					// #087
+	NULL,					// #088
+	NULL,					// #089
 
 	// DarkPlaces extensions (1)
 	PF_tracebox,			// #090 PF_tracebox
 	PF_randomvec,			// #091 PF_randomvec
-	PF_fixme,				// #092 PF_getlight
+	NULL,					// #092 PF_getlight
 	PF_registercvar,        // #093 PF_registercvar
 	PF_min,					// #094 PF_min
 	PF_max,                 // #095 PF_max
@@ -2052,9 +2043,9 @@ builtin_t pr_builtin[] =
 	PF_checkextension,      // #099 PF_checkextension
 
 	// Used by someone for something probably...
-	PF_FIXME100,			// #100 - 199
-	PF_FIXME100,			// #200 - 299
-	PF_FIXME100,			// #300 - 399
+	NULL100,				// #100 - 199
+	NULL100,				// #200 - 299
+	NULL100,				// #300 - 399
 
 /*
 	// DarkPlaces extensions (2)
