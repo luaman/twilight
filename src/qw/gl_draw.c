@@ -51,7 +51,9 @@ extern cvar_t *crosshair, *cl_crossx, *cl_crossy, *crosshaircolor;
 cvar_t		*gl_nobind;
 cvar_t		*gl_max_size;
 cvar_t		*gl_picmip;
+cvar_t		*gl_constretch;
 cvar_t		*gl_texturemode;
+cvar_t		*cl_verstring;					// FIXME: Move this?
 
 Uint8		*draw_chars;					// 8*8 graphic characters
 qpic_t		*draw_disc;
@@ -189,30 +191,6 @@ Draw_CachePic (char *path)
 }
 
 
-void
-Draw_CharToConback (int num, Uint8 *dest)
-{
-	int         row, col;
-	Uint8      *source;
-	int         drawline;
-	int         x;
-
-	row = num >> 4;
-	col = num & 15;
-	source = draw_chars + (row << 10) + (col << 3);
-
-	drawline = 8;
-
-	while (drawline--) {
-		for (x = 0; x < 8; x++)
-			if (source[x] != 255)
-				dest[x] = 0x60 + source[x];
-		source += 128;
-		dest += 320;
-	}
-
-}
-
 typedef struct {
 	char       *name;
 	int         minimize, maximize;
@@ -275,7 +253,11 @@ Draw_Init_Cvars (void)
 	gl_nobind = Cvar_Get ("gl_nobind", "0", CVAR_NONE, NULL);
 	gl_max_size = Cvar_Get ("gl_max_size", "1024", CVAR_NONE, NULL);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", CVAR_NONE, NULL);
-	gl_texturemode = Cvar_Get ("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE, Set_TextureMode_f);
+	gl_constretch = Cvar_Get ("gl_constretch", "1", CVAR_ARCHIVE, NULL);
+	gl_texturemode = Cvar_Get ("gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST",
+			CVAR_ARCHIVE, Set_TextureMode_f);
+	cl_verstring = Cvar_Get ("cl_verstring",
+			"Project Twilight v" VERSION " QW", CVAR_NONE, NULL);
 
 	// 3dfx can only handle 256 wide textures
 	if (!strncasecmp ((char *) gl_renderer, "3dfx", 4) ||
@@ -292,13 +274,6 @@ void
 Draw_Init (void)
 {
 	int         i;
-	qpic_t     *cb;
-	Uint8      *dest;
-	int         x;
-	char        ver[40];
-	glpic_t    *gl;
-	int         start;
-	Uint8      *ncdata;
 
 	// load the console background and the charset
 	// by hand, because we need to write the version
@@ -313,41 +288,10 @@ Draw_Init (void)
 	char_texture =
 		GL_LoadTexture ("charset", 128, 128, draw_chars, false, true);
 
-	//  Draw_CrosshairAdjust();
 	cs_texture = GL_LoadTexture ("crosshair", 8, 8, cs_data, false, true);
-
-	start = Hunk_LowMark ();
-
-	cb = (qpic_t *) COM_LoadHunkFile ("gfx/conback.lmp");
-	if (!cb)
-		Sys_Error ("Couldn't load gfx/conback.lmp");
-	SwapPic (cb);
-
-	snprintf (ver, sizeof (ver), "twilight %s", VERSION);
-	dest = cb->data + 320 + 320 * 186 - 11 - 8 * strlen (ver);
-	for (x = 0; x < strlen (ver); x++)
-		Draw_CharToConback (ver[x], dest + (x << 3));
-
-	conback->width = cb->width;
-	conback->height = cb->height;
-	ncdata = cb->data;
 
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	gl = (glpic_t *) conback->data;
-	gl->texnum =
-		GL_LoadTexture ("conback", conback->width, conback->height, ncdata,
-						false, false);
-	gl->sl = 0;
-	gl->sh = 1;
-	gl->tl = 0;
-	gl->th = 1;
-	conback->width = vid.conwidth;
-	conback->height = vid.conheight;
-
-	// free loaded console
-	Hunk_FreeToLowMark (start);
 
 	// save a texture slot for translated picture
 	translate_texture = texture_extension_number++;
@@ -708,26 +652,47 @@ Draw_ConsoleBackground
 void
 Draw_ConsoleBackground (int lines)
 {
-	char        ver[80];
-	int         x;
 	int         y;
+	qpic_t	   *conback;
+	glpic_t	   *gl;
+	float		alpha;
+	float		ofs;
 
+	conback = Draw_CachePic ("gfx/conback.lmp");
+	gl = (glpic_t *) conback->data;
+	
 	y = (vid.height * 3) >> 2;
-	if (lines > y)
-		Draw_Pic (0, lines - vid.height, conback);
+
+	if (cls.state != ca_active || lines > y)
+		alpha = 1.0;
 	else
-		Draw_AlphaPic (0, lines - vid.height, conback,
-					   (float) (1.2 * lines) / y);
+		alpha = (float) (0.6 * lines / y);
 
+	if (gl_constretch->value)
+		ofs = 0.0f;
+	else
+		ofs = (float) ((vid.conheight - lines) / vid.conheight);
+
+	qglColor4f (1.0f, 1.0f, 1.0f, alpha);
+	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
+	qglBegin (GL_QUADS);
+	qglTexCoord2f (gl->sl, gl->tl + ofs);
+	qglVertex2f (0, 0);
+	qglTexCoord2f (gl->sh, gl->tl + ofs);
+	qglVertex2f (vid.conwidth, 0);
+	qglTexCoord2f (gl->sh, gl->th);
+	qglVertex2f (vid.conwidth, lines);
+	qglTexCoord2f (gl->sl, gl->th);
+	qglVertex2f (0, lines);
+	qglEnd ();
+											
 	// hack the version number directly into the pic
-	y = lines - 14;
 	if (!cls.download) {
-		snprintf (ver, sizeof (ver), "Twilight %s QuakeWorld", VERSION);
-		x = vid.conwidth - (strlen (ver) * 8 + 11) -
-			(vid.conwidth * 8 / 320) * 7;
-
-		Draw_Alt_String (x, y, ver);
+		Draw_Alt_String (vid.conwidth - strlen (cl_verstring->string) * 8 - 11,
+				lines - 14, cl_verstring->string);
 	}
+	
+	qglColor3f (1.0f, 1.0f, 1.0f);
 }
 
 
