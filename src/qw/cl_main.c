@@ -330,14 +330,14 @@ CL_Rcon_f (void)
 	message[3] = 255;
 	message[4] = 0;
 
-	strcat (message, "rcon ");
+	strlcat_s (message, "rcon ");
 
-	strcat (message, rcon_password->svalue);
-	strcat (message, " ");
+	strlcat_s (message, rcon_password->svalue);
+	strlcat_s (message, " ");
 
 	for (i = 1; i < Cmd_Argc (); i++) {
-		strcat (message, Cmd_Argv (i));
-		strcat (message, " ");
+		strlcat_s (message, Cmd_Argv (i));
+		strlcat_s (message, " ");
 	}
 
 	if (ccls.state >= ca_connected)
@@ -423,7 +423,7 @@ CL_Disconnect (void)
 			CL_Stop_f ();
 
 		final[0] = clc_stringcmd;
-		strcpy (final + 1, "drop");
+		strlcpy (final + 1, "drop", sizeof(final) - 1);
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
@@ -975,7 +975,7 @@ CL_Download_f (void)
 			break;
 	}
 
-	strcpy (cls.downloadtempname, cls.downloadname);
+	strlcpy_s (cls.downloadtempname, cls.downloadname);
 	cls.download = fopen (cls.downloadname, "wb");
 	cls.downloadtype = dl_single;
 

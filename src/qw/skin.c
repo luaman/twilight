@@ -282,7 +282,7 @@ Sets all skins to one specific one
 static void
 Skin_AllSkins_f (void)
 {
-	strcpy (allskins, Cmd_Argv (1));
+	strlcpy_s (allskins, Cmd_Argv (1));
 	Skin_Skins_f ();
 }
 

@@ -446,7 +446,7 @@ SVC_Log (void)
 				 NET_AdrToString (net_from));
 
 	snprintf (data, sizeof (data), "stdlog %i\n", svs.logsequence - 1);
-	strcat (data, (char *) svs.log_buf[((svs.logsequence - 1) & 1)]);
+	strlcat_s (data, (char *) svs.log_buf[((svs.logsequence - 1) & 1)]);
 
 	NET_SendPacket (NS_SERVER, strlen (data) + 1, data, net_from);
 }
@@ -767,8 +767,8 @@ SVC_RemoteCommand (void)
 		remaining[0] = 0;
 
 		for (i = 2; i < Cmd_Argc (); i++) {
-			strcat (remaining, Cmd_Argv (i));
-			strcat (remaining, " ");
+			strlcat_s (remaining, Cmd_Argv (i));
+			strlcat_s (remaining, " ");
 		}
 
 		Cmd_ExecuteString (remaining, src_client);
@@ -1485,7 +1485,7 @@ SV_ExtractFromUserinfo (client_t *cl)
 
 	if (p != newname && !*p) {
 		// white space only
-		strcpy (newname, "unnamed");
+		strlcpy_s (newname, "unnamed");
 		p = newname;
 	}
 

@@ -1386,13 +1386,13 @@ COM_LoadPackFile (char *packfile)
 	// parse the directory
 	for (i = 0; i < numpackfiles; i++)
 	{
-		strcpy (newfiles[i].name, info[i].name);
+		strlcpy_s (newfiles[i].name, info[i].name);
 		newfiles[i].filepos = LittleLong (info[i].filepos);
 		newfiles[i].filelen = LittleLong (info[i].filelen);
 	}
 
 	pack = Z_Malloc (sizeof (pack_t));
-	strcpy (pack->filename, packfile);
+	strlcpy_s (pack->filename, packfile);
 	pack->handle = packhandle;
 	pack->numfiles = numpackfiles;
 	pack->files = newfiles;
@@ -1420,17 +1420,17 @@ COM_AddDirectory (char *dir)
 	char		   *p;
 
 	if ((p = strrchr (dir, '/')) != NULL)
-		strcpy (gamedirfile, ++p);
+		strlcpy_s (gamedirfile, ++p);
 	else
-		strcpy (gamedirfile, p);
-	strcpy (com_gamedir, dir);
+		strlcpy_s (gamedirfile, p);
+	strlcpy_s (com_gamedir, dir);
 	Sys_mkdir (com_gamedir);
 
 	/*
 	 * add the directory to the search path
 	 */
 	search = Z_Malloc (sizeof (searchpath_t));
-	strcpy (search->filename, dir);
+	strlcpy_s (search->filename, dir);
 	search->next = com_searchpaths;
 	com_searchpaths = search;
 
@@ -1498,7 +1498,7 @@ COM_Gamedir (char *dir)
 		// still the same
 		return;
 
-	strcpy (gamedirfile, dir);
+	strlcpy_s (gamedirfile, dir);
 
 	/*
 	 * free up any current game dir info

@@ -736,7 +736,7 @@ Mod_LoadBrushModel (model_t *mod, void *buffer, int flags)
 					Mod_UnloadModel (mod);
 				// Copy over the basic information.
 				*mod = *first;
-				strcpy (mod->name, name);
+				strlcpy_s (mod->name, name);
 				// Allocate a new brush struct.
 				mod->brush = Zone_Alloc(first->zone, sizeof(brushhdr_t));
 				// Copy over the basics.

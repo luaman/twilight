@@ -269,7 +269,7 @@ CL_ParseServerInfo (void)
 
 // parse signon message
 	str = MSG_ReadString ();
-	strlcpy (ccl.levelname, str, sizeof (ccl.levelname));
+	strlcpy_s (ccl.levelname, str);
 
 // seperate the printfs so the server message can have a color
 	Com_Printf ("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36"
@@ -290,7 +290,7 @@ CL_ParseServerInfo (void)
 			break;
 		if (nummodels == MAX_MODELS)
 			Host_Error ("Server sent too many model precaches\n");
-		strcpy (model_precache[nummodels], str);
+		strlcpy_s (model_precache[nummodels], str);
 		Mod_TouchModel (str);
 	}
 
@@ -302,7 +302,7 @@ CL_ParseServerInfo (void)
 			break;
 		if (numsounds == MAX_SOUNDS)
 			Host_Error ("Server sent too many sound precaches\n");
-		strcpy (sound_precache[numsounds], str);
+		strlcpy_s (sound_precache[numsounds], str);
 	}
 
 //
@@ -317,7 +317,7 @@ CL_ParseServerInfo (void)
 			cl.model_precache[i] = Mod_ForName (model_precache[i],
 					FLAG_CRASH | FLAG_RENDER | FLAG_SUBMODELS);
 
-			strlcpy (mapname, COM_SkipPath (model_precache[i]), sizeof (mapname));
+			strlcpy_s (mapname, COM_SkipPath (model_precache[i]));
 			COM_StripExtension (mapname, mapname);
 			Cvar_Set (cl_mapname, mapname);
 		} else
@@ -782,7 +782,7 @@ CL_ParseServerMessage (void)
 				i = MSG_ReadByte ();
 				if (i >= MAX_LIGHTSTYLES)
 					Sys_Error ("svc_lightstyle > MAX_LIGHTSTYLES");
-				strcpy (cl_lightstyle[i].map, MSG_ReadString ());
+				strlcpy_s (cl_lightstyle[i].map, MSG_ReadString ());
 				cl_lightstyle[i].length = strlen (cl_lightstyle[i].map);
 				break;
 
@@ -800,7 +800,7 @@ CL_ParseServerMessage (void)
 				if (i >= ccl.max_users)
 					Host_Error ("CL_ParseServerMessage: svc_updatename >"
 							" MAX_SCOREBOARD");
-				strcpy (ccl.users[i].name, MSG_ReadString ());
+				strlcpy_s (ccl.users[i].name, MSG_ReadString ());
 				ccl.user_flags &= ~(USER_FLAG_TEAM_SORTED | USER_FLAG_SORTED);
 				break;
 

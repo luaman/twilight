@@ -120,7 +120,7 @@ memzone_t *_Zone_AllocZone(const char *name, const char *filename, const int fil
 	zone->chain = NULL;
 	zone->totalsize = 0;
 	zone->realsize = sizeof(memzone_t);
-	strcpy(zone->name, name);
+	strlcpy_s (zone->name, name);
 	zone->next = zonechain;
 	zonechain = zone;
 	return zone;

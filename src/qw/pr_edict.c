@@ -281,7 +281,7 @@ GetEdictFieldValue (edict_t *ed, char *field)
 	if (strlen (field) < MAX_FIELD_LEN)
 	{
 		gefvCache[rep].pcache = def;
-		strcpy (gefvCache[rep].field, field);
+		strlcpy_s (gefvCache[rep].field, field);
 		rep ^= 1;
 	}
 
@@ -376,8 +376,8 @@ PR_GlobalString (int ofs)
 
 	i = strlen (line);
 	for (; i < 20; i++)
-		strcat (line, " ");
-	strcat (line, " ");
+		strlcat_s (line, " ");
+	strlcat_s (line, " ");
 
 	return line;
 }
@@ -398,8 +398,8 @@ PR_GlobalStringNoContents (int ofs)
 
 	i = strlen (line);
 	for (; i < 20; i++)
-		strcat (line, " ");
-	strcat (line, " ");
+		strlcat_s (line, " ");
+	strlcat_s (line, " ");
 
 	return line;
 }
@@ -599,7 +599,7 @@ ED_ParseEpair (void *base, ddef_t *key, char *s)
 			break;
 
 		case ev_vector:
-			strcpy (string, s);
+			strlcpy_s (string, s);
 			v = string;
 			w = string;
 			for (i = 0; i < 3; i++)
@@ -679,7 +679,7 @@ ED_ParseEdict (char *data, edict_t *ent)
 		// and allow them to be turned into vectors. (FIXME...)
 		if (!strcmp (com_token, "angle"))
 		{
-			strcpy (com_token, "angles");
+			strlcpy_s (com_token, "angles");
 			anglehack = true;
 		}
 		else
@@ -687,9 +687,9 @@ ED_ParseEdict (char *data, edict_t *ent)
 
 		// FIXME: change light to _light to get rid of this hack
 		if (!strcmp (com_token, "light"))
-			strcpy (com_token, "light_lev");	// hack for single light def
+			strlcpy_s (com_token, "light_lev");	// hack for single light def
 
-		strcpy (keyname, com_token);
+		strlcpy_s (keyname, com_token);
 
 		// parse value 
 		data = COM_Parse (data);
@@ -717,7 +717,7 @@ ED_ParseEdict (char *data, edict_t *ent)
 		{
 			char		temp[32];
 
-			strcpy (temp, com_token);
+			strlcpy_s (temp, com_token);
 			snprintf (com_token, sizeof (com_token), "0 %s 0", temp);
 		}
 
@@ -851,13 +851,13 @@ PR_LoadProgs (void)
 	if (!deathmatch->ivalue)
 	{
 		progs = (dprograms_t *)COM_LoadZoneFile ("spprogs.dat", true, progs_memzone);
-		strcpy (pname, "spprogs.dat");
+		strlcpy_s (pname, "spprogs.dat");
 	}
 
 	if (!progs)
 	{
 		progs = (dprograms_t *)COM_LoadZoneFile ("qwprogs.dat", true, progs_memzone);
-		strcpy (pname, "qwprogs.dat");
+		strlcpy_s (pname, "qwprogs.dat");
 	}
 
 	if (!progs)

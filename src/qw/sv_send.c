@@ -86,7 +86,7 @@ SV_RedirectedPrint (char *msg)
 	if (strlen (msg) + strlen (sv_outputbuf) > sizeof (sv_outputbuf) - 1)
 		SV_FlushRedirect ();
 
-	strcat (sv_outputbuf, msg);
+	strlcat_s (sv_outputbuf, msg);
 }
 
 /*

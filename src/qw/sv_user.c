@@ -774,8 +774,8 @@ SV_Say (qboolean team)
 		p[strlen (p) - 1] = 0;
 	}
 
-	strcat (text, p);
-	strcat (text, "\n");
+	strlcat_s (text, p);
+	strlcat_s (text, "\n");
 
 	Sys_Printf ("%s", text);
 

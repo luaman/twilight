@@ -207,14 +207,14 @@ CL_CheckOrDownloadFile (char *filename)
 	if (ccls.demoplayback)
 		return true;
 
-	strcpy (cls.downloadname, filename);
+	strlcpy_s (cls.downloadname, filename);
 	Com_Printf ("Downloading %s...\n", cls.downloadname);
 
 	// download to a temp name, and only rename
 	// to the real name when done, so if interrupted
 	// a runt file wont be left
 	COM_StripExtension (cls.downloadname, cls.downloadtempname);
-	strcat (cls.downloadtempname, ".tmp");
+	strlcat_s (cls.downloadtempname, ".tmp");
 
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message,
@@ -678,7 +678,7 @@ CL_ParseSoundlist (void)
 		numsounds++;
 		if (numsounds == MAX_SOUNDS)
 			Host_EndGame ("Server sent too many sound_precache");
-		strcpy (cl.sound_name[numsounds], str);
+		strlcpy_s (cl.sound_name[numsounds], str);
 	}
 
 	n = MSG_ReadByte ();
@@ -717,7 +717,7 @@ CL_ParseModellist (void)
 		nummodels++;
 		if (nummodels == MAX_MODELS)
 			Host_EndGame ("Server sent too many model_precache");
-		strcpy (cl.model_name[nummodels], str);
+		strlcpy_s (cl.model_name[nummodels], str);
 
 		if (!strcmp (cl.model_name[nummodels], "progs/spike.mdl"))
 			cl_spikeindex = nummodels;
@@ -1241,7 +1241,7 @@ CL_ParseServerMessage (void)
 				i = MSG_ReadByte ();
 				if (i >= MAX_LIGHTSTYLES)
 					Host_EndGame ("svc_lightstyle > MAX_LIGHTSTYLES");
-				strcpy (cl_lightstyle[i].map, MSG_ReadString ());
+				strlcpy_s (cl_lightstyle[i].map, MSG_ReadString ());
 				cl_lightstyle[i].length = strlen (cl_lightstyle[i].map);
 				break;
 
