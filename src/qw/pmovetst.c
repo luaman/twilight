@@ -193,6 +193,9 @@ PM_TestPlayerPosition (vec3_t pos)
 
 	for (i = 0; i < pmove.numphysent; i++) {
 		pe = &pmove.physents[i];
+		if ((pe->id != -1) && (pe->id == pmove.player_id))
+			continue;
+
 		// get the clipping hull
 		if (pe->model)
 			hull = &pmove.physents[i].model->hulls[1];
@@ -217,25 +220,24 @@ PM_TestPlayerPosition (vec3_t pos)
 PM_PlayerMove
 ================
 */
-trace_t
+trace_t *
 PM_PlayerMove (vec3_t start, vec3_t end)
 {
-	trace_t		trace, total;
-	vec3_t      offset;
+	static trace_t	traces[2];
+	trace_t		*cur, *shortest;
 	vec3_t      start_l, end_l;
 	hull_t     *hull;
-	int         i;
+	int         i, trace = 0;
 	physent_t  *pe;
 	vec3_t      mins, maxs;
 
-// fill in a default trace
-	memset (&total, 0, sizeof (trace_t));
-	total.fraction = 1;
-	total.ent = NULL;
-	VectorCopy (end, total.endpos);
+	cur = &traces[trace];
+	shortest = NULL;
 
 	for (i = 0; i < pmove.numphysent; i++) {
 		pe = &pmove.physents[i];
+		if ((pe->id != -1) && (pe->id == pmove.player_id))
+			continue;
 		// get the clipping hull
 		if (pe->model)
 			hull = &pmove.physents[i].model->hulls[1];
@@ -245,29 +247,21 @@ PM_PlayerMove (vec3_t start, vec3_t end)
 			hull = PM_HullForBox (mins, maxs);
 		}
 
-		// PM_HullForEntity (ent, mins, maxs, offset);
-		VectorCopy (pe->origin, offset);
-
-		VectorSubtract (start, offset, start_l);
-		VectorSubtract (end, offset, end_l);
+		VectorSubtract (start, pe->origin, start_l);
+		VectorSubtract (end, pe->origin, end_l);
 
 		// trace a line through the apropriate clipping hull
-		TraceLine_Raw (hull, start_l, end_l, &trace);
-
-		if (trace.allsolid)
-			trace.startsolid = true;
-		if (trace.startsolid)
-			trace.fraction = 0;
+		TraceLine_Raw (hull, start_l, end_l, cur);
 
 		// did we clip the move?
-		if (trace.fraction < total.fraction) {
-			// fix trace up by the offset
-			VectorAdd (trace.endpos, offset, trace.endpos);
-			total = trace;
-			total.ent = pe;
+		if (!shortest || (cur->fraction < shortest->fraction)) {
+			VectorAdd (cur->endpos, pe->origin, cur->endpos);
+			cur->ent = pe;
+			// Swap spare and cur.
+			shortest = cur;
+			cur = &traces[++trace % 2];
 		}
-
 	}
 
-	return total;
+	return shortest;
 }

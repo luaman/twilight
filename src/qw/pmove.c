@@ -103,63 +103,56 @@ PM_FlyMove
 The basic solid body movement clip that slides along multiple planes
 ============
 */
-#define	MAX_CLIP_PLANES	5
+#define	MAX_CLIP_PLANES	20
 
 int
 PM_FlyMove (void)
 {
-	int         bumpcount, numbumps;
-	vec3_t      dir;
-	float       d;
-	int         numplanes;
-	vec3_t      planes[MAX_CLIP_PLANES];
-	vec3_t      primal_velocity, original_velocity;
-	int         i, j;
-	trace_t		trace;
-	vec3_t      end;
-	float       time_left;
-	int         blocked;
+	int		bumpcount, numbumps, numplanes, i, j, blocked;
+	vec3_t	planes[MAX_CLIP_PLANES];
+	vec3_t	dir, end;
+	vec3_t	primal_velocity, original_velocity;
+	trace_t	*trace;
+	float	d, time_left;
 
+	time_left = frametime;
+	numplanes = 0;
 	numbumps = 4;
-
 	blocked = 0;
 	VectorCopy (pmove.velocity, original_velocity);
 	VectorCopy (pmove.velocity, primal_velocity);
-	numplanes = 0;
 
-	time_left = frametime;
 
 	for (bumpcount = 0; bumpcount < numbumps; bumpcount++) {
-		for (i = 0; i < 3; i++)
-			end[i] = pmove.origin[i] + time_left * pmove.velocity[i];
+		if (!pmove.velocity[0] && !pmove.velocity[1] && !pmove.velocity[2])
+			break;
+
+		VectorMA(pmove.origin, time_left, pmove.velocity, end);
 
 		trace = PM_PlayerMove (pmove.origin, end);
 
-		if (trace.startsolid || trace.allsolid) {	// entity is trapped in
-			// another solid
+		if (trace->startsolid) {	// entity is trapped in another solid
 			VectorClear (pmove.velocity);
 			return 3;
 		}
 
-		if (trace.fraction > 0) {		// actually covered some distance
-			VectorCopy (trace.endpos, pmove.origin);
+		if (trace->fraction > 0) {		// actually covered some distance
+			VectorCopy (trace->endpos, pmove.origin);
 			numplanes = 0;
 		}
 
-		if (trace.fraction == 1)
+		if (trace->fraction == 1)
 			break;						// moved the entire distance
 
 		// save entity for contact
-		pmove.touch[pmove.numtouch++] = trace.ent;
+		pmove.touch[pmove.numtouch++] = trace->ent;
 
-		if (trace.plane.normal[2] > 0.7) {
+		if (trace->plane.normal[2] > 0.7)
 			blocked |= 1;				// floor
-		}
-		if (!trace.plane.normal[2]) {
+		if (!trace->plane.normal[2])
 			blocked |= 2;				// step
-		}
 
-		time_left -= time_left * trace.fraction;
+		time_left -= time_left * trace->fraction;
 
 		// cliped to another plane
 		if (numplanes >= MAX_CLIP_PLANES) {	// this shouldn't really happen
@@ -167,7 +160,7 @@ PM_FlyMove (void)
 			break;
 		}
 
-		VectorCopy (trace.plane.normal, planes[numplanes]);
+		VectorCopy (trace->plane.normal, planes[numplanes]);
 		numplanes++;
 
 //
@@ -184,8 +177,7 @@ PM_FlyMove (void)
 				break;
 		}
 
-		if (i != numplanes) {			// go along this plane
-		} else {						// go along the crease
+		if (i == numplanes) {			// go along the crease
 			if (numplanes != 2) {
 				VectorClear (pmove.velocity);
 				break;
@@ -195,10 +187,8 @@ PM_FlyMove (void)
 			VectorScale (dir, d, pmove.velocity);
 		}
 
-//
-// if original velocity is against the original velocity, stop dead
-// to avoid tiny occilations in sloping corners
-//
+		// if original velocity is against the original velocity, stop dead
+		// to avoid tiny occilations in sloping corners
 		if (DotProduct (pmove.velocity, primal_velocity) <= 0) {
 			VectorClear (pmove.velocity);
 			break;
@@ -222,7 +212,7 @@ void
 PM_GroundMove (void)
 {
 	vec3_t      start, dest;
-	trace_t		trace;
+	trace_t		*trace;
 	vec3_t      original, originalvel, down, up, downvel;
 	float       downdist, updist;
 
@@ -238,8 +228,8 @@ PM_GroundMove (void)
 	// first try moving directly to the next spot
 	VectorCopy (dest, start);
 	trace = PM_PlayerMove (pmove.origin, dest);
-	if (trace.fraction == 1) {
-		VectorCopy (trace.endpos, pmove.origin);
+	if (trace->fraction == 1) {
+		VectorCopy (trace->endpos, pmove.origin);
 		return;
 	}
 	// try sliding forward both on ground and up 16 pixels
@@ -260,9 +250,8 @@ PM_GroundMove (void)
 	VectorCopy (pmove.origin, dest);
 	dest[2] += STEPSIZE;
 	trace = PM_PlayerMove (pmove.origin, dest);
-	if (!trace.startsolid && !trace.allsolid) {
-		VectorCopy (trace.endpos, pmove.origin);
-	}
+	if (!trace->startsolid)
+		VectorCopy (trace->endpos, pmove.origin);
 // slide move
 	PM_FlyMove ();
 
@@ -270,10 +259,10 @@ PM_GroundMove (void)
 	VectorCopy (pmove.origin, dest);
 	dest[2] -= STEPSIZE;
 	trace = PM_PlayerMove (pmove.origin, dest);
-	if (trace.plane.normal[2] < 0.7)
+	if (trace->plane.normal[2] < 0.7)
 		goto usedown;
-	if (!trace.startsolid && !trace.allsolid) {
-		VectorCopy (trace.endpos, pmove.origin);
+	if (!trace->startsolid) {
+		VectorCopy (trace->endpos, pmove.origin);
 	}
 	VectorCopy (pmove.origin, up);
 
@@ -311,7 +300,7 @@ PM_Friction (void)
 	float       friction;
 	float       drop;
 	vec3_t      start, stop;
-	trace_t		trace;
+	trace_t		*trace;
 
 	if (pmove.waterjumptime)
 		return;
@@ -337,7 +326,7 @@ PM_Friction (void)
 
 		trace = PM_PlayerMove (start, stop);
 
-		if (trace.fraction == 1) {
+		if (trace->fraction == 1) {
 			friction *= 2;
 		}
 	}
@@ -437,7 +426,7 @@ PM_WaterMove (void)
 	float       wishspeed;
 	vec3_t      wishdir;
 	vec3_t      start, dest;
-	trace_t		trace;
+	trace_t		*trace;
 
 //
 // user intentions
@@ -470,9 +459,9 @@ PM_WaterMove (void)
 	VectorCopy (dest, start);
 	start[2] += STEPSIZE + 1;
 	trace = PM_PlayerMove (start, dest);
-	if (!trace.startsolid && !trace.allsolid)	// FIXME: check steep slope?
+	if (!trace->startsolid)	// FIXME: check steep slope?
 	{									// walked up the step
-		VectorCopy (trace.endpos, pmove.origin);
+		VectorCopy (trace->endpos, pmove.origin);
 		return;
 	}
 
@@ -546,7 +535,7 @@ PM_CatagorizePosition (void)
 {
 	vec3_t      point;
 	int         cont;
-	trace_t		tr;
+	trace_t		*tr;
 
 // if the player hull point one unit down is solid, the player
 // is on ground
@@ -559,18 +548,18 @@ PM_CatagorizePosition (void)
 		pmove.groundent = NULL;
 	} else {
 		tr = PM_PlayerMove (pmove.origin, point);
-		if (tr.plane.normal[2] < 0.7)
+		if (tr->plane.normal[2] < 0.7)
 			pmove.groundent = NULL;				// too steep
 		else
-			pmove.groundent = tr.ent;
+			pmove.groundent = tr->ent;
 		if (pmove.groundent) {
 			pmove.waterjumptime = 0;
-			if (!tr.startsolid && !tr.allsolid)
-				VectorCopy (tr.endpos, pmove.origin);
+			if (!tr->startsolid)
+				VectorCopy (tr->endpos, pmove.origin);
 		}
 		// standing on an entity other than the world
-		if (tr.ent > 0) {
-			pmove.touch[pmove.numtouch++] = tr.ent;
+		if (tr->ent > 0) {
+			pmove.touch[pmove.numtouch++] = tr->ent;
 		}
 	}
 

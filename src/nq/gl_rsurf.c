@@ -431,7 +431,7 @@ Combine and scale multiple lightmaps into the 8.8 format in blocklights
 static void
 GL_BuildLightmap (msurface_t *surf)
 {
-	int			i, j, size, size3, stride;
+	int			i, j, size3, stride;
 	Uint8	   *lightmap, *dest, *stain;
 	Uint32		scale, *bl;
 
@@ -445,8 +445,7 @@ GL_BuildLightmap (msurface_t *surf)
 	surf->cached_light[2] = d_lightstylevalue[surf->styles[2]];
 	surf->cached_light[3] = d_lightstylevalue[surf->styles[3]];
 
-	size = surf->smax * surf->tmax;
-	size3 = size * 3;
+	size3 = surf->smax * surf->tmax * 3;
 
 	lightmap = surf->samples;
 
@@ -472,25 +471,15 @@ GL_BuildLightmap (msurface_t *surf)
 				bl = blocklights;
 
 				for (j = 0; j < size3; j++)
-					*bl++ += *lightmap++ * scale;
+					bl[j] += lightmap[j] * scale;
+				lightmap += j;
 			}
 		}
 	}
 
-	// apply the stainmap
-	// NB: This is only done for colored lighting.  While it is possible to do
-	// it in the non-colored case, but it would suck.  A lot. 
-	if (colorlights && r_stainmaps->ivalue)
-	{
-		stain = surf->stainsamples;
-		if (stain)
-			for (bl = blocklights, i = 0; i < size3; i++)
-				if (stain[i] < 255)
-					bl[i] = (bl[i] * stain[i]) >> 8;
-	}
-
 	bl = blocklights;
 	dest = templight;
+	stain = surf->stainsamples;
 
 	// bound, invert, and shift
 	stride = surf->alignedwidth * lightmap_bytes;
@@ -503,11 +492,12 @@ GL_BuildLightmap (msurface_t *surf)
 			{
 				for (j = 0; j < surf->smax; j++)
 				{
-					dest[0] = bound (0, bl[0] >> lightmap_shift, 255);
-					dest[1] = bound (0, bl[1] >> lightmap_shift, 255);
-					dest[2] = bound (0, bl[2] >> lightmap_shift, 255);
+					dest[0]=bound(0, (bl[0] * stain[0]) >> lightmap_shift, 255);
+					dest[1]=bound(0, (bl[1] * stain[1]) >> lightmap_shift, 255);
+					dest[2]=bound(0, (bl[2] * stain[2]) >> lightmap_shift, 255);
 					bl += 3;
 					dest += 3;
+					stain += 3;
 				}
 			}
 
@@ -519,12 +509,13 @@ GL_BuildLightmap (msurface_t *surf)
 			{
 				for (j = 0; j < surf->smax; j++)
 				{
-					dest[0] = bound (0, bl[0] >> lightmap_shift, 255);
-					dest[1] = bound (0, bl[1] >> lightmap_shift, 255);
-					dest[2] = bound (0, bl[2] >> lightmap_shift, 255);
+					dest[0]=bound(0, (bl[0] * stain[0]) >> lightmap_shift, 255);
+					dest[1]=bound(0, (bl[1] * stain[1]) >> lightmap_shift, 255);
+					dest[2]=bound(0, (bl[2] * stain[2]) >> lightmap_shift, 255);
 					dest[3] = 255;
 					bl += 3;
 					dest += 4;
+					stain += 3;
 				}
 			}
 
@@ -550,8 +541,8 @@ GL_BuildLightmap (msurface_t *surf)
 	}
 
 	qglTexSubImage2D (GL_TEXTURE_2D, 0, surf->light_s, surf->light_t,
-			surf->alignedwidth, surf->tmax, gl_lightmap_format, GL_UNSIGNED_BYTE,
-			templight);
+			surf->alignedwidth, surf->tmax, gl_lightmap_format,
+			GL_UNSIGNED_BYTE, templight);
 }
 
 static void
@@ -1431,15 +1422,14 @@ GL_BuildLightmaps (void)
 	else
 		lightmap_shift = 8;
 
+	lightmap_shift += 8;
+
 	switch (gl_colorlights->ivalue)
 	{
 		case 0:
 			gl_lightmap_format = GL_LUMINANCE;
 			lightmap_bytes = 1;
 			colorlights = false;
-
-			// adjust lightmap_shift for an extra divide by 256
-			lightmap_shift += 8;
 			break;
 
 		default:
