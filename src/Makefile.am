@@ -7,5 +7,8 @@ AUTOMAKE_OPTIONS=gnu dist-zip
 if CLIENTS
 clients = image renderer sound
 endif
-SUBDIRS=base $(clients)
+SUBDIRS=include base $(clients) nq qw
 
+
+noinst_HEADERS= \
+	config.h win32config.h

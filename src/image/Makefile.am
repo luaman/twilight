@@ -4,7 +4,7 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/src/include
 
 CFLAGS=@CFLAGS@ @SDL_CFLAGS@
 

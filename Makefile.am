@@ -4,13 +4,15 @@
 
 AUTOMAKE_OPTIONS=gnu dist-zip
 
-SUBDIRS=include src doc tools nq qw
+SUBDIRS=src doc tools
 
 EXTRA_DIST= \
 	COPYING.BSD \
 	acconfig.h bootstrap \
 	twilight.dsw \
 	twilight.spec
+
+tbs = $(top_builddir)/src
 
 clean-generic:
 	-rm $(top_builddir)/twilight-nq@EXEEXT@
@@ -19,11 +21,11 @@ clean-generic:
 
 all: all-recursive
 if CLIENTS
-	${INSTALL} $(top_builddir)/nq/twilight-nq@EXEEXT@ $(top_builddir)
-	${INSTALL} $(top_builddir)/qw/twilight-qw@EXEEXT@ $(top_builddir)
+	${INSTALL} $(tbs)/nq/twilight-nq@EXEEXT@ $(top_builddir)
+	${INSTALL} $(tbs)/qw/twilight-qw@EXEEXT@ $(top_builddir)
 endif
 if SERVERS
-	${INSTALL} $(top_builddir)/qw/twilight-qwsv@EXEEXT@ $(top_builddir)
+	${INSTALL} $(tbs)/qw/twilight-qwsv@EXEEXT@ $(top_builddir)
 endif
 
 ChangeLog:
