@@ -100,6 +100,10 @@ SOURCE=.\cl_demo.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\cl_ents.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\cl_input.c
 # End Source File
 # Begin Source File
