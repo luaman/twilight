@@ -139,7 +139,6 @@ R_Init_Cvars (void)
 	r_fullbright = Cvar_Get ("r_fullbright", "0", CVAR_NONE, NULL);
 	r_lightmap = Cvar_Get ("r_lightmap", "0", CVAR_NONE, NULL);
 	r_shadows = Cvar_Get ("r_shadows", "0", CVAR_NONE, NULL);
-	r_mirroralpha = Cvar_Get ("r_mirroralpha", "1", CVAR_NONE, NULL);
 	r_wateralpha = Cvar_Get ("r_wateralpha", "1", CVAR_NONE, NULL);
 	r_dynamic = Cvar_Get ("r_dynamic", "1", CVAR_NONE, NULL);
 	r_novis = Cvar_Get ("r_novis", "0", CVAR_NONE, NULL);
@@ -149,7 +148,6 @@ R_Init_Cvars (void)
 
 	gl_clear = Cvar_Get ("gl_clear", "1", CVAR_NONE, NULL);
 	gl_cull = Cvar_Get ("gl_cull", "1", CVAR_NONE, NULL);
-	gl_texsort = Cvar_Get ("gl_texsort", "1", CVAR_NONE, NULL);
 	gl_affinemodels = Cvar_Get ("gl_affinemodels", "0", CVAR_NONE, NULL);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", CVAR_NONE, NULL);
 	gl_flashblend = Cvar_Get ("gl_flashblend", "1", CVAR_NONE, NULL);
@@ -167,9 +165,6 @@ R_Init_Cvars (void)
 	gl_oldlights = Cvar_Get ("gl_oldlights", "0", CVAR_NONE, NULL);
 
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
-
-	if (gl_mtexable)
-		Cvar_Set (gl_texsort, "0");
 }
 
 /*
@@ -419,14 +414,11 @@ R_NewMap (void)
 
 	// identify sky texture
 	skytexturenum = -1;
-	mirrortexturenum = -1;
 	for (i = 0; i < cl.worldmodel->numtextures; i++) {
 		if (!cl.worldmodel->textures[i])
 			continue;
 		if (!strncmp (cl.worldmodel->textures[i]->name, "sky", 3))
 			skytexturenum = i;
-		if (!strncmp (cl.worldmodel->textures[i]->name, "window02_1", 10))
-			mirrortexturenum = i;
 		cl.worldmodel->textures[i]->texturechain = NULL;
 	}
 }
