@@ -23,7 +23,6 @@
 
 	$Id$
 */
-// refresh.h -- public interface to refresh functions
 
 #ifndef __RENDER_H
 #define __RENDER_H
@@ -37,20 +36,20 @@
 //=============================================================================
 
 typedef struct colormap_s {
-	vec3_t	top;
-	vec3_t	bottom;
+	vec3_t		top;
+	vec3_t		bottom;
 } colormap_t;
 
 typedef struct entity_save_s {
-	vec3_t	origin;
-	float	origin_time;
-	float	origin_interval;
-	vec3_t	angles;
-	float	angles_time;
-	float	angles_interval;
-	int		frame;
-	float	frame_time;
-	float	frame_interval;
+	vec3_t		origin;
+	float		origin_time;
+	float		origin_interval;
+	vec3_t		angles;
+	float		angles_time;
+	float		angles_interval;
+	int			frame;
+	float		frame_time;
+	float		frame_interval;
 } entity_save_t;
 
 typedef struct entity_s {
@@ -58,7 +57,8 @@ typedef struct entity_s {
 	entity_save_t	to;
 	entity_save_t	cur;
 
-	struct model_s	*model;				// NULL = no model
+	// NULL = no model
+	struct model_s	*model;
 	int				skinnum;
 	int				effects;
 
@@ -69,8 +69,10 @@ typedef struct entity_s {
 	unsigned int	times;
 
 	float			frame_blend;
-	skin_t			*skin;				// Skin other then model.
-	colormap_t		*colormap;			// Colormap for the model, if any.
+	// Skin other then model.
+	skin_t			*skin;
+	// Colormap for the model, if any.
+	colormap_t		*colormap;
 } entity_t;
 
 #define MAX_ENTITIES	1024
@@ -96,24 +98,28 @@ extern vec3_t r_origin, vpn, vright, vup;
 
 extern entity_t r_worldentity;
 
-void        R_Init_Cvars (void);
-void        R_Init (void);
-void        R_InitTextures (void);
-void        R_RenderView (void);		// must set r_refdef first
-								// called whenever r_refdef or vid change
-void        R_InitSky (texture_t *mt);	// called at level load
+void R_Init_Cvars (void);
+void R_Init (void);
+void R_InitTextures (void);
 
-void        R_NewMap (void);
+// must set r_refdef first
+// called whenever r_refdef or vid change
+void R_RenderView (void);
+
+// called at level load
+void R_InitSky (struct texture_s *mt);
+
+void R_NewMap (void);
 
 
-void        R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count);
-void        R_RocketTrail (vec3_t start, vec3_t end);
-void        R_ParticleTrail (vec3_t start, vec3_t end, int type);
+void R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count);
+void R_RocketTrail (vec3_t start, vec3_t end);
+void R_ParticleTrail (vec3_t start, vec3_t end, int type);
 
-void        R_BlobExplosion (vec3_t org);
-void        R_ParticleExplosion (vec3_t org);
-void        R_LavaSplash (vec3_t org);
-void        R_TeleportSplash (vec3_t org);
+void R_BlobExplosion (vec3_t org);
+void R_ParticleExplosion (vec3_t org);
+void R_LavaSplash (vec3_t org);
+void R_TeleportSplash (vec3_t org);
 
 //
 // gl_rlight.c
@@ -121,27 +127,27 @@ void        R_TeleportSplash (vec3_t org);
 #define	MAX_DLIGHTS		32
 
 typedef struct {
-	int         key;					// so entities can reuse same entry
-	vec3_t      origin;
-	float       radius;
-	float       die;					// stop lighting after this time
-	float       decay;					// drop this each second
-	float       minlight;				// don't add when contributing less
-	float       color[3];
+	int			key;					// so entities can reuse same entry
+	vec3_t		origin;
+	float		radius;
+	float		die;					// stop lighting after this time
+	float		decay;					// drop this each second
+	float		minlight;				// don't add when contributing less
+	float		color[3];
 } dlight_t;
 
-void        R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node);
-void		R_MarkLights (dlight_t *light, int bit, model_t *model);
-void        R_AnimateLight (void);
-void        R_RenderDlights (void);
-int         R_LightPoint (vec3_t p);
-void        R_PushDlights (void);
+void R_MarkLights (dlight_t *light, int bit, model_t *model);
+void R_MarkLightsNoVis (dlight_t *light, int bit, mnode_t *node);
+void R_AnimateLight (void);
+int R_LightPoint (vec3_t p);
+void R_RenderDlights (void);
+void R_PushDlights (void);
 
-void        R_InitParticles (void);
-void        R_ClearParticles (void);
-void        R_MoveParticles (void);
-void        R_DrawParticles (void);
-void        R_DrawWaterSurfaces (void);
+void R_InitParticles (void);
+void R_ClearParticles (void);
+void R_MoveParticles (void);
+void R_DrawParticles (void);
+void R_DrawWaterSurfaces (void);
 
 #endif // __RENDER_H
 
