@@ -225,6 +225,18 @@ Con_CheckResize (void)
 
 /*
 ================
+Con_Init_Cvars
+================
+*/
+void
+Con_Init_Cvars (void)
+{
+	// time in seconds
+	con_notifytime = Cvar_Get ("con_notifytime", "3", CVAR_NONE, NULL);
+}
+
+/*
+================
 Con_Init
 ================
 */
@@ -251,12 +263,9 @@ Con_Init (void)
 
 	Con_Printf ("Console initialized.\n");
 
-//
-// register our commands
-//
-	// time in seconds
-	con_notifytime = Cvar_Get ("con_notifytime", "3", CVAR_NONE, NULL);
-
+	//
+	// register our commands
+	//
 	Cmd_AddCommand ("toggleconsole", Con_ToggleConsole_f);
 	Cmd_AddCommand ("messagemode", Con_MessageMode_f);
 	Cmd_AddCommand ("messagemode2", Con_MessageMode2_f);
@@ -275,8 +284,7 @@ Con_Linefeed (void)
 {
 	con_x = 0;
 	con_current++;
-	Q_memset (&con_text[(con_current % con_totallines) * con_linewidth]
-			  , ' ', con_linewidth);
+	Q_memset (&con_text[(con_current % con_totallines) * con_linewidth], ' ', con_linewidth);
 }
 
 /*

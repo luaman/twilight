@@ -49,12 +49,17 @@ vec3_t      chase_dest_angles;
 
 
 void
-Chase_Init (void)
+Chase_Init_Cvars (void)
 {
 	chase_back = Cvar_Get ("chase_back", "100", CVAR_NONE, NULL);
 	chase_up = Cvar_Get ("chase_up", "16", CVAR_NONE, NULL);
 	chase_right = Cvar_Get ("chase_right", "0", CVAR_NONE, NULL);
 	chase_active = Cvar_Get ("chase_active", "0", CVAR_NONE, NULL);
+}
+
+void
+Chase_Init (void)
+{
 }
 
 void

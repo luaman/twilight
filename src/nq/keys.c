@@ -563,6 +563,16 @@ Key_WriteBindings (FILE * f)
 
 /*
 ===================
+Key_Init_Cvars
+===================
+*/
+void
+Key_Init_Cvars (void)
+{
+}
+
+/*
+===================
 Key_Init
 ===================
 */

@@ -77,6 +77,7 @@ void        VID_ShiftPalette (unsigned char *palette);
 
 // called for bonus and pain flashes, and for underwater color changes
 
+void        VID_Init_Cvars (void);
 void        VID_Init (unsigned char *palette);
 
 // Called at startup to set up translation tables, takes 256 8 bit RGB values

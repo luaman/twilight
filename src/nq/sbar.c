@@ -122,6 +122,16 @@ Sbar_Changed (void)
 
 /*
 ===============
+Sbar_Init_Cvars
+===============
+*/
+void
+Sbar_Init_Cvars (void)
+{
+}
+
+/*
+===============
 Sbar_Init
 ===============
 */

@@ -948,6 +948,21 @@ COM_InitArgv (int argc, char **argv)
 
 /*
 ================
+COM_Init_Cvars
+This MUST be called after
+COM_Init and NOT before
+================
+*/
+void
+COM_Init_Cvars (void)
+{
+	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
+	cmdline = Cvar_Get ("cmdline", com_cmdline, CVAR_USERINFO, NULL);
+	COM_CheckRegistered ();
+}
+
+/*
+================
 COM_Init
 ================
 */
@@ -975,12 +990,8 @@ COM_Init (void)
 		LittleFloat = FloatSwap;
 	}
 
-	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
-	cmdline = Cvar_Get ("cmdline", com_cmdline, CVAR_USERINFO, NULL);
 	Cmd_AddCommand ("path", COM_Path_f);
-
 	COM_InitFilesystem ();
-	COM_CheckRegistered ();
 }
 
 

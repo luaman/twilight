@@ -209,17 +209,14 @@ Host_FindMaxClients (void)
 		Cvar_Set (deathmatch, "0");
 }
 
-
 /*
 =======================
-Host_InitLocal
+Host_InitLocal_Cvars
 ======================
 */
 void
-Host_InitLocal (void)
+Host_InitLocal_Cvars (void)
 {
-	Host_InitCommands ();
-
 	// set for slow motion
 	host_framerate = Cvar_Get ("host_framerate", "0", CVAR_NONE, NULL);
 	// set for running times
@@ -247,11 +244,19 @@ Host_InitLocal (void)
 	pausable = Cvar_Get ("pausable", "1", CVAR_NONE, NULL);
 
 	temp1 = Cvar_Get ("temp1", "0", CVAR_NONE, NULL);
+}
 
+/*
+=======================
+Host_InitLocal
+======================
+*/
+void
+Host_InitLocal (void)
+{
+	Host_InitCommands ();
 	Host_FindMaxClients ();
-
-	host_time = 1.0;					// so a think at time 0 won't get
-	// called
+	host_time = 1.0;		// so a think at time 0 won't get called
 }
 
 
@@ -810,27 +815,50 @@ Host_Init (quakeparms_t *parms)
 	com_argv = parms->argv;
 
 	Memory_Init (parms->membase, parms->memsize);
-	Cbuf_Init ();
-	Cvar_Init ();
-	Cmd_Init ();
-	V_Init ();
-	Chase_Init ();
-	COM_Init ();
-	SCR_InitCvars ();
-	Host_InitLocal ();
+	Cvar_Init ();		// add all cvar related manipulation commands and set developer cvar
+	Cbuf_Init ();		// initialize cmd_text buffer
+	Cmd_Init ();		// setup the basic commands we need for the system
+
+	Con_Init_Cvars ();				// initialize all console related cvars
+	Key_Init_Cvars ();				// initialize all key related cvars
+	Mod_Init_Cvars();				// initialize all model related cvars
+	Chase_Init_Cvars ();			// initialize all chase camera related cvars
+	SCR_Init_Cvars ();				// initialize all screen(?) related cvars
+	VID_Init_Cvars();				// initialize all video related cvars
+	V_Init_Cvars();					// initialize all view related cvars
+	M_Init_Cvars ();				// initialize all menu related cvars
+	R_Init_Cvars ();				// initialize all rendering system related cvars
+	Sbar_Init_Cvars ();				// initialize all statusbar related cvars
+	CL_Init_Cvars ();				// initialize all cl_* related cvars
+	S_Init_Cvars ();				// initialize all sound system related cvars
+	IN_Init_Cvars ();				// initialize all input related cvars
+	NET_Init_Cvars ();				// initialize all net related cvars
+	Host_InitLocal_Cvars ();		// initialize all local host related cvars
+	PR_Init_Cvars();				// initialize all pr_* related cvars
+		
+	// execute +set as early as possible
+	Cmd_StuffCmds_f ();
+
+	Chase_Init ();					// setup chase camera
+	COM_Init ();					// setup filesystem, add related commands
+	COM_Init_Cvars ();				// initialize all filesystem related variables
+
+	Host_InitLocal ();				// initialize local host
 	W_LoadWadFile ("gfx.wad");
-	Key_Init ();
-	Con_Init ();
-	M_Init ();
-	PR_Init ();
-	Mod_Init ();
-	NET_Init ();
-	SV_Init ();
+	Key_Init ();					// setup keysyms
+	Con_Init ();					// setup console, add related commands
+	M_Init ();						// setup menu, add related commands
+	PR_Init ();						// setup pr_* edicts, add related commands
+	Mod_Init ();					// setup models, add related commands
+	NET_Init ();					// setup networking
+	SV_Init ();						// setup server
+
+	V_Init ();						// setup view, add related commands
 
 	Con_Printf ("Exe: " __TIME__ " " __DATE__ "\n");
 	Con_Printf ("%4.1f megabyte heap\n", parms->memsize / (1024 * 1024.0));
 
-	R_InitTextures ();					// needed even for dedicated servers
+	R_InitTextures ();				// needed even for dedicated servers
 
 	if (cls.state != ca_dedicated) {
 		host_basepal = (byte *) COM_LoadHunkFile ("gfx/palette.lmp");
@@ -841,14 +869,16 @@ Host_Init (quakeparms_t *parms)
 			Sys_Error ("Couldn't load gfx/colormap.lmp");
 
 		VID_Init (host_basepal);
-		IN_Init ();
+		Draw_Init_Cvars ();
 		Draw_Init ();
 		SCR_Init ();
 		R_Init ();
 		S_Init ();
+		CDAudio_Init_Cvars ();
 		CDAudio_Init ();
 		Sbar_Init ();
 		CL_Init ();
+		IN_Init ();
 	}
 
 	Cbuf_InsertText ("exec quake.rc\n");

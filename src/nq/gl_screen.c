@@ -382,7 +382,7 @@ SCR_SizeDown_f (void)
 //============================================================================
 
 void
-SCR_InitCvars (void)
+SCR_Init_Cvars (void)
 {
 	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE, NULL);
 	scr_fov = Cvar_Get ("fov", "90", CVAR_NONE, NULL);
@@ -403,9 +403,9 @@ SCR_Init
 void
 SCR_Init (void)
 {
-//
-// register our commands
-//
+	//
+	// register our commands
+	//
 	Cmd_AddCommand ("screenshot", SCR_ScreenShot_f);
 	Cmd_AddCommand ("sizeup", SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown", SCR_SizeDown_f);

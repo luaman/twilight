@@ -189,7 +189,8 @@ extern int  com_argc;
 extern char **com_argv;
 
 int         COM_CheckParm (char *parm);
-void        COM_Init ();
+void        COM_Init_Cvars (void);
+void        COM_Init (void);
 void        COM_InitArgv (int argc, char **argv);
 
 char       *COM_SkipPath (char *pathname);

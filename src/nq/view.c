@@ -992,16 +992,12 @@ V_RenderView (void)
 
 /*
 =============
-V_Init
+V_Init_Cvars
 =============
 */
 void
-V_Init (void)
+V_Init_Cvars (void)
 {
-	Cmd_AddCommand ("v_cshift", V_cshift_f);
-	Cmd_AddCommand ("bf", V_BonusFlash_f);
-	Cmd_AddCommand ("centerview", V_StartPitchDrift);
-
 	lcd_x = Cvar_Get ("lcd_x", "0", CVAR_NONE, NULL);
 	lcd_yaw = Cvar_Get ("lcd_yaw", "0", CVAR_NONE, NULL);
 
@@ -1039,6 +1035,19 @@ V_Init (void)
 	v_centerspeed = Cvar_Get ("v_centerspeed", "500", CVAR_NONE, NULL);
 
 	v_gamma = Cvar_Get ("gamma", "1", CVAR_ARCHIVE, NULL);
+}
+
+/*
+=============
+V_Init
+=============
+*/
+void
+V_Init (void)
+{
+	Cmd_AddCommand ("v_cshift", V_cshift_f);
+	Cmd_AddCommand ("bf", V_BonusFlash_f);
+	Cmd_AddCommand ("centerview", V_StartPitchDrift);
 	BuildGammaTable (1.0);				// no gamma yet
 }
 

@@ -58,14 +58,23 @@ cvar_t     *gl_subdivide_size;
 
 /*
 ===============
+Mod_Init_Cvars
+===============
+*/
+void
+Mod_Init_Cvars (void)
+{
+	gl_subdivide_size = Cvar_Get ("gl_subdivide_size", "128", CVAR_ARCHIVE, NULL);
+}
+
+/*
+===============
 Mod_Init
 ===============
 */
 void
 Mod_Init (void)
 {
-	gl_subdivide_size = Cvar_Get ("gl_subdivide_size", "128", CVAR_ARCHIVE,
-			NULL);
 	memset (mod_novis, 0xff, sizeof (mod_novis));
 }
 

@@ -710,21 +710,12 @@ CL_SendCmd (void)
 
 /*
 =================
-CL_Init
+CL_Init_Cvars
 =================
 */
 void
-CL_Init (void)
+CL_Init_Cvars (void)
 {
-	SZ_Alloc (&cls.message, 1024);
-
-	CL_InitInput ();
-	CL_InitTEnts ();
-
-//
-// register our commands
-//
-
 	_cl_name = Cvar_Get ("_cl_name", "player", CVAR_ARCHIVE, NULL);
 	_cl_color = Cvar_Get ("_cl_color", "0", CVAR_ARCHIVE, NULL);
 
@@ -740,7 +731,24 @@ CL_Init (void)
 	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_ARCHIVE, NULL);
 	m_forward = Cvar_Get ("m_forward", "1", CVAR_ARCHIVE, NULL);
 	m_side = Cvar_Get ("m_side", "0.8", CVAR_ARCHIVE, NULL);
+}
 
+/*
+=================
+CL_Init
+=================
+*/
+void
+CL_Init (void)
+{
+	SZ_Alloc (&cls.message, 1024);
+
+	CL_InitInput ();
+	CL_InitTEnts ();
+
+	//
+	// register our commands
+	//
 	Cmd_AddCommand ("entities", CL_PrintEntities_f);
 	Cmd_AddCommand ("disconnect", CL_Disconnect_f);
 	Cmd_AddCommand ("record", CL_Record_f);
@@ -748,3 +756,4 @@ CL_Init (void)
 	Cmd_AddCommand ("playdemo", CL_PlayDemo_f);
 	Cmd_AddCommand ("timedemo", CL_TimeDemo_f);
 }
+

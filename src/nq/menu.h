@@ -38,6 +38,7 @@ extern int  m_activenet;
 //
 // menus
 //
+void        M_Init_Cvars (void);
 void        M_Init (void);
 void        M_Keydown (int key);
 void        M_Draw (void);
