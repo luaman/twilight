@@ -6,7 +6,7 @@ AC_PREREQ(2.13)
 AC_INIT(nq/sv_main.c)
 AC_REVISION($Revision$)
 
-VERSION=0.2.00-RC1
+VERSION=0.2.00-RC2
 DEVEL_RELEASE=yes
 
 if test "x$DEVEL_RELEASE" = "xyes"; then

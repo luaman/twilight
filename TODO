@@ -1,9 +1,12 @@
 Project Twilight todo list
 --------------------------
 
-Stuff /required/ for 0.2.0: NOTHING!
+Stuff /required/ for 0.2.0: Test a /LOT/.
 
 Bugs we know about:
+  - In QW coop mode, the scoreboard does not seem to work.
+    (Possibily a server issue though.)
+  - Some of the particles need tweaking.
 
   - Quake never checked BSPs very well, a bad one can crash the engine.
     (Need some example bad BSPs.)
