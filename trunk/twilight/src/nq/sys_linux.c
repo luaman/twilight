@@ -121,6 +121,8 @@ Sys_Init (void)
 #if id386
 	Sys_SetFPCW ();
 #endif
+
+	Math_Init ();
 }
 
 void

@@ -1038,7 +1038,7 @@ R_Mirror (void)
 	d = DotProduct (vpn, mirror_plane->normal);
 	VectorMA (vpn, -2 * d, mirror_plane->normal, vpn);
 
-	r_refdef.viewangles[0] = -asin (vpn[2]) / M_PI * 180;
+	r_refdef.viewangles[0] = -Q_asin (vpn[2]) / M_PI * 180;
 	r_refdef.viewangles[1] = Q_atan2 (vpn[1], vpn[0]) / M_PI * 180;
 	r_refdef.viewangles[2] = -r_refdef.viewangles[2];
 

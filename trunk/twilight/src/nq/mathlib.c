@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // mathlib.c -- math primitives
 
+#include <SDL_types.h>
 #include <math.h>
 #include <time.h>
 #include "quakedef.h"
@@ -243,7 +244,7 @@ Q_rand(void)
 // Square root with lookup table (http://www.nvidia.com/developer)
 ////////////////////////////////////////////////////////////////////////
 
-#define FP_BITS(fp) (* (DWORD *) &(fp))
+#define FP_BITS(fp) (* (Uint32 *) &(fp))
 
 typedef union FastSqrtUnion
 {

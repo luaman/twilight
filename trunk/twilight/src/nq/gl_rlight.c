@@ -86,8 +86,8 @@ R_InitBubble (void)
 
 	for (i = 16; i >= 0; i--) {
 		a = i / 16.0 * M_PI * 2;
-		*bub_sin++ = sin (a);
-		*bub_cos++ = cos (a);
+		*bub_sin++ = Q_sin (a);
+		*bub_cos++ = Q_cos (a);
 	}
 }
 
