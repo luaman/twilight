@@ -10,6 +10,17 @@ env_defs = My_Options ()
 config_defs = My_Options ()
 building = 0
 
+def check_func_flag (context, flag):
+	context.Message ('Checking for function flag "' + flag + '" ... ')
+	ret = context.TryCompile ("""
+int """ + flag + """ test (int a, int b)
+{
+    return a + b;
+}
+""", ".c")
+	context.Result (ret);
+	return ret;
+
 def parse_SDL_conf(env, output):
 	dict = {
 		'CPPPATH' : [],
@@ -198,7 +209,7 @@ def do_configure (env):
 	config_defs.set('VERSION', '"0.2.02.cvs"')
 	opts.args (ARGUMENTS)
 	opts.save('config_opts.py')
-	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag}
+	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag, 'func_flag' : check_func_flag}
 	conf = Configure(env, custom_tests = tests)
 	handle_opts (conf, opts, config_defs, 0)
 
@@ -231,6 +242,14 @@ def do_configure (env):
 	check_cheaders (conf, config_defs, ['unistd.h', 'fcntl.h', 'windef.h', \
 		'pwd.h', 'sys/types.h', 'sys/stat.h', 'limits.h', 'signal.h', \
 		'sys/time.h', 'time.h', 'execinfo.h', 'dlfcn.h'])
+
+	if conf.func_flag('inline __attribute__((always_inline))'):
+		config_defs.create('inline', 'inline __attribute__((always_inline))')
+	elif conf.func_flag('inline'):
+		config_defs.create('inline', 'inline')
+	elif conf.func_flag('__inline'):
+		config_defs.create('inline', '__inline')
+
 
 	if not config_defs.has_key('HAVE_DLOPEN'):
 		if conf.CheckLib ('dl', 'dlopen', 1):
