@@ -71,6 +71,9 @@ CL_StopPlayback (void)
 
 	if (cls.timedemo)
 		CL_FinishTimeDemo ();
+
+	memset (cl.cshifts, 0, sizeof(cl.cshifts));
+	cl.stats[STAT_ITEMS] = 0;
 }
 
 #define dem_cmd		0
@@ -620,7 +623,7 @@ CL_Record_f (void)
 
 		MSG_WriteByte (&buf, svc_updateentertime);
 		MSG_WriteByte (&buf, i);
-		MSG_WriteFloat (&buf, player->entertime);
+		MSG_WriteFloat (&buf, realtime - player->entertime);
 
 		MSG_WriteByte (&buf, svc_updateuserinfo);
 		MSG_WriteByte (&buf, i);

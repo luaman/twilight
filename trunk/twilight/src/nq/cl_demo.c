@@ -70,6 +70,8 @@ CL_StopPlayback (void)
 
 	if (cls.timedemo)
 		CL_FinishTimeDemo ();
+
+	memset (cl.cshifts, 0, sizeof(cl.cshifts));
 }
 
 /*
