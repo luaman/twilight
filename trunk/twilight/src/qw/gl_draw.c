@@ -66,7 +66,6 @@ cvar_t *hud_chflash;
 cvar_t *hud_chspeed;
 cvar_t *hud_chalpha;
 
-Uint8 *draw_chars;
 qpic_t *draw_disc;
 qpic_t *draw_backtile;
 
@@ -334,15 +333,6 @@ Draw_Init (void)
 	if (!img)
 		Sys_Error ("Draw_Init: Unable to load conchars\n");
 	
-	// FIXME: *sigh* gl_screen and gl_ngraph still use draw_chars
-	draw_chars = W_GetLumpName ("conchars");
-	if (!draw_chars)
-		Sys_Error ("Draw_Init: cannot find a lump named %s\n", name);
-	   
-	for (i = 0; i < 256 * 64; i++)
-		if (draw_chars[i] == 0)
-			draw_chars[i] = 255;            /* proper transparent color */
-	 
 	char_texture = R_LoadTexture ("charset", img, TEX_ALPHA);
 
 	// Keep track of the first crosshair texture

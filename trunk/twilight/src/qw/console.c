@@ -426,6 +426,7 @@ Con_DrawInput (void)
 				con_vislines - (con->tsize * 2.65), 11, con->tsize);
 }
 
+extern void rshot_fill (int x, int y, int w, int h);
 
 /*
 ================
