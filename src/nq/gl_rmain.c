@@ -149,13 +149,17 @@ R_CullBox (vec3_t mins, vec3_t maxs)
 
 
 void
-R_RotateForEntity (entity_t *e)
+R_RotateForEntity (entity_t *e, qboolean shadow)
 {
 	qglTranslatef (e->origin[0], e->origin[1], e->origin[2]);
 
 	qglRotatef (e->angles[1], 0, 0, 1);
-	qglRotatef (-e->angles[0], 0, 1, 0);
-	qglRotatef (e->angles[2], 1, 0, 0);
+
+	if (!shadow)
+	{
+		qglRotatef (-e->angles[0], 0, 1, 0);
+		qglRotatef (e->angles[2], 1, 0, 0);
+	}
 }
 
 
@@ -166,7 +170,7 @@ R_BlendedRotateForEntity
 fenix@io.com: model transform interpolation
 =============
 */
-void R_BlendedRotateForEntity (entity_t *e)
+void R_BlendedRotateForEntity (entity_t *e, qboolean shadow)
 {
 	float timepassed;
 	float blend;
@@ -237,8 +241,12 @@ void R_BlendedRotateForEntity (entity_t *e)
 	}
 
 	qglRotatef ( e->angles1[1] + ( blend * d[1]), 0, 0, 1);
-	qglRotatef (-e->angles1[0] + (-blend * d[0]), 0, 1, 0);
-	qglRotatef ( e->angles1[2] + ( blend * d[2]), 1, 0, 0);
+
+	if (!shadow)
+	{
+		qglRotatef (-e->angles1[0] + (-blend * d[0]), 0, 1, 0);
+		qglRotatef ( e->angles1[2] + ( blend * d[2]), 1, 0, 0);
+	}
 }
 
 /*
@@ -885,9 +893,9 @@ R_DrawAliasModel (entity_t *e)
 	qglPushMatrix ();
 
 	if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
-		R_BlendedRotateForEntity (e);
+		R_BlendedRotateForEntity (e, false);
 	else
-		R_RotateForEntity (e);
+		R_RotateForEntity (e, false);
 
 	if ((clmodel->modflags & FLAG_DOUBLESIZE)
 			&& gl_doubleeyes->value) {
@@ -970,9 +978,9 @@ R_DrawAliasModel (entity_t *e)
 		qglPushMatrix ();
 
 		if (gl_im_transform->value && !(clmodel->modflags & FLAG_NO_IM_FORM))
-			R_BlendedRotateForEntity (e);
+			R_BlendedRotateForEntity (e, true);
 		else
-            R_RotateForEntity (e);
+            R_RotateForEntity (e, true);
 
 		qglDisable (GL_TEXTURE_2D);
 		qglEnable (GL_BLEND);
@@ -989,7 +997,6 @@ R_DrawAliasModel (entity_t *e)
 		qglColor4f (1, 1, 1, 1);
 		qglPopMatrix ();
 	}
-
 }
 
 //==================================================================================
@@ -1368,8 +1375,6 @@ R_RenderScene (void)
 	GL_DisableMultitexture ();
 
 	R_RenderDlights ();
-
-	R_DrawParticles ();
 }
 
 
@@ -1532,6 +1537,7 @@ R_RenderView (void)
 	R_RenderScene ();
 	R_DrawViewModel ();
 	R_DrawWaterSurfaces ();
+	R_DrawParticles ();
 	R_DrawEntitiesOnList2 ();
 
 //  More fog right here :)
