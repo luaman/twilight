@@ -4,19 +4,97 @@ AM_INIT_AUTOMAKE(twilight,0.0.0)
 AM_CONFIG_HEADER(config.h)
 
 dnl Checks for programs
+AC_PROG_AWK
 AC_PROG_CC
+AC_PROG_CPP
 AC_PROG_INSTALL
 
+dnl Custom macros (move these to a seperate file?)
+AC_DEFUN(TL_CHECK_LIB,[
+	LDFLAGS_SAVE=$LDFLAGS
+	LDFLAGS="$3 -l$1 $LDFLAGS"
+	AC_TRY_LINK_FUNC($2, [$4], [$5])
+	LDFLAGS=$LDFLAGS_SAVE
+])
+AC_DEFUN(TL_CHECK_HEADER,[
+	CPPFLAGS_SAVE=$CPPFLAGS
+	CPPFLAGS="$2 $CPPFLAGS"
+	AC_TRY_CPP([
+#include <$1>
+], [$3], [$4])
+	CPPFLAGS=$CPPFLAGS_SAVE
+])
 dnl Checks for libraries
 AM_PATH_SDL(1.2.0,,AC_MSG_ERROR([*** SDL >= 1.2.0 not installed - please install first ***]))
 
-AC_CHECK_LIB(GL,glBegin,[
-	AC_DEFINE(HAVE_GL,1,define if libGL is present)
-	GL_LIBS="-lGL"
-	],AC_MSG_WARN(GL not found),$SDL_CFLAGS $SDL_LIBS)
+dnl Check for libGL
+dnl Not having GL is fatal until we have a software renderer again
+
+GL_CHECK_LIB_PATHS=". /usr/X11R6/lib"
+GL_CHECK_INCLUDE_PATHS=". /usr/X11R6/include"
+
+AC_ARG_WITH(gl,
+[  --with-gl[=DIR]         libGL is located in DIR],
+[
+	if test $withval != no; then
+		if test $withval != yes; then
+			GL_CHECK_INCLUDE_PATHS="$withval $withval/include $GL_CHECK_INCLUDE_PATHS"
+			GL_CHECK_LIB_PATHS="$withval $withval/lib $GL_CHECK_LIB_PATHS"
+		fi
+	else
+		GL_CHECK_LIB_PATHS=""
+	fi
+], GL_LIBRARIES=yes)
+
+AC_MSG_CHECKING(for glBegin in -lGL)
+for check_path in $GL_CHECK_LIB_PATHS; do
+	TL_CHECK_LIB(GL,glBegin,-L$check_path,[
+		if test $check_path != .; then
+			EXTRA_PATH=" ($check_path)"
+			GL_LIBS="$GL_LIBS -L$check_path"
+		fi
+		AC_MSG_RESULT(yes$EXTRA_PATH)
+		GL_LIBS="$GL_LIBS -lGL"
+		HAVE_GL=1
+		break
+	])
+done
+if test x$HAVE_GL != x1; then
+	AC_MSG_RESULT(no)
+	AC_MSG_ERROR(GL 1.2 or above is currently required to build $PACKAGE)
+fi
 AC_SUBST(GL_LIBS)
 
-dnl Checks for header files.
+dnl Check for GL headers
+AC_ARG_WITH(gl,
+[  --with-gl-headers[=DIR] libGL headers are located in DIR],
+[
+	if test $withval != no; then
+		if test $withval != yes; then
+			GL_CHECK_INCLUDE_PATHS="$withval $withval/include $GL_CHECK_INCLUDE_PATHS"
+		fi
+	else
+		GL_CHECK_INCLUDE_PATHS=""
+	fi
+], GL_LIBRARIES=yes)
+
+AC_MSG_CHECKING(for GL headers)
+for check_path in $GL_CHECK_INCLUDE_PATHS; do
+	TL_CHECK_HEADER(GL/gl.h,-I$check_path,[
+		if test $check_path != .; then
+			EXTRA_PATH=" ($check_path)"
+			GL_CFLAGS="$GL_CFLAGS -I$check_path"
+		fi
+		AC_MSG_RESULT(yes$EXTRA_PATH)
+		HAVE_GL_HEADERS=1
+		break
+	])
+done
+if test x$HAVE_GL_HEADERS != x1; then
+	AC_MSG_RESULT(no)
+	AC_MSG_ERROR(GL 1.2 or above is currently required to build $PACKAGE)
+fi
+AC_SUBST(GL_CFLAGS)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
