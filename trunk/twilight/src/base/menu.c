@@ -114,7 +114,7 @@ Menu_Parse_QPic_Trans (codetree_t *tree_base, menu_qpic_trans_t *trans)
 	codetree_t			*code;
 	codeword_t			*word, *word2;
 
-#define ERROR()		do {												\
+#define MENU_ERROR()		do {												\
 	Com_Printf("ERROR: Parse error when building qpic trans. (%d %d)\n", __LINE__, code->linenumber);	\
 	return false;														\
 } while (0)
@@ -123,40 +123,40 @@ Menu_Parse_QPic_Trans (codetree_t *tree_base, menu_qpic_trans_t *trans)
 	        tree_base = tree_base->child;
 
 	for (code = tree_base; code; code = code->next) {
-		if (!(word = code->words)) ERROR ();
-		if (!(word2 = word->next)) ERROR ();
+		if (!(word = code->words)) MENU_ERROR ();
+		if (!(word2 = word->next)) MENU_ERROR ();
 		if (!strcmp(word->string, "from") && !code->child) {
 			if (word2 && (word2->flags & WORDFLAG_STRING))
 				trans->from_cvar = Cvar_Find(word2->string);
 			else if (word2 && (word2->flags & WORDFLAG_INTEGER))
 				trans->from = word2->intvalue;
-			else ERROR ();
+			else MENU_ERROR ();
 		} else if (!strcmp(word->string, "from_bits") && !code->child) {
 			if (word2 && (word2->flags & WORDFLAG_INTEGER))
 				trans->from_bits = word2->intvalue;
-			else ERROR ();
+			else MENU_ERROR ();
 		} else if (!strcmp(word->string, "from_shift") && !code->child) {
 			if (word2 && (word2->flags & WORDFLAG_INTEGER))
 				trans->from_shift = word2->intvalue;
-			else ERROR ();
+			else MENU_ERROR ();
 		} else if (!strcmp(word->string, "to") && !code->child) {
 			if (word2 && (word2->flags & WORDFLAG_STRING))
 				trans->to_cvar = Cvar_Find(word2->string);
 			else if (word2 && (word2->flags & WORDFLAG_INTEGER))
 				trans->to = word2->intvalue;
-			else ERROR ();
+			else MENU_ERROR ();
 		} else if (!strcmp(word->string, "to_bits") && !code->child) {
 			if (word2 && (word2->flags & WORDFLAG_INTEGER))
 				trans->to_bits = word2->intvalue;
-			else ERROR ();
+			else MENU_ERROR ();
 		} else if (!strcmp(word->string, "to_shift") && !code->child) {
 			if (word2 && (word2->flags & WORDFLAG_INTEGER))
 				trans->to_shift = word2->intvalue;
-			else ERROR ();
+			else MENU_ERROR ();
 		} else
-			ERROR ();
+			MENU_ERROR ();
 	}
-#undef ERROR
+#undef MENU_ERROR
 	return true;
 }
 
@@ -169,7 +169,7 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 	int				i;
 
 	item = Zone_Alloc(m_zone, sizeof(menu_item_t));
-#define ERROR()		do {												\
+#define MENU_ERROR()		do {												\
 	Com_Printf("ERROR: Parse error when building menu item. (%d %d)\n", __LINE__, code->linenumber);	\
 	menu_errors++;														\
 	Menu_Delete_Item(item);												\
@@ -200,14 +200,14 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 	} else if (!strcmp(type, "qpic")) {
 		item->type = m_qpic;
 	} else
-		ERROR();
+		MENU_ERROR();
 
 	item->flags = MITEM_SELECTABLE | MITEM_DRAW | MITEM_DRAW_LABEL
 				| MITEM_DRAW_VALUE;
 	item->height = 8;
 
 	for (code = tree_base; code; code = code->next) {
-		if (!(word = code->words)) ERROR ();
+		if (!(word = code->words)) MENU_ERROR ();
 		if ((word2 = word->next))
 			if ((word3 = word->next))
 				if ((word4 = word->next))
@@ -215,7 +215,7 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 		if (!strcmp(word->string, "label") && !code->child) {
 			if (word2 && (word2->flags & WORDFLAG_STRING)) {
 				item->label = Zstrdup(m_zone, word2->string);
-			} else ERROR ();
+			} else MENU_ERROR ();
 		} else if (!strcmp(word->string, "control") && !code->child) {
 			item->n_control++;
 		} else if (!strcmp(word->string, "flags") && !code->child) {
@@ -237,138 +237,138 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 				else if (!strcmp(word2->string, "~draw_value"))
 					item->flags &= ~MITEM_DRAW_VALUE;
 				else
-					ERROR ();
+					MENU_ERROR ();
 			}
 		} else if (!strcmp(word->string, "height") && !code->child) {
 			if (word2 && (word2->flags & WORDFLAG_INTEGER))
 				item->height = word2->intvalue;
-			else ERROR ();
+			else MENU_ERROR ();
 		} else {
 			switch (item->type) {
 				case m_command:
 					if (!strcmp(word->string, "command") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
 							item->u.command = Zstrdup(m_zone, word2->string);
-						else ERROR ();
-					} else ERROR ();
+						else MENU_ERROR ();
+					} else MENU_ERROR ();
 					break;
 				case m_toggle:
 					if (!strcmp(word->string, "cvar") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
 							item->u.toggle = Cvar_Find(word2->string);
-						else ERROR ();
-					} else ERROR ();
+						else MENU_ERROR ();
+					} else MENU_ERROR ();
 					break;
 				case m_slider:
 					if (!strcmp(word->string, "cvar") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
 							item->u.slider.cvar = Cvar_Find(word2->string);
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "min") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_DOUBLE))
 							item->u.slider.min = word2->doublevalue;
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "max") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_DOUBLE))
 							item->u.slider.max = word2->doublevalue;
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "step") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_DOUBLE))
 							item->u.slider.step = word2->doublevalue;
-						else ERROR ();
-					} else ERROR ();
+						else MENU_ERROR ();
+					} else MENU_ERROR ();
 					break;
 				case m_text_entry:
 					if (!strcmp(word->string, "cvar") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
 							item->u.text_entry.cvar = Cvar_Find(word2->string);
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string,"max_len")&& !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_INTEGER))
 							item->u.text_entry.max_len = word2->intvalue;
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string,"min_valid")&&!code->child){
 						if (word2 && (word2->flags & WORDFLAG_INTEGER))
 							item->u.text_entry.min_valid = word2->intvalue;
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string,"max_valid")&&!code->child){
 						if (word2 && (word2->flags & WORDFLAG_INTEGER))
 							item->u.text_entry.max_valid = word2->intvalue;
-						else ERROR ();
-					} else ERROR ();
+						else MENU_ERROR ();
+					} else MENU_ERROR ();
 					break;
 				case m_multi_select:
 					if (!strcmp(word->string, "cvar") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
 							item->u.multi.cvar = Cvar_Find(word2->string);
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string,"value") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
 							item->u.multi.n_values++;
-						else ERROR ();
-					} else ERROR ();
+						else MENU_ERROR ();
+					} else MENU_ERROR ();
 					break;
 				case m_qpic:
 					if (!strcmp(word->string, "qpic") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
 							item->u.qpic.qpic = Draw_CachePic(word2->string);
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "x") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_INTEGER))
 							item->u.qpic.x = word2->intvalue;
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "y") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_INTEGER))
 							item->u.qpic.y = word2->intvalue;
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string,"trans") && code->child)
 						item->u.qpic.n_trans++;
-					else ERROR ();
+					else MENU_ERROR ();
 					break;
 				case m_text:
 					if (!strcmp(word->string, "text") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
 							item->u.text = Zstrdup(m_zone, word2->string);
-						else ERROR ();
-					} else ERROR ();
+						else MENU_ERROR ();
+					} else MENU_ERROR ();
 					break;
 				case m_step_float:
 					if (!strcmp(word->string, "cvar") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
 							item->u.step_float.cvar = Cvar_Find(word2->string);
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "min") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_DOUBLE))
 							item->u.step_float.min = word2->doublevalue;
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "step") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_DOUBLE))
 							item->u.step_float.step = word2->doublevalue;
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "bound") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_INTEGER))
 							item->u.step_float.bound = !!word2->intvalue;
-						else ERROR ();
-					} else ERROR ();
+						else MENU_ERROR ();
+					} else MENU_ERROR ();
 					break;
 				case m_loop_int:
 					if (!strcmp(word->string, "cvar") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_STRING))
 							item->u.loop_int.cvar = Cvar_Find(word2->string);
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "max") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_DOUBLE))
 							item->u.loop_int.max = word2->intvalue;
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "shift") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_DOUBLE))
 							item->u.loop_int.shift = word2->intvalue;
-						else ERROR ();
+						else MENU_ERROR ();
 					} else if (!strcmp(word->string, "bits") && !code->child) {
 						if (word2 && (word2->flags & WORDFLAG_INTEGER))
 							item->u.loop_int.bits = word2->intvalue;
-						else ERROR ();
-					} else ERROR ();
+						else MENU_ERROR ();
+					} else MENU_ERROR ();
 					break;
 			}
 		}
@@ -381,15 +381,15 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 		item->control =
 			Zone_Alloc(m_zone, sizeof(menu_control_t)*item->n_control);
 		for (code = tree_base, i = 0; code; code = code->next) {
-			if (!(word = code->words)) ERROR ();
+			if (!(word = code->words)) MENU_ERROR ();
 			if (!strcmp(word->string, "control") && !code->child) {
-				if ((!(word2 = word->next)) || word2->flags) ERROR ();
+				if ((!(word2 = word->next)) || word2->flags) MENU_ERROR ();
 				if ((!(word3 = word2->next)) ||
 						!(word3->flags & WORDFLAG_STRING))
-					ERROR ();
+					MENU_ERROR ();
 				if ((!(word4 = word3->next)) ||
 						!(word4->flags & (WORDFLAG_STRING | WORDFLAG_DOUBLE)))
-					ERROR ();
+					MENU_ERROR ();
 
 				if ((word5 = word4->next) && (word5->flags & WORDFLAG_INTEGER))
 					item->control[i].invert = !!word5->intvalue;
@@ -401,10 +401,10 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 				else if (!strcasecmp(word2->string, "kill_load"))
 					item->control[i].type = c_kill_load;
 				else
-					ERROR ();
+					MENU_ERROR ();
 
 				if (!(item->control[i].cvar = Cvar_Find(word3->string)))
-					ERROR ();
+					MENU_ERROR ();
 
 				if (word4->flags & WORDFLAG_INTEGER)
 					item->control[i].ivalue = word4->intvalue;
@@ -423,14 +423,14 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 	switch (item->type) {
 		case m_multi_select:
 			if (!item->u.multi.n_values)
-				ERROR ();
+				MENU_ERROR ();
 
 			item->u.multi.values = Zone_Alloc(m_zone,
 					sizeof(multi_item_t) * item->u.multi.n_values);
 
 			for (code = tree_base, i = 0; code; code = code->next) {
-				if (!(word = code->words)) ERROR ();
-				if (!(word2 = word->next)) ERROR ();
+				if (!(word = code->words)) MENU_ERROR ();
+				if (!(word2 = word->next)) MENU_ERROR ();
 				word3 = word2->next;
 				if (!strcmp(word->string,"value")&& !code->child) {
 					if (word2 && (word2->flags & WORDFLAG_STRING)) {
@@ -440,7 +440,7 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 							item->u.multi.values[i].label =
 								Zstrdup(m_zone,word3->string);
 						i++;
-					} else ERROR ();
+					} else MENU_ERROR ();
 				}
 			}
 			break;
@@ -452,17 +452,17 @@ Menu_Parse_Item (char *type, codetree_t *tree_base)
 					sizeof(menu_qpic_trans_t) * item->u.qpic.n_trans);
 
 			for (code = tree_base, i = 0; code; code = code->next) {
-				if (!(word = code->words)) ERROR ();
+				if (!(word = code->words)) MENU_ERROR ();
 				if (!strcmp(word->string, "trans") && code->child) {
 					if (!Menu_Parse_QPic_Trans (code->child, &item->u.qpic.trans[i++]))
-						ERROR ();
+						MENU_ERROR ();
 				}
 			}
 			break;
 		default:
 			break;
 	}
-#undef ERROR
+#undef MENU_ERROR
 	return item;
 }
 
@@ -476,7 +476,7 @@ Menu_Parse_Menu (codetree_t *tree_base)
 
 	menu_errors = 0;
 
-#define ERROR()		do {											\
+#define MENU_ERROR()		do {											\
 	Com_Printf("ERROR: Parse error when building menu. (%d %d '%s')\n", __LINE__, code->linenumber, word->string);	\
 	menu_errors++;													\
 } while (0)
@@ -491,27 +491,27 @@ Menu_Parse_Menu (codetree_t *tree_base)
 			if ((word = word->next) && word->flags & WORDFLAG_STRING)
 				menu->id = Zstrdup(m_zone, word->string);
 			else
-				ERROR ();
+				MENU_ERROR ();
 		} else if (!strcmp(word->string, "title") && !code->child) {
 			if ((word = word->next) && word->flags & WORDFLAG_STRING)
 				menu->title = Zstrdup(m_zone, word->string);
 			else
-				ERROR ();
+				MENU_ERROR ();
 		} else if (!strcmp(word->string, "on_enter") && !code->child) {
 			if ((word = word->next) && word->flags & WORDFLAG_STRING)
 				menu->on_enter = Zstrdup(m_zone, word->string);
 			else
-				ERROR ();
+				MENU_ERROR ();
 		} else if (!strcmp(word->string, "on_exit") && !code->child) {
 			if ((word = word->next) && word->flags & WORDFLAG_STRING)
 				menu->on_exit = Zstrdup(m_zone, word->string);
 			else
-				ERROR ();
+				MENU_ERROR ();
 		} else if (!strcmp(word->string, "item") && code->child) {
 			if ((word = word->next))
 				i++;
 		} else
-			ERROR ();
+			MENU_ERROR ();
 	}
 
 	menu->items = Zone_Alloc(m_zone, sizeof(menu_item_t *) * ++i);
@@ -525,14 +525,14 @@ Menu_Parse_Menu (codetree_t *tree_base)
 				if (menu->items[i])
 					i++;
 			} else
-				ERROR ();
+				MENU_ERROR ();
 		}
 	}
 	menu->items[i] = NULL;
 
 	for (tmenu = m_first; tmenu; tmenu = tmenu->next) {
 		if (!strcasecmp(menu->id, tmenu->id)) {
-			Com_Printf("ERROR! Menu '%s' already defined!\n", menu->id);
+			Com_Printf("MENU_ERROR! Menu '%s' already defined!\n", menu->id);
 			Menu_Delete_Menu(menu);
 			return;
 		}
@@ -540,7 +540,7 @@ Menu_Parse_Menu (codetree_t *tree_base)
 
 	menu->next = m_first;
 	m_first = menu;
-#undef ERROR
+#undef MENU_ERROR
 	if (menu_errors)
 		LHP_printcodetree_c(1, tree_base);
 }
@@ -551,7 +551,7 @@ Menu_Parse_Menus (codetree_t *tree_base)
 	codetree_t		*code = tree_base;
 	codeword_t		*word;
 
-#define ERROR()		do {											\
+#define MENU_ERROR()		do {											\
 	Com_Printf("ERROR: Parse error when parsing menus. (%d %d '%s')\n", __LINE__, code->linenumber, word->string);	\
 	return;															\
 } while (0)
@@ -564,9 +564,9 @@ Menu_Parse_Menus (codetree_t *tree_base)
 		if (!strcmp(word->string, "menu") && code->child) {
 			Menu_Parse_Menu (code->child);
 		} else
-			ERROR ();
+			MENU_ERROR ();
 	}
-#undef ERROR
+#undef MENU_ERROR
 }
 
 void
