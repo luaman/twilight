@@ -784,7 +784,6 @@ Con_CompleteCommandLine (void)
 			Con_Printf("%i possible aliases%s\n", a, (a > 1) ? "s: " : ":");
 			Con_DisplayList(list[2]);
 		}
-		return;
 	}
 	
 	if (cmd) {
