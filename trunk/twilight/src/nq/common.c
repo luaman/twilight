@@ -48,8 +48,10 @@ static char *safeargvs[NUM_SAFE_ARGVS] =
 
 cvar_t *registered;
 cvar_t *cmdline;
-cvar_t *fs_userpath;
+cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;
+cvar_t *fs_userconf;
+cvar_t *fs_userpath;
 
 qboolean    com_modified;				// set true if using non-id files
 
@@ -978,6 +980,7 @@ COM_Init_Cvars (void)
 	registered = Cvar_Get ("registered", "0", CVAR_NONE, NULL);
 	cmdline = Cvar_Get ("cmdline", com_cmdline, CVAR_USERINFO, NULL);
 
+	// fs_shareconf/userconf have to be done by Host_Init
 	fs_sharepath = Cvar_Get ("fs_sharepath", SHAREPATH, CVAR_ROM, NULL);
 	fs_userpath = Cvar_Get ("fs_userpath", USERPATH, CVAR_ROM, NULL);
 }

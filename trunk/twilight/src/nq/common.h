@@ -30,6 +30,11 @@
 
 #include "qtypes.h"
 
+extern struct cvar_s *fs_userconf;
+extern struct cvar_s *fs_userpath;
+extern struct cvar_s *fs_shareconf;
+extern struct cvar_s *fs_sharepath;
+
 //============================================================================
 
 typedef struct sizebuf_s {

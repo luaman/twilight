@@ -16,6 +16,10 @@
 
 #define SHAREPATH		"."
 
+#define USERCONF		"~/twilight.rc"
+
+#define SHARECONF		"~/twilight.conf"
+
 #define GL_LIBRARY		"opengl32.dll"
 
 #define HAVE__SNPRINTF 1

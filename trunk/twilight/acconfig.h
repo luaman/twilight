@@ -14,6 +14,12 @@
 /* Location of user-modifyable gamedata */
 #undef USERPATH
 
+/* Location of read-only (shared) configuration file */
+#undef SHARECONF
+
+/* Location of user-modifyable configuration file */
+#undef USERCONF
+
 /* Define to whatever your OS requires */
 #undef APIENTRY
 
