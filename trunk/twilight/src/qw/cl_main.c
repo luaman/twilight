@@ -1498,8 +1498,6 @@ Host_Init (void)
 	Con_Init ();					// setup and initialize console, add related commands
 	M_Init ();						// setup menu, add related commands
 
-	R_InitTextures ();				// setup texture system defaults
-
 	Com_Printf ("Exe: "__TIME__" "__DATE__"\n");
 	Com_Printf ("%4.1f megs RAM used.\n", hunk_size / (1024 * 1024.0));
 

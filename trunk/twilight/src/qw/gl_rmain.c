@@ -1127,6 +1127,7 @@ R_Init (void)
 		qglClientActiveTextureARB(GL_TEXTURE0_ARB);
 	}
 
+	R_InitTextures ();
 	R_InitBubble ();
 	R_InitParticles ();
 	TNT_Init ();
