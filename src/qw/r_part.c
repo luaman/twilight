@@ -709,9 +709,11 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 					porg[j] = start[j] + ((Q_rand () % 6) - 3);
 				break;
 
+			case 4:					// slight blood
+				lsub += 3;
 			case 2:					// blood
 				ptype = pt_grav;
-				pcolor = 67 + (Q_rand () & 3);
+				pcolor = 0x40 + (Q_rand () & 3);
 				for (j = 0; j < 3; j++)
 					porg[j] = start[j] + ((Q_rand () % 6) - 3);
 				break;
@@ -735,14 +737,6 @@ R_RocketTrail (vec3_t start, vec3_t end, int type)
 					pvel[0] = 30 * -vec[1];
 					pvel[1] = 30 * vec[0];
 				}
-				break;
-
-			case 4:					// slight blood
-				ptype = pt_grav;
-				pcolor = 67 + (Q_rand () & 3);
-				for (j = 0; j < 3; j++)
-					porg[j] = start[j] + ((Q_rand () % 6) - 3);
-				lsub += 3;
 				break;
 
 			case 6:					// voor trail

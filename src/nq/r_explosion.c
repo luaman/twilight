@@ -54,6 +54,15 @@ extern float TraceLine (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);
 #define EXPLOSIONFADESTART (1.5f)
 #define EXPLOSIONFADERATE (4.5f)
 
+#if EXPLOSIONSVERTS > MAX_VERTEX_ARRAYS
+#error Explosion too complex for vertex array size.
+#endif
+
+#if EXPLOSIONINDICES > MAX_VERTEX_INDICES
+#error Explosion too complex for vertex indice array size.
+#endif
+
+
 vec3_t explosionspherevert[EXPLOSIONVERTS];
 vec3_t explosionspherevertvel[EXPLOSIONVERTS];
 float explosiontexcoords[EXPLOSIONVERTS][2];

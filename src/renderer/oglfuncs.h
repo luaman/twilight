@@ -693,7 +693,7 @@ OGL_EXT_DONT_WANT (void, glTexCoordPointerListIBM, (GLint, GLenum, GLint, const 
 OGL_EXT_DONT_WANT (void, glTexCoordPointervINTEL, (GLint, GLenum, const GLvoid * *));
 OGL_NEED (void, glTexEnvf, (GLenum target, GLenum pname, GLfloat param));
 OGL_DONT_NEED (void, glTexEnvfv, (GLenum target, GLenum pname, const GLfloat * params));
-OGL_DONT_NEED (void, glTexEnvi, (GLenum target, GLenum pname, GLint param));
+OGL_NEED (void, glTexEnvi, (GLenum target, GLenum pname, GLint param));
 OGL_DONT_NEED (void, glTexEnviv, (GLenum target, GLenum pname, const GLint * params));
 OGL_EXT_DONT_WANT (void, glTexFilterFuncSGIS, (GLenum, GLenum, GLsizei, const GLfloat *));
 OGL_DONT_NEED (void, glTexGend, (GLenum coord, GLenum pname, GLdouble param));

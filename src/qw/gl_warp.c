@@ -233,54 +233,34 @@ EmitWaterPolys (msurface_t *fa, texture_t *tex, int transform, float alpha)
 	glpoly_t   *p;
 	float	   *v;
 	float		temp[3];
-	int			i, texnum;
-	float		s, t;
+	int			i;
+	float		s, t, ripple;
 
-	texnum = tex->gl_texturenum;
+	ripple = r_waterripple->value;
 
-	if (r_waterripple->value) {
-		for (p = fa->polys; p; p = p->next)
+	qglColor4f(1, 1, 1, alpha);
+
+	for (p = fa->polys; p; p = p->next)
+	{
+		qglBegin (GL_TRIANGLE_FAN);
+		for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
 		{
-			qglBegin (GL_TRIANGLE_FAN);
-			for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
-			{
-				if (transform)
-					softwaretransform(v, temp);
-				else
-					VectorCopy(v, temp);
+			if (transform)
+				softwaretransform(v, temp);
+			else
+				VectorCopy(v, temp);
 
-				temp[2] += r_waterripple->value * TURBSIN(temp[0], 1/32.0f) *
+			if (ripple)
+				temp[2] += ripple * TURBSIN(temp[0], 1/32.0f) *
 					TURBSIN(temp[1], 1/32.0f) * (1/64.0f);
 
-				s = (temp[3] + v[3]) * (1/64.0f);
-				t = (temp[4] + v[4]) * (1/64.0f);
+			s = (v[3] + TURBSIN(v[4], 0.125)) * (1/64.0f);
+			t = (v[4] + TURBSIN(v[3], 0.125)) * (1/64.0f);
 
-				qglColor4f(1, 1, 1, alpha);
-				qglTexCoord2f (s, t);
-				qglVertex3fv (temp);
-			}
-			qglEnd ();
+			qglTexCoord2f (s, t);
+			qglVertex3fv (temp);
 		}
-	} else {
-		for (p = fa->polys; p; p = p->next)
-		{
-			qglBegin (GL_TRIANGLE_FAN);
-			for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
-			{
-				s = (v[3] + TURBSIN(v[4], 0.125)) * (1/64.0f);
-				t = (v[4] + TURBSIN(v[3], 0.125)) * (1/64.0f);
-
-				if (transform)
-					softwaretransform(v, temp);
-				else
-					VectorCopy(v, temp);
-
-				qglColor4f(1, 1, 1, alpha);
-				qglTexCoord2f (s, t);
-				qglVertex3fv (temp);
-			}
-			qglEnd ();
-		}
+		qglEnd ();
 	}
 }
 
@@ -724,7 +704,7 @@ void R_DrawSkyBox (void)
 	if (!draw_skybox || (skytexturenum == -1))
 		return;
 
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	for (i = 0; i < 6; i++)
 	{
 		if (skymins[0][i] >= skymaxs[0][i]
@@ -740,7 +720,7 @@ void R_DrawSkyBox (void)
 		MakeSkyVec (skymaxs[0][i], skymins[1][i], i);
 		qglEnd ();
 	}
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
 

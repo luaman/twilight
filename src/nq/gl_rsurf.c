@@ -501,45 +501,6 @@ R_RenderBrushPolyMTex (msurface_t *fa, texture_t *t)
 
 /*
 ================
-R_RenderTris
-================
-*/
-static void
-R_RenderTris (msurface_t *fa)
-{
-	int			i;
-	glpoly_t	*p;
-
-	qglDisable (GL_TEXTURE_2D);
-	if (gl_mtex) {
-		qglActiveTextureARB (GL_TEXTURE0_ARB);
-		qglDisable (GL_TEXTURE_2D);
-	}
-
-	qglDisable (GL_DEPTH_TEST);
-	qglColor4f (1,1,1,1);
-
-	p = fa->polys;
-	for (i = 2 ; i < p->numverts; i++)
-	{
-		qglBegin (GL_LINE_STRIP);
-		qglVertex3fv (p->verts[0]);
-		qglVertex3fv (p->verts[i - 1]);
-		qglVertex3fv (p->verts[i]);
-		qglVertex3fv (p->verts[0]);
-		qglEnd ();
-	}
-
-	qglEnable (GL_DEPTH_TEST);
-	qglEnable (GL_TEXTURE_2D);
-	if (gl_mtex) {
-		qglActiveTextureARB (GL_TEXTURE1_ARB);
-		qglEnable (GL_TEXTURE_2D);
-	}
-}
-
-/*
-================
 R_RenderBrushPoly
 ================
 */
@@ -594,7 +555,6 @@ static void
 DrawTextureChains ()
 {
 	unsigned int	i;
-	unsigned int	show_tris = 0;
 	msurface_t	   *s;
 	texture_t	   *t, *st;
 
@@ -634,26 +594,28 @@ DrawTextureChains ()
 		qglDisable (GL_BLEND);
 		if (gl_mtexcombine)
 		{
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_REPLACE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_ARB, GL_TEXTURE);
 			qglActiveTextureARB (GL_TEXTURE1_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 4.0);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_MODULATE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_ARB, GL_TEXTURE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_ARB, GL_PREVIOUS_ARB);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 4);
 		}
 		else
 		{
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			qglActiveTextureARB (GL_TEXTURE1_ARB);
-			qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		}
 		qglEnable (GL_TEXTURE_2D);
-
-		if (!(cl.maxclients > 1) && r_showtris->value)
-			show_tris = 1;
 
 		for (i = 0; i < cl.worldmodel->numtextures; i++)
 		{
@@ -671,43 +633,22 @@ DrawTextureChains ()
 			for (; s; s = s->texturechain)
 				R_RenderBrushPolyMTex (s, st);
 			
-			if (!show_tris)
-				t->texturechain = NULL;
-		}
-
-		if (show_tris) {
-			for (i = 0; i < cl.worldmodel->numtextures; i++)
-			{
-				t = cl.worldmodel->textures[i];
-				if (!t)
-					continue;
-				s = t->texturechain;
-				if (!s || (s->flags & SURF_DRAWTURB))
-					continue;
-
-				for (; s; s = s->texturechain)
-					R_RenderTris (s);
-
-				t->texturechain = NULL;
-			}
+			t->texturechain = NULL;
 		}
 
 		qglDisable (GL_TEXTURE_2D);
 
 		if (gl_mtexcombine)
-			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1.0);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
 
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglDisable (GL_TEXTURE_2D);
 		qglActiveTextureARB (GL_TEXTURE0_ARB);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
 	else
 	{
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-		if (!(cl.maxclients > 1) && r_showtris->value)
-			show_tris = 1;
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 		for (i = 0; i < cl.worldmodel->numtextures; i++)
 		{
@@ -723,28 +664,10 @@ DrawTextureChains ()
 			for (; s; s = s->texturechain)
 				R_RenderBrushPoly (s, st);
 				
-			if (!show_tris)
-				t->texturechain = NULL;
+			t->texturechain = NULL;
 		}
 
-		if (show_tris) {
-			for (i = 0; i < cl.worldmodel->numtextures; i++)
-			{
-				t = cl.worldmodel->textures[i];
-				if (!t)
-					continue;
-				s = t->texturechain;
-				if (!s || (s->flags & SURF_DRAWTURB))
-					continue;
-
-				for (; s; s = s->texturechain)
-					R_RenderTris (s);
-
-				t->texturechain = NULL;
-			}
-		}
-
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		R_BlendLightmaps();
 	}
 
@@ -762,13 +685,9 @@ void
 R_DrawWaterTextureChains ()
 {
 	unsigned int	i;
-	unsigned int	show_tris = 0;
 	msurface_t		*s;
 	texture_t		*t, *st;
 	float			wateralpha = r_wateralpha->value;
-
-	if (!(cl.maxclients > 1) && r_showtris->value)
-		show_tris = 1;
 
 	for (i = 0; i < cl.worldmodel->numtextures; i++)
 	{
@@ -784,25 +703,7 @@ R_DrawWaterTextureChains ()
 		for (; s; s = s->texturechain)
 			EmitWaterPolys (s, st, false, wateralpha);
 
-		if (!show_tris)
-			t->texturechain = NULL;
-	}
-
-	if (show_tris) {
-		for (i = 0; i < cl.worldmodel->numtextures; i++)
-		{
-			t = cl.worldmodel->textures[i];
-			if (!t)
-				continue;
-			s = t->texturechain;
-			if (!(s && (s->flags & SURF_DRAWTURB)))
-				continue;
-
-			for (; s; s = s->texturechain)
-				EmitWaterTris (s);
-
-			t->texturechain = NULL;
-		}
+		t->texturechain = NULL;
 	}
 
 	if (wateralpha != 1.0f)
@@ -818,7 +719,6 @@ void
 R_DrawBrushModel (entity_t *e)
 {
 	int				i, k, texnum, rotated;
-	unsigned int	show_tris = 0;
 	vec3_t			mins, maxs;
 	msurface_t	   *psurf;
 	float			dot, wateralpha = r_wateralpha->value;
@@ -840,9 +740,6 @@ R_DrawBrushModel (entity_t *e)
 
 	if (R_CullBox (mins, maxs))
 		return;
-
-	if (!(cl.maxclients > 1) && r_showtris->value)
-		show_tris = 1;
 
 	memset (lightmap_polys, 0, sizeof (lightmap_polys));
 
@@ -932,45 +829,34 @@ R_DrawBrushModel (entity_t *e)
 				EmitWaterPolys (psurf,
 						R_TextureAnimation(psurf->texinfo->texture), true,
 						wateralpha);
-				if (!show_tris)
-					psurf->visframe = -1;
-			}
-		}
-	}
-
-	if (show_tris) {
-	for (i = 0, psurf = &clmodel->surfaces[clmodel->firstmodelsurface];
-			i < clmodel->nummodelsurfaces; i++, psurf++)
-	{
-		if (psurf->visframe == r_framecount)
-		{
-			if (psurf->flags & SURF_DRAWTURB)
-			{
-				EmitWaterTris (psurf);
 				psurf->visframe = -1;
-				}
 			}
 		}
 	}
 
 	if (gl_mtexcombine) {
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_REPLACE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_REPLACE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_ARB, GL_TEXTURE);
 		qglActiveTextureARB (GL_TEXTURE1_ARB);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 4.0);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_MODULATE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_ARB, GL_TEXTURE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_ARB, GL_PREVIOUS_ARB);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 4);
 		qglEnable (GL_TEXTURE_2D);
 	} else if (gl_mtex) {
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 		qglActiveTextureARB (GL_TEXTURE1_ARB);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglEnable (GL_TEXTURE_2D);
 	} else
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	texnum = -1;
 	for (i = 0, psurf = &clmodel->surfaces[clmodel->firstmodelsurface];
@@ -1000,23 +886,15 @@ R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-	if (!(cl.maxclients > 1) && r_showtris->value) {
-		for (i = 0, psurf = &clmodel->surfaces[clmodel->firstmodelsurface];
-				i < clmodel->nummodelsurfaces; i++, psurf++) {
-			if (psurf->visframe == r_framecount)
-				R_RenderTris (psurf);
-		}
-	}
-
 	if (gl_mtex) {
 		if (gl_mtexcombine)
-			qglTexEnvf (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1.0);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			qglTexEnvi (GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		qglDisable (GL_TEXTURE_2D);
 		qglActiveTextureARB (GL_TEXTURE0_ARB);
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	} else {
-		qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		R_BlendLightmaps ();
 	}
 
