@@ -266,9 +266,19 @@ FS_Alloc_Group (fs_group_t *parent, const char *id)
 void
 FS_Free_Group (fs_group_t *group)
 {
-	fs_group_t *sub;
-	for (sub = group->subs; sub; sub = sub->sub_next)
+	fs_group_t *sub, *next;
+
+	if (group->prev)
+		group->prev->next = group->next;
+	else if (group == fs_paths)
+		fs_paths = group->next;
+
+	sub = group->subs;
+	while (sub) {
+		next = sub->sub_next;
 		FS_Free_Group (sub);
+		sub = next;
+	}
 
 	hash_destroy (group->files);
 
