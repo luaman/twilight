@@ -35,6 +35,7 @@ static const char rcsid[] =
 #include "zone.h"
 #include "stdlib.h"
 
+void Hunk_Print (qboolean all);
 memzone_t *zonechain = NULL;
 
 void *_Zone_Alloc(memzone_t *zone, size_t size, char *filename, int fileline)
@@ -346,12 +347,14 @@ void ZoneList_f(void)
 	case 1:
 		Zone_PrintList(false);
 		Zone_PrintStats();
+		Hunk_Print (false);
 		break;
 	case 2:
 		if (!strcmp(Cmd_Argv(1), "all"))
 		{
 			Zone_PrintList(true);
 			Zone_PrintStats();
+			Hunk_Print (true);
 			break;
 		}
 		// drop through
@@ -476,7 +479,7 @@ Hunk_Print (qboolean all)
 		// 
 		// print the single block
 		// 
-		memcpy (name, h->name, 8);
+		memcpy (name, h->name, sizeof(name));
 		if (all)
 			Com_Printf ("%8p :%8i %8s\n", h, h->size, name);
 
@@ -484,7 +487,7 @@ Hunk_Print (qboolean all)
 		// print the total
 		//
 		if (next == endlow || next == endhigh ||
-			strncmp (h->name, next->name, 8)) {
+			strcmp (h->name, next->name)) {
 			if (!all)
 				Com_Printf ("          :%8i %8s (TOTAL)\n", sum, name);
 			count = 0;
@@ -1027,7 +1030,7 @@ void Zone_Init (void)
 	if (j)
 		hunk_size = (int) (Q_atof (com_argv[j + 1]) * 1024 * 1024);
 	else
-		hunk_size = 16 * 1024 * 1024;
+		hunk_size = 4 * 1024 * 1024;
 
 	hunk_base = Zone_Alloc (hunkzone, hunk_size);
 

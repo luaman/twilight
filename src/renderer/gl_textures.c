@@ -31,11 +31,13 @@ static const char rcsid[] =
 
 #include "dyngl.h"
 #include "gl_textures.h"
+#include "gl_info.h"
 #include "mathlib.h"
 #include "qtypes.h"
 #include "strlib.h"
 #include "model.h"
 #include "draw.h"
+#include "sys.h"
 
 memzone_t	*glt_zone;
 
@@ -223,7 +225,7 @@ GLT_Skin_SubParse (aliashdr_t *amodel, skin_sub_t *skin, Uint8 *in, int width,
 		qboolean tri_check, char *name)
 {
 	Uint8			*mskin;
-	int				i, numtris;
+	Uint			i, numtris;
 	int				*triangles;
 	astvert_t		texcoords[3];
 
@@ -341,7 +343,69 @@ GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name,
 }
 
 void
+GLT_Delete_Sub_Skin (skin_sub_t *sub)
+{
+	GL_Delete_Texture(sub->texnum);
+	if (sub->indices)
+		Zone_Free(sub->indices);
+	Zone_Free(sub);
+}
+
+void
+GLT_Delete_Skin (skin_t *skin)
+{
+	int i;
+
+	for (i = 0; i < skin->frames; i++) {
+		GLT_Delete_Sub_Skin(&skin->raw[i]);
+		GLT_Delete_Sub_Skin(&skin->base[i]);
+		GLT_Delete_Sub_Skin(&skin->base_team[i]);
+		GLT_Delete_Sub_Skin(&skin->top_bottom[i]);
+		GLT_Delete_Sub_Skin(&skin->fb[i]);
+		GLT_Delete_Sub_Skin(&skin->top[i]);
+		GLT_Delete_Sub_Skin(&skin->bottom[i]);
+	}
+}
+
+void
 GLT_Init ()
 {
 	glt_zone = Zone_AllocZone("GL textures");
 }
+
+/*
+===============
+R_TextureAnimation
+
+Returns the proper texture for a given time and base texture
+===============
+ */
+texture_t *
+R_TextureAnimation (texture_t *base, int frame)
+{
+	int         relative;
+	int         count;
+
+	if (frame) {
+		if (base->alt_anims)
+			base = base->alt_anims;
+	}
+
+	if (!base->anim_total)
+		return base;
+
+	relative = (int) (r_time * 10) % base->anim_total;
+
+	count = 0;
+	while (base->anim_min > relative || base->anim_max <= relative)
+	{
+		base = base->anim_next;
+		if (!base)
+			Sys_Error ("R_TextureAnimation: broken cycle");
+		if (++count > 100)
+			Sys_Error ("R_TextureAnimation: infinite cycle");
+	}
+
+	return base;
+}
+

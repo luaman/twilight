@@ -495,6 +495,7 @@ Sys_CheckClipboardPaste(int key)
 		}
 	}
 #endif
+	key = key;
 	return false;
 }
 

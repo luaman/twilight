@@ -163,11 +163,11 @@ SV_HullForEntity (edict_t *ent, vec3_t mins, vec3_t maxs, vec3_t offset)
 
 		VectorSubtract (maxs, mins, size);
 		if (size[0] < 3)
-			hull = &model->hulls[0];
+			hull = &model->extra.brush->hulls[0];
 		else if (size[0] <= 32)
-			hull = &model->hulls[1];
+			hull = &model->extra.brush->hulls[1];
 		else
-			hull = &model->hulls[2];
+			hull = &model->extra.brush->hulls[2];
 
 // calculate an offset value to center the origin
 		VectorSubtract (hull->clip_mins, mins, offset);
@@ -352,7 +352,7 @@ SV_FindTouchedLeafs (edict_t *ent, mnode_t *node)
 			return;
 
 		leaf = (mleaf_t *) node;
-		leafnum = leaf - sv.worldmodel->leafs - 1;
+		leafnum = leaf - sv.worldmodel->extra.brush->leafs - 1;
 
 		ent->leafnums[ent->num_leafs] = leafnum;
 		ent->num_leafs++;
@@ -418,7 +418,7 @@ SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 // link to PVS leafs
 	ent->num_leafs = 0;
 	if (ent->v.modelindex)
-		SV_FindTouchedLeafs (ent, sv.worldmodel->nodes);
+		SV_FindTouchedLeafs (ent, sv.worldmodel->extra.brush->nodes);
 
 	if (ent->v.solid == SOLID_NOT)
 		return;
@@ -877,7 +877,7 @@ SV_TestPlayerPosition (edict_t *ent, vec3_t origin)
 	int         e;
 
 // check world first
-	hull = &sv.worldmodel->hulls[1];
+	hull = &sv.worldmodel->extra.brush->hulls[1];
 	if (SV_HullPointContents (hull, hull->firstclipnode, origin) !=
 		CONTENTS_EMPTY)
 		return sv.edicts;

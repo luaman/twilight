@@ -80,7 +80,7 @@ CL_ParseBeam
 void
 CL_ParseBeam (model_t *m)
 {
-	int         ent;
+	Uint        ent;
 	vec3_t      start, end;
 	beam_t     *b;
 	int         i;

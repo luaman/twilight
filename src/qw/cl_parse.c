@@ -301,7 +301,8 @@ Model_NextDownload (void)
 	// done with modellist, request first of static signon messages
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message,
-			va (prespawn_name, cl.servercount, cl.worldmodel->checksum2));
+			va (prespawn_name, cl.servercount,
+				cl.worldmodel->extra.brush->checksum2));
 }
 
 /*
@@ -885,7 +886,7 @@ CL_ProcessUserInfo
 ==============
 */
 void
-CL_ProcessUserInfo (int slot, player_info_t *player)
+CL_ProcessUserInfo (player_info_t *player)
 {
 	Uint8	color;
 
@@ -940,7 +941,7 @@ CL_UpdateUserinfo (void)
 	strncpy (player->userinfo, MSG_ReadString (),
 			   sizeof (player->userinfo) - 1);
 
-	CL_ProcessUserInfo (slot, player);
+	CL_ProcessUserInfo (player);
 }
 
 /*
@@ -971,7 +972,7 @@ CL_SetInfo (void)
 
 	Info_SetValueForKey (player->userinfo, key, value, MAX_INFO_STRING);
 
-	CL_ProcessUserInfo (slot, player);
+	CL_ProcessUserInfo (player);
 }
 
 /*

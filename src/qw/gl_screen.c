@@ -736,6 +736,8 @@ WritePCXfile (char *filename, Uint8 *data, int width, int height,
 	pcx_t	   *pcx;
 	Uint8	   *pack;
 
+	rowbytes = rowbytes;
+
 	// Worst case is twice the size of the image.
 	pcx = Zone_Alloc(tempzone, sizeof(pcx_t) + ((width * height) * 2) + 769); 
 	if (pcx == NULL) {

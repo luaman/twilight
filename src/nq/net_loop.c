@@ -59,12 +59,14 @@ Loop_Shutdown (void)
 void
 Loop_Listen (qboolean state)
 {
+	state = state;
 }
 
 
 void
 Loop_SearchForHosts (qboolean xmit)
 {
+	xmit = xmit;
 	if (!sv.active)
 		return;
 
@@ -252,6 +254,7 @@ Loop_CanSendMessage (qsocket_t * sock)
 qboolean
 Loop_CanSendUnreliableMessage (qsocket_t * sock)
 {
+	sock = sock;
 	return true;
 }
 

@@ -218,6 +218,8 @@ UDP_CloseSocket (int socket)
 int
 UDP_Connect (int socket, struct qsockaddr *addr)
 {
+	socket = socket;
+	addr = addr;
 	return 0;
 }
 

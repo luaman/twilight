@@ -1,7 +1,7 @@
 /*
 	$RCSfile$
 
-	Copyright (C) 2002  Joseph Carter
+	Copyright (C) 1996-1997  Id Software, Inc.
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -20,47 +20,24 @@
 		Free Software Foundation, Inc.
 		59 Temple Place - Suite 330
 		Boston, MA  02111-1307, USA
+
+	$Id$
 */
-static const char rcsid[] =
-	"$Id$";
 
-#include <string.h>
+#ifndef __R_SKY_H
+#define __R_SKY_H
 
-#include "twiconfig.h"
+#include "qtypes.h"
+#include "model.h"
 
-#include "client.h"
+extern void R_Draw_Old_Sky_Chain (chain_head_t *chain, vec3_t origin);
+extern void R_Draw_Fast_Sky_Chain (chain_head_t *chain, vec3_t origin);
+extern void R_Draw_Depth_Sky_Chain (chain_head_t *chain, vec3_t origin);
+extern void R_DrawSkyBox (void);
+extern void R_Init_Sky (void);
+extern void R_Init_Sky_Cvars (void);
+extern void R_InitSky (texture_t *unused, Uint8 *pixels);
 
-/*
- * Null client
- *
- * Basically, anything required to make the server compile without a client
- * should go in here.  It's just a stub.
- */
+extern qboolean draw_skybox;
 
-// net_chan depends on cls (for now)
-client_static_t cls;
-
-// Funtions that don't actually exist
-
-void
-Draw_Disc (void)
-{
-}
-
-void
-CL_Disconnect (void)
-{
-}
-
-void
-Con_Print (char *txt)
-{
-	txt = txt;
-}
-
-void
-CL_Init (void)
-{
-	memset (&cls, 0, sizeof(client_static_t));
-}
-
+#endif // __R_SKY_H

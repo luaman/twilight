@@ -295,6 +295,7 @@ Datagram_CanSendMessage (qsocket_t * sock)
 qboolean
 Datagram_CanSendUnreliableMessage (qsocket_t * sock)
 {
+	sock = sock;
 	return true;
 }
 

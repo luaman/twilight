@@ -79,8 +79,6 @@ static int sdl_flags = SDL_OPENGL;
 
 /*-----------------------------------------------------------------------*/
 
-int texture_extension_number = 1;
-
 void I_KeypadMode (cvar_t *cvar);
 void IN_WindowedMouse (cvar_t *cvar);
 
@@ -162,6 +160,8 @@ GammaChanged (cvar_t *cvar)
 {
 	vec3_t		hw;
 
+	cvar = cvar;
+
 	if (!VID_Inited)
 		return;
 
@@ -238,6 +238,8 @@ Size_Changed2D (cvar_t *cvar)
 	int			width, height;
 	float		txt_scale;
 
+	cvar = cvar;
+
 	if (con)
 	{
 		txt_scale = bound (0.5, text_scale->fvalue, 3);
@@ -304,6 +306,8 @@ VID_Init (unsigned char *palette)
 	Uint		i;
 	const		SDL_VideoInfo *info = NULL;
 	char		sdl_driver[256];
+
+	palette = palette;
 
 	/* interpret command-line params */
 
@@ -622,6 +626,7 @@ IN_Shutdown (void)
 void
 IN_WindowedMouse (cvar_t *cvar)
 {
+	cvar = cvar;
 	if (!use_mouse)
 		return;
 

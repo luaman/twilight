@@ -1462,6 +1462,9 @@ int NoCrash_NUM_FOR_EDICT(edict_t *e, char *filename, int fileline)
 {
 	int	b;
 
+	filename = filename;
+	fileline = fileline;
+
 	b = (Uint8 *)e - (Uint8 *)sv.edicts;
 	b = b / pr_edict_size;
 

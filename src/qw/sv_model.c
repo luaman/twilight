@@ -40,16 +40,27 @@ static const char rcsid[] =
 #include "server.h"
 #include <math.h>
 
-model_t    *loadmodel;
+model_t		*loadmodel;
+brushhdr_t	*bheader;
 
-void        Mod_LoadBrushModel (model_t *mod, void *buffer);
-model_t    *Mod_LoadModel (model_t *mod, qboolean crash);
+void         Mod_LoadBrushModel (model_t *mod, void *buffer);
+model_t		*Mod_LoadModel (model_t *mod, qboolean crash);
+void		 Mod_UnloadModel (model_t *mod);
+void		 Mod_UnloadBrushModel (model_t *mod);
 
-Uint8       mod_novis[MAX_MAP_LEAFS / 8];
+unsigned	*model_checksum;
 
-texture_t   r_notexture_mip;
+void
+Mod_UnloadModel (model_t *mod)
+{
+	if (mod->needload)
+		return;
 
-unsigned   *model_checksum;
+	Mod_UnloadBrushModel (mod);
+
+	memset(mod, 0, sizeof(model_t));
+	mod->needload = true;
+}
 
 /*
 ==================
@@ -123,8 +134,8 @@ Mod_LoadFaces (lump_t *l)
 	count = l->filelen / sizeof (*in);
 	out = Hunk_AllocName (count * sizeof (*out), loadmodel->name);
 
-	loadmodel->surfaces = out;
-	loadmodel->numsurfaces = count;
+	bheader->surfaces = out;
+	bheader->numsurfaces = count;
 
 	for (surfnum = 0; surfnum < count; surfnum++, in++, out++) {
 		out->firstedge = LittleLong (in->firstedge);
@@ -136,7 +147,7 @@ Mod_LoadFaces (lump_t *l)
 		if (side)
 			out->flags |= SURF_PLANEBACK;
 
-		out->plane = loadmodel->planes + planenum;
+		out->plane = bheader->planes + planenum;
 
 		out->texinfo = NULL;
 
@@ -160,8 +171,14 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 	Uint32		i;
 	dheader_t	*header;
 	dmodel_t	*bm;
+	model_t		*first;
+	char		name[10];
 
-	loadmodel->type = mod_brush;
+	first = mod;
+	mod->extrazone = Zone_AllocZone(mod->name);
+	mod->extra.brush = Zone_Alloc(mod->extrazone, sizeof(brushhdr_t));
+	mod->type = mod_brush;
+	bheader = mod->extra.brush;
 
 	header = (dheader_t *) buffer;
 
@@ -178,20 +195,20 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		((int *) header)[i] = LittleLong (((int *) header)[i]);
 
 	// load into heap
-	mod->checksum = 0;
-	mod->checksum2 = 0;
+	bheader->checksum = 0;
+	bheader->checksum2 = 0;
 
 	// checksum all of the map, except for entities
 	for (i = 0; i < HEADER_LUMPS; i++) {
 		if (i == LUMP_ENTITIES)
 			continue;
-		mod->checksum ^= Com_BlockChecksum (mod_base + 
+		bheader->checksum ^= Com_BlockChecksum (mod_base + 
 			header->lumps[i].fileofs,  header->lumps[i].filelen);
 
 		if (i == LUMP_VISIBILITY || i == LUMP_LEAFS || i == LUMP_NODES)
 			continue;
 
-		mod->checksum2 ^= Com_BlockChecksum (mod_base +
+		bheader->checksum2 ^= Com_BlockChecksum (mod_base +
 			header->lumps[i].fileofs, header->lumps[i].filelen);
 	}
 
@@ -215,21 +232,22 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 //
 // set up the submodels (FIXME: this is confusing)
 //
-	for (i = 0; i < mod->numsubmodels; i++) {
-		int			k, l, j;
+	for (i = 0; i < bheader->numsubmodels; i++) {
+		int			l;
+		Uint		k, j;
 		float		dist, modelyawradius, modelradius, *vec;
 		msurface_t	*surf;
 
-		bm = &mod->submodels[i];
+		bm = &bheader->submodels[i];
 
-		mod->hulls[0].firstclipnode = bm->headnode[0];
+		bheader->hulls[0].firstclipnode = bm->headnode[0];
 		for (j = 1; j < MAX_MAP_HULLS; j++) {
-			mod->hulls[j].firstclipnode = bm->headnode[j];
-			mod->hulls[j].lastclipnode = mod->numclipnodes - 1;
+			bheader->hulls[j].firstclipnode = bm->headnode[j];
+			bheader->hulls[j].lastclipnode = bheader->numclipnodes - 1;
 		}
 
-		mod->firstmodelsurface = bm->firstface;
-		mod->nummodelsurfaces = bm->numfaces;
+		bheader->firstmodelsurface = bm->firstface;
+		bheader->nummodelsurfaces = bm->numfaces;
 
 		mod->normalmins[0] = mod->normalmins[1] = mod->normalmins[2] = 1000000000.0f;
 		mod->normalmaxs[0] = mod->normalmaxs[1] = mod->normalmaxs[2] = -1000000000.0f;
@@ -237,14 +255,14 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		modelradius = 0;
 
 		// Calculate the bounding boxes, don't trust what the model says.
-		surf = &mod->surfaces[mod->firstmodelsurface];
-		for (j = 0; j < mod->nummodelsurfaces; j++, surf++) {
+		surf = &bheader->surfaces[bheader->firstmodelsurface];
+		for (j = 0; j < bheader->nummodelsurfaces; j++, surf++) {
 			for (k = 0; k < surf->numedges; k++) {
-				l = mod->surfedges[k + surf->firstedge];
+				l = bheader->surfedges[k + surf->firstedge];
 				if (l > 0)
-					vec = mod->vertexes[mod->edges[l].v[0]].position;
+					vec = bheader->vertexes[bheader->edges[l].v[0]].position;
 				else
-					vec = mod->vertexes[mod->edges[-l].v[1]].position;
+					vec = bheader->vertexes[bheader->edges[-l].v[1]].position;
 				if (mod->normalmins[0] > vec[0]) mod->normalmins[0] = vec[0];
 				if (mod->normalmins[1] > vec[1]) mod->normalmins[1] = vec[1];
 				if (mod->normalmins[2] > vec[2]) mod->normalmins[2] = vec[2];
@@ -269,16 +287,39 @@ Mod_LoadBrushModel (model_t *mod, void *buffer)
 		VectorSet(mod->rotatedmins, -modelradius, -modelradius, -modelradius);
 		VectorSet(mod->rotatedmaxs, modelradius, modelradius, modelradius);
 
-		mod->numleafs = bm->visleafs;
+		bheader->numleafs = bm->visleafs;
 
-		if (i < mod->numsubmodels - 1) {	// duplicate the basic information
-			char        name[10];
-
-			snprintf (name, sizeof (name), "*%i", i + 1);
+		if (i < bheader->numsubmodels - 1)
+		{
+			// duplicate the basic information
+			strncpy (name, va("*%d", i + 1), sizeof(name));
 			loadmodel = Mod_FindName (name);
+			if (!loadmodel->needload)
+				Mod_UnloadModel (loadmodel);
 			*loadmodel = *mod;
 			strcpy (loadmodel->name, name);
+			loadmodel->extra.brush = Zone_Alloc(first->extrazone, sizeof(brushhdr_t));
+			*loadmodel->extra.brush = *mod->extra.brush;
+			bheader = loadmodel->extra.brush;
 			mod = loadmodel;
+			mod->extra.brush->is_submodel = true;
 		}
 	}
 }
+
+void
+Mod_UnloadBrushModel (model_t *mod)
+{
+	model_t *sub;
+	Uint    i;
+
+	if (mod->extra.brush->is_submodel)
+		return;
+
+	for (i = 1; i < mod->extra.brush->numsubmodels; i++) {
+		sub = Mod_FindName(va("*%d", i));
+		Mod_UnloadModel(sub);
+	}
+	Zone_FreeZone (&mod->extrazone);
+}
+
