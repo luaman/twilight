@@ -721,15 +721,6 @@ CL_Init_Cvars (void)
 	// cl_shownet can be 0, 1, or 2
 	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);
 	cl_nolerp = Cvar_Get ("cl_nolerp", "0", CVAR_NONE, NULL);
-
-	lookspring = Cvar_Get ("lookspring", "0", CVAR_ARCHIVE, NULL);
-	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE, NULL);
-	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE, NULL);
-
-	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE, NULL);
-	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_ARCHIVE, NULL);
-	m_forward = Cvar_Get ("m_forward", "1", CVAR_ARCHIVE, NULL);
-	m_side = Cvar_Get ("m_side", "0.8", CVAR_ARCHIVE, NULL);
 }
 
 /*

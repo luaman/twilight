@@ -657,6 +657,15 @@ CL_InitInputCvars (void)
 	cl_pitchspeed = Cvar_Get ("cl_pitchspeed", "150", CVAR_NONE, NULL);
 	cl_anglespeedkey = Cvar_Get ("cl_anglespeedkey", "1.5", CVAR_NONE, NULL);
 
+	lookspring = Cvar_Get ("lookspring", "0", CVAR_ARCHIVE, NULL);
+	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE, NULL);
+	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE, NULL);
+
+	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE, NULL);
+	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_ARCHIVE, NULL);
+	m_forward = Cvar_Get ("m_forward", "1", CVAR_ARCHIVE, NULL);
+	m_side = Cvar_Get ("m_side", "0.8", CVAR_ARCHIVE, NULL);
+
 	in_key_repeat_delay = Cvar_Get ("in_key_repeat_delay",
 			va ("%i", SDL_DEFAULT_REPEAT_DELAY), CVAR_NONE,
 			CL_InputSetRepeatDelay);
