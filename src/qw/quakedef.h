@@ -82,6 +82,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 typedef struct {
 	char       *basedir;
+	char	   *sharedir;
 	char       *cachedir;				// for development over ISDN lines
 	int         argc;
 	char      **argv;

@@ -1,5 +1,9 @@
 #!/usr/bin/make -f
 
+SHAREPATH=\"/usr/share/games/twilight\"
+USERPATH=\"/home/knghtbrd/.twilight\"
+
+
 OBJECTS=cd_linux.o chase.o cl_demo.o cl_input.o cl_main.o cl_parse.o \
 	cl_tent.o cmd.o common.o console.o crc.o cvar.o gl_draw.o gl_mesh.o \
 	gl_model.o gl_refrag.o gl_rlight.o gl_rmain.o gl_rmisc.o gl_rsurf.o \
@@ -10,7 +14,8 @@ OBJECTS=cd_linux.o chase.o cl_demo.o cl_input.o cl_main.o cl_parse.o \
 	sv_phys.o sv_user.o sys_linux.o vid_sdl.o view.o wad.o world.o zone.o
 #ASM_OBJECTS=math.o snd_mixa.o sys_dosa.o worlda.o
 
-CFLAGS=-ggdb -Wall -Werror `sdl-config --cflags`
+PATHS=-DSHAREPATH=$(SHAREPATH) -DUSERPATH=$(USERPATH)
+CFLAGS=-ggdb -Wall -Werror $(PATHS) `sdl-config --cflags`
 OPTIMIZATIONS= -O6 -ffast-math -funroll-loops -fomit-frame-pointer \
 	-fexpensive-optimizations
 

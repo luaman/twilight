@@ -244,6 +244,7 @@ typedef struct
 typedef struct
 {
 	char	*basedir;
+	char	*sharedir;
 	char	*cachedir;		// for development over ISDN lines
 	int		argc;
 	char	**argv;

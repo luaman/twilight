@@ -41,7 +41,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 int         noconinput = 0;
 int         nostdout = 0;
 
-char       *basedir = ".";
+char       *basedir = USERPATH;
+char	   *sharedir = SHAREPATH;
 char       *cachedir = "/tmp";
 
 cvar_t      sys_linerefresh = { "sys_linerefresh", "0" };	// set for entity
@@ -396,6 +397,7 @@ main (int c, char **v)
 	parms.membase = malloc (parms.memsize);
 
 	parms.basedir = basedir;
+	parms.sharedir = sharedir;
 // caching is disabled by default, use -cachedir to enable
 //  parms.cachedir = cachedir;
 
