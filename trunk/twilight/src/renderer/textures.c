@@ -237,7 +237,7 @@ Set_Anisotropy_f (struct cvar_s *var)
 	if (!gl_ext_anisotropy)
 	{
 		if (var->fvalue)
-			Com_Printf("Ignoring anisotropy (not supported)\n");
+			Com_DPrintf("Ignoring anisotropy (not supported)\n");
 		return;
 	}
 
