@@ -343,7 +343,6 @@ extern struct cvar_s *cl_pitchspeed;
 extern struct cvar_s *cl_anglespeedkey;
 
 extern struct cvar_s *cl_shownet;
-extern struct cvar_s *cl_sbar;
 extern struct cvar_s *cl_hudswap;
 extern struct cvar_s *cl_mapname;
 

@@ -42,7 +42,7 @@ static const char rcsid[] =
 #include "sys.h"
 #include "strlib.h"
 
-void        CL_FinishTimeDemo (void);
+void CL_FinishTimeDemo (void);
 
 /*
 ==============================================================================
@@ -192,9 +192,8 @@ CL_GetDemoMessage (void)
 			cls.td_startframe = host_framecount;
 		}
 		cls.realtime = demotime;			// warp
-	} else if (!cl.paused && cls.state >= ca_onserver) {	// always grab
-		// until fully
-		// connected
+	} else if (!cl.paused && cls.state >= ca_onserver) {
+		// always grab until fully connected
 		if (cls.realtime + 1.0 < demotime) {
 			// too far back
 			cls.realtime = demotime - 1.0;
@@ -206,10 +205,10 @@ CL_GetDemoMessage (void)
 			// rewind back to time
 			fseek (cls.demofile, ftell (cls.demofile) - sizeof (demotime),
 				   SEEK_SET);
-			return 0;					// don't need another message yet
+			return 0;	// don't need another message yet
 		}
 	} else
-		cls.realtime = demotime;			// we're warping
+		cls.realtime = demotime;	// we're warping
 
 	if (cls.state < ca_demostart)
 		Host_Error ("CL_GetDemoMessage: cls.state != ca_active");
@@ -323,7 +322,6 @@ CL_Stop_f (void)
 	Com_Printf ("Completed demo\n");
 }
 
-
 /*
 ====================
 CL_WriteDemoMessage
@@ -334,8 +332,7 @@ Dumps the current net message, prefixed by the length and view angles
 void
 CL_WriteRecordDemoMessage (sizebuf_t *msg, int seq)
 {
-	int		len;
-	int		i;
+	int		len, i;
 	float	fl;
 	Uint8	c;
 
@@ -430,8 +427,7 @@ CL_Record_f (void)
 	Com_Printf ("recording to %s.\n", name);
 	cls.demorecording = true;
 
-/*-------------------------------------------------*/
-
+	/*-------------------------------------------------*/
 	// serverdata
 	// send the info about the new client to all connected clients
 	SZ_Init (&buf, buf_data, sizeof(buf_data));
@@ -464,7 +460,7 @@ CL_Record_f (void)
 
 	// send music
 	MSG_WriteByte (&buf, svc_cdtrack);
-	MSG_WriteByte (&buf, 0);			// none in demos
+	MSG_WriteByte (&buf, 0);	// none in demos
 
 	// send server info string
 	MSG_WriteByte (&buf, svc_stufftext);
@@ -524,8 +520,8 @@ CL_Record_f (void)
 		CL_WriteRecordDemoMessage (&buf, seq++);
 		SZ_Clear (&buf);
 	}
-	// spawnstatic
 
+	// spawnstatic
 	for (i = 0; i < cl_num_static_entities; i++) {
 		ent = &cl_static_entities[i];
 
@@ -588,8 +584,8 @@ CL_Record_f (void)
 		CL_WriteRecordDemoMessage (&buf, seq++);
 		SZ_Clear (&buf);
 	}
-	// send current status of all other players
 
+	// send current status of all other players
 	for (i = 0; i < MAX_CLIENTS; i++) {
 		player = cl.players + i;
 
@@ -746,7 +742,6 @@ CL_FinishTimeDemo (void)
 	float	time;
 
 	cls.timedemo = false;
-
 	// the first frame didn't count
 	frames = (host_framecount - cls.td_startframe) - 1;
 	time = Sys_DoubleTime () - cls.td_starttime;
@@ -781,5 +776,6 @@ CL_TimeDemo_f (void)
 	cls.timedemo = true;
 	cls.td_starttime = 0;
 	cls.td_startframe = host_framecount;
-	cls.td_lastframe = -1;				// get a new message this frame
+	cls.td_lastframe = -1;	// get a new message this frame
 }
+

@@ -833,7 +833,6 @@ Host_Init ()
 	Sbar_Init_Cvars ();				// statusbar related cvars
 	CL_Init_Cvars ();				// cl_* related cvars
 	S_Init_Cvars ();				// sound system related cvars
-	IN_Init_Cvars ();				// input related cvars
 	NET_Init_Cvars ();				// net related cvars
 	Host_InitLocal_Cvars ();		// local host related cvars
 	PR_Init_Cvars();				// pr_* related cvars

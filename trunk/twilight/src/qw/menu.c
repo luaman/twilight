@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include "glquake.h"
 #include "mathlib.h"
 #include "menu.h"
+#include "sbar.h"
 #include "screen.h"
 #include "sound.h"
 #include "strlib.h"

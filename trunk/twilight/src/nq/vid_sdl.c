@@ -617,11 +617,6 @@ Force_CenterView_f (void)
 }
 
 void
-IN_Init_Cvars (void)
-{
-}
-
-void
 IN_Init (void)
 {
 	mouse_x = 0.0f;

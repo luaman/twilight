@@ -44,6 +44,7 @@ static const char rcsid[] =
 #include "sbar.h"
 #include "screen.h"
 #include "server.h"
+#include "vid.h"
 #include "wad.h"
 
 
@@ -92,6 +93,19 @@ void        Sbar_MiniDeathmatchOverlay (void);
 void        Sbar_DeathmatchOverlay (void);
 void        M_DrawPic (int x, int y, qpic_t *pic);
 
+cvar_t		*cl_sbar;
+
+/*
+===============
+Sbar_Callback
+===============
+*/
+void 
+Sbar_Callback (cvar_t *cvar)
+{
+	vid.recalc_refdef = true;
+}
+
 /*
 ===============
 Sbar_ShowScores
@@ -120,14 +134,10 @@ Sbar_DontShowScores (void)
 	sb_showscores = false;
 }
 
-/*
-===============
-Sbar_Init_Cvars
-===============
-*/
 void
 Sbar_Init_Cvars (void)
 {
+	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, &Sbar_Callback);
 }
 
 /*
