@@ -133,15 +133,15 @@ void Matrix4x4_Invert_Simple (matrix4x4_t *out, const matrix4x4_t *in1)
 
 	// invert the rotation by transposing and multiplying by the squared
 	// recipricol of the input matrix scale as described above
-	out->m[0][0] = in1->m[0][0] * scale;
-	out->m[0][1] = in1->m[1][0] * scale;
-	out->m[0][2] = in1->m[2][0] * scale;
-	out->m[1][0] = in1->m[0][1] * scale;
-	out->m[1][1] = in1->m[1][1] * scale;
-	out->m[1][2] = in1->m[2][1] * scale;
-	out->m[2][0] = in1->m[0][2] * scale;
-	out->m[2][1] = in1->m[1][2] * scale;
-	out->m[2][2] = in1->m[2][2] * scale;
+	out->m[0][0] = (float)(in1->m[0][0] * scale);
+	out->m[0][1] = (float)(in1->m[1][0] * scale);
+	out->m[0][2] = (float)(in1->m[2][0] * scale);
+	out->m[1][0] = (float)(in1->m[0][1] * scale);
+	out->m[1][1] = (float)(in1->m[1][1] * scale);
+	out->m[1][2] = (float)(in1->m[2][1] * scale);
+	out->m[2][0] = (float)(in1->m[0][2] * scale);
+	out->m[2][1] = (float)(in1->m[1][2] * scale);
+	out->m[2][2] = (float)(in1->m[2][2] * scale);
 
 	// invert the translate
 	out->m[0][3] = -(in1->m[0][3] * out->m[0][0] + in1->m[1][3] * out->m[0][1] + in1->m[2][3] * out->m[0][2]);
@@ -201,12 +201,12 @@ void Matrix4x4_CreateRotate (matrix4x4_t *out, float angle, vec3_t v)
 
 	len = DotProduct(v,v);
 	if (len != 0.0f)
-		len = 1.0f / sqrt(len);
+		len = 1.0f / (float)sqrt(len);
 	VectorScale(v, len, v);
 
-	angle *= -M_PI / 180.0;
-	c = cos(angle);
-	s = sin(angle);
+	angle *= (float)(-M_PI / 180.0);
+	c = (float)cos(angle);
+	s = (float)sin(angle);
 
 	out->m[0][0]=v[0] * v[0] + c * (1 - v[0] * v[0]);
 	out->m[0][1]=v[0] * v[1] * (1 - c) + v[2] * s;
@@ -279,17 +279,17 @@ void Matrix4x4_CreateFromQuakeEntity(matrix4x4_t *out, vec3_t origin, vec3_t ang
 	angle = angles[ROLL] * (M_PI*2 / 360);
 	sr = sin(angle);
 	cr = cos(angle);
-	out->m[0][0] = (cp*cy) * scale;
-	out->m[0][1] = (sr*sp*cy+cr*-sy) * scale;
-	out->m[0][2] = (cr*sp*cy+-sr*-sy) * scale;
+	out->m[0][0] = (float)((cp*cy) * scale);
+	out->m[0][1] = (float)((sr*sp*cy+cr*-sy) * scale);
+	out->m[0][2] = (float)((cr*sp*cy+-sr*-sy) * scale);
 	out->m[0][3] = origin[0];
-	out->m[1][0] = (cp*sy) * scale;
-	out->m[1][1] = (sr*sp*sy+cr*cy) * scale;
-	out->m[1][2] = (cr*sp*sy+-sr*cy) * scale;
+	out->m[1][0] = (float)((cp*sy) * scale);
+	out->m[1][1] = (float)((sr*sp*sy+cr*cy) * scale);
+	out->m[1][2] = (float)((cr*sp*sy+-sr*cy) * scale);
 	out->m[1][3] = origin[1];
-	out->m[2][0] = (-sp) * scale;
-	out->m[2][1] = (sr*cp) * scale;
-	out->m[2][2] = (cr*cp) * scale;
+	out->m[2][0] = (float)((-sp) * scale);
+	out->m[2][1] = (float)((sr*cp) * scale);
+	out->m[2][2] = (float)((cr*cp) * scale);
 	out->m[2][3] = origin[2];
 	out->m[3][0] = 0;
 	out->m[3][1] = 0;
