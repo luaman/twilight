@@ -482,6 +482,7 @@ M_AdjustSliders (int dir)
 
 		case 15:
 			Cvar_Set (cl_hudswap, va ("%i", !(int)cl_hudswap->value));
+			break;
 
 		case 16:						// _windowed_mouse
 			Cvar_Set (_windowed_mouse, va ("%i", !(int)_windowed_mouse->value));

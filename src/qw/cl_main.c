@@ -1047,6 +1047,13 @@ CL_Download_f (void)
 	SZ_Print (&cls.netchan.message, va ("download %s\n", Cmd_Argv (1)));
 }
 
+void 
+CL_SbarCallback (cvar_t *cvar)
+{
+	vid.recalc_refdef = true;
+}
+
+
 /*
 =================
 CL_Init_Cvars
@@ -1072,7 +1079,7 @@ CL_Init_Cvars (void)
 	// can be 0, 1, or 2
 	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);
 
-	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, NULL);
+	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, &CL_SbarCallback);
 	cl_hudswap = Cvar_Get ("cl_hudswap", "0", CVAR_ARCHIVE, NULL);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "0", CVAR_ARCHIVE, NULL);
 

@@ -60,6 +60,9 @@ cvar_t		*_cl_color;
 cvar_t		*cl_shownet;
 cvar_t		*cl_nolerp;
 
+cvar_t		*cl_sbar;
+cvar_t		*cl_hudswap;
+
 cvar_t		*cl_mapname;
 
 cvar_t		*show_fps;
@@ -686,6 +689,12 @@ CL_SendCmd (void)
 	SZ_Clear (&cls.message);
 }
 
+void 
+CL_SbarCallback (cvar_t *cvar)
+{
+	vid.recalc_refdef = true;
+}
+
 /*
 =================
 CL_Init_Cvars
@@ -702,6 +711,9 @@ CL_Init_Cvars (void)
 	// cl_shownet can be 0, 1, or 2
 	cl_shownet = Cvar_Get ("cl_shownet", "0", CVAR_NONE, NULL);
 	cl_nolerp = Cvar_Get ("cl_nolerp", "0", CVAR_NONE, NULL);
+
+	cl_sbar = Cvar_Get ("cl_sbar", "0", CVAR_ARCHIVE, &CL_SbarCallback);
+	cl_hudswap = Cvar_Get ("cl_hudswap", "0", CVAR_ARCHIVE, NULL);
 
 	cl_mapname = Cvar_Get ("cl_mapname", "", CVAR_ROM, NULL);
 }

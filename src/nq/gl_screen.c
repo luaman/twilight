@@ -109,7 +109,6 @@ int         scr_copyeverything;
 float       scr_con_current;
 float       scr_conlines;				// lines of console to display
 
-float       oldscreensize, oldfov;
 cvar_t		*scr_viewsize;
 cvar_t		*scr_fov;
 cvar_t		*scr_conspeed;
@@ -342,74 +341,25 @@ Internal use only
 static void
 SCR_CalcRefdef (void)
 {
-	float       size;
-	int         h;
-	qboolean    full = false;
-
-
 	vid.recalc_refdef = false;
 
-//========================================
-
-// Vic
-// FIXME: make these two callbacks?
-
-// bound viewsize
-	if (scr_viewsize->value < 30)
-		Cvar_Set (scr_viewsize, "30");
-	if (scr_viewsize->value > 120)
-		Cvar_Set (scr_viewsize, "120");
-
-// bound field of view
-	if (scr_fov->value < 10)
-		Cvar_Set (scr_fov, "10");
-	if (scr_fov->value > 170)
-		Cvar_Set (scr_fov, "170");
-
-// intermission is always full screen   
-	if (cl.intermission)
-		size = 120;
-	else
-		size = scr_viewsize->value;
-
-	if (size >= 120)
-		sb_lines = 0;					// no status bar at all
-	else if (size >= 110)
-		sb_lines = 24;					// no inventory
-	else
-		sb_lines = 24 + 16 + 8;
-
-	if (scr_viewsize->value >= 100.0) {
-		full = true;
-		size = 100.0;
-	} else
-		size = scr_viewsize->value;
-	if (cl.intermission) {
-		full = true;
-		size = 100;
+	// intermission is always full screen   
+	if (scr_viewsize->value >= 120 || cl.intermission) {
 		sb_lines = 0;
-	}
-//	size /= 100.0;
-	size *= (1 / 100.0);
-
-	h = vid.height - sb_lines;
-
-	r_refdef.vrect.width = vid.width * size;
-	if (r_refdef.vrect.width < 96) {
-		size = 96.0 / r_refdef.vrect.width;
-		r_refdef.vrect.width = 96;		// min for icons
+	} else if (scr_viewsize->value >= 110) {
+		sb_lines = 24;
+	} else {
+		sb_lines = 24 + 16 + 8;
 	}
 
-	r_refdef.vrect.height = vid.height * size;
-	if (r_refdef.vrect.height > vid.height - sb_lines)
+	if (cl_sbar->value)
 		r_refdef.vrect.height = vid.height - sb_lines;
-	if (r_refdef.vrect.height > vid.height)
-		r_refdef.vrect.height = vid.height;
-	r_refdef.vrect.x = (vid.width - r_refdef.vrect.width) / 2;
-	if (full)
-		r_refdef.vrect.y = 0;
 	else
-		r_refdef.vrect.y = (h - r_refdef.vrect.height) / 2;
+		r_refdef.vrect.height = vid.height;
+
+	r_refdef.vrect.width = vid.width;
+	r_refdef.vrect.x = 0;
+	r_refdef.vrect.y = 0;
 
 	r_refdef.fov_x = scr_fov->value;
 	r_refdef.fov_y =
@@ -430,7 +380,6 @@ void
 SCR_SizeUp_f (void)
 {
 	Cvar_Slide (scr_viewsize, 10);
-	vid.recalc_refdef = true;
 }
 
 
@@ -445,16 +394,40 @@ void
 SCR_SizeDown_f (void)
 {
 	Cvar_Slide (scr_viewsize, -10);
-	vid.recalc_refdef = true;
 }
 
 //============================================================================
+static void
+SCR_viewsize_CB (cvar_t *cvar)
+{
+	// bound viewsize
+	if (cvar->value < 30) {
+		Cvar_Set (cvar, "30");
+	} else if (cvar->value > 120) {
+		Cvar_Set (cvar, "120");
+	} else {
+		vid.recalc_refdef = true;
+	}
+}
+
+static void
+SCR_fov_CB (cvar_t *cvar)
+{
+	// bound field of view
+	if (cvar->value < 1) {
+		Cvar_Set (cvar, "1");
+	} else if (cvar->value > 170) {
+		Cvar_Set (cvar, "170");
+	} else {
+		vid.recalc_refdef = true;
+	}
+}
 
 void
 SCR_Init_Cvars (void)
 {
-	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE, NULL);
-	scr_fov = Cvar_Get ("fov", "90", CVAR_NONE, NULL);
+	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE, SCR_viewsize_CB);
+	scr_fov = Cvar_Get ("fov", "90", CVAR_NONE, SCR_fov_CB);	// 10 - 170
 	scr_conspeed = Cvar_Get ("scr_conspeed", "300", CVAR_NONE, NULL);
 	scr_centertime = Cvar_Get ("scr_centertime", "2", CVAR_NONE, NULL);
 	scr_showram = Cvar_Get ("showram", "1", CVAR_NONE, NULL);
@@ -918,19 +891,6 @@ SCR_UpdateScreen (void)
 
 
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
-
-	// 
-	// determine size of refresh window
-	// 
-	if (oldfov != scr_fov->value) {
-		oldfov = scr_fov->value;
-		vid.recalc_refdef = true;
-	}
-
-	if (oldscreensize != scr_viewsize->value) {
-		oldscreensize = scr_viewsize->value;
-		vid.recalc_refdef = true;
-	}
 
 	if (vid.recalc_refdef)
 		SCR_CalcRefdef ();

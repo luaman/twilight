@@ -728,6 +728,37 @@ Draw_TileClear (int x, int y, int w, int h)
 	qglEnd ();
 }
 
+void
+Draw_SubPic (int x, int y, qpic_t *pic, int srcx, int srcy, int width,
+			 int height)
+{
+	glpic_t    *gl;
+	float       newsl, newtl, newsh, newth;
+	float       oldglwidth, oldglheight;
+
+	gl = (glpic_t *) pic->data;
+
+	oldglwidth = gl->sh - gl->sl;
+	oldglheight = gl->th - gl->tl;
+
+	newsl = gl->sl + (srcx * oldglwidth) / pic->width;
+	newsh = newsl + (width * oldglwidth) / pic->width;
+
+	newtl = gl->tl + (srcy * oldglheight) / pic->height;
+	newth = newtl + (height * oldglheight) / pic->height;
+
+	qglBindTexture (GL_TEXTURE_2D, gl->texnum);
+	qglBegin (GL_QUADS);
+	qglTexCoord2f (newsl, newtl);
+	qglVertex2f (x, y);
+	qglTexCoord2f (newsh, newtl);
+	qglVertex2f (x + width, y);
+	qglTexCoord2f (newsh, newth);
+	qglVertex2f (x + width, y + height);
+	qglTexCoord2f (newsl, newth);
+	qglVertex2f (x, y + height);
+	qglEnd ();
+}
 
 /*
 =============
