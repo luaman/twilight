@@ -387,7 +387,7 @@ SND_PickChannel (int entnum, int entchannel)
 			break;
 		}
 		// don't let monster sounds override player sounds
-		if (channels[ch_idx].entnum == (int) cl.viewentity && entnum != (int) cl.viewentity
+		if (channels[ch_idx].entnum == cl.viewentity && entnum != cl.viewentity
 			&& channels[ch_idx].sfx)
 			continue;
 
@@ -421,7 +421,7 @@ SND_Spatialize (channel_t *ch)
 	sfx_t      *snd;
 
 // anything coming from the view entity will always be full volume
-	if (ch->entnum == (int) cl.viewentity) {
+	if (ch->entnum == cl.viewentity) {
 		ch->leftvol = ch->master_vol;
 		ch->rightvol = ch->master_vol;
 		return;

@@ -63,9 +63,10 @@ extern colorub_t	*scub_array_p;
 
 extern GLuint *vindices;
 
-extern GLuint	v_index, i_index;
+extern GLint	v_index, i_index;
 extern qboolean	va_locked;
-extern GLuint	MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
+extern GLint	MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
+extern memzone_t *vzone;
 
 extern float_int_t *FtoUB_tmp;
 

@@ -36,9 +36,6 @@ static const char rcsid[] =
 #include "dyngl.h"
 #include "cmd.h"
 
-double r_time, r_frametime;	// Current time, and time since last frame.
-Uint r_framecount;			// Current frame.
-
 GLfloat whitev[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 int fb_size[4];

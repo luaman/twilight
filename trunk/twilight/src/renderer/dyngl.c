@@ -22,9 +22,6 @@ static const char rcsid[] =
 #include "SDL.h"
 
 #include "dyngl.h"
-#ifdef DMALLOC
-#include "dmalloc.h"
-#endif
 
 /*
  * Alternate functions for DYNGL_WANT

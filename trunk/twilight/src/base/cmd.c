@@ -36,9 +36,6 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "zone.h"
-#ifdef DMALLOC
-#include "dmalloc.h"
-#endif
 
 #define MAX_ALIAS_NAME 32
 

@@ -182,11 +182,3 @@ SOURCE=.\transform.h
 # End Group
 # End Target
 # End Project
-Source File
-# Begin Source File
-
-SOURCE=.\transform.h
-# End Source File
-# End Group
-# End Target
-# End Project

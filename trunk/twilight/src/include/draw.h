@@ -55,7 +55,6 @@ void Draw_Crosshair (void);
 int GL_LoadTexture (const char *identifier, int width, int height,
 		Uint8 *data, int flags, int bpp);
 int GL_LoadPicTexture (struct qpic_s *pic);
-qboolean GL_Delete_Texture (int texnum);
 void GL_Set2D (void);
 
 int R_LoadTexture (const char *identifier, struct image_s *img, int flags);

@@ -81,6 +81,8 @@ static int sdl_flags = SDL_OPENGL;
 
 /*-----------------------------------------------------------------------*/
 
+int texture_extension_number = 1;
+
 void I_KeypadMode (cvar_t *cvar);
 void IN_WindowedMouse (cvar_t *cvar);
 

@@ -35,9 +35,7 @@ extern void GLT_FloodFillSkin8 (Uint8 * skin, int skinwidth, int skinheight);
 extern qboolean GLT_TriangleCheck8 (Uint8 *tex, int width, int height, astvert_t texcoords[3], Uint8 color);
 extern int GLT_Mangle8 (Uint8 *in, Uint8 *out, int width, int height, short mask, Uint8 to, qboolean bleach);
 extern void GLT_Skin_Parse (Uint8 *data, skin_t *skin, aliashdr_t *amodel, char *name, int width, int height, int frames, float interval);
-extern void GLT_Delete_Skin (skin_t *skin);
 extern void GLT_Init ();
-extern texture_t *R_TextureAnimation (texture_t *base, int frame);
 
 #define TEX_NONE		0
 #define TEX_ALPHA		1

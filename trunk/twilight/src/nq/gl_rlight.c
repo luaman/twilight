@@ -42,8 +42,8 @@ static const char rcsid[] =
 #include "view.h"
 
 rdlight_t r_dlight[MAX_DLIGHTS];
-Uint r_numdlights = 0;
-Uint r_dlightframecount;
+int r_numdlights = 0;
+int r_dlightframecount;
 
 static int corona_texture;
 
@@ -80,7 +80,7 @@ R_InitLightTextures (void)
 void
 R_DrawCoronas (void)
 {
-	Uint		i;
+	int			i;
 	float		scale, viewdist, dist;
 	vec4_t		brightness;
 	vec3_t		diff;
@@ -137,7 +137,6 @@ R_DrawCoronas (void)
 	}
 
 	qglDisableClientState (GL_COLOR_ARRAY);
-	qglColor4fv (whitev);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglEnable (GL_DEPTH_TEST);
 }
@@ -295,7 +294,7 @@ R_MarkLightsNoVis (rdlight_t *light, int bit, mnode_t *node)
 
 		// mark the polygons
 		maxdist = light->cullradius2;
-		surf = cl.worldmodel->extra.brush->surfaces + node->firstsurface;
+		surf = cl.worldmodel->surfaces + node->firstsurface;
 
 		for (i = 0; i < node->numsurfaces; i++, surf++)
 		{
@@ -383,14 +382,14 @@ R_MarkLights (rdlight_t *light, int bit, model_t *model)
 	msurface_t	   *surf, **mark;
 	mleaf_t		   *leaf;
 	Uint8		   *in = pvsleaf->compressed_vis;
-	int				row = (model->extra.brush->numleafs+7)>>3;
+	int				row = (model->numleafs+7)>>3;
 	float			low[3], high[3], radius, dist, maxdist;
 
 	if (!pvsleaf->compressed_vis || gl_oldlights->ivalue)
 	{
 		// no vis info, so make all visible
-		R_MarkLightsNoVis(light, bit, model->extra.brush->nodes
-				+ model->extra.brush->hulls[0].firstclipnode);
+		R_MarkLightsNoVis(light, bit, model->nodes
+				+ model->hulls[0].firstclipnode);
 		return;
 	}
 
@@ -414,13 +413,13 @@ R_MarkLights (rdlight_t *light, int bit, model_t *model)
 		c = *in++;
 		if (c)
 		{
-			l = model->extra.brush->numleafs + 1 - (k << 3);
+			l = model->numleafs + 1 - (k << 3);
 			l = min (l, 8);
 			for (i=0 ; i<l ; i++)
 			{
 				if (c & (1<<i))
 				{
-					leaf = &model->extra.brush->leafs[(k << 3)+i+1];
+					leaf = &model->leafs[(k << 3)+i+1];
 					if (leaf->visframe != r_framecount)
 						continue;
 					if (leaf->contents == CONTENTS_SOLID)
@@ -541,7 +540,7 @@ R_PushDlights
 void
 R_PushDlights (void)
 {
-	Uint		i;
+	int			i;
 	rdlight_t	*l;
 
 	if (gl_flashblend->ivalue)
@@ -612,11 +611,11 @@ RecursiveLightPoint (vec3_t color, mnode_t *node, vec3_t start,
 		// check for impact on this node
 		VectorCopy (mid, lightspot);
 		lightplane = node->plane;
-		surf = cl.worldmodel->extra.brush->surfaces + node->firstsurface;
+		surf = cl.worldmodel->surfaces + node->firstsurface;
 
 		for (i = 0; i < node->numsurfaces; i++, surf++)
 		{
-			if (surf->flags & SURF_NOLIGHTMAP)
+			if (surf->flags & SURF_DRAWTILED)
 				// no lightmaps
 				continue;
 
@@ -729,7 +728,7 @@ int R_LightPoint (vec3_t p)
 {
 	vec3_t end;
 
-	if (!cl.worldmodel->extra.brush->lightdata)
+	if (!cl.worldmodel->lightdata)
 	{
 		lightcolor[0] = lightcolor[1] = lightcolor[2] = 255;
 		return 255;
@@ -740,7 +739,7 @@ int R_LightPoint (vec3_t p)
 	end[2] = p[2] - 2048;
 	lightcolor[0] = lightcolor[1] = lightcolor[2] = 0;
 
-	RecursiveLightPoint (lightcolor, cl.worldmodel->extra.brush->nodes, p, end);
+	RecursiveLightPoint (lightcolor, cl.worldmodel->nodes, p, end);
 
 	return 255;
 }
