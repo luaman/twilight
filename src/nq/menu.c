@@ -1071,9 +1071,9 @@ M_Options_Draw (void)
 	M_Print (16, y, "         Go to console"); y += 8;
 	M_Print (16, y, "     Reset to defaults"); y += 8;
 
-	scrap = (width_2d->ivalue == -1) ? vid.width : (width_2d->ivalue);
+	scrap = (width_2d->ivalue == -1) ? (int)vid.width : (width_2d->ivalue);
 	M_Print (16, y, "   2D Resolution Width"); M_DrawSlider (220, y, scrap / 1000.0f); y += 8;
-	scrap = (height_2d->ivalue == -1) ? vid.height : (height_2d->ivalue);
+	scrap = (height_2d->ivalue == -1) ? (int)vid.height : (height_2d->ivalue);
 	M_Print (16, y, "  2D Resolution Height"); M_DrawSlider (220, y, scrap / 1000.0f); y += 8;
 	M_Print (16, y, "             Text Size"); M_DrawSlider (220, y, text_scale->fvalue / 3.0f); y += 8;
 
