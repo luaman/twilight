@@ -86,7 +86,7 @@ R_InitParticleTexture (void)
 	// particle texture
 	// 
 	particletexture = texture_extension_number++;
-	GL_Bind (particletexture);
+	glBindTexture (GL_TEXTURE_2D, particletexture);
 
 	for (x = 0; x < 8; x++) {
 		for (y = 0; y < 8; y++) {
@@ -310,7 +310,7 @@ R_TranslatePlayerSkin (int playernum)
 
 	// because this happens during gameplay, do it fast
 	// instead of sending it through gl_upload 8
-	GL_Bind (playertextures + playernum);
+	glBindTexture (GL_TEXTURE_2D, playertextures + playernum);
 
 #if 0
 	byte        translated[320 * 200];
