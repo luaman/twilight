@@ -232,7 +232,7 @@ Con_CheckResize (void)
 static void
 setlogname (cvar_t *con_logname)
 {
-	if (con_logname->string)
+	if (com_gamedir[0] && con_logname->string && con_logname->string[0])
 		snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
 				con_logname->string);
 	else
