@@ -62,6 +62,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name twilight_base
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name twilight_renderer
+    End Project Dependency
 }}}
 
 ###############################################################################
