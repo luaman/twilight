@@ -206,6 +206,7 @@ Called by R_RenderView, possibily repeatedly.
 static void
 R_Render3DView (void)
 {
+	Check_GL_Error();
 	R_DrawSkyEntities ();
 
 	R_PushDlights ();
