@@ -404,9 +404,10 @@ char       *
 CopyString (char *in)
 {
 	char       *out;
+	size_t     length = Q_strlen (in) + 1;
 
-	out = Z_Malloc (Q_strlen (in) + 1);
-	Q_strcpy (out, in);
+	out = Z_Malloc (length);
+	Q_memcpy (out, in, length);
 	return out;
 }
 
@@ -566,9 +567,9 @@ Cmd_TokenizeString (char *text)
 			return;
 
 		if (cmd_argc < MAX_ARGS) {
-			cmd_argv[cmd_argc] = Z_Malloc (Q_strlen (com_token) + 1);
-			Q_strcpy (cmd_argv[cmd_argc], com_token);
-			cmd_argc++;
+			size_t length = Q_strlen (com_token) + 1;
+			cmd_argv[cmd_argc] = Z_Malloc (length);
+			Q_memcpy (cmd_argv[cmd_argc], com_token, length);
 		}
 	}
 
