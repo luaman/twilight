@@ -299,7 +299,6 @@ Sys_ExpandPath (char *str)
 	char *s = str, *p;
 	struct passwd *entry;
 
-
 	if (*s == '~')
 	{
 		s++;

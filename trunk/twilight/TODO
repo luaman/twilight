@@ -4,8 +4,9 @@ Project Twilight todo list
 These things need to be done before first public release:
 
   - replacement md4.c, ours is a GPL violation
-  - Sys_ExpandPath, for twiddle expansion, / normalization, etc
-  - Dynamic OpenGL binding
+  - Make +set happen as early as possible
+  - Add Cvars fs_sharepath and fs_userpath
+  - Global config file support
   - Documentation, we've changed enough that this is necessary
 
 

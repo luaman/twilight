@@ -35,3 +35,6 @@ void        Sys_Quit (void);
 double      Sys_DoubleTime (void);
 char       *Sys_ConsoleInput (void);
 void        Sys_Init (void);
+
+char       *Sys_ExpandPath (char *str);
+

@@ -33,6 +33,7 @@ static const char rcsid[] =
 #include <signal.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <pwd.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -311,6 +312,46 @@ Sys_ConsoleInput (void)
 	}
 #endif
 	return NULL;
+}
+
+
+char *
+Sys_ExpandPath (char *str)
+{
+	static char buf[PATH_MAX] = "";
+	char *s = str, *p;
+	struct passwd *entry;
+
+	if (*s == '~')
+	{
+		s++;
+		if (*s == '/' || *s == '\0')
+		{
+			/* Current user's home directory */
+			if ((p = getenv("HOME")))
+				Q_strncpy(buf, p, PATH_MAX);
+			else
+				Q_strncpy(buf, ".", PATH_MAX);
+			Q_strncat (buf, s, PATH_MAX);
+		} else {
+			/* Another user's home directory */
+			if ((p = strchr(s, '/')) != NULL)
+				*p = '\0';
+			if ((entry = getpwnam(s)) != NULL)
+			{
+				Q_strncpy (buf, entry->pw_dir, PATH_MAX);
+				if (p) {
+					*p = '/';
+					Q_strncat (buf, p, PATH_MAX);
+				}
+			} else
+				/* ~user expansion failed, no such user */
+				Q_strcpy(buf, "");
+		}
+	} else
+		Q_strncpy (buf, str, PATH_MAX);
+
+	return buf;
 }
 
 

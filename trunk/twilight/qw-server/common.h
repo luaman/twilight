@@ -137,10 +137,13 @@ void        MSG_ReadDeltaUsercmd (struct usercmd_s *from,
 #define Q_strcpy(d, s) strcpy((d), (s))
 #define Q_strncpy(d, s, n) strncpy((d), (s), (n))
 #define Q_strlen(s) ((int)strlen(s))
+#define Q_strchr(s, c) strchr((s), (c))
 #define Q_strrchr(s, c) strrchr((s), (c))
 #define Q_strcat(d, s) strcat((d), (s))
+#define Q_strncat(d, s, c) strncat((d), (s), (c))
 #define Q_strcmp(s1, s2) strcmp((s1), (s2))
 #define Q_strncmp(s1, s2, n) strncmp((s1), (s2), (n))
+#define Q_strdup(s) strdup ((s))
 
 #ifdef _WIN32
 
@@ -232,3 +235,4 @@ byte        COM_BlockSequenceCRCByte (byte * base, int length, int sequence);
 int         build_number (void);
 
 #endif // _COMMON_H
+

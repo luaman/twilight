@@ -497,6 +497,37 @@ Sys_Sleep (void)
 }
 
 
+char *
+Sys_ExpandPath (char *str)
+{
+	static char buf[MAX_PATH] = "";
+	char *s = str, *p;
+
+	if (*s == '~')
+	{
+		s++;
+		if (*s == '/' || *s == '\0')
+		{
+			/* Current user's home directory */
+			if ((p = getenv("TWILIGHT")))
+				Q_strncpy(buf, p, MAX_PATH);
+			else if ((p = getenv("HOME")))
+				Q_strncpy(buf, p, MAX_PATH);
+			else if ((p = getenv("WINDIR")))
+				Q_strncpy(buf, p, MAX_PATH);
+			else
+				/* should never happen */
+				Q_strncpy(buf, ".", MAX_PATH);
+			Q_strncat (buf, s, MAX_PATH);
+		} else {
+			/* ~user expansion in win32 always fails */
+			Q_strcpy(buf, "");
+		}
+	} else
+		Q_strncpy (buf, str, MAX_PATH);
+
+	return buf;
+}
 
 
 /*
