@@ -12,5 +12,6 @@ libtwilight_renderer_a_SOURCES= \
 	dynogl.c dynogl.h opengl.h oglfuncs.h \
 	noise.c noise_textures.c \
         glquake.h transform.c transform.h \
-        wad.c
+        wad.c \
+	tga.c pcx.c
 
