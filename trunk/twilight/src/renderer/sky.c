@@ -57,7 +57,7 @@ cvar_t *r_fastsky;
 sky_type_t	sky_type = SKY_SPHERE;
 
 static void
-Sky_Emit_Chain (model_t *mod, chain_head_t *chain)
+Sky_Emit_Chain (model_t *mod, chain_head_t *chain, qboolean arranged)
 {
 	glpoly_t		*p;
 	msurface_t		*s;
@@ -71,12 +71,18 @@ Sky_Emit_Chain (model_t *mod, chain_head_t *chain)
 			s = c[j].surf;
 			for (p = s->polys; p; p = p->next) 
 			{
-				memcpy(v_array_v(0), B_Vert_v(brush, p->start),
-						sizeof(vertex_t) * p->numverts);
+				if (!arranged) {
+					memcpy(v_array_v(0), B_Vert_v(brush, p->start),
+							sizeof(vertex_t) * p->numverts);
 
-				TWI_PreVDrawCVA (0, p->numverts);
-				qglDrawArrays (GL_POLYGON, 0, p->numverts);
-				TWI_PostVDrawCVA ();
+					TWI_PreVDrawCVA (0, p->numverts);
+					qglDrawArrays (GL_POLYGON, 0, p->numverts);
+					TWI_PostVDrawCVA ();
+				} else {
+					TWI_PreVDrawCVA (p->start, p->numverts);
+					qglDrawArrays (GL_POLYGON, p->start, p->numverts);
+					TWI_PostVDrawCVA ();
+				}
 			}
 		}
 	}
@@ -98,7 +104,7 @@ Sky_Fast_Draw_Chain (model_t *mod, chain_head_t *chain)
 	qglDisable (GL_TEXTURE_2D);
 	qglColor4fv (d_8tofloattable[(Uint8) r_fastsky->ivalue - 1]);
 
-	Sky_Emit_Chain (mod, chain);
+	Sky_Emit_Chain (mod, chain, true);
 
 	qglColor4fv (whitev);
 	qglEnable (GL_TEXTURE_2D);
@@ -121,7 +127,7 @@ Sky_Depth_Draw_Chain (model_t *mod, chain_head_t *chain)
 	qglEnable (GL_BLEND);
 	qglBlendFunc (GL_ZERO, GL_ONE);
 
-	Sky_Emit_Chain (mod, chain);
+	Sky_Emit_Chain (mod, chain, false);
 
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDisable (GL_BLEND);
