@@ -478,7 +478,7 @@ CL_AdjustAngles (void)
 		V_StopPitchDrift ();
 
 	// KB: Allow looking straight up/down
-	cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90);
+	cl.viewangles[PITCH] = bound (-90, cl.viewangles[PITCH], 90 - ANG16_DELTA);
 	cl.viewangles[ROLL] = bound (-50, cl.viewangles[ROLL], 50);
 }
 
@@ -521,9 +521,6 @@ CL_BaseMove (usercmd_t *cmd)
 		cmd->sidemove *= cl_movespeedkey->fvalue;
 		cmd->upmove *= cl_movespeedkey->fvalue;
 	}
-
-	if (cl.viewangles[PITCH] >= 90) // HACK! HACK! HACK!
-		cmd->forwardmove *= -1;
 }
 
 static int
