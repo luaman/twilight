@@ -43,7 +43,7 @@ typedef struct
 	vec_t				cullradius2;
 
 	// the brightness of the light
-	vec3_t				light;
+	vec4_t				light;
 
 	// only for culling comparisons
 	vec_t				cullradius;

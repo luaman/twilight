@@ -81,11 +81,11 @@ R_InitLightTextures (void)
 void
 R_DrawCoronas (void)
 {
-	int i;
-	float scale, viewdist, dist, brightness;
-	vec3_t diff;
-	vec4_t dlightcolor;
-	rdlight_t *rd;
+	int			i;
+	float		scale, viewdist, dist;
+	vec4_t		brightness;
+	vec3_t		diff;
+	rdlight_t	*rd;
 
 	qglDisable (GL_DEPTH_TEST);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
@@ -100,9 +100,11 @@ R_DrawCoronas (void)
 
 	// Need brighter coronas if we don't have dynamic lightmaps
 	if (gl_flashblend->ivalue)
-		brightness = 1.0f / 131072.0f;
+		VectorSet4 (brightness, 1.0f / 131072.0f, 1.0f / 131072.0f,
+				1.0f / 131072.0f, 1.0f);
 	else
-		brightness = 1.0f / 262144.0f;
+		VectorSet4 (brightness, 1.0f / 262144.0f, 1.0f / 262144.0f,
+				1.0f / 262144.0f, 1.0f);
 
 	for (i = 0; i < r_numdlights; i++)
 	{
@@ -114,12 +116,7 @@ R_DrawCoronas (void)
 			VectorSubtract(rd->origin, vpn, diff);
 			if (TraceLine (cl.worldmodel, r_origin, diff, NULL, NULL) == 1)
 			{
-				dlightcolor[0] = rd->light[0] * brightness;
-				dlightcolor[1] = rd->light[1] * brightness;
-				dlightcolor[2] = rd->light[2] * brightness;
-				dlightcolor[3] = 1.0f;
-
-				TWI_FtoUB (dlightcolor, c_array_v(0), 4);
+				TWI_FtoUBMod (rd->light, c_array_v(0), brightness, 4);
 				VectorCopy4 (c_array_v(0), c_array_v(1));
 				VectorCopy4 (c_array_v(0), c_array_v(2));
 				VectorCopy4 (c_array_v(0), c_array_v(3));
@@ -206,6 +203,7 @@ R_BuildLightList (void)
 		rd = &r_dlight[r_numdlights++];
 		VectorCopy (cd->origin, rd->origin);
 		VectorScale (cd->color, cd->radius * 128.0f, rd->light);
+		rd->light[3] = 1.0f;
 		rd->cullradius = (1.0f / 128.0f) * sqrt (DotProduct (rd->light, rd->light));
 
 		// clamp radius to avoid overflowing division table in lightmap code
