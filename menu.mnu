@@ -1,6 +1,7 @@
 menu:
 	id "single_game"
 	title "Single Player"
+	on_exit "menu Main"
 	item command:
 		label "New Game"
 		command "disconnect; maxplayers 1; map start"
@@ -8,6 +9,7 @@ menu:
 menu:
 	id "multi_game"
 	title "Multiplayer Game"
+	on_exit "menu Main"
 	item command:
 		control kill_load "game_name" "nq"
 		label "Begin Game"
@@ -159,6 +161,7 @@ menu:
 menu:
 	id "config"
 	title "Configuration Options"
+	on_exit "menu Main"
 	item step_float:
 		label "2D Width"
 		cvar "width_2d"

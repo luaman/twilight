@@ -125,6 +125,7 @@ typedef struct menu_item_s {
 
 typedef struct menu_s {
 	char			*id, *title;
+	char			*on_enter, *on_exit;
 	menu_item_t		**items;
 	int				 item;
 	struct menu_s	*next;
@@ -142,6 +143,9 @@ extern void Menu_Parse_Menus (codetree_t *tree_base);
 extern void M_ToggleMenu_f (void);
 extern void M_DrawPic (int x, int y, qpic_t *pic);
 extern void M_DrawTextBox (int x, int y, int width, int lines);
+extern void M_Exit (qboolean new_menu);
+extern void M_Enter (menu_t *menu);
+
 
 extern void M_Init (void);
 extern void M_Init_Cvars(void);
@@ -149,6 +153,8 @@ extern void M_Base_Init (void);
 extern void M_Base_Init_Cvars (void);
 extern void M_Renderer_Init (void);
 extern void M_Renderer_Init_Cvars (void);
+extern void M_SetKeyDest (void);
+
 
 extern inline control_type_t
 MItem_Control (menu_item_t *item)

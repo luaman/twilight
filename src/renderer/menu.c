@@ -201,6 +201,17 @@ M_Trans_Table_Trans (int from, int to)
 //=============================================================================
 /* Menu Subsystem */
 
+void
+M_SetKeyDest (void)
+{
+	if (m_menu)
+		key_dest = key_menu;
+	else if (r_worldmodel)
+		key_dest = key_game;
+	else
+		key_dest = key_console;
+}
+
 /*
 ================
 M_ToggleMenu_f
@@ -212,24 +223,15 @@ M_ToggleMenu_f (void)
 	m_entersound = true;
 
 	if (key_dest == key_menu) {
-		if (!m_menu) {	// XXX: SHOULD NEVER HAPPEN! :XXX
-			if (r_worldmodel)
-				key_dest = key_game;
-			else
-				key_dest = key_console;
-			return;
-		}
-		if (strcasecmp(m_menu->id, "Main")) {
-			Cbuf_InsertText("menu Main\n");
+		if (!m_menu) {	// XXX: IMPOSSIBLE! :XXX
+			Com_Printf("IMPOSSIBLE at %s %d (%s)\n",
+					__FILE__, __LINE__, __FUNCTION__);
+			M_SetKeyDest ();
 			return;
 		}
 
-		S_LocalSound ("misc/menu2.wav");
-		if (r_worldmodel)
-			key_dest = key_game;
-		else
-			key_dest = key_console;
-		m_menu = NULL;
+		M_Exit (false);
+		M_SetKeyDest ();
 		return;
 	} else if (key_dest == key_console && r_worldmodel)
 		Con_ToggleConsole_f ();
