@@ -55,6 +55,7 @@ cvar_t      *m_yaw;
 cvar_t      *m_forward;
 cvar_t      *m_side;
 
+cvar_t     *show_fps;
 
 client_static_t cls;
 client_state_t cl;
@@ -707,6 +708,8 @@ CL_Init_Cvars
 void
 CL_Init_Cvars (void)
 {
+	show_fps = Cvar_Get ("show_fps", "0", CVAR_NONE, NULL);
+
 	_cl_name = Cvar_Get ("_cl_name", "player", CVAR_ARCHIVE, NULL);
 	_cl_color = Cvar_Get ("_cl_color", "0", CVAR_ARCHIVE, NULL);
 

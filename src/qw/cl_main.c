@@ -157,7 +157,7 @@ Uint8      *host_colormap;
 
 netadr_t    master_adr;					// address of the master server
 
-int         fps_count;
+int         fps_count = 0;
 
 jmp_buf     host_abort;
 
@@ -1322,9 +1322,11 @@ Host_Frame (float time)
 		oldrealtime = 0;
 
 	if (cl_maxfps->value)
-		fps = bound (30.0, cl_maxfps->value, 72.0);
+		fps = cl_maxfps->value;
 	else
-		fps = bound (30.0, rate->value / 80.0, 72.0);
+		fps = rate->value / 80.0f;
+
+	fps = bound (30.0f, fps, 72.0f);
 
 	if (!cls.timedemo && realtime - oldrealtime < 1.0 / fps)
 		return;							// framerate is too high

@@ -276,10 +276,6 @@ SOURCE=.\strlib.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\sys_win.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\tga.c
 # End Source File
 # Begin Source File
