@@ -747,6 +747,52 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="">
+			<File
+				RelativePath=".\chase.h">
+			</File>
+			<File
+				RelativePath=".\cl_console.h">
+			</File>
+			<File
+				RelativePath=".\client.h">
+			</File>
+			<File
+				RelativePath=".\net.h">
+			</File>
+			<File
+				RelativePath=".\net_dgrm.h">
+			</File>
+			<File
+				RelativePath=".\net_loop.h">
+			</File>
+			<File
+				RelativePath=".\net_udp.h">
+			</File>
+			<File
+				RelativePath=".\pr_execprogram.h">
+			</File>
+			<File
+				RelativePath=".\progdefs.h">
+			</File>
+			<File
+				RelativePath=".\progs.h">
+			</File>
+			<File
+				RelativePath=".\protocol.h">
+			</File>
+			<File
+				RelativePath=".\render.h">
+			</File>
+			<File
+				RelativePath=".\server.h">
+			</File>
+			<File
+				RelativePath=".\world.h">
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\twilight.ico">
 		</File>

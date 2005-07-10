@@ -239,6 +239,28 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="">
+			<File
+				RelativePath=".\image.h">
+			</File>
+			<File
+				RelativePath=".\jpeg.h">
+			</File>
+			<File
+				RelativePath=".\pcx.h">
+			</File>
+			<File
+				RelativePath=".\qlmp.h">
+			</File>
+			<File
+				RelativePath=".\sdlimage.h">
+			</File>
+			<File
+				RelativePath=".\tga.h">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

@@ -522,6 +522,70 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="">
+			<File
+				RelativePath=".\cmd.h">
+			</File>
+			<File
+				RelativePath=".\collision.h">
+			</File>
+			<File
+				RelativePath=".\cpu.h">
+			</File>
+			<File
+				RelativePath=".\crc.h">
+			</File>
+			<File
+				RelativePath=".\cvar.h">
+			</File>
+			<File
+				RelativePath=".\hash.h">
+			</File>
+			<File
+				RelativePath=".\lh_parser.h">
+			</File>
+			<File
+				RelativePath=".\loadso.h">
+			</File>
+			<File
+				RelativePath=".\locs.h">
+			</File>
+			<File
+				RelativePath=".\mathlib.h">
+			</File>
+			<File
+				RelativePath=".\matrixlib.h">
+			</File>
+			<File
+				RelativePath=".\mdfour.h">
+			</File>
+			<File
+				RelativePath=".\menu.h">
+			</File>
+			<File
+				RelativePath=".\mod_brush.h">
+			</File>
+			<File
+				RelativePath=".\mod_brush_disk.h">
+			</File>
+			<File
+				RelativePath=".\model.h">
+			</File>
+			<File
+				RelativePath=".\sdlstub.h">
+			</File>
+			<File
+				RelativePath=".\strlib.h">
+			</File>
+			<File
+				RelativePath=".\winconsole.h">
+			</File>
+			<File
+				RelativePath=".\zone.h">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

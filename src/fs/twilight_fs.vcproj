@@ -300,6 +300,40 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="">
+			<File
+				RelativePath=".\bsp.h">
+			</File>
+			<File
+				RelativePath=".\dir.h">
+			</File>
+			<File
+				RelativePath=".\embedded.h">
+			</File>
+			<File
+				RelativePath=".\embedded_data.h">
+			</File>
+			<File
+				RelativePath=".\fs.h">
+			</File>
+			<File
+				RelativePath=".\fs_hash.h">
+			</File>
+			<File
+				RelativePath=".\fs_new.h">
+			</File>
+			<File
+				RelativePath=".\pak.h">
+			</File>
+			<File
+				RelativePath=".\rw_ops.h">
+			</File>
+			<File
+				RelativePath=".\wad.h">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

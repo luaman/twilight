@@ -599,6 +599,37 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="">
+			<File
+				RelativePath=".\client.h">
+			</File>
+			<File
+				RelativePath=".\net.h">
+			</File>
+			<File
+				RelativePath=".\pmove.h">
+			</File>
+			<File
+				RelativePath=".\progdefs.h">
+			</File>
+			<File
+				RelativePath=".\progs.h">
+			</File>
+			<File
+				RelativePath=".\protocol.h">
+			</File>
+			<File
+				RelativePath=".\render.h">
+			</File>
+			<File
+				RelativePath=".\server.h">
+			</File>
+			<File
+				RelativePath=".\world.h">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
