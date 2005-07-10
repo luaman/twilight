@@ -153,6 +153,10 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="">
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

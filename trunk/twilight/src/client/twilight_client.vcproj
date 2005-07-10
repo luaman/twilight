@@ -259,6 +259,28 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="">
+			<File
+				RelativePath=".\cclient.h">
+			</File>
+			<File
+				RelativePath=".\console.h">
+			</File>
+			<File
+				RelativePath=".\dlight.h">
+			</File>
+			<File
+				RelativePath=".\hud.h">
+			</File>
+			<File
+				RelativePath=".\keys.h">
+			</File>
+			<File
+				RelativePath=".\teamplay.h">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

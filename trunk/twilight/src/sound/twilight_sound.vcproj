@@ -199,6 +199,16 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="">
+			<File
+				RelativePath=".\cdaudio.h">
+			</File>
+			<File
+				RelativePath=".\sound.h">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
