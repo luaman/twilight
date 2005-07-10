@@ -122,10 +122,11 @@ void
 Cbuf_InsertText (const char *text)
 {
 	sizebuf_t	*p;
-	char		*buf;
+	Uint8		*buf;
 	size_t		len;
 
-	if (!(len = strlen (text)))
+	len = strlen (text);
+	if (len == 0)
 		return;
 
 	p = Zone_Alloc (stringzone, sizeof (sizebuf_t));

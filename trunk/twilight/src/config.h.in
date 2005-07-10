@@ -1,268 +1,171 @@
 /* src/config.h.in.  Generated from configure.in by autoheader.  */
 
-/* 
-   Defined if this is a CVS snapshot */
+/* Defined if this is a CVS snapshot */
 #undef DEVEL_RELEASE
 
-/* 
-   Define to whatever your OS requires */
+/* Define to whatever your OS requires */
 #undef DYNGLENTRY
 
-/* 
-   Define to your default OpenGL library */
+/* Define to your default OpenGL library */
 #undef GL_LIBRARY
 
-/* 
-   Define to 1 if you have the <dlfcn.h>
-   header file. */
+/* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
-/* 
-   Define to 1 if you have the `dlopen'
-   function. */
+/* Define to 1 if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
 
-/* 
-   Define to 1 if you have the <execinfo.h>
-   header file. */
+/* Define to 1 if you have the <execinfo.h> header file. */
 #undef HAVE_EXECINFO_H
 
-/* 
-   Define to 1 if you have the `fcntl'
-   function. */
+/* Define to 1 if you have the `fcntl' function. */
 #undef HAVE_FCNTL
 
-/* 
-   Define to 1 if you have the <fcntl.h>
-   header file. */
+/* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
-/* 
-   Define to 1 if you have the <inttypes.h>
-   header file. */
+/* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* 
-   Define to 1 if you have the <limits.h>
-   header file. */
+/* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 
-/* 
-   Define to 1 if you have the <memory.h>
-   header file. */
+/* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* 
-   Define to 1 if you have the `mkdir'
-   function. */
+/* Define to 1 if you have the `mkdir' function. */
 #undef HAVE_MKDIR
 
-/* 
-   Defined if we have mmx support */
+/* Defined if we have mmx support */
 #undef HAVE_MMX
 
-/* 
-   Define to 1 if you have the <pwd.h>
-   header file. */
+/* Define to 1 if you have the <pwd.h> header file. */
 #undef HAVE_PWD_H
 
-/* 
-   Define if you have SDL available (required for
-   clients) */
+/* Define if you have SDL available (required for clients) */
 #undef HAVE_SDL_H
 
-/* 
-   Defined if we have SDL_LoadObject */
+/* Defined if we have SDL_LoadObject */
 #undef HAVE_SDL_LOADOBJECT
 
-/* 
-   Define to 1 if you have the <signal.h>
-   header file. */
+/* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
 
-/* 
-   Define to 1 if you have the `snprintf'
-   function. */
+/* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
 
-/* 
-   Define to 1 if you have the `stat'
-   function. */
+/* Define to 1 if you have the `stat' function. */
 #undef HAVE_STAT
 
-/* 
-   Define to 1 if you have the <stdint.h>
-   header file. */
+/* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
-/* 
-   Define to 1 if you have the <stdlib.h>
-   header file. */
+/* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
-/* 
-   Define to 1 if you have the `strcasecmp'
-   function. */
+/* Define to 1 if you have the `strcasecmp' function. */
 #undef HAVE_STRCASECMP
 
-/* 
-   Define to 1 if you have the <strings.h>
-   header file. */
+/* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
-/* 
-   Define to 1 if you have the <string.h>
-   header file. */
+/* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
-/* 
-   Define to 1 if you have the `strlcat'
-   function. */
+/* Define to 1 if you have the `strlcat' function. */
 #undef HAVE_STRLCAT
 
-/* 
-   Define to 1 if you have the `strlcpy'
-   function. */
+/* Define to 1 if you have the `strlcpy' function. */
 #undef HAVE_STRLCPY
 
-/* 
-   Define to 1 if you have the `strncasecmp'
-   function. */
+/* Define to 1 if you have the `strncasecmp' function. */
 #undef HAVE_STRNCASECMP
 
-/* 
-   Define to 1 if you have the <sys/stat.h>
-   header file. */
+/* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
-/* 
-   Define to 1 if you have the <sys/time.h>
-   header file. */
+/* Define to 1 if you have the <sys/time.h> header file. */
 #undef HAVE_SYS_TIME_H
 
-/* 
-   Define to 1 if you have the <sys/types.h>
-   header file. */
+/* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* 
-   Define to 1 if you have the <time.h>
-   header file. */
+/* Define to 1 if you have the <time.h> header file. */
 #undef HAVE_TIME_H
 
-/* 
-   Define to 1 if you have the <unistd.h>
-   header file. */
+/* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* 
-   Define to 1 if you have the `vsnprintf'
-   function. */
+/* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
 
-/* 
-   Define to 1 if you have the <windef.h>
-   header file. */
+/* Define to 1 if you have the <windef.h> header file. */
 #undef HAVE_WINDEF_H
 
-/* 
-   Define to 1 if you have the `_mkdir'
-   function. */
+/* Define to 1 if you have the `_mkdir' function. */
 #undef HAVE__MKDIR
 
-/* 
-   Define to 1 if you have the `_snprintf'
-   function. */
+/* Define to 1 if you have the `_snprintf' function. */
 #undef HAVE__SNPRINTF
 
-/* 
-   Define to 1 if you have the `_stat'
-   function. */
+/* Define to 1 if you have the `_stat' function. */
 #undef HAVE__STAT
 
-/* 
-   Define to 1 if you have the `_stricmp'
-   function. */
+/* Define to 1 if you have the `_stricmp' function. */
 #undef HAVE__STRICMP
 
-/* 
-   Define to 1 if you have the `_strnicmp'
-   function. */
+/* Define to 1 if you have the `_strnicmp' function. */
 #undef HAVE__STRNICMP
 
-/* 
-   Define to 1 if you have the `_vsnprintf'
-   function. */
+/* Define to 1 if you have the `_vsnprintf' function. */
 #undef HAVE__VSNPRINTF
 
-/* 
-   Name of package */
+/* Name of package */
 #undef PACKAGE
 
-/* 
-   Define to the address where bug reports for
-   this package should be sent. */
+/* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
-/* 
-   Define to the full name of this package.
-   */
+/* Define to the full name of this package. */
 #undef PACKAGE_NAME
 
-/* 
-   Define to the full name and version of
-   this package. */
+/* Define to the full name and version of this package. */
 #undef PACKAGE_STRING
 
-/* 
-   Define to the one symbol short name of
-   this package. */
+/* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
 
-/* 
-   Define to the version of this package. */
+/* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* 
-   Define to your default SDL_image library */
+/* Define to your default SDL_image library */
 #undef SDL_IMAGE_LIBRARY
 
-/* 
-   Location of read-only (shared) configuration file */
+/* Location of read-only (shared) configuration file */
 #undef SHARECONF
 
-/* 
-   Location of read-only (shared) gamedata */
+/* Location of read-only (shared) gamedata */
 #undef SHAREPATH
 
-/* 
-   Define to 1 if you have the ANSI
-   C header files. */
+/* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* 
-   Location of user-modifyable configuration file */
+/* Location of user-modifyable configuration file */
 #undef USERCONF
 
-/* 
-   Location of user-modifyable gamedata */
+/* Location of user-modifyable gamedata */
 #undef USERPATH
 
-/* 
-   Version number of package */
+/* Version number of package */
 #undef VERSION
 
-/* 
-   Define if clients should be compiled */
+/* Define if clients should be compiled */
 #undef WANT_CLIENTS
 
-/* 
-   Define if servers should be compiled */
+/* Define if servers should be compiled */
 #undef WANT_SERVERS
 
-/* 
-   Define to empty if `const' does not conform
-   to ANSI C. */
+/* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
 /* Define to `__inline__' or `__inline' if that's what the C compiler

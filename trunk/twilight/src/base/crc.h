@@ -28,7 +28,7 @@
 #ifndef __CRC_H
 #define __CRC_H
 
-Uint16 CRC_Block (const Uint8 *start, size_t count);
+Uint16 CRC_Block (const char *start, size_t count);
 Uint8 COM_BlockSequenceCRCByte (const Uint8 *base, size_t length, int sequence);
 
 #endif // __CRC_H

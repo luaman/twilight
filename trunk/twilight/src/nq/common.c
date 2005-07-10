@@ -914,7 +914,7 @@ COM_LoadZoneFile (const char *path, qboolean complain, memzone_t *zone)
 	return COM_LoadFile (path, complain, 0, zone);
 }
 
-Uint8 *
+char *
 COM_LoadTempFile (const char *path, qboolean complain)
 {
 	return COM_LoadFile (path, complain, 1, NULL);

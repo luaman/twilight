@@ -81,7 +81,7 @@ CRC_Init (Uint16 *crcvalue)
 }
 
 Uint16
-CRC_Block (const Uint8 *start, size_t count)
+CRC_Block (const char *start, size_t count)
 {
 	Uint16 crc;
 
@@ -173,7 +173,7 @@ COM_BlockSequenceCRCByte (const Uint8 *base, size_t length, int sequence)
 {
 	Uint16	crc;
 	Uint8	*p;
-	Uint8	chkb[60 + 4];
+	char	chkb[60 + 4];
 
 	p = chktbl + (sequence % (sizeof (chktbl) - 8));
 
