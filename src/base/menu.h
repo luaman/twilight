@@ -133,8 +133,6 @@ typedef struct menu_s {
 } menu_t;
 
 extern menu_t		*m_menu;
-extern menu_t		*m_first;
-extern memzone_t	*m_zone;
 extern qboolean		m_entersound;
 
 

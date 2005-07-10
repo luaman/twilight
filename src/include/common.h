@@ -191,7 +191,7 @@ extern int  com_filesize;
 extern char com_gamedir[MAX_OSPATH];
 
 Uint8 *COM_LoadZoneFile (const char *path, qboolean complain, memzone_t *zone);
-Uint8 *COM_LoadTempFile (const char *path, qboolean complain);
+char *COM_LoadTempFile (const char *path, qboolean complain);
 Uint8 *COM_LoadNamedFile (const char *path, qboolean complain);
 void COM_CreatePath (const char *path);
 void COM_Gamedir (const char *dir);
