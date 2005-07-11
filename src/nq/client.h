@@ -79,7 +79,7 @@ typedef struct {
 	struct qsocket_s	*netcon;
 	sizebuf_t			message;				// writing buffer to send to server
 
-	Uint8				msg_buf[1024];
+	int				msg_buf[1024];
 } client_static_t;
 
 extern client_static_t cls;
@@ -210,9 +210,9 @@ typedef struct {
 	int         state;					// low bit is down state
 } kbutton_t;
 
-extern kbutton_t in_mlook, in_klook;
-extern kbutton_t in_strafe;
-extern kbutton_t in_speed;
+static kbutton_t in_mlook, in_klook;
+static kbutton_t in_strafe;
+static kbutton_t in_speed;
 
 #define freelook (m_freelook->ivalue || (in_mlook.state & 1))
 
@@ -264,8 +264,8 @@ void	V_SetContentsColor (int contents);
 //
 // cl_ents
 //
-extern entity_t *traceline_entity[MAX_EDICTS];
-extern int traceline_entities;
+static entity_t *traceline_entity[MAX_EDICTS];
+static int traceline_entities;
 
 void CL_ScanForBModels (void);
 void CL_Update_Matrices (entity_t *ent);

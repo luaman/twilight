@@ -94,7 +94,7 @@ static cvar_t *sys_asciionly;
 static cvar_t *sys_extrasleep;
 static cvar_t *sys_logname;
 
-static int sys_gametypes;
+int sys_gametypes;
 
 char logname[MAX_OSPATH] = "";
 
