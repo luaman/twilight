@@ -71,7 +71,6 @@ extern qboolean	va_locked;
 extern GLuint	MAX_VERTEX_ARRAYS, MAX_VERTEX_INDICES;
 extern cvar_t	*gl_copy_arrays;
 extern cvar_t	*gl_vbo_v, *gl_vbo_tc, *gl_vbo_c;
-extern memzone_t *vzone;
 
 extern float_int_t *FtoUB_tmp;
 
