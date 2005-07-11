@@ -59,7 +59,6 @@ typedef struct
 extern int dlightdivtable[32768];
 extern mplane_t *lightplane;
 extern vec3_t lightspot;
-extern vec3_t lightcolor;
 
 void GL_Light_Tables_Init (void);
 void R_DrawCoronas(void);
