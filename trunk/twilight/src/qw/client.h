@@ -220,18 +220,18 @@ extern struct cvar_s *cl_shownet;
 extern struct cvar_s *cl_hudswap;
 extern struct cvar_s *cl_mapname;
 
-extern struct cvar_s *cl_pitchdriftspeed;
-extern struct cvar_s *lookspring;
-extern struct cvar_s *lookstrafe;
-extern struct cvar_s *sensitivity;
+static struct cvar_s *cl_pitchdriftspeed;
+static struct cvar_s *lookspring;
+static struct cvar_s *lookstrafe;
+static struct cvar_s *sensitivity;
 
-extern struct cvar_s *m_pitch;
-extern struct cvar_s *m_yaw;
-extern struct cvar_s *m_forward;
-extern struct cvar_s *m_side;
+static struct cvar_s *m_pitch;
+static struct cvar_s *m_yaw;
+static struct cvar_s *m_forward;
+static struct cvar_s *m_side;
 
-extern struct cvar_s *m_freelook;
-extern struct cvar_s *m_filter;
+static struct cvar_s *m_freelook;
+static struct cvar_s *m_filter;
 
 extern struct cvar_s *_windowed_mouse;
 
@@ -295,8 +295,8 @@ typedef struct {
 	int	state;		// low bit is down state
 } kbutton_t;
 
-extern kbutton_t in_mlook, in_klook;
-extern kbutton_t in_strafe;
+static kbutton_t in_mlook, in_klook;
+static kbutton_t in_strafe;
 extern kbutton_t in_speed;
 
 #define freelook (m_freelook->ivalue || (in_mlook.state & 1))

@@ -58,17 +58,17 @@ memzone_t	*snd_zone;
 channel_t   channels[MAX_CHANNELS];
 int         total_channels;
 
-static int         snd_blocked = 0;
-static qboolean    snd_initialized = false;
+extern int         snd_blocked = 0;
+extern qboolean    snd_initialized = false;
 
 // pointer should go away
 dma_t *shm = 0;
 
-static vec3_t      listener_origin;
-static vec3_t      listener_forward;
-static vec3_t      listener_right;
-static vec3_t      listener_up;
-static vec_t       sound_nominal_clip_dist = 1000.0;
+vec3_t      listener_origin;
+vec3_t      listener_forward;
+vec3_t      listener_right;
+vec3_t      listener_up;
+vec_t       sound_nominal_clip_dist = 1000.0;
 
 int         soundtime;					// sample PAIRS
 int         paintedtime;				// sample PAIRS
