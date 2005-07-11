@@ -81,7 +81,7 @@ static const char rcsid[] =
 #endif
 
 
-static int nostdout = 0;
+extern int nostdout = 0;
 
 static cvar_t *sys_asciionly;
 static cvar_t *sys_logname;

@@ -82,7 +82,7 @@ static cvar_t     *maxspectators;
 cvar_t     *deathmatch;
 static cvar_t     *spawn;
 static cvar_t     *watervis;
-static cvar_t     *hostname;
+cvar_t     *hostname;
 static cvar_t     *filterban;
 static cvar_t     *temp1;
 cvar_t     *coop;

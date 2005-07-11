@@ -44,8 +44,8 @@ static const char rcsid[] =
 dprograms_t *progs;
 dfunction_t *pr_functions;
 char *pr_strings;
-static ddef_t *pr_fielddefs;
-static ddef_t *pr_globaldefs;
+ddef_t *pr_fielddefs;
+ddef_t *pr_globaldefs;
 dstatement_t *pr_statements;
 globalvars_t *pr_global_struct;
 float *pr_globals;			// same as pr_global_struct
@@ -54,7 +54,7 @@ Uint32 pr_edict_size;			// in bytes
 static memzone_t *progs_memzone;
 static memzone_t *edictstring_memzone;
 
-static Uint32 type_size[8] =
+Uint32 type_size[8] =
 {
 	1,
 	sizeof (void *) / 4,

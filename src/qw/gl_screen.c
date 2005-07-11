@@ -114,7 +114,7 @@ static cvar_t   *r_brightness;
 static cvar_t   *r_contrast;
 static cvar_t   *cl_avidemo;
 
-static cvar_t	*show_fps;
+cvar_t	*show_fps;
 int				fps_capped0, fps_capped1;
 int				fps_count;
 

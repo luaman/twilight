@@ -49,12 +49,12 @@ static const char rcsid[] =
 usercmd_t nullcmd;					// guarenteed to be zero
 
 cvar_t *fs_shareconf;
-static cvar_t *fs_sharepath;
+cvar_t *fs_sharepath;
 cvar_t *fs_userconf;
-static cvar_t *fs_userpath;
-static cvar_t *fs_gamename;
-static cvar_t *game_name;
-static cvar_t *registered;
+cvar_t *fs_userpath;
+cvar_t *fs_gamename;
+cvar_t *game_name;
+cvar_t *registered;
 
 static void COM_InitFilesystem (void);
 //static void COM_Path_f (void);
