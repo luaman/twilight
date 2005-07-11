@@ -66,17 +66,17 @@ static gltexture_t *gltextures;
 /*
  * Memory zones.
  */
-static memzone_t *glt_skin_zone;
-static memzone_t *glt_zone;
+memzone_t *glt_skin_zone;
+memzone_t *glt_zone;
 
 /*
  * This stuff is entirely specific to the selection of gl filter and 
  * texture modes.
  */
-static int		glt_filter_min = GL_LINEAR_MIPMAP_NEAREST;
-static int		glt_filter_mag = GL_LINEAR;
-static int		glt_solid_format = 3;
-static int		glt_alpha_format = 4;
+int		glt_filter_min = GL_LINEAR_MIPMAP_NEAREST;
+int		glt_filter_mag = GL_LINEAR;
+int		glt_solid_format = 3;
+int		glt_alpha_format = 4;
 
 typedef struct {
 	char	*name;
