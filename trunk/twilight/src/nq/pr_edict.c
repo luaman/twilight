@@ -44,8 +44,8 @@ static const char rcsid[] =
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
 char			*pr_strings;
-static ddef_t			*pr_fielddefs;
-static ddef_t			*pr_globaldefs;
+ddef_t			*pr_fielddefs;
+ddef_t			*pr_globaldefs;
 dstatement_t	*pr_statements;
 globalvars_t	*pr_global_struct;
 float			*pr_globals;		// same as pr_global_struct
