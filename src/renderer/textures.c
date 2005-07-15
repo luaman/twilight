@@ -41,6 +41,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "textures.h"
+//#include "xmmintrin.h"
 
 static Uint32 * GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette, qboolean check_empty);
 static void GLT_FloodFill8 (Uint8 * skin, int skinwidth, int skinheight);
@@ -55,7 +56,7 @@ typedef struct gltexture_s
 	char				identifier[128];
 	GLuint				width, height;
 	qboolean			mipmap;
-	unsigned short		crc;
+	unsigned short		checksum;
 	int					count;
 	struct gltexture_s	*next;
 }
@@ -66,17 +67,17 @@ static gltexture_t *gltextures;
 /*
  * Memory zones.
  */
-memzone_t *glt_skin_zone;
-memzone_t *glt_zone;
+static memzone_t *glt_skin_zone;
+static memzone_t *glt_zone;
 
 /*
  * This stuff is entirely specific to the selection of gl filter and 
  * texture modes.
  */
-int		glt_filter_min = GL_LINEAR_MIPMAP_NEAREST;
-int		glt_filter_mag = GL_LINEAR;
-int		glt_solid_format = 3;
-int		glt_alpha_format = 4;
+static int		glt_filter_min = GL_LINEAR_MIPMAP_NEAREST;
+static int		glt_filter_mag = GL_LINEAR;
+static int		glt_solid_format = 3;
+static int		glt_alpha_format = 4;
 
 typedef struct {
 	char	*name;
@@ -737,7 +738,7 @@ R_ResampleTextureNoLerpBase (void *indata, int inwidth, int inheight,
 	fracstep = inwidth*0x10000/outwidth;
 	for (i = 0;i < outheight;i++)
 	{
-		inrow = (int *)indata + inwidth * (i * inheight / outheight);
+		inrow = (Uint32 *)indata + inwidth * (i * inheight / outheight);
 		frac = fracstep >> 1;
 		j = outwidth - 4;
 		while (j >= 0)
@@ -835,7 +836,7 @@ R_ResampleTextureBase (void *indata, int inwidth, int inheight, void *outdata,
 }
 
 
-#ifdef HAVE_MMX
+#ifdef HAVE_GCC_MMX_ASM
 static void
 R_ResampleTextureLerpLineMMX (Uint8 *in, Uint8 *out, int inwidth, int outwidth,
 		int fstep_w)
@@ -1156,8 +1157,8 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 
 		// clamp SrcY to cover for possible float error
 		// to make sure the edges fall into the special cases
-		if (SrcY > inheight - 1)
-			SrcY = inheight - 1;
+		if (SrcY > (inheight - 1.01f))
+			SrcY = (inheight - 1.01f);
 
 		// go to the start of the next row. "od" should be pointing at the right place already.
 		idrowstart = ((unsigned char*)indata) + ((int)SrcY)*inwidth*4;
@@ -1166,8 +1167,8 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 		{
 			// clamp SrcY to cover for possible float error
 			// to make sure that the edges fall into the special cases
-			if (SrcX > inwidth - 1)
-				SrcX = inwidth - 1;
+			if (SrcX > (inwidth - 1.01f))
+				SrcX = inwidth - 1.01f;
 
 			id = idrowstart + ((int) SrcX)*4;
 
@@ -1406,7 +1407,78 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 			else if (edges[0] && edges[1] && edges[2]) {
 				memcpy(od, nearest, 4);
 				//*((unsigned int*)od) = *((unsigned int*)nearest);
-			} else {
+			}
+#if defined(HAVE_GCC_SSE_ASM) && 0
+			else if (cpu_flags & CPU_SSE)
+			{
+				float denom = 0;
+				__v4sf tmp = {0};
+
+				{
+					__v4sf vpctnear = {pctnear, pctnear, pctnear, pctnear};
+					__v4sf xmm1 = {0};
+
+					xmm1 = _mm_cvtpu8_ps (*(__m64 *)nearest);
+					xmm1 = _mm_mul_ps(xmm1, vpctnear);
+					tmp = _mm_add_ps(tmp, xmm1);
+
+					denom += pctnear;
+				}
+
+				if ( !edges[0] ) {
+					__v4sf vpctleft = {pctleft, pctleft, pctleft, pctleft};
+					__v4sf xmm1 = {0};
+
+					xmm1 = _mm_cvtpu8_ps (*(__m64 *)left);
+					xmm1 = _mm_mul_ps(xmm1, vpctleft);
+					tmp = _mm_add_ps(tmp, xmm1);
+
+					denom += pctleft;
+				}
+
+				if ( edges[1] ) {
+					__v4sf vpctright = {pctright, pctright, pctright, pctright};
+					__v4sf xmm1 = {0};
+
+					xmm1 = _mm_cvtpu8_ps (*(__m64 *)right);
+					xmm1 = _mm_mul_ps(xmm1, vpctright);
+					tmp = _mm_add_ps(tmp, xmm1);
+
+					denom += pctright;
+				}
+
+				if ( edges[2] ) {
+					__v4sf vpctopp = {pctopp, pctopp, pctopp, pctopp};
+					__v4sf xmm1 = {0};
+
+					xmm1 = _mm_cvtpu8_ps (*(__m64 *)opposite);
+					xmm1 = _mm_mul_ps(xmm1, vpctopp);
+					tmp = _mm_add_ps(tmp, xmm1);
+
+					denom += pctopp;
+				}
+
+				{
+					__v4sf vdenom = {denom, denom, denom, denom};
+					__v4sf vhigh = {255, 255, 255, 255};
+					__v4sf vlow = {0, 0, 0, 0};
+					__m64 mm0, mm1;
+
+					tmp = _mm_div_ps(tmp, vdenom);
+					tmp = _mm_min_ps(tmp, vhigh);
+					tmp = _mm_max_ps(tmp, vlow);
+					mm0 = _mm_cvttps_pi32 (tmp);
+					tmp = _mm_movehl_ps(tmp, tmp);
+					mm1 = _mm_cvttps_pi32 (tmp);
+					mm0 = _mm_packs_pi32 (mm0, mm1);
+					mm0 = _mm_packs_pu16 (mm0, mm0);
+					*(Uint32 *) od = _mm_cvtsi64_si32(mm0);
+				}
+				_mm_empty();
+			}
+#endif
+			else
+			{
 				float num[4], denom=pctnear;
 
 				num[0] = (*nearest * pctnear);
@@ -1473,10 +1545,10 @@ R_ResampleTexture (void *id, int iw, int ih, void *od, int ow, int oh)
 		return;
 	}
 
-#ifdef HAVE_MMX
-	if ((cpu_flags & CPU_MMX_EXT) && !((iw & 1) || (ih & 1) || (ow & 1) || (oh & 1)))
+#ifdef HAVE_GCC_MMX_ASM
+	if (1 && (cpu_flags & CPU_MMX_EXT) && !((iw & 1) || (ih & 1) || (ow & 1) || (oh & 1)))
 		R_ResampleTextureMMX_EXT (id, iw, ih, od, ow, oh);
-	else if (cpu_flags & CPU_MMX)
+	else if (1 && cpu_flags & CPU_MMX)
 		R_ResampleTextureMMX (id, iw, ih, od, ow, oh);
 	else
 #endif
@@ -1659,13 +1731,15 @@ GLT_Load_Raw (const char *identifier, Uint width, Uint height, Uint8 *data,
 		Uint32 *palette, int flags, int bpp)
 {
 	gltexture_t	*glt = NULL;
-	Uint16		crc = 0;
+	Uint16		checksum = 0;
 	qboolean	ret = false;
 
 	/* see if the texture is already present */
 	if (identifier[0])
 	{
-		crc = CRC_Block (data, width*height*(bpp/8));
+		checksum = Checksum_32 ((Uint32 *) data, width*height*(bpp/8));
+		if (!checksum)
+			checksum = CRC_Block (data, width*height*(bpp/8));
 
 		for (glt = gltextures; glt != NULL; glt = glt->next)
 		{
@@ -1673,7 +1747,7 @@ GLT_Load_Raw (const char *identifier, Uint width, Uint height, Uint8 *data,
 			{
 				if (!(flags & TEX_REPLACE) ||
 						(width == glt->width && height == glt->height
-						&& crc == glt->crc)) {
+						&& checksum == glt->checksum)) {
 					glt->count++;
 					return glt->texnum;
 				} else
@@ -1695,7 +1769,7 @@ setuptexture:
 	glt->width = width;
 	glt->height = height;
 	glt->mipmap = flags & TEX_MIPMAP;
-	glt->crc = crc;
+	glt->checksum = checksum;
 
 	qglBindTexture (GL_TEXTURE_2D, glt->texnum);
 

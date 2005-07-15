@@ -81,7 +81,7 @@ CRC_Init (Uint16 *crcvalue)
 }
 
 Uint16
-CRC_Block (const char *start, size_t count)
+CRC_Block (const Uint8 *start, size_t count)
 {
 	Uint16 crc;
 
@@ -173,7 +173,7 @@ COM_BlockSequenceCRCByte (const Uint8 *base, size_t length, int sequence)
 {
 	Uint16	crc;
 	Uint8	*p;
-	char	chkb[60 + 4];
+	Uint8	chkb[60 + 4];
 
 	p = chktbl + (sequence % (sizeof (chktbl) - 8));
 
@@ -193,4 +193,19 @@ COM_BlockSequenceCRCByte (const Uint8 *base, size_t length, int sequence)
 	crc &= 0xff;
 
 	return crc;
+}
+
+Uint32
+Checksum_32 (Uint32 *data, size_t size)
+{
+	Uint32	checksum = 0, i;
+
+	if (size % 4)
+		return 0;
+	size /= 4;
+
+	for (i = 0; i < size; i++)
+		checksum += data[i];
+
+	return checksum;
 }

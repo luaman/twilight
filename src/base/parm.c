@@ -32,12 +32,12 @@ static const char rcsid[] =
 #include "sys.h"
 
 #define MAX_NUM_ARGVS   50
-#define NUM_SAFE_ARGVS  5
+#define NUM_SAFE_ARGVS  6
 
 static char *largv[MAX_NUM_ARGVS + NUM_SAFE_ARGVS + 1];
 static char *argvdummy = " ";
 static char *safeargvs[NUM_SAFE_ARGVS] =
-	{ "-nocdaudio", "-nolan", "-nomouse", "-nosound", "-window" };
+	{ "-nocdaudio", "-nolan", "-nomouse", "-nosound", "-window", "-nocpuid"};
 
 int com_argc;
 char **com_argv;

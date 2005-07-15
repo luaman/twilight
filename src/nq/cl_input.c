@@ -42,16 +42,16 @@ static const char rcsid[] =
 static cvar_t	*in_key_repeat_delay;
 static cvar_t	*in_key_repeat_interval;
 
-cvar_t	*lookspring;
-cvar_t	*lookstrafe;
-cvar_t	*sensitivity;
+static cvar_t	*lookspring;
+static cvar_t	*lookstrafe;
+static cvar_t	*sensitivity;
 
-cvar_t	*m_filter;
-cvar_t	*m_pitch;
-cvar_t	*m_yaw;
-cvar_t	*m_forward;
-cvar_t	*m_side;
-cvar_t	*m_freelook;
+static cvar_t	*m_filter;
+static cvar_t	*m_pitch;
+static cvar_t	*m_yaw;
+static cvar_t	*m_forward;
+static cvar_t	*m_side;
+static cvar_t	*m_freelook;
 
 /*
 ===============================================================================
@@ -80,7 +80,7 @@ static kbutton_t in_left, in_right, in_forward, in_back;
 static kbutton_t in_lookup, in_lookdown, in_moveleft, in_moveright;
 static kbutton_t in_speed, in_use, in_jump, in_attack;
 static kbutton_t in_up, in_down;
-static kbutton_t in_strafe, in_mlook;
+kbutton_t in_strafe, in_mlook;
 
 static int in_impulse;
 

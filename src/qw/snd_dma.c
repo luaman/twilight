@@ -58,17 +58,17 @@ memzone_t	*snd_zone;
 channel_t   channels[MAX_CHANNELS];
 int         total_channels;
 
-extern int         snd_blocked = 0;
-extern qboolean    snd_initialized = false;
+static int         snd_blocked = 0;
+static qboolean    snd_initialized = false;
 
 // pointer should go away
 dma_t *shm = 0;
 
-vec3_t      listener_origin;
-vec3_t      listener_forward;
-vec3_t      listener_right;
-vec3_t      listener_up;
-vec_t       sound_nominal_clip_dist = 1000.0;
+static vec3_t      listener_origin;
+static vec3_t      listener_forward;
+static vec3_t      listener_right;
+static vec3_t      listener_up;
+static vec_t       sound_nominal_clip_dist = 1000.0;
 
 int         soundtime;					// sample PAIRS
 int         paintedtime;				// sample PAIRS
@@ -389,8 +389,10 @@ S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol,
 	if (!sound_started)
 		return;
 
-	if (!sfx)
+	if (!sfx) {
+		Com_DPrintf("Unable to play: NULL sfx passed.\n", sfx->name);
 		return;
+	}
 
 	if (nosound->ivalue)
 		return;
@@ -399,8 +401,10 @@ S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol,
 
 // pick a channel to play on
 	target_chan = SND_PickChannel (entnum, entchannel);
-	if (!target_chan)
+	if (!target_chan) {
+		Com_DPrintf("Unable to play %s: No target channel.\n", sfx->name);
 		return;
+	}
 
 // spatialize
 	memset (target_chan, 0, sizeof (*target_chan));
@@ -417,6 +421,7 @@ S_StartSound (int entnum, int entchannel, sfx_t *sfx, vec3_t origin, float fvol,
 // new channel
 	S_LoadSound (sfx);
 	if (!sfx->loaded) {
+		Com_DPrintf("Unable to play %s: Not loaded.\n", sfx->name);
 		target_chan->sfx = NULL;
 		return;							// couldn't load the sound's data
 	}

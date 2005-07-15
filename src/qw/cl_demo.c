@@ -353,7 +353,8 @@ void
 CL_Record_f (void)
 {
 	int				c, n, i, j, seq = 1;
-	char			name[MAX_OSPATH], buf_data[MAX_MSGLEN], *s;
+	char			name[MAX_OSPATH], *s;
+	Uint8			buf_data[MAX_MSGLEN];
 	entity_t		*ent;
 	sizebuf_t		buf;
 	player_info_t	*player;

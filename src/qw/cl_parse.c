@@ -284,7 +284,7 @@ Model_NextDownload (void)
 	// done with modellist, request first of static signon messages
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message,
-			va (prespawn_name, cl.servercount,
+			va ("prespawn %d 0 %d", cl.servercount,
 				ccl.worldmodel->brush->checksum2));
 }
 
@@ -322,7 +322,7 @@ Sound_NextDownload (void)
 	cl_flagindex = -1;
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message,
-			va (modellist_name, cl.servercount, 0));
+			va ("modellist %d %d", cl.servercount, 0));
 }
 
 
@@ -361,7 +361,6 @@ static void
 CL_ParseDownload (void)
 {
 	int         size, percent;
-	Uint8       name[MAX_OSPATH];
 
 
 	// read the data
@@ -387,9 +386,9 @@ CL_ParseDownload (void)
 
 	// open the file if not opened yet
 	if (!cls.download) {
-		COM_CreatePath (name);
+		COM_CreatePath (cls.downloadname);
 
-		cls.download = FS_Open_New (name, 0);
+		cls.download = FS_Open_New (cls.downloadname, 0);
 
 		if (!cls.download) {
 			msg_readcount += size;
@@ -585,7 +584,7 @@ CL_ParseServerData (void)
 	memset (cl.sound_name, 0, sizeof (cl.sound_name));
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message,
-			va (soundlist_name, cl.servercount, 0));
+			va ("soundlist %d %d", cl.servercount, 0));
 
 	// now waiting for downloads, etc
 	ccls.state = ca_onserver;
@@ -618,7 +617,7 @@ CL_ParseSoundlist (void)
 	if (n) {
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message,
-				va (soundlist_name, cl.servercount, n));
+				va ("soundlist %d %d", cl.servercount, n));
 		return;
 	}
 
@@ -635,6 +634,7 @@ CL_ParseModellist (void)
 	int         n;
 
 // precache models and note certain default indexes
+	Com_Printf ("Recieving model list...");
 	nummodels = MSG_ReadByte ();
 
 	for (;;) {
@@ -654,14 +654,17 @@ CL_ParseModellist (void)
 			cl_flagindex = nummodels;
 	}
 
+	Com_Printf ("%d", nummodels);
 	n = MSG_ReadByte ();
 
 	if (n) {
+		Com_Printf (".%d\n", n);
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message,
-						 va (modellist_name, cl.servercount, n));
+						 va ("modellist %d %d", cl.servercount, n));
 		return;
 	}
+	Com_Printf ("\n", n);
 
 	cls.downloadnumber = 0;
 	cls.downloadtype = dl_model;

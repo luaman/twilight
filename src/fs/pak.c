@@ -43,10 +43,6 @@ typedef struct fsp_group_s {
 	fs_file_t	*pak;
 } fsp_group_t;
 
-typedef struct fsp_file_s {
-	int	ofs;
-} fsp_file_t;
-
 typedef struct
 {
 	char	name[56];
@@ -71,23 +67,20 @@ static void
 FSP_Free_File (fs_file_t *file)
 {
 	Zone_Free (file->name_base);
-	Zone_Free (file->fs_data);
 }
 
 static SDL_RWops *
 FSP_Open_File (fs_file_t *file, Uint32 flags)
 {
-	fsp_file_t	*p_file;
 	fsp_group_t	*pak;
 	SDL_RWops	*rw;
 
 	if (flags & FSF_WRITE)
 		return NULL;
 
-	p_file = file->fs_data;
 	pak = file->group->fs_data;
 
-	rw = LimitFromRW(pak->pak->open(pak->pak, 0), p_file->ofs, p_file->ofs + file->len);
+	rw = LimitFromRW(pak->pak->open(pak->pak, 0), file->fs_data.ofs, file->fs_data.ofs + file->len);
 	return rw;
 }
 
@@ -96,9 +89,9 @@ FSP_Add_Pak (fs_group_t *group, fsp_group_t *pak, fs_file_t *file)
 {
 	dpackfile_t		pfile;
 	dpackheader_t	pheader;
-	fsp_file_t		*fsp_file;
 	SDL_RWops		*rw;
 	int				i, nfiles;
+	fs_file_data_t	file_data;
 
 	rw = file->open(file, 0);
 
@@ -122,9 +115,8 @@ FSP_Add_Pak (fs_group_t *group, fsp_group_t *pak, fs_file_t *file)
 		SDL_RWread(rw, &pfile, sizeof(pfile), 1);
 		pfile.filepos = LittleLong (pfile.filepos);
 		pfile.filelen = LittleLong (pfile.filelen);
-		fsp_file = Zone_Alloc (fs_zone, sizeof(fsp_file_t));
-		fsp_file->ofs = pfile.filepos;
-		FS_Add_File (group, pfile.name, pfile.filelen, FSP_Open_File, fsp_file);
+		file_data.ofs = pfile.filepos;
+		FS_Add_File (group, pfile.name, pfile.filelen, FSP_Open_File, file_data);
 	}
 	SDL_RWclose(rw);
 	return true;

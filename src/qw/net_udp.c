@@ -269,7 +269,7 @@ NET_GetPacket (netsrc_t sock)
 {
 	int         ret;
 	struct sockaddr_in from;
-	int         fromlen;
+	Uint        fromlen;
 	int			net_socket = ip_sockets[sock];
 
 	if (NET_GetLoopPacket (sock))

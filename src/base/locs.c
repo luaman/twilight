@@ -164,7 +164,7 @@ loc_load (const char *file)
 {
 	char	*orig, *data, *p;
 
-	orig = data = COM_LoadTempFile (file, 1);
+	orig = data = (char *) COM_LoadTempFile (file, 1);
 	if (!data)
 		return;
 

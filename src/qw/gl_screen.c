@@ -114,7 +114,7 @@ static cvar_t   *r_brightness;
 static cvar_t   *r_contrast;
 static cvar_t   *cl_avidemo;
 
-cvar_t	*show_fps;
+static cvar_t	*show_fps;
 int				fps_capped0, fps_capped1;
 int				fps_count;
 
@@ -536,6 +536,23 @@ SCR_DrawFPS (void)
 	x = vid.width_2d - st_len * con->tsize - con->tsize;
 	y = vid.height_2d - sb_lines - con->tsize;
 	Draw_String_Len (x, y, st, st_len, con->tsize);
+}
+
+static void
+SCR_DrawDownload (void)
+{
+	int		x, y;
+	char	st[80];
+
+	if (!cls.download)
+		return;
+
+	snprintf(st, sizeof (st), "%03d%% %s", cls.downloadpercent, cls.downloadname);
+
+	x = 0;
+	y = vid.height_2d - con->tsize;
+
+	Draw_String (x, y, st, con->tsize);
 }
 
 
@@ -998,6 +1015,7 @@ SCR_UpdateScreen (void)
 		SCR_CheckDrawCenterString ();
 		HUD_Draw ();
 		SCR_DrawConsole ();
+		SCR_DrawDownload ();
 		M_Draw ();
 	}
 

@@ -119,32 +119,10 @@ static jmp_buf host_abort;
 
 void		Master_Connect_f (void);
 
-float	server_version = 0;			// version of server we connected to
+static float	server_version = 0;			// version of server we connected to
 
-char        emodel_name[] =
-	{ 'e' ^ 0xff, 'm' ^ 0xff, 'o' ^ 0xff, 'd' ^ 0xff, 'e' ^ 0xff, 'l' ^ 0xff,
-	0
-};
-char        pmodel_name[] =
-	{ 'p' ^ 0xff, 'm' ^ 0xff, 'o' ^ 0xff, 'd' ^ 0xff, 'e' ^ 0xff, 'l' ^ 0xff,
-	0
-};
-char        prespawn_name[] =
-	{ 'p' ^ 0xff, 'r' ^ 0xff, 'e' ^ 0xff, 's' ^ 0xff, 'p' ^ 0xff, 'a' ^ 0xff,
-	'w' ^ 0xff, 'n' ^ 0xff,
-	' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, ' ' ^ 0xff, '0' ^ 0xff, ' ' ^ 0xff,
-	'%' ^ 0xff, 'i' ^ 0xff, 0
-};
-char        modellist_name[] =
-	{ 'm' ^ 0xff, 'o' ^ 0xff, 'd' ^ 0xff, 'e' ^ 0xff, 'l' ^ 0xff, 'l' ^ 0xff,
-	'i' ^ 0xff, 's' ^ 0xff, 't' ^ 0xff,
-	' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, ' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, 0
-};
-char        soundlist_name[] =
-	{ 's' ^ 0xff, 'o' ^ 0xff, 'u' ^ 0xff, 'n' ^ 0xff, 'd' ^ 0xff, 'l' ^ 0xff,
-	'i' ^ 0xff, 's' ^ 0xff, 't' ^ 0xff,
-	' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, ' ' ^ 0xff, '%' ^ 0xff, 'i' ^ 0xff, 0
-};
+char        emodel_name[] = "emodel";
+char        pmodel_name[] = "pmodel";
 
 static void
 CL_Quit_f (void)
@@ -380,7 +358,7 @@ CL_Disconnect (void)
 			CL_Stop_f ();
 
 		final[0] = clc_stringcmd;
-		strlcpy (final + 1, "drop", sizeof(final) - 1);
+		strlcpy ((char *) final + 1, "drop", sizeof(final) - 1);
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
 		Netchan_Transmit (&cls.netchan, 6, final);
@@ -397,7 +375,9 @@ CL_Disconnect (void)
 	}
 
 	CL_StopUpload ();
-	r.worldmodel = NULL;
+	if (r.worldmodel)
+		Mod_UnloadModel(r.worldmodel, false);
+	ccl.worldmodel = r.worldmodel = NULL;
 
 }
 
@@ -1043,7 +1023,7 @@ CL_Init (void)
 	ccl.users = Zone_Alloc(ccl_zone, sizeof(*ccl.users) * ccl.max_users);
 
 	ccls.state = ca_disconnected;
-	r.worldmodel = NULL;
+	ccl.worldmodel = r.worldmodel = NULL;
 
 	Info_SetValueForKey (cls.userinfo, "name", "unnamed", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "topcolor", "0", MAX_INFO_STRING);
@@ -1316,23 +1296,6 @@ Host_Frame (double time)
 	fps_capped0 = fps_capped1 = 0;
 }
 
-static void
-simple_decrypt (char *buf, int len)
-{
-	while (len--)
-		*buf++ ^= 0xff;
-}
-
-static void
-Host_FixupModelNames (void)
-{
-	simple_decrypt (emodel_name, sizeof (emodel_name) - 1);
-	simple_decrypt (pmodel_name, sizeof (pmodel_name) - 1);
-	simple_decrypt (prespawn_name, sizeof (prespawn_name) - 1);
-	simple_decrypt (modellist_name, sizeof (modellist_name) - 1);
-	simple_decrypt (soundlist_name, sizeof (soundlist_name) - 1);
-}
-
 //============================================================================
 
 static void
@@ -1392,7 +1355,6 @@ Host_Init (void)
 
 	COM_Init ();					// setup and initialize filesystem, endianess, add related commands
 
-	Host_FixupModelNames ();		// fix model names (how?)
 	Mod_Init ();					// setup models, add related commands
 
 	V_Init ();						// setup view, add related commands

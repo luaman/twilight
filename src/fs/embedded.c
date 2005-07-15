@@ -50,7 +50,7 @@ FSE_Free_File (fs_file_t *file)
 static SDL_RWops *
 FSE_Open_File (fs_file_t *file, Uint32 flags)
 {
-	embeddedfile_t	*e_file = file->fs_data;
+	embeddedfile_t	*e_file = file->fs_data.data;
 
 	if (flags & FSF_WRITE)
 		return NULL;
@@ -62,11 +62,14 @@ static qboolean
 FSE_Add (fs_group_t *group)
 {
 	embeddedfile_t	*e_file;
+	fs_file_data_t	file_data;
 
 	group->fs_data = embeddedfile;
 
-	for (e_file = embeddedfile; e_file->name; e_file++)
-		FS_Add_File (group, e_file->name, e_file->datasize, FSE_Open_File, e_file);
+	for (e_file = embeddedfile; e_file->name; e_file++) {
+		file_data.data = e_file;
+		FS_Add_File (group, e_file->name, e_file->datasize, FSE_Open_File, file_data);
+	}
 	return true;
 }
 

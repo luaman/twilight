@@ -511,15 +511,15 @@ Host_Loadgame_f (void)
 	// SCR_BeginLoadingPlaque ();
 
 	Com_Printf ("Loading game from %s...\n", name);
-	cur = saved = COM_LoadTempFile (name, true);
+	cur = saved = (char *) COM_LoadTempFile (name, true);
 	if (!saved) {
 		Com_Printf ("ERROR: couldn't load.\n");
 		return;
 	}
 
 	tmp = strchr (cur, '\n'); *tmp = '\0';
-	cur = tmp + 1;
 	sscanf (cur, "%d", &version);
+	cur = tmp + 1;
 	if (version != SAVEGAME_VERSION)
 	{
 		Zone_Free (saved);
@@ -527,7 +527,6 @@ Host_Loadgame_f (void)
 				SAVEGAME_VERSION);
 		return;
 	}
-	cur = strchr (cur, '\n') + 1;
 	for (i = 0; i < NUM_SPAWN_PARMS; i++) {
 		tmp = strchr (cur, '\n'); *tmp = '\0';
 		sscanf (cur, "%f", &spawn_parms[i]);

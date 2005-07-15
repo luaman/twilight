@@ -617,9 +617,15 @@ Mod_MakeChains (model_t *mod)
 						sizeof(chain_item_t) * bheader->tex_chains[i].n_items);
 		}
 
-	bheader->verts = Zone_Alloc(mod->zone, sizeof(vertex_t) * bheader->numsets);
-	bheader->tcoords[0] = Zone_Alloc(mod->zone, sizeof(texcoord_t) * bheader->numsets);
-	bheader->tcoords[1] = Zone_Alloc(mod->zone, sizeof(texcoord_t) * bheader->numsets);
+	if (bheader->numsets) {
+		bheader->verts = Zone_Alloc(mod->zone, sizeof(vertex_t) * bheader->numsets);
+		bheader->tcoords[0] = Zone_Alloc(mod->zone, sizeof(texcoord_t) * bheader->numsets);
+		bheader->tcoords[1] = Zone_Alloc(mod->zone, sizeof(texcoord_t) * bheader->numsets);
+	} else {
+		bheader->verts = NULL;
+		bheader->tcoords[0] = NULL;
+		bheader->tcoords[1] = NULL;
+	}
 
 	/*
 	 * Second pass:
