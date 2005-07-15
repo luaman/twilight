@@ -46,6 +46,9 @@ case "${host}" in
 		SHAREPATH="."
 		USERPATH="."
 		;;
+	*-*-darwin*)
+		SYS=Mac
+		;;
 	*)
 		# Default to POSIX compliant system
 		SYS=POSIX
@@ -204,11 +207,11 @@ AC_ARG_WITH(libgl,
                           (only affects value of the gl_driver Cvar)],,
 	[with_libgl=yes])
 if test "x$with_libgl" = "xyes" -o "x$with_libgl" = "xno"; then
-	if test "$SYS" = "Win32"; then
-		with_libgl="opengl32.dll"
-	else
-		with_libgl="libGL.so.1"
-	fi
+	case "$SYS" in
+		Win32)	with_libgl="opengl32.dll" ;;
+		Mac)	with_libgl="None (provided by SDL)" ;;
+		*)		with_libgl="libGL.so.1" ;;
+	esac
 fi
 
 AC_DEFINE_UNQUOTED(GL_LIBRARY, "$with_libgl",
