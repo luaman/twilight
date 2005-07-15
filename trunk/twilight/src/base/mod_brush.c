@@ -696,8 +696,10 @@ Mod_LoadBrushModel (model_t *mod, void *buffer, int flags)
 				// Get a struct for this model name.
 				mod = Mod_FindName (name);
 				// If it was an old model then unload it first.
-				if (mod->loaded)
+				if (mod->loaded) {
+					Com_DPrintf ("Warning, unloading %s during model load.\n", name);
 					Mod_UnloadModel (mod, false);
+				}
 				// Copy over the basic information.
 				*mod = *first;
 				mod->submodel = true;

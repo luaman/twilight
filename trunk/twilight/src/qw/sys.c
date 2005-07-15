@@ -81,7 +81,7 @@ static const char rcsid[] =
 #endif
 
 
-extern int nostdout = 0;
+static int nostdout = 0;
 
 static cvar_t *sys_asciionly;
 static cvar_t *sys_logname;
@@ -144,7 +144,7 @@ Sys_Printf (const char *fmt, ...)
 		return;
 
 	va_start (argptr, fmt);
-	vsnprintf (text, sizeof (text), fmt, argptr);
+	vsnprintf ((char *) text, sizeof (text), fmt, argptr);
 	va_end (argptr);
 
 	if (sys_asciionly && sys_asciionly->ivalue)
@@ -347,6 +347,11 @@ Sys_DebugLog (const char *file, const char *fmt, ...)
 	va_end (argptr);
 
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
+	if (fd < 0) {
+		fprintf(stderr, "-%s-\n", file);
+		perror ("Unable to open debug file for writing:");
+		return;
+	}
 	write (fd, data, strlen (data));
 	close (fd);
 }

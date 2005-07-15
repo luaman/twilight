@@ -37,7 +37,6 @@ static const char rcsid[] =
 Uint32	cpu_flags;
 char	*cpu_id;
 
-#ifdef i386
 void
 check_cpuid ()
 {
@@ -45,6 +44,7 @@ check_cpuid ()
 	char	raw_id[13] = {0};
 	Uint32	*tmp = (Uint32 *) &raw_id[0];
 
+#ifdef HAVE_GCC_X86_ASM
 	asm ("\n"
 		"pushfl\n"
 		"pop					%%eax\n"
@@ -78,6 +78,7 @@ check_cpuid ()
 		"end:\n"
 		: "=m" (raw_flags), "=m" (raw_eflags), "=m" (*tmp)
 		: : "eax", "ebx", "ecx", "edx", "memory");
+#endif
 
 	if (raw_flags)
 		cpu_flags |= CPU_CPUID;
@@ -98,6 +99,8 @@ check_cpuid ()
 			}
 			break;
 		case 0x68747541:	// AMD
+			if (raw_flags & BIT(25))
+				cpu_flags |= CPU_SSE;
 			if (raw_eflags & BIT(22))
 				cpu_flags |= CPU_MMX_EXT;
 			if (raw_eflags & BIT(23))
@@ -119,21 +122,18 @@ check_cpuid ()
 
 	cpu_id = strdup(raw_id);
 
-#ifndef HAVE_MMX
+#ifndef HAVE_GCC_MMX_ASM
 	if (raw_flags & BIT(23))	// Bit 23 is universally used for MMX.
 		cpu_flags &= ~CPU_MMX;
 #endif
 }
-#else
-void
-check_cpuid ()
-{
-}
-#endif
 
 void
 CPU_Init()
 {
+	if (COM_CheckParm ("-nocpuid"))
+		return;
+
 	Com_Printf("Checking CPUID.\n");
 	check_cpuid();
 

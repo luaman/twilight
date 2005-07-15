@@ -46,8 +46,6 @@ extern netadr_t net_local_adr;
 extern netadr_t net_from;				// address of who sent the packet
 extern sizebuf_t net_message;
 
-extern struct cvar_s *hostname;
-
 typedef enum {NS_CLIENT, NS_SERVER} netsrc_t;
 
 void NET_Init (void);

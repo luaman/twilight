@@ -41,7 +41,7 @@ static mplane_t frustum[4];
 static Uint	 vis_pvsframecount;
 Uint		 vis_framecount;
 mleaf_t		*vis_viewleaf;
-mleaf_t	*vis_oldviewleaf;
+static mleaf_t	*vis_oldviewleaf;
 
 void
 Vis_Init_Cvars (void)

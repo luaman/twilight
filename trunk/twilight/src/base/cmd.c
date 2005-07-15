@@ -122,11 +122,10 @@ void
 Cbuf_InsertText (const char *text)
 {
 	sizebuf_t	*p;
-	Uint8		*buf;
+	char		*buf;
 	size_t		len;
 
-	len = strlen (text);
-	if (len == 0)
+	if (!(len = strlen (text)))
 		return;
 
 	p = Zone_Alloc (stringzone, sizeof (sizebuf_t));
@@ -134,7 +133,7 @@ Cbuf_InsertText (const char *text)
 	memcpy (buf, text, len);
 	p->cursize = len;
 	p->maxsize = len + 2048;
-	p->data = buf;
+	p->data = (Uint8 *) buf;
 	p->next = cmd_text;
 	cmd_text = p;
 }
@@ -452,7 +451,7 @@ Cmd_Exec_f (void)
 		return;
 	}
 
-	f = COM_LoadTempFile (Cmd_Argv (1), true);
+	f = (char *) COM_LoadTempFile (Cmd_Argv (1), true);
 	if (!f)
 	{
 		Com_Printf ("couldn't exec %s\n", Cmd_Argv (1));

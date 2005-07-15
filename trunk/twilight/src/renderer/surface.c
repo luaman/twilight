@@ -56,7 +56,7 @@ Surf_Init_Cvars (void)
 }
 
 void
-BuildGLPolyFromEdges (msurface_t *surf, model_t *model, int *count)
+BuildGLPolyFromEdges (msurface_t *surf, model_t *model, Uint *count)
 {
 	int			 i, vert, lindex, lnumverts;
 	medge_t		*pedges, *r_pedge;
@@ -77,6 +77,9 @@ BuildGLPolyFromEdges (msurface_t *surf, model_t *model, int *count)
 	 * draw texture
 	 */
 	poly = Zone_Alloc (zone, sizeof (glpoly_t)); 
+
+	if (surf->polys)
+		Com_Printf("Well, we actually have more then one poly for the surface.\n");
 
 	poly->next = surf->polys;
 	surf->polys = poly;

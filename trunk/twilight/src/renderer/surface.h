@@ -30,7 +30,7 @@
 #include "model.h"
 
 void Surf_Init_Cvars(void);
-void BuildGLPolyFromEdges(msurface_t *surf, model_t *model, int *count);
+void BuildGLPolyFromEdges(msurface_t *surf, model_t *model, Uint *count);
 void SetupLightmapSettings (void);
 qboolean AllocLightBlockForSurf(int *allocated, int num, msurface_t *surf, memzone_t *zone);
 

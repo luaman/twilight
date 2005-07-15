@@ -75,6 +75,7 @@ static const char rcsid[] =
 #include "strlib.h"
 #include "sys.h"
 #include "keys.h"
+#include "fatal.h"
 
 // LordHavoc: for win32 which does not have PATH_MAX defined without POSIX
 // (and that disables lots of other useful stuff)
@@ -94,7 +95,7 @@ static cvar_t *sys_asciionly;
 static cvar_t *sys_extrasleep;
 static cvar_t *sys_logname;
 
-int sys_gametypes;
+static int sys_gametypes;
 
 char logname[MAX_OSPATH] = "";
 
@@ -172,10 +173,10 @@ Sys_Printf (const char *fmt, ...)
 #endif
 
 	if (sys_asciionly && sys_asciionly->ivalue)
-		for (p = text; *p; p++)
+		for (p = (unsigned char *) text; *p; p++)
 			putc (sys_charmap[*p], stdout);
 	else
-		for (p = text; *p; p++)
+		for (p = (unsigned char *) text; *p; p++)
 			if ((*p > 128 || *p < 32) && *p != 10 && *p != 13 && *p != 9)
 				printf ("[%02x]", *p);
 			else
@@ -272,28 +273,13 @@ Sys_Init (void)
 	}
 #endif
 
-	sdlflags = SDL_INIT_TIMER;
-	if (COM_CheckParm ("-noparachute"))
-	{
-		sdlflags |= SDL_INIT_NOPARACHUTE;
-		Sys_Printf ("Flying without a parachute!\n");
-	}
-
+	sdlflags = SDL_INIT_TIMER | SDL_INIT_NOPARACHUTE;
 	SDL_Init (sdlflags);
-}
 
-static void
-Sys_BackTrace (int fd)
-{
-#if HAVE_EXECINFO_H
-	void		*array[128] = { 0 };
-	int			size;
-
-	size = backtrace (array, sizeof(array) / sizeof(array[0]));
-	backtrace_symbols_fd (array, size, fd);
-#else
-	fd = fd;	// Make it referenced.
-#endif
+	if (COM_CheckParm ("-noparachute"))
+		Sys_Printf ("Flying without a parachute!\n");
+	else
+		Twi_InstallParachute ();
 }
 
 void
@@ -333,7 +319,7 @@ Sys_Error (const char *error, ...)
 #endif
 	fprintf (stderr, "Error: %s\n", text);
 
-	Sys_BackTrace (2);
+	Twi_BackTrace (2);
 	SDL_Quit ();
 	Sys_Quit (1);
 }
@@ -406,6 +392,10 @@ Sys_DebugLog (const char *file, const char *fmt, ...)
 	va_end (argptr);
 
 	fd = open (file, O_WRONLY | O_CREAT | O_APPEND, 0666);
+	if (fd < 0) {
+		perror ("Unable to open debug file for writing:");
+		return;
+	}
 	write (fd, data, strlen (data));
 	close (fd);
 }

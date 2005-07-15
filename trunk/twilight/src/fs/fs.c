@@ -187,7 +187,7 @@ FS_AddGroup (fs_group_t *group)
 
 void
 FS_Add_File (fs_group_t *group, const char *name, size_t len,
-		fs_open_t *open, void *fs_data)
+		fs_open_t *open, fs_file_data_t fs_data)
 {
 	fs_file_t	*file;
 
@@ -241,7 +241,7 @@ FS_Alloc_Group (fs_group_t *parent, const char *id)
 	char		*t0, *t1;
 
 	group = Zone_Alloc (fs_zone, sizeof (fs_group_t));
-	group->files = hash_create (10, (do_compare_t *) FSH_compare, (do_index_t *) FSH_hash, (do_free_t *) FSH_free);
+	group->files = hash_create (10, (do_compare_t *) FSH_compare, (do_index_t *) FSH_hash, (do_free_t *) FSH_free, fs_zone);
 
 	if (parent) {
 		group->id = FS_MangleName(va("%s/%s", parent->id, id));

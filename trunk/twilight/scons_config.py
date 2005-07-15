@@ -10,8 +10,20 @@ env_defs = My_Options ()
 config_defs = My_Options ()
 building = 0
 
-def check_mmx_asm (context):
-	context.Message('Checking to see if computer understands MMX asm ... ')
+def check_gcc_x86_asm (context):
+	context.Message('Checking to see if computer understands gcc x86 asm ... ')
+	ret = context.TryCompile ("""
+int main ()
+{
+	asm ("cpuid" ::: "eax", "ebx", "ecx");
+	return 0;
+}
+""", ".c")
+	context.Result (ret)
+	return ret;
+
+def check_gcc_mmx_asm (context):
+	context.Message('Checking to see if computer understands gcc MMX asm ... ')
 	ret = context.TryCompile ("""
 int main ()
 {
@@ -22,8 +34,8 @@ int main ()
 	context.Result (ret)
 	return ret;
 
-def check_sse_asm (context):
-	context.Message('Checking to see if computer understands SSE asm ... ')
+def check_gcc_sse_asm (context):
+	context.Message('Checking to see if computer understands gcc SSE asm ... ')
 	ret = context.TryCompile ("""
 int main ()
 {
@@ -221,6 +233,8 @@ def handle_opts (conf, opts, config_defs, destructive):
 		if ('gcc' in env['TOOLS']):
 			if int(opts['optimize']):
 				conf.cflag ('-O2')
+			else:
+				conf.cflag ('-O')
 			if int(opts['debug']):
 				conf.cflag ('-g')
 			if int(opts['warnings']):
@@ -274,7 +288,7 @@ def do_configure (env):
 		opts.load('config_opts.py')
 	opts.args (ARGUMENTS)
 	opts.save('config_opts.py')
-	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag, 'lflag' : check_lflag, 'func_flag' : check_func_flag, 'mmx_asm' : check_mmx_asm, 'sse_asm' : check_sse_asm}
+	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag, 'lflag' : check_lflag, 'func_flag' : check_func_flag, 'gcc_x86_asm' : check_gcc_x86_asm, 'gcc_mmx_asm' : check_gcc_mmx_asm, 'gcc_sse_asm' : check_gcc_sse_asm}
 	conf = Configure(env, custom_tests = tests)
 	handle_opts (conf, opts, config_defs, 0)
 
@@ -310,10 +324,12 @@ def do_configure (env):
 		'pwd.h', 'sys/types.h', 'sys/stat.h', 'limits.h', 'signal.h', \
 		'sys/time.h', 'time.h', 'execinfo.h', 'dlfcn.h'])
 
-	if conf.mmx_asm():
-		config_defs.set('HAVE_MMX', 1)
-	if conf.sse_asm():
-		config_defs.set('HAVE_SSE', 1)
+	if conf.gcc_x86_asm():
+		config_defs.set('HAVE_GCC_X86_ASM', 1)
+		if conf.gcc_mmx_asm():
+			config_defs.set('HAVE_GCC_MMX_ASM', 1)
+		if conf.gcc_sse_asm():
+			config_defs.set('HAVE_GCC_SSE_ASM', 1)
 
 	if not config_defs.has_key('HAVE_DLOPEN'):
 		if conf.CheckLib ('dl', 'dlopen', 1):

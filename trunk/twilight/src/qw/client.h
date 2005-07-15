@@ -220,18 +220,7 @@ extern struct cvar_s *cl_shownet;
 extern struct cvar_s *cl_hudswap;
 extern struct cvar_s *cl_mapname;
 
-static struct cvar_s *cl_pitchdriftspeed;
-static struct cvar_s *lookspring;
-static struct cvar_s *lookstrafe;
-static struct cvar_s *sensitivity;
-
-static struct cvar_s *m_pitch;
-static struct cvar_s *m_yaw;
-static struct cvar_s *m_forward;
-static struct cvar_s *m_side;
-
-static struct cvar_s *m_freelook;
-static struct cvar_s *m_filter;
+extern struct cvar_s *cl_pitchdriftspeed;
 
 extern struct cvar_s *_windowed_mouse;
 
@@ -245,7 +234,6 @@ extern client_state_t cl;
 extern entity_state_t cl_baselines[MAX_EDICTS];
 
 extern qboolean nomaster;
-extern float server_version;	// version of server we connected to
 
 //============================================================================
 
@@ -266,7 +254,6 @@ extern cvar_t *localid;
 extern cvar_t *password;
 extern cvar_t *name;
 extern cvar_t *skin;
-extern cvar_t *show_fps;
 extern client_static_t cls;
 extern client_state_t cl;
 extern entity_state_t cl_baselines[768];
@@ -274,9 +261,6 @@ extern double connect_time;
 extern qboolean nomaster;
 extern char emodel_name[];
 extern char pmodel_name[];
-extern char prespawn_name[];
-extern char modellist_name[];
-extern char soundlist_name[];
 extern int nopacketcount;
 
 void CL_BeginServerConnect(void);
@@ -295,9 +279,8 @@ typedef struct {
 	int	state;		// low bit is down state
 } kbutton_t;
 
-static kbutton_t in_mlook, in_klook;
-static kbutton_t in_strafe;
-extern kbutton_t in_speed;
+extern kbutton_t in_mlook;
+extern kbutton_t in_strafe;
 
 #define freelook (m_freelook->ivalue || (in_mlook.state & 1))
 

@@ -79,7 +79,7 @@ typedef struct {
 	struct qsocket_s	*netcon;
 	sizebuf_t			message;				// writing buffer to send to server
 
-	int				msg_buf[1024];
+	Uint8				msg_buf[1024];
 } client_static_t;
 
 extern client_static_t cls;
@@ -158,16 +158,7 @@ extern struct cvar_s *cl_hudswap;
 extern struct cvar_s *cl_maxfps;
 
 extern struct cvar_s *cl_pitchdriftspeed;
-extern struct cvar_s *lookspring;
-extern struct cvar_s *lookstrafe;
-extern struct cvar_s *sensitivity;
 
-extern struct cvar_s *m_pitch;
-extern struct cvar_s *m_yaw;
-extern struct cvar_s *m_forward;
-extern struct cvar_s *m_side;
-extern struct cvar_s *m_freelook;
-extern struct cvar_s *m_filter;
 
 #define	MAX_TEMP_ENTITIES	64			// lightning bolts, etc
 #define	MAX_STATIC_ENTITIES	128			// torches, etc
@@ -210,9 +201,7 @@ typedef struct {
 	int         state;					// low bit is down state
 } kbutton_t;
 
-static kbutton_t in_mlook, in_klook;
-static kbutton_t in_strafe;
-static kbutton_t in_speed;
+extern kbutton_t in_strafe;
 
 #define freelook (m_freelook->ivalue || (in_mlook.state & 1))
 
@@ -264,9 +253,6 @@ void	V_SetContentsColor (int contents);
 //
 // cl_ents
 //
-static entity_t *traceline_entity[MAX_EDICTS];
-static int traceline_entities;
-
 void CL_ScanForBModels (void);
 void CL_Update_Matrices (entity_t *ent);
 void CL_Update_Matrices_C (entity_common_t *ent);

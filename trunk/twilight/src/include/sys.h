@@ -35,8 +35,6 @@
 #define GAME_QW_CLIENT	(1<<2)
 #define GAME_QW_SERVER	(1<<3)
 
-extern int sys_gametypes;
-extern int nostdout;
 extern char logname[128];
 extern double curtime;
 extern qboolean do_stdin;

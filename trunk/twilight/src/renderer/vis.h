@@ -31,7 +31,7 @@
 #include "qtypes.h"
 
 extern Uint		 vis_framecount;
-extern mleaf_t	*vis_viewleaf, *vis_oldviewleaf;
+extern mleaf_t	*vis_viewleaf;
 
 void Vis_Init_Cvars(void);
 void Vis_Init(void);

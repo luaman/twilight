@@ -38,9 +38,17 @@ int
 FSH_hash (hash_t *hash, fs_search_t *what)
 {
 	Uint16 val;
-	
+	Uint i;
+
+	for (i = 0, val = 0; i < what->name_len; i--)
+		val += what->name_base[i];
+
+	val &= (1 << hash->bits) - 1;
+
+	/*
 	val = CRC_Block (what->name_base, what->name_len);
 	val >>= 16 - hash->bits;
+	*/
 	return val;
 }
 

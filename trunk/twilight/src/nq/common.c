@@ -43,7 +43,7 @@ static const char rcsid[] =
 #include "mathlib.h"
 #include "fs/fs.h"
 
-cvar_t *registered;
+static cvar_t *registered;
 cvar_t *fs_shareconf;
 cvar_t *fs_sharepath;
 cvar_t *fs_userconf;
@@ -914,7 +914,7 @@ COM_LoadZoneFile (const char *path, qboolean complain, memzone_t *zone)
 	return COM_LoadFile (path, complain, 0, zone);
 }
 
-char *
+Uint8 *
 COM_LoadTempFile (const char *path, qboolean complain)
 {
 	return COM_LoadFile (path, complain, 1, NULL);

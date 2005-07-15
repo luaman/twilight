@@ -46,11 +46,5 @@ int GLT_Load_image(const char *identifier, image_t *img, Uint32 *palette, int fl
 int GLT_Load_Pixmap(const char *name, const char *data);
 qboolean GLT_Delete(GLuint texnum);
 
-extern int		glt_solid_format;
-extern int		glt_alpha_format;
-extern int		glt_filter_min;
-extern int		glt_filter_mag;
-extern memzone_t *glt_zone;
-
 #endif // __gl_textures_h
 

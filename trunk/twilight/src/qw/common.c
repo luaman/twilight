@@ -49,16 +49,16 @@ static const char rcsid[] =
 usercmd_t nullcmd;					// guarenteed to be zero
 
 cvar_t *fs_shareconf;
-cvar_t *fs_sharepath;
+static cvar_t *fs_sharepath;
 cvar_t *fs_userconf;
-cvar_t *fs_userpath;
-cvar_t *fs_gamename;
-cvar_t *game_name;
-cvar_t *registered;
+static cvar_t *fs_userpath;
+static cvar_t *fs_gamename;
+static cvar_t *game_name;
+static cvar_t *registered;
 
 static void COM_InitFilesystem (void);
 //static void COM_Path_f (void);
-static void Com_PrintHex (const char *str, int len);
+static void Com_PrintHex (Uint8 *str, int len);
 static void *SZ_GetSpace (sizebuf_t *buf, size_t length);
 
 
@@ -653,9 +653,9 @@ Com_EndRedirect (void)
 }
 
 static
-void Com_PrintHex (const char *str, int len)
+void Com_PrintHex (Uint8 *str, int len)
 {
-	char	c;
+	Uint8	c;
 	int		i;
 
 	for (i = 0; i < len; i++) {

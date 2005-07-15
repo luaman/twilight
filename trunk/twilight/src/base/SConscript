@@ -4,12 +4,12 @@ Import ("env", "opts")
 env.Append (CPPPATH = ["#/src/base"])
 
 base_headers = Split("""cmd.h collision.h cpu.h crc.h cvar.h
-	hash.h lh_parser.h loadso.h locs.h mathlib.h matrixlib.h mdfour.h
+	fatal.h hash.h lh_parser.h loadso.h locs.h mathlib.h matrixlib.h mdfour.h
 	menu.h mod_brush.h mod_brush_disk.h model.h sdlstub.h strlib.h
 	zone.h""")
 
-base_sources = Split("""buildnum.c cmd.c collision.c cpu.c crc.c cvar.c hash.c
-	lh_parser.c loadso.c locs.c mathlib.c matrixlib.c mdfour.c menu.c
+base_sources = Split("""buildnum.c cmd.c collision.c cpu.c crc.c cvar.c fatal.c
+	hash.c lh_parser.c loadso.c locs.c mathlib.c matrixlib.c mdfour.c menu.c
 	mod_brush.c model.c parm.c sdlstub.c strlib.c zone.c""")
 
 base_headers = ['#/src/base/'+e for e in base_headers]

@@ -60,7 +60,7 @@ static int localstack_used;
 
 qboolean pr_trace;
 dfunction_t *pr_xfunction;
-int pr_xstatement;
+static int pr_xstatement;
 
 
 Uint pr_argc;

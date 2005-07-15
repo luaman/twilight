@@ -110,8 +110,8 @@ S_LoadSound (sfx_t *s)
 		return s;
 
 // load it in
-	strcpy (namebuffer, "sound/");
-	strcat (namebuffer, s->name);
+	strlcpy_s (namebuffer, "sound/");
+	strlcat_s (namebuffer, s->name);
 
 	data = COM_LoadTempFile (namebuffer, true);
 

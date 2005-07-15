@@ -93,8 +93,6 @@ extern int eval_punchvector;
 extern dprograms_t	*progs;
 extern dfunction_t	*pr_functions;
 extern char			*pr_strings;
-extern ddef_t		*pr_globaldefs;
-extern ddef_t		*pr_fielddefs;
 extern dstatement_t	*pr_statements;
 extern globalvars_t	*pr_global_struct;
 extern float		*pr_globals;		// same as pr_global_struct
@@ -160,7 +158,6 @@ extern Uint pr_argc;
 
 extern qboolean pr_trace;
 extern dfunction_t *pr_xfunction;
-extern int pr_xstatement;
 
 extern unsigned short pr_crc;
 

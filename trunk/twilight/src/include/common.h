@@ -52,9 +52,7 @@ extern int COM_CheckParm (const char *parm);
 
 
 extern struct cvar_s *fs_userconf;
-extern struct cvar_s *fs_userpath;
 extern struct cvar_s *fs_shareconf;
-extern struct cvar_s *fs_sharepath;
 extern struct cvar_s *game_directory;
 extern struct cvar_s *game_rogue;
 extern struct cvar_s *game_hipnotic;
@@ -191,7 +189,7 @@ extern int  com_filesize;
 extern char com_gamedir[MAX_OSPATH];
 
 Uint8 *COM_LoadZoneFile (const char *path, qboolean complain, memzone_t *zone);
-char *COM_LoadTempFile (const char *path, qboolean complain);
+Uint8 *COM_LoadTempFile (const char *path, qboolean complain);
 Uint8 *COM_LoadNamedFile (const char *path, qboolean complain);
 void COM_CreatePath (const char *path);
 void COM_Gamedir (const char *dir);
@@ -208,8 +206,6 @@ void Com_EndRedirect (void);
 #define DEBUG_ZONE				BIT(1)
 #define DEBUG_FS				BIT(2)
 #define DEBUG_SOUND				BIT(3)
-
-extern struct cvar_s *registered;
 
 int	build_number (void);
 

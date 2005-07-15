@@ -75,7 +75,7 @@ static void
 FSB_Free_File (fs_file_t *file)
 {
 	Zone_Free (file->name_base);
-	Zone_Free (file->fs_data);
+	Zone_Free (file->fs_data.data);
 }
 
 static int
@@ -89,7 +89,7 @@ FSB_Close_File (SDL_RWops *rw, void *data)
 static SDL_RWops *
 FSB_Open_LMP_File (fs_file_t *file, Uint32 flags)
 {
-	fsb_file_t	*b_file = file->fs_data;
+	fsb_file_t	*b_file = file->fs_data.data;
 	fsb_group_t	*bsp = file->group->fs_data;
 	SDL_RWops	*rw;
 	Uint32		*buf;
@@ -112,7 +112,7 @@ FSB_Open_LMP_File (fs_file_t *file, Uint32 flags)
 static SDL_RWops *
 FSB_Open_RAW_File (fs_file_t *file, Uint32 flags)
 {
-	fsb_file_t	*b_file = file->fs_data;
+	fsb_file_t	*b_file = file->fs_data.data;
 	fsb_group_t	*bsp = file->group->fs_data;
 	SDL_RWops	*rw;
 
@@ -135,6 +135,7 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 	Uint32			*offsets;
 	dmiptex_t		miptex;
 	char			*base_name;
+	fs_file_data_t	file_data;
 
 	rw = file->open(file, 0);
 
@@ -179,7 +180,8 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 		fsb_file->height = LittleLong (miptex.height);
 
 		size = (fsb_file->width * fsb_file->height) + (sizeof (Uint32) * 2);
-		FS_Add_File (group, va("%s/%s.lmp", base_name, miptex.name), size, FSB_Open_LMP_File, fsb_file);
+		file_data.data = fsb_file;
+		FS_Add_File (group, va("%s/%s.lmp", base_name, miptex.name), size, FSB_Open_LMP_File, file_data);
 	}
 	Zone_Free (offsets);
 
@@ -189,7 +191,8 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 		fsb_file->ofs = header.lumps[LUMP_ENTITIES].fileofs;
 
 		size = header.lumps[LUMP_ENTITIES].filelen;
-		FS_Add_File (group, va("%s.ent", base_name), size, FSB_Open_RAW_File, fsb_file);
+		file_data.data = fsb_file;
+		FS_Add_File (group, va("%s.ent", base_name), size, FSB_Open_RAW_File, file_data);
 	}
 
 	if (header.lumps[LUMP_VISIBILITY].fileofs &&
@@ -198,7 +201,8 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 		fsb_file->ofs = header.lumps[LUMP_VISIBILITY].fileofs;
 
 		size = header.lumps[LUMP_VISIBILITY].filelen;
-		FS_Add_File (group, va("%s.vis", base_name), size, FSB_Open_RAW_File, fsb_file);
+		file_data.data = fsb_file;
+		FS_Add_File (group, va("%s.vis", base_name), size, FSB_Open_RAW_File, file_data);
 	}
 
 	if (header.lumps[LUMP_LEAFS].fileofs &&
@@ -207,7 +211,8 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 		fsb_file->ofs = header.lumps[LUMP_LEAFS].fileofs;
 
 		size = header.lumps[LUMP_LEAFS].filelen;
-		FS_Add_File (group, va("%s.leaf", base_name), size, FSB_Open_RAW_File, fsb_file);
+		file_data.data = fsb_file;
+		FS_Add_File (group, va("%s.leaf", base_name), size, FSB_Open_RAW_File, file_data);
 	}
 	SDL_RWclose(rw);
 	return true;

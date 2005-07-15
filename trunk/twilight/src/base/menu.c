@@ -603,7 +603,7 @@ M_Loadmenu_f (void)
 		return;
 	}
 
-	if (!(menu_buffer = COM_LoadTempFile(Cmd_Argv(1), true))) {
+	if (!(menu_buffer = (char *) COM_LoadTempFile(Cmd_Argv(1), true))) {
 		Com_Printf("Could not load '%s'\n", Cmd_Argv(1));
 		return;
 	}

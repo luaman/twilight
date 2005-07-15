@@ -58,12 +58,18 @@ typedef struct fs_group_s {
 	struct fs_group_s	*up, *subs, *sub_next;
 } fs_group_t;
 
+typedef union {
+	void	*data;
+	int		ofs;
+	char	*path;
+} fs_file_data_t;
+
 typedef struct fs_file_s {
 	size_t				name_len;
 	char				*name_base, *ext;
 	size_t				len;
 	fs_open_t			*open;
-	void				*fs_data;
+	fs_file_data_t		fs_data;
 	fs_group_t			*group;
 } fs_file_t;
 
@@ -79,7 +85,7 @@ extern fs_group_t	*fs_paths;
 
 void FS_Init (void);
 
-void FS_Add_File (fs_group_t *group, const char *name, size_t len, fs_open_t *open, void *fs_data);
+void FS_Add_File (fs_group_t *group, const char *name, size_t len, fs_open_t *open, fs_file_data_t fs_data);
 fs_file_t *FS_FindFiles_Complex (const char **names, char **exts);
 fs_file_t *FS_FindFile_Complex (const char *name, char **exts);
 fs_file_t *FS_FindFile (const char *name);

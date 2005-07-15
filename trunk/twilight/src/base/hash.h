@@ -28,6 +28,7 @@
 #define __HASH_H
 
 #include "qtypes.h"
+#include "zone.h"
 
 typedef struct hash_value_s {
 	void				*data;
@@ -45,9 +46,10 @@ typedef struct hash_s {
 	int				bits, length;		// Length is derived from bits.
 	int				n_values;
 	hash_value_t	**values;
+	memzone_t		*zone;
 } hash_t;
 
-hash_t *hash_create (int bits, do_compare_t *do_compare, do_index_t *do_index, do_free_t *do_free);
+hash_t *hash_create (int bits, do_compare_t *do_compare, do_index_t *do_index, do_free_t *do_free, memzone_t *zone);
 void hash_destroy (hash_t *hash);
 void *hash_get (hash_t *hash, void *data);
 qboolean hash_add (hash_t *hash, void *data);

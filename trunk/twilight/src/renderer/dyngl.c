@@ -367,7 +367,7 @@ DynGL_GetFunctions (void (*errfunc)(const char *fmt, ...))
 #undef DYNGL_WANT
 
 	/* Now we need the extensions list */
-	gl_extensions_list = strdup ((const char *)qglGetString (GL_EXTENSIONS));
+	gl_extensions_list = strdup ((const char *) qglGetString (GL_EXTENSIONS));
 	p = gl_extensions_list;
 	last = p + strlen (p);
 

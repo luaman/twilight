@@ -329,11 +329,10 @@ R_DrawBrushDepthSkies (void)
 	}
 }
 
-/* FIXME: Can't inline this in gcc4? */
-static void
+static inline void
 R_RenderBrushPolys (glpoly_t *p)
 {
-	for (/**/; p != NULL; p = p->next)
+	for (;p; p = p->next)
 	{
 		r.brush_polys++;
 		qglDrawArrays (GL_POLYGON, p->start, p->numverts);

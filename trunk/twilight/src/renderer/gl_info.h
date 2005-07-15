@@ -34,13 +34,45 @@
 #include "model.h"
 #include "palette.h"
 
-#define Check_GL_Error()		do {								\
-	int _err;														\
-	if ((_err = qglGetError())) {									\
-		fprintf(stderr, "%s %d (%s): Error: %d\n",__FILE__,__LINE__,__FUNCTION__,_err);\
-		fflush(NULL);												\
-	}																\
-} while (0)
+extern inline qboolean
+_Check_GL_Error(const char *file, int line, const char *function)
+{
+	int err = qglGetError();
+
+	switch (err) {
+		case 0:
+			return false;
+		case GL_INVALID_VALUE:
+			fprintf(stderr, "%s %d (%s): Error: 0x%x (GL_INVALID_VALUE)\n",
+					file, line, function, err);
+			break;
+		case GL_INVALID_ENUM:
+			fprintf(stderr, "%s %d (%s): Error: 0x%x (GL_INVALID_ENUM)\n",
+					file, line, function, err);
+			break;
+		case GL_INVALID_OPERATION:
+			fprintf(stderr, "%s %d (%s): Error: 0x%x (GL_INVALID_OPERATION)\n",
+					file, line, function, err);
+			break;
+		case GL_STACK_OVERFLOW:
+			fprintf(stderr, "%s %d (%s): Error: 0x%x (GL_STACK_OVERFLOW)\n",
+					file, line, function, err);
+			break;
+		case GL_STACK_UNDERFLOW:
+			fprintf(stderr, "%s %d (%s): Error: 0x%x (GL_STACK_UNDERFLOW)\n",
+					file, line, function, err);
+			break;
+		case GL_OUT_OF_MEMORY:
+			fprintf(stderr, "%s %d (%s): Error: 0x%x (GL_OUT_OF_MEMORY)\n",
+					file, line, function, err);
+		default:
+			fprintf(stderr, "%s %d (%s): Error: 0x%x (UNKNOWN)\n",
+					file, line, function, err);
+			break;
+	}
+	return true;
+}
+#define Check_GL_Error()	_Check_GL_Error(__FILE__, __LINE__, __FUNCTION__)
 
 typedef struct colormap_s {
 	vec4_t	top;
@@ -57,7 +89,6 @@ extern cvar_t *gl_cull;
 extern GLfloat whitev[4];
 
 extern const char *gl_vendor;
-extern const char *gl_renderer;
 extern const char *gl_version;
 extern const char *gl_extensions;
 extern int gl_cva;

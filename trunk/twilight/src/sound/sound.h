@@ -133,22 +133,12 @@ extern int  total_channels;
 //
 
 extern memzone_t *snd_zone;
-extern qboolean fakedma;
 extern int  fakedma_updates;
 extern int  paintedtime;
-extern vec3_t listener_origin;
-extern vec3_t listener_forward;
-extern vec3_t listener_right;
-extern vec3_t listener_up;
-extern vec_t sound_nominal_clip_dist;
 extern dma_t *shm;
 
 extern struct cvar_s *loadas8bit;
 extern struct cvar_s *volume;
-
-extern qboolean snd_initialized;
-
-extern int  snd_blocked;
 
 void		 S_LocalSound (char *s);
 sfx_t		*S_LoadSound (sfx_t *s);

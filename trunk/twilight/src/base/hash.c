@@ -29,16 +29,13 @@ static const char rcsid[] =
 #include "twiconfig.h"
 #include "hash.h"
 
-#define HASH_LENGTH	8
-hash_t	hashs[HASH_LENGTH];
-
 hash_t *
 hash_create (int bits, do_compare_t *do_compare, do_index_t *do_index,
-			 do_free_t *do_free)
+			 do_free_t *do_free, memzone_t *zone)
 {
 	hash_t	*hash;
 
-	hash = (hash_t *) malloc(sizeof(hash_t));
+	hash = (hash_t *) Zone_Alloc(zone, sizeof(hash_t));
 
 	hash->bits = bits;
 	hash->length = 1 << bits;
@@ -46,7 +43,8 @@ hash_create (int bits, do_compare_t *do_compare, do_index_t *do_index,
 	hash->do_index = do_index;
 	hash->do_free = do_free;
 	hash->n_values = 0;
-	hash->values = (hash_value_t **)calloc(hash->length,sizeof(hash_value_t *));
+	hash->values = (hash_value_t **) Zone_Alloc(zone, hash->length * sizeof(hash_value_t *));
+	hash->zone = zone;
 
 	return hash;
 }
@@ -67,7 +65,8 @@ hash_destroy (hash_t *hash)
 			val = next;
 		}
 	}
-	free (hash);
+	Zone_Free (hash->values);
+	Zone_Free (hash);
 }
 
 void *
@@ -94,8 +93,8 @@ hash_add (hash_t *hash, void *data)
 	int				which;
 
 	which = hash->do_index(hash, data);
-					
-	val = (hash_value_t *) malloc(sizeof(hash_value_t));
+
+	val = (hash_value_t *) Zone_Alloc(hash->zone, sizeof(hash_value_t));
 
 	val->data = data;
 
@@ -123,7 +122,7 @@ hash_del (hash_t *hash, void *data)
 			}
 			hash->do_free(hash, val->data);
 			hash->n_values--;
-			free (val);
+			Zone_Free (val);
 			return true;
 		}
 	}
