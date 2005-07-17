@@ -263,8 +263,7 @@ Model_NextDownload (void)
 		}
 
 		if (!strcasecmp (ccl.model_precache[i]->name, "progs/flame.mdl")) {
-			if (!mdl_torch)
-				mdl_torch = Mod_ForName ("progs/torch.mdl", FLAG_RENDER);
+			mdl_torch = Mod_ForName ("progs/torch.mdl", FLAG_RENDER);
 			if (!mdl_torch)
 				mdl_torch = Mod_ForName ("progs/fire.mdl", FLAG_RENDER);
 		}

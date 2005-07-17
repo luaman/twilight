@@ -36,8 +36,8 @@ static const char rcsid[] =
 void Mod_Brush_Init (void);
 
 #define	MAX_MOD_KNOWN 4096
-model_t     mod_known[MAX_MOD_KNOWN];
-int         mod_numknown;
+static model_t     mod_known[MAX_MOD_KNOWN];
+static int         mod_numknown;
 
 
 void

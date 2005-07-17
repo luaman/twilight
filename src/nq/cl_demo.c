@@ -67,6 +67,8 @@ CL_StopPlayback (void)
 	ccls.demoplayback = false;
 	ccls.demofile = NULL;
 	ccls.state = ca_disconnected;
+	if (r.worldmodel)
+		Mod_UnloadModel (r.worldmodel, false);
 	ccl.worldmodel = r.worldmodel = NULL;
 
 	if (ccls.timedemo)

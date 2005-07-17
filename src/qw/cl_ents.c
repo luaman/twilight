@@ -1017,13 +1017,13 @@ Made up of: clients, packet_entities, nails, and tents
 void
 CL_EmitEntities (void)
 {
+	R_ClearEntities ();
+
 	if (ccls.state != ca_active)
 		return;
 
 	if (!cl.validsequence)
 		return;
-
-	R_ClearEntities ();
 
 	cl_num_tmp_entities = 0;
 

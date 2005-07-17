@@ -131,6 +131,8 @@ CL_Disconnect (void)
 
 	ccls.demoplayback = ccls.timedemo = false;
 	cls.signon = 0;
+	if (r.worldmodel)
+		Mod_UnloadModel (r.worldmodel, false);
 	ccl.worldmodel = r.worldmodel = NULL;
 }
 
