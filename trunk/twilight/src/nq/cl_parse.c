@@ -308,8 +308,7 @@ CL_ParseServerInfo (void)
 
 
 		if (!strcasecmp (model_precache[i], "progs/flame.mdl")) {
-			if (!mdl_torch)
-				mdl_torch = Mod_ForName ("progs/torch.mdl", FLAG_RENDER);
+			mdl_torch = Mod_ForName ("progs/torch.mdl", FLAG_RENDER);
 			if (!mdl_torch)
 				mdl_torch = Mod_ForName ("progs/fire.mdl", FLAG_RENDER);
 		}

@@ -60,6 +60,8 @@ Mod_UnloadModel (model_t *mod, qboolean keep)
 			break;
 	}
 
+	Com_DPrintf ("Unloaded model: %s\n", mod->name);
+
 	if (keep) {
 		char		name[MAX_QPATH];
 		qboolean	submodel;
@@ -134,6 +136,7 @@ Mod_LoadModel (model_t *mod, int flags)
 	mod->modflags |= flags;
 
 	Zone_Free (buf);
+	Com_DPrintf ("Loaded model: %s\n", mod->name);
 	return mod;
 }
 

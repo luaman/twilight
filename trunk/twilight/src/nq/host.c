@@ -181,6 +181,8 @@ Host_FindMaxClients (void)
 			svs.maxclients = 16;
 	} else {
 		ccls.state = ca_disconnected;
+		if (r.worldmodel)
+			Mod_UnloadModel (r.worldmodel, false);
 		ccl.worldmodel = r.worldmodel = NULL;
 	}
 
