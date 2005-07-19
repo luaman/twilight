@@ -148,7 +148,7 @@ FSB_Add_BSP (fs_group_t *group, fsb_group_t *bsp, fs_file_t *file)
 
 	SDL_RWread(rw, &header, sizeof(header), 1);
 	for (i = 0; i < sizeof (dheader_t) / 4; i++)
-		((int *) &header)[i] = LittleLong (((int *) &header)[i]);
+		((Uint32 *) &header)[i] = LittleLong (((Uint32 *) &header)[i]);
 	if (header.version != BSPVERSION) {
 		if ((LittleLong(header.version) == IDPOLYHEADER) ||
 				LittleLong(header.version) == IDSPRITEHEADER) {
