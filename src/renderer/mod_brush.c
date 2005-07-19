@@ -119,8 +119,8 @@ Mod_LoadTextures (dlump_t *l, model_t *mod)
 		else
 			what = WHAT_NORMAL;
 
-		tx->width = dmiptex->width;
-		tx->height = dmiptex->height;
+		tx->width = LittleLong(dmiptex->width);
+		tx->height = LittleLong(dmiptex->height);
 
 		paths[0] = zasprintf (tempzone, "%s/%s", base_name, tx->name);
 		paths[1] = zasprintf (tempzone, "override/%s/%s", map_name, tx->name);
