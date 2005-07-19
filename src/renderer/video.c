@@ -250,7 +250,7 @@ VID_Shutdown (void)
 {
 	DynGL_CloseLibrary ();
 //	SDL_QuitSubSystem (SDL_INIT_VIDEO);
-	SDL_SetVideoMode (vid.width, vid.height, vid.bpp, sdl_flags & ~SDL_OPENGL);
+	SDL_SetVideoMode (vid.width, vid.height, vid.bpp, sdl_flags & ~(SDL_OPENGL | SDL_FULLSCREEN));
 	VID_Inited = false;
 
 	memset (&vid, 0, sizeof (viddef_t));

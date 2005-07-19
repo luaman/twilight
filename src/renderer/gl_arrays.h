@@ -185,7 +185,7 @@ TWI_ChangeVDrawArraysALL (GLuint num, qboolean cva, vertex_t *pv, vbo_t *vv,
 			if ((gva_tc0type != ARRAY_DEFAULT) && (gva_tc0type != ARRAY_COPY))
 				qglTexCoordPointer (2, GL_FLOAT, sizeof(texcoord_t), tc0_array_p);
 			if ((gva_tc0type != ARRAY_COPY) || (gva_tc0array.pointer != ptc0)) {
-				memcpy (tc0_array_p, ptc0, sizeof (vertex_t) * num);
+				memcpy (tc0_array_p, ptc0, sizeof (texcoord_t) * num);
 				gva_tc0type = ARRAY_COPY;
 			}
 		} else {
@@ -218,7 +218,7 @@ TWI_ChangeVDrawArraysALL (GLuint num, qboolean cva, vertex_t *pv, vbo_t *vv,
 					qglClientActiveTextureARB(GL_TEXTURE0_ARB);
 				}
 				if ((gva_tc1type != ARRAY_COPY) || (gva_tc1array.pointer != ptc1)) {
-					memcpy (tc1_array_p, ptc1, sizeof (vertex_t) * num);
+					memcpy (tc1_array_p, ptc1, sizeof (texcoord_t) * num);
 					gva_tc1type = ARRAY_COPY;
 				}
 			} else {
