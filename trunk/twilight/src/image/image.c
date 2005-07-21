@@ -50,6 +50,8 @@ Image_Init (void)
 
 	img_zone = Zone_AllocZone ("Image");
 
+	count += Image_InitSDL ();
+
 	search = Zone_Alloc (img_zone, sizeof(img_search_t));
 	search->ext = Zstrdup(img_zone, "tga");
 	search->load = TGA_Load;
@@ -70,8 +72,6 @@ Image_Init (void)
 	search->next = img_search;
 	count++;
 	img_search = search;
-
-	count += Image_InitSDL ();
 
 	exts = Zone_Alloc (img_zone, sizeof (char *) * (count + 1));
 
