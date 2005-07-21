@@ -1,9 +1,8 @@
-#!/usr/bin/python
-
+#! /usr/bin/env python
 #
 # SCons - a Software Constructor
 #
-# Copyright (c) 2001, 2002, 2003 Steven Knight
+# Copyright (c) 2001, 2002, 2003, 2004 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -25,15 +24,15 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-__revision__ = "/home/scons/scons/branch.0/baseline/src/script/scons.py 0.94.D001 2003/11/07 06:02:01 knight"
+__revision__ = "/home/scons/scons/branch.0/branch.96/baseline/src/script/scons.py 0.96.90.D001 2005/02/15 20:11:37 knight"
 
-__version__ = "0.94"
+__version__ = "0.96.90"
 
 __build__ = "D001"
 
 __buildsys__ = "casablanca"
 
-__date__ = "2003/11/07 06:02:01"
+__date__ = "2005/02/15 20:11:37"
 
 __developer__ = "knight"
 
@@ -129,6 +128,23 @@ else:
                                            'site-packages'),
                            prefs))
     prefs = temp
+
+    # Add the parent directory of the current python's library to the
+    # preferences.  On SuSE-91/AMD64, for example, this is /usr/lib64,
+    # not /usr/lib.
+    try:
+        libpath = os.__file__
+    except AttributeError:
+        pass
+    else:
+        while libpath:
+            libpath, tail = os.path.split(libpath)
+            if tail[:6] == "python":
+                break
+        if libpath:
+            # Python library is in /usr/libfoo/python*;
+            # check /usr/libfoo/scons*.
+            prefs.append(libpath)
 
 # Look first for 'scons-__version__' in all of our preference libs,
 # then for 'scons'.

@@ -1,9 +1,8 @@
-#!/usr/bin/python
-
+#! /usr/bin/env python
 #
 # SCons - a Software Constructor
 #
-# Copyright (c) 2001, 2002, 2003 Steven Knight
+# Copyright (c) 2001, 2002, 2003, 2004 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -25,15 +24,15 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-__revision__ = "0.94.D001"
+__revision__ = "/home/scons/scons/branch.0/branch.96/baseline/src/script/sconsign.py 0.96.90.D001 2005/02/15 20:11:37 knight"
 
-__version__ = "0.94"
+__version__ = "0.96.90"
 
 __build__ = "D001"
 
 __buildsys__ = "casablanca"
 
-__date__ = "2003/11/07 06:02:01"
+__date__ = "2005/02/15 20:11:37"
 
 __developer__ = "knight"
 
@@ -131,6 +130,23 @@ else:
                            prefs))
     prefs = temp
 
+    # Add the parent directory of the current python's library to the
+    # preferences.  On SuSE-91/AMD64, for example, this is /usr/lib64,
+    # not /usr/lib.
+    try:
+        libpath = os.__file__
+    except AttributeError:
+        pass
+    else:
+        while libpath:
+            libpath, tail = os.path.split(libpath)
+            if tail[:6] == "python":
+                break
+        if libpath:
+            # Python library is in /usr/libfoo/python*;
+            # check /usr/libfoo/scons*.
+            prefs.append(libpath)
+
 # Look first for 'scons-__version__' in all of our preference libs,
 # then for 'scons'.
 libs.extend(map(lambda x: os.path.join(x, scons_version), prefs))
@@ -142,43 +158,110 @@ sys.path = libs + sys.path
 # END STANDARD SCons SCRIPT HEADER
 ##############################################################################
 
-PF_bsig      = 0x1
-PF_csig      = 0x2
-PF_timestamp = 0x4
-PF_implicit  = 0x8
-PF_all       = PF_bsig | PF_csig | PF_timestamp | PF_implicit
+import cPickle
+import imp
+import string
+import whichdb
 
-Do_Func = None
+import SCons.SConsign
+
+def my_whichdb(filename):
+    try:
+        f = open(filename + ".dblite", "rb")
+        f.close()
+        return "SCons.dblite"
+    except IOError:
+        pass
+    return _orig_whichdb(filename)
+
+_orig_whichdb = whichdb.whichdb
+whichdb.whichdb = my_whichdb
+
+def my_import(mname):
+    if '.' in mname:
+        i = string.rfind(mname, '.')
+        parent = my_import(mname[:i])
+        fp, pathname, description = imp.find_module(mname[i+1:],
+                                                    parent.__path__)
+    else:
+        fp, pathname, description = imp.find_module(mname)
+    return imp.load_module(mname, fp, pathname, description)
+
+class Flagger:
+    default_value = 1
+    def __setitem__(self, item, value):
+        self.__dict__[item] = value
+        self.default_value = 0
+    def __getitem__(self, item):
+        return self.__dict__.get(item, self.default_value)
+
+Do_Call = None
 Print_Directories = []
 Print_Entries = []
-Print_Flags = 0
+Print_Flags = Flagger()
 Verbose = 0
 Readable = 0
 
-def field(name, pf, val):
-    if Print_Flags & pf:
-        if Verbose:
-            sep = "\n    " + name + ": "
-        else:
-            sep = " "
-        return sep + str(val)
+def default_mapper(entry, name):
+    try:
+        val = eval("entry."+name)
+    except:
+        val = None
+    return str(val)
+
+def map_timestamp(entry, name):
+    try:
+        timestamp = entry.timestamp
+    except AttributeError:
+        timestamp = None
+    if Readable and timestamp:
+        return "'" + time.ctime(timestamp) + "'"
     else:
-        return ""
+        return str(timestamp)
+
+def map_bkids(entry, name):
+    try:
+        bkids = entry.bsources + entry.bdepends + entry.bimplicit
+        bkidsigs = entry.bsourcesigs + entry.bdependsigs + entry.bimplicitsigs
+    except AttributeError:
+        return None
+    result = []
+    for i in xrange(len(bkids)):
+        result.append("%s: %s" % (bkids[i], bkidsigs[i]))
+    if result == []:
+        return None
+    return string.join(result, "\n        ")
+
+map_field = {
+    'timestamp' : map_timestamp,
+    'bkids'     : map_bkids,
+}
+
+map_name = {
+    'implicit'  : 'bkids',
+}
 
 def printfield(name, entry):
-    if Readable and entry.timestamp:
-        ts = "'" + time.ctime(entry.timestamp) + "'"
-    else:
-        ts = entry.timestamp
-    timestamp = field("timestamp", PF_timestamp, ts)
-    bsig = field("bsig", PF_bsig, entry.bsig)
-    csig = field("csig", PF_csig, entry.csig)
-    print name + ":" + timestamp + bsig + csig
-    if Print_Flags & PF_implicit and entry.implicit:
+    def field(name, verbose=Verbose, entry=entry):
+        if not Print_Flags[name]:
+            return None
+        fieldname = map_name.get(name, name)
+        mapper = map_field.get(fieldname, default_mapper)
+        val = mapper(entry, name)
+        if verbose:
+            val = name + ": " + val
+        return val
+
+    fieldlist = ["timestamp", "bsig", "csig"]
+    outlist = [name+":"] + filter(None, map(field, fieldlist))
+    sep = Verbose and "\n    " or " "
+    print string.join(outlist, sep)
+
+    outlist = field("implicit", 0)
+    if outlist:
         if Verbose:
             print "    implicit:"
-        for i in entry.implicit:
-            print "        %s" % i
+        print "        " + outlist
 
 def printentries(entries):
     if Print_Entries:
@@ -193,38 +276,63 @@ def printentries(entries):
         for name, e in entries.items():
             printfield(name, e)
 
-import SCons.Sig
+class Do_SConsignDB:
+    def __init__(self, dbm_name, dbm):
+        self.dbm_name = dbm_name
+        self.dbm = dbm
 
-def Do_SConsignDB(name):
-    import anydbm
-    import cPickle
-    try:
-        open(name, 'rb')
-    except (IOError, OSError), e:
-        sys.stderr.write("sconsign: %s\n" % (e))
-        return
-    try:
-        db = anydbm.open(name, "r")
-    except anydbm.error, e:
-        sys.stderr.write("sconsign: ignoring invalid .sconsign.dbm file `%s': %s\n" % (name, e))
-        return
-    if Print_Directories:
-        for dir in Print_Directories:
+    def __call__(self, fname):
+        # The *dbm modules stick their own file suffixes on the names
+        # that are passed in.  This is causes us to jump through some
+        # hoops here to be able to allow the user
+        try:
+            # Try opening the specified file name.  Example:
+            #   SPECIFIED                  OPENED BY self.dbm.open()
+            #   ---------                  -------------------------
+            #   .sconsign               => .sconsign.dblite
+            #   .sconsign.dblite        => .sconsign.dblite.dblite
+            db = self.dbm.open(fname, "r")
+        except (IOError, OSError), e:
+            print_e = e
             try:
-                val = db[dir]
-            except KeyError:
-                sys.stderr.write("sconsign: no dir `%s' in `%s'\n" % (dir, args[0]))
-            else:
-                entries = cPickle.loads(val)
-                print '=== ' + dir + ':'
-                printentries(entries)
-    else:
-        keys = db.keys()
-        keys.sort()
-        for dir in keys:
-            entries = cPickle.loads(db[dir])
-            print '=== ' + dir + ':'
-            printentries(entries)
+                # That didn't work, so try opening the base name,
+                # so that if the actually passed in 'sconsign.dblite'
+                # (for example), the dbm module will put the suffix back
+                # on for us and open it anyway.
+                db = self.dbm.open(os.path.splitext(fname)[0], "r")
+            except (IOError, OSError):
+                # That didn't work either.  See if the file name
+                # they specified just exists (independent of the dbm
+                # suffix-mangling).
+                try:
+                    open(fname, "r")
+                except (IOError, OSError), e:
+                    # Nope, that file doesn't even exist, so report that
+                    # fact back.
+                    print_e = e
+                sys.stderr.write("sconsign: %s\n" % (print_e))
+                return
+        except:
+            sys.stderr.write("sconsign: ignoring invalid `%s' file `%s'\n" % (self.dbm_name, fname))
+            return
+
+        if Print_Directories:
+            for dir in Print_Directories:
+                try:
+                    val = db[dir]
+                except KeyError:
+                    sys.stderr.write("sconsign: no dir `%s' in `%s'\n" % (dir, args[0]))
+                else:
+                    self.printentries(dir, val)
+        else:
+            keys = db.keys()
+            keys.sort()
+            for dir in keys:
+                self.printentries(dir, db[dir])
+
+    def printentries(self, dir, val):
+        print '=== ' + dir + ':'
+        printentries(cPickle.loads(val))
 
 def Do_SConsignDir(name):
     try:
@@ -233,14 +341,11 @@ def Do_SConsignDir(name):
         sys.stderr.write("sconsign: %s\n" % (e))
         return
     try:
-        sconsign = SCons.Sig.SConsignDir(fp)
+        sconsign = SCons.SConsign.Dir(fp)
     except:
         sys.stderr.write("sconsign: ignoring invalid .sconsign file `%s'\n" % name)
         return
     printentries(sconsign.entries)
-
-Function_Map = {'dbm'      : Do_SConsignDB,
-                'sconsign' : Do_SConsignDir}
 
 ##############################################################################
 
@@ -266,43 +371,53 @@ opts, args = getopt.getopt(sys.argv[1:], "bcd:e:f:hirtv",
                              'format=', 'help', 'implicit',
                              'readable', 'timestamp', 'verbose'])
 
+
 for o, a in opts:
     if o in ('-b', '--bsig'):
-        Print_Flags = Print_Flags | PF_bsig
+        Print_Flags['bsig'] = 1
     elif o in ('-c', '--csig'):
-        Print_Flags = Print_Flags | PF_csig
+        Print_Flags['csig'] = 1
     elif o in ('-d', '--dir'):
         Print_Directories.append(a)
     elif o in ('-e', '--entry'):
         Print_Entries.append(a)
     elif o in ('-f', '--format'):
-        try:
-            Do_Func = Function_Map[a]
-        except KeyError:
-            sys.stderr.write("sconsign: illegal file format `%s'\n" % a)
-            print helpstr
-            sys.exit(2)
+        Module_Map = {'dblite'   : 'SCons.dblite',
+                      'sconsign' : None}
+        dbm_name = Module_Map.get(a, a)
+        if dbm_name:
+            try:
+                dbm = my_import(dbm_name)
+            except:
+                sys.stderr.write("sconsign: illegal file format `%s'\n" % a)
+                print helpstr
+                sys.exit(2)
+            Do_Call = Do_SConsignDB(a, dbm)
+        else:
+            Do_Call = Do_SConsignDir
     elif o in ('-h', '--help'):
         print helpstr
         sys.exit(0)
     elif o in ('-i', '--implicit'):
-        Print_Flags = Print_Flags | PF_implicit
+        Print_Flags['implicit'] = 1
     elif o in ('-r', '--readable'):
         Readable = 1
     elif o in ('-t', '--timestamp'):
-        Print_Flags = Print_Flags | PF_timestamp
+        Print_Flags['timestamp'] = 1
     elif o in ('-v', '--verbose'):
         Verbose = 1
 
-if Print_Flags == 0:
-    Print_Flags = PF_all
-    
-for a in args:
-    if Do_Func:
-        Do_Func(a)
-    elif a[-4:] == '.dbm':
-        Do_SConsignDB(a)
-    else:
-        Do_SConsignDir(a)
+if Do_Call:
+    for a in args:
+        Do_Call(a)
+else:
+    for a in args:
+        dbm_name = whichdb.whichdb(a)
+        if dbm_name:
+            Map_Module = {'SCons.dblite' : 'dblite'}
+            dbm = my_import(dbm_name)
+            Do_SConsignDB(Map_Module.get(dbm_name, dbm_name), dbm)(a)
+        else:
+            Do_SConsignDir(a)
 
 sys.exit(0)
