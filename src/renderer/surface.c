@@ -45,13 +45,11 @@ int lightmap_bytes;				// 1, 3, or 4
 int lightmap_shift;
 int gl_lightmap_format = GL_RGB;
 
-cvar_t *gl_subdivide_size;
 cvar_t *gl_colorlights;
 
 void
 Surf_Init_Cvars (void)
 {
-	gl_subdivide_size =Cvar_Get("gl_subdivide_size", "128", CVAR_ARCHIVE, NULL);
 	gl_colorlights = Cvar_Get ("gl_colorlights", "1", CVAR_NONE, NULL);
 }
 

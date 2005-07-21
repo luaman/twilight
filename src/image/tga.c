@@ -46,7 +46,7 @@ typedef struct _TargaHeader {
 
 
 static image_t *
-TGA_LoadBuffer (Uint8 *buffer)
+TGA_LoadBuffer (Uint8 *buffer, const char *name)
 {
 	size_t		numPixels;
 	int         columns, rows;
@@ -83,12 +83,12 @@ TGA_LoadBuffer (Uint8 *buffer)
 
 	if (targa_header.image_type != 2 && targa_header.image_type != 10 &&
 		targa_header.image_type != 3)
-		Sys_Error ("LoadTGA: Only type 2, 3 and 10 targa RGB images supported\n");
+		Sys_Error ("LoadTGA: Only type 2, 3 and 10 targa RGB images supported. (%s)\n", name);
 
 	if (targa_header.colormap_type != 0
 		|| (targa_header.pixel_size != 32 && targa_header.pixel_size != 24))
 		Sys_Error
-			("Texture_LoadTGA: Only 32 or 24 bit images supported (no colormaps)\n");
+			("Texture_LoadTGA: Only 32 or 24 bit images supported (no colormaps). (%s)\n", name);
 
 	columns = targa_header.width;
 	rows = targa_header.height;
@@ -267,7 +267,7 @@ TGA_Load (fs_file_t *file, SDL_RWops *rw)
 	buf = Zone_Alloc (tempzone, file->len);
 	SDL_RWread (rw, buf, file->len, 1);
 	SDL_RWclose (rw);
-	image = TGA_LoadBuffer (buf);
+	image = TGA_LoadBuffer (buf, file->name_base);
 	Zone_Free (buf);
 	return image;
 }

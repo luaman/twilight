@@ -38,6 +38,5 @@ extern Uint8 templight[LIGHTBLOCK_WIDTH * LIGHTBLOCK_HEIGHT * 4];
 extern int lightmap_bytes;
 extern int lightmap_shift;
 extern int gl_lightmap_format;
-extern cvar_t *gl_subdivide_size;
 
 #endif // __R_SURFACE_H

@@ -1237,6 +1237,13 @@ _Datagram_Connect (char *host)
 	if (dfunc.Connect (newsock, &sendaddr) == -1)
 		goto ErrorReturn;
 
+	/* Attempt to work around NAT router */
+	SZ_Clear(&net_message);
+	MSG_WriteLong (&net_message, -1);
+	MSG_WriteString (&net_message, "NAT router nudge");
+	dfunc.Write (newsock, net_message.data, net_message.cursize, &sendaddr);
+	SZ_Clear (&net_message);
+
 	// send the connection request
 	Com_Printf ("trying...\n");
 	SCR_UpdateScreen ();
