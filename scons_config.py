@@ -213,25 +213,35 @@ def conf_base ():
 
 	return opts
 
+def check_func (conf, defs, func):
+	if conf.CheckFunc (func):
+		defs.set('HAVE_' + string.upper(func), 1)
+		return 1
+	return 0
+
 def check_funcs (conf, defs, funcs):
 	for func in funcs:
-		if conf.CheckFunc (func):
-			defs.set('HAVE_' + string.upper(func), 1)
+		check_func (conf, defs, func)
+
+def check_cheader (conf, defs, header):
+	if conf.CheckCHeader (header):
+		str = string.upper(header)
+		str = string.replace(str, '.', '_')
+		str = string.replace(str, '/', '_')
+		defs.set('HAVE_' + str, 1)
+		return 1
+	return 0
 
 def check_cheaders (conf, defs, headers):
 	for header in headers:
-		if conf.CheckCHeader (header):
-			str = string.upper(header)
-			str = string.replace(str, '.', '_')
-			str = string.replace(str, '/', '_')
-			defs.set('HAVE_' + str, 1)
+		check_cheader (conf, defs, header)
 
 def handle_opts (conf, opts, config_defs, destructive):
 	if destructive:
 		if ('gcc' in env['TOOLS']):
 			if int(opts['werror']):
 				conf.cflag ('-Werror')
-		if ('msvc' in env['TOOLS']):
+		elif ('msvc' in env['TOOLS']):
 			conf.cflag ('/MD')
 			if int(opts['werror']):
 				conf.cflag ('/WX')
@@ -241,8 +251,6 @@ def handle_opts (conf, opts, config_defs, destructive):
 		if ('gcc' in env['TOOLS']):
 			if int(opts['optimize']):
 				conf.cflag ('-O2')
-			else:
-				conf.cflag ('-O')
 			if int(opts['debug']):
 				conf.cflag ('-g')
 			if int(opts['warnings']):
@@ -260,7 +268,7 @@ def handle_opts (conf, opts, config_defs, destructive):
 				conf.cflag ('-pipe', 1)
 			conf.cflag ('-fno-strict-aliasing', 1)
 			conf.cflag ('-finline', 1)
-		if ('msvc' in env['TOOLS']):
+		elif ('msvc' in env['TOOLS']):
 			if int(opts['debug']):
 				conf.cflag ('/Zi')
 				conf.cflag ('/GZ')
@@ -324,10 +332,17 @@ def do_configure (env):
 		print "Twilight requires SDL 1.2.5. (" + repr (sdl_ver) + " found)"
 		Exit (1)
 
-	check_funcs (conf, config_defs, ['strlcat', 'strlcpy', 'snprintf', \
-		'_snprintf', 'vsnprintf', '_vsnprintf', 'strcasecmp', '_stricmp', \
-		'strncasecmp', '_strnicmp', 'fcntl', 'stat', '_stat', 'mkdir', \
-		'_mkdir', 'SDL_LoadObject', 'dlopen'])
+	if not check_func(conf, config_defs, 'strncasecmp'):
+		check_func('_strnicmp')
+	if not check_func(conf, config_defs, 'strcasecmp'):
+		check_func('_stricmp')
+	if not check_func(conf, config_defs, 'snprintf'):
+		check_func('_snprintf')
+	if not check_func(conf, config_defs, 'vsnprintf'):
+		check_func('_vsnprintf')
+
+	check_funcs (conf, config_defs, ['strlcat', 'strlcpy', \
+		'fcntl', 'mkdir', '_mkdir', 'SDL_LoadObject'])
 	check_cheaders (conf, config_defs, ['unistd.h', 'fcntl.h', 'windef.h', \
 		'pwd.h', 'sys/types.h', 'sys/stat.h', 'limits.h', 'signal.h', \
 		'sys/time.h', 'time.h', 'execinfo.h', 'dlfcn.h'])
@@ -339,7 +354,7 @@ def do_configure (env):
 		if conf.gcc_sse_asm():
 			config_defs.set('HAVE_GCC_SSE_ASM', 1)
 
-	if not config_defs.has_key('HAVE_DLOPEN'):
+	if not check_func(conf, config_defs, 'dlopen'):
 		if conf.CheckLib ('dl', 'dlopen', 1):
 			config_defs.set('HAVE_DLOPEN', 1)
 	handle_opts (conf, opts, config_defs, 1)

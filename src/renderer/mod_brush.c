@@ -619,10 +619,6 @@ Mod_MakeChains (model_t *mod)
 		}
 
 	if (bheader->numsets) {
-		if (bheader->numsets >= MAX_VERTEX_ARRAYS) {
-			Com_Printf("ERROR!  Too many vertices in %s.  Fixme.\n", mod->name);
-			Sys_Quit (1);
-		}
 		bheader->verts = Zone_Alloc(mod->zone, sizeof(vertex_t) * bheader->numsets);
 		bheader->tcoords[0] = Zone_Alloc(mod->zone, sizeof(texcoord_t) * bheader->numsets);
 		bheader->tcoords[1] = Zone_Alloc(mod->zone, sizeof(texcoord_t) * bheader->numsets);
