@@ -588,6 +588,11 @@ GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 		conv_trans_size = size;
 	}
 
+	for (i = 0; i < size; i++) {
+		if ((conv_trans[i] = palette[data[i]]) != d_palette_empty)
+			count++;
+	}
+	/*
 	for (i = 0; i < size;) {
 		d = LittleLong(((Uint32 *) data)[i >> 2]);
 
@@ -613,6 +618,7 @@ GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 				break;
 		}
 	}
+	*/
 
 	if (!count && check_empty)
 		return NULL;
