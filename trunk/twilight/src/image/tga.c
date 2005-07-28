@@ -51,7 +51,7 @@ TGA_LoadBuffer (Uint8 *buffer, const char *name)
 	size_t		numPixels;
 	int         columns, rows;
 	Uint8       *pixbuf;
-	int         row, column;
+	int         row, column, start_row, row_inc;
 	TargaHeader	targa_header;
 	Uint8		*targa_rgba, *buf_p;
 	Uint8		red, green, blue, alphabyte;
@@ -81,6 +81,7 @@ TGA_LoadBuffer (Uint8 *buffer, const char *name)
 	targa_header.pixel_size = *buf_p++;
 	targa_header.attributes = *buf_p++;
 
+
 	if (targa_header.image_type != 2 && targa_header.image_type != 10 &&
 		targa_header.image_type != 3)
 		Sys_Error ("LoadTGA: Only type 2, 3 and 10 targa RGB images supported. (%s)\n", name);
@@ -94,6 +95,14 @@ TGA_LoadBuffer (Uint8 *buffer, const char *name)
 	rows = targa_header.height;
 	numPixels = columns * rows;
 
+	if (targa_header.attributes & 0x20) {
+		start_row = 0;
+		row_inc = 1;
+	} else {
+		start_row = rows - 1;
+		row_inc = -1;
+	}
+
 	img->width = columns;
 	img->height = rows;
 
@@ -106,7 +115,7 @@ TGA_LoadBuffer (Uint8 *buffer, const char *name)
 	if (targa_header.image_type == 2 || targa_header.image_type == 3)
 	{ 
 		// Uncompressed RGB or gray scale image
-		for (row = rows - 1; row >= 0; row--) 
+		for (row = start_row; row >= 0 && row < rows; row += row_inc) 
 		{
 			pixbuf = targa_rgba + row * columns * 4;
 
@@ -159,7 +168,7 @@ TGA_LoadBuffer (Uint8 *buffer, const char *name)
 		blue = 0;
 		alphabyte = 0xff;
 
-		for (row = rows - 1; row >= 0; row--) {
+		for (row = start_row; row >= 0 && row < rows; row += row_inc) {
 
 			pixbuf = targa_rgba + row*columns*4;
 
@@ -197,10 +206,17 @@ TGA_LoadBuffer (Uint8 *buffer, const char *name)
 						if (column == columns) { // run spans across rows
 							column = 0;
 
-							if (row > 0)
-								row--;
-							else
-								goto breakOut;
+							if (row_inc < 0) {
+								if (row > 0)
+									row--;
+								else
+									goto breakOut;
+							} else {
+								if (row < rows - 1)
+									row++;
+								else
+									goto breakOut;
+							}
 
 							pixbuf = targa_rgba + row * columns * 4;
 						}
@@ -239,10 +255,17 @@ TGA_LoadBuffer (Uint8 *buffer, const char *name)
 						if (column == columns) { // pixel packet run spans across rows
 							column = 0;
 
-							if (row > 0)
-								row--;
-							else
-								goto breakOut;
+							if (row_inc < 0) {
+								if (row > 0)
+									row--;
+								else
+									goto breakOut;
+							} else {
+								if (row < rows - 1)
+									row++;
+								else
+									goto breakOut;
+							}
 
 							pixbuf = targa_rgba + row * columns * 4;
 						}						
