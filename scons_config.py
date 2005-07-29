@@ -198,8 +198,8 @@ def conf_base ():
 		opts.create('userconf', '~/Library/Preferences/com.icculus.Twilight.conf', 'Default user config')
 		opts.create('sharepath', '/Library/Application Support/Twilight', 'Default shared data path')
 		opts.create('userpath', '~/Library/Application Support/Twilight', 'Default user data path')
-		opts.create('sdl_image', 'noneyet', 'Name of your SDL_image library')
-		opts.create('libgl', '/sw/lib/libSDL_image-1.2.0.dylib', 'Name of your OpenGL library')
+		opts.create('sdl_image', '/sw/lib/libSDL_image-1.2.0.dylib', 'Name of your SDL_image library')
+		opts.create('libgl', 'Provided by SDL', 'Name of your OpenGL library')
 	else:
 		opts.create('dir_mode', 'dir_posix', 'Directory access mode')
 		opts.create('shareconf', '/etc/twilight.conf', 'Default shared config')
