@@ -588,11 +588,6 @@ GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 		conv_trans_size = size;
 	}
 
-	for (i = 0; i < size; i++) {
-		if ((conv_trans[i] = palette[data[i]]) != d_palette_empty)
-			count++;
-	}
-	/*
 	for (i = 0; i < size;) {
 		d = LittleLong(((Uint32 *) data)[i >> 2]);
 
@@ -618,7 +613,6 @@ GLT_8to32_convert (Uint8 *data, int width, int height, Uint32 *palette,
 				break;
 		}
 	}
-	*/
 
 	if (!count && check_empty)
 		return NULL;
@@ -791,7 +785,9 @@ R_ResampleTextureBase (void *indata, int inwidth, int inheight, void *outdata,
 		yi = f >> 16;
 		if (yi < endy)
 		{
-			int lerp = f & 0xFFFF;
+			int lerp2 = (f & 0xFFFF) >> 8;
+			int lerp1 = 256-lerp2;
+
 			if (yi != oldy)
 			{
 				inrow = (Uint8 *)indata + inwidth*4*yi;
@@ -804,19 +800,19 @@ R_ResampleTextureBase (void *indata, int inwidth, int inheight, void *outdata,
 						inwidth, outwidth);
 				oldy = yi;
 			}
-			for (j = 0; j < outwidth; j++)  
+			for (j = 0; j < outwidth; j++)
 			{
 				Uint32	r1, r2, out_32;
 				r1 = *((Uint32 *) row1);
 				r2 = *((Uint32 *) row2);
 				out_32 = r1;
 
-				out_32  = (((((((r2 & 0xFF000000) - (r1 & 0xFF000000)) >> 16) * lerp)) + (r1 & 0xFF000000)) & 0xFF000000);
-				out_32 |= (((((((r2 & 0x00FF0000) - (r1 & 0x00FF0000)) >> 16) * lerp)) + (r1 & 0x00FF0000)) & 0x00FF0000);
-				out_32 |= (((((((r2 & 0x0000FF00) - (r1 & 0x0000FF00))) * lerp) >> 16) + (r1 & 0x0000FF00)) & 0x0000FF00);
-				out_32 |= (((((((r2 & 0x000000FF) - (r1 & 0x000000FF))) * lerp) >> 16) + (r1 & 0x000000FF)) & 0x000000FF);
+				*((Uint32 *) out) =
+					((((r1 & 0xFF00FF00) >> 8) * lerp1 +
+					  ((r2 & 0xFF00FF00) >> 8) * lerp2) & 0xFF00FF00) +
+					((((r1 & 0x00FF00FF) * lerp1 +
+					   (r2 & 0x00FF00FF) * lerp2) >> 8) & 0x00FF00FF);
 
-				*((Uint32 *) out) = out_32;
 				out += 4;
 				row1 += 4;
 				row2 += 4;
@@ -842,7 +838,7 @@ R_ResampleTextureBase (void *indata, int inwidth, int inheight, void *outdata,
 }
 
 
-#ifdef HAVE_GCC_MMX_ASM
+#if defined(HAVE_GCC_MMX_ASM) && 0
 static void
 R_ResampleTextureLerpLineMMX (Uint8 *in, Uint8 *out, int inwidth, int outwidth,
 		int fstep_w)
@@ -1551,7 +1547,7 @@ R_ResampleTexture (void *id, int iw, int ih, void *od, int ow, int oh)
 		return;
 	}
 
-#ifdef HAVE_GCC_MMX_ASM
+#if defined(HAVE_GCC_MMX_ASM) && 0
 	if (1 && (cpu_flags & CPU_MMX_EXT) && !((iw & 1) || (ih & 1) || (ow & 1) || (oh & 1)))
 		R_ResampleTextureMMX_EXT (id, iw, ih, od, ow, oh);
 	else if (1 && cpu_flags & CPU_MMX)
