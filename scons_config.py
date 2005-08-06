@@ -333,13 +333,13 @@ def do_configure (env):
 		Exit (1)
 
 	if not check_func(conf, config_defs, 'strncasecmp'):
-		check_func('_strnicmp')
+		check_func(conf, config_defs, '_strnicmp')
 	if not check_func(conf, config_defs, 'strcasecmp'):
-		check_func('_stricmp')
+		check_func(conf, config_defs, '_stricmp')
 	if not check_func(conf, config_defs, 'snprintf'):
-		check_func('_snprintf')
+		check_func(conf, config_defs, '_snprintf')
 	if not check_func(conf, config_defs, 'vsnprintf'):
-		check_func('_vsnprintf')
+		check_func(conf, config_defs, '_vsnprintf')
 
 	check_funcs (conf, config_defs, ['strlcat', 'strlcpy', \
 		'fcntl', 'mkdir', '_mkdir', 'SDL_LoadObject'])
