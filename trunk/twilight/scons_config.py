@@ -342,7 +342,7 @@ def do_configure (env):
 		check_func(conf, config_defs, '_vsnprintf')
 
 	check_funcs (conf, config_defs, ['strlcat', 'strlcpy', \
-		'fcntl', 'mkdir', '_mkdir', 'SDL_LoadObject'])
+		'fcntl', 'mkdir', '_mkdir', 'SDL_LoadObject', 'sigaction'])
 	check_cheaders (conf, config_defs, ['unistd.h', 'fcntl.h', 'windef.h', \
 		'pwd.h', 'sys/types.h', 'sys/stat.h', 'limits.h', 'signal.h', \
 		'sys/time.h', 'time.h', 'execinfo.h', 'dlfcn.h'])
