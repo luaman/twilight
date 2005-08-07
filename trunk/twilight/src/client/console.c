@@ -597,6 +597,6 @@ Con_CompleteCommandLine (void)
 	}
 	for (i = 0; i < 3; i++)
 		if (list[i])
-			free (list[i]);
+			free ((void *) list[i]);
 }
 
