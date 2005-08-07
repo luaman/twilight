@@ -53,32 +53,24 @@ FSD_Free (fs_group_t *group)
 static void
 FSD_Free_File (fs_file_t *file)
 {
+	Zone_Free (file->fs_data.path);
 	Zone_Free (file->name_base);
 }
 
 static SDL_RWops *
 FSD_Open_File (fs_file_t *file, Uint32 flags)
 {
-	fsd_group_t	*dir;
-	char		*name;
 	SDL_RWops	*rw;
-
-	dir = file->group->fs_data;
-	if (file->ext)
-		name = zasprintf (tempzone, "%s/%s.%s", dir->path, file->name_base, file->ext);
-	else
-		name = zasprintf (tempzone, "%s/%s", dir->path, file->name_base);
 
 	if (flags & FSF_WRITE) {
 		if (file->group->flags & FS_READ_ONLY) {
-			Com_Printf ("Refusing to open '%s' in write mode.\n", name);
+			Com_Printf ("Refusing to open '%s' in write mode.\n", file->fs_data.path);
 			rw = NULL;
 		} else
-			rw = SDL_RWFromFile (name, (flags & FSF_ASCII) ? "w" : "wb");
+			rw = SDL_RWFromFile (file->fs_data.path, (flags & FSF_ASCII) ? "w" : "wb");
 	} else
-		rw = SDL_RWFromFile (name, (flags & FSF_ASCII) ? "r" : "rb");
+		rw = SDL_RWFromFile (file->fs_data.path, (flags & FSF_ASCII) ? "r" : "rb");
 
-	Zone_Free (name);
 	return rw;
 }
 
@@ -88,11 +80,15 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 	long int			dir;
 	struct _finddata_t	n_file;
 	char				*file, *tmp;
+	fs_file_data_t	file_data;
 
 	if (depth > 32)
 		return;
 
-	tmp = zasprintf(fs_zone, "%s/%s/*", g_dir->path, path);
+	if (path)
+		tmp = zasprintf(fs_zone, "%s/%s/*", g_dir->path, path);
+	else
+		tmp = zasprintf(fs_zone, "%s/*", g_dir->path);
 	dir = _findfirst (tmp, &n_file);
 
 	Com_DFPrintf (DEBUG_FS, "Win32 Add Dir: %s %p\n", tmp, dir);
@@ -107,11 +103,17 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 fire:
 		if (!strcmp(".", n_file.name) || !strcmp("..", n_file.name))
 			continue;
-		file = zasprintf(fs_zone, "%s/%s", path, n_file.name);
+		if (path)
+			file = zasprintf(fs_zone, "%s/%s", path, n_file.name);
+		else
+			file = zasprintf(fs_zone, "%s", n_file.name);
+
+		file_data.path = file;
+
 		if (n_file.attrib & _A_SUBDIR)
 			FSD_Add_Dir (group, g_dir, file, depth + 1);
 		else
-			FS_Add_File (group, file, n_file.size, FSD_Open_File, NULL);
+			FS_Add_File (group, file, n_file.size, FSD_Open_File, file_data);
 		Zone_Free (file);
 	}
 	_findclose (dir);
@@ -142,6 +144,7 @@ FSD_Close_New (fs_group_t *group, fs_new_t *new)
 {
 	fsd_group_t	*dir = group->fs_data;
 	int			len;
+	fs_file_data_t	file_data;
 
 	SDL_RWseek (new->rw, 0, SEEK_END);
 	len = SDL_RWtell (new->rw);
@@ -150,7 +153,8 @@ FSD_Close_New (fs_group_t *group, fs_new_t *new)
 			va("%s/%s", dir->path, new->wanted));
 	Zone_Free (new->temp);
 	new->temp = NULL;
-	FS_Add_File (group, new->wanted, len, FSD_Open_File, NULL);
+	file_data.path = zasprintf (fs_zone, "%s/%s", dir->path, new->wanted);
+	FS_Add_File (group, new->wanted, len, FSD_Open_File, file_data);
 }
 
 fs_group_t *
@@ -175,7 +179,7 @@ FSD_New_Group (const char *path, fs_group_t *parent, const char *id,
 
 	dir->path = Zstrdup (fs_zone, path);
 
-	FSD_Add_Dir (group, dir, "", 0);
+	FSD_Add_Dir (group, dir, NULL, 0);
 
 	return group;
 }
