@@ -39,7 +39,7 @@ Twi_BackTrace (int fd)
 #endif
 }
 
-#ifndef HAVE_SIGNAL_H
+#ifndef HAVE_SIGACTION
 
 /* No signals on this platform, nothing to do.. */
 
