@@ -108,7 +108,7 @@ fire:
 		else
 			file = zasprintf(fs_zone, "%s", n_file.name);
 
-		file_data.path = file;
+		file_data.path = zasprintf (fs_zone, "%s/%s", full_path, n_file.name);
 
 		if (n_file.attrib & _A_SUBDIR)
 			FSD_Add_Dir (group, g_dir, file, depth + 1);
