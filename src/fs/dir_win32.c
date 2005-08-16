@@ -79,21 +79,20 @@ FSD_Add_Dir (fs_group_t *group, fsd_group_t *g_dir, char *path, int depth)
 {
 	long int			dir;
 	struct _finddata_t	n_file;
-	char				*file, *tmp;
+	char				*file, *full_path;
 	fs_file_data_t	file_data;
 
 	if (depth > 32)
 		return;
 
 	if (path)
-		tmp = zasprintf(fs_zone, "%s/%s/*", g_dir->path, path);
+		full_path = zasprintf(fs_zone, "%s/%s/*", g_dir->path, path);
 	else
-		tmp = zasprintf(fs_zone, "%s/*", g_dir->path);
-	dir = _findfirst (tmp, &n_file);
+		full_path = zasprintf(fs_zone, "%s/*", g_dir->path);
+	dir = _findfirst (full_path, &n_file);
 
-	Com_DFPrintf (DEBUG_FS, "Win32 Add Dir: %s %p\n", tmp, dir);
+	Com_DFPrintf (DEBUG_FS, "Win32 Add Dir: %s %p\n", full_path, dir);
 
-	Zone_Free (tmp);
 	if (dir != -1)
 		goto fire;
 
@@ -116,6 +115,7 @@ fire:
 			FS_Add_File (group, file, n_file.size, FSD_Open_File, file_data);
 		Zone_Free (file);
 	}
+	Zone_Free (full_path);
 	_findclose (dir);
 }
 
