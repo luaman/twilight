@@ -935,6 +935,7 @@ static void
 COM_AddDirectory (const char *dir, Uint32 flags)
 {
 	strlcpy_s (com_gamedir, dir);
+	Sys_UpdateLogpath();
 
 	FS_AddPath (dir, NULL, flags);
 }

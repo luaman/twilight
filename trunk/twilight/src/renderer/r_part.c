@@ -343,7 +343,7 @@ R_ReadPointFile_f (void)
 	snprintf (name, sizeof (name), "maps/%s.pts", cl_mapname->svalue);
 
 	Com_Printf ("Reading %s...\n", name);
-	cur = start = COM_LoadTempFile (name, true);
+	cur = start = (char *) COM_LoadTempFile (name, true);
 
 	if (!cur)
 	{

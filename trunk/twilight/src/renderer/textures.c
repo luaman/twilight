@@ -838,7 +838,7 @@ R_ResampleTextureBase (void *indata, int inwidth, int inheight, void *outdata,
 }
 
 
-#if defined(HAVE_GCC_MMX_ASM) && 0
+#if defined(HAVE_GCC_ASM_X86_MMX) && 1
 static void
 R_ResampleTextureLerpLineMMX (Uint8 *in, Uint8 *out, int inwidth, int outwidth,
 		int fstep_w)
@@ -1410,75 +1410,6 @@ R_ResampleTextureSmartFlt(void *indata, int inwidth, int inheight,
 				memcpy(od, nearest, 4);
 				//*((unsigned int*)od) = *((unsigned int*)nearest);
 			}
-#if defined(HAVE_GCC_SSE_ASM) && 0
-			else if (cpu_flags & CPU_SSE)
-			{
-				float denom = 0;
-				__v4sf tmp = {0};
-
-				{
-					__v4sf vpctnear = {pctnear, pctnear, pctnear, pctnear};
-					__v4sf xmm1 = {0};
-
-					xmm1 = _mm_cvtpu8_ps (*(__m64 *)nearest);
-					xmm1 = _mm_mul_ps(xmm1, vpctnear);
-					tmp = _mm_add_ps(tmp, xmm1);
-
-					denom += pctnear;
-				}
-
-				if ( !edges[0] ) {
-					__v4sf vpctleft = {pctleft, pctleft, pctleft, pctleft};
-					__v4sf xmm1 = {0};
-
-					xmm1 = _mm_cvtpu8_ps (*(__m64 *)left);
-					xmm1 = _mm_mul_ps(xmm1, vpctleft);
-					tmp = _mm_add_ps(tmp, xmm1);
-
-					denom += pctleft;
-				}
-
-				if ( edges[1] ) {
-					__v4sf vpctright = {pctright, pctright, pctright, pctright};
-					__v4sf xmm1 = {0};
-
-					xmm1 = _mm_cvtpu8_ps (*(__m64 *)right);
-					xmm1 = _mm_mul_ps(xmm1, vpctright);
-					tmp = _mm_add_ps(tmp, xmm1);
-
-					denom += pctright;
-				}
-
-				if ( edges[2] ) {
-					__v4sf vpctopp = {pctopp, pctopp, pctopp, pctopp};
-					__v4sf xmm1 = {0};
-
-					xmm1 = _mm_cvtpu8_ps (*(__m64 *)opposite);
-					xmm1 = _mm_mul_ps(xmm1, vpctopp);
-					tmp = _mm_add_ps(tmp, xmm1);
-
-					denom += pctopp;
-				}
-
-				{
-					__v4sf vdenom = {denom, denom, denom, denom};
-					__v4sf vhigh = {255, 255, 255, 255};
-					__v4sf vlow = {0, 0, 0, 0};
-					__m64 mm0, mm1;
-
-					tmp = _mm_div_ps(tmp, vdenom);
-					tmp = _mm_min_ps(tmp, vhigh);
-					tmp = _mm_max_ps(tmp, vlow);
-					mm0 = _mm_cvttps_pi32 (tmp);
-					tmp = _mm_movehl_ps(tmp, tmp);
-					mm1 = _mm_cvttps_pi32 (tmp);
-					mm0 = _mm_packs_pi32 (mm0, mm1);
-					mm0 = _mm_packs_pu16 (mm0, mm0);
-					*(Uint32 *) od = _mm_cvtsi64_si32(mm0);
-				}
-				_mm_empty();
-			}
-#endif
 			else
 			{
 				float num[4], denom=pctnear;
@@ -1547,7 +1478,7 @@ R_ResampleTexture (void *id, int iw, int ih, void *od, int ow, int oh)
 		return;
 	}
 
-#if defined(HAVE_GCC_MMX_ASM) && 0
+#if defined(HAVE_GCC_ASM_X86_MMX) && 1
 	if (1 && (cpu_flags & CPU_MMX_EXT) && !((iw & 1) || (ih & 1) || (ow & 1) || (oh & 1)))
 		R_ResampleTextureMMX_EXT (id, iw, ih, od, ow, oh);
 	else if (1 && cpu_flags & CPU_MMX)

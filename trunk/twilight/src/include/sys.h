@@ -50,6 +50,7 @@ double Sys_DoubleTime(void);
 char *Sys_ConsoleInput(void);
 int Sys_CheckClipboardPaste(int key);
 char *Sys_ExpandPath(char *str);
+void Sys_UpdateLogpath(void);
 
 #endif // __SYS_H
 
