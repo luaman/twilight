@@ -204,7 +204,7 @@ Sys_ESCallback (cvar_t *cvar)
 void
 Sys_UpdateLogpath (void)
 {
-	if (sys_logname->svalue && sys_logname->svalue[0]) {
+	if (sys_logname && sys_logname->svalue && sys_logname->svalue[0]) {
 		if (com_gamedir[0])
 			snprintf (logname, MAX_OSPATH, "%s/%s.log", com_gamedir,
 					sys_logname->svalue);
