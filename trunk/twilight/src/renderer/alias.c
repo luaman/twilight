@@ -455,7 +455,7 @@ R_DrawOpaqueAliasModels (entity_common_t *ents[],int num_ents, qboolean viewent)
 	qglEnableClientState (GL_COLOR_ARRAY);
 	qglBlendFunc (GL_ONE, GL_ONE);
 
-	if (gl_nv_register_combiners) {
+	if (gl_nv_register_combiners && gl_mtex) {
 		qglEnable (GL_REGISTER_COMBINERS_NV);
 
 		qglCombinerInputNV (GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV, GL_TEXTURE0_ARB, GL_UNSIGNED_IDENTITY_NV, GL_RGB);
