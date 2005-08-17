@@ -10,20 +10,46 @@ env_defs = My_Options ()
 config_defs = My_Options ()
 building = 0
 
-def check_gcc_x86_asm (context):
-	context.Message('Checking to see if computer understands gcc x86 asm ... ')
+def check_gcc_asm (context):
+	context.Message('Checking to see if compiler gcc style asm ... ')
 	ret = context.TryCompile ("""
 int main ()
 {
-	asm ("cpuid" ::: "eax", "ebx", "ecx");
+	asm ("ret\\n" :: );
 	return 0;
 }
 """, ".c")
 	context.Result (ret)
 	return ret;
 
-def check_gcc_mmx_asm (context):
-	context.Message('Checking to see if computer understands gcc MMX asm ... ')
+def check_gcc_asm_x86_eflags (context):
+	context.Message('Checking for x86 eflags asm ... ')
+	ret = context.TryCompile ("""
+int main ()
+{
+	asm ("pushfl\\n"
+	     "popfl\\n"
+	     :: );
+	return 0;
+}
+""", ".c")
+	context.Result (ret)
+	return ret;
+
+def check_gcc_asm_x86_cpuid (context):
+	context.Message('Checking for x86 cpuid asm ... ')
+	ret = context.TryCompile ("""
+int main ()
+{
+	asm ("cpuid\\n" ::: "eax", "ebx", "ecx");
+	return 0;
+}
+""", ".c")
+	context.Result (ret)
+	return ret;
+
+def check_gcc_asm_x86_mmx (context):
+	context.Message('Checking for x86 MMX asm ... ')
 	ret = context.TryCompile ("""
 int main ()
 {
@@ -34,8 +60,8 @@ int main ()
 	context.Result (ret)
 	return ret;
 
-def check_gcc_sse_asm (context):
-	context.Message('Checking to see if computer understands gcc SSE asm ... ')
+def check_gcc_asm_x86_sse (context):
+	context.Message('Checking for x86 SSE asm ... ')
 	ret = context.TryCompile ("""
 int main ()
 {
@@ -304,7 +330,16 @@ def do_configure (env):
 		opts.load('config_opts.py')
 	opts.args (ARGUMENTS)
 	opts.save('config_opts.py')
-	tests = {'SDL_config' : check_SDL_config, 'SDL_headers' : check_SDL_headers, 'cflag' : check_cflag, 'lflag' : check_lflag, 'func_flag' : check_func_flag, 'gcc_x86_asm' : check_gcc_x86_asm, 'gcc_mmx_asm' : check_gcc_mmx_asm, 'gcc_sse_asm' : check_gcc_sse_asm}
+	tests = {'SDL_config' : check_SDL_config,
+		'SDL_headers' : check_SDL_headers,
+		'cflag' : check_cflag,
+		'lflag' : check_lflag,
+		'func_flag' : check_func_flag,
+		'gcc_asm' : check_gcc_asm,
+		'gcc_asm_x86_eflags' : check_gcc_asm_x86_eflags,
+		'gcc_asm_x86_cpuid' : check_gcc_asm_x86_cpuid,
+		'gcc_asm_x86_mmx' : check_gcc_asm_x86_mmx,
+		'gcc_asm_x86_sse' : check_gcc_asm_x86_sse}
 	conf = Configure(env, custom_tests = tests)
 	handle_opts (conf, opts, config_defs, 0)
 
@@ -347,12 +382,16 @@ def do_configure (env):
 		'pwd.h', 'sys/types.h', 'sys/stat.h', 'limits.h', 'signal.h', \
 		'sys/time.h', 'time.h', 'execinfo.h', 'dlfcn.h'])
 
-	if conf.gcc_x86_asm():
-		config_defs.set('HAVE_GCC_X86_ASM', 1)
-		if conf.gcc_mmx_asm():
-			config_defs.set('HAVE_GCC_MMX_ASM', 1)
-		if conf.gcc_sse_asm():
-			config_defs.set('HAVE_GCC_SSE_ASM', 1)
+	if conf.gcc_asm ():
+		config_defs.set('HAVE_GCC_ASM', 1)
+		if conf.gcc_asm_x86_eflags ():
+			config_defs.set('HAVE_GCC_ASM_X86_EFLAGS', 1)
+		if conf.gcc_asm_x86_cpuid ():
+			config_defs.set('HAVE_GCC_ASM_X86_CPUID', 1)
+			if conf.gcc_asm_x86_mmx ():
+				config_defs.set('HAVE_GCC_ASM_X86_MMX', 1)
+			if conf.gcc_asm_x86_sse ():
+				config_defs.set('HAVE_GCC_ASM_X86_SSE', 1)
 
 	if not check_func(conf, config_defs, 'dlopen'):
 		if conf.CheckLib ('dl', 'dlopen', 1):

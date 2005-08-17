@@ -34,7 +34,7 @@
 #include "model.h"
 #include "palette.h"
 
-inline qboolean
+static inline qboolean
 _Check_GL_Error(const char *file, int line, const char *function)
 {
 	int err = qglGetError();

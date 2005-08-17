@@ -201,8 +201,8 @@ Sys_ESCallback (cvar_t *cvar)
 	sys_sleep = (Uint32)((cvar->ivalue) * (1.0f / 1000.0f));
 }
 
-static void
-setlogname (cvar_t *sys_logname)
+void
+Sys_UpdateLogpath (void)
 {
 	if (sys_logname->svalue && sys_logname->svalue[0]) {
 		if (com_gamedir[0])
@@ -212,6 +212,13 @@ setlogname (cvar_t *sys_logname)
 			snprintf (logname, MAX_OSPATH, "id1/%s.log", sys_logname->svalue);
 	} else
 		logname[0] = '\0';
+}
+
+static void
+setlogname (cvar_t *sys_logname)
+{
+	sys_logname = sys_logname;
+	Sys_UpdateLogpath ();
 }
 
 void

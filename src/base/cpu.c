@@ -44,8 +44,9 @@ check_cpuid ()
 	char	raw_id[13] = {0};
 	Uint32	*tmp = (Uint32 *) &raw_id[0];
 
-#ifdef HAVE_GCC_X86_ASM
+#ifdef HAVE_GCC_ASM_X86_CPUID
 	asm ("\n"
+#ifdef HAVE_GCC_ASM_X86_EFLAGS
 		"pushfl\n"
 		"pop					%%eax\n"
 		"mov					%%eax, %%ebx\n"
@@ -58,6 +59,7 @@ check_cpuid ()
 		"popfl\n"
 		"xorl					%%ebx, %%eax\n"
 		"je						end\n"
+#endif
 		"mov					$0, %%eax\n"
 		"cpuid\n"
 		"mov					%%ebx, %2\n"
@@ -122,7 +124,7 @@ check_cpuid ()
 
 	cpu_id = strdup(raw_id);
 
-#ifndef HAVE_GCC_MMX_ASM
+#ifndef HAVE_GCC_ASM_X86_MMX
 	if (raw_flags & BIT(23))	// Bit 23 is universally used for MMX.
 		cpu_flags &= ~CPU_MMX;
 #endif

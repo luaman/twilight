@@ -30,6 +30,7 @@
 #include <stdio.h>
 
 #include "twiconfig.h"
+#include <stddef.h>
 
 // KJB Undefined true and false defined in SciTech's DEBUG.H header
 #undef true
@@ -64,8 +65,8 @@ typedef double			GLclampd;		/* double precision float in [0,1] */
  * I am 99% sure that nVidia has these types completely WRONG.
  * But this is what they have for x86, at least at the moment.
  */
-typedef int GLintptrARB;
-typedef int GLsizeiptrARB;
+typedef ptrdiff_t GLintptrARB;
+typedef ptrdiff_t GLsizeiptrARB;
 
 #endif /* DYNGL_TYPES */
 
