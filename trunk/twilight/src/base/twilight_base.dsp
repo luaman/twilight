@@ -109,6 +109,10 @@ SOURCE=.\cvar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\fatal.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\hash.c
 # End Source File
 # Begin Source File
