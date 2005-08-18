@@ -159,6 +159,77 @@ menu:
 		max 13
 
 menu:
+	id "config_tgamma"
+	title "Texture gamma ramp tuning (Restart required)"
+	on_exit "menu config"
+	item slider:
+		label "Grey Red Bias"
+		cvar "v_tgrey_r"
+		min -1
+		max 1
+		step 0.01
+	item slider:
+		label "Grey Green Bias"
+		cvar "v_tgrey_g"
+		min -1
+		max 1
+		step 0.01
+	item slider:
+		label "Grey Blue Bias"
+		cvar "v_tgrey_b"
+		min -1
+		max 1
+		step 0.01
+	item slider:
+		label "White"
+		cvar "v_twhite"
+		min 0
+		max 1
+		step 0.01
+	item slider:
+		label "White Red Bias"
+		cvar "v_twhite_r"
+		min -1
+		max 1
+		step 0.01
+	item slider:
+		label "White Green Bias"
+		cvar "v_twhite_g"
+		min -1
+		max 1
+		step 0.01
+	item slider:
+		label "White Blue Bias"
+		cvar "v_twhite_b"
+		min -1
+		max 1
+		step 0.01
+	item slider:
+		label "Black"
+		cvar "v_tblack"
+		min 0
+		max 1
+		step 0.01
+	item slider:
+		label "Black Red Bias"
+		cvar "v_tblack_r"
+		min -1
+		max 1
+		step 0.01
+	item slider:
+		label "Black Green Bias"
+		cvar "v_tblack_g"
+		min -1
+		max 1
+		step 0.01
+	item slider:
+		label "Black Blue Bias"
+		cvar "v_tblack_b"
+		min -1
+		max 1
+		step 0.01
+
+menu:
 	id "config_gamma"
 	title "Gamma ramp tuning"
 	on_exit "menu config"
@@ -249,9 +320,18 @@ menu:
 		min 0
 		max 1
 		step 0.05
+	item slider:
+		label "Texture Grey (Needs restart)"
+		cvar "v_tgrey"
+		min 0
+		max 1
+		step 0.05
 	item command:
 		label "Gamma ramp tuning"
 		command "menu config_gamma"
+	item command:
+		label "Texture gamma ramp tuning"
+		command "menu config_tgamma"
 	item slider:
 		label "Text Size"
 		cvar "text_scale"
@@ -328,6 +408,9 @@ menu:
 		label "Skybox"
 		cvar "r_skyname"
 		max_len 30
+	item command:
+		label "Video Restart"
+		command "vid_restart"
 
 menu:
 	id "Main"
