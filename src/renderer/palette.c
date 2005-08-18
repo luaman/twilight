@@ -249,11 +249,7 @@ GammaChanged (cvar_t *cvar)
 	if (SDL_SetGammaRamp (hw_gamma_ramps[0], hw_gamma_ramps[1],
 				hw_gamma_ramps[2]) < 0)
 	{
-		/* No hardware gamma support, turn off and set ROM. */
-		Com_Printf ("No hardware gamma support: Disabling. (%s)\n",
-				SDL_GetError ());
-		Cvar_Set (v_hwgamma, "0");
-		v_hwgamma->flags |= CVAR_ROM;
+		Com_Printf ("Unable to set hardware gamma: (%s)\n", SDL_GetError ());
 	}
 }
 
@@ -276,18 +272,18 @@ PAL_Init_Cvars (void)
 	v_white_g = Cvar_Get ("v_white_g", "0", CVAR_ARCHIVE, &GammaChanged);
 	v_white_b = Cvar_Get ("v_white_b", "0", CVAR_ARCHIVE, &GammaChanged);
 
-	v_tblack = Cvar_Get ("v_tblack", "0", CVAR_ROM, &TGammaChanged);
-	v_tblack_r = Cvar_Get ("v_tblack_r", "0", CVAR_ROM, &TGammaChanged);
-	v_tblack_g = Cvar_Get ("v_tblack_g", "0", CVAR_ROM, &TGammaChanged);
-	v_tblack_b = Cvar_Get ("v_tblack_b", "0", CVAR_ROM, &TGammaChanged);
-	v_tgrey = Cvar_Get ("v_tgrey", "0.5", CVAR_ROM, &TGammaChanged);
-	v_tgrey_r = Cvar_Get ("v_tgrey_r", "0", CVAR_ROM, &TGammaChanged);
-	v_tgrey_g = Cvar_Get ("v_tgrey_g", "0", CVAR_ROM, &TGammaChanged);
-	v_tgrey_b = Cvar_Get ("v_tgrey_b", "0", CVAR_ROM, &TGammaChanged);
-	v_twhite = Cvar_Get ("v_twhite", "1", CVAR_ROM, &TGammaChanged);
-	v_twhite_r = Cvar_Get ("v_twhite_r", "0", CVAR_ROM, &TGammaChanged);
-	v_twhite_g = Cvar_Get ("v_twhite_g", "0", CVAR_ROM, &TGammaChanged);
-	v_twhite_b = Cvar_Get ("v_twhite_b", "0", CVAR_ROM, &TGammaChanged);
+	v_tblack = Cvar_Get ("v_tblack", "0", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_tblack_r = Cvar_Get ("v_tblack_r", "0", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_tblack_g = Cvar_Get ("v_tblack_g", "0", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_tblack_b = Cvar_Get ("v_tblack_b", "0", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_tgrey = Cvar_Get ("v_tgrey", "0.5", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_tgrey_r = Cvar_Get ("v_tgrey_r", "0", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_tgrey_g = Cvar_Get ("v_tgrey_g", "0", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_tgrey_b = Cvar_Get ("v_tgrey_b", "0", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_twhite = Cvar_Get ("v_twhite", "1", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_twhite_r = Cvar_Get ("v_twhite_r", "0", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_twhite_g = Cvar_Get ("v_twhite_g", "0", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
+	v_twhite_b = Cvar_Get ("v_twhite_b", "0", CVAR_ARCHIVE | CVAR_ROM, &TGammaChanged);
 }
 
 void
