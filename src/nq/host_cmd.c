@@ -487,9 +487,9 @@ Host_Loadgame_f (void)
 	char		name[MAX_OSPATH];
 	char		mapname[MAX_OSPATH];
 	const char	*start;
-	char		*saved, *tmp, c;
+	char		*saved;
 	const char	*cur;
-	float       time, tfloat, spawn_parms[NUM_SPAWN_PARMS];
+	float       time, spawn_parms[NUM_SPAWN_PARMS];
 	Sint		entnum, version;
 	Uint		i;
 	edict_t		*ent;
