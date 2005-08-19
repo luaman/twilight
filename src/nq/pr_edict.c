@@ -40,12 +40,17 @@ static const char rcsid[] =
 #include "sys.h"
 #include "world.h"
 #include "fs/rw_ops.h"
+#include "progsvm.h"
 
 dprograms_t		*progs;
 dfunction_t		*pr_functions;
-char			*pr_strings;
-static ddef_t			*pr_fielddefs;
-static ddef_t			*pr_globaldefs;
+static char		*pr_strings;
+static int		pr_stringssize;
+static const char	**pr_knownstrings;
+static int		pr_maxknownstrings;
+static int		pr_numknownstrings;
+static ddef_t	*pr_fielddefs;
+static ddef_t	*pr_globaldefs;
 dstatement_t	*pr_statements;
 globalvars_t	*pr_global_struct;
 float			*pr_globals;		// same as pr_global_struct
@@ -282,7 +287,7 @@ ED_FindField (char *name)
 	for (i = 0; i < progs->numfielddefs; i++)
 	{
 		def = &pr_fielddefs[i];
-		if (!strcmp (pr_strings + def->s_name, name))
+		if (!strcmp (PRVM_GetString(def->s_name), name))
 			return def;
 	}
 	return NULL;
@@ -298,7 +303,7 @@ ED_FindGlobal (char *name)
 	for (i = 0; i < progs->numglobaldefs; i++)
 	{
 		def = &pr_globaldefs[i];
-		if (!strcmp (pr_strings + def->s_name, name))
+		if (!strcmp (PRVM_GetString(def->s_name), name))
 			return def;
 	}
 	return NULL;
@@ -314,7 +319,7 @@ ED_FindFunction (char *name)
 	for (i = 0; i < progs->numfunctions; i++)
 	{
 		func = &pr_functions[i];
-		if (!strcmp (pr_strings + func->s_name, name))
+		if (!strcmp (PRVM_GetString(func->s_name), name))
 			return func;
 	}
 	return NULL;
@@ -340,7 +345,7 @@ PR_ValueString (etype_t type, eval_t *val)
 	switch (type)
 	{
 		case ev_string:
-			snprintf (line, sizeof (line), "%s", pr_strings + val->string);
+			snprintf (line, sizeof (line), "%s", PRVM_GetString(val->string));
 			break;
 		case ev_entity:
 			n = NoCrash_NUM_FOR_EDICT (PROG_TO_EDICT (val->edict), __FILE__, __LINE__);
@@ -351,11 +356,11 @@ PR_ValueString (etype_t type, eval_t *val)
 			break;
 		case ev_function:
 			f = pr_functions + val->function;
-			snprintf (line, sizeof (line), "%s()", pr_strings + f->s_name);
+			snprintf (line, sizeof (line), "%s()", PRVM_GetString(f->s_name));
 			break;
 		case ev_field:
 			def = ED_FieldAtOfs (val->_int);
-			snprintf (line, sizeof (line), ".%s", pr_strings + def->s_name);
+			snprintf (line, sizeof (line), ".%s", PRVM_GetString(def->s_name));
 			break;
 		case ev_void:
 			snprintf (line, sizeof (line), "void");
@@ -398,7 +403,7 @@ PR_UglyValueString (etype_t type, eval_t *val)
 	switch (type)
 	{
 		case ev_string:
-			snprintf (line, sizeof (line), "%s", pr_strings + val->string);
+			snprintf (line, sizeof (line), "%s", PRVM_GetString(val->string));
 			break;
 		case ev_entity:
 			n = NoCrash_NUM_FOR_EDICT (PROG_TO_EDICT (val->edict), __FILE__, __LINE__);
@@ -406,11 +411,11 @@ PR_UglyValueString (etype_t type, eval_t *val)
 			break;
 		case ev_function:
 			f = pr_functions + val->function;
-			snprintf (line, sizeof (line), "%s", pr_strings + f->s_name);
+			snprintf (line, sizeof (line), "%s", PRVM_GetString(f->s_name));
 			break;
 		case ev_field:
 			def = ED_FieldAtOfs (val->_int);
-			s = pr_strings + def->s_name;
+			s = PRVM_GetString(def->s_name);
 			n = 0;
 			while (n < sizeof (line - 1) && *s)
 			{
@@ -472,7 +477,7 @@ PR_GlobalString (int ofs)
 	{
 		s = PR_ValueString (def->type, val);
 		snprintf (line, sizeof (line), "%i(%s)%s", ofs,
-				  pr_strings + def->s_name, s);
+				  PRVM_GetString(def->s_name), s);
 	}
 
 	i = strlen (line);
@@ -494,7 +499,7 @@ PR_GlobalStringNoContents (int ofs)
 	if (!def)
 		snprintf (line, sizeof (line), "%i(\?\?\?)", ofs);
 	else
-		snprintf (line, sizeof (line), "%i(%s)", ofs, pr_strings + def->s_name);
+		snprintf (line, sizeof (line), "%i(%s)", ofs, PRVM_GetString(def->s_name));
 
 	for (i = strlen (line); i < 20; i++)
 		strlcat_s (line, " ");
@@ -530,7 +535,7 @@ ED_Print (edict_t *ed)
 	for (i = 1; i < progs->numfielddefs; i++)
 	{
 		d = &pr_fielddefs[i];
-		name = pr_strings + d->s_name;
+		name = PRVM_GetString(d->s_name);
 		if (name[strlen (name) - 2] == '_')
 			// skip _x, _y, _z vars
 			continue;
@@ -580,7 +585,7 @@ ED_Write (SDL_RWops *rw, edict_t *ed)
 	for (i = 1; i < progs->numfielddefs; i++)
 	{
 		d = &pr_fielddefs[i];
-		name = pr_strings + d->s_name;
+		name = PRVM_GetString(d->s_name);
 		if (name[strlen (name) - 2] == '_')
 			// skip _x, _y, _z vars
 			continue;
@@ -705,7 +710,7 @@ ED_WriteGlobals (SDL_RWops *rw)
 		if (type != ev_string && type != ev_float && type != ev_entity)
 			continue;
 
-		name = pr_strings + def->s_name;
+		name = PRVM_GetString(def->s_name);
 		RWprintf (rw, "\"%s\" ", name);
 		RWprintf (rw, "\"%s\"\n", PR_UglyValueString (type,
 					(eval_t *) &pr_globals[def->ofs]));
@@ -716,23 +721,21 @@ ED_WriteGlobals (SDL_RWops *rw)
 void
 ED_ParseGlobals (const char *data)
 {
-	char		keyname[64];
+	char		keyname[1024];
 	ddef_t		*key;
 
 	while (1)
 	{
 		// parse key
-		data = COM_Parse (data);
+		if (!COM_ParseToken(&data, false))
+			Host_Error ("ED_ParseEntity: EOF without closing brace");
 		if (com_token[0] == '}')
 			break;
-		if (!data)
-			Host_Error ("ED_ParseEntity: EOF without closing brace");
 
 		strlcpy_s (keyname, com_token);
 
-		// parse value 
-		data = COM_Parse (data);
-		if (!data)
+		// parse value
+		if (!COM_ParseToken(&data, false))
 			Host_Error ("ED_ParseEntity: EOF without closing brace");
 
 		if (com_token[0] == '}')
@@ -750,37 +753,6 @@ ED_ParseGlobals (const char *data)
 	}
 }
 
-//============================================================================
-
-
-static char *
-ED_NewString (char *string)
-{
-	char		*new, *new_p;
-	Uint		i, l;
-
-	l = strlen(string) + 1;
-	new = Zone_Alloc(edictstring_memzone, l);
-	new_p = new;
-
-	for (i = 0; i < l ;i++)
-	{
-		if (string[i] == '\\' && i < l-1)
-		{
-			i++;
-			if (string[i] == 'n')
-				*new_p++ = '\n';
-			else
-				*new_p++ = '\\';
-		}
-		else
-			*new_p++ = string[i];
-	}
-
-	return new;
-}
-
-
 /*
 =============
 Can parse either fields or globals
@@ -790,8 +762,8 @@ returns false if error
 static qboolean
 ED_ParseEpair (void *base, ddef_t *key, char *s)
 {
-	Uint			i;
-	char			string[128], *v, *w;
+	Uint			i, l;
+	char			string[128], *v, *w, *new_p;
 	ddef_t			*def;
 	void			*d;
 	dfunction_t		*func;
@@ -801,7 +773,24 @@ ED_ParseEpair (void *base, ddef_t *key, char *s)
 	switch (key->type & ~DEF_SAVEGLOBAL)
 	{
 		case ev_string:
-			*(string_t *) d = ED_NewString (s) - pr_strings;
+			l = strlen(s) + 1;
+			new_p = PRVM_AllocString(l);
+			*(string_t *) d = PRVM_SetQCString(new_p);
+			for (i = 0;i < l;i++)
+			{
+				if (s[i] == '\\' && i < l-1)
+				{
+					i++;
+					if (s[i] == 'n')
+						*new_p++ = '\n';
+					else if (s[i] == 'r')
+						*new_p++ = '\r';
+					else
+						*new_p++ = s[i];
+				}
+				else
+					*new_p++ = s[i];
+			}
 			break;
 
 		case ev_float:
@@ -878,11 +867,10 @@ ED_ParseEdict (const char *data, edict_t *ent)
 	while (1)
 	{
 		// parse key
-		data = COM_Parse (data);
+		if (!COM_ParseToken (&data, false))
+			Host_Error ("ED_ParseEntity: EOF without closing brace");
 		if (com_token[0] == '}')
 			break;
-		if (!data)
-			Host_Error ("ED_ParseEntity: EOF without closing brace");
 
 		// anglehack is to allow QuakeEd to write single scalar angles
 		// and allow them to be turned into vectors. (FIXME...)
@@ -909,8 +897,7 @@ ED_ParseEdict (const char *data, edict_t *ent)
 		}
 
 		// parse value 
-		data = COM_Parse (data);
-		if (!data)
+		if (!COM_ParseToken (&data, false))
 			Host_Error ("ED_ParseEntity: EOF without closing brace");
 
 		if (com_token[0] == '}')
@@ -975,8 +962,7 @@ ED_LoadFromFile (const char *data)
 	while (1)
 	{
 		// parse the opening brace  
-		data = COM_Parse (data);
-		if (!data)
+		if (!COM_ParseToken (&data, false))
 			break;
 		if (com_token[0] != '{')
 			Host_Error ("ED_LoadFromFile: found %s when expecting {", com_token);
@@ -1018,7 +1004,7 @@ ED_LoadFromFile (const char *data)
 			continue;
 		}
 		// look for the spawn function
-		func = ED_FindFunction (pr_strings + ent->v.classname);
+		func = ED_FindFunction (PRVM_GetString(ent->v.classname));
 
 		if (!func)
 		{
@@ -1116,6 +1102,17 @@ PR_LoadProgs (void)
 
 	pr_functions = (dfunction_t *)((Uint8 *) progs + progs->ofs_functions);
 	pr_strings = (char *) progs + progs->ofs_strings;
+	pr_stringssize = 0;
+	for (i = 0;i < progs->numstrings;i++)
+	{
+		if (progs->ofs_strings + pr_stringssize >= com_filesize)
+			Host_Error ("progs.dat strings go past end of file\n");
+		pr_stringssize += strlen (pr_strings + pr_stringssize) + 1;
+	}
+	pr_numknownstrings = 0;
+	pr_maxknownstrings = 0;
+	pr_knownstrings = NULL;
+
 	pr_globaldefs = (ddef_t *)((Uint8 * )progs + progs->ofs_globaldefs);
 
 	// we need to expand the fielddefs list to include all the engine fields,
@@ -1171,7 +1168,7 @@ PR_LoadProgs (void)
 	{
 		pr_fielddefs[progs->numfielddefs].type = eval_fields[i].type;
 		pr_fielddefs[progs->numfielddefs].ofs = progs->entityfields;
-		pr_fielddefs[progs->numfielddefs].s_name = eval_fields[i].string - pr_strings;
+		pr_fielddefs[progs->numfielddefs].s_name = PRVM_SetEngineString(eval_fields[i].string);
 		if (pr_fielddefs[progs->numfielddefs].type == ev_vector)
 			progs->entityfields += 3;
 		else
@@ -1315,7 +1312,7 @@ PR_Fields_f (void)
 	}
 
 	for (i = 0; i < progs->numfielddefs; i++)
-		Com_Printf ("%s\n", (pr_strings + pr_fielddefs[i].s_name));
+		Com_Printf ("%s\n", PRVM_GetString(pr_fielddefs[i].s_name));
 
 	Com_Printf ("%i entity fields, totalling %i bytes per edict, %i edicts, "
 			"%i bytes total spent on edict fields\n", progs->entityfields,
@@ -1335,7 +1332,7 @@ PR_Globals_f (void)
 	}
 
 	for (i = 0; i < progs->numglobaldefs; i++)
-		Com_Printf ("%s\n", (pr_strings + pr_globaldefs[i].s_name));
+		Com_Printf ("%s\n", PRVM_GetString(pr_globaldefs[i].s_name));
 
 	Com_Printf ("%i global variables, totalling %i bytes\n",
 		progs->numglobals, progs->numglobals * 4);
@@ -1405,5 +1402,109 @@ NoCrash_NUM_FOR_EDICT (edict_t *e, char *filename, int fileline)
 	b = b / pr_edict_size;
 
 	return b;
+}
+
+
+/* Took a few things from DP to get stuff working again. */
+char *PRVM_GetString(int num)
+{
+	if (num >= 0 && num < pr_stringssize)
+		return pr_strings + num;
+	else if (num < 0 && num >= -pr_numknownstrings)
+	{
+		num = -1 - num;
+		if (!pr_knownstrings[num])
+			Host_Error("PRVM_GetString: attempt to get string that is already freed\n");
+		return pr_knownstrings[num];
+	}
+	else
+	{
+		Host_Error("PRVM_GetString: invalid string offset %i\n", num);
+		return "";
+	}
+}
+
+int PRVM_SetQCString(const char *s)
+{
+	int i;
+	if (!s)
+		return 0;
+	if (s >= pr_strings && s <= pr_strings + pr_stringssize)
+		return s - pr_strings;
+	for (i = 0;i < pr_numknownstrings;i++)
+		if (pr_knownstrings[i] == s)
+			return -1 - i;
+	Host_Error("PR_SetQCString: unknown string\n");
+	return -1 - i;
+}
+
+int PRVM_SetEngineString(const char *s)
+{
+	int i;
+	if (!s)
+		return 0;
+	if (s >= pr_strings && s <= pr_strings + pr_stringssize)
+		Host_Error("PRVM_SetEngineString: s in pr_strings area\n");
+	for (i = 0;i < pr_numknownstrings;i++)
+		if (pr_knownstrings[i] == s)
+			return -1 - i;
+	// new unknown engine string
+	Com_DPrintf("new engine string %p\n", s);
+	for (i = 0;i < pr_numknownstrings;i++)
+		if (!pr_knownstrings[i])
+			break;
+	if (i >= pr_numknownstrings)
+	{
+		if (i >= pr_maxknownstrings)
+		{
+			const char **oldstrings = pr_knownstrings;
+			pr_maxknownstrings += 128;
+			pr_knownstrings = Zone_Alloc(edictstring_memzone, pr_maxknownstrings * sizeof(char *));
+			if (pr_numknownstrings)
+				memcpy((char **)pr_knownstrings, oldstrings, pr_numknownstrings * sizeof(char *));
+		}
+		pr_numknownstrings++;
+	}
+	pr_knownstrings[i] = s;
+	return -1 - i;
+}
+
+char *PRVM_AllocString(int bufferlength)
+{
+	int i;
+	if (!bufferlength)
+		return 0;
+	for (i = 0;i < pr_numknownstrings;i++)
+		if (!pr_knownstrings[i])
+			break;
+	if (i >= pr_numknownstrings)
+	{
+		if (i >= pr_maxknownstrings)
+		{
+			const char **oldstrings = pr_knownstrings;
+			pr_maxknownstrings += 128;
+			pr_knownstrings = Zone_Alloc (edictstring_memzone, pr_maxknownstrings * sizeof(char *));
+			if (pr_numknownstrings)
+				memcpy((char **)pr_knownstrings, oldstrings, pr_numknownstrings * sizeof(char *));
+		}
+		pr_numknownstrings++;
+	}
+	return (char *)(pr_knownstrings[i] = Zone_Alloc(edictstring_memzone, bufferlength));
+}
+
+void PRVM_FreeString(char *s)
+{
+	int i;
+	if (!s)
+		Host_Error("PR_FreeString: attempt to free a NULL string\n");
+	if (s >= pr_strings && s <= pr_strings + pr_stringssize)
+		Host_Error("PR_FreeString: attempt to free a constant string\n");
+	for (i = 0;i < pr_numknownstrings;i++)
+		if (pr_knownstrings[i] == s)
+			break;
+	if (i == pr_numknownstrings)
+		Host_Error("PR_FreeString: attempt to free a non-existent or already freed string\n");
+	Zone_Free((char *) pr_knownstrings[i]);
+	pr_knownstrings[i] = NULL;
 }
 

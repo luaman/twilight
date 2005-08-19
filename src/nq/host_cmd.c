@@ -43,6 +43,7 @@ static const char rcsid[] =
 #include "world.h"
 #include "fs/fs.h"
 #include "fs/rw_ops.h"
+#include "progsvm.h"
 
 int         current_skill;
 
@@ -464,7 +465,7 @@ Host_Savegame_f (void)
 	// write the light styles
 	for (i = 0; i < MAX_LIGHTSTYLES; i++)
 	{
-		if (sv.lightstyles[i])
+		if (sv.lightstyles[i][0])
 			RWprintf (rw, "%s\n", sv.lightstyles[i]);
 		else
 			RWprintf (rw, "m\n");
@@ -484,9 +485,10 @@ static void
 Host_Loadgame_f (void)
 {
 	char		name[MAX_OSPATH];
-	char		*mapname;
+	char		mapname[MAX_OSPATH];
 	const char	*start;
-	char		*saved, *cur, *tmp, c;
+	char		*saved, *tmp, c;
+	const char	*cur;
 	float       time, tfloat, spawn_parms[NUM_SPAWN_PARMS];
 	Sint		entnum, version;
 	Uint		i;
@@ -517,9 +519,8 @@ Host_Loadgame_f (void)
 		return;
 	}
 
-	tmp = strchr (cur, '\n'); *tmp = '\0';
-	sscanf (cur, "%d", &version);
-	cur = tmp + 1;
+	COM_ParseToken (&cur, false);
+	version = atoi(com_token);
 	if (version != SAVEGAME_VERSION)
 	{
 		Zone_Free (saved);
@@ -527,25 +528,25 @@ Host_Loadgame_f (void)
 				SAVEGAME_VERSION);
 		return;
 	}
+
+	COM_ParseTokenConsole(&cur);
+
 	for (i = 0; i < NUM_SPAWN_PARMS; i++) {
-		tmp = strchr (cur, '\n'); *tmp = '\0';
-		sscanf (cur, "%f", &spawn_parms[i]);
-		cur = tmp + 1;
+		COM_ParseToken (&cur, false);
+		spawn_parms[i] = atof (com_token);
 	}
 	// Quake 1.06 used float skill...
-	tmp = strchr (cur, '\n'); *tmp = '\0';
-	sscanf (cur, "%f", &tfloat);
-	cur = tmp + 1;
-	current_skill = (int) (tfloat + 0.1);
-	Cvar_Set (skill, va("%i", current_skill));
+	COM_ParseToken (&cur, false);
+	current_skill = (int)(atof(com_token) + 0.5);
+	Cvar_Set (skill, va("%d", current_skill));
 
-	tmp = strchr (cur, '\n'); *tmp = '\0';
-	mapname = cur;
-	cur = tmp + 1;
+	COM_ParseToken (&cur, false);
+	strlcpy_s (mapname, com_token);
+	Com_Printf("com_token: %s\n", com_token);
 
-	tmp = strchr (cur, '\n'); *tmp = '\0';
-	sscanf (cur, "%f", &time);
-	cur = tmp + 1;
+	COM_ParseToken (&cur, false);
+	time = atof (com_token);
+	Com_Printf("com_token: %s\n", com_token);
 
 	CL_Disconnect_f ();
 
@@ -563,22 +564,21 @@ Host_Loadgame_f (void)
 
 	for (i = 0; i < MAX_LIGHTSTYLES; i++)
 	{
-		tmp = strchr (cur, '\n'); *tmp = '\0';
-		sv.lightstyles[i] = Zone_Alloc (sv_zone, strlen (cur) + 1);
-		strlcpy_s (sv.lightstyles[i], cur);
-		cur = tmp + 1;
+		COM_ParseToken (&cur, false);
+		strlcpy_s (sv.lightstyles[i], com_token);
 	}
 
 	// load the edicts out of the savegame file
 	entnum = -1;						// -1 is the globals
-	while ((cur - saved) < com_filesize)
+	while (1)
 	{
-		tmp = strchr (cur, '}') + 1; c = *tmp; *tmp = '\0';
-		start = COM_Parse (cur);
-		*tmp = c; cur = tmp;
-		if (!com_token[0])
-			// end of file
-			break;
+		start = cur;
+		while (COM_ParseToken (&cur, false))
+			if (!strcmp(com_token, "}"))
+				break;
+		if (!COM_ParseToken (&start, false))
+			break; // EOF.
+
 		if (strcmp (com_token, "{"))
 			Sys_Error ("First token isn't a brace");
 
@@ -587,6 +587,8 @@ Host_Loadgame_f (void)
 			// parse the global vars
 			ED_ParseGlobals (start);
 		}
+		else if (entnum >= MAX_EDICTS)
+			Host_Error ("Host_Loadgame_f: too many edicts in save file (reached MAX_EDICTS %i)\n", MAX_EDICTS);
 		else
 		{
 			// parse an edict
@@ -605,6 +607,7 @@ Host_Loadgame_f (void)
 
 	sv.num_edicts = entnum;
 	sv.time = time;
+	Com_Printf("num_edicts: %d, time: %f\n", sv.num_edicts, sv.time);
 
 	Zone_Free (saved);
 
@@ -647,7 +650,7 @@ Host_Name_f (void)
 		if (strcmp (host_client->name, newName) != 0)
 			Com_Printf ("%s renamed to %s\n", host_client->name, newName);
 	strlcpy_s (host_client->name, newName);
-	host_client->edict->v.netname = host_client->name - pr_strings;
+	host_client->edict->v.netname = PRVM_SetEngineString(host_client->name);
 
 // send notification to all clients
 
@@ -880,10 +883,10 @@ Host_Pause_f (void)
 
 		if (sv.paused) {
 			SV_BroadcastPrintf ("%s paused the game\n",
-								pr_strings + sv_player->v.netname);
+								PRVM_GetString(sv_player->v.netname));
 		} else {
 			SV_BroadcastPrintf ("%s unpaused the game\n",
-								pr_strings + sv_player->v.netname);
+								PRVM_GetString(sv_player->v.netname));
 		}
 
 		// send notification to all clients
@@ -947,7 +950,7 @@ Host_Spawn_f (void)
 		memset (&ent->v, 0, progs->entityfields * 4);
 		ent->v.colormap = NUM_FOR_EDICT (ent, __FILE__, __LINE__);
 		ent->v.team = (host_client->colors & 15) + 1;
-		ent->v.netname = host_client->name - pr_strings;
+		ent->v.netname = PRVM_SetEngineString(host_client->name);
 
 		// copy spawn parms out of the client_t
 

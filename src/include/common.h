@@ -173,6 +173,8 @@ extern char com_token[1024];
 extern qboolean com_eof;
 
 const char *COM_Parse (const char *data);
+int COM_ParseToken (const char **datapointer, int returnnewline);
+int COM_ParseTokenConsole (const char **datapointer);
 
 
 void COM_Init_Cvars (void);

@@ -693,6 +693,211 @@ char        com_token[1024];
 
 /*
 ==============
+COM_ParseToken
+
+Parse a token out of a string
+==============
+*/
+int COM_ParseToken(const char **datapointer, int returnnewline)
+{
+	int len;
+	const char *data = *datapointer;
+
+	len = 0;
+	com_token[0] = 0;
+
+	if (!data)
+	{
+		*datapointer = NULL;
+		return false;
+	}
+
+// skip whitespace
+skipwhite:
+	// line endings:
+	// UNIX: \n
+	// Mac: \r
+	// Windows: \r\n
+	for (;*data <= ' ' && ((*data != '\n' && *data != '\r') || !returnnewline);data++)
+	{
+		if (*data == 0)
+		{
+			// end of file
+			*datapointer = NULL;
+			return false;
+		}
+	}
+
+	// handle Windows line ending
+	if (data[0] == '\r' && data[1] == '\n')
+		data++;
+
+	if (data[0] == '/' && data[1] == '/')
+	{
+		// comment
+		while (*data && *data != '\n' && *data != '\r')
+			data++;
+		goto skipwhite;
+	}
+	else if (data[0] == '/' && data[1] == '*')
+	{
+		// comment
+		data++;
+		while (*data && (data[0] != '*' || data[1] != '/'))
+			data++;
+		data += 2;
+		goto skipwhite;
+	}
+	else if (*data == '\"')
+	{
+		// quoted string
+		for (data++;*data != '\"';data++)
+		{
+			if (*data == '\\' && data[1] == '"' )
+				data++;
+			if (!*data || len >= (int)sizeof(com_token) - 1)
+			{
+				com_token[0] = 0;
+				*datapointer = NULL;
+				return false;
+			}
+			com_token[len++] = *data;
+		}
+		com_token[len] = 0;
+		*datapointer = data+1;
+		return true;
+	}
+	else if (*data == '\'')
+	{
+		// quoted string
+		for (data++;*data != '\'';data++)
+		{
+			if (*data == '\\' && data[1] == '\'' )
+				data++;
+			if (!*data || len >= (int)sizeof(com_token) - 1)
+			{
+				com_token[0] = 0;
+				*datapointer = NULL;
+				return false;
+			}
+			com_token[len++] = *data;
+		}
+		com_token[len] = 0;
+		*datapointer = data+1;
+		return true;
+	}
+	else if (*data == '\r')
+	{
+		// translate Mac line ending to UNIX
+		com_token[len++] = '\n';
+		com_token[len] = 0;
+		*datapointer = data;
+		return true;
+	}
+	else if (*data == '\n' || *data == '{' || *data == '}' || *data == ')' || *data == '(' || *data == ']' || *data == '[' || *data == '\'' || *data == ':' || *data == ',' || *data == ';')
+	{
+		// single character
+		com_token[len++] = *data++;
+		com_token[len] = 0;
+		*datapointer = data;
+		return true;
+	}
+	else
+	{
+		// regular word
+		for (;*data > ' ' && *data != '{' && *data != '}' && *data != ')' && *data != '(' && *data != ']' && *data != '[' && *data != '\'' && *data != ':' && *data != ',' && *data != ';' && *data != '\'' && *data != '"';data++)
+		{
+			if (len >= (int)sizeof(com_token) - 1)
+			{
+				com_token[0] = 0;
+				*datapointer = NULL;
+				return false;
+			}
+			com_token[len++] = *data;
+		}
+		com_token[len] = 0;
+		*datapointer = data;
+		return true;
+	}
+}
+
+/*
+==============
+COM_ParseTokenConsole
+
+Parse a token out of a string, behaving like the qwcl console
+==============
+*/
+int COM_ParseTokenConsole(const char **datapointer)
+{
+	int len;
+	const char *data = *datapointer;
+
+	len = 0;
+	com_token[0] = 0;
+
+	if (!data)
+	{
+		*datapointer = NULL;
+		return false;
+	}
+
+// skip whitespace
+skipwhite:
+	for (;*data <= ' ';data++)
+	{
+		if (*data == 0)
+		{
+			// end of file
+			*datapointer = NULL;
+			return false;
+		}
+	}
+
+	if (*data == '/' && data[1] == '/')
+	{
+		// comment
+		while (*data && *data != '\n' && *data != '\r')
+			data++;
+		goto skipwhite;
+	}
+	else if (*data == '\"')
+	{
+		// quoted string
+		for (data++;*data != '\"';data++)
+		{
+			if (!*data || len >= (int)sizeof(com_token) - 1)
+			{
+				com_token[0] = 0;
+				*datapointer = NULL;
+				return false;
+			}
+			com_token[len++] = *data;
+		}
+		com_token[len] = 0;
+		*datapointer = data+1;
+	}
+	else
+	{
+		// regular word
+		for (;*data > ' ';data++)
+		{
+			if (len >= (int)sizeof(com_token) - 1)
+			{
+				com_token[0] = 0;
+				*datapointer = NULL;
+				return false;
+			}
+			com_token[len++] = *data;
+		}
+		com_token[len] = 0;
+		*datapointer = data;
+	}
+
+	return true;
+}
+/*
+==============
 Parse a token out of a string
 ==============
 */
