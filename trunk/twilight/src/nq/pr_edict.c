@@ -46,7 +46,7 @@ dprograms_t		*progs;
 dfunction_t		*pr_functions;
 static char		*pr_strings;
 static int		pr_stringssize;
-static const char	**pr_knownstrings;
+static char		**pr_knownstrings;
 static int		pr_maxknownstrings;
 static int		pr_numknownstrings;
 static ddef_t	*pr_fielddefs;
@@ -1424,7 +1424,7 @@ char *PRVM_GetString(int num)
 	}
 }
 
-int PRVM_SetQCString(const char *s)
+int PRVM_SetQCString(char *s)
 {
 	int i;
 	if (!s)
@@ -1438,7 +1438,7 @@ int PRVM_SetQCString(const char *s)
 	return -1 - i;
 }
 
-int PRVM_SetEngineString(const char *s)
+int PRVM_SetEngineString(char *s)
 {
 	int i;
 	if (!s)
@@ -1457,7 +1457,7 @@ int PRVM_SetEngineString(const char *s)
 	{
 		if (i >= pr_maxknownstrings)
 		{
-			const char **oldstrings = pr_knownstrings;
+			char **oldstrings = pr_knownstrings;
 			pr_maxknownstrings += 128;
 			pr_knownstrings = Zone_Alloc(edictstring_memzone, pr_maxknownstrings * sizeof(char *));
 			if (pr_numknownstrings)
@@ -1481,7 +1481,7 @@ char *PRVM_AllocString(int bufferlength)
 	{
 		if (i >= pr_maxknownstrings)
 		{
-			const char **oldstrings = pr_knownstrings;
+			char **oldstrings = pr_knownstrings;
 			pr_maxknownstrings += 128;
 			pr_knownstrings = Zone_Alloc (edictstring_memzone, pr_maxknownstrings * sizeof(char *));
 			if (pr_numknownstrings)
