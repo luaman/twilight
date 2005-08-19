@@ -489,7 +489,7 @@ SCR_DrawTurtle (void)
 static void
 SCR_DrawNet (void)
 {
-	if (ccl.time - cl.last_received_message < 0.3)
+	if (host.time - cl.last_received_message < 0.3)
 		return;
 	if (ccls.demoplayback)
 		return;

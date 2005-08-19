@@ -60,10 +60,10 @@ typedef struct {
 	char			name[64];		// map name
 	char			modelname[64];	// maps/<name>.bsp, for model_precache[0]
 	struct model_s	*worldmodel;
-	char			*model_precache[MAX_MODELS];	// NULL terminated
+	char			model_precache[MAX_MODELS][MAX_QPATH];	// NULL terminated
 	struct model_s	*models[MAX_MODELS];
-	char			*sound_precache[MAX_SOUNDS];	// NULL terminated
-	char			*lightstyles[MAX_LIGHTSTYLES];
+	char			sound_precache[MAX_SOUNDS][MAX_QPATH];	// NULL terminated
+	char			lightstyles[MAX_LIGHTSTYLES][64];
 	Uint			num_edicts;
 	Uint			max_edicts;
 	/* Can NOT be array indexed, because edict_t is variable sized,

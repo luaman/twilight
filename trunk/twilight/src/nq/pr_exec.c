@@ -200,7 +200,7 @@ PR_StackTrace (void)
 		if (!f)
 			Com_Printf ("<NULL FUNCTION>\n");
 		else
-			Com_Printf ("%12s : %s : statement %i\n", pr_strings + f->s_file, pr_strings + f->s_name, pr_stack[i].s - f->first_statement);
+			Com_Printf ("%12s : %s : statement %i\n", PRVM_GetString(f->s_file), PRVM_GetString(f->s_name), pr_stack[i].s - f->first_statement);
 	}
 }
 
@@ -228,7 +228,7 @@ PR_Profile_f (void)
 		{
 			if (num < 10)
 				Com_Printf ("%7i %s\n", best->profile,
-							pr_strings + best->s_name);
+							PRVM_GetString(best->s_name));
 			num++;
 			best->profile = 0;
 		}

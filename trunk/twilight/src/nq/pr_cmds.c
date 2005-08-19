@@ -40,14 +40,26 @@ static const char rcsid[] =
 #include "sys.h"
 #include "world.h"
 
+// LordHavoc: added this to semi-fix the problem of using many ftos calls in a print
+#define STRINGTEMP_BUFFERS 16
+#define STRINGTEMP_LENGTH 4096
+static char pr_string_temp[STRINGTEMP_BUFFERS][STRINGTEMP_LENGTH];
+static int pr_string_tempindex = 0;
+
+static char *PR_GetTempString(void)
+{
+	char *s;
+	s = pr_string_temp[pr_string_tempindex];
+	pr_string_tempindex = (pr_string_tempindex + 1) % STRINGTEMP_BUFFERS;
+	return s;
+}
+
 #define RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
 
 Uint8 checkpvs[MAX_MAP_LEAFS / 8];
 
 #define	MAX_CHECK 16
 static int c_invis, c_notvis;
-
-static char pr_string_temp[128];
 
 #define	MSG_BROADCAST	0				// unreliable to all
 #define	MSG_ONE			1				// reliable to one (msg_entity)
@@ -110,7 +122,7 @@ PF_error (void)
 
 	s = PF_VarString (0);
 	Com_Printf ("======SERVER ERROR in %s:\n%s\n",
-			pr_strings + pr_xfunction->s_name, s);
+			PRVM_GetString (pr_xfunction->s_name), s);
 	ed = PROG_TO_EDICT (pr_global_struct->self);
 	ED_Print (ed);
 
@@ -133,7 +145,7 @@ PF_objerror (void)
 
 	s = PF_VarString (0);
 	Com_Printf ("======OBJECT ERROR in %s:\n%s\n",
-			pr_strings + pr_xfunction->s_name, s);
+			PRVM_GetString (pr_xfunction->s_name), s);
 	ed = PROG_TO_EDICT (pr_global_struct->self);
 	ED_Print (ed);
 	ED_Free (ed);
@@ -241,21 +253,21 @@ static void
 PF_setmodel (void)
 {
 	edict_t		*e;
-	char		*m, **check;
+	char		*m;
 	int			i;
 
 	e = G_EDICT (OFS_PARM0);
 	m = G_STRING (OFS_PARM1);
 
 	// check to see if model was properly precached
-	for (i = 0, check = sv.model_precache; *check; i++, check++)
-		if (!strcmp (*check, m))
+	for (i = 0; i < MAX_MODELS && sv.model_precache[i]; i++)
+		if (!strcmp (sv.model_precache[i], m))
 			break;
 
-	if (!*check)
+	if (!sv.model_precache[i])
 		PR_RunError ("no precache: %s\n", m);
 
-	e->v.model = m - pr_strings;
+	e->v.model = PRVM_SetEngineString(sv.model_precache[i]);
 	e->v.modelindex = i;				// SV_ModelIndex (m);
 
 	if (m[0] == '*' || !strcmp(COM_FileExtension(m), "bsp"))
@@ -481,7 +493,6 @@ PF_particle (void)
 static void
 PF_ambientsound (void)
 {
-	char		**check;
 	char		*samp;
 	float		*pos;
 	float		vol, attenuation;
@@ -493,12 +504,11 @@ PF_ambientsound (void)
 	attenuation = G_FLOAT (OFS_PARM3);
 
 	// check to see if samp was properly precached
-	for (soundnum = 0, check = sv.sound_precache; *check; check++, soundnum++)
-		if (!strcmp (*check, samp))
+	for (soundnum = 0; soundnum < MAX_SOUNDS && sv.sound_precache[soundnum]; soundnum++)
+		if (!strcmp (sv.sound_precache[soundnum], samp))
 			break;
 
-	if (!*check)
-	{
+	if (!sv.sound_precache[soundnum]) {
 		Com_Printf ("no precache: %s\n", samp);
 		return;
 	}
@@ -915,15 +925,17 @@ PF_dprint (void)
 static void
 PF_ftos (void)
 {
-	float		v;
+	float v;
+	char *s;
 
 	v = G_FLOAT (OFS_PARM0);
 
+	s = PR_GetTempString ();
 	if (v == (int) v)
-		snprintf (pr_string_temp, sizeof (pr_string_temp), "%d", (int) v);
+		sprintf (s, "%d", (int) v);
 	else
-		snprintf (pr_string_temp, sizeof (pr_string_temp), "%5.1f", v);
-	G_INT (OFS_RETURN) = pr_string_temp - pr_strings;
+		sprintf (s, "%5.1f", v);
+	G_INT (OFS_RETURN) = PRVM_SetEngineString (s);
 }
 
 static void
@@ -938,18 +950,20 @@ PF_fabs (void)
 static void
 PF_vtos (void)
 {
-	snprintf (pr_string_temp, sizeof (pr_string_temp), "'%5.1f %5.1f %5.1f'",
+	char *s = PR_GetTempString ();
+	sprintf (s, "'%5.1f %5.1f %5.1f'",
 			G_VECTOR (OFS_PARM0)[0], G_VECTOR (OFS_PARM0)[1],
 			G_VECTOR (OFS_PARM0)[2]);
-	G_INT (OFS_RETURN) = pr_string_temp - pr_strings;
+	G_INT (OFS_RETURN) = PRVM_SetEngineString (s);
 }
 
 static void
 PF_etos (void)
 {
-	snprintf (pr_string_temp, sizeof (pr_string_temp), "entity %i",
+	char *s = PR_GetTempString ();
+	sprintf (s, "entity %i",
 			G_EDICTNUM(OFS_PARM0));
-	G_INT (OFS_RETURN) = pr_string_temp - pr_strings;
+	G_INT (OFS_RETURN) = PRVM_SetEngineString(s);
 }
 
 
@@ -1042,9 +1056,9 @@ PF_precache_sound (void)
 
 	for (i = 0; i < MAX_SOUNDS; i++)
 	{
-		if (!sv.sound_precache[i])
+		if (!sv.sound_precache[i][0])
 		{
-			sv.sound_precache[i] = s;
+			strlcpy_s(sv.sound_precache[i], s);
 			return;
 		}
 		if (!strcmp (sv.sound_precache[i], s))
@@ -1067,11 +1081,11 @@ PF_precache_model (void)
 	G_INT (OFS_RETURN) = G_INT (OFS_PARM0);
 	PR_CheckEmptyString (s);
 
-	for (i = 0; i < MAX_MODELS; i++)
+	for (i = 1; i < MAX_MODELS; i++)
 	{
-		if (!sv.model_precache[i])
+		if (!sv.model_precache[i][0])
 		{
-			sv.model_precache[i] = s;
+			strlcpy_s(sv.model_precache[i], s);
 			if (ccls.state == ca_dedicated)
 				sv.models[i] = Mod_ForName (s, FLAG_CRASH);
 			else
@@ -1199,7 +1213,7 @@ PF_lightstyle (void)
 	val = G_STRING (OFS_PARM1);
 
 	// change the string in sv
-	sv.lightstyles[style] = val;
+	strlcpy_s (sv.lightstyles[style], val);
 
 	// send message to all clients on this server
 	if (sv.state != ss_active)
@@ -1573,7 +1587,7 @@ PF_makestatic (void)
 
 	MSG_WriteByte (&sv.signon, svc_spawnstatic);
 
-	MSG_WriteByte (&sv.signon, SV_ModelIndex (pr_strings + ent->v.model));
+	MSG_WriteByte (&sv.signon, SV_ModelIndex (PRVM_GetString (ent->v.model)));
 
 	MSG_WriteByte (&sv.signon, ent->v.frame);
 	MSG_WriteByte (&sv.signon, ent->v.colormap);
