@@ -755,13 +755,13 @@ def get_default_visualstudio_version(env):
             version = env['MSVS_VERSION']
         else:
             version = versions[0] #use highest version by default
+
+        env['MSVS_VERSION'] = version
+        env['MSVS']['VERSIONS'] = versions
+        env['MSVS']['VERSION'] = version
     else:
         version = env['MSVS']['VERSION']
-        versions = env['MSVS']['VERSIONS']
 
-    env['MSVS_VERSION'] = version
-    env['MSVS']['VERSIONS'] = versions
-    env['MSVS']['VERSION'] = version
     
     return version
 
