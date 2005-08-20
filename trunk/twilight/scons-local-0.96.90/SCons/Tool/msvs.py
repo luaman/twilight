@@ -746,21 +746,18 @@ def get_default_visualstudio_version(env):
     version = '6.0'
     versions = [version]
 
-    if env.has_key('MSVS_VERSION'):
-        if not env.has_key('MSVS') or type(env['MSVS']) != types.DictType:
-            version = env['MSVS_VERSION']
-            versions = [version]
-        else:
-            version = env['MSVS']['VERSION']
-            versions = env['MSVS']['VERSIONS']
-    elif not env.has_key('MSVS') or type(env['MSVS']) != types.DictType:
-        if SCons.Util.can_read_reg:
-            versions = get_visualstudio_versions()
-            if versions:
-                version = versions[0] #use highest version by default
-
     if not env.has_key('MSVS') or type(env['MSVS']) != types.DictType:
         env['MSVS'] = {}    
+
+        if SCons.Util.can_read_reg:
+            versions = get_visualstudio_versions()
+        if env.has_key('MSVS_VERSION'):
+            version = env['MSVS_VERSION']
+        else:
+            version = versions[0] #use highest version by default
+    else:
+        version = env['MSVS']['VERSION']
+        versions = env['MSVS']['VERSIONS']
 
     env['MSVS_VERSION'] = version
     env['MSVS']['VERSIONS'] = versions
