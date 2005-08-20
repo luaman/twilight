@@ -4,7 +4,7 @@
 	System configuration for MacOS X without autoconf
 */
 
-#define VERSION "0.2.02.cvs"
+#define VERSION "0.2.1"
 
 #define WANT_CLIENTS 1
 #define WANT_SERVERS 1
