@@ -1220,7 +1220,7 @@ Host_Frame (double time)
 			fps_capped0++;
 			if (host.frametime < (min_time - 0.002)) {
 				wait = (host.time + min_time) - time;
-				SDL_Delay(wait * 990);
+				SDL_Delay((Uint32)(wait * 990));
 				fps_capped1++;
 			}
 
