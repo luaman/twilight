@@ -1030,7 +1030,7 @@ CL_Init (void)
 	Info_SetValueForKey (cls.userinfo, "bottomcolor", "0", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "rate", "2500", MAX_INFO_STRING);
 	Info_SetValueForKey (cls.userinfo, "msg", "1", MAX_INFO_STRING);
-	snprintf (st, sizeof (st), "%s-%04d", VERSION, build_number ());
+	snprintf (st, sizeof (st), "Twilight %s-%04d", VERSION, build_number ());
 	Info_SetValueForStarKey (cls.userinfo, "*ver", st, MAX_INFO_STRING);
 
 	CL_Input_Init_Cvars ();			// initialize all cl_input related cvars

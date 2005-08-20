@@ -325,7 +325,7 @@ def write_c_defines (filename, defs):
 def do_configure (env):
 	global opts, config_defs, env_defs
 
-	config_defs.set('VERSION', '"0.2.02.cvs"')
+	config_defs.set('VERSION', '"0.2.1"')
 	if (not (ARGUMENTS.has_key('reset') and ARGUMENTS['reset'])):
 		opts.load('config_opts.py')
 	opts.args (ARGUMENTS)
