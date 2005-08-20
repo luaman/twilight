@@ -8,7 +8,7 @@
 #pragma warning( disable : 4018 4115 4127 4200 4201 4211 4214 4244 4305 4514 4706)
 #endif
 
-#define VERSION			"0.2.1"
+#define VERSION			"0.2.2"
 
 #define USERPATH		"."
 
