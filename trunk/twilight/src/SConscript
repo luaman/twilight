@@ -1,0 +1,12 @@
+#! /usr/bin/python
+
+Import("env", "opts")
+env.Append(CPPPATH = ["#/src"])
+
+if env['PLATFORM'] == "cygwin" or env['PLATFORM'] == "mingw" or env['PLATFORM'] == "win32":
+	env.RES('twilight.rc')
+	resource_files = Split("""src/twilight.res""")
+else:
+	resource_files = Split(""" """)
+
+Export("resource_files")

@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 Import ("env", "opts", "base_sources", "client_sources", "fs_sources")
-Import ("image_sources", "renderer_sources", "sound_sources")
+Import ("image_sources", "renderer_sources", "sound_sources", "resource_files")
 
 nq_headers = Split("""chase.h cl_console.h client.h net.h net_dgram.h
 	net_loop.h net_udp.h pr_execprogram.h progdefs.h progs.h protocol.h
@@ -21,5 +21,6 @@ nq_sources.extend (fs_sources)
 nq_sources.extend (image_sources)
 nq_sources.extend (renderer_sources)
 nq_sources.extend (sound_sources)
+nq_sources.extend (resource_files)
 
 Export ("nq_headers", "nq_sources")

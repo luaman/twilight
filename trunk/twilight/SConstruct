@@ -9,7 +9,7 @@ Import ("env", "opts", "building")
 
 if building == 1:
 	env.Append (CPPPATH = ["#/src"])
-	SConscript (dirs=['src/include/', 'src/base/', 'src/fs/', 'src/tools/'])
+	SConscript (dirs=['src/', 'src/include/', 'src/base/', 'src/fs/', 'src/tools/'])
 	if opts['clients']:
 		SConscript (dirs=['src/client/', 'src/renderer/', 'src/sound/', 'src/image/'])
 	SConscript (dirs=['src/server/'])
@@ -27,5 +27,5 @@ if building == 1:
 		env.Program (target = "twilight-qwsv", source = qwsv_sources)
 		env.Alias ('qwsv', 'twilight-qwsv');
 
-	Import ("tools_sources")
-	env.Program (target = "lhbin2c", source = tools_sources)
+#	Import ("tools_sources")
+#	env.Program (target = "lhbin2c", source = tools_sources)
