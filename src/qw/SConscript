@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 Import ("env", "opts", "base_sources", "client_sources", "fs_sources")
-Import ("image_sources", "renderer_sources", "sound_sources")
+Import ("image_sources", "renderer_sources", "sound_sources", "resource_files")
 #env.Append (CPPPATH = ["#/src/qw"])
 
 if int(opts['clients']):
@@ -20,6 +20,7 @@ if int(opts['clients']):
     qw_sources.extend (image_sources)
     qw_sources.extend (renderer_sources)
     qw_sources.extend (sound_sources)
+    qw_sources.extend (resource_files)
     Export ("qw_headers", "qw_sources")
 
 if int(opts['servers']):
@@ -33,4 +34,5 @@ if int(opts['servers']):
     qwsv_sources = ['#/src/qw/'+e for e in qwsv_sources]
     qwsv_sources.extend (base_sources)
     qwsv_sources.extend (fs_sources)
+    qwsv_sources.extend (resource_files)
     Export ("qwsv_headers", "qwsv_sources")
