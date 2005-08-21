@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-Import("env", "opts")
+Import ("env")
 env.Append(CPPPATH = ["#/src"])
 
 if env['PLATFORM'] == "cygwin" or env['PLATFORM'] == "mingw" or env['PLATFORM'] == "win32":

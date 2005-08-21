@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-Import ("env", "opts")
+Import ("env")
 env.Append (CPPPATH = ["#/src/base"])
 
 base_headers = Split("""cmd.h collision.h cpu.h crc.h cvar.h

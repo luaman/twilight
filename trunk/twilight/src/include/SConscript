@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-Import ("env", "opts")
+Import ("env")
 env.Append (CPPPATH = ["#/src/include"])
 
 include_headers = Split("""common.h host.h info.h input.h pmove.h pr_comp.h

@@ -5,27 +5,27 @@ import sys
 
 SConscript ("scons_config.py")
 
-Import ("env", "opts", "building")
+Import ("env")
 
-if building == 1:
-	env.Append (CPPPATH = ["#/src"])
-	SConscript (dirs=['src/', 'src/include/', 'src/base/', 'src/fs/', 'src/tools/'])
-	if opts['clients']:
-		SConscript (dirs=['src/client/', 'src/renderer/', 'src/sound/', 'src/image/'])
-	SConscript (dirs=['src/server/'])
-	SConscript (dirs=['src/nq/', 'src/qw/'])
-	Import ("nq_sources")
-	env.Program (target = "twilight-nq", source = nq_sources)
-	env.Alias ('nq', 'twilight-nq');
+env.Append (CPPPATH = ["#/src"])
+SConscript (dirs=['src/', 'src/include/', 'src/base/', 'src/fs/', 'src/tools/'])
+SConscript (dirs=['src/client/', 'src/renderer/', 'src/sound/', 'src/image/'])
+SConscript (dirs=['src/server/'])
+SConscript (dirs=['src/nq/', 'src/qw/'])
+Import ("nq_sources")
+nq = env.Program (target = "twilight-nq", source = nq_sources)
+env.Alias ('nq', 'twilight-nq');
 
-	if int(opts['clients']):
-		Import ("qw_sources")
-		env.Program (target = "twilight-qw", source = qw_sources)
-		env.Alias ('qw', 'twilight-qw');
-	if int(opts['servers']):
-		Import ("qwsv_sources")
-		env.Program (target = "twilight-qwsv", source = qwsv_sources)
-		env.Alias ('qwsv', 'twilight-qwsv');
+Import ("qw_sources")
+qw = env.Program (target = "twilight-qw", source = qw_sources)
+env.Alias ('qw', 'twilight-qw');
+Import ("qwsv_sources")
+qwsv = env.Program (target = "twilight-qwsv", source = qwsv_sources)
+env.Alias ('qwsv', 'twilight-qwsv');
+if int(env['clients']):
+	env.Default (nq, qw)
+if int(env['servers']):
+	env.Default (nq, qwsv)
 
 #	Import ("tools_sources")
 #	env.Program (target = "lhbin2c", source = tools_sources)
