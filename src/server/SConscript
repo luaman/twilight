@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-Import ("env", "opts")
+Import ("env")
 env.Append (CPPPATH = ["#/src/server"])
 
 server_headers = Split(""" """)

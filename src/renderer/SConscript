@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-Import ("env", "opts")
+Import ("env")
 #env.Append (CPPPATH = ["#/src/renderer"])
 
 renderer_headers = Split("""alias.h brush.h dglfuncs.h draw.h dyngl.h entities.h

@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-Import ("env", "opts")
+Import ("env")
 #env.Append (CPPPATH = ["#/src/sound"])
 
 sound_headers = Split("""cdaudio.h sound.h""")

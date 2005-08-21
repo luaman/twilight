@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-Import ("env", "opts")
+Import ("env")
 env.Append (CPPPATH = ["#/src/client"])
 
 client_headers = Split("""cclient.h console.h dlight.h hud.h keys.h

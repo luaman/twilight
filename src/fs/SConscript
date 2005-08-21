@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-Import ("env", "opts")
+Import ("env")
 #env.Append (CPPPATH = ["#/src/fs"])
 
 fs_headers = Split("""bsp.h dir.h embedded.h embedded_data.h fs.h fs_hash.h
@@ -8,7 +8,7 @@ fs_headers = Split("""bsp.h dir.h embedded.h embedded_data.h fs.h fs_hash.h
 
 fs_sources = Split("""bsp.c embedded.c fs.c fs_hash.c fs_new.c pak.c rw_ops.c
 	wad.c""")
-fs_sources.extend ([opts['dir_mode'] + '.c'])
+fs_sources.extend ([env['dir_mode'] + '.c'])
 
 fs_headers = ['#/src/fs/'+e for e in fs_headers]
 fs_sources = ['#/src/fs/'+e for e in fs_sources]

@@ -3,12 +3,12 @@ import os
 import sys
 import string
 
-from scons_lib import *
+if (not (ARGUMENTS.has_key('reset') and ARGUMENTS['reset'])):
+    opts = Options ('config_opts.py', ARGUMENTS)
+else:
+    opts = Options (None, ARGUMENTS)
 
-opts = My_Options ()
-env_defs = My_Options ()
-config_defs = My_Options ()
-building = 0
+config_defs = {};
 
 def check_gcc_asm (context):
 	context.Message('Checking to see if compiler gcc style asm ... ')
@@ -195,53 +195,56 @@ def check_cflag (context, cflag, add = 1):
 
 def conf_base ():
 	global opts
-	opts.create('bitchiness', 1, 'Enable (many) extra compiler warnings')
-	opts.create('warnings', 1, 'Enable most warnings')
-	opts.create('werror', 1, 'Enable error on compiler warnings')
-	opts.create('profile', 0, 'Enable profiling with gprof')
-	opts.create('servers', 1, 'Enable dedicated servers')
-	opts.create('clients', 1, 'Enable clients')
-	opts.create('debug', 1, 'Enable debugging')
-	opts.create('optimize', 1, 'Enable optimizations')
-	opts.create('CC', env['CC'], 'C compiler command')
-	opts.create('CFLAGS', '', 'Base C compiler flags')
-	opts.create('save-temps', 0, 'Save temporary compilation files')
-	opts.create('sdl_include', '', 'Path to your SDL headers')
+	opts.AddOptions (
+		BoolOption ('bitchiness', 'Enable (many) extra compiler warnings', 1),
+		BoolOption ('warnings', 'Enable most warnings', 1),
+		BoolOption ('werror', 'Enable error on compiler warnings', 1),
+		BoolOption ('profile', 'Enable profiling with gprof', 0),
+		BoolOption ('servers', 'Enable dedicated servers', 1),
+		BoolOption ('clients', 'Enable clients', 1),
+		BoolOption ('debug', 'Enable debugging', 1),
+		BoolOption ('optimize', 'Enable optimizations', 1),
+		BoolOption ('save_temps', 'Save temporary compilation files', 0),
+		('CC', 'C compiler command', env['CC']),
+		('CFLAGS', 'Base C compiler flags', ''),
+		('sdl_include', 'Path to your SDL headers', ''))
 
 	if env['PLATFORM'] == "cygwin" or env['PLATFORM'] == "mingw" or env['PLATFORM'] == "win32":
-		opts.create('dir_mode', 'dir_win32', 'Directory access mode')
-		opts.create('shareconf', '~/twilight.conf', 'Default shared config')
-		opts.create('userconf', '~/twilight.rc', 'Default user config')
+		opts.Add('dir_mode', 'Directory access mode', 'dir_win32')
+		opts.Add('shareconf', 'Default shared config', '~/twilight.conf')
+		opts.Add('userconf', 'Default user config', '~/twilight.rc')
 
-		opts.create('sharepath', '.', 'Default shared data path')
-		opts.create('userpath', '.', 'Default user data path')
-		opts.create('sdl_image', 'SDL_image.dll', 'Name of your SDL_image library')
-		opts.create('libgl', 'opengl32.dll', 'Name of your OpenGL library')
-		config_defs.create('DYNGLENTRY', 'APIENTRY')
+		opts.Add('sharepath', 'Default shared data path', '.')
+		opts.Add('userpath', 'Default user data path', '.')
+		opts.Add('sdl_image', 'Name of your SDL_image library', 'SDL_image.dll')
+		opts.Add('libgl', 'Name of your OpenGL library', 'opengl32.dll')
+		config_defs['DYNGLENTRY'] = 'APIENTRY';
 	elif env['PLATFORM'] == "darwin":
-		opts.create('dir_mode', 'dir_posix', 'Directory access mode')
-		opts.create('shareconf', '/Library/Preferences/com.icculus.Twilight.conf', 'Default shared config')
-		opts.create('userconf', '~/Library/Preferences/com.icculus.Twilight.conf', 'Default user config')
-		opts.create('sharepath', '/Library/Application Support/Twilight', 'Default shared data path')
-		opts.create('userpath', '~/Library/Application Support/Twilight', 'Default user data path')
-		opts.create('sdl_image', '/sw/lib/libSDL_image-1.2.0.dylib', 'Name of your SDL_image library')
-		opts.create('libgl', 'Provided by SDL', 'Name of your OpenGL library')
+		opts.Add('dir_mode', 'Directory access mode', 'dir_posix')
+		opts.Add('shareconf', 'Default shared config', '/Library/Preferences/com.icculus.Twilight.conf')
+		opts.Add('userconf', 'Default user config', '~/Library/Preferences/com.icculus.Twilight.conf')
+		opts.Add('sharepath', 'Default shared data path', '/Library/Application Support/Twilight')
+		opts.Add('userpath', 'Default user data path', '~/Library/Application Support/Twilight')
+		opts.Add('sdl_image', 'Name of your SDL_image library', '/sw/lib/libSDL_image-1.2.0.dylib')
+		opts.Add('libgl', 'Name of your OpenGL library', 'Provided by SDL')
 	else:
-		opts.create('dir_mode', 'dir_posix', 'Directory access mode')
-		opts.create('shareconf', '/etc/twilight.conf', 'Default shared config')
-		opts.create('userconf', '~/twilight.rc', 'Default user config')
+		opts.Add('dir_mode', 'Directory access mode', 'dir_posix')
+		opts.Add('shareconf', 'Default shared config', '/etc/twilight.conf')
+		opts.Add('userconf', 'Default user config', '~/twilight.rc')
 
-		opts.create('sharepath', '/usr/local/share/games/twilight', 'Default shared data path')
-		opts.create('userpath', '~/.twilight', 'Default user data path')
-		opts.create('sdl_image', 'libSDL_image-1.2.so.0', 'Name of your SDL_image library')
-		opts.create('libgl', 'libGL.so.1', 'Name of your OpenGL library')
-		config_defs.create('DYNGLENTRY', '')
+		opts.Add('sharepath', 'Default shared data path', '/usr/local/share/games/twilight')
+		opts.Add('userpath', 'Default user data path', '~/.twilight')
+		opts.Add('sdl_image', 'Name of your SDL_image library', 'libSDL_image-1.2.so.0')
+		opts.Add('libgl', 'Name of your OpenGL library', 'libGL.so.1')
+		config_defs['DYNGLENTRY'] = '';
 
+	opts.Update(env)
+	Help(opts.GenerateHelpText(env))
 	return opts
 
 def check_func (conf, defs, func):
 	if conf.CheckFunc (func):
-		defs.set('HAVE_' + string.upper(func), 1)
+		defs['HAVE_' + string.upper(func)] = 1
 		return 1
 	return 0
 
@@ -254,7 +257,7 @@ def check_cheader (conf, defs, header):
 		str = string.upper(header)
 		str = string.replace(str, '.', '_')
 		str = string.replace(str, '/', '_')
-		defs.set('HAVE_' + str, 1)
+		defs['HAVE_' + str] = 1
 		return 1
 	return 0
 
@@ -265,52 +268,51 @@ def check_cheaders (conf, defs, headers):
 def handle_opts (conf, opts, config_defs, destructive):
 	if destructive:
 		if ('gcc' in env['TOOLS']):
-			if int(opts['werror']):
+			if int(env['werror']):
 				conf.cflag ('-Werror')
 		elif ('msvc' in env['TOOLS']):
 			conf.cflag ('/MD')
-			if int(opts['werror']):
+			if int(env['werror']):
 				conf.cflag ('/WX')
 	else:
-		conf.env.Replace (CC = opts['CC'])
-		conf.env.Replace (CCFLAGS = Split (opts['CFLAGS']))
+		conf.env.Replace (CCFLAGS = Split (env['CFLAGS']))
 		if ('gcc' in env['TOOLS']):
-			if int(opts['optimize']):
+			if int(env['optimize']):
 				conf.cflag ('-O2')
-			if int(opts['debug']):
+			if int(env['debug']):
 				conf.cflag ('-g')
-			if int(opts['warnings']):
+			if int(env['warnings']):
 				conf.cflag ('-Wall')
-			if int(opts['bitchiness']):
+			if int(env['bitchiness']):
 				conf.cflag ('-Wcast-qual')
 				conf.cflag ('-Wsign-compare')
 				conf.cflag ('-W')
-			if int(opts['profile']):
+			if int(env['profile']):
 				conf.lflag ('-pg')
 				conf.cflag ('-pg')
-			if int(opts['save-temps']):
+			if int(env['save_temps']):
 				conf.cflag ('-save-temps', 1)
 			else:
 				conf.cflag ('-pipe', 1)
 			conf.cflag ('-fno-strict-aliasing', 1)
 			conf.cflag ('-finline', 1)
 		elif ('msvc' in env['TOOLS']):
-			if int(opts['debug']):
+			if int(env['debug']):
 				conf.cflag ('/Zi')
 				conf.cflag ('/GZ')
-			if int(opts['optimize']):
+			if int(env['optimize']):
 				conf.cflag ('/Oi', 1)
 				conf.cflag ('/G5', 1)
-				if (int(opts['debug']) == 0):
+				if (int(env['debug']) == 0):
 					conf.cflag ('/Og', 1)
 					conf.cflag ('/O2', 1)
 
-		config_defs.set('SDL_IMAGE_LIBRARY', '"' + opts['sdl_image'] + '"')
-		config_defs.set('USERPATH', '"' + opts['userpath'] + '"')
-		config_defs.set('SHAREPATH', '"' + opts['sharepath'] + '"')
-		config_defs.set('USERCONF', '"' + opts['userconf'] + '"')
-		config_defs.set('SHARECONF', '"' + opts['userconf'] + '"')
-		config_defs.set('GL_LIBRARY', '"' + opts['libgl'] + '"')
+		config_defs['SDL_IMAGE_LIBRARY'] = '"' + env['sdl_image'] + '"'
+		config_defs['USERPATH'] = '"' + env['userpath'] + '"'
+		config_defs['SHAREPATH'] = '"' + env['sharepath'] + '"'
+		config_defs['USERCONF'] = '"' + env['userconf'] + '"'
+		config_defs['SHARECONF'] = '"' + env['userconf'] + '"'
+		config_defs['GL_LIBRARY'] = '"' + env['libgl'] + '"'
 
 def write_c_defines (filename, defs):
 	env.Append (CPPDEFINES = "HAVE_CONFIG_H")
@@ -323,13 +325,10 @@ def write_c_defines (filename, defs):
 	fh.close();
 
 def do_configure (env):
-	global opts, config_defs, env_defs
+	global opts, config_defs;
 
-	config_defs.set('VERSION', '"0.2.2"')
-	if (not (ARGUMENTS.has_key('reset') and ARGUMENTS['reset'])):
-		opts.load('config_opts.py')
-	opts.args (ARGUMENTS)
-	opts.save('config_opts.py')
+	config_defs['VERSION'] = '"0.2.2"'
+	opts.Save('config_opts.py', env)
 	tests = {'SDL_config' : check_SDL_config,
 		'SDL_headers' : check_SDL_headers,
 		'cflag' : check_cflag,
@@ -350,8 +349,8 @@ def do_configure (env):
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		sdl_ver = ret[1]
 	else:
-		if (opts['sdl_include']):
-			env.Append (CPPPATH = [opts['sdl_include']])
+		if (env['sdl_include']):
+			env.Append (CPPPATH = [env['sdl_include']])
 		check_cheaders (conf, config_defs, ['SDL.h'])
 		if not config_defs.has_key ('HAVE_SDL_H'):
 			print "Twilight requires SDL 1.2.5. (None found.)"
@@ -383,27 +382,27 @@ def do_configure (env):
 		'sys/time.h', 'time.h', 'execinfo.h', 'dlfcn.h'])
 
 	if conf.gcc_asm ():
-		config_defs.set('HAVE_GCC_ASM', 1)
+		config_defs['HAVE_GCC_ASM'] = 1
 		if conf.gcc_asm_x86_eflags ():
-			config_defs.set('HAVE_GCC_ASM_X86_EFLAGS', 1)
+			config_defs['HAVE_GCC_ASM_X86_EFLAGS'] = 1
 		if conf.gcc_asm_x86_cpuid ():
-			config_defs.set('HAVE_GCC_ASM_X86_CPUID', 1)
+			config_defs['HAVE_GCC_ASM_X86_CPUID'] = 1
 			if conf.gcc_asm_x86_mmx ():
-				config_defs.set('HAVE_GCC_ASM_X86_MMX', 1)
+				config_defs['HAVE_GCC_ASM_X86_MMX'] = 1
 			if conf.gcc_asm_x86_sse ():
-				config_defs.set('HAVE_GCC_ASM_X86_SSE', 1)
+				config_defs['HAVE_GCC_ASM_X86_SSE'] = 1
 
 	if not check_func(conf, config_defs, 'dlopen'):
 		if conf.CheckLib ('dl', 'dlopen', 1):
-			config_defs.set('HAVE_DLOPEN', 1)
+			config_defs['HAVE_DLOPEN'] = 1
 	handle_opts (conf, opts, config_defs, 1)
 
 	if conf.func_flag('inline __attribute__((always_inline))'):
-		config_defs.create('inline', 'inline __attribute__((always_inline))')
+		config_defs['inline'] = 'inline __attribute__((always_inline))'
 	elif conf.func_flag('inline'):
-		config_defs.create('inline', 'inline')
+		config_defs['inline'] = 'inline'
 	elif conf.func_flag('__inline'):
-		config_defs.create('inline', '__inline')
+		config_defs['inline'] = '__inline'
 
 	if env['PLATFORM'] == 'win32':
 		env.Append (LIBS = ['user32', 'wsock32', 'shell32', 'gdi32'])
@@ -430,19 +429,18 @@ def do_configure (env):
 		print """\
     Lib path                    : """ + string.join(env['LIBPATH'], " ")
 	print """\
-    Default OpenGL library      : """ + opts['libgl'] + """
+    Default OpenGL library      : """ + env['libgl'] + """
 
   Path information
-    Shared (read-only) data in  : """ + opts['sharepath'] + """
-    User (writable) data in     : """ + opts['userpath'] + """
-    Shared configuration        : """ + opts['shareconf'] + """
-    User's configuration        : """ + opts['userconf'] + """
+    Shared (read-only) data in  : """ + env['sharepath'] + """
+    User (writable) data in     : """ + env['userpath'] + """
+    Shared configuration        : """ + env['shareconf'] + """
+    User's configuration        : """ + env['userconf'] + """
   """
 
 env = Environment ()
 conf_base ()
 
 do_configure (env)
-building = 1
 
-Export ("env", "opts", "building")
+Export ("env")

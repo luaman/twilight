@@ -1,10 +1,10 @@
 #! /usr/bin/python
 
-Import ("env", "opts", "base_sources", "client_sources", "fs_sources")
+Import ("env", "base_sources", "client_sources", "fs_sources")
 Import ("image_sources", "renderer_sources", "sound_sources", "resource_files")
 #env.Append (CPPPATH = ["#/src/qw"])
 
-if int(opts['clients']):
+if int(env['clients']):
     qw_headers = Split("""net.h protocol.h render.h screen.h""")
 
     qw_sources = Split("""cl_cam.c cl_demo.c cl_ents.c cl_input.c cl_main.c
@@ -23,7 +23,7 @@ if int(opts['clients']):
     qw_sources.extend (resource_files)
     Export ("qw_headers", "qw_sources")
 
-if int(opts['servers']):
+if int(env['servers']):
     qwsv_headers = Split("""progdefs.h progs.h server.h world.h""")
     qwsv_sources = Split("""cl_null.c common.c info.c net_chan.c net_udp.c
 	    pmove.c pmovetst.c pr_cmds.c pr_edict.c pr_exec.c sv_ccmds.c
