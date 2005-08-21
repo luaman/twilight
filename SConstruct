@@ -25,7 +25,7 @@ env.Alias ('qwsv', 'twilight-qwsv');
 if int(env['clients']):
 	env.Default (nq, qw)
 if int(env['servers']):
-	env.Default (nq, qwsv)
+	env.Default (qwsv)
 
-#	Import ("tools_sources")
-#	env.Program (target = "lhbin2c", source = tools_sources)
+Import ("tools_sources")
+env.Program (target = "lhbin2c", source = tools_sources)
