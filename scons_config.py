@@ -218,7 +218,9 @@ def conf_base ():
 		opts.Add('userpath', 'Default user data path', '.')
 		opts.Add('sdl_image', 'Name of your SDL_image library', 'SDL_image.dll')
 		opts.Add('libgl', 'Name of your OpenGL library', 'opengl32.dll')
-		config_defs['DYNGLENTRY'] = 'APIENTRY';
+		config_defs['DYNGLENTRY'] = 'APIENTRY'
+        if ('msvc' in env['TOOLS']):
+            opts.Add('MSVS_VERSION', 'which version of MSVC to use')
 	elif env['PLATFORM'] == "darwin":
 		opts.Add('dir_mode', 'Directory access mode', 'dir_posix')
 		opts.Add('shareconf', 'Default shared config', '/Library/Preferences/com.icculus.Twilight.conf')
