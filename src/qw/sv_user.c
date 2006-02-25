@@ -507,7 +507,19 @@ SV_NextDownload_f (void)
 	r = host_client->downloadsize - host_client->downloadcount;
 	if (r > 768)
 		r = 768;
-	r = SDL_RWread (host_client->download, buffer, r, 1);
+	if (SDL_RWread (host_client->download, buffer, r, 1) != 1)
+	{
+		// read error
+		Com_Printf("WARNING: read failed during client download!\n");
+		// size = -1 signals a file not found error
+		ClientReliableWrite_Begin (host_client, svc_download, 6);
+		ClientReliableWrite_Short (host_client, -1);
+		ClientReliableWrite_Byte (host_client, 0);
+		// close the file
+		SDL_RWclose (host_client->download);
+		host_client->download = NULL;
+		return;
+	}
 	ClientReliableWrite_Begin (host_client, svc_download, 6 + r);
 	ClientReliableWrite_Short (host_client, r);
 
